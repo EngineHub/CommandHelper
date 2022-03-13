@@ -40,7 +40,6 @@ import com.laytonsmith.core.events.Event;
 import com.laytonsmith.core.events.EventList;
 import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.events.prefilters.Prefilter;
-import com.laytonsmith.core.events.prefilters.PrefilterBuilder;
 import com.laytonsmith.core.events.prefilters.PrefilterStatus;
 import com.laytonsmith.core.exceptions.CRE.CREBindException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
@@ -244,20 +243,19 @@ public class EventBinding {
 			}
 
 			// Return if there are no prefilters defined for this event.
-			PrefilterBuilder<BindableEvent> prefilterBuilder = ev.getPrefilters();
-			if(prefilterBuilder == null) {
+			Map<String, Prefilter<? extends BindableEvent>> prefilters = ev.getPrefilters();
+			if(prefilters == null) {
 				return analysis.typecheck(prefilterParseTree, env, exceptions);
 			}
 
 			// Validate prefilters.
-			Map<String, Prefilter<BindableEvent>> prefilters = prefilterBuilder.build();
 			for(ParseTree node : prefilterParseTree.getChildren()) {
 				if(node.getData() instanceof CFunction && node.getData().val().equals(Compiler.centry.NAME)) {
 					List<ParseTree> children = node.getChildren();
 					String prefilterKey = children.get(0).getData().val();
 					ParseTree prefilterEntryValParseTree = children.get(1);
 					if(prefilters.containsKey(prefilterKey)) {
-						Prefilter<BindableEvent> prefilter = prefilters.get(prefilterKey);
+						Prefilter<? extends BindableEvent> prefilter = prefilters.get(prefilterKey);
 						prefilter.getMatcher().typecheck(analysis, prefilterEntryValParseTree, env, exceptions);
 						if(prefilter.getStatus().contains(PrefilterStatus.REMOVED)) {
 							exceptions.add(new ConfigCompileException("This prefilter has been removed,"

@@ -5,8 +5,9 @@ import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.core.events.BindableEvent;
 import com.laytonsmith.core.events.Event;
-import com.laytonsmith.core.events.prefilters.PrefilterBuilder;
+import com.laytonsmith.core.events.prefilters.Prefilter;
 import com.laytonsmith.core.functions.Function;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -76,7 +77,7 @@ public class DocGenExportTool {
 		for(Class<? extends Event> eventC : events) {
 			Map<String, Object> event = new HashMap<>();
 			Event e = ReflectionUtils.newInstance(eventC);
-			PrefilterBuilder prefilters = e.getPrefilters();
+			Map<String, Prefilter<? extends BindableEvent>> prefilters = e.getPrefilters();
 			Matcher m = eventPattern.matcher(e.docs());
 			if(m.find()) {
 				String name = e.getName();
@@ -85,7 +86,7 @@ public class DocGenExportTool {
 				if(prefilters == null) {
 					prefilter = DocGen.PrefilterData.Get(m.group(1).split("\\|"), type);
 				} else {
-					prefilter = DocGen.PrefilterData.GetFromBuilder(prefilters, type);
+					prefilter = DocGen.PrefilterData.GetFromModernPrefilters(prefilters, type);
 				}
 				String eventData = DocGen.EventData.Get(m.group(3).split("\\|"), type);
 				String mutability = DocGen.MutabilityData.Get(m.group(4).split("\\|"), type);

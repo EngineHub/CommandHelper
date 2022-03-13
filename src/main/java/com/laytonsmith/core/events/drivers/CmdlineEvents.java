@@ -95,7 +95,7 @@ public class CmdlineEvents {
 		}
 
 		@Override
-		public PrefilterBuilder getPrefilters() {
+		protected PrefilterBuilder getPrefilterBuilder() {
 			return PrefilterBuilder.EMPTY;
 		}
 
@@ -159,7 +159,7 @@ public class CmdlineEvents {
 		}
 
 		@Override
-		public PrefilterBuilder getPrefilters() {
+		protected PrefilterBuilder getPrefilterBuilder() {
 			return PrefilterBuilder.EMPTY;
 		}
 

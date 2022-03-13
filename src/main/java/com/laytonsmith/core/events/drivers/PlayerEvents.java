@@ -136,7 +136,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public PrefilterBuilder getPrefilters() {
+		protected PrefilterBuilder getPrefilterBuilder() {
 			return new PrefilterBuilder<MCFoodLevelChangeEvent>()
 					.set("player", "The player whose food level changed", new StringPrefilterMatcher<>() {
 						@Override
@@ -213,7 +213,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public PrefilterBuilder getPrefilters() {
+		protected PrefilterBuilder getPrefilterBuilder() {
 			return new PrefilterBuilder<MCPlayerItemConsumeEvent>()
 					.set("player", "The player consuming the item", new PlayerPrefilterMatcher<>())
 					.set("itemname", "The item the player is consuming", new ItemStackPrefilterMatcher<>() {
@@ -301,7 +301,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public PrefilterBuilder getPrefilters() {
+		protected PrefilterBuilder getPrefilterBuilder() {
 			return new PrefilterBuilder<MCPlayerKickEvent>()
 					.set("player", "The player being kicked", new PlayerPrefilterMatcher<>())
 					.set("reason", "The reason string", new MacroPrefilterMatcher<>() {
@@ -379,7 +379,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public PrefilterBuilder getPrefilters() {
+		protected PrefilterBuilder getPrefilterBuilder() {
 			return new PrefilterBuilder<MCPlayerTeleportEvent>()
 					.set("player", "The player teleporting.", new PlayerPrefilterMatcher<>())
 					.set("type", "The teleportation cause.", new EnumICPrefilterMatcher<>(MCTeleportCause.class) {
@@ -481,7 +481,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public PrefilterBuilder getPrefilters() {
+		protected PrefilterBuilder getPrefilterBuilder() {
 			return new PrefilterBuilder<MCPlayerPortalEvent>()
 					.set("player", "The player portaling", new PlayerPrefilterMatcher<>())
 					.set("from", "The location where the player is coming from", new LocationPrefilterMatcher<>() {
@@ -604,7 +604,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public PrefilterBuilder getPrefilters() {
+		protected PrefilterBuilder getPrefilterBuilder() {
 			return new PrefilterBuilder<MCPlayerLoginEvent>()
 					.set("player", "The player that is about to login", new PlayerPrefilterMatcher<>());
 		}
@@ -714,7 +714,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public PrefilterBuilder getPrefilters() {
+		protected PrefilterBuilder getPrefilterBuilder() {
 			return new PrefilterBuilder<MCPlayerJoinEvent>()
 					.set("player", "The player joining", new PlayerPrefilterMatcher<>())
 					.set("world", "The world the player is logging in to", new WorldPrefilterMatcher<>() {
@@ -863,7 +863,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public PrefilterBuilder<MCPlayerInteractEvent> getPrefilters() {
+		protected PrefilterBuilder<MCPlayerInteractEvent> getPrefilterBuilder() {
 			return new PrefilterBuilder<MCPlayerInteractEvent>()
 					.set("button", "\"left\" or \"right\". If they left or right clicked",
 							new StringICPrefilterMatcher<>() {
@@ -986,7 +986,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public PrefilterBuilder getPrefilters() {
+		protected PrefilterBuilder getPrefilterBuilder() {
 			return new PrefilterBuilder<MCPlayerEnterBedEvent>()
 					.set("location", "The location of the bed", new LocationPrefilterMatcher<>() {
 						@Override
@@ -1063,7 +1063,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public PrefilterBuilder getPrefilters() {
+		protected PrefilterBuilder getPrefilterBuilder() {
 			return new PrefilterBuilder<MCPlayerLeaveBedEvent>()
 					.set("location", "The location of the bed", new LocationPrefilterMatcher<>() {
 						@Override
@@ -1125,7 +1125,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public PrefilterBuilder getPrefilters() {
+		protected PrefilterBuilder getPrefilterBuilder() {
 			return new PrefilterBuilder<MCPlayerInteractEvent>()
 					.set("location", "The location of the pressure plate", new LocationPrefilterMatcher<>() {
 						@Override
@@ -1212,7 +1212,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public PrefilterBuilder getPrefilters() {
+		protected PrefilterBuilder getPrefilterBuilder() {
 			return new PrefilterBuilder<MCPlayerRespawnEvent>()
 					.set("player", "The player respawning", new PlayerPrefilterMatcher<>())
 					.set("x", "The x location of the spawn. Deprecated in favor of location.", new ExpressionPrefilterMatcher<>() {
@@ -1346,7 +1346,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public PrefilterBuilder getPrefilters() {
+		protected PrefilterBuilder getPrefilterBuilder() {
 			return new PrefilterBuilder<MCPlayerDeathEvent>()
 					.set("player", "The player that died.", new MacroICPrefilterMatcher<MCPlayerDeathEvent>() {
 						@Override
@@ -1459,7 +1459,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public PrefilterBuilder getPrefilters() {
+		protected PrefilterBuilder getPrefilterBuilder() {
 			return new PrefilterBuilder<MCPlayerQuitEvent>()
 					.set("player", "The quitting player.", new PlayerPrefilterMatcher<>());
 		}
@@ -1552,7 +1552,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public PrefilterBuilder getPrefilters() {
+		protected PrefilterBuilder getPrefilterBuilder() {
 			return new PrefilterBuilder<MCPlayerChatEvent>()
 					.set("player", "The player chatting", new PlayerPrefilterMatcher<MCPlayerChatEvent>() {
 						@Override
@@ -1695,7 +1695,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public PrefilterBuilder getPrefilters() {
+		protected PrefilterBuilder getPrefilterBuilder() {
 			return new PrefilterBuilder<MCPlayerChatEvent>()
 					.set("player", "The player chatting", new PlayerPrefilterMatcher<MCPlayerChatEvent>() {
 						@Override
@@ -1809,7 +1809,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public PrefilterBuilder getPrefilters() {
+		protected PrefilterBuilder getPrefilterBuilder() {
 			return new PrefilterBuilder<MCPlayerCommandEvent>()
 					.set("player", "The player running the command", new PlayerPrefilterMatcher<>())
 					.set("command", "The entire command the player ran", new StringPrefilterMatcher<>() {
@@ -1922,7 +1922,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public PrefilterBuilder getPrefilters() {
+		protected PrefilterBuilder getPrefilterBuilder() {
 			return new PrefilterBuilder<MCWorldChangedEvent>()
 					.set("player", "The player that switched worlds.", new PlayerPrefilterMatcher<>())
 					.set("from", "The world the player is coming from.", new WorldPrefilterMatcher<MCWorldChangedEvent>() {
@@ -2042,7 +2042,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public PrefilterBuilder getPrefilters() {
+		protected PrefilterBuilder getPrefilterBuilder() {
 			return new PrefilterBuilder<MCPlayerMoveEvent>()
 					.set("player", "The player that moved. Switching worlds does not trigger this event.", new PlayerPrefilterMatcher<>())
 					.set("threshold", "The minimum distance the player must have travelled before the event"
@@ -2136,7 +2136,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public PrefilterBuilder getPrefilters() {
+		protected PrefilterBuilder getPrefilterBuilder() {
 			return new PrefilterBuilder<MCPlayerFishEvent>()
 					.set("state", "Can be one of " + StringUtils.Join(MCFishingState.values(), ", ", ", or ") + ".",
 							new EnumPrefilterMatcher<>(MCFishingState.class) {
@@ -2272,7 +2272,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public PrefilterBuilder getPrefilters() {
+		protected PrefilterBuilder getPrefilterBuilder() {
 			return new PrefilterBuilder<MCGamemodeChangeEvent>()
 					.set("player", "The player changing game modes", new MacroICPrefilterMatcher<MCGamemodeChangeEvent>() {
 						@Override
@@ -2340,7 +2340,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public PrefilterBuilder getPrefilters() {
+		protected PrefilterBuilder getPrefilterBuilder() {
 			return new PrefilterBuilder<MCExpChangeEvent>()
 					.set("player", "The player whose exp is changing", new PlayerPrefilterMatcher<>());
 		}
@@ -2416,7 +2416,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public PrefilterBuilder getPrefilters() {
+		protected PrefilterBuilder getPrefilterBuilder() {
 			return new PrefilterBuilder<MCPlayerEditBookEvent>()
 					.set("player", "The player which edited the book", new PlayerPrefilterMatcher<>())
 					.set("signing", "Whether or not the book is being signed", new BooleanPrefilterMatcher<>() {
@@ -2561,7 +2561,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public PrefilterBuilder getPrefilters() {
+		protected PrefilterBuilder getPrefilterBuilder() {
 			return new PrefilterBuilder<MCPlayerToggleFlightEvent>()
 					.set("player", "The player who toggled their flying state", new PlayerPrefilterMatcher<>())
 					.set("flying", "Whether or not the player is trying to start or stop flying", new BooleanPrefilterMatcher<>() {
@@ -2633,7 +2633,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public PrefilterBuilder getPrefilters() {
+		protected PrefilterBuilder getPrefilterBuilder() {
 			return new PrefilterBuilder<MCPlayerToggleSneakEvent>()
 					.set("player", "The player who toggled their sneaking state", new PlayerPrefilterMatcher<>())
 					.set("sneaking", "Whether or not the player is now sneaking", new BooleanPrefilterMatcher<>() {
@@ -2704,7 +2704,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public PrefilterBuilder getPrefilters() {
+		protected PrefilterBuilder getPrefilterBuilder() {
 			return new PrefilterBuilder<MCPlayerToggleSprintEvent>()
 					.set("player", "The player who toggled their sprinting state.", new PlayerPrefilterMatcher<>())
 					.set("sprinting", "Whether or not the player is now sprinting.", new BooleanPrefilterMatcher<>() {
@@ -2771,7 +2771,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public PrefilterBuilder getPrefilters() {
+		protected PrefilterBuilder getPrefilterBuilder() {
 			return new PrefilterBuilder<MCPlayerResourcePackEvent>()
 					.set("player", "The player requesting the resource pack", new PlayerPrefilterMatcher<>())
 					.set("status", "The status received from the client: "

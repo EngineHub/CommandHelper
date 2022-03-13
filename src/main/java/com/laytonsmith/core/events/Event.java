@@ -1,6 +1,5 @@
 package com.laytonsmith.core.events;
 
-import com.laytonsmith.core.events.prefilters.PrefilterBuilder;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.ParseTree;
@@ -8,6 +7,7 @@ import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.BoundEvent.ActiveEvent;
+import com.laytonsmith.core.events.prefilters.Prefilter;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
@@ -229,8 +229,6 @@ public interface Event extends Comparable<Event>, Documentation {
 	 *
 	 * @return
 	 */
-	// TODO: Once everything has this, this should be re-added, since everything should have its own version.
-//	@ForceImplementation
-	public PrefilterBuilder getPrefilters();
+	public Map<String, Prefilter<? extends BindableEvent>> getPrefilters();
 
 }

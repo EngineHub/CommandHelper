@@ -11,7 +11,6 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.events.BoundEvent.Priority;
 import com.laytonsmith.core.events.prefilters.Prefilter;
-import com.laytonsmith.core.events.prefilters.PrefilterBuilder;
 import com.laytonsmith.core.exceptions.CRE.CREBindException;
 import com.laytonsmith.core.exceptions.CRE.CREEventException;
 import com.laytonsmith.core.extensions.Extension;
@@ -25,7 +24,6 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 
 import java.io.File;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -182,8 +180,6 @@ public final class EventUtils {
 		}
 	}
 
-	private static Map<Event, Map<String, Prefilter<BindableEvent>>> prefilterData = new HashMap<>();
-
 	/**
 	 * This returns whether or not the given BoundEvent's prefilters matches the event. This method will never
 	 * throw a {@link PrefilterNonMatchException}
@@ -193,19 +189,7 @@ public final class EventUtils {
 	 * @return
 	 */
 	public static boolean PrefilterMatches(BoundEvent b, BindableEvent e, Event driver) {
-		Map<String, Prefilter<BindableEvent>> prefilters;
-		// Keep a cache so we only build the prefilters object once.
-		if(!prefilterData.containsKey(driver)) {
-			PrefilterBuilder prefilterBuilder = driver.getPrefilters();
-			if(prefilterBuilder != null) {
-				prefilters = prefilterBuilder.build();
-			} else {
-				prefilters = null;
-			}
-			prefilterData.put(driver, prefilters);
-		} else {
-			prefilters = prefilterData.get(driver);
-		}
+		Map<String, Prefilter<? extends BindableEvent>> prefilters = driver.getPrefilters();
 		Map<String, Mixed> userPrefilters = b.getPrefilter();
 		if(prefilters == null) {
 			// Old, deprecated method
@@ -220,7 +204,7 @@ public final class EventUtils {
 					// The compiler should have already warned about this
 					continue;
 				}
-				Prefilter<BindableEvent> pf = prefilters.get(prefilter.getKey());
+				Prefilter<? extends BindableEvent> pf = prefilters.get(prefilter.getKey());
 				PrefilterMatcher matcher = pf.getMatcher();
 				Mixed value = prefilter.getValue();
 				if(!matcher.matches(prefilter.getKey(), value, e, b.getTarget())) {

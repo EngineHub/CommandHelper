@@ -10,9 +10,9 @@ import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.Installer;
 import com.laytonsmith.core.Prefs;
+import com.laytonsmith.core.events.BindableEvent;
 import com.laytonsmith.core.events.Event;
 import com.laytonsmith.core.events.prefilters.Prefilter;
-import com.laytonsmith.core.events.prefilters.PrefilterBuilder;
 import com.laytonsmith.core.events.prefilters.PrefilterMatcher;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -499,11 +499,10 @@ public class DocGen {
 			return b.toString();
 		}
 
-		public static String GetFromBuilder(PrefilterBuilder builder, MarkupType type) {
+		public static String GetFromModernPrefilters(Map<String, Prefilter<? extends BindableEvent>> prefilters, MarkupType type) {
 			StringBuilder b = new StringBuilder();
-			Map<String, Prefilter> prefilters = builder.build();
 			boolean first = true;
-			for(Map.Entry<String, Prefilter> e : prefilters.entrySet()) {
+			for(Map.Entry<String, Prefilter<? extends BindableEvent>> e : prefilters.entrySet()) {
 				Prefilter pf = e.getValue();
 				b.append(GetSinglePrefilter(e.getKey(), type, pf, first));
 				first = false;
@@ -737,8 +736,8 @@ public class DocGen {
 			if(m.find()) {
 				description = m.group(2).trim();
 				prefilter = new ArrayList<>();
-				PrefilterBuilder builder = event.getPrefilters();
-				if(builder == null) {
+				Map<String, Prefilter<? extends BindableEvent>> modernPrefilters = event.getPrefilters();
+				if(modernPrefilters == null) {
 					for(String p : m.group(1).split("\\|")) {
 						if("".equals(p)) {
 							continue;
@@ -749,8 +748,7 @@ public class DocGen {
 						prefilter.add(new PrefilterData(d[0], desc));
 					}
 				} else {
-					Map<String, Prefilter> modernPrefilters = builder.build();
-					for(Map.Entry<String, Prefilter> e : modernPrefilters.entrySet()) {
+					for(Map.Entry<String, Prefilter<? extends BindableEvent>> e : modernPrefilters.entrySet()) {
 						Prefilter pf = e.getValue();
 						PrefilterMatcher matcher = pf.getMatcher();
 						boolean wikiFormat = type == MarkupType.WIKI;

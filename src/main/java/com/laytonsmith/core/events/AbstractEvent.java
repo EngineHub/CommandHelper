@@ -1,6 +1,5 @@
 package com.laytonsmith.core.events;
 
-import com.laytonsmith.core.events.prefilters.PrefilterBuilder;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.abstraction.MCCommandSender;
@@ -19,6 +18,8 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
+import com.laytonsmith.core.events.prefilters.Prefilter;
+import com.laytonsmith.core.events.prefilters.PrefilterBuilder;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -300,8 +301,29 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 		return false;
 	}
 
+	private Map<String, Prefilter<? extends BindableEvent>> prefilterCache = null;
+	private volatile boolean isCacheSaturated = false;
+
 	@Override
-	public PrefilterBuilder getPrefilters() {
+	public final Map<String, Prefilter<? extends BindableEvent>> getPrefilters() {
+		if(!isCacheSaturated) {
+			synchronized(this) {
+				if(!isCacheSaturated) {
+					prefilterCache = getPrefilterBuilder().build();
+				}
+			}
+		}
+		return prefilterCache;
+	}
+
+	/**
+	 * Returns the prefilter builder for this subclass. This is built by AbstractEvent and cached, so that calls
+	 * to getPrefilters will be faster for future calls.
+	 * @return
+	 */
+	// TODO: Once everything has this, this should be re-added, since everything should have its own version.
+//	@ForceImplementation
+	protected PrefilterBuilder getPrefilterBuilder() {
 		return null;
 	}
 
