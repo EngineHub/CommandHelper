@@ -367,7 +367,23 @@ public class StaticAnalysis {
 			} else if(cFunc.hasIVariable()) { // The function is a var reference to a closure: '@myClosure(<args>)'.
 				return CClassType.AUTO; // TODO - Get actual type (return type of closure, iclosure, rclosure?).
 			} else if(cFunc.hasProcedure()) { // The function is a procedure reference.
-				return CClassType.AUTO; // TODO - Get actual type.
+				String procName = cFunc.val();
+				Scope scope = this.getTermScope(ast);
+				if(scope != null) {
+					Set<Declaration> decls = scope.getDeclarations(Namespace.PROCEDURE, procName);
+					if(decls.isEmpty()) {
+						return CClassType.AUTO; // Proc cannot be resolved. Exception for this is already generated.
+					} else {
+						// TODO - Get the most specific type when multiple declarations exist.
+						return decls.iterator().next().getType();
+					}
+				} else {
+					// If this runs, then a proc reference was created without setting its Scope using setTermScope().
+					exceptions.add(new ConfigCompileException("Procedure cannot be resolved (missing procedure scope,"
+							+ " this is an internal error that should never happen): "
+							+ procName, cFunc.getTarget()));
+					return CClassType.AUTO;
+				}
 			} else {
 				throw new Error("Unsupported " + CFunction.class.getSimpleName()
 						+ " type in type checking for node with value: " + cFunc.val());
@@ -376,8 +392,7 @@ public class StaticAnalysis {
 			IVariable ivar = (IVariable) node;
 			Scope scope = this.getTermScope(ast);
 			if(scope != null) {
-				Set<Declaration> decls = scope.getDeclarations(
-						Namespace.IVARIABLE, ivar.getVariableName());
+				Set<Declaration> decls = scope.getDeclarations(Namespace.IVARIABLE, ivar.getVariableName());
 				if(decls.isEmpty()) {
 					exceptions.add(new ConfigCompileException(
 							"Variable cannot be resolved: " + ivar.getVariableName(), ivar.getTarget()));
