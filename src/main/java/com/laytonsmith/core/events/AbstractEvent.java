@@ -306,10 +306,11 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 
 	@Override
 	public final Map<String, Prefilter<? extends BindableEvent>> getPrefilters() {
-		if(!isCacheSaturated) {
+		PrefilterBuilder builder = getPrefilterBuilder();
+		if(builder != null && !isCacheSaturated) {
 			synchronized(this) {
 				if(!isCacheSaturated) {
-					prefilterCache = getPrefilterBuilder().build();
+					prefilterCache = builder.build();
 				}
 			}
 		}
