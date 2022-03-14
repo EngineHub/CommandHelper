@@ -25,6 +25,7 @@ public class ProcKeyword extends Keyword {
 			if(list.get(keywordPosition + 1).getData() instanceof CFunction) {
 				ParseTree procNode = new ParseTree(new CFunction(
 						proc.NAME, list.get(keywordPosition).getTarget()), list.get(keywordPosition).getFileOptions());
+				procNode.getNodeModifiers().merge(list.get(keywordPosition).getNodeModifiers());
 				procNode.addChild(new ParseTree(new CString(list.get(keywordPosition + 1).getData().val(),
 						list.get(keywordPosition + 1).getTarget()), list.get(keywordPosition + 1).getFileOptions()));
 				// Grab the functions children, and put them on the stack

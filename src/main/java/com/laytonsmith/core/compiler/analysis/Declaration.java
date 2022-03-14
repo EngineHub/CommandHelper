@@ -1,5 +1,6 @@
 package com.laytonsmith.core.compiler.analysis;
 
+import com.laytonsmith.core.NodeModifiers;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
 
@@ -16,18 +17,21 @@ public class Declaration {
 	private final String identifier;
 	private final CClassType type;
 	private final Target target;
+	private final NodeModifiers modifiers;
 
 	/**
 	 * Creates a new {@link Declaration}.
 	 * @param namespace - The {@link Namespace} of the declaration.
 	 * @param identifier - The idenfifier (e.g. variable or procedure name).
 	 * @param type - The {@link CClassType} of this declaration.
+	 * @param modifiers The element modifiers.
 	 * @param t - The target of the declaration.
 	 */
-	public Declaration(Namespace namespace, String identifier, CClassType type, Target t) {
+	public Declaration(Namespace namespace, String identifier, CClassType type, NodeModifiers modifiers, Target t) {
 		this.namespace = namespace;
 		this.identifier = identifier;
 		this.type = type;
+		this.modifiers = modifiers;
 		this.target = t;
 	}
 
@@ -45,5 +49,9 @@ public class Declaration {
 
 	public Target getTarget() {
 		return this.target;
+	}
+
+	public NodeModifiers getNodeModifiers() {
+		return this.modifiers;
 	}
 }

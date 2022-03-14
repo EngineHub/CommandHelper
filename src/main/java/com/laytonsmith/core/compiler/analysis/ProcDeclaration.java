@@ -1,5 +1,6 @@
 package com.laytonsmith.core.compiler.analysis;
 
+import com.laytonsmith.core.NodeModifiers;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -18,10 +19,11 @@ public class ProcDeclaration extends Declaration {
 	 * Creates a new {@link ProcDeclaration} in the {@link Namespace#PROCEDURE} namespace.
 	 * @param identifier - The procedure name.
 	 * @param type - The procedure return type.
+	 * @param modifiers Node modifiers for this Procedure.
 	 * @param t - The procedure target.
 	 */
-	public ProcDeclaration(String identifier, CClassType type, Target t) {
-		super(Namespace.PROCEDURE, identifier, type, t);
+	public ProcDeclaration(String identifier, CClassType type, NodeModifiers modifiers, Target t) {
+		super(Namespace.PROCEDURE, identifier, type, modifiers, t);
 	}
 
 	/**

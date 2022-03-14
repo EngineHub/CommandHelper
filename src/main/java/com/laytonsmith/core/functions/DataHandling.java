@@ -18,6 +18,7 @@ import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.MethodScriptCompiler;
+import com.laytonsmith.core.NodeModifiers;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Procedure;
@@ -442,7 +443,8 @@ public class DataHandling {
 
 					// Add the new variable declaration.
 					declScope.addDeclaration(new Declaration(
-							Namespace.IVARIABLE, iVar.getVariableName(), type, ast.getTarget()));
+							Namespace.IVARIABLE, iVar.getVariableName(), type, ast.getNodeModifiers(),
+							ast.getTarget()));
 					analysis.setTermScope(ivarAst, declScope);
 				}
 
@@ -463,7 +465,9 @@ public class DataHandling {
 					IVariable iVar = (IVariable) rawIVar;
 
 					// Add ivariable assign declaration in a new scope.
-					newScope.addDeclaration(new IVariableAssignDeclaration(iVar.getVariableName(), iVar.getTarget()));
+					newScope.addDeclaration(new IVariableAssignDeclaration(iVar.getVariableName(),
+							ast.getNodeModifiers(),
+							iVar.getTarget()));
 					analysis.setTermScope(ivarAst, newScope);
 				}
 
@@ -504,7 +508,8 @@ public class DataHandling {
 
 					// Add the new variable declaration.
 					paramScope = analysis.createNewScope(paramScope);
-					paramScope.addDeclaration(new ParamDeclaration(iVar.getVariableName(), type, ast.getTarget()));
+					paramScope.addDeclaration(new ParamDeclaration(iVar.getVariableName(), type, ast.getNodeModifiers(),
+							ast.getTarget()));
 					analysis.setTermScope(ivarAst, paramScope);
 				}
 
@@ -528,7 +533,8 @@ public class DataHandling {
 					// Add the new variable declaration.
 					paramScope = analysis.createNewScope(paramScope);
 					paramScope.addDeclaration(new ParamDeclaration(
-							iVar.getVariableName(), CClassType.AUTO, ast.getTarget()));
+							iVar.getVariableName(), CClassType.AUTO, ast.getNodeModifiers(),
+							ast.getTarget()));
 					analysis.setTermScope(ivarAst, paramScope);
 				}
 
@@ -1436,6 +1442,7 @@ public class DataHandling {
 			List<String> varNames = new ArrayList<>();
 			boolean usesAssign = false;
 			CClassType returnType = Auto.TYPE;
+			NodeModifiers modifiers = null;
 			if(nodes[0].getData().equals(CVoid.VOID) || nodes[0].getData().isInstanceOf(CClassType.TYPE)) {
 				if(nodes[0].getData().equals(CVoid.VOID)) {
 					returnType = CVoid.TYPE;
@@ -1446,8 +1453,10 @@ public class DataHandling {
 				for(int i = 1; i < nodes.length; i++) {
 					newNodes[i - 1] = nodes[i];
 				}
+				modifiers = nodes[0].getNodeModifiers();
 				nodes = newNodes;
 			}
+			nodes[0].getNodeModifiers().merge(modifiers);
 			// We have to restore the variable list once we're done
 			IVariableList originalList = env.getEnv(GlobalEnv.class).GetVarList().clone();
 			for(int i = 0; i < nodes.length; i++) {
@@ -1506,7 +1515,7 @@ public class DataHandling {
 				}
 			}
 			env.getEnv(GlobalEnv.class).SetVarList(originalList);
-			Procedure myProc = new Procedure(name, returnType, vars, tree, t);
+			Procedure myProc = new Procedure(name, returnType, vars, nodes[0].getNodeModifiers().getComment(), tree, t);
 			if(usesAssign) {
 				myProc.definitelyNotConstant();
 			}
@@ -1547,7 +1556,8 @@ public class DataHandling {
 			Scope paramScope = analysis.createNewScope();
 
 			// Insert @arguments parameter.
-			paramScope.addDeclaration(new ParamDeclaration("@arguments", CArray.TYPE, ast.getTarget()));
+			paramScope.addDeclaration(new ParamDeclaration("@arguments", CArray.TYPE, ast.getNodeModifiers(),
+					ast.getTarget()));
 
 			// Handle procedure parameters from left to right.
 			Scope valScope = parentScope;
@@ -1565,11 +1575,12 @@ public class DataHandling {
 			// Create proc declaration in a new scope.
 			// TODO - Include proc signature (argument types and number of arguments) in declaration.
 			Scope declScope = analysis.createNewScope(parentScope);
-			ProcDeclaration procDecl = new ProcDeclaration(procName, retType, ast.getTarget());
+			ProcDeclaration procDecl = new ProcDeclaration(procName, retType, ast.getNodeModifiers(), ast.getTarget());
 			declScope.addDeclaration(procDecl);
+			analysis.setTermScope(ast, declScope);
 
 			// Create proc root declaration in the inner root scope.
-			paramScope.addDeclaration(new ProcRootDeclaration(procDecl));
+			paramScope.addDeclaration(new ProcRootDeclaration(procDecl, ast.getNodeModifiers()));
 
 			// Allow procedures to perform lookups in the decl scope.
 			paramScope.addSpecificParent(declScope, Namespace.PROCEDURE);
@@ -2524,7 +2535,8 @@ public class DataHandling {
 			}
 
 			// Insert @arguments parameter.
-			paramScope.addDeclaration(new ParamDeclaration("@arguments", CArray.TYPE, ast.getTarget()));
+			paramScope.addDeclaration(new ParamDeclaration("@arguments", CArray.TYPE, ast.getNodeModifiers(),
+					ast.getTarget()));
 
 			// Handle closure parameters from left to right.
 			Scope valScope = parentScope;

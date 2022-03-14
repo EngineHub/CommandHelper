@@ -219,7 +219,8 @@ public class StaticAnalysis {
 					scope.addReference(new Reference(Namespace.IVARIABLE, decl.getIdentifier(), decl.getTarget()));
 				} else {
 					scope.addDeclaration(new Declaration(
-							Namespace.IVARIABLE, decl.getIdentifier(), CClassType.AUTO, decl.getTarget()));
+							Namespace.IVARIABLE, decl.getIdentifier(), CClassType.AUTO, decl.getNodeModifiers(),
+							decl.getTarget()));
 				}
 			}
 		}
@@ -269,7 +270,7 @@ public class StaticAnalysis {
 					if(!rootDecls.isEmpty()) {
 						for(Declaration decl : rootDecls) {
 							ProcRootDeclaration procRootDecl = (ProcRootDeclaration) decl;
-							procRootDecl.procDecl.addRequiredReference(ref);
+							procRootDecl.getProcDeclaration().addRequiredReference(ref);
 						}
 					} else {
 
@@ -319,7 +320,7 @@ public class StaticAnalysis {
 						if(!rootDecls.isEmpty()) {
 							for(Declaration decl : rootDecls) {
 								ProcRootDeclaration procRootDecl = (ProcRootDeclaration) decl;
-								changed |= procRootDecl.procDecl.addRequiredReference(ref);
+								changed |= procRootDecl.getProcDeclaration().addRequiredReference(ref);
 							}
 						} else {
 
@@ -787,7 +788,7 @@ public class StaticAnalysis {
 		if(node instanceof IVariable iVar) { // Normal parameter.
 			Scope newParamScope = this.createNewScope(paramScope);
 			newParamScope.addDeclaration(new ParamDeclaration(
-					iVar.getVariableName(), iVar.getDefinedType(), iVar.getTarget()));
+					iVar.getVariableName(), iVar.getDefinedType(), ast.getNodeModifiers(), iVar.getTarget()));
 			this.setTermScope(ast, newParamScope);
 			return new Scope[] {newParamScope, valScope};
 		}

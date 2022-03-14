@@ -86,6 +86,7 @@ public class ParseTree implements Cloneable {
 	private final FileOptions fileOptions;
 	private List<ParseTree> children = null;
 	private boolean hasBeenMadeStatic = false;
+	private NodeModifiers nodeModifiers = new NodeModifiers();
 
 	/**
 	 * Creates a new empty tree node
@@ -448,6 +449,14 @@ public class ParseTree implements Cloneable {
 		} else {
 			throw new Error("Unhandled type, please report this bug");
 		}
+	}
+
+	/**
+	 * Returns the NodeModifiers object for this ParseTree node.
+	 * @return
+	 */
+	public NodeModifiers getNodeModifiers() {
+		return nodeModifiers;
 	}
 
 }
