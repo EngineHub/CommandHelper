@@ -66,6 +66,7 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import java.util.Arrays;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -2912,9 +2913,13 @@ public class Environment {
 														children.get(1).getTarget(), null));
 									}
 								} else {
-									env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
-												new CompilerWarning("Unexpected entry, this will be ignored.",
-														children.get(0).getTarget(), null));
+									List<String> validProps = Arrays.asList("color", "shape");
+									String prop = children.get(0).getData().val();
+									if(!validProps.contains(prop)) {
+										env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
+													new CompilerWarning("Unexpected entry, this will be ignored.",
+															children.get(0).getTarget(), null));
+									}
 								}
 							}
 						}

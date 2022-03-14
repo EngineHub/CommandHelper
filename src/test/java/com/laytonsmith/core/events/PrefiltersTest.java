@@ -61,28 +61,6 @@ public class PrefiltersTest {
 	}
 
 	@Test
-	public void testItemMatch() {
-		Map<String, Mixed> map = new HashMap<>();
-		map.put("x", C.String("35:2"));
-		try {
-			Prefilters.match(map, "x", "35:4", PrefilterType.ITEM_MATCH);
-		} catch (PrefilterNonMatchException e) {
-			fail("Expected a match here");
-		}
-		try {
-			Prefilters.match(map, "x", "35", PrefilterType.ITEM_MATCH);
-		} catch (PrefilterNonMatchException e) {
-			fail("Expected a match here");
-		}
-		try {
-			Prefilters.match(map, "x", "36:2", PrefilterType.ITEM_MATCH);
-			fail("Did not expect a match here");
-		} catch (PrefilterNonMatchException e) {
-		}
-
-	}
-
-	@Test
 	public void testStringMatch() {
 		Map<String, Mixed> map = new HashMap<>();
 		map.put("x", C.String("test"));

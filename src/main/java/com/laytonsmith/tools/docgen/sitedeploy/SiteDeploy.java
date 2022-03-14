@@ -1567,7 +1567,7 @@ public final class SiteDeploy {
 						throw new RuntimeException("While trying to construct " + eventClass
 								+ ", got the following", ex);
 					}
-					final DocGen.EventDocInfo edi = new DocGen.EventDocInfo(e.docs(), e.getName());
+					final DocGen.EventDocInfo edi = new DocGen.EventDocInfo(e, e.docs(), e.getName(), DocGen.MarkupType.WIKI);
 					if(e.since().equals(MSVersion.V0_0_0)) {
 						// Don't add these
 						continue;

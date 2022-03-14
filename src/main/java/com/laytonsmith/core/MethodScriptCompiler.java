@@ -1285,6 +1285,7 @@ public final class MethodScriptCompiler {
 				Environment e = Static.GenerateStandaloneEnvironment(false);
 				environment = environment.cloneAndAdd(e.getEnv(CompilerEnvironment.class));
 			}
+			environment.getEnv(CompilerEnvironment.class).setStaticAnalysis(staticAnalysis);
 		} catch (IOException | DataSourceException | URISyntaxException | Profiles.InvalidProfileException ex) {
 			throw new RuntimeException(ex);
 		}
@@ -1343,6 +1344,7 @@ public final class MethodScriptCompiler {
 		int braceCount = 0;
 
 		boolean inObjectDefinition = false;
+		SmartComment lastSmartComment = null;
 
 		// Create a Token array to iterate over, rather than using the LinkedList's O(n) get() method.
 		Token[] tokenArray = stream.toArray(new Token[stream.size()]);
@@ -1788,8 +1790,18 @@ public final class MethodScriptCompiler {
 				tree.addChild(new ParseTree(new Variable(t.val(), null, false, t.type.equals(TType.FINAL_VAR), t.target), fileOptions));
 				constructCount.peek().incrementAndGet();
 				//right_vars.add(new Variable(t.val(), null, t.line_num));
+			} else if(t.type.equals(TType.SMART_COMMENT)) {
+				lastSmartComment = new SmartComment(t.val());
+				continue;
 			}
-
+			if(lastSmartComment != null) {
+				if(tree.getChildren().isEmpty()) {
+					tree.getNodeModifiers().setComment(lastSmartComment);
+				} else {
+					tree.getChildren().get(tree.getChildren().size() - 1).getNodeModifiers().setComment(lastSmartComment);
+				}
+				lastSmartComment = null;
+			}
 		}
 
 		assert t != null || stream.size() == 0;
@@ -2141,6 +2153,7 @@ public final class MethodScriptCompiler {
 						.rewrite(root.getChildren(), returnSConcat, envs);
 				root.setData(ret.getData());
 				root.setChildren(ret.getChildren());
+				root.getNodeModifiers().merge(ret.getNodeModifiers());
 			} catch (ConfigCompileException ex) {
 				compilerExceptions.add(ex);
 				return;
@@ -2354,6 +2367,9 @@ public final class MethodScriptCompiler {
 				// If an error occurs, we will skip the rest of this element
 				compilerErrors.add(ex);
 				return;
+			} catch (ConfigCompileGroupException ex) {
+				compilerErrors.addAll(ex.getList());
+				return;
 			} catch (ConfigRuntimeException ex) {
 				compilerErrors.add(new ConfigCompileException(ex));
 				return;
@@ -2445,6 +2461,7 @@ public final class MethodScriptCompiler {
 					env.getEnv(GlobalEnv.class).SetFlag("no-check-undefined", true);
 				}
 				Procedure myProc = DataHandling.proc.getProcedure(tree.getTarget(), env, fakeScript, children.toArray(new ParseTree[children.size()]));
+				tree.getNodeModifiers().merge(children.get(0).getNodeModifiers());
 				if(env.hasEnv(GlobalEnv.class)) {
 					env.getEnv(GlobalEnv.class).ClearFlag("no-check-undefined");
 				}
@@ -2509,6 +2526,9 @@ public final class MethodScriptCompiler {
 				compilerErrors.add(ex);
 				// Also turn off optimizations for the rest of this flow, so we don't try the other optimization
 				// mechanisms, which are also bound to fail.
+				options = NO_OPTIMIZATIONS;
+			} catch (ConfigCompileGroupException ex) {
+				compilerErrors.addAll(ex.getList());
 				options = NO_OPTIMIZATIONS;
 			}
 		}

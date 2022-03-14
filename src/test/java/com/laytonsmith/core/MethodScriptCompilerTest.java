@@ -3,6 +3,17 @@ package com.laytonsmith.core;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
+import com.laytonsmith.core.compiler.analysis.Declaration;
+import com.laytonsmith.core.compiler.analysis.Namespace;
+import com.laytonsmith.core.compiler.analysis.ProcDeclaration;
+import com.laytonsmith.core.compiler.analysis.ProcRootDeclaration;
+import com.laytonsmith.core.compiler.analysis.Scope;
+import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
+import com.laytonsmith.core.constructs.CFunction;
+import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CPrimitive;
+import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.constructs.Variable;
@@ -32,6 +43,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.laytonsmith.testing.StaticTest.RunCommand;
 import static com.laytonsmith.testing.StaticTest.SRun;
+import java.util.Collections;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -1280,5 +1292,95 @@ public class MethodScriptCompilerTest {
 		URL url = MethodScriptCompilerTest.class.getResource("/unbalancedRTLSource.ms");
 		File f = new File(new URI(url.toString()));
 		MethodScriptCompiler.lex(FileUtil.read(f), null, null, true);
+	}
+
+	@Test
+	@SuppressWarnings("checkstyle:localvariablename")
+	public void testParseTreeHasCorrectType() throws Exception {
+		Environment env = Static.GenerateStandaloneEnvironment();
+		StaticAnalysis sa = new StaticAnalysis(true);
+		sa.setLocalEnable(true);
+		ParseTree tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex("primitive @s = 'asdf'; msg(@s); int proc _a(){return(1);} _a();",
+				env, null, true), env, env.getEnvClasses(), sa);
+		ParseTree sUsage = tree.getChildAt(0).getChildAt(1).getChildAt(0);
+		assertTrue(sUsage.getDeclaredType(env).equals(CPrimitive.TYPE));
+		ParseTree asdf = tree.getChildAt(0).getChildAt(0).getChildAt(2);
+		assertTrue(asdf.getDeclaredType(env).equals(CString.TYPE));
+		ParseTree msg = tree.getChildAt(0).getChildAt(1);
+		assertTrue(msg.getDeclaredType(env).equals(CVoid.TYPE));
+		ParseTree _a = tree.getChildAt(0).getChildAt(3);
+		assertTrue(_a.getDeclaredType(env).equals(CInt.TYPE));
+	}
+
+	@Test
+	public void testSmartCommentIsOnNode() throws Exception {
+		String[] scripts = new String[]{
+			"/** smart comment */ proc('_test', null);",
+			"/** smart comment */ void proc _test(){}",
+			"/** smart comment */ proc _test(){}",
+		};
+		for(String script : scripts) {
+			Environment env = Static.GenerateStandaloneEnvironment();
+			StaticAnalysis sa = new StaticAnalysis(true);
+			sa.setLocalEnable(true);
+			ParseTree tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(
+					script,
+					env, null, true), env, env.getEnvClasses(), sa);
+			assertTrue(tree.getChildAt(0).getNodeModifiers().getComment() != null);
+		}
+	}
+
+	@Test
+	public void testGettingSmartCommentFromReferenceWorks() throws Exception {
+		String[] scripts = new String[]{
+			"/** smart comment */ proc _test() {}; _test();",
+			"/** smart comment */ void proc _test(){} _test();",
+			"/** smart comment */ proc _test(){} _test();",
+		};
+		for(String script : scripts) {
+			Environment env = Static.GenerateStandaloneEnvironment();
+			StaticAnalysis sa = new StaticAnalysis(true);
+			sa.setLocalEnable(true);
+			ParseTree tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(
+					script,
+					env, null, true), env, env.getEnvClasses(), sa);
+			ParseTree root = tree.getChildAt(0);
+			assertTrue(root.getChildAt(0).getNodeModifiers().getComment() != null);
+			assertTrue(root.getChildAt(1).getData() instanceof CFunction);
+			assertEquals("_test", root.getChildAt(1).getData().val());
+			assertTrue(sa.getTermScope(root.getChildAt(0)) != null);
+			Declaration decl = sa.getTermScope(root.getChildAt(0)).getDeclarationLocal(Namespace.PROCEDURE, "_test");
+			assertTrue(decl != null && decl instanceof ProcDeclaration);
+			assertTrue(decl.getNodeModifiers().getComment() != null);
+			assertEquals("smart comment", decl.getNodeModifiers().getComment().getBody());
+		}
+	}
+
+	@Test
+	public void testGettingListOfProcsWorks() throws Exception {
+		String script = """
+				proc _a() {}
+				proc _b() {}
+				proc _c() {
+					proc _d() {}
+				}
+				if(rand()) { proc _e(){} }
+				""";
+		Environment env = Static.GenerateStandaloneEnvironment();
+		StaticAnalysis sa = new StaticAnalysis(true);
+		sa.setLocalEnable(true);
+		MethodScriptCompiler.compile(MethodScriptCompiler.lex(
+				script,
+				env, null, true), env, env.getEnvClasses(), sa);
+		List<String> names = new ArrayList<>();
+		for(Scope scope : sa.getRootScopes()) {
+			for(Declaration decl : scope.getAllDeclarationsLocal(Namespace.PROCEDURE)) {
+				if(decl instanceof ProcRootDeclaration d) {
+					names.add(d.getProcDeclaration().getIdentifier());
+				}
+			}
+		}
+		Collections.sort(names);
+		assertEquals(Arrays.asList("_a", "_b", "_c", "_d", "_e"), names);
 	}
 }

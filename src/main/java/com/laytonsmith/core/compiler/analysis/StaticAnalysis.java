@@ -128,7 +128,7 @@ public class StaticAnalysis {
 			Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> exceptions) {
 
 		// Don't perform static analysis if it's disabled.
-		if(!enabled()) {
+		if(!enabled() && !isLocalEnabled()) {
 			return;
 		}
 
@@ -219,7 +219,8 @@ public class StaticAnalysis {
 					scope.addReference(new Reference(Namespace.IVARIABLE, decl.getIdentifier(), decl.getTarget()));
 				} else {
 					scope.addDeclaration(new Declaration(
-							Namespace.IVARIABLE, decl.getIdentifier(), CClassType.AUTO, decl.getTarget()));
+							Namespace.IVARIABLE, decl.getIdentifier(), CClassType.AUTO, decl.getNodeModifiers(),
+							decl.getTarget()));
 				}
 			}
 		}
@@ -269,7 +270,7 @@ public class StaticAnalysis {
 					if(!rootDecls.isEmpty()) {
 						for(Declaration decl : rootDecls) {
 							ProcRootDeclaration procRootDecl = (ProcRootDeclaration) decl;
-							procRootDecl.procDecl.addRequiredReference(ref);
+							procRootDecl.getProcDeclaration().addRequiredReference(ref);
 						}
 					} else {
 
@@ -319,7 +320,7 @@ public class StaticAnalysis {
 						if(!rootDecls.isEmpty()) {
 							for(Declaration decl : rootDecls) {
 								ProcRootDeclaration procRootDecl = (ProcRootDeclaration) decl;
-								changed |= procRootDecl.procDecl.addRequiredReference(ref);
+								changed |= procRootDecl.getProcDeclaration().addRequiredReference(ref);
 							}
 						} else {
 
@@ -366,7 +367,23 @@ public class StaticAnalysis {
 			} else if(cFunc.hasIVariable()) { // The function is a var reference to a closure: '@myClosure(<args>)'.
 				return CClassType.AUTO; // TODO - Get actual type (return type of closure, iclosure, rclosure?).
 			} else if(cFunc.hasProcedure()) { // The function is a procedure reference.
-				return CClassType.AUTO; // TODO - Get actual type.
+				String procName = cFunc.val();
+				Scope scope = this.getTermScope(ast);
+				if(scope != null) {
+					Set<Declaration> decls = scope.getDeclarations(Namespace.PROCEDURE, procName);
+					if(decls.isEmpty()) {
+						return CClassType.AUTO; // Proc cannot be resolved. Exception for this is already generated.
+					} else {
+						// TODO - Get the most specific type when multiple declarations exist.
+						return decls.iterator().next().getType();
+					}
+				} else {
+					// If this runs, then a proc reference was created without setting its Scope using setTermScope().
+					exceptions.add(new ConfigCompileException("Procedure cannot be resolved (missing procedure scope,"
+							+ " this is an internal error that should never happen): "
+							+ procName, cFunc.getTarget()));
+					return CClassType.AUTO;
+				}
 			} else {
 				throw new Error("Unsupported " + CFunction.class.getSimpleName()
 						+ " type in type checking for node with value: " + cFunc.val());
@@ -375,8 +392,7 @@ public class StaticAnalysis {
 			IVariable ivar = (IVariable) node;
 			Scope scope = this.getTermScope(ast);
 			if(scope != null) {
-				Set<Declaration> decls = scope.getDeclarations(
-						Namespace.IVARIABLE, ivar.getVariableName());
+				Set<Declaration> decls = scope.getDeclarations(Namespace.IVARIABLE, ivar.getVariableName());
 				if(decls.isEmpty()) {
 					exceptions.add(new ConfigCompileException(
 							"Variable cannot be resolved: " + ivar.getVariableName(), ivar.getTarget()));
@@ -518,9 +534,10 @@ public class StaticAnalysis {
 	 * @param exceptions
 	 * @return The {@link CClasType} if it was one, or {@code null} if it wasn't.
 	 */
+	@SuppressWarnings("null")
 	public static CClassType requireClassType(Mixed node, Target t, Set<ConfigCompileException> exceptions) {
-		if(node instanceof CClassType) {
-			return (CClassType) node;
+		if(node instanceof CClassType cClassType) {
+			return cClassType;
 		}
 
 		// The node can be anything. If it has a type, get that. If it doesn't, use the node's class name.
@@ -723,8 +740,7 @@ public class StaticAnalysis {
 	public Scope linkScope(Scope parentScope, ParseTree ast,
 			Environment env, Set<ConfigCompileException> exceptions) {
 		Mixed node = ast.getData();
-		if(node instanceof CFunction) {
-			CFunction cFunc = (CFunction) node;
+		if(node instanceof CFunction cFunc) {
 			if(cFunc.hasFunction()) {
 				Function func = cFunc.getCachedFunction();
 				if(func != null) {
@@ -743,6 +759,7 @@ public class StaticAnalysis {
 				// Add procedure reference in a new scope.
 				Scope refScope = this.createNewScope(parentScope);
 				refScope.addReference(new Reference(Namespace.PROCEDURE, cFunc.val(), cFunc.getTarget()));
+				this.setTermScope(ast, refScope);
 
 				// Handle the proc call arguments.
 				Scope argScope = refScope;
@@ -754,8 +771,7 @@ public class StaticAnalysis {
 				throw new Error("Unsupported " + CFunction.class.getSimpleName()
 						+ " type in static analysis for node with value: " + cFunc.val());
 			}
-		} else if(node instanceof IVariable) {
-			IVariable ivar = (IVariable) node;
+		} else if(node instanceof IVariable ivar) {
 
 			// Add variable reference in a new scope.
 			Scope refScope = this.createNewScope(parentScope);
@@ -778,23 +794,23 @@ public class StaticAnalysis {
 	 * @param exceptions
 	 * @return The resulting scopes in format {paramScope, valScope}.
 	 */
+	@SuppressWarnings("null")
 	public Scope[] linkParamScope(Scope paramScope, Scope valScope,
 			ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
 		Mixed node = ast.getData();
 
 		// Handle normal untyped parameter.
-		if(node instanceof IVariable) { // Normal parameter.
-			IVariable iVar = (IVariable) node;
+		if(node instanceof IVariable iVar) { // Normal parameter.
 			Scope newParamScope = this.createNewScope(paramScope);
 			newParamScope.addDeclaration(new ParamDeclaration(
-					iVar.getVariableName(), iVar.getDefinedType(), iVar.getTarget()));
+					iVar.getVariableName(), iVar.getDefinedType(), ast.getNodeModifiers(), iVar.getTarget()));
 			this.setTermScope(ast, newParamScope);
 			return new Scope[] {newParamScope, valScope};
 		}
 
 		// Handle assign parameter (typed and/or with default value).
-		if(node instanceof CFunction) { // Typed parameter or assign.
-			Function func = ((CFunction) node).getCachedFunction();
+		if(node instanceof CFunction cFunction) { // Typed parameter or assign.
+			Function func = cFunction.getCachedFunction();
 			if(func != null && func instanceof DataHandling.assign) {
 				return ((DataHandling.assign) func).linkParamScope(this, paramScope, valScope, ast, env, exceptions);
 			}
@@ -829,7 +845,7 @@ public class StaticAnalysis {
 	public Set<Scope> getRootScopes() {
 		Set<Scope> ret = new HashSet<>();
 		for(Scope scope : this.scopes) {
-			if(scope.getParents().size() == 0) {
+			if(scope.getParents().isEmpty()) {
 				ret.add(scope);
 			}
 		}
@@ -840,6 +856,12 @@ public class StaticAnalysis {
 		this.astScopeMap.put(term, scope);
 	}
 
+	/**
+	 * Returns the Scope that this term is defined in. This may return null for untracked nodes, so unless the type
+	 * is known to for sure be in the scope map, the return value should first be checked for null.
+	 * @param term
+	 * @return
+	 */
 	public Scope getTermScope(ParseTree term) {
 		return this.astScopeMap.get(term);
 	}
@@ -851,13 +873,17 @@ public class StaticAnalysis {
 	 * to their original start and end scope, and not to the cloned ones.
 	 */
 	@Override
+	@SuppressWarnings({"CloneDoesntCallSuperClone", "CloneDeclaresCloneNotSupported"})
 	public StaticAnalysis clone() {
 		return this.clone(new HashMap<>(), true);
 	}
 
 	private StaticAnalysis clone(Map<Scope, Scope> cloneMapping, boolean cloneAnalyses) {
+		@SuppressWarnings("LocalVariableHidesMemberVariable")
 		Scope startScope = cloneScope(this.startScope, cloneMapping);
+		@SuppressWarnings("LocalVariableHidesMemberVariable")
 		Scope endScope = cloneScope(this.endScope, cloneMapping);
+		@SuppressWarnings("LocalVariableHidesMemberVariable")
 		Scope globalScope = cloneScope(this.globalScope, cloneMapping);
 
 		Set<Scope> scopesClone = new HashSet<>();
@@ -874,6 +900,7 @@ public class StaticAnalysis {
 			}
 		}
 
+		@SuppressWarnings("LocalVariableHidesMemberVariable")
 		Map<ParseTree, Scope> astScopeMap = new HashMap<>();
 		for(Entry<ParseTree, Scope> entry : this.astScopeMap.entrySet()) {
 			astScopeMap.put(entry.getKey(), cloneScope(entry.getValue(), cloneMapping));
@@ -911,6 +938,23 @@ public class StaticAnalysis {
 			}
 		}
 		return scopeClone;
+	}
+
+	private boolean localEnable = false;
+	public void setLocalEnable(boolean enabled) {
+		this.localEnable = enabled;
+	}
+
+	/**
+	 * Returns true if this specific instance of the SA object is enabled (or it's globally enabled).
+	 * This is useful in unit tests to override the global value.
+	 * @deprecated This is a temporary method, it should be replaced with proper settings once static analysis is
+	 * ready for release.
+	 * @return
+	 */
+	@Deprecated
+	public boolean isLocalEnabled() {
+		return this.localEnable || enabled();
 	}
 
 	/**

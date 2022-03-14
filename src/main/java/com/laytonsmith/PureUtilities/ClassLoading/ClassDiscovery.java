@@ -71,7 +71,7 @@ public class ClassDiscovery {
 	public static synchronized ClassDiscovery getDefaultInstance() {
 		if(defaultInstance == null) {
 			defaultInstance = new ClassDiscovery();
-			//defaultInstance.setDebugMode(true);
+//			defaultInstance.setDebugMode(true);
 		}
 		return defaultInstance;
 	}
@@ -414,7 +414,7 @@ public class ClassDiscovery {
 		if(url == null) {
 			throw new NullPointerException("url cannot be null");
 		}
-		if(urlCache.contains(url)) {
+		if(urlCache.contains(url) && classCache.containsKey(url)) {
 			//Already here, so just return.
 			return;
 		}

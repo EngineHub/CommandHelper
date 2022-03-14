@@ -74,6 +74,7 @@ import org.eclipse.lsp4j.CompletionItemKind;
 import org.eclipse.lsp4j.CompletionList;
 import org.eclipse.lsp4j.CompletionOptions;
 import org.eclipse.lsp4j.CompletionParams;
+import org.eclipse.lsp4j.DeclarationParams;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.DidChangeConfigurationParams;
@@ -94,6 +95,7 @@ import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializeResult;
 import org.eclipse.lsp4j.InitializedParams;
 import org.eclipse.lsp4j.Location;
+import org.eclipse.lsp4j.LocationLink;
 import org.eclipse.lsp4j.MessageParams;
 import org.eclipse.lsp4j.MessageType;
 import org.eclipse.lsp4j.Position;
@@ -381,7 +383,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 				for(Event e : EventList.GetEvents()) {
 					final DocGen.EventDocInfo edi;
 					try {
-						edi = new DocGen.EventDocInfo(e.docs(), e.getName());
+						edi = new DocGen.EventDocInfo(e, e.docs(), e.getName(), DocGen.MarkupType.HTML);
 					} catch (IllegalArgumentException ex) {
 						MSLog.GetLogger().Log(LANGSERVLOGTAG, LogLevel.ERROR, ex.getMessage(), Target.UNKNOWN);
 						continue;
@@ -1080,6 +1082,11 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 			result.complete(links);
 		});
 		return result;
+	}
+
+	@Override
+	public CompletableFuture<Either<List<? extends Location>, List<? extends LocationLink>>> declaration(DeclarationParams params) {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override

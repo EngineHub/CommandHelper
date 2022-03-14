@@ -11,6 +11,7 @@ import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.MSP.Burst;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.Implementation;
+import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.datasource;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.CommandLineTool;
@@ -22,6 +23,7 @@ import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.events.prefilters.PrefilterMatcher.PrefilterDocs;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.FunctionBase;
@@ -837,6 +839,30 @@ public class DocGenTemplates {
 					.append(" (added ")
 					.append(s.since())
 					.append(")\n");
+		}
+		return b.toString();
+	};
+
+	public static final Generator PREFILTER_DESCRIPTIONS = (args) -> {
+		StringBuilder b = new StringBuilder();
+		// Make them arbitrarily but deterministicly ordered
+		SortedSet<Class<? extends PrefilterDocs>> set = new TreeSet(new Comparator<Class<? extends PrefilterDocs>>() {
+			@Override
+			public int compare(Class<? extends PrefilterDocs> o1, Class<? extends PrefilterDocs> o2) {
+				return o1.getName().compareTo(o2.getName());
+			}
+		});
+		set.addAll(ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(api.class, PrefilterDocs.class));
+		for(Class<? extends PrefilterDocs> prefilterMatcher : set) {
+			try {
+				PrefilterDocs matcher = ReflectionUtils.newInstance(prefilterMatcher);
+				b.append("== ").append(matcher.getName()).append(" ==\n");
+				b.append(DoTemplateReplacement(matcher.docs(), GetGenerators()));
+				b.append("\n\n").append("Since: ").append(matcher.since());
+				b.append("\n\n");
+			} catch (ReflectionUtils.ReflectionException ex) {
+				ex.printStackTrace(System.err);
+			}
 		}
 		return b.toString();
 	};

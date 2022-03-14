@@ -1,11 +1,18 @@
 package com.laytonsmith.core;
 
+import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.FileOptions;
+import com.laytonsmith.core.compiler.analysis.Declaration;
+import com.laytonsmith.core.compiler.analysis.Namespace;
+import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
+import com.laytonsmith.core.constructs.Auto;
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
@@ -14,8 +21,10 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.objects.ObjectType;
 import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.WeakHashMap;
 
 /**
@@ -77,6 +86,7 @@ public class ParseTree implements Cloneable {
 	private final FileOptions fileOptions;
 	private List<ParseTree> children = null;
 	private boolean hasBeenMadeStatic = false;
+	private NodeModifiers nodeModifiers = new NodeModifiers();
 
 	/**
 	 * Creates a new empty tree node
@@ -387,6 +397,66 @@ public class ParseTree implements Cloneable {
 		} else {
 			return data.getTarget();
 		}
+	}
+
+	/**
+	 * Returns the declared CClassType of this node. For constants, this is just the type, for variables, this is the
+	 * defined type, and for functions and procs, this is the return type of the function. For many values,
+	 * the type will be AUTO. The type may be CNull for literal nulls, but will never be java null.
+	 *
+	 * @param env
+	 * @return
+	 */
+	public CClassType getDeclaredType(Environment env) {
+		if(isConst()) {
+			return getData().typeof();
+		} else if(getData() instanceof IVariable ivar) {
+			StaticAnalysis sa = env.getEnv(CompilerEnvironment.class).getStaticAnalysis();
+			if(sa.isLocalEnabled()) {
+				List<Declaration> decls = new ArrayList<>(sa.getTermScope(this).getDeclarations(Namespace.IVARIABLE, ivar.getVariableName()));
+				if(decls.size() == 1) {
+					return decls.get(0).getType();
+				} else {
+					return Auto.TYPE;
+				}
+			} else {
+				// This isn't possible to accurately get without static analysis enabled.
+				return Auto.TYPE;
+			}
+		} else if(getData() instanceof CFunction cf) {
+			if(cf.hasProcedure()) {
+				StaticAnalysis sa = env.getEnv(CompilerEnvironment.class).getStaticAnalysis();
+				if(sa.isLocalEnabled()) {
+					List<Declaration> decls = new ArrayList<>(sa.getTermScope(this).getDeclarations(Namespace.PROCEDURE, cf.val()));
+					if(decls.size() == 1) {
+						return decls.get(0).getType();
+					} else {
+						return Auto.TYPE;
+					}
+				} else {
+					return Auto.TYPE;
+				}
+			} else {
+				List<CClassType> argTypes = new ArrayList<>();
+				List<Target> argTargets = new ArrayList<>();
+				Set<ConfigCompileException> exceptions = new HashSet<>();
+				for(ParseTree child : getChildren()) {
+					argTypes.add(child.getDeclaredType(env));
+					argTargets.add(child.getTarget());
+				}
+				return cf.getCachedFunction().getReturnType(getTarget(), argTypes, argTargets, env, exceptions);
+			}
+		} else {
+			throw new Error("Unhandled type, please report this bug");
+		}
+	}
+
+	/**
+	 * Returns the NodeModifiers object for this ParseTree node.
+	 * @return
+	 */
+	public NodeModifiers getNodeModifiers() {
+		return nodeModifiers;
 	}
 
 }
