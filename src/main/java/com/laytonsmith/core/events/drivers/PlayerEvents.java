@@ -2019,8 +2019,12 @@ public class PlayerEvents {
 		@Override
 		public void bind(BoundEvent event) {
 			Map<String, Mixed> prefilters = event.getPrefilter();
-			int threshold = (prefilters.containsKey("threshold")
-					? ArgumentValidation.getInt32(prefilters.get("threshold"), Target.UNKNOWN) : 1);
+			int threshold = 1;
+			if(prefilters.containsKey("threshold")) {
+				threshold = ArgumentValidation.getInt32(prefilters.get("threshold"), Target.UNKNOWN);
+			} else {
+				prefilters.put("threshold", new CInt(threshold, Target.UNKNOWN));
+			}
 			Integer count = THRESHOLD_LIST.get(threshold);
 			THRESHOLD_LIST.put(threshold, (count != null ? count + 1 : 1));
 		}
