@@ -1349,7 +1349,8 @@ public class MethodScriptCompilerTest {
 			assertTrue(root.getChildAt(1).getData() instanceof CFunction);
 			assertEquals("_test", root.getChildAt(1).getData().val());
 			assertTrue(sa.getTermScope(root.getChildAt(0)) != null);
-			Declaration decl = sa.getTermScope(root.getChildAt(0)).getDeclarationLocal(Namespace.PROCEDURE, "_test");
+			Declaration decl = new ArrayList<>(sa.getTermScope(root.getChildAt(1))
+					.getReachableDeclarations(Namespace.PROCEDURE, "_test")).get(0);
 			assertTrue(decl != null && decl instanceof ProcDeclaration);
 			assertTrue(decl.getNodeModifiers().getComment() != null);
 			assertEquals("smart comment", decl.getNodeModifiers().getComment().getBody());

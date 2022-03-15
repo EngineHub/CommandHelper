@@ -8,6 +8,7 @@ import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MethodScriptExecutionQueue;
 import com.laytonsmith.core.Procedure;
 import com.laytonsmith.core.Script;
+import com.laytonsmith.core.ScriptProvider;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CBoolean;
@@ -64,6 +65,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	private final MutableObject<Map<String, Mixed>> runtimeSettings
 			= new MutableObject<>(new ConcurrentHashMap<>());
 	private FileOptions fileOptions;
+	private ScriptProvider scriptProvider = new ScriptProvider.FileSystemScriptProvider();
 
 	/**
 	 * Creates a new GlobalEnvironment. All fields in the constructor are required, and cannot be null.
@@ -497,5 +499,13 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	 */
 	public FileOptions GetFileOptions() {
 		return this.fileOptions;
+	}
+
+	public ScriptProvider GetScriptProvider() {
+		return this.scriptProvider;
+	}
+
+	public void SetScriptProvider(ScriptProvider provider) {
+		this.scriptProvider = provider;
 	}
 }

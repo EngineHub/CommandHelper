@@ -1,6 +1,5 @@
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.PureUtilities.ZipReader;
 import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.MethodScriptCompiler;
@@ -11,6 +10,7 @@ import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.CRE.CREIOException;
 import com.laytonsmith.core.exceptions.CRE.CREIncludeException;
@@ -65,7 +65,7 @@ public class IncludeCache {
 				throw new CRESecurityException("The script cannot access " + file
 						+ " due to restrictions imposed by the base-dir setting.", t);
 			}
-			String s = new ZipReader(file).getFileContents();
+			String s = env.getEnv(GlobalEnv.class).GetScriptProvider().getScript(file);
 			ProfilePoint p = profiler.start("Compiling " + file, LogLevel.WARNING);
 			ParseTree tree;
 			try {

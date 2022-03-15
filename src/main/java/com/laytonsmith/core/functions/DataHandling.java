@@ -1561,9 +1561,10 @@ public class DataHandling {
 
 			// Handle procedure parameters from left to right.
 			Scope valScope = parentScope;
+			List<ParamDeclaration> params = new ArrayList<>();
 			while(ind < ast.numberOfChildren() - 1) {
 				ParseTree param = ast.getChildAt(ind++);
-				Scope[] scopes = analysis.linkParamScope(paramScope, valScope, param, env, exceptions);
+				Scope[] scopes = analysis.linkParamScope(paramScope, valScope, param, env, exceptions, params);
 				valScope = scopes[1];
 				paramScope = scopes[0];
 			}
@@ -1575,7 +1576,8 @@ public class DataHandling {
 			// Create proc declaration in a new scope.
 			// TODO - Include proc signature (argument types and number of arguments) in declaration.
 			Scope declScope = analysis.createNewScope(parentScope);
-			ProcDeclaration procDecl = new ProcDeclaration(procName, retType, ast.getNodeModifiers(), ast.getTarget());
+			ProcDeclaration procDecl = new ProcDeclaration(procName, retType, params,
+					ast.getNodeModifiers(), ast.getTarget());
 			declScope.addDeclaration(procDecl);
 			analysis.setTermScope(ast, declScope);
 
@@ -2540,9 +2542,10 @@ public class DataHandling {
 
 			// Handle closure parameters from left to right.
 			Scope valScope = parentScope;
+			List<ParamDeclaration> params = new ArrayList<>();
 			while(ind < ast.numberOfChildren() - 1) {
 				ParseTree param = ast.getChildAt(ind++);
-				Scope[] scopes = analysis.linkParamScope(paramScope, valScope, param, env, exceptions);
+				Scope[] scopes = analysis.linkParamScope(paramScope, valScope, param, env, exceptions, params);
 				valScope = scopes[1];
 				paramScope = scopes[0];
 			}

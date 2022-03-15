@@ -2,46 +2,35 @@ package com.laytonsmith.tools.langserv;
 
 import com.laytonsmith.PureUtilities.ArgumentParser;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
-import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
-import com.laytonsmith.annotations.api;
-import com.laytonsmith.annotations.hide;
+import com.laytonsmith.PureUtilities.MapBuilder;
+import com.laytonsmith.PureUtilities.SmartComment;
 import com.laytonsmith.core.AbstractCommandLineTool;
-import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.MSLog;
-import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Profiles;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Security;
 import com.laytonsmith.core.Static;
-import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.compiler.TokenStream;
+import com.laytonsmith.core.compiler.analysis.Declaration;
+import com.laytonsmith.core.compiler.analysis.Namespace;
+import com.laytonsmith.core.compiler.analysis.ParamDeclaration;
+import com.laytonsmith.core.compiler.analysis.ProcDeclaration;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.Construct;
-import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Token;
-import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
-import com.laytonsmith.core.environments.GlobalEnv;
-import com.laytonsmith.core.environments.RuntimeMode;
-import com.laytonsmith.core.events.Event;
-import com.laytonsmith.core.events.EventList;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
-import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.functions.DocumentLinkProvider;
 import com.laytonsmith.core.functions.DocumentSymbolProvider;
 import com.laytonsmith.core.functions.Function;
-import com.laytonsmith.core.functions.FunctionBase;
-import com.laytonsmith.core.functions.FunctionList;
-import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.tool;
 import com.laytonsmith.persistence.DataSourceException;
-import com.laytonsmith.tools.docgen.DocGen;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -52,30 +41,25 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.net.Socket;
-import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.EnumSet;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.lsp4j.CompletionItem;
-import org.eclipse.lsp4j.CompletionItemKind;
 import org.eclipse.lsp4j.CompletionList;
 import org.eclipse.lsp4j.CompletionOptions;
 import org.eclipse.lsp4j.CompletionParams;
 import org.eclipse.lsp4j.DeclarationParams;
-import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.DidChangeConfigurationParams;
 import org.eclipse.lsp4j.DidChangeTextDocumentParams;
@@ -91,20 +75,21 @@ import org.eclipse.lsp4j.DocumentSymbol;
 import org.eclipse.lsp4j.DocumentSymbolParams;
 import org.eclipse.lsp4j.ExecuteCommandOptions;
 import org.eclipse.lsp4j.ExecuteCommandParams;
+import org.eclipse.lsp4j.Hover;
+import org.eclipse.lsp4j.HoverParams;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializeResult;
 import org.eclipse.lsp4j.InitializedParams;
 import org.eclipse.lsp4j.Location;
 import org.eclipse.lsp4j.LocationLink;
+import org.eclipse.lsp4j.MarkupContent;
 import org.eclipse.lsp4j.MessageParams;
 import org.eclipse.lsp4j.MessageType;
 import org.eclipse.lsp4j.Position;
-import org.eclipse.lsp4j.PublishDiagnosticsParams;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.SymbolInformation;
 import org.eclipse.lsp4j.SymbolKind;
-import org.eclipse.lsp4j.TextDocumentContentChangeEvent;
 import org.eclipse.lsp4j.TextDocumentSyncKind;
 import org.eclipse.lsp4j.WorkspaceFolder;
 import org.eclipse.lsp4j.WorkspaceFoldersOptions;
@@ -317,6 +302,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 	private final boolean usingStdio;
 
 	private LanguageClient client;
+	private LangServModel model;
 
 	/**
 	 * This executor uses an unbounded thread pool, and should only be used for task in which a user is actively
@@ -341,113 +327,21 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 			return new Thread(r, "LowPriority-thread-pool-" + (++count));
 		}
 	});
-	private List<CompletionItem> functionCompletionItems = null;
-	private List<CompletionItem> objectCompletionItems = null;
-	private List<CompletionItem> eventCompletionItems = null;
-	private List<CompletionItem> allCompletionItems = null;
+
 
 	@Override
 	@SuppressWarnings("UseSpecificCatch")
 	public void connect(LanguageClient client) {
 		logv(this.getClass().getName() + "." + StackTraceUtils.currentMethod() + " called");
 		this.client = client;
-		highPriorityProcessors.execute(() -> {
-			// Create the base completion list.
-			{
-				List<CompletionItem> list = new ArrayList<>();
-				for(FunctionBase fb : FunctionList.getFunctionList(api.Platforms.INTERPRETER_JAVA, null)) {
-					if(fb.getClass().getAnnotation(hide.class) != null) {
-						continue;
-					}
-					DocGen.DocInfo di;
-					try {
-						di = new DocGen.DocInfo(fb.docs());
-					} catch (IllegalArgumentException ex) {
-						MSLog.GetLogger().Log(LANGSERVLOGTAG, LogLevel.ERROR, "Error parsing function \""
-								+ fb.getName() + "\". " + ex.getMessage(), Target.UNKNOWN);
-						continue;
-					}
-					CompletionItem ci = new CompletionItem(fb.getName());
-//					ci.setCommitCharacters(Arrays.asList("("));
-					ci.setKind(CompletionItemKind.Function);
-					ci.setDetail(di.ret);
-					ci.setDocumentation(di.originalArgs + "\n\n" + di.desc
-							+ (di.extendedDesc == null ? "" : "\n\n" + di.extendedDesc));
-					list.add(ci);
-				}
-				functionCompletionItems = list;
-				logv("Function completion list completed. (" + list.size() + ")");
-			}
-			{
-				List<CompletionItem> list = new ArrayList<>();
-				for(Event e : EventList.GetEvents()) {
-					final DocGen.EventDocInfo edi;
-					try {
-						edi = new DocGen.EventDocInfo(e, e.docs(), e.getName(), DocGen.MarkupType.HTML);
-					} catch (IllegalArgumentException ex) {
-						MSLog.GetLogger().Log(LANGSERVLOGTAG, LogLevel.ERROR, ex.getMessage(), Target.UNKNOWN);
-						continue;
-					}
-					CompletionItem ci = new CompletionItem(e.getName());
-					ci.setCommitCharacters(Arrays.asList("'", "\""));
-					ci.setKind(CompletionItemKind.Function);
-					ci.setDetail("Event Type");
-					StringBuilder description = new StringBuilder();
-					description.append(edi.description).append("\n");
-					if(!edi.prefilter.isEmpty()) {
-						for(DocGen.EventDocInfo.PrefilterData pdata : edi.prefilter) {
-							description.append(pdata.name).append(": ")
-									.append(pdata.formatDescription(DocGen.MarkupType.TEXT))
-									.append("\n");
-						}
-						description.append("\n");
-					}
-					if(!edi.eventData.isEmpty()) {
-						for(DocGen.EventDocInfo.EventData edata : edi.eventData) {
-							description.append(edata.name)
-									.append(!edata.description.isEmpty() ? ": " + edata.description : "")
-									.append("\n");
-						}
-						description.append("\n");
-					}
-					if(!edi.mutability.isEmpty()) {
-						for(DocGen.EventDocInfo.MutabilityData mdata : edi.mutability) {
-							description.append(mdata.name)
-									.append(!mdata.description.isEmpty() ? ": " + mdata.description : "")
-									.append("\n");
-						}
-						description.append("\n");
-					}
-					ci.setDocumentation(description.toString());
-					list.add(ci);
-				}
-				eventCompletionItems = list;
-				logv("Event completion list completed. (" + list.size() + ")");
-			}
-			{
-				List<CompletionItem> list = new ArrayList<>();
-				for(FullyQualifiedClassName fqcn : NativeTypeList.getNativeTypeList()) {
-					try {
-						Mixed m = NativeTypeList.getInvalidInstanceForUse(fqcn);
-						CompletionItem ci = new CompletionItem(m.typeof().getSimpleName());
-						ci.setKind(CompletionItemKind.TypeParameter);
-						ci.setDetail(m.getName());
-						ci.setDocumentation(m.docs());
-						ci.setCommitCharacters(Arrays.asList(" "));
-						list.add(ci);
-					} catch (Throwable ex) {
-						// Skip it.
-					}
-				}
-				objectCompletionItems = list;
-				logv("Object completion list completed. (" + list.size() + ")");
-			}
-			allCompletionItems = new ArrayList<>();
-			allCompletionItems.addAll(functionCompletionItems);
-			allCompletionItems.addAll(eventCompletionItems);
-			allCompletionItems.addAll(objectCompletionItems);
-			logd("Completion list generated.");
-		});
+
+		if(this.model == null) {
+			this.model = new LangServModel(this);
+		}
+		this.model.setClient(client);
+		this.model.setProcessors(highPriorityProcessors, lowPriorityProcessors);
+
+		this.model.startup();
 	}
 
 	@java.lang.annotation.Target(ElementType.TYPE)
@@ -507,6 +401,8 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 		sc.setWorkspace(wsc);
 
 		sc.setDocumentSymbolProvider(true);
+		sc.setDeclarationProvider(true);
+		sc.setHoverProvider(true);
 
 		{
 			ExecuteCommandOptions eco = new ExecuteCommandOptions();
@@ -535,7 +431,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 		if(usingStdio) {
 			System.err.println("Language Server Connected");
 		}
-		workspaceFolders.addAll(params.getWorkspaceFolders());
+		model.addWorkspace(params.getWorkspaceFolders());
 		return cf;
 	}
 
@@ -543,18 +439,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 	public void initialized(InitializedParams params) {
 		logv(this.getClass().getName() + "." + StackTraceUtils.currentMethod() + " called");
 		client.workspaceFolders().thenAccept((List<WorkspaceFolder> t) -> {
-			for(WorkspaceFolder f : t) {
-				File workspace = new File(f.getUri().replaceFirst("file://", ""));
-				try {
-					FileUtil.recursiveFind(workspace, (File f1) -> {
-						if(f1.isFile() && (f1.getName().endsWith(".ms") || f1.getName().endsWith(".msa"))) {
-							doCompilation(null, lowPriorityProcessors, f1.toURI().toString(), false);
-						}
-					});
-				} catch (IOException ex) {
-					client.logMessage(new MessageParams(MessageType.Warning, ex.getMessage()));
-				}
-			}
+
 		});
 	}
 
@@ -584,7 +469,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 		return this;
 	}
 
-	private static DiagnosticSeverity getSeverity(CompilerWarning warning) {
+	public static DiagnosticSeverity getSeverity(CompilerWarning warning) {
 		if(warning.getSuppressCategory() == null) {
 			return DiagnosticSeverity.Warning;
 		}
@@ -599,342 +484,36 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 		throw new Error("Unaccounted for case: " + warning.getSuppressCategory());
 	}
 
-	/**
-	 * This function compiles MSA files and returns the Script objects. Note that this is not intended for use
-	 * to get compile errors. If there are compile errors, it will not call the future. This is also the case
-	 * if the uri does not point to a msa file. Any other errors will result in the future being called.
-	 */
-	public void doPreprocess(CompletableFuture<List<Script>> future, Executor threadPool, final String uri,
-			boolean withDelay) {
-		threadPool.execute(() -> {
-			URI uuri;
-			String code;
-			try {
-				uuri = new URI(uri);
-				code = getDocument(uri);
-			} catch (URISyntaxException | IOException ex) {
-				return;
-			}
-			File f;
-			if("untitled".equals(uuri.getScheme())) {
-				// For open files that aren't saved to disk, the client sends something like "untitled:untitled-1",
-				// which isn't a valid file provider, so we can't call Paths.get on it. Instead, we just mock
-				// the name here. We also need to provide getAbsoluteFile, so that the below call to getParentFile
-				// will work.
-				f = new File(uuri.getSchemeSpecificPart()).getAbsoluteFile();
-			} else {
-				f = Paths.get(uuri).toFile();
-			}
-			if(!f.getName().endsWith(".msa")) {
-				return;
-			}
 
-			logd(() -> "Compiling " + f);
-
-			Environment env;
-			try {
-				// Cmdline mode disables things like security checks and whatnot.
-				// These may be present in the runtime environment,
-				// but it's not possible for us to tell that at this point.
-				env = Static.GenerateStandaloneEnvironment(false, EnumSet.of(RuntimeMode.CMDLINE));
-				// Make this configurable at some point. For now, however, we need this so we can get
-				// correct handling on minecraft functions.
-				env = env.cloneAndAdd(new CommandHelperEnvironment());
-			} catch (IOException | DataSourceException | URISyntaxException | Profiles.InvalidProfileException ex) {
-				throw new RuntimeException(ex);
-			}
-			CompilerEnvironment compilerEnv = env.getEnv(CompilerEnvironment.class);
-			compilerEnv.setLogCompilerWarnings(false); // No one would see them
-			GlobalEnv gEnv = env.getEnv(GlobalEnv.class);
-			gEnv.SetRootFolder(f.getParentFile());
-			// Eventually we want to rework this so that this is available
-			Set<Class<? extends Environment.EnvironmentImpl>> envs = new HashSet<>();
-			for(Class<Environment.EnvironmentImpl> c
-					: ClassDiscovery.getDefaultInstance().loadClassesThatExtend(Environment.EnvironmentImpl.class)) {
-				envs.add(c);
-			}
-			try {
-				TokenStream tokens = MethodScriptCompiler.lex(code, env, f, false);
-				List<Script> scripts = MethodScriptCompiler.preprocess(tokens, envs);
-				future.complete(scripts);
-			} catch (ConfigCompileException ex) {
-				return;
-			}
-		});
-	}
-
-	private final List<WorkspaceFolder> workspaceFolders = new ArrayList<>();
 
 	@Override
 	public void didChangeWorkspaceFolders(DidChangeWorkspaceFoldersParams params) {
-		workspaceFolders.removeAll(params.getEvent().getRemoved());
-		workspaceFolders.addAll(params.getEvent().getAdded());
+		model.removeWorkspace(params.getEvent().getRemoved());
+		model.addWorkspace(params.getEvent().getAdded());
 	}
 
-	/**
-	 * Compiles the file, on the given thread pool.
-	 * @param future After compilation is done, the parse tree is returned. May be null if you don't need it.
-	 * @param threadPool
-	 * @param uri
-	 * @param withDelay If true, waits {@link #COMPILATION_DELAY} seconds before compiling, resetting the timer if
-	 * another request to compile the file comes in before the timer is up.
-	 */
-	@SuppressWarnings({"UseSpecificCatch", "SleepWhileInLoop"})
-	public void doCompilation(CompletableFuture<ParseTree> future, Executor threadPool, final String uri,
-			boolean withDelay) {
-		// This has to be finished before compile on change can be enabled, but for now compile on save is good enough
-//		if(compilerDelayThread == null) {
-//			compilerDelayThread = new Thread(() -> {
-//				try {
-//					while(true) {
-//						Thread.sleep(1000);
-//						if(compileDelays.isEmpty()) {
-//							continue;
-//						}
-//						Map<String, Triplet<Long, Executor, CompletableFuture<ParseTree>>> localCompileDelays;
-//						synchronized(compileDelays) {
-//							// Don't do the compilation while in the synchronized block,
-//							// we want to just copy the map then leave the block
-//							localCompileDelays = new HashMap<>(compileDelays);
-//						}
-//						for(Map.Entry<String, Triplet<Long, Executor, CompletableFuture<ParseTree>>> entry :
-//								localCompileDelays.entrySet()) {
-//							Triplet<Long, Executor, CompletableFuture<ParseTree>> params = entry.getValue();
-//							if(params.getFirst() < System.currentTimeMillis()) {
-//								doCompilation(params.getThird(), params.getSecond(), entry.getKey(), false);
-//							}
-//						}
-//					}
-//				} catch (InterruptedException ex) {
-//					//
-//				}
-//			}, "CompilerDelayThread");
-//			compilerDelayThread.setDaemon(true);
-//			compilerDelayThread.start();
-//		}
-//		if(withDelay) {
-//			synchronized(compileDelays) {
-//				compileDelays.put(uri, new Triplet<>(System.currentTimeMillis() + (COMPILATION_DELAY * 1000),
-//						threadPool, future));
-//				return;
-//			}
-//		} else {
-//			// If a compilation request withDelay = false comes in, we need to clear out the queue, since it will be
-//			// compiled immediately anyways.
-//		}
 
-		threadPool.execute(() -> {
-			try {
-
-				Set<ConfigCompileException> exceptions = new HashSet<>();
-				String code;
-				// Eventually we want to rework this so that this is available
-				Set<Class<? extends Environment.EnvironmentImpl>> envs = new HashSet<>();
-				for(Class<Environment.EnvironmentImpl> c
-						: ClassDiscovery.getDefaultInstance().loadClassesThatExtend(Environment.EnvironmentImpl.class)) {
-					envs.add(c);
-				}
-				Environment env;
-				try {
-					// Cmdline mode disables things like security checks and whatnot.
-					// These may be present in the runtime environment,
-					// but it's not possible for us to tell that at this point.
-					env = Static.GenerateStandaloneEnvironment(false, EnumSet.of(RuntimeMode.CMDLINE));
-					// Make this configurable at some point. For now, however, we need this so we can get
-					// correct handling on minecraft functions.
-					env = env.cloneAndAdd(new CommandHelperEnvironment());
-				} catch (IOException | DataSourceException | URISyntaxException | Profiles.InvalidProfileException ex) {
-					throw new RuntimeException(ex);
-				}
-				CompilerEnvironment compilerEnv = env.getEnv(CompilerEnvironment.class);
-				compilerEnv.setLogCompilerWarnings(false); // No one would see them
-				GlobalEnv gEnv = env.getEnv(GlobalEnv.class);
-
-
-				File f;
-				{
-					URI uuri = new URI(uri);
-					if("untitled".equals(uuri.getScheme())) {
-						// For open files that aren't saved to disk, the client sends something like "untitled:untitled-1",
-						// which isn't a valid file provider, so we can't call Paths.get on it. Instead, we just mock
-						// the name here. We also need to provide getAbsoluteFile, so that the below call to getParentFile
-						// will work.
-						f = new File(uuri.getSchemeSpecificPart()).getAbsoluteFile();
-					} else {
-						f = Paths.get(uuri).toFile();
-					}
-				}
-
-				if(f.getAbsolutePath().replace("\\", "/").contains(".disabled/")) {
-					// Don't compile files in disabled folders at all.
-					return;
-				}
-
-				// SA is currently not async safe, so we just manually synch outside for now. This is obviously
-				// bad and should be fixed.
-				synchronized(LangServ.class) {
-					Set<File> autoIncludes = new HashSet<>();
-					for(WorkspaceFolder folder : workspaceFolders) {
-						URI uuri = new URI(folder.getUri());
-						File ai = Paths.get(uuri).toFile();
-						FileUtil.recursiveFind(ai, (r) -> {
-							if(r.isFile() && r.getAbsolutePath().endsWith("auto_include.ms")) {
-								String path = r.getAbsolutePath().replace("\\", "/");
-								if(!path.contains(".disabled/")
-										&& !path.contains(".library/")) {
-									autoIncludes.add(r);
-								}
-							}
-						});
-					}
-					autoIncludes.remove(f); // If we're compiling the auto_include file itself
-					logv(() -> "Providing StaticAnalysis with auto includes: " + autoIncludes.toString());
-
-					StaticAnalysis.setAndAnalyzeAutoIncludes(new ArrayList<>(autoIncludes), env, envs, exceptions);
-				}
-
-				gEnv.SetRootFolder(f.getParentFile());
-				TokenStream tokens = null;
-				ParseTree tree = null;
-				try {
-					ParseTree fTree;
-					logd(() -> "Compiling " + f);
-					code = getDocument(uri);
-					if(f.getName().endsWith(".msa")) {
-						tokens = MethodScriptCompiler.lex(code, env, f, false);
-						fTree = new ParseTree(null);
-						final Environment finalEnv = env;
-						MethodScriptCompiler.preprocess(tokens, envs).forEach((script) -> {
-							try {
-								script.compile(finalEnv);
-							} catch (ConfigCompileException ex) {
-								exceptions.add(ex);
-							} catch (ConfigCompileGroupException ex) {
-								exceptions.addAll(ex.getList());
-							}
-							script.getTrees().forEach(r -> fTree.addChild(r));
-						});
-					} else {
-						// Actually, for untitled files, this may not be a correct default. However, there's no
-						// other good way of determining that, so let's just assume it's pure methodscript.
-						tokens = MethodScriptCompiler.lex(code, env, f, true);
-						fTree = MethodScriptCompiler.compile(tokens, env, envs);
-					}
-					tree = fTree;
-				} catch (ConfigCompileException e) {
-					exceptions.add(e);
-				} catch (ConfigCompileGroupException e) {
-					exceptions.addAll(e.getList());
-				} catch (Throwable e) {
-					// Just skip this, we can't do much here.
-					loge(() -> StackTraceUtils.GetStacktrace(e));
-				}
-				List<Diagnostic> diagnosticsList = new ArrayList<>();
-				if(!exceptions.isEmpty()) {
-					logi(() -> "Errors found, reporting " + exceptions.size() + " errors");
-					for(ConfigCompileException e : exceptions) {
-						Diagnostic d = new Diagnostic();
-						d.setRange(convertTargetToRange(tokens, e.getTarget()));
-						d.setSeverity(DiagnosticSeverity.Error);
-						d.setMessage(e.getMessage());
-						diagnosticsList.add(d);
-					}
-				}
-				List<CompilerWarning> warnings = compilerEnv.getCompilerWarnings();
-				if(!warnings.isEmpty()) {
-					for(CompilerWarning c : warnings) {
-						Diagnostic d = new Diagnostic();
-						d.setRange(convertTargetToRange(tokens, c.getTarget()));
-						d.setSeverity(getSeverity(c));
-						d.setMessage(c.getMessage());
-						diagnosticsList.add(d);
-					}
-				}
-
-				// We need to report to the client always, with an empty list, implying that all problems are fixed.
-				PublishDiagnosticsParams diagnostics
-						= new PublishDiagnosticsParams(uri, diagnosticsList);
-				client.publishDiagnostics(diagnostics);
-
-				if(future != null && tree != null) {
-					future.complete(tree);
-				}
-			} catch (Throwable t) {
-				client.logMessage(new MessageParams(MessageType.Error, t.getMessage() + "\n"
-						+ StackTraceUtils.GetStacktrace(t)));
-			}
-
-		});
-	}
 
 	//<editor-fold defaultstate="collapsed" desc="DocumentManagement">
 
-	/**
-	 * Maps from URI to document text. If the document isn't in this map, it may be safely read from disk.
-	 */
-	private final Map<String, String> documents = new HashMap<>();
-
-	/**
-	 * Returns the document text either from the document cache, if the client is managing the document, or from
-	 * the file system if it isn't.
-	 * @param uri
-	 * @return
-	 * @throws java.io.IOException
-	 */
-	public String getDocument(String uri) throws IOException {
-		if(documents.containsKey(uri)) {
-			return documents.get(uri);
-		}
-		File f;
-		try {
-			f = Paths.get(new URI(uri)).toFile();
-		} catch (URISyntaxException ex) {
-			throw new RuntimeException(ex);
-		}
-		return FileUtil.read(f);
-	}
-
 	@Override
 	public void didOpen(DidOpenTextDocumentParams params) {
-		// The document open notification is sent from the client to the server to signal newly opened text documents.
-		// The document’s truth is now managed by the client and the server must not try to read the document’s truth
-		// using the document’s Uri.
-		logv(this.getClass().getName() + "." + StackTraceUtils.currentMethod() + " called");
-		String uri = params.getTextDocument().getUri();
-		documents.put(uri, params.getTextDocument().getText());
-		doCompilation(null, highPriorityProcessors, uri, false);
+		model.didOpen(params);
 	}
 
 	@Override
 	public void didChange(DidChangeTextDocumentParams params) {
-		logv(this.getClass().getName() + "." + StackTraceUtils.currentMethod() + " called");
-		logv(() -> "Changing " + params);
-		String uri = params.getTextDocument().getUri();
-		// If the processing mode is changed to incremental, this logic needs modification
-//		String text = documents.get(uri);
-		if(params.getContentChanges().size() > 1) {
-			logw("Unexpected size from didChange event.");
-		}
-		for(TextDocumentContentChangeEvent change : params.getContentChanges()) {
-			String newText = change.getText();
-			documents.put(uri, newText);
-		}
-//		doCompilation(null, highPriorityProcessors, uri, true);
+		model.didChange(params);
 	}
 
 	@Override
 	public void didClose(DidCloseTextDocumentParams params) {
-		// The document close notification is sent from the client to the server when the document got closed in the
-		// client. The document’s truth now exists where the document’s Uri points to (e.g. if the document’s Uri is
-		// a file Uri the truth now exists on disk).
-		logv(this.getClass().getName() + "." + StackTraceUtils.currentMethod() + " called");
-		documents.remove(params.getTextDocument().getUri());
+		model.didClose(params);
 	}
 
 	@Override
 	public void didSave(DidSaveTextDocumentParams params) {
-		logv(this.getClass().getName() + "." + StackTraceUtils.currentMethod() + " called");
-		doCompilation(null, highPriorityProcessors, params.getTextDocument().getUri(), false);
+		model.didSave(params);
 	}
 
 	//</editor-fold>
@@ -997,6 +576,34 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 		return convertNakedTargetToRange(t, tokenLength);
 	}
 
+	public void convertPositionToParseTree(CompletableFuture<ParseTree> future, Executor threadPool, String uri, Position position) {
+		CompletableFuture<ParseTree> privateFuture = new CompletableFuture<>();
+		model.getParseTree(privateFuture, uri);
+		privateFuture.thenAccept(new Consumer<ParseTree>() {
+			@Override
+			public void accept(ParseTree t) {
+				ParseTree result = findToken(t, position);
+				future.complete(result);
+			}
+		});
+	}
+
+	private ParseTree findToken(ParseTree start, Position position) {
+		// TODO: Should be able to convert this to a O(log n)ish algo if we're smarter about it. Also, should
+		// probably add original token length to the Target, so we can be smarter about that too.
+		for(ParseTree node : start.getAllNodes()) {
+			Target t = node.getTarget();
+			if(t.line() != position.getLine() + 1) {
+				continue;
+			}
+			if(position.getCharacter() >= t.col()
+					&& position.getCharacter() <= (t.col() + node.getData().val().length())) {
+				return node;
+			}
+		}
+		return null;
+	}
+
 	public static Location convertTargetToLocation(Target t, Range range) {
 		Location location = new Location(t.file().toURI().toString(), range);
 		return location;
@@ -1018,8 +625,8 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 		logv(() -> String.format("Completion request sent: %s", position));
 		CompletableFuture<Either<List<CompletionItem>, CompletionList>> result = new CompletableFuture<>();
 		highPriorityProcessors.execute(() -> {
-			result.complete(Either.forLeft(functionCompletionItems));
-			logv(() -> "Completion list returned with " + functionCompletionItems.size() + " items");
+			result.complete(Either.forLeft(model.getFunctionCompletionItems()));
+			logv(() -> "Completion list returned with " + model.getFunctionCompletionItems().size() + " items");
 		});
 		return result;
 	}
@@ -1042,8 +649,11 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 
 		CompletableFuture<ParseTree> future = new CompletableFuture<>();
 		CompletableFuture<List<DocumentLink>> result = new CompletableFuture<>();
-		doCompilation(future, lowPriorityProcessors, uri, false);
+		model.getParseTree(future, uri);
 		future.thenAccept((tree) -> {
+			if(tree == null) {
+				return;
+			}
 			Environment env;
 			try {
 				env = Static.GenerateStandaloneEnvironment(false);
@@ -1086,7 +696,101 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 
 	@Override
 	public CompletableFuture<Either<List<? extends Location>, List<? extends LocationLink>>> declaration(DeclarationParams params) {
-		throw new UnsupportedOperationException();
+		logv(this.getClass().getName() + "." + StackTraceUtils.currentMethod() + " called");
+		logv(() -> params.toString());
+		CompletableFuture<Either<List<? extends Location>, List<? extends LocationLink>>> result = new CompletableFuture<>();
+
+		return result;
+	}
+
+	@Override
+	public CompletableFuture<Hover> hover(HoverParams params) {
+		logv(this.getClass().getName() + "." + StackTraceUtils.currentMethod() + " called");
+		logv(() -> params.toString());
+
+		CompletableFuture<Hover> result = new CompletableFuture<>();
+		CompletableFuture<ParseTree> findParseTree = new CompletableFuture<>();
+		String uri = params.getTextDocument().getUri();
+		convertPositionToParseTree(findParseTree, highPriorityProcessors, uri,
+				params.getPosition());
+
+		findParseTree.thenAccept(new Consumer<ParseTree>() {
+			@Override
+			public void accept(ParseTree t) {
+				if(t == null) {
+					result.cancel(true);
+					return;
+				}
+				Hover hover = null;
+				StaticAnalysis sa;
+				try {
+					sa = model.getStaticAnalysis(uri);
+				} catch(URISyntaxException ex) {
+					result.cancel(true);
+					return;
+				}
+				if(sa == null) {
+					// We can't find declarations of anything.
+					result.cancel(true);
+					return;
+				}
+				if(t.getData() instanceof CFunction cf) {
+					if(cf.hasProcedure()) {
+						Collection<Declaration> col = sa.getTermScope(t)
+								.getReachableDeclarations(Namespace.PROCEDURE, cf.val());
+						if(!col.isEmpty()) {
+							ProcDeclaration decl = (ProcDeclaration) new ArrayList<>(col).get(0);
+							SmartComment sc = decl.getNodeModifiers().getComment();
+							if(sc != null) {
+								sc = doReplacements(sc);
+							}
+							String content = "";
+							content += decl.getType().getSimpleName() + " " + decl.getIdentifier() + "(";
+							boolean first = true;
+							for(ParamDeclaration pDecl : decl.getParameters()) {
+								if(!first) {
+									content += ", ";
+								}
+								content += pDecl.getType().getSimpleName() + " " + pDecl.getIdentifier();
+								first = false;
+							}
+							content += ")\n\n";
+							if(sc != null) {
+								content += sc.getBody() + "\n\n";
+								List<String> parameters = sc.getAnnotations("param");
+								paramIter: for(ParamDeclaration pDecl : decl.getParameters()) {
+									for(String paramDocs : parameters) {
+										String[] split = paramDocs.split(" ", 2);
+										if(split.length > 1) {
+											if(pDecl.getIdentifier().replace("@", "").equals(split[0])) {
+												content += " - @" + split[0] + " - " + split[1] + "\n";
+												continue paramIter;
+											}
+										}
+									}
+								}
+								content += "\n";
+								if(!sc.getAnnotations("returns").isEmpty()) {
+									content += "Returns: " + sc.getAnnotations("returns").get(0) + "\n\n";
+								}
+							}
+
+							MarkupContent mContent = new MarkupContent("markdown", content);
+							hover = new Hover();
+							hover.setContents(mContent);
+						}
+					}
+				}
+				if(hover == null) {
+					result.cancel(true);
+				} else {
+					result.complete(hover);
+				}
+
+			}
+		});
+
+		return result;
 	}
 
 	@Override
@@ -1103,7 +807,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 		// Different handling for msa and ms. msa returns aliases, ms returns procs and things.
 		if(uri.endsWith(".msa")) {
 			CompletableFuture<List<Script>> future = new CompletableFuture<>();
-			doPreprocess(future, lowPriorityProcessors, uri, false);
+			model.doPreprocess(future, lowPriorityProcessors, uri, false);
 			future.thenAccept((scripts) -> {
 				for(Script script : scripts) {
 					String link = script.getSignatureWithoutLabel();
@@ -1116,8 +820,11 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 			});
 		} else {
 			CompletableFuture<ParseTree> future = new CompletableFuture<>();
-			doCompilation(future, lowPriorityProcessors, uri, false);
+			model.getParseTree(future, uri);
 			future.thenAccept((tree) -> {
+				if(tree == null) {
+					return;
+				}
 				tree.getAllNodes().forEach(node -> {
 					if(node.getData() instanceof CFunction && ((CFunction) (node.getData())).hasFunction()) {
 						try {
@@ -1144,7 +851,16 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 		return result;
 	}
 
-
+	public static SmartComment doReplacements(SmartComment sc) {
+		return new SmartComment(sc, MapBuilder.empty(String.class, SmartComment.Replacement.class)
+			.set("code", new SmartComment.Replacement() {
+				@Override
+				public String replace(String data) {
+					return "`" + data + "`";
+				}
+			})
+			.build());
+	}
 
 	@Override
 	public CompletableFuture<Object> executeCommand(ExecuteCommandParams params) {
