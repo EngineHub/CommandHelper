@@ -849,7 +849,7 @@ public class StaticAnalysis {
 		if(node instanceof CFunction cFunction) { // Typed parameter or assign.
 			Function func = cFunction.getCachedFunction();
 			if(func != null && func instanceof DataHandling.assign) {
-				return ((DataHandling.assign) func).linkParamScope(this, paramScope, valScope, ast, env, exceptions);
+				return ((DataHandling.assign) func).linkParamScope(this, paramScope, valScope, ast, env, exceptions, params);
 			}
 		}
 

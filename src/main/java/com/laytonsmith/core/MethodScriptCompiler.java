@@ -1324,7 +1324,7 @@ public final class MethodScriptCompiler {
 		constructCount.push(new AtomicInteger(0));
 		parents.push(tree);
 
-		tree.addChild(new ParseTree(new CFunction(__autoconcat__.NAME, unknown), fileOptions));
+		tree.addChild(new ParseTree(new CFunction(__autoconcat__.NAME, unknown), fileOptions, true));
 		parents.push(tree.getChildAt(0));
 		tree = tree.getChildAt(0);
 		constructCount.push(new AtomicInteger(0));
@@ -1358,7 +1358,7 @@ public final class MethodScriptCompiler {
 			// Brace handling
 			if(t.type == TType.LCURLY_BRACKET) {
 				inObjectDefinition = false;
-				ParseTree b = new ParseTree(new CFunction(__cbrace__.NAME, t.getTarget()), fileOptions);
+				ParseTree b = new ParseTree(new CFunction(__cbrace__.NAME, t.getTarget()), fileOptions, true);
 				tree.addChild(b);
 				tree = b;
 				parents.push(b);
@@ -1376,7 +1376,7 @@ public final class MethodScriptCompiler {
 					//We need to autoconcat some stuff
 					int stacks = constructCount.peek().get();
 					int replaceAt = tree.getChildren().size() - stacks;
-					ParseTree c = new ParseTree(new CFunction(__autoconcat__.NAME, tree.getTarget()), fileOptions);
+					ParseTree c = new ParseTree(new CFunction(__autoconcat__.NAME, tree.getTarget()), fileOptions, true);
 					List<ParseTree> subChildren = new ArrayList<>();
 					for(int b = replaceAt; b < tree.numberOfChildren(); b++) {
 						subChildren.add(tree.getChildAt(b));
@@ -1453,23 +1453,23 @@ public final class MethodScriptCompiler {
 				ParseTree myArray = tree.getChildAt(array);
 				ParseTree myIndex;
 				if(!emptyArray) {
-					myIndex = new ParseTree(new CFunction(__autoconcat__.NAME, myArray.getTarget()), fileOptions);
+					myIndex = new ParseTree(new CFunction(__autoconcat__.NAME, myArray.getTarget()), fileOptions, true);
 
 					for(int j = index; j < tree.numberOfChildren(); j++) {
 						myIndex.addChild(tree.getChildAt(j));
 					}
 				} else {
-					myIndex = new ParseTree(new CSlice("0..-1", t.target), fileOptions);
+					myIndex = new ParseTree(new CSlice("0..-1", t.target), fileOptions, true);
 				}
 				tree.setChildren(tree.getChildren().subList(0, array));
-				ParseTree arrayGet = new ParseTree(new CFunction(array_get.NAME, t.target), fileOptions);
+				ParseTree arrayGet = new ParseTree(new CFunction(array_get.NAME, t.target), fileOptions, true);
 				arrayGet.addChild(myArray);
 				arrayGet.addChild(myIndex);
 
 				// Check if the @var[...] had a negating "-" in front. If so, add a neg().
 				if(!minusArrayStack.isEmpty() && arrayStack.size() + 1 == minusArrayStack.peek().get()) {
-					if(!next1.type.equals(TType.LSQUARE_BRACKET)) { // Wait if there are more array_get's comming.
-						ParseTree negTree = new ParseTree(new CFunction(neg.NAME, unknown), fileOptions);
+					if(!next1.type.equals(TType.LSQUARE_BRACKET)) { // Wait if there are more array_get's coming.
+						ParseTree negTree = new ParseTree(new CFunction(neg.NAME, unknown), fileOptions, true);
 						negTree.addChild(arrayGet);
 						tree.addChild(negTree);
 						minusArrayStack.pop();
@@ -1494,7 +1494,7 @@ public final class MethodScriptCompiler {
 					function.addChild(string);
 					tree.addChild(function);
 				} else {
-					tree.addChild(new ParseTree(new CString(t.val(), t.target), fileOptions));
+					tree.addChild(new ParseTree(new CString(t.val(), t.target), fileOptions, true));
 				}
 				constructCount.peek().incrementAndGet();
 				continue;
@@ -1545,7 +1545,7 @@ public final class MethodScriptCompiler {
 					//We need to autoconcat some stuff
 					int stacks = constructCount.peek().get();
 					int replaceAt = tree.getChildren().size() - stacks;
-					ParseTree c = new ParseTree(new CFunction(__autoconcat__.NAME, tree.getTarget()), fileOptions);
+					ParseTree c = new ParseTree(new CFunction(__autoconcat__.NAME, tree.getTarget()), fileOptions, true);
 					List<ParseTree> subChildren = new ArrayList<>();
 					for(int b = replaceAt; b < tree.numberOfChildren(); b++) {
 						subChildren.add(tree.getChildAt(b));

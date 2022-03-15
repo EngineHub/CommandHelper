@@ -87,6 +87,7 @@ public class ParseTree implements Cloneable {
 	private List<ParseTree> children = null;
 	private boolean hasBeenMadeStatic = false;
 	private NodeModifiers nodeModifiers = new NodeModifiers();
+	private boolean isSyntheticNode;
 
 	/**
 	 * Creates a new empty tree node
@@ -100,10 +101,28 @@ public class ParseTree implements Cloneable {
 	 * Creates a new tree node, with this construct as the data
 	 *
 	 * @param construct
+	 * @param options
 	 */
 	public ParseTree(Mixed construct, FileOptions options) {
+		this(construct, options, false);
+	}
+
+	/**
+	 * Creates a new tree node, with this construct as the data.
+	 *
+	 * @param construct The value that this node wraps
+	 * @param options The fileoptions for this node
+	 * @param isSyntheticNode Whether or not this node was generated synthetically. A synthetic node is one that is not
+	 * based exactly on user input code, but is instead synthesized as part of syntax sugar or other AST rewrites.
+	 */
+	public ParseTree(Mixed construct, FileOptions options, boolean isSyntheticNode) {
 		this(options);
 		setData(construct);
+		this.isSyntheticNode = isSyntheticNode;
+	}
+
+	public boolean isSyntheticNode() {
+		return this.isSyntheticNode;
 	}
 
 	public FileOptions getFileOptions() {

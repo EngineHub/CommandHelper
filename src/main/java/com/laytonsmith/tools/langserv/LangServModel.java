@@ -31,6 +31,7 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
+import com.laytonsmith.core.functions.IncludeCache;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.persistence.DataSourceException;
 import com.laytonsmith.tools.docgen.DocGen;
@@ -133,6 +134,7 @@ public class LangServModel {
 	 */
 	private void dirtyTree() {
 		isDirty = true;
+		IncludeCache.clearCache();
 	}
 
 	/**
@@ -513,7 +515,9 @@ public class LangServModel {
 				autoIncludes.remove(f); // If we're compiling the auto_include file itself
 				langServ.logv(() -> "Providing StaticAnalysis with auto includes: " + autoIncludes.toString());
 
-				StaticAnalysis.setAndAnalyzeAutoIncludes(new ArrayList<>(autoIncludes), env, envs, exceptions);
+				if(StaticAnalysis.enabled()) {
+					StaticAnalysis.setAndAnalyzeAutoIncludes(new ArrayList<>(autoIncludes), env, envs, exceptions);
+				}
 			}
 
 			gEnv.SetRootFolder(f.getParentFile());
@@ -542,7 +546,9 @@ public class LangServModel {
 					// other good way of determining that, so let's just assume it's pure methodscript.
 					tokens = MethodScriptCompiler.lex(code, env, f, true);
 					StaticAnalysis staticAnalysis = new StaticAnalysis(true);
-					staticAnalysis.setLocalEnable(true);
+					// TODO: Disabled until the known problems are fixed, at which point it should be forced on here
+					// first, to assist in detecting unknown bugs.
+//					staticAnalysis.setLocalEnable(true);
 					staticAnalyses.put(URIUtils.canonicalize(new URI(uri)).toString(), staticAnalysis);
 					fTree = MethodScriptCompiler.compile(tokens, env, envs, staticAnalysis);
 				}

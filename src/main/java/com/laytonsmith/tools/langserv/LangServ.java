@@ -19,6 +19,7 @@ import com.laytonsmith.core.compiler.analysis.Declaration;
 import com.laytonsmith.core.compiler.analysis.Namespace;
 import com.laytonsmith.core.compiler.analysis.ParamDeclaration;
 import com.laytonsmith.core.compiler.analysis.ProcDeclaration;
+import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.Construct;
@@ -91,6 +92,7 @@ import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.SymbolInformation;
 import org.eclipse.lsp4j.SymbolKind;
 import org.eclipse.lsp4j.TextDocumentSyncKind;
+import org.eclipse.lsp4j.TypeDefinitionParams;
 import org.eclipse.lsp4j.WorkspaceFolder;
 import org.eclipse.lsp4j.WorkspaceFoldersOptions;
 import org.eclipse.lsp4j.WorkspaceServerCapabilities;
@@ -403,6 +405,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 		sc.setDocumentSymbolProvider(true);
 		sc.setDeclarationProvider(true);
 		sc.setHoverProvider(true);
+//		sc.setTypeDefinitionProvider(true);
 
 		{
 			ExecuteCommandOptions eco = new ExecuteCommandOptions();
@@ -591,6 +594,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 	private ParseTree findToken(ParseTree start, Position position) {
 		// TODO: Should be able to convert this to a O(log n)ish algo if we're smarter about it. Also, should
 		// probably add original token length to the Target, so we can be smarter about that too.
+		ParseTree bestCandidate = null;
 		for(ParseTree node : start.getAllNodes()) {
 			Target t = node.getTarget();
 			if(t.line() != position.getLine() + 1) {
@@ -598,10 +602,16 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 			}
 			if(position.getCharacter() >= t.col()
 					&& position.getCharacter() <= (t.col() + node.getData().val().length())) {
-				return node;
+				if(node.isSyntheticNode()) {
+					// This might be the best candidate, but maybe there is a better choice after us
+					bestCandidate = node;
+				} else {
+					// This definitely is the best candidate.
+					return node;
+				}
 			}
 		}
-		return null;
+		return bestCandidate;
 	}
 
 	public static Location convertTargetToLocation(Target t, Range range) {
@@ -699,7 +709,51 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 		logv(this.getClass().getName() + "." + StackTraceUtils.currentMethod() + " called");
 		logv(() -> params.toString());
 		CompletableFuture<Either<List<? extends Location>, List<? extends LocationLink>>> result = new CompletableFuture<>();
+		CompletableFuture<ParseTree> future = new CompletableFuture<>();
+		String uri = params.getTextDocument().getUri();
+		convertPositionToParseTree(future, highPriorityProcessors, uri, params.getPosition());
+		future.thenAccept(new Consumer<ParseTree>() {
+			@Override
+			public void accept(ParseTree t) {
+				if(t == null) {
+					result.cancel(true);
+					return;
+				}
+				if(t.getData() instanceof CFunction cf) {
+					if(cf.hasProcedure()) {
+						String procName = cf.val();
+						StaticAnalysis sa;
+						try {
+							sa = model.getStaticAnalysis(uri);
+						} catch(URISyntaxException ex) {
+							throw new Error(ex);
+						}
+						List<Location> locations = new ArrayList<>();
+						Scope scope = sa.getTermScope(t);
+						if(scope != null) {
+							Collection<Declaration> decls = scope.getDeclarations(Namespace.PROCEDURE, procName);
+							for(Declaration decl : decls) {
+								Target definition = decl.getTarget();
+								Range range = convertNakedTargetToRange(decl.getTarget(), decl.getIdentifier().length());
+								locations.add(convertTargetToLocation(definition, range));
+							}
+							result.complete(Either.forLeft(locations));
+							return;
+						}
+					}
+				}
+				result.cancel(true);
+			}
+		});
+		return result;
+	}
 
+	@Override
+	public CompletableFuture<Either<List<? extends Location>, List<? extends LocationLink>>> typeDefinition(TypeDefinitionParams params) {
+		logv(this.getClass().getName() + "." + StackTraceUtils.currentMethod() + " called");
+		logv(() -> params.toString());
+		CompletableFuture<Either<List<? extends Location>, List<? extends LocationLink>>> result = new CompletableFuture<>();
+		result.cancel(true);
 		return result;
 	}
 
@@ -736,8 +790,12 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 				}
 				if(t.getData() instanceof CFunction cf) {
 					if(cf.hasProcedure()) {
-						Collection<Declaration> col = sa.getTermScope(t)
-								.getReachableDeclarations(Namespace.PROCEDURE, cf.val());
+						Scope scope = sa.getTermScope(t);
+						if(scope == null) {
+							result.cancel(true);
+							return;
+						}
+						Collection<Declaration> col = scope.getReachableDeclarations(Namespace.PROCEDURE, cf.val());
 						if(!col.isEmpty()) {
 							ProcDeclaration decl = (ProcDeclaration) new ArrayList<>(col).get(0);
 							SmartComment sc = decl.getNodeModifiers().getComment();
@@ -857,6 +915,23 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 				@Override
 				public String replace(String data) {
 					return "`" + data + "`";
+				}
+			})
+			.set("url", new SmartComment.Replacement() {
+				@Override
+				public String replace(String data) {
+					String[] split = data.split(" ", 2);
+					String url;
+					String display;
+					if(split.length == 0) {
+						return "";
+					} else if(split.length == 1) {
+						url = display = split[0];
+					} else {
+						url = split[0];
+						display = split[1];
+					}
+					return "[" + display + "](" + url + ")";
 				}
 			})
 			.build());
