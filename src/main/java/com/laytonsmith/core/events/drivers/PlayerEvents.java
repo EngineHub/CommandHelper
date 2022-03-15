@@ -2574,10 +2574,10 @@ public class PlayerEvents {
 							return event.isFlying();
 						}
 					})
-					.set("world", "The world the player is in.", new WorldPrefilterMatcher<>() {
+					.set("world", "The world the player is in.", new MacroPrefilterMatcher<>() {
 						@Override
-						protected MCWorld getWorld(MCPlayerToggleFlightEvent event) {
-							return event.getPlayer().getWorld();
+						protected Object getProperty(MCPlayerToggleFlightEvent event) {
+							return event.getPlayer().getWorld().getName();
 						}
 					});
 		}
@@ -2646,10 +2646,10 @@ public class PlayerEvents {
 							return event.isSneaking();
 						}
 					})
-					.set("world", "The world of the player", new WorldPrefilterMatcher<>() {
+					.set("world", "The world of the player", new MacroPrefilterMatcher<>() {
 						@Override
-						protected MCWorld getWorld(MCPlayerToggleSneakEvent event) {
-							return event.getPlayer().getWorld();
+						protected Object getProperty(MCPlayerToggleSneakEvent event) {
+							return event.getPlayer().getWorld().getName();
 						}
 					});
 		}
@@ -2717,10 +2717,10 @@ public class PlayerEvents {
 							return event.isSprinting();
 						}
 					})
-					.set("world", "The world the player is in.", new WorldPrefilterMatcher<MCPlayerToggleSprintEvent>() {
+					.set("world", "The world the player is in.", new MacroPrefilterMatcher<>() {
 						@Override
-						protected MCWorld getWorld(MCPlayerToggleSprintEvent event) {
-							return event.getPlayer().getWorld();
+						protected Object getProperty(MCPlayerToggleSprintEvent event) {
+							return event.getPlayer().getWorld().getName();
 						}
 					});
 		}
