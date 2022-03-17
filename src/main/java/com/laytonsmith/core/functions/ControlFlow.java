@@ -122,8 +122,12 @@ public class ControlFlow {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			return new SignatureBuilder("T", Mixed.TYPE, MatchType.MATCH_FIRST).param(Booleanish.TYPE, "cond")
-					.genericParam("T", Mixed.TYPE, "ifValue").genericParam("T", Mixed.TYPE, "elseValue")
+			/*
+			 *  TODO - Decide how to define the ternary return value.
+			 *  Note that getReturnType is overridden, so these signatures are not used for typechecking.
+			 */
+			return new SignatureBuilder(CClassType.AUTO, MatchType.MATCH_FIRST).param(Booleanish.TYPE, "cond")
+					.param(Mixed.TYPE, "ifValue").param(Mixed.TYPE, "elseValue")
 					.newSignature(CVoid.TYPE).param(Booleanish.TYPE, "cond")
 					.param(null, "ifCode").param(null, "elseCode", true).build();
 		}
@@ -148,7 +152,7 @@ public class ControlFlow {
 				}
 			}
 
-			// Perform partial type inference since there is no way to set the generic type yet.
+			// Perform partial type inference since there is no way to express an A OR B type yet.
 			/*
 			 * TODO - This currently returns the lowest type if one extends the other.
 			 * Make this return a multitype instead as soon as all typechecking code supports multitypes.

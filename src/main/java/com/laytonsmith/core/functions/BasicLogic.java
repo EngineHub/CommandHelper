@@ -18,6 +18,7 @@ import com.laytonsmith.core.compiler.signature.FunctionSignatures;
 import com.laytonsmith.core.compiler.signature.SignatureBuilder;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
@@ -1245,7 +1246,12 @@ public class BasicLogic {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			return new SignatureBuilder("T", Mixed.TYPE).genericVarParam("T", Mixed.TYPE, "vals").build();
+			/*
+			 *  TODO - Decide how to define the return value.
+			 *  Note that getReturnType could be overridden, not using this signature for typechecking.
+			 *  That implementation is not yet possible until A OR B OR ... types can be described.
+			 */
+			return new SignatureBuilder(CClassType.AUTO).varParam(Mixed.TYPE, "vals").build();
 		}
 
 		@Override
@@ -1533,7 +1539,12 @@ public class BasicLogic {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			return new SignatureBuilder("T", Mixed.TYPE).genericVarParam("T", Mixed.TYPE, "vals").build();
+			/*
+			 *  TODO - Decide how to define the return value.
+			 *  Note that getReturnType could be overridden, not using this signature for typechecking.
+			 *  That implementation is not yet possible until A OR B OR ... types can be described.
+			 */
+			return new SignatureBuilder(Mixed.TYPE).varParam(Mixed.TYPE, "vals").build();
 		}
 
 		@Override

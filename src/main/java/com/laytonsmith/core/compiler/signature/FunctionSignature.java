@@ -9,7 +9,6 @@ import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.environments.Environment;
-import com.laytonsmith.core.natives.interfaces.Mixed;
 
 /**
  * Represents a single function, procedure or closure signature.
@@ -157,12 +156,6 @@ public class FunctionSignature {
 	public String getParamTypesString() {
 		return "(" + StringUtils.Join(this.params, ", ", null, null, null, (Param param) -> {
 			String ret = (param.getType() == null ? "any" : param.getType().getSimpleName());
-			if(param.getGenericIdentifier() != null) {
-				ret = param.getGenericIdentifier();
-				if(param.getType() != Mixed.TYPE) {
-					ret += " extends " + ret;
-				}
-			}
 			if(param.isVarParam()) {
 				ret += "...";
 			}

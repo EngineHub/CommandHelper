@@ -10,15 +10,12 @@ public class Param {
 
 	private final CClassType type;
 	private final String name;
-	private final String genericIdentifier;
 	private final boolean isVarParam;
 	private final boolean isOptional;
 
 	/**
 	 * Creates a new {@link Param} with the given properties.
-	 * If geneticIdentifier is non-null, then the parameter type is 'geneticIdentifier extends type'.
 	 * Parameters cannot be variable and optional at the same time, as varparams already imply optionality.
-	 * @param genericIdentifier - The generic identifier, which can be used to link generic types.
 	 * @param type - The (parent) type of the parameter.
 	 * @param name - The name of the parameter.
 	 * @param isVarParam - {@code true} if the parameter is a varparam, meaning that it matches zero or more arguments
@@ -26,9 +23,8 @@ public class Param {
 	 * Note that a varparam is only usable as type {@code array<type>}.
 	 * @param isOptional - {@code true} if the parameter is optional, {@code false} otherwise.
 	 */
-	public Param(String genericIdentifier, CClassType type, String name, boolean isVarParam, boolean isOptional) {
+	public Param(CClassType type, String name, boolean isVarParam, boolean isOptional) {
 		assert !isVarParam || !isOptional : "A parameter cannot be variable and optional at the same time.";
-		this.genericIdentifier = genericIdentifier;
 		this.type = type;
 		this.name = name;
 		this.isVarParam = isVarParam;
@@ -36,17 +32,16 @@ public class Param {
 	}
 
 	/**
-	 * Creates a new non-generic non-varparam {@link Param} with the given properties.
+	 * Creates a new non-varparam {@link Param} with the given properties.
 	 * @param type - The type of the parameter.
 	 * @param name - The name of the parameter.
 	 */
 	public Param(CClassType type, String name) {
-		this(null, type, name, false, false);
+		this(type, name, false, false);
 	}
 
 	/**
 	 * Gets the parameter {@link CClassType}.
-	 * If this {@link Param} is generic, then the type in 'genericIdentifier extends type' is returned.
 	 * If this {@link Param} is a varparam, then the type in 'type name...' is returned (and not {@code array<type>}).
 	 * @return The type.
 	 */
@@ -60,15 +55,6 @@ public class Param {
 	 */
 	public String getName() {
 		return this.name;
-	}
-
-	/**
-	 * Gets the generic identifier.
-	 * @return The generic identifier in 'genericIdentifier extends type',
-	 * or {@code null} if the parameter type is not generic.
-	 */
-	public String getGenericIdentifier() {
-		return this.genericIdentifier;
 	}
 
 	/**
