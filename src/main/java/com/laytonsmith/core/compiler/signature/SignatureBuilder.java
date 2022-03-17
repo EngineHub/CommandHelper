@@ -55,7 +55,7 @@ public class SignatureBuilder {
 	}
 
 	/**
-	 * Adds a variable function parameter (varparam). Parameters should be added from left to right.
+	 * Adds a variadic function parameter (varparam). Parameters should be added from left to right.
 	 * @param paramType - The {@link CClassType} of the parameter (the type in 'paramType paramName...').
 	 * @param paramName - The name of the parameter.
 	 * @return This {@link SignatureBuilder}, for chaining builder methods.

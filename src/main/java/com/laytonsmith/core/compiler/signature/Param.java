@@ -15,7 +15,7 @@ public class Param {
 
 	/**
 	 * Creates a new {@link Param} with the given properties.
-	 * Parameters cannot be variable and optional at the same time, as varparams already imply optionality.
+	 * Parameters cannot be variadic and optional at the same time, as varparams already imply optionality.
 	 * @param type - The (parent) type of the parameter.
 	 * @param name - The name of the parameter.
 	 * @param isVarParam - {@code true} if the parameter is a varparam, meaning that it matches zero or more arguments
@@ -24,7 +24,7 @@ public class Param {
 	 * @param isOptional - {@code true} if the parameter is optional, {@code false} otherwise.
 	 */
 	public Param(CClassType type, String name, boolean isVarParam, boolean isOptional) {
-		assert !isVarParam || !isOptional : "A parameter cannot be variable and optional at the same time.";
+		assert !isVarParam || !isOptional : "A parameter cannot be variadic and optional at the same time.";
 		this.type = type;
 		this.name = name;
 		this.isVarParam = isVarParam;
