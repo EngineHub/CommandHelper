@@ -49,6 +49,7 @@ import java.util.Stack;
 public abstract class AbstractFunction implements Function {
 
 	private boolean shouldProfile = true;
+	private FunctionSignatures cachedFunctionSignatures = null;
 
 	protected AbstractFunction() {
 		//If we have the noprofile annotation, cache that we don't want to profile.
@@ -71,9 +72,26 @@ public abstract class AbstractFunction implements Function {
 		return CVoid.VOID;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * Calling {@link #getCachedSignatures()} where possible is preferred for runtime performance.
+	 */
 	@Override
 	public FunctionSignatures getSignatures() {
 		return null;
+	}
+
+	/**
+	 * Gets the function's signatures from the cache, or through {@link #getSignatures()} if they have not been cached.
+	 * The signatures will be cached in this second case.
+	 * Do NOT call this method from {@link #getSignatures()}.
+	 * @return This function's signatures.
+	 */
+	public FunctionSignatures getCachedSignatures() {
+		if(this.cachedFunctionSignatures == null) {
+			this.cachedFunctionSignatures = this.getSignatures();
+		}
+		return this.cachedFunctionSignatures;
 	}
 
 	/**
@@ -84,7 +102,7 @@ public abstract class AbstractFunction implements Function {
 			List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
 
 		// Match arguments to function signatures if available.
-		FunctionSignatures signatures = this.getSignatures();
+		FunctionSignatures signatures = this.getCachedSignatures();
 		if(signatures != null) {
 			return signatures.getReturnType(t, argTypes, argTargets, env, exceptions);
 		}
