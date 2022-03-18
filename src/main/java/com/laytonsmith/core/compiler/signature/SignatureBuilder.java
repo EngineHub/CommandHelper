@@ -19,7 +19,7 @@ public class SignatureBuilder {
 	 * @param returnType - The return type for the first {@link FunctionSignature}.
 	 */
 	public SignatureBuilder(CClassType returnType) {
-		this(returnType, MatchType.MATCH_ALL);
+		this(returnType, null, MatchType.MATCH_ALL);
 	}
 
 	/**
@@ -28,8 +28,28 @@ public class SignatureBuilder {
 	 * @param matchType - The {@link MatchType} used for determining the return type for given argument types.
 	 */
 	public SignatureBuilder(CClassType returnType, MatchType matchType) {
+		this(returnType, null, matchType);
+	}
+
+	/**
+	 * Creates a new {@link SignatureBuilder}, initialized with a {@link FunctionSignature} with the given return type.
+	 * When determining the return type for given argument types, all matching signatures will be used.
+	 * @param returnType - The return type for the first {@link FunctionSignature}.
+	 * @param returnValDesc - The return value description.
+	 */
+	public SignatureBuilder(CClassType returnType, String returnValDesc) {
+		this(returnType, returnValDesc, MatchType.MATCH_ALL);
+	}
+
+	/**
+	 * Creates a new {@link SignatureBuilder}, initialized with a {@link FunctionSignature} with the given return type.
+	 * @param returnType - The return type for the first {@link FunctionSignature}.
+	 * @param returnValDesc - The return value description.
+	 * @param matchType - The {@link MatchType} used for determining the return type for given argument types.
+	 */
+	public SignatureBuilder(CClassType returnType, String returnValDesc, MatchType matchType) {
 		this.signatures = new FunctionSignatures(matchType);
-		this.signature = new FunctionSignature(new ReturnType(returnType));
+		this.signature = new FunctionSignature(new ReturnType(returnType, returnValDesc));
 	}
 
 	/**
@@ -85,7 +105,17 @@ public class SignatureBuilder {
 	 * @return This {@link SignatureBuilder}, for chaining builder methods.
 	 */
 	public SignatureBuilder newSignature(CClassType returnType) {
-		return this.newSignature(new ReturnType(returnType));
+		return this.newSignature(returnType, null);
+	}
+
+	/**
+	 * Finalizes the last function signature and starts a new function signature with the given return type.
+	 * @param returnType - The return type of the new function signature.
+	 * @param returnValDesc - The return value description.
+	 * @return This {@link SignatureBuilder}, for chaining builder methods.
+	 */
+	public SignatureBuilder newSignature(CClassType returnType, String returnValDesc) {
+		return this.newSignature(new ReturnType(returnType, returnValDesc));
 	}
 
 	private SignatureBuilder newSignature(ReturnType returnType) {
