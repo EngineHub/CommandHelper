@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.DateUtils;
 import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
+import com.laytonsmith.PureUtilities.ExecutionQueueImpl;
 import com.laytonsmith.PureUtilities.SimpleVersion;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.PureUtilities.XMLDocument;
@@ -62,6 +63,7 @@ import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Function;
+import com.laytonsmith.core.functions.IncludeCache;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.core.taskmanager.TaskManagerImpl;
@@ -1309,12 +1311,13 @@ public final class Static {
 				: new ProfilesImpl());
 		PersistenceNetwork persistenceNetwork = new PersistenceNetworkImpl(MethodScriptFileLocations.getDefault().getPersistenceConfig(),
 				new URI(URLEncoder.encode("sqlite://" + new File(platformFolder, "persistence.db").getCanonicalPath().replace('\\', '/'), "UTF-8")), options);
-		GlobalEnv gEnv = new GlobalEnv(new MethodScriptExecutionQueue("MethodScriptExecutionQueue", "default"),
-				platformFolder, runtimeModes);
+		GlobalEnv gEnv = new GlobalEnv(platformFolder, runtimeModes);
 		gEnv.SetLabel(GLOBAL_PERMISSION);
 		StaticRuntimeEnv staticRuntimeEnv = new StaticRuntimeEnv(
 				new Profiler(MethodScriptFileLocations.getDefault().getProfilerConfigFile()),
-				persistenceNetwork, profiles, new TaskManagerImpl());
+				persistenceNetwork, profiles, new TaskManagerImpl(),
+				new ExecutionQueueImpl("MethodScriptExecutionQueue", "default"),
+				new IncludeCache(), null);
 		return Environment.createEnvironment(gEnv, staticRuntimeEnv, new CompilerEnvironment());
 	}
 

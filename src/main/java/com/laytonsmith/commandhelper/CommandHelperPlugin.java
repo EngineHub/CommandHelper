@@ -26,7 +26,6 @@ import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Common.TimeConversionUtil;
-import com.laytonsmith.PureUtilities.ExecutionQueue;
 import com.laytonsmith.PureUtilities.MapBuilder;
 import com.laytonsmith.PureUtilities.SimpleVersion;
 import com.laytonsmith.PureUtilities.TermColors;
@@ -53,19 +52,15 @@ import com.laytonsmith.annotations.EventIdentifier;
 import com.laytonsmith.core.AliasCore;
 import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.Installer;
-import com.laytonsmith.core.MethodScriptExecutionQueue;
 import com.laytonsmith.core.MethodScriptFileLocations;
 import com.laytonsmith.core.Prefs;
-import com.laytonsmith.core.Profiles;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.UpgradeLog;
 import com.laytonsmith.core.apps.AppsApiUtil;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.extensions.ExtensionManager;
-import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.core.telemetry.DefaultTelemetry;
 import com.laytonsmith.core.telemetry.Telemetry;
-import com.laytonsmith.persistence.PersistenceNetwork;
 import org.bukkit.Bukkit;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.Command;
@@ -108,10 +103,6 @@ public class CommandHelperPlugin extends JavaPlugin {
 	public static ExecutorService hostnameLookupThreadPool;
 	public static ConcurrentHashMap<String, String> hostnameLookupCache;
 	private static int hostnameThreadPoolID = 0;
-	public Profiler profiler;
-	public final ExecutionQueue executionQueue = new MethodScriptExecutionQueue("CommandHelperExecutionQueue", "default");
-	public PersistenceNetwork persistenceNetwork;
-	public Profiles profiles;
 	private boolean firstLoad = true;
 	private long interpreterUnlockedUntil = 0;
 	private Thread loadingThread;
@@ -276,6 +267,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 			Prefs.init(CommandHelperFileLocations.getDefault().getPreferencesFile());
 		} catch (IOException ex) {
 			getLogger().log(Level.SEVERE, null, ex);
+			return;
 		}
 
 		Prefs.SetColors();
@@ -365,12 +357,6 @@ public class CommandHelperPlugin extends JavaPlugin {
 		m.addCustomChart(new Metrics.SingleLineChart("player_count",
 				() -> Static.getServer().getOnlinePlayers().size()));
 
-		try {
-			//This may seem redundant, but on a /reload, we want to refresh these properties.
-			Prefs.init(CommandHelperFileLocations.getDefault().getPreferencesFile());
-		} catch (IOException ex) {
-			getLogger().log(Level.SEVERE, null, ex);
-		}
 		if(Prefs.UseSudoFallback()) {
 			getLogger().log(Level.WARNING, "In your preferences, use-sudo-fallback is turned on."
 					+ " Consider turning this off if you can.");
@@ -379,18 +365,13 @@ public class CommandHelperPlugin extends JavaPlugin {
 
 		version = new SimpleVersion(getDescription().getVersion());
 
-		String scriptName = Prefs.ScriptName();
-		String mainFile = Prefs.MainFile();
 		boolean showSplashScreen = Prefs.ShowSplashScreen();
 		if(showSplashScreen) {
 			StreamUtils.GetSystemOut().println(TermColors.reset());
 			//StreamUtils.GetSystemOut().flush();
 			StreamUtils.GetSystemOut().println("\n\n" + Static.Logo());
 		}
-		ac = new AliasCore(new File(CommandHelperFileLocations.getDefault().getConfigDirectory(), scriptName),
-				CommandHelperFileLocations.getDefault().getLocalPackagesDirectory(),
-				CommandHelperFileLocations.getDefault().getPreferencesFile(),
-				new File(CommandHelperFileLocations.getDefault().getConfigDirectory(), mainFile), this);
+		ac = new AliasCore(CommandHelperFileLocations.getDefault());
 		ac.reload(null, null, this.firstLoad);
 
 		//Clear out our hostname cache
@@ -437,17 +418,13 @@ public class CommandHelperPlugin extends JavaPlugin {
 	public void onDisable() {
 		//free up some memory
 		StaticLayer.GetConvertor().runShutdownHooks();
-		stopExecutionQueue();
+		if(ac.getStaticRuntimeEnv() != null) {
+			ac.getStaticRuntimeEnv().getExecutionQueue().stopAllNow();
+		}
 
 		ExtensionManager.Cleanup();
 
 		ac = null;
-	}
-
-	public void stopExecutionQueue() {
-		for(String queue : executionQueue.activeQueues()) {
-			executionQueue.clear(queue);
-		}
 	}
 
 	/**

@@ -188,7 +188,7 @@ public final class Prefs {
 				"true", Preferences.Type.BOOLEAN, "Whether or"
 				+ " not to use console colors.", GENERAL_GROUP));
 		a.add(new Preference(PNames.HALT_ON_FAILURE.config(), "false", Preferences.Type.BOOLEAN, "Whether or not to"
-				+ " halt compilation of pure mscript files if a compilation failure occurs in any one of the files.",
+				+ " halt server on startup if a critical configuration or compilation failure occurs in any one of the files.",
 				GENERAL_GROUP));
 		a.add(new Preference(PNames.USE_SUDO_FALLBACK.config(), "false", Preferences.Type.BOOLEAN, "If true, sudo()"
 				+ " will use a less safe fallback method if it fails. See the documentation on the sudo function for"

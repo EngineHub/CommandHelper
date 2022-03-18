@@ -165,8 +165,7 @@ public class ExampleScript {
 	private class FakeCore extends AliasCore {
 
 		public FakeCore() {
-			super(null, null, null, null, null);
-			this.autoIncludes = new ArrayList<>();
+			super(null);
 		}
 	}
 
