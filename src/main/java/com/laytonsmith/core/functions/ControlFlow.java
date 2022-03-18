@@ -160,7 +160,7 @@ public class ControlFlow {
 			 * TODO - This currently returns the lowest type if one extends the other.
 			 * Make this return a multitype instead as soon as all typechecking code supports multitypes.
 			 */
-			if(retType == Mixed.TYPE && argTypes.size() == 3) {
+			if(retType == CClassType.AUTO && argTypes.size() == 3) {
 				if(InstanceofUtil.isInstanceof(argTypes.get(1), argTypes.get(2), env)) {
 					return argTypes.get(2);
 				}
