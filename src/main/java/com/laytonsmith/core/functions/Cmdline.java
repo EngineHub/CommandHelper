@@ -2008,7 +2008,7 @@ public class Cmdline {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{1, 2};
+			return new Integer[]{1, 2, 3};
 		}
 
 		@MEnum("ms.lang.FindType")
