@@ -40,6 +40,7 @@ import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CRECausedByWrapper;
@@ -386,8 +387,8 @@ public class Exceptions {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args[0].isInstanceOf(CClosure.TYPE)) {
-				CClosure old = environment.getEnv(GlobalEnv.class).GetExceptionHandler();
-				environment.getEnv(GlobalEnv.class).SetExceptionHandler((CClosure) args[0]);
+				CClosure old = environment.getEnv(StaticRuntimeEnv.class).getExceptionHandler();
+				environment.getEnv(StaticRuntimeEnv.class).setExceptionHandler((CClosure) args[0]);
 				if(old == null) {
 					return CNull.NULL;
 				} else {

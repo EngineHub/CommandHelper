@@ -65,6 +65,7 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.Environment.EnvironmentImpl;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
@@ -1777,10 +1778,11 @@ public class DataHandling {
 
 			// Create new static analysis for dynamic includes that have not yet been cached.
 			StaticAnalysis analysis;
+			IncludeCache includeCache = env.getEnv(StaticRuntimeEnv.class).getIncludeCache();
 			boolean isFirstCompile = false;
-			Scope parentScope = IncludeCache.DYNAMIC_ANALYSIS_PARENT_SCOPE_CACHE.get(t);
+			Scope parentScope = includeCache.getDynamicAnalysisParentScopeCache().get(t);
 			if(parentScope != null) {
-				analysis = IncludeCache.getStaticAnalysis(file);
+				analysis = includeCache.getStaticAnalysis(file);
 				if(analysis == null) {
 					analysis = new StaticAnalysis(true);
 					analysis.getStartScope().addParent(parentScope);
@@ -1872,7 +1874,8 @@ public class DataHandling {
 
 					// The include is dynamic, so it cannot be checked in compile time.
 					// Store the parent scope for static analysis to check the file as soon as it is loaded in runtime.
-					IncludeCache.DYNAMIC_ANALYSIS_PARENT_SCOPE_CACHE.put(ast.getTarget(), parentScope);
+					env.getEnv(StaticRuntimeEnv.class).getIncludeCache().getDynamicAnalysisParentScopeCache()
+							.put(ast.getTarget(), parentScope);
 					return super.linkScope(analysis, parentScope, ast, env, exceptions);
 				}
 			}

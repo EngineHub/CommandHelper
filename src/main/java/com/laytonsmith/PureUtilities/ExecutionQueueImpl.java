@@ -27,26 +27,19 @@ public class ExecutionQueueImpl implements ExecutionQueue {
 	private final Map<String, Object> locks;
 	private Map<String, Boolean> runningQueues;
 	private String defaultQueueName;
-	private Thread.UncaughtExceptionHandler uncaughtExceptionHandler = null;
 	private ThreadFactory threadFactory;
-
-	public ExecutionQueueImpl(String threadPrefix, String defaultQueueName) {
-		this(threadPrefix, defaultQueueName, null);
-	}
 
 	/**
 	 * Creates a new ExecutionQueue instance.
 	 *
 	 * @param threadPrefix The prefix to use when naming the threads
 	 * @param defaultQueueName The name of the default queue
-	 * @param exceptionHandler The uncaught exception handler for these queues
 	 * @throws NullPointerException if either threadPrefix or defaultQueueName are null
 	 */
-	public ExecutionQueueImpl(final String threadPrefix, String defaultQueueName, final Thread.UncaughtExceptionHandler exceptionHandler) {
+	public ExecutionQueueImpl(final String threadPrefix, String defaultQueueName) {
 		if(threadPrefix == null || defaultQueueName == null) {
 			throw new NullPointerException();
 		}
-		uncaughtExceptionHandler = exceptionHandler;
 		threadFactory = new ThreadFactory() {
 
 			@Override
@@ -61,11 +54,6 @@ public class ExecutionQueueImpl implements ExecutionQueue {
 		this.defaultQueueName = defaultQueueName;
 		locks = new HashMap<String, Object>();
 		runningQueues = new HashMap<String, Boolean>();
-	}
-
-	@Override
-	public final void setUncaughtExceptionHandler(Thread.UncaughtExceptionHandler exceptionHandler) {
-		this.uncaughtExceptionHandler = exceptionHandler;
 	}
 
 	/**
@@ -254,12 +242,8 @@ public class ExecutionQueueImpl implements ExecutionQueue {
 						try {
 							pumpQueue(queue);
 						} catch (RuntimeException t) {
-							if(uncaughtExceptionHandler != null) {
-								uncaughtExceptionHandler.uncaughtException(Thread.currentThread(), t);
-							} else {
-								StreamUtils.GetSystemErr().println("The queue \"" + queue + "\" threw an exception, and it was not handled.");
-								t.printStackTrace(StreamUtils.GetSystemErr());
-							}
+							StreamUtils.GetSystemErr().println("The queue \"" + queue + "\" threw an exception, and it was not handled.");
+							t.printStackTrace(StreamUtils.GetSystemErr());
 						} finally {
 							if(dm != null) {
 								dm.deactivateThread(null);
@@ -287,6 +271,11 @@ public class ExecutionQueueImpl implements ExecutionQueue {
 	 */
 	@Override
 	public synchronized void stopAllNow() {
+		// shutdownNow doesn't fully clear the queue. It only clears the leading delay.
+		// Clearing the queue first fixes this, but there may be a better fix.
+		for(String queue : activeQueues()) {
+			clear(queue);
+		}
 		if(service != null) {
 			service.shutdownNow();
 			service = null;
