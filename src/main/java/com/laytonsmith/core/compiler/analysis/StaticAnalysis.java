@@ -447,7 +447,7 @@ public class StaticAnalysis {
 		// Generate an exception if the given type is not instanceof the expected type.
 		if(!InstanceofUtil.isInstanceof(type, expected, env)) {
 			exceptions.add(new ConfigCompileException("Expected type " + expected.getSimpleName()
-				+ ", but received type " + type.getSimpleName() + " instead.", t));
+				+ ", but received type " + (type == null ? "none" : type.getSimpleName()) + " instead.", t));
 		}
 	}
 
@@ -473,14 +473,14 @@ public class StaticAnalysis {
 		// Add an exception since the type was not compatible.
 		if(expected.length == 1) {
 			exceptions.add(new ConfigCompileException("Expected type " + expected[0].getSimpleName()
-					+ ", but received type " + type.getSimpleName() + " instead.", t));
+					+ ", but received type " + (type == null ? "none" : type.getSimpleName()) + " instead.", t));
 		} else {
 			String types = "";
 			for(CClassType exp : expected) {
 				types += (types.isEmpty() ? exp.getSimpleName() : ", " + exp.getSimpleName());
 			}
 			exceptions.add(new ConfigCompileException("Expected any of types {" + types
-					+ "}, but received type " + type.getSimpleName() + " instead.", t));
+					+ "}, but received type " + (type == null ? "none" : type.getSimpleName()) + " instead.", t));
 		}
 	}
 
