@@ -10,6 +10,7 @@ public class Param {
 
 	private final CClassType type;
 	private final String name;
+	private final String desc;
 	private final boolean isVarParam;
 	private final boolean isOptional;
 
@@ -18,15 +19,17 @@ public class Param {
 	 * Parameters cannot be variadic and optional at the same time, as varparams already imply optionality.
 	 * @param type - The (parent) type of the parameter.
 	 * @param name - The name of the parameter.
+	 * @param desc - The description of the parameter.
 	 * @param isVarParam - {@code true} if the parameter is a varparam, meaning that it matches zero or more arguments
 	 * of the given type, or one argument of type {@code array<type>}. {@code false} otherwise.
 	 * Note that a varparam is only usable as type {@code array<type>}.
 	 * @param isOptional - {@code true} if the parameter is optional, {@code false} otherwise.
 	 */
-	public Param(CClassType type, String name, boolean isVarParam, boolean isOptional) {
+	public Param(CClassType type, String name, String desc, boolean isVarParam, boolean isOptional) {
 		assert !isVarParam || !isOptional : "A parameter cannot be variadic and optional at the same time.";
 		this.type = type;
 		this.name = name;
+		this.desc = desc;
 		this.isVarParam = isVarParam;
 		this.isOptional = isOptional;
 	}
@@ -35,9 +38,10 @@ public class Param {
 	 * Creates a new non-varparam {@link Param} with the given properties.
 	 * @param type - The type of the parameter.
 	 * @param name - The name of the parameter.
+	 * @param desc - The description of the parameter.
 	 */
-	public Param(CClassType type, String name) {
-		this(type, name, false, false);
+	public Param(CClassType type, String name, String desc) {
+		this(type, name, desc, false, false);
 	}
 
 	/**
@@ -55,6 +59,14 @@ public class Param {
 	 */
 	public String getName() {
 		return this.name;
+	}
+
+	/**
+	 * Gets the description of the parameter.
+	 * @return The description.
+	 */
+	public String getDesc() {
+		return this.desc;
 	}
 
 	/**

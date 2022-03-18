@@ -126,10 +126,13 @@ public class ControlFlow {
 			 *  TODO - Decide how to define the ternary return value.
 			 *  Note that getReturnType is overridden, so these signatures are not used for typechecking.
 			 */
-			return new SignatureBuilder(CClassType.AUTO, MatchType.MATCH_FIRST).param(Booleanish.TYPE, "cond")
-					.param(Mixed.TYPE, "ifValue").param(Mixed.TYPE, "elseValue")
-					.newSignature(CVoid.TYPE).param(Booleanish.TYPE, "cond")
-					.param(null, "ifCode").param(null, "elseCode", true).build();
+			return new SignatureBuilder(CClassType.AUTO, MatchType.MATCH_FIRST)
+					.param(Booleanish.TYPE, "cond", "The condition.")
+					.param(Mixed.TYPE, "ifValue", "The value that is returned when the condition is true.")
+					.param(Mixed.TYPE, "elseValue", "The value that is returned when the condition is false.")
+					.newSignature(CVoid.TYPE).param(Booleanish.TYPE, "cond", "The condition.")
+					.param(null, "ifCode", "The code that runs when the condition is true.")
+					.param(null, "elseCode", "The optional code that runs when the condition is false.", true).build();
 		}
 
 		@Override
@@ -1083,8 +1086,14 @@ public class ControlFlow {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			return new SignatureBuilder(CVoid.TYPE).param(Mixed.TYPE, "assign").param(Booleanish.TYPE, "condition")
-					.param(Mixed.TYPE, "loopExpr").param(null, "loopCode").build();
+			return new SignatureBuilder(CVoid.TYPE)
+					.param(Mixed.TYPE, "assign", "The ivariable assign for the loop variable in this loop.")
+					.param(Booleanish.TYPE, "condition",
+							"The loop condition that is checked each time before the loopCode is executed."
+							+ "When this is false, this function returns.")
+					.param(Mixed.TYPE, "loopExpr", "The expression that is executed each time the loop continues"
+							+ " after executing the loopCode.")
+					.param(null, "loopCode", "The code that is executed in the loop.").build();
 		}
 
 		@Override
@@ -1300,8 +1309,17 @@ public class ControlFlow {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			return new SignatureBuilder(CVoid.TYPE).param(Mixed.TYPE, "assign").param(Booleanish.TYPE, "condition")
-					.param(Mixed.TYPE, "loopExpr").param(null, "loopCode").param(null, "elseCode").build();
+			return new SignatureBuilder(CVoid.TYPE)
+					.param(Mixed.TYPE, "assign", "The ivariable assign for the loop variable in this loop.")
+					.param(Booleanish.TYPE, "condition",
+							"The loop condition that is checked each time before the loopCode is executed."
+							+ "When this is false, this function returns."
+							+ " If loopCode has not been executed in the first iteration, then elseCode is executed.")
+					.param(Mixed.TYPE, "loopExpr", "The expression that is executed each time the loop continues"
+							+ " after executing the loopCode.")
+					.param(null, "loopCode", "The code that is executed in the loop.")
+					.param(null, "elseCode", "The code that is executed when the condition returns"
+							+ " false in the first iteration of the loop.").build();
 		}
 
 		@Override
@@ -1531,8 +1549,12 @@ public class ControlFlow {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			return new SignatureBuilder(CVoid.TYPE).param(com.laytonsmith.core.natives.interfaces.Iterable.TYPE, "data")
-					.param(null, "key", true).param(null, "value").param(null, "code").build();
+			return new SignatureBuilder(CVoid.TYPE)
+					.param(com.laytonsmith.core.natives.interfaces.Iterable.TYPE, "data", "The iterable data.")
+					.param(null, "key",
+							"The optional ivariable used to assign the key of each data entry key to.", true)
+					.param(null, "value", "The ivariable used to assign each data entry value to.")
+					.param(null, "code", "The code that will be executed for each entry in the data.").build();
 		}
 
 		@Override
@@ -1822,8 +1844,14 @@ public class ControlFlow {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			return new SignatureBuilder(CVoid.TYPE).param(com.laytonsmith.core.natives.interfaces.Iterable.TYPE, "data")
-					.param(null, "key", true).param(null, "value").param(null, "code").param(null, "elseCode").build();
+			return new SignatureBuilder(CVoid.TYPE)
+					.param(com.laytonsmith.core.natives.interfaces.Iterable.TYPE, "data", "The iterable data.")
+					.param(null, "key",
+							"The optional ivariable used to assign the key of each data entry key to.", true)
+					.param(null, "value", "The ivariable used to assign each data entry value to.")
+					.param(null, "code", "The code that will be executed for each entry in the data.")
+					.param(null, "elseCode", "The code that will be executed when the data contains no entries.")
+					.build();
 		}
 
 		@Override
@@ -1976,7 +2004,10 @@ public class ControlFlow {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			return new SignatureBuilder(CVoid.TYPE).param(Booleanish.TYPE, "cond").param(null, "code", true).build();
+			return new SignatureBuilder(CVoid.TYPE)
+					.param(Booleanish.TYPE, "cond",
+							"The loop condition that is checked each time before the code is executed.")
+					.param(null, "code", "The code that is executed in the loop.", true).build();
 		}
 
 		@Override
@@ -2071,7 +2102,10 @@ public class ControlFlow {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			return new SignatureBuilder(CVoid.TYPE).param(null, "code").param(Booleanish.TYPE, "cond").build();
+			return new SignatureBuilder(CVoid.TYPE)
+					.param(null, "code", "The code that is executed in the loop.")
+					.param(Booleanish.TYPE, "cond",
+							"The loop condition that is checked each time after the code is executed.").build();
 		}
 
 		@Override
@@ -2218,7 +2252,8 @@ public class ControlFlow {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			return new SignatureBuilder(null).param(CInt.TYPE, "loopAmount", true).build();
+			return new SignatureBuilder(null)
+					.param(CInt.TYPE, "loopAmount", "The amount of loops to break from.", true).build();
 		}
 
 		@Override
@@ -2319,7 +2354,8 @@ public class ControlFlow {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			return new SignatureBuilder(null).param(CInt.TYPE, "loopAmount", true).build();
+			return new SignatureBuilder(null)
+					.param(CInt.TYPE, "loopAmount", "The amount of loop iterations to continue.", true).build();
 		}
 
 		@Override
@@ -2394,8 +2430,9 @@ public class ControlFlow {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			return new SignatureBuilder(null).param(Mixed.TYPE, "value", true)
-					.newSignature(null).param(CVoid.TYPE, "value").build();
+			return new SignatureBuilder(null)
+					.param(Mixed.TYPE, "value", "The value to return. If omitted, void will be returned.", true)
+					.build();
 		}
 	}
 
@@ -2459,7 +2496,9 @@ public class ControlFlow {
 		@Override
 		public FunctionSignatures getSignatures() {
 			// TODO - Overwrite getReturnType() to return the return type of the proc when available.
-			return new SignatureBuilder(Auto.TYPE).param(CString.TYPE, "procName").varParam(Mixed.TYPE, "args").build();
+			return new SignatureBuilder(Auto.TYPE)
+					.param(CString.TYPE, "procName", "The name of the procedure.")
+					.varParam(Mixed.TYPE, "args", "The procedure arguments.").build();
 		}
 
 		@Override
@@ -2579,7 +2618,8 @@ public class ControlFlow {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			return new SignatureBuilder(null).varParam(Mixed.TYPE, "values").build();
+			return new SignatureBuilder(null).varParam(Mixed.TYPE, "messages",
+					"The messages that will be shown to the user (concatenated together).").build();
 		}
 
 		@Override

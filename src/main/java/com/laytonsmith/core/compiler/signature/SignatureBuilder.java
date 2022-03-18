@@ -36,11 +36,12 @@ public class SignatureBuilder {
 	 * Adds a normal function parameter. Parameters should be added from left to right.
 	 * @param paramType - The {@link CClassType} of the parameter.
 	 * @param paramName - The name of the parameter.
+	 * @param paramDesc - The description of the parameter.
 	 * @param isOptional - Whether the parameter is optional or not.
 	 * @return This {@link SignatureBuilder}, for chaining builder methods.
 	 */
-	public SignatureBuilder param(CClassType paramType, String paramName, boolean isOptional) {
-		this.signature.addParam(new Param(paramType, paramName, false, isOptional));
+	public SignatureBuilder param(CClassType paramType, String paramName, String paramDesc, boolean isOptional) {
+		this.signature.addParam(new Param(paramType, paramName, paramDesc, false, isOptional));
 		return this;
 	}
 
@@ -48,20 +49,22 @@ public class SignatureBuilder {
 	 * Adds a normal non-optional function parameter. Parameters should be added from left to right.
 	 * @param paramType - The {@link CClassType} of the parameter.
 	 * @param paramName - The name of the parameter.
+	 * @param paramDesc - The description of the parameter.
 	 * @return This {@link SignatureBuilder}, for chaining builder methods.
 	 */
-	public SignatureBuilder param(CClassType paramType, String paramName) {
-		return this.param(paramType, paramName, false);
+	public SignatureBuilder param(CClassType paramType, String paramName, String paramDesc) {
+		return this.param(paramType, paramName, paramDesc, false);
 	}
 
 	/**
 	 * Adds a variadic function parameter (varparam). Parameters should be added from left to right.
 	 * @param paramType - The {@link CClassType} of the parameter (the type in 'paramType paramName...').
 	 * @param paramName - The name of the parameter.
+	 * @param paramDesc - The description of the parameter.
 	 * @return This {@link SignatureBuilder}, for chaining builder methods.
 	 */
-	public SignatureBuilder varParam(CClassType paramType, String paramName) {
-		this.signature.addParam(new Param(paramType, paramName, true, false));
+	public SignatureBuilder varParam(CClassType paramType, String paramName, String paramDesc) {
+		this.signature.addParam(new Param(paramType, paramName, paramDesc, true, false));
 		return this;
 	}
 

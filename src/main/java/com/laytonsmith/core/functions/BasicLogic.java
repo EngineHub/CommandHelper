@@ -156,7 +156,9 @@ public class BasicLogic {
 		@Override
 		public FunctionSignatures getSignatures() {
 			return new SignatureBuilder(CBoolean.TYPE)
-					.param(Mixed.TYPE, "obj1").param(Mixed.TYPE, "obj2").varParam(Mixed.TYPE, "objs").build();
+					.param(Mixed.TYPE, "obj1", "The first object.")
+					.param(Mixed.TYPE, "obj2", "The second object.")
+					.varParam(Mixed.TYPE, "objs", "Additional objects.").build();
 		}
 
 		@Override
@@ -269,7 +271,9 @@ public class BasicLogic {
 		@Override
 		public FunctionSignatures getSignatures() {
 			return new SignatureBuilder(CBoolean.TYPE)
-					.param(Mixed.TYPE, "obj1").param(Mixed.TYPE, "obj2").varParam(Mixed.TYPE, "objs").build();
+					.param(Mixed.TYPE, "obj1", "The first object.")
+					.param(Mixed.TYPE, "obj2", "The second object.")
+					.varParam(Mixed.TYPE, "objs", "Additional objects.").build();
 		}
 
 		@Override
@@ -333,7 +337,9 @@ public class BasicLogic {
 		@Override
 		public FunctionSignatures getSignatures() {
 			return new SignatureBuilder(CBoolean.TYPE)
-					.param(Mixed.TYPE, "obj1").param(Mixed.TYPE, "obj2").varParam(Mixed.TYPE, "objs").build();
+					.param(Mixed.TYPE, "obj1", "The first object.")
+					.param(Mixed.TYPE, "obj2", "The second object.")
+					.varParam(Mixed.TYPE, "objs", "Additional objects.").build();
 		}
 
 		@Override
@@ -409,7 +415,9 @@ public class BasicLogic {
 		@Override
 		public FunctionSignatures getSignatures() {
 			return new SignatureBuilder(CBoolean.TYPE)
-					.param(Mixed.TYPE, "obj1").param(Mixed.TYPE, "obj2").varParam(Mixed.TYPE, "objs").build();
+					.param(Mixed.TYPE, "obj1", "The first object.")
+					.param(Mixed.TYPE, "obj2", "The second object.")
+					.varParam(Mixed.TYPE, "objs", "Additional objects.").build();
 		}
 
 		@Override
@@ -524,7 +532,9 @@ public class BasicLogic {
 		@Override
 		public FunctionSignatures getSignatures() {
 			return new SignatureBuilder(CBoolean.TYPE)
-					.param(Mixed.TYPE, "obj1").param(Mixed.TYPE, "obj2").varParam(Mixed.TYPE, "objs").build();
+					.param(Mixed.TYPE, "obj1", "The first object.")
+					.param(Mixed.TYPE, "obj2", "The second object.")
+					.varParam(Mixed.TYPE, "objs", "Additional objects.").build();
 		}
 
 		@Override
@@ -574,7 +584,9 @@ public class BasicLogic {
 		@Override
 		public FunctionSignatures getSignatures() {
 			return new SignatureBuilder(CBoolean.TYPE)
-					.param(Mixed.TYPE, "obj1").param(Mixed.TYPE, "obj2").varParam(Mixed.TYPE, "objs").build();
+					.param(Mixed.TYPE, "obj1", "The first object.")
+					.param(Mixed.TYPE, "obj2", "The second object.")
+					.varParam(Mixed.TYPE, "objs", "Additional objects.").build();
 		}
 
 		@Override
@@ -666,7 +678,9 @@ public class BasicLogic {
 		@Override
 		public FunctionSignatures getSignatures() {
 			return new SignatureBuilder(CBoolean.TYPE)
-					.param(Mixed.TYPE, "obj1").param(Mixed.TYPE, "obj2").varParam(Mixed.TYPE, "objs").build();
+					.param(Mixed.TYPE, "obj1", "The first object.")
+					.param(Mixed.TYPE, "obj2", "The second object.")
+					.varParam(Mixed.TYPE, "objs", "Additional objects.").build();
 		}
 
 		@Override
@@ -715,7 +729,9 @@ public class BasicLogic {
 		@Override
 		public FunctionSignatures getSignatures() {
 			return new SignatureBuilder(CBoolean.TYPE)
-					.param(Mixed.TYPE, "obj1").param(Mixed.TYPE, "obj2").varParam(Mixed.TYPE, "objs").build();
+					.param(Mixed.TYPE, "obj1", "The first object.")
+					.param(Mixed.TYPE, "obj2", "The second object.")
+					.varParam(Mixed.TYPE, "objs", "Additional objects.").build();
 		}
 
 		@Override
@@ -785,7 +801,8 @@ public class BasicLogic {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			return new SignatureBuilder(CBoolean.TYPE).param(CNumber.TYPE, "val1").param(CNumber.TYPE, "val2").build();
+			return new SignatureBuilder(CBoolean.TYPE)
+					.param(CNumber.TYPE, "val1", null).param(CNumber.TYPE, "val2", null).build();
 		}
 
 		@Override
@@ -858,7 +875,8 @@ public class BasicLogic {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			return new SignatureBuilder(CBoolean.TYPE).param(CNumber.TYPE, "val1").param(CNumber.TYPE, "val2").build();
+			return new SignatureBuilder(CBoolean.TYPE)
+					.param(CNumber.TYPE, "val1", null).param(CNumber.TYPE, "val2", null).build();
 		}
 
 		@Override
@@ -931,7 +949,8 @@ public class BasicLogic {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			return new SignatureBuilder(CBoolean.TYPE).param(CNumber.TYPE, "val1").param(CNumber.TYPE, "val2").build();
+			return new SignatureBuilder(CBoolean.TYPE)
+					.param(CNumber.TYPE, "val1", null).param(CNumber.TYPE, "val2", null).build();
 		}
 
 		@Override
@@ -1005,7 +1024,8 @@ public class BasicLogic {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			return new SignatureBuilder(CBoolean.TYPE).param(CNumber.TYPE, "val1").param(CNumber.TYPE, "val2").build();
+			return new SignatureBuilder(CBoolean.TYPE)
+					.param(CNumber.TYPE, "val1", null).param(CNumber.TYPE, "val2", null).build();
 		}
 
 		@Override
@@ -1094,8 +1114,10 @@ public class BasicLogic {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			return new SignatureBuilder(CBoolean.TYPE).param(Booleanish.TYPE, "val1")
-					.param(Booleanish.TYPE, "val2").varParam(Booleanish.TYPE, "vals").build();
+			return new SignatureBuilder(CBoolean.TYPE)
+					.param(Booleanish.TYPE, "val1", null)
+					.param(Booleanish.TYPE, "val2", null)
+					.varParam(Booleanish.TYPE, "vals", null).build();
 		}
 
 		@Override
@@ -1251,7 +1273,7 @@ public class BasicLogic {
 			 *  Note that getReturnType could be overridden, not using this signature for typechecking.
 			 *  That implementation is not yet possible until A OR B OR ... types can be described.
 			 */
-			return new SignatureBuilder(CClassType.AUTO).varParam(Mixed.TYPE, "vals").build();
+			return new SignatureBuilder(CClassType.AUTO).varParam(Mixed.TYPE, "vals", null).build();
 		}
 
 		@Override
@@ -1384,8 +1406,10 @@ public class BasicLogic {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			return new SignatureBuilder(CBoolean.TYPE).param(Booleanish.TYPE, "val1")
-					.param(Booleanish.TYPE, "val2").varParam(Booleanish.TYPE, "vals").build();
+			return new SignatureBuilder(CBoolean.TYPE)
+					.param(Booleanish.TYPE, "val1", null)
+					.param(Booleanish.TYPE, "val2", null)
+					.varParam(Booleanish.TYPE, "vals", null).build();
 		}
 
 		@Override
@@ -1544,7 +1568,7 @@ public class BasicLogic {
 			 *  Note that getReturnType could be overridden, not using this signature for typechecking.
 			 *  That implementation is not yet possible until A OR B OR ... types can be described.
 			 */
-			return new SignatureBuilder(Mixed.TYPE).varParam(Mixed.TYPE, "vals").build();
+			return new SignatureBuilder(Mixed.TYPE).varParam(Mixed.TYPE, "vals", null).build();
 		}
 
 		@Override
@@ -1626,7 +1650,7 @@ public class BasicLogic {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			return new SignatureBuilder(CBoolean.TYPE).param(Booleanish.TYPE, "val").build();
+			return new SignatureBuilder(CBoolean.TYPE).param(Booleanish.TYPE, "val", "The value to negate.").build();
 		}
 
 		@Override
@@ -1732,8 +1756,8 @@ public class BasicLogic {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			return new SignatureBuilder(CBoolean.TYPE).param(Booleanish.TYPE, "val1")
-					.param(Booleanish.TYPE, "val2").build();
+			return new SignatureBuilder(CBoolean.TYPE).param(Booleanish.TYPE, "val1", null)
+					.param(Booleanish.TYPE, "val2", null).build();
 		}
 
 		@Override
@@ -1806,8 +1830,10 @@ public class BasicLogic {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			return new SignatureBuilder(CBoolean.TYPE).param(Booleanish.TYPE, "val1")
-					.param(Booleanish.TYPE, "val2").varParam(Booleanish.TYPE, "vals").build();
+			return new SignatureBuilder(CBoolean.TYPE)
+					.param(Booleanish.TYPE, "val1", null)
+					.param(Booleanish.TYPE, "val2", null)
+					.varParam(Booleanish.TYPE, "vals", null).build();
 		}
 
 		@Override
@@ -1879,8 +1905,10 @@ public class BasicLogic {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			return new SignatureBuilder(CBoolean.TYPE).param(Booleanish.TYPE, "val1")
-					.param(Booleanish.TYPE, "val2").varParam(Booleanish.TYPE, "vals").build();
+			return new SignatureBuilder(CBoolean.TYPE)
+					.param(Booleanish.TYPE, "val1", null)
+					.param(Booleanish.TYPE, "val2", null)
+					.varParam(Booleanish.TYPE, "vals", null).build();
 		}
 
 		@Override
@@ -1950,8 +1978,9 @@ public class BasicLogic {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			return new SignatureBuilder(CBoolean.TYPE).param(Booleanish.TYPE, "val1")
-					.param(Booleanish.TYPE, "val2").build();
+			return new SignatureBuilder(CBoolean.TYPE)
+					.param(Booleanish.TYPE, "val1", null)
+					.param(Booleanish.TYPE, "val2", null).build();
 		}
 
 		@Override
@@ -2025,8 +2054,10 @@ public class BasicLogic {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			return new SignatureBuilder(CInt.TYPE).param(CInt.TYPE, "val1").param(CInt.TYPE, "val2")
-					.varParam(CInt.TYPE, "vals").build();
+			return new SignatureBuilder(CInt.TYPE)
+					.param(CInt.TYPE, "val1", null)
+					.param(CInt.TYPE, "val2", null)
+					.varParam(CInt.TYPE, "vals", null).build();
 		}
 
 		@Override
@@ -2110,8 +2141,10 @@ public class BasicLogic {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			return new SignatureBuilder(CInt.TYPE).param(CInt.TYPE, "val1").param(CInt.TYPE, "val2")
-					.varParam(CInt.TYPE, "vals").build();
+			return new SignatureBuilder(CInt.TYPE)
+					.param(CInt.TYPE, "val1", null)
+					.param(CInt.TYPE, "val2", null)
+					.varParam(CInt.TYPE, "vals", null).build();
 		}
 
 		@Override
@@ -2197,8 +2230,10 @@ public class BasicLogic {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			return new SignatureBuilder(CInt.TYPE).param(CInt.TYPE, "val1").param(CInt.TYPE, "val2")
-					.varParam(CInt.TYPE, "vals").build();
+			return new SignatureBuilder(CInt.TYPE)
+					.param(CInt.TYPE, "val1", null)
+					.param(CInt.TYPE, "val2", null)
+					.varParam(CInt.TYPE, "vals", null).build();
 		}
 
 		@Override
@@ -2276,7 +2311,7 @@ public class BasicLogic {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			return new SignatureBuilder(CInt.TYPE).param(CInt.TYPE, "val").build();
+			return new SignatureBuilder(CInt.TYPE).param(CInt.TYPE, "val", null).build();
 		}
 
 		@Override
@@ -2344,7 +2379,9 @@ public class BasicLogic {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			return new SignatureBuilder(CInt.TYPE).param(CInt.TYPE, "val1").param(CInt.TYPE, "val2").build();
+			return new SignatureBuilder(CInt.TYPE)
+					.param(CInt.TYPE, "val1", null)
+					.param(CInt.TYPE, "val2", null).build();
 		}
 
 		@Override
@@ -2412,7 +2449,9 @@ public class BasicLogic {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			return new SignatureBuilder(CInt.TYPE).param(CInt.TYPE, "val1").param(CInt.TYPE, "val2").build();
+			return new SignatureBuilder(CInt.TYPE)
+					.param(CInt.TYPE, "val1", null)
+					.param(CInt.TYPE, "val2", null).build();
 		}
 
 		@Override
@@ -2482,7 +2521,9 @@ public class BasicLogic {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			return new SignatureBuilder(CInt.TYPE).param(CInt.TYPE, "val1").param(CInt.TYPE, "val2").build();
+			return new SignatureBuilder(CInt.TYPE)
+					.param(CInt.TYPE, "val1", null)
+					.param(CInt.TYPE, "val2", null).build();
 		}
 
 		@Override
@@ -2526,7 +2567,8 @@ public class BasicLogic {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			return new SignatureBuilder(CVoid.TYPE).param(CString.TYPE, "message").build();
+			return new SignatureBuilder(CVoid.TYPE)
+					.param(CString.TYPE, "message", "The compile error message.").build();
 		}
 
 		@Override
@@ -2605,7 +2647,7 @@ public class BasicLogic {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			return new SignatureBuilder(CInt.TYPE).param(Mixed.TYPE, "val").build();
+			return new SignatureBuilder(CInt.TYPE).param(Mixed.TYPE, "value", "The value to hash.").build();
 		}
 
 		@Override

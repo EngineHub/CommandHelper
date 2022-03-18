@@ -57,7 +57,7 @@ public class FunctionSignaturesTest {
 	public void testSingleParam() {
 
 		// Create "array func(int param1)" signature.
-		FunctionSignatures signatures = new SignatureBuilder(CArray.TYPE).param(CInt.TYPE, "param1").build();
+		FunctionSignatures signatures = new SignatureBuilder(CArray.TYPE).param(CInt.TYPE, "param1", "desc1").build();
 
 		// Assert that a parameter was added with the correct type and description.
 		assertEquals(1, signatures.getSignatures().size());
@@ -71,7 +71,7 @@ public class FunctionSignaturesTest {
 	public void testSingleThrows() {
 
 		// Create "array func(int param1) throws CREIndexOverflowException" signature.
-		FunctionSignatures signatures = new SignatureBuilder(CArray.TYPE).param(CInt.TYPE, "param1")
+		FunctionSignatures signatures = new SignatureBuilder(CArray.TYPE).param(CInt.TYPE, "param1", "desc1")
 				.throwsEx(CREIndexOverflowException.class, "exDesc").build();
 
 		// Assert that a throws was added with the correct exception class and description.
@@ -86,7 +86,7 @@ public class FunctionSignaturesTest {
 	public void testDoubleThrows() {
 
 		// Create "array func(int param1) throws CREIndexOverflowException, CRECastException" signature.
-		FunctionSignatures signatures = new SignatureBuilder(CArray.TYPE).param(CInt.TYPE, "param1")
+		FunctionSignatures signatures = new SignatureBuilder(CArray.TYPE).param(CInt.TYPE, "param1", "desc1")
 				.throwsEx(CREIndexOverflowException.class, "exDesc1")
 				.throwsEx(CRECastException.class, "exDesc2").build();
 
@@ -141,7 +141,7 @@ public class FunctionSignaturesTest {
 	public void testSingleArgSingleSignatureMatch() {
 
 		// Create "array func(int param1)" signature.
-		FunctionSignatures signatures = new SignatureBuilder(CArray.TYPE).param(CInt.TYPE, "param1").build();
+		FunctionSignatures signatures = new SignatureBuilder(CArray.TYPE).param(CInt.TYPE, "param1", "desc1").build();
 
 		// Assert return type and compile exceptions for one argument.
 		Set<ConfigCompileException> exceptions = new HashSet<>();
@@ -158,7 +158,7 @@ public class FunctionSignaturesTest {
 	public void testSingleArgSingleSignatureAutoMatch() {
 
 		// Create "array func(int param1)" signature.
-		FunctionSignatures signatures = new SignatureBuilder(CArray.TYPE).param(CInt.TYPE, "param1").build();
+		FunctionSignatures signatures = new SignatureBuilder(CArray.TYPE).param(CInt.TYPE, "param1", "desc1").build();
 
 		// Assert return type and compile exceptions for one argument.
 		Set<ConfigCompileException> exceptions = new HashSet<>();
@@ -175,7 +175,7 @@ public class FunctionSignaturesTest {
 	public void testSingleArgSingleSignatureTooFewArgs() {
 
 		// Create "array func(int param1)" signature.
-		FunctionSignatures signatures = new SignatureBuilder(CArray.TYPE).param(CInt.TYPE, "param1").build();
+		FunctionSignatures signatures = new SignatureBuilder(CArray.TYPE).param(CInt.TYPE, "param1", "desc1").build();
 
 		// Assert return type and compile exceptions for two arguments.
 		Set<ConfigCompileException> exceptions = new HashSet<>();
@@ -192,7 +192,7 @@ public class FunctionSignaturesTest {
 	public void testSingleArgSingleSignatureTooManyArgs() {
 
 		// Create "array func(int param1)" signature.
-		FunctionSignatures signatures = new SignatureBuilder(CArray.TYPE).param(CInt.TYPE, "param1").build();
+		FunctionSignatures signatures = new SignatureBuilder(CArray.TYPE).param(CInt.TYPE, "param1", "desc1").build();
 
 		// Assert return type and compile exceptions for two arguments.
 		Set<ConfigCompileException> exceptions = new HashSet<>();
@@ -209,7 +209,7 @@ public class FunctionSignaturesTest {
 	public void testSingleArgSingleSignatureWrongType() {
 
 		// Create "array func(int param1)" signature.
-		FunctionSignatures signatures = new SignatureBuilder(CArray.TYPE).param(CInt.TYPE, "param1").build();
+		FunctionSignatures signatures = new SignatureBuilder(CArray.TYPE).param(CInt.TYPE, "param1", "desc1").build();
 
 		// Assert return type and compile exceptions for one wrongly typed argument.
 		Set<ConfigCompileException> exceptions = new HashSet<>();
@@ -226,7 +226,7 @@ public class FunctionSignaturesTest {
 	public void testSingleArgSingleSignatureWrongVoidType() {
 
 		// Create "array func(int param1)" signature.
-		FunctionSignatures signatures = new SignatureBuilder(CArray.TYPE).param(CInt.TYPE, "param1").build();
+		FunctionSignatures signatures = new SignatureBuilder(CArray.TYPE).param(CInt.TYPE, "param1", "desc1").build();
 
 		// Assert return type and compile exceptions for one wrongly typed argument.
 		Set<ConfigCompileException> exceptions = new HashSet<>();
@@ -243,8 +243,8 @@ public class FunctionSignaturesTest {
 	public void testSingleArgMultiSignatureSingleMatch1() {
 
 		// Create "array func(int param1)|int func(boolean param1)" signature.
-		FunctionSignatures signatures = new SignatureBuilder(CArray.TYPE).param(CInt.TYPE, "param1")
-				.newSignature(CInt.TYPE).param(CBoolean.TYPE, "param1").build();
+		FunctionSignatures signatures = new SignatureBuilder(CArray.TYPE).param(CInt.TYPE, "param1", "desc1")
+				.newSignature(CInt.TYPE).param(CBoolean.TYPE, "param1", "desc1").build();
 
 		// Assert return type and compile exceptions for matching the first signature.
 		Set<ConfigCompileException> exceptions = new HashSet<>();
@@ -261,8 +261,8 @@ public class FunctionSignaturesTest {
 	public void testSingleArgMultiSignatureSingleMatch2() {
 
 		// Create "array func(int param1)|int func(boolean param1)" signature.
-		FunctionSignatures signatures = new SignatureBuilder(CArray.TYPE).param(CInt.TYPE, "param1")
-				.newSignature(CInt.TYPE).param(CBoolean.TYPE, "param1").build();
+		FunctionSignatures signatures = new SignatureBuilder(CArray.TYPE).param(CInt.TYPE, "param1", "desc1")
+				.newSignature(CInt.TYPE).param(CBoolean.TYPE, "param1", "desc1").build();
 
 		// Assert return type and compile exceptions for matching the second signature.
 		Set<ConfigCompileException> exceptions = new HashSet<>();
@@ -279,8 +279,8 @@ public class FunctionSignaturesTest {
 	public void testSingleArgMultiSignatureMultiMatchSameType() {
 
 		// Create "int func(int param1)|int func(boolean param1)" signature.
-		FunctionSignatures signatures = new SignatureBuilder(CInt.TYPE).param(CInt.TYPE, "param1")
-				.newSignature(CInt.TYPE).param(CBoolean.TYPE, "param1").build();
+		FunctionSignatures signatures = new SignatureBuilder(CInt.TYPE).param(CInt.TYPE, "param1", "desc1")
+				.newSignature(CInt.TYPE).param(CBoolean.TYPE, "param1", "desc1").build();
 
 		// Assert return type and compile exceptions for matching the both signatures.
 		Set<ConfigCompileException> exceptions = new HashSet<>();
@@ -298,8 +298,8 @@ public class FunctionSignaturesTest {
 	public void testSingleArgMultiSignatureMultiMatchDifferentType() {
 
 		// Create "array func(int param1)|int func(boolean param1)" signature.
-		FunctionSignatures signatures = new SignatureBuilder(CInt.TYPE).param(CInt.TYPE, "param1")
-				.newSignature(CArray.TYPE).param(CBoolean.TYPE, "param1").build();
+		FunctionSignatures signatures = new SignatureBuilder(CInt.TYPE).param(CInt.TYPE, "param1", "desc1")
+				.newSignature(CArray.TYPE).param(CBoolean.TYPE, "param1", "desc1").build();
 
 		// Assert return type and compile exceptions for matching the both signatures.
 		Set<ConfigCompileException> exceptions = new HashSet<>();
@@ -316,7 +316,7 @@ public class FunctionSignaturesTest {
 	public void testOptionalArgSingleSignatureMatch() {
 
 		// Create "array func([int param1])" signature.
-		FunctionSignatures signatures = new SignatureBuilder(CArray.TYPE).param(CInt.TYPE, "param1", true).build();
+		FunctionSignatures signatures = new SignatureBuilder(CArray.TYPE).param(CInt.TYPE, "param1", "desc1", true).build();
 
 		// Assert return type and compile exceptions for zero and one arguments.
 		Set<ConfigCompileException> exceptions = new HashSet<>();
@@ -340,7 +340,7 @@ public class FunctionSignaturesTest {
 	public void testVarArgSingleSignatureMatch() {
 
 		// Create "array func(int param1...)" signature.
-		FunctionSignatures signatures = new SignatureBuilder(CArray.TYPE).varParam(CInt.TYPE, "param1").build();
+		FunctionSignatures signatures = new SignatureBuilder(CArray.TYPE).varParam(CInt.TYPE, "param1", "desc1").build();
 
 		// Assert return type and compile exceptions for zero, one and two arguments.
 		Set<ConfigCompileException> exceptions = new HashSet<>();
@@ -372,8 +372,9 @@ public class FunctionSignaturesTest {
 
 		// Create "array func(int param1, int param2..., int param3, [array param4], array param5)" signature.
 		FunctionSignatures signatures = new SignatureBuilder(CArray.TYPE)
-				.param(CInt.TYPE, "param1").varParam(CInt.TYPE, "param2").param(CInt.TYPE, "param3")
-				.param(CArray.TYPE, "param4", true).param(CArray.TYPE, "param5").build();
+				.param(CInt.TYPE, "param1", "desc1").varParam(CInt.TYPE, "param2", "desc2")
+				.param(CInt.TYPE, "param3", "desc3").param(CArray.TYPE, "param4", "desc4", true)
+				.param(CArray.TYPE, "param5", "desc5").build();
 
 		// Validate signature parameter types through its string version.
 		assertEquals("(int, int..., int, [array], array)", signatures.getSignaturesParamTypesString());
@@ -410,9 +411,10 @@ public class FunctionSignaturesTest {
 		// Create "array func(int param1..., int param2..., int param3...,
 		// [int param4], int param5, int param6, int param7)" signature.
 		FunctionSignatures signatures = new SignatureBuilder(CArray.TYPE)
-				.varParam(CInt.TYPE, "param1").varParam(CInt.TYPE, "param2").varParam(CInt.TYPE, "param3")
-				.param(CInt.TYPE, "param4", true).param(CInt.TYPE, "param5").param(CInt.TYPE, "param6")
-				.param(CInt.TYPE, "param7").build();
+				.varParam(CInt.TYPE, "param1", "desc1").varParam(CInt.TYPE, "param2", "desc2")
+				.varParam(CInt.TYPE, "param3", "desc3").param(CInt.TYPE, "param4", "desc4", true)
+				.param(CInt.TYPE, "param5", "desc5").param(CInt.TYPE, "param6", "desc6")
+				.param(CInt.TYPE, "param7", "desc7").build();
 
 		// Validate signature parameter types through its string version.
 		assertEquals("(int..., int..., int..., [int], int, int, int)", signatures.getSignaturesParamTypesString());
