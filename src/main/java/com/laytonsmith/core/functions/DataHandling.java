@@ -508,7 +508,8 @@ public class DataHandling {
 
 					// Add the new variable declaration.
 					paramScope = analysis.createNewScope(paramScope);
-					ParamDeclaration pDecl = new ParamDeclaration(iVar.getVariableName(), type, ast.getNodeModifiers(),
+					ParamDeclaration pDecl = new ParamDeclaration(iVar.getVariableName(), type, ast.getChildAt(2),
+							ast.getNodeModifiers(),
 							ast.getTarget());
 					params.add(pDecl);
 					paramScope.addDeclaration(pDecl);
@@ -535,7 +536,7 @@ public class DataHandling {
 					// Add the new variable declaration.
 					paramScope = analysis.createNewScope(paramScope);
 					ParamDeclaration pDecl = new ParamDeclaration(
-							iVar.getVariableName(), CClassType.AUTO, ast.getNodeModifiers(),
+							iVar.getVariableName(), CClassType.AUTO, null, ast.getNodeModifiers(),
 							ast.getTarget());
 					params.add(pDecl);
 					paramScope.addDeclaration(pDecl);
@@ -1560,7 +1561,7 @@ public class DataHandling {
 			Scope paramScope = analysis.createNewScope();
 
 			// Insert @arguments parameter.
-			paramScope.addDeclaration(new ParamDeclaration("@arguments", CArray.TYPE, ast.getNodeModifiers(),
+			paramScope.addDeclaration(new ParamDeclaration("@arguments", CArray.TYPE, null, ast.getNodeModifiers(),
 					ast.getTarget()));
 
 			// Handle procedure parameters from left to right.
@@ -2557,7 +2558,7 @@ public class DataHandling {
 			}
 
 			// Insert @arguments parameter.
-			paramScope.addDeclaration(new ParamDeclaration("@arguments", CArray.TYPE, ast.getNodeModifiers(),
+			paramScope.addDeclaration(new ParamDeclaration("@arguments", CArray.TYPE, null, ast.getNodeModifiers(),
 					ast.getTarget()));
 
 			// Handle closure parameters from left to right.

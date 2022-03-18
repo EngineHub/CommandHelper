@@ -470,7 +470,12 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	 * @return
 	 */
 	protected String getQuote() {
-		return "'" + val().replace("\\", "\\\\").replace("'", "\\'") + "'";
+		return "'" + val()
+				.replace("\\", "\\\\")
+				.replace("'", "\\'")
+				.replace("\n", "\\n")
+				.replace("\r", "\\r")
+				+ "'";
 	}
 
 	/**

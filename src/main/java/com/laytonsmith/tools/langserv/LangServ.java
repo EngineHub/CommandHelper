@@ -22,6 +22,8 @@ import com.laytonsmith.core.compiler.analysis.ProcDeclaration;
 import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.CFunction;
+import com.laytonsmith.core.constructs.CNull;
+import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Token;
@@ -30,6 +32,7 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.DocumentLinkProvider;
 import com.laytonsmith.core.functions.DocumentSymbolProvider;
 import com.laytonsmith.core.functions.Function;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.tool;
 import com.laytonsmith.persistence.DataSourceException;
 import java.io.File;
@@ -802,7 +805,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 							if(sc != null) {
 								sc = doReplacements(sc);
 							}
-							String content = "";
+							String content = "## ";
 							content += decl.getType().getSimpleName() + " " + decl.getIdentifier() + "(";
 							boolean first = true;
 							for(ParamDeclaration pDecl : decl.getParameters()) {
@@ -816,20 +819,51 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 							if(sc != null) {
 								content += sc.getBody() + "\n\n";
 								List<String> parameters = sc.getAnnotations("param");
-								paramIter: for(ParamDeclaration pDecl : decl.getParameters()) {
-									for(String paramDocs : parameters) {
-										String[] split = paramDocs.split(" ", 2);
-										if(split.length > 1) {
-											if(pDecl.getIdentifier().replace("@", "").equals(split[0])) {
-												content += " - @" + split[0] + " - " + split[1] + "\n";
-												continue paramIter;
+								if(!decl.getParameters().isEmpty()) {
+									content += "### Parameters\n";
+									for(ParamDeclaration pDecl : decl.getParameters()) {
+										content += " - " + pDecl.getType().getSimpleName() + " " + pDecl.getIdentifier();
+										ParseTree defaultValue = pDecl.getDefaultValue();
+										if(defaultValue != null) {
+											if(defaultValue.isConst() && defaultValue.getData() != CNull.UNDEFINED) {
+												Mixed data = defaultValue.getData();
+												content += " [default ";
+												if(data instanceof CString str) {
+													content += str.getQuote();
+												} else {
+													content += data.val();
+												}
+												content += "]";
 											}
 										}
+										for(String paramDocs : parameters) {
+											String[] split = paramDocs.split(" ", 2);
+											if(split.length > 1) {
+												if(pDecl.getIdentifier().replace("@", "").equals(split[0])) {
+													content += " - " + split[1].replace("\r", "").replace("\n", "");
+													break;
+												}
+											}
+										}
+										content += "\n";
 									}
 								}
 								content += "\n";
 								if(!sc.getAnnotations("returns").isEmpty()) {
-									content += "Returns: " + sc.getAnnotations("returns").get(0) + "\n\n";
+									content += "### Returns\n" + sc.getAnnotations("returns").get(0) + "\n\n";
+								}
+
+								if(!sc.getAnnotations("seeAlso").isEmpty()) {
+									content += "### See Also\n";
+									for(String seeAlso : sc.getAnnotations("seeAlso")) {
+										if(content.matches("https?://.*")) {
+											content += " - " + convertURLToLink(seeAlso);
+										} else {
+											content += " - " + seeAlso;
+										}
+										content += "\n";
+									}
+									content += "\n";
 								}
 							}
 
@@ -920,21 +954,25 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 			.set("url", new SmartComment.Replacement() {
 				@Override
 				public String replace(String data) {
-					String[] split = data.split(" ", 2);
-					String url;
-					String display;
-					if(split.length == 0) {
-						return "";
-					} else if(split.length == 1) {
-						url = display = split[0];
-					} else {
-						url = split[0];
-						display = split[1];
-					}
-					return "[" + display + "](" + url + ")";
+					return convertURLToLink(data);
 				}
 			})
 			.build());
+	}
+
+	private static String convertURLToLink(String annotationText) {
+		String[] split = annotationText.split(" ", 2);
+		String url;
+		String display;
+		if(split.length == 0) {
+			return "";
+		} else if(split.length == 1) {
+			url = display = split[0];
+		} else {
+			url = split[0];
+			display = split[1];
+		}
+		return "[" + display + "](" + url + ")";
 	}
 
 	@Override
