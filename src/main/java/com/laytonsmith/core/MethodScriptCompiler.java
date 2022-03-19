@@ -42,7 +42,6 @@ import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.extensions.ExtensionTracker;
 import com.laytonsmith.core.functions.Compiler;
@@ -56,7 +55,6 @@ import com.laytonsmith.core.functions.DataHandling;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
-import com.laytonsmith.core.functions.IncludeCache;
 import com.laytonsmith.core.functions.ArrayHandling.array_get;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.persistence.DataSourceException;
@@ -2861,21 +2859,6 @@ public final class MethodScriptCompiler {
 			return returnable;
 		}
 		return Static.resolveConstruct(b.toString().trim(), Target.UNKNOWN);
-	}
-
-	public static void registerAutoIncludes(Environment env, Script s) {
-		for(File f : Static.getAliasCore().autoIncludes) {
-			try {
-				MethodScriptCompiler.execute(
-						IncludeCache.get(f, env, env.getEnvClasses(), new Target(0, f, 0)), env, null, s);
-			} catch (ProgramFlowManipulationException e) {
-				ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.CreateUncatchableException(
-						"Cannot break program flow in auto include files.", e.getTarget()), env);
-			} catch (ConfigRuntimeException e) {
-				e.setEnv(env);
-				ConfigRuntimeException.HandleUncaughtException(e, env);
-			}
-		}
 	}
 
 	private static final List<Character> PDF_STACK = Arrays.asList(

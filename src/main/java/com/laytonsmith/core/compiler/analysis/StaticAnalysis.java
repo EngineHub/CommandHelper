@@ -24,6 +24,7 @@ import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.CRE.CREException;
 import com.laytonsmith.core.functions.DataHandling;
@@ -74,8 +75,6 @@ public class StaticAnalysis {
 	 */
 	private Map<ParseTree, Scope> astScopeMap = new HashMap<>();
 
-	private static StaticAnalysis autoIncludesAnalysis = null;
-
 	/**
 	 * Creates a new {@link StaticAnalysis}.
 	 *
@@ -123,7 +122,7 @@ public class StaticAnalysis {
 	 *
 	 * @param ast - The {@link ParseTree} to analze.
 	 * @param env - The {@link Environment}.
-	 * @param envs - The set of expected {@link EnvironmentImpl} classes to be available at runtime.
+	 * @param envs - The set of expected {@link Environment.EnvironmentImpl} classes to be available at runtime.
 	 * @param exceptions - Any compile exceptions will be added to this set.
 	 */
 	public void analyze(ParseTree ast, Environment env,
@@ -142,6 +141,7 @@ public class StaticAnalysis {
 		this.astRootNode = ast;
 
 		// Handle auto includes if present.
+		StaticAnalysis autoIncludesAnalysis = env.getEnv(StaticRuntimeEnv.class).getAutoIncludeAnalysis();
 		if(autoIncludesAnalysis != null) {
 			if(this.isMainAnalysis) {
 				this.startScope.addParent(autoIncludesAnalysis.endScope);
@@ -167,7 +167,7 @@ public class StaticAnalysis {
 	 *
 	 * @param autoIncludes - The list of auto include files.
 	 * @param env - The {@link Environment}.
-	 * @param envs - The set of expected {@link EnvironmentImpl} classes to be available at runtime.
+	 * @param envs - The set of expected {@link Environment.EnvironmentImpl} classes to be available at runtime.
 	 * @param exceptions - Any compile exceptions will be added to this set.
 	 */
 	public static void setAndAnalyzeAutoIncludes(List<File> autoIncludes, Environment env,
@@ -178,18 +178,16 @@ public class StaticAnalysis {
 			return;
 		}
 
-		// Clear previous auto includes analysis and return since there are no auto includes.
-		if(autoIncludes == null || autoIncludes.size() == 0) {
-			autoIncludesAnalysis = null;
-			return;
-		}
-
 		// Create scope graph with an include for each auto include.
 		// This fakes the scope graph for a script with an include for each auto include file.
-		Scope startScope = new Scope();
-		StaticAnalysis analysis = new StaticAnalysis(startScope, true);
+
+		StaticAnalysis analysis = env.getEnv(StaticRuntimeEnv.class).getAutoIncludeAnalysis();
+		if(analysis.endScope != null) {
+			throw new IllegalStateException("setAndAnalyzeAutoIncludes called twice on autoIncludeAnalysis");
+		}
+
 		analysis.staticAnalyses.remove(analysis); // Remove itself from analyses, as it isn't actually a file analysis.
-		Scope inScope = startScope;
+		Scope inScope = analysis.startScope;
 		for(File autoInclude : autoIncludes) {
 			Scope outScope = analysis.createNewScope();
 			inScope.addReference(new IncludeReference(
@@ -202,9 +200,6 @@ public class StaticAnalysis {
 		// Perform static analysis on the created script.
 		analysis.handleIncludeRefs(env, envs, exceptions);
 		analysis.analyzeFinalScopeGraph(env, exceptions);
-
-		// Store the new analysis.
-		autoIncludesAnalysis = analysis;
 	}
 
 	public void analyzeFinalScopeGraph(Environment env, Set<ConfigCompileException> exceptions) {
@@ -567,6 +562,7 @@ public class StaticAnalysis {
 	private void compileIncludesLinkCycles(Set<IncludeReference> handledRefs, Set<IncludeReference> linkedRefs,
 			Stack<IncludeReference> path, Environment env, Set<Class<? extends Environment.EnvironmentImpl>> envs,
 			Set<ConfigCompileException> exceptions) {
+		IncludeCache includeCache = env.getEnv(StaticRuntimeEnv.class).getIncludeCache();
 		for(IncludeReference includeRef : this.getIncludeRefs()) {
 
 			// Directly link scope graphs of cyclic includes.
@@ -582,7 +578,7 @@ public class StaticAnalysis {
 						// Get the static analysis of the include.
 						File file = Static.GetFileFromArgument(
 								pathRef.getIdentifier(), env, pathRef.getTarget(), null);
-						StaticAnalysis includeAnalysis = IncludeCache.getStaticAnalysis(file);
+						StaticAnalysis includeAnalysis = includeCache.getStaticAnalysis(file);
 						if(includeAnalysis == null) {
 
 							// The include did not compile, so ignore the include entirely.
@@ -624,11 +620,11 @@ public class StaticAnalysis {
 			StaticAnalysis includeAnalysis;
 			try {
 				File file = Static.GetFileFromArgument(includeRef.getIdentifier(), env, includeRef.getTarget(), null);
-				includeAnalysis = IncludeCache.getStaticAnalysis(file);
+				includeAnalysis = includeCache.getStaticAnalysis(file);
 				if(includeAnalysis == null) {
 					includeAnalysis = new StaticAnalysis(false);
 					IncludeCache.get(file, env, envs, includeAnalysis, includeRef.getTarget());
-					assert IncludeCache.getStaticAnalysis(file) != null : "Failed to cache include analysis.";
+					assert includeCache.getStaticAnalysis(file) != null : "Failed to cache include analysis.";
 				}
 			} catch(CREException e) {
 
