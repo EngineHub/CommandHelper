@@ -259,7 +259,7 @@ public class ClassUtils {
 		} else if("V".equals(classname)) {
 			return "void"; //special case
 		} else {
-			classname = classname.substring(1, classname.length() - 1).replace('/', '.').replace('$', '.');
+			classname = classname.substring(1, classname.length() - 1).replace('/', '.');
 		}
 		return classname + StringUtils.stringMultiply(arrayCount, "[]");
 	}
