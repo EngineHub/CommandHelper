@@ -600,11 +600,14 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 		ParseTree bestCandidate = null;
 		for(ParseTree node : start.getAllNodes()) {
 			Target t = node.getTarget();
+			// Both line numbers and column numbers are 1 indexed in MethodScript, since they are usually
+			// human readable fields, and text editors always start at line one. However, the protocol is
+			// zero based, so we add 1 to all those numbers.
 			if(t.line() != position.getLine() + 1) {
 				continue;
 			}
-			if(position.getCharacter() >= t.col()
-					&& position.getCharacter() <= (t.col() + node.getData().val().length())) {
+			if(position.getCharacter() + 1 >= t.col()
+					&& position.getCharacter() + 1 <= (t.col() + node.getData().val().length())) {
 				if(node.isSyntheticNode()) {
 					// This might be the best candidate, but maybe there is a better choice after us
 					bestCandidate = node;

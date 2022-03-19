@@ -188,7 +188,7 @@ public final class MethodScriptCompiler {
 			lastColumn = i;
 			if(c == '\n') {
 				lineNum++;
-				column = 1;
+				column = 0;
 				if(!inMultiline && !inPureMScript) {
 					inCommand = true;
 				}
