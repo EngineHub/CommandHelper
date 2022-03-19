@@ -6,6 +6,8 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
+import com.laytonsmith.core.compiler.signature.FunctionSignatures;
+import com.laytonsmith.core.compiler.signature.SignatureBuilder;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
@@ -77,6 +79,12 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 	 * @throws CancelCommandException
 	 */
 	public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException;
+
+	/**
+	 * Gets the function's signatures. {@link SignatureBuilder} offers a convenient way to create these signatures.
+	 * @return This function's signatures.
+	 */
+	public FunctionSignatures getSignatures();
 
 	/**
 	 * Gets the return type of this function, based on the types of the passed arguments.

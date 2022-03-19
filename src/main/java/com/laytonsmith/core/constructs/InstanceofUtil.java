@@ -128,18 +128,33 @@ public class InstanceofUtil {
 
 	/**
 	 * Returns whether or not a given MethodScript type is an instance of the specified MethodScript type.
-	 *
-	 * @param type The type to check for
-	 * @param instanceofThis The CClassType to check
+	 * The following rules apply in the given order:
+	 * <ul>
+	 *     <li>If value == instanceofThis, {@code true} is returned.</li>
+	 *     <li>If instanceofThis == Java null, {@code true} is returned.</li>
+	 *     <li>Java null is only instanceof Java null.</li>
+	 *     <li>auto and null are instanceof any type.</li>
+	 *     <li>Any type is instanceof auto.</li>
+	 *     <li>Nothing is instanceof void and null.</li>
+	 *     <li>void is instanceof nothing.</li>
+	 * </ul>
+	 * @param type - The type to check for.
+	 * Java {@code null} can be used to indicate no type (e.g. from control flow breaking statements).
+	 * @param instanceofThis - The {@link CClassType} to check against.
+	 * Java {@code null} can be used to indicate that anything is allowed to match this
+	 * (i.e. making this method return {@code true}).
 	 * @param env
 	 * @return
 	 */
 	public static boolean isInstanceof(CClassType type, CClassType instanceofThis, Environment env) {
-		Static.AssertNonNull(instanceofThis, "instanceofThis may not be null");
 
-		// Return true for AUTO, as everything can be used as AUTO.
-		if(instanceofThis == CClassType.AUTO) {
+		// Handle special cases.
+		if(type == instanceofThis || instanceofThis == null || type == CClassType.AUTO
+				|| type == CNull.TYPE || instanceofThis == CClassType.AUTO) {
 			return true;
+		}
+		if(type == null || type == CVoid.TYPE || instanceofThis == CVoid.TYPE || instanceofThis == CNull.TYPE) {
+			return false;
 		}
 
 		// Get cached result or compute and cache result.

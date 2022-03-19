@@ -18,9 +18,7 @@ import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CKeyword;
 import com.laytonsmith.core.constructs.CLabel;
-import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
-import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.Target;
@@ -453,20 +451,10 @@ public class StaticAnalysis {
 	public static void requireType(CClassType type, CClassType expected,
 			Target t, Environment env, Set<ConfigCompileException> exceptions) {
 
-		// Handle types that cause exceptions in the InstanceofUtil isInstanceof check.
-		if(type == expected || type == CClassType.AUTO || type == CNull.TYPE) {
-			return;
-		}
-		if(type == CVoid.TYPE || expected == CVoid.TYPE || expected == CNull.TYPE) {
-			exceptions.add(new ConfigCompileException("Expected type " + expected.getSimpleName()
-					+ ", but received type " + type.getSimpleName() + " instead.", t));
-			return;
-		}
-
-		// Handle 'normal' types.
+		// Generate an exception if the given type is not instanceof the expected type.
 		if(!InstanceofUtil.isInstanceof(type, expected, env)) {
 			exceptions.add(new ConfigCompileException("Expected type " + expected.getSimpleName()
-					+ ", but received type " + type.getSimpleName() + " instead.", t));
+				+ ", but received type " + (type == null ? "none" : type.getSimpleName()) + " instead.", t));
 		}
 	}
 
@@ -485,9 +473,7 @@ public class StaticAnalysis {
 
 		// Return if the type is instanceof any expected type.
 		for(CClassType exp : expected) {
-			if(type == exp || type == CClassType.AUTO || type == CNull.TYPE
-					|| (type != CVoid.TYPE && exp != CVoid.TYPE && exp != CNull.TYPE)
-					|| InstanceofUtil.isInstanceof(type, exp, env)) {
+			if(InstanceofUtil.isInstanceof(type, exp, env)) {
 				return;
 			}
 		}
@@ -495,14 +481,14 @@ public class StaticAnalysis {
 		// Add an exception since the type was not compatible.
 		if(expected.length == 1) {
 			exceptions.add(new ConfigCompileException("Expected type " + expected[0].getSimpleName()
-					+ ", but received type " + type.getSimpleName() + " instead.", t));
+					+ ", but received type " + (type == null ? "none" : type.getSimpleName()) + " instead.", t));
 		} else {
 			String types = "";
 			for(CClassType exp : expected) {
 				types += (types.isEmpty() ? exp.getSimpleName() : ", " + exp.getSimpleName());
 			}
 			exceptions.add(new ConfigCompileException("Expected any of types {" + types
-					+ "}, but received type " + type.getSimpleName() + " instead.", t));
+					+ "}, but received type " + (type == null ? "none" : type.getSimpleName()) + " instead.", t));
 		}
 	}
 

@@ -12,7 +12,7 @@ public abstract class BlockPrefilterMatcher<T extends BindableEvent> extends Mat
 	@Override
 	protected MCMaterial getMaterial(T event) {
 		MCBlock block = getBlock(event);
-		if(block == null) {
+		if(block.isEmpty()) {
 			return null;
 		}
 		return block.getType();
