@@ -317,82 +317,82 @@ public final class MethodScriptCompiler {
 					switch(c) {
 						case '+': {
 							if(c2 == '=') { // "+=".
-								token = new Token(TType.PLUS_ASSIGNMENT, "+=", target);
+								token = new Token(TType.PLUS_ASSIGNMENT, "+=", target.copy());
 								i++;
 							} else if(c2 == '+') { // "++".
-								token = new Token(TType.INCREMENT, "++", target);
+								token = new Token(TType.INCREMENT, "++", target.copy());
 								i++;
 							} else { // "+".
-								token = new Token(TType.PLUS, "+", target);
+								token = new Token(TType.PLUS, "+", target.copy());
 							}
 							break;
 						}
 						case '-': {
 							if(c2 == '=') { // "-=".
-								token = new Token(TType.MINUS_ASSIGNMENT, "-=", target);
+								token = new Token(TType.MINUS_ASSIGNMENT, "-=", target.copy());
 								i++;
 							} else if(c2 == '-') { // "--".
-								token = new Token(TType.DECREMENT, "--", target);
+								token = new Token(TType.DECREMENT, "--", target.copy());
 								i++;
 							} else if(c2 == '>') { // "->".
-								token = new Token(TType.DEREFERENCE, "->", target);
+								token = new Token(TType.DEREFERENCE, "->", target.copy());
 								i++;
 							} else { // "-".
-								token = new Token(TType.MINUS, "-", target);
+								token = new Token(TType.MINUS, "-", target.copy());
 							}
 							break;
 						}
 						case '*': {
 							if(c2 == '=') { // "*=".
-								token = new Token(TType.MULTIPLICATION_ASSIGNMENT, "*=", target);
+								token = new Token(TType.MULTIPLICATION_ASSIGNMENT, "*=", target.copy());
 								i++;
 							} else if(c2 == '*') { // "**".
-								token = new Token(TType.EXPONENTIAL, "**", target);
+								token = new Token(TType.EXPONENTIAL, "**", target.copy());
 								i++;
 							} else { // "*".
-								token = new Token(TType.MULTIPLICATION, "*", target);
+								token = new Token(TType.MULTIPLICATION, "*", target.copy());
 							}
 							break;
 						}
 						case '/': {
 							if(c2 == '=') { // "/=".
-								token = new Token(TType.DIVISION_ASSIGNMENT, "/=", target);
+								token = new Token(TType.DIVISION_ASSIGNMENT, "/=", target.copy());
 								i++;
 							} else { // "/".
 								// Protect against matching commands.
 								if(Character.isLetter(c2)) {
 									break matched; // Pretend that division didn't match.
 								}
-								token = new Token(TType.DIVISION, "/", target);
+								token = new Token(TType.DIVISION, "/", target.copy());
 							}
 							break;
 						}
 						case '.': {
 							if(c2 == '=') { // ".=".
-								token = new Token(TType.CONCAT_ASSIGNMENT, ".=", target);
+								token = new Token(TType.CONCAT_ASSIGNMENT, ".=", target.copy());
 								i++;
 							} else if(c2 == '.') { // "..".
-								token = new Token(TType.SLICE, "..", target);
+								token = new Token(TType.SLICE, "..", target.copy());
 								i++;
 							} else { // ".".
-								token = new Token(TType.DOT, ".", target);
+								token = new Token(TType.DOT, ".", target.copy());
 							}
 							break;
 						}
 						case '%': {
-							token = new Token(TType.MODULO, "%", target);
+							token = new Token(TType.MODULO, "%", target.copy());
 							break;
 						}
 						case '>': {
 							if(c2 == '=') { // ">=".
-								token = new Token(TType.GTE, ">=", target);
+								token = new Token(TType.GTE, ">=", target.copy());
 								i++;
 							} else if(c2 == '>' && i < script.length() - 2 && script.charAt(i + 2) == '>') { // ">>>".
-								token = new Token(TType.MULTILINE_START, ">>>", target);
+								token = new Token(TType.MULTILINE_START, ">>>", target.copy());
 								inMultiline = true;
 								i += 2;
 							} else { // ">".
-								token = new Token(TType.GT, ">", target);
+								token = new Token(TType.GT, ">", target.copy());
 							}
 							break;
 						}
@@ -405,43 +405,43 @@ public final class MethodScriptCompiler {
 								}
 
 								if(saveAllTokens) {
-									tokenList.add(new Token(TType.FILE_OPTIONS_START, "<!", target));
+									tokenList.add(new Token(TType.FILE_OPTIONS_START, "<!", target.copy()));
 								}
 								inFileOptions = true;
 								fileOptionsLineNumberStart = lineNum;
 								i++;
 								continue;
 							} else if(c2 == '=') { // "<=".
-								token = new Token(TType.LTE, "<=", target);
+								token = new Token(TType.LTE, "<=", target.copy());
 								i++;
 							} else if(c2 == '<' && i < script.length() - 2 && script.charAt(i + 2) == '<') { // "<<<".
-								token = new Token(TType.MULTILINE_END, "<<<", target);
+								token = new Token(TType.MULTILINE_END, "<<<", target.copy());
 								inMultiline = false;
 								i += 2;
 							} else { // "<".
-								token = new Token(TType.LT, "<", target);
+								token = new Token(TType.LT, "<", target.copy());
 							}
 							break;
 						}
 						case '=': {
 							if(c2 == '=') {
 								if(i < script.length() - 2 && script.charAt(i + 2) == '=') { // "===".
-									token = new Token(TType.STRICT_EQUALS, "===", target);
+									token = new Token(TType.STRICT_EQUALS, "===", target.copy());
 									i += 2;
 								} else { // "==".
-									token = new Token(TType.EQUALS, "==", target);
+									token = new Token(TType.EQUALS, "==", target.copy());
 									i++;
 								}
 							} else { // "=".
 								if(inCommand) {
 									if(inOptVar) {
-										token = new Token(TType.OPT_VAR_ASSIGN, "=", target);
+										token = new Token(TType.OPT_VAR_ASSIGN, "=", target.copy());
 									} else {
-										token = new Token(TType.ALIAS_END, "=", target);
+										token = new Token(TType.ALIAS_END, "=", target.copy());
 										inCommand = false;
 									}
 								} else {
-									token = new Token(TType.ASSIGNMENT, "=", target);
+									token = new Token(TType.ASSIGNMENT, "=", target.copy());
 								}
 							}
 							break;
@@ -449,24 +449,24 @@ public final class MethodScriptCompiler {
 						case '!': {
 							if(c2 == '=') {
 								if(i < script.length() - 2 && script.charAt(i + 2) == '=') { // "!==".
-									token = new Token(TType.STRICT_NOT_EQUALS, "!==", target);
+									token = new Token(TType.STRICT_NOT_EQUALS, "!==", target.copy());
 									i += 2;
 								} else { // "!=".
-									token = new Token(TType.NOT_EQUALS, "!=", target);
+									token = new Token(TType.NOT_EQUALS, "!=", target.copy());
 									i++;
 								}
 							} else { // "!".
-								token = new Token(TType.LOGICAL_NOT, "!", target);
+								token = new Token(TType.LOGICAL_NOT, "!", target.copy());
 							}
 							break;
 						}
 						case '&': {
 							if(c2 == '&') {
 								if(i < script.length() - 2 && script.charAt(i + 2) == '&') { // "&&&".
-									token = new Token(TType.DEFAULT_AND, "&&&", target);
+									token = new Token(TType.DEFAULT_AND, "&&&", target.copy());
 									i += 2;
 								} else { // "&&".
-									token = new Token(TType.LOGICAL_AND, "&&", target);
+									token = new Token(TType.LOGICAL_AND, "&&", target.copy());
 									i++;
 								}
 							} else { // "&".
@@ -479,10 +479,10 @@ public final class MethodScriptCompiler {
 						case '|': {
 							if(c2 == '|') {
 								if(i < script.length() - 2 && script.charAt(i + 2) == '|') { // "|||".
-									token = new Token(TType.DEFAULT_OR, "|||", target);
+									token = new Token(TType.DEFAULT_OR, "|||", target.copy());
 									i += 2;
 								} else { // "||".
-									token = new Token(TType.LOGICAL_OR, "||", target);
+									token = new Token(TType.LOGICAL_OR, "||", target.copy());
 									i++;
 								}
 							} else { // "|".
@@ -499,15 +499,15 @@ public final class MethodScriptCompiler {
 //						}
 						case ':': {
 							if(c2 == ':') { // "::".
-								token = new Token(TType.DEREFERENCE, "::", target);
+								token = new Token(TType.DEREFERENCE, "::", target.copy());
 								i++;
 							} else { // ":".
-								token = new Token(TType.LABEL, ":", target);
+								token = new Token(TType.LABEL, ":", target.copy());
 							}
 							break;
 						}
 						case '{': {
-							token = new Token(TType.LCURLY_BRACKET, "{", target);
+							token = new Token(TType.LCURLY_BRACKET, "{", target.copy());
 							break;
 						}
 						case '}': {
@@ -519,29 +519,29 @@ public final class MethodScriptCompiler {
 								buf = new StringBuilder();
 								break;
 							}
-							token = new Token(TType.RCURLY_BRACKET, "}", target);
+							token = new Token(TType.RCURLY_BRACKET, "}", target.copy());
 							break;
 						}
 						case '[': {
-							token = new Token(TType.LSQUARE_BRACKET, "[", target);
+							token = new Token(TType.LSQUARE_BRACKET, "[", target.copy());
 							inOptVar = true;
 							break;
 						}
 						case ']': {
-							token = new Token(TType.RSQUARE_BRACKET, "]", target);
+							token = new Token(TType.RSQUARE_BRACKET, "]", target.copy());
 							inOptVar = false;
 							break;
 						}
 						case ',': {
-							token = new Token(TType.COMMA, ",", target);
+							token = new Token(TType.COMMA, ",", target.copy());
 							break;
 						}
 						case ';': {
-							token = new Token(TType.SEMICOLON, ";", target);
+							token = new Token(TType.SEMICOLON, ";", target.copy());
 							break;
 						}
 						case '(': {
-							token = new Token(TType.FUNC_START, "(", target);
+							token = new Token(TType.FUNC_START, "(", target.copy());
 
 							// Handle the buffer or previous token, with the knowledge that a FUNC_START follows.
 							if(buf.length() > 0) {
@@ -581,25 +581,25 @@ public final class MethodScriptCompiler {
 											tokenList.removeLast();
 										}
 									} else {
-										tokenList.add(new Token(TType.FUNC_NAME, "__autoconcat__", target));
+										tokenList.add(new Token(TType.FUNC_NAME, "__autoconcat__", target.copy()));
 									}
 								} catch (NoSuchElementException e) {
 									// This is the first element on the list, so, it's another autoconcat.
-									tokenList.add(new Token(TType.FUNC_NAME, "__autoconcat__", target));
+									tokenList.add(new Token(TType.FUNC_NAME, "__autoconcat__", target.copy()));
 								}
 							}
 							break;
 						}
 						case ')': {
-							token = new Token(TType.FUNC_END, ")", target);
+							token = new Token(TType.FUNC_END, ")", target.copy());
 							break;
 						}
 						case ' ': { // Whitespace case #1.
-							token = new Token(TType.WHITESPACE, " ", target);
+							token = new Token(TType.WHITESPACE, " ", target.copy());
 							break;
 						}
 						case '\t': { // Whitespace case #2 (TAB).
-							token = new Token(TType.WHITESPACE, "\t", target);
+							token = new Token(TType.WHITESPACE, "\t", target.copy());
 							break;
 						}
 						case '@': {
@@ -1348,10 +1348,10 @@ public final class MethodScriptCompiler {
 		Token[] tokenArray = stream.toArray(new Token[stream.size()]);
 		for(int i = 0; i < tokenArray.length; i++) {
 			t = tokenArray[i];
-			Token prev1 = i - 1 >= 0 ? tokenArray[i - 1] : new Token(TType.UNKNOWN, "", t.target);
-			Token next1 = i + 1 < stream.size() ? tokenArray[i + 1] : new Token(TType.UNKNOWN, "", t.target);
-			Token next2 = i + 2 < stream.size() ? tokenArray[i + 2] : new Token(TType.UNKNOWN, "", t.target);
-			Token next3 = i + 3 < stream.size() ? tokenArray[i + 3] : new Token(TType.UNKNOWN, "", t.target);
+			Token prev1 = i - 1 >= 0 ? tokenArray[i - 1] : new Token(TType.UNKNOWN, "", t.target.copy());
+			Token next1 = i + 1 < stream.size() ? tokenArray[i + 1] : new Token(TType.UNKNOWN, "", t.target.copy());
+			Token next2 = i + 2 < stream.size() ? tokenArray[i + 2] : new Token(TType.UNKNOWN, "", t.target.copy());
+			Token next3 = i + 3 < stream.size() ? tokenArray[i + 3] : new Token(TType.UNKNOWN, "", t.target.copy());
 
 			// Brace handling
 			if(t.type == TType.LCURLY_BRACKET) {

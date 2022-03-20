@@ -229,23 +229,13 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 		MSLog.GetLogger().Log(LANGSERVLOGTAG, level, s, Target.UNKNOWN);
 		if(client != null && MSLog.GetLogger().WillLog(LANGSERVLOGTAG, level)) {
 			MessageType type;
-			switch(level) {
-				case DEBUG:
-					type = MessageType.Log;
-					break;
-				case INFO:
-					type = MessageType.Info;
-					break;
-				case WARNING:
-					type = MessageType.Warning;
-					break;
-				case ERROR:
-					type = MessageType.Error;
-					break;
-				default:
-					type = MessageType.Log;
-					break;
-			}
+			type = switch(level) {
+				case DEBUG -> MessageType.Log;
+				case INFO -> MessageType.Info;
+				case WARNING -> MessageType.Warning;
+				case ERROR -> MessageType.Error;
+				default -> MessageType.Log;
+			};
 
 			String full = s.getString();
 			client.logMessage(new MessageParams(type, full));
@@ -480,12 +470,15 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 			return DiagnosticSeverity.Warning;
 		}
 		switch(warning.getSuppressCategory().getSeverityLevel()) {
-			case HIGH:
+			case HIGH -> {
 				return DiagnosticSeverity.Warning;
-			case MEDIUM:
+			}
+			case MEDIUM -> {
 				return DiagnosticSeverity.Information;
-			case LOW:
+			}
+			case LOW -> {
 				return DiagnosticSeverity.Hint;
+			}
 		}
 		throw new Error("Unaccounted for case: " + warning.getSuppressCategory());
 	}
@@ -524,16 +517,15 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 
 	//</editor-fold>
 
-	private static Range convertNakedTargetToRange(Target t, int tokenLength) {
+	public static Range convertTargetToRange(Target t) {
+		int tokenLength = t.length();
 		if(tokenLength < 1) {
 			// Something went wrong, but we always want an error to show up, so set this here
 			tokenLength = 1;
 		}
-		// I'm not sure if the column offset -2 is because of a bug in the code target calculation,
-		// or due to how VSCode indexes the column numbers, but either way it seems most all errors
-		// suffer from the weird -2 offset.
-		Position start = new Position(t.line() - 1, t.col() - 2);
-		Position end = new Position(t.line() - 1, t.col() + tokenLength - 2);
+		
+		Position start = new Position(t.line() - 1, t.col() - 1);
+		Position end = new Position(t.line() - 1, t.col() + tokenLength - 1);
 		if(start.getLine() < 0) {
 			start.setLine(0);
 		}
@@ -549,80 +541,27 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 		return new Range(start, end);
 	}
 
-	public static Range convertTargetToRange(Script script, Target t) {
-		int tokenLength = script.getSignature().length();
-		return convertNakedTargetToRange(t, tokenLength);
-	}
-
 	public static Range convertTargetToRange(ParseTree node) {
-		String val = Construct.nval(node.getData());
-		if(val == null) {
-			val = "null";
-		}
-		int tokenLength = val.length();
-		Target t = node.getTarget();
-		return convertNakedTargetToRange(t, tokenLength);
-	}
-
-	public static Range convertTargetToRange(TokenStream tokens, Target t) {
-		int tokenLength = 5;
-		if(tokens != null) {
-			for(int i = 0; i < tokens.size(); i++) {
-				Token token = tokens.get(i);
-				if(token.lineNum == t.line() && token.column == t.col()) {
-					tokenLength = token.value.length();
-					break;
-				}
-			}
-		}
-		if(tokenLength < 1) {
-			// Something went wrong, but we always want an error to show up, so set this here
-			tokenLength = 1;
-		}
-		return convertNakedTargetToRange(t, tokenLength);
+		return convertTargetToRange(node.getTarget());
 	}
 
 	public void convertPositionToParseTree(CompletableFuture<ParseTree> future, Executor threadPool, String uri, Position position) {
 		CompletableFuture<ParseTree> privateFuture = new CompletableFuture<>();
 		model.getParseTree(privateFuture, uri);
-		privateFuture.thenAccept(new Consumer<ParseTree>() {
-			@Override
-			public void accept(ParseTree t) {
-				ParseTree result = findToken(t, position);
-				future.complete(result);
-			}
+		privateFuture.thenAccept((ParseTree t) -> {
+			ParseTree result = LangServModel.findToken(t, position);
+			future.complete(result);
 		});
 	}
 
-	private ParseTree findToken(ParseTree start, Position position) {
-		// TODO: Should be able to convert this to a O(log n)ish algo if we're smarter about it. Also, should
-		// probably add original token length to the Target, so we can be smarter about that too.
-		ParseTree bestCandidate = null;
-		for(ParseTree node : start.getAllNodes()) {
-			Target t = node.getTarget();
-			// Both line numbers and column numbers are 1 indexed in MethodScript, since they are usually
-			// human readable fields, and text editors always start at line one. However, the protocol is
-			// zero based, so we add 1 to all those numbers.
-			if(t.line() != position.getLine() + 1) {
-				continue;
-			}
-			if(position.getCharacter() + 1 >= t.col()
-					&& position.getCharacter() + 1 <= (t.col() + node.getData().val().length())) {
-				if(node.isSyntheticNode()) {
-					// This might be the best candidate, but maybe there is a better choice after us
-					bestCandidate = node;
-				} else {
-					// This definitely is the best candidate.
-					return node;
-				}
-			}
-		}
-		return bestCandidate;
-	}
-
-	public static Location convertTargetToLocation(Target t, Range range) {
+	public static Location convertTargetToLocation(Target t) {
+		Range range = convertTargetToRange(t);
 		Location location = new Location(t.file().toURI().toString(), range);
 		return location;
+	}
+	
+	public static Location convertTargetToLocation(ParseTree node) {
+		return convertTargetToLocation(node.getTarget());
 	}
 
 	@Override
@@ -718,38 +657,28 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 		CompletableFuture<ParseTree> future = new CompletableFuture<>();
 		String uri = params.getTextDocument().getUri();
 		convertPositionToParseTree(future, highPriorityProcessors, uri, params.getPosition());
-		future.thenAccept(new Consumer<ParseTree>() {
-			@Override
-			public void accept(ParseTree t) {
-				if(t == null) {
-					result.cancel(true);
-					return;
-				}
-				if(t.getData() instanceof CFunction cf) {
-					if(cf.hasProcedure()) {
-						String procName = cf.val();
-						StaticAnalysis sa;
-						try {
-							sa = model.getStaticAnalysis(uri);
-						} catch(URISyntaxException ex) {
-							throw new Error(ex);
+		future.thenAccept((ParseTree t) -> {
+			if(t == null) {
+				result.cancel(true);
+				return;
+			}
+			if(t.getData() instanceof CFunction cf) {
+				if(cf.hasProcedure()) {
+					String procName = cf.val();
+					StaticAnalysis sa = model.getStaticAnalysis();
+					List<Location> locations = new ArrayList<>();
+					Scope scope = sa.getTermScope(t);
+					if(scope != null) {
+						Collection<Declaration> decls = scope.getDeclarations(Namespace.PROCEDURE, procName);
+						for(Declaration decl : decls) {
+							locations.add(convertTargetToLocation(decl.getTarget()));
 						}
-						List<Location> locations = new ArrayList<>();
-						Scope scope = sa.getTermScope(t);
-						if(scope != null) {
-							Collection<Declaration> decls = scope.getDeclarations(Namespace.PROCEDURE, procName);
-							for(Declaration decl : decls) {
-								Target definition = decl.getTarget();
-								Range range = convertNakedTargetToRange(decl.getTarget(), decl.getIdentifier().length());
-								locations.add(convertTargetToLocation(definition, range));
-							}
-							result.complete(Either.forLeft(locations));
-							return;
-						}
+						result.complete(Either.forLeft(locations));
+						return;
 					}
 				}
-				result.cancel(true);
 			}
+			result.cancel(true);
 		});
 		return result;
 	}
@@ -774,114 +703,104 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 		convertPositionToParseTree(findParseTree, highPriorityProcessors, uri,
 				params.getPosition());
 
-		findParseTree.thenAccept(new Consumer<ParseTree>() {
-			@Override
-			public void accept(ParseTree t) {
-				if(t == null) {
-					result.cancel(true);
-					return;
-				}
-				Hover hover = null;
-				StaticAnalysis sa;
-				try {
-					sa = model.getStaticAnalysis(uri);
-				} catch(URISyntaxException ex) {
-					result.cancel(true);
-					return;
-				}
-				if(sa == null) {
-					// We can't find declarations of anything.
-					result.cancel(true);
-					return;
-				}
-				if(t.getData() instanceof CFunction cf) {
-					if(cf.hasProcedure()) {
-						Scope scope = sa.getTermScope(t);
-						if(scope == null) {
-							result.cancel(true);
-							return;
+		findParseTree.thenAccept((ParseTree t) -> {
+			if(t == null) {
+				result.cancel(true);
+				return;
+			}
+			Hover hover = null;
+			StaticAnalysis sa = model.getStaticAnalysis();
+			if(sa == null) {
+				// We can't find declarations of anything.
+				result.cancel(true);
+				return;
+			}
+			if(t.getData() instanceof CFunction cf) {
+				if(cf.hasProcedure()) {
+					Scope scope = sa.getTermScope(t);
+					if(scope == null) {
+						result.cancel(true);
+						return;
+					}
+					Collection<Declaration> col = scope.getReachableDeclarations(Namespace.PROCEDURE, cf.val());
+					if(!col.isEmpty()) {
+						ProcDeclaration decl = (ProcDeclaration) new ArrayList<>(col).get(0);
+						SmartComment sc = decl.getNodeModifiers().getComment();
+						if(sc != null) {
+							sc = doReplacements(sc);
 						}
-						Collection<Declaration> col = scope.getReachableDeclarations(Namespace.PROCEDURE, cf.val());
-						if(!col.isEmpty()) {
-							ProcDeclaration decl = (ProcDeclaration) new ArrayList<>(col).get(0);
-							SmartComment sc = decl.getNodeModifiers().getComment();
-							if(sc != null) {
-								sc = doReplacements(sc);
+						String content = "## ";
+						content += decl.getType().getSimpleName() + " " + decl.getIdentifier() + "(";
+						boolean first = true;
+						for(ParamDeclaration pDecl : decl.getParameters()) {
+							if(!first) {
+								content += ", ";
 							}
-							String content = "## ";
-							content += decl.getType().getSimpleName() + " " + decl.getIdentifier() + "(";
-							boolean first = true;
-							for(ParamDeclaration pDecl : decl.getParameters()) {
-								if(!first) {
-									content += ", ";
-								}
-								content += pDecl.getType().getSimpleName() + " " + pDecl.getIdentifier();
-								first = false;
-							}
-							content += ")\n\n";
-							if(sc != null) {
-								content += sc.getBody() + "\n\n";
-								List<String> parameters = sc.getAnnotations("param");
-								if(!decl.getParameters().isEmpty()) {
-									content += "### Parameters\n";
-									for(ParamDeclaration pDecl : decl.getParameters()) {
-										content += " - " + pDecl.getType().getSimpleName() + " " + pDecl.getIdentifier();
-										ParseTree defaultValue = pDecl.getDefaultValue();
-										if(defaultValue != null) {
-											if(defaultValue.isConst() && defaultValue.getData() != CNull.UNDEFINED) {
-												Mixed data = defaultValue.getData();
-												content += " [default ";
-												if(data instanceof CString str) {
-													content += str.getQuote();
-												} else {
-													content += data.val();
-												}
-												content += "]";
+							content += pDecl.getType().getSimpleName() + " " + pDecl.getIdentifier();
+							first = false;
+						}
+						content += ")\n\n";
+						if(sc != null) {
+							content += sc.getBody() + "\n\n";
+							List<String> parameters = sc.getAnnotations("param");
+							if(!decl.getParameters().isEmpty()) {
+								content += "### Parameters\n";
+								for(ParamDeclaration pDecl : decl.getParameters()) {
+									content += " - " + pDecl.getType().getSimpleName() + " " + pDecl.getIdentifier();
+									ParseTree defaultValue = pDecl.getDefaultValue();
+									if(defaultValue != null) {
+										if(defaultValue.isConst() && defaultValue.getData() != CNull.UNDEFINED) {
+											Mixed data = defaultValue.getData();
+											content += " [default ";
+											if(data instanceof CString str) {
+												content += str.getQuote();
+											} else {
+												content += data.val();
 											}
+											content += "]";
 										}
-										for(String paramDocs : parameters) {
-											String[] split = paramDocs.split(" ", 2);
-											if(split.length > 1) {
-												if(pDecl.getIdentifier().replace("@", "").equals(split[0])) {
-													content += " - " + split[1].replace("\r", "").replace("\n", "");
-													break;
-												}
-											}
-										}
-										content += "\n";
 									}
-								}
-								content += "\n";
-								if(!sc.getAnnotations("returns").isEmpty()) {
-									content += "### Returns\n" + sc.getAnnotations("returns").get(0) + "\n\n";
-								}
-
-								if(!sc.getAnnotations("seeAlso").isEmpty()) {
-									content += "### See Also\n";
-									for(String seeAlso : sc.getAnnotations("seeAlso")) {
-										if(content.matches("https?://.*")) {
-											content += " - " + convertURLToLink(seeAlso);
-										} else {
-											content += " - " + seeAlso;
+									for(String paramDocs : parameters) {
+										String[] split = paramDocs.split(" ", 2);
+										if(split.length > 1) {
+											if(pDecl.getIdentifier().replace("@", "").equals(split[0])) {
+												content += " - " + split[1].replace("\r", "").replace("\n", "");
+												break;
+											}
 										}
-										content += "\n";
 									}
 									content += "\n";
 								}
 							}
-
-							MarkupContent mContent = new MarkupContent("markdown", content);
-							hover = new Hover();
-							hover.setContents(mContent);
+							content += "\n";
+							if(!sc.getAnnotations("returns").isEmpty()) {
+								content += "### Returns\n" + sc.getAnnotations("returns").get(0) + "\n\n";
+							}
+							
+							if(!sc.getAnnotations("seeAlso").isEmpty()) {
+								content += "### See Also\n";
+								for(String seeAlso : sc.getAnnotations("seeAlso")) {
+									if(content.matches("https?://.*")) {
+										content += " - " + convertURLToLink(seeAlso);
+									} else {
+										content += " - " + seeAlso;
+									}
+									content += "\n";
+								}
+								content += "\n";
+							}
 						}
+						
+						MarkupContent mContent = new MarkupContent("markdown", content);
+						hover = new Hover();
+						hover.setContents(mContent);
 					}
 				}
-				if(hover == null) {
-					result.cancel(true);
-				} else {
-					result.complete(hover);
-				}
-
+			}
+			if(hover == null) {
+				result.cancel(true);
+			} else {
+				result.complete(hover);
 			}
 		});
 
@@ -908,7 +827,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 					String link = script.getSignatureWithoutLabel();
 					link = link.replace("[ ", "[").replace(" ]", "]");
 					SymbolInformation docSymbol = new SymbolInformation(link, SymbolKind.Method,
-							convertTargetToLocation(script.getTarget(), convertTargetToRange(script, script.getTarget())));
+							convertTargetToLocation(script.getTarget()));
 					links.add(Either.forLeft(docSymbol));
 				}
 				result.complete(links);
@@ -930,7 +849,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 								if(link != null) {
 									SymbolInformation docSymbol = new SymbolInformation(link,
 											documentSymbolProvider.getSymbolKind(),
-											convertTargetToLocation(node.getTarget(), convertTargetToRange(node)));
+											convertTargetToLocation(node));
 									links.add(Either.forLeft(docSymbol));
 								}
 							}
@@ -946,6 +865,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 		return result;
 	}
 
+	@SuppressWarnings("Convert2Lambda")
 	public static SmartComment doReplacements(SmartComment sc) {
 		return new SmartComment(sc, MapBuilder.empty(String.class, SmartComment.Replacement.class)
 			.set("code", new SmartComment.Replacement() {
@@ -967,13 +887,15 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 		String[] split = annotationText.split(" ", 2);
 		String url;
 		String display;
-		if(split.length == 0) {
-			return "";
-		} else if(split.length == 1) {
-			url = display = split[0];
-		} else {
-			url = split[0];
-			display = split[1];
+		switch(split.length) {
+			case 0 -> {
+				return "";
+			}
+			case 1 -> url = display = split[0];
+			default -> {
+					url = split[0];
+					display = split[1];
+			}
 		}
 		return "[" + display + "](" + url + ")";
 	}

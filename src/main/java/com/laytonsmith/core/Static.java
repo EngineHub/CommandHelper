@@ -27,6 +27,7 @@ import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
+import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBareString;
 import com.laytonsmith.core.constructs.CBoolean;
@@ -1300,6 +1301,25 @@ public final class Static {
 	public static Environment GenerateStandaloneEnvironment(
 			boolean install, EnumSet<RuntimeMode> runtimeModes)
 			throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
+		return GenerateStandaloneEnvironment(install, runtimeModes, null, null);
+	}
+	/**
+	 * Generates a new environment, assuming that the jar has a folder next to it named CommandHelper, and that folder
+	 * is the root.
+	 * @param install
+	 * @param runtimeModes The {@link RuntimeMode}s for this environment.
+	 * @param inludeCache If null, a default is provided, but otherwise can be provided
+	 * @param staticAnalysis By default null, but if provided that is used instead
+	 * @return
+	 * @throws IOException
+	 * @throws DataSourceException
+	 * @throws URISyntaxException
+	 * @throws com.laytonsmith.core.Profiles.InvalidProfileException
+	 */
+	public static Environment GenerateStandaloneEnvironment(
+			boolean install, EnumSet<RuntimeMode> runtimeModes, IncludeCache includeCache, 
+			StaticAnalysis staticAnalysis)
+				throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
 		File platformFolder = MethodScriptFileLocations.getDefault().getConfigDirectory();
 		if(install) {
 			Installer.Install(platformFolder);
@@ -1314,10 +1334,10 @@ public final class Static {
 		GlobalEnv gEnv = new GlobalEnv(platformFolder, runtimeModes);
 		gEnv.SetLabel(GLOBAL_PERMISSION);
 		StaticRuntimeEnv staticRuntimeEnv = new StaticRuntimeEnv(
-				new Profiler(MethodScriptFileLocations.getDefault().getProfilerConfigFile()),
-				persistenceNetwork, profiles, new TaskManagerImpl(),
-				new ExecutionQueueImpl("MethodScriptExecutionQueue", "default"),
-				new IncludeCache(), null);
+					new Profiler(MethodScriptFileLocations.getDefault().getProfilerConfigFile()),
+					persistenceNetwork, profiles, new TaskManagerImpl(),
+					new ExecutionQueueImpl("MethodScriptExecutionQueue", "default"),
+					includeCache == null ? new IncludeCache() : includeCache, staticAnalysis);
 		return Environment.createEnvironment(gEnv, staticRuntimeEnv, new CompilerEnvironment());
 	}
 

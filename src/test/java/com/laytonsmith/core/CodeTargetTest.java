@@ -33,7 +33,7 @@ public class CodeTargetTest {
 		return tree;
 	}
 
-	private void validateTarget(int expectedLine, int expectedColumn, ParseTree node) {
+	private void validateTarget(int expectedLine, int expectedColumn, int expectedLength, ParseTree node) {
 		Target actual = node.getTarget();
 		if(node.isSyntheticNode()) {
 			fail("Testing synthetic node");
@@ -45,6 +45,9 @@ public class CodeTargetTest {
 			fail("Incorrect code target, expected " + expectedLine + "." + expectedColumn + " but got "
 				+ actual.line() + "." + actual.col());
 		}
+		if(expectedLength != actual.length()) {
+			fail("Incorrect length, expected " + expectedLength + " but found " + actual.length());
+		}
 	}
 
 	@Test
@@ -53,12 +56,12 @@ public class CodeTargetTest {
 				"msg();\n"
 				+ "msg();\n"
 				+ " msg();\n"
-				+ " msg('a', 'b');\n"
+				+ " msg('a', 'bb');\n"
 		);
-		validateTarget(1, 1, nodes.get(0));
-		validateTarget(2, 1, nodes.get(1));
-		validateTarget(3, 2, nodes.get(2));
-		validateTarget(4, 7, nodes.get(3).getChildAt(0));
-		validateTarget(4, 12, nodes.get(3).getChildAt(1));
+		validateTarget(1, 1, 3, nodes.get(0));
+		validateTarget(2, 1, 3, nodes.get(1));
+		validateTarget(3, 2, 3, nodes.get(2));
+		validateTarget(4, 7, 1, nodes.get(3).getChildAt(0));
+		validateTarget(4, 12, 2, nodes.get(3).getChildAt(1));
 	}
 }

@@ -25,6 +25,7 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.RuntimeMode;
+import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.events.Event;
 import com.laytonsmith.core.events.EventList;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -62,6 +63,7 @@ import org.eclipse.lsp4j.DidOpenTextDocumentParams;
 import org.eclipse.lsp4j.DidSaveTextDocumentParams;
 import org.eclipse.lsp4j.MessageParams;
 import org.eclipse.lsp4j.MessageType;
+import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.PublishDiagnosticsParams;
 import org.eclipse.lsp4j.TextDocumentContentChangeEvent;
 import org.eclipse.lsp4j.WorkspaceFolder;
@@ -76,7 +78,7 @@ import org.eclipse.lsp4j.services.LanguageClient;
 public class LangServModel {
 
 	private LanguageClient client;
-	private LangServ langServ;
+	private final LangServ langServ;
 
 	private volatile boolean isDirty = true;
 
@@ -134,7 +136,6 @@ public class LangServModel {
 	 */
 	private void dirtyTree() {
 		isDirty = true;
-		IncludeCache.clearCache();
 	}
 
 	/**
@@ -174,7 +175,7 @@ public class LangServModel {
 
 	private volatile boolean interruptBuilding = false;
 	private final Map<String, ParseTree> parseTrees = new HashMap<>();
-	private final Map<String, StaticAnalysis> staticAnalyses = new HashMap<>();
+	private StaticAnalysis staticAnalysis;
 
 	/**
 	 * Usually this should only be called by rebuildTree. This method blocks until the rebuild is finished. If the tree
@@ -186,22 +187,119 @@ public class LangServModel {
 		}
 		interruptBuilding = false;
 		parseTrees.clear();
-		staticAnalyses.clear();
+		// Calculate all auto includes first
+		Set<File> autoIncludes = new HashSet<>();
+		try {
+			for(WorkspaceFolder folder : getWorkspaceFolders()) {
+				URI uuri = new URI(folder.getUri());
+				File ai = Paths.get(uuri).toFile();
+				FileUtil.recursiveFind(ai, (r) -> {
+					if(r.isFile() && r.getAbsolutePath().endsWith("auto_include.ms")) {
+						String path = r.getAbsolutePath().replace("\\", "/");
+						if(!path.contains(".disabled/")
+								&& !path.contains(".library/")) {
+							autoIncludes.add(r);
+						}
+					}
+				});
+			}
+		} catch(IOException | URISyntaxException ex) {
+			client.logMessage(new MessageParams(MessageType.Warning, ex.getMessage()));
+		}
+		
+		IncludeCache includeCache = new IncludeCache();
+		staticAnalysis = new StaticAnalysis(true);
+		Environment env;
+		try {
+			// Cmdline mode disables things like security checks and whatnot.
+			// These may be present in the runtime environment,
+			// but it's not possible for us to tell that at this point.
+			env = Static.GenerateStandaloneEnvironment(false, EnumSet.of(RuntimeMode.CMDLINE), includeCache, 
+					staticAnalysis);
+			// Make this configurable at some point. For now, however, we need this so we can get
+			// correct handling on minecraft functions.
+			env = env.cloneAndAdd(new CommandHelperEnvironment());
+		} catch(IOException | DataSourceException | URISyntaxException | Profiles.InvalidProfileException ex) {
+			throw new RuntimeException(ex);
+		}
+		CompilerEnvironment compilerEnv = env.getEnv(CompilerEnvironment.class);
+		compilerEnv.setLogCompilerWarnings(false); // No one would see them
+		GlobalEnv gEnv = env.getEnv(GlobalEnv.class);
+		gEnv.SetScriptProvider((File file) -> getDocument(file.toURI().toString()));
+		Set<ConfigCompileException> exceptions = new HashSet<>();
+		
 		for(WorkspaceFolder f : workspaceFolders) {
 			if(interruptBuilding) {
 				return;
 			}
 			File workspace = new File(f.getUri().replaceFirst("file://", ""));
+			
+			langServ.logv(() -> "Providing StaticAnalysis with auto includes: " + autoIncludes.toString());
+			StaticAnalysis.setAndAnalyzeAutoIncludes(new ArrayList<>(autoIncludes), env, env.getEnvClasses(), exceptions);
+			
+			final Environment _env = env;
+			
 			try {
 				FileUtil.recursiveFind(workspace, (File f1) -> {
 					if(f1.isFile() && (f1.getName().endsWith(".ms") || f1.getName().endsWith(".msa"))) {
-						parseTrees.put(URIUtils.canonicalize(f1.toURI()).toString(), doCompilation(f1.toURI().toString()));
+						parseTrees.put(URIUtils.canonicalize(f1.toURI()).toString(),
+								doCompilation(f1.toURI().toString(), includeCache, staticAnalysis, _env, exceptions));
 					}
 				});
 			} catch(IOException ex) {
 				client.logMessage(new MessageParams(MessageType.Warning, ex.getMessage()));
 			}
 		}
+		
+		Map<String, List<Diagnostic>> diagnosticsLists = new HashMap<>();
+		if(!exceptions.isEmpty()) {
+			langServ.logi(() -> "Errors found, reporting " + exceptions.size() + " errors");
+			for(ConfigCompileException e : exceptions) {
+				Diagnostic d = new Diagnostic();
+				if(e.getTarget().file() == null) {
+					continue;
+				}
+				String uri = URIUtils.canonicalize(e.getTarget().file().toURI()).toString();
+				d.setRange(convertTargetToRange(e.getTarget()));
+				d.setSeverity(DiagnosticSeverity.Error);
+				d.setMessage(e.getMessage());
+				List<Diagnostic> diagnosticsList = diagnosticsLists.get(uri);
+				if(diagnosticsList == null) {
+					diagnosticsList = new ArrayList<>();
+					diagnosticsLists.put(uri, diagnosticsList);
+				}
+				diagnosticsList.add(d);
+			}
+		}
+		
+		List<CompilerWarning> warnings = compilerEnv.getCompilerWarnings();
+		if(!warnings.isEmpty()) {
+			for(CompilerWarning c : warnings) {
+				Diagnostic d = new Diagnostic();
+				if(c.getTarget().file() == null) {
+					continue;
+				}
+				String uri = URIUtils.canonicalize(c.getTarget().file().toURI()).toString();
+				d.setRange(convertTargetToRange(c.getTarget()));
+				d.setSeverity(LangServ.getSeverity(c));
+				d.setMessage(c.getMessage());
+				List<Diagnostic> diagnosticsList = diagnosticsLists.get(uri);
+				if(diagnosticsList == null) {
+					diagnosticsList = new ArrayList<>();
+					diagnosticsLists.put(uri, diagnosticsList);
+				}
+				diagnosticsList.add(d);
+			}
+		}
+
+		// We need to report to the client always, with an empty list, implying that all problems are fixed.
+		for(String uri : parseTrees.keySet()) {
+			List<Diagnostic> diagnosticsList = diagnosticsLists.get(uri);
+			PublishDiagnosticsParams diagnostics
+					= new PublishDiagnosticsParams(uri, diagnosticsList != null ? diagnosticsList : new ArrayList<>());
+			client.publishDiagnostics(diagnostics);
+		}
+		
 		isDirty = false;
 	}
 
@@ -209,11 +307,10 @@ public class LangServModel {
 	 * Returns the StaticAnalysis object that was used to compile the given URI.NOTE! This will only return a valid
 	 * value after compilation, so always call getParseTree before calling this method.
 	 *
-	 * @param uri
 	 * @return
 	 */
-	public StaticAnalysis getStaticAnalysis(String uri) throws URISyntaxException {
-		return staticAnalyses.get(URIUtils.canonicalize(new URI(uri)).toString());
+	public StaticAnalysis getStaticAnalysis() {
+		return staticAnalysis;
 	}
 
 	/**
@@ -226,14 +323,11 @@ public class LangServModel {
 	 * @param uri
 	 */
 	public void getParseTree(CompletableFuture<ParseTree> future, String uri) {
-		Runnable getter = new Runnable() {
-			@Override
-			public void run() {
-				try {
-					future.complete(parseTrees.get(URIUtils.canonicalize(new URI(uri)).toString()));
-				} catch(URISyntaxException ex) {
-					future.completeExceptionally(ex);
-				}
+		Runnable getter = () -> {
+			try {
+				future.complete(parseTrees.get(URIUtils.canonicalize(new URI(uri)).toString()));
+			} catch(URISyntaxException ex) {
+				future.completeExceptionally(ex);
 			}
 		};
 		if(!isDirty) {
@@ -245,6 +339,7 @@ public class LangServModel {
 
 	private static boolean onceEverStartupCompleted = false;
 
+	@SuppressWarnings("UseSpecificCatch")
 	public void startup() {
 		/*
 			This method should include only things that literally never change, unless the jar is recompiled.
@@ -443,10 +538,11 @@ public class LangServModel {
 	 *
 	 * @param uri The URI of the file to compile.
 	 */
-	private ParseTree doCompilation(final String uri) {
+	@SuppressWarnings("UseSpecificCatch")
+	private ParseTree doCompilation(final String uri, IncludeCache includeCache, StaticAnalysis staticAnalysis,
+			Environment env, Set<ConfigCompileException> exceptions) {
 		try {
 
-			Set<ConfigCompileException> exceptions = new HashSet<>();
 			String code;
 			// Eventually we want to rework this so that this is available
 			Set<Class<? extends Environment.EnvironmentImpl>> envs = new HashSet<>();
@@ -454,27 +550,7 @@ public class LangServModel {
 					: ClassDiscovery.getDefaultInstance().loadClassesThatExtend(Environment.EnvironmentImpl.class)) {
 				envs.add(c);
 			}
-			Environment env;
-			try {
-				// Cmdline mode disables things like security checks and whatnot.
-				// These may be present in the runtime environment,
-				// but it's not possible for us to tell that at this point.
-				env = Static.GenerateStandaloneEnvironment(false, EnumSet.of(RuntimeMode.CMDLINE));
-				// Make this configurable at some point. For now, however, we need this so we can get
-				// correct handling on minecraft functions.
-				env = env.cloneAndAdd(new CommandHelperEnvironment());
-			} catch(IOException | DataSourceException | URISyntaxException | Profiles.InvalidProfileException ex) {
-				throw new RuntimeException(ex);
-			}
-			CompilerEnvironment compilerEnv = env.getEnv(CompilerEnvironment.class);
-			compilerEnv.setLogCompilerWarnings(false); // No one would see them
-			GlobalEnv gEnv = env.getEnv(GlobalEnv.class);
-			gEnv.SetScriptProvider(new ScriptProvider() {
-				@Override
-				public String getScript(File file) throws IOException {
-					return getDocument(file.toURI().toString());
-				}
-			});
+			
 
 			File f;
 			{
@@ -495,32 +571,7 @@ public class LangServModel {
 				return null;
 			}
 
-			// SA is currently not async safe, so we just manually synch outside for now. This is obviously
-			// bad and should be fixed.
-			synchronized(LangServ.class) {
-				Set<File> autoIncludes = new HashSet<>();
-				for(WorkspaceFolder folder : getWorkspaceFolders()) {
-					URI uuri = new URI(folder.getUri());
-					File ai = Paths.get(uuri).toFile();
-					FileUtil.recursiveFind(ai, (r) -> {
-						if(r.isFile() && r.getAbsolutePath().endsWith("auto_include.ms")) {
-							String path = r.getAbsolutePath().replace("\\", "/");
-							if(!path.contains(".disabled/")
-									&& !path.contains(".library/")) {
-								autoIncludes.add(r);
-							}
-						}
-					});
-				}
-				autoIncludes.remove(f); // If we're compiling the auto_include file itself
-				langServ.logv(() -> "Providing StaticAnalysis with auto includes: " + autoIncludes.toString());
-
-				if(StaticAnalysis.enabled()) {
-					StaticAnalysis.setAndAnalyzeAutoIncludes(new ArrayList<>(autoIncludes), env, envs, exceptions);
-				}
-			}
-
-			gEnv.SetRootFolder(f.getParentFile());
+			env.getEnv(GlobalEnv.class).SetRootFolder(f.getParentFile());
 			TokenStream tokens = null;
 			ParseTree tree = null;
 			try {
@@ -545,11 +596,6 @@ public class LangServModel {
 					// Actually, for untitled files, this may not be a correct default. However, there's no
 					// other good way of determining that, so let's just assume it's pure methodscript.
 					tokens = MethodScriptCompiler.lex(code, env, f, true);
-					StaticAnalysis staticAnalysis = new StaticAnalysis(true);
-					// TODO: Disabled until the known problems are fixed, at which point it should be forced on here
-					// first, to assist in detecting unknown bugs.
-//					staticAnalysis.setLocalEnable(true);
-					staticAnalyses.put(URIUtils.canonicalize(new URI(uri)).toString(), staticAnalysis);
 					fTree = MethodScriptCompiler.compile(tokens, env, envs, staticAnalysis);
 				}
 				tree = fTree;
@@ -561,33 +607,8 @@ public class LangServModel {
 				// Just skip this, we can't do much here.
 				langServ.loge(() -> StackTraceUtils.GetStacktrace(e));
 			}
-			List<Diagnostic> diagnosticsList = new ArrayList<>();
-			if(!exceptions.isEmpty()) {
-				langServ.logi(() -> "Errors found, reporting " + exceptions.size() + " errors");
-				for(ConfigCompileException e : exceptions) {
-					Diagnostic d = new Diagnostic();
-					d.setRange(convertTargetToRange(tokens, e.getTarget()));
-					d.setSeverity(DiagnosticSeverity.Error);
-					d.setMessage(e.getMessage());
-					diagnosticsList.add(d);
-				}
-			}
-			List<CompilerWarning> warnings = compilerEnv.getCompilerWarnings();
-			if(!warnings.isEmpty()) {
-				for(CompilerWarning c : warnings) {
-					Diagnostic d = new Diagnostic();
-					d.setRange(convertTargetToRange(tokens, c.getTarget()));
-					d.setSeverity(LangServ.getSeverity(c));
-					d.setMessage(c.getMessage());
-					diagnosticsList.add(d);
-				}
-			}
-
-			// We need to report to the client always, with an empty list, implying that all problems are fixed.
-			PublishDiagnosticsParams diagnostics
-					= new PublishDiagnosticsParams(uri, diagnosticsList);
-			client.publishDiagnostics(diagnostics);
-
+			
+			
 			return tree;
 		} catch(Throwable t) {
 			client.logMessage(new MessageParams(MessageType.Error, t.getMessage() + "\n"
@@ -597,10 +618,16 @@ public class LangServModel {
 	}
 
 	/**
-	 * This function compiles MSA files and returns the Script objects. Note that this is not intended for use to get
-	 * compile errors. If there are compile errors, it will not call the future. This is also the case if the uri does
-	 * not point to a msa file. Any other errors will result in the future being called.
+	 * This function compiles MSA files and returns the Script objects.Note that this is not intended for use to get
+	 * compile errors.If there are compile errors, it will not call the future.This is also the case if the uri does not
+	 * point to a msa file.Any other errors will result in the future being called.
+	 *
+	 * @param future
+	 * @param threadPool
+	 * @param uri
+	 * @param withDelay
 	 */
+	@SuppressWarnings("UnnecessaryReturnStatement")
 	public void doPreprocess(CompletableFuture<List<Script>> future, Executor threadPool, final String uri,
 			boolean withDelay) {
 		threadPool.execute(() -> {
@@ -658,5 +685,45 @@ public class LangServModel {
 				return;
 			}
 		});
+	}
+	
+	public static ParseTree findToken(ParseTree start, Target target) {
+		ParseTree bestCandidate = null;
+		for(ParseTree node : start.getAllNodes()) {
+			if(node.getTarget().equals(target)) {
+				if(node.isSyntheticNode()) {
+					bestCandidate = node;
+				} else {
+					return node;
+				}
+			}
+		}
+		return bestCandidate;
+	}
+	
+	public static ParseTree findToken(ParseTree start, Position position) {
+		// TODO: Should be able to convert this to a O(log n)ish algo if we're smarter about it. Also, should
+		// probably add original token length to the Target, so we can be smarter about that too.
+		ParseTree bestCandidate = null;
+		for(ParseTree node : start.getAllNodes()) {
+			Target t = node.getTarget();
+			// Both line numbers and column numbers are 1 indexed in MethodScript, since they are usually
+			// human readable fields, and text editors always start at line one. However, the protocol is
+			// zero based, so we add 1 to all those numbers.
+			if(t.line() != position.getLine() + 1) {
+				continue;
+			}
+			if(position.getCharacter() + 1 >= t.col()
+					&& position.getCharacter() + 1 <= (t.col() + node.getData().val().length())) {
+				if(node.isSyntheticNode()) {
+					// This might be the best candidate, but maybe there is a better choice after us
+					bestCandidate = node;
+				} else {
+					// This definitely is the best candidate.
+					return node;
+				}
+			}
+		}
+		return bestCandidate;
 	}
 }
