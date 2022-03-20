@@ -14,7 +14,6 @@ import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Security;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.CompilerWarning;
-import com.laytonsmith.core.compiler.TokenStream;
 import com.laytonsmith.core.compiler.analysis.Declaration;
 import com.laytonsmith.core.compiler.analysis.Namespace;
 import com.laytonsmith.core.compiler.analysis.ParamDeclaration;
@@ -24,9 +23,7 @@ import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.DocumentLinkProvider;
@@ -56,7 +53,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
-import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.lsp4j.CompletionItem;
@@ -131,40 +127,36 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 		}
 	};
 
-
 	@tool("lang-serv")
 	public static class LangServMode extends AbstractCommandLineTool {
-
 
 		@Override
 		public ArgumentParser getArgumentParser() {
 			return ArgumentParser.GetParser()
 					.addDescription("Starts up the language server, which implements the Language Server Protocol")
 					.addArgument(new ArgumentParser.ArgumentBuilder()
-						.setDescription("The host location that the client is running on.")
-						.setUsageName("host")
-						.setOptional()
-						.setName("host")
-						.setArgType(ArgumentParser.ArgumentBuilder.BuilderTypeNonFlag.STRING))
+							.setDescription("The host location that the client is running on.")
+							.setUsageName("host")
+							.setOptional()
+							.setName("host")
+							.setArgType(ArgumentParser.ArgumentBuilder.BuilderTypeNonFlag.STRING))
 					.addArgument(new ArgumentParser.ArgumentBuilder()
-						.setDescription("The port the client is running on.")
-						.setUsageName("port")
-						.setOptional()
-						.setName("port")
-						.setArgType(ArgumentParser.ArgumentBuilder.BuilderTypeNonFlag.NUMBER))
-
+							.setDescription("The port the client is running on.")
+							.setUsageName("port")
+							.setOptional()
+							.setName("port")
+							.setArgType(ArgumentParser.ArgumentBuilder.BuilderTypeNonFlag.NUMBER))
 					.addArgument(new ArgumentParser.ArgumentBuilder()
-						.setDescription("If set, stdio is used instead of socket connections.")
-						.asFlag()
-						.setName("stdio"))
-
+							.setDescription("If set, stdio is used instead of socket connections.")
+							.asFlag()
+							.setName("stdio"))
 					.setErrorOnUnknownArgs(false)
 					.addArgument(new ArgumentParser.ArgumentBuilder()
-						.setDescription("For future compatibility reasons, unrecognized arguments are not an error,"
-								+ " but they are not supported unless otherwise noted.")
-						.setUsageName("unrecognizedArgs")
-						.setOptionalAndDefault()
-						.setArgType(ArgumentParser.ArgumentBuilder.BuilderTypeNonFlag.ARRAY_OF_STRINGS));
+							.setDescription("For future compatibility reasons, unrecognized arguments are not an error,"
+									+ " but they are not supported unless otherwise noted.")
+							.setUsageName("unrecognizedArgs")
+							.setOptionalAndDefault()
+							.setArgType(ArgumentParser.ArgumentBuilder.BuilderTypeNonFlag.ARRAY_OF_STRINGS));
 		}
 
 		@Override
@@ -208,7 +200,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 					System.err.println("Started Language Server, awaiting connections");
 				}
 				launcher.startListening();
-			} catch (Throwable t) {
+			} catch(Throwable t) {
 				t.printStackTrace(System.err);
 				System.exit(1);
 			}
@@ -230,11 +222,16 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 		if(client != null && MSLog.GetLogger().WillLog(LANGSERVLOGTAG, level)) {
 			MessageType type;
 			type = switch(level) {
-				case DEBUG -> MessageType.Log;
-				case INFO -> MessageType.Info;
-				case WARNING -> MessageType.Warning;
-				case ERROR -> MessageType.Error;
-				default -> MessageType.Log;
+				case DEBUG ->
+					MessageType.Log;
+				case INFO ->
+					MessageType.Info;
+				case WARNING ->
+					MessageType.Warning;
+				case ERROR ->
+					MessageType.Error;
+				default ->
+					MessageType.Log;
 			};
 
 			String full = s.getString();
@@ -300,12 +297,13 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 	private LangServModel model;
 
 	/**
-	 * This executor uses an unbounded thread pool, and should only be used for task in which a user is actively
-	 * waiting for results, however, tasks submitted to this processor will begin immediately, as opposed to the
+	 * This executor uses an unbounded thread pool, and should only be used for task in which a user is actively waiting
+	 * for results, however, tasks submitted to this processor will begin immediately, as opposed to the
 	 * lowPriorityProcessors queue, which has a fixed size thread pool.
 	 */
 	private final Executor highPriorityProcessors = Executors.newCachedThreadPool(new ThreadFactory() {
 		private int count = 0;
+
 		@Override
 		public Thread newThread(Runnable r) {
 			return new Thread(r, "HighPriority-thread-pool-" + (++count));
@@ -317,12 +315,12 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 	 */
 	private final Executor lowPriorityProcessors = Executors.newFixedThreadPool(5, new ThreadFactory() {
 		private int count = 0;
+
 		@Override
 		public Thread newThread(Runnable r) {
 			return new Thread(r, "LowPriority-thread-pool-" + (++count));
 		}
 	});
-
 
 	@Override
 	@SuppressWarnings("UseSpecificCatch")
@@ -342,14 +340,17 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 	@java.lang.annotation.Target(ElementType.TYPE)
 	@Retention(RetentionPolicy.RUNTIME)
 	public static @interface Command {
+
 		/**
 		 * The name of the command.
+		 *
 		 * @return
 		 */
 		String value();
 	}
 
 	public static interface CommandProvider {
+
 		CompletableFuture<Object> execute(LanguageClient client, ExecuteCommandParams params);
 	}
 
@@ -372,7 +373,6 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 //		}
 //
 //	}
-
 	private final Map<String, CommandProvider> commandProviders = new HashMap<>();
 
 	@Override
@@ -408,7 +408,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 				CommandProvider cp;
 				try {
 					cp = c.newInstance();
-				} catch (InstantiationException | IllegalAccessException ex) {
+				} catch(InstantiationException | IllegalAccessException ex) {
 					// We can't recover from this, so just skip it
 					Logger.getLogger(LangServ.class.getName()).log(Level.SEVERE, null, ex);
 					continue;
@@ -483,18 +483,13 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 		throw new Error("Unaccounted for case: " + warning.getSuppressCategory());
 	}
 
-
-
 	@Override
 	public void didChangeWorkspaceFolders(DidChangeWorkspaceFoldersParams params) {
 		model.removeWorkspace(params.getEvent().getRemoved());
 		model.addWorkspace(params.getEvent().getAdded());
 	}
 
-
-
 	//<editor-fold defaultstate="collapsed" desc="DocumentManagement">
-
 	@Override
 	public void didOpen(DidOpenTextDocumentParams params) {
 		model.didOpen(params);
@@ -516,14 +511,13 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 	}
 
 	//</editor-fold>
-
 	public static Range convertTargetToRange(Target t) {
 		int tokenLength = t.length();
 		if(tokenLength < 1) {
 			// Something went wrong, but we always want an error to show up, so set this here
 			tokenLength = 1;
 		}
-		
+
 		Position start = new Position(t.line() - 1, t.col() - 1);
 		Position end = new Position(t.line() - 1, t.col() + tokenLength - 1);
 		if(start.getLine() < 0) {
@@ -559,7 +553,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 		Location location = new Location(t.file().toURI().toString(), range);
 		return location;
 	}
-	
+
 	public static Location convertTargetToLocation(ParseTree node) {
 		return convertTargetToLocation(node.getTarget());
 	}
@@ -612,7 +606,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 			Environment env;
 			try {
 				env = Static.GenerateStandaloneEnvironment(false);
-			} catch (IOException | DataSourceException | URISyntaxException | Profiles.InvalidProfileException ex) {
+			} catch(IOException | DataSourceException | URISyntaxException | Profiles.InvalidProfileException ex) {
 				loge(ex);
 				result.cancel(true);
 				return;
@@ -638,7 +632,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 								}
 							}
 						}
-					} catch (ConfigCompileException ex) {
+					} catch(ConfigCompileException ex) {
 						// Ignore this. This can be caused by procs, or other errors, but the point is, it's not a
 						// DocumentLinkProvider.
 					}
@@ -776,7 +770,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 							if(!sc.getAnnotations("returns").isEmpty()) {
 								content += "### Returns\n" + sc.getAnnotations("returns").get(0) + "\n\n";
 							}
-							
+
 							if(!sc.getAnnotations("seeAlso").isEmpty()) {
 								content += "### See Also\n";
 								for(String seeAlso : sc.getAnnotations("seeAlso")) {
@@ -790,7 +784,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 								content += "\n";
 							}
 						}
-						
+
 						MarkupContent mContent = new MarkupContent("markdown", content);
 						hover = new Hover();
 						hover.setContents(mContent);
@@ -817,7 +811,6 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 		List<Either<SymbolInformation, DocumentSymbol>> links = new ArrayList<>();
 
 		// TODO: Sort by kind/link name
-
 		// Different handling for msa and ms. msa returns aliases, ms returns procs and things.
 		if(uri.endsWith(".msa")) {
 			CompletableFuture<List<Script>> future = new CompletableFuture<>();
@@ -853,7 +846,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 									links.add(Either.forLeft(docSymbol));
 								}
 							}
-						} catch (ConfigCompileException ex) {
+						} catch(ConfigCompileException ex) {
 							// Ignore this. This can be caused errors, but the point is, it's not a
 							// valid symbol right now.
 						}
@@ -868,19 +861,19 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 	@SuppressWarnings("Convert2Lambda")
 	public static SmartComment doReplacements(SmartComment sc) {
 		return new SmartComment(sc, MapBuilder.empty(String.class, SmartComment.Replacement.class)
-			.set("code", new SmartComment.Replacement() {
-				@Override
-				public String replace(String data) {
-					return "`" + data + "`";
-				}
-			})
-			.set("url", new SmartComment.Replacement() {
-				@Override
-				public String replace(String data) {
-					return convertURLToLink(data);
-				}
-			})
-			.build());
+				.set("code", new SmartComment.Replacement() {
+					@Override
+					public String replace(String data) {
+						return "`" + data + "`";
+					}
+				})
+				.set("url", new SmartComment.Replacement() {
+					@Override
+					public String replace(String data) {
+						return convertURLToLink(data);
+					}
+				})
+				.build());
 	}
 
 	private static String convertURLToLink(String annotationText) {
@@ -891,10 +884,11 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 			case 0 -> {
 				return "";
 			}
-			case 1 -> url = display = split[0];
+			case 1 ->
+				url = display = split[0];
 			default -> {
-					url = split[0];
-					display = split[1];
+				url = split[0];
+				display = split[1];
 			}
 		}
 		return "[" + display + "](" + url + ")";

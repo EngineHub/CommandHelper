@@ -25,7 +25,6 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.RuntimeMode;
-import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.events.Event;
 import com.laytonsmith.core.events.EventList;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -206,7 +205,7 @@ public class LangServModel {
 		} catch(IOException | URISyntaxException ex) {
 			client.logMessage(new MessageParams(MessageType.Warning, ex.getMessage()));
 		}
-		
+
 		IncludeCache includeCache = new IncludeCache();
 		staticAnalysis = new StaticAnalysis(true);
 		Environment env;
@@ -214,7 +213,7 @@ public class LangServModel {
 			// Cmdline mode disables things like security checks and whatnot.
 			// These may be present in the runtime environment,
 			// but it's not possible for us to tell that at this point.
-			env = Static.GenerateStandaloneEnvironment(false, EnumSet.of(RuntimeMode.CMDLINE), includeCache, 
+			env = Static.GenerateStandaloneEnvironment(false, EnumSet.of(RuntimeMode.CMDLINE), includeCache,
 					staticAnalysis);
 			// Make this configurable at some point. For now, however, we need this so we can get
 			// correct handling on minecraft functions.
@@ -227,30 +226,30 @@ public class LangServModel {
 		GlobalEnv gEnv = env.getEnv(GlobalEnv.class);
 		gEnv.SetScriptProvider((File file) -> getDocument(file.toURI().toString()));
 		Set<ConfigCompileException> exceptions = new HashSet<>();
-		
+
 		for(WorkspaceFolder f : workspaceFolders) {
 			if(interruptBuilding) {
 				return;
 			}
 			File workspace = new File(f.getUri().replaceFirst("file://", ""));
-			
+
 			langServ.logv(() -> "Providing StaticAnalysis with auto includes: " + autoIncludes.toString());
 			StaticAnalysis.setAndAnalyzeAutoIncludes(new ArrayList<>(autoIncludes), env, env.getEnvClasses(), exceptions);
-			
-			final Environment _env = env;
-			
+
+			final Environment finalEnv = env;
+
 			try {
 				FileUtil.recursiveFind(workspace, (File f1) -> {
 					if(f1.isFile() && (f1.getName().endsWith(".ms") || f1.getName().endsWith(".msa"))) {
 						parseTrees.put(URIUtils.canonicalize(f1.toURI()).toString(),
-								doCompilation(f1.toURI().toString(), includeCache, staticAnalysis, _env, exceptions));
+								doCompilation(f1.toURI().toString(), includeCache, staticAnalysis, finalEnv, exceptions));
 					}
 				});
 			} catch(IOException ex) {
 				client.logMessage(new MessageParams(MessageType.Warning, ex.getMessage()));
 			}
 		}
-		
+
 		Map<String, List<Diagnostic>> diagnosticsLists = new HashMap<>();
 		if(!exceptions.isEmpty()) {
 			langServ.logi(() -> "Errors found, reporting " + exceptions.size() + " errors");
@@ -271,7 +270,7 @@ public class LangServModel {
 				diagnosticsList.add(d);
 			}
 		}
-		
+
 		List<CompilerWarning> warnings = compilerEnv.getCompilerWarnings();
 		if(!warnings.isEmpty()) {
 			for(CompilerWarning c : warnings) {
@@ -299,7 +298,7 @@ public class LangServModel {
 					= new PublishDiagnosticsParams(uri, diagnosticsList != null ? diagnosticsList : new ArrayList<>());
 			client.publishDiagnostics(diagnostics);
 		}
-		
+
 		isDirty = false;
 	}
 
@@ -550,7 +549,6 @@ public class LangServModel {
 					: ClassDiscovery.getDefaultInstance().loadClassesThatExtend(Environment.EnvironmentImpl.class)) {
 				envs.add(c);
 			}
-			
 
 			File f;
 			{
@@ -607,8 +605,7 @@ public class LangServModel {
 				// Just skip this, we can't do much here.
 				langServ.loge(() -> StackTraceUtils.GetStacktrace(e));
 			}
-			
-			
+
 			return tree;
 		} catch(Throwable t) {
 			client.logMessage(new MessageParams(MessageType.Error, t.getMessage() + "\n"
@@ -686,7 +683,7 @@ public class LangServModel {
 			}
 		});
 	}
-	
+
 	public static ParseTree findToken(ParseTree start, Target target) {
 		ParseTree bestCandidate = null;
 		for(ParseTree node : start.getAllNodes()) {
@@ -700,7 +697,7 @@ public class LangServModel {
 		}
 		return bestCandidate;
 	}
-	
+
 	public static ParseTree findToken(ParseTree start, Position position) {
 		// TODO: Should be able to convert this to a O(log n)ish algo if we're smarter about it. Also, should
 		// probably add original token length to the Target, so we can be smarter about that too.

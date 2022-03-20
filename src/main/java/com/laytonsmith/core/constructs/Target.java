@@ -23,7 +23,7 @@ public class Target implements Comparable<Target> {
 	private int length = 1;
 	private boolean lengthSet = false;
 	private String originalSet = null;
-	
+
 	private static final boolean IS_DEBUG = java.lang.management.ManagementFactory.getRuntimeMXBean()
 			.getInputArguments().toString().contains("jdwp");
 
@@ -76,20 +76,22 @@ public class Target implements Comparable<Target> {
 	public int col() {
 		return col;
 	}
-	
+
 	/**
 	 * The length of the token.
-	 * @return 
+	 *
+	 * @return
 	 */
 	public int length() {
 		return length;
 	}
-	
+
 	/**
-	 * Sets the length of the token. (Defaults to 1.) Returns {@code this} for easy chaining. Note that setLength
-	 * must ONLY be called once per object, or a RuntimeException is thrown, as this points to a definite bug.
+	 * Sets the length of the token. (Defaults to 1.) Returns {@code this} for easy chaining. Note that setLength must
+	 * ONLY be called once per object, or a RuntimeException is thrown, as this points to a definite bug.
+	 *
 	 * @param length
-	 * @return 
+	 * @return
 	 */
 	public Target setLength(int length) {
 		if(IS_DEBUG && lengthSet) {
@@ -102,7 +104,7 @@ public class Target implements Comparable<Target> {
 		this.lengthSet = true;
 		return this;
 	}
-	
+
 	public Target copy() {
 		Target t = new Target(line(), file(), col());
 		// Set the length, but allow it to be set again by leaving lengthSet false.
