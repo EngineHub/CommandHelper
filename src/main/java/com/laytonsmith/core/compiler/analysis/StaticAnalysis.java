@@ -37,6 +37,7 @@ import java.io.IOException;
 
 /**
  * This class can be used to perform static analysis.
+ *
  * @author P.J.S. Kools
  */
 public class StaticAnalysis {
@@ -49,7 +50,7 @@ public class StaticAnalysis {
 			if(CONFIGURATION.globalEnable()) {
 				Telemetry.GetDefault().metric(DefaultTelemetry.StaticAnalysisOnMetric.class);
 			}
-		} catch (IOException ex) {
+		} catch(IOException ex) {
 			throw new RuntimeException(ex);
 		}
 	}
@@ -69,15 +70,16 @@ public class StaticAnalysis {
 	private Set<StaticAnalysis> staticAnalyses = new HashSet<>();
 
 	/**
-	 * Contains the {@link Scope} object belonging to each AST node.
-	 * Should only contain AST nodes within the file for which analysis was created (excluding includes).
+	 * Contains the {@link Scope} object belonging to each AST node. Should only contain AST nodes within the file for
+	 * which analysis was created (excluding includes).
 	 */
 	private Map<ParseTree, Scope> astScopeMap = new HashMap<>();
 
 	/**
 	 * Creates a new {@link StaticAnalysis}.
-	 * @param isMainAnalysis - If {@code true}, full analyses will be performed with auto includes if present.
-	 * If {@code false}, only the scope graph will be generated and a full analysis is expected to be done externally.
+	 *
+	 * @param isMainAnalysis - If {@code true}, full analyses will be performed with auto includes if present. If
+	 * {@code false}, only the scope graph will be generated and a full analysis is expected to be done externally.
 	 */
 	public StaticAnalysis(boolean isMainAnalysis) {
 		this(null, isMainAnalysis);
@@ -86,9 +88,10 @@ public class StaticAnalysis {
 	/**
 	 * Creates a new {@link StaticAnalysis} with a custom {@link Scope} in which this file's start scope can perform
 	 * lookups.
+	 *
 	 * @param parentScope - The {@link Scope} in which this file's start scope can perform lookups.
-	 * @param isMainAnalysis - If {@code true}, full analyses will be performed with auto includes if present.
-	 * If {@code false}, only the scope graph will be generated and a full analysis is expected to be done externally.
+	 * @param isMainAnalysis - If {@code true}, full analyses will be performed with auto includes if present. If
+	 * {@code false}, only the scope graph will be generated and a full analysis is expected to be done externally.
 	 */
 	public StaticAnalysis(Scope parentScope, boolean isMainAnalysis) {
 		this.startScope = (parentScope != null ? parentScope : new Scope());
@@ -116,6 +119,7 @@ public class StaticAnalysis {
 	 * Starts analysis on the given AST. If this is a main analysis, full analysis is performed with auto includes if
 	 * available. Otherwise, only the scope graph will be generated and a full analysis is expected to be done
 	 * externally.
+	 *
 	 * @param ast - The {@link ParseTree} to analze.
 	 * @param env - The {@link Environment}.
 	 * @param envs - The set of expected {@link Environment.EnvironmentImpl} classes to be available at runtime.
@@ -156,10 +160,11 @@ public class StaticAnalysis {
 	}
 
 	/**
-	 * Sets and analyzes the given list of auto includes which will be used when performing main analyses.
-	 * This works by creating a scope graph that represents a file with an {@code include()} call for each auto include
-	 * in the provided order. Both this 'fake' file and future analyses will be able to lookup procedures in these
-	 * auto includes. Main analyses can also use variables that are available at the end of these auto includes.
+	 * Sets and analyzes the given list of auto includes which will be used when performing main analyses. This works by
+	 * creating a scope graph that represents a file with an {@code include()} call for each auto include in the
+	 * provided order. Both this 'fake' file and future analyses will be able to lookup procedures in these auto
+	 * includes. Main analyses can also use variables that are available at the end of these auto includes.
+	 *
 	 * @param autoIncludes - The list of auto include files.
 	 * @param env - The {@link Environment}.
 	 * @param envs - The set of expected {@link Environment.EnvironmentImpl} classes to be available at runtime.
@@ -340,8 +345,9 @@ public class StaticAnalysis {
 
 	/**
 	 * Traverses the parse tree, type checking functions through their
-	 * {@link Function#typecheck(StaticAnalysis, ParseTree, Environment, Set)} methods.
-	 * When {@link IVariable}s are traversed, a compile error is added when they do not resolve to a declaration.
+	 * {@link Function#typecheck(StaticAnalysis, ParseTree, Environment, Set)} methods. When {@link IVariable}s are
+	 * traversed, a compile error is added when they do not resolve to a declaration.
+	 *
 	 * @param ast - The parse tree.
 	 * @param env - The {@link Environment}, used for instanceof checks on types.
 	 * @param exceptions - Any compile exceptions will be added to this set.
@@ -405,8 +411,8 @@ public class StaticAnalysis {
 		} else if(node instanceof CKeyword) {
 
 			// Use the more specific compile error caused during keyword processing if available.
-			ConfigCompileException ex =
-					env.getEnv(CompilerEnvironment.class).potentialKeywordCompileErrors.get(node.getTarget());
+			ConfigCompileException ex
+					= env.getEnv(CompilerEnvironment.class).potentialKeywordCompileErrors.get(node.getTarget());
 			exceptions.add(ex != null ? ex
 					: new ConfigCompileException("Unexpected keyword: " + node.val(), node.getTarget()));
 			return CClassType.AUTO;
@@ -419,7 +425,7 @@ public class StaticAnalysis {
 		// The node is some other Construct, so return its type.
 		try {
 			return node.typeof();
-		} catch (Throwable t) {
+		} catch(Throwable t) {
 			// Functions that might contain these unsupported objects should make sure that they don't type check them.
 			// In case an unsupported object causes an error here, it likely means that we have a syntax error.
 			exceptions.add(new ConfigCompileException("Unsupported AST node implementation in type checking: "
@@ -429,8 +435,9 @@ public class StaticAnalysis {
 	}
 
 	/**
-	 * Checks whether the given type is instance of the expected type, adding a compile error to the passed
-	 * exceptions set if it isn't. This never generates an error when the given type is {@link CClassType#AUTO}.
+	 * Checks whether the given type is instance of the expected type, adding a compile error to the passed exceptions
+	 * set if it isn't. This never generates an error when the given type is {@link CClassType#AUTO}.
+	 *
 	 * @param type - The type to check.
 	 * @param expected - The expected {@link CClassType}.
 	 * @param t
@@ -449,6 +456,7 @@ public class StaticAnalysis {
 	/**
 	 * Checks whether the given type is instance of any of the expected types, adding a compile error to the passed
 	 * exceptions set if it isn't. This never generates an error when the given type is {@link CClassType#AUTO}.
+	 *
 	 * @param type - The type to check.
 	 * @param expected - The expected {@link CClassType}s, which should always be of at least size 1.
 	 * @param t
@@ -480,8 +488,9 @@ public class StaticAnalysis {
 	}
 
 	/**
-	 * Checks whether the given AST node is an {@link IVariable}, adding a compile error to the passed
-	 * exceptions set if it isn't.
+	 * Checks whether the given AST node is an {@link IVariable}, adding a compile error to the passed exceptions set if
+	 * it isn't.
+	 *
 	 * @param node - The AST node to check.
 	 * @param t
 	 * @param exceptions
@@ -500,7 +509,7 @@ public class StaticAnalysis {
 		try {
 			exceptions.add(new ConfigCompileException(
 					"Expected ivariable, but received type " + node.getName() + " instead.", t));
-		} catch (NullPointerException e) {
+		} catch(NullPointerException e) {
 			exceptions.add(new ConfigCompileException(
 					"Expected ivariable, but received " + node.getClass().getSimpleName() + " instead.", t));
 		}
@@ -508,8 +517,9 @@ public class StaticAnalysis {
 	}
 
 	/**
-	 * Checks whether the given AST node is an {@link CClassType}, adding a compile error to the passed
-	 * exceptions set if it isn't.
+	 * Checks whether the given AST node is an {@link CClassType}, adding a compile error to the passed exceptions set
+	 * if it isn't.
+	 *
 	 * @param node - The AST node to check.
 	 * @param t
 	 * @param exceptions
@@ -526,7 +536,7 @@ public class StaticAnalysis {
 		try {
 			exceptions.add(new ConfigCompileException(
 					"Expected classtype, but received type " + node.getName() + " instead.", t));
-		} catch (NullPointerException e) {
+		} catch(NullPointerException e) {
 			exceptions.add(new ConfigCompileException(
 					"Expected classtype, but received " + node.getClass().getSimpleName() + " instead.", t));
 		}
@@ -541,6 +551,7 @@ public class StaticAnalysis {
 	/**
 	 * Compiles and caches all used includes. Directly links the scope graphs of cyclic includes, and links clones of
 	 * the scope graph of non-cyclic includes.
+	 *
 	 * @param handledRefs - Supply an empty set. Will contain all handled references.
 	 * @param linkedRefs - Supply an empty set. Will contain all linked references.
 	 * @param path - Supply an empty stack. Will be empty when this method returns.
@@ -615,7 +626,7 @@ public class StaticAnalysis {
 					IncludeCache.get(file, env, envs, includeAnalysis, includeRef.getTarget());
 					assert includeCache.getStaticAnalysis(file) != null : "Failed to cache include analysis.";
 				}
-			} catch (CREException e) {
+			} catch(CREException e) {
 
 				// Convert CREs into compile errors if there was a problem resolving or compiling a static include.
 				// TODO - Split compilation such that we can use syntax-correct faulty includes anyways.
@@ -663,9 +674,9 @@ public class StaticAnalysis {
 	}
 
 	/**
-	 * Gets all include references in this analysis.
-	 * This traverses the scope graph starting from all root scopes, including the gaps left by include references.
-	 * This should not be called on a cyclic scope graph.
+	 * Gets all include references in this analysis. This traverses the scope graph starting from all root scopes,
+	 * including the gaps left by include references. This should not be called on a cyclic scope graph.
+	 *
 	 * @return All include references in this analysis.
 	 */
 	private Set<IncludeReference> getIncludeRefs() {
@@ -681,8 +692,9 @@ public class StaticAnalysis {
 
 	/**
 	 * Set whether this is a main analysis or not.
-	 * @param isMainAnalysis - If {@code true}, full analyses will be performed with auto includes if present.
-	 * If {@code false}, only the scope graph will be generated and a full analysis is expected to be done externally.
+	 *
+	 * @param isMainAnalysis - If {@code true}, full analyses will be performed with auto includes if present. If
+	 * {@code false}, only the scope graph will be generated and a full analysis is expected to be done externally.
 	 */
 	public void setMainAnalysis(boolean isMainAnalysis) {
 		this.isMainAnalysis = isMainAnalysis;
@@ -690,6 +702,7 @@ public class StaticAnalysis {
 
 	/**
 	 * Gets the scope at the start of the analyzed file.
+	 *
 	 * @return The start scope.
 	 */
 	public Scope getStartScope() {
@@ -698,6 +711,7 @@ public class StaticAnalysis {
 
 	/**
 	 * Gets the scope at the end of the analyzed file.
+	 *
 	 * @return The end scope, or {@code null} if no analysis has been done.
 	 */
 	public Scope getEndScope() {
@@ -705,19 +719,19 @@ public class StaticAnalysis {
 	}
 
 	/**
-	 * If the given AST node is a {@link CFunction} containing a function:
-	 * Calls {@link Function#linkScope(Scope, ParseTree, Set)} on the given AST node.
-	 * If the given AST node is a {@link CFunction} containing a variable ("@c()" closure execution syntax):
-	 * Generates a compile error if the variable cannot be resolved.
-	 * If the given AST node is an {@link IVariable} variable reference, the variable's declared type is set to the
-	 * type of the variable declaration it resolves to.
-	 * If it does not resolve to a declaration, a compile error is generated.
+	 * If the given AST node is a {@link CFunction} containing a function: Calls
+	 * {@link Function#linkScope(Scope, ParseTree, Set)} on the given AST node. If the given AST node is a
+	 * {@link CFunction} containing a variable ("@c()" closure execution syntax): Generates a compile error if the
+	 * variable cannot be resolved. If the given AST node is an {@link IVariable} variable reference, the variable's
+	 * declared type is set to the type of the variable declaration it resolves to. If it does not resolve to a
+	 * declaration, a compile error is generated.
+	 *
 	 * @param parentScope
 	 * @param ast
 	 * @param env
 	 * @param exceptions - Any compile exceptions will be added to this set.
-	 * @return The returned scope from {@link Function#linkScope(Scope, ParseTree, Set)} in the first case,
-	 * or the parent scope otherwise.
+	 * @return The returned scope from {@link Function#linkScope(Scope, ParseTree, Set)} in the first case, or the
+	 * parent scope otherwise.
 	 */
 	public Scope linkScope(Scope parentScope, ParseTree ast,
 			Environment env, Set<ConfigCompileException> exceptions) {
@@ -766,9 +780,9 @@ public class StaticAnalysis {
 
 	/**
 	 * Handles parameter AST nodes, namely {@link IVariable}s or the {@code assign()} function (for typed parameters or
-	 * parameters with a default value). The parameter is declared in a new scope that is chained to paramScope.
-	 * If the parameter is typed and/or has a default value assigned to it,
-	 * then that value will be handled in the valScope.
+	 * parameters with a default value).The parameter is declared in a new scope that is chained to paramScope. If the
+	 * parameter is typed and/or has a default value assigned to it, then that value will be handled in the valScope.
+	 *
 	 * @param paramScope - The scope to which a new scope is linked in which the declaration will be placed.
 	 * @param valScope - The scope to which a new scope is linked in which the assigned value will be handled.
 	 * @param ast
@@ -779,29 +793,53 @@ public class StaticAnalysis {
 	@SuppressWarnings("null")
 	public Scope[] linkParamScope(Scope paramScope, Scope valScope,
 			ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+		return linkParamScope(paramScope, valScope, ast, env, exceptions, null);
+	}
+	/**
+	 * Handles parameter AST nodes, namely {@link IVariable}s or the {@code assign()} function (for typed parameters or
+	 * parameters with a default value).The parameter is declared in a new scope that is chained to paramScope. If the
+	 * parameter is typed and/or has a default value assigned to it, then that value will be handled in the valScope.
+	 *
+	 * @param paramScope - The scope to which a new scope is linked in which the declaration will be placed.
+	 * @param valScope - The scope to which a new scope is linked in which the assigned value will be handled.
+	 * @param ast
+	 * @param env
+	 * @param exceptions
+	 * @param params
+	 * @return The resulting scopes in format {paramScope, valScope}.
+	 */
+	@SuppressWarnings("null")
+	public Scope[] linkParamScope(Scope paramScope, Scope valScope,
+			ParseTree ast, Environment env, Set<ConfigCompileException> exceptions, List<ParamDeclaration> params) {
 		Mixed node = ast.getData();
+		if(params == null) {
+			params = new ArrayList<>();
+		}
 
 		// Handle normal untyped parameter.
 		if(node instanceof IVariable iVar) { // Normal parameter.
 			Scope newParamScope = this.createNewScope(paramScope);
-			newParamScope.addDeclaration(new ParamDeclaration(
-					iVar.getVariableName(), iVar.getDefinedType(), ast.getNodeModifiers(), iVar.getTarget()));
+			ParamDeclaration param = new ParamDeclaration(
+					iVar.getVariableName(), iVar.getDefinedType(), null,
+					ast.getNodeModifiers(), iVar.getTarget());
+			params.add(param);
+			newParamScope.addDeclaration(param);
 			this.setTermScope(ast, newParamScope);
-			return new Scope[] {newParamScope, valScope};
+			return new Scope[]{newParamScope, valScope};
 		}
 
 		// Handle assign parameter (typed and/or with default value).
 		if(node instanceof CFunction cFunction) { // Typed parameter or assign.
 			Function func = cFunction.getCachedFunction();
 			if(func != null && func instanceof DataHandling.assign) {
-				return ((DataHandling.assign) func).linkParamScope(this, paramScope, valScope, ast, env, exceptions);
+				return ((DataHandling.assign) func).linkParamScope(this, paramScope, valScope, ast, env, exceptions, params);
 			}
 		}
 
 		// Handle non-parameter parameter. Fall back to handling the function's arguments.
 		// TODO - Does this fallback make sense or should this term just be skipped?
 		exceptions.add(new ConfigCompileException("Invalid parameter", node.getTarget()));
-		return new Scope[] {paramScope, this.linkScope(valScope, ast, env, exceptions)};
+		return new Scope[]{paramScope, this.linkScope(valScope, ast, env, exceptions)};
 	}
 
 	public Scope createNewScope(Scope parent) {
@@ -839,8 +877,9 @@ public class StaticAnalysis {
 	}
 
 	/**
-	 * Returns the Scope that this term is defined in. This may return null for untracked nodes, so unless the type
-	 * is known to for sure be in the scope map, the return value should first be checked for null.
+	 * Returns the Scope that this term is defined in. This may return null for untracked nodes, so unless the type is
+	 * known to for sure be in the scope map, the return value should first be checked for null.
+	 *
 	 * @param term
 	 * @return
 	 */
@@ -849,10 +888,10 @@ public class StaticAnalysis {
 	}
 
 	/**
-	 * Clones this {@link StaticAnalysis} including its scopes, but with shared declaration and reference links in
-	 * these scopes. This method should only be called after all references and declarations have been added to the
-	 * scope graph, and will no longer change. This also means that for example {@link IncludeReference}s still point
-	 * to their original start and end scope, and not to the cloned ones.
+	 * Clones this {@link StaticAnalysis} including its scopes, but with shared declaration and reference links in these
+	 * scopes. This method should only be called after all references and declarations have been added to the scope
+	 * graph, and will no longer change. This also means that for example {@link IncludeReference}s still point to their
+	 * original start and end scope, and not to the cloned ones.
 	 */
 	@Override
 	@SuppressWarnings({"CloneDoesntCallSuperClone", "CloneDeclaresCloneNotSupported"})
@@ -923,15 +962,17 @@ public class StaticAnalysis {
 	}
 
 	private boolean localEnable = false;
+
 	public void setLocalEnable(boolean enabled) {
 		this.localEnable = enabled;
 	}
 
 	/**
-	 * Returns true if this specific instance of the SA object is enabled (or it's globally enabled).
-	 * This is useful in unit tests to override the global value.
-	 * @deprecated This is a temporary method, it should be replaced with proper settings once static analysis is
-	 * ready for release.
+	 * Returns true if this specific instance of the SA object is enabled (or it's globally enabled). This is useful in
+	 * unit tests to override the global value.
+	 *
+	 * @deprecated This is a temporary method, it should be replaced with proper settings once static analysis is ready
+	 * for release.
 	 * @return
 	 */
 	@Deprecated
@@ -941,9 +982,10 @@ public class StaticAnalysis {
 
 	/**
 	 * Returns whether static analysis is enabled or not.
+	 *
 	 * @return
-	 * @deprecated This is a temporary method, it should be replaced with proper settings once static analysis is
-	 * ready for release.
+	 * @deprecated This is a temporary method, it should be replaced with proper settings once static analysis is ready
+	 * for release.
 	 */
 	@Deprecated
 	public static boolean enabled() {

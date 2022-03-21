@@ -22,6 +22,9 @@ public class ProcKeyword extends Keyword {
 	public int process(List<ParseTree> list, int keywordPosition) throws ConfigCompileException {
 		if(list.get(keywordPosition).getData() instanceof CKeyword) {
 			// It's a lone keyword, so we expect some function to follow, which is the proc name + variables
+			if(list.size() <= keywordPosition + 1) {
+				throw new ConfigCompileException("Unexpected keyword", list.get(keywordPosition).getTarget());
+			}
 			if(list.get(keywordPosition + 1).getData() instanceof CFunction) {
 				ParseTree procNode = new ParseTree(new CFunction(
 						proc.NAME, list.get(keywordPosition).getTarget()), list.get(keywordPosition).getFileOptions());

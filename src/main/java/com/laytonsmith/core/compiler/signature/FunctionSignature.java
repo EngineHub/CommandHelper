@@ -19,17 +19,20 @@ public class FunctionSignature {
 	private final ReturnType returnType;
 	private final List<Param> params;
 	private final List<Throws> throwsList;
+	private boolean noneIsAllowed;
 
 	/**
 	 * Creates a new {@link FunctionSignature} with the given properties.
 	 * @param returnType - The function return type.
 	 * @param params - The function parameters.
 	 * @param throwsList - The list of possibly thrown exceptions by the function.
+	 * @param noneIsAllowed If the none type is allowed. If so, none is treated as auto.
 	 */
-	public FunctionSignature(ReturnType returnType, List<Param> params, List<Throws> throwsList) {
+	public FunctionSignature(ReturnType returnType, List<Param> params, List<Throws> throwsList, boolean noneIsAllowed) {
 		this.returnType = returnType;
 		this.params = params;
 		this.throwsList = throwsList;
+		this.noneIsAllowed = noneIsAllowed;
 	}
 
 	/**
@@ -38,7 +41,7 @@ public class FunctionSignature {
 	 * @param returnType - The function return type.
 	 */
 	public FunctionSignature(ReturnType returnType) {
-		this(returnType, new ArrayList<>(), new ArrayList<>());
+		this(returnType, new ArrayList<>(), new ArrayList<>(), false);
 	}
 
 	protected void addParam(Param param) {
@@ -47,6 +50,10 @@ public class FunctionSignature {
 
 	protected void addThrows(Throws throwsObj) {
 		this.throwsList.add(throwsObj);
+	}
+
+	protected void setNoneIsAllowed(boolean noneIsAllowed) {
+		this.noneIsAllowed = noneIsAllowed;
 	}
 
 	/**
@@ -114,7 +121,9 @@ public class FunctionSignature {
 				// Match as many arguments as possible with this varparam.
 				int numMatches = 0;
 				while(argIndex < argTypes.size()
-						&& InstanceofUtil.isInstanceof(argTypes.get(argIndex), param.getType(), env)) {
+						&& (
+						(argTypes.get(argIndex) == null && noneIsAllowed)
+						|| InstanceofUtil.isInstanceof(argTypes.get(argIndex), param.getType(), env))) {
 					argIndex++;
 					numMatches++;
 				}

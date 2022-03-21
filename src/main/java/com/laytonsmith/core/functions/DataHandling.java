@@ -479,8 +479,7 @@ public class DataHandling {
 		}
 
 		/**
-		 * Handles an {@code assign()} that is used as parameter in for example a procedure or closure.
-		 * This will declare the parameter in the paramScope scope, using the {@link Namespace#IVARIABLE} namespace.
+		 * Handles an {@code assign()} that is used as parameter in for example a procedure or closure.This will declare the parameter in the paramScope scope, using the {@link Namespace#IVARIABLE} namespace.
 		 * The default parameter value (assigned value) will be handled in the valScope.
 		 * @param analysis
 		 * @param paramScope - The scope to which a new scope is linked in which the declaration will be placed.
@@ -488,10 +487,11 @@ public class DataHandling {
 		 * @param ast - The AST of the {@code assign()} function.
 		 * @param env
 		 * @param exceptions
+		 * @param params
 		 * @return The resulting scopes in format {paramScope, valScope}.
 		 */
 		public Scope[] linkParamScope(StaticAnalysis analysis, Scope paramScope, Scope valScope,
-				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions, List<ParamDeclaration> params) {
 
 			// Typed parameter: assign(type, var, val).
 			if(ast.getChildren().size() == 3) {
@@ -509,8 +509,11 @@ public class DataHandling {
 
 					// Add the new variable declaration.
 					paramScope = analysis.createNewScope(paramScope);
-					paramScope.addDeclaration(new ParamDeclaration(iVar.getVariableName(), type, ast.getNodeModifiers(),
-							ast.getTarget()));
+					ParamDeclaration pDecl = new ParamDeclaration(iVar.getVariableName(), type, ast.getChildAt(2),
+							ast.getNodeModifiers(),
+							ast.getTarget());
+					params.add(pDecl);
+					paramScope.addDeclaration(pDecl);
 					analysis.setTermScope(ivarAst, paramScope);
 				}
 
@@ -533,9 +536,11 @@ public class DataHandling {
 
 					// Add the new variable declaration.
 					paramScope = analysis.createNewScope(paramScope);
-					paramScope.addDeclaration(new ParamDeclaration(
-							iVar.getVariableName(), CClassType.AUTO, ast.getNodeModifiers(),
-							ast.getTarget()));
+					ParamDeclaration pDecl = new ParamDeclaration(
+							iVar.getVariableName(), CClassType.AUTO, null, ast.getNodeModifiers(),
+							ast.getTarget());
+					params.add(pDecl);
+					paramScope.addDeclaration(pDecl);
 					analysis.setTermScope(ivarAst, paramScope);
 				}
 
@@ -1557,14 +1562,15 @@ public class DataHandling {
 			Scope paramScope = analysis.createNewScope();
 
 			// Insert @arguments parameter.
-			paramScope.addDeclaration(new ParamDeclaration("@arguments", CArray.TYPE, ast.getNodeModifiers(),
+			paramScope.addDeclaration(new ParamDeclaration("@arguments", CArray.TYPE, null, ast.getNodeModifiers(),
 					ast.getTarget()));
 
 			// Handle procedure parameters from left to right.
 			Scope valScope = parentScope;
+			List<ParamDeclaration> params = new ArrayList<>();
 			while(ind < ast.numberOfChildren() - 1) {
 				ParseTree param = ast.getChildAt(ind++);
-				Scope[] scopes = analysis.linkParamScope(paramScope, valScope, param, env, exceptions);
+				Scope[] scopes = analysis.linkParamScope(paramScope, valScope, param, env, exceptions, params);
 				valScope = scopes[1];
 				paramScope = scopes[0];
 			}
@@ -1576,7 +1582,8 @@ public class DataHandling {
 			// Create proc declaration in a new scope.
 			// TODO - Include proc signature (argument types and number of arguments) in declaration.
 			Scope declScope = analysis.createNewScope(parentScope);
-			ProcDeclaration procDecl = new ProcDeclaration(procName, retType, ast.getNodeModifiers(), ast.getTarget());
+			ProcDeclaration procDecl = new ProcDeclaration(procName, retType, params,
+					ast.getNodeModifiers(), ast.getTarget());
 			declScope.addDeclaration(procDecl);
 			analysis.setTermScope(ast, declScope);
 
@@ -1676,11 +1683,18 @@ public class DataHandling {
 		@Override
 		public String symbolDisplayName(List<ParseTree> children) {
 			StringBuilder builder = new StringBuilder();
-			builder.append("proc ");
-			builder.append(ArgumentValidation.getString(children.get(0).getData(), Target.UNKNOWN));
+			int offset = 0;
+			if(children.get(0).getData() instanceof CClassType type) {
+				offset = 1;
+				builder.append(type.getSimpleName());
+			} else {
+				builder.append("auto");
+			}
+			builder.append(" proc ");
+			builder.append(ArgumentValidation.getString(children.get(offset).getData(), Target.UNKNOWN));
 			builder.append("(");
 			boolean first = true;
-			for(int i = 1; i < children.size() - 1; i++) {
+			for(int i = 1 + offset; i < children.size() - 1; i++) {
 				if(!first) {
 					builder.append(", ");
 				}
@@ -1692,19 +1706,28 @@ public class DataHandling {
 				} else if(parameter instanceof CFunction f) {
 					try {
 						if(f.getFunction() instanceof assign) {
+							CClassType type = Auto.TYPE;
 							Mixed variable = child.getChildAt(0).getData();
 							Mixed value = child.getChildAt(1).getData();
+							if(variable instanceof CClassType cct) {
+								type = cct;
+								variable = child.getChildAt(1).getData();
+								value = child.getChildAt(2).getData();
+							}
+							builder.append(type.getSimpleName()).append(" ");
 							if(variable instanceof IVariable ivar) {
-								builder.append(ivar.getVariableName())
-										.append(" = ");
-								if(value instanceof CString) {
-									builder.append("'")
-											.append(value.val().replace("\\", "\\\\")
-													.replaceAll("\t", "\\\\t").replaceAll("\n", "\\\\n")
-													.replace("'", "\\'"))
-											.append("'");
-								} else {
-									builder.append(value.val());
+								builder.append(ivar.getVariableName());
+								if(value != CNull.UNDEFINED) {
+									builder.append(" = ");
+									if(value instanceof CString) {
+										builder.append("'")
+												.append(value.val().replace("\\", "\\\\")
+														.replaceAll("\t", "\\\\t").replaceAll("\n", "\\\\n")
+														.replace("'", "\\'"))
+												.append("'");
+									} else {
+										builder.append(value.val());
+									}
 								}
 							}
 						}
@@ -2538,14 +2561,15 @@ public class DataHandling {
 			}
 
 			// Insert @arguments parameter.
-			paramScope.addDeclaration(new ParamDeclaration("@arguments", CArray.TYPE, ast.getNodeModifiers(),
+			paramScope.addDeclaration(new ParamDeclaration("@arguments", CArray.TYPE, null, ast.getNodeModifiers(),
 					ast.getTarget()));
 
 			// Handle closure parameters from left to right.
 			Scope valScope = parentScope;
+			List<ParamDeclaration> params = new ArrayList<>();
 			while(ind < ast.numberOfChildren() - 1) {
 				ParseTree param = ast.getChildAt(ind++);
-				Scope[] scopes = analysis.linkParamScope(paramScope, valScope, param, env, exceptions);
+				Scope[] scopes = analysis.linkParamScope(paramScope, valScope, param, env, exceptions, params);
 				valScope = scopes[1];
 				paramScope = scopes[0];
 			}

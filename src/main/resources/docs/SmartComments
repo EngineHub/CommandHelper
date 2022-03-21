@@ -12,9 +12,9 @@ reader of the code, and have no functional purpose as far as the compiler is con
 are thus discarded as part of the compilation process, and so the runtime has no knowledge that
 these types of comments ever existed in the source code.
 
-Comment blocks that start with /** however, are smart comments, and the subject of this article.
+Comment blocks that start with /** and end with */ however, are smart comments, and the subject of this article.
 These comments are not lost with compilation, and are able to be used in later stages of compilation,
-to provide additional functionality to code.
+to provide additional meta functionality to code.
 
 <%NOTE|Note that this page outlines some expected functionality, rather than functionality that currently exists.
 Where this is true, it is noted, but the format of comments can go ahead and begin using these conventions,
@@ -88,14 +88,10 @@ follow the format {@url https://url.com replacementText} where the replacement t
 is displayed, and the url is where the link goes. If replacementText is empty, the url is used as the
 text.
 
-This is currently unimplemented.
-
 === {@code} ===
 
 This is meant for references to literal code elements, for instance variable names, etc. The common use case
 is to simply format the text with a monospace font, but could be used for syntax highlighting, etc.
-
-This is currently unimplemented.
 
 == Annotations ==
 
@@ -116,10 +112,10 @@ or
 This provides a link to either another element in the codebase, or an external web url. Note that the element variety
 of this is not implemented or defined yet, but will have the same semantics as the embedded {@link} annotation.
 
-This is not implemented yet, though most text editors provide url clicking anyways.
-
 === @param ===
 
-Documents a parameter. This is used for inputs to the element.
+Documents a parameter. This is used for inputs to the element. The general format is
+<code>@param value description</code>, where value is the name of the parameter without the at sign, and description
+is free form.
 
 
