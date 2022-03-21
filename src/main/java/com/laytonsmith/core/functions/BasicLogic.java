@@ -1568,7 +1568,8 @@ public class BasicLogic {
 			 *  Note that getReturnType could be overridden, not using this signature for typechecking.
 			 *  That implementation is not yet possible until A OR B OR ... types can be described.
 			 */
-			return new SignatureBuilder(Mixed.TYPE).varParam(Mixed.TYPE, "vals", null).build();
+			return new SignatureBuilder(Mixed.TYPE).varParam(Mixed.TYPE, "vals", null)
+					.setNoneIsAllowed(true).build();
 		}
 
 		@Override

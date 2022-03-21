@@ -99,6 +99,11 @@ public class SignatureBuilder {
 		return this;
 	}
 
+	public SignatureBuilder setNoneIsAllowed(boolean allowed) {
+		this.signature.setNoneIsAllowed(allowed);
+		return this;
+	}
+
 	/**
 	 * Finalizes the last function signature and starts a new function signature with the given return type.
 	 * @param returnType - The return type of the new function signature.
