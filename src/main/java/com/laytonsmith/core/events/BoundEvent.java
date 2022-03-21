@@ -2,6 +2,7 @@ package com.laytonsmith.core.events;
 
 import com.laytonsmith.PureUtilities.Common.DateUtils;
 import com.laytonsmith.PureUtilities.Pair;
+import com.laytonsmith.annotations.MEnum;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Prefs;
@@ -70,6 +71,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
 	/**
 	 * Event priorities. This is sorted and events are run in a particular order.
 	 */
+	@MEnum("ms.lang.EventPriority")
 	public enum Priority {
 		LOWEST(5),
 		LOW(4),

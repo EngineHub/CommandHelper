@@ -18,6 +18,7 @@ import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.MethodScriptCompiler;
+import com.laytonsmith.core.NodeModifiers;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Procedure;
@@ -45,6 +46,7 @@ import com.laytonsmith.core.constructs.CByteArray;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CDouble;
+import com.laytonsmith.core.constructs.CFixedArray;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CIClosure;
 import com.laytonsmith.core.constructs.CInt;
@@ -63,6 +65,7 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.Environment.EnvironmentImpl;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
@@ -97,6 +100,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.eclipse.lsp4j.SymbolKind;
 
 /**
  *
@@ -440,7 +444,8 @@ public class DataHandling {
 
 					// Add the new variable declaration.
 					declScope.addDeclaration(new Declaration(
-							Namespace.IVARIABLE, iVar.getVariableName(), type, ast.getTarget()));
+							Namespace.IVARIABLE, iVar.getVariableName(), type, ast.getNodeModifiers(),
+							ast.getTarget()));
 					analysis.setTermScope(ivarAst, declScope);
 				}
 
@@ -461,7 +466,9 @@ public class DataHandling {
 					IVariable iVar = (IVariable) rawIVar;
 
 					// Add ivariable assign declaration in a new scope.
-					newScope.addDeclaration(new IVariableAssignDeclaration(iVar.getVariableName(), iVar.getTarget()));
+					newScope.addDeclaration(new IVariableAssignDeclaration(iVar.getVariableName(),
+							ast.getNodeModifiers(),
+							iVar.getTarget()));
 					analysis.setTermScope(ivarAst, newScope);
 				}
 
@@ -472,8 +479,7 @@ public class DataHandling {
 		}
 
 		/**
-		 * Handles an {@code assign()} that is used as parameter in for example a procedure or closure.
-		 * This will declare the parameter in the paramScope scope, using the {@link Namespace#IVARIABLE} namespace.
+		 * Handles an {@code assign()} that is used as parameter in for example a procedure or closure.This will declare the parameter in the paramScope scope, using the {@link Namespace#IVARIABLE} namespace.
 		 * The default parameter value (assigned value) will be handled in the valScope.
 		 * @param analysis
 		 * @param paramScope - The scope to which a new scope is linked in which the declaration will be placed.
@@ -481,10 +487,11 @@ public class DataHandling {
 		 * @param ast - The AST of the {@code assign()} function.
 		 * @param env
 		 * @param exceptions
+		 * @param params
 		 * @return The resulting scopes in format {paramScope, valScope}.
 		 */
 		public Scope[] linkParamScope(StaticAnalysis analysis, Scope paramScope, Scope valScope,
-				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions, List<ParamDeclaration> params) {
 
 			// Typed parameter: assign(type, var, val).
 			if(ast.getChildren().size() == 3) {
@@ -502,7 +509,11 @@ public class DataHandling {
 
 					// Add the new variable declaration.
 					paramScope = analysis.createNewScope(paramScope);
-					paramScope.addDeclaration(new ParamDeclaration(iVar.getVariableName(), type, ast.getTarget()));
+					ParamDeclaration pDecl = new ParamDeclaration(iVar.getVariableName(), type, ast.getChildAt(2),
+							ast.getNodeModifiers(),
+							ast.getTarget());
+					params.add(pDecl);
+					paramScope.addDeclaration(pDecl);
 					analysis.setTermScope(ivarAst, paramScope);
 				}
 
@@ -525,8 +536,11 @@ public class DataHandling {
 
 					// Add the new variable declaration.
 					paramScope = analysis.createNewScope(paramScope);
-					paramScope.addDeclaration(new ParamDeclaration(
-							iVar.getVariableName(), CClassType.AUTO, ast.getTarget()));
+					ParamDeclaration pDecl = new ParamDeclaration(
+							iVar.getVariableName(), CClassType.AUTO, null, ast.getNodeModifiers(),
+							ast.getTarget());
+					params.add(pDecl);
+					paramScope.addDeclaration(pDecl);
 					analysis.setTermScope(ivarAst, paramScope);
 				}
 
@@ -1371,7 +1385,7 @@ public class DataHandling {
 
 	@api
 	@unbreakable
-	public static class proc extends AbstractFunction implements BranchStatement, VariableScope {
+	public static class proc extends AbstractFunction implements BranchStatement, VariableScope, DocumentSymbolProvider {
 
 		public static final String NAME = "proc";
 
@@ -1434,6 +1448,7 @@ public class DataHandling {
 			List<String> varNames = new ArrayList<>();
 			boolean usesAssign = false;
 			CClassType returnType = Auto.TYPE;
+			NodeModifiers modifiers = null;
 			if(nodes[0].getData().equals(CVoid.VOID) || nodes[0].getData().isInstanceOf(CClassType.TYPE)) {
 				if(nodes[0].getData().equals(CVoid.VOID)) {
 					returnType = CVoid.TYPE;
@@ -1444,8 +1459,10 @@ public class DataHandling {
 				for(int i = 1; i < nodes.length; i++) {
 					newNodes[i - 1] = nodes[i];
 				}
+				modifiers = nodes[0].getNodeModifiers();
 				nodes = newNodes;
 			}
+			nodes[0].getNodeModifiers().merge(modifiers);
 			// We have to restore the variable list once we're done
 			IVariableList originalList = env.getEnv(GlobalEnv.class).GetVarList().clone();
 			for(int i = 0; i < nodes.length; i++) {
@@ -1504,7 +1521,7 @@ public class DataHandling {
 				}
 			}
 			env.getEnv(GlobalEnv.class).SetVarList(originalList);
-			Procedure myProc = new Procedure(name, returnType, vars, tree, t);
+			Procedure myProc = new Procedure(name, returnType, vars, nodes[0].getNodeModifiers().getComment(), tree, t);
 			if(usesAssign) {
 				myProc.definitelyNotConstant();
 			}
@@ -1545,13 +1562,15 @@ public class DataHandling {
 			Scope paramScope = analysis.createNewScope();
 
 			// Insert @arguments parameter.
-			paramScope.addDeclaration(new ParamDeclaration("@arguments", CArray.TYPE, ast.getTarget()));
+			paramScope.addDeclaration(new ParamDeclaration("@arguments", CArray.TYPE, null, ast.getNodeModifiers(),
+					ast.getTarget()));
 
 			// Handle procedure parameters from left to right.
 			Scope valScope = parentScope;
+			List<ParamDeclaration> params = new ArrayList<>();
 			while(ind < ast.numberOfChildren() - 1) {
 				ParseTree param = ast.getChildAt(ind++);
-				Scope[] scopes = analysis.linkParamScope(paramScope, valScope, param, env, exceptions);
+				Scope[] scopes = analysis.linkParamScope(paramScope, valScope, param, env, exceptions, params);
 				valScope = scopes[1];
 				paramScope = scopes[0];
 			}
@@ -1563,11 +1582,13 @@ public class DataHandling {
 			// Create proc declaration in a new scope.
 			// TODO - Include proc signature (argument types and number of arguments) in declaration.
 			Scope declScope = analysis.createNewScope(parentScope);
-			ProcDeclaration procDecl = new ProcDeclaration(procName, retType, ast.getTarget());
+			ProcDeclaration procDecl = new ProcDeclaration(procName, retType, params,
+					ast.getNodeModifiers(), ast.getTarget());
 			declScope.addDeclaration(procDecl);
+			analysis.setTermScope(ast, declScope);
 
 			// Create proc root declaration in the inner root scope.
-			paramScope.addDeclaration(new ProcRootDeclaration(procDecl));
+			paramScope.addDeclaration(new ProcRootDeclaration(procDecl, ast.getNodeModifiers()));
 
 			// Allow procedures to perform lookups in the decl scope.
 			paramScope.addSpecificParent(declScope, Namespace.PROCEDURE);
@@ -1658,6 +1679,71 @@ public class DataHandling {
 			}
 			return ret;
 		}
+
+		@Override
+		public String symbolDisplayName(List<ParseTree> children) {
+			StringBuilder builder = new StringBuilder();
+			int offset = 0;
+			if(children.get(0).getData() instanceof CClassType type) {
+				offset = 1;
+				builder.append(type.getSimpleName());
+			} else {
+				builder.append("auto");
+			}
+			builder.append(" proc ");
+			builder.append(ArgumentValidation.getString(children.get(offset).getData(), Target.UNKNOWN));
+			builder.append("(");
+			boolean first = true;
+			for(int i = 1 + offset; i < children.size() - 1; i++) {
+				if(!first) {
+					builder.append(", ");
+				}
+				first = false;
+				ParseTree child = children.get(i);
+				Mixed parameter = child.getData();
+				if(parameter instanceof IVariable ivar) {
+					builder.append(ivar.getVariableName());
+				} else if(parameter instanceof CFunction f) {
+					try {
+						if(f.getFunction() instanceof assign) {
+							CClassType type = Auto.TYPE;
+							Mixed variable = child.getChildAt(0).getData();
+							Mixed value = child.getChildAt(1).getData();
+							if(variable instanceof CClassType cct) {
+								type = cct;
+								variable = child.getChildAt(1).getData();
+								value = child.getChildAt(2).getData();
+							}
+							builder.append(type.getSimpleName()).append(" ");
+							if(variable instanceof IVariable ivar) {
+								builder.append(ivar.getVariableName());
+								if(value != CNull.UNDEFINED) {
+									builder.append(" = ");
+									if(value instanceof CString) {
+										builder.append("'")
+												.append(value.val().replace("\\", "\\\\")
+														.replaceAll("\t", "\\\\t").replaceAll("\n", "\\\\n")
+														.replace("'", "\\'"))
+												.append("'");
+									} else {
+										builder.append(value.val());
+									}
+								}
+							}
+						}
+					} catch (ConfigCompileException ex) {
+						builder.append("_");
+					}
+				}
+			}
+			builder.append(")");
+			return builder.toString();
+		}
+
+		@Override
+		public SymbolKind getSymbolKind() {
+			return SymbolKind.Function;
+		}
 	}
 
 	@api
@@ -1715,10 +1801,11 @@ public class DataHandling {
 
 			// Create new static analysis for dynamic includes that have not yet been cached.
 			StaticAnalysis analysis;
+			IncludeCache includeCache = env.getEnv(StaticRuntimeEnv.class).getIncludeCache();
 			boolean isFirstCompile = false;
-			Scope parentScope = IncludeCache.DYNAMIC_ANALYSIS_PARENT_SCOPE_CACHE.get(t);
+			Scope parentScope = includeCache.getDynamicAnalysisParentScopeCache().get(t);
 			if(parentScope != null) {
-				analysis = IncludeCache.getStaticAnalysis(file);
+				analysis = includeCache.getStaticAnalysis(file);
 				if(analysis == null) {
 					analysis = new StaticAnalysis(true);
 					analysis.getStartScope().addParent(parentScope);
@@ -1810,7 +1897,8 @@ public class DataHandling {
 
 					// The include is dynamic, so it cannot be checked in compile time.
 					// Store the parent scope for static analysis to check the file as soon as it is loaded in runtime.
-					IncludeCache.DYNAMIC_ANALYSIS_PARENT_SCOPE_CACHE.put(ast.getTarget(), parentScope);
+					env.getEnv(StaticRuntimeEnv.class).getIncludeCache().getDynamicAnalysisParentScopeCache()
+							.put(ast.getTarget(), parentScope);
 					return super.linkScope(analysis, parentScope, ast, env, exceptions);
 				}
 			}
@@ -2473,13 +2561,15 @@ public class DataHandling {
 			}
 
 			// Insert @arguments parameter.
-			paramScope.addDeclaration(new ParamDeclaration("@arguments", CArray.TYPE, ast.getTarget()));
+			paramScope.addDeclaration(new ParamDeclaration("@arguments", CArray.TYPE, null, ast.getNodeModifiers(),
+					ast.getTarget()));
 
 			// Handle closure parameters from left to right.
 			Scope valScope = parentScope;
+			List<ParamDeclaration> params = new ArrayList<>();
 			while(ind < ast.numberOfChildren() - 1) {
 				ParseTree param = ast.getChildAt(ind++);
-				Scope[] scopes = analysis.linkParamScope(paramScope, valScope, param, env, exceptions);
+				Scope[] scopes = analysis.linkParamScope(paramScope, valScope, param, env, exceptions, params);
 				valScope = scopes[1];
 				paramScope = scopes[0];
 			}
@@ -3807,6 +3897,74 @@ public class DataHandling {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+	}
+
+	@api
+	@seealso(array.class)
+	public static class fixed_array extends AbstractFunction {
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[] {CRERangeException.class, CRECastException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			CClassType type = ArgumentValidation.getClassType(args[0], t);
+			int size = ArgumentValidation.getInt32(args[1], t);
+			if(size < 0) {
+				throw new CRERangeException("Array size must be zero or greater. Received: " + size, t);
+			}
+			// nullOut is intentionally ignored here, as it's irrelevant in the case of the interpreter
+			return new CFixedArray(t, type, size);
+		}
+
+		@Override
+		public String getName() {
+			return "fixed_array";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3};
+		}
+
+		@Override
+		public String docs() {
+			return "fixed_array {ClassType type, int size, [boolean nullOut]} Creates an array that can hold values of"
+					+ " the given type, and is of the given size."
+					+ " The array cannot be resized or retyped later."
+					+ " The array cannot be associative. In general, this isn't"
+					+ " meant for normal use, and unless you have specific need for a fixed_size array, array() should"
+					+ " be used instead. This is instead meant for writing low level system code. On the other hand,"
+					+ " for performance sensitive needs, this may be used instead, though note that most of the API"
+					+ " does not accept fixed_arrays (though it does implement ArrayAccess, and so can be used in most"
+					+ " read only array based functions), nor will it in the future. This does however map to the"
+					+ " underlying system array closely, and so can in particular be used to integrate more directly"
+					+ " with the system. fixed_array isn't a particularly flexible type, but it isn't meant to be,"
+					+ " it's meant to more directly map to the lower level part of the system. nullOut defaults to"
+					+ " true, and in the interpreter is irrelevant, but for native code, if set to true, this loops"
+					+ " through the array and sets each value to null (or equivalent for primitive types). This"
+					+ " takes additional work, but sets the value to a known state. This can be bypassed if the array"
+					+ " is about to be filled from 0 to length, but should otherwise always be set to true."
+					+ " A RangeException is thrown if size is negative, or larger than a 32 bits signed integer."
+					+ " A CastException is thrown when size cannot be cast to an int.";
 		}
 	}
 

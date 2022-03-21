@@ -21,6 +21,7 @@ import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CClosure;
+import com.laytonsmith.core.constructs.CFixedArray;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CMutablePrimitive;
 import com.laytonsmith.core.constructs.CNull;
@@ -53,6 +54,8 @@ import com.laytonsmith.core.functions.DataHandling.array;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.natives.interfaces.Iterator;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import com.laytonsmith.core.natives.interfaces.Sizeable;
+
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.LinkedHashSet;
@@ -85,6 +88,11 @@ public class ArrayHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			// TODO: It's far too late to deprecate this, but this method and length() are aliases, so
+			// we should at least harmonize the implementations.
+			if(args[0] instanceof Sizeable s) {
+				return new CInt(s.size(), t);
+			}
 			if(args[0].isInstanceOf(CArray.TYPE) && !(args[0] instanceof CMutablePrimitive)) {
 				return new CInt(((CArray) args[0]).size(), t);
 			}
@@ -398,6 +406,10 @@ public class ArrayHandling {
 			env.getEnv(GlobalEnv.class).ClearFlag("array-special-get");
 			Mixed index = parent.seval(nodes[1], env);
 			Mixed value = parent.seval(nodes[2], env);
+			if(array instanceof CFixedArray) {
+				((CFixedArray) array).set(ArgumentValidation.getInt32(index, t), value, t);
+				return value;
+			}
 			if(!(array.isInstanceOf(CArray.TYPE))) {
 				throw new CRECastException("Argument 1 of " + this.getName() + " must be an array", t);
 			}
@@ -514,7 +526,7 @@ public class ArrayHandling {
 				}
 				return CVoid.VOID;
 			}
-			throw new CRECastException("Argument 1 of " + this.getName() + " must be an array", t);
+			throw new CRECastException("Argument 1 of " + this.getName() + " must be a (non-fixed) array", t);
 		}
 
 		@Override
@@ -691,12 +703,15 @@ public class ArrayHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
-			if(!(args[0].isInstanceOf(CArray.TYPE))) {
-				throw new CRECastException("Argument 1 of " + this.getName() + " must be an array", t);
+			ArrayAccess aa;
+			if(args[0] instanceof ArrayAccess) {
+				aa = (ArrayAccess) args[0];
+			} else {
+				CArray ca = ArgumentValidation.getArray(args[0], t);
+				aa = ca;
 			}
-			CArray ca = (CArray) args[0];
-			for(Mixed key : ca.keySet()) {
-				if(new equals().exec(t, env, ca.get(key, t), args[1]).getBoolean()) {
+			for(Mixed key : aa.keySet()) {
+				if(new equals().exec(t, env, aa.get(key, t), args[1]).getBoolean()) {
 					return CBoolean.TRUE;
 				}
 			}
@@ -799,17 +814,18 @@ public class ArrayHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			if(args[0].isInstanceOf(CArray.TYPE)) {
-				CArray ca = (CArray) args[0];
-				for(int i = 0; i < ca.size(); i++) {
-					if(new equals_ic().exec(t, environment, ca.get(i, t), args[1]).getBoolean()) {
-						return CBoolean.TRUE;
-					}
-				}
-				return CBoolean.FALSE;
+			ArrayAccess aa;
+			if(args[0] instanceof ArrayAccess a) {
+				aa = a;
 			} else {
-				throw new CRECastException("Argument 1 of " + this.getName() + " must be an array", t);
+				aa = ArgumentValidation.getArray(args[0], t);
 			}
+			for(Mixed key : aa.keySet()) {
+				if(new equals_ic().exec(t, environment, aa.get(key, t), args[1]).getBoolean()) {
+					return CBoolean.TRUE;
+				}
+			}
+			return CBoolean.FALSE;
 		}
 
 		@Override
@@ -852,12 +868,14 @@ public class ArrayHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
-			if(!(args[0].isInstanceOf(CArray.TYPE))) {
-				throw new CRECastException("Argument 1 of " + this.getName() + " must be an array", t);
+			ArrayAccess aa;
+			if(args[0] instanceof ArrayAccess a) {
+				aa = a;
+			} else {
+				aa = ArgumentValidation.getArray(args[0], t);
 			}
-			CArray ca = (CArray) args[0];
-			for(Mixed key : ca.keySet()) {
-				if(new sequals().exec(t, env, ca.get(key, t), args[1]).getBoolean()) {
+			for(Mixed key : aa.keySet()) {
+				if(new sequals().exec(t, env, aa.get(key, t), args[1]).getBoolean()) {
 					return CBoolean.TRUE;
 				}
 			}
@@ -2771,16 +2789,21 @@ public class ArrayHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			CArray array = ArgumentValidation.getArray(args[0], t);
+			ArrayAccess aa;
+			if(args[0] instanceof CFixedArray fa) {
+				aa = fa;
+			} else {
+				aa = ArgumentValidation.getArray(args[0], t);
+			}
 			CClosure closure = ArgumentValidation.getObject(args[1], t, CClosure.class);
-			for(Mixed key : array.keySet()) {
+			for(Mixed key : aa.keySet()) {
 				try {
-					closure.executeCallable(environment, t, key, array.get(key, t));
+					closure.executeCallable(environment, t, key, aa.get(key, t));
 				} catch (ProgramFlowManipulationException ex) {
 					// Ignored
 				}
 			}
-			return array;
+			return aa;
 		}
 
 		@Override
@@ -3759,5 +3782,66 @@ public class ArrayHandling {
 			return MSVersion.V3_3_4;
 		}
 
+	}
+
+	@api
+	public static class array_fill extends AbstractFunction {
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			Mixed fill = args[1];
+			if(args[0] instanceof CFixedArray fa) {
+				fa.fill(fill, t);
+				return fa;
+			} else {
+				CArray array = ArgumentValidation.getArray(args[0], t);
+				if(array.isAssociative()) {
+					throw new CRECastException(getName() + " can only accept normal arrays.", t);
+				}
+				for(Mixed key : array.keySet()) {
+					array.set(key, fill, t);
+				}
+				return array;
+			}
+		}
+
+		@Override
+		public String getName() {
+			return "array_fill";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "array {array, fill} Fills the array fully with the given item. This works with both dynamic and"
+					+ " fixed arrays, however with dynamic arrays, it must be a normal array, if the array is"
+					+ " associative, a cast exception is thrown. This fills"
+					+ " the entire array. The change is made in place, but a reference to the array is returned"
+					+ " for easy chaining.";
+		}
 	}
 }

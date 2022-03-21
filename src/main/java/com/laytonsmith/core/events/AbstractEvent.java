@@ -18,11 +18,14 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
+import com.laytonsmith.core.events.prefilters.Prefilter;
+import com.laytonsmith.core.events.prefilters.PrefilterBuilder;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
+import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.profiler.ProfilePoint;
@@ -85,6 +88,11 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 	@Override
 	public void hook() {
 
+	}
+
+	@Override
+	public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+		throw new UnsupportedOperationException();
 	}
 
 	/**
@@ -291,6 +299,36 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 			c = c.getDeclaringClass();
 		} while(c != null);
 		return false;
+	}
+
+	private Map<String, Prefilter<? extends BindableEvent>> prefilterCache = null;
+	private volatile boolean isCacheSaturated = false;
+
+	@Override
+	public final Map<String, Prefilter<? extends BindableEvent>> getPrefilters() {
+		if(!isCacheSaturated) {
+			synchronized(this) {
+				if(!isCacheSaturated) {
+					PrefilterBuilder builder = getPrefilterBuilder();
+					if(builder != null) {
+						prefilterCache = builder.build();
+					}
+					isCacheSaturated = true;
+				}
+			}
+		}
+		return prefilterCache;
+	}
+
+	/**
+	 * Returns the prefilter builder for this subclass. This is built by AbstractEvent and cached, so that calls
+	 * to getPrefilters will be faster for future calls.
+	 * @return
+	 */
+	// TODO: Once everything has this, this should be re-added, since everything should have its own version.
+//	@ForceImplementation
+	protected PrefilterBuilder getPrefilterBuilder() {
+		return null;
 	}
 
 }

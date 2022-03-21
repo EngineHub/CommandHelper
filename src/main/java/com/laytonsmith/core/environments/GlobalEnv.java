@@ -1,17 +1,15 @@
 package com.laytonsmith.core.environments;
 
 import com.laytonsmith.PureUtilities.Common.MutableObject;
-import com.laytonsmith.PureUtilities.ExecutionQueue;
 import com.laytonsmith.PureUtilities.SmartComment;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSLog;
-import com.laytonsmith.core.MethodScriptExecutionQueue;
 import com.laytonsmith.core.Procedure;
 import com.laytonsmith.core.Script;
+import com.laytonsmith.core.ScriptProvider;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CBoolean;
-import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.IVariableList;
 import com.laytonsmith.core.constructs.Target;
@@ -37,20 +35,16 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 
-	//Fields that are MutableObjects are shared among all environments.
-	//This makes some things "system wide", for instance, the uncaught
-	//exception handler should not be different for closures vs outside
-	//of closures. This only applies to things that can change during runtime
+	//Fields that are MutableObjects are shared across environments.
+	//This only applies to things that can change during runtime
 	//via a script, and should be totally global.
 	//Anything else varies based on the particular needs of
 	//that field. Note that lists, maps, and other reference based objects don't
 	//need to use MutableObjects, as they are inherently Mutable themselves.
-	private ExecutionQueue executionQueue = null;
 	private final Map<String, Boolean> flags = new HashMap<>();
 	private final Map<String, Object> custom = new HashMap<>();
 	private Script script = null;
 	private final MutableObject<File> root;
-	private final MutableObject<CClosure> uncaughtExceptionHandler = new MutableObject<>();
 	private Map<String, Procedure> procs = null;
 	private IVariableList iVariableList = null;
 	private String label = null;
@@ -64,28 +58,19 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	private final MutableObject<Map<String, Mixed>> runtimeSettings
 			= new MutableObject<>(new ConcurrentHashMap<>());
 	private FileOptions fileOptions;
+	private ScriptProvider scriptProvider = new ScriptProvider.FileSystemScriptProvider();
 
 	/**
 	 * Creates a new GlobalEnvironment. All fields in the constructor are required, and cannot be null.
 	 *
-	 * @param queue The ExecutionQueue object to use
 	 * @param root The root working directory to use
 	 * @param runtimeModes The {@link RuntimeMode}s for this environment.
 	 */
-	public GlobalEnv(ExecutionQueue queue, File root, EnumSet<RuntimeMode> runtimeModes) {
-		Static.AssertNonNull(queue, "ExecutionQueue cannot be null");
+	public GlobalEnv(File root, EnumSet<RuntimeMode> runtimeModes) {
 		Static.AssertNonNull(root, "Root file cannot be null");
 		RuntimeMode.validate(runtimeModes);
-		this.executionQueue = queue;
 		this.root = new MutableObject(root);
-		if(this.executionQueue instanceof MethodScriptExecutionQueue) {
-			((MethodScriptExecutionQueue) executionQueue).setEnvironment(this);
-		}
 		this.runtimeModes = runtimeModes;
-	}
-
-	public ExecutionQueue GetExecutionQueue() {
-		return executionQueue;
 	}
 
 	/**
@@ -211,14 +196,6 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 			throw new IllegalArgumentException("File provided to SetRootFolder must be a folder, not a file. (" + file.toString() + " was found.)");
 		}
 		this.root.setObject(file);
-	}
-
-	public void SetExceptionHandler(CClosure construct) {
-		uncaughtExceptionHandler.setObject(construct);
-	}
-
-	public CClosure GetExceptionHandler() {
-		return uncaughtExceptionHandler.getObject();
 	}
 
 	/**
@@ -497,5 +474,13 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	 */
 	public FileOptions GetFileOptions() {
 		return this.fileOptions;
+	}
+
+	public ScriptProvider GetScriptProvider() {
+		return this.scriptProvider;
+	}
+
+	public void SetScriptProvider(ScriptProvider provider) {
+		this.scriptProvider = provider;
 	}
 }

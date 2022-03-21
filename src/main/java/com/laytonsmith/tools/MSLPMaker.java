@@ -7,7 +7,7 @@ import static com.laytonsmith.PureUtilities.TermColors.pl;
 import static com.laytonsmith.PureUtilities.TermColors.prompt;
 import static com.laytonsmith.PureUtilities.TermColors.reset;
 import com.laytonsmith.PureUtilities.ZipMaker;
-import com.laytonsmith.core.AliasCore;
+import com.laytonsmith.core.LocalPackages;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.Profiles;
 import com.laytonsmith.core.Script;
@@ -47,10 +47,10 @@ public class MSLPMaker {
 			}
 		}
 		//First attempt to compile it, and make sure it doesn't fail
-		AliasCore.LocalPackage localPackage = new AliasCore.LocalPackage();
-		AliasCore.GetAuxAliases(start, localPackage);
+		LocalPackages localPackages = new LocalPackages();
+		localPackages.search(start);
 		boolean error = false;
-		for(AliasCore.LocalPackage.FileInfo fi : localPackage.getMSFiles()) {
+		for(LocalPackages.FileInfo fi : localPackages.getMSFiles()) {
 			try {
 				MethodScriptCompiler.compile(
 						MethodScriptCompiler.lex(fi.contents(), null, fi.file(), true), null, envs);
@@ -63,7 +63,7 @@ public class MSLPMaker {
 			}
 		}
 		List<Script> allScripts = new ArrayList<>();
-		for(AliasCore.LocalPackage.FileInfo fi : localPackage.getMSAFiles()) {
+		for(LocalPackages.FileInfo fi : localPackages.getMSAFiles()) {
 			List<Script> tempScripts;
 			try {
 				tempScripts = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(fi.contents(), null, fi.file(), false), envs);

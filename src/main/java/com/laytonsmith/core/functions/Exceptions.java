@@ -40,6 +40,7 @@ import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CRECausedByWrapper;
@@ -386,8 +387,8 @@ public class Exceptions {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args[0].isInstanceOf(CClosure.TYPE)) {
-				CClosure old = environment.getEnv(GlobalEnv.class).GetExceptionHandler();
-				environment.getEnv(GlobalEnv.class).SetExceptionHandler((CClosure) args[0]);
+				CClosure old = environment.getEnv(StaticRuntimeEnv.class).getExceptionHandler();
+				environment.getEnv(StaticRuntimeEnv.class).setExceptionHandler((CClosure) args[0]);
 				if(old == null) {
 					return CNull.NULL;
 				} else {
@@ -502,7 +503,7 @@ public class Exceptions {
 				for(int i = 1; i < nodes.length - 1; i += 2) {
 					ParseTree assign = nodes[i];
 					CClassType clauseType = ((CClassType) assign.getChildAt(0).getData());
-					if(exceptionType.unsafeDoesExtend(clauseType)) {
+					if(exceptionType.doesExtend(clauseType)) {
 						try {
 							// We need to define the exception in the variable table
 							IVariableList varList = env.getEnv(GlobalEnv.class).GetVarList();
@@ -617,7 +618,7 @@ public class Exceptions {
 				types.add(type);
 
 				// Validate that the exception type extends throwable.
-				if(!type.unsafeDoesExtend(CREThrowable.TYPE)) {
+				if(!type.doesExtend(CREThrowable.TYPE)) {
 					throw new ConfigCompileException("The type defined in a catch clause must extend the"
 							+ " Throwable class.", t);
 				}

@@ -1,9 +1,7 @@
 package com.laytonsmith.abstraction.events;
 
-import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.enums.MCResourcePackStatus;
 
-public interface MCPlayerResourcePackEvent {
-	MCPlayer getPlayer();
+public interface MCPlayerResourcePackEvent extends MCPlayerEvent {
 	MCResourcePackStatus getStatus();
 }

@@ -43,7 +43,6 @@ import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.extensions.ExtensionTracker;
 import com.laytonsmith.core.functions.ArrayHandling.array_get;
@@ -57,6 +56,7 @@ import com.laytonsmith.core.functions.DataHandling;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
+import com.laytonsmith.core.functions.ArrayHandling.array_get;
 import com.laytonsmith.core.functions.IncludeCache;
 import com.laytonsmith.core.functions.Math.neg;
 import com.laytonsmith.core.natives.interfaces.Mixed;
@@ -195,7 +195,7 @@ public final class MethodScriptCompiler {
 			lastColumn = i;
 			if(c == '\n') {
 				lineNum++;
-				column = 1;
+				column = 0;
 				if(!inMultiline && !inPureMScript) {
 					inCommand = true;
 				}
@@ -286,6 +286,7 @@ public final class MethodScriptCompiler {
 						if(inComment && commentIsBlock && c2 == '/') { // "*/".
 							if(saveAllTokens || inSmartComment) {
 								buf.append("*/");
+								validateTerminatedBidiSequence(buf.toString(), target);
 								tokenList.add(new Token(inSmartComment ? TType.SMART_COMMENT : TType.COMMENT,
 										buf.toString(), target));
 							}
@@ -305,6 +306,7 @@ public final class MethodScriptCompiler {
 						if(inComment && !commentIsBlock) { // "\n".
 							inComment = false;
 							if(saveAllTokens) {
+								validateTerminatedBidiSequence(buf.toString(), target);
 								tokenList.add(new Token(TType.COMMENT, buf.toString(), target));
 								tokenList.add(new Token(TType.NEWLINE, "\n", new Target(lineNum + 1, file, 0)));
 							}
@@ -334,82 +336,82 @@ public final class MethodScriptCompiler {
 					switch(c) {
 						case '+': {
 							if(c2 == '=') { // "+=".
-								token = new Token(TType.PLUS_ASSIGNMENT, "+=", target);
+								token = new Token(TType.PLUS_ASSIGNMENT, "+=", target.copy());
 								i++;
 							} else if(c2 == '+') { // "++".
-								token = new Token(TType.INCREMENT, "++", target);
+								token = new Token(TType.INCREMENT, "++", target.copy());
 								i++;
 							} else { // "+".
-								token = new Token(TType.PLUS, "+", target);
+								token = new Token(TType.PLUS, "+", target.copy());
 							}
 							break;
 						}
 						case '-': {
 							if(c2 == '=') { // "-=".
-								token = new Token(TType.MINUS_ASSIGNMENT, "-=", target);
+								token = new Token(TType.MINUS_ASSIGNMENT, "-=", target.copy());
 								i++;
 							} else if(c2 == '-') { // "--".
-								token = new Token(TType.DECREMENT, "--", target);
+								token = new Token(TType.DECREMENT, "--", target.copy());
 								i++;
 							} else if(c2 == '>') { // "->".
-								token = new Token(TType.DEREFERENCE, "->", target);
+								token = new Token(TType.DEREFERENCE, "->", target.copy());
 								i++;
 							} else { // "-".
-								token = new Token(TType.MINUS, "-", target);
+								token = new Token(TType.MINUS, "-", target.copy());
 							}
 							break;
 						}
 						case '*': {
 							if(c2 == '=') { // "*=".
-								token = new Token(TType.MULTIPLICATION_ASSIGNMENT, "*=", target);
+								token = new Token(TType.MULTIPLICATION_ASSIGNMENT, "*=", target.copy());
 								i++;
 							} else if(c2 == '*') { // "**".
-								token = new Token(TType.EXPONENTIAL, "**", target);
+								token = new Token(TType.EXPONENTIAL, "**", target.copy());
 								i++;
 							} else { // "*".
-								token = new Token(TType.MULTIPLICATION, "*", target);
+								token = new Token(TType.MULTIPLICATION, "*", target.copy());
 							}
 							break;
 						}
 						case '/': {
 							if(c2 == '=') { // "/=".
-								token = new Token(TType.DIVISION_ASSIGNMENT, "/=", target);
+								token = new Token(TType.DIVISION_ASSIGNMENT, "/=", target.copy());
 								i++;
 							} else { // "/".
 								// Protect against matching commands.
 								if(Character.isLetter(c2)) {
 									break matched; // Pretend that division didn't match.
 								}
-								token = new Token(TType.DIVISION, "/", target);
+								token = new Token(TType.DIVISION, "/", target.copy());
 							}
 							break;
 						}
 						case '.': {
 							if(c2 == '=') { // ".=".
-								token = new Token(TType.CONCAT_ASSIGNMENT, ".=", target);
+								token = new Token(TType.CONCAT_ASSIGNMENT, ".=", target.copy());
 								i++;
 							} else if(c2 == '.') { // "..".
-								token = new Token(TType.SLICE, "..", target);
+								token = new Token(TType.SLICE, "..", target.copy());
 								i++;
 							} else { // ".".
-								token = new Token(TType.DOT, ".", target);
+								token = new Token(TType.DOT, ".", target.copy());
 							}
 							break;
 						}
 						case '%': {
-							token = new Token(TType.MODULO, "%", target);
+							token = new Token(TType.MODULO, "%", target.copy());
 							break;
 						}
 						case '>': {
 							if(c2 == '=') { // ">=".
-								token = new Token(TType.GTE, ">=", target);
+								token = new Token(TType.GTE, ">=", target.copy());
 								i++;
 							} else if(c2 == '>' && i < script.length() - 2 && script.charAt(i + 2) == '>') { // ">>>".
-								token = new Token(TType.MULTILINE_START, ">>>", target);
+								token = new Token(TType.MULTILINE_START, ">>>", target.copy());
 								inMultiline = true;
 								i += 2;
 							} else { // ">".
-								token = new Token(TType.GT, ">", target);
+								token = new Token(TType.GT, ">", target.copy());
 							}
 							break;
 						}
@@ -422,43 +424,43 @@ public final class MethodScriptCompiler {
 								}
 
 								if(saveAllTokens) {
-									tokenList.add(new Token(TType.FILE_OPTIONS_START, "<!", target));
+									tokenList.add(new Token(TType.FILE_OPTIONS_START, "<!", target.copy()));
 								}
 								inFileOptions = true;
 								fileOptionsLineNumberStart = lineNum;
 								i++;
 								continue;
 							} else if(c2 == '=') { // "<=".
-								token = new Token(TType.LTE, "<=", target);
+								token = new Token(TType.LTE, "<=", target.copy());
 								i++;
 							} else if(c2 == '<' && i < script.length() - 2 && script.charAt(i + 2) == '<') { // "<<<".
-								token = new Token(TType.MULTILINE_END, "<<<", target);
+								token = new Token(TType.MULTILINE_END, "<<<", target.copy());
 								inMultiline = false;
 								i += 2;
 							} else { // "<".
-								token = new Token(TType.LT, "<", target);
+								token = new Token(TType.LT, "<", target.copy());
 							}
 							break;
 						}
 						case '=': {
 							if(c2 == '=') {
 								if(i < script.length() - 2 && script.charAt(i + 2) == '=') { // "===".
-									token = new Token(TType.STRICT_EQUALS, "===", target);
+									token = new Token(TType.STRICT_EQUALS, "===", target.copy());
 									i += 2;
 								} else { // "==".
-									token = new Token(TType.EQUALS, "==", target);
+									token = new Token(TType.EQUALS, "==", target.copy());
 									i++;
 								}
 							} else { // "=".
 								if(inCommand) {
 									if(inOptVar) {
-										token = new Token(TType.OPT_VAR_ASSIGN, "=", target);
+										token = new Token(TType.OPT_VAR_ASSIGN, "=", target.copy());
 									} else {
-										token = new Token(TType.ALIAS_END, "=", target);
+										token = new Token(TType.ALIAS_END, "=", target.copy());
 										inCommand = false;
 									}
 								} else {
-									token = new Token(TType.ASSIGNMENT, "=", target);
+									token = new Token(TType.ASSIGNMENT, "=", target.copy());
 								}
 							}
 							break;
@@ -466,24 +468,24 @@ public final class MethodScriptCompiler {
 						case '!': {
 							if(c2 == '=') {
 								if(i < script.length() - 2 && script.charAt(i + 2) == '=') { // "!==".
-									token = new Token(TType.STRICT_NOT_EQUALS, "!==", target);
+									token = new Token(TType.STRICT_NOT_EQUALS, "!==", target.copy());
 									i += 2;
 								} else { // "!=".
-									token = new Token(TType.NOT_EQUALS, "!=", target);
+									token = new Token(TType.NOT_EQUALS, "!=", target.copy());
 									i++;
 								}
 							} else { // "!".
-								token = new Token(TType.LOGICAL_NOT, "!", target);
+								token = new Token(TType.LOGICAL_NOT, "!", target.copy());
 							}
 							break;
 						}
 						case '&': {
 							if(c2 == '&') {
 								if(i < script.length() - 2 && script.charAt(i + 2) == '&') { // "&&&".
-									token = new Token(TType.DEFAULT_AND, "&&&", target);
+									token = new Token(TType.DEFAULT_AND, "&&&", target.copy());
 									i += 2;
 								} else { // "&&".
-									token = new Token(TType.LOGICAL_AND, "&&", target);
+									token = new Token(TType.LOGICAL_AND, "&&", target.copy());
 									i++;
 								}
 							} else { // "&".
@@ -496,10 +498,10 @@ public final class MethodScriptCompiler {
 						case '|': {
 							if(c2 == '|') {
 								if(i < script.length() - 2 && script.charAt(i + 2) == '|') { // "|||".
-									token = new Token(TType.DEFAULT_OR, "|||", target);
+									token = new Token(TType.DEFAULT_OR, "|||", target.copy());
 									i += 2;
 								} else { // "||".
-									token = new Token(TType.LOGICAL_OR, "||", target);
+									token = new Token(TType.LOGICAL_OR, "||", target.copy());
 									i++;
 								}
 							} else { // "|".
@@ -516,15 +518,15 @@ public final class MethodScriptCompiler {
 //						}
 						case ':': {
 							if(c2 == ':') { // "::".
-								token = new Token(TType.DEREFERENCE, "::", target);
+								token = new Token(TType.DEREFERENCE, "::", target.copy());
 								i++;
 							} else { // ":".
-								token = new Token(TType.LABEL, ":", target);
+								token = new Token(TType.LABEL, ":", target.copy());
 							}
 							break;
 						}
 						case '{': {
-							token = new Token(TType.LCURLY_BRACKET, "{", target);
+							token = new Token(TType.LCURLY_BRACKET, "{", target.copy());
 							break;
 						}
 						case '}': {
@@ -536,29 +538,29 @@ public final class MethodScriptCompiler {
 								buf = new StringBuilder();
 								break;
 							}
-							token = new Token(TType.RCURLY_BRACKET, "}", target);
+							token = new Token(TType.RCURLY_BRACKET, "}", target.copy());
 							break;
 						}
 						case '[': {
-							token = new Token(TType.LSQUARE_BRACKET, "[", target);
+							token = new Token(TType.LSQUARE_BRACKET, "[", target.copy());
 							inOptVar = true;
 							break;
 						}
 						case ']': {
-							token = new Token(TType.RSQUARE_BRACKET, "]", target);
+							token = new Token(TType.RSQUARE_BRACKET, "]", target.copy());
 							inOptVar = false;
 							break;
 						}
 						case ',': {
-							token = new Token(TType.COMMA, ",", target);
+							token = new Token(TType.COMMA, ",", target.copy());
 							break;
 						}
 						case ';': {
-							token = new Token(TType.SEMICOLON, ";", target);
+							token = new Token(TType.SEMICOLON, ";", target.copy());
 							break;
 						}
 						case '(': {
-							token = new Token(TType.FUNC_START, "(", target);
+							token = new Token(TType.FUNC_START, "(", target.copy());
 
 							// Handle the buffer or previous token, with the knowledge that a FUNC_START follows.
 							if(buf.length() > 0) {
@@ -598,25 +600,25 @@ public final class MethodScriptCompiler {
 											tokenList.removeLast();
 										}
 									} else {
-										tokenList.add(new Token(TType.FUNC_NAME, "__autoconcat__", target));
+										tokenList.add(new Token(TType.FUNC_NAME, "__autoconcat__", target.copy()));
 									}
 								} catch (NoSuchElementException e) {
 									// This is the first element on the list, so, it's another autoconcat.
-									tokenList.add(new Token(TType.FUNC_NAME, "__autoconcat__", target));
+									tokenList.add(new Token(TType.FUNC_NAME, "__autoconcat__", target.copy()));
 								}
 							}
 							break;
 						}
 						case ')': {
-							token = new Token(TType.FUNC_END, ")", target);
+							token = new Token(TType.FUNC_END, ")", target.copy());
 							break;
 						}
 						case ' ': { // Whitespace case #1.
-							token = new Token(TType.WHITESPACE, " ", target);
+							token = new Token(TType.WHITESPACE, " ", target.copy());
 							break;
 						}
 						case '\t': { // Whitespace case #2 (TAB).
-							token = new Token(TType.WHITESPACE, "\t", target);
+							token = new Token(TType.WHITESPACE, "\t", target.copy());
 							break;
 						}
 						case '@': {
@@ -652,6 +654,7 @@ public final class MethodScriptCompiler {
 			switch(c) {
 				case '\'': {
 					if(stateInQuote && !inSmartQuote) {
+						validateTerminatedBidiSequence(buf.toString(), target);
 						tokenList.add(new Token(TType.STRING, buf.toString(), target));
 						buf = new StringBuilder();
 						target = new Target(lineNum, file, column);
@@ -675,6 +678,7 @@ public final class MethodScriptCompiler {
 				}
 				case '"': {
 					if(stateInQuote && inSmartQuote) {
+						validateTerminatedBidiSequence(buf.toString(), target);
 						tokenList.add(new Token(TType.SMART_STRING, buf.toString(), target));
 						buf = new StringBuilder();
 						target = new Target(lineNum, file, column);
@@ -1298,6 +1302,7 @@ public final class MethodScriptCompiler {
 				Environment e = Static.GenerateStandaloneEnvironment(false);
 				environment = environment.cloneAndAdd(e.getEnv(CompilerEnvironment.class));
 			}
+			environment.getEnv(CompilerEnvironment.class).setStaticAnalysis(staticAnalysis);
 		} catch (IOException | DataSourceException | URISyntaxException | Profiles.InvalidProfileException ex) {
 			throw new RuntimeException(ex);
 		}
@@ -1336,7 +1341,7 @@ public final class MethodScriptCompiler {
 		constructCount.push(new AtomicInteger(0));
 		parents.push(tree);
 
-		tree.addChild(new ParseTree(new CFunction(__autoconcat__.NAME, unknown), fileOptions));
+		tree.addChild(new ParseTree(new CFunction(__autoconcat__.NAME, unknown), fileOptions, true));
 		parents.push(tree.getChildAt(0));
 		tree = tree.getChildAt(0);
 		constructCount.push(new AtomicInteger(0));
@@ -1356,20 +1361,21 @@ public final class MethodScriptCompiler {
 		int braceCount = 0;
 
 		boolean inObjectDefinition = false;
+		SmartComment lastSmartComment = null;
 
 		// Create a Token array to iterate over, rather than using the LinkedList's O(n) get() method.
 		Token[] tokenArray = stream.toArray(new Token[stream.size()]);
 		for(int i = 0; i < tokenArray.length; i++) {
 			t = tokenArray[i];
-			Token prev1 = i - 1 >= 0 ? tokenArray[i - 1] : new Token(TType.UNKNOWN, "", t.target);
-			Token next1 = i + 1 < stream.size() ? tokenArray[i + 1] : new Token(TType.UNKNOWN, "", t.target);
-			Token next2 = i + 2 < stream.size() ? tokenArray[i + 2] : new Token(TType.UNKNOWN, "", t.target);
-			Token next3 = i + 3 < stream.size() ? tokenArray[i + 3] : new Token(TType.UNKNOWN, "", t.target);
+			Token prev1 = i - 1 >= 0 ? tokenArray[i - 1] : new Token(TType.UNKNOWN, "", t.target.copy());
+			Token next1 = i + 1 < stream.size() ? tokenArray[i + 1] : new Token(TType.UNKNOWN, "", t.target.copy());
+			Token next2 = i + 2 < stream.size() ? tokenArray[i + 2] : new Token(TType.UNKNOWN, "", t.target.copy());
+			Token next3 = i + 3 < stream.size() ? tokenArray[i + 3] : new Token(TType.UNKNOWN, "", t.target.copy());
 
 			// Brace handling
 			if(t.type == TType.LCURLY_BRACKET) {
 				inObjectDefinition = false;
-				ParseTree b = new ParseTree(new CFunction(__cbrace__.NAME, t.getTarget()), fileOptions);
+				ParseTree b = new ParseTree(new CFunction(__cbrace__.NAME, t.getTarget()), fileOptions, true);
 				tree.addChild(b);
 				tree = b;
 				parents.push(b);
@@ -1387,7 +1393,7 @@ public final class MethodScriptCompiler {
 					//We need to autoconcat some stuff
 					int stacks = constructCount.peek().get();
 					int replaceAt = tree.getChildren().size() - stacks;
-					ParseTree c = new ParseTree(new CFunction(__autoconcat__.NAME, tree.getTarget()), fileOptions);
+					ParseTree c = new ParseTree(new CFunction(__autoconcat__.NAME, tree.getTarget()), fileOptions, true);
 					List<ParseTree> subChildren = new ArrayList<>();
 					for(int b = replaceAt; b < tree.numberOfChildren(); b++) {
 						subChildren.add(tree.getChildAt(b));
@@ -1464,23 +1470,23 @@ public final class MethodScriptCompiler {
 				ParseTree myArray = tree.getChildAt(array);
 				ParseTree myIndex;
 				if(!emptyArray) {
-					myIndex = new ParseTree(new CFunction(__autoconcat__.NAME, myArray.getTarget()), fileOptions);
+					myIndex = new ParseTree(new CFunction(__autoconcat__.NAME, myArray.getTarget()), fileOptions, true);
 
 					for(int j = index; j < tree.numberOfChildren(); j++) {
 						myIndex.addChild(tree.getChildAt(j));
 					}
 				} else {
-					myIndex = new ParseTree(new CSlice("0..-1", t.target), fileOptions);
+					myIndex = new ParseTree(new CSlice("0..-1", t.target), fileOptions, true);
 				}
 				tree.setChildren(tree.getChildren().subList(0, array));
-				ParseTree arrayGet = new ParseTree(new CFunction(array_get.NAME, t.target), fileOptions);
+				ParseTree arrayGet = new ParseTree(new CFunction(array_get.NAME, t.target), fileOptions, true);
 				arrayGet.addChild(myArray);
 				arrayGet.addChild(myIndex);
 
 				// Check if the @var[...] had a negating "-" in front. If so, add a neg().
 				if(!minusArrayStack.isEmpty() && arrayStack.size() + 1 == minusArrayStack.peek().get()) {
-					if(!next1.type.equals(TType.LSQUARE_BRACKET)) { // Wait if there are more array_get's comming.
-						ParseTree negTree = new ParseTree(new CFunction(neg.NAME, unknown), fileOptions);
+					if(!next1.type.equals(TType.LSQUARE_BRACKET)) { // Wait if there are more array_get's coming.
+						ParseTree negTree = new ParseTree(new CFunction(neg.NAME, unknown), fileOptions, true);
 						negTree.addChild(arrayGet);
 						tree.addChild(negTree);
 						minusArrayStack.pop();
@@ -1505,7 +1511,7 @@ public final class MethodScriptCompiler {
 					function.addChild(string);
 					tree.addChild(function);
 				} else {
-					tree.addChild(new ParseTree(new CString(t.val(), t.target), fileOptions));
+					tree.addChild(new ParseTree(new CString(t.val(), t.target), fileOptions, true));
 				}
 				constructCount.peek().incrementAndGet();
 				continue;
@@ -1556,7 +1562,7 @@ public final class MethodScriptCompiler {
 					//We need to autoconcat some stuff
 					int stacks = constructCount.peek().get();
 					int replaceAt = tree.getChildren().size() - stacks;
-					ParseTree c = new ParseTree(new CFunction(__autoconcat__.NAME, tree.getTarget()), fileOptions);
+					ParseTree c = new ParseTree(new CFunction(__autoconcat__.NAME, tree.getTarget()), fileOptions, true);
 					List<ParseTree> subChildren = new ArrayList<>();
 					for(int b = replaceAt; b < tree.numberOfChildren(); b++) {
 						subChildren.add(tree.getChildAt(b));
@@ -1801,8 +1807,18 @@ public final class MethodScriptCompiler {
 				tree.addChild(new ParseTree(new Variable(t.val(), null, false, t.type.equals(TType.FINAL_VAR), t.target), fileOptions));
 				constructCount.peek().incrementAndGet();
 				//right_vars.add(new Variable(t.val(), null, t.line_num));
+			} else if(t.type.equals(TType.SMART_COMMENT)) {
+				lastSmartComment = new SmartComment(t.val());
+				continue;
 			}
-
+			if(lastSmartComment != null) {
+				if(tree.getChildren().isEmpty()) {
+					tree.getNodeModifiers().setComment(lastSmartComment);
+				} else {
+					tree.getChildren().get(tree.getChildren().size() - 1).getNodeModifiers().setComment(lastSmartComment);
+				}
+				lastSmartComment = null;
+			}
 		}
 
 		assert t != null || stream.size() == 0;
@@ -2154,6 +2170,7 @@ public final class MethodScriptCompiler {
 						.rewrite(root.getChildren(), returnSConcat, envs);
 				root.setData(ret.getData());
 				root.setChildren(ret.getChildren());
+				root.getNodeModifiers().merge(ret.getNodeModifiers());
 			} catch (ConfigCompileException ex) {
 				compilerExceptions.add(ex);
 				return;
@@ -2367,6 +2384,9 @@ public final class MethodScriptCompiler {
 				// If an error occurs, we will skip the rest of this element
 				compilerErrors.add(ex);
 				return;
+			} catch (ConfigCompileGroupException ex) {
+				compilerErrors.addAll(ex.getList());
+				return;
 			} catch (ConfigRuntimeException ex) {
 				compilerErrors.add(new ConfigCompileException(ex));
 				return;
@@ -2458,6 +2478,7 @@ public final class MethodScriptCompiler {
 					env.getEnv(GlobalEnv.class).SetFlag("no-check-undefined", true);
 				}
 				Procedure myProc = DataHandling.proc.getProcedure(tree.getTarget(), env, fakeScript, children.toArray(new ParseTree[children.size()]));
+				tree.getNodeModifiers().merge(children.get(0).getNodeModifiers());
 				if(env.hasEnv(GlobalEnv.class)) {
 					env.getEnv(GlobalEnv.class).ClearFlag("no-check-undefined");
 				}
@@ -2482,6 +2503,11 @@ public final class MethodScriptCompiler {
 			try {
 				ParseTree tempNode;
 				try {
+					for(ParseTree child : tree.getChildren()) {
+						if(child.getData() instanceof CSymbol) {
+							throw new ConfigCompileException("Unexpected symbol", tree.getData().getTarget());
+						}
+					}
 					tempNode = ((Optimizable) func).optimizeDynamic(tree.getData().getTarget(), env, envs,
 							tree.getChildren(), tree.getFileOptions());
 				} catch (ConfigRuntimeException e) {
@@ -2517,6 +2543,9 @@ public final class MethodScriptCompiler {
 				compilerErrors.add(ex);
 				// Also turn off optimizations for the rest of this flow, so we don't try the other optimization
 				// mechanisms, which are also bound to fail.
+				options = NO_OPTIMIZATIONS;
+			} catch (ConfigCompileGroupException ex) {
+				compilerErrors.addAll(ex.getList());
 				options = NO_OPTIMIZATIONS;
 			}
 		}
@@ -2851,18 +2880,77 @@ public final class MethodScriptCompiler {
 		return Static.resolveConstruct(b.toString().trim(), Target.UNKNOWN);
 	}
 
-	public static void registerAutoIncludes(Environment env, Script s) {
-		for(File f : Static.getAliasCore().autoIncludes) {
-			try {
-				MethodScriptCompiler.execute(
-						IncludeCache.get(f, env, env.getEnvClasses(), new Target(0, f, 0)), env, null, s);
-			} catch (ProgramFlowManipulationException e) {
-				ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.CreateUncatchableException(
-						"Cannot break program flow in auto include files.", e.getTarget()), env);
-			} catch (ConfigRuntimeException e) {
-				e.setEnv(env);
-				ConfigRuntimeException.HandleUncaughtException(e, env);
+	private static final List<Character> PDF_STACK = Arrays.asList(
+			'\u202A', // LRE
+			'\u202B', // RLE
+			'\u202D', // LRO
+			'\u202E'  // RLO
+	);
+	private static final List<Character> PDI_STACK = Arrays.asList(
+			'\u2066', // LRI
+			'\u2067'  // RLI
+	);
+	private static final char PDF = '\u202C';
+	private static final char PDI = '\u2069';
+
+	/**
+	 * A bidirectional control character (bidi character) is a unicode character which is used in legitimate
+	 * circumstances to force right to left languages such as Arabic and Hebrew to format correctly, when used
+	 * within the same encoding stream. There are a number of these characters, but in particular, there are two
+	 * which can be used to hide the functionality, because they cause the rendering of the text to appear one way,
+	 * but the compiler will read the code differently. In particular, if we insert "right to left isolation override"
+	 * in the middle of a comment, it will cause the rest of the line to be reversed.
+	 * <p>
+	 * Say we have the following code, which appears like this in a text editor, where RLI is the text direction override.
+	 * <pre>
+	 *     /* This is a comment RLI &#42;/ if(!@admin) {exit()}
+	 *     codeOnlyForAdmins();
+	 * </pre>
+	 *
+	 * The editor will render that code as shown above, but the compiler will view the code as if it were
+	 * written as such:
+	 * <pre>
+	 *     /* This is a comment if(!@admin) {exit()} &#42;/
+	 *     codeOnlyForAdmins();
+	 * </pre>
+	 *
+	 * Thus bypassing the apparently correct check for admin access. The key here is that the RLI indicator is not
+	 * visible in the editor, and so cannot be checked for through simple code review without compiler or editor
+	 * support. Some editors may add this in the future, but here, we simply disallow the attack at the compiler
+	 * level, making such code uncompilable whether or not it is visible in the editor.
+	 * <p>
+	 * It's also worth noting that the end of a line implicitely terminates unbalanced flow modifiers.
+	 * <p>
+	 * The solution then is to disallow unterminated flow modifiers from being used in comments and strings, where
+	 * the effects can flow across string or comment end markers. This allows for right-to-left languages to be used
+	 * within strings and comments anyways, but prevents them from being used maliciously. Thus, this function should
+	 * be called against the full string of the completed token.
+	 * <p>
+	 * For full details, see
+	 * <a href="https://trojansource.codes/trojan-source.pdf">https://trojansource.codes/trojan-source.pdf</a>
+	 * @param s The string to check
+	 * @param t The code target of the token
+	 * @throws ConfigCompileException If an unexpected sequence is detected
+	 */
+	private static void validateTerminatedBidiSequence(String s, Target t) throws ConfigCompileException {
+		int pdfStack = 0;
+		int pdiStack = 0;
+		for(Character c : s.toCharArray()) {
+			if(PDF_STACK.contains(c)) {
+				pdfStack++;
 			}
+			if(c == PDF) {
+				pdfStack--;
+			}
+			if(PDI_STACK.contains(c)) {
+				pdiStack++;
+			}
+			if(c == PDI) {
+				pdiStack--;
+			}
+		}
+		if(pdfStack != 0 || pdiStack != 0) {
+			throw new ConfigCompileException("Incorrectly formatted unicode sequence", t);
 		}
 	}
 }

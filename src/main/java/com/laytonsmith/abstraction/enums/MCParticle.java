@@ -2,7 +2,8 @@ package com.laytonsmith.abstraction.enums;
 
 import com.laytonsmith.PureUtilities.ClassLoading.DynamicEnum;
 import com.laytonsmith.annotations.MDynamicEnum;
-import com.laytonsmith.core.Static;
+import com.laytonsmith.core.MSLog;
+import com.laytonsmith.core.constructs.Target;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,6 +27,16 @@ public abstract class MCParticle<Concrete> extends DynamicEnum<MCParticle.MCVani
 	public static MCParticle valueOf(String test) throws IllegalArgumentException {
 		MCParticle ret = MAP.get(test);
 		if(ret == null) {
+			switch(test) {
+				case "BARRIER":
+					MSLog.GetLogger().e(MSLog.Tags.GENERAL,
+							"BARRIER particle type was changed in 1.18. Converted to BLOCK_MARKER.", Target.UNKNOWN);
+					return MAP.get("BLOCK_MARKER");
+				case "LIGHT":
+					MSLog.GetLogger().e(MSLog.Tags.GENERAL,
+							"LIGHT particle type was changed in 1.18. Converted to BLOCK_MARKER.", Target.UNKNOWN);
+					return MAP.get("BLOCK_MARKER");
+			}
 			throw new IllegalArgumentException("Unknown particle type: " + test);
 		}
 		return ret;
@@ -38,7 +49,9 @@ public abstract class MCParticle<Concrete> extends DynamicEnum<MCParticle.MCVani
 		if(NULL == null) { // docs mode
 			Set<String> dummy = new HashSet<>();
 			for(final MCVanillaParticle t : MCVanillaParticle.values()) {
-				dummy.add(t.name());
+				if(t.existsIn(MCVersion.CURRENT)) {
+					dummy.add(t.name());
+				}
 			}
 			return dummy;
 		}
@@ -52,6 +65,9 @@ public abstract class MCParticle<Concrete> extends DynamicEnum<MCParticle.MCVani
 		if(NULL == null) { // docs mode
 			ArrayList<MCParticle> dummy = new ArrayList<>();
 			for(final MCParticle.MCVanillaParticle p : MCParticle.MCVanillaParticle.values()) {
+				if(!p.existsIn(MCVersion.CURRENT)) {
+					continue;
+				}
 				dummy.add(new MCParticle<Object>(p, null) {
 					@Override
 					public String name() {
@@ -104,7 +120,7 @@ public abstract class MCParticle<Concrete> extends DynamicEnum<MCParticle.MCVani
 		SNOW_SHOVEL,
 		SLIME,
 		HEART,
-		BARRIER,
+		BARRIER(MCVersion.MC1_8, MCVersion.MC1_17_X),
 		ITEM_CRACK,
 		BLOCK_CRACK,
 		BLOCK_DUST,
@@ -145,7 +161,7 @@ public abstract class MCParticle<Concrete> extends DynamicEnum<MCParticle.MCVani
 		LANDING_OBSIDIAN_TEAR(MCVersion.MC1_16),
 		REVERSE_PORTAL(MCVersion.MC1_16),
 		WHITE_ASH(MCVersion.MC1_16),
-		LIGHT(MCVersion.MC1_17),
+		LIGHT(MCVersion.MC1_17, MCVersion.MC1_17_X),
 		DUST_COLOR_TRANSITION(MCVersion.MC1_17),
 		VIBRATION(MCVersion.MC1_17),
 		FALLING_SPORE_BLOSSOM(MCVersion.MC1_17),
@@ -162,20 +178,27 @@ public abstract class MCParticle<Concrete> extends DynamicEnum<MCParticle.MCVani
 		WAX_OFF(MCVersion.MC1_17),
 		ELECTRIC_SPARK(MCVersion.MC1_17),
 		SCRAPE(MCVersion.MC1_17),
+		BLOCK_MARKER(MCVersion.MC1_18),
 		UNKNOWN(MCVersion.NEVER);
 
 		private final MCVersion since;
+		private final MCVersion until;
 
 		MCVanillaParticle() {
 			this(MCVersion.MC1_0);
 		}
 
 		MCVanillaParticle(MCVersion since) {
-			this.since = since;
+			this(since, MCVersion.CURRENT);
 		}
 
-		public boolean existsInCurrent() {
-			return Static.getServer().getMinecraftVersion().gte(since);
+		MCVanillaParticle(MCVersion since, MCVersion until) {
+			this.since = since;
+			this.until = until;
+		}
+
+		public boolean existsIn(MCVersion version) {
+			return version.gte(since) && version.lte(until);
 		}
 	}
 }

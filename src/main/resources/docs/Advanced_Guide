@@ -421,11 +421,15 @@ it simply provides additional integrations on top of the alias system.
 A full complex example, which provides a custom tabcompleter and overrides some existing parameters, might look
 like this:
 
+main.ms:
+<%CODE|
+// Simulate some database of users
+export('list', associative_array());
+%>
+
 auto_include.ms:
 <%CODE|
-// Simulate some DB of users
-export('list', associative_array());
-
+// Create modification procedures for the simulated database
 proc _usersInList() {
 	return(import('list'));
 }

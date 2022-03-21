@@ -185,7 +185,9 @@ public class EntityEvents {
 		public String docs() {
 			return "{itemname: <string match> the type of item that spawned}"
 					+ " Fires when an item entity comes into existence."
-					+ " {location: where the item spawns | id: the item's entityID | item}"
+					+ " {location: Where the item spawns "
+					+ "| id: The item's entityID "
+					+ "| item: An item array representing the item being spawned.}"
 					+ " {item: the itemstack of the entity}"
 					+ " {}";
 		}
@@ -1097,8 +1099,9 @@ public class EntityEvents {
 		public String docs() {
 			return "{player: <macro> | itemname: <string match>} "
 					+ "This event is called when a player drops an item. "
-					+ "{player: The player | item: An item array representing "
-					+ "the item being dropped. } "
+					+ "{player: The player "
+					+ "| id: The item's entityID "
+					+ "| item: An item array representing the item being dropped.} "
 					+ "{item: setting this to null removes the dropped item} "
 					+ "{player|item}";
 		}

@@ -1,6 +1,7 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.SmartComment;
 import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CClassType;
@@ -50,16 +51,20 @@ public class Procedure implements Cloneable {
 	private ParseTree tree;
 	private CClassType returnType;
 	private boolean possiblyConstant = false;
+	private SmartComment procComment;
+
 	private static final Pattern PROCEDURE_NAME_REGEX = Pattern.compile("^_[\\p{L}0-9]+[\\p{L}_0-9]*");
 	/**
 	 * The line the procedure is defined at (for stacktraces)
 	 */
 	private final Target definedAt;
 
-	public Procedure(String name, CClassType returnType, List<IVariable> varList, ParseTree tree, Target t) {
+	public Procedure(String name, CClassType returnType, List<IVariable> varList, SmartComment procComment,
+			ParseTree tree, Target t) {
 		this.name = name;
 		this.definedAt = t;
 		this.varList = new HashMap<>();
+		this.procComment = procComment;
 		for(IVariable var : varList) {
 			try {
 				this.varList.put(var.getVariableName(), var.clone());
@@ -150,6 +155,10 @@ public class Procedure implements Cloneable {
 	@Override
 	public String toString() {
 		return name + "(" + StringUtils.Join(varList.keySet(), ", ") + ")";
+	}
+
+	public SmartComment getSmartComment() {
+		return procComment;
 	}
 
 	/**

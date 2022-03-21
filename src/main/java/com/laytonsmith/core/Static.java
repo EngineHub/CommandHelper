@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.DateUtils;
 import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
+import com.laytonsmith.PureUtilities.ExecutionQueueImpl;
 import com.laytonsmith.PureUtilities.SimpleVersion;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.PureUtilities.XMLDocument;
@@ -17,13 +18,16 @@ import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCPlugin;
+import com.laytonsmith.abstraction.MCRemoteCommandSender;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
+import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
+import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBareString;
 import com.laytonsmith.core.constructs.CBoolean;
@@ -60,6 +64,7 @@ import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Function;
+import com.laytonsmith.core.functions.IncludeCache;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.core.taskmanager.TaskManagerImpl;
@@ -275,10 +280,10 @@ public final class Static {
 	}
 
 	/**
-	 * Currently forwards the call to
-	 * {@link ArgumentValidation#getBooleanish},
-	 * to keep backwards compatible behavior, but will be removed in a future release. Explicitly use either
-	 * {@link ArgumentValidation#getBooleanish} or {@link ArgumentValidation#getBooleanObject}.
+	 * Currently forwards the call to {@link ArgumentValidation#getBooleanish}, to keep backwards compatible behavior,
+	 * but will be removed in a future release. Explicitly use either {@link ArgumentValidation#getBooleanish} or
+	 * {@link ArgumentValidation#getBooleanObject}.
+	 *
 	 * @param c
 	 * @param t
 	 * @return
@@ -425,7 +430,7 @@ public final class Static {
 		} else {
 			try {
 				v = loadSelfVersion();
-			} catch (Exception ex) {
+			} catch(Exception ex) {
 				//Ignored
 			}
 		}
@@ -447,7 +452,7 @@ public final class Static {
 			Yaml yaml = new Yaml();
 			Map<String, Object> map = (Map<String, Object>) yaml.load(contents);
 			return new SimpleVersion((String) map.get("version"));
-		} catch (RuntimeException | IOException ex) {
+		} catch(RuntimeException | IOException ex) {
 			throw new Exception(ex);
 		}
 	}
@@ -541,7 +546,6 @@ public final class Static {
 	private static final Pattern VALID_DECIMAL = Pattern.compile("-?0m[0-9]+");
 	private static final Pattern INVALID_DECIMAL = Pattern.compile("-?0m[0-9]*[^0-9]+[0-9]*");
 
-
 	/**
 	 * Given a string input, creates and returns a Construct of the appropriate type. This takes into account that null,
 	 * true, and false are keywords.
@@ -560,6 +564,7 @@ public final class Static {
 	 * true, and false are keywords.
 	 *
 	 * If returnBareStrings is true, then we don't return CString, we return CBareString.
+	 *
 	 * @param val
 	 * @param t
 	 * @param returnBareStrings
@@ -611,7 +616,7 @@ public final class Static {
 		}
 		try {
 			return new CInt(Long.parseLong(val), t);
-		} catch (NumberFormatException e) {
+		} catch(NumberFormatException e) {
 			try {
 				if(!(val.contains(" ") || val.contains("\t"))) {
 					//Interesting behavior in Double.parseDouble causes it to "trim" strings first, then
@@ -619,7 +624,7 @@ public final class Static {
 					//any characters other than [\-0-9\.], we want to make it a string instead
 					return new CDouble(Double.parseDouble(val), t);
 				}
-			} catch (NumberFormatException g) {
+			} catch(NumberFormatException g) {
 				// Not a double either
 			}
 		}
@@ -627,7 +632,7 @@ public final class Static {
 		if(fqType != null) {
 			try {
 				return CClassType.get(FullyQualifiedClassName.forFullyQualifiedClass(fqType));
-			} catch (ClassNotFoundException ex) {
+			} catch(ClassNotFoundException ex) {
 				// Can't happen, because we just resolved the type, and it wasn't null.
 				throw new Error(ex);
 			}
@@ -663,13 +668,17 @@ public final class Static {
 	 */
 	public static void SendMessage(final MCCommandSender m, String msg, final Target t) {
 		if(m != null && !(m instanceof MCConsoleCommandSender)) {
-			if(m instanceof MCPlayer) {
-				MCPlayer p = (MCPlayer) m;
+			if(m instanceof MCPlayer p) {
 				if(!p.isOnline()) {
 					throw new CREPlayerOfflineException("The player " + p.getName() + " is not online", t);
 				}
 			}
 			m.sendMessage(msg);
+		} else if(m instanceof MCRemoteCommandSender rcon) {
+			if(!Prefs.UseColors()) {
+				msg = MCChatColor.stripColor(msg);
+			}
+			rcon.sendMessage(msg);
 		} else {
 			msg = Static.MCToANSIColors(msg);
 			if(msg.contains("\033")) {
@@ -691,7 +700,7 @@ public final class Static {
 	public static void SendMessage(final MCCommandSender m, String msg) {
 		try {
 			SendMessage(m, msg, Target.UNKNOWN);
-		} catch (ConfigRuntimeException e) {
+		} catch(ConfigRuntimeException e) {
 			//Ignored
 		}
 	}
@@ -738,7 +747,7 @@ public final class Static {
 			} else {
 				type = Integer.parseInt(notation);
 			}
-		} catch (NumberFormatException e) {
+		} catch(NumberFormatException e) {
 			throw new CREFormatException("Invalid item format: " + notation, t);
 		}
 		MCMaterial mat = StaticLayer.GetMaterialFromLegacy(type, data);
@@ -777,7 +786,7 @@ public final class Static {
 				throw new CRELengthException("A UUID is expected to be 32 or 36 characters,"
 						+ " but the given string was " + subject.length() + " characters.", t);
 			}
-		} catch (IllegalArgumentException iae) {
+		} catch(IllegalArgumentException iae) {
 			throw new CREFormatException("A UUID length string was given, but was not a valid UUID.", t);
 		}
 	}
@@ -806,7 +815,7 @@ public final class Static {
 		} else {
 			try {
 				ofp = getServer().getOfflinePlayer(GetUUID(search, t));
-			} catch (ConfigRuntimeException cre) {
+			} catch(ConfigRuntimeException cre) {
 				if(cre instanceof CREThrowable && ((CREThrowable) cre).isInstanceOf(CRELengthException.TYPE)) {
 					throw new CRELengthException("The given string was the wrong size to identify a player."
 							+ " A player name is expected to be between 1 and 16 characters. " + cre.getMessage(), t);
@@ -840,7 +849,7 @@ public final class Static {
 		} else {
 			try {
 				m = getServer().getPlayer(GetUUID(player, t));
-			} catch (ConfigRuntimeException cre) {
+			} catch(ConfigRuntimeException cre) {
 				if(cre instanceof CREThrowable && ((CREThrowable) cre).isInstanceOf(CRELengthException.TYPE)) {
 					throw new CRELengthException("The given string was the wrong size to identify a player."
 							+ " A player name is expected to be between 1 and 16 characters. " + cre.getMessage(), t);
@@ -884,7 +893,7 @@ public final class Static {
 		} else {
 			try {
 				m = Static.getServer().getPlayer(player);
-			} catch (Exception e) {
+			} catch(Exception e) {
 				//Apparently the server can occasionally throw exceptions here, so instead of rethrowing
 				//a NPE or whatever, we'll assume that the player just isn't online, and
 				//throw a CRE instead.
@@ -1282,6 +1291,7 @@ public final class Static {
 	/**
 	 * Generates a new environment, assuming that the jar has a folder next to it named CommandHelper, and that folder
 	 * is the root.
+	 *
 	 * @param install
 	 * @param runtimeModes The {@link RuntimeMode}s for this environment.
 	 * @return
@@ -1291,6 +1301,27 @@ public final class Static {
 	 */
 	public static Environment GenerateStandaloneEnvironment(
 			boolean install, EnumSet<RuntimeMode> runtimeModes)
+			throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
+		return GenerateStandaloneEnvironment(install, runtimeModes, null, null);
+	}
+
+	/**
+	 * Generates a new environment, assuming that the jar has a folder next to it named CommandHelper, and that folder
+	 * is the root.
+	 *
+	 * @param install
+	 * @param runtimeModes The {@link RuntimeMode}s for this environment.
+	 * @param inludeCache If null, a default is provided, but otherwise can be provided
+	 * @param staticAnalysis By default null, but if provided that is used instead
+	 * @return
+	 * @throws IOException
+	 * @throws DataSourceException
+	 * @throws URISyntaxException
+	 * @throws com.laytonsmith.core.Profiles.InvalidProfileException
+	 */
+	public static Environment GenerateStandaloneEnvironment(
+			boolean install, EnumSet<RuntimeMode> runtimeModes, IncludeCache includeCache,
+			StaticAnalysis staticAnalysis)
 			throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
 		File platformFolder = MethodScriptFileLocations.getDefault().getConfigDirectory();
 		if(install) {
@@ -1303,18 +1334,20 @@ public final class Static {
 				: new ProfilesImpl());
 		PersistenceNetwork persistenceNetwork = new PersistenceNetworkImpl(MethodScriptFileLocations.getDefault().getPersistenceConfig(),
 				new URI(URLEncoder.encode("sqlite://" + new File(platformFolder, "persistence.db").getCanonicalPath().replace('\\', '/'), "UTF-8")), options);
-		GlobalEnv gEnv = new GlobalEnv(new MethodScriptExecutionQueue("MethodScriptExecutionQueue", "default"),
-				platformFolder, runtimeModes);
+		GlobalEnv gEnv = new GlobalEnv(platformFolder, runtimeModes);
 		gEnv.SetLabel(GLOBAL_PERMISSION);
 		StaticRuntimeEnv staticRuntimeEnv = new StaticRuntimeEnv(
 				new Profiler(MethodScriptFileLocations.getDefault().getProfilerConfigFile()),
-				persistenceNetwork, profiles, new TaskManagerImpl());
+				persistenceNetwork, profiles, new TaskManagerImpl(),
+				new ExecutionQueueImpl("MethodScriptExecutionQueue", "default"),
+				includeCache == null ? new IncludeCache() : includeCache, staticAnalysis);
 		return Environment.createEnvironment(gEnv, staticRuntimeEnv, new CompilerEnvironment());
 	}
 
 	/**
 	 * Generates a new environment, assuming that the jar has a folder next to it named CommandHelper, and that folder
 	 * is the root. This new environment is in embedded mode (and not in cmdline and interpreter mode).
+	 *
 	 * @param install
 	 * @return
 	 * @throws IOException
@@ -1329,6 +1362,7 @@ public final class Static {
 	/**
 	 * Generates a new environment, assuming that the jar has a folder next to it named CommandHelper, and that folder
 	 * is the root. This new environment is in embedded mode (and not in cmdline and interpreter mode).
+	 *
 	 * @return
 	 * @throws IOException
 	 * @throws DataSourceException
@@ -1401,8 +1435,8 @@ public final class Static {
 	}
 
 	/**
-	 * Returns true if currently running in cmdline mode. If the environment is null, or the GlobalEnv is
-	 * not available, then defaultValue is returned.
+	 * Returns true if currently running in cmdline mode. If the environment is null, or the GlobalEnv is not available,
+	 * then defaultValue is returned.
 	 *
 	 * @param environment
 	 * @param defaultValue What should be returned if the environment is null or GlobalEnv is not present. (Happens

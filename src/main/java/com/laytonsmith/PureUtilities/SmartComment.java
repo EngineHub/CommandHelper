@@ -23,6 +23,7 @@ public class SmartComment {
 	private static final Pattern ANNOTATION = Pattern.compile("@[a-zA-Z][a-zA-Z0-9]*");
 	private static final Pattern EMBEDDED_ANNOTATION = Pattern.compile("\\{@([a-zA-Z][a-zA-Z0-9]*) +(.*?)\\}");
 	private static final String LINE_START = "[\\t ]*\\* ?";
+	private String unprocessed;
 	private String raw;
 	private String body;
 	private final Map<String, List<String>> annotations = new HashMap<>();
@@ -38,18 +39,29 @@ public class SmartComment {
 	}
 
 	/**
+	 * Creates a new SmartComment object, with additional embedded annotation processors.
+	 *
+	 * @param comment
+	 * @param replacements
+	 */
+	public SmartComment(SmartComment comment, Map<String, Replacement> replacements) {
+		this(comment.unprocessed, replacements);
+	}
+
+	/**
 	 * Creates a new smart comment.
 	 *
 	 * @param comment The comment to be parsed
 	 * @param replacements This is used to replace embedded annotations with some other text. For instance, if the
-	 * comment contained {
-	 * @ code myCode }, (minus spaces) it may be used to return "&lt;code&gt;myCode&lt;/code&gt;". By default, if a
+	 * comment contained {@code {@code myCode}}, it may be used to return "&lt;code&gt;myCode&lt;/code&gt;". By default, if a
 	 * particular embedded annotation has no handler, the embedded text is simply used as is.
 	 */
 	public SmartComment(String comment, Map<String, Replacement> replacements) {
 		if(replacements == null) {
 			replacements = new HashMap<>();
 		}
+
+		unprocessed = comment;
 
 		//Remove the @ at the beginning, if present.
 		for(String key : replacements.keySet()) {

@@ -1677,7 +1677,7 @@ public class Cmdline {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREInsufficientPermissionException.class};
+			return new Class[]{CREInsufficientPermissionException.class, CREIOException.class};
 		}
 
 		@Override
@@ -1695,12 +1695,17 @@ public class Cmdline {
 			requireCmdlineMode(environment, this, t);
 			CArray ca = new CArray(t);
 			File cwd = Static.GetFileFromArgument(args.length > 0 ? args[0].val() : null, environment, t, environment.getEnv(GlobalEnv.class).GetRootFolder());
-			if(cwd.exists()) {
-				for(File f : cwd.listFiles()) {
+			if(cwd.isDirectory()) {
+				File[] fs = cwd.listFiles();
+				if(fs == null) {
+					throw new CREIOException("Directory could not be read in.", t);
+				}
+
+				for(File f : fs) {
 					ca.push(new CString(f.getName(), t), t);
 				}
 			} else {
-				throw new CREIOException("No such file or directory: " + cwd.getPath(), t);
+				throw new CREIOException("No such directory: " + cwd.getPath(), t);
 			}
 			return ca;
 		}
@@ -2003,7 +2008,7 @@ public class Cmdline {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{1, 2};
+			return new Integer[]{1, 2, 3};
 		}
 
 		@MEnum("ms.lang.FindType")

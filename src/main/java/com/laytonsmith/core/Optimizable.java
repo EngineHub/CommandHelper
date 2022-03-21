@@ -5,6 +5,7 @@ import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.natives.interfaces.Mixed;
@@ -162,7 +163,7 @@ public interface Optimizable extends Function {
 			throws ConfigRuntimeException, ConfigCompileException;
 
 	/**
-	 * If the function indicates it can optimize dynamic values, this method is called. It may also throw a compile
+	 * If the function indicates it can optimize dynamic values, this method is called.It may also throw a compile
 	 * exception should the parameters be unacceptable. It may return null if no changes should be made (which is likely
 	 * the default).
 	 *
@@ -174,10 +175,11 @@ public interface Optimizable extends Function {
 	 * @param fileOptions The file options for the top level function
 	 * @return
 	 * @throws com.laytonsmith.core.exceptions.ConfigCompileException
+	 * @throws com.laytonsmith.core.exceptions.ConfigCompileGroupException
 	 */
 	public ParseTree optimizeDynamic(Target t, Environment env, Set<Class<? extends Environment.EnvironmentImpl>> envs,
 			List<ParseTree> children, FileOptions fileOptions)
-			throws ConfigCompileException, ConfigRuntimeException;
+			throws ConfigCompileException, ConfigRuntimeException, ConfigCompileGroupException;
 
 	/**
 	 * Does custom linking in a given function. This is called if the {@link OptimizationOption#CUSTOM_LINK} option is

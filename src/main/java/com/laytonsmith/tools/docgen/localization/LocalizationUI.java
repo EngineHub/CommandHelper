@@ -8,11 +8,11 @@ import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.TemplateBuilder;
 import com.laytonsmith.PureUtilities.Common.UIUtils;
 import com.laytonsmith.PureUtilities.DaemonManager;
+import com.laytonsmith.PureUtilities.ExecutionQueueImpl;
 import com.laytonsmith.PureUtilities.UI.TextDialog;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.commandhelper.CommandHelperFileLocations;
 import com.laytonsmith.core.MSVersion;
-import com.laytonsmith.core.MethodScriptExecutionQueue;
 import com.laytonsmith.core.MethodScriptFileLocations;
 import com.laytonsmith.core.Profiles;
 import com.laytonsmith.core.ProfilesImpl;
@@ -21,6 +21,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.RuntimeMode;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
+import com.laytonsmith.core.functions.IncludeCache;
 import com.laytonsmith.core.functions.OAuth;
 import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.core.taskmanager.TaskManagerImpl;
@@ -1354,11 +1355,12 @@ public final class LocalizationUI extends javax.swing.JFrame {
 				storedLocation = this.pn.get(new String[]{"l10n", "lastLoadedDb"});
 				azureKey = this.pn.get(new String[]{"l10n", "azureKey"});
 			}
-			this.gEnv = new GlobalEnv(new MethodScriptExecutionQueue("L10N-UI", "default"),
-					MethodScriptFileLocations.getDefault().getTempDir(), EnumSet.of(RuntimeMode.CMDLINE));
+			this.gEnv = new GlobalEnv(MethodScriptFileLocations.getDefault().getTempDir(),
+					EnumSet.of(RuntimeMode.CMDLINE));
 			this.staticRuntimeEnv = new StaticRuntimeEnv(
 					new Profiler(CommandHelperFileLocations.getDefault().getProfilerConfigFile()), this.pn,
-					new ProfilesImpl(MethodScriptFileLocations.getDefault().getProfilesFile()), new TaskManagerImpl());
+					new ProfilesImpl(MethodScriptFileLocations.getDefault().getProfilesFile()), new TaskManagerImpl(),
+					new ExecutionQueueImpl("L10N-UI", "default"), new IncludeCache(), null);
 		} catch(URISyntaxException | IOException | DataSourceException | Profiles.InvalidProfileException ex) {
 			showError("Could not load Persistence Database! " + ex.getMessage());
 		}

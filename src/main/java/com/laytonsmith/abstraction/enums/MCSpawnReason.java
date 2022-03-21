@@ -50,5 +50,6 @@ public enum MCSpawnReason {
 	DROWNED,
 	SHEARED,
 	EXPLOSION,
-	FROZEN
+	FROZEN,
+	SPELL,
 }

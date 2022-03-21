@@ -11,17 +11,18 @@ import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.MSP.Burst;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.Implementation;
+import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.datasource;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.CommandLineTool;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Main;
 import com.laytonsmith.core.Optimizable;
-import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.events.prefilters.PrefilterMatcher.PrefilterDocs;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.FunctionBase;
@@ -35,7 +36,6 @@ import com.laytonsmith.tools.Manager;
 import com.laytonsmith.tools.SimpleSyntaxHighlighter;
 import com.laytonsmith.tools.docgen.DocGenTemplates.Generator.GenerateException;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
@@ -102,11 +102,6 @@ public class DocGenTemplates {
 	}
 
 	public static String Generate(String forPage, Map<String, String> customTemplates) {
-		try {
-			Prefs.init(null);
-		} catch (IOException ex) {
-			Logger.getLogger(DocGenTemplates.class.getName()).log(Level.SEVERE, null, ex);
-		}
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(DocGenTemplates.class));
 		//Grab the template from the resources
 		String template = StreamUtils.GetString(DocGenTemplates.class.getResourceAsStream("/docs/" + forPage));
@@ -188,13 +183,6 @@ public class DocGenTemplates {
 	 * @return
 	 */
 	public static String DoTemplateReplacement(String template, Map<String, Generator> generators) throws GenerateException {
-		try {
-			if(Implementation.GetServerType() != Implementation.Type.BUKKIT) {
-				Prefs.init(null);
-			}
-		} catch (IOException ex) {
-			Logger.getLogger(DocGenTemplates.class.getName()).log(Level.SEVERE, null, ex);
-		}
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(DocGenTemplates.class));
 
 		// Find all the <%templates%> (which are the same as %%templates%%, but are nestable)
@@ -577,7 +565,7 @@ public class DocGenTemplates {
 			try {
 				out = SimpleSyntaxHighlighter.Highlight(code, true);
 			} catch (ConfigCompileException ex) {
-				throw new GenerateException(ex.getMessage() + "\nFor code: " + code, ex);
+				return "<p>(The following code doesn't compile)</p>\n" + PRE.generate(args);
 			} catch (Exception ex) {
 				throw new RuntimeException(ex);
 			}
@@ -837,6 +825,30 @@ public class DocGenTemplates {
 					.append(" (added ")
 					.append(s.since())
 					.append(")\n");
+		}
+		return b.toString();
+	};
+
+	public static final Generator PREFILTER_DESCRIPTIONS = (args) -> {
+		StringBuilder b = new StringBuilder();
+		// Make them arbitrarily but deterministicly ordered
+		SortedSet<Class<? extends PrefilterDocs>> set = new TreeSet(new Comparator<Class<? extends PrefilterDocs>>() {
+			@Override
+			public int compare(Class<? extends PrefilterDocs> o1, Class<? extends PrefilterDocs> o2) {
+				return o1.getName().compareTo(o2.getName());
+			}
+		});
+		set.addAll(ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(api.class, PrefilterDocs.class));
+		for(Class<? extends PrefilterDocs> prefilterMatcher : set) {
+			try {
+				PrefilterDocs matcher = ReflectionUtils.newInstance(prefilterMatcher);
+				b.append("== ").append(matcher.getName()).append(" ==\n");
+				b.append(DoTemplateReplacement(matcher.docs(), GetGenerators()));
+				b.append("\n\n").append("Since: ").append(matcher.since());
+				b.append("\n\n");
+			} catch (ReflectionUtils.ReflectionException ex) {
+				ex.printStackTrace(System.err);
+			}
 		}
 		return b.toString();
 	};

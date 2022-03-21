@@ -55,4 +55,11 @@ public class BukkitMCBanner extends BukkitMCBlockState implements MCBanner {
 	public void addPattern(MCPattern pattern) {
 		b.addPattern((Pattern) pattern.getHandle());
 	}
+
+	@Override
+	public void clearPatterns() {
+		for(int i = b.numberOfPatterns() - 1; i >= 0; i--) {
+			b.removePattern(i);
+		}
+	}
 }

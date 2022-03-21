@@ -33,6 +33,7 @@ import com.laytonsmith.abstraction.enums.MCEffect;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCGameRule;
 import com.laytonsmith.abstraction.enums.MCParticle;
+import com.laytonsmith.abstraction.enums.MCParticle.MCVanillaParticle;
 import com.laytonsmith.abstraction.enums.MCSound;
 import com.laytonsmith.abstraction.enums.MCSoundCategory;
 import com.laytonsmith.abstraction.enums.MCTreeType;
@@ -298,10 +299,14 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 		switch((MCParticle.MCVanillaParticle) pa.getAbstracted()) {
 			case BLOCK_DUST:
 			case BLOCK_CRACK:
+			case BLOCK_MARKER:
 			case FALLING_DUST:
 				BlockData bd;
 				if(data instanceof MCBlockData) {
 					bd = (BlockData) ((MCBlockData) data).getHandle();
+				} else if(pa.getAbstracted() == MCVanillaParticle.BLOCK_MARKER) {
+					// Barrier (and light) particles were replaced by block markers, so this is the best fallback.
+					bd = Material.BARRIER.createBlockData();
 				} else {
 					bd = Material.STONE.createBlockData();
 				}
@@ -486,6 +491,16 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 		} catch (Exception e) {
 			return false;
 		}
+	}
+
+	@Override
+	public boolean isAutoSave() {
+		return w.isAutoSave();
+	}
+
+	@Override
+	public void setAutoSave(boolean autoSave) {
+		w.setAutoSave(autoSave);
 	}
 
 	@Override

@@ -25,7 +25,7 @@ public class SQLiteProfile extends SQLProfile {
 	public File getFile() {
 		File f = new File(file);
 		if(!f.isAbsolute()) {
-			f = new File(MethodScriptFileLocations.getDefault().getProfilesFile(), f.getPath());
+			f = new File(MethodScriptFileLocations.getDefault().getProfilesFile().getParentFile(), f.getPath());
 		}
 		return f;
 	}

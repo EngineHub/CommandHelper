@@ -1,5 +1,6 @@
 package com.laytonsmith.core.compiler.analysis;
 
+import com.laytonsmith.core.NodeModifiers;
 import com.laytonsmith.core.constructs.Target;
 
 /**
@@ -11,10 +12,11 @@ public class IVariableAssignDeclaration extends Declaration {
 
 	/**
 	 * Creates a new {@link IVariableAssignDeclaration} in the {@link Namespace#IVARIABLE_ASSIGN} namespace.
-	 * @param identifier - The variable name.
-	 * @param t - The target of the declaration.
+	 * @param identifier The variable name.
+	 * @param modifiers The node modifiers
+	 * @param t The target of the declaration.
 	 */
-	public IVariableAssignDeclaration(String identifier, Target t) {
-		super(Namespace.IVARIABLE_ASSIGN, identifier, null, t);
+	public IVariableAssignDeclaration(String identifier, NodeModifiers modifiers, Target t) {
+		super(Namespace.IVARIABLE_ASSIGN, identifier, null, modifiers, t);
 	}
 }

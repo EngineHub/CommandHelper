@@ -1,6 +1,11 @@
 package com.laytonsmith.core.environments;
 
+import com.laytonsmith.PureUtilities.Common.MutableObject;
 import com.laytonsmith.PureUtilities.DaemonManager;
+import com.laytonsmith.PureUtilities.ExecutionQueue;
+import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
+import com.laytonsmith.core.constructs.CClosure;
+import com.laytonsmith.core.functions.IncludeCache;
 import com.laytonsmith.core.Profiles;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.environments.Environment.EnvironmentImpl;
@@ -19,7 +24,11 @@ public class StaticRuntimeEnv implements Environment.EnvironmentImpl, Cloneable 
 	private final PersistenceNetwork persistenceNetwork;
 	private final Profiles profiles;
 	private final TaskManager taskManager;
+	private final IncludeCache includeCache;
+	private final StaticAnalysis autoIncludesAnalysis;
+	private final ExecutionQueue executionQueue;
 	private final DaemonManager daemonManager = new DaemonManager();
+	private final MutableObject<CClosure> uncaughtExceptionHandler = new MutableObject<>();
 
 	/**
 	 * Creates a new {@link StaticRuntimeEnv}. All fields in the constructor are required, and must not be null.
@@ -27,16 +36,25 @@ public class StaticRuntimeEnv implements Environment.EnvironmentImpl, Cloneable 
 	 * @param network - The pre-configured PersistenceNetwork object to use.
 	 * @param profiles - The Profiles object to use.
 	 * @param taskManager - The TaskManager object to use.
+	 * @param executionQueue The ExecutionQueue object to use.
+	 * @param includeCache - The IncludeCache object to use.
+	 * @param autoIncludesAnalysis - The StaticAnalysis of autoIncludes. Can be null when there are no autoIncludes.
 	 */
-	public StaticRuntimeEnv(Profiler profiler, PersistenceNetwork network, Profiles profiles, TaskManager taskManager) {
+	public StaticRuntimeEnv(Profiler profiler, PersistenceNetwork network, Profiles profiles, TaskManager taskManager,
+			ExecutionQueue executionQueue, IncludeCache includeCache, StaticAnalysis autoIncludesAnalysis) {
 		Static.AssertNonNull(profiler, "Profiler must not be null");
 		Static.AssertNonNull(network, "PersistenceNetwork must not be null");
 		Static.AssertNonNull(profiles, "Profiles must not be null");
 		Static.AssertNonNull(taskManager, "TaskManager must not be null");
+		Static.AssertNonNull(includeCache, "IncludeCache must not be null");
+		Static.AssertNonNull(executionQueue, "MethodScriptExecutionQueue must not be null");
 		this.profiler = profiler;
 		this.persistenceNetwork = network;
 		this.profiles = profiles;
 		this.taskManager = taskManager;
+		this.includeCache = includeCache;
+		this.autoIncludesAnalysis = autoIncludesAnalysis;
+		this.executionQueue = executionQueue;
 	}
 
 	public Profiler GetProfiler() {
@@ -57,6 +75,26 @@ public class StaticRuntimeEnv implements Environment.EnvironmentImpl, Cloneable 
 
 	public DaemonManager GetDaemonManager() {
 		return this.daemonManager;
+	}
+
+	public IncludeCache getIncludeCache() {
+		return this.includeCache;
+	}
+
+	public StaticAnalysis getAutoIncludeAnalysis() {
+		return this.autoIncludesAnalysis;
+	}
+
+	public ExecutionQueue getExecutionQueue() {
+		return this.executionQueue;
+	}
+
+	public CClosure getExceptionHandler() {
+		return uncaughtExceptionHandler.getObject();
+	}
+
+	public void setExceptionHandler(CClosure closure) {
+		uncaughtExceptionHandler.setObject(closure);
 	}
 
 	@Override

@@ -3,6 +3,13 @@ Below is a reverse chronological guide to help you with the most notable of thes
 
 ----
 
+== Minecraft 1.18 ==
+
+* BARRIER and LIGHT particle types have been changed to the BLOCK_MARKER particle type with a 'block' parameter.
+* There are many removals and name changes to biomes.
+
+----
+
 == Minecraft 1.17 ==
 
 * GRASS_PATH changed to DIRT_PATH (converted automatically where possible)

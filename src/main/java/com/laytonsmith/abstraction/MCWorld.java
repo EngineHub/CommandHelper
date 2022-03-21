@@ -154,6 +154,10 @@ public interface MCWorld extends MCMetadatable {
 	 */
 	boolean exists();
 
+	boolean isAutoSave();
+
+	void setAutoSave(boolean autoSave);
+
 	void save();
 
 	void setKeepSpawnInMemory(boolean keepLoaded);

@@ -824,4 +824,105 @@ public class ArrayUtils {
 		System.gc();
 		return chars;
 	}
+
+	/**
+	 * Fills an array with the given value.
+	 * @param array The array to fill.
+	 * @param with The value to fill the array with.
+	 * @param <T> The type of the array.
+	 */
+	public static <T> void fill(T[] array, T with) {
+		for(int i = 0; i < array.length; i++) {
+			array[i] = with;
+		}
+	}
+
+	/**
+	 * Fills an array with the given value.
+	 * @param array The array to fill.
+	 * @param with The value to fill the array with.
+	 */
+	public static void fill(char[] array, char with) {
+		for(int i = 0; i < array.length; i++) {
+			array[i] = with;
+		}
+	}
+
+	/**
+	 * Fills an array with the given value.
+	 * @param array The array to fill.
+	 * @param with The value to fill the array with.
+	 */
+	public static void fill(byte[] array, byte with) {
+		for(int i = 0; i < array.length; i++) {
+			array[i] = with;
+		}
+	}
+
+	/**
+	 * Fills an array with the given value.
+	 * @param array The array to fill.
+	 * @param with The value to fill the array with.
+	 */
+	public static void fill(short[] array, short with) {
+		for(int i = 0; i < array.length; i++) {
+			array[i] = with;
+		}
+	}
+
+	/**
+	 * Fills an array with the given value.
+	 * @param array The array to fill.
+	 * @param with The value to fill the array with.
+	 */
+	public static void fill(int[] array, int with) {
+		for(int i = 0; i < array.length; i++) {
+			array[i] = with;
+		}
+	}
+
+	/**
+	 * Fills an array with the given value.
+	 * @param array The array to fill.
+	 * @param with The value to fill the array with.
+	 */
+	public static void fill(long[] array, long with) {
+		for(int i = 0; i < array.length; i++) {
+			array[i] = with;
+		}
+	}
+
+	/**
+	 * Fills an array with the given value.
+	 * @param array The array to fill.
+	 * @param with The value to fill the array with.
+	 */
+	public static void fill(float[] array, float with) {
+		for(int i = 0; i < array.length; i++) {
+			array[i] = with;
+		}
+	}
+
+	/**
+	 * Fills an array with the given value.
+	 * @param array The array to fill.
+	 * @param with The value to fill the array with.
+	 */
+	public static void fill(double[] array, double with) {
+		for(int i = 0; i < array.length; i++) {
+			array[i] = with;
+		}
+	}
+
+	/**
+	 * Fills an array with the given value.
+	 * @param array The array to fill.
+	 * @param with The value to fill the array with.
+	 */
+	public static void fill(boolean[] array, boolean with) {
+		for(int i = 0; i < array.length; i++) {
+			array[i] = with;
+		}
+	}
+
 }

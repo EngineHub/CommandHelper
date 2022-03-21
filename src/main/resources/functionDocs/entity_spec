@@ -24,7 +24,7 @@ This particle array must contain a "particle" key, and supports the keys "block"
 | ARROW
 | 
 * %KEY_ARROW_CRITICAL%: If this arrow is critical. (boolean)
-* %KEY_ARROW_KNOCKBACK%: The knockback strength. (double)
+* %KEY_ARROW_KNOCKBACK%: The knockback strength. (int)
 * %KEY_ARROW_DAMAGE%: The amount of damage. (double)
 * %KEY_TIPPEDARROW_POTIONMETA%: An associative array with a "base" potion array and a "potions" array of effect arrays for a tipped arrow.
 |-

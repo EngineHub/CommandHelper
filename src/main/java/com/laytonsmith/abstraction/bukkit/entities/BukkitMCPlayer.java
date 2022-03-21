@@ -24,6 +24,7 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCVibration;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.enums.MCParticle;
+import com.laytonsmith.abstraction.enums.MCParticle.MCVanillaParticle;
 import com.laytonsmith.abstraction.enums.MCPlayerStatistic;
 import com.laytonsmith.abstraction.enums.MCPotionEffectType;
 import com.laytonsmith.abstraction.enums.MCSound;
@@ -419,20 +420,23 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 		// Get some version specific strings
 		String nms;
 		String playersPackage;
-		String ops;
+		String ops = "operators";
+		String getPlayerList = "getPlayerList";
 		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_17)) {
 			nms = "net.minecraft.server";
 			playersPackage = nms + ".players";
 			ops = "n";
+			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_18)) {
+				getPlayerList = "ac";
+			}
 		} else { // 1.16.5 and prior
 			nms = "net.minecraft.server." + version;
 			playersPackage = nms;
-			ops = "operators";
 		}
 
 		Class nmsMinecraftServerClass = Class.forName(nms + ".MinecraftServer");
 		/*n.m.s.MinecraftServer*/ Object nmsServer = ReflectionUtils.invokeMethod(nmsMinecraftServerClass, null, "getServer");
-		/*n.m.s.PlayerList*/ Object nmsPlayerList = ReflectionUtils.invokeMethod(nmsServer, "getPlayerList");
+		/*n.m.s.PlayerList*/ Object nmsPlayerList = ReflectionUtils.invokeMethod(nmsServer, getPlayerList);
 		/*n.m.s.OpList*/ Object opSet = ReflectionUtils.get(Class.forName(playersPackage + ".PlayerList"), nmsPlayerList, ops);
 		//opSet.getClass().getSuperclass() == n.m.s.JsonList
 		Map/*<String, n.m.s.OpListEntry>*/ d = (Map) ReflectionUtils.get(opSet.getClass().getSuperclass(), opSet, "d");
@@ -580,10 +584,14 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 		switch((MCParticle.MCVanillaParticle) pa.getAbstracted()) {
 			case BLOCK_DUST:
 			case BLOCK_CRACK:
+			case BLOCK_MARKER:
 			case FALLING_DUST:
 				BlockData bd;
 				if(data instanceof MCBlockData) {
 					bd = (BlockData) ((MCBlockData) data).getHandle();
+				} else if(pa.getAbstracted() == MCVanillaParticle.BLOCK_MARKER) {
+					// Barrier (and light) particles were replaced by block markers, so this is the best fallback.
+					bd = Material.BARRIER.createBlockData();
 				} else {
 					bd = Material.STONE.createBlockData();
 				}

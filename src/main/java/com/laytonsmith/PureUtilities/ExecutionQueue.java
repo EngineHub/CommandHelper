@@ -59,8 +59,6 @@ public interface ExecutionQueue {
 	 */
 	void removeFront(String queue);
 
-	void setUncaughtExceptionHandler(Thread.UncaughtExceptionHandler exceptionHandler);
-
 	/**
 	 * Attempts an orderly shutdown of all existing tasks.
 	 */

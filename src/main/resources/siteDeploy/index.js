@@ -220,7 +220,7 @@
 				}
 			});
 			if (window.location.hash) {
-				$(window.location.hash)[0].scrollIntoView({behavior: "smooth"});
+				document.getElementById(window.location.hash.slice(1)).scrollIntoView({behavior: "smooth"});
 			}
 			pageRender.resolve();
 		});
