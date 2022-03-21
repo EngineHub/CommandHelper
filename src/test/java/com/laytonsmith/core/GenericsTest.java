@@ -77,14 +77,14 @@ public class GenericsTest {
 
 	@Test
 	public void testLHSToStringIsCorrect() throws Exception {
-		// ? extends array<int>
+		// ? extends array<array<int>>
 		LeftHandGenericUse lhgu = new LeftHandGenericUse(CArray.TYPE, Target.UNKNOWN, env, new Constraints(Target.UNKNOWN, ConstraintLocation.LHS,
 				new UpperBoundConstraint(Target.UNKNOWN, "?", CClassType.get(CArray.TYPE.getFQCN(), Target.UNKNOWN,
 						GenericParameters
 								.addParameter(CArray.TYPE, new LeftHandGenericUse(CArray.TYPE, Target.UNKNOWN, env,
 										new Constraints(Target.UNKNOWN, ConstraintLocation.LHS, new ExactType(Target.UNKNOWN, CInt.TYPE, null))))
 								.build(), env), null)));
-		assertEquals("? extends ms.lang.array<ms.lang.int>", lhgu.toString());
+		assertEquals("? extends ms.lang.array<ms.lang.array<ms.lang.int>>", lhgu.toString());
 
 		// ? extends array<? extends int>
 
@@ -94,14 +94,14 @@ public class GenericsTest {
 								.addParameter(CArray.TYPE, new LeftHandGenericUse(CArray.TYPE, Target.UNKNOWN, env,
 										new Constraints(Target.UNKNOWN, ConstraintLocation.LHS, new UpperBoundConstraint(Target.UNKNOWN, "?", CInt.TYPE, null))))
 								.build(), env), null)));
-		assertEquals("? extends ms.lang.array<? extends ms.lang.int>", lhgu.toString());
+		assertEquals("? extends ms.lang.array<ms.lang.array<? extends ms.lang.int>>", lhgu.toString());
 
 		GenericParameters params = GenericParameters
 				.addParameter(CArray.TYPE, lhgu).build();
 
 		CClassType array = CClassType.get(CArray.TYPE.getFQCN(), Target.UNKNOWN, params, env);
 
-		assertEquals("ms.lang.array<? extends ms.lang.array<? extends ms.lang.int>>", array.val());
+		assertEquals("ms.lang.array<ms.lang.array<? extends ms.lang.array<ms.lang.array<? extends ms.lang.int>>>>", array.val());
 	}
 
 //	@Test Need to do this type comparison in the compiler, not in the runtime

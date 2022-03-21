@@ -118,11 +118,19 @@ public final class FullyQualifiedClassName implements Comparable<FullyQualifiedC
 	 * @return The FullyQualifiedClassName for this native class (generally defined by the typeof annotation)
 	 */
 	public static FullyQualifiedClassName forNativeClass(Class<? extends Mixed> clazz) {
+		String fqcn = null;
 		typeof t = ClassDiscovery.GetClassAnnotation(clazz, typeof.class);
-		if(t == null) {
+		if(t != null) {
+			fqcn = t.value();
+		} else {
+			MEnum m = ClassDiscovery.GetClassAnnotation(clazz, MEnum.class);
+			if(m != null) {
+				fqcn = m.value();
+			}
+		}
+		if(fqcn == null) {
 			throw new Error("Native class " + clazz + " does not provide a typeof annotation");
 		}
-		String fqcn = t.value();
 		FullyQualifiedClassName f = new FullyQualifiedClassName(fqcn);
 		f.nativeClass = clazz;
 		f.nativeClassLoaded = true;

@@ -264,7 +264,12 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	 */
 	public static CClassType getNakedClassType(FullyQualifiedClassName type, Environment env) {
 		try {
-			NativeTypeList.getNativeClass(type);
+			Class<? extends Mixed> clazz = NativeTypeList.getNativeClass(type);
+			if(clazz.getEnclosingClass() != null && clazz.getEnclosingClass() == MEnumType.class) {
+				if(!NATIVE_CACHE.contains(type, null)) {
+					NATIVE_CACHE.add(type, null, new CClassType(type, Target.UNKNOWN, true, null, env, clazz));
+				}
+			}
 		} catch(ClassNotFoundException e) {
 			// Ignored, because we just want to load the Java class, which this method does.
 		}
@@ -844,6 +849,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	 *
 	 * @return null if no generics are defined on this class, or they were, but it's the naked class.
 	 */
+	@Override
 	public GenericParameters getGenericParameters() {
 		return this.genericParameters;
 	}

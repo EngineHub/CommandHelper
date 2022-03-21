@@ -1075,6 +1075,9 @@
 						<goals>
 							<goal>check</goal>
 						</goals>
+						<configuration>
+							<rules></rules>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>
