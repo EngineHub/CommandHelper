@@ -35,7 +35,7 @@ public class StaticAnalysisTest {
 		runScript(script);
 	}
 
-	@Test(expected=ConfigCompileException.class)
+	@Test(expected = ConfigCompileException.class)
 	public void testNoneDoesntWorkLikeAuto() throws Exception {
 		String script = "rand() || die()";
 		runScript(script);
