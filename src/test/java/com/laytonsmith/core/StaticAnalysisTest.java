@@ -21,9 +21,7 @@ public class StaticAnalysisTest {
 		StaticTest.InstallFakeServerFrontend();
 	}
 
-	@Test
-	public void testNoneWorksLikeAuto() throws Exception {
-		String script = "rand() ||| die()";
+	public void runScript(String script) throws Exception {
 		StaticAnalysis staticAnalysis = new StaticAnalysis(true);
 		staticAnalysis.setLocalEnable(true);
 		Environment env = Static.GenerateStandaloneEnvironment(false, EnumSet.of(RuntimeMode.CMDLINE), null, staticAnalysis);
@@ -31,13 +29,28 @@ public class StaticAnalysisTest {
 		MethodScriptCompiler.compile(stream, env, env.getEnvClasses(), staticAnalysis);
 	}
 
+	@Test
+	public void testNoneWorksLikeAuto() throws Exception {
+		String script = "rand() ||| die()";
+		runScript(script);
+	}
+
 	@Test(expected=ConfigCompileException.class)
 	public void testNoneDoesntWorkLikeAuto() throws Exception {
 		String script = "rand() || die()";
-		StaticAnalysis staticAnalysis = new StaticAnalysis(true);
-		staticAnalysis.setLocalEnable(true);
-		Environment env = Static.GenerateStandaloneEnvironment(false, EnumSet.of(RuntimeMode.CMDLINE), null, staticAnalysis);
-		TokenStream stream = MethodScriptCompiler.lex(script, env, new File("test.ms"), true);
-		MethodScriptCompiler.compile(stream, env, env.getEnvClasses(), staticAnalysis);
+		runScript(script);
 	}
+
+	@Test
+	public void testBreakWorksInStrict() throws Exception {
+		String script = "<! strict >\n foreach(@i in 1..5) { break(); }";
+		runScript(script);
+	}
+
+	@Test
+	public void testBreakWorksInNonStrict() throws Exception {
+		String script = "<! strict: false >\n foreach(@i in 1..5) { break(); }";
+		runScript(script);
+	}
+
 }
