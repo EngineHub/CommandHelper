@@ -1568,7 +1568,7 @@ public class Environment {
 						if(players.isAssociative()) {
 							throw new CREIllegalArgumentException("Players argument must be a normal array.", t);
 						}
-						for(Mixed playerName : players.asList()) {
+						for(Mixed playerName : players.asList(env)) {
 							player = Static.GetPlayer(playerName, t, env);
 							player.spawnParticle(l, p, count, offsetX, offsetY, offsetZ, speed, data);
 						}

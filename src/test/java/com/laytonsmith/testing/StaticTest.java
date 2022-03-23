@@ -50,6 +50,7 @@ import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.MethodScriptComplete;
+import com.laytonsmith.core.MethodScriptFileLocations;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Script;
@@ -638,6 +639,11 @@ public class StaticTest {
 		}
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(Static.class));
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(StaticTest.class));
+		try {
+			Prefs.init(MethodScriptFileLocations.getDefault().getPreferencesFile());
+		} catch(IOException ex) {
+			throw new RuntimeException(ex);
+		}
 		ExtensionManager.Initialize(ClassDiscovery.getDefaultInstance());
 		Implementation.setServerType(Implementation.Type.TEST);
 		AliasCore fakeCore = mock(AliasCore.class);

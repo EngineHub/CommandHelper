@@ -119,7 +119,7 @@ public final class CMutablePrimitive extends CArray implements Sizeable {
 	}
 
 	@Override
-	public List<Mixed> asList() {
+	public List<Mixed> asList(Environment env) {
 		return getArray();
 	}
 

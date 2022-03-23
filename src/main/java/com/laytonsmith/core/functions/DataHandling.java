@@ -2859,7 +2859,7 @@ public class DataHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			Mixed[] vals = ArgumentValidation.getArray(args[0], t, env).asList().toArray(new Mixed[0]);
+			Mixed[] vals = ArgumentValidation.getArray(args[0], t, env).asList(env).toArray(new Mixed[0]);
 			CClosure closure = ArgumentValidation.getObject(args[1], t, CClosure.class);
 			return closure.executeCallable(vals);
 		}

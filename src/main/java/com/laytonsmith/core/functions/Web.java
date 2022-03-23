@@ -111,7 +111,7 @@ public class Web {
 		for(Cookie cookie : cookieJar.getAllCookies()) {
 			boolean update = false;
 			CArray aCookie = null;
-			for(Mixed ac : arrayJar.asList()) {
+			for(Mixed ac : arrayJar.asList(env)) {
 				aCookie = ArgumentValidation.getArray(ac, t, env);
 				if(cookie.getName().equals(aCookie.get("name", t, env).val())
 						&& cookie.getDomain().equals(aCookie.get("domain", t, env).val())
@@ -904,7 +904,7 @@ public class Web {
 					attachments.push(bodyAttachment, 0, t, env);
 				}
 
-				for(Mixed c : to.asList()) {
+				for(Mixed c : to.asList(env)) {
 					Message.RecipientType type = Message.RecipientType.TO;
 					String address;
 					if(c.isInstanceOf(CArray.TYPE, null, env)) {
@@ -949,7 +949,7 @@ public class Web {
 					message.setContent(getContent(content, t, env), type);
 				} else {
 					Multipart mp = new MimeMultipart("alternative");
-					for(Mixed attachment : attachments.asList()) {
+					for(Mixed attachment : attachments.asList(env)) {
 						CArray pattachment = ArgumentValidation.getArray(attachment, t, env);
 						final String type = ArgumentValidation.getItemFromArray(pattachment, "type", t, null, env).val();
 						final String fileName = ArgumentValidation.getItemFromArray(pattachment, "filename", t, new CString("", t), env).val().trim();

@@ -1170,7 +1170,7 @@ public class MobManagement {
 					throw new CRECastException("The array must not be associative.", t);
 				}
 				transparents = new HashSet<>();
-				for(Mixed mat : givenTransparents.asList()) {
+				for(Mixed mat : givenTransparents.asList(env)) {
 					MCMaterial material = StaticLayer.GetMaterial(mat.val());
 					if(material != null) {
 						transparents.add(StaticLayer.GetMaterial(mat.val()));

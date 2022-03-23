@@ -684,7 +684,7 @@ public class Echoes {
 
 				// Get the recipients from the array.
 				Set<MCCommandSender> recipients = new HashSet<>();
-				for(Mixed p : array.asList()) {
+				for(Mixed p : array.asList(env)) {
 					if(p.val().equalsIgnoreCase("~console")) {
 						recipients.add(server.getConsole());
 					} else {

@@ -104,7 +104,7 @@ public class Trades {
 			if(trades.isAssociative()) {
 				throw new CRECastException("Expected non-associative array for list of trade arrays.", t);
 			}
-			for(Mixed trade : trades.asList()) {
+			for(Mixed trade : trades.asList(env)) {
 				recipes.add(trade(trade, t, env));
 			}
 			merchant.setRecipes(recipes);
@@ -426,7 +426,7 @@ public class Trades {
 					+ ingredients.size(env), t);
 		}
 		List<MCItemStack> mcIngredients = new ArrayList<>();
-		for(Mixed ingredient : ingredients.asList()) {
+		for(Mixed ingredient : ingredients.asList(env)) {
 			mcIngredients.add(ObjectGenerator.GetGenerator().item(ingredient, t, env));
 		}
 		mer.setIngredients(mcIngredients);

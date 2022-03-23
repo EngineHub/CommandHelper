@@ -221,7 +221,7 @@ public class ObjectManagement {
 					AccessModifier.class, t);
 
 			// 1 - Object Modifiers
-			Set<ObjectModifier> objectModifiers = evaluateArrayNoNull(nodes[1], "object modifiers", t, env).asList().stream()
+			Set<ObjectModifier> objectModifiers = evaluateArrayNoNull(nodes[1], "object modifiers", t, env).asList(env).stream()
 					.map((item) -> ArgumentValidation.getEnum(item, ObjectModifier.class, t))
 					.collect(Collectors.toSet());
 

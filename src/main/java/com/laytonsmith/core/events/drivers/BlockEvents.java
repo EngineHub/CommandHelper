@@ -1509,7 +1509,7 @@ public class BlockEvents {
 					if(value.isInstanceOf(CArray.TYPE, null, env)) {
 						CArray ba = (CArray) value;
 						List<MCBlock> blocks = new ArrayList<>();
-						for(Mixed m : ba.asList()) {
+						for(Mixed m : ba.asList(env)) {
 							MCLocation loc = ObjectGenerator.GetGenerator().location(m, null, value.getTarget(), env);
 							blocks.add(loc.getBlock());
 						}

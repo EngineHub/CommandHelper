@@ -239,7 +239,7 @@ public class BukkitMCCommand implements MCCommand {
 							ret.add(((CArray) fret).get(key, Target.UNKNOWN, env).val());
 						}
 					} else {
-						for(Mixed value : ((CArray) fret).asList()) {
+						for(Mixed value : ((CArray) fret).asList(env)) {
 							ret.add(value.val());
 						}
 					}

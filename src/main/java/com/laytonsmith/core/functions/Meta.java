@@ -435,11 +435,11 @@ public class Meta {
 			if(args.length == 2) {
 				sender = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 				commandString = args[0].val();
-				argList = ArgumentValidation.getArray(args[1], t, env).asList();
+				argList = ArgumentValidation.getArray(args[1], t, env).asList(env);
 			} else {
 				sender = Static.GetCommandSender(args[0].val(), t);
 				commandString = args[1].val();
-				argList = ArgumentValidation.getArray(args[2], t, env).asList();
+				argList = ArgumentValidation.getArray(args[2], t, env).asList(env);
 			}
 
 			if(commandString.length() < 1 || commandString.charAt(0) != '/') {

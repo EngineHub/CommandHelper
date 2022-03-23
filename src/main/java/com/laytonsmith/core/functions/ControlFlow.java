@@ -759,7 +759,7 @@ public class ControlFlow {
 					+ " remove the duplicate value";
 			final BasicLogic.equals equals = new BasicLogic.equals();
 			Set<Mixed> values = new TreeSet<>((Mixed t1, Mixed t2) -> {
-				if(equals.exec(Target.UNKNOWN, null, t1, t2).getBoolean()) {
+				if(equals.exec(Target.UNKNOWN, env, t1, t2).getBoolean()) {
 					return 0;
 				} else {
 					return t1.val().compareTo(t2.val());
@@ -786,10 +786,10 @@ public class ControlFlow {
 				}
 				//Now we validate that the values are constant and non-repeating.
 				if(children.get(i).getData().isInstanceOf(CArray.TYPE, null, env)) {
-					List<Mixed> list = ((CArray) children.get(i).getData()).asList();
+					List<Mixed> list = ((CArray) children.get(i).getData()).asList(env);
 					for(Mixed c : list) {
 						if(c instanceof CSlice) {
-							for(Mixed cc : ((CSlice) c).asList()) {
+							for(Mixed cc : ((CSlice) c).asList(env)) {
 								if(values.contains(cc)) {
 									throw new ConfigCompileException(alreadyContains, cc.getTarget());
 								}
@@ -834,7 +834,7 @@ public class ControlFlow {
 						data = new CArray(t, null, env);
 						((CArray) data).push(children.get(i).getData(), t, env);
 					}
-					for(Mixed value : ((CArray) data).asList()) {
+					for(Mixed value : ((CArray) data).asList(env)) {
 						if(value instanceof CSlice) {
 							long rangeLeft = ((CSlice) value).getStart();
 							long rangeRight = ((CSlice) value).getFinish();
@@ -953,7 +953,7 @@ public class ControlFlow {
 				Mixed caseData = child.getData();
 				if(caseData instanceof CArray) {
 					CArray newData = new CArray(child.getTarget(), null, env);
-					for(Mixed cse : ((CArray) caseData).asList()) {
+					for(Mixed cse : ((CArray) caseData).asList(env)) {
 						if(cse instanceof CString) {
 							CString data = (CString) cse;
 							newData.push(new CString(data.val().toLowerCase(), data.getTarget()), data.getTarget(), env);

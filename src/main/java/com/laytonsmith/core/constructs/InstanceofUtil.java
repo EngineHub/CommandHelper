@@ -224,8 +224,8 @@ public class InstanceofUtil {
 
 		// They are defined on the class, AND some were provided. If they pass this, they are instanceof, otherwise
 		// they aren't.
-		return type.getTypeGenericParameters().get(instanceofThis.getNakedType(env)).
-				isInstanceof(instanceofThisGenerics, env);
+		return type.getTypeGenericParameters().get(instanceofThis.getNakedType(env))
+				.isInstanceof(instanceofThisGenerics, env);
 	}
 
 	/**
@@ -340,7 +340,6 @@ public class InstanceofUtil {
 	 * @param env
 	 * @return
 	 */
-	@Deprecated
 	public static boolean isAssignableTo(CClassType type, CClassType instanceofThis, LeftHandGenericUse instanceofThisGenerics, Environment env) {
 		return isAssignableTo(LeftHandSideType.fromHardCodedType(type),
 				LeftHandSideType.fromCClassType(instanceofThis, instanceofThisGenerics, Target.UNKNOWN), env);

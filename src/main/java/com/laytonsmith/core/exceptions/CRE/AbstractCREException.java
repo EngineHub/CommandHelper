@@ -149,7 +149,7 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 		}
 		String message = exception.get("message", t, env).val();
 		List<StackTraceElement> st = new ArrayList<>();
-		for(Mixed consStElement : ArgumentValidation.getArray(exception.get("stackTrace", t, env), t, env).asList()) {
+		for(Mixed consStElement : ArgumentValidation.getArray(exception.get("stackTrace", t, env), t, env).asList(env)) {
 			CArray stElement = ArgumentValidation.getArray(consStElement, t, env);
 			int line = ArgumentValidation.getInt32(stElement.get("line", t, env), t, env);
 			File f = new File(stElement.get("file", t, env).val());

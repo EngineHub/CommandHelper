@@ -984,7 +984,7 @@ public class ObjectGenerator {
 								// New style (supports multiple effects)
 								Mixed effects = firework.get("effects", t, env);
 								if(effects.isInstanceOf(CArray.TYPE, null, env)) {
-									for(Mixed effect : ((CArray) effects).asList()) {
+									for(Mixed effect : ((CArray) effects).asList(env)) {
 										if(effect.isInstanceOf(CArray.TYPE, null, env)) {
 											fmeta.addEffect(fireworkEffect((CArray) effect, t, env));
 										} else {
@@ -1178,7 +1178,7 @@ public class ObjectGenerator {
 						Mixed value = ma.get("projectiles", t, env);
 						if(!(value instanceof CNull)) {
 							List<MCItemStack> projectiles = new ArrayList<>();
-							for(Mixed m : ArgumentValidation.getArray(value, t, env).asList()) {
+							for(Mixed m : ArgumentValidation.getArray(value, t, env).asList(env)) {
 								projectiles.add(item(m, t, env));
 							}
 							((MCCrossbowMeta) meta).setChargedProjectiles(projectiles);
@@ -1658,7 +1658,7 @@ public class ObjectGenerator {
 				if(ccolors.size(env) == 0) {
 					builder.addColor(MCColor.WHITE);
 				} else {
-					for(Mixed color : ccolors.asList()) {
+					for(Mixed color : ccolors.asList(env)) {
 						MCColor mccolor;
 						if(color.isInstanceOf(CString.TYPE, null, env)) {
 							mccolor = StaticLayer.GetConvertor().GetColor(color.val(), t);
@@ -1695,7 +1695,7 @@ public class ObjectGenerator {
 			Mixed colors = fe.get("fade", t, env);
 			if(colors.isInstanceOf(CArray.TYPE, null, env)) {
 				CArray ccolors = (CArray) colors;
-				for(Mixed color : ccolors.asList()) {
+				for(Mixed color : ccolors.asList(env)) {
 					MCColor mccolor;
 					if(color.isInstanceOf(CArray.TYPE, null, env)) {
 						mccolor = color((CArray) color, t, env);
@@ -1870,7 +1870,7 @@ public class ObjectGenerator {
 					throw new CREFormatException("Shape array is invalid.", t);
 				}
 				int i = 0;
-				for(Mixed row : shaped.asList()) {
+				for(Mixed row : shaped.asList(env)) {
 					if(row.isInstanceOf(CString.TYPE, null, env) && row.val().length() >= 1 && row.val().length() <= 3) {
 						shape[i] = row.val();
 						i++;
@@ -1919,7 +1919,7 @@ public class ObjectGenerator {
 				if(ingredients.inAssociativeMode()) {
 					throw new CREIllegalArgumentException("Ingredients array is invalid.", t);
 				}
-				for(Mixed ingredient : ingredients.asList()) {
+				for(Mixed ingredient : ingredients.asList(env)) {
 					if(ingredient.isInstanceOf(CArray.TYPE, null, env)) {
 						if(((CArray) ingredient).isAssociative()) {
 							((MCShapelessRecipe) ret).addIngredient(item(ingredient, t, env));

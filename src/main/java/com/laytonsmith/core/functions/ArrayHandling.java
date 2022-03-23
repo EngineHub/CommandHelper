@@ -2475,7 +2475,7 @@ public class ArrayHandling {
 			if(array.inAssociativeMode()) {
 				return array.clone();
 			} else {
-				List<Mixed> asList = array.asList();
+				List<Mixed> asList = array.asList(env);
 				CArray newArray = new CArray(t, null, env);
 				Set<Mixed> set = new LinkedComparatorSet<>(asList, new LinkedComparatorSet.EqualsComparator<Mixed>() {
 

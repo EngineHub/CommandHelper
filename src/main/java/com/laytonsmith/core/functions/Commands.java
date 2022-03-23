@@ -260,7 +260,7 @@ public class Commands {
 				List<String> oldAliases = new ArrayList<>(cmd.getAliases());
 				if(ops.containsKey("aliases")) {
 					if(ops.get("aliases", t, env).isInstanceOf(CArray.TYPE, null, env)) {
-						List<Mixed> ca = ((CArray) ops.get("aliases", t, env)).asList();
+						List<Mixed> ca = ((CArray) ops.get("aliases", t, env)).asList(env);
 						List<String> aliases = new ArrayList<>();
 						for(Mixed c : ca) {
 							String alias = c.val().toLowerCase().trim();

@@ -234,7 +234,7 @@ public class ServerEvents {
 						// Modifies the player list. The new list will be the intersection of the original
 						// and the given list. Names and UUID's outside this intersection will simply be ignored.
 						Set<MCPlayer> modifiedPlayers = new HashSet<>();
-						List<Mixed> passedList = ArgumentValidation.getArray(value, value.getTarget(), env).asList();
+						List<Mixed> passedList = ArgumentValidation.getArray(value, value.getTarget(), env).asList(env);
 						for(MCPlayer player : e.getPlayers()) {
 							for(Mixed construct : passedList) {
 								String playerStr = construct.val();
@@ -346,7 +346,7 @@ public class ServerEvents {
 								comp.add(((CArray) value).get(k, value.getTarget(), env).val());
 							}
 						} else {
-							for(Mixed v : ((CArray) value).asList()) {
+							for(Mixed v : ((CArray) value).asList(env)) {
 								comp.add(v.val());
 							}
 						}

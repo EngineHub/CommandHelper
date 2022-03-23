@@ -117,7 +117,6 @@ public class InstanceofUtilTest {
 				new Constraints(Target.UNKNOWN, ConstraintLocation.LHS,
 						new ExactType(Target.UNKNOWN, CInt.TYPE, null)));
 
-
 		assertTrue(InstanceofUtil.isInstanceof(arrayInt, CArray.TYPE, intLHGU, env));
 		assertFalse(InstanceofUtil.isInstanceof(arrayInt, CArray.TYPE, stringLHGU, env));
 		assertTrue(InstanceofUtil.isInstanceof(arrayString, CArray.TYPE, stringLHGU, env));
@@ -142,7 +141,6 @@ public class InstanceofUtilTest {
 				new Constraints(Target.UNKNOWN, ConstraintLocation.LHS,
 						new ExactType(Target.UNKNOWN, CArray.TYPE, extendsPrimitiveLHGU)));
 
-
 		// Nested LHGU
 		assertEquals("ms.lang.array<ms.lang.array<ms.lang.int>>", arrayArrayInt.toString());
 		assertEquals("ms.lang.array<ms.lang.int>", arrayIntLHGU.toString());
@@ -164,7 +162,7 @@ public class InstanceofUtilTest {
 		try {
 			StaticTest.SRun("string @s = array();", null);
 			fail();
-		} catch (ConfigCompileException | ConfigRuntimeException ex) {
+		} catch(ConfigCompileException | ConfigRuntimeException ex) {
 			// Pass
 		}
 		assertFalse(new _instanceof().exec(Target.UNKNOWN, env, CNull.NULL, CString.TYPE).getBoolean());
@@ -172,7 +170,6 @@ public class InstanceofUtilTest {
 
 	@typeof("InstanceofUtilTestA")
 	public static class InstanceofUtilTestA implements Mixed {
-
 
 		@SuppressWarnings("FieldNameHidesFieldInSuperclass")
 		public static final CClassType TYPE = CClassType.getWithGenericDeclaration(InstanceofUtilTestA.class, new GenericDeclaration(Target.UNKNOWN,
@@ -315,17 +312,17 @@ public class InstanceofUtilTest {
 		// A<string>
 		CClassType aString = CClassType.get(InstanceofUtilTestA.TYPE.getFQCN(), Target.UNKNOWN,
 				MapBuilder.start(InstanceofUtilTestA.TYPE, GenericParameters
-					.addParameter(CString.TYPE, null).build()).build(), env);
+						.addParameter(CString.TYPE, null).build()).build(), env);
 		// A<string>
 		CClassType aInt = CClassType.get(InstanceofUtilTestA.TYPE.getFQCN(), Target.UNKNOWN,
 				MapBuilder.start(InstanceofUtilTestA.TYPE, GenericParameters
-					.addParameter(CInt.TYPE, null).build()).build(), env);
+						.addParameter(CInt.TYPE, null).build()).build(), env);
 
 		assertFalse(bStringInt.isInstanceOf(bIntInt.typeof(env), null, env));
 		assertTrue(bStringInt.isInstanceOf(bStringInt.typeof(env), null, env));
 
 		assertTrue(bStringInt.isInstanceOf(aString, null, env));
 		assertFalse(bStringInt.isInstanceOf(aInt, null, env));
-		
+
 	}
 }

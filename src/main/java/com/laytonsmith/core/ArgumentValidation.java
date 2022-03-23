@@ -546,7 +546,7 @@ public final class ArgumentValidation {
 		}
 		CArray ca = (CArray) c;
 		Set<T> set = EnumSet.noneOf(enumClass);
-		for(Mixed v : ca.asList()) {
+		for(Mixed v : ca.asList(env)) {
 			set.add(getEnum(v, enumClass, t));
 		}
 		return set;

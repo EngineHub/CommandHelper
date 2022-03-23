@@ -41,9 +41,10 @@ import java.util.Set;
 public final class LeftHandSideType extends Construct {
 
 	/**
-	 * Merges the inputs to create a single type union class. For instance, if {@code int | string}
-	 * and {@code array | string} are passed in, the resulting type would be {@code int | string | array}. Note that
-	 * for subtypes with generic parameters, these are not merged unless they are completely equal.
+	 * Merges the inputs to create a single type union class. For instance, if {@code int | string} and
+	 * {@code array | string} are passed in, the resulting type would be {@code int | string | array}. Note that for
+	 * subtypes with generic parameters, these are not merged unless they are completely equal.
+	 *
 	 * @param types
 	 * @return
 	 */
@@ -79,6 +80,19 @@ public final class LeftHandSideType extends Construct {
 	}
 
 	/**
+	 * Creates a new LeftHandSideType from the given CClassType and LeftHandGenericUse. The LeftHangGenericUse may be
+	 * null if this represents a type without generics, or without generics defined.
+	 *
+	 * @param t The code target.
+	 * @param classType The class type.
+	 * @param generics The LeftHangGenericUse object.
+	 * @return A new LeftHandSideType
+	 */
+	public static LeftHandSideType fromCClassType(CClassType classType, LeftHandGenericUse generics, Target t) {
+		return fromCClassTypeUnion(t, Arrays.asList(new Pair<>(classType, generics)));
+	}
+
+	/**
 	 * Creates a new LeftHandSideType from the given union of CClassTypes with no generics.
 	 *
 	 * @param t The code target.
@@ -91,19 +105,6 @@ public final class LeftHandSideType extends Construct {
 			pairs.add(new Pair<>(type, null));
 		}
 		return fromCClassTypeUnion(t, pairs);
-	}
-
-	/**
-	 * Creates a new LeftHandSideType from the given CClassType and LeftHandGenericUse. The LeftHangGenericUse may be
-	 * null if this represents a type without generics, or without generics defined.
-	 *
-	 * @param t The code target.
-	 * @param classType The class type.
-	 * @param generics The LeftHangGenericUse object.
-	 * @return A new LeftHandSideType
-	 */
-	public static LeftHandSideType fromCClassType(CClassType classType, LeftHandGenericUse generics, Target t) {
-		return fromCClassTypeUnion(t, Arrays.asList(new Pair<>(classType, generics)));
 	}
 
 	/**
@@ -216,8 +217,8 @@ public final class LeftHandSideType extends Construct {
 	}
 
 	/**
-	 * Returns an array of the set of superclasses that all of the underlying types implements.Note that if this is a type
-	 * union, and not all types in the underlying types implement a superclass, it is not included in this list.
+	 * Returns an array of the set of superclasses that all of the underlying types implements.Note that if this is a
+	 * type union, and not all types in the underlying types implement a superclass, it is not included in this list.
 	 *
 	 * @param env
 	 * @return
@@ -242,8 +243,8 @@ public final class LeftHandSideType extends Construct {
 
 	/**
 	 * A collapsed type is the nearest super class for all subtypes in the type union. For single types, this is just
-	 * this instance. Note that this is not equivalent to the original LeftHandSideType value, and is a loss of specificity.
-	 * However, in some cases, a single type is necessary.
+	 * this instance. Note that this is not equivalent to the original LeftHandSideType value, and is a loss of
+	 * specificity. However, in some cases, a single type is necessary.
 	 *
 	 * @return A LeftHandSideType which is guaranteed to only contain one type, and not a type union.
 	 */
@@ -259,10 +260,11 @@ public final class LeftHandSideType extends Construct {
 	/**
 	 * If and only if this was constructed in such a way that it could have been a CClassType to begin with, this
 	 * function will return the CClassType. This is generally useful when converting initially from a CClassType, and
-	 * then getting that value back, however, it can be used anyways if the parameters are such that it's allowed.
-	 * In particular, this cannot be a type union, and the LeftHandGenericUse statement must be null. (There may be
-	 * concrete generic parameters attached to the underlying CClassType though.) If these requirements are not met,
-	 * a CREIllegalArgumentException is thrown.
+	 * then getting that value back, however, it can be used anyways if the parameters are such that it's allowed. In
+	 * particular, this cannot be a type union, and the LeftHandGenericUse statement must be null. (There may be
+	 * concrete generic parameters attached to the underlying CClassType though.) If these requirements are not met, a
+	 * CREIllegalArgumentException is thrown.
+	 *
 	 * @param t
 	 * @return
 	 */
@@ -280,6 +282,7 @@ public final class LeftHandSideType extends Construct {
 
 	/**
 	 * Returns true if the underlying type is a single type, and that type is void.
+	 *
 	 * @return
 	 */
 	public boolean isVoid() {
@@ -291,6 +294,7 @@ public final class LeftHandSideType extends Construct {
 
 	/**
 	 * Returns true if the underlying type is a single type, and that type is auto.
+	 *
 	 * @return
 	 */
 	public boolean isAuto() {

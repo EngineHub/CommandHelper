@@ -502,6 +502,18 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 		return typeof(this, env);
 	}
 
+	/**
+	 * Returns the typeof for the given class, using the same mechanism as the default.(Whether or not that subtype
+	 * overrode the original typeof() method.
+	 *
+	 * @param that
+	 * @param env
+	 * @return
+	 */
+	public static CClassType typeof(Mixed that, Environment env) {
+		return CClassType.get(that.getClass(), Target.UNKNOWN, that.getGenericParameters(), env);
+	}
+
 	private final Map<CClassType, GenericParameters> genericParameters = new HashMap<>();
 
 	/**
@@ -521,18 +533,6 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 
 	protected final void registerGenericParameters(CClassType type, GenericParameters parameters) {
 		this.genericParameters.put(type, parameters);
-	}
-
-	/**
-	 * Returns the typeof for the given class, using the same mechanism as the default.(Whether or not that subtype
-	 * overrode the original typeof() method.
-	 *
-	 * @param that
-	 * @param env
-	 * @return
-	 */
-	public static CClassType typeof(Mixed that, Environment env) {
-		return CClassType.get(that.getClass(), Target.UNKNOWN, that.getGenericParameters(), env);
 	}
 
 	/**

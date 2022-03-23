@@ -2838,7 +2838,7 @@ public class EntityManagement {
 							case entity_spec.KEY_FIREWORK_EFFECTS:
 								fm.clearEffects();
 								CArray effects = ArgumentValidation.getArray(specArray.get(index, t, env), t, env);
-								for(Mixed eff : effects.asList()) {
+								for(Mixed eff : effects.asList(env)) {
 									if(eff.isInstanceOf(CArray.TYPE, null, env)) {
 										fm.addEffect(ObjectGenerator.GetGenerator().fireworkEffect((CArray) eff, t, env));
 									} else {
@@ -4366,7 +4366,7 @@ public class EntityManagement {
 			if(options.containsKey("effects")) {
 				Mixed cEffects = options.get("effects", t, env);
 				if(cEffects.isInstanceOf(CArray.TYPE, null, env)) {
-					for(Mixed c : ((CArray) cEffects).asList()) {
+					for(Mixed c : ((CArray) cEffects).asList(env)) {
 						effects.add(ObjectGenerator.GetGenerator().fireworkEffect((CArray) c, t, env));
 					}
 				} else {

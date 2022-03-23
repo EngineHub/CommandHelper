@@ -122,7 +122,7 @@ public class Statistics {
 			List<Double> values = new ArrayList<>();
 			if(args.length == 1 && args[0].isInstanceOf(CArray.TYPE, null, env)) {
 				CArray c = ArgumentValidation.getArray(args[0], t, env);
-				for(Mixed m : c.asList()) {
+				for(Mixed m : c.asList(env)) {
 					values.add(ArgumentValidation.getDouble(m, t, env));
 				}
 			} else {
@@ -178,7 +178,7 @@ public class Statistics {
 			List<Double> values = new ArrayList<>();
 			if(args.length == 1 && args[0].isInstanceOf(CArray.TYPE, null, env)) {
 				CArray c = ArgumentValidation.getArray(args[0], t, env);
-				for(Mixed m : c.asList()) {
+				for(Mixed m : c.asList(env)) {
 					values.add(ArgumentValidation.getDouble(m, t, env));
 				}
 			} else {
@@ -242,7 +242,7 @@ public class Statistics {
 			List<Double> values = new ArrayList<>();
 			if(args.length == 1 && args[0].isInstanceOf(CArray.TYPE, null, env)) {
 				CArray c = ArgumentValidation.getArray(args[0], t, env);
-				for(Mixed m : c.asList()) {
+				for(Mixed m : c.asList(env)) {
 					values.add(ArgumentValidation.getDouble(m, t, env));
 				}
 			} else {
@@ -343,7 +343,7 @@ public class Statistics {
 			List<Double> values = new ArrayList<>();
 			if(args.length == 2 && args[1].isInstanceOf(CArray.TYPE, null, env)) {
 				CArray c = ArgumentValidation.getArray(args[1], t, env);
-				for(Mixed m : c.asList()) {
+				for(Mixed m : c.asList(env)) {
 					values.add(ArgumentValidation.getNumber(m, t, env));
 				}
 			} else {

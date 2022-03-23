@@ -624,7 +624,7 @@ public class PlayerManagement {
 			if(transparentIndex >= 0) {
 				CArray ta = (CArray) args[transparentIndex];
 				trans = new HashSet<>();
-				for(Mixed mat : ta.asList()) {
+				for(Mixed mat : ta.asList(env)) {
 					MCMaterial material = StaticLayer.GetMaterial(mat.val());
 					if(material != null) {
 						trans.add(StaticLayer.GetMaterial(mat.val()));

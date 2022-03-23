@@ -2396,7 +2396,7 @@ public class PlayerEvents {
 						throw new CRECastException("The page array must not be associative.", pageArray.getTarget());
 					} else {
 						List<String> pages = new ArrayList<>();
-						for(Mixed page : pageArray.asList()) {
+						for(Mixed page : pageArray.asList(env)) {
 							pages.add(page.val());
 						}
 						MCPlayerEditBookEvent e = ((MCPlayerEditBookEvent) event);

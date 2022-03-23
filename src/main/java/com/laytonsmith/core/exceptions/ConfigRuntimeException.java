@@ -270,7 +270,7 @@ public class ConfigRuntimeException extends RuntimeException {
 				CArray exception = ((CRECausedByWrapper) ex).getException();
 				CArray stackTrace = ArgumentValidation.getArray(exception.get("stackTrace", t, env), t, env);
 				List<StackTraceElement> newSt = new ArrayList<>();
-				for(Mixed consElement : stackTrace.asList()) {
+				for(Mixed consElement : stackTrace.asList(env)) {
 					CArray element = ArgumentValidation.getArray(consElement, t, env);
 					int line = ArgumentValidation.getInt32(element.get("line", t, env), t, env);
 					File file = new File(element.get("file", t, env).val());

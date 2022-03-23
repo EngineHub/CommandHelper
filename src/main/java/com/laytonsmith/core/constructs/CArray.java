@@ -178,7 +178,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	 *
 	 * @return
 	 */
-	public List<Mixed> asList() {
+	public List<Mixed> asList(Environment env) {
 		if(inAssociativeMode()) {
 			throw new RuntimeException("asList can only be called on a normal array");
 		} else {
