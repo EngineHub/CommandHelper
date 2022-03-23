@@ -156,7 +156,7 @@ public class Exceptions {
 					interest.add(FullyQualifiedClassName.forName(ptypes.val(), t, env));
 				} else if(ptypes.isInstanceOf(CArray.TYPE, null, env)) {
 					CArray ca = (CArray) ptypes;
-					for(int i = 0; i < ca.size(); i++) {
+					for(int i = 0; i < ca.size(env); i++) {
 						interest.add(FullyQualifiedClassName.forName(ca.get(i, t, env).val(), t, env));
 					}
 				} else {
@@ -503,7 +503,7 @@ public class Exceptions {
 				for(int i = 1; i < nodes.length - 1; i += 2) {
 					ParseTree assign = nodes[i];
 					CClassType clauseType = ((CClassType) assign.getChildAt(0).getData());
-					if(exceptionType.unsafeDoesExtend(clauseType)) {
+					if(exceptionType.doesExtend(env, clauseType)) {
 						try {
 							// We need to define the exception in the variable table
 							IVariableList varList = env.getEnv(GlobalEnv.class).GetVarList();
@@ -622,7 +622,7 @@ public class Exceptions {
 				types.add(type);
 
 				// Validate that the exception type extends throwable.
-				if(!type.unsafeDoesExtend(CREThrowable.TYPE)) {
+				if(!type.doesExtend(env, CREThrowable.TYPE)) {
 					throw new ConfigCompileException("The type defined in a catch clause must extend the"
 							+ " Throwable class.", t);
 				}

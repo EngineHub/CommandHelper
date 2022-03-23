@@ -11,6 +11,7 @@ import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CClassType.ClassTypeCache;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CNull;
@@ -31,6 +32,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -63,6 +65,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	private boolean interrupt = false;
 	private final List<Iterator> arrayAccessList = Collections.synchronizedList(new ArrayList<>());
 	private final WeakHashMap<Thread, StackTraceManager> stackTraceManagers = new WeakHashMap<>();
+	private final Map<CClassType, Set<CClassType>> isInstanceofCache = new HashMap<>();
 	private final MutableObject<Map<String, Mixed>> runtimeSettings
 			= new MutableObject<>(new ConcurrentHashMap<>());
 	private FileOptions fileOptions;
@@ -509,5 +512,14 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	 */
 	public ClassTypeCache GetClassCache() {
 		return this.classTypeCache;
+	}
+
+	/**
+	 * Returns the instanceof cache for this runtime. This should only be used by InstanceofUtil. Use that class
+	 * directly if you think you need this value.
+	 * @return
+	 */
+	public Map<CClassType, Set<CClassType>> getIsInstanceofCache() {
+		return isInstanceofCache;
 	}
 }

@@ -59,6 +59,7 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.IVariableList;
 import com.laytonsmith.core.constructs.InstanceofUtil;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -132,12 +133,12 @@ public class DataHandling {
 		}
 
 		@Override
-		public CClassType typecheck(StaticAnalysis analysis,
+		public LeftHandSideType typecheck(StaticAnalysis analysis,
 				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
 			return typecheckArray(analysis, ast, env, exceptions);
 		}
 
-		protected static CClassType typecheckArray(StaticAnalysis analysis,
+		protected static LeftHandSideType typecheckArray(StaticAnalysis analysis,
 				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
 			for(ParseTree child : ast.getChildren()) {
 				Mixed elem = child.getData();
@@ -145,17 +146,17 @@ public class DataHandling {
 				// If this is a centry(), ignore the first (CLabel) argument.
 				if(elem instanceof CFunction && centry.NAME.equals(elem.val())) {
 					if(child.numberOfChildren() == 2) {
-						CClassType type = analysis.typecheck(child.getChildAt(1), env, exceptions);
+						LeftHandSideType type = analysis.typecheck(child.getChildAt(1), env, exceptions);
 						StaticAnalysis.requireType(type, Mixed.TYPE, child.getChildAt(1).getTarget(), env, exceptions);
 					}
 				} else {
 
 					// This is normal value, so typecheck it.
-					CClassType type = analysis.typecheck(child, env, exceptions);
+					LeftHandSideType type = analysis.typecheck(child, env, exceptions);
 					StaticAnalysis.requireType(type, Mixed.TYPE, child.getTarget(), env, exceptions);
 				}
 			}
-			return CArray.TYPE;
+			return CArray.TYPE.asLeftHandSideType();
 		}
 
 		@Override
@@ -259,7 +260,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public CClassType typecheck(StaticAnalysis analysis,
+		public LeftHandSideType typecheck(StaticAnalysis analysis,
 				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
 			return array.typecheckArray(analysis, ast, env, exceptions);
 		}
@@ -318,7 +319,7 @@ public class DataHandling {
 		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			IVariableList list = env.getEnv(GlobalEnv.class).GetVarList();
 			int offset;
-			CClassType type;
+			LeftHandSideType type;
 			String name;
 			IVariable definedVar;
 			if(args.length == 3) {
@@ -369,7 +370,7 @@ public class DataHandling {
 
 		@Override
 		@SuppressWarnings("checkstyle:FallThrough")
-		public CClassType typecheck(StaticAnalysis analysis,
+		public LeftHandSideType typecheck(StaticAnalysis analysis,
 				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
 			int ind = 0;
 			CClassType declaredType = null;
@@ -388,7 +389,7 @@ public class DataHandling {
 
 					// Get assigned value.
 					ParseTree valNode = ast.getChildAt(ind);
-					CClassType valType = analysis.typecheck(valNode, env, exceptions);
+					LeftHandSideType valType = analysis.typecheck(valNode, env, exceptions);
 
 					// Attempt to get the declared type from this variable's declaration.
 					if(declaredType == null && ivar != null) {
@@ -419,7 +420,7 @@ public class DataHandling {
 					return valType;
 				default:
 					// Invalid number of arguments. Don't generate any further errors.
-					return CClassType.AUTO;
+					return CClassType.AUTO.asLeftHandSideType();
 			}
 		}
 
@@ -441,8 +442,14 @@ public class DataHandling {
 				Mixed rawType = ast.getChildAt(0).getData();
 				ParseTree ivarAst = ast.getChildAt(1);
 				Mixed rawIVar = ivarAst.getData();
-				if(rawType instanceof CClassType type && rawIVar instanceof IVariable iVar) {
-
+				if((rawType instanceof CClassType || rawType instanceof LeftHandSideType)
+						&& rawIVar instanceof IVariable iVar) {
+					LeftHandSideType type;
+					if(rawType instanceof CClassType cct) {
+						type = cct.asLeftHandSideType();
+					} else {
+						type = (LeftHandSideType) rawType;
+					}
 					// Add the new variable declaration.
 					declScope.addDeclaration(new Declaration(
 							Namespace.IVARIABLE, iVar.getVariableName(), type, ast.getTarget()));
@@ -500,7 +507,14 @@ public class DataHandling {
 				Mixed rawType = ast.getChildAt(0).getData();
 				ParseTree ivarAst = ast.getChildAt(1);
 				Mixed rawIVar = ivarAst.getData();
-				if(rawType instanceof CClassType type && rawIVar instanceof IVariable iVar) {
+				if((rawType instanceof CClassType || rawType instanceof LeftHandSideType)
+						&& rawIVar instanceof IVariable iVar) {
+					LeftHandSideType type;
+					if(rawType instanceof CClassType cct) {
+						type = cct.asLeftHandSideType();
+					} else {
+						type = (LeftHandSideType) rawType;
+					}
 					// Add the new variable declaration.
 					paramScope = analysis.createNewScope(paramScope);
 					paramScope.addDeclaration(new ParamDeclaration(iVar.getVariableName(), type, ast.getTarget()));
@@ -526,7 +540,7 @@ public class DataHandling {
 					// Add the new variable declaration.
 					paramScope = analysis.createNewScope(paramScope);
 					paramScope.addDeclaration(new ParamDeclaration(
-							iVar.getVariableName(), CClassType.AUTO, ast.getTarget()));
+							iVar.getVariableName(), CClassType.AUTO.asLeftHandSideType(), ast.getTarget()));
 					analysis.setTermScope(ivarAst, paramScope);
 				}
 
@@ -801,8 +815,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
-			return CBoolean.TYPE;
+		public LeftHandSideType getReturnType(Target t, List<LeftHandSideType> argTypes, List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+			return CBoolean.TYPE.asLeftHandSideType();
 		}
 
 
@@ -1539,14 +1553,16 @@ public class DataHandling {
 
 			// Handle optional return type argument (CClassType or CVoid, default to AUTO).
 			int ind = 0;
-			CClassType retType;
+			LeftHandSideType retType;
 			if(ast.getChildAt(ind).getData() instanceof CClassType) {
-				retType = (CClassType) ast.getChildAt(ind++).getData();
+				retType = ((CClassType) ast.getChildAt(ind++).getData()).asLeftHandSideType();
+			} else if(ast.getChildAt(ind).getData() instanceof LeftHandSideType lhst) {
+				retType = lhst;
 			} else if(ast.getChildAt(ind).getData().equals(CVoid.VOID)) {
 				ind++;
-				retType = CVoid.TYPE;
+				retType = CVoid.TYPE.asLeftHandSideType();
 			} else {
-				retType = CClassType.AUTO;
+				retType = CClassType.AUTO.asLeftHandSideType();
 			}
 
 			// Get proc name.
@@ -1557,7 +1573,7 @@ public class DataHandling {
 			Scope paramScope = analysis.createNewScope();
 
 			// Insert @arguments parameter.
-			paramScope.addDeclaration(new ParamDeclaration("@arguments", CArray.TYPE, ast.getTarget()));
+			paramScope.addDeclaration(new ParamDeclaration("@arguments", CArray.TYPE.asLeftHandSideType(), ast.getTarget()));
 
 			// Handle procedure parameters from left to right.
 			Scope valScope = parentScope;
@@ -2455,12 +2471,17 @@ public class DataHandling {
 		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			if(nodes.length == 0) {
 				//Empty closure, do nothing.
-				return new CClosure(null, env, Auto.TYPE, new String[]{}, new Mixed[]{}, new CClassType[]{}, t);
+				return new CClosure(null, env, Auto.TYPE.asLeftHandSideType(),
+						new String[]{}, new Mixed[]{}, new LeftHandSideType[]{}, t);
 			}
 			// Handle the closure type first thing
-			CClassType returnType = Auto.TYPE;
-			if(nodes[0].getData() instanceof CClassType) {
-				returnType = (CClassType) nodes[0].getData();
+			LeftHandSideType returnType = Auto.TYPE.asLeftHandSideType();
+			if(nodes[0].getData() instanceof LeftHandSideType || nodes[0].getData() instanceof CClassType) {
+				if(nodes[0].getData() instanceof CClassType cct) {
+					returnType = LeftHandSideType.fromCClassType(cct, t);
+				} else {
+					returnType = (LeftHandSideType) nodes[0].getData();
+				}
 				ParseTree[] newNodes = new ParseTree[nodes.length - 1];
 				for(int i = 1; i < nodes.length; i++) {
 					newNodes[i - 1] = nodes[i];
@@ -2469,7 +2490,7 @@ public class DataHandling {
 			}
 			String[] names = new String[nodes.length - 1];
 			Mixed[] defaults = new Mixed[nodes.length - 1];
-			CClassType[] types = new CClassType[nodes.length - 1];
+			LeftHandSideType[] types = new LeftHandSideType[nodes.length - 1];
 			// We clone the enviornment at this point, because we don't want the values
 			// that are assigned here to overwrite values in the main scope.
 			Environment myEnv;
@@ -2533,7 +2554,7 @@ public class DataHandling {
 			}
 
 			// Insert @arguments parameter.
-			paramScope.addDeclaration(new ParamDeclaration("@arguments", CArray.TYPE, ast.getTarget()));
+			paramScope.addDeclaration(new ParamDeclaration("@arguments", CArray.TYPE.asLeftHandSideType(), ast.getTarget()));
 
 			// Handle closure parameters from left to right.
 			Scope valScope = parentScope;
@@ -2627,12 +2648,17 @@ public class DataHandling {
 		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			if(nodes.length == 0) {
 				//Empty closure, do nothing.
-				return new CIClosure(null, env, Auto.TYPE, new String[]{}, new Mixed[]{}, new CClassType[]{}, t);
+				return new CIClosure(null, env, Auto.TYPE.asLeftHandSideType(),
+						new String[]{}, new Mixed[]{}, new LeftHandSideType[]{}, t);
 			}
 			// Handle the closure type first thing
-			CClassType returnType = Auto.TYPE;
-			if(nodes[0].getData() instanceof CClassType) {
-				returnType = (CClassType) nodes[0].getData();
+			LeftHandSideType returnType = Auto.TYPE.asLeftHandSideType();
+			if(nodes[0].getData() instanceof CClassType || nodes[0].getData() instanceof LeftHandSideType) {
+				if(nodes[0].getData() instanceof CClassType cct) {
+					returnType = LeftHandSideType.fromCClassType(cct, t);
+				} else {
+					returnType = (LeftHandSideType) nodes[0].getData();
+				}
 				ParseTree[] newNodes = new ParseTree[nodes.length - 1];
 				for(int i = 1; i < nodes.length; i++) {
 					newNodes[i - 1] = nodes[i];
@@ -2641,7 +2667,7 @@ public class DataHandling {
 			}
 			String[] names = new String[nodes.length - 1];
 			Mixed[] defaults = new Mixed[nodes.length - 1];
-			CClassType[] types = new CClassType[nodes.length - 1];
+			LeftHandSideType[] types = new LeftHandSideType[nodes.length - 1];
 			// We clone the enviornment at this point, because we don't want the values
 			// that are assigned here to overwrite values in the main scope.
 			Environment myEnv;
@@ -3349,7 +3375,7 @@ public class DataHandling {
 	private static String GetNamespace(CArray array, Target t, Environment env) {
 		boolean first = true;
 		StringBuilder b = new StringBuilder();
-		for(int i = 0; i < array.size(); i++) {
+		for(int i = 0; i < array.size(env); i++) {
 			if(!first) {
 				b.append(".");
 			}
@@ -3896,13 +3922,13 @@ public class DataHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			CClassType type = ArgumentValidation.getClassType(args[0], t, env);
+			LeftHandSideType type = ArgumentValidation.getClassType(args[0], t, env);
 			int size = ArgumentValidation.getInt32(args[1], t, env);
 			if(size < 0) {
 				throw new CRERangeException("Array size must be zero or greater. Received: " + size, t);
 			}
 			// nullOut is intentionally ignored here, as it's irrelevant in the case of the interpreter
-			return new CFixedArray(t, type, size);
+			return new CFixedArray(t, type.asConcreteType(t), size);
 		}
 
 		@Override

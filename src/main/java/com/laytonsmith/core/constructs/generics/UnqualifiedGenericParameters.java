@@ -1,5 +1,6 @@
 package com.laytonsmith.core.constructs.generics;
 
+import com.laytonsmith.PureUtilities.MapBuilder;
 import com.laytonsmith.PureUtilities.Pair;
 import com.laytonsmith.core.UnqualifiedClassName;
 import com.laytonsmith.core.constructs.CClassType;
@@ -8,6 +9,7 @@ import com.laytonsmith.core.environments.Environment;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * An UnqualifiedGenericParameters class represents the generic parameters at the intermediate stage of compilation,
@@ -31,7 +33,8 @@ public class UnqualifiedGenericParameters {
 	 * @return
 	 * @throws ClassNotFoundException
 	 */
-	public GenericParameters qualify(CClassType forType, Target t, Environment env) throws ClassNotFoundException {
+	public Map<CClassType, GenericParameters> qualify(CClassType forType, Target t, Environment env) throws ClassNotFoundException {
+		// TODO: Add superclasses here
 		GenericParameters.GenericParametersBuilder p = null;
 		for(Pair<UnqualifiedClassName, UnqualifiedLeftHandGenericUse> pair : parameters) {
 			UnqualifiedClassName ucn = pair.getKey();
@@ -44,7 +47,7 @@ public class UnqualifiedGenericParameters {
 				p.addParameter(type, lhgu);
 			}
 		}
-		return p == null ? null : p.build();
+		return p == null ? null : MapBuilder.start(forType, p.build());
 	}
 
 

@@ -73,7 +73,7 @@ public class CFixedArray extends Construct implements
 	}
 
 	@Override
-	public Set<Mixed> keySet() {
+	public Set<Mixed> keySet(Environment env) {
 		Set<Mixed> set = new LinkedHashSet<>(data.length);
 		for(int i = 0; i < data.length; i++) {
 			set.add(new CInt(i, Target.UNKNOWN));
@@ -82,7 +82,7 @@ public class CFixedArray extends Construct implements
 	}
 
 	private void validateSet(Mixed value, Target t, Environment env) {
-		if(!value.typeof(env).doesExtend(allowedType)) {
+		if(!value.typeof(env).doesExtend(env, allowedType)) {
 			throw new CRECastException("Cannot set value of type " + value.typeof(env).toString() + " into fixed_array of type " + allowedType.toString(), t);
 		}
 	}
@@ -111,12 +111,12 @@ public class CFixedArray extends Construct implements
 	}
 
 	@Override
-	public boolean getBooleanValue(Target t) {
-		return size() > 0;
+	public boolean getBooleanValue(Environment env, Target t) {
+		return size(env) > 0;
 	}
 
 	@Override
-	public long size() {
+	public long size(Environment env) {
 		return data.length;
 	}
 

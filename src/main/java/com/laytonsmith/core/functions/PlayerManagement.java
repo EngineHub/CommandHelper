@@ -534,7 +534,7 @@ public class PlayerManagement {
 					if(!(ca.containsKey("pitch"))) {
 						l.setPitch(ploc.getPitch());
 					}
-				} else if(ca.size() < 5) {
+				} else if(ca.size(env) < 5) {
 					l.setYaw(ploc.getYaw());
 					l.setPitch(ploc.getPitch());
 				}
@@ -4147,7 +4147,7 @@ public class PlayerManagement {
 			if(args.length == 2 || args.length == 3) {
 				//Lines are in an array
 				CArray lineArray = ArgumentValidation.getArray(args[1 + offset], t, env);
-				if(lineArray.size() != 4) {
+				if(lineArray.size(env) != 4) {
 					throw new CRECastException("Line array must have 4 elements.", t);
 				}
 				lines[0] = lineArray.get(0, t, env).val();

@@ -651,7 +651,7 @@ public class StringHandling {
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			if(args[0].isInstanceOf(Sizeable.TYPE, null, env)) {
-				return new CInt(((Sizeable) args[0]).size(), t);
+				return new CInt(((Sizeable) args[0]).size(env), t);
 			} else {
 				return new CInt(args[0].val().length(), t);
 			}
@@ -1428,7 +1428,7 @@ public class StringHandling {
 				if(((CArray) args[2]).inAssociativeMode()) {
 					throw new CRECastException("If the second argument to " + getName() + " is an array, it may not be associative.", t);
 				} else {
-					for(int i = 0; i < ((CArray) args[2]).size(); i++) {
+					for(int i = 0; i < ((CArray) args[2]).size(env); i++) {
 						flattenedArgs.add(((CArray) args[2]).get(i, t, env));
 					}
 				}

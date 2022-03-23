@@ -70,6 +70,11 @@ public class UnboundedConstraint extends Constraint {
 	}
 
 	@Override
+	public String toSimpleString() {
+		return toString();
+	}
+
+	@Override
 	public String toString() {
 		return getTypeName();
 	}

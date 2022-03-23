@@ -1,5 +1,6 @@
 package com.laytonsmith.core.constructs;
 
+import com.laytonsmith.PureUtilities.MapBuilder;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.Implementation.Type;
@@ -30,6 +31,8 @@ import org.junit.Test;
 
 import java.net.URL;
 import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
@@ -90,22 +93,22 @@ public class InstanceofUtilTest {
 				new Constraints(Target.UNKNOWN, ConstraintLocation.LHS,
 						new ExactType(Target.UNKNOWN, CString.TYPE, null)));
 
-		CClassType arrayInt = CClassType.get(CArray.TYPE, Target.UNKNOWN, GenericParameters
-				.addParameter(CInt.TYPE, null).build(), env);
-		CClassType arrayString = CClassType.get(CArray.TYPE, Target.UNKNOWN, GenericParameters
-				.addParameter(CString.TYPE, null).build(), env);
-		CClassType arrayArrayInt = CClassType.get(CArray.TYPE.getFQCN(), Target.UNKNOWN, GenericParameters
-				.addParameter(CArray.TYPE, intExactTypeLHGU).build(), env);
-		CClassType arrayArrayString = CClassType.get(CArray.TYPE, Target.UNKNOWN, GenericParameters
-				.addParameter(CArray.TYPE, stringExactTypeLHGU).build(), env);
-		CClassType arrayArrayExtendsNumber = CClassType.get(CArray.TYPE, Target.UNKNOWN, GenericParameters
-				.addParameter(CArray.TYPE, extendsNumberLHGU).build(), env);
-		CClassType arrayArrayExtendsPrimitive = CClassType.get(CArray.TYPE, Target.UNKNOWN, GenericParameters
-				.addParameter(CArray.TYPE, extendsPrimitiveLHGU).build(), env);
-		CClassType arrayArraySuperPrimitive = CClassType.get(CArray.TYPE, Target.UNKNOWN, GenericParameters
-				.addParameter(CArray.TYPE, superPrimitiveLHGU).build(), env);
-		CClassType arrayArraySuperNumber = CClassType.get(CArray.TYPE, Target.UNKNOWN, GenericParameters
-				.addParameter(CArray.TYPE, superNumberLHGU).build(), env);
+		CClassType arrayInt = CClassType.get(CArray.TYPE, Target.UNKNOWN, MapBuilder.start(CArray.TYPE, GenericParameters
+				.addParameter(CInt.TYPE, null).build()), env);
+		CClassType arrayString = CClassType.get(CArray.TYPE, Target.UNKNOWN, MapBuilder.start(CArray.TYPE, GenericParameters
+				.addParameter(CString.TYPE, null).build()), env);
+		CClassType arrayArrayInt = CClassType.get(CArray.TYPE.getFQCN(), Target.UNKNOWN, MapBuilder.start(CArray.TYPE, GenericParameters
+				.addParameter(CArray.TYPE, intExactTypeLHGU).build()), env);
+		CClassType arrayArrayString = CClassType.get(CArray.TYPE, Target.UNKNOWN, MapBuilder.start(CArray.TYPE, GenericParameters
+				.addParameter(CArray.TYPE, stringExactTypeLHGU).build()), env);
+		CClassType arrayArrayExtendsNumber = CClassType.get(CArray.TYPE, Target.UNKNOWN, MapBuilder.start(CArray.TYPE, GenericParameters
+				.addParameter(CArray.TYPE, extendsNumberLHGU).build()), env);
+		CClassType arrayArrayExtendsPrimitive = CClassType.get(CArray.TYPE, Target.UNKNOWN, MapBuilder.start(CArray.TYPE, GenericParameters
+				.addParameter(CArray.TYPE, extendsPrimitiveLHGU).build()), env);
+		CClassType arrayArraySuperPrimitive = CClassType.get(CArray.TYPE, Target.UNKNOWN, MapBuilder.start(CArray.TYPE, GenericParameters
+				.addParameter(CArray.TYPE, superPrimitiveLHGU).build()), env);
+		CClassType arrayArraySuperNumber = CClassType.get(CArray.TYPE, Target.UNKNOWN, MapBuilder.start(CArray.TYPE, GenericParameters
+				.addParameter(CArray.TYPE, superNumberLHGU).build()), env);
 
 		LeftHandGenericUse stringLHGU = new LeftHandGenericUse(CArray.TYPE, Target.UNKNOWN, env,
 				new Constraints(Target.UNKNOWN, ConstraintLocation.LHS,
@@ -156,7 +159,7 @@ public class InstanceofUtilTest {
 		assertTrue(InstanceofUtil.isInstanceof(arrayArrayInt, CArray.TYPE, arrayExtendsPrimitiveLHGU, env));
 
 		// Assignment vs instanceof
-		assertFalse(InstanceofUtil.isInstanceof(CNull.NULL, arrayInt, null, env));
+		assertFalse(InstanceofUtil.isInstanceof(CNull.NULL, arrayInt, env));
 		assertEquals("null", StaticTest.SRun("string @s = null; msg(@s);", null));
 		try {
 			StaticTest.SRun("string @s = array();", null);
@@ -170,14 +173,20 @@ public class InstanceofUtilTest {
 	@typeof("InstanceofUtilTestA")
 	public static class InstanceofUtilTestA implements Mixed {
 
-		private GenericParameters genericParameters = null;
 
+		@SuppressWarnings("FieldNameHidesFieldInSuperclass")
 		public static final CClassType TYPE = CClassType.getWithGenericDeclaration(InstanceofUtilTestA.class, new GenericDeclaration(Target.UNKNOWN,
 				new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
 						new UpperBoundConstraint(Target.UNKNOWN, "T", CPrimitive.TYPE, null))));
 
+		private final Map<CClassType, GenericParameters> genericParameters = new HashMap<>();
+
 		public InstanceofUtilTestA(GenericParameters genericParameters) {
-			this.genericParameters = genericParameters;
+			registerGenerics(InstanceofUtilTestA.TYPE, genericParameters);
+		}
+
+		protected final void registerGenerics(CClassType type, GenericParameters parameters) {
+			genericParameters.put(type, parameters);
 		}
 
 		@Override
@@ -257,7 +266,7 @@ public class InstanceofUtilTest {
 
 		@Override
 		public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env) {
-			return InstanceofUtil.isInstanceof(this, type, lhsGenericParameters, env);
+			return InstanceofUtil.isInstanceof(this.typeof(env), type, lhsGenericParameters, env);
 		}
 
 		@Override
@@ -266,15 +275,14 @@ public class InstanceofUtilTest {
 		}
 
 		@Override
-		public GenericParameters getGenericParameters() {
-			return genericParameters;
+		public Map<CClassType, GenericParameters> getGenericParameters() {
+			return new HashMap<>(genericParameters);
 		}
 
 	}
 
 	@typeof("InstanceofUtilTestB")
 	public static class InstanceofUtilTestB extends InstanceofUtilTestA {
-		private GenericParameters genericParameters = null;
 
 		@SuppressWarnings("FieldNameHidesFieldInSuperclass")
 		public static final CClassType TYPE = CClassType.getWithGenericDeclaration(InstanceofUtilTestB.class, new GenericDeclaration(Target.UNKNOWN,
@@ -284,12 +292,7 @@ public class InstanceofUtilTest {
 
 		public InstanceofUtilTestB(GenericParameters genericParameters) {
 			super(genericParameters.subset(InstanceofUtilTestA.TYPE.getGenericDeclaration(), "T"));
-			this.genericParameters = genericParameters;
-		}
-
-		@Override
-		public GenericParameters getGenericParameters() {
-			return genericParameters;
+			registerGenerics(InstanceofUtilTestB.TYPE, genericParameters);
 		}
 
 		@Override
@@ -301,22 +304,28 @@ public class InstanceofUtilTest {
 
 	@Test
 	public void testGenericInheritanceInstanceof() throws Exception {
+		// B<string, int> extends A<string>
 		InstanceofUtilTestB bStringInt = new InstanceofUtilTestB(GenericParameters
 				.addParameter(CString.TYPE, null)
 				.addParameter(CInt.TYPE, null).build());
+		// B<int, int> extends A<int>
 		InstanceofUtilTestB bIntInt = new InstanceofUtilTestB(GenericParameters
 				.addParameter(CInt.TYPE, null)
 				.addParameter(CInt.TYPE, null).build());
-		CClassType aString = CClassType.get(InstanceofUtilTestA.TYPE.getFQCN(), Target.UNKNOWN, GenericParameters
-				.addParameter(CString.TYPE, null).build(), env);
+		// A<string>
+		CClassType aString = CClassType.get(InstanceofUtilTestA.TYPE.getFQCN(), Target.UNKNOWN,
+				MapBuilder.start(InstanceofUtilTestA.TYPE, GenericParameters
+					.addParameter(CString.TYPE, null).build()).build(), env);
+		// A<string>
+		CClassType aInt = CClassType.get(InstanceofUtilTestA.TYPE.getFQCN(), Target.UNKNOWN,
+				MapBuilder.start(InstanceofUtilTestA.TYPE, GenericParameters
+					.addParameter(CInt.TYPE, null).build()).build(), env);
 
-		assertFalse(bStringInt.isInstanceOf(bIntInt.typeof(env), bIntInt.getGenericParameters()
-				.toLeftHandEquivalent(bIntInt.typeof(env), env), env));
+		assertFalse(bStringInt.isInstanceOf(bIntInt.typeof(env), null, env));
 		assertTrue(bStringInt.isInstanceOf(bStringInt.typeof(env), null, env));
-		// TODO: Need to figure out how to square the circle here. The ClassType contains the parameter, but then
-		// if that's the case, what does the LHS parameter contain? In general, the second part of the instanceof
-		// check contains a LHS declaration, so how do we generally represent that here?
-		assertTrue(bStringInt.isInstanceOf(aString, aString.getGenericParameters().toLeftHandEquivalent(aString, env), env));
-		assertFalse(bIntInt.isInstanceOf(aString, aString.getGenericParameters().toLeftHandEquivalent(aString, env), env));
+
+		assertTrue(bStringInt.isInstanceOf(aString, null, env));
+		assertFalse(bStringInt.isInstanceOf(aInt, null, env));
+		
 	}
 }

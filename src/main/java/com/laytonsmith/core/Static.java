@@ -1351,16 +1351,16 @@ public final class Static {
 			CArray array = (CArray) construct;
 			if(array.isAssociative()) {
 				HashMap<String, Object> map = new HashMap<>();
-				for(Mixed key : array.keySet()) {
+				for(Mixed key : array.keySet(env)) {
 					Mixed c = array.get(key.val(), Target.UNKNOWN, env);
 					map.put(key.val(), (c == array) ? map : getJavaObject(c, env));
 				}
 				return map;
 			} else {
-				Object[] a = new Object[(int) array.size()];
+				Object[] a = new Object[(int) array.size(env)];
 				boolean nullable = false;
 				Class<?> clazz = null;
-				for(int i = 0; i < array.size(); i++) {
+				for(int i = 0; i < array.size(env); i++) {
 					Mixed c = array.get(i, Target.UNKNOWN, env);
 					if(c == array) {
 						a[i] = a;

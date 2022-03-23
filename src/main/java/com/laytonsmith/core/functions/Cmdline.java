@@ -985,8 +985,8 @@ public class Cmdline {
 			final boolean subshell;
 			if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
 				CArray array = (CArray) args[0];
-				command = new String[(int) array.size()];
-				for(int i = 0; i < array.size(); i++) {
+				command = new String[(int) array.size(env)];
+				for(int i = 0; i < array.size(env); i++) {
 					command[i] = array.get(i, t, env).val();
 				}
 			} else {
@@ -1184,8 +1184,8 @@ public class Cmdline {
 			File workingDir = null;
 			if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
 				CArray array = (CArray) args[0];
-				command = new String[(int) array.size()];
-				for(int i = 0; i < array.size(); i++) {
+				command = new String[(int) array.size(env)];
+				for(int i = 0; i < array.size(env); i++) {
 					command[i] = array.get(i, t, env).val();
 				}
 			} else {

@@ -61,6 +61,23 @@ public class Constraints implements Iterable<Constraint> {
 		return typename;
 	}
 
+	/**
+	 * Works like toString, but uses the class's simple name.
+	 * @return
+	 */
+	public String toSimpleString() {
+		StringBuilder b = new StringBuilder();
+		boolean doComma = false;
+		for(Constraint c : constraints) {
+			if(doComma) {
+				b.append(" & ");
+			}
+			doComma = true;
+			b.append(c.toSimpleString());
+		}
+		return b.toString();
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder b = new StringBuilder();

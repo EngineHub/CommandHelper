@@ -138,7 +138,7 @@ public class Meta {
 			String cmd = args[1].val().substring(1);
 			if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
 				CArray u = (CArray) args[0];
-				for(int i = 0; i < u.size(); i++) {
+				for(int i = 0; i < u.size(env); i++) {
 					exec(t, env, new Mixed[]{new CString(u.get(i, t, env).val(), t), args[1]});
 				}
 				return CVoid.VOID;

@@ -8,6 +8,7 @@ import com.laytonsmith.core.Script;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.InstanceofUtil;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
@@ -31,7 +32,7 @@ public class UserObject implements Mixed {
 	private final Environment env;
 	private final Target t;
 	private final ObjectDefinition objectDefinition;
-	private final GenericParameters genericParameters;
+	private final Map<CClassType, GenericParameters> genericParameters;
 
 	private final Map<String, Mixed> fieldTable;
 
@@ -52,7 +53,7 @@ public class UserObject implements Mixed {
 	 * if this is not a native object, this should be null.
 	 */
 	public UserObject(Target t, Script parent, Environment env, ObjectDefinition objectDefinition,
-			GenericParameters genericParameters, Mixed nativeObject) {
+			Map<CClassType, GenericParameters> genericParameters, Mixed nativeObject) {
 		this.t = t;
 		this.env = env;
 		this.objectDefinition = objectDefinition;
@@ -159,16 +160,17 @@ public class UserObject implements Mixed {
 
 	@Override
 	public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env) {
-		return InstanceofUtil.isInstanceof(this, type, lhsGenericParameters, env);
+		return InstanceofUtil.isInstanceof(this, LeftHandSideType
+				.fromCClassType(type, lhsGenericParameters, Target.UNKNOWN), env);
 	}
 
 	@Override
-	public CClassType typeof(Environment env) {
+	public final CClassType typeof(Environment env) {
 		return CClassType.get(objectDefinition.getType(), Target.UNKNOWN, this.getGenericParameters(), env);
 	}
 
 	@Override
-	public GenericParameters getGenericParameters() {
+	public Map<CClassType, GenericParameters> getGenericParameters() {
 		return genericParameters;
 	}
 

@@ -31,7 +31,7 @@ public class LowerBoundConstraint extends BoundaryConstraint {
 
 	@Override
 	protected boolean isConcreteClassWithinConstraint(CClassType type, LeftHandGenericUse generics, Environment env) {
-		return this.bound.doesExtend(type) && (
+		return this.bound.doesExtend(env, type) && (
 				(getBoundaryGenerics() == null && generics == null)
 				|| getBoundaryGenerics().isWithinBounds(env, new Pair<>(type, generics))
 		);
@@ -39,6 +39,12 @@ public class LowerBoundConstraint extends BoundaryConstraint {
 
 	public CClassType getLowerBound() {
 		return this.bound;
+	}
+
+	@Override
+	public String toSimpleString() {
+		return getTypeName() + " super " + getLowerBound().getSimpleName()
+				+ (genericParameters == null ? "" : "<" + genericParameters.toSimpleString() + ">");
 	}
 
 	@Override

@@ -889,7 +889,7 @@ public class EntityManagement {
 			if(args.length == 3) {
 				if(args[2].isInstanceOf(CArray.TYPE, null, env)) {
 					CArray ta = (CArray) args[2];
-					for(int i = 0; i < ta.size(); i++) {
+					for(int i = 0; i < ta.size(env); i++) {
 						types.add(ta.get(i, t, env).val());
 					}
 				} else {

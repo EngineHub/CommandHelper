@@ -58,11 +58,11 @@ public class TestCClassType {
 
 	@Test
 	public void testDoesExtend() throws Exception {
-		assertTrue(get("array").doesExtend(get("mixed")));
-		assertTrue(get("array").doesExtend(get("ArrayAccess")));
-		assertFalse(get("array").doesExtend(get("string")));
-		assertTrue(get("array").doesExtend(get("array")));
-		assertTrue(get("array").doesExtend(get("Booleanish")));
+		assertTrue(get("array").doesExtend(env, get("mixed")));
+		assertTrue(get("array").doesExtend(env, get("ArrayAccess")));
+		assertFalse(get("array").doesExtend(env, get("string")));
+		assertTrue(get("array").doesExtend(env, get("array")));
+		assertTrue(get("array").doesExtend(env, get("Booleanish")));
 	}
 
 	@Test

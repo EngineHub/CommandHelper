@@ -18,12 +18,12 @@ import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.constructs.CArray;
-import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CMutablePrimitive;
 import com.laytonsmith.core.constructs.IVariable;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
@@ -1195,11 +1195,11 @@ public class Math {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
-			if(argTypes.size() == 0) {
-				return CDouble.TYPE;
+		public LeftHandSideType getReturnType(Target t, List<LeftHandSideType> argTypes, List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+			if(argTypes.isEmpty()) {
+				return CDouble.TYPE.asLeftHandSideType();
 			} else {
-				return CInt.TYPE;
+				return CInt.TYPE.asLeftHandSideType();
 			}
 		}
 	}
@@ -1497,7 +1497,7 @@ public class Math {
 		public List<Mixed> recList(List<Mixed> list, Environment env, Mixed... args) {
 			for(Mixed c : args) {
 				if(c.isInstanceOf(CArray.TYPE, null, env)) {
-					for(int i = 0; i < ((CArray) c).size(); i++) {
+					for(int i = 0; i < ((CArray) c).size(env); i++) {
 						recList(list, env, ((CArray) c).get(i, Target.UNKNOWN, env));
 					}
 				} else {
@@ -1579,7 +1579,7 @@ public class Math {
 		public List<Mixed> recList(List<Mixed> list, Environment env, Mixed... args) {
 			for(Mixed c : args) {
 				if(c.isInstanceOf(CArray.TYPE, null, env)) {
-					for(int i = 0; i < ((CArray) c).size(); i++) {
+					for(int i = 0; i < ((CArray) c).size(env); i++) {
 						recList(list, env, ((CArray) c).get(i, Target.UNKNOWN, env));
 					}
 				} else {
@@ -2435,8 +2435,8 @@ public class Math {
 			String[] varNames;
 			if(vars != null) {
 				int i = 0;
-				da = new double[(int) vars.size()];
-				varNames = new String[(int) vars.size()];
+				da = new double[(int) vars.size(env)];
+				varNames = new String[(int) vars.size(env)];
 				for(String key : vars.stringKeySet()) {
 					varNames[i] = key;
 					da[i] = ArgumentValidation.getDouble(vars.get(key, t, env), t, env);

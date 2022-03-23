@@ -3,6 +3,7 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.ClassMirror;
 import com.laytonsmith.PureUtilities.ClassLoading.DynamicEnum;
+import com.laytonsmith.PureUtilities.Pair;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.MDynamicEnum;
 import com.laytonsmith.annotations.MEnum;
@@ -28,9 +29,11 @@ import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.IVariable;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
@@ -56,7 +59,6 @@ import com.laytonsmith.persistence.PersistenceNetwork;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -358,23 +360,24 @@ public class Reflection {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			CClassType type = ArgumentValidation.getClassType(args[0], t, env);
+			LeftHandSideType types = ArgumentValidation.getClassType(args[0], t, env);
 			CArray ret = new CArray(t, null, env);
-			ret.set("fqcn", type.getFQCN().getFQCN(), env);
-			ret.set("name", type.getFQCN().getSimpleName(), env);
+			ret.set("fqcn", types.val(), env);
+			ret.set("name", types.getSimpleName(), env);
 			ret.set("interfaces", new CArray(t, GenericParameters
-					.addParameter(CClassType.TYPE, null).build(), env, type.getTypeInterfaces(env)), t, env);
+					.addParameter(CClassType.TYPE, null).build(), env, types.getTypeInterfaces(env)), t, env);
 			ret.set("superclasses", new CArray(t, GenericParameters
-					.addParameter(CClassType.TYPE, null).build(), env, type.getTypeSuperclasses(env)), t, env);
+					.addParameter(CClassType.TYPE, null).build(), env, types.getTypeSuperclasses(env)), t, env);
 
 			CArray typeDocs = new CArray(t, null, env);
 			// When type unions are a thing, this will need to be implemented slightly differently.
-			for(CClassType m : Arrays.asList(type)) {
+			for(Pair<CClassType, LeftHandGenericUse> pair : types.getTypes()) {
+				CClassType type = pair.getKey();
 				CArray docs = CArray.GetAssociativeArray(t, null, env);
 				docs.set("package", type.getPackage() == null ? CNull.NULL : type.getPackage(), t, env);
 				docs.set("isNative", CBoolean.get(type.getNativeType() != null), t, env);
-				docs.set("docs", m.getTypeDocs(env), env);
-				docs.set("since", m.getTypeSince(env).toString(), env);
+				docs.set("docs", type.getTypeDocs(env), env);
+				docs.set("since", type.getTypeSince(env).toString(), env);
 				typeDocs.push(docs, t, env);
 			}
 			ret.set("typeDocs", typeDocs, t, env);

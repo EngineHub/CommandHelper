@@ -1,6 +1,7 @@
 package com.laytonsmith.core.compiler.analysis;
 
 import com.laytonsmith.core.constructs.CClassType;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
 
 /**
@@ -14,7 +15,7 @@ public class Declaration {
 
 	private final Namespace namespace;
 	private final String identifier;
-	private final CClassType type;
+	private final LeftHandSideType type;
 	private final Target target;
 
 	/**
@@ -24,7 +25,7 @@ public class Declaration {
 	 * @param type - The {@link CClassType} of this declaration.
 	 * @param t - The target of the declaration.
 	 */
-	public Declaration(Namespace namespace, String identifier, CClassType type, Target t) {
+	public Declaration(Namespace namespace, String identifier, LeftHandSideType type, Target t) {
 		this.namespace = namespace;
 		this.identifier = identifier;
 		this.type = type;
@@ -39,7 +40,7 @@ public class Declaration {
 		return this.identifier;
 	}
 
-	public CClassType getType() {
+	public LeftHandSideType getType() {
 		return this.type;
 	}
 

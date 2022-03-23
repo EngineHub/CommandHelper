@@ -1,12 +1,14 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.MapBuilder;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNumber;
 import com.laytonsmith.core.constructs.IVariable;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.generics.Constraint;
 import com.laytonsmith.core.constructs.generics.ConstraintLocation;
@@ -30,6 +32,7 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -80,24 +83,24 @@ public class GenericsTest {
 		// ? extends array<array<int>>
 		LeftHandGenericUse lhgu = new LeftHandGenericUse(CArray.TYPE, Target.UNKNOWN, env, new Constraints(Target.UNKNOWN, ConstraintLocation.LHS,
 				new UpperBoundConstraint(Target.UNKNOWN, "?", CClassType.get(CArray.TYPE.getFQCN(), Target.UNKNOWN,
-						GenericParameters
+						MapBuilder.start(CArray.TYPE, GenericParameters
 								.addParameter(CArray.TYPE, new LeftHandGenericUse(CArray.TYPE, Target.UNKNOWN, env,
 										new Constraints(Target.UNKNOWN, ConstraintLocation.LHS, new ExactType(Target.UNKNOWN, CInt.TYPE, null))))
-								.build(), env), null)));
+								.build()), env), null)));
 		assertEquals("? extends ms.lang.array<ms.lang.array<ms.lang.int>>", lhgu.toString());
 
 		// ? extends array<? extends int>
 
 		lhgu = new LeftHandGenericUse(CArray.TYPE, Target.UNKNOWN, env, new Constraints(Target.UNKNOWN, ConstraintLocation.LHS,
 				new UpperBoundConstraint(Target.UNKNOWN, "?", CClassType.get(CArray.TYPE.getFQCN(), Target.UNKNOWN,
-						GenericParameters
+						MapBuilder.start(CArray.TYPE, GenericParameters
 								.addParameter(CArray.TYPE, new LeftHandGenericUse(CArray.TYPE, Target.UNKNOWN, env,
 										new Constraints(Target.UNKNOWN, ConstraintLocation.LHS, new UpperBoundConstraint(Target.UNKNOWN, "?", CInt.TYPE, null))))
-								.build(), env), null)));
+								.build()), env), null)));
 		assertEquals("? extends ms.lang.array<ms.lang.array<? extends ms.lang.int>>", lhgu.toString());
 
-		GenericParameters params = GenericParameters
-				.addParameter(CArray.TYPE, lhgu).build();
+		Map<CClassType, GenericParameters> params = MapBuilder.start(CArray.TYPE, GenericParameters
+				.addParameter(CArray.TYPE, lhgu).build()).build();
 
 		CClassType array = CClassType.get(CArray.TYPE.getFQCN(), Target.UNKNOWN, params, env);
 
@@ -113,7 +116,7 @@ public class GenericsTest {
 		CArray array = new CArray(Target.UNKNOWN, GenericParameters
 				.addParameter(CDouble.TYPE, null).build(), env);
 		try {
-			IVariable var = new IVariable(CArray.TYPE, "@a", array, Target.UNKNOWN, lhgu, null);
+			IVariable var = new IVariable(LeftHandSideType.fromCClassType(CArray.TYPE, lhgu, Target.UNKNOWN), "@a", array, Target.UNKNOWN, null);
 			new assign().exec(Target.UNKNOWN, env, var, array);
 			fail(); // Shouldn't get here
 		} catch (CREGenericConstraintException cce) {

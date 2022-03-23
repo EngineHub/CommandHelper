@@ -12,6 +12,7 @@ import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.InstanceofUtil;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
@@ -30,6 +31,7 @@ import java.net.URL;
 import java.util.AbstractList;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -38,6 +40,8 @@ import java.util.stream.Collectors;
  * real enum, or dynamically generated based on user code. Enums marked with {@link MEnum} or {@link MDynamicEnum} are
  * automatically added to the ecosystem, however.
  */
+// The fully qualified name of this class cannot be changed without breaking startup.
+// The good news is that it will be a very obvious breakage, but a difficult bug to track down.
 @typeof("ms.lang.enum")
 public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.interfaces.Iterable {
 
@@ -149,7 +153,8 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 
 			@Override
 			public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env) {
-				return InstanceofUtil.isInstanceof(this, type, lhsGenericParameters, env);
+				return InstanceofUtil.isInstanceof(this, LeftHandSideType
+						.fromCClassType(type, lhsGenericParameters, Target.UNKNOWN), env);
 			}
 
 			@Override
@@ -253,7 +258,7 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 							}
 
 							@Override
-							public GenericParameters getGenericParameters() {
+							public Map<CClassType, GenericParameters> getGenericParameters() {
 								return null;
 							}
 
@@ -264,7 +269,8 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 
 							@Override
 							public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env) {
-								return InstanceofUtil.isInstanceof(this, type, lhsGenericParameters, env);
+								return InstanceofUtil.isInstanceof(this, LeftHandSideType
+										.fromCClassType(type, lhsGenericParameters, Target.UNKNOWN), env);
 							}
 
 							@Override
@@ -325,7 +331,7 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 			}
 
 			@Override
-			public boolean getBooleanValue(Target t) {
+			public boolean getBooleanValue(Environment env, Target t) {
 				return true;
 			}
 
@@ -337,6 +343,26 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 		protected List<MEnumTypeValue> getValues() {
 			throw new UnsupportedOperationException("The root MEnumType is a meta object, and cannot be used normally."
 					+ " There are no values in the class.");
+		}
+
+		@Override
+		public String docs() {
+			return super.docs(); //To change body of generated methods, choose Tools | Templates.
+		}
+
+		@Override
+		public CClassType[] getInterfaces() {
+			return super.getInterfaces(); //To change body of generated methods, choose Tools | Templates.
+		}
+
+		@Override
+		public Version since() {
+			return super.since(); //To change body of generated methods, choose Tools | Templates.
+		}
+
+		@Override
+		public CClassType[] getSuperclasses() {
+			return super.getSuperclasses(); //To change body of generated methods, choose Tools | Templates.
 		}
 
 	};
@@ -427,7 +453,8 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 
 	@Override
 	public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env) {
-		return InstanceofUtil.isInstanceof(this, type, lhsGenericParameters, env);
+		return InstanceofUtil.isInstanceof(this, LeftHandSideType
+				.fromCClassType(type, lhsGenericParameters, Target.UNKNOWN), env);
 	}
 
 	@Override
@@ -436,7 +463,7 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 	}
 
 	@Override
-	public GenericParameters getGenericParameters() {
+	public Map<CClassType, GenericParameters> getGenericParameters() {
 		return null;
 	}
 
@@ -493,12 +520,12 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 	}
 
 	@Override
-	public Set<Mixed> keySet() {
+	public Set<Mixed> keySet(Environment env) {
 		return values().stream().collect(Collectors.toSet());
 	}
 
 	@Override
-	public long size() {
+	public long size(Environment env) {
 		return values().size();
 	}
 
@@ -524,7 +551,7 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 	protected abstract List<MEnumTypeValue> getValues();
 
 	@Override
-	public boolean getBooleanValue(Target t) {
+	public boolean getBooleanValue(Environment env, Target t) {
 		return true;
 	}
 

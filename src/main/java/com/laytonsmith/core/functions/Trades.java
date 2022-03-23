@@ -421,9 +421,9 @@ public class Trades {
 		if(ingredients.inAssociativeMode()) {
 			throw new CREFormatException("Ingredients array is invalid.", t);
 		}
-		if(ingredients.size() < 1 || ingredients.size() > 2) {
+		if(ingredients.size(env) < 1 || ingredients.size(env) > 2) {
 			throw new CRERangeException("Ingredients for merchants must contain 1 or 2 items, found "
-					+ ingredients.size(), t);
+					+ ingredients.size(env), t);
 		}
 		List<MCItemStack> mcIngredients = new ArrayList<>();
 		for(Mixed ingredient : ingredients.asList()) {

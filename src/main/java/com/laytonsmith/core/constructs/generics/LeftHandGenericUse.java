@@ -31,7 +31,6 @@ public class LeftHandGenericUse {
 		ConstraintValidator.ValidateLHS(t, forType, Arrays.asList(constraints), env);
 	}
 
-
 	@Override
 	public boolean equals(Object that) {
 		return ObjectHelpers.DoEquals(this, that);
@@ -44,6 +43,24 @@ public class LeftHandGenericUse {
 
 	public List<Constraints> getConstraints() {
 		return constraints;
+	}
+
+	/**
+	 * Works like toString, but uses the class's simple name.
+	 *
+	 * @return
+	 */
+	public String toSimpleString() {
+		StringBuilder b = new StringBuilder();
+		boolean doComma = false;
+		for(Constraints cc : constraints) {
+			if(doComma) {
+				b.append(", ");
+			}
+			doComma = true;
+			b.append(cc.toSimpleString());
+		}
+		return b.toString();
 	}
 
 	@Override
@@ -79,6 +96,7 @@ public class LeftHandGenericUse {
 
 	/**
 	 * Returns true if the input LHS type is a subtype of this LHS.
+	 *
 	 * @param env The environment
 	 * @param presumedSubtype The value to check if it is within the bounds represented by this object
 	 */

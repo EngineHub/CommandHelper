@@ -225,7 +225,7 @@ public class ObjectDefinition implements Commentable {
 									.getObjectDefinitionTable().get(fqcn);
 							superclass.qualifyClasses(env);
 						}
-						GenericParameters genericParameters = null;
+						Map<CClassType, GenericParameters> genericParameters = null;
 						if(parameters != null) {
 							CClassType nakedSuperClass = CClassType.getNakedClassType(fqcn, env);
 							genericParameters = parameters.qualify(nakedSuperClass, ucn.getTarget(), env);

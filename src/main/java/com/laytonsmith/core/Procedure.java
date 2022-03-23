@@ -202,7 +202,7 @@ public class Procedure implements Cloneable {
 			if(this.varIndex.size() > varInd) {
 				IVariable var = this.varIndex.get(varInd);
 				if(c instanceof CVoid
-						&& !(var.getDefinedType().equals(Auto.TYPE) || var.getDefinedType().equals(CVoid.TYPE))) {
+						&& !(var.getDefinedType().isAuto() || var.getDefinedType().isVoid())) {
 					throw new CRECastException("Procedure \"" + name + "\" expects a value of type "
 							+ var.getDefinedType().val() + " in argument " + (varInd + 1) + ", but"
 							+ " a void value was found instead.", c.getTarget());
@@ -210,7 +210,7 @@ public class Procedure implements Cloneable {
 						|| InstanceofUtil.isInstanceof(c, var.getDefinedType(), env)) {
 					try {
 						env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(var.getDefinedType(),
-								var.getVariableName(), c, c.getTarget()));
+								var.getVariableName(), c, c.getTarget(), env));
 					} catch (ConfigCompileException cce) {
 						throw new CREFormatException(cce.getMessage(), t);
 					}

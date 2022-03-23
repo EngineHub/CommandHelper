@@ -43,14 +43,14 @@ public class CClosure extends Construct implements Callable {
 	protected final Environment env;
 	protected final String[] names;
 	protected final Mixed[] defaults;
-	protected final CClassType[] types;
-	protected final CClassType returnType;
+	protected final LeftHandSideType[] types;
+	protected final LeftHandSideType returnType;
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
 	public static final CClassType TYPE = CClassType.get(CClosure.class);
 
-	public CClosure(ParseTree node, Environment env, CClassType returnType, String[] names, Mixed[] defaults,
-			CClassType[] types, Target t) {
+	public CClosure(ParseTree node, Environment env, LeftHandSideType returnType, String[] names, Mixed[] defaults,
+			LeftHandSideType[] types, Target t) {
 		super(node != null ? node.toString() : "", ConstructType.CLOSURE, t);
 		this.node = node;
 		this.env = env;
@@ -271,7 +271,7 @@ public class CClosure extends Construct implements Callable {
 				// Check the return type of the closure to see if it matches the defined type
 				// Normal execution.
 				Mixed ret = ex.getReturn();
-				if(!InstanceofUtil.isInstanceof(ret, returnType, environment)) {
+				if(!InstanceofUtil.isInstanceof(ret.typeof(env).asLeftHandSideType(), returnType, environment)) {
 					throw new CRECastException("Expected closure to return a value of type " + returnType.val()
 							+ " but a value of type " + ret.typeof(env) + " was returned instead", ret.getTarget());
 				}
@@ -290,7 +290,7 @@ public class CClosure extends Construct implements Callable {
 				stManager.popStackTraceElement();
 			}
 			// If we got here, then there was no return type. This is fine, but only for returnType void or auto.
-			if(!(returnType.equals(Auto.TYPE) || returnType.equals(CVoid.TYPE))) {
+			if(!(returnType.isAuto() || returnType.isVoid())) {
 				throw new CRECastException("Expecting closure to return a value of type " + returnType.val() + ","
 						+ " but no value was returned.", node.getTarget());
 			}

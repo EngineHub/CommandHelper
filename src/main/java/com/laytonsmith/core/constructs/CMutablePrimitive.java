@@ -105,9 +105,9 @@ public final class CMutablePrimitive extends CArray implements Sizeable {
 	}
 
 	@Override
-	public long size() {
-		if(value.isInstanceOf(Sizeable.TYPE, null, fallbackEnv)) {
-			return ArgumentValidation.getObject(value, Target.UNKNOWN, Sizeable.class).size();
+	public long size(Environment env) {
+		if(value.isInstanceOf(Sizeable.TYPE, null, env)) {
+			return ArgumentValidation.getObject(value, Target.UNKNOWN, Sizeable.class).size(env);
 		} else {
 			return 0;
 		}

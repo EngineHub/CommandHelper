@@ -35,6 +35,12 @@ public class UpperBoundConstraint extends BoundaryConstraint {
 	}
 
 	@Override
+	public String toSimpleString() {
+		return getTypeName() + " extends " + getUpperBound().getSimpleName()
+				+ (genericParameters == null ? "" : "<" + genericParameters.toSimpleString() + ">");
+	}
+
+	@Override
 	public String toString() {
 		return getTypeName() + " extends " + getUpperBound()
 				+ (genericParameters == null ? "" : "<" + genericParameters + ">");
@@ -52,7 +58,7 @@ public class UpperBoundConstraint extends BoundaryConstraint {
 
 	@Override
 	protected boolean isConcreteClassWithinConstraint(CClassType type, LeftHandGenericUse generics, Environment env) {
-		return type.doesExtend(bound) && (
+		return type.doesExtend(env, bound) && (
 				(getBoundaryGenerics() == null && generics == null)
 				|| getBoundaryGenerics().isWithinBounds(env, new Pair<>(type, generics))
 		);
@@ -73,7 +79,7 @@ public class UpperBoundConstraint extends BoundaryConstraint {
 
 			@Override
 			public Boolean isWithinBounds(LowerBoundConstraint lhs) {
-				return lhs.getLowerBound().doesExtend(UpperBoundConstraint.this.getUpperBound());
+				return lhs.getLowerBound().doesExtend(env, UpperBoundConstraint.this.getUpperBound());
 			}
 
 			@Override
@@ -82,7 +88,7 @@ public class UpperBoundConstraint extends BoundaryConstraint {
 				if(UpperBoundConstraint.this.genericParameters != null) {
 					subtypeMatches = UpperBoundConstraint.this.genericParameters.isWithinBounds(env, lhs.genericParameters);
 				}
-				return lhs.getUpperBound().doesExtend(UpperBoundConstraint.this.getUpperBound()) && subtypeMatches;
+				return lhs.getUpperBound().doesExtend(env, UpperBoundConstraint.this.getUpperBound()) && subtypeMatches;
 			}
 
 			@Override

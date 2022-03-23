@@ -1760,7 +1760,7 @@ public class PlayerEvents {
 				if(prefilter.containsKey("prefix")) {
 					StringHandling.parse_args pa = new StringHandling.parse_args();
 					CArray ca = (CArray) pa.exec(Target.UNKNOWN, null, new CString(command, Target.UNKNOWN));
-					if(ca.size() > 0) {
+					if(ca.size(env) > 0) {
 						return ca.get(0, Target.UNKNOWN, env).val().equals(prefilter.get("prefix").val());
 					} else {
 						return false;

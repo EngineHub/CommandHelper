@@ -381,7 +381,7 @@ public class Web {
 						settings.setDisableCertChecking(true);
 					} else if(trustStore.isInstanceOf(CArray.TYPE, null, env)) {
 						CArray trustStoreA = ((CArray) trustStore);
-						LinkedHashMap<String, String> trustStoreJ = new LinkedHashMap<>((int) trustStoreA.size());
+						LinkedHashMap<String, String> trustStoreJ = new LinkedHashMap<>((int) trustStoreA.size(env));
 						final String noDefault = "no default";
 						for(String key : trustStoreA.stringKeySet()) {
 							String value = trustStoreA.get(key, t, env).val();
@@ -930,7 +930,7 @@ public class Web {
 					message.addRecipient(type, new InternetAddress(address));
 				}
 
-				if(attachments.size() == 1) {
+				if(attachments.size(env) == 1) {
 					CArray pattachment = ArgumentValidation.getArray(attachments.get(0, t, env), t, env);
 					String type = ArgumentValidation.getItemFromArray(pattachment, "type", t, null, env).val();
 					String fileName = ArgumentValidation.getItemFromArray(pattachment, "filename", t, new CString("", t), env).val().trim();

@@ -62,7 +62,7 @@ public class CString extends CPrimitive implements Cloneable,
 	}
 
 	@Override
-	public long size() {
+	public long size(Environment env) {
 		return val().length();
 	}
 
@@ -119,7 +119,7 @@ public class CString extends CPrimitive implements Cloneable,
 	}
 
 	@Override
-	public Set<Mixed> keySet() {
+	public Set<Mixed> keySet(Environment env) {
 		return new AbstractSet<Mixed>() {
 			@Override
 			public int size() {
@@ -177,7 +177,7 @@ public class CString extends CPrimitive implements Cloneable,
 	}
 
 	@Override
-	public boolean getBooleanValue(Target t) {
+	public boolean getBooleanValue(Environment env, Target t) {
 		if(val().equals("false")) {
 			MSLog.GetLogger().e(MSLog.Tags.FALSESTRING, "String \"false\" evaluates as true (non-empty strings are"
 					+ " true). This is most likely not what you meant to do. This warning can globally be disabled"

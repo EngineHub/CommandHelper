@@ -235,7 +235,7 @@ public class BukkitMCCommand implements MCCommand {
 				if(fret.isInstanceOf(CArray.TYPE, null, env)) {
 					List<String> ret = new ArrayList<>();
 					if(((CArray) fret).inAssociativeMode()) {
-						for(Mixed key : ((CArray) fret).keySet()) {
+						for(Mixed key : ((CArray) fret).keySet(env)) {
 							ret.add(((CArray) fret).get(key, Target.UNKNOWN, env).val());
 						}
 					} else {

@@ -1,9 +1,9 @@
 package com.laytonsmith.core.compiler.analysis;
 
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
 
 /**
@@ -20,7 +20,7 @@ public class ProcDeclaration extends Declaration {
 	 * @param type - The procedure return type.
 	 * @param t - The procedure target.
 	 */
-	public ProcDeclaration(String identifier, CClassType type, Target t) {
+	public ProcDeclaration(String identifier, LeftHandSideType type, Target t) {
 		super(Namespace.PROCEDURE, identifier, type, t);
 	}
 

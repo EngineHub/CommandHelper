@@ -50,19 +50,20 @@ public interface ArrayAccess extends Booleanish {
 	public Mixed get(Mixed index, Target t, Environment env) throws ConfigRuntimeException;
 
 	/**
-	 * If {@link #isAssociative()} returns true, this should return a set of all keys. If {@link #isAssociative()}
+	 * If {@link #isAssociative()} returns true, this should return a set of all keys.If {@link #isAssociative()}
 	 * returns false, this method will not be called.
 	 *
+	 * @param env
 	 * @return
 	 */
-	public Set<Mixed> keySet();
+	public Set<Mixed> keySet(Environment env);
 
 	/**
 	 * Unlike {@link #canBeAssociative()}, this is a runtime flag. If the underlying object is associative (that is, it
 	 * is an unordered, non numeric key set), this should return true. If this is true, then
 	 * {@link #get(java.lang.String, com.laytonsmith.core.constructs.Target, Environment)} will not be called, and
-	 * {@link #get(int, com.laytonsmith.core.constructs.Target, Environment)} will be called instead. If this is false, the opposite
-	 * will occur.
+	 * {@link #get(int, com.laytonsmith.core.constructs.Target, Environment)} will be called instead. If this is false,
+	 * the opposite will occur.
 	 *
 	 * @return
 	 */
@@ -86,7 +87,6 @@ public interface ArrayAccess extends Booleanish {
 	 * @return
 	 */
 	public Mixed slice(int begin, int end, Target t, Environment env);
-
 
 	@Override
 	public String docs();

@@ -1,6 +1,7 @@
 package com.laytonsmith.core.compiler.analysis;
 
 import com.laytonsmith.core.constructs.CClassType;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
 
 /**
@@ -15,7 +16,7 @@ public class ParamDeclaration extends Declaration {
 	 * @param type - The parameter {@link CClassType}.
 	 * @param t - The parameter target.
 	 */
-	public ParamDeclaration(String identifier, CClassType type, Target t) {
+	public ParamDeclaration(String identifier, LeftHandSideType type, Target t) {
 		super(Namespace.IVARIABLE, identifier, type, t);
 	}
 }

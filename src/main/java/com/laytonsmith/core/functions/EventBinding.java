@@ -718,7 +718,7 @@ public class EventBinding {
 			} else {
 				if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
 					CArray ca = (CArray) args[1];
-					for(int i = 0; i < ca.size(); i++) {
+					for(int i = 0; i < ca.size(env); i++) {
 						params.add(ca.get(i, t, env).val());
 					}
 				} else {

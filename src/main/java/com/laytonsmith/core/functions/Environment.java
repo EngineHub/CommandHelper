@@ -385,7 +385,7 @@ public class Environment {
 			try {
 				if(args[1] instanceof CArray) {
 					CArray bda = (CArray) args[1];
-					if(bda.size() == 1) {
+					if(bda.size(env) == 1) {
 						MCMaterial mat = StaticLayer.GetMaterial(bda.get("block", t, env).val().toUpperCase());
 						if(mat == null) {
 							throw new CREIllegalArgumentException("Cannot find material \""
@@ -483,16 +483,16 @@ public class Environment {
 				String line4 = "";
 				if(args.length == 2 && args[1].isInstanceOf(CArray.TYPE, null, env)) {
 					CArray ca = (CArray) args[1];
-					if(ca.size() >= 1) {
+					if(ca.size(env) >= 1) {
 						line1 = ca.get(0, t, env).val();
 					}
-					if(ca.size() >= 2) {
+					if(ca.size(env) >= 2) {
 						line2 = ca.get(1, t, env).val();
 					}
-					if(ca.size() >= 3) {
+					if(ca.size(env) >= 3) {
 						line3 = ca.get(2, t, env).val();
 					}
-					if(ca.size() >= 4) {
+					if(ca.size(env) >= 4) {
 						line4 = ca.get(3, t, env).val();
 					}
 

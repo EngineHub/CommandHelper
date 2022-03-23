@@ -299,7 +299,7 @@ public class BlockEvents {
 				List<MCItemStack> drops = new ArrayList<>();
 				if(value.isInstanceOf(CArray.TYPE, null, env)) {
 					CArray arr = (CArray) value;
-					for(int i = 0; i < arr.size(); i++) {
+					for(int i = 0; i < arr.size(env); i++) {
 						CArray item = ArgumentValidation.getArray(arr.get(i, value.getTarget(), env), value.getTarget(), env);
 						MCItemStack stack = ObjectGenerator.GetGenerator().item(item, value.getTarget(), env);
 						if(!stack.isEmpty()) {
@@ -999,7 +999,7 @@ public class BlockEvents {
 				}
 
 				CArray val = (CArray) value;
-				if(val.size() != 4) {
+				if(val.size(env) != 4) {
 					return false;
 				}
 

@@ -24,6 +24,7 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.IVariableList;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -55,7 +56,7 @@ public abstract class AbstractFunction implements Function {
 
 	/**
 	 * {@inheritDoc}
-	 * 
+	 *
 	 * By default, we return CVoid.
 	 *
 	 * @param t
@@ -74,9 +75,9 @@ public abstract class AbstractFunction implements Function {
 	 * By default, {@link CClassType#AUTO} is returned.
 	 */
 	@Override
-	public CClassType getReturnType(Target t, List<CClassType> argTypes,
+	public LeftHandSideType getReturnType(Target t, List<LeftHandSideType> argTypes,
 			List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
-		return CClassType.AUTO; // No information is available about the return type.
+		return LeftHandSideType.fromCClassType(CClassType.AUTO, t); // No information is available about the return type.
 	}
 
 	/**
@@ -85,12 +86,12 @@ public abstract class AbstractFunction implements Function {
 	 * them to {@link #getReturnType(Target, List, List, Set)} to get this function's return type.
 	 */
 	@Override
-	public CClassType typecheck(StaticAnalysis analysis,
+	public LeftHandSideType typecheck(StaticAnalysis analysis,
 			ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
 
 		// Get and check the types of the function's arguments.
 		List<ParseTree> children = ast.getChildren();
-		List<CClassType> argTypes = new ArrayList<>(children.size());
+		List<LeftHandSideType> argTypes = new ArrayList<>(children.size());
 		List<Target> argTargets = new ArrayList<>(children.size());
 		for(ParseTree child : children) {
 			argTypes.add(analysis.typecheck(child, env, exceptions));
@@ -273,7 +274,7 @@ public abstract class AbstractFunction implements Function {
 			if(ccc instanceof CArray || ccc.isInstanceOf(CArray.TYPE, null, env)) {
 				//Arrays take too long to toString, so we don't want to actually toString them here if
 				//we don't need to.
-				b.append("<arrayNotShown size:").append(((CArray) ccc).size()).append(">");
+				b.append("<arrayNotShown size:").append(((CArray) ccc).size(env)).append(">");
 			} else if(ccc instanceof CClosure || ccc.isInstanceOf(CClosure.TYPE, null, env)) {
 				//The toString of a closure is too long, so let's not output them either.
 				b.append("<closureNotShown>");

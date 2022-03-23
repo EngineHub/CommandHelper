@@ -7,6 +7,7 @@ import com.laytonsmith.core.Script;
 import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.CClassType;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
@@ -89,7 +90,7 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 	 * is unknown, {@link CClassType#AUTO} is returned, indicating that this value should be handled as dynamic
 	 * during static type checking.
 	 */
-	public CClassType getReturnType(Target t, List<CClassType> argTypes,
+	public LeftHandSideType getReturnType(Target t, List<LeftHandSideType> argTypes,
 			List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions);
 
 	/**
@@ -102,7 +103,7 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 	 * @param exceptions - Any compile exceptions will be added to this set.
 	 * @return The return type of this function.
 	 */
-	public CClassType typecheck(StaticAnalysis analysis,
+	public LeftHandSideType typecheck(StaticAnalysis analysis,
 			ParseTree ast, Environment env, Set<ConfigCompileException> exceptions);
 
 	/**

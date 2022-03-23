@@ -690,7 +690,7 @@ public class ControlFlow {
 					if(c1.getData() instanceof CLabel
 							&& CKeyword.isKeyword(((CLabel) c1.getData()).cVal(), "default")) {
 						//Default case
-						if(lastCodeBlock.size() > 0) {
+						if(!lastCodeBlock.isEmpty()) {
 							//Ok, need to push some stuff on to the new children
 							newChildren.add(new ParseTree(conditions, c1.getFileOptions()));
 							conditions = new CArray(t, null, env);
@@ -704,7 +704,7 @@ public class ControlFlow {
 							}
 							newChildren.add(codeBlock);
 							lastCodeBlock = new ArrayList<>();
-						} else if(conditions.size() > 0) {
+						} else if(conditions.size(env) > 0) {
 							//Special case where they have
 							//case 0:
 							//default:
@@ -726,7 +726,7 @@ public class ControlFlow {
 						lastCodeBlock.add(c1);
 					}
 				}
-				if(conditions.size() > 0) {
+				if(conditions.size(env) > 0) {
 					newChildren.add(new ParseTree(conditions, children.get(0).getFileOptions()));
 				}
 				if(lastCodeBlock.size() > 0) {
@@ -1344,7 +1344,7 @@ public class ControlFlow {
 
 				//Clone the set, so changes in the array won't cause changes in
 				//the iteration order.
-				Set<Mixed> keySet = new LinkedHashSet<>(one.keySet());
+				Set<Mixed> keySet = new LinkedHashSet<>(one.keySet(env));
 				//Continues in an associative array are slightly different, so
 				//we have to track this differently. Basically, we skip the
 				//next element in the array key set.
@@ -1417,7 +1417,7 @@ public class ControlFlow {
 								continue;
 							}
 						}
-						if(current >= one.size()) {
+						if(current >= one.size(env)) {
 							//Done with the iterations.
 							break;
 						}
@@ -1733,7 +1733,7 @@ public class ControlFlow {
 				throw new CRECastException(getName() + " expects an array for parameter 1", t);
 			}
 
-			if(((CArray) data).isEmpty()) {
+			if(((CArray) data).isEmpty(env)) {
 				parent.eval(elseCode, env);
 			} else {
 				ParseTree pass[] = new ParseTree[nodes.length - 1];
@@ -2383,7 +2383,7 @@ public class ControlFlow {
 			if(ca.inAssociativeMode()) {
 				throw new CRECastException("Expected the array passed to " + getName() + " to be non-associative.", t);
 			}
-			Mixed[] args2 = new Mixed[(int) ca.size() + 1];
+			Mixed[] args2 = new Mixed[(int) ca.size(env) + 1];
 			args2[0] = args[0];
 			for(int i = 1; i < args2.length; i++) {
 				args2[i] = ca.get(i - 1, t, env);

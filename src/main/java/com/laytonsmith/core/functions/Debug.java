@@ -369,7 +369,7 @@ public class Debug {
 						+ TermColors.BRIGHT_WHITE + ivar.getDefinedType()
 						+ TermColors.RESET + " (actual type "
 						+ TermColors.BRIGHT_WHITE + val.typeof(env)
-						+ (val.isInstanceOf(Sizeable.TYPE, null, env) ? ", length: " + ((Sizeable) val).size() : "")
+						+ (val.isInstanceOf(Sizeable.TYPE, null, env) ? ", length: " + ((Sizeable) val).size(env) : "")
 						+ TermColors.RESET + ") "
 						+ TermColors.CYAN + ivar.getVariableName()
 						+ TermColors.RESET + ": " + val.val());

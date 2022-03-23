@@ -130,7 +130,7 @@ public class CSlice extends CArray {
 	}
 
 	@Override
-	public Set<Mixed> keySet() {
+	public Set<Mixed> keySet(Environment env) {
 		// To keep our memory footprint down, we create a "fake" keyset here, which doesn't
 		// require actually creating an entire Set. Removing items from the set isn't supported,
 		// but all iteration options are.
@@ -161,13 +161,13 @@ public class CSlice extends CArray {
 
 			@Override
 			public int size() {
-				return (int) CSlice.this.size();
+				return (int) CSlice.this.size(env);
 			}
 		};
 	}
 
 	@Override
-	public long size() {
+	public long size(Environment env) {
 		return size;
 	}
 

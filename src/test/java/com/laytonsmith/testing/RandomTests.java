@@ -99,7 +99,7 @@ public class RandomTests {
 	 * This function automatically tests all the boilerplate portions of all functions. Note that this can be disabled
 	 * in the StaticTest class, so that high quality test coverage can be measured.
 	 */
-	@Test
+	@Test//(timeout = 100000)
 	@SuppressWarnings({"ThrowableResultIgnored", "CallToPrintStackTrace"})
 	public void testAllBoilerplate() {
 		Map<String, Throwable> uhohs = new HashMap<>();
@@ -140,7 +140,11 @@ public class RandomTests {
 				}
 				TESTED_FUNCTIONS.add(f.getName());
 
+				long start = System.currentTimeMillis();
+				System.out.println("Testing " + f.getName());
 				StaticTest.TestBoilerplate(f, f.getName());
+				System.out.println("TestBoilerplate took " + ((int)(System.currentTimeMillis() - start) / 1000)
+					 + " seconds for " + f.getName());
 				Class upper = f.getClass().getEnclosingClass();
 				if(upper == null) {
 					fail(f.getName() + " is not enclosed in an upper class.");

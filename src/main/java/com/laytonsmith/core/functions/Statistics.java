@@ -72,7 +72,7 @@ public class Statistics {
 			long count;
 			if(args.length == 1 && args[0].isInstanceOf(CArray.TYPE, null, env)) {
 				CArray c = ArgumentValidation.getArray(args[0], t, env);
-				count = c.size();
+				count = c.size(env);
 			} else {
 				count = args.length;
 			}

@@ -20,6 +20,7 @@ import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CNumber;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Booleanish;
@@ -378,7 +379,7 @@ public final class ArgumentValidation {
 			return false;
 		}
 		if(c.isInstanceOf(Booleanish.TYPE, null, env)) {
-			return ((Booleanish) c).getBooleanValue(t);
+			return ((Booleanish) c).getBooleanValue(env, t);
 		}
 		throw new CRECastException("Could not convert value of type " + c.typeof(env) + " to a " + Booleanish.TYPE, t);
 	}
@@ -400,9 +401,9 @@ public final class ArgumentValidation {
 		}
 	}
 
-	public static CClassType getClassType(Mixed c, Target t, Environment env) {
-		if(c instanceof CClassType) {
-			return (CClassType) c;
+	public static LeftHandSideType getClassType(Mixed c, Target t, Environment env) {
+		if(c instanceof CClassType cct) {
+			return cct.asLeftHandSideType();
 		} else {
 			throw new CRECastException("Expecting a ClassType, but found " + c.typeof(env) + " instead.", t);
 		}

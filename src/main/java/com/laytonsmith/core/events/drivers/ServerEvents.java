@@ -342,7 +342,7 @@ public class ServerEvents {
 					if(value.isInstanceOf(CArray.TYPE, null, env)) {
 						List<String> comp = new ArrayList<>();
 						if(((CArray) value).inAssociativeMode()) {
-							for(Mixed k : ((CArray) value).keySet()) {
+							for(Mixed k : ((CArray) value).keySet(env)) {
 								comp.add(((CArray) value).get(k, value.getTarget(), env).val());
 							}
 						} else {
@@ -479,7 +479,7 @@ public class ServerEvents {
 			}
 			Set<MCCommandSender> recipients = new HashSet<>();
 			CArray recipientsArray = (CArray) cRecipients;
-			for(int i = 0; i < recipientsArray.size(); i++) {
+			for(int i = 0; i < recipientsArray.size(env); i++) {
 				MCPlayer player = Static.GetPlayer(recipientsArray.get(i, t, env), t, env);
 				recipients.add(player);
 			}

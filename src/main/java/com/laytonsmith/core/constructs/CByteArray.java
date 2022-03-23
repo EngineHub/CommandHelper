@@ -389,7 +389,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	 * @return
 	 */
 	@Override
-	public long size() {
+	public long size(Environment env) {
 		return maxValue;
 	}
 
@@ -494,7 +494,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	}
 
 	@Override
-	public Set<Mixed> keySet() {
+	public Set<Mixed> keySet(Environment env) {
 		throw new UnsupportedOperationException("Not supported.");
 	}
 
@@ -576,7 +576,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 		}
 
 		@Override
-		public long size() {
+		public long size(Environment env) {
 			return backing.length;
 		}
 

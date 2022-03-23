@@ -53,7 +53,8 @@ public abstract class CompositeFunction extends AbstractFunction {
 
 				String script = script();
 				Scope rootScope = new Scope();
-				rootScope.addDeclaration(new ParamDeclaration("@arguments", CArray.TYPE, Target.UNKNOWN));
+				rootScope.addDeclaration(new ParamDeclaration("@arguments", CArray.TYPE.asLeftHandSideType(),
+						Target.UNKNOWN));
 				tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, env, debugFile, true),
 						env, env.getEnvClasses(), new StaticAnalysis(rootScope, true))
 						// the root of the tree is null, so go ahead and pull it up

@@ -91,11 +91,11 @@ public final class CSecureString extends Construct {
 	}
 
 	private static byte[] CArrayToByteArray(CArray val, Target t, Environment env) {
-		List<Byte> cval = new ArrayList<>((int) val.size());
+		List<Byte> cval = new ArrayList<>((int) val.size(env));
 		if(val.isAssociative()) {
 			throw new CREFormatException("Expected a normal array in secure string, but an associative one was passed in", t);
 		}
-		for(int i = 0; i < val.size(); i++) {
+		for(int i = 0; i < val.size(env); i++) {
 			String c = val.get(i, t, env).val();
 			if(c.length() != 1) {
 				throw new CREFormatException("The array passed in must be an array of single character strings", t);

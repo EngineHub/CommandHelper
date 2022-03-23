@@ -13,6 +13,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.objects.AccessModifier;
 import com.laytonsmith.core.objects.ObjectModifier;
 import com.laytonsmith.core.objects.ObjectType;
+import java.util.Map;
 
 import java.util.Set;
 
@@ -135,11 +136,12 @@ public interface Mixed extends Cloneable, Documentation {
 	 * {@code typeof().getGenericDeclaration()} would return null, and MUST NOT be null if it doesn't.
 	 * <p>
 	 * The generic parameters represent the concrete types that this instance was constructed with at runtime, and
-	 * remain with the instance as part of the runtime data.
+	 * remain with the instance as part of the runtime data. In general, subclasses should not implement this directly,
+	 * instead a superclass should provide a registration method, and handle it in a generic way.
 	 *
 	 * @return The generic parameters for this instance, or null if it doesn't/can't have any.
 	 */
-	public GenericParameters getGenericParameters();
+	public Map<CClassType, GenericParameters> getGenericParameters();
 
 	/**
 	 * Casts the class to the specified type. This only works with Java types, and so for dynamic elements, this may

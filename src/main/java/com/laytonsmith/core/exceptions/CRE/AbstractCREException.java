@@ -13,6 +13,7 @@ import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.InstanceofUtil;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
@@ -29,7 +30,9 @@ import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -40,6 +43,8 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 	private static final Class[] EMPTY_CLASS = new Class[0];
 
 	private List<StackTraceElement> stackTrace = null;
+
+	private final Map<CClassType, GenericParameters> genericParameters = new HashMap<>();
 
 	public AbstractCREException(String msg, Target t) {
 		super(msg, t);
@@ -211,8 +216,8 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 	}
 
 	@Override
-	public Set<Mixed> keySet() {
-		return exceptionObject.keySet();
+	public Set<Mixed> keySet(Environment env) {
+		return exceptionObject.keySet(env);
 	}
 
 	@Override
@@ -301,7 +306,7 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 
 	@Override
 	public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhs, Environment env) {
-		return InstanceofUtil.isInstanceof(this, type, lhs, env);
+		return InstanceofUtil.isInstanceof(this, LeftHandSideType.fromCClassType(type, lhs, Target.UNKNOWN), env);
 	}
 
 	@Override
@@ -310,12 +315,20 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 	}
 
 	@Override
-	public GenericParameters getGenericParameters() {
-		return null;
+	public final Map<CClassType, GenericParameters> getGenericParameters() {
+		if(genericParameters.isEmpty()) {
+			return null;
+		} else {
+			return genericParameters;
+		}
+	}
+
+	protected final void registerGenerics(CClassType type, GenericParameters genericParameters) {
+		this.genericParameters.put(type, genericParameters);
 	}
 
 	@Override
-	public boolean getBooleanValue(Target t) {
+	public boolean getBooleanValue(Environment env, Target t) {
 		return true;
 	}
 

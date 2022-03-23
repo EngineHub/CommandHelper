@@ -13,6 +13,7 @@ import com.laytonsmith.core.asm.LLVMFunction;
 import com.laytonsmith.core.asm.LLVMVersion;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.IVariable;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
@@ -31,7 +32,7 @@ public class DataHandling {
 		public IRData buildIR(IRBuilder builder, Target t, Environment env, ParseTree... nodes) throws ConfigCompileException {
 			LLVMEnvironment llvmenv = env.getEnv(LLVMEnvironment.class);
 			int offset;
-			CClassType type;
+			LeftHandSideType type;
 			String name;
 			if(nodes.length == 3) {
 				offset = 1;
@@ -59,7 +60,7 @@ public class DataHandling {
 				name = ((IVariable) nodes[offset].getData()).getVariableName();
 				type = llvmenv.getVariableType(name);
 				if(type == null) {
-					type = CClassType.AUTO;
+					type = CClassType.AUTO.asLeftHandSideType();
 				}
 			}
 

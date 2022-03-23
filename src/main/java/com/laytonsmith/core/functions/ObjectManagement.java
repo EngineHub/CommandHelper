@@ -236,7 +236,7 @@ public class ObjectManagement {
 			LinkedHashSet<Pair<UnqualifiedClassName, UnqualifiedGenericParameters>> superclasses = new LinkedHashSet<>();
 			{
 				CArray su = evaluateArrayNoNull(nodes[4], "superclasses", t, env);
-				if(!type.canUseExtends() && !su.isEmpty()) {
+				if(!type.canUseExtends() && !su.isEmpty(env)) {
 					throw new CREClassDefinitionError("An object definition of type " + type.name().toLowerCase()
 							+ " may not extend"
 							+ " another object type" + (type.canUseImplements() ? " (though it can implement"
@@ -298,7 +298,9 @@ public class ObjectManagement {
 			if(nodes[9].getData() instanceof CNull) {
 				containingClass = null;
 			} else {
-				containingClass = ArgumentValidation.getClassType(evaluateMixed(nodes[9], t, env), t, env);
+				// TODO - Validate this isn't a type union
+				containingClass = ArgumentValidation.getClassType(evaluateMixed(nodes[9], t, env), t, env)
+						.getTypes().get(0).getKey();
 			}
 
 			// 10 - Class Comment
@@ -506,7 +508,7 @@ public class ObjectManagement {
 				// TODO If this is a native object, we need to intercept the call to the native constructor,
 				// and grab the object generated there.
 			}
-			GenericParameters genericParameters = null; // TODO
+			Map<CClassType, GenericParameters> genericParameters = null; // TODO
 			Mixed obj = new UserObject(t, parent, env, od, genericParameters, null);
 			// This is the MethodScript construction.
 			if(constructor != null) {

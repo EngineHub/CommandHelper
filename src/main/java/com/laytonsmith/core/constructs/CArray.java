@@ -118,7 +118,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 							try {
 								int i = Integer.parseInt(key);
 								max = java.lang.Math.max(max, i);
-							} catch (NumberFormatException e) {
+							} catch(NumberFormatException e) {
 							}
 						}
 						if(max == Integer.MIN_VALUE) {
@@ -289,7 +289,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 				try {
 					int i = Integer.parseInt(key);
 					max = java.lang.Math.max(max, i);
-				} catch (NumberFormatException e) {
+				} catch(NumberFormatException e) {
 				}
 			}
 			if(c instanceof CEntry) {
@@ -311,7 +311,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	 * @return
 	 */
 	@Override
-	public Set<Mixed> keySet() {
+	public Set<Mixed> keySet(Environment env) {
 		Set<Mixed> set;
 		if(!associativeMode) {
 			set = new LinkedHashSet<>(array.size());
@@ -375,7 +375,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 					} else {
 						array.set(indx, c);
 					}
-				} catch (ConfigRuntimeException e) {
+				} catch(ConfigRuntimeException e) {
 					// Not a number
 					setAssociative();
 				}
@@ -412,7 +412,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		if(!associativeMode) {
 			try {
 				return array.get(ArgumentValidation.getInt32(index, t, env));
-			} catch (IndexOutOfBoundsException e) {
+			} catch(IndexOutOfBoundsException e) {
 				throw new CREIndexOverflowException("The element at index \"" + index.val() + "\" does not exist", t, e);
 			}
 		} else {
@@ -451,7 +451,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		} else {
 			try {
 				return Integer.valueOf(c) < array.size();
-			} catch (NumberFormatException e) {
+			} catch(NumberFormatException e) {
 				return false;
 			}
 		}
@@ -519,11 +519,12 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	}
 
 	/**
-	 * Returns a string version of this array. The arrays that have been accounted for so far are stored in arrays, to
+	 * Returns a string version of this array.The arrays that have been accounted for so far are stored in arrays, to
 	 * prevent recursion. Subclasses may override this method if a more efficient or concise string can be generated.
 	 *
 	 * @param arrays The values accounted for so far
 	 * @param t
+	 * @param env
 	 * @return
 	 */
 	protected String getString(Stack<CArray> arrays, Target t, Environment env) {
@@ -533,7 +534,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		StringBuilder b = new StringBuilder();
 		b.append("{");
 		if(!inAssociativeMode()) {
-			for(int i = 0; i < this.size(); i++) {
+			for(int i = 0; i < this.size(env); i++) {
 				Mixed value = this.get(i, t, env);
 				String v;
 				if(value.isInstanceOf(CArray.TYPE, null, env)) {
@@ -586,7 +587,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	}
 
 	@Override
-	public long size() {
+	public long size(Environment env) {
 		if(associativeMode) {
 			return associativeArray.size();
 		} else {
@@ -599,7 +600,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		CArray clone;
 		try {
 			clone = (CArray) super.clone();
-		} catch (CloneNotSupportedException ex) {
+		} catch(CloneNotSupportedException ex) {
 			throw new RuntimeException(ex);
 		}
 		clone.associativeMode = associativeMode;
@@ -628,12 +629,12 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		}
 
 		// Create the clone to put array in and add it to the cloneRefs list.
-		CArray clone = new CArray(t, (int) array.size(), array.genericParameters, env);
+		CArray clone = new CArray(t, (int) array.size(env), array.genericParameters, env);
 		clone.associativeMode = array.associativeMode;
 		cloneRefs.add(new CArray[]{array, clone});
 
 		// Iterate over the array, recursively calling this method to perform a deep clone.
-		for(Mixed key : array.keySet()) {
+		for(Mixed key : array.keySet(env)) {
 			Mixed value = array.get(key, t, env);
 			if(value.isInstanceOf(CArray.TYPE, null, env)) {
 				value = deepClone((CArray) value, t, cloneRefs, env);
@@ -696,10 +697,10 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 			try {
 				ret = array.remove(Integer.parseInt(c));
 				nextIndex--;
-			} catch (NumberFormatException e) {
+			} catch(NumberFormatException e) {
 				throw new CRECastException("Expecting an integer, but received \"" + c
 						+ "\" (were you expecting an associative array? This array is a normal array.)", construct.getTarget());
-			} catch (IndexOutOfBoundsException e) {
+			} catch(IndexOutOfBoundsException e) {
 				throw new CRERangeException("Cannot remove the value at '" + c
 						+ "', as no such index exists in the array", construct.getTarget());
 			}
@@ -741,8 +742,8 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 
 	/**
 	 * Creates a new, empty array, with the same type. Note to subclasses: By default, this method expects a constructor
-	 * that accepts a {@link Target}, {@link GenericParameters}, {@link Environment}.
-	 * If this assumption is not valid, you may override this method as needed.
+	 * that accepts a {@link Target}, {@link GenericParameters}, {@link Environment}. If this assumption is not valid,
+	 * you may override this method as needed.
 	 *
 	 * @param t
 	 * @return
@@ -752,12 +753,12 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 			Constructor<CArray> con = (Constructor<CArray>) this.getClass().getConstructor(Target.class, GenericParameters.class, Environment.class);
 			try {
 				return con.newInstance(t, this.genericParameters, env);
-			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+			} catch(InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
 				throw new RuntimeException(ex);
 			}
-		} catch (NoSuchMethodException ex) {
+		} catch(NoSuchMethodException ex) {
 			throw new RuntimeException(this.typeof(env) + " does not support creating a new value.");
-		} catch (SecurityException ex) {
+		} catch(SecurityException ex) {
 			throw new RuntimeException(ex);
 		}
 	}
@@ -903,21 +904,25 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 				}
 				//At this point, things will either be numbers or strings
 				return switch(sort) {
-					case REGULAR -> compareRegular(o1, o2, env);
-					case NUMERIC -> compareNumeric(o1, o2, env);
-					case STRING -> compareString(o1.val(), o2.val());
-					case STRING_IC -> compareString(o1.val().toLowerCase(), o2.val().toLowerCase());
+					case REGULAR ->
+						compareRegular(o1, o2, env);
+					case NUMERIC ->
+						compareNumeric(o1, o2, env);
+					case STRING ->
+						compareString(o1.val(), o2.val());
+					case STRING_IC ->
+						compareString(o1.val().toLowerCase(), o2.val().toLowerCase());
 				};
 			}
 
 			public int compareRegular(Mixed o1, Mixed o2, Environment env) {
-				if(ArgumentValidation.getBooleanObject(new DataHandling.is_numeric().exec(Target.UNKNOWN, null, o1), Target.UNKNOWN, env)
-						&& ArgumentValidation.getBooleanObject(new DataHandling.is_numeric().exec(Target.UNKNOWN, null, o2), Target.UNKNOWN, env)) {
+				if(ArgumentValidation.getBooleanObject(new DataHandling.is_numeric().exec(Target.UNKNOWN, env, o1), Target.UNKNOWN, env)
+						&& ArgumentValidation.getBooleanObject(new DataHandling.is_numeric().exec(Target.UNKNOWN, env, o2), Target.UNKNOWN, env)) {
 					return compareNumeric(o1, o2, env);
-				} else if(ArgumentValidation.getBooleanObject(new DataHandling.is_numeric().exec(Target.UNKNOWN, null, o1), Target.UNKNOWN, env)) {
+				} else if(ArgumentValidation.getBooleanObject(new DataHandling.is_numeric().exec(Target.UNKNOWN, env, o1), Target.UNKNOWN, env)) {
 					//The first is a number, the second is a string
 					return -1;
-				} else if(ArgumentValidation.getBooleanObject(new DataHandling.is_numeric().exec(Target.UNKNOWN, null, o2), Target.UNKNOWN, env)) {
+				} else if(ArgumentValidation.getBooleanObject(new DataHandling.is_numeric().exec(Target.UNKNOWN, env, o2), Target.UNKNOWN, env)) {
 					//The second is a number, the first is a string
 					return 1;
 				} else {
@@ -939,8 +944,8 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		this.setDirty();
 	}
 
-	public boolean isEmpty() {
-		return size() == 0;
+	public boolean isEmpty(Environment env) {
+		return size(env) == 0;
 	}
 
 	/**
@@ -974,8 +979,8 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	}
 
 	@Override
-	public boolean getBooleanValue(Target t) {
-		return size() > 0;
+	public boolean getBooleanValue(Environment env, Target t) {
+		return size(env) > 0;
 	}
 
 }

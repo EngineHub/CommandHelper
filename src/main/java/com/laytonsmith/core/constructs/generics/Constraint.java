@@ -151,6 +151,12 @@ public abstract class Constraint implements Comparable<Constraint> {
 	 */
 	public abstract ExactType convertFromDiamond(Target t) throws CREGenericConstraintException;
 
+	/**
+	 * Works like toString, but uses the class's simple name.
+	 * @return
+	 */
+	public abstract String toSimpleString();
+
 	@Override
 	public int compareTo(Constraint o) {
 		// Just compare against the toString, order doesn't *really* matter, it's just so that equality checks

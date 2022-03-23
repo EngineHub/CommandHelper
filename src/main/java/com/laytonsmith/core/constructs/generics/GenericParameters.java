@@ -109,11 +109,23 @@ public final class GenericParameters {
 		}
 
 		/**
+		 * Returns if this builder object is empty. If it is, calling build causes an error, so it's important to check
+		 * this first if you are using this generically.
+		 * @return
+		 */
+		public boolean isEmpty() {
+			return p.parameters.isEmpty();
+		}
+
+		/**
 		 * Returns the fully constructed object.
 		 *
 		 * @return
 		 */
 		public GenericParameters build() {
+			if(p.parameters.isEmpty()) {
+				throw new Error("Empty parameter builders cannot be used. Check for this condition with isEmpty()");
+			}
 			return p;
 		}
 	}
@@ -136,8 +148,16 @@ public final class GenericParameters {
 	 * @return this, for easy chaining. Use build() to construct the final object.
 	 */
 	public static GenericParametersBuilder addParameter(CClassType type, LeftHandGenericUse genericStatement) {
+		return emptyBuilder().addParameter(type, genericStatement);
+	}
+
+	/**
+	 * Returns an empty builder. Note that calling build on an empty builder is an error.
+	 * @return
+	 */
+	public static GenericParametersBuilder emptyBuilder() {
 		GenericParameters gp = new GenericParameters();
-		return new GenericParametersBuilder(gp).addParameter(type, genericStatement);
+		return new GenericParametersBuilder(gp);
 	}
 
 	private GenericParameters() {

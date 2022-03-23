@@ -174,25 +174,25 @@ public class ObjectGenerator {
 		float yaw = 0;
 		float pitch = 0;
 		if(!array.inAssociativeMode()) {
-			if(array.size() == 3) {
+			if(array.size(env) == 3) {
 				//Just the xyz, with default yaw and pitch, and given world
 				x = ArgumentValidation.getNumber(array.get(0, t, env), t, env);
 				y = ArgumentValidation.getNumber(array.get(1, t, env), t, env);
 				z = ArgumentValidation.getNumber(array.get(2, t, env), t, env);
-			} else if(array.size() == 4) {
+			} else if(array.size(env) == 4) {
 				//x, y, z, world
 				x = ArgumentValidation.getNumber(array.get(0, t, env), t, env);
 				y = ArgumentValidation.getNumber(array.get(1, t, env), t, env);
 				z = ArgumentValidation.getNumber(array.get(2, t, env), t, env);
 				world = Static.getServer().getWorld(array.get(3, t, env).val());
-			} else if(array.size() == 5) {
+			} else if(array.size(env) == 5) {
 				//x, y, z, yaw, pitch, with given world
 				x = ArgumentValidation.getNumber(array.get(0, t, env), t, env);
 				y = ArgumentValidation.getNumber(array.get(1, t, env), t, env);
 				z = ArgumentValidation.getNumber(array.get(2, t, env), t, env);
 				yaw = (float) ArgumentValidation.getNumber(array.get(3, t, env), t, env);
 				pitch = (float) ArgumentValidation.getNumber(array.get(4, t, env), t, env);
-			} else if(array.size() == 6) {
+			} else if(array.size(env) == 6) {
 				//All have been given
 				x = ArgumentValidation.getNumber(array.get(0, t, env), t, env);
 				y = ArgumentValidation.getNumber(array.get(1, t, env), t, env);
@@ -749,7 +749,7 @@ public class ObjectGenerator {
 					} else if(li.isInstanceOf(CArray.TYPE, null, env)) {
 						CArray la = (CArray) li;
 						List<String> ll = new ArrayList<>();
-						for(int j = 0; j < la.size(); j++) {
+						for(int j = 0; j < la.size(env); j++) {
 							ll.add(la.get(j, t, env).val());
 						}
 						meta.setLore(ll);
@@ -783,7 +783,7 @@ public class ObjectGenerator {
 					Mixed flags = ma.get("flags", t, env);
 					if(flags.isInstanceOf(CArray.TYPE, null, env)) {
 						CArray flagArray = (CArray) flags;
-						for(int i = 0; i < flagArray.size(); i++) {
+						for(int i = 0; i < flagArray.size(env); i++) {
 							Mixed flag = flagArray.get(i, t, env);
 							meta.addItemFlags(MCItemFlag.valueOf(flag.val().toUpperCase()));
 						}
@@ -1033,7 +1033,7 @@ public class ObjectGenerator {
 						} else if(pages.isInstanceOf(CArray.TYPE, null, env)) {
 							CArray pa = (CArray) pages;
 							List<String> pl = new ArrayList<>();
-							for(int j = 0; j < pa.size(); j++) {
+							for(int j = 0; j < pa.size(env); j++) {
 								pl.add(pa.get(j, t, env).val());
 							}
 							((MCBookMeta) meta).setPages(pl);
@@ -1360,14 +1360,14 @@ public class ObjectGenerator {
 			double z = v.Z();
 
 			if(!va.isAssociative()) {
-				if(va.size() == 3) { // 3rd dimension vector
+				if(va.size(env) == 3) { // 3rd dimension vector
 					x = ArgumentValidation.getNumber(va.get(0, t, env), t, env);
 					y = ArgumentValidation.getNumber(va.get(1, t, env), t, env);
 					z = ArgumentValidation.getNumber(va.get(2, t, env), t, env);
-				} else if(va.size() == 2) { // 2nd dimension vector
+				} else if(va.size(env) == 2) { // 2nd dimension vector
 					x = ArgumentValidation.getNumber(va.get(0, t, env), t, env);
 					y = ArgumentValidation.getNumber(va.get(1, t, env), t, env);
-				} else if(va.size() == 1) {
+				} else if(va.size(env) == 1) {
 					x = ArgumentValidation.getNumber(va.get(0, t, env), t, env);
 				}
 			} else {
@@ -1655,7 +1655,7 @@ public class ObjectGenerator {
 			Mixed colors = fe.get("colors", t, env);
 			if(colors.isInstanceOf(CArray.TYPE, null, env)) {
 				CArray ccolors = (CArray) colors;
-				if(ccolors.size() == 0) {
+				if(ccolors.size(env) == 0) {
 					builder.addColor(MCColor.WHITE);
 				} else {
 					for(Mixed color : ccolors.asList()) {
@@ -1664,7 +1664,7 @@ public class ObjectGenerator {
 							mccolor = StaticLayer.GetConvertor().GetColor(color.val(), t);
 						} else if(color.isInstanceOf(CArray.TYPE, null, env)) {
 							mccolor = color((CArray) color, t, env);
-						} else if(color.isInstanceOf(CInt.TYPE, null, env) && ccolors.size() == 3) {
+						} else if(color.isInstanceOf(CInt.TYPE, null, env) && ccolors.size(env) == 3) {
 							// Appears to be a single color
 							builder.addColor(color(ccolors, t, env));
 							break;
@@ -1701,7 +1701,7 @@ public class ObjectGenerator {
 						mccolor = color((CArray) color, t, env);
 					} else if(color.isInstanceOf(CString.TYPE, null, env)) {
 						mccolor = StaticLayer.GetConvertor().GetColor(color.val(), t);
-					} else if(color.isInstanceOf(CInt.TYPE, null, env) && ccolors.size() == 3) {
+					} else if(color.isInstanceOf(CInt.TYPE, null, env) && ccolors.size(env) == 3) {
 						// Appears to be a single color
 						builder.addFadeColor(color(ccolors, t, env));
 						break;
@@ -1865,8 +1865,8 @@ public class ObjectGenerator {
 		switch(recipeType) {
 			case SHAPED:
 				CArray shaped = ArgumentValidation.getArray(recipe.get("shape", t, env), t, env);
-				String[] shape = new String[(int) shaped.size()];
-				if(shaped.size() < 1 || shaped.size() > 3 || shaped.inAssociativeMode()) {
+				String[] shape = new String[(int) shaped.size(env)];
+				if(shaped.size(env) < 1 || shaped.size(env) > 3 || shaped.inAssociativeMode()) {
 					throw new CREFormatException("Shape array is invalid.", t);
 				}
 				int i = 0;
@@ -1891,8 +1891,8 @@ public class ObjectGenerator {
 							((MCShapedRecipe) ret).setIngredient(key.charAt(0), item(ingredient, t, env).getType());
 						} else {
 							CArray list = (CArray) ingredient;
-							MCMaterial[] mats = new MCMaterial[(int) list.size()];
-							for(int index = 0; index < list.size(); index++) {
+							MCMaterial[] mats = new MCMaterial[(int) list.size(env)];
+							for(int index = 0; index < list.size(env); index++) {
 								MCMaterial mat = StaticLayer.GetMaterial(list.get(index, t, env).val());
 								if(mat == null) {
 									throw new CREIllegalArgumentException("Recipe input is invalid: "
@@ -1925,8 +1925,8 @@ public class ObjectGenerator {
 							((MCShapelessRecipe) ret).addIngredient(item(ingredient, t, env));
 						} else {
 							CArray list = (CArray) ingredient;
-							MCMaterial[] mats = new MCMaterial[(int) list.size()];
-							for(int index = 0; index < list.size(); index++) {
+							MCMaterial[] mats = new MCMaterial[(int) list.size(env)];
+							for(int index = 0; index < list.size(env); index++) {
 								MCMaterial mat = StaticLayer.GetMaterial(list.get(index, t, env).val());
 								if(mat == null) {
 									throw new CREIllegalArgumentException("Recipe input is invalid: "
@@ -1956,8 +1956,8 @@ public class ObjectGenerator {
 						((MCCookingRecipe) ret).setInput(item(input, t, env));
 					} else {
 						CArray list = (CArray) input;
-						MCMaterial[] mats = new MCMaterial[(int) list.size()];
-						for(int index = 0; index < list.size(); index++) {
+						MCMaterial[] mats = new MCMaterial[(int) list.size(env)];
+						for(int index = 0; index < list.size(env); index++) {
 							MCMaterial mat = StaticLayer.GetMaterial(list.get(index, t, env).val());
 							if(mat == null) {
 								throw new CREIllegalArgumentException("Recipe input is invalid: "
@@ -1989,8 +1989,8 @@ public class ObjectGenerator {
 						((MCStonecuttingRecipe) ret).setInput(item(stoneCutterInput, t, env));
 					} else {
 						CArray list = (CArray) stoneCutterInput;
-						MCMaterial[] mats = new MCMaterial[(int) list.size()];
-						for(int index = 0; index < list.size(); index++) {
+						MCMaterial[] mats = new MCMaterial[(int) list.size(env)];
+						for(int index = 0; index < list.size(env); index++) {
 							MCMaterial mat = StaticLayer.GetMaterial(list.get(index, t, env).val());
 							if(mat == null) {
 								throw new CREIllegalArgumentException("Recipe input is invalid: "

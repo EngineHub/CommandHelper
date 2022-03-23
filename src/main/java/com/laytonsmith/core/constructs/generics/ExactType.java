@@ -112,6 +112,13 @@ public class ExactType extends Constraint {
 	}
 
 	@Override
+	public String toSimpleString() {
+		return type == null ? "?" : type.getFQCN().getSimpleName()
+				+ (genericParameters == null ? "" : "<" + genericParameters.toSimpleString() + ">");
+	}
+
+
+	@Override
 	public String toString() {
 		return type == null ? "?" : type.getFQCN().getFQCN()
 				+ (genericParameters == null ? "" : "<" + genericParameters.toString() + ">");

@@ -1,12 +1,13 @@
 package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.PureUtilities.Pair;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -26,9 +27,14 @@ public class InstanceofUtil {
 	 * @return
 	 */
 	public static Set<CClassType> getAllCastableClasses(CClassType c, Environment env) {
-		Set<CClassType> ret = new HashSet<>();
-		getAllCastableClassesWithBlacklist(c, ret, env);
-		return ret;
+		Map<CClassType, Set<CClassType>> cache = env.getEnv(GlobalEnv.class).getIsInstanceofCache();
+		c = c.getNakedType(env);
+		if(!cache.containsKey(c)) {
+			Set<CClassType> ret = new HashSet<>();
+			getAllCastableClassesWithBlacklist(c, ret, env);
+			cache.put(c, ret);
+		}
+		return cache.get(c);
 	}
 
 	/**
@@ -124,25 +130,19 @@ public class InstanceofUtil {
 	 * @return
 	 */
 	public static boolean isInstanceof(Mixed value, CClassType instanceofThis, Environment env) {
-		return isInstanceof(value, instanceofThis, null, env);
+		return isInstanceof(value, instanceofThis.asLeftHandSideType(), env);
 	}
 
 	/**
 	 * Returns whether or not a given MethodScript value is an instance of the specified MethodScript type.
 	 *
 	 * @param value The value to check for
-	 * @param instanceofThis The CClassType to check
-	 * @param generics The LHS generic parameters
-	 * @param env
+	 * @param type The type to check against
+	 * @param env The environment
 	 * @return
 	 */
-	public static boolean isInstanceof(Mixed value, CClassType instanceofThis, LeftHandGenericUse generics, Environment env) {
-		if(generics == null && value.typeof(env).getGenericParameters() == null
-				&& instanceofThis.getNativeType() != null && instanceofThis.getNativeType().isAssignableFrom(value.getClass())) {
-			// Short circuit this for native classes if neither side has generics, since this is faster and more memory efficient anyways
-			return true;
-		}
-		return isInstanceof(value.typeof(env), instanceofThis, generics, env);
+	public static boolean isInstanceof(Mixed value, LeftHandSideType type, Environment env) {
+		return isInstanceof(value.typeof(env).asLeftHandSideType(), type, env);
 	}
 
 	/**
@@ -176,7 +176,7 @@ public class InstanceofUtil {
 	 */
 	public static boolean isInstanceof(
 			CClassType type, CClassType instanceofThis, LeftHandGenericUse instanceofThisGenerics, Environment env) {
-		instanceofThis = (instanceofThis != null ? CClassType.getNakedClassType(instanceofThis.getFQCN(), env) : null);
+//		instanceofThis = (instanceofThis != null ? CClassType.getNakedClassType(instanceofThis.getFQCN(), env) : null);
 
 		// Handle special cases.
 		if((type == instanceofThis && instanceofThisGenerics == null) // Identity short circuit
@@ -203,18 +203,19 @@ public class InstanceofUtil {
 		 */
 		// Get cached result or compute and cache result.
 		CClassType nakedType = type.getNakedType(env);
-		Set<CClassType> castableClasses = ISINSTANCEOF_CACHE.get(nakedType);
-		if(castableClasses == null) {
-			castableClasses = getAllCastableClasses(nakedType, env);
-			ISINSTANCEOF_CACHE.put(nakedType, castableClasses);
-		}
+		Set<CClassType> castableClasses = getAllCastableClasses(nakedType, env);
 
 		// Return the result.
-		if(!castableClasses.contains(instanceofThis)) {
+		if(!castableClasses.contains(instanceofThis.getNakedType(env))) {
 			return false;
 		}
 		// The classes match, validate generics.
 
+		if(instanceofThis.getGenericDeclaration() != null && instanceofThisGenerics == null) {
+			// Pull up the actual class's generics
+			instanceofThisGenerics = instanceofThis.getTypeGenericParameters().get(instanceofThis.getNakedType(env))
+					.toLeftHandEquivalent(instanceofThis, env);
+		}
 		// No generics defined on the RHS, or they are defined, but the LHS doesn't provide them,
 		// so implied <auto>, so they pass.
 		if(instanceofThis.getGenericDeclaration() == null || instanceofThisGenerics == null) {
@@ -223,13 +224,108 @@ public class InstanceofUtil {
 
 		// They are defined on the class, AND some were provided. If they pass this, they are instanceof, otherwise
 		// they aren't.
-		return type.getGenericParameters().isInstanceof(instanceofThisGenerics, env);
+		return type.getTypeGenericParameters().get(instanceofThis.getNakedType(env)).
+				isInstanceof(instanceofThisGenerics, env);
 	}
 
 	/**
-	 * This contains only naked CClassTypes.
+	 * Returns true if the class being checked is within bounds of the specified super class and is thus
+	 * assignable to the specified type. Note that for
+	 * type unions, the rule is that if ALL of the classes to check extend the super class, then the check passes,
+	 * and if not, even if some of them to extend the superclass, it will return false.
+	 * <p>
+	 * For instance, consider {@code string | int}. This extends {@code primitive}, but not {@code number}, as the
+	 * value could hold a string, which doesn't extend number.
+	 * <p>
+	 * When considering the reverse, it returns true if the checked class extends ANY of the super classes. That is,
+	 * {@code string} extends {@code array | primitive} because it extends primitive.
+	 * <p>
+	 * If any of the values contain a generic, those are checked via the normal generic inheritance rules.
+	 * @param env The environment object.
+	 * @param checkClasses The assumed "subclass" type union.
+	 * @param superClasses The assumed "superclass" type union.
+	 * @return
 	 */
-	private static final Map<CClassType, Set<CClassType>> ISINSTANCEOF_CACHE = new HashMap<>();
+	@SuppressWarnings("null")
+	public static boolean isInstanceof(LeftHandSideType checkClasses, LeftHandSideType superClasses, Environment env) {
+		// This method is called during JVM bootstrapping, and we have a circular dependency between auto and
+		// the regular implementation of this method. Therefore, we have a special bootstrapping mode here which
+		// bypasses the code below.
+		if(checkClasses.getTypes().get(0).getKey() == null || superClasses.getTypes().get(0).getKey() == null) {
+			return false;
+		}
+		if("auto".equals(checkClasses.getTypes().get(0).getKey().getFQCN().getFQCN())) {
+			return true;
+		}
+		if("auto".equals(superClasses.getTypes().get(0).getKey().getFQCN().getFQCN())) {
+			return true;
+		}
+
+		for(Pair<CClassType, LeftHandGenericUse> checkClass : checkClasses.getTypes()) {
+			boolean anyExtend = false;
+			CClassType checkClassType = checkClass.getKey();
+			Set<CClassType> castableClasses = null;
+			if(checkClassType.getNativeType() == null) {
+				castableClasses = getAllCastableClasses(checkClassType, env);
+			}
+			LeftHandGenericUse checkLHGU = checkClass.getValue();
+			for(Pair<CClassType, LeftHandGenericUse> superClass : superClasses.getTypes()) {
+				CClassType superClassType = superClass.getKey();
+				LeftHandGenericUse superLHGU = superClass.getValue();
+				// Check if check extends super, if so, set anyExtend to true and break
+				if(checkClassType.equals(superClassType) && checkLHGU == null && superLHGU == null) {
+					// more efficient check
+					anyExtend = true;
+					break;
+				}
+				// TODO: This is currently being done in a very lazy way. It needs to be reworked.
+				// For now, this is ok, but will not work once user types are added.
+				if(checkClassType.getNativeType() != null && superClassType.getNativeType() != null) {
+					// Since native classes are not allowed to extend multiple superclasees, but
+					// in general, they are allowed to advertise that they do, for the sake of
+					// methodscript, this can only be used to return true. If it returns true, it
+					// definitely is, but if it returns false, that does not explicitly mean that
+					// it doesn't. However, this check is faster, so we can do it and in 99% of
+					// cases get a performance boost.
+					if(!superClassType.getNativeType().isAssignableFrom(checkClassType.getNativeType())) {
+						break;
+					}
+				} else {
+					if(!castableClasses.contains(superClassType)) {
+						break;
+					}
+				}
+
+				if(checkLHGU == null) {
+					// Check if the actual type has parameters
+					if(checkClassType.getGenericParameters() != null) {
+						checkLHGU = checkClassType.getGenericParameters().get(checkClassType)
+								.toLeftHandEquivalent(checkClassType, env);
+					}
+				}
+				if(checkLHGU == null && superLHGU == null) {
+					anyExtend = true;
+					break;
+				}
+				// At this point, the types match or are castable, but we also need to consider the generics.
+				// For same type, this is easy, but for say, B<string, int> extends A<string>, this is instanceof,
+				// but we have to select the correct generic parameters to compare, because string, int != string.
+				if(castableClasses == null) {
+					castableClasses = getAllCastableClasses(checkClassType, env);
+				}
+
+				if(checkLHGU != null && checkLHGU.isWithinBounds(env, superLHGU)) {
+					anyExtend = true;
+					break;
+				}
+			}
+			if(!anyExtend) {
+				// All of the check classes must extend any of the super classes.
+				return false;
+			}
+		}
+		return true;
+	}
 
 	/**
 	 * This function returns true if a value of a certain type is assignable to the given type. In general, this is
@@ -244,12 +340,35 @@ public class InstanceofUtil {
 	 * @param env
 	 * @return
 	 */
+	@Deprecated
 	public static boolean isAssignableTo(CClassType type, CClassType instanceofThis, LeftHandGenericUse instanceofThisGenerics, Environment env) {
-		if(type != null && type.getNakedType(env).equals(CNull.TYPE) // TODO: Check for NotNull anntoation on instanceofThis
-				) {
-			return true;
+		return isAssignableTo(LeftHandSideType.fromHardCodedType(type),
+				LeftHandSideType.fromCClassType(instanceofThis, instanceofThisGenerics, Target.UNKNOWN), env);
+	}
+
+	/**
+	 * This function returns true if a value of a certain type is assignable to the given type. In general, this is
+	 * precisely equivalent to {@link #isInstanceof(CClassType, CClassType, LeftHandGenericUse, Environment)} except
+	 * this allows for null to be assigned to any value in general. The only exception to this rule is if the type is
+	 * defined with the NotNull annotation.
+	 *
+	 * @param type The type to check for. Java {@code null} can be used to indicate no type (e.g. from control flow
+	 * breaking statements), though this is in general the wrong method to use for this type of check.
+	 * @param instanceofThis The type of the variable to determine if this can be assigned.
+	 * @param env
+	 * @return
+	 */
+	public static boolean isAssignableTo(LeftHandSideType type, LeftHandSideType instanceofThis, Environment env) {
+		if(!type.isTypeUnion()) {
+			// Only one iteration here
+			for(Pair<CClassType, LeftHandGenericUse> t : type.getTypes()) {
+				// TODO: Check for NotNull anntoation on instanceofThis
+				if(t.getKey() != null && t.getKey().getNakedType(env).equals(CNull.TYPE)) {
+					return true;
+				}
+			}
 		}
-		return isInstanceof(type, instanceofThis, instanceofThisGenerics, env);
+		return isInstanceof(type, instanceofThis, env);
 	}
 
 }

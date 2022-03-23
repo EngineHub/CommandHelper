@@ -54,6 +54,13 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	private Target target;
 	private transient boolean wasIdentifier = false;
 
+	/**
+	 * Gets the ConstructType of this Construct
+	 * @return
+	 * @deprecated Nothing in general should be Construct specific, and should be replaced with more generic
+	 * instanceof checks, rather than getting the ConstructType.
+	 */
+	@Deprecated
 	public ConstructType getCType() {
 		return ctype;
 	}
@@ -212,7 +219,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 			CArray ca = (CArray) c;
 			if(!ca.inAssociativeMode()) {
 				List<Object> list = new ArrayList<Object>();
-				for(int i = 0; i < ca.size(); i++) {
+				for(int i = 0; i < ca.size(env); i++) {
 					list.add(json_encode0(ca.get(i, t, env), t, env));
 				}
 				return list;
@@ -429,7 +436,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 				return map;
 			} else {
 				//ArrayList
-				ArrayList<Object> list = new ArrayList<Object>((int) ca.size());
+				ArrayList<Object> list = new ArrayList<Object>((int) ca.size(env));
 				for(Mixed construct : ca.getArray()) {
 					list.add(GetPOJO(construct, env));
 				}
@@ -495,6 +502,8 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 		return typeof(this, env);
 	}
 
+	private final Map<CClassType, GenericParameters> genericParameters = new HashMap<>();
+
 	/**
 	 * Returns the generic parameters for this Construct. By default, null, but this MUST be overridden by objects which
 	 * have generics.
@@ -502,8 +511,16 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	 * @return
 	 */
 	@Override
-	public GenericParameters getGenericParameters() {
-		return null;
+	public Map<CClassType, GenericParameters> getGenericParameters() {
+		if(genericParameters.isEmpty()) {
+			return null;
+		} else {
+			return genericParameters;
+		}
+	}
+
+	protected final void registerGenericParameters(CClassType type, GenericParameters parameters) {
+		this.genericParameters.put(type, parameters);
 	}
 
 	/**
@@ -605,7 +622,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 			// but anyways, for now, just return false.
 			return false;
 		}
-		return that.typeof(env).doesExtend(CClassType.get(type));
+		return that.typeof(env).doesExtend(env, CClassType.get(type));
 	}
 
 	@Override
@@ -616,7 +633,8 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 			// they currently aren't first class, and can only be accessed by accident.
 			return false;
 		}
-		return InstanceofUtil.isInstanceof(this, type, lhsGenericParameters, env);
+		return InstanceofUtil.isInstanceof(this,
+				LeftHandSideType.fromCClassType(type, lhsGenericParameters, Target.UNKNOWN), env);
 	}
 
 	/**

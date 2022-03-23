@@ -10,6 +10,7 @@ import com.laytonsmith.core.constructs.CLabel;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.InstanceofUtil;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.Environment;
@@ -174,7 +175,7 @@ public class StaticAnalysis {
 		}
 
 		// Clear previous auto includes analysis and return since there are no auto includes.
-		if(autoIncludes == null || autoIncludes.size() == 0) {
+		if(autoIncludes == null || autoIncludes.isEmpty()) {
 			autoIncludesAnalysis = null;
 			return;
 		}
@@ -217,7 +218,8 @@ public class StaticAnalysis {
 					scope.addReference(new Reference(Namespace.IVARIABLE, decl.getIdentifier(), decl.getTarget()));
 				} else {
 					scope.addDeclaration(new Declaration(
-							Namespace.IVARIABLE, decl.getIdentifier(), CClassType.AUTO, decl.getTarget()));
+							Namespace.IVARIABLE, decl.getIdentifier(), CClassType.AUTO.asLeftHandSideType(),
+							decl.getTarget()));
 				}
 			}
 		}
@@ -351,7 +353,7 @@ public class StaticAnalysis {
 	 * @param exceptions - Any compile exceptions will be added to this set.
 	 * @return The return type of the parse tree.
 	 */
-	public CClassType typecheck(ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+	public LeftHandSideType typecheck(ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
 		Mixed node = ast.getData();
 		if(node instanceof CFunction) {
 			CFunction cFunc = (CFunction) node;
@@ -360,11 +362,11 @@ public class StaticAnalysis {
 				if(func != null) {
 					return func.typecheck(this, ast, env, exceptions);
 				}
-				return CClassType.AUTO; // Unknown return type.
+				return LeftHandSideType.fromCClassType(CClassType.AUTO, Target.UNKNOWN); // Unknown return type.
 			} else if(cFunc.hasIVariable()) { // The function is a var reference to a closure: '@myClosure(<args>)'.
-				return CClassType.AUTO; // TODO - Get actual type (return type of closure, iclosure, rclosure?).
+				return LeftHandSideType.fromCClassType(CClassType.AUTO, Target.UNKNOWN); // TODO - Get actual type (return type of closure, iclosure, rclosure?).
 			} else if(cFunc.hasProcedure()) { // The function is a procedure reference.
-				return CClassType.AUTO; // TODO - Get actual type.
+				return LeftHandSideType.fromCClassType(CClassType.AUTO, Target.UNKNOWN); // TODO - Get actual type.
 			} else {
 				throw new Error("Unsupported " + CFunction.class.getSimpleName()
 						+ " type in type checking for node with value: " + cFunc.val());
@@ -378,19 +380,23 @@ public class StaticAnalysis {
 				if(decls.isEmpty()) {
 					exceptions.add(new ConfigCompileException(
 							"Variable cannot be resolved: " + ivar.getVariableName(), ivar.getTarget()));
-					return CClassType.AUTO;
+					return LeftHandSideType.fromCClassType(CClassType.AUTO, Target.UNKNOWN);
 				} else {
-					// TODO - Get the most specific type when multiple declarations exist.
-					return decls.iterator().next().getType();
+					LeftHandSideType[] types = new LeftHandSideType[decls.size()];
+					List<Declaration> declsList = new ArrayList<>(decls);
+					for(int i = 0; i < types.length; i++) {
+						types[i] = declsList.get(i).getType();
+					}
+					return LeftHandSideType.fromTypeUnion(Target.UNKNOWN, types);
 				}
 			} else {
 				// If this runs, then an IVariable reference was created without setting its Scope using setTermScope().
 				exceptions.add(new ConfigCompileException("Variable cannot be resolved (missing variable scope, this is"
 						+ " an internal error that should never happen): " + ivar.getVariableName(), ivar.getTarget()));
-				return CClassType.AUTO;
+				return LeftHandSideType.fromCClassType(CClassType.AUTO, Target.UNKNOWN);
 			}
 		} else if(node instanceof Variable) {
-			return CString.TYPE; // $vars can only be strings.
+			return LeftHandSideType.fromCClassType(CString.TYPE, Target.UNKNOWN); // $vars can only be strings.
 		} else if(node instanceof CKeyword) {
 
 			// Use the more specific compile error caused during keyword processing if available.
@@ -398,38 +404,69 @@ public class StaticAnalysis {
 					env.getEnv(CompilerEnvironment.class).potentialKeywordCompileErrors.get(node.getTarget());
 			exceptions.add(ex != null ? ex
 					: new ConfigCompileException("Unexpected keyword: " + node.val(), node.getTarget()));
-			return CClassType.AUTO;
+			return LeftHandSideType.fromCClassType(CClassType.AUTO, Target.UNKNOWN);
 		} else if(node instanceof CLabel) {
 			exceptions.add(new ConfigCompileException(
 					"Unexpected label: " + ((CLabel) node).cVal().val(), node.getTarget()));
-			return CClassType.AUTO;
+			return LeftHandSideType.fromCClassType(CClassType.AUTO, Target.UNKNOWN);
 		}
 
 		// The node is some other Construct, so return its type.
 		try {
-			return node.typeof(env);
+			// TODO - Add LHGU
+			return LeftHandSideType.fromCClassType(node.typeof(env), null, node.getTarget());
 		} catch (Throwable t) {
 			// Functions that might contain these unsupported objects should make sure that they don't type check them.
 			// In case an unsupported object causes an error here, it likely means that we have a syntax error.
 			exceptions.add(new ConfigCompileException("Unsupported AST node implementation in type checking: "
 					+ node.getClass().getSimpleName(), node.getTarget()));
-			return CClassType.AUTO;
+			return LeftHandSideType.fromCClassType(CClassType.AUTO, Target.UNKNOWN);
 		}
 	}
 
 	/**
 	 * Checks whether the given type is instance of the expected type, adding a compile error to the passed
-	 * exceptions set if it isn't. This never generates an error when the given type is {@link CClassType#AUTO}.
+	 * exceptions set if it isn't.This never generates an error when the given type is {@link CClassType#AUTO}.
 	 * @param type - The type to check.
 	 * @param expected - The expected {@link CClassType}.
 	 * @param t
+	 * @param env
+	 * @param exceptions
+	 */
+	public static void requireType(LeftHandSideType type, CClassType expected,
+			Target t, Environment env, Set<ConfigCompileException> exceptions) {
+		requireType(type, LeftHandSideType.fromHardCodedType(expected), t, env, exceptions);
+	}
+
+	/**
+	 * Checks whether the given type is instance of the expected type, adding a compile error to the passed
+	 * exceptions set if it isn't.This never generates an error when the given type is {@link CClassType#AUTO}.
+	 * @param type - The type to check.
+	 * @param expected - The expected {@link CClassType}.
+	 * @param t
+	 * @param env
 	 * @param exceptions
 	 */
 	public static void requireType(CClassType type, CClassType expected,
 			Target t, Environment env, Set<ConfigCompileException> exceptions) {
+		requireType(LeftHandSideType.fromHardCodedType(type),
+				LeftHandSideType.fromHardCodedType(expected), t, env, exceptions);
+	}
+
+	/**
+	 * Checks whether the given type is instance of the expected type, adding a compile error to the passed
+	 * exceptions set if it isn't.This never generates an error when the given type is {@link CClassType#AUTO}.
+	 * @param type - The type to check.
+	 * @param expected - The expected {@link CClassType}.
+	 * @param t
+	 * @param env
+	 * @param exceptions
+	 */
+	public static void requireType(LeftHandSideType type, LeftHandSideType expected,
+			Target t, Environment env, Set<ConfigCompileException> exceptions) {
 
 		// Generate an exception if the given type is not instanceof the expected type.
-		if(!InstanceofUtil.isInstanceof(type, expected, null, env)) {
+		if(!InstanceofUtil.isInstanceof(type, expected, env)) {
 			exceptions.add(new ConfigCompileException("Expected type " + expected.getSimpleName()
 				+ ", but received type " + type.getSimpleName() + " instead.", t));
 		}
@@ -437,19 +474,51 @@ public class StaticAnalysis {
 
 	/**
 	 * Checks whether the given type is instance of any of the expected types, adding a compile error to the passed
-	 * exceptions set if it isn't. This never generates an error when the given type is {@link CClassType#AUTO}.
-	 * @param type - The type to check.
-	 * @param expected - The expected {@link CClassType}s, which should always be of at least size 1.
-	 * @param t
-	 * @param exceptions
+	 * exceptions set if it isn't.This never generates an error when the given type is {@link CClassType#AUTO}.
+	 * @param type The type to check.
+	 * @param expected The expected {@link CClassType}s, which should always be of at least size 1.
+	 * @param t The code target
+	 * @param env The environment
+	 * @param exceptions The exceptions object, which can be added to if there are any problems with the code.
 	 */
-	public static void requireAnyType(CClassType type, CClassType[] expected,
+	public static void requireAnyType(CClassType type, LeftHandSideType[] expected,
+			Target t, Environment env, Set<ConfigCompileException> exceptions) {
+		requireAnyType(LeftHandSideType.fromHardCodedType(type), expected, t, env, exceptions);
+	}
+
+	/**
+	 * Checks whether the given type is instance of any of the expected types, adding a compile error to the passed
+	 * exceptions set if it isn't.This never generates an error when the given type is {@link CClassType#AUTO}.
+	 * @param type The type to check.
+	 * @param expected The expected {@link CClassType}s, which should always be of at least size 1.
+	 * @param t The code target
+	 * @param env The environment
+	 * @param exceptions The exceptions object, which can be added to if there are any problems with the code.
+	 */
+	public static void requireAnyType(LeftHandSideType type, CClassType[] expected,
+			Target t, Environment env, Set<ConfigCompileException> exceptions) {
+		LeftHandSideType[] expectedLHS = new LeftHandSideType[expected.length];
+		for(int i = 0; i < expected.length; i++) {
+			expectedLHS[i] = expected[i].asLeftHandSideType();
+		}
+		requireAnyType(type, expectedLHS, t, env, exceptions);
+	}
+	/**
+	 * Checks whether the given type is instance of any of the expected types, adding a compile error to the passed
+	 * exceptions set if it isn't.This never generates an error when the given type is {@link CClassType#AUTO}.
+	 * @param type The type to check.
+	 * @param expected The expected {@link CClassType}s, which should always be of at least size 1.
+	 * @param t The code target
+	 * @param env The environment
+	 * @param exceptions The exceptions object, which can be added to if there are any problems with the code.
+	 */
+	public static void requireAnyType(LeftHandSideType type, LeftHandSideType[] expected,
 			Target t, Environment env, Set<ConfigCompileException> exceptions) {
 		assert expected.length > 0 : "You must at least provide one expected type to requireAnyType().";
 
 		// Return if the type is instanceof any expected type.
-		for(CClassType exp : expected) {
-			if(InstanceofUtil.isInstanceof(type, exp, null, env)) {
+		for(LeftHandSideType exp : expected) {
+			if(InstanceofUtil.isInstanceof(type, exp, env)) {
 				return;
 			}
 		}
@@ -460,7 +529,7 @@ public class StaticAnalysis {
 					+ ", but received type " + type.getSimpleName() + " instead.", t));
 		} else {
 			String types = "";
-			for(CClassType exp : expected) {
+			for(LeftHandSideType exp : expected) {
 				types += (types.isEmpty() ? exp.getSimpleName() : ", " + exp.getSimpleName());
 			}
 			exceptions.add(new ConfigCompileException("Expected any of types {" + types

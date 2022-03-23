@@ -32,6 +32,19 @@ public class ConstructorConstraint extends Constraint {
 	}
 
 	@Override
+	public String toSimpleString() {
+		return "new " + getTypeName() + "("
+				+ StringUtils.Join(types,
+					", ",
+					", ",
+					", ",
+					"",
+					item -> item.getKey().getSimpleName()
+							+ (item.getValue() == null ? "" : "<" + item.getValue().toSimpleString() + ">"))
+				+ ")";
+	}
+
+	@Override
 	public String toString() {
 		return "new " + getTypeName() + "("
 				+ StringUtils.Join(types,

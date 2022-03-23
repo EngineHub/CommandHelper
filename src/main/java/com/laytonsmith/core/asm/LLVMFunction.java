@@ -12,6 +12,7 @@ import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CFunction;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -99,9 +100,9 @@ public abstract class LLVMFunction implements FunctionBase, Function {
 	 * By default, null is returned.
 	 */
 	@Override
-	public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
+	public LeftHandSideType getReturnType(Target t, List<LeftHandSideType> argTypes, List<Target> argTargets,
 			Environment env, Set<ConfigCompileException> exceptions) {
-		return CClassType.AUTO; // No information is available about the return type.
+		return LeftHandSideType.fromCClassType(CClassType.AUTO, t); // No information is available about the return type.
 	}
 
 	/**
@@ -110,12 +111,12 @@ public abstract class LLVMFunction implements FunctionBase, Function {
 	 * them to {@link #getReturnType(Target, List, List, Environment, Set)} (Target, List, List, Set)} to get this function's return type.
 	 */
 	@Override
-	public CClassType typecheck(StaticAnalysis analysis,
+	public LeftHandSideType typecheck(StaticAnalysis analysis,
 			ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
 
 		// Get and check the types of the function's arguments.
 		List<ParseTree> children = ast.getChildren();
-		List<CClassType> argTypes = new ArrayList<>(children.size());
+		List<LeftHandSideType> argTypes = new ArrayList<>(children.size());
 		List<Target> argTargets = new ArrayList<>(children.size());
 		for(ParseTree child : children) {
 			argTypes.add(analysis.typecheck(child, env, exceptions));

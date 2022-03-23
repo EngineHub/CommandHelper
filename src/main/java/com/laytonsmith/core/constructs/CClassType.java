@@ -148,7 +148,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		}
 
 		@Override
-		public GenericParameters getGenericParameters() {
+		public Map<CClassType, GenericParameters> getGenericParameters() {
 			throw new Error();
 		}
 
@@ -186,7 +186,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	@StandardField
 	private final FullyQualifiedClassName fqcn;
 	@StandardField
-	private final GenericParameters genericParameters;
+	private final Map<CClassType, GenericParameters> genericParameters;
 
 	/**
 	 * This is an invalid instance of the underlying type that can only be used for Documentation purposes or finding
@@ -336,7 +336,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	 * defines a new T() constraint, then a class will be required in the generics, this cannot be inferred. If it's not
 	 * provided, then this will be thrown.
 	 */
-	public static CClassType get(CClassType nakedType, Target t, GenericParameters generics, Environment env) {
+	public static CClassType get(CClassType nakedType, Target t, Map<CClassType, GenericParameters> generics, Environment env) {
 		return get(nakedType.getFQCN(), t, generics, env);
 	}
 
@@ -360,18 +360,19 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	 * defines a new T() constraint, then a class will be required in the generics, this cannot be inferred. If it's not
 	 * provided, then this will be thrown.
 	 */
-	public static CClassType get(Class<? extends Mixed> type, Target t, GenericParameters generics, Environment env) {
+	public static CClassType get(Class<? extends Mixed> type, Target t, Map<CClassType, GenericParameters> generics, Environment env) {
 		return get(FullyQualifiedClassName.forNativeClass(type), t, generics, env);
 	}
 
 	/**
-	 * Returns the singular instance of CClassType that represents this type. If it doesn't exist, it creates it,
-	 * stores, and returns that instance. Note that in general, == is not supported for these types, even though in
-	 * general it is correct to say that for each type, there will only be one instance.
+	 * Returns the singular instance of CClassType that represents this type.If it doesn't exist, it creates it, stores,
+	 * and returns that instance. Note that in general, == is not supported for these types, even though in general it
+	 * is correct to say that for each type, there will only be one instance.
 	 *
 	 * @param type The fully qualified class name.
 	 * @param t The code target where this instance is being used.
 	 * @param generics The generics to be added to this CClassType
+	 * @param env
 	 * @return The CClassType object with the given generic parameter set
 	 *
 	 * @throws NoClassDefFoundError If there are generic parameters defined as non-null, but the naked class has not
@@ -384,22 +385,39 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	 * defines a new T() constraint, then a class will be required in the generics, this cannot be inferred. If it's not
 	 * provided, then this will be thrown.
 	 */
-	public static CClassType get(FullyQualifiedClassName type, Target t, GenericParameters generics, Environment env) {
+	public static CClassType get(FullyQualifiedClassName type, Target t, Map<CClassType, GenericParameters> generics, Environment env) {
 		Objects.requireNonNull(type);
 		CClassType naked = getNakedClassType(type, env);
+		if(naked == CNull.TYPE || naked == CVoid.TYPE) {
+			return naked;
+		}
+
 		if(naked == null) {
 			throw new NoClassDefFoundError("Naked class for " + type.getFQCN()
 					+ " is not yet defined, it must be defined before use.");
 		}
-		if(naked.getGenericDeclaration() != null && generics == null) {
-			for(Constraints c : naked.getGenericDeclaration().getConstraints()) {
-				// Inferred parameters, assuming these all pass, it's fine
-				c.convertFromDiamond(t);
+
+		for(CClassType chainType : InstanceofUtil.getAllCastableClasses(naked, env)) {
+			if(chainType.getGenericDeclaration() != null) {
+				if(generics == null) {
+					generics = new HashMap<>();
+				}
+				GenericParameters subGenerics = generics.get(chainType);
+				if(subGenerics == null) {
+					GenericParameters.GenericParametersBuilder builder = GenericParameters.emptyBuilder();
+					for(Constraints c : chainType.getGenericDeclaration().getConstraints()) {
+						// Inferred parameters, assuming these all pass, it's fine
+						builder.addParameter(c.convertFromDiamond(t).getType(), null);
+					}
+					if(!builder.isEmpty()) {
+						generics.put(chainType, builder.build());
+					}
+				}
 			}
 		}
 
 		if(naked.getGenericDeclaration() == null) {
-			if(generics != null) {
+			if(generics != null && generics.get(naked) != null) {
 				throw new CRECastException("Generic parameters passed to " + type.getFQCN() + ", but none are"
 						+ " defined on the type.", t);
 			}
@@ -415,7 +433,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 			ctype = cache.get(type, generics);
 		} else {
 			// The constructor adds it to the cache
-			ctype = new CClassType(naked, t, generics, cache);
+			ctype = new CClassType(naked, t, generics, cache, env);
 		}
 		return ctype;
 	}
@@ -500,6 +518,13 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		}
 	}
 
+	private static String getParametersString(CClassType nakedType, Map<CClassType, GenericParameters> genericParameters) {
+		if(genericParameters == null) {
+			return "";
+		}
+		return genericParameters.get(nakedType).toString();
+	}
+
 	/**
 	 * Creates a genericized version of an existing naked class definition.
 	 *
@@ -507,8 +532,9 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	 * @param t Code target
 	 * @param genericParameters The concrete generic parameters
 	 */
-	private CClassType(CClassType nakedType, Target t, GenericParameters genericParameters, ClassTypeCache cache) {
-		super(nakedType.getFQCN() + (genericParameters == null ? "" : genericParameters.toString()),
+	private CClassType(CClassType nakedType, Target t, Map<CClassType, GenericParameters> genericParameters, ClassTypeCache cache,
+			Environment env) {
+		super(nakedType.getFQCN() + getParametersString(nakedType, genericParameters),
 				ConstructType.CLASS_TYPE, t);
 		this.genericDeclaration = nakedType.getGenericDeclaration(); // same declaration as "parent" class
 		fqcn = nakedType.fqcn;
@@ -571,76 +597,47 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		return ObjectHelpers.DoHashCode(this);
 	}
 
+	public static boolean doesExtend(Environment env, LeftHandSideType checkClasses, LeftHandSideType superClasses) {
+		return InstanceofUtil.isInstanceof(checkClasses, superClasses, env);
+	}
+
+	public static boolean doesExtend(Environment env, CClassType checkClass, LeftHandSideType superClass) {
+		return doesExtend(env, LeftHandSideType.fromHardCodedType(checkClass), superClass);
+	}
+
 	/**
 	 * Returns true if checkClass extends, implements, or otherwise derives from superClass
+	 *
+	 * @param checkClass
+	 * @param superClass
+	 * @return
 	 */
-	public static boolean doesExtend(CClassType checkClass, CClassType superClass) {
-		if(checkClass.equals(superClass)) {
-			// more efficient check
-			return true;
-		}
-		if(checkClass.nativeClass != null && superClass.nativeClass != null
-				&& superClass.nativeClass.isAssignableFrom(checkClass.nativeClass)) {
-			// Since native classes are not allowed to extend multiple superclasees, but
-			// in general, they are allowed to advertise that they do, for the sake of
-			// methodscript, this can only be used to return true. If it returns true, it
-			// definitely is, but if it returns false, that does not explicitly mean that
-			// it doesn't. However, this check is faster, so we can do it and in 99% of
-			// cases get a performance boost.
-			return true;
-		}
-		try {
-			// TODO: This is currently being done in a very lazy way. It needs to be reworked.
-			// For now, this is ok, but will not work once user types are added.
-			if(checkClass.nativeClass != null && superClass.nativeClass != null) {
-				if(!superClass.nativeClass.isAssignableFrom(checkClass.nativeClass)) {
-					return false;
-				}
-			} else {
-				// TODO
-				throw new ClassNotFoundException();
-			}
-		} catch(ClassNotFoundException ex) {
-			throw new RuntimeException(ex);
-		}
-		return true;
+	public static boolean doesExtend(Environment env, CClassType checkClass, CClassType superClass) {
+		return doesExtend(env, checkClass, LeftHandSideType.fromHardCodedType(superClass));
+	}
+
+	public boolean doesExtend(Environment env, LeftHandSideType superClass) {
+		return doesExtend(env, LeftHandSideType.fromHardCodedType(this), superClass);
 	}
 
 	/**
 	 * Returns true if this class extends the specified one
+	 *
+	 * @param superClass
+	 * @return
 	 */
-	public boolean doesExtend(CClassType superClass) {
-		return doesExtend(this, superClass);
-	}
-
-	/**
-	 * Works like {@link #doesExtend(com.laytonsmith.core.constructs.CClassType, com.laytonsmith.core.constructs.CClassType)
-	 * }, however rethrows the {@link ClassNotFoundException} that doesExtend throws as an {@link Error}. This should
-	 * not be used unless the class names come from hardcoded values.
-	 */
-	public static boolean unsafeDoesExtend(CClassType checkClass, CClassType superClass) {
-		return doesExtend(checkClass, superClass);
-	}
-
-	/**
-	 * Performs an unsafe check to see if this class extends the specified one
-	 */
-	public boolean unsafeDoesExtend(CClassType superClass) {
-		return unsafeDoesExtend(this, superClass);
+	public boolean doesExtend(Environment env, CClassType superClass) {
+		return doesExtend(env, this, superClass);
 	}
 
 	/**
 	 * Returns true if the specified class extends this one
+	 *
+	 * @param checkClass
+	 * @return
 	 */
-	public boolean isExtendedBy(CClassType checkClass) throws ClassNotFoundException {
-		return doesExtend(checkClass, this);
-	}
-
-	/**
-	 * Performs an unsafe check to see if the specified class extends this one
-	 */
-	public boolean unsafeIsExtendedBy(CClassType checkClass) {
-		return unsafeDoesExtend(checkClass, this);
+	public boolean isExtendedBy(Environment env, CClassType checkClass) {
+		return doesExtend(env, checkClass, this);
 	}
 
 	@Override
@@ -680,6 +677,10 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		}
 		String[] parts = val().split(Pattern.quote(PATH_SEPARATOR));
 		return new CPackage(Target.UNKNOWN, ArrayUtils.slice(parts, 0, parts.length - 2));
+	}
+
+	public Map<CClassType, GenericParameters> getTypeGenericParameters() {
+		return genericParameters;
 	}
 
 	/**
@@ -729,13 +730,22 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		return val();
 	}
 
-	public boolean isEnum() {
+	public boolean isEnum(Environment env) {
 		if("ms.lang.enum".equals(fqcn.getFQCN())) {
 			// By default, this returns true when something is instanceof a thing, but in this case, we don't want
 			// that, because ironically, ms.lang.enum is itself not an enum.
 			return false;
 		}
-		return doesExtend(MEnumType.TYPE);
+		if(MEnumType.TYPE == null) {
+			// We're in the bootstrapping for MEnumType, so we can't do this comparison like this. Anyways, assuming
+			// we really are in the spot we think, then this is true.
+			for(StackTraceElement ste : Thread.currentThread().getStackTrace()) {
+				if(ste.getClassName().equals("com.laytonsmith.core.natives.interfaces.MEnumType")) {
+					return true;
+				}
+			}
+		}
+		return doesExtend(env, MEnumType.TYPE);
 	}
 
 	@Override
@@ -747,7 +757,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	// so we just specifically support enums for now.
 	@Override
 	public Mixed get(String index, Target t, Environment env) throws ConfigRuntimeException {
-		if(isEnum()) {
+		if(isEnum(env)) {
 			try {
 				return NativeTypeList.getNativeEnumType(fqcn).get(index, t, env);
 			} catch(ClassNotFoundException ex) {
@@ -759,7 +769,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 
 	@Override
 	public Mixed get(int index, Target t, Environment env) throws ConfigRuntimeException {
-		if(isEnum()) {
+		if(isEnum(env)) {
 			try {
 				return NativeTypeList.getNativeEnumType(fqcn).get(index, t, env);
 			} catch(ClassNotFoundException ex) {
@@ -771,7 +781,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 
 	@Override
 	public Mixed get(Mixed index, Target t, Environment env) throws ConfigRuntimeException {
-		if(isEnum()) {
+		if(isEnum(env)) {
 			try {
 				return NativeTypeList.getNativeEnumType(fqcn).get(index, t, env);
 			} catch(ClassNotFoundException ex) {
@@ -782,10 +792,10 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	}
 
 	@Override
-	public Set<Mixed> keySet() {
-		if(isEnum()) {
+	public Set<Mixed> keySet(Environment env) {
+		if(isEnum(env)) {
 			try {
-				return NativeTypeList.getNativeEnumType(fqcn).keySet();
+				return NativeTypeList.getNativeEnumType(fqcn).keySet(env);
 			} catch(ClassNotFoundException ex) {
 				throw new RuntimeException(ex);
 			}
@@ -794,10 +804,10 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	}
 
 	@Override
-	public long size() {
-		if(isEnum()) {
+	public long size(Environment env) {
+		if(isEnum(env)) {
 			try {
-				return NativeTypeList.getNativeEnumType(fqcn).size();
+				return NativeTypeList.getNativeEnumType(fqcn).size(env);
 			} catch(ClassNotFoundException ex) {
 				throw new RuntimeException(ex);
 			}
@@ -821,16 +831,18 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	}
 
 	/**
-	 * If this was constructed against a native class, we can do some optimizations in the course of operation. This may
+	 * If this was constructed against a native class, we can do some optimizations in the course of operation.This may
 	 * be null, and all code that uses this method must support the mechanisms if this is null anyways, but if it isn't
 	 * null, then this can perhaps be used to help optimize.
+	 *
+	 * @return
 	 */
 	public Class<? extends Mixed> getNativeType() {
 		return nativeClass;
 	}
 
 	@Override
-	public boolean getBooleanValue(Target t) {
+	public boolean getBooleanValue(Environment env, Target t) {
 		return true;
 	}
 
@@ -844,20 +856,14 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		return genericDeclaration;
 	}
 
-	/**
-	 * Returns the generic parameters on the instance of the class.
-	 *
-	 * @return null if no generics are defined on this class, or they were, but it's the naked class.
-	 */
-	@Override
-	public GenericParameters getGenericParameters() {
-		return this.genericParameters;
+	public LeftHandSideType asLeftHandSideType() {
+		return LeftHandSideType.fromHardCodedType(this);
 	}
 
 	// For accessor reasons, this must remain an inner class. The class should be public, but the methods private.
 	public static class ClassTypeCache {
 
-		private final Map<Pair<FullyQualifiedClassName, GenericParameters>, CClassType> cache;
+		private final Map<Pair<FullyQualifiedClassName, Map<CClassType, GenericParameters>>, CClassType> cache;
 
 		public ClassTypeCache() {
 			cache = Collections.synchronizedMap(new HashMap<>());
@@ -871,7 +877,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		 * definition, but also if this is the naked class.
 		 * @param type The CClassType.
 		 */
-		private void add(FullyQualifiedClassName fqcn, GenericParameters parameters, CClassType type) {
+		private void add(FullyQualifiedClassName fqcn, Map<CClassType, GenericParameters> parameters, CClassType type) {
 			cache.put(new Pair<>(fqcn, parameters), type);
 		}
 
@@ -891,14 +897,14 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		 * @param declaration The parameter declaration. Null if this is a type without a parameter declaration, or if
 		 * you wish to get the naked class.
 		 */
-		private CClassType get(FullyQualifiedClassName fqcn, GenericParameters declaration) {
+		private CClassType get(FullyQualifiedClassName fqcn, Map<CClassType, GenericParameters> declaration) {
 			return cache.get(new Pair<>(fqcn, declaration));
 		}
 
 		/**
 		 * Returns true if the cache contains this class.
 		 */
-		private boolean contains(FullyQualifiedClassName fqcn, GenericParameters declaration) {
+		private boolean contains(FullyQualifiedClassName fqcn, Map<CClassType, GenericParameters> declaration) {
 			return get(fqcn, declaration) != null;
 		}
 
