@@ -14,6 +14,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.RuntimeMode;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
+import com.laytonsmith.core.functions.IncludeCache;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.core.taskmanager.TaskManager;
@@ -75,8 +76,9 @@ public class ObjectDefinitionTableTest {
 		TaskManager taskManager = Mockito.mock(TaskManager.class);
 
 		env = Environment.createEnvironment(new CompilerEnvironment(),
-			new GlobalEnv(executionQueue, new File("."), EnumSet.of(RuntimeMode.CMDLINE)),
-			new StaticRuntimeEnv(Profiler.FakeProfiler(), persistenceNetwork, profiles, taskManager));
+			new GlobalEnv(new File("."), EnumSet.of(RuntimeMode.CMDLINE)),
+			new StaticRuntimeEnv(Profiler.FakeProfiler(), persistenceNetwork, profiles, taskManager,
+					executionQueue, new IncludeCache(), null));
 	}
 
 	@Test

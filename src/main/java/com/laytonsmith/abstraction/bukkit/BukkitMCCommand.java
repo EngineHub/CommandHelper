@@ -251,7 +251,7 @@ public class BukkitMCCommand implements MCCommand {
 			}
 		}
 		BukkitMCCommandTabCompleteEvent event = new BukkitMCCommandTabCompleteEvent(sender, cmd, alias, args);
-		EventUtils.TriggerListener(Driver.TAB_COMPLETE, "tab_complete_command", event, CommandHelperPlugin.getCore().getLastLoadedEnv());
+		EventUtils.TriggerListener(Driver.TAB_COMPLETE, "tab_complete_command", event);
 		return event.getCompletions();
 	}
 

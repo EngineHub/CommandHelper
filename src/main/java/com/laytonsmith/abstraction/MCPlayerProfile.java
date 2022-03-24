@@ -6,11 +6,7 @@ public interface MCPlayerProfile extends AbstractionObject {
 
 	String getName();
 
-	String setName(String name);
-
 	UUID getId();
-
-	UUID setId(UUID id);
 
 	MCProfileProperty getProperty(String key);
 

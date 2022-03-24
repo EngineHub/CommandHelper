@@ -494,6 +494,16 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	}
 
 	@Override
+	public boolean isAutoSave() {
+		return w.isAutoSave();
+	}
+
+	@Override
+	public void setAutoSave(boolean autoSave) {
+		w.setAutoSave(autoSave);
+	}
+
+	@Override
 	public MCFallingBlock spawnFallingBlock(MCLocation loc, MCBlockData data) {
 		return new BukkitMCFallingBlock(w.spawnFallingBlock((Location) loc.getHandle(), (BlockData) data.getHandle()));
 	}

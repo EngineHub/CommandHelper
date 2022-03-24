@@ -71,53 +71,53 @@ public class BukkitPlayerListener implements Listener {
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onFoodLevelChange(FoodLevelChangeEvent e) {
 		BukkitMCFoodLevelChangeEvent pke = new BukkitMCFoodLevelChangeEvent(e);
-		EventUtils.TriggerListener(Driver.FOOD_LEVEL_CHANGED, "food_level_changed", pke, CommandHelperPlugin.getCore().getLastLoadedEnv());
+		EventUtils.TriggerListener(Driver.FOOD_LEVEL_CHANGED, "food_level_changed", pke);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerKick(PlayerKickEvent e) {
 		BukkitMCPlayerKickEvent pke = new BukkitMCPlayerKickEvent(e);
-		EventUtils.TriggerListener(Driver.PLAYER_KICK, "player_kick", pke, CommandHelperPlugin.getCore().getLastLoadedEnv());
+		EventUtils.TriggerListener(Driver.PLAYER_KICK, "player_kick", pke);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerBedEnter(PlayerBedEnterEvent e) {
 		BukkitMCPlayerEnterBedEvent be = new BukkitMCPlayerEnterBedEvent(e);
-		EventUtils.TriggerListener(Driver.PLAYER_ENTER_BED, "player_enter_bed", be, CommandHelperPlugin.getCore().getLastLoadedEnv());
+		EventUtils.TriggerListener(Driver.PLAYER_ENTER_BED, "player_enter_bed", be);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerBedLeave(PlayerBedLeaveEvent e) {
 		BukkitMCPlayerLeaveBedEvent be = new BukkitMCPlayerLeaveBedEvent(e);
-		EventUtils.TriggerListener(Driver.PLAYER_LEAVE_BED, "player_leave_bed", be, CommandHelperPlugin.getCore().getLastLoadedEnv());
+		EventUtils.TriggerListener(Driver.PLAYER_LEAVE_BED, "player_leave_bed", be);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerLogin(PlayerLoginEvent e) {
 		BukkitMCPlayerLoginEvent ple = new BukkitMCPlayerLoginEvent(e);
-		EventUtils.TriggerListener(Driver.PLAYER_LOGIN, "player_login", ple, CommandHelperPlugin.getCore().getLastLoadedEnv());
+		EventUtils.TriggerListener(Driver.PLAYER_LOGIN, "player_login", ple);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerJoin(PlayerJoinEvent e) {
 		BukkitMCPlayerJoinEvent pje = new BukkitMCPlayerJoinEvent(e);
-		EventUtils.TriggerListener(Driver.PLAYER_JOIN, "player_join", pje, CommandHelperPlugin.getCore().getLastLoadedEnv());
+		EventUtils.TriggerListener(Driver.PLAYER_JOIN, "player_join", pje);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerInteract(PlayerInteractEvent e) {
 		BukkitMCPlayerInteractEvent pie = new BukkitMCPlayerInteractEvent(e);
 		if(e.getAction().equals(Action.PHYSICAL)) {
-			EventUtils.TriggerListener(Driver.PLAYER_INTERACT, "pressure_plate_activated", pie, CommandHelperPlugin.getCore().getLastLoadedEnv());
+			EventUtils.TriggerListener(Driver.PLAYER_INTERACT, "pressure_plate_activated", pie);
 		} else {
-			EventUtils.TriggerListener(Driver.PLAYER_INTERACT, "player_interact", pie, CommandHelperPlugin.getCore().getLastLoadedEnv());
+			EventUtils.TriggerListener(Driver.PLAYER_INTERACT, "player_interact", pie);
 		}
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerRespawn(PlayerRespawnEvent event) {
 		BukkitMCPlayerRespawnEvent pre = new BukkitMCPlayerRespawnEvent(event);
-		EventUtils.TriggerListener(Driver.PLAYER_SPAWN, "player_spawn", pre, CommandHelperPlugin.getCore().getLastLoadedEnv());
+		EventUtils.TriggerListener(Driver.PLAYER_SPAWN, "player_spawn", pre);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
@@ -130,7 +130,7 @@ public class BukkitPlayerListener implements Listener {
 		if(event.isAsynchronous()) {
 			//The async event gets priority, and if cancelled, doesn't trigger a normal player_chat event.
 			BukkitMCPlayerChatEvent pce = new BukkitMCPlayerChatEvent(event);
-			EventUtils.TriggerListener(Driver.PLAYER_CHAT, "async_player_chat", pce, CommandHelperPlugin.getCore().getLastLoadedEnv());
+			EventUtils.TriggerListener(Driver.PLAYER_CHAT, "async_player_chat", pce);
 			if(event.isCancelled()) {
 				return;
 			}
@@ -221,13 +221,13 @@ public class BukkitPlayerListener implements Listener {
 
 	private void fireChat(AsyncPlayerChatEvent event) {
 		BukkitMCPlayerChatEvent pce = new BukkitMCPlayerChatEvent(event);
-		EventUtils.TriggerListener(Driver.PLAYER_CHAT, "player_chat", pce, CommandHelperPlugin.getCore().getLastLoadedEnv());
+		EventUtils.TriggerListener(Driver.PLAYER_CHAT, "player_chat", pce);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerQuit(PlayerQuitEvent event) {
 		BukkitMCPlayerQuitEvent pqe = new BukkitMCPlayerQuitEvent(event);
-		EventUtils.TriggerListener(Driver.PLAYER_QUIT, "player_quit", pqe, CommandHelperPlugin.getCore().getLastLoadedEnv());
+		EventUtils.TriggerListener(Driver.PLAYER_QUIT, "player_quit", pqe);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
@@ -237,7 +237,7 @@ public class BukkitPlayerListener implements Listener {
 		}
 
 		BukkitMCWorldChangedEvent wce = new BukkitMCWorldChangedEvent(event);
-		EventUtils.TriggerListener(Driver.WORLD_CHANGED, "world_changed", wce, CommandHelperPlugin.getCore().getLastLoadedEnv());
+		EventUtils.TriggerListener(Driver.WORLD_CHANGED, "world_changed", wce);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
@@ -247,67 +247,67 @@ public class BukkitPlayerListener implements Listener {
 		}
 
 		BukkitMCPlayerTeleportEvent pte = new BukkitMCPlayerTeleportEvent(event);
-		EventUtils.TriggerListener(Driver.PLAYER_TELEPORT, "player_teleport", pte, CommandHelperPlugin.getCore().getLastLoadedEnv());
+		EventUtils.TriggerListener(Driver.PLAYER_TELEPORT, "player_teleport", pte);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPortalEnter(PlayerPortalEvent event) {
 		BukkitMCPlayerPortalEvent pe = new BukkitMCPlayerPortalEvent(event);
-		EventUtils.TriggerListener(Driver.PLAYER_PORTAL_TRAVEL, "player_portal_travel", pe, CommandHelperPlugin.getCore().getLastLoadedEnv());
+		EventUtils.TriggerListener(Driver.PLAYER_PORTAL_TRAVEL, "player_portal_travel", pe);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onConsume(PlayerItemConsumeEvent event) {
 		BukkitMCPlayerItemConsumeEvent pic = new BukkitMCPlayerItemConsumeEvent(event);
-		EventUtils.TriggerListener(Driver.PLAYER_CONSUME, "player_consume", pic, CommandHelperPlugin.getCore().getLastLoadedEnv());
+		EventUtils.TriggerListener(Driver.PLAYER_CONSUME, "player_consume", pic);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onFish(PlayerFishEvent event) {
 		BukkitMCPlayerFishEvent fish = new BukkitMCPlayerFishEvent(event);
-		EventUtils.TriggerListener(Driver.PLAYER_FISH, "player_fish", fish, CommandHelperPlugin.getCore().getLastLoadedEnv());
+		EventUtils.TriggerListener(Driver.PLAYER_FISH, "player_fish", fish);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onGamemodeChange(PlayerGameModeChangeEvent event) {
 		BukkitMCGamemodeChangeEvent e = new BukkitMCGamemodeChangeEvent(event);
-		EventUtils.TriggerListener(Driver.GAMEMODE_CHANGE, "gamemode_change", e, CommandHelperPlugin.getCore().getLastLoadedEnv());
+		EventUtils.TriggerListener(Driver.GAMEMODE_CHANGE, "gamemode_change", e);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onExpChange(PlayerExpChangeEvent event) {
 		BukkitMCExpChangeEvent e = new BukkitMCExpChangeEvent(event);
-		EventUtils.TriggerListener(Driver.EXP_CHANGE, "exp_change", e, CommandHelperPlugin.getCore().getLastLoadedEnv());
+		EventUtils.TriggerListener(Driver.EXP_CHANGE, "exp_change", e);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerEditBook(PlayerEditBookEvent event) {
 		BukkitMCPlayerEditBookEvent pebe = new BukkitMCPlayerEditBookEvent(event);
-		EventUtils.TriggerListener(Driver.BOOK_EDITED, "book_edited", pebe, CommandHelperPlugin.getCore().getLastLoadedEnv());
+		EventUtils.TriggerListener(Driver.BOOK_EDITED, "book_edited", pebe);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerToggleFlight(PlayerToggleFlightEvent event) {
 		BukkitMCPlayerToggleFlightEvent ptfe = new BukkitMCPlayerToggleFlightEvent(event);
-		EventUtils.TriggerListener(Driver.PLAYER_TOGGLE_FLIGHT, "player_toggle_flight", ptfe, CommandHelperPlugin.getCore().getLastLoadedEnv());
+		EventUtils.TriggerListener(Driver.PLAYER_TOGGLE_FLIGHT, "player_toggle_flight", ptfe);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerToggleSneak(PlayerToggleSneakEvent event) {
 		BukkitMCPlayerToggleSneakEvent ptse = new BukkitMCPlayerToggleSneakEvent(event);
-		EventUtils.TriggerListener(Driver.PLAYER_TOGGLE_SNEAK, "player_toggle_sneak", ptse, CommandHelperPlugin.getCore().getLastLoadedEnv());
+		EventUtils.TriggerListener(Driver.PLAYER_TOGGLE_SNEAK, "player_toggle_sneak", ptse);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerToggleSprint(PlayerToggleSprintEvent event) {
 		BukkitMCPlayerToggleSprintEvent ptse = new BukkitMCPlayerToggleSprintEvent(event);
-		EventUtils.TriggerListener(Driver.PLAYER_TOGGLE_SPRINT, "player_toggle_sprint", ptse, CommandHelperPlugin.getCore().getLastLoadedEnv());
+		EventUtils.TriggerListener(Driver.PLAYER_TOGGLE_SPRINT, "player_toggle_sprint", ptse);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerResourcePackStatus(PlayerResourcePackStatusEvent event) {
 		BukkitMCPlayerResourcePackEvent prpse = new BukkitMCPlayerResourcePackEvent(event);
-		EventUtils.TriggerListener(Driver.RESOURCE_PACK_STATUS, "resource_pack_status", prpse, CommandHelperPlugin.getCore().getLastLoadedEnv());
+		EventUtils.TriggerListener(Driver.RESOURCE_PACK_STATUS, "resource_pack_status", prpse);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
@@ -334,7 +334,7 @@ public class BukkitPlayerListener implements Listener {
 			}
 			if(last.distance(movedTo) > threshold) {
 				BukkitMCPlayerMoveEvent pme = new BukkitMCPlayerMoveEvent(event, threshold, last);
-				EventUtils.TriggerListener(Driver.PLAYER_MOVE, "player_move", pme, CommandHelperPlugin.getCore().getLastLoadedEnv());
+				EventUtils.TriggerListener(Driver.PLAYER_MOVE, "player_move", pme);
 				if(!pme.isCancelled()) {
 					lastLocations.put(p, movedTo);
 				}

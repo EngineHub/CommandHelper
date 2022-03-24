@@ -18,6 +18,7 @@ import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.MethodScriptCompiler;
+import com.laytonsmith.core.NodeModifiers;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Procedure;
@@ -65,6 +66,7 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.Environment.EnvironmentImpl;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
@@ -452,7 +454,8 @@ public class DataHandling {
 					}
 					// Add the new variable declaration.
 					declScope.addDeclaration(new Declaration(
-							Namespace.IVARIABLE, iVar.getVariableName(), type, ast.getTarget()));
+							Namespace.IVARIABLE, iVar.getVariableName(), type, ast.getNodeModifiers(),
+							ast.getTarget()));
 					analysis.setTermScope(ivarAst, declScope);
 				}
 
@@ -472,7 +475,9 @@ public class DataHandling {
 				if(rawIVar instanceof IVariable iVar) {
 
 					// Add ivariable assign declaration in a new scope.
-					newScope.addDeclaration(new IVariableAssignDeclaration(iVar.getVariableName(), iVar.getTarget()));
+					newScope.addDeclaration(new IVariableAssignDeclaration(iVar.getVariableName(),
+							ast.getNodeModifiers(),
+							iVar.getTarget()));
 					analysis.setTermScope(ivarAst, newScope);
 				}
 
@@ -483,8 +488,7 @@ public class DataHandling {
 		}
 
 		/**
-		 * Handles an {@code assign()} that is used as parameter in for example a procedure or closure.
-		 * This will declare the parameter in the paramScope scope, using the {@link Namespace#IVARIABLE} namespace.
+		 * Handles an {@code assign()} that is used as parameter in for example a procedure or closure.This will declare the parameter in the paramScope scope, using the {@link Namespace#IVARIABLE} namespace.
 		 * The default parameter value (assigned value) will be handled in the valScope.
 		 * @param analysis
 		 * @param paramScope - The scope to which a new scope is linked in which the declaration will be placed.
@@ -492,10 +496,11 @@ public class DataHandling {
 		 * @param ast - The AST of the {@code assign()} function.
 		 * @param env
 		 * @param exceptions
+		 * @param params
 		 * @return The resulting scopes in format {paramScope, valScope}.
 		 */
 		public Scope[] linkParamScope(StaticAnalysis analysis, Scope paramScope, Scope valScope,
-				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions, List<ParamDeclaration> params) {
 
 			// Typed parameter: assign(type, var, val).
 			if(ast.getChildren().size() == 3) {
@@ -517,7 +522,11 @@ public class DataHandling {
 					}
 					// Add the new variable declaration.
 					paramScope = analysis.createNewScope(paramScope);
-					paramScope.addDeclaration(new ParamDeclaration(iVar.getVariableName(), type, ast.getTarget()));
+					ParamDeclaration pDecl = new ParamDeclaration(iVar.getVariableName(), type, ast.getChildAt(2),
+							ast.getNodeModifiers(),
+							ast.getTarget());
+					params.add(pDecl);
+					paramScope.addDeclaration(pDecl);
 					analysis.setTermScope(ivarAst, paramScope);
 				}
 
@@ -539,8 +548,11 @@ public class DataHandling {
 
 					// Add the new variable declaration.
 					paramScope = analysis.createNewScope(paramScope);
-					paramScope.addDeclaration(new ParamDeclaration(
-							iVar.getVariableName(), CClassType.AUTO.asLeftHandSideType(), ast.getTarget()));
+					ParamDeclaration pDecl = new ParamDeclaration(
+							iVar.getVariableName(), CClassType.AUTO.asLeftHandSideType(), null, ast.getNodeModifiers(),
+							ast.getTarget());
+					params.add(pDecl);
+					paramScope.addDeclaration(pDecl);
 					analysis.setTermScope(ivarAst, paramScope);
 				}
 
@@ -1456,6 +1468,7 @@ public class DataHandling {
 			List<String> varNames = new ArrayList<>();
 			boolean usesAssign = false;
 			CClassType returnType = Auto.TYPE;
+			NodeModifiers modifiers = null;
 			if(nodes[0].getData().equals(CVoid.VOID) || nodes[0].getData().isInstanceOf(CClassType.TYPE, null, env)) {
 				if(nodes[0].getData().equals(CVoid.VOID)) {
 					returnType = CVoid.TYPE;
@@ -1466,8 +1479,10 @@ public class DataHandling {
 				for(int i = 1; i < nodes.length; i++) {
 					newNodes[i - 1] = nodes[i];
 				}
+				modifiers = nodes[0].getNodeModifiers();
 				nodes = newNodes;
 			}
+			nodes[0].getNodeModifiers().merge(modifiers);
 			// We have to restore the variable list once we're done
 			IVariableList originalList = env.getEnv(GlobalEnv.class).GetVarList().clone();
 			for(int i = 0; i < nodes.length; i++) {
@@ -1530,7 +1545,7 @@ public class DataHandling {
 				}
 			}
 			env.getEnv(GlobalEnv.class).SetVarList(originalList);
-			Procedure myProc = new Procedure(name, returnType, vars, tree, t);
+			Procedure myProc = new Procedure(name, returnType, vars, nodes[0].getNodeModifiers().getComment(), tree, t);
 			if(usesAssign) {
 				myProc.definitelyNotConstant();
 			}
@@ -1573,13 +1588,15 @@ public class DataHandling {
 			Scope paramScope = analysis.createNewScope();
 
 			// Insert @arguments parameter.
-			paramScope.addDeclaration(new ParamDeclaration("@arguments", CArray.TYPE.asLeftHandSideType(), ast.getTarget()));
+			paramScope.addDeclaration(new ParamDeclaration("@arguments", CArray.TYPE.asLeftHandSideType(), null, ast.getNodeModifiers(),
+					ast.getTarget()));
 
 			// Handle procedure parameters from left to right.
 			Scope valScope = parentScope;
+			List<ParamDeclaration> params = new ArrayList<>();
 			while(ind < ast.numberOfChildren() - 1) {
 				ParseTree param = ast.getChildAt(ind++);
-				Scope[] scopes = analysis.linkParamScope(paramScope, valScope, param, env, exceptions);
+				Scope[] scopes = analysis.linkParamScope(paramScope, valScope, param, env, exceptions, params);
 				valScope = scopes[1];
 				paramScope = scopes[0];
 			}
@@ -1591,11 +1608,13 @@ public class DataHandling {
 			// Create proc declaration in a new scope.
 			// TODO - Include proc signature (argument types and number of arguments) in declaration.
 			Scope declScope = analysis.createNewScope(parentScope);
-			ProcDeclaration procDecl = new ProcDeclaration(procName, retType, ast.getTarget());
+			ProcDeclaration procDecl = new ProcDeclaration(procName, retType, params,
+					ast.getNodeModifiers(), ast.getTarget());
 			declScope.addDeclaration(procDecl);
+			analysis.setTermScope(ast, declScope);
 
 			// Create proc root declaration in the inner root scope.
-			paramScope.addDeclaration(new ProcRootDeclaration(procDecl));
+			paramScope.addDeclaration(new ProcRootDeclaration(procDecl, ast.getNodeModifiers()));
 
 			// Allow procedures to perform lookups in the decl scope.
 			paramScope.addSpecificParent(declScope, Namespace.PROCEDURE);
@@ -1689,11 +1708,18 @@ public class DataHandling {
 		@Override
 		public String symbolDisplayName(List<ParseTree> children) {
 			StringBuilder builder = new StringBuilder();
-			builder.append("proc ");
-			builder.append(ArgumentValidation.getString(children.get(0).getData(), Target.UNKNOWN));
+			int offset = 0;
+			if(children.get(0).getData() instanceof CClassType type) {
+				offset = 1;
+				builder.append(type.getSimpleName());
+			} else {
+				builder.append("auto");
+			}
+			builder.append(" proc ");
+			builder.append(ArgumentValidation.getString(children.get(offset).getData(), Target.UNKNOWN));
 			builder.append("(");
 			boolean first = true;
-			for(int i = 1; i < children.size() - 1; i++) {
+			for(int i = 1 + offset; i < children.size() - 1; i++) {
 				if(!first) {
 					builder.append(", ");
 				}
@@ -1705,19 +1731,28 @@ public class DataHandling {
 				} else if(parameter instanceof CFunction f) {
 					try {
 						if(f.getFunction() instanceof assign) {
+							CClassType type = Auto.TYPE;
 							Mixed variable = child.getChildAt(0).getData();
 							Mixed value = child.getChildAt(1).getData();
+							if(variable instanceof CClassType cct) {
+								type = cct;
+								variable = child.getChildAt(1).getData();
+								value = child.getChildAt(2).getData();
+							}
+							builder.append(type.getSimpleName()).append(" ");
 							if(variable instanceof IVariable ivar) {
-								builder.append(ivar.getVariableName())
-										.append(" = ");
-								if(value instanceof CString) {
-									builder.append("'")
-											.append(value.val().replace("\\", "\\\\")
-													.replaceAll("\t", "\\\\t").replaceAll("\n", "\\\\n")
-													.replace("'", "\\'"))
-											.append("'");
-								} else {
-									builder.append(value.val());
+								builder.append(ivar.getVariableName());
+								if(value != CNull.UNDEFINED) {
+									builder.append(" = ");
+									if(value instanceof CString) {
+										builder.append("'")
+												.append(value.val().replace("\\", "\\\\")
+														.replaceAll("\t", "\\\\t").replaceAll("\n", "\\\\n")
+														.replace("'", "\\'"))
+												.append("'");
+									} else {
+										builder.append(value.val());
+									}
 								}
 							}
 						}
@@ -1791,10 +1826,11 @@ public class DataHandling {
 
 			// Create new static analysis for dynamic includes that have not yet been cached.
 			StaticAnalysis analysis;
+			IncludeCache includeCache = env.getEnv(StaticRuntimeEnv.class).getIncludeCache();
 			boolean isFirstCompile = false;
-			Scope parentScope = IncludeCache.DYNAMIC_ANALYSIS_PARENT_SCOPE_CACHE.get(t);
+			Scope parentScope = includeCache.getDynamicAnalysisParentScopeCache().get(t);
 			if(parentScope != null) {
-				analysis = IncludeCache.getStaticAnalysis(file);
+				analysis = includeCache.getStaticAnalysis(file);
 				if(analysis == null) {
 					analysis = new StaticAnalysis(true);
 					analysis.getStartScope().addParent(parentScope);
@@ -1886,7 +1922,8 @@ public class DataHandling {
 
 					// The include is dynamic, so it cannot be checked in compile time.
 					// Store the parent scope for static analysis to check the file as soon as it is loaded in runtime.
-					IncludeCache.DYNAMIC_ANALYSIS_PARENT_SCOPE_CACHE.put(ast.getTarget(), parentScope);
+					env.getEnv(StaticRuntimeEnv.class).getIncludeCache().getDynamicAnalysisParentScopeCache()
+							.put(ast.getTarget(), parentScope);
 					return super.linkScope(analysis, parentScope, ast, env, exceptions);
 				}
 			}
@@ -2554,13 +2591,15 @@ public class DataHandling {
 			}
 
 			// Insert @arguments parameter.
-			paramScope.addDeclaration(new ParamDeclaration("@arguments", CArray.TYPE.asLeftHandSideType(), ast.getTarget()));
+			paramScope.addDeclaration(new ParamDeclaration("@arguments", CArray.TYPE.asLeftHandSideType(), null, ast.getNodeModifiers(),
+					ast.getTarget()));
 
 			// Handle closure parameters from left to right.
 			Scope valScope = parentScope;
+			List<ParamDeclaration> params = new ArrayList<>();
 			while(ind < ast.numberOfChildren() - 1) {
 				ParseTree param = ast.getChildAt(ind++);
-				Scope[] scopes = analysis.linkParamScope(paramScope, valScope, param, env, exceptions);
+				Scope[] scopes = analysis.linkParamScope(paramScope, valScope, param, env, exceptions, params);
 				valScope = scopes[1];
 				paramScope = scopes[0];
 			}

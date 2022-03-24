@@ -7,6 +7,7 @@ import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CNumber;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
@@ -19,20 +20,27 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.Map;
 
 /**
+ * Use PrefilterMatchers instead. This class was deprecated on 2022/03/08, and will remain supported for no less than
+ * 1 year or until version >= 3.3.6, or until all core prefilters are swapped to the new mechanism.
+ * Instead of using this class, use declarative matchers. Events can override the
+ * {@link Event#getPrefilters()} method to integrate into this new system. Docs for the prefilters should be replaced
+ * with empty brackets, and as a separate deprecation phase, those will also be removed.
  *
- *
+ * @deprecated
  */
+@Deprecated
 public final class Prefilters {
 
 	private Prefilters() {
 	}
 
+	/**
+	 * Use PrefilterMatchers instead.
+	 *
+	 * @deprecated
+	 */
+	@Deprecated
 	public enum PrefilterType {
-		/**
-		 * Item matches are fuzzy matches for item notation. Red wool and black wool will match. Essentially, this match
-		 * ignores the item's data value when comparing. (deprecated)
-		 */
-		ITEM_MATCH,
 		/**
 		 * Checks if indexes 'x', 'y', 'z' and 'world' (or 0, 1, 2, 3) of a location array match. The location is
 		 * matched via block matching, for instance if the array's x parameter is 1, 1.3 will match.
@@ -67,26 +75,51 @@ public final class Prefilters {
 		MACRO
 	}
 
+	/**
+	 * Use PrefilterMatchers instead.
+	 * @deprecated
+	 */
+	@Deprecated
 	public static void match(Map<String, Mixed> map, String key,
 			String actualValue, PrefilterType type, Environment env) throws PrefilterNonMatchException {
 		match(map, key, new CString(actualValue, Target.UNKNOWN), type, env);
 	}
 
+	/**
+	 * Use PrefilterMatchers instead.
+	 * @deprecated
+	 */
+	@Deprecated
 	public static void match(Map<String, Mixed> map, String key,
 			int actualValue, PrefilterType type, Environment env) throws PrefilterNonMatchException {
 		match(map, key, new CInt(actualValue, Target.UNKNOWN), type, env);
 	}
 
+	/**
+	 * Use PrefilterMatchers instead.
+	 * @deprecated
+	 */
+	@Deprecated
 	public static void match(Map<String, Mixed> map, String key,
 			double actualValue, PrefilterType type, Environment env) throws PrefilterNonMatchException {
 		match(map, key, new CDouble(actualValue, Target.UNKNOWN), type, env);
 	}
 
+	/**
+	 * Use PrefilterMatchers instead.
+	 * @deprecated
+	 */
+	@Deprecated
 	public static void match(Map<String, Mixed> map, String key,
 			boolean actualValue, PrefilterType type, Environment env) throws PrefilterNonMatchException {
 		match(map, key, CBoolean.get(actualValue), type, env);
 	}
 
+	/**
+	 * Use PrefilterMatchers instead.
+	 * @deprecated
+	 */
+	@Deprecated
 	public static void match(Map<String, Mixed> map, String key,
 			MCLocation actualValue, PrefilterType type, Environment env) throws PrefilterNonMatchException {
 		match(map, key, ObjectGenerator.GetGenerator().location(actualValue, false, env), type, env);
@@ -96,14 +129,13 @@ public final class Prefilters {
 	 * Given a prototype and the actual user provided value, determines if it matches. If it doesn't, it throws an
 	 * exception. If the value is not provided, or it does match, it returns void, which means that the test passed, and
 	 * the event matches.
+	 * @deprecated Use PrefilterMatchers instead
 	 */
+	@Deprecated
 	public static void match(Map<String, Mixed> map, String key,
 			Mixed actualValue, PrefilterType type, Environment env) throws PrefilterNonMatchException {
 		if(map.containsKey(key)) {
 			switch(type) {
-				case ITEM_MATCH:
-					ItemMatch(map.get(key), actualValue);
-					break;
 				case STRING_MATCH:
 					StringMatch(map.get(key).val(), actualValue.val());
 					break;
@@ -144,35 +176,59 @@ public final class Prefilters {
 		}
 	}
 
-	private static void ItemMatch(Mixed item1, Mixed item2) throws PrefilterNonMatchException {
-		String i1 = item1.val().split(":")[0];
-		String i2 = item2.val().split(":")[0];
-		if(!i1.trim().equals(i2)) {
-			throw new PrefilterNonMatchException();
-		}
-	}
-
 	private static void BooleanMatch(Mixed bool1, Mixed bool2, Environment env) throws PrefilterNonMatchException {
-		if(ArgumentValidation.getBoolean(bool1, Target.UNKNOWN, env)
-				!= ArgumentValidation.getBoolean(bool2, Target.UNKNOWN, env)) {
+		if(ArgumentValidation.getBoolean(bool1, Target.UNKNOWN, env) != ArgumentValidation.getBoolean(bool2, Target.UNKNOWN, env)) {
 			throw new PrefilterNonMatchException();
 		}
 	}
 
-	private static void LocationMatch(Mixed location1, Mixed location2, Environment env) throws PrefilterNonMatchException {
+	/**
+	 * Use PrefilterMatchers instead.
+	 * @deprecated
+	 */
+	@Deprecated
+	public static boolean FastLocationMatch(Mixed location1, MCLocation location2, Environment env) {
 		MCLocation l1 = ObjectGenerator.GetGenerator().location(location1, null, location1.getTarget(), env);
-		MCLocation l2 = ObjectGenerator.GetGenerator().location(location2, null, Target.UNKNOWN, env);
-		if((!l1.getWorld().equals(l2.getWorld())) || (l1.getBlockX() != l2.getBlockX()) || (l1.getBlockY() != l2.getBlockY()) || (l1.getBlockZ() != l2.getBlockZ())) {
+		MCLocation l2 = location2;
+		return !((!l1.getWorld().equals(l2.getWorld())) || (l1.getBlockX() != l2.getBlockX()) || (l1.getBlockY() != l2.getBlockY()) || (l1.getBlockZ() != l2.getBlockZ()));
+	}
+
+	/**
+	 * Use PrefilterMatchers instead.
+	 * @deprecated
+	 */
+	@Deprecated
+	private static void LocationMatch(Mixed location1, Mixed location2, Environment env) throws PrefilterNonMatchException {
+		if(!FastLocationMatch(location1, ObjectGenerator.GetGenerator().location(location2, null, Target.UNKNOWN, env), env)) {
 			throw new PrefilterNonMatchException();
 		}
 	}
 
+	/**
+	 * Use PrefilterMatchers instead.
+	 * @deprecated
+	 */
+	@Deprecated
+	public static boolean FastStringMatch(String string1, String string2) {
+		return string1.equals(string2);
+	}
+
+	/**
+	 * Use PrefilterMatchers instead.
+	 * @deprecated
+	 */
+	@Deprecated
 	private static void StringMatch(String string1, String string2) throws PrefilterNonMatchException {
-		if(!string1.equals(string2)) {
+		if(!FastStringMatch(string1, string2)) {
 			throw new PrefilterNonMatchException();
 		}
 	}
 
+	/**
+	 * Use PrefilterMatchers instead.
+	 * @deprecated
+	 */
+	@Deprecated
 	private static void MathMatch(Mixed one, Mixed two, Environment env) throws PrefilterNonMatchException {
 		try {
 			double dOne = ArgumentValidation.getNumber(one, Target.UNKNOWN, env);
@@ -185,8 +241,13 @@ public final class Prefilters {
 		}
 	}
 
-	private static void ExpressionMatch(Mixed expression, String key, Mixed dvalue, Environment env) throws PrefilterNonMatchException {
-		String exp = expression.val().substring(1, expression.val().length() - 1);
+	/**
+	 * Use PrefilterMatchers instead.
+	 * @deprecated
+	 */
+	@Deprecated
+	public static boolean FastExpressionMatch(String expression, String key, double dvalue, Target t) {
+		String exp = expression.substring(1, expression.length() - 1);
 		boolean inequalityMode = false;
 		if(exp.contains("<") || exp.contains(">") || exp.contains("==")) {
 			inequalityMode = true;
@@ -199,49 +260,84 @@ public final class Prefilters {
 			eClazz = Class.forName(eClass);
 			errClazz = Class.forName(errClass);
 		} catch (ClassNotFoundException cnf) {
-			throw new CREPluginInternalException("You are missing a required dependency: " + eClass, expression.getTarget(), cnf);
+			throw new CREPluginInternalException("You are missing a required dependency: " + eClass, t, cnf);
 		}
 		try {
 			Object e = ReflectionUtils.invokeMethod(eClazz, null, "compile",
 					new Class[]{String.class, String[].class}, new Object[]{exp, new String[]{key}});
 			double val = (double) ReflectionUtils.invokeMethod(eClazz, e, "evaluate",
 					new Class[]{double[].class},
-					new Object[]{new double[]{ArgumentValidation.getDouble(dvalue, Target.UNKNOWN, env)}});
+					new Object[]{new double[]{dvalue}});
 			if(inequalityMode) {
 				if(val == 0) {
-					throw new PrefilterNonMatchException();
+					return false;
 				}
 			} else {
-				if(val != ArgumentValidation.getDouble(dvalue, Target.UNKNOWN, env)) {
-					throw new PrefilterNonMatchException();
+				if(val != dvalue) {
+					return false;
 				}
 			}
 		} catch (ReflectionUtils.ReflectionException rex) {
 			if(rex.getCause().getClass().isAssignableFrom(errClazz)) {
-				throw new CREPluginInternalException("Your expression was invalidly formatted", expression.getTarget(), rex.getCause());
+				throw new CREPluginInternalException("Your expression was invalidly formatted", t, rex.getCause());
 			} else {
 				throw new CREPluginInternalException(rex.getMessage(),
-						expression.getTarget(), rex.getCause());
+						t, rex.getCause());
 			}
+		}
+		return true;
+	}
+
+	private static void ExpressionMatch(Mixed expression, String key, Mixed dvalue, Environment env) throws PrefilterNonMatchException {
+		if(!FastExpressionMatch(expression.val(), key, ArgumentValidation.getDouble(dvalue, Target.UNKNOWN, env), expression.getTarget())) {
+			throw new PrefilterNonMatchException();
 		}
 	}
 
-	private static void RegexMatch(String regex, Mixed value) throws PrefilterNonMatchException {
+	/**
+	 * Use PrefilterMatchers instead.
+	 * @deprecated
+	 */
+	@Deprecated
+	public static boolean FastRegexMatch(String regex, String value) {
 		regex = regex.substring(1, regex.length() - 1);
-		if(!value.val().matches(regex)) {
+		return value.matches(regex);
+	}
+
+	private static void RegexMatch(String regex, Mixed value) throws PrefilterNonMatchException {
+		if(!FastRegexMatch(regex, value.val())) {
 			throw new PrefilterNonMatchException();
+		}
+	}
+
+	/**
+	 * Use PrefilterMatchers instead.
+	 * @deprecated
+	 */
+	@Deprecated
+	public static boolean FastMacroMatch(String key, String expression, Object javaObject, Target t) {
+		if(expression.isEmpty()) {
+			return false;
+		} else if(expression.charAt(0) == '(' && expression.charAt(expression.length() - 1) == ')') {
+			try {
+				return FastExpressionMatch(expression, key, (double) javaObject, t);
+			} catch (ClassCastException ex) {
+				throw new RuntimeException("Unexpected class type, please report this bug to the developers.", ex);
+			}
+		} else if(expression.charAt(0) == '/' && expression.charAt(expression.length() - 1) == '/') {
+			return FastRegexMatch(expression, javaObject.toString());
+		} else {
+			return FastStringMatch(expression, javaObject.toString());
 		}
 	}
 
 	private static void MacroMatch(String key, Mixed expression, Mixed value, Environment env) throws PrefilterNonMatchException {
-		if(expression.val().isEmpty()) {
+		Object javaObject = value.val();
+		if(value.isInstanceOf(CNumber.TYPE, null, env)) {
+			javaObject = ArgumentValidation.getNumber(value, Target.UNKNOWN, env);
+		}
+		if(!FastMacroMatch(key, expression.val(), javaObject, expression.getTarget())) {
 			throw new PrefilterNonMatchException();
-		} else if(expression.val().charAt(0) == '(' && expression.val().charAt(expression.val().length() - 1) == ')') {
-			ExpressionMatch(expression, key, value, env);
-		} else if(expression.val().charAt(0) == '/' && expression.val().charAt(expression.val().length() - 1) == '/') {
-			RegexMatch(expression.val(), value);
-		} else {
-			StringMatch(expression.val(), value.val());
 		}
 	}
 }

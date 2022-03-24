@@ -240,7 +240,7 @@ public class ArrayHandling {
 											+ "\" does not exist", t);
 								}
 							}
-							return ca.get(iindex, t, env);
+							return ca.get(iindex, t);
 						} else {
 							return ca.get(index, t, env);
 						}
@@ -2060,7 +2060,7 @@ public class ArrayHandling {
 				array.removeValues(args[1]);
 			} else {
 				for(long i = array.size(env) - 1; i >= 0; i--) {
-					if(BasicLogic.equals.doEquals(array.get(i, t, env), args[1])) {
+					if(BasicLogic.equals.doEquals(array.get(i, t), args[1])) {
 						new array_remove().exec(t, env, array, new CInt(i, t));
 					}
 				}
@@ -2247,7 +2247,7 @@ public class ArrayHandling {
 			if(ca.isEmpty(env)) {
 				return CNull.NULL;
 			} else {
-				return ca.get(ca.size(env) - 1, t, env);
+				return ca.get(ca.size(env) - 1, t);
 			}
 		}
 

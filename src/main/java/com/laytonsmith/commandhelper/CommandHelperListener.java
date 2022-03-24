@@ -78,7 +78,7 @@ public class CommandHelperListener implements Listener {
 		Environment env = CommandHelperPlugin.getCore().getLastLoadedEnv();
 		MCPlayerCommandEvent mpce = new BukkitPlayerEvents.BukkitMCPlayerCommandEvent(event);
 
-		EventUtils.TriggerListener(Driver.PLAYER_COMMAND, "player_command", mpce, env);
+		EventUtils.TriggerListener(Driver.PLAYER_COMMAND, "player_command", mpce);
 		if(mpce.isCancelled()) {
 			return;
 		}

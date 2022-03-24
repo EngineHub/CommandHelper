@@ -10,7 +10,10 @@ import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.Installer;
 import com.laytonsmith.core.Prefs;
+import com.laytonsmith.core.events.BindableEvent;
 import com.laytonsmith.core.events.Event;
+import com.laytonsmith.core.events.prefilters.Prefilter;
+import com.laytonsmith.core.events.prefilters.PrefilterMatcher;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.extensions.ExtensionManager;
@@ -477,6 +480,36 @@ public class DocGen {
 
 	public static class PrefilterData {
 
+		public static String GetSinglePrefilter(String name, MarkupType type, Prefilter pf, boolean first) {
+			PrefilterMatcher matcher = pf.getMatcher();
+			String left = type == MarkupType.HTML || type == MarkupType.WIKI ? "&lt;" : "<";
+			String right = type == MarkupType.HTML || type == MarkupType.WIKI ? "&gt;" : ">";
+			String description = left + (type == MarkupType.WIKI ? matcher.getNameWiki() : matcher.getName()) + right
+					+ " " + pf.getDocs();
+			StringBuilder b = new StringBuilder();
+			if(type == MarkupType.HTML) {
+				b.append(first ? "" : "<br />\n").append("<strong>").append(name).append("</strong>: ").append(description);
+			} else if(type == MarkupType.WIKI) {
+				b.append(first ? "" : "<br />\n").append("'''").append(name).append("''': ").append(description);
+			} else if(type == MarkupType.TEXT) {
+				b.append(first ? "" : "\n").append("\t").append(name).append(": ").append(description);
+			} else if(type == MarkupType.MARKDOWN) {
+				b.append(first ? "" : "  \n").append("**").append(name).append("**: ").append(description);
+			}
+			return b.toString();
+		}
+
+		public static String GetFromModernPrefilters(Map<String, Prefilter<? extends BindableEvent>> prefilters, MarkupType type) {
+			StringBuilder b = new StringBuilder();
+			boolean first = true;
+			for(Map.Entry<String, Prefilter<? extends BindableEvent>> e : prefilters.entrySet()) {
+				Prefilter pf = e.getValue();
+				b.append(GetSinglePrefilter(e.getKey(), type, pf, first));
+				first = false;
+			}
+			return b.toString();
+		}
+
 		public static String Get(String[] data, MarkupType type) {
 			StringBuilder b = new StringBuilder();
 			boolean first = true;
@@ -509,7 +542,7 @@ public class DocGen {
 		}
 
 		private static String ExpandMacro(String macro, MarkupType type) {
-			if(type == MarkupType.HTML) {
+					if(type == MarkupType.HTML) {
 				return "<em>" + macro
 						.replaceAll("<string match>", "&lt;String Match&gt;")
 						.replaceAll("<boolean match>", "&lt;Boolean Match&gt;")
@@ -536,7 +569,7 @@ public class DocGen {
 						.replaceAll("<math match>", "<Math Match>")
 						.replaceAll("<macro>", "<Macro>")
 						.replaceAll("<expression>", "<Expression>");
-			}
+					}
 			return macro;
 		}
 	}
@@ -698,17 +731,33 @@ public class DocGen {
 		public final List<MutabilityData> mutability;
 		private static final Pattern EVENT_PATTERN = Pattern.compile("\\{(.*?)\\} *?(.*?) *?\\{(.*?)\\} *?\\{(.*?)\\}");
 
-		public EventDocInfo(String docs, String eventName) {
+		public EventDocInfo(Event event, String docs, String eventName, MarkupType type) {
 			Matcher m = EVENT_PATTERN.matcher(docs);
 			if(m.find()) {
 				description = m.group(2).trim();
 				prefilter = new ArrayList<>();
-				for(String p : m.group(1).split("\\|")) {
-					if("".equals(p)) {
-						continue;
+				Map<String, Prefilter<? extends BindableEvent>> modernPrefilters = event.getPrefilters();
+				if(modernPrefilters == null) {
+					for(String p : m.group(1).split("\\|")) {
+						if("".equals(p)) {
+							continue;
+						}
+						String[] d = p.split(":");
+						String desc;
+						desc = d.length > 1 ? d[1] : "";
+						prefilter.add(new PrefilterData(d[0], desc));
 					}
-					String[] d = p.split(":");
-					prefilter.add(new PrefilterData(d[0], d.length > 1 ? d[1] : ""));
+				} else {
+					for(Map.Entry<String, Prefilter<? extends BindableEvent>> e : modernPrefilters.entrySet()) {
+						Prefilter pf = e.getValue();
+						PrefilterMatcher matcher = pf.getMatcher();
+						boolean wikiFormat = type == MarkupType.WIKI;
+						String left = wikiFormat || type == MarkupType.HTML ? "&lt;" : "<";
+						String right = wikiFormat || type == MarkupType.HTML ? "&gt;" : ">";
+						String desc = left + (wikiFormat ? matcher.getNameWiki() : matcher.getName()) + right
+								+ " " + pf.getDocs();
+						prefilter.add(new PrefilterData(e.getKey(), desc));
+					}
 				}
 				eventData = new ArrayList<>();
 				for(String e : m.group(3).split("\\|")) {

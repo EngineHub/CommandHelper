@@ -548,9 +548,9 @@ public class Compiler {
 					t = list.get(0).getTarget();
 				}
 				if(returnSConcat) {
-					tree = new ParseTree(new CFunction(sconcat.NAME, t), options);
+					tree = new ParseTree(new CFunction(sconcat.NAME, t), options, true);
 				} else {
-					tree = new ParseTree(new CFunction(__statements__.NAME, t), options);
+					tree = new ParseTree(new CFunction(__statements__.NAME, t), options, true);
 				}
 				tree.setChildren(list);
 				return tree;
@@ -583,6 +583,11 @@ public class Compiler {
 		@Override
 		public LeftHandSideType getReturnType(Target t, List<LeftHandSideType> argTypes,
 				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+			for(LeftHandSideType argType : argTypes) {
+				if(argType == null) {
+					return null; // An argument alters control flow, so this function will never return.
+				}
+			}
 			return CVoid.TYPE.asLeftHandSideType();
 		}
 

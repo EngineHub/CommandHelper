@@ -66,7 +66,7 @@ public class ExecutionQueue {
 				queue = Construct.nval(args[1]);
 			}
 
-			env.getEnv(GlobalEnv.class).GetExecutionQueue().push(
+			env.getEnv(StaticRuntimeEnv.class).getExecutionQueue().push(
 					env.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), queue, new Runnable() {
 
 				@Override
@@ -149,7 +149,7 @@ public class ExecutionQueue {
 				queue = Construct.nval(args[1]);
 			}
 
-			env.getEnv(GlobalEnv.class).GetExecutionQueue().pushFront(
+			env.getEnv(StaticRuntimeEnv.class).getExecutionQueue().pushFront(
 					env.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), queue, new Runnable() {
 
 				@Override
@@ -226,7 +226,7 @@ public class ExecutionQueue {
 			if(args.length == 1) {
 				queue = Construct.nval(args[0]);
 			}
-			environment.getEnv(GlobalEnv.class).GetExecutionQueue().remove(queue);
+			environment.getEnv(StaticRuntimeEnv.class).getExecutionQueue().remove(queue);
 			return CVoid.VOID;
 		}
 
@@ -276,7 +276,7 @@ public class ExecutionQueue {
 			if(args.length == 1) {
 				queue = Construct.nval(args[0]);
 			}
-			environment.getEnv(GlobalEnv.class).GetExecutionQueue().removeFront(queue);
+			environment.getEnv(StaticRuntimeEnv.class).getExecutionQueue().removeFront(queue);
 			return CVoid.VOID;
 		}
 
@@ -327,7 +327,7 @@ public class ExecutionQueue {
 			if(args.length == 1) {
 				queue = Construct.nval(args[0]);
 			}
-			environment.getEnv(GlobalEnv.class).GetExecutionQueue().clear(queue);
+			environment.getEnv(StaticRuntimeEnv.class).getExecutionQueue().clear(queue);
 			return CVoid.VOID;
 		}
 
@@ -378,7 +378,7 @@ public class ExecutionQueue {
 			if(args.length == 1) {
 				queue = Construct.nval(args[0]);
 			}
-			return CBoolean.get(environment.getEnv(GlobalEnv.class).GetExecutionQueue().isRunning(queue));
+			return CBoolean.get(environment.getEnv(StaticRuntimeEnv.class).getExecutionQueue().isRunning(queue));
 		}
 
 		@Override
@@ -428,7 +428,7 @@ public class ExecutionQueue {
 				queue = Construct.nval(args[1]);
 			}
 			final long delay = ArgumentValidation.getInt(args[0], t, env);
-			env.getEnv(GlobalEnv.class).GetExecutionQueue().push(
+			env.getEnv(StaticRuntimeEnv.class).getExecutionQueue().push(
 					env.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), queue, new Runnable() {
 
 				@Override
@@ -491,7 +491,7 @@ public class ExecutionQueue {
 				queue = Construct.nval(args[1]);
 			}
 			final long delay = ArgumentValidation.getInt(args[0], t, env);
-			env.getEnv(GlobalEnv.class).GetExecutionQueue().pushFront(
+			env.getEnv(StaticRuntimeEnv.class).getExecutionQueue().pushFront(
 					env.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), queue, new Runnable() {
 
 				@Override

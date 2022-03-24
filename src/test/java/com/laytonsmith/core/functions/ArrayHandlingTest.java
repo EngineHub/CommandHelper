@@ -345,6 +345,23 @@ public class ArrayHandlingTest {
 	}
 
 	@Test
+	public void testArrayIndexExists() throws Exception {
+		assertEquals("true", SRun("array_index_exists(array(a: 1), 'a')", null));
+		assertEquals("false", SRun("array_index_exists(array(a: 1), 'b')", null));
+		assertEquals("true", SRun("array_index_exists(array(1), 0)", null));
+		assertEquals("false", SRun("array_index_exists(array(1), 1)", null));
+		assertEquals("false", SRun("array_index_exists(array(1), 'a')", null));
+	}
+
+	@Test
+	public void testMultiArrayIndexExists() throws Exception {
+		assertEquals("true", SRun("array_index_exists(array(a: array(b: 1)), 'a', 'b')", null));
+		assertEquals("true", SRun("array_index_exists(array(a: array(1)), 'a', 0)", null));
+		assertEquals("false", SRun("array_index_exists(array(a: array(b: 1)), 'a', 'b', 'c')", null));
+		assertEquals("false", SRun("array_index_exists(array(a: array(b: array())), 'a', 'b', 'c')", null));
+	}
+
+	@Test
 	public void testArrayRand() throws Exception {
 		assertEquals("{1}", SRun("array_rand(array(1, 1, 1), 1, false)", null));
 		String output = SRun("array_rand(array('a', 'b', 'c'))", null);

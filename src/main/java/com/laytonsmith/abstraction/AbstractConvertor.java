@@ -1,7 +1,6 @@
 package com.laytonsmith.abstraction;
 
 import com.laytonsmith.PureUtilities.DaemonManager;
-import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.BindableEvent;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
@@ -25,7 +24,7 @@ public abstract class AbstractConvertor implements Convertor {
 	}
 
 	@Override
-	public void runShutdownHooks(Environment env) {
+	public void runShutdownHooks() {
 		// Fire off the shutdown event, before we shut down all the internal hooks
 		EventUtils.TriggerListener(Driver.SHUTDOWN, "shutdown", new BindableEvent() {
 
@@ -33,7 +32,7 @@ public abstract class AbstractConvertor implements Convertor {
 			public Object _GetObject() {
 				return new Object();
 			}
-		}, env);
+		});
 		Iterator<Runnable> iter = shutdownHooks.iterator();
 		while(iter.hasNext()) {
 			iter.next().run();

@@ -130,6 +130,10 @@ public class InstanceofUtil {
 	 * @return
 	 */
 	public static boolean isInstanceof(Mixed value, CClassType instanceofThis, Environment env) {
+		if(instanceofThis == null) {
+			// "None" type, which is not instanceof anything, nor is anything instanceof it
+			return false;
+		}
 		return isInstanceof(value, instanceofThis.asLeftHandSideType(), env);
 	}
 
@@ -142,7 +146,13 @@ public class InstanceofUtil {
 	 * @return
 	 */
 	public static boolean isInstanceof(Mixed value, LeftHandSideType type, Environment env) {
-		return isInstanceof(value.typeof(env).asLeftHandSideType(), type, env);
+		LeftHandSideType valueType;
+		if(value instanceof LeftHandSideType lhs) {
+			valueType = lhs;
+		} else {
+			valueType = value.typeof(env).asLeftHandSideType();
+		}
+		return isInstanceof(valueType, type, env);
 	}
 
 	/**
@@ -249,8 +259,11 @@ public class InstanceofUtil {
 	@SuppressWarnings("null")
 	public static boolean isInstanceof(LeftHandSideType checkClasses, LeftHandSideType superClasses, Environment env) {
 		// This method is called during JVM bootstrapping, and we have a circular dependency between auto and
-		// the regular implementation of this method. Therefore, we have a special bootstrapping mode here which
+		// the regular implementation of this method. Therefore, we have a special bootstrapping modes here which
 		// bypasses the code below.
+		if(checkClasses == null || superClasses == null) {
+			return false;
+		}
 		if(checkClasses.getTypes().get(0).getKey() == null || superClasses.getTypes().get(0).getKey() == null) {
 			return false;
 		}

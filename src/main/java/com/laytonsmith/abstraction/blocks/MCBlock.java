@@ -55,6 +55,8 @@ public interface MCBlock extends MCMetadatable {
 
 	boolean isPassable();
 
+	boolean isBanner();
+
 	Collection<MCItemStack> getDrops();
 
 	Collection<MCItemStack> getDrops(MCItemStack tool);

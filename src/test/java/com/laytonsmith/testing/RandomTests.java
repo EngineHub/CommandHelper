@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.ExecutionQueueImpl;
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.Implementation.Type;
@@ -19,6 +20,7 @@ import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
+import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
@@ -43,6 +45,7 @@ import com.laytonsmith.core.functions.ArrayHandling;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
+import com.laytonsmith.core.functions.IncludeCache;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.persistence.PersistenceNetworkImpl;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
@@ -352,7 +355,8 @@ public class RandomTests {
 					env.getEnv(CompilerEnvironment.class),
 					env.getEnv(StaticRuntimeEnv.class),
 					new CommandHelperEnvironment(),
-					new StaticRuntimeEnv(srEnv.GetProfiler(), network, srEnv.getProfiles(), srEnv.GetTaskManager()));
+					new StaticRuntimeEnv(srEnv.GetProfiler(), network, srEnv.getProfiles(), srEnv.GetTaskManager(),
+							new ExecutionQueueImpl("default", "default"), new IncludeCache(), new StaticAnalysis(true)));
 
 			Run("store_value('t.test1', 'test')\n"
 					+ "store_value('t.test2', 'test')\n"

@@ -19,6 +19,7 @@ import com.laytonsmith.core.events.BoundEvent;
 import com.laytonsmith.core.events.CancellableEvent;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
+import com.laytonsmith.core.events.prefilters.PrefilterBuilder;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
@@ -59,7 +60,7 @@ public class CmdlineEvents {
 								public Object _GetObject() {
 									return new Object();
 								}
-							}, event.getEnvironment());
+							});
 							try {
 								Thread.sleep(5000);
 							} catch (InterruptedException ex) {
@@ -92,6 +93,11 @@ public class CmdlineEvents {
 		@Override
 		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Environment env) throws PrefilterNonMatchException {
 			return true;
+		}
+
+		@Override
+		protected PrefilterBuilder getPrefilterBuilder() {
+			return PrefilterBuilder.EMPTY;
 		}
 
 		@Override
@@ -154,9 +160,14 @@ public class CmdlineEvents {
 		}
 
 		@Override
+		protected PrefilterBuilder getPrefilterBuilder() {
+			return PrefilterBuilder.EMPTY;
+		}
+
+		@Override
 		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			CmdlinePromptInput cpi = new CmdlinePromptInput(manualObject.get("command", t, env).val(),
-					ArgumentValidation.getBoolean(manualObject.get("shellMode", t, env), t, env));
+			CmdlinePromptInput cpi = new CmdlinePromptInput(manualObject.get("command", t).val(),
+					ArgumentValidation.getBoolean(manualObject.get("shellMode", t), t, env));
 			return cpi;
 		}
 

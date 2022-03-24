@@ -8,9 +8,11 @@ import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCNote;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
+import com.laytonsmith.abstraction.MCPattern;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
+import com.laytonsmith.abstraction.blocks.MCBanner;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockData;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
@@ -19,8 +21,10 @@ import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.blocks.MCSign;
 import com.laytonsmith.abstraction.blocks.MCSkull;
 import com.laytonsmith.abstraction.enums.MCBiomeType;
+import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.enums.MCParticle;
+import com.laytonsmith.abstraction.enums.MCPatternShape;
 import com.laytonsmith.abstraction.enums.MCSound;
 import com.laytonsmith.abstraction.enums.MCSoundCategory;
 import com.laytonsmith.abstraction.enums.MCTone;
@@ -45,6 +49,7 @@ import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
@@ -62,6 +67,7 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import java.util.Arrays;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -1723,7 +1729,8 @@ public class Environment {
 								MCSound.MCVanillaSound.valueOf(children.get(1).getData().val().toUpperCase());
 							} catch (IllegalArgumentException ex) {
 								env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
-										new CompilerWarning(ex.getMessage(), t, null));
+										new CompilerWarning(children.get(1).getData().val()
+												+ " is not a valid enum in com.commandhelper.Sound", t, null));
 							}
 						}
 					}
@@ -2723,5 +2730,214 @@ public class Environment {
 				throw new CREFormatException("The block at the specified location is not a command block", t);
 			}
 		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class get_banner_patterns extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[] {CREFormatException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t, env);
+			MCBlock b = loc.getWorld().getBlockAt(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
+			if(b.getState() instanceof MCBanner banner) {
+				CArray patterns = new CArray(t, banner.numberOfPatterns(), null, env);
+				for(MCPattern p : banner.getPatterns()) {
+					CArray pattern = CArray.GetAssociativeArray(t, null, env);
+					pattern.set("color", p.getColor().name(), env);
+					pattern.set("shape", p.getShape().name(), env);
+					patterns.push(pattern, t, env);
+				}
+				return patterns;
+			} else {
+				throw new CREFormatException("Block at location isn't a banner.", t);
+			}
+		}
+
+		@Override
+		public String getName() {
+			return "get_banner_patterns";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public LeftHandSideType getReturnType(Target t, List<LeftHandSideType> argTypes, List<Target> argTargets,
+				com.laytonsmith.core.environments.Environment env, Set<ConfigCompileException> exceptions) {
+			return CArray.TYPE.asLeftHandSideType();
+		}
+
+
+		@Override
+		public String docs() {
+			return "array {array location} Returns the banner pattern information for the standing banner at"
+					+ " the given location. This will be an array of items containing the \"color\" and \"shape\""
+					+ " parameters. ---- Valid colors are: " + StringUtils.Join(MCDyeColor.values(), ", ", ", or ")
+					+ " and valid shapes are " + StringUtils.Join(MCPatternShape.values(), ", ", ", or ");
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class set_banner_patterns extends AbstractFunction implements Optimizable {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public LeftHandSideType getReturnType(Target t, List<LeftHandSideType> argTypes, List<Target> argTargets, com.laytonsmith.core.environments.Environment env, Set<ConfigCompileException> exceptions) {
+			return CVoid.TYPE.asLeftHandSideType();
+		}
+
+		@Override
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t, env);
+			MCBlock b = loc.getWorld().getBlockAt(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
+			CArray patterns = ArgumentValidation.getArray(args[1], t, env);
+			if(b.getState() instanceof MCBanner banner) {
+				banner.clearPatterns();
+				for(Mixed mp : patterns.asList(env)) {
+					CArray p = ArgumentValidation.getArray(mp, t, env);
+					MCDyeColor color;
+					try {
+						color = MCDyeColor.valueOf(p.get("color", t).val());
+					} catch (IllegalArgumentException ex) {
+						throw new CREFormatException("Invalid color name", t);
+					}
+					MCPatternShape shape;
+					try {
+						shape = MCPatternShape.valueOf(p.get("shape", t).val());
+					} catch (IllegalArgumentException ex) {
+						throw new CREFormatException("Invalid shape name", t);
+					}
+					MCPattern pattern = StaticLayer.GetConvertor().GetPattern(color, shape);
+
+					banner.addPattern(pattern);
+					banner.update();
+				}
+
+				return CVoid.VOID;
+			} else {
+				throw new CREFormatException("Block at location isn't a banner.", t);
+			}
+		}
+
+		@Override
+		public String getName() {
+			return "set_banner_patterns";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "void {array location, array patterns} Overwrites the banner patterns for the standing banner at"
+					+ " the given location. Patterns should be an array of associative arrays containing the keys"
+					+ " \"color\" and \"shape\". ---- In vanilla Minecraft, only 6 patterns are allowed, however"
+					+ " no such limit is enforced here directly."
+					+ " Valid colors are: " + StringUtils.Join(MCDyeColor.values(), ", ", ", or ")
+					+ " and valid shapes are " + StringUtils.Join(MCPatternShape.values(), ", ", ", or ");
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, com.laytonsmith.core.environments.Environment env,
+				Set<Class<? extends com.laytonsmith.core.environments.Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+
+			if(children.size() < 2) {
+				return null;
+			}
+			ParseTree child = children.get(1);
+			if(child.getData() instanceof CFunction && child.getData().val().equals("array")) {
+				for(ParseTree node1 : child.getChildren()) {
+					if(node1.getData() instanceof CFunction && child.getData().val().equals("array")) {
+						for(ParseTree node : node1.getChildren()) {
+							if(node.getData() instanceof CFunction && node.getData().val().equals("centry")) {
+								children = node.getChildren();
+								if(children.get(0).getData().val().equals("color")
+										&& children.get(1).getData().isInstanceOf(CString.TYPE, null, env)) {
+									try {
+										MCDyeColor.valueOf(children.get(1).getData().val());
+									} catch (IllegalArgumentException ex) {
+										env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
+												new CompilerWarning(children.get(1).getData().val()
+													+ " is not a valid enum in com.commandhelper.DyeColor",
+														children.get(1).getTarget(), null));
+									}
+								} else if(children.get(0).getData().val().equals("shape")
+										&& children.get(1).getData().isInstanceOf(CString.TYPE, null, env)) {
+									try {
+										MCPatternShape.valueOf(children.get(1).getData().val());
+									} catch (IllegalArgumentException ex) {
+										env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
+												new CompilerWarning(children.get(1).getData().val()
+													+ " is not a valid enum in com.commandhelper.PatternShape",
+														children.get(1).getTarget(), null));
+									}
+								} else {
+									List<String> validProps = Arrays.asList("color", "shape");
+									String prop = children.get(0).getData().val();
+									if(!validProps.contains(prop)) {
+										env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
+													new CompilerWarning("Unexpected entry, this will be ignored.",
+															children.get(0).getTarget(), null));
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			return null;
+		}
+
+		@Override
+		public Set<Optimizable.OptimizationOption> optimizationOptions() {
+			return EnumSet.of(Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+
 	}
 }

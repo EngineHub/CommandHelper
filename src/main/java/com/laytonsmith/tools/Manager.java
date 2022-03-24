@@ -4,13 +4,13 @@ import com.laytonsmith.PureUtilities.Common.ArrayUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.DaemonManager;
+import com.laytonsmith.PureUtilities.ExecutionQueueImpl;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.commandhelper.CommandHelperFileLocations;
 import com.laytonsmith.core.Installer;
 import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MethodScriptCompiler;
-import com.laytonsmith.core.MethodScriptExecutionQueue;
 import com.laytonsmith.core.MethodScriptFileLocations;
 import com.laytonsmith.core.Profiles;
 import com.laytonsmith.core.ProfilesImpl;
@@ -24,6 +24,7 @@ import com.laytonsmith.core.environments.RuntimeMode;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
+import com.laytonsmith.core.functions.IncludeCache;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.core.taskmanager.TaskManagerImpl;
@@ -94,10 +95,10 @@ public class Manager {
 		Installer.Install(CH_DIRECTORY);
 		MSLog.initialize(CH_DIRECTORY);
 		profiler = new Profiler(CommandHelperFileLocations.getDefault().getProfilerConfigFile());
-		gEnv = new GlobalEnv(
-				new MethodScriptExecutionQueue("Manager", "default"), CH_DIRECTORY, EnumSet.of(RuntimeMode.CMDLINE));
+		gEnv = new GlobalEnv(CH_DIRECTORY, EnumSet.of(RuntimeMode.CMDLINE));
 		staticRuntimeEnv = new StaticRuntimeEnv(profiler, persistenceNetwork,
-				new ProfilesImpl(MethodScriptFileLocations.getDefault().getProfilesFile()), new TaskManagerImpl());
+				new ProfilesImpl(MethodScriptFileLocations.getDefault().getProfilesFile()), new TaskManagerImpl(),
+				new ExecutionQueueImpl("Manager", "default"), new IncludeCache(), null);
 		cls();
 		pl("\n" + Static.Logo() + "\n\n" + Static.DataManagerLogo());
 

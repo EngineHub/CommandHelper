@@ -205,7 +205,7 @@ public final class Interpreter {
 				System.exit(1);
 			}
 		} finally {
-			StaticLayer.GetConvertor().runShutdownHooks(e);
+			StaticLayer.GetConvertor().runShutdownHooks();
 		}
 	}
 
@@ -735,7 +735,7 @@ public final class Interpreter {
 	 */
 	public void execute(String script, List<String> args, File fromFile, Environment env) throws ConfigCompileException, IOException, ConfigCompileGroupException {
 		CmdlineEvents.cmdline_prompt_input.CmdlinePromptInput input = new CmdlineEvents.cmdline_prompt_input.CmdlinePromptInput(script, inShellMode);
-		EventUtils.TriggerListener(Driver.CMDLINE_PROMPT_INPUT, "cmdline_prompt_input", input, env);
+		EventUtils.TriggerListener(Driver.CMDLINE_PROMPT_INPUT, "cmdline_prompt_input", input);
 		if(input.isCancelled()) {
 			return;
 		}

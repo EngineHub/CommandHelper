@@ -121,6 +121,21 @@ public class CSlice extends CArray {
 	}
 
 	@Override
+	public Mixed get(String index, Target t, Environment env) {
+		return get(new CString(index, t), t, env);
+	}
+
+	@Override
+	public Mixed get(int index, Target t) {
+		long i = index;
+		if(i > max) {
+			throw new CRERangeException("Index out of bounds. Index: " + i + " Size: " + max, t);
+		}
+		return new CInt(start + (direction * i), t);
+	}
+
+
+	@Override
 	public Mixed get(Mixed index, Target t, Environment env) {
 		long i = ArgumentValidation.getInt(index, t, env);
 		if(i > max) {

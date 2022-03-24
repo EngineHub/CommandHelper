@@ -35,7 +35,7 @@ public class CommandHelperServerListener implements Listener {
 
 		Environment env = CommandHelperPlugin.getCore().getLastLoadedEnv();
 		BukkitServerEvents.BukkitMCServerCommandEvent cce = new BukkitServerEvents.BukkitMCServerCommandEvent(event, sender);
-		EventUtils.TriggerListener(Driver.SERVER_COMMAND, "server_command", cce, env);
+		EventUtils.TriggerListener(Driver.SERVER_COMMAND, "server_command", cce);
 		if(event.isCancelled()) {
 			return;
 		}

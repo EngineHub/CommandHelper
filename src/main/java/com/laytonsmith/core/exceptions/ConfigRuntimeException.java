@@ -20,7 +20,7 @@ import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
-import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
 import com.laytonsmith.core.exceptions.CRE.CRECausedByWrapper;
 import com.laytonsmith.core.natives.interfaces.Mixed;
@@ -110,8 +110,8 @@ public class ConfigRuntimeException extends RuntimeException {
 	public static Reaction GetReaction(ConfigRuntimeException e, Environment env) {
 
 		// If there is an exception handler, call it to see what it says.
-		if(env.getEnv(GlobalEnv.class).GetExceptionHandler() != null) {
-			CClosure c = env.getEnv(GlobalEnv.class).GetExceptionHandler();
+		if(env.getEnv(StaticRuntimeEnv.class).getExceptionHandler() != null) {
+			CClosure c = env.getEnv(StaticRuntimeEnv.class).getExceptionHandler();
 			CArray ex = ObjectGenerator.GetGenerator().exception(e, env, Target.UNKNOWN);
 			if(e.getEnv() != null) {
 				MCCommandSender sender = e.getEnv().getEnv(CommandHelperEnvironment.class).GetCommandSender();

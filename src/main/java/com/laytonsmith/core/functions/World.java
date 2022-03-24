@@ -2342,4 +2342,109 @@ public class World {
 			return MSVersion.V3_3_2;
 		}
 	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class get_world_autosave extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInvalidWorldException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			MCWorld w = Static.getServer().getWorld(args[0].val());
+			if(w == null) {
+				throw new CREInvalidWorldException("Unknown world: " + args[0].val(), t);
+			}
+			return CBoolean.get(w.isAutoSave());
+		}
+
+		@Override
+		public String getName() {
+			return "get_world_autosave";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {world_name} Fetch the world's current auto-save state.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class set_world_autosave extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			if(args.length == 1) {
+				boolean autosave = ArgumentValidation.getBooleanish(args[0], t, env);
+				for(MCWorld world : Static.getServer().getWorlds()) {
+					world.setAutoSave(autosave);
+				}
+			} else {
+				MCWorld world = Static.getServer().getWorld(args[0].val());
+				if(world == null) {
+					throw new CREInvalidWorldException("Unknown world: " + args[0].val(), t);
+				}
+				world.setAutoSave(ArgumentValidation.getBooleanish(args[1], t, env));
+			}
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "set_world_autosave";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		@Override
+		public String docs() {
+			return "void {[world_name], newState} Updates the world's auto-save state. If no world is specified,"
+					+ " set the option for all worlds.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+	}
 }

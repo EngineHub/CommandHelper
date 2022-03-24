@@ -18,6 +18,7 @@ import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -35,6 +36,7 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -106,6 +108,12 @@ public class Echoes {
 		@Override
 		public Boolean runAsync() {
 			return false;
+		}
+
+		@Override
+		public LeftHandSideType getReturnType(Target t, List<LeftHandSideType> argTypes, List<Target> argTargets,
+				Environment env, Set<ConfigCompileException> exceptions) {
+			return CVoid.TYPE.asLeftHandSideType();
 		}
 
 	}

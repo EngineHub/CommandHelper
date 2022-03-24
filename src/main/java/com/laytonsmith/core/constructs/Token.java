@@ -315,6 +315,7 @@ public class Token {
 		this.file = t.file();
 		this.column = t.col();
 		this.target = t;
+		t.setLength(value.length());
 	}
 
 	public String val() {

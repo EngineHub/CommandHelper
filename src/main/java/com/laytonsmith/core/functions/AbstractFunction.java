@@ -16,6 +16,7 @@ import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
+import com.laytonsmith.core.compiler.signature.FunctionSignatures;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CClosure;
@@ -28,6 +29,7 @@ import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.snapins.PackagePermission;
@@ -48,6 +50,7 @@ import java.util.Stack;
 public abstract class AbstractFunction implements Function {
 
 	private boolean shouldProfile = true;
+	private FunctionSignatures cachedFunctionSignatures = null;
 
 	protected AbstractFunction() {
 		//If we have the noprofile annotation, cache that we don't want to profile.
@@ -72,18 +75,46 @@ public abstract class AbstractFunction implements Function {
 
 	/**
 	 * {@inheritDoc}
-	 * By default, {@link CClassType#AUTO} is returned.
+	 * Calling {@link #getCachedSignatures()} where possible is preferred for runtime performance.
+	 */
+	@Override
+	public FunctionSignatures getSignatures() {
+		return null;
+	}
+
+	/**
+	 * Gets the function's signatures from the cache, or through {@link #getSignatures()} if they have not been cached.
+	 * The signatures will be cached in this second case.
+	 * Do NOT call this method from {@link #getSignatures()}.
+	 * @return This function's signatures.
+	 */
+	public FunctionSignatures getCachedSignatures() {
+		if(this.cachedFunctionSignatures == null) {
+			this.cachedFunctionSignatures = this.getSignatures();
+		}
+		return this.cachedFunctionSignatures;
+	}
+
+	/**
+	 * {@inheritDoc} By default, {@link CClassType#AUTO} is returned.
 	 */
 	@Override
 	public LeftHandSideType getReturnType(Target t, List<LeftHandSideType> argTypes,
 			List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
-		return LeftHandSideType.fromCClassType(CClassType.AUTO, t); // No information is available about the return type.
+
+		// Match arguments to function signatures if available.
+		FunctionSignatures signatures = this.getCachedSignatures();
+		if(signatures != null) {
+			return signatures.getReturnType(t, argTypes, argTargets, env, exceptions);
+		}
+
+		// No information is available about the return type.
+		return CClassType.AUTO.asLeftHandSideType();
 	}
 
 	/**
-	 * {@inheritDoc}
-	 * By default, this calls {@link StaticAnalysis#typecheck(ParseTree, Set)} on the function's arguments and passes
-	 * them to {@link #getReturnType(Target, List, List, Set)} to get this function's return type.
+	 * {@inheritDoc} By default, this calls {@link StaticAnalysis#typecheck(ParseTree, Set)} on the function's arguments
+	 * and passes them to {@link #getReturnType(Target, List, List, Set)} to get this function's return type.
 	 */
 	@Override
 	public LeftHandSideType typecheck(StaticAnalysis analysis,
@@ -103,9 +134,9 @@ public abstract class AbstractFunction implements Function {
 	}
 
 	/**
-	 * {@inheritDoc}
-	 * By default, the parent scope is passed to the first child, the result is passed to the second child, etc.
-	 * This method returns the scope as returned by the last child, or the parent scope if it does not have children.
+	 * {@inheritDoc} By default, the parent scope is passed to the first child, the result is passed to the second
+	 * child, etc. This method returns the scope as returned by the last child, or the parent scope if it does not have
+	 * children.
 	 */
 	@Override
 	public Scope linkScope(StaticAnalysis analysis, Scope parentScope,
@@ -118,15 +149,16 @@ public abstract class AbstractFunction implements Function {
 	}
 
 	/**
-	 * Functions that use lazy evaluation where the first argument is always evaluated, and later arguments might not
-	 * be evaluated depending on the outcome of previous arguments.
+	 * Functions that use lazy evaluation where the first argument is always evaluated, and later arguments might not be
+	 * evaluated depending on the outcome of previous arguments.
+	 *
 	 * @param analysis - The {@link StaticAnalysis}.
 	 * @param parentScope - The current scope.
 	 * @param ast - The abstract syntax tree representing this function.
 	 * @param env - The environment.
 	 * @param exceptions - A set to put compile errors in.
-	 * @return The new (linked) scope from the first argument, or the parent scope if no arguments are available or
-	 * if this function does not require a new scope.
+	 * @return The new (linked) scope from the first argument, or the parent scope if no arguments are available or if
+	 * this function does not require a new scope.
 	 */
 	protected Scope linkScopeLazy(StaticAnalysis analysis, Scope parentScope,
 			ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
@@ -211,7 +243,7 @@ public abstract class AbstractFunction implements Function {
 	}
 
 	/**
-	 * It may be that a function can simply check for compile errors, but not optimize. In this case, it is appropriate
+	 * It may be that a function can simply check for compile errors, but not optimize.In this case, it is appropriate
 	 * to use this definition of optimizeDynamic, to return a value that will essentially make no changes, or in the
 	 * case where it can optimize anyways, even if some values are undetermined at the moment.
 	 *
@@ -222,10 +254,11 @@ public abstract class AbstractFunction implements Function {
 	 * @param fileOptions
 	 * @return
 	 * @throws com.laytonsmith.core.exceptions.ConfigCompileException
+	 * @throws com.laytonsmith.core.exceptions.ConfigCompileGroupException
 	 */
 	public ParseTree optimizeDynamic(Target t, Environment env,
 			Set<Class<? extends Environment.EnvironmentImpl>> envs, List<ParseTree> children, FileOptions fileOptions)
-			throws ConfigCompileException, ConfigRuntimeException {
+			throws ConfigCompileException, ConfigRuntimeException, ConfigCompileGroupException {
 		return null;
 	}
 

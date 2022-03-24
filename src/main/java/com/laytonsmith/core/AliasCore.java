@@ -2,8 +2,9 @@ package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.ArgumentParser;
 import com.laytonsmith.PureUtilities.ArgumentParser.ArgumentBuilder;
+import com.laytonsmith.PureUtilities.ExecutionQueue;
+import com.laytonsmith.PureUtilities.ExecutionQueueImpl;
 import com.laytonsmith.PureUtilities.SmartComment;
-import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCCommand;
 import com.laytonsmith.abstraction.MCCommandMap;
@@ -11,8 +12,6 @@ import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.enums.MCChatColor;
-import com.laytonsmith.commandhelper.CommandHelperFileLocations;
-import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.CClosure;
@@ -25,9 +24,7 @@ import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
-import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.functions.Commands;
 import com.laytonsmith.core.functions.IncludeCache;
@@ -36,8 +33,9 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.profiler.ProfilePoint;
 import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.core.taskmanager.TaskManagerImpl;
+import com.laytonsmith.persistence.DataSourceException;
 import com.laytonsmith.persistence.DataSourceFactory;
-import com.laytonsmith.persistence.MemoryDataSource;
+import com.laytonsmith.persistence.PersistenceNetwork;
 import com.laytonsmith.persistence.PersistenceNetworkImpl;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 
@@ -53,55 +51,36 @@ import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URI;
-import java.nio.charset.Charset;
+import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 /**
- * This class contains all the handling code. It only deals with built-in Java Objects, so that if the Minecraft API
- * Hook changes, porting the code will only require changing the API specific portions, not this core file.
- *
- *
+ * This class manages aliases as well as the reloading of core configurations, scripts, extensions,
+ * and other managers within the installation directory.
  */
 public class AliasCore {
 
-	private final File aliasConfig;
-	private final File auxAliases;
-	private final File prefFile;
-	private final File mainFile;
-	private List<Script> scripts;
+	private final MethodScriptFileLocations fileLocations;
 	private final Set<String> echoCommand = new HashSet<>();
 	private CompilerEnvironment compilerEnv;
+	private StaticRuntimeEnv staticRuntimeEnv;
 	private Environment env;
-	public List<File> autoIncludes;
-	public static CommandHelperPlugin parent;
-	public List<String> registeredCommands = new ArrayList<>();
+	private List<Script> scripts;
 
 	/**
-	 * This constructor accepts the configuration settings for the plugin, and ensures that the manager uses these
-	 * settings.
+	 * This constructor accepts the constant file locations object for MethodScript.
 	 *
-	 * @param aliasConfig
-	 * @param auxAliases
-	 * @param prefFile
-	 * @param mainFile
-	 * @param parent
+	 * @param fileLocations The {@link MethodScriptFileLocations} for this manager
 	 */
-	public AliasCore(File aliasConfig, File auxAliases, File prefFile, File mainFile, CommandHelperPlugin parent) {
-		this.aliasConfig = aliasConfig;
-		this.auxAliases = auxAliases;
-		this.prefFile = prefFile;
-		AliasCore.parent = parent;
-		this.mainFile = mainFile;
+	public AliasCore(MethodScriptFileLocations fileLocations) {
+		this.fileLocations = fileLocations;
 		if(Prefs.CheckForUpdates()) {
 			new Thread(() -> {
 				try {
@@ -117,8 +96,25 @@ public class AliasCore {
 		}
 	}
 
+	/**
+	 * Gets a list of currently defined alias scripts.
+	 * Can be null if reload has not been successfully called.
+	 *
+	 * @return List of alias scripts
+	 */
 	public List<Script> getScripts() {
-		return new ArrayList<>(scripts);
+		return scripts;
+	}
+
+	/**
+	 * Gets the current valid core StaticRuntimeEnv.
+	 * Can be used to generate a new environment with globally shared managers.
+	 * Can be null if reload has not been successfully called.
+	 *
+	 * @return Shared StaticRuntimeEnv
+	 */
+	public StaticRuntimeEnv getStaticRuntimeEnv() {
+		return staticRuntimeEnv;
 	}
 
 	/**
@@ -156,17 +152,15 @@ public class AliasCore {
 			Static.getLogger().log(Level.INFO, "Running alias on " + sender.getName() + " ---> " + command);
 		}
 
-		GlobalEnv gEnv = new GlobalEnv(parent.executionQueue,
-				MethodScriptFileLocations.getDefault().getConfigDirectory(), EnumSet.of(RuntimeMode.EMBEDDED));
-		StaticRuntimeEnv staticRuntimeEnv = new StaticRuntimeEnv(parent.profiler,
-				parent.persistenceNetwork, parent.profiles, new TaskManagerImpl());
+		GlobalEnv gEnv = new GlobalEnv(fileLocations.getConfigDirectory(), EnumSet.of(RuntimeMode.EMBEDDED));
 		CommandHelperEnvironment cEnv = new CommandHelperEnvironment();
 		cEnv.SetCommandSender(sender);
 		cEnv.SetCommand(command);
-		env = Environment.createEnvironment(gEnv, staticRuntimeEnv, cEnv, compilerEnv);
+		Environment env = Environment.createEnvironment(gEnv, staticRuntimeEnv, cEnv, compilerEnv);
 
 		this.addPlayerReference(sender);
-		ProfilePoint alias = staticRuntimeEnv.GetProfiler().start("Alias - \"" + command + "\"", LogLevel.ERROR);
+		ProfilePoint alias = env.getEnv(StaticRuntimeEnv.class).GetProfiler().start("Alias - \"" + command + "\"",
+				LogLevel.ERROR);
 		try {
 			script.run(script.getVariables(command), env, output -> {
 				// If this is a macro, we need to run the output as a command
@@ -174,7 +168,7 @@ public class AliasCore {
 					return;
 				}
 				output = output.trim();
-				if(!output.isEmpty() && output.startsWith("/")) {
+				if(output.startsWith("/")) {
 					if(Prefs.DebugMode()) {
 						Static.getLogger().log(Level.INFO, "Executing command on " + sender.getName() + ": " + output);
 					}
@@ -196,20 +190,21 @@ public class AliasCore {
 		return true;
 	}
 
-	public Environment getLastLoadedEnv() {
-		return env;
-	}
-
 	/**
-	 * Loads the global alias file in from the file system. If a player is running the command, send a reference to
-	 * them, and they will see compile errors, otherwise, null.
+	 * Loads or reloads configuration files, scripts, extensions, and managers.
+	 * Takes optional settings arguments that controls what to reload. (everything by default)
+	 * Configuration files like preferences and profiles are always reloaded first.
+	 * If scripts are reloaded and there's a compile error, the reload process will halt
+	 * and existing tasks, aliases, event binds, and queues will continue.
+	 * However, when firstLoad is true and halt-on-failure is true in preferences.ini,
+	 * the server will be shutdown immediately.
 	 *
-	 * @param player
-	 * @param settings The argument list for the settings.
-	 * @param firstLoad Indicates that CH is loading
+	 * @param player The player to send messages to (can be null)
+	 * @param settings The argument list for the {@link ReloadOptions} (can be null)
+	 * @param firstLoad {@code true} if CommandHelper is loading
 	 */
-	public final void reload(MCPlayer player, String[] settings, boolean firstLoad) {
-		ReloadOptions options;
+	public final void reload(MCPlayer player, String[] settings, final boolean firstLoad) {
+		final ReloadOptions options;
 		try {
 			options = new ReloadOptions(settings);
 		} catch (Exception ex) {
@@ -220,127 +215,135 @@ public class AliasCore {
 			}
 			return;
 		}
-		try {
-			// TODO: Maybe consider adding a ReloadOption for this? Probably not though, that would cause
-			// a huge headache.
-			compilerEnv = new CompilerEnvironment();
-			if(Prefs.AllowDynamicShell()) {
-				MSLog.GetLogger().Log(MSLog.Tags.GENERAL, LogLevel.WARNING, "allow-dynamic-shell is set to true in "
-						+ CommandHelperFileLocations.getDefault().getProfilerConfigFile().getName()
-						+ " you should set this to false, except during development.", Target.UNKNOWN);
-			}
 
-			if(parent.profiler == null || options.reloadProfiler()) {
-				parent.profiler = new Profiler(MethodScriptFileLocations.getDefault().getProfilerConfigFile());
-			}
-
-			ProfilePoint extensionPreReload = parent.profiler.start("Extension PreReloadAliases call", LogLevel.VERBOSE);
+		// Prefs is expected to be loaded before reload is called on startup, as it's needed earlier.
+		if(!firstLoad) {
 			try {
-				// Allow new-style extensions know we are about to reload aliases.
-				ExtensionManager.PreReloadAliases(options);
-			} finally {
-				extensionPreReload.stop();
-			}
-
-			ProfilePoint shutdownHooks = parent.profiler.start("Shutdown hooks call", LogLevel.VERBOSE);
-			try {
-				StaticLayer.GetConvertor().runShutdownHooks(env);
-			} finally {
-				shutdownHooks.stop();
-			}
-
-			if(!firstLoad && options.reloadExtensions()) {
-				ProfilePoint extensionManagerShutdown = parent.profiler.start("Extension manager shutdown", LogLevel.VERBOSE);
-				try {
-					ExtensionManager.Shutdown();
-				} finally {
-					extensionManagerShutdown.stop();
-				}
-			}
-
-			MSLog.initialize(MethodScriptFileLocations.getDefault().getConfigDirectory());
-
-			//Clear out the data source cache
-			DataSourceFactory.DisconnectAll();
-
-			// PacketJumper.startup(); we're not using this yet
-			if(options.reloadExtensions()) {
-				ProfilePoint extensionManagerStartup = parent.profiler.start("Extension manager startup", LogLevel.VERBOSE);
-				try {
-					ExtensionManager.Startup();
-				} finally {
-					extensionManagerStartup.stop();
-				}
-			}
-			MSLog.GetLogger().Log(MSLog.Tags.GENERAL, LogLevel.VERBOSE, "Scripts reloading...", Target.UNKNOWN);
-			if(parent.persistenceNetwork == null || options.reloadPersistenceConfig()) {
-				ProfilePoint persistenceConfigReload = parent.profiler.start("Reloading persistence configuration", LogLevel.VERBOSE);
-				try {
-					MemoryDataSource.ClearDatabases();
-					ConnectionMixinFactory.ConnectionMixinOptions mixinOptions = new ConnectionMixinFactory.ConnectionMixinOptions();
-					mixinOptions.setWorkingDirectory(MethodScriptFileLocations.getDefault().getConfigDirectory());
-					parent.persistenceNetwork = new PersistenceNetworkImpl(MethodScriptFileLocations.getDefault().getPersistenceConfig(),
-							new URI("sqlite:/" + MethodScriptFileLocations.getDefault().getDefaultPersistenceDBFile()
-									.getCanonicalFile().toURI().getRawSchemeSpecificPart().replace('\\', '/')), mixinOptions);
-				} finally {
-					persistenceConfigReload.stop();
-				}
-			}
-			try {
-				parent.profiles = new ProfilesImpl(MethodScriptFileLocations.getDefault().getProfilesFile());
-			} catch (IOException | Profiles.InvalidProfileException ex) {
-				MSLog.GetLogger().e(MSLog.Tags.GENERAL, ex.getMessage(), Target.UNKNOWN);
+				Prefs.init(fileLocations.getPreferencesFile());
+			} catch (IOException ex) {
+				Static.getLogger().log(Level.SEVERE, "Failed to reload preferences.", ex);
 				return;
 			}
-			GlobalEnv gEnv = new GlobalEnv(parent.executionQueue,
-					MethodScriptFileLocations.getDefault().getConfigDirectory(), EnumSet.of(RuntimeMode.EMBEDDED));
-			StaticRuntimeEnv staticRuntimeEnv = new StaticRuntimeEnv(parent.profiler,
-					parent.persistenceNetwork, parent.profiles, new TaskManagerImpl());
-			gEnv.SetLabel(Static.GLOBAL_PERMISSION);
-			if(options.reloadExecutionQueue()) {
-				ProfilePoint stoppingExecutionQueue = parent.profiler.start("Stopping execution queues", LogLevel.VERBOSE);
-				try {
-					parent.executionQueue.stopAllNow();
-				} finally {
-					stoppingExecutionQueue.stop();
-				}
+		} else {
+			if(Prefs.AllowDynamicShell()) {
+				MSLog.GetLogger().Log(MSLog.Tags.GENERAL, LogLevel.WARNING, "allow-dynamic-shell is set to true in "
+						+ fileLocations.getProfilerConfigFile().getName()
+						+ " you should set this to false, except during development.", Target.UNKNOWN);
 			}
-			CommandHelperEnvironment cEnv = new CommandHelperEnvironment();
-			Environment env = Environment.createEnvironment(gEnv, staticRuntimeEnv, cEnv, compilerEnv);
-			if(options.reloadGlobals()) {
-				ProfilePoint clearingGlobals = parent.profiler.start("Clearing globals", LogLevel.VERBOSE);
-				try {
-					Globals.clear();
-				} finally {
-					clearingGlobals.stop();
+		}
+
+		MSLog.initialize(fileLocations.getConfigDirectory());
+
+		Profiler profiler;
+		if(options.reloadProfiler()) {
+			try {
+				profiler = new Profiler(fileLocations.getProfilerConfigFile());
+			} catch (IOException ex) {
+				Static.getLogger().log(Level.SEVERE, "Failed to create Profiler from config file.", ex);
+				if(Prefs.HaltOnFailure() && firstLoad) {
+					Static.getLogger().log(Level.SEVERE, "Shutting down server (halt-on-failure)");
+					Static.getServer().shutdown();
 				}
+				return;
 			}
-			if(options.reloadTimeouts()) {
-				ProfilePoint clearingTimeouts = parent.profiler.start("Clearing timeouts/intervals", LogLevel.VERBOSE);
-				try {
-					Scheduling.ClearScheduledRunners();
-				} finally {
-					clearingTimeouts.stop();
+		} else {
+			// If not reloading profiler, keep the old one.
+			profiler = staticRuntimeEnv.GetProfiler();
+		}
+
+		// Allow extensions know we are about to reload. Runs extension's onPreReloadAliases().
+		ProfilePoint extensionPreReload = profiler.start("Extension PreReloadAliases call", LogLevel.VERBOSE);
+		try {
+			ExtensionManager.PreReloadAliases(options);
+		} finally {
+			extensionPreReload.stop();
+		}
+
+		Profiles profiles;
+		try {
+			profiles = new ProfilesImpl(fileLocations.getProfilesFile());
+		} catch (IOException | Profiles.InvalidProfileException ex) {
+			MSLog.GetLogger().e(MSLog.Tags.GENERAL, ex.getMessage(), Target.UNKNOWN);
+			if(Prefs.HaltOnFailure() && firstLoad) {
+				Static.getLogger().log(Level.SEVERE, "Shutting down server (halt-on-failure)");
+				Static.getServer().shutdown();
+			}
+			return;
+		}
+
+		PersistenceNetwork persistenceNetwork;
+		if(options.reloadPersistenceConfig()) {
+			ProfilePoint persistenceConfigReload = profiler.start("Reloading persistence configuration", LogLevel.VERBOSE);
+			try {
+				DataSourceFactory.DisconnectAll();
+				ConnectionMixinFactory.ConnectionMixinOptions opts = new ConnectionMixinFactory.ConnectionMixinOptions();
+				opts.setWorkingDirectory(fileLocations.getConfigDirectory());
+				persistenceNetwork = new PersistenceNetworkImpl(fileLocations.getPersistenceConfig(),
+						new URI("sqlite://" + fileLocations.getDefaultPersistenceDBFile().getCanonicalFile().toURI()
+								.getRawSchemeSpecificPart().replace('\\', '/')), opts);
+			} catch (DataSourceException | URISyntaxException | IOException ex) {
+				Static.getLogger().log(Level.SEVERE, null, ex);
+				if(Prefs.HaltOnFailure() && firstLoad) {
+					Static.getLogger().log(Level.SEVERE, "Shutting down server (halt-on-failure)");
+					Static.getServer().shutdown();
 				}
+				return;
+			} finally {
+				persistenceConfigReload.stop();
 			}
+		} else {
+			// If not reloading persistence config, keep the old one.
+			persistenceNetwork = staticRuntimeEnv.GetPersistenceNetwork();
+		}
+
+		// If not reloading scripts, some objects should be kept from the previous StaticRuntimeEnv.
+		// Objects generated from configurations should usually be recreated above (ReloadOptions permitting)
+		IncludeCache includeCache;
+		ExecutionQueue executionQueue;
+		StaticAnalysis autoIncludeAnalysis;
+		if(options.reloadScripts()) {
+			includeCache = new IncludeCache();
+			executionQueue = new ExecutionQueueImpl("MethodScriptExecutionQueue", "default");
+			autoIncludeAnalysis = new StaticAnalysis(true);
+		} else {
+			includeCache = staticRuntimeEnv.getIncludeCache();
+			executionQueue = staticRuntimeEnv.getExecutionQueue();
+			autoIncludeAnalysis = staticRuntimeEnv.getAutoIncludeAnalysis();
+		}
+
+		StaticRuntimeEnv oldStaticRuntimeEnv = staticRuntimeEnv;
+		StaticRuntimeEnv newStaticRuntimeEnv = new StaticRuntimeEnv(profiler, persistenceNetwork, profiles,
+				new TaskManagerImpl(), executionQueue, includeCache, autoIncludeAnalysis);
+
+		Environment env = null;
+		LocalPackages localPackages = new LocalPackages();
+		if(options.reloadScripts()) {
+			// Create the new environment
+			GlobalEnv globalEnv = new GlobalEnv(fileLocations.getConfigDirectory(), EnumSet.of(RuntimeMode.EMBEDDED));
+			CommandHelperEnvironment commandHelperEnv = new CommandHelperEnvironment();
+			CompilerEnvironment compilerEnv = new CompilerEnvironment();
+			env = Environment.createEnvironment(globalEnv, newStaticRuntimeEnv, commandHelperEnv, compilerEnv);
+
+			File aliasConfig = new File(fileLocations.getConfigDirectory(), Prefs.ScriptName());
 			if(!aliasConfig.exists()) {
-				aliasConfig.getParentFile().mkdirs();
-				aliasConfig.createNewFile();
 				try {
+					aliasConfig.getParentFile().mkdirs();
+					aliasConfig.createNewFile();
 					String sampAliases = getStringResource(AliasCore.class.getResourceAsStream("/samp_aliases.txt"));
 					//Because the sample config may have been written an a machine that isn't this type, replace all
 					//line endings
 					sampAliases = sampAliases.replaceAll("\n|\r\n", System.getProperty("line.separator"));
 					file_put_contents(aliasConfig, sampAliases, "o");
 				} catch (Exception e) {
-					Static.getLogger().log(Level.WARNING, "Could not write sample config file");
+					Static.getLogger().log(Level.WARNING, "Could not write sample aliases file");
 				}
 			}
 
+			File mainFile = new File(fileLocations.getConfigDirectory(), Prefs.MainFile());
 			if(!mainFile.exists()) {
-				mainFile.getParentFile().mkdirs();
-				mainFile.createNewFile();
 				try {
+					mainFile.getParentFile().mkdirs();
+					mainFile.createNewFile();
 					String sampMain = getStringResource(AliasCore.class.getResourceAsStream("/samp_main.txt"));
 					sampMain = sampMain.replaceAll("\n|\r\n", System.getProperty("line.separator"));
 					file_put_contents(mainFile, sampMain, "o");
@@ -349,121 +352,229 @@ public class AliasCore {
 				}
 			}
 
-			if(!Prefs.isInitialized()) {
-				Prefs.init(prefFile);
-			}
-
-			if(options.reloadScripts()) {
-				ProfilePoint unregisteringEvents = parent.profiler.start("Unregistering events", LogLevel.VERBOSE);
-				try {
-					EventUtils.UnregisterAll();
-				} finally {
-					unregisteringEvents.stop();
-				}
-				ProfilePoint runningExtensionHooks = parent.profiler.start("Running event hooks", LogLevel.VERBOSE);
-				try {
-					ExtensionManager.RunHooks();
-				} finally {
-					runningExtensionHooks.stop();
-				}
-
-				//Clear the include cache, so it re-pulls files.
-				IncludeCache.clearCache();
-
-				// Close all channel messenger channels registered by CH.
-				Static.getServer().getMessenger().closeAllChannels();
-
-				// Unregister previously registered commands
-				{
-					MCCommandMap map = Static.getServer().getCommandMap();
-					for(String command : registeredCommands) {
-						map.getCommand(command).unregister(map);
-					}
-					registeredCommands = new ArrayList<>();
-				}
-				scripts = new ArrayList<>();
-
-				LocalPackage localPackages = new LocalPackage();
-
-				//Run the main file once
+			// Get the default files (main.ms, aliases.msa, auto_include.ms)
+			try {
 				String main = file_get_contents(mainFile.getAbsolutePath());
 				localPackages.appendMS(main, mainFile);
+			} catch (IOException e) {
+				Static.getLogger().log(Level.WARNING, "Could not read main file");
+			}
 
-				String aliasConfigStr = file_get_contents(aliasConfig.getAbsolutePath()); //get the file again
+			try {
+				String aliasConfigStr = file_get_contents(aliasConfig.getAbsolutePath());
 				localPackages.appendMSA(aliasConfigStr, aliasConfig);
+			} catch (IOException e) {
+				Static.getLogger().log(Level.WARNING, "Could not read aliases file");
+			}
 
-				File autoInclude = new File(env.getEnv(GlobalEnv.class).GetRootFolder(), "auto_include.ms");
-				if(autoInclude.exists()) {
-					localPackages.addAutoInclude(autoInclude);
-				}
+			File autoInclude = new File(env.getEnv(GlobalEnv.class).GetRootFolder(), "auto_include.ms");
+			if(autoInclude.exists()) {
+				localPackages.addAutoInclude(autoInclude);
+			}
 
-				//Now that we've included the default files, search the local_packages directory
-				GetAuxAliases(auxAliases, localPackages);
+			// Now that the default files are added, search the LocalPackages directory
+			localPackages.search(fileLocations.getLocalPackagesDirectory());
+			includeCache.addAutoIncludes(localPackages.getAutoIncludes());
 
-				autoIncludes = localPackages.getAutoIncludes();
+			ProfilePoint compilerMS = profiler.start("Compilation of MS files in Local Packages", LogLevel.VERBOSE);
 
-				ProfilePoint compilerMS = parent.profiler.start("Compilation of MS files in Local Packages", LogLevel.VERBOSE);
+			// Set and analyze auto includes for static analysis.
+			Set<ConfigCompileException> compileExceptions = new HashSet<>();
+			StaticAnalysis.setAndAnalyzeAutoIncludes(
+					localPackages.getAutoIncludes(), env, env.getEnvClasses(), compileExceptions);
+			for(ConfigCompileException ex : compileExceptions) {
+				ConfigRuntimeException.HandleUncaughtException(ex, "Compile error in script."
+						+ " Compilation will attempt to continue, however.", player, env);
+			}
 
-				// Set and analyze auto includes for static analysis.
-				Set<ConfigCompileException> compileExceptions = new HashSet<>();
-				StaticAnalysis.setAndAnalyzeAutoIncludes(
-						this.autoIncludes, env, env.getEnvClasses(), compileExceptions);
-				for(ConfigCompileException ex : compileExceptions) {
-					ConfigRuntimeException.HandleUncaughtException(ex, "Compile error in script."
-							+ " Compilation will attempt to continue, however.", player, env);
-				}
+			try {
+				// If auto_includes have no dynamic content, we could register them before caching the
+				// environment for aliases. But for now, register them after we clone the new environment (newEnv).
+				includeCache.registerAutoIncludes(env, null);
+				localPackages.compileMS(player, env);
+			} finally {
+				compilerMS.stop();
+			}
 
-				try {
-					env.getEnv(CommandHelperEnvironment.class).SetCommandSender(Static.getServer().getConsole());
-					MethodScriptCompiler.registerAutoIncludes(env, null);
-					localPackages.compileMS(player, env);
-				} finally {
-					env.getEnv(CommandHelperEnvironment.class).SetCommandSender(null);
-					compilerMS.stop();
-				}
-				ProfilePoint compilerMSA = parent.profiler.start("Compilation of MSA files in Local Packages", LogLevel.VERBOSE);
-				try {
-					localPackages.compileMSA(scripts, player, env, env.getEnvClasses());
-					// Check for uniqueness among commands.
-					for(int i = 0; i < scripts.size(); i++) {
-						Script s1 = scripts.get(i);
-						if(!s1.getSmartComment().getAnnotations("@command").isEmpty()) {
-							for(int j = i + 1; j < scripts.size(); j++) {
-								Script s2 = scripts.get(j);
-								if(!s2.getSmartComment().getAnnotations("@command").isEmpty()) {
-									if(s1.getCommandName().equalsIgnoreCase(s2.getCommandName())) {
-										ConfigRuntimeException.HandleUncaughtException(
-												new ConfigCompileException("Duplicate command defined. (First occurance found at "
-												+ s1.getTarget() + ")", s2.getTarget()), "Duplicate command.", player, env);
-									}
+			ProfilePoint compilerMSA = profiler.start("Compilation of MSA files in Local Packages", LogLevel.VERBOSE);
+			List<Script> newScripts;
+			try {
+				newScripts = localPackages.compileMSA(player, env, env.getEnvClasses());
+				// Check for uniqueness among commands.
+				for(int i = 0; i < newScripts.size(); i++) {
+					Script s1 = newScripts.get(i);
+					if(!s1.getSmartComment().getAnnotations("@command").isEmpty()) {
+						for(int j = i + 1; j < newScripts.size(); j++) {
+							Script s2 = newScripts.get(j);
+							if(!s2.getSmartComment().getAnnotations("@command").isEmpty()) {
+								if(s1.getCommandName().equalsIgnoreCase(s2.getCommandName())) {
+									ConfigRuntimeException.HandleUncaughtException(
+											new ConfigCompileException("Duplicate command defined. (First occurrence found at "
+													+ s1.getTarget() + ")", s2.getTarget()), "Duplicate command.", player, env);
 								}
 							}
 						}
 					}
-				} finally {
-					compilerMSA.stop();
 				}
+			} finally {
+				compilerMSA.stop();
 			}
-			// Register commands, and set up tabcompleters and things
-			for(int i = 0; i < scripts.size(); i++) {
-				Script s1 = scripts.get(i);
-				if(!s1.getSmartComment().getAnnotations("@command").isEmpty()) {
-					registerCommand(s1, env);
+
+			if(localPackages.hasCompileErrors()) {
+				Static.getLogger().log(Level.SEVERE, "Execution halted due to compile errors.");
+				if(player != null) {
+					player.sendMessage(MCChatColor.RED + "[CommandHelper] Execution halted due to compile errors.");
 				}
+				if(Prefs.HaltOnFailure() && firstLoad) {
+					Static.getLogger().log(Level.SEVERE, "Shutting down server (halt-on-failure)");
+					Static.getServer().shutdown();
+				}
+				return;
 			}
-		} catch (IOException ex) {
-			Static.getLogger().log(Level.SEVERE, "Path to config file is not correct/accessible."
-					+ " Please check the location and try loading the plugin again.");
-		} catch (Throwable t) {
-			t.printStackTrace();
+			MSLog.GetLogger().Log(MSLog.Tags.GENERAL, LogLevel.VERBOSE, "Compilation completed", Target.UNKNOWN);
+
+			// Now that script compilation was successful, reload things that don't have their own reload option.
+
+			// Calls shutdown event and runs all shutdown hooks
+			ProfilePoint shutdownHooks = profiler.start("Shutdown hooks call", LogLevel.VERBOSE);
+			try {
+				StaticLayer.GetConvertor().runShutdownHooks();
+			} finally {
+				shutdownHooks.stop();
+			}
+
+			// Clear all event binds after shutdown hooks
+			ProfilePoint unregisteringEvents = profiler.start("Unregistering events", LogLevel.VERBOSE);
+			try {
+				EventUtils.UnregisterAll();
+			} finally {
+				unregisteringEvents.stop();
+			}
+
+			// Run hook() for all events after event unbinding
+			ProfilePoint runningExtensionHooks = profiler.start("Running event hooks", LogLevel.VERBOSE);
+			try {
+				ExtensionManager.RunHooks();
+			} finally {
+				runningExtensionHooks.stop();
+			}
+
+			Static.getServer().getMessenger().closeAllChannels();
+
+			// Set the scripts, CompilerEnvironment, and StaticRuntimeEnv to the new ones after shutdown hooks
+			this.scripts = newScripts;
+			this.compilerEnv = compilerEnv;
+			this.staticRuntimeEnv = newStaticRuntimeEnv;
+			this.env = env;
+		} else {
+			// We're proceeding, so use the new StaticRuntimeEnv even if we don't reload scripts
+			this.staticRuntimeEnv = newStaticRuntimeEnv;
 		}
 
-		ProfilePoint postReloadAliases = parent.profiler.start("Extension manager post reload aliases", LogLevel.VERBOSE);
+		// Reload things here that have their own reload options, but don't need to run on startup.
+		if(!firstLoad) {
+			// Clear all queues
+			if(options.reloadExecutionQueue() && oldStaticRuntimeEnv != null) {
+				ProfilePoint stoppingExecutionQueue = profiler.start("Stopping execution queues", LogLevel.VERBOSE);
+				try {
+					oldStaticRuntimeEnv.getExecutionQueue().stopAllNow();
+				} finally {
+					stoppingExecutionQueue.stop();
+				}
+			}
+
+			// Clear all delayed and repeating tasks
+			if(options.reloadTimeouts()) {
+				ProfilePoint clearingTimeouts = profiler.start("Clearing timeouts/intervals", LogLevel.VERBOSE);
+				try {
+					Scheduling.ClearScheduledRunners();
+				} finally {
+					clearingTimeouts.stop();
+				}
+			}
+
+			// Clear all import/export globals
+			if(options.reloadGlobals()) {
+				ProfilePoint clearingGlobals = profiler.start("Clearing globals", LogLevel.VERBOSE);
+				try {
+					Globals.clear();
+				} finally {
+					clearingGlobals.stop();
+				}
+			}
+
+			// Run extension's onShutdown()
+			if(options.reloadExtensions()) {
+				ProfilePoint extManagerShutdown = profiler.start("Extension manager shutdown", LogLevel.VERBOSE);
+				try {
+					ExtensionManager.Shutdown();
+				} finally {
+					extManagerShutdown.stop();
+				}
+			}
+		}
+
+		// Reload things here that have their own reload option and also run on startup.
+		if(options.reloadExtensions()) {
+			ProfilePoint extensionManagerStartup = profiler.start("Extension manager startup", LogLevel.VERBOSE);
+			try {
+				ExtensionManager.Startup();
+			} finally {
+				extensionManagerStartup.stop();
+			}
+		}
+
+		// Everything else should be reloaded now, so execute successfully compiled scripts and register commands
+		if(options.reloadScripts() && env != null) {
+			ProfilePoint executeMS = profiler.start("Execution of MS files in Local Packages", LogLevel.VERBOSE);
+			try {
+				env.getEnv(GlobalEnv.class).SetLabel(Static.GLOBAL_PERMISSION);
+				env.getEnv(CommandHelperEnvironment.class).SetCommandSender(Static.getServer().getConsole());
+				localPackages.executeMS(env);
+			} finally {
+				env.getEnv(CommandHelperEnvironment.class).SetCommandSender(null);
+				executeMS.stop();
+			}
+
+			ProfilePoint registerCommands = profiler.start("Registering of annotated commands", LogLevel.VERBOSE);
+			try {
+				// Register commands, and set up tabcompleters and things
+				for(Script s1 : scripts) {
+					if(!s1.getSmartComment().getAnnotations("@command").isEmpty()) {
+						registerCommand(s1, env);
+					}
+				}
+			} finally {
+				registerCommands.stop();
+			}
+		}
+
+		// Allow extensions know we are done reloading. Runs extension's onPostReloadAliases().
+		ProfilePoint postReloadAliases = profiler.start("Extension manager post reload aliases", LogLevel.VERBOSE);
 		try {
 			ExtensionManager.PostReloadAliases();
 		} finally {
 			postReloadAliases.stop();
 		}
+
+		String output;
+		if(firstLoad) {
+			output = "Load complete. ";
+		} else {
+			output = "Reload complete. ";
+		}
+		if(options.reloadScripts()) {
+			int count = localPackages.getMSFileCount() + localPackages.getMSAFileCount() + includeCache.size();
+			output += count + " files processed.";
+		}
+		Static.getLogger().log(Level.INFO, output);
+		if(player != null) {
+			player.sendMessage(MCChatColor.YELLOW + "[CommandHelper] " + output);
+		}
+	}
+
+	public Environment getLastLoadedEnv() {
+		return this.env;
 	}
 
 	private void registerCommand(Script script, Environment env) {
@@ -659,7 +770,7 @@ public class AliasCore {
 	public static String file_get_contents(String fileLocation) throws IOException {
 		StringBuilder ret = new StringBuilder();
 		try(BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(fileLocation),
-				Charset.forName("UTF-8")))) {
+				StandardCharsets.UTF_8))) {
 			String str;
 			while((str = in.readLine()) != null) {
 				ret.append(str).append('\n');
@@ -682,9 +793,8 @@ public class AliasCore {
 	 */
 	public static boolean file_put_contents(File fileLocation, String contents, String mode)
 			throws Exception {
-		BufferedWriter out = null;
-		File f = fileLocation;
-		if(f.exists()) {
+		BufferedWriter out;
+		if(fileLocation.exists()) {
 			//do different things depending on our mode
 			if(mode.equalsIgnoreCase("o")) {
 				out = new BufferedWriter(new FileWriter(fileLocation));
@@ -700,13 +810,9 @@ public class AliasCore {
 		}
 		//At this point, we are assured that the file is open, and ready to be written in
 		//from this point in the file.
-		if(out != null) {
-			out.write(contents);
-			out.close();
-			return true;
-		} else {
-			return false;
-		}
+		out.write(contents);
+		out.close();
+		return true;
 	}
 
 	public static String getStringResource(InputStream is) throws IOException {
@@ -744,240 +850,6 @@ public class AliasCore {
 			return echoCommand.contains(p.getName());
 		} else {
 			return false;
-		}
-	}
-
-	public static class LocalPackage {
-
-		public static final class FileInfo {
-
-			String contents;
-			File file;
-
-			private FileInfo(String contents, File file) {
-				this.contents = contents;
-				this.file = file;
-			}
-
-			public String contents() {
-				return contents;
-			}
-
-			public File file() {
-				return file;
-			}
-		}
-		private final List<File> autoIncludes = new ArrayList<>();
-		private final List<FileInfo> ms = new ArrayList<>();
-		private final List<FileInfo> msa = new ArrayList<>();
-
-		public List<FileInfo> getMSFiles() {
-			return new ArrayList<>(ms);
-		}
-
-		public List<FileInfo> getMSAFiles() {
-			return new ArrayList<>(msa);
-		}
-
-		private List<File> getAutoIncludes() {
-			return autoIncludes;
-		}
-
-		private void addAutoInclude(File f) {
-			autoIncludes.add(f);
-		}
-
-		public void appendMSA(String s, File path) {
-			msa.add(new FileInfo(s, path));
-		}
-
-		public void appendMS(String s, File path) {
-			ms.add(new FileInfo(s, path));
-		}
-
-		public void compileMSA(List<Script> scripts, MCPlayer player,
-				Environment env, Set<Class<? extends Environment.EnvironmentImpl>> envs) {
-			for(FileInfo fi : msa) {
-				List<Script> tempScripts;
-				try {
-					ProfilePoint p = parent.profiler.start("Compiling " + fi.file, LogLevel.WARNING);
-					try {
-						tempScripts = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(fi.contents,
-								null, fi.file, false), envs);
-					} finally {
-						p.stop();
-					}
-					for(Script s : tempScripts) {
-						try {
-							try {
-								s.compile(env.clone());
-								s.checkAmbiguous(scripts);
-								scripts.add(s);
-							} catch (ConfigCompileException e) {
-								ConfigRuntimeException.HandleUncaughtException(e, "Compile error in script."
-										+ " Compilation will attempt to continue, however.", player, env);
-							} catch (ConfigCompileGroupException ex) {
-								for(ConfigCompileException e : ex.getList()) {
-									ConfigRuntimeException.HandleUncaughtException(e, "Compile error in script."
-											+ " Compilation will attempt to continue, however.", player, env);
-								}
-							} catch (CloneNotSupportedException e) {
-								throw new Error("Environment wasn't clonable, while it should be.", e);
-							}
-						} catch (RuntimeException ee) {
-							throw new RuntimeException("While processing a script, "
-									+ "(" + fi.file() + ") an unexpected exception occurred. (No further information"
-									+ " is available, unfortunately.)", ee);
-						}
-					}
-				} catch (ConfigCompileException e) {
-					ConfigRuntimeException.HandleUncaughtException(e, "Could not compile file " + fi.file
-							+ ", so compilation will halt.", player, env);
-					return;
-				}
-			}
-			int errors = 0;
-			for(Script s : scripts) {
-				if(s.compilerError) {
-					errors++;
-				}
-			}
-			if(errors > 0) {
-				Static.getLogger().log(Level.INFO, TermColors.YELLOW
-						+ (scripts.size() - errors) + " aliases defined, " + TermColors.RED + "with "
-						+ errors + " aliases with compile errors." + TermColors.reset());
-				if(player != null) {
-					player.sendMessage(MCChatColor.YELLOW + "[CommandHelper] "
-							+ (scripts.size() - errors) + " aliases defined, " + MCChatColor.RED + "with "
-							+ errors + " aliases with compile errors.");
-				}
-			} else {
-				Static.getLogger().log(Level.INFO, TermColors.YELLOW + scripts.size() + " aliases defined."
-						+ TermColors.reset());
-				if(player != null) {
-					player.sendMessage(MCChatColor.YELLOW + "[CommandHelper] " + scripts.size() + " aliases defined.");
-				}
-			}
-		}
-
-		public void compileMS(MCPlayer player, Environment env) {
-			@SuppressWarnings("deprecation") // Remove as soon as static analysis is enforced.
-			boolean staticAnalysisEnabled = StaticAnalysis.enabled();
-			for(FileInfo fi : ms) {
-				boolean exception = false;
-
-				// Clone base environment for this ms file to potentially make changes to.
-				Environment msFileEnv;
-				if(staticAnalysisEnabled) {
-					try {
-						msFileEnv = env.clone();
-					} catch (CloneNotSupportedException e) {
-						throw new Error("Environment wasn't clonable, while it should be.", e);
-					}
-				} else {
-					// Compatibility behavior to not silently change code behavior. Static analysis does catch code
-					// that relies on this behavior, so when static analysis is enforced, this case should be removed.
-					msFileEnv = env;
-				}
-
-				try {
-					StaticAnalysis analysis = new StaticAnalysis(true);
-					MethodScriptCompiler.execute(MethodScriptCompiler.compile(
-							MethodScriptCompiler.lex(fi.contents, msFileEnv, fi.file, true),
-							msFileEnv, msFileEnv.getEnvClasses(), analysis), msFileEnv, null, null);
-				} catch (ConfigCompileGroupException e) {
-					exception = true;
-					ConfigRuntimeException.HandleUncaughtException(e, fi.file.getAbsolutePath()
-							+ " could not be compiled, due to compile errors.", player, env);
-				} catch (ConfigCompileException e) {
-					exception = true;
-					ConfigRuntimeException.HandleUncaughtException(e, fi.file.getAbsolutePath()
-							+ " could not be compiled, due to a compile error.", player, env);
-				} catch (ConfigRuntimeException e) {
-					exception = true;
-					ConfigRuntimeException.HandleUncaughtException(e, msFileEnv);
-				} catch (CancelCommandException e) {
-					if(e.getMessage() != null && !"".equals(e.getMessage().trim())) {
-						Static.getLogger().log(Level.INFO, e.getMessage());
-					}
-				} catch (ProgramFlowManipulationException e) {
-					exception = true;
-					ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.CreateUncatchableException(
-							"Cannot break program flow in main files.", e.getTarget()), msFileEnv);
-				}
-				if(exception) {
-					if(Prefs.HaltOnFailure()) {
-						Static.getLogger().log(Level.SEVERE, TermColors.RED
-								+ "Compilation halted due to unrecoverable failure." + TermColors.reset());
-						return;
-					}
-				}
-			}
-			Static.getLogger().log(Level.INFO, TermColors.YELLOW
-					+ (ms.size() + autoIncludes.size()) + " MethodScript files processed" + TermColors.reset());
-			if(player != null) {
-				player.sendMessage(MCChatColor.YELLOW + "[CommandHelper] "
-						+  (ms.size() + autoIncludes.size())  + " MethodScript files processed");
-			}
-		}
-	}
-
-	public static void GetAuxAliases(File start, LocalPackage pack) {
-		if(start.isDirectory() && !start.getName().endsWith(".disabled") && !start.getName().endsWith(".library")) {
-			for(File f : start.listFiles()) {
-				GetAuxAliases(f, pack);
-			}
-		} else if(start.isFile()) {
-			if(start.getName().endsWith(".msa")) {
-				try {
-					pack.appendMSA(file_get_contents(start.getAbsolutePath()), start);
-				} catch (IOException ex) {
-					Logger.getLogger(AliasCore.class.getName()).log(Level.SEVERE, null, ex);
-				}
-			} else if(start.getName().endsWith(".ms")) {
-				if(start.getName().equals("auto_include.ms")) {
-					pack.addAutoInclude(start);
-				} else {
-					try {
-						pack.appendMS(file_get_contents(start.getAbsolutePath()), start);
-					} catch (IOException ex) {
-						Logger.getLogger(AliasCore.class.getName()).log(Level.SEVERE, null, ex);
-					}
-				}
-			} else if(start.getName().endsWith(".mslp")) {
-				try {
-					GetAuxZipAliases(new ZipFile(start), pack);
-				} catch (IOException ex) {
-					Logger.getLogger(AliasCore.class.getName()).log(Level.SEVERE, null, ex);
-				}
-			}
-		}
-	}
-
-	private static void GetAuxZipAliases(ZipFile file, LocalPackage pack) {
-		ZipEntry ze;
-		Enumeration<? extends ZipEntry> entries = file.entries();
-		while(entries.hasMoreElements()) {
-			ze = entries.nextElement();
-			if(ze.getName().endsWith(".ms")) {
-				if(ze.getName().equals("auto_include.ms")) {
-					pack.addAutoInclude(new File(file.getName() + File.separator + ze.getName()));
-				} else {
-					try {
-						pack.appendMS(Installer.parseISToString(file.getInputStream(ze)), new File(file.getName()
-								+ File.separator + ze.getName()));
-					} catch (IOException ex) {
-						Logger.getLogger(AliasCore.class.getName()).log(Level.SEVERE, null, ex);
-					}
-				}
-			} else if(ze.getName().endsWith(".msa")) {
-				try {
-					pack.appendMSA(Installer.parseISToString(file.getInputStream(ze)), new File(file.getName()
-							+ File.separator + ze.getName()));
-				} catch (IOException ex) {
-					Logger.getLogger(AliasCore.class.getName()).log(Level.SEVERE, null, ex);
-				}
-			}
 		}
 	}
 }

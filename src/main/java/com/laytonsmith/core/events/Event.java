@@ -7,6 +7,7 @@ import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.BoundEvent.ActiveEvent;
+import com.laytonsmith.core.events.prefilters.Prefilter;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
@@ -43,12 +44,21 @@ public interface Event extends Comparable<Event>, Documentation {
 	 * This function should return true if the event code should be run, based on this prefilter and triggering event's
 	 * parameters.
 	 *
+	 * For subclasses who properly implement {@link #getPrefilters}, this should be changed to throw an
+	 * UnsupportedOperationException until the method is fully removed. For classes that extend AbstractEvent, it
+	 * should simply be removed.
+	 *
 	 * @param prefilter The prefilter map, provided by the script
 	 * @param e The bindable event itself
 	 * @return True, iff the event code should be run
 	 * @throws com.laytonsmith.core.exceptions.PrefilterNonMatchException Equivalent to returning false, though throwing
 	 * an exception is sometimes easier, given that lower level code may be handling the prefilter match.
+	 * @deprecated The {@link #getPrefilters} declarative approach is preferred here. While this isn't going to be
+	 * removed until all events are converted over, if {@link #getPrefilters} returns non-null, that should be used
+	 * instead of this method. For event types that return non-null in {@link #getPrefilters}, calling this method is an
+	 * Error.
 	 */
+	@Deprecated
 	public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Environment env) throws PrefilterNonMatchException;
 
 	/**
@@ -200,5 +210,25 @@ public interface Event extends Comparable<Event>, Documentation {
 	 * @return
 	 */
 	public boolean isCore();
+
+	/**
+	 * This method is used to return a declarative list of prefilter types that are available in this event. Since this
+	 * was added later, it's possible that this method isn't supported, and old, unconverted event types should remain
+	 * supported. In that case, this method should simply return null, which should be the initial default.
+	 * <p>
+	 * For newer, supported event types though, this replaces the call to the matches method, as well as the
+	 * documentation for the prefilters in docs, and is more efficient, as it replaces the exception driven matching
+	 * pattern with a closure driven one.
+	 * <p>
+	 * The general behavior is to return a list of matchers, mapping from prefilter name to a pair of prefilter types
+	 * and prefilter matcher closures. The name and type are used in the documentation, and a subclass of the
+	 * PrefilterMatcher is used in order to get the correct object out of the event. Depending on the prefilter type,
+	 * the correct method is called. (All other methods return null, and aren't called in normal course.) The method for
+	 * the given type should be overridden. A unit test exists in the core to ensure that these are correctly
+	 * implemented, though this doesn't necessarily help with extensions.
+	 *
+	 * @return
+	 */
+	public Map<String, Prefilter<? extends BindableEvent>> getPrefilters();
 
 }

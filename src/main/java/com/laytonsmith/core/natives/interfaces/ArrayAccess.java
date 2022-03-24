@@ -18,32 +18,35 @@ public interface ArrayAccess extends Booleanish {
 	public static final CClassType TYPE = CClassType.get(ArrayAccess.class);
 
 	/**
-	 * Return the mixed at this location. This should throw an exception if the index does not exist. This method will
+	 * Return the mixed at this location.This should throw an exception if the index does not exist. This method will
 	 * not be called if {@link #isAssociative()} returns false.
 	 *
 	 * @param index
 	 * @param t
+	 * @param env
 	 * @return
 	 */
 	public Mixed get(String index, Target t, Environment env) throws ConfigRuntimeException;
 
 	/**
-	 * Returns the mixed at this location. This should throw an exception if the index does not exist. This method will
+	 * Returns the mixed at this location.This should throw an exception if the index does not exist. This method will
 	 * not be called if {@link #isAssociative()} returns true.
 	 *
 	 * @param index
 	 * @param t
+	 * @param env
 	 * @return
 	 * @throws ConfigRuntimeException
 	 */
 	public Mixed get(int index, Target t, Environment env) throws ConfigRuntimeException;
 
 	/**
-	 * Returns the mixed at this location. This should throw an exception if the index does not exist. This method may
-	 * be called whether or not it isAssociative returns true.
+	 * Returns the mixed at this location.This should throw an exception if the index does not exist. This method may be
+	 * called whether or not it isAssociative returns true.
 	 *
 	 * @param index
 	 * @param t
+	 * @param env
 	 * @return
 	 * @throws ConfigRuntimeException
 	 */
@@ -79,11 +82,12 @@ public interface ArrayAccess extends Booleanish {
 	public boolean canBeAssociative();
 
 	/**
-	 * Returns a slice at the specified location. Should throw an exception if an element in the range doesn't exist.
+	 * Returns a slice at the specified location.Should throw an exception if an element in the range doesn't exist.
 	 *
 	 * @param begin
 	 * @param end
 	 * @param t
+	 * @param env
 	 * @return
 	 */
 	public Mixed slice(int begin, int end, Target t, Environment env);

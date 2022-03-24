@@ -4,10 +4,10 @@ import com.laytonsmith.PureUtilities.Common.DateUtils;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.ExecutionQueue;
+import com.laytonsmith.PureUtilities.ExecutionQueueImpl;
 import com.laytonsmith.PureUtilities.Preferences;
 import com.laytonsmith.PureUtilities.Preferences.Preference;
 import com.laytonsmith.core.LogLevel;
-import com.laytonsmith.core.MethodScriptExecutionQueue;
 import com.laytonsmith.core.Static;
 import java.io.File;
 import java.io.IOException;
@@ -81,7 +81,7 @@ public final class Profiler {
 	private Profiler() {
 		//Private constructor for FakeProfiler
 		if(outputQueue == null) {
-			outputQueue = new MethodScriptExecutionQueue("CommandHelper-Profiler", "default");
+			outputQueue = new ExecutionQueueImpl("CommandHelper-Profiler", "default");
 		}
 	}
 

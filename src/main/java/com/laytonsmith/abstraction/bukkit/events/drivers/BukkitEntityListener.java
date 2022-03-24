@@ -29,7 +29,6 @@ import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCProj
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCProjectileLaunchEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCTargetEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents;
-import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
 import org.bukkit.entity.Player;
@@ -70,32 +69,32 @@ public class BukkitEntityListener implements Listener {
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onSpawn(CreatureSpawnEvent event) {
 		BukkitMCCreatureSpawnEvent cse = new BukkitMCCreatureSpawnEvent(event);
-		EventUtils.TriggerListener(Driver.CREATURE_SPAWN, "creature_spawn", cse, CommandHelperPlugin.getCore().getLastLoadedEnv());
+		EventUtils.TriggerListener(Driver.CREATURE_SPAWN, "creature_spawn", cse);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onClickEnt(PlayerInteractEntityEvent event) {
 		BukkitMCPlayerInteractEntityEvent piee = new BukkitMCPlayerInteractEntityEvent(event);
-		EventUtils.TriggerListener(Driver.PLAYER_INTERACT_ENTITY, "player_interact_entity", piee, CommandHelperPlugin.getCore().getLastLoadedEnv());
+		EventUtils.TriggerListener(Driver.PLAYER_INTERACT_ENTITY, "player_interact_entity", piee);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onClickAtEnt(PlayerInteractAtEntityEvent event) {
 		BukkitMCPlayerInteractAtEntityEvent piaee = new BukkitMCPlayerInteractAtEntityEvent(event);
-		EventUtils.TriggerListener(Driver.PLAYER_INTERACT_AT_ENTITY, "player_interact_at_entity", piaee, CommandHelperPlugin.getCore().getLastLoadedEnv());
+		EventUtils.TriggerListener(Driver.PLAYER_INTERACT_AT_ENTITY, "player_interact_at_entity", piaee);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onItemDrop(PlayerDropItemEvent event) {
 		BukkitMCPlayerDropItemEvent pdie = new BukkitMCPlayerDropItemEvent(event);
-		EventUtils.TriggerListener(Driver.ITEM_DROP, "item_drop", pdie, CommandHelperPlugin.getCore().getLastLoadedEnv());
+		EventUtils.TriggerListener(Driver.ITEM_DROP, "item_drop", pdie);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onItemPickup(EntityPickupItemEvent event) {
 		if(((EntityEvent) event).getEntity() instanceof Player) {
 			BukkitMCPlayerPickupItemEvent ppie = new BukkitMCPlayerPickupItemEvent(event);
-			EventUtils.TriggerListener(Driver.ITEM_PICKUP, "item_pickup", ppie, CommandHelperPlugin.getCore().getLastLoadedEnv());
+			EventUtils.TriggerListener(Driver.ITEM_PICKUP, "item_pickup", ppie);
 		}
 	}
 
@@ -107,9 +106,9 @@ public class BukkitEntityListener implements Listener {
 		} else {
 			ede = new BukkitMCEntityDeathEvent(event);
 		}
-		EventUtils.TriggerListener(Driver.ENTITY_DEATH, "entity_death", ede, CommandHelperPlugin.getCore().getLastLoadedEnv());
+		EventUtils.TriggerListener(Driver.ENTITY_DEATH, "entity_death", ede);
 		if(event instanceof PlayerDeathEvent) {
-			EventUtils.TriggerListener(Driver.PLAYER_DEATH, "player_death", ede, CommandHelperPlugin.getCore().getLastLoadedEnv());
+			EventUtils.TriggerListener(Driver.PLAYER_DEATH, "player_death", ede);
 		}
 	}
 
@@ -120,7 +119,7 @@ public class BukkitEntityListener implements Listener {
 		if(target == null || !(target instanceof MCPlayer)) {
 			return;
 		}
-		EventUtils.TriggerListener(Driver.TARGET_ENTITY, "target_player", ete, CommandHelperPlugin.getCore().getLastLoadedEnv());
+		EventUtils.TriggerListener(Driver.TARGET_ENTITY, "target_player", ete);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
@@ -128,115 +127,115 @@ public class BukkitEntityListener implements Listener {
 		BukkitMCEntityDamageEvent ede;
 		if(event instanceof EntityDamageByEntityEvent) {
 			ede = new BukkitMCEntityDamageByEntityEvent(event);
-			EventUtils.TriggerListener(Driver.ENTITY_DAMAGE, "entity_damage", ede, CommandHelperPlugin.getCore().getLastLoadedEnv());
+			EventUtils.TriggerListener(Driver.ENTITY_DAMAGE, "entity_damage", ede);
 			if(ede.getEntity() instanceof MCPlayer) {
-				EventUtils.TriggerListener(Driver.ENTITY_DAMAGE_PLAYER, "entity_damage_player", ede, CommandHelperPlugin.getCore().getLastLoadedEnv());
+				EventUtils.TriggerListener(Driver.ENTITY_DAMAGE_PLAYER, "entity_damage_player", ede);
 			}
 		} else {
 			ede = new BukkitMCEntityDamageEvent(event);
-			EventUtils.TriggerListener(Driver.ENTITY_DAMAGE, "entity_damage", ede, CommandHelperPlugin.getCore().getLastLoadedEnv());
+			EventUtils.TriggerListener(Driver.ENTITY_DAMAGE, "entity_damage", ede);
 		}
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPHit(ProjectileHitEvent event) {
 		BukkitMCProjectileHitEvent phe = new BukkitMCProjectileHitEvent(event);
-		EventUtils.TriggerListener(Driver.PROJECTILE_HIT, "projectile_hit", phe, CommandHelperPlugin.getCore().getLastLoadedEnv());
+		EventUtils.TriggerListener(Driver.PROJECTILE_HIT, "projectile_hit", phe);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onProjectileLaunch(ProjectileLaunchEvent event) {
 		BukkitMCProjectileLaunchEvent ple = new BukkitMCProjectileLaunchEvent(event);
-		EventUtils.TriggerListener(Driver.PROJECTILE_LAUNCH, "projectile_launch", ple, CommandHelperPlugin.getCore().getLastLoadedEnv());
+		EventUtils.TriggerListener(Driver.PROJECTILE_LAUNCH, "projectile_launch", ple);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPortalEnter(EntityPortalEnterEvent event) {
 		BukkitMCEntityEnterPortalEvent pe = new BukkitMCEntityEnterPortalEvent(event);
-		EventUtils.TriggerListener(Driver.ENTITY_ENTER_PORTAL, "entity_enter_portal", pe, CommandHelperPlugin.getCore().getLastLoadedEnv());
+		EventUtils.TriggerListener(Driver.ENTITY_ENTER_PORTAL, "entity_enter_portal", pe);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onExplode(EntityExplodeEvent event) {
 		BukkitMCEntityExplodeEvent ee = new BukkitMCEntityExplodeEvent(event);
-		EventUtils.TriggerListener(Driver.ENTITY_EXPLODE, "entity_explode", ee, CommandHelperPlugin.getCore().getLastLoadedEnv());
+		EventUtils.TriggerListener(Driver.ENTITY_EXPLODE, "entity_explode", ee);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onItemDespawn(ItemDespawnEvent event) {
 		BukkitMCItemDespawnEvent id = new BukkitMCItemDespawnEvent(event);
-		EventUtils.TriggerListener(Driver.ITEM_DESPAWN, "item_despawn", id, CommandHelperPlugin.getCore().getLastLoadedEnv());
+		EventUtils.TriggerListener(Driver.ITEM_DESPAWN, "item_despawn", id);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onItemSpawn(ItemSpawnEvent event) {
 		BukkitMCItemSpawnEvent is = new BukkitMCItemSpawnEvent(event);
-		EventUtils.TriggerListener(Driver.ITEM_SPAWN, "item_spawn", is, CommandHelperPlugin.getCore().getLastLoadedEnv());
+		EventUtils.TriggerListener(Driver.ITEM_SPAWN, "item_spawn", is);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onChangeBlock(EntityChangeBlockEvent event) {
 		BukkitMCEntityChangeBlockEvent ecbe = new BukkitMCEntityChangeBlockEvent(event);
-		EventUtils.TriggerListener(Driver.ENTITY_CHANGE_BLOCK, "entity_change_block", ecbe, CommandHelperPlugin.getCore().getLastLoadedEnv());
+		EventUtils.TriggerListener(Driver.ENTITY_CHANGE_BLOCK, "entity_change_block", ecbe);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onInteract(EntityInteractEvent event) {
 		BukkitMCEntityInteractEvent eie = new BukkitMCEntityInteractEvent(event);
-		EventUtils.TriggerListener(Driver.ENTITY_INTERACT, "entity_interact", eie, CommandHelperPlugin.getCore().getLastLoadedEnv());
+		EventUtils.TriggerListener(Driver.ENTITY_INTERACT, "entity_interact", eie);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onHangingBreak(HangingBreakEvent event) {
 		BukkitMCHangingBreakEvent hbe = new BukkitMCHangingBreakEvent(event);
-		EventUtils.TriggerListener(Driver.HANGING_BREAK, "hanging_break", hbe, CommandHelperPlugin.getCore().getLastLoadedEnv());
+		EventUtils.TriggerListener(Driver.HANGING_BREAK, "hanging_break", hbe);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onHangingPlace(HangingPlaceEvent event) {
 		BukkitMCHangingPlaceEvent hpe = new BukkitMCHangingPlaceEvent(event);
-		EventUtils.TriggerListener(Driver.HANGING_PLACE, "hanging_place", hpe, CommandHelperPlugin.getCore().getLastLoadedEnv());
+		EventUtils.TriggerListener(Driver.HANGING_PLACE, "hanging_place", hpe);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onEntityToggleGlide(EntityToggleGlideEvent event) {
 		BukkitMCEntityToggleGlideEvent etge = new BukkitMCEntityToggleGlideEvent(event);
-		EventUtils.TriggerListener(Driver.ENTITY_TOGGLE_GLIDE, "entity_toggle_glide", etge, CommandHelperPlugin.getCore().getLastLoadedEnv());
+		EventUtils.TriggerListener(Driver.ENTITY_TOGGLE_GLIDE, "entity_toggle_glide", etge);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onFireworkExplode(FireworkExplodeEvent event) {
 		BukkitMCFireworkExplodeEvent fee = new BukkitMCFireworkExplodeEvent(event);
-		EventUtils.TriggerListener(Driver.FIREWORK_EXPLODE, "firework_explode", fee, CommandHelperPlugin.getCore().getLastLoadedEnv());
+		EventUtils.TriggerListener(Driver.FIREWORK_EXPLODE, "firework_explode", fee);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onRegainHealth(EntityRegainHealthEvent event) {
 		BukkitMCEntityRegainHealthEvent erhe = new BukkitMCEntityRegainHealthEvent(event);
-		EventUtils.TriggerListener(Driver.ENTITY_REGAIN_HEALTH, "entity_regain_health", erhe, CommandHelperPlugin.getCore().getLastLoadedEnv());
+		EventUtils.TriggerListener(Driver.ENTITY_REGAIN_HEALTH, "entity_regain_health", erhe);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPortalTravel(EntityPortalEvent event) {
 		BukkitMCEntityPortalEvent epe = new BukkitMCEntityPortalEvent(event);
-		EventUtils.TriggerListener(Driver.ENTITY_PORTAL_TRAVEL, "entity_portal_travel", epe, CommandHelperPlugin.getCore().getLastLoadedEnv());
+		EventUtils.TriggerListener(Driver.ENTITY_PORTAL_TRAVEL, "entity_portal_travel", epe);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onEntityUnleash(EntityUnleashEvent event) {
 		BukkitMCEntityUnleashEvent epe = new BukkitMCEntityUnleashEvent(event);
-		EventUtils.TriggerListener(Driver.ENTITY_UNLEASH, "entity_unleash", epe, CommandHelperPlugin.getCore().getLastLoadedEnv());
+		EventUtils.TriggerListener(Driver.ENTITY_UNLEASH, "entity_unleash", epe);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPotionSplash(PotionSplashEvent event) {
 		BukkitMCPotionSplashEvent pse = new BukkitMCPotionSplashEvent(event);
-		EventUtils.TriggerListener(Driver.POTION_SPLASH, "potion_splash", pse, CommandHelperPlugin.getCore().getLastLoadedEnv());
+		EventUtils.TriggerListener(Driver.POTION_SPLASH, "potion_splash", pse);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onEntityPotionEffectEvent(EntityPotionEffectEvent event) {
 		BukkitEntityPotionEffectEvent potion = new BukkitEntityPotionEffectEvent(event);
-		EventUtils.TriggerListener(Driver.ENTITY_POTION_EFFECT, "entity_potion", potion, CommandHelperPlugin.getCore().getLastLoadedEnv());
+		EventUtils.TriggerListener(Driver.ENTITY_POTION_EFFECT, "entity_potion", potion);
 	}
 }

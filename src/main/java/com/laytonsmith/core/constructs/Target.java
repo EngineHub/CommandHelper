@@ -1,5 +1,6 @@
 package com.laytonsmith.core.constructs;
 
+import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
 import java.io.File;
 
 /**
@@ -19,6 +20,12 @@ public class Target implements Comparable<Target> {
 	private final int line;
 	private final File file;
 	private final int col;
+	private int length = 1;
+	private boolean lengthSet = false;
+	private String originalSet = null;
+
+	private static final boolean IS_DEBUG = java.lang.management.ManagementFactory.getRuntimeMXBean()
+			.getInputArguments().toString().contains("jdwp");
 
 	private Target(int line, File file, int col, String ignored) {
 		this.line = line;
@@ -29,9 +36,9 @@ public class Target implements Comparable<Target> {
 	/**
 	 * Creates a new target that represents a location in a source file.
 	 *
-	 * @param line
-	 * @param file
-	 * @param col
+	 * @param line The line the token is defined on. 1 indexed.
+	 * @param file The file the token is defined in.
+	 * @param col The column the token starts on. 1 indexed.
 	 */
 	public Target(int line, File file, int col) {
 		if(line == 0 && col == 0 && file == null) {
@@ -68,6 +75,41 @@ public class Target implements Comparable<Target> {
 	 */
 	public int col() {
 		return col;
+	}
+
+	/**
+	 * The length of the token.
+	 *
+	 * @return
+	 */
+	public int length() {
+		return length;
+	}
+
+	/**
+	 * Sets the length of the token. (Defaults to 1.) Returns {@code this} for easy chaining. Note that setLength must
+	 * ONLY be called once per object, or a RuntimeException is thrown, as this points to a definite bug.
+	 *
+	 * @param length
+	 * @return
+	 */
+	public Target setLength(int length) {
+		if(IS_DEBUG && lengthSet) {
+			throw new RuntimeException("Length should not be set twice. Originally set at " + originalSet);
+		}
+		if(IS_DEBUG) {
+			originalSet = StackTraceUtils.GetStacktrace(new Throwable());
+		}
+		this.length = length;
+		this.lengthSet = true;
+		return this;
+	}
+
+	public Target copy() {
+		Target t = new Target(line(), file(), col());
+		// Set the length, but allow it to be set again by leaving lengthSet false.
+		t.length = length;
+		return t;
 	}
 
 	/**

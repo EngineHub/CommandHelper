@@ -1,12 +1,8 @@
 package com.laytonsmith.abstraction.events;
 
-import com.laytonsmith.abstraction.MCPlayer;
-
-public interface MCPlayerToggleSprintEvent {
+public interface MCPlayerToggleSprintEvent extends MCPlayerEvent {
 
 	boolean isSprinting();
-
-	MCPlayer getPlayer();
 
 	void setCancelled(boolean state);
 

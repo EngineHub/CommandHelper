@@ -140,7 +140,7 @@ public interface Convertor {
 	 * Runs all the registered shutdown hooks. This should only be called by the shutdown mechanism. After running, each
 	 * Runnable will be removed from the queue.
 	 */
-	void runShutdownHooks(Environment env);
+	void runShutdownHooks();
 
 	/**
 	 * Runs some task on the "main" thread, possibly now, possibly in the future, and possibly even on this thread.

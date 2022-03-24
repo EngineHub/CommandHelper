@@ -27,6 +27,7 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.events.BoundEvent;
 import com.laytonsmith.core.exceptions.CRE.CREBindException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
@@ -524,12 +525,13 @@ public class Sandbox {
 			int num = 0;
 			try {
 				if(Static.InCmdLine(env, true) || Security.CheckSecurity(file)) {
+					IncludeCache includeCache = env.getEnv(StaticRuntimeEnv.class).getIncludeCache();
 					if(file.isDirectory()) {
 						HashMap<File, ParseTree> files = compileDirectory(file, env, t);
-						IncludeCache.addAll(files);
+						includeCache.addAll(files);
 						num = files.size();
-					} else if(IncludeCache.has(file)) {
-						IncludeCache.add(file, compileFile(file, env, t));
+					} else if(includeCache.has(file)) {
+						includeCache.add(file, compileFile(file, env, t));
 						num = 1;
 					}
 				} else {
@@ -546,10 +548,11 @@ public class Sandbox {
 			HashMap<File, ParseTree> newFiles = new HashMap<>();
 			File[] files = file.listFiles();
 			if(files != null) {
+				IncludeCache includeCache = env.getEnv(StaticRuntimeEnv.class).getIncludeCache();
 				for(File f : files) {
 					if(f.isDirectory()) {
 						newFiles.putAll(compileDirectory(f, env, t));
-					} else if(IncludeCache.has(f)) {
+					} else if(includeCache.has(f)) {
 						newFiles.put(f, compileFile(f, env, t));
 					}
 				}

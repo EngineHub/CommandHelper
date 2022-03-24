@@ -8,7 +8,6 @@ import com.laytonsmith.abstraction.bukkit.events.BukkitVehicleEvents.BukkitMCVeh
 import com.laytonsmith.abstraction.bukkit.events.BukkitVehicleEvents.BukkitMCVehicleEntityCollideEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitVehicleEvents.BukkitMCVehicleExitEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitVehicleEvents.BukkitMCVehicleMoveEvent;
-import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.events.drivers.VehicleEvents;
@@ -35,13 +34,13 @@ public class BukkitVehicleListener implements Listener {
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onEnter(VehicleEnterEvent event) {
 		BukkitMCVehicleEnterEvent vee = new BukkitMCVehicleEnterEvent(event);
-		EventUtils.TriggerListener(Driver.VEHICLE_ENTER, "vehicle_enter", vee, CommandHelperPlugin.getCore().getLastLoadedEnv());
+		EventUtils.TriggerListener(Driver.VEHICLE_ENTER, "vehicle_enter", vee);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onExit(VehicleExitEvent event) {
 		BukkitMCVehicleExitEvent vee = new BukkitMCVehicleExitEvent(event);
-		EventUtils.TriggerListener(Driver.VEHICLE_LEAVE, "vehicle_leave", vee, CommandHelperPlugin.getCore().getLastLoadedEnv());
+		EventUtils.TriggerListener(Driver.VEHICLE_LEAVE, "vehicle_leave", vee);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
@@ -50,7 +49,7 @@ public class BukkitVehicleListener implements Listener {
 			return;
 		}
 		BukkitMCVehicleBlockCollideEvent vbc = new BukkitMCVehicleBlockCollideEvent(event);
-		EventUtils.TriggerListener(Driver.VEHICLE_COLLIDE, "vehicle_collide", vbc, CommandHelperPlugin.getCore().getLastLoadedEnv());
+		EventUtils.TriggerListener(Driver.VEHICLE_COLLIDE, "vehicle_collide", vbc);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
@@ -58,7 +57,7 @@ public class BukkitVehicleListener implements Listener {
 		List<Entity> passengers = event.getVehicle().getPassengers();
 		if(passengers.isEmpty() || passengers.get(0) != event.getEntity()) {
 			BukkitMCVehicleEntityCollideEvent vec = new BukkitMCVehicleEntityCollideEvent(event);
-			EventUtils.TriggerListener(Driver.VEHICLE_COLLIDE, "vehicle_collide", vec, CommandHelperPlugin.getCore().getLastLoadedEnv());
+			EventUtils.TriggerListener(Driver.VEHICLE_COLLIDE, "vehicle_collide", vec);
 		}
 	}
 
@@ -81,7 +80,7 @@ public class BukkitVehicleListener implements Listener {
 			BukkitMCLocation movedTo = new BukkitMCLocation(to);
 			if(last.distance(movedTo) > threshold) {
 				BukkitMCVehicleMoveEvent vme = new BukkitMCVehicleMoveEvent(event, threshold, last);
-				EventUtils.TriggerListener(Driver.VEHICLE_MOVE, "vehicle_move", vme, CommandHelperPlugin.getCore().getLastLoadedEnv());
+				EventUtils.TriggerListener(Driver.VEHICLE_MOVE, "vehicle_move", vme);
 				if(!vme.isCancelled()) {
 					lastLocations.put(id, movedTo);
 				} else {
@@ -95,6 +94,6 @@ public class BukkitVehicleListener implements Listener {
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onVehicleDestroy(VehicleDestroyEvent event) {
 		BukkitMCVehicleDestroyEvent vee = new BukkitMCVehicleDestroyEvent(event);
-		EventUtils.TriggerListener(Driver.VEHICLE_DESTROY, "vehicle_destroy", vee, CommandHelperPlugin.getCore().getLastLoadedEnv());
+		EventUtils.TriggerListener(Driver.VEHICLE_DESTROY, "vehicle_destroy", vee);
 	}
 }

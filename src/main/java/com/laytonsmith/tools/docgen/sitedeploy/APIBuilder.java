@@ -134,7 +134,7 @@ public class APIBuilder {
 				try {
 					DocGen.EventDocInfo edi;
 					try {
-						edi = new DocGen.EventDocInfo(e.docs(), e.getName());
+						edi = new DocGen.EventDocInfo(e, e.docs(), e.getName(), DocGen.MarkupType.HTML);
 					} catch (IllegalArgumentException ex) {
 						continue;
 					}
@@ -153,7 +153,7 @@ public class APIBuilder {
 					event.put("mutability", md);
 					Map<String, String> pd = new TreeMap<>();
 					for(DocGen.EventDocInfo.PrefilterData pdd : edi.prefilter) {
-						pd.put(pdd.name, pdd.formatDescription(DocGen.MarkupType.TEXT));
+						pd.put(pdd.name, pdd.formatDescription(DocGen.MarkupType.HTML));
 					}
 					event.put("prefilters", pd);
 					event.put("since", e.since().toString());

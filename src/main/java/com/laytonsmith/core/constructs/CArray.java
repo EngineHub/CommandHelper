@@ -407,6 +407,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		set(index, value, Target.UNKNOWN, env);
 	}
 
+
 	@Override
 	public Mixed get(Mixed index, Target t, Environment env) {
 		if(!associativeMode) {
@@ -431,18 +432,67 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		}
 	}
 
-	public final Mixed get(long index, Target t, Environment env) {
-		return this.get(new CInt(index, t), t, env);
+	public final Mixed get(long index, Target t) {
+		if((int) index != index) {
+			throw new CREIndexOverflowException("The element at index \"" + index + "\" does not exist", t);
+		}
+		return get((int) index, t);
 	}
 
 	@Override
 	public final Mixed get(int index, Target t, Environment env) {
-		return this.get(new CInt(index, t), t, env);
+		return get(index, t);
+	}
+
+	public Mixed get(int index, Target t) {
+		if(!associativeMode) {
+			try {
+				return array.get(index);
+			} catch(IndexOutOfBoundsException e) {
+				throw new CREIndexOverflowException("The element at index \"" + index + "\" does not exist", t, e);
+			}
+		} else {
+			Mixed val = associativeArray.get(Integer.toString(index));
+			if(val != null) {
+				if(val instanceof CEntry) {
+					return ((CEntry) val).construct();
+				}
+				return val;
+			} else {
+				//Create this so we can at least attach a stacktrace.
+				@SuppressWarnings({"ThrowableInstanceNotThrown", "ThrowableInstanceNeverThrown"})
+				IndexOutOfBoundsException ioobe = new IndexOutOfBoundsException();
+				throw new CREIndexOverflowException("The element at index \"" + index + "\" does not exist", t, ioobe);
+			}
+		}
 	}
 
 	@Override
-	public final Mixed get(String index, Target t, Environment env) {
-		return this.get(new CString(index, t), t, env);
+	public Mixed get(String index, Target t, Environment env) {
+		return get(index, t);
+	}
+
+	public final Mixed get(String index, Target t) {
+		if(!associativeMode) {
+			try {
+				return array.get(Integer.parseInt(index));
+			} catch(NumberFormatException e) {
+				throw new CREIndexOverflowException("The element at index \"" + index + "\" does not exist", t, e);
+			}
+		} else {
+			Mixed val = associativeArray.get(index);
+			if(val != null) {
+				if(val instanceof CEntry) {
+					return ((CEntry) val).construct();
+				}
+				return val;
+			} else {
+				//Create this so we can at least attach a stacktrace.
+				@SuppressWarnings({"ThrowableInstanceNotThrown", "ThrowableInstanceNeverThrown"})
+				IndexOutOfBoundsException ioobe = new IndexOutOfBoundsException();
+				throw new CREIndexOverflowException("The element at index \"" + index + "\" does not exist", t, ioobe);
+			}
+		}
 	}
 
 	public boolean containsKey(String c) {
@@ -535,15 +585,15 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		b.append("{");
 		if(!inAssociativeMode()) {
 			for(int i = 0; i < this.size(env); i++) {
-				Mixed value = this.get(i, t, env);
+				Mixed value = this.get(i, t);
 				String v;
-				if(value.isInstanceOf(CArray.TYPE, null, env)) {
-					if(arrays.contains(value)) {
+				if(value instanceof CArray carray) {
+					if(arrays.contains(carray)) {
 						//Check for recursion
 						v = "*recursion*";
 					} else {
-						arrays.add(((CArray) value));
-						v = ((CArray) value).getString(arrays, t, env);
+						arrays.add(carray);
+						v = carray.getString(arrays, t, env);
 						arrays.pop();
 					}
 				} else {
@@ -562,16 +612,16 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 				}
 				first = false;
 				String v;
-				if(this.get(key, t, env) == null) {
+				if(this.get(key, t) == null) {
 					v = "null";
 				} else {
-					Mixed value = this.get(key, t, env);
-					if(value.isInstanceOf(CArray.TYPE, null, env)) {
-						if(arrays.contains(value)) {
+					Mixed value = this.get(key, t);
+					if(value instanceof CArray carray) {
+						if(arrays.contains(carray)) {
 							v = "*recursion*";
 						} else {
-							arrays.add(((CArray) value));
-							v = ((CArray) value).getString(arrays, t, env);
+							arrays.add(carray);
+							v = carray.getString(arrays, t, env);
 						}
 					} else {
 						v = value.val();

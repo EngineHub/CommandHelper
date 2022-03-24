@@ -1,6 +1,7 @@
 package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.ObjectHelpers;
 import com.laytonsmith.PureUtilities.Pair;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.core.MSVersion;
@@ -17,6 +18,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * A LeftHandSideType is a type reference that belongs on the left hand side (LHS) of a value definition. This is
@@ -41,10 +43,11 @@ import java.util.Set;
 public final class LeftHandSideType extends Construct {
 
 	/**
-	 * Merges the inputs to create a single type union class. For instance, if {@code int | string} and
+	 * Merges the inputs to create a single type union class.For instance, if {@code int | string} and
 	 * {@code array | string} are passed in, the resulting type would be {@code int | string | array}. Note that for
 	 * subtypes with generic parameters, these are not merged unless they are completely equal.
 	 *
+	 * @param t
 	 * @param types
 	 * @return
 	 */
@@ -134,11 +137,19 @@ public final class LeftHandSideType extends Construct {
 		return new LeftHandSideType(value, t, classTypes);
 	}
 
+	@ObjectHelpers.StandardField
 	private final List<Pair<CClassType, LeftHandGenericUse>> types;
 
 	private LeftHandSideType(String value, Target t, List<Pair<CClassType, LeftHandGenericUse>> types) {
 		super(value, ConstructType.CLASS_TYPE, t);
-		this.types = new ArrayList<>(types);
+		// Sort the list with TreeSet first
+		Set<Pair<CClassType, LeftHandGenericUse>> tempSet = new TreeSet<>((o1, o2) -> {
+			String o1Index = o1.getKey().val() + (o1.getValue() == null ? "" : ("<" + o1.getValue().toString() + ">"));
+			String o2Index = o2.getKey().val() + (o2.getValue() == null ? "" : ("<" + o2.getValue().toString() + ">"));
+			return o1Index.compareTo(o2Index);
+		});
+		tempSet.addAll(types);
+		this.types = new ArrayList<>(tempSet);
 		if(isTypeUnion()) {
 			for(Pair<CClassType, LeftHandGenericUse> type : types) {
 				if(Auto.TYPE.equals(type.getKey())) {
@@ -328,6 +339,22 @@ public final class LeftHandSideType extends Construct {
 	public String docs() {
 		return "Represents a left hand side type expression. This has LHS semantics, including supporting bounded"
 				+ " generics and type unions.";
+	}
+
+	@Override
+	@SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
+	public boolean equals(Object obj) {
+		return ObjectHelpers.DoEquals(this, obj);
+	}
+
+	@Override
+	public int hashCode() {
+		return ObjectHelpers.DoHashCode(this);
+	}
+
+	@Override
+	public String toString() {
+		return val();
 	}
 
 }

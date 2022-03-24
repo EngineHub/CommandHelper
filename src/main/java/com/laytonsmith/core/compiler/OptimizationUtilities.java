@@ -2,8 +2,6 @@ package com.laytonsmith.core.compiler;
 
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
-import com.laytonsmith.core.Profiles.InvalidProfileException;
-import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CFunction;
@@ -15,11 +13,8 @@ import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
-import com.laytonsmith.persistence.DataSourceException;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Set;
 
@@ -116,11 +111,7 @@ public class OptimizationUtilities {
 					b.append(",");
 				}
 				first = false;
-				try {
-					b.append(optimize0(new ParseTree(n.get(key, Target.UNKNOWN, Static.GenerateStandaloneEnvironment()), node.getFileOptions())));
-				} catch (IOException | DataSourceException | URISyntaxException | InvalidProfileException e) {
-					throw new RuntimeException(e);
-				}
+				b.append(optimize0(new ParseTree(n.get(key, Target.UNKNOWN), node.getFileOptions(), true)));
 			}
 			b.append(")");
 			return b.toString();

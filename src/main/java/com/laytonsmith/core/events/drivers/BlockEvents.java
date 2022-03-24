@@ -300,7 +300,7 @@ public class BlockEvents {
 				if(value.isInstanceOf(CArray.TYPE, null, env)) {
 					CArray arr = (CArray) value;
 					for(int i = 0; i < arr.size(env); i++) {
-						CArray item = ArgumentValidation.getArray(arr.get(i, value.getTarget(), env), value.getTarget(), env);
+						CArray item = ArgumentValidation.getArray(arr.get(i, value.getTarget()), value.getTarget(), env);
 						MCItemStack stack = ObjectGenerator.GetGenerator().item(item, value.getTarget(), env);
 						if(!stack.isEmpty()) {
 							drops.add(stack);
@@ -810,11 +810,11 @@ public class BlockEvents {
 				if(value.isInstanceOf(CArray.TYPE, null, env)) {
 					CArray blockArray = (CArray) value;
 					if(blockArray.containsKey("name")) {
-						Mixed name = blockArray.get("name", value.getTarget(), env);
+						Mixed name = blockArray.get("name", value.getTarget());
 						int data = 0;
 						if(blockArray.containsKey("data")) {
 							try {
-								data = Integer.parseInt(blockArray.get("data", value.getTarget(), env).val());
+								data = Integer.parseInt(blockArray.get("data", value.getTarget()).val());
 							} catch (Exception ex) {
 								throw new CREFormatException("blockArray is invalid", value.getTarget());
 							}
@@ -832,13 +832,13 @@ public class BlockEvents {
 						int type;
 						int data = 0;
 						try {
-							type = Integer.parseInt(blockArray.get("type", value.getTarget(), env).val());
+							type = Integer.parseInt(blockArray.get("type", value.getTarget()).val());
 						} catch (Exception ex) {
 							throw new CREFormatException("blockArray is invalid", value.getTarget());
 						}
 						if(blockArray.containsKey("data")) {
 							try {
-								data = Integer.parseInt(blockArray.get("data", value.getTarget(), env).val());
+								data = Integer.parseInt(blockArray.get("data", value.getTarget()).val());
 							} catch (Exception ex) {
 								throw new CREFormatException("blockArray is invalid", value.getTarget());
 							}
@@ -866,11 +866,11 @@ public class BlockEvents {
 				if(value.isInstanceOf(CArray.TYPE, null, env)) {
 					CArray blockArray = (CArray) value;
 					if(blockArray.containsKey("name")) {
-						Mixed name = blockArray.get("name", value.getTarget(), env);
+						Mixed name = blockArray.get("name", value.getTarget());
 						int data = 0;
 						if(blockArray.containsKey("data")) {
 							try {
-								data = Integer.parseInt(blockArray.get("data", value.getTarget(), env).val());
+								data = Integer.parseInt(blockArray.get("data", value.getTarget()).val());
 							} catch (Exception ex) {
 								throw new CREFormatException("blockArray is invalid", value.getTarget());
 							}
@@ -888,13 +888,13 @@ public class BlockEvents {
 						int type;
 						int data = 0;
 						try {
-							type = Integer.parseInt(blockArray.get("type", value.getTarget(), env).val());
+							type = Integer.parseInt(blockArray.get("type", value.getTarget()).val());
 						} catch (Exception ex) {
 							throw new CREFormatException("blockArray is invalid", value.getTarget());
 						}
 						if(blockArray.containsKey("data")) {
 							try {
-								data = Integer.parseInt(blockArray.get("data", value.getTarget(), env).val());
+								data = Integer.parseInt(blockArray.get("data", value.getTarget()).val());
 							} catch (Exception ex) {
 								throw new CREFormatException("blockArray is invalid", value.getTarget());
 							}
@@ -1006,7 +1006,7 @@ public class BlockEvents {
 				String[] lines = {"", "", "", ""};
 
 				for(int i = 0; i < 4; i++) {
-					lines[i] = val.get(i, value.getTarget(), env).toString();
+					lines[i] = val.get(i, value.getTarget()).toString();
 				}
 
 				sce.setLines(lines);
@@ -1041,9 +1041,9 @@ public class BlockEvents {
 		public BindableEvent convert(CArray manual, Target t, Environment env) {
 			MCSignChangeEvent e = EventBuilder.instantiate(
 					MCSignChangeEvent.class,
-					Static.GetPlayer(manual.get("player", Target.UNKNOWN, env).val(), Target.UNKNOWN, env),
-					manual.get("1", Target.UNKNOWN, env).val(), manual.get("2", Target.UNKNOWN, env).val(),
-					manual.get("3", Target.UNKNOWN, env).val(), manual.get("4", Target.UNKNOWN, env).val());
+					Static.GetPlayer(manual.get("player", Target.UNKNOWN).val(), Target.UNKNOWN, env),
+					manual.get("1", Target.UNKNOWN).val(), manual.get("2", Target.UNKNOWN).val(),
+					manual.get("3", Target.UNKNOWN).val(), manual.get("4", Target.UNKNOWN).val());
 			return e;
 		}
 	}

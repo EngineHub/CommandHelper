@@ -3,6 +3,7 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MethodScriptCompiler;
+import com.laytonsmith.core.NodeModifiers;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Script;
@@ -53,7 +54,8 @@ public abstract class CompositeFunction extends AbstractFunction {
 
 				String script = script();
 				Scope rootScope = new Scope();
-				rootScope.addDeclaration(new ParamDeclaration("@arguments", CArray.TYPE.asLeftHandSideType(),
+				rootScope.addDeclaration(new ParamDeclaration("@arguments", CArray.TYPE.asLeftHandSideType(), null,
+						new NodeModifiers(),
 						Target.UNKNOWN));
 				tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, env, debugFile, true),
 						env, env.getEnvClasses(), new StaticAnalysis(rootScope, true))

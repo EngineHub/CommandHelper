@@ -202,12 +202,12 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 	 */
 	@Override
 	public Mixed get(String index, Target t, Environment env) throws ConfigRuntimeException {
-		return exceptionObject.get(index, t, env);
+		return exceptionObject.get(index, t);
 	}
 
 	@Override
 	public Mixed get(int index, Target t, Environment env) throws ConfigRuntimeException {
-		return exceptionObject.get(index, t, env);
+		return exceptionObject.get(index, t);
 	}
 
 	@Override
