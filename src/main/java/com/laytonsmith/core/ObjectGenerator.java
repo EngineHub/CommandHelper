@@ -161,6 +161,20 @@ public class ObjectGenerator {
 	 * 4 usages: <ul> <li>(x, y, z)</li> <li>(x, y, z, world)</li> <li>(x, y, z, yaw, pitch)</li> <li>(x, y, z, world,
 	 * yaw, pitch)</li> </ul> In all cases, the pitch and yaw default to 0, and the world defaults to the specified
 	 * world. <em>More conveniently: ([world], x, y, z, [yaw, pitch])</em>
+	 * @deprecated Use {@link #location(com.laytonsmith.core.natives.interfaces.Mixed, com.laytonsmith.abstraction.MCWorld, com.laytonsmith.core.constructs.Target, com.laytonsmith.core.environments.Environment)}
+	 * and include the environment. This method will be removed once user objects are introduced.
+	 */
+	@Deprecated
+	public MCLocation location(Mixed c, MCWorld w, Target t) {
+		return location(c, w, t, null);
+	}
+
+	/**
+	 * Given a Location Object, returns a MCLocation. If the optional world is not specified in the object, the world
+	 * provided is used instead. Location "objects" are MethodScript arrays that represent a location in game. There are
+	 * 4 usages: <ul> <li>(x, y, z)</li> <li>(x, y, z, world)</li> <li>(x, y, z, yaw, pitch)</li> <li>(x, y, z, world,
+	 * yaw, pitch)</li> </ul> In all cases, the pitch and yaw default to 0, and the world defaults to the specified
+	 * world. <em>More conveniently: ([world], x, y, z, [yaw, pitch])</em>
 	 */
 	public MCLocation location(Mixed c, MCWorld w, Target t, Environment env) {
 		if(!(c.isInstanceOf(CArray.TYPE, null, env))) {

@@ -64,6 +64,18 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	// For the val(), we need to use the fallbackEnv
 	protected final Environment fallbackEnv;
 
+	/**
+	 * @deprecated Generic parameters and an environment are now needed for correct instantiation of CArrays. This
+	 * method will be removed once user classes are introduced, though generic parameters can be null if {@code array<auto>}
+	 * is the desired type. However, it is encouraged to use proper generic types where possible.
+	 * @param t
+	 * @param initialCapactity
+	 */
+	@Deprecated
+	public CArray(Target t, int initialCapactity) {
+		this(t, initialCapactity, null, null);
+	}
+
 	public CArray(Target t, GenericParameters genericParameters, Environment env) {
 		this(t, 0, genericParameters, env, (Mixed[]) null);
 	}
