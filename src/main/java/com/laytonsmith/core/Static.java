@@ -568,7 +568,7 @@ public final class Static {
 		} else {
 			try {
 				ofp = getServer().getOfflinePlayer(GetUUID(search, t));
-			} catch (ConfigRuntimeException cre) {
+			} catch(ConfigRuntimeException cre) {
 				if(cre instanceof CREThrowable && ((CREThrowable) cre).isInstanceOf(CRELengthException.TYPE, null, env)) {
 					throw new CRELengthException("The given string was the wrong size to identify a player."
 							+ " A player name is expected to be between 1 and 16 characters. " + cre.getMessage(), t);
@@ -589,6 +589,57 @@ public final class Static {
 	 * @param t
 	 * @return
 	 * @throws ConfigRuntimeException
+	 * @deprecated This method doesn't work with user classes, and will cause errors once those are introduced. This
+	 * will be removed once those are added, instead, use the version with the environment.
+	 */
+	@Deprecated
+	public static MCPlayer GetPlayer(String player, Target t) throws ConfigRuntimeException {
+		return GetPlayer(player, t, null);
+	}
+
+	/**
+	 * Returns the player specified by name.Injected players also are returned in this list. If provided a string
+	 * between 1 and 16 characters, the lookup will be name-based. If provided a string that is 32 or 36 characters, the
+	 * lookup will be uuid-based.
+	 *
+	 * @param player
+	 * @param t
+	 * @param env
+	 * @return
+	 * @throws ConfigRuntimeException
+	 * @deprecated This method doesn't work with user classes, and will cause errors once those are introduced. This
+	 * will be removed once those are added, instead, use the version with the environment.
+	 */
+	@Deprecated
+	public static MCPlayer GetPlayer(Mixed player, Target t) throws ConfigRuntimeException {
+		return GetPlayer(player, t, null);
+	}
+
+	/**
+	 * Returns the player specified by name.Injected players also are returned in this list. If provided a string
+	 * between 1 and 16 characters, the lookup will be name-based. If provided a string that is 32 or 36 characters, the
+	 * lookup will be uuid-based.
+	 *
+	 * @param player
+	 * @param t
+	 * @param env
+	 * @return
+	 * @throws ConfigRuntimeException
+	 */
+	public static MCPlayer GetPlayer(Mixed player, Target t, Environment env) throws ConfigRuntimeException {
+		return GetPlayer(player.val(), t, env);
+	}
+
+	/**
+	 * Returns the player specified by name.Injected players also are returned in this list. If provided a string
+	 * between 1 and 16 characters, the lookup will be name-based. If provided a string that is 32 or 36 characters, the
+	 * lookup will be uuid-based.
+	 *
+	 * @param player
+	 * @param t
+	 * @param env
+	 * @return
+	 * @throws ConfigRuntimeException
 	 */
 	public static MCPlayer GetPlayer(String player, Target t, Environment env) throws ConfigRuntimeException {
 		MCCommandSender m;
@@ -602,7 +653,7 @@ public final class Static {
 		} else {
 			try {
 				m = getServer().getPlayer(GetUUID(player, t));
-			} catch (ConfigRuntimeException cre) {
+			} catch(ConfigRuntimeException cre) {
 				if(cre instanceof CREThrowable && ((CREThrowable) cre).isInstanceOf(CRELengthException.TYPE, null, env)) {
 					throw new CRELengthException("The given string was the wrong size to identify a player."
 							+ " A player name is expected to be between 1 and 16 characters. " + cre.getMessage(), t);
@@ -622,10 +673,6 @@ public final class Static {
 			throw new CREPlayerOfflineException("The specified player (" + player + ") is not online", t);
 		}
 		return p;
-	}
-
-	public static MCPlayer GetPlayer(Mixed player, Target t, Environment env) throws ConfigRuntimeException {
-		return GetPlayer(player.val(), t, env);
 	}
 
 	/**
@@ -1274,7 +1321,7 @@ public final class Static {
 		} else if(object instanceof boolean[]) {
 			boolean[] array = (boolean[]) object;
 			CArray r = new CArray(t, GenericParameters
-				.addParameter(CBoolean.TYPE, null).build(), env);
+					.addParameter(CBoolean.TYPE, null).build(), env);
 			for(boolean b : array) {
 				r.push(CBoolean.get(b), t, env);
 			}

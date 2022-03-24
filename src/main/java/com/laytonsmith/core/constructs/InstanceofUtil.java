@@ -7,15 +7,23 @@ import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import java.util.HashMap;
 
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
  * This class checks "instanceof" for native MethodScript objects, unlike the java "instanceof" keyword.
  */
 public class InstanceofUtil {
+
+	/**
+	 * Native classes never change without a JVM restart, so for classes which are native, we can put them
+	 * in here instead.
+	 */
+	private static final Map<CClassType, Set<CClassType>> NATIVE_INSTANCEOFCACHE = new HashMap<>();
 
 	/**
 	 * Returns a list of all naked classes that the specified class can be validly cast to.This includes all super
@@ -27,7 +35,13 @@ public class InstanceofUtil {
 	 * @return
 	 */
 	public static Set<CClassType> getAllCastableClasses(CClassType c, Environment env) {
-		Map<CClassType, Set<CClassType>> cache = env.getEnv(GlobalEnv.class).getIsInstanceofCache();
+		Map<CClassType, Set<CClassType>> cache;
+		if(c.getNativeType() == null) {
+			Objects.requireNonNull(env);
+			cache = env.getEnv(GlobalEnv.class).getIsInstanceofCache();
+		} else {
+			cache = NATIVE_INSTANCEOFCACHE;
+		}
 		c = c.getNakedType(env);
 		if(!cache.containsKey(c)) {
 			Set<CClassType> ret = new HashSet<>();
