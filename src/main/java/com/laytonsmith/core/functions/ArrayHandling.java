@@ -410,11 +410,7 @@ public class ArrayHandling {
 			if(!(array.isInstanceOf(CArray.TYPE))) {
 				throw new CRECastException("Argument 1 of " + this.getName() + " must be an array", t);
 			}
-			try {
-				((CArray) array).set(index, value, t);
-			} catch (IndexOutOfBoundsException e) {
-				throw new CREIndexOverflowException("The index " + new CString(index).getQuote() + " is out of bounds", t);
-			}
+			((CArray) array).set(index, value, t);
 			return value;
 		}
 
