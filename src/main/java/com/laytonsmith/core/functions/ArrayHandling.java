@@ -421,11 +421,7 @@ public class ArrayHandling {
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			if(args[0].isInstanceOf(CArray.TYPE)) {
-				try {
-					((CArray) args[0]).set(args[1], args[2], t);
-				} catch (IndexOutOfBoundsException e) {
-					throw new CREIndexOverflowException("The index " + args[1].val() + " is out of bounds", t);
-				}
+				((CArray) args[0]).set(args[1], args[2], t);
 				return args[2];
 			}
 			throw new CRECastException("Argument 1 of " + this.getName() + " must be an array", t);
