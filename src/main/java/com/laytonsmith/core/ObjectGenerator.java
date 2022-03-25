@@ -93,6 +93,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import com.laytonsmith.PureUtilities.Common.Annotations.AggressiveDeprecation;
 
 /**
  * This file is responsible for converting CH objects into server objects, and vice versa
@@ -163,8 +164,10 @@ public class ObjectGenerator {
 	 * world. <em>More conveniently: ([world], x, y, z, [yaw, pitch])</em>
 	 * @deprecated Use {@link #location(com.laytonsmith.core.natives.interfaces.Mixed, com.laytonsmith.abstraction.MCWorld, com.laytonsmith.core.constructs.Target, com.laytonsmith.core.environments.Environment)}
 	 * and include the environment. This method will be removed once user objects are introduced.
+	 * @hidden
 	 */
 	@Deprecated
+	@AggressiveDeprecation
 	public MCLocation location(Mixed c, MCWorld w, Target t) {
 		return location(c, w, t, null);
 	}

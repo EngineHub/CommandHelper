@@ -1,26 +1,38 @@
 package com.laytonsmith.PureUtilities.Common.Annotations;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.AbstractMethodMirror;
+import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.AnnotationMirror;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.ClassMirror;
+import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.ClassReferenceMirror;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.MethodMirror;
+import com.laytonsmith.PureUtilities.Common.FileUtil;
+import com.laytonsmith.PureUtilities.Common.FileWriteMode;
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.ExhaustiveVisitor;
 import com.laytonsmith.annotations.NonInheritImplements;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.constructs.CClassType;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.instrument.IllegalClassFormatException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * This class is run by maven at compile time, and checks to ensure that the various annotations referenced here are
@@ -249,6 +261,40 @@ public class AnnotationChecks {
 		if(!uhohs.isEmpty()) {
 			String error = StringUtils.Join(uhohs, "\n");
 			throw new Error(error);
+		}
+	}
+
+	public static void rewriteAggressiveDeprecations() throws IOException {
+		System.out.println("Looking for aggressive deprecations to rewrite");
+		Set<ClassMirror<?>> toVerify = ClassDiscovery.getDefaultInstance()
+				.getKnownClasses();
+		Set<ClassMirror<?>> classesToRewrite = new HashSet<>();
+		String annotationJVMName = ClassReferenceMirror.fromClass(AggressiveDeprecation.class).getJVMName();
+		for(ClassMirror c : toVerify) {
+			methodLoop: for(AbstractMethodMirror m : c.getAllMethods()) {
+				for(AnnotationMirror am : m.getAnnotations()) {
+					if(am.getType().getJVMName().equals(annotationJVMName)) {
+						classesToRewrite.add(c);
+						break methodLoop;
+					}
+				}
+			}
+		}
+		for(ClassMirror c : classesToRewrite) {
+			if(!c.isReadOnly()) {
+				System.out.println("Rewriting " + c.getClassName());
+				InputStream stream = c.getClassStream();
+				try {
+					byte[] newClass = new AggressiveDeprecationTransformer().transform(stream);
+					System.out.println(c.getClassLocation().toURI().getSchemeSpecificPart());
+					File location = new File(c.getClassLocation().toURI().getSchemeSpecificPart());
+					FileUtil.write(newClass, location, FileWriteMode.OVERWRITE, false);
+				} catch(IllegalClassFormatException | IOException | URISyntaxException ex) {
+					Logger.getLogger(AnnotationChecks.class.getName()).log(Level.SEVERE, null, ex);
+				}
+			} else {
+				System.out.println("Read only file! Cannot rewrite " + c.getClassName());
+			}
 		}
 	}
 
