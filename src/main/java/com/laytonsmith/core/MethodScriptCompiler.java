@@ -2216,6 +2216,26 @@ public final class MethodScriptCompiler {
 			if(newChild != null && child != newChild) {
 				ast.getChildren().set(i, newChild);
 				i--; // Allow the new child to do a rewrite step as well.
+				continue;
+			}
+
+			// In strict mode throw compile errors when encountering child statements in function arguments where
+			// statements are not acceptable because void would be an invalid argument type. This would otherwise be
+			// a runtime error in strict mode where auto-concat is not allowed and statements are used instead.
+			// This can be removed once a more comprehensive void return type check is implemented.
+			if(ast.getFileOptions().isStrict()
+					&& child.getData() instanceof CFunction
+					&& child.getData().val().equals(Compiler.__statements__.NAME)
+					&& ast.getData() instanceof CFunction cFunction) {
+				Function function = cFunction.getCachedFunction();
+				if(function instanceof BranchStatement branchStatement) {
+					List<Boolean> branches = branchStatement.isBranch(ast.getChildren());
+					if(branches.get(i)) {
+						continue;
+					}
+				}
+				exceptions.add(new ConfigCompileException("Invalid use of auto concat in "
+						+ function.getName() + "()", child.getTarget()));
 			}
 		}
 		return ast;
