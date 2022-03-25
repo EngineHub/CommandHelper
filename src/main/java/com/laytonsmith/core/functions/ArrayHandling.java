@@ -264,22 +264,19 @@ public class ArrayHandling {
 			} else if(args[0].isInstanceOf(ArrayAccess.TYPE)) {
 				com.laytonsmith.core.natives.interfaces.Iterable aa
 						= (com.laytonsmith.core.natives.interfaces.Iterable) args[0];
-				if(index instanceof CSlice) {
+				if(index instanceof CSlice cslice) {
 					//It's a range
-					int start = (int) ((CSlice) index).getStart();
-					int finish = (int) ((CSlice) index).getFinish();
-					try {
-						//Convert negative indexes
-						if(start < 0) {
-							start = (int) aa.size() + start;
-						}
-						if(finish < 0) {
-							finish = (int) aa.size() + finish;
-						}
-						return aa.slice(start, finish + 1, t);
-					} catch (NumberFormatException e) {
-						throw new CRECastException("Ranges must be integer numbers, i.e., [0..5]", t);
+					int start = (int) cslice.getStart();
+					int finish = (int) cslice.getFinish();
+
+					//Convert negative indexes
+					if(start < 0) {
+						start = (int) aa.size() + start;
 					}
+					if(finish < 0) {
+						finish = (int) aa.size() + finish;
+					}
+					return aa.slice(start, finish + 1, t);
 				} else if(index.isInstanceOf(CInt.TYPE)) {
 					return aa.get(ArgumentValidation.getInt32(index, t), t);
 				} else {
