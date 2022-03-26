@@ -6,9 +6,14 @@ import com.laytonsmith.abstraction.enums.MCWorldEnvironment;
 import com.laytonsmith.abstraction.enums.MCWorldType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCWorldEnvironment;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCWorldType;
+import com.laytonsmith.core.Static;
 import org.bukkit.World;
+import org.bukkit.World.Environment;
 import org.bukkit.WorldCreator;
 import org.bukkit.WorldType;
+
+import java.io.File;
+import java.util.logging.Level;
 
 public class BukkitMCWorldCreator implements MCWorldCreator {
 
@@ -20,7 +25,20 @@ public class BukkitMCWorldCreator implements MCWorldCreator {
 
 	@Override
 	public MCWorld createWorld() {
-		return new BukkitMCWorld(creator.createWorld());
+		World w = creator.createWorld();
+		if(w != null && w.getEnvironment() == Environment.NORMAL) {
+			File nether = new File(w.getWorldFolder(), "DIM-1");
+			if(nether.exists()) {
+				Static.getLogger().log(Level.WARNING, "Loaded " + w.getName() + " world with overworld (NORMAL)"
+						+ " environment but found DIM-1 (NETHER) directory exists.");
+			}
+			File end = new File(w.getWorldFolder(), "DIM1");
+			if(end.exists()) {
+				Static.getLogger().log(Level.WARNING, "Loaded " + w.getName() + " world with overworld (NORMAL)"
+						+ " environment but found DIM1 (THE_END) directory exists.");
+			}
+		}
+		return new BukkitMCWorld(w);
 	}
 
 	@Override

@@ -1058,13 +1058,15 @@ public class World {
 
 		@Override
 		public String docs() {
-			return "void {name, [type, environment, [seed, [generator]]]} Creates a world with the specified options."
-					+ " If a world by that name already exists, it will instead be loaded from disk, and the last three"
-					+ " arguments may be ignored. The name is the name of the world, type is one of "
-					+ StringUtils.Join(MCWorldType.values(), ", ") + " and environment is one of "
-					+ StringUtils.Join(MCWorldEnvironment.values(), ", ") + ". The seed can be an integer,"
-					+ " a string (will be the hashcode), or null (will be random int)."
-					+ " Generator is the name of a world generator loaded on the server.";
+			return "void {name, type, environment, [seed, [generator]]} Creates or loads a world."
+					+ " The 'name' is the same as the directory name for the world."
+					+ " If a world directory by that name already exists, it will be loaded."
+					+ " The 'type' is one of " + StringUtils.Join(MCWorldType.values(), ", ") + "."
+					+ " However, if level.dat exists in the world directory, the type from that will be used instead."
+					+ " The 'environment' is one of " + StringUtils.Join(MCWorldEnvironment.values(), ", ") + "."
+					+ " This affects which regions directory is used in the world directory."
+					+ " The 'seed' can be an integer, a string (will be the hashcode), or null (will be random int)."
+					+ " The 'generator' is the name of a custom world generator loaded on the server.";
 		}
 
 		@Override
