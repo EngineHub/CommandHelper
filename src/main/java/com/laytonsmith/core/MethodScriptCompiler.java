@@ -249,22 +249,26 @@ public final class MethodScriptCompiler {
 										target, SuppressWarning.FutureNestedCommentChange);
 								env.getEnv(CompilerEnvironment.class).addCompilerWarning(builtFileOptions, warning);
 							}
-							buf.append("/*");
-							inComment = true;
-							commentIsBlock = true;
-							if(i < script.length() - 2 && script.charAt(i + 2) == '*') { // "/**".
-								inSmartComment = true;
-								buf.append("*");
+							if(!inComment) {
+								buf.append("/*");
+								inComment = true;
+								commentIsBlock = true;
+								if(i < script.length() - 2 && script.charAt(i + 2) == '*') { // "/**".
+									inSmartComment = true;
+									buf.append("*");
+									i++;
+								}
+								commentLineNumberStart = lineNum;
 								i++;
+								continue;
 							}
-							commentLineNumberStart = lineNum;
-							i++;
-							continue;
 						} else if(c2 == '/') { // "//".
-							buf.append("//");
-							inComment = true;
-							i++;
-							continue;
+							if(!inComment) {
+								buf.append("//");
+								inComment = true;
+								i++;
+								continue;
+							}
 						}
 						break;
 					}
@@ -2216,6 +2220,34 @@ public final class MethodScriptCompiler {
 			if(newChild != null && child != newChild) {
 				ast.getChildren().set(i, newChild);
 				i--; // Allow the new child to do a rewrite step as well.
+				continue;
+			}
+
+			// In strict mode throw compile errors when encountering child statements in function arguments where
+			// statements are not acceptable because void would be an invalid argument type. This would otherwise be
+			// a runtime error in strict mode where auto-concat is not allowed and statements are used instead.
+			// This can be removed once a more comprehensive void return type check is implemented.
+			if(child.getData() instanceof CFunction
+					&& child.getData().val().equals(Compiler.__statements__.NAME)
+					&& ast.getData() instanceof CFunction cFunction) {
+				Function function = cFunction.getCachedFunction();
+				if(function instanceof BranchStatement branchStatement) {
+					List<Boolean> branches = branchStatement.isBranch(ast.getChildren());
+					if(branches.get(i)) {
+						continue;
+					}
+				}
+				if(function.getName().equals(Compiler.__statements__.NAME)) {
+					ParseTree lastChild = child;
+					if(child.numberOfChildren() > 0) {
+						lastChild = child.getChildAt(child.numberOfChildren() - 1);
+					}
+					exceptions.add(new ConfigCompileException("Invalid comma after "
+							+ lastChild.getData().val(), lastChild.getTarget()));
+				} else {
+					exceptions.add(new ConfigCompileException("Invalid use of auto concat in "
+							+ function.getName() + "()", cFunction.getTarget()));
+				}
 			}
 		}
 		return ast;

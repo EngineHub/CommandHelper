@@ -46,6 +46,7 @@ import com.laytonsmith.abstraction.entities.MCFireball;
 import com.laytonsmith.abstraction.entities.MCFirework;
 import com.laytonsmith.abstraction.entities.MCFox;
 import com.laytonsmith.abstraction.entities.MCGoat;
+import com.laytonsmith.abstraction.entities.MCHanging;
 import com.laytonsmith.abstraction.entities.MCHorse;
 import com.laytonsmith.abstraction.entities.MCHorse.MCHorseColor;
 import com.laytonsmith.abstraction.entities.MCHorse.MCHorsePattern;
@@ -112,9 +113,13 @@ import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ObjectGenerator;
+import com.laytonsmith.core.Optimizable;
+import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CInt;
@@ -142,8 +147,10 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -4444,6 +4451,164 @@ public class EntityManagement {
 		@Override
 		public MSVersion since() {
 			return MSVersion.V3_3_1;
+		}
+
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class get_hanging_direction extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[] {CREBadEntityException.class, CRELengthException.class, CREFormatException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args) throws ConfigRuntimeException {
+			MCEntity entity = Static.getEntity(args[0], t);
+			if(entity instanceof MCHanging hanging) {
+				return new CString(hanging.getFacing().name(), t);
+			}
+			throw new CREBadEntityException("Not a hanging entity.", t);
+		}
+
+		@Override
+		public String getName() {
+			return "get_hanging_direction";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
+				com.laytonsmith.core.environments.Environment env, Set<ConfigCompileException> exceptions) {
+			return CString.TYPE;
+		}
+
+
+		@Override
+		public String docs() {
+			return "string {entityUUID} Returns the direction a hanging entity is facing.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class set_hanging_direction extends AbstractFunction implements Optimizable {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[] {CREBadEntityException.class, CRELengthException.class, CREFormatException.class,
+					CREIllegalArgumentException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets, com.laytonsmith.core.environments.Environment env, Set<ConfigCompileException> exceptions) {
+			return CVoid.TYPE;
+		}
+
+		@Override
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args) throws ConfigRuntimeException {
+			MCEntity entity = Static.getEntity(args[0], t);
+			if(entity instanceof MCHanging hanging) {
+				MCBlockFace face;
+				try {
+					face = MCBlockFace.valueOf(args[1].val());
+					boolean force = false;
+					if(args.length == 3) {
+						force = ArgumentValidation.getBooleanObject(args[2], t);
+					}
+					hanging.setFacingDirection(face, force);
+					return CVoid.VOID;
+				} catch (IllegalArgumentException ex) {
+					throw new CREIllegalArgumentException("Invalid direction for " + entity.getType().name() + ": "
+							+ args[1].val(), t);
+				}
+			}
+			throw new CREBadEntityException("Not a hanging entity.", t);
+		}
+
+		@Override
+		public String getName() {
+			return "set_hanging_direction";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3};
+		}
+
+		@Override
+		public String docs() {
+			return "void {entityUUID, direction, [force]} Sets the direction a hanging entity is facing."
+					+ " Valid directions are NORTH, SOUTH, EAST, and WEST. UP and DOWN are also valid for item frames."
+					+ " A hanging will not change direction if there's no supporting block in the new position."
+					+ " However, the 'force' parameter can be set to true to override this behavior."
+					+ " While leash hitches are technically hangings, they don't support different directions.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, com.laytonsmith.core.environments.Environment env,
+				Set<Class<? extends com.laytonsmith.core.environments.Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+						throws ConfigCompileException, ConfigRuntimeException {
+
+			if(children.size() < 2) {
+				return null;
+			}
+			Mixed data = children.get(1).getData();
+			if(data instanceof CString) {
+				try {
+					MCBlockFace.valueOf(data.val());
+					// also check for unsupported BlockFaces
+					if(!data.val().contains("_") && !data.val().equals("SELF")) {
+						return null;
+					}
+				} catch (IllegalArgumentException ex) {
+					// invalid BlockFace
+				}
+				throw new CREIllegalArgumentException("Invalid direction. Must be one of"
+						+ " UP, DOWN, NORTH, SOUTH, EAST or WEST", data.getTarget());
+			}
+			return null;
+		}
+
+		@Override
+		public Set<Optimizable.OptimizationOption> optimizationOptions() {
+			return EnumSet.of(Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
 
 	}
