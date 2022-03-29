@@ -569,9 +569,9 @@ public final class ArgumentValidation {
 	}
 
 	/**
-	 * Returns true if any of the constructs are a CDouble
+	 * Returns true if any of the constructs are a CDouble, false otherwise
 	 *
-	 * @param env, false otherwise.
+	 * @param env
 	 *
 	 * @param c
 	 * @return
