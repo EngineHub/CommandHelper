@@ -249,22 +249,26 @@ public final class MethodScriptCompiler {
 										target, SuppressWarning.FutureNestedCommentChange);
 								env.getEnv(CompilerEnvironment.class).addCompilerWarning(builtFileOptions, warning);
 							}
-							buf.append("/*");
-							inComment = true;
-							commentIsBlock = true;
-							if(i < script.length() - 2 && script.charAt(i + 2) == '*') { // "/**".
-								inSmartComment = true;
-								buf.append("*");
+							if(!inComment) {
+								buf.append("/*");
+								inComment = true;
+								commentIsBlock = true;
+								if(i < script.length() - 2 && script.charAt(i + 2) == '*') { // "/**".
+									inSmartComment = true;
+									buf.append("*");
+									i++;
+								}
+								commentLineNumberStart = lineNum;
 								i++;
+								continue;
 							}
-							commentLineNumberStart = lineNum;
-							i++;
-							continue;
 						} else if(c2 == '/') { // "//".
-							buf.append("//");
-							inComment = true;
-							i++;
-							continue;
+							if(!inComment) {
+								buf.append("//");
+								inComment = true;
+								i++;
+								continue;
+							}
 						}
 						break;
 					}
