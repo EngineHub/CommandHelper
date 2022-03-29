@@ -2227,8 +2227,7 @@ public final class MethodScriptCompiler {
 			// statements are not acceptable because void would be an invalid argument type. This would otherwise be
 			// a runtime error in strict mode where auto-concat is not allowed and statements are used instead.
 			// This can be removed once a more comprehensive void return type check is implemented.
-			if(ast.getFileOptions().isStrict()
-					&& child.getData() instanceof CFunction
+			if(child.getData() instanceof CFunction
 					&& child.getData().val().equals(Compiler.__statements__.NAME)
 					&& ast.getData() instanceof CFunction cFunction) {
 				Function function = cFunction.getCachedFunction();
@@ -2238,8 +2237,17 @@ public final class MethodScriptCompiler {
 						continue;
 					}
 				}
-				exceptions.add(new ConfigCompileException("Invalid use of auto concat in "
-						+ function.getName() + "()", child.getTarget()));
+				if(function.getName().equals(Compiler.__statements__.NAME)) {
+					ParseTree lastChild = child;
+					if(child.numberOfChildren() > 0) {
+						lastChild = child.getChildAt(child.numberOfChildren() - 1);
+					}
+					exceptions.add(new ConfigCompileException("Invalid comma after "
+							+ lastChild.getData().val(), lastChild.getTarget()));
+				} else {
+					exceptions.add(new ConfigCompileException("Invalid use of auto concat in "
+							+ function.getName() + "()", cFunction.getTarget()));
+				}
 			}
 		}
 		return ast;
