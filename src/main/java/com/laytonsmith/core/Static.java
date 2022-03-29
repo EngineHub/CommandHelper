@@ -1,6 +1,7 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.PureUtilities.Common.Annotations.AggressiveDeprecation;
 import com.laytonsmith.PureUtilities.Common.DateUtils;
 import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
@@ -305,11 +306,12 @@ public final class Static {
 	private static final Pattern INVALID_DECIMAL = Pattern.compile("-?0m[0-9]*[^0-9]+[0-9]*");
 
 	/**
-	 * Given a string input, creates and returns a Construct of the appropriate type. This takes into account that null,
+	 * Given a string input, creates and returns a Construct of the appropriate type.This takes into account that null,
 	 * true, and false are keywords.
 	 *
 	 * @param val
 	 * @param t
+	 * @param env
 	 * @return
 	 * @throws ConfigRuntimeException If the value is a hex or binary value, but has invalid characters in it.
 	 */
@@ -592,6 +594,7 @@ public final class Static {
 	 * @deprecated This method doesn't work with user classes, and will cause errors once those are introduced. This
 	 * will be removed once those are added, instead, use the version with the environment.
 	 */
+	@AggressiveDeprecation
 	@Deprecated
 	public static MCPlayer GetPlayer(String player, Target t) throws ConfigRuntimeException {
 		return GetPlayer(player, t, null);
@@ -610,6 +613,7 @@ public final class Static {
 	 * @deprecated This method doesn't work with user classes, and will cause errors once those are introduced. This
 	 * will be removed once those are added, instead, use the version with the environment.
 	 */
+	@AggressiveDeprecation
 	@Deprecated
 	public static MCPlayer GetPlayer(Mixed player, Target t) throws ConfigRuntimeException {
 		return GetPlayer(player, t, null);
@@ -1292,6 +1296,7 @@ public final class Static {
 	 *
 	 * @param object
 	 * @param t
+	 * @param env
 	 * @return
 	 */
 	public static Construct getMSObject(Object object, Target t, Environment env) {
@@ -1401,6 +1406,7 @@ public final class Static {
 	 * Given a MethodScript object, returns a java object.
 	 *
 	 * @param construct
+	 * @param env
 	 * @return
 	 */
 	public static Object getJavaObject(Mixed construct, Environment env) {
