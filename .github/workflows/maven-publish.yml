@@ -17,7 +17,7 @@ jobs:
         java-version: '16'
         distribution: 'adopt'
     - name: Build with Maven
-      run: sudo -- sh -c "export methodscript_run_llvm_integration_tests=1 && export PATH=$JAVA_HOME/bin:\$PATH && export JAVA_HOME=$JAVA_HOME && mvn -version && mvn -B package --file pom.xml -Pfail-on-test-failures"
+      run: sudo -- sh -c "export methodscript_run_llvm_integration_tests=1 && export PATH=$JAVA_HOME/bin:\$PATH && export JAVA_HOME=$JAVA_HOME && mvn -version && mvn -B clean package --file pom.xml -Pfail-on-test-failures"
   build_windows:
     runs-on: windows-latest
     env:
@@ -30,7 +30,7 @@ jobs:
         java-version: '16'
         distribution: 'adopt'
     - name: Build with Maven
-      run: mvn -B package --file pom.xml -Pfail-on-test-failures
+      run: mvn -B clean package --file pom.xml -Pfail-on-test-failures
   build_mac:
     runs-on: macos-latest
     steps:
@@ -43,7 +43,7 @@ jobs:
         java-version: '16'
         distribution: 'adopt'
     - name: Build with Maven
-      run: mvn -version && mvn -B package --file pom.xml -Pfail-on-test-failures
+      run: mvn -version && mvn -B clean package --file pom.xml -Pfail-on-test-failures
   publish:
     needs:
       - build_windows # For now only windows, eventually all 3, once they're stable.
@@ -68,7 +68,7 @@ jobs:
         find: 'version: "\${project\.version}"'
         replace: 'version: "${project.version}-${{ github.RUN_NUMBER }}"'
     - name: Package Build
-      run: mvn package
+      run: mvn clean package
       env:
         GITHUB_TOKEN: ${{ github.token }}
     - name: Upload to Blob Store
