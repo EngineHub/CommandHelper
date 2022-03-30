@@ -188,24 +188,26 @@ class A {
 
 class B extends A {
 	// We are allowed to "narrow" the return type of a method, and this still
-	// overrides the A->f method. Note that the override keyword is in place
+	// overrides the A->f method. Note that the override annotation is in place
 	// to ensure this method does indeed override a parent method. If it does
 	// not, it will cause a compile error, and actually, it is required
-	// if the method does override a parent method.
-	override int f(number @a) { /*...*/ }
+	// if the method does override a parent method and strict mode is enabled.
+	@{Override}
+	int f(number @a) { /*...*/ }
 }
 
 class C extends A {
 	// Not allowed! Actually, the only reason this isn't allowed is because we have
-	// added the override keyword. It is possible to create this method anyways,
-	// (without the override keyword), but then if the method were called, it would
+	// added the override annotation. It is possible to create this method anyways,
+	// (without the override annotation), but then if the method were called, it would
 	// follow the normal overloading rules of deciding which method to call, as
 	// if we had simply created both methods within the same class.
-	override number f(int @a) { /*...*/ }
+	@{Override}
+	number f(int @a) { /*...*/ }
 }
 
 class D extends A {
-	// This is not allowed, (with or without the override keyword, it's a compiler error with it),
+	// This is not allowed, (with or without the override annotation),
 	// because the rules governing inheritance do not allow for return type changes.
 	string f(number @a) { /*...*/ }
 }
@@ -221,7 +223,7 @@ A @a = new D();
 // string, accepting one number parameter. However, the variable is defined as A, not D!
 // It is entirely possible that instead of an object of type D, we have an object of
 // type A, which does not define a method<string, number>.
-@a->f<string, number>(1);
+@a->f<string, number>(1); // Compile error, no method 'string f(number)' found in class A
 %>
 
 Examining the constructor, there is the new function, <code>super()</code>,
@@ -444,13 +446,14 @@ class B extends A {
 	 * Since the return type was defined as self, we MUST also define the return type here as self, for this
 	 * to be a proper override. But in this case, we must return a value of type B, not type A.
 	 */
-	override self newInstance() {
+	@{Override}
+	self newInstance() {
 		return(new B());
 	}
 }
 %>
 
-The self keyword can also be used in generic definitions, such as <code>ClassType<? extends self></code>, and within
+The self keyword can also be used in generic definitions, such as <code>array<? extends self></code>, and within
 general code, such as <code>self @a = new self();</code> or <code>msg(self);</code>.
 
 === Access Modifiers ===
@@ -500,9 +503,9 @@ class B extends A {
 }
 %%
 
-Note that we are explicitely calling A's constructor with the call to super,
+Note that we are explicitly calling A's constructor with the call to super,
 and A's method2. If there had been several parents, this could be used to
-"un-override" a call, or otherwise explicitely selected a method that had been
+"un-override" a call, or otherwise explicitly selected a method that had been
 overridden by multiple children. This is useful outside of diamond inheritance,
 but is more often used when dealing with multiple inheritance. Note that in the
 case of super() constructors, it is always an error to cause a child's
@@ -662,7 +665,7 @@ defining it as such:
 
 %%CODE|
 class C extends A, B {
-	inherit B::method(int @a);
+	inherit B::method<mixed, int>;
 }
 %%
 
@@ -685,7 +688,7 @@ class B extends A {
 	 * it is not allowed to decrease the visibility of any method, whether or not it is inherited using
 	 * the inherit keyword.
 	 */
-	inherit public method(int @a);
+	inherit public method<mixed, int>;
 }
 %>
 
@@ -697,28 +700,34 @@ hierarchy:
 %%CODE|
 class A { }
 class B extends A { }
-class C extends A { }
-class D extends B { }
+class C1 extends A implements MyInterface { }
+class C2 extends B implements MyInterface { }
 %%
 
-Now, assume that we want to accept an instance of either type D or type C, but not
+Now, assume that we want to accept an instance of either type C1 or type C2, but not
 type B or A. In this case, the nearest parent is type A, so we could accept type A and
-do a runtime check to ensure that it is of type D or C only, but this is a runtime
+do a runtime check to ensure that it is of type C1 or C2 only, but this is a runtime
 check, and it would be better if we could simply declare that we only want those
 two types. In that case, we can use a '''type union''' to signal to the compiler
 the various types we will accept. To specify a type union, use the
 '''%%NOWIKI||%%''' character.
 
 %%CODE|
-D | C @var;
+C1 | C2 @var;
 %%
 
 As many types as required can be chained this way. As far as the inferred type of
 that object, it will be whatever the nearest '''type intersection''' is. So, in this
-case, the code using the variable @var must assume that it is of type A, unless it
-does an explicit cast first. So, as far as code that ''uses'' the variable, it will
-work as if it were defined as <code>A @var</code>, but with the guarantee that only
-a D or C type instance will have been assigned to it.
+case, the code using the variable @var cannot assume that it is of type C1 or C2, unless it
+does an explicit cast first. You can think of this type intersection as a synthetic
+class which is defined as '''class C1_C2 extends A implements MyInterface''', as the
+nearest superclass is A, and both C1 and C2 independently implement MyInterface.
+'''Duck typing''' is not supported, so even if there happen to be methods with the
+same signature in all unioned classes, it is not allowed to call them.
+
+Type unions are a compile time only function, at runtime, the value will be a single,
+concrete type, nor can you use type unions on the Right Hand Side (RHS) by doing something
+such as '''new A <%NOWIKI||%> B()'''.
 
 === <code>use</code> statements ===
 
@@ -958,34 +967,34 @@ class A {
 	immutable MyObject @b;
 
 	public A(MyObject @a, MyObject @b) {
-		this->@a = @a;
-		this->@b = @b;
+		@this->a = @a;
+		@this->b = @b;
 		// This is valid. Immutable values are not "frozen" until construction is complete.
-		this->@b->@value = "initial value";
-		this->setup();
+		@this->b->value = "initial value";
+		@this->setup();
 	}
 
 	public void m() {
 		// Valid
-		this->@a->@value = "test";
-		this->@a->setValue("test");
+		@this->a->value = "test";
+		@this->a->setValue("test");
 
 		// Compile error, fields in @b may not be modified, either directly or indirectly
-		// this->@b->@value = "test2";
-		// this->@b->setValue("test2");
-		// this->setup();
+		// @this->b->value = "test2";
+		// @this->b->setValue("test2");
+		// @this->setup();
 	}
 
 	private void setup() {
 		// This is valid too, but only because the setup method is only called from the constructor. Note that this
 		// method is actually not available to the reflection mechanism either, as it is inlined in the constructor.
-		this->@b->@value = "called from setup";
+		@this->b->value = "called from setup";
 	}
 
 	public void publicSetup() {
 		// This isn't valid, because the method is public. Methods that modify immutable values are only allowed
 		// to be private, and are only allowed to be called from the constructor.
-		// this->@b->@value = "invalid";
+		// @this->b->value = "invalid";
 	}
 }
 %>
@@ -1000,11 +1009,11 @@ class A {
 	MyObject @mutable;
 
 	public void set(immutable MyObject @v) {
-		this->@immutable = @v;
+		@this->immutable = @v;
 	}
 
 	public void set(MyObject @v) {
-		this->@mutable = @v;
+		@this->mutable = @v;
 	}
 }
 
@@ -1012,7 +1021,6 @@ A @a = new A();
 @a->set(new immutable MyObject()); // sets the immutable object
 @a->set(new MyObject()); // sets the mutable object
 @mo = new MyObject();
-@a->set((immutable MyObject) @mo); // sets the immutable object, despite the @mo value being mutable
 %>
 
 It's also worth pointing out that an immutable field is not constant, and the referenced object may be changed,
