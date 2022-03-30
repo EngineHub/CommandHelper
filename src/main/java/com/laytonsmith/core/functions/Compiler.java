@@ -78,14 +78,7 @@ public class Compiler {
 
 		@Override
 		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
-			switch(nodes.length) {
-				case 0:
-					return CVoid.VOID;
-				case 1:
-					return parent.eval(nodes[0], env);
-				default:
-					return new __autoconcat__().execs(t, env, parent, nodes);
-			}
+			return (nodes.length == 1 ? parent.eval(nodes[0], env) : CVoid.VOID);
 		}
 
 		@Override
