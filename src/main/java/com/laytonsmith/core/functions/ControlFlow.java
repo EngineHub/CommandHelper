@@ -2056,7 +2056,9 @@ public class ControlFlow {
 		public List<Boolean> isBranch(List<ParseTree> children) {
 			List<Boolean> ret = new ArrayList<>();
 			ret.add(false);
-			ret.add(true);
+			if(children.size() >= 1) {
+				ret.add(true);
+			}
 			return ret;
 		}
 
