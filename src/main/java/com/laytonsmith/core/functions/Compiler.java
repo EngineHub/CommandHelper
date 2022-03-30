@@ -141,10 +141,13 @@ public class Compiler {
 		}
 
 		/**
-		 * Rewrites this __autoconcat__ node to an executable AST node as part of compilation. This either results in
-		 * this __autoconcat__ node being replaced or in a compile error if the __autoconcat__ cannot be converted to
-		 * an executable AST node. This being a function is merely a convenient way to defer processing until after
-		 * parsing, meaning that it should ALWAYS be rewritten before executing the AST.
+		 * Gets an executable AST node to replace an __autoconcat__ with as part of compilation. This results in a
+		 * compile error if the __autoconcat__ cannot be converted to an executable AST node.
+		 *  __autoconcat__ being a function is merely a convenient way to defer processing until after parsing,
+		 *  meaning that it should ALWAYS be rewritten before executing the AST.
+		 * When this method is called, the caller must ensure that the passed children do not contain any
+		 * __autoconcat__. This can be ensured by calling this method on all __autoconcat__ nodes in a depth-first
+		 * post-order AST traversal.
 		 * @param list - A list containing all {@link ParseTree} children of this __autoconcat__.
 		 * @param returnSConcat - If parsing results in only one child function, then this argument is ignored.
 		 * If {@code true}, the resulting parsed functions will be wrapped into {@link sconcat}.
@@ -152,7 +155,7 @@ public class Compiler {
 		 * @return The executable AST node, representing the code/tokens in this __autoconcat__.
 		 * @throws ConfigCompileException If this __autoconcat__ cannot be converted to an executable AST node.
 		 */
-		public ParseTree rewrite(List<ParseTree> list, boolean returnSConcat,
+		public static ParseTree rewrite(List<ParseTree> list, boolean returnSConcat,
 				Set<Class<? extends Environment.EnvironmentImpl>> envs) throws ConfigCompileException {
 			//If any of our nodes are CSymbols, we have different behavior
 			boolean inSymbolMode = false; //caching this can save Xn
@@ -172,23 +175,22 @@ public class Compiler {
 					ParseTree rhs;
 					if(i < list.size() - 3) {
 						//Need to autoconcat
-						ParseTree ac = new ParseTree(
-								new CFunction(__autoconcat__.NAME, node.getTarget()), lhs.getFileOptions());
+						List<ParseTree> valChildren = new ArrayList<>();
 						int index = i + 2;
 						// add all preceding symbols
 						while(list.size() > index + 1 && list.get(index).getData() instanceof CSymbol) {
-							ac.addChild(list.get(index));
+							valChildren.add(list.get(index));
 							list.remove(index);
 						}
 						// add first item
-						ac.addChild(list.get(index));
+						valChildren.add(list.get(index));
 						list.remove(index);
 						// loop through all additional symbols/items
 						while(list.size() > index + 1 && list.get(index).getData() instanceof CSymbol) {
 							// add all contiguous symbols
 							do {
 								// symbols first
-								ac.addChild(list.get(index));
+								valChildren.add(list.get(index));
 								list.remove(index);
 							} while(list.size() > index && list.get(index).getData() instanceof CSymbol);
 							if(list.size() <= index) {
@@ -196,12 +198,12 @@ public class Compiler {
 										list.get(list.size() - 1).getTarget());
 							}
 							// then item
-							ac.addChild(list.get(index));
+							valChildren.add(list.get(index));
 							list.remove(index);
 						}
 						//Set this subset into the correct slot, the rest of the
 						//code will grab it correctly that way.
-						list.add(i + 2, ac);
+						list.add(i + 2, rewrite(valChildren, returnSConcat, envs));
 					}
 					if(list.size() <= i + 2) {
 						throw new ConfigCompileException("Unexpected end of statement", list.get(i).getTarget());
@@ -486,10 +488,14 @@ public class Compiler {
 			if(list.size() >= 1) {
 				ParseTree node = list.get(0);
 				if(node.getData() instanceof CLabel) {
-					ParseTree value = new ParseTree(new CFunction(__autoconcat__.NAME, node.getTarget()), node.getFileOptions());
-					for(int i = 1; i < list.size(); i++) {
-						value.addChild(list.get(i));
-					}
+
+					// Remove the label from the children, leaving only value nodes as children.
+					list.remove(0);
+
+					// Rewrite value nodes to a single value using autoconcat logic.
+					ParseTree value = rewrite(list, returnSConcat, envs);
+
+					// Create centry node from the label and value, and return the result.
 					ParseTree ce = new ParseTree(new CFunction(centry.NAME, node.getTarget()), node.getFileOptions());
 					ce.addChild(node);
 					ce.addChild(value);
@@ -502,7 +508,11 @@ public class Compiler {
 			//be handled in MethodScriptCompiler's optimize function. Also, we must scan for CPreIdentifiers,
 			//which may be turned into a function
 			if(list.size() == 1) {
-				return list.get(0);
+				ParseTree node = list.get(0);
+				if(node.getData() instanceof CFunction && node.getData().val().equals(__autoconcat__.NAME)) {
+					node = rewrite(node.getChildren(), returnSConcat, envs);
+				}
+				return node;
 			} else {
 				for(int i = 0; i < list.size(); i++) {
 					if(Construct.IsCType(list.get(i).getData(), Construct.ConstructType.IDENTIFIER)) {
@@ -520,6 +530,10 @@ public class Compiler {
 								Function f = (Function) FunctionList.getFunction(identifier, envs);
 								ParseTree node = new ParseTree(
 										f.execs(identifier.getTarget(), null, null, child), child.getFileOptions());
+								if(node.getData() instanceof CFunction
+										&& node.getData().val().equals(__autoconcat__.NAME)) {
+									node = rewrite(node.getChildren(), returnSConcat, envs);
+								}
 								return node;
 							} catch (Exception e) {
 								throw new Error("Unknown function " + identifier.val() + "?");
