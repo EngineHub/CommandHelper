@@ -2168,8 +2168,7 @@ public final class MethodScriptCompiler {
 			boolean returnSConcat = !root.getFileOptions().isStrict();
 
 			try {
-				ParseTree ret = ((Compiler.__autoconcat__) ((CFunction) root.getData()).getFunction())
-						.rewrite(root.getChildren(), returnSConcat, envs);
+				ParseTree ret = __autoconcat__.rewrite(root.getChildren(), returnSConcat, envs);
 				root.setData(ret.getData());
 				root.setChildren(ret.getChildren());
 				root.getNodeModifiers().merge(ret.getNodeModifiers());
@@ -2177,9 +2176,6 @@ public final class MethodScriptCompiler {
 				compilerExceptions.add(ex);
 				return;
 			}
-
-			// __autoconcat__'s AST rewrite can include new __autoconcat__'s, so handle them again.
-			rewriteAutoconcats(root, env, envs, compilerExceptions);
 		}
 	}
 
