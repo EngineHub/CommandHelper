@@ -113,22 +113,6 @@ public class Compiler {
 
 		public static final String NAME = "__autoconcat__";
 
-		public static ParseTree getParseTree(List<ParseTree> children, FileOptions fo, Target t) {
-			CFunction ac = new CFunction(__autoconcat__.NAME, t);
-			ParseTree tree = new ParseTree(ac, fo);
-			tree.setChildren(children);
-			return tree;
-		}
-
-		public static ParseTree getParseTree(ParseTree child, FileOptions fo, Target t) {
-			CFunction ac = new CFunction(__autoconcat__.NAME, t);
-			ParseTree tree = new ParseTree(ac, fo);
-			List<ParseTree> children = new ArrayList<>();
-			children.add(child);
-			tree.setChildren(children);
-			return tree;
-		}
-
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			throw new Error("Should not have gotten here, " + __autoconcat__.NAME + " was not removed before runtime.");
