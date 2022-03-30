@@ -2293,9 +2293,7 @@ public final class MethodScriptCompiler {
 					return;
 				}
 
-				Integer[] numArgs = function.numArgs();
-				if(!Arrays.asList(numArgs).contains(Integer.MAX_VALUE)
-						&& !Arrays.asList(numArgs).contains(tree.getChildren().size())) {
+				if(!isValidNumArgs(function, tree.getChildren().size())) {
 					compilerErrors.add(new ConfigCompileException("Incorrect number of arguments passed to "
 							+ tree.getData().val(), tree.getData().getTarget()));
 				}
@@ -2399,11 +2397,12 @@ public final class MethodScriptCompiler {
 
 		List<ParseTree> children = tree.getChildren();
 		if(func instanceof Optimizable && ((Optimizable) func).optimizationOptions()
-				.contains(OptimizationOption.PRIORITY_OPTIMIZATION)) {
+				.contains(OptimizationOption.PRIORITY_OPTIMIZATION) && isValidNumArgs(func, children.size())) {
 			// This is a priority optimization function, meaning it needs to be optimized before its children are.
-			// This is required when optimization of the children could cause different internal behavior, for instance
-			// if this function is expecting the precense of soem code element, but the child gets optimized out, this
-			// would cause an error, even though the user did in fact provide code in that section.
+			// This is required when optimization of the children could cause different internal behavior, for
+			// instance if this function is expecting the precense of soem code element, but the child gets
+			// optimized out, this would cause an error, even though the user did in fact provide code in that
+			// section.
 			try {
 				((Optimizable) func).optimizeDynamic(tree.getTarget(), env, envs, children, tree.getFileOptions());
 			} catch (ConfigCompileException ex) {
@@ -2525,7 +2524,7 @@ public final class MethodScriptCompiler {
 		if(func instanceof Optimizable) {
 			options = ((Optimizable) func).optimizationOptions();
 		}
-		if(options.contains(OptimizationOption.OPTIMIZE_DYNAMIC)) {
+		if(options.contains(OptimizationOption.OPTIMIZE_DYNAMIC) && isValidNumArgs(func, tree.numberOfChildren())) {
 			try {
 				ParseTree tempNode;
 				try {
@@ -2597,9 +2596,7 @@ public final class MethodScriptCompiler {
 				try {
 					Mixed result;
 					if(options.contains(OptimizationOption.CONSTANT_OFFLINE)) {
-						List<Integer> numArgsList = Arrays.asList(func.numArgs());
-						if(!numArgsList.contains(Integer.MAX_VALUE)
-								&& !numArgsList.contains(tree.getChildren().size())) {
+						if(!isValidNumArgs(func, tree.getChildren().size())) {
 							compilerErrors.add(new ConfigCompileException("Incorrect number of arguments passed to "
 									+ tree.getData().val(), tree.getData().getTarget()));
 							result = null;
@@ -2619,8 +2616,10 @@ public final class MethodScriptCompiler {
 //							}
 							result = func.exec(tree.getData().getTarget(), env, constructs);
 						}
-					} else {
+					} else if(isValidNumArgs(func, constructs.length)) {
 						result = ((Optimizable) func).optimize(tree.getData().getTarget(), env, constructs);
+					} else {
+						result = null;
 					}
 
 					//If the result is null, it was just a check, it can't optimize further.
@@ -2688,8 +2687,7 @@ public final class MethodScriptCompiler {
 			if(f instanceof BranchStatement) {
 				branches = ((BranchStatement) f).isBranch(children);
 				if(branches.size() != children.size()) {
-					List<Integer> numArgs = Arrays.asList(f.numArgs());
-					if(!numArgs.contains(Integer.MAX_VALUE) && !numArgs.contains(children.size())) {
+					if(!isValidNumArgs(f, children.size())) {
 						// Incorrect number of arguments passed to the function, not a branch implementation error.
 						return false;
 					}
@@ -2809,6 +2807,15 @@ public final class MethodScriptCompiler {
 						: new ConfigCompileException("Unexpected keyword: " + m.val(), m.getTarget()));
 			}
 		}
+	}
+
+	private static boolean isValidNumArgs(Function function, int numArgs) {
+		for(int allowedNumArgs : function.numArgs()) {
+			if(allowedNumArgs == Integer.MAX_VALUE || allowedNumArgs == numArgs) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
