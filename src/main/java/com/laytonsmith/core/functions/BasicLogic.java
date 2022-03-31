@@ -1116,7 +1116,6 @@ public class BasicLogic {
 		public FunctionSignatures getSignatures() {
 			return new SignatureBuilder(CBoolean.TYPE)
 					.param(Booleanish.TYPE, "val1", null)
-					.param(Booleanish.TYPE, "val2", null)
 					.varParam(Booleanish.TYPE, "vals", null).build();
 		}
 
