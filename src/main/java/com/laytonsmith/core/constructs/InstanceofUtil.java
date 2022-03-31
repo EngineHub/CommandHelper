@@ -129,8 +129,7 @@ public class InstanceofUtil {
 	 * @param env
 	 * @return
 	 */
-	public static boolean isInstanceof(Mixed value, Class<? extends Mixed> instanceofThis, Environment env)
-			throws ClassNotFoundException {
+	public static boolean isInstanceof(Mixed value, Class<? extends Mixed> instanceofThis, Environment env) {
 		CClassType type = CClassType.get(instanceofThis);
 		return isInstanceof(value, type, env);
 	}

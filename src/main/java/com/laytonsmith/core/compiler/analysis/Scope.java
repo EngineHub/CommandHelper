@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.Stack;
 
@@ -42,6 +43,10 @@ public class Scope {
 
 	private Scope(Set<Scope> parents, Map<Namespace, Set<Scope>> specificParents,
 			Map<Namespace, Map<String, Declaration>> declarations, Map<Namespace, Set<Reference>> references) {
+		Objects.requireNonNull(parents);
+		for(Scope s : parents) {
+			Objects.requireNonNull(s, "The set of parent scopes may not contain null values.");
+		}
 		this.parents = parents;
 		this.specificParents = specificParents;
 		this.declarations = declarations;
@@ -49,6 +54,7 @@ public class Scope {
 	}
 
 	public void addParent(Scope parent) {
+		Objects.requireNonNull(parent);
 		this.parents.add(parent);
 	}
 

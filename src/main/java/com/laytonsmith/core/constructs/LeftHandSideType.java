@@ -126,6 +126,9 @@ public final class LeftHandSideType extends Construct {
 			throw new IllegalArgumentException("A LeftHandSideType object must contain at least one type");
 		}
 		String value = StringUtils.Join(classTypes, " | ", (pair) -> {
+			if(pair.getKey() == null) {
+				return "none";
+			}
 			String ret = pair.getKey().getFQCN().getFQCN();
 			if(pair.getValue() != null) {
 				ret += "<";

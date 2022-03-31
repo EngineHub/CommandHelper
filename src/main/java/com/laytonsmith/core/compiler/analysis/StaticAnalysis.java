@@ -121,7 +121,7 @@ public class StaticAnalysis {
 	 * available. Otherwise, only the scope graph will be generated and a full analysis is expected to be done
 	 * externally.
 	 *
-	 * @param ast - The {@link ParseTree} to analze.
+	 * @param ast - The {@link ParseTree} to analyze.
 	 * @param env - The {@link Environment}.
 	 * @param envs - The set of expected {@link Environment.EnvironmentImpl} classes to be available at runtime.
 	 * @param exceptions - Any compile exceptions will be added to this set.
@@ -144,7 +144,7 @@ public class StaticAnalysis {
 		// Handle auto includes if present.
 		StaticAnalysis autoIncludesAnalysis = env.getEnv(StaticRuntimeEnv.class).getAutoIncludeAnalysis();
 		if(autoIncludesAnalysis != null) {
-			if(this.isMainAnalysis) {
+			if(this.isMainAnalysis && autoIncludesAnalysis.endScope != null) {
 				this.startScope.addParent(autoIncludesAnalysis.endScope);
 			}
 			this.globalScope = autoIncludesAnalysis.globalScope;
@@ -181,7 +181,6 @@ public class StaticAnalysis {
 
 		// Create scope graph with an include for each auto include.
 		// This fakes the scope graph for a script with an include for each auto include file.
-
 		StaticAnalysis analysis = env.getEnv(StaticRuntimeEnv.class).getAutoIncludeAnalysis();
 		if(analysis.endScope != null) {
 			throw new IllegalStateException("setAndAnalyzeAutoIncludes called twice on autoIncludeAnalysis");
@@ -433,7 +432,7 @@ public class StaticAnalysis {
 		try {
 			// TODO - Add LHGU
 			return LeftHandSideType.fromCClassType(node.typeof(env), null, node.getTarget());
-		} catch (Throwable t) {
+		} catch(Throwable t) {
 			// Functions that might contain these unsupported objects should make sure that they don't type check them.
 			// In case an unsupported object causes an error here, it likely means that we have a syntax error.
 			exceptions.add(new ConfigCompileException("Unsupported AST node implementation in type checking: "
@@ -443,8 +442,9 @@ public class StaticAnalysis {
 	}
 
 	/**
-	 * Checks whether the given type is instance of the expected type, adding a compile error to the passed
-	 * exceptions set if it isn't.This never generates an error when the given type is {@link CClassType#AUTO}.
+	 * Checks whether the given type is instance of the expected type, adding a compile error to the passed exceptions
+	 * set if it isn't.This never generates an error when the given type is {@link CClassType#AUTO}.
+	 *
 	 * @param type - The type to check.
 	 * @param expected - The expected {@link CClassType}.
 	 * @param t
@@ -457,8 +457,9 @@ public class StaticAnalysis {
 	}
 
 	/**
-	 * Checks whether the given type is instance of the expected type, adding a compile error to the passed
-	 * exceptions set if it isn't.This never generates an error when the given type is {@link CClassType#AUTO}.
+	 * Checks whether the given type is instance of the expected type, adding a compile error to the passed exceptions
+	 * set if it isn't.This never generates an error when the given type is {@link CClassType#AUTO}.
+	 *
 	 * @param type - The type to check.
 	 * @param expected - The expected {@link CClassType}.
 	 * @param t
@@ -472,8 +473,9 @@ public class StaticAnalysis {
 	}
 
 	/**
-	 * Checks whether the given type is instance of the expected type, adding a compile error to the passed
-	 * exceptions set if it isn't.This never generates an error when the given type is {@link CClassType#AUTO}.
+	 * Checks whether the given type is instance of the expected type, adding a compile error to the passed exceptions
+	 * set if it isn't. This never generates an error when the given type is {@link CClassType#AUTO}.
+	 *
 	 * @param type - The type to check.
 	 * @param expected - The expected {@link CClassType}.
 	 * @param t
@@ -484,15 +486,16 @@ public class StaticAnalysis {
 			Target t, Environment env, Set<ConfigCompileException> exceptions) {
 
 		// Generate an exception if the given type is not instanceof the expected type.
-		if(!InstanceofUtil.isInstanceof(type, expected, env)) {
+		if(!InstanceofUtil.isAssignableTo(type, expected, env)) {
 			exceptions.add(new ConfigCompileException("Expected type " + expected.getSimpleName()
-				+ ", but received type " + (type == null ? "none" : type.getSimpleName()) + " instead.", t));
+					+ ", but received type " + (type == null ? "none" : type.getSimpleName()) + " instead.", t));
 		}
 	}
 
 	/**
 	 * Checks whether the given type is instance of any of the expected types, adding a compile error to the passed
 	 * exceptions set if it isn't.This never generates an error when the given type is {@link CClassType#AUTO}.
+	 *
 	 * @param type The type to check.
 	 * @param expected The expected {@link CClassType}s, which should always be of at least size 1.
 	 * @param t The code target
@@ -507,6 +510,7 @@ public class StaticAnalysis {
 	/**
 	 * Checks whether the given type is instance of any of the expected types, adding a compile error to the passed
 	 * exceptions set if it isn't.This never generates an error when the given type is {@link CClassType#AUTO}.
+	 *
 	 * @param type The type to check.
 	 * @param expected The expected {@link CClassType}s, which should always be of at least size 1.
 	 * @param t The code target
@@ -521,9 +525,11 @@ public class StaticAnalysis {
 		}
 		requireAnyType(type, expectedLHS, t, env, exceptions);
 	}
+
 	/**
 	 * Checks whether the given type is instance of any of the expected types, adding a compile error to the passed
 	 * exceptions set if it isn't.This never generates an error when the given type is {@link CClassType#AUTO}.
+	 *
 	 * @param type The type to check.
 	 * @param expected The expected {@link CClassType}s, which should always be of at least size 1.
 	 * @param t The code target
@@ -863,6 +869,7 @@ public class StaticAnalysis {
 			ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
 		return linkParamScope(paramScope, valScope, ast, env, exceptions, null);
 	}
+
 	/**
 	 * Handles parameter AST nodes, namely {@link IVariable}s or the {@code assign()} function (for typed parameters or
 	 * parameters with a default value).The parameter is declared in a new scope that is chained to paramScope. If the
