@@ -2273,7 +2273,7 @@ public class ControlFlow {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			return SignatureBuilder.WithNoneReturnType()
+			return SignatureBuilder.withNoneReturnType()
 					.param(CInt.TYPE, "loopAmount", "The amount of loops to break from.", true).build();
 		}
 
@@ -2375,7 +2375,7 @@ public class ControlFlow {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			return SignatureBuilder.WithNoneReturnType()
+			return SignatureBuilder.withNoneReturnType()
 					.param(CInt.TYPE, "loopAmount", "The amount of loop iterations to continue.", true).build();
 		}
 
@@ -2451,7 +2451,7 @@ public class ControlFlow {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			return SignatureBuilder.WithNoneReturnType()
+			return SignatureBuilder.withNoneReturnType()
 					.param(Mixed.TYPE, "value", "The value to return. If omitted, void will be returned.", true)
 					.build();
 		}
@@ -2639,7 +2639,7 @@ public class ControlFlow {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			return SignatureBuilder.WithNoneReturnType()
+			return SignatureBuilder.withNoneReturnType()
 					.varParam(Mixed.TYPE, "messages",
 					"The messages that will be shown to the user (concatenated together).").build();
 		}

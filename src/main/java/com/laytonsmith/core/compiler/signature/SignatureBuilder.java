@@ -14,7 +14,7 @@ public class SignatureBuilder {
 	private final FunctionSignatures signatures;
 	private FunctionSignature signature;
 
-	public static SignatureBuilder WithNoneReturnType() {
+	public static SignatureBuilder withNoneReturnType() {
 		return new SignatureBuilder((LeftHandSideType) null);
 	}
 

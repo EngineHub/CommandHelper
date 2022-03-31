@@ -80,47 +80,6 @@ public class InstanceofUtil {
 		return blacklist;
 	}
 
-//	/**
-//	 * Returns true whether or not a given MethodScript value is an instance of the specified MethodScript type.
-//	 *
-//	 * @param value The value to check for
-//	 * @param instanceofThis The string type to check. This must be the fully qualified name.
-//	 * @param env
-//	 * @return
-//	 */
-//	public static boolean isInstanceof(Mixed value, FullyQualifiedClassName instanceofThis, Environment env) {
-//		Static.AssertNonNull(instanceofThis, "instanceofThis may not be null");
-//		if(instanceofThis.getFQCN().equals("auto")) {
-//			return true;
-//		}
-//		if(value instanceof CFunction) {
-//			// TODO: Need to put the return type here, so we can work with this, but for now, just always return false
-//			return false;
-//		}
-//		return isInstanceof(value.typeof(env), instanceofThis, env);
-//	}
-//	/**
-//	 * Returns true whether or not a given MethodScript type is an instance of the specified MethodScript type.
-//	 *
-//	 * @param type The type to check for
-//	 * @param instanceofThis The string type to check. This must be the fully qualified name.
-//	 * @param env
-//	 * @return
-//	 */
-//	public static boolean isInstanceof(CClassType type, FullyQualifiedClassName instanceofThis, Environment env) {
-//		Static.AssertNonNull(instanceofThis, "instanceofThis may not be null");
-//		if(instanceofThis.getFQCN().equals("auto")) {
-//			return true;
-//		}
-//		for(CClassType c : getAllCastableClasses(type, env)) {
-//			FullyQualifiedClassName typeof = c.getFQCN();
-//			if(typeof != null && typeof.equals(instanceofThis)) {
-//				// Check generics, if they exist
-//				return true;
-//			}
-//		}
-//		return false;
-//	}
 	/**
 	 * Returns whether or not a given MethodScript value is an instanceof the specified MethodScript type.
 	 *
@@ -158,6 +117,7 @@ public class InstanceofUtil {
 	 * @param env The environment
 	 * @return
 	 */
+	@SuppressWarnings("null")
 	public static boolean isInstanceof(Mixed value, LeftHandSideType type, Environment env) {
 		LeftHandSideType valueType;
 		if(value instanceof LeftHandSideType lhs) {
@@ -250,6 +210,8 @@ public class InstanceofUtil {
 		return type.getTypeGenericParameters().get(instanceofThis.getNakedType(env))
 				.isInstanceof(instanceofThisGenerics, env);
 	}
+
+	// TODO: Harmonize and combine these two methods, and put the CClassType one in terms of the LHS one.
 
 	/**
 	 * Returns true if the class being checked is within bounds of the specified super class and is thus

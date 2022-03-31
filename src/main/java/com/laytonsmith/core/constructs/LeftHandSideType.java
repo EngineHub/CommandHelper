@@ -51,12 +51,12 @@ public final class LeftHandSideType extends Construct {
 	 * @param types
 	 * @return
 	 */
-	public static LeftHandSideType fromTypeUnion(Target t, LeftHandSideType... types) {
+	public static LeftHandSideType createTypeUnion(Target t, LeftHandSideType... types) {
 		Set<Pair<CClassType, LeftHandGenericUse>> set = new HashSet<>();
 		for(LeftHandSideType union : types) {
 			set.addAll(union.getTypes());
 		}
-		return fromCClassTypeUnion(t, new ArrayList<>(set));
+		return createCClassTypeUnion(t, new ArrayList<>(set));
 	}
 
 	/**
@@ -79,7 +79,7 @@ public final class LeftHandSideType extends Construct {
 	 * @return A new LeftHandSideType
 	 */
 	public static LeftHandSideType fromCClassType(CClassType classType, Target t) {
-		return fromCClassTypeUnion(t, Arrays.asList(new Pair<>(classType, null)));
+		return createCClassTypeUnion(t, Arrays.asList(new Pair<>(classType, null)));
 	}
 
 	/**
@@ -92,7 +92,7 @@ public final class LeftHandSideType extends Construct {
 	 * @return A new LeftHandSideType
 	 */
 	public static LeftHandSideType fromCClassType(CClassType classType, LeftHandGenericUse generics, Target t) {
-		return fromCClassTypeUnion(t, Arrays.asList(new Pair<>(classType, generics)));
+		return createCClassTypeUnion(t, Arrays.asList(new Pair<>(classType, generics)));
 	}
 
 	/**
@@ -107,7 +107,7 @@ public final class LeftHandSideType extends Construct {
 		for(CClassType type : classTypes) {
 			pairs.add(new Pair<>(type, null));
 		}
-		return fromCClassTypeUnion(t, pairs);
+		return createCClassTypeUnion(t, pairs);
 	}
 
 	/**
@@ -120,7 +120,7 @@ public final class LeftHandSideType extends Construct {
 	 * @return A new LeftHandSideType
 	 * @throws IllegalArgumentException If the classTypes list is empty.
 	 */
-	public static LeftHandSideType fromCClassTypeUnion(Target t, List<Pair<CClassType, LeftHandGenericUse>> classTypes) {
+	public static LeftHandSideType createCClassTypeUnion(Target t, List<Pair<CClassType, LeftHandGenericUse>> classTypes) {
 		Objects.requireNonNull(classTypes);
 		if(classTypes.isEmpty()) {
 			throw new IllegalArgumentException("A LeftHandSideType object must contain at least one type");

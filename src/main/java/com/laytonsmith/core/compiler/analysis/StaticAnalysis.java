@@ -404,7 +404,7 @@ public class StaticAnalysis {
 					for(int i = 0; i < types.length; i++) {
 						types[i] = declsList.get(i).getType();
 					}
-					return LeftHandSideType.fromTypeUnion(Target.UNKNOWN, types);
+					return LeftHandSideType.createTypeUnion(Target.UNKNOWN, types);
 				}
 			} else {
 				// If this runs, then an IVariable reference was created without setting its Scope using setTermScope().
@@ -443,7 +443,7 @@ public class StaticAnalysis {
 
 	/**
 	 * Checks whether the given type is instance of the expected type, adding a compile error to the passed exceptions
-	 * set if it isn't.This never generates an error when the given type is {@link CClassType#AUTO}.
+	 * set if it isn't. This never generates an error when the given type is {@link CClassType#AUTO}.
 	 *
 	 * @param type - The type to check.
 	 * @param expected - The expected {@link CClassType}.
@@ -458,7 +458,7 @@ public class StaticAnalysis {
 
 	/**
 	 * Checks whether the given type is instance of the expected type, adding a compile error to the passed exceptions
-	 * set if it isn't.This never generates an error when the given type is {@link CClassType#AUTO}.
+	 * set if it isn't. This never generates an error when the given type is {@link CClassType#AUTO}.
 	 *
 	 * @param type - The type to check.
 	 * @param expected - The expected {@link CClassType}.
