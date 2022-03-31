@@ -94,7 +94,7 @@ public class Param {
 			b.append("[");
 		}
 		b.append(getType() == null ? "any" : getType().val())
-				.append(isVarParam ? "...":"")
+				.append(isVarParam ? "..." : "")
 				.append(" @").append(getName());
 		if(isOptional) {
 			b.append("]");

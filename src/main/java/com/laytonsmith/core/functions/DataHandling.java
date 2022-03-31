@@ -2506,38 +2506,38 @@ public class DataHandling {
 
 		@Override
 		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
-			if(nodes.length == 0) {
-				//Empty closure, do nothing.
-				return new CClosure(null, env, Auto.TYPE.asLeftHandSideType(),
-						new String[]{}, new Mixed[]{}, new LeftHandSideType[]{}, t);
-			}
-			// Handle the closure type first thing
+			// Use first child as closure return type if it is a type.
 			LeftHandSideType returnType = Auto.TYPE.asLeftHandSideType();
-			if(nodes[0].getData() instanceof LeftHandSideType || nodes[0].getData() instanceof CClassType) {
-				if(nodes[0].getData() instanceof CClassType cct) {
-					returnType = LeftHandSideType.fromCClassType(cct, t);
+			int nodeOffset = 0;
+			if(nodes.length > 0 && nodes[0].getData().isInstanceOf(CClassType.TYPE, null, env)) {
+				if(nodes[0].getData() instanceof LeftHandSideType lhst) {
+					returnType = lhst;
 				} else {
-					returnType = (LeftHandSideType) nodes[0].getData();
+					returnType = ((CClassType) nodes[0].getData()).asLeftHandSideType();
 				}
-				ParseTree[] newNodes = new ParseTree[nodes.length - 1];
-				for(int i = 1; i < nodes.length; i++) {
-					newNodes[i - 1] = nodes[i];
-				}
-				nodes = newNodes;
+				nodeOffset = 1;
 			}
-			String[] names = new String[nodes.length - 1];
-			Mixed[] defaults = new Mixed[nodes.length - 1];
-			LeftHandSideType[] types = new LeftHandSideType[nodes.length - 1];
-			// We clone the enviornment at this point, because we don't want the values
-			// that are assigned here to overwrite values in the main scope.
+
+			// Return an empty (possibly statically typed) closure when it is empty and does not have any parameters.
+			if(nodes.length - nodeOffset == 0) {
+				return new CClosure(null, env, returnType, new String[0], new Mixed[0], new LeftHandSideType[0], t);
+			}
+
+			// Clone the environment to prevent parameter and variable assigns overwriting variables in the outer scope.
 			Environment myEnv;
 			try {
 				myEnv = env.clone();
 			} catch (CloneNotSupportedException ex) {
 				throw new RuntimeException(ex);
 			}
-			for(int i = 0; i < nodes.length - 1; i++) {
-				ParseTree node = nodes[i];
+
+			// Get closure parameter names, default values and types.
+			int numParams = nodes.length - nodeOffset - 1;
+			String[] names = new String[numParams];
+			Mixed[] defaults = new Mixed[numParams];
+			LeftHandSideType[] types = new LeftHandSideType[numParams];
+			for(int i = 0; i < numParams; i++) {
+				ParseTree node = nodes[i + nodeOffset];
 				ParseTree newNode = new ParseTree(new CFunction(g.NAME, t), node.getFileOptions());
 				List<ParseTree> children = new ArrayList<>();
 				children.add(node);
@@ -2557,8 +2557,9 @@ public class DataHandling {
 					Logger.getLogger(DataHandling.class.getName()).log(Level.SEVERE, null, ex);
 				}
 			}
-			CClosure closure = new CClosure(nodes[nodes.length - 1], myEnv, returnType, names, defaults, types, t);
-			return closure;
+
+			// Create and return the closure, using the last argument as the closure body.
+			return new CClosure(nodes[nodes.length - 1], myEnv, returnType, names, defaults, types, t);
 		}
 
 		@Override
