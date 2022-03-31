@@ -263,6 +263,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	 * @return The naked class type. This may return null if the class is not yet defined.
 	 */
 	public static CClassType getNakedClassType(FullyQualifiedClassName type, Environment env) {
+		Objects.requireNonNull(type);
 		try {
 			Class<? extends Mixed> clazz = NativeTypeList.getNativeClass(type);
 			if(clazz.getEnclosingClass() != null && clazz.getEnclosingClass() == MEnumType.class) {

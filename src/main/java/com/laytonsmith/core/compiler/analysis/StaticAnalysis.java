@@ -584,8 +584,12 @@ public class StaticAnalysis {
 			exceptions.add(new ConfigCompileException(
 					"Expected ivariable, but received type " + node.getName() + " instead.", t));
 		} catch(NullPointerException e) {
+			String name = node.getClass().getSimpleName();
+			if(node instanceof CFunction cf) {
+				name = cf.getCachedFunction().getName() + "()";
+			}
 			exceptions.add(new ConfigCompileException(
-					"Expected ivariable, but received " + node.getClass().getSimpleName() + " instead.", t));
+					"Expected ivariable, but received " + name + " instead.", t));
 		}
 		return null;
 	}

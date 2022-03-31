@@ -346,12 +346,14 @@ public class InstanceofUtil {
 	 * @return
 	 */
 	public static boolean isAssignableTo(LeftHandSideType type, LeftHandSideType instanceofThis, Environment env) {
-		if(!type.isTypeUnion()) {
+		if(type != null && !type.isTypeUnion()) {
 			// Only one iteration here
 			for(Pair<CClassType, LeftHandGenericUse> t : type.getTypes()) {
 				// TODO: Check for NotNull anntoation on instanceofThis
-				if(t.getKey() != null && t.getKey().getNakedType(env).equals(CNull.TYPE)) {
-					return true;
+				if(t.getKey() != null) {
+					if(CNull.TYPE.equals(t.getKey().getNakedType(env))) {
+						return true;
+					}
 				}
 			}
 		}
