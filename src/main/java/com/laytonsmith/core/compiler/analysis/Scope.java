@@ -2,6 +2,7 @@ package com.laytonsmith.core.compiler.analysis;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -35,9 +36,9 @@ public class Scope {
 		if(parent != null) {
 			this.parents.add(parent);
 		}
-		this.specificParents = new HashMap<>();
-		this.declarations = new HashMap<>();
-		this.references = new HashMap<>();
+		this.specificParents = new EnumMap<>(Namespace.class);
+		this.declarations = new EnumMap<>(Namespace.class);
+		this.references = new EnumMap<>(Namespace.class);
 	}
 
 	private Scope(Set<Scope> parents, Map<Namespace, Set<Scope>> specificParents,
@@ -215,6 +216,6 @@ public class Scope {
 	 * @return The clone.
 	 */
 	public Scope shallowUnlinkedClone() {
-		return new Scope(new HashSet<>(), new HashMap<>(), this.declarations, this.references);
+		return new Scope(new HashSet<>(), new EnumMap<>(Namespace.class), this.declarations, this.references);
 	}
 }

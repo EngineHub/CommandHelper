@@ -187,7 +187,7 @@ public class LangServModel {
 		interruptBuilding = false;
 		parseTrees.clear();
 		// Calculate all auto includes first
-		Set<File> autoIncludes = new HashSet<>();
+		List<File> autoIncludes = new ArrayList<>();
 		try {
 			for(WorkspaceFolder folder : getWorkspaceFolders()) {
 				URI uuri = new URI(folder.getUri());
@@ -233,8 +233,8 @@ public class LangServModel {
 			}
 			File workspace = new File(f.getUri().replaceFirst("file://", ""));
 
-			langServ.logv(() -> "Providing StaticAnalysis with auto includes: " + autoIncludes.toString());
-			StaticAnalysis.setAndAnalyzeAutoIncludes(new ArrayList<>(autoIncludes), env, env.getEnvClasses(), exceptions);
+			langServ.logv(() -> "Providing StaticAnalysis with auto includes: " + autoIncludes);
+			StaticAnalysis.setAndAnalyzeAutoIncludes(autoIncludes, env, env.getEnvClasses(), exceptions);
 
 			final Environment finalEnv = env;
 
@@ -242,7 +242,7 @@ public class LangServModel {
 				FileUtil.recursiveFind(workspace, (File f1) -> {
 					if(f1.isFile() && (f1.getName().endsWith(".ms") || f1.getName().endsWith(".msa"))) {
 						parseTrees.put(URIUtils.canonicalize(f1.toURI()).toString(),
-								doCompilation(f1.toURI().toString(), includeCache, staticAnalysis, finalEnv, exceptions));
+								doCompilation(f1.toURI().toString(), includeCache, new StaticAnalysis(true), finalEnv, exceptions));
 					}
 				});
 			} catch(IOException ex) {
