@@ -25,6 +25,7 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
+import com.laytonsmith.core.exceptions.CRE.CREIOException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.CRE.CREException;
 import com.laytonsmith.core.functions.DataHandling;
@@ -626,6 +627,11 @@ public class StaticAnalysis {
 			StaticAnalysis includeAnalysis;
 			try {
 				File file = Static.GetFileFromArgument(includeRef.getIdentifier(), env, includeRef.getTarget(), null);
+				try {
+					file = file.getCanonicalFile();
+				} catch (IOException ex) {
+					throw new CREIOException(ex.getMessage(), includeRef.getTarget());
+				}
 				includeAnalysis = includeCache.getStaticAnalysis(file);
 				if(includeAnalysis == null) {
 					includeAnalysis = new StaticAnalysis(false);

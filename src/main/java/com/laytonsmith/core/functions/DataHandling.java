@@ -69,6 +69,7 @@ import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREIOException;
 import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CRE.CREIncludeException;
 import com.laytonsmith.core.exceptions.CRE.CREIndexOverflowException;
@@ -1769,7 +1770,7 @@ public class DataHandling {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREIncludeException.class};
+			return new Class[]{CREIncludeException.class, CREIOException.class};
 		}
 
 		@Override
@@ -1798,7 +1799,11 @@ public class DataHandling {
 			Mixed arg = parent.seval(tree, env);
 			String location = arg.val();
 			File file = Static.GetFileFromArgument(location, env, t, null);
-
+			try {
+				file = file.getCanonicalFile();
+			} catch (IOException ex) {
+				throw new CREIOException(ex.getMessage(), t);
+			}
 			// Create new static analysis for dynamic includes that have not yet been cached.
 			StaticAnalysis analysis;
 			IncludeCache includeCache = env.getEnv(StaticRuntimeEnv.class).getIncludeCache();

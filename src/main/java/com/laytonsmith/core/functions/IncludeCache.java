@@ -108,11 +108,6 @@ public class IncludeCache {
 	public static ParseTree get(File file, com.laytonsmith.core.environments.Environment env,
 			Set<Class<? extends Environment.EnvironmentImpl>> envs, StaticAnalysis staticAnalysis, Target t) {
 		MSLog.GetLogger().Log(TAG, LogLevel.DEBUG, "Loading " + file, t);
-		try {
-			file = file.getCanonicalFile();
-		} catch (IOException ex) {
-			throw new CREIOException(ex.getMessage(), t);
-		}
 		IncludeCache includeCache = env.getEnv(StaticRuntimeEnv.class).getIncludeCache();
 		if(includeCache.cache.containsKey(file)) {
 			MSLog.GetLogger().Log(TAG, LogLevel.INFO, "Returning " + file + " from cache", t);
