@@ -585,6 +585,10 @@ public class StaticAnalysis {
 						// Get the static analysis of the include.
 						File file = Static.GetFileFromArgument(
 								pathRef.getIdentifier(), env, pathRef.getTarget(), null);
+						try {
+							file = file.getCanonicalFile();
+						} catch(IOException ex) {
+						}
 						StaticAnalysis includeAnalysis = includeCache.getStaticAnalysis(file);
 						if(includeAnalysis == null) {
 
