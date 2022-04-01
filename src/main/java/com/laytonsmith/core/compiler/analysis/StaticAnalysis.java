@@ -15,6 +15,7 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
+import com.laytonsmith.core.exceptions.CRE.CREIOException;
 import com.laytonsmith.core.exceptions.CRE.CREException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.DataHandling;
@@ -151,7 +152,13 @@ public class StaticAnalysis {
 		}
 
 		// Pass the start scope to the root node, allowing it to adjust the scope graph.
-		this.endScope = linkScope(this.startScope, ast, env, exceptions);
+		if(ast != null) {
+			this.endScope = linkScope(this.startScope, ast, env, exceptions);
+		} else {
+
+			// This program is empty. Link scopes so that it can be used as a valid include.
+			this.endScope = this.startScope;
+		}
 
 		// Handle include references and analyze the final scope graph if this is the main analysis.
 		if(this.isMainAnalysis) {
@@ -656,6 +663,10 @@ public class StaticAnalysis {
 						// Get the static analysis of the include.
 						File file = Static.GetFileFromArgument(
 								pathRef.getIdentifier(), env, pathRef.getTarget(), null);
+						try {
+							file = file.getCanonicalFile();
+						} catch(IOException ex) {
+						}
 						StaticAnalysis includeAnalysis = includeCache.getStaticAnalysis(file);
 						if(includeAnalysis == null) {
 
@@ -698,6 +709,11 @@ public class StaticAnalysis {
 			StaticAnalysis includeAnalysis;
 			try {
 				File file = Static.GetFileFromArgument(includeRef.getIdentifier(), env, includeRef.getTarget(), null);
+				try {
+					file = file.getCanonicalFile();
+				} catch (IOException ex) {
+					throw new CREIOException(ex.getMessage(), includeRef.getTarget());
+				}
 				includeAnalysis = includeCache.getStaticAnalysis(file);
 				if(includeAnalysis == null) {
 					includeAnalysis = new StaticAnalysis(false);

@@ -187,17 +187,24 @@ public class LangServModel {
 		interruptBuilding = false;
 		parseTrees.clear();
 		// Calculate all auto includes first
-		Set<File> autoIncludes = new HashSet<>();
+		List<File> autoIncludes = new ArrayList<>();
+		List<File> mainFiles = new ArrayList<>();
+		List<File> libraryFiles = new ArrayList<>();
 		try {
 			for(WorkspaceFolder folder : getWorkspaceFolders()) {
 				URI uuri = new URI(folder.getUri());
 				File ai = Paths.get(uuri).toFile();
 				FileUtil.recursiveFind(ai, (r) -> {
-					if(r.isFile() && r.getAbsolutePath().endsWith("auto_include.ms")) {
-						String path = r.getAbsolutePath().replace("\\", "/");
-						if(!path.contains(".disabled/")
-								&& !path.contains(".library/")) {
+					String path = r.getAbsolutePath().replace("\\", "/");
+					if(!path.contains(".disabled/") && r.isFile()) {
+						if(path.contains(".library/")) {
+							if(path.endsWith(".ms")) {
+								libraryFiles.add(r);
+							}
+						} else if(path.endsWith("auto_include.ms")) {
 							autoIncludes.add(r);
+						} else if(path.endsWith(".ms") || path.endsWith(".msa")) {
+							mainFiles.add(r);
 						}
 					}
 				});
@@ -227,27 +234,30 @@ public class LangServModel {
 		gEnv.SetScriptProvider((File file) -> getDocument(file.toURI().toString()));
 		Set<ConfigCompileException> exceptions = new HashSet<>();
 
-		for(WorkspaceFolder f : workspaceFolders) {
-			if(interruptBuilding) {
-				return;
-			}
-			File workspace = new File(f.getUri().replaceFirst("file://", ""));
+		langServ.logv(() -> "Providing StaticAnalysis with auto includes: " + autoIncludes);
+		StaticAnalysis.setAndAnalyzeAutoIncludes(autoIncludes, env, env.getEnvClasses(), exceptions);
 
-			langServ.logv(() -> "Providing StaticAnalysis with auto includes: " + autoIncludes.toString());
-			StaticAnalysis.setAndAnalyzeAutoIncludes(new ArrayList<>(autoIncludes), env, env.getEnvClasses(), exceptions);
+		for(File f1 : autoIncludes) {
+			parseTrees.put(URIUtils.canonicalize(f1.toURI()).toString(),
+					doCompilation(f1.toURI().toString(), includeCache, new StaticAnalysis(true), env, exceptions));
+		}
 
-			final Environment finalEnv = env;
+		for(File f2 : mainFiles) {
+			parseTrees.put(URIUtils.canonicalize(f2.toURI()).toString(),
+					doCompilation(f2.toURI().toString(), includeCache, new StaticAnalysis(true), env, exceptions));
+		}
 
+		for(File f3 : libraryFiles) {
 			try {
-				FileUtil.recursiveFind(workspace, (File f1) -> {
-					if(f1.isFile() && (f1.getName().endsWith(".ms") || f1.getName().endsWith(".msa"))) {
-						parseTrees.put(URIUtils.canonicalize(f1.toURI()).toString(),
-								doCompilation(f1.toURI().toString(), includeCache, staticAnalysis, finalEnv, exceptions));
-					}
-				});
+				f3 = f3.getCanonicalFile();
 			} catch(IOException ex) {
-				client.logMessage(new MessageParams(MessageType.Warning, ex.getMessage()));
 			}
+			StaticAnalysis analysis = includeCache.getStaticAnalysis(f3);
+			if(analysis == null) {
+				analysis = new StaticAnalysis(true);
+			}
+			parseTrees.put(URIUtils.canonicalize(f3.toURI()).toString(),
+					doCompilation(f3.toURI().toString(), includeCache, analysis, env, exceptions));
 		}
 
 		Map<String, List<Diagnostic>> diagnosticsLists = new HashMap<>();
@@ -564,11 +574,6 @@ public class LangServModel {
 				} else {
 					f = Paths.get(uuri).toFile();
 				}
-			}
-
-			if(f.getAbsolutePath().replace("\\", "/").contains(".disabled/")) {
-				// Don't compile files in disabled folders at all.
-				return null;
 			}
 
 			env.getEnv(GlobalEnv.class).SetRootFolder(f.getParentFile());

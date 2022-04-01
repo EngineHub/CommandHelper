@@ -1309,9 +1309,16 @@ public final class MethodScriptCompiler {
 			throw new RuntimeException(ex);
 		}
 		Set<ConfigCompileException> compilerErrors = new HashSet<>();
+
+		// Return a null AST when the program is empty.
+		// Do run static analysis to allow for including this empty file in another file.
 		if(stream == null || stream.isEmpty()) {
+			if(staticAnalysis != null) {
+				staticAnalysis.analyze(null, environment, envs, compilerErrors);
+			}
 			return null;
 		}
+
 		Target unknown;
 		try {
 			//Instead of using Target.UNKNOWN, we can at least set the file.
