@@ -150,7 +150,13 @@ public class StaticAnalysis {
 		}
 
 		// Pass the start scope to the root node, allowing it to adjust the scope graph.
-		this.endScope = linkScope(this.startScope, ast, env, exceptions);
+		if(ast != null) {
+			this.endScope = linkScope(this.startScope, ast, env, exceptions);
+		} else {
+
+			// This program is empty. Link scopes so that it can be used as a valid include.
+			this.endScope = this.startScope;
+		}
 
 		// Handle include references and analyze the final scope graph if this is the main analysis.
 		if(this.isMainAnalysis) {
