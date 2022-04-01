@@ -83,6 +83,8 @@ public class ClassMirror<T> implements Serializable {
 		return info.modifiers;
 	}
 
+	private String jvmClassName = null;
+
 	/**
 	 * Returns the name of this class as recognized by the JVM, not the common class name. Use {@link #getClassName()}
 	 * instead, if you want the common name.
@@ -90,10 +92,14 @@ public class ClassMirror<T> implements Serializable {
 	 * @return
 	 */
 	public String getJVMClassName() {
-		if(underlyingClass != null) {
-			return ClassUtils.getJVMName(underlyingClass);
+		if(jvmClassName == null) {
+			if(underlyingClass != null) {
+				jvmClassName = ClassUtils.getJVMName(underlyingClass);
+			} else {
+				jvmClassName = "L" + info.name + ";";
+			}
 		}
-		return "L" + info.name + ";";
+		return jvmClassName;
 	}
 
 	/**
