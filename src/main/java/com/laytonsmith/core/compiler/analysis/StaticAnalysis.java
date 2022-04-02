@@ -144,7 +144,7 @@ public class StaticAnalysis {
 		// Handle auto includes if present.
 		StaticAnalysis autoIncludesAnalysis = env.getEnv(StaticRuntimeEnv.class).getAutoIncludeAnalysis();
 		if(autoIncludesAnalysis != null) {
-			if(this.isMainAnalysis) {
+			if(this.isMainAnalysis && autoIncludesAnalysis.endScope != null) {
 				this.startScope.addParent(autoIncludesAnalysis.endScope);
 			}
 			this.globalScope = autoIncludesAnalysis.globalScope;

@@ -3804,7 +3804,7 @@ public class DataHandling {
 				Set<Class<? extends Environment.EnvironmentImpl>> envs, List<ParseTree> children,
 				FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			// There are two specific cases here where we will give more precise error messages.
-			// If it's a string, yell at them
+			// If it's a string, yell at them (Note CKeyword extends CString, for better or worse)
 			if(children.get(1).getData().isInstanceOf(CString.TYPE)) {
 				throw new ConfigCompileException("Unexpected string type passed to \"instanceof\"", t);
 			}
