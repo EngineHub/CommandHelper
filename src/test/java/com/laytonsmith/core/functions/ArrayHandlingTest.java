@@ -64,7 +64,7 @@ public class ArrayHandlingTest {
 	public void testArraySize() throws Exception, CancelCommandException {
 		ArrayHandling.array_size a = new ArrayHandling.array_size();
 		CArray arr = commonArray;
-		Mixed ret = a.exec(Target.UNKNOWN, env, arr);
+		Mixed ret = a.exec(Target.UNKNOWN, env, null, arr);
 		assertReturn(ret, C.INT);
 		assertCEquals(C.onstruct(3), ret);
 	}
@@ -72,7 +72,7 @@ public class ArrayHandlingTest {
 	@Test(expected = Exception.class, timeout = 10000)
 	public void testArraySizeEx() throws CancelCommandException {
 		ArrayHandling.array_size a = new ArrayHandling.array_size();
-		a.exec(Target.UNKNOWN, env, C.Int(0));
+		a.exec(Target.UNKNOWN, env, null, C.Int(0));
 	}
 
 	@Test//(timeout = 10000)

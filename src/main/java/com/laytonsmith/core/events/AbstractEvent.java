@@ -98,7 +98,7 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 		if(hasOldMethod) {
 			return (boolean) ReflectionUtils.invokeMethod(this.getClass(), this, "matches",
 					new Class[]{Map.class, BindableEvent.class},
-					new Object[] {prefilter, e}); 
+					new Object[] {prefilter, e});
 		}
 		throw new UnsupportedOperationException();
 	}
