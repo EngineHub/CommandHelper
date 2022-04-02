@@ -13,7 +13,6 @@ import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.FileOptions.SuppressWarning;
-import com.laytonsmith.core.compiler.Keyword;
 import com.laytonsmith.core.compiler.KeywordList;
 import com.laytonsmith.core.compiler.TokenStream;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
@@ -2763,40 +2762,29 @@ public final class MethodScriptCompiler {
 	private static void processKeywords(ParseTree tree, Environment env, Set<ConfigCompileException> compileErrors) {
 		// Keyword processing
 		List<ParseTree> children = tree.getChildren();
-		boolean processRemainingChildren = true;
 		for(int i = 0; i < children.size(); i++) {
 			ParseTree node = children.get(i);
 			// Keywords can be standalone, or a function can double as a keyword. So we have to check for both
 			// conditions.
-			if(processRemainingChildren) {
-				processKeywords(node, env, compileErrors);
-			}
+			processKeywords(node, env, compileErrors);
 			Mixed m = node.getData();
-			if(!(m instanceof CKeyword
+			if(m instanceof CKeyword
 					|| (m instanceof CLabel && ((CLabel) m).cVal() instanceof CKeyword)
-					|| (m instanceof CFunction))) {
-				continue;
-			}
-			Keyword keyword = KeywordList.getKeywordByName(m.val());
-			if(keyword == null) {
-				continue;
-			}
-			// This looks a bit confusing, but is fairly straightforward. We want to process the child elements of all
-			// remaining nodes, so that subchildren that need processing will be finished, and our current tree level will
-			// be able to independently process it. We don't want to process THIS level though, just the children of this level.
-			if(processRemainingChildren) {
+					|| (m instanceof CFunction && KeywordList.getKeywordByName(m.val()) != null)) {
+				// This looks a bit confusing, but is fairly straightforward. We want to process the child elements of all
+				// remaining nodes, so that subchildren that need processing will be finished, and our current tree level will
+				// be able to independently process it. We don't want to process THIS level though, just the children of this level.
 				for(int j = i + 1; j < children.size(); j++) {
 					processKeywords(children.get(j), env, compileErrors);
 				}
-			}
-			processRemainingChildren = false;
-			// Now that all the children of the rest of the chain are processed, we can do the processing of this level.
-			try {
-				i = keyword.process(children, i);
-			} catch (ConfigCompileException ex) {
-				// Keyword processing failed, but the keyword might be part of some other syntax where it's valid.
-				// Store the compile error so that it can be thrown after all if the keyword won't be handled.
-				env.getEnv(CompilerEnvironment.class).potentialKeywordCompileErrors.put(m.getTarget(), ex);
+				// Now that all the children of the rest of the chain are processed, we can do the processing of this level.
+				try {
+					i = KeywordList.getKeywordByName(m.val()).process(children, i);
+				} catch (ConfigCompileException ex) {
+					// Keyword processing failed, but the keyword might be part of some other syntax where it's valid.
+					// Store the compile error so that it can be thrown after all if the keyword won't be handled.
+					env.getEnv(CompilerEnvironment.class).potentialKeywordCompileErrors.put(m.getTarget(), ex);
+				}
 			}
 		}
 
