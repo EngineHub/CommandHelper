@@ -89,8 +89,8 @@ public class ArrayHandling {
 			return new Integer[]{1};
 		}
 
-//		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		@Override
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			// TODO: It's far too late to deprecate this, but this method and length() are aliases, so
 			// we should at least harmonize the implementations.
 			if(args[0] instanceof Sizeable s) {
