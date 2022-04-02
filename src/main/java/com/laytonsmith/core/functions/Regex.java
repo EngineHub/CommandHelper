@@ -91,7 +91,7 @@ public class Regex {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			Pattern pattern = getPattern(args[0], t, env);
 			String subject = args[1].val();
 			CArray ret = CArray.GetAssociativeArray(t, null, env);
@@ -194,7 +194,7 @@ public class Regex {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			Pattern pattern = getPattern(args[0], t, env);
 			String subject = args[1].val();
 			CArray fret = new CArray(t, null, env);
@@ -296,7 +296,7 @@ public class Regex {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			Pattern pattern = getPattern(args[0], t, env);
 			String replacement = args[1].val();
 			String subject = args[2].val();
@@ -405,7 +405,7 @@ public class Regex {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			Pattern pattern = getPattern(args[0], t, env);
 			String subject = args[1].val();
 			/**
@@ -506,7 +506,7 @@ public class Regex {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			Pattern pattern = getPattern(args[0], t, env);
 			String subject = args[1].val();
 			long ret = 0;
@@ -565,7 +565,7 @@ public class Regex {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return new CString(java.util.regex.Pattern.quote(args[0].val()), t);
 		}
 

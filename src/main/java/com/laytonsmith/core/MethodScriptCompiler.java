@@ -2630,7 +2630,8 @@ public final class MethodScriptCompiler {
 								}
 							}
 							if(!stop) {
-								result = func.exec(tree.getData().getTarget(), env, constructs);
+								// TODO: Provide generic parameters
+								result = func.exec(tree.getData().getTarget(), env, null, constructs);
 							} else {
 								result = null;
 							}

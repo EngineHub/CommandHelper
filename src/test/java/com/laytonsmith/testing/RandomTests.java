@@ -373,7 +373,7 @@ public class RandomTests {
 	public void testVoidAndReturnedVoidAreTheExactSame() throws Exception {
 		try {
 			Environment env = Static.GenerateStandaloneEnvironment(true);
-			Mixed returnedVoid = new ArrayHandling.array_insert().exec(Target.UNKNOWN, env,
+			Mixed returnedVoid = new ArrayHandling.array_insert().exec(Target.UNKNOWN, env, null,
 					C.Array(), C.String(""), C.Int(0));
 			Construct voidKeyword = Static.resolveConstruct("void", Target.UNKNOWN, env);
 			assertTrue(returnedVoid == voidKeyword);

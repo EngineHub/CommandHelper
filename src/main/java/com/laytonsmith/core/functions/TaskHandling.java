@@ -10,6 +10,7 @@ import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
@@ -50,7 +51,7 @@ public class TaskHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			TaskManager tm = env.getEnv(StaticRuntimeEnv.class).GetTaskManager();
 			CArray ret = new CArray(t, null, env);
 			for(TaskHandler task : tm.getTasks()) {
@@ -134,7 +135,7 @@ public class TaskHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String type = args[0].val();
 			int id = ArgumentValidation.getInt32(args[1], t, env);
 			TaskManager tm = env.getEnv(StaticRuntimeEnv.class).GetTaskManager();

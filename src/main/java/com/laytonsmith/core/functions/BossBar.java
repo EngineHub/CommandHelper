@@ -80,7 +80,7 @@ public class BossBar {
 		}
 
 		@Override
-		public CArray exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public CArray exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CArray ca = new CArray(t, GenericParameters
 					.addParameter(CString.TYPE, null).build(), env);
 			for(String id : BARS.keySet()) {
@@ -123,7 +123,7 @@ public class BossBar {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String id = args[0].val();
 			if(BARS.containsKey(id)) {
 				throw new CREIllegalArgumentException("That boss bar id is already in use.", t);
@@ -205,7 +205,7 @@ public class BossBar {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String id = args[0].val();
 			MCBossBar bar = BARS.get(id);
 			if(bar == null) {
@@ -281,7 +281,7 @@ public class BossBar {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String id = args[0].val();
 			MCBossBar bar = BARS.get(id);
 			if(bar == null) {
@@ -322,7 +322,7 @@ public class BossBar {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String id = args[0].val();
 			MCBossBar bar = BARS.get(id);
 			if(bar == null) {
@@ -359,7 +359,7 @@ public class BossBar {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCBossBar bar = BARS.get(args[0].val());
 			if(bar == null) {
 				throw new CRENotFoundException("That boss bar id does not exist.", t);
@@ -393,7 +393,7 @@ public class BossBar {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCBossBar bar = BARS.get(args[0].val());
 			if(bar == null) {
 				throw new CRENotFoundException("That boss bar id does not exist.", t);
@@ -427,7 +427,7 @@ public class BossBar {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCBossBar bar = BARS.get(args[0].val());
 			if(bar == null) {
 				throw new CRENotFoundException("That boss bar id does not exist.", t);

@@ -68,7 +68,7 @@ public class Statistics {
 	public static class average extends StatisticsFunction {
 
 		@Override
-		public CNumber exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public CNumber exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			long count;
 			if(args.length == 1 && args[0].isInstanceOf(CArray.TYPE, null, env)) {
 				CArray c = ArgumentValidation.getArray(args[0], t, env);
@@ -76,7 +76,7 @@ public class Statistics {
 			} else {
 				count = args.length;
 			}
-			double sum = new sum().exec(t, env, args).getNumber();
+			double sum = new sum().exec(t, env, null, args).getNumber();
 			return new CDouble(sum / count, t);
 		}
 
@@ -118,7 +118,7 @@ public class Statistics {
 	public static class sum extends StatisticsFunction {
 
 		@Override
-		public CNumber exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public CNumber exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			List<Double> values = new ArrayList<>();
 			if(args.length == 1 && args[0].isInstanceOf(CArray.TYPE, null, env)) {
 				CArray c = ArgumentValidation.getArray(args[0], t, env);
@@ -174,7 +174,7 @@ public class Statistics {
 	public static class median extends StatisticsFunction {
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			List<Double> values = new ArrayList<>();
 			if(args.length == 1 && args[0].isInstanceOf(CArray.TYPE, null, env)) {
 				CArray c = ArgumentValidation.getArray(args[0], t, env);
@@ -238,7 +238,7 @@ public class Statistics {
 	public static class mode extends StatisticsFunction {
 
 		@Override
-		public CArray exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public CArray exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			List<Double> values = new ArrayList<>();
 			if(args.length == 1 && args[0].isInstanceOf(CArray.TYPE, null, env)) {
 				CArray c = ArgumentValidation.getArray(args[0], t, env);
@@ -338,7 +338,7 @@ public class Statistics {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			double percentile = ArgumentValidation.getDouble(args[0], t, env);
 			List<Double> values = new ArrayList<>();
 			if(args.length == 2 && args[1].isInstanceOf(CArray.TYPE, null, env)) {

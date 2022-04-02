@@ -9,6 +9,7 @@ import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
@@ -55,7 +56,7 @@ public class ExecutionQueue {
 		}
 
 		@Override
-		public Mixed exec(Target t, final Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			final CClosure c;
 			String queue = null;
 			if(!(args[0].isInstanceOf(CClosure.TYPE, null, env))) {
@@ -138,7 +139,7 @@ public class ExecutionQueue {
 		}
 
 		@Override
-		public Mixed exec(Target t, final Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			final CClosure c;
 			String queue = null;
 			if(!(args[0].isInstanceOf(CClosure.TYPE, null, env))) {
@@ -221,12 +222,12 @@ public class ExecutionQueue {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String queue = null;
 			if(args.length == 1) {
 				queue = Construct.nval(args[0]);
 			}
-			environment.getEnv(StaticRuntimeEnv.class).getExecutionQueue().remove(queue);
+			env.getEnv(StaticRuntimeEnv.class).getExecutionQueue().remove(queue);
 			return CVoid.VOID;
 		}
 
@@ -271,12 +272,12 @@ public class ExecutionQueue {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String queue = null;
 			if(args.length == 1) {
 				queue = Construct.nval(args[0]);
 			}
-			environment.getEnv(StaticRuntimeEnv.class).getExecutionQueue().removeFront(queue);
+			env.getEnv(StaticRuntimeEnv.class).getExecutionQueue().removeFront(queue);
 			return CVoid.VOID;
 		}
 
@@ -322,12 +323,12 @@ public class ExecutionQueue {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String queue = null;
 			if(args.length == 1) {
 				queue = Construct.nval(args[0]);
 			}
-			environment.getEnv(StaticRuntimeEnv.class).getExecutionQueue().clear(queue);
+			env.getEnv(StaticRuntimeEnv.class).getExecutionQueue().clear(queue);
 			return CVoid.VOID;
 		}
 
@@ -373,12 +374,12 @@ public class ExecutionQueue {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String queue = null;
 			if(args.length == 1) {
 				queue = Construct.nval(args[0]);
 			}
-			return CBoolean.get(environment.getEnv(StaticRuntimeEnv.class).getExecutionQueue().isRunning(queue));
+			return CBoolean.get(env.getEnv(StaticRuntimeEnv.class).getExecutionQueue().isRunning(queue));
 		}
 
 		@Override
@@ -422,7 +423,7 @@ public class ExecutionQueue {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String queue = null;
 			if(args.length == 2) {
 				queue = Construct.nval(args[1]);
@@ -485,7 +486,7 @@ public class ExecutionQueue {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String queue = null;
 			if(args.length == 2) {
 				queue = Construct.nval(args[1]);

@@ -12,6 +12,7 @@ import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.Event;
 import com.laytonsmith.core.events.EventList;
@@ -57,9 +58,9 @@ public class ExtensionMeta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			try {
-				FunctionList.getFunction(args[0].val().toLowerCase(), environment.getEnvClasses(), t);
+				FunctionList.getFunction(args[0].val().toLowerCase(), env.getEnvClasses(), t);
 			} catch (ConfigCompileException ex) {
 				return CBoolean.FALSE;
 			}
@@ -159,7 +160,7 @@ public class ExtensionMeta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return CBoolean.get(EventList.getEvent(args[0].val().toLowerCase()) != null);
 		}
 
@@ -204,7 +205,7 @@ public class ExtensionMeta {
 				throw new ConfigCompileException(getName() + " can only accept hardcoded string values", t);
 			}
 
-			return new ParseTree(this.exec(t, null, children.get(0).getData()), children.get(0).getFileOptions());
+			return new ParseTree(this.exec(t, env, null, children.get(0).getData()), children.get(0).getFileOptions());
 		}
 	}
 
@@ -228,7 +229,7 @@ public class ExtensionMeta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			Map<URL, ExtensionTracker> trackers = ExtensionManager.getTrackers();
 			for(ExtensionTracker tracker : trackers.values()) {
 				String identifier = tracker.getIdentifier();
@@ -276,7 +277,7 @@ public class ExtensionMeta {
 			} else if(!(children.get(0).getData().isInstanceOf(CString.TYPE, null, env))) {
 				throw new ConfigCompileException(getName() + " can only accept hardcoded string values", t);
 			} else {
-				return new ParseTree(this.exec(t, null, children.get(0).getData()), children.get(0).getFileOptions());
+				return new ParseTree(this.exec(t, env, null, children.get(0).getData()), children.get(0).getFileOptions());
 			}
 		}
 	}
@@ -300,7 +301,7 @@ public class ExtensionMeta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			Map<URL, ExtensionTracker> trackers = ExtensionManager.getTrackers();
 
 			CArray retn = CArray.GetAssociativeArray(t, null, env);

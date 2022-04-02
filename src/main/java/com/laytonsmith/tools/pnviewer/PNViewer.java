@@ -341,7 +341,7 @@ public class PNViewer extends javax.swing.JFrame {
 			} catch (MarshalException | InvalidProfileException | DataSourceException | IOException | URISyntaxException ex) {
 				Logger.getLogger(PNViewer.class.getName()).log(Level.SEVERE, null, ex);
 			}
-			valueTypeLabel.setText(new DataHandling.typeof().exec(Target.UNKNOWN, null, c).val());
+			valueTypeLabel.setText(new DataHandling.typeof().exec(Target.UNKNOWN, null, null, c).val());
 			valueTextArea.setText(c.val());
 		}
 	}

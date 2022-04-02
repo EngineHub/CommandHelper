@@ -184,7 +184,7 @@ public class Enchantments {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			int offset = 0;
 			if(args.length == 4 || args.length == 3 && args[2].isInstanceOf(CArray.TYPE, null, env)) {
@@ -259,7 +259,7 @@ public class Enchantments {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			int offset = 0;
 			if(args.length == 3) {
@@ -332,7 +332,7 @@ public class Enchantments {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			Mixed slot;
 			if(args.length == 2) {
@@ -393,7 +393,7 @@ public class Enchantments {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCEnchantment e = GetEnchantment(args[0].val(), t);
 			MCItemStack is = ObjectGenerator.GetGenerator().item(args[1], t, env);
 			return CBoolean.get(e.canEnchantItem(is));
@@ -440,7 +440,7 @@ public class Enchantments {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCEnchantment e = GetEnchantment(args[0].val().replace(' ', '_'), t);
 			return new CInt(e.getMaxLevel(), t);
 		}
@@ -489,7 +489,7 @@ public class Enchantments {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCItemStack is;
 			if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
 				is = ObjectGenerator.GetGenerator().item(args[0], t, env);
@@ -575,7 +575,7 @@ public class Enchantments {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			try {
 				GetEnchantment(args[0].val(), t);
 				return CBoolean.TRUE;
@@ -604,12 +604,12 @@ public class Enchantments {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCEnchantment[] enchantments = StaticLayer.GetEnchantmentValues();
 			CArray ret = new CArray(t, GenericParameters
-					.addParameter(CString.TYPE, null).build(), environment);
+					.addParameter(CString.TYPE, null).build(), env);
 			for(MCEnchantment e : enchantments) {
-				ret.push(new CString(e.getKey(), t), t, environment);
+				ret.push(new CString(e.getKey(), t), t, env);
 			}
 			return ret;
 		}

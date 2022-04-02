@@ -15,6 +15,7 @@ import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -92,7 +93,7 @@ public abstract class LLVMFunction implements FunctionBase, Function {
 	}
 
 	@Override
-	public final Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+	public final Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 		throw new UnsupportedOperationException("Not supported.");
 	}
 
@@ -227,7 +228,7 @@ public abstract class LLVMFunction implements FunctionBase, Function {
 	}
 
 	@Override
-	public final Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+	public final Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
 		throw new UnsupportedOperationException("Not supported.");
 	}
 

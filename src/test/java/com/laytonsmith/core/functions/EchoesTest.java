@@ -67,7 +67,7 @@ public class EchoesTest {
 	@Test(timeout = 10000)
 	public void testChat() throws CancelCommandException {
 		Echoes.chat a = new Echoes.chat();
-		a.exec(Target.UNKNOWN, env, C.onstruct("Hello World!"));
+		a.exec(Target.UNKNOWN, env, null, C.onstruct("Hello World!"));
 		verify(fakePlayer).chat("Hello World!");
 	}
 
@@ -77,7 +77,7 @@ public class EchoesTest {
 		Echoes.broadcast a = new Echoes.broadcast();
 		when(fakePlayer.getServer()).thenReturn(fakeServer);
 		CommandHelperPlugin.myServer = fakeServer;
-		a.exec(Target.UNKNOWN, env, C.onstruct("Hello World!"));
+		a.exec(Target.UNKNOWN, env, null, C.onstruct("Hello World!"));
 		verify(fakeServer).broadcastMessage("Hello World!");
 	}
 
@@ -129,7 +129,7 @@ public class EchoesTest {
 	}
 
 	private static final String LOWERCASE_A =
-			new color().exec(Target.UNKNOWN, null, new CString("a", Target.UNKNOWN)).val();
+			new color().exec(Target.UNKNOWN, null, null, new CString("a", Target.UNKNOWN)).val();
 
 	@Test
 	public void testColorize1() throws Exception {
@@ -163,7 +163,7 @@ public class EchoesTest {
 
 	@Test
 	public void testColorizeRGB() throws Exception {
-		String expectedColor = new color().exec(Target.UNKNOWN, null, new CString("#ff11aa", Target.UNKNOWN)).val();
+		String expectedColor = new color().exec(Target.UNKNOWN, null, null, new CString("#ff11aa", Target.UNKNOWN)).val();
 		assertEquals(expectedColor + "Hi", SRun("colorize('&#ff11aaHi', '&')", fakePlayer));
 	}
 

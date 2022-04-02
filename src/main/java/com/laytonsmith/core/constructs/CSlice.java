@@ -70,7 +70,7 @@ public class CSlice extends CArray {
 
 	@Override
 	public List<Mixed> asList(Environment env) {
-		CArray ca = new ArrayHandling.range().exec(Target.UNKNOWN, env, new CInt(start, Target.UNKNOWN), new CInt(finish, Target.UNKNOWN));
+		CArray ca = new ArrayHandling.range().exec(Target.UNKNOWN, env, null, new CInt(start, Target.UNKNOWN), new CInt(finish, Target.UNKNOWN));
 		return ca.asList(env);
 	}
 

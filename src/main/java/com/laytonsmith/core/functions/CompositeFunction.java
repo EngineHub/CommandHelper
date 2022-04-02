@@ -15,6 +15,7 @@ import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.IVariableList;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
@@ -41,7 +42,7 @@ public abstract class CompositeFunction extends AbstractFunction {
 	private static final Map<Class<? extends CompositeFunction>, ParseTree> CACHED_SCRIPTS = new HashMap<>();
 
 	@Override
-	public final Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+	public final Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 		ParseTree tree;
 		// TODO: Ultimately, this is not scalable. We need to compile and cache these scripts at Java compile time,
 		// not at runtime the first time a function is used. This is an easier first step though.
@@ -143,7 +144,7 @@ public abstract class CompositeFunction extends AbstractFunction {
 	}
 
 	@Override
-	public final Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+	public final Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
 		throw new Error(this.getClass().toString());
 	}
 

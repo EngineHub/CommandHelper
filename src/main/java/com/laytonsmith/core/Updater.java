@@ -49,7 +49,7 @@ public class Updater {
 	}
 
 	public static Boolean isUpdateAvailable() {
-		Mixed buildDate = new Meta.engine_build_date().exec(null, null, (Mixed[]) null);
+		Mixed buildDate = new Meta.engine_build_date().exec(null, null, null, (Mixed[]) null);
 		if(buildDate instanceof CNull) {
 			return null;
 		}

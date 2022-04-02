@@ -206,48 +206,48 @@ public class BasicLogicTest {
 	@Test(timeout = 10000)
 	public void testNot() throws CancelCommandException {
 		BasicLogic.not a = new BasicLogic.not();
-		assertCFalse(a.exec(Target.UNKNOWN, env, cTrue));
-		assertCTrue(a.exec(Target.UNKNOWN, env, cFalse));
+		assertCFalse(a.exec(Target.UNKNOWN, env, null, cTrue));
+		assertCTrue(a.exec(Target.UNKNOWN, env, null, cFalse));
 	}
 
 	@Test(timeout = 10000)
 	public void testGt() throws CancelCommandException {
 		BasicLogic.gt a = new BasicLogic.gt();
-		assertCFalse(a.exec(Target.UNKNOWN, env, argOne, argOne2));
-		assertCTrue(a.exec(Target.UNKNOWN, env, argTwo, argOne));
-		assertCFalse(a.exec(Target.UNKNOWN, env, argOne, argTwo));
-		assertCFalse(a.exec(Target.UNKNOWN, env, argNegOne, argOne));
-		assertCTrue(a.exec(Target.UNKNOWN, env, argOne, argNegOne));
+		assertCFalse(a.exec(Target.UNKNOWN, env, null, argOne, argOne2));
+		assertCTrue(a.exec(Target.UNKNOWN, env, null, argTwo, argOne));
+		assertCFalse(a.exec(Target.UNKNOWN, env, null, argOne, argTwo));
+		assertCFalse(a.exec(Target.UNKNOWN, env, null, argNegOne, argOne));
+		assertCTrue(a.exec(Target.UNKNOWN, env, null, argOne, argNegOne));
 	}
 
 	@Test(timeout = 10000)
 	public void testGte() throws CancelCommandException {
 		BasicLogic.gte a = new BasicLogic.gte();
-		assertCTrue(a.exec(Target.UNKNOWN, env, argOne, argOne2));
-		assertCTrue(a.exec(Target.UNKNOWN, env, argTwo, argOne));
-		assertCFalse(a.exec(Target.UNKNOWN, env, argOne, argTwo));
-		assertCFalse(a.exec(Target.UNKNOWN, env, argNegOne, argOne));
-		assertCTrue(a.exec(Target.UNKNOWN, env, argOne, argNegOne));
+		assertCTrue(a.exec(Target.UNKNOWN, env, null, argOne, argOne2));
+		assertCTrue(a.exec(Target.UNKNOWN, env, null, argTwo, argOne));
+		assertCFalse(a.exec(Target.UNKNOWN, env, null, argOne, argTwo));
+		assertCFalse(a.exec(Target.UNKNOWN, env, null, argNegOne, argOne));
+		assertCTrue(a.exec(Target.UNKNOWN, env, null, argOne, argNegOne));
 	}
 
 	@Test(timeout = 10000)
 	public void testLt() throws CancelCommandException {
 		BasicLogic.lt a = new BasicLogic.lt();
-		assertCFalse(a.exec(Target.UNKNOWN, env, argOne, argOne2));
-		assertCFalse(a.exec(Target.UNKNOWN, env, argTwo, argOne));
-		assertCTrue(a.exec(Target.UNKNOWN, env, argOne, argTwo));
-		assertCTrue(a.exec(Target.UNKNOWN, env, argNegOne, argOne));
-		assertCFalse(a.exec(Target.UNKNOWN, env, argOne, argNegOne));
+		assertCFalse(a.exec(Target.UNKNOWN, env, null, argOne, argOne2));
+		assertCFalse(a.exec(Target.UNKNOWN, env, null, argTwo, argOne));
+		assertCTrue(a.exec(Target.UNKNOWN, env, null, argOne, argTwo));
+		assertCTrue(a.exec(Target.UNKNOWN, env, null, argNegOne, argOne));
+		assertCFalse(a.exec(Target.UNKNOWN, env, null, argOne, argNegOne));
 	}
 
 	@Test(timeout = 10000)
 	public void testLte() throws CancelCommandException {
 		BasicLogic.lte a = new BasicLogic.lte();
-		assertCTrue(a.exec(Target.UNKNOWN, env, argOne, argOne2));
-		assertCFalse(a.exec(Target.UNKNOWN, env, argTwo, argOne));
-		assertCTrue(a.exec(Target.UNKNOWN, env, argOne, argTwo));
-		assertCTrue(a.exec(Target.UNKNOWN, env, argNegOne, argOne));
-		assertCFalse(a.exec(Target.UNKNOWN, env, argOne, argNegOne));
+		assertCTrue(a.exec(Target.UNKNOWN, env, null, argOne, argOne2));
+		assertCFalse(a.exec(Target.UNKNOWN, env, null, argTwo, argOne));
+		assertCTrue(a.exec(Target.UNKNOWN, env, null, argOne, argTwo));
+		assertCTrue(a.exec(Target.UNKNOWN, env, null, argNegOne, argOne));
+		assertCFalse(a.exec(Target.UNKNOWN, env, null, argOne, argNegOne));
 	}
 
 	@Test(timeout = 10000)

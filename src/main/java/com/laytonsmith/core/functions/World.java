@@ -113,7 +113,7 @@ public class World {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String world;
 			if(args.length == 1) {
 				world = args[0].val();
@@ -150,7 +150,7 @@ public class World {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCWorld w = null;
 			if(p != null) {
@@ -246,7 +246,7 @@ public class World {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCWorld world;
 			int x;
@@ -305,7 +305,7 @@ public class World {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCWorld world;
 			int x;
@@ -388,7 +388,7 @@ public class World {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCWorld world;
 			int x;
@@ -469,8 +469,8 @@ public class World {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCWorld world;
 			if(args.length == 1) {
 				// World Provided
@@ -489,13 +489,13 @@ public class World {
 				throw new CRENotFoundException(
 						"Could not find the chunk objects of the world (are you running in cmdline mode?)", t);
 			}
-			CArray ret = new CArray(t, null, environment);
+			CArray ret = new CArray(t, null, env);
 			for(MCChunk c : chunks) {
-				CArray chunk = CArray.GetAssociativeArray(t, null, environment);
-				chunk.set("x", new CInt(c.getX(), t), t, environment);
-				chunk.set("z", new CInt(c.getZ(), t), t, environment);
-				chunk.set("world", c.getWorld().getName(), t, environment);
-				ret.push(chunk, t, environment);
+				CArray chunk = CArray.GetAssociativeArray(t, null, env);
+				chunk.set("x", new CInt(c.getX(), t), t, env);
+				chunk.set("z", new CInt(c.getZ(), t), t, env);
+				chunk.set("world", c.getWorld().getName(), t, env);
+				ret.push(chunk, t, env);
 			}
 			return ret;
 		}
@@ -566,7 +566,7 @@ public class World {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCWorld world;
 			int x;
@@ -659,7 +659,7 @@ public class World {
 		Random rnd = new Random();
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCWorld world;
 			int x;
@@ -775,10 +775,10 @@ public class World {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCWorld w = null;
-			if(environment.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
-				w = environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
+			if(env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
+				w = env.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
 			}
 			if(args.length == 2) {
 				w = Static.getServer().getWorld(args[0].val());
@@ -866,10 +866,10 @@ public class World {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCWorld w = null;
-			if(environment.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
-				w = environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
+			if(env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
+				w = env.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
 			}
 			if(args.length == 1) {
 				w = Static.getServer().getWorld(args[0].val());
@@ -920,7 +920,7 @@ public class World {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCWorld w = null;
 			if(env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
 				w = env.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
@@ -981,10 +981,10 @@ public class World {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCWorld w = null;
-			if(environment.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
-				w = environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
+			if(env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
+				w = env.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
 			}
 			if(args.length == 1) {
 				w = Static.getServer().getWorld(args[0].val());
@@ -1015,7 +1015,7 @@ public class World {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCWorldCreator creator = StaticLayer.GetConvertor().getWorldCreator(args[0].val());
 			if(args.length >= 3) {
 				MCWorldType type;
@@ -1095,11 +1095,11 @@ public class World {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CArray worlds = new CArray(t, GenericParameters
-					.addParameter(CString.TYPE, null).build(), environment);
+					.addParameter(CString.TYPE, null).build(), env);
 			for(MCWorld w : Static.getServer().getWorlds()) {
-				worlds.push(new CString(w.getName(), t), t, environment);
+				worlds.push(new CString(w.getName(), t), t, env);
 			}
 			return worlds;
 		}
@@ -1139,7 +1139,7 @@ public class World {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			MCCommandSender cs = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer p = null;
 			MCWorld w = null;
@@ -1226,7 +1226,7 @@ public class World {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], p != null ? p.getWorld() : null, t, env);
 
@@ -1307,19 +1307,19 @@ public class World {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCWorld w = Static.getServer().getWorld(args[0].val());
 			if(w == null) {
 				throw new CREInvalidWorldException("Unknown world: " + args[0], t);
 			}
-			CArray ret = CArray.GetAssociativeArray(t, null, environment);
-			ret.set("name", new CString(w.getName(), t), t, environment);
-			ret.set("seed", new CInt(w.getSeed(), t), t, environment);
-			ret.set("environment", new CString(w.getEnvironment().name(), t), t, environment);
-			ret.set("generator", new CString(w.getGenerator(), t), t, environment);
-			ret.set("worldtype", new CString(w.getWorldType().name(), t), t, environment);
-			ret.set("sealevel", new CInt(w.getSeaLevel(), t), t, environment);
-			ret.set("maxheight", new CInt(w.getMaxHeight(), t), t, environment);
+			CArray ret = CArray.GetAssociativeArray(t, null, env);
+			ret.set("name", new CString(w.getName(), t), t, env);
+			ret.set("seed", new CInt(w.getSeed(), t), t, env);
+			ret.set("environment", new CString(w.getEnvironment().name(), t), t, env);
+			ret.set("generator", new CString(w.getGenerator(), t), t, env);
+			ret.set("worldtype", new CString(w.getWorldType().name(), t), t, env);
+			ret.set("sealevel", new CInt(w.getSeaLevel(), t), t, env);
+			ret.set("maxheight", new CInt(w.getMaxHeight(), t), t, env);
 			return ret;
 		}
 
@@ -1365,7 +1365,7 @@ public class World {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			boolean save = true;
 			if(args.length == 2) {
 				save = ArgumentValidation.getBoolean(args[1], t, env);
@@ -1439,7 +1439,7 @@ public class World {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCWorld world = Static.getServer().getWorld(args[0].val());
 			if(world == null) {
 				throw new CREInvalidWorldException("Unknown world: " + args[0].val(), t);
@@ -1489,7 +1489,7 @@ public class World {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCDifficulty difficulty;
 			if(args.length == 1) {
 				try {
@@ -1555,7 +1555,7 @@ public class World {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCWorld world = Static.getServer().getWorld(args[0].val());
 			if(world == null) {
 				throw new CREInvalidWorldException("Unknown world: " + args[0].val(), t);
@@ -1604,7 +1604,7 @@ public class World {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(args.length == 1) {
 				boolean pvp = ArgumentValidation.getBoolean(args[0], t, env);
 				for(MCWorld world : Static.getServer().getWorlds()) {
@@ -1663,7 +1663,7 @@ public class World {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCWorld world = Static.getServer().getWorld(args[0].val());
 			if(world == null) {
 				throw new CREInvalidWorldException("Unknown world: " + args[0].val(), t);
@@ -1733,7 +1733,7 @@ public class World {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCGameRule gameRule;
 			boolean success = false;
 			if(args.length == 2) {
@@ -1783,7 +1783,7 @@ public class World {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCWorld world = Static.getServer().getWorld(args[0].val());
 			if(world == null) {
 				throw new CREInvalidWorldException("Unknown world: " + args[0].val(), t);
@@ -1846,7 +1846,7 @@ public class World {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], p != null ? p.getWorld() : null, t, env);
 			double distance = 1;
@@ -1922,7 +1922,7 @@ public class World {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 
@@ -1989,7 +1989,7 @@ public class World {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 
@@ -2050,7 +2050,7 @@ public class World {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			Vector3D v = ObjectGenerator.GetGenerator().location(args[0], p == null ? null : p.getWorld(), t, env).getDirection();
 			if(args.length == 2) {
@@ -2100,7 +2100,7 @@ public class World {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCLocation loc1 = ObjectGenerator.GetGenerator().location(args[0], null, t, env);
 			MCLocation loc2 = ObjectGenerator.GetGenerator().location(args[1], null, t, env);
 			try {
@@ -2130,7 +2130,7 @@ public class World {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCWorld world = Static.getWorld(args[0], t);
 			world.save();
 			return CVoid.VOID;
@@ -2177,14 +2177,14 @@ public class World {
 		}
 
 		@Override
-		public Mixed exec(Target target, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCWorld world = null;
 			if(player != null) {
 				world = player.getWorld();
 			}
-			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], world, target, env);
-			return new CDouble(loc.getBlock().getTemperature(), target);
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], world, t, env);
+			return new CDouble(loc.getBlock().getTemperature(), t);
 		}
 
 		@Override
@@ -2227,7 +2227,7 @@ public class World {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCWorld w = Static.getServer().getWorld(args[0].val());
 			if(w == null) {
 				throw new CREInvalidWorldException("Unknown world: " + args[0], t);
@@ -2285,7 +2285,7 @@ public class World {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCWorld w = Static.getServer().getWorld(args[0].val());
 			if(w == null) {
 				throw new CREInvalidWorldException("Unknown world: " + args[0], t);
@@ -2364,7 +2364,7 @@ public class World {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCWorld w = Static.getServer().getWorld(args[0].val());
 			if(w == null) {
 				throw new CREInvalidWorldException("Unknown world: " + args[0].val(), t);
@@ -2412,7 +2412,7 @@ public class World {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(args.length == 1) {
 				boolean autosave = ArgumentValidation.getBooleanish(args[0], t, env);
 				for(MCWorld world : Static.getServer().getWorlds()) {

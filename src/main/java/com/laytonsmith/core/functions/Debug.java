@@ -243,7 +243,7 @@ public class Debug {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(Prefs.DebugMode()) {
 				try {
 					Static.LogDebug(MethodScriptFileLocations.getDefault().getConfigDirectory(), args[0].val(), LogLevel.DEBUG);
@@ -260,11 +260,11 @@ public class Debug {
 	public static class trace extends always_trace {
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			//TODO: Once Prefs are no longer static, check to see if debug mode is on during compilation, and
 			//if so, remove this function entirely
 			if(Prefs.DebugMode()) {
-				return always_trace.doTrace(t, environment, args);
+				return always_trace.doTrace(t, env, args);
 			}
 			return CVoid.VOID;
 		}
@@ -307,8 +307,8 @@ public class Debug {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			return doTrace(t, environment, args);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			return doTrace(t, env, args);
 		}
 
 		@Override
@@ -607,7 +607,7 @@ public class Debug {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
 			CArray carray = new CArray(t, GenericParameters
 					.addParameter(CString.TYPE, null).build(), env);
@@ -660,7 +660,7 @@ public class Debug {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			File file = new File("dump.hprof");
 			try {
 				HeapDumper.dumpHeap(file.getAbsolutePath(), true);
@@ -715,7 +715,7 @@ public class Debug {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			Script.debugOutput = ArgumentValidation.getBoolean(args[0], t, env);
 			if(Script.debugOutput) {
 				StreamUtils.GetSystemOut().println(TermColors.BG_RED + "[[DEBUG]] set_debug_output(true)"

@@ -941,19 +941,19 @@ public final class Interpreter {
 						a = new Construct[]{new CString(args.get(0), Target.UNKNOWN)};
 					}
 					try {
-						new Cmdline.cd().exec(Target.UNKNOWN, env, a);
+						new Cmdline.cd().exec(Target.UNKNOWN, env, null, a);
 					} catch (CREIOException ex) {
 						pl(RED + ex.getMessage());
 					}
 					return true;
 				case "pwd":
-					pl(new Cmdline.pwd().exec(Target.UNKNOWN, env).val());
+					pl(new Cmdline.pwd().exec(Target.UNKNOWN, env, null).val());
 					return true;
 				case "exit":
 					// We need previous code to intercept, we cannot do this here.
 					throw new Error("I should not run");
 				case "logout":
-					new Cmdline.exit().exec(Target.UNKNOWN, env, new CInt(0, Target.UNKNOWN));
+					new Cmdline.exit().exec(Target.UNKNOWN, env, null, new CInt(0, Target.UNKNOWN));
 					return true; // won't actually run
 				case "echo":
 					// TODO Probably need some variable interpolation maybe? Otherwise, I don't think this command
@@ -966,7 +966,7 @@ public final class Interpreter {
 					}
 					String output = StringUtils.Join(args, " ");
 					if(colorize) {
-						output = new Echoes.colorize().exec(Target.UNKNOWN, env, new CString(output, Target.UNKNOWN)).val();
+						output = new Echoes.colorize().exec(Target.UNKNOWN, env, null, new CString(output, Target.UNKNOWN)).val();
 					}
 					pl(output);
 					return true;

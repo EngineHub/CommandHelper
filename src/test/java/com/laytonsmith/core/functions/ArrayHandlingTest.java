@@ -121,46 +121,46 @@ public class ArrayHandlingTest {
 	@Test(timeout = 10000)
 	public void testArrayContains() throws CancelCommandException {
 		ArrayHandling.array_contains a = new ArrayHandling.array_contains();
-		assertCEquals(C.onstruct(true), a.exec(Target.UNKNOWN, env, commonArray, C.onstruct(1)));
-		assertCEquals(C.onstruct(false), a.exec(Target.UNKNOWN, env, commonArray, C.onstruct(55)));
+		assertCEquals(C.onstruct(true), a.exec(Target.UNKNOWN, env, null, commonArray, C.onstruct(1)));
+		assertCEquals(C.onstruct(false), a.exec(Target.UNKNOWN, env, null, commonArray, C.onstruct(55)));
 	}
 
 	@Test(timeout = 10000)
 	public void testArraySContains() throws CancelCommandException {
 		ArrayHandling.array_scontains a = new ArrayHandling.array_scontains();
-		assertCEquals(C.onstruct(true), a.exec(Target.UNKNOWN, env, commonArray, C.onstruct(1)));
-		assertCEquals(C.onstruct(false), a.exec(Target.UNKNOWN, env, commonArray, C.onstruct(55)));
-		assertCEquals(C.onstruct(false), a.exec(Target.UNKNOWN, env, commonArray, new CString("2", Target.UNKNOWN)));
+		assertCEquals(C.onstruct(true), a.exec(Target.UNKNOWN, env, null, commonArray, C.onstruct(1)));
+		assertCEquals(C.onstruct(false), a.exec(Target.UNKNOWN, env, null, commonArray, C.onstruct(55)));
+		assertCEquals(C.onstruct(false), a.exec(Target.UNKNOWN, env, null, commonArray, new CString("2", Target.UNKNOWN)));
 	}
 
 	@Test(expected = Exception.class, timeout = 10000)
 	public void testArrayContainsEx() throws CancelCommandException {
 		ArrayHandling.array_contains a = new ArrayHandling.array_contains();
-		a.exec(Target.UNKNOWN, env, C.Int(0), C.Int(1));
+		a.exec(Target.UNKNOWN, env, null, C.Int(0), C.Int(1));
 	}
 
 	@Test(timeout = 10000)
 	public void testArrayGet() throws CancelCommandException {
 		ArrayHandling.array_get a = new ArrayHandling.array_get();
-		assertCEquals(C.onstruct(1), a.exec(Target.UNKNOWN, env, commonArray, C.onstruct(0)));
+		assertCEquals(C.onstruct(1), a.exec(Target.UNKNOWN, env, null, commonArray, C.onstruct(0)));
 	}
 
 	@Test(expected = Exception.class, timeout = 10000)
 	public void testArrayGetEx() throws CancelCommandException {
 		ArrayHandling.array_get a = new ArrayHandling.array_get();
-		a.exec(Target.UNKNOWN, env, C.Int(0), C.Int(1));
+		a.exec(Target.UNKNOWN, env, null, C.Int(0), C.Int(1));
 	}
 
 	@Test(expected = ConfigRuntimeException.class, timeout = 10000)
 	public void testArrayGetBad() throws CancelCommandException {
 		ArrayHandling.array_get a = new ArrayHandling.array_get();
-		a.exec(Target.UNKNOWN, env, commonArray, C.onstruct(55));
+		a.exec(Target.UNKNOWN, env, null, commonArray, C.onstruct(55));
 	}
 
 	@Test(timeout = 10000)
 	public void testArrayPush() throws CancelCommandException {
 		ArrayHandling.array_push a = new ArrayHandling.array_push();
-		assertReturn(a.exec(Target.UNKNOWN, env, commonArray, C.onstruct(4)), C.VOID);
+		assertReturn(a.exec(Target.UNKNOWN, env, null, commonArray, C.onstruct(4)), C.VOID);
 		assertCEquals(C.onstruct(1), commonArray.get(0, Target.UNKNOWN, env));
 		assertCEquals(C.onstruct(2), commonArray.get(1, Target.UNKNOWN, env));
 		assertCEquals(C.onstruct(3), commonArray.get(2, Target.UNKNOWN, env));
@@ -178,7 +178,7 @@ public class ArrayHandlingTest {
 	@Test(expected = Exception.class)
 	public void testArrayPushEx() throws CancelCommandException {
 		ArrayHandling.array_push a = new ArrayHandling.array_push();
-		a.exec(Target.UNKNOWN, env, C.Int(0), C.Int(1));
+		a.exec(Target.UNKNOWN, env, null, C.Int(0), C.Int(1));
 	}
 
 	@Test(timeout = 10000)

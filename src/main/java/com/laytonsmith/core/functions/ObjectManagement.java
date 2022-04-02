@@ -85,7 +85,7 @@ public class ObjectManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 		}
 
@@ -136,7 +136,7 @@ public class ObjectManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			throw new Error();
 		}
 
@@ -205,7 +205,7 @@ public class ObjectManagement {
 					throw new CREClassDefinitionError("Expected __to_class_reference__, but found " + data.getData()
 							+ " instead", t);
 				}
-				return new __to_class_reference__().exec(t, env,
+				return new __to_class_reference__().exec(t, env, null,
 						data.getChildren().stream()
 								.map((parseTree -> parseTree.getData()))
 								.collect(Collectors.toList())
@@ -215,7 +215,7 @@ public class ObjectManagement {
 		}
 
 		@Override
-		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
 			// 0 - Access Modifier
 			AccessModifier accessModifier = ArgumentValidation.getEnum(evaluateStringNoNull(nodes[0], t, env),
 					AccessModifier.class, t);
@@ -393,7 +393,7 @@ public class ObjectManagement {
 				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			// Do the same thing as execs, but remove this call
-			execs(t, env, null, children.toArray(new ParseTree[children.size()]));
+			execs(t, env, null, null, children.toArray(new ParseTree[children.size()]));
 			return REMOVE_ME;
 		}
 
@@ -461,7 +461,7 @@ public class ObjectManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			throw new Error();
 		}
 
@@ -473,7 +473,7 @@ public class ObjectManagement {
 		private static final int UNDECIDEABLE = -2;
 
 		@Override
-		public Mixed execs(final Target t, final Environment env, Script parent, ParseTree... args)
+		public Mixed execs(final Target t, final Environment env, Script parent, GenericParameters generics, ParseTree... args)
 				throws ConfigRuntimeException {
 			ObjectDefinitionTable odt = env.getEnv(CompilerEnvironment.class).getObjectDefinitionTable();
 			CClassType clazz = ((CClassType) args[0].getData());
@@ -607,7 +607,7 @@ public class ObjectManagement {
 
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return CClassType.get(FullyQualifiedClassName.forFullyQualifiedClass(args[0].val()), env);
 		}
 

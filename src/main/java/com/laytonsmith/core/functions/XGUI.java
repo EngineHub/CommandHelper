@@ -12,6 +12,7 @@ import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREIOException;
@@ -79,7 +80,7 @@ public class XGUI {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			JFrame frame = new JFrame();
 			int id = WINDOW_IDS.incrementAndGet();
 			String title = "";
@@ -149,7 +150,7 @@ public class XGUI {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			int id = ArgumentValidation.getInt32(args[0], t, env);
 			boolean show = true;
 			if(args.length > 1) {
@@ -203,7 +204,7 @@ public class XGUI {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			int windowID = ArgumentValidation.getInt32(args[0], t, env);
 			int x = ArgumentValidation.getInt32(args[1], t, env);
 			int y = ArgumentValidation.getInt32(args[2], t, env);
@@ -268,7 +269,7 @@ public class XGUI {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String url = args[0].val();
 			try {
 				if(Desktop.isDesktopSupported()) {

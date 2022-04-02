@@ -117,7 +117,7 @@ public class GenericsTest {
 				.addParameter(CDouble.TYPE, null).build(), env);
 		try {
 			IVariable var = new IVariable(LeftHandSideType.fromCClassType(CArray.TYPE, lhgu, Target.UNKNOWN), "@a", array, Target.UNKNOWN, null);
-			new assign().exec(Target.UNKNOWN, env, var, array);
+			new assign().exec(Target.UNKNOWN, env, null, var, array);
 			fail(); // Shouldn't get here
 		} catch (CREGenericConstraintException cce) {
 			assertEquals("", cce.getMessage());

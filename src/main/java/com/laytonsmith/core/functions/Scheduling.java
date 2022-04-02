@@ -128,7 +128,7 @@ public class Scheduling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			return new CInt(System.currentTimeMillis(), t);
 		}
 	}
@@ -173,7 +173,7 @@ public class Scheduling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			return new CInt(System.nanoTime(), t);
 		}
 	}
@@ -218,7 +218,7 @@ public class Scheduling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			Mixed x = args[0];
 			double time = ArgumentValidation.getNumber(x, t, env);
 			try {
@@ -275,7 +275,7 @@ public class Scheduling {
 		}
 
 		@Override
-		public Mixed exec(final Target t, final Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			long time = ArgumentValidation.getInt(args[0], t, env);
 			int offset = 0;
 			long delay = time;
@@ -366,7 +366,7 @@ public class Scheduling {
 		}
 
 		@Override
-		public Mixed exec(final Target t, final Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			final TaskManager taskManager = env.getEnv(StaticRuntimeEnv.class).GetTaskManager();
 			long time = ArgumentValidation.getInt(args[0], t, env);
 			if(!(args[1].isInstanceOf(CClosure.TYPE, null, env))) {
@@ -401,7 +401,7 @@ public class Scheduling {
 			}));
 			taskManager.addTask(new TimeoutTaskHandler(ret.get(), t, () -> {
 				if(isRunning.get()) {
-					new clear_task().exec(t, env, new CInt(ret.get(), t));
+					new clear_task().exec(t, env, null, new CInt(ret.get(), t));
 					env.getEnv(GlobalEnv.class).SetInterrupt(true);
 					taskManager.getTask(CoreTaskType.TIMEOUT, ret.get()).changeState(TaskState.KILLED);
 				}
@@ -466,7 +466,7 @@ public class Scheduling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(args.length == 0 && env.getEnv(GlobalEnv.class).GetCustom("timeout-id") != null) {
 				StaticLayer.ClearFutureRunnable((Integer) env.getEnv(GlobalEnv.class).GetCustom("timeout-id"));
 			} else if(args.length == 1) {
@@ -568,7 +568,7 @@ public class Scheduling {
 		}
 
 		@Override
-		public CString exec(Target t, Environment env, Mixed... args) {
+		public CString exec(Target t, Environment env, GenericParameters generics, Mixed... args) {
 			Date now = new Date();
 			if(args.length >= 2 && !(args[1] instanceof CNull)) {
 				now = new Date(ArgumentValidation.getInt(args[1], t, env));
@@ -639,7 +639,7 @@ public class Scheduling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			SimpleDateFormat dateFormat;
 			Locale locale = Locale.getDefault();
 			if(args.length >= 3) {
@@ -720,7 +720,7 @@ public class Scheduling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String[] timezones = ArrayUtils.EMPTY_STRING_ARRAY;
 			try {
 				timezones = TimeZone.getAvailableIDs();
@@ -808,7 +808,7 @@ public class Scheduling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			//First things first, check the format of the arguments.
 			if(!(args[0].isInstanceOf(CString.TYPE, null, env))) {
 				throw new CRECastException("Expected string for argument 1 in " + getName(), t);
@@ -1160,7 +1160,7 @@ public class Scheduling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			Integer id = (Integer) env.getEnv(GlobalEnv.class).GetCustom("cron-task-id");
 			if(args.length == 1) {
 				id = (int) ArgumentValidation.getInt(args[0], t, env);

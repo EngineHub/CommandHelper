@@ -98,7 +98,7 @@ public class Cmdline {
 		}
 
 		@Override
-		public CVoid exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public CVoid exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String msg = Static.MCToANSIColors(args[0].val());
 			StreamUtils.GetSystemOut().print(msg);
 			if(msg.contains("\033")) {
@@ -162,7 +162,7 @@ public class Cmdline {
 		}
 
 		@Override
-		public CVoid exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public CVoid exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String msg = Static.MCToANSIColors(args[0].val());
 			PrintStream se = StreamUtils.GetSystemErr();
 			se.print(msg);
@@ -226,7 +226,7 @@ public class Cmdline {
 		}
 
 		@Override
-		public CVoid exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public CVoid exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String msg = Static.MCToANSIColors(args[0].val());
 			PrintStream so = StreamUtils.GetSystemOut();
 			so.print(msg);
@@ -283,7 +283,7 @@ public class Cmdline {
 		}
 
 		@Override
-		public CVoid exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public CVoid exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String msg = Static.MCToANSIColors(args[0].val());
 			StreamUtils.GetSystemErr().print(msg);
 			StreamUtils.GetSystemErr().flush();
@@ -338,7 +338,7 @@ public class Cmdline {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			int exit_code = 0;
 			if(args.length == 1) {
 				exit_code = ArgumentValidation.getInt32(args[0], t, env);
@@ -346,7 +346,7 @@ public class Cmdline {
 			if(Static.InCmdLine(env, true)) {
 				System.exit(exit_code);
 			}
-			return new ControlFlow.die().exec(t, env, args);
+			return new ControlFlow.die().exec(t, env, null, args);
 		}
 
 		@Override
@@ -404,7 +404,7 @@ public class Cmdline {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(args.length == 1) {
 				String propName = args[0].val();
 				String prop;
@@ -511,7 +511,7 @@ public class Cmdline {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(args.length == 1) {
 				return new CString(System.getenv(args[0].val()), t);
 			} else {
@@ -566,7 +566,7 @@ public class Cmdline {
 
 		@SuppressWarnings({"BroadCatchBlock", "TooBroadCatch", "UseSpecificCatch"})
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			//TODO: Make this more robust by having a local cache of the environment which we modify, and get_env returns from.
 			Map<String, String> newenv = new HashMap<>(System.getenv());
 			newenv.put(args[0].val(), args[1].val());
@@ -657,7 +657,7 @@ public class Cmdline {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(!Static.InCmdLine(env, true)) {
 				throw new CREInsufficientPermissionException(getName() + " cannot be used outside of cmdline mode.", t);
 			}
@@ -735,8 +735,8 @@ public class Cmdline {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			requireCmdlineMode(environment, this, t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			requireCmdlineMode(env, this, t);
 
 			String prompt = args[0].val();
 			try {
@@ -808,8 +808,8 @@ public class Cmdline {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			if(!Static.InCmdLine(environment, true)) {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			if(!Static.InCmdLine(env, true)) {
 				throw new CREInsufficientPermissionException(getName() + " cannot be used outside of cmdline mode.", t);
 			}
 
@@ -867,7 +867,7 @@ public class Cmdline {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			java.awt.Toolkit.getDefaultToolkit().beep();
 			return CVoid.VOID;
 		}
@@ -914,8 +914,8 @@ public class Cmdline {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			if(Static.InCmdLine(environment, true)) {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			if(Static.InCmdLine(env, true)) {
 				try {
 					new jline.console.ConsoleReader().clearScreen();
 				} catch (IOException ex) {
@@ -968,7 +968,7 @@ public class Cmdline {
 		}
 
 		@Override
-		public Mixed exec(final Target t, final Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(!Static.InCmdLine(env, true)) {
 				if(!Prefs.AllowShellCommands()) {
 					throw new CREInsufficientPermissionException("Shell commands are not allowed. Enable them in preferences.ini.", t);
@@ -1170,7 +1170,7 @@ public class Cmdline {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(!Static.InCmdLine(env, true)) {
 				if(!Prefs.AllowShellCommands()) {
 					throw new CREInsufficientPermissionException("Shell commands are not allowed. Enable them in preferences.ini.", t);
@@ -1304,7 +1304,7 @@ public class Cmdline {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			Set<OSUtils.OS> oses = new HashSet<>();
 			String osS = args[0].val();
 			for(String osSS : osS.split("\\|")) {
@@ -1317,7 +1317,7 @@ public class Cmdline {
 				oses.add(os);
 			}
 			if(oses.contains(OSUtils.GetOS())) {
-				return new shell_adv().exec(t, environment, ArrayUtils.cast(ArrayUtils.slice(args, 1, args.length - 1), Construct[].class));
+				return new shell_adv().exec(t, env, generics, ArrayUtils.cast(ArrayUtils.slice(args, 1, args.length - 1), Construct[].class));
 			}
 			return CVoid.VOID;
 		}
@@ -1370,7 +1370,7 @@ public class Cmdline {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			Set<OSUtils.OS> oses = new HashSet<>();
 			String osS = args[0].val();
 			for(String osSS : osS.split("\\|")) {
@@ -1383,7 +1383,7 @@ public class Cmdline {
 				oses.add(os);
 			}
 			if(oses.contains(OSUtils.GetOS())) {
-				return new shell().exec(t, environment, ArrayUtils.cast(ArrayUtils.slice(args, 1, args.length - 1), Construct[].class));
+				return new shell().exec(t, env, generics, ArrayUtils.cast(ArrayUtils.slice(args, 1, args.length - 1), Construct[].class));
 			}
 			return CNull.NULL;
 		}
@@ -1446,7 +1446,7 @@ public class Cmdline {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return new CString(OSUtils.GetOS().name(), t);
 		}
 
@@ -1491,7 +1491,7 @@ public class Cmdline {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(!Static.InCmdLine(env, true)) {
 				throw new CREInsufficientPermissionException(getName() + " cannot be used outside of cmdline mode.", t);
 			}
@@ -1575,10 +1575,10 @@ public class Cmdline {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			File root;
-			if(Static.InCmdLine(environment, true)) {
-				root = environment.getEnv(GlobalEnv.class).GetRootFolder();
+			if(Static.InCmdLine(env, true)) {
+				root = env.getEnv(GlobalEnv.class).GetRootFolder();
 			} else if(t.file() == null) {
 				root = null;
 			} else {
@@ -1642,13 +1642,13 @@ public class Cmdline {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			requireCmdlineMode(environment, this, t);
-			File cd = Static.GetFileFromArgument(args.length == 0 ? null : args[0].val(), environment, t, new File(System.getProperty("user.home")));
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			requireCmdlineMode(env, this, t);
+			File cd = Static.GetFileFromArgument(args.length == 0 ? null : args[0].val(), env, t, new File(System.getProperty("user.home")));
 			if(!cd.exists()) {
 				throw new CREIOException("No such file or directory: " + cd.getPath(), t);
 			}
-			environment.getEnv(GlobalEnv.class).SetRootFolder(cd);
+			env.getEnv(GlobalEnv.class).SetRootFolder(cd);
 			return CVoid.VOID;
 		}
 
@@ -1694,7 +1694,7 @@ public class Cmdline {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			requireCmdlineMode(env, this, t);
 			CArray ca = new CArray(t, GenericParameters.addParameter(CString.TYPE, null).build(), env);
 			File cwd = Static.GetFileFromArgument(args.length > 0 ? args[0].val() : null, env, t, env.getEnv(GlobalEnv.class).GetRootFolder());
@@ -1755,7 +1755,7 @@ public class Cmdline {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			requireCmdlineMode(env, this, t);
 			if(!(args[0].isInstanceOf(CClosure.TYPE, null, env))) {
 				throw new CRECastException("Expecting a closure for argument 1 of " + getName(), t);
@@ -1808,8 +1808,8 @@ public class Cmdline {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			requireCmdlineMode(environment, this, t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			requireCmdlineMode(env, this, t);
 			try {
 				int i = new jline.console.ConsoleReader().getTerminal().getWidth();
 				return new CInt(i, t);
@@ -1860,8 +1860,8 @@ public class Cmdline {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			String name = StaticLayer.GetConvertor().GetUser(environment);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			String name = StaticLayer.GetConvertor().GetUser(env);
 			if(name == null) {
 				return CNull.NULL;
 			} else {
@@ -1912,8 +1912,8 @@ public class Cmdline {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			return CBoolean.GenerateCBoolean(Static.InCmdLine(environment, true), t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			return CBoolean.GenerateCBoolean(Static.InCmdLine(env, true), t);
 		}
 
 		@Override
@@ -1957,7 +1957,7 @@ public class Cmdline {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			requireCmdlineMode(env, this, t);
 			final CArray a = new CArray(t, null, env);
 			String regex = ArgumentValidation.getString(args[0], t);

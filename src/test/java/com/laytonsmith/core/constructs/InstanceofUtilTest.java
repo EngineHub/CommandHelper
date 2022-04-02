@@ -165,7 +165,7 @@ public class InstanceofUtilTest {
 		} catch(ConfigCompileException | ConfigRuntimeException ex) {
 			// Pass
 		}
-		assertFalse(new _instanceof().exec(Target.UNKNOWN, env, CNull.NULL, CString.TYPE).getBoolean());
+		assertFalse(new _instanceof().exec(Target.UNKNOWN, env, null, CNull.NULL, CString.TYPE).getBoolean());
 	}
 
 	@typeof("InstanceofUtilTestA")

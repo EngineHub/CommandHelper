@@ -68,7 +68,7 @@ public class Commands {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCServer s = Static.getServer();
 			MCCommandMap map = s.getCommandMap();
 			if(map == null) {
@@ -78,7 +78,7 @@ public class Commands {
 			if(cmd == null) {
 				throw new CRENotFoundException("Command not found, did you forget to register it?", t);
 			}
-			customExec(t, environment, cmd, args[1]);
+			customExec(t, env, cmd, args[1]);
 			return CVoid.VOID;
 		}
 
@@ -164,7 +164,7 @@ public class Commands {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCCommandMap map = Static.getServer().getCommandMap();
 			if(map == null) {
 				throw new CRENotFoundException(this.getName() + " is not supported in this mode (CommandMap not found).", t);
@@ -225,7 +225,7 @@ public class Commands {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCCommandMap map = Static.getServer().getCommandMap();
 			if(map == null) {
 				throw new CRENotFoundException(
@@ -495,7 +495,7 @@ public class Commands {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCCommandMap map = Static.getServer().getCommandMap();
 			if(map == null) {
 				throw new CRENotFoundException(this.getName() + " is not supported in this mode (CommandMap not found).", t);
@@ -504,7 +504,7 @@ public class Commands {
 			if(cmd == null) {
 				throw new CRENotFoundException("Command not found did you forget to register it?", t);
 			}
-			customExec(t, environment, cmd, args[1]);
+			customExec(t, env, cmd, args[1]);
 			return CVoid.VOID;
 		}
 
@@ -567,7 +567,7 @@ public class Commands {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCCommandMap map = Static.getServer().getCommandMap();
 			if(map == null) {
 				return CNull.NULL;
@@ -641,7 +641,7 @@ public class Commands {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCCommandMap map = Static.getServer().getCommandMap();
 			if(map != null) {
 				map.clearCommands();

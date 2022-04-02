@@ -1,6 +1,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.annotations.DocumentLink;
 import com.laytonsmith.annotations.MEnum;
@@ -27,6 +28,7 @@ import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.IVariableList;
 import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
@@ -43,6 +45,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
+import java.util.TreeSet;
 
 /**
  *
@@ -69,8 +72,28 @@ public abstract class AbstractFunction implements Function {
 	 * @return
 	 */
 	@Override
-	public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+	public Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
 		return CVoid.VOID;
+	}
+
+	private Set<Function> nagAlert = new TreeSet<>();
+
+	public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		boolean hasOld = ReflectionUtils.hasMethod(this.getClass(), "exec", null,
+				new Class[]{Target.class, Environment.class, Mixed[].class});
+		if(hasOld) {
+			if(!nagAlert.contains(this)) {
+				System.err.println("The extension function " + this.getName() + " is implementing an old version of the exec"
+						+ " method. This extension WILL break in the future, and needs code changes. Please alert"
+						+ " the author.");
+				nagAlert.add(this);
+			}
+			return (Mixed) ReflectionUtils.invokeMethod(this.getClass(), this, "exec",
+					new Class[]{Target.class, Environment.class, Mixed[].class},
+					new Object[]{t, env, args});
+		}
+		// It doesn't have the old method, nor does it override this method.
+		throw new Error(this.getClass() + " does not properly implement the exec method.");
 	}
 
 	/**

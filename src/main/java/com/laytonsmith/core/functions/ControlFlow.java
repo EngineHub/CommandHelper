@@ -42,6 +42,7 @@ import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
@@ -103,7 +104,7 @@ public class ControlFlow {
 		}
 
 		@Override
-		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
 			ParseTree condition = nodes[0];
 			if(ArgumentValidation.getBooleanish(parent.seval(condition, env), t, env)) {
 				ParseTree ifCode = nodes[1];
@@ -117,7 +118,7 @@ public class ControlFlow {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args)
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args)
 				throws CancelCommandException, ConfigRuntimeException {
 			return CVoid.VOID;
 		}
@@ -375,12 +376,12 @@ public class ControlFlow {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return CNull.NULL;
 		}
 
 		@Override
-		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
 			if(nodes.length < 2) {
 				throw new CREInsufficientArgumentsException("ifelse expects at least 2 arguments", t);
 			}
@@ -537,12 +538,12 @@ public class ControlFlow {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return CNull.NULL;
 		}
 
 		@Override
-		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
 			Mixed value = parent.seval(nodes[0], env);
 			BasicLogic.equals equals = new BasicLogic.equals();
 			try {
@@ -575,11 +576,11 @@ public class ControlFlow {
 										return parent.seval(code, env);
 									}
 								}
-							} else if(equals.exec(t, env, value, inner).getBoolean()) {
+							} else if(equals.exec(t, env, null, value, inner).getBoolean()) {
 								return parent.seval(code, env);
 							}
 						}
-					} else if(equals.exec(t, env, value, evalStatement).getBoolean()) {
+					} else if(equals.exec(t, env, null, value, evalStatement).getBoolean()) {
 						return parent.seval(code, env);
 					}
 				}
@@ -838,7 +839,7 @@ public class ControlFlow {
 					+ " remove the duplicate value";
 			final BasicLogic.equals equals = new BasicLogic.equals();
 			Set<Mixed> values = new TreeSet<>((Mixed t1, Mixed t2) -> {
-				if(equals.exec(Target.UNKNOWN, env, t1, t2).getBoolean()) {
+				if(equals.exec(Target.UNKNOWN, env, null, t1, t2).getBoolean()) {
 					return 0;
 				} else {
 					return t1.val().compareTo(t2.val());
@@ -926,7 +927,7 @@ public class ControlFlow {
 									break;
 								}
 							}
-						} else if(equals.exec(t, null, children.get(0).getData(), value).getBoolean()) {
+						} else if(equals.exec(t, null, null, children.get(0).getData(), value).getBoolean()) {
 							toReturn = children.get(i + 1);
 							break;
 						}
@@ -987,7 +988,7 @@ public class ControlFlow {
 	public static class switch_ic extends _switch implements Optimizable, BranchStatement, VariableScope {
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			throw new Error();
 		}
 
@@ -1073,7 +1074,7 @@ public class ControlFlow {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) {
 			return CVoid.VOID;
 		}
 
@@ -1083,8 +1084,8 @@ public class ControlFlow {
 		}
 
 		@Override
-		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
-			return new forelse(true).execs(t, env, parent, nodes);
+		public Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
+			return new forelse(true).execs(t, env, parent, generics, nodes);
 		}
 
 		@Override
@@ -1256,12 +1257,12 @@ public class ControlFlow {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return null;
 		}
 
 		@Override
-		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) throws ConfigRuntimeException {
+		public Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) throws ConfigRuntimeException {
 			ParseTree assign = nodes[0];
 			ParseTree condition = nodes[1];
 			ParseTree expression = nodes[2];
@@ -1394,13 +1395,13 @@ public class ControlFlow {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args)
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args)
 				throws CancelCommandException, ConfigRuntimeException {
 			return CVoid.VOID;
 		}
 
 		@Override
-		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
 			if(nodes.length < 3) {
 				throw new CREInsufficientArgumentsException("Insufficient arguments passed to " + getName(), t);
 			}
@@ -1428,9 +1429,9 @@ public class ControlFlow {
 				long finish = ((CSlice) arr).getFinish();
 				if(finish < start) {
 					arr = new ArrayHandling.range()
-							.exec(t, env, new CInt(start, t), new CInt(finish - 1, t), new CInt(-1, t));
+							.exec(t, env, null, new CInt(start, t), new CInt(finish - 1, t), new CInt(-1, t));
 				} else {
-					arr = new ArrayHandling.range().exec(t, env, new CInt(start, t), new CInt(finish + 1, t));
+					arr = new ArrayHandling.range().exec(t, env, null, new CInt(start, t), new CInt(finish + 1, t));
 				}
 			}
 			if(!(arr instanceof com.laytonsmith.core.natives.interfaces.Iterable)) {
@@ -1839,7 +1840,7 @@ public class ControlFlow {
 		}
 
 		@Override
-		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
 			ParseTree array = nodes[0];
 			//The last one
 			ParseTree elseCode = nodes[nodes.length - 1];
@@ -1856,7 +1857,7 @@ public class ControlFlow {
 				ParseTree pass[] = new ParseTree[nodes.length - 1];
 				System.arraycopy(nodes, 0, pass, 0, nodes.length - 1);
 				nodes[0] = new ParseTree(data, null);
-				return super.execs(t, env, parent, pass);
+				return super.execs(t, env, parent, generics, pass);
 			}
 
 			return CVoid.VOID;
@@ -2002,7 +2003,7 @@ public class ControlFlow {
 		}
 
 		@Override
-		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
 			try {
 				while(ArgumentValidation.getBoolean(parent.seval(nodes[0], env), t, env)) {
 					//We allow while(thing()); to be done. This makes certain
@@ -2037,7 +2038,7 @@ public class ControlFlow {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return CNull.NULL;
 		}
 
@@ -2119,7 +2120,7 @@ public class ControlFlow {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return CNull.NULL;
 		}
 
@@ -2157,7 +2158,7 @@ public class ControlFlow {
 		}
 
 		@Override
-		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
 			try {
 				do {
 					try {
@@ -2264,7 +2265,7 @@ public class ControlFlow {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args)
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args)
 				throws CancelCommandException, ConfigRuntimeException {
 			int num = 1;
 			if(args.length == 1) {
@@ -2366,7 +2367,7 @@ public class ControlFlow {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args)
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args)
 				throws CancelCommandException, ConfigRuntimeException {
 			int num = 1;
 			if(args.length == 1) {
@@ -2446,7 +2447,7 @@ public class ControlFlow {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			Mixed ret = (args.length == 1 ? args[0] : CVoid.VOID);
 			throw new FunctionReturnException(ret, t);
 		}
@@ -2503,7 +2504,7 @@ public class ControlFlow {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(args.length < 1) {
 				throw new CREInsufficientArgumentsException("Expecting at least one argument to " + getName(), t);
 			}
@@ -2553,7 +2554,7 @@ public class ControlFlow {
 	public static class call_proc_array extends call_proc {
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CArray ca = ArgumentValidation.getArray(args[1], t, env);
 			if(ca.inAssociativeMode()) {
 				throw new CRECastException("Expected the array passed to " + getName() + " to be non-associative.", t);
@@ -2563,7 +2564,7 @@ public class ControlFlow {
 			for(int i = 1; i < args2.length; i++) {
 				args2[i] = ca.get(i - 1, t, env);
 			}
-			return super.exec(t, env, args2);
+			return super.exec(t, env, generics, args2);
 		}
 
 		@Override
@@ -2614,7 +2615,7 @@ public class ControlFlow {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException {
 			if(args.length == 0) {
 				throw new CancelCommandException("", t);
 			}

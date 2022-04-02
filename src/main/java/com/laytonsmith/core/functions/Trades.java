@@ -21,6 +21,7 @@ import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
@@ -57,7 +58,7 @@ public class Trades {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CArray ret = new CArray(t, null, env);
 			for(MCMerchantRecipe mr : GetMerchant(args[0], t).getRecipes()) {
 				ret.push(trade(mr, t, env), t, env);
@@ -97,7 +98,7 @@ public class Trades {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCMerchant merchant = GetMerchant(args[0], t);
 			CArray trades = ArgumentValidation.getArray(args[1], t, env);
 			List<MCMerchantRecipe> recipes = new ArrayList<>();
@@ -169,7 +170,7 @@ public class Trades {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CArray ret = CArray.GetAssociativeArray(t, null, env);
 			for(Map.Entry<String, MCMerchant> entry : VIRTUAL_MERCHANTS.entrySet()) {
 				if(entry.getValue() == null) {
@@ -212,7 +213,7 @@ public class Trades {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(VIRTUAL_MERCHANTS.containsKey(args[0].val())) {
 				throw new CREIllegalArgumentException("There is already a merchant with id " + args[0].val(), t);
 			} else {
@@ -255,7 +256,7 @@ public class Trades {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return CBoolean.get(VIRTUAL_MERCHANTS.remove(args[0].val()) != null);
 		}
 
@@ -291,7 +292,7 @@ public class Trades {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer player;
 			boolean force = false;
 			if(args.length > 1) {
@@ -345,7 +346,7 @@ public class Trades {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCMerchant merchant = GetMerchant(args[0], t);
 			return merchant.isTrading() ? new CString(merchant.getTrader().getUniqueId().toString(), t) : CNull.NULL;
 		}

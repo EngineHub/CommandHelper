@@ -415,7 +415,8 @@ public class Script {
 					}
 					Mixed ret;
 					try {
-						ret = f.execs(m.getTarget(), env, this, c.getChildren().toArray(new ParseTree[]{}));
+						// TODO: Provide generic parameters
+						ret = f.execs(m.getTarget(), env, this, null, c.getChildren().toArray(new ParseTree[]{}));
 					} finally {
 						if(p != null) {
 							p.stop();
@@ -459,7 +460,8 @@ public class Script {
 					}
 					Mixed ret;
 					try {
-						ret = f.exec(m.getTarget(), env, ca);
+						// TODO: Provide generic parameters
+						ret = f.exec(m.getTarget(), env, null, ca);
 					} finally {
 						if(p != null) {
 							p.stop();

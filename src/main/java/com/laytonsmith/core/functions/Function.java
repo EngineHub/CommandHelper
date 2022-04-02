@@ -11,9 +11,9 @@ import com.laytonsmith.core.compiler.signature.SignatureBuilder;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
-import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
@@ -64,7 +64,7 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 	public Boolean runAsync();
 
 	/**
-	 * This function is invoked when the script is run. The line number is provided so that if there is an error, the
+	 * This function is invoked when the script is run.The line number is provided so that if there is an error, the
 	 * function can provide a more specific error message for the user. If the function was canceled due to a fatal
 	 * error in the syntax of the user input or some similar situation, it should throw a ConfigRuntimeException. All
 	 * parameters sent to the function have already been resolved into an atomic value, so functions do not have to
@@ -75,36 +75,44 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 	 *
 	 * @param t The location of this function call in the code, used for correct error messages
 	 * @param env The current code environment
+	 * @param generics The generic type parameter(s) passed to the function. For instance, in the code
+	 * {@code array<string>("asdf", "fdsa")} this will contain the reference to the {@code string} type. This will
+	 * have been validated beforehand to be within the bounds of the function signature. If no type parameters
+	 * were passed in, or if the diamond operator was used, this will contain the default type values filled in.
+	 * However, this parameter MAY be null, which indicates the same thing, and so all functions must accept
+	 * null values here.
 	 * @param args An array of evaluated objects
 	 * @return
-	 * @throws CancelCommandException
 	 */
-	public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException;
+	public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException;
 
 	/**
 	 * Gets the function's signatures. {@link SignatureBuilder} offers a convenient way to create these signatures.
+	 *
 	 * @return This function's signatures.
 	 */
 	public FunctionSignatures getSignatures();
 
 	/**
 	 * Gets the return type of this function, based on the types of the passed arguments.
+	 *
 	 * @param t - The code target, used for setting the code target in thrown exceptions.
 	 * @param argTypes - The types of the passed arguments.
 	 * @param argTargets - The {@link Target}s belonging to the argTypes (in the same order).
 	 * @param env - The {@link Environment}, used for instanceof checks on types.
 	 * @param exceptions - A set to which all type errors will be added.
-	 * @return The return type of this function when invoked with the given argument types. If the return type
-	 * is unknown, {@link CClassType#AUTO} is returned, indicating that this value should be handled as dynamic
-	 * during static type checking.
+	 * @return The return type of this function when invoked with the given argument types. If the return type is
+	 * unknown, {@link CClassType#AUTO} is returned, indicating that this value should be handled as dynamic during
+	 * static type checking.
 	 */
 	public LeftHandSideType getReturnType(Target t, List<LeftHandSideType> argTypes,
 			List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions);
 
 	/**
-	 * Typechecks this function, generating compile errors when types or signatures don't match.
-	 * This method is responsible for type checking the function arguments (child nodes of the passed AST node),
-	 * which can be done by calling this method on those child nodes.
+	 * Typechecks this function, generating compile errors when types or signatures don't match. This method is
+	 * responsible for type checking the function arguments (child nodes of the passed AST node), which can be done by
+	 * calling this method on those child nodes.
+	 *
 	 * @param analysis - The {@link StaticAnalysis}, used to resolve variable/proc/... references.
 	 * @param ast - The parse tree.
 	 * @param env - The {@link Environment}, used for instanceof checks on types.
@@ -115,10 +123,11 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 			ParseTree ast, Environment env, Set<ConfigCompileException> exceptions);
 
 	/**
-	 * If functions contain declarations or references, then these functions should create a new scope,
-	 * link it to the parent scope if it is allowed to perform lookups
-	 * in there, put the new declaration or reference in the new scope and return this new scope.
-	 * Functions are also responsible for calling this method on their children to further generate the scope graph.
+	 * If functions contain declarations or references, then these functions should create a new scope, link it to the
+	 * parent scope if it is allowed to perform lookups in there, put the new declaration or reference in the new scope
+	 * and return this new scope. Functions are also responsible for calling this method on their children to further
+	 * generate the scope graph.
+	 *
 	 * @param analysis - The {@link StaticAnalysis}.
 	 * @param parentScope - The current scope.
 	 * @param ast - The abstract syntax tree representing this function.
@@ -130,9 +139,9 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 			ParseTree ast, Environment env, Set<ConfigCompileException> exceptions);
 
 	/**
-	 * Allows functions to perform a rewrite step to rewrite the AST as received from the parser to a valid
-	 * executable AST. Optimizations should not yet be performed in this rewrite step.
-	 * Traversal is pre-order depth-first.
+	 * Allows functions to perform a rewrite step to rewrite the AST as received from the parser to a valid executable
+	 * AST. Optimizations should not yet be performed in this rewrite step. Traversal is pre-order depth-first.
+	 *
 	 * @param ast - The abstract syntax tree representing this function.
 	 * @param env - The environment.
 	 * @param envs - The set of expected environment classes at runtime.
@@ -153,14 +162,21 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 
 	/**
 	 * If useSpecialExec indicates it needs the code tree instead of the resolved constructs, this gets called instead
-	 * of exec. If execs is needed, exec should return CVoid.
+	 * of exec.If execs is needed, exec should return CVoid.
 	 *
-	 * @param t
-	 * @param env
-	 * @param nodes
-	 * @return
+	 * @param t The code target currently running. Exceptions generated should use this value where possible.
+	 * @param env The environment
+	 * @param parent The parent script, which can be used to evaluate nodes.
+	 * @param generics The generic type parameter(s) passed to the function. For instance, in the code
+	 * {@code array<string>("asdf", "fdsa")} this will contain the reference to the {@code string} type. This will
+	 * have been validated beforehand to be within the bounds of the function signature. If no type parameters
+	 * were passed in, or if the diamond operator was used, this will contain the default type values filled in.
+	 * However, this parameter MAY be null, which indicates the same thing, and so all functions must accept
+	 * null values here.
+	 * @param nodes the raw parse tree nodes, which should be evaluated by this function.
+	 * @return The resulting value after function execution.
 	 */
-	public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes);
+	public Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes);
 
 	/**
 	 * Returns an array of example scripts, which are used for documentation purposes.

@@ -109,7 +109,7 @@ public final class CResource<T> extends Construct implements Finalizable {
 
 	@Override
 	public void msFinalize() {
-		new res_free_resource().exec(new Target(0, new File("/Finalizer"), 0), null, this);
+		new res_free_resource().exec(new Target(0, new File("/Finalizer"), 0), null, null, this);
 	}
 
 	public static interface ResourceToString {

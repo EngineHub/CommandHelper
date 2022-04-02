@@ -28,6 +28,7 @@ import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
@@ -80,7 +81,7 @@ public class FileHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			File location = Static.GetFileFromArgument(args[0].val(), env, t, null);
 			String charset = "UTF-8";
 			if(args.length > 1) {
@@ -160,7 +161,7 @@ public class FileHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return CNull.NULL;
 		}
 
@@ -204,9 +205,9 @@ public class FileHandling {
 
 			String ret;
 			if(children.size() == 1) {
-				ret = new read().exec(t, env, children.get(0).getData()).val();
+				ret = new read().exec(t, env, null, children.get(0).getData()).val();
 			} else {
-				ret = new read().exec(t, env, children.get(0).getData(),
+				ret = new read().exec(t, env, null, children.get(0).getData(),
 						children.get(1).getData()).val();
 			}
 			ParseTree tree = new ParseTree(new CString(ret, t), fileOptions);
@@ -262,7 +263,7 @@ public class FileHandling {
 		}
 
 		@Override
-		public Mixed exec(final Target t, final Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			startup();
 			final String file = args[0].val();
 			final CClosure callback;
@@ -389,10 +390,10 @@ public class FileHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			File location = Static.GetFileFromArgument(args[0].val(), environment, t, null);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			File location = Static.GetFileFromArgument(args[0].val(), env, t, null);
 			try {
-				if(!Static.InCmdLine(environment, true) && !Security.CheckSecurity(location)) {
+				if(!Static.InCmdLine(env, true) && !Security.CheckSecurity(location)) {
 					throw new CRESecurityException("You do not have permission to access the file '" + location + "'", t);
 				}
 			} catch (IOException ex) {
@@ -442,7 +443,7 @@ public class FileHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			File location = Static.GetFileFromArgument(args[0].val(), env, t, null);
 			try {
 				if(!Static.InCmdLine(env, true)) {
@@ -505,7 +506,7 @@ public class FileHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			File location = Static.GetFileFromArgument(args[0].val(), env, t, null);
 			try {
 				//Verify this file is not above the craftbukkit directory (or whatever directory the user specified
@@ -566,7 +567,7 @@ public class FileHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			//TODO: Doesn't work yet.
 			//TODO: Be sure to change over to Static.GetFileFromArgument
 			String path = args[0].val().trim().replace('\\', '/');
@@ -630,8 +631,8 @@ public class FileHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			File f = Static.GetFileFromArgument(args[0].val(), environment, t, null);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			File f = Static.GetFileFromArgument(args[0].val(), env, t, null);
 			try {
 				return new CString(f.getCanonicalPath(), t);
 			} catch (IOException ex) {
