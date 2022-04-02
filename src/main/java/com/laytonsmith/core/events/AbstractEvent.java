@@ -1,6 +1,7 @@
 package com.laytonsmith.core.events;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
@@ -92,6 +93,13 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 
 	@Override
 	public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Environment env) throws PrefilterNonMatchException {
+		boolean hasOldMethod = ReflectionUtils.hasMethod(this.getClass(), "matches", boolean.class,
+				new Class[]{Map.class, BindableEvent.class});
+		if(hasOldMethod) {
+			return (boolean) ReflectionUtils.invokeMethod(this.getClass(), this, "matches",
+					new Class[]{Map.class, BindableEvent.class},
+					new Object[] {prefilter, e}); 
+		}
 		throw new UnsupportedOperationException();
 	}
 
