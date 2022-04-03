@@ -7,6 +7,7 @@ import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.compiler.Keyword;
 import com.laytonsmith.core.constructs.CFunction;
+import com.laytonsmith.core.constructs.CKeyword;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.BasicLogic.not;
 import com.laytonsmith.core.functions.DataHandling._instanceof;
@@ -25,6 +26,9 @@ public class NotInstanceofKeyword extends Keyword {
 		if(list.size() <= keywordPosition + 1) {
 			throw new ConfigCompileException("Expected type to follow \"notinstanceof\" keyword, but no type was found.", list.get(keywordPosition).getTarget());
 		}
+		if(list.get(keywordPosition + 1).getData() instanceof CKeyword cKeyword) {
+			cKeyword.getKeyword().process(list, keywordPosition + 1);
+		}
 		ParseTree node = new ParseTree(new CFunction(_instanceof.NAME,
 				list.get(keywordPosition).getTarget()), list.get(keywordPosition).getFileOptions());
 		node.addChild(list.get(keywordPosition - 1));
@@ -35,7 +39,7 @@ public class NotInstanceofKeyword extends Keyword {
 		list.set(keywordPosition - 1, notNode); // Overwrite the LHS
 		list.remove(keywordPosition); // Remove the keyword
 		list.remove(keywordPosition); // Remove the RHS
-		return keywordPosition;
+		return keywordPosition - 1;
 	}
 
 	@Override
