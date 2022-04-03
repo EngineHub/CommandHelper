@@ -84,4 +84,9 @@ public class StaticAnalysisTest {
 				+ "}");
 	}
 
+	@Test
+	public void testInstanceof() throws Exception {
+		runScript("@a = closure(){}; msg(@a instanceof closure);");
+	}
+
 }
