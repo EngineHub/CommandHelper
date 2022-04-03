@@ -434,14 +434,32 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 			ctype = cache.get(type, generics);
 		} else {
 			// The constructor adds it to the cache
-			ctype = new CClassType(naked, t, generics, cache, env);
+			ctype = new CClassType(naked, t, generics, cache);
 		}
 		return ctype;
 	}
 
 	/**
-	 * This function defines a brand new class type. This should exclusively be used in a class definition scenario, and
+	 * Returns a CClassType that wraps a typename from a GenericDeclaration. Note that almost nothing in this type will
+	 * function correctly, as it is only meant to be a LHS type, hence why this method is package private.
+	 *
+	 * @param typename The type name
+	 * @return A thin CClassType wrapper around the typename.
+	 */
+	/*package*/ static CClassType getFromGenericTypeName(String typename, Target t) {
+		return new CClassType(typename, t);
+	}
+
+	/**
+	 * This function defines a brand new class type.This should exclusively be used in a class definition scenario, and
 	 * never when simply looking up an existing class. The created CClassType is returned.
+	 *
+	 * @param fqcn The fully qualified class name.
+	 * @param genericDeclaration The ClassType's generic declaration, if it has one, null otherwise.
+	 * @param env The environment.
+	 * @param nativeClass The native {@link Class} type, if it is backed by a native class. Many operations are quicker
+	 * with a native class.
+	 * @return The created CClassType.
 	 */
 	public static CClassType defineClass(FullyQualifiedClassName fqcn, GenericDeclaration genericDeclaration,
 			Environment env, Class<? extends Mixed> nativeClass) {
@@ -519,6 +537,14 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		}
 	}
 
+	private CClassType(String genericTypeName, Target t) {
+		super(genericTypeName, ConstructType.CLASS_TYPE, t);
+		this.fqcn = FullyQualifiedClassName.forFullyQualifiedClass(genericTypeName);
+		this.genericParameters = null;
+		this.nativeClass = null;
+		this.genericDeclaration = null;
+	}
+
 	private static String getParametersString(CClassType nakedType, Map<CClassType, GenericParameters> genericParameters) {
 		if(genericParameters == null) {
 			return "";
@@ -533,8 +559,8 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	 * @param t Code target
 	 * @param genericParameters The concrete generic parameters
 	 */
-	private CClassType(CClassType nakedType, Target t, Map<CClassType, GenericParameters> genericParameters, ClassTypeCache cache,
-			Environment env) {
+	@SuppressWarnings("LeakingThisInConstructor")
+	private CClassType(CClassType nakedType, Target t, Map<CClassType, GenericParameters> genericParameters, ClassTypeCache cache) {
 		super(nakedType.getFQCN() + getParametersString(nakedType, genericParameters),
 				ConstructType.CLASS_TYPE, t);
 		this.genericDeclaration = nakedType.getGenericDeclaration(); // same declaration as "parent" class

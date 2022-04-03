@@ -19,7 +19,7 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 public final class FunctionSignatures {
 
 	private final List<FunctionSignature> signatures = new ArrayList<>();
-	private MatchType matchType;
+	private final MatchType matchType;
 
 	protected FunctionSignatures(MatchType matchType) {
 		this.matchType = matchType;
@@ -73,7 +73,7 @@ public final class FunctionSignatures {
 
 		// Select the return type based on the matches.
 		switch(matches.size()) {
-			case 0: {
+			case 0 -> {
 				// No matches. Generate a compile error and return AUTO to prevent further typechecking errors.
 				String argTypesStr = "(" + StringUtils.Join(argTypes, ", ",
 						(LeftHandSideType type) -> (type == null ? "none" : type.getSimpleName())) + ")";
@@ -81,11 +81,11 @@ public final class FunctionSignatures {
 						+ " do not match required " + this.getSignaturesParamTypesString() + ".", t));
 				return CClassType.AUTO.asLeftHandSideType();
 			}
-			case 1: {
+			case 1 -> {
 				// Exactly one signature matches, so return the return type.
 				return matches.get(0).getReturnType().getType();
 			}
-			default: {
+			default -> {
 				// TODO - Ideally, we'd either return a multi-type or the most specific super type of the signatures.
 
 				// Return the return type of all matching signatures if they are the same.

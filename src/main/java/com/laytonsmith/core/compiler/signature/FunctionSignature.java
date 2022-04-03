@@ -8,6 +8,7 @@ import java.util.Stack;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.LeftHandSideType;
+import com.laytonsmith.core.constructs.generics.GenericDeclaration;
 import com.laytonsmith.core.environments.Environment;
 
 /**
@@ -19,6 +20,8 @@ public class FunctionSignature {
 	private final ReturnType returnType;
 	private final List<Param> params;
 	private final List<Throws> throwsList;
+	private GenericDeclaration genericDeclaration;
+	private String genericDeclarationDocs;
 	private boolean noneIsAllowed;
 
 	/**
@@ -26,22 +29,27 @@ public class FunctionSignature {
 	 * @param returnType - The function return type.
 	 * @param params - The function parameters.
 	 * @param throwsList - The list of possibly thrown exceptions by the function.
+	 * @param methodGenericDeclaration The GenericDeclaration for the method. For signatures that do not have
+	 * generics, this may be null. GenericDeclarations are what are verified against when type parameters are
+	 * passed to a given function.
 	 * @param noneIsAllowed If the none type is allowed. If so, none is treated as auto.
 	 */
-	public FunctionSignature(ReturnType returnType, List<Param> params, List<Throws> throwsList, boolean noneIsAllowed) {
+	public FunctionSignature(ReturnType returnType, List<Param> params, List<Throws> throwsList,
+			GenericDeclaration methodGenericDeclaration, boolean noneIsAllowed) {
 		this.returnType = returnType;
 		this.params = params;
 		this.throwsList = throwsList;
+		this.genericDeclaration = methodGenericDeclaration;
 		this.noneIsAllowed = noneIsAllowed;
 	}
 
 	/**
-	 * Creates a new {@link FunctionSignature} with the given return type and no parameters
-	 * and possibly thrown exceptions.
+	 * Creates a new {@link FunctionSignature} with the given return type and no parameters,
+	 * generic declaration, or possibly thrown exceptions.
 	 * @param returnType - The function return type.
 	 */
 	public FunctionSignature(ReturnType returnType) {
-		this(returnType, new ArrayList<>(), new ArrayList<>(), false);
+		this(returnType, new ArrayList<>(), new ArrayList<>(), null, false);
 	}
 
 	protected void addParam(Param param) {
@@ -50,6 +58,11 @@ public class FunctionSignature {
 
 	protected void addThrows(Throws throwsObj) {
 		this.throwsList.add(throwsObj);
+	}
+
+	protected void setGenericDeclaration(GenericDeclaration methodGenericDeclaration, String docs) {
+		this.genericDeclaration = methodGenericDeclaration;
+		this.genericDeclarationDocs = docs;
 	}
 
 	protected void setNoneIsAllowed(boolean noneIsAllowed) {
@@ -78,6 +91,24 @@ public class FunctionSignature {
 	 */
 	public List<Throws> getThrows() {
 		return Collections.unmodifiableList(this.throwsList);
+	}
+
+	/**
+	 * Returns the generic declaration for this method. This declaration is validated against for type parameters
+	 * sent in, either at compile time (if Static Analysis is enabled) or at runtime, and thus does can be
+	 * relied on to be correct within the function exec method.
+	 * @return The definition, or null, if the function does not have one.
+	 */
+	public GenericDeclaration getGenericDeclaration() {
+		return this.genericDeclaration;
+	}
+
+	/**
+	 * Returns the docs specified in the builder. May be null.
+	 * @return
+	 */
+	public String getGenericDeclarationDocs() {
+		return this.genericDeclarationDocs;
 	}
 
 	/**

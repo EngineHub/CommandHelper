@@ -3,6 +3,7 @@ package com.laytonsmith.core.compiler.signature;
 import com.laytonsmith.core.compiler.signature.FunctionSignatures.MatchType;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.LeftHandSideType;
+import com.laytonsmith.core.constructs.generics.GenericDeclaration;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 
 /**
@@ -103,6 +104,30 @@ public class SignatureBuilder {
 	 * @param isOptional - Whether the parameter is optional or not.
 	 * @return This {@link SignatureBuilder}, for chaining builder methods.
 	 */
+	public SignatureBuilder param(LeftHandSideType paramType, String paramName, String paramDesc, boolean isOptional) {
+		this.signature.addParam(new Param(paramType, paramName, paramDesc, false, isOptional));
+		return this;
+	}
+
+	/**
+	 * Adds a normal non-optional function parameter. Parameters should be added from left to right.
+	 * @param paramType - The {@link CClassType} of the parameter.
+	 * @param paramName - The name of the parameter.
+	 * @param paramDesc - The description of the parameter.
+	 * @return This {@link SignatureBuilder}, for chaining builder methods.
+	 */
+	public SignatureBuilder param(LeftHandSideType paramType, String paramName, String paramDesc) {
+		return this.param(paramType, paramName, paramDesc, false);
+	}
+
+	/**
+	 * Adds a normal function parameter. Parameters should be added from left to right.
+	 * @param paramType - The {@link CClassType} of the parameter.
+	 * @param paramName - The name of the parameter.
+	 * @param paramDesc - The description of the parameter.
+	 * @param isOptional - Whether the parameter is optional or not.
+	 * @return This {@link SignatureBuilder}, for chaining builder methods.
+	 */
 	public SignatureBuilder param(CClassType paramType, String paramName, String paramDesc, boolean isOptional) {
 		this.signature.addParam(new Param(paramType == null ? null : paramType.asLeftHandSideType(), paramName, paramDesc, false, isOptional));
 		return this;
@@ -153,6 +178,18 @@ public class SignatureBuilder {
 		return this;
 	}
 
+	public SignatureBuilder setGenericDeclaration(GenericDeclaration genericDeclaration, String docs) {
+		this.signature.setGenericDeclaration(genericDeclaration, docs);
+		return this;
+	}
+
+	/**
+	 * Sets whether or not values of the {@code none} type are allowed to be passed in here. In general, this
+	 * should be false, as code such as {@code add(die(), die())} is almost certainly an error, however, branch
+	 * type functions, such as if, loops, and even less direct ones such as dor should accept.
+	 * @param allowed
+	 * @return
+	 */
 	public SignatureBuilder setNoneIsAllowed(boolean allowed) {
 		this.signature.setNoneIsAllowed(allowed);
 		return this;

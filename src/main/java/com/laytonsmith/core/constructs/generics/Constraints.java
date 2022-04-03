@@ -30,7 +30,9 @@ public class Constraints implements Iterable<Constraint> {
 	private final List<Constraint> unorderedConstraints;
 
 	/**
-	 * Constructs a new constraint object. Note that if this is being used on the LHS, no validation is done
+	 * Constructs a new constraint object.Note that if this is being used on the LHS, no validation is done
+	 * @param t The code target
+	 * @param location The location of the Constraints
 	 * @param constraints The constraints. This is an unordered list, but they will be normalized into their
 	 *                    natural order.
 	 */

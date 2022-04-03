@@ -1,21 +1,32 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.Pair;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.annotations.seealso;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.LogLevel;
+import com.laytonsmith.core.compiler.signature.FunctionSignatures;
+import com.laytonsmith.core.compiler.signature.SignatureBuilder;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.ConstraintLocation;
+import com.laytonsmith.core.constructs.generics.Constraints;
+import com.laytonsmith.core.constructs.generics.GenericDeclaration;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
+import com.laytonsmith.core.constructs.generics.UnboundedConstraint;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
@@ -154,9 +165,10 @@ public class Persistence {
 
 		@Override
 		public String docs() {
-			return "mixed {[namespace, ...,] key} Returns a stored value stored with store_value. If the key doesn't exist in storage, null"
-					+ " is returned. On a more detailed note: If the value stored in the persistence database is not actually a construct,"
-					+ " then null is also returned.";
+			return "auto {[namespace, ...,] key} Returns a stored value stored with store_value. If the key doesn't exist in storage, null"
+					+ " is returned. On a more detailed note: If the value stored in the persistence database is not actually a type known to MethodsScript,"
+					+ " then null is also returned. The type of the returned object can be specified with the type parameter. If the"
+					+ " stored type cannot be coerced into the specified type, a CastException is thrown.";
 		}
 
 		@Override
@@ -175,7 +187,7 @@ public class Persistence {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) {
 			Object o;
 			String namespace = GetNamespace(args, null, getName(), t);
 			MSLog.GetLogger().Log(MSLog.Tags.PERSISTENCE, LogLevel.DEBUG, "Getting value: " + namespace, t);
@@ -197,10 +209,32 @@ public class Persistence {
 				throw ConfigRuntimeException.CreateUncatchableException(ex.getMessage(), t);
 			}
 			try {
-				return (Mixed) o;
+				Mixed ret = (Mixed) o;
+				if(generics == null) {
+					return ret;
+				}
+				Pair<CClassType, LeftHandGenericUse> expectedReturn = generics.getParameters().get(0);
+				if(ret.isInstanceOf(expectedReturn.getKey(), expectedReturn.getValue(), env)) {
+					return ret;
+				} else {
+					return ArgumentValidation.typeCoerce(ret, expectedReturn.getKey(), env, t);
+				}
 			} catch (ClassCastException e) {
 				return CNull.NULL;
 			}
+		}
+
+		@Override
+		public FunctionSignatures getSignatures() {
+			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN,
+				new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+					new UnboundedConstraint(Target.UNKNOWN, "T")));
+			LeftHandSideType t = LeftHandSideType.fromGenericDefinitionType(genericDeclaration, "T", null, Target.UNKNOWN);
+			return new SignatureBuilder(t)
+					.varParam(CString.TYPE, "namespace", "Automatically prepended namespace parameters.")
+					.param(CString.TYPE, "key", "The key to lookup.")
+					.setGenericDeclaration(genericDeclaration, "The type that should be returned, by default auto.")
+					.build();
 		}
 
 		@Override

@@ -26,6 +26,9 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Booleanish;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import com.laytonsmith.core.objects.UserObject;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.EnumSet;
 import java.util.Objects;
 
@@ -547,7 +550,7 @@ public final class ArgumentValidation {
 	}
 
 	/**
-	 * Returns a String object from the given construct.Note that unlike {@link #getString}, this strictly expects a
+	 * Returns a String object from the given construct. Note that unlike {@link #getString}, this strictly expects a
 	 * string object (or subtype), and will throw a CRECastException if it is not a string.
 	 *
 	 * @param c
@@ -718,4 +721,72 @@ public final class ArgumentValidation {
 		}
 		return set;
 	}
+
+	/**
+	 * Proxies the given interface, to allow direct Java access to any type that implements the given interface,
+	 * including user classes. Note that if the type natively implements the given interface, no proxying is done, it is
+	 * just cast and returned.
+	 * <p>
+	 * For user classes, however, it is detected if they implement the given interface, and if so, the calls to the
+	 * interface which are generally available in the api are correctly proxied. NOTE! Only methods which are part of
+	 * the actual API can be used this way, otherwise, an Error will be thrown for user types, since they will not
+	 * have been required to implement the given method.
+	 *
+	 * @param <T> The interface type to proxy
+	 * @param iface The interface type to proxy
+	 * @param value The value to proxy
+	 * @param env The environment.
+	 * @return The same value, but cast to the desired interface.
+	 * @throws ClassCastException If the underlying type does not implement the given interface.
+	 */
+	public static <T extends Mixed> T getFromProxy(Class<T> iface, Mixed value, Environment env) {
+		if(value.getClass().isAssignableFrom(iface)) {
+			return (T) value;
+		}
+		if(value instanceof UserObject obj) {
+			CClassType ifaceCT = CClassType.get(iface);
+			if(!value.typeof(env).doesExtend(env, ifaceCT)) {
+				throw new ClassCastException("Type does not extend the desired type");
+			}
+
+			return (T) Proxy.newProxyInstance(ArgumentValidation.class.getClassLoader(), new Class[]{iface},
+					(Object proxy, Method method, Object[] args) -> {
+						// TODO
+						throw new UnsupportedOperationException("User object proxying not yet supported");
+					});
+		}
+		throw new ClassCastException("Type does not extend the desired type");
+	}
+
+	/**
+	 * Coerces the type according to cross casting rules. If the type is already correct, it is simply returned.
+	 * For now, only a limited set of types is supported, but this will be expanded later to support proper cross
+	 * casting.
+	 * @param value The value to potentially coerce.
+	 * @param expected The expected type.
+	 * @param env The environment.
+	 * @param t The code target.
+	 * @return The coerced type, or the original value if it's already the proper type.
+	 */
+	public static Mixed typeCoerce(Mixed value, CClassType expected, Environment env, Target t) {
+		if(CNull.NULL.equals(value)) {
+			return value;
+		}
+		CClassType actual = value.typeof(env);
+		if(actual.equals(expected)) {
+			return value;
+		}
+		if(expected.equals(CInt.TYPE)) {
+			return new CInt(getInt(value, t, env), t);
+		} else if(expected.equals(CDouble.TYPE)) {
+			return new CDouble(getDouble(value, t, env), t);
+		} else if(expected.equals(CString.TYPE)) {
+			return new CString(getString(value, t), t);
+		} else if(expected.equals(CBoolean.TYPE)) {
+			return CBoolean.get(getBooleanish(value, t, env));
+		} else {
+			throw new CRECastException("Cannot cast from " + actual.getName() + " to " + expected.getName(), t);
+		}
+	}
+
 }

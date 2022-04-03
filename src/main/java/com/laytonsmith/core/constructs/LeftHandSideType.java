@@ -5,6 +5,8 @@ import com.laytonsmith.PureUtilities.ObjectHelpers;
 import com.laytonsmith.PureUtilities.Pair;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.constructs.generics.Constraints;
+import com.laytonsmith.core.constructs.generics.GenericDeclaration;
 import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
@@ -69,6 +71,37 @@ public final class LeftHandSideType extends Construct {
 	 */
 	public static LeftHandSideType fromHardCodedType(CClassType type) {
 		return fromCClassType(type, Target.UNKNOWN);
+	}
+
+	/**
+	 * When creating a type in a GenericDeclaration object, the type reference doesn't actually exist, but it still
+	 * needs to be represented as a left hand type.For instance, if we have {@code class C<T>}, then within the class,
+	 * {@code T} can be used as method return types, parameter types, field types, etc.This is not a "real" type in the
+	 * sense that it can be used at runtime, but within the compilation system, this needs to be representable somehow,
+	 * without actually using CClassType.Note that the relevant GenericDeclaration needs to be passed in as well. It is
+	 * validated that such a type parameter exists, and it also is used to pull out the appropriate constraints so that
+	 * additional validation can be done elsewhere.
+	 *
+	 * @param declaration The declaration which contains this type name.
+	 * @param genericTypeName The generic type name, for instance {@code T}
+	 * @param genericLHGU The generic parameters for this type, for instance {@code ? extends int}
+	 * in {@code T<? extends int>}
+	 * @param t The code target
+	 * @return The LeftHandSideType wrapping this generic typename.
+	 */
+	public static LeftHandSideType fromGenericDefinitionType(GenericDeclaration declaration, String genericTypeName,
+			LeftHandGenericUse genericLHGU, Target t) {
+		Constraints constraints = null;
+		for(Constraints c : declaration.getConstraints()) {
+			if(c.getTypeName().equals(genericTypeName)) {
+				constraints = c;
+				break;
+			}
+		}
+		if(constraints == null) {
+			throw new IllegalArgumentException("Provided GenericDeclaration does not contain the specified type name.");
+		}
+		return new LeftHandSideType(genericTypeName, t, null, constraints, genericTypeName, genericLHGU);
 	}
 
 	/**
@@ -137,31 +170,50 @@ public final class LeftHandSideType extends Construct {
 			}
 			return ret;
 		});
-		return new LeftHandSideType(value, t, classTypes);
+		return new LeftHandSideType(value, t, classTypes, null, null, null);
 	}
+
+	private final boolean isTypeName;
 
 	@ObjectHelpers.StandardField
 	private final List<Pair<CClassType, LeftHandGenericUse>> types;
 
-	private LeftHandSideType(String value, Target t, List<Pair<CClassType, LeftHandGenericUse>> types) {
+	@ObjectHelpers.StandardField
+	private final String genericTypeName;
+
+	private final Constraints constraints;
+
+	private LeftHandSideType(String value, Target t, List<Pair<CClassType, LeftHandGenericUse>> types,
+			Constraints constraints, String genericTypeName, LeftHandGenericUse genericTypeLHGU) {
 		super(value, ConstructType.CLASS_TYPE, t);
-		// Sort the list with TreeSet first
-		Set<Pair<CClassType, LeftHandGenericUse>> tempSet = new TreeSet<>((o1, o2) -> {
-			String o1Index = o1.getKey().val() + (o1.getValue() == null ? "" : ("<" + o1.getValue().toString() + ">"));
-			String o2Index = o2.getKey().val() + (o2.getValue() == null ? "" : ("<" + o2.getValue().toString() + ">"));
-			return o1Index.compareTo(o2Index);
-		});
-		tempSet.addAll(types);
-		this.types = new ArrayList<>(tempSet);
-		if(isTypeUnion()) {
-			for(Pair<CClassType, LeftHandGenericUse> type : types) {
-				if(Auto.TYPE.equals(type.getKey())) {
-					throw new CREIllegalArgumentException("auto type cannot be used in a type union", t);
-				}
-				if(CVoid.TYPE.equals(type.getKey())) {
-					throw new CREIllegalArgumentException("void type cannot be used in a type union", t);
+		if(types != null) {
+			isTypeName = false;
+			// Sort the list with TreeSet first
+			Set<Pair<CClassType, LeftHandGenericUse>> tempSet = new TreeSet<>((o1, o2) -> {
+				String o1Index = o1.getKey().val() + (o1.getValue() == null ? "" : ("<" + o1.getValue().toString() + ">"));
+				String o2Index = o2.getKey().val() + (o2.getValue() == null ? "" : ("<" + o2.getValue().toString() + ">"));
+				return o1Index.compareTo(o2Index);
+			});
+			tempSet.addAll(types);
+			this.types = new ArrayList<>(tempSet);
+			if(isTypeUnion()) {
+				for(Pair<CClassType, LeftHandGenericUse> type : types) {
+					if(Auto.TYPE.equals(type.getKey())) {
+						throw new CREIllegalArgumentException("auto type cannot be used in a type union", t);
+					}
+					if(CVoid.TYPE.equals(type.getKey())) {
+						throw new CREIllegalArgumentException("void type cannot be used in a type union", t);
+					}
 				}
 			}
+			this.constraints = null;
+			this.genericTypeName = null;
+		} else {
+			this.types = new ArrayList<>();
+			this.types.add(new Pair<>(CClassType.getFromGenericTypeName(genericTypeName, t), genericTypeLHGU));
+			isTypeName = true;
+			this.constraints = constraints;
+			this.genericTypeName = genericTypeName;
 		}
 	}
 
@@ -170,7 +222,14 @@ public final class LeftHandSideType extends Construct {
 		return false;
 	}
 
+	/**
+	 *
+	 * @return
+	 */
 	public List<Pair<CClassType, LeftHandGenericUse>> getTypes() {
+		if(isTypeName) {
+			throw new Error();
+		}
 		return new ArrayList<>(types);
 	}
 

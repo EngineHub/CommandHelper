@@ -67,31 +67,37 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	protected final Environment fallbackEnv;
 
 	@AggressiveDeprecation
+	@Deprecated
 	public CArray(Target t, int initialCapactity) {
 		this(t, initialCapactity, null, null);
 	}
 
 	@AggressiveDeprecation
+	@Deprecated
 	public CArray(Target t) {
 		this(t, null, null);
 	}
 
 	@AggressiveDeprecation
+	@Deprecated
 	public CArray(Target t, Mixed... items) {
 		this(t, 16, null, null, items);
 	}
 
 	@AggressiveDeprecation
+	@Deprecated
 	public CArray(Target t, Collection<Mixed> items) {
 		this(t, 16, items, null, null);
 	}
 
 	@AggressiveDeprecation
+	@Deprecated
 	public CArray(Target t, int initialCapacity, Collection<Mixed> items) {
 		this(t, initialCapacity, items, null, null);
 	}
 
 	@AggressiveDeprecation
+	@Deprecated
 	public CArray(Target t, int initialCapacity, Mixed... items) {
 		this(t, initialCapacity, null, null, items);
 	}
@@ -207,6 +213,12 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		return c;
 	}
 
+	@AggressiveDeprecation
+	@Deprecated
+	public List<Mixed> asList() {
+		return asList(null);
+	}
+
 	/**
 	 * Returns a List based on the array.This is only applicable if this is a normal array.
 	 *
@@ -235,6 +247,18 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	 */
 	public boolean inAssociativeMode() {
 		return associativeMode;
+	}
+
+	@AggressiveDeprecation
+	@Deprecated
+	public static CArray GetAssociativeArray(Target t) {
+		return GetAssociativeArray(t, null, null);
+	}
+
+	@AggressiveDeprecation
+	@Deprecated
+	public static CArray GetAssociativeArray(Target t, Mixed[] args) {
+		return GetAssociativeArray(t, null, null, args);
 	}
 
 	/**
@@ -287,6 +311,12 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		} else {
 			throw new CRECastException("Cannot reverse an associative array.", t);
 		}
+	}
+
+	@AggressiveDeprecation
+	@Deprecated
+	public void push(Mixed c, Target t) {
+		push(c, t, null);
 	}
 
 	/**
@@ -397,6 +427,12 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		array = null; // null out the original array container so it can be GC'd
 	}
 
+	@AggressiveDeprecation
+	@Deprecated
+	public void set(Mixed index, Mixed c, Target t) {
+		set(index, c, t, null);
+	}
+
 	/**
 	 * Sets the value at the given index.
 	 *
@@ -451,6 +487,12 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 
 	public final void set(String index, String value, Environment env) {
 		set(index, value, Target.UNKNOWN, env);
+	}
+
+	@AggressiveDeprecation
+	@Deprecated
+	public Mixed get(Mixed index, Target t) {
+		return get(index, t, null);
 	}
 
 	@Override
@@ -785,6 +827,12 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		return remove(new CString(s, Target.UNKNOWN), env);
 	}
 
+	@AggressiveDeprecation
+	@Deprecated
+	public Mixed remove(Mixed construct) {
+		return remove(construct, null);
+	}
+
 	/**
 	 * Removes the value at the specified key
 	 *
@@ -953,6 +1001,12 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		STRING_IC
 	}
 
+	@AggressiveDeprecation
+	@Deprecated
+	public void sort(ArraySortType sort) {
+		sort(sort, null);
+	}
+
 	public void sort(final ArraySortType sort, Environment env) {
 		if(this.associativeMode) {
 			array = new ArrayList<>(associativeArray.values());
@@ -1046,6 +1100,12 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 			}
 		});
 		this.setDirty();
+	}
+
+	@AggressiveDeprecation
+	@Deprecated
+	public boolean isEmpty() {
+		return isEmpty(null);
 	}
 
 	public boolean isEmpty(Environment env) {
