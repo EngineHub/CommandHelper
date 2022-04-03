@@ -258,4 +258,10 @@ public class GenericsTest {
 			test.test();
 		}
 	}
+
+	@Test
+	public void testNakedArrayIsAuto() throws Exception {
+		String result = StaticTest.SRun("typeof(array())", null);
+		assertEquals("ms.lang.array<auto>", result);
+	}
 }

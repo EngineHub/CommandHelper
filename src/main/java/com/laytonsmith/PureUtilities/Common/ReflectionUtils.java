@@ -393,6 +393,33 @@ public final class ReflectionUtils {
 	}
 
 	/**
+	 * Checks to see if a field with the given name and type exists.
+	 *
+	 * @param c The class to check in.
+	 * @param fieldName The name of the field
+	 * @param type May be null, in which case any type is accepted. Otherwise, checks to see if the field extends
+	 * this type.
+	 * @return True, if the field with the given name and optionally type exists.
+	 * @throws com.laytonsmith.PureUtilities.Common.ReflectionUtils.ReflectionException
+	 */
+	public static boolean hasField(Class<?> c, String fieldName, Class type) throws ReflectionException {
+		Field f;
+		try {
+			f = c.getField(fieldName);
+		} catch (NoSuchFieldException ex) {
+			return false;
+		} catch (SecurityException ex) {
+			throw new ReflectionException(ex);
+		}
+		if(type != null) {
+			if(!type.isAssignableFrom(f.getType())) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
 	 * Returns sun.misc.Unsafe. It is an object, which requires reflective calls made onto it. This is to prevent any
 	 * warnings from the JVM.
 	 *

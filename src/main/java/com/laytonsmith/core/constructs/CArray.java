@@ -63,7 +63,6 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	private String mutVal;
 	private CArray parent = null;
 	private boolean valueDirty = true;
-	private GenericParameters genericParameters = null;
 	// For the val(), we need to use the fallbackEnv
 	protected final Environment fallbackEnv;
 
@@ -123,7 +122,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		this.fallbackEnv = env;
 		parameters = parameters != null ? parameters : GenericParameters.addParameter(Auto.TYPE, null)
 				.build();
-		this.genericParameters = parameters;
+		registerGenericParameters(TYPE, parameters);
 		if(initialCapacity == -1) {
 			associativeMode = true;
 		} else if(items != null) {
@@ -728,7 +727,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		}
 
 		// Create the clone to put array in and add it to the cloneRefs list.
-		CArray clone = new CArray(t, (int) array.size(env), array.genericParameters, env);
+		CArray clone = new CArray(t, (int) array.size(env), array.getThisGenericParameters(env), env);
 		clone.associativeMode = array.associativeMode;
 		cloneRefs.add(new CArray[]{array, clone});
 
@@ -856,7 +855,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		try {
 			Constructor<CArray> con = (Constructor<CArray>) this.getClass().getConstructor(Target.class, GenericParameters.class, Environment.class);
 			try {
-				return con.newInstance(t, this.genericParameters, env);
+				return con.newInstance(t, this.getThisGenericParameters(env), env);
 			} catch(InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
 				throw new RuntimeException(ex);
 			}

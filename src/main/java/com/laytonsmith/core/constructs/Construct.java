@@ -536,6 +536,16 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 		}
 	}
 
+	/**
+	 * Returns the GenericParameters that was registered to this class.
+	 * @param env The environment.
+	 * @return The generic parameters for this class, or null, if none were registered with
+	 * {@link #registerGenericParameters}
+	 */
+	protected GenericParameters getThisGenericParameters(Environment env) {
+		return genericParameters.get(this.typeof(env));
+	}
+
 	protected final void registerGenericParameters(CClassType type, GenericParameters parameters) {
 		this.genericParameters.put(type, parameters);
 	}
