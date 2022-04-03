@@ -1,5 +1,6 @@
 package com.laytonsmith.core.constructs;
 
+import com.laytonsmith.PureUtilities.Common.Annotations.AggressiveDeprecation;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.MEnum;
 import com.laytonsmith.annotations.typeof;
@@ -35,6 +36,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.Stack;
@@ -50,6 +52,7 @@ import java.util.TreeMap;
 public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		com.laytonsmith.core.natives.interfaces.Iterable {
 
+	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
 	public static final CClassType TYPE = CClassType.getWithGenericDeclaration(CArray.class, new GenericDeclaration(Target.UNKNOWN,
 			new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
 					new UnboundedConstraint(Target.UNKNOWN, "T"))));
@@ -64,16 +67,34 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	// For the val(), we need to use the fallbackEnv
 	protected final Environment fallbackEnv;
 
-	/**
-	 * @deprecated Generic parameters and an environment are now needed for correct instantiation of CArrays. This
-	 * method will be removed once user classes are introduced, though generic parameters can be null if {@code array<auto>}
-	 * is the desired type. However, it is encouraged to use proper generic types where possible.
-	 * @param t
-	 * @param initialCapactity
-	 */
-	@Deprecated
+	@AggressiveDeprecation
 	public CArray(Target t, int initialCapactity) {
 		this(t, initialCapactity, null, null);
+	}
+
+	@AggressiveDeprecation
+	public CArray(Target t) {
+		this(t, null, null);
+	}
+
+	@AggressiveDeprecation
+	public CArray(Target t, Mixed... items) {
+		this(t, 16, null, null, items);
+	}
+
+	@AggressiveDeprecation
+	public CArray(Target t, Collection<Mixed> items) {
+		this(t, 16, items, null, null);
+	}
+
+	@AggressiveDeprecation
+	public CArray(Target t, int initialCapacity, Collection<Mixed> items) {
+		this(t, initialCapacity, items, null, null);
+	}
+
+	@AggressiveDeprecation
+	public CArray(Target t, int initialCapacity, Mixed... items) {
+		this(t, initialCapacity, null, null, items);
 	}
 
 	public CArray(Target t, GenericParameters genericParameters, Environment env) {
@@ -96,6 +117,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		this(t, initialCapacity, genericParameters, env, getArray(items));
 	}
 
+	@SuppressWarnings({"LeakingThisInConstructor", "null"})
 	public CArray(Target t, int initialCapacity, GenericParameters parameters, Environment env, Mixed... items) {
 		super("{}", ConstructType.ARRAY, t);
 		this.fallbackEnv = env;
@@ -118,9 +140,10 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		if(associativeMode) {
 			if(items != null) {
 				for(Mixed item : items) {
-					if(item instanceof CEntry) {
-						Mixed value = ((CEntry) item).construct;
-						associativeArray.put(normalizeConstruct(((CEntry) item).ckey, env), value);
+					Objects.requireNonNull(item);
+					if(item instanceof CEntry cEntry) {
+						Mixed value = cEntry.construct;
+						associativeArray.put(normalizeConstruct(cEntry.ckey, env), value);
 						if(value.isInstanceOf(CArray.TYPE, null, env)) {
 							((CArray) value).parent = this;
 						}
@@ -186,8 +209,9 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	}
 
 	/**
-	 * Returns a List based on the array. This is only applicable if this is a normal array.
+	 * Returns a List based on the array.This is only applicable if this is a normal array.
 	 *
+	 * @param env
 	 * @return
 	 */
 	public List<Mixed> asList(Environment env) {
@@ -218,6 +242,8 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	 * Returns a new empty CArray that is in associative mode.
 	 *
 	 * @param t
+	 * @param genericParameters
+	 * @param env
 	 * @return
 	 */
 	public static CArray GetAssociativeArray(Target t, GenericParameters genericParameters, Environment env) {
@@ -269,6 +295,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	 *
 	 * @param c
 	 * @param t
+	 * @param env
 	 */
 	public final void push(Mixed c, Target t, Environment env) {
 		push(c, null, t, env);
@@ -277,14 +304,19 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	/**
 	 * Pushes a new Construct onto the end of the array. If the index is specified, this works like a "insert"
 	 * operation, in that all values are shifted to the right, starting with the value at that index. If the array is
-	 * associative though, you MUST send null, otherwise an {@link IllegalArgumentException} is thrown. Ideally, you
+	 * associative though, you MUST send null, otherwise an {@link IllegalArgumentException} is thrown.Ideally, you
 	 * should use {@link #set} anyways for an associative array.
 	 *
 	 * @param c The Construct to add to the array
+	 * @param index The index to push on. May be null.
+	 * @param t The code target
+	 * @param env The environment
 	 * @throws IllegalArgumentException If index is not null, and this is an associative array.
 	 * @throws IndexOutOfBoundsException If the index is not null, and the index specified is out of range.
 	 */
+	@SuppressWarnings("null")
 	public void push(Mixed c, Integer index, Target t, Environment env) throws IllegalArgumentException, IndexOutOfBoundsException {
+		Objects.requireNonNull(c);
 		if(!associativeMode) {
 			if(index != null) {
 				array.add(index, c);
@@ -304,8 +336,8 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 				} catch(NumberFormatException e) {
 				}
 			}
-			if(c instanceof CEntry) {
-				associativeArray.put(Integer.toString(max + 1), ((CEntry) c).construct());
+			if(c instanceof CEntry cEntry) {
+				associativeArray.put(Integer.toString(max + 1), cEntry.construct());
 			} else {
 				associativeArray.put(Integer.toString(max + 1), c);
 			}
@@ -367,9 +399,12 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	}
 
 	/**
+	 * Sets the value at the given index.
 	 *
-	 * @param index
-	 * @param c
+	 * @param index The index. Should be either an int or a string.
+	 * @param c The element to set.
+	 * @param t The code target.
+	 * @param env The environment.
 	 */
 	public void set(Mixed index, Mixed c, Target t, Environment env) {
 		if(!associativeMode) {
@@ -419,7 +454,6 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		set(index, value, Target.UNKNOWN, env);
 	}
 
-
 	@Override
 	public Mixed get(Mixed index, Target t, Environment env) {
 		if(!associativeMode) {
@@ -431,8 +465,8 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		} else {
 			Mixed val = associativeArray.get(normalizeConstruct(index, env));
 			if(val != null) {
-				if(val instanceof CEntry) {
-					return ((CEntry) val).construct();
+				if(val instanceof CEntry cEntry) {
+					return cEntry.construct();
 				}
 				return val;
 			} else {
@@ -466,8 +500,8 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		} else {
 			Mixed val = associativeArray.get(Integer.toString(index));
 			if(val != null) {
-				if(val instanceof CEntry) {
-					return ((CEntry) val).construct();
+				if(val instanceof CEntry cEntry) {
+					return cEntry.construct();
 				}
 				return val;
 			} else {
@@ -494,8 +528,8 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		} else {
 			Mixed val = associativeArray.get(index);
 			if(val != null) {
-				if(val instanceof CEntry) {
-					return ((CEntry) val).construct();
+				if(val instanceof CEntry cEntry) {
+					return cEntry.construct();
 				}
 				return val;
 			} else {
@@ -542,8 +576,9 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	/**
 	 * Returns an array of the keys of all the values that are equal to the value specified
 	 *
-	 * @param value
-	 * @return
+	 * @param value The value to find the index(es) of
+	 * @param env The environment
+	 * @return An array of keys where the corresponding value is equal to the value specified.
 	 */
 	public CArray indexesOf(Mixed value, Environment env) {
 		CArray ret;
@@ -589,6 +624,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	 * @param env
 	 * @return
 	 */
+	@SuppressWarnings("null")
 	protected String getString(Stack<CArray> arrays, Target t, Environment env) {
 		if(!valueDirty) {
 			return mutVal;
@@ -658,6 +694,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	}
 
 	@Override
+	@SuppressWarnings("CloneDeclaresCloneNotSupported")
 	public CArray clone() {
 		CArray clone;
 		try {
@@ -706,17 +743,18 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		return clone;
 	}
 
+	@SuppressWarnings("null")
 	private String normalizeConstruct(Mixed c, Environment env) {
 		if(c instanceof CNull) {
 			return "";
-		} else if(c instanceof CBoolean) {
-			if(((CBoolean) c).getBoolean()) {
+		} else if(c instanceof CBoolean cBoolean) {
+			if(cBoolean.getBoolean()) {
 				return "1";
 			} else {
 				return "0";
 			}
-		} else if(c instanceof CLabel) {
-			return normalizeConstruct(((CLabel) c).cVal(), env);
+		} else if(c instanceof CLabel cLabel) {
+			return normalizeConstruct(cLabel.cVal(), env);
 		} else if(c.isInstanceOf(CArray.TYPE, null, env)) {
 			throw new CRECastException("Arrays cannot be used as the key in an associative array", c.getTarget());
 		} else if(c.isInstanceOf(CString.TYPE, null, env) || c.isInstanceOf(CInt.TYPE, null, env)) {
@@ -729,8 +767,9 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	/**
 	 * Removes the value at the specified integer key.
 	 *
-	 * @param i
-	 * @return
+	 * @param i The index to remove at
+	 * @param env The environment
+	 * @return The value that was removed
 	 */
 	public Mixed remove(int i, Environment env) {
 		return remove(new CInt(i, Target.UNKNOWN), env);
@@ -739,8 +778,9 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	/**
 	 * Removes the value at the specified string key.
 	 *
-	 * @param s
-	 * @return
+	 * @param s The index to remove at
+	 * @param env The environment
+	 * @return The value that was removed
 	 */
 	public Mixed remove(String s, Environment env) {
 		return remove(new CString(s, Target.UNKNOWN), env);
@@ -750,6 +790,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	 * Removes the value at the specified key
 	 *
 	 * @param construct The value to remove
+	 * @param env The environment
 	 * @return The removed value, or CNull if nothing was removed.
 	 */
 	public Mixed remove(Mixed construct, Environment env) {
@@ -807,8 +848,9 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	 * that accepts a {@link Target}, {@link GenericParameters}, {@link Environment}. If this assumption is not valid,
 	 * you may override this method as needed.
 	 *
-	 * @param t
-	 * @return
+	 * @param t The code target
+	 * @param env The environment
+	 * @return A new empty array
 	 */
 	public CArray createNew(Target t, Environment env) {
 		try {
@@ -922,6 +964,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		}
 		array.sort(new Comparator<Mixed>() {
 			@Override
+			@SuppressWarnings("null")
 			public int compare(Mixed o1, Mixed o2) {
 				//o1 < o2 -> -1
 				//o1 == o2 -> 0

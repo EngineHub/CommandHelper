@@ -15,7 +15,7 @@ import java.lang.annotation.Target;
  * To use this annotation, simply tag the method that would otherwise be deprecated with this annotation in addition to
  * the {@link Deprecated} annotation, {@code @deprecated} javadoc, and {@code @hidden} javadoc.
  */
-@Target(ElementType.METHOD)
+@Target({ElementType.METHOD, ElementType.CONSTRUCTOR})
 @Retention(RetentionPolicy.CLASS)
 public @interface AggressiveDeprecation {
 
