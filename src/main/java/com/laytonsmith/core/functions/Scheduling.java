@@ -392,7 +392,11 @@ public class Scheduling {
 				} catch (ProgramFlowManipulationException e) {
 					ConfigRuntimeException.DoWarning("Using a program flow manipulation construct improperly! " + e.getClass().getSimpleName());
 				} finally {
-					taskManager.getTask(CoreTaskType.TIMEOUT, ret.get()).changeState(TaskState.FINISHED);
+					TaskHandler task = taskManager.getTask(CoreTaskType.TIMEOUT, ret.get());
+					// If the task was somehow killed in the closure, it'll be null
+					if(task != null) {
+						task.changeState(TaskState.FINISHED);
+					}
 				}
 			}));
 			taskManager.addTask(new TimeoutTaskHandler(ret.get(), t, () -> {
