@@ -227,9 +227,6 @@ public final class LeftHandSideType extends Construct {
 	 * @return
 	 */
 	public List<Pair<CClassType, LeftHandGenericUse>> getTypes() {
-		if(isTypeName) {
-			throw new Error();
-		}
 		return new ArrayList<>(types);
 	}
 
