@@ -143,17 +143,25 @@ public abstract class AbstractFunction implements Function {
 	public LeftHandSideType typecheck(StaticAnalysis analysis,
 			ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
 
-		// Get and check the types of the function's arguments.
-		List<ParseTree> children = ast.getChildren();
-		List<LeftHandSideType> argTypes = new ArrayList<>(children.size());
-		List<Target> argTargets = new ArrayList<>(children.size());
-		for(ParseTree child : children) {
-			argTypes.add(analysis.typecheck(child, env, exceptions));
-			argTargets.add(child.getTarget());
-		}
+		try {
 
-		// Return the return type of this function.
-		return this.getReturnType(ast.getTarget(), argTypes, argTargets, env, exceptions);
+			// Get and check the types of the function's arguments.
+			List<ParseTree> children = ast.getChildren();
+			List<LeftHandSideType> argTypes = new ArrayList<>(children.size());
+			List<Target> argTargets = new ArrayList<>(children.size());
+			for(ParseTree child : children) {
+				argTypes.add(analysis.typecheck(child, env, exceptions));
+				argTargets.add(child.getTarget());
+			}
+
+			// Return the return type of this function.
+			return this.getReturnType(ast.getTarget(), argTypes, argTargets, env, exceptions);
+		} catch(RuntimeException t) {
+			// We can't recover from this, but at least we can give a more useful error message
+			String e = "While typechecking " + this.getName() + ", the attached Throwable occurred. This was"
+					+ " associated with the code at or around " + ast.getTarget() + ": " + t.getMessage();
+			throw new RuntimeException(e, t);
+		}
 	}
 
 	/**
