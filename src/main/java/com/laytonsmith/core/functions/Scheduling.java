@@ -46,6 +46,7 @@ import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.profiler.ProfilePoint;
 import com.laytonsmith.core.taskmanager.CoreTaskType;
+import com.laytonsmith.core.taskmanager.TaskHandler;
 import com.laytonsmith.core.taskmanager.TaskManager;
 import com.laytonsmith.core.taskmanager.TaskState;
 import com.laytonsmith.core.taskmanager.TimeoutTaskHandler;
@@ -67,7 +68,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeSet;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -374,10 +374,8 @@ public class Scheduling {
 			}
 			final CClosure c = (CClosure) args[1];
 			final AtomicInteger ret = new AtomicInteger(-1);
-			final AtomicBoolean isRunning = new AtomicBoolean(false);
 			ret.set(StaticLayer.SetFutureRunnable(
 					env.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), time, () -> {
-				isRunning.set(true);
 				c.getEnv().getEnv(GlobalEnv.class).SetCustom("timeout-id", ret.get());
 				taskManager.getTask(CoreTaskType.TIMEOUT, ret.get()).changeState(TaskState.RUNNING);
 				try {
@@ -395,16 +393,16 @@ public class Scheduling {
 				} catch (ProgramFlowManipulationException e) {
 					ConfigRuntimeException.DoWarning("Using a program flow manipulation construct improperly! " + e.getClass().getSimpleName());
 				} finally {
-					taskManager.getTask(CoreTaskType.TIMEOUT, ret.get()).changeState(TaskState.FINISHED);
-					env.getEnv(GlobalEnv.class).SetInterrupt(false);
+					TaskHandler task = taskManager.getTask(CoreTaskType.TIMEOUT, ret.get());
+					// If the task was somehow killed in the closure, it'll be null
+					if(task != null) {
+						task.changeState(TaskState.FINISHED);
+					}
 				}
 			}));
 			taskManager.addTask(new TimeoutTaskHandler(ret.get(), t, () -> {
-				if(isRunning.get()) {
-					new clear_task().exec(t, env, null, new CInt(ret.get(), t));
-					env.getEnv(GlobalEnv.class).SetInterrupt(true);
-					taskManager.getTask(CoreTaskType.TIMEOUT, ret.get()).changeState(TaskState.KILLED);
-				}
+				StaticLayer.ClearFutureRunnable(ret.get());
+				taskManager.getTask(CoreTaskType.TIMEOUT, ret.get()).changeState(TaskState.KILLED);
 			}));
 			taskManager.getTask(CoreTaskType.TIMEOUT, ret.get()).changeState(TaskState.IDLE);
 			return new CInt(ret.get(), t);
@@ -474,7 +472,14 @@ public class Scheduling {
 					throw new CRENullPointerException("Null value sent to " + getName()
 							+ "(). Did you mean " + getName() + "(0)?", t);
 				}
-				StaticLayer.ClearFutureRunnable(ArgumentValidation.getInt32(args[0], t, env));
+				int id = ArgumentValidation.getInt32(args[0], t);
+				TaskManager taskManager = env.getEnv(StaticRuntimeEnv.class).GetTaskManager();
+				TaskHandler task = taskManager.getTask(CoreTaskType.TIMEOUT, id);
+				if(task == null) { // may not be a timeout
+					StaticLayer.ClearFutureRunnable(id);
+				} else {
+					task.kill();
+				}
 			} else {
 				throw new CREInsufficientArgumentsException("No id was passed to clear_task, and it's not running inside a task either.", t);
 			}
