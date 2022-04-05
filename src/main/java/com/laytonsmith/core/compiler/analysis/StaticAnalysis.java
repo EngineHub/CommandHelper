@@ -25,9 +25,7 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
-import com.laytonsmith.core.exceptions.CRE.CREIOException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
-import com.laytonsmith.core.exceptions.CRE.CREException;
 import com.laytonsmith.core.functions.DataHandling;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.IncludeCache;
@@ -628,30 +626,29 @@ public class StaticAnalysis {
 			}
 
 			// Resolve and compile the include.
-			StaticAnalysis includeAnalysis;
+			StaticAnalysis includeAnalysis = null;
+			File file = Static.GetFileFromArgument(includeRef.getIdentifier(), env, includeRef.getTarget(), null);
 			try {
-				File file = Static.GetFileFromArgument(includeRef.getIdentifier(), env, includeRef.getTarget(), null);
-				try {
-					file = file.getCanonicalFile();
-				} catch (IOException ex) {
-					throw new CREIOException(ex.getMessage(), includeRef.getTarget());
-				}
-				includeAnalysis = includeCache.getStaticAnalysis(file);
-				if(includeAnalysis == null) {
-					includeAnalysis = new StaticAnalysis(false);
-					IncludeCache.get(file, env, envs, includeAnalysis, includeRef.getTarget());
+				file = file.getCanonicalFile();
+			} catch (IOException ex) {
+
+				// The file might still read fine, so add a compile exception and hope for the best.
+				exceptions.add(new ConfigCompileException(ex.getMessage(), includeRef.getTarget()));
+			}
+			includeAnalysis = includeCache.getStaticAnalysis(file);
+			if(includeAnalysis == null) {
+				includeAnalysis = new StaticAnalysis(false);
+				boolean includeCompileSuccess = IncludeCache.get(
+						file, env, envs, includeAnalysis, includeRef.getTarget(), exceptions) != null;
+				if(!includeCompileSuccess) {
+
+					// Link directly and continue as there's no StaticAnalysis to handle.
+					this.addDirectedEdge(includeRef.getOutScope(), includeRef.getInScope());
+					linkedRefs.add(includeRef);
+					continue;
+				} else {
 					assert includeCache.getStaticAnalysis(file) != null : "Failed to cache include analysis.";
 				}
-			} catch(CREException e) {
-
-				// Convert CREs into compile errors if there was a problem resolving or compiling a static include.
-				// TODO - Split compilation such that we can use syntax-correct faulty includes anyways.
-				exceptions.add(new ConfigCompileException(e.getMessage(), e.getTarget()));
-
-				// Link directly and continue as there's no StaticAnalysis to handle.
-				this.addDirectedEdge(includeRef.getOutScope(), includeRef.getInScope());
-				linkedRefs.add(includeRef);
-				continue;
 			}
 
 			// Skip the file if the analysis does not contain a complete scope graph.
