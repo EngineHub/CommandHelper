@@ -252,12 +252,15 @@ public class LangServModel {
 				f3 = f3.getCanonicalFile();
 			} catch(IOException ex) {
 			}
-			StaticAnalysis analysis = includeCache.getStaticAnalysis(f3);
-			if(analysis == null) {
-				analysis = new StaticAnalysis(true);
+			if(includeCache.has(f3)) {
+				parseTrees.put(URIUtils.canonicalize(f3.toURI()).toString(),
+						IncludeCache.get(f3, env, env.getEnvClasses(), Target.UNKNOWN));
+			} else {
+				// This was not included or was dynamically included.
+				// Can only treat it as an isolated script at this point.
+				parseTrees.put(URIUtils.canonicalize(f3.toURI()).toString(),
+						doCompilation(f3.toURI().toString(), includeCache, new StaticAnalysis(true), env, exceptions));
 			}
-			parseTrees.put(URIUtils.canonicalize(f3.toURI()).toString(),
-					doCompilation(f3.toURI().toString(), includeCache, analysis, env, exceptions));
 		}
 
 		Map<String, List<Diagnostic>> diagnosticsLists = new HashMap<>();
