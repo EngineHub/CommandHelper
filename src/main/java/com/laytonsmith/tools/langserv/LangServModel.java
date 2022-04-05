@@ -242,14 +242,10 @@ public class LangServModel {
 				f1 = f1.getCanonicalFile();
 			} catch(IOException ex) {
 			}
-			if(includeCache.has(f1)) {
-				parseTrees.put(URIUtils.canonicalize(f1.toURI()).toString(),
-						IncludeCache.get(f1, env, env.getEnvClasses(), Target.UNKNOWN));
-			} else {
-				// There was an exception, so it wasn't added to the cache.
-				parseTrees.put(URIUtils.canonicalize(f1.toURI()).toString(),
-						doCompilation(f1.toURI().toString(), includeCache, new StaticAnalysis(true), env, exceptions));
-			}
+
+			// Get the parse tree from the include cache if available. Possible exceptions have already been obtained.
+			parseTrees.put(URIUtils.canonicalize(f1.toURI()).toString(),
+					(includeCache.has(f1) ? IncludeCache.get(f1, env, env.getEnvClasses(), Target.UNKNOWN) : null));
 		}
 
 		for(File f2 : mainFiles) {
