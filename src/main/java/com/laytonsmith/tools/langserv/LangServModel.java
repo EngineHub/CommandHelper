@@ -238,8 +238,18 @@ public class LangServModel {
 		StaticAnalysis.setAndAnalyzeAutoIncludes(autoIncludes, env, env.getEnvClasses(), exceptions);
 
 		for(File f1 : autoIncludes) {
-			parseTrees.put(URIUtils.canonicalize(f1.toURI()).toString(),
-					doCompilation(f1.toURI().toString(), includeCache, new StaticAnalysis(true), env, exceptions));
+			try {
+				f1 = f1.getCanonicalFile();
+			} catch(IOException ex) {
+			}
+			if(includeCache.has(f1)) {
+				parseTrees.put(URIUtils.canonicalize(f1.toURI()).toString(),
+						IncludeCache.get(f1, env, env.getEnvClasses(), Target.UNKNOWN));
+			} else {
+				// There was an exception, so it wasn't added to the cache.
+				parseTrees.put(URIUtils.canonicalize(f1.toURI()).toString(),
+						doCompilation(f1.toURI().toString(), includeCache, new StaticAnalysis(true), env, exceptions));
+			}
 		}
 
 		for(File f2 : mainFiles) {
@@ -256,7 +266,7 @@ public class LangServModel {
 				parseTrees.put(URIUtils.canonicalize(f3.toURI()).toString(),
 						IncludeCache.get(f3, env, env.getEnvClasses(), Target.UNKNOWN));
 			} else {
-				// This was not included or was dynamically included.
+				// This was not included, was dynamically included, or there was a compile exception.
 				// Can only treat it as an isolated script at this point.
 				parseTrees.put(URIUtils.canonicalize(f3.toURI()).toString(),
 						doCompilation(f3.toURI().toString(), includeCache, new StaticAnalysis(true), env, exceptions));
