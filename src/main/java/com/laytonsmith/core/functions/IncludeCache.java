@@ -155,7 +155,6 @@ public class IncludeCache {
 		} catch (ConfigCompileException ex) {
 			if(exceptions != null) {
 				exceptions.add(ex);
-				exceptions.add(new ConfigCompileException("Compile error(s) in included file at " + file, t));
 				return null;
 			} else {
 				String fileName = (ex.getFile() == null ? "Unknown Source" : ex.getFile().getName());
@@ -165,7 +164,6 @@ public class IncludeCache {
 		} catch (ConfigCompileGroupException exs) {
 			if(exceptions != null) {
 				exceptions.addAll(exs.getList());
-				exceptions.add(new ConfigCompileException("Compile error(s) in included file at " + file, t));
 				return null;
 			} else {
 				StringBuilder b = new StringBuilder();
