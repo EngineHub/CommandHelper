@@ -37,6 +37,7 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.snapins.PackagePermission;
 import com.laytonsmith.tools.docgen.DocGenTemplates;
 import com.laytonsmith.tools.docgen.DocGenTemplates.Generator.GenerateException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -78,6 +79,7 @@ public abstract class AbstractFunction implements Function {
 
 	private Set<Function> nagAlert = new TreeSet<>();
 
+	@Override
 	public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 		boolean hasOld = ReflectionUtils.hasMethod(this.getClass(), "exec", null,
 				new Class[]{Target.class, Environment.class, Mixed[].class});
@@ -88,9 +90,19 @@ public abstract class AbstractFunction implements Function {
 						+ " the author.");
 				nagAlert.add(this);
 			}
-			return (Mixed) ReflectionUtils.invokeMethod(this.getClass(), this, "exec",
-					new Class[]{Target.class, Environment.class, Mixed[].class},
-					new Object[]{t, env, args});
+			try {
+				return (Mixed) ReflectionUtils.invokeMethod(this.getClass(), this, "exec",
+						new Class[]{Target.class, Environment.class, Mixed[].class},
+						new Object[]{t, env, args});
+			} catch(ReflectionUtils.ReflectionException ex) {
+				if(ex.getCause() instanceof InvocationTargetException ite) {
+					if(ite.getCause() instanceof ConfigRuntimeException cre) {
+						// throw this one normally, so the rest of the framework can react accordingly
+						throw cre;
+					}
+				}
+				throw ex;
+			}
 		}
 		// It doesn't have the old method, nor does it override this method.
 		throw new Error(this.getClass() + " does not properly implement the exec method.");
