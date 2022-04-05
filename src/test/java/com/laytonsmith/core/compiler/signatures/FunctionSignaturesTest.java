@@ -114,6 +114,7 @@ public class FunctionSignaturesTest {
 		Set<ConfigCompileException> exceptions = new HashSet<>();
 		LeftHandSideType returnType = signatures.getReturnType(
 				Target.UNKNOWN,
+				null,
 				Arrays.asList(),
 				Arrays.asList(),
 				this.env, exceptions);
@@ -131,6 +132,7 @@ public class FunctionSignaturesTest {
 		Set<ConfigCompileException> exceptions = new HashSet<>();
 		LeftHandSideType returnType = signatures.getReturnType(
 				Target.UNKNOWN,
+				null,
 				Arrays.asList(CInt.TYPE.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN),
 				this.env, exceptions);
@@ -148,6 +150,7 @@ public class FunctionSignaturesTest {
 		Set<ConfigCompileException> exceptions = new HashSet<>();
 		LeftHandSideType returnType = signatures.getReturnType(
 				Target.UNKNOWN,
+				null,
 				Arrays.asList(CInt.TYPE.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN),
 				this.env, exceptions);
@@ -165,6 +168,7 @@ public class FunctionSignaturesTest {
 		Set<ConfigCompileException> exceptions = new HashSet<>();
 		LeftHandSideType returnType = signatures.getReturnType(
 				Target.UNKNOWN,
+				null,
 				Arrays.asList(CClassType.AUTO.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN),
 				this.env, exceptions);
@@ -182,6 +186,7 @@ public class FunctionSignaturesTest {
 		Set<ConfigCompileException> exceptions = new HashSet<>();
 		LeftHandSideType returnType = signatures.getReturnType(
 				Target.UNKNOWN,
+				null,
 				Arrays.asList(),
 				Arrays.asList(),
 				this.env, exceptions);
@@ -199,6 +204,7 @@ public class FunctionSignaturesTest {
 		Set<ConfigCompileException> exceptions = new HashSet<>();
 		LeftHandSideType returnType = signatures.getReturnType(
 				Target.UNKNOWN,
+				null,
 				Arrays.asList(CInt.TYPE.asLeftHandSideType(), CBoolean.TYPE.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN, Target.UNKNOWN),
 				this.env, exceptions);
@@ -216,6 +222,7 @@ public class FunctionSignaturesTest {
 		Set<ConfigCompileException> exceptions = new HashSet<>();
 		LeftHandSideType returnType = signatures.getReturnType(
 				Target.UNKNOWN,
+				null,
 				Arrays.asList(CBoolean.TYPE.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN),
 				this.env, exceptions);
@@ -233,6 +240,7 @@ public class FunctionSignaturesTest {
 		Set<ConfigCompileException> exceptions = new HashSet<>();
 		LeftHandSideType returnType = signatures.getReturnType(
 				Target.UNKNOWN,
+				null,
 				Arrays.asList(CVoid.TYPE.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN),
 				this.env, exceptions);
@@ -251,6 +259,7 @@ public class FunctionSignaturesTest {
 		Set<ConfigCompileException> exceptions = new HashSet<>();
 		LeftHandSideType returnType = signatures.getReturnType(
 				Target.UNKNOWN,
+				null,
 				Arrays.asList(CInt.TYPE.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN),
 				this.env, exceptions);
@@ -269,6 +278,7 @@ public class FunctionSignaturesTest {
 		Set<ConfigCompileException> exceptions = new HashSet<>();
 		LeftHandSideType returnType = signatures.getReturnType(
 				Target.UNKNOWN,
+				null,
 				Arrays.asList(CBoolean.TYPE.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN),
 				this.env, exceptions);
@@ -287,6 +297,7 @@ public class FunctionSignaturesTest {
 		Set<ConfigCompileException> exceptions = new HashSet<>();
 		LeftHandSideType returnType = signatures.getReturnType(
 				Target.UNKNOWN,
+				null,
 				Arrays.asList(CClassType.AUTO.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN),
 				this.env, exceptions);
@@ -306,6 +317,7 @@ public class FunctionSignaturesTest {
 		Set<ConfigCompileException> exceptions = new HashSet<>();
 		LeftHandSideType returnType = signatures.getReturnType(
 				Target.UNKNOWN,
+				null,
 				Arrays.asList(CClassType.AUTO.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN),
 				this.env, exceptions);
@@ -323,6 +335,7 @@ public class FunctionSignaturesTest {
 		Set<ConfigCompileException> exceptions = new HashSet<>();
 		LeftHandSideType returnType1 = signatures.getReturnType(
 				Target.UNKNOWN,
+				null,
 				Arrays.asList(),
 				Arrays.asList(),
 				this.env, exceptions);
@@ -330,6 +343,7 @@ public class FunctionSignaturesTest {
 		assertArrayEquals(new Object[0], exceptions.toArray());
 		LeftHandSideType returnType2 = signatures.getReturnType(
 				Target.UNKNOWN,
+				null,
 				Arrays.asList(CInt.TYPE.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN),
 				this.env, exceptions);
@@ -347,6 +361,7 @@ public class FunctionSignaturesTest {
 		Set<ConfigCompileException> exceptions = new HashSet<>();
 		LeftHandSideType returnType1 = signatures.getReturnType(
 				Target.UNKNOWN,
+				null,
 				Arrays.asList(),
 				Arrays.asList(),
 				this.env, exceptions);
@@ -354,6 +369,7 @@ public class FunctionSignaturesTest {
 		assertArrayEquals(new Object[0], exceptions.toArray());
 		LeftHandSideType returnType2 = signatures.getReturnType(
 				Target.UNKNOWN,
+				null,
 				Arrays.asList(CInt.TYPE.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN),
 				this.env, exceptions);
@@ -361,6 +377,7 @@ public class FunctionSignaturesTest {
 		assertArrayEquals(new Object[0], exceptions.toArray());
 		LeftHandSideType returnType3 = signatures.getReturnType(
 				Target.UNKNOWN,
+				null,
 				Arrays.asList(CInt.TYPE.asLeftHandSideType(), CInt.TYPE.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN, Target.UNKNOWN),
 				this.env, exceptions);
@@ -384,6 +401,7 @@ public class FunctionSignaturesTest {
 		Set<ConfigCompileException> exceptions = new HashSet<>();
 		LeftHandSideType returnType = signatures.getReturnType(
 				Target.UNKNOWN,
+				null,
 				Arrays.asList(CInt.TYPE.asLeftHandSideType(), CInt.TYPE.asLeftHandSideType(), CArray.TYPE.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN, Target.UNKNOWN, Target.UNKNOWN),
 				this.env, exceptions);
@@ -391,6 +409,7 @@ public class FunctionSignaturesTest {
 		assertArrayEquals(new Object[0], exceptions.toArray());
 		LeftHandSideType returnType2 = signatures.getReturnType(
 				Target.UNKNOWN,
+				null,
 				Arrays.asList(CInt.TYPE.asLeftHandSideType(), CInt.TYPE.asLeftHandSideType(), CInt.TYPE.asLeftHandSideType(), CInt.TYPE.asLeftHandSideType(), CArray.TYPE.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN, Target.UNKNOWN, Target.UNKNOWN, Target.UNKNOWN, Target.UNKNOWN),
 				this.env, exceptions);
@@ -398,6 +417,7 @@ public class FunctionSignaturesTest {
 		assertArrayEquals(new Object[0], exceptions.toArray());
 		LeftHandSideType returnType3 = signatures.getReturnType(
 				Target.UNKNOWN,
+				null,
 				Arrays.asList(CInt.TYPE.asLeftHandSideType(), CInt.TYPE.asLeftHandSideType(), CInt.TYPE.asLeftHandSideType(), CInt.TYPE.asLeftHandSideType(), CArray.TYPE.asLeftHandSideType(), CArray.TYPE.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN, Target.UNKNOWN,
 						Target.UNKNOWN, Target.UNKNOWN, Target.UNKNOWN, Target.UNKNOWN),
@@ -432,7 +452,7 @@ public class FunctionSignaturesTest {
 				argTargets.add(Target.UNKNOWN);
 			}
 			LeftHandSideType returnType = signatures.getReturnType(
-					Target.UNKNOWN, argTypes, argTargets, this.env, exceptions);
+					Target.UNKNOWN, null, argTypes, argTargets, this.env, exceptions);
 			assertEquals(CArray.TYPE.asLeftHandSideType(), returnType);
 			assertArrayEquals(new Object[0], exceptions.toArray());
 		}

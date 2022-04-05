@@ -829,7 +829,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public LeftHandSideType getReturnType(Target t, List<LeftHandSideType> argTypes, List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+		public LeftHandSideType getReturnType(Target t, GenericParameters generics, List<LeftHandSideType> argTypes, List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
 			return CBoolean.TYPE.asLeftHandSideType();
 		}
 

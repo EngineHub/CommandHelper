@@ -1,6 +1,8 @@
 package com.laytonsmith.core.constructs.generics;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.Pair;
+import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
@@ -12,10 +14,12 @@ import java.util.SortedSet;
 
 public final class ConstraintValidator {
 
-	private ConstraintValidator() {}
+	private ConstraintValidator() {
+	}
 
 	/**
 	 * Validates and returns the typename for a set of constraints.
+	 *
 	 * @param constraints The constraint(s) to validate
 	 * @return The typename, for instance <code>T</code> in <code>T extends Number</code>.
 	 */
@@ -63,6 +67,7 @@ public final class ConstraintValidator {
 	 * Validates the RHS against the LHS of a definition. This should be called with null if no generic parameters were
 	 * defined, as that is not always allowed, depending on the ClassType, and this case is accounted for. It is assumed
 	 * that the LHS fits the constraints defined in the constraint definition.
+	 *
 	 * @param t
 	 * @param type
 	 * @param genericParameters
@@ -75,6 +80,7 @@ public final class ConstraintValidator {
 	 * Validates the RHS against the LHS of a definition. This should be called with null if no generic parameters were
 	 * defined, as that is not always allowed, depending on the ClassType, and this case is accounted for. It is assumed
 	 * that the LHS fits the constraints defined in the constraint definition.
+	 *
 	 * @param t
 	 * @param type
 	 * @param c
@@ -114,11 +120,12 @@ public final class ConstraintValidator {
 
 	/**
 	 * Checks that the given constraints are within the bounds of the other constraints.
+	 *
 	 * @param t
 	 * @param checkIfTheseConstraints These are the constraints to check to see if they are within the bounds of the
-	 *                                other constraints.
-	 * @param areWithinBoundsOfThese These are the constraints to check against. These can be thought of as the "definition"
-	 *                               even though that's not the case using previously defined terminology.
+	 * other constraints.
+	 * @param areWithinBoundsOfThese These are the constraints to check against. These can be thought of as the
+	 * "definition" even though that's not the case using previously defined terminology.
 	 * @param env
 	 * @throws CREGenericConstraintException
 	 */
@@ -147,5 +154,54 @@ public final class ConstraintValidator {
 						+ StringUtils.Join(errors, "\n"), t);
 			}
 		}
+	}
+
+	/**
+	 * Validates a parameter set against a given parameter declaration.This ensures that the parameters passed in
+	 * conform in size and type to the given constraints of the definition.
+	 *
+	 * @param t The code target, used in case of failure to throw a CREGenericConstraintException.
+	 * @param env The environment.
+	 * @param parameters The parameters.
+	 * @param declaration The declaration.
+	 */
+	public static void ValidateParametersToDeclaration(Target t, Environment env,
+			GenericParameters parameters, GenericDeclaration declaration) {
+		if(declaration == null) {
+			if(parameters != null) {
+				throw new CREGenericConstraintException("No generics are defined here, unexpected generic parameters"
+						+ " provided.", t);
+			} else {
+				// No parameters, no declaration, nothing to validate.
+				return;
+			}
+		}
+		if(parameters == null) {
+			// Everything is auto, though this doesn't inherently work everywhere, so just fill it in with auto
+			// based on the parameter count, then do the validation normally.
+			GenericParameters.GenericParametersBuilder builder = GenericParameters.emptyBuilder();
+			for(int i = 0; i < declaration.getParameterCount(); i++) {
+				builder.addParameter(Auto.TYPE, null);
+			}
+			parameters = builder.build();
+		}
+
+		if(parameters.getParameters().size() != declaration.getParameterCount()) {
+			throw new CREGenericConstraintException(StringUtils.PluralTemplateHelper(declaration.getParameterCount(),
+					"Expected %d generic parameter", "Expected %d generic parameters") + " to be provided, but"
+					+ " instead "
+					+ StringUtils.PluralTemplateHelper(parameters.getParameters().size(),
+							"%d was found.", "%d were found."), t);
+		}
+
+		for(int i = 0; i < declaration.getParameterCount(); i++) {
+			Constraints c = declaration.getConstraints().get(i);
+			Pair<CClassType, LeftHandGenericUse> param = parameters.getParameters().get(i);
+			if(!c.withinBounds(param.getKey(), param.getValue(), env)) {
+				throw new CREGenericConstraintException("Generic parameter at location " + i
+						+ " does not satisfy the constraints: " + c.toString(), t);
+			}
+		}
+
 	}
 }

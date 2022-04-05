@@ -96,16 +96,17 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 	/**
 	 * Gets the return type of this function, based on the types of the passed arguments.
 	 *
-	 * @param t - The code target, used for setting the code target in thrown exceptions.
-	 * @param argTypes - The types of the passed arguments.
-	 * @param argTargets - The {@link Target}s belonging to the argTypes (in the same order).
-	 * @param env - The {@link Environment}, used for instanceof checks on types.
-	 * @param exceptions - A set to which all type errors will be added.
+	 * @param t The code target, used for setting the code target in thrown exceptions.
+	 * @param generics
+	 * @param argTypes The types of the passed arguments.
+	 * @param argTargets The {@link Target}s belonging to the argTypes (in the same order).
+	 * @param env The {@link Environment}, used for instanceof checks on types.
+	 * @param exceptions A set to which all type errors will be added.
 	 * @return The return type of this function when invoked with the given argument types. If the return type is
 	 * unknown, {@link CClassType#AUTO} is returned, indicating that this value should be handled as dynamic during
 	 * static type checking.
 	 */
-	public LeftHandSideType getReturnType(Target t, List<LeftHandSideType> argTypes,
+	public LeftHandSideType getReturnType(Target t, GenericParameters generics, List<LeftHandSideType> argTypes,
 			List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions);
 
 	/**

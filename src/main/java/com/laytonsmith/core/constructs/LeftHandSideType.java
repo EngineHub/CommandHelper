@@ -84,8 +84,8 @@ public final class LeftHandSideType extends Construct {
 	 *
 	 * @param declaration The declaration which contains this type name.
 	 * @param genericTypeName The generic type name, for instance {@code T}
-	 * @param genericLHGU The generic parameters for this type, for instance {@code ? extends int}
-	 * in {@code T<? extends int>}
+	 * @param genericLHGU The generic parameters for this type, for instance {@code ? extends int} in
+	 * {@code T<? extends int>}
 	 * @param t The code target
 	 * @return The LeftHandSideType wrapping this generic typename.
 	 */
@@ -246,6 +246,27 @@ public final class LeftHandSideType extends Construct {
 	public boolean isTypeUnion() {
 		return types.size() > 1;
 	}
+
+	/**
+	 * Returns true if this represents a typename. A typename is a "fake" type that only exists in the scope of the
+	 * given class or method, and cannot be resolved into a real type except by converting it based on the
+	 * GenericDeclaration associated with it. Note that in general, you need to know if this is a read only or write
+	 * only context, as the type returned will be different.
+	 *
+	 * @return
+	 */
+	public boolean isTypeName() {
+		return isTypeName;
+	}
+
+	/**
+	 * If this was defined as a typename, returns the typename, null otherwise.
+	 * @return
+	 */
+	public String getTypename() {
+		return this.genericTypeName;
+	}
+
 
 	public String getSimpleName() {
 		return StringUtils.Join(types, " | ", pair -> {

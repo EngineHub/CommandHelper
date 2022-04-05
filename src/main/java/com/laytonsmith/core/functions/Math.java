@@ -17,13 +17,14 @@ import com.laytonsmith.core.Script;
 import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
+import com.laytonsmith.core.compiler.signature.FunctionSignatures;
+import com.laytonsmith.core.compiler.signature.SignatureBuilder;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CMutablePrimitive;
 import com.laytonsmith.core.constructs.IVariable;
-import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
@@ -1196,13 +1197,16 @@ public class Math {
 		}
 
 		@Override
-		public LeftHandSideType getReturnType(Target t, List<LeftHandSideType> argTypes, List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
-			if(argTypes.isEmpty()) {
-				return CDouble.TYPE.asLeftHandSideType();
-			} else {
-				return CInt.TYPE.asLeftHandSideType();
-			}
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CDouble.TYPE)
+					.newSignature(CInt.TYPE)
+					.param(CInt.TYPE, "max", "The maximum integer to return, exclusive")
+					.newSignature(CInt.TYPE)
+					.param(CInt.TYPE, "min", "The minimum integer to return, inclusive")
+					.param(CInt.TYPE, "max", "The maximum integer to return, exclusive")
+					.build();
 		}
+
 	}
 
 	@api

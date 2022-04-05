@@ -122,13 +122,13 @@ public abstract class AbstractFunction implements Function {
 	 * {@inheritDoc} By default, {@link CClassType#AUTO} is returned.
 	 */
 	@Override
-	public LeftHandSideType getReturnType(Target t, List<LeftHandSideType> argTypes,
+	public LeftHandSideType getReturnType(Target t, GenericParameters generics, List<LeftHandSideType> argTypes,
 			List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
 
 		// Match arguments to function signatures if available.
 		FunctionSignatures signatures = this.getCachedSignatures();
 		if(signatures != null) {
-			return signatures.getReturnType(t, argTypes, argTargets, env, exceptions);
+			return signatures.getReturnType(t, generics, argTypes, argTargets, env, exceptions);
 		}
 
 		// No information is available about the return type.
@@ -155,7 +155,8 @@ public abstract class AbstractFunction implements Function {
 			}
 
 			// Return the return type of this function.
-			return this.getReturnType(ast.getTarget(), argTypes, argTargets, env, exceptions);
+			return this.getReturnType(ast.getTarget(), ast.getNodeModifiers().getGenerics(),
+					argTypes, argTargets, env, exceptions);
 		} catch(RuntimeException t) {
 			// We can't recover from this, but at least we can give a more useful error message
 			String e = "While typechecking " + this.getName() + ", the attached Throwable occurred. This was"

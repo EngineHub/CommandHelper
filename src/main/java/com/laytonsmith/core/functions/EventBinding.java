@@ -225,7 +225,8 @@ public class EventBinding {
 			}
 
 			// Return the return type of this function.
-			return this.getReturnType(ast.getTarget(), argTypes, argTargets, env, exceptions);
+			return this.getReturnType(ast.getTarget(), ast.getNodeModifiers().getGenerics(),
+					argTypes, argTargets, env, exceptions);
 		}
 
 		private LeftHandSideType typecheckPrefilterParseTree(

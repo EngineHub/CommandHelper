@@ -139,11 +139,11 @@ public class ControlFlow {
 		}
 
 		@Override
-		public LeftHandSideType getReturnType(Target t, List<LeftHandSideType> argTypes,
+		public LeftHandSideType getReturnType(Target t, GenericParameters generics, List<LeftHandSideType> argTypes,
 				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
 
 			// Get return type based on the function signatures. This generates all necessary compile errors.
-			LeftHandSideType retType = super.getReturnType(t, argTypes, argTargets, env, exceptions);
+			LeftHandSideType retType = super.getReturnType(t, generics, argTypes, argTargets, env, exceptions);
 
 			// When void is returned, ternary usage could still be possible when a branch is terminating.
 			// It is also possible that both branches are terminating, in which case this should return null as well.

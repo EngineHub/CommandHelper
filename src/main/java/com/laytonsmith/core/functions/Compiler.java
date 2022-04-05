@@ -574,7 +574,7 @@ public class Compiler {
 		}
 
 		@Override
-		public LeftHandSideType getReturnType(Target t, List<LeftHandSideType> argTypes,
+		public LeftHandSideType getReturnType(Target t, GenericParameters generics, List<LeftHandSideType> argTypes,
 				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
 			for(LeftHandSideType argType : argTypes) {
 				if(argType == null) {

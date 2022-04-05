@@ -32,7 +32,7 @@ import java.util.WeakHashMap;
  * particular section of code.
  *
  */
-public class ParseTree implements Cloneable {
+public final class ParseTree implements Cloneable {
 
 	private enum CacheTypes {
 		IS_SYNC, IS_ASYNC, FUNCTIONS
@@ -44,8 +44,7 @@ public class ParseTree implements Cloneable {
 	 * so we also want to maintain a cache. But we ALSO don't want to have a memory leak by simply having tons of cached
 	 * references. So, we store a private cache of weak references to "this" instance.
 	 */
-	private static Map<ParseTree, Map<CacheTypes, Object>> cache
-			= new WeakHashMap<ParseTree, Map<CacheTypes, Object>>();
+	private static Map<ParseTree, Map<CacheTypes, Object>> cache = new WeakHashMap<>();
 
 	private static boolean isCached(ParseTree tree, CacheTypes type) {
 		if(!cache.containsKey(tree)) {
@@ -72,13 +71,9 @@ public class ParseTree implements Cloneable {
 
 	private static void setCache(ParseTree tree, CacheTypes type, Object value) {
 		if(!cache.containsKey(tree)) {
-			cache.put(tree, new EnumMap<CacheTypes, Object>(CacheTypes.class));
+			cache.put(tree, new EnumMap<>(CacheTypes.class));
 		}
 		cache.get(tree).put(type, value);
-	}
-
-	private static void clearCache(ParseTree tree) {
-		cache.remove(tree);
 	}
 
 	private Mixed data = null;
@@ -86,14 +81,15 @@ public class ParseTree implements Cloneable {
 	private final FileOptions fileOptions;
 	private List<ParseTree> children = null;
 	private boolean hasBeenMadeStatic = false;
-	private NodeModifiers nodeModifiers = new NodeModifiers();
+	private final NodeModifiers nodeModifiers = new NodeModifiers();
 	private boolean isSyntheticNode;
 
 	/**
 	 * Creates a new empty tree node
+	 * @param options
 	 */
 	public ParseTree(FileOptions options) {
-		children = new ArrayList<ParseTree>();
+		children = new ArrayList<>();
 		this.fileOptions = options;
 	}
 
@@ -274,8 +270,8 @@ public class ParseTree implements Cloneable {
 	 */
 	public boolean isConst() {
 		// Constructs may or may not be const, everything else is dynamic. Enums are always const.
-		if(data instanceof Construct) {
-			return !((Construct) data).isDynamic();
+		if(data instanceof Construct construct) {
+			return !construct.isDynamic();
 		}
 		// TODO This will be changed once the concept of immutable objects are introduced
 		return data.getObjectType() == ObjectType.ENUM;
@@ -287,8 +283,8 @@ public class ParseTree implements Cloneable {
 	 * @return
 	 */
 	public boolean isDynamic() {
-		if(data instanceof Construct) {
-			return ((Construct) data).isDynamic();
+		if(data instanceof Construct construct) {
+			return construct.isDynamic();
 		}
 		return data.getObjectType() != ObjectType.ENUM;
 	}
@@ -354,11 +350,10 @@ public class ParseTree implements Cloneable {
 			List<Mixed> allChildren = getAllData();
 			loop:
 			for(Mixed c : allChildren) {
-				if(c instanceof CFunction) {
+				if(c instanceof CFunction cFunction) {
 					try {
-						FunctionBase f = FunctionList.getFunction((CFunction) c, null);
-						if(f instanceof Function) {
-							Function ff = (Function) f;
+						FunctionBase f = FunctionList.getFunction(cFunction, null);
+						if(f instanceof Function ff) {
 							functions.add(ff);
 						}
 					} catch (ConfigCompileException ex) {
@@ -368,7 +363,7 @@ public class ParseTree implements Cloneable {
 				}
 			}
 			setCache(this, CacheTypes.FUNCTIONS, functions);
-			return new ArrayList<Function>(functions);
+			return new ArrayList<>(functions);
 		}
 	}
 
@@ -376,7 +371,7 @@ public class ParseTree implements Cloneable {
 	public ParseTree clone() throws CloneNotSupportedException {
 		ParseTree clone = (ParseTree) super.clone();
 		clone.data = data.clone();
-		clone.children = new ArrayList<ParseTree>(this.children);
+		clone.children = new ArrayList<>(this.children);
 		return clone;
 	}
 
@@ -402,8 +397,8 @@ public class ParseTree implements Cloneable {
 		} else if(data instanceof CString) {
 			// Convert: \ -> \\ and ' -> \'
 			stringRepresentation.append("'").append(data.val().replaceAll("\t", "\\t").replaceAll("\n", "\\n").replace("\\", "\\\\").replace("'", "\\'")).append("'");
-		} else if(data instanceof IVariable) {
-			stringRepresentation.append(((IVariable) data).getVariableName());
+		} else if(data instanceof IVariable iVariable) {
+			stringRepresentation.append(iVariable.getVariableName());
 		} else {
 			stringRepresentation.append(data.val());
 		}
@@ -463,7 +458,8 @@ public class ParseTree implements Cloneable {
 					argTypes.add(child.getDeclaredType(env));
 					argTargets.add(child.getTarget());
 				}
-				return cf.getCachedFunction().getReturnType(getTarget(), argTypes, argTargets, env, exceptions);
+				return cf.getCachedFunction().getReturnType(getTarget(), getNodeModifiers().getGenerics(),
+						argTypes, argTargets, env, exceptions);
 			}
 		} else {
 			throw new Error("Unhandled type, please report this bug");

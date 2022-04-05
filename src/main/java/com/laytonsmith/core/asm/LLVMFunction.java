@@ -107,7 +107,7 @@ public abstract class LLVMFunction implements FunctionBase, Function {
 	 * By default, null is returned.
 	 */
 	@Override
-	public LeftHandSideType getReturnType(Target t, List<LeftHandSideType> argTypes, List<Target> argTargets,
+	public LeftHandSideType getReturnType(Target t, GenericParameters generics, List<LeftHandSideType> argTypes, List<Target> argTargets,
 			Environment env, Set<ConfigCompileException> exceptions) {
 		return LeftHandSideType.fromCClassType(CClassType.AUTO, t); // No information is available about the return type.
 	}
@@ -131,7 +131,8 @@ public abstract class LLVMFunction implements FunctionBase, Function {
 		}
 
 		// Return the return type of this function.
-		return this.getReturnType(ast.getTarget(), argTypes, argTargets, env, exceptions);
+		return this.getReturnType(ast.getTarget(), ast.getNodeModifiers().getGenerics(),
+				argTypes, argTargets, env, exceptions);
 	}
 
 	/**

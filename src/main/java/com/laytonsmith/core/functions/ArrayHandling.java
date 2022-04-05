@@ -104,7 +104,7 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public LeftHandSideType getReturnType(Target t, List<LeftHandSideType> argTypes, List<Target> argTargets,
+		public LeftHandSideType getReturnType(Target t, GenericParameters generics, List<LeftHandSideType> argTypes, List<Target> argTargets,
 				Environment env, Set<ConfigCompileException> exceptions) {
 			if(argTypes.size() == 1) {
 				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);
@@ -295,7 +295,7 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public LeftHandSideType getReturnType(Target t, List<LeftHandSideType> argTypes, List<Target> argTargets,
+		public LeftHandSideType getReturnType(Target t, GenericParameters generics, List<LeftHandSideType> argTypes, List<Target> argTargets,
 				Environment env, Set<ConfigCompileException> exceptions) {
 			if(argTypes.size() == 2 || argTypes.size() == 3) {
 				StaticAnalysis.requireType(argTypes.get(0), ArrayAccess.TYPE, argTargets.get(0), env, exceptions);
@@ -439,7 +439,7 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public LeftHandSideType getReturnType(Target t, List<LeftHandSideType> argTypes, List<Target> argTargets,
+		public LeftHandSideType getReturnType(Target t, GenericParameters generics, List<LeftHandSideType> argTypes, List<Target> argTargets,
 				Environment env, Set<ConfigCompileException> exceptions) {
 			if(argTypes.size() == 3) {
 				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);
@@ -534,7 +534,7 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public LeftHandSideType getReturnType(Target t, List<LeftHandSideType> argTypes, List<Target> argTargets,
+		public LeftHandSideType getReturnType(Target t, GenericParameters generics, List<LeftHandSideType> argTypes, List<Target> argTargets,
 				Environment env, Set<ConfigCompileException> exceptions) {
 			if(argTypes.size() >= 2) {
 				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);
@@ -642,7 +642,7 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public LeftHandSideType getReturnType(Target t, List<LeftHandSideType> argTypes, List<Target> argTargets,
+		public LeftHandSideType getReturnType(Target t, GenericParameters generics, List<LeftHandSideType> argTypes, List<Target> argTargets,
 				Environment env, Set<ConfigCompileException> exceptions) {
 			if(argTypes.size() == 3) {
 				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);
@@ -723,7 +723,7 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public LeftHandSideType getReturnType(Target t, List<LeftHandSideType> argTypes, List<Target> argTargets,
+		public LeftHandSideType getReturnType(Target t, GenericParameters generics, List<LeftHandSideType> argTypes, List<Target> argTargets,
 				Environment env, Set<ConfigCompileException> exceptions) {
 			if(argTypes.size() == 2) {
 				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);
@@ -833,7 +833,7 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public LeftHandSideType getReturnType(Target t, List<LeftHandSideType> argTypes, List<Target> argTargets,
+		public LeftHandSideType getReturnType(Target t, GenericParameters generics, List<LeftHandSideType> argTypes, List<Target> argTargets,
 				Environment env, Set<ConfigCompileException> exceptions) {
 			if(argTypes.size() == 2) {
 				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);
@@ -887,7 +887,7 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public LeftHandSideType getReturnType(Target t, List<LeftHandSideType> argTypes, List<Target> argTargets,
+		public LeftHandSideType getReturnType(Target t, GenericParameters generics, List<LeftHandSideType> argTypes, List<Target> argTargets,
 				Environment env, Set<ConfigCompileException> exceptions) {
 			if(argTypes.size() == 2) {
 				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);
@@ -1019,7 +1019,7 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public LeftHandSideType getReturnType(Target t, List<LeftHandSideType> argTypes, List<Target> argTargets,
+		public LeftHandSideType getReturnType(Target t, GenericParameters generics, List<LeftHandSideType> argTypes, List<Target> argTargets,
 				Environment env, Set<ConfigCompileException> exceptions) {
 			if(argTypes.size() >= 1) {
 				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);
@@ -1126,7 +1126,7 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public LeftHandSideType getReturnType(Target t, List<LeftHandSideType> argTypes, List<Target> argTargets,
+		public LeftHandSideType getReturnType(Target t, GenericParameters generics, List<LeftHandSideType> argTypes, List<Target> argTargets,
 				Environment env, Set<ConfigCompileException> exceptions) {
 			if(argTypes.size() == 2 || argTypes.size() == 3) {
 				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);

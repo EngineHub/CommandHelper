@@ -89,4 +89,10 @@ public class StaticAnalysisTest {
 		runScript("@a = closure(){}; msg(@a instanceof closure);");
 	}
 
+	@Test
+	public void testUseGetValue() throws Exception {
+		// get_value returns a generic type, which should be converted so the typechecking doesn't fail
+		runScript("get_value('asdf') == false");
+	}
+
 }

@@ -2774,8 +2774,8 @@ public class Environment {
 		}
 
 		@Override
-		public LeftHandSideType getReturnType(Target t, List<LeftHandSideType> argTypes, List<Target> argTargets,
-				com.laytonsmith.core.environments.Environment env, Set<ConfigCompileException> exceptions) {
+		public LeftHandSideType getReturnType(Target t, GenericParameters generics, List<LeftHandSideType> argTypes,
+				List<Target> argTargets, com.laytonsmith.core.environments.Environment env, Set<ConfigCompileException> exceptions) {
 			return CArray.TYPE.asLeftHandSideType();
 		}
 
@@ -2814,7 +2814,8 @@ public class Environment {
 		}
 
 		@Override
-		public LeftHandSideType getReturnType(Target t, List<LeftHandSideType> argTypes, List<Target> argTargets, com.laytonsmith.core.environments.Environment env, Set<ConfigCompileException> exceptions) {
+		public LeftHandSideType getReturnType(Target t, GenericParameters generics, List<LeftHandSideType> argTypes,
+				List<Target> argTargets, com.laytonsmith.core.environments.Environment env, Set<ConfigCompileException> exceptions) {
 			return CVoid.TYPE.asLeftHandSideType();
 		}
 
