@@ -1,5 +1,6 @@
 package com.laytonsmith.core.events;
 
+import com.laytonsmith.PureUtilities.Common.Annotations.AggressiveDeprecation;
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.core.ArgumentValidation;
@@ -75,6 +76,13 @@ public final class Prefilters {
 		MACRO
 	}
 
+	@Deprecated
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	public static void match(Map<String, Mixed> map, String key,
+			String actualValue, PrefilterType type) throws PrefilterNonMatchException {
+		match(map, key, actualValue, type, null);
+	}
+
 	/**
 	 * Use PrefilterMatchers instead.
 	 * @deprecated
@@ -83,6 +91,13 @@ public final class Prefilters {
 	public static void match(Map<String, Mixed> map, String key,
 			String actualValue, PrefilterType type, Environment env) throws PrefilterNonMatchException {
 		match(map, key, new CString(actualValue, Target.UNKNOWN), type, env);
+	}
+
+	@Deprecated
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	public static void match(Map<String, Mixed> map, String key,
+			int actualValue, PrefilterType type) throws PrefilterNonMatchException {
+		match(map, key, actualValue, type, null);
 	}
 
 	/**
@@ -95,6 +110,13 @@ public final class Prefilters {
 		match(map, key, new CInt(actualValue, Target.UNKNOWN), type, env);
 	}
 
+	@Deprecated
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	public static void match(Map<String, Mixed> map, String key,
+			double actualValue, PrefilterType type) throws PrefilterNonMatchException {
+		match(map, key, actualValue, type, null);
+	}
+
 	/**
 	 * Use PrefilterMatchers instead.
 	 * @deprecated
@@ -103,6 +125,13 @@ public final class Prefilters {
 	public static void match(Map<String, Mixed> map, String key,
 			double actualValue, PrefilterType type, Environment env) throws PrefilterNonMatchException {
 		match(map, key, new CDouble(actualValue, Target.UNKNOWN), type, env);
+	}
+
+	@Deprecated
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	public static void match(Map<String, Mixed> map, String key,
+			boolean actualValue, PrefilterType type) throws PrefilterNonMatchException {
+		match(map, key, actualValue, type, null);
 	}
 
 	/**
@@ -115,6 +144,13 @@ public final class Prefilters {
 		match(map, key, CBoolean.get(actualValue), type, env);
 	}
 
+	@Deprecated
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	public static void match(Map<String, Mixed> map, String key,
+			MCLocation actualValue, PrefilterType type) throws PrefilterNonMatchException {
+		match(map, key, actualValue, type, null);
+	}
+
 	/**
 	 * Use PrefilterMatchers instead.
 	 * @deprecated
@@ -123,6 +159,13 @@ public final class Prefilters {
 	public static void match(Map<String, Mixed> map, String key,
 			MCLocation actualValue, PrefilterType type, Environment env) throws PrefilterNonMatchException {
 		match(map, key, ObjectGenerator.GetGenerator().location(actualValue, false, env), type, env);
+	}
+
+	@Deprecated
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	public static void match(Map<String, Mixed> map, String key,
+			Mixed actualValue, PrefilterType type) throws PrefilterNonMatchException {
+		match(map, key, actualValue, type, null);
 	}
 
 	/**

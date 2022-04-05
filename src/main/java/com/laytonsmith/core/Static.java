@@ -550,8 +550,20 @@ public final class Static {
 		return GetUUID(subject.val(), t);
 	}
 
+	@Deprecated
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	public static MCOfflinePlayer GetUser(Mixed search, Target t) {
+		return GetUser(search, t, null);
+	}
+
 	public static MCOfflinePlayer GetUser(Mixed search, Target t, Environment env) {
 		return GetUser(search.val(), t, env);
+	}
+
+	@Deprecated
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	public static MCOfflinePlayer GetUser(String search, Target t) {
+		return GetUser(search, t, null);
 	}
 
 	/**
@@ -594,7 +606,7 @@ public final class Static {
 	 * @deprecated This method doesn't work with user classes, and will cause errors once those are introduced. This
 	 * will be removed once those are added, instead, use the version with the environment.
 	 */
-	@AggressiveDeprecation
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
 	@Deprecated
 	public static MCPlayer GetPlayer(String player, Target t) throws ConfigRuntimeException {
 		return GetPlayer(player, t, null);
@@ -613,7 +625,7 @@ public final class Static {
 	 * @deprecated This method doesn't work with user classes, and will cause errors once those are introduced. This
 	 * will be removed once those are added, instead, use the version with the environment.
 	 */
-	@AggressiveDeprecation
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
 	@Deprecated
 	public static MCPlayer GetPlayer(Mixed player, Target t) throws ConfigRuntimeException {
 		return GetPlayer(player, t, null);

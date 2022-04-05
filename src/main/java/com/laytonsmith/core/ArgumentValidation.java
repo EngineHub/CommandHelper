@@ -46,7 +46,7 @@ public final class ArgumentValidation {
 		//
 	}
 
-	@AggressiveDeprecation
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
 	@Deprecated
 	public static Mixed getItemFromArray(CArray object, String key, Target t, Mixed defaultItem) throws ConfigRuntimeException {
 		return getItemFromArray(object, key, t, defaultItem, null);
@@ -77,7 +77,7 @@ public final class ArgumentValidation {
 		}
 	}
 
-	@AggressiveDeprecation
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
 	@Deprecated
 	public static CArray getArray(Mixed construct, Target t) {
 		return getArray(construct, t, null);
@@ -129,7 +129,7 @@ public final class ArgumentValidation {
 		}
 	}
 
-	@AggressiveDeprecation
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
 	@Deprecated
 	public static double getNumber(Mixed c, Target t) {
 		return getNumber(c, t, null);
@@ -198,7 +198,7 @@ public final class ArgumentValidation {
 			+ ")[\\x00-\\x20]*" // trailing whitespace
 	);
 
-	@AggressiveDeprecation
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
 	@Deprecated
 	public static boolean isNumber(Mixed c) {
 		return isNumber(c, null);
@@ -217,7 +217,7 @@ public final class ArgumentValidation {
 		return c instanceof CNumber || VALID_DOUBLE.matcher(c.val()).matches();
 	}
 
-	@AggressiveDeprecation
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
 	@Deprecated
 	public static double getDouble(Mixed c, Target t) {
 		return getDouble(c, t, null);
@@ -244,7 +244,7 @@ public final class ArgumentValidation {
 		}
 	}
 
-	@AggressiveDeprecation
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
 	@Deprecated
 	public static float getDouble32(Mixed c, Target t) {
 		return getDouble32(c, t, null);
@@ -274,7 +274,7 @@ public final class ArgumentValidation {
 		return f;
 	}
 
-	@AggressiveDeprecation
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
 	@Deprecated
 	public static long getInt(Mixed c, Target t) {
 		return getInt(c, t, null);
@@ -315,7 +315,7 @@ public final class ArgumentValidation {
 		return i;
 	}
 
-	@AggressiveDeprecation
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
 	@Deprecated
 	public static int getInt32(Mixed c, Target t) {
 		return getInt32(c, t, null);
@@ -345,7 +345,7 @@ public final class ArgumentValidation {
 		return i;
 	}
 
-	@AggressiveDeprecation
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
 	@Deprecated
 	public static short getInt16(Mixed c, Target t) {
 		return getInt16(c, t, null);
@@ -375,7 +375,7 @@ public final class ArgumentValidation {
 		return s;
 	}
 
-	@AggressiveDeprecation
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
 	@Deprecated
 	public static byte getInt8(Mixed c, Target t) {
 		return getInt8(c, t, null);
@@ -405,7 +405,7 @@ public final class ArgumentValidation {
 		return b;
 	}
 
-	@AggressiveDeprecation
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
 	@Deprecated
 	public static boolean getBooleanObject(Mixed c, Target t) {
 		return getBooleanObject(c, t, null);
@@ -428,7 +428,7 @@ public final class ArgumentValidation {
 		return getBooleanish(c, t, env);
 	}
 
-	@AggressiveDeprecation
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
 	@Deprecated
 	public static boolean getBoolean(Mixed c, Target t) {
 		return getBoolean(c, t, null);
@@ -451,7 +451,7 @@ public final class ArgumentValidation {
 		return getBooleanish(c, t, env);
 	}
 
-	@AggressiveDeprecation
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
 	@Deprecated
 	public static boolean getBooleanish(Mixed c, Target t) {
 		return getBooleanish(c, t, null);
@@ -485,7 +485,7 @@ public final class ArgumentValidation {
 		throw new CRECastException("Could not convert value of type " + c.typeof(env) + " to a " + Booleanish.TYPE, t);
 	}
 
-	@AggressiveDeprecation
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
 	@Deprecated
 	public static CByteArray getByteArray(Mixed c, Target t) {
 		return getByteArray(c, t, null);
@@ -543,7 +543,7 @@ public final class ArgumentValidation {
 		return c.val();
 	}
 
-	@AggressiveDeprecation
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
 	@Deprecated
 	public static String getStringObject(Mixed c, Target t) {
 		return getStringObject(c, t, null);
@@ -565,7 +565,7 @@ public final class ArgumentValidation {
 		return c.val();
 	}
 
-	@AggressiveDeprecation
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
 	@Deprecated
 	public static boolean anyDoubles(Mixed... c) {
 		return anyDoubles(null, c);
@@ -588,7 +588,7 @@ public final class ArgumentValidation {
 		return false;
 	}
 
-	@AggressiveDeprecation
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
 	@Deprecated
 	public static boolean anyStrings(Mixed... c) {
 		return anyStrings(null, c);

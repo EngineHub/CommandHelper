@@ -18,5 +18,17 @@ import java.lang.annotation.Target;
 @Target({ElementType.METHOD, ElementType.CONSTRUCTOR})
 @Retention(RetentionPolicy.CLASS)
 public @interface AggressiveDeprecation {
+	/**
+	 * Returns the minimum version in which this will be actually removed.
+	 * @return
+	 */
+	String removalVersion();
 
+	/**
+	 * Returns the date that this was deprecated, in YYYY-MM-DD format. In general, removals
+	 * don't happen for at least a year, though that is not always the case.
+	 * @return
+	 */
+
+	String deprecationDate();
 }

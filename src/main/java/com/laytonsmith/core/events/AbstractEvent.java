@@ -103,6 +103,30 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
+	public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
+		boolean hasOldMethod = ReflectionUtils.hasMethod(this.getClass(), "evaluate", Map.class,
+				new Class[]{BindableEvent.class});
+		if(hasOldMethod) {
+			return (Map<String, Mixed>) ReflectionUtils.invokeMethod(this.getClass(), this, "evaluate",
+					new Class[]{BindableEvent.class},
+					new Object[] {e});
+		}
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
+		boolean hasOldMethod = ReflectionUtils.hasMethod(this.getClass(), "modifyEvent", boolean.class,
+				new Class[]{String.class, Mixed.class, BindableEvent.class});
+		if(hasOldMethod) {
+			return (boolean) ReflectionUtils.invokeMethod(this.getClass(), this, "modifyEvent",
+					new Class[]{String.class, Mixed.class, BindableEvent.class},
+					new Object[] {key, value, event});
+		}
+		throw new UnsupportedOperationException();
+	}
+
 	/**
 	 * This function is run when the actual event occurs.
 	 *
