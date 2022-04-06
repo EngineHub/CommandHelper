@@ -376,16 +376,6 @@ public class AliasCore {
 			includeCache.addAutoIncludes(localPackages.getAutoIncludes());
 
 			ProfilePoint compilerMS = profiler.start("Compilation of MS files in Local Packages", LogLevel.VERBOSE);
-
-			// Set and analyze auto includes for static analysis.
-			Set<ConfigCompileException> compileExceptions = new HashSet<>();
-			StaticAnalysis.setAndAnalyzeAutoIncludes(
-					localPackages.getAutoIncludes(), env, env.getEnvClasses(), compileExceptions);
-			for(ConfigCompileException ex : compileExceptions) {
-				ConfigRuntimeException.HandleUncaughtException(ex, "Compile error in script."
-						+ " Compilation will attempt to continue, however.", player);
-			}
-
 			try {
 				localPackages.compileMS(player, env);
 			} finally {
