@@ -189,7 +189,7 @@ public class IncludeCache {
 	 * @param env The {@link Environment} to execute with
 	 * @param s The {@link Script} to execute with (can be null)
 	 */
-	public void registerAutoIncludes(Environment env, Script s) {
+	public void executeAutoIncludes(Environment env, Script s) {
 		for(File f : this.autoIncludes) {
 			try {
 				MethodScriptCompiler.execute(
