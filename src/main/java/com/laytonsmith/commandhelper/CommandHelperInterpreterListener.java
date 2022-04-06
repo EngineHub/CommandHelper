@@ -151,7 +151,7 @@ public class CommandHelperInterpreterListener implements Listener {
 		ParseTree tree = MethodScriptCompiler.compile(stream, env, env.getEnvClasses());
 		final boolean isInterpeterMode = interpreterMode.remove(p.getName());
 		try {
-			env.getEnv(StaticRuntimeEnv.class).getIncludeCache().registerAutoIncludes(env, null);
+			env.getEnv(StaticRuntimeEnv.class).getIncludeCache().executeAutoIncludes(env, null);
 			MethodScriptCompiler.execute(tree, env, output -> {
 				output = output.trim();
 				if(output.isEmpty()) {
