@@ -126,8 +126,13 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		assert type != null;
 		CClassType ctype = CACHE.get(type);
 		if(ctype == null) {
-			ctype = new CClassType(type, Target.UNKNOWN, false);
-			CACHE.put(type, ctype);
+			synchronized(CACHE) {
+				ctype = CACHE.get(type);
+				if(ctype == null) {
+					ctype = new CClassType(type, Target.UNKNOWN, false);
+					CACHE.put(type, ctype);
+				}
+			}
 		}
 		return ctype;
 	}
@@ -149,8 +154,13 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 				= FullyQualifiedClassName.forFullyQualifiedClass(StringUtils.Join(t, "|", e -> e.getFQCN()));
 		CClassType ctype = CACHE.get(type);
 		if(ctype == null) {
-			ctype = new CClassType(type, Target.UNKNOWN, false);
-			CACHE.put(type, ctype);
+			synchronized(CACHE) {
+				ctype = CACHE.get(type);
+				if(ctype == null) {
+					ctype = new CClassType(type, Target.UNKNOWN, false);
+					CACHE.put(type, ctype);
+				}
+			}
 		}
 		return ctype;
 	}
