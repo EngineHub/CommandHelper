@@ -388,9 +388,6 @@ public class AliasCore {
 			}
 
 			try {
-				// If auto_includes have no dynamic content, we could register them before caching the
-				// environment for aliases. But for now, register them after we clone the new environment (newEnv).
-				includeCache.registerAutoIncludes(env, null);
 				localPackages.compileMS(player, env);
 			} finally {
 				compilerMS.stop();
@@ -526,6 +523,12 @@ public class AliasCore {
 
 		// Everything else should be reloaded now, so execute successfully compiled scripts and register commands
 		if(options.reloadScripts() && env != null) {
+			ProfilePoint executeAutoIncludes = profiler.start("Execution of auto includes", LogLevel.VERBOSE);
+			try {
+				includeCache.executeAutoIncludes(env, null);
+			} finally {
+				executeAutoIncludes.stop();
+			}
 			ProfilePoint executeMS = profiler.start("Execution of MS files in Local Packages", LogLevel.VERBOSE);
 			try {
 				env.getEnv(GlobalEnv.class).SetLabel(Static.GLOBAL_PERMISSION);

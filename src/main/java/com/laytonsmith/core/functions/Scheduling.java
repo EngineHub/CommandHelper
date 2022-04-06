@@ -261,7 +261,7 @@ public class Scheduling {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class};
+			return new Class[]{CRECastException.class, CRERangeException.class};
 		}
 
 		@Override
@@ -282,6 +282,12 @@ public class Scheduling {
 			if(args.length == 3) {
 				offset = 1;
 				delay = ArgumentValidation.getInt(args[1], t, env);
+				if(delay < 0) {
+					throw new CRERangeException("Negative initial delay", t);
+				}
+			}
+			if(time < 0) {
+				throw new CRERangeException("Negative repeating delay", t);
 			}
 			if(!(args[1 + offset].isInstanceOf(CClosure.TYPE, null, env))) {
 				throw new CRECastException(getName() + " expects a closure to be sent as the second argument", t);
@@ -352,7 +358,7 @@ public class Scheduling {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class};
+			return new Class[]{CRECastException.class, CRERangeException.class};
 		}
 
 		@Override
@@ -368,7 +374,10 @@ public class Scheduling {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			final TaskManager taskManager = env.getEnv(StaticRuntimeEnv.class).GetTaskManager();
-			long time = ArgumentValidation.getInt(args[0], t, env);
+			long time = ArgumentValidation.getInt(args[0], t);
+			if(time < 0) {
+				throw new CRERangeException("Negative delay", t);
+			}
 			if(!(args[1].isInstanceOf(CClosure.TYPE, null, env))) {
 				throw new CRECastException(getName() + " expects a closure to be sent as the second argument", t);
 			}
@@ -377,9 +386,16 @@ public class Scheduling {
 			ret.set(StaticLayer.SetFutureRunnable(
 					env.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), time, () -> {
 				c.getEnv().getEnv(GlobalEnv.class).SetCustom("timeout-id", ret.get());
-				taskManager.getTask(CoreTaskType.TIMEOUT, ret.get()).changeState(TaskState.RUNNING);
+				TaskHandler task = taskManager.getTask(CoreTaskType.TIMEOUT, ret.get());
+				if(task == null) {
+					// Task probably got called from Timer thread before it could be unregistered.
+					// Once it got to the main thread here, it was no longer in the TaskManager.
+					// Don't run this since it was cleared.
+					return;
+				}
+				task.changeState(TaskState.RUNNING);
 				try {
-					ProfilePoint p = env.getEnv(StaticRuntimeEnv.class).GetProfiler().start("Executing timeout"
+					ProfilePoint p = c.getEnv().getEnv(StaticRuntimeEnv.class).GetProfiler().start("Executing timeout"
 							+ " with id " + ret.get() + " (defined at " + t.toString() + ")", LogLevel.ERROR);
 					try {
 						c.executeCallable();
@@ -387,15 +403,14 @@ public class Scheduling {
 						p.stop();
 					}
 				} catch (ConfigRuntimeException e) {
-					ConfigRuntimeException.HandleUncaughtException(e, env);
+					ConfigRuntimeException.HandleUncaughtException(e, c.getEnv());
 				} catch (CancelCommandException e) {
 					//Ok
 				} catch (ProgramFlowManipulationException e) {
 					ConfigRuntimeException.DoWarning("Using a program flow manipulation construct improperly! " + e.getClass().getSimpleName());
 				} finally {
-					TaskHandler task = taskManager.getTask(CoreTaskType.TIMEOUT, ret.get());
-					// If the task was somehow killed in the closure, it'll be null
-					if(task != null) {
+					// If the task was somehow killed in the closure, it'll already be finished
+					if(!task.getState().isFinalized()) {
 						task.changeState(TaskState.FINISHED);
 					}
 				}

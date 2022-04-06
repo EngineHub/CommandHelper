@@ -157,8 +157,12 @@ public class Scope {
 			if(decl != null) {
 				decls.add(decl);
 			} else {
-				scopeStack.addAll(scope.getParents());
-				scopeStack.addAll(scope.getSpecificParents(namespace));
+				for(Scope sc : scope.getParents()) {
+					scopeStack.push(sc);
+				}
+				for(Scope sc : scope.getSpecificParents(namespace)) {
+					scopeStack.push(sc);
+				}
 			}
 		} while(!scopeStack.empty());
 		return decls;
@@ -184,8 +188,12 @@ public class Scope {
 			if(decl != null) {
 				decls.add(decl);
 			}
-			scopeStack.addAll(scope.getParents());
-			scopeStack.addAll(scope.getSpecificParents(namespace));
+			for(Scope sc : scope.getParents()) {
+				scopeStack.push(sc);
+			}
+			for(Scope sc : scope.getSpecificParents(namespace)) {
+				scopeStack.push(sc);
+			}
 		} while(!scopeStack.empty());
 		return decls;
 	}

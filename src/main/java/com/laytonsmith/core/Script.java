@@ -249,7 +249,7 @@ public class Script {
 					}
 				}
 
-				currentEnv.getEnv(StaticRuntimeEnv.class).getIncludeCache().registerAutoIncludes(currentEnv, this);
+				currentEnv.getEnv(StaticRuntimeEnv.class).getIncludeCache().executeAutoIncludes(currentEnv, this);
 				MethodScriptCompiler.execute(rootNode, currentEnv, done, this);
 			}
 		} catch (ConfigRuntimeException ex) {
