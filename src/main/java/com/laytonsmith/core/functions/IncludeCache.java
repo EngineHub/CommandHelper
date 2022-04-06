@@ -182,6 +182,16 @@ public class IncludeCache {
 	}
 
 	/**
+	 * @param env
+	 * @param s
+	 * @deprecated The method was renamed to properly reflect what it does, which is to {@link #executeAutoIncludes}.
+	 */
+	@Deprecated
+	public void registerAutoIncludes(Environment env, Script s) {
+		executeAutoIncludes(env, s);
+	}
+
+	/**
 	 * Compiles and executes all the auto_include.ms files added to this object.
 	 * This will use a cached {@link ParseTree} for each {@link File} when available.
 	 * This effectively stores all the defined procedures within the given {@link Environment}.
