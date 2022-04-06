@@ -22,7 +22,6 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.profiler.ProfilePoint;
 import com.laytonsmith.core.profiler.Profiler;
-import com.laytonsmith.PureUtilities.Common.Annotations.AggressiveDeprecation;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -213,17 +212,6 @@ public class IncludeCache {
 	 */
 	public void addAutoIncludes(List<File> autoIncludes) {
 		this.autoIncludes.addAll(autoIncludes);
-	}
-
-	/**
-	 * @param env
-	 * @param s
-	 * @deprecated The method was renamed to properly reflect what it does, which is to {@link #executeAutoIncludes}.
-	 */
-	@Deprecated
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
-	public void registerAutoIncludes(Environment env, Script s) {
-		executeAutoIncludes(env, s);
 	}
 
 	/**
