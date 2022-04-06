@@ -82,29 +82,43 @@ public class IncludeCache {
 	}
 
 	/**
-	 * @see IncludeCache#get(File, Environment, Set, StaticAnalysis, Target)
+	 * Equivalent to calling {@code get(file, env, envs, new StaticAnalysis(false), t, null)}.
+	 * @see IncludeCache#get(File, Environment, Set, StaticAnalysis, Target, Set)
 	 */
 	public static ParseTree get(File file, com.laytonsmith.core.environments.Environment env,
 			Set<Class<? extends Environment.EnvironmentImpl>> envs, Target t) {
-		return get(file, env, envs, new StaticAnalysis(false), t);
+		return get(file, env, envs, new StaticAnalysis(false), t, null);
 	}
 
 	/**
-	 * Gets a compiled {@link ParseTree} for a {@link File}. First returns a cached ParseTree if previously compiled in
-	 * this {@link Environment}, otherwise compiles and stores the result in the environment's IncludeCache.
-	 *
-	 * Throws {@link CRESecurityException} when not in cmd-line mode and file path is not within the base-dir of
-	 * {@link com.laytonsmith.core.Prefs}. Throws {@link CREIOException} when the file does not exist or cannot be read.
-	 *
-	 * @param file The {@link File} to get the cached {@link ParseTree}
-	 * @param env The {@link com.laytonsmith.core.environments.Environment} in which get or store the {@link ParseTree}
-	 * @param envs The environment types used when compiling
-	 * @param staticAnalysis The {@link StaticAnalysis} used for compilation and cached for this file
-	 * @param t The code {@link Target} where this method is called
-	 * @return the ParseTree for the given File
+	 * Equivalent to calling {@code get(file, env, envs, staticAnalysis, t, null)}.
+	 * @see IncludeCache#get(File, Environment, Set, StaticAnalysis, Target, Set)
 	 */
 	public static ParseTree get(File file, com.laytonsmith.core.environments.Environment env,
 			Set<Class<? extends Environment.EnvironmentImpl>> envs, StaticAnalysis staticAnalysis, Target t) {
+		return get(file, env, envs, staticAnalysis, t, null);
+	}
+
+	/**
+	 * Gets a compiled {@link ParseTree} for a {@link File}.
+	 * Returns a cached {@link ParseTree} if previously compiled in this {@link Environment},
+	 * otherwise compiles the file and stores the result in the environment's {@link IncludeCache}.
+	 * @param file - The {@link File} to get the cached {@link ParseTree}
+	 * @param env - The {@link com.laytonsmith.core.environments.Environment} in which get or store the {@link ParseTree}
+	 * @param envs - The environment types used when compiling
+	 * @param staticAnalysis - The {@link StaticAnalysis} used for compilation and cached for this file
+	 * @param t - The code {@link Target} where this method is called
+	 * @param exceptions - The set to add compile exceptions to, in case the file is not cached and cannot be compiled.
+	 * If {@code null} is supplied, then {@link ConfigRuntimeException}s are generated and thrown instead.
+	 * @return The {@link ParseTree} for the given {@link File},
+	 * or {@code null} if exceptions is non-null and compilation failed.
+	 * @throws CRESecurityException When exceptions is {@code null}, not in cmd-line mode, and the file path
+	 * is not within the base-dir of {@link com.laytonsmith.core.Prefs}.
+	 * @throws CREIOException When exceptions is {@code null}, and the file does not exist or cannot be read.
+	 */
+	public static ParseTree get(File file, com.laytonsmith.core.environments.Environment env,
+			Set<Class<? extends Environment.EnvironmentImpl>> envs,
+			StaticAnalysis staticAnalysis, Target t, Set<ConfigCompileException> exceptions) {
 		MSLog.GetLogger().Log(TAG, LogLevel.DEBUG, "Loading " + file, t);
 		IncludeCache includeCache = env.getEnv(StaticRuntimeEnv.class).getIncludeCache();
 		if(includeCache.cache.containsKey(file)) {
@@ -115,8 +129,14 @@ public class IncludeCache {
 		Profiler profiler = env.getEnv(StaticRuntimeEnv.class).GetProfiler();
 		try {
 			if(!Static.InCmdLine(env, true) && !Security.CheckSecurity(file)) {
-				throw new CRESecurityException("The script cannot access " + file
-						+ " due to restrictions imposed by the base-dir setting.", t);
+				if(exceptions != null) {
+					exceptions.add(new ConfigCompileException("The script cannot access " + file
+							+ " due to restrictions imposed by the base-dir setting.", t));
+					return null;
+				} else {
+					throw new CRESecurityException("The script cannot access " + file
+							+ " due to restrictions imposed by the base-dir setting.", t);
+				}
 			}
 			MSLog.GetLogger().Log(TAG, LogLevel.VERBOSE, "Security check passed", t);
 			String s = env.getEnv(GlobalEnv.class).GetScriptProvider().getScript(file);
@@ -132,21 +152,37 @@ public class IncludeCache {
 			includeCache.cache.put(file, tree);
 			includeCache.analysisCache.put(file, staticAnalysis);
 			return tree;
-		} catch(ConfigCompileException ex) {
-			String fileName = (ex.getFile() == null ? "Unknown Source" : ex.getFile().getName());
-			throw new CREIncludeException("There was a compile error when trying to include the script at " + file
-					+ "\n" + ex.getMessage() + " :: " + fileName + ":" + ex.getLineNum(), t);
-		} catch(ConfigCompileGroupException exs) {
-			StringBuilder b = new StringBuilder();
-			b.append("There were compile errors when trying to include the script at ").append(file).append("\n");
-			for(ConfigCompileException ex : exs.getList()) {
+		} catch (ConfigCompileException ex) {
+			if(exceptions != null) {
+				exceptions.add(ex);
+				return null;
+			} else {
 				String fileName = (ex.getFile() == null ? "Unknown Source" : ex.getFile().getName());
-				b.append(ex.getMessage()).append(" :: ").append(fileName).append(":")
-						.append(ex.getLineNum()).append("\n");
+				throw new CREIncludeException("There was a compile error when trying to include the script at " + file
+						+ "\n" + ex.getMessage() + " :: " + fileName + ":" + ex.getLineNum(), t);
 			}
-			throw new CREIncludeException(b.toString(), t);
-		} catch(IOException ex) {
-			throw new CREIOException("The script at " + file + " could not be found or read in.", t, ex);
+		} catch (ConfigCompileGroupException exs) {
+			if(exceptions != null) {
+				exceptions.addAll(exs.getList());
+				return null;
+			} else {
+				StringBuilder b = new StringBuilder();
+				b.append("There were compile errors when trying to include the script at ").append(file).append("\n");
+				for(ConfigCompileException ex : exs.getList()) {
+					String fileName = (ex.getFile() == null ? "Unknown Source" : ex.getFile().getName());
+					b.append(ex.getMessage()).append(" :: ").append(fileName).append(":")
+							.append(ex.getLineNum()).append("\n");
+				}
+				throw new CREIncludeException(b.toString(), t);
+			}
+		} catch (IOException ex) {
+			if(exceptions != null) {
+				exceptions.add(new ConfigCompileException(
+						"The script at " + file + " could not be found or read in.", t, ex));
+				return null;
+			} else {
+				throw new CREIOException("The script at " + file + " could not be found or read in.", t, ex);
+			}
 		}
 	}
 
