@@ -374,7 +374,7 @@ public class Scheduling {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			final TaskManager taskManager = env.getEnv(StaticRuntimeEnv.class).GetTaskManager();
-			long time = ArgumentValidation.getInt(args[0], t);
+			long time = ArgumentValidation.getInt(args[0], t, env);
 			if(time < 0) {
 				throw new CRERangeException("Negative delay", t);
 			}
@@ -487,7 +487,7 @@ public class Scheduling {
 					throw new CRENullPointerException("Null value sent to " + getName()
 							+ "(). Did you mean " + getName() + "(0)?", t);
 				}
-				int id = ArgumentValidation.getInt32(args[0], t);
+				int id = ArgumentValidation.getInt32(args[0], t, env);
 				TaskManager taskManager = env.getEnv(StaticRuntimeEnv.class).GetTaskManager();
 				TaskHandler task = taskManager.getTask(CoreTaskType.TIMEOUT, id);
 				if(task == null) { // may not be a timeout

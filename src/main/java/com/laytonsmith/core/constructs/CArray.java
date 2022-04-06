@@ -472,8 +472,20 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		setDirty();
 	}
 
+	@Deprecated
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	public final void set(int index, Mixed c, Target t) {
+		this.set(index, c, t, null);
+	}
+
 	public final void set(int index, Mixed c, Target t, Environment env) {
 		this.set(new CInt(index, t), c, t, env);
+	}
+
+	@Deprecated
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	public void set(String index, Mixed c, Target t) {
+		this.set(index, c, t, null);
 	}
 
 	/* Shortcuts */
@@ -481,8 +493,20 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		set(new CString(index, t), c, t, env);
 	}
 
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@Deprecated
+	public final void set(String index, String value, Target t) {
+		this.set(index, value, t, null);
+	}
+
 	public final void set(String index, String value, Target t, Environment env) {
 		set(index, new CString(value, t), t, env);
+	}
+
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@Deprecated
+	public final void set(String index, String value) {
+		this.set(index, value, null);
 	}
 
 	public final void set(String index, String value, Environment env) {
@@ -960,6 +984,12 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	@Override
 	public boolean canBeAssociative() {
 		return true;
+	}
+
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@Deprecated
+	public Mixed slice(int begin, int end, Target t) {
+		return slice(begin, end, t, null);
 	}
 
 	@Override
