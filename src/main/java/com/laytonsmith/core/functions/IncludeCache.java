@@ -22,6 +22,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.profiler.ProfilePoint;
 import com.laytonsmith.core.profiler.Profiler;
+import com.laytonsmith.PureUtilities.Common.Annotations.AggressiveDeprecation;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -42,8 +43,8 @@ public class IncludeCache {
 	private final Map<Target, Scope> dynamicAnalysisParentScopeCache = new HashMap<>();
 
 	/**
-	 * Adds a single file and its associated compiled {@link ParseTree} to this cache.
-	 * To ensure only one ParseTree is stored per file, use a canonical file path.
+	 * Adds a single file and its associated compiled {@link ParseTree} to this cache. To ensure only one ParseTree is
+	 * stored per file, use a canonical file path.
 	 *
 	 * @param file The {@link File} that was compiled
 	 * @param tree The {@link ParseTree} to be cached
@@ -62,8 +63,7 @@ public class IncludeCache {
 	}
 
 	/**
-	 * Checks if this cache contains the compiled {@link ParseTree} for a file.
-	 * A canonical file path should be used.
+	 * Checks if this cache contains the compiled {@link ParseTree} for a file. A canonical file path should be used.
 	 *
 	 * @param file The {@link File} to check
 	 * @return {@code true} if the cache contains this file
@@ -90,13 +90,11 @@ public class IncludeCache {
 	}
 
 	/**
-	 * Gets a compiled {@link ParseTree} for a {@link File}.
-	 * First returns a cached ParseTree if previously compiled in this {@link Environment},
-	 * otherwise compiles and stores the result in the environment's IncludeCache.
+	 * Gets a compiled {@link ParseTree} for a {@link File}. First returns a cached ParseTree if previously compiled in
+	 * this {@link Environment}, otherwise compiles and stores the result in the environment's IncludeCache.
 	 *
-	 * Throws {@link CRESecurityException} when not in cmd-line mode and file path
-	 * is not within the base-dir of {@link com.laytonsmith.core.Prefs}.
-	 * Throws {@link CREIOException} when the file does not exist or cannot be read.
+	 * Throws {@link CRESecurityException} when not in cmd-line mode and file path is not within the base-dir of
+	 * {@link com.laytonsmith.core.Prefs}. Throws {@link CREIOException} when the file does not exist or cannot be read.
 	 *
 	 * @param file The {@link File} to get the cached {@link ParseTree}
 	 * @param env The {@link com.laytonsmith.core.environments.Environment} in which get or store the {@link ParseTree}
@@ -134,11 +132,11 @@ public class IncludeCache {
 			includeCache.cache.put(file, tree);
 			includeCache.analysisCache.put(file, staticAnalysis);
 			return tree;
-		} catch (ConfigCompileException ex) {
+		} catch(ConfigCompileException ex) {
 			String fileName = (ex.getFile() == null ? "Unknown Source" : ex.getFile().getName());
 			throw new CREIncludeException("There was a compile error when trying to include the script at " + file
 					+ "\n" + ex.getMessage() + " :: " + fileName + ":" + ex.getLineNum(), t);
-		} catch (ConfigCompileGroupException exs) {
+		} catch(ConfigCompileGroupException exs) {
 			StringBuilder b = new StringBuilder();
 			b.append("There were compile errors when trying to include the script at ").append(file).append("\n");
 			for(ConfigCompileException ex : exs.getList()) {
@@ -147,7 +145,7 @@ public class IncludeCache {
 						.append(ex.getLineNum()).append("\n");
 			}
 			throw new CREIncludeException(b.toString(), t);
-		} catch (IOException ex) {
+		} catch(IOException ex) {
 			throw new CREIOException("The script at " + file + " could not be found or read in.", t, ex);
 		}
 	}
@@ -172,8 +170,8 @@ public class IncludeCache {
 	}
 
 	/**
-	 * Adds a list of auto_include.ms files this object.
-	 * These are executed when {@link #registerAutoIncludes} is called.
+	 * Adds a list of auto_include.ms files this object. These are executed when {@link #registerAutoIncludes} is
+	 * called.
 	 *
 	 * @param autoIncludes The list of auto_include.ms files to be added
 	 */
@@ -187,14 +185,15 @@ public class IncludeCache {
 	 * @deprecated The method was renamed to properly reflect what it does, which is to {@link #executeAutoIncludes}.
 	 */
 	@Deprecated
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
 	public void registerAutoIncludes(Environment env, Script s) {
 		executeAutoIncludes(env, s);
 	}
 
 	/**
-	 * Compiles and executes all the auto_include.ms files added to this object.
-	 * This will use a cached {@link ParseTree} for each {@link File} when available.
-	 * This effectively stores all the defined procedures within the given {@link Environment}.
+	 * Compiles and executes all the auto_include.ms files added to this object. This will use a cached
+	 * {@link ParseTree} for each {@link File} when available. This effectively stores all the defined procedures within
+	 * the given {@link Environment}.
 	 *
 	 * @param env The {@link Environment} to execute with
 	 * @param s The {@link Script} to execute with (can be null)
@@ -204,10 +203,10 @@ public class IncludeCache {
 			try {
 				MethodScriptCompiler.execute(
 						IncludeCache.get(f, env, env.getEnvClasses(), new Target(0, f, 0)), env, null, s);
-			} catch (ProgramFlowManipulationException e) {
+			} catch(ProgramFlowManipulationException e) {
 				ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.CreateUncatchableException(
 						"Cannot break program flow in auto include files.", e.getTarget()), env);
-			} catch (ConfigRuntimeException e) {
+			} catch(ConfigRuntimeException e) {
 				e.setEnv(env);
 				ConfigRuntimeException.HandleUncaughtException(e, env);
 			}
