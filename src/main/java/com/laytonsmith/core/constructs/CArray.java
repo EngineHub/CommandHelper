@@ -506,7 +506,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
 	@Deprecated
 	public final void set(String index, String value) {
-		this.set(index, value, null);
+		this.set(index, value, (Environment) null);
 	}
 
 	public final void set(String index, String value, Environment env) {
