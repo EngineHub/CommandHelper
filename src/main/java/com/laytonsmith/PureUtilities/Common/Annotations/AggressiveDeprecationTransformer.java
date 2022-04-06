@@ -2,14 +2,21 @@ package com.laytonsmith.PureUtilities.Common.Annotations;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.AbstractMethodMirror;
+import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.AnnotationMirror;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.ClassReferenceMirror;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.ConstructorMirror;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.MethodMirror;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.SimpleVersion;
+import com.laytonsmith.PureUtilities.TermColors;
+import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.core.MSVersion;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
@@ -21,6 +28,8 @@ import org.objectweb.asm.Type;
  *
  */
 public final class AggressiveDeprecationTransformer implements ClassFileTransformer {
+
+	private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("uuuu-MM-dd");
 
 	public byte[] transform(final InputStream input) throws IllegalClassFormatException, IOException {
 		final ClassReader classReader = new ClassReader(input);
@@ -35,8 +44,8 @@ public final class AggressiveDeprecationTransformer implements ClassFileTransfor
 			classReader.accept(new TranslatingClassVisitor(classWriter), 0);
 		} catch(RuntimeException e) {
 			final Throwable cause = e.getCause();
-			if(cause instanceof IllegalClassFormatException) {
-				throw (IllegalClassFormatException) cause;
+			if(cause instanceof IllegalClassFormatException illegalClassFormatException) {
+				throw illegalClassFormatException;
 			}
 			throw e;
 		}
@@ -79,9 +88,22 @@ public final class AggressiveDeprecationTransformer implements ClassFileTransfor
 				}
 			}
 
-			if(mirror.getAnnotation(AggressiveDeprecation.class) != null) {
-				System.out.println(mirror.getDeclaringClass() + "." + mirror.getName() + "(" + mirror.getParams() + ") needs rewrite");
+			AnnotationMirror aggressiveDeprecation = mirror.getAnnotation(AggressiveDeprecation.class);
+			if(aggressiveDeprecation != null) {
+//				System.out.println(mirror.getDeclaringClass() + "." + mirror.getName() + "(" + mirror.getParams()
+//						+ ") needs rewrite");
 				access = access | Opcodes.ACC_BRIDGE | Opcodes.ACC_SYNTHETIC;
+				Version removalVersion = new SimpleVersion((String) aggressiveDeprecation.getValue("removalVersion"));
+				LocalDate deprecationDate =
+							LocalDate.parse((String) aggressiveDeprecation.getValue("deprecationDate"), FORMATTER);
+
+				if(MSVersion.LATEST.gte(removalVersion) || LocalDate.now()
+						.isAfter(deprecationDate.plusYears(1))) {
+					System.err.println(TermColors.YELLOW + mirror.getDeclaringClass() + "." + mirror.getName() + "(" + mirror.getParams()
+						+ ") is slated for removal now, consider removing it from the codebase or updating"
+								+ " the deprecation date or removal version." + TermColors.RESET);
+				}
+
 			}
 			return new MethodVisitor(Opcodes.ASM9,
 					super.visitMethod(access, name, methodDesc, signature, exceptions)){};

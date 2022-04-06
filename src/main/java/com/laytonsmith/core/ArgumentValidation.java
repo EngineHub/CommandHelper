@@ -447,6 +447,7 @@ public final class ArgumentValidation {
 	 * getBooleanish should be used. If it indicates a probable error, getBooleanObject should be used.
 	 */
 	@Deprecated
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
 	public static boolean getBoolean(Mixed c, Target t, Environment env) {
 		return getBooleanish(c, t, env);
 	}

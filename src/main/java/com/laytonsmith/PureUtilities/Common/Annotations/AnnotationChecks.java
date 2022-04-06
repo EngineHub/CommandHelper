@@ -282,7 +282,7 @@ public class AnnotationChecks {
 		}
 		for(ClassMirror c : classesToRewrite) {
 			if(!c.isReadOnly()) {
-				System.out.println("Rewriting " + c.getClassName());
+//				System.out.println("Rewriting " + c.getClassName());
 				InputStream stream = c.getClassStream();
 				try {
 					byte[] newClass = new AggressiveDeprecationTransformer().transform(stream);
