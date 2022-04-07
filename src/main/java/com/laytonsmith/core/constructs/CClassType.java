@@ -42,7 +42,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * A CClassType represents a reference to a MethodScript class.
+ * A CClassType represents a reference to a MethodScript class, which is generally used on the right hand side.
+ * See {@link LeftHandSideType} for the left hand side equivalent.
  */
 @typeof("ms.lang.ClassType")
 @SuppressWarnings("checkstyle:overloadmethodsdeclarationorder")

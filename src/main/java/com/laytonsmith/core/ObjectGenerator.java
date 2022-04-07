@@ -178,11 +178,11 @@ public class ObjectGenerator {
 	}
 
 	/**
-	 * Given a Location Object, returns a MCLocation.If the optional world is not specified in the object, the world
-	 * provided is used instead.Location "objects" are MethodScript arrays that represent a location in game.There are 4
-	 * usages: <ul> <li>(x, y, z)</li> <li>(x, y, z, world)</li> <li>(x, y, z, yaw, pitch)</li> <li>(x, y, z, world,
+	 * Given a Location Object, returns a MCLocation. If the optional world is not specified in the object, the world
+	 * provided is used instead. Location "objects" are MethodScript arrays that represent a location in game. There are
+	 * 4 usages: <ul> <li>(x, y, z)</li> <li>(x, y, z, world)</li> <li>(x, y, z, yaw, pitch)</li> <li>(x, y, z, world,
 	 * yaw, pitch)</li> </ul> In all cases, the pitch and yaw default to 0, and the world defaults to the specified
-	 * world.<em>More conveniently: ([world], x, y, z, [yaw, pitch])</em>
+	 * world. <em>More conveniently: ([world], x, y, z, [yaw, pitch])</em>
 	 *
 	 * @param c
 	 * @param w
@@ -265,10 +265,10 @@ public class ObjectGenerator {
 	}
 
 	/**
-	 * An Item Object consists of data about a particular item stack.Information included is: recipeType, data, qty, and
-	 * an array of enchantment objects (labeled enchants): erecipeType (enchantment recipeType) and elevel (enchantment
-	 * level).For backwards compatibility, this information is also listed in numerical slots as well as associative
-	 * slots. If the MCItemStack is null, or the underlying item is nonexistant (or air) CNull is returned.
+	 * An Item Object consists of data about a particular item stack. Information included is: recipeType, data, qty,
+	 * and an array of enchantment objects (labeled enchants): erecipeType (enchantment recipeType) and elevel
+	 * (enchantment level). For backwards compatibility, this information is also listed in numerical slots as well as
+	 * associative slots. If the MCItemStack is null, or the underlying item is nonexistant (or air) CNull is returned.
 	 *
 	 * @param is
 	 * @param t
@@ -1289,7 +1289,7 @@ public class ObjectGenerator {
 	}
 
 	/**
-	 * Returns a CArray given an MCColor.It will be in the format array(r: 0, g: 0, b: 0)
+	 * Returns a CArray given an MCColor. It will be in the format array(r: 0, g: 0, b: 0)
 	 *
 	 * @param color
 	 * @param t
@@ -1403,7 +1403,7 @@ public class ObjectGenerator {
 	}
 
 	/**
-	 * Gets a Vector, given a vector object.A vector has three parts: the X, Y, and Z.
+	 * Gets a Vector, given a vector object. A vector has three parts: the X, Y, and Z.
 	 *
 	 * If the vector object is missing the Z part, then we will assume it is zero. If the vector object is missing the X
 	 * and/or Y part, then we will assume it is not a vector.
@@ -1430,7 +1430,7 @@ public class ObjectGenerator {
 	}
 
 	/**
-	 * Modifies an existing vector using a given vector object.Because Vector3D is immutable, this method does not
+	 * Modifies an existing vector using a given vector object. Because Vector3D is immutable, this method does not
 	 * actually modify the existing vector, but creates a new one.
 	 *
 	 * @param v the original vector
@@ -2175,7 +2175,8 @@ public class ObjectGenerator {
 				}
 				return ret;
 			}
-			default -> throw new CREIllegalArgumentException("Could not find valid recipe type.", t);
+			default ->
+				throw new CREIllegalArgumentException("Could not find valid recipe type.", t);
 		}
 	}
 

@@ -1,5 +1,6 @@
 package com.laytonsmith.core.constructs;
 
+import com.laytonsmith.PureUtilities.Common.Annotations.AggressiveDeprecation;
 import com.laytonsmith.PureUtilities.Sizes;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
@@ -49,6 +50,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	 *
 	 * @param b
 	 * @param t
+	 * @param env
 	 * @return
 	 */
 	public static CByteArray wrap(byte[] b, Target t, Environment env) {
@@ -66,6 +68,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	 * Creates a new, empty CByteArray, with initial capacity 1024.
 	 *
 	 * @param t
+	 * @param env
 	 */
 	public CByteArray(Target t, Environment env) {
 		this(t, INITIAL_SIZE, env);
@@ -76,6 +79,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	 *
 	 * @param t
 	 * @param capacity
+	 * @param env
 	 */
 	public CByteArray(Target t, int capacity, Environment env) {
 		super(t, INITIAL_SIZE, null, env);
@@ -124,7 +128,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 			data.rewind();
 			try {
 				value = new String(data.array(), "UTF-8");
-			} catch (UnsupportedEncodingException ex) {
+			} catch(UnsupportedEncodingException ex) {
 				throw new Error(ex);
 			}
 			data.position(position);
@@ -370,6 +374,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	 *
 	 * @param size
 	 * @param pos
+	 * @param env
 	 * @return
 	 */
 	public CByteArray getBytes(int size, Integer pos, Environment env) {
@@ -386,6 +391,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	/**
 	 * Returns the current size of the byte array. This is not to be confused with the capacity.
 	 *
+	 * @param env
 	 * @return
 	 */
 	@Override
@@ -452,6 +458,12 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 		return new String(array, encoding);
 	}
 
+	@Deprecated
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	public CArray asArray(Target t) {
+		return asArray(t, null);
+	}
+
 	/**
 	 * Returns a new read only CArray object with integers at each index, representing the underlying byte array. They
 	 * are not linked. This array is faster than normal CArrays, at the cost of being read only. Cloning the array is
@@ -459,10 +471,11 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	 * CArray is independent of this CByteArray (it is a new copy).
 	 *
 	 * @param t
+	 * @param env
 	 * @return
 	 */
-	public CArray asArray(Target t) {
-		return new CArrayByteBacking(asByteArrayCopy(), t, fallbackEnv);
+	public CArray asArray(Target t, Environment env) {
+		return new CArrayByteBacking(asByteArrayCopy(), t, env);
 	}
 
 	/**
@@ -570,7 +583,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 			int i = ArgumentValidation.getInt32(index, t, env);
 			try {
 				return new CInt(backing[i], t);
-			} catch (ArrayIndexOutOfBoundsException e) {
+			} catch(ArrayIndexOutOfBoundsException e) {
 				throw new CRERangeException("Index out of range. Found " + i + ", but array length is only " + backing.length, t);
 			}
 		}
@@ -585,7 +598,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 			if(value == null) {
 				try {
 					value = new String(backing, "UTF-8");
-				} catch (UnsupportedEncodingException ex) {
+				} catch(UnsupportedEncodingException ex) {
 					throw new Error(ex);
 				}
 			}

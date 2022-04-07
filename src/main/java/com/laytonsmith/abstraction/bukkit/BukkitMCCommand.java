@@ -8,7 +8,6 @@ import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlugin;
 import com.laytonsmith.abstraction.bukkit.events.BukkitMiscEvents.BukkitMCCommandTabCompleteEvent;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
-import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CClosure;
@@ -213,20 +212,15 @@ public class BukkitMCCommand implements MCCommand {
 
 	@Override
 	public List<String> handleTabComplete(MCCommandSender sender, String alias, String[] args) {
-		Environment env;
-		try {
-			env = Static.GenerateStandaloneEnvironment();
-		} catch (Exception ex) {
-			throw new RuntimeException(ex);
-		}
 		if(Commands.onTabComplete.containsKey(cmd.getName().toLowerCase())) {
 			Target t = Target.UNKNOWN;
+			CClosure closure = Commands.onTabComplete.get(cmd.getName().toLowerCase());
+			Environment env = closure.getEnv();
 			CArray cargs = new CArray(t, GenericParameters
 					.addParameter(CString.TYPE, null).build(), env);
 			for(String arg : args) {
 				cargs.push(new CString(arg, t), t, env);
 			}
-			CClosure closure = Commands.onTabComplete.get(cmd.getName().toLowerCase());
 			closure.getEnv().getEnv(CommandHelperEnvironment.class).SetCommandSender(sender);
 			try {
 				Mixed fret = closure.executeCallable(null, t, new CString(alias, t), new CString(sender.getName(), t), cargs,
@@ -257,13 +251,9 @@ public class BukkitMCCommand implements MCCommand {
 
 	@Override
 	public boolean handleCustomCommand(MCCommandSender sender, String label, String[] args) {
-		Environment env;
-		try {
-			env = Static.GenerateStandaloneEnvironment();
-		} catch (Exception ex) {
-			throw new RuntimeException(ex);
-		}
 		if(Commands.onCommand.containsKey(cmd.getName().toLowerCase())) {
+			CClosure closure = Commands.onCommand.get(cmd.getName().toLowerCase());
+			Environment env = closure.getEnv();
 			Target t = Target.UNKNOWN;
 			CArray cargs = new CArray(t, GenericParameters
 					.addParameter(CString.TYPE, null).build(), env);
@@ -271,7 +261,6 @@ public class BukkitMCCommand implements MCCommand {
 				cargs.push(new CString(arg, t), t, env);
 			}
 
-			CClosure closure = Commands.onCommand.get(cmd.getName().toLowerCase());
 			CommandHelperEnvironment cEnv = closure.getEnv().getEnv(CommandHelperEnvironment.class);
 			cEnv.SetCommandSender(sender);
 			cEnv.SetCommand("/" + label + StringUtils.Join(args, " "));

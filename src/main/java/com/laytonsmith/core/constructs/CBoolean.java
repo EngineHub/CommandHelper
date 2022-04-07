@@ -1,5 +1,6 @@
 package com.laytonsmith.core.constructs;
 
+import com.laytonsmith.PureUtilities.Common.Annotations.AggressiveDeprecation;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.MSVersion;
@@ -87,6 +88,12 @@ public final class CBoolean extends CPrimitive implements Cloneable {
 	 * @return
 	 */
 	public boolean getBoolean() {
+		return val;
+	}
+
+	@Deprecated
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	public boolean getBooleanValue(Target t) {
 		return val;
 	}
 

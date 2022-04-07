@@ -26,7 +26,7 @@ public class InstanceofUtil {
 	private static final Map<CClassType, Set<CClassType>> NATIVE_INSTANCEOFCACHE = new HashMap<>();
 
 	/**
-	 * Returns a list of all naked classes that the specified class can be validly cast to.This includes all super
+	 * Returns a list of all naked classes that the specified class can be validly cast to. This includes all super
 	 * classes, as well as all interfaces (and superclasses of those interfaces, etc) and java.lang.Object, as well as
 	 * the class itself.
 	 *

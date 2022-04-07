@@ -53,7 +53,7 @@ public final class ArgumentValidation {
 	}
 
 	/**
-	 * Returns an item from an array, as a generic construct.This provides a standard way of returning an item from an
+	 * Returns an item from an array, as a generic construct. This provides a standard way of returning an item from an
 	 * array. If defaultItem is null, then it is required that the item be present in the object. If it is not, a
 	 * {@link ConfigRuntimeException} is thrown.
 	 *
@@ -322,7 +322,7 @@ public final class ArgumentValidation {
 	}
 
 	/**
-	 * Returns a 32 bit int from the construct.Since the backing value is actually a long, if the number contained in
+	 * Returns a 32 bit int from the construct. Since the backing value is actually a long, if the number contained in
 	 * the construct is not the same after truncating, an exception is thrown (fail fast). When needing an int from a
 	 * construct, this method is much preferred over silently truncating.
 	 *
@@ -352,7 +352,7 @@ public final class ArgumentValidation {
 	}
 
 	/**
-	 * Returns a 16 bit int from the construct (a short).Since the backing value is actually a long, if the number
+	 * Returns a 16 bit int from the construct (a short). Since the backing value is actually a long, if the number
 	 * contained in the construct is not the same after truncating, an exception is thrown (fail fast). When needing an
 	 * short from a construct, this method is much preferred over silently truncating.
 	 *
@@ -382,7 +382,7 @@ public final class ArgumentValidation {
 	}
 
 	/**
-	 * Returns an 8 bit int from the construct (a byte).Since the backing value is actually a long, if the number
+	 * Returns an 8 bit int from the construct (a byte). Since the backing value is actually a long, if the number
 	 * contained in the construct is not the same after truncating, an exception is thrown (fail fast). When needing a
 	 * byte from a construct, this method is much preferred over silently truncating.
 	 *
@@ -730,8 +730,8 @@ public final class ArgumentValidation {
 	 * <p>
 	 * For user classes, however, it is detected if they implement the given interface, and if so, the calls to the
 	 * interface which are generally available in the api are correctly proxied. NOTE! Only methods which are part of
-	 * the actual API can be used this way, otherwise, an Error will be thrown for user types, since they will not
-	 * have been required to implement the given method.
+	 * the actual API can be used this way, otherwise, an Error will be thrown for user types, since they will not have
+	 * been required to implement the given method.
 	 *
 	 * @param <T> The interface type to proxy
 	 * @param iface The interface type to proxy
@@ -760,9 +760,9 @@ public final class ArgumentValidation {
 	}
 
 	/**
-	 * Coerces the type according to cross casting rules. If the type is already correct, it is simply returned.
-	 * For now, only a limited set of types is supported, but this will be expanded later to support proper cross
-	 * casting.
+	 * Coerces the type according to cross casting rules. If the type is already correct, it is simply returned. For
+	 * now, only a limited set of types is supported, but this will be expanded later to support proper cross casting.
+	 *
 	 * @param value The value to potentially coerce.
 	 * @param expected The expected type.
 	 * @param env The environment.

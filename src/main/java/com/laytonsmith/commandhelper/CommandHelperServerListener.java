@@ -6,17 +6,15 @@ import com.laytonsmith.abstraction.bukkit.events.BukkitServerEvents;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.core.InternalException;
 import com.laytonsmith.core.Static;
-import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import java.util.logging.Level;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.RemoteServerCommandEvent;
 import org.bukkit.event.server.ServerCommandEvent;
-
-import java.util.logging.Level;
 
 public class CommandHelperServerListener implements Listener {
 
@@ -33,7 +31,6 @@ public class CommandHelperServerListener implements Listener {
 	private void processServerCommand(ServerCommandEvent event) {
 		MCCommandSender sender = BukkitConvertor.BukkitGetCorrectSender(event.getSender());
 
-		Environment env = CommandHelperPlugin.getCore().getLastLoadedEnv();
 		BukkitServerEvents.BukkitMCServerCommandEvent cce = new BukkitServerEvents.BukkitMCServerCommandEvent(event, sender);
 		EventUtils.TriggerListener(Driver.SERVER_COMMAND, "server_command", cce);
 		if(event.isCancelled()) {

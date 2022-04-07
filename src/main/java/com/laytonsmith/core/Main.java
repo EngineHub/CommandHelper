@@ -220,7 +220,7 @@ public class Main {
 		Implementation.setServerType(Implementation.Type.SHELL);
 		AppsApiUtil.ConfigureDefaults();
 		if(args.length > 0) {
-			for(Class c : FAST_STARTUP) {
+			for(Class<CommandLineTool> c : FAST_STARTUP) {
 				String tool = ((tool) c.getAnnotation(tool.class)).value();
 				if(args[0].equals(tool)) {
 					String[] a;
@@ -230,7 +230,7 @@ public class Main {
 						a = new String[0];
 					}
 					HandleModeStartupTelemetry(tool, false);
-					CommandLineTool t = (CommandLineTool) c.newInstance();
+					CommandLineTool t = c.newInstance();
 					ArgumentParser.ArgumentParserResults res;
 					try {
 						res	= t.getArgumentParser().match(a);

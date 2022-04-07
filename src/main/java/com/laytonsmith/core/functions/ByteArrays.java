@@ -85,7 +85,7 @@ public class ByteArrays {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CByteArray ba = ArgumentValidation.getByteArray(args[0], t, env);
-			return ba.asArray(t);
+			return ba.asArray(t, env);
 		}
 
 		@Override
