@@ -169,7 +169,8 @@ public class Main {
 		JavaVersionMode.class,
 		EditPrefsMode.class,
 		InstallMSSQLAuthMode.class,
-		Updater.CheckUpdate.class
+		Updater.CheckUpdate.class,
+		CmdlineArgsTool.class
 	};
 
 	/**
