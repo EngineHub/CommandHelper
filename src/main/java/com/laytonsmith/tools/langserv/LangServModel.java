@@ -239,13 +239,12 @@ public class LangServModel {
 
 		for(File f1 : autoIncludes) {
 			try {
-				f1 = f1.getCanonicalFile();
+				File cf1 = f1.getCanonicalFile();
+				// Get the parse tree from the include cache if available. Possible exceptions have already been obtained.
+				parseTrees.put(URIUtils.canonicalize(f1.toURI()).toString(),
+						(includeCache.has(cf1) ? IncludeCache.get(cf1, env, env.getEnvClasses(), Target.UNKNOWN) : null));
 			} catch(IOException ex) {
 			}
-
-			// Get the parse tree from the include cache if available. Possible exceptions have already been obtained.
-			parseTrees.put(URIUtils.canonicalize(f1.toURI()).toString(),
-					(includeCache.has(f1) ? IncludeCache.get(f1, env, env.getEnvClasses(), Target.UNKNOWN) : null));
 		}
 
 		for(File f2 : mainFiles) {
@@ -255,17 +254,17 @@ public class LangServModel {
 
 		for(File f3 : libraryFiles) {
 			try {
-				f3 = f3.getCanonicalFile();
+				File cf3 = f3.getCanonicalFile();
+				if(includeCache.has(cf3)) {
+					parseTrees.put(URIUtils.canonicalize(f3.toURI()).toString(),
+							IncludeCache.get(cf3, env, env.getEnvClasses(), Target.UNKNOWN));
+				} else {
+					// This was not included, was dynamically included, or there was a compile exception.
+					// Can only treat it as an isolated script at this point.
+					parseTrees.put(URIUtils.canonicalize(f3.toURI()).toString(),
+							doCompilation(f3.toURI().toString(), includeCache, new StaticAnalysis(true), env, exceptions));
+				}
 			} catch(IOException ex) {
-			}
-			if(includeCache.has(f3)) {
-				parseTrees.put(URIUtils.canonicalize(f3.toURI()).toString(),
-						IncludeCache.get(f3, env, env.getEnvClasses(), Target.UNKNOWN));
-			} else {
-				// This was not included, was dynamically included, or there was a compile exception.
-				// Can only treat it as an isolated script at this point.
-				parseTrees.put(URIUtils.canonicalize(f3.toURI()).toString(),
-						doCompilation(f3.toURI().toString(), includeCache, new StaticAnalysis(true), env, exceptions));
 			}
 		}
 
