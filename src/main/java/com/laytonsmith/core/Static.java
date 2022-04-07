@@ -143,7 +143,7 @@ public final class Static {
 	 * @deprecated Use {@link ArgumentValidation#getArray(Mixed, Target)} instead.
 	 */
 	@Deprecated
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	public static CArray getArray(Mixed construct, Target t) {
 		return ArgumentValidation.getArray(construct, t);
 	}
@@ -161,7 +161,7 @@ public final class Static {
 	 * @deprecated Use {@link ArgumentValidation#getArray(Mixed, Target)} instead.
 	 */
 	@Deprecated
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	public static <T extends Mixed> T getObject(Mixed construct, Target t, Class<T> clazz) {
 		return ArgumentValidation.getObject(construct, t, clazz);
 	}
@@ -174,7 +174,7 @@ public final class Static {
 	 * @return A construct equivalent to the given java number, whose the type is the better to represent it.
 	 */
 	@Deprecated
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	public static CNumber getNumber(Number number, Target t) {
 		long longValue = number.longValue();
 		double doubleValue = number.doubleValue();
@@ -203,7 +203,7 @@ public final class Static {
 	 * @deprecated Use {@link ArgumentValidation#getDouble(Mixed, Target)} instead.
 	 */
 	@Deprecated
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	public static double getDouble(Mixed c, Target t) {
 		return ArgumentValidation.getDouble(c, t);
 	}
@@ -216,7 +216,7 @@ public final class Static {
 	 * @deprecated Use {@link ArgumentValidation#getDouble32(Mixed, Target)} instead.
 	 */
 	@Deprecated
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	public static float getDouble32(Mixed c, Target t) {
 		return ArgumentValidation.getDouble32(c, t);
 	}
@@ -231,7 +231,7 @@ public final class Static {
 	 * @deprecated Use {@link ArgumentValidation#getInt(Mixed, Target)} instead.
 	 */
 	@Deprecated
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	public static long getInt(Mixed c, Target t) {
 		return ArgumentValidation.getInt(c, t);
 	}
@@ -249,7 +249,7 @@ public final class Static {
 	 * @deprecated Use {@link ArgumentValidation#getInt32(Mixed, Target)} instead.
 	 */
 	@Deprecated
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	public static int getInt32(Mixed c, Target t) {
 		return ArgumentValidation.getInt32(c, t);
 	}
@@ -267,7 +267,7 @@ public final class Static {
 	 * @deprecated Use {@link ArgumentValidation#getInt16(Mixed, Target)} instead.
 	 */
 	@Deprecated
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	public static short getInt16(Mixed c, Target t) {
 		return ArgumentValidation.getInt16(c, t);
 	}
@@ -285,7 +285,7 @@ public final class Static {
 	 * @deprecated Use {@link ArgumentValidation#getInt8(Mixed, Target)} instead.
 	 */
 	@Deprecated
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	public static byte getInt8(Mixed c, Target t) {
 		return ArgumentValidation.getInt8(c, t);
 	}
@@ -306,7 +306,7 @@ public final class Static {
 	 * method. (Or any of the other methods that are duplicated.)
 	 */
 	@Deprecated
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	public static boolean getBoolean(Mixed c, Target t) {
 		return ArgumentValidation.getBooleanish(c, t);
 	}
@@ -320,7 +320,7 @@ public final class Static {
 	 * @deprecated Use {@link ArgumentValidation#getObject(Mixed, Target, Class)} with {@link CPrimitive}.class instead.
 	 */
 	@Deprecated
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	public static CPrimitive getPrimitive(Mixed c, Target t) {
 		return ArgumentValidation.getObject(c, t, CPrimitive.class);
 	}
@@ -334,7 +334,7 @@ public final class Static {
 	 * @deprecated Use {@link ArgumentValidation#getByteArray(Mixed, Target)} instead.
 	 */
 	@Deprecated
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	public static CByteArray getByteArray(Mixed c, Target t) {
 		return ArgumentValidation.getByteArray(c, t);
 	}
@@ -347,7 +347,7 @@ public final class Static {
 	 * @deprecated Use {@link ArgumentValidation#anyDoubles(Mixed...)} instead.
 	 */
 	@Deprecated
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	public static boolean anyDoubles(Mixed... c) {
 		return ArgumentValidation.anyDoubles(c);
 	}
@@ -360,7 +360,7 @@ public final class Static {
 	 * @deprecated Use {@link ArgumentValidation#anyStrings(Mixed...)} instead.
 	 */
 	@Deprecated
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	public static boolean anyStrings(Mixed... c) {
 		return ArgumentValidation.anyStrings(c);
 	}
@@ -373,7 +373,7 @@ public final class Static {
 	 * @deprecated Use {@link ArgumentValidation#anyBooleans(Mixed...)} instead.
 	 */
 	@Deprecated
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	public static boolean anyBooleans(Mixed... c) {
 		return ArgumentValidation.anyBooleans(c);
 	}
@@ -386,7 +386,7 @@ public final class Static {
 	 * @deprecated Use {@link ArgumentValidation#anyNulls(Mixed...)} instead.
 	 */
 	@Deprecated
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	public static boolean anyNulls(Mixed... c) {
 		return ArgumentValidation.anyNulls(c);
 	}
@@ -810,7 +810,7 @@ public final class Static {
 	}
 
 	@Deprecated
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	public static MCOfflinePlayer GetUser(Mixed search, Target t) {
 		return GetUser(search, t, null);
 	}
@@ -820,7 +820,7 @@ public final class Static {
 	}
 
 	@Deprecated
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	public static MCOfflinePlayer GetUser(String search, Target t) {
 		return GetUser(search, t, null);
 	}
@@ -865,7 +865,7 @@ public final class Static {
 	 * @deprecated This method doesn't work with user classes, and will cause errors once those are introduced. This
 	 * will be removed once those are added, instead, use the version with the environment.
 	 */
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public static MCPlayer GetPlayer(String player, Target t) throws ConfigRuntimeException {
 		return GetPlayer(player, t, null);
@@ -884,7 +884,7 @@ public final class Static {
 	 * @deprecated This method doesn't work with user classes, and will cause errors once those are introduced. This
 	 * will be removed once those are added, instead, use the version with the environment.
 	 */
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public static MCPlayer GetPlayer(Mixed player, Target t) throws ConfigRuntimeException {
 		return GetPlayer(player, t, null);

@@ -34,4 +34,19 @@ public @interface AggressiveDeprecation {
 	 */
 
 	String deprecationDate();
+
+	/**
+	 * The version in which this will (automatically) start being aggressively deprecated. The usual
+	 * pattern is to set this to the next version number, and then the removal version to the one
+	 * after that. Say that the current version is version 1.0.0. If you say that the deprecationVersion
+	 * is 1.1.0, and the removal version is 1.2.0, then for dependencies building against 1.0.0, they
+	 * will continue to work completely as is, and can continue to build just fine (though with a deprecation
+	 * warning, assuming you also place the Deprecated annotation). Then, automatically, when the current
+	 * version bumps to 1.1.0, it will automatically start being aggressively deprecated. Downstream
+	 * dependencies built against 1.0.0 will continue to be binary compatible, but cannot be built
+	 * against 1.1.0 without changes. Finally, 1.2.0, the method can actually be removed, as the
+	 * binary compatibility was no longer guaranteed.
+	 * @return
+	 */
+	String deprecationVersion();
 }

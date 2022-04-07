@@ -459,7 +459,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	}
 
 	@Deprecated
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	public CArray asArray(Target t) {
 		return asArray(t, null);
 	}

@@ -92,7 +92,7 @@ public final class CBoolean extends CPrimitive implements Cloneable {
 	}
 
 	@Deprecated
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	public boolean getBooleanValue(Target t) {
 		return val;
 	}

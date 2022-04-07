@@ -89,7 +89,9 @@ public final class AggressiveDeprecationTransformer implements ClassFileTransfor
 			}
 
 			AnnotationMirror aggressiveDeprecation = mirror.getAnnotation(AggressiveDeprecation.class);
-			if(aggressiveDeprecation != null) {
+			if(aggressiveDeprecation != null
+					&& MSVersion.LATEST
+							.gte(new SimpleVersion((String) aggressiveDeprecation.getValue("deprecationVersion")))) {
 //				System.out.println(mirror.getDeclaringClass() + "." + mirror.getName() + "(" + mirror.getParams()
 //						+ ") needs rewrite");
 				access = access | Opcodes.ACC_BRIDGE | Opcodes.ACC_SYNTHETIC;

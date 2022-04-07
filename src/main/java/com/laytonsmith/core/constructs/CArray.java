@@ -66,37 +66,37 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	// For the val(), we need to use the fallbackEnv
 	protected final Environment fallbackEnv;
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public CArray(Target t, int initialCapactity) {
 		this(t, initialCapactity, null, null);
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public CArray(Target t) {
 		this(t, null, null);
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public CArray(Target t, Mixed... items) {
 		this(t, 16, null, null, items);
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public CArray(Target t, Collection<Mixed> items) {
 		this(t, 16, items, null, null);
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public CArray(Target t, int initialCapacity, Collection<Mixed> items) {
 		this(t, initialCapacity, items, null, null);
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public CArray(Target t, int initialCapacity, Mixed... items) {
 		this(t, initialCapacity, null, null, items);
@@ -213,7 +213,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		return c;
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public List<Mixed> asList() {
 		return asList(null);
@@ -249,13 +249,13 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		return associativeMode;
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public static CArray GetAssociativeArray(Target t) {
 		return GetAssociativeArray(t, null, null);
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public static CArray GetAssociativeArray(Target t, Mixed[] args) {
 		return GetAssociativeArray(t, null, null, args);
@@ -313,7 +313,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		}
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public void push(Mixed c, Target t) {
 		push(c, t, null);
@@ -427,7 +427,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		array = null; // null out the original array container so it can be GC'd
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public void set(Mixed index, Mixed c, Target t) {
 		set(index, c, t, null);
@@ -473,7 +473,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	}
 
 	@Deprecated
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	public final void set(int index, Mixed c, Target t) {
 		this.set(index, c, t, null);
 	}
@@ -483,7 +483,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	}
 
 	@Deprecated
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	public void set(String index, Mixed c, Target t) {
 		this.set(index, c, t, null);
 	}
@@ -493,7 +493,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		set(new CString(index, t), c, t, env);
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public final void set(String index, String value, Target t) {
 		this.set(index, value, t, null);
@@ -503,7 +503,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		set(index, new CString(value, t), t, env);
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public final void set(String index, String value) {
 		this.set(index, value, (Environment) null);
@@ -513,7 +513,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		set(index, value, Target.UNKNOWN, env);
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public Mixed get(Mixed index, Target t) {
 		return get(index, t, null);
@@ -750,7 +750,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	}
 
 	@Deprecated
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	public long size() {
 		return size(null);
 	}
@@ -857,7 +857,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		return remove(new CString(s, Target.UNKNOWN), env);
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public Mixed remove(Mixed construct) {
 		return remove(construct, null);
@@ -986,7 +986,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		return true;
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public Mixed slice(int begin, int end, Target t) {
 		return slice(begin, end, t, null);
@@ -1037,7 +1037,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		STRING_IC
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public void sort(ArraySortType sort) {
 		sort(sort, null);
@@ -1138,7 +1138,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		this.setDirty();
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public boolean isEmpty() {
 		return isEmpty(null);

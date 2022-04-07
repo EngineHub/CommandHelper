@@ -110,7 +110,7 @@ public class ObjectGenerator {
 		return pog;
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public CArray location(MCLocation l) {
 		return location(l, null);
@@ -127,7 +127,7 @@ public class ObjectGenerator {
 		return location(l, true, env);
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public CArray location(MCLocation l, boolean includeYawAndPitch) {
 		return location(l, includeYawAndPitch, null);
@@ -171,7 +171,7 @@ public class ObjectGenerator {
 		return ca;
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public MCLocation location(Mixed c, MCWorld w, Target t) {
 		return location(c, w, t, null);
@@ -258,7 +258,7 @@ public class ObjectGenerator {
 		return StaticLayer.GetLocation(world, x, y, z, yaw, pitch);
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public Construct item(MCItemStack is, Target t) {
 		return item(is, t, null);
@@ -287,7 +287,7 @@ public class ObjectGenerator {
 		return ret;
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public MCItemStack item(Mixed i, Target t) {
 		return item(i, t, null);
@@ -305,7 +305,7 @@ public class ObjectGenerator {
 		return item(i, t, false, env);
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public MCItemStack item(Mixed i, Target t, boolean legacy) {
 		return item(i, t, legacy, null);
@@ -460,7 +460,7 @@ public class ObjectGenerator {
 		return StaticLayer.GetItemStack("AIR", 0);
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public Construct itemMeta(MCItemStack is, Target t) {
 		return itemMeta(is, t, null);
@@ -765,7 +765,7 @@ public class ObjectGenerator {
 		}
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public MCItemMeta itemMeta(Mixed c, MCMaterial mat, Target t) throws ConfigRuntimeException {
 		return itemMeta(c, mat, t, null);
@@ -1282,7 +1282,7 @@ public class ObjectGenerator {
 		return AbstractCREException.getFromCArray(exception, t, env);
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public CArray color(MCColor color, Target t) {
 		return color(color, t, null);
@@ -1304,7 +1304,7 @@ public class ObjectGenerator {
 		return ca;
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public MCColor color(CArray color, Target t) {
 		return color(color, t, null);
@@ -1351,7 +1351,7 @@ public class ObjectGenerator {
 		}
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public CArray vector(Vector3D vector) {
 		return vector(vector, (Environment) null);
@@ -1368,7 +1368,7 @@ public class ObjectGenerator {
 		return vector(vector, Target.UNKNOWN, env);
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public CArray vector(Vector3D vector, Target t) {
 		return vector(vector, t, null);
@@ -1396,7 +1396,7 @@ public class ObjectGenerator {
 		return ca;
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public Vector3D vector(Mixed c, Target t) {
 		return vector(c, t, null);
@@ -1423,7 +1423,7 @@ public class ObjectGenerator {
 		return vector(Vector3D.ZERO, c, t, env);
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public Vector3D vector(Vector3D v, Mixed c, Target t) {
 		return vector(v, c, t, null);
@@ -1484,7 +1484,7 @@ public class ObjectGenerator {
 		}
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public CArray enchants(Map<MCEnchantment, Integer> map, Target t) {
 		return enchants(map, t, null);
@@ -1501,7 +1501,7 @@ public class ObjectGenerator {
 		return ret;
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public Map<MCEnchantment, Integer> enchants(CArray enchantArray, Target t) {
 		return enchants(enchantArray, t, null);
@@ -1541,7 +1541,7 @@ public class ObjectGenerator {
 		return ret;
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public CArray attributeModifier(MCAttributeModifier m, Target t) {
 		return attributeModifier(m, t, null);
@@ -1564,7 +1564,7 @@ public class ObjectGenerator {
 		return modifier;
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public MCAttributeModifier attributeModifier(CArray m, Target t) {
 		return attributeModifier(m, t, null);
@@ -1623,7 +1623,7 @@ public class ObjectGenerator {
 		return StaticLayer.GetConvertor().GetAttributeModifier(attribute, uuid, name, amount, operation, slot);
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public CArray potion(MCLivingEntity.MCEffect eff, Target t) {
 		return potion(eff, t, null);
@@ -1641,7 +1641,7 @@ public class ObjectGenerator {
 		return effect;
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public CArray potions(List<MCLivingEntity.MCEffect> effectList, Target t) {
 		return potions(effectList, t, null);
@@ -1656,7 +1656,7 @@ public class ObjectGenerator {
 		return ea;
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public List<MCLivingEntity.MCEffect> potions(CArray ea, Target t) {
 		return potions(ea, t, null);
@@ -1714,7 +1714,7 @@ public class ObjectGenerator {
 		return ret;
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public CArray potionData(MCPotionData mcpd, Target t) {
 		return potionData(mcpd, t, null);
@@ -1728,7 +1728,7 @@ public class ObjectGenerator {
 		return base;
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public MCPotionData potionData(CArray pd, Target t) {
 		return potionData(pd, t, null);
@@ -1768,7 +1768,7 @@ public class ObjectGenerator {
 		}
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public CArray fireworkEffect(MCFireworkEffect mcfe, Target t) {
 		return fireworkEffect(mcfe, t, null);
@@ -1797,7 +1797,7 @@ public class ObjectGenerator {
 		return fe;
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public MCFireworkEffect fireworkEffect(CArray fe, Target t) {
 		return fireworkEffect(fe, t, null);
@@ -1891,7 +1891,7 @@ public class ObjectGenerator {
 		return builder.build();
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public Construct recipe(MCRecipe r, Target t) {
 		return recipe(r, t, null);
@@ -1995,7 +1995,7 @@ public class ObjectGenerator {
 		return ret;
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public MCRecipe recipe(Mixed c, Target t) {
 		return recipe(c, t, null);
@@ -2192,7 +2192,7 @@ public class ObjectGenerator {
 		return material(name.val(), t);
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public MCBlockData blockData(CArray ca, Target t) {
 		return blockData(ca, t, null);
@@ -2222,7 +2222,7 @@ public class ObjectGenerator {
 		return Static.getServer().createBlockData(b.toString());
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public CArray blockData(MCBlockData blockdata, Target t) {
 		return blockData(blockdata, t, null);
@@ -2260,7 +2260,7 @@ public class ObjectGenerator {
 		return new CString(value, Target.UNKNOWN);
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public MCMetadataValue metadataValue(Mixed value, MCPlugin plugin) {
 		return metadataValue(value, plugin, null);

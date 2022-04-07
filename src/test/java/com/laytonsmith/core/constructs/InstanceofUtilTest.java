@@ -325,4 +325,12 @@ public class InstanceofUtilTest {
 		assertFalse(bStringInt.isInstanceOf(aInt, null, env));
 
 	}
+
+	@Test
+	public void testUsualInstanceofTypes() throws Exception {
+		assertTrue(InstanceofUtil.isAssignableTo(CNull.TYPE, CString.TYPE, null, env));
+		assertFalse(InstanceofUtil.isAssignableTo(null, CString.TYPE, null, env));
+		assertFalse(InstanceofUtil.isAssignableTo(null, CString.TYPE, null, env));
+		assertFalse(InstanceofUtil.isAssignableTo(CVoid.TYPE, CString.TYPE, null, env));
+	}
 }

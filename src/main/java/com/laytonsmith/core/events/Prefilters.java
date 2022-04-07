@@ -77,7 +77,7 @@ public final class Prefilters {
 	}
 
 	@Deprecated
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	public static void match(Map<String, Mixed> map, String key,
 			String actualValue, PrefilterType type) throws PrefilterNonMatchException {
 		match(map, key, actualValue, type, null);
@@ -94,7 +94,7 @@ public final class Prefilters {
 	}
 
 	@Deprecated
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	public static void match(Map<String, Mixed> map, String key,
 			int actualValue, PrefilterType type) throws PrefilterNonMatchException {
 		match(map, key, actualValue, type, null);
@@ -111,7 +111,7 @@ public final class Prefilters {
 	}
 
 	@Deprecated
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	public static void match(Map<String, Mixed> map, String key,
 			double actualValue, PrefilterType type) throws PrefilterNonMatchException {
 		match(map, key, actualValue, type, null);
@@ -128,7 +128,7 @@ public final class Prefilters {
 	}
 
 	@Deprecated
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	public static void match(Map<String, Mixed> map, String key,
 			boolean actualValue, PrefilterType type) throws PrefilterNonMatchException {
 		match(map, key, actualValue, type, null);
@@ -145,7 +145,7 @@ public final class Prefilters {
 	}
 
 	@Deprecated
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	public static void match(Map<String, Mixed> map, String key,
 			MCLocation actualValue, PrefilterType type) throws PrefilterNonMatchException {
 		match(map, key, actualValue, type, null);
@@ -162,7 +162,7 @@ public final class Prefilters {
 	}
 
 	@Deprecated
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7")
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	public static void match(Map<String, Mixed> map, String key,
 			Mixed actualValue, PrefilterType type) throws PrefilterNonMatchException {
 		match(map, key, actualValue, type, null);
