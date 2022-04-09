@@ -45,7 +45,11 @@ public class TryKeyword extends Keyword {
 			return keywordPosition;
 		}
 		// Otherwise it's not, and we can continue on, assuming keyword usage.
-		this.validateCodeBlock(list.get(keywordPosition + 1), "Expecting braces after try keyword");
+		if(list.size() > keywordPosition + 1) {
+			this.validateCodeBlock(list.get(keywordPosition + 1), "Expecting braces after try keyword");
+		} else {
+			throw new ConfigCompileException("Expecting braces after try keyword", list.get(keywordPosition).getTarget());
+		}
 
 		ParseTree complexTry = new ParseTree(new CFunction(complex_try.NAME,
 				list.get(keywordPosition).getTarget()), list.get(keywordPosition).getFileOptions());
