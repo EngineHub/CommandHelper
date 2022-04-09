@@ -659,7 +659,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 			if(t.getData() instanceof CFunction cf) {
 				if(cf.hasProcedure()) {
 					String procName = cf.val();
-					StaticAnalysis sa = model.getStaticAnalysis();
+					StaticAnalysis sa = model.getStaticAnalysis(uri);
 					List<Location> locations = new ArrayList<>();
 					Scope scope = sa.getTermScope(t);
 					if(scope != null) {
@@ -703,7 +703,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 				return;
 			}
 			Hover hover = null;
-			StaticAnalysis sa = model.getStaticAnalysis();
+			StaticAnalysis sa = model.getStaticAnalysis(uri);
 			if(sa == null) {
 				// We can't find declarations of anything.
 				result.cancel(true);

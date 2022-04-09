@@ -96,8 +96,6 @@ public class LangServModel {
 
 	private final List<WorkspaceFolder> workspaceFolders = new ArrayList<>();
 
-	private final Set<String> openDocuments = new HashSet<>();
-
 	public LangServModel(LangServ server) {
 		this.langServ = server;
 	}
@@ -174,7 +172,8 @@ public class LangServModel {
 
 	private volatile boolean interruptBuilding = false;
 	private final Map<String, ParseTree> parseTrees = new HashMap<>();
-	private StaticAnalysis staticAnalysis;
+	private final Map<String, StaticAnalysis> staticAnalysisMap = new HashMap<>();
+	private Environment env;
 
 	/**
 	 * Usually this should only be called by rebuildTree. This method blocks until the rebuild is finished. If the tree
@@ -186,6 +185,7 @@ public class LangServModel {
 		}
 		interruptBuilding = false;
 		parseTrees.clear();
+		staticAnalysisMap.clear();
 		// Calculate all auto includes first
 		List<File> autoIncludes = new ArrayList<>();
 		List<File> mainFiles = new ArrayList<>();
@@ -214,14 +214,12 @@ public class LangServModel {
 		}
 
 		IncludeCache includeCache = new IncludeCache();
-		staticAnalysis = new StaticAnalysis(true);
-		Environment env;
 		try {
 			// Cmdline mode disables things like security checks and whatnot.
 			// These may be present in the runtime environment,
 			// but it's not possible for us to tell that at this point.
 			env = Static.GenerateStandaloneEnvironment(false, EnumSet.of(RuntimeMode.CMDLINE), includeCache,
-					staticAnalysis);
+					new StaticAnalysis(true));
 			// Make this configurable at some point. For now, however, we need this so we can get
 			// correct handling on minecraft functions.
 			env = env.cloneAndAdd(new CommandHelperEnvironment());
@@ -240,34 +238,48 @@ public class LangServModel {
 		for(File f1 : autoIncludes) {
 			try {
 				File cf1 = f1.getCanonicalFile();
+				String uri = f1.toURI().toString();
 				// Get the parse tree from the include cache if available. Possible exceptions have already been obtained.
-				parseTrees.put(URIUtils.canonicalize(f1.toURI()).toString(),
-						(includeCache.has(cf1) ? IncludeCache.get(cf1, env, env.getEnvClasses(), Target.UNKNOWN) : null));
-			} catch(IOException ex) {
-			}
-		}
-
-		for(File f2 : mainFiles) {
-			parseTrees.put(URIUtils.canonicalize(f2.toURI()).toString(),
-					doCompilation(f2.toURI().toString(), includeCache, new StaticAnalysis(true), env, exceptions));
-		}
-
-		for(File f3 : libraryFiles) {
-			try {
-				File cf3 = f3.getCanonicalFile();
-				if(includeCache.has(cf3)) {
-					parseTrees.put(URIUtils.canonicalize(f3.toURI()).toString(),
-							IncludeCache.get(cf3, env, env.getEnvClasses(), Target.UNKNOWN));
+				if(includeCache.has(cf1)) {
+					parseTrees.put(uri, IncludeCache.get(cf1, env, env.getEnvClasses(), Target.UNKNOWN));
+					staticAnalysisMap.put(uri, includeCache.getStaticAnalysis(cf1));
 				} else {
-					// This was not included, was dynamically included, or there was a compile exception.
-					// Can only treat it as an isolated script at this point.
-					parseTrees.put(URIUtils.canonicalize(f3.toURI()).toString(),
-							doCompilation(f3.toURI().toString(), includeCache, new StaticAnalysis(true), env, exceptions));
+					parseTrees.put(f1.toURI().toString(), null);
 				}
 			} catch(IOException ex) {
 			}
 		}
 
+		for(File f2 : mainFiles) {
+			String uri = f2.toURI().toString();
+			StaticAnalysis staticAnalysis = new StaticAnalysis(true);
+			parseTrees.put(uri, doCompilation(uri, new StaticAnalysis(true), env, exceptions));
+			staticAnalysisMap.put(uri, staticAnalysis);
+		}
+
+		for(File f3 : libraryFiles) {
+			try {
+				File cf3 = f3.getCanonicalFile();
+				String uri = f3.toURI().toString();
+				if(includeCache.has(cf3)) {
+					parseTrees.put(uri, IncludeCache.get(cf3, env, env.getEnvClasses(), Target.UNKNOWN));
+					staticAnalysisMap.put(uri, includeCache.getStaticAnalysis(cf3));
+				} else {
+					// This was not included, was dynamically included, or there was a compile exception.
+					// Can only treat it as an isolated script at this point.
+					StaticAnalysis staticAnalysis = new StaticAnalysis(true);
+					parseTrees.put(uri, doCompilation(uri, staticAnalysis, env, exceptions));
+					staticAnalysisMap.put(uri, staticAnalysis);
+				}
+			} catch(IOException ex) {
+			}
+		}
+
+		publishDiagnostics(parseTrees.keySet(), exceptions);
+		isDirty = false;
+	}
+
+	private void publishDiagnostics(Set<String> toUpdate, Set<ConfigCompileException> exceptions) {
 		Map<String, List<Diagnostic>> diagnosticsLists = new HashMap<>();
 		if(!exceptions.isEmpty()) {
 			langServ.logi(() -> "Errors found, reporting " + exceptions.size() + " errors");
@@ -276,7 +288,7 @@ public class LangServModel {
 				if(e.getTarget().file() == null) {
 					continue;
 				}
-				String uri = URIUtils.canonicalize(e.getTarget().file().toURI()).toString();
+				String uri = e.getTarget().file().toURI().toString().toLowerCase();
 				d.setRange(convertTargetToRange(e.getTarget()));
 				d.setSeverity(DiagnosticSeverity.Error);
 				d.setMessage(e.getMessage());
@@ -289,14 +301,14 @@ public class LangServModel {
 			}
 		}
 
-		List<CompilerWarning> warnings = compilerEnv.getCompilerWarnings();
+		List<CompilerWarning> warnings = env.getEnv(CompilerEnvironment.class).getCompilerWarnings();
 		if(!warnings.isEmpty()) {
 			for(CompilerWarning c : warnings) {
 				Diagnostic d = new Diagnostic();
 				if(c.getTarget().file() == null) {
 					continue;
 				}
-				String uri = URIUtils.canonicalize(c.getTarget().file().toURI()).toString();
+				String uri = c.getTarget().file().toURI().toString().toLowerCase();
 				d.setRange(convertTargetToRange(c.getTarget()));
 				d.setSeverity(LangServ.getSeverity(c));
 				d.setMessage(c.getMessage());
@@ -310,24 +322,23 @@ public class LangServModel {
 		}
 
 		// We need to report to the client always, with an empty list, implying that all problems are fixed.
-		for(String uri : parseTrees.keySet()) {
-			List<Diagnostic> diagnosticsList = diagnosticsLists.get(uri);
+		for(String uri : toUpdate) {
+			List<Diagnostic> diagnosticsList = diagnosticsLists.get(uri.toLowerCase());
 			PublishDiagnosticsParams diagnostics
 					= new PublishDiagnosticsParams(uri, diagnosticsList != null ? diagnosticsList : new ArrayList<>());
 			client.publishDiagnostics(diagnostics);
 		}
-
-		isDirty = false;
 	}
 
 	/**
 	 * Returns the StaticAnalysis object that was used to compile the given URI.NOTE! This will only return a valid
 	 * value after compilation, so always call getParseTree before calling this method.
 	 *
+	 * @param uri
 	 * @return
 	 */
-	public StaticAnalysis getStaticAnalysis() {
-		return staticAnalysis;
+	public StaticAnalysis getStaticAnalysis(String uri) {
+		return staticAnalysisMap.get(URIUtils.canonicalize(uri).toString());
 	}
 
 	/**
@@ -494,8 +505,9 @@ public class LangServModel {
 	 * @throws java.io.IOException
 	 */
 	public String getDocument(String uri) throws IOException {
-		if(documents.containsKey(uri)) {
-			return documents.get(uri);
+		String lower = uri.toLowerCase();
+		if(documents.containsKey(lower)) {
+			return documents.get(lower);
 		}
 		File f;
 		try {
@@ -511,16 +523,14 @@ public class LangServModel {
 		// The document’s truth is now managed by the client and the server must not try to read the document’s truth
 		// using the document’s Uri.
 		langServ.logv(this.getClass().getName() + "." + StackTraceUtils.currentMethod() + " called");
-		String uri = params.getTextDocument().getUri();
+		String uri = URIUtils.canonicalize(params.getTextDocument().getUri()).toString().toLowerCase();
 		documents.put(uri, params.getTextDocument().getText());
-		openDocuments.add(uri);
-		dirtyAndRebuildTree(highPriorityProcessors);
 	}
 
 	public void didChange(DidChangeTextDocumentParams params) {
 		langServ.logv(this.getClass().getName() + "." + StackTraceUtils.currentMethod() + " called");
 		langServ.logv(() -> "Changing " + params);
-		String uri = params.getTextDocument().getUri();
+		String uri = URIUtils.canonicalize(params.getTextDocument().getUri()).toString();
 		// If the processing mode is changed to incremental, this logic needs modification
 //		String text = documents.get(uri);
 		if(params.getContentChanges().size() > 1) {
@@ -528,7 +538,7 @@ public class LangServModel {
 		}
 		for(TextDocumentContentChangeEvent change : params.getContentChanges()) {
 			String newText = change.getText();
-			documents.put(uri, newText);
+			documents.put(uri.toLowerCase(), newText);
 		}
 //		dirtyAndRebuildTree(lowPriorityProcessors);
 	}
@@ -538,9 +548,8 @@ public class LangServModel {
 		// client. The document’s truth now exists where the document’s Uri points to (e.g. if the document’s Uri is
 		// a file Uri the truth now exists on disk).
 		langServ.logv(this.getClass().getName() + "." + StackTraceUtils.currentMethod() + " called");
-		String uri = params.getTextDocument().getUri();
+		String uri = URIUtils.canonicalize(params.getTextDocument().getUri()).toString().toLowerCase();
 		documents.remove(uri);
-		openDocuments.remove(uri);
 	}
 
 	public void didSave(DidSaveTextDocumentParams params) {
@@ -554,10 +563,12 @@ public class LangServModel {
 	 * already been reported to the client.
 	 *
 	 * @param uri The URI of the file to compile.
+	 * @param staticAnalysis
+	 * @param env
+	 * @param exceptions
 	 */
-	@SuppressWarnings("UseSpecificCatch")
-	private ParseTree doCompilation(final String uri, IncludeCache includeCache, StaticAnalysis staticAnalysis,
-			Environment env, Set<ConfigCompileException> exceptions) {
+	private ParseTree doCompilation(final String uri, StaticAnalysis staticAnalysis, Environment env,
+				Set<ConfigCompileException> exceptions) {
 		try {
 
 			String code;
