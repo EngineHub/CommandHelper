@@ -108,7 +108,7 @@ public abstract class LLVMFunction implements FunctionBase, Function {
 	 */
 	@Override
 	public LeftHandSideType getReturnType(Target t, GenericParameters generics, List<LeftHandSideType> argTypes, List<Target> argTargets,
-			Environment env, Set<ConfigCompileException> exceptions) {
+			LeftHandSideType inferredType, Environment env, Set<ConfigCompileException> exceptions) {
 		return LeftHandSideType.fromCClassType(CClassType.AUTO, t); // No information is available about the return type.
 	}
 
@@ -119,20 +119,20 @@ public abstract class LLVMFunction implements FunctionBase, Function {
 	 */
 	@Override
 	public LeftHandSideType typecheck(StaticAnalysis analysis,
-			ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+			ParseTree ast, LeftHandSideType inferredType, Environment env, Set<ConfigCompileException> exceptions) {
 
 		// Get and check the types of the function's arguments.
 		List<ParseTree> children = ast.getChildren();
 		List<LeftHandSideType> argTypes = new ArrayList<>(children.size());
 		List<Target> argTargets = new ArrayList<>(children.size());
 		for(ParseTree child : children) {
-			argTypes.add(analysis.typecheck(child, env, exceptions));
+			argTypes.add(analysis.typecheck(child, inferredType, env, exceptions));
 			argTargets.add(child.getTarget());
 		}
 
 		// Return the return type of this function.
 		return this.getReturnType(ast.getTarget(), ast.getNodeModifiers().getGenerics(),
-				argTypes, argTargets, env, exceptions);
+				argTypes, argTargets, inferredType, env, exceptions);
 	}
 
 	/**

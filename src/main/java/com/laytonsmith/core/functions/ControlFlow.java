@@ -28,7 +28,6 @@ import com.laytonsmith.core.compiler.signature.FunctionSignatures.MatchType;
 import com.laytonsmith.core.compiler.signature.SignatureBuilder;
 import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.CArray;
-import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CKeyword;
@@ -39,10 +38,13 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
-import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.ConstraintLocation;
+import com.laytonsmith.core.constructs.generics.Constraints;
+import com.laytonsmith.core.constructs.generics.GenericDeclaration;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.UnboundedConstraint;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
@@ -125,55 +127,35 @@ public class ControlFlow {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			/*
-			 *  TODO - Decide how to define the ternary return value.
-			 *  Note that getReturnType is overridden, so these signatures are not used for typechecking.
-			 */
-			return new SignatureBuilder(CClassType.AUTO, MatchType.MATCH_FIRST)
-					.param(Booleanish.TYPE, "cond", "The condition.")
-					.param(Mixed.TYPE, "ifValue", "The value that is returned when the condition is true.")
-					.param(Mixed.TYPE, "elseValue", "The value that is returned when the condition is false.")
-					.newSignature(CVoid.TYPE).param(Booleanish.TYPE, "cond", "The condition.")
+			GenericDeclaration ternaryIfOnly = new GenericDeclaration(Target.UNKNOWN,
+				new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+					new UnboundedConstraint(Target.UNKNOWN, "T")));
+			GenericDeclaration ternaryIfElse = new GenericDeclaration(Target.UNKNOWN,
+				new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+					new UnboundedConstraint(Target.UNKNOWN, "T")),
+				new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+					new UnboundedConstraint(Target.UNKNOWN, "U")));
+			LeftHandSideType voidOrBooleanish = LeftHandSideType.createTypeUnion(Target.UNKNOWN, CVoid.LHSTYPE,
+					Booleanish.TYPE.asLeftHandSideType());
+			LeftHandSideType tTernaryIfOnly = LeftHandSideType.fromGenericDefinitionType(ternaryIfOnly, "T", null, Target.UNKNOWN);
+			LeftHandSideType tTernaryIfElse = LeftHandSideType.fromGenericDefinitionType(ternaryIfElse, "T", null, Target.UNKNOWN);
+			LeftHandSideType uTernaryIfElse = LeftHandSideType.fromGenericDefinitionType(ternaryIfElse, "U", null, Target.UNKNOWN);
+			return new SignatureBuilder(
+						LeftHandSideType.createTypeUnion(Target.UNKNOWN, tTernaryIfElse, uTernaryIfElse),
+						MatchType.MATCH_FIRST)
+					.param(voidOrBooleanish, "cond", "The condition.")
+					.param(tTernaryIfElse, "ifValue", "The value that is returned when the condition is true.")
+					.param(uTernaryIfElse, "elseValue", "The value that is returned when the condition is false.")
+					.setGenericDeclaration(ternaryIfElse, "T is the return type if the condition is true, U is the return type if false.")
+					.newSignature(LeftHandSideType.createTypeUnion(Target.UNKNOWN, tTernaryIfOnly, CVoid.LHSTYPE))
+					.param(voidOrBooleanish, "cond", "The condition.")
+					.param(tTernaryIfOnly, "ifValue", "The value that is returned when the condition is true.")
+					.setGenericDeclaration(ternaryIfOnly, "T is the return type if the condition is true (void otherwise).")
+					.newSignature(CVoid.TYPE)
+					.param(voidOrBooleanish, "cond", "The condition.")
 					.param((LeftHandSideType) null, "ifCode", "The code that runs when the condition is true.")
-					.param((LeftHandSideType) null, "elseCode", "The optional code that runs when the condition is false.", true).build();
-		}
-
-		@Override
-		public LeftHandSideType getReturnType(Target t, GenericParameters generics, List<LeftHandSideType> argTypes,
-				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
-
-			// Get return type based on the function signatures. This generates all necessary compile errors.
-			LeftHandSideType retType = super.getReturnType(t, generics, argTypes, argTargets, env, exceptions);
-
-			// When void is returned, ternary usage could still be possible when a branch is terminating.
-			// It is also possible that both branches are terminating, in which case this should return null as well.
-			if(retType.isVoid() && argTypes.size() == 3) {
-
-				// Return the type of the other branch if one branch is terminating (ternary, terminating or void).
-				if(argTypes.get(1) == null) {
-					return argTypes.get(2);
-				}
-				if(argTypes.get(2) == null) {
-					return argTypes.get(1);
-				}
-			}
-
-			// Perform partial type inference since there is no way to express an A OR B type yet.
-			/*
-			 * TODO - This currently returns the lowest type if one extends the other.
-			 * Make this return a multitype instead as soon as all typechecking code supports multitypes.
-			 */
-			if(retType.isAuto() && argTypes.size() == 3) {
-				if(InstanceofUtil.isInstanceof(argTypes.get(1), argTypes.get(2), env)) {
-					return argTypes.get(2);
-				}
-				if(InstanceofUtil.isInstanceof(argTypes.get(2), argTypes.get(1), env)) {
-					return argTypes.get(1);
-				}
-			}
-
-			// Return the super result.
-			return retType;
+					.param((LeftHandSideType) null, "elseCode", "The optional code that runs when the condition is false.", true)
+					.build();
 		}
 
 		@Override

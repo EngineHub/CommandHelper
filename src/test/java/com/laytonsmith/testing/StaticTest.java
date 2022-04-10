@@ -55,10 +55,14 @@ import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.signature.FunctionSignature;
+import com.laytonsmith.core.compiler.signature.FunctionSignatures;
+import com.laytonsmith.core.compiler.signature.Param;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Token;
+import com.laytonsmith.core.constructs.generics.Constraints;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
@@ -213,6 +217,48 @@ public class StaticTest {
 							+ " '" + fieldName + "', which differs from what getName() returns.");
 				}
 				break;
+			}
+		}
+
+		if(f.getSignatures() != null) {
+			for(FunctionSignature fs : f.getSignatures().getSignatures()) {
+				for(Param p : fs.getParams()) {
+					if(p.getType() != null) {
+						if(p.getType().isTypeName()) {
+							// Ensure that a generics signature has been registered, and it contains this type parameter
+							if(fs.getGenericDeclaration() == null) {
+								fail(f.getName() + " is missing a generics declaration on one of the signatures");
+							}
+							boolean found = false;
+							for(Constraints c : fs.getGenericDeclaration().getConstraints()) {
+								if(c.getTypeName().equals(p.getType().getTypename())) {
+									found = true;
+									break;
+								}
+							}
+							if(!found) {
+								fail(f.getName() + " contains a parameter with a typename, but that typename is"
+										+ " not in the signature");
+							}
+						}
+					}
+				}
+				if(fs.getReturnType().getType() != null && fs.getReturnType().getType().isTypeName()) {
+					if(fs.getGenericDeclaration() == null) {
+						fail(f.getName() + " is missing a generics declaration on one of the signatures");
+					}
+					boolean found = false;
+					for(Constraints c : fs.getGenericDeclaration().getConstraints()) {
+						if(c.getTypeName().equals(fs.getReturnType().getType().getTypename())) {
+							found = true;
+							break;
+						}
+					}
+					if(!found) {
+						fail(f.getName() + "'s return type is a typename, but that typename is"
+								+ " not in the signature");
+					}
+				}
 			}
 		}
 

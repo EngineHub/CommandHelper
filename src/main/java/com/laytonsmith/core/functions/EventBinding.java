@@ -200,7 +200,8 @@ public class EventBinding {
 
 		@Override
 		public LeftHandSideType typecheck(StaticAnalysis analysis,
-				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+				ParseTree ast, LeftHandSideType inferredType,
+				Environment env, Set<ConfigCompileException> exceptions) {
 
 			// Get and check the types of the function's arguments.
 			List<ParseTree> children = ast.getChildren();
@@ -219,14 +220,14 @@ public class EventBinding {
 				} else {
 
 					// Typecheck child node.
-					argTypes.add(analysis.typecheck(child, env, exceptions));
+					argTypes.add(analysis.typecheck(child, null, env, exceptions));
 					argTargets.add(child.getTarget());
 				}
 			}
 
 			// Return the return type of this function.
 			return this.getReturnType(ast.getTarget(), ast.getNodeModifiers().getGenerics(),
-					argTypes, argTargets, env, exceptions);
+					argTypes, argTargets, inferredType, env, exceptions);
 		}
 
 		private LeftHandSideType typecheckPrefilterParseTree(
@@ -236,19 +237,19 @@ public class EventBinding {
 			// Return if the prefilter parse tree is not a hard-coded "array(...)" node.
 			if(!(prefilterParseTree.getData() instanceof CFunction)
 					|| !prefilterParseTree.getData().val().equals(DataHandling.array.NAME)) {
-				return analysis.typecheck(prefilterParseTree, env, exceptions);
+				return analysis.typecheck(prefilterParseTree, null, env, exceptions);
 			}
 
 			// Return if the event name is invalid.
 			Event ev = EventList.getEvent(eventName);
 			if(ev == null) {
-				return analysis.typecheck(prefilterParseTree, env, exceptions);
+				return analysis.typecheck(prefilterParseTree, null, env, exceptions);
 			}
 
 			// Return if there are no prefilters defined for this event.
 			Map<String, Prefilter<? extends BindableEvent>> prefilters = ev.getPrefilters();
 			if(prefilters == null) {
-				return analysis.typecheck(prefilterParseTree, env, exceptions);
+				return analysis.typecheck(prefilterParseTree, null, env, exceptions);
 			}
 
 			// Validate prefilters.
@@ -279,7 +280,7 @@ public class EventBinding {
 				} else {
 
 					// Non-centry node, type check and continue.
-					analysis.typecheck(node, env, exceptions);
+					analysis.typecheck(node, null, env, exceptions);
 				}
 			}
 

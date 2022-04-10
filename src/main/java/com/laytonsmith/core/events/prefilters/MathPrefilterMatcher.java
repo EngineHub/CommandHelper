@@ -87,7 +87,7 @@ public abstract class MathPrefilterMatcher<T extends BindableEvent> extends Abst
 				if(entry.getData() instanceof CEntry centry) {
 					String key = entry.getChildAt(0).getData().val();
 					ParseTree valParseTree = entry.getChildAt(1);
-					LeftHandSideType valType = analysis.typecheck(valParseTree, env, exceptions);
+					LeftHandSideType valType = analysis.typecheck(valParseTree, null, env, exceptions);
 					if(!VALID_KEYS.contains(key)) {
 						env.getEnv(CompilerEnvironment.class).addCompilerWarning(
 								prefilterValueParseTree.getFileOptions(),
@@ -106,7 +106,7 @@ public abstract class MathPrefilterMatcher<T extends BindableEvent> extends Abst
 								new CompilerWarning("Tolerance should be a number", centry.ckey().getTarget(), null));
 					}
 				} else {
-					analysis.typecheck(entry, env, exceptions);
+					analysis.typecheck(entry, null, env, exceptions);
 				}
 			}
 			return CArray.TYPE.asLeftHandSideType();

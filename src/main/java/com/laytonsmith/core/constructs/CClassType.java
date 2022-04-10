@@ -367,6 +367,20 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	}
 
 	/**
+	 * Returns the singular instance of CClassType that represents this MEnum type.
+	 * Note that in general, == is not supported for these types, even though in
+	 * general it is correct to say that for each type, there will only be one instance.
+	 *
+	 * @param type The native enum class. It is a runtime error if this type is not annotated with {@code @MEnum}
+	 * @param t The code target where this instance is being used.
+	 *
+	 * @throws NoClassDefFoundError
+	 */
+	public static CClassType getEnum(Class<? extends Enum> type, Target t) {
+		return get(FullyQualifiedClassName.forNativeEnum(type), t, null, null);
+	}
+
+	/**
 	 * Returns the singular instance of CClassType that represents this type.If it doesn't exist, it creates it, stores,
 	 * and returns that instance. Note that in general, == is not supported for these types, even though in general it
 	 * is correct to say that for each type, there will only be one instance.

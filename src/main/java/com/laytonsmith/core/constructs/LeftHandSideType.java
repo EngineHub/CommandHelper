@@ -5,8 +5,10 @@ import com.laytonsmith.PureUtilities.ObjectHelpers;
 import com.laytonsmith.PureUtilities.Pair;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.constructs.generics.ConstraintValidator;
 import com.laytonsmith.core.constructs.generics.Constraints;
 import com.laytonsmith.core.constructs.generics.GenericDeclaration;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
@@ -18,6 +20,7 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
@@ -55,10 +58,12 @@ public final class LeftHandSideType extends Construct {
 	 */
 	public static LeftHandSideType createTypeUnion(Target t, LeftHandSideType... types) {
 		Set<Pair<CClassType, LeftHandGenericUse>> set = new HashSet<>();
+		List<Boolean> isTypenameList = new ArrayList<>();
 		for(LeftHandSideType union : types) {
 			set.addAll(union.getTypes());
+			isTypenameList.add(union.isTypeName);
 		}
-		return createCClassTypeUnion(t, new ArrayList<>(set));
+		return createCClassTypeUnion(t, new ArrayList<>(set), isTypenameList);
 	}
 
 	/**
@@ -101,7 +106,8 @@ public final class LeftHandSideType extends Construct {
 		if(constraints == null) {
 			throw new IllegalArgumentException("Provided GenericDeclaration does not contain the specified type name.");
 		}
-		return new LeftHandSideType(genericTypeName, t, null, constraints, genericTypeName, genericLHGU);
+		return new LeftHandSideType(genericTypeName, t, null, Arrays.asList(true), genericTypeName, genericLHGU,
+				constraints);
 	}
 
 	/**
@@ -112,7 +118,9 @@ public final class LeftHandSideType extends Construct {
 	 * @return A new LeftHandSideType
 	 */
 	public static LeftHandSideType fromCClassType(CClassType classType, Target t) {
-		return createCClassTypeUnion(t, Arrays.asList(new Pair<>(classType, null)));
+		List<Boolean> isTypenameList = new ArrayList<>();
+		isTypenameList.add(false);
+		return createCClassTypeUnion(t, Arrays.asList(new Pair<>(classType, null)), isTypenameList);
 	}
 
 	/**
@@ -125,7 +133,9 @@ public final class LeftHandSideType extends Construct {
 	 * @return A new LeftHandSideType
 	 */
 	public static LeftHandSideType fromCClassType(CClassType classType, LeftHandGenericUse generics, Target t) {
-		return createCClassTypeUnion(t, Arrays.asList(new Pair<>(classType, generics)));
+		List<Boolean> isTypenameList = new ArrayList<>();
+		isTypenameList.add(false);
+		return createCClassTypeUnion(t, Arrays.asList(new Pair<>(classType, generics)), isTypenameList);
 	}
 
 	/**
@@ -137,32 +147,40 @@ public final class LeftHandSideType extends Construct {
 	 */
 	public static LeftHandSideType fromCClassTypeUnion(Target t, CClassType... classTypes) {
 		List<Pair<CClassType, LeftHandGenericUse>> pairs = new ArrayList<>();
+		List<Boolean> isTypenameList = new ArrayList<>();
 		for(CClassType type : classTypes) {
 			pairs.add(new Pair<>(type, null));
+			isTypenameList.add(false);
 		}
-		return createCClassTypeUnion(t, pairs);
+		return createCClassTypeUnion(t, pairs, isTypenameList);
 	}
 
 	/**
 	 * Creates a new LeftHandSideType from the given list of CClassTypes and LeftHandGenericUse pairs. Each pair
 	 * represents a single type in the type union. The LeftHangGenericUse in each pair may be null, but the CClassTypes
 	 * may not, except when representing the none type.
+	 * <p>
+	 * If any of the types in the union are {@code auto}, then simply {@code auto} is returned.
 	 *
 	 * @param t The code target.
 	 * @param classTypes The type union types.
+	 * @param isTypenameList A List of booleans representing if each value is a typename or not.
 	 * @return A new LeftHandSideType
 	 * @throws IllegalArgumentException If the classTypes list is empty.
 	 */
-	public static LeftHandSideType createCClassTypeUnion(Target t, List<Pair<CClassType, LeftHandGenericUse>> classTypes) {
+	private static LeftHandSideType createCClassTypeUnion(Target t,
+			List<Pair<CClassType, LeftHandGenericUse>> classTypes,
+			List<Boolean> isTypenameList) {
 		Objects.requireNonNull(classTypes);
 		if(classTypes.isEmpty()) {
 			throw new IllegalArgumentException("A LeftHandSideType object must contain at least one type");
 		}
+
 		String value = StringUtils.Join(classTypes, " | ", (pair) -> {
 			if(pair.getKey() == null) {
 				return "none";
 			}
-			String ret = pair.getKey().getFQCN().getFQCN();
+			String ret = pair.getKey().toString();
 			if(pair.getValue() != null) {
 				ret += "<";
 				ret += pair.getValue().toString();
@@ -170,28 +188,136 @@ public final class LeftHandSideType extends Construct {
 			}
 			return ret;
 		});
-		return new LeftHandSideType(value, t, classTypes, null, null, null);
+		for(Pair<CClassType, LeftHandGenericUse> classType : classTypes) {
+			if(Auto.TYPE.equals(classType.getKey())) {
+				if(Auto.LHSTYPE == null) {
+					// Bootstrapping problem, Auto.LHSTYPE calls us, and so is null at this point
+					List<Pair<CClassType, LeftHandGenericUse>> types = Arrays.asList(new Pair<>(Auto.TYPE, null));
+					List<Boolean> itl = Arrays.asList(false);
+					return new LeftHandSideType("auto", Target.UNKNOWN, types, itl, null, null, null);
+				} else {
+					return Auto.LHSTYPE;
+				}
+			}
+		}
+		return new LeftHandSideType(value, t, classTypes, isTypenameList, null, null, null);
 	}
 
-	private final boolean isTypeName;
+	/**
+	 * Given a LeftHandSideType object {@code type} that might be a type union containing type names, resolves
+	 * each component of the type union into concrete types. Typenames
+	 * can only be used in their defined context, and if they need to leak beyond that, must be resolved. This usually
+	 * entails taking the generic parameters for the given call site, but might also involve using the inferredType
+	 * or perhaps simply returning auto. If the value passed in is not a typename, it is simply returned, so this
+	 * can be used in general, without first checking if it would need to be called.
+	 *
+	 * @param t The code target.
+	 * @param env The environment.
+	 * @param types The type to convert, which might be a type union (or not, if it isn't a typename)
+	 * @param parameters The type parameters passed to the function.
+	 * @param declaration The generic declaration for the function.
+	 * @param inferredTypes The inferredTypes to use, in case the type parameter is not explicitly provided. The map
+	 * maps from typename to inferredType.
+	 * @return
+	 */
+	public static LeftHandSideType resolveTypeFromGenerics(Target t, Environment env, LeftHandSideType types,
+			GenericParameters parameters, GenericDeclaration declaration, Map<String, LeftHandSideType> inferredTypes) {
+		if(types == null) {
+			// Type is none, cannot have generics
+			return types;
+		}
+		LeftHandSideType[] lhst = new LeftHandSideType[types.getTypes().size()];
+		for(int i = 0; i < lhst.length; i++) {
+			Pair<CClassType, LeftHandGenericUse> type = types.getTypes().get(i);
+			LeftHandSideType inferredType = inferredTypes == null
+					? null : inferredTypes.get(type.getKey().getFQCN().getFQCN());
+			LeftHandSideType newType = LeftHandSideType.fromCClassType(type.getKey(), type.getValue(), t);
+			newType.isTypeName = types.isTypenameList.get(i);
+			if(newType.isTypeName) {
+				newType.genericTypeName = type.getKey().getFQCN().getFQCN();
+			}
+			lhst[i] = resolveTypeFromGenerics(t, env, newType, parameters, declaration, inferredType);
+		}
+		return LeftHandSideType.createTypeUnion(t, lhst);
+	}
+
+	/**
+	 * Given a LeftHandSideType object {@code type}, resolves this into a non-typename if it is a typename. Typenames
+	 * can only be used in their defined context, and if they need to leak beyond that, must be resolved. This usually
+	 * entails taking the generic parameters for the given call site, but might also involve using the inferredType
+	 * or perhaps simply returning auto. If the value passed in is not a typename, it is simply returned, so this
+	 * can be used in general, without first checking if it would need to be called.
+	 *
+	 * @param t The code target.
+	 * @param env The environment.
+	 * @param type The type to convert (or not, if it isn't a typename)
+	 * @param parameters The type parameters passed to the function.
+	 * @param declaration The generic declaration for the function.
+	 * @param inferredType The inferredType to use, in case the type parameter is not explicitly provided.
+	 * @return
+	 */
+	public static LeftHandSideType resolveTypeFromGenerics(Target t, Environment env, LeftHandSideType type,
+			GenericParameters parameters, GenericDeclaration declaration, LeftHandSideType inferredType) {
+		if(type == null) {
+			// Type is none, cannot have generics
+			return type;
+		}
+		if(type.isTypeUnion()) {
+			throw new Error("Type unions cannot be resolved as a union with this method. See the other override.");
+		}
+		if(!type.isTypeName()) {
+			return type;
+		}
+		// Validate the parameters against the declaration, and then return the type of the correct parameter
+		ConstraintValidator.ValidateParametersToDeclaration(t, env, parameters, declaration, inferredType);
+
+		if(parameters == null && inferredType == null) {
+			// Return auto for no type. This already passed, since ValidateParametersToDeclaration would have
+			// failed if this were null and either auto or the inferred type wasn't sufficient due to the constraints.
+			return Auto.LHSTYPE;
+		}
+		// It passes. Lookup the correct parameter based on the typename.
+		String typename = type.getTypename();
+		for(int i = 0; i < declaration.getParameterCount(); i++) {
+			if(declaration.getConstraints().get(i).getTypeName().equals(typename)) {
+				// Found it
+				if(parameters != null) {
+					Pair<CClassType, LeftHandGenericUse> p;
+					p = parameters.getParameters().get(i);
+					return LeftHandSideType.fromCClassType(p.getKey(), p.getValue(), t);
+				} else if(inferredType != null) {
+					return inferredType;
+				}
+			}
+		}
+		// Would be good to unit test for this, but this won't be able to happen generally in user
+		// classes.
+		throw new Error("Typename returned by native function is not in the GenericDeclaration!");
+	}
+
+	private boolean isTypeName;
 
 	@ObjectHelpers.StandardField
 	private final List<Pair<CClassType, LeftHandGenericUse>> types;
+	private final List<Boolean> isTypenameList;
 
 	@ObjectHelpers.StandardField
-	private final String genericTypeName;
+	private String genericTypeName;
 
 	private final Constraints constraints;
 
 	private LeftHandSideType(String value, Target t, List<Pair<CClassType, LeftHandGenericUse>> types,
-			Constraints constraints, String genericTypeName, LeftHandGenericUse genericTypeLHGU) {
+			List<Boolean> isTypenameList, String genericTypeName, LeftHandGenericUse genericTypeLHGU,
+			Constraints constraints) {
 		super(value, ConstructType.CLASS_TYPE, t);
+		this.isTypenameList = isTypenameList;
 		if(types != null) {
 			isTypeName = false;
+
 			// Sort the list with TreeSet first
 			Set<Pair<CClassType, LeftHandGenericUse>> tempSet = new TreeSet<>((o1, o2) -> {
-				String o1Index = o1.getKey().val() + (o1.getValue() == null ? "" : ("<" + o1.getValue().toString() + ">"));
-				String o2Index = o2.getKey().val() + (o2.getValue() == null ? "" : ("<" + o2.getValue().toString() + ">"));
+				String o1Index = (o1.getKey() == null ? "none" : o1.getKey().val()) + (o1.getValue() == null ? "" : ("<" + o1.getValue().toString() + ">"));
+				String o2Index = (o2.getKey() == null ? "none" : o2.getKey().val()) + (o2.getValue() == null ? "" : ("<" + o2.getValue().toString() + ">"));
 				return o1Index.compareTo(o2Index);
 			});
 			tempSet.addAll(types);
@@ -201,19 +327,16 @@ public final class LeftHandSideType extends Construct {
 					if(Auto.TYPE.equals(type.getKey())) {
 						throw new CREIllegalArgumentException("auto type cannot be used in a type union", t);
 					}
-					if(CVoid.TYPE.equals(type.getKey())) {
-						throw new CREIllegalArgumentException("void type cannot be used in a type union", t);
-					}
 				}
 			}
-			this.constraints = null;
 			this.genericTypeName = null;
+			this.constraints = null;
 		} else {
 			this.types = new ArrayList<>();
 			this.types.add(new Pair<>(CClassType.getFromGenericTypeName(genericTypeName, t), genericTypeLHGU));
 			isTypeName = true;
-			this.constraints = constraints;
 			this.genericTypeName = genericTypeName;
+			this.constraints = constraints;
 		}
 	}
 
@@ -252,6 +375,8 @@ public final class LeftHandSideType extends Construct {
 	 * given class or method, and cannot be resolved into a real type except by converting it based on the
 	 * GenericDeclaration associated with it. Note that in general, you need to know if this is a read only or write
 	 * only context, as the type returned will be different.
+	 * <p>
+	 * Type unions are never typenames, though they may consist only of, or partially of other type unions.
 	 *
 	 * @return
 	 */
@@ -361,7 +486,7 @@ public final class LeftHandSideType extends Construct {
 	 */
 	public CClassType asConcreteType(Target t) throws CREIllegalArgumentException {
 		String exMsg = "Cannot use the type \"" + getSimpleName() + "\" in this context.";
-		if(!isTypeUnion()) {
+		if(isTypeUnion()) {
 			throw new CREIllegalArgumentException(exMsg, t);
 		}
 		Pair<CClassType, LeftHandGenericUse> type = types.get(0);
@@ -393,6 +518,24 @@ public final class LeftHandSideType extends Construct {
 			return false;
 		}
 		return CClassType.AUTO.equals(types.get(0).getKey());
+	}
+
+	public boolean isNull() {
+		if(isTypeUnion()) {
+			return false;
+		}
+		return CNull.TYPE.equals(types.get(0).getKey());
+	}
+
+	/**
+	 * Returns a LeftHandGenericUse statement from this typename. Note that the environment may be null when
+	 * this is used in native declarations, but otherwise must be provided.
+	 * @param env The environment, or null during native signature declarations.
+	 * @return An equivalent LeftHandGenericUse statement.
+	 */
+	public LeftHandGenericUse toLeftHandGenericUse(Environment env) {
+		return new LeftHandGenericUse(CClassType.getFromGenericTypeName(getTypename(), Target.UNKNOWN), Target.UNKNOWN,
+				env);
 	}
 
 	@Override

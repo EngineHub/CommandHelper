@@ -86,6 +86,7 @@ public final class ParseTree implements Cloneable {
 
 	/**
 	 * Creates a new empty tree node
+	 *
 	 * @param options
 	 */
 	public ParseTree(FileOptions options) {
@@ -356,7 +357,7 @@ public final class ParseTree implements Cloneable {
 						if(f instanceof Function ff) {
 							functions.add(ff);
 						}
-					} catch (ConfigCompileException ex) {
+					} catch(ConfigCompileException ex) {
 						throw new Error(ex);
 					}
 
@@ -414,14 +415,15 @@ public final class ParseTree implements Cloneable {
 	}
 
 	/**
-	 * Returns the declared CClassType of this node. For constants, this is just the type, for variables, this is the
-	 * defined type, and for functions and procs, this is the return type of the function. For many values,
-	 * the type will be AUTO. The type may be CNull for literal nulls, but will never be java null.
+	 * Returns the declared CClassType of this node.For constants, this is just the type, for variables, this is the
+	 * defined type, and for functions and procs, this is the return type of the function. For many values, the type
+	 * will be AUTO. The type may be CNull for literal nulls, but will never be java null.
 	 *
-	 * @param env
+	 * @param env The environment
+	 * @param inferredType The inferred type, if this is a function call. Otherwise, can be null.
 	 * @return
 	 */
-	public LeftHandSideType getDeclaredType(Environment env) {
+	public LeftHandSideType getDeclaredType(Environment env, LeftHandSideType inferredType) {
 		if(isConst()) {
 			return getData().typeof(env).asLeftHandSideType();
 		} else if(getData() instanceof IVariable ivar) {
@@ -455,11 +457,11 @@ public final class ParseTree implements Cloneable {
 				List<Target> argTargets = new ArrayList<>();
 				Set<ConfigCompileException> exceptions = new HashSet<>();
 				for(ParseTree child : getChildren()) {
-					argTypes.add(child.getDeclaredType(env));
+					argTypes.add(child.getDeclaredType(env, inferredType));
 					argTargets.add(child.getTarget());
 				}
 				return cf.getCachedFunction().getReturnType(getTarget(), getNodeModifiers().getGenerics(),
-						argTypes, argTargets, env, exceptions);
+						argTypes, argTargets, inferredType, env, exceptions);
 			}
 		} else {
 			throw new Error("Unhandled type, please report this bug");
@@ -468,6 +470,7 @@ public final class ParseTree implements Cloneable {
 
 	/**
 	 * Returns the NodeModifiers object for this ParseTree node.
+	 *
 	 * @return
 	 */
 	public NodeModifiers getNodeModifiers() {

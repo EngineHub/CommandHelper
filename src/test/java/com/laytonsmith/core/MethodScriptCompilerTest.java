@@ -1303,13 +1303,13 @@ public class MethodScriptCompilerTest {
 		ParseTree tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex("primitive @s = 'asdf'; msg(@s); int proc _a(){return(1);} _a();",
 				env, null, true), env, env.getEnvClasses(), sa);
 		ParseTree sUsage = tree.getChildAt(0).getChildAt(1).getChildAt(0);
-		assertTrue(sUsage.getDeclaredType(env).equals(CPrimitive.TYPE.asLeftHandSideType()));
+		assertTrue(sUsage.getDeclaredType(env, null).equals(CPrimitive.TYPE.asLeftHandSideType()));
 		ParseTree asdf = tree.getChildAt(0).getChildAt(0).getChildAt(2);
-		assertTrue(asdf.getDeclaredType(env).equals(CString.TYPE.asLeftHandSideType()));
+		assertTrue(asdf.getDeclaredType(env, null).equals(CString.TYPE.asLeftHandSideType()));
 		ParseTree msg = tree.getChildAt(0).getChildAt(1);
-		assertTrue(msg.getDeclaredType(env).equals(CVoid.TYPE.asLeftHandSideType()));
+		assertTrue(msg.getDeclaredType(env, null).equals(CVoid.TYPE.asLeftHandSideType()));
 		ParseTree _a = tree.getChildAt(0).getChildAt(3);
-		assertTrue(_a.getDeclaredType(env).equals(CInt.TYPE.asLeftHandSideType()));
+		assertTrue(_a.getDeclaredType(env, null).equals(CInt.TYPE.asLeftHandSideType()));
 	}
 
 	@Test

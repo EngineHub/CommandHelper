@@ -4,9 +4,11 @@ import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Pair;
 import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.CClassType;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREGenericConstraintException;
+import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -91,7 +93,7 @@ public final class ConstraintValidator {
 		GenericDeclaration dec = type.getGenericDeclaration();
 		if(dec == null) {
 			// Nothing to validate here
-			if(c != null) {
+			if(c != null && !c.isEmpty()) {
 				// However, they provided something anyways...
 				throw new CREGenericConstraintException(type.getFQCN().getFQCN() + " does not define generic parameters,"
 						+ " but they were provided anyways", t);
@@ -164,9 +166,24 @@ public final class ConstraintValidator {
 	 * @param env The environment.
 	 * @param parameters The parameters.
 	 * @param declaration The declaration.
+	 * @param inferredType If the parameters are not provided, the inferred type provides outside context to decide
+	 * what the specified type should be. This is used in place of auto when parameters are not provided. Note that
+	 * parameters always take precedence over this type. This should map to the values of the GenericDeclaration, that
+	 * is, if the signature is {@code T function(U @value)}, and the GenericDeclaration defines {@code T, U}, and
+	 * the call site looks like {@code string @s = function<mixed, number>(1);}, then the inferredTypes would be
+	 * {@code string, int}. (While the GenericParameters would still be {@code mixed, number}, and in this case,
+	 * the inferredTypes would be unused.) This parameter may be null, in which case auto will be inferred, but this
+	 * should in general mean that the return value is not used, though the type parameter may be used internally
+	 * by the function, which may cause an error if it is auto.
+	 * @throws CREIllegalArgumentException In the case that the inferred type cannot be converted into a concrete
+	 * CClassType, this is thrown. This can only happen in the case that the parameters are null AND the inferred
+	 * LHS types are incapable of being converted to a concrete type. For instance, if the inferred type were
+	 * {@code int}, this would never happen, but if it were {@code int | string}, and the generics parameters are
+	 * not specified, then it would be thrown, because type unions cannot be converted into a CClassType (and
+	 * concrete types are required for generic parameters, no matter how they get passed in.)
 	 */
 	public static void ValidateParametersToDeclaration(Target t, Environment env,
-			GenericParameters parameters, GenericDeclaration declaration) {
+			GenericParameters parameters, GenericDeclaration declaration, LeftHandSideType inferredType) {
 		if(declaration == null) {
 			if(parameters != null) {
 				throw new CREGenericConstraintException("No generics are defined here, unexpected generic parameters"
@@ -181,7 +198,8 @@ public final class ConstraintValidator {
 			// based on the parameter count, then do the validation normally.
 			GenericParameters.GenericParametersBuilder builder = GenericParameters.emptyBuilder();
 			for(int i = 0; i < declaration.getParameterCount(); i++) {
-				builder.addParameter(Auto.TYPE, null);
+				LeftHandSideType type = inferredType == null ? Auto.LHSTYPE : inferredType;
+				builder.addParameter(type.isAuto() ? Auto.TYPE : type.asConcreteType(t), null);
 			}
 			parameters = builder.build();
 		}

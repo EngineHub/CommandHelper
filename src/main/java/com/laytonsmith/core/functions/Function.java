@@ -100,6 +100,8 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 	 * @param generics
 	 * @param argTypes The types of the passed arguments.
 	 * @param argTargets The {@link Target}s belonging to the argTypes (in the same order).
+	 * @param inferredReturnType The inferred return type of the function. This may be null. This is used to infer
+	 * types with generic typenames.
 	 * @param env The {@link Environment}, used for instanceof checks on types.
 	 * @param exceptions A set to which all type errors will be added.
 	 * @return The return type of this function when invoked with the given argument types. If the return type is
@@ -107,21 +109,25 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 	 * static type checking.
 	 */
 	public LeftHandSideType getReturnType(Target t, GenericParameters generics, List<LeftHandSideType> argTypes,
-			List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions);
+			List<Target> argTargets, LeftHandSideType inferredReturnType, Environment env,
+			Set<ConfigCompileException> exceptions);
 
 	/**
 	 * Typechecks this function, generating compile errors when types or signatures don't match. This method is
 	 * responsible for type checking the function arguments (child nodes of the passed AST node), which can be done by
 	 * calling this method on those child nodes.
 	 *
-	 * @param analysis - The {@link StaticAnalysis}, used to resolve variable/proc/... references.
-	 * @param ast - The parse tree.
-	 * @param env - The {@link Environment}, used for instanceof checks on types.
-	 * @param exceptions - Any compile exceptions will be added to this set.
+	 * @param analysis The {@link StaticAnalysis}, used to resolve variable/proc/... references.
+	 * @param ast The parse tree.
+	 * @param inferredReturnType The inferred return type of the function. This may be null. This is used to infer the
+	 * type of a function that returns a generic typename.
+	 * @param env The {@link Environment}, used for instanceof checks on types.
+	 * @param exceptions Any compile exceptions will be added to this set.
 	 * @return The return type of this function.
 	 */
 	public LeftHandSideType typecheck(StaticAnalysis analysis,
-			ParseTree ast, Environment env, Set<ConfigCompileException> exceptions);
+			ParseTree ast, LeftHandSideType inferredReturnType,
+			Environment env, Set<ConfigCompileException> exceptions);
 
 	/**
 	 * If functions contain declarations or references, then these functions should create a new scope, link it to the

@@ -480,6 +480,9 @@ public final class ArgumentValidation {
 		if(c == null) {
 			return false;
 		}
+		if(c instanceof CNull) {
+			return false;
+		}
 		if(c.isInstanceOf(Booleanish.TYPE, null, env)) {
 			return ((Booleanish) c).getBooleanValue(env, t);
 		}

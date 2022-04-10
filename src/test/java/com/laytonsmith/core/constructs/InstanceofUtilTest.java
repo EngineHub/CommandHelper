@@ -329,8 +329,141 @@ public class InstanceofUtilTest {
 	@Test
 	public void testUsualInstanceofTypes() throws Exception {
 		assertTrue(InstanceofUtil.isAssignableTo(CNull.TYPE, CString.TYPE, null, env));
-		assertFalse(InstanceofUtil.isAssignableTo(null, CString.TYPE, null, env));
+		assertTrue(InstanceofUtil.isAssignableTo(CString.TYPE, CString.TYPE, null, env));
+		assertFalse(InstanceofUtil.isAssignableTo(CInt.TYPE, CString.TYPE, null, env));
 		assertFalse(InstanceofUtil.isAssignableTo(null, CString.TYPE, null, env));
 		assertFalse(InstanceofUtil.isAssignableTo(CVoid.TYPE, CString.TYPE, null, env));
+
+		assertTrue(InstanceofUtil.isInstanceof(CString.TYPE, CString.TYPE, null, env));
+		assertTrue(InstanceofUtil.isInstanceof((CClassType) null, (CClassType) null, null, env));
+		assertTrue(InstanceofUtil.isInstanceof(CNull.TYPE, CNull.TYPE, null, env));
+		assertTrue(InstanceofUtil.isInstanceof(CVoid.TYPE, CVoid.TYPE, null, env));
+
+		assertTrue(InstanceofUtil.isInstanceof(CString.TYPE, null, null, env));
+		assertTrue(InstanceofUtil.isInstanceof(CNull.TYPE, null, null, env));
+		assertTrue(InstanceofUtil.isInstanceof(CVoid.TYPE, null, null, env));
+
+		assertTrue(InstanceofUtil.isInstanceof(CString.TYPE, Auto.TYPE, null, env));
+		assertTrue(InstanceofUtil.isInstanceof((CClassType) null, Auto.TYPE, null, env));
+		assertTrue(InstanceofUtil.isInstanceof(CNull.TYPE, Auto.TYPE, null, env));
+		assertTrue(InstanceofUtil.isInstanceof(CVoid.TYPE, Auto.TYPE, null, env));
+
+		assertFalse(InstanceofUtil.isInstanceof(null, CString.TYPE, null, env));
+		assertFalse(InstanceofUtil.isInstanceof(null, CNull.TYPE, null, env));
+		assertFalse(InstanceofUtil.isInstanceof(null, CVoid.TYPE, null, env));
+
+		assertTrue(InstanceofUtil.isInstanceof(Auto.TYPE, CString.TYPE, null, env));
+		assertTrue(InstanceofUtil.isInstanceof(Auto.TYPE, (CClassType) null, null, env));
+		assertTrue(InstanceofUtil.isInstanceof(Auto.TYPE, CNull.TYPE, null, env));
+		assertTrue(InstanceofUtil.isInstanceof(Auto.TYPE, CVoid.TYPE, null, env));
+
+		assertFalse(InstanceofUtil.isInstanceof(CNull.TYPE, CString.TYPE, null, env));
+		assertFalse(InstanceofUtil.isInstanceof(CNull.TYPE, CVoid.TYPE, null, env));
+
+		assertTrue(InstanceofUtil.isInstanceof(CString.TYPE, Auto.TYPE, null, env));
+		assertTrue(InstanceofUtil.isInstanceof((CClassType) null, Auto.TYPE, null, env));
+		assertTrue(InstanceofUtil.isInstanceof(CNull.TYPE, Auto.TYPE, null, env));
+		assertTrue(InstanceofUtil.isInstanceof(CVoid.TYPE, Auto.TYPE, null, env));
+
+		assertFalse(InstanceofUtil.isInstanceof(CString.TYPE, CNull.TYPE, null, env));
+		assertFalse(InstanceofUtil.isInstanceof((CClassType) null, CNull.TYPE, null, env));
+		assertFalse(InstanceofUtil.isInstanceof(CVoid.TYPE, CNull.TYPE, null, env));
+
+		assertFalse(InstanceofUtil.isInstanceof(CString.TYPE, CVoid.TYPE, null, env));
+		assertFalse(InstanceofUtil.isInstanceof((CClassType) null, CVoid.TYPE, null, env));
+		assertFalse(InstanceofUtil.isInstanceof(CNull.TYPE, CVoid.TYPE, null, env));
+
+		assertFalse(InstanceofUtil.isInstanceof(CVoid.TYPE, CString.TYPE, null, env));
+		assertFalse(InstanceofUtil.isInstanceof(CVoid.TYPE, CNull.TYPE, null, env));
+
+		assertTrue(InstanceofUtil.isInstanceof(new CString("", Target.UNKNOWN), CString.class, env));
+		assertFalse(InstanceofUtil.isInstanceof(new CInt(0, Target.UNKNOWN), CString.class, env));
+		assertFalse(InstanceofUtil.isInstanceof(CNull.NULL, CString.TYPE, env));
+		assertFalse(InstanceofUtil.isInstanceof(null, CString.TYPE, null, env));
+		assertFalse(InstanceofUtil.isInstanceof(CVoid.VOID, CString.TYPE, env));
+		assertFalse(InstanceofUtil.isInstanceof(CVoid.TYPE, CString.TYPE, null, env));
+	}
+
+	@Test
+	public void testUsualInstanceofTypesWithLHSTypes() throws Exception {
+		assertTrue(InstanceofUtil.isAssignableTo(CNull.TYPE.asLeftHandSideType(), CString.TYPE.asLeftHandSideType(), env));
+		assertTrue(InstanceofUtil.isAssignableTo(CString.TYPE.asLeftHandSideType(), CString.TYPE.asLeftHandSideType(), env));
+		assertFalse(InstanceofUtil.isAssignableTo(CInt.TYPE.asLeftHandSideType(), CString.TYPE.asLeftHandSideType(), env));
+		assertFalse(InstanceofUtil.isAssignableTo(LeftHandSideType.fromHardCodedType(null), CString.TYPE.asLeftHandSideType(), env));
+		assertFalse(InstanceofUtil.isAssignableTo(CVoid.TYPE.asLeftHandSideType(), CString.TYPE.asLeftHandSideType(), env));
+
+		assertTrue(InstanceofUtil.isInstanceof(CString.TYPE.asLeftHandSideType(), CString.TYPE.asLeftHandSideType(), env));
+		assertTrue(InstanceofUtil.isInstanceof(LeftHandSideType.fromHardCodedType(null), LeftHandSideType.fromHardCodedType(null), env));
+		assertTrue(InstanceofUtil.isInstanceof(CNull.TYPE.asLeftHandSideType(), CNull.TYPE.asLeftHandSideType(), env));
+		assertTrue(InstanceofUtil.isInstanceof(CVoid.TYPE.asLeftHandSideType(), CVoid.TYPE.asLeftHandSideType(), env));
+
+		assertTrue(InstanceofUtil.isInstanceof(CString.TYPE.asLeftHandSideType(), LeftHandSideType.fromHardCodedType(null), env));
+		assertTrue(InstanceofUtil.isInstanceof(LeftHandSideType.fromHardCodedType(null), LeftHandSideType.fromHardCodedType(null), env));
+		assertTrue(InstanceofUtil.isInstanceof(CNull.TYPE.asLeftHandSideType(), LeftHandSideType.fromHardCodedType(null), env));
+		assertTrue(InstanceofUtil.isInstanceof(CVoid.TYPE.asLeftHandSideType(), LeftHandSideType.fromHardCodedType(null), env));
+
+		assertTrue(InstanceofUtil.isInstanceof(CString.TYPE.asLeftHandSideType(), Auto.TYPE.asLeftHandSideType(), env));
+		assertTrue(InstanceofUtil.isInstanceof(LeftHandSideType.fromHardCodedType(null), Auto.TYPE.asLeftHandSideType(), env));
+		assertTrue(InstanceofUtil.isInstanceof(CNull.TYPE.asLeftHandSideType(), Auto.TYPE.asLeftHandSideType(), env));
+		assertTrue(InstanceofUtil.isInstanceof(CVoid.TYPE.asLeftHandSideType(), Auto.TYPE.asLeftHandSideType(), env));
+
+		assertFalse(InstanceofUtil.isInstanceof(LeftHandSideType.fromHardCodedType(null), CString.TYPE.asLeftHandSideType(), env));
+		assertTrue(InstanceofUtil.isInstanceof(LeftHandSideType.fromHardCodedType(null), LeftHandSideType.fromHardCodedType(null), env));
+		assertFalse(InstanceofUtil.isInstanceof(LeftHandSideType.fromHardCodedType(null), CNull.TYPE.asLeftHandSideType(), env));
+		assertFalse(InstanceofUtil.isInstanceof(LeftHandSideType.fromHardCodedType(null), CVoid.TYPE.asLeftHandSideType(), env));
+
+		assertTrue(InstanceofUtil.isInstanceof(Auto.TYPE.asLeftHandSideType(), CString.TYPE.asLeftHandSideType(), env));
+		assertTrue(InstanceofUtil.isInstanceof(Auto.TYPE.asLeftHandSideType(), LeftHandSideType.fromHardCodedType(null), env));
+		assertTrue(InstanceofUtil.isInstanceof(Auto.TYPE.asLeftHandSideType(), CNull.TYPE.asLeftHandSideType(), env));
+		assertTrue(InstanceofUtil.isInstanceof(Auto.TYPE.asLeftHandSideType(), CVoid.TYPE.asLeftHandSideType(), env));
+
+		assertFalse(InstanceofUtil.isInstanceof(CNull.TYPE.asLeftHandSideType(), CString.TYPE.asLeftHandSideType(), env));
+		assertFalse(InstanceofUtil.isInstanceof(CNull.TYPE.asLeftHandSideType(), CVoid.TYPE.asLeftHandSideType(), env));
+
+		assertTrue(InstanceofUtil.isInstanceof(CString.TYPE.asLeftHandSideType(), Auto.TYPE.asLeftHandSideType(), env));
+		assertTrue(InstanceofUtil.isInstanceof(LeftHandSideType.fromHardCodedType(null), Auto.TYPE.asLeftHandSideType(), env));
+		assertTrue(InstanceofUtil.isInstanceof(CNull.TYPE.asLeftHandSideType(), Auto.TYPE.asLeftHandSideType(), env));
+		assertTrue(InstanceofUtil.isInstanceof(CVoid.TYPE.asLeftHandSideType(), Auto.TYPE.asLeftHandSideType(), env));
+
+		assertFalse(InstanceofUtil.isInstanceof(CString.TYPE.asLeftHandSideType(), CNull.TYPE.asLeftHandSideType(), env));
+		assertFalse(InstanceofUtil.isInstanceof(LeftHandSideType.fromHardCodedType(null), CNull.TYPE.asLeftHandSideType(), env));
+		assertFalse(InstanceofUtil.isInstanceof(CVoid.TYPE.asLeftHandSideType(), CNull.TYPE.asLeftHandSideType(), env));
+
+		assertFalse(InstanceofUtil.isInstanceof(CString.TYPE.asLeftHandSideType(), CVoid.TYPE.asLeftHandSideType(), env));
+		assertFalse(InstanceofUtil.isInstanceof(LeftHandSideType.fromHardCodedType(null), CVoid.TYPE.asLeftHandSideType(), env));
+		assertFalse(InstanceofUtil.isInstanceof(CNull.TYPE.asLeftHandSideType(), CVoid.TYPE.asLeftHandSideType(), env));
+
+		assertFalse(InstanceofUtil.isInstanceof(CVoid.TYPE.asLeftHandSideType(), CString.TYPE.asLeftHandSideType(), env));
+		assertFalse(InstanceofUtil.isInstanceof(CVoid.TYPE.asLeftHandSideType(), CNull.TYPE.asLeftHandSideType(), env));
+
+	}
+
+	@Test
+	public void testTypeUnions() throws Exception {
+		Target t = Target.UNKNOWN;
+		assertTrue(InstanceofUtil.isInstanceof(CVoid.LHSTYPE,
+				LeftHandSideType.createTypeUnion(t, CVoid.LHSTYPE, Booleanish.TYPE.asLeftHandSideType()),
+				env));
+		assertTrue(InstanceofUtil.isInstanceof(CInt.TYPE.asLeftHandSideType(),
+				LeftHandSideType.createTypeUnion(t, CInt.TYPE.asLeftHandSideType(), CString.TYPE.asLeftHandSideType()),
+				env));
+		assertFalse(InstanceofUtil.isInstanceof(CArray.TYPE.asLeftHandSideType(),
+				LeftHandSideType.createTypeUnion(t, CInt.TYPE.asLeftHandSideType(), CString.TYPE.asLeftHandSideType()),
+				env));
+
+		assertTrue(InstanceofUtil.isInstanceof(
+				LeftHandSideType.createTypeUnion(t, CString.TYPE.asLeftHandSideType(), CInt.TYPE.asLeftHandSideType()),
+				LeftHandSideType.createTypeUnion(t, CString.TYPE.asLeftHandSideType(), CInt.TYPE.asLeftHandSideType()),
+				env));
+		assertFalse(InstanceofUtil.isInstanceof(
+				LeftHandSideType.createTypeUnion(t, CString.TYPE.asLeftHandSideType(),
+						CInt.TYPE.asLeftHandSideType(), CArray.TYPE.asLeftHandSideType()),
+				LeftHandSideType.createTypeUnion(t, CString.TYPE.asLeftHandSideType(), CInt.TYPE.asLeftHandSideType()),
+				env));
+
+		assertFalse(InstanceofUtil.isAssignableTo(CVoid.LHSTYPE, CVoid.LHSTYPE, env));
+		assertTrue(InstanceofUtil.isAssignableTo(CVoid.LHSTYPE,
+				LeftHandSideType.createTypeUnion(t, CVoid.LHSTYPE, Booleanish.TYPE.asLeftHandSideType()),
+				env));
 	}
 }

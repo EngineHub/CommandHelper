@@ -4,6 +4,10 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.ConstraintLocation;
+import com.laytonsmith.core.constructs.generics.Constraints;
+import com.laytonsmith.core.constructs.generics.GenericDeclaration;
+import com.laytonsmith.core.constructs.generics.UnboundedConstraint;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import java.util.Set;
@@ -15,7 +19,10 @@ import java.util.Set;
 public interface ArrayAccess extends Booleanish {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get(ArrayAccess.class);
+	public static final CClassType TYPE = CClassType.getWithGenericDeclaration(ArrayAccess.class,
+			new GenericDeclaration(Target.UNKNOWN,
+				new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+						new UnboundedConstraint(Target.UNKNOWN, "T"))));
 
 	/**
 	 * Return the mixed at this location.This should throw an exception if the index does not exist. This method will

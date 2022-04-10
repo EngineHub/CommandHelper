@@ -117,7 +117,7 @@ public class FunctionSignaturesTest {
 				null,
 				Arrays.asList(),
 				Arrays.asList(),
-				this.env, exceptions);
+				null, this.env, exceptions);
 		assertEquals(CVoid.TYPE.asLeftHandSideType(), returnType);
 		assertArrayEquals(new Object[0], exceptions.toArray());
 	}
@@ -135,7 +135,7 @@ public class FunctionSignaturesTest {
 				null,
 				Arrays.asList(CInt.TYPE.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN),
-				this.env, exceptions);
+				null, this.env, exceptions);
 		assertEquals(CClassType.AUTO.asLeftHandSideType(), returnType);
 		assertFalse(exceptions.isEmpty());
 	}
@@ -153,7 +153,7 @@ public class FunctionSignaturesTest {
 				null,
 				Arrays.asList(CInt.TYPE.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN),
-				this.env, exceptions);
+				null, this.env, exceptions);
 		assertEquals(CArray.TYPE.asLeftHandSideType(), returnType);
 		assertArrayEquals(new Object[0], exceptions.toArray());
 	}
@@ -171,7 +171,7 @@ public class FunctionSignaturesTest {
 				null,
 				Arrays.asList(CClassType.AUTO.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN),
-				this.env, exceptions);
+				null, this.env, exceptions);
 		assertEquals(CArray.TYPE.asLeftHandSideType(), returnType);
 		assertArrayEquals(new Object[0], exceptions.toArray());
 	}
@@ -189,7 +189,7 @@ public class FunctionSignaturesTest {
 				null,
 				Arrays.asList(),
 				Arrays.asList(),
-				this.env, exceptions);
+				null, this.env, exceptions);
 		assertEquals(CClassType.AUTO.asLeftHandSideType(), returnType);
 		assertFalse(exceptions.isEmpty());
 	}
@@ -207,7 +207,7 @@ public class FunctionSignaturesTest {
 				null,
 				Arrays.asList(CInt.TYPE.asLeftHandSideType(), CBoolean.TYPE.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN, Target.UNKNOWN),
-				this.env, exceptions);
+				null, this.env, exceptions);
 		assertEquals(CClassType.AUTO.asLeftHandSideType(), returnType);
 		assertFalse(exceptions.isEmpty());
 	}
@@ -225,7 +225,7 @@ public class FunctionSignaturesTest {
 				null,
 				Arrays.asList(CBoolean.TYPE.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN),
-				this.env, exceptions);
+				null, this.env, exceptions);
 		assertEquals(CClassType.AUTO.asLeftHandSideType(), returnType);
 		assertFalse(exceptions.isEmpty());
 	}
@@ -243,7 +243,7 @@ public class FunctionSignaturesTest {
 				null,
 				Arrays.asList(CVoid.TYPE.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN),
-				this.env, exceptions);
+				null, this.env, exceptions);
 		assertEquals(CClassType.AUTO.asLeftHandSideType(), returnType);
 		assertFalse(exceptions.isEmpty());
 	}
@@ -262,7 +262,7 @@ public class FunctionSignaturesTest {
 				null,
 				Arrays.asList(CInt.TYPE.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN),
-				this.env, exceptions);
+				null, this.env, exceptions);
 		assertEquals(CArray.TYPE.asLeftHandSideType(), returnType);
 		assertArrayEquals(new Object[0], exceptions.toArray());
 	}
@@ -281,7 +281,7 @@ public class FunctionSignaturesTest {
 				null,
 				Arrays.asList(CBoolean.TYPE.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN),
-				this.env, exceptions);
+				null, this.env, exceptions);
 		assertEquals(CInt.TYPE.asLeftHandSideType(), returnType);
 		assertArrayEquals(new Object[0], exceptions.toArray());
 	}
@@ -300,7 +300,7 @@ public class FunctionSignaturesTest {
 				null,
 				Arrays.asList(CClassType.AUTO.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN),
-				this.env, exceptions);
+				null, this.env, exceptions);
 		assertEquals(CInt.TYPE.asLeftHandSideType(), returnType);
 		assertArrayEquals(new Object[0], exceptions.toArray());
 	}
@@ -320,7 +320,7 @@ public class FunctionSignaturesTest {
 				null,
 				Arrays.asList(CClassType.AUTO.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN),
-				this.env, exceptions);
+				null, this.env, exceptions);
 		assertEquals(CClassType.AUTO.asLeftHandSideType(), returnType);
 		assertArrayEquals(new Object[0], exceptions.toArray());
 	}
@@ -338,7 +338,7 @@ public class FunctionSignaturesTest {
 				null,
 				Arrays.asList(),
 				Arrays.asList(),
-				this.env, exceptions);
+				null, this.env, exceptions);
 		assertEquals(CArray.TYPE.asLeftHandSideType(), returnType1);
 		assertArrayEquals(new Object[0], exceptions.toArray());
 		LeftHandSideType returnType2 = signatures.getReturnType(
@@ -346,7 +346,7 @@ public class FunctionSignaturesTest {
 				null,
 				Arrays.asList(CInt.TYPE.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN),
-				this.env, exceptions);
+				null, this.env, exceptions);
 		assertEquals(CArray.TYPE.asLeftHandSideType(), returnType2);
 		assertArrayEquals(new Object[0], exceptions.toArray());
 	}
@@ -364,7 +364,7 @@ public class FunctionSignaturesTest {
 				null,
 				Arrays.asList(),
 				Arrays.asList(),
-				this.env, exceptions);
+				null, this.env, exceptions);
 		assertEquals(CArray.TYPE.asLeftHandSideType(), returnType1);
 		assertArrayEquals(new Object[0], exceptions.toArray());
 		LeftHandSideType returnType2 = signatures.getReturnType(
@@ -372,7 +372,7 @@ public class FunctionSignaturesTest {
 				null,
 				Arrays.asList(CInt.TYPE.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN),
-				this.env, exceptions);
+				null, this.env, exceptions);
 		assertEquals(CArray.TYPE.asLeftHandSideType(), returnType2);
 		assertArrayEquals(new Object[0], exceptions.toArray());
 		LeftHandSideType returnType3 = signatures.getReturnType(
@@ -380,7 +380,7 @@ public class FunctionSignaturesTest {
 				null,
 				Arrays.asList(CInt.TYPE.asLeftHandSideType(), CInt.TYPE.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN, Target.UNKNOWN),
-				this.env, exceptions);
+				null, this.env, exceptions);
 		assertEquals(CArray.TYPE.asLeftHandSideType(), returnType3);
 		assertArrayEquals(new Object[0], exceptions.toArray());
 	}
@@ -404,7 +404,7 @@ public class FunctionSignaturesTest {
 				null,
 				Arrays.asList(CInt.TYPE.asLeftHandSideType(), CInt.TYPE.asLeftHandSideType(), CArray.TYPE.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN, Target.UNKNOWN, Target.UNKNOWN),
-				this.env, exceptions);
+				null, this.env, exceptions);
 		assertEquals(CArray.TYPE.asLeftHandSideType(), returnType);
 		assertArrayEquals(new Object[0], exceptions.toArray());
 		LeftHandSideType returnType2 = signatures.getReturnType(
@@ -412,7 +412,7 @@ public class FunctionSignaturesTest {
 				null,
 				Arrays.asList(CInt.TYPE.asLeftHandSideType(), CInt.TYPE.asLeftHandSideType(), CInt.TYPE.asLeftHandSideType(), CInt.TYPE.asLeftHandSideType(), CArray.TYPE.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN, Target.UNKNOWN, Target.UNKNOWN, Target.UNKNOWN, Target.UNKNOWN),
-				this.env, exceptions);
+				null, this.env, exceptions);
 		assertEquals(CArray.TYPE.asLeftHandSideType(), returnType2);
 		assertArrayEquals(new Object[0], exceptions.toArray());
 		LeftHandSideType returnType3 = signatures.getReturnType(
@@ -421,7 +421,7 @@ public class FunctionSignaturesTest {
 				Arrays.asList(CInt.TYPE.asLeftHandSideType(), CInt.TYPE.asLeftHandSideType(), CInt.TYPE.asLeftHandSideType(), CInt.TYPE.asLeftHandSideType(), CArray.TYPE.asLeftHandSideType(), CArray.TYPE.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN, Target.UNKNOWN,
 						Target.UNKNOWN, Target.UNKNOWN, Target.UNKNOWN, Target.UNKNOWN),
-				this.env, exceptions);
+				null, this.env, exceptions);
 		assertEquals(CArray.TYPE.asLeftHandSideType(), returnType3);
 		assertArrayEquals(new Object[0], exceptions.toArray());
 	}
@@ -452,7 +452,7 @@ public class FunctionSignaturesTest {
 				argTargets.add(Target.UNKNOWN);
 			}
 			LeftHandSideType returnType = signatures.getReturnType(
-					Target.UNKNOWN, null, argTypes, argTargets, this.env, exceptions);
+					Target.UNKNOWN, null, argTypes, argTargets, null, this.env, exceptions);
 			assertEquals(CArray.TYPE.asLeftHandSideType(), returnType);
 			assertArrayEquals(new Object[0], exceptions.toArray());
 		}

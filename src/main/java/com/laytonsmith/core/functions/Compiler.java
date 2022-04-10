@@ -11,6 +11,8 @@ import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.compiler.FileOptions;
+import com.laytonsmith.core.compiler.signature.FunctionSignatures;
+import com.laytonsmith.core.compiler.signature.SignatureBuilder;
 import com.laytonsmith.core.constructs.CBracket;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CEntry;
@@ -24,7 +26,11 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.ConstraintLocation;
+import com.laytonsmith.core.constructs.generics.Constraints;
+import com.laytonsmith.core.constructs.generics.GenericDeclaration;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.UnboundedConstraint;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.functions.DataHandling._string;
@@ -575,7 +581,7 @@ public class Compiler {
 
 		@Override
 		public LeftHandSideType getReturnType(Target t, GenericParameters generics, List<LeftHandSideType> argTypes,
-				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+				List<Target> argTargets, LeftHandSideType inferredType, Environment env, Set<ConfigCompileException> exceptions) {
 			for(LeftHandSideType argType : argTypes) {
 				if(argType == null) {
 					return null; // An argument alters control flow, so this function will never return.
@@ -638,6 +644,20 @@ public class Compiler {
 			}
 			return args[0];
 		}
+
+		@Override
+		public FunctionSignatures getSignatures() {
+			GenericDeclaration declaration = new GenericDeclaration(Target.UNKNOWN,
+				new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+					new UnboundedConstraint(Target.UNKNOWN, "T")));
+			LeftHandSideType t = LeftHandSideType.fromGenericDefinitionType(declaration, "T", null, Target.UNKNOWN);
+			return new SignatureBuilder(t)
+					.param(t, "argument", "The value to return.")
+					.setGenericDeclaration(declaration, "The type of the value.")
+					.newSignature(CVoid.TYPE)
+					.build();
+		}
+
 	}
 
 	@api

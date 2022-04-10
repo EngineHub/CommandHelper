@@ -39,6 +39,8 @@ import com.laytonsmith.core.compiler.analysis.ProcDeclaration;
 import com.laytonsmith.core.compiler.analysis.ProcRootDeclaration;
 import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
+import com.laytonsmith.core.compiler.signature.FunctionSignatures;
+import com.laytonsmith.core.compiler.signature.SignatureBuilder;
 import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
@@ -62,7 +64,11 @@ import com.laytonsmith.core.constructs.IVariableList;
 import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.ConstraintLocation;
+import com.laytonsmith.core.constructs.generics.Constraints;
+import com.laytonsmith.core.constructs.generics.GenericDeclaration;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.UnboundedConstraint;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.Environment.EnvironmentImpl;
@@ -137,31 +143,46 @@ public class DataHandling {
 		}
 
 		@Override
-		public LeftHandSideType typecheck(StaticAnalysis analysis,
-				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
-			return typecheckArray(analysis, ast, env, exceptions);
+		public FunctionSignatures getSignatures() {
+			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN,
+				new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+					new UnboundedConstraint(Target.UNKNOWN, "T")));
+			LeftHandSideType t = LeftHandSideType.fromGenericDefinitionType(genericDeclaration, "T", null, Target.UNKNOWN);
+			return new SignatureBuilder(LeftHandSideType.fromCClassType(CArray.TYPE, t.toLeftHandGenericUse(null), Target.UNKNOWN))
+					.varParam(t, "item", "The items to put into the array initially.")
+					.setGenericDeclaration(genericDeclaration, "The generic type of the array. Note that"
+							+ " a type must be explicitely provided in strict mode.")
+					.build();
 		}
 
-		protected static LeftHandSideType typecheckArray(StaticAnalysis analysis,
-				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
-			for(ParseTree child : ast.getChildren()) {
-				Mixed elem = child.getData();
 
-				// If this is a centry(), ignore the first (CLabel) argument.
-				if(elem instanceof CFunction && centry.NAME.equals(elem.val())) {
-					if(child.numberOfChildren() == 2) {
-						LeftHandSideType type = analysis.typecheck(child.getChildAt(1), env, exceptions);
-						StaticAnalysis.requireType(type, Mixed.TYPE, child.getChildAt(1).getTarget(), env, exceptions);
-					}
-				} else {
 
-					// This is normal value, so typecheck it.
-					LeftHandSideType type = analysis.typecheck(child, env, exceptions);
-					StaticAnalysis.requireType(type, Mixed.TYPE, child.getTarget(), env, exceptions);
-				}
-			}
-			return CArray.TYPE.asLeftHandSideType();
-		}
+//		@Override
+//		public LeftHandSideType typecheck(StaticAnalysis analysis,
+//				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+//			return typecheckArray(analysis, ast, env, exceptions);
+//		}
+//
+//		protected static LeftHandSideType typecheckArray(StaticAnalysis analysis,
+//				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+//			for(ParseTree child : ast.getChildren()) {
+//				Mixed elem = child.getData();
+//
+//				// If this is a centry(), ignore the first (CLabel) argument.
+//				if(elem instanceof CFunction && centry.NAME.equals(elem.val())) {
+//					if(child.numberOfChildren() == 2) {
+//						LeftHandSideType type = analysis.typecheck(child.getChildAt(1), env, exceptions);
+//						StaticAnalysis.requireType(type, Mixed.TYPE, child.getChildAt(1).getTarget(), env, exceptions);
+//					}
+//				} else {
+//
+//					// This is normal value, so typecheck it.
+//					LeftHandSideType type = analysis.typecheck(child, env, exceptions);
+//					StaticAnalysis.requireType(type, Mixed.TYPE, child.getTarget(), env, exceptions);
+//				}
+//			}
+//			return CArray.TYPE.asLeftHandSideType();
+//		}
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -264,10 +285,23 @@ public class DataHandling {
 		}
 
 		@Override
-		public LeftHandSideType typecheck(StaticAnalysis analysis,
-				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
-			return array.typecheckArray(analysis, ast, env, exceptions);
+		public FunctionSignatures getSignatures() {
+			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN,
+				new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+					new UnboundedConstraint(Target.UNKNOWN, "T")));
+			LeftHandSideType t = LeftHandSideType.fromGenericDefinitionType(genericDeclaration, "T", null, Target.UNKNOWN);
+			return new SignatureBuilder(LeftHandSideType.fromCClassType(CArray.TYPE, t.toLeftHandGenericUse(null), Target.UNKNOWN))
+					.varParam(t, "item", "The items to put into the array initially.")
+					.setGenericDeclaration(genericDeclaration, "The generic type of the array. Note that"
+							+ " a type must be explicitely provided in strict mode.")
+					.build();
 		}
+
+//		@Override
+//		public LeftHandSideType typecheck(StaticAnalysis analysis,
+//				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+//			return array.typecheckArray(analysis, ast, env, exceptions);
+//		}
 
 		@Override
 		public String getName() {
@@ -375,9 +409,10 @@ public class DataHandling {
 		@Override
 		@SuppressWarnings("checkstyle:FallThrough")
 		public LeftHandSideType typecheck(StaticAnalysis analysis,
-				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+				ParseTree ast, LeftHandSideType inferredType,
+				Environment env, Set<ConfigCompileException> exceptions) {
 			int ind = 0;
-			CClassType declaredType = null;
+			LeftHandSideType declaredType = null;
 			switch(ast.numberOfChildren()) {
 				case 3:
 					// Typecheck declaration type.
@@ -393,7 +428,8 @@ public class DataHandling {
 
 					// Get assigned value.
 					ParseTree valNode = ast.getChildAt(ind);
-					LeftHandSideType valType = analysis.typecheck(valNode, env, exceptions);
+					LeftHandSideType valType = analysis.typecheck(valNode,
+							declaredType == null ? Auto.LHSTYPE : declaredType, env, exceptions);
 
 					// Attempt to get the declared type from this variable's declaration.
 					if(declaredType == null && ivar != null) {
@@ -413,8 +449,8 @@ public class DataHandling {
 					}
 
 					// If a variable is declared as AUTO or unknown, then its value should actually be any mixed.
-					if(declaredType == null || declaredType == CClassType.AUTO) {
-						declaredType = Mixed.TYPE;
+					if(declaredType == null || declaredType.isAuto()) {
+						declaredType = Mixed.TYPE.asLeftHandSideType();
 					}
 
 					// Type check assigned value.
@@ -825,14 +861,15 @@ public class DataHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("True condition", "is_string('yes')"),
-				new ExampleScript("False condition", "is_string(1) #is_stringable() would return true here")};
+				new ExampleScript("False condition", "is_string(1) // is_stringable() would return true here")};
 		}
 
 		@Override
-		public LeftHandSideType getReturnType(Target t, GenericParameters generics, List<LeftHandSideType> argTypes, List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
-			return CBoolean.TYPE.asLeftHandSideType();
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CBoolean.TYPE)
+					.param(Auto.TYPE, "value", "The value to check if it is a string.")
+					.build();
 		}
-
 
 	}
 

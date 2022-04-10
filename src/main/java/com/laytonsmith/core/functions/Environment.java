@@ -41,6 +41,8 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.compiler.FileOptions;
+import com.laytonsmith.core.compiler.signature.FunctionSignatures;
+import com.laytonsmith.core.compiler.signature.SignatureBuilder;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CFunction;
@@ -49,7 +51,6 @@ import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
-import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
@@ -2774,11 +2775,11 @@ public class Environment {
 		}
 
 		@Override
-		public LeftHandSideType getReturnType(Target t, GenericParameters generics, List<LeftHandSideType> argTypes,
-				List<Target> argTargets, com.laytonsmith.core.environments.Environment env, Set<ConfigCompileException> exceptions) {
-			return CArray.TYPE.asLeftHandSideType();
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CArray.TYPE, "The banner patterns.")
+					.param(CArray.TYPE, "location", "The location of the banner.")
+					.build();
 		}
-
 
 		@Override
 		public String docs() {
@@ -2814,9 +2815,11 @@ public class Environment {
 		}
 
 		@Override
-		public LeftHandSideType getReturnType(Target t, GenericParameters generics, List<LeftHandSideType> argTypes,
-				List<Target> argTargets, com.laytonsmith.core.environments.Environment env, Set<ConfigCompileException> exceptions) {
-			return CVoid.TYPE.asLeftHandSideType();
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CVoid.TYPE)
+					.param(CArray.TYPE, "location", "The location of the banner.")
+					.param(CArray.TYPE, "patterns", "The patterns to apply.")
+					.build();
 		}
 
 		@Override

@@ -16,10 +16,10 @@ import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.compiler.FileOptions;
-import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
+import com.laytonsmith.core.compiler.signature.FunctionSignatures;
+import com.laytonsmith.core.compiler.signature.SignatureBuilder;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
-import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CFixedArray;
 import com.laytonsmith.core.constructs.CInt;
@@ -32,7 +32,11 @@ import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.ConstraintLocation;
+import com.laytonsmith.core.constructs.generics.Constraints;
+import com.laytonsmith.core.constructs.generics.GenericDeclaration;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.UnboundedConstraint;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
@@ -104,12 +108,10 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public LeftHandSideType getReturnType(Target t, GenericParameters generics, List<LeftHandSideType> argTypes, List<Target> argTargets,
-				Environment env, Set<ConfigCompileException> exceptions) {
-			if(argTypes.size() == 1) {
-				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);
-			}
-			return LeftHandSideType.fromHardCodedType(CInt.TYPE);
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CInt.TYPE)
+					.param(Sizeable.TYPE, "array", "The array to check the size of.")
+					.build();
 		}
 
 		@Override
@@ -295,17 +297,21 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public LeftHandSideType getReturnType(Target t, GenericParameters generics, List<LeftHandSideType> argTypes, List<Target> argTargets,
-				Environment env, Set<ConfigCompileException> exceptions) {
-			if(argTypes.size() == 2 || argTypes.size() == 3) {
-				StaticAnalysis.requireType(argTypes.get(0), ArrayAccess.TYPE, argTargets.get(0), env, exceptions);
-				StaticAnalysis.requireAnyType(argTypes.get(1),
-						new CClassType[] {CInt.TYPE, CSlice.TYPE, CString.TYPE}, argTargets.get(1), env, exceptions);
-				if(argTypes.size() == 3) {
-					StaticAnalysis.requireType(argTypes.get(2), Mixed.TYPE, argTargets.get(2), env, exceptions);
-				}
-			}
-			return LeftHandSideType.fromHardCodedType(CClassType.AUTO);
+		public FunctionSignatures getSignatures() {
+			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN,
+				new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+					new UnboundedConstraint(Target.UNKNOWN, "T")));
+			LeftHandSideType t = LeftHandSideType.fromGenericDefinitionType(genericDeclaration, "T", null, Target.UNKNOWN);
+			return new SignatureBuilder(t)
+					.param(LeftHandSideType.fromCClassType(ArrayAccess.TYPE, t.toLeftHandGenericUse(null), Target.UNKNOWN),
+							"array", "The ArrayAccess object to read from.")
+					.param(LeftHandSideType.createTypeUnion(Target.UNKNOWN,
+							CInt.TYPE.asLeftHandSideType(), CSlice.TYPE.asLeftHandSideType(),
+							CString.TYPE.asLeftHandSideType()),
+							"index", "The index to read from.")
+					.param(t, "default", "The default value to return, if the value at the specified index does not exist.", true)
+					.setGenericDeclaration(genericDeclaration, "The generic type of the array.")
+					.build();
 		}
 
 		@Override
@@ -439,16 +445,20 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public LeftHandSideType getReturnType(Target t, GenericParameters generics, List<LeftHandSideType> argTypes, List<Target> argTargets,
-				Environment env, Set<ConfigCompileException> exceptions) {
-			if(argTypes.size() == 3) {
-				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);
-				StaticAnalysis.requireAnyType(argTypes.get(1),
-						new CClassType[] {CInt.TYPE, CSlice.TYPE, CString.TYPE}, argTargets.get(1), env, exceptions);
-				StaticAnalysis.requireType(argTypes.get(2), Mixed.TYPE, argTargets.get(2), env, exceptions);
-				return argTypes.get(2);
-			}
-			return LeftHandSideType.fromHardCodedType(CClassType.AUTO);
+		public FunctionSignatures getSignatures() {
+			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN,
+				new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+					new UnboundedConstraint(Target.UNKNOWN, "T")));
+			LeftHandSideType t = LeftHandSideType.fromGenericDefinitionType(genericDeclaration, "T", null, Target.UNKNOWN);
+			return new SignatureBuilder(t)
+					.param(LeftHandSideType.fromCClassType(CArray.TYPE, t.toLeftHandGenericUse(null), Target.UNKNOWN),
+							"array", "The array to set the value in.")
+					.param(LeftHandSideType.createTypeUnion(Target.UNKNOWN,
+							CInt.TYPE.asLeftHandSideType(), CString.TYPE.asLeftHandSideType()),
+							"index", "The index to write to.")
+					.param(t, "value", "The value to set in the array.")
+					.setGenericDeclaration(genericDeclaration, "The generic type of the array.")
+					.build();
 		}
 
 		@Override
@@ -534,15 +544,18 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public LeftHandSideType getReturnType(Target t, GenericParameters generics, List<LeftHandSideType> argTypes, List<Target> argTargets,
-				Environment env, Set<ConfigCompileException> exceptions) {
-			if(argTypes.size() >= 2) {
-				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);
-				for(int i = 1; i < argTypes.size(); i++) {
-					StaticAnalysis.requireType(argTypes.get(i), Mixed.TYPE, argTargets.get(i), env, exceptions);
-				}
-			}
-			return LeftHandSideType.fromHardCodedType(CVoid.TYPE);
+		public FunctionSignatures getSignatures() {
+			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN,
+				new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+					new UnboundedConstraint(Target.UNKNOWN, "T")));
+			LeftHandSideType t = LeftHandSideType.fromGenericDefinitionType(genericDeclaration, "T", null, Target.UNKNOWN);
+			return new SignatureBuilder(CVoid.TYPE)
+					.param(LeftHandSideType.fromCClassType(CArray.TYPE, t.toLeftHandGenericUse(null), Target.UNKNOWN),
+							"array", "The array to push the values in.")
+					.param(t, "pushValue", "The values to push in the array.")
+					.varParam(t, "additionalValues", "Additional values to push on to the array.")
+					.setGenericDeclaration(genericDeclaration, "The generic type of the array.")
+					.build();
 		}
 
 		@Override
@@ -642,14 +655,18 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public LeftHandSideType getReturnType(Target t, GenericParameters generics, List<LeftHandSideType> argTypes, List<Target> argTargets,
-				Environment env, Set<ConfigCompileException> exceptions) {
-			if(argTypes.size() == 3) {
-				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);
-				StaticAnalysis.requireType(argTypes.get(1), Mixed.TYPE, argTargets.get(1), env, exceptions);
-				StaticAnalysis.requireType(argTypes.get(2), CInt.TYPE, argTargets.get(2), env, exceptions);
-			}
-			return LeftHandSideType.fromHardCodedType(CVoid.TYPE);
+		public FunctionSignatures getSignatures() {
+			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN,
+				new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+					new UnboundedConstraint(Target.UNKNOWN, "T")));
+			LeftHandSideType t = LeftHandSideType.fromGenericDefinitionType(genericDeclaration, "T", null, Target.UNKNOWN);
+			return new SignatureBuilder(CVoid.TYPE)
+					.param(LeftHandSideType.fromCClassType(CArray.TYPE, t.toLeftHandGenericUse(null), Target.UNKNOWN),
+							"array", "The array to insert the value in.")
+					.param(CInt.TYPE, "index", "The index to insert at.")
+					.param(t, "value", "The value to insert in the array.")
+					.setGenericDeclaration(genericDeclaration, "The generic type of the array.")
+					.build();
 		}
 
 		@Override
@@ -723,13 +740,17 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public LeftHandSideType getReturnType(Target t, GenericParameters generics, List<LeftHandSideType> argTypes, List<Target> argTargets,
-				Environment env, Set<ConfigCompileException> exceptions) {
-			if(argTypes.size() == 2) {
-				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);
-				StaticAnalysis.requireType(argTypes.get(1), Mixed.TYPE, argTargets.get(1), env, exceptions);
-			}
-			return LeftHandSideType.fromHardCodedType(CBoolean.TYPE);
+		public FunctionSignatures getSignatures() {
+			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN,
+				new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+					new UnboundedConstraint(Target.UNKNOWN, "T")));
+			LeftHandSideType t = LeftHandSideType.fromGenericDefinitionType(genericDeclaration, "T", null, Target.UNKNOWN);
+			return new SignatureBuilder(CBoolean.TYPE)
+					.param(LeftHandSideType.fromCClassType(CArray.TYPE, t.toLeftHandGenericUse(null), Target.UNKNOWN),
+							"array", "The array to search in.")
+					.param(t, "testValue", "The value to search for.")
+					.setGenericDeclaration(genericDeclaration, "The generic type of the array.")
+					.build();
 		}
 
 		@Override
@@ -833,13 +854,17 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public LeftHandSideType getReturnType(Target t, GenericParameters generics, List<LeftHandSideType> argTypes, List<Target> argTargets,
-				Environment env, Set<ConfigCompileException> exceptions) {
-			if(argTypes.size() == 2) {
-				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);
-				StaticAnalysis.requireType(argTypes.get(1), Mixed.TYPE, argTargets.get(1), env, exceptions);
-			}
-			return LeftHandSideType.fromHardCodedType(CBoolean.TYPE);
+		public FunctionSignatures getSignatures() {
+			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN,
+				new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+					new UnboundedConstraint(Target.UNKNOWN, "T")));
+			LeftHandSideType t = LeftHandSideType.fromGenericDefinitionType(genericDeclaration, "T", null, Target.UNKNOWN);
+			return new SignatureBuilder(CBoolean.TYPE)
+					.param(LeftHandSideType.fromCClassType(CArray.TYPE, t.toLeftHandGenericUse(null), Target.UNKNOWN),
+							"array", "The array to search in.")
+					.param(t, "testValue", "The value to search for.")
+					.setGenericDeclaration(genericDeclaration, "The generic type of the array.")
+					.build();
 		}
 
 		@Override
@@ -887,13 +912,17 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public LeftHandSideType getReturnType(Target t, GenericParameters generics, List<LeftHandSideType> argTypes, List<Target> argTargets,
-				Environment env, Set<ConfigCompileException> exceptions) {
-			if(argTypes.size() == 2) {
-				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);
-				StaticAnalysis.requireType(argTypes.get(1), Mixed.TYPE, argTargets.get(1), env, exceptions);
-			}
-			return LeftHandSideType.fromHardCodedType(CBoolean.TYPE);
+		public FunctionSignatures getSignatures() {
+			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN,
+				new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+					new UnboundedConstraint(Target.UNKNOWN, "T")));
+			LeftHandSideType t = LeftHandSideType.fromGenericDefinitionType(genericDeclaration, "T", null, Target.UNKNOWN);
+			return new SignatureBuilder(CBoolean.TYPE)
+					.param(LeftHandSideType.fromCClassType(CArray.TYPE, t.toLeftHandGenericUse(null), Target.UNKNOWN),
+							"array", "The array to search in.")
+					.param(t, "testValue", "The value to search for.")
+					.setGenericDeclaration(genericDeclaration, "The generic type of the array.")
+					.build();
 		}
 
 		@Override
@@ -1019,15 +1048,22 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public LeftHandSideType getReturnType(Target t, GenericParameters generics, List<LeftHandSideType> argTypes, List<Target> argTargets,
-				Environment env, Set<ConfigCompileException> exceptions) {
-			if(argTypes.size() >= 1) {
-				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);
-				for(int i = 1; i < argTypes.size(); i++) {
-					StaticAnalysis.requireType(argTypes.get(i), Mixed.TYPE, argTargets.get(i), env, exceptions);
-				}
-			}
-			return LeftHandSideType.fromHardCodedType(CBoolean.TYPE);
+		public FunctionSignatures getSignatures() {
+			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN,
+				new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+					new UnboundedConstraint(Target.UNKNOWN, "T")));
+			LeftHandSideType t = LeftHandSideType.fromGenericDefinitionType(genericDeclaration, "T", null, Target.UNKNOWN);
+			return new SignatureBuilder(CBoolean.TYPE)
+					.param(LeftHandSideType.fromCClassType(CArray.TYPE, t.toLeftHandGenericUse(null), Target.UNKNOWN),
+							"array", "The array to search in.")
+					.param(LeftHandSideType.createTypeUnion(Target.UNKNOWN,
+							CInt.TYPE.asLeftHandSideType(), CString.TYPE.asLeftHandSideType()),
+							"index", "The index to check.")
+					.varParam(LeftHandSideType.createTypeUnion(Target.UNKNOWN,
+							CInt.TYPE.asLeftHandSideType(), CString.TYPE.asLeftHandSideType()),
+							"additionalIndices", "Additionaly indices to recurse down and check.")
+					.setGenericDeclaration(genericDeclaration, "The generic type of the array.")
+					.build();
 		}
 
 		@Override
@@ -1126,16 +1162,18 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public LeftHandSideType getReturnType(Target t, GenericParameters generics, List<LeftHandSideType> argTypes, List<Target> argTargets,
-				Environment env, Set<ConfigCompileException> exceptions) {
-			if(argTypes.size() == 2 || argTypes.size() == 3) {
-				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);
-				StaticAnalysis.requireType(argTypes.get(1), CInt.TYPE, argTargets.get(1), env, exceptions);
-				if(argTypes.size() == 3) {
-					StaticAnalysis.requireType(argTypes.get(2), Mixed.TYPE, argTargets.get(2), env, exceptions);
-				}
-			}
-			return CArray.TYPE.asLeftHandSideType();
+		public FunctionSignatures getSignatures() {
+			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN,
+				new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+					new UnboundedConstraint(Target.UNKNOWN, "T")));
+			LeftHandSideType t = LeftHandSideType.fromGenericDefinitionType(genericDeclaration, "T", null, Target.UNKNOWN);
+			return new SignatureBuilder(CArray.TYPE, "A reference to the passed in array.")
+					.param(LeftHandSideType.fromCClassType(CArray.TYPE, t.toLeftHandGenericUse(null), Target.UNKNOWN),
+							"array", "The array to search in.")
+					.param(CInt.TYPE, "size", "The new array size.")
+					.param(t, "fill", "The value to fill in the array, null, by default", true)
+					.setGenericDeclaration(genericDeclaration, "The generic type of the array.")
+					.build();
 		}
 
 		@Override

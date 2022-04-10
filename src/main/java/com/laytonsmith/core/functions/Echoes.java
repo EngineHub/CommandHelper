@@ -13,12 +13,14 @@ import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.signature.FunctionSignatures;
+import com.laytonsmith.core.compiler.signature.SignatureBuilder;
+import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
-import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
@@ -37,7 +39,6 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -112,9 +113,12 @@ public class Echoes {
 		}
 
 		@Override
-		public LeftHandSideType getReturnType(Target t, GenericParameters generics, List<LeftHandSideType> argTypes, List<Target> argTargets,
-				Environment env, Set<ConfigCompileException> exceptions) {
-			return CVoid.TYPE.asLeftHandSideType();
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CVoid.TYPE)
+					.param(Auto.TYPE, "message", "The message to send.")
+					.varParam(Auto.TYPE, "additionalMessages", "Additional parts of the message to send. These parts"
+							+ " will simply be concatenated with the others")
+					.build();
 		}
 
 	}

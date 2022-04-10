@@ -344,7 +344,7 @@ public class StaticAnalysis {
 	private void typecheck(Environment env, Set<ConfigCompileException> exceptions) {
 		for(StaticAnalysis analysis : this.staticAnalyses) {
 			if(analysis.astRootNode != null) { // This is null for empty files, since those are not analyzed.
-				analysis.typecheck(analysis.astRootNode, env, exceptions);
+				analysis.typecheck(analysis.astRootNode, null, env, exceptions);
 			}
 		}
 	}
@@ -354,19 +354,29 @@ public class StaticAnalysis {
 	 * {@link Function#typecheck(StaticAnalysis, ParseTree, Environment, Set)} methods. When {@link IVariable}s are
 	 * traversed, a compile error is added when they do not resolve to a declaration.
 	 *
-	 * @param ast - The parse tree.
-	 * @param env - The {@link Environment}, used for instanceof checks on types.
-	 * @param exceptions - Any compile exceptions will be added to this set.
+	 * @param ast The parse tree.
+	 * @param inferredReturnType The inferred return type that this node should have. For instance, in the call
+	 * {@code primitive @s = function();}, the inferred return type is {@code primitive}, even though function
+	 * might return {@code int}. This is only used for generics with typenames, to infer the type of the typename
+	 * if the function type parameters have not been explicitly provided. In general, the calculation is simply
+	 * the LHS type of the parameter. That is, for a function defined as {@code void function(string @a)}, the
+	 * inferred return type when typechecking the first child of the call {@code function(g())} (that is,
+	 * {@code g()}), the type is {@code string}. This calculation may require recursion, as in some cases,
+	 * the parameter types of a function are typenames, which cannot be used to infer. If there is no inferred
+	 * return type (that is, this is a statement or other top level structure), null may be set.
+	 * @param env The {@link Environment}, used for instanceof checks on types.
+	 * @param exceptions Any compile exceptions will be added to this set.
 	 * @return The return type of the parse tree.
 	 */
-	public LeftHandSideType typecheck(ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+	@SuppressWarnings("null")
+	public LeftHandSideType typecheck(ParseTree ast, LeftHandSideType inferredReturnType,
+			Environment env, Set<ConfigCompileException> exceptions) {
 		Mixed node = ast.getData();
-		if(node instanceof CFunction) {
-			CFunction cFunc = (CFunction) node;
+		if(node instanceof CFunction cFunc) {
 			if(cFunc.hasFunction()) {
 				Function func = cFunc.getCachedFunction();
 				if(func != null) {
-					return func.typecheck(this, ast, env, exceptions);
+					return func.typecheck(this, ast, inferredReturnType, env, exceptions);
 				}
 				return LeftHandSideType.fromCClassType(CClassType.AUTO, Target.UNKNOWN); // Unknown return type.
 			} else if(cFunc.hasIVariable()) { // The function is a var reference to a closure: '@myClosure(<args>)'.
@@ -394,8 +404,7 @@ public class StaticAnalysis {
 				throw new Error("Unsupported " + CFunction.class.getSimpleName()
 						+ " type in type checking for node with value: " + cFunc.val());
 			}
-		} else if(node instanceof IVariable) {
-			IVariable ivar = (IVariable) node;
+		} else if(node instanceof IVariable ivar) {
 			Scope scope = this.getTermScope(ast);
 			if(scope != null) {
 				Set<Declaration> decls = scope.getDeclarations(Namespace.IVARIABLE, ivar.getVariableName());
@@ -427,9 +436,9 @@ public class StaticAnalysis {
 			exceptions.add(ex != null ? ex
 					: new ConfigCompileException("Unexpected keyword: " + node.val(), node.getTarget()));
 			return LeftHandSideType.fromCClassType(CClassType.AUTO, Target.UNKNOWN);
-		} else if(node instanceof CLabel) {
+		} else if(node instanceof CLabel cLabel) {
 			exceptions.add(new ConfigCompileException(
-					"Unexpected label: " + ((CLabel) node).cVal().val(), node.getTarget()));
+					"Unexpected label: " + cLabel.cVal().val(), node.getTarget()));
 			return LeftHandSideType.fromCClassType(CClassType.AUTO, Target.UNKNOWN);
 		}
 
@@ -609,9 +618,11 @@ public class StaticAnalysis {
 	 * @return The {@link CClasType} if it was one, or {@code null} if it wasn't.
 	 */
 	@SuppressWarnings("null")
-	public static CClassType requireClassType(Mixed node, Target t, Set<ConfigCompileException> exceptions) {
+	public static LeftHandSideType requireClassType(Mixed node, Target t, Set<ConfigCompileException> exceptions) {
 		if(node instanceof CClassType cClassType) {
-			return cClassType;
+			return cClassType.asLeftHandSideType();
+		} else if(node instanceof LeftHandSideType lhst) {
+			return lhst;
 		}
 
 		// The node can be anything. If it has a type, get that. If it doesn't, use the node's class name.
@@ -708,7 +719,7 @@ public class StaticAnalysis {
 			File file = Static.GetFileFromArgument(includeRef.getIdentifier(), env, includeRef.getTarget(), null);
 			try {
 				file = file.getCanonicalFile();
-			} catch (IOException ex) {
+			} catch(IOException ex) {
 
 				// The file might still read fine, so add a compile exception and hope for the best.
 				exceptions.add(new ConfigCompileException(ex.getMessage(), includeRef.getTarget()));

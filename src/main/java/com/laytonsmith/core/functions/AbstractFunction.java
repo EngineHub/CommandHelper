@@ -135,12 +135,13 @@ public abstract class AbstractFunction implements Function {
 	 */
 	@Override
 	public LeftHandSideType getReturnType(Target t, GenericParameters generics, List<LeftHandSideType> argTypes,
-			List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+			List<Target> argTargets, LeftHandSideType inferredReturnType,
+			Environment env, Set<ConfigCompileException> exceptions) {
 
 		// Match arguments to function signatures if available.
 		FunctionSignatures signatures = this.getCachedSignatures();
 		if(signatures != null) {
-			return signatures.getReturnType(t, generics, argTypes, argTargets, env, exceptions);
+			return signatures.getReturnType(t, generics, argTypes, argTargets, inferredReturnType, env, exceptions);
 		}
 
 		// No information is available about the return type.
@@ -153,7 +154,8 @@ public abstract class AbstractFunction implements Function {
 	 */
 	@Override
 	public LeftHandSideType typecheck(StaticAnalysis analysis,
-			ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+			ParseTree ast, LeftHandSideType inferredReturnType,
+			Environment env, Set<ConfigCompileException> exceptions) {
 
 		try {
 
@@ -162,13 +164,15 @@ public abstract class AbstractFunction implements Function {
 			List<LeftHandSideType> argTypes = new ArrayList<>(children.size());
 			List<Target> argTargets = new ArrayList<>(children.size());
 			for(ParseTree child : children) {
-				argTypes.add(analysis.typecheck(child, env, exceptions));
+				LeftHandSideType inferredParameterType = child.getDeclaredType(env, null);
+				inferredParameterType = LeftHandSideType.resolveTypeFromGenerics(Target.UNKNOWN, env, inferredParameterType, null, null, (Map) null);
+				argTypes.add(analysis.typecheck(child, inferredParameterType, env, exceptions));
 				argTargets.add(child.getTarget());
 			}
 
 			// Return the return type of this function.
 			return this.getReturnType(ast.getTarget(), ast.getNodeModifiers().getGenerics(),
-					argTypes, argTargets, env, exceptions);
+					argTypes, argTargets, inferredReturnType, env, exceptions);
 		} catch(RuntimeException t) {
 			// We can't recover from this, but at least we can give a more useful error message
 			String e = "While typechecking " + this.getName() + ", the attached Throwable occurred. This was"

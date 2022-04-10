@@ -47,7 +47,7 @@ public abstract class AbstractPrefilterMatcher<T extends BindableEvent> implemen
 	@Override
 	public LeftHandSideType typecheck(StaticAnalysis analysis,
 			ParseTree prefilterValueParseTree, Environment env, Set<ConfigCompileException> exceptions) {
-		LeftHandSideType prefilterValueType = analysis.typecheck(prefilterValueParseTree, env, exceptions);
+		LeftHandSideType prefilterValueType = analysis.typecheck(prefilterValueParseTree, null, env, exceptions);
 		try {
 			this.validate(prefilterValueParseTree, prefilterValueType, env);
 		} catch (ConfigCompileException e) {

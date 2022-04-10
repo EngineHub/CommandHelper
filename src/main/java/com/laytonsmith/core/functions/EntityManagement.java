@@ -108,6 +108,7 @@ import com.laytonsmith.abstraction.enums.MCRabbitType;
 import com.laytonsmith.abstraction.enums.MCRotation;
 import com.laytonsmith.abstraction.enums.MCTreeSpecies;
 import com.laytonsmith.abstraction.enums.MCVersion;
+import com.laytonsmith.annotations.MEnum;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.ArgumentValidation;
@@ -117,8 +118,11 @@ import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.FileOptions;
+import com.laytonsmith.core.compiler.signature.FunctionSignatures;
+import com.laytonsmith.core.compiler.signature.SignatureBuilder;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CInt;
@@ -143,6 +147,7 @@ import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.natives.interfaces.MEnumType;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 
 import java.lang.reflect.Field;
@@ -4493,11 +4498,11 @@ public class EntityManagement {
 		}
 
 		@Override
-		public LeftHandSideType getReturnType(Target t, GenericParameters generics, List<LeftHandSideType> argTypes, List<Target> argTargets,
-				com.laytonsmith.core.environments.Environment env, Set<ConfigCompileException> exceptions) {
-			return CString.TYPE.asLeftHandSideType();
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CString.TYPE)
+					.param(CString.TYPE, "entityUUID", "The entity uuid to check (with or without dashes).")
+					.build();
 		}
-
 
 		@Override
 		public String docs() {
@@ -4531,9 +4536,13 @@ public class EntityManagement {
 		}
 
 		@Override
-		public LeftHandSideType getReturnType(Target t, GenericParameters generics, List<LeftHandSideType> argTypes,
-				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
-			return CVoid.TYPE.asLeftHandSideType();
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CVoid.TYPE)
+					.param(CString.TYPE, "entityUUID", "The uuid of the entity, (with or without dashes).")
+					.param(CClassType.getEnum(MCBlockFace.class, Target.UNKNOWN), "direction", "The direction to set.")
+					.param(CBoolean.TYPE, "force", "A hanging will not change direction if there's no supporting"
+							+ " block in the new position, unless this is set to true.", true)
+					.build();
 		}
 
 		@Override

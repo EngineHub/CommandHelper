@@ -206,7 +206,7 @@ public final class LLVMArgumentValidation {
 			return IRDataBuilder.setReturnVariable(load, datatype);
 		} else if(c.getData() instanceof CFunction cf) {
 			Set<ConfigCompileException> exceptions = new HashSet<>();
-			LeftHandSideType retType = cf.getCachedFunction().typecheck(e.getStaticAnalysis(), c, env, exceptions);
+			LeftHandSideType retType = cf.getCachedFunction().typecheck(e.getStaticAnalysis(), c, null, env, exceptions);
 			IRData data = handleFunction(t, convertCClassTypeToIRType(retType, env), builder, env, c);
 			int alloca = e.getNewLocalVariableReference(data.getResultType());
 			int load = e.getNewLocalVariableReference(data.getResultType());
