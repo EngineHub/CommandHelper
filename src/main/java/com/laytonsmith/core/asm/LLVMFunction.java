@@ -11,6 +11,7 @@ import com.laytonsmith.core.Script;
 import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.compiler.signature.FunctionSignatures;
+import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.LeftHandSideType;
@@ -102,12 +103,26 @@ public abstract class LLVMFunction implements FunctionBase, Function {
 		return null;
 	}
 
+	@Override
+	public List<LeftHandSideType> getResolvedParameterTypes(Target t, Environment env, GenericParameters generics,
+			LeftHandSideType inferredReturnType, List<ParseTree> children) {
+		List<LeftHandSideType> ret = new ArrayList<>();
+		if(generics != null) {
+			// Explicit parameters were provided, just use those.
+			return generics.getLeftHandParameters();
+		}
+		for(ParseTree child : children) {
+			ret.add(child.getDeclaredType(t, env, Auto.LHSTYPE));
+		}
+		return ret;
+	}
+
 	/**
 	 * {@inheritDoc}
 	 * By default, null is returned.
 	 */
 	@Override
-	public LeftHandSideType getReturnType(Target t, GenericParameters generics, List<LeftHandSideType> argTypes, List<Target> argTargets,
+	public LeftHandSideType getReturnType(ParseTree node, Target t, List<LeftHandSideType> argTypes, List<Target> argTargets,
 			LeftHandSideType inferredType, Environment env, Set<ConfigCompileException> exceptions) {
 		return LeftHandSideType.fromCClassType(CClassType.AUTO, t); // No information is available about the return type.
 	}
@@ -131,7 +146,7 @@ public abstract class LLVMFunction implements FunctionBase, Function {
 		}
 
 		// Return the return type of this function.
-		return this.getReturnType(ast.getTarget(), ast.getNodeModifiers().getGenerics(),
+		return this.getReturnType(ast, ast.getTarget(),
 				argTypes, argTargets, inferredType, env, exceptions);
 	}
 

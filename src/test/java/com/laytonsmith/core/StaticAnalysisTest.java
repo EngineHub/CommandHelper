@@ -6,6 +6,7 @@ import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.RuntimeMode;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.testing.StaticTest;
@@ -27,8 +28,11 @@ public class StaticAnalysisTest {
 	}
 
 	public String runScript(String script) throws Exception {
-		saScript(script);
-		return StaticTest.SRun(script, null);
+		StaticAnalysis staticAnalysis = new StaticAnalysis(true);
+		staticAnalysis.setLocalEnable(true);
+		Environment env
+				= Static.GenerateStandaloneEnvironment(false, EnumSet.of(RuntimeMode.CMDLINE), null, staticAnalysis);
+		return StaticTest.SRun(script, null, env);
 	}
 
 	public void saScriptExpectException(String script) throws Exception {
@@ -43,7 +47,8 @@ public class StaticAnalysisTest {
 	public void saScript(String script) throws Exception {
 		StaticAnalysis staticAnalysis = new StaticAnalysis(true);
 		staticAnalysis.setLocalEnable(true);
-		Environment env = Static.GenerateStandaloneEnvironment(false, EnumSet.of(RuntimeMode.CMDLINE), null, staticAnalysis);
+		Environment env
+				= Static.GenerateStandaloneEnvironment(false, EnumSet.of(RuntimeMode.CMDLINE), null, staticAnalysis);
 		try {
 			try {
 				TokenStream stream = MethodScriptCompiler.lex(script, env, new File("test.ms"), true);
@@ -116,6 +121,29 @@ public class StaticAnalysisTest {
 		saScriptExpectException("string @s = if(dyn(true), 'string', 0)");
 		saScript("string @s = if(dyn(true), get_value('asdf'), get_value('fdsa'));");
 		saScript("number @n = if(dyn(true), 1, 2.0);");
+	}
+
+	@Test
+	public void testCast() throws Exception {
+		saScriptExpectException("int @i = 1; string @s = @i;");
+		saScript("int @i = 1; string @s = cast(@i);"); // Inferred cast to string
+		try {
+			runScript("int @i = 1; string @s = cast(@i);");
+			Assert.fail();
+		} catch(CRECastException ex) {
+			// pass
+		}
+		try {
+			// Same script, but try with static analysis off, which is a different code path
+			StaticTest.SRun("int @i = 1; string @s = cast(@i);", null);
+			Assert.fail();
+		} catch(CRECastException ex) {
+			// pass
+		}
+		saScriptExpectException("primitive @p = 1; int @i = @p;");
+		saScript("primitive @p = 1; int @i = cast(@p);");
+		runScript("primitive @p = 1; int @i = cast(@p);");
+
 	}
 
 }

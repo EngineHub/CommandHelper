@@ -580,7 +580,7 @@ public class Compiler {
 		}
 
 		@Override
-		public LeftHandSideType getReturnType(Target t, GenericParameters generics, List<LeftHandSideType> argTypes,
+		public LeftHandSideType getReturnType(ParseTree node, Target t, List<LeftHandSideType> argTypes,
 				List<Target> argTargets, LeftHandSideType inferredType, Environment env, Set<ConfigCompileException> exceptions) {
 			for(LeftHandSideType argType : argTypes) {
 				if(argType == null) {

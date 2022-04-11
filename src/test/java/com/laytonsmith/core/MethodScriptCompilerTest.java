@@ -9,6 +9,7 @@ import com.laytonsmith.core.compiler.analysis.ProcDeclaration;
 import com.laytonsmith.core.compiler.analysis.ProcRootDeclaration;
 import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
+import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CPrimitive;
@@ -1303,13 +1304,14 @@ public class MethodScriptCompilerTest {
 		ParseTree tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex("primitive @s = 'asdf'; msg(@s); int proc _a(){return(1);} _a();",
 				env, null, true), env, env.getEnvClasses(), sa);
 		ParseTree sUsage = tree.getChildAt(0).getChildAt(1).getChildAt(0);
-		assertTrue(sUsage.getDeclaredType(env, null).equals(CPrimitive.TYPE.asLeftHandSideType()));
+		Target t = Target.UNKNOWN;
+		assertTrue(sUsage.getDeclaredType(t, env, null).equals(CPrimitive.TYPE.asLeftHandSideType()));
 		ParseTree asdf = tree.getChildAt(0).getChildAt(0).getChildAt(2);
-		assertTrue(asdf.getDeclaredType(env, null).equals(CString.TYPE.asLeftHandSideType()));
+		assertTrue(asdf.getDeclaredType(t, env, null).equals(Auto.LHSTYPE));
 		ParseTree msg = tree.getChildAt(0).getChildAt(1);
-		assertTrue(msg.getDeclaredType(env, null).equals(CVoid.TYPE.asLeftHandSideType()));
+		assertTrue(msg.getDeclaredType(t, env, null).equals(CVoid.TYPE.asLeftHandSideType()));
 		ParseTree _a = tree.getChildAt(0).getChildAt(3);
-		assertTrue(_a.getDeclaredType(env, null).equals(CInt.TYPE.asLeftHandSideType()));
+		assertTrue(_a.getDeclaredType(t, env, null).equals(CInt.TYPE.asLeftHandSideType()));
 	}
 
 	@Test

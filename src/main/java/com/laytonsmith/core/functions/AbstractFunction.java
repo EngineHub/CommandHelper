@@ -18,6 +18,7 @@ import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.compiler.signature.FunctionSignatures;
+import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CClosure;
@@ -134,18 +135,62 @@ public abstract class AbstractFunction implements Function {
 	 * {@inheritDoc} By default, {@link CClassType#AUTO} is returned.
 	 */
 	@Override
-	public LeftHandSideType getReturnType(Target t, GenericParameters generics, List<LeftHandSideType> argTypes,
+	public LeftHandSideType getReturnType(ParseTree node, Target t, List<LeftHandSideType> argTypes,
 			List<Target> argTargets, LeftHandSideType inferredReturnType,
 			Environment env, Set<ConfigCompileException> exceptions) {
 
 		// Match arguments to function signatures if available.
 		FunctionSignatures signatures = this.getCachedSignatures();
 		if(signatures != null) {
-			return signatures.getReturnType(t, generics, argTypes, argTargets, inferredReturnType, env, exceptions);
+			return signatures.getReturnType(node, t, argTypes, argTargets, inferredReturnType, env, exceptions);
 		}
 
 		// No information is available about the return type.
 		return CClassType.AUTO.asLeftHandSideType();
+	}
+
+	@Override
+	public List<LeftHandSideType> getResolvedParameterTypes(Target t, Environment env, GenericParameters generics,
+			LeftHandSideType inferredReturnType, List<ParseTree> children) {
+//		FunctionSignatures signatures = getCachedSignatures();
+		List<LeftHandSideType> ret = new ArrayList<>(children.size());
+		if(generics != null) {
+			// Explicit parameters were provided, just use those.
+			return generics.getLeftHandParameters();
+		}
+		for(ParseTree child : children) {
+			ret.add(child.getDeclaredType(t, env, Auto.LHSTYPE));
+		}
+		return ret;
+//		if(signatures == null) {
+//			return ret;
+//		} else {
+//			List<FunctionSignature> matches = new ArrayList<>();
+//			for(FunctionSignature s : signatures.getSignatures()) {
+//				if(s.matches(ret, generics, env, inferredReturnType, false)) {
+//					matches.add(s);
+//				}
+//			}
+//			if(matches.size() != 1) {
+//				throw new CRECastException("Cannot infer argument types for " + getName() + ", "
+//						+ (matches.isEmpty()
+//								? "no signature matched." : "multiple signatures matched.")
+//						+ " Provide explicit type parameters, or use an", t);
+//			}
+//			FunctionSignature s = matches.get(0);
+//			for(Param p : s.getParams()) {
+//				if(p.getType() == null) {
+//					ret.add(null);
+//				} else {
+//					if(p.getType().isTypeName()) {
+//
+//					} else {
+//						ret.add(p.getType());
+//					}
+//				}
+//			}
+//		}
+//		return ret;
 	}
 
 	/**
@@ -164,14 +209,13 @@ public abstract class AbstractFunction implements Function {
 			List<LeftHandSideType> argTypes = new ArrayList<>(children.size());
 			List<Target> argTargets = new ArrayList<>(children.size());
 			for(ParseTree child : children) {
-				LeftHandSideType inferredParameterType = child.getDeclaredType(env, null);
+				LeftHandSideType inferredParameterType = child.getDeclaredType(ast.getTarget(), env, Auto.LHSTYPE);
 				inferredParameterType = LeftHandSideType.resolveTypeFromGenerics(Target.UNKNOWN, env, inferredParameterType, null, null, (Map) null);
 				argTypes.add(analysis.typecheck(child, inferredParameterType, env, exceptions));
 				argTargets.add(child.getTarget());
 			}
-
 			// Return the return type of this function.
-			return this.getReturnType(ast.getTarget(), ast.getNodeModifiers().getGenerics(),
+			return this.getReturnType(ast, ast.getTarget(),
 					argTypes, argTargets, inferredReturnType, env, exceptions);
 		} catch(RuntimeException t) {
 			// We can't recover from this, but at least we can give a more useful error message

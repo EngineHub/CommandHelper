@@ -12,6 +12,8 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.TokenStream;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
+import com.laytonsmith.core.compiler.signature.FunctionSignature;
+import com.laytonsmith.core.compiler.signature.FunctionSignatures;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CString;
@@ -23,6 +25,7 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.constructs.Token.TType;
 import com.laytonsmith.core.constructs.Variable;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
@@ -45,6 +48,7 @@ import com.laytonsmith.core.exceptions.StackTraceManager;
 import com.laytonsmith.core.extensions.Extension;
 import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.extensions.ExtensionTracker;
+import com.laytonsmith.core.functions.AbstractFunction;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.natives.interfaces.Mixed;
@@ -460,8 +464,8 @@ public class Script {
 					}
 					Mixed ret;
 					try {
-						// TODO: Provide generic parameters
-						ret = f.exec(m.getTarget(), env, null, ca);
+						GenericParameters parameters = c.getNodeModifiers().getGenerics();
+						ret = f.exec(m.getTarget(), env, parameters, ca);
 					} finally {
 						if(p != null) {
 							p.stop();

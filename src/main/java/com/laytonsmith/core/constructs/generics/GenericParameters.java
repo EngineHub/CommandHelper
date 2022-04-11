@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.ObjectHelpers;
 import com.laytonsmith.PureUtilities.ObjectHelpers.StandardField;
 import com.laytonsmith.PureUtilities.Pair;
 import com.laytonsmith.core.constructs.CClassType;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 
@@ -171,6 +172,14 @@ public final class GenericParameters {
 	 */
 	public List<Pair<CClassType, LeftHandGenericUse>> getParameters() {
 		return new ArrayList<>(parameters);
+	}
+
+	public List<LeftHandSideType> getLeftHandParameters() {
+		List<LeftHandSideType> ret = new ArrayList<>();
+		for(Pair<CClassType, LeftHandGenericUse> pair : parameters) {
+			ret.add(LeftHandSideType.fromCClassType(pair.getKey(), pair.getValue(), Target.UNKNOWN));
+		}
+		return ret;
 	}
 
 	/**

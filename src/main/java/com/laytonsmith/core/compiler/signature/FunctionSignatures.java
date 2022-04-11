@@ -6,9 +6,11 @@ import java.util.List;
 import java.util.Set;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.ConstraintValidator;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -55,8 +57,9 @@ public final class FunctionSignatures {
 	 * Gets the return {@link CClassType} based on this {@link FunctionSignatures}.If none of the signatures match, a
 	 * compile error is generated.If multiple signatures match, then the most specific shared type is returned.
 	 *
+	 * @param node The function node. This is populated with the generic types if they aren't already there explicitly.
+	 * The explicit nodes are pulled from here as well.
 	 * @param t The code target, used for setting the code target in thrown exceptions.
-	 * @param generics The generic parameters passed to the function.
 	 * @param argTypes The types of the passed arguments.
 	 * @param argTargets The {@link Target}s belonging to the argTypes (in the same order).
 	 * @param inferredReturnType The inferred return type, which are used in case the function call does not
@@ -65,22 +68,19 @@ public final class FunctionSignatures {
 	 * @param exceptions A set to which all type errors will be added.
 	 * @return The return type.
 	 */
-	public LeftHandSideType getReturnType(Target t, GenericParameters generics, List<LeftHandSideType> argTypes,
+	public LeftHandSideType getReturnType(ParseTree node, Target t, List<LeftHandSideType> argTypes,
 			List<Target> argTargets, LeftHandSideType inferredReturnType,
 			Environment env, Set<ConfigCompileException> exceptions) {
 
 		// List all matching signatures, or return the return type of the first match when MatchType MATCH_FIRST is set.
+		GenericParameters generics = node.getNodeModifiers().getGenerics();
 		List<FunctionSignature> matches = new ArrayList<>();
 		for(FunctionSignature signature : this.getSignatures()) {
 			if(signature.matches(argTypes, generics, env, inferredReturnType, false)) {
-				if(this.matchType == MatchType.MATCH_FIRST) {
-					Map<String, LeftHandSideType> typeResolutions
-							= signature.getTypeResolutions(t, argTypes, generics, inferredReturnType, env);
-					return LeftHandSideType.resolveTypeFromGenerics(t, env,
-							signature.getReturnType().getType(), generics, signature.getGenericDeclaration(),
-							typeResolutions);
-				}
 				matches.add(signature);
+				if(this.matchType == MatchType.MATCH_FIRST) {
+					break;
+				}
 			}
 		}
 
@@ -96,8 +96,28 @@ public final class FunctionSignatures {
 			}
 			case 1 -> {
 				// Exactly one signature matches, so return the return type.
-				return LeftHandSideType.resolveTypeFromGenerics(t, env, matches.get(0).getReturnType().getType(), generics,
-						matches.get(0).getGenericDeclaration(), inferredReturnType);
+				FunctionSignature signature = matches.get(0);
+				Map<String, LeftHandSideType> typeResolutions
+						= signature.getTypeResolutions(t, argTypes, generics, inferredReturnType, env);
+				if(generics == null && !typeResolutions.isEmpty()) {
+					// Put them in the node
+					GenericParameters.GenericParametersBuilder builder = GenericParameters.emptyBuilder();
+					for(Map.Entry<String, LeftHandSideType> entry : typeResolutions.entrySet()) {
+						if(entry.getValue() == null) {
+							builder.addParameter(null, null);
+						} else {
+							builder.addParameter(entry.getValue().asConcreteType(t), null);
+						}
+					}
+					generics = builder.build();
+					node.getNodeModifiers().setGenerics(generics);
+					// If this is wrong, this implies we did something wrong here, but just in case.
+					ConstraintValidator.ValidateParametersToDeclaration(t, env, generics,
+							signature.getGenericDeclaration(), inferredReturnType);
+				}
+				return LeftHandSideType.resolveTypeFromGenerics(t, env,
+						signature.getReturnType().getType(), generics, signature.getGenericDeclaration(),
+						typeResolutions);
 			}
 			default -> {
 				// TODO - Ideally, we'd either return a multi-type or the most specific super type of the signatures.

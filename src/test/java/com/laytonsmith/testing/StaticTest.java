@@ -55,6 +55,7 @@ import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.compiler.signature.FunctionSignature;
 import com.laytonsmith.core.compiler.signature.Param;
 import com.laytonsmith.core.constructs.CBoolean;
@@ -65,6 +66,7 @@ import com.laytonsmith.core.constructs.generics.Constraints;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.events.AbstractEvent;
 import com.laytonsmith.core.events.BindableEvent;
 import com.laytonsmith.core.events.EventMixinInterface;
@@ -586,9 +588,15 @@ public class StaticTest {
 			env = StaticTest.env;
 		}
 		env.getEnv(GlobalEnv.class).GetVarList().clear();
-		env.getEnv(CommandHelperEnvironment.class).SetCommandSender(player);
+		if(env.hasEnv(CommandHelperEnvironment.class)) {
+			env.getEnv(CommandHelperEnvironment.class).SetCommandSender(player);
+		}
+		StaticAnalysis staticAnalysis = null;
+		if(env.hasEnv(StaticRuntimeEnv.class)) {
+			staticAnalysis = env.getEnv(StaticRuntimeEnv.class).getAutoIncludeAnalysis();
+		}
 		MethodScriptCompiler.execute(MethodScriptCompiler.compile(
-				MethodScriptCompiler.lex(script, env, null, true), env, envs, null), env, done, null);
+				MethodScriptCompiler.lex(script, env, null, true), env, envs, staticAnalysis), env, done, null);
 	}
 
 	public static void RunCommand(String combinedScript, MCCommandSender player, String command) throws Exception {

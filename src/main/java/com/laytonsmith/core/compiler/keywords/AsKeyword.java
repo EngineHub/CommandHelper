@@ -20,7 +20,7 @@ public class AsKeyword extends Keyword {
 
 	@Override
 	public String docs() {
-		return "Used in foreach loops, to indicate the name of the index variable";
+		return "Used to cast (or crosscast) a value to a specific type.";
 	}
 
 	@Override

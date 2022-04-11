@@ -250,6 +250,12 @@ public class FunctionSignature {
 			if(param.getType() != null && param.getType().isTypeName()) {
 				inferredTypes.put(param.getType().getTypename(), argType);
 			}
+			if(generics != null && genericDeclaration != null) {
+				if(generics.getParameters().size() != genericDeclaration.getParameterCount()) {
+					// Different parameter counts for the generics, so no match on this signature.
+					return false;
+				}
+			}
 			LeftHandSideType paramType = LeftHandSideType.resolveTypeFromGenerics(t, env, param.getType(),
 					generics, genericDeclaration, inferredTypes);
 			// Match parameter.

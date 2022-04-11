@@ -419,13 +419,15 @@ public final class ParseTree implements Cloneable {
 	 * defined type, and for functions and procs, this is the return type of the function. For many values, the type
 	 * will be AUTO. The type may be CNull for literal nulls, but will never be java null.
 	 *
+	 * @param t The code target, used for exceptions for ambiguous matches.
 	 * @param env The environment
 	 * @param inferredType The inferred type, if this is a function call. Otherwise, can be null.
 	 * @return
 	 */
-	public LeftHandSideType getDeclaredType(Environment env, LeftHandSideType inferredType) {
+	public LeftHandSideType getDeclaredType(Target t, Environment env, LeftHandSideType inferredType) {
 		if(isConst()) {
-			return getData().typeof(env).asLeftHandSideType();
+			return Auto.LHSTYPE;
+//			return getData().typeof(env).asLeftHandSideType();
 		} else if(getData() instanceof IVariable ivar) {
 			StaticAnalysis sa = env.getEnv(CompilerEnvironment.class).getStaticAnalysis();
 			if(sa.isLocalEnabled()) {
@@ -453,14 +455,15 @@ public final class ParseTree implements Cloneable {
 					return Auto.TYPE.asLeftHandSideType();
 				}
 			} else {
-				List<LeftHandSideType> argTypes = new ArrayList<>();
 				List<Target> argTargets = new ArrayList<>();
 				Set<ConfigCompileException> exceptions = new HashSet<>();
+				List<LeftHandSideType> argTypes = cf.getCachedFunction()
+						.getResolvedParameterTypes(t, env, this.getNodeModifiers().getGenerics(),
+								inferredType, getChildren());
 				for(ParseTree child : getChildren()) {
-					argTypes.add(child.getDeclaredType(env, inferredType));
 					argTargets.add(child.getTarget());
 				}
-				return cf.getCachedFunction().getReturnType(getTarget(), getNodeModifiers().getGenerics(),
+				return cf.getCachedFunction().getReturnType(this, getTarget(),
 						argTypes, argTargets, inferredType, env, exceptions);
 			}
 		} else {

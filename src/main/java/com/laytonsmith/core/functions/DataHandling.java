@@ -1,6 +1,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Common.FileUtil;
+import com.laytonsmith.PureUtilities.Pair;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.annotations.DocumentLink;
@@ -68,6 +69,7 @@ import com.laytonsmith.core.constructs.generics.ConstraintLocation;
 import com.laytonsmith.core.constructs.generics.Constraints;
 import com.laytonsmith.core.constructs.generics.GenericDeclaration;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
 import com.laytonsmith.core.constructs.generics.UnboundedConstraint;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -600,6 +602,46 @@ public class DataHandling {
 
 			// Invalid parameter. Fall back to handling this function's arguments.
 			return new Scope[] {paramScope, super.linkScope(analysis, valScope, ast, env, exceptions)};
+		}
+
+		@Override
+		public List<LeftHandSideType> getResolvedParameterTypes(Target t, Environment env, GenericParameters generics, LeftHandSideType inferredReturnType, List<ParseTree> children) {
+			List<LeftHandSideType> ret = new ArrayList<>(children.size());
+			if(children.size() == 2) {
+				ret.add(Auto.LHSTYPE);
+				ret.add(Auto.LHSTYPE);
+			} else {
+				Mixed data = children.get(0).getData();
+				LeftHandSideType type;
+				if(data instanceof LeftHandSideType lhst) {
+					type = lhst;
+				} else if(data instanceof CClassType ctype) {
+					type = ctype.asLeftHandSideType();
+				} else {
+					type = Auto.LHSTYPE;
+				}
+				ret.add(type);
+				ret.add(Auto.LHSTYPE);
+				ret.add(type);
+			}
+			return ret;
+		}
+
+		@Override
+		public LeftHandSideType getReturnType(ParseTree node, Target t, List<LeftHandSideType> argTypes, List<Target> argTargets, LeftHandSideType inferredReturnType, Environment env, Set<ConfigCompileException> exceptions) {
+			if(node.getChildren().size() == 2) {
+				return Auto.LHSTYPE;
+			} else {
+				Mixed data = node.getChildAt(0).getData();
+				if(data instanceof LeftHandSideType lhst) {
+					return lhst;
+				} else if(data instanceof CClassType type) {
+					return type.asLeftHandSideType();
+				} else {
+					exceptions.add(new ConfigCompileException("Unexpected type passed to assign", t));
+					return Auto.LHSTYPE;
+				}
+			}
 		}
 
 		@Override
@@ -4045,6 +4087,85 @@ public class DataHandling {
 					+ " A RangeException is thrown if size is negative, or larger than a 32 bits signed integer."
 					+ " A CastException is thrown when size cannot be cast to an int.";
 		}
+	}
+
+	@api
+	public static class cast extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public String getName() {
+			return "cast";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "value {value, type} Returns the value, cast as the appropriate type. For true casts, this"
+					+ "is a compile time only operation, though for cross casts, an actual conversion is done"
+					+ " on the type, and the resulting value is not strictly equal to the original. ----"
+					+ " Casting is in general the process of informing the typechecker that we expect the"
+					+ " actual, concrete, underlying type to be of the correct value. Consider for instance"
+					+ " this code:\n\n"
+					+ " <%CODE|\n"
+					+ "primitive @p = 1.0; // Actual value is 1.0, which is a double\n"
+					+ "int @i = @p; // Compiler complains, because @p is a primitive, and not an int\n"
+					+ "%>";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_6;
+		}
+
+		@Override
+		public FunctionSignatures getSignatures() {
+			GenericDeclaration declaration = new GenericDeclaration(Target.UNKNOWN,
+					new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+						new UnboundedConstraint(Target.UNKNOWN, "T")));
+			LeftHandSideType t = LeftHandSideType.fromGenericDefinitionType(declaration, "T", null, Target.UNKNOWN);
+			return new SignatureBuilder(t)
+					.param(Auto.TYPE, "value", "The value to cast.")
+					.setGenericDeclaration(declaration, "The value to cast to.")
+					.throwsEx(CRECastException.class, "If the underlying type cannot actually be cast to the specified type.")
+					.build();
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			if(generics != null) {
+				Pair<CClassType, LeftHandGenericUse> expectedType = generics.getParameters().get(0);
+				// We would probably throw an exception later anyways, but putting the cast here ensures that we
+				// will for sure throw an exception, and at the expected location.
+				if(!args[0].isInstanceOf(expectedType.getKey(), expectedType.getValue(), env)) {
+					// TODO: Implement cross casting
+					String value = expectedType.getKey().toString() + (expectedType.getValue() == null ? ""
+							: expectedType.getValue().toString());
+					throw new CRECastException("Expected a value of type " + value + " but " + args[0].typeof(env)
+							+ " was found.", t);
+				}
+			}
+			return args[0];
+		}
+
 	}
 
 }

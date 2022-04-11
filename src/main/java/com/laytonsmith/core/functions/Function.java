@@ -76,11 +76,11 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 	 * @param t The location of this function call in the code, used for correct error messages
 	 * @param env The current code environment
 	 * @param generics The generic type parameter(s) passed to the function. For instance, in the code
-	 * {@code array<string>("asdf", "fdsa")} this will contain the reference to the {@code string} type. This will
-	 * have been validated beforehand to be within the bounds of the function signature. If no type parameters
-	 * were passed in, or if the diamond operator was used, this will contain the default type values filled in.
-	 * However, this parameter MAY be null, which indicates the same thing, and so all functions must accept
-	 * null values here.
+	 * {@code array<string>("asdf", "fdsa")} this will contain the reference to the {@code string} type. This will have
+	 * been validated beforehand to be within the bounds of the function signature. If no type parameters were passed
+	 * in, or if the diamond operator was used, this will contain the default or inferred values filled in. However,
+	 * this parameter MAY be null, if type checking is disabled, so functions should check for null first, and use auto
+	 * for type parameters in that case.
 	 * @param args An array of evaluated objects
 	 * @return
 	 */
@@ -96,19 +96,19 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 	/**
 	 * Gets the return type of this function, based on the types of the passed arguments.
 	 *
+	 * @param node The function node. Used to pull out explicit generic parameters, or set them, if they are inferred.
 	 * @param t The code target, used for setting the code target in thrown exceptions.
-	 * @param generics
 	 * @param argTypes The types of the passed arguments.
 	 * @param argTargets The {@link Target}s belonging to the argTypes (in the same order).
-	 * @param inferredReturnType The inferred return type of the function. This may be null. This is used to infer
-	 * types with generic typenames.
+	 * @param inferredReturnType The inferred return type of the function. This may be null. This is used to infer types
+	 * with generic typenames.
 	 * @param env The {@link Environment}, used for instanceof checks on types.
 	 * @param exceptions A set to which all type errors will be added.
 	 * @return The return type of this function when invoked with the given argument types. If the return type is
 	 * unknown, {@link CClassType#AUTO} is returned, indicating that this value should be handled as dynamic during
 	 * static type checking.
 	 */
-	public LeftHandSideType getReturnType(Target t, GenericParameters generics, List<LeftHandSideType> argTypes,
+	public LeftHandSideType getReturnType(ParseTree node, Target t, List<LeftHandSideType> argTypes,
 			List<Target> argTargets, LeftHandSideType inferredReturnType, Environment env,
 			Set<ConfigCompileException> exceptions);
 
@@ -128,6 +128,25 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 	public LeftHandSideType typecheck(StaticAnalysis analysis,
 			ParseTree ast, LeftHandSideType inferredReturnType,
 			Environment env, Set<ConfigCompileException> exceptions);
+
+	/**
+	 * Returns a list of resolved parameter types for the function.For functions without type parameters, this is just
+	 * the list of declared types of the children. For functions with type parameters, this is based on the other inputs
+	 * to the function, or perhaps the inferred return type. (These are generally function specific definitions.)
+	 * <p>
+	 * Implementation note: This is correctly implemented for functions that implement getSignatures, and should
+	 * generally not need to be overridden.
+	 *
+	 * @param t The code target.
+	 * @param env The environment.
+	 * @param generics The explicit generic parameters
+	 * @param children The child nodes of this function.
+	 * @param inferredReturnType The inferred return type of this function. May not be used.
+	 * @return A List of LeftHandSideTypes. This should be the same size as the children.
+	 */
+	public List<LeftHandSideType> getResolvedParameterTypes(Target t, Environment env, GenericParameters generics,
+			LeftHandSideType inferredReturnType,
+			List<ParseTree> children);
 
 	/**
 	 * If functions contain declarations or references, then these functions should create a new scope, link it to the
@@ -175,11 +194,10 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 	 * @param env The environment
 	 * @param parent The parent script, which can be used to evaluate nodes.
 	 * @param generics The generic type parameter(s) passed to the function. For instance, in the code
-	 * {@code array<string>("asdf", "fdsa")} this will contain the reference to the {@code string} type. This will
-	 * have been validated beforehand to be within the bounds of the function signature. If no type parameters
-	 * were passed in, or if the diamond operator was used, this will contain the default type values filled in.
-	 * However, this parameter MAY be null, which indicates the same thing, and so all functions must accept
-	 * null values here.
+	 * {@code array<string>("asdf", "fdsa")} this will contain the reference to the {@code string} type. This will have
+	 * been validated beforehand to be within the bounds of the function signature. If no type parameters were passed
+	 * in, or if the diamond operator was used, this will contain the default type values filled in. However, this
+	 * parameter MAY be null, which indicates the same thing, and so all functions must accept null values here.
 	 * @param nodes the raw parse tree nodes, which should be evaluated by this function.
 	 * @return The resulting value after function execution.
 	 */

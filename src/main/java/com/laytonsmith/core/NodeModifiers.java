@@ -1,6 +1,8 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.SmartComment;
+import com.laytonsmith.core.constructs.generics.ConstraintValidator;
+import com.laytonsmith.core.constructs.generics.GenericDeclaration;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
 
 /**
@@ -38,6 +40,11 @@ public class NodeModifiers {
 		return comment;
 	}
 
+	/**
+	 * Sets the generics for this node. For instance, if this is a function, and the code is {@code func<string>()},
+	 * then the generic parameter {@code string} would be associated with the func node.
+	 * @param generics The generics to set.
+	 */
 	public void setGenerics(GenericParameters generics) {
 		this.genericParameters = generics;
 	}

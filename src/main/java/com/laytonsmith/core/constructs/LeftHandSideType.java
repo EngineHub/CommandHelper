@@ -397,7 +397,7 @@ public final class LeftHandSideType extends Construct {
 		return StringUtils.Join(types, " | ", pair -> {
 			CClassType type = pair.getKey();
 			LeftHandGenericUse lhgu = pair.getValue();
-			String ret = type.getSimpleName();
+			String ret = type == null ? "none" : type.getSimpleName();
 			if(lhgu != null) {
 				ret += "<";
 				ret += lhgu.toSimpleString();

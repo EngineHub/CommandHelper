@@ -1,5 +1,6 @@
 package com.laytonsmith.core.compiler.signatures;
 
+import com.laytonsmith.core.ParseTree;
 import static org.junit.Assert.*;
 
 import java.util.ArrayList;
@@ -20,6 +21,7 @@ import com.laytonsmith.core.compiler.signature.Throws;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CClassType;
+import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.LeftHandSideType;
@@ -33,6 +35,7 @@ import com.laytonsmith.testing.StaticTest;
 public class FunctionSignaturesTest {
 
 	private Environment env;
+	private ParseTree fakeParseTree;
 
 	@BeforeClass
 	public static void setUpClass() throws Exception {
@@ -42,6 +45,7 @@ public class FunctionSignaturesTest {
 	@Before
 	public void setUp() throws Exception {
 		this.env = Static.GenerateStandaloneEnvironment(false);
+		this.fakeParseTree = new ParseTree(new CFunction("test", Target.UNKNOWN), null);
 	}
 
 	@Test
@@ -113,8 +117,8 @@ public class FunctionSignaturesTest {
 		// Assert return type and compile exceptions for zero arguments.
 		Set<ConfigCompileException> exceptions = new HashSet<>();
 		LeftHandSideType returnType = signatures.getReturnType(
+				fakeParseTree,
 				Target.UNKNOWN,
-				null,
 				Arrays.asList(),
 				Arrays.asList(),
 				null, this.env, exceptions);
@@ -131,8 +135,8 @@ public class FunctionSignaturesTest {
 		// Assert return type and compile exceptions for one argument.
 		Set<ConfigCompileException> exceptions = new HashSet<>();
 		LeftHandSideType returnType = signatures.getReturnType(
+				fakeParseTree,
 				Target.UNKNOWN,
-				null,
 				Arrays.asList(CInt.TYPE.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN),
 				null, this.env, exceptions);
@@ -149,8 +153,8 @@ public class FunctionSignaturesTest {
 		// Assert return type and compile exceptions for one argument.
 		Set<ConfigCompileException> exceptions = new HashSet<>();
 		LeftHandSideType returnType = signatures.getReturnType(
+				fakeParseTree,
 				Target.UNKNOWN,
-				null,
 				Arrays.asList(CInt.TYPE.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN),
 				null, this.env, exceptions);
@@ -167,8 +171,8 @@ public class FunctionSignaturesTest {
 		// Assert return type and compile exceptions for one argument.
 		Set<ConfigCompileException> exceptions = new HashSet<>();
 		LeftHandSideType returnType = signatures.getReturnType(
+				fakeParseTree,
 				Target.UNKNOWN,
-				null,
 				Arrays.asList(CClassType.AUTO.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN),
 				null, this.env, exceptions);
@@ -185,8 +189,8 @@ public class FunctionSignaturesTest {
 		// Assert return type and compile exceptions for two arguments.
 		Set<ConfigCompileException> exceptions = new HashSet<>();
 		LeftHandSideType returnType = signatures.getReturnType(
+				fakeParseTree,
 				Target.UNKNOWN,
-				null,
 				Arrays.asList(),
 				Arrays.asList(),
 				null, this.env, exceptions);
@@ -203,8 +207,8 @@ public class FunctionSignaturesTest {
 		// Assert return type and compile exceptions for two arguments.
 		Set<ConfigCompileException> exceptions = new HashSet<>();
 		LeftHandSideType returnType = signatures.getReturnType(
+				fakeParseTree,
 				Target.UNKNOWN,
-				null,
 				Arrays.asList(CInt.TYPE.asLeftHandSideType(), CBoolean.TYPE.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN, Target.UNKNOWN),
 				null, this.env, exceptions);
@@ -221,8 +225,8 @@ public class FunctionSignaturesTest {
 		// Assert return type and compile exceptions for one wrongly typed argument.
 		Set<ConfigCompileException> exceptions = new HashSet<>();
 		LeftHandSideType returnType = signatures.getReturnType(
+				fakeParseTree,
 				Target.UNKNOWN,
-				null,
 				Arrays.asList(CBoolean.TYPE.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN),
 				null, this.env, exceptions);
@@ -239,8 +243,8 @@ public class FunctionSignaturesTest {
 		// Assert return type and compile exceptions for one wrongly typed argument.
 		Set<ConfigCompileException> exceptions = new HashSet<>();
 		LeftHandSideType returnType = signatures.getReturnType(
+				fakeParseTree,
 				Target.UNKNOWN,
-				null,
 				Arrays.asList(CVoid.TYPE.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN),
 				null, this.env, exceptions);
@@ -258,8 +262,8 @@ public class FunctionSignaturesTest {
 		// Assert return type and compile exceptions for matching the first signature.
 		Set<ConfigCompileException> exceptions = new HashSet<>();
 		LeftHandSideType returnType = signatures.getReturnType(
+				fakeParseTree,
 				Target.UNKNOWN,
-				null,
 				Arrays.asList(CInt.TYPE.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN),
 				null, this.env, exceptions);
@@ -277,8 +281,8 @@ public class FunctionSignaturesTest {
 		// Assert return type and compile exceptions for matching the second signature.
 		Set<ConfigCompileException> exceptions = new HashSet<>();
 		LeftHandSideType returnType = signatures.getReturnType(
+				fakeParseTree,
 				Target.UNKNOWN,
-				null,
 				Arrays.asList(CBoolean.TYPE.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN),
 				null, this.env, exceptions);
@@ -296,8 +300,8 @@ public class FunctionSignaturesTest {
 		// Assert return type and compile exceptions for matching the both signatures.
 		Set<ConfigCompileException> exceptions = new HashSet<>();
 		LeftHandSideType returnType = signatures.getReturnType(
+				fakeParseTree,
 				Target.UNKNOWN,
-				null,
 				Arrays.asList(CClassType.AUTO.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN),
 				null, this.env, exceptions);
@@ -316,8 +320,8 @@ public class FunctionSignaturesTest {
 		// Assert return type and compile exceptions for matching the both signatures.
 		Set<ConfigCompileException> exceptions = new HashSet<>();
 		LeftHandSideType returnType = signatures.getReturnType(
+				fakeParseTree,
 				Target.UNKNOWN,
-				null,
 				Arrays.asList(CClassType.AUTO.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN),
 				null, this.env, exceptions);
@@ -334,16 +338,16 @@ public class FunctionSignaturesTest {
 		// Assert return type and compile exceptions for zero and one arguments.
 		Set<ConfigCompileException> exceptions = new HashSet<>();
 		LeftHandSideType returnType1 = signatures.getReturnType(
+				fakeParseTree,
 				Target.UNKNOWN,
-				null,
 				Arrays.asList(),
 				Arrays.asList(),
 				null, this.env, exceptions);
 		assertEquals(CArray.TYPE.asLeftHandSideType(), returnType1);
 		assertArrayEquals(new Object[0], exceptions.toArray());
 		LeftHandSideType returnType2 = signatures.getReturnType(
+				fakeParseTree,
 				Target.UNKNOWN,
-				null,
 				Arrays.asList(CInt.TYPE.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN),
 				null, this.env, exceptions);
@@ -360,24 +364,24 @@ public class FunctionSignaturesTest {
 		// Assert return type and compile exceptions for zero, one and two arguments.
 		Set<ConfigCompileException> exceptions = new HashSet<>();
 		LeftHandSideType returnType1 = signatures.getReturnType(
+				fakeParseTree,
 				Target.UNKNOWN,
-				null,
 				Arrays.asList(),
 				Arrays.asList(),
 				null, this.env, exceptions);
 		assertEquals(CArray.TYPE.asLeftHandSideType(), returnType1);
 		assertArrayEquals(new Object[0], exceptions.toArray());
 		LeftHandSideType returnType2 = signatures.getReturnType(
+				fakeParseTree,
 				Target.UNKNOWN,
-				null,
 				Arrays.asList(CInt.TYPE.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN),
 				null, this.env, exceptions);
 		assertEquals(CArray.TYPE.asLeftHandSideType(), returnType2);
 		assertArrayEquals(new Object[0], exceptions.toArray());
 		LeftHandSideType returnType3 = signatures.getReturnType(
+				fakeParseTree,
 				Target.UNKNOWN,
-				null,
 				Arrays.asList(CInt.TYPE.asLeftHandSideType(), CInt.TYPE.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN, Target.UNKNOWN),
 				null, this.env, exceptions);
@@ -400,24 +404,24 @@ public class FunctionSignaturesTest {
 		// Assert return type and compile exceptions for matching the signature in multiple ways.
 		Set<ConfigCompileException> exceptions = new HashSet<>();
 		LeftHandSideType returnType = signatures.getReturnType(
+				fakeParseTree,
 				Target.UNKNOWN,
-				null,
 				Arrays.asList(CInt.TYPE.asLeftHandSideType(), CInt.TYPE.asLeftHandSideType(), CArray.TYPE.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN, Target.UNKNOWN, Target.UNKNOWN),
 				null, this.env, exceptions);
 		assertEquals(CArray.TYPE.asLeftHandSideType(), returnType);
 		assertArrayEquals(new Object[0], exceptions.toArray());
 		LeftHandSideType returnType2 = signatures.getReturnType(
+				fakeParseTree,
 				Target.UNKNOWN,
-				null,
 				Arrays.asList(CInt.TYPE.asLeftHandSideType(), CInt.TYPE.asLeftHandSideType(), CInt.TYPE.asLeftHandSideType(), CInt.TYPE.asLeftHandSideType(), CArray.TYPE.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN, Target.UNKNOWN, Target.UNKNOWN, Target.UNKNOWN, Target.UNKNOWN),
 				null, this.env, exceptions);
 		assertEquals(CArray.TYPE.asLeftHandSideType(), returnType2);
 		assertArrayEquals(new Object[0], exceptions.toArray());
 		LeftHandSideType returnType3 = signatures.getReturnType(
+				fakeParseTree,
 				Target.UNKNOWN,
-				null,
 				Arrays.asList(CInt.TYPE.asLeftHandSideType(), CInt.TYPE.asLeftHandSideType(), CInt.TYPE.asLeftHandSideType(), CInt.TYPE.asLeftHandSideType(), CArray.TYPE.asLeftHandSideType(), CArray.TYPE.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN, Target.UNKNOWN,
 						Target.UNKNOWN, Target.UNKNOWN, Target.UNKNOWN, Target.UNKNOWN),
@@ -452,7 +456,8 @@ public class FunctionSignaturesTest {
 				argTargets.add(Target.UNKNOWN);
 			}
 			LeftHandSideType returnType = signatures.getReturnType(
-					Target.UNKNOWN, null, argTypes, argTargets, null, this.env, exceptions);
+					fakeParseTree,
+					Target.UNKNOWN, argTypes, argTargets, null, this.env, exceptions);
 			assertEquals(CArray.TYPE.asLeftHandSideType(), returnType);
 			assertArrayEquals(new Object[0], exceptions.toArray());
 		}

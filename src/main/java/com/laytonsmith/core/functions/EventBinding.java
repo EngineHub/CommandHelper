@@ -226,7 +226,7 @@ public class EventBinding {
 			}
 
 			// Return the return type of this function.
-			return this.getReturnType(ast.getTarget(), ast.getNodeModifiers().getGenerics(),
+			return this.getReturnType(ast, ast.getTarget(),
 					argTypes, argTargets, inferredType, env, exceptions);
 		}
 
