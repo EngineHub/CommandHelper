@@ -172,6 +172,7 @@ public final class Static {
 	 * @param number The java number to convert.
 	 * @param t The code target.
 	 * @return A construct equivalent to the given java number, whose the type is the better to represent it.
+	 * @deprecated Use {@link ArgumentValidation#getNumber(com.laytonsmith.core.natives.interfaces.Mixed, com.laytonsmith.core.constructs.Target, com.laytonsmith.core.environments.Environment)}
 	 */
 	@Deprecated
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")

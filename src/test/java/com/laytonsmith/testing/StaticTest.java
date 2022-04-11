@@ -56,7 +56,6 @@ import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.signature.FunctionSignature;
-import com.laytonsmith.core.compiler.signature.FunctionSignatures;
 import com.laytonsmith.core.compiler.signature.Param;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CString;
