@@ -1,8 +1,6 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.SmartComment;
-import com.laytonsmith.core.constructs.generics.ConstraintValidator;
-import com.laytonsmith.core.constructs.generics.GenericDeclaration;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
 
 /**
