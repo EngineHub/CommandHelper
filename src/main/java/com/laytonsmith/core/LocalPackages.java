@@ -167,7 +167,7 @@ public class LocalPackages {
 		if(!compileExceptions.isEmpty()) {
 			compileErrors = true;
 			for(ConfigCompileException ex : compileExceptions) {
-				ConfigRuntimeException.HandleUncaughtException(ex, "Compile error in script.", player);
+				ConfigRuntimeException.HandleUncaughtException(ex, "Compile error in script.", player, env);
 			}
 		}
 
