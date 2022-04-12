@@ -3,6 +3,8 @@ package com.laytonsmith.core;
 
 import com.laytonsmith.core.compiler.TokenStream;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
+import com.laytonsmith.core.constructs.Auto;
+import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.RuntimeMode;
@@ -27,11 +29,17 @@ public class StaticAnalysisTest {
 		StaticTest.InstallFakeServerFrontend();
 	}
 
-	public String runScript(String script) throws Exception {
-		StaticAnalysis staticAnalysis = new StaticAnalysis(true);
+	Environment env;
+	StaticAnalysis staticAnalysis;
+
+	public void setup() throws Exception {
+		staticAnalysis = new StaticAnalysis(true);
 		staticAnalysis.setLocalEnable(true);
-		Environment env
-				= Static.GenerateStandaloneEnvironment(false, EnumSet.of(RuntimeMode.CMDLINE), null, staticAnalysis);
+		this.env = Static.GenerateStandaloneEnvironment(false, EnumSet.of(RuntimeMode.CMDLINE), null, staticAnalysis);
+	}
+
+	public String runScript(String script) throws Exception {
+		setup();
 		return StaticTest.SRun(script, null, env);
 	}
 
@@ -44,15 +52,12 @@ public class StaticAnalysisTest {
 		}
 	}
 
-	public void saScript(String script) throws Exception {
-		StaticAnalysis staticAnalysis = new StaticAnalysis(true);
-		staticAnalysis.setLocalEnable(true);
-		Environment env
-				= Static.GenerateStandaloneEnvironment(false, EnumSet.of(RuntimeMode.CMDLINE), null, staticAnalysis);
+	public ParseTree saScript(String script) throws Exception {
+		setup();
 		try {
 			try {
 				TokenStream stream = MethodScriptCompiler.lex(script, env, new File("test.ms"), true);
-				MethodScriptCompiler.compile(stream, env, env.getEnvClasses(), staticAnalysis);
+				return MethodScriptCompiler.compile(stream, env, env.getEnvClasses(), staticAnalysis);
 			} catch(ConfigCompileException ex) {
 				throw new ConfigCompileGroupException(new HashSet<>(Arrays.asList(ex)), ex);
 			}
@@ -117,10 +122,10 @@ public class StaticAnalysisTest {
 
 	@Test
 	public void testTernaryIfReturnCorrectType() throws Exception {
-		saScript("string @s = if(dyn(true), 'string', 'string')");
-		saScriptExpectException("string @s = if(dyn(true), 'string', 0)");
+		saScript("string @r = 'string'; string @k = 'string'; string @s = if(dyn(true), @r, @k)");
+		saScriptExpectException("string @r = 'string'; int @i = 0; string @s = if(dyn(true), @r, @i)");
 		saScript("string @s = if(dyn(true), get_value('asdf'), get_value('fdsa'));");
-		saScript("number @n = if(dyn(true), 1, 2.0);");
+		saScript("int @i = 1; double @d = 2.0; number @n = if(dyn(true), @i, @d);");
 	}
 
 	@Test
@@ -144,6 +149,31 @@ public class StaticAnalysisTest {
 		saScript("primitive @p = 1; int @i = cast(@p);");
 		runScript("primitive @p = 1; int @i = cast(@p);");
 
+	}
+
+	@Test
+	public void testRecursiveTypeInferrenceWorks() throws Exception {
+		// dyn is defined as `<T> T dyn(T @value)` and so is a perfect candidate for this test
+		ParseTree tree = saScript("string @r = 'string'; string @s = dyn(dyn(dyn(dyn(dyn(@r)))));");
+		ParseTree topDynNode = tree.getChildAt(0).getChildAt(1).getChildAt(2);
+		Assert.assertEquals(CString.TYPE.asLeftHandSideType(),
+				topDynNode.getDeclaredType(Target.UNKNOWN, env, null));
+		Assert.assertEquals(CString.TYPE.asLeftHandSideType(),
+				topDynNode.getDeclaredType(Target.UNKNOWN, env, CString.TYPE.asLeftHandSideType()));
+		// This is auto, because constants are auto typed.
+		tree = saScript("string @s = dyn(dyn(dyn(dyn(dyn('string')))));");
+		topDynNode = tree.getChildAt(0).getChildAt(2);
+		Assert.assertEquals(Auto.LHSTYPE,
+				topDynNode.getDeclaredType(Target.UNKNOWN, env, null));
+		Assert.assertEquals(Auto.LHSTYPE,
+				topDynNode.getDeclaredType(Target.UNKNOWN, env, CString.TYPE.asLeftHandSideType()));
+
+		saScriptExpectException("string @s = dyn(dyn(dyn(array())));");
+	}
+
+	@Test
+	public void testHardcodedTypesAreAuto() throws Exception {
+		saScript("boolean @b = '123' < '123';");
 	}
 
 }

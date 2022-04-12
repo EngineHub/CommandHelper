@@ -3,6 +3,7 @@ package com.laytonsmith.core.compiler.analysis;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
+import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CKeyword;
@@ -443,6 +444,9 @@ public class StaticAnalysis {
 		}
 
 		// The node is some other Construct, so return its type.
+		if(ast.isConst()) {
+			return Auto.LHSTYPE;
+		}
 		try {
 			// TODO - Add LHGU
 			return LeftHandSideType.fromCClassType(node.typeof(env), null, node.getTarget());

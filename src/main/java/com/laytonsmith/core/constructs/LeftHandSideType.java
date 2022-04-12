@@ -490,7 +490,7 @@ public final class LeftHandSideType extends Construct {
 			throw new CREIllegalArgumentException(exMsg, t);
 		}
 		Pair<CClassType, LeftHandGenericUse> type = types.get(0);
-		if(type.getValue() != null) {
+		if(type.getValue() != null && !type.getValue().getConstraints().isEmpty()) {
 			throw new CREIllegalArgumentException(exMsg, t);
 		}
 		return type.getKey();
