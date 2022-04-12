@@ -4,6 +4,7 @@ import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.analysis.Declaration;
 import com.laytonsmith.core.compiler.analysis.Namespace;
+import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.CFunction;
@@ -431,28 +432,38 @@ public final class ParseTree implements Cloneable {
 		} else if(getData() instanceof IVariable ivar) {
 			StaticAnalysis sa = env.getEnv(CompilerEnvironment.class).getStaticAnalysis();
 			if(sa.isLocalEnabled()) {
-				List<Declaration> decls = new ArrayList<>(sa.getTermScope(this).getDeclarations(Namespace.IVARIABLE, ivar.getVariableName()));
+				Scope scope = sa.getTermScope(this);
+				if(scope == null) {
+					System.out.println("Could not determine scope for " + this.getTarget());
+					return Auto.LHSTYPE;
+				}
+				List<Declaration> decls = new ArrayList<>(scope.getDeclarations(Namespace.IVARIABLE, ivar.getVariableName()));
 				if(decls.size() == 1) {
 					return decls.get(0).getType();
 				} else {
-					return Auto.TYPE.asLeftHandSideType();
+					return Auto.LHSTYPE;
 				}
 			} else {
 				// This isn't possible to accurately get without static analysis enabled.
-				return Auto.TYPE.asLeftHandSideType();
+				return Auto.LHSTYPE;
 			}
 		} else if(getData() instanceof CFunction cf) {
 			if(cf.hasProcedure()) {
 				StaticAnalysis sa = env.getEnv(CompilerEnvironment.class).getStaticAnalysis();
 				if(sa.isLocalEnabled()) {
-					List<Declaration> decls = new ArrayList<>(sa.getTermScope(this).getDeclarations(Namespace.PROCEDURE, cf.val()));
+					Scope scope = sa.getTermScope(this);
+					if(scope == null) {
+						System.out.println("Could not determine scope for " + this.getTarget());
+						return Auto.LHSTYPE;
+					}
+					List<Declaration> decls = new ArrayList<>(scope.getDeclarations(Namespace.PROCEDURE, cf.val()));
 					if(decls.size() == 1) {
 						return decls.get(0).getType();
 					} else {
-						return Auto.TYPE.asLeftHandSideType();
+						return Auto.LHSTYPE;
 					}
 				} else {
-					return Auto.TYPE.asLeftHandSideType();
+					return Auto.LHSTYPE;
 				}
 			} else {
 				List<Target> argTargets = new ArrayList<>();
