@@ -205,8 +205,8 @@ public class IncludeCache {
 	}
 
 	/**
-	 * Adds a list of auto_include.ms files this object. These are executed when {@link #registerAutoIncludes} is
-	 * called.
+	 * Adds a list of auto_include.ms files this object.
+	 * These are executed when {@link #executeAutoIncludes} is called.
 	 *
 	 * @param autoIncludes The list of auto_include.ms files to be added
 	 */

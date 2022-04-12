@@ -3,6 +3,7 @@ package com.laytonsmith.core;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.CancelCommandException;
@@ -10,12 +11,14 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
+import com.laytonsmith.core.functions.IncludeCache;
 import com.laytonsmith.core.profiler.ProfilePoint;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
@@ -149,31 +152,32 @@ public class LocalPackages {
 	 * @param env The {@link Environment} to compile with
 	 */
 	public void compileMS(MCPlayer player, Environment env) {
-		@SuppressWarnings("deprecation") // Remove as soon as static analysis is enforced.
-		boolean staticAnalysisEnabled = StaticAnalysis.enabled()
-				|| (env.hasEnv(CompilerEnvironment.class)
-				&& env.getEnv(CompilerEnvironment.class).getStaticAnalysis() != null
-				&& env.getEnv(CompilerEnvironment.class).getStaticAnalysis().isLocalEnabled());
-		for(FileInfo fi : ms) {
-			// Clone base environment for this ms file to potentially make changes to.
-			Environment msFileEnv;
-			if(staticAnalysisEnabled) {
-				try {
-					msFileEnv = env.clone();
-				} catch (CloneNotSupportedException e) {
-					throw new Error("Environment wasn't clonable, while it should be.", e);
-				}
-			} else {
-				// Compatibility behavior to not silently change code behavior. Static analysis does catch code
-				// that relies on this behavior, so when static analysis is enforced, this case should be removed.
-				msFileEnv = env;
+		// Compile auto includes before main ms files
+		Set<ConfigCompileException> compileExceptions = new HashSet<>();
+		if(StaticAnalysis.enabled()) {
+			StaticAnalysis.setAndAnalyzeAutoIncludes(
+					autoIncludes, env, env.getEnvClasses(), compileExceptions);
+		} else {
+			// If StaticAnalysis is off, we have to compile auto includes here.
+			for(File f : autoIncludes) {
+				IncludeCache.get(f, env, env.getEnvClasses(), new StaticAnalysis(true),
+						new Target(0, f, 0), compileExceptions);
 			}
+		}
+		if(!compileExceptions.isEmpty()) {
+			compileErrors = true;
+			for(ConfigCompileException ex : compileExceptions) {
+				ConfigRuntimeException.HandleUncaughtException(ex, "Compile error in script.", player);
+			}
+		}
 
+		// Compile main ms files after auto includes
+		for(FileInfo fi : ms) {
 			try {
 				StaticAnalysis analysis = new StaticAnalysis(true);
 				msCompiled.add(MethodScriptCompiler.compile(
-						MethodScriptCompiler.lex(fi.contents, msFileEnv, fi.file, true),
-						msFileEnv, msFileEnv.getEnvClasses(), analysis));
+						MethodScriptCompiler.lex(fi.contents, env, fi.file, true),
+						env, env.getEnvClasses(), analysis));
 			} catch (ConfigCompileGroupException e) {
 				compileErrors = true;
 				ConfigRuntimeException.HandleUncaughtException(e, fi.file.getAbsolutePath()
@@ -196,9 +200,27 @@ public class LocalPackages {
 	 * @param env The {@link Environment} to execute with
 	 */
 	public void executeMS(Environment env) {
+		@SuppressWarnings("deprecation") // Remove as soon as static analysis is enforced.
+		boolean staticAnalysisEnabled = StaticAnalysis.enabled()
+				|| (env.hasEnv(CompilerEnvironment.class)
+				&& env.getEnv(CompilerEnvironment.class).getStaticAnalysis() != null
+				&& env.getEnv(CompilerEnvironment.class).getStaticAnalysis().isLocalEnabled());
 		for(ParseTree pt : msCompiled) {
 			try {
-				MethodScriptCompiler.execute(pt, env, null, null);
+				// Clone base environment for this ms file to potentially make changes to.
+				Environment msFileEnv;
+				if(staticAnalysisEnabled) {
+					try {
+						msFileEnv = env.clone();
+					} catch (CloneNotSupportedException e) {
+						throw new Error("Environment wasn't clonable, while it should be.", e);
+					}
+				} else {
+					// Compatibility behavior to not silently change code behavior. Static analysis does catch code
+					// that relies on this behavior, so when static analysis is enforced, this case should be removed.
+					msFileEnv = env;
+				}
+				MethodScriptCompiler.execute(pt, msFileEnv, null, null);
 			} catch (ConfigRuntimeException e) {
 				ConfigRuntimeException.HandleUncaughtException(e, env);
 			} catch (CancelCommandException e) {

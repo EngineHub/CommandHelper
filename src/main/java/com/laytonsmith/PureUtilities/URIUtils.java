@@ -27,4 +27,13 @@ public final class URIUtils {
 		}
 		return newURI;
 	}
+
+	/**
+	 * Creates and canonicalizes a URI from a String. See {@link #canonicalize}.
+	 * @param uri
+	 * @return
+	 */
+	public static URI canonicalize(String uri) {
+		return canonicalize(URI.create(uri));
+	}
 }
