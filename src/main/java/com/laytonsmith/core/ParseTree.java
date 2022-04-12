@@ -1,6 +1,5 @@
 package com.laytonsmith.core;
 
-import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.analysis.Declaration;
 import com.laytonsmith.core.compiler.analysis.Namespace;
@@ -416,26 +415,25 @@ public final class ParseTree implements Cloneable {
 	}
 
 	/**
-	 * Returns the declared CClassType of this node.For constants, this is just the type, for variables, this is the
-	 * defined type, and for functions and procs, this is the return type of the function. For many values, the type
-	 * will be AUTO. The type may be CNull for literal nulls, but will never be java null.
+	 * Returns the declared CClassType of this node. For constants, this is just the type, for variables, this is the
+	 * defined type, and for functions and procs, this is the return type of the function.For many values, the type will
+	 * be AUTO. The type may be CNull for literal nulls, but will never be java null.
 	 *
+	 * @param sa The static analysis object.
 	 * @param t The code target, used for exceptions for ambiguous matches.
 	 * @param env The environment
 	 * @param inferredType The inferred type, if this is a function call. Otherwise, can be null.
 	 * @return
 	 */
-	public LeftHandSideType getDeclaredType(Target t, Environment env, LeftHandSideType inferredType) {
+	public LeftHandSideType getDeclaredType(StaticAnalysis sa, Target t, Environment env, LeftHandSideType inferredType) {
 		if(isConst()) {
 			return Auto.LHSTYPE;
 //			return getData().typeof(env).asLeftHandSideType();
 		} else if(getData() instanceof IVariable ivar) {
-			StaticAnalysis sa = env.getEnv(CompilerEnvironment.class).getStaticAnalysis();
 			if(sa.isLocalEnabled()) {
 				Scope scope = sa.getTermScope(this);
 				if(scope == null) {
-					System.out.println("Could not determine scope for " + this.getTarget());
-					return Auto.LHSTYPE;
+					throw new RuntimeException("Could not determine scope for " + this.getTarget());
 				}
 				List<Declaration> decls = new ArrayList<>(scope.getDeclarations(Namespace.IVARIABLE, ivar.getVariableName()));
 				if(decls.size() == 1) {
@@ -449,12 +447,10 @@ public final class ParseTree implements Cloneable {
 			}
 		} else if(getData() instanceof CFunction cf) {
 			if(cf.hasProcedure()) {
-				StaticAnalysis sa = env.getEnv(CompilerEnvironment.class).getStaticAnalysis();
 				if(sa.isLocalEnabled()) {
 					Scope scope = sa.getTermScope(this);
 					if(scope == null) {
-						System.out.println("Could not determine scope for " + this.getTarget());
-						return Auto.LHSTYPE;
+						throw new RuntimeException("Could not determine scope for " + this.getTarget());
 					}
 					List<Declaration> decls = new ArrayList<>(scope.getDeclarations(Namespace.PROCEDURE, cf.val()));
 					if(decls.size() == 1) {
@@ -469,7 +465,7 @@ public final class ParseTree implements Cloneable {
 				List<Target> argTargets = new ArrayList<>();
 				Set<ConfigCompileException> exceptions = new HashSet<>();
 				List<LeftHandSideType> argTypes = cf.getCachedFunction()
-						.getResolvedParameterTypes(t, env, this.getNodeModifiers().getGenerics(),
+						.getResolvedParameterTypes(sa, t, env, this.getNodeModifiers().getGenerics(),
 								inferredType, getChildren());
 				for(ParseTree child : getChildren()) {
 					argTargets.add(child.getTarget());

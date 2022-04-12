@@ -7,12 +7,14 @@ import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.RuntimeMode;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.testing.StaticTest;
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashSet;
@@ -31,15 +33,21 @@ public class StaticAnalysisTest {
 
 	Environment env;
 	StaticAnalysis staticAnalysis;
+	ScriptProvider scriptProvider;
 
-	public void setup() throws Exception {
+	public void setup(ScriptProvider provider) throws Exception {
 		staticAnalysis = new StaticAnalysis(true);
 		staticAnalysis.setLocalEnable(true);
+		scriptProvider = provider != null ? provider : new ScriptProvider.FileSystemScriptProvider();
 		this.env = Static.GenerateStandaloneEnvironment(false, EnumSet.of(RuntimeMode.CMDLINE), null, staticAnalysis);
+		this.env.getEnv(GlobalEnv.class).SetScriptProvider(scriptProvider);
 	}
 
 	public String runScript(String script) throws Exception {
-		setup();
+		return runScript(script, null);
+	}
+	public String runScript(String script, ScriptProvider provider) throws Exception {
+		setup(provider);
 		return StaticTest.SRun(script, null, env);
 	}
 
@@ -53,7 +61,11 @@ public class StaticAnalysisTest {
 	}
 
 	public ParseTree saScript(String script) throws Exception {
-		setup();
+		return saScript(script, null);
+	}
+
+	public ParseTree saScript(String script, ScriptProvider provider) throws Exception {
+		setup(provider);
 		try {
 			try {
 				TokenStream stream = MethodScriptCompiler.lex(script, env, new File("test.ms"), true);
@@ -157,16 +169,16 @@ public class StaticAnalysisTest {
 		ParseTree tree = saScript("string @r = 'string'; string @s = dyn(dyn(dyn(dyn(dyn(@r)))));");
 		ParseTree topDynNode = tree.getChildAt(0).getChildAt(1).getChildAt(2);
 		Assert.assertEquals(CString.TYPE.asLeftHandSideType(),
-				topDynNode.getDeclaredType(Target.UNKNOWN, env, null));
+				topDynNode.getDeclaredType(staticAnalysis, Target.UNKNOWN, env, null));
 		Assert.assertEquals(CString.TYPE.asLeftHandSideType(),
-				topDynNode.getDeclaredType(Target.UNKNOWN, env, CString.TYPE.asLeftHandSideType()));
+				topDynNode.getDeclaredType(staticAnalysis, Target.UNKNOWN, env, CString.TYPE.asLeftHandSideType()));
 		// This is auto, because constants are auto typed.
 		tree = saScript("string @s = dyn(dyn(dyn(dyn(dyn('string')))));");
 		topDynNode = tree.getChildAt(0).getChildAt(2);
 		Assert.assertEquals(Auto.LHSTYPE,
-				topDynNode.getDeclaredType(Target.UNKNOWN, env, null));
+				topDynNode.getDeclaredType(staticAnalysis, Target.UNKNOWN, env, null));
 		Assert.assertEquals(Auto.LHSTYPE,
-				topDynNode.getDeclaredType(Target.UNKNOWN, env, CString.TYPE.asLeftHandSideType()));
+				topDynNode.getDeclaredType(staticAnalysis, Target.UNKNOWN, env, CString.TYPE.asLeftHandSideType()));
 
 		saScriptExpectException("string @s = dyn(dyn(dyn(array())));");
 	}
@@ -174,6 +186,23 @@ public class StaticAnalysisTest {
 	@Test
 	public void testHardcodedTypesAreAuto() throws Exception {
 		saScript("boolean @b = '123' < '123';");
+	}
+
+	@Test
+	public void testProcs() throws Exception {
+		saScript("void proc _asdf(array @a) { return(array_keys(@a)); } _asdf(array(test: 1, testing: 2));");
+	}
+
+	@Test
+	public void testIncludesAreProcessedProperly() throws Exception {
+		ScriptProvider provider = (File file) -> {
+			if(file.getName().endsWith("file1.ms")) {
+				return "void proc _asdf(array @a) { return(array_keys(@a)); }";
+			}
+			throw new IOException();
+		};
+
+		saScript("include('file1.ms'); _asdf(array(test: 1, testing: 2, onetwothree: 3));", provider);
 	}
 
 }

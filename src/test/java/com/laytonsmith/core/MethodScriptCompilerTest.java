@@ -1304,13 +1304,13 @@ public class MethodScriptCompilerTest {
 				env, null, true), env, env.getEnvClasses(), sa);
 		ParseTree sUsage = tree.getChildAt(0).getChildAt(1).getChildAt(0);
 		Target t = Target.UNKNOWN;
-		assertTrue(sUsage.getDeclaredType(t, env, null).equals(CPrimitive.TYPE.asLeftHandSideType()));
+		assertTrue(sUsage.getDeclaredType(sa, t, env, null).equals(CPrimitive.TYPE.asLeftHandSideType()));
 		ParseTree asdf = tree.getChildAt(0).getChildAt(0).getChildAt(2);
-		assertTrue(asdf.getDeclaredType(t, env, null).equals(Auto.LHSTYPE));
+		assertTrue(asdf.getDeclaredType(sa, t, env, null).equals(Auto.LHSTYPE));
 		ParseTree msg = tree.getChildAt(0).getChildAt(1);
-		assertTrue(msg.getDeclaredType(t, env, null).equals(CVoid.TYPE.asLeftHandSideType()));
+		assertTrue(msg.getDeclaredType(sa, t, env, null).equals(CVoid.TYPE.asLeftHandSideType()));
 		ParseTree _a = tree.getChildAt(0).getChildAt(3);
-		assertTrue(_a.getDeclaredType(t, env, null).equals(CInt.TYPE.asLeftHandSideType()));
+		assertTrue(_a.getDeclaredType(sa, t, env, null).equals(CInt.TYPE.asLeftHandSideType()));
 	}
 
 	@Test

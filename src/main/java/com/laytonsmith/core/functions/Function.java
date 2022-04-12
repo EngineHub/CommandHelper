@@ -130,13 +130,14 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 			Environment env, Set<ConfigCompileException> exceptions);
 
 	/**
-	 * Returns a list of resolved parameter types for the function.For functions without type parameters, this is just
-	 * the list of declared types of the children. For functions with type parameters, this is based on the other inputs
+	 * Returns a list of resolved parameter types for the function. For functions without type parameters, this is just
+	 * the list of declared types of the children.For functions with type parameters, this is based on the other inputs
 	 * to the function, or perhaps the inferred return type. (These are generally function specific definitions.)
 	 * <p>
 	 * Implementation note: This is correctly implemented for functions that implement getSignatures, and should
 	 * generally not need to be overridden.
 	 *
+	 * @param analysis The static analysis object.
 	 * @param t The code target.
 	 * @param env The environment.
 	 * @param generics The explicit generic parameters
@@ -144,7 +145,8 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 	 * @param inferredReturnType The inferred return type of this function. May not be used.
 	 * @return A List of LeftHandSideTypes. This should be the same size as the children.
 	 */
-	public List<LeftHandSideType> getResolvedParameterTypes(Target t, Environment env, GenericParameters generics,
+	public List<LeftHandSideType> getResolvedParameterTypes(StaticAnalysis analysis, Target t, Environment env,
+			GenericParameters generics,
 			LeftHandSideType inferredReturnType,
 			List<ParseTree> children);
 

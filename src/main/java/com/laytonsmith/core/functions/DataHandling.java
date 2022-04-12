@@ -605,7 +605,9 @@ public class DataHandling {
 		}
 
 		@Override
-		public List<LeftHandSideType> getResolvedParameterTypes(Target t, Environment env, GenericParameters generics, LeftHandSideType inferredReturnType, List<ParseTree> children) {
+		public List<LeftHandSideType> getResolvedParameterTypes(StaticAnalysis analysis,
+				Target t, Environment env, GenericParameters generics,
+				LeftHandSideType inferredReturnType, List<ParseTree> children) {
 			List<LeftHandSideType> ret = new ArrayList<>(children.size());
 			if(children.size() == 2) {
 				ret.add(Auto.LHSTYPE);

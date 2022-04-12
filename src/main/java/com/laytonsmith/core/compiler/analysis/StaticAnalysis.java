@@ -15,6 +15,7 @@ import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.DataHandling;
@@ -731,6 +732,9 @@ public class StaticAnalysis {
 			includeAnalysis = includeCache.getStaticAnalysis(file);
 			if(includeAnalysis == null) {
 				includeAnalysis = new StaticAnalysis(false);
+				// Carry over local enabled from the parent object
+				includeAnalysis.setLocalEnable(env.getEnv(StaticRuntimeEnv.class)
+						.getAutoIncludeAnalysis().isLocalEnabled());
 				boolean includeCompileSuccess = IncludeCache.get(
 						file, env, envs, includeAnalysis, includeRef.getTarget(), exceptions) != null;
 				if(!includeCompileSuccess) {

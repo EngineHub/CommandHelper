@@ -150,7 +150,8 @@ public abstract class AbstractFunction implements Function {
 	}
 
 	@Override
-	public List<LeftHandSideType> getResolvedParameterTypes(Target t, Environment env, GenericParameters generics,
+	public List<LeftHandSideType> getResolvedParameterTypes(StaticAnalysis analysis,
+			Target t, Environment env, GenericParameters generics,
 			LeftHandSideType inferredReturnType, List<ParseTree> children) {
 //		FunctionSignatures signatures = getCachedSignatures();
 		List<LeftHandSideType> ret = new ArrayList<>(children.size());
@@ -159,7 +160,7 @@ public abstract class AbstractFunction implements Function {
 			return generics.getLeftHandParameters();
 		}
 		for(ParseTree child : children) {
-			ret.add(child.getDeclaredType(t, env, Auto.LHSTYPE));
+			ret.add(child.getDeclaredType(analysis, t, env, Auto.LHSTYPE));
 		}
 		return ret;
 //		if(signatures == null) {
@@ -209,7 +210,7 @@ public abstract class AbstractFunction implements Function {
 			List<LeftHandSideType> argTypes = new ArrayList<>(children.size());
 			List<Target> argTargets = new ArrayList<>(children.size());
 			for(ParseTree child : children) {
-				LeftHandSideType inferredParameterType = child.getDeclaredType(ast.getTarget(), env, Auto.LHSTYPE);
+				LeftHandSideType inferredParameterType = child.getDeclaredType(analysis, ast.getTarget(), env, Auto.LHSTYPE);
 				inferredParameterType = LeftHandSideType.resolveTypeFromGenerics(Target.UNKNOWN, env, inferredParameterType, null, null, (Map) null);
 				argTypes.add(analysis.typecheck(child, inferredParameterType, env, exceptions));
 				argTargets.add(child.getTarget());

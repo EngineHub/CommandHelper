@@ -104,7 +104,8 @@ public abstract class LLVMFunction implements FunctionBase, Function {
 	}
 
 	@Override
-	public List<LeftHandSideType> getResolvedParameterTypes(Target t, Environment env, GenericParameters generics,
+	public List<LeftHandSideType> getResolvedParameterTypes(StaticAnalysis analysis,
+			Target t, Environment env, GenericParameters generics,
 			LeftHandSideType inferredReturnType, List<ParseTree> children) {
 		List<LeftHandSideType> ret = new ArrayList<>();
 		if(generics != null) {
@@ -112,7 +113,7 @@ public abstract class LLVMFunction implements FunctionBase, Function {
 			return generics.getLeftHandParameters();
 		}
 		for(ParseTree child : children) {
-			ret.add(child.getDeclaredType(t, env, Auto.LHSTYPE));
+			ret.add(child.getDeclaredType(analysis, t, env, Auto.LHSTYPE));
 		}
 		return ret;
 	}
