@@ -256,6 +256,7 @@ public final class LeftHandSideType extends Construct {
 	 * @param inferredType The inferredType to use, in case the type parameter is not explicitly provided.
 	 * @return
 	 */
+	@SuppressWarnings("checkstyle:localvariablename")
 	public static LeftHandSideType resolveTypeFromGenerics(Target t, Environment env, LeftHandSideType type,
 			GenericParameters parameters, GenericDeclaration declaration, LeftHandSideType inferredType) {
 		if(type == null) {
