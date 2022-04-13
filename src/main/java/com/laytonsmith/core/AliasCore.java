@@ -617,13 +617,17 @@ public class AliasCore {
 						script.getTarget());
 			} else {
 				Procedure p = env.getEnv(GlobalEnv.class).GetProcs().get(proc);
-				Mixed m = p.execute(new ArrayList<>(), env, script.getTarget());
-				if(!(m instanceof CClosure)) {
-					MSLog.GetLogger().e(MSLog.Tags.COMPILER, "Procedure " + proc + " returns a value other than"
-							+ " a closure. It must unconditionally return a closure.",
-						p.getTarget());
-				} else {
-					Commands.set_tabcompleter.customExec(script.getTarget(), env, cmd, m);
+				try {
+					Mixed m = p.execute(new ArrayList<>(), env, script.getTarget());
+					if(!(m instanceof CClosure)) {
+						MSLog.GetLogger().e(MSLog.Tags.COMPILER, "Procedure " + proc + " returns a value other than"
+								+ " a closure. It must unconditionally return a closure.",
+							p.getTarget());
+					} else {
+						Commands.set_tabcompleter.customExec(script.getTarget(), env, cmd, m);
+					}
+				} catch(ConfigRuntimeException ex) {
+					ConfigRuntimeException.HandleUncaughtException(ex, env);
 				}
 			}
 		}

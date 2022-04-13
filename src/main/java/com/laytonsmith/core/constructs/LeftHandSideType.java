@@ -263,7 +263,8 @@ public final class LeftHandSideType extends Construct {
 			return type;
 		}
 		if(type.isTypeUnion()) {
-			throw new Error("Type unions cannot be resolved as a union with this method. See the other override.");
+			throw new Error("Type unions cannot be resolved as a union with this method."
+					+ " See the other override. Caused by code at or around " + t.toString());
 		}
 		if(!type.isTypeName()) {
 			return type;

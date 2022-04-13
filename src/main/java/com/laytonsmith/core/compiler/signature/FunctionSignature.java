@@ -244,7 +244,7 @@ public class FunctionSignature {
 			LeftHandSideType argType = null;
 			if(argIndex < argTypes.size()) {
 				argType = LeftHandSideType.resolveTypeFromGenerics(t, env, argTypes.get(argIndex),
-					generics, genericDeclaration, (LeftHandSideType) null);
+					generics, genericDeclaration, (Map) null);
 			}
 			Map<String, LeftHandSideType> inferredTypes = new HashMap<>();
 			if(param.getType() != null && param.getType().isTypeName()) {
