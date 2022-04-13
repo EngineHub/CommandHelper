@@ -202,9 +202,7 @@ public abstract class AbstractFunction implements Function {
 	public LeftHandSideType typecheck(StaticAnalysis analysis,
 			ParseTree ast, LeftHandSideType inferredReturnType,
 			Environment env, Set<ConfigCompileException> exceptions) {
-
 		try {
-
 			// Get and check the types of the function's arguments.
 			List<ParseTree> children = ast.getChildren();
 			List<LeftHandSideType> argTypes = new ArrayList<>(children.size());

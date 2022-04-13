@@ -11,8 +11,10 @@ import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.compiler.FileOptions;
+import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.compiler.signature.FunctionSignatures;
 import com.laytonsmith.core.compiler.signature.SignatureBuilder;
+import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.CBracket;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CEntry;
@@ -48,6 +50,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -111,6 +114,19 @@ public class Compiler {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return new CEntry(args[0], args[1], t);
+		}
+
+		@Override
+		public LeftHandSideType typecheck(StaticAnalysis analysis,
+				ParseTree ast, LeftHandSideType inferredReturnType,
+				Environment env, Set<ConfigCompileException> exceptions) {
+			if(!(ast.getChildAt(0).getData() instanceof CLabel)) {
+				exceptions.add(new ConfigCompileException("Expected label.", ast.getChildAt(0).getTarget()));
+			}
+			LeftHandSideType inferredParameterType = ast.getChildAt(1)
+					.getDeclaredType(analysis, ast.getTarget(), env, Auto.LHSTYPE);
+			inferredParameterType = LeftHandSideType.resolveTypeFromGenerics(Target.UNKNOWN, env, inferredParameterType, null, null, (Map) null);
+			return analysis.typecheck(ast.getChildAt(1), inferredParameterType, env, exceptions);
 		}
 	}
 

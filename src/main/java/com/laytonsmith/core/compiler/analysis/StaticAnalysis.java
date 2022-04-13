@@ -428,7 +428,7 @@ public class StaticAnalysis {
 				return LeftHandSideType.fromCClassType(CClassType.AUTO, Target.UNKNOWN);
 			}
 		} else if(node instanceof Variable) {
-			return LeftHandSideType.fromCClassType(CString.TYPE, Target.UNKNOWN); // $vars can only be strings.
+			return Auto.LHSTYPE;
 		} else if(node instanceof CKeyword) {
 
 			// Use the more specific compile error caused during keyword processing if available.

@@ -12,6 +12,7 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.Function;
@@ -473,8 +474,10 @@ public final class ParseTree implements Cloneable {
 				return cf.getCachedFunction().getReturnType(this, getTarget(),
 						argTypes, argTargets, inferredType, env, exceptions);
 			}
+		} else if(getData() instanceof Variable) {
+			return Auto.LHSTYPE;
 		} else {
-			throw new Error("Unhandled type, please report this bug");
+			throw new Error("Unhandled type, please report this bug. Caused by code from " + getTarget());
 		}
 	}
 

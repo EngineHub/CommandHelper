@@ -213,4 +213,9 @@ public class StaticAnalysisTest {
 			+ "}");
 	}
 
+	@Test
+	public void testLabels() throws Exception {
+		saScript("array @a = array(label: 'goes', here: 'too'); msg(@a);");
+	}
+
 }
