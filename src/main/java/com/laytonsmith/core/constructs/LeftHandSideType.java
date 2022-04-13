@@ -263,8 +263,17 @@ public final class LeftHandSideType extends Construct {
 			return type;
 		}
 		if(type.isTypeUnion()) {
-			throw new Error("Type unions cannot be resolved as a union with this method."
-					+ " See the other override. Caused by code at or around " + t.toString());
+			LeftHandSideType[] lhst = new LeftHandSideType[type.getTypes().size()];
+			for(int i = 0; i < lhst.length; i++) {
+				Pair<CClassType, LeftHandGenericUse> _type = type.getTypes().get(i);
+				LeftHandSideType newType = LeftHandSideType.fromCClassType(_type.getKey(), _type.getValue(), t);
+				newType.isTypeName = type.isTypenameList.get(i);
+				if(newType.isTypeName) {
+					newType.genericTypeName = _type.getKey().getFQCN().getFQCN();
+				}
+				lhst[i] = resolveTypeFromGenerics(t, env, newType, parameters, declaration, inferredType);
+			}
+			return LeftHandSideType.createTypeUnion(t, lhst);
 		}
 		if(!type.isTypeName()) {
 			return type;

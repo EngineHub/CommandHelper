@@ -205,4 +205,12 @@ public class StaticAnalysisTest {
 		saScript("include('file1.ms'); _asdf(array(test: 1, testing: 2, onetwothree: 3));", provider);
 	}
 
+	@Test
+	public void testArrayReturnWithoutGenerics() throws Exception {
+		saScript("array proc _test() {\n"
+			+ "    array @t = null;\n"
+			+ "    return(if(!is_array(@t), array(), @t));\n"
+			+ "}");
+	}
+
 }
