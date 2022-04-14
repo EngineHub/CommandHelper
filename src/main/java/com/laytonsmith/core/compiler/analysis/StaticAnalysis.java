@@ -8,6 +8,7 @@ import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CKeyword;
 import com.laytonsmith.core.constructs.CLabel;
+import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.LeftHandSideType;
@@ -427,7 +428,11 @@ public class StaticAnalysis {
 				return LeftHandSideType.fromCClassType(CClassType.AUTO, Target.UNKNOWN);
 			}
 		} else if(node instanceof Variable) {
-			return Auto.LHSTYPE;
+			if(ast.getFileOptions().isStrict()) {
+				return CString.TYPE.asLeftHandSideType();
+			} else {
+				return Auto.LHSTYPE;
+			}
 		} else if(node instanceof CKeyword) {
 
 			// Use the more specific compile error caused during keyword processing if available.
@@ -443,7 +448,8 @@ public class StaticAnalysis {
 		}
 
 		// The node is some other Construct, so return its type.
-		if(ast.isConst()) {
+		// In non-strict mode, constants are defined as auto, to make things like `'123' > 10` work.
+		if(ast.isConst() && !ast.getFileOptions().isStrict()) {
 			return Auto.LHSTYPE;
 		}
 		try {

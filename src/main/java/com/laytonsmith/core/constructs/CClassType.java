@@ -363,7 +363,11 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	 * provided, then this will be thrown.
 	 */
 	public static CClassType get(Class<? extends Mixed> type, Target t, Map<CClassType, GenericParameters> generics, Environment env) {
-		return get(FullyQualifiedClassName.forNativeClass(type), t, generics, env);
+		try {
+			return get(FullyQualifiedClassName.forNativeClass(type), t, generics, env);
+		} catch(Error e) {
+			throw new Error(e.getMessage() + " Caused by code around " + t.toString(), e);
+		}
 	}
 
 	/**

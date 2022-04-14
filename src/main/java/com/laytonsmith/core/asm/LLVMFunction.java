@@ -113,7 +113,7 @@ public abstract class LLVMFunction implements FunctionBase, Function {
 			return generics.getLeftHandParameters();
 		}
 		for(ParseTree child : children) {
-			ret.add(child.getDeclaredType(analysis, t, env, Auto.LHSTYPE));
+			ret.add(child.getDeclaredType(analysis, env, Auto.LHSTYPE));
 		}
 		return ret;
 	}

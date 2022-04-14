@@ -169,16 +169,16 @@ public class StaticAnalysisTest {
 		ParseTree tree = saScript("string @r = 'string'; string @s = dyn(dyn(dyn(dyn(dyn(@r)))));");
 		ParseTree topDynNode = tree.getChildAt(0).getChildAt(1).getChildAt(2);
 		Assert.assertEquals(CString.TYPE.asLeftHandSideType(),
-				topDynNode.getDeclaredType(staticAnalysis, Target.UNKNOWN, env, null));
+				topDynNode.getDeclaredType(staticAnalysis, env, null));
 		Assert.assertEquals(CString.TYPE.asLeftHandSideType(),
-				topDynNode.getDeclaredType(staticAnalysis, Target.UNKNOWN, env, CString.TYPE.asLeftHandSideType()));
+				topDynNode.getDeclaredType(staticAnalysis, env, CString.TYPE.asLeftHandSideType()));
 		// This is auto, because constants are auto typed.
 		tree = saScript("string @s = dyn(dyn(dyn(dyn(dyn('string')))));");
 		topDynNode = tree.getChildAt(0).getChildAt(2);
 		Assert.assertEquals(Auto.LHSTYPE,
-				topDynNode.getDeclaredType(staticAnalysis, Target.UNKNOWN, env, null));
+				topDynNode.getDeclaredType(staticAnalysis, env, null));
 		Assert.assertEquals(Auto.LHSTYPE,
-				topDynNode.getDeclaredType(staticAnalysis, Target.UNKNOWN, env, CString.TYPE.asLeftHandSideType()));
+				topDynNode.getDeclaredType(staticAnalysis, env, CString.TYPE.asLeftHandSideType()));
 
 		saScriptExpectException("string @s = dyn(dyn(dyn(array())));");
 	}
@@ -216,6 +216,17 @@ public class StaticAnalysisTest {
 	@Test
 	public void testLabels() throws Exception {
 		saScript("array @a = array(label: 'goes', here: 'too'); msg(@a);");
+	}
+
+	@Test
+	public void testLabelsWithStrictMode() throws Exception {
+		saScript("<!strict> assign(@w, array('world': 'overworld', 'world_nether': 'nether', 'world_the_end': 'end'))");
+	}
+
+	@Test
+	public void testVariablesInStrictMode() throws Exception {
+		saScriptExpectException("<! strict > if($var > 1) { msg(''); }");
+		saScript("if($var > 1) { msg(''); }");
 	}
 
 }

@@ -124,10 +124,26 @@ public class Compiler {
 				exceptions.add(new ConfigCompileException("Expected label.", ast.getChildAt(0).getTarget()));
 			}
 			LeftHandSideType inferredParameterType = ast.getChildAt(1)
-					.getDeclaredType(analysis, ast.getTarget(), env, Auto.LHSTYPE);
+					.getDeclaredType(analysis, env, Auto.LHSTYPE);
 			inferredParameterType = LeftHandSideType.resolveTypeFromGenerics(Target.UNKNOWN, env, inferredParameterType, null, null, (Map) null);
 			return analysis.typecheck(ast.getChildAt(1), inferredParameterType, env, exceptions);
 		}
+
+		@Override
+		public List<LeftHandSideType> getResolvedParameterTypes(StaticAnalysis analysis, Target t, Environment env, GenericParameters generics, LeftHandSideType inferredReturnType, List<ParseTree> children) {
+			List<LeftHandSideType> ret = new ArrayList<>();
+			ret.add(Auto.LHSTYPE);
+			ret.add(children.get(1).getDeclaredType(analysis, env, inferredReturnType));
+			return ret;
+		}
+
+		@Override
+		public LeftHandSideType getReturnType(ParseTree node, Target t, List<LeftHandSideType> argTypes, List<Target> argTargets, LeftHandSideType inferredReturnType, Environment env, Set<ConfigCompileException> exceptions) {
+			return argTypes.get(1);
+		}
+
+
+
 	}
 
 	@api

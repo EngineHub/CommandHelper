@@ -421,15 +421,17 @@ public final class ParseTree implements Cloneable {
 	 * be AUTO. The type may be CNull for literal nulls, but will never be java null.
 	 *
 	 * @param sa The static analysis object.
-	 * @param t The code target, used for exceptions for ambiguous matches.
 	 * @param env The environment
 	 * @param inferredType The inferred type, if this is a function call. Otherwise, can be null.
 	 * @return
 	 */
-	public LeftHandSideType getDeclaredType(StaticAnalysis sa, Target t, Environment env, LeftHandSideType inferredType) {
+	public LeftHandSideType getDeclaredType(StaticAnalysis sa, Environment env, LeftHandSideType inferredType) {
 		if(isConst()) {
-			return Auto.LHSTYPE;
-//			return getData().typeof(env).asLeftHandSideType();
+			if(!getFileOptions().isStrict()) {
+				return Auto.LHSTYPE;
+			} else {
+				return getData().typeof(env).asLeftHandSideType();
+			}
 		} else if(getData() instanceof IVariable ivar) {
 			if(sa.isLocalEnabled()) {
 				Scope scope = sa.getTermScope(this);
@@ -465,9 +467,20 @@ public final class ParseTree implements Cloneable {
 			} else {
 				List<Target> argTargets = new ArrayList<>();
 				Set<ConfigCompileException> exceptions = new HashSet<>();
-				List<LeftHandSideType> argTypes = cf.getCachedFunction()
-						.getResolvedParameterTypes(sa, t, env, this.getNodeModifiers().getGenerics(),
-								inferredType, getChildren());
+				List<LeftHandSideType> argTypes;
+				try {
+					if(cf.getCachedFunction() == null) {
+						// Function doesn't exist, just make everything auto so that the rest of typechecking
+						// can continue running.
+						return Auto.LHSTYPE;
+					} else {
+						argTypes = cf.getFunction()
+								.getResolvedParameterTypes(sa, getTarget(), env, this.getNodeModifiers().getGenerics(),
+										inferredType, getChildren());
+					}
+				} catch(ConfigCompileException ex) {
+					throw new RuntimeException(getTarget().toString(), ex);
+				}
 				for(ParseTree child : getChildren()) {
 					argTargets.add(child.getTarget());
 				}
@@ -475,7 +488,11 @@ public final class ParseTree implements Cloneable {
 						argTypes, argTargets, inferredType, env, exceptions);
 			}
 		} else if(getData() instanceof Variable) {
-			return Auto.LHSTYPE;
+			if(getFileOptions().isStrict()) {
+				return CString.TYPE.asLeftHandSideType();
+			} else {
+				return Auto.LHSTYPE;
+			}
 		} else {
 			throw new Error("Unhandled type, please report this bug. Caused by code from " + getTarget());
 		}

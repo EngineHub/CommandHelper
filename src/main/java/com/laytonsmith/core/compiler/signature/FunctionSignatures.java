@@ -7,6 +7,7 @@ import java.util.Set;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
@@ -120,21 +121,29 @@ public final class FunctionSignatures {
 						typeResolutions);
 			}
 			default -> {
-				// TODO - Ideally, we'd either return a multi-type or the most specific super type of the signatures.
-				// Return the return type of all matching signatures if they are the same.
-				LeftHandSideType type = LeftHandSideType.resolveTypeFromGenerics(t, env, matches.get(0).getReturnType().getType(),
-					generics,
-					matches.get(0).getGenericDeclaration(), inferredReturnType);
-				for(int i = 1; i < matches.size(); i++) {
+				LeftHandSideType[] types = new LeftHandSideType[matches.size()];
+				for(int i = 0; i < matches.size(); i++) {
 					LeftHandSideType retType = LeftHandSideType.resolveTypeFromGenerics(t, env,
 						matches.get(i).getReturnType().getType(),
 						generics,
 						matches.get(0).getGenericDeclaration(), inferredReturnType);
-					if((retType == null ? retType != type : !retType.equals(type))) {
-						return CClassType.AUTO.asLeftHandSideType();
+					types[i] = retType;
+				}
+				LeftHandSideType ret = LeftHandSideType.createTypeUnion(t, types);
+				if(ret.isTypeUnion()) {
+					// If multiple types match, and one or more of the arguments is auto, we return auto, rather than
+					// the type union. This indicates that the user is content with runtime type verification, and so
+					// we continue that up the chain. In non-strict mode, constants (and $vars) are declared as auto,
+					// so that we get expected behavior with for instance `'123' > 10`, which causes this mode to be
+					// triggered more often than in non-strict mode. For non-ambiguous signatures even with auto arguments,
+					// this behavior is not triggered.
+					for(LeftHandSideType argType : argTypes) {
+						if(Auto.LHSTYPE.equals(argType)) {
+							return Auto.LHSTYPE;
+						}
 					}
 				}
-				return type;
+				return ret;
 			}
 		}
 	}

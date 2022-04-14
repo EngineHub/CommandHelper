@@ -516,7 +516,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	 * @return
 	 */
 	public static CClassType typeof(Mixed that, Environment env) {
-		return CClassType.get(that.getClass(), Target.UNKNOWN, that.getGenericParameters(), env);
+		return CClassType.get(that.getClass(), that.getTarget(), that.getGenericParameters(), env);
 	}
 
 	private final Map<CClassType, GenericParameters> genericParameters = new HashMap<>();
