@@ -11,7 +11,7 @@ import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.MethodScriptFileLocations;
 import com.laytonsmith.core.Optimizable;
-import com.laytonsmith.core.compiler.Keyword;
+import com.laytonsmith.core.compiler.KeywordDocumentation;
 import com.laytonsmith.core.compiler.KeywordList;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.NativeTypeList;
@@ -180,7 +180,7 @@ public class APIBuilder {
 		{
 			// keywords
 			Map<String, Map<String, String>> keywords = new TreeMap<>();
-			for(Keyword keyword : KeywordList.getKeywordList()) {
+			for(KeywordDocumentation keyword : KeywordList.getKeywordList()) {
 				Map<String, String> keyw = new TreeMap<>();
 				keyw.put("name", keyword.getKeywordName());
 				keyw.put("docs", keyword.docs());

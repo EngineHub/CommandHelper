@@ -483,4 +483,17 @@ public class OptimizationTest {
 		assertEquals("not(@value)", optimize("!@value"));
 		// !!!!@value (or more than 2 !!) is broken in the compiler -.-
 	}
+
+	@Test
+	public void testReturnAsKeyword() throws Exception {
+		// It shouldn't have string(), but whatever, it's the weird sconcat behavior.
+		assertEquals("proc('_name',string(return('value')))", optimize("proc _name() { return 'value'; }"));
+		assertEquals("proc('_name',string(return(rand(1,10))))", optimize("proc _name() { return rand(1, 10); }"));
+
+		assertEquals("proc('_name',__statements__(return('value')))", optimize("<! strict > proc _name() { return 'value'; }"));
+		assertEquals("proc('_name',__statements__(return(rand(1,10))))", optimize("<! strict > proc _name() { return rand(1, 10); }"));
+
+		assertEquals("proc('_name',string(return(add(dyn(1),dyn(2)))))", optimize("proc _name() { return dyn(1) + dyn(2); }"));
+		assertEquals("proc('_name',__statements__(return(add(dyn(1),dyn(2)))))", optimize("<! strict > proc _name() { return dyn(1) + dyn(2); }"));
+	}
 }
