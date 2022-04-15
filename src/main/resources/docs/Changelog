@@ -42,6 +42,7 @@ configuration is wrong, such that the code can not come up completely. This is u
 security is provided through CommandHelper, so that if something changes and the code no longer will run, it is better \
 for the server to shut down than run unprotected. Various other backend improvements were made in this area.
 * Extension load time was reduced.
+* <code>return</code> can now be used as a keyword, such as <code>return expression();</code>
 * As always, hundreds of additional performance fixes and bug fixes and other minor things.
 
 Very early support for LLVM is being introduced. This is not generally usable for basically anything yet, but you
