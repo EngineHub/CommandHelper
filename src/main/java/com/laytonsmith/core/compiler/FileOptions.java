@@ -240,7 +240,7 @@ public final class FileOptions {
 		for(Field f : ClassDiscovery.getDefaultInstance().loadFieldsWithAnnotation(Option.class)) {
 			String desc = f.getAnnotation(Option.class).value();
 			try {
-				b.append(desc).append(": ").append(f.get(this));
+				b.append(desc).append(": ").append(f.get(this)).append("; ");
 			} catch (IllegalArgumentException | IllegalAccessException ex) {
 				// uh
 			}

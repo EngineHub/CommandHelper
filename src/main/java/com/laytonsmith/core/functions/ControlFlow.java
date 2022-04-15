@@ -2377,9 +2377,11 @@ public class ControlFlow {
 	@api
 	public static class _return extends AbstractFunction implements Optimizable {
 
+		public static final String NAME = "return";
+
 		@Override
 		public String getName() {
-			return "return";
+			return NAME;
 		}
 
 		@Override
