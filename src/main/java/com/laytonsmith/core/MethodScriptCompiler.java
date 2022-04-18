@@ -60,6 +60,7 @@ import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.functions.ArrayHandling.array_get;
 import com.laytonsmith.core.functions.Math.neg;
+import com.laytonsmith.core.functions.StringHandling;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.persistence.DataSourceException;
 
@@ -1886,7 +1887,7 @@ public final class MethodScriptCompiler {
 		Stack<List<Procedure>> procs = new Stack<>();
 		procs.add(new ArrayList<>());
 		processKeywords(tree, environment, compilerErrors);
-		rewriteAutoconcats(tree, environment, envs, compilerErrors);
+		rewriteAutoconcats(tree, environment, envs, compilerErrors, true);
 		processLateKeywords(tree, environment, compilerErrors);
 		checkLinearComponents(tree, environment, compilerErrors);
 		postParseRewrite(rootNode, environment, envs, compilerErrors); // Pass rootNode since this might rewrite 'tree'.
@@ -2162,7 +2163,8 @@ public final class MethodScriptCompiler {
 	 * @param compilerExceptions
 	 */
 	private static void rewriteAutoconcats(ParseTree root, Environment env,
-			Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> compilerExceptions) {
+			Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> compilerExceptions,
+			boolean rewriteKeywords) {
 		if(!root.hasChildren()) {
 			return;
 		}
@@ -2184,22 +2186,41 @@ public final class MethodScriptCompiler {
 		}
 
 		List<ParseTree> newChildren = new ArrayList<>();
+		ParseTree statements = new ParseTree(new CFunction(Compiler.__statements__.NAME,
+				root.getTarget()), root.getFileOptions(), true);
 		for(int k = 0; k < children.size(); k++) {
 			List<ParseTree> subChild = children.get(k);
-			ParseTree statement = new ParseTree(new CFunction(Compiler.__statements__.NAME,
-					root.getTarget()), root.getFileOptions(), true);
 			ParseTree autoconcat = new ParseTree(new CFunction(Compiler.__autoconcat__.NAME,
 					root.getTarget()), root.getFileOptions(), true);
 			autoconcat.setChildren(subChild);
-			statement.addChild(autoconcat);
-			rewriteAutoconcats(statement, env, envs, compilerExceptions);
-			if(statement.getChildren().size() == 1 && statement.getChildAt(0).getData() instanceof CFunction) {
-				if(statement.getChildAt(0).isSyntheticNode()) {
-					// Pull it up, this was a synthetic node that was generated from autoconcat
-					statement.setChildren(statement.getChildAt(0).getChildren());
+			rewriteAutoconcats(autoconcat, env, envs, compilerExceptions, false);
+			if(rewriteKeywords) {
+				if(autoconcat.getChildren().isEmpty()) {
+					// Uh oh, the rewrite pulled it up, but we still need it to be in a sub-function, so put
+					// it back in an autoconcat. We'll pull it back up again in the next step if we need.
+					ParseTree autoconcat2 = new ParseTree(new CFunction(Compiler.__autoconcat__.NAME,
+							root.getTarget()), root.getFileOptions(), true);
+					autoconcat2.addChild(autoconcat);
+					autoconcat = autoconcat2;
 				}
+				processLateKeywords(autoconcat, env, compilerExceptions);
 			}
-			newChildren.add(statement);
+			// Between the rewrite and the keywords, we've removed the need for autoconcat, so pull
+			// up the value here.
+			if(autoconcat.getChildren().size() == 1 && autoconcat.getChildAt(0).getData() instanceof CFunction cf
+					&& cf.val().equals(Compiler.__statements__.NAME)) {
+				autoconcat.replace(autoconcat.getChildAt(0));
+			}
+			statements.addChild(autoconcat);
+		}
+		if(statements.getChildren().size() == 1 && statements.getChildAt(0).getData() instanceof CFunction) {
+			if(statements.getChildAt(0).isSyntheticNode()) {
+				// Pull it up, this was a synthetic node that was generated from autoconcat
+				statements.setChildren(statements.getChildAt(0).getChildren());
+			}
+		}
+		if(!statements.getChildren().isEmpty()) {
+			newChildren.add(statements);
 		}
 
 		root.setChildren(newChildren);
@@ -2212,7 +2233,7 @@ public final class MethodScriptCompiler {
 
 
 		for(int j = 0; j < root.getChildren().size(); j++) {
-			rewriteAutoconcats(root.getChildAt(j), env, envs, compilerExceptions);
+			rewriteAutoconcats(root.getChildAt(j), env, envs, compilerExceptions, true);
 		}
 		if(root.getData() instanceof CFunction && root.getData().val().equals(__autoconcat__.NAME)) {
 
@@ -2264,8 +2285,61 @@ public final class MethodScriptCompiler {
 			if(newChild != null && child != newChild) {
 				ast.getChildren().set(i, newChild);
 				i--; // Allow the new child to do a rewrite step as well.
+				continue;
+			}
+			// In strict mode throw compile errors when encountering child statements in function arguments where
+			// statements are not acceptable because void would be an invalid argument type. This would otherwise be
+			// a runtime error in strict mode where auto-concat is not allowed and statements are used instead.
+			// This can be removed once a more comprehensive void return type check is implemented.
+			if(child.getData() instanceof CFunction
+					&& child.getData().val().equals(Compiler.__statements__.NAME)
+					&& ast.getData() instanceof CFunction cFunction) {
+				Function function = cFunction.getCachedFunction();
+				if(function == null) {
+					exceptions.add(new ConfigCompileException("Unknown function", cFunction.getTarget()));
+					continue;
+				}
+				boolean statementsAllowed = false;
+				if(function instanceof BranchStatement branchStatement) {
+					List<Boolean> branches = branchStatement.isBranch(ast.getChildren());
+					if(branches.get(i)) {
+						statementsAllowed = true;
+					}
+				}
+
+				if(!statementsAllowed) {
+					if(ast.getFileOptions().isStrict()) {
+						exceptions.add(new ConfigCompileException("Unexpected statement", cFunction.getTarget()));
+					} else {
+						// Statements aren't allowed here, but we aren't in strict mode, so
+						// pull up the value in the statement to here. sconcat is an exception to this rule, since
+						// it's entirely too special.
+						if(!(ast.getData() instanceof CFunction cf) || !cf.val().equals(StringHandling.sconcat.NAME)) {
+							if(child.getChildren().size() != 1) {
+								exceptions.add(new ConfigCompileException("Unexpected statement", child.getTarget()));
+							} else {
+								ast.getChildAt(i).replace(child);
+							}
+						}
+					}
+				}
+				if(statementsAllowed) {
+					continue;
+				}
+				if(function.getName().equals(Compiler.__statements__.NAME)) {
+					ParseTree lastChild = child;
+					if(child.numberOfChildren() > 0) {
+						lastChild = child.getChildAt(child.numberOfChildren() - 1);
+					}
+					exceptions.add(new ConfigCompileException("Invalid comma after "
+							+ lastChild.getData().val(), lastChild.getTarget()));
+				} else if(ast.getFileOptions().isStrict()) {
+					exceptions.add(new ConfigCompileException("Invalid use of auto concat in "
+							+ function.getName() + "()", cFunction.getTarget()));
+				}
 			}
 		}
+
 		return ast;
 	}
 
@@ -2840,7 +2914,7 @@ public final class MethodScriptCompiler {
 				}
 				switch(keyword.getAssociativity()) {
 					case LEFT ->  {
-						if(i == 0 && !keyword.allowEmptyValue()) {
+						if(lhs == null && !keyword.allowEmptyValue()) {
 							throw new ConfigCompileException("Unexpected keyword " + keyword.getName(), node.getTarget());
 						}
 						ParseTree replacement = keyword.processLeftAssociative(node.getTarget(), node.getFileOptions(), lhs);
@@ -2851,7 +2925,7 @@ public final class MethodScriptCompiler {
 						}
 					}
 					case RIGHT ->  {
-						if(i >= children.size() && !keyword.allowEmptyValue()) {
+						if(rhs == null && !keyword.allowEmptyValue()) {
 							throw new ConfigCompileException("Unexpected keyword " + keyword.getName(), node.getTarget());
 						}
 						ParseTree replacement = keyword.processRightAssociative(node.getTarget(), node.getFileOptions(), rhs);

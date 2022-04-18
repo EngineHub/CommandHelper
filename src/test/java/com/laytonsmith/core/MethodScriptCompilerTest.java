@@ -1301,11 +1301,11 @@ public class MethodScriptCompilerTest {
 		sa.setLocalEnable(true);
 		ParseTree tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex("primitive @s = 'asdf'; msg(@s); int proc _a(){return(1);} _a();",
 				env, null, true), env, env.getEnvClasses(), sa);
-		ParseTree sUsage = tree.getChildAt(0).getChildAt(1).getChildAt(0).getChildAt(0);
+		ParseTree sUsage = tree.getChildAt(0).getChildAt(1).getChildAt(0);
 		assertTrue(sUsage.getDeclaredType(env).equals(CPrimitive.TYPE));
-		ParseTree asdf = tree.getChildAt(0).getChildAt(0).getChildAt(0).getChildAt(2);
+		ParseTree asdf = tree.getChildAt(0).getChildAt(0).getChildAt(2);
 		assertTrue(asdf.getDeclaredType(env).equals(CString.TYPE));
-		ParseTree msg = tree.getChildAt(0).getChildAt(1).getChildAt(0);
+		ParseTree msg = tree.getChildAt(0).getChildAt(1);
 		assertTrue(msg.getDeclaredType(env).equals(CVoid.TYPE));
 		ParseTree _a = tree.getChildAt(0).getChildAt(2).getChildAt(1);
 		assertTrue(_a.getDeclaredType(env).equals(CInt.TYPE));
@@ -1344,11 +1344,11 @@ public class MethodScriptCompilerTest {
 					script,
 					env, null, true), env, env.getEnvClasses(), sa);
 			ParseTree root = tree.getChildAt(0);
-			assertTrue(root.getChildAt(0).getChildAt(0).getNodeModifiers().getComment() != null);
-			assertTrue(root.getChildAt(1).getChildAt(0).getData() instanceof CFunction);
-			assertEquals("_test", root.getChildAt(1).getChildAt(0).getData().val());
-			assertTrue(sa.getTermScope(root.getChildAt(0).getChildAt(0)) != null);
-			Declaration decl = new ArrayList<>(sa.getTermScope(root.getChildAt(1).getChildAt(0))
+			assertTrue(root.getChildAt(0).getNodeModifiers().getComment() != null);
+			assertTrue(root.getChildAt(1).getData() instanceof CFunction);
+			assertEquals("_test", root.getChildAt(1).getData().val());
+			assertTrue(sa.getTermScope(root.getChildAt(0)) != null);
+			Declaration decl = new ArrayList<>(sa.getTermScope(root.getChildAt(1))
 					.getReachableDeclarations(Namespace.PROCEDURE, "_test")).get(0);
 			assertTrue(decl != null && decl instanceof ProcDeclaration);
 			assertTrue(decl.getNodeModifiers().getComment() != null);

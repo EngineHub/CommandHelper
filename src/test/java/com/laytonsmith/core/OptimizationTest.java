@@ -1,6 +1,7 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.core.compiler.OptimizationUtilities;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
@@ -10,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import org.junit.Assert;
 import static org.junit.Assert.assertEquals;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -36,8 +38,9 @@ public class OptimizationTest {
 				throw new ConfigCompileGroupException(new HashSet<>(Arrays.asList(ex)));
 			}
 		} catch(ConfigCompileGroupException ex) {
-			String msg = ex.getList().toString();
-			throw new ConfigCompileException(msg, new ArrayList<>(ex.getList()).get(0).getTarget(), ex);
+			Target t = new ArrayList<>(ex.getList()).get(0).getTarget();
+			String msg = ex.getList().toString() + " " + t;
+			throw new ConfigCompileException(msg, t, ex);
 		}
 	}
 
@@ -118,8 +121,7 @@ public class OptimizationTest {
 
 	@Test
 	public void testClosure() throws Exception {
-		assertEquals("sconcat(__statements__(assign(@c,closure(@target,msg(concat('Hello ',@target,'!'))))),"
-				+ "__statements__(@c('world')))",
+		assertEquals("__statements__(assign(@c,closure(@target,msg(concat('Hello ',@target,'!')))),@c('world'))",
 				optimize("@c = closure(@target) {msg('Hello '.@target.'!')}; @c('world');"));
 	}
 
@@ -144,8 +146,8 @@ public class OptimizationTest {
 						+ "return(5);"
 						+ "}"
 						+ "execute(@a);"));
-		assertEquals("sconcat(__statements__(msg('a')),if(dyn(1),ifelse(dyn(1),sconcat(__statements__(die())),dyn(2),"
-				+ "sconcat(__statements__(die())),sconcat(__statements__(die()))),__statements__(msg('b'))))",
+		assertEquals("sconcat(__statements__(msg('a')),if(dyn(1),ifelse(dyn(1),__statements__(die()),dyn(2),"
+				+ "__statements__(die()),__statements__(die())),__statements__(msg('b'))))",
 				optimize("msg('a');"
 						+ "if(dyn(1)){"
 						+ "	if(dyn(1)){"
@@ -161,7 +163,7 @@ public class OptimizationTest {
 						+ "} else {"
 						+ "	msg('b');"
 						+ "}"));
-		assertEquals("sconcat(__statements__(msg('a')),__statements__(die()))",
+		assertEquals("sconcat(__statements__(msg('a'),die()))",
 				optimize("msg('a');"
 						+ "die();"
 						+ "if(dyn(1)){"
@@ -183,7 +185,7 @@ public class OptimizationTest {
 	@Test
 	public void testInnerDie() throws Exception {
 		// Since p is not a branch function, we expect a die inside of that to bubble up
-		assertEquals("sconcat(__statements__(concat(die())))",
+		assertEquals("__statements__(concat(die()))",
 				optimize("p(concat(die(), msg('bad'))); msg('bad');"));
 	}
 
@@ -253,7 +255,7 @@ public class OptimizationTest {
 
 	@Test
 	public void testMultipleAdjacentAssignment() throws Exception {
-		assertEquals("sconcat(__statements__(assign(@one,inc(@two))),__statements__(assign(ms.lang.int,@three,0)),__statements__(assign(@four,'test')))",
+		assertEquals("__statements__(assign(@one,inc(@two)),assign(ms.lang.int,@three,0),assign(@four,'test'))",
 				optimize("@one = ++@two; int @three = 0; @four = 'test';"));
 	}
 
@@ -365,7 +367,7 @@ public class OptimizationTest {
 	@Test
 	public void testSwitch1() throws Exception {
 		assertEquals("switch(@a,array(1,2),__statements__(msg('1, 2')),"
-				+ "3..4,sconcat(__statements__(msg('3')),__statements__(msg('4'))),"
+				+ "3..4,__statements__(msg('3'),msg('4')),"
 				+ "false,__statements__(msg('false')),"
 				+ "0.07,__statements__(msg(0.07)),"
 				+ "__statements__(msg('default')))",
@@ -540,13 +542,38 @@ public class OptimizationTest {
 		assertEquals("proc('_name',__statements__(return(add(dyn(1),dyn(2)))))", optimize("proc _name() { return dyn(1) + dyn(2); }"));
 		assertEquals("proc('_name',__statements__(return(add(dyn(1),dyn(2)))))", optimize("<! strict > proc _name() { return dyn(1) + dyn(2); }"));
 
-		// return void
-		assertEquals("proc('_name',__statements__(return()))", optimize("proc _name() { return; }"));
-		assertEquals("proc('_name',__statements__(return()))", optimize("<! strict > proc _name() { return; }"));
+	}
 
-		assertEquals("proc('_name',__statements__(__statements__(return())))", optimize("<! strict > proc _name() { return; msg('Dead code'); }"));
+	@Test
+	public void testReturnVoidKeyword() throws Exception {
+		assertEquals("proc('_name',__statements__(return()))", optimize("<! strict > proc _name() { return; msg('Dead code'); }"));
 		assertEquals("proc('_name',sconcat(__statements__(return())))", optimize("proc _name() { return; msg('Dead code') msg('Other dead code')}"));
 		assertEquals("proc('_name',__statements__(return(msg('Dead code'))))", optimize("<! strict > proc _name() { return msg('Dead code') msg('Other dead code')}"));
 
+		assertEquals("proc('_name',__statements__(return()))", optimize("proc _name() { return; }"));
+		assertEquals("proc('_name',__statements__(return()))", optimize("<! strict > proc _name() { return; }"));
+	}
+
+	@Test(expected = ConfigCompileException.class)
+	public void testIfWithStatementFailsInStrictMode() throws Exception {
+		try {
+			optimize("if(dyn(true);) { }");
+		} catch(ConfigCompileException ex) {
+			Assert.fail();
+		}
+		optimize("<! strict > if(dyn(true);) { }");
+	}
+
+	@Test(expected = ConfigCompileException.class)
+	public void testIfStatementWithMultipleInvalidParameters() throws Exception {
+		optimize("if(dyn(true); dyn(false);) { }");
+	}
+
+	@Test
+	public void testSconcatWithNonStatement() throws Exception {
+		assertEquals("__statements__(assign(ms.lang.int,@i,0),assign(ms.lang.int,@j,0))",
+				optimize("int @i = 0; int @j = 0;"));
+		assertEquals("sconcat(__statements__(assign(ms.lang.int,@i,0)),assign(ms.lang.int,@j,0))",
+				optimize("int @i = 0; int @j = 0"));
 	}
 }

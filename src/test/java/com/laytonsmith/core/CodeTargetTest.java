@@ -58,10 +58,10 @@ public class CodeTargetTest {
 				+ " msg();\n"
 				+ " msg('a', 'bb');\n"
 		);
-		validateTarget(1, 1, 3, nodes.get(0).getChildAt(0));
-		validateTarget(2, 1, 3, nodes.get(1).getChildAt(0));
-		validateTarget(3, 2, 3, nodes.get(2).getChildAt(0));
-		validateTarget(4, 7, 1, nodes.get(3).getChildAt(0).getChildAt(0));
-		validateTarget(4, 12, 2, nodes.get(3).getChildAt(0).getChildAt(1));
+		validateTarget(1, 1, 3, nodes.get(0));
+		validateTarget(2, 1, 3, nodes.get(1));
+		validateTarget(3, 2, 3, nodes.get(2));
+		validateTarget(4, 7, 1, nodes.get(3).getChildAt(0));
+		validateTarget(4, 12, 2, nodes.get(3).getChildAt(1));
 	}
 }
