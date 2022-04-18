@@ -56,16 +56,17 @@ public abstract class LateBindingKeyword implements KeywordDocumentation {
 	}
 
 	@Override
-	public URL getSourceJar() {
+	public final URL getSourceJar() {
 		return ClassDiscovery.GetClassContainer(this.getClass());
 	}
 
 	@Override
-	public String getName() {
+	public final String getName() {
 		return this.getClass().getAnnotation(Keyword.keyword.class).value();
 	}
 
-	public String getKeywordName() {
+	@Override
+	public final String getKeywordName() {
 		return getName();
 	}
 

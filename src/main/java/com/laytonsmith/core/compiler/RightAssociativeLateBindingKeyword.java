@@ -14,7 +14,7 @@ public abstract class RightAssociativeLateBindingKeyword extends LateBindingKeyw
 		return LateBindingKeyword.Associativity.RIGHT;
 	}
 
-	protected abstract ParseTree process(Target t, FileOptions fileOptions, ParseTree leftHandNode) throws ConfigCompileException;
+	protected abstract ParseTree process(Target t, FileOptions fileOptions, ParseTree rightHandNode) throws ConfigCompileException;
 
 	@Override
 	public final ParseTree processLeftAssociative(Target t, FileOptions fileOptions, ParseTree leftHandNode) {

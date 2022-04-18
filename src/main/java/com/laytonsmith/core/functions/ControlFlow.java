@@ -2080,6 +2080,8 @@ public class ControlFlow {
 	@api
 	public static class _break extends AbstractFunction implements Optimizable {
 
+		public static final String NAME = "break";
+
 		@Override
 		public String getName() {
 			return "break";
@@ -2185,6 +2187,8 @@ public class ControlFlow {
 
 	@api
 	public static class _continue extends AbstractFunction {
+
+		public static final String NAME = "continue";
 
 		@Override
 		public String getName() {

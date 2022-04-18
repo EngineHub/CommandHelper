@@ -8,17 +8,18 @@ import com.laytonsmith.core.compiler.Keyword;
 import com.laytonsmith.core.compiler.RightAssociativeLateBindingKeyword;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.ControlFlow;
 
 /**
  *
  */
-@Keyword.keyword("return")
-public class ReturnKeyword extends RightAssociativeLateBindingKeyword {
+@Keyword.keyword("continue")
+public class ContinueKeyword extends RightAssociativeLateBindingKeyword {
 
 	@Override
-	protected ParseTree process(Target t, FileOptions fileOptions, ParseTree rightHandNode) {
-		ParseTree ret = new ParseTree(new CFunction(ControlFlow._return.NAME, t), fileOptions);
+	protected ParseTree process(Target t, FileOptions fileOptions, ParseTree rightHandNode) throws ConfigCompileException {
+		ParseTree ret = new ParseTree(new CFunction(ControlFlow._continue.NAME, t), fileOptions);
 		if(rightHandNode != null) {
 			ret.addChild(rightHandNode);
 		}
@@ -26,8 +27,14 @@ public class ReturnKeyword extends RightAssociativeLateBindingKeyword {
 	}
 
 	@Override
+	public boolean allowEmptyValue() {
+		return true;
+	}
+
+	@Override
 	public String docs() {
-		return "Returns the specified value from the Callable.";
+		return "Stops processing this loop iteration, and immediately starts the next iteration. Keyword version of"
+				+ " the continue function.";
 	}
 
 	@Override
@@ -35,8 +42,4 @@ public class ReturnKeyword extends RightAssociativeLateBindingKeyword {
 		return MSVersion.V3_3_5;
 	}
 
-	@Override
-	public boolean allowEmptyValue() {
-		return true;
-	}
 }
