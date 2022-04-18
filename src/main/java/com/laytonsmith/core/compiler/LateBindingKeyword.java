@@ -3,6 +3,7 @@ package com.laytonsmith.core.compiler;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import java.net.URL;
 
@@ -32,13 +33,21 @@ public abstract class LateBindingKeyword implements KeywordDocumentation {
 		BOTH;
 	}
 
-	public abstract ParseTree processLeftAssociative(ParseTree leftHandNode) throws ConfigCompileException;
+	public abstract ParseTree processLeftAssociative(Target t, FileOptions fileOptions, ParseTree leftHandNode) throws ConfigCompileException;
 
-	public abstract ParseTree processRightAssociative(ParseTree rightHandNode) throws ConfigCompileException;
+	public abstract ParseTree processRightAssociative(Target t, FileOptions fileOptions, ParseTree rightHandNode) throws ConfigCompileException;
 
-	public abstract ParseTree processBothAssociative(ParseTree leftHandNode, ParseTree rightHandNode) throws ConfigCompileException;
+	public abstract ParseTree processBothAssociative(Target t, FileOptions fileOptions, ParseTree leftHandNode, ParseTree rightHandNode) throws ConfigCompileException;
 
 	public abstract Associativity getAssociativity();
+
+	/**
+	 * Defaults to false, but if true, allows for null to be passed, indicating there was no value to pass on that side.
+	 * @return
+	 */
+	public boolean allowEmptyValue() {
+		return false;
+	}
 
 	@Override
 	@SuppressWarnings("unchecked")

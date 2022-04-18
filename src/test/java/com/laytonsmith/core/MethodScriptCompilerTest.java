@@ -1015,17 +1015,16 @@ public class MethodScriptCompilerTest {
 	public void testLiteralDecimal() throws Exception {
 		assertEquals("123.4", SRun("0m123.4", fakePlayer));
 		assertEquals("123", SRun("0m123", fakePlayer));
-		assertEquals("decimal", SRun("typeof(0m123)", fakePlayer));
-		assertEquals("decimal", SRun("typeof(0m123.4)", fakePlayer));
-		assertEquals("decimal", SRun("typeof(-0m123.4)", fakePlayer));
-		assertEquals("decimal", SRun("typeof(-0m123)", fakePlayer));
+		assertEquals("ms.lang.decimal", SRun("typeof(0m123)", fakePlayer));
+		assertEquals("ms.lang.decimal", SRun("typeof(0m123.4)", fakePlayer));
+		assertEquals("ms.lang.decimal", SRun("typeof(-0m123.4)", fakePlayer));
+		assertEquals("ms.lang.decimal", SRun("typeof(-0m123)", fakePlayer));
 
-		assertEquals("decimal", SRun("typeof(0m1234567890987654321)", fakePlayer));
-		assertEquals("decimal", SRun("typeof(0m1234567890987654321.1234567890987654321)", fakePlayer));
+		assertEquals("ms.lang.decimal", SRun("typeof(0m1234567890987654321)", fakePlayer));
+		assertEquals("ms.lang.decimal", SRun("typeof(0m1234567890987654321.1234567890987654321)", fakePlayer));
 	}
 
 	@Test(expected = CREFormatException.class)
-	@Ignore("Ignore for now, until the feature is implemented")
 	public void testLiteralBinary() throws Exception {
 		SRun("0b2", fakePlayer);
 	}
@@ -1302,20 +1301,20 @@ public class MethodScriptCompilerTest {
 		sa.setLocalEnable(true);
 		ParseTree tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex("primitive @s = 'asdf'; msg(@s); int proc _a(){return(1);} _a();",
 				env, null, true), env, env.getEnvClasses(), sa);
-		ParseTree sUsage = tree.getChildAt(0).getChildAt(1).getChildAt(0);
+		ParseTree sUsage = tree.getChildAt(0).getChildAt(1).getChildAt(0).getChildAt(0);
 		assertTrue(sUsage.getDeclaredType(env).equals(CPrimitive.TYPE));
-		ParseTree asdf = tree.getChildAt(0).getChildAt(0).getChildAt(2);
+		ParseTree asdf = tree.getChildAt(0).getChildAt(0).getChildAt(0).getChildAt(2);
 		assertTrue(asdf.getDeclaredType(env).equals(CString.TYPE));
-		ParseTree msg = tree.getChildAt(0).getChildAt(1);
+		ParseTree msg = tree.getChildAt(0).getChildAt(1).getChildAt(0);
 		assertTrue(msg.getDeclaredType(env).equals(CVoid.TYPE));
-		ParseTree _a = tree.getChildAt(0).getChildAt(3);
+		ParseTree _a = tree.getChildAt(0).getChildAt(2).getChildAt(1);
 		assertTrue(_a.getDeclaredType(env).equals(CInt.TYPE));
 	}
 
 	@Test
 	public void testSmartCommentIsOnNode() throws Exception {
 		String[] scripts = new String[]{
-			"/** smart comment */ proc('_test', null);",
+			"/** smart comment */ proc('_test', null)",
 			"/** smart comment */ void proc _test(){}",
 			"/** smart comment */ proc _test(){}",
 		};
@@ -1334,8 +1333,8 @@ public class MethodScriptCompilerTest {
 	public void testGettingSmartCommentFromReferenceWorks() throws Exception {
 		String[] scripts = new String[]{
 			"/** smart comment */ proc _test() {}; _test();",
-			"/** smart comment */ void proc _test(){} _test();",
-			"/** smart comment */ proc _test(){} _test();",
+			"/** smart comment */ void proc _test(){}; _test();",
+			"/** smart comment */ proc _test(){}; _test();",
 		};
 		for(String script : scripts) {
 			Environment env = Static.GenerateStandaloneEnvironment();
@@ -1345,11 +1344,11 @@ public class MethodScriptCompilerTest {
 					script,
 					env, null, true), env, env.getEnvClasses(), sa);
 			ParseTree root = tree.getChildAt(0);
-			assertTrue(root.getChildAt(0).getNodeModifiers().getComment() != null);
-			assertTrue(root.getChildAt(1).getData() instanceof CFunction);
-			assertEquals("_test", root.getChildAt(1).getData().val());
-			assertTrue(sa.getTermScope(root.getChildAt(0)) != null);
-			Declaration decl = new ArrayList<>(sa.getTermScope(root.getChildAt(1))
+			assertTrue(root.getChildAt(0).getChildAt(0).getNodeModifiers().getComment() != null);
+			assertTrue(root.getChildAt(1).getChildAt(0).getData() instanceof CFunction);
+			assertEquals("_test", root.getChildAt(1).getChildAt(0).getData().val());
+			assertTrue(sa.getTermScope(root.getChildAt(0).getChildAt(0)) != null);
+			Declaration decl = new ArrayList<>(sa.getTermScope(root.getChildAt(1).getChildAt(0))
 					.getReachableDeclarations(Namespace.PROCEDURE, "_test")).get(0);
 			assertTrue(decl != null && decl instanceof ProcDeclaration);
 			assertTrue(decl.getNodeModifiers().getComment() != null);

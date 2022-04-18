@@ -34,6 +34,7 @@ import com.laytonsmith.core.functions.StringHandling.concat;
 import com.laytonsmith.core.functions.StringHandling.sconcat;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.ArrayList;
@@ -57,7 +58,7 @@ public class Compiler {
 	@api
 	@noprofile
 	@hide("This is only used internally by the compiler.")
-	public static class p extends DummyFunction {
+	public static class p extends DummyFunction implements Optimizable {
 
 		public static final String NAME = "p";
 
@@ -85,6 +86,40 @@ public class Compiler {
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return CVoid.VOID;
 		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, Environment env, Set<Class<? extends Environment.EnvironmentImpl>> envs, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException, ConfigCompileGroupException {
+			if(children.size() == 1) {
+				return Optimizable.PULL_ME_UP;
+			} else if(children.isEmpty()) {
+				return Optimizable.REMOVE_ME;
+			} else {
+				return null;
+			}
+		}
+
+		@Override
+		public ParseTree postParseRewrite(ParseTree ast, Environment env, Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> exceptions) {
+			if(ast.getChildren().size() == 1) {
+				return ast.getChildAt(0);
+			}
+			return null;
+		}
+
+		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+			if(argTypes.size() == 1) {
+				return argTypes.get(0);
+			} else {
+				return CVoid.TYPE;
+			}
+		}
+
 	}
 
 	@api

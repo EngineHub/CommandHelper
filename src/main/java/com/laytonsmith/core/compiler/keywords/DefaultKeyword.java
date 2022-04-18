@@ -21,7 +21,8 @@ public class DefaultKeyword extends Keyword {
 	@Override
 	public String docs() {
 		return "Works similar to a case definition, but defines the default case, which runs if no defined cases"
-				+ " match.";
+				+ " match. When used in context of a class or method definition, provides default access to the class"
+				+ " or method.";
 	}
 
 	@Override

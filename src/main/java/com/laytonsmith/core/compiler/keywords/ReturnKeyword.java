@@ -17,11 +17,11 @@ import com.laytonsmith.core.functions.ControlFlow;
 public class ReturnKeyword extends RightAssociativeLateBindingKeyword {
 
 	@Override
-	protected ParseTree process(ParseTree leftHandNode) {
-		Target t = leftHandNode.getTarget();
-		FileOptions fileOptions = leftHandNode.getFileOptions();
+	protected ParseTree process(Target t, FileOptions fileOptions, ParseTree leftHandNode) {
 		ParseTree ret = new ParseTree(new CFunction(ControlFlow._return.NAME, t), fileOptions);
-		ret.addChild(leftHandNode);
+		if(leftHandNode != null) {
+			ret.addChild(leftHandNode);
+		}
 		return ret;
 	}
 
@@ -35,5 +35,8 @@ public class ReturnKeyword extends RightAssociativeLateBindingKeyword {
 		return MSVersion.V3_3_5;
 	}
 
-
+	@Override
+	public boolean allowEmptyValue() {
+		return true;
+	}
 }

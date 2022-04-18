@@ -3,8 +3,12 @@ package com.laytonsmith.core;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.testing.StaticTest;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Set;
 import static org.junit.Assert.assertEquals;
 import org.junit.BeforeClass;
@@ -25,7 +29,16 @@ public class OptimizationTest {
 	}
 
 	public String optimize(String script) throws Exception {
-		return OptimizationUtilities.optimize(script, null, envs, null, false);
+		try {
+			try {
+				return OptimizationUtilities.optimize(script, null, envs, null, false);
+			} catch(ConfigCompileException ex) {
+				throw new ConfigCompileGroupException(new HashSet<>(Arrays.asList(ex)));
+			}
+		} catch(ConfigCompileGroupException ex) {
+			String msg = ex.getList().toString();
+			throw new ConfigCompileException(msg, new ArrayList<>(ex.getList()).get(0).getTarget(), ex);
+		}
 	}
 
 	@Test
@@ -105,7 +118,8 @@ public class OptimizationTest {
 
 	@Test
 	public void testClosure() throws Exception {
-		assertEquals("sconcat(assign(@c,closure(@target,msg(concat('Hello ',@target,'!')))),@c('world'))",
+		assertEquals("sconcat(__statements__(assign(@c,closure(@target,msg(concat('Hello ',@target,'!'))))),"
+				+ "__statements__(@c('world')))",
 				optimize("@c = closure(@target) {msg('Hello '.@target.'!')}; @c('world');"));
 	}
 
@@ -119,17 +133,19 @@ public class OptimizationTest {
 	@Test
 	public void testUnreachableCodeWithBranchTypeFunction() throws Exception {
 		assertEquals("if(@var,die(),msg(''))", optimize("if(@var){ die() } else { msg('') }"));
-		assertEquals("sconcat(while(lt(rand(),0.5),die()),msg('survived'))", optimize("while(rand() < 0.5) { die(); } msg('survived');"));
+		assertEquals("__statements__(while(lt(rand(),0.5),__statements__(die())),msg('survived'))",
+				optimize("while(rand() < 0.5) { die(); } msg('survived');"));
 	}
 
 	@Test
 	public void testUnreachableCodeComplex() throws Exception {
-		assertEquals("sconcat(assign(@a,closure(return(5))),execute(@a))",
+		assertEquals("__statements__(assign(@a,closure(__statements__(return(5)))),execute(@a))",
 				optimize("@a = closure(){"
 						+ "return(5);"
 						+ "}"
 						+ "execute(@a);"));
-		assertEquals("sconcat(msg('a'),if(dyn(1),ifelse(dyn(1),sconcat(die()),dyn(2),sconcat(die()),sconcat(die())),msg('b')))",
+		assertEquals("sconcat(__statements__(msg('a')),if(dyn(1),ifelse(dyn(1),sconcat(__statements__(die())),dyn(2),"
+				+ "sconcat(__statements__(die())),sconcat(__statements__(die()))),__statements__(msg('b'))))",
 				optimize("msg('a');"
 						+ "if(dyn(1)){"
 						+ "	if(dyn(1)){"
@@ -145,7 +161,7 @@ public class OptimizationTest {
 						+ "} else {"
 						+ "	msg('b');"
 						+ "}"));
-		assertEquals("sconcat(msg('a'),die())",
+		assertEquals("sconcat(__statements__(msg('a')),__statements__(die()))",
 				optimize("msg('a');"
 						+ "die();"
 						+ "if(dyn(1)){"
@@ -167,7 +183,7 @@ public class OptimizationTest {
 	@Test
 	public void testInnerDie() throws Exception {
 		// Since p is not a branch function, we expect a die inside of that to bubble up
-		assertEquals("sconcat(p(concat(die())))",
+		assertEquals("sconcat(__statements__(concat(die())))",
 				optimize("p(concat(die(), msg('bad'))); msg('bad');"));
 	}
 
@@ -237,7 +253,7 @@ public class OptimizationTest {
 
 	@Test
 	public void testMultipleAdjacentAssignment() throws Exception {
-		assertEquals("sconcat(assign(@one,inc(@two)),assign(ms.lang.int,@three,0),assign(@four,'test'))",
+		assertEquals("sconcat(__statements__(assign(@one,inc(@two))),__statements__(assign(ms.lang.int,@three,0)),__statements__(assign(@four,'test')))",
 				optimize("@one = ++@two; int @three = 0; @four = 'test';"));
 	}
 
@@ -348,11 +364,11 @@ public class OptimizationTest {
 	//tests the new switch syntax
 	@Test
 	public void testSwitch1() throws Exception {
-		assertEquals("switch(@a,array(1,2),msg('1, 2'),"
-				+ "array(3..4),sconcat(msg('3'),msg('4')),"
-				+ "array(false),msg('false'),"
-				+ "array(0.07),msg(0.07),"
-				+ "msg('default'))",
+		assertEquals("switch(@a,array(1,2),__statements__(msg('1, 2')),"
+				+ "3..4,sconcat(__statements__(msg('3')),__statements__(msg('4'))),"
+				+ "false,__statements__(msg('false')),"
+				+ "0.07,__statements__(msg(0.07)),"
+				+ "__statements__(msg('default')))",
 				optimize("switch(@a){"
 						+ "	case 1:"
 						+ "	case 2:"
@@ -370,6 +386,22 @@ public class OptimizationTest {
 						+ "}"));
 	}
 
+	@Test
+	public void testSwitchInSwitch() throws Exception {
+		assertEquals("switch(dyn(1),1,switch(dyn(2),2,__statements__(msg('hi')),3,__statements__(msg('hi'))),2,__statements__(msg('hi')))",
+				optimize("switch(dyn(1)) {\n"
+						+ "case 1:\n"
+						+ "		switch(dyn(2)) {\n"
+						+ "			case 2:\n"
+						+ "				msg('hi');\n"
+						+ "			case 3:\n"
+						+ "				msg('hi');\n"
+						+ "		}\n"
+						+ "case 2:\n"
+						+ "		msg('hi');\n"
+						+ "}\n"));
+	}
+
 	@Test(expected = ConfigCompileException.class)
 	public void testSwitch2() throws Exception {
 		optimize("switch(@a){"
@@ -382,6 +414,12 @@ public class OptimizationTest {
 	@Test
 	public void testEmptySwitch() throws Exception {
 		assertEquals("switch(dyn(1))", optimize("switch(dyn(1)){ case 1: case 2: default: }"));
+	}
+
+	@Test
+	public void testDuplicatedDefault() throws Exception {
+		assertEquals("switch(dyn(1),msg('hello'))",
+				optimize("switch(dyn(1)) { case 1: case 2: default: msg('hello') }"));
 	}
 
 	// Tests "-" signs in front of values to negate them.
@@ -441,7 +479,7 @@ public class OptimizationTest {
 //	}
 	@Test
 	public void testNotinstanceofKeyword() throws Exception {
-		assertEquals("msg(not(instanceof(dyn(2),ms.lang.int)))", optimize("msg(dyn(2) notinstanceof int);"));
+		assertEquals("__statements__(msg(not(instanceof(dyn(2),ms.lang.int))))", optimize("msg(dyn(2) notinstanceof int);"));
 	}
 
 	@Test
@@ -473,8 +511,15 @@ public class OptimizationTest {
 
 	@Test
 	public void testSwitchIc() throws Exception {
-		assertEquals("switch_ic(to_lower(dyn('AsDf')),array('asdf'),msg('hello'),array('fdsa'),msg('nope'))",
+		assertEquals("switch_ic(to_lower(dyn('AsDf')),'asdf',__statements__(msg('hello')),'fdsa',__statements__(msg('nope')))",
 				optimize("switch_ic(dyn('AsDf')) { case 'aSdF': msg('hello'); case 'fdsa': msg('nope'); }"));
+	}
+
+	@Test
+	public void testSwitchWithComments() throws Exception {
+		assertEquals("switch(dyn(1),1,__statements__(break()),2,__statements__(break()),3,__statements__(break()))",
+				optimize("switch(dyn(1)) { /** comment */ case 1: break(); /* comment */ case 2: break();\n"
+						+ "// comment\ncase /*comment*/ 3: /** comment */ break(); }"));
 	}
 
 	@Test
@@ -486,14 +531,22 @@ public class OptimizationTest {
 
 	@Test
 	public void testReturnAsKeyword() throws Exception {
-		// It shouldn't have string(), but whatever, it's the weird sconcat behavior.
-		assertEquals("proc('_name',string(return('value')))", optimize("proc _name() { return 'value'; }"));
-		assertEquals("proc('_name',string(return(rand(1,10))))", optimize("proc _name() { return rand(1, 10); }"));
+		assertEquals("proc('_name',__statements__(return('value')))", optimize("proc _name() { return 'value'; }"));
+		assertEquals("proc('_name',__statements__(return(rand(1,10))))", optimize("proc _name() { return rand(1, 10); }"));
 
 		assertEquals("proc('_name',__statements__(return('value')))", optimize("<! strict > proc _name() { return 'value'; }"));
 		assertEquals("proc('_name',__statements__(return(rand(1,10))))", optimize("<! strict > proc _name() { return rand(1, 10); }"));
 
-		assertEquals("proc('_name',string(return(add(dyn(1),dyn(2)))))", optimize("proc _name() { return dyn(1) + dyn(2); }"));
+		assertEquals("proc('_name',__statements__(return(add(dyn(1),dyn(2)))))", optimize("proc _name() { return dyn(1) + dyn(2); }"));
 		assertEquals("proc('_name',__statements__(return(add(dyn(1),dyn(2)))))", optimize("<! strict > proc _name() { return dyn(1) + dyn(2); }"));
+
+		// return void
+		assertEquals("proc('_name',__statements__(return()))", optimize("proc _name() { return; }"));
+		assertEquals("proc('_name',__statements__(return()))", optimize("<! strict > proc _name() { return; }"));
+
+		assertEquals("proc('_name',__statements__(__statements__(return())))", optimize("<! strict > proc _name() { return; msg('Dead code'); }"));
+		assertEquals("proc('_name',sconcat(__statements__(return())))", optimize("proc _name() { return; msg('Dead code') msg('Other dead code')}"));
+		assertEquals("proc('_name',__statements__(return(msg('Dead code'))))", optimize("<! strict > proc _name() { return msg('Dead code') msg('Other dead code')}"));
+
 	}
 }

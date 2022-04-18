@@ -121,6 +121,19 @@ public class ParseTree implements Cloneable {
 		this.isSyntheticNode = isSyntheticNode;
 	}
 
+	/**
+	 * Replaces the contents of this ParseTree with the given ParseTree. When the replacement is done, the old
+	 * parse tree will have its data, children, and other associated values replaced. Node modifiers will be merged,
+	 * however.
+	 * @param newData
+	 */
+	public void replace(ParseTree newData) {
+		this.setData(newData.data);
+		this.setChildren(newData.children);
+		this.getNodeModifiers().merge(newData.nodeModifiers);
+		this.isSyntheticNode = newData.isSyntheticNode;
+	}
+
 	public boolean isSyntheticNode() {
 		return this.isSyntheticNode;
 	}

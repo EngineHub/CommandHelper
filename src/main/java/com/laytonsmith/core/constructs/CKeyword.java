@@ -28,6 +28,12 @@ public class CKeyword extends CBareString {
 		return node instanceof CKeyword && keyword.equals(node.val());
 	}
 
+	public static boolean isKeyword(Token t, String keyword) {
+		return t != null && t.val().equals(keyword)
+				&& (t.type == Token.TType.KEYWORD || t.type == Token.TType.FUNC_NAME)
+				&& KeywordList.getKeywordNames().contains(keyword);
+	}
+
 	@Override
 	public Version since() {
 		return super.since();

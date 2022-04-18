@@ -1,20 +1,20 @@
 package com.laytonsmith.core.compiler.keywords;
 
+import com.laytonsmith.PureUtilities.SmartComment;
 import com.laytonsmith.core.ParseTree;
-import com.laytonsmith.core.compiler.Keyword;
-import com.laytonsmith.core.constructs.CBareString;
+import com.laytonsmith.core.compiler.EarlyBindingKeyword;
+import com.laytonsmith.core.compiler.TokenStream;
 import com.laytonsmith.core.constructs.CClassType;
-import com.laytonsmith.core.constructs.CFunction;
-import com.laytonsmith.core.constructs.CKeyword;
-import com.laytonsmith.core.constructs.CNull;
-import com.laytonsmith.core.constructs.CSymbol;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.Token;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.natives.interfaces.MAnnotation;
 import com.laytonsmith.core.objects.AccessModifier;
 import com.laytonsmith.core.objects.ObjectModifier;
 import com.laytonsmith.core.objects.ObjectType;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -22,14 +22,11 @@ import java.util.Set;
  * An ObjectDefinitionKeyword is a keyword which defines an object type, for instance "class" or
  * "interface". The particulars of the contents of the class may vary, and it is up to the subclass
  * to parse the contents correctly.
- *
- * Keywords that define this have special support in the compiler, and can contain commas between
- * the keyword and the first curly brace.
  */
-public abstract class ObjectDefinitionKeyword extends Keyword {
+public abstract class ObjectDefinitionKeyword extends EarlyBindingKeyword {
 
 	@Override
-	public int process(List<ParseTree> list, int keywordPosition) throws ConfigCompileException {
+	public int process(TokenStream stream, Environment env, int keywordPosition) throws ConfigCompileException {
 		// There are a couple of rules for all object definition keywords, particularly that the
 		// object definition name must come exactly after, the optional modifiers may come before (in any
 		// order), optionally followed by implements or extends, and after those, a comma separated list
@@ -39,13 +36,45 @@ public abstract class ObjectDefinitionKeyword extends Keyword {
 		// Do a lookbehind until we reach 0, or we find something other than an access modifier or
 		// object modifier.
 		int startRemovalFrom = keywordPosition;
+		AccessModifier accessModifier = null;
+		Set<ObjectModifier> objectModifiers = new HashSet<>();
+		SmartComment smartComment = null;
+		for(int i = keywordPosition; i >= 0; i--) {
+			Token keyword = stream.get(i);
+			if(keyword.type == Token.TType.COMMENT) {
+				continue;
+			}
+			if(keyword.type == Token.TType.SMART_COMMENT && smartComment == null) {
+				smartComment = new SmartComment(keyword.value);
+			}
+			if(keyword.type == Token.TType.KEYWORD) {
+				AccessModifier possibleAccessModifier = AccessModifier.valueOf(keyword.value.toUpperCase());
+				if(possibleAccessModifier != null) {
+					if(accessModifier != null) {
+						throw new ConfigCompileException("Unexpected access modifier", keyword.target);
+					}
+					accessModifier = possibleAccessModifier;
+				}
+
+				ObjectModifier possibleObjectModifier = ObjectModifier.valueOf(keyword.value.toUpperCase());
+				if(possibleObjectModifier != null) {
+					if(objectModifiers.contains(possibleObjectModifier)) {
+						throw new ConfigCompileException("Duplicated object modifier", keyword.target);
+					}
+					objectModifiers.add(possibleObjectModifier);
+				}
+			} else {
+				break;
+			}
+		}
 		// Now we have the keyword itself (i.e. "class") which we can ignore.
 		// After that, we have the object name. However, note that this should be the
 		// fully qualified class name, which in most cases should have multiple parts, i.e. "ms.lang.string"
 		// This would be 5 different nodes. So we start with a bare string, then can be followed by one of:
 		// 1. a concat operator, 2. the implements keyword, 3. the extends keyword, 4. the __cbrace__ function.
 		// All other nodes are an error case. After we determine which case, we follow a different code path.
-		ParseTree className = getClassName(list, keywordPosition + 1);
+		StringBuilder className = new StringBuilder();
+		int advance = getClassName(stream, keywordPosition + 1, className);
 		List<ParseTree> implementsTypes = new ArrayList<>();
 		// Concat operator
 			// Append the ., look for another bare string, start loop over
@@ -53,49 +82,51 @@ public abstract class ObjectDefinitionKeyword extends Keyword {
 
 		{
 			// Implements keyword
-			// Loop through finding the class name
 			boolean inImplementsKeyword = false;
-			for(int i = keywordPosition + 2; i < list.size(); i++) {
-				ParseTree l = list.get(i);
-				Keyword k = null;
-				if(l.getData() instanceof CKeyword) {
-					k = ((CKeyword) l.getData()).getKeyword();
-				}
-				if(inImplementsKeyword) {
-					if(l.getData() instanceof CSymbol && ((CSymbol) l.getData()).convert().equals(",")) {
-						continue;
-					} else if(k != null) {
-						break;
-					} else if(CFunction.IsFunction(l.getData(),
-							com.laytonsmith.core.functions.Compiler.__cbrace__.class)) {
-						break;
-					} else if(l.getData() instanceof CBareString) {
-						implementsTypes.add(getClassName(list, i));
-					} else {
-						throw new ConfigCompileException("Unexpected value: " + l.getData(), l.getTarget());
-					}
-				} else {
-					if(k != null && k instanceof ImplementsKeyword) {
-						inImplementsKeyword = true;
-					}
-				}
-			}
-		}
-		Target objectDeclaration = list.get(keywordPosition).getTarget();
+			for(int i = advance; i < stream.size(); i++) {
 
-		ParseTree cbrace = null;
-		for(int i = startRemovalFrom; i < list.size(); i++) {
-			if(CFunction.IsFunction(list.get(i).getData(), com.laytonsmith.core.functions.Compiler.__cbrace__.class)) {
-				cbrace = list.get(i);
-				break;
 			}
-			i--;
-			list.remove(i);
+//			for(int i = keywordPosition + 2; i < list.size(); i++) {
+//				ParseTree l = list.get(i);
+//				Keyword k = null;
+//				if(l.getData() instanceof CKeyword) {
+//					k = ((CKeyword) l.getData()).getKeyword();
+//				}
+//				if(inImplementsKeyword) {
+//					if(l.getData() instanceof CSymbol && ((CSymbol) l.getData()).convert().equals(",")) {
+//						continue;
+//					} else if(k != null) {
+//						break;
+//					} else if(CFunction.IsFunction(l.getData(),
+//							com.laytonsmith.core.functions.Compiler.__cbrace__.class)) {
+//						break;
+//					} else if(l.getData() instanceof CBareString) {
+//						implementsTypes.add(getClassName(list, i));
+//					} else {
+//						throw new ConfigCompileException("Unexpected value: " + l.getData(), l.getTarget());
+//					}
+//				} else {
+//					if(k != null && k instanceof ImplementsKeyword) {
+//						inImplementsKeyword = true;
+//					}
+//				}
+//			}
 		}
-
-		if(cbrace == null) {
-			throw new ConfigCompileException("Invalid object declaration", objectDeclaration);
-		}
+//		Target objectDeclaration = list.get(keywordPosition).getTarget();
+//
+//		ParseTree cbrace = null;
+//		for(int i = startRemovalFrom; i < list.size(); i++) {
+//			if(CFunction.IsFunction(list.get(i).getData(), com.laytonsmith.core.functions.Compiler.__cbrace__.class)) {
+//				cbrace = list.get(i);
+//				break;
+//			}
+//			i--;
+//			list.remove(i);
+//		}
+//
+//		if(cbrace == null) {
+//			throw new ConfigCompileException("Invalid object declaration", objectDeclaration);
+//		}
 
 		// TODO: All the object parameters should be here now, need to further parse the cbrace for relevant data
 		// (some of which needs to go to the subclass, for instance, for enums), and rewrite them to a define_object
@@ -103,39 +134,22 @@ public abstract class ObjectDefinitionKeyword extends Keyword {
 		return keywordPosition;
 	}
 
-	private static ParseTree getClassName(List<ParseTree> list, int start) throws ConfigCompileException {
-		List<ParseTree> ret = new ArrayList<>();
+	private static int getClassName(TokenStream list, int start, StringBuilder builder) throws ConfigCompileException {
+		Token lastToken = null;
 		for(int i = start; i < list.size(); i++) {
-			ParseTree one = list.get(i);
-			ParseTree two = new ParseTree(CNull.NULL, null);
-			if(list.size() > i + 1) {
-				two = list.get(i + 1);
-			}
-			// CKeyword extends CBareString, not sure why that is.
-			if(!(one.getData() instanceof CKeyword) && one.getData() instanceof CBareString) {
-				ret.add(one);
-				continue;
-			}
-			if(two.getData() instanceof CSymbol) {
-				CSymbol s = (CSymbol) two.getData();
-				if(s.convert().equals(".")) {
-					ret.add(two);
-					continue;
+			Token t = list.get(i);
+			lastToken = t;
+			switch(t.type) {
+				case STRING -> builder.append(t.toString());
+				case CONCAT -> builder.append(t.toString());
+				case LCURLY_BRACKET, KEYWORD -> {
+					return i;
 				}
-				throw new ConfigCompileException("Unexpected symbol in object definition: " + one.getData(),
-						one.getTarget());
 			}
-			break;
 		}
-		if(ret.size() == 1) {
-			return ret.get(0);
-		} else {
-			ParseTree p = new ParseTree(new CFunction("__autoconcat__", Target.UNKNOWN), ret.get(0).getFileOptions());
-			for(ParseTree m : ret) {
-				p.addChild(m);
-			}
-			return p;
-		}
+
+		throw new ConfigCompileException("Unexpected end of class definition",
+				lastToken == null ? Target.UNKNOWN : lastToken.target);
 	}
 
 	/**
