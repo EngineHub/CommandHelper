@@ -42,7 +42,16 @@ configuration is wrong, such that the code can not come up completely. This is u
 security is provided through CommandHelper, so that if something changes and the code no longer will run, it is better \
 for the server to shut down than run unprotected. Various other backend improvements were made in this area.
 * Extension load time was reduced.
-* <code>return</code> can now be used as a keyword, such as <code>return expression();</code>
+* <code>return</code> can now be used as a keyword, such as <code>return expression();</code> or <code>return;</code>
+* <code>continue</code> and <code>break</code> can also be used as keywords, in the same way.
+* Full support for statements has been added. In either strict and non-strict mode, adding a semicolon creates a \
+statement. For now, they are not required in any mode, though they will cause errors in strict mode if they are \
+used in places they shouldn't. To keep backwards compatibility, in non-strict mode, when a statement is used where \
+it shouldn't be, the value will be "pulled up" and not cause any errors. For instance, for the code \
+<code>if(@a;){}</code>, this will cause an error in strict mode, but work like <code>if(@a){}</code> in non-strict \
+mode. Eventually, this will cause a warning in non-strict mode, but additional work is needed before that can be \
+implemented. In both modes, when statements are used, properly, this may increase runtime performance, because it \
+skips the automatic sconcat feature, which is required for small aliases, but is inefficient in all other cases.
 * As always, hundreds of additional performance fixes and bug fixes and other minor things.
 
 Very early support for LLVM is being introduced. This is not generally usable for basically anything yet, but you
