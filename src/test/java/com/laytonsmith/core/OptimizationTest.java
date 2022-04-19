@@ -603,4 +603,12 @@ public class OptimizationTest {
 						+ "	}\n"
 						+ "<<<\n", false));
 	}
+
+	@Test
+	public void testPartialStatementsInStrict() throws Exception {
+		assertEquals("__statements__(assign(ms.lang.int,@i,1),msg(@i),msg(@i))", optimize("<! strict >\n"
+				+ "int @i = 1\n"
+				+ "msg(@i);\n"
+				+ "msg(@i);\n"));
+	}
 }

@@ -2211,7 +2211,15 @@ public final class MethodScriptCompiler {
 					&& cf.val().equals(Compiler.__statements__.NAME)) {
 				autoconcat.replace(autoconcat.getChildAt(0));
 			}
-			statements.addChild(autoconcat);
+			if(autoconcat.getData() instanceof CFunction cf
+					&& cf.val().equals(Compiler.__statements__.NAME)) {
+				// Pull up any sub-statements, instead of nesting.
+				for(ParseTree statementChild : autoconcat.getChildren()) {
+					statements.addChild(statementChild);
+				}
+			} else {
+				statements.addChild(autoconcat);
+			}
 		}
 		if(statements.getChildren().size() == 1 && statements.getChildAt(0).getData() instanceof CFunction) {
 			if(statements.getChildAt(0).isSyntheticNode()) {
