@@ -2985,9 +2985,7 @@ public final class MethodScriptCompiler {
 			try {
 				i = keyword.process(stream, env, i);
 			} catch (ConfigCompileException ex) {
-				// Keyword processing failed, but the keyword might be part of some other syntax where it's valid.
-				// Store the compile error so that it can be thrown after all if the keyword won't be handled.
-				env.getEnv(CompilerEnvironment.class).potentialKeywordCompileErrors.put(token.getTarget(), ex);
+				compileErrors.add(ex);
 			}
 		}
 	}

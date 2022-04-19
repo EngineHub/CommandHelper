@@ -181,7 +181,12 @@ public class SwitchKeyword extends EarlyBindingKeyword {
 							newStream.add(new Token(TType.COMMA, ",", Target.UNKNOWN));
 						}
 						first = false;
-						newStream.addAll(r);
+						for(Token tt : r) {
+							if(tt.type == TType.SMART_STRING) {
+								tt = com.laytonsmith.core.functions.Compiler.__smart_string__.getDumbStringOrFail(tt);
+							}
+							newStream.add(tt);
+						}
 					}
 					newStream.add(new Token(TType.FUNC_END, ")", Target.UNKNOWN));
 					newStream.add(new Token(TType.COMMA, ",", Target.UNKNOWN));
@@ -204,7 +209,8 @@ public class SwitchKeyword extends EarlyBindingKeyword {
 				List<Token> caseTokens = new ArrayList<>();
 				while(t.type != TType.LABEL) {
 					if(t.type != TType.LIT && t.type != TType.SLICE && t.type != TType.STRING
-							&& t.type != TType.INTEGER && t.type != TType.KEYWORD && t.type != TType.DOT) {
+							&& t.type != TType.INTEGER && t.type != TType.KEYWORD && t.type != TType.DOT
+							&& t.type != TType.SMART_STRING) {
 						throw new ConfigCompileException("Unsupported type in case clause", t.target);
 					}
 					caseTokens.add(t);

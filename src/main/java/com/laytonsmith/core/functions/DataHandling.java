@@ -201,6 +201,7 @@ public class DataHandling {
 		FileOptions lastFileOptions = null;
 
 		@Override
+		@SuppressWarnings("null")
 		public ParseTree optimizeDynamic(Target t, Environment env,
 				Set<Class<? extends Environment.EnvironmentImpl>> envs, List<ParseTree> children,
 				FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
@@ -213,13 +214,17 @@ public class DataHandling {
 					if(((CLabel) child.getChildAt(0).getData()).cVal() instanceof CSlice) {
 						throw new ConfigCompileException("Slices cannot be used as array indices", child.getChildAt(0).getTarget());
 					}
-					if(((CLabel) child.getChildAt(0).getData()).cVal() instanceof IVariable) {
+					CLabel label = ((CLabel) child.getChildAt(0).getData());
+					if(label.cVal() instanceof IVariable || label.cVal() instanceof CFunction) {
 						String array = "@a";
-						String valueName = ((IVariable) ((CLabel) child.getChildAt(0).getData()).cVal()).getVariableName();
+						String valueName = "\"key\"";
+						if(label.cVal() instanceof IVariable ivar) {
+							valueName = ivar.getVariableName();
+						}
 						Mixed value = child.getChildAt(1).getData();
 						String v;
-						if(value instanceof IVariable) {
-							v = ((IVariable) value).getVariableName();
+						if(value instanceof IVariable iVariable) {
+							v = iVariable.getVariableName();
 						} else if(value.isInstanceOf(CString.TYPE)) {
 							v = ((CString) value).getQuote();
 						} else {
