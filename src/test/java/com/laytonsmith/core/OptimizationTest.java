@@ -31,9 +31,14 @@ public class OptimizationTest {
 	}
 
 	public String optimize(String script) throws Exception {
+		return optimize(script, true);
+	}
+
+	public String optimize(String script, boolean pureMethodScript) throws Exception {
 		try {
 			try {
-				return OptimizationUtilities.optimize(script, null, envs, null, false);
+				Environment env = Static.GenerateStandaloneEnvironment();
+				return OptimizationUtilities.optimize(script, env, envs, null, false, pureMethodScript);
 			} catch(ConfigCompileException ex) {
 				throw new ConfigCompileGroupException(new HashSet<>(Arrays.asList(ex)));
 			}
@@ -575,5 +580,28 @@ public class OptimizationTest {
 				optimize("int @i = 0; int @j = 0;"));
 		assertEquals("sconcat(__statements__(assign(ms.lang.int,@i,0)),assign(ms.lang.int,@j,0))",
 				optimize("int @i = 0; int @j = 0"));
+	}
+
+	@Test
+	public void testPartialStatementsInStrictMSA() throws Exception {
+		assertEquals("__statements__(assign(ms.lang.int,@i,0),assign(ms.lang.string,@s,'asdf'))",
+				optimize("<! strict >\n"
+						+ "/test = >>>\n"
+						+ "	int @i = 0;\n"
+						+ "	string @s = 'asdf'\n"
+						+ "<<<\n", false));
+	}
+
+	@Test
+	public void testPartialStatementsInStrictMSA2() throws Exception {
+		assertEquals("if(dyn(1),__statements__(assign(ms.lang.int,@i,1),msg(@i)))",
+				optimize("<! strict >\n"
+						+ "/test = >>>\n"
+						+ "	if(dyn(1)) {\n"
+						+ "		int @i = 1;\n"
+						+ "		msg(@i)\n"
+						+ "	}\n"
+						+ "<<<\n"
+						, false));
 	}
 }

@@ -573,10 +573,26 @@ public class Compiler {
 				}
 				if(returnSConcat) {
 					tree = new ParseTree(new CFunction(sconcat.NAME, t), options, true);
+					tree.setChildren(list);
 				} else {
 					tree = new ParseTree(new CFunction(__statements__.NAME, t), options, true);
+					// Instead of straight up adding children, we want to pull up any sub-statements and
+					// simply append them here. This can generally happen if we have partially semi-colon'd code,
+					// so `a; b` will cause this to look like `__autoconcat__(__statements__(a), b))` which we
+					// want to turn into `__statements__(a, b)` rather than `__statements__(__statements__(a), b))`
+					List<ParseTree> newChildren = new ArrayList<>();
+					for(int i = 0; i < list.size(); i++) {
+						ParseTree child = list.get(i);
+						if(child.getData() instanceof CFunction cf && cf.val().equals(__statements__.NAME)) {
+							for(ParseTree subChild : child.getChildren()) {
+								newChildren.add(subChild);
+							}
+						} else {
+							newChildren.add(child);
+						}
+					}
+					tree.setChildren(newChildren);
 				}
-				tree.setChildren(list);
 				return tree;
 			}
 		}

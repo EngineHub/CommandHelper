@@ -806,9 +806,9 @@ public class Script {
 		for(int j = 0; j < left.size(); j++) {
 			Token t = left.get(j);
 			//Token prev_token = j - 2 >= 0?c.tokens.get(j - 2):new Token(TType.UNKNOWN, "", t.line_num);
-			Token lastToken = j - 1 >= 0 ? left.get(j - 1) : new Token(TType.UNKNOWN, "", t.getTarget());
-			Token nextToken = j + 1 < left.size() ? left.get(j + 1) : new Token(TType.UNKNOWN, "", t.getTarget());
-			Token afterToken = j + 2 < left.size() ? left.get(j + 2) : new Token(TType.UNKNOWN, "", t.getTarget());
+			Token lastToken = j - 1 >= 0 ? left.get(j - 1) : new Token(TType.UNKNOWN, "", t.getTarget().copy());
+			Token nextToken = j + 1 < left.size() ? left.get(j + 1) : new Token(TType.UNKNOWN, "", t.getTarget().copy());
+			Token afterToken = j + 2 < left.size() ? left.get(j + 2) : new Token(TType.UNKNOWN, "", t.getTarget().copy());
 
 			if(j == 0) {
 				if(nextToken.type == TType.LABEL) {
