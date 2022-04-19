@@ -88,12 +88,17 @@ public class Target implements Comparable<Target> {
 
 	/**
 	 * Sets the length of the token. (Defaults to 1.) Returns {@code this} for easy chaining. Note that setLength must
-	 * ONLY be called once per object, or a RuntimeException is thrown, as this points to a definite bug.
+	 * ONLY be called once per object, or a RuntimeException is thrown, as this points to a definite bug. The exception
+	 * is if the target is UNKNOWN, in which case the length is not set, but this should only be used for synthetic
+	 * elements, which, if wrong, would be a bug in the compiler, not user code anyways.
 	 *
 	 * @param length
 	 * @return
 	 */
 	public Target setLength(int length) {
+		if(this == Target.UNKNOWN) {
+			return this;
+		}
 		if(IS_DEBUG && lengthSet) {
 			throw new RuntimeException("Length should not be set twice. Originally set at " + originalSet);
 		}
@@ -106,6 +111,9 @@ public class Target implements Comparable<Target> {
 	}
 
 	public Target copy() {
+		if(this == Target.UNKNOWN) {
+			return this;
+		}
 		Target t = new Target(line(), file(), col());
 		// Set the length, but allow it to be set again by leaving lengthSet false.
 		t.length = length;

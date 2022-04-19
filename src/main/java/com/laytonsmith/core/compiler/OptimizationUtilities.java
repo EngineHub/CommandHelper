@@ -2,6 +2,7 @@ package com.laytonsmith.core.compiler;
 
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.Script;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CFunction;
@@ -55,16 +56,28 @@ public class OptimizationUtilities {
 	 * @param envs
 	 * @param source
 	 * @param doStaticAnalysis
+	 * @param pureMethodScript
 	 * @return
 	 * @throws ConfigCompileException
 	 * @throws com.laytonsmith.core.exceptions.ConfigCompileGroupException
 	 */
 	public static String optimize(String script, Environment env,
 			Set<Class<? extends Environment.EnvironmentImpl>> envs,
-			File source, boolean doStaticAnalysis) throws ConfigCompileException, ConfigCompileGroupException {
+			File source, boolean doStaticAnalysis, boolean pureMethodScript) throws ConfigCompileException, ConfigCompileGroupException {
 		StaticAnalysis analysis = (doStaticAnalysis ? new StaticAnalysis(true) : null);
-		ParseTree tree = MethodScriptCompiler.compile(
-				MethodScriptCompiler.lex(script, env, source, true), null, envs, analysis);
+		TokenStream ts = MethodScriptCompiler.lex(script, env, source, pureMethodScript);
+		ParseTree tree;
+		if(!pureMethodScript) {
+			List<Script> scripts = MethodScriptCompiler.preprocess(ts, envs);
+			if(scripts.size() != 1) {
+				throw new RuntimeException("Optimization Utilities only works with single alias tests.");
+			}
+			env.getEnv(CompilerEnvironment.class).setStaticAnalysis(analysis);
+			scripts.get(0).compile(env).compileRight(env);
+			tree = scripts.get(0).getTrees().get(0);
+		} else {
+			tree = MethodScriptCompiler.compile(ts, null, envs, analysis);
+		}
 		StringBuilder b = new StringBuilder();
 		//The root always contains null.
 		for(ParseTree child : tree.getChildren()) {

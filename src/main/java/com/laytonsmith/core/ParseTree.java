@@ -119,6 +119,19 @@ public final class ParseTree implements Cloneable {
 		this.isSyntheticNode = isSyntheticNode;
 	}
 
+	/**
+	 * Replaces the contents of this ParseTree with the given ParseTree. When the replacement is done, the old
+	 * parse tree will have its data, children, and other associated values replaced. Node modifiers will be merged,
+	 * however.
+	 * @param newData
+	 */
+	public void replace(ParseTree newData) {
+		this.setData(newData.data);
+		this.setChildren(newData.children);
+		this.getNodeModifiers().merge(newData.nodeModifiers);
+		this.isSyntheticNode = newData.isSyntheticNode;
+	}
+
 	public boolean isSyntheticNode() {
 		return this.isSyntheticNode;
 	}
@@ -422,7 +435,8 @@ public final class ParseTree implements Cloneable {
 	 *
 	 * @param sa The static analysis object.
 	 * @param env The environment
-	 * @param inferredType The inferred type, if this is a function call. Otherwise, can be null.
+	 * @param inferredType The inferred type, if this is a function call, and the result of this value is being
+	 * used as an argument to another function. Otherwise, can be null.
 	 * @return
 	 */
 	public LeftHandSideType getDeclaredType(StaticAnalysis sa, Environment env, LeftHandSideType inferredType) {

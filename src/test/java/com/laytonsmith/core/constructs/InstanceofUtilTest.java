@@ -158,7 +158,7 @@ public class InstanceofUtilTest {
 
 		// Assignment vs instanceof
 		assertFalse(InstanceofUtil.isInstanceof(CNull.NULL, arrayInt, env));
-		assertEquals("null", StaticTest.SRun("string @s = null; msg(@s);", null));
+		assertEquals("null", StaticTest.SRun("string @s = null; @s", null));
 		try {
 			StaticTest.SRun("string @s = array();", null);
 			fail();

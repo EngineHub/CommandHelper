@@ -11,13 +11,14 @@ import com.laytonsmith.core.Optimizable.OptimizationOption;
 import com.laytonsmith.core.compiler.BranchStatement;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
+import com.laytonsmith.core.compiler.EarlyBindingKeyword;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.FileOptions.SuppressWarning;
 import com.laytonsmith.core.compiler.Keyword;
 import com.laytonsmith.core.compiler.KeywordList;
+import com.laytonsmith.core.compiler.LateBindingKeyword;
 import com.laytonsmith.core.compiler.TokenStream;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
-import com.laytonsmith.core.compiler.keywords.ObjectDefinitionKeyword;
 import com.laytonsmith.core.constructs.CBareString;
 import com.laytonsmith.core.constructs.CDecimal;
 import com.laytonsmith.core.constructs.CDouble;
@@ -27,6 +28,7 @@ import com.laytonsmith.core.constructs.CKeyword;
 import com.laytonsmith.core.constructs.CLabel;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CPreIdentifier;
+import com.laytonsmith.core.constructs.CSemicolon;
 import com.laytonsmith.core.constructs.CSlice;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CSymbol;
@@ -58,6 +60,7 @@ import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.functions.ArrayHandling.array_get;
 import com.laytonsmith.core.functions.Math.neg;
+import com.laytonsmith.core.functions.StringHandling;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.persistence.DataSourceException;
 
@@ -1336,6 +1339,13 @@ public final class MethodScriptCompiler {
 			}
 		}
 
+		processEarlyKeywords(stream, environment, compilerErrors);
+		// All early keyword errors are handled, but then we halt compilation at this stage, since most
+		// further errors are likley meaningless.
+		if(!compilerErrors.isEmpty()) {
+			throw new ConfigCompileGroupException(compilerErrors);
+		}
+
 		// Get the file options.
 		final FileOptions fileOptions = stream.getFileOptions();
 
@@ -1370,7 +1380,6 @@ public final class MethodScriptCompiler {
 
 		int braceCount = 0;
 
-		boolean inObjectDefinition = false;
 		SmartComment lastSmartComment = null;
 
 		// Create a Token array to iterate over, rather than using the LinkedList's O(n) get() method.
@@ -1384,7 +1393,6 @@ public final class MethodScriptCompiler {
 
 			// Brace handling
 			if(t.type == TType.LCURLY_BRACKET) {
-				inObjectDefinition = false;
 				ParseTree b = new ParseTree(new CFunction(__cbrace__.NAME, t.getTarget()), fileOptions, true);
 				tree.addChild(b);
 				tree = b;
@@ -1429,10 +1437,6 @@ public final class MethodScriptCompiler {
 					throw new ConfigCompileException("Unexpected end curly brace", t.target);
 				}
 				continue;
-			}
-
-			if(t.type == TType.KEYWORD && KeywordList.getKeywordByName(t.value) instanceof ObjectDefinitionKeyword) {
-				inObjectDefinition = true;
 			}
 
 			//Associative array/label handling
@@ -1617,12 +1621,6 @@ public final class MethodScriptCompiler {
 				}
 
 			} else if(t.type.equals(TType.COMMA)) {
-				if(inObjectDefinition) {
-					// This is not part of a function use, so we have special handling, just push this on, and
-					// carry on.
-					tree.addChild(new ParseTree(new CSymbol(",", TType.COMMA, unknown), fileOptions));
-					continue;
-				}
 				if(constructCount.peek().get() > 1) {
 					int stacks = constructCount.peek().get();
 					int replaceAt = tree.getChildren().size() - stacks;
@@ -1820,6 +1818,9 @@ public final class MethodScriptCompiler {
 			} else if(t.type.equals(TType.SMART_COMMENT)) {
 				lastSmartComment = new SmartComment(t.val());
 				continue;
+			} else if(t.type.equals(TType.SEMICOLON)) {
+				tree.addChild(new ParseTree(new CSemicolon(t.target), fileOptions));
+				constructCount.peek().incrementAndGet();
 			}
 			if(lastSmartComment != null) {
 				if(tree.getChildren().isEmpty()) {
@@ -1871,9 +1872,6 @@ public final class MethodScriptCompiler {
 			// Find the last '{' that was not closed and use that as target instead of the last line of the script.
 			Target target = traceMismatchedOpenToken(stream, TType.LCURLY_BRACKET, TType.RCURLY_BRACKET);
 			assert target != null : "Mismatched curly brace was detected, but target-finding code could not find it.";
-			if(target == null) {
-				target = t.target;
-			}
 
 			// Throw a CRE.
 			throw new ConfigCompileException("Mismatched curly braces", target);
@@ -1889,7 +1887,8 @@ public final class MethodScriptCompiler {
 		Stack<List<Procedure>> procs = new Stack<>();
 		procs.add(new ArrayList<>());
 		processKeywords(tree, environment, compilerErrors);
-		rewriteAutoconcats(tree, environment, envs, compilerErrors);
+		rewriteAutoconcats(tree, environment, envs, compilerErrors, true);
+		processLateKeywords(tree, environment, compilerErrors);
 		checkLinearComponents(tree, environment, compilerErrors);
 		postParseRewrite(rootNode, environment, envs, compilerErrors); // Pass rootNode since this might rewrite 'tree'.
 		tree = rootNode.getChildAt(0);
@@ -2164,11 +2163,85 @@ public final class MethodScriptCompiler {
 	 * @param compilerExceptions
 	 */
 	private static void rewriteAutoconcats(ParseTree root, Environment env,
-			Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> compilerExceptions) {
-		for(ParseTree child : root.getChildren()) {
-			if(child.hasChildren()) {
-				rewriteAutoconcats(child, env, envs, compilerExceptions);
+			Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> compilerExceptions,
+			boolean rewriteKeywords) {
+		if(!root.hasChildren()) {
+			return;
+		}
+		List<List<ParseTree>> children = new ArrayList<>();
+		List<ParseTree> ongoingChildren = new ArrayList<>();
+		for(int i = 0; i < root.numberOfChildren(); i++) {
+			ParseTree child = root.getChildAt(i);
+			if(child.getData() instanceof CSemicolon) {
+				if(ongoingChildren.isEmpty()) {
+					env.getEnv(CompilerEnvironment.class).addCompilerWarning(child.getFileOptions(),
+							new CompilerWarning("Empty statement.", child.getTarget(),
+									SuppressWarning.UselessCode));
+				}
+				children.add(ongoingChildren);
+				ongoingChildren = new ArrayList<>();
+			} else {
+				ongoingChildren.add(child);
 			}
+		}
+
+		List<ParseTree> newChildren = new ArrayList<>();
+		ParseTree statements = new ParseTree(new CFunction(Compiler.__statements__.NAME,
+				root.getTarget()), root.getFileOptions(), true);
+		for(int k = 0; k < children.size(); k++) {
+			List<ParseTree> subChild = children.get(k);
+			ParseTree autoconcat = new ParseTree(new CFunction(Compiler.__autoconcat__.NAME,
+					root.getTarget()), root.getFileOptions(), true);
+			autoconcat.setChildren(subChild);
+			rewriteAutoconcats(autoconcat, env, envs, compilerExceptions, false);
+			if(rewriteKeywords) {
+				if(autoconcat.getChildren().isEmpty()) {
+					// Uh oh, the rewrite pulled it up, but we still need it to be in a sub-function, so put
+					// it back in an autoconcat. We'll pull it back up again in the next step if we need.
+					ParseTree autoconcat2 = new ParseTree(new CFunction(Compiler.__autoconcat__.NAME,
+							root.getTarget()), root.getFileOptions(), true);
+					autoconcat2.addChild(autoconcat);
+					autoconcat = autoconcat2;
+				}
+				processLateKeywords(autoconcat, env, compilerExceptions);
+			}
+			// Between the rewrite and the keywords, we've removed the need for autoconcat, so pull
+			// up the value here.
+			if(autoconcat.getChildren().size() == 1 && autoconcat.getChildAt(0).getData() instanceof CFunction cf
+					&& cf.val().equals(Compiler.__statements__.NAME)) {
+				autoconcat.replace(autoconcat.getChildAt(0));
+			}
+			if(autoconcat.getData() instanceof CFunction cf
+					&& cf.val().equals(Compiler.__statements__.NAME)) {
+				// Pull up any sub-statements, instead of nesting.
+				for(ParseTree statementChild : autoconcat.getChildren()) {
+					statements.addChild(statementChild);
+				}
+			} else {
+				statements.addChild(autoconcat);
+			}
+		}
+		if(statements.getChildren().size() == 1 && statements.getChildAt(0).getData() instanceof CFunction) {
+			if(statements.getChildAt(0).isSyntheticNode()) {
+				// Pull it up, this was a synthetic node that was generated from autoconcat
+				statements.setChildren(statements.getChildAt(0).getChildren());
+			}
+		}
+		if(!statements.getChildren().isEmpty()) {
+			newChildren.add(statements);
+		}
+
+		root.setChildren(newChildren);
+
+		if(!ongoingChildren.isEmpty()) {
+			for(ParseTree child : ongoingChildren) {
+				root.addChild(child);
+			}
+		}
+
+
+		for(int j = 0; j < root.getChildren().size(); j++) {
+			rewriteAutoconcats(root.getChildAt(j), env, envs, compilerExceptions, true);
 		}
 		if(root.getData() instanceof CFunction && root.getData().val().equals(__autoconcat__.NAME)) {
 
@@ -2177,12 +2250,9 @@ public final class MethodScriptCompiler {
 
 			try {
 				ParseTree ret = __autoconcat__.rewrite(root.getChildren(), returnSConcat, envs);
-				root.setData(ret.getData());
-				root.setChildren(ret.getChildren());
-				root.getNodeModifiers().merge(ret.getNodeModifiers());
+				root.replace(ret);
 			} catch (ConfigCompileException ex) {
 				compilerExceptions.add(ex);
-				return;
 			}
 		}
 	}
@@ -2204,8 +2274,7 @@ public final class MethodScriptCompiler {
 	private static ParseTree postParseRewrite(ParseTree ast, Environment env,
 			Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> exceptions) {
 		Mixed node = ast.getData();
-		if(node instanceof CFunction) {
-			CFunction cFunc = (CFunction) node;
+		if(node instanceof CFunction cFunc) {
 			if(cFunc.hasFunction()) {
 				try {
 					Function func = cFunc.getFunction();
@@ -2226,7 +2295,6 @@ public final class MethodScriptCompiler {
 				i--; // Allow the new child to do a rewrite step as well.
 				continue;
 			}
-
 			// In strict mode throw compile errors when encountering child statements in function arguments where
 			// statements are not acceptable because void would be an invalid argument type. This would otherwise be
 			// a runtime error in strict mode where auto-concat is not allowed and statements are used instead.
@@ -2235,11 +2303,36 @@ public final class MethodScriptCompiler {
 					&& child.getData().val().equals(Compiler.__statements__.NAME)
 					&& ast.getData() instanceof CFunction cFunction) {
 				Function function = cFunction.getCachedFunction();
+				if(function == null) {
+					exceptions.add(new ConfigCompileException("Unknown function", cFunction.getTarget()));
+					continue;
+				}
+				boolean statementsAllowed = false;
 				if(function instanceof BranchStatement branchStatement) {
 					List<Boolean> branches = branchStatement.isBranch(ast.getChildren());
 					if(branches.get(i)) {
-						continue;
+						statementsAllowed = true;
 					}
+				}
+
+				if(!statementsAllowed) {
+					if(ast.getFileOptions().isStrict()) {
+						exceptions.add(new ConfigCompileException("Unexpected statement", cFunction.getTarget()));
+					} else {
+						// Statements aren't allowed here, but we aren't in strict mode, so
+						// pull up the value in the statement to here. sconcat is an exception to this rule, since
+						// it's entirely too special.
+						if(!(ast.getData() instanceof CFunction cf) || !cf.val().equals(StringHandling.sconcat.NAME)) {
+							if(child.getChildren().size() != 1) {
+								exceptions.add(new ConfigCompileException("Unexpected statement", child.getTarget()));
+							} else {
+								ast.getChildAt(i).replace(child);
+							}
+						}
+					}
+				}
+				if(statementsAllowed) {
+					continue;
 				}
 				if(function.getName().equals(Compiler.__statements__.NAME)) {
 					ParseTree lastChild = child;
@@ -2248,12 +2341,13 @@ public final class MethodScriptCompiler {
 					}
 					exceptions.add(new ConfigCompileException("Invalid comma after "
 							+ lastChild.getData().val(), lastChild.getTarget()));
-				} else {
+				} else if(ast.getFileOptions().isStrict()) {
 					exceptions.add(new ConfigCompileException("Invalid use of auto concat in "
 							+ function.getName() + "()", cFunction.getTarget()));
 				}
 			}
 		}
+
 		return ast;
 	}
 
@@ -2291,8 +2385,8 @@ public final class MethodScriptCompiler {
 	 * @param compilerErrors
 	 */
 	private static void link(ParseTree tree, Set<ConfigCompileException> compilerErrors) {
-		if(tree.getData() instanceof CFunction) {
-			Function function = ((CFunction) tree.getData()).getCachedFunction();
+		if(tree.getData() instanceof CFunction cFunction) {
+			Function function = cFunction.getCachedFunction();
 
 			// Check the argument count, and do any custom linking the function may have.
 			if(function != null) {
@@ -2305,8 +2399,7 @@ public final class MethodScriptCompiler {
 					compilerErrors.add(new ConfigCompileException("Incorrect number of arguments passed to "
 							+ tree.getData().val(), tree.getData().getTarget()));
 				}
-				if(function instanceof Optimizable) {
-					Optimizable op = (Optimizable) function;
+				if(function instanceof Optimizable op) {
 					if(op.optimizationOptions().contains(OptimizationOption.CUSTOM_LINK)) {
 						try {
 							op.link(tree.getData().getTarget(), tree.getChildren());
@@ -2339,10 +2432,9 @@ public final class MethodScriptCompiler {
 			Set<Class<? extends Environment.EnvironmentImpl>> envs) {
 
 		// Ignore non-CFunction nodes.
-		if(tree.getData() instanceof CFunction) {
+		if(tree.getData() instanceof CFunction cFunc) {
 
 			// Check current node, returning if it is a 'nolinking' function.
-			CFunction cFunc = (CFunction) tree.getData();
 			if(cFunc.hasFunction()) {
 				FunctionBase func = cFunc.getCachedFunction(envs);
 				lookup: {
@@ -2433,8 +2525,7 @@ public final class MethodScriptCompiler {
 				optimize(node, env, envs, procs, compilerErrors);
 			}
 
-			if(node.getData() instanceof Construct) {
-				Construct d = (Construct) node.getData();
+			if(node.getData() instanceof Construct d) {
 				if(d.isDynamic() || (d instanceof IVariable)) {
 					fullyStatic = false;
 				}
@@ -2529,8 +2620,8 @@ public final class MethodScriptCompiler {
 		//static, so do this first.
 		String oldFunctionName = func.getName();
 		Set<OptimizationOption> options = NO_OPTIMIZATIONS;
-		if(func instanceof Optimizable) {
-			options = ((Optimizable) func).optimizationOptions();
+		if(func instanceof Optimizable optimizable) {
+			options = optimizable.optimizationOptions();
 		}
 		if(options.contains(OptimizationOption.OPTIMIZE_DYNAMIC) && isValidNumArgs(func, tree.numberOfChildren())) {
 			try {
@@ -2704,8 +2795,8 @@ public final class MethodScriptCompiler {
 			}
 			List<ParseTree> children = tree.getChildren();
 			List<Boolean> branches;
-			if(f instanceof BranchStatement) {
-				branches = ((BranchStatement) f).isBranch(children);
+			if(f instanceof BranchStatement branchStatement) {
+				branches = branchStatement.isBranch(children);
 				if(branches.size() != children.size()) {
 					if(!isValidNumArgs(f, children.size())) {
 						// Incorrect number of arguments passed to the function, not a branch implementation error.
@@ -2740,17 +2831,17 @@ public final class MethodScriptCompiler {
 					}
 				}
 				ParseTree child = children.get(m);
-				if(child.getData() instanceof CFunction) {
-					if(!((CFunction) child.getData()).hasFunction()) {
+				if(child.getData() instanceof CFunction cFunction) {
+					if(!cFunction.hasFunction()) {
 						continue;
 					}
-					Function c = ((CFunction) child.getData()).getCachedFunction(envs);
+					Function c = cFunction.getCachedFunction(envs);
 					if(c == null) {
 						continue;
 					}
 					Set<OptimizationOption> options = NO_OPTIMIZATIONS;
-					if(c instanceof Optimizable) {
-						options = ((Optimizable) c).optimizationOptions();
+					if(c instanceof Optimizable optimizable) {
+						options = optimizable.optimizationOptions();
 					}
 					doDeletion = options.contains(OptimizationOption.TERMINAL);
 					boolean subDoDelete = eliminateDeadCode(child, env, envs);
@@ -2772,6 +2863,7 @@ public final class MethodScriptCompiler {
 	 *
 	 * @param tree
 	 */
+	@SuppressWarnings("ThrowableResultIgnored")
 	private static void processKeywords(ParseTree tree, Environment env, Set<ConfigCompileException> compileErrors) {
 		List<ParseTree> children = tree.getChildren();
 		boolean processSubChildren = true;
@@ -2811,6 +2903,105 @@ public final class MethodScriptCompiler {
 			}
 		}
 
+	}
+
+	@SuppressWarnings("ThrowableResultIgnored")
+	private static void processLateKeywords(ParseTree tree, Environment env, Set<ConfigCompileException> compileErrors) {
+		List<ParseTree> children = tree.getChildren();
+		for(int i = 0; i < children.size(); i++) {
+			ParseTree node = children.get(i);
+			processLateKeywords(node, env, compileErrors);
+			// Keywords can be standalone, or a function can double as a keyword. So we have to check for both
+			// conditions.
+			Mixed m = node.getData();
+			if(!(m instanceof CKeyword)) {
+				continue;
+			}
+			LateBindingKeyword keyword = KeywordList.getLateBindingKeywordByName(m.val());
+			if(keyword == null) {
+				continue;
+			}
+
+			// Now that all the children of the rest of the chain are processed, we can do the processing of this level.
+			try {
+				ParseTree lhs = null;
+				if(i != 0) {
+					lhs = children.get(i - 1);
+				}
+				ParseTree rhs = null;
+				if(i + 1 < children.size()) {
+					rhs = children.get(i + 1);
+				}
+				switch(keyword.getAssociativity()) {
+					case LEFT ->  {
+						if(lhs == null && !keyword.allowEmptyValue()) {
+							throw new ConfigCompileException("Unexpected keyword " + keyword.getName(), node.getTarget());
+						}
+						ParseTree replacement = keyword.processLeftAssociative(node.getTarget(), node.getFileOptions(), lhs);
+						children.set(i, replacement);
+						if(lhs != null) {
+							children.remove(i - 1);
+							i--;
+						}
+					}
+					case RIGHT ->  {
+						if(rhs == null && !keyword.allowEmptyValue()) {
+							throw new ConfigCompileException("Unexpected keyword " + keyword.getName(), node.getTarget());
+						}
+						ParseTree replacement = keyword.processRightAssociative(node.getTarget(), node.getFileOptions(), rhs);
+						children.set(i, replacement);
+						if(rhs != null) {
+							children.remove(i + 1);
+						}
+					}
+					case BOTH ->  {
+						if(!keyword.allowEmptyValue() && (i == 0 || i + 1 >= children.size())) {
+							throw new ConfigCompileException("Unexpected keyword " + keyword.getName(), node.getTarget());
+						}
+						ParseTree replacement = keyword.processBothAssociative(node.getTarget(), node.getFileOptions(),
+								lhs, rhs);
+						children.set(i, replacement);
+						if(rhs != null) {
+							children.remove(i + 1);
+							i--;
+						}
+						if(lhs != null) {
+							children.remove(i - 1);
+						}
+					}
+				}
+			} catch (ConfigCompileException ex) {
+				// Keyword processing failed, but the keyword might be part of some other syntax where it's valid.
+				// Store the compile error so that it can be thrown after all if the keyword won't be handled.
+				env.getEnv(CompilerEnvironment.class).potentialKeywordCompileErrors.put(m.getTarget(), ex);
+			}
+		}
+	}
+
+	@SuppressWarnings("ThrowableResultIgnored")
+	private static void processEarlyKeywords(TokenStream stream, Environment env, Set<ConfigCompileException> compileErrors) {
+		for(int i = 0; i < stream.size(); i++) {
+			Token token = stream.get(i);
+
+			// Some keywords look like function names, we need those too.
+			if(token.type != TType.KEYWORD && token.type != TType.FUNC_NAME) {
+				continue;
+			}
+
+			EarlyBindingKeyword keyword = KeywordList.getEarlyBindingKeywordByName(token.val());
+			if(keyword == null) {
+				continue;
+			}
+
+			// Now that all the children of the rest of the chain are processed, we can do the processing of this level.
+			try {
+				i = keyword.process(stream, env, i);
+			} catch (ConfigCompileException ex) {
+				// Keyword processing failed, but the keyword might be part of some other syntax where it's valid.
+				// Store the compile error so that it can be thrown after all if the keyword won't be handled.
+				env.getEnv(CompilerEnvironment.class).potentialKeywordCompileErrors.put(token.getTarget(), ex);
+			}
+		}
 	}
 
 	/**
@@ -2911,13 +3102,13 @@ public final class MethodScriptCompiler {
 				varMap.put(v.getVariableName(), v);
 			}
 			for(Mixed tempNode : root.getAllData()) {
-				if(tempNode instanceof Variable) {
-					Variable vv = varMap.get(((Variable) tempNode).getVariableName());
+				if(tempNode instanceof Variable variable) {
+					Variable vv = varMap.get(variable.getVariableName());
 					if(vv != null) {
-						((Variable) tempNode).setVal(vv.getDefault());
+						variable.setVal(vv.getDefault());
 					} else {
 						//The variable is unset. I'm not quite sure what cases would cause this
-						((Variable) tempNode).setVal("");
+						variable.setVal("");
 					}
 				}
 			}

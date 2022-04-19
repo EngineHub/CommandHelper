@@ -240,7 +240,7 @@ public final class FileOptions {
 		for(Field f : ClassDiscovery.getDefaultInstance().loadFieldsWithAnnotation(Option.class)) {
 			String desc = f.getAnnotation(Option.class).value();
 			try {
-				b.append(desc).append(": ").append(f.get(this));
+				b.append(desc).append(": ").append(f.get(this)).append("; ");
 			} catch (IllegalArgumentException | IllegalAccessException ex) {
 				// uh
 			}
@@ -350,7 +350,10 @@ public final class FileOptions {
 				+ " warning is provided now during"
 				+ " a phase in period in case you would like to deal with it by removing the opening"
 				+ " comment symbol.",
-				MSVersion.V3_3_5, SeverityLevel.HIGH);
+				MSVersion.V3_3_5, SeverityLevel.HIGH),
+		UselessCode("The code or element at this location serves no purpose, and should be removed. Its existence"
+				+ " may indicate a problem with the code.",
+				MSVersion.V3_3_5, SeverityLevel.MEDIUM);
 
 		private SuppressWarning(String docs, Version version, SeverityLevel severityLevel) {
 			this.docs = docs;

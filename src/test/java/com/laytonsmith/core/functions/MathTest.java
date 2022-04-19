@@ -275,13 +275,13 @@ public class MathTest {
 
 	@Test
 	public void testClamp() throws Exception {
-		assertEquals("8.0", SRun("clamp(8, 1, 10);", null));
-		assertEquals("10.0", SRun("clamp(1, 10, 20);", null));
-		assertEquals("25.0", SRun("clamp(50, 10, 25);", null));
-		assertEquals("5.0", SRun("clamp(5, 20, 10);", null));
-		assertEquals("50.0", SRun("clamp(50, 20, 10);", null));
-		assertEquals("10.0", SRun("clamp(12, 20, 10);", null));
-		assertEquals("20.0", SRun("clamp(19, 20, 10);", null));
-		assertEquals("10.0", SRun("clamp(15, 20, 10);", null));
+		assertEquals("8.0", SRun("clamp(8, 1, 10)", null));
+		assertEquals("10.0", SRun("clamp(1, 10, 20)", null));
+		assertEquals("25.0", SRun("clamp(50, 10, 25)", null));
+		assertEquals("5.0", SRun("clamp(5, 20, 10)", null));
+		assertEquals("50.0", SRun("clamp(50, 20, 10)", null));
+		assertEquals("10.0", SRun("clamp(12, 20, 10)", null));
+		assertEquals("20.0", SRun("clamp(19, 20, 10)", null));
+		assertEquals("10.0", SRun("clamp(15, 20, 10)", null));
 	}
 }

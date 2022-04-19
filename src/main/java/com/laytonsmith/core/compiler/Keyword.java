@@ -22,7 +22,7 @@ import java.util.List;
  * passed to the keyword handler for processing. In order for keywords to be dynamically introduced, the keyword
  * implementation must be tagged with the keyword annotation.
  */
-public abstract class Keyword implements Documentation {
+public abstract class Keyword implements KeywordDocumentation {
 
 	protected Keyword() {
 	}

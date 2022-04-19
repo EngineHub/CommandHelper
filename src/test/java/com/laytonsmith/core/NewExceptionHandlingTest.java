@@ -38,7 +38,7 @@ public class NewExceptionHandlingTest {
 	}
 
 	public String optimize(String script) throws Exception {
-		return OptimizationUtilities.optimize(script, null, envs, null, true);
+		return OptimizationUtilities.optimize(script, null, envs, null, true, true);
 	}
 
 	MCPlayer fakePlayer;
@@ -56,7 +56,8 @@ public class NewExceptionHandlingTest {
 
 	@Test
 	public void testTryFinallyKeywordUsage() throws Exception {
-		assertEquals("complex_try(msg('a'),msg('b'))", optimize("try { msg(\"a\"); } finally { msg(\"b\"); }"));
+		assertEquals("complex_try(__statements__(msg('a')),__statements__(msg('b')))",
+				optimize("try { msg(\"a\"); } finally { msg(\"b\"); }"));
 	}
 
 	@Test

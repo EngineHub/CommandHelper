@@ -8,11 +8,7 @@ import com.laytonsmith.core.compiler.Keyword;
  *
  */
 @Keyword.keyword("switch_ic")
-public class SwitchIcKeyword extends SimpleBlockKeywordFunction {
-	@Override
-	protected Integer[] getFunctionArgumentCount() {
-		return new Integer[]{1};
-	}
+public class SwitchIcKeyword extends SwitchKeyword {
 
 	@Override
 	public String docs() {

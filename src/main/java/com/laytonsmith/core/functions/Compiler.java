@@ -44,6 +44,7 @@ import com.laytonsmith.core.functions.StringHandling.concat;
 import com.laytonsmith.core.functions.StringHandling.sconcat;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.ArrayList;
@@ -68,7 +69,7 @@ public class Compiler {
 	@api
 	@noprofile
 	@hide("This is only used internally by the compiler.")
-	public static class p extends DummyFunction {
+	public static class p extends DummyFunction implements Optimizable {
 
 		public static final String NAME = "p";
 
@@ -96,6 +97,42 @@ public class Compiler {
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return CVoid.VOID;
 		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, Environment env, Set<Class<? extends Environment.EnvironmentImpl>> envs, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException, ConfigCompileGroupException {
+			if(children.size() == 1) {
+				return Optimizable.PULL_ME_UP;
+			} else if(children.isEmpty()) {
+				return Optimizable.REMOVE_ME;
+			} else {
+				return null;
+			}
+		}
+
+		@Override
+		public ParseTree postParseRewrite(ParseTree ast, Environment env, Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> exceptions) {
+			if(ast.getChildren().size() == 1) {
+				return ast.getChildAt(0);
+			}
+			return null;
+		}
+
+		@Override
+		public LeftHandSideType getReturnType(ParseTree node, Target t, List<LeftHandSideType> argTypes,
+				List<Target> argTargets, LeftHandSideType inferredReturnType, Environment env,
+				Set<ConfigCompileException> exceptions) {
+			if(argTypes.size() == 1) {
+				return argTypes.get(0);
+			} else {
+				return CVoid.LHSTYPE;
+			}
+		}
+
 	}
 
 	@api
@@ -580,10 +617,26 @@ public class Compiler {
 				}
 				if(returnSConcat) {
 					tree = new ParseTree(new CFunction(sconcat.NAME, t), options, true);
+					tree.setChildren(list);
 				} else {
 					tree = new ParseTree(new CFunction(__statements__.NAME, t), options, true);
+					// Instead of straight up adding children, we want to pull up any sub-statements and
+					// simply append them here. This can generally happen if we have partially semi-colon'd code,
+					// so `a; b` will cause this to look like `__autoconcat__(__statements__(a), b))` which we
+					// want to turn into `__statements__(a, b)` rather than `__statements__(__statements__(a), b))`
+					List<ParseTree> newChildren = new ArrayList<>();
+					for(int i = 0; i < list.size(); i++) {
+						ParseTree child = list.get(i);
+						if(child.getData() instanceof CFunction cf && cf.val().equals(__statements__.NAME)) {
+							for(ParseTree subChild : child.getChildren()) {
+								newChildren.add(subChild);
+							}
+						} else {
+							newChildren.add(child);
+						}
+					}
+					tree.setChildren(newChildren);
 				}
-				tree.setChildren(list);
 				return tree;
 			}
 		}

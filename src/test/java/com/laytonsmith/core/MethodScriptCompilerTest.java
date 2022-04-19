@@ -1015,17 +1015,16 @@ public class MethodScriptCompilerTest {
 	public void testLiteralDecimal() throws Exception {
 		assertEquals("123.4", SRun("0m123.4", fakePlayer));
 		assertEquals("123", SRun("0m123", fakePlayer));
-		assertEquals("decimal", SRun("typeof(0m123)", fakePlayer));
-		assertEquals("decimal", SRun("typeof(0m123.4)", fakePlayer));
-		assertEquals("decimal", SRun("typeof(-0m123.4)", fakePlayer));
-		assertEquals("decimal", SRun("typeof(-0m123)", fakePlayer));
+		assertEquals("ms.lang.decimal", SRun("typeof(0m123)", fakePlayer));
+		assertEquals("ms.lang.decimal", SRun("typeof(0m123.4)", fakePlayer));
+		assertEquals("ms.lang.decimal", SRun("typeof(-0m123.4)", fakePlayer));
+		assertEquals("ms.lang.decimal", SRun("typeof(-0m123)", fakePlayer));
 
-		assertEquals("decimal", SRun("typeof(0m1234567890987654321)", fakePlayer));
-		assertEquals("decimal", SRun("typeof(0m1234567890987654321.1234567890987654321)", fakePlayer));
+		assertEquals("ms.lang.decimal", SRun("typeof(0m1234567890987654321)", fakePlayer));
+		assertEquals("ms.lang.decimal", SRun("typeof(0m1234567890987654321.1234567890987654321)", fakePlayer));
 	}
 
 	@Test(expected = CREFormatException.class)
-	@Ignore("Ignore for now, until the feature is implemented")
 	public void testLiteralBinary() throws Exception {
 		SRun("0b2", fakePlayer);
 	}
@@ -1308,14 +1307,14 @@ public class MethodScriptCompilerTest {
 		assertTrue(asdf.getDeclaredType(sa, env, null).equals(Auto.LHSTYPE));
 		ParseTree msg = tree.getChildAt(0).getChildAt(1);
 		assertTrue(msg.getDeclaredType(sa, env, null).equals(CVoid.TYPE.asLeftHandSideType()));
-		ParseTree _a = tree.getChildAt(0).getChildAt(3);
+		ParseTree _a = tree.getChildAt(0).getChildAt(2).getChildAt(1);
 		assertTrue(_a.getDeclaredType(sa, env, null).equals(CInt.TYPE.asLeftHandSideType()));
 	}
 
 	@Test
 	public void testSmartCommentIsOnNode() throws Exception {
 		String[] scripts = new String[]{
-			"/** smart comment */ proc('_test', null);",
+			"/** smart comment */ proc('_test', null)",
 			"/** smart comment */ void proc _test(){}",
 			"/** smart comment */ proc _test(){}",
 		};
@@ -1334,8 +1333,8 @@ public class MethodScriptCompilerTest {
 	public void testGettingSmartCommentFromReferenceWorks() throws Exception {
 		String[] scripts = new String[]{
 			"/** smart comment */ proc _test() {}; _test();",
-			"/** smart comment */ void proc _test(){} _test();",
-			"/** smart comment */ proc _test(){} _test();",
+			"/** smart comment */ void proc _test(){}; _test();",
+			"/** smart comment */ proc _test(){}; _test();",
 		};
 		for(String script : scripts) {
 			Environment env = Static.GenerateStandaloneEnvironment();

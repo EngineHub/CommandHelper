@@ -65,7 +65,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -292,13 +291,10 @@ public class Reflection {
 				return a;
 			} else if("keywords".equalsIgnoreCase(param)) {
 				if(args.length == 1) {
-					CArray a = new CArray(t, null, env);
-					List<Keyword> l = new ArrayList<>(KeywordList.getKeywordList());
-					l.forEach(new Consumer<Keyword>() {
-						@Override
-						public void accept(Keyword t) {
-							a.push(new CString(t.getKeywordName(), Target.UNKNOWN), Target.UNKNOWN, env);
-						}
+					CArray a = new CArray(t);
+					List<String> l = new ArrayList<>(KeywordList.getKeywordNames());
+					l.forEach((String t1) -> {
+						a.push(new CString(t1, Target.UNKNOWN), Target.UNKNOWN);
 					});
 					return new ArrayHandling.array_sort().exec(t, env, null, a);
 				} else if(args.length == 2) {

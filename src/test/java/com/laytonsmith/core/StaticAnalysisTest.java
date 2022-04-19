@@ -174,10 +174,18 @@ public class StaticAnalysisTest {
 				topDynNode.getDeclaredType(staticAnalysis, env, CString.TYPE.asLeftHandSideType()));
 		// This is auto, because constants are auto typed.
 		tree = saScript("string @s = dyn(dyn(dyn(dyn(dyn('string')))));");
-		topDynNode = tree.getChildAt(0).getChildAt(2);
+		topDynNode = tree.getChildAt(0).getChildAt(0).getChildAt(2);
 		Assert.assertEquals(Auto.LHSTYPE,
 				topDynNode.getDeclaredType(staticAnalysis, env, null));
 		Assert.assertEquals(Auto.LHSTYPE,
+				topDynNode.getDeclaredType(staticAnalysis, env, CString.TYPE.asLeftHandSideType()));
+
+		// Except in strict mode it really is a string
+		tree = saScript("<! strict > string @s = dyn(dyn(dyn(dyn(dyn('string')))));");
+		topDynNode = tree.getChildAt(0).getChildAt(0).getChildAt(2);
+		Assert.assertEquals(CString.TYPE.asLeftHandSideType(),
+				topDynNode.getDeclaredType(staticAnalysis, env, null));
+		Assert.assertEquals(CString.TYPE.asLeftHandSideType(),
 				topDynNode.getDeclaredType(staticAnalysis, env, CString.TYPE.asLeftHandSideType()));
 
 		saScriptExpectException("string @s = dyn(dyn(dyn(array())));");
