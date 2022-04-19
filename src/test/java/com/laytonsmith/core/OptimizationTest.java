@@ -601,7 +601,6 @@ public class OptimizationTest {
 						+ "		int @i = 1;\n"
 						+ "		msg(@i)\n"
 						+ "	}\n"
-						+ "<<<\n"
-						, false));
+						+ "<<<\n", false));
 	}
 }
