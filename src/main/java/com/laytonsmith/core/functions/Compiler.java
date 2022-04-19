@@ -33,6 +33,7 @@ import com.laytonsmith.core.constructs.generics.Constraints;
 import com.laytonsmith.core.constructs.generics.GenericDeclaration;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.constructs.generics.UnboundedConstraint;
+import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.functions.DataHandling._string;
@@ -811,6 +812,34 @@ public class Compiler {
 	public static class __smart_string__ extends AbstractFunction {
 
 		public static final String NAME = "__smart_string__";
+
+		/**
+		 * If token is a SMART_STRING, returns a dumb string if could be. If the token isn't a SMART_STRING, an
+		 * Error is thrown, and if it is a SMART_STRING but it uses dynamic inputs, it throws a ConfigCompileException.
+		 * @param token The token to convert.
+		 * @return A regular STRING token, with an equivalent (perhaps slightly transformed) dumb string.
+		 * @throws ConfigCompileException If the string contains dynamic portions that
+		 */
+		public static Token getDumbStringOrFail(Token token) throws ConfigCompileException {
+			if(token.type != Token.TType.SMART_STRING) {
+				throw new Error("This method can only be called on SMART_STRING tokens.");
+			}
+			String original = token.value;
+			StringBuilder b = new StringBuilder();
+			for(int i = 0; i < original.length(); i++) {
+					char c = original.charAt(i);
+					char c2 = (i + 1 < original.length() ? original.charAt(i + 1) : '\0');
+					if(c == '\\' && c2 == '@') {
+						b.append('@');
+						i++;
+						continue;
+					}
+					if(c == '@') {
+						throw new ConfigCompileException("Cannot use smart strings here", token.target);
+					}
+			}
+			return new Token(Token.TType.STRING, b.toString(), token.target.copy());
+		}
 
 		@Override
 		public String getName() {

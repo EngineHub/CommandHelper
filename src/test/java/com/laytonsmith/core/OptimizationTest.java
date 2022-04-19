@@ -611,4 +611,30 @@ public class OptimizationTest {
 				+ "msg(@i);\n"
 				+ "msg(@i);\n"));
 	}
+
+	@Test
+	public void testSwitchWithSmartStrings() throws Exception {
+		assertEquals("switch(@level,'1',__statements__(msg('1')),'@2',__statements__(msg('2')))",
+				optimize("switch(@level) {\n"
+				+ "		case \"1\":\n"
+				+ "			msg('1');\n"
+				+ "		case \"\\@2\":\n"
+				+ "			msg('2');\n"
+				+ "}\n"));
+	}
+
+	@Test(expected = ConfigCompileException.class)
+	public void testSwitchWithSmartStrings2() throws Exception {
+		optimize("switch(@level) {\n"
+			+ "		case \"@level\":\n"
+			+ "			msg('1');\n"
+			+ "		case \"2\":\n"
+			+ "			msg('2');\n"
+			+ "}\n");
+	}
+
+	@Test(expected = ConfigCompileException.class)
+	public void testSmartStringInArrayFails() throws Exception {
+		optimize("@a = 'asdf'; array(\"@a\": 'test')");
+	}
 }
