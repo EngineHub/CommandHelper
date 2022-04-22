@@ -2326,7 +2326,7 @@ public final class MethodScriptCompiler {
 							if(child.getChildren().size() != 1) {
 								exceptions.add(new ConfigCompileException("Unexpected statement", child.getTarget()));
 							} else {
-								ast.getChildAt(i).replace(child);
+								ast.getChildAt(i).replace(child.getChildren().get(0));
 							}
 						}
 					}

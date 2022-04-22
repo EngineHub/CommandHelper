@@ -613,6 +613,13 @@ public class OptimizationTest {
 	}
 
 	@Test
+	public void testStatementInArrayInNonStrict() throws Exception {
+		// Not the erroneous semicolon after 'c';. We are in non-strict mode though, so this should just
+		// work anyways.
+		assertEquals("array('a','b','c')", optimize("array('a', 'b', 'c';)"));
+	}
+
+	@Test
 	public void testSwitchWithSmartStrings() throws Exception {
 		assertEquals("switch(@level,'1',__statements__(msg('1')),'@2',__statements__(msg('2')))",
 				optimize("switch(@level) {\n"
