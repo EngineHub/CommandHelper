@@ -2316,16 +2316,20 @@ public final class MethodScriptCompiler {
 				}
 
 				if(!statementsAllowed) {
+					String unexpectedStatement = "Unexpected statement, semicolon (;) not allowed in this context.";
 					if(ast.getFileOptions().isStrict()) {
-						exceptions.add(new ConfigCompileException("Unexpected statement", cFunction.getTarget()));
+						exceptions.add(new ConfigCompileException(unexpectedStatement, child.getTarget()));
 					} else {
 						// Statements aren't allowed here, but we aren't in strict mode, so
 						// pull up the value in the statement to here. sconcat is an exception to this rule, since
 						// it's entirely too special.
 						if(!(ast.getData() instanceof CFunction cf) || !cf.val().equals(StringHandling.sconcat.NAME)) {
 							if(child.getChildren().size() != 1) {
-								exceptions.add(new ConfigCompileException("Unexpected statement", child.getTarget()));
+								exceptions.add(new ConfigCompileException(unexpectedStatement, child.getTarget()));
 							} else {
+								CompilerWarning warning = new CompilerWarning(unexpectedStatement,
+										child.getTarget(), SuppressWarning.UnexpectedStatement);
+								env.getEnv(CompilerEnvironment.class).addCompilerWarning(ast.getFileOptions(), warning);
 								ast.getChildAt(i).replace(child.getChildren().get(0));
 							}
 						}

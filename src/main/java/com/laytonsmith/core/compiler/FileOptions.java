@@ -353,7 +353,9 @@ public final class FileOptions {
 				MSVersion.V3_3_5, SeverityLevel.HIGH),
 		UselessCode("The code or element at this location serves no purpose, and should be removed. Its existence"
 				+ " may indicate a problem with the code.",
-				MSVersion.V3_3_5, SeverityLevel.MEDIUM);
+				MSVersion.V3_3_5, SeverityLevel.MEDIUM),
+		UnexpectedStatement("In strict mode, unexpected statements are an error, but in non-strict mode, they are"
+				+ " a warning.", MSVersion.V3_3_5, SeverityLevel.HIGH);
 
 		private SuppressWarning(String docs, Version version, SeverityLevel severityLevel) {
 			this.docs = docs;
