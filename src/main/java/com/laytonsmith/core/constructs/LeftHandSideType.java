@@ -56,7 +56,7 @@ public final class LeftHandSideType extends Construct {
 	 * @param types
 	 * @return
 	 */
-	public static LeftHandSideType createTypeUnion(Target t, LeftHandSideType... types) {
+	public static LeftHandSideType fromTypeUnion(Target t, LeftHandSideType... types) {
 		Set<Pair<CClassType, LeftHandGenericUse>> set = new HashSet<>();
 		List<Boolean> isTypenameList = new ArrayList<>();
 		for(LeftHandSideType union : types) {
@@ -93,9 +93,11 @@ public final class LeftHandSideType extends Construct {
 	 * {@code T<? extends int>}
 	 * @param t The code target
 	 * @return The LeftHandSideType wrapping this generic typename.
+	 * @throws IllegalArgumentException If the GenericDeclaration does not contain a Constraints value with the
+	 * specified typename.
 	 */
 	public static LeftHandSideType fromGenericDefinitionType(GenericDeclaration declaration, String genericTypeName,
-			LeftHandGenericUse genericLHGU, Target t) {
+			LeftHandGenericUse genericLHGU, Target t) throws IllegalArgumentException {
 		Constraints constraints = null;
 		for(Constraints c : declaration.getConstraints()) {
 			if(c.getTypeName().equals(genericTypeName)) {
@@ -106,8 +108,7 @@ public final class LeftHandSideType extends Construct {
 		if(constraints == null) {
 			throw new IllegalArgumentException("Provided GenericDeclaration does not contain the specified type name.");
 		}
-		return new LeftHandSideType(genericTypeName, t, null, Arrays.asList(true), genericTypeName, genericLHGU,
-				constraints);
+		return new LeftHandSideType(genericTypeName, t, null, Arrays.asList(true), genericTypeName, genericLHGU);
 	}
 
 	/**
@@ -194,22 +195,22 @@ public final class LeftHandSideType extends Construct {
 					// Bootstrapping problem, Auto.LHSTYPE calls us, and so is null at this point
 					List<Pair<CClassType, LeftHandGenericUse>> types = Arrays.asList(new Pair<>(Auto.TYPE, null));
 					List<Boolean> itl = Arrays.asList(false);
-					return new LeftHandSideType("auto", Target.UNKNOWN, types, itl, null, null, null);
+					return new LeftHandSideType("auto", Target.UNKNOWN, types, itl, null, null);
 				} else {
 					return Auto.LHSTYPE;
 				}
 			}
 		}
-		return new LeftHandSideType(value, t, classTypes, isTypenameList, null, null, null);
+		return new LeftHandSideType(value, t, classTypes, isTypenameList, null, null);
 	}
 
 	/**
-	 * Given a LeftHandSideType object {@code type} that might be a type union containing type names, resolves
-	 * each component of the type union into concrete types. Typenames
-	 * can only be used in their defined context, and if they need to leak beyond that, must be resolved. This usually
-	 * entails taking the generic parameters for the given call site, but might also involve using the inferredType
-	 * or perhaps simply returning auto. If the value passed in is not a typename, it is simply returned, so this
-	 * can be used in general, without first checking if it would need to be called.
+	 * Given a LeftHandSideType object {@code type} that might be a type union containing type names, resolves each
+	 * component of the type union into concrete types. Typenames can only be used in their defined context, and if they
+	 * need to leak beyond that, must be resolved. This usually entails taking the generic parameters for the given call
+	 * site, but might also involve using the inferredType or perhaps simply returning auto. If the value passed in is
+	 * not a typename, it is simply returned, so this can be used in general, without first checking if it would need to
+	 * be called.
 	 *
 	 * @param t The code target.
 	 * @param env The environment.
@@ -238,15 +239,15 @@ public final class LeftHandSideType extends Construct {
 			}
 			lhst[i] = resolveTypeFromGenerics(t, env, newType, parameters, declaration, inferredType);
 		}
-		return LeftHandSideType.createTypeUnion(t, lhst);
+		return LeftHandSideType.fromTypeUnion(t, lhst);
 	}
 
 	/**
-	 * Given a LeftHandSideType object {@code type}, resolves this into a non-typename if it is a typename. Typenames
-	 * can only be used in their defined context, and if they need to leak beyond that, must be resolved. This usually
-	 * entails taking the generic parameters for the given call site, but might also involve using the inferredType
-	 * or perhaps simply returning auto. If the value passed in is not a typename, it is simply returned, so this
-	 * can be used in general, without first checking if it would need to be called.
+	 * Given a LeftHandSideType object {@code type}, resolves this into a non-typename if it is a typename.Typenames can
+	 * only be used in their defined context, and if they need to leak beyond that, must be resolved. This usually
+	 * entails taking the generic parameters for the given call site, but might also involve using the inferredType or
+	 * perhaps simply returning auto. If the value passed in is not a typename, it is simply returned, so this can be
+	 * used in general, without first checking if it would need to be called.
 	 *
 	 * @param t The code target.
 	 * @param env The environment.
@@ -274,7 +275,7 @@ public final class LeftHandSideType extends Construct {
 				}
 				lhst[i] = resolveTypeFromGenerics(t, env, newType, parameters, declaration, inferredType);
 			}
-			return LeftHandSideType.createTypeUnion(t, lhst);
+			return LeftHandSideType.fromTypeUnion(t, lhst);
 		}
 		if(!type.isTypeName()) {
 			return type;
@@ -293,9 +294,8 @@ public final class LeftHandSideType extends Construct {
 			if(declaration.getConstraints().get(i).getTypeName().equals(typename)) {
 				// Found it
 				if(parameters != null) {
-					Pair<CClassType, LeftHandGenericUse> p;
-					p = parameters.getParameters().get(i);
-					return LeftHandSideType.fromCClassType(p.getKey(), p.getValue(), t);
+					LeftHandSideType p = parameters.getParameters().get(i);
+					return p;
 				} else if(inferredType != null) {
 					return inferredType;
 				}
@@ -315,11 +315,8 @@ public final class LeftHandSideType extends Construct {
 	@ObjectHelpers.StandardField
 	private String genericTypeName;
 
-	private final Constraints constraints;
-
 	private LeftHandSideType(String value, Target t, List<Pair<CClassType, LeftHandGenericUse>> types,
-			List<Boolean> isTypenameList, String genericTypeName, LeftHandGenericUse genericTypeLHGU,
-			Constraints constraints) {
+			List<Boolean> isTypenameList, String genericTypeName, LeftHandGenericUse genericTypeLHGU) {
 		super(value, ConstructType.CLASS_TYPE, t);
 		this.isTypenameList = isTypenameList;
 		if(types != null) {
@@ -341,13 +338,11 @@ public final class LeftHandSideType extends Construct {
 				}
 			}
 			this.genericTypeName = null;
-			this.constraints = null;
 		} else {
 			this.types = new ArrayList<>();
 			this.types.add(new Pair<>(CClassType.getFromGenericTypeName(genericTypeName, t), genericTypeLHGU));
 			isTypeName = true;
 			this.genericTypeName = genericTypeName;
-			this.constraints = constraints;
 		}
 	}
 
@@ -369,7 +364,11 @@ public final class LeftHandSideType extends Construct {
 	}
 
 	public boolean doesExtend(CClassType type, Environment env) {
-		return CClassType.doesExtend(env, type, this);
+		return this.doesExtend(type.asLeftHandSideType(), env);
+	}
+
+	public boolean doesExtend(LeftHandSideType type, Environment env) {
+		return CClassType.doesExtend(env, this, type);
 	}
 
 	/**
@@ -397,12 +396,12 @@ public final class LeftHandSideType extends Construct {
 
 	/**
 	 * If this was defined as a typename, returns the typename, null otherwise.
+	 *
 	 * @return
 	 */
 	public String getTypename() {
 		return this.genericTypeName;
 	}
-
 
 	public String getSimpleName() {
 		return StringUtils.Join(types, " | ", pair -> {
@@ -497,9 +496,6 @@ public final class LeftHandSideType extends Construct {
 	 */
 	public CClassType asConcreteType(Target t) throws CREIllegalArgumentException {
 		String exMsg = "Cannot use the type \"" + getSimpleName() + "\" in this context.";
-		if(isTypeUnion()) {
-			throw new CREIllegalArgumentException(exMsg, t);
-		}
 		Pair<CClassType, LeftHandGenericUse> type = types.get(0);
 		if(type.getValue() != null && !type.getValue().getConstraints().isEmpty()) {
 			throw new CREIllegalArgumentException(exMsg, t);
@@ -539,8 +535,9 @@ public final class LeftHandSideType extends Construct {
 	}
 
 	/**
-	 * Returns a LeftHandGenericUse statement from this typename. Note that the environment may be null when
-	 * this is used in native declarations, but otherwise must be provided.
+	 * Returns a LeftHandGenericUse statement from this typename. Note that the environment may be null when this is
+	 * used in native declarations, but otherwise must be provided.
+	 *
 	 * @param env The environment, or null during native signature declarations.
 	 * @return An equivalent LeftHandGenericUse statement.
 	 */
@@ -552,6 +549,18 @@ public final class LeftHandSideType extends Construct {
 	@Override
 	public Set<ObjectModifier> getObjectModifiers() {
 		return EnumSet.of(ObjectModifier.FINAL);
+	}
+
+	/**
+	 * Returns a List of Sets of ObjectModifers for each underlying type in the union.
+	 * @return
+	 */
+	public List<Set<ObjectModifier>> getTypeObjectModifiers() {
+		List<Set<ObjectModifier>> ret = new ArrayList<>();
+		for(Pair<CClassType, LeftHandGenericUse> type : types) {
+			ret.add(type.getKey().getObjectModifiers());
+		}
+		return ret;
 	}
 
 	@Override

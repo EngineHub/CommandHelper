@@ -1,7 +1,7 @@
 package com.laytonsmith.core.constructs.generics;
 
 import com.laytonsmith.core.constructs.Auto;
-import com.laytonsmith.core.constructs.CClassType;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREGenericConstraintException;
@@ -10,34 +10,30 @@ import com.laytonsmith.core.exceptions.CRE.CREGenericConstraintException;
  * A TypeConstraint is a value that has a ClassType boundary.
  */
 public abstract class BoundaryConstraint extends Constraint {
-	protected CClassType bound;
-	protected LeftHandGenericUse genericParameters;
+	/**
+	 * The bound (either upper or lower). Will never be auto.
+	 */
+	protected LeftHandSideType bound;
 
-	protected BoundaryConstraint(Target t, String typename, CClassType bound, LeftHandGenericUse genericParameters) {
+	protected BoundaryConstraint(Target t, String typename, LeftHandSideType bound) {
 		super(t, typename);
-		if(bound == Auto.TYPE) {
+		if(Auto.LHSTYPE.equals(bound)) {
 			throw new CREGenericConstraintException("Cannot use auto types on " + getConstraintName()
 					+ " constraints", t);
 		}
 		this.bound = bound;
-		this.genericParameters = genericParameters;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 * @param type The concrete type to check
-	 * @param generics Any LHS generics that were defined.
 	 * @return
 	 */
 	@Override
-	public boolean isWithinConstraint(CClassType type, LeftHandGenericUse generics, Environment env) {
-		return isConcreteClassWithinConstraint(type, generics, env);
+	public boolean isWithinConstraint(LeftHandSideType type, Environment env) {
+		return isConcreteClassWithinConstraint(type, env);
 	}
 
-	public LeftHandGenericUse getBoundaryGenerics() {
-		return genericParameters;
-	}
-
-	protected abstract boolean isConcreteClassWithinConstraint(CClassType type, LeftHandGenericUse generics, Environment env);
+	protected abstract boolean isConcreteClassWithinConstraint(LeftHandSideType type, Environment env);
 
 }

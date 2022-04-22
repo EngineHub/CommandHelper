@@ -427,7 +427,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 					GenericParameters.GenericParametersBuilder builder = GenericParameters.emptyBuilder();
 					for(Constraints c : chainType.getGenericDeclaration().getConstraints()) {
 						// Inferred parameters, assuming these all pass, it's fine
-						builder.addParameter(c.convertFromDiamond(t).getType(), null);
+						builder.addParameter(c.convertFromDiamond(t).getType());
 					}
 					if(!builder.isEmpty()) {
 						generics.put(chainType, builder.build());
@@ -648,22 +648,23 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	}
 
 	public static boolean doesExtend(Environment env, CClassType checkClass, LeftHandSideType superClass) {
-		return doesExtend(env, LeftHandSideType.fromHardCodedType(checkClass), superClass);
+		return doesExtend(env, checkClass.asLeftHandSideType(), superClass);
 	}
 
 	/**
 	 * Returns true if checkClass extends, implements, or otherwise derives from superClass
 	 *
-	 * @param checkClass
-	 * @param superClass
-	 * @return
+	 * @param env The environment.
+	 * @param checkClass The class to check if it extends superClass.
+	 * @param superClass The class to check if the checkClass extends.
+	 * @return True if checkClass extends (or is equal to) superClass.
 	 */
 	public static boolean doesExtend(Environment env, CClassType checkClass, CClassType superClass) {
-		return doesExtend(env, checkClass, LeftHandSideType.fromHardCodedType(superClass));
+		return doesExtend(env, checkClass, superClass.asLeftHandSideType());
 	}
 
 	public boolean doesExtend(Environment env, LeftHandSideType superClass) {
-		return doesExtend(env, LeftHandSideType.fromHardCodedType(this), superClass);
+		return doesExtend(env, this.asLeftHandSideType(), superClass);
 	}
 
 	/**

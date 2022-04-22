@@ -237,4 +237,14 @@ public class StaticAnalysisTest {
 		saScript("if($var > 1) { msg(''); }");
 	}
 
+	@Test
+	public void testNestedIf() throws Exception {
+		saScript("<! strict > @s = if(dyn(true), 'asdf', if(dyn(true), true, 'string'))");
+	}
+
+	@Test
+	public void testNestedIf2() throws Exception {
+		saScript("<! strict > @s = if(dyn(true), 'asdf', if(dyn(true), true, null))");
+	}
+
 }

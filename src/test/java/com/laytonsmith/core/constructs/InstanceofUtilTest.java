@@ -70,28 +70,28 @@ public class InstanceofUtilTest {
 		// Generics testing
 		LeftHandGenericUse extendsNumberLHGU = new LeftHandGenericUse(CArray.TYPE, Target.UNKNOWN, env,
 				new Constraints(Target.UNKNOWN, ConstraintLocation.LHS,
-						new UpperBoundConstraint(Target.UNKNOWN, "?", CNumber.TYPE, null)));
+						new UpperBoundConstraint(Target.UNKNOWN, "?", CNumber.TYPE.asLeftHandSideType())));
 
 		LeftHandGenericUse superIntLHGU = new LeftHandGenericUse(CArray.TYPE, Target.UNKNOWN, env,
 				new Constraints(Target.UNKNOWN, ConstraintLocation.LHS,
-						new LowerBoundConstraint(Target.UNKNOWN, "?", CInt.TYPE, null)));
+						new LowerBoundConstraint(Target.UNKNOWN, "?", CInt.TYPE.asLeftHandSideType())));
 		LeftHandGenericUse superPrimitiveLHGU = new LeftHandGenericUse(CArray.TYPE, Target.UNKNOWN, env,
 				new Constraints(Target.UNKNOWN, ConstraintLocation.LHS,
-						new LowerBoundConstraint(Target.UNKNOWN, "?", CPrimitive.TYPE, null)));
+						new LowerBoundConstraint(Target.UNKNOWN, "?", CPrimitive.TYPE.asLeftHandSideType())));
 		LeftHandGenericUse superNumberLHGU = new LeftHandGenericUse(CArray.TYPE, Target.UNKNOWN, env,
 				new Constraints(Target.UNKNOWN, ConstraintLocation.LHS,
-						new LowerBoundConstraint(Target.UNKNOWN, "?", CNumber.TYPE, null)));
+						new LowerBoundConstraint(Target.UNKNOWN, "?", CNumber.TYPE.asLeftHandSideType())));
 
 		LeftHandGenericUse extendsPrimitiveLHGU = new LeftHandGenericUse(CArray.TYPE, Target.UNKNOWN, env,
 				new Constraints(Target.UNKNOWN, ConstraintLocation.LHS,
-						new UpperBoundConstraint(Target.UNKNOWN, "?", CPrimitive.TYPE, null)));
+						new UpperBoundConstraint(Target.UNKNOWN, "?", CPrimitive.TYPE.asLeftHandSideType())));
 
 		LeftHandGenericUse intExactTypeLHGU = new LeftHandGenericUse(CArray.TYPE, Target.UNKNOWN, env,
 				new Constraints(Target.UNKNOWN, ConstraintLocation.LHS,
-						new ExactType(Target.UNKNOWN, CInt.TYPE, null)));
+						new ExactType(Target.UNKNOWN, CInt.TYPE.asLeftHandSideType())));
 		LeftHandGenericUse stringExactTypeLHGU = new LeftHandGenericUse(CArray.TYPE, Target.UNKNOWN, env,
 				new Constraints(Target.UNKNOWN, ConstraintLocation.LHS,
-						new ExactType(Target.UNKNOWN, CString.TYPE, null)));
+						new ExactType(Target.UNKNOWN, CString.TYPE.asLeftHandSideType())));
 
 		CClassType arrayInt = CClassType.get(CArray.TYPE, Target.UNKNOWN, MapBuilder.start(CArray.TYPE, GenericParameters
 				.addParameter(CInt.TYPE, null).build()), env);
@@ -112,10 +112,10 @@ public class InstanceofUtilTest {
 
 		LeftHandGenericUse stringLHGU = new LeftHandGenericUse(CArray.TYPE, Target.UNKNOWN, env,
 				new Constraints(Target.UNKNOWN, ConstraintLocation.LHS,
-						new ExactType(Target.UNKNOWN, CString.TYPE, null)));
+						new ExactType(Target.UNKNOWN, CString.TYPE.asLeftHandSideType())));
 		LeftHandGenericUse intLHGU = new LeftHandGenericUse(CArray.TYPE, Target.UNKNOWN, env,
 				new Constraints(Target.UNKNOWN, ConstraintLocation.LHS,
-						new ExactType(Target.UNKNOWN, CInt.TYPE, null)));
+						new ExactType(Target.UNKNOWN, CInt.TYPE.asLeftHandSideType())));
 
 		assertTrue(InstanceofUtil.isInstanceof(arrayInt, CArray.TYPE, intLHGU, env));
 		assertFalse(InstanceofUtil.isInstanceof(arrayInt, CArray.TYPE, stringLHGU, env));
@@ -126,20 +126,20 @@ public class InstanceofUtilTest {
 
 		LeftHandGenericUse arrayIntLHGU = new LeftHandGenericUse(CArray.TYPE, Target.UNKNOWN, env,
 				new Constraints(Target.UNKNOWN, ConstraintLocation.LHS,
-						new ExactType(Target.UNKNOWN, CArray.TYPE, intLHGU)));
+						new ExactType(Target.UNKNOWN, LeftHandSideType.fromCClassType(CArray.TYPE, intLHGU, Target.UNKNOWN))));
 
 		LeftHandGenericUse arrayExtendsNumberLHGU = new LeftHandGenericUse(CArray.TYPE, Target.UNKNOWN, env,
 				new Constraints(Target.UNKNOWN, ConstraintLocation.LHS,
-						new ExactType(Target.UNKNOWN, CArray.TYPE, extendsNumberLHGU)));
+						new ExactType(Target.UNKNOWN, LeftHandSideType.fromCClassType(CArray.TYPE, extendsNumberLHGU, Target.UNKNOWN))));
 		LeftHandGenericUse arraySuperIntLHGU = new LeftHandGenericUse(CArray.TYPE, Target.UNKNOWN, env,
 				new Constraints(Target.UNKNOWN, ConstraintLocation.LHS,
-						new ExactType(Target.UNKNOWN, CArray.TYPE, superIntLHGU)));
+						new ExactType(Target.UNKNOWN, LeftHandSideType.fromCClassType(CArray.TYPE, superIntLHGU, Target.UNKNOWN))));
 		LeftHandGenericUse arraySuperPrimitiveLHGU = new LeftHandGenericUse(CArray.TYPE, Target.UNKNOWN, env,
 				new Constraints(Target.UNKNOWN, ConstraintLocation.LHS,
-						new ExactType(Target.UNKNOWN, CArray.TYPE, superPrimitiveLHGU)));
+						new ExactType(Target.UNKNOWN, LeftHandSideType.fromCClassType(CArray.TYPE, superPrimitiveLHGU, Target.UNKNOWN))));
 		LeftHandGenericUse arrayExtendsPrimitiveLHGU = new LeftHandGenericUse(CArray.TYPE, Target.UNKNOWN, env,
 				new Constraints(Target.UNKNOWN, ConstraintLocation.LHS,
-						new ExactType(Target.UNKNOWN, CArray.TYPE, extendsPrimitiveLHGU)));
+						new ExactType(Target.UNKNOWN, LeftHandSideType.fromCClassType(CArray.TYPE, extendsPrimitiveLHGU, Target.UNKNOWN))));
 
 		// Nested LHGU
 		assertEquals("ms.lang.array<ms.lang.array<ms.lang.int>>", arrayArrayInt.toString());
@@ -174,7 +174,7 @@ public class InstanceofUtilTest {
 		@SuppressWarnings("FieldNameHidesFieldInSuperclass")
 		public static final CClassType TYPE = CClassType.getWithGenericDeclaration(InstanceofUtilTestA.class, new GenericDeclaration(Target.UNKNOWN,
 				new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
-						new UpperBoundConstraint(Target.UNKNOWN, "T", CPrimitive.TYPE, null))));
+						new UpperBoundConstraint(Target.UNKNOWN, "T", CPrimitive.TYPE.asLeftHandSideType()))));
 
 		private final Map<CClassType, GenericParameters> genericParameters = new HashMap<>();
 
@@ -285,7 +285,7 @@ public class InstanceofUtilTest {
 		public static final CClassType TYPE = CClassType.getWithGenericDeclaration(InstanceofUtilTestB.class, new GenericDeclaration(Target.UNKNOWN,
 				InstanceofUtilTestA.TYPE.getGenericDeclaration().getConstraints().get(0),
 				new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
-						new UpperBoundConstraint(Target.UNKNOWN, "U", CNumber.TYPE, null))));
+						new UpperBoundConstraint(Target.UNKNOWN, "U", CNumber.TYPE.asLeftHandSideType()))));
 
 		public InstanceofUtilTestB(GenericParameters genericParameters) {
 			super(genericParameters.subset(InstanceofUtilTestA.TYPE.getGenericDeclaration(), "T"));
@@ -442,28 +442,28 @@ public class InstanceofUtilTest {
 	public void testTypeUnions() throws Exception {
 		Target t = Target.UNKNOWN;
 		assertTrue(InstanceofUtil.isInstanceof(CVoid.LHSTYPE,
-				LeftHandSideType.createTypeUnion(t, CVoid.LHSTYPE, Booleanish.TYPE.asLeftHandSideType()),
+				LeftHandSideType.fromTypeUnion(t, CVoid.LHSTYPE, Booleanish.TYPE.asLeftHandSideType()),
 				env));
 		assertTrue(InstanceofUtil.isInstanceof(CInt.TYPE.asLeftHandSideType(),
-				LeftHandSideType.createTypeUnion(t, CInt.TYPE.asLeftHandSideType(), CString.TYPE.asLeftHandSideType()),
+				LeftHandSideType.fromTypeUnion(t, CInt.TYPE.asLeftHandSideType(), CString.TYPE.asLeftHandSideType()),
 				env));
 		assertFalse(InstanceofUtil.isInstanceof(CArray.TYPE.asLeftHandSideType(),
-				LeftHandSideType.createTypeUnion(t, CInt.TYPE.asLeftHandSideType(), CString.TYPE.asLeftHandSideType()),
+				LeftHandSideType.fromTypeUnion(t, CInt.TYPE.asLeftHandSideType(), CString.TYPE.asLeftHandSideType()),
 				env));
 
 		assertTrue(InstanceofUtil.isInstanceof(
-				LeftHandSideType.createTypeUnion(t, CString.TYPE.asLeftHandSideType(), CInt.TYPE.asLeftHandSideType()),
-				LeftHandSideType.createTypeUnion(t, CString.TYPE.asLeftHandSideType(), CInt.TYPE.asLeftHandSideType()),
+				LeftHandSideType.fromTypeUnion(t, CString.TYPE.asLeftHandSideType(), CInt.TYPE.asLeftHandSideType()),
+				LeftHandSideType.fromTypeUnion(t, CString.TYPE.asLeftHandSideType(), CInt.TYPE.asLeftHandSideType()),
 				env));
 		assertFalse(InstanceofUtil.isInstanceof(
-				LeftHandSideType.createTypeUnion(t, CString.TYPE.asLeftHandSideType(),
+				LeftHandSideType.fromTypeUnion(t, CString.TYPE.asLeftHandSideType(),
 						CInt.TYPE.asLeftHandSideType(), CArray.TYPE.asLeftHandSideType()),
-				LeftHandSideType.createTypeUnion(t, CString.TYPE.asLeftHandSideType(), CInt.TYPE.asLeftHandSideType()),
+				LeftHandSideType.fromTypeUnion(t, CString.TYPE.asLeftHandSideType(), CInt.TYPE.asLeftHandSideType()),
 				env));
 
 		assertFalse(InstanceofUtil.isAssignableTo(CVoid.LHSTYPE, CVoid.LHSTYPE, env));
 		assertTrue(InstanceofUtil.isAssignableTo(CVoid.LHSTYPE,
-				LeftHandSideType.createTypeUnion(t, CVoid.LHSTYPE, Booleanish.TYPE.asLeftHandSideType()),
+				LeftHandSideType.fromTypeUnion(t, CVoid.LHSTYPE, Booleanish.TYPE.asLeftHandSideType()),
 				env));
 	}
 }

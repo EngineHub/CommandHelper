@@ -1,13 +1,13 @@
 package com.laytonsmith.core.constructs.generics;
 
-import com.laytonsmith.PureUtilities.Pair;
-import com.laytonsmith.core.constructs.CClassType;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREGenericConstraintException;
 import com.laytonsmith.core.objects.ObjectModifier;
 
 import java.util.EnumSet;
+import java.util.Set;
 
 /**
  * An UpperBoundConstraint is defined with the extends keyword, such as <code>T extends Number</code>.
@@ -20,30 +20,29 @@ public class UpperBoundConstraint extends BoundaryConstraint {
 	 * @param t Code target
 	 * @param typename The name of this parameter, may be ? for LHS constraints
 	 * @param upperBound The concrete upper bound
-	 * @param genericParameters LHS generics that the upper bound type may provide. May be null if none were provided.
 	 */
-	public UpperBoundConstraint(Target t, String typename, CClassType upperBound, LeftHandGenericUse genericParameters) {
-		super(t, typename, upperBound, genericParameters);
-		if(upperBound.getObjectModifiers().contains(ObjectModifier.FINAL)) {
-			throw new CREGenericConstraintException(upperBound.getFQCN().getFQCN() + " is marked as final, and so"
-					+ " cannot be used in an upper bound constraint.", t);
+	public UpperBoundConstraint(Target t, String typename, LeftHandSideType upperBound) {
+		super(t, typename, upperBound);
+		for(Set<ObjectModifier> upperBoundComponent : upperBound.getTypeObjectModifiers()) {
+			if(upperBoundComponent.contains(ObjectModifier.FINAL)) {
+				throw new CREGenericConstraintException(upperBound.val() + " is marked as final, and so"
+						+ " cannot be used in an upper bound constraint.", t);
+			}
 		}
 	}
 
-	public CClassType getUpperBound() {
+	public LeftHandSideType getUpperBound() {
 		return this.bound;
 	}
 
 	@Override
 	public String toSimpleString() {
-		return getTypeName() + " extends " + getUpperBound().getSimpleName()
-				+ (genericParameters == null ? "" : "<" + genericParameters.toSimpleString() + ">");
+		return getTypeName() + " extends " + getUpperBound().getSimpleName();
 	}
 
 	@Override
 	public String toString() {
-		return getTypeName() + " extends " + getUpperBound()
-				+ (genericParameters == null ? "" : "<" + genericParameters + ">");
+		return getTypeName() + " extends " + getUpperBound();
 	}
 
 	@Override
@@ -57,11 +56,8 @@ public class UpperBoundConstraint extends BoundaryConstraint {
 	}
 
 	@Override
-	protected boolean isConcreteClassWithinConstraint(CClassType type, LeftHandGenericUse generics, Environment env) {
-		return type.doesExtend(env, bound) && (
-				(getBoundaryGenerics() == null && generics == null)
-				|| getBoundaryGenerics().isWithinBounds(env, new Pair<>(type, generics))
-		);
+	protected boolean isConcreteClassWithinConstraint(LeftHandSideType type, Environment env) {
+		return type.doesExtend(bound, env);
 	}
 
 	@Override
@@ -74,21 +70,17 @@ public class UpperBoundConstraint extends BoundaryConstraint {
 
 			@Override
 			public Boolean isWithinBounds(ExactType lhs) {
-				return isWithinConstraint(lhs.getType(), lhs.getGenericParameters(), env);
+				return isWithinConstraint(lhs.getType(), env);
 			}
 
 			@Override
 			public Boolean isWithinBounds(LowerBoundConstraint lhs) {
-				return lhs.getLowerBound().doesExtend(env, UpperBoundConstraint.this.getUpperBound());
+				return lhs.getLowerBound().doesExtend(UpperBoundConstraint.this.getUpperBound(), env);
 			}
 
 			@Override
 			public Boolean isWithinBounds(UpperBoundConstraint lhs) {
-				boolean subtypeMatches = true;
-				if(UpperBoundConstraint.this.genericParameters != null) {
-					subtypeMatches = UpperBoundConstraint.this.genericParameters.isWithinBounds(env, lhs.genericParameters);
-				}
-				return lhs.getUpperBound().doesExtend(env, UpperBoundConstraint.this.getUpperBound()) && subtypeMatches;
+				return lhs.getUpperBound().doesExtend(UpperBoundConstraint.this.getUpperBound(), env);
 			}
 
 			@Override
@@ -100,6 +92,11 @@ public class UpperBoundConstraint extends BoundaryConstraint {
 
 	@Override
 	public ExactType convertFromDiamond(Target t) {
-		return new ExactType(t, this.bound, this.genericParameters);
+		return new ExactType(t, this.bound);
+	}
+
+	@Override
+	public boolean supportsTypeUnions() {
+		return true;
 	}
 }

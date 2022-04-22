@@ -1,7 +1,6 @@
 package com.laytonsmith.core.constructs.generics;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
-import com.laytonsmith.PureUtilities.Pair;
 import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.LeftHandSideType;
@@ -11,6 +10,7 @@ import com.laytonsmith.core.exceptions.CRE.CREGenericConstraintException;
 import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.SortedSet;
 
@@ -114,10 +114,10 @@ public final class ConstraintValidator {
 		}
 	}
 
-	public static void ValidateRHStoLHS(Target t, CClassType rhs, LeftHandGenericUse lhsGenerics, Environment env) {
+	public static void ValidateRHStoLHS(Constraints declarationConstraints, Target t, LeftHandSideType type, Environment env) {
 		List<Constraints> exactType = new ArrayList<>();
-		exactType.add(new Constraints(t, ConstraintLocation.RHS, new ExactType(t, rhs, lhsGenerics)));
-		ValidateLHStoLHS(t, exactType, lhsGenerics.getConstraints(), env);
+		exactType.add(new Constraints(t, ConstraintLocation.RHS, new ExactType(t, type)));
+		ValidateLHStoLHS(t, exactType, Arrays.asList(declarationConstraints), env);
 	}
 
 	/**
@@ -195,11 +195,13 @@ public final class ConstraintValidator {
 		}
 		if(parameters == null) {
 			// Everything is auto, though this doesn't inherently work everywhere, so just fill it in with auto
-			// based on the parameter count, then do the validation normally.
+			// based on the parameter count, then do the validation normally. Note that for type unions, these
+			// cannot be turned into concrete types, and so we have to instead check if the corresponding constraint
+			// can work with a type union, and if so, set it to the collapsed type, and otherwise allow it to fail.
 			GenericParameters.GenericParametersBuilder builder = GenericParameters.emptyBuilder();
 			for(int i = 0; i < declaration.getParameterCount(); i++) {
 				LeftHandSideType type = inferredType == null ? Auto.LHSTYPE : inferredType;
-				builder.addParameter(type.isAuto() ? Auto.TYPE : type.asConcreteType(t), null);
+				builder.addParameter(type);
 			}
 			parameters = builder.build();
 		}
@@ -214,8 +216,8 @@ public final class ConstraintValidator {
 
 		for(int i = 0; i < declaration.getParameterCount(); i++) {
 			Constraints c = declaration.getConstraints().get(i);
-			Pair<CClassType, LeftHandGenericUse> param = parameters.getParameters().get(i);
-			if(!c.withinBounds(param.getKey(), param.getValue(), env)) {
+			LeftHandSideType param = parameters.getParameters().get(i);
+			if(!c.withinBounds(param, env)) {
 				throw new CREGenericConstraintException("Generic parameter at location " + i
 						+ " does not satisfy the constraints: " + c.toString(), t);
 			}

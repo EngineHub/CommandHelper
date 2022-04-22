@@ -157,7 +157,7 @@ public abstract class AbstractFunction implements Function {
 		List<LeftHandSideType> ret = new ArrayList<>(children.size());
 		if(generics != null) {
 			// Explicit parameters were provided, just use those.
-			return generics.getLeftHandParameters();
+			return generics.getParameters();
 		}
 		for(ParseTree child : children) {
 			ret.add(child.getDeclaredType(analysis, env, Auto.LHSTYPE));
@@ -209,7 +209,8 @@ public abstract class AbstractFunction implements Function {
 			List<Target> argTargets = new ArrayList<>(children.size());
 			for(ParseTree child : children) {
 				LeftHandSideType inferredParameterType = child.getDeclaredType(analysis, env, Auto.LHSTYPE);
-				inferredParameterType = LeftHandSideType.resolveTypeFromGenerics(Target.UNKNOWN, env, inferredParameterType, null, null, (Map) null);
+				inferredParameterType = LeftHandSideType.resolveTypeFromGenerics(
+						Target.UNKNOWN, env, inferredParameterType, null, null, (Map) null);
 				argTypes.add(analysis.typecheck(child, inferredParameterType, env, exceptions));
 				argTargets.add(child.getTarget());
 			}

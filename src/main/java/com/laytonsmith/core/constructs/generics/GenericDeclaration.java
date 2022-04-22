@@ -27,6 +27,16 @@ public class GenericDeclaration {
 	}
 
 	/**
+	 * Returns the Constraints object at the specified location. Equivalent to {@code getConstraints().get(location)}.
+	 *
+	 * @param location The parameter location, 0 indexed.
+	 * @return The Constraints object governing the given parameter.
+	 */
+	public Constraints getParameter(int location) {
+		return constraints.get(location);
+	}
+
+	/**
 	 * Returns the number of parameters in this declaration.
 	 * @return
 	 */

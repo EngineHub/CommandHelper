@@ -368,7 +368,7 @@ public class InstanceofUtil {
 	 * @return
 	 */
 	public static boolean isAssignableTo(CClassType type, CClassType instanceofThis, LeftHandGenericUse instanceofThisGenerics, Environment env) {
-		return isAssignableTo(LeftHandSideType.fromHardCodedType(type),
+		return isAssignableTo(type == null ? null : type.asLeftHandSideType(),
 				LeftHandSideType.fromCClassType(instanceofThis, instanceofThisGenerics, Target.UNKNOWN), env);
 	}
 

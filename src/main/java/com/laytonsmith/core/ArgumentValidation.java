@@ -772,21 +772,21 @@ public final class ArgumentValidation {
 	 * @param t The code target.
 	 * @return The coerced type, or the original value if it's already the proper type.
 	 */
-	public static Mixed typeCoerce(Mixed value, CClassType expected, Environment env, Target t) {
+	public static Mixed typeCoerce(Mixed value, LeftHandSideType expected, Environment env, Target t) {
 		if(CNull.NULL.equals(value)) {
 			return value;
 		}
-		CClassType actual = value.typeof(env);
+		LeftHandSideType actual = value.typeof(env).asLeftHandSideType();
 		if(actual.equals(expected)) {
 			return value;
 		}
-		if(expected.equals(CInt.TYPE)) {
+		if(expected.equals(CInt.TYPE.asLeftHandSideType())) {
 			return new CInt(getInt(value, t, env), t);
-		} else if(expected.equals(CDouble.TYPE)) {
+		} else if(expected.equals(CDouble.TYPE.asLeftHandSideType())) {
 			return new CDouble(getDouble(value, t, env), t);
-		} else if(expected.equals(CString.TYPE)) {
+		} else if(expected.equals(CString.TYPE.asLeftHandSideType())) {
 			return new CString(getString(value, t), t);
-		} else if(expected.equals(CBoolean.TYPE)) {
+		} else if(expected.equals(CBoolean.TYPE.asLeftHandSideType())) {
 			return CBoolean.get(getBooleanish(value, t, env));
 		} else {
 			throw new CRECastException("Cannot cast from " + actual.getName() + " to " + expected.getName(), t);

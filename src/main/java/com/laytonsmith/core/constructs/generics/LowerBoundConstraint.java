@@ -1,7 +1,6 @@
 package com.laytonsmith.core.constructs.generics;
 
-import com.laytonsmith.PureUtilities.Pair;
-import com.laytonsmith.core.constructs.CClassType;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREGenericConstraintException;
@@ -20,37 +19,31 @@ public class LowerBoundConstraint extends BoundaryConstraint {
 	 * @param t Code target
 	 * @param typename The name of this parameter, may be ? for LHS constraints
 	 * @param lowerBound The concrete lower bound
-	 * @param genericParameters LHS generics that the upper bound type may provide. May be null if none were provided.
 	 */
-	public LowerBoundConstraint(Target t, String typename, CClassType lowerBound, LeftHandGenericUse genericParameters) {
-		super(t, typename, lowerBound, genericParameters);
-		if(lowerBound.equals(Mixed.TYPE)) {
+	public LowerBoundConstraint(Target t, String typename, LeftHandSideType lowerBound) {
+		super(t, typename, lowerBound);
+		if(lowerBound.equals(Mixed.TYPE.asLeftHandSideType())) {
 			throw new CREGenericConstraintException("Cannot create a lower bound on mixed", t);
 		}
 	}
 
 	@Override
-	protected boolean isConcreteClassWithinConstraint(CClassType type, LeftHandGenericUse generics, Environment env) {
-		return this.bound.doesExtend(env, type) && (
-				(getBoundaryGenerics() == null && generics == null)
-				|| getBoundaryGenerics().isWithinBounds(env, new Pair<>(type, generics))
-		);
+	protected boolean isConcreteClassWithinConstraint(LeftHandSideType type, Environment env) {
+		return this.bound.doesExtend(type, env);
 	}
 
-	public CClassType getLowerBound() {
+	public LeftHandSideType getLowerBound() {
 		return this.bound;
 	}
 
 	@Override
 	public String toSimpleString() {
-		return getTypeName() + " super " + getLowerBound().getSimpleName()
-				+ (genericParameters == null ? "" : "<" + genericParameters.toSimpleString() + ">");
+		return getTypeName() + " super " + getLowerBound().getSimpleName();
 	}
 
 	@Override
 	public String toString() {
-		return getTypeName() + " super " + getLowerBound()
-				+ (genericParameters == null ? "" : "<" + genericParameters + ">");
+		return getTypeName() + " super " + getLowerBound();
 	}
 
 	@Override
@@ -73,12 +66,12 @@ public class LowerBoundConstraint extends BoundaryConstraint {
 
 			@Override
 			public Boolean isWithinBounds(ExactType lhs) {
-				return isWithinConstraint(lhs.getType(), lhs.getGenericParameters(), env);
+				return isWithinConstraint(lhs.getType(), env);
 			}
 
 			@Override
 			public Boolean isWithinBounds(LowerBoundConstraint lhs) {
-				return isWithinConstraint(lhs.getLowerBound(), lhs.genericParameters, env);
+				return isWithinConstraint(lhs.getLowerBound(), env);
 			}
 
 			@Override
@@ -95,7 +88,12 @@ public class LowerBoundConstraint extends BoundaryConstraint {
 
 	@Override
 	public ExactType convertFromDiamond(Target t) {
-		return new ExactType(t, this.bound, this.genericParameters);
+		return new ExactType(t, this.bound);
+	}
+
+	@Override
+	public boolean supportsTypeUnions() {
+		return true;
 	}
 
 }

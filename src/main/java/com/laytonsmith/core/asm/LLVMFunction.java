@@ -110,7 +110,7 @@ public abstract class LLVMFunction implements FunctionBase, Function {
 		List<LeftHandSideType> ret = new ArrayList<>();
 		if(generics != null) {
 			// Explicit parameters were provided, just use those.
-			return generics.getLeftHandParameters();
+			return generics.getParameters();
 		}
 		for(ParseTree child : children) {
 			ret.add(child.getDeclaredType(analysis, env, Auto.LHSTYPE));

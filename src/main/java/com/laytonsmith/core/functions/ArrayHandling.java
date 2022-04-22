@@ -298,14 +298,15 @@ public class ArrayHandling {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN,
-				new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
-					new UnboundedConstraint(Target.UNKNOWN, "T")));
+			Constraints tConstraints = new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+					new UnboundedConstraint(Target.UNKNOWN, "T"));
+			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN, tConstraints);
 			LeftHandSideType t = LeftHandSideType.fromGenericDefinitionType(genericDeclaration, "T", null, Target.UNKNOWN);
 			return new SignatureBuilder(t)
-					.param(LeftHandSideType.fromCClassType(ArrayAccess.TYPE, t.toLeftHandGenericUse(null), Target.UNKNOWN),
+					.param(LeftHandSideType.fromCClassType(
+							ArrayAccess.TYPE, t.toLeftHandGenericUse(null), Target.UNKNOWN),
 							"array", "The ArrayAccess object to read from.")
-					.param(LeftHandSideType.createTypeUnion(Target.UNKNOWN,
+					.param(LeftHandSideType.fromTypeUnion(Target.UNKNOWN,
 							CInt.TYPE.asLeftHandSideType(), CSlice.TYPE.asLeftHandSideType(),
 							CString.TYPE.asLeftHandSideType()),
 							"index", "The index to read from.")
@@ -446,14 +447,15 @@ public class ArrayHandling {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN,
-				new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
-					new UnboundedConstraint(Target.UNKNOWN, "T")));
+			Constraints tConstraints = new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+					new UnboundedConstraint(Target.UNKNOWN, "T"));
+			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN, tConstraints);
 			LeftHandSideType t = LeftHandSideType.fromGenericDefinitionType(genericDeclaration, "T", null, Target.UNKNOWN);
 			return new SignatureBuilder(t)
-					.param(LeftHandSideType.fromCClassType(CArray.TYPE, t.toLeftHandGenericUse(null), Target.UNKNOWN),
+					.param(LeftHandSideType.fromCClassType(CArray.TYPE, t.toLeftHandGenericUse(null),
+							Target.UNKNOWN),
 							"array", "The array to set the value in.")
-					.param(LeftHandSideType.createTypeUnion(Target.UNKNOWN,
+					.param(LeftHandSideType.fromTypeUnion(Target.UNKNOWN,
 							CInt.TYPE.asLeftHandSideType(), CString.TYPE.asLeftHandSideType()),
 							"index", "The index to write to.")
 					.param(t, "value", "The value to set in the array.")
@@ -545,12 +547,13 @@ public class ArrayHandling {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN,
-				new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
-					new UnboundedConstraint(Target.UNKNOWN, "T")));
+			Constraints tConstraints = new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+					new UnboundedConstraint(Target.UNKNOWN, "T"));
+			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN, tConstraints);
 			LeftHandSideType t = LeftHandSideType.fromGenericDefinitionType(genericDeclaration, "T", null, Target.UNKNOWN);
 			return new SignatureBuilder(CVoid.TYPE)
-					.param(LeftHandSideType.fromCClassType(CArray.TYPE, t.toLeftHandGenericUse(null), Target.UNKNOWN),
+					.param(LeftHandSideType.fromCClassType(CArray.TYPE,
+							t.toLeftHandGenericUse(null), Target.UNKNOWN),
 							"array", "The array to push the values in.")
 					.param(t, "pushValue", "The values to push in the array.")
 					.varParam(t, "additionalValues", "Additional values to push on to the array.")
@@ -656,12 +659,13 @@ public class ArrayHandling {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN,
-				new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
-					new UnboundedConstraint(Target.UNKNOWN, "T")));
+			Constraints tConstraints = new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+					new UnboundedConstraint(Target.UNKNOWN, "T"));
+			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN, tConstraints);
 			LeftHandSideType t = LeftHandSideType.fromGenericDefinitionType(genericDeclaration, "T", null, Target.UNKNOWN);
 			return new SignatureBuilder(CVoid.TYPE)
-					.param(LeftHandSideType.fromCClassType(CArray.TYPE, t.toLeftHandGenericUse(null), Target.UNKNOWN),
+					.param(LeftHandSideType.fromCClassType(CArray.TYPE,
+							t.toLeftHandGenericUse(null), Target.UNKNOWN),
 							"array", "The array to insert the value in.")
 					.param(CInt.TYPE, "index", "The index to insert at.")
 					.param(t, "value", "The value to insert in the array.")
@@ -741,12 +745,13 @@ public class ArrayHandling {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN,
-				new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
-					new UnboundedConstraint(Target.UNKNOWN, "T")));
+			Constraints tConstraints = new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+					new UnboundedConstraint(Target.UNKNOWN, "T"));
+			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN, tConstraints);
 			LeftHandSideType t = LeftHandSideType.fromGenericDefinitionType(genericDeclaration, "T", null, Target.UNKNOWN);
 			return new SignatureBuilder(CBoolean.TYPE)
-					.param(LeftHandSideType.fromCClassType(CArray.TYPE, t.toLeftHandGenericUse(null), Target.UNKNOWN),
+					.param(LeftHandSideType.fromCClassType(CArray.TYPE,
+							t.toLeftHandGenericUse(null), Target.UNKNOWN),
 							"array", "The array to search in.")
 					.param(t, "testValue", "The value to search for.")
 					.setGenericDeclaration(genericDeclaration, "The generic type of the array.")
@@ -855,12 +860,13 @@ public class ArrayHandling {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN,
-				new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
-					new UnboundedConstraint(Target.UNKNOWN, "T")));
+			Constraints tConstraints = new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+					new UnboundedConstraint(Target.UNKNOWN, "T"));
+			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN, tConstraints);
 			LeftHandSideType t = LeftHandSideType.fromGenericDefinitionType(genericDeclaration, "T", null, Target.UNKNOWN);
 			return new SignatureBuilder(CBoolean.TYPE)
-					.param(LeftHandSideType.fromCClassType(CArray.TYPE, t.toLeftHandGenericUse(null), Target.UNKNOWN),
+					.param(LeftHandSideType.fromCClassType(CArray.TYPE,
+							t.toLeftHandGenericUse(null), Target.UNKNOWN),
 							"array", "The array to search in.")
 					.param(t, "testValue", "The value to search for.")
 					.setGenericDeclaration(genericDeclaration, "The generic type of the array.")
@@ -913,12 +919,13 @@ public class ArrayHandling {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN,
-				new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
-					new UnboundedConstraint(Target.UNKNOWN, "T")));
+			Constraints tConstraints = new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+					new UnboundedConstraint(Target.UNKNOWN, "T"));
+			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN, tConstraints);
 			LeftHandSideType t = LeftHandSideType.fromGenericDefinitionType(genericDeclaration, "T", null, Target.UNKNOWN);
 			return new SignatureBuilder(CBoolean.TYPE)
-					.param(LeftHandSideType.fromCClassType(CArray.TYPE, t.toLeftHandGenericUse(null), Target.UNKNOWN),
+					.param(LeftHandSideType.fromCClassType(CArray.TYPE,
+							t.toLeftHandGenericUse(null), Target.UNKNOWN),
 							"array", "The array to search in.")
 					.param(t, "testValue", "The value to search for.")
 					.setGenericDeclaration(genericDeclaration, "The generic type of the array.")
@@ -1049,17 +1056,18 @@ public class ArrayHandling {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN,
-				new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
-					new UnboundedConstraint(Target.UNKNOWN, "T")));
+			Constraints tConstraints = new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+					new UnboundedConstraint(Target.UNKNOWN, "T"));
+			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN, tConstraints);
 			LeftHandSideType t = LeftHandSideType.fromGenericDefinitionType(genericDeclaration, "T", null, Target.UNKNOWN);
 			return new SignatureBuilder(CBoolean.TYPE)
-					.param(LeftHandSideType.fromCClassType(CArray.TYPE, t.toLeftHandGenericUse(null), Target.UNKNOWN),
+					.param(LeftHandSideType.fromCClassType(CArray.TYPE,
+							t.toLeftHandGenericUse(null), Target.UNKNOWN),
 							"array", "The array to search in.")
-					.param(LeftHandSideType.createTypeUnion(Target.UNKNOWN,
+					.param(LeftHandSideType.fromTypeUnion(Target.UNKNOWN,
 							CInt.TYPE.asLeftHandSideType(), CString.TYPE.asLeftHandSideType()),
 							"index", "The index to check.")
-					.varParam(LeftHandSideType.createTypeUnion(Target.UNKNOWN,
+					.varParam(LeftHandSideType.fromTypeUnion(Target.UNKNOWN,
 							CInt.TYPE.asLeftHandSideType(), CString.TYPE.asLeftHandSideType()),
 							"additionalIndices", "Additionaly indices to recurse down and check.")
 					.setGenericDeclaration(genericDeclaration, "The generic type of the array.")
@@ -1163,9 +1171,9 @@ public class ArrayHandling {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN,
-				new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
-					new UnboundedConstraint(Target.UNKNOWN, "T")));
+			Constraints tConstraints = new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+					new UnboundedConstraint(Target.UNKNOWN, "T"));
+			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN, tConstraints);
 			LeftHandSideType t = LeftHandSideType.fromGenericDefinitionType(genericDeclaration, "T", null, Target.UNKNOWN);
 			return new SignatureBuilder(CArray.TYPE, "A reference to the passed in array.")
 					.param(LeftHandSideType.fromCClassType(CArray.TYPE, t.toLeftHandGenericUse(null), Target.UNKNOWN),

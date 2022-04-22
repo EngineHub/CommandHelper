@@ -1,7 +1,6 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
-import com.laytonsmith.PureUtilities.Pair;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.noboilerplate;
@@ -14,18 +13,17 @@ import com.laytonsmith.core.compiler.signature.FunctionSignatures;
 import com.laytonsmith.core.compiler.signature.SignatureBuilder;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
-import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.generics.ConstraintLocation;
 import com.laytonsmith.core.constructs.generics.Constraints;
 import com.laytonsmith.core.constructs.generics.GenericDeclaration;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
-import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
 import com.laytonsmith.core.constructs.generics.UnboundedConstraint;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
@@ -213,11 +211,11 @@ public class Persistence {
 				if(generics == null) {
 					return ret;
 				}
-				Pair<CClassType, LeftHandGenericUse> expectedReturn = generics.getParameters().get(0);
-				if(ret.isInstanceOf(expectedReturn.getKey(), expectedReturn.getValue(), env)) {
+				LeftHandSideType expectedReturn = generics.getParameters().get(0);
+				if(InstanceofUtil.isInstanceof(ret, expectedReturn, env)) {
 					return ret;
 				} else {
-					return ArgumentValidation.typeCoerce(ret, expectedReturn.getKey(), env, t);
+					return ArgumentValidation.typeCoerce(ret, expectedReturn, env, t);
 				}
 			} catch (ClassCastException e) {
 				return CNull.NULL;

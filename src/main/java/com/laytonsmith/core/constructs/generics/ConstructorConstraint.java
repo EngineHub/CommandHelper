@@ -1,8 +1,7 @@
 package com.laytonsmith.core.constructs.generics;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
-import com.laytonsmith.PureUtilities.Pair;
-import com.laytonsmith.core.constructs.CClassType;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREGenericConstraintException;
@@ -20,40 +19,38 @@ import java.util.List;
  */
 public class ConstructorConstraint extends Constraint {
 
-	private final List<Pair<CClassType, LeftHandGenericUse>> types;
+	private final List<LeftHandSideType> argTypes;
 
-	public ConstructorConstraint(Target t, String typename, List<Pair<CClassType, LeftHandGenericUse>> types) {
+	public ConstructorConstraint(Target t, String typename, List<LeftHandSideType> argTypes) {
 		super(t, typename);
-		this.types = types;
+		this.argTypes = argTypes;
 	}
 
-	public List<Pair<CClassType, LeftHandGenericUse>> getTypes() {
-		return new ArrayList<>(this.types);
+	public List<LeftHandSideType> getArgTypes() {
+		return new ArrayList<>(this.argTypes);
 	}
 
 	@Override
 	public String toSimpleString() {
 		return "new " + getTypeName() + "("
-				+ StringUtils.Join(types,
+				+ StringUtils.Join(argTypes,
 					", ",
 					", ",
 					", ",
 					"",
-					item -> item.getKey().getSimpleName()
-							+ (item.getValue() == null ? "" : "<" + item.getValue().toSimpleString() + ">"))
+					item -> item.getSimpleName())
 				+ ")";
 	}
 
 	@Override
 	public String toString() {
 		return "new " + getTypeName() + "("
-				+ StringUtils.Join(types,
+				+ StringUtils.Join(argTypes,
 					", ",
 					", ",
 					", ",
 					"",
-					item -> item.getKey().toString()
-							+ (item.getValue() == null ? "" : "<" + item.getValue().toString() + ">"))
+					item -> item.val())
 				+ ")";
 	}
 
@@ -68,7 +65,7 @@ public class ConstructorConstraint extends Constraint {
 	}
 
 	@Override
-	public boolean isWithinConstraint(CClassType type, LeftHandGenericUse generics, Environment env) {
+	public boolean isWithinConstraint(LeftHandSideType type, Environment env) {
 		// TODO: Nothing has constructors yet, this is always false
 		return false;
 	}
@@ -78,12 +75,12 @@ public class ConstructorConstraint extends Constraint {
 		return new ConstraintToConstraintValidator() {
 			@Override
 			public Boolean isWithinBounds(ConstructorConstraint lhs) {
-				return ConstructorConstraint.this.types.equals(lhs.types);
+				return ConstructorConstraint.this.argTypes.equals(lhs.argTypes);
 			}
 
 			@Override
 			public Boolean isWithinBounds(ExactType lhs) {
-				return ConstructorConstraint.this.isWithinConstraint(lhs.getType(), lhs.getGenericParameters(), env);
+				return ConstructorConstraint.this.isWithinConstraint(lhs.getType(), env);
 			}
 
 			@Override
@@ -106,5 +103,10 @@ public class ConstructorConstraint extends Constraint {
 	@Override
 	public ExactType convertFromDiamond(Target t) {
 		throw new CREGenericConstraintException("Cannot infer generic parameter from new constraint.", t);
+	}
+
+	@Override
+	public boolean supportsTypeUnions() {
+		return false;
 	}
 }

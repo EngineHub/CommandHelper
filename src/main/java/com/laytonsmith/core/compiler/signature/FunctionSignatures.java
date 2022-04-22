@@ -76,6 +76,33 @@ public final class FunctionSignatures {
 		// List all matching signatures, or return the return type of the first match when MatchType MATCH_FIRST is set.
 		GenericParameters generics = node.getNodeModifiers().getGenerics();
 		List<FunctionSignature> matches = new ArrayList<>();
+		/*
+			TODO: This must be changed to take into account the fact that the runtime uses late binding. Consider a
+			function defined with two signatures, `int func(array)` and `string func(ArrayAccess)`. At first blush,
+			if the input argument is `ArrayAccess` we might assume that surely the second signature should match, and
+			string returned, and not the first.
+
+			But consider the caller code such as `ArrayAccess @a = array(); func(@a);`. In this case, at runtime, the
+			type is array(), and so the second one which returns string is in fact the signature that should be
+			used. Unfortunately, this code currently will select the ArrayAccess one, and will state that the
+			return type will be int, which is not always the case, the correct return type in this case for ArrayAccess
+			should be `int | string`, and not `string`. Additional parameters that definitely don't match can
+			disambiguate, such as `func(ArrayAccess, string)` and `func(array, int)`. In this case, we use the second
+			parameter to determine if the first or second signature should match, because `func(array, string)` always
+			matches the first, and `func(array, int)` always matches the second.
+
+			Null values must also be taken into account, but we can require an explicit cast for hardcoded nulls that
+			are ambiguous.
+
+			Signatures such as `int func(ArrayAccess, array)` and `int func(array, ArrayAccess)` are not allowed,
+			because a call to `func(array, array)` would be completely ambiguous, and cannot be resolved even at
+			runtime either. To determine this, we take the first argument in the first signature, and see that
+			ArrayAccess is a superclass of array in the second signature, and so the second signature is so far
+			eligible to be an overmatched signature. Then, we see that the second parameter of the first signature
+			is array, which is not an superclass of ArrayAccess. However, it is a subclass of the overmatched signature.
+			We end the search, and find there were no disambiguating parameters, and we had subclasses of overmatched
+			signatures, and so we trigger a compile error, because the signatures are ambiguous.
+		*/
 		for(FunctionSignature signature : this.getSignatures()) {
 			if(signature.matches(argTypes, generics, env, inferredReturnType, false)) {
 				matches.add(signature);
@@ -129,7 +156,7 @@ public final class FunctionSignatures {
 						matches.get(0).getGenericDeclaration(), inferredReturnType);
 					types[i] = retType;
 				}
-				LeftHandSideType ret = LeftHandSideType.createTypeUnion(t, types);
+				LeftHandSideType ret = LeftHandSideType.fromTypeUnion(t, types);
 				if(ret.isTypeUnion()) {
 					// If multiple types match, and one or more of the arguments is auto, we return auto, rather than
 					// the type union. This indicates that the user is content with runtime type verification, and so

@@ -1,6 +1,6 @@
 package com.laytonsmith.core.constructs.generics;
 
-import com.laytonsmith.core.constructs.CClassType;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREGenericConstraintException;
@@ -30,7 +30,7 @@ public class UnboundedConstraint extends Constraint {
 	}
 
 	@Override
-	public boolean isWithinConstraint(CClassType type, LeftHandGenericUse generics, Environment env) {
+	public boolean isWithinConstraint(LeftHandSideType type, Environment env) {
 		return true;
 	}
 
@@ -59,14 +59,14 @@ public class UnboundedConstraint extends Constraint {
 
 			@Override
 			public Boolean isWithinBounds(UnboundedConstraint lhs) {
-				throw new Error("Unexpected constraint combination.");
+				return true;
 			}
 		};
 	}
 
 	@Override
 	public ExactType convertFromDiamond(Target t) throws CREGenericConstraintException {
-		return new ExactType(t, Mixed.TYPE, null);
+		return new ExactType(t, Mixed.TYPE.asLeftHandSideType());
 	}
 
 	@Override
@@ -77,5 +77,10 @@ public class UnboundedConstraint extends Constraint {
 	@Override
 	public String toString() {
 		return getTypeName();
+	}
+
+	@Override
+	public boolean supportsTypeUnions() {
+		return true;
 	}
 }

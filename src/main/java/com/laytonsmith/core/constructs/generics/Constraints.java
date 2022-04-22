@@ -1,10 +1,11 @@
 package com.laytonsmith.core.constructs.generics;
 
+import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.ObjectHelpers;
 import com.laytonsmith.PureUtilities.ObjectHelpers.StandardField;
-import com.laytonsmith.PureUtilities.Pair;
 import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.constructs.CClassType;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREGenericConstraintException;
@@ -41,7 +42,10 @@ public class Constraints implements Iterable<Constraint> {
 		this.constraints = new TreeSet<>(unorderedConstraints);
 		if(location == ConstraintLocation.RHS) {
 			if(constraints.length != 1 || !(constraints[0] instanceof ExactType)) {
-				throw new CREGenericConstraintException("Constraints cannot be used on the RHS", t);
+				throw new CREGenericConstraintException("Constraints (other than a single ExactType constraint)"
+						+ " cannot be used on the RHS. This definition contains " + constraints.length + " "
+						+ " constraint(s), of type(s): " + StringUtils.Join(constraints, ", ",
+								(item) -> item.getClass().toString()), t);
 			}
 		}
 		if(location == ConstraintLocation.DEFINITION) {
@@ -132,14 +136,28 @@ public class Constraints implements Iterable<Constraint> {
 	 * Validates that this concrete type (and perhaps the concrete type's generics) fit within the boundary
 	 * specified in the LHS constraint.This is used to validate the RHS against the LHS. Use
 	 * {@link #withinBounds(Constraints, List, Environment)} to validate the LHS against the definition.
-	 * @param rhsType The RHS type
+	 * @param type The type to check.
 	 * @param rhsGenerics The LHS generics that are associated with the RHS.
 	 * @param env
 	 * @return If the specified RHS types passed in fit within the bounds of these Constraints
 	 */
-	public boolean withinBounds(CClassType rhsType, LeftHandGenericUse rhsGenerics, Environment env) {
+	public boolean withinBounds(LeftHandSideType type, Environment env) {
 		for(Constraint c : constraints) {
-			if(!c.isWithinConstraint(rhsType, rhsGenerics, env)) {
+			if(!c.isWithinConstraint(type, env)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Returns whether ALL of this set of constraints can support type unions on the LHS. Note that type unions
+	 * can never be used on the RHS. This is generally only used when validating LHS against LHS.
+	 * @return
+	 */
+	public boolean supportsTypeUnions() {
+		for(Constraint c : constraints) {
+			if(!c.supportsTypeUnions()) {
 				return false;
 			}
 		}
@@ -174,13 +192,15 @@ public class Constraints implements Iterable<Constraint> {
 	/**
 	 * Given a string such as <code>? extends array&lt;number&gt; & new ?()</code>, parses it into a Constraints[]
 	 * object. Note that the outer angle brackets should not be provided.
+	 *
 	 * @param constraintDefinition The constraint definition, without the angle brackets
 	 * @param location The location the constraints are being defined in. This varies behavior slightly.
 	 * @param t The code target, for exceptions
 	 * @param env The environment
 	 * @return An array of Constraints, each one representing a single parameter.
 	 */
-	public static Constraints[] BuildFromString(String constraintDefinition, ConstraintLocation location, Target t, Environment env) throws ClassNotFoundException {
+	public static Constraints[] BuildFromString(String constraintDefinition, ConstraintLocation location,
+			Target t, Environment env) {
 		int bracketStack = 0;
 		int parenthesisStack = 0;
 		constraintDefinition = constraintDefinition.replaceAll("\n", " ");
@@ -209,10 +229,11 @@ public class Constraints implements Iterable<Constraint> {
 
 		constraintsS.add(GetConstraints(buf.toString(), t, location, env));
 
-		return constraintsS.toArray(new Constraints[0]);
+		return constraintsS.toArray(Constraints[]::new);
 	}
 
-	private static Constraints GetConstraints(String s, Target t, ConstraintLocation location, Environment env) throws ClassNotFoundException {
+	private static Constraints GetConstraints(String s, Target t, ConstraintLocation location,
+			Environment env) {
 		int bracketStack = 0;
 		int parenthesisStack = 0;
 		List<Constraint> constraints = new ArrayList<>();
@@ -251,13 +272,24 @@ public class Constraints implements Iterable<Constraint> {
 		return new Constraints(t, location, constraints.toArray(Constraint[]::new));
 	}
 
+	/**
+	 * Parses a constraint from a string. This is only meant
+	 * @param s The string to parse.
+	 * @param t The code target.
+	 * @param location The location of these constraints.
+	 * @param declarationConstraints The constraints for the relevant definition.
+	 * Must be provided if location is not definition.
+	 * @param env The environment.
+	 * @return
+	 * @throws ClassNotFoundException
+	 */
 	/*package*/ static Constraint GetConstraint(String s, Target t,
-											ConstraintLocation location, Environment env) throws ClassNotFoundException {
+			ConstraintLocation location, Environment env) {
 		// Now we know we only have one constraint to process
 		s = s.trim();
 		String name = "";
 		String keyword = null;
-		Pair<CClassType, LeftHandGenericUse> clazz;
+		LeftHandSideType clazz;
 		boolean inName = true;
 		boolean inKeyword = false;
 		boolean isNewConstraint = false;
@@ -305,7 +337,7 @@ public class Constraints implements Iterable<Constraint> {
 			if(isNewConstraint && c == ')') {
 				newParenthesisStack--;
 				if(newParenthesisStack == 0) {
-					List<Pair<CClassType, LeftHandGenericUse>> types = GetNewTypes(buf.toString(), t, env);
+					List<LeftHandSideType> types = GetNewTypes(buf.toString(), t, env);
 					return new ConstructorConstraint(t, name, types);
 				}
 			}
@@ -315,9 +347,9 @@ public class Constraints implements Iterable<Constraint> {
 			// Now buf contains the class, which may need additional parsing
 			clazz = ParseClassType(buf.toString(), t, env);
 			if("extends".equals(keyword)) {
-				return new UpperBoundConstraint(t, name, clazz.getKey(), clazz.getValue());
+				return new UpperBoundConstraint(t, name, clazz);
 			} else if("super".equals(keyword)) {
-				return new LowerBoundConstraint(t, name, clazz.getKey(), clazz.getValue());
+				return new LowerBoundConstraint(t, name, clazz);
 			}
 		}
 		if(inName && keyword == null) {
@@ -330,7 +362,7 @@ public class Constraints implements Iterable<Constraint> {
 					return ExactType.AsUnboundedWildcard(t);
 				} else {
 					clazz = ParseClassType(typename, t, env);
-					return new ExactType(t, clazz.getKey(), clazz.getValue());
+					return new ExactType(t, clazz);
 				}
 			}
 		}
@@ -340,8 +372,8 @@ public class Constraints implements Iterable<Constraint> {
 	/**
 	 * This will contain the types as comma separated fields. (Not including the outer parenthesis.)
 	 */
-	private static List<Pair<CClassType, LeftHandGenericUse>> GetNewTypes(String s, Target t, Environment env) throws ClassNotFoundException {
-		List<Pair<CClassType, LeftHandGenericUse>> list = new ArrayList<>();
+	private static List<LeftHandSideType> GetNewTypes(String s, Target t, Environment env) {
+		List<LeftHandSideType> list = new ArrayList<>();
 		int bracketStack = 0;
 		int parenthesisStack = 0;
 		StringBuilder buf = new StringBuilder();
@@ -362,14 +394,14 @@ public class Constraints implements Iterable<Constraint> {
 			}
 			buf.append(c);
 		}
+
 		list.add(ParseClassType(buf.toString(), t, env));
 		return list;
 	}
 
-	private static Pair<CClassType, LeftHandGenericUse> ParseClassType(String s, Target t, Environment env)
-			throws ClassNotFoundException {
+	private static LeftHandSideType ParseClassType(String s, Target t, Environment env) {
 		s = s.trim();
-		CClassType type = null;
+		CClassType nakedType = null;
 		LeftHandGenericUse lhgu = null;
 		boolean inLHS = false;
 		int bracketStack = 0;
@@ -377,7 +409,7 @@ public class Constraints implements Iterable<Constraint> {
 		for(Character c : s.toCharArray()) {
 			if(c == '<') {
 				if(!inLHS) {
-					type = CClassType.getNakedClassType(FullyQualifiedClassName.forName(buf.toString(), t, env), env);
+					nakedType = CClassType.getNakedClassType(FullyQualifiedClassName.forName(buf.toString(), t, env), env);
 					buf = new StringBuilder();
 				}
 				inLHS = true;
@@ -387,7 +419,7 @@ public class Constraints implements Iterable<Constraint> {
 				bracketStack--;
 				if(bracketStack == 0) {
 					buf.append(c);
-					lhgu = new LeftHandGenericUse(type, t, env, BuildFromString(buf.toString().trim()
+					lhgu = new LeftHandGenericUse(nakedType, t, env, BuildFromString(buf.toString().trim()
 							.replaceAll("<(.*)>", "$1"), ConstraintLocation.LHS, t, env));
 					buf = new StringBuilder();
 					continue;
@@ -396,13 +428,18 @@ public class Constraints implements Iterable<Constraint> {
 			buf.append(c);
 		}
 		if(!inLHS) {
-			type = CClassType.getNakedClassType(FullyQualifiedClassName.forName(buf.toString(), t, env), env);
+			lhgu = null;
 		}
 
-		return new Pair<>(type, lhgu);
+		if(nakedType == null) {
+			nakedType = CClassType.getNakedClassType(FullyQualifiedClassName.forName(buf.toString(), t, env), env);
+		}
+
+		return LeftHandSideType.fromCClassType(nakedType, lhgu, t);
 	}
 
 	@Override
+	@SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
 	public boolean equals(Object o) {
 		return ObjectHelpers.DoEquals(this, o);
 	}

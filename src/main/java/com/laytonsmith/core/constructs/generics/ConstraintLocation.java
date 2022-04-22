@@ -11,7 +11,9 @@ public enum ConstraintLocation {
 	DEFINITION("generic type definition"),
 	/**
 	 * The left hand side of a statement, either the left hand of an assignment, or the parameter definition
-	 * of a function call.
+	 * of a function call. This can be a bit confusing sometimes, because you can have a left hand side value
+	 * on the right hand side, particularly during typechecking, where the concrete runtime values may not be
+	 * known.
 	 */
 	LHS("left hand type definition"),
 	/**

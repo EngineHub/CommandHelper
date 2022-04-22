@@ -240,11 +240,10 @@ public class FunctionSignature {
 		matchLoop:
 		for(int paramIndex = 0; paramIndex < this.params.size(); paramIndex++) {
 			Param param = this.params.get(paramIndex);
-
 			LeftHandSideType argType = null;
 			if(argIndex < argTypes.size()) {
 				argType = LeftHandSideType.resolveTypeFromGenerics(t, env, argTypes.get(argIndex),
-					generics, genericDeclaration, (Map) null);
+						generics, genericDeclaration, (Map) null);
 			}
 			Map<String, LeftHandSideType> inferredTypes = new HashMap<>();
 			if(param.getType() != null && param.getType().isTypeName()) {

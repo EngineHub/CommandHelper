@@ -135,19 +135,19 @@ public class ControlFlow {
 					new UnboundedConstraint(Target.UNKNOWN, "T")),
 				new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
 					new UnboundedConstraint(Target.UNKNOWN, "U")));
-			LeftHandSideType voidOrBooleanish = LeftHandSideType.createTypeUnion(Target.UNKNOWN, CVoid.LHSTYPE,
+			LeftHandSideType voidOrBooleanish = LeftHandSideType.fromTypeUnion(Target.UNKNOWN, CVoid.LHSTYPE,
 					Booleanish.TYPE.asLeftHandSideType());
 			LeftHandSideType tTernaryIfOnly = LeftHandSideType.fromGenericDefinitionType(ternaryIfOnly, "T", null, Target.UNKNOWN);
 			LeftHandSideType tTernaryIfElse = LeftHandSideType.fromGenericDefinitionType(ternaryIfElse, "T", null, Target.UNKNOWN);
 			LeftHandSideType uTernaryIfElse = LeftHandSideType.fromGenericDefinitionType(ternaryIfElse, "U", null, Target.UNKNOWN);
 			return new SignatureBuilder(
-						LeftHandSideType.createTypeUnion(Target.UNKNOWN, tTernaryIfElse, uTernaryIfElse),
+						LeftHandSideType.fromTypeUnion(Target.UNKNOWN, tTernaryIfElse, uTernaryIfElse),
 						MatchType.MATCH_FIRST)
 					.param(voidOrBooleanish, "cond", "The condition.")
 					.param(tTernaryIfElse, "ifValue", "The value that is returned when the condition is true.")
 					.param(uTernaryIfElse, "elseValue", "The value that is returned when the condition is false.")
 					.setGenericDeclaration(ternaryIfElse, "T is the return type if the condition is true, U is the return type if false.")
-					.newSignature(LeftHandSideType.createTypeUnion(Target.UNKNOWN, tTernaryIfOnly, CVoid.LHSTYPE))
+					.newSignature(LeftHandSideType.fromTypeUnion(Target.UNKNOWN, tTernaryIfOnly, CVoid.LHSTYPE))
 					.param(voidOrBooleanish, "cond", "The condition.")
 					.param(tTernaryIfOnly, "ifValue", "The value that is returned when the condition is true.")
 					.setGenericDeclaration(ternaryIfOnly, "T is the return type if the condition is true (void otherwise).")

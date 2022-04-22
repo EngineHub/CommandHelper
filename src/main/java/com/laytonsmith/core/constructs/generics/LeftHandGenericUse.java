@@ -2,8 +2,8 @@ package com.laytonsmith.core.constructs.generics;
 
 import com.laytonsmith.PureUtilities.ObjectHelpers;
 import com.laytonsmith.PureUtilities.ObjectHelpers.StandardField;
-import com.laytonsmith.PureUtilities.Pair;
 import com.laytonsmith.core.constructs.CClassType;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 
@@ -79,15 +79,20 @@ public class LeftHandGenericUse {
 
 	/**
 	 * Checks if the generics on the RHS are within bounds of this LHS generic definition.
+	 *
+	 * @param env The environment
+	 * @param types The types, each argument corresponding to the Constraints objects, that is, each argument
+	 * to the generic parameter set.
+	 * @return True if all types are within bounds.
 	 */
-	public boolean isWithinBounds(Environment env, Pair<CClassType, LeftHandGenericUse>... types) {
+	public boolean isWithinBounds(Environment env, LeftHandSideType... types) {
 		if(this.getConstraints().size() != types.length) {
 			return false;
 		}
 		for(int i = 0; i < this.getConstraints().size(); i++) {
 			Constraints lhs = this.getConstraints().get(i);
-			Pair<CClassType, LeftHandGenericUse> type = types[i];
-			if(!lhs.withinBounds(type.getKey(), type.getValue(), env)) {
+			LeftHandSideType type = types[i];
+			if(!lhs.withinBounds(type, env)) {
 				return false;
 			}
 		}

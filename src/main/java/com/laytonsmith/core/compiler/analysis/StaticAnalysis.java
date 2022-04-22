@@ -419,7 +419,7 @@ public class StaticAnalysis {
 					for(int i = 0; i < types.length; i++) {
 						types[i] = declsList.get(i).getType();
 					}
-					return LeftHandSideType.createTypeUnion(Target.UNKNOWN, types);
+					return LeftHandSideType.fromTypeUnion(Target.UNKNOWN, types);
 				}
 			} else {
 				// If this runs, then an IVariable reference was created without setting its Scope using setTermScope().

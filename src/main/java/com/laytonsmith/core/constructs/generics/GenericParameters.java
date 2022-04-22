@@ -2,7 +2,6 @@ package com.laytonsmith.core.constructs.generics;
 
 import com.laytonsmith.PureUtilities.ObjectHelpers;
 import com.laytonsmith.PureUtilities.ObjectHelpers.StandardField;
-import com.laytonsmith.PureUtilities.Pair;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
@@ -25,7 +24,7 @@ import java.util.List;
 public final class GenericParameters {
 
 	private GenericDeclaration genericDeclaration;
-	private final List<Pair<CClassType, LeftHandGenericUse>> parameters;
+	private final List<LeftHandSideType> parameters;
 
 	/**
 	 * When representing MethodScript generics in Java, and there is an inheritance chain with generics at each step,
@@ -70,17 +69,17 @@ public final class GenericParameters {
 			return false;
 		}
 		for(int i = 0; i < parameters.size(); i++) {
-			Pair<CClassType, LeftHandGenericUse> pair = parameters.get(i);
+			LeftHandSideType parameter = parameters.get(i);
 			Constraints constraints = generics.getConstraints().get(i);
-			if(!isInstanceofParameter(pair.getKey(), pair.getValue(), constraints, env)) {
+			if(!isInstanceofParameter(parameter, constraints, env)) {
 				return false;
 			}
 		}
 		return true;
 	}
 
-	private static boolean isInstanceofParameter(CClassType rhsType, LeftHandGenericUse rhsGenerics, Constraints lhs, Environment env) {
-		return lhs.withinBounds(rhsType, rhsGenerics, env);
+	private static boolean isInstanceofParameter(LeftHandSideType type, Constraints lhs, Environment env) {
+		return lhs.withinBounds(type, env);
 	}
 
 	public static final class GenericParametersBuilder {
@@ -92,7 +91,7 @@ public final class GenericParameters {
 		}
 
 		/**
-		 * Adds a new parameter. Each parameter consists of a CClassType, and optionally a LeftHandGenericUse. For
+		 * Adds a new parameter.Each parameter consists of a CClassType, and optionally a LeftHandGenericUse. For
 		 * instance, in the statement <code>new A&lt;B&lt;? extends C&gt;&gt;</code> where A is the class being
 		 * constructed, with signature <code>class A&lt;T&gt;</code> and B is a concrete class itself with a single
 		 * template parameter, and C being another class, then this method would be called with the parameters
@@ -105,13 +104,18 @@ public final class GenericParameters {
 		 * @return this, for easy chaining. Use build() to construct the final object.
 		 */
 		public GenericParametersBuilder addParameter(CClassType type, LeftHandGenericUse genericStatement) {
-			p.parameters.add(new Pair<>(type, genericStatement));
+			return addParameter(LeftHandSideType.fromCClassType(type, genericStatement, Target.UNKNOWN));
+		}
+
+		public GenericParametersBuilder addParameter(LeftHandSideType type) {
+			p.parameters.add(type);
 			return this;
 		}
 
 		/**
 		 * Returns if this builder object is empty. If it is, calling build causes an error, so it's important to check
 		 * this first if you are using this generically.
+		 *
 		 * @return
 		 */
 		public boolean isEmpty() {
@@ -132,7 +136,7 @@ public final class GenericParameters {
 	}
 
 	/**
-	 * Begins construction of a new GenericParameters object, which represents the RHS of the generic declaration. The
+	 * Begins construction of a new GenericParameters object, which represents the RHS of the generic declaration.The
 	 * actual GenericDeclaration object is passed in in order to validate the types against the constraints. Each
 	 * instance of a class which has a GenericDeclaration will have one of these objects in it, associated with that
 	 * particular instance. This data is not lost after compilation, and types are reified for runtime use.
@@ -154,6 +158,7 @@ public final class GenericParameters {
 
 	/**
 	 * Returns an empty builder. Note that calling build on an empty builder is an error.
+	 *
 	 * @return
 	 */
 	public static GenericParametersBuilder emptyBuilder() {
@@ -170,16 +175,8 @@ public final class GenericParameters {
 	 *
 	 * @return
 	 */
-	public List<Pair<CClassType, LeftHandGenericUse>> getParameters() {
+	public List<LeftHandSideType> getParameters() {
 		return new ArrayList<>(parameters);
-	}
-
-	public List<LeftHandSideType> getLeftHandParameters() {
-		List<LeftHandSideType> ret = new ArrayList<>();
-		for(Pair<CClassType, LeftHandGenericUse> pair : parameters) {
-			ret.add(LeftHandSideType.fromCClassType(pair.getKey(), pair.getValue(), Target.UNKNOWN));
-		}
-		return ret;
 	}
 
 	/**
@@ -195,8 +192,8 @@ public final class GenericParameters {
 	public LeftHandGenericUse toLeftHandEquivalent(CClassType forType, Environment env) {
 		Constraints[] constraints = new Constraints[parameters.size()];
 		for(int i = 0; i < parameters.size(); i++) {
-			Pair<CClassType, LeftHandGenericUse> parameter = parameters.get(i);
-			Constraint c = new ExactType(Target.UNKNOWN, parameter.getKey(), parameter.getValue());
+			LeftHandSideType parameter = parameters.get(i);
+			Constraint c = new ExactType(Target.UNKNOWN, parameter);
 			constraints[i] = new Constraints(Target.UNKNOWN, ConstraintLocation.LHS, c);
 		}
 		LeftHandGenericUse lhgu = new LeftHandGenericUse(forType, Target.UNKNOWN, env, constraints);
@@ -218,15 +215,12 @@ public final class GenericParameters {
 		StringBuilder b = new StringBuilder();
 		b.append("<");
 		boolean doComma = false;
-		for(Pair<CClassType, LeftHandGenericUse> p : parameters) {
+		for(LeftHandSideType p : parameters) {
 			if(doComma) {
 				b.append(", ");
 			}
 			doComma = true;
-			b.append(p.getKey().val());
-			if(p.getValue() != null) {
-				b.append("<").append(p.getValue()).append(">");
-			}
+			b.append(p.val());
 		}
 		b.append(">");
 		return b.toString();

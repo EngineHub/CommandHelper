@@ -121,6 +121,19 @@ public final class StringUtils {
 	}
 
 	/**
+	 * Joins an array together, rendering each item with the custom renderer.
+	 *
+	 * @param <T> The type of the items in the array
+	 * @param list The list to join
+	 * @param glue The glue between each element
+	 * @param r The renderer which should return a string representation of the item in the list.
+	 * @return
+	 */
+	public static <T> String Join(T[] list, String glue, Renderer<T> r) {
+		return Join(list, glue, null, null, null, r);
+	}
+
+	/**
 	 * Joins a set together (using StringBuilder's {@link StringBuilder#append(Object)} method to "toString" the Object)
 	 * using the specified string for glue. If lastGlue is null, it is the same as glue, but otherwise it is used to
 	 * glue just the last two items together, which is useful for sets that are being read by a human, to have a proper

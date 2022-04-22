@@ -1,7 +1,6 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Common.FileUtil;
-import com.laytonsmith.PureUtilities.Pair;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.annotations.DocumentLink;
@@ -69,7 +68,6 @@ import com.laytonsmith.core.constructs.generics.ConstraintLocation;
 import com.laytonsmith.core.constructs.generics.Constraints;
 import com.laytonsmith.core.constructs.generics.GenericDeclaration;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
-import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
 import com.laytonsmith.core.constructs.generics.UnboundedConstraint;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -146,11 +144,12 @@ public class DataHandling {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN,
-				new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
-					new UnboundedConstraint(Target.UNKNOWN, "T")));
+			Constraints tConstraints = new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+					new UnboundedConstraint(Target.UNKNOWN, "T"));
+			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN, tConstraints);
 			LeftHandSideType t = LeftHandSideType.fromGenericDefinitionType(genericDeclaration, "T", null, Target.UNKNOWN);
-			return new SignatureBuilder(LeftHandSideType.fromCClassType(CArray.TYPE, t.toLeftHandGenericUse(null), Target.UNKNOWN))
+			return new SignatureBuilder(LeftHandSideType.fromCClassType(CArray.TYPE,
+					t.toLeftHandGenericUse(null), Target.UNKNOWN))
 					.varParam(t, "item", "The items to put into the array initially.")
 					.setGenericDeclaration(genericDeclaration, "The generic type of the array. Note that"
 							+ " a type must be explicitely provided in strict mode.")
@@ -293,11 +292,12 @@ public class DataHandling {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN,
-				new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
-					new UnboundedConstraint(Target.UNKNOWN, "T")));
+			Constraints tConstraints = new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+					new UnboundedConstraint(Target.UNKNOWN, "T"));
+			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN, tConstraints);
 			LeftHandSideType t = LeftHandSideType.fromGenericDefinitionType(genericDeclaration, "T", null, Target.UNKNOWN);
-			return new SignatureBuilder(LeftHandSideType.fromCClassType(CArray.TYPE, t.toLeftHandGenericUse(null), Target.UNKNOWN))
+			return new SignatureBuilder(LeftHandSideType.fromCClassType(CArray.TYPE,
+					t.toLeftHandGenericUse(null), Target.UNKNOWN))
 					.varParam(t, "item", "The items to put into the array initially.")
 					.setGenericDeclaration(genericDeclaration, "The generic type of the array. Note that"
 							+ " a type must be explicitely provided in strict mode.")
@@ -4159,13 +4159,12 @@ public class DataHandling {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(generics != null) {
-				Pair<CClassType, LeftHandGenericUse> expectedType = generics.getParameters().get(0);
+				LeftHandSideType expectedType = generics.getParameters().get(0);
 				// We would probably throw an exception later anyways, but putting the cast here ensures that we
 				// will for sure throw an exception, and at the expected location.
-				if(!args[0].isInstanceOf(expectedType.getKey(), expectedType.getValue(), env)) {
+				if(!InstanceofUtil.isInstanceof(args[0], expectedType, env)) {
 					// TODO: Implement cross casting
-					String value = expectedType.getKey().toString() + (expectedType.getValue() == null ? ""
-							: expectedType.getValue().toString());
+					String value = expectedType.val();
 					throw new CRECastException("Expected a value of type " + value + " but " + args[0].typeof(env)
 							+ " was found.", t);
 				}

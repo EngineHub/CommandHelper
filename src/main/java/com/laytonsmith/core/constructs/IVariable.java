@@ -44,7 +44,7 @@ public class IVariable extends Construct implements Cloneable {
 	 */
 	@Deprecated
 	public IVariable(CClassType type, String name, Mixed value, Target t, Environment env) throws ConfigCompileException {
-		this(LeftHandSideType.fromCClassType(type, t), name, value, t, env);
+		this(type.asLeftHandSideType(), name, value, t, env);
 	}
 
 	/**

@@ -1,7 +1,7 @@
 package com.laytonsmith.core.constructs.generics;
 
 import com.laytonsmith.PureUtilities.Common.Annotations.ForceImplementation;
-import com.laytonsmith.core.constructs.CClassType;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREGenericConstraintException;
@@ -131,12 +131,20 @@ public abstract class Constraint implements Comparable<Constraint> {
 	}
 
 	/**
-	 * Returns true if the concrete type is within the bounds of this constraint.
+	 * Returns true if the type is within the bounds of this constraint.
 	 *
-	 * @param type The concrete type to check
-	 * @param generics Any LHS generics that were defined along with the type, null if there were none.
+	 * @param type The type to check
+	 * @param env The environment.
+	 * @return True if the type is within the bounds of this constraint.
 	 */
-	public abstract boolean isWithinConstraint(CClassType type, LeftHandGenericUse generics, Environment env);
+	public abstract boolean isWithinConstraint(LeftHandSideType type, Environment env);
+
+	/**
+	 * Returns true if type unions can be used in the LHS of this value. Note that in no case can type unions
+	 * be used on the RHS, since those require a concrete type.
+	 * @return True if the constraint can support type unions.
+	 */
+	public abstract boolean supportsTypeUnions();
 
 	@ForceImplementation
 	protected abstract ConstraintToConstraintValidator getConstraintToConstraintValidator(Environment env);
