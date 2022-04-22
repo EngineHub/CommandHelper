@@ -1,0 +1,188 @@
+A ''statement'' is a single executable instruction, which has no "top level" return value (or the return
+value is unused). In many cases, MethodScript can figure out what the end of a statement is, based solely
+on the fact that individual function calls end with a right parenthesis. For instance, take this code:
+
+<%CODE|
+msg('Random number: ' . rand())
+%>
+
+In this case, the end of the statement is the right most right parenthesis. The second to last right parenthesis
+belongs to the rand function, and is not a statement, it is an argument to the msg function. While
+MethodScript can tell that this is in fact the end of a statement, we can also write this to be
+explicit, using the semicolon character.
+
+<%CODE|
+msg('Random number: ' . rand());
+%>
+
+This unambiguously denotes the end of the statement. In this case, it wasn't strictly necessary, and so in
+non-strict mode, is optional. However, there are some cases where the semicolon is required, and depending
+on its presence or absence, causes different behavior. There are primarily three cases where this occurs:
+prefix and postfix operators, callable execution, and keywords which have optional right hand types.
+
+=== Prefix and Postfix Operators ===
+
+For instance, take the following code:
+
+<%CODE|
+@a ++ @b
+>
+
+In this case, it's not clear if this code is meant to increment the @a value or the @b value. Because order of
+operations are well defined, it will in fact actually increment @a, not @b, but it's not particularly obvious
+just from reading the code. Further, if the code were <code>@a ++@b</code> a future reader may be forgiven if
+they assume that @b will be incremented. This example is somewhat contrived, but consider a more practical example:
+
+<%CODE|
+int @b = 0
+int @a = 0
+++@b
+%>
+
+In this case, @a will actually be the one that is incremented, because the increment operator actually applies to
+the 0 in the statement <code>int @a = 0</code>! Thus the practical result of this code is that @a is 1, and @b is
+0, which is obviously not the desired behavior.
+
+We could wrap ++@b in parenthesis, such as <code>(++@b)</code> (though this has downsides, as discussed
+below), or restructure the code, but ideally we would use
+semicolons to denote the end of statement for each of these lines. This code performs as intended, that is, after
+running, @a is 0, and @b is 1:
+
+<%CODE|
+int @b = 0;
+int @a = 0;
+++@b;
+%>
+
+=== Parenthesis and Callables ===
+
+Another example is parenthesis. In general, closures (and other callables) are first class data structures, that is,
+they can be stored in variables, arrays, and used just like any other data type. Execution of the closures can also
+be accomplished much the same way as any other function execution, using parenthesis.
+
+<%CODE|
+closure @c = closure(@arg) { }
+@c(123)
+%>
+
+This code stores the closure in @c, and then we execute the closure, sending it the argument 123. This code works
+as intended, but consider that we combine it with our sub-par fix in the code from above:
+
+<%CODE|
+int @b = 0
+auto @a = closure(@arg) { return(@arg) }
+(++@b)
+%>
+
+Now, the parenthesis surrounding ++@b will actually be taken to mean that we want to execute the value before it,
+so we will execute the closure, and then store the returned value in @a, rather than storing the closure!
+
+Again, we can disambiguate using semicolons.
+
+<%CODE|
+int @b = 0;
+auto @a = closure(@arg) { return(@arg); };
+++@b;
+%>
+
+=== Keywords ===
+
+Finally, there are some keywords that have an optional associated value, for instance, the return keyword. Simply calling
+<code>return</code> by itself causes the callable to return void, but we can also do for instance <code>return 5</code>
+to return the value 5 from the callable. However, consider a more real example. Say we have some code, and for test
+purposes, we want to return early from the code.
+
+<%CODE|
+closure() {
+	msg('Start')
+	int @a = 0
+	return
+	// Dead code, temporarily left for testing
+	@a = 2
+	// More code
+}
+%>
+
+Based on the formatting, you would expect this to return nothing, but in fact, it will return 2! Actually, the compiler
+will build the code as if it were <code>return(@a = 2)</code>. Instead, we should write this code as:
+
+<%CODE|
+closure() {
+	msg('Start');
+	int @a = 0;
+	return;
+	@a = 2;
+	// ...
+}
+%>
+
+=== Autoconcat ===
+
+There is one other less obvious benefit to using semicolons that is specific to MethodScript in non-strict mode. In
+general, MethodScript supports a concept called auto concatenation, that is, values that are next to each other, with
+no separator of any sort, get automatically added to the sconcat function. The following two lines of code are
+identical:
+
+<%CODE|
+msg('Parts' 'of' 'the' 'string')
+msg(sconcat('Parts', 'of', 'the', 'string'))
+%>
+
+The problem is that in general, we cannot tell when it is intended to be autoconcatenated or not, and so the sconcat
+wrapper has to be generated for ALL code that doesn't use statements. Further, the sconcat function is actually
+run for every script, which causes an additional, often wasted runtime hit.
+However, if all the code in the code base were to properly use semicolons, this runtime hit can be avoided, as
+statements have special support to say that they do not have a return type, and so should not be added to the synthetic
+sconcat function.
+
+=== Self-Statements ===
+
+Some functions are considered "self-statements", that is, they are naturally terminating, cannot return a value, are
+very common, usually with somewhat special keyword or compiler support, and therefore do not require semicolon. The
+full list is below, but let's take one example, {{function|while}}.
+
+<%CODE|
+while(true) {
+	msg('Hello, World!');
+} // No semicolon needed
+%>
+
+This is true whether or not you use the functional notation, though using the curly braces in cases like this is
+the preferred and modern format.
+
+There is one function, {{function|if}}, which has very special handling, and is unique. Normally, if has two forms,
+the regular one, and the tertiary form. When using the tertiary form, it is not considered a self-statement, and must
+be terminated with a semicolon (though if it is an argument to another function, which is the usual case for such a
+usage, it does not require termination, though the containing statement would). In the normal form, when using it
+as an if/else chain, where each branch contains its own statements, it is considered a self-statement.
+
+The full list of functions that are considered self-statements is:
+
+<%SELF_STATEMENT_FUNCTIONS%>
+
+=== Unexpected Statements ===
+
+Statements are not always allowed. In general, statements cannot be sent as arguments to other functions, unless
+those functions contain ''Branch Statements'', or are at the top level of the script. Consider the following code:
+
+<%CODE|
+array @a = array(
+	_procCall();,
+	_procCall();,
+	_procCall();,
+);
+%>
+
+In non-strict mode, this will cause a compiler warning for each line where we have _procCall, because, while in other
+contexts, you might need a semicolon behind the _procCall(), since we are using this as input to the array function,
+we do not. In non-strict mode, the semicolon is simply ignored, and the value is used as if it were missing, though
+a compiler warning is issued, and should be fixed regardless. In strict mode, this is a compiler error, and compilation
+will halt.
+
+=== Strict Mode ===
+
+In non-strict mode, semicolons are optional, though highly recommended anyways, for all the above reasons. In
+strict mode, they are always required, even when the code isn't necessary ambiguous. The purpose for this is to
+ensure that you consistently use them, to ensure that when it would be ambiguous, you are well trained to use
+them in those cases, to ensure that the statements are not in fact ambiguous. Thus, in strict mode, if a statement
+should have ended with a semicolon, but it didn't, a compile error is issued.

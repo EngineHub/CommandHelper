@@ -852,4 +852,10 @@ public class DocGenTemplates {
 		}
 		return b.toString();
 	};
+
+	public static final Generator SELF_STATEMENT_FUNCTIONS = (args) -> {
+		StringBuilder b = new StringBuilder();
+		// TODO
+		return b.toString();
+	};
 }

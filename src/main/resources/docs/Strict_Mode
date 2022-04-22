@@ -8,7 +8,8 @@ longer compile. Future additions to strict mode will be implemented, and if your
 have to upgrade them immediately.}}
 
 Conforming to strict mode has its advantages, however. Errors that would have gone unnoticed are highlighted much more
-quickly. Strict mode enforces better programming practices and clearer and cleaner code. Strict mode will be expanded
+quickly. Strict mode enforces better programming practices and clearer and cleaner code, which the compiler has
+the opportunity to do more optimizations on. Strict mode will be expanded
 in the future, and those expansions will be listed below, so that you can begin to write conformant code, and it will
 not break once strict mode expands to include those options. However, unlisted modes may be added in the future with no
 notice, however, they will then be added to this documentation.
@@ -49,40 +50,25 @@ msg('this' . ' is' . ' also' . ' concatenated'); // explicit concatenation
 %>
 
 While less code to write, this has the unfortunate side effect that the whole script must be wrapped in a concatenation
-block, which means that for each line of code, the concatenation effect must also run, even in cases where the 
+block, which means that for each line of code, the concatenation effect must also run, even in cases where the
 concatenation doesn't make sense. This adds overhead to the code for no extra value in 99% of cases, and so strict
 mode disallows this feature, requiring explicit concatenation operators, at the benefit of decreased code runtime.
 
+Note that even in non-strict mode, 100% proper use of semicolons will cause the code to run in the performant mode,
+however, missing a semicolon will not cause any sort of warning, and so is difficult to enforce.
+
 == Statement semicolons ==
 
-(not yet implemented)
+Semicolons are used to denote end of statements. In a future strict mode update, they will be required, though
+the specification for them is not fully complete. Where used, they currently do create statements, and this works in
+non-strict mode as well.
 
-Semicolons are used to denote end of statements, and they are currently allowed in code, but they are completely
-optional, and unused. In strict mode, they must be used. Not all constructs are statements, however. For instance, a 
-msg() call is a statement, but a for loop and a proc definition are not.
+See the article on [[Statements]] for a fuller treatment of statements.
 
-<%CODE|
-msg('hi'); // <- required semicolon
-foreach(int @i : 1..10) {
+Strict mode simply requires this on every statement, which can help ensure you as a programmer have the correct habit,
+so that the possibly ambiguous cases are less likely to happen.
 
-} // No semicolon required
-%>
-
-While this seems arbitrary, separating statements is required in two cases. Using the ++ or -- operators, it is
-ambiguous whether the operator is meant to apply to the previous value (postfix) or following value (prefix).
-Direct closure execution is allowed with parenthesis:
-
-<%CODE|
-closure @c = closure(string @value){};
-@c('value');
-%>
-
-However, since parenthesis are also allowed to be used to group values together, it would be ambiguous if the
-parenthesis were simply a grouping mechanism, or if they are intended to execute the previous closure. In non-strict
-mode, the semicolons will be required in these cases only when the behavior is not clear, however, in strict mode,
-semicolons are required on all statements.
-
-Some languages solve this same problem with newlines, instead of semicolons. However, MethodScript has a design 
+Some languages solve this same problem with newlines, instead of semicolons. However, MethodScript has a design
 principal which states that whitespace should never be used as code.
 
 == Object typing ==
@@ -102,7 +88,7 @@ int proc _myproc(string @m) {
 }
 %>
 
-Adding type safety to your code is a well documented advantage, as it allows the compiler to more easily and quickly 
+Adding type safety to your code is a well documented advantage, as it allows the compiler to more easily and quickly
 detect invalid code, as you cannot in the future assign a value of a different type to a variable that was defined with
 another type. In non-strict mode, types are still allowed, and have the same behavior, but untyped values are assumed
 to have the type ''auto''. This type is still allowed in strict mode, but the declaration must be explicit.
@@ -118,6 +104,6 @@ Please see the page on [[Cross_Casting|cross casting]] for a further discussion
 == Compiler Warnings ==
 
 Compiler warnings, such as deprecations and others are normally warned about, but compilation continues. In strict mode,
-these warnings instead trigger a compile error, and must be fixed immediately. However, in combination with the 
+these warnings instead trigger a compile error, and must be fixed immediately. However, in combination with the
 suppressWarnings file option, individual warnings can be ignored, and these will trigger neither a compiler warning or
 a compiler error.

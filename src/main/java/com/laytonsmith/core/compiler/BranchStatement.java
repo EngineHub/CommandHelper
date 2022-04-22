@@ -4,7 +4,8 @@ import com.laytonsmith.core.ParseTree;
 import java.util.List;
 
 /**
- * A BranchStatement is a function that has different branches, only one of which may in fact execute. During
+ * A BranchStatement is a function that has different branches, where a given branch may or may not execute,
+ * depending on runtime conditions. During
  * optimization, this is considered, and certain features, such as exit detection, uses this information to determine
  * various conditions, such as dead code analysis and other functionality.
  * <p>
