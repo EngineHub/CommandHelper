@@ -285,7 +285,7 @@ public class AnnotationChecks {
 				InputStream stream = c.getClassStream();
 				try {
 					byte[] newClass = new AggressiveDeprecationTransformer().transform(stream);
-					System.out.println(c.getClassLocation().getPath());
+					System.out.println("Doing aggressive deprecation rewrite in " + c.getClassLocation().getPath());
 					File location = new File(c.getClassLocation().getPath());
 					FileUtil.write(newClass, location, FileWriteMode.OVERWRITE, false);
 				} catch(IllegalClassFormatException | IOException ex) {

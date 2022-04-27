@@ -152,7 +152,7 @@ public class RandomTests {
 				TESTED_FUNCTIONS.add(f.getName());
 
 				long start = System.currentTimeMillis();
-				System.out.println("Testing " + f.getName());
+//				System.out.println("Testing " + f.getName());
 				StaticTest.TestBoilerplate(f, f.getName());
 				int secondsTaken = ((int) (System.currentTimeMillis() - start) / 1000);
 				if(secondsTaken > 10) {
