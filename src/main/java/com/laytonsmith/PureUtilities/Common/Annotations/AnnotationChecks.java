@@ -24,7 +24,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -286,10 +285,10 @@ public class AnnotationChecks {
 				InputStream stream = c.getClassStream();
 				try {
 					byte[] newClass = new AggressiveDeprecationTransformer().transform(stream);
-					System.out.println(c.getClassLocation().toURI().getSchemeSpecificPart());
-					File location = new File(c.getClassLocation().toURI().getSchemeSpecificPart());
+					System.out.println(c.getClassLocation().getPath());
+					File location = new File(c.getClassLocation().getPath());
 					FileUtil.write(newClass, location, FileWriteMode.OVERWRITE, false);
-				} catch(IllegalClassFormatException | IOException | URISyntaxException ex) {
+				} catch(IllegalClassFormatException | IOException ex) {
 					Logger.getLogger(AnnotationChecks.class.getName()).log(Level.SEVERE, null, ex);
 				}
 			} else {
