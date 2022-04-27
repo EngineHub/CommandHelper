@@ -599,7 +599,9 @@ public class ClassMirror<T> implements Serializable {
 		if(url.endsWith("!/")) {
 			url = StringUtils.replaceLast(url, "!/", "");
 		}
-		URL classUrl = new URL(url + "/" + StringUtils.replaceLast(getJVMClassName().replaceFirst("L", ""), ";", "") + ".class");
+		String sUrl = url + "/" + StringUtils.replaceLast(getJVMClassName().replaceFirst("L", ""), ";", "") + ".class";
+		sUrl = sUrl.replace(" ", "%20");
+		URL classUrl = new URL(sUrl);
 		return classUrl;
 	}
 
