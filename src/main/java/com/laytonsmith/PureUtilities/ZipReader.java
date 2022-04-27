@@ -11,6 +11,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.security.AccessControlException;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -69,7 +71,7 @@ public class ZipReader {
 	 * @param url
 	 */
 	public ZipReader(URL url) {
-		this(new File(url.getFile()));
+		this(new File(URLDecoder.decode(url.getFile(), StandardCharsets.UTF_8)));
 	}
 
 	/**

@@ -12,6 +12,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -600,7 +602,7 @@ public class ClassMirror<T> implements Serializable {
 			url = StringUtils.replaceLast(url, "!/", "");
 		}
 		String sUrl = url + "/" + StringUtils.replaceLast(getJVMClassName().replaceFirst("L", ""), ";", "") + ".class";
-		sUrl = sUrl.replace(" ", "%20");
+		sUrl = URLEncoder.encode(sUrl, StandardCharsets.UTF_8);
 		URL classUrl = new URL(sUrl);
 		return classUrl;
 	}
