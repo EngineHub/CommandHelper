@@ -1,5 +1,6 @@
 package com.laytonsmith.core.constructs.generics;
 
+import com.laytonsmith.core.constructs.generics.constraints.Constraint;
 import com.laytonsmith.PureUtilities.ObjectHelpers;
 import com.laytonsmith.PureUtilities.ObjectHelpers.StandardField;
 import com.laytonsmith.core.constructs.Target;
@@ -66,6 +67,7 @@ public class GenericDeclaration {
 	}
 
 	@Override
+	@SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
 	public boolean equals(Object that) {
 		return ObjectHelpers.DoEquals(this, that);
 	}

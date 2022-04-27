@@ -798,8 +798,8 @@ public final class Interpreter {
 			//However, it doesn't get added to either $ or @arguments, due to the
 			//uncommon use of it.
 			StringBuilder finalArgument = new StringBuilder();
-			CArray arguments = new CArray(Target.UNKNOWN, GenericParameters
-					.addParameter(CString.TYPE, null).build(), env);
+			CArray arguments = new CArray(Target.UNKNOWN, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			{
 				//Set the $0 argument
 				Variable v = new Variable("$0", "", Target.UNKNOWN);

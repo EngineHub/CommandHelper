@@ -5,6 +5,7 @@ import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -14,7 +15,7 @@ import java.util.Arrays;
 
 /**
  * A method is the foundational class for containing information about a method defined in a class. These may include
- * interfaces, where the method isn't actually defined, abstract methods, and
+ * interfaces, where the method isn't actually defined, abstract methods, and concrete classes.
  */
 @typeof("ms.lang.Method")
 public class Method extends Construct implements Callable {
@@ -81,6 +82,11 @@ public class Method extends Construct implements Callable {
 
 	public ParseTree getTree() {
 		return tree;
+	}
+
+	@Override
+	public GenericParameters getGenericParameters() {
+		return null;
 	}
 
 }

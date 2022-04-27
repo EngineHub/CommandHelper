@@ -3,9 +3,9 @@ package com.laytonsmith.core.compiler.signature;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Stack;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
@@ -14,6 +14,7 @@ import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Stack;
 
 /**
  * Represents a single function, procedure or closure signature.
@@ -115,6 +116,19 @@ public class FunctionSignature {
 		return this.genericDeclarationDocs;
 	}
 
+	private LeftHandSideType merge(Environment env, LeftHandSideType oldValue, LeftHandSideType newValue) {
+		LeftHandSideType[] types;
+		if(oldValue == null) {
+			types = new LeftHandSideType[1];
+			types[0] = newValue;
+		} else {
+			types = new LeftHandSideType[2];
+			types[0] = oldValue;
+			types[1] = newValue;
+		}
+		return LeftHandSideType.fromTypeUnion(Target.UNKNOWN, env, types);
+	}
+
 	/**
 	 * Given an argument set, which may contain typenames, resolves all of them based on the actual arg types that
 	 * were passed in, comparing them to the generic parameters.These are the same values sent to {@link #matches}.
@@ -132,8 +146,9 @@ public class FunctionSignature {
 		// In general, parameter types have precedence over return type, so if the return type is a typename, we go
 		// ahead and set it, but then overwrite it with the parameter of the same type.
 		Map<String, LeftHandSideType> ret = new HashMap<>();
+		Map<String, LeftHandSideType> fallbackTypes = new HashMap<>();
 		if(returnType.getType() != null && returnType.getType().isTypeName()) {
-			ret.put(returnType.getType().getTypename(), inferredReturnType);
+			fallbackTypes.put(returnType.getType().getTypename(), inferredReturnType);
 		}
 		// TODO: Would be nice to figure out how to not basically copy paste this
 		int argIndex = 0;
@@ -169,7 +184,7 @@ public class FunctionSignature {
 
 					// Normal param match, continue with next param.
 					if(param.getType() != null && param.getType().isTypeName()) {
-						ret.put(param.getType().getTypename(), argType);
+						ret.put(param.getType().getTypename(), merge(env, ret.get(param.getType().getTypename()), argType));
 					}
 					argIndex++;
 					continue;
@@ -188,10 +203,17 @@ public class FunctionSignature {
 						(argType == null && noneIsAllowed)
 						|| InstanceofUtil.isInstanceof(argType, paramType, env))) {
 					if(param.getType() != null && param.getType().isTypeName()) {
-						ret.put(param.getType().getTypename(), argType);
+						ret.put(param.getType().getTypename(), merge(env, ret.get(param.getType().getTypename()), argType));
 					}
 					argIndex++;
 					numMatches++;
+				}
+				if(param.getType().isTypeName() && argTypes.isEmpty() && ret.get(param.getType().getTypename()) == null
+						&& !fallbackTypes.containsKey(param.getType().getTypename())) {
+					// There were no parameters to put in for this argument, and this might be the only
+					// one that has this typename, so we have to use auto. It's fine if it's replaced
+					// with a more concrete type later.
+					fallbackTypes.put(param.getType().getTypename(), Auto.LHSTYPE);
 				}
 				numArgMatchStack.push(numMatches);
 				continue;
@@ -216,6 +238,11 @@ public class FunctionSignature {
 					// Retry matching.
 					continue matchLoop;
 				}
+			}
+		}
+		for(Map.Entry<String, LeftHandSideType> fallbackType : fallbackTypes.entrySet()) {
+			if(ret.get(fallbackType.getKey()) == null) {
+				ret.put(fallbackType.getKey(), fallbackType.getValue());
 			}
 		}
 		return ret;

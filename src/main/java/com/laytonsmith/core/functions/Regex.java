@@ -420,8 +420,8 @@ public class Regex {
 				limit = ArgumentValidation.getInt32(args[2], t, env);
 			}
 			String[] rsplit = pattern.split(subject, limit + 1);
-			CArray ret = new CArray(t, GenericParameters
-					.addParameter(CString.TYPE, null).build(), env);
+			CArray ret = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			for(String split : rsplit) {
 				ret.push(new CString(split, t), t, env);
 			}

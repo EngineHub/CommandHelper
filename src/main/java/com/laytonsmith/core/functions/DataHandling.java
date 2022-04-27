@@ -68,7 +68,7 @@ import com.laytonsmith.core.constructs.generics.ConstraintLocation;
 import com.laytonsmith.core.constructs.generics.Constraints;
 import com.laytonsmith.core.constructs.generics.GenericDeclaration;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
-import com.laytonsmith.core.constructs.generics.UnboundedConstraint;
+import com.laytonsmith.core.constructs.generics.constraints.UnboundedConstraint;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.Environment.EnvironmentImpl;
@@ -147,9 +147,9 @@ public class DataHandling {
 			Constraints tConstraints = new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
 					new UnboundedConstraint(Target.UNKNOWN, "T"));
 			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN, tConstraints);
-			LeftHandSideType t = LeftHandSideType.fromGenericDefinitionType(genericDeclaration, "T", null, Target.UNKNOWN);
-			return new SignatureBuilder(LeftHandSideType.fromCClassType(CArray.TYPE,
-					t.toLeftHandGenericUse(null), Target.UNKNOWN))
+			LeftHandSideType t = LeftHandSideType.fromNativeGenericDefinitionType(genericDeclaration, "T", null);
+			return new SignatureBuilder(LeftHandSideType.fromNativeCClassType(CArray.TYPE,
+					t.toNativeLeftHandGenericUse()))
 					.varParam(t, "item", "The items to put into the array initially.")
 					.setGenericDeclaration(genericDeclaration, "The generic type of the array. Note that"
 							+ " a type must be explicitely provided in strict mode.")
@@ -295,9 +295,8 @@ public class DataHandling {
 			Constraints tConstraints = new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
 					new UnboundedConstraint(Target.UNKNOWN, "T"));
 			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN, tConstraints);
-			LeftHandSideType t = LeftHandSideType.fromGenericDefinitionType(genericDeclaration, "T", null, Target.UNKNOWN);
-			return new SignatureBuilder(LeftHandSideType.fromCClassType(CArray.TYPE,
-					t.toLeftHandGenericUse(null), Target.UNKNOWN))
+			LeftHandSideType t = LeftHandSideType.fromNativeGenericDefinitionType(genericDeclaration, "T", null);
+			return new SignatureBuilder(LeftHandSideType.fromNativeCClassType(CArray.TYPE, t.toNativeLeftHandGenericUse()))
 					.varParam(t, "item", "The items to put into the array initially.")
 					.setGenericDeclaration(genericDeclaration, "The generic type of the array. Note that"
 							+ " a type must be explicitely provided in strict mode.")
@@ -2787,7 +2786,7 @@ public class DataHandling {
 			LeftHandSideType returnType = Auto.TYPE.asLeftHandSideType();
 			if(nodes[0].getData() instanceof CClassType || nodes[0].getData() instanceof LeftHandSideType) {
 				if(nodes[0].getData() instanceof CClassType cct) {
-					returnType = LeftHandSideType.fromCClassType(cct, t);
+					returnType = LeftHandSideType.fromCClassType(cct, t, env);
 				} else {
 					returnType = (LeftHandSideType) nodes[0].getData();
 				}
@@ -3111,13 +3110,15 @@ public class DataHandling {
 		@Override
 		public String docs() {
 			return "boolean {item} Returns a new construct that has been cast to a boolean. The item is cast according to"
-					+ " the boolean conversion rules. Since all data types can be cast to a"
-					+ " a boolean, this function will never throw an exception.";
+					+ " the boolean conversion rules. Void types are false, the special \"none\" type is false, null"
+					+ " is false, mutable primitives are cast according to the underlying primitive value, and all"
+					+ " other values are cast based on their booleanish value. Any other type of value causes a"
+					+ " CastException.";
 		}
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return null;
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -4060,7 +4061,7 @@ public class DataHandling {
 				throw new CRERangeException("Array size must be zero or greater. Received: " + size, t);
 			}
 			// nullOut is intentionally ignored here, as it's irrelevant in the case of the interpreter
-			return new CFixedArray(t, type.asConcreteType(t), size);
+			return new CFixedArray(t, generics, size);
 		}
 
 		@Override
@@ -4074,8 +4075,20 @@ public class DataHandling {
 		}
 
 		@Override
+		public FunctionSignatures getSignatures() {
+			GenericDeclaration tDeclaration = new GenericDeclaration(Target.UNKNOWN,
+				new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+					new UnboundedConstraint(Target.UNKNOWN, "T")));
+			LeftHandSideType t = LeftHandSideType.fromNativeGenericDefinitionType(tDeclaration, "T", null);
+			return new SignatureBuilder(LeftHandSideType.fromNativeCClassType(CFixedArray.TYPE, t.toNativeLeftHandGenericUse()))
+					.param(CInt.TYPE, "size", "The size of the fixed array. This cannot be changed later.")
+					.param(CBoolean.TYPE, "nullOut", "Whether or not to null out the values in the array.", true)
+					.build();
+		}
+
+		@Override
 		public String docs() {
-			return "fixed_array {ClassType type, int size, [boolean nullOut]} Creates an array that can hold values of"
+			return "fixed_array {int size, [boolean nullOut]} Creates an array that can hold values of"
 					+ " the given type, and is of the given size."
 					+ " The array cannot be resized or retyped later."
 					+ " The array cannot be associative. In general, this isn't"
@@ -4091,8 +4104,7 @@ public class DataHandling {
 					+ " through the array and sets each value to null (or equivalent for primitive types). This"
 					+ " takes additional work, but sets the value to a known state. This can be bypassed if the array"
 					+ " is about to be filled from 0 to length, but should otherwise always be set to true."
-					+ " A RangeException is thrown if size is negative, or larger than a 32 bits signed integer."
-					+ " A CastException is thrown when size cannot be cast to an int.";
+					+ " A RangeException is thrown if size is negative, or larger than a 32 bits signed integer.";
 		}
 	}
 
@@ -4148,7 +4160,7 @@ public class DataHandling {
 			GenericDeclaration declaration = new GenericDeclaration(Target.UNKNOWN,
 					new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
 						new UnboundedConstraint(Target.UNKNOWN, "T")));
-			LeftHandSideType t = LeftHandSideType.fromGenericDefinitionType(declaration, "T", null, Target.UNKNOWN);
+			LeftHandSideType t = LeftHandSideType.fromNativeGenericDefinitionType(declaration, "T", null);
 			return new SignatureBuilder(t)
 					.param(Auto.TYPE, "value", "The value to cast.")
 					.setGenericDeclaration(declaration, "The value to cast to.")

@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.compiler.Keyword;
 import com.laytonsmith.core.compiler.KeywordList;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 
 /**
@@ -57,5 +58,10 @@ public class CKeyword extends CBareString {
 	@Override
 	public CKeyword duplicate() {
 		throw new UnsupportedOperationException("Should have been removed at compile time");
+	}
+
+	@Override
+	public GenericParameters getGenericParameters() {
+		return null;
 	}
 }

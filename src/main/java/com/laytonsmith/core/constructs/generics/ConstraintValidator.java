@@ -1,5 +1,7 @@
 package com.laytonsmith.core.constructs.generics;
 
+import com.laytonsmith.core.constructs.generics.constraints.ExactType;
+import com.laytonsmith.core.constructs.generics.constraints.Constraint;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.CClassType;
@@ -23,6 +25,7 @@ public final class ConstraintValidator {
 	 * Validates and returns the typename for a set of constraints.
 	 *
 	 * @param constraints The constraint(s) to validate
+	 * @param t The code target, for exceptions
 	 * @return The typename, for instance <code>T</code> in <code>T extends Number</code>.
 	 */
 	public static String ValidateDefinition(SortedSet<Constraint> constraints, Target t)
@@ -70,9 +73,10 @@ public final class ConstraintValidator {
 	 * defined, as that is not always allowed, depending on the ClassType, and this case is accounted for. It is assumed
 	 * that the LHS fits the constraints defined in the constraint definition.
 	 *
-	 * @param t
-	 * @param type
-	 * @param genericParameters
+	 * @param t The code target, for exceptions.
+	 * @param type The LHS type.
+	 * @param genericParameters The generic parameters.
+	 * @param env The environment.
 	 */
 	public static void ValidateLHS(Target t, CClassType type, LeftHandGenericUse genericParameters, Environment env) {
 		ValidateLHS(t, type, genericParameters == null ? null : genericParameters.getConstraints(), env);
@@ -86,6 +90,7 @@ public final class ConstraintValidator {
 	 * @param t
 	 * @param type
 	 * @param c
+	 * @param env
 	 * @throws CREGenericConstraintException
 	 */
 	public static void ValidateLHS(Target t, CClassType type, List<Constraints> c, Environment env)
@@ -166,21 +171,21 @@ public final class ConstraintValidator {
 	 * @param env The environment.
 	 * @param parameters The parameters.
 	 * @param declaration The declaration.
-	 * @param inferredType If the parameters are not provided, the inferred type provides outside context to decide
-	 * what the specified type should be. This is used in place of auto when parameters are not provided. Note that
+	 * @param inferredType If the parameters are not provided, the inferred type provides outside context to decide what
+	 * the specified type should be. This is used in place of auto when parameters are not provided. Note that
 	 * parameters always take precedence over this type. This should map to the values of the GenericDeclaration, that
-	 * is, if the signature is {@code T function(U @value)}, and the GenericDeclaration defines {@code T, U}, and
-	 * the call site looks like {@code string @s = function<mixed, number>(1);}, then the inferredTypes would be
-	 * {@code string, int}. (While the GenericParameters would still be {@code mixed, number}, and in this case,
-	 * the inferredTypes would be unused.) This parameter may be null, in which case auto will be inferred, but this
-	 * should in general mean that the return value is not used, though the type parameter may be used internally
-	 * by the function, which may cause an error if it is auto.
+	 * is, if the signature is {@code T function(U @value)}, and the GenericDeclaration defines {@code T, U}, and the
+	 * call site looks like {@code string @s = function<mixed, number>(1);}, then the inferredTypes would be
+	 * {@code string, int}. (While the GenericParameters would still be {@code mixed, number}, and in this case, the
+	 * inferredTypes would be unused.) This parameter may be null, in which case auto will be inferred, but this should
+	 * in general mean that the return value is not used, though the type parameter may be used internally by the
+	 * function, which may cause an error if it is auto.
 	 * @throws CREIllegalArgumentException In the case that the inferred type cannot be converted into a concrete
-	 * CClassType, this is thrown. This can only happen in the case that the parameters are null AND the inferred
-	 * LHS types are incapable of being converted to a concrete type. For instance, if the inferred type were
-	 * {@code int}, this would never happen, but if it were {@code int | string}, and the generics parameters are
-	 * not specified, then it would be thrown, because type unions cannot be converted into a CClassType (and
-	 * concrete types are required for generic parameters, no matter how they get passed in.)
+	 * CClassType, this is thrown. This can only happen in the case that the parameters are null AND the inferred LHS
+	 * types are incapable of being converted to a concrete type. For instance, if the inferred type were {@code int},
+	 * this would never happen, but if it were {@code int | string}, and the generics parameters are not specified, then
+	 * it would be thrown, because type unions cannot be converted into a CClassType (and concrete types are required
+	 * for generic parameters, no matter how they get passed in.)
 	 */
 	public static void ValidateParametersToDeclaration(Target t, Environment env,
 			GenericParameters parameters, GenericDeclaration declaration, LeftHandSideType inferredType) {
@@ -195,15 +200,13 @@ public final class ConstraintValidator {
 		}
 		if(parameters == null) {
 			// Everything is auto, though this doesn't inherently work everywhere, so just fill it in with auto
-			// based on the parameter count, then do the validation normally. Note that for type unions, these
-			// cannot be turned into concrete types, and so we have to instead check if the corresponding constraint
-			// can work with a type union, and if so, set it to the collapsed type, and otherwise allow it to fail.
-			GenericParameters.GenericParametersBuilder builder = GenericParameters.emptyBuilder();
+			// based on the parameter count, then do the validation normally.
+			GenericParameters.GenericParametersBuilder builder = GenericParameters.emptyBuilder((CClassType) null);
 			for(int i = 0; i < declaration.getParameterCount(); i++) {
 				LeftHandSideType type = inferredType == null ? Auto.LHSTYPE : inferredType;
 				builder.addParameter(type);
 			}
-			parameters = builder.build();
+			parameters = builder.buildWithoutValidation();
 		}
 
 		if(parameters.getParameters().size() != declaration.getParameterCount()) {
@@ -222,6 +225,13 @@ public final class ConstraintValidator {
 						+ " does not satisfy the constraints: " + c.toString(), t);
 			}
 		}
+	}
 
+	public static void ValidateTypename(String typename, Target t) throws CREGenericConstraintException {
+		String regex = "[a-zA-Z][a-zA-Z0-9_]*|\\?";
+		if(!typename.matches(regex)) {
+			throw new CREGenericConstraintException("Typenames must match the regex " + regex
+					+ " but found \"" + typename + "\"", t);
+		}
 	}
 }

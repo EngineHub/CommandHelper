@@ -216,8 +216,8 @@ public class BukkitMCCommand implements MCCommand {
 			Target t = Target.UNKNOWN;
 			CClosure closure = Commands.onTabComplete.get(cmd.getName().toLowerCase());
 			Environment env = closure.getEnv();
-			CArray cargs = new CArray(t, GenericParameters
-					.addParameter(CString.TYPE, null).build(), env);
+			CArray cargs = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			for(String arg : args) {
 				cargs.push(new CString(arg, t), t, env);
 			}
@@ -255,8 +255,8 @@ public class BukkitMCCommand implements MCCommand {
 			CClosure closure = Commands.onCommand.get(cmd.getName().toLowerCase());
 			Environment env = closure.getEnv();
 			Target t = Target.UNKNOWN;
-			CArray cargs = new CArray(t, GenericParameters
-					.addParameter(CString.TYPE, null).build(), env);
+			CArray cargs = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			for(String arg : args) {
 				cargs.push(new CString(arg, t), t, env);
 			}

@@ -136,8 +136,8 @@ public class InventoryEvents {
 				Target t = Target.UNKNOWN;
 
 				map.put("player", new CString(e.getWhoClicked().getName(), t));
-				CArray viewers = new CArray(t, GenericParameters
-						.addParameter(CString.TYPE, null).build(), env);
+				CArray viewers = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+						.addNativeParameter(CString.TYPE, null).buildNative(), env);
 				for(MCHumanEntity viewer : e.getViewers()) {
 					viewers.push(new CString(viewer.getName(), t), t, env);
 				}
@@ -280,15 +280,15 @@ public class InventoryEvents {
 				map.put("newcursoritem", ObjectGenerator.GetGenerator().item(e.getCursor(), Target.UNKNOWN, env));
 				map.put("oldcursoritem", ObjectGenerator.GetGenerator().item(e.getOldCursor(), Target.UNKNOWN, env));
 
-				CArray slots = new CArray(Target.UNKNOWN, GenericParameters
-						.addParameter(CInt.TYPE, null).build(), env);
+				CArray slots = new CArray(Target.UNKNOWN, GenericParameters.emptyBuilder(CArray.TYPE)
+						.addNativeParameter(CInt.TYPE, null).buildNative(), env);
 				for(Integer slot : e.getInventorySlots()) {
 					slots.push(new CInt(slot.intValue(), Target.UNKNOWN), Target.UNKNOWN, env);
 				}
 				map.put("slots", slots);
 
-				CArray rawSlots = new CArray(Target.UNKNOWN, GenericParameters
-						.addParameter(CInt.TYPE, null).build(), env);
+				CArray rawSlots = new CArray(Target.UNKNOWN, GenericParameters.emptyBuilder(CArray.TYPE)
+						.addNativeParameter(CInt.TYPE, null).buildNative(), env);
 				for(Integer slot : e.getRawSlots()) {
 					rawSlots.push(new CInt(slot.intValue(), Target.UNKNOWN), Target.UNKNOWN, env);
 				}
@@ -651,8 +651,8 @@ public class InventoryEvents {
 				map.put("inventorytype", new CString(e.getInventory().getType().name(), t));
 				map.put("enchantmentbonus", new CInt(e.getEnchantmentBonus(), t));
 
-				CArray expCostsCArray = new CArray(t, GenericParameters
-						.addParameter(CInt.TYPE, null).build(), env);
+				CArray expCostsCArray = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+						.addNativeParameter(CInt.TYPE, null).buildNative(), env);
 
 				MCEnchantmentOffer[] offers = e.getOffers();
 				for(MCEnchantmentOffer offer : offers) {
@@ -941,12 +941,11 @@ public class InventoryEvents {
 
 		@Override
 		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
-			if(event instanceof MCPrepareItemCraftEvent) {
-				MCPrepareItemCraftEvent e = (MCPrepareItemCraftEvent) event;
+			if(event instanceof MCPrepareItemCraftEvent e) {
 				Map<String, Mixed> ret = evaluate_helper(e);
 				Target t = Target.UNKNOWN;
-				CArray viewers = new CArray(t, GenericParameters
-						.addParameter(CString.TYPE, null).build(), env);
+				CArray viewers = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+						.addNativeParameter(CString.TYPE, null).buildNative(), env);
 				for(MCHumanEntity v : e.getViewers()) {
 					viewers.push(new CString(v.getName(), t), t, env);
 				}

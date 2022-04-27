@@ -1,13 +1,23 @@
 package com.laytonsmith.core.constructs.generics;
 
+import com.laytonsmith.core.constructs.generics.constraints.ExactType;
+import com.laytonsmith.core.constructs.generics.constraints.UnboundedConstraint;
+import com.laytonsmith.core.constructs.generics.constraints.UpperBoundConstraint;
+import com.laytonsmith.core.constructs.generics.constraints.LowerBoundConstraint;
+import com.laytonsmith.core.constructs.generics.constraints.ConstructorConstraint;
+import com.laytonsmith.core.constructs.generics.constraints.Constraint;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.ObjectHelpers;
 import com.laytonsmith.PureUtilities.ObjectHelpers.StandardField;
 import com.laytonsmith.core.FullyQualifiedClassName;
+import com.laytonsmith.core.compiler.CompilerEnvironment;
+import com.laytonsmith.core.compiler.CompilerWarning;
+import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREGenericConstraintException;
 
 import java.util.ArrayList;
@@ -126,10 +136,7 @@ public class Constraints implements Iterable<Constraint> {
 						+ " this constraint.");
 			}
 		}
-		if(errors.size() > 0) {
-			return false;
-		}
-		return true;
+		return errors.isEmpty();
 	}
 
 	/**
@@ -195,12 +202,14 @@ public class Constraints implements Iterable<Constraint> {
 	 *
 	 * @param constraintDefinition The constraint definition, without the angle brackets
 	 * @param location The location the constraints are being defined in. This varies behavior slightly.
+	 * @param declarationConstraints The type of the declaration, if location isn't DEFINITION.
 	 * @param t The code target, for exceptions
 	 * @param env The environment
 	 * @return An array of Constraints, each one representing a single parameter.
 	 */
-	public static Constraints[] BuildFromString(String constraintDefinition, ConstraintLocation location,
-			Target t, Environment env) {
+	public static Constraints[] BuildFromString(FileOptions fileOptions,
+			String constraintDefinition, ConstraintLocation location,
+			List<Constraints> declarationConstraints, Target t, Environment env) {
 		int bracketStack = 0;
 		int parenthesisStack = 0;
 		constraintDefinition = constraintDefinition.replaceAll("\n", " ");
@@ -209,6 +218,8 @@ public class Constraints implements Iterable<Constraint> {
 		List<Constraints> constraintsS = new ArrayList<>();
 
 		StringBuilder buf = new StringBuilder();
+
+		int declarationCount = 0;
 
 		for(Character c : constraintDefinition.toCharArray()) {
 			if(c == '<') {
@@ -220,19 +231,22 @@ public class Constraints implements Iterable<Constraint> {
 			} else if(c == ')') {
 				parenthesisStack--;
 			} else if(c == ',' && bracketStack == 0 && parenthesisStack == 0) {
-				constraintsS.add(GetConstraints(buf.toString(), t, location, env));
+				constraintsS.add(GetConstraints(fileOptions, buf.toString(), t, location, declarationConstraints == null
+						? null : declarationConstraints.get(declarationCount++), env));
 				buf = new StringBuilder();
 				continue;
 			}
 			buf.append(c);
 		}
 
-		constraintsS.add(GetConstraints(buf.toString(), t, location, env));
+		constraintsS.add(GetConstraints(fileOptions, buf.toString(), t, location, declarationConstraints == null
+						? null : declarationConstraints.get(declarationCount++), env));
 
 		return constraintsS.toArray(Constraints[]::new);
 	}
 
-	private static Constraints GetConstraints(String s, Target t, ConstraintLocation location,
+	private static Constraints GetConstraints(FileOptions fileOptions, String s, Target t, ConstraintLocation location,
+			Constraints declarationConstraints,
 			Environment env) {
 		int bracketStack = 0;
 		int parenthesisStack = 0;
@@ -256,7 +270,7 @@ public class Constraints implements Iterable<Constraint> {
 				}
 			} else if(bracketStack == 0 && c == '&') {
 				// end of constraint, process it
-				constraints.add(GetConstraint(buf.toString(), t, location, env));
+				constraints.add(GetConstraint(fileOptions, buf.toString(), t, location, declarationConstraints, env));
 				endOfConstraint = false;
 				buf = new StringBuilder();
 				continue;
@@ -267,24 +281,26 @@ public class Constraints implements Iterable<Constraint> {
 			buf.append(c);
 		}
 
-		constraints.add(GetConstraint(buf.toString(), t, location, env));
+		constraints.add(GetConstraint(fileOptions, buf.toString(), t, location, declarationConstraints, env));
 
 		return new Constraints(t, location, constraints.toArray(Constraint[]::new));
 	}
 
 	/**
-	 * Parses a constraint from a string. This is only meant
+	 * Parses a constraint from a string. This is only meant as a stopgap measure until the
+	 * compiler is updated.
+	 * @param fileOptions The file options.
 	 * @param s The string to parse.
 	 * @param t The code target.
 	 * @param location The location of these constraints.
-	 * @param declarationConstraints The constraints for the relevant definition.
+	 * @param declarationConstraints The Constraints for the relevant definition.
 	 * Must be provided if location is not definition.
 	 * @param env The environment.
 	 * @return
 	 * @throws ClassNotFoundException
 	 */
-	/*package*/ static Constraint GetConstraint(String s, Target t,
-			ConstraintLocation location, Environment env) {
+	/*package*/ static Constraint GetConstraint(FileOptions fileOptions, String s, Target t,
+			ConstraintLocation location, Constraints declarationConstraints, Environment env) {
 		// Now we know we only have one constraint to process
 		s = s.trim();
 		String name = "";
@@ -337,7 +353,7 @@ public class Constraints implements Iterable<Constraint> {
 			if(isNewConstraint && c == ')') {
 				newParenthesisStack--;
 				if(newParenthesisStack == 0) {
-					List<LeftHandSideType> types = GetNewTypes(buf.toString(), t, env);
+					List<LeftHandSideType> types = GetNewTypes(fileOptions, buf.toString(), t, env);
 					return new ConstructorConstraint(t, name, types);
 				}
 			}
@@ -345,7 +361,7 @@ public class Constraints implements Iterable<Constraint> {
 		}
 		if(!inName && !inKeyword) {
 			// Now buf contains the class, which may need additional parsing
-			clazz = ParseClassType(buf.toString(), t, env);
+			clazz = ParseClassType(fileOptions, buf.toString(), t, env);
 			if("extends".equals(keyword)) {
 				return new UpperBoundConstraint(t, name, clazz);
 			} else if("super".equals(keyword)) {
@@ -355,13 +371,27 @@ public class Constraints implements Iterable<Constraint> {
 		if(inName && keyword == null) {
 			// Unbounded or Type
 			if(location == ConstraintLocation.DEFINITION) {
+				if(fileOptions != null) {
+					try {
+						CClassType.get(FullyQualifiedClassName.forName(buf.toString(), t, env), env);
+						// This passed. It will still work just fine, this is an UnboundedConstraint
+						// though, not an ExactType, which cannot be used in the Definition site. However,
+						// this will hide the name of the real type, which should be warned against
+						CompilerWarning warning
+								= new CompilerWarning("Typename overrides a real type, which may be confusing.",
+										t, FileOptions.SuppressWarning.GenericTypeOverrides);
+						env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions, warning);
+					} catch(CRECastException ex) {
+						// Ok
+					}
+				}
 				return new UnboundedConstraint(t, buf.toString());
 			} else {
 				String typename = buf.toString();
 				if("?".equals(typename)) {
-					return ExactType.AsUnboundedWildcard(t);
+					return ExactType.AsUnboundedWildcard(t, declarationConstraints);
 				} else {
-					clazz = ParseClassType(typename, t, env);
+					clazz = ParseClassType(fileOptions, typename, t, env);
 					return new ExactType(t, clazz);
 				}
 			}
@@ -372,14 +402,14 @@ public class Constraints implements Iterable<Constraint> {
 	/**
 	 * This will contain the types as comma separated fields. (Not including the outer parenthesis.)
 	 */
-	private static List<LeftHandSideType> GetNewTypes(String s, Target t, Environment env) {
+	private static List<LeftHandSideType> GetNewTypes(FileOptions fileOptions, String s, Target t, Environment env) {
 		List<LeftHandSideType> list = new ArrayList<>();
 		int bracketStack = 0;
 		int parenthesisStack = 0;
 		StringBuilder buf = new StringBuilder();
 		for(Character c : s.toCharArray()) {
 			if(bracketStack == 0 && parenthesisStack == 0 && c == ',') {
-				list.add(ParseClassType(buf.toString(), t, env));
+				list.add(ParseClassType(fileOptions, buf.toString(), t, env));
 				buf = new StringBuilder();
 				continue;
 			}
@@ -395,11 +425,14 @@ public class Constraints implements Iterable<Constraint> {
 			buf.append(c);
 		}
 
-		list.add(ParseClassType(buf.toString(), t, env));
+		if(!buf.isEmpty()) {
+			list.add(ParseClassType(fileOptions, buf.toString(), t, env));
+		}
 		return list;
 	}
 
-	private static LeftHandSideType ParseClassType(String s, Target t, Environment env) {
+	@SuppressWarnings("null")
+	private static LeftHandSideType ParseClassType(FileOptions fileOptions, String s, Target t, Environment env) {
 		s = s.trim();
 		CClassType nakedType = null;
 		LeftHandGenericUse lhgu = null;
@@ -419,8 +452,9 @@ public class Constraints implements Iterable<Constraint> {
 				bracketStack--;
 				if(bracketStack == 0) {
 					buf.append(c);
-					lhgu = new LeftHandGenericUse(nakedType, t, env, BuildFromString(buf.toString().trim()
-							.replaceAll("<(.*)>", "$1"), ConstraintLocation.LHS, t, env));
+					lhgu = new LeftHandGenericUse(nakedType, t, env, BuildFromString(fileOptions, buf.toString().trim()
+							.replaceAll("<(.*)>", "$1"), ConstraintLocation.LHS,
+								nakedType.getGenericDeclaration().getConstraints(), t, env));
 					buf = new StringBuilder();
 					continue;
 				}
@@ -435,7 +469,7 @@ public class Constraints implements Iterable<Constraint> {
 			nakedType = CClassType.getNakedClassType(FullyQualifiedClassName.forName(buf.toString(), t, env), env);
 		}
 
-		return LeftHandSideType.fromCClassType(nakedType, lhgu, t);
+		return LeftHandSideType.fromCClassType(new ConcreteGenericParameter(nakedType, lhgu, t, env), t, env);
 	}
 
 	@Override

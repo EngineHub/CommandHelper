@@ -9,6 +9,7 @@ import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -105,7 +106,7 @@ public class ObjectManagementTest {
 		assertFalse(env.getObjectDefinitionTable().getObjectDefinitionSet().isEmpty());
 		ObjectDefinition B = env.getObjectDefinitionTable().get(FullyQualifiedClassName
 				.forFullyQualifiedClass("B"));
-		B.qualifyClasses(Environment.createEnvironment(env, Static.GenerateStandaloneEnvironment(false).getEnv(GlobalEnv.class)));
+		B.qualifyClasses(Environment.createEnvironment(env, Static.GenerateStandaloneEnvironment(false).getEnv(GlobalEnv.class)), Target.UNKNOWN);
 		assertEquals(FullyQualifiedClassName.forFullyQualifiedClass("A"),
 				new ArrayList<>(B.getSuperclasses()).get(0).getFQCN());
 	}
@@ -160,7 +161,7 @@ public class ObjectManagementTest {
 		assertFalse(env.getObjectDefinitionTable().getObjectDefinitionSet().isEmpty());
 		ObjectDefinition C = env.getObjectDefinitionTable().get(FullyQualifiedClassName
 				.forFullyQualifiedClass("C"));
-		C.qualifyClasses(Environment.createEnvironment(env, Static.GenerateStandaloneEnvironment(false).getEnv(GlobalEnv.class)));
+		C.qualifyClasses(Environment.createEnvironment(env, Static.GenerateStandaloneEnvironment(false).getEnv(GlobalEnv.class)), Target.UNKNOWN);
 		assertEquals(FullyQualifiedClassName.forFullyQualifiedClass("B"),
 				new ArrayList<>(C.getSuperclasses()).get(0).getFQCN());
 		assertEquals(FullyQualifiedClassName.forFullyQualifiedClass("A"),
@@ -188,7 +189,7 @@ public class ObjectManagementTest {
 		assertFalse(env.getObjectDefinitionTable().getObjectDefinitionSet().isEmpty());
 		ObjectDefinition A = env.getObjectDefinitionTable().get(FullyQualifiedClassName
 				.forFullyQualifiedClass("A"));
-		A.qualifyClasses(Environment.createEnvironment(env, Static.GenerateStandaloneEnvironment(false).getEnv(GlobalEnv.class)));
+		A.qualifyClasses(Environment.createEnvironment(env, Static.GenerateStandaloneEnvironment(false).getEnv(GlobalEnv.class)), Target.UNKNOWN);
 		assertEquals(ObjectType.INTERFACE, A.getObjectType());
 	}
 
@@ -227,7 +228,7 @@ public class ObjectManagementTest {
 		assertFalse(env.getObjectDefinitionTable().getObjectDefinitionSet().isEmpty());
 		ObjectDefinition B = env.getObjectDefinitionTable().get(FullyQualifiedClassName
 				.forFullyQualifiedClass("B"));
-		B.qualifyClasses(Environment.createEnvironment(env, Static.GenerateStandaloneEnvironment(false).getEnv(GlobalEnv.class)));
+		B.qualifyClasses(Environment.createEnvironment(env, Static.GenerateStandaloneEnvironment(false).getEnv(GlobalEnv.class)), Target.UNKNOWN);
 		assertEquals(FullyQualifiedClassName.forFullyQualifiedClass("A"),
 				new ArrayList<>(B.getInterfaces()).get(0).getFQCN());
 	}
@@ -281,7 +282,7 @@ public class ObjectManagementTest {
 		assertFalse(env.getObjectDefinitionTable().getObjectDefinitionSet().isEmpty());
 		ObjectDefinition C = env.getObjectDefinitionTable().get(FullyQualifiedClassName
 				.forFullyQualifiedClass("C"));
-		C.qualifyClasses(Environment.createEnvironment(env, Static.GenerateStandaloneEnvironment(false).getEnv(GlobalEnv.class)));
+		C.qualifyClasses(Environment.createEnvironment(env, Static.GenerateStandaloneEnvironment(false).getEnv(GlobalEnv.class)), Target.UNKNOWN);
 		assertEquals(FullyQualifiedClassName.forFullyQualifiedClass("B"),
 				new ArrayList<>(C.getInterfaces()).get(0).getFQCN());
 		assertEquals(FullyQualifiedClassName.forFullyQualifiedClass("A"),

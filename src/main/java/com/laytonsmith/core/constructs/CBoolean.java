@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.Common.Annotations.AggressiveDeprecation;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.objects.ObjectModifier;
 import java.util.EnumSet;
@@ -152,6 +153,11 @@ public final class CBoolean extends CPrimitive implements Cloneable {
 	@Override
 	public CBoolean duplicate() {
 		return new CBoolean(val, getTarget());
+	}
+
+	@Override
+	public GenericParameters getGenericParameters() {
+		return null;
 	}
 
 }

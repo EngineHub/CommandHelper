@@ -1,11 +1,15 @@
 package com.laytonsmith.core.constructs.generics;
 
+import com.laytonsmith.core.constructs.generics.constraints.ExactType;
+import com.laytonsmith.core.constructs.generics.constraints.Constraint;
 import com.laytonsmith.PureUtilities.ObjectHelpers;
 import com.laytonsmith.PureUtilities.ObjectHelpers.StandardField;
+import com.laytonsmith.core.compiler.signature.FunctionSignature;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CRE.CREGenericConstraintException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,42 +60,17 @@ public final class GenericParameters {
 		return newParams;
 	}
 
-	/**
-	 * Returns true if this parameter set is a subtype of the LHS constraints.This does not check the base types against
-	 * each other, so this can't be used in place of a full instanceof check, as it merely compares generics themselves.
-	 *
-	 * @param generics The generics to check if this is a subtype of.
-	 * @param env
-	 * @return
-	 */
-	public boolean isInstanceof(LeftHandGenericUse generics, Environment env) {
-		if((generics == null && genericDeclaration != null) || generics.getConstraints().size() != parameters.size()) {
-			return false;
-		}
-		for(int i = 0; i < parameters.size(); i++) {
-			LeftHandSideType parameter = parameters.get(i);
-			Constraints constraints = generics.getConstraints().get(i);
-			if(!isInstanceofParameter(parameter, constraints, env)) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	private static boolean isInstanceofParameter(LeftHandSideType type, Constraints lhs, Environment env) {
-		return lhs.withinBounds(type, env);
-	}
-
 	public static final class GenericParametersBuilder {
 
-		GenericParameters p;
+		private final GenericParameters p;
 
-		private GenericParametersBuilder(GenericParameters p) {
+		private GenericParametersBuilder(GenericParameters p, GenericDeclaration forType) {
 			this.p = p;
+			p.genericDeclaration = forType;
 		}
 
 		/**
-		 * Adds a new parameter.Each parameter consists of a CClassType, and optionally a LeftHandGenericUse. For
+		 * Adds a new parameter.Each parameter consists of a CClassType, and optionally a LeftHandGenericUse.For
 		 * instance, in the statement <code>new A&lt;B&lt;? extends C&gt;&gt;</code> where A is the class being
 		 * constructed, with signature <code>class A&lt;T&gt;</code> and B is a concrete class itself with a single
 		 * template parameter, and C being another class, then this method would be called with the parameters
@@ -101,15 +80,46 @@ public final class GenericParameters {
 		 * @param type The concrete class type
 		 * @param genericStatement The LHS generic statement for this parameter. This may be null if the type did not
 		 * include a generic statement.
+		 * @param env The environment
+		 * @param t The code target
 		 * @return this, for easy chaining. Use build() to construct the final object.
+		 * @throws CREGenericConstraintException If the generic statement does not validate against the type.
 		 */
-		public GenericParametersBuilder addParameter(CClassType type, LeftHandGenericUse genericStatement) {
-			return addParameter(LeftHandSideType.fromCClassType(type, genericStatement, Target.UNKNOWN));
+		public GenericParametersBuilder addParameter(CClassType type, LeftHandGenericUse genericStatement, Environment env, Target t) {
+			return addParameter(new ConcreteGenericParameter(type, genericStatement, t, env));
 		}
 
+		/**
+		 * Adds a new ConcreteGenericParameter.
+		 *
+		 * @param type
+		 * @return
+		 */
+		public GenericParametersBuilder addParameter(ConcreteGenericParameter type) {
+			return addParameter(type.asLeftHandSideType());
+		}
+
+		/**
+		 * Add a LeftHandSideType parameter.
+		 *
+		 * @param type
+		 * @return
+		 */
 		public GenericParametersBuilder addParameter(LeftHandSideType type) {
 			p.parameters.add(type);
 			return this;
+		}
+
+		/**
+		 * Adds a new native parameter. Unlike the normal method, this will cause an error if the parameters are
+		 * incorrect.
+		 *
+		 * @param nativeType
+		 * @param nativeGenericStatement
+		 * @return
+		 */
+		public GenericParametersBuilder addNativeParameter(CClassType nativeType, LeftHandGenericUse nativeGenericStatement) {
+			return addParameter(nativeType, nativeGenericStatement, null, Target.UNKNOWN);
 		}
 
 		/**
@@ -123,11 +133,38 @@ public final class GenericParameters {
 		}
 
 		/**
-		 * Returns the fully constructed object.
-		 *
+		 * If the parameter set only contains native classes, this method can be used instead, which will cause Errors
+		 * instead of user compiler errors.
 		 * @return
 		 */
-		public GenericParameters build() {
+		public GenericParameters buildNative() {
+			return build(Target.UNKNOWN, null);
+		}
+
+		/**
+		 * Returns the fully constructed object.
+		 *
+		 * @param t
+		 * @param env
+		 * @return
+		 */
+		public GenericParameters build(Target t, Environment env) {
+			if(p.parameters.isEmpty()) {
+				throw new Error("Empty parameter builders cannot be used. Check for this condition with isEmpty()");
+			}
+			ConstraintValidator.ValidateParametersToDeclaration(t, env, p, p.genericDeclaration, null);
+			return p;
+		}
+
+		/**
+		 * If these parameters are being built before the type is known (during compilation, mainly) then forType
+		 * may be set to null, and then this method called. Calling the normal build methods if forType is null
+		 * will cause an error.
+		 * <p>
+		 * These parameters must be validated later independently.
+		 * @return
+		 */
+		public GenericParameters buildWithoutValidation() {
 			if(p.parameters.isEmpty()) {
 				throw new Error("Empty parameter builders cannot be used. Check for this condition with isEmpty()");
 			}
@@ -137,7 +174,7 @@ public final class GenericParameters {
 
 	/**
 	 * Begins construction of a new GenericParameters object, which represents the RHS of the generic declaration.The
-	 * actual GenericDeclaration object is passed in in order to validate the types against the constraints. Each
+	 * actual GenericDeclaration object is passed in in order to validate the types against the constraints.Each
 	 * instance of a class which has a GenericDeclaration will have one of these objects in it, associated with that
 	 * particular instance. This data is not lost after compilation, and types are reified for runtime use.
 	 * <p>
@@ -147,23 +184,53 @@ public final class GenericParameters {
 	 * another class, then this method would be called with the parameters <code>B</code> and a new instance of the
 	 * LeftHandGenericUse class representing the constraint <code>? extends C</code>.
 	 *
+	 * @param forType The type that these parameters are being added to.
 	 * @param type The concrete class type
 	 * @param genericStatement The LHS generic statement for this parameter. This may be null if the type did not
 	 * include a generic statement.
+	 * @param env The environment
+	 * @param t The code target
 	 * @return this, for easy chaining. Use build() to construct the final object.
+	 * @throws CREGenericConstraintException If the generic statement does not validate against the type.
 	 */
-	public static GenericParametersBuilder addParameter(CClassType type, LeftHandGenericUse genericStatement) {
-		return emptyBuilder().addParameter(type, genericStatement);
+	public static GenericParametersBuilder addParameter(CClassType forType, CClassType type, LeftHandGenericUse genericStatement, Environment env, Target t) {
+		return emptyBuilder(forType).addParameter(type, genericStatement, env, t);
+	}
+
+	/**
+	 * Begins construction of a new GenericParameters object.This should only be used with native, hardcoded classes, as
+	 * incorrect usage will cause an Error.
+	 *
+	 * @param forType The type that these parameters are being added to.
+	 * @param type
+	 * @param nativeGenericStatement
+	 * @return
+	 */
+	public static GenericParametersBuilder addNativeParameter(CClassType forType, CClassType type,
+			LeftHandGenericUse nativeGenericStatement) {
+		return emptyBuilder(forType).addParameter(type, nativeGenericStatement, null, Target.UNKNOWN);
 	}
 
 	/**
 	 * Returns an empty builder. Note that calling build on an empty builder is an error.
 	 *
+	 * @param forType The type that these parameters are being added to.
 	 * @return
 	 */
-	public static GenericParametersBuilder emptyBuilder() {
+	public static GenericParametersBuilder emptyBuilder(CClassType forType) {
 		GenericParameters gp = new GenericParameters();
-		return new GenericParametersBuilder(gp);
+		return new GenericParametersBuilder(gp, forType == null ? null : forType.getGenericDeclaration());
+	}
+
+	/**
+	 * Returns an empty builder. Note that calling build on an empty builder is an error.
+	 *
+	 * @param forSignature The function signature that these are targetting.
+	 * @return
+	 */
+	public static GenericParametersBuilder emptyBuilder(FunctionSignature forSignature) {
+		GenericParameters gp = new GenericParameters();
+		return new GenericParametersBuilder(gp, forSignature.getGenericDeclaration());
 	}
 
 	private GenericParameters() {
@@ -200,6 +267,23 @@ public final class GenericParameters {
 		return lhgu;
 	}
 
+	/**
+	 * Returns a new GenericTypeParameters equivalent object. Note that all the types will be single ExactType
+	 * constraints, rather than typenames.
+	 *
+	 * @param forType The type that these generics will be associated with.
+	 * @param t The code target where these were defined, for validation errors.
+	 * @param env The environment.
+	 * @return
+	 */
+	public GenericTypeParameters toGenericTypeParameters(CClassType forType, Target t, Environment env) {
+		GenericTypeParameters.GenericTypeParametersBuilder builder = GenericTypeParameters.emptyBuilder(forType, t, env);
+		for(LeftHandSideType lhst : parameters) {
+			builder.addParameter(lhst);
+		}
+		return builder.build();
+	}
+
 	@Override
 	public boolean equals(Object that) {
 		return ObjectHelpers.DoEquals(this, that);
@@ -220,7 +304,7 @@ public final class GenericParameters {
 				b.append(", ");
 			}
 			doComma = true;
-			b.append(p.val());
+			b.append(p.toString());
 		}
 		b.append(">");
 		return b.toString();

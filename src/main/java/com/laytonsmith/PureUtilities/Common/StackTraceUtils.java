@@ -19,6 +19,9 @@ public final class StackTraceUtils {
 	 * @return
 	 */
 	public static String GetStacktrace(Throwable t) {
+		if(t == null) {
+			return "null";
+		}
 		final Writer result = new StringWriter();
 		final PrintWriter printWriter = new PrintWriter(result);
 		boolean first = true;

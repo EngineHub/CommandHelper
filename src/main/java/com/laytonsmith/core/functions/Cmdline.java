@@ -418,8 +418,8 @@ public class Cmdline {
 				}
 				return new CString(prop, t);
 			} else {
-				CArray ca = CArray.GetAssociativeArray(t, GenericParameters
-						.addParameter(CString.TYPE, null).build(), env);
+				CArray ca = CArray.GetAssociativeArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+						.addNativeParameter(CString.TYPE, null).buildNative(), env);
 				for(String key : System.getProperties().stringPropertyNames()) {
 					ca.set(key, System.getProperty(key), env);
 				}
@@ -515,8 +515,8 @@ public class Cmdline {
 			if(args.length == 1) {
 				return new CString(System.getenv(args[0].val()), t);
 			} else {
-				CArray ca = CArray.GetAssociativeArray(t, GenericParameters
-						.addParameter(CString.TYPE, null).build(), env);
+				CArray ca = CArray.GetAssociativeArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+						.addNativeParameter(CString.TYPE, null).buildNative(), env);
 				for(String key : System.getenv().keySet()) {
 					ca.set(key, System.getenv(key), env);
 				}
@@ -1696,7 +1696,8 @@ public class Cmdline {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			requireCmdlineMode(env, this, t);
-			CArray ca = new CArray(t, GenericParameters.addParameter(CString.TYPE, null).build(), env);
+			CArray ca = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			File cwd = Static.GetFileFromArgument(args.length > 0 ? args[0].val() : null, env, t, env.getEnv(GlobalEnv.class).GetRootFolder());
 			if(cwd.isDirectory()) {
 				File[] fs = cwd.listFiles();

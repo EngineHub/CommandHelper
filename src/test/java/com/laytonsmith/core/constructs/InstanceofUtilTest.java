@@ -1,6 +1,5 @@
 package com.laytonsmith.core.constructs;
 
-import com.laytonsmith.PureUtilities.MapBuilder;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.Implementation.Type;
@@ -9,12 +8,13 @@ import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.generics.ConstraintLocation;
 import com.laytonsmith.core.constructs.generics.Constraints;
-import com.laytonsmith.core.constructs.generics.ExactType;
+import com.laytonsmith.core.constructs.generics.constraints.ExactType;
 import com.laytonsmith.core.constructs.generics.GenericDeclaration;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.GenericTypeParameters;
 import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
-import com.laytonsmith.core.constructs.generics.LowerBoundConstraint;
-import com.laytonsmith.core.constructs.generics.UpperBoundConstraint;
+import com.laytonsmith.core.constructs.generics.constraints.LowerBoundConstraint;
+import com.laytonsmith.core.constructs.generics.constraints.UpperBoundConstraint;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -31,8 +31,6 @@ import org.junit.Test;
 
 import java.net.URL;
 import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
@@ -93,22 +91,22 @@ public class InstanceofUtilTest {
 				new Constraints(Target.UNKNOWN, ConstraintLocation.LHS,
 						new ExactType(Target.UNKNOWN, CString.TYPE.asLeftHandSideType())));
 
-		CClassType arrayInt = CClassType.get(CArray.TYPE, Target.UNKNOWN, MapBuilder.start(CArray.TYPE, GenericParameters
-				.addParameter(CInt.TYPE, null).build()), env);
-		CClassType arrayString = CClassType.get(CArray.TYPE, Target.UNKNOWN, MapBuilder.start(CArray.TYPE, GenericParameters
-				.addParameter(CString.TYPE, null).build()), env);
-		CClassType arrayArrayInt = CClassType.get(CArray.TYPE.getFQCN(), Target.UNKNOWN, MapBuilder.start(CArray.TYPE, GenericParameters
-				.addParameter(CArray.TYPE, intExactTypeLHGU).build()), env);
-		CClassType arrayArrayString = CClassType.get(CArray.TYPE, Target.UNKNOWN, MapBuilder.start(CArray.TYPE, GenericParameters
-				.addParameter(CArray.TYPE, stringExactTypeLHGU).build()), env);
-		CClassType arrayArrayExtendsNumber = CClassType.get(CArray.TYPE, Target.UNKNOWN, MapBuilder.start(CArray.TYPE, GenericParameters
-				.addParameter(CArray.TYPE, extendsNumberLHGU).build()), env);
-		CClassType arrayArrayExtendsPrimitive = CClassType.get(CArray.TYPE, Target.UNKNOWN, MapBuilder.start(CArray.TYPE, GenericParameters
-				.addParameter(CArray.TYPE, extendsPrimitiveLHGU).build()), env);
-		CClassType arrayArraySuperPrimitive = CClassType.get(CArray.TYPE, Target.UNKNOWN, MapBuilder.start(CArray.TYPE, GenericParameters
-				.addParameter(CArray.TYPE, superPrimitiveLHGU).build()), env);
-		CClassType arrayArraySuperNumber = CClassType.get(CArray.TYPE, Target.UNKNOWN, MapBuilder.start(CArray.TYPE, GenericParameters
-				.addParameter(CArray.TYPE, superNumberLHGU).build()), env);
+		CClassType arrayInt = CClassType.get(CArray.TYPE.getFQCN(), Target.UNKNOWN, GenericTypeParameters.nativeBuilder(CArray.TYPE)
+				.addParameter(CInt.TYPE, null).build(), env);
+		CClassType arrayString = CClassType.get(CArray.TYPE.getFQCN(), Target.UNKNOWN, GenericTypeParameters.nativeBuilder(CArray.TYPE)
+				.addParameter(CString.TYPE, null).build(), env);
+		CClassType arrayArrayInt = CClassType.get(CArray.TYPE.getFQCN(), Target.UNKNOWN, GenericTypeParameters.nativeBuilder(CArray.TYPE)
+				.addParameter(CArray.TYPE, intExactTypeLHGU).build(), env);
+		CClassType arrayArrayString = CClassType.get(CArray.TYPE.getFQCN(), Target.UNKNOWN, GenericTypeParameters.nativeBuilder(CArray.TYPE)
+				.addParameter(CArray.TYPE, stringExactTypeLHGU).build(), env);
+		CClassType arrayArrayExtendsNumber = CClassType.get(CArray.TYPE.getFQCN(), Target.UNKNOWN, GenericTypeParameters.nativeBuilder(CArray.TYPE)
+				.addParameter(CArray.TYPE, extendsNumberLHGU).build(), env);
+		CClassType arrayArrayExtendsPrimitive = CClassType.get(CArray.TYPE.getFQCN(), Target.UNKNOWN, GenericTypeParameters.nativeBuilder(CArray.TYPE)
+				.addParameter(CArray.TYPE, extendsPrimitiveLHGU).build(), env);
+		CClassType arrayArraySuperPrimitive = CClassType.get(CArray.TYPE.getFQCN(), Target.UNKNOWN, GenericTypeParameters.nativeBuilder(CArray.TYPE)
+				.addParameter(CArray.TYPE, superPrimitiveLHGU).build(), env);
+		CClassType arrayArraySuperNumber = CClassType.get(CArray.TYPE.getFQCN(), Target.UNKNOWN, GenericTypeParameters.nativeBuilder(CArray.TYPE)
+				.addParameter(CArray.TYPE, superNumberLHGU).build(), env);
 
 		LeftHandGenericUse stringLHGU = new LeftHandGenericUse(CArray.TYPE, Target.UNKNOWN, env,
 				new Constraints(Target.UNKNOWN, ConstraintLocation.LHS,
@@ -126,20 +124,20 @@ public class InstanceofUtilTest {
 
 		LeftHandGenericUse arrayIntLHGU = new LeftHandGenericUse(CArray.TYPE, Target.UNKNOWN, env,
 				new Constraints(Target.UNKNOWN, ConstraintLocation.LHS,
-						new ExactType(Target.UNKNOWN, LeftHandSideType.fromCClassType(CArray.TYPE, intLHGU, Target.UNKNOWN))));
+						new ExactType(Target.UNKNOWN, LeftHandSideType.fromNativeCClassType(CArray.TYPE, intLHGU))));
 
 		LeftHandGenericUse arrayExtendsNumberLHGU = new LeftHandGenericUse(CArray.TYPE, Target.UNKNOWN, env,
 				new Constraints(Target.UNKNOWN, ConstraintLocation.LHS,
-						new ExactType(Target.UNKNOWN, LeftHandSideType.fromCClassType(CArray.TYPE, extendsNumberLHGU, Target.UNKNOWN))));
+						new ExactType(Target.UNKNOWN, LeftHandSideType.fromNativeCClassType(CArray.TYPE, extendsNumberLHGU))));
 		LeftHandGenericUse arraySuperIntLHGU = new LeftHandGenericUse(CArray.TYPE, Target.UNKNOWN, env,
 				new Constraints(Target.UNKNOWN, ConstraintLocation.LHS,
-						new ExactType(Target.UNKNOWN, LeftHandSideType.fromCClassType(CArray.TYPE, superIntLHGU, Target.UNKNOWN))));
+						new ExactType(Target.UNKNOWN, LeftHandSideType.fromNativeCClassType(CArray.TYPE, superIntLHGU))));
 		LeftHandGenericUse arraySuperPrimitiveLHGU = new LeftHandGenericUse(CArray.TYPE, Target.UNKNOWN, env,
 				new Constraints(Target.UNKNOWN, ConstraintLocation.LHS,
-						new ExactType(Target.UNKNOWN, LeftHandSideType.fromCClassType(CArray.TYPE, superPrimitiveLHGU, Target.UNKNOWN))));
+						new ExactType(Target.UNKNOWN, LeftHandSideType.fromNativeCClassType(CArray.TYPE, superPrimitiveLHGU))));
 		LeftHandGenericUse arrayExtendsPrimitiveLHGU = new LeftHandGenericUse(CArray.TYPE, Target.UNKNOWN, env,
 				new Constraints(Target.UNKNOWN, ConstraintLocation.LHS,
-						new ExactType(Target.UNKNOWN, LeftHandSideType.fromCClassType(CArray.TYPE, extendsPrimitiveLHGU, Target.UNKNOWN))));
+						new ExactType(Target.UNKNOWN, LeftHandSideType.fromNativeCClassType(CArray.TYPE, extendsPrimitiveLHGU))));
 
 		// Nested LHGU
 		assertEquals("ms.lang.array<ms.lang.array<ms.lang.int>>", arrayArrayInt.toString());
@@ -176,14 +174,10 @@ public class InstanceofUtilTest {
 				new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
 						new UpperBoundConstraint(Target.UNKNOWN, "T", CPrimitive.TYPE.asLeftHandSideType()))));
 
-		private final Map<CClassType, GenericParameters> genericParameters = new HashMap<>();
+		private final GenericParameters genericParameters;
 
 		public InstanceofUtilTestA(GenericParameters genericParameters) {
-			registerGenerics(InstanceofUtilTestA.TYPE, genericParameters);
-		}
-
-		protected final void registerGenerics(CClassType type, GenericParameters parameters) {
-			genericParameters.put(type, parameters);
+			this.genericParameters = genericParameters;
 		}
 
 		@Override
@@ -268,12 +262,15 @@ public class InstanceofUtilTest {
 
 		@Override
 		public CClassType typeof(Environment env) {
-			return CClassType.get(this.getClass(), Target.UNKNOWN, this.getGenericParameters(), env);
+			return Construct.typeof(this, env);
+//			CClassType type = ReflectionUtils.get(this.getClass(), this, "TYPE");
+//			return CClassType.get(this.getClass(), Target.UNKNOWN, this.getGenericParameters()
+//					.toGenericTypeParameters(type, Target.UNKNOWN, env), env);
 		}
 
 		@Override
-		public Map<CClassType, GenericParameters> getGenericParameters() {
-			return new HashMap<>(genericParameters);
+		public GenericParameters getGenericParameters() {
+			return genericParameters;
 		}
 
 	}
@@ -283,13 +280,18 @@ public class InstanceofUtilTest {
 
 		@SuppressWarnings("FieldNameHidesFieldInSuperclass")
 		public static final CClassType TYPE = CClassType.getWithGenericDeclaration(InstanceofUtilTestB.class, new GenericDeclaration(Target.UNKNOWN,
-				InstanceofUtilTestA.TYPE.getGenericDeclaration().getConstraints().get(0),
 				new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
-						new UpperBoundConstraint(Target.UNKNOWN, "U", CNumber.TYPE.asLeftHandSideType()))));
+						new UpperBoundConstraint(Target.UNKNOWN, "T", CPrimitive.TYPE.asLeftHandSideType())),
+				new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+						new UpperBoundConstraint(Target.UNKNOWN, "U", CNumber.TYPE.asLeftHandSideType()))))
+				.withSuperParameters(GenericTypeParameters.nativeBuilder(InstanceofUtilTestA.TYPE).addParameter("T", null))
+				.done();
+
+		private final GenericParameters genericParameters;
 
 		public InstanceofUtilTestB(GenericParameters genericParameters) {
 			super(genericParameters.subset(InstanceofUtilTestA.TYPE.getGenericDeclaration(), "T"));
-			registerGenerics(InstanceofUtilTestB.TYPE, genericParameters);
+			this.genericParameters = genericParameters;
 		}
 
 		@Override
@@ -297,26 +299,35 @@ public class InstanceofUtilTest {
 			return new CClassType[]{InstanceofUtilTestA.TYPE};
 		}
 
+		@Override
+		public GenericParameters getGenericParameters() {
+			return genericParameters;
+		}
+
 	}
 
 	@Test
 	public void testGenericInheritanceInstanceof() throws Exception {
 		// B<string, int> extends A<string>
-		InstanceofUtilTestB bStringInt = new InstanceofUtilTestB(GenericParameters
-				.addParameter(CString.TYPE, null)
-				.addParameter(CInt.TYPE, null).build());
+		InstanceofUtilTestB bStringInt = new InstanceofUtilTestB(GenericParameters.emptyBuilder(InstanceofUtilTestB.TYPE)
+				.addNativeParameter(CString.TYPE, null)
+				.addNativeParameter(CInt.TYPE, null).buildNative());
+		assertEquals("InstanceofUtilTestB<ms.lang.string, ms.lang.int>", bStringInt.typeof(null).toString());
 		// B<int, int> extends A<int>
-		InstanceofUtilTestB bIntInt = new InstanceofUtilTestB(GenericParameters
-				.addParameter(CInt.TYPE, null)
-				.addParameter(CInt.TYPE, null).build());
+		InstanceofUtilTestB bIntInt = new InstanceofUtilTestB(GenericParameters.emptyBuilder(InstanceofUtilTestB.TYPE)
+				.addNativeParameter(CInt.TYPE, null)
+				.addNativeParameter(CInt.TYPE, null).buildNative());
+		assertEquals("InstanceofUtilTestB<ms.lang.int, ms.lang.int>", bIntInt.typeof(null).toString());
 		// A<string>
 		CClassType aString = CClassType.get(InstanceofUtilTestA.TYPE.getFQCN(), Target.UNKNOWN,
-				MapBuilder.start(InstanceofUtilTestA.TYPE, GenericParameters
-						.addParameter(CString.TYPE, null).build()).build(), env);
+				GenericTypeParameters.nativeBuilder(InstanceofUtilTestA.TYPE)
+						.addParameter(CString.TYPE, null).build(), env);
+		assertEquals("InstanceofUtilTestA<ms.lang.string>", aString.toString());
 		// A<string>
 		CClassType aInt = CClassType.get(InstanceofUtilTestA.TYPE.getFQCN(), Target.UNKNOWN,
-				MapBuilder.start(InstanceofUtilTestA.TYPE, GenericParameters
-						.addParameter(CInt.TYPE, null).build()).build(), env);
+				GenericTypeParameters.nativeBuilder(InstanceofUtilTestA.TYPE)
+						.addParameter(CInt.TYPE, null).build(), env);
+		assertEquals("InstanceofUtilTestA<ms.lang.int>", aInt.toString());
 
 		assertFalse(bStringInt.isInstanceOf(bIntInt.typeof(env), null, env));
 		assertTrue(bStringInt.isInstanceOf(bStringInt.typeof(env), null, env));
@@ -442,28 +453,43 @@ public class InstanceofUtilTest {
 	public void testTypeUnions() throws Exception {
 		Target t = Target.UNKNOWN;
 		assertTrue(InstanceofUtil.isInstanceof(CVoid.LHSTYPE,
-				LeftHandSideType.fromTypeUnion(t, CVoid.LHSTYPE, Booleanish.TYPE.asLeftHandSideType()),
+				LeftHandSideType.fromNativeTypeUnion(CVoid.LHSTYPE, Booleanish.TYPE.asLeftHandSideType()),
 				env));
 		assertTrue(InstanceofUtil.isInstanceof(CInt.TYPE.asLeftHandSideType(),
-				LeftHandSideType.fromTypeUnion(t, CInt.TYPE.asLeftHandSideType(), CString.TYPE.asLeftHandSideType()),
+				LeftHandSideType.fromNativeTypeUnion(CInt.TYPE.asLeftHandSideType(), CString.TYPE.asLeftHandSideType()),
 				env));
 		assertFalse(InstanceofUtil.isInstanceof(CArray.TYPE.asLeftHandSideType(),
-				LeftHandSideType.fromTypeUnion(t, CInt.TYPE.asLeftHandSideType(), CString.TYPE.asLeftHandSideType()),
+				LeftHandSideType.fromNativeTypeUnion(CInt.TYPE.asLeftHandSideType(), CString.TYPE.asLeftHandSideType()),
 				env));
 
 		assertTrue(InstanceofUtil.isInstanceof(
-				LeftHandSideType.fromTypeUnion(t, CString.TYPE.asLeftHandSideType(), CInt.TYPE.asLeftHandSideType()),
-				LeftHandSideType.fromTypeUnion(t, CString.TYPE.asLeftHandSideType(), CInt.TYPE.asLeftHandSideType()),
+				LeftHandSideType.fromNativeTypeUnion(CString.TYPE.asLeftHandSideType(), CInt.TYPE.asLeftHandSideType()),
+				LeftHandSideType.fromNativeTypeUnion(CString.TYPE.asLeftHandSideType(), CInt.TYPE.asLeftHandSideType()),
 				env));
 		assertFalse(InstanceofUtil.isInstanceof(
-				LeftHandSideType.fromTypeUnion(t, CString.TYPE.asLeftHandSideType(),
+				LeftHandSideType.fromNativeTypeUnion(CString.TYPE.asLeftHandSideType(),
 						CInt.TYPE.asLeftHandSideType(), CArray.TYPE.asLeftHandSideType()),
-				LeftHandSideType.fromTypeUnion(t, CString.TYPE.asLeftHandSideType(), CInt.TYPE.asLeftHandSideType()),
+				LeftHandSideType.fromNativeTypeUnion(CString.TYPE.asLeftHandSideType(), CInt.TYPE.asLeftHandSideType()),
 				env));
 
 		assertFalse(InstanceofUtil.isAssignableTo(CVoid.LHSTYPE, CVoid.LHSTYPE, env));
 		assertTrue(InstanceofUtil.isAssignableTo(CVoid.LHSTYPE,
-				LeftHandSideType.fromTypeUnion(t, CVoid.LHSTYPE, Booleanish.TYPE.asLeftHandSideType()),
+				LeftHandSideType.fromNativeTypeUnion(CVoid.LHSTYPE, Booleanish.TYPE.asLeftHandSideType()),
 				env));
+	}
+
+	@Test
+	public void testSuperClassWithGenericsInstanceof() throws Exception {
+		// Both the instance and the type need to be instanceof.
+		GenericTypeParameters genericTypeParameters = GenericTypeParameters.addParameter(CArray.TYPE, Target.UNKNOWN, env, CInt.TYPE, null).build();
+		CClassType arrayInt = CClassType.get(CArray.TYPE, Target.UNKNOWN, genericTypeParameters, env);
+		GenericTypeParameters genericTypeParametersWrong = GenericTypeParameters.addParameter(CArray.TYPE, Target.UNKNOWN, env, CString.TYPE, null).build();
+		CClassType arrayString = CClassType.get(CArray.TYPE, Target.UNKNOWN, genericTypeParametersWrong, env);
+
+		assertTrue(InstanceofUtil.isInstanceof(new CByteArray(Target.UNKNOWN, env), arrayInt, env));
+		assertFalse(InstanceofUtil.isInstanceof(new CByteArray(Target.UNKNOWN, env), arrayString, env));
+
+		assertTrue(InstanceofUtil.isInstanceof(CByteArray.TYPE, arrayInt, null, env));
+		assertFalse(InstanceofUtil.isInstanceof(CByteArray.TYPE, arrayString, null, env));
 	}
 }

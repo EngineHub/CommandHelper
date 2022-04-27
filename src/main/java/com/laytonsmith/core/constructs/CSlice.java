@@ -4,6 +4,8 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.GenericTypeParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
@@ -25,7 +27,10 @@ import java.util.Stack;
 public class CSlice extends CArray {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get(CSlice.class);
+	public static final CClassType TYPE = CClassType.get(CSlice.class)
+			.withSuperParameters(GenericTypeParameters.nativeBuilder(CArray.TYPE)
+				.addParameter(CInt.TYPE, null))
+			.done();
 
 	private long start;
 	private long finish;
@@ -34,7 +39,9 @@ public class CSlice extends CArray {
 	private long size;
 
 	public CSlice(String slice, Target t, Environment env) throws ConfigCompileException {
-		super(t, null, env);
+		super(t, GenericParameters.emptyBuilder(CArray.TYPE)
+				.addNativeParameter(CInt.TYPE, null)
+				.buildNative(), env);
 		String[] split = slice.split("\\.\\.");
 		if(split.length > 2) {
 			throw new ConfigCompileException("Invalid slice notation! (" + slice + ")", t);
@@ -237,5 +244,10 @@ public class CSlice extends CArray {
 		} else {
 			return new CSlice(finish - begin, start - end, t, env);
 		}
+	}
+
+	@Override
+	public GenericParameters getGenericParameters() {
+		return null;
 	}
 }

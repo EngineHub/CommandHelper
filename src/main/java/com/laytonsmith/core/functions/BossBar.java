@@ -81,8 +81,8 @@ public class BossBar {
 
 		@Override
 		public CArray exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CArray ca = new CArray(t, GenericParameters
-					.addParameter(CString.TYPE, null).build(), env);
+			CArray ca = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			for(String id : BARS.keySet()) {
 				ca.push(new CString(id, t), t, env);
 			}
@@ -432,8 +432,8 @@ public class BossBar {
 			if(bar == null) {
 				throw new CRENotFoundException("That boss bar id does not exist.", t);
 			}
-			CArray players = new CArray(t, GenericParameters
-					.addParameter(CString.TYPE, null).build(), env);
+			CArray players = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			for(MCPlayer player : bar.getPlayers()) {
 				players.push(new CString(player.getName(), t), t, env);
 			}

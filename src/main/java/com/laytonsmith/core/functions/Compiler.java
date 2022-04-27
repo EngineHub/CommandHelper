@@ -32,7 +32,7 @@ import com.laytonsmith.core.constructs.generics.ConstraintLocation;
 import com.laytonsmith.core.constructs.generics.Constraints;
 import com.laytonsmith.core.constructs.generics.GenericDeclaration;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
-import com.laytonsmith.core.constructs.generics.UnboundedConstraint;
+import com.laytonsmith.core.constructs.generics.constraints.UnboundedConstraint;
 import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
@@ -736,7 +736,7 @@ public class Compiler {
 			GenericDeclaration declaration = new GenericDeclaration(Target.UNKNOWN,
 				new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
 					new UnboundedConstraint(Target.UNKNOWN, "T")));
-			LeftHandSideType t = LeftHandSideType.fromGenericDefinitionType(declaration, "T", null, Target.UNKNOWN);
+			LeftHandSideType t = LeftHandSideType.fromNativeGenericDefinitionType(declaration, "T", null);
 			return new SignatureBuilder(t)
 					.param(t, "argument", "The value to return.")
 					.setGenericDeclaration(declaration, "The type of the value.")

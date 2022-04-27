@@ -3,6 +3,7 @@ package com.laytonsmith.core.constructs;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 
 /**
@@ -45,5 +46,10 @@ public abstract class CNumber extends CPrimitive {
 	@Override
 	public boolean getBooleanValue(Environment env, Target t) {
 		return getNumber() != 0.0;
+	}
+
+	@Override
+	public GenericParameters getGenericParameters() {
+		return null;
 	}
 }

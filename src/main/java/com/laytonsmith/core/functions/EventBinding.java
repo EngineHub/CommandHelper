@@ -578,7 +578,7 @@ public class EventBinding {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREBindException.class};
+			return new Class[]{CREBindException.class, CRECastException.class};
 		}
 
 		@Override
@@ -1083,8 +1083,8 @@ public class EventBinding {
 			if(env.getEnv(GlobalEnv.class).GetEvent() == null) {
 				throw new CREBindException("event_meta must be called from within an event handler!", t);
 			}
-			CArray history = new CArray(t, GenericParameters
-					.addParameter(CString.TYPE, null).build(), env);
+			CArray history = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			for(String entry : env.getEnv(GlobalEnv.class).GetEvent().getHistory()) {
 				history.push(new CString(entry, t), t, env);
 			}

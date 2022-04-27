@@ -1,63 +1,61 @@
-package com.laytonsmith.core.constructs.generics;
+package com.laytonsmith.core.constructs.generics.constraints;
 
 import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.ConstraintLocation;
+import com.laytonsmith.core.constructs.generics.ConstraintToConstraintValidator;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREGenericConstraintException;
-import com.laytonsmith.core.objects.ObjectModifier;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 
 import java.util.EnumSet;
-import java.util.Set;
 
 /**
- * An UpperBoundConstraint is defined with the extends keyword, such as <code>T extends Number</code>.
- * In this case, Number is the upper bound.
+ * A LowerBoundConstraint is defined with the super keyword, such as <code>T super number</code>.
+ * In this case, number is the lower bound.
  */
-public class UpperBoundConstraint extends BoundaryConstraint {
+public class LowerBoundConstraint extends BoundaryConstraint {
 
 	/**
 	 * Constructs a new upper bound constraint.
 	 * @param t Code target
 	 * @param typename The name of this parameter, may be ? for LHS constraints
-	 * @param upperBound The concrete upper bound
+	 * @param lowerBound The concrete lower bound
 	 */
-	public UpperBoundConstraint(Target t, String typename, LeftHandSideType upperBound) {
-		super(t, typename, upperBound);
-		for(Set<ObjectModifier> upperBoundComponent : upperBound.getTypeObjectModifiers()) {
-			if(upperBoundComponent.contains(ObjectModifier.FINAL)) {
-				throw new CREGenericConstraintException(upperBound.val() + " is marked as final, and so"
-						+ " cannot be used in an upper bound constraint.", t);
-			}
+	public LowerBoundConstraint(Target t, String typename, LeftHandSideType lowerBound) {
+		super(t, typename, lowerBound);
+		if(lowerBound.equals(Mixed.TYPE.asLeftHandSideType())) {
+			throw new CREGenericConstraintException("Cannot create a lower bound on mixed", t);
 		}
 	}
 
-	public LeftHandSideType getUpperBound() {
+	@Override
+	protected boolean isConcreteClassWithinConstraint(LeftHandSideType type, Environment env) {
+		return this.bound.doesExtend(type, env);
+	}
+
+	public LeftHandSideType getLowerBound() {
 		return this.bound;
 	}
 
 	@Override
 	public String toSimpleString() {
-		return getTypeName() + " extends " + getUpperBound().getSimpleName();
+		return getTypeName() + " super " + getLowerBound().getSimpleName();
 	}
 
 	@Override
 	public String toString() {
-		return getTypeName() + " extends " + getUpperBound();
+		return getTypeName() + " super " + getLowerBound();
 	}
 
 	@Override
 	public EnumSet<ConstraintLocation> validLocations() {
-		return EnumSet.allOf(ConstraintLocation.class);
+		return EnumSet.of(ConstraintLocation.LHS);
 	}
 
 	@Override
 	public String getConstraintName() {
-		return "upper bound";
-	}
-
-	@Override
-	protected boolean isConcreteClassWithinConstraint(LeftHandSideType type, Environment env) {
-		return type.doesExtend(bound, env);
+		return "lower bound";
 	}
 
 	@Override
@@ -75,12 +73,12 @@ public class UpperBoundConstraint extends BoundaryConstraint {
 
 			@Override
 			public Boolean isWithinBounds(LowerBoundConstraint lhs) {
-				return lhs.getLowerBound().doesExtend(UpperBoundConstraint.this.getUpperBound(), env);
+				return isWithinConstraint(lhs.getLowerBound(), env);
 			}
 
 			@Override
 			public Boolean isWithinBounds(UpperBoundConstraint lhs) {
-				return lhs.getUpperBound().doesExtend(UpperBoundConstraint.this.getUpperBound(), env);
+				return false;
 			}
 
 			@Override
@@ -99,4 +97,5 @@ public class UpperBoundConstraint extends BoundaryConstraint {
 	public boolean supportsTypeUnions() {
 		return true;
 	}
+
 }

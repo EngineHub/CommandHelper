@@ -14,6 +14,7 @@ import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Variable;
+import com.laytonsmith.core.constructs.generics.ConcreteGenericParameter;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -379,9 +380,9 @@ public class StaticAnalysis {
 				if(func != null) {
 					return func.typecheck(this, ast, inferredReturnType, env, exceptions);
 				}
-				return LeftHandSideType.fromCClassType(CClassType.AUTO, Target.UNKNOWN); // Unknown return type.
+				return Auto.LHSTYPE; // Unknown return type.
 			} else if(cFunc.hasIVariable()) { // The function is a var reference to a closure: '@myClosure(<args>)'.
-				return LeftHandSideType.fromCClassType(CClassType.AUTO, Target.UNKNOWN); // TODO - Get actual type (return type of closure, iclosure, rclosure?).
+				return Auto.LHSTYPE; // TODO - Get actual type (return type of closure, iclosure, rclosure?).
 			} else if(cFunc.hasProcedure()) { // The function is a procedure reference.
 				String procName = cFunc.val();
 				Scope scope = this.getTermScope(ast);
@@ -389,7 +390,7 @@ public class StaticAnalysis {
 					Set<Declaration> decls = scope.getDeclarations(Namespace.PROCEDURE, procName);
 					if(decls.isEmpty()) {
 						// Proc cannot be resolved. Exception for this is already generated.
-						return CClassType.AUTO.asLeftHandSideType();
+						return Auto.LHSTYPE;
 					} else {
 						// TODO - Get the most specific type when multiple declarations exist.
 						return decls.iterator().next().getType();
@@ -399,7 +400,7 @@ public class StaticAnalysis {
 					exceptions.add(new ConfigCompileException("Procedure cannot be resolved (missing procedure scope,"
 							+ " this is an internal error that should never happen): "
 							+ procName, cFunc.getTarget()));
-					return CClassType.AUTO.asLeftHandSideType();
+					return Auto.LHSTYPE;
 				}
 			} else {
 				throw new Error("Unsupported " + CFunction.class.getSimpleName()
@@ -412,20 +413,20 @@ public class StaticAnalysis {
 				if(decls.isEmpty()) {
 					exceptions.add(new ConfigCompileException(
 							"Variable cannot be resolved: " + ivar.getVariableName(), ivar.getTarget()));
-					return LeftHandSideType.fromCClassType(CClassType.AUTO, Target.UNKNOWN);
+					return Auto.LHSTYPE;
 				} else {
 					LeftHandSideType[] types = new LeftHandSideType[decls.size()];
 					List<Declaration> declsList = new ArrayList<>(decls);
 					for(int i = 0; i < types.length; i++) {
 						types[i] = declsList.get(i).getType();
 					}
-					return LeftHandSideType.fromTypeUnion(Target.UNKNOWN, types);
+					return LeftHandSideType.fromTypeUnion(Target.UNKNOWN, env, types);
 				}
 			} else {
 				// If this runs, then an IVariable reference was created without setting its Scope using setTermScope().
 				exceptions.add(new ConfigCompileException("Variable cannot be resolved (missing variable scope, this is"
 						+ " an internal error that should never happen): " + ivar.getVariableName(), ivar.getTarget()));
-				return LeftHandSideType.fromCClassType(CClassType.AUTO, Target.UNKNOWN);
+				return Auto.LHSTYPE;
 			}
 		} else if(node instanceof Variable) {
 			if(ast.getFileOptions().isStrict()) {
@@ -440,11 +441,11 @@ public class StaticAnalysis {
 					= env.getEnv(CompilerEnvironment.class).potentialKeywordCompileErrors.get(node.getTarget());
 			exceptions.add(ex != null ? ex
 					: new ConfigCompileException("Unexpected keyword: " + node.val(), node.getTarget()));
-			return LeftHandSideType.fromCClassType(CClassType.AUTO, Target.UNKNOWN);
+			return Auto.LHSTYPE;
 		} else if(node instanceof CLabel cLabel) {
 			exceptions.add(new ConfigCompileException(
 					"Unexpected label: " + cLabel.cVal().val(), node.getTarget()));
-			return LeftHandSideType.fromCClassType(CClassType.AUTO, Target.UNKNOWN);
+			return Auto.LHSTYPE;
 		}
 
 		// The node is some other Construct, so return its type.
@@ -454,13 +455,14 @@ public class StaticAnalysis {
 		}
 		try {
 			// TODO - Add LHGU
-			return LeftHandSideType.fromCClassType(node.typeof(env), null, node.getTarget());
+			return LeftHandSideType.fromCClassType(new ConcreteGenericParameter(node.typeof(env), null,
+					node.getTarget(), env), node.getTarget(), env);
 		} catch(Throwable t) {
 			// Functions that might contain these unsupported objects should make sure that they don't type check them.
 			// In case an unsupported object causes an error here, it likely means that we have a syntax error.
 			exceptions.add(new ConfigCompileException("Unsupported AST node implementation in type checking: "
 					+ node.getClass().getSimpleName(), node.getTarget()));
-			return LeftHandSideType.fromCClassType(CClassType.AUTO, Target.UNKNOWN);
+			return Auto.LHSTYPE;
 		}
 	}
 

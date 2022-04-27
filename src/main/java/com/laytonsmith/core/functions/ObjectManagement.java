@@ -23,11 +23,12 @@ import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.constructs.generics.UnqualifiedGenericDeclaration;
-import com.laytonsmith.core.constructs.generics.UnqualifiedGenericParameters;
+import com.laytonsmith.core.constructs.generics.UnqualifiedGenericTypeParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.CREClassDefinitionError;
@@ -233,7 +234,7 @@ public class ObjectManagement {
 					= FullyQualifiedClassName.forFullyQualifiedClass(evaluateStringNoNull(nodes[3], t, env).val());
 
 			// 4 - Superclasses
-			LinkedHashSet<Pair<UnqualifiedClassName, UnqualifiedGenericParameters>> superclasses = new LinkedHashSet<>();
+			LinkedHashSet<Pair<UnqualifiedClassName, UnqualifiedGenericTypeParameters>> superclasses = new LinkedHashSet<>();
 			{
 				CArray su = evaluateArrayNoNull(nodes[4], "superclasses", t, env);
 				if(!type.canUseExtends() && !su.isEmpty(env)) {
@@ -258,7 +259,7 @@ public class ObjectManagement {
 			}
 
 			// 5 - Interfaces
-			LinkedHashSet<Pair<UnqualifiedClassName, UnqualifiedGenericParameters>> interfaces = new LinkedHashSet<>();
+			LinkedHashSet<Pair<UnqualifiedClassName, UnqualifiedGenericTypeParameters>> interfaces = new LinkedHashSet<>();
 			{
 				CArray su = evaluateArrayNoNull(nodes[5], "interfaces", t, env);
 				for(Mixed m : su) {
@@ -298,9 +299,11 @@ public class ObjectManagement {
 			if(nodes[9].getData() instanceof CNull) {
 				containingClass = null;
 			} else {
-				// TODO - Validate this isn't a type union
-				containingClass = ArgumentValidation.getClassType(evaluateMixed(nodes[9], t, env), t, env)
-						.getTypes().get(0).getKey();
+				LeftHandSideType lhst = ArgumentValidation.getClassType(evaluateMixed(nodes[9], t, env), t, env);
+				if(lhst.isTypeUnion()) {
+					throw new CREClassDefinitionError("Containing class cannot be a type union.", t);
+				}
+				containingClass = lhst.getTypes().get(0).getType();
 			}
 
 			// 10 - Class Comment
@@ -373,7 +376,7 @@ public class ObjectManagement {
 					// However, during the course of normal runtime, new classes are allowed to be defined, but they
 					// are defined and qualified at the same time, so they are ready for immediate use. The bulk compilation
 					// option is set only at first load, and then unset, so normal runtime will not have this flag set.
-					def.qualifyClasses(env);
+					def.qualifyClasses(env, t);
 				} catch (ConfigCompileGroupException ex) {
 					List<String> msgs = new ArrayList<>();
 					for(ConfigCompileException e : ex.getList()) {
@@ -508,7 +511,7 @@ public class ObjectManagement {
 				// TODO If this is a native object, we need to intercept the call to the native constructor,
 				// and grab the object generated there.
 			}
-			Map<CClassType, GenericParameters> genericParameters = null; // TODO
+			GenericParameters genericParameters = null; // TODO
 			Mixed obj = new UserObject(t, parent, env, od, genericParameters, null);
 			// This is the MethodScript construction.
 			if(constructor != null) {

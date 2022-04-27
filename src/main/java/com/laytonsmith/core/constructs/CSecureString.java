@@ -121,8 +121,9 @@ public final class CSecureString extends Construct {
 
 	public CArray getDecryptedCharCArray(Environment env) {
 		char[] array = getDecryptedCharArray();
-		CArray carray = new CArray(Target.UNKNOWN, array.length, GenericParameters
-			.addParameter(CString.TYPE, null).build(), env);
+		CArray carray = new CArray(Target.UNKNOWN, array.length, GenericParameters.emptyBuilder(CArray.TYPE)
+				.addNativeParameter(CString.TYPE, null)
+				.buildNative(), env);
 		for(char c : array) {
 			carray.push(new CString(c, Target.UNKNOWN), Target.UNKNOWN, env);
 		}
@@ -222,5 +223,10 @@ public final class CSecureString extends Construct {
 	@Override
 	public Set<ObjectModifier> getObjectModifiers() {
 		return EnumSet.of(ObjectModifier.FINAL);
+	}
+
+	@Override
+	public GenericParameters getGenericParameters() {
+		return null;
 	}
 }

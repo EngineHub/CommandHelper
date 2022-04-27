@@ -3,7 +3,6 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.ClassMirror;
 import com.laytonsmith.PureUtilities.ClassLoading.DynamicEnum;
-import com.laytonsmith.PureUtilities.Pair;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.MDynamicEnum;
 import com.laytonsmith.annotations.MEnum;
@@ -32,8 +31,8 @@ import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.ConcreteGenericParameter;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
-import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
@@ -219,8 +218,8 @@ public class Reflection {
 			} else if("varlist".equalsIgnoreCase(param)) {
 				if(args.length == 1) {
 					//No name provided
-					CArray ca = new CArray(t, GenericParameters
-						.addParameter(CString.TYPE, null).build(), env);
+					CArray ca = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+						.addNativeParameter(CString.TYPE, null).buildNative(), env);
 					for(String name : env.getEnv(GlobalEnv.class).GetVarList().keySet()) {
 						ca.push(new CString(name, t), t, env);
 					}
@@ -262,8 +261,8 @@ public class Reflection {
 						protocols.add(new CString(s, Target.UNKNOWN));
 					}
 				}
-				return new CArray(t, protocols, GenericParameters
-						.addParameter(CString.TYPE, null).build(), env);
+				return new CArray(t, protocols, GenericParameters.emptyBuilder(CArray.TYPE)
+						.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			} else if("enum".equalsIgnoreCase(param)) {
 				CArray a = new CArray(t, null, env);
 				Set<ClassMirror<? extends Enum>> enums = ClassDiscovery.getDefaultInstance().getClassesWithAnnotationThatExtend(MEnum.class, Enum.class);
@@ -360,15 +359,15 @@ public class Reflection {
 			CArray ret = new CArray(t, null, env);
 			ret.set("fqcn", types.val(), env);
 			ret.set("name", types.getSimpleName(), env);
-			ret.set("interfaces", new CArray(t, GenericParameters
-					.addParameter(CClassType.TYPE, null).build(), env, types.getTypeInterfaces(env)), t, env);
-			ret.set("superclasses", new CArray(t, GenericParameters
-					.addParameter(CClassType.TYPE, null).build(), env, types.getTypeSuperclasses(env)), t, env);
+			ret.set("interfaces", new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CClassType.TYPE, null).buildNative(), env, types.getTypeInterfaces(env)), t, env);
+			ret.set("superclasses", new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CClassType.TYPE, null).buildNative(), env, types.getTypeSuperclasses(env)), t, env);
 
 			CArray typeDocs = new CArray(t, null, env);
-			// When type unions are a thing, this will need to be implemented slightly differently.
-			for(Pair<CClassType, LeftHandGenericUse> pair : types.getTypes()) {
-				CClassType type = pair.getKey();
+
+			for(ConcreteGenericParameter pair : types.getTypes()) {
+				CClassType type = pair.getType();
 				CArray docs = CArray.GetAssociativeArray(t, null, env);
 				docs.set("package", type.getPackage() == null ? CNull.NULL : type.getPackage(), t, env);
 				docs.set("isNative", CBoolean.get(type.getNativeType() != null), t, env);
@@ -605,8 +604,8 @@ public class Reflection {
 				initf(env);
 			}
 			for(String cname : FUNCS.keySet()) {
-				CArray fnames = new CArray(t, GenericParameters
-						.addParameter(CString.TYPE, null).build(), env);
+				CArray fnames = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+						.addNativeParameter(CString.TYPE, null).buildNative(), env);
 				for(String fname : FUNCS.get(cname)) {
 					fnames.push(new CString(fname, t), t, env);
 				}
@@ -658,8 +657,8 @@ public class Reflection {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CArray ret = new CArray(t, GenericParameters
-					.addParameter(CString.TYPE, null).build(), env);
+			CArray ret = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			for(Event event : EventList.GetEvents()) {
 				ret.push(new CString(event.getName(), t), t, env);
 			}
@@ -708,8 +707,8 @@ public class Reflection {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CArray ret = new CArray(t, GenericParameters
-					.addParameter(CString.TYPE, null).build(), env);
+			CArray ret = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			for(Script s : Static.getAliasCore().getScripts()) {
 				ret.push(new CString(s.getSignature(), t), t, env);
 			}
@@ -809,8 +808,8 @@ public class Reflection {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CArray ret = new CArray(t, GenericParameters
-					.addParameter(CString.TYPE, null).build(), env);
+			CArray ret = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			for(Map.Entry<String, Procedure> p : env.getEnv(GlobalEnv.class).GetProcs().entrySet()) {
 				ret.push(new CString(p.getKey(), t), t, env);
 			}
@@ -875,8 +874,8 @@ public class Reflection {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CArray ret = new CArray(t, GenericParameters
-					.addParameter(CClassType.TYPE, null).build(), env);
+			CArray ret = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CClassType.TYPE, null).buildNative(), env);
 			ObjectDefinitionTable odt = env.getEnv(CompilerEnvironment.class).getObjectDefinitionTable();
 			for(ObjectDefinition od : odt.getObjectDefinitionSet()) {
 				ret.push(od.getType(), t, env);

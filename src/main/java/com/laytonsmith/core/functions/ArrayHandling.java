@@ -36,7 +36,7 @@ import com.laytonsmith.core.constructs.generics.ConstraintLocation;
 import com.laytonsmith.core.constructs.generics.Constraints;
 import com.laytonsmith.core.constructs.generics.GenericDeclaration;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
-import com.laytonsmith.core.constructs.generics.UnboundedConstraint;
+import com.laytonsmith.core.constructs.generics.constraints.UnboundedConstraint;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
@@ -72,7 +72,9 @@ import java.util.TreeSet;
 
 @SuppressWarnings("ALL")
 @core
-public class ArrayHandling {
+public final class ArrayHandling {
+
+	private ArrayHandling() {}
 
 	public static String docs() {
 		return "This class contains functions that provide a way to manipulate arrays. To create an array, use the"
@@ -102,7 +104,7 @@ public class ArrayHandling {
 			}
 			if(args[0].isInstanceOf(CArray.TYPE, null, env)
 					&& !(args[0] instanceof CMutablePrimitive)) {
-				return new CInt(((CArray) args[0]).size(env), t);
+				return new CInt(((Sizeable) args[0]).size(env), t);
 			}
 			throw new CRECastException("Argument 1 of " + this.getName() + " must be an array", t);
 		}
@@ -301,12 +303,12 @@ public class ArrayHandling {
 			Constraints tConstraints = new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
 					new UnboundedConstraint(Target.UNKNOWN, "T"));
 			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN, tConstraints);
-			LeftHandSideType t = LeftHandSideType.fromGenericDefinitionType(genericDeclaration, "T", null, Target.UNKNOWN);
+			LeftHandSideType t = LeftHandSideType.fromNativeGenericDefinitionType(genericDeclaration, "T", null);
 			return new SignatureBuilder(t)
-					.param(LeftHandSideType.fromCClassType(
-							ArrayAccess.TYPE, t.toLeftHandGenericUse(null), Target.UNKNOWN),
+					.param(LeftHandSideType.fromNativeCClassType(
+							ArrayAccess.TYPE, t.toNativeLeftHandGenericUse()),
 							"array", "The ArrayAccess object to read from.")
-					.param(LeftHandSideType.fromTypeUnion(Target.UNKNOWN,
+					.param(LeftHandSideType.fromNativeTypeUnion(
 							CInt.TYPE.asLeftHandSideType(), CSlice.TYPE.asLeftHandSideType(),
 							CString.TYPE.asLeftHandSideType()),
 							"index", "The index to read from.")
@@ -450,12 +452,11 @@ public class ArrayHandling {
 			Constraints tConstraints = new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
 					new UnboundedConstraint(Target.UNKNOWN, "T"));
 			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN, tConstraints);
-			LeftHandSideType t = LeftHandSideType.fromGenericDefinitionType(genericDeclaration, "T", null, Target.UNKNOWN);
+			LeftHandSideType t = LeftHandSideType.fromNativeGenericDefinitionType(genericDeclaration, "T", null);
 			return new SignatureBuilder(t)
-					.param(LeftHandSideType.fromCClassType(CArray.TYPE, t.toLeftHandGenericUse(null),
-							Target.UNKNOWN),
+					.param(LeftHandSideType.fromNativeCClassType(CArray.TYPE, t.toNativeLeftHandGenericUse()),
 							"array", "The array to set the value in.")
-					.param(LeftHandSideType.fromTypeUnion(Target.UNKNOWN,
+					.param(LeftHandSideType.fromNativeTypeUnion(
 							CInt.TYPE.asLeftHandSideType(), CString.TYPE.asLeftHandSideType()),
 							"index", "The index to write to.")
 					.param(t, "value", "The value to set in the array.")
@@ -550,10 +551,9 @@ public class ArrayHandling {
 			Constraints tConstraints = new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
 					new UnboundedConstraint(Target.UNKNOWN, "T"));
 			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN, tConstraints);
-			LeftHandSideType t = LeftHandSideType.fromGenericDefinitionType(genericDeclaration, "T", null, Target.UNKNOWN);
+			LeftHandSideType t = LeftHandSideType.fromNativeGenericDefinitionType(genericDeclaration, "T", null);
 			return new SignatureBuilder(CVoid.TYPE)
-					.param(LeftHandSideType.fromCClassType(CArray.TYPE,
-							t.toLeftHandGenericUse(null), Target.UNKNOWN),
+					.param(LeftHandSideType.fromNativeCClassType(CArray.TYPE, t.toNativeLeftHandGenericUse()),
 							"array", "The array to push the values in.")
 					.param(t, "pushValue", "The values to push in the array.")
 					.varParam(t, "additionalValues", "Additional values to push on to the array.")
@@ -662,10 +662,9 @@ public class ArrayHandling {
 			Constraints tConstraints = new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
 					new UnboundedConstraint(Target.UNKNOWN, "T"));
 			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN, tConstraints);
-			LeftHandSideType t = LeftHandSideType.fromGenericDefinitionType(genericDeclaration, "T", null, Target.UNKNOWN);
+			LeftHandSideType t = LeftHandSideType.fromNativeGenericDefinitionType(genericDeclaration, "T", null);
 			return new SignatureBuilder(CVoid.TYPE)
-					.param(LeftHandSideType.fromCClassType(CArray.TYPE,
-							t.toLeftHandGenericUse(null), Target.UNKNOWN),
+					.param(LeftHandSideType.fromNativeCClassType(CArray.TYPE, t.toNativeLeftHandGenericUse()),
 							"array", "The array to insert the value in.")
 					.param(CInt.TYPE, "index", "The index to insert at.")
 					.param(t, "value", "The value to insert in the array.")
@@ -748,10 +747,9 @@ public class ArrayHandling {
 			Constraints tConstraints = new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
 					new UnboundedConstraint(Target.UNKNOWN, "T"));
 			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN, tConstraints);
-			LeftHandSideType t = LeftHandSideType.fromGenericDefinitionType(genericDeclaration, "T", null, Target.UNKNOWN);
+			LeftHandSideType t = LeftHandSideType.fromNativeGenericDefinitionType(genericDeclaration, "T", null);
 			return new SignatureBuilder(CBoolean.TYPE)
-					.param(LeftHandSideType.fromCClassType(CArray.TYPE,
-							t.toLeftHandGenericUse(null), Target.UNKNOWN),
+					.param(LeftHandSideType.fromNativeCClassType(CArray.TYPE, t.toNativeLeftHandGenericUse()),
 							"array", "The array to search in.")
 					.param(t, "testValue", "The value to search for.")
 					.setGenericDeclaration(genericDeclaration, "The generic type of the array.")
@@ -863,10 +861,9 @@ public class ArrayHandling {
 			Constraints tConstraints = new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
 					new UnboundedConstraint(Target.UNKNOWN, "T"));
 			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN, tConstraints);
-			LeftHandSideType t = LeftHandSideType.fromGenericDefinitionType(genericDeclaration, "T", null, Target.UNKNOWN);
+			LeftHandSideType t = LeftHandSideType.fromNativeGenericDefinitionType(genericDeclaration, "T", null);
 			return new SignatureBuilder(CBoolean.TYPE)
-					.param(LeftHandSideType.fromCClassType(CArray.TYPE,
-							t.toLeftHandGenericUse(null), Target.UNKNOWN),
+					.param(LeftHandSideType.fromNativeCClassType(CArray.TYPE, t.toNativeLeftHandGenericUse()),
 							"array", "The array to search in.")
 					.param(t, "testValue", "The value to search for.")
 					.setGenericDeclaration(genericDeclaration, "The generic type of the array.")
@@ -922,10 +919,9 @@ public class ArrayHandling {
 			Constraints tConstraints = new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
 					new UnboundedConstraint(Target.UNKNOWN, "T"));
 			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN, tConstraints);
-			LeftHandSideType t = LeftHandSideType.fromGenericDefinitionType(genericDeclaration, "T", null, Target.UNKNOWN);
+			LeftHandSideType t = LeftHandSideType.fromNativeGenericDefinitionType(genericDeclaration, "T", null);
 			return new SignatureBuilder(CBoolean.TYPE)
-					.param(LeftHandSideType.fromCClassType(CArray.TYPE,
-							t.toLeftHandGenericUse(null), Target.UNKNOWN),
+					.param(LeftHandSideType.fromNativeCClassType(CArray.TYPE, t.toNativeLeftHandGenericUse()),
 							"array", "The array to search in.")
 					.param(t, "testValue", "The value to search for.")
 					.setGenericDeclaration(genericDeclaration, "The generic type of the array.")
@@ -1059,15 +1055,14 @@ public class ArrayHandling {
 			Constraints tConstraints = new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
 					new UnboundedConstraint(Target.UNKNOWN, "T"));
 			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN, tConstraints);
-			LeftHandSideType t = LeftHandSideType.fromGenericDefinitionType(genericDeclaration, "T", null, Target.UNKNOWN);
+			LeftHandSideType t = LeftHandSideType.fromNativeGenericDefinitionType(genericDeclaration, "T", null);
 			return new SignatureBuilder(CBoolean.TYPE)
-					.param(LeftHandSideType.fromCClassType(CArray.TYPE,
-							t.toLeftHandGenericUse(null), Target.UNKNOWN),
+					.param(LeftHandSideType.fromNativeCClassType(CArray.TYPE, t.toNativeLeftHandGenericUse()),
 							"array", "The array to search in.")
-					.param(LeftHandSideType.fromTypeUnion(Target.UNKNOWN,
+					.param(LeftHandSideType.fromNativeTypeUnion(
 							CInt.TYPE.asLeftHandSideType(), CString.TYPE.asLeftHandSideType()),
 							"index", "The index to check.")
-					.varParam(LeftHandSideType.fromTypeUnion(Target.UNKNOWN,
+					.varParam(LeftHandSideType.fromNativeTypeUnion(
 							CInt.TYPE.asLeftHandSideType(), CString.TYPE.asLeftHandSideType()),
 							"additionalIndices", "Additionaly indices to recurse down and check.")
 					.setGenericDeclaration(genericDeclaration, "The generic type of the array.")
@@ -1174,9 +1169,9 @@ public class ArrayHandling {
 			Constraints tConstraints = new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
 					new UnboundedConstraint(Target.UNKNOWN, "T"));
 			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN, tConstraints);
-			LeftHandSideType t = LeftHandSideType.fromGenericDefinitionType(genericDeclaration, "T", null, Target.UNKNOWN);
+			LeftHandSideType t = LeftHandSideType.fromNativeGenericDefinitionType(genericDeclaration, "T", null);
 			return new SignatureBuilder(CArray.TYPE, "A reference to the passed in array.")
-					.param(LeftHandSideType.fromCClassType(CArray.TYPE, t.toLeftHandGenericUse(null), Target.UNKNOWN),
+					.param(LeftHandSideType.fromNativeCClassType(CArray.TYPE, t.toNativeLeftHandGenericUse()),
 							"array", "The array to search in.")
 					.param(CInt.TYPE, "size", "The new array size.")
 					.param(t, "fill", "The value to fill in the array, null, by default", true)
@@ -1257,11 +1252,11 @@ public class ArrayHandling {
 				increment = ArgumentValidation.getInt(args[2], t, env);
 			}
 			if(start < finish && increment < 0 || start > finish && increment > 0 || increment == 0) {
-				return new CArray(t, GenericParameters
-						.addParameter(CInt.TYPE, null).build(), env);
+				return new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+						.addNativeParameter(CInt.TYPE, null).buildNative(), env);
 			}
-			CArray ret = new CArray(t, GenericParameters
-					.addParameter(CInt.TYPE, null).build(), env);
+			CArray ret = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CInt.TYPE, null).buildNative(), env);
 			for(long i = start; (increment > 0 ? i < finish : i > finish); i = i + increment) {
 				ret.push(new CInt(i, t), t, env);
 			}

@@ -251,8 +251,8 @@ public class Statistics {
 				}
 			}
 			List<Double> returns = mode(values);
-			CArray ret = new CArray(t, returns.size(), GenericParameters
-				.addParameter(CNumber.TYPE, null).build(), env);
+			CArray ret = new CArray(t, returns.size(), GenericParameters.emptyBuilder(CArray.TYPE)
+				.addNativeParameter(CNumber.TYPE, null).buildNative(), env);
 			for(Double d : returns) {
 				ret.push(new CDouble(d, t), t, env);
 			}

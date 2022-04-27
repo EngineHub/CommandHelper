@@ -1,8 +1,11 @@
-package com.laytonsmith.core.constructs.generics;
+package com.laytonsmith.core.constructs.generics.constraints;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.ConstraintLocation;
+import com.laytonsmith.core.constructs.generics.ConstraintToConstraintValidator;
+import com.laytonsmith.core.constructs.generics.ConstraintValidator;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREGenericConstraintException;
 
@@ -11,11 +14,9 @@ import java.util.EnumSet;
 import java.util.List;
 
 /**
- * A ConstructorConstraint is defined with <code>new T()</code>, optionally providing
- * types such as <code>new T(A, B, C)</code> where <code>A, B, C</code> are concrete types, and
- * <code>T</code> is the type variable.
- * This requires that the class provided by the use-site contains a constructor of the
- * specified type.
+ * A ConstructorConstraint is defined with <code>new T()</code>, optionally providing types such as
+ * <code>new T(A, B, C)</code> where <code>A, B, C</code> are concrete types, and <code>T</code> is the type variable.
+ * This requires that the class provided by the use-site contains a constructor of the specified type.
  */
 public class ConstructorConstraint extends Constraint {
 
@@ -23,6 +24,7 @@ public class ConstructorConstraint extends Constraint {
 
 	public ConstructorConstraint(Target t, String typename, List<LeftHandSideType> argTypes) {
 		super(t, typename);
+		ConstraintValidator.ValidateTypename(typename, t);
 		this.argTypes = argTypes;
 	}
 
@@ -34,23 +36,18 @@ public class ConstructorConstraint extends Constraint {
 	public String toSimpleString() {
 		return "new " + getTypeName() + "("
 				+ StringUtils.Join(argTypes,
-					", ",
-					", ",
-					", ",
-					"",
-					item -> item.getSimpleName())
+						", ",
+						", ",
+						", ",
+						"",
+						item -> item.getSimpleName())
 				+ ")";
 	}
 
 	@Override
 	public String toString() {
 		return "new " + getTypeName() + "("
-				+ StringUtils.Join(argTypes,
-					", ",
-					", ",
-					", ",
-					"",
-					item -> item.val())
+				+ StringUtils.Join(argTypes, ", ", item -> item.val())
 				+ ")";
 	}
 
@@ -95,7 +92,7 @@ public class ConstructorConstraint extends Constraint {
 
 			@Override
 			public Boolean isWithinBounds(UnboundedConstraint lhs) {
-				throw new Error("Unexpected constraint combination.");
+				return false;
 			}
 		};
 	}

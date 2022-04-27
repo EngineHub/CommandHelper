@@ -387,8 +387,8 @@ public class DataTransformations {
 			} catch (IOException ex) {
 				throw new CREFormatException(ex.getMessage(), t);
 			}
-			CArray arr = CArray.GetAssociativeArray(t, GenericParameters
-					.addParameter(CString.TYPE, null).build(), env);
+			CArray arr = CArray.GetAssociativeArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			for(String key : props.stringPropertyNames()) {
 				arr.set(key, props.getProperty(key), env);
 			}

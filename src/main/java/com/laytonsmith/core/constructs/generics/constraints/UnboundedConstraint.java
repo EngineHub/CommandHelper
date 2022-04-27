@@ -1,7 +1,10 @@
-package com.laytonsmith.core.constructs.generics;
+package com.laytonsmith.core.constructs.generics.constraints;
 
 import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.ConstraintLocation;
+import com.laytonsmith.core.constructs.generics.ConstraintToConstraintValidator;
+import com.laytonsmith.core.constructs.generics.ConstraintValidator;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREGenericConstraintException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
@@ -17,6 +20,7 @@ public class UnboundedConstraint extends Constraint {
 
 	public UnboundedConstraint(Target t, String typename) {
 		super(t, typename);
+		ConstraintValidator.ValidateTypename(typename, t);
 	}
 
 	@Override

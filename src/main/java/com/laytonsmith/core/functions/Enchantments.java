@@ -504,8 +504,8 @@ public class Enchantments {
 			if(CACHE.containsKey(name)) {
 				return CACHE.get(name).clone();
 			}
-			CArray ca = new CArray(t, GenericParameters
-					.addParameter(CString.TYPE, null).build(), env);
+			CArray ca = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			for(MCEnchantment e : StaticLayer.GetEnchantmentValues()) {
 				if(e.canEnchantItem(is)) {
 					ca.push(new CString(e.getKey(), t), t, env);
@@ -606,8 +606,8 @@ public class Enchantments {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCEnchantment[] enchantments = StaticLayer.GetEnchantmentValues();
-			CArray ret = new CArray(t, GenericParameters
-					.addParameter(CString.TYPE, null).build(), env);
+			CArray ret = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			for(MCEnchantment e : enchantments) {
 				ret.push(new CString(e.getKey(), t), t, env);
 			}

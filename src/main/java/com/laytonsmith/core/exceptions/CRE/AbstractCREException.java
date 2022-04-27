@@ -16,6 +16,7 @@ import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.ConcreteGenericParameter;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
 import com.laytonsmith.core.environments.Environment;
@@ -30,9 +31,7 @@ import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -43,8 +42,6 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 	private static final Class[] EMPTY_CLASS = new Class[0];
 
 	private List<StackTraceElement> stackTrace = null;
-
-	private final Map<CClassType, GenericParameters> genericParameters = new HashMap<>();
 
 	public AbstractCREException(String msg, Target t) {
 		super(msg, t);
@@ -306,7 +303,8 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 
 	@Override
 	public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhs, Environment env) {
-		return InstanceofUtil.isInstanceof(this, LeftHandSideType.fromCClassType(type, lhs, Target.UNKNOWN), env);
+		return InstanceofUtil.isInstanceof(this, LeftHandSideType.fromCClassType(
+				new ConcreteGenericParameter(type, lhs, Target.UNKNOWN, env), Target.UNKNOWN, env), env);
 	}
 
 	@Override
@@ -315,16 +313,8 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 	}
 
 	@Override
-	public final Map<CClassType, GenericParameters> getGenericParameters() {
-		if(genericParameters.isEmpty()) {
-			return null;
-		} else {
-			return genericParameters;
-		}
-	}
-
-	protected final void registerGenerics(CClassType type, GenericParameters genericParameters) {
-		this.genericParameters.put(type, genericParameters);
+	public GenericParameters getGenericParameters() {
+		return null;
 	}
 
 	@Override

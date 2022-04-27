@@ -378,8 +378,8 @@ public class BukkitBlockEvents {
 
 		@Override
 		public CArray getLines(Environment env) {
-			CArray retn = new CArray(Target.UNKNOWN, GenericParameters
-					.addParameter(CString.TYPE, null).build(), env);
+			CArray retn = new CArray(Target.UNKNOWN, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 
 			for(int i = 0; i < 4; i++) {
 				retn.push(new CString(pie.getLine(i), Target.UNKNOWN), Target.UNKNOWN, env);

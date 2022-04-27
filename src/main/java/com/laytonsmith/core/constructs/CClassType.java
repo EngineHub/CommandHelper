@@ -1,6 +1,7 @@
 package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.PureUtilities.Common.ArrayUtils;
+import com.laytonsmith.PureUtilities.Either;
 import com.laytonsmith.PureUtilities.ObjectHelpers;
 import com.laytonsmith.PureUtilities.ObjectHelpers.StandardField;
 import com.laytonsmith.PureUtilities.Pair;
@@ -10,16 +11,23 @@ import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
+import com.laytonsmith.core.constructs.generics.ConcreteGenericParameter;
+import com.laytonsmith.core.constructs.generics.ConstraintLocation;
 import com.laytonsmith.core.constructs.generics.Constraints;
 import com.laytonsmith.core.constructs.generics.GenericDeclaration;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.GenericTypeParameters;
 import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
+import com.laytonsmith.core.constructs.generics.LeftHandGenericUseParameter;
+import com.laytonsmith.core.constructs.generics.constraints.ExactType;
+import com.laytonsmith.core.constructs.generics.constraints.UnboundedConstraint;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREGenericConstraintException;
 import com.laytonsmith.core.exceptions.CRE.CREUnsupportedOperationException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.natives.interfaces.MEnumType;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.objects.AccessModifier;
@@ -31,19 +39,22 @@ import com.laytonsmith.core.objects.ObjectType;
 import com.laytonsmith.core.objects.UserObject;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.Stack;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * A CClassType represents a reference to a MethodScript class, which is generally used on the right hand side.
- * See {@link LeftHandSideType} for the left hand side equivalent.
+ * A CClassType represents a reference to a MethodScript class, which is generally used on the right hand side. See
+ * {@link LeftHandSideType} for the left hand side equivalent.
  */
 @typeof("ms.lang.ClassType")
 @SuppressWarnings("checkstyle:overloadmethodsdeclarationorder")
@@ -60,10 +71,22 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	private static final ClassTypeCache NATIVE_CACHE = new ClassTypeCache();
 
 	// The only types that can be created here are the ones that don't have a real class associated with them, or the
-	// TYPE value itself
+	// TYPE value itself, or values that are used in initialization of CClassType itself.
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
 	public static final CClassType TYPE;
 	public static final CClassType AUTO;
+	public static final CClassType MENUM_TYPE;
+	public static final CClassType ITERABLE_TYPE;
+	public static final CClassType ARRAY_ACCESS_TYPE;
+
+	/**
+	 * This type is used in generic definitions for when the type being defined is also used in the type. This
+	 * is then replaced with the type later, once it is actually completely defined. This cannot be used for any
+	 * other purpose, and is an invalid type.
+	 */
+	public static final CClassType RECURSIVE_DEFINITION
+			= new CClassType("f735051c_a5e7_4b9b_a96a_b84e9d0d2975", Target.UNKNOWN);
+
 	/**
 	 * Used to differentiate between null and uninitialized. Note that use of this type beyond simply checking if
 	 * something is java == to this is an Error.
@@ -149,7 +172,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		}
 
 		@Override
-		public Map<CClassType, GenericParameters> getGenericParameters() {
+		public GenericParameters getGenericParameters() {
 			throw new Error();
 		}
 
@@ -169,6 +192,23 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		try {
 			TYPE = new CClassType("ms.lang.ClassType", Target.UNKNOWN, null, CClassType.class);
 			AUTO = new CClassType("auto", Target.UNKNOWN, null, null);
+			ARRAY_ACCESS_TYPE = CClassType.getWithGenericDeclaration(ArrayAccess.class,
+				new GenericDeclaration(Target.UNKNOWN,
+					new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+							new UnboundedConstraint(Target.UNKNOWN, "T"))));
+			ITERABLE_TYPE = CClassType.getWithGenericDeclaration(com.laytonsmith.core.natives.interfaces.Iterable.class,
+					new GenericDeclaration(Target.UNKNOWN, new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+							new UnboundedConstraint(Target.UNKNOWN, "T"))))
+				.withSuperParameters(GenericTypeParameters.nativeBuilder(ARRAY_ACCESS_TYPE).addParameter("T", null))
+				.done();
+			MENUM_TYPE = CClassType.get(MEnumType.class)
+				.withSuperParameters(GenericTypeParameters.nativeBuilder(ITERABLE_TYPE)
+					.addParameter(CClassType.RECURSIVE_DEFINITION, null))
+				.done();
+			// Have to do it in this order for bootstrapping reasons.
+			TYPE.withSuperParameters(GenericTypeParameters.nativeBuilder(com.laytonsmith.core.natives.interfaces.Iterable.TYPE)
+					.addParameter(MENUM_TYPE, null))
+				.done();
 		} catch(ClassNotFoundException e) {
 			throw new Error(e);
 		}
@@ -187,7 +227,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	@StandardField
 	private final FullyQualifiedClassName fqcn;
 	@StandardField
-	private final Map<CClassType, GenericParameters> genericParameters;
+	private final GenericTypeParameters genericParameters;
 
 	/**
 	 * This is an invalid instance of the underlying type that can only be used for Documentation purposes or finding
@@ -248,6 +288,38 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 			classtype = defineClass(fqcn, generics, null, type);
 		} else {
 			classtype = getNakedClassType(fqcn, null);
+		}
+		return classtype;
+	}
+
+	/**
+	 * Returns the singular instance of CClassType that represents this type.
+	 * <p>
+	 * IMPORTANT: This MUST NOT be used to declare native classes. It can be used to get native classes, after the type
+	 * is first defined, but cannot be used for a first declaration. For user classes, this will define the class if it
+	 * doesn't exist.
+	 *
+	 * @param fqcn The type to get
+	 * @param generics The generic declaration for this class. Null, if it doesn't have any.
+	 * @param env The environment. May be null if the FQCN represents a native class, but required to be a non-null
+	 * otherwise.
+	 * @return A CClassType representing this class
+	 */
+	public static CClassType getWithGenericDeclaration(FullyQualifiedClassName fqcn, GenericDeclaration generics,
+			Environment env) {
+		ClassTypeCache cache;
+		if(fqcn.isNativeClassLoaded()) {
+			cache = NATIVE_CACHE;
+		} else {
+			cache = env.getEnv(GlobalEnv.class).GetClassCache();
+		}
+
+		CClassType classtype;
+		if(!cache.containsNakedClassType(fqcn)) {
+			// hasn't been defined yet
+			classtype = defineClass(fqcn, generics, env, fqcn.getNativeClass());
+		} else {
+			classtype = getNakedClassType(fqcn, env);
 		}
 		return classtype;
 	}
@@ -338,7 +410,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	 * defines a new T() constraint, then a class will be required in the generics, this cannot be inferred. If it's not
 	 * provided, then this will be thrown.
 	 */
-	public static CClassType get(CClassType nakedType, Target t, Map<CClassType, GenericParameters> generics, Environment env) {
+	public static CClassType get(CClassType nakedType, Target t, GenericTypeParameters generics, Environment env) {
 		return get(nakedType.getFQCN(), t, generics, env);
 	}
 
@@ -362,7 +434,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	 * defines a new T() constraint, then a class will be required in the generics, this cannot be inferred. If it's not
 	 * provided, then this will be thrown.
 	 */
-	public static CClassType get(Class<? extends Mixed> type, Target t, Map<CClassType, GenericParameters> generics, Environment env) {
+	public static CClassType get(Class<? extends Mixed> type, Target t, GenericTypeParameters generics, Environment env) {
 		try {
 			return get(FullyQualifiedClassName.forNativeClass(type), t, generics, env);
 		} catch(Error e) {
@@ -371,9 +443,9 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	}
 
 	/**
-	 * Returns the singular instance of CClassType that represents this MEnum type.
-	 * Note that in general, == is not supported for these types, even though in
-	 * general it is correct to say that for each type, there will only be one instance.
+	 * Returns the singular instance of CClassType that represents this MEnum type. Note that in general, == is not
+	 * supported for these types, even though in general it is correct to say that for each type, there will only be one
+	 * instance.
 	 *
 	 * @param type The native enum class. It is a runtime error if this type is not annotated with {@code @MEnum}
 	 * @param t The code target where this instance is being used.
@@ -405,7 +477,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	 * defines a new T() constraint, then a class will be required in the generics, this cannot be inferred. If it's not
 	 * provided, then this will be thrown.
 	 */
-	public static CClassType get(FullyQualifiedClassName type, Target t, Map<CClassType, GenericParameters> generics, Environment env) {
+	public static CClassType get(FullyQualifiedClassName type, Target t, GenericTypeParameters generics, Environment env) {
 		Objects.requireNonNull(type);
 		CClassType naked = getNakedClassType(type, env);
 		if(naked == CNull.TYPE || naked == CVoid.TYPE) {
@@ -417,27 +489,8 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 					+ " is not yet defined, it must be defined before use.");
 		}
 
-		for(CClassType chainType : InstanceofUtil.getAllCastableClasses(naked, env)) {
-			if(chainType.getGenericDeclaration() != null) {
-				if(generics == null) {
-					generics = new HashMap<>();
-				}
-				GenericParameters subGenerics = generics.get(chainType);
-				if(subGenerics == null) {
-					GenericParameters.GenericParametersBuilder builder = GenericParameters.emptyBuilder();
-					for(Constraints c : chainType.getGenericDeclaration().getConstraints()) {
-						// Inferred parameters, assuming these all pass, it's fine
-						builder.addParameter(c.convertFromDiamond(t).getType());
-					}
-					if(!builder.isEmpty()) {
-						generics.put(chainType, builder.build());
-					}
-				}
-			}
-		}
-
 		if(naked.getGenericDeclaration() == null) {
-			if(generics != null && generics.get(naked) != null) {
+			if(generics != null) {
 				throw new CRECastException("Generic parameters passed to " + type.getFQCN() + ", but none are"
 						+ " defined on the type.", t);
 			}
@@ -454,18 +507,19 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		} else {
 			// The constructor adds it to the cache
 			ctype = new CClassType(naked, t, generics, cache);
+			ctype.chainParameters = naked.chainParameters;
 		}
 		return ctype;
 	}
 
 	/**
 	 * Returns a CClassType that wraps a typename from a GenericDeclaration. Note that almost nothing in this type will
-	 * function correctly, as it is only meant to be a LHS type, hence why this method is package private.
+	 * function correctly, as it is only meant to be a LHS type.
 	 *
 	 * @param typename The type name
 	 * @return A thin CClassType wrapper around the typename.
 	 */
-	/*package*/ static CClassType getFromGenericTypeName(String typename, Target t) {
+	public static CClassType getFromGenericTypeName(String typename, Target t) {
 		return new CClassType(typename, t);
 	}
 
@@ -564,11 +618,11 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		this.genericDeclaration = null;
 	}
 
-	private static String getParametersString(CClassType nakedType, Map<CClassType, GenericParameters> genericParameters) {
+	private static String getParametersString(CClassType nakedType, GenericTypeParameters genericParameters) {
 		if(genericParameters == null) {
 			return "";
 		}
-		return genericParameters.get(nakedType).toString();
+		return "<" + genericParameters.toString() + ">";
 	}
 
 	/**
@@ -579,7 +633,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	 * @param genericParameters The concrete generic parameters
 	 */
 	@SuppressWarnings("LeakingThisInConstructor")
-	private CClassType(CClassType nakedType, Target t, Map<CClassType, GenericParameters> genericParameters, ClassTypeCache cache) {
+	private CClassType(CClassType nakedType, Target t, GenericTypeParameters genericParameters, ClassTypeCache cache) {
 		super(nakedType.getFQCN() + getParametersString(nakedType, genericParameters),
 				ConstructType.CLASS_TYPE, t);
 		this.genericDeclaration = nakedType.getGenericDeclaration(); // same declaration as "parent" class
@@ -694,7 +748,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 
 	@Override
 	public CClassType[] getInterfaces() {
-		return CClassType.EMPTY_CLASS_ARRAY;
+		return new CClassType[]{com.laytonsmith.core.natives.interfaces.Iterable.TYPE};
 	}
 
 	/**
@@ -726,7 +780,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		return new CPackage(Target.UNKNOWN, ArrayUtils.slice(parts, 0, parts.length - 2));
 	}
 
-	public Map<CClassType, GenericParameters> getTypeGenericParameters() {
+	public GenericTypeParameters getTypeGenericParameters() {
 		return genericParameters;
 	}
 
@@ -903,14 +957,192 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		return genericDeclaration;
 	}
 
+	/**
+	 * Returns the generic parameters for CClassType itself, which are always null. You most likely want
+	 * {@link #getTypeGenericParameters()}.
+	 * @return
+	 */
+	@Override
+	public GenericParameters getGenericParameters() {
+		return null;
+	}
+
 	public LeftHandSideType asLeftHandSideType() {
 		return LeftHandSideType.fromHardCodedType(this);
+	}
+
+	/**
+	 * Returns the set of generic parameters for the given superclass, perhaps using the parameters provided to the
+	 * specific subclass. For instance, if we have {@code class A<T, U> extends B<U>}, and we want to see if the value
+	 * {@code A<some, thing>} is instanceof {@code B<thing>}, then we need to convert the generic parameters to
+	 * {@code <thing>} and then compare. Not everything needs the types passed in, for instance byte_array does
+	 * not have generic parameters, but it extends {@code array<string>}, so the returned parameters for
+	 * the byte_array class (with null parameters passed in) would return string.
+	 * <p>
+	 * The superClass must be in the set of castable classes, or an error is thrown.
+	 *
+	 * @param superClass The superclass to get the parameters for.
+	 * @param parameters The parameters associated with this class type. These may be empty if there aren't any, but
+	 * should be provided as is if they do exist.
+	 * @param env The environment.
+	 * @return The generic parameters for the given supertype.
+	 */
+	public LeftHandGenericUse getSuperclassGenerics(CClassType superClass, LeftHandGenericUse parameters, Environment env) {
+		if(this.getNakedType(env).equals(superClass.getNakedType(env))) {
+			// No transformation needed
+			return parameters;
+		}
+
+		// First, we have to find a path through the castable classes to the specified one. There could be multiple
+		// paths due to diamond inheritance, but for the purposes of generics, it actually doesn't matter which
+		// path we choose.
+		Stack<CClassType> path = new Stack<>();
+		if(!findPath(this.getNakedType(env), superClass.getNakedType(env), env, path)) {
+			throw new Error(this.getSimpleName() + " is not a subclass of " + superClass.getSimpleName());
+		}
+
+		// Found it, need to walk through the types, converting as we go.
+
+		LeftHandGenericUse ret = parameters;
+		CClassType current = this;
+		for(CClassType p : path) {
+			ret = getDirectSuperclassGenerics(current, p, ret, env);
+			current = p;
+		}
+		return ret;
+	}
+
+	private boolean chainParametersDone = false;
+	// This field is accessed reflectively, don't change the name.
+	private Map<CClassType, GenericTypeParameters> chainParameters = new HashMap<>();
+
+	/**
+	 * Adds the given superclass's generic parameters. For instance, if this is {@code class A} which extends
+	 * {@code class B<int>}, then when defining A.TYPE, after calling CClass.get(...) it should chain
+	 * {@code .withSuperParameters(GenericTypeParameters.nativeBuilder(B.TYPE).addParameter(CInt.TYPE, null)).done()}.
+	 * If multiple classes with parameters are extended, those can be chained, as the method returns {@code this}.
+	 * <p>
+	 * Indirect superclasses need not be considered, as they should also build themselves like this.
+	 *
+	 * @param parametersBuilder The GenericTypeParameters builder.
+	 * They may contain locally defined typenames, which will be properly resolved based on this class's
+	 * definition and input parameters.
+	 * @return
+	 */
+	public CClassType withSuperParameters(GenericTypeParameters.GenericTypeParametersBuilder parametersBuilder) {
+		if(chainParametersDone) {
+			throw new Error("withSuperParameters should only be called during TYPE definition.");
+		}
+		GenericTypeParameters parameters = parametersBuilder.buildWithSubclassDefinition(this);
+		Objects.requireNonNull(parameters);
+		for(Either<LeftHandSideType, Pair<String, Constraints>> param : parameters.getParameters()) {
+			if(!param.hasLeft() && !param.hasRight()) {
+				throw new Error("Parameters may not be empty");
+			}
+			if(param.hasLeft()) {
+				for(ConcreteGenericParameter p : param.getLeft().get().getTypes()) {
+					if(p.getType() == null) {
+						throw new Error("Parameters may not be null");
+					}
+				}
+			} else {
+				if(param.getRight().get().getKey() == null) {
+					throw new Error("Parameters may not have a null typename");
+				}
+				if(param.getRight().get().getValue() == null) {
+					throw new Error("Parameters may not have null typename constraints");
+				}
+			}
+		}
+		chainParameters.put(parameters.getForType(), parameters);
+		return this;
+	}
+
+	/**
+	 * Called after all necessary {@code withSuperParameters} calls are completed, preventing future ones from
+	 * accidentally being called.
+	 * @return
+	 */
+	public CClassType done() {
+		chainParametersDone = true;
+		return this;
+	}
+
+	private LeftHandGenericUse getDirectSuperclassGenerics(CClassType current, CClassType superClass, LeftHandGenericUse parameters, Environment env) {
+		GenericTypeParameters typeParameters = current.chainParameters.get(superClass);
+		if(typeParameters == null) {
+			// There are none, just return null. We still have to keep going though.
+			return null;
+		}
+		// We need to (possibly) resolve all typename parameters based on the current class's parameters.
+		if(!typeParameters.hasTypenames()) {
+			return typeParameters.toLeftHandGenericUse();
+		} else {
+			List<LeftHandGenericUseParameter> newParams = new ArrayList<>();
+			int i = 0;
+			for(Either<LeftHandSideType, Pair<String, Constraints>> param : typeParameters.getParameters()) {
+				if(param.hasLeft()) {
+					newParams.add(param.getLeft().get().toLeftHandGenericUse(superClass, Target.UNKNOWN, env, ConstraintLocation.RHS, i));
+				} else {
+					String typename = param.getRight().get().getKey();
+					for(int k = 0; k < current.getGenericDeclaration().getConstraints().size(); k++) {
+						if(typename.equals(current.getGenericDeclaration().getConstraints().get(k).getTypeName())) {
+							if(parameters == null) {
+								newParams.add(new LeftHandGenericUseParameter(Either.left(
+										new Constraints(Target.UNKNOWN, ConstraintLocation.RHS,
+												new ExactType(Target.UNKNOWN, Auto.LHSTYPE)))));
+							} else {
+								newParams.add(parameters.getParameters().get(k));
+							}
+							break;
+						}
+					}
+				}
+				i++;
+			}
+			return new LeftHandGenericUse(superClass, Target.UNKNOWN, null, newParams);
+		}
+	}
+
+	private static boolean findPath(CClassType startNode, CClassType parentNode, Environment env, Stack<CClassType> path) {
+		// All classes must be passed in naked
+		for(CClassType superClass : startNode.getTypeSuperclasses(env)) {
+			if(superClass.equals(parentNode)) {
+				path.add(parentNode);
+				return true; // Found
+			}
+		}
+
+		for(CClassType superClass : startNode.getTypeInterfaces(env)) {
+			if(superClass.equals(parentNode)) {
+				path.add(parentNode);
+				return true;
+			}
+		}
+
+		// Not found, need to go deeper
+		for(CClassType superClass : startNode.getTypeSuperclasses(env)) {
+			path.push(superClass);
+			if(findPath(superClass, parentNode, env, path)) {
+				return true;
+			}
+			path.pop();
+		}
+
+		for(CClassType superClass : startNode.getTypeInterfaces(env)) {
+			path.push(superClass);
+			if(findPath(superClass, parentNode, env, path)) {
+				return true;
+			}
+			path.pop();
+		}
+		return false;
 	}
 
 	// For accessor reasons, this must remain an inner class. The class should be public, but the methods private.
 	public static class ClassTypeCache {
 
-		private final Map<Pair<FullyQualifiedClassName, Map<CClassType, GenericParameters>>, CClassType> cache;
+		private final Map<Pair<FullyQualifiedClassName, GenericTypeParameters>, CClassType> cache;
 
 		public ClassTypeCache() {
 			cache = Collections.synchronizedMap(new HashMap<>());
@@ -924,7 +1156,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		 * definition, but also if this is the naked class.
 		 * @param type The CClassType.
 		 */
-		private void add(FullyQualifiedClassName fqcn, Map<CClassType, GenericParameters> parameters, CClassType type) {
+		private void add(FullyQualifiedClassName fqcn, GenericTypeParameters parameters, CClassType type) {
 			cache.put(new Pair<>(fqcn, parameters), type);
 		}
 
@@ -944,14 +1176,14 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		 * @param declaration The parameter declaration. Null if this is a type without a parameter declaration, or if
 		 * you wish to get the naked class.
 		 */
-		private CClassType get(FullyQualifiedClassName fqcn, Map<CClassType, GenericParameters> declaration) {
+		private CClassType get(FullyQualifiedClassName fqcn, GenericTypeParameters declaration) {
 			return cache.get(new Pair<>(fqcn, declaration));
 		}
 
 		/**
 		 * Returns true if the cache contains this class.
 		 */
-		private boolean contains(FullyQualifiedClassName fqcn, Map<CClassType, GenericParameters> declaration) {
+		private boolean contains(FullyQualifiedClassName fqcn, GenericTypeParameters declaration) {
 			return get(fqcn, declaration) != null;
 		}
 

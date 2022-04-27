@@ -756,8 +756,8 @@ public class Scheduling {
 			//Let's sort the timezones
 			List<String> tz = new ArrayList<>(Arrays.asList(timezones));
 			Collections.sort(tz);
-			CArray ret = new CArray(t, GenericParameters
-					.addParameter(CString.TYPE, null).build(), env);
+			CArray ret = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			for(String s : tz) {
 				ret.push(new CString(s, t), t, env);
 			}

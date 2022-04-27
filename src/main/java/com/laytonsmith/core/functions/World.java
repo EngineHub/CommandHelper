@@ -1096,8 +1096,8 @@ public class World {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CArray worlds = new CArray(t, GenericParameters
-					.addParameter(CString.TYPE, null).build(), env);
+			CArray worlds = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			for(MCWorld w : Static.getServer().getWorlds()) {
 				worlds.push(new CString(w.getName(), t), t, env);
 			}
@@ -1669,8 +1669,8 @@ public class World {
 				throw new CREInvalidWorldException("Unknown world: " + args[0].val(), t);
 			}
 			if(args.length == 1) {
-				CArray gameRules = CArray.GetAssociativeArray(t, GenericParameters
-						.addParameter(CString.TYPE, null).build(), env);
+				CArray gameRules = CArray.GetAssociativeArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+						.addNativeParameter(CString.TYPE, null).buildNative(), env);
 				for(String gameRule : world.getGameRules()) {
 					gameRules.set(new CString(gameRule, t),
 							Static.resolveConstruct(world.getGameRuleValue(gameRule), t, env), t, env);

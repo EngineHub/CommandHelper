@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.Common.Annotations.InterfaceRunnerFor;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.constructs.CClassType;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 
 /**
  *
@@ -29,6 +30,11 @@ public class SizeableRunner extends AbstractMixedInterfaceRunner {
 	@Override
 	public CClassType[] getInterfaces() {
 		return CClassType.EMPTY_CLASS_ARRAY;
+	}
+
+	@Override
+	public GenericParameters getGenericParameters() {
+		return null;
 	}
 
 }

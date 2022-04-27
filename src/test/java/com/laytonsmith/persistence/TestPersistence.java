@@ -374,7 +374,9 @@ public class TestPersistence {
 		Environment env = Static.GenerateStandaloneEnvironment();
 		Target t = Target.UNKNOWN;
 		new Persistence.store_value().exec(Target.UNKNOWN, env, null, new CString("testKey", t), new CString("007", t));
-		Mixed value = new Persistence.get_value().exec(Target.UNKNOWN, env, GenericParameters.addParameter(CInt.TYPE, null).build(),
+		Mixed value = new Persistence.get_value().exec(Target.UNKNOWN, env, GenericParameters
+				.emptyBuilder(new Persistence.get_value().getSignatures().getSignatures().get(0))
+				.addNativeParameter(CInt.TYPE, null).buildNative(),
 				new CString("testKey", t));
 		assertEquals(CInt.TYPE, value.typeof(env));
 		assertEquals(7, ((CInt) value).getInt());

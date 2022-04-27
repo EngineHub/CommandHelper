@@ -1550,8 +1550,8 @@ public class PlayerEvents {
 				Map<String, Mixed> map = evaluate_helper(e);
 				//Fill in the event parameters
 				map.put("message", new CString(event.getMessage(), Target.UNKNOWN));
-				CArray ca = new CArray(Target.UNKNOWN, GenericParameters
-						.addParameter(CString.TYPE, null).build(), env);
+				CArray ca = new CArray(Target.UNKNOWN, GenericParameters.emptyBuilder(CArray.TYPE)
+						.addNativeParameter(CString.TYPE, null).buildNative(), env);
 				for(MCPlayer recipient : event.getRecipients()) {
 					ca.push(new CString(recipient.getName(), Target.UNKNOWN), Target.UNKNOWN, env);
 				}
@@ -1690,8 +1690,8 @@ public class PlayerEvents {
 				Map<String, Mixed> map = evaluate_helper(e);
 				//Fill in the event parameters
 				map.put("message", new CString(event.getMessage(), Target.UNKNOWN));
-				CArray ca = new CArray(Target.UNKNOWN, GenericParameters
-					.addParameter(CString.TYPE, null).build(), env);
+				CArray ca = new CArray(Target.UNKNOWN, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 				for(MCPlayer recipient : event.getRecipients()) {
 					ca.push(new CString(recipient.getName(), Target.UNKNOWN), Target.UNKNOWN, env);
 				}
@@ -2389,8 +2389,8 @@ public class PlayerEvents {
 					oldBookArray.set("author", CNull.NULL, Target.UNKNOWN, env);
 				}
 				if(oldBookMeta.hasPages()) {
-					CArray pages = new CArray(Target.UNKNOWN, GenericParameters
-							.addParameter(CString.TYPE, null).build(), env);
+					CArray pages = new CArray(Target.UNKNOWN, GenericParameters.emptyBuilder(CArray.TYPE)
+							.addNativeParameter(CString.TYPE, null).buildNative(), env);
 					for(String page : oldBookMeta.getPages()) {
 						pages.push(new CString(page, Target.UNKNOWN), Target.UNKNOWN, env);
 					}
@@ -2412,8 +2412,8 @@ public class PlayerEvents {
 					newBookArray.set("author", CNull.NULL, Target.UNKNOWN, env);
 				}
 				if(newBookMeta.hasPages()) {
-					CArray pages = new CArray(Target.UNKNOWN, GenericParameters
-						.addParameter(CString.TYPE, null).build(), env);
+					CArray pages = new CArray(Target.UNKNOWN, GenericParameters.emptyBuilder(CArray.TYPE)
+						.addNativeParameter(CString.TYPE, null).buildNative(), env);
 					for(String page : newBookMeta.getPages()) {
 						pages.push(new CString(page, Target.UNKNOWN), Target.UNKNOWN, env);
 					}

@@ -1,8 +1,9 @@
 package com.laytonsmith.core.constructs;
 
-import com.laytonsmith.PureUtilities.Pair;
 import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.core.constructs.generics.ConcreteGenericParameter;
 import com.laytonsmith.core.constructs.generics.ConstraintValidator;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
@@ -72,9 +73,9 @@ public class IVariable extends Construct implements Cloneable {
 			throw new CRECastException("Void may not be assigned to a variable", t);
 		}
 		boolean hasValidType = true;
-		for(Pair<CClassType, LeftHandGenericUse> types : type.getTypes()) {
-			LeftHandGenericUse genericDefinition = types.getValue();
-			CClassType subType = types.getKey();
+		for(ConcreteGenericParameter types : type.getTypes()) {
+			LeftHandGenericUse genericDefinition = types.getLeftHandGenericUse();
+			CClassType subType = types.getType();
 			if(subType.equals(CVoid.TYPE)) {
 				throw new CRECastException("Variables may not be of type void", t);
 			}
@@ -174,6 +175,11 @@ public class IVariable extends Construct implements Cloneable {
 	@Override
 	public CClassType[] getInterfaces() {
 		return new CClassType[]{};
+	}
+
+	@Override
+	public GenericParameters getGenericParameters() {
+		return null;
 	}
 
 }

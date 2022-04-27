@@ -1383,8 +1383,8 @@ public class ObjectGenerator {
 	 * @return the vector array
 	 */
 	public CArray vector(Vector3D vector, Target t, Environment env) {
-		CArray ca = CArray.GetAssociativeArray(t, GenericParameters
-				.addParameter(CDouble.TYPE, null).build(), env);
+		CArray ca = CArray.GetAssociativeArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+				.addNativeParameter(CDouble.TYPE, null).buildNative(), env);
 		//Integral keys first
 		ca.set(0, new CDouble(vector.X(), t), t, env);
 		ca.set(1, new CDouble(vector.Y(), t), t, env);
@@ -1911,8 +1911,8 @@ public class ObjectGenerator {
 			if(list.length == 1) {
 				ret.set("input", new CString(list[0].getName(), t), t, env);
 			} else {
-				CArray mats = new CArray(t, GenericParameters
-						.addParameter(CString.TYPE, null).build(), env);
+				CArray mats = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+						.addNativeParameter(CString.TYPE, null).buildNative(), env);
 				for(MCMaterial mat : recipe.getInput()) {
 					mats.push(new CString(mat.getName(), t), t, env);
 				}
@@ -1947,8 +1947,8 @@ public class ObjectGenerator {
 				} else if(entry.getValue().length == 1) {
 					imap.set(entry.getKey().toString(), entry.getValue()[0].getName(), t, env);
 				} else {
-					CArray materials = new CArray(t, GenericParameters
-							.addParameter(CString.TYPE, null).build(), env);
+					CArray materials = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+							.addNativeParameter(CString.TYPE, null).buildNative(), env);
 					for(MCMaterial mat : entry.getValue()) {
 						materials.push(new CString(mat.getName(), t), t, env);
 					}
@@ -1961,8 +1961,8 @@ public class ObjectGenerator {
 			if(list.length == 1) {
 				ret.set("input", new CString(list[0].getName(), t), t, env);
 			} else {
-				CArray mats = new CArray(t, GenericParameters
-						.addParameter(CString.TYPE, null).build(), env);
+				CArray mats = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+						.addNativeParameter(CString.TYPE, null).buildNative(), env);
 				for(MCMaterial mat : list) {
 					mats.push(new CString(mat.getName(), t), t, env);
 				}
@@ -1973,8 +1973,8 @@ public class ObjectGenerator {
 			if(base.length == 1) {
 				ret.set("base", new CString(base[0].getName(), t), t, env);
 			} else {
-				CArray mats = new CArray(t, GenericParameters
-						.addParameter(CString.TYPE, null).build(), env);
+				CArray mats = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+						.addNativeParameter(CString.TYPE, null).buildNative(), env);
 				for(MCMaterial mat : base) {
 					mats.push(new CString(mat.getName(), t), t, env);
 				}
@@ -1984,8 +1984,8 @@ public class ObjectGenerator {
 			if(additions.length == 1) {
 				ret.set("addition", new CString(additions[0].getName(), t), t, env);
 			} else {
-				CArray mats = new CArray(t, GenericParameters
-						.addParameter(CString.TYPE, null).build(), env);
+				CArray mats = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+						.addNativeParameter(CString.TYPE, null).buildNative(), env);
 				for(MCMaterial mat : additions) {
 					mats.push(new CString(mat.getName(), t), t, env);
 				}

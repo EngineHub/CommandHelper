@@ -371,8 +371,8 @@ public class PluginMeta {
 						"Could not find the internal Messenger object (are you running in cmdline mode?)", t);
 			}
 			Set<String> chans = messenger.getIncomingChannels();
-			CArray arr = new CArray(t, GenericParameters
-					.addParameter(CString.TYPE, null).build(), env);
+			CArray arr = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 
 			for(String chan : chans) {
 				arr.push(new CString(chan, t), t, env);

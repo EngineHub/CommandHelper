@@ -10,6 +10,7 @@ import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.ConcreteGenericParameter;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
 import com.laytonsmith.core.environments.Environment;
@@ -25,14 +26,14 @@ import java.util.Set;
  * A UserObject represents an instance of an object that was defined in MethodScript, i.e. we have no native
  * class reference here.
  */
-public class UserObject implements Mixed {
+public final class UserObject implements Mixed {
 
 	private static int objectIdCounter = 0;
 
 	private final Environment env;
 	private final Target t;
 	private final ObjectDefinition objectDefinition;
-	private final Map<CClassType, GenericParameters> genericParameters;
+	private final GenericParameters genericParameters;
 
 	private final Map<String, Mixed> fieldTable;
 
@@ -53,7 +54,7 @@ public class UserObject implements Mixed {
 	 * if this is not a native object, this should be null.
 	 */
 	public UserObject(Target t, Script parent, Environment env, ObjectDefinition objectDefinition,
-			Map<CClassType, GenericParameters> genericParameters, Mixed nativeObject) {
+			GenericParameters genericParameters, Mixed nativeObject) {
 		this.t = t;
 		this.env = env;
 		this.objectDefinition = objectDefinition;
@@ -161,16 +162,17 @@ public class UserObject implements Mixed {
 	@Override
 	public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env) {
 		return InstanceofUtil.isInstanceof(this, LeftHandSideType
-				.fromCClassType(type, lhsGenericParameters, Target.UNKNOWN), env);
+				.fromCClassType(
+						new ConcreteGenericParameter(type, lhsGenericParameters, Target.UNKNOWN, env), Target.UNKNOWN, env), env);
 	}
 
 	@Override
 	public final CClassType typeof(Environment env) {
-		return CClassType.get(objectDefinition.getType(), Target.UNKNOWN, this.getGenericParameters(), env);
+		return objectDefinition.getType();
 	}
 
 	@Override
-	public Map<CClassType, GenericParameters> getGenericParameters() {
+	public GenericParameters getGenericParameters() {
 		return genericParameters;
 	}
 

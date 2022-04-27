@@ -1,16 +1,23 @@
 package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
-import com.laytonsmith.PureUtilities.Pair;
+import com.laytonsmith.PureUtilities.Either;
 import com.laytonsmith.annotations.typeof;
+import com.laytonsmith.core.constructs.generics.ConcreteGenericParameter;
+import com.laytonsmith.core.constructs.generics.ConstraintLocation;
+import com.laytonsmith.core.constructs.generics.Constraints;
 import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
+import com.laytonsmith.core.constructs.generics.LeftHandGenericUseParameter;
+import com.laytonsmith.core.constructs.generics.constraints.ExactType;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -168,8 +175,6 @@ public class InstanceofUtil {
 	 */
 	public static boolean isInstanceof(
 			CClassType type, CClassType instanceofThis, LeftHandGenericUse instanceofThisGenerics, Environment env) {
-//		instanceofThis = (instanceofThis != null ? CClassType.getNakedClassType(instanceofThis.getFQCN(), env) : null);
-
 		// Handle special cases.
 		if((type == instanceofThis && instanceofThisGenerics == null) // Identity short circuit
 				|| instanceofThis == null // java null on RHS defined as true for implementation purposes
@@ -187,37 +192,40 @@ public class InstanceofUtil {
 				) {
 			return false;
 		}
+		return isInstanceof(type.asLeftHandSideType(), new ConcreteGenericParameter(instanceofThis,
+				instanceofThisGenerics, Target.UNKNOWN, env).asLeftHandSideType(), env);
 
-		/*
-		In general at this point, all special cases have been handled, so the approach is to validate that the
-		naked type is instanceof the specified value, and then if not, return false. If it is, we also need to
-		validate that the generics match, because A<int> is instanceof A<int> but not A<string>.
-		 */
-		// Get cached result or compute and cache result.
-		CClassType nakedType = type.getNakedType(env);
-		Set<CClassType> castableClasses = getAllCastableClasses(nakedType, env);
-
-		// Return the result.
-		if(!castableClasses.contains(instanceofThis.getNakedType(env))) {
-			return false;
-		}
-		// The classes match, validate generics.
-
-		if(instanceofThis.getGenericDeclaration() != null && instanceofThisGenerics == null) {
-			// Pull up the actual class's generics
-			instanceofThisGenerics = instanceofThis.getTypeGenericParameters().get(instanceofThis.getNakedType(env))
-					.toLeftHandEquivalent(instanceofThis, env);
-		}
-		// No generics defined on the RHS, or they are defined, but the LHS doesn't provide them,
-		// so implied <auto>, so they pass.
-		if(instanceofThis.getGenericDeclaration() == null || instanceofThisGenerics == null) {
-			return true;
-		}
-
-		// They are defined on the class, AND some were provided. If they pass this, they are instanceof, otherwise
-		// they aren't.
-		return type.getTypeGenericParameters().get(instanceofThis.getNakedType(env))
-				.isInstanceof(instanceofThisGenerics, env);
+//
+//		/*
+//		In general at this point, all special cases have been handled, so the approach is to validate that the
+//		naked type is instanceof the specified value, and then if not, return false. If it is, we also need to
+//		validate that the generics match, because A<int> is instanceof A<int> but not A<string>.
+//		 */
+//		// Get cached result or compute and cache result.
+//		CClassType nakedType = type.getNakedType(env);
+//		Set<CClassType> castableClasses = getAllCastableClasses(nakedType, env);
+//
+//		// Return the result.
+//		if(!castableClasses.contains(instanceofThis.getNakedType(env))) {
+//			return false;
+//		}
+//		// The classes match, validate generics.
+//
+//		if(instanceofThis.getGenericDeclaration() != null && instanceofThisGenerics == null) {
+//			// Pull up the actual class's generics
+//			instanceofThisGenerics = instanceofThis.getTypeGenericParameters()
+//					.toLeftHandGenericUse();
+//		}
+//		// No generics defined on the RHS, or they are defined, but the LHS doesn't provide them,
+//		// so implied <auto>, so they pass.
+//		if(instanceofThis.getGenericDeclaration() == null || instanceofThisGenerics == null) {
+//			return true;
+//		}
+//
+//		// They are defined on the class, AND some were provided. If they pass this, they are instanceof, otherwise
+//		// they aren't.
+//		return type.getTypeGenericParameters()
+//				.isInstanceof(instanceofThisGenerics, env);
 	}
 
 	// TODO: Harmonize and combine these two methods, and put the CClassType one in terms of the LHS one.
@@ -251,18 +259,18 @@ public class InstanceofUtil {
 		if(checkClasses == null || superClasses == null) {
 			return false;
 		}
-		if("auto".equals(checkClasses.getTypes().get(0).getKey() == null
-				? "" : checkClasses.getTypes().get(0).getKey().getFQCN().getFQCN())) {
+		if("auto".equals(checkClasses.getTypes().get(0).getType() == null
+				? "" : checkClasses.getTypes().get(0).getType().getFQCN().getFQCN())) {
 			return true;
 		}
-		if("auto".equals(superClasses.getTypes().get(0).getKey() == null
-				? "" : superClasses.getTypes().get(0).getKey().getFQCN().getFQCN())) {
+		if("auto".equals(superClasses.getTypes().get(0).getType() == null
+				? "" : superClasses.getTypes().get(0).getType().getFQCN().getFQCN())) {
 			return true;
 		}
-		if(superClasses.getTypes().get(0).getKey() == null) {
+		if(superClasses.getTypes().get(0).getType() == null) {
 			return true;
 		}
-		if(checkClasses.getTypes().get(0).getKey() == null) {
+		if(checkClasses.getTypes().get(0).getType() == null) {
 			return false;
 		}
 
@@ -283,26 +291,61 @@ public class InstanceofUtil {
 			return false;
 		}
 
-		for(Pair<CClassType, LeftHandGenericUse> checkClass : checkClasses.getTypes()) {
+		for(ConcreteGenericParameter checkClass : checkClasses.getTypes()) {
 			boolean anyExtend = false;
-			CClassType checkClassType = checkClass.getKey();
+			CClassType checkClassType = checkClass.getType();
 			Set<CClassType> castableClasses = null;
 			if(checkClassType.getNativeType() == null) {
 				castableClasses = getAllCastableClasses(checkClassType, env);
 			}
-			LeftHandGenericUse checkLHGU = checkClass.getValue();
-			for(Pair<CClassType, LeftHandGenericUse> superClass : superClasses.getTypes()) {
-				CClassType superClassType = superClass.getKey();
-				LeftHandGenericUse superLHGU = superClass.getValue();
+			LeftHandGenericUse checkLHGU = checkClass.getLeftHandGenericUse();
+			if(checkLHGU == null) {
+				// Check if the actual type has parameters
+				if(checkClassType.getGenericParameters() != null) {
+					checkLHGU = checkClassType.getGenericParameters()
+							.toLeftHandEquivalent(checkClassType, env);
+				}
+			}
+			if(checkLHGU == null
+					&& checkClassType.getGenericDeclaration() != null
+					&& checkClassType.getGenericDeclaration().getParameterCount() > 0) {
+				// Synthesize it from autos
+				List<LeftHandGenericUseParameter> params = new ArrayList<>();
+				for(Constraints c : checkClassType.getGenericDeclaration().getConstraints()) {
+					params.add(new LeftHandGenericUseParameter(Either.left(
+							new Constraints(Target.UNKNOWN, ConstraintLocation.RHS,
+									new ExactType(Target.UNKNOWN, Auto.LHSTYPE)))));
+				}
+				checkLHGU = new LeftHandGenericUse(checkClassType, Target.UNKNOWN, env, params);
+			}
+			for(ConcreteGenericParameter superClass : superClasses.getTypes()) {
+				CClassType superClassType = superClass.getType();
+				LeftHandGenericUse superLHGU = superClass.getLeftHandGenericUse();
+				if(superLHGU == null && superClass.getType().getTypeGenericParameters() != null) {
+					superLHGU = superClass.getType().getTypeGenericParameters().toLeftHandGenericUse();
+				}
+				if(superLHGU == null
+						&& superClassType.getGenericDeclaration() != null
+						&& superClassType.getGenericDeclaration().getParameterCount() > 0) {
+					// Synthesize it from autos
+					List<LeftHandGenericUseParameter> params = new ArrayList<>();
+					for(Constraints c : superClassType.getGenericDeclaration().getConstraints()) {
+						params.add(new LeftHandGenericUseParameter(Either.left(
+								new Constraints(Target.UNKNOWN, ConstraintLocation.RHS,
+										new ExactType(Target.UNKNOWN, Auto.LHSTYPE)))));
+					}
+					superLHGU = new LeftHandGenericUse(superClassType, Target.UNKNOWN, env, params);
+				}
+
 				// Check if check extends super, if so, set anyExtend to true and break
 				if(checkClassType.equals(superClassType) && checkLHGU == null && superLHGU == null) {
 					// more efficient check
 					anyExtend = true;
 					break;
 				}
-				// TODO: This is currently being done in a very lazy way. It needs to be reworked.
-				// For now, this is ok, but will not work once user types are added.
-				if(checkClassType.getNativeType() != null && superClassType.getNativeType() != null) {
+
+				if(checkClassType.getNativeType() != null && superClassType.getNativeType() != null
+						&& checkLHGU == null && superLHGU == null) {
 					// Since native classes are not allowed to extend multiple superclasees, but
 					// in general, they are allowed to advertise that they do, for the sake of
 					// methodscript, this can only be used to return true. If it returns true, it
@@ -319,32 +362,26 @@ public class InstanceofUtil {
 					castableClasses = getAllCastableClasses(checkClassType, env);
 				}
 
-				if(!castableClasses.contains(superClassType)) {
+				if(!castableClasses.contains(superClassType.getNakedType(env))) {
 					continue;
 				}
 
-				if(checkLHGU == null) {
-					// Check if the actual type has parameters
-					if(checkClassType.getGenericParameters() != null) {
-						checkLHGU = checkClassType.getGenericParameters().get(checkClassType)
-								.toLeftHandEquivalent(checkClassType, env);
-					}
-				}
 				if(checkLHGU == null && superLHGU == null) {
 					anyExtend = true;
 					break;
 				}
 				// At this point, the types match or are castable, but we also need to consider the generics.
-				// For same type, this is easy, but for say, B<string, int> extends A<string>, this is instanceof,
-				// but we have to select the correct generic parameters to compare, because string, int != string.
-				if(castableClasses == null) {
-					castableClasses = getAllCastableClasses(checkClassType, env);
-				}
-
-				if(checkLHGU != null && checkLHGU.isWithinBounds(env, superLHGU)) {
+				// They may not be the same type. We need to convert the generic parameters into the right supertype
+				// and then compare. For instance, if class A<T, U> extends B<U>, then we need to convert <T, U>
+				// into <U>, then compare against superLHGU. But actually, some classes might not have generics
+				// at all, so it's just up to each class to tell us the parameters.
+				checkLHGU = checkClassType.getSuperclassGenerics(superClass.getType(), checkLHGU, env);
+				if((superLHGU == null && checkLHGU == null)
+						|| (superLHGU != null && superLHGU.isWithinBounds(env, checkLHGU))) {
 					anyExtend = true;
 					break;
 				}
+
 			}
 			if(!anyExtend) {
 				// All of the check classes must extend any of the super classes.
@@ -369,7 +406,8 @@ public class InstanceofUtil {
 	 */
 	public static boolean isAssignableTo(CClassType type, CClassType instanceofThis, LeftHandGenericUse instanceofThisGenerics, Environment env) {
 		return isAssignableTo(type == null ? null : type.asLeftHandSideType(),
-				LeftHandSideType.fromCClassType(instanceofThis, instanceofThisGenerics, Target.UNKNOWN), env);
+				LeftHandSideType.fromCClassType(
+						new ConcreteGenericParameter(instanceofThis, instanceofThisGenerics, Target.UNKNOWN, env), Target.UNKNOWN, env), env);
 	}
 
 	/**
@@ -391,10 +429,10 @@ public class InstanceofUtil {
 	public static boolean isAssignableTo(LeftHandSideType type, LeftHandSideType instanceofThis, Environment env) {
 		if(type != null && !type.isTypeUnion()) {
 			// Only one iteration here
-			for(Pair<CClassType, LeftHandGenericUse> t : type.getTypes()) {
+			for(ConcreteGenericParameter t : type.getTypes()) {
 				// TODO: Check for NotNull anntoation on instanceofThis
-				if(t.getKey() != null) {
-					if(CNull.TYPE.equals(t.getKey().getNakedType(env))) {
+				if(t.getType() != null) {
+					if(CNull.TYPE.equals(t.getType().getNakedType(env))) {
 						return true;
 					}
 				}

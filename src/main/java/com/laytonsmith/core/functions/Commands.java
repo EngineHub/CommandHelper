@@ -587,8 +587,8 @@ public class Commands {
 				ca.set("permission", permission, t, env);
 				ca.set("nopermmsg", new CString(command.getPermissionMessage(), t), t, env);
 				ca.set("usage", new CString(command.getUsage(), t), t, env);
-				CArray aliases = new CArray(t, GenericParameters
-						.addParameter(CString.TYPE, null).build(), env);
+				CArray aliases = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+						.addNativeParameter(CString.TYPE, null).buildNative(), env);
 				for(String a : command.getAliases()) {
 					aliases.push(new CString(a, t), t, env);
 				}

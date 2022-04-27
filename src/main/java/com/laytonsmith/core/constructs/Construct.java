@@ -6,6 +6,7 @@ import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.constructs.generics.ConcreteGenericParameter;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
 import com.laytonsmith.core.environments.Environment;
@@ -14,6 +15,7 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.objects.AccessModifier;
 import com.laytonsmith.core.objects.ObjectModifier;
 import com.laytonsmith.core.objects.ObjectType;
+import com.laytonsmith.core.objects.UserObject;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -508,18 +510,26 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	}
 
 	/**
-	 * Returns the typeof for the given class, using the same mechanism as the default.(Whether or not that subtype
-	 * overrode the original typeof() method.
+	 * Returns the typeof for the given native class, using the same mechanism as the default. (Whether or not that
+	 * subtype overrode the original typeof() method.
 	 *
 	 * @param that
 	 * @param env
 	 * @return
 	 */
 	public static CClassType typeof(Mixed that, Environment env) {
-		return CClassType.get(that.getClass(), that.getTarget(), that.getGenericParameters(), env);
+		CClassType naked;
+		if(that instanceof UserObject uo) {
+			naked = uo.typeof(env);
+		} else {
+			naked = CClassType.get(that.getClass());
+		}
+		if(that.getGenericParameters() == null) {
+			return naked;
+		}
+		return CClassType.get(naked, Target.UNKNOWN,
+				that.getGenericParameters().toGenericTypeParameters(naked, Target.UNKNOWN, env), env);
 	}
-
-	private final Map<CClassType, GenericParameters> genericParameters = new HashMap<>();
 
 	/**
 	 * Returns the generic parameters for this Construct. By default, null, but this MUST be overridden by objects which
@@ -528,26 +538,8 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	 * @return
 	 */
 	@Override
-	public Map<CClassType, GenericParameters> getGenericParameters() {
-		if(genericParameters.isEmpty()) {
-			return null;
-		} else {
-			return genericParameters;
-		}
-	}
-
-	/**
-	 * Returns the GenericParameters that was registered to this class.
-	 * @param env The environment.
-	 * @return The generic parameters for this class, or null, if none were registered with
-	 * {@link #registerGenericParameters}
-	 */
-	protected GenericParameters getThisGenericParameters(Environment env) {
-		return genericParameters.get(this.typeof(env));
-	}
-
-	protected final void registerGenericParameters(CClassType type, GenericParameters parameters) {
-		this.genericParameters.put(type, parameters);
+	public GenericParameters getGenericParameters() {
+		return null;
 	}
 
 	/**
@@ -649,7 +641,8 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 			return false;
 		}
 		return InstanceofUtil.isInstanceof(this,
-				LeftHandSideType.fromCClassType(type, lhsGenericParameters, Target.UNKNOWN), env);
+				LeftHandSideType.fromCClassType(
+						new ConcreteGenericParameter(type, lhsGenericParameters, Target.UNKNOWN, env), Target.UNKNOWN, env), env);
 	}
 
 	/**

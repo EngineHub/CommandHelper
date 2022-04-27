@@ -198,7 +198,7 @@ public final class LLVMArgumentValidation {
 	public static IRData getAny(IRBuilder builder, Environment env, ParseTree c, Target t) throws ConfigCompileException {
 		LLVMEnvironment e = env.getEnv(LLVMEnvironment.class);
 		if(c.isConst()) {
-			IRType datatype = convertCClassTypeToIRType(LeftHandSideType.fromCClassType(c.getData().typeof(env), t), env);
+			IRType datatype = convertCClassTypeToIRType(LeftHandSideType.fromCClassType(c.getData().typeof(env), t, env), env);
 			String data = getValueFromConstant(builder, c, env);
 			int alloca = e.getNewLocalVariableReference(datatype);
 			int load = e.getNewLocalVariableReference(datatype);

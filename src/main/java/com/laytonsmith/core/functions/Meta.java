@@ -457,8 +457,8 @@ public class Meta {
 			}
 
 			List<String> completions = command.tabComplete(sender, commandString, arguments);
-			CArray ret = new CArray(t, GenericParameters
-					.addParameter(CString.TYPE, null).build(), env);
+			CArray ret = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			for(String s : completions) {
 				ret.push(new CString(s, t), t, env);
 			}
@@ -1293,8 +1293,8 @@ public class Meta {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CArray ret = new CArray(t, GenericParameters
-					.addParameter(CString.TYPE, null).build(), env);
+			CArray ret = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			for(FileOptions.CompilerOption s : FileOptions.CompilerOption.values()) {
 				ret.push(new CString(s.getName(), t), t, env);
 			}
@@ -1343,8 +1343,8 @@ public class Meta {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CArray ret = new CArray(t, GenericParameters
-					.addParameter(CString.TYPE, null).build(), env);
+			CArray ret = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			for(FileOptions.SuppressWarning s : FileOptions.SuppressWarning.values()) {
 				ret.push(new CString(s.getName(), t), t, env);
 			}
@@ -1685,8 +1685,8 @@ public class Meta {
 			CArray annotations = CArray.GetAssociativeArray(t, null, env);
 			ret.set("annotations", annotations, t, env);
 			for(Map.Entry<String, List<String>> entry : comment.getAnnotations().entrySet()) {
-				CArray list = new CArray(t, entry.getValue().size(), GenericParameters
-						.addParameter(CString.TYPE, null).build(), env);
+				CArray list = new CArray(t, entry.getValue().size(), GenericParameters.emptyBuilder(CArray.TYPE)
+						.addNativeParameter(CString.TYPE, null).buildNative(), env);
 				for(String s : entry.getValue()) {
 					list.push(new CString(s, t), t, env);
 				}

@@ -4,8 +4,11 @@ import com.laytonsmith.PureUtilities.Common.Annotations.ForceImplementation;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.GenericTypeParameters;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.objects.ObjectType;
@@ -17,7 +20,9 @@ import com.laytonsmith.core.objects.ObjectType;
 public class CREThrowable extends AbstractCREException {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get(CREThrowable.class);
+	public static final CClassType TYPE = CClassType.get(CREThrowable.class)
+			.withSuperParameters(GenericTypeParameters.nativeBuilder(ArrayAccess.TYPE).addParameter(Auto.TYPE, null))
+			.done();
 
 	@ForceImplementation
 	public CREThrowable(String msg, Target t) {
@@ -87,6 +92,11 @@ public class CREThrowable extends AbstractCREException {
 
 	@Override
 	public CClassType getContainingClass() {
+		return null;
+	}
+
+	@Override
+	public GenericParameters getGenericParameters() {
 		return null;
 	}
 

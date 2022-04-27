@@ -797,8 +797,8 @@ public class MobManagement {
 			if(eq.getHolder() instanceof MCPlayer) {
 				throw new CREBadEntityException(getName() + " does not work on players.", t);
 			}
-			CArray ret = CArray.GetAssociativeArray(t, GenericParameters
-				.addParameter(CDouble.TYPE, null).build(), env);
+			CArray ret = CArray.GetAssociativeArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+				.addNativeParameter(CDouble.TYPE, null).buildNative(), env);
 			for(Map.Entry<MCEquipmentSlot, Float> ent : eq.getAllDropChances().entrySet()) {
 				ret.set(ent.getKey().name(), new CDouble(ent.getValue(), t), t, env);
 			}

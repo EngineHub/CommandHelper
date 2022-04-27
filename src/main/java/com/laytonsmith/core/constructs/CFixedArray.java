@@ -7,8 +7,10 @@ import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.constructs.generics.ConstraintLocation;
 import com.laytonsmith.core.constructs.generics.Constraints;
-import com.laytonsmith.core.constructs.generics.UnboundedConstraint;
+import com.laytonsmith.core.constructs.generics.constraints.UnboundedConstraint;
 import com.laytonsmith.core.constructs.generics.GenericDeclaration;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.GenericTypeParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREIndexOverflowException;
@@ -35,14 +37,18 @@ public class CFixedArray extends Construct implements
 			new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
 				new UnboundedConstraint(Target.UNKNOWN, "T")));
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.getWithGenericDeclaration(CFixedArray.class, GEN);
+	public static final CClassType TYPE = CClassType.getWithGenericDeclaration(CFixedArray.class, GEN)
+			.withSuperParameters(GenericTypeParameters.nativeBuilder(com.laytonsmith.core.natives.interfaces.Iterable.TYPE)
+				.addParameter("T", null))
+			.done();
 	private final Mixed[] data;
-	private final CClassType allowedType;
-
-	public CFixedArray(Target t, CClassType type, int size) {
-		super(type.getSimpleName() + "[" + size + "]", ConstructType.ARRAY, t);
+	private final GenericParameters genericParameters;
+	private final LeftHandSideType allowedType;
+	public CFixedArray(Target t, GenericParameters parameters, int size) {
+		super(parameters.getParameters().get(0).toString() + "[" + size + "]", ConstructType.ARRAY, t);
 		data = new Mixed[size];
-		allowedType = type;
+		genericParameters = parameters;
+		this.allowedType = parameters.getParameters().get(0);
 	}
 
 	@Override
@@ -83,7 +89,8 @@ public class CFixedArray extends Construct implements
 
 	private void validateSet(Mixed value, Target t, Environment env) {
 		if(!value.typeof(env).doesExtend(env, allowedType)) {
-			throw new CRECastException("Cannot set value of type " + value.typeof(env).toString() + " into fixed_array of type " + allowedType.toString(), t);
+			throw new CRECastException("Cannot set value of type "
+					+ value.typeof(env).toString() + " into fixed_array of type " + allowedType.toString(), t);
 		}
 	}
 
@@ -152,5 +159,10 @@ public class CFixedArray extends Construct implements
 	@Override
 	public Version since() {
 		return MSVersion.V3_3_5;
+	}
+
+	@Override
+	public GenericParameters getGenericParameters() {
+		return genericParameters;
 	}
 }

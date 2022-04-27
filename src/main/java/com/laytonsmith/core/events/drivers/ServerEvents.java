@@ -207,8 +207,8 @@ public class ServerEvents {
 				ret.put("motd", new CString(event.getMOTD(), t));
 				ret.put("players", new CInt(event.getNumPlayers(), t));
 				ret.put("maxplayers", new CInt(event.getMaxPlayers(), t));
-				CArray players = new CArray(t, GenericParameters
-						.addParameter(CString.TYPE, null).build(), env);
+				CArray players = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+						.addNativeParameter(CString.TYPE, null).buildNative(), env);
 				for(MCPlayer player : event.getPlayers()) {
 					players.push(new CString(player.getName(), t), t, env);
 				}
@@ -307,8 +307,8 @@ public class ServerEvents {
 				Target t = Target.UNKNOWN;
 				Map<String, Mixed> ret = evaluate_helper(event);
 				ret.put("sender", new CString(e.getCommandSender().getName(), t));
-				CArray comp = new CArray(t, GenericParameters
-						.addParameter(CString.TYPE, null).build(), env);
+				CArray comp = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+						.addNativeParameter(CString.TYPE, null).buildNative(), env);
 				if(e.getCompletions() != null) {
 					for(String c : e.getCompletions()) {
 						comp.push(new CString(c, t), t, env);
@@ -316,8 +316,8 @@ public class ServerEvents {
 				}
 				ret.put("completions", comp);
 				ret.put("command", new CString(e.getCommand().getName(), t));
-				CArray args = new CArray(t, GenericParameters
-						.addParameter(CString.TYPE, null).build(), env);
+				CArray args = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+						.addNativeParameter(CString.TYPE, null).buildNative(), env);
 				for(String a : e.getArguments()) {
 					args.push(new CString(a, t), t, env);
 				}
@@ -501,8 +501,8 @@ public class ServerEvents {
 			MCBroadcastMessageEvent event = (MCBroadcastMessageEvent) e;
 			Map<String, Mixed> map = evaluate_helper(e);
 			map.put("message", new CString(event.getMessage(), Target.UNKNOWN));
-			CArray cRecipients = new CArray(Target.UNKNOWN, GenericParameters
-					.addParameter(CString.TYPE, null).build(), env);
+			CArray cRecipients = new CArray(Target.UNKNOWN, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			for(MCPlayer player : event.getPlayerRecipients()) {
 				cRecipients.push(new CString(player.getName(), Target.UNKNOWN), Target.UNKNOWN, env);
 			}

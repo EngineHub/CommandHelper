@@ -16,6 +16,7 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCCommandSender;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.api.Platforms;
+import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
@@ -24,16 +25,20 @@ import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Command;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Variable;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.GenericTypeParameters;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
@@ -69,6 +74,9 @@ import java.util.logging.Logger;
 import static com.laytonsmith.testing.StaticTest.Run;
 import static com.laytonsmith.testing.StaticTest.SRun;
 import java.awt.HeadlessException;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -184,6 +192,33 @@ public class RandomTests {
 			}
 		}
 
+		// Ensure everything with a GenericsParameter field also overrides getGenericParameters.
+		for(Class<? extends Mixed> c : ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(typeof.class, Mixed.class)) {
+			boolean hasGenerics = false;
+			for(Field f : c.getDeclaredFields()) {
+				if(f.getType() == GenericParameters.class) {
+					hasGenerics = true;
+					break;
+				}
+			}
+			if(hasGenerics && !ReflectionUtils.hasDeclaredMethod(c, "getGenericParameters", GenericParameters.class)) {
+				uhohs.put(c.getName(), new RuntimeException("Class does not override getGenericParameters, but contains generic parameters"));
+			}
+
+			CClassType type = ReflectionUtils.get(c, "TYPE");
+			if(type.equals(CVoid.TYPE) || type.equals(CNull.TYPE)) {
+				continue;
+			}
+			List<CClassType> supers = new ArrayList<>(Arrays.asList(type.getTypeSuperclasses(null)));
+			supers.addAll(Arrays.asList(type.getTypeInterfaces(env)));
+			Map<CClassType, GenericTypeParameters> chainParameters = ReflectionUtils.get(CClassType.class, type, "chainParameters");
+			for(CClassType val : supers) {
+				if(val.getGenericDeclaration() != null && !chainParameters.containsKey(val)) {
+					uhohs.put(type.getNativeType() + " does not provide generic chain parameters for " + val.getNativeType(), null);
+				}
+			}
+		}
+
 		if(!StaticTest.brokenJunk.isEmpty()) {
 			System.err.println("There " + StringUtils.PluralTemplateHelper(StaticTest.brokenJunk.size(), "is %d test that has", "are %d tests that have") + " a failure in extreme circumstances.");
 			for(String s : StaticTest.brokenJunk) {
@@ -193,7 +228,10 @@ public class RandomTests {
 		if(!uhohs.isEmpty()) {
 			StringBuilder b = new StringBuilder();
 			for(String key : uhohs.keySet()) {
-				b.append(key).append(" threw: ").append(uhohs.get(key)).append("\n");
+				b.append(key);
+				if(uhohs.get(key) != null) {
+					b.append(" threw: ").append(uhohs.get(key)).append("\n");
+				}
 			}
 			String output = ("There was/were " + uhohs.size() + " boilerplate failure(s). Output:\n" + b.toString());
 			StreamUtils.GetSystemOut().println(output);

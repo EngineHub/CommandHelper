@@ -110,7 +110,7 @@ public abstract class LLVMFunction implements FunctionBase, Function {
 		List<LeftHandSideType> ret = new ArrayList<>();
 		if(generics != null) {
 			// Explicit parameters were provided, just use those.
-			return generics.getParameters();
+			generics.getParameters();
 		}
 		for(ParseTree child : children) {
 			ret.add(child.getDeclaredType(analysis, env, Auto.LHSTYPE));
@@ -125,7 +125,7 @@ public abstract class LLVMFunction implements FunctionBase, Function {
 	@Override
 	public LeftHandSideType getReturnType(ParseTree node, Target t, List<LeftHandSideType> argTypes, List<Target> argTargets,
 			LeftHandSideType inferredType, Environment env, Set<ConfigCompileException> exceptions) {
-		return LeftHandSideType.fromCClassType(CClassType.AUTO, t); // No information is available about the return type.
+		return LeftHandSideType.fromNativeCClassType(CClassType.AUTO); // No information is available about the return type.
 	}
 
 	/**

@@ -1,6 +1,7 @@
 
 package com.laytonsmith.core;
 
+import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
 import com.laytonsmith.core.compiler.TokenStream;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.Auto;
@@ -76,7 +77,7 @@ public class StaticAnalysisTest {
 		} catch(ConfigCompileGroupException ex) {
 			StringBuilder b = new StringBuilder();
 			for(ConfigCompileException e : ex.getList()) {
-				b.append(e.toString()).append("\n");
+				b.append(e.toString()).append(" cause: ").append(StackTraceUtils.GetStacktrace(e)).append("\n");
 			}
 			throw new ConfigCompileException(b.toString(), Target.UNKNOWN, ex);
 		}

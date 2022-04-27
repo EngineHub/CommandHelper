@@ -1,6 +1,5 @@
 package com.laytonsmith.core.constructs.generics;
 
-import com.laytonsmith.PureUtilities.MapBuilder;
 import com.laytonsmith.PureUtilities.Pair;
 import com.laytonsmith.core.UnqualifiedClassName;
 import com.laytonsmith.core.constructs.CClassType;
@@ -9,7 +8,6 @@ import com.laytonsmith.core.environments.Environment;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * An UnqualifiedGenericParameters class represents the generic parameters at the intermediate stage of compilation,
@@ -20,7 +18,7 @@ import java.util.Map;
  * Unqualified versions of each component can be created and stored with their own code targets, so that compiler errors
  * can be more specific, instead of highlighting the entire parameter set.
  */
-public class UnqualifiedGenericParameters {
+public class UnqualifiedGenericTypeParameters {
 
 	private final List<Pair<UnqualifiedClassName, UnqualifiedLeftHandGenericUse>> parameters = new ArrayList<>();
 
@@ -29,15 +27,13 @@ public class UnqualifiedGenericParameters {
 	 * defined with a null parameter set.
 	 *
 	 * @param forType
-	 * @param t
 	 * @param env
+	 * @param t
 	 * @return
 	 * @throws ClassNotFoundException
 	 */
-	public Map<CClassType, GenericParameters> qualify(CClassType forType,
-			Target t, Environment env) throws ClassNotFoundException {
-		// TODO: Add superclasses here
-		GenericParameters.GenericParametersBuilder p = GenericParameters.emptyBuilder();
+	public GenericTypeParameters qualify(CClassType forType, Environment env, Target t) throws ClassNotFoundException {
+		GenericTypeParameters.GenericTypeParametersBuilder p = GenericTypeParameters.emptyBuilder(forType, t, env);
 		for(int i = 0; i < parameters.size(); i++) {
 			Pair<UnqualifiedClassName, UnqualifiedLeftHandGenericUse> pair = parameters.get(i);
 			UnqualifiedClassName ucn = pair.getKey();
@@ -45,19 +41,19 @@ public class UnqualifiedGenericParameters {
 			CClassType type = CClassType.getNakedClassType(ucn.getFQCN(env), env);
 			LeftHandGenericUse lhgu = ulhgu.qualify(forType, env);
 			if(p == null) {
-				p = GenericParameters.addParameter(type, lhgu);
+				p = GenericTypeParameters.addParameter(forType, t, env, type, lhgu);
 			} else {
 				p.addParameter(type, lhgu);
 			}
 		}
-		return p == null ? null : MapBuilder.start(forType, p.build());
+		return p == null ? null : p.build();
 	}
 
 	public static final class UnqualifiedGenericParametersBuilder {
 
-		UnqualifiedGenericParameters p;
+		UnqualifiedGenericTypeParameters p;
 
-		private UnqualifiedGenericParametersBuilder(UnqualifiedGenericParameters p) {
+		private UnqualifiedGenericParametersBuilder(UnqualifiedGenericTypeParameters p) {
 			this.p = p;
 		}
 
@@ -85,7 +81,7 @@ public class UnqualifiedGenericParameters {
 		 *
 		 * @return
 		 */
-		public UnqualifiedGenericParameters build() {
+		public UnqualifiedGenericTypeParameters build() {
 			return p;
 		}
 	}
@@ -105,7 +101,7 @@ public class UnqualifiedGenericParameters {
 	 */
 	public static UnqualifiedGenericParametersBuilder addParameter(UnqualifiedClassName type,
 			UnqualifiedLeftHandGenericUse genericStatement) {
-		return new UnqualifiedGenericParametersBuilder(new UnqualifiedGenericParameters())
+		return new UnqualifiedGenericParametersBuilder(new UnqualifiedGenericTypeParameters())
 				.addParameter(type, genericStatement);
 	}
 

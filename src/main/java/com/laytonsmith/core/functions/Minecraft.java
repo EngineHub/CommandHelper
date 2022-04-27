@@ -655,8 +655,8 @@ public class Minecraft {
 			}
 			if(index == 8 || index == -1) {
 				//Array of op's
-				CArray co = new CArray(t, GenericParameters
-						.addParameter(CString.TYPE, null).build(), null);
+				CArray co = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+						.addNativeParameter(CString.TYPE, null).buildNative(), null);
 				List<MCOfflinePlayer> so = server.getOperators();
 				for(MCOfflinePlayer o : so) {
 					if(o == null) {
@@ -669,8 +669,8 @@ public class Minecraft {
 			}
 			if(index == 9 || index == -1) {
 				//Array of plugins
-				CArray co = new CArray(t, GenericParameters
-						.addParameter(CString.TYPE, null).build(), env);
+				CArray co = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+						.addNativeParameter(CString.TYPE, null).buildNative(), env);
 				MCPluginManager plugManager = server.getPluginManager();
 				if(plugManager == null) {
 					throw new CRENotFoundException(this.getName()
@@ -1033,8 +1033,8 @@ public class Minecraft {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCServer s = Static.getServer();
-			CArray ret = new CArray(t, GenericParameters
-					.addParameter(CString.TYPE, null).build(), env);
+			CArray ret = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			for(String ip : s.getIPBans()) {
 				ret.push(new CString(ip, t), t, env);
 			}
@@ -1384,8 +1384,8 @@ public class Minecraft {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CArray mats = new CArray(t, GenericParameters
-					.addParameter(CString.TYPE, null).build(), env);
+			CArray mats = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			for(MCMaterial mat : StaticLayer.GetMaterialValues()) {
 				if(!mat.isLegacy()) {
 					mats.push(new CString(mat.getName(), t), t, env);

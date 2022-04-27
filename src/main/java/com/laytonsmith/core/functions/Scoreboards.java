@@ -205,8 +205,8 @@ public class Scoreboards {
 		ops.set("collisionrule", new CString(team.getOption(MCOption.COLLISION_RULE).name(), t), t, env);
 		ops.set("deathmessagevisibility", new CString(team.getOption(MCOption.DEATH_MESSAGE_VISIBILITY).name(), t), t, env);
 		to.set("options", ops, t, env);
-		CArray pl = new CArray(t, GenericParameters
-				.addParameter(CString.TYPE, null).build(), env);
+		CArray pl = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+				.addNativeParameter(CString.TYPE, null).buildNative(), env);
 		for(String entry : team.getEntries()) {
 			pl.push(new CString(entry, t), t, env);
 		}
@@ -335,8 +335,8 @@ public class Scoreboards {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CArray ret = new CArray(t, GenericParameters
-					.addParameter(CString.TYPE, null).build(), env);
+			CArray ret = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			for(String id : boards.keySet()) {
 				ret.push(new CString(id, t), t, env);
 			}
@@ -389,8 +389,8 @@ public class Scoreboards {
 			} else {
 				os = s.getObjectives();
 			}
-			CArray ret = new CArray(t, GenericParameters
-				.addParameter(CArray.TYPE, null).build(), env);
+			CArray ret = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+				.addNativeParameter(CArray.TYPE, null).buildNative(), env);
 			for(MCObjective o : os) {
 				CArray obj = CArray.GetAssociativeArray(t, null, env);
 				obj.set("name", new CString(o.getName(), t), t, env);

@@ -78,8 +78,8 @@ public final class ReflectionUtils {
 	 * @param variableName
 	 * @return
 	 */
-	public static Object get(Class clazz, String variableName) throws ReflectionException {
-		return get(clazz, null, variableName);
+	public static <T> T get(Class clazz, String variableName) throws ReflectionException {
+		return (T) get(clazz, null, variableName);
 	}
 
 	/**
@@ -97,7 +97,7 @@ public final class ReflectionUtils {
 	 * @param variableName
 	 * @return
 	 */
-	public static Object get(Class clazz, Object instance, String variableName) throws ReflectionException {
+	public static <T> T get(Class clazz, Object instance, String variableName) throws ReflectionException {
 		try {
 			if(variableName.contains(".")) {
 				String split[] = variableName.split("\\.");
@@ -107,11 +107,11 @@ public final class ReflectionUtils {
 					myInstance = get(myClazz, myInstance, var);
 					myClazz = myInstance.getClass();
 				}
-				return myInstance;
+				return (T) myInstance;
 			} else {
 				Field f = clazz.getDeclaredField(variableName);
 				f.setAccessible(true);
-				return f.get(instance);
+				return (T) f.get(instance);
 			}
 		} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException ex) {
 			throw new ReflectionException(ex);
@@ -381,6 +381,33 @@ public final class ReflectionUtils {
 		Method m;
 		try {
 			m = c.getMethod(methodName, params);
+		} catch (NoSuchMethodException ex) {
+			return false;
+		} catch (SecurityException ex) {
+			throw new ReflectionException(ex);
+		}
+		if(returnType != null) {
+			return returnType.isAssignableFrom(m.getReturnType());
+		}
+		return true;
+	}
+
+	/**
+	 * Checks to see if a method with the given signature exists.
+	 *
+	 * @param c The class to check
+	 * @param methodName The method name
+	 * @param returnType The return type of the method, or if it is otherwise castable to this. Sending null or
+	 * Object.class implies that the return type doesn't matter.
+	 * @param params The signature of the method
+	 * @return True, if the method with this signature exists.
+	 * @throws ReflectionException If a SecurityException is thrown by the underlying code, this will be thrown.
+	 */
+	@SuppressWarnings("unchecked")
+	public static boolean hasDeclaredMethod(Class<?> c, String methodName, Class returnType, Class... params) throws ReflectionException {
+		Method m;
+		try {
+			m = c.getDeclaredMethod(methodName, params);
 		} catch (NoSuchMethodException ex) {
 			return false;
 		} catch (SecurityException ex) {

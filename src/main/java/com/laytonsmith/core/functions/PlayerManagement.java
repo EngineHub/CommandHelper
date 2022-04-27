@@ -954,8 +954,8 @@ public class PlayerManagement {
 							"Could not find the location of the player (are you running in cmdline mode?)", t);
 				}
 				retVals.add(new CArray(t,
-						GenericParameters
-								.addParameter(CDouble.TYPE, null).build(), env,
+						GenericParameters.emptyBuilder(CArray.TYPE)
+								.addNativeParameter(CDouble.TYPE, null).buildNative(), env,
 						new CDouble(loc.getX(), t),
 						new CDouble(loc.getY() - 1, t),
 						new CDouble(loc.getZ(), t)));
@@ -971,8 +971,8 @@ public class PlayerManagement {
 				if(b == null) {
 					retVals.add(CNull.NULL);
 				} else {
-					retVals.add(new CArray(t, GenericParameters
-							.addParameter(CInt.TYPE, null).build(), env,
+					retVals.add(new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+							.addNativeParameter(CInt.TYPE, null).buildNative(), env,
 							new CInt(b.getX(), t), new CInt(b.getY(), t), new CInt(b.getZ(), t)));
 				}
 			}
@@ -1010,8 +1010,8 @@ public class PlayerManagement {
 			}
 			if(index == 9 || index == -1) {
 				//MCPlayer groups
-				CArray a = new CArray(t, GenericParameters
-						.addParameter(CString.TYPE, null).build(), env);
+				CArray a = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+						.addNativeParameter(CString.TYPE, null).buildNative(), env);
 				for(String group : p.getGroups()) {
 					a.push(new CString(group, t), t, env);
 				}
@@ -1495,8 +1495,8 @@ public class PlayerManagement {
 						yaw += 360.0f;
 					}
 					float pitch = l.getPitch();
-					return new CArray(t, GenericParameters
-							.addParameter(CDouble.TYPE, null).build(), env,
+					return new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+							.addNativeParameter(CDouble.TYPE, null).buildNative(), env,
 							new CDouble(yaw, t), new CDouble(pitch, t));
 				}
 			}
@@ -4871,8 +4871,8 @@ public class PlayerManagement {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCServer s = Static.getServer();
-			CArray ret = new CArray(t, GenericParameters
-				.addParameter(CString.TYPE, null).build(), env);
+			CArray ret = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+				.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			// This causes the function to return an empty array for a fake/null server.
 			if(s != null) {
 				MCOfflinePlayer[] players = s.getOfflinePlayers();

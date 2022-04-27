@@ -795,8 +795,8 @@ public class InventoryManagement {
 				throw new CRENotFoundException(
 						"Could not find the inventory of the given player (are you running in cmdline mode?)", t);
 			}
-			CArray ret = new CArray(t, GenericParameters
-					.addParameter(CInt.TYPE, null).build(), env);
+			CArray ret = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CInt.TYPE, null).buildNative(), env);
 			for(int i = 0; i < 36; i++) {
 				if(IsMatch(ca, is, inv.getItem(i), t, env)) {
 					ret.push(new CInt(i, t), t, env);
@@ -2599,8 +2599,8 @@ public class InventoryManagement {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCInventory inv = GetInventory(args[0], null, t, env);
-			CArray list = new CArray(t, GenericParameters
-					.addParameter(CString.TYPE, null).build(), env);
+			CArray list = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			for(MCHumanEntity viewer : inv.getViewers()) {
 				list.push(new CString(viewer.getName(), t), t, env);
 			}
@@ -2649,8 +2649,8 @@ public class InventoryManagement {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CArray list = new CArray(t, GenericParameters
-					.addParameter(CString.TYPE, null).build(), env);
+			CArray list = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			for(String id : VIRTUAL_INVENTORIES.keySet()) {
 				list.push(new CString(id, t), t, env);
 			}

@@ -10,6 +10,7 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.ConcreteGenericParameter;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
 import com.laytonsmith.core.environments.Environment;
@@ -19,7 +20,6 @@ import com.laytonsmith.core.objects.ObjectType;
 
 import java.net.URL;
 import java.util.EnumSet;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -127,14 +127,13 @@ public abstract class AbstractMixedInterfaceRunner implements MixedInterfaceRunn
 	}
 
 	@Override
-	public Map<CClassType, GenericParameters> getGenericParameters() {
+	public GenericParameters getGenericParameters() {
 		return null;
 	}
 
 	@Override
 	public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env) {
-		return InstanceofUtil.isInstanceof(this,
-				LeftHandSideType.fromCClassType(type, lhsGenericParameters, Target.UNKNOWN), env);
+		return InstanceofUtil.isInstanceof(this, LeftHandSideType.fromCClassType(
+				new ConcreteGenericParameter(type, lhsGenericParameters, Target.UNKNOWN, env), Target.UNKNOWN, env), env);
 	}
-
 }

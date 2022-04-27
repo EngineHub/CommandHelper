@@ -12,7 +12,8 @@ import com.laytonsmith.core.constructs.generics.ConstraintLocation;
 import com.laytonsmith.core.constructs.generics.Constraints;
 import com.laytonsmith.core.constructs.generics.GenericDeclaration;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
-import com.laytonsmith.core.constructs.generics.UnboundedConstraint;
+import com.laytonsmith.core.constructs.generics.GenericTypeParameters;
+import com.laytonsmith.core.constructs.generics.constraints.UnboundedConstraint;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
@@ -55,11 +56,15 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
 	public static final CClassType TYPE = CClassType.getWithGenericDeclaration(CArray.class, new GenericDeclaration(Target.UNKNOWN,
 			new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
-					new UnboundedConstraint(Target.UNKNOWN, "T"))));
+					new UnboundedConstraint(Target.UNKNOWN, "T"))))
+			.withSuperParameters(GenericTypeParameters.nativeBuilder(com.laytonsmith.core.natives.interfaces.Iterable.TYPE)
+				.addParameter("T", null))
+			.done();
 	private boolean associativeMode = false;
 	private long nextIndex = 0;
 	private List<Mixed> array;
 	private SortedMap<String, Mixed> associativeArray;
+	private final GenericParameters genericParameters;
 	private String mutVal;
 	private CArray parent = null;
 	private boolean valueDirty = true;
@@ -126,9 +131,10 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	public CArray(Target t, int initialCapacity, GenericParameters parameters, Environment env, Mixed... items) {
 		super("{}", ConstructType.ARRAY, t);
 		this.fallbackEnv = env;
-		parameters = parameters != null ? parameters : GenericParameters.addParameter(Auto.TYPE, null)
-				.build();
-		registerGenericParameters(TYPE, parameters);
+		parameters = parameters != null ? parameters : GenericParameters.emptyBuilder(CArray.TYPE)
+				.addNativeParameter(Auto.TYPE, null)
+				.buildNative();
+		this.genericParameters = parameters;
 		if(initialCapacity == -1) {
 			associativeMode = true;
 		} else if(items != null) {
@@ -648,16 +654,16 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	public CArray indexesOf(Mixed value, Environment env) {
 		CArray ret;
 		if(associativeMode) {
-			ret = new CArray(Target.UNKNOWN, GenericParameters
-					.addParameter(CString.TYPE, null).build(), env);
+			ret = new CArray(Target.UNKNOWN, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			for(String key : associativeArray.keySet()) {
 				if(BasicLogic.equals.doEquals(associativeArray.get(key), value)) {
 					ret.push(new CString(key, Target.UNKNOWN), Target.UNKNOWN, env);
 				}
 			}
 		} else {
-			ret = new CArray(Target.UNKNOWN, GenericParameters
-					.addParameter(CInt.TYPE, null).build(), env);
+			ret = new CArray(Target.UNKNOWN, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CInt.TYPE, null).buildNative(), env);
 			for(int i = 0; i < array.size(); i++) {
 				if(BasicLogic.equals.doEquals(array.get(i), value)) {
 					ret.push(new CInt(i, Target.UNKNOWN), Target.UNKNOWN, env);
@@ -799,7 +805,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		}
 
 		// Create the clone to put array in and add it to the cloneRefs list.
-		CArray clone = new CArray(t, (int) array.size(env), array.getThisGenericParameters(env), env);
+		CArray clone = new CArray(t, (int) array.size(env), array.genericParameters, env);
 		clone.associativeMode = array.associativeMode;
 		cloneRefs.add(new CArray[]{array, clone});
 
@@ -920,6 +926,11 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		setDirty();
 	}
 
+	@Override
+	public GenericParameters getGenericParameters() {
+		return genericParameters;
+	}
+
 	/**
 	 * Creates a new, empty array, with the same type. Note to subclasses: By default, this method expects a constructor
 	 * that accepts a {@link Target}, {@link GenericParameters}, {@link Environment}. If this assumption is not valid,
@@ -933,7 +944,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		try {
 			Constructor<CArray> con = (Constructor<CArray>) this.getClass().getConstructor(Target.class, GenericParameters.class, Environment.class);
 			try {
-				return con.newInstance(t, this.getThisGenericParameters(env), env);
+				return con.newInstance(t, this.genericParameters, env);
 			} catch(InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
 				throw new RuntimeException(ex);
 			}

@@ -25,7 +25,7 @@ public class LeftHandSideTypeTest {
 
 	@Test
 	public void testInterfacesAreCorrect() throws Exception {
-		LeftHandSideType type = LeftHandSideType.fromCClassTypeUnion(Target.UNKNOWN, CString.TYPE, CArray.TYPE);
+		LeftHandSideType type = LeftHandSideType.fromCClassTypeUnion(Target.UNKNOWN, null, CString.TYPE, CArray.TYPE);
 		List<CClassType> interfaces = Arrays.asList(type.getTypeInterfaces(env));
 		assertTrue(interfaces.contains(com.laytonsmith.core.natives.interfaces.Iterable.TYPE));
 		assertFalse(interfaces.contains(Booleanish.TYPE));
@@ -33,15 +33,15 @@ public class LeftHandSideTypeTest {
 
 	@Test
 	public void testUnionsAreNormalized() throws Exception {
-		assertTrue(LeftHandSideType.fromCClassTypeUnion(Target.UNKNOWN, CInt.TYPE, CString.TYPE).equals(
-				LeftHandSideType.fromCClassTypeUnion(Target.UNKNOWN, CString.TYPE, CInt.TYPE)));
+		assertTrue(LeftHandSideType.fromCClassTypeUnion(Target.UNKNOWN, null, CInt.TYPE, CString.TYPE).equals(
+				LeftHandSideType.fromCClassTypeUnion(Target.UNKNOWN, null, CString.TYPE, CInt.TYPE)));
 	}
 
 	@Test
 	public void testUnionsWithSupertypesAreNormalized() throws Exception {
 		assertEquals(CPrimitive.TYPE.asLeftHandSideType(),
-				LeftHandSideType.fromCClassTypeUnion(Target.UNKNOWN, CInt.TYPE, CPrimitive.TYPE));
+				LeftHandSideType.fromCClassTypeUnion(Target.UNKNOWN, null, CInt.TYPE, CPrimitive.TYPE));
 		assertEquals(CPrimitive.TYPE.asLeftHandSideType(),
-				LeftHandSideType.fromCClassTypeUnion(Target.UNKNOWN, CPrimitive.TYPE, CInt.TYPE));
+				LeftHandSideType.fromCClassTypeUnion(Target.UNKNOWN, null, CPrimitive.TYPE, CInt.TYPE));
 	}
 }

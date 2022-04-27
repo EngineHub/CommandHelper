@@ -1597,8 +1597,8 @@ public final class Static {
 			return (Construct) object;
 		} else if(object instanceof boolean[]) {
 			boolean[] array = (boolean[]) object;
-			CArray r = new CArray(t, GenericParameters
-					.addParameter(CBoolean.TYPE, null).build(), env);
+			CArray r = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CBoolean.TYPE, null).buildNative(), env);
 			for(boolean b : array) {
 				r.push(CBoolean.get(b), t, env);
 			}
@@ -1607,48 +1607,48 @@ public final class Static {
 			return CByteArray.wrap((byte[]) object, t, env);
 		} else if(object instanceof char[]) {
 			char[] array = (char[]) object;
-			CArray r = new CArray(t, GenericParameters
-					.addParameter(CString.TYPE, null).build(), env);
+			CArray r = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			for(char c : array) {
 				r.push(new CString(c, t), t, env);
 			}
 			return r;
 		} else if(object instanceof short[]) {
 			short[] array = (short[]) object;
-			CArray r = new CArray(t, GenericParameters
-					.addParameter(CInt.TYPE, null).build(), env);
+			CArray r = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CInt.TYPE, null).buildNative(), env);
 			for(short s : array) {
 				r.push(new CInt(s, t), t, env);
 			}
 			return r;
 		} else if(object instanceof int[]) {
 			int[] array = (int[]) object;
-			CArray r = new CArray(t, GenericParameters
-					.addParameter(CInt.TYPE, null).build(), null);
+			CArray r = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CInt.TYPE, null).buildNative(), null);
 			for(int i : array) {
 				r.push(new CInt(i, t), t, env);
 			}
 			return r;
 		} else if(object instanceof long[]) {
 			long[] array = (long[]) object;
-			CArray r = new CArray(t, GenericParameters
-					.addParameter(CInt.TYPE, null).build(), env);
+			CArray r = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CInt.TYPE, null).buildNative(), env);
 			for(long l : array) {
 				r.push(new CInt(l, t), t, env);
 			}
 			return r;
 		} else if(object instanceof float[]) {
 			float[] array = (float[]) object;
-			CArray r = new CArray(t, GenericParameters
-					.addParameter(CDouble.TYPE, null).build(), env);
+			CArray r = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CDouble.TYPE, null).buildNative(), env);
 			for(float f : array) {
 				r.push(new CDouble(f, t), t, env);
 			}
 			return r;
 		} else if(object instanceof double[]) {
 			double[] array = (double[]) object;
-			CArray r = new CArray(t, GenericParameters
-					.addParameter(CDouble.TYPE, null).build(), env);
+			CArray r = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CDouble.TYPE, null).buildNative(), env);
 			for(double d : array) {
 				r.push(new CDouble(d, t), t, env);
 			}

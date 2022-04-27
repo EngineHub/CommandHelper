@@ -472,8 +472,8 @@ public class Web {
 						}
 						CArray headers = CArray.GetAssociativeArray(t, null, env);
 						for(String key : resp.getHeaderNames()) {
-							CArray h = new CArray(t, GenericParameters
-									.addParameter(CString.TYPE, null).build(), env);
+							CArray h = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+									.addNativeParameter(CString.TYPE, null).buildNative(), env);
 							for(String val : resp.getHeaders(key)) {
 								h.push(new CString(val, t), t, env);
 							}

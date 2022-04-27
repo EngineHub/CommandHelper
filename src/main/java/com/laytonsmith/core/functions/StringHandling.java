@@ -387,8 +387,8 @@ public class StringHandling {
 			for(int i = 0; i < a.size(); i++) {
 				csa[i] = a.get(i);
 			}
-			return new CArray(t, GenericParameters
-					.addParameter(CString.TYPE, null).build(), env, csa);
+			return new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env, csa);
 		}
 
 		@Override
@@ -401,7 +401,7 @@ public class StringHandling {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{};
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -1317,8 +1317,8 @@ public class StringHandling {
 			//http://stackoverflow.com/questions/2667015/is-regex-too-slow-real-life-examples-where-simple-non-regex-alternative-is-bett
 			//According to this, regex isn't necessarily slower, but we do want to escape the pattern either way, since the main advantage
 			//of this function is convenience (not speed) however, if we can eek out a little extra speed too, excellent.
-			CArray array = new CArray(t, GenericParameters
-					.addParameter(CString.TYPE, null).build(), env);
+			CArray array = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			String split = args[0].val();
 			String string = args[1].val();
 			int limit = Integer.MAX_VALUE;
@@ -2512,8 +2512,8 @@ public class StringHandling {
 				CSecureString secure = ArgumentValidation.getObject(args[0], t, CSecureString.class);
 				return secure.getDecryptedCharCArray(env);
 			} else if(args[0].isInstanceOf(CString.TYPE, null, env)) {
-				CArray array = new CArray(Target.UNKNOWN, args[0].val().length(), GenericParameters
-						.addParameter(CString.TYPE, null).build(), env);
+				CArray array = new CArray(Target.UNKNOWN, args[0].val().length(), GenericParameters.emptyBuilder(CArray.TYPE)
+						.addNativeParameter(CString.TYPE, null).buildNative(), env);
 				for(char c : args[0].val().toCharArray()) {
 					array.push(new CString(c, t), t, env);
 				}

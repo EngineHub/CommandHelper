@@ -129,15 +129,15 @@ public final class FunctionSignatures {
 						= signature.getTypeResolutions(t, argTypes, generics, inferredReturnType, env);
 				if(generics == null && !typeResolutions.isEmpty()) {
 					// Put them in the node
-					GenericParameters.GenericParametersBuilder builder = GenericParameters.emptyBuilder();
+					GenericParameters.GenericParametersBuilder builder = GenericParameters.emptyBuilder(signature);
 					for(Map.Entry<String, LeftHandSideType> entry : typeResolutions.entrySet()) {
 						if(entry.getValue() == null) {
-							builder.addParameter(null, null);
+							builder.addParameter(null, null, env, t);
 						} else {
-							builder.addParameter(entry.getValue().asConcreteType(t), null);
+							builder.addParameter(entry.getValue());
 						}
 					}
-					generics = builder.build();
+					generics = builder.build(t, env);
 					node.getNodeModifiers().setGenerics(generics);
 					// If this is wrong, this implies we did something wrong here, but just in case.
 					ConstraintValidator.ValidateParametersToDeclaration(t, env, generics,
@@ -156,7 +156,7 @@ public final class FunctionSignatures {
 						matches.get(0).getGenericDeclaration(), inferredReturnType);
 					types[i] = retType;
 				}
-				LeftHandSideType ret = LeftHandSideType.fromTypeUnion(t, types);
+				LeftHandSideType ret = LeftHandSideType.fromTypeUnion(t, env, types);
 				if(ret.isTypeUnion()) {
 					// If multiple types match, and one or more of the arguments is auto, we return auto, rather than
 					// the type union. This indicates that the user is content with runtime type verification, and so

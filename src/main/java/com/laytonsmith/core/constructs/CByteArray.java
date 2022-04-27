@@ -6,6 +6,8 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.GenericTypeParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREReadOnlyException;
@@ -25,14 +27,17 @@ import java.util.Set;
 import java.util.SortedMap;
 
 /**
- *
+ *The
  *
  */
 @typeof("ms.lang.byte_array")
 public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get(CByteArray.class);
+	public static final CClassType TYPE = CClassType.get(CByteArray.class)
+			.withSuperParameters(GenericTypeParameters.nativeBuilder(CArray.TYPE).addParameter(CInt.TYPE, null))
+			.withSuperParameters(GenericTypeParameters.nativeBuilder(ArrayAccess.TYPE).addParameter(CInt.TYPE, null))
+			.done();
 
 	/**
 	 * Initial size of the ByteBuffer
@@ -82,7 +87,9 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	 * @param env
 	 */
 	public CByteArray(Target t, int capacity, Environment env) {
-		super(t, INITIAL_SIZE, null, env);
+		super(t, INITIAL_SIZE, GenericParameters.emptyBuilder(CArray.TYPE)
+				.addNativeParameter(CInt.TYPE, null)
+				.buildNative(), env);
 		//super("", ConstructType.BYTE_ARRAY, t);
 		data = ByteBuffer.allocate(capacity);
 	}
@@ -547,6 +554,11 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 		return new CClassType[]{Sizeable.TYPE, ArrayAccess.TYPE};
 	}
 
+	@Override
+	public GenericParameters getGenericParameters() {
+		return null;
+	}
+
 	/**
 	 * This is a more efficient implementation of CArray for the backing byte arrays.
 	 */
@@ -554,12 +566,17 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	private static class CArrayByteBacking extends CArray {
 
 		@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-		public static final CClassType TYPE = CClassType.get(CArrayByteBacking.class);
+		public static final CClassType TYPE = CClassType.get(CArrayByteBacking.class)
+				.withSuperParameters(GenericTypeParameters.nativeBuilder(CArray.TYPE)
+					.addParameter(CInt.TYPE, null))
+				.done();
 		private final byte[] backing;
 		private String value = null;
 
 		public CArrayByteBacking(byte[] backing, Target t, Environment env) {
-			super(t, null, env);
+			super(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CInt.TYPE, null)
+					.buildNative(), env);
 			this.backing = backing;
 		}
 
@@ -652,6 +669,11 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 			return CByteArray.TYPE;
 		}
 
+		@Override
+		public GenericParameters getGenericParameters() {
+			return null;
+		}
+
 		@typeof("ms.lang.ByteArrayReadOnlyException")
 		public static class CREByteArrayReadOnlyException extends CREReadOnlyException {
 
@@ -694,6 +716,11 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 			@Override
 			public CClassType getContainingClass() {
 				return CArrayByteBacking.TYPE;
+			}
+
+			@Override
+			public GenericParameters getGenericParameters() {
+				return null;
 			}
 
 		}

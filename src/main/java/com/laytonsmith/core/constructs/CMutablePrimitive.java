@@ -4,6 +4,8 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.GenericTypeParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
@@ -25,7 +27,9 @@ import java.util.Stack;
 public final class CMutablePrimitive extends CArray implements Sizeable {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get(CMutablePrimitive.class);
+	public static final CClassType TYPE = CClassType.get(CMutablePrimitive.class)
+			.withSuperParameters(GenericTypeParameters.nativeBuilder(CArray.TYPE).addParameter(Auto.LHSTYPE))
+			.done();
 
 	private Mixed value = CNull.NULL;
 
@@ -34,7 +38,9 @@ public final class CMutablePrimitive extends CArray implements Sizeable {
 	}
 
 	public CMutablePrimitive(Mixed value, Target t, Environment env) {
-		super(t, 0, null, env);
+		super(t, 0, GenericParameters.emptyBuilder(CArray.TYPE)
+				.addNativeParameter(Auto.TYPE, null)
+				.buildNative(), env);
 		set(value, t, env);
 	}
 
@@ -173,5 +179,10 @@ public final class CMutablePrimitive extends CArray implements Sizeable {
 	@Override
 	public Set<ObjectModifier> getObjectModifiers() {
 		return EnumSet.of(ObjectModifier.FINAL);
+	}
+
+	@Override
+	public GenericParameters getGenericParameters() {
+		return null;
 	}
 }
