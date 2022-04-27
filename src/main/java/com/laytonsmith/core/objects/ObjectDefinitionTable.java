@@ -18,6 +18,8 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -100,7 +102,8 @@ public final class ObjectDefinitionTable implements Iterable<ObjectDefinition> {
 				Queue<File> msFiles = new LinkedList<>();
 				try {
 					Queue<File> q = new LinkedList<>();
-					File root = new File(ObjectDefinitionTable.class.getResource("/nativeSource").toExternalForm());
+					File root = new File(URLDecoder.decode(ObjectDefinitionTable.class.getResource("/nativeSource")
+							.toExternalForm(), StandardCharsets.UTF_8));
 					ZipReader reader = new ZipReader(root);
 					q.addAll(Arrays.asList(reader.listFiles()));
 					// Flatten the structure, so we get a full list of files (no directories)
