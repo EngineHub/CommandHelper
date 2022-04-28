@@ -822,6 +822,7 @@ public class Compiler {
 					if(c == '@') {
 						throw new ConfigCompileException("Cannot use smart strings here", token.target);
 					}
+					b.append(c);
 			}
 			return new Token(Token.TType.STRING, b.toString(), token.target.copy());
 		}

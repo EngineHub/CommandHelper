@@ -168,29 +168,30 @@ public class SwitchKeyword extends EarlyBindingKeyword {
 				}
 				firstComma = true;
 				// Write out the case labels, we're actually done with them now
-				if(caseLabels.size() == 1) {
-					List<List<Token>> caseLabelsList = new ArrayList<>(caseLabels);
-					newStream.addAll(caseLabelsList.get(0));
-					newStream.add(new Token(TType.COMMA, ",", Target.UNKNOWN));
-				} else {
+				if(caseLabels.size() > 1) {
 					newStream.add(new Token(TType.FUNC_NAME, "array", Target.UNKNOWN));
 					newStream.add(new Token(TType.FUNC_START, "(", Target.UNKNOWN));
-					boolean first = true;
-					for(List<Token> r : caseLabels) {
-						if(!first) {
-							newStream.add(new Token(TType.COMMA, ",", Target.UNKNOWN));
-						}
-						first = false;
-						for(Token tt : r) {
-							if(tt.type == TType.SMART_STRING) {
-								tt = com.laytonsmith.core.functions.Compiler.__smart_string__.getDumbStringOrFail(tt);
-							}
-							newStream.add(tt);
-						}
-					}
-					newStream.add(new Token(TType.FUNC_END, ")", Target.UNKNOWN));
-					newStream.add(new Token(TType.COMMA, ",", Target.UNKNOWN));
 				}
+
+				boolean first = true;
+				for(List<Token> r : caseLabels) {
+					if(!first) {
+						newStream.add(new Token(TType.COMMA, ",", Target.UNKNOWN));
+					}
+					first = false;
+					for(Token tt : r) {
+						if(tt.type == TType.SMART_STRING) {
+							tt = com.laytonsmith.core.functions.Compiler.__smart_string__.getDumbStringOrFail(tt);
+						}
+						newStream.add(tt);
+					}
+				}
+
+				if(caseLabels.size() > 1) {
+					newStream.add(new Token(TType.FUNC_END, ")", Target.UNKNOWN));
+				}
+
+				newStream.add(new Token(TType.COMMA, ",", Target.UNKNOWN));
 				caseLabels = new TreeSet<>(tokenComparator);
 				if(inDefault) {
 					inCode = true;

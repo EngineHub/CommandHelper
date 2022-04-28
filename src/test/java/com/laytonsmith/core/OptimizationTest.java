@@ -642,6 +642,17 @@ public class OptimizationTest {
 			+ "}\n");
 	}
 
+	@Test
+	public void testFallthroughCasesAndDoubleQuotes() throws Exception {
+		assertEquals("switch(@o,array('one','two'),__statements__(msg('hi')),__statements__(msg('hello')))", optimize("switch(@o){\n"
+				+ "		case \"one\":\n"
+				+ "		case \"two\":\n"
+				+ "			msg('hi');\n"
+				+ "		default:\n"
+				+ "			msg('hello');\n"
+				+ "}"));
+	}
+
 	@Test(expected = ConfigCompileException.class)
 	public void testSmartStringInArrayFails() throws Exception {
 		optimize("@a = 'asdf'; array(\"@a\": 'test')");
