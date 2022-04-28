@@ -440,12 +440,6 @@ public class MethodScriptCompilerTest {
 	}
 
 	@Test
-	public void testExecute22() throws Exception {
-		SRun("msg('hi' ('this is a thing'))", fakePlayer);
-		verify(fakePlayer).sendMessage("hi this is a thing");
-	}
-
-	@Test
 	public void testCompile1() {
 		try {
 			String config = "/cmd [$p] $q = msg('')";
@@ -724,11 +718,6 @@ public class MethodScriptCompilerTest {
 	public void testArrayBooleanType() throws Exception {
 		assertEquals("true", SRun("boolean(array(1))", null));
 		assertEquals("false", SRun("boolean(array())", null));
-	}
-
-	@Test
-	public void testParenthesisAfterQuotedString() throws Exception {
-		assertEquals("2 + 2 is 4", SRun("'2 + 2 is' (2 + 2)", fakePlayer));
 	}
 
 	@Test(expected = AbstractCompileException.class)

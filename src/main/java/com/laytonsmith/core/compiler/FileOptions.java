@@ -355,7 +355,15 @@ public final class FileOptions {
 				+ " may indicate a problem with the code.",
 				MSVersion.V3_3_5, SeverityLevel.MEDIUM),
 		UnexpectedStatement("In strict mode, unexpected statements are an error, but in non-strict mode, they are"
-				+ " a warning.", MSVersion.V3_3_5, SeverityLevel.HIGH);
+				+ " a warning.", MSVersion.V3_3_5, SeverityLevel.HIGH),
+		PossibleUnexpectedExecution("If the parenthesis following a token is on a different line as the previous"
+				+ " token, and it in general looks like a value that might be executable, this warning is"
+				+ " issued, as it will cause an attempt at executing the previous statement. This"
+				+ " warning will be removed in 3.3.7, and code will always attempt to execute,"
+				+ " but in the meantime, to get"
+				+ " rid of it, place a semicolon at the end of the previous line (if you don't mean"
+				+ " for it to be executed) or move the left parenthesis up to the same line (if you "
+				+ " do mean for it to be executed).", MSVersion.V3_3_5, SeverityLevel.HIGH);
 
 		private SuppressWarning(String docs, Version version, SeverityLevel severityLevel) {
 			this.docs = docs;

@@ -1,5 +1,6 @@
 package com.laytonsmith.core;
 
+import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
@@ -24,6 +25,7 @@ import org.junit.Test;
 public class OptimizationTest {
 
 	static Set<Class<? extends Environment.EnvironmentImpl>> envs = Environment.getDefaultEnvClasses();
+	static Environment env;
 
 	@BeforeClass
 	public static void setUpClass() {
@@ -37,10 +39,10 @@ public class OptimizationTest {
 	public String optimize(String script, boolean pureMethodScript) throws Exception {
 		try {
 			try {
-				Environment env = Static.GenerateStandaloneEnvironment();
+				env = Static.GenerateStandaloneEnvironment();
 				return OptimizationUtilities.optimize(script, env, envs, null, false, pureMethodScript);
 			} catch(ConfigCompileException ex) {
-				throw new ConfigCompileGroupException(new HashSet<>(Arrays.asList(ex)));
+				throw new ConfigCompileGroupException(new HashSet<>(Arrays.asList(ex)), ex);
 			}
 		} catch(ConfigCompileGroupException ex) {
 			Target t = new ArrayList<>(ex.getList()).get(0).getTarget();
@@ -126,7 +128,7 @@ public class OptimizationTest {
 
 	@Test
 	public void testClosure() throws Exception {
-		assertEquals("__statements__(assign(@c,closure(@target,msg(concat('Hello ',@target,'!')))),@c('world'))",
+		assertEquals("__statements__(assign(@c,closure(@target,msg(concat('Hello ',@target,'!')))),execute('world',@c))",
 				optimize("@c = closure(@target) {msg('Hello '.@target.'!')}; @c('world');"));
 	}
 
@@ -643,5 +645,48 @@ public class OptimizationTest {
 	@Test(expected = ConfigCompileException.class)
 	public void testSmartStringInArrayFails() throws Exception {
 		optimize("@a = 'asdf'; array(\"@a\": 'test')");
+	}
+
+	@Test
+	public void testParenthesisRewritesCorrectly1() throws Exception {
+		assertEquals("__statements__(assign(ms.lang.closure,@c,closure(null)),execute(@c))",
+				optimize("closure @c = closure() {};\n@c();"));
+	}
+
+	@Test
+	public void testParenthesisRewritesCorrectly2() throws Exception {
+		assertEquals("__statements__(assign(ms.lang.closure,@c,closure(assign(ms.lang.int,@a,null),__statements__(msg(@a)))),execute(10,@c))",
+				optimize("closure @c = closure(int @a) {msg(@a);};\n@c(10);"));
+	}
+
+	@Test
+	public void testParenthesisRewritesCorrectly3() throws Exception {
+		assertEquals("__statements__(assign(ms.lang.closure,@c,closure(assign(ms.lang.int,@a,null),assign(ms.lang.int,@b,null),__statements__(msg(@a)))),execute(10,11,@c))",
+				optimize("closure @c = closure(int @a, int @b) {msg(@a);};\n@c(10,11);"));
+	}
+
+	@Test
+	public void testFreeParenthesisWork() throws Exception {
+		assertEquals("__statements__(msg(multiply(dyn(2),add(dyn(3),dyn(4)))))",
+				optimize("msg(dyn(2) * (dyn(3) + dyn(4)));"));
+	}
+
+	@Test
+	public void testParenthesisWarnsButRewritesCorrectly() throws Exception {
+		optimize("closure @c = closure() {};\n@c\n();");
+		assertEquals(1, env.getEnv(CompilerEnvironment.class).getCompilerWarnings().size());
+	}
+
+	@Test
+	public void testNestedExecute() throws Exception {
+		assertEquals("__statements__(proc('_t',__statements__(return(closure(__statements__(return(closure(__statements__(msg('hi'))))))))),"
+				+ "execute(execute(_t())))",
+				optimize("proc _t() { return closure() { return closure() { msg('hi'); }; }; } _t()()();"));
+		assertEquals("__statements__(proc('_t',__statements__(return(closure(__statements__(return(closure(__statements__(msg('hi'))))))))),"
+				+ "execute(execute(_t())))",
+				optimize("proc _t() { return closure() { return closure() { msg('hi'); }; }; }; _t()()();"));
+		assertEquals("__statements__(proc('_t',@a,__statements__(return(closure(@b,__statements__(return(closure(@c,__statements__(msg('hi'))))))))),"
+				+ "execute(3,4,execute(2,_t(1))))",
+				optimize("proc _t(@a) { return closure(@b) { return closure(@c) { msg('hi'); }; }; }; _t(1)(2)(3,4);"));
 	}
 }

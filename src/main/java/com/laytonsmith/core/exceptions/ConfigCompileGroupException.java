@@ -17,6 +17,11 @@ public class ConfigCompileGroupException extends AbstractCompileException {
 		this.list = new TreeSet<>(group);
 	}
 
+	public ConfigCompileGroupException(Set<ConfigCompileException> group, Throwable cause) {
+		super(cause);
+		this.list = new TreeSet<>(group);
+	}
+
 	public Set<ConfigCompileException> getList() {
 		return new TreeSet<>(this.list);
 	}

@@ -14,6 +14,7 @@ import java.util.TreeSet;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
+import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CKeyword;
@@ -368,8 +369,6 @@ public class StaticAnalysis {
 					return func.typecheck(this, ast, env, exceptions);
 				}
 				return CClassType.AUTO; // Unknown return type.
-			} else if(cFunc.hasIVariable()) { // The function is a var reference to a closure: '@myClosure(<args>)'.
-				return CClassType.AUTO; // TODO - Get actual type (return type of closure, iclosure, rclosure?).
 			} else if(cFunc.hasProcedure()) { // The function is a procedure reference.
 				String procName = cFunc.val();
 				Scope scope = this.getTermScope(ast);
@@ -412,7 +411,11 @@ public class StaticAnalysis {
 				return CClassType.AUTO;
 			}
 		} else if(node instanceof Variable) {
-			return CString.TYPE; // $vars can only be strings.
+			if(ast.getFileOptions().isStrict()) {
+				return CString.TYPE;
+			} else {
+				return Auto.TYPE;
+			}
 		} else if(node instanceof CKeyword) {
 
 			// Use the more specific compile error caused during keyword processing if available.
@@ -428,6 +431,10 @@ public class StaticAnalysis {
 		}
 
 		// The node is some other Construct, so return its type.
+		// In non-strict mode, constants are defined as auto, to make things like `'123' > 10` work.
+		if(ast.isConst() && !ast.getFileOptions().isStrict()) {
+			return Auto.TYPE;
+		}
 		try {
 			return node.typeof();
 		} catch(Throwable t) {
@@ -756,13 +763,6 @@ public class StaticAnalysis {
 					return func.linkScope(this, parentScope, ast, env, exceptions);
 				}
 				return parentScope;
-			} else if(cFunc.hasIVariable()) { // The function is a var reference to a closure: '@myClosure(<args>)'.
-
-				// Add variable reference in a new scope.
-				Scope refScope = this.createNewScope(parentScope);
-				refScope.addReference(new Reference(Namespace.IVARIABLE, cFunc.val(), cFunc.getTarget()));
-				this.setTermScope(ast, refScope);
-				return refScope;
 			} else if(cFunc.hasProcedure()) { // The function is a procedure reference.
 
 				// Add procedure reference in a new scope.
