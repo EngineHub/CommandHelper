@@ -380,9 +380,6 @@ public class StaticAnalysis {
 				if(func != null) {
 					return func.typecheck(this, ast, inferredReturnType, env, exceptions);
 				}
-				return Auto.LHSTYPE; // Unknown return type.
-			} else if(cFunc.hasIVariable()) { // The function is a var reference to a closure: '@myClosure(<args>)'.
-				return Auto.LHSTYPE; // TODO - Get actual type (return type of closure, iclosure, rclosure?).
 			} else if(cFunc.hasProcedure()) { // The function is a procedure reference.
 				String procName = cFunc.val();
 				Scope scope = this.getTermScope(ast);
@@ -859,13 +856,6 @@ public class StaticAnalysis {
 					return func.linkScope(this, parentScope, ast, env, exceptions);
 				}
 				return parentScope;
-			} else if(cFunc.hasIVariable()) { // The function is a var reference to a closure: '@myClosure(<args>)'.
-
-				// Add variable reference in a new scope.
-				Scope refScope = this.createNewScope(parentScope);
-				refScope.addReference(new Reference(Namespace.IVARIABLE, cFunc.val(), cFunc.getTarget()));
-				this.setTermScope(ast, refScope);
-				return refScope;
 			} else if(cFunc.hasProcedure()) { // The function is a procedure reference.
 
 				// Add procedure reference in a new scope.

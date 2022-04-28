@@ -55,21 +55,12 @@ public class CFunction extends Construct {
 	}
 
 	/**
-	 * Returns true if this CFunction is expected to represent an IVariable based on the format.
-	 *
-	 * @return
-	 */
-	public boolean hasIVariable() {
-		return val().charAt(0) == '@';
-	}
-
-	/**
 	 * Returns true if this CFunction is expected to represent a function based on the format.
 	 *
 	 * @return
 	 */
 	public boolean hasFunction() {
-		return !hasProcedure() && !hasIVariable();
+		return !hasProcedure();
 	}
 
 	/**

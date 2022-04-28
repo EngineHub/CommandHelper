@@ -359,7 +359,15 @@ public final class FileOptions {
 		GenericTypeOverrides("When using generics, defining a typename which matches an in-scope actual object type"
 				+ " can lead to confusion, since referneces to the original type will no longer reference the"
 				+ " actual type, but rather the typename. Thus, this should be avoided.", MSVersion.V3_3_6,
-				SeverityLevel.HIGH);
+				SeverityLevel.HIGH),
+		PossibleUnexpectedExecution("If the parenthesis following a token is on a different line as the previous"
+				+ " token, and it in general looks like a value that might be executable, this warning is"
+				+ " issued, as it will cause an attempt at executing the previous statement. This"
+				+ " warning will be removed in 3.3.7, and code will always attempt to execute,"
+				+ " but in the meantime, to get"
+				+ " rid of it, place a semicolon at the end of the previous line (if you don't mean"
+				+ " for it to be executed) or move the left parenthesis up to the same line (if you "
+				+ " do mean for it to be executed).", MSVersion.V3_3_5, SeverityLevel.HIGH);
 
 		private SuppressWarning(String docs, Version version, SeverityLevel severityLevel) {
 			this.docs = docs;

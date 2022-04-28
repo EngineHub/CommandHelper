@@ -259,6 +259,10 @@ public final class Prefs {
 	}
 
 	public static Boolean DebugMode() {
+		if(prefs == null) {
+			// In testing, just return false so that we don't trigger a NPE
+			return false;
+		}
 		return prefs.getBooleanPreference(PNames.DEBUG_MODE.config()) || ScreamErrors();
 	}
 

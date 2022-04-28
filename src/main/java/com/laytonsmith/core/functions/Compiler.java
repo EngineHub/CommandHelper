@@ -54,6 +54,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 
 /**
  *
@@ -566,6 +567,8 @@ public class Compiler {
 				}
 			}
 
+			rewriteParenthesis(list);
+
 			//We've eliminated the need for __autoconcat__ either way, however, if there are still arguments
 			//left, it needs to go to sconcat, which MAY be able to be further optimized, but that will
 			//be handled in MethodScriptCompiler's optimize function. Also, we must scan for CPreIdentifiers,
@@ -604,7 +607,7 @@ public class Compiler {
 							}
 						} else {
 							//Hmm, this is weird. I'm not sure what condition this can happen in
-							throw new ConfigCompileException("Unexpected IDENTIFIER? O.o Please report a bug,"
+							throw new ConfigCompileException("Unexpected IDENTIFIER. Please report a bug,"
 									+ " and include the script you used to get this error. At or around:", list.get(i).getTarget());
 						}
 					}
@@ -616,6 +619,7 @@ public class Compiler {
 					options = list.get(0).getFileOptions();
 					t = list.get(0).getTarget();
 				}
+
 				if(returnSConcat) {
 					tree = new ParseTree(new CFunction(sconcat.NAME, t), options, true);
 					tree.setChildren(list);
@@ -639,6 +643,45 @@ public class Compiler {
 					tree.setChildren(newChildren);
 				}
 				return tree;
+			}
+		}
+
+		private static void rewriteParenthesis(List<ParseTree> list) throws ConfigCompileException {
+			Stack<ParseTree> executes = new Stack<>();
+			while(list.size() > 1) {
+				ParseTree lastNode = list.get(list.size() - 1);
+				if(lastNode.getData() instanceof CFunction cf
+						&& cf.hasFunction()
+						&& cf.getFunction() != null
+						&& cf.getFunction().getName().equals(Compiler.p.NAME)) {
+					executes.push(lastNode);
+					list.remove(list.size() - 1);
+				} else {
+					break;
+				}
+			}
+			if(!executes.isEmpty()) {
+				if(!list.isEmpty()) {
+					ParseTree lastNode = list.get(list.size() - 1);
+					// This is the core executable. Build statements in reverse order, then store this in place of
+					// list.size() - 1
+					// @x(@a)(@b) is execute(@a, execute(@b, @x))
+					ParseTree execute = new ParseTree(new CFunction(DataHandling.execute.NAME, lastNode.getTarget()),
+							lastNode.getFileOptions(), true);
+					while(!executes.empty()) {
+						execute.setChildren(executes.pop().getChildren());
+						execute.addChild(lastNode);
+						list.set(list.size() - 1, execute);
+						lastNode = execute;
+						execute = new ParseTree(new CFunction(DataHandling.execute.NAME, lastNode.getTarget()),
+							lastNode.getFileOptions(), true);
+					}
+				} else {
+					if(executes.size() != 1) {
+						throw new ConfigCompileException("Unexpected parenthesis", executes.peek().getTarget());
+					}
+					// else just a regular p statement that happens to be last.
+				}
 			}
 		}
 	}
@@ -837,6 +880,7 @@ public class Compiler {
 					if(c == '@') {
 						throw new ConfigCompileException("Cannot use smart strings here", token.target);
 					}
+					b.append(c);
 			}
 			return new Token(Token.TType.STRING, b.toString(), token.target.copy());
 		}

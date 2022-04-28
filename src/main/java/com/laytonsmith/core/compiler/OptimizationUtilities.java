@@ -76,7 +76,7 @@ public class OptimizationUtilities {
 			scripts.get(0).compile(env).compileRight(env);
 			tree = scripts.get(0).getTrees().get(0);
 		} else {
-			tree = MethodScriptCompiler.compile(ts, null, envs, analysis);
+			tree = MethodScriptCompiler.compile(ts, env, envs, analysis);
 		}
 		StringBuilder b = new StringBuilder();
 		//The root always contains null.

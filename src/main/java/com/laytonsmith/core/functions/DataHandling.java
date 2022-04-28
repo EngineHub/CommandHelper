@@ -13,6 +13,7 @@ import com.laytonsmith.annotations.noprofile;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.annotations.unbreakable;
 import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.Callable;
 import com.laytonsmith.core.Globals;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.MSLog;
@@ -2900,6 +2901,8 @@ public class DataHandling {
 	@seealso({com.laytonsmith.tools.docgen.templates.Closures.class, execute_array.class, executeas.class})
 	public static class execute extends AbstractFunction {
 
+		public static final String NAME = "execute";
+
 		@Override
 		public String getName() {
 			return "execute";
@@ -2912,10 +2915,14 @@ public class DataHandling {
 
 		@Override
 		public String docs() {
-			return "mixed {[values...], closure} Executes the given closure. You can also send arguments"
-					+ " to the closure, which it may or may not use, depending on the particular closure's"
-					+ " definition. If the closure returns a value with return(), then that value will"
-					+ " be returned with execute. Otherwise, void is returned.";
+			return "mixed {[values...], callable} Executes the given closure or other Callable. You can also"
+					+ " send arguments"
+					+ " to the Callable, which it may or may not use, depending on the particular Callable's"
+					+ " definition. If the Callable returns a value, then that value will"
+					+ " be returned with execute. Otherwise, void is returned. Note that Callables are in"
+					+ " general first class language features, which can be invoked with parenthesis, for"
+					+ " instance <code>Callable @c = ...; @c();</code> will execute @c, and is the preferred"
+					+ " syntax.";
 		}
 
 		@Override
@@ -2938,10 +2945,10 @@ public class DataHandling {
 			if(args[args.length - 1].isInstanceOf(CClosure.TYPE, null, env)) {
 				Mixed[] vals = new Mixed[args.length - 1];
 				System.arraycopy(args, 0, vals, 0, args.length - 1);
-				CClosure closure = (CClosure) args[args.length - 1];
-				return closure.executeCallable(vals);
+				Callable closure = (Callable) args[args.length - 1];
+				return closure.executeCallable(env, t, vals);
 			} else {
-				throw new CRECastException("Only a closure (created from the closure function) can be sent to execute()", t);
+				throw new CRECastException("Only a Callable (created for instance from the closure function) can be sent to execute()", t);
 			}
 		}
 
@@ -2949,6 +2956,16 @@ public class DataHandling {
 		public MSVersion since() {
 			return MSVersion.V3_3_1;
 		}
+
+		@Override
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(Auto.TYPE)
+					.varParam(Auto.TYPE, "parameters", "The parameters to be sent to the Callable.")
+					.param(Callable.TYPE, "callable", "The executable Callable object")
+					.build();
+		}
+
+
 	}
 
 	@api

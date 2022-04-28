@@ -2,6 +2,7 @@ package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.SimpleVersion;
 import com.laytonsmith.PureUtilities.SmartComment;
 import com.laytonsmith.annotations.OperatorPreferred;
 import com.laytonsmith.annotations.breakable;
@@ -570,20 +571,21 @@ public final class MethodScriptCompiler {
 
 							// Handle the buffer or previous token, with the knowledge that a FUNC_START follows.
 							if(buf.length() > 0) {
-								if(saveAllTokens) {
-									// In this case, we need to check for keywords first, because we want to go ahead
-									// and convert into that stage. In the future, we might want to do this
-									// unconditionally, but for now, just go ahead and only do it if saveAllTokens is
-									// true, because we know that won't be used by the compiler.
-									if(KeywordList.getKeywordByName(buf.toString()) != null) {
-										// It's a keyword.
-										tokenList.add(new Token(TType.KEYWORD, buf.toString(), target));
-									} else {
-										// It's not a keyword, but a normal function.
-										tokenList.add(new Token(TType.FUNC_NAME, buf.toString(), target));
-									}
+								// In this case, we need to check for keywords first, because we want to go ahead
+								// and convert into that stage. In the future, we might want to do this
+								// unconditionally, but for now, just go ahead and only do it if saveAllTokens is
+								// true, because we know that won't be used by the compiler.
+								if(saveAllTokens && KeywordList.getKeywordByName(buf.toString()) != null) {
+									// It's a keyword.
+									tokenList.add(new Token(TType.KEYWORD, buf.toString(), target));
 								} else {
-									tokenList.add(new Token(TType.FUNC_NAME, buf.toString(), target));
+									// It's not a keyword, but a normal function.
+									String funcName = buf.toString();
+									if(funcName.matches("[_a-zA-Z0-9]+")) {
+										tokenList.add(new Token(TType.FUNC_NAME, funcName, target));
+									} else {
+										tokenList.add(new Token(TType.UNKNOWN, funcName, target));
+									}
 								}
 								buf = new StringBuilder();
 								target = new Target(lineNum, file, column);
@@ -605,12 +607,9 @@ public final class MethodScriptCompiler {
 										for(int a = 0; a < count; a++) {
 											tokenList.removeLast();
 										}
-									} else {
-										tokenList.add(new Token(TType.FUNC_NAME, "__autoconcat__", target.copy()));
 									}
 								} catch (NoSuchElementException e) {
 									// This is the first element on the list, so, it's another autoconcat.
-									tokenList.add(new Token(TType.FUNC_NAME, "__autoconcat__", target.copy()));
 								}
 							}
 							break;
@@ -1563,7 +1562,28 @@ public final class MethodScriptCompiler {
 				parents.push(f);
 			} else if(t.type.equals(TType.FUNC_START)) {
 				if(!prev1.type.equals(TType.FUNC_NAME)) {
-					throw new ConfigCompileException("Unexpected parenthesis", t.target);
+					ParseTree f;
+					if(prev1.type != TType.SEMICOLON
+							&& prev1.type != TType.COMMA
+							&& prev1.type != TType.FUNC_START
+							&& prev1.target.line() != t.target.line()
+							&& MSVersion.LATEST.lt(new SimpleVersion(3, 3, 7))) {
+						// Remove this in 3.3.7, and just always do the rewrite.
+						CompilerWarning warning = new CompilerWarning("This will attempt to execute the previous"
+								+ " statement in version 3.3.7 and above."
+								+ " If this is not intended, place a semicolon at the end of the above line, and"
+								+ " this warning will go away. If it is intended, move this parenthesis up to the same"
+								+ " line to actually execute it.", t.target,
+								SuppressWarning.PossibleUnexpectedExecution);
+						environment.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions, warning);
+						f = new ParseTree(new CFunction(Compiler.__autoconcat__.NAME, unknown), fileOptions);
+					} else {
+						f = new ParseTree(new CFunction(Compiler.p.NAME, unknown), fileOptions);
+					}
+					constructCount.push(new AtomicInteger(0));
+					tree.addChild(f);
+					tree = f;
+					parents.push(f);
 				}
 				parens++;
 			} else if(t.type.equals(TType.FUNC_END)) {
