@@ -7,7 +7,6 @@ import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
-import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.testing.StaticTest;
 import static com.laytonsmith.testing.StaticTest.RunCommand;
@@ -310,7 +309,7 @@ public class DataHandlingTest {
 		verify(fakePlayer).sendMessage("Hello World");
 	}
 
-	@Test(timeout = 10000, expected = CancelCommandException.class)
+	@Test(timeout = 10000, expected = CRECastException.class)
 	public void testClosure13() throws Exception {
 		SRun("@s = 'string';\n"
 				+ "@s();", fakePlayer);

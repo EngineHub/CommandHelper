@@ -695,9 +695,27 @@ public class OptimizationTest {
 				optimize("proc _t() { return closure() { return closure() { msg('hi'); }; }; } _t()()();"));
 		assertEquals("__statements__(proc('_t',__statements__(return(closure(__statements__(return(closure(__statements__(msg('hi'))))))))),"
 				+ "execute(execute(_t())))",
-				optimize("proc _t() { return closure() { return closure() { msg('hi'); }; }; }; _t()()();"));
+				optimize("<!strict> proc _t() { return closure() { return closure() { msg('hi'); }; }; }; _t()()();"));
 		assertEquals("__statements__(proc('_t',@a,__statements__(return(closure(@b,__statements__(return(closure(@c,__statements__(msg('hi'))))))))),"
 				+ "execute(3,4,execute(2,_t(1))))",
-				optimize("proc _t(@a) { return closure(@b) { return closure(@c) { msg('hi'); }; }; }; _t(1)(2)(3,4);"));
+				optimize("<!strict> proc _t(@a) { return closure(@b) { return closure(@c) { msg('hi'); }; }; }; _t(1)(2)(3,4);"));
+	}
+
+	@Test
+	public void testNestedExecuteWithStatement() throws Exception {
+		assertEquals("execute(closure())", optimize("closure()()"));
+		assertEquals("__statements__(execute(closure()))", optimize("closure()();"));
+	}
+
+	@Test
+	public void testParenthesisInArrayDefinition() throws Exception {
+		assertEquals("array(centry(a:,neg(@a)))", optimize("array(a: -(@a))"));
+	}
+
+	@Test
+	public void testNoErrorWithParenthesisAfterSymbol() throws Exception {
+		assertEquals("if(and(@a,or(@b,@c)),null)",
+				optimize("if(@a &&\n(@b || @c)) {}"));
+		assertEquals(0, env.getEnv(CompilerEnvironment.class).getCompilerWarnings().size());
 	}
 }

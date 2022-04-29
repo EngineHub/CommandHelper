@@ -2830,13 +2830,13 @@ public class DataHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			if(args[args.length - 1].isInstanceOf(Callable.TYPE)) {
+			if(args[args.length - 1] instanceof Callable callable) {
 				Mixed[] vals = new Mixed[args.length - 1];
 				System.arraycopy(args, 0, vals, 0, args.length - 1);
-				Callable closure = (Callable) args[args.length - 1];
-				return closure.executeCallable(environment, t, vals);
+				return callable.executeCallable(environment, t, vals);
 			} else {
-				throw new CRECastException("Only a Callable (created for instance from the closure function) can be sent to execute()", t);
+				throw new CRECastException("Only a Callable (created for instance from the closure function) can be"
+						+ " sent to execute(), or executed directly, such as @c().", t);
 			}
 		}
 

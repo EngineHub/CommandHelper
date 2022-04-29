@@ -281,9 +281,10 @@ public class Compiler {
 							ParseTree conversion;
 							if(node.getData().val().equals("-") || node.getData().val().equals("+")) {
 								//These are special, because if the values to the left isn't a symbol,
-								//it's not unary
+								//it's not unary. Labels also are a separate term.
 								if((i == 0 || list.get(i - 1).getData() instanceof CSymbol)
-										&& !(list.get(i + 1).getData() instanceof CSymbol)) {
+										&& !(list.get(i + 1).getData() instanceof CSymbol)
+										|| (i != 0 && list.get(i - 1).getData() instanceof CLabel)) {
 									if(node.getData().val().equals("-")) {
 										//We have to negate it
 										conversion = new ParseTree(
