@@ -1763,7 +1763,7 @@ public class DataHandling {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{};
+			return new Class[]{CREIllegalArgumentException.class};
 		}
 
 		@Override
@@ -1779,7 +1779,11 @@ public class DataHandling {
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			String procName = args[0].val();
-			return new ProcedureUsage(env.getEnv(GlobalEnv.class).GetProcs().get(procName), t);
+			Procedure proc = env.getEnv(GlobalEnv.class).GetProcs().get(procName);
+			if(proc == null) {
+				throw new CREIllegalArgumentException("Could not find proc named \"" + procName + "\" in this scope.", t);
+			}
+			return new ProcedureUsage(proc, t);
 		}
 
 		@Override
@@ -1789,6 +1793,20 @@ public class DataHandling {
 			if(!children.get(0).isConst()) {
 				throw new ConfigCompileException("get_proc (or proc keyword usage) must contain a"
 						+ " hardcoded procedure name.", t);
+			}
+			if(children.get(0).getData() instanceof CNull) {
+				throw new ConfigCompileException("get_proc cannot accept null.", t);
+			}
+			String procName = children.get(0).getData().val();
+			StaticAnalysis sa = env.getEnv(CompilerEnvironment.class).getStaticAnalysis();
+			boolean found;
+			if(sa != null && sa.isLocalEnabled()) {
+				found = !sa.getTermScope(children.get(0)).getDeclarations(Namespace.PROCEDURE, procName).isEmpty();
+			} else {
+				found = true;
+			}
+			if(!found) {
+				throw new ConfigCompileException("Could not find proc \"" + procName + "\"", t);
 			}
 			return null;
 		}

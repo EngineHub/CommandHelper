@@ -7,7 +7,6 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
-import com.laytonsmith.core.natives.interfaces.Mixed;
 
 /**
  * A Callable represents something that is executable.

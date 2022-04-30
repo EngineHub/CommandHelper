@@ -50,7 +50,8 @@ public class ClassInfoTest {
 	@Test
 	public void testOnlyContainedClassesHaveVariousModifiers() throws Exception {
 		List<String> failures = new ArrayList<>();
-		Set<ObjectModifier> allowed = EnumSet.of(ObjectModifier.FINAL, ObjectModifier.ABSTRACT);
+		Set<ObjectModifier> allowed = EnumSet.of(ObjectModifier.FINAL, ObjectModifier.ABSTRACT, ObjectModifier.NATIVE,
+				ObjectModifier.IMMUTABLE);
 		for(FullyQualifiedClassName t : NativeTypeList.getNativeTypeList()) {
 			Mixed m = NativeTypeList.getInvalidInstanceForUse(t);
 			if(m.getContainingClass() == null) {
