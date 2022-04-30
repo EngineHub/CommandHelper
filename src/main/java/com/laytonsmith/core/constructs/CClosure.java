@@ -3,7 +3,7 @@ package com.laytonsmith.core.constructs;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.ArgumentValidation;
-import com.laytonsmith.core.Callable;
+import com.laytonsmith.core.natives.interfaces.Callable;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
@@ -29,8 +29,6 @@ import java.util.logging.Logger;
 
 /**
  * A closure is just an anonymous procedure.
- *
- *
  */
 @typeof("ms.lang.closure")
 public class CClosure extends Construct implements Callable {
@@ -315,7 +313,7 @@ public class CClosure extends Construct implements Callable {
 
 	@Override
 	public CClassType[] getInterfaces() {
-		return CClassType.EMPTY_CLASS_ARRAY;
+		return new CClassType[]{Callable.TYPE};
 	}
 
 }

@@ -6,7 +6,7 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.core.ArgumentValidation;
-import com.laytonsmith.core.Callable;
+import com.laytonsmith.core.natives.interfaces.Callable;
 import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;

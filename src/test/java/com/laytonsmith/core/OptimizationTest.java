@@ -718,4 +718,11 @@ public class OptimizationTest {
 				optimize("if(@a &&\n(@b || @c)) {}"));
 		assertEquals(0, env.getEnv(CompilerEnvironment.class).getCompilerWarnings().size());
 	}
+
+	@Test
+	public void testProcReference() throws Exception {
+		assertEquals("__statements__(proc(ms.lang.int,'_asdf',assign(ms.lang.int,@i,null),__statements__(return(@i))),"
+				+ "assign(ms.lang.Callable,@c,get_proc('_asdf')))",
+				optimize("int proc _asdf(int @i) { return @i; } Callable @c = proc _asdf;"));
+	}
 }

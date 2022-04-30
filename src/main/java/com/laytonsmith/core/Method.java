@@ -1,5 +1,6 @@
 package com.laytonsmith.core;
 
+import com.laytonsmith.core.natives.interfaces.Callable;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.constructs.CClassType;
@@ -54,7 +55,7 @@ public class Method extends Construct implements Callable {
 
 	@Override
 	public CClassType[] getInterfaces() {
-		return CClassType.EMPTY_CLASS_ARRAY;
+		return new CClassType[]{Callable.TYPE};
 	}
 
 	@Override

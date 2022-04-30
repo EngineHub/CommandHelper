@@ -13,7 +13,7 @@ import com.laytonsmith.annotations.noprofile;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.annotations.unbreakable;
 import com.laytonsmith.core.ArgumentValidation;
-import com.laytonsmith.core.Callable;
+import com.laytonsmith.core.natives.interfaces.Callable;
 import com.laytonsmith.core.Globals;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.MSLog;
@@ -63,6 +63,7 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.IVariableList;
 import com.laytonsmith.core.constructs.InstanceofUtil;
+import com.laytonsmith.core.constructs.ProcedureUsage;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -1753,6 +1754,74 @@ public class DataHandling {
 		public SymbolKind getSymbolKind() {
 			return SymbolKind.Function;
 		}
+	}
+
+	@api
+	public static class get_proc extends AbstractFunction implements Optimizable {
+
+		public static final String NAME = "get_proc";
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			String procName = args[0].val();
+			return new ProcedureUsage(env.getEnv(GlobalEnv.class).GetProcs().get(procName), t);
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, Environment env, Set<Class<? extends EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException,
+				ConfigRuntimeException, ConfigCompileGroupException {
+			if(!children.get(0).isConst()) {
+				throw new ConfigCompileException("get_proc (or proc keyword usage) must contain a"
+						+ " hardcoded procedure name.", t);
+			}
+			return null;
+		}
+
+		@Override
+		public String getName() {
+			return "get_proc";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "Procedure {reference} Returns a first class reference to the currently in scope procedure."
+					+ " This can be stored in variables and generally passed around, though it cannot be"
+					+ " serialized. Keyword usage is preferred, such as <code>proc _asdf;</code> instead of"
+					+ " <code>get_proc('_asdf')</code>. Note that this is a special compiler function, and"
+					+ " must contain a hardcoded procedure name.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+
 	}
 
 	@api

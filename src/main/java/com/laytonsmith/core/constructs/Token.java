@@ -1,8 +1,13 @@
 package com.laytonsmith.core.constructs;
 
+import com.laytonsmith.PureUtilities.Pair;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import java.io.File;
 import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -21,24 +26,24 @@ public class Token {
 	private enum TokenVariant {
 		ADDITIVE, EQUALITY, EXPONENTIAL, IDENTIFIER, LOGICAL_AND, LOGICAL_OR, DEFAULT_AND, DEFAULT_OR,
 		MULTIPLICATIVE, PLUS_MINUS, POSTFIX, RELATIONAL, SYMBOL, UNARY, ASSIGNMENT,
-		SEPARATOR, ATOMIC_LIT, WHITESPACE, KEYWORD, COMMENT, FILE_OPTION
+		SEPARATOR, ATOMIC_LIT, WHITESPACE, KEYWORD, COMMENT, FILE_OPTION, LEFT_BALANCE_TOKEN, RIGHT_BALANCE_TOKEN
 	}
 
 	public enum TType {
 
 		//TODO: Comment this out once the compiler is replaced, and clean up unused ones
 		UNKNOWN(TokenVariant.IDENTIFIER),
-		LSQUARE_BRACKET(TokenVariant.SEPARATOR),
-		RSQUARE_BRACKET(TokenVariant.SEPARATOR),
+		LSQUARE_BRACKET(TokenVariant.SEPARATOR, TokenVariant.LEFT_BALANCE_TOKEN),
+		RSQUARE_BRACKET(TokenVariant.SEPARATOR, TokenVariant.RIGHT_BALANCE_TOKEN),
 		OPT_VAR_ASSIGN(TokenVariant.SEPARATOR),
 		ALIAS_END(TokenVariant.SEPARATOR),
 		COMMA(TokenVariant.SEPARATOR),
 		FUNC_NAME(),
-		FUNC_START(TokenVariant.SEPARATOR),
-		FUNC_END(TokenVariant.SEPARATOR),
+		FUNC_START(TokenVariant.SEPARATOR, TokenVariant.LEFT_BALANCE_TOKEN),
+		FUNC_END(TokenVariant.SEPARATOR, TokenVariant.RIGHT_BALANCE_TOKEN),
 		NEWLINE(TokenVariant.WHITESPACE),
-		MULTILINE_START(TokenVariant.SEPARATOR),
-		MULTILINE_END(TokenVariant.SEPARATOR),
+		MULTILINE_START(TokenVariant.SEPARATOR, TokenVariant.LEFT_BALANCE_TOKEN),
+		MULTILINE_END(TokenVariant.SEPARATOR, TokenVariant.RIGHT_BALANCE_TOKEN),
 		COMMENT(TokenVariant.COMMENT),
 		SMART_COMMENT(TokenVariant.COMMENT),
 		COMMAND(),
@@ -78,8 +83,8 @@ public class Token {
 		CONCAT(TokenVariant.SYMBOL, TokenVariant.ADDITIVE),
 		EXPONENTIAL(TokenVariant.SYMBOL, TokenVariant.EXPONENTIAL),
 		WHITESPACE(TokenVariant.WHITESPACE),
-		LCURLY_BRACKET(TokenVariant.SEPARATOR),
-		RCURLY_BRACKET(TokenVariant.SEPARATOR),
+		LCURLY_BRACKET(TokenVariant.SEPARATOR, TokenVariant.LEFT_BALANCE_TOKEN),
+		RCURLY_BRACKET(TokenVariant.SEPARATOR, TokenVariant.RIGHT_BALANCE_TOKEN),
 		IDENTIFIER(),
 		DOUBLE(TokenVariant.IDENTIFIER, TokenVariant.ATOMIC_LIT),
 		INTEGER(TokenVariant.IDENTIFIER, TokenVariant.ATOMIC_LIT),
@@ -92,10 +97,132 @@ public class Token {
 		CONCAT_ASSIGNMENT(TokenVariant.ASSIGNMENT, TokenVariant.SYMBOL, TokenVariant.ADDITIVE),
 		SEMICOLON(TokenVariant.SEPARATOR),
 		KEYWORD(TokenVariant.KEYWORD),
-		FILE_OPTIONS_START(TokenVariant.SEPARATOR, TokenVariant.FILE_OPTION),
-		FILE_OPTIONS_STRING(TokenVariant.FILE_OPTION),
+		FILE_OPTIONS_START(TokenVariant.SEPARATOR, TokenVariant.FILE_OPTION, TokenVariant.LEFT_BALANCE_TOKEN),
+		FILE_OPTIONS_STRING(TokenVariant.FILE_OPTION, TokenVariant.RIGHT_BALANCE_TOKEN),
 		FILE_OPTIONS_END(TokenVariant.SEPARATOR, TokenVariant.FILE_OPTION),
 		ANNOTATION(TokenVariant.COMMENT);
+
+		private static final List<Pair<TType, TType>> BALANCE_TOKENS = Arrays.asList(
+				new Pair<>(LSQUARE_BRACKET, RSQUARE_BRACKET),
+				new Pair<>(FUNC_START, FUNC_END),
+				new Pair<>(MULTILINE_START, MULTILINE_END),
+				new Pair<>(LCURLY_BRACKET, RCURLY_BRACKET),
+				new Pair<>(FILE_OPTIONS_START, FILE_OPTIONS_END)
+		);
+
+		/**
+		 * Given a balance token on either side, returns the opposing balance token type.
+		 * @param forType The token type.
+		 * @return The opposing token type. For instance, passing in FUNC_START returns FUNC_END, and passing in
+		 * RSQUARE_BRACKET returns LSQUARE_BRACKET.
+		 * @throws IllegalArgumentException If the token type is not a balance token. This can be checked by seeing
+		 * if one of either {@link #isLeftBalanceToken()} or {@link #isRightBalanceToken()} returns true.
+		 */
+		public static TType getBalanceToken(TType forType) {
+			for(Pair<TType, TType> types : BALANCE_TOKENS) {
+				if(types.getKey() == forType) {
+					return types.getValue();
+				} else if(types.getValue() == forType) {
+					return types.getKey();
+				}
+			}
+			throw new IllegalArgumentException("Cannot call getBalanceToken on " + forType);
+		}
+
+		public static class BalanceMap {
+			private final Map<TType, Integer> map = getEmptyBalanceTokenMap();
+
+			/**
+			 * Given any token type, processes it. If it's a left balance token, increments it, if it's
+			 * a right one, decrements. Otherwise, it is ignored.
+			 * @param token
+			 * @throws ConfigCompileException
+			 */
+			public void process(Token token) throws ConfigCompileException {
+				if(token.type.isLeftBalanceToken()) {
+					inc(token);
+				} else if(token.type.isRightBalanceToken()) {
+					dec(token);
+				}
+			}
+
+			/**
+			 * Decrements the internal counter for the given token type, if it is a balance token.
+			 * Should the internal counter be caused to drop below 0, a compile exception is thrown
+			 * automatically.
+			 * @param token
+			 * @throws ConfigCompileException
+			 */
+			public void dec(Token token) throws ConfigCompileException {
+				TType type = token.type;
+				if(!type.isLeftBalanceToken() || !type.isRightBalanceToken()) {
+					return;
+				}
+				map.put(type, map.get(type) - 1);
+				if(map.get(type) < 0) {
+					throw new ConfigCompileException("Unexpected " + type.name(), token.target);
+				}
+			}
+
+			/**
+			 * Increments the internal counter for the given token type, if it is a balance token.
+			 * @param token
+			 */
+			public void inc(Token token) {
+				TType type = token.type;
+				if(!type.isLeftBalanceToken() || !type.isRightBalanceToken()) {
+					return;
+				}
+				map.put(type, map.get(type) + 1);
+			}
+
+			/**
+			 * Returns true if it is currently balanced, or more specifically, if all integer
+			 * values in the map are 0.
+			 * @return True if it is balanced.
+			 */
+			public boolean isBalanced() {
+				for(Integer i : map.values()) {
+					if(i != 0) {
+						return false;
+					}
+				}
+				return true;
+			}
+
+			/**
+			 * Returns the current count of the given {@link TokenVariant#LEFT_BALANCE_TOKEN} type.
+			 * @param type
+			 * @return
+			 */
+			public int getCount(TType type) {
+				return map.get(type);
+			}
+
+			@Override
+			public String toString() {
+				StringBuilder b = new StringBuilder();
+				for(Map.Entry<TType, Integer> entry : map.entrySet()) {
+					b.append(entry.getKey()).append(": ").append(entry.getValue()).append("; ");
+				}
+				return b.toString().trim();
+			}
+
+		}
+
+		/**
+		 * Returns a new balance token map. This contains the left hand side of all balance token types,
+		 * which map to an integer, initially zero. This can be used to easily and generically keep track
+		 * of all balance tokens.
+		 * @return
+		 */
+		private static Map<TType, Integer> getEmptyBalanceTokenMap() {
+			Map<TType, Integer> map = new HashMap<>();
+			for(Pair<TType, TType> pairs : BALANCE_TOKENS) {
+				map.put(pairs.getKey(), 0);
+			}
+			return map;
+		}
 
 		private final Set<TokenVariant> variants = EnumSet.noneOf(TokenVariant.class);
 
@@ -304,6 +431,24 @@ public class Token {
 		 */
 		public boolean isFileOption() {
 			return this.variants.contains(TokenVariant.FILE_OPTION);
+		}
+
+		/**
+		 * Returns true if this is a left balance token, meaning that it needs an equivalent right balance
+		 * token to be considered "balanced".
+		 * @return
+		 */
+		public boolean isLeftBalanceToken() {
+			return this.variants.contains(TokenVariant.LEFT_BALANCE_TOKEN);
+		}
+
+		/**
+		 * Returns true if this is a right balance token, meaning that it needs an equivalent right balance
+		 * token to be considered "balanced".
+		 * @return
+		 */
+		public boolean isRightBalanceToken() {
+			return this.variants.contains(TokenVariant.RIGHT_BALANCE_TOKEN);
 		}
 
 	}

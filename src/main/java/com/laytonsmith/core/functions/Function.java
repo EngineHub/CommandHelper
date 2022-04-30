@@ -78,7 +78,7 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 	 * @return
 	 * @throws CancelCommandException
 	 */
-	public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException;
+	public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException;
 
 	/**
 	 * Gets the function's signatures. {@link SignatureBuilder} offers a convenient way to create these signatures.
