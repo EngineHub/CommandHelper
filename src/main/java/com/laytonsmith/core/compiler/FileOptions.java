@@ -48,6 +48,8 @@ public final class FileOptions {
 	private final String copyright;
 	@Option("Distribution License Information")
 	private final String license;
+	@Option("Disables undefined proc errors in the typechecker")
+	private final Boolean allDynamicProcs;
 
 	private final Map<String, String> rawOptions;
 	//TODO: Make this non-public once this is all finished.
@@ -66,6 +68,7 @@ public final class FileOptions {
 		compilerOptions = parseEnumSet(getDefault(parsedOptions, "compileroptions", ""), CompilerOption.class);
 		copyright = getDefault(parsedOptions, "copyright", "").trim();
 		license = getDefault(parsedOptions, "license", "").trim();
+		allDynamicProcs = parseBoolean(getDefault(parsedOptions, "allDynamicProcs", null));
 	}
 
 	private String getDefault(Map<String, String> map, String key, String defaultIfNone) {
@@ -208,6 +211,15 @@ public final class FileOptions {
 	 */
 	public String getCopyright() {
 		return copyright;
+	}
+
+	/**
+	 * If true, all proc reference errors are suppressed, and it is assumed that the signature of any unknown
+	 * procs that are called have the signature <code>auto proc _name(auto... @values);</code>.
+	 * @return
+	 */
+	public boolean isAllDynamicProcs() {
+		return allDynamicProcs;
 	}
 
 	/**

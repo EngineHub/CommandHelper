@@ -1,0 +1,282 @@
+Procedures (also referred to as procs) are a way of calling code multiple times, without having to copy
+paste the code everywhere. Also commonly known as functions, they accept zero or more inputs, and have
+zero or one output. Procs are named, and can be referenced elsewhere by name.
+
+[[Closures]] are similar to procs, but have different semantics, though both procs and closures are of the
+''Callable'' type, meaning they can be executed via {{function|execute}} or with parenthesis based execution,
+with the addition that procs can be called by name.
+
+== Defining a proc ==
+
+The first step to using a proc is to define it. The general format of a proc definition is:
+
+<%PRE|
+[ReturnType] proc [ProcName]([arguments]) {
+	[Code]
+}
+%>
+
+For instance:
+
+<%CODE|
+int proc _asdf(int @int, string @string = 'a default value') {
+	return 42;
+}
+%>
+
+The return type is some valid MethodScript type, followed by the mandatory ''proc'' keyword, the proc name, which
+must start with a single underscore, a left parenthesis, zero or more arguments, with or without types, followed by
+the code block. Arguments may be considered optional by using an assignment in the variable declarations. The proc
+may return a value (in this example the int 42) or not (a void type proc). If untyped, the return type is considered
+auto.
+
+There is older, functional notation as well, see the API docs for information on this format, though using the
+functional notation is not preferred.
+
+== Calling a proc ==
+
+Once a proc is defined, it can be called such as this:
+
+<%CODE|
+_asdf(10, 'a different string');
+_asdf(50);
+%>
+
+In general, these work the same as native function calls, and have more or less the same semantics, with a few
+differences related to scope (native functions are globally accessible, while procs are not necessarily).
+
+There are alternative ways of calling a proc, for instance the {{function|call_proc}} and {{function|call_proc_array}}
+functions, as well as first class proc references (see below), but these are not the usual way of calling them.
+
+== Scope within procs ==
+
+Within a proc, only variables that were defined in the argument list (plus the @arguments argument) are available.
+All other values are not in scope.
+
+You can share data generally, with for instance {{function|import}} and {{function|export}}, but that requires
+specific action to get a value. {{function|closure}} is a proc-like data structure which gets a copy of all currently
+in scope values, which might be a good alternative to procs.
+
+== Scope of procs ==
+
+In general, a proc is only available to be called after it is defined, but once defined, they are available from
+within and without any variable scope. The only exception to this is procs defined within other procs, which leave
+scope at the end of the proc, and work like "private procs" in a way.
+
+Conditional procs are possible, but their behavior is somewhat intentionally poorly defined. Rather than conditionally
+defining a proc, consider other options, such as {{function|iclosure}} (isolated closure) which has the same internal
+scoping rules as procs, but have variable scope, and can be defined with the same scope as other variables.
+
+Conditional procs can accidentally (or intentionally) occur when using the {{function|include}} function with a
+non-hardcoded path. See the discussion below for dynamic procs. The solutions there can perhaps be useful in other
+conditions where you think you might need a conditional proc definition.
+
+In general, the intention is for procs to be considered "global" and immutable, though in practice this is possible
+to circumvent, though this is fragile and intentionally poorly defined, as changes may occur in the future that cause
+patterns outside these conventions to break.
+
+=== Proc redefinition ===
+
+A subset of conditional procs are proc redefinitions. Consider the following code:
+
+<%CODE|
+proc _asdf() {
+        msg('first');
+}
+
+proc _asdf() {
+        msg('second');
+}
+
+_asdf();
+%>
+
+The output of this code will be "second", because the proc was redefined internally with the new declaration. This is
+a side effect, and not necessarily intended behavior, though it is in general an officially sanctioned pattern, that
+is only subject to minor changes in the future, with one large caveat: The return type and argument count/types should
+remain the same from one declaration to the next, and only the internal implementation should vary.
+
+If you follow these rules, you may safely do proc redefinitions, and only have to make minor changes in the future.
+
+If the signature of the proc changes, that is, the return type or argument count/types changes, this will cause compile
+errors in future versions.
+
+== Arguments and return type ==
+
+It is optional though highly recommended (and required in future versions of strict mode) that the return type and
+parameter types are specified. If missing, the return type is considered to be auto, as are argument types.
+
+<%CODE|
+// Implied auto
+proc _asdf1(@a, @b, @c) {
+	...
+}
+
+// Explicit version of the above
+auto proc _asdf2(auto @a, auto @b, auto @c) {
+	...
+}
+
+// Specific types, strongly typed, so that a call such as `string @s = _asdf(4.5, array(), 'test');` would cause
+// a compile error (when typechecking is enabled).
+int proc _asdf3(int @a, string @b, array @c) {
+	...
+}
+%>
+
+=== @arguments ===
+
+The @arguments variable is a special, predefined value, which is available in every procedure. It is defined as
+
+<%PRE|array%>
+
+And contains all values passed to the proc, in order.
+
+This value should not generally be relied on, as it may cause compiler errors in calling code in the future. Instead,
+proper support for variadic arguments will be provided, though it will continue to exist for within the proc for other
+meta purposes.
+
+== First class references to procs ==
+
+In general, a first class reference to a proc can be obtained by using the {{function|get_proc}} keyword, or preferrably,
+using the keyword. The returned value is a <code>ms.lang.Procedure</code> object, which implements the
+<code>ms.lang.Callable</code> type, and can be assigned to variables and generally passed around (including escaping
+the general boundaries for private procs). Since closures also implement Callable, this means that references to the
+two types can be mixed together.
+
+<%CODE|
+proc _asdf() {
+	msg('Inside proc');
+}
+
+closure @closure = closure() {
+	msg('Inside closure');
+};
+
+// "proc _asdf" returns a typesafe reference to the proc instance, and refers to whatever
+// proc reference was in scope at the location it is called.
+foreach(Callable @callable in array(proc _asdf, @closure)) {
+	@callable();
+}
+%>
+
+This will print "Inside proc" and "Inside closure".
+
+== Proc Docs ==
+
+Procs can use a special type of comment, called a smart comment, to add useful human readable information about the
+procedure, its parameters, and return type, which are the available to be read directly when looking at the definition,
+or when using the official MethodScriptVSC extension in Visual Studio Code, when hovering over references to the
+proc. The following format is supported:
+
+<%CODE|
+/**
+ * This is the body, where the main description is.
+ * @param a A description of the parameter a
+ * @param b A description of the parameter b
+ * @returns A description explaining what the proc returns
+ * @seeAlso https://url.com A clickable link to a page that perhaps contains more details
+ */
+int proc _asdf(int @a, int @b) {
+	...
+}
+%>
+
+Using this feature is a handy and easy way to leave easy to access notes for future readers.
+
+For more details on the general format of smart comments see [[this article|SmartComments]].
+
+== Dynamic procs ==
+
+In general, procs are required to be defined before they are used, and they are additionally required to be known
+during compilatin, so they can be typechecked, even if they are fully auto. This leads to a problem when using dynamic
+includes, for instance <code>include(@pathToLibrary.'/procs.ms');</code> and then calling a proc that is defined in
+whatever file may or may not be included in that file. The typechecker does not allow these references in general,
+and it will cause a compile error, preventing your code from execution. There are, however, good reasons for wanting
+to have "dynamic includes", but in general, doing so makes your code less safe, and so isn't allowed by default. There
+are 3 different ways around this though, going in order of preferred to least preferred:
+
+=== Forward declarations ===
+
+A forward declaration is a declaration of the signature of the proc, without the implementation. This effectively tells
+the compiler that at the point that this procedure is called, it will be defined, and it will have this signature. This
+allows code to still be fully typechecked, but can conditionally or lazily include the actual proc definition, possibly
+depending on runtime factors. To forward declare a proc, simply leave off the function body:
+
+<%CODE|
+array proc _asdf(int @a, string @b);
+%>
+
+This will cause the typechecker to register a declaration with the given types, and this is the signature that future
+calls will be typechecked against. Missing procs at runtime will be a runtime error, however.
+
+Note, if the procedure is actually unconditionally implemented, a forward declaration is not necessary, as the proc
+implementation also serves to declare the proc's signature.
+
+<%CODE|
+array proc _asdf(int @a, string @b);
+
+// Different versions of _asdf are defined in test.ms and prod.ms, though they both have the same signature
+if(@test) {
+	include('test.ms');
+} else {
+	include('prod.ms');
+}
+
+_asdf(10, 'string'); // This reference is fully typechecked, and a compile error will be issued if it does not match.
+%>
+
+For now, forward declarations are only part of the typechecking framework, but in the future, it will cause a runtime
+error at include site if an implementation of a forward declared method has the wrong signature, which will make tracing
+back exceptions to the actual problem easier. For now, simply be careful to ensure that when implementing a forward
+declaration that you implement the same signature.9
+
+<%NOTE|To introduce this feature, backwards compatibility is broken, but only in obscure cases.
+In previous versions, the last argument was always taken to be the body of the proc. However,
+now it is considered a forward declaration if the last parameter is simply a parameter, and not
+executable code. The impact of this change is expected to be minimal, since the code would have
+been useless to begin with.%>
+
+=== @{DynamicProc} annotation ===
+
+You can turn off typechecking for specific and single calls to dynamic procs, with the @{DynamicProc} annotation.
+
+<%CODE|
+// Different versions of _asdf are defined in test.ms and prod.ms, though they both have the same signature.
+// However, we are not forward declaring the signature.
+if(@test) {
+	include('test.ms');
+} else {
+	include('prod.ms');
+}
+
+@{DynamicProc}
+_asdf(10, 'string'); // No compile error
+@{DynamicProc}
+_asdf('string', 10); // No compile error, though there is a runtime exception
+
+_asdf(10, 'string'); // Compile error, could not find _asdf
+%>
+
+This simply causes typechecking to be disabled for the single call to the proc, other calls to the same proc
+will be typechecked if they also do not contain the annotation.
+
+=== File options ===
+
+Missing declaration errors can also simply be turned off for a whole file, using the allDynamicProcs file option.
+
+<%CODE|
+<! allDynamicProcs >
+
+_asdf(10, 'string'); // No compile error
+
+void proc _fdsa() {
+	...
+}
+
+_fdsa(10, 'test'); // Compile error, known procs are still typechecked.
+%>
+
+In general, it is preferred that procs are all statically linked, that is, they are defined once and only once, and
+are included with hardcoded and non-conditional include references. In the future, the class library will be the
+preferred and fully supported way of doing dynamic linking.
