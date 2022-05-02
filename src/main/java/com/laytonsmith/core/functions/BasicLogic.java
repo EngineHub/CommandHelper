@@ -16,6 +16,7 @@ import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.compiler.signature.FunctionSignatures;
 import com.laytonsmith.core.compiler.signature.SignatureBuilder;
+import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CClassType;
@@ -1567,7 +1568,7 @@ public class BasicLogic {
 			 *  Note that getReturnType could be overridden, not using this signature for typechecking.
 			 *  That implementation is not yet possible until A OR B OR ... types can be described.
 			 */
-			return new SignatureBuilder(Mixed.TYPE).varParam(Mixed.TYPE, "vals", null)
+			return new SignatureBuilder(Auto.TYPE).varParam(Mixed.TYPE, "vals", null)
 					.setNoneIsAllowed(true).build();
 		}
 
