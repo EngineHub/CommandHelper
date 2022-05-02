@@ -38,6 +38,7 @@ import com.laytonsmith.core.compiler.analysis.Namespace;
 import com.laytonsmith.core.compiler.analysis.ParamDeclaration;
 import com.laytonsmith.core.compiler.analysis.ProcDeclaration;
 import com.laytonsmith.core.compiler.analysis.ProcRootDeclaration;
+import com.laytonsmith.core.compiler.analysis.Reference;
 import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.compiler.signature.FunctionSignatures;
@@ -1787,26 +1788,54 @@ public class DataHandling {
 		}
 
 		@Override
+		public Scope linkScope(StaticAnalysis analysis, Scope parentScope, ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+			ParseTree procName = ast.getChildren().get(0);
+			Target t = procName.getTarget();
+			if(!procName.isConst()) {
+				exceptions.add(new ConfigCompileException("get_proc (or proc keyword usage) must contain a"
+						+ " hardcoded procedure name.", t));
+				return parentScope;
+			}
+			if(procName.getData() instanceof CNull) {
+				exceptions.add(new ConfigCompileException("get_proc cannot accept null.", t));
+				return parentScope;
+			}
+
+			Scope refScope = analysis.createNewScope(parentScope);
+			refScope.addReference(new Reference(Namespace.PROCEDURE, procName.getData().val(), procName.getTarget()));
+			analysis.setTermScope(procName, refScope);
+			return refScope;
+		}
+
+		@Override
+		public CClassType typecheck(StaticAnalysis sa, ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+			ParseTree procName = ast.getChildren().get(0);
+			Target t = procName.getTarget();
+			boolean found;
+			if(sa != null && sa.isLocalEnabled()) {
+				found = !sa.getTermScope(procName)
+						.getDeclarations(Namespace.PROCEDURE, procName.getData().val()).isEmpty();
+			} else {
+				found = true;
+			}
+			if(!found) {
+				exceptions.add(new ConfigCompileException("Could not find proc \"" + procName + "\"",
+						t));
+			}
+			return ProcedureUsage.TYPE;
+		}
+
+		@Override
 		public ParseTree optimizeDynamic(Target t, Environment env, Set<Class<? extends EnvironmentImpl>> envs,
 				List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException,
 				ConfigRuntimeException, ConfigCompileGroupException {
+			// TODO: Once typecheck is always called, this whole function can be removed.
 			if(!children.get(0).isConst()) {
 				throw new ConfigCompileException("get_proc (or proc keyword usage) must contain a"
 						+ " hardcoded procedure name.", t);
 			}
 			if(children.get(0).getData() instanceof CNull) {
 				throw new ConfigCompileException("get_proc cannot accept null.", t);
-			}
-			String procName = children.get(0).getData().val();
-			StaticAnalysis sa = env.getEnv(CompilerEnvironment.class).getStaticAnalysis();
-			boolean found;
-			if(sa != null && sa.isLocalEnabled()) {
-				found = !sa.getTermScope(children.get(0)).getDeclarations(Namespace.PROCEDURE, procName).isEmpty();
-			} else {
-				found = true;
-			}
-			if(!found) {
-				throw new ConfigCompileException("Could not find proc \"" + procName + "\"", t);
 			}
 			return null;
 		}

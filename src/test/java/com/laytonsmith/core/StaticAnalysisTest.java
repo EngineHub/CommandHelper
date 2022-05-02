@@ -74,4 +74,11 @@ public class StaticAnalysisTest {
 		runScript("@a = closure(){}; msg(@a instanceof closure);");
 	}
 
+	@Test
+	public void testGetProc() throws Exception {
+		runScript("proc _test() {}\n"
+				+ "@var = proc _test;\n"
+				+ "@var();");
+	}
+
 }
