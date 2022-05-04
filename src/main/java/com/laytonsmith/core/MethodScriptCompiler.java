@@ -1508,7 +1508,7 @@ public final class MethodScriptCompiler {
 				continue;
 			} else if(t.type == TType.SMART_STRING) {
 				//Smart strings
-				if(t.val().contains("@")) {
+				if(t.val().replace("\\\\", "").replace("\\@", "").contains("@")) {
 					ParseTree function = new ParseTree(fileOptions);
 					function.setData(new CFunction(__smart_string__.NAME, t.target));
 					ParseTree string = new ParseTree(fileOptions);
@@ -1516,7 +1516,9 @@ public final class MethodScriptCompiler {
 					function.addChild(string);
 					tree.addChild(function);
 				} else {
-					tree.addChild(new ParseTree(new CString(t.val(), t.target), fileOptions, true));
+					// To convert a smart string to a regular string, we need to un-escape the '\' and '@' chars.
+					String str = t.val().replace("\\\\", "\\").replace("\\@", "@");
+					tree.addChild(new ParseTree(new CString(str, t.target), fileOptions, true));
 				}
 				constructCount.peek().incrementAndGet();
 				continue;
