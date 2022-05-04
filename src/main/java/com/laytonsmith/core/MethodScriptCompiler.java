@@ -2220,7 +2220,8 @@ public final class MethodScriptCompiler {
 			// Between the rewrite and the keywords, we've removed the need for autoconcat, so pull
 			// up the value here.
 			if(autoconcat.getChildren().size() == 1 && autoconcat.getChildAt(0).getData() instanceof CFunction cf
-					&& cf.val().equals(Compiler.__statements__.NAME)) {
+					&& cf.val().equals(Compiler.__statements__.NAME)
+					&& autoconcat.isSyntheticNode()) {
 				autoconcat.replace(autoconcat.getChildAt(0));
 			}
 			if(autoconcat.getData() instanceof CFunction cf

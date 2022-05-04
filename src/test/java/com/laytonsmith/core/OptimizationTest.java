@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.Set;
 import org.junit.Assert;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -724,5 +725,21 @@ public class OptimizationTest {
 		assertEquals("__statements__(proc(ms.lang.int,'_asdf',assign(ms.lang.int,@i,null),__statements__(return(@i))),"
 				+ "assign(ms.lang.Callable,@c,get_proc('_asdf')))",
 				optimize("int proc _asdf(int @i) { return @i; } Callable @c = proc _asdf;"));
+	}
+
+	@Test
+	public void testInvalidStatements() throws Exception {
+		assertEquals("__statements__(msg('test'))", optimize("msg('test';);"));
+		try {
+			optimize("<!strict> msg('test';);");
+			fail();
+		} catch (ConfigCompileException | ConfigCompileGroupException c) {
+			// pass
+		}
+	}
+
+	@Test
+	public void testSmartStringsWithEscapesValidate() throws Exception {
+		assertEquals("'^\\\\w+$'", optimize("\"^\\\\w+$\""));
 	}
 }
