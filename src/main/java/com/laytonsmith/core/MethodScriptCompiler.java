@@ -2960,7 +2960,7 @@ public final class MethodScriptCompiler {
 						if(lhs == null && !keyword.allowEmptyValue()) {
 							throw new ConfigCompileException("Unexpected keyword " + keyword.getName(), node.getTarget());
 						}
-						ParseTree replacement = keyword.processLeftAssociative(node.getTarget(), node.getFileOptions(), lhs);
+						ParseTree replacement = keyword.processLeftAssociative(env, node.getTarget(), node.getFileOptions(), lhs);
 						children.set(i, replacement);
 						if(lhs != null) {
 							children.remove(i - 1);
@@ -2971,7 +2971,7 @@ public final class MethodScriptCompiler {
 						if(rhs == null && !keyword.allowEmptyValue()) {
 							throw new ConfigCompileException("Unexpected keyword " + keyword.getName(), node.getTarget());
 						}
-						ParseTree replacement = keyword.processRightAssociative(node.getTarget(), node.getFileOptions(), rhs);
+						ParseTree replacement = keyword.processRightAssociative(env, node.getTarget(), node.getFileOptions(), rhs);
 						children.set(i, replacement);
 						if(rhs != null) {
 							children.remove(i + 1);
@@ -2981,15 +2981,15 @@ public final class MethodScriptCompiler {
 						if(!keyword.allowEmptyValue() && (i == 0 || i + 1 >= children.size())) {
 							throw new ConfigCompileException("Unexpected keyword " + keyword.getName(), node.getTarget());
 						}
-						ParseTree replacement = keyword.processBothAssociative(node.getTarget(), node.getFileOptions(),
+						ParseTree replacement = keyword.processBothAssociative(env, node.getTarget(), node.getFileOptions(),
 								lhs, rhs);
 						children.set(i, replacement);
-						if(rhs != null) {
-							children.remove(i + 1);
-							i--;
-						}
 						if(lhs != null) {
 							children.remove(i - 1);
+						}
+						if(rhs != null) {
+							children.remove(i);
+							i--;
 						}
 					}
 				}

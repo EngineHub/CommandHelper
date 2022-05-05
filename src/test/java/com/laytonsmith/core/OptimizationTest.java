@@ -742,4 +742,9 @@ public class OptimizationTest {
 	public void testSmartStringsWithEscapesValidate() throws Exception {
 		assertEquals("'^\\\\w+$'", optimize("\"^\\\\w+$\""));
 	}
+
+	@Test
+	public void testAsKeyword() throws Exception {
+		assertEquals("string(cast<ms.lang.int>(@value))", optimize("@value as int"));
+	}
 }

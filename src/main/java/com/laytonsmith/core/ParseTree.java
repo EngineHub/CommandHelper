@@ -392,7 +392,12 @@ public final class ParseTree implements Cloneable {
 
 	@Override
 	public String toString() {
-		return data.toString();
+		StringBuilder builder = new StringBuilder();
+		builder.append(data.toString());
+		if(getNodeModifiers().getGenerics() != null) {
+			builder.append(getNodeModifiers().getGenerics().toString());
+		}
+		return builder.toString();
 	}
 
 	public String toStringVerbose() {

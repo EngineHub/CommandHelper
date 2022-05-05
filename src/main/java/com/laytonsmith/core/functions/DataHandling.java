@@ -4245,6 +4245,8 @@ public class DataHandling {
 	@api
 	public static class cast extends AbstractFunction {
 
+		public static final String NAME = "cast";
+
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRECastException.class};
@@ -4272,7 +4274,7 @@ public class DataHandling {
 
 		@Override
 		public String docs() {
-			return "value {value, type} Returns the value, cast as the appropriate type. For true casts, this"
+			return "value {value} Returns the value, cast as the appropriate type. For true casts, this"
 					+ "is a compile time only operation, though for cross casts, an actual conversion is done"
 					+ " on the type, and the resulting value is not strictly equal to the original. ----"
 					+ " Casting is in general the process of informing the typechecker that we expect the"
@@ -4281,7 +4283,22 @@ public class DataHandling {
 					+ " <%CODE|\n"
 					+ "primitive @p = 1.0; // Actual value is 1.0, which is a double\n"
 					+ "int @i = @p; // Compiler complains, because @p is a primitive, and not an int\n"
-					+ "%>";
+					+ "%>"
+					+ "\n"
+					+ "We can retain type safety, but also move the typecheck into runtime by using a cast."
+					+ "<%CODE|\n"
+					+ "primitive @p = 1.0;\n"
+					+ "int @i = cast<int>(@p); // Passes typechecking, will cause a runtime error if it's wrong\n"
+					+ "int @j = cast(@p); // <int> is inferred because that's the value we're assigning to\n"
+					+ "int @k = @p as int; // Using as keyword, preferred syntax\n"
+					+ "%>"
+					+ "\n"
+					+ "In general, this will work to cast values that could possibly be converted. Some types are"
+					+ " not castable anyways, for instance <code>string @string = ...; cast&lt;closure&gt;(@string);</code>"
+					+ " will not work, since a string is not convertable no matter what.\n\n"
+					+ "This function will also work to cross cast a value, though this is not yet defined.\n\n"
+					+ "Keyword notation is preferred, <code>@value as int</code> is equivalent to"
+					+ " <code>cast&lt;int&gt;(@value)</code>.";
 		}
 
 		@Override
