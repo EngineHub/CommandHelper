@@ -804,7 +804,7 @@ public class Compiler {
 		 * Error is thrown, and if it is a SMART_STRING but it uses dynamic inputs, it throws a ConfigCompileException.
 		 * @param token The token to convert.
 		 * @return A regular STRING token, with an equivalent (perhaps slightly transformed) dumb string.
-		 * @throws ConfigCompileException If the string contains dynamic portions that
+		 * @throws ConfigCompileException If the string contains an ivariable reference.
 		 */
 		public static Token getDumbStringOrFail(Token token) throws ConfigCompileException {
 			if(token.type != Token.TType.SMART_STRING) {
@@ -813,17 +813,22 @@ public class Compiler {
 			String original = token.value;
 			StringBuilder b = new StringBuilder();
 			for(int i = 0; i < original.length(); i++) {
-					char c = original.charAt(i);
-					char c2 = (i + 1 < original.length() ? original.charAt(i + 1) : '\0');
-					if(c == '\\' && c2 == '@') {
-						b.append('@');
+				char c = original.charAt(i);
+				char c2 = (i + 1 < original.length() ? original.charAt(i + 1) : '\0');
+				if(c == '\\') {
+					if(c2 == '@' || c2 == '\\') {
+						b.append(c2);
 						i++;
 						continue;
+					} else {
+						throw new ConfigCompileException(
+								"Invalid unhandled escape sequence passed to " + NAME + ": \\" + c2, token.target);
 					}
-					if(c == '@') {
-						throw new ConfigCompileException("Cannot use smart strings here", token.target);
-					}
+				} else if(c == '@') {
+					throw new ConfigCompileException("Cannot use smart strings here", token.target);
+				} else {
 					b.append(c);
+				}
 			}
 			return new Token(Token.TType.STRING, b.toString(), token.target.copy());
 		}
@@ -900,16 +905,14 @@ public class Compiler {
 
 					// The parser passes '\' as '\\' and literal '@' as '\@' for disambiguation in parsing here.
 					if(c == '\\') {
-						if(c2 == '@') {
-							b.append('@');
-						} else if(c2 == '\\') {
-							b.append('\\');
+						if(c2 == '@' || c2 == '\\') {
+							b.append(c2);
+							i++;
+							continue;
 						} else {
 							throw new ConfigCompileException(
 									"Invalid unhandled escape sequence passed to " + this.getName() + ": \\" + c2, t);
 						}
-						i++;
-						continue;
 					}
 
 					if(c == '@') {
