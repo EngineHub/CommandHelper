@@ -13,15 +13,26 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
+import com.laytonsmith.core.compiler.CompilerWarning;
+import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
+import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CClosure;
+import com.laytonsmith.core.constructs.CNativeClosure;
+import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.Command;
+import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.RuntimeMode;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.events.EventUtils;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -29,6 +40,7 @@ import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.functions.Commands;
 import com.laytonsmith.core.functions.IncludeCache;
 import com.laytonsmith.core.functions.Scheduling;
+import com.laytonsmith.core.natives.interfaces.MEnumType;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.profiler.ProfilePoint;
 import com.laytonsmith.core.profiler.Profiler;
@@ -54,10 +66,13 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 
@@ -613,7 +628,7 @@ public class AliasCore {
 			if("".equals(proc)) {
 				// Default implementation
 				// TODO: Need to fake closure instantiation.
-				MSLog.GetLogger().i(MSLog.Tags.COMPILER, "Automatically generated tab completes aren't implemented yet.",
+				MSLog.GetLogger().i(MSLog.Tags.COMPILER, "Missing proc name in @tabcompleter annotation.",
 						script.getTarget());
 			} else {
 				Procedure p = env.getEnv(GlobalEnv.class).GetProcs().get(proc);
@@ -630,12 +645,133 @@ public class AliasCore {
 					ConfigRuntimeException.HandleUncaughtException(ex, env);
 				}
 			}
+		} else {
+			// Set up the default one based on param values.
+			Map<String, String> paramTypes = new HashMap<>();
+			for(String param : comment.getAnnotations("@param")) {
+				String[] vals = param.split(" ");
+				if(vals.length < 2) {
+					CompilerWarning warning = new CompilerWarning("One of the @param values for this comment is malformed,"
+							+ " and won't be autocompleted."
+							+ " The general format should be \"@param $variableName <TYPE> [<DESCRIPTION>]\"",
+							script.getTarget(), FileOptions.SuppressWarning.MalformedComment);
+					env.getEnv(CompilerEnvironment.class).addCompilerWarning(script.getScriptFileOptions(), warning);
+				} else {
+					String name = vals[0];
+					String type = vals[1];
+					if(type.startsWith("[")) {
+						for(int i = 2; i < vals.length; i++) {
+							type += " " + vals[i];
+							if(vals[i].endsWith("]")) {
+								break;
+							}
+						}
+					}
+					paramTypes.put(name, type);
+				}
+			}
+			final List<CompletionValues> completions = new ArrayList<>();
+			boolean hasFinal = false;
+			for(Construct parameter : script.getParameters()) {
+				if(parameter instanceof Command) {
+					continue;
+				}
+
+				if(parameter instanceof CString s) {
+					completions.add(() -> Arrays.asList(s.val()));
+				} else if(parameter instanceof Variable v) {
+					if(v.isFinal()) {
+						hasFinal = true;
+					}
+					String type = paramTypes.get(v.getVariableName());
+					if(type == null) {
+						if(v.getVariableName().toLowerCase().contains("player")) {
+							type = "$Player";
+						} else {
+							completions.add(NONE);
+							continue;
+						}
+					}
+					if(type.startsWith("[") && type.endsWith("]")) {
+						type = type.substring(1, type.length() - 1);
+						String finalType = type;
+						completions.add(() -> Arrays.asList(finalType.split(","))
+								.stream().map(item -> item.trim()).toList());
+					} else if(type.equalsIgnoreCase("$none") || type.equalsIgnoreCase("none")
+							|| type.equalsIgnoreCase("string")) {
+						completions.add(NONE);
+					} else if(type.equalsIgnoreCase("$player")) {
+						completions.add(new CompletionValues() {
+							@Override
+							public List<String> getCompletions() {
+								return Static.getServer().getOnlinePlayers().stream()
+										.map(player -> player.getName()).toList();
+							}
+						});
+					} else if(type.equalsIgnoreCase("$offlineplayer")) {
+						completions.add(() -> Arrays.asList(Static.getServer().getOfflinePlayers())
+								.stream().map(player -> player.getName()).toList());
+					} else if(type.equalsIgnoreCase("$boolean") || type.equalsIgnoreCase("boolean")) {
+						completions.add(() -> Arrays.asList("true", "false"));
+					} else {
+						// MethodScript type. Check if it's an enum, and if so, pull the values from it.
+						// Otherwise disable completions.
+						try {
+							FullyQualifiedClassName fqcn = FullyQualifiedClassName.forName(type, Target.UNKNOWN, env);
+							CClassType t = CClassType.get(fqcn, env);
+							if(t.isEnum(env)) {
+								MEnumType enumType = NativeTypeList.getNativeEnumType(fqcn);
+								completions.add(() -> enumType.values()
+										.stream().map(value -> value.name()).toList());
+								continue;
+							}
+						} catch(CRECastException | ClassNotFoundException ex) {
+						}
+						completions.add(NONE);
+					}
+				} else {
+					// Unknown type, disable completions
+					completions.add(NONE);
+				}
+			}
+
+			boolean finalHasFinal = hasFinal;
+			CNativeClosure.ClosureRunnable runnable = (Target t, Environment e, Mixed... args) -> {
+				List<String> inputArgs = ((CArray) args[2]).asList().stream().map(val -> val.val()).toList();
+				CompletionValues completion = null;
+				if(inputArgs.size() <= completions.size()) {
+					completion = completions.get(inputArgs.size() - 1);
+				}
+				if(completion == null) {
+					if(finalHasFinal) {
+						completion = completions.get(completions.size() - 1);
+					} else {
+						return new CArray(Target.UNKNOWN);
+					}
+				}
+				List<String> list = completion.getCompletions();
+				String comparison = inputArgs.get(inputArgs.size() - 1);
+				Mixed[] toReturn = list.stream()
+						.filter(item -> item.startsWith(comparison))
+						.map(item -> new CString(item, Target.UNKNOWN))
+						.toList().toArray(CString[]::new);
+				return new CArray(t, toReturn);
+			};
+
+			CNativeClosure nativeClosure = new CNativeClosure(runnable, env);
+
+			Commands.set_tabcompleter.customExec(script.getTarget(), env, cmd, nativeClosure);
 		}
 		MCCommandMap map = Static.getServer().getCommandMap();
 		String prefix = Implementation.GetServerType().getBranding().toLowerCase(Locale.ENGLISH);
 		map.register(prefix + ":" + script.getCommandName().toLowerCase(), cmd);
 	}
 
+	private static interface CompletionValues {
+		List<String> getCompletions();
+	}
+
+	private static final CompletionValues NONE = () -> new ArrayList<>();
 
 
 	/**

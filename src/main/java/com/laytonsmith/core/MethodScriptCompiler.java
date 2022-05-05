@@ -1382,7 +1382,7 @@ public final class MethodScriptCompiler {
 		SmartComment lastSmartComment = null;
 
 		// Create a Token array to iterate over, rather than using the LinkedList's O(n) get() method.
-		Token[] tokenArray = stream.toArray(new Token[stream.size()]);
+		Token[] tokenArray = stream.toArray(Token[]::new);
 		for(int i = 0; i < tokenArray.length; i++) {
 			t = tokenArray[i];
 			Token prev1 = i - 1 >= 0 ? tokenArray[i - 1] : new Token(TType.UNKNOWN, "", t.target.copy());
@@ -1399,9 +1399,7 @@ public final class MethodScriptCompiler {
 				braceCount++;
 				constructCount.push(new AtomicInteger(0));
 				continue;
-			}
-
-			if(t.type == TType.RCURLY_BRACKET) {
+			} else if(t.type == TType.RCURLY_BRACKET) {
 				if(braceCount == 0) {
 					throw new ConfigCompileException("Unexpected end curly brace", t.target);
 				}
@@ -1436,10 +1434,8 @@ public final class MethodScriptCompiler {
 					throw new ConfigCompileException("Unexpected end curly brace", t.target);
 				}
 				continue;
-			}
-
-			//Associative array/label handling
-			if(t.type == TType.LABEL && tree.getChildren().size() > 0) {
+			} else if(t.type == TType.LABEL && !tree.getChildren().isEmpty()) {
+				//Associative array/label handling
 				//If it's not an atomic identifier it's an error.
 				if(!prev1.type.isAtomicLit() && prev1.type != TType.IVARIABLE && prev1.type != TType.KEYWORD) {
 					ConfigCompileException error = new ConfigCompileException("Invalid label specified", t.getTarget());
@@ -1455,12 +1451,10 @@ public final class MethodScriptCompiler {
 				// Wrap previous construct in a CLabel
 				ParseTree cc = tree.getChildren().get(tree.getChildren().size() - 1);
 				tree.removeChildAt(tree.getChildren().size() - 1);
-				tree.addChild(new ParseTree(new CLabel((Construct) cc.getData()), fileOptions));
+				tree.addChild(new ParseTree(new CLabel(cc.getData()), fileOptions));
 				continue;
-			}
-
-			//Array notation handling
-			if(t.type.equals(TType.LSQUARE_BRACKET)) {
+			} else if(t.type.equals(TType.LSQUARE_BRACKET)) {
+				//Array notation handling
 				//tree.addChild(new ParseTree(new CFunction("__cbracket__", t.getTarget()), fileOptions));
 				arrayStack.push(new AtomicInteger(tree.getChildren().size() - 1));
 				continue;
@@ -1512,11 +1506,9 @@ public final class MethodScriptCompiler {
 				}
 				constructCount.peek().set(constructCount.peek().get() - myIndex.numberOfChildren());
 				continue;
-			}
-
-			//Smart strings
-			if(t.type == TType.SMART_STRING) {
-				if(t.val().contains("@")) {
+			} else if(t.type == TType.SMART_STRING) {
+				//Smart strings
+				if(t.val().replace("\\\\", "").replace("\\@", "").contains("@")) {
 					ParseTree function = new ParseTree(fileOptions);
 					function.setData(new CFunction(__smart_string__.NAME, t.target));
 					ParseTree string = new ParseTree(fileOptions);
@@ -1524,19 +1516,17 @@ public final class MethodScriptCompiler {
 					function.addChild(string);
 					tree.addChild(function);
 				} else {
-					tree.addChild(new ParseTree(new CString(t.val(), t.target), fileOptions, true));
+					// To convert a smart string to a regular string, we need to un-escape the '\' and '@' chars.
+					String str = t.val().replace("\\\\", "\\").replace("\\@", "@");
+					tree.addChild(new ParseTree(new CString(str, t.target), fileOptions, true));
 				}
 				constructCount.peek().incrementAndGet();
 				continue;
-			}
-
-			if(t.type == TType.DEREFERENCE) {
+			} else if(t.type == TType.DEREFERENCE) {
 				//Currently unimplemented, but going ahead and making it strict
 				compilerErrors.add(new ConfigCompileException("The '" + t.val() + "' symbol is not currently allowed in raw strings. You must quote all"
 						+ " symbols.", t.target));
-			}
-
-			if(t.type.equals(TType.FUNC_NAME)) {
+			} else if(t.type.equals(TType.FUNC_NAME)) {
 				CFunction func = new CFunction(t.val(), t.target);
 				{
 					// Check for code upgrade warning
@@ -1566,6 +1556,7 @@ public final class MethodScriptCompiler {
 					if(prev1.type != TType.SEMICOLON
 							&& prev1.type != TType.COMMA
 							&& prev1.type != TType.FUNC_START
+							&& !prev1.type.isSymbol()
 							&& prev1.target.line() != t.target.line()
 							&& MSVersion.LATEST.lt(new SimpleVersion(3, 3, 7))) {
 						// Remove this in 3.3.7, and just always do the rewrite.
@@ -1663,86 +1654,87 @@ public final class MethodScriptCompiler {
 				}
 				constructCount.peek().set(0);
 				continue;
-			}
-			if(t.type == TType.SLICE) {
-				//We got here because the previous token isn't being ignored, because it's
-				//actually a control character, instead of whitespace, but this is a
-				//"empty first" slice notation. Compare this to the code below.
-				try {
-					CSlice slice;
-					String value = next1.val();
-					if(next1.type == TType.MINUS || next1.type == TType.PLUS) {
-						value = next1.val() + next2.val();
+			} else if(t.type == TType.SLICE || next1.type == TType.SLICE) {
+				if(t.type == TType.SLICE) {
+					//We got here because the previous token isn't being ignored, because it's
+					//actually a control character, instead of whitespace, but this is a
+					//"empty first" slice notation. Compare this to the code below.
+					try {
+						CSlice slice;
+						String value = next1.val();
+						if(next1.type == TType.MINUS || next1.type == TType.PLUS) {
+							value = next1.val() + next2.val();
+							i++;
+						}
+						slice = new CSlice(".." + value, t.getTarget(), environment);
 						i++;
+						tree.addChild(new ParseTree(slice, fileOptions));
+						constructCount.peek().incrementAndGet();
+						continue;
+					} catch (ConfigRuntimeException ex) {
+						//CSlice can throw CREs, but at this stage, we have to
+						//turn them into a CCE.
+						throw new ConfigCompileException(ex);
 					}
-					slice = new CSlice(".." + value, t.getTarget(), environment);
-					i++;
-					tree.addChild(new ParseTree(slice, fileOptions));
-					constructCount.peek().incrementAndGet();
-					continue;
-				} catch (ConfigRuntimeException ex) {
-					//CSlice can throw CREs, but at this stage, we have to
-					//turn them into a CCE.
-					throw new ConfigCompileException(ex);
 				}
-			}
-			if(next1.type.equals(TType.SLICE)) {
-				//Slice notation handling
-				try {
-					CSlice slice;
-					if(t.type.isSeparator() || (t.type.isWhitespace() && prev1.type.isSeparator()) || t.type.isKeyword()) {
-						//empty first
-						String value = next2.val();
-						i++;
-						if(next2.type == TType.MINUS || next2.type == TType.PLUS) {
-							value = next2.val() + next3.val();
+				if(next1.type.equals(TType.SLICE)) {
+					//Slice notation handling
+					try {
+						CSlice slice;
+						if(t.type.isSeparator() || (t.type.isWhitespace() && prev1.type.isSeparator()) || t.type.isKeyword()) {
+							//empty first
+							String value = next2.val();
 							i++;
-						}
-						slice = new CSlice(".." + value, next1.getTarget(), environment);
-						if(t.type.isKeyword()) {
-							tree.addChild(new ParseTree(new CKeyword(t.val(), t.getTarget()), fileOptions));
-							constructCount.peek().incrementAndGet();
-						}
-					} else if(next2.type.isSeparator() || next2.type.isKeyword()) {
-						//empty last
-						String modifier = "";
-						if(prev1.type == TType.MINUS || prev1.type == TType.PLUS) {
-							//The negative would have already been inserted into the tree
-							modifier = prev1.val();
-							tree.removeChildAt(tree.getChildren().size() - 1);
-						}
-						slice = new CSlice(modifier + t.value + "..", t.target, environment);
-					} else {
-						//both are provided
-						String modifier1 = "";
-						if(prev1.type == TType.MINUS || prev1.type == TType.PLUS) {
-							//It's a negative, incorporate that here, and remove the
-							//minus from the tree
-							modifier1 = prev1.val();
-							tree.removeChildAt(tree.getChildren().size() - 1);
-						}
-						Token first = t;
-						if(first.type.isWhitespace()) {
-							first = prev1;
-						}
-						Token second = next2;
-						i++;
-						String modifier2 = "";
-						if(next2.type == TType.MINUS || next2.type == TType.PLUS) {
-							modifier2 = next2.val();
-							second = next3;
+							if(next2.type == TType.MINUS || next2.type == TType.PLUS) {
+								value = next2.val() + next3.val();
+								i++;
+							}
+							slice = new CSlice(".." + value, next1.getTarget(), environment);
+							if(t.type.isKeyword()) {
+								tree.addChild(new ParseTree(new CKeyword(t.val(), t.getTarget()), fileOptions));
+								constructCount.peek().incrementAndGet();
+							}
+						} else if(next2.type.isSeparator() || next2.type.isKeyword()) {
+							//empty last
+							String modifier = "";
+							if(prev1.type == TType.MINUS || prev1.type == TType.PLUS) {
+								//The negative would have already been inserted into the tree
+								modifier = prev1.val();
+								tree.removeChildAt(tree.getChildren().size() - 1);
+							}
+							slice = new CSlice(modifier + t.value + "..", t.target, environment);
+						} else {
+							//both are provided
+							String modifier1 = "";
+							if(prev1.type == TType.MINUS || prev1.type == TType.PLUS) {
+								//It's a negative, incorporate that here, and remove the
+								//minus from the tree
+								modifier1 = prev1.val();
+								tree.removeChildAt(tree.getChildren().size() - 1);
+							}
+							Token first = t;
+							if(first.type.isWhitespace()) {
+								first = prev1;
+							}
+							Token second = next2;
 							i++;
+							String modifier2 = "";
+							if(next2.type == TType.MINUS || next2.type == TType.PLUS) {
+								modifier2 = next2.val();
+								second = next3;
+								i++;
+							}
+							slice = new CSlice(modifier1 + first.value + ".." + modifier2 + second.value, t.target, environment);
 						}
-						slice = new CSlice(modifier1 + first.value + ".." + modifier2 + second.value, t.target, environment);
+						i++;
+						tree.addChild(new ParseTree(slice, fileOptions));
+						constructCount.peek().incrementAndGet();
+						continue;
+					} catch (ConfigRuntimeException ex) {
+						//CSlice can throw CREs, but at this stage, we have to
+						//turn them into a CCE.
+						throw new ConfigCompileException(ex);
 					}
-					i++;
-					tree.addChild(new ParseTree(slice, fileOptions));
-					constructCount.peek().incrementAndGet();
-					continue;
-				} catch (ConfigRuntimeException ex) {
-					//CSlice can throw CREs, but at this stage, we have to
-					//turn them into a CCE.
-					throw new ConfigCompileException(ex);
 				}
 			} else if(t.type == TType.LIT) {
 				Construct c = Static.resolveConstruct(t.val(), t.target, true, environment);
@@ -1852,10 +1844,10 @@ public final class MethodScriptCompiler {
 			}
 		}
 
-		assert t != null || stream.size() == 0;
+		assert t != null || stream.isEmpty();
 
 		// Handle mismatching square brackets "[]".
-		assert arrayStack.size() != 0 : "The last element of arrayStack should be present, but it was popped.";
+		assert !arrayStack.isEmpty() : "The last element of arrayStack should be present, but it was popped.";
 		if(arrayStack.size() != 1) {
 
 			// Some starting square bracket '[' was not closed at the end of the script.
@@ -2228,7 +2220,8 @@ public final class MethodScriptCompiler {
 			// Between the rewrite and the keywords, we've removed the need for autoconcat, so pull
 			// up the value here.
 			if(autoconcat.getChildren().size() == 1 && autoconcat.getChildAt(0).getData() instanceof CFunction cf
-					&& cf.val().equals(Compiler.__statements__.NAME)) {
+					&& cf.val().equals(Compiler.__statements__.NAME)
+					&& autoconcat.isSyntheticNode()) {
 				autoconcat.replace(autoconcat.getChildAt(0));
 			}
 			if(autoconcat.getData() instanceof CFunction cf
@@ -2241,8 +2234,14 @@ public final class MethodScriptCompiler {
 				statements.addChild(autoconcat);
 			}
 		}
-		if(statements.getChildren().size() == 1 && statements.getChildAt(0).getData() instanceof CFunction) {
-			if(statements.getChildAt(0).isSyntheticNode()) {
+		if(statements.getChildren().size() == 1 && statements.getChildAt(0).getData() instanceof CFunction cf) {
+			if(statements.getChildAt(0).isSyntheticNode()
+					&& (
+						cf.val().equals(Compiler.__statements__.NAME)
+						|| cf.val().equals(Compiler.__autoconcat__.NAME)
+						|| cf.val().equals(StringHandling.sconcat.NAME)
+						|| cf.val().equals(DataHandling._string.NAME)
+					)) {
 				// Pull it up, this was a synthetic node that was generated from autoconcat
 				statements.setChildren(statements.getChildAt(0).getChildren());
 			}

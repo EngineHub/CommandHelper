@@ -248,4 +248,11 @@ public class StaticAnalysisTest {
 		saScript("<! strict > @s = if(dyn(true), 'asdf', if(dyn(true), true, null))");
 	}
 
+	@Test
+	public void testGetProc() throws Exception {
+		runScript("proc _test() {}\n"
+				+ "@var = proc _test;\n"
+				+ "@var();");
+	}
+
 }

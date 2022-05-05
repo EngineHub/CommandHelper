@@ -13,7 +13,7 @@ import com.laytonsmith.annotations.noprofile;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.annotations.unbreakable;
 import com.laytonsmith.core.ArgumentValidation;
-import com.laytonsmith.core.Callable;
+import com.laytonsmith.core.natives.interfaces.Callable;
 import com.laytonsmith.core.Globals;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.MSLog;
@@ -38,6 +38,7 @@ import com.laytonsmith.core.compiler.analysis.Namespace;
 import com.laytonsmith.core.compiler.analysis.ParamDeclaration;
 import com.laytonsmith.core.compiler.analysis.ProcDeclaration;
 import com.laytonsmith.core.compiler.analysis.ProcRootDeclaration;
+import com.laytonsmith.core.compiler.analysis.Reference;
 import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.compiler.signature.FunctionSignatures;
@@ -64,6 +65,7 @@ import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.IVariableList;
 import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.LeftHandSideType;
+import com.laytonsmith.core.constructs.ProcedureUsage;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.generics.ConstraintLocation;
 import com.laytonsmith.core.constructs.generics.Constraints;
@@ -1860,6 +1862,121 @@ public class DataHandling {
 	}
 
 	@api
+	public static class get_proc extends AbstractFunction implements Optimizable {
+
+		public static final String NAME = "get_proc";
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREIllegalArgumentException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			String procName = args[0].val();
+			Procedure proc = env.getEnv(GlobalEnv.class).GetProcs().get(procName);
+			if(proc == null) {
+				throw new CREIllegalArgumentException("Could not find proc named \"" + procName + "\" in this scope.", t);
+			}
+			return new ProcedureUsage(proc, env, t);
+		}
+
+		@Override
+		public Scope linkScope(StaticAnalysis analysis, Scope parentScope, ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+			ParseTree procName = ast.getChildren().get(0);
+			Target t = procName.getTarget();
+			if(!procName.isConst()) {
+				exceptions.add(new ConfigCompileException("get_proc (or proc keyword usage) must contain a"
+						+ " hardcoded procedure name.", t));
+				return parentScope;
+			}
+			if(procName.getData() instanceof CNull) {
+				exceptions.add(new ConfigCompileException("get_proc cannot accept null.", t));
+				return parentScope;
+			}
+
+			Scope refScope = analysis.createNewScope(parentScope);
+			refScope.addReference(new Reference(Namespace.PROCEDURE, procName.getData().val(), procName.getTarget()));
+			analysis.setTermScope(procName, refScope);
+			return refScope;
+		}
+
+		@Override
+		public LeftHandSideType typecheck(StaticAnalysis sa, ParseTree ast, LeftHandSideType inferredType,
+				Environment env, Set<ConfigCompileException> exceptions) {
+			ParseTree procName = ast.getChildren().get(0);
+			Target t = procName.getTarget();
+			boolean found;
+			if(sa != null && sa.isLocalEnabled()) {
+				found = !sa.getTermScope(procName)
+						.getDeclarations(Namespace.PROCEDURE, procName.getData().val()).isEmpty();
+			} else {
+				found = true;
+			}
+			if(!found) {
+				exceptions.add(new ConfigCompileException("Could not find proc \"" + procName + "\"",
+						t));
+			}
+			return ProcedureUsage.TYPE.asLeftHandSideType();
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, Environment env, Set<Class<? extends EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException,
+				ConfigRuntimeException, ConfigCompileGroupException {
+			// TODO: Once typecheck is always called, this whole function can be removed.
+			if(!children.get(0).isConst()) {
+				throw new ConfigCompileException("get_proc (or proc keyword usage) must contain a"
+						+ " hardcoded procedure name.", t);
+			}
+			if(children.get(0).getData() instanceof CNull) {
+				throw new ConfigCompileException("get_proc cannot accept null.", t);
+			}
+			return null;
+		}
+
+		@Override
+		public String getName() {
+			return "get_proc";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "Procedure {reference} Returns a first class reference to the currently in scope procedure."
+					+ " This can be stored in variables and generally passed around, though it cannot be"
+					+ " serialized. Keyword usage is preferred, such as <code>proc _asdf;</code> instead of"
+					+ " <code>get_proc('_asdf')</code>. Note that this is a special compiler function, and"
+					+ " must contain a hardcoded procedure name.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+
+	}
+
+	@api
 	@DocumentLink(0)
 	public static class include extends AbstractFunction implements Optimizable, DocumentLinkProvider {
 
@@ -2942,13 +3059,13 @@ public class DataHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			if(args[args.length - 1].isInstanceOf(CClosure.TYPE, null, env)) {
+			if(args[args.length - 1] instanceof Callable callable) {
 				Mixed[] vals = new Mixed[args.length - 1];
 				System.arraycopy(args, 0, vals, 0, args.length - 1);
-				Callable closure = (Callable) args[args.length - 1];
-				return closure.executeCallable(env, t, vals);
+				return callable.executeCallable(env, t, vals);
 			} else {
-				throw new CRECastException("Only a Callable (created for instance from the closure function) can be sent to execute()", t);
+				throw new CRECastException("Only a Callable (created for instance from the closure function) can be"
+						+ " sent to execute(), or executed directly, such as @c().", t);
 			}
 		}
 

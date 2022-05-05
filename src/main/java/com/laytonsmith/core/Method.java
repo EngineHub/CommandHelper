@@ -1,5 +1,6 @@
 package com.laytonsmith.core;
 
+import com.laytonsmith.core.natives.interfaces.Callable;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.constructs.CClassType;
@@ -27,13 +28,15 @@ public class Method extends Construct implements Callable {
 	private final String name;
 	private final CClassType[] parameters;
 	private final ParseTree tree;
+	private final Environment env;
 
-	public Method(Target t, CClassType returnType, String name, CClassType[] parameters, ParseTree tree) {
+	public Method(Target t, Environment env, CClassType returnType, String name, CClassType[] parameters, ParseTree tree) {
 		super(returnType + " " + name + " " + Arrays.toString(parameters), ConstructType.FUNCTION, t);
 		this.returnType = returnType;
 		this.name = name;
 		this.parameters = parameters;
 		this.tree = tree;
+		this.env = env;
 	}
 
 	@Override
@@ -55,7 +58,7 @@ public class Method extends Construct implements Callable {
 
 	@Override
 	public CClassType[] getInterfaces() {
-		return CClassType.EMPTY_CLASS_ARRAY;
+		return new CClassType[]{Callable.TYPE};
 	}
 
 	@Override
@@ -89,4 +92,8 @@ public class Method extends Construct implements Callable {
 		return null;
 	}
 
+	@Override
+	public Environment getEnv() {
+		return this.env;
+	}
 }

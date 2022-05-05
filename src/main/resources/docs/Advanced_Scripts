@@ -1,7 +1,9 @@
 
 == auto_include.ms ==
 
-This file goes into the same directory as your aliases.msa file, and is normally used for Procedures. You can put useful commands that you want in <b>every</b> alias here.  Here's a simple one, that is used by the example scripts below
+This file goes into the same directory as your aliases.msa file, and is normally used for [[Procedures]].
+You can put useful commands that you want in <b>every</b> alias here.  Here's a simple one, that is used by the example
+scripts below
 
 %%CODE|
 
@@ -11,11 +13,13 @@ proc _bc(@label, @str) {
 
 %%
 
-This lets you use the alias _bc in every alias, to do a Broadcast to the server, with a leading subject. You will see it used below.
+This lets you use the alias _bc in every alias, to do a Broadcast to the server, with a leading subject. You will see
+it used below.
 
 == Reset a Spleef Arena ==
 
-This script lets anyone with the permission "command.fixspleef" reset a spleef arena. It also only lets it happen every 5 minutes, to stop people spamming it.
+This script lets anyone with the permission "command.fixspleef" reset a spleef arena. It also only lets it happen every
+5 minutes, to stop people spamming it.
 
 %%ALIAS|
 *:/fixspleef = >>>
@@ -53,7 +57,7 @@ This script lets anyone with the permission "command.fixspleef" reset a spleef a
     store_value('spleef1_lastreset', time() / 1000);
 
     # The runas() command runs in a separate namespace. This NORMALLY doesn't
-    # cause problems, until you start caring about edge cases - This is one. 
+    # cause problems, until you start caring about edge cases - This is one.
     # Run the selection in the same namespace as the //set.  Even though the
     # user may have access to /region select, it won't work. Trust me. Do it
     # this way.
@@ -63,7 +67,7 @@ This script lets anyone with the permission "command.fixspleef" reset a spleef a
     sudo('//set snow_block');
 
     # Now we do a broadcast, using my handy-dandy broadcast procedure
-    # to tell everyone who did the reset. This is just in case someone 
+    # to tell everyone who did the reset. This is just in case someone
     # tries to cheat, everyone gets to know about it.
     _bc(Spleef, display_name() . ' has just reset the spleef arena with the /fixspleef command!');
 <<<
@@ -158,7 +162,7 @@ proc _writeUTF(@ba, @str) {
     ba_put_byte(@ba, @len);
     ba_put_bytes(@ba, string_get_bytes(@str, 'ascii'));
 }
- 
+
 proc _changeserver(@player, @server) {
     @ba = byte_array();
     _writeUTF(@ba, 'Connect');
@@ -181,7 +185,7 @@ Those two functions, when added to auto_include.ms, will let you do something li
 
 You could also have a script that moves EVERYONE off the server, like this:
 
-%%ALIAS| 
+%%ALIAS|
 *:/sendall $world = >>>
     if(has_permission('command.sendall')) {
         die('You do not have permission to send all players.');

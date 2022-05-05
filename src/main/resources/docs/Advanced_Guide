@@ -400,10 +400,10 @@ normal alias permission system, and so it's recommended to continue using the * 
 more.
 
 @tabcompleter - Provides the name of a proc that is called, which should return the tab complete closure for this
-command. If the annotation is provided with no proc name, there are a set of default completions that will be provided
+command. If the annotation is not provided, there are a set of default completions that will be provided
 on a best-effort basis, first based on variable names in the alias and superceded by information provided in the @param
 annotations in this comment. Variable names with "player" in them will autocomplete player names. Other variables will
-simply disable autocompletion. (The automatic tab completion is not yet implemented.)
+simply disable autocompletion.
 
 @param - This documents the variables in the alias, and generally follows the format
 "@param $variableName type description". Description is optional, and is only used as a code comment. The $variableName
@@ -499,10 +499,9 @@ provides a decent compromise between functionality and code terseness.
 /**
  * This command does things.
  * @command
- * @tabcompleter
  * @param $enum [add, remove]
  * @param $player $Player
- * @param $ string
+ * @param $ $none
  */
 *:/myCommand $enum $player [$] = ...
 %>

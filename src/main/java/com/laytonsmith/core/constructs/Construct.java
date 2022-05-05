@@ -603,7 +603,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	 */
 	@Override
 	public Set<ObjectModifier> getObjectModifiers() {
-		return EnumSet.noneOf(ObjectModifier.class);
+		return EnumSet.of(ObjectModifier.NATIVE);
 	}
 
 	/**

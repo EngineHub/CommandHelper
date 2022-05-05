@@ -10,7 +10,6 @@ import com.laytonsmith.abstraction.bukkit.events.BukkitMiscEvents.BukkitMCComman
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
-import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
@@ -21,6 +20,7 @@ import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.exceptions.CRE.CREPluginInternalException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Commands;
+import com.laytonsmith.core.natives.interfaces.Callable;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandException;
@@ -214,13 +214,14 @@ public class BukkitMCCommand implements MCCommand {
 	public List<String> handleTabComplete(MCCommandSender sender, String alias, String[] args) {
 		if(Commands.onTabComplete.containsKey(cmd.getName().toLowerCase())) {
 			Target t = Target.UNKNOWN;
-			CClosure closure = Commands.onTabComplete.get(cmd.getName().toLowerCase());
+			Callable closure = Commands.onTabComplete.get(cmd.getName().toLowerCase());
 			Environment env = closure.getEnv();
 			CArray cargs = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
 					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			for(String arg : args) {
 				cargs.push(new CString(arg, t), t, env);
 			}
+
 			closure.getEnv().getEnv(CommandHelperEnvironment.class).SetCommandSender(sender);
 			try {
 				Mixed fret = closure.executeCallable(null, t, new CString(alias, t), new CString(sender.getName(), t), cargs,
@@ -252,7 +253,7 @@ public class BukkitMCCommand implements MCCommand {
 	@Override
 	public boolean handleCustomCommand(MCCommandSender sender, String label, String[] args) {
 		if(Commands.onCommand.containsKey(cmd.getName().toLowerCase())) {
-			CClosure closure = Commands.onCommand.get(cmd.getName().toLowerCase());
+			Callable closure = Commands.onCommand.get(cmd.getName().toLowerCase());
 			Environment env = closure.getEnv();
 			Target t = Target.UNKNOWN;
 			CArray cargs = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)

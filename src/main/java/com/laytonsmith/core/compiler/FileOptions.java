@@ -48,6 +48,8 @@ public final class FileOptions {
 	private final String copyright;
 	@Option("Distribution License Information")
 	private final String license;
+	@Option("Disables undefined proc errors in the typechecker")
+	private final Boolean allDynamicProcs;
 
 	private final Map<String, String> rawOptions;
 	//TODO: Make this non-public once this is all finished.
@@ -66,6 +68,7 @@ public final class FileOptions {
 		compilerOptions = parseEnumSet(getDefault(parsedOptions, "compileroptions", ""), CompilerOption.class);
 		copyright = getDefault(parsedOptions, "copyright", "").trim();
 		license = getDefault(parsedOptions, "license", "").trim();
+		allDynamicProcs = parseBoolean(getDefault(parsedOptions, "allDynamicProcs", null));
 	}
 
 	private String getDefault(Map<String, String> map, String key, String defaultIfNone) {
@@ -208,6 +211,15 @@ public final class FileOptions {
 	 */
 	public String getCopyright() {
 		return copyright;
+	}
+
+	/**
+	 * If true, all proc reference errors are suppressed, and it is assumed that the signature of any unknown
+	 * procs that are called have the signature <code>auto proc _name(auto... @values);</code>.
+	 * @return
+	 */
+	public boolean isAllDynamicProcs() {
+		return allDynamicProcs;
 	}
 
 	/**
@@ -367,7 +379,8 @@ public final class FileOptions {
 				+ " but in the meantime, to get"
 				+ " rid of it, place a semicolon at the end of the previous line (if you don't mean"
 				+ " for it to be executed) or move the left parenthesis up to the same line (if you "
-				+ " do mean for it to be executed).", MSVersion.V3_3_5, SeverityLevel.HIGH);
+				+ " do mean for it to be executed).", MSVersion.V3_3_5, SeverityLevel.HIGH),
+		MalformedComment("The comment related to this element is malformed.", MSVersion.V3_3_5, SeverityLevel.HIGH);
 
 		private SuppressWarning(String docs, Version version, SeverityLevel severityLevel) {
 			this.docs = docs;
