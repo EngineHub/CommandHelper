@@ -898,6 +898,7 @@ public class Compiler {
 				StringBuilder b = new StringBuilder();
 				boolean inBrace = false;
 				boolean inSimpleVar = false;
+				boolean isDumbString = true;
 				ParseTree root = new ParseTree(null, fileOptions);
 				for(int i = 0; i < value.length(); i++) {
 					char c = value.charAt(i);
@@ -916,6 +917,7 @@ public class Compiler {
 					}
 
 					if(c == '@') {
+						isDumbString = false;
 						if(c2 == '{') {
 							//Start of a complex variable
 							inBrace = true;
@@ -956,6 +958,9 @@ public class Compiler {
 						}
 					}
 					b.append(c);
+				}
+				if(isDumbString) {
+					return new ParseTree(new CString(b.toString(), t), fileOptions);
 				}
 				if(inBrace) {
 					throw new ConfigCompileException("Missing end brace (}) in smart string", t);
