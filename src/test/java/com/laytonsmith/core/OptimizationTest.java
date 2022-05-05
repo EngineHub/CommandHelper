@@ -739,7 +739,17 @@ public class OptimizationTest {
 	}
 
 	@Test
-	public void testSmartStringsWithEscapesValidate() throws Exception {
-		assertEquals("'^\\\\w+$'", optimize("\"^\\\\w+$\""));
+	public void testSmartStringToDumbStringRewriteWithEscapes() throws Exception {
+		assertEquals("'@'", optimize("\"\\@\"")); // Escaped '@'.
+		assertEquals("'\\\\'", optimize("\"\\\\\"")); // Escaped '\'.
+		assertEquals("'\\\\@'", optimize("\"\\\\\\@\"")); // Escaped '@' and '\'.
+		assertEquals("'@\\\\'", optimize("\"\\@\\\\\"")); // Escaped '\' and '@'.
+		assertEquals("'@@'", optimize("\"\\@\\@\"")); // Double escaped '@'.
+		assertEquals("'\\\\\\\\'", optimize("\"\\\\\\\\\"")); // Double escaped '\'.
+		assertEquals("'\\\\@\\\\\\\\@@\\\\\\\\\\\\@@@'",
+				optimize("\"\\\\\\@\\\\\\\\\\@\\@\\\\\\\\\\\\\\@\\@\\@\"")); // Combination of both.
+		assertEquals("'\\t'", optimize("\"\\t\"")); // Regular '\t'.
+		assertEquals("'\\\\\\t'", optimize("\"\\\\\\t\"")); // Escaped '\' followed by '\t'.
+		assertEquals("'a@b@ c @d @ e\\\\f\\\\@g'", optimize("\"a\\@b\\@ c \\@d \\@ e\\\\f\\\\\\@g\"")); // Mix of above.
 	}
 }
