@@ -26,11 +26,13 @@ public class ProcedureUsage extends Construct implements Callable {
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
 	public static final CClassType TYPE = CClassType.get(ProcedureUsage.class);
 
-	Procedure proc;
+	private final Procedure proc;
+	private final Environment env;
 
-	public ProcedureUsage(Procedure proc, Target t) {
+	public ProcedureUsage(Procedure proc, Environment env, Target t) {
 		super(proc.getName(), ConstructType.FUNCTION, t);
 		this.proc = proc;
+		this.env = env;
 	}
 
 	@Override
@@ -79,5 +81,8 @@ public class ProcedureUsage extends Construct implements Callable {
 		return proc.execute(Arrays.asList(values), environment, t);
 	}
 
-
+	@Override
+	public Environment getEnv() {
+		return this.env;
+	}
 }

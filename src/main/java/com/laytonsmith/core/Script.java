@@ -753,7 +753,7 @@ public class Script {
 				if(m.type != TType.WHITESPACE && m.type != TType.LABEL) {
 					b.append(m.value);
 				}
-				t = new Token(TType.STRING, b.toString(), t.target);
+				t = new Token(TType.STRING, b.toString(), t.target.copy());
 				if(m.type == TType.LABEL) {
 					tempLeft.add(t);
 					tempLeft.add(m);
@@ -762,7 +762,7 @@ public class Script {
 			}
 			//Go ahead and toString the other symbols too
 			if(t.type.isSymbol()) {
-				t = new Token(TType.STRING, t.value, t.target);
+				t = new Token(TType.STRING, t.value, t.target.copy());
 			}
 			if(t.type != TType.WHITESPACE) {
 				tempLeft.add(t);
@@ -924,6 +924,15 @@ public class Script {
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * Returns a list of the left hand tokens. For instance, in `/cmd const $var` this will return 3 Constructs, a
+	 * Command, a CString, and a Variable. These are the only types that will be in the list.
+	 * @return
+	 */
+	public List<Construct> getParameters() {
+		return new ArrayList<>(cleft);
 	}
 
 	public void compileRight(Environment env) throws ConfigCompileException, ConfigCompileGroupException {

@@ -375,7 +375,8 @@ public final class FileOptions {
 				+ " but in the meantime, to get"
 				+ " rid of it, place a semicolon at the end of the previous line (if you don't mean"
 				+ " for it to be executed) or move the left parenthesis up to the same line (if you "
-				+ " do mean for it to be executed).", MSVersion.V3_3_5, SeverityLevel.HIGH);
+				+ " do mean for it to be executed).", MSVersion.V3_3_5, SeverityLevel.HIGH),
+		MalformedComment("The comment related to this element is malformed.", MSVersion.V3_3_5, SeverityLevel.HIGH);
 
 		private SuppressWarning(String docs, Version version, SeverityLevel severityLevel) {
 			this.docs = docs;

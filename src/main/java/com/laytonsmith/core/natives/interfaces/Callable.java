@@ -35,4 +35,10 @@ public interface Callable extends Mixed {
 	 */
 	Mixed executeCallable(Environment environment, Target t, Mixed... values)
 			throws ConfigRuntimeException, ProgramFlowManipulationException, CancelCommandException;
+
+	/**
+	 * Returns the environment associated with this callable.
+	 * @return
+	 */
+	Environment getEnv();
 }

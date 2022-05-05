@@ -27,13 +27,15 @@ public class Method extends Construct implements Callable {
 	private final String name;
 	private final CClassType[] parameters;
 	private final ParseTree tree;
+	private final Environment env;
 
-	public Method(Target t, CClassType returnType, String name, CClassType[] parameters, ParseTree tree) {
+	public Method(Target t, Environment env, CClassType returnType, String name, CClassType[] parameters, ParseTree tree) {
 		super(returnType + " " + name + " " + Arrays.toString(parameters), ConstructType.FUNCTION, t);
 		this.returnType = returnType;
 		this.name = name;
 		this.parameters = parameters;
 		this.tree = tree;
+		this.env = env;
 	}
 
 	@Override
@@ -84,4 +86,8 @@ public class Method extends Construct implements Callable {
 		return tree;
 	}
 
+	@Override
+	public Environment getEnv() {
+		return this.env;
+	}
 }

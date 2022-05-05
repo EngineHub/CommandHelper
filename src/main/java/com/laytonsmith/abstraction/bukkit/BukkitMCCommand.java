@@ -10,7 +10,6 @@ import com.laytonsmith.abstraction.bukkit.events.BukkitMiscEvents.BukkitMCComman
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
-import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
@@ -19,6 +18,7 @@ import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.exceptions.CRE.CREPluginInternalException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Commands;
+import com.laytonsmith.core.natives.interfaces.Callable;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.ArrayList;
 import java.util.List;
@@ -215,7 +215,7 @@ public class BukkitMCCommand implements MCCommand {
 			for(String arg : args) {
 				cargs.push(new CString(arg, t), t);
 			}
-			CClosure closure = Commands.onTabComplete.get(cmd.getName().toLowerCase());
+			Callable closure = Commands.onTabComplete.get(cmd.getName().toLowerCase());
 			closure.getEnv().getEnv(CommandHelperEnvironment.class).SetCommandSender(sender);
 			try {
 				Mixed fret = closure.executeCallable(null, t, new CString(alias, t), new CString(sender.getName(), t), cargs,
@@ -253,7 +253,7 @@ public class BukkitMCCommand implements MCCommand {
 				cargs.push(new CString(arg, t), t);
 			}
 
-			CClosure closure = Commands.onCommand.get(cmd.getName().toLowerCase());
+			Callable closure = Commands.onCommand.get(cmd.getName().toLowerCase());
 			CommandHelperEnvironment cEnv = closure.getEnv().getEnv(CommandHelperEnvironment.class);
 			cEnv.SetCommandSender(sender);
 			cEnv.SetCommand("/" + label + StringUtils.Join(args, " "));

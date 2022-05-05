@@ -26,7 +26,9 @@ import java.util.Set;
  * This class is run by maven at compile time, and checks to ensure that the various annotations referenced here are
  * checked, and fail if any of the parameters are missing.
  */
-public class AnnotationChecks {
+public final class AnnotationChecks {
+
+	private AnnotationChecks() {}
 
 	public static void checkForTypeInTypeofClasses() throws Exception {
 		Set<ClassMirror<?>> classes = ClassDiscovery.getDefaultInstance().getClassesWithAnnotation(typeof.class);
@@ -44,7 +46,7 @@ public class AnnotationChecks {
 				}
 			} catch (ReflectionUtils.ReflectionException ex) {
 				errors.add(clazz.getClassName() + " needs to add the following:\n\t@SuppressWarnings(\"FieldNameHidesFieldInSuperclass\")\n"
-						+ "\tpublic static final CClassType TYPE = CClassType.get(\"" + clazz.getAnnotation(typeof.class).getValue("value") + "\");");
+						+ "\tpublic static final CClassType TYPE = CClassType.get(" + clazz.getSimpleName() + ".class);");
 			}
 		}
 		if(!errors.isEmpty()) {
@@ -127,12 +129,12 @@ public class AnnotationChecks {
 //		for(Class cc : executable.getParameterTypes()){
 //			l.add(cc.getName());
 //		}
-		if(executable instanceof Method) {
-			for(Class cc : ((Method) executable).getParameterTypes()) {
+		if(executable instanceof Method method) {
+			for(Class cc : method.getParameterTypes()) {
 				l.add(cc.getName());
 			}
-		} else if(executable instanceof Constructor) {
-			for(Class cc : ((Constructor) executable).getParameterTypes()) {
+		} else if(executable instanceof Constructor constructor) {
+			for(Class cc : constructor.getParameterTypes()) {
 				l.add(cc.getName());
 			}
 		} else {

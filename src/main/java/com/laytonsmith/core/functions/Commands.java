@@ -25,6 +25,7 @@ import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.natives.interfaces.Callable;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 
 import java.util.ArrayList;
@@ -44,8 +45,8 @@ public class Commands {
 		return "A series of functions for creating and managing custom commands.";
 	}
 
-	public static Map<String, CClosure> onCommand = new HashMap<>();
-	public static Map<String, CClosure> onTabComplete = new HashMap<>();
+	public static Map<String, Callable> onCommand = new HashMap<>();
+	public static Map<String, Callable> onTabComplete = new HashMap<>();
 
 	@api(environments = {CommandHelperEnvironment.class})
 	@seealso({register_command.class})
@@ -90,10 +91,10 @@ public class Commands {
 		 * @param arg
 		 */
 		public static void customExec(Target t, Environment environment, MCCommand cmd, Mixed arg) {
-			if(arg.isInstanceOf(CClosure.TYPE)) {
-				onTabComplete.put(cmd.getName(), (CClosure) arg);
+			if(arg.isInstanceOf(Callable.TYPE)) {
+				onTabComplete.put(cmd.getName(), (Callable) arg);
 			} else {
-				throw new CREFormatException("At this time, only closures are accepted as tabcompleters", t);
+				throw new CREFormatException("Only Callables are accepted as tabcompleters", t);
 			}
 		}
 

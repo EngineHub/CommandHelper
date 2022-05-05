@@ -1784,7 +1784,7 @@ public class DataHandling {
 			if(proc == null) {
 				throw new CREIllegalArgumentException("Could not find proc named \"" + procName + "\" in this scope.", t);
 			}
-			return new ProcedureUsage(proc, t);
+			return new ProcedureUsage(proc, env, t);
 		}
 
 		@Override
