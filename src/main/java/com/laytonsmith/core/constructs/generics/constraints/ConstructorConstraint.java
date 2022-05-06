@@ -76,7 +76,7 @@ public class ConstructorConstraint extends Constraint {
 			}
 
 			@Override
-			public Boolean isWithinBounds(ExactType lhs) {
+			public Boolean isWithinBounds(ExactTypeConstraint lhs) {
 				return ConstructorConstraint.this.isWithinConstraint(lhs.getType(), env);
 			}
 
@@ -94,11 +94,16 @@ public class ConstructorConstraint extends Constraint {
 			public Boolean isWithinBounds(UnboundedConstraint lhs) {
 				return false;
 			}
+
+			@Override
+			public Boolean isWithinBounds(VariadicTypeConstraint lhs) {
+				return null;
+			}
 		};
 	}
 
 	@Override
-	public ExactType convertFromDiamond(Target t) {
+	public ExactTypeConstraint convertFromDiamond(Target t) {
 		throw new CREGenericConstraintException("Cannot infer generic parameter from new constraint.", t);
 	}
 

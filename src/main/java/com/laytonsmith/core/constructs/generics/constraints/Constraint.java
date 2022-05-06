@@ -28,8 +28,8 @@ import java.util.Set;
  * <li>RHS - Function parameters, RHS of an assignment</li>
  * </ul>
  *
- * Different constraints are valid in different locations, though the RHS can only contain an ExactType constraint, and
- * so isn't grouped as part of the Constraint heirarchy itself.
+ * Different constraints are valid in different locations, though the RHS can only contain an ExactTypeConstraint
+ * constraint, and so isn't grouped as part of the Constraint heirarchy itself.
  * <p>
  * For the Definition site and LHS sites though, some constraints are simply not valid at all, and others must be used
  * as a wildcard.
@@ -70,8 +70,8 @@ public abstract class Constraint implements Comparable<Constraint> {
 	public abstract Set<ConstraintLocation> validLocations();
 
 	/**
-	 * @return The name of the type of constraint, for instance "lower bound constraint". This is useful for
-	 * identifying the constraint type in error messages.
+	 * @return The name of the type of constraint, for instance "lower bound constraint". This is useful for identifying
+	 * the constraint type in error messages.
 	 */
 	public abstract String getConstraintName();
 
@@ -117,13 +117,15 @@ public abstract class Constraint implements Comparable<Constraint> {
 		Boolean baseResult = false;
 		if(lhs instanceof ConstructorConstraint c) {
 			baseResult = validator.isWithinBounds(c);
-		} else if(lhs instanceof ExactType c) {
+		} else if(lhs instanceof ExactTypeConstraint c) {
 			baseResult = validator.isWithinBounds(c);
 		} else if(lhs instanceof LowerBoundConstraint c) {
 			baseResult = validator.isWithinBounds(c);
 		} else if(lhs instanceof UpperBoundConstraint c) {
 			baseResult = validator.isWithinBounds(c);
 		} else if(lhs instanceof UnboundedConstraint c) {
+			baseResult = validator.isWithinBounds(c);
+		} else if(lhs instanceof VariadicTypeConstraint c) {
 			baseResult = validator.isWithinBounds(c);
 		} else {
 			throw new Error("Unhandled constraint type");
@@ -158,10 +160,10 @@ public abstract class Constraint implements Comparable<Constraint> {
 	 * definition.
 	 *
 	 * @param t The code target
-	 * @return The ExactType
+	 * @return The ExactTypeConstraint
 	 * @throws CREGenericConstraintException If the type cannot be inferred from this Constraint
 	 */
-	public abstract ExactType convertFromDiamond(Target t) throws CREGenericConstraintException;
+	public abstract ExactTypeConstraint convertFromDiamond(Target t) throws CREGenericConstraintException;
 
 	/**
 	 * Works like toString, but uses the class's simple name.

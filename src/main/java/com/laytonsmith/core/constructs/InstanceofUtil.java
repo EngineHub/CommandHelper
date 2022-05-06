@@ -8,7 +8,7 @@ import com.laytonsmith.core.constructs.generics.ConstraintLocation;
 import com.laytonsmith.core.constructs.generics.Constraints;
 import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
 import com.laytonsmith.core.constructs.generics.LeftHandGenericUseParameter;
-import com.laytonsmith.core.constructs.generics.constraints.ExactType;
+import com.laytonsmith.core.constructs.generics.constraints.ExactTypeConstraint;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.natives.interfaces.Mixed;
@@ -169,7 +169,7 @@ public class InstanceofUtil {
 	 * @param instanceofThisGenerics The LHS generics. Confusingly, this is actually on the RHS of the instanceof
 	 * statement, because we generally accept LHS statements RHS of the instanceof. For example
 	 * {@code (new A<int>()) instanceof A<? extends primitive>} and {@code (new A<int>()) instanceof A<int>} are both
-	 * valid. In the second example, this is simply a LeftHandGenericUse with an ExactType value.
+	 * valid. In the second example, this is simply a LeftHandGenericUse with an ExactTypeConstraint value.
 	 * @param env
 	 * @return {@code true} if type is instance of instanceofThis.
 	 */
@@ -312,9 +312,8 @@ public class InstanceofUtil {
 				// Synthesize it from autos
 				List<LeftHandGenericUseParameter> params = new ArrayList<>();
 				for(Constraints c : checkClassType.getGenericDeclaration().getConstraints()) {
-					params.add(new LeftHandGenericUseParameter(Either.left(
-							new Constraints(Target.UNKNOWN, ConstraintLocation.RHS,
-									new ExactType(Target.UNKNOWN, Auto.LHSTYPE)))));
+					params.add(new LeftHandGenericUseParameter(Either.left(new Constraints(Target.UNKNOWN, ConstraintLocation.RHS,
+							new ExactTypeConstraint(Target.UNKNOWN, Auto.LHSTYPE)))));
 				}
 				checkLHGU = new LeftHandGenericUse(checkClassType, Target.UNKNOWN, env, params);
 			}
@@ -330,9 +329,8 @@ public class InstanceofUtil {
 					// Synthesize it from autos
 					List<LeftHandGenericUseParameter> params = new ArrayList<>();
 					for(Constraints c : superClassType.getGenericDeclaration().getConstraints()) {
-						params.add(new LeftHandGenericUseParameter(Either.left(
-								new Constraints(Target.UNKNOWN, ConstraintLocation.RHS,
-										new ExactType(Target.UNKNOWN, Auto.LHSTYPE)))));
+						params.add(new LeftHandGenericUseParameter(Either.left(new Constraints(Target.UNKNOWN, ConstraintLocation.RHS,
+								new ExactTypeConstraint(Target.UNKNOWN, Auto.LHSTYPE)))));
 					}
 					superLHGU = new LeftHandGenericUse(superClassType, Target.UNKNOWN, env, params);
 				}

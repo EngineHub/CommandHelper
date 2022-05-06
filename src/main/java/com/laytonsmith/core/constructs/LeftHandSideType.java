@@ -14,7 +14,7 @@ import com.laytonsmith.core.constructs.generics.GenericDeclaration;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
 import com.laytonsmith.core.constructs.generics.LeftHandGenericUseParameter;
-import com.laytonsmith.core.constructs.generics.constraints.ExactType;
+import com.laytonsmith.core.constructs.generics.constraints.ExactTypeConstraint;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
@@ -675,7 +675,7 @@ public final class LeftHandSideType extends Construct {
 			return new LeftHandGenericUseParameter(Either.right(new Pair<>(getTypename(),
 					forType.getGenericDeclaration().getConstraints().get(parameterPosition))));
 		} else {
-			return new LeftHandGenericUseParameter(Either.left(new Constraints(t, location, new ExactType(t, this))));
+			return new LeftHandGenericUseParameter(Either.left(new Constraints(t, location, new ExactTypeConstraint(t, this))));
 		}
 	}
 

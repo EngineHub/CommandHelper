@@ -1,6 +1,6 @@
 package com.laytonsmith.core.constructs.generics;
 
-import com.laytonsmith.core.constructs.generics.constraints.ExactType;
+import com.laytonsmith.core.constructs.generics.constraints.ExactTypeConstraint;
 import com.laytonsmith.core.constructs.generics.constraints.Constraint;
 import com.laytonsmith.PureUtilities.ObjectHelpers;
 import com.laytonsmith.PureUtilities.ObjectHelpers.StandardField;
@@ -135,6 +135,7 @@ public final class GenericParameters {
 		/**
 		 * If the parameter set only contains native classes, this method can be used instead, which will cause Errors
 		 * instead of user compiler errors.
+		 *
 		 * @return
 		 */
 		public GenericParameters buildNative() {
@@ -157,11 +158,12 @@ public final class GenericParameters {
 		}
 
 		/**
-		 * If these parameters are being built before the type is known (during compilation, mainly) then forType
-		 * may be set to null, and then this method called. Calling the normal build methods if forType is null
-		 * will cause an error.
+		 * If these parameters are being built before the type is known (during compilation, mainly) then forType may be
+		 * set to null, and then this method called. Calling the normal build methods if forType is null will cause an
+		 * error.
 		 * <p>
 		 * These parameters must be validated later independently.
+		 *
 		 * @return
 		 */
 		public GenericParameters buildWithoutValidation() {
@@ -247,8 +249,8 @@ public final class GenericParameters {
 	}
 
 	/**
-	 * Converts this concrete GenericParameter object into a LeftHandGenericUse equivalent.It uses the ExactType
-	 * constraint for all parameters, but makes for easier comparisons.
+	 * Converts this concrete GenericParameter object into a LeftHandGenericUse equivalent.It uses the
+	 * ExactTypeConstraint constraint for all parameters, but makes for easier comparisons.
 	 *
 	 * @param forType The type of the containing object. In general, this is not tracked by the GenericParameters class,
 	 * because it can be used more generically, though in practice, this will certainly belong to some instance of a
@@ -260,7 +262,7 @@ public final class GenericParameters {
 		Constraints[] constraints = new Constraints[parameters.size()];
 		for(int i = 0; i < parameters.size(); i++) {
 			LeftHandSideType parameter = parameters.get(i);
-			Constraint c = new ExactType(Target.UNKNOWN, parameter);
+			Constraint c = new ExactTypeConstraint(Target.UNKNOWN, parameter);
 			constraints[i] = new Constraints(Target.UNKNOWN, ConstraintLocation.LHS, c);
 		}
 		LeftHandGenericUse lhgu = new LeftHandGenericUse(forType, Target.UNKNOWN, env, constraints);

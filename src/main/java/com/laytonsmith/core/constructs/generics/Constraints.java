@@ -1,6 +1,6 @@
 package com.laytonsmith.core.constructs.generics;
 
-import com.laytonsmith.core.constructs.generics.constraints.ExactType;
+import com.laytonsmith.core.constructs.generics.constraints.ExactTypeConstraint;
 import com.laytonsmith.core.constructs.generics.constraints.UnboundedConstraint;
 import com.laytonsmith.core.constructs.generics.constraints.UpperBoundConstraint;
 import com.laytonsmith.core.constructs.generics.constraints.LowerBoundConstraint;
@@ -16,6 +16,7 @@ import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.constraints.VariadicTypeConstraint;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREGenericConstraintException;
@@ -38,6 +39,8 @@ public class Constraints implements Iterable<Constraint> {
 	@StandardField
 	private final String typename;
 
+	private final boolean isVariadic;
+
 	private final List<Constraint> unorderedConstraints;
 
 	/**
@@ -51,7 +54,7 @@ public class Constraints implements Iterable<Constraint> {
 		this.unorderedConstraints = Arrays.asList(constraints);
 		this.constraints = new TreeSet<>(unorderedConstraints);
 		if(location == ConstraintLocation.RHS) {
-			if(constraints.length != 1 || !(constraints[0] instanceof ExactType)) {
+			if(constraints.length != 1 || !(constraints[0] instanceof ExactTypeConstraint)) {
 				throw new CREGenericConstraintException("Constraints (other than a single ExactType constraint)"
 						+ " cannot be used on the RHS. This definition contains " + constraints.length + " "
 						+ " constraint(s), of type(s): " + StringUtils.Join(constraints, ", ",
@@ -63,6 +66,16 @@ public class Constraints implements Iterable<Constraint> {
 		} else {
 			typename = "?";
 		}
+		boolean isVariadic = false;
+		for(Constraint c : constraints) {
+			if(c instanceof VariadicTypeConstraint) {
+				if(isVariadic) {
+					throw new CREGenericConstraintException("Only one variadic type definition may be in the parameter", t);
+				}
+				isVariadic = true;
+			}
+		}
+		this.isVariadic = isVariadic;
 	}
 
 	public int size() {
@@ -174,14 +187,14 @@ public class Constraints implements Iterable<Constraint> {
 	/**
 	 * Given that this is the constraints on the LHS, returns the ExactType value that should be used on the RHS if
 	 * the diamond operator was used. Not all Constraints support this, so this might throw an exception.
-	 * @return The most narrow ExactType that suits these constraints, if it's possible to do so.
+	 * @return The most narrow ExactTypeConstraint that suits these constraints, if it's possible to do so.
 	 */
-	public ExactType convertFromDiamond(Target t) throws CREGenericConstraintException {
+	public ExactTypeConstraint convertFromDiamond(Target t) throws CREGenericConstraintException {
 		// Diamond operator can currently only be used in simple cases, though we anyways check for definitely
 		// wrong cases.
-		ExactType type = null;
+		ExactTypeConstraint type = null;
 		for(Constraint c : constraints) {
-			ExactType newType = c.convertFromDiamond(t);
+			ExactTypeConstraint newType = c.convertFromDiamond(t);
 			if(type == null) {
 				type = newType;
 			} else {
@@ -375,7 +388,7 @@ public class Constraints implements Iterable<Constraint> {
 					try {
 						CClassType.get(FullyQualifiedClassName.forName(buf.toString(), t, env), env);
 						// This passed. It will still work just fine, this is an UnboundedConstraint
-						// though, not an ExactType, which cannot be used in the Definition site. However,
+						// though, not an ExactTypeConstraint, which cannot be used in the Definition site. However,
 						// this will hide the name of the real type, which should be warned against
 						CompilerWarning warning
 								= new CompilerWarning("Typename overrides a real type, which may be confusing.",
@@ -385,14 +398,18 @@ public class Constraints implements Iterable<Constraint> {
 						// Ok
 					}
 				}
-				return new UnboundedConstraint(t, buf.toString());
+				if(buf.toString().endsWith("...")) {
+					return new VariadicTypeConstraint(t, buf.toString().substring(0, buf.toString().length() - 3));
+				} else {
+					return new UnboundedConstraint(t, buf.toString());
+				}
 			} else {
 				String typename = buf.toString();
 				if("?".equals(typename)) {
-					return ExactType.AsUnboundedWildcard(t, declarationConstraints);
+					return ExactTypeConstraint.AsUnboundedWildcard(t, declarationConstraints);
 				} else {
 					clazz = ParseClassType(fileOptions, typename, t, env);
-					return new ExactType(t, clazz);
+					return new ExactTypeConstraint(t, clazz);
 				}
 			}
 		}
@@ -495,5 +512,14 @@ public class Constraints implements Iterable<Constraint> {
 	 */
 	public List<Constraint> getInDefinitionOrder() {
 		return new ArrayList<>(this.unorderedConstraints);
+	}
+
+	/**
+	 * Returns true if this Constraints parameter represents a variadic type. (That is, does it contain a
+	 * {@link VariadicTypeConstraint} Constraint in it.)
+	 * @return
+	 */
+	public boolean isVariadic() {
+		return this.isVariadic;
 	}
 }

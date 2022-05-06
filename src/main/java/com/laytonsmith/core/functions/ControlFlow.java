@@ -1478,17 +1478,19 @@ public class ControlFlow {
 					+ " The same syntax is valid as in an array slice."
 					+ " If key is set (it must be an ivariable) then the index of each iteration will be set to that."
 					+ " See the examples for a demonstration. ---- "
-					+ " Enhanced syntax may also be used in foreach, using the \"in\", \"as\" and \"else\" keywords."
+					+ " Enhanced syntax may also be used in foreach, using the \"in\" and \"else\" keywords."
 					+ " See the examples for examples of each structure. Using these keywords makes the structure of"
 					+ " the foreach read much better. For instance, with foreach(@value in @array){ } the code very"
 					+ " literally reads \"for each value in array\", making ascertaining the behavior of the loop"
-					+ " easier. The \"as\" keyword reads less plainly, and so is not recommended for use, but is"
-					+ " allowed. Note that the array and value are reversed with the \"as\" keyword. An \"else\" block"
+					+ " easier. An \"else\" block"
 					+ " may be used after the foreach, which will only run if the array provided is empty, that is, the"
 					+ " loop code would never run. This provides a good way to provide \"default\" handling."
 					+ " Array modifications while iterating are supported, and are well defined."
 					+ " See [[Array_iteration|the page documenting array iterations]]"
-					+ " for full details.";
+					+ " for full details. Note that previous versions supported using the \"as\" keyword in"
+					+ " foreach statements. This still works for backwards compatibility purposes, but is not"
+					+ " recommended for new code, as it conflicts with cast usage, and may be removed in"
+					+ " future versions.";
 		}
 
 		@Override
@@ -1523,10 +1525,10 @@ public class ControlFlow {
 				+ "foreach(@key: @value in @array){\n"
 				+ "\tmsg(@key . ': ' . @value);\n"
 				+ "}"),
-				new ExampleScript("Using \"as\" keyword", "@array = array(1, 2, 3);\n"
-				+ "foreach(@array as @value){\n"
-				+ "\tmsg(@value);\n"
-				+ "}"),
+//				new ExampleScript("Using \"as\" keyword", "@array = array(1, 2, 3);\n"
+//				+ "foreach(@array as @value){\n"
+//				+ "\tmsg(@value);\n"
+//				+ "}"),
 				/* This is actually borked in real code, so it needs to be fixed.
 				 * In the meantime, whatever, just remove the example.
 				new ExampleScript("Using \"as\" keyword, with a key", "@array = array(1, 2, 3);\n"

@@ -6,7 +6,7 @@ import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.constructs.generics.constraints.ExactType;
+import com.laytonsmith.core.constructs.generics.constraints.ExactTypeConstraint;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREGenericConstraintException;
 import java.util.Objects;
@@ -85,12 +85,12 @@ public class ConcreteGenericParameter {
 	}
 
 	/**
-	 * Returns the individual parameter as an ExactType Constraints object.
+	 * Returns the individual parameter as an ExactTypeConstraint Constraints object.
 	 * @return
 	 */
 	public LeftHandGenericUseParameter asLeftHandGenericUseParameter() {
 		Constraints constraints = new Constraints(Target.UNKNOWN, ConstraintLocation.RHS,
-				new ExactType(Target.UNKNOWN, asLeftHandSideType()));
+				new ExactTypeConstraint(Target.UNKNOWN, asLeftHandSideType()));
 		return new LeftHandGenericUseParameter(Either.left(constraints));
 	}
 

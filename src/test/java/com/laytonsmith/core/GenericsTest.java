@@ -16,9 +16,10 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.generics.ConcreteGenericParameter;
 import com.laytonsmith.core.constructs.generics.constraints.Constraint;
 import com.laytonsmith.core.constructs.generics.ConstraintLocation;
+import com.laytonsmith.core.constructs.generics.ConstraintValidator;
 import com.laytonsmith.core.constructs.generics.Constraints;
 import com.laytonsmith.core.constructs.generics.constraints.ConstructorConstraint;
-import com.laytonsmith.core.constructs.generics.constraints.ExactType;
+import com.laytonsmith.core.constructs.generics.constraints.ExactTypeConstraint;
 import com.laytonsmith.core.constructs.generics.GenericDeclaration;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.constructs.generics.GenericTypeParameters;
@@ -26,6 +27,7 @@ import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
 import com.laytonsmith.core.constructs.generics.constraints.LowerBoundConstraint;
 import com.laytonsmith.core.constructs.generics.constraints.UnboundedConstraint;
 import com.laytonsmith.core.constructs.generics.constraints.UpperBoundConstraint;
+import com.laytonsmith.core.constructs.generics.constraints.VariadicTypeConstraint;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREGenericConstraintException;
 import com.laytonsmith.core.functions.DataHandling.assign;
@@ -95,7 +97,7 @@ public class GenericsTest {
 				new UpperBoundConstraint(Target.UNKNOWN, "?", CClassType.get(CArray.TYPE.getFQCN(), Target.UNKNOWN,
 						GenericTypeParameters.nativeBuilder(CArray.TYPE)
 								.addParameter(CArray.TYPE, new LeftHandGenericUse(CArray.TYPE, Target.UNKNOWN, env,
-										new Constraints(Target.UNKNOWN, ConstraintLocation.LHS, new ExactType(Target.UNKNOWN, CInt.TYPE.asLeftHandSideType()))))
+										new Constraints(Target.UNKNOWN, ConstraintLocation.LHS, new ExactTypeConstraint(Target.UNKNOWN, CInt.TYPE.asLeftHandSideType()))))
 								.build(), env).asLeftHandSideType())));
 		assertEquals("? extends ms.lang.array<ms.lang.array<ms.lang.int>>", lhgu.toString());
 
@@ -121,7 +123,7 @@ public class GenericsTest {
 	public void testIVariableDefinitionErrorsOnBadType() throws Exception {
 		// int
 		LeftHandGenericUse lhgu = new LeftHandGenericUse(CArray.TYPE, Target.UNKNOWN, env, new Constraints(Target.UNKNOWN, ConstraintLocation.LHS,
-				new ExactType(Target.UNKNOWN, CInt.TYPE.asLeftHandSideType())));
+				new ExactTypeConstraint(Target.UNKNOWN, CInt.TYPE.asLeftHandSideType())));
 		// double
 		CArray array = new CArray(Target.UNKNOWN, GenericParameters.emptyBuilder(CArray.TYPE)
 				.addNativeParameter(CDouble.TYPE, null).buildNative(), env);
@@ -147,7 +149,7 @@ public class GenericsTest {
 								new UnboundedConstraint(Target.UNKNOWN, "U"))),
 				Target.UNKNOWN, env);
 		assertTrue(cs.length == 2);
-		assertTrue(cs[1].getInDefinitionOrder().get(0) instanceof ExactType);
+		assertTrue(cs[1].getInDefinitionOrder().get(0) instanceof ExactTypeConstraint);
 		List<Constraint> constraints = cs[0].getInDefinitionOrder();
 		assertTrue(constraints.size() == 2);
 		assertTrue(constraints.get(0) instanceof UpperBoundConstraint);
@@ -308,16 +310,73 @@ public class GenericsTest {
 		// Wildcard in unacceptable place
 		new GenericTestCase(fileOptions, "?", "int", CInt.TYPE, null, Expected.FAIL).test();
 
-		// ExactType in declaration, pass, but warn
+		// ExactTypeConstraint in declaration, pass, but warn
 		int warningCount = env.getEnv(CompilerEnvironment.class).getCompilerWarnings().size();
 		new GenericTestCase(fileOptions, "int", "int", CInt.TYPE, null, Expected.PASS).test();
 		assertEquals(warningCount + 2, env.getEnv(CompilerEnvironment.class).getCompilerWarnings().size());
+
+		// Variadic test, can only do simple test in this framework
+		new GenericTestCase(fileOptions, "T...", "int", CInt.TYPE, null, Expected.PASS).test();
+		new GenericTestCase(fileOptions, "T...", "? extends int", CInt.TYPE, null, Expected.FAIL).test();
 	}
 
 	@Test
 	public void testNakedArrayIsAuto() throws Exception {
 		String result = StaticTest.SRun("typeof(array())", null);
 		assertEquals("ms.lang.array<auto>", result);
+	}
+
+	@Test
+	public void testVariadicType() throws Exception {
+		Constraints returnType = new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+				new UnboundedConstraint(Target.UNKNOWN, "ReturnType"));
+		Constraints parameters = new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+				new VariadicTypeConstraint(Target.UNKNOWN, "Parameters"));
+		List<Constraints> definition = Arrays.asList(returnType, parameters);
+		assertEquals(Arrays.asList("ReturnType", "Parameters"),
+				ConstraintValidator.ValidateDefinition(definition, Target.UNKNOWN));
+		try {
+			// Variadic has to be last
+			ConstraintValidator.ValidateDefinition(Arrays.asList(parameters, returnType), Target.UNKNOWN);
+			fail();
+		} catch(CREGenericConstraintException ex) {
+			// pass
+		}
+
+		List<Constraints> lhs = Arrays.asList(new Constraints(Target.UNKNOWN, ConstraintLocation.LHS, new ExactTypeConstraint(Target.UNKNOWN, CInt.TYPE.asLeftHandSideType())),
+				new Constraints(Target.UNKNOWN, ConstraintLocation.LHS, new ExactTypeConstraint(Target.UNKNOWN, CString.TYPE.asLeftHandSideType())),
+				new Constraints(Target.UNKNOWN, ConstraintLocation.LHS, new ExactTypeConstraint(Target.UNKNOWN, CArray.TYPE.asLeftHandSideType()))
+		);
+
+		List<Constraints> badlhs = Arrays.asList(new Constraints(Target.UNKNOWN, ConstraintLocation.LHS, new ExactTypeConstraint(Target.UNKNOWN, CInt.TYPE.asLeftHandSideType())),
+				new Constraints(Target.UNKNOWN, ConstraintLocation.LHS, new UpperBoundConstraint(Target.UNKNOWN, "?", CString.TYPE.asLeftHandSideType())),
+				new Constraints(Target.UNKNOWN, ConstraintLocation.LHS, new ExactTypeConstraint(Target.UNKNOWN, CArray.TYPE.asLeftHandSideType()))
+		);
+		List<Constraints> badlhs2 = Arrays.asList(new Constraints(Target.UNKNOWN, ConstraintLocation.LHS, new ExactTypeConstraint(Target.UNKNOWN, CInt.TYPE.asLeftHandSideType()))
+		);
+
+		List<Constraints> rhs = Arrays.asList(new Constraints(Target.UNKNOWN, ConstraintLocation.RHS, new ExactTypeConstraint(Target.UNKNOWN, CInt.TYPE.asLeftHandSideType())),
+				new Constraints(Target.UNKNOWN, ConstraintLocation.RHS, new ExactTypeConstraint(Target.UNKNOWN, CString.TYPE.asLeftHandSideType())),
+				new Constraints(Target.UNKNOWN, ConstraintLocation.RHS, new ExactTypeConstraint(Target.UNKNOWN, CArray.TYPE.asLeftHandSideType()))
+		);
+
+		ConstraintValidator.ValidateLHStoLHS(Target.UNKNOWN, lhs, definition, env);
+
+		try {
+			ConstraintValidator.ValidateLHStoLHS(Target.UNKNOWN, badlhs, definition, env);
+			fail();
+		} catch(CREGenericConstraintException ex) {
+			// Pass
+		}
+
+		try {
+			ConstraintValidator.ValidateLHStoLHS(Target.UNKNOWN, badlhs2, definition, env);
+			fail();
+		} catch(CREGenericConstraintException ex) {
+			// Pass
+		}
+
+		ConstraintValidator.ValidateLHStoLHS(Target.UNKNOWN, rhs, lhs, env);
 	}
 
 }

@@ -73,7 +73,7 @@ public class UpperBoundConstraint extends BoundaryConstraint {
 			}
 
 			@Override
-			public Boolean isWithinBounds(ExactType lhs) {
+			public Boolean isWithinBounds(ExactTypeConstraint lhs) {
 				if(lhs.getType() == null) {
 					// Wildcard
 					return true;
@@ -95,12 +95,17 @@ public class UpperBoundConstraint extends BoundaryConstraint {
 			public Boolean isWithinBounds(UnboundedConstraint lhs) {
 				throw new Error("Unexpected constraint combination.");
 			}
+
+			@Override
+			public Boolean isWithinBounds(VariadicTypeConstraint lhs) {
+				throw new Error("Unexpected constraint combination.");
+			}
 		};
 	}
 
 	@Override
-	public ExactType convertFromDiamond(Target t) {
-		return new ExactType(t, this.bound);
+	public ExactTypeConstraint convertFromDiamond(Target t) {
+		return new ExactTypeConstraint(t, this.bound);
 	}
 
 	@Override

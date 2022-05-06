@@ -1,6 +1,6 @@
 package com.laytonsmith.core.constructs.generics;
 
-import com.laytonsmith.core.constructs.generics.constraints.ExactType;
+import com.laytonsmith.core.constructs.generics.constraints.ExactTypeConstraint;
 import com.laytonsmith.core.constructs.generics.constraints.Constraint;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.core.constructs.Auto;
@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.SortedSet;
+import java.util.TreeSet;
 
 public final class ConstraintValidator {
 
@@ -22,11 +23,34 @@ public final class ConstraintValidator {
 	}
 
 	/**
-	 * Validates and returns the typename for a set of constraints.
+	 * Validates and returns a list of the typenames for a list of Constraints objects.
 	 *
-	 * @param constraints The constraint(s) to validate
+	 * @param parameters The Constraints objects to validate.
 	 * @param t The code target, for exceptions
-	 * @return The typename, for instance <code>T</code> in <code>T extends Number</code>.
+	 * @return The typenames for each parameters, for instance <code>T, U</code> in <code>T extends number, U</code>.
+	 * @throws CREGenericConstraintException If validation fails.
+	 */
+	public static List<String> ValidateDefinition(List<Constraints> parameters, Target t)
+			throws CREGenericConstraintException {
+		List<String> typenames = new ArrayList<>();
+		for(int i = 0; i < parameters.size(); i++) {
+			Constraints c = parameters.get(i);
+			if(c.isVariadic() && i != parameters.size() - 1) {
+				throw new CREGenericConstraintException("Variadic generic types can only be the last parameter.", t);
+			}
+
+			typenames.add(ValidateDefinition(new TreeSet<>(c.getInDefinitionOrder()), t));
+		}
+		return typenames;
+	}
+
+	/**
+	 * Validates and returns the typename for a set of Constraint objects.
+	 *
+	 * @param constraints The constraint object(s) to validate
+	 * @param t The code target, for exceptions
+	 * @return The typename, for instance <code>T</code> in <code>T extends number</code>.
+	 * @throws CREGenericConstraintException If validation fails.
 	 */
 	public static String ValidateDefinition(SortedSet<Constraint> constraints, Target t)
 			throws CREGenericConstraintException {
@@ -121,7 +145,7 @@ public final class ConstraintValidator {
 
 	public static void ValidateRHStoLHS(Constraints declarationConstraints, Target t, LeftHandSideType type, Environment env) {
 		List<Constraints> exactType = new ArrayList<>();
-		exactType.add(new Constraints(t, ConstraintLocation.RHS, new ExactType(t, type)));
+		exactType.add(new Constraints(t, ConstraintLocation.RHS, new ExactTypeConstraint(t, type)));
 		ValidateLHStoLHS(t, exactType, Arrays.asList(declarationConstraints), env);
 	}
 
@@ -136,6 +160,7 @@ public final class ConstraintValidator {
 	 * @param env
 	 * @throws CREGenericConstraintException
 	 */
+	@SuppressWarnings("null")
 	public static void ValidateLHStoLHS(Target t, List<Constraints> checkIfTheseConstraints, List<Constraints> areWithinBoundsOfThese, Environment env)
 			throws CREGenericConstraintException {
 		if((checkIfTheseConstraints == null || checkIfTheseConstraints.isEmpty())
@@ -146,12 +171,33 @@ public final class ConstraintValidator {
 		if(areWithinBoundsOfThese != null && checkIfTheseConstraints == null) {
 			throw new RuntimeException("Missing constraints.");
 		}
-		if(checkIfTheseConstraints.size() != areWithinBoundsOfThese.size()) {
-			throw new CREGenericConstraintException("Expected " + areWithinBoundsOfThese.size() + " parameter(s), but found"
-					+ " " + checkIfTheseConstraints.size(), t);
+
+		boolean isVariadic;
+		if(areWithinBoundsOfThese.get(areWithinBoundsOfThese.size() - 1).isVariadic()) {
+			if(checkIfTheseConstraints.size() < areWithinBoundsOfThese.size()) {
+				throw new CREGenericConstraintException("Expected at least " + areWithinBoundsOfThese.size() + " parameter(s), but found"
+						+ " only " + checkIfTheseConstraints.size(), t);
+			}
+			isVariadic = true;
+		} else {
+			if(checkIfTheseConstraints.size() != areWithinBoundsOfThese.size()) {
+				throw new CREGenericConstraintException("Expected " + areWithinBoundsOfThese.size() + " parameter(s), but found"
+						+ " " + checkIfTheseConstraints.size(), t);
+			}
+			isVariadic = false;
 		}
-		for(int i = 0; i < areWithinBoundsOfThese.size(); i++) {
-			Constraints definition = areWithinBoundsOfThese.get(i);
+		for(int i = 0; i < checkIfTheseConstraints.size(); i++) {
+			Constraints definition;
+			if(isVariadic) {
+				if(i >= areWithinBoundsOfThese.size()) {
+					definition = areWithinBoundsOfThese.get(areWithinBoundsOfThese.size() - 1);
+				} else {
+					definition = areWithinBoundsOfThese.get(i);
+				}
+			} else {
+				definition = areWithinBoundsOfThese.get(i);
+			}
+
 			Constraints lhs = checkIfTheseConstraints.get(i);
 			// Check that the LHS fits the bounds of the definition
 			List<String> errors = new ArrayList<>();

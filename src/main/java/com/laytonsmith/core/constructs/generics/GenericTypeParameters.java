@@ -6,7 +6,7 @@ import com.laytonsmith.PureUtilities.Pair;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.constructs.generics.constraints.ExactType;
+import com.laytonsmith.core.constructs.generics.constraints.ExactTypeConstraint;
 import com.laytonsmith.core.environments.Environment;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,6 +17,7 @@ import java.util.List;
  * definition.
  */
 public class GenericTypeParameters {
+
 	@ObjectHelpers.StandardField
 	private final List<Either<LeftHandSideType, Pair<String, Constraints>>> parameters;
 	@ObjectHelpers.StandardField
@@ -40,7 +41,7 @@ public class GenericTypeParameters {
 			if(param.hasLeft()) {
 				LeftHandSideType type = param.getLeft().get();
 				Constraints c = new Constraints(t, ConstraintLocation.LHS,
-						new ExactType(t, type));
+						new ExactTypeConstraint(t, type));
 				validation.add(c);
 			} else {
 				validation.add(param.getRight().get().getValue());
@@ -56,6 +57,7 @@ public class GenericTypeParameters {
 	/**
 	 * Returns a list of the Constraints objects. Each Constraints object represents a single type parameter, though
 	 * itself can contain multiple individual Constraint objects.
+	 *
 	 * @return
 	 */
 	public List<Either<LeftHandSideType, Pair<String, Constraints>>> getParameters() {
@@ -74,7 +76,7 @@ public class GenericTypeParameters {
 		if(param.hasLeft()) {
 			LeftHandSideType type = param.getLeft().get();
 			c = new Constraints(Target.UNKNOWN, ConstraintLocation.LHS,
-					new ExactType(Target.UNKNOWN, type));
+					new ExactTypeConstraint(Target.UNKNOWN, type));
 		} else {
 			c = param.getRight().get().getValue();
 		}
@@ -84,6 +86,7 @@ public class GenericTypeParameters {
 	/**
 	 * Returns a List of LeftHandSideTypes. This will only work if all parameters are ConcreteGenericParameters,
 	 * otherwise a RuntimeException is thrown.
+	 *
 	 * @return
 	 */
 	public List<LeftHandSideType> toLeftHandSideTypes() {
@@ -98,8 +101,8 @@ public class GenericTypeParameters {
 	}
 
 	/**
-	 * @return Returns a LeftHandGenericUse equivalent, with each parameter converted into a single ExactType Constraints
-	 * object. This only works if all parameters are ConcretGenericParameters.
+	 * @return Returns a LeftHandGenericUse equivalent, with each parameter converted into a single ExactTypeConstraint
+	 * Constraints object. This only works if all parameters are ConcretGenericParameters.
 	 */
 	public LeftHandGenericUse toLeftHandGenericUse() {
 		List<LeftHandGenericUseParameter> params = new ArrayList<>();
@@ -148,6 +151,7 @@ public class GenericTypeParameters {
 
 	/**
 	 * Returns the number of parameters in this declaration.
+	 *
 	 * @return
 	 */
 	public int getParameterCount() {
@@ -156,6 +160,7 @@ public class GenericTypeParameters {
 
 	/**
 	 * The type these parameters are for.
+	 *
 	 * @return
 	 */
 	public CClassType getForType() {
@@ -212,6 +217,7 @@ public class GenericTypeParameters {
 
 	/**
 	 * Returns a new builder and adds a parameter to it.
+	 *
 	 * @param forType
 	 * @param t
 	 * @param env
@@ -224,6 +230,7 @@ public class GenericTypeParameters {
 
 	/**
 	 * Returns a new builder and adds a parameter to it.
+	 *
 	 * @param forType
 	 * @param t
 	 * @param env
@@ -237,6 +244,7 @@ public class GenericTypeParameters {
 
 	/**
 	 * Returns a new builder and adds a parameter to it.
+	 *
 	 * @param forType
 	 * @param t
 	 * @param env
@@ -249,6 +257,7 @@ public class GenericTypeParameters {
 
 	/**
 	 * Returns a new builder and adds a parameter to it.
+	 *
 	 * @param forType
 	 * @param t
 	 * @param env
@@ -262,6 +271,7 @@ public class GenericTypeParameters {
 
 	/**
 	 * Returns a new, empty builder.
+	 *
 	 * @param forType
 	 * @param t
 	 * @param env
@@ -273,14 +283,13 @@ public class GenericTypeParameters {
 
 	/**
 	 * Returns a new, empty builder. Note that this builder can only be used to add native types to.
+	 *
 	 * @param forType
 	 * @return
 	 */
 	public static GenericTypeParametersBuilder nativeBuilder(CClassType forType) {
 		return new GenericTypeParametersBuilder(forType, Target.UNKNOWN, null);
 	}
-
-
 
 	public static final class GenericTypeParametersBuilder {
 
@@ -310,8 +319,8 @@ public class GenericTypeParameters {
 		 * Adds a new parameter.
 		 *
 		 * @param typename The typename.
-		 * @param constraints The constraints governing this typename. May be null if this should be inherited,
-		 * in which case the typename is looked up in the forType, and the associated Constraints object is used.
+		 * @param constraints The constraints governing this typename. May be null if this should be inherited, in which
+		 * case the typename is looked up in the forType, and the associated Constraints object is used.
 		 * @return this, for easy chaining. Use build() to construct the final object.
 		 */
 		public GenericTypeParametersBuilder addParameter(String typename, Constraints constraints) {
@@ -347,10 +356,11 @@ public class GenericTypeParameters {
 		}
 
 		/**
-		 * Shorthand for adding a ConcreteGenericParameter. Note that for generic declarations where the class
-		 * is used as a generic parameter, you must instead use {@link CClassType#RECURSIVE_DEFINITION}, which is
-		 * then replaced by the actual class type during building. Otherwise, using the type directly with
-		 * Class.TYPE will fail, since by definition during instantiation, it is still null.
+		 * Shorthand for adding a ConcreteGenericParameter. Note that for generic declarations where the class is used
+		 * as a generic parameter, you must instead use {@link CClassType#RECURSIVE_DEFINITION}, which is then replaced
+		 * by the actual class type during building. Otherwise, using the type directly with Class.TYPE will fail, since
+		 * by definition during instantiation, it is still null.
+		 *
 		 * @param type
 		 * @param lhgu
 		 * @return

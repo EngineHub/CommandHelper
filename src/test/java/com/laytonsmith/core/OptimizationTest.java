@@ -756,5 +756,7 @@ public class OptimizationTest {
 	@Test
 	public void testAsKeyword() throws Exception {
 		assertEquals("string(cast<ms.lang.int>(@value))", optimize("@value as int"));
+		assertEquals("string(cast<ms.lang.int>(cast<ms.lang.primitive>(@value)))",
+				optimize("@value as primitive as int"));
 	}
 }

@@ -10,7 +10,13 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.compiler.FileOptions;
+import com.laytonsmith.core.constructs.generics.ConstraintLocation;
+import com.laytonsmith.core.constructs.generics.Constraints;
+import com.laytonsmith.core.constructs.generics.GenericDeclaration;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.GenericTypeParameters;
+import com.laytonsmith.core.constructs.generics.constraints.UnboundedConstraint;
+import com.laytonsmith.core.constructs.generics.constraints.VariadicTypeConstraint;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
@@ -45,8 +51,15 @@ public class CClosure extends Construct implements Callable {
 	protected final LeftHandSideType[] types;
 	protected final LeftHandSideType returnType;
 
+	private static final Constraints RETURN_TYPE = new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION, new UnboundedConstraint(Target.UNKNOWN, "ReturnType"));
+	private static final Constraints PARAMETERS = new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION, new VariadicTypeConstraint(Target.UNKNOWN, "Parameters"));
+
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get(CClosure.class);
+	public static final CClassType TYPE = CClassType.getWithGenericDeclaration(CClosure.class,
+			new GenericDeclaration(Target.UNKNOWN, RETURN_TYPE, PARAMETERS))
+			.withSuperParameters(GenericTypeParameters.nativeBuilder(Callable.TYPE)
+				.addParameter("ReturnType", RETURN_TYPE)
+				.addParameter("Parameters", PARAMETERS));
 
 	public CClosure(ParseTree node, Environment env, LeftHandSideType returnType, String[] names, Mixed[] defaults,
 			LeftHandSideType[] types, Target t) {

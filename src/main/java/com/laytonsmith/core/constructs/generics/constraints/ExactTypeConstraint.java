@@ -15,29 +15,27 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import java.util.EnumSet;
 import java.util.Objects;
 
-public class ExactType extends Constraint {
+public class ExactTypeConstraint extends Constraint {
 
 	@StandardField
 	private final LeftHandSideType type;
 
 	private Constraints declarationBounds;
 
-
 	/**
-	 * Constructs a new unbounded wildcard instance of ExactType.
+	 * Constructs a new unbounded wildcard instance of ExactTypeConstraint.
 	 *
 	 * @param t The code target
-	 * @param declarationBounds The bounds of the declaration. This is used to check if
-	 * the given concrete right hand side is within bounds of the declaration. Note that
-	 * this will cause an exception to be thrown if the declarationBounds type is a type union,
-	 * as unbounded wildcards cannot be used against a type union.
+	 * @param declarationBounds The bounds of the declaration. This is used to check if the given concrete right hand
+	 * side is within bounds of the declaration. Note that this will cause an exception to be thrown if the
+	 * declarationBounds type is a type union, as unbounded wildcards cannot be used against a type union.
 	 * @return
 	 */
-	public static ExactType AsUnboundedWildcard(Target t, Constraints declarationBounds) {
+	public static ExactTypeConstraint AsUnboundedWildcard(Target t, Constraints declarationBounds) {
 		Objects.requireNonNull(declarationBounds);
-		ExactType type;
+		ExactTypeConstraint type;
 		try {
-			type = new ExactType(t);
+			type = new ExactTypeConstraint(t);
 		} catch(ConfigCompileException ex) {
 			throw new Error(ex);
 		}
@@ -45,17 +43,18 @@ public class ExactType extends Constraint {
 		return type;
 	}
 
-	private ExactType(Target t) throws ConfigCompileException {
+	private ExactTypeConstraint(Target t) throws ConfigCompileException {
 		super(t, "?");
 		type = null;
 	}
 
 	/**
 	 * Constructs a new ExactType constraint.
+	 *
 	 * @param t The target where this is being defined.
 	 * @param type The type.
 	 */
-	public ExactType(Target t, LeftHandSideType type) {
+	public ExactTypeConstraint(Target t, LeftHandSideType type) {
 		super(t, type.val());
 		Objects.requireNonNull(type);
 		this.type = type;
@@ -92,7 +91,7 @@ public class ExactType extends Constraint {
 					|| (ours.getLeftHandGenericUse() == null && theirs.getLeftHandGenericUse() != null)
 					|| (ours.getLeftHandGenericUse() != null && theirs.getLeftHandGenericUse() == null)
 					|| (ours.getLeftHandGenericUse() != null
-						&& !ours.getLeftHandGenericUse().isWithinBounds(env, theirs.getLeftHandGenericUse()))) {
+					&& !ours.getLeftHandGenericUse().isWithinBounds(env, theirs.getLeftHandGenericUse()))) {
 				return false;
 			}
 		}
@@ -108,20 +107,20 @@ public class ExactType extends Constraint {
 			}
 
 			@Override
-			public Boolean isWithinBounds(ExactType lhs) {
-				if(ExactType.this.equals(lhs)) {
+			public Boolean isWithinBounds(ExactTypeConstraint lhs) {
+				if(ExactTypeConstraint.this.equals(lhs)) {
 					return true;
 				}
-				if(ExactType.this.getType().isAuto() || lhs.getType().isAuto()) {
+				if(ExactTypeConstraint.this.getType().isAuto() || lhs.getType().isAuto()) {
 					return true;
 				}
-				if(!ExactType.this.getType().getNakedType(Target.UNKNOWN, env)
+				if(!ExactTypeConstraint.this.getType().getNakedType(Target.UNKNOWN, env)
 						.equals(lhs.getType().getNakedType(Target.UNKNOWN, env))) {
 					return false;
 				}
 				// Upper type is the same now, for instance `array<? super int>` and `array<? super primitive>`, but
 				// now we have to ensure that the <? super int> is in bounds of <? super primitive>.
-				return InstanceofUtil.isInstanceof(lhs.getType(), ExactType.this.getType(), env);
+				return InstanceofUtil.isInstanceof(lhs.getType(), ExactTypeConstraint.this.getType(), env);
 			}
 
 			@Override
@@ -138,17 +137,22 @@ public class ExactType extends Constraint {
 			public Boolean isWithinBounds(UnboundedConstraint lhs) {
 				throw new Error("Unexpected constraint combination.");
 			}
+
+			@Override
+			public Boolean isWithinBounds(VariadicTypeConstraint lhs) {
+				throw new Error("Unexpected constraint combination.");
+			}
 		};
 	}
 
 	@Override
-	public ExactType convertFromDiamond(Target t) {
+	public ExactTypeConstraint convertFromDiamond(Target t) {
 		return this;
 	}
 
 	/**
-	 * Returns the exact type for this constraint.Note that in the case of a wildcard "?", an ExactType constraint will
-	 * be used, however, this value will be null.
+	 * Returns the exact type for this constraint.Note that in the case of a wildcard "?", an ExactTypeConstraint
+	 * constraint will be used, however, this value will be null.
 	 *
 	 * @return The type, or null if it was defined as a wildcard.
 	 */

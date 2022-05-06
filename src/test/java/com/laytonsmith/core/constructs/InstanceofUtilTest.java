@@ -8,7 +8,7 @@ import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.generics.ConstraintLocation;
 import com.laytonsmith.core.constructs.generics.Constraints;
-import com.laytonsmith.core.constructs.generics.constraints.ExactType;
+import com.laytonsmith.core.constructs.generics.constraints.ExactTypeConstraint;
 import com.laytonsmith.core.constructs.generics.GenericDeclaration;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.constructs.generics.GenericTypeParameters;
@@ -86,10 +86,10 @@ public class InstanceofUtilTest {
 
 		LeftHandGenericUse intExactTypeLHGU = new LeftHandGenericUse(CArray.TYPE, Target.UNKNOWN, env,
 				new Constraints(Target.UNKNOWN, ConstraintLocation.LHS,
-						new ExactType(Target.UNKNOWN, CInt.TYPE.asLeftHandSideType())));
+						new ExactTypeConstraint(Target.UNKNOWN, CInt.TYPE.asLeftHandSideType())));
 		LeftHandGenericUse stringExactTypeLHGU = new LeftHandGenericUse(CArray.TYPE, Target.UNKNOWN, env,
 				new Constraints(Target.UNKNOWN, ConstraintLocation.LHS,
-						new ExactType(Target.UNKNOWN, CString.TYPE.asLeftHandSideType())));
+						new ExactTypeConstraint(Target.UNKNOWN, CString.TYPE.asLeftHandSideType())));
 
 		CClassType arrayInt = CClassType.get(CArray.TYPE.getFQCN(), Target.UNKNOWN, GenericTypeParameters.nativeBuilder(CArray.TYPE)
 				.addParameter(CInt.TYPE, null).build(), env);
@@ -110,10 +110,10 @@ public class InstanceofUtilTest {
 
 		LeftHandGenericUse stringLHGU = new LeftHandGenericUse(CArray.TYPE, Target.UNKNOWN, env,
 				new Constraints(Target.UNKNOWN, ConstraintLocation.LHS,
-						new ExactType(Target.UNKNOWN, CString.TYPE.asLeftHandSideType())));
+						new ExactTypeConstraint(Target.UNKNOWN, CString.TYPE.asLeftHandSideType())));
 		LeftHandGenericUse intLHGU = new LeftHandGenericUse(CArray.TYPE, Target.UNKNOWN, env,
 				new Constraints(Target.UNKNOWN, ConstraintLocation.LHS,
-						new ExactType(Target.UNKNOWN, CInt.TYPE.asLeftHandSideType())));
+						new ExactTypeConstraint(Target.UNKNOWN, CInt.TYPE.asLeftHandSideType())));
 
 		assertTrue(InstanceofUtil.isInstanceof(arrayInt, CArray.TYPE, intLHGU, env));
 		assertFalse(InstanceofUtil.isInstanceof(arrayInt, CArray.TYPE, stringLHGU, env));
@@ -124,20 +124,20 @@ public class InstanceofUtilTest {
 
 		LeftHandGenericUse arrayIntLHGU = new LeftHandGenericUse(CArray.TYPE, Target.UNKNOWN, env,
 				new Constraints(Target.UNKNOWN, ConstraintLocation.LHS,
-						new ExactType(Target.UNKNOWN, LeftHandSideType.fromNativeCClassType(CArray.TYPE, intLHGU))));
+						new ExactTypeConstraint(Target.UNKNOWN, LeftHandSideType.fromNativeCClassType(CArray.TYPE, intLHGU))));
 
 		LeftHandGenericUse arrayExtendsNumberLHGU = new LeftHandGenericUse(CArray.TYPE, Target.UNKNOWN, env,
 				new Constraints(Target.UNKNOWN, ConstraintLocation.LHS,
-						new ExactType(Target.UNKNOWN, LeftHandSideType.fromNativeCClassType(CArray.TYPE, extendsNumberLHGU))));
+						new ExactTypeConstraint(Target.UNKNOWN, LeftHandSideType.fromNativeCClassType(CArray.TYPE, extendsNumberLHGU))));
 		LeftHandGenericUse arraySuperIntLHGU = new LeftHandGenericUse(CArray.TYPE, Target.UNKNOWN, env,
 				new Constraints(Target.UNKNOWN, ConstraintLocation.LHS,
-						new ExactType(Target.UNKNOWN, LeftHandSideType.fromNativeCClassType(CArray.TYPE, superIntLHGU))));
+						new ExactTypeConstraint(Target.UNKNOWN, LeftHandSideType.fromNativeCClassType(CArray.TYPE, superIntLHGU))));
 		LeftHandGenericUse arraySuperPrimitiveLHGU = new LeftHandGenericUse(CArray.TYPE, Target.UNKNOWN, env,
 				new Constraints(Target.UNKNOWN, ConstraintLocation.LHS,
-						new ExactType(Target.UNKNOWN, LeftHandSideType.fromNativeCClassType(CArray.TYPE, superPrimitiveLHGU))));
+						new ExactTypeConstraint(Target.UNKNOWN, LeftHandSideType.fromNativeCClassType(CArray.TYPE, superPrimitiveLHGU))));
 		LeftHandGenericUse arrayExtendsPrimitiveLHGU = new LeftHandGenericUse(CArray.TYPE, Target.UNKNOWN, env,
 				new Constraints(Target.UNKNOWN, ConstraintLocation.LHS,
-						new ExactType(Target.UNKNOWN, LeftHandSideType.fromNativeCClassType(CArray.TYPE, extendsPrimitiveLHGU))));
+						new ExactTypeConstraint(Target.UNKNOWN, LeftHandSideType.fromNativeCClassType(CArray.TYPE, extendsPrimitiveLHGU))));
 
 		// Nested LHGU
 		assertEquals("ms.lang.array<ms.lang.array<ms.lang.int>>", arrayArrayInt.toString());

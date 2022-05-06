@@ -13,13 +13,14 @@ import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.constructs.generics.ConcreteGenericParameter;
 import com.laytonsmith.core.constructs.generics.ConstraintLocation;
+import com.laytonsmith.core.constructs.generics.ConstraintValidator;
 import com.laytonsmith.core.constructs.generics.Constraints;
 import com.laytonsmith.core.constructs.generics.GenericDeclaration;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.constructs.generics.GenericTypeParameters;
 import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
 import com.laytonsmith.core.constructs.generics.LeftHandGenericUseParameter;
-import com.laytonsmith.core.constructs.generics.constraints.ExactType;
+import com.laytonsmith.core.constructs.generics.constraints.ExactTypeConstraint;
 import com.laytonsmith.core.constructs.generics.constraints.UnboundedConstraint;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
@@ -576,6 +577,10 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		this.genericDeclaration = genericDeclaration;
 		this.nativeClass = nativeClass;
 
+		if(genericDeclaration != null) {
+			ConstraintValidator.ValidateDefinition(genericDeclaration.getConstraints(), t);
+		}
+
 		if(!newDefinition) {
 			boolean found = false;
 			String localFQCN = fqcn.getFQCN();
@@ -1088,9 +1093,8 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 					for(int k = 0; k < current.getGenericDeclaration().getConstraints().size(); k++) {
 						if(typename.equals(current.getGenericDeclaration().getConstraints().get(k).getTypeName())) {
 							if(parameters == null) {
-								newParams.add(new LeftHandGenericUseParameter(Either.left(
-										new Constraints(Target.UNKNOWN, ConstraintLocation.RHS,
-												new ExactType(Target.UNKNOWN, Auto.LHSTYPE)))));
+								newParams.add(new LeftHandGenericUseParameter(Either.left(new Constraints(Target.UNKNOWN, ConstraintLocation.RHS,
+												new ExactTypeConstraint(Target.UNKNOWN, Auto.LHSTYPE)))));
 							} else {
 								newParams.add(parameters.getParameters().get(k));
 							}
