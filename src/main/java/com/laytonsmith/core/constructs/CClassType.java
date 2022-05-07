@@ -95,6 +95,11 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	private final SortedSet<FullyQualifiedClassName> types = new TreeSet<>();
 
 	/**
+	 * If this represents a vararg type, which is actually an array type.
+	 */
+	private boolean isVararg = false;
+
+	/**
 	 * Returns the singular instance of CClassType that represents this type.
 	 *
 	 * <p>IMPORTANT: The type MUST be fully qualified AND exist as a real, instantiable class, or this will cause
@@ -626,6 +631,25 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	@Override
 	public boolean getBooleanValue(Target t) {
 		return true;
+	}
+
+	/**
+	 * Sets if this is a vararg type or not. Returns this for easy chaining.
+	 * @param set
+	 * @return
+	 */
+	public CClassType setIsVarargs(boolean set) {
+		this.isVararg = set;
+		return this;
+	}
+
+	/**
+	 * Returns true if this is a var arg type, for instance `string...`. This is actually an array type in most
+	 * cases.
+	 * @return
+	 */
+	public boolean isVarargs() {
+		return this.isVararg;
 	}
 
 }

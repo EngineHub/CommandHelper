@@ -14,6 +14,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREStackOverflowError;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -21,6 +22,7 @@ import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.LoopManipulationException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.exceptions.StackTraceManager;
+import com.laytonsmith.core.functions.DataHandling;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,6 +54,13 @@ public class CClosure extends Construct implements Callable {
 		this.names = names;
 		this.defaults = defaults;
 		this.types = types;
+		if(types.length > 0) {
+			for(int i = 0; i < types.length - 1; i++) {
+				if(types[i].isVarargs()) {
+					throw new CREFormatException("Varargs can only be added to the last argument.", t);
+				}
+			}
+		}
 		this.returnType = returnType;
 		for(String pName : names) {
 			if(pName.equals("@arguments")) {
@@ -185,21 +194,13 @@ public class CClosure extends Construct implements Callable {
 	}
 
 	/**
-	 * @deprecated This method suffers from the fact that a FunctionReturnException may end up bubbling up past the
-	 * point of intended handling, given an error in the code that forgets to catch FunctionReturnException
-	 * (or a superclass), but may be
-	 * hard to detect. Instead, use {@link #ExecuteClosure} which unconditionally catches the exception, and then
-	 * returns it. This also simplifies the code. This will not be removed earlier than 3.3.5.
 	 * @param values
 	 * @throws ConfigRuntimeException
 	 * @throws ProgramFlowManipulationException
 	 * @throws FunctionReturnException
 	 * @throws CancelCommandException
 	 */
-	// This method actually shouldn't be removed when the deprecation period is over, it should just be made protected,
-	// since it is still the foundation of executeClosure.
-	@Deprecated
-	public void execute(Mixed... values) throws ConfigRuntimeException, ProgramFlowManipulationException,
+	protected void execute(Mixed... values) throws ConfigRuntimeException, ProgramFlowManipulationException,
 			FunctionReturnException, CancelCommandException {
 		if(node == null) {
 			return;
@@ -211,17 +212,42 @@ public class CClosure extends Construct implements Callable {
 			synchronized(this) {
 				environment = env.clone();
 			}
+			CArray arguments = new CArray(node.getData().getTarget());
+			CArray vararg = null;
 			if(values != null) {
-				for(int i = 0; i < names.length; i++) {
-					String name = names[i];
+				for(int i = 0; i < values.length; i++) {
 					Mixed value;
 					try {
 						value = values[i];
 					} catch (Exception e) {
 						value = defaults[i].clone();
 					}
-					environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(types[i], name, value,
-							getTarget(), environment));
+					arguments.push(value, node.getData().getTarget());
+					boolean isVarArg = false;
+					if(this.names.length > i
+						|| (this.names.length != 0
+							&& this.types[this.names.length - 1].isVarargs())) {
+						String name;
+						if(i < this.names.length - 1
+								|| !this.types[this.types.length - 1].isVarargs()) {
+							name = names[i];
+						} else {
+							name = this.names[this.names.length - 1];
+							if(vararg == null) {
+								// TODO: Once generics are added, add the type
+								vararg = new CArray(value.getTarget());
+								environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE,
+										name, vararg, value.getTarget()));
+							}
+							isVarArg = true;
+						}
+						if(isVarArg) {
+							vararg.push(value, value.getTarget());
+						} else {
+							IVariable var = new IVariable(types[i], name, value, getTarget(), environment);
+							environment.getEnv(GlobalEnv.class).GetVarList().set(var);
+						}
+					}
 				}
 			}
 			boolean hasArgumentsParam = false;
@@ -233,17 +259,11 @@ public class CClosure extends Construct implements Callable {
 			}
 
 			if(!hasArgumentsParam) {
-				CArray arguments = new CArray(node.getData().getTarget());
-				if(values != null) {
-					for(Mixed value : values) {
-						arguments.push(value, node.getData().getTarget());
-					}
-				}
 				environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, "@arguments", arguments,
 						node.getData().getTarget()));
 			}
 
-			ParseTree newNode = new ParseTree(new CFunction("g", getTarget()), node.getFileOptions());
+			ParseTree newNode = new ParseTree(new CFunction(DataHandling.g.NAME, getTarget()), node.getFileOptions());
 			List<ParseTree> children = new ArrayList<>();
 			children.add(node);
 			newNode.setChildren(children);

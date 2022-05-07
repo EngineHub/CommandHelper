@@ -21,6 +21,7 @@ import com.laytonsmith.core.compiler.LateBindingKeyword;
 import com.laytonsmith.core.compiler.TokenStream;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.CBareString;
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CDecimal;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CFunction;
@@ -103,9 +104,10 @@ public final class MethodScriptCompiler {
 	private static final Pattern IVAR_PATTERN = Pattern.compile(IVariable.VARIABLE_NAME_REGEX);
 
 	/**
-	 * Lexes the script, and turns it into a token stream. This looks through the script character by character.
+	 * Lexes the script, and turns it into a token stream.This looks through the script character by character.
 	 *
 	 * @param script The script to lex
+	 * @param env The environment.
 	 * @param file The file this script came from, or potentially null if the code is from a dynamic source
 	 * @param inPureMScript If the script is in pure MethodScript, this should be true. Pure MethodScript is defined as
 	 * code that doesn't have command alias wrappers.
@@ -136,6 +138,7 @@ public final class MethodScriptCompiler {
 	 * @return A stream of tokens
 	 * @throws ConfigCompileException If compilation fails due to bad syntax
 	 */
+	@SuppressWarnings({"null", "UnnecessaryContinue"})
 	public static TokenStream lex(String script, Environment env, File file,
 			boolean inPureMScript, boolean saveAllTokens) throws ConfigCompileException {
 		if(env == null) {
@@ -149,7 +152,7 @@ public final class MethodScriptCompiler {
 		if(script.isEmpty()) {
 			return new TokenStream(new LinkedList<>(), "", new HashMap<>());
 		}
-		if((int) script.charAt(0) == 65279) {
+		if(script.charAt(0) == 65279) {
 			// Remove the UTF-8 Byte Order Mark, if present.
 			script = script.substring(1);
 		}
@@ -188,10 +191,14 @@ public final class MethodScriptCompiler {
 
 		// Lex the script character by character.
 		for(int i = 0; i < script.length(); i++) {
-			Character c = script.charAt(i);
-			Character c2 = null;
+			char c = script.charAt(i);
+			char c2 = '\0';
+			char c3 = '\0';
 			if(i < script.length() - 1) {
 				c2 = script.charAt(i + 1);
+			}
+			if(i < script.length() - 2) {
+				c3 = script.charAt(i + 2);
 			}
 
 			column += i - lastColumn;
@@ -397,6 +404,9 @@ public final class MethodScriptCompiler {
 							if(c2 == '=') { // ".=".
 								token = new Token(TType.CONCAT_ASSIGNMENT, ".=", target.copy());
 								i++;
+							} else if(c2 == '.' && c3 == '.') {
+								token = new Token(TType.VARARGS, "...", target.copy());
+								i += 2;
 							} else if(c2 == '.') { // "..".
 								token = new Token(TType.SLICE, "..", target.copy());
 								i++;
@@ -1046,6 +1056,7 @@ public final class MethodScriptCompiler {
 	 * @return
 	 * @throws ConfigCompileException
 	 */
+	@SuppressWarnings("UnnecessaryLabelOnContinueStatement")
 	public static List<Script> preprocess(TokenStream tokenStream,
 			Set<Class<? extends Environment.EnvironmentImpl>> envs) throws ConfigCompileException {
 		if(tokenStream == null || tokenStream.isEmpty()) {
@@ -1736,14 +1747,22 @@ public final class MethodScriptCompiler {
 						throw new ConfigCompileException(ex);
 					}
 				}
+			} else if(t.type == TType.VARARGS) {
+				if(tree.getChildren().isEmpty()) {
+					throw new ConfigCompileException("Unexpected varargs token (\"...\")", t.target);
+				}
+				ParseTree previous = tree.getChildAt(tree.getChildren().size() - 1);
+				// TODO: Add LHSType as well, though this will not work as is with user objects. It may need
+				// to be moved into a node modifier or something.
+				if(!(previous.getData() instanceof CClassType)) {
+					throw new ConfigCompileException("Unexpected varargs token (\"...\"). This can only be used with types.", t.target);
+				}
+				if(previous.getData() instanceof CClassType c) {
+					c.setIsVarargs(true);
+				}
+				continue;
 			} else if(t.type == TType.LIT) {
 				Construct c = Static.resolveConstruct(t.val(), t.target, true);
-				// We need to consider other contexts, such as array(key: 'value'), which should be allowed. Thus
-				// this can't be implemented like this.
-//				if(c instanceof CBareString && StrictMode.isStrictMode(fileOptions, environment, unknown)) {
-//					compilerErrors.add(new ConfigCompileException("Bare strings are not allowed in strict mode",
-//							c.getTarget()));
-//				}
 				if((c instanceof CInt || c instanceof CDecimal) && next1.type == TType.DOT && next2.type == TType.LIT) {
 					// make CDouble/CDecimal here because otherwise Long.parseLong() will remove
 					// minus zero before decimals and leading zeroes after decimals
@@ -1854,9 +1873,6 @@ public final class MethodScriptCompiler {
 			// Find the last '[' that was not closed and use that as target instead of the last line of the script.
 			Target target = traceMismatchedOpenToken(stream, TType.LSQUARE_BRACKET, TType.RSQUARE_BRACKET);
 			assert target != null : "Mismatched bracket was detected, but target-finding code could not find it.";
-			if(target == null) {
-				target = t.target;
-			}
 
 			// Throw a CRE.
 			throw new ConfigCompileException("Mismatched square brackets", target);
@@ -1869,9 +1885,6 @@ public final class MethodScriptCompiler {
 			// Find the last '(' that was not closed and use that as target instead of the last line of the script.
 			Target target = traceMismatchedOpenToken(stream, TType.FUNC_START, TType.FUNC_END);
 			assert target != null : "Mismatched parentheses was detected, but target-finding code could not find it.";
-			if(target == null) {
-				target = t.target;
-			}
 
 			// Throw a CRE.
 			throw new ConfigCompileException("Mismatched parentheses", target);
@@ -1910,7 +1923,6 @@ public final class MethodScriptCompiler {
 		optimize(tree, environment, envs, procs, compilerErrors);
 		link(tree, compilerErrors);
 		checkFunctionsExist(tree, compilerErrors, envs);
-		checkLabels(tree, compilerErrors);
 		checkBreaks(tree, compilerErrors);
 		if(staticAnalysis == null) {
 			checkUnhandledCompilerConstructs(tree, environment, compilerErrors);
@@ -2048,121 +2060,6 @@ public final class MethodScriptCompiler {
 			checkBreaks0(child, currentLoops, lastUnbreakable, compilerErrors);
 		}
 	}
-
-//	private static void processLinearComponents(ParseTree tree, Set<ConfigCompileException> compilerErrors) {
-//		if(tree.hasChildren()) {
-//			for(ParseTree child : tree.getChildren()) {
-//				processLinearComponents(child, compilerErrors);
-//			}
-//			// Process bare string "concatenation"
-//			for(int i = 0; i < tree.getChildren().size(); i++) {
-//				ParseTree data = tree.getChildAt(i);
-//				ParseTree data2 = null;
-//				if(i < tree.getChildren().size() - 1) {
-//					data2 = tree.getChildAt(i + 1);
-//				}
-//				if(data2 != null) {
-//					if(data.getData() instanceof CBareString && data2.getData() instanceof CSymbol
-//							&& ((CSymbol) data2.getData()).isConcatenation()) {
-//
-//					}
-//				}
-//			}
-//		}
-//		// If there are no children, there's nothing to do right now, so just skip this invocation
-//	}
-
-//	private static void processBareStrings(ParseTree root, Set<ConfigCompileException> compilerExceptions) {
-//		if(root.hasChildren()) {
-//			for(ParseTree child : root.getChildren()) {
-//				processBareStrings(child, compilerExceptions);
-//			}
-//		}
-//		// We need to first remove the CBareStrings, and convert them to CStrings (or CClassType or issue a compiler
-//		// warning, depending on the case), as the rest of these methods assume CStrings.
-//		List<ParseTree> temp = new ArrayList<>(root.getChildren());
-//		checkClassType: for(int i = 0; i < temp.size() - 1; i++) {
-//			ParseTree node = temp.get(i);
-//			ParseTree next = temp.get(i + 1);
-//			if(node.getData() instanceof CBareString && next.getData() instanceof CSymbol
-//					&& ((CSymbol) next.getData()).isConcatenation()) {
-//				// Concatenation of bare strings. We need to look at the whole chain and see if it's a valid
-//				// type or not, and if not, issue an error.
-//				String type = node.getData().val() + ".";
-//				temp.remove(i);
-//				temp.remove(i);
-//				for(int j = i; j < temp.size(); j++) {
-//					ParseTree jNode = temp.get(j);
-//					ParseTree jNext = null;
-//					if(j < temp.size() - 1) {
-//						jNext = temp.get(j + 1);
-//					}
-//					if(jNode.getData() instanceof CBareString) {
-//						type += jNode.getData().val();
-//						temp.remove(j);
-//						if(jNext != null && jNext.getData() instanceof CSymbol
-//								&& ((CSymbol) jNext.getData()).isConcatenation()) {
-//							// Continue the chain
-//							type += ".";
-//							temp.remove(j);
-//							j--;
-//						} else {
-//							// End of the chain, break here.
-//							break;
-//						}
-//					} else {
-//						// This is completely unexpected, and means that we are concatenating a bare string with
-//						// some other data type. We'll reset list, and let the rest of the code take over.
-//						temp = root.getChildren();
-//						break checkClassType;
-//					}
-//				}
-//				// TODO: Once compiler environments are added, we would need to check to see if the value here is a custom
-//				// type. However, as it stands, since we only support the native types, we will just hardcode the check here.
-//				String fqType = NativeTypeList.resolveNativeType(type);
-//				if(fqType != null) {
-//					try {
-//						temp.add(i, new ParseTree(CClassType.get(FullyQualifiedClassName
-//								.forFullyQualifiedClass(fqType)), node.getFileOptions()));
-//					} catch(ClassNotFoundException ex) {
-//						throw new RuntimeException(ex);
-//					}
-//				} else {
-//					compilerExceptions.add(new ConfigCompileException("Invalid/Unknown type: " + type, node.getTarget()));
-//					return;
-//				}
-//				i--;
-//			}
-//		}
-//		root.setChildren(temp);
-//		// Now, any bare strings that remain are an error in strict mode, or need to be converted to CStrings
-//		// in non-strict mode. There is one exception though, if the string is a class type, then it was a
-//		// not fully qualified class name, which is allowed, so in that case, we convert it to CClassType.
-//		for(int i = 0; i < root.getChildren().size(); i++) {
-//			ParseTree node = root.getChildren().get(i);
-//			if(node.getData() instanceof CBareString) {
-//				String fqType = NativeTypeList.resolveNativeType(node.getData().val());
-//				if(fqType != null) {
-//					root.getChildren().remove(i);
-//					try {
-//						root.getChildren().add(i, new ParseTree(CClassType.get(FullyQualifiedClassName
-//								.forFullyQualifiedClass(fqType)), node.getFileOptions()));
-//					} catch(ClassNotFoundException ex) {
-//						throw new RuntimeException(ex);
-//					}
-//					continue;
-//				}
-//				if(node.getFileOptions().isStrict()) {
-//					compilerExceptions.add(new ConfigCompileException("Bare strings are not allowed in strict mode.",
-//							node.getTarget()));
-//				} else {
-//					root.getChildren().remove(i);
-//					root.getChildren().add(i, new ParseTree(new CString(node.getData().val(), node.getTarget()),
-//							node.getFileOptions()));
-//				}
-//			}
-//		}
-//	}
 
 	/**
 	 * Rewrites __autoconcat__ AST nodes to executable AST nodes. This should be called before AST optimization,
@@ -2375,26 +2272,6 @@ public final class MethodScriptCompiler {
 	}
 
 	/**
-	 * Recurses down the tree and ensures that there are no dynamic labels. This has to finish completely after
-	 * optimization, because the optimizer has no good hook to know when optimization for a unit is fully completed,
-	 * until ALL units are fully complete, so this happens separately after optimization, but as apart of the normal
-	 * compile process.
-	 *
-	 * @param tree
-	 * @throws ConfigCompileException
-	 */
-	private static void checkLabels(ParseTree tree, Set<ConfigCompileException> compilerErrors) throws ConfigCompileException {
-//		for(ParseTree t : tree.getChildren()){
-//			if(t.getData() instanceof CLabel){
-//				if(((CLabel)t.getData()).cVal() instanceof IVariable){
-//					throw new ConfigCompileException("Variables may not be used as labels", t.getTarget());
-//				}
-//			}
-//			checkLabels(t);
-//		}
-	}
-
-	/**
 	 * Recurses down the tree and
 	 * <ul>
 	 *     <li>Links functions</li>
@@ -2497,10 +2374,7 @@ public final class MethodScriptCompiler {
 		if(tree.isOptimized()) {
 			return; //Don't need to re-run this
 		}
-//		if(tree.getData() instanceof CIdentifier) {
-//			optimize(((CIdentifier) tree.getData()).contained(), procs);
-//			return;
-//		}
+
 		if(!(tree.getData() instanceof CFunction)) {
 			//There's no way to optimize something that's not a function
 			return;
@@ -2607,24 +2481,12 @@ public final class MethodScriptCompiler {
 				ParseTree root = new ParseTree(
 						new CFunction(__autoconcat__.NAME, Target.UNKNOWN), tree.getFileOptions());
 				Script fakeScript = Script.GenerateScript(root, "*", null);
-//				Environment env = null;
-//				try {
-//					if(Implementation.GetServerType().equals(Implementation.Type.BUKKIT)) {
-//						CommandHelperPlugin plugin = CommandHelperPlugin.self;
-//						GlobalEnv gEnv = new GlobalEnv(plugin.executionQueue, plugin.profiler, plugin.persistenceNetwork,
-//								MethodScriptFileLocations.getDefault().getConfigDirectory(), plugin.profiles, new TaskManagerImpl());
-//						env = Environment.createEnvironment(gEnv, new CommandHelperEnvironment());
-//					} else {
-//						env = Static.GenerateStandaloneEnvironment(false);
-//					}
-//				} catch (IOException | DataSourceException | URISyntaxException | Profiles.InvalidProfileException e) {
-//					//
-//				}
+
 				if(env.hasEnv(GlobalEnv.class)) {
 					// For testing, we frequently set this to null, so check this first.
 					env.getEnv(GlobalEnv.class).SetFlag("no-check-undefined", true);
 				}
-				Procedure myProc = DataHandling.proc.getProcedure(tree.getTarget(), env, fakeScript, children.toArray(new ParseTree[children.size()]));
+				Procedure myProc = DataHandling.proc.getProcedure(tree.getTarget(), env, fakeScript, children.toArray(ParseTree[]::new));
 				tree.getNodeModifiers().merge(children.get(0).getNodeModifiers());
 				if(env.hasEnv(GlobalEnv.class)) {
 					env.getEnv(GlobalEnv.class).ClearFlag("no-check-undefined");
@@ -2723,19 +2585,6 @@ public final class MethodScriptCompiler {
 									+ tree.getData().val(), tree.getData().getTarget()));
 							result = null;
 						} else {
-//							// TODO: This should probably be moved up outside of this single method, and create a
-//							// compiler environment, which would be used by the functions that can do specific
-//							// optimizations, i.e. compile time type checking, etc. This is a good first start
-//							// though.
-//							Environment env = null;
-//							try {
-//								env = Static.GenerateStandaloneEnvironment(false);
-//							} catch (IOException | DataSourceException | URISyntaxException
-//									| Profiles.InvalidProfileException e) {
-//								// Print the stacktrace and move on. Not sure how to deal with this right now, or
-//								// what cases it would occur in.
-//								e.printStackTrace(System.err);
-//							}
 							result = func.exec(tree.getData().getTarget(), env, constructs);
 						}
 					} else if(isValidNumArgs(func, constructs.length)) {
@@ -2820,10 +2669,7 @@ public final class MethodScriptCompiler {
 							+ tree.getTarget());
 				}
 			} else {
-				branches = new ArrayList<>(children.size());
-				for(ParseTree child : children) {
-					branches.add(false);
-				}
+				branches = children.stream().map(child -> false).toList();
 			}
 			boolean doDeletion = false;
 			for(int m = 0; m < children.size(); m++) {
@@ -3129,6 +2975,7 @@ public final class MethodScriptCompiler {
 			if(root.numberOfChildren() == 1) {
 				returnable = retc;
 			}
+			@SuppressWarnings("null")
 			String ret = retc instanceof CNull ? "null" : retc.val();
 			if(ret != null && !ret.trim().isEmpty()) {
 				b.append(ret).append(" ");

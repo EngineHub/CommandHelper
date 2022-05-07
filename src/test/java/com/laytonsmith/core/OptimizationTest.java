@@ -33,11 +33,7 @@ public class OptimizationTest {
 		StaticTest.InstallFakeServerFrontend();
 	}
 
-	public String optimize(String script) throws Exception {
-		return optimize(script, true);
-	}
-
-	public String optimize(String script, boolean pureMethodScript) throws Exception {
+	public static String optimize(String script, boolean pureMethodScript, Environment env) throws Exception {
 		try {
 			try {
 				env = Static.GenerateStandaloneEnvironment();
@@ -50,6 +46,14 @@ public class OptimizationTest {
 			String msg = ex.getList().toString() + " " + t;
 			throw new ConfigCompileException(msg, t, ex);
 		}
+	}
+
+	public String optimize(String script) throws Exception {
+		return optimize(script, true);
+	}
+
+	public String optimize(String script, boolean pureMethodScript) throws Exception {
+		return optimize(script, pureMethodScript, env);
 	}
 
 	@Test

@@ -65,13 +65,20 @@ public class Procedure implements Cloneable {
 		this.definedAt = t;
 		this.varList = new HashMap<>();
 		this.procComment = procComment;
-		for(IVariable var : varList) {
+		for(int i = 0; i < varList.size(); i++) {
+			IVariable var = varList.get(i);
+			if(var.getDefinedType().isVarargs() && i != varList.size() - 1) {
+				throw new CREFormatException("Varargs can only be added to the last argument.", t);
+			}
 			try {
 				this.varList.put(var.getVariableName(), var.clone());
 			} catch (CloneNotSupportedException e) {
 				this.varList.put(var.getVariableName(), var);
 			}
 			this.varIndex.add(var);
+			if(var.getDefinedType().isVarargs() && var.ival() != CNull.UNDEFINED) {
+				throw new CREFormatException("Varargs may not have default values", t);
+			}
 			this.originals.put(var.getVariableName(), var.ival());
 		}
 		this.tree = tree;
@@ -204,11 +211,28 @@ public class Procedure implements Cloneable {
 
 		// Handle passed procedure arguments.
 		int varInd;
+		CArray vararg = null;
 		for(varInd = 0; varInd < args.size(); varInd++) {
 			Mixed c = args.get(varInd);
 			arguments.push(c, t);
-			if(this.varIndex.size() > varInd) {
-				IVariable var = this.varIndex.get(varInd);
+			if(this.varIndex.size() > varInd
+					|| (!this.varIndex.isEmpty()
+						&& this.varIndex.get(this.varIndex.size() - 1).getDefinedType().isVarargs())) {
+				IVariable var;
+				boolean isVarArg = false;
+				if(varInd < this.varIndex.size() - 1
+						|| !this.varIndex.get(this.varIndex.size() - 1).getDefinedType().isVarargs()) {
+					var = this.varIndex.get(varInd);
+				} else {
+					var = this.varIndex.get(this.varIndex.size() - 1);
+					if(vararg == null) {
+						// TODO: Once generics are added, add the type
+						vararg = new CArray(t);
+						env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE,
+								var.getVariableName(), vararg, c.getTarget()));
+					}
+					isVarArg = true;
+				}
 				if(c instanceof CVoid
 						&& !(var.getDefinedType().equals(Auto.TYPE) || var.getDefinedType().equals(CVoid.TYPE))) {
 					throw new CRECastException("Procedure \"" + name + "\" expects a value of type "
@@ -216,8 +240,12 @@ public class Procedure implements Cloneable {
 							+ " a void value was found instead.", c.getTarget());
 				} else if(!(c instanceof CVoid) && c instanceof CNull || var.getDefinedType().equals(Auto.TYPE)
 						|| InstanceofUtil.isInstanceof(c, var.getDefinedType(), env)) {
-					env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(var.getDefinedType(),
-							var.getVariableName(), c, c.getTarget()));
+					if(isVarArg) {
+						vararg.push(c, t);
+					} else {
+						env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(var.getDefinedType(),
+								var.getVariableName(), c, c.getTarget()));
+					}
 				} else {
 					throw new CRECastException("Procedure \"" + name + "\" expects a value of type "
 							+ var.getDefinedType().val() + " in argument " + (varInd + 1) + ", but"

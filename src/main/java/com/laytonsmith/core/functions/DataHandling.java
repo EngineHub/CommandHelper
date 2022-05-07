@@ -194,8 +194,8 @@ public class DataHandling {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Basic usage", "assign(@array, array(1, 2, 3))\nmsg(@array)"),
-				new ExampleScript("Associative array creation", "assign(@array, array(one: 'apple', two: 'banana'))\nmsg(@array)")};
+				new ExampleScript("Basic usage", "array @array = array(1, 2, 3);\nmsg(@array);"),
+				new ExampleScript("Associative array creation", "array @array = array(one: 'apple', two: 'banana');\nmsg(@array);")};
 		}
 
 		@Override
@@ -353,6 +353,13 @@ public class DataHandling {
 					}
 				}
 				type = ArgumentValidation.getClassType(args[0], t);
+				Boolean varArgsAllowed = env.getEnv(GlobalEnv.class).GetFlag("var-args-allowed");
+				if(varArgsAllowed == null) {
+					varArgsAllowed = false;
+				}
+				if(type.isVarargs() && !varArgsAllowed) {
+					throw new CRECastException("Cannot use varargs type in this context", t);
+				}
 			} else {
 				offset = 0;
 				if(!(args[offset] instanceof IVariable)) {
@@ -1493,7 +1500,9 @@ public class DataHandling {
 						}
 					}
 					env.getEnv(GlobalEnv.class).SetFlag("no-check-duplicate-assign", true);
+					env.getEnv(GlobalEnv.class).SetFlag("var-args-allowed", true);
 					Mixed cons = parent.eval(nodes[i], env);
+					env.getEnv(GlobalEnv.class).ClearFlag("var-args-allowed");
 					env.getEnv(GlobalEnv.class).ClearFlag("no-check-duplicate-assign");
 					if(i == 0) {
 						if(cons instanceof IVariable) {
@@ -2645,7 +2654,9 @@ public class DataHandling {
 				newNode.setChildren(children);
 				Script fakeScript = Script.GenerateScript(newNode, myEnv.getEnv(GlobalEnv.class).GetLabel(), null);
 				myEnv.getEnv(GlobalEnv.class).SetFlag("closure-warn-overwrite", true);
+				myEnv.getEnv(GlobalEnv.class).SetFlag("var-args-allowed", true);
 				Mixed ret = MethodScriptCompiler.execute(newNode, myEnv, null, fakeScript);
+				myEnv.getEnv(GlobalEnv.class).ClearFlag("var-args-allowed");
 				myEnv.getEnv(GlobalEnv.class).ClearFlag("closure-warn-overwrite");
 				if(!(ret instanceof IVariable)) {
 					throw new CRECastException("Arguments sent to " + getName() + " barring the last) must be ivariables", t);
@@ -2820,7 +2831,9 @@ public class DataHandling {
 				newNode.setChildren(children);
 				Script fakeScript = Script.GenerateScript(newNode, myEnv.getEnv(GlobalEnv.class).GetLabel(), null);
 				myEnv.getEnv(GlobalEnv.class).SetFlag("closure-warn-overwrite", true);
+				myEnv.getEnv(GlobalEnv.class).SetFlag("var-args-allowed", true);
 				Mixed ret = MethodScriptCompiler.execute(newNode, myEnv, null, fakeScript);
+				myEnv.getEnv(GlobalEnv.class).ClearFlag("var-args-allowed");
 				myEnv.getEnv(GlobalEnv.class).ClearFlag("closure-warn-overwrite");
 				if(!(ret instanceof IVariable)) {
 					throw new CRECastException("Arguments sent to " + getName() + " barring the last) must be ivariables", t);
