@@ -106,4 +106,24 @@ public class VarargTest {
 		Run("proc _test(string... @values) { msg(@values); } @callable = proc _test; @callable('a', 'b', 'c');", fakePlayer);
 		verify(fakePlayer).sendMessage("{a, b, c}");
 	}
+
+	@Test(expected = CRECastException.class)
+	public void testBadParametersProcReference() throws Exception {
+		Run("proc _test(string... @values) { msg(@values); } @callable = proc _test; @callable(1, 2, 3);", fakePlayer);
+	}
+
+	@Test(expected = CRECastException.class)
+	public void testBadParametersProc() throws Exception {
+		Run("proc _test(string... @values) { msg(@values); } _test(1, 2, 3);", fakePlayer);
+	}
+
+	@Test(expected = CRECastException.class)
+	public void testBadParametersClosure() throws Exception {
+		Run("@closure = closure(string... @values) { msg(@values); } @closure(1, 2, 3);", fakePlayer);
+	}
+
+	@Test(expected = CRECastException.class)
+	public void testBadParametersIClosure() throws Exception {
+		Run("@closure = iclosure(string... @values) { msg(@values); } @closure(1, 2, 3);", fakePlayer);
+	}
 }

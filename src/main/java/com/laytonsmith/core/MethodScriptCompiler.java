@@ -1307,7 +1307,8 @@ public final class MethodScriptCompiler {
 	public static ParseTree compile(TokenStream stream, Environment environment,
 			Set<Class<? extends Environment.EnvironmentImpl>> envs, StaticAnalysis staticAnalysis)
 			throws ConfigCompileException, ConfigCompileGroupException {
-		Objects.requireNonNull(envs, () -> "envs parameter must not be null");
+		Objects.requireNonNull(envs, "envs parameter must not be null");
+		Objects.requireNonNull(staticAnalysis, "Static Analysis may be disabled, but cannot be null.");
 		try {
 			if(environment == null) {
 					// We MUST have a CompilerEnvironment. It doesn't need to be used, but we have to create it at
@@ -1327,9 +1328,7 @@ public final class MethodScriptCompiler {
 		// Return a null AST when the program is empty.
 		// Do run static analysis to allow for including this empty file in another file.
 		if(stream == null || stream.isEmpty()) {
-			if(staticAnalysis != null) {
-				staticAnalysis.analyze(null, environment, envs, compilerErrors);
-			}
+			staticAnalysis.analyze(null, environment, envs, compilerErrors);
 			return null;
 		}
 
@@ -1917,14 +1916,12 @@ public final class MethodScriptCompiler {
 		checkLinearComponents(tree, environment, compilerErrors);
 		postParseRewrite(rootNode, environment, envs, compilerErrors); // Pass rootNode since this might rewrite 'tree'.
 		tree = rootNode.getChildAt(0);
-		if(staticAnalysis != null) {
-			staticAnalysis.analyze(tree, environment, envs, compilerErrors);
-		}
+		staticAnalysis.analyze(tree, environment, envs, compilerErrors);
 		optimize(tree, environment, envs, procs, compilerErrors);
 		link(tree, compilerErrors);
 		checkFunctionsExist(tree, compilerErrors, envs);
 		checkBreaks(tree, compilerErrors);
-		if(staticAnalysis == null) {
+		if(!staticAnalysis.isLocalEnabled()) {
 			checkUnhandledCompilerConstructs(tree, environment, compilerErrors);
 		}
 		if(!compilerErrors.isEmpty()) {

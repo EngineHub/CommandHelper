@@ -54,6 +54,7 @@ import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
@@ -540,8 +541,10 @@ public class StaticTest {
 		}
 		env.getEnv(GlobalEnv.class).GetVarList().clear();
 		env.getEnv(CommandHelperEnvironment.class).SetCommandSender(player);
+		StaticAnalysis analysis = new StaticAnalysis(true);
+		analysis.setLocalEnable(false);
 		MethodScriptCompiler.execute(MethodScriptCompiler.compile(
-				MethodScriptCompiler.lex(script, env, null, true), env, envs, null), env, done, null);
+				MethodScriptCompiler.lex(script, env, null, true), env, envs, analysis), env, done, null);
 	}
 
 	public static void RunCommand(String combinedScript, MCCommandSender player, String command) throws Exception {

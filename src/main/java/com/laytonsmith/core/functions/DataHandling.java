@@ -1950,7 +1950,7 @@ public class DataHandling {
 					isFirstCompile = true;
 				}
 			} else {
-				analysis = null; // It's a static include.
+				analysis = new StaticAnalysis(true); // It's a static include.
 			}
 
 			// Get or load the include.
@@ -1969,7 +1969,7 @@ public class DataHandling {
 
 				// Remove this parent scope since it should not end up in the cached analysis.
 				analysis.getStartScope().removeParent(parentScope);
-			} else if(analysis != null) {
+			} else {
 
 				// Set up analysis. Cloning is required to not mess up the cached analysis.
 				analysis = analysis.clone();

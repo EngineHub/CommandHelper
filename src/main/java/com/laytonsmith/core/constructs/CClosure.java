@@ -214,6 +214,7 @@ public class CClosure extends Construct implements Callable {
 			}
 			CArray arguments = new CArray(node.getData().getTarget());
 			CArray vararg = null;
+			CClassType varargType = null;
 			if(values != null) {
 				for(int i = 0; i < Math.max(values.length, names.length); i++) {
 					Mixed value;
@@ -238,10 +239,15 @@ public class CClosure extends Construct implements Callable {
 								vararg = new CArray(value.getTarget());
 								environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE,
 										name, vararg, value.getTarget()));
+								varargType = this.types[this.types.length - 1];
 							}
 							isVarArg = true;
 						}
 						if(isVarArg) {
+							if(!InstanceofUtil.isInstanceof(value, varargType, env)) {
+								throw new CRECastException("Expected type " + varargType + " but found " + value.typeof(),
+										getTarget());
+							}
 							vararg.push(value, value.getTarget());
 						} else {
 							IVariable var = new IVariable(types[i], name, value, getTarget(), environment);
