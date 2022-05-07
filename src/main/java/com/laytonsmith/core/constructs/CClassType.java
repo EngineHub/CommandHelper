@@ -634,13 +634,18 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	}
 
 	/**
-	 * Sets if this is a vararg type or not. Returns this for easy chaining.
-	 * @param set
-	 * @return
+	 * Returns a new type based on the parent type, which is a vararg variant.
+	 * @return A new vararg type.
 	 */
-	public CClassType setIsVarargs(boolean set) {
-		this.isVararg = set;
-		return this;
+	public CClassType asVarargs() {
+		CClassType newType;
+		try {
+			newType = new CClassType(fqcn, Target.UNKNOWN, isTypeUnion);
+		} catch(ClassNotFoundException ex) {
+			throw new Error(ex);
+		}
+		newType.isVararg = true;
+		return newType;
 	}
 
 	/**

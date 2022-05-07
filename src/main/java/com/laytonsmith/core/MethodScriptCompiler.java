@@ -1758,7 +1758,7 @@ public final class MethodScriptCompiler {
 					throw new ConfigCompileException("Unexpected varargs token (\"...\"). This can only be used with types.", t.target);
 				}
 				if(previous.getData() instanceof CClassType c) {
-					c.setIsVarargs(true);
+					previous.setData(c.asVarargs());
 				}
 				continue;
 			} else if(t.type == TType.LIT) {
