@@ -36,7 +36,6 @@ public class OptimizationTest {
 	public static String optimize(String script, boolean pureMethodScript, Environment env) throws Exception {
 		try {
 			try {
-				env = Static.GenerateStandaloneEnvironment();
 				return OptimizationUtilities.optimize(script, env, envs, null, false, pureMethodScript);
 			} catch(ConfigCompileException ex) {
 				throw new ConfigCompileGroupException(new HashSet<>(Arrays.asList(ex)), ex);
@@ -53,6 +52,7 @@ public class OptimizationTest {
 	}
 
 	public String optimize(String script, boolean pureMethodScript) throws Exception {
+		env = Static.GenerateStandaloneEnvironment();
 		return optimize(script, pureMethodScript, env);
 	}
 

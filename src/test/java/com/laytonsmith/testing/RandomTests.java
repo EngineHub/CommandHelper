@@ -337,22 +337,23 @@ public class RandomTests {
 			options = new ConnectionMixinFactory.ConnectionMixinOptions();
 			options.setWorkingDirectory(new File("."));
 			PersistenceNetworkImpl network = new PersistenceNetworkImpl(
-					"**=json://persistence.json", new URI("default"), options);
+					"**=mem://persistence.json", new URI("default"), options);
 			StaticRuntimeEnv staticRuntimeEnvSpy = Mockito.spy(env.getEnv(StaticRuntimeEnv.class));
 			when(staticRuntimeEnvSpy.GetPersistenceNetwork()).thenReturn(network);
 
 			// Run the test code.
-			Run("store_value('t.test1', 'test')\n"
-					+ "store_value('t.test2', 'test')\n"
-					+ "store_value('t.test3.third', 'test')\n"
-					+ "msg(get_values('t'))", fakePlayer, new MethodScriptComplete() {
+			String prefix = "f40fd90df455459aa5ff3c34299f4728";
+			Run("store_value('" + prefix + ".test1', 'test')\n"
+					+ "store_value('" + prefix + ".test2', 'test')\n"
+					+ "store_value('" + prefix + ".test3.third', 'test')\n"
+					+ "msg(get_values('" + prefix + "'))", fakePlayer, new MethodScriptComplete() {
 
 				@Override
 				public void done(String output) {
 					//
 				}
 			}, env);
-			verify(fakePlayer).sendMessage("{t.test1: test, t.test2: test, t.test3.third: test}");
+			verify(fakePlayer).sendMessage("{" + prefix + ".test1: test, " + prefix + ".test2: test, " + prefix + ".test3.third: test}");
 		} finally {
 			new File("persistence.json").deleteOnExit();
 		}

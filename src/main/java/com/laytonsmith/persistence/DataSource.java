@@ -144,6 +144,18 @@ public interface DataSource extends SimpleDocumentation {
 	public void clearKey(DaemonManager dm, String[] key) throws DataSourceException, ReadOnlyException, IOException;
 
 	/**
+	 * Clears out all values from the data source. This may not be implemented for all data source types, in which
+	 * case nothing happens.
+	 * @param dm
+	 * @throws DataSourceException
+	 * @throws ReadOnlyException
+	 * @throws IOException
+	 */
+	default void clearDatabase(DaemonManager dm) throws DataSourceException, ReadOnlyException, IOException {
+
+	}
+
+	/**
 	 * Starts a transaction for this data source. If the data source is not transient, this has no effect, but if it is,
 	 * then all reads and writes will not be transient until the transaction is stopped.
 	 */

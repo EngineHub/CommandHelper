@@ -53,6 +53,27 @@ public class VarargTest {
 
 	}
 
+	@Test
+	public void testSingleVarArgsInProcs() throws Exception {
+		Run("void proc _test(string... @values) { msg(@values); }\n"
+				+ "_test('a');", fakePlayer);
+		verify(fakePlayer).sendMessage("{a}");
+	}
+
+	@Test
+	public void testSingleVarArgsInClosure() throws Exception {
+		Run("@closure = closure(string... @values) { msg(@values); };\n"
+				+ "@closure('a');", fakePlayer);
+		verify(fakePlayer).sendMessage("{a}");
+	}
+
+	@Test
+	public void testSingleVarArgsInCIClosure() throws Exception {
+		Run("@closure = iclosure(string... @values) { msg(@values); };\n"
+				+ "@closure('a');", fakePlayer);
+		verify(fakePlayer).sendMessage("{a}");
+	}
+
 	@Test(expected = CRECastException.class)
 	public void testVarArgsInRegularAssign() throws Exception {
 		Run("string... @a = 'test';", fakePlayer);

@@ -27,7 +27,7 @@ import java.util.logging.Logger;
 @datasource("mem")
 public final class MemoryDataSource extends AbstractDataSource {
 
-	private static final Map<String, Map<String, String>> DATABASE_POOL = new TreeMap<String, Map<String, String>>();
+	private static final Map<String, Map<String, String>> DATABASE_POOL = new TreeMap<>();
 
 	/**
 	 * Clears all data from all databases. Should be called when a natural reload type operation is called.
@@ -53,13 +53,13 @@ public final class MemoryDataSource extends AbstractDataSource {
 	 */
 	public static synchronized Map<String, String> getDatabase(String name) {
 		if(!DATABASE_POOL.containsKey(name)) {
-			DATABASE_POOL.put(name, Collections.synchronizedMap(new TreeMap<String, String>()));
+			DATABASE_POOL.put(name, Collections.synchronizedMap(new TreeMap<>()));
 		}
 		return DATABASE_POOL.get(name);
 	}
 
-	private String dbName;
-	private List<Transaction> transactionList = new ArrayList<Transaction>();
+	private final String dbName;
+	private final List<Transaction> transactionList = new ArrayList<>();
 
 	private static enum Action {
 		CLEAR, SET
@@ -98,10 +98,6 @@ public final class MemoryDataSource extends AbstractDataSource {
 			}
 		}
 		transactionList.clear();
-	}
-
-	private MemoryDataSource() {
-
 	}
 
 	public MemoryDataSource(URI uri, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException {
@@ -173,8 +169,15 @@ public final class MemoryDataSource extends AbstractDataSource {
 	}
 
 	@Override
+	public void clearDatabase(DaemonManager dm) throws DataSourceException, ReadOnlyException, IOException {
+		ClearDatabases();
+	}
+
+
+
+	@Override
 	public Set<String> stringKeySet(String[] keyBase) throws DataSourceException {
-		Set<String> keys = new TreeSet<String>();
+		Set<String> keys = new TreeSet<>();
 		for(String[] key : keySet(keyBase)) {
 			keys.add(StringUtils.Join(key, "."));
 		}
@@ -183,7 +186,7 @@ public final class MemoryDataSource extends AbstractDataSource {
 
 	@Override
 	public synchronized Set<String[]> keySet(String[] keyBase) throws DataSourceException {
-		Set<String> set = new HashSet<String>();
+		Set<String> set = new HashSet<>();
 		for(String key : getDatabase(dbName).keySet()) {
 			set.add(key);
 		}
@@ -198,7 +201,7 @@ public final class MemoryDataSource extends AbstractDataSource {
 				}
 			}
 		}
-		Set<String[]> ret = new HashSet<String[]>();
+		Set<String[]> ret = new HashSet<>();
 		String kb = StringUtils.Join(keyBase, ".");
 		for(String key : set) {
 			if(key.startsWith(kb)) {

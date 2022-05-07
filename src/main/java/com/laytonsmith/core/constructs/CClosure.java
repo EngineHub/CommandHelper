@@ -215,11 +215,11 @@ public class CClosure extends Construct implements Callable {
 			CArray arguments = new CArray(node.getData().getTarget());
 			CArray vararg = null;
 			if(values != null) {
-				for(int i = 0; i < values.length; i++) {
+				for(int i = 0; i < Math.max(values.length, names.length); i++) {
 					Mixed value;
-					try {
+					if(i < values.length) {
 						value = values[i];
-					} catch (Exception e) {
+					} else {
 						value = defaults[i].clone();
 					}
 					arguments.push(value, node.getData().getTarget());

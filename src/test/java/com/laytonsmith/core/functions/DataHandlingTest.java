@@ -315,7 +315,7 @@ public class DataHandlingTest {
 				+ "@s();", fakePlayer);
 	}
 
-	@Test(timeout = 10000)
+	@Test
 	public void testIClosure1() throws Exception {
 		SRun("@s = 'string';\n"
 				+ "@c = iclosure(@var){msg(reflect_pull('varlist'))};\n"
