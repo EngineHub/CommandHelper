@@ -16,6 +16,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREError;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREStackOverflowError;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -48,6 +49,7 @@ public class Procedure implements Cloneable {
 	private Map<String, IVariable> varList;
 	private final Map<String, Mixed> originals = new HashMap<>();
 	private final List<IVariable> varIndex = new ArrayList<>();
+	private final List<Boolean> isVarArg;
 	private ParseTree tree;
 	private CClassType returnType;
 	private boolean possiblyConstant = false;
@@ -59,19 +61,27 @@ public class Procedure implements Cloneable {
 	 */
 	private final Target definedAt;
 
-	public Procedure(String name, CClassType returnType, List<IVariable> varList, SmartComment procComment,
+	public Procedure(String name, CClassType returnType, List<IVariable> varList, List<Boolean> isVarArg,
+			SmartComment procComment,
 			ParseTree tree, Target t) {
 		this.name = name;
 		this.definedAt = t;
 		this.varList = new HashMap<>();
 		this.procComment = procComment;
-		for(IVariable var : varList) {
+		for(int i = 0; i < varList.size(); i++) {
+			IVariable var = varList.get(i);
+			if(isVarArg.get(i) && i != varList.size() - 1) {
+				throw new CREFormatException("Varargs can only be added to the last argument.", t);
+			}
 			try {
 				this.varList.put(var.getVariableName(), var.clone());
 			} catch (CloneNotSupportedException e) {
 				this.varList.put(var.getVariableName(), var);
 			}
 			this.varIndex.add(var);
+			if(isVarArg.get(i) && var.ival() != CNull.UNDEFINED) {
+				throw new CREFormatException("Varargs may not have default values", t);
+			}
 			this.originals.put(var.getVariableName(), var.ival());
 		}
 		this.tree = tree;
@@ -83,6 +93,7 @@ public class Procedure implements Cloneable {
 		//we can be sure that we cannot inline this in any way.
 		this.possiblyConstant = checkPossiblyConstant(tree);
 		this.returnType = returnType;
+		this.isVarArg = isVarArg;
 	}
 
 	private boolean checkPossiblyConstant(ParseTree tree) {
@@ -205,11 +216,32 @@ public class Procedure implements Cloneable {
 
 		// Handle passed procedure arguments.
 		int varInd;
+		CArray vararg = null;
 		for(varInd = 0; varInd < args.size(); varInd++) {
 			Mixed c = args.get(varInd);
-			arguments.push(c, t, env);
-			if(this.varIndex.size() > varInd) {
-				IVariable var = this.varIndex.get(varInd);
+			arguments.push(c, t);
+			if(this.varIndex.size() > varInd
+					|| (!this.varIndex.isEmpty()
+						&& this.isVarArg.get(this.varIndex.size() - 1))) {
+				IVariable var;
+				boolean isVarArg = false;
+				if(varInd < this.varIndex.size() - 1
+						|| !this.isVarArg.get(this.varIndex.size() - 1)) {
+					var = this.varIndex.get(varInd);
+				} else {
+					var = this.varIndex.get(this.varIndex.size() - 1);
+					if(vararg == null) {
+						// TODO: Once generics are added, add the type
+						vararg = new CArray(t);
+						try {
+							env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE,
+									var.getVariableName(), vararg, c.getTarget()));
+						} catch(ConfigCompileException ex) {
+							throw new CREError(ex.getMessage(), t, ex);
+						}
+					}
+					isVarArg = true;
+				}
 				if(c instanceof CVoid
 						&& !(var.getDefinedType().isAuto() || var.getDefinedType().isVoid())) {
 					throw new CRECastException("Procedure \"" + name + "\" expects a value of type "
@@ -217,11 +249,15 @@ public class Procedure implements Cloneable {
 							+ " a void value was found instead.", c.getTarget());
 				} else if(!(c instanceof CVoid) && c instanceof CNull || var.getDefinedType().equals(Auto.TYPE)
 						|| InstanceofUtil.isInstanceof(c, var.getDefinedType(), env)) {
-					try {
-						env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(var.getDefinedType(),
-								var.getVariableName(), c, c.getTarget(), env));
-					} catch (ConfigCompileException cce) {
-						throw new CREFormatException(cce.getMessage(), t);
+					if(isVarArg) {
+						vararg.push(c, t);
+					} else {
+						try {
+							env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(var.getDefinedType(),
+									var.getVariableName(), c, c.getTarget(), env));
+						} catch(ConfigCompileException ex) {
+							throw new CREError(ex.getMessage(), t, ex);
+						}
 					}
 				} else {
 					throw new CRECastException("Procedure \"" + name + "\" expects a value of type "

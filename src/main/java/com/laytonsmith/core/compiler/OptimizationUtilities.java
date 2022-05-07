@@ -64,7 +64,8 @@ public class OptimizationUtilities {
 	public static String optimize(String script, Environment env,
 			Set<Class<? extends Environment.EnvironmentImpl>> envs,
 			File source, boolean doStaticAnalysis, boolean pureMethodScript) throws ConfigCompileException, ConfigCompileGroupException {
-		StaticAnalysis analysis = (doStaticAnalysis ? new StaticAnalysis(true) : null);
+		StaticAnalysis analysis = new StaticAnalysis(true);
+		analysis.setLocalEnable(doStaticAnalysis);
 		TokenStream ts = MethodScriptCompiler.lex(script, env, source, pureMethodScript);
 		ParseTree tree;
 		if(!pureMethodScript) {

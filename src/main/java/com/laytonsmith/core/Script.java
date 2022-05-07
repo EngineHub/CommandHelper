@@ -30,6 +30,7 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.InvalidEnvironmentException;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREInsufficientPermissionException;
 import com.laytonsmith.core.exceptions.CRE.CREInvalidProcedureException;
 import com.laytonsmith.core.exceptions.CRE.CREStackOverflowError;
@@ -394,6 +395,12 @@ public class Script {
 				if(debugOutput) {
 					doDebugOutput(f.getName(), c.getChildren());
 				}
+
+				// TODO: Move this into the compiler, not runtime.
+				Boolean varArgsAllowed = env.getEnv(GlobalEnv.class).GetFlag("var-args-allowed");
+				if(varArgsAllowed == null) {
+					varArgsAllowed = false;
+				}
 				if(f.useSpecialExec()) {
 					ProfilePoint p = null;
 					if(f.shouldProfile() && env.getEnv(StaticRuntimeEnv.class).GetProfiler() != null
@@ -403,6 +410,13 @@ public class Script {
 					}
 					Mixed ret;
 					try {
+						if(!varArgsAllowed) {
+							for(ParseTree node : c.getChildren()) {
+								if(node.getNodeModifiers().isVarArgs()) {
+									throw new CRECastException("Varargs not allowed here.", node.getTarget());
+								}
+							}
+						}
 						// TODO: Provide generic parameters
 						ret = f.execs(m.getTarget(), env, this, null, c.getChildren().toArray(ParseTree[]::new));
 					} finally {
@@ -414,23 +428,15 @@ public class Script {
 				}
 
 				for(ParseTree c2 : c.getChildren()) {
+					if(!varArgsAllowed && c2.getNodeModifiers().isVarArgs()) {
+						throw new CRECastException("Varargs not allowed here.", c2.getTarget());
+					}
 					args.add(eval(c2, env));
 				}
 				Object[] a = args.toArray();
 				Mixed[] ca = new Mixed[a.length];
 				for(int i = 0; i < a.length; i++) {
 					ca[i] = (Mixed) a[i];
-					// TODO: This code is outdated and needs to be rethought.
-					//CArray, CBoolean, CDouble, CInt, CNull, CString, CVoid, CEntry, CLabel (only to sconcat).
-//					if(!(ca[i].isInstanceOf(CArray.class) || ca[i] instanceof CBoolean || ca[i] instanceof CDouble
-//							|| ca[i] instanceof CInt || ca[i] instanceof CNull
-//							|| ca[i] instanceof CString || ca[i] instanceof CVoid
-//							|| ca[i] instanceof IVariable || ca[i] instanceof CEntry || ca[i] instanceof CLabel)
-//							&& (!f.getName().equals("__autoconcat__") && (ca[i] instanceof CLabel))) {
-//						throw new CRECastException("Invalid Mixed ("
-//								+ ca[i].getClass() + ") being passed as an argument to a function ("
-//								+ f.getName() + ")", m.getTarget());
-//					}
 					while(f.preResolveVariables() && ca[i] instanceof IVariable) {
 						IVariable cur = (IVariable) ca[i];
 						ca[i] = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getVariableName(), cur.getTarget(),

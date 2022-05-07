@@ -150,6 +150,14 @@ public class PersistenceNetworkImpl implements PersistenceNetwork {
 		ds.clearKey(dm, key);
 	}
 
+	@Override
+	public void clearDatabase(DaemonManager dm) throws DataSourceException, ReadOnlyException, IOException {
+		for(URI uri : filter.getAllConnections()) {
+			DataSource ds = getDataSource(uri);
+			ds.clearDatabase(dm);
+		}
+	}
+
 	/**
 	 * This method returns a list of all keys and values that match the namespace. If a.b.c is requested, then keys (and
 	 * values) a.b.c.d and a.b.c.e would be returned. If the namespace is empty, it will match all keys.

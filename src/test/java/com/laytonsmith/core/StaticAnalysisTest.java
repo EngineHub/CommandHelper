@@ -20,7 +20,9 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashSet;
 import org.junit.Assert;
+import static org.junit.Assert.*;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -253,6 +255,33 @@ public class StaticAnalysisTest {
 		runScript("proc _test() {}\n"
 				+ "@var = proc _test;\n"
 				+ "@var();");
+	}
+
+	@Test(expected = ConfigCompileException.class)
+	@Ignore("Ignored until parameter typechecking is implemented")
+	public void testWrongArgsToProc() throws Exception {
+		runScript("<! strict > void proc _test(int @a) {} _test(array());");
+	}
+
+	@Test
+	@Ignore("Ignored until parameter typechecking is implemented")
+	public void testVarargsProc() throws Exception {
+		runScript("<! strict > void proc _test(string... @args) { msg(@args); }\n"
+				+ "_test('a', 'b', 'c');");
+		try {
+			runScript("<! strict > void proc _test(string... @args) { msg(@args); }\n"
+					+ "_test(1, 2, 3);");
+			fail();
+		} catch(ConfigCompileException ex) {
+			// Pass
+		}
+		try {
+			runScript("<! strict > void proc _test(string... @args) { msg(@args); }\n"
+					+ "_test('a', 2, 3);");
+			fail();
+		} catch(ConfigCompileException ex) {
+			// Pass
+		}
 	}
 
 }

@@ -60,6 +60,7 @@ public class Token {
 		LABEL(TokenVariant.SEPARATOR),
 		DEREFERENCE(),
 		SLICE(),
+		VARARGS(),
 		PLUS(TokenVariant.SYMBOL, TokenVariant.UNARY, TokenVariant.ADDITIVE, TokenVariant.PLUS_MINUS),
 		MINUS(TokenVariant.SYMBOL, TokenVariant.UNARY, TokenVariant.ADDITIVE, TokenVariant.PLUS_MINUS),
 		MULTIPLICATION(TokenVariant.SYMBOL, TokenVariant.MULTIPLICATIVE),

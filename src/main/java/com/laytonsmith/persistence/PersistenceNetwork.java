@@ -24,6 +24,16 @@ public interface PersistenceNetwork {
 			throws DataSourceException, ReadOnlyException, IOException, IllegalArgumentException;
 
 	/**
+	 * Clears the entire database. This is a permanent removal of everything! This is not guaranteed to complete.
+	 * It could complete some deletions, then throw, succeed, or totally fail.
+	 * @param dm The system DaemonManager.
+	 * @throws com.laytonsmith.persistence.DataSourceException If there is an error with the data source
+	 * @throws ReadOnlyException If the data source is marked as read only
+	 * @throws IOException If an IO exception occurs during the operation
+	 */
+	void clearDatabase(DaemonManager dm) throws DataSourceException, ReadOnlyException, IOException;
+
+	/**
 	 * Returns the value for this key, or null if it doesn't exist.
 	 *
 	 * @param key

@@ -14,6 +14,7 @@ public class NodeModifiers {
 	// NOTE: Remember to update the merges if more fields are added here.
 	private SmartComment comment;
 	private GenericParameters genericParameters;
+	private Boolean isVarArgs = null;
 
 	/**
 	 * Merges in NodeModifiers to this NodeModifiers object. For constant-length items, the value in this object take
@@ -30,6 +31,9 @@ public class NodeModifiers {
 		}
 		if(this.genericParameters == null) {
 			this.genericParameters = that.genericParameters;
+		}
+		if(this.isVarArgs == null) {
+			this.isVarArgs = that.isVarArgs;
 		}
 	}
 
@@ -52,8 +56,12 @@ public class NodeModifiers {
 		if(this.genericParameters != null) {
 			throw new ConfigCompileException("Generic parameters not allowed here.", t);
 		}
+		if(this.isVarArgs != null) {
+			throw new ConfigCompileException("Varargs not allowed here.", t);
+		}
 		this.comment = that.comment;
 		this.genericParameters = that.genericParameters;
+		this.isVarArgs = that.isVarArgs;
 	}
 
 	/**
@@ -80,7 +88,11 @@ public class NodeModifiers {
 		if(this.genericParameters != null) {
 			throw new ConfigCompileException("Generic parameters not allowed here.", t);
 		}
+		if(this.isVarArgs != null) {
+			throw new ConfigCompileException("Varargs not allowed here.", t);
+		}
 		this.genericParameters = that.genericParameters;
+		this.isVarArgs = that.isVarArgs;
 	}
 
 	public void setComment(SmartComment comment) {
@@ -114,6 +126,23 @@ public class NodeModifiers {
 	 */
 	public GenericParameters getGenerics() {
 		return this.genericParameters;
+	}
+
+	/**
+	 * Sets whether this is a vararg parameter or not. This is only valid for types, and defaults to false.
+	 * @param isVarArgs
+	 */
+	public void setIsVarArgs(boolean isVarArgs) {
+		this.isVarArgs = isVarArgs;
+	}
+
+	/**
+	 * Returns whether this is a vararg parameter or not. This is only valid for types, and defaults to false.
+	 * @return
+	 */
+	@SuppressWarnings("null")
+	public boolean isVarArgs() {
+		return this.isVarArgs == null ? false : this.isVarArgs;
 	}
 
 }

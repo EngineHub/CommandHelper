@@ -4,7 +4,6 @@ import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
-import com.laytonsmith.PureUtilities.ExecutionQueueImpl;
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.Implementation.Type;
@@ -18,10 +17,9 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.api.Platforms;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
+import com.laytonsmith.core.MethodScriptComplete;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
-import com.laytonsmith.core.compiler.CompilerEnvironment;
-import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
@@ -41,7 +39,6 @@ import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.constructs.generics.GenericTypeParameters;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
-import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.CRE.CREPluginInternalException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -50,7 +47,6 @@ import com.laytonsmith.core.functions.ArrayHandling;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
-import com.laytonsmith.core.functions.IncludeCache;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.persistence.PersistenceNetworkImpl;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
@@ -80,6 +76,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import org.mockito.Mockito;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -383,25 +380,29 @@ public class RandomTests {
 
 			// Generate the environment.
 			Environment env = Static.GenerateStandaloneEnvironment();
-			StaticRuntimeEnv srEnv = env.getEnv(StaticRuntimeEnv.class);
+			env = env.cloneAndAdd(new CommandHelperEnvironment());
+
 			ConnectionMixinFactory.ConnectionMixinOptions options;
 			options = new ConnectionMixinFactory.ConnectionMixinOptions();
 			options.setWorkingDirectory(new File("."));
 			PersistenceNetworkImpl network = new PersistenceNetworkImpl(
-					"**=json://persistence.json", new URI("default"), options);
-			env = env.cloneAndAdd(env.getEnv(GlobalEnv.class),
-					env.getEnv(CompilerEnvironment.class),
-					env.getEnv(StaticRuntimeEnv.class),
-					new CommandHelperEnvironment(),
-					new StaticRuntimeEnv(srEnv.GetProfiler(), network, srEnv.getProfiles(), srEnv.GetTaskManager(),
-							new ExecutionQueueImpl("default", "default"), new IncludeCache(), new StaticAnalysis(true)));
+					"**=mem://persistence.json", new URI("default"), options);
+			StaticRuntimeEnv staticRuntimeEnvSpy = Mockito.spy(env.getEnv(StaticRuntimeEnv.class));
+			when(staticRuntimeEnvSpy.GetPersistenceNetwork()).thenReturn(network);
 
-			Run("store_value('t.test1', 'test')\n"
-					+ "store_value('t.test2', 'test')\n"
-					+ "store_value('t.test3.third', 'test')\n"
-					+ "msg(get_values('t'))", fakePlayer, output -> {
-					}, env);
-			verify(fakePlayer).sendMessage("{t.test1: test, t.test2: test, t.test3.third: test}");
+			// Run the test code.
+			String prefix = "f40fd90df455459aa5ff3c34299f4728";
+			Run("store_value('" + prefix + ".test1', 'test')\n"
+					+ "store_value('" + prefix + ".test2', 'test')\n"
+					+ "store_value('" + prefix + ".test3.third', 'test')\n"
+					+ "msg(get_values('" + prefix + "'))", fakePlayer, new MethodScriptComplete() {
+
+				@Override
+				public void done(String output) {
+					//
+				}
+			}, env);
+			verify(fakePlayer).sendMessage("{" + prefix + ".test1: test, " + prefix + ".test2: test, " + prefix + ".test3.third: test}");
 		} finally {
 			new File("persistence.json").deleteOnExit();
 		}

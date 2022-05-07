@@ -21,6 +21,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREError;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREStackOverflowError;
 import com.laytonsmith.core.exceptions.CancelCommandException;
@@ -30,6 +31,7 @@ import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.LoopManipulationException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.exceptions.StackTraceManager;
+import com.laytonsmith.core.functions.DataHandling;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 
 import java.util.ArrayList;
@@ -50,6 +52,7 @@ public class CClosure extends Construct implements Callable {
 	protected final Mixed[] defaults;
 	protected final LeftHandSideType[] types;
 	protected final LeftHandSideType returnType;
+	protected final Boolean[] isVarArgs;
 
 	private static final Constraints RETURN_TYPE = new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION, new UnboundedConstraint(Target.UNKNOWN, "ReturnType"));
 	private static final Constraints PARAMETERS = new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION, new VariadicTypeConstraint(Target.UNKNOWN, "Parameters"));
@@ -62,13 +65,21 @@ public class CClosure extends Construct implements Callable {
 				.addParameter("Parameters", PARAMETERS));
 
 	public CClosure(ParseTree node, Environment env, LeftHandSideType returnType, String[] names, Mixed[] defaults,
-			LeftHandSideType[] types, Target t) {
+			Boolean[] isVarArgs, LeftHandSideType[] types, Target t) {
 		super(node != null ? node.toString() : "", ConstructType.CLOSURE, t);
 		this.node = node;
 		this.env = env;
 		this.names = names;
 		this.defaults = defaults;
 		this.types = types;
+		this.isVarArgs = isVarArgs;
+		if(types.length > 0) {
+			for(int i = 0; i < types.length - 1; i++) {
+				if(isVarArgs[i]) {
+					throw new CREFormatException("Varargs can only be added to the last argument.", t);
+				}
+			}
+		}
 		this.returnType = returnType;
 		for(String pName : names) {
 			if(pName.equals("@arguments")) {
@@ -202,11 +213,6 @@ public class CClosure extends Construct implements Callable {
 	}
 
 	/**
-	 * This method suffers from the fact that a FunctionReturnException may end up bubbling up past the
-	 * point of intended handling, given an error in the code that forgets to catch FunctionReturnException
-	 * (or a superclass), but may be
-	 * hard to detect. Instead, use {@link #executeCallable} which unconditionally catches the exception, and then
-	 * returns it. This also simplifies the code. This will not be removed earlier than 3.3.5.
 	 * @param values
 	 * @throws ConfigRuntimeException
 	 * @throws ProgramFlowManipulationException
@@ -225,20 +231,56 @@ public class CClosure extends Construct implements Callable {
 			synchronized(this) {
 				environment = env.clone();
 			}
+			CArray arguments = new CArray(node.getData().getTarget());
+			CArray vararg = null;
+			LeftHandSideType varargType = null;
 			if(values != null) {
-				for(int i = 0; i < names.length; i++) {
-					String name = names[i];
+				for(int i = 0; i < Math.max(values.length, names.length); i++) {
 					Mixed value;
-					try {
+					if(i < values.length) {
 						value = values[i];
-					} catch (Exception e) {
+					} else {
 						value = defaults[i].clone();
 					}
-					try {
-						environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(types[i], name, value,
-								getTarget(), environment));
-					} catch (ConfigCompileException cce) {
-						throw new CREFormatException(cce.getMessage(), getTarget());
+					arguments.push(value, node.getData().getTarget());
+					boolean isVarArg = false;
+					if(this.names.length > i
+						|| (this.names.length != 0
+							&& this.isVarArgs[this.names.length - 1])) {
+						String name;
+						if(i < this.names.length - 1
+								|| !this.isVarArgs[this.types.length - 1]) {
+							name = names[i];
+						} else {
+							name = this.names[this.names.length - 1];
+							if(vararg == null) {
+								// TODO: Once generics are added, add the type
+								vararg = new CArray(value.getTarget());
+								try {
+									environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE,
+											name, vararg, value.getTarget()));
+								} catch(ConfigCompileException ex) {
+									throw new CREError(ex.getMessage(), getTarget(), ex);
+								}
+								varargType = this.types[this.types.length - 1];
+							}
+							isVarArg = true;
+						}
+						if(isVarArg) {
+							if(!InstanceofUtil.isInstanceof(value, varargType, environment)) {
+								throw new CRECastException("Expected type " + varargType + " but found " + value.typeof(environment),
+										getTarget());
+							}
+							vararg.push(value, value.getTarget());
+						} else {
+							IVariable var;
+							try {
+								var = new IVariable(types[i], name, value, getTarget(), environment);
+							} catch(ConfigCompileException ex) {
+								throw new CREError(ex.getMessage(), getTarget(), ex);
+							}
+							environment.getEnv(GlobalEnv.class).GetVarList().set(var);
+						}
 					}
 				}
 			}
@@ -251,21 +293,15 @@ public class CClosure extends Construct implements Callable {
 			}
 
 			if(!hasArgumentsParam) {
-				CArray arguments = new CArray(node.getData().getTarget(), null, env);
-				if(values != null) {
-					for(Mixed value : values) {
-						arguments.push(value, node.getData().getTarget(), env);
-					}
-				}
 				try {
 					environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, "@arguments", arguments,
 							node.getData().getTarget()));
-				} catch (ConfigCompileException cce) {
-					throw new CREFormatException(cce.getMessage(), node.getData().getTarget());
+				} catch(ConfigCompileException ex) {
+					throw new CREError(ex.getMessage(), getTarget(), ex);
 				}
 			}
 
-			ParseTree newNode = new ParseTree(new CFunction("g", getTarget()), node.getFileOptions());
+			ParseTree newNode = new ParseTree(new CFunction(DataHandling.g.NAME, getTarget()), node.getFileOptions());
 			List<ParseTree> children = new ArrayList<>();
 			children.add(node);
 			newNode.setChildren(children);

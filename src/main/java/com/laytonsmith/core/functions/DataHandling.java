@@ -216,8 +216,8 @@ public class DataHandling {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Basic usage", "assign(@array, array(1, 2, 3))\nmsg(@array)"),
-				new ExampleScript("Associative array creation", "assign(@array, array(one: 'apple', two: 'banana'))\nmsg(@array)")};
+				new ExampleScript("Basic usage", "array @array = array(1, 2, 3);\nmsg(@array);"),
+				new ExampleScript("Associative array creation", "array @array = array(one: 'apple', two: 'banana');\nmsg(@array);")};
 		}
 
 		@Override
@@ -1575,6 +1575,7 @@ public class DataHandling {
 			nodes[0].getNodeModifiers().merge(modifiers);
 			// We have to restore the variable list once we're done
 			IVariableList originalList = env.getEnv(GlobalEnv.class).GetVarList().clone();
+			List<Boolean> isVarArgs = new ArrayList<>();
 			for(int i = 0; i < nodes.length; i++) {
 				if(i == nodes.length - 1) {
 					tree = nodes[i];
@@ -1592,7 +1593,10 @@ public class DataHandling {
 						}
 					}
 					env.getEnv(GlobalEnv.class).SetFlag("no-check-duplicate-assign", true);
+					env.getEnv(GlobalEnv.class).SetFlag("var-args-allowed", true);
 					Mixed cons = parent.eval(nodes[i], env);
+
+					env.getEnv(GlobalEnv.class).ClearFlag("var-args-allowed");
 					env.getEnv(GlobalEnv.class).ClearFlag("no-check-duplicate-assign");
 					if(i == 0) {
 						if(cons instanceof IVariable) {
@@ -1600,6 +1604,11 @@ public class DataHandling {
 						}
 						name = cons.val();
 					} else {
+						if(nodes[i].hasChildren()) {
+							isVarArgs.add(nodes[i].getChildAt(0).getNodeModifiers().isVarArgs());
+						} else {
+							isVarArgs.add(false);
+						}
 						if(!(cons instanceof IVariable)) {
 							throw new CREInvalidProcedureException("You must use IVariables as the arguments", t);
 						}
@@ -1635,7 +1644,8 @@ public class DataHandling {
 				}
 			}
 			env.getEnv(GlobalEnv.class).SetVarList(originalList);
-			Procedure myProc = new Procedure(name, returnType, vars, nodes[0].getNodeModifiers().getComment(), tree, t);
+			Procedure myProc = new Procedure(name, returnType, vars, isVarArgs,
+					nodes[0].getNodeModifiers().getComment(), tree, t);
 			if(usesAssign) {
 				myProc.definitelyNotConstant();
 			}
@@ -2046,7 +2056,7 @@ public class DataHandling {
 					isFirstCompile = true;
 				}
 			} else {
-				analysis = null; // It's a static include.
+				analysis = new StaticAnalysis(true); // It's a static include.
 			}
 
 			// Get or load the include.
@@ -2065,7 +2075,7 @@ public class DataHandling {
 
 				// Remove this parent scope since it should not end up in the cached analysis.
 				analysis.getStartScope().removeParent(parentScope);
-			} else if(analysis != null) {
+			} else if(parentScope != null) {
 
 				// Set up analysis. Cloning is required to not mess up the cached analysis.
 				analysis = analysis.clone();
@@ -2729,7 +2739,8 @@ public class DataHandling {
 
 			// Return an empty (possibly statically typed) closure when it is empty and does not have any parameters.
 			if(nodes.length - nodeOffset == 0) {
-				return new CClosure(null, env, returnType, new String[0], new Mixed[0], new LeftHandSideType[0], t);
+				return new CClosure(null, env, returnType, new String[0], new Mixed[0], new Boolean[0],
+						new LeftHandSideType[0], t);
 			}
 
 			// Clone the environment to prevent parameter and variable assigns overwriting variables in the outer scope.
@@ -2744,16 +2755,24 @@ public class DataHandling {
 			int numParams = nodes.length - nodeOffset - 1;
 			String[] names = new String[numParams];
 			Mixed[] defaults = new Mixed[numParams];
+			Boolean[] isVarArgs = new Boolean[numParams];
 			LeftHandSideType[] types = new LeftHandSideType[numParams];
 			for(int i = 0; i < numParams; i++) {
 				ParseTree node = nodes[i + nodeOffset];
+				if(node.hasChildren()) {
+					isVarArgs[i] = node.getChildAt(0).getNodeModifiers().isVarArgs();
+				} else {
+					isVarArgs[i] = false;
+				}
 				ParseTree newNode = new ParseTree(new CFunction(g.NAME, t), node.getFileOptions());
 				List<ParseTree> children = new ArrayList<>();
 				children.add(node);
 				newNode.setChildren(children);
 				Script fakeScript = Script.GenerateScript(newNode, myEnv.getEnv(GlobalEnv.class).GetLabel(), null);
 				myEnv.getEnv(GlobalEnv.class).SetFlag("closure-warn-overwrite", true);
+				myEnv.getEnv(GlobalEnv.class).SetFlag("var-args-allowed", true);
 				Mixed ret = MethodScriptCompiler.execute(newNode, myEnv, null, fakeScript);
+				myEnv.getEnv(GlobalEnv.class).ClearFlag("var-args-allowed");
 				myEnv.getEnv(GlobalEnv.class).ClearFlag("closure-warn-overwrite");
 				if(!(ret instanceof IVariable)) {
 					throw new CRECastException("Arguments sent to " + getName() + " barring the last) must be ivariables", t);
@@ -2768,7 +2787,7 @@ public class DataHandling {
 			}
 
 			// Create and return the closure, using the last argument as the closure body.
-			return new CClosure(nodes[nodes.length - 1], myEnv, returnType, names, defaults, types, t);
+			return new CClosure(nodes[nodes.length - 1], myEnv, returnType, names, defaults, isVarArgs, types, t);
 		}
 
 		@Override
@@ -2898,7 +2917,7 @@ public class DataHandling {
 			if(nodes.length == 0) {
 				//Empty closure, do nothing.
 				return new CIClosure(null, env, Auto.TYPE.asLeftHandSideType(),
-						new String[]{}, new Mixed[]{}, new LeftHandSideType[]{}, t);
+						new String[0], new Mixed[0], new Boolean[0], new LeftHandSideType[0], t);
 			}
 			// Handle the closure type first thing
 			LeftHandSideType returnType = Auto.TYPE.asLeftHandSideType();
@@ -2916,6 +2935,7 @@ public class DataHandling {
 			}
 			String[] names = new String[nodes.length - 1];
 			Mixed[] defaults = new Mixed[nodes.length - 1];
+			Boolean[] isVarArgs = new Boolean[nodes.length - 1];
 			LeftHandSideType[] types = new LeftHandSideType[nodes.length - 1];
 			// We clone the enviornment at this point, because we don't want the values
 			// that are assigned here to overwrite values in the main scope.
@@ -2927,13 +2947,20 @@ public class DataHandling {
 			}
 			for(int i = 0; i < nodes.length - 1; i++) {
 				ParseTree node = nodes[i];
+				if(node.hasChildren()) {
+					isVarArgs[i] = node.getChildAt(0).getNodeModifiers().isVarArgs();
+				} else {
+					isVarArgs[i] = false;
+				}
 				ParseTree newNode = new ParseTree(new CFunction(g.NAME, t), node.getFileOptions());
 				List<ParseTree> children = new ArrayList<>();
 				children.add(node);
 				newNode.setChildren(children);
 				Script fakeScript = Script.GenerateScript(newNode, myEnv.getEnv(GlobalEnv.class).GetLabel(), null);
 				myEnv.getEnv(GlobalEnv.class).SetFlag("closure-warn-overwrite", true);
+				myEnv.getEnv(GlobalEnv.class).SetFlag("var-args-allowed", true);
 				Mixed ret = MethodScriptCompiler.execute(newNode, myEnv, null, fakeScript);
+				myEnv.getEnv(GlobalEnv.class).ClearFlag("var-args-allowed");
 				myEnv.getEnv(GlobalEnv.class).ClearFlag("closure-warn-overwrite");
 				if(!(ret instanceof IVariable)) {
 					throw new CRECastException("Arguments sent to " + getName() + " barring the last) must be ivariables", t);
@@ -2949,7 +2976,7 @@ public class DataHandling {
 			// Now that iclosure is done with the current variable list, it can be removed from the cloned environment.
 			// This ensures it's not unintentionally retaining values in memory cloned from the original scope.
 			myEnv.getEnv(GlobalEnv.class).SetVarList(null);
-			return new CIClosure(nodes[nodes.length - 1], myEnv, returnType, names, defaults, types, t);
+			return new CIClosure(nodes[nodes.length - 1], myEnv, returnType, names, defaults, isVarArgs, types, t);
 		}
 
 		@Override

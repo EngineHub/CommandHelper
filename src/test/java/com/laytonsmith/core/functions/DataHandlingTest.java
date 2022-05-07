@@ -12,7 +12,6 @@ import com.laytonsmith.testing.StaticTest;
 import static com.laytonsmith.testing.StaticTest.RunCommand;
 import static com.laytonsmith.testing.StaticTest.SRun;
 import java.io.File;
-import java.io.IOException;
 import java.util.Set;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -79,14 +78,15 @@ public class DataHandlingTest {
 		verify(fakePlayer).sendMessage("hello world");
 	}
 
-	@Test(timeout = 10000)
-	public void testInclude() throws Exception, IOException {
+	@Test
+	public void testInclude() throws Exception {
 		String script
 				= "include('unit_test_inc.ms')";
 		//Create the test file
 		File test = new File("unit_test_inc.ms");
 		FileUtil.write("msg('hello')", test);
-		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, new File("./script.txt"), true), null, envs), env, null, null, null);
+		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler
+				.lex(script, null, new File("./script.txt"), true), null, envs), env, null, null, null);
 		verify(fakePlayer).sendMessage("hello");
 		//delete the test file
 		test.delete();
@@ -315,7 +315,7 @@ public class DataHandlingTest {
 				+ "@s();", fakePlayer);
 	}
 
-	@Test(timeout = 10000)
+	@Test
 	public void testIClosure1() throws Exception {
 		SRun("@s = 'string';\n"
 				+ "@c = iclosure(@var){msg(reflect_pull('varlist'))};\n"

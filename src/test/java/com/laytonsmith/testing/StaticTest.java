@@ -66,7 +66,6 @@ import com.laytonsmith.core.constructs.generics.Constraints;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
-import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.events.AbstractEvent;
 import com.laytonsmith.core.events.BindableEvent;
 import com.laytonsmith.core.events.EventMixinInterface;
@@ -591,12 +590,10 @@ public class StaticTest {
 		if(env.hasEnv(CommandHelperEnvironment.class)) {
 			env.getEnv(CommandHelperEnvironment.class).SetCommandSender(player);
 		}
-		StaticAnalysis staticAnalysis = null;
-		if(env.hasEnv(StaticRuntimeEnv.class)) {
-			staticAnalysis = env.getEnv(StaticRuntimeEnv.class).getAutoIncludeAnalysis();
-		}
+		StaticAnalysis analysis = new StaticAnalysis(true);
+		analysis.setLocalEnable(false);
 		MethodScriptCompiler.execute(MethodScriptCompiler.compile(
-				MethodScriptCompiler.lex(script, env, null, true), env, envs, staticAnalysis), env, done, null);
+				MethodScriptCompiler.lex(script, env, null, true), env, envs, analysis), env, done, null);
 	}
 
 	public static void RunCommand(String combinedScript, MCCommandSender player, String command) throws Exception {
