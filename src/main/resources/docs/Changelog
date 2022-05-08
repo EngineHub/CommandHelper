@@ -52,6 +52,23 @@ it shouldn't be, the value will be "pulled up" and not cause any errors. For ins
 mode. Eventually, this will cause a warning in non-strict mode, but additional work is needed before that can be \
 implemented. In both modes, when statements are used, properly, this may increase runtime performance, because it \
 skips the automatic sconcat feature, which is required for small aliases, but is inefficient in all other cases.
+* First class proc referneces are added. Assuming a proc named _test is defined, <code>proc _test</code> will return \
+a reference to it, which can be stored in a variable, or otherwise passed around as an argument.
+* Closures, iclosures, and proc references now extend the new Callable interface.
+* All callables can be executed with parenthetical notation, no matter how they are stored. Previously this \
+only worked with top level variables, such as <code>@c()</code> but now it works with any other format, including \
+direct returns from other functions and array references, for instance, assuming func returns a Callable, \
+<code>func()()</code> will execute it.
+* Tab completion is now enhanced for aliases defined with the @command syntax, if they also provide type information \
+in @param tags. For instance, if the alias is </code>/test $enum</code> and <code>@param $enum WorldEnvironment</code> \
+is provided, then the $enum value will automatically provide autocomplete with the values from the WorldEnvironment enum.
+* Support for variadic arguments is added. Callables may now be defined with a variadic type in the last parameter,
+which will match all overflow parameters, for instance <code>proc _test(string... @values)</code> can now be called \
+such as <code>_test('a', 'b', 'c')</code>, and @values will be an array of strings <code>array('a', 'b', 'c')</code> \
+within the proc.
+* Additional methods of handling dynamic includes and static analysis have been added. Forward proc declarations, \
+@{DynamicProc} annotations, and additional file options. See the page on [[Procedures]] for more details.
+* Annotations have been added. For now, only @{DynamicProc} exists, though this will be expanded on in the future.
 * As always, hundreds of additional performance fixes and bug fixes and other minor things.
 
 Very early support for LLVM is being introduced. This is not generally usable for basically anything yet, but you
