@@ -30,7 +30,6 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.InvalidEnvironmentException;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
-import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREInsufficientPermissionException;
 import com.laytonsmith.core.exceptions.CRE.CREInvalidProcedureException;
 import com.laytonsmith.core.exceptions.CRE.CREStackOverflowError;
@@ -396,11 +395,6 @@ public class Script {
 					doDebugOutput(f.getName(), c.getChildren());
 				}
 
-				// TODO: Move this into the compiler, not runtime.
-				Boolean varArgsAllowed = env.getEnv(GlobalEnv.class).GetFlag("var-args-allowed");
-				if(varArgsAllowed == null) {
-					varArgsAllowed = false;
-				}
 				if(f.useSpecialExec()) {
 					ProfilePoint p = null;
 					if(f.shouldProfile() && env.getEnv(StaticRuntimeEnv.class).GetProfiler() != null
@@ -410,13 +404,6 @@ public class Script {
 					}
 					Mixed ret;
 					try {
-						if(!varArgsAllowed) {
-							for(ParseTree node : c.getChildren()) {
-								if(node.getNodeModifiers().isVarArgs()) {
-									throw new CRECastException("Varargs not allowed here.", node.getTarget());
-								}
-							}
-						}
 						// TODO: Provide generic parameters
 						ret = f.execs(m.getTarget(), env, this, null, c.getChildren().toArray(ParseTree[]::new));
 					} finally {
@@ -428,9 +415,6 @@ public class Script {
 				}
 
 				for(ParseTree c2 : c.getChildren()) {
-					if(!varArgsAllowed && c2.getNodeModifiers().isVarArgs()) {
-						throw new CRECastException("Varargs not allowed here.", c2.getTarget());
-					}
 					args.add(eval(c2, env));
 				}
 				Object[] a = args.toArray();

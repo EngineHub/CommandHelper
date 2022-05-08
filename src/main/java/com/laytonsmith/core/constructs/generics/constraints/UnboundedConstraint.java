@@ -1,5 +1,6 @@
 package com.laytonsmith.core.constructs.generics.constraints;
 
+import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.generics.ConstraintLocation;
@@ -91,5 +92,10 @@ public class UnboundedConstraint extends Constraint {
 	@Override
 	public boolean supportsTypeUnions() {
 		return true;
+	}
+
+	@Override
+	public ExactTypeConstraint convertFromNull(Target t) throws CREGenericConstraintException {
+		return new ExactTypeConstraint(t, Auto.LHSTYPE);
 	}
 }

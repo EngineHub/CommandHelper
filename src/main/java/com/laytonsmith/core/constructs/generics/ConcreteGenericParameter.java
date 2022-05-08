@@ -45,6 +45,14 @@ public class ConcreteGenericParameter {
 			ConstraintValidator.ValidateLHS(t, type, lhgu, env);
 		}
 		this.type = type;
+		if(type != null && type.getGenericDeclaration() != null && type.getTypeGenericParameters() == null && lhgu == null) {
+			// Go ahead and prefill the types with auto
+			GenericParameters.GenericParametersBuilder builder = GenericParameters.emptyBuilder(type);
+			for(Constraints c : type.getGenericDeclaration().getConstraints()) {
+				builder.addParameter(c.convertFromNull(t).getType());
+			}
+			lhgu = builder.build(t, env).toLeftHandEquivalent(type, env);
+		}
 		this.lhgu = lhgu;
 		this.env = env;
 	}

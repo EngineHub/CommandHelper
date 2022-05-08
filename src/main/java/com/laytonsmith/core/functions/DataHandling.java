@@ -400,6 +400,16 @@ public class DataHandling {
 				}
 				type = listVar.getDefinedType();
 			}
+
+			// TODO: Move this into the compiler, not runtime.
+			Boolean varArgsAllowed = env.getEnv(GlobalEnv.class).GetFlag("var-args-allowed");
+			if(varArgsAllowed == null) {
+				varArgsAllowed = false;
+			}
+			if(!varArgsAllowed && type.isVariadicType()) {
+				throw new CRECastException("Varargs not allowed here.", t);
+			}
+
 			Mixed c = args[offset + 1];
 
 			while(c instanceof IVariable cur) {
@@ -1604,11 +1614,6 @@ public class DataHandling {
 						}
 						name = cons.val();
 					} else {
-						if(nodes[i].hasChildren()) {
-							isVarArgs.add(nodes[i].getChildAt(0).getNodeModifiers().isVarArgs());
-						} else {
-							isVarArgs.add(false);
-						}
 						if(!(cons instanceof IVariable)) {
 							throw new CREInvalidProcedureException("You must use IVariables as the arguments", t);
 						}
@@ -1616,6 +1621,7 @@ public class DataHandling {
 						try {
 							Mixed c = cons;
 							String varName = ((IVariable) c).getVariableName();
+							isVarArgs.add(((IVariable) c).getDefinedType().isVariadicType());
 							if(varNames.contains(varName)) {
 								throw new CREInvalidProcedureException("Same variable name defined twice in " + name, t);
 							}
@@ -2759,11 +2765,6 @@ public class DataHandling {
 			LeftHandSideType[] types = new LeftHandSideType[numParams];
 			for(int i = 0; i < numParams; i++) {
 				ParseTree node = nodes[i + nodeOffset];
-				if(node.hasChildren()) {
-					isVarArgs[i] = node.getChildAt(0).getNodeModifiers().isVarArgs();
-				} else {
-					isVarArgs[i] = false;
-				}
 				ParseTree newNode = new ParseTree(new CFunction(g.NAME, t), node.getFileOptions());
 				List<ParseTree> children = new ArrayList<>();
 				children.add(node);
@@ -2781,6 +2782,7 @@ public class DataHandling {
 				try {
 					defaults[i] = ((IVariable) ret).ival().clone();
 					types[i] = ((IVariable) ret).getDefinedType();
+					isVarArgs[i] = types[i].isVariadicType();
 				} catch (CloneNotSupportedException ex) {
 					Logger.getLogger(DataHandling.class.getName()).log(Level.SEVERE, null, ex);
 				}
@@ -2947,11 +2949,6 @@ public class DataHandling {
 			}
 			for(int i = 0; i < nodes.length - 1; i++) {
 				ParseTree node = nodes[i];
-				if(node.hasChildren()) {
-					isVarArgs[i] = node.getChildAt(0).getNodeModifiers().isVarArgs();
-				} else {
-					isVarArgs[i] = false;
-				}
 				ParseTree newNode = new ParseTree(new CFunction(g.NAME, t), node.getFileOptions());
 				List<ParseTree> children = new ArrayList<>();
 				children.add(node);
@@ -2969,6 +2966,7 @@ public class DataHandling {
 				try {
 					defaults[i] = ((IVariable) ret).ival().clone();
 					types[i] = ((IVariable) ret).getDefinedType();
+					isVarArgs[i] = types[i].isVariadicType();
 				} catch (CloneNotSupportedException ex) {
 					Logger.getLogger(DataHandling.class.getName()).log(Level.SEVERE, null, ex);
 				}

@@ -50,7 +50,7 @@ import java.util.TreeSet;
  * instance {@code int @i = 1;}. Therefore, there are convenience methods for easily converting a CClassType into a
  * LeftHandSideType. Additionally, all the actual types represented are naked CClassType values.
  */
-public final class LeftHandSideType extends Construct {
+public final class LeftHandSideType extends Construct implements SourceType {
 
 	/**
 	 * Merges the inputs to create a single type union class.For instance, if {@code int | string} and
@@ -165,8 +165,12 @@ public final class LeftHandSideType extends Construct {
 	public static LeftHandSideType fromCClassType(CClassType classType, Target t, Environment env) {
 		List<Boolean> isTypenameList = new ArrayList<>();
 		isTypenameList.add(false);
-		return createCClassTypeUnion(t, env, Arrays.asList(
+		LeftHandSideType lhst = createCClassTypeUnion(t, env, Arrays.asList(
 				new ConcreteGenericParameter(classType, null, Target.UNKNOWN, null)), isTypenameList);
+		if(classType != null) {
+			lhst.isVariadicType = classType.isVariadicType();
+		}
+		return lhst;
 	}
 
 	/**
@@ -425,6 +429,9 @@ public final class LeftHandSideType extends Construct {
 	@ObjectHelpers.StandardField
 	private String genericTypeName;
 
+	@ObjectHelpers.StandardField
+	private boolean isVariadicType = false;
+
 	private LeftHandSideType(String value, Target t, Environment env, List<ConcreteGenericParameter> types,
 			List<Boolean> isTypenameList, String genericTypeName, LeftHandGenericUse genericTypeLHGU) {
 		super(value, ConstructType.CLASS_TYPE, t);
@@ -565,22 +572,6 @@ public final class LeftHandSideType extends Construct {
 			}
 		}
 		return superclasses.toArray(CClassType[]::new);
-	}
-
-	/**
-	 * A collapsed type is the nearest super class for all subtypes in the type union. For single types, this is just
-	 * this instance. Note that this is not equivalent to the original LeftHandSideType value, and is a loss of
-	 * specificity. However, in some cases, a single type is necessary.
-	 *
-	 * @return A LeftHandSideType which is guaranteed to only contain one type, and not a type union.
-	 */
-	public LeftHandSideType getCollapsedType() {
-		if(!isTypeUnion()) {
-			return this;
-		} else {
-			// TODO
-			throw new UnsupportedOperationException("Not yet supported");
-		}
 	}
 
 	/**
@@ -757,6 +748,19 @@ public final class LeftHandSideType extends Construct {
 	@Override
 	public GenericParameters getGenericParameters() {
 		return null;
+	}
+
+	@Override
+	public SourceType asVariadicType(Environment env) {
+		LeftHandSideType newType = new LeftHandSideType(val() + "...", getTarget(), env, types, isTypenameList,
+				genericTypeName, null);
+		newType.isVariadicType = true;
+		return newType;
+	}
+
+	@Override
+	public boolean isVariadicType() {
+		return isVariadicType;
 	}
 
 }

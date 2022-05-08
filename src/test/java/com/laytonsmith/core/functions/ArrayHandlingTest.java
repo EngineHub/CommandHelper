@@ -531,6 +531,8 @@ public class ArrayHandlingTest {
 
 	@Test
 	public void testArrayIntersect() throws Exception {
+		assertThat(SRun("array_intersect(array(1, 2, 3), array(4, 5, 6), closure(@a, @b) { return(true); })", fakePlayer),
+				is("{1, 2, 3}"));
 		assertThat(SRun("array_intersect(array(one: 1, two: 2), array(one: 1, three: 3))", fakePlayer), is("{one: 1}"));
 		try {
 			SRun("array_intersect(array(one: 1, two: 2), array(one: 1, three: 3), 'EQUALS')", fakePlayer);
@@ -549,8 +551,6 @@ public class ArrayHandlingTest {
 		assertThat(SRun("array_intersect(array('1', '2', '3'), array(1, 2, 3), 'STRICT_EQUALS')", fakePlayer), is("{}"));
 		assertThat(SRun("array_intersect(array('1', '2', '3'), array('1', 2, 3), 'STRICT_EQUALS')", fakePlayer), is("{1}"));
 
-		assertThat(SRun("array_intersect(array(1, 2, 3), array(4, 5, 6), closure(@a, @b) { return(true); })", fakePlayer),
-				is("{1, 2, 3}"));
 		assertThat(SRun("array_intersect(array(1, 2, 3), array(1, 2, 3), closure(@a, @b) { return(false); })", fakePlayer),
 				is("{}"));
 

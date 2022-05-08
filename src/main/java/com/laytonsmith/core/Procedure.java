@@ -11,7 +11,9 @@ import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.InstanceofUtil;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
@@ -231,8 +233,8 @@ public class Procedure implements Cloneable {
 				} else {
 					var = this.varIndex.get(this.varIndex.size() - 1);
 					if(vararg == null) {
-						// TODO: Once generics are added, add the type
-						vararg = new CArray(t);
+						vararg = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+								.addParameter(var.getDefinedType()).build(t, env), env);
 						try {
 							env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE,
 									var.getVariableName(), vararg, c.getTarget()));
@@ -362,5 +364,17 @@ public class Procedure implements Cloneable {
 
 	public void definitelyNotConstant() {
 		possiblyConstant = false;
+	}
+
+	public LeftHandSideType getReturnType() {
+		return returnType.asLeftHandSideType();
+	}
+
+	public List<LeftHandSideType> getParameterTypes() {
+		List<LeftHandSideType> ret = new ArrayList<>();
+		for(IVariable var : this.varIndex) {
+			ret.add(var.getDefinedType());
+		}
+		return ret;
 	}
 }

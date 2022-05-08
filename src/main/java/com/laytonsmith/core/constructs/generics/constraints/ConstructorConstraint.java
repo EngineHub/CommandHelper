@@ -111,4 +111,9 @@ public class ConstructorConstraint extends Constraint {
 	public boolean supportsTypeUnions() {
 		return false;
 	}
+
+	@Override
+	public ExactTypeConstraint convertFromNull(Target t) throws CREGenericConstraintException {
+		throw new CREGenericConstraintException("Generic type required, auto type cannot be used.", t);
+	}
 }

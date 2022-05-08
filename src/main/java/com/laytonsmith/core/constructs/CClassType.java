@@ -59,7 +59,7 @@ import java.util.stream.Stream;
  */
 @typeof("ms.lang.ClassType")
 @SuppressWarnings("checkstyle:overloadmethodsdeclarationorder")
-public final class CClassType extends Construct implements com.laytonsmith.core.natives.interfaces.Iterable {
+public final class CClassType extends Construct implements com.laytonsmith.core.natives.interfaces.Iterable, SourceType {
 
 	public static final String PATH_SEPARATOR = FullyQualifiedClassName.PATH_SEPARATOR;
 
@@ -229,6 +229,8 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	private final FullyQualifiedClassName fqcn;
 	@StandardField
 	private final GenericTypeParameters genericParameters;
+	@StandardField
+	private boolean isVariadicType = false;
 
 	/**
 	 * This is an invalid instance of the underlying type that can only be used for Documentation purposes or finding
@@ -571,7 +573,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	private CClassType(FullyQualifiedClassName type, Target t, boolean newDefinition,
 			GenericDeclaration genericDeclaration, Environment env, Class<? extends Mixed> nativeClass)
 			throws ClassNotFoundException {
-		super(type.getFQCN(), ConstructType.CLASS_TYPE, t);
+		super(type.toString(), ConstructType.CLASS_TYPE, t);
 		fqcn = type;
 		this.genericParameters = null;
 		this.genericDeclaration = genericDeclaration;
@@ -1197,5 +1199,23 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		private boolean containsNakedClassType(FullyQualifiedClassName fqcn) {
 			return contains(fqcn, null);
 		}
+	}
+
+	@Override
+	public boolean isVariadicType() {
+		return isVariadicType;
+	}
+
+	@Override
+	public SourceType asVariadicType(Environment env) {
+		CClassType newType;
+		try {
+			newType = new CClassType(this.fqcn.asVariadicType(), getTarget(), false,
+					this.genericDeclaration, env, this.nativeClass);
+		} catch(ClassNotFoundException ex) {
+			throw new Error(ex);
+		}
+		newType.isVariadicType = true;
+		return newType;
 	}
 }

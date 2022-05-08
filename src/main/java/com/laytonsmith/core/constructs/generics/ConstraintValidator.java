@@ -174,8 +174,8 @@ public final class ConstraintValidator {
 
 		boolean isVariadic;
 		if(areWithinBoundsOfThese.get(areWithinBoundsOfThese.size() - 1).isVariadic()) {
-			if(checkIfTheseConstraints.size() < areWithinBoundsOfThese.size()) {
-				throw new CREGenericConstraintException("Expected at least " + areWithinBoundsOfThese.size() + " parameter(s), but found"
+			if(checkIfTheseConstraints.size() < areWithinBoundsOfThese.size() - 1) {
+				throw new CREGenericConstraintException("Expected at least " + (areWithinBoundsOfThese.size() - 1) + " parameter(s), but found"
 						+ " only " + checkIfTheseConstraints.size(), t);
 			}
 			isVariadic = true;

@@ -68,7 +68,10 @@ public class Constraints implements Iterable<Constraint> {
 		}
 		boolean isVariadic = false;
 		for(Constraint c : constraints) {
-			if(c instanceof VariadicTypeConstraint) {
+			if(c instanceof VariadicTypeConstraint
+					|| (c instanceof ExactTypeConstraint etc
+						&& etc.getType() != null
+						&& etc.getType().isVariadicType())) {
 				if(isVariadic) {
 					throw new CREGenericConstraintException("Only one variadic type definition may be in the parameter", t);
 				}
@@ -195,6 +198,29 @@ public class Constraints implements Iterable<Constraint> {
 		ExactTypeConstraint type = null;
 		for(Constraint c : constraints) {
 			ExactTypeConstraint newType = c.convertFromDiamond(t);
+			if(type == null) {
+				type = newType;
+			} else {
+				throw new CREGenericConstraintException("Cannot infer generic type from LHS, please explicitely define"
+						+ " the RHS generic parameters.", t);
+			}
+		}
+		if(type == null) {
+			throw new CREGenericConstraintException("Cannot infer generic type from LHS, please explicitely define the"
+					+ " RHS generic parameters.", t);
+		}
+		return type;
+	}
+
+	/**
+	 * If the constraint is null, this returns the appropriate auto type. This may not pass, if auto is not valid
+	 * for the given constraints.
+	 * @return
+	 */
+	public ExactTypeConstraint convertFromNull(Target t) throws CREGenericConstraintException {
+		ExactTypeConstraint type = null;
+		for(Constraint c : constraints) {
+			ExactTypeConstraint newType = c.convertFromNull(t);
 			if(type == null) {
 				type = newType;
 			} else {

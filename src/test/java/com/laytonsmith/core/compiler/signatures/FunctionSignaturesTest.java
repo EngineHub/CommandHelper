@@ -399,7 +399,7 @@ public class FunctionSignaturesTest {
 				.param(CArray.TYPE, "param5", "desc5").build();
 
 		// Validate signature parameter types through its string version.
-		assertEquals("(int, int..., int, [array], array)", signatures.getSignaturesParamTypesString());
+		assertEquals("(int, int..., int, [array<auto>], array<auto>)", signatures.getSignaturesParamTypesString());
 
 		// Assert return type and compile exceptions for matching the signature in multiple ways.
 		Set<ConfigCompileException> exceptions = new HashSet<>();

@@ -492,4 +492,21 @@ public class InstanceofUtilTest {
 		assertTrue(InstanceofUtil.isInstanceof(CByteArray.TYPE, arrayInt, null, env));
 		assertFalse(InstanceofUtil.isInstanceof(CByteArray.TYPE, arrayString, null, env));
 	}
+
+	@Test
+	public void testTypeofCallableIsAuto() throws Exception {
+		assertEquals("ms.lang.closure<auto>", StaticTest.SRun("string(typeof(closure(){}))", null));
+		assertEquals("ms.lang.iclosure<auto>", StaticTest.SRun("string(typeof(iclosure(){}))", null));
+		assertEquals("ms.lang.Procedure<auto>", StaticTest.SRun("proc _test(){} string(typeof(proc _test))", null));
+	}
+
+	@Test
+	public void testTypeofTypedCallableIsNotTyped() throws Exception {
+		assertEquals("ms.lang.closure<ms.lang.int, ms.lang.string, ms.lang.array<auto>>",
+				StaticTest.SRun("string(typeof(int closure(string @s, array @a){ return 1; }))", null));
+		assertEquals("ms.lang.iclosure<ms.lang.int, ms.lang.string, ms.lang.array<auto>>",
+				StaticTest.SRun("string(typeof(int iclosure(string @s, array @a){ return 1; }))", null));
+		assertEquals("ms.lang.Procedure<ms.lang.int, ms.lang.string, ms.lang.array<auto>>",
+				StaticTest.SRun("int proc _test(string @a, array @b){ return 1; } string(typeof(proc _test))", null));
+	}
 }

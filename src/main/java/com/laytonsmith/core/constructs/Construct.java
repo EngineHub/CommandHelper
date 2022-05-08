@@ -7,6 +7,7 @@ import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.generics.ConcreteGenericParameter;
+import com.laytonsmith.core.constructs.generics.Constraints;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
 import com.laytonsmith.core.environments.Environment;
@@ -525,7 +526,15 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 			naked = CClassType.get(that.getClass());
 		}
 		if(that.getGenericParameters() == null) {
-			return naked;
+			if(naked.getGenericDeclaration() == null) {
+				return naked;
+			}
+			GenericParameters.GenericParametersBuilder builder = GenericParameters.emptyBuilder(naked);
+			for(Constraints c : naked.getGenericDeclaration().getConstraints()) {
+				builder.addParameter(c.convertFromNull(that.getTarget()).getType());
+			}
+			return CClassType.get(naked, that.getTarget(), builder.buildWithoutValidation()
+					.toGenericTypeParameters(naked, that.getTarget(), env), env);
 		}
 		return CClassType.get(naked, Target.UNKNOWN,
 				that.getGenericParameters().toGenericTypeParameters(naked, Target.UNKNOWN, env), env);

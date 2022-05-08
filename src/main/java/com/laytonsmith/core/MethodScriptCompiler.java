@@ -21,7 +21,6 @@ import com.laytonsmith.core.compiler.LateBindingKeyword;
 import com.laytonsmith.core.compiler.TokenStream;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.CBareString;
-import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CDecimal;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CFunction;
@@ -37,7 +36,7 @@ import com.laytonsmith.core.constructs.CSymbol;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
-import com.laytonsmith.core.constructs.LeftHandSideType;
+import com.laytonsmith.core.constructs.SourceType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.constructs.Token.TType;
@@ -1752,12 +1751,10 @@ public final class MethodScriptCompiler {
 					throw new ConfigCompileException("Unexpected varargs token (\"...\")", t.target);
 				}
 				ParseTree previous = tree.getChildAt(tree.getChildren().size() - 1);
-				// TODO: Add LHSType as well, though this will not work as is with user objects. It may need
-				// to be moved into a node modifier or something.
-				if(!(previous.getData() instanceof CClassType) && !(previous.getData() instanceof LeftHandSideType)) {
+				if(!(previous.getData() instanceof SourceType st)) {
 					throw new ConfigCompileException("Unexpected varargs token (\"...\"). This can only be used with types.", t.target);
 				}
-				previous.getNodeModifiers().setIsVarArgs(true);
+				previous.setData(st.asVariadicType(environment));
 				continue;
 			} else if(t.type == TType.LIT) {
 				Construct c = Static.resolveConstruct(t.val(), t.target, true, environment);

@@ -2,6 +2,7 @@ package com.laytonsmith.core.constructs.generics.constraints;
 
 import com.laytonsmith.PureUtilities.ObjectHelpers;
 import com.laytonsmith.PureUtilities.ObjectHelpers.StandardField;
+import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
@@ -10,6 +11,7 @@ import com.laytonsmith.core.constructs.generics.ConstraintLocation;
 import com.laytonsmith.core.constructs.generics.ConstraintToConstraintValidator;
 import com.laytonsmith.core.constructs.generics.Constraints;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CRE.CREGenericConstraintException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 
 import java.util.EnumSet;
@@ -184,5 +186,10 @@ public class ExactTypeConstraint extends Constraint {
 	@Override
 	public boolean supportsTypeUnions() {
 		return false;
+	}
+
+	@Override
+	public ExactTypeConstraint convertFromNull(Target t) throws CREGenericConstraintException {
+		return new ExactTypeConstraint(t, Auto.LHSTYPE);
 	}
 }

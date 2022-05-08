@@ -352,8 +352,7 @@ public class GenericsTest {
 				new Constraints(Target.UNKNOWN, ConstraintLocation.LHS, new UpperBoundConstraint(Target.UNKNOWN, "?", CString.TYPE.asLeftHandSideType())),
 				new Constraints(Target.UNKNOWN, ConstraintLocation.LHS, new ExactTypeConstraint(Target.UNKNOWN, CArray.TYPE.asLeftHandSideType()))
 		);
-		List<Constraints> badlhs2 = Arrays.asList(new Constraints(Target.UNKNOWN, ConstraintLocation.LHS, new ExactTypeConstraint(Target.UNKNOWN, CInt.TYPE.asLeftHandSideType()))
-		);
+		List<Constraints> badlhs2 = Arrays.asList(new Constraints(Target.UNKNOWN, ConstraintLocation.LHS));
 
 		List<Constraints> rhs = Arrays.asList(new Constraints(Target.UNKNOWN, ConstraintLocation.RHS, new ExactTypeConstraint(Target.UNKNOWN, CInt.TYPE.asLeftHandSideType())),
 				new Constraints(Target.UNKNOWN, ConstraintLocation.RHS, new ExactTypeConstraint(Target.UNKNOWN, CString.TYPE.asLeftHandSideType())),

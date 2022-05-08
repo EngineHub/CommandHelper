@@ -30,7 +30,14 @@ public class LeftHandGenericUse {
 	private final List<LeftHandGenericUseParameter> parameters;
 
 	private static void ValidateCount(int inputParameters, CClassType forType, Target t) {
-		if(forType.getGenericDeclaration().getParameterCount() != inputParameters) {
+		GenericDeclaration declaration = forType.getGenericDeclaration();
+		List<Constraints> constraints = declaration.getConstraints();
+		if(declaration.getParameterCount() != inputParameters) {
+			if(!constraints.isEmpty()
+					&& constraints.get(constraints.size() - 1).isVariadic()
+					&& inputParameters >= constraints.size() - 1) {
+				return;
+			}
 			throw new CREGenericConstraintException(
 					forType.getSimpleName() + " expects "
 					+ StringUtils.PluralTemplateHelper(forType.getGenericDeclaration().getParameterCount(),
@@ -242,12 +249,15 @@ public class LeftHandGenericUse {
 		}
 		List<Constraints> checkIfTheseConstraints = presumedSubtype.getConstraints();
 		List<Constraints> areWithinBoundsOfThese = this.getConstraints();
-		if(checkIfTheseConstraints.size() != areWithinBoundsOfThese.size()) {
+		boolean isVariadic = !areWithinBoundsOfThese.isEmpty()
+				&& areWithinBoundsOfThese.get(areWithinBoundsOfThese.size() - 1).isVariadic();
+		if((isVariadic && checkIfTheseConstraints.size() < areWithinBoundsOfThese.size() - 1)
+				|| (!isVariadic && checkIfTheseConstraints.size() != areWithinBoundsOfThese.size())) {
 			return false;
 		}
-		for(int i = 0; i < areWithinBoundsOfThese.size(); i++) {
-			Constraints definition = areWithinBoundsOfThese.get(i);
-			Constraints lhs = checkIfTheseConstraints.get(i);
+		for(int i = 0; i < Math.max(checkIfTheseConstraints.size(), areWithinBoundsOfThese.size()); i++) {
+			Constraints definition = areWithinBoundsOfThese.get(Math.min(i, areWithinBoundsOfThese.size() - 1));
+			Constraints lhs = checkIfTheseConstraints.get(Math.min(i, checkIfTheseConstraints.size() - 1));
 			// Check that the LHS fits the bounds of the definition
 			List<String> errors = new ArrayList<>();
 			if(!definition.withinBounds(lhs, errors, env)) {

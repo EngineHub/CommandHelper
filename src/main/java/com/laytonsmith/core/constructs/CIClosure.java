@@ -59,7 +59,12 @@ public class CIClosure extends CClosure {
 
 	@Override
 	public GenericParameters getGenericParameters() {
-		return null;
+		GenericParameters.GenericParametersBuilder builder = GenericParameters.emptyBuilder(TYPE);
+		builder.addParameter(returnType);
+		for(LeftHandSideType type : types) {
+			builder.addParameter(type);
+		}
+		return builder.buildWithoutValidation();
 	}
 
 }

@@ -42,6 +42,7 @@ public final class FullyQualifiedClassName implements Comparable<FullyQualifiedC
 	private final String fullyQualifiedName;
 	private Class<? extends Mixed> nativeClass;
 	private boolean nativeClassLoaded = false;
+	private boolean isVariadicType = false;
 
 	private FullyQualifiedClassName(String name) {
 		Objects.requireNonNull(name, "The name passed in may not be null");
@@ -206,9 +207,15 @@ public final class FullyQualifiedClassName implements Comparable<FullyQualifiedC
 		return new UnqualifiedClassName(this);
 	}
 
+	public FullyQualifiedClassName asVariadicType() {
+		FullyQualifiedClassName fqcn = new FullyQualifiedClassName(fullyQualifiedName);
+		fqcn.isVariadicType = true;
+		return fqcn;
+	}
+
 	@Override
 	public String toString() {
-		return fullyQualifiedName;
+		return fullyQualifiedName + (isVariadicType ? "..." : "");
 	}
 
 	@Override

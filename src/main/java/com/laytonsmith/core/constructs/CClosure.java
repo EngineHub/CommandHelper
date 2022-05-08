@@ -255,7 +255,8 @@ public class CClosure extends Construct implements Callable {
 							name = this.names[this.names.length - 1];
 							if(vararg == null) {
 								// TODO: Once generics are added, add the type
-								vararg = new CArray(value.getTarget());
+								vararg = new CArray(value.getTarget(), GenericParameters.emptyBuilder(CArray.TYPE)
+									.addParameter(varargType).build(getTarget(), environment), environment);
 								try {
 									environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE,
 											name, vararg, value.getTarget()));
@@ -376,7 +377,12 @@ public class CClosure extends Construct implements Callable {
 
 	@Override
 	public GenericParameters getGenericParameters() {
-		return null;
+		GenericParameters.GenericParametersBuilder builder = GenericParameters.emptyBuilder(TYPE);
+		builder.addParameter(returnType);
+		for(LeftHandSideType type : types) {
+			builder.addParameter(type);
+		}
+		return builder.buildWithoutValidation();
 	}
 
 }

@@ -1,5 +1,6 @@
 package com.laytonsmith.core.constructs.generics.constraints;
 
+import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.generics.ConstraintLocation;
@@ -77,12 +78,17 @@ public class VariadicTypeConstraint extends Constraint {
 
 	@Override
 	public ExactTypeConstraint convertFromDiamond(Target t) throws CREGenericConstraintException {
-		throw new CREGenericConstraintException("Cannot infer generic parameter from variadic type constraint.", t);
+		return new ExactTypeConstraint(t, Auto.LHSTYPE);
 	}
 
 	@Override
 	public String toSimpleString() {
 		return getTypeName() + "...";
+	}
+
+	@Override
+	public ExactTypeConstraint convertFromNull(Target t) throws CREGenericConstraintException {
+		return new ExactTypeConstraint(t, (LeftHandSideType) Auto.LHSTYPE.asVariadicType(null));
 	}
 
 }

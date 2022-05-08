@@ -102,6 +102,11 @@ public class ProcedureUsage extends Construct implements Callable {
 
 	@Override
 	public GenericParameters getGenericParameters() {
-		return null;
+		GenericParameters.GenericParametersBuilder builder = GenericParameters.emptyBuilder(TYPE);
+		builder.addParameter(proc.getReturnType());
+		for(LeftHandSideType type : proc.getParameterTypes()) {
+			builder.addParameter(type);
+		}
+		return builder.buildWithoutValidation();
 	}
 }

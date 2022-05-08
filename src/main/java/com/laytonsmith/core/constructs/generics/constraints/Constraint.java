@@ -166,6 +166,15 @@ public abstract class Constraint implements Comparable<Constraint> {
 	public abstract ExactTypeConstraint convertFromDiamond(Target t) throws CREGenericConstraintException;
 
 	/**
+	 * Returns the appropriate auto type for this constraint. This is used as the inferred type for naked
+	 * types, which is opposed to the diamond operator, which returns a non-auto type.
+	 * @param t The code target
+	 * @return The appropriate ExactTypeConstraint filled with an auto type value.
+	 * @throws CREGenericConstraintException If an auto type cannot be used with this Constraint.
+	 */
+	public abstract ExactTypeConstraint convertFromNull(Target t) throws CREGenericConstraintException;
+
+	/**
 	 * Works like toString, but uses the class's simple name.
 	 *
 	 * @return The class's simple name.

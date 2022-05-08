@@ -38,4 +38,9 @@ public abstract class BoundaryConstraint extends Constraint {
 
 	protected abstract boolean isConcreteClassWithinConstraint(LeftHandSideType type, Environment env);
 
+	@Override
+	public ExactTypeConstraint convertFromNull(Target t) throws CREGenericConstraintException {
+		return new ExactTypeConstraint(t, Auto.LHSTYPE);
+	}
+
 }
