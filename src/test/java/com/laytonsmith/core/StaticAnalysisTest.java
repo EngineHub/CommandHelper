@@ -5,6 +5,7 @@ import com.laytonsmith.core.compiler.TokenStream;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.RuntimeMode;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
@@ -28,9 +29,16 @@ public class StaticAnalysisTest {
 	}
 
 	public void runScript(String script) throws Exception {
+		runScript(script, null);
+	}
+
+	public void runScript(String script, ScriptProvider scriptProvider) throws Exception {
 		StaticAnalysis staticAnalysis = new StaticAnalysis(true);
 		staticAnalysis.setLocalEnable(true);
 		Environment env = Static.GenerateStandaloneEnvironment(false, EnumSet.of(RuntimeMode.CMDLINE), null, staticAnalysis);
+		if(scriptProvider != null) {
+			env.getEnv(GlobalEnv.class).SetScriptProvider(scriptProvider);
+		}
 		try {
 			try {
 				TokenStream stream = MethodScriptCompiler.lex(script, env, new File("test.ms"), true);
@@ -107,6 +115,28 @@ public class StaticAnalysisTest {
 			fail();
 		} catch(ConfigCompileException ex) {
 			// Pass
+		}
+	}
+
+	@Test
+	public void testForwardDeclares() throws Exception {
+		runScript("int proc _test(); include(dyn('include.ms')); int @good = _test();",
+				file -> "int proc _test() { return 5; }");
+		
+		try {
+			runScript("int proc _test(); include(dyn('include.ms')); string @bad = _test();",
+					file -> "int proc _test() { return 5; }");
+			fail();
+		} catch(ConfigCompileException ex) {
+			// pass
+		}
+
+		try {
+			runScript("include(dyn('include.ms')); string @bad = _test();",
+					file -> "int proc _test() { return 5; }");
+			fail();
+		} catch(ConfigCompileException ex) {
+			// pass
 		}
 	}
 

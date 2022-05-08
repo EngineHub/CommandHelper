@@ -9,6 +9,7 @@ import com.laytonsmith.core.compiler.Keyword;
 import com.laytonsmith.core.constructs.CBareString;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CKeyword;
+import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -39,15 +40,25 @@ public class ProcKeyword extends Keyword {
 				for(ParseTree child : list.get(keywordPosition + 1).getChildren()) {
 					procNode.addChild(child);
 				}
+				boolean forwardDeclaration = false;
 				if(list.size() > keywordPosition + 2) {
-					validateCodeBlock(list.get(keywordPosition + 2), "Expected braces to follow proc definition");
-					procNode.addChild(getArgumentOrNull(list.get(keywordPosition + 2)));
+					if(list.get(keywordPosition + 2).getData() instanceof CFunction cf
+							&& com.laytonsmith.core.functions.Compiler.__cbrace__.NAME.equals(cf.val())) {
+						validateCodeBlock(list.get(keywordPosition + 2), "Expected braces to follow proc definition");
+						procNode.addChild(getArgumentOrNull(list.get(keywordPosition + 2)));
+					} else {
+						// Forward declaration, add a null "implementation"
+						forwardDeclaration = true;
+						procNode.addChild(new ParseTree(CNull.NULL, list.get(keywordPosition + 1).getFileOptions(), true));
+					}
 				} else {
 					throw new ConfigCompileException("Expected braces to follow proc definition", list.get(keywordPosition + 1).getTarget());
 				}
 				list.remove(keywordPosition); // Remove the keyword
 				list.remove(keywordPosition); // Remove the function definition
-				list.remove(keywordPosition); // Remove the cbrace
+				if(!forwardDeclaration) {
+					list.remove(keywordPosition); // Remove the cbrace
+				}
 				list.add(keywordPosition, procNode); // Add in the new proc definition
 			} else if(list.get(keywordPosition + 1).getData() instanceof CBareString name) {
 				// get_proc rewrite
