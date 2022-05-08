@@ -122,7 +122,7 @@ public class StaticAnalysisTest {
 	public void testForwardDeclares() throws Exception {
 		runScript("int proc _test(); include(dyn('include.ms')); int @good = _test();",
 				file -> "int proc _test() { return 5; }");
-		
+
 		try {
 			runScript("int proc _test(); include(dyn('include.ms')); string @bad = _test();",
 					file -> "int proc _test() { return 5; }");
