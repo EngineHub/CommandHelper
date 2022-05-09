@@ -581,7 +581,7 @@ public class ControlFlow {
 			if(nodes.size() == 1) {
 				return true;
 			}
-			for(int i = 2; i < nodes.size(); i+= 2) {
+			for(int i = 2; i < nodes.size(); i += 2) {
 				doAutoconcatRewrite(nodes.get(i), env, envs);
 				if(nodes.get(i).getData() instanceof CFunction cf && cf.val().equals(Compiler.__statements__.NAME)) {
 					return true;
