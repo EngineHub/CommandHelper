@@ -2104,14 +2104,15 @@ public final class MethodScriptCompiler {
 	}
 
 	/**
-	 * Rewrites __autoconcat__ AST nodes to executable AST nodes. This should be called before AST optimization,
-	 * static analysis and anything else that requires a fully executable AST.
-	 * When this method returns, any __autoconcat__ that did not contain compile errors has been rewritten.
+	 * Rewrites __autoconcat__ AST nodes to executable AST nodes. This should be called before AST optimization, static
+	 * analysis and anything else that requires a fully executable AST. When this method returns, any __autoconcat__
+	 * that did not contain compile errors has been rewritten.
 	 *
 	 * @param root
 	 * @param env
 	 * @param envs
 	 * @param compilerExceptions
+	 * @param rewriteKeywords
 	 */
 	public static void rewriteAutoconcats(ParseTree root, Environment env,
 			Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> compilerExceptions,
@@ -2128,6 +2129,7 @@ public final class MethodScriptCompiler {
 					env.getEnv(CompilerEnvironment.class).addCompilerWarning(child.getFileOptions(),
 							new CompilerWarning("Empty statement.", child.getTarget(),
 									SuppressWarning.UselessCode));
+					continue;
 				}
 				children.add(ongoingChildren);
 				ongoingChildren = new ArrayList<>();

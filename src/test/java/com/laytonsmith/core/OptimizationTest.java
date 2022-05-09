@@ -770,4 +770,9 @@ public class OptimizationTest {
 		assertEquals("__statements__(while(true,__statements__(msg(''),for(assign(ms.lang.int,@i,0),lt(@i,10),inc(@i),__statements__(msg(@i))))))",
 				optimize("while(true) { msg('') for(int @i = 0, @i < 10, @i++) { msg(@i); }}"));
 	}
+
+	@Test
+	public void testEmptyStatementsAreRemoved() throws Exception {
+		assertEquals("__statements__(msg('hi'))", optimize("msg('hi');;;;;;;;;;;;;"));
+	}
 }
