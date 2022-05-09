@@ -1,0 +1,60 @@
+Variadic arguments, or varargs for short, are a way of providing typesafe and variable numbers of parameters
+to a given Callable. In general, many native functions use this, though they currently have support for varargs
+in multiple positions, whereas user code currently only can place varargs as the last parameter.
+
+In order to use varargs, the Callable needs to be specially defined.
+
+<%CODE|
+void proc _varargTest(string... @values) {
+	// Within the proc, @values is actually defined as an array of strings, not a single string object.
+	foreach(string @s in @values) {'
+		msg(@s);
+	}
+}
+%>
+
+Now this allows us to send as many string parameters to the proc as we like. They will internally be converted into
+an array and passed to the function.
+
+<%CODE|
+_varargTest('a', 'b', 'c', 'd');
+%>
+
+Implicit auto values are not supported in this scenario, though you can explicitly provide the auto type, such as
+
+<%CODE|
+void proc _autoTest(auto... @values) {}
+%>
+
+== @arguments ==
+
+The <code>@arguments</code> parameter will continue to exist, and will continue to be defined as an
+<code>array&lt;auto&gt;</code> which contains all parameters sent to the Callable, but this should not be
+relied on in the future for strict code, as eventually, parameters will be typechecked, and will also include
+a check for argument counts. Take for instance this code:
+
+<%CODE|
+proc _test() {
+	foreach(@arg in @arguments) {
+		msg(@arg);
+	}
+}
+
+_test('a', 'b', 'c');
+%>
+
+To allow this code to work in strict mode, it should be upgraded to provide an auto vararg (and provide a return type).
+The internal implementation doesn't need to change.
+
+<%CODE|
+void proc _test(auto... @args) {
+	foreach(@arg in @arguments) {
+		msg(@arg);
+	}
+}
+
+_test('a', 'b', 'c');
+%>
+
+This syntax works for all parameter types in Callables, but must be the last parameter. This notation cannot be used
+as a return type, or general types, such as in assignments.

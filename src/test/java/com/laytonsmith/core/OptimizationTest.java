@@ -105,7 +105,7 @@ public class OptimizationTest {
 //	}
 	@Test
 	public void testProcOptimizationRecursion() throws Exception {
-		assertEquals("sconcat(proc('_loop',@a,if(gt(@a,0),_loop(subtract(@a,1)),return(@a))),_loop(2))",
+		assertEquals("sconcat(__statements__(proc('_loop',@a,if(gt(@a,0),_loop(subtract(@a,1)),return(@a)))),_loop(2))",
 				optimize("proc(_loop, @a, if(@a > 0, _loop(@a - 1), return(@a))) _loop(2)"));
 	}
 
@@ -116,7 +116,8 @@ public class OptimizationTest {
 	@Test
 	public void testProcOptimization3() throws Exception {
 		//Rather, lack of optimization
-		assertEquals("sconcat(proc('_nope',msg('Hi')),_nope())", optimize("proc(_nope, msg('Hi')) _nope()"));
+		assertEquals("sconcat(__statements__(proc('_nope',msg('Hi'))),_nope())",
+				optimize("proc(_nope, msg('Hi')) _nope()"));
 	}
 
 //	@Test
@@ -127,7 +128,7 @@ public class OptimizationTest {
 //	}
 	@Test
 	public void testProcReturn() throws Exception {
-		assertEquals("sconcat(proc('_proc',return(array(1))),array_get(_proc(),0))",
+		assertEquals("sconcat(__statements__(proc('_proc',return(array(1)))),array_get(_proc(),0))",
 				optimize("proc(_proc, return(array(1))) _proc()[0]"));
 	}
 
@@ -158,7 +159,7 @@ public class OptimizationTest {
 						+ "return(5);"
 						+ "}"
 						+ "execute(@a);"));
-		assertEquals("sconcat(__statements__(msg('a')),if(dyn(1),ifelse(dyn(1),__statements__(die()),dyn(2),"
+		assertEquals("__statements__(msg('a'),if(dyn(1),ifelse(dyn(1),__statements__(die()),dyn(2),"
 				+ "__statements__(die()),__statements__(die())),__statements__(msg('b'))))",
 				optimize("msg('a');"
 						+ "if(dyn(1)){"
@@ -175,7 +176,7 @@ public class OptimizationTest {
 						+ "} else {"
 						+ "	msg('b');"
 						+ "}"));
-		assertEquals("sconcat(__statements__(msg('a'),die()))",
+		assertEquals("__statements__(msg('a'),die())",
 				optimize("msg('a');"
 						+ "die();"
 						+ "if(dyn(1)){"
@@ -335,8 +336,10 @@ public class OptimizationTest {
 
 	@Test
 	public void testForWithPostfix() throws Exception {
-		assertEquals("for(assign(@i,0),lt(@i,5),inc(@i),msg(''))", optimize("for(@i = 0, @i < 5, @i++, msg(''))"));
-		assertEquals("for(assign(@i,0),lt(@i,5),dec(@i),msg(''))", optimize("for(@i = 0, @i < 5, @i--, msg(''))"));
+		assertEquals("__statements__(for(assign(@i,0),lt(@i,5),inc(@i),msg('')))",
+				optimize("for(@i = 0, @i < 5, @i++, msg(''))"));
+		assertEquals("__statements__(for(assign(@i,0),lt(@i,5),dec(@i),msg('')))",
+				optimize("for(@i = 0, @i < 5, @i--, msg(''))"));
 	}
 
 	// Need to add this back too
@@ -378,11 +381,11 @@ public class OptimizationTest {
 	//tests the new switch syntax
 	@Test
 	public void testSwitch1() throws Exception {
-		assertEquals("switch(@a,array(1,2),__statements__(msg('1, 2')),"
+		assertEquals("__statements__(switch(@a,array(1,2),__statements__(msg('1, 2')),"
 				+ "3..4,__statements__(msg('3'),msg('4')),"
 				+ "false,__statements__(msg('false')),"
 				+ "0.07,__statements__(msg(0.07)),"
-				+ "__statements__(msg('default')))",
+				+ "__statements__(msg('default'))))",
 				optimize("switch(@a){"
 						+ "	case 1:"
 						+ "	case 2:"
@@ -402,16 +405,16 @@ public class OptimizationTest {
 
 	@Test
 	public void testSwitchInSwitch() throws Exception {
-		assertEquals("switch(dyn(1),1,switch(dyn(2),2,__statements__(msg('hi')),3,__statements__(msg('hi'))),2,__statements__(msg('hi')))",
+		assertEquals("__statements__(switch(dyn(1),2,switch(dyn(4),5,__statements__(msg('hi')),6,__statements__(msg('hi'))),3,__statements__(msg('hi'))))",
 				optimize("switch(dyn(1)) {\n"
-						+ "case 1:\n"
-						+ "		switch(dyn(2)) {\n"
-						+ "			case 2:\n"
+						+ "case 2:\n"
+						+ "		switch(dyn(4)) {\n"
+						+ "			case 5:\n"
 						+ "				msg('hi');\n"
-						+ "			case 3:\n"
+						+ "			case 6:\n"
 						+ "				msg('hi');\n"
 						+ "		}\n"
-						+ "case 2:\n"
+						+ "case 3:\n"
 						+ "		msg('hi');\n"
 						+ "}\n"));
 	}
@@ -427,11 +430,13 @@ public class OptimizationTest {
 
 	@Test
 	public void testEmptySwitch() throws Exception {
-		assertEquals("switch(dyn(1))", optimize("switch(dyn(1)){ case 1: case 2: default: }"));
+		assertEquals("__statements__(switch(dyn(1)))",
+				optimize("switch(dyn(1)){ case 1: case 2: default: }"));
 	}
 
 	@Test
 	public void testDuplicatedDefault() throws Exception {
+		// TODO: When typechecking is enabled globally, this will break, because msg (will eventually) return void
 		assertEquals("switch(dyn(1),msg('hello'))",
 				optimize("switch(dyn(1)) { case 1: case 2: default: msg('hello') }"));
 	}
@@ -525,13 +530,13 @@ public class OptimizationTest {
 
 	@Test
 	public void testSwitchIc() throws Exception {
-		assertEquals("switch_ic(to_lower(dyn('AsDf')),'asdf',__statements__(msg('hello')),'fdsa',__statements__(msg('nope')))",
+		assertEquals("__statements__(switch_ic(to_lower(dyn('AsDf')),'asdf',__statements__(msg('hello')),'fdsa',__statements__(msg('nope'))))",
 				optimize("switch_ic(dyn('AsDf')) { case 'aSdF': msg('hello'); case 'fdsa': msg('nope'); }"));
 	}
 
 	@Test
 	public void testSwitchWithComments() throws Exception {
-		assertEquals("switch(dyn(1),1,__statements__(break()),2,__statements__(break()),3,__statements__(break()))",
+		assertEquals("__statements__(switch(dyn(1),1,__statements__(break()),2,__statements__(break()),3,__statements__(break())))",
 				optimize("switch(dyn(1)) { /** comment */ case 1: break(); /* comment */ case 2: break();\n"
 						+ "// comment\ncase /*comment*/ 3: /** comment */ break(); }"));
 	}
@@ -601,7 +606,7 @@ public class OptimizationTest {
 
 	@Test
 	public void testPartialStatementsInStrictMSA2() throws Exception {
-		assertEquals("if(dyn(1),__statements__(assign(ms.lang.int,@i,1),msg(@i)))",
+		assertEquals("__statements__(if(dyn(1),__statements__(assign(ms.lang.int,@i,1),msg(@i))))",
 				optimize("<! strict >\n"
 						+ "/test = >>>\n"
 						+ "	if(dyn(1)) {\n"
@@ -628,7 +633,7 @@ public class OptimizationTest {
 
 	@Test
 	public void testSwitchWithSmartStrings() throws Exception {
-		assertEquals("switch(@level,'1',__statements__(msg('1')),'@2',__statements__(msg('2')))",
+		assertEquals("__statements__(switch(@level,'1',__statements__(msg('1')),'@2',__statements__(msg('2'))))",
 				optimize("switch(@level) {\n"
 				+ "		case \"1\":\n"
 				+ "			msg('1');\n"
@@ -649,7 +654,8 @@ public class OptimizationTest {
 
 	@Test
 	public void testFallthroughCasesAndDoubleQuotes() throws Exception {
-		assertEquals("switch(@o,array('one','two'),__statements__(msg('hi')),__statements__(msg('hello')))", optimize("switch(@o){\n"
+		assertEquals("__statements__(switch(@o,array('one','two'),__statements__(msg('hi')),__statements__(msg('hello'))))",
+				optimize("switch(@o){\n"
 				+ "		case \"one\":\n"
 				+ "		case \"two\":\n"
 				+ "			msg('hi');\n"
@@ -755,5 +761,13 @@ public class OptimizationTest {
 		assertEquals("'\\t'", optimize("\"\\t\"")); // Regular '\t'.
 		assertEquals("'\\\\\\t'", optimize("\"\\\\\\t\"")); // Escaped '\' followed by '\t'.
 		assertEquals("'a@b@ c @d @ e\\\\f\\\\@g'", optimize("\"a\\@b\\@ c \\@d \\@ e\\\\f\\\\\\@g\"")); // Mix of above.
+	}
+
+	@Test
+	public void testForIsSelfStatement() throws Exception {
+		assertEquals("__statements__(for(assign(ms.lang.int,@i,0),lt(@i,10),inc(@i),__statements__(msg(@i))))",
+				optimize("for(int @i = 0, @i < 10, @i++) { msg(@i); }"));
+		assertEquals("__statements__(while(true,__statements__(msg(''),for(assign(ms.lang.int,@i,0),lt(@i,10),inc(@i),__statements__(msg(@i))))))",
+				optimize("while(true) { msg('') for(int @i = 0, @i < 10, @i++) { msg(@i); }}"));
 	}
 }
