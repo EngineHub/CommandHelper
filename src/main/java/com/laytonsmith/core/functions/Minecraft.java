@@ -604,7 +604,7 @@ public class Minecraft {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
-			MCServer server = StaticLayer.GetServer();
+			MCServer server = Static.getServer();
 			int index = -1;
 			if(args.length == 0) {
 				index = -1;
@@ -769,7 +769,7 @@ public class Minecraft {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
-			MCServer server = StaticLayer.GetServer();
+			MCServer server = Static.getServer();
 			CArray co = new CArray(t);
 			List<MCOfflinePlayer> so = server.getBannedPlayers();
 			for(MCOfflinePlayer o : so) {
@@ -823,7 +823,7 @@ public class Minecraft {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
-			MCServer server = StaticLayer.GetServer();
+			MCServer server = Static.getServer();
 			CArray co = new CArray(t);
 			List<MCOfflinePlayer> so = server.getWhitelistedPlayers();
 			for(MCOfflinePlayer o : so) {
