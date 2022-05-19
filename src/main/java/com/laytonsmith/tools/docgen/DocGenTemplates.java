@@ -863,7 +863,7 @@ public class DocGenTemplates {
 				b.append(", ");
 			}
 			first = false;
-			b.append(f.getName());
+			b.append(ReflectionUtils.instantiateUnsafe(f).getName());
 		}
 		return b.toString();
 	};
