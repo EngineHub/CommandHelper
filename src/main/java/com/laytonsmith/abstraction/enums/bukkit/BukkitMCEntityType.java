@@ -35,7 +35,6 @@ public class BukkitMCEntityType extends MCEntityType<EntityType> {
 
 	// This way we don't take up extra memory on non-bukkit implementations
 	public static void build() {
-		NULL = new BukkitMCEntityType(EntityType.UNKNOWN, MCVanillaEntityType.UNKNOWN);
 		for(MCVanillaEntityType v : MCVanillaEntityType.values()) {
 			if(v.existsIn(Static.getServer().getMinecraftVersion())) {
 				EntityType type;
@@ -66,11 +65,6 @@ public class BukkitMCEntityType extends MCEntityType<EntityType> {
 	}
 
 	@Override
-	public String concreteName() {
-		return getConcrete().name();
-	}
-
-	@Override
 	public boolean isSpawnable() {
 		if(getAbstracted() == MCVanillaEntityType.UNKNOWN) {
 			return getConcrete() != EntityType.UNKNOWN && getConcrete().isSpawnable();
@@ -90,15 +84,8 @@ public class BukkitMCEntityType extends MCEntityType<EntityType> {
 		if(type != null) {
 			return (BukkitMCEntityType) type;
 		}
-		return (BukkitMCEntityType) NULL;
-	}
-
-	public static BukkitMCEntityType valueOfConcrete(String test) {
-		try {
-			return valueOfConcrete(EntityType.valueOf(test));
-		} catch (IllegalArgumentException iae) {
-			return (BukkitMCEntityType) NULL;
-		}
+		MSLog.GetLogger().e(MSLog.Tags.GENERAL, "Bukkit EntityType missing in BUKKIT_MAP: " + test.name(), Target.UNKNOWN);
+		return new BukkitMCEntityType(test, MCVanillaEntityType.UNKNOWN);
 	}
 
 	// Add exceptions here

@@ -53,11 +53,6 @@ public abstract class MCProfession<Concrete> extends DynamicEnum<MCProfession.MC
 					public String name() {
 						return s.name();
 					}
-
-					@Override
-					public String concreteName() {
-						return s.name();
-					}
 				});
 			}
 			return dummy;

@@ -60,7 +60,7 @@ public class BukkitMCShapelessRecipe extends BukkitMCRecipe implements MCShapele
 			List<Material> choices = ((RecipeChoice.MaterialChoice) choice).getChoices();
 			MCMaterial[] list = new MCMaterial[choices.size()];
 			for(int i = 0; i < choices.size(); i++) {
-				list[i] = new BukkitMCMaterial(choices.get(i));
+				list[i] = BukkitMCMaterial.valueOfConcrete(choices.get(i));
 			}
 			ret.add(list);
 		}

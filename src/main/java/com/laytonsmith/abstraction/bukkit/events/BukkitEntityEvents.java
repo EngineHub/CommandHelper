@@ -729,7 +729,7 @@ public class BukkitEntityEvents {
 
 		@Override
 		public MCMaterial getTo() {
-			return new BukkitMCMaterial(ecb.getTo());
+			return BukkitMCMaterial.valueOfConcrete(ecb.getTo());
 		}
 
 		@Override

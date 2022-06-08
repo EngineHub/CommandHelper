@@ -45,6 +45,8 @@ import com.laytonsmith.abstraction.entities.MCFallingBlock;
 import com.laytonsmith.abstraction.entities.MCFireball;
 import com.laytonsmith.abstraction.entities.MCFirework;
 import com.laytonsmith.abstraction.entities.MCFox;
+import com.laytonsmith.abstraction.entities.MCFrog;
+import com.laytonsmith.abstraction.entities.MCFrog.MCFrogType;
 import com.laytonsmith.abstraction.entities.MCGoat;
 import com.laytonsmith.abstraction.entities.MCHanging;
 import com.laytonsmith.abstraction.entities.MCHorse;
@@ -1711,6 +1713,7 @@ public class EntityManagement {
 			docs = docs.replace("%MUSHROOM_COW_TYPE%", StringUtils.Join(MCMushroomCowType.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%PANDA_GENE%", StringUtils.Join(MCPanda.Gene.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%AXOLOTL_TYPE%", StringUtils.Join(MCAxolotlType.values(), ", ", ", or ", " or "));
+			docs = docs.replace("%FROG_TYPE%", StringUtils.Join(MCFrogType.values(), ", ", ", or ", " or "));
 			for(Field field : entity_spec.class.getDeclaredFields()) {
 				try {
 					String name = field.getName();
@@ -1916,6 +1919,10 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_GENERIC_SITTING, CBoolean.get(fox.isSitting()), t);
 					specArray.set(entity_spec.KEY_FOX_CROUCHING, CBoolean.get(fox.isCrouching()), t);
 					specArray.set(entity_spec.KEY_FOX_TYPE, fox.getVariant().name(), t);
+					break;
+				case FROG:
+					MCFrog frog = (MCFrog) entity;
+					specArray.set(entity_spec.KEY_FROG_TYPE, frog.getFrogType().name(), t);
 					break;
 				case GOAT:
 					MCGoat goat = (MCGoat) entity;
@@ -2214,6 +2221,7 @@ public class EntityManagement {
 		private static final String KEY_FIREWORK_EFFECTS = "effects";
 		private static final String KEY_FOX_CROUCHING = "crouching";
 		private static final String KEY_FOX_TYPE = "type";
+		private static final String KEY_FROG_TYPE = "type";
 		private static final String KEY_GOAT_SCREAMING = "screaming";
 		private static final String KEY_HORSE_COLOR = "color";
 		private static final String KEY_HORSE_STYLE = "style";
@@ -2916,6 +2924,22 @@ public class EntityManagement {
 									fox.setVariant(MCFoxType.valueOf(specArray.get(index, t).val().toUpperCase()));
 								} catch (IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid fox type: " + specArray.get(index, t).val(), t);
+								}
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
+				case FROG:
+					MCFrog frog = (MCFrog) entity;
+					for(String index : specArray.stringKeySet()) {
+						switch(index.toLowerCase()) {
+							case entity_spec.KEY_FROG_TYPE:
+								try {
+									frog.setFrogType(MCFrogType.valueOf(specArray.get(index, t).val().toUpperCase()));
+								} catch (IllegalArgumentException exception) {
+									throw new CREFormatException("Invalid frog type: " + specArray.get(index, t).val(), t);
 								}
 								break;
 							default:

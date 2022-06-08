@@ -38,6 +38,7 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCommand;
 import com.laytonsmith.abstraction.bukkit.BukkitMCServer;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.abstraction.enums.MCVersion;
@@ -298,20 +299,17 @@ public class CommandHelperPlugin extends JavaPlugin {
 		};
 		loadingThread.start();
 
-		SimpleVersion javaVersion = new SimpleVersion(System.getProperty("java.version"));
-		if(javaVersion.lt(new SimpleVersion("1.8"))) {
-			MSLog.GetLogger().e(MSLog.Tags.GENERAL, "CommandHelper does not support Java versions older than 8!",
-					Target.UNKNOWN);
-		}
-
 		myServer = BukkitMCServer.Get();
+
+		// Build dynamic enums
 		BukkitMCEntityType.build();
 		BukkitMCBiomeType.build();
 		BukkitMCSound.build();
 		BukkitMCParticle.build();
-		BukkitMCLegacyMaterial.build();
 		BukkitMCPotionEffectType.build();
 		BukkitMCProfession.build();
+		BukkitMCMaterial.build();
+		BukkitMCLegacyMaterial.build();
 	}
 
 	/**
@@ -361,14 +359,11 @@ public class CommandHelperPlugin extends JavaPlugin {
 			getLogger().log(Level.WARNING, "In your preferences, use-sudo-fallback is turned on."
 					+ " Consider turning this off if you can.");
 		}
-		MSLog.initialize(CommandHelperFileLocations.getDefault().getConfigDirectory());
 
 		version = new SimpleVersion(getDescription().getVersion());
 
-		boolean showSplashScreen = Prefs.ShowSplashScreen();
-		if(showSplashScreen) {
+		if(Prefs.ShowSplashScreen()) {
 			StreamUtils.GetSystemOut().println(TermColors.reset());
-			//StreamUtils.GetSystemOut().flush();
 			StreamUtils.GetSystemOut().println("\n\n" + Static.Logo());
 		}
 		ac = new AliasCore(CommandHelperFileLocations.getDefault());

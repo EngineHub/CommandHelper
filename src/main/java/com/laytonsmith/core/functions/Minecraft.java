@@ -1380,10 +1380,8 @@ public class Minecraft {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			CArray mats = new CArray(t);
-			for(MCMaterial mat : StaticLayer.GetMaterialValues()) {
-				if(!mat.isLegacy()) {
-					mats.push(new CString(mat.getName(), t), t);
-				}
+			for(String mat : MCMaterial.types()) {
+				mats.push(new CString(mat, t), t);
 			}
 			return mats;
 		}

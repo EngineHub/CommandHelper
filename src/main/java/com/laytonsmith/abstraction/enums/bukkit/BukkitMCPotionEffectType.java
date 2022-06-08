@@ -2,6 +2,7 @@ package com.laytonsmith.abstraction.enums.bukkit;
 
 import com.laytonsmith.abstraction.enums.MCPotionEffectType;
 import com.laytonsmith.core.MSLog;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
 import org.bukkit.potion.PotionEffectType;
 
@@ -19,21 +20,22 @@ public class BukkitMCPotionEffectType extends MCPotionEffectType<PotionEffectTyp
 
 	@Override
 	public String name() {
-		return getAbstracted() == MCVanillaPotionEffectType.UNKNOWN ? concreteName() : getAbstracted().name();
-	}
-
-	@Override
-	public String concreteName() {
-		return getConcrete().getName();
+		return getAbstracted() == MCVanillaPotionEffectType.UNKNOWN ? getConcrete().getName() : getAbstracted().name();
 	}
 
 	public static MCPotionEffectType valueOfConcrete(PotionEffectType test) {
-		return BUKKIT_MAP.get(test);
+		MCPotionEffectType type = BUKKIT_MAP.get(test);
+		if(type == null) {
+			MSLog.GetLogger().e(MSLog.Tags.GENERAL, "Bukkit PotionEffectType missing in BUKKIT_MAP: " + test.getName(),
+					Target.UNKNOWN);
+			return new BukkitMCPotionEffectType(MCVanillaPotionEffectType.UNKNOWN, test);
+		}
+		return type;
 	}
 
 	public static void build() {
 		for(MCVanillaPotionEffectType v : MCVanillaPotionEffectType.values()) {
-			if(v.existsInCurrent()) {
+			if(v.existsIn(Static.getServer().getMinecraftVersion())) {
 				PotionEffectType effect = getBukkitType(v);
 				if(effect == null) {
 					MSLog.GetLogger().w(MSLog.Tags.RUNTIME, "Could not find a Bukkit potion effect type for " + v.name(), Target.UNKNOWN);

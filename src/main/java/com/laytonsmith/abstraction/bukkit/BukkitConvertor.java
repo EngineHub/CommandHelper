@@ -230,7 +230,7 @@ public class BukkitConvertor extends AbstractConvertor {
 		Material[] mats = Material.values();
 		MCMaterial[] ret = new MCMaterial[mats.length];
 		for(int i = 0; i < mats.length; i++) {
-			ret[i] = new BukkitMCMaterial(mats[i]);
+			ret[i] = BukkitMCMaterial.valueOfConcrete(mats[i]);
 		}
 		return ret;
 	}
@@ -238,31 +238,30 @@ public class BukkitConvertor extends AbstractConvertor {
 	@Override
 	public MCMaterial GetMaterialFromLegacy(String mat, int data) {
 		Material m = BukkitMCLegacyMaterial.getMaterial(mat, data);
-		return m == null ? null : new BukkitMCMaterial(m);
+		return m == null ? null : BukkitMCMaterial.valueOfConcrete(m);
 	}
 
 	@Override
 	public MCMaterial GetMaterialFromLegacy(int id, int data) {
 		Material m = BukkitMCLegacyMaterial.getMaterial(id, data);
-		return m == null ? null : new BukkitMCMaterial(m);
+		return m == null ? null : BukkitMCMaterial.valueOfConcrete(m);
 	}
 
 	@Override
 	public MCMaterial GetMaterial(String name) {
-		// Fast match
-		Material match = Material.getMaterial(name);
-		if(match != null) {
-			return new BukkitMCMaterial(match);
+		MCMaterial ret = MCMaterial.get(name);
+		if(ret != null) {
+			return ret;
 		}
 		// Try fuzzy match
-		match = Material.matchMaterial(name);
+		Material match = Material.matchMaterial(name);
 		if(match != null) {
-			return new BukkitMCMaterial(match);
+			return BukkitMCMaterial.valueOfConcrete(match);
 		}
 		// Try legacy
 		match = BukkitMCLegacyMaterial.getMaterial(name);
 		if(match != null) {
-			return new BukkitMCMaterial(match);
+			return BukkitMCMaterial.valueOfConcrete(match);
 		}
 		return null;
 	}
