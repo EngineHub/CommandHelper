@@ -919,20 +919,20 @@ public class MethodScriptCompilerTest {
 
 	@Test
 	public void testClosureToString2() throws Exception {
-		SRun("msg(closure('\\n'))", fakePlayer);
-		verify(fakePlayer).sendMessage("'\\n'");
+		SRun("msg(closure(msg('\\n')))", fakePlayer);
+		verify(fakePlayer).sendMessage("msg('\\n')");
 	}
 
 	@Test
 	public void testClosureToString3() throws Exception {
-		SRun("msg(closure('\\\\'))", fakePlayer);
-		verify(fakePlayer).sendMessage("'\\\\'");
+		SRun("msg(closure(msg('\\\\')))", fakePlayer);
+		verify(fakePlayer).sendMessage("msg('\\\\')");
 	}
 
 	@Test
 	public void testClosureToString4() throws Exception {
-		SRun("msg(closure('\\''))", fakePlayer);
-		verify(fakePlayer).sendMessage("'\\''");
+		SRun("msg(closure(msg('\\'')))", fakePlayer);
+		verify(fakePlayer).sendMessage("msg('\\'')");
 	}
 
 	@Test
@@ -1296,14 +1296,14 @@ public class MethodScriptCompilerTest {
 		assertTrue(asdf.getDeclaredType(env).equals(CString.TYPE));
 		ParseTree msg = tree.getChildAt(0).getChildAt(1);
 		assertTrue(msg.getDeclaredType(env).equals(CVoid.TYPE));
-		ParseTree _a = tree.getChildAt(0).getChildAt(2).getChildAt(1);
+		ParseTree _a = tree.getChildAt(0).getChildAt(3);
 		assertTrue(_a.getDeclaredType(env).equals(CInt.TYPE));
 	}
 
 	@Test
 	public void testSmartCommentIsOnNode() throws Exception {
 		String[] scripts = new String[]{
-			"/** smart comment */ proc('_test', null)",
+			"/** smart comment */ proc('_test', noop())",
 			"/** smart comment */ void proc _test(){}",
 			"/** smart comment */ proc _test(){}",
 		};
@@ -1314,7 +1314,7 @@ public class MethodScriptCompilerTest {
 			ParseTree tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(
 					script,
 					env, null, true), env, env.getEnvClasses(), sa);
-			assertTrue(tree.getChildAt(0).getNodeModifiers().getComment() != null);
+			assertTrue(tree.getChildAt(0).getChildAt(0).getNodeModifiers().getComment() != null);
 		}
 	}
 

@@ -50,13 +50,14 @@ public class NewExceptionHandlingTest {
 
 	@Test
 	public void testBasicKeywordUsage() throws Exception {
-		assertEquals("complex_try(null,assign(ms.lang.IOException,@e,null),null,assign(ms.lang.Exception,@e,null),null,null)",
+		assertEquals("__statements__(complex_try(__statements__(noop()),assign(ms.lang.IOException,@e,null),__statements__(noop()),"
+				+ "assign(ms.lang.Exception,@e,null),__statements__(noop()),__statements__(noop())))",
 				optimize("try { } catch (IOException @e){ } catch (Exception @e){ } finally { }"));
 	}
 
 	@Test
 	public void testTryFinallyKeywordUsage() throws Exception {
-		assertEquals("complex_try(__statements__(msg('a')),__statements__(msg('b')))",
+		assertEquals("__statements__(complex_try(__statements__(msg('a')),__statements__(msg('b'))))",
 				optimize("try { msg(\"a\"); } finally { msg(\"b\"); }"));
 	}
 

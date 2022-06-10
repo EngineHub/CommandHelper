@@ -43,7 +43,7 @@ public class IfKeyword extends Keyword {
 				} catch (IndexOutOfBoundsException ex) {
 					// Doesn't matter, we're apparently at the end of the stream
 				}
-				node.addChild(getArgumentOrNull(list.get(keywordPosition + 1)));
+				node.addChild(getArgumentOrNoop(list.get(keywordPosition + 1)));
 				list.remove(keywordPosition + 1);
 			}
 
@@ -54,7 +54,7 @@ public class IfKeyword extends Keyword {
 						if(isCodeBlock(list.get(keywordPosition + 2))) {
 							// So ends the chain
 							validateCodeBlock(list.get(keywordPosition + 2), "");
-							node.addChild(getArgumentOrNull(list.get(keywordPosition + 2)));
+							node.addChild(getArgumentOrNoop(list.get(keywordPosition + 2)));
 							// remove the else keyword + the brace
 							list.remove(keywordPosition + 1);
 							list.remove(keywordPosition + 1);
@@ -73,7 +73,7 @@ public class IfKeyword extends Keyword {
 							}
 							// Ok, checks are complete, so we can actually construct the arguments now
 							node.addChild(list.get(keywordPosition + 2).getChildAt(0));
-							node.addChild(getArgumentOrNull(list.get(keywordPosition + 3)));
+							node.addChild(getArgumentOrNoop(list.get(keywordPosition + 3)));
 							// Remove the else, if function, and braces
 							list.remove(keywordPosition + 1);
 							list.remove(keywordPosition + 1);

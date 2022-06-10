@@ -1,5 +1,6 @@
 package com.laytonsmith.core;
 
+import com.laytonsmith.PureUtilities.SimpleVersion;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.constructs.Target;
@@ -550,25 +551,25 @@ public class OptimizationTest {
 
 	@Test
 	public void testReturnAsKeyword() throws Exception {
-		assertEquals("proc('_name',__statements__(return('value')))", optimize("proc _name() { return 'value'; }"));
-		assertEquals("proc('_name',__statements__(return(rand(1,10))))", optimize("proc _name() { return rand(1, 10); }"));
+		assertEquals("__statements__(proc('_name',__statements__(return('value'))))", optimize("proc _name() { return 'value'; }"));
+		assertEquals("__statements__(proc('_name',__statements__(return(rand(1,10)))))", optimize("proc _name() { return rand(1, 10); }"));
 
-		assertEquals("proc('_name',__statements__(return('value')))", optimize("<! strict > proc _name() { return 'value'; }"));
-		assertEquals("proc('_name',__statements__(return(rand(1,10))))", optimize("<! strict > proc _name() { return rand(1, 10); }"));
+		assertEquals("__statements__(proc('_name',__statements__(return('value'))))", optimize("<! strict > proc _name() { return 'value'; }"));
+		assertEquals("__statements__(proc('_name',__statements__(return(rand(1,10)))))", optimize("<! strict > proc _name() { return rand(1, 10); }"));
 
-		assertEquals("proc('_name',__statements__(return(add(dyn(1),dyn(2)))))", optimize("proc _name() { return dyn(1) + dyn(2); }"));
-		assertEquals("proc('_name',__statements__(return(add(dyn(1),dyn(2)))))", optimize("<! strict > proc _name() { return dyn(1) + dyn(2); }"));
+		assertEquals("__statements__(proc('_name',__statements__(return(add(dyn(1),dyn(2))))))", optimize("proc _name() { return dyn(1) + dyn(2); }"));
+		assertEquals("__statements__(proc('_name',__statements__(return(add(dyn(1),dyn(2))))))", optimize("<! strict > proc _name() { return dyn(1) + dyn(2); }"));
 
 	}
 
 	@Test
 	public void testReturnVoidKeyword() throws Exception {
-		assertEquals("proc('_name',__statements__(return()))", optimize("<! strict > proc _name() { return; msg('Dead code'); }"));
-		assertEquals("proc('_name',sconcat(__statements__(return())))", optimize("proc _name() { return; msg('Dead code') msg('Other dead code')}"));
-		assertEquals("proc('_name',__statements__(return(msg('Dead code'))))", optimize("<! strict > proc _name() { return msg('Dead code') msg('Other dead code')}"));
+		assertEquals("__statements__(proc('_name',__statements__(return())))", optimize("<! strict > proc _name() { return; msg('Dead code'); }"));
+		assertEquals("__statements__(proc('_name',sconcat(__statements__(return()))))", optimize("proc _name() { return; msg('Dead code') msg('Other dead code')}"));
+		assertEquals("__statements__(proc('_name',__statements__(return(msg('Dead code')))))", optimize("<! strict > proc _name() { return msg('Dead code'); msg('Other dead code');}"));
 
-		assertEquals("proc('_name',__statements__(return()))", optimize("proc _name() { return; }"));
-		assertEquals("proc('_name',__statements__(return()))", optimize("<! strict > proc _name() { return; }"));
+		assertEquals("__statements__(proc('_name',__statements__(return())))", optimize("proc _name() { return; }"));
+		assertEquals("__statements__(proc('_name',__statements__(return())))", optimize("<! strict > proc _name() { return; }"));
 	}
 
 	@Test(expected = ConfigCompileException.class)
@@ -594,7 +595,7 @@ public class OptimizationTest {
 				optimize("int @i = 0; int @j = 0"));
 	}
 
-	@Test
+	@Test(expected = ConfigCompileException.class)
 	public void testPartialStatementsInStrictMSA() throws Exception {
 		assertEquals("__statements__(assign(ms.lang.int,@i,0),assign(ms.lang.string,@s,'asdf'))",
 				optimize("<! strict >\n"
@@ -604,7 +605,7 @@ public class OptimizationTest {
 						+ "<<<\n", false));
 	}
 
-	@Test
+	@Test(expected = ConfigCompileException.class)
 	public void testPartialStatementsInStrictMSA2() throws Exception {
 		assertEquals("__statements__(if(dyn(1),__statements__(assign(ms.lang.int,@i,1),msg(@i))))",
 				optimize("<! strict >\n"
@@ -616,7 +617,7 @@ public class OptimizationTest {
 						+ "<<<\n", false));
 	}
 
-	@Test
+	@Test(expected = ConfigCompileException.class)
 	public void testPartialStatementsInStrict() throws Exception {
 		assertEquals("__statements__(assign(ms.lang.int,@i,1),msg(@i),msg(@i))", optimize("<! strict >\n"
 				+ "int @i = 1\n"
@@ -628,7 +629,7 @@ public class OptimizationTest {
 	public void testStatementInArrayInNonStrict() throws Exception {
 		// Not the erroneous semicolon after 'c';. We are in non-strict mode though, so this should just
 		// work anyways.
-		assertEquals("array('a','b','c')", optimize("array('a', 'b', 'c';)"));
+		assertEquals("array('a','b','c')", optimize("array('a', 'b', p('c');)"));
 	}
 
 	@Test
@@ -671,7 +672,7 @@ public class OptimizationTest {
 
 	@Test
 	public void testParenthesisRewritesCorrectly1() throws Exception {
-		assertEquals("__statements__(assign(ms.lang.closure,@c,closure(null)),execute(@c))",
+		assertEquals("__statements__(assign(ms.lang.closure,@c,closure(__statements__(noop()))),execute(@c))",
 				optimize("closure @c = closure() {};\n@c();"));
 	}
 
@@ -703,10 +704,10 @@ public class OptimizationTest {
 	public void testNestedExecute() throws Exception {
 		assertEquals("__statements__(proc('_t',__statements__(return(closure(__statements__(return(closure(__statements__(msg('hi'))))))))),"
 				+ "execute(execute(_t())))",
-				optimize("proc _t() { return closure() { return closure() { msg('hi'); }; }; } _t()()();"));
+				optimize("<!strict> proc _t() { return closure() { return closure() { msg('hi'); }; }; }; _t()()();"));
 		assertEquals("__statements__(proc('_t',__statements__(return(closure(__statements__(return(closure(__statements__(msg('hi'))))))))),"
 				+ "execute(execute(_t())))",
-				optimize("<!strict> proc _t() { return closure() { return closure() { msg('hi'); }; }; }; _t()()();"));
+				optimize("proc _t() { return closure() { return closure() { msg('hi'); }; }; } _t()()();"));
 		assertEquals("__statements__(proc('_t',@a,__statements__(return(closure(@b,__statements__(return(closure(@c,__statements__(msg('hi'))))))))),"
 				+ "execute(3,4,execute(2,_t(1))))",
 				optimize("<!strict> proc _t(@a) { return closure(@b) { return closure(@c) { msg('hi'); }; }; }; _t(1)(2)(3,4);"));
@@ -725,7 +726,7 @@ public class OptimizationTest {
 
 	@Test
 	public void testNoErrorWithParenthesisAfterSymbol() throws Exception {
-		assertEquals("if(and(@a,or(@b,@c)),null)",
+		assertEquals("__statements__(if(and(@a,or(@b,@c)),__statements__(noop())))",
 				optimize("if(@a &&\n(@b || @c)) {}"));
 		assertEquals(0, env.getEnv(CompilerEnvironment.class).getCompilerWarnings().size());
 	}
@@ -739,7 +740,7 @@ public class OptimizationTest {
 
 	@Test
 	public void testInvalidStatements() throws Exception {
-		assertEquals("__statements__(msg('test'))", optimize("msg('test';);"));
+		assertEquals("__statements__(msg('test'))", optimize("msg(p('test'););"));
 		try {
 			optimize("<!strict> msg('test';);");
 			fail();
@@ -774,5 +775,51 @@ public class OptimizationTest {
 	@Test
 	public void testEmptyStatementsAreRemoved() throws Exception {
 		assertEquals("__statements__(msg('hi'))", optimize("msg('hi');;;;;;;;;;;;;"));
+	}
+
+	private void testSemicolonUsage(String script, boolean passExpected) throws Exception {
+		try {
+			optimize(script);
+			if(!passExpected) {
+				if(MSVersion.LATEST.lte(new SimpleVersion(3, 3, 6))) {
+					assertEquals(1, env.getEnv(CompilerEnvironment.class).getCompilerWarnings().size());
+				} else {
+					fail();
+				}
+			}
+		} catch(ConfigCompileException ex) {
+			// pass
+			if(passExpected) {
+				fail();
+			}
+		}
+	}
+
+	@Test
+	public void testMissingSemicolonWarnsInStrictMode() throws Exception {
+		testSemicolonUsage("<! strict > if(dyn(true)) { if(dyn(true)) {} if(dyn(true)) {} }", true);
+		testSemicolonUsage("<! strict > if(dyn(true)) { } else if(dyn(1) == 1) { }", true);
+		testSemicolonUsage("<! strict > for(int @i = 0, @i < 10, @i++) { msg(''); }", true);
+		testSemicolonUsage("<! strict > array() if(dyn(true)) {}", false);
+		testSemicolonUsage("<! strict > msg('hi');", true);
+		testSemicolonUsage("<! strict > msg('hi')", false);
+		testSemicolonUsage("<! strict > if(dyn(true)) {} array()", false);
+	}
+
+	@Test
+	public void testConstantIsntStatement() throws Exception {
+		try {
+			optimize("'string';");
+			fail();
+		} catch(ConfigCompileException ex) {
+			// pass
+		}
+
+		try {
+			optimize("closure('string')");
+			fail();
+		} catch(ConfigCompileException ex) {
+			// pass
+		}
 	}
 }

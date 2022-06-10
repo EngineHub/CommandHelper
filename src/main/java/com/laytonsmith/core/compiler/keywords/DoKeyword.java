@@ -35,7 +35,7 @@ public class DoKeyword extends Keyword {
 			}
 			ParseTree dowhile = new ParseTree(
 					new CFunction(_dowhile.NAME, t), list.get(keywordPosition).getFileOptions());
-			dowhile.addChild(Keyword.getArgumentOrNull(codeTree));
+			dowhile.addChild(Keyword.getArgumentOrNoop(codeTree));
 			dowhile.addChild(whileTree.getChildAt(0));
 			list.set(keywordPosition, dowhile);
 			list.remove(keywordPosition + 2);

@@ -12,6 +12,7 @@ import com.laytonsmith.core.Optimizable.OptimizationOption;
 import com.laytonsmith.core.compiler.BranchStatement;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
+import com.laytonsmith.core.compiler.ConditionalSelfStatement;
 import com.laytonsmith.core.compiler.EarlyBindingKeyword;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.FileOptions.SuppressWarning;
@@ -1915,7 +1916,7 @@ public final class MethodScriptCompiler {
 		rewriteAutoconcats(tree, environment, envs, compilerErrors, true);
 		processLateKeywords(tree, environment, compilerErrors);
 		checkLinearComponents(tree, environment, compilerErrors);
-		postParseRewrite(rootNode, environment, envs, compilerErrors); // Pass rootNode since this might rewrite 'tree'.
+		postParseRewrite(rootNode, environment, envs, compilerErrors, true); // Pass rootNode since this might rewrite 'tree'.
 		moveNodeModifiersOffSyntheticNodes(tree);
 		tree = rootNode.getChildAt(0);
 		staticAnalysis.analyze(tree, environment, envs, compilerErrors);
@@ -2081,7 +2082,8 @@ public final class MethodScriptCompiler {
 			boolean isSelfStatement;
 			try {
 				isSelfStatement = node.getData() instanceof CFunction cf
-						&& cf.getCachedFunction() != null
+						&& cf.hasFunction()
+						&& cf.getFunction() != null
 						&& cf.getCachedFunction().isSelfStatement(node.getTarget(), env, node.getChildren(), envs);
 			} catch(ConfigCompileException ex) {
 				compilerErrors.add(ex);
@@ -2174,6 +2176,13 @@ public final class MethodScriptCompiler {
 			} else {
 				statements.addChild(autoconcat);
 			}
+			if(rewriteKeywords
+					&& autoconcat.getData() instanceof CFunction cf
+					&& autoconcat.getData().val().equals(Compiler.__statements__.NAME)
+					&& autoconcat.getChildren().size() > 1
+					&& root.getFileOptions().isStrict()) {
+				doMissingSemicolonError(autoconcat.getChildAt(0).getTarget(), compilerExceptions);
+			}
 		}
 		if(statements.getChildren().size() == 1 && statements.getChildAt(0).getData() instanceof CFunction cf) {
 			if(statements.getChildAt(0).isSyntheticNode()
@@ -2211,10 +2220,43 @@ public final class MethodScriptCompiler {
 			try {
 				ParseTree ret = __autoconcat__.rewrite(root.getChildren(), returnSConcat, envs);
 				root.replace(ret);
+				// TODO: Remove this. This is a stopgap measure, because some keyword handlers
+				// don't remove the keywords before this step, and they are handled in a postParseRewrite
+				// override. This goes against the idea of the keyword handlers, but in the meantime,
+				// it means that we can't always detect if it's supposed to be a statement or not,
+				// so just bypass the check in this case.
+				boolean hasKeyword = false;
+				for(ParseTree node : root.getChildren()) {
+					if(node.getData() instanceof CKeyword) {
+						hasKeyword = true;
+						break;
+					}
+				}
+				if(rewriteKeywords && !hasKeyword && root.getFileOptions().isStrict()
+						&& root.getData() instanceof CFunction cf
+						&& cf.val().equals(Compiler.__statements__.NAME)
+						&& ret.numberOfChildren() > 1
+						&& !ongoingChildren.isEmpty()) {
+					// The last statement was expected to have a semicolon, but didn't.
+					doMissingSemicolonError(root.getChildAt(root.numberOfChildren() - 1)
+							.getTarget(), compilerExceptions);
+				}
 			} catch (ConfigCompileException ex) {
 				compilerExceptions.add(ex);
 			}
 		}
+	}
+
+	private static void doMissingSemicolonError(Target target, Set<ConfigCompileException> exceptions) {
+		String message = "Semicolon ';' expected.";
+//		if(MSVersion.LATEST.lte(new SimpleVersion(3, 3, 6))) {
+//			// Warning
+//			message += " This will be an error in the next version.";
+//			env.getEnv(CompilerEnvironment.class).addFutureErrorCompilerWarning(message, target);
+//		} else {
+			// Error
+			exceptions.add(new ConfigCompileException(message, target));
+//		}
 	}
 
 	/**
@@ -2223,16 +2265,17 @@ public final class MethodScriptCompiler {
 	 * Additionally, this step traverses all {@link CFunction} nodes and ensures that they either have their represented
 	 * function cached or are unknown by the compiler.
 	 * Traversal is pre-order depth-first.
-	 * @param ast - The abstract syntax tree representing this function.
-	 * @param env - The environment.
-	 * @param envs - The set of expected environment classes at runtime.
-	 * @param exceptions - A set to put compile errors in.
+	 * @param ast The abstract syntax tree representing this function.
+	 * @param env The environment.
+	 * @param envs The set of expected environment classes at runtime.
+	 * @param exceptions A set to put compile errors in.
+	 * @param topLevel True if this is the top level of the parse tree. External code should always pass in true here.
 	 * @return The rewritten AST node that should completely replace the AST node representing this function, or
 	 * {@code null} to not replace this AST node. Note that the rewrite will be called on this newly returned AST node
 	 * if it is different from the passed node.
 	 */
 	private static ParseTree postParseRewrite(ParseTree ast, Environment env,
-			Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> exceptions) {
+			Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> exceptions, boolean topLevel) {
 		Mixed node = ast.getData();
 		if(node instanceof CFunction cFunc) {
 			if(cFunc.hasFunction()) {
@@ -2247,9 +2290,10 @@ public final class MethodScriptCompiler {
 				}
 			}
 		}
+		boolean isStrict = ast.getFileOptions().isStrict();
 		for(int i = 0; i < ast.numberOfChildren(); i++) {
 			ParseTree child = ast.getChildAt(i);
-			ParseTree newChild = postParseRewrite(child, env, envs, exceptions);
+			ParseTree newChild = postParseRewrite(child, env, envs, exceptions, false);
 			if(newChild != null && child != newChild) {
 				ast.getChildren().set(i, newChild);
 				i--; // Allow the new child to do a rewrite step as well.
@@ -2259,66 +2303,83 @@ public final class MethodScriptCompiler {
 			// statements are not acceptable because void would be an invalid argument type. This would otherwise be
 			// a runtime error in strict mode where auto-concat is not allowed and statements are used instead.
 			// This can be removed once a more comprehensive void return type check is implemented.
-			if(child.getData() instanceof CFunction
-					&& child.getData().val().equals(Compiler.__statements__.NAME)
-					&& ast.getData() instanceof CFunction cFunction) {
-				Function function = cFunction.getCachedFunction();
-				if(function == null) {
-					exceptions.add(new ConfigCompileException("Unknown function", cFunction.getTarget()));
-					continue;
+			if(ast.getData() instanceof CNull || ast.getData() instanceof CFunction) {
+				Function function;
+				if(ast.getData() instanceof CFunction cFunction) {
+					function = cFunction.getCachedFunction();
+				} else {
+					function = null;
 				}
-				boolean statementsAllowed = false;
+				boolean statementsAllowed = topLevel;
 				if(function instanceof BranchStatement branchStatement) {
-					List<Boolean> branches = branchStatement.isBranch(ast.getChildren());
+					List<Boolean> branches = branchStatement.statementsAllowed(ast.getChildren());
 					if(branches.get(i)) {
 						statementsAllowed = true;
 					}
 				}
-
-				if(!statementsAllowed) {
-					String unexpectedStatement = "Unexpected statement, semicolon (;) not allowed in this context.";
-					try {
-						if(ast.getData() instanceof CFunction cf
-								&& cf.getCachedFunction().isSelfStatement(ast.getTarget(), env, ast.getChildren(), envs)) {
-							// We can give a better error message here, because the semicolon wasn't actually added
-							// by the user (probably) it's the self statement function that's the problem here.
-							unexpectedStatement = "Unexpected statement, " + ast.getData().val()
-									+ " not allowed in this context.";
+				if(child.getData() instanceof CFunction) {
+					if(child.getData().val().equals(Compiler.__statements__.NAME)) {
+						if(!(ast.getData() instanceof CNull) && function == null) {
+							exceptions.add(new ConfigCompileException("Unknown function", ast.getTarget()));
+							continue;
 						}
-					} catch(ConfigCompileException ex) {
-						exceptions.add(ex);
-					}
-					if(ast.getFileOptions().isStrict()) {
-						exceptions.add(new ConfigCompileException(unexpectedStatement, child.getTarget()));
-					} else {
-						// Statements aren't allowed here, but we aren't in strict mode, so
-						// pull up the value in the statement to here. sconcat is an exception to this rule, since
-						// it's entirely too special.
-						if(!(ast.getData() instanceof CFunction cf) || !cf.val().equals(StringHandling.sconcat.NAME)) {
-							if(child.getChildren().size() != 1) {
+
+						if(!statementsAllowed) {
+							String unexpectedStatement = "Unexpected statement, semicolon (;) not allowed in this context.";
+							try {
+								if(ast.getData() instanceof CFunction cf
+										&& cf.getCachedFunction().isSelfStatement(ast.getTarget(), env, ast.getChildren(), envs)) {
+									// We can give a better error message here, because the semicolon wasn't actually added
+									// by the user (probably) it's the self statement function that's the problem here.
+									unexpectedStatement = "Unexpected statement, " + ast.getData().val()
+											+ " not allowed in this context.";
+								}
+							} catch(ConfigCompileException ex) {
+								exceptions.add(ex);
+							}
+							if(ast.getFileOptions().isStrict()) {
 								exceptions.add(new ConfigCompileException(unexpectedStatement, child.getTarget()));
 							} else {
-								CompilerWarning warning = new CompilerWarning(unexpectedStatement,
-										child.getTarget(), SuppressWarning.UnexpectedStatement);
-								env.getEnv(CompilerEnvironment.class).addCompilerWarning(ast.getFileOptions(), warning);
-								ast.getChildAt(i).replace(child.getChildren().get(0));
+								// Statements aren't allowed here, but we aren't in strict mode, so
+								// pull up the value in the statement to here. sconcat is an exception to this rule, since
+								// it's entirely too special.
+								if(!(ast.getData() instanceof CFunction cf) || !cf.val().equals(StringHandling.sconcat.NAME)) {
+									if(child.getChildren().size() != 1) {
+										exceptions.add(new ConfigCompileException(unexpectedStatement, child.getTarget()));
+									} else {
+										CompilerWarning warning = new CompilerWarning(unexpectedStatement,
+												child.getTarget(), SuppressWarning.UnexpectedStatement);
+										env.getEnv(CompilerEnvironment.class).addCompilerWarning(ast.getFileOptions(), warning);
+										ast.getChildAt(i).replace(child.getChildren().get(0));
+									}
+								}
 							}
 						}
+						if(statementsAllowed) {
+							continue;
+						}
+						if(function.getName().equals(Compiler.__statements__.NAME)) {
+							ParseTree lastChild = child;
+							if(child.numberOfChildren() > 0) {
+								lastChild = child.getChildAt(child.numberOfChildren() - 1);
+							}
+							exceptions.add(new ConfigCompileException("Invalid comma after "
+									+ lastChild.getData().val(), lastChild.getTarget()));
+						} else if(ast.getFileOptions().isStrict()) {
+							exceptions.add(new ConfigCompileException("Invalid use of auto concat in "
+									+ function.getName() + "()", ast.getTarget()));
+						}
+					} else if(statementsAllowed) {
+						// It is a function, but it isn't a statement. Check for strict mode.
+						if(isStrict) {
+							doMissingSemicolonError(child.getTarget(), exceptions);
+						}
 					}
-				}
-				if(statementsAllowed) {
-					continue;
-				}
-				if(function.getName().equals(Compiler.__statements__.NAME)) {
-					ParseTree lastChild = child;
-					if(child.numberOfChildren() > 0) {
-						lastChild = child.getChildAt(child.numberOfChildren() - 1);
+				} else if(statementsAllowed) {
+					if(((topLevel && isStrict) || !topLevel) && (function == null
+							|| function.getClass().getAnnotation(ConditionalSelfStatement.class) == null)) {
+						exceptions.add(new ConfigCompileException("Not a statement.", child.getTarget()));
 					}
-					exceptions.add(new ConfigCompileException("Invalid comma after "
-							+ lastChild.getData().val(), lastChild.getTarget()));
-				} else if(ast.getFileOptions().isStrict()) {
-					exceptions.add(new ConfigCompileException("Invalid use of auto concat in "
-							+ function.getName() + "()", cFunction.getTarget()));
 				}
 			}
 		}

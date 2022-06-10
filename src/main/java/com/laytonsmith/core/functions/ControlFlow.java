@@ -19,6 +19,7 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.BranchStatement;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
+import com.laytonsmith.core.compiler.ConditionalSelfStatement;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.SelfStatement;
 import com.laytonsmith.core.compiler.VariableScope;
@@ -87,6 +88,7 @@ public class ControlFlow {
 	}
 
 	@api
+	@ConditionalSelfStatement
 	public static class _if extends AbstractFunction implements Optimizable, BranchStatement, VariableScope {
 
 		public static final String NAME = "if";
@@ -342,6 +344,7 @@ public class ControlFlow {
 	}
 
 	@api(environments = {GlobalEnv.class})
+	@ConditionalSelfStatement
 	public static class ifelse extends AbstractFunction implements Optimizable, BranchStatement, VariableScope {
 
 		public static final String NAME = "ifelse";
@@ -519,6 +522,7 @@ public class ControlFlow {
 
 	@api
 	@breakable
+	@ConditionalSelfStatement
 	public static class _switch extends AbstractFunction implements Optimizable, BranchStatement, VariableScope {
 
 		@Override
@@ -917,6 +921,7 @@ public class ControlFlow {
 	}
 
 	@api
+	@ConditionalSelfStatement
 	public static class switch_ic extends _switch implements Optimizable, BranchStatement, VariableScope {
 
 		@Override
@@ -1132,6 +1137,16 @@ public class ControlFlow {
 			ret.add(false);
 			ret.add(false);
 			ret.add(true);
+			ret.add(true);
+			return ret;
+		}
+
+		@Override
+		public List<Boolean> statementsAllowed(List<ParseTree> children) {
+			List<Boolean> ret = new ArrayList<>();
+			ret.add(false);
+			ret.add(false);
+			ret.add(false);
 			ret.add(true);
 			return ret;
 		}

@@ -28,6 +28,9 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.BranchStatement;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.VariableScope;
+import com.laytonsmith.core.compiler.signature.FunctionSignatures;
+import com.laytonsmith.core.compiler.signature.SignatureBuilder;
+import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CInt;
@@ -1012,6 +1015,8 @@ public class Meta {
 	@api
 	public static class noop extends AbstractFunction {
 
+		public static final String NAME = "noop";
+
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return null;
@@ -1051,6 +1056,13 @@ public class Meta {
 		@Override
 		public Version since() {
 			return MSVersion.V3_3_1;
+		}
+
+		@Override
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CVoid.TYPE)
+					.varParam(Auto.TYPE, "params", "Any parameters. These are ignored, but evaluated.")
+					.build();
 		}
 
 	}
