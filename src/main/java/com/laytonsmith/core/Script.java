@@ -48,6 +48,7 @@ import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.profiler.ProfilePoint;
+import com.laytonsmith.core.profiler.Profiler;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -298,8 +299,7 @@ public class Script {
 	 */
 	public Mixed seval(ParseTree c, final Environment env) {
 		Mixed ret = eval(c, env);
-		while(ret instanceof IVariable) {
-			IVariable cur = (IVariable) ret;
+		while(ret instanceof IVariable cur) {
 			ret = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getVariableName(), cur.getTarget(), env).ival();
 		}
 		return ret;
@@ -315,16 +315,15 @@ public class Script {
 	 */
 	@SuppressWarnings("UseSpecificCatch")
 	public Mixed eval(ParseTree c, final Environment env) throws CancelCommandException {
-		if(env.getEnv(GlobalEnv.class).IsInterrupted()) {
-			//First things first, if we're interrupted, kill the script
-			//unconditionally.
+		GlobalEnv globalEnv = env.getEnv(GlobalEnv.class);
+		if(globalEnv.IsInterrupted()) {
+			//First things first, if we're interrupted, kill the script unconditionally.
 			throw new CancelCommandException("", Target.UNKNOWN);
 		}
 
 		final Mixed m = c.getData();
 		currentEnv = env;
-		if(m instanceof Construct) {
-			Construct co = (Construct) m;
+		if(m instanceof Construct co) {
 			if(co.getCType() != ConstructType.FUNCTION) {
 				if(co.getCType() == ConstructType.VARIABLE) {
 					return new CString(m.val(), m.getTarget());
@@ -342,16 +341,16 @@ public class Script {
 					+ m.val(), m.getTarget());
 		}
 
-		StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
+		StackTraceManager stManager = globalEnv.GetStackTraceManager();
 		boolean addedRootStackElement = false;
 		try {
 			// If it's an unknown target, this is not user generated code, and we want to skip adding the element here.
-			if(stManager.isStackEmpty() && !m.getTarget().equals(Target.UNKNOWN)) {
+			if(stManager.isStackEmpty() && m.getTarget() != Target.UNKNOWN) {
 				stManager.addStackTraceElement(new ConfigRuntimeException.StackTraceElement("<<main code>>", m.getTarget()));
 				addedRootStackElement = true;
 			}
 			stManager.setCurrentTarget(c.getTarget());
-			env.getEnv(GlobalEnv.class).SetScript(this);
+			globalEnv.SetScript(this);
 
 			if(possibleFunction.hasProcedure()) {
 				//Not really a function, so we can't put it in Function.
@@ -359,7 +358,11 @@ public class Script {
 				if(p == null) {
 					throw new CREInvalidProcedureException("Unknown procedure \"" + m.val() + "\"", m.getTarget());
 				}
-				ProfilePoint pp = env.getEnv(StaticRuntimeEnv.class).GetProfiler().start(m.val() + " execution", LogLevel.INFO);
+				ProfilePoint pp = null;
+				Profiler profiler = env.getEnv(StaticRuntimeEnv.class).GetProfiler();
+				if(profiler.isLoggable(LogLevel.INFO)) {
+					pp = profiler.start(m.val() + " execution", LogLevel.INFO);
+				}
 				Mixed ret;
 				try {
 					if(debugOutput) {
@@ -367,7 +370,9 @@ public class Script {
 					}
 					ret = p.cexecute(c.getChildren(), env, m.getTarget());
 				} finally {
-					pp.stop();
+					if(pp != null) {
+						pp.stop();
+					}
 				}
 				return ret;
 			}
@@ -381,9 +386,9 @@ public class Script {
 						+ m.val(), m.getTarget());
 			}
 
-			env.getEnv(GlobalEnv.class).SetFileOptions(c.getFileOptions());
+			globalEnv.SetFileOptions(c.getFileOptions());
 
-			ArrayList<Mixed> args = new ArrayList<>();
+			Mixed[] args = new Mixed[c.numberOfChildren()];
 			try {
 				if(f.isRestricted() && !Static.hasCHPermission(f.getName(), env)) {
 					throw new CREInsufficientPermissionException("You do not have permission to use the "
@@ -395,14 +400,15 @@ public class Script {
 				}
 				if(f.useSpecialExec()) {
 					ProfilePoint p = null;
-					if(f.shouldProfile() && env.getEnv(StaticRuntimeEnv.class).GetProfiler() != null
-							&& env.getEnv(StaticRuntimeEnv.class).GetProfiler().isLoggable(f.profileAt())) {
-						p = env.getEnv(StaticRuntimeEnv.class)
-								.GetProfiler().start(f.profileMessageS(c.getChildren()), f.profileAt());
+					if(f.shouldProfile()) {
+						Profiler profiler = env.getEnv(StaticRuntimeEnv.class).GetProfiler();
+						if(profiler.isLoggable(f.profileAt())) {
+							p = profiler.start(f.profileMessageS(c.getChildren()), f.profileAt());
+						}
 					}
 					Mixed ret;
 					try {
-						ret = f.execs(m.getTarget(), env, this, c.getChildren().toArray(new ParseTree[]{}));
+						ret = f.execs(m.getTarget(), env, this, c.getChildren().toArray(new ParseTree[args.length]));
 					} finally {
 						if(p != null) {
 							p.stop();
@@ -411,28 +417,10 @@ public class Script {
 					return ret;
 				}
 
-				for(ParseTree c2 : c.getChildren()) {
-					args.add(eval(c2, env));
-				}
-				Object[] a = args.toArray();
-				Mixed[] ca = new Mixed[a.length];
-				for(int i = 0; i < a.length; i++) {
-					ca[i] = (Mixed) a[i];
-					// TODO: This code is outdated and needs to be rethought.
-					//CArray, CBoolean, CDouble, CInt, CNull, CString, CVoid, CEntry, CLabel (only to sconcat).
-//					if(!(ca[i].isInstanceOf(CArray.class) || ca[i] instanceof CBoolean || ca[i] instanceof CDouble
-//							|| ca[i] instanceof CInt || ca[i] instanceof CNull
-//							|| ca[i] instanceof CString || ca[i] instanceof CVoid
-//							|| ca[i] instanceof IVariable || ca[i] instanceof CEntry || ca[i] instanceof CLabel)
-//							&& (!f.getName().equals("__autoconcat__") && (ca[i] instanceof CLabel))) {
-//						throw new CRECastException("Invalid Mixed ("
-//								+ ca[i].getClass() + ") being passed as an argument to a function ("
-//								+ f.getName() + ")", m.getTarget());
-//					}
-					while(f.preResolveVariables() && ca[i] instanceof IVariable) {
-						IVariable cur = (IVariable) ca[i];
-						ca[i] = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getVariableName(), cur.getTarget(),
-								env).ival();
+				for(int i = 0; i < args.length; i++) {
+					args[i] = eval(c.getChildAt(i), env);
+					while(f.preResolveVariables() && args[i] instanceof IVariable cur) {
+						args[i] = globalEnv.GetVarList().get(cur.getVariableName(), cur.getTarget(), env).ival();
 					}
 				}
 
@@ -440,13 +428,15 @@ public class Script {
 					//It takes a moment to generate the toString of some things, so lets not do it
 					//if we actually aren't going to profile
 					ProfilePoint p = null;
-					if(f.shouldProfile() && env.getEnv(StaticRuntimeEnv.class).GetProfiler() != null
-							&& env.getEnv(StaticRuntimeEnv.class).GetProfiler().isLoggable(f.profileAt())) {
-						p = env.getEnv(StaticRuntimeEnv.class).GetProfiler().start(f.profileMessage(ca), f.profileAt());
+					if(f.shouldProfile()) {
+						Profiler profiler = env.getEnv(StaticRuntimeEnv.class).GetProfiler();
+						if(profiler.isLoggable(f.profileAt())) {
+							p = profiler.start(f.profileMessage(args), f.profileAt());
+						}
 					}
 					Mixed ret;
 					try {
-						ret = f.exec(m.getTarget(), env, ca);
+						ret = f.exec(m.getTarget(), env, args);
 					} finally {
 						if(p != null) {
 							p.stop();
@@ -508,22 +498,19 @@ public class Script {
 
 				List<String> args2 = new ArrayList<>();
 				Map<String, String> vars = new HashMap<>();
-				for(Mixed cc : args) {
-					if(cc instanceof IVariable) {
-						Mixed ccc = env.getEnv(GlobalEnv.class).GetVarList().get(((IVariable) cc).getVariableName(),
-								cc.getTarget(), env).ival();
-						String vval = ccc.val();
-						if(ccc instanceof CString) {
-							vval = new CString(ccc.val(), Target.UNKNOWN).getQuote();
+				for(int i = 0; i < args.length; i++) {
+					Mixed cc = args[i];
+					if(c.getChildAt(i).getData() instanceof IVariable ivar) {
+						String vval = cc.val();
+						if(cc instanceof CString) {
+							vval = ((CString) cc).getQuote();
 						}
-						vars.put(((IVariable) cc).getVariableName(), vval);
-					}
-					if(cc == null) {
+						vars.put(ivar.getVariableName(), vval);
+						args2.add(ivar.getVariableName());
+					} else if(cc == null) {
 						args2.add("java-null");
 					} else if(cc instanceof CString) {
 						args2.add(new CString(cc.val(), Target.UNKNOWN).getQuote());
-					} else if(cc instanceof IVariable) {
-						args2.add(((IVariable) cc).getVariableName());
 					} else if(cc instanceof CClosure) {
 						args2.add("<closure>");
 					} else {
