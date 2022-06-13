@@ -56,6 +56,7 @@ import org.bukkit.FireworkEffect;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
+import org.bukkit.SoundCategory;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -308,8 +309,24 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 
 	@Override
 	public void playSound(MCLocation l, MCSound sound, MCSoundCategory category, float volume, float pitch) {
-		w.playSound((Location) l.getHandle(), ((BukkitMCSound) sound).getConcrete(),
-				BukkitMCSoundCategory.getConvertor().getConcreteEnum(category), volume, pitch);
+		if(category == null) {
+			w.playSound((Location) l.getHandle(), ((BukkitMCSound) sound).getConcrete(),
+					SoundCategory.MASTER, volume, pitch);
+		} else {
+			w.playSound((Location) l.getHandle(), ((BukkitMCSound) sound).getConcrete(),
+					BukkitMCSoundCategory.getConvertor().getConcreteEnum(category), volume, pitch);
+		}
+	}
+
+	@Override
+	public void playSound(MCEntity ent, MCSound sound, MCSoundCategory category, float volume, float pitch) {
+		if(category == null) {
+			w.playSound((Entity) ent.getHandle(), ((BukkitMCSound) sound).getConcrete(),
+					SoundCategory.MASTER, volume, pitch);
+		} else {
+			w.playSound((Entity) ent.getHandle(), ((BukkitMCSound) sound).getConcrete(),
+					BukkitMCSoundCategory.getConvertor().getConcreteEnum(category), volume, pitch);
+		}
 	}
 
 	@Override

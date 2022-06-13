@@ -29,6 +29,7 @@ import com.laytonsmith.abstraction.enums.MCSound;
 import com.laytonsmith.abstraction.enums.MCSoundCategory;
 import com.laytonsmith.abstraction.enums.MCTone;
 import com.laytonsmith.abstraction.enums.MCTreeType;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.core.ArgumentValidation;
@@ -1632,7 +1633,16 @@ public class Environment {
 				com.laytonsmith.core.environments.Environment environment,
 				Mixed... args) throws ConfigRuntimeException {
 
-			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			MCLocation loc = null;
+			MCEntity ent = null;
+			if(args[0].isInstanceOf(CArray.TYPE)) {
+				loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			} else if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_18_X)) {
+				ent = Static.getEntity(args[0], t);
+			} else {
+				throw new CREFormatException("Expecting a location array on versions prior to MC 1.18.2", t);
+			}
+
 			MCSound sound;
 			MCSoundCategory category = null;
 			float volume = 1;
@@ -1669,7 +1679,7 @@ public class Environment {
 			}
 
 			if(args.length == 3) {
-				java.util.List<MCPlayer> players = new java.util.ArrayList<MCPlayer>();
+				java.util.List<MCPlayer> players = new java.util.ArrayList<>();
 				if(args[2].isInstanceOf(CArray.TYPE)) {
 					for(String key : ((CArray) args[2]).stringKeySet()) {
 						players.add(Static.GetPlayer(((CArray) args[2]).get(key, t), t));
@@ -1678,9 +1688,9 @@ public class Environment {
 					players.add(Static.GetPlayer(args[2], t));
 				}
 
-				if(category == null) {
+				if(loc == null) {
 					for(MCPlayer p : players) {
-						p.playSound(loc, sound, volume, pitch);
+						p.playSound(ent, sound, category, volume, pitch);
 					}
 				} else {
 					for(MCPlayer p : players) {
@@ -1688,8 +1698,8 @@ public class Environment {
 					}
 				}
 
-			} else if(category == null) {
-				loc.getWorld().playSound(loc, sound, volume, pitch);
+			} else if(loc == null) {
+				ent.getWorld().playSound(ent, sound, category, volume, pitch);
 			} else {
 				loc.getWorld().playSound(loc, sound, category, volume, pitch);
 			}
@@ -1708,8 +1718,8 @@ public class Environment {
 
 		@Override
 		public String docs() {
-			return "void {locationArray, soundArray[, players]} Plays a sound at the"
-					+ " given location. SoundArray is in an associative array with"
+			return "void {source, soundArray[, players]} Plays a sound at the given source."
+					+ " Source can be a location array or entity UUID. SoundArray is in an associative array with"
 					+ " keys 'sound', 'category', 'volume', 'pitch', where all are optional except sound."
 					+ " Volume, if greater than 1.0 (default), is the distance in chunks players can hear the sound."
 					+ " Pitch has a range of 0.5 - 2.0, where where 1.0 is the middle pitch and default. Players can"
@@ -1745,7 +1755,8 @@ public class Environment {
 							} catch (IllegalArgumentException ex) {
 								env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
 										new CompilerWarning(children.get(1).getData().val()
-												+ " is not a valid enum in com.commandhelper.Sound", t, null));
+												+ " is not a valid enum in com.commandhelper.Sound",
+												children.get(1).getTarget(), null));
 							}
 						}
 					}

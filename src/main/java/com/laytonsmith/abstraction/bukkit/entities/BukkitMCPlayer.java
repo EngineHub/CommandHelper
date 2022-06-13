@@ -41,6 +41,7 @@ import org.bukkit.Material;
 import org.bukkit.Note;
 import org.bukkit.Particle;
 import org.bukkit.Server;
+import org.bukkit.SoundCategory;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -542,8 +543,24 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 
 	@Override
 	public void playSound(MCLocation l, MCSound sound, MCSoundCategory category, float volume, float pitch) {
-		p.playSound((Location) l.getHandle(), ((BukkitMCSound) sound).getConcrete(),
-				BukkitMCSoundCategory.getConvertor().getConcreteEnum(category), volume, pitch);
+		if(category == null) {
+			p.playSound((Location) l.getHandle(), ((BukkitMCSound) sound).getConcrete(),
+					SoundCategory.MASTER, volume, pitch);
+		} else {
+			p.playSound((Location) l.getHandle(), ((BukkitMCSound) sound).getConcrete(),
+					BukkitMCSoundCategory.getConvertor().getConcreteEnum(category), volume, pitch);
+		}
+	}
+
+	@Override
+	public void playSound(MCEntity ent, MCSound sound, MCSoundCategory category, float volume, float pitch) {
+		if(category == null) {
+			p.playSound((Entity) ent.getHandle(), ((BukkitMCSound) sound).getConcrete(),
+					SoundCategory.MASTER, volume, pitch);
+		} else {
+			p.playSound((Entity) ent.getHandle(), ((BukkitMCSound) sound).getConcrete(),
+					BukkitMCSoundCategory.getConvertor().getConcreteEnum(category), volume, pitch);
+		}
 	}
 
 	@Override
