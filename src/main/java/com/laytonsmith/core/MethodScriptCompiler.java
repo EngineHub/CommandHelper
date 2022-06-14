@@ -54,6 +54,7 @@ import com.laytonsmith.core.functions.Compiler;
 import com.laytonsmith.core.functions.Compiler.__autoconcat__;
 import com.laytonsmith.core.functions.Compiler.__cbrace__;
 import com.laytonsmith.core.functions.Compiler.__smart_string__;
+import com.laytonsmith.core.functions.Compiler.__statements__;
 import com.laytonsmith.core.functions.Compiler.p;
 import com.laytonsmith.core.functions.ControlFlow;
 import com.laytonsmith.core.functions.DataHandling;
@@ -2118,6 +2119,12 @@ public final class MethodScriptCompiler {
 			Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> compilerExceptions,
 			boolean rewriteKeywords) {
 		if(!root.hasChildren()) {
+			if(root.getData() instanceof CFunction && root.getData().val().equals(__autoconcat__.NAME)) {
+				ParseTree tree = new ParseTree(new CFunction(__statements__.NAME, root.getTarget()),
+						root.getFileOptions(), true);
+				tree.setOptimized(true);
+				root.replace(tree);
+			}
 			return;
 		}
 		List<List<ParseTree>> children = new ArrayList<>();
