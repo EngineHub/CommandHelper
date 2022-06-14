@@ -3,9 +3,7 @@ package com.laytonsmith.abstraction.bukkit.entities;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.entities.MCPanda;
 import com.laytonsmith.abstraction.enums.EnumConvertor;
-import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.annotations.abstractionenum;
-import com.laytonsmith.core.Static;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Panda;
 
@@ -52,14 +50,6 @@ public class BukkitMCPanda extends BukkitMCAgeable implements MCPanda {
 				instance = new BukkitMCPandaGene();
 			}
 			return instance;
-		}
-
-		@Override
-		protected Panda.Gene getConcreteEnumCustom(MCPanda.Gene abstracted) {
-			if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_14)) {
-				return null;
-			}
-			return super.getConcreteEnumCustom(abstracted);
 		}
 	}
 }

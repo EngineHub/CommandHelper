@@ -61,9 +61,6 @@ public abstract class MCProfession<Concrete> extends DynamicEnum<MCProfession.MC
 	}
 
 	public enum MCVanillaProfession {
-		BLACKSMITH(MCVersion.MC1_12_X, MCVersion.MC1_13_X),
-		NORMAL(MCVersion.MC1_12_X, MCVersion.MC1_13_X),
-		PRIEST(MCVersion.MC1_12_X, MCVersion.MC1_13_X),
 		BUTCHER,
 		FARMER,
 		LIBRARIAN,

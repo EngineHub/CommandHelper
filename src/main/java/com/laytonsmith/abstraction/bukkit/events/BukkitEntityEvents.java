@@ -1,6 +1,5 @@
 package com.laytonsmith.abstraction.bukkit.events;
 
-import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCEntity;
@@ -40,7 +39,6 @@ import com.laytonsmith.abstraction.enums.MCRemoveCause;
 import com.laytonsmith.abstraction.enums.MCSpawnReason;
 import com.laytonsmith.abstraction.enums.MCTargetReason;
 import com.laytonsmith.abstraction.enums.MCUnleashReason;
-import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDamageCause;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCRegainReason;
@@ -77,7 +75,6 @@ import com.laytonsmith.abstraction.events.MCPotionSplashEvent;
 import com.laytonsmith.abstraction.events.MCProjectileHitEvent;
 import com.laytonsmith.abstraction.events.MCProjectileLaunchEvent;
 import com.laytonsmith.annotations.abstraction;
-import com.laytonsmith.core.Static;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -115,7 +112,6 @@ import org.bukkit.event.hanging.HangingPlaceEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
-import org.bukkit.event.player.PlayerPortalEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
@@ -955,10 +951,6 @@ public class BukkitEntityEvents {
 			World w = (World) newloc.getWorld().getHandle();
 			Location loc = new Location(w, newloc.getX(), newloc.getY(), newloc.getZ());
 			epe.setTo(loc);
-			if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_14)) {
-				// Use travel agent if setting location
-				useTravelAgent();
-			}
 		}
 
 		@Override
@@ -984,46 +976,14 @@ public class BukkitEntityEvents {
 			return epe.isCancelled();
 		}
 
-		// 1.13.2 support
-		private Object getTravelAgent() {
-			return ReflectionUtils.invokeMethod(PlayerPortalEvent.class, epe, "getPortalTravelAgent");
-		}
-
-		// 1.13.2 support
-		private void useTravelAgent() {
-			ReflectionUtils.set(PlayerPortalEvent.class, epe, "useTravelAgent", true);
-		}
-
 		@Override
 		public int getSearchRadius() {
-			try {
-				return epe.getSearchRadius();
-			} catch (NoSuchMethodError ex) {
-				// prior to 1.15.1
-			}
-			try {
-				Object ta = getTravelAgent();
-				return (int) ReflectionUtils.invokeMethod(ta, "getSearchRadius");
-			} catch (ReflectionUtils.ReflectionException ex) {
-				// after 1.13.2
-			}
-			return 128; // default, though this can be modified on some servers
+			return epe.getSearchRadius();
 		}
 
 		@Override
 		public void setSearchRadius(int radius) {
-			try {
-				epe.setSearchRadius(radius);
-			} catch (NoSuchMethodError ex) {
-				// prior to 1.15.1
-			}
-			try {
-				useTravelAgent();
-				Object ta = getTravelAgent();
-				ReflectionUtils.set(ta.getClass(), ta, "searchRadius", radius);
-			} catch (ReflectionUtils.ReflectionException ex) {
-				// after 1.13.2
-			}
+			epe.setSearchRadius(radius);
 		}
 	}
 

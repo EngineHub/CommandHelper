@@ -1030,8 +1030,9 @@ public class Environment {
 				try {
 					MCBiomeType.MCVanillaBiomeType.valueOf(c.val());
 				} catch (IllegalArgumentException ex) {
-					env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
-							new CompilerWarning(c.val() + " is not a valid enum in com.commandhelper.BiomeType", t, null));
+					env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions, new CompilerWarning(
+							c.val() + " is not a valid enum in com.commandhelper.BiomeType",
+							c.getTarget(), null));
 				}
 			}
 			return null;

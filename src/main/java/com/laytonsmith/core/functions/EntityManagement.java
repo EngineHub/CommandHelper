@@ -61,7 +61,6 @@ import com.laytonsmith.abstraction.entities.MCLlama;
 import com.laytonsmith.abstraction.entities.MCLlama.MCLlamaColor;
 import com.laytonsmith.abstraction.entities.MCMinecart;
 import com.laytonsmith.abstraction.entities.MCMushroomCow;
-import com.laytonsmith.abstraction.entities.MCOcelot;
 import com.laytonsmith.abstraction.entities.MCPainting;
 import com.laytonsmith.abstraction.entities.MCPanda;
 import com.laytonsmith.abstraction.entities.MCParrot;
@@ -81,7 +80,6 @@ import com.laytonsmith.abstraction.entities.MCSpectralArrow;
 import com.laytonsmith.abstraction.entities.MCStrider;
 import com.laytonsmith.abstraction.entities.MCTNT;
 import com.laytonsmith.abstraction.entities.MCThrownPotion;
-import com.laytonsmith.abstraction.entities.MCTippedArrow;
 import com.laytonsmith.abstraction.entities.MCTrident;
 import com.laytonsmith.abstraction.entities.MCTropicalFish;
 import com.laytonsmith.abstraction.entities.MCVex;
@@ -102,14 +100,12 @@ import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCFireworkType;
 import com.laytonsmith.abstraction.enums.MCFoxType;
 import com.laytonsmith.abstraction.enums.MCMushroomCowType;
-import com.laytonsmith.abstraction.enums.MCOcelotType;
 import com.laytonsmith.abstraction.enums.MCParrotType;
 import com.laytonsmith.abstraction.enums.MCParticle;
 import com.laytonsmith.abstraction.enums.MCProfession;
 import com.laytonsmith.abstraction.enums.MCRabbitType;
 import com.laytonsmith.abstraction.enums.MCRotation;
 import com.laytonsmith.abstraction.enums.MCTreeSpecies;
-import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.ArgumentValidation;
@@ -118,12 +114,15 @@ import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.CompilerEnvironment;
+import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CDouble;
+import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
@@ -304,9 +303,8 @@ public class EntityManagement {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCEntity e;
 			try {
-				e = Static.getEntity(args[0], t);
+				Static.getEntity(args[0], t);
 			} catch (ConfigRuntimeException cre) {
 				return CBoolean.FALSE;
 			}
@@ -730,7 +728,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class shoot_projectile extends EntityFunction {
+	public static class shoot_projectile extends EntityFunction implements Optimizable {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -859,10 +857,37 @@ public class EntityManagement {
 		public MSVersion since() {
 			return MSVersion.V3_3_1;
 		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, com.laytonsmith.core.environments.Environment env,
+				Set<Class<? extends com.laytonsmith.core.environments.Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+
+			if(children.size() < 2) {
+				return null;
+			}
+			Mixed c = children.get(1).getData();
+			if(c.isInstanceOf(CString.TYPE)) {
+				try {
+					MCEntityType.MCVanillaEntityType.valueOf(c.val().toUpperCase());
+				} catch (IllegalArgumentException ex) {
+					env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions, new CompilerWarning(
+							c.val() + " is not a valid enum in com.commandhelper.EntityType",
+							c.getTarget(), null));
+				}
+			}
+			return null;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class entities_in_radius extends EntityFunction {
+	public static class entities_in_radius extends EntityFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -960,6 +985,45 @@ public class EntityManagement {
 		@Override
 		public MSVersion since() {
 			return MSVersion.V3_3_1;
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, com.laytonsmith.core.environments.Environment env,
+				Set<Class<? extends com.laytonsmith.core.environments.Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+
+			if(children.size() < 3) {
+				return null;
+			}
+			Mixed c = children.get(children.size() - 1).getData();
+			if(c.isInstanceOf(CString.TYPE)) {
+				try {
+					MCEntityType.MCVanillaEntityType.valueOf(c.val().toUpperCase());
+				} catch (IllegalArgumentException ex) {
+					env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions, new CompilerWarning(
+							c.val() + " is not a valid enum in com.commandhelper.EntityType",
+							c.getTarget(), null));
+				}
+			} else if(c instanceof CFunction && c.val().equals("array")) {
+				for(ParseTree node : children.get(children.size() - 1).getChildren()) {
+					if(node.getData().isInstanceOf(CString.TYPE)) {
+						try {
+							MCEntityType.MCVanillaEntityType.valueOf(node.getData().val().toUpperCase());
+						} catch (IllegalArgumentException ex) {
+							env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions, new CompilerWarning(
+									node.getData().val() + " is not a valid enum in com.commandhelper.EntityType",
+									node.getTarget(), null));
+						}
+					}
+				}
+			}
+			return null;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
 	}
 
@@ -1125,7 +1189,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class spawn_entity extends EntityFunction {
+	public static class spawn_entity extends EntityFunction implements Optimizable {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -1250,6 +1314,33 @@ public class EntityManagement {
 							+ " closure(@id){ set_entity_spec(@id, array('baby': true)); set_entity_ai(@id, false); })",
 							"Creates a zombie, changes it to a baby zombie without AI, then adds it to the world."),
 			};
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, com.laytonsmith.core.environments.Environment env,
+				Set<Class<? extends com.laytonsmith.core.environments.Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+
+			if(children.size() < 1) {
+				return null;
+			}
+			Mixed c = children.get(0).getData();
+			if(c.isInstanceOf(CString.TYPE)) {
+				try {
+					MCEntityType.MCVanillaEntityType.valueOf(c.val().toUpperCase());
+				} catch (IllegalArgumentException ex) {
+					env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions, new CompilerWarning(
+							c.val() + " is not a valid enum in com.commandhelper.EntityType",
+							c.getTarget(), null));
+				}
+			}
+			return null;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
 	}
 
@@ -1698,7 +1789,6 @@ public class EntityManagement {
 			docs = docs.replace("%HORSE_STYLE%", StringUtils.Join(MCHorsePattern.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%LLAMA_COLOR%", StringUtils.Join(MCLlamaColor.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%ROTATION%", StringUtils.Join(MCRotation.values(), ", ", ", or ", " or "));
-			docs = docs.replace("%OCELOT_TYPE%", StringUtils.Join(MCOcelotType.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%PARROT_TYPE%", StringUtils.Join(MCParrotType.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%ART%", StringUtils.Join(MCArt.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%DYE_COLOR%", StringUtils.Join(MCDyeColor.values(), ", ", ", or ", " or "));
@@ -1765,13 +1855,11 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_ARROW_CRITICAL, CBoolean.get(arrow.isCritical()), t);
 					specArray.set(entity_spec.KEY_ARROW_KNOCKBACK, new CInt(arrow.getKnockbackStrength(), t), t);
 					specArray.set(entity_spec.KEY_ARROW_DAMAGE, new CDouble(arrow.getDamage(), t), t);
-					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_14)) {
-						CArray tippedmeta = CArray.GetAssociativeArray(t);
-						CArray tippedeffects = ObjectGenerator.GetGenerator().potions(arrow.getCustomEffects(), t);
-						tippedmeta.set("potions", tippedeffects, t);
-						tippedmeta.set("base", ObjectGenerator.GetGenerator().potionData(arrow.getBasePotionData(), t), t);
-						specArray.set(entity_spec.KEY_TIPPEDARROW_POTIONMETA, tippedmeta, t);
-					}
+					CArray tippedmeta = CArray.GetAssociativeArray(t);
+					CArray tippedeffects = ObjectGenerator.GetGenerator().potions(arrow.getCustomEffects(), t);
+					tippedmeta.set("potions", tippedeffects, t);
+					tippedmeta.set("base", ObjectGenerator.GetGenerator().potionData(arrow.getBasePotionData(), t), t);
+					specArray.set(entity_spec.KEY_TIPPEDARROW_POTIONMETA, tippedmeta, t);
 					break;
 				case ARMOR_STAND:
 					MCArmorStand stand = (MCArmorStand) entity;
@@ -1985,17 +2073,8 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_MINECART_OFFSET, new CInt(commandminecart.getDisplayBlockOffset(), t), t);
 					break;
 				case MUSHROOM_COW:
-					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_14)) {
-						MCMushroomCow cow = (MCMushroomCow) entity;
-						specArray.set(entity_spec.KEY_MUSHROOM_COW_TYPE, cow.getVariant().name(), t);
-					}
-					break;
-				case OCELOT:
-					if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_14)) {
-						MCOcelot ocelot = (MCOcelot) entity;
-						specArray.set(entity_spec.KEY_OCELOT_TYPE, new CString(ocelot.getCatType().name(), t), t);
-						specArray.set(entity_spec.KEY_GENERIC_SITTING, CBoolean.get(ocelot.isSitting()), t);
-					}
+					MCMushroomCow cow = (MCMushroomCow) entity;
+					specArray.set(entity_spec.KEY_MUSHROOM_COW_TYPE, cow.getVariant().name(), t);
 					break;
 				case PAINTING:
 					MCPainting painting = (MCPainting) entity;
@@ -2080,24 +2159,12 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_SPECTRAL_ARROW_GLOWING_TICKS, new CInt(spectral.getGlowingTicks(), t), t);
 					break;
 				case SPLASH_POTION:
-				case LINGERING_POTION: // 1.13 only
 					MCThrownPotion potion = (MCThrownPotion) entity;
 					specArray.set(entity_spec.KEY_SPLASH_POTION_ITEM, ObjectGenerator.GetGenerator().item(potion.getItem(), t), t);
 					break;
 				case STRIDER:
 					MCStrider strider = (MCStrider) entity;
 					specArray.set(entity_spec.KEY_STEERABLE_SADDLED, CBoolean.get(strider.isSaddled()), t);
-					break;
-				case TIPPED_ARROW: // 1.13 only
-					MCTippedArrow tippedarrow = (MCTippedArrow) entity;
-					specArray.set(entity_spec.KEY_ARROW_CRITICAL, CBoolean.get(tippedarrow.isCritical()), t);
-					specArray.set(entity_spec.KEY_ARROW_KNOCKBACK, new CInt(tippedarrow.getKnockbackStrength(), t), t);
-					specArray.set(entity_spec.KEY_ARROW_DAMAGE, new CDouble(tippedarrow.getDamage(), t), t);
-					CArray tippedmeta = CArray.GetAssociativeArray(t);
-					CArray tippedeffects = ObjectGenerator.GetGenerator().potions(tippedarrow.getCustomEffects(), t);
-					tippedmeta.set("potions", tippedeffects, t);
-					tippedmeta.set("base", ObjectGenerator.GetGenerator().potionData(tippedarrow.getBasePotionData(), t), t);
-					specArray.set(entity_spec.KEY_TIPPEDARROW_POTIONMETA, tippedmeta, t);
 					break;
 				case TRIDENT:
 					MCTrident trident = (MCTrident) entity;
@@ -2148,7 +2215,6 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_VILLAGER_PROFESSION, new CString(zombievillager.getProfession().name(), t), t);
 					break;
 				case ZOMBIFIED_PIGLIN:
-				case PIG_ZOMBIE:
 					MCPigZombie pigZombie = (MCPigZombie) entity;
 					specArray.set(entity_spec.KEY_ZOMBIFIED_PIGLIN_ANGRY, CBoolean.get(pigZombie.isAngry()), t);
 					specArray.set(entity_spec.KEY_ZOMBIFIED_PIGLIN_ANGER, new CInt(pigZombie.getAnger(), t), t);
@@ -2242,7 +2308,6 @@ public class EntityManagement {
 		private static final String KEY_MINECART_COMMAND_COMMAND = "command";
 		private static final String KEY_MINECART_COMMAND_CUSTOMNAME = "customname";
 		private static final String KEY_MUSHROOM_COW_TYPE = "type";
-		private static final String KEY_OCELOT_TYPE = "type";
 		private static final String KEY_PAINTING_ART = "type";
 		private static final String KEY_PANDA_MAINGENE = "maingene";
 		private static final String KEY_PANDA_HIDDENGENE = "hiddengene";
@@ -2478,9 +2543,6 @@ public class EntityManagement {
 								arrow.setDamage(d);
 								break;
 							case entity_spec.KEY_TIPPEDARROW_POTIONMETA:
-								if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_14)) {
-									throwException(index, t);
-								}
 								Mixed c = specArray.get(index, t);
 								if(c.isInstanceOf(CArray.TYPE)) {
 									CArray meta = (CArray) c;
@@ -3141,41 +3203,18 @@ public class EntityManagement {
 					}
 					break;
 				case MUSHROOM_COW:
-					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_14)) {
-						MCMushroomCow cow = (MCMushroomCow) entity;
-						for(String index : specArray.stringKeySet()) {
-							switch(index.toLowerCase()) {
-								case entity_spec.KEY_MUSHROOM_COW_TYPE:
-									try {
-										cow.setVariant(MCMushroomCowType.valueOf(specArray.get(index, t).val().toUpperCase()));
-									} catch (IllegalArgumentException exception) {
-										throw new CREFormatException("Invalid mushroom cow type: " + specArray.get(index, t).val(), t);
-									}
-									break;
-								default:
-									throwException(index, t);
-							}
-						}
-					}
-					break;
-				case OCELOT:
-					if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_14)) {
-						MCOcelot ocelot = (MCOcelot) entity;
-						for(String index : specArray.stringKeySet()) {
-							switch(index.toLowerCase()) {
-								case entity_spec.KEY_OCELOT_TYPE:
-									try {
-										ocelot.setCatType(MCOcelotType.valueOf(specArray.get(index, t).val().toUpperCase()));
-									} catch (IllegalArgumentException exception) {
-										throw new CREFormatException("Invalid ocelot type: " + specArray.get(index, t).val(), t);
-									}
-									break;
-								case entity_spec.KEY_GENERIC_SITTING:
-									ocelot.setSitting(ArgumentValidation.getBoolean(specArray.get(index, t), t));
-									break;
-								default:
-									throwException(index, t);
-							}
+					MCMushroomCow cow = (MCMushroomCow) entity;
+					for(String index : specArray.stringKeySet()) {
+						switch(index.toLowerCase()) {
+							case entity_spec.KEY_MUSHROOM_COW_TYPE:
+								try {
+									cow.setVariant(MCMushroomCowType.valueOf(specArray.get(index, t).val().toUpperCase()));
+								} catch (IllegalArgumentException exception) {
+									throw new CREFormatException("Invalid mushroom cow type: " + specArray.get(index, t).val(), t);
+								}
+								break;
+							default:
+								throwException(index, t);
 						}
 					}
 					break;
@@ -3448,7 +3487,6 @@ public class EntityManagement {
 						}
 					}
 					break;
-				case LINGERING_POTION:
 				case SPLASH_POTION:
 					MCThrownPotion potion = (MCThrownPotion) entity;
 					for(String index : specArray.stringKeySet()) {
@@ -3472,58 +3510,6 @@ public class EntityManagement {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_STEERABLE_SADDLED:
 								strider.setSaddled(ArgumentValidation.getBoolean(specArray.get(index, t), t));
-								break;
-							default:
-								throwException(index, t);
-						}
-					}
-					break;
-				case TIPPED_ARROW:
-					MCTippedArrow tippedarrow = (MCTippedArrow) entity;
-					for(String index : specArray.stringKeySet()) {
-						switch(index.toLowerCase()) {
-							case entity_spec.KEY_ARROW_CRITICAL:
-								tippedarrow.setCritical(ArgumentValidation.getBoolean(specArray.get(index, t), t));
-								break;
-							case entity_spec.KEY_ARROW_KNOCKBACK:
-								int k = ArgumentValidation.getInt32(specArray.get(index, t), t);
-								if(k < 0) {
-									throw new CRERangeException("Knockback can not be negative.", t);
-								} else {
-									tippedarrow.setKnockbackStrength(k);
-								}
-								break;
-							case entity_spec.KEY_ARROW_DAMAGE:
-								double d = ArgumentValidation.getDouble(specArray.get(index, t), t);
-								if(d < 0) {
-									throw new CRERangeException("Damage cannot be negative.", t);
-								}
-								tippedarrow.setDamage(d);
-								break;
-							case entity_spec.KEY_TIPPEDARROW_POTIONMETA:
-								Mixed c = specArray.get(index, t);
-								if(c.isInstanceOf(CArray.TYPE)) {
-									CArray meta = (CArray) c;
-									if(meta.containsKey("base")) {
-										Mixed base = meta.get("base", t);
-										if(base.isInstanceOf(CArray.TYPE)) {
-											MCPotionData pd = ObjectGenerator.GetGenerator().potionData((CArray) base, t);
-											tippedarrow.setBasePotionData(pd);
-										}
-									}
-									if(meta.containsKey("potions")) {
-										tippedarrow.clearCustomEffects();
-										Mixed potions = meta.get("potions", t);
-										if(potions.isInstanceOf(CArray.TYPE)) {
-											List<MCLivingEntity.MCEffect> list = ObjectGenerator.GetGenerator().potions((CArray) potions, t);
-											for(MCLivingEntity.MCEffect effect : list) {
-												tippedarrow.addCustomEffect(effect);
-											}
-										}
-									}
-								} else {
-									throw new CRECastException("TippedArrow potion meta must be an array", t);
-								}
 								break;
 							default:
 								throwException(index, t);
@@ -3714,7 +3700,6 @@ public class EntityManagement {
 					}
 					break;
 				case ZOMBIFIED_PIGLIN:
-				case PIG_ZOMBIE:
 					MCPigZombie pigZombie = (MCPigZombie) entity;
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {

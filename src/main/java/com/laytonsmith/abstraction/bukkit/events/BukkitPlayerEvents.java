@@ -1,6 +1,5 @@
 package com.laytonsmith.abstraction.bukkit.events;
 
-import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCBookMeta;
 import com.laytonsmith.abstraction.MCEntity;
@@ -29,7 +28,6 @@ import com.laytonsmith.abstraction.enums.MCFishingState;
 import com.laytonsmith.abstraction.enums.MCGameMode;
 import com.laytonsmith.abstraction.enums.MCResourcePackStatus;
 import com.laytonsmith.abstraction.enums.MCTeleportCause;
-import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCAction;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEnterBedResult;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCFishingState;
@@ -63,7 +61,6 @@ import com.laytonsmith.abstraction.events.MCPlayerToggleSneakEvent;
 import com.laytonsmith.abstraction.events.MCPlayerToggleSprintEvent;
 import com.laytonsmith.abstraction.events.MCWorldChangedEvent;
 import com.laytonsmith.annotations.abstraction;
-import com.laytonsmith.core.Static;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -335,16 +332,6 @@ public class BukkitPlayerEvents {
 			p = event;
 		}
 
-		// 1.13.2 support
-		private Object getTravelAgent() {
-			return ReflectionUtils.invokeMethod(PlayerPortalEvent.class, p, "getPortalTravelAgent");
-		}
-
-		// 1.13.2 support
-		private void useTravelAgent() {
-			ReflectionUtils.set(PlayerPortalEvent.class, p, "useTravelAgent", true);
-		}
-
 		@Override
 		public MCLocation getTo() {
 			if(e.getTo() == null) {
@@ -356,111 +343,36 @@ public class BukkitPlayerEvents {
 		@Override
 		public void setTo(MCLocation newloc) {
 			super.setTo(newloc);
-			if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_14)) {
-				// Use travel agent if setting location
-				useTravelAgent();
-			}
 		}
 
 		@Override
 		public int getSearchRadius() {
-			try {
-				return p.getSearchRadius();
-			} catch (NoSuchMethodError ex) {
-				// prior to 1.15.1
-			}
-			try {
-				Object ta = getTravelAgent();
-				return (int) ReflectionUtils.invokeMethod(ta, "getSearchRadius");
-			} catch (ReflectionUtils.ReflectionException ex) {
-				// after 1.13.2
-			}
-			return 128; // default, though this can be modified on some servers
+			return p.getSearchRadius();
 		}
 
 		@Override
 		public void setSearchRadius(int radius) {
-			try {
-				p.setSearchRadius(radius);
-			} catch (NoSuchMethodError ex) {
-				// prior to 1.15.1
-			}
-			try {
-				useTravelAgent();
-				Object ta = getTravelAgent();
-				ReflectionUtils.set(ta.getClass(), ta, "searchRadius", radius);
-			} catch (ReflectionUtils.ReflectionException ex) {
-				// after 1.13.2
-			}
+			p.setSearchRadius(radius);
 		}
 
 		@Override
 		public int getCreationRadius() {
-			try {
-				return p.getCreationRadius();
-			} catch (NoSuchMethodError ex) {
-				// prior to 1.15.1
-			}
-			try {
-				Object ta = getTravelAgent();
-				return (int) ReflectionUtils.invokeMethod(ta, "getCreationRadius");
-			} catch (ReflectionUtils.ReflectionException ex) {
-				// after 1.13.2
-			}
-			return 16; // default
+			return p.getCreationRadius();
 		}
 
 		@Override
 		public void setCreationRadius(int radius) {
-			try {
-				p.setCreationRadius(radius);
-			} catch (NoSuchMethodError ex) {
-				// prior to 1.15.1
-			}
-			try {
-				useTravelAgent();
-				Object ta = getTravelAgent();
-				ReflectionUtils.set(ta.getClass(), ta, "creationRadius", radius);
-			} catch (ReflectionUtils.ReflectionException ex) {
-				// after 1.13.2
-			}
+			p.setCreationRadius(radius);
 		}
 
 		@Override
 		public boolean canCreatePortal() {
-			try {
-				return p.getCanCreatePortal();
-			} catch (NoSuchMethodError ex) {
-				// prior to 1.15.1
-			}
-			try {
-				boolean useTravelAgent = (boolean) ReflectionUtils.invokeMethod(PlayerPortalEvent.class, p,
-						"useTravelAgent", new Class[]{}, new Object[]{});
-				if(!useTravelAgent) {
-					return false;
-				}
-				Object ta = getTravelAgent();
-				return (boolean) ReflectionUtils.invokeMethod(ta, "getCanCreatePortal");
-			} catch (ReflectionUtils.ReflectionException ex) {
-				// after 1.13.2
-			}
-			return true;
+			return p.getCanCreatePortal();
 		}
 
 		@Override
 		public void setCanCreatePortal(boolean canCreate) {
-			try {
-				p.setCanCreatePortal(canCreate);
-			} catch (NoSuchMethodError ex) {
-				// prior to 1.15.1
-			}
-			try {
-				useTravelAgent();
-				Object ta = getTravelAgent();
-				ReflectionUtils.set(ta.getClass(), ta, "canCreatePortal", canCreate);
-			} catch (ReflectionUtils.ReflectionException ex) {
-				// after 1.13.2
-			}
+			p.setCanCreatePortal(canCreate);
 		}
 	}
 
