@@ -411,7 +411,11 @@ should match the parameter in the alias, and the type can be any valid MethodScr
 "$Player" and "$OfflinePlayer", or an ad-hoc enum, which is a comma separated list contained within square brackets.
 Depending on the MethodScript type, there will be different default autocomplete result, with special handling for
 enums, which autocomplete to the list of enums, boolean, which autocompletes to the strings "true" and "false". All
-other types disable auto completes for this variable.
+other types disable auto completes for this variable. Another special type begins with <code>$proc-></code> and should
+be the name of a proc that is used to provide autocompletion. It is only called for the specified parameter, and accepts
+the same arguments as general autocompleters. For instance, <code>$proc->_myCompleter</code> would call _myCompleter, sending
+it string @alias, string @sender, array @args, and would expect an array to be returned, which returns the list
+of completions. This is useful for completers that handle generic parameter types, but still require custom code.
 
 Note that these annotations will not be used if placed on an alias that isn't also a @command.
 The executor of the command is simply the code in the alias itself. Actually, it's worth noting that nothing

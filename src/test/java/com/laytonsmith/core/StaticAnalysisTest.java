@@ -284,4 +284,26 @@ public class StaticAnalysisTest {
 		}
 	}
 
+	@Test
+	public void testForwardDeclares() throws Exception {
+		saScript("int proc _test(); include(dyn('include.ms')); int @good = _test();",
+				file -> "int proc _test() { return 5; }");
+
+		try {
+			saScript("int proc _test(); include(dyn('include.ms')); string @bad = _test();",
+					file -> "int proc _test() { return 5; }");
+			fail();
+		} catch(ConfigCompileException ex) {
+			// pass
+		}
+
+		try {
+			saScript("include(dyn('include.ms')); string @bad = _test();",
+					file -> "int proc _test() { return 5; }");
+			fail();
+		} catch(ConfigCompileException ex) {
+			// pass
+		}
+	}
+
 }

@@ -52,4 +52,5 @@ public enum MCSpawnReason {
 	EXPLOSION,
 	FROZEN,
 	SPELL,
+	METAMORPHOSIS,
 }

@@ -285,12 +285,8 @@ public class BukkitMCServer implements MCServer {
 	private int bukkitBroadcastMessage(String message, Set<CommandSender> recipients) {
 
 		// Fire a BroadcastMessageEvent for this broadcast.
-		BroadcastMessageEvent broadcastMessageEvent;
-		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_14)) {
-			broadcastMessageEvent = new BroadcastMessageEvent(!Bukkit.isPrimaryThread(), message, recipients);
-		} else {
-			broadcastMessageEvent = new BroadcastMessageEvent(message, recipients);
-		}
+		BroadcastMessageEvent broadcastMessageEvent = new BroadcastMessageEvent(!Bukkit.isPrimaryThread(), message,
+				recipients);
 		this.s.getPluginManager().callEvent(broadcastMessageEvent);
 
 		// Return if the event was cancelled.
@@ -422,9 +418,6 @@ public class BukkitMCServer implements MCServer {
 
 	@Override
 	public String getServerName() {
-		if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_14)) {
-			return (String) ReflectionUtils.invokeMethod(Server.class, s, "getServerName");
-		}
 		return "";
 	}
 
@@ -575,12 +568,7 @@ public class BukkitMCServer implements MCServer {
 
 	@Override
 	public boolean removeRecipe(String key) {
-		try {
-			return s.removeRecipe(NamespacedKey.minecraft(key));
-		} catch (NoSuchMethodError ex) {
-			// probably before 1.15.2
-			return false;
-		}
+		return s.removeRecipe(NamespacedKey.minecraft(key));
 	}
 
 	@Override

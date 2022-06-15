@@ -606,7 +606,7 @@ public class Minecraft {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
-			MCServer server = StaticLayer.GetServer();
+			MCServer server = Static.getServer();
 			int index = -1;
 			if(args.length == 0) {
 				index = -1;
@@ -773,7 +773,7 @@ public class Minecraft {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
-			MCServer server = StaticLayer.GetServer();
+			MCServer server = Static.getServer();
 			CArray co = new CArray(t, null, env);
 			List<MCOfflinePlayer> so = server.getBannedPlayers();
 			for(MCOfflinePlayer o : so) {
@@ -827,7 +827,7 @@ public class Minecraft {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
-			MCServer server = StaticLayer.GetServer();
+			MCServer server = Static.getServer();
 			CArray co = new CArray(t, null, env);
 			List<MCOfflinePlayer> so = server.getWhitelistedPlayers();
 			for(MCOfflinePlayer o : so) {
@@ -1384,12 +1384,9 @@ public class Minecraft {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CArray mats = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
-					.addNativeParameter(CString.TYPE, null).buildNative(), env);
-			for(MCMaterial mat : StaticLayer.GetMaterialValues()) {
-				if(!mat.isLegacy()) {
-					mats.push(new CString(mat.getName(), t), t, env);
-				}
+			CArray mats = new CArray(t, null, env);
+			for(String mat : MCMaterial.types()) {
+				mats.push(new CString(mat, t), t, env);
 			}
 			return mats;
 		}

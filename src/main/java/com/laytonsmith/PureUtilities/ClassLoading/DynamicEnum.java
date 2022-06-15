@@ -5,7 +5,7 @@ package com.laytonsmith.PureUtilities.ClassLoading;
  */
 public abstract class DynamicEnum<Abstracted extends Enum, Concrete> {
 
-	protected Abstracted abstracted;
+	protected Abstracted abstracted; // field name reflectively accessed
 	protected Concrete concrete;
 
 	public DynamicEnum(Abstracted abstracted, Concrete concrete) {
@@ -14,11 +14,6 @@ public abstract class DynamicEnum<Abstracted extends Enum, Concrete> {
 	}
 
 	public abstract String name();
-
-	/**
-	 * @return always returns the concrete name
-	 */
-	public abstract String concreteName();
 
 	/**
 	 * Override me in API

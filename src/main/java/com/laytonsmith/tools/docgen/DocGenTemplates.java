@@ -20,11 +20,13 @@ import com.laytonsmith.core.Main;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.compiler.FileOptions;
+import com.laytonsmith.core.compiler.SelfStatement;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.events.prefilters.PrefilterMatcher.PrefilterDocs;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.functions.Scheduling;
@@ -855,7 +857,14 @@ public class DocGenTemplates {
 
 	public static final Generator SELF_STATEMENT_FUNCTIONS = (args) -> {
 		StringBuilder b = new StringBuilder();
-		// TODO
+		boolean first = true;
+		for(Class<? extends Function> f : ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(SelfStatement.class, Function.class)) {
+			if(!first) {
+				b.append(", ");
+			}
+			first = false;
+			b.append(ReflectionUtils.instantiateUnsafe(f).getName());
+		}
 		return b.toString();
 	};
 }

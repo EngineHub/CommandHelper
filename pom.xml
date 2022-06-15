@@ -177,7 +177,7 @@
 			<!-- GPL -->
 			<groupId>org.spigotmc</groupId>
 			<artifactId>spigot-api</artifactId>
-			<version>1.17-R0.1-SNAPSHOT</version>
+			<version>1.19-R0.1-SNAPSHOT</version>
 		</dependency>
 
 		<!-- Used for storing and retreiving Constructs in a storage transparent medium: JSONs -->
@@ -384,7 +384,7 @@
 		<dependency>
 			<groupId>org.eclipse.lsp4j</groupId>
 			<artifactId>org.eclipse.lsp4j</artifactId>
-			<version>0.12.0</version>
+			<version>0.13.0</version>
 		</dependency>
 		<dependency>
 			<groupId>io.swagger.core.v3</groupId>
@@ -928,12 +928,6 @@
 									<excludes>
 										<exclude>META-INF/**</exclude>
 									</excludes>
-								</filter>
-								<filter>
-									<artifact>org.spigotmc:spigot-api:jar:*</artifact>
-									<includes>
-										<include>org/bukkit/Material.class</include>
-									</includes>
 								</filter>
 							</filters>
 						</configuration>

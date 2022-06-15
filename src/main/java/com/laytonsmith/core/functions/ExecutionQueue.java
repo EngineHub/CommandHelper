@@ -14,6 +14,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
@@ -409,7 +410,7 @@ public class ExecutionQueue {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class};
+			return new Class[]{CRECastException.class, CRERangeException.class};
 		}
 
 		@Override
@@ -429,6 +430,9 @@ public class ExecutionQueue {
 				queue = Construct.nval(args[1]);
 			}
 			final long delay = ArgumentValidation.getInt(args[0], t, env);
+			if(delay < 0) {
+				throw new CRERangeException("Negative delay", t);
+			}
 			env.getEnv(StaticRuntimeEnv.class).getExecutionQueue().push(
 					env.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), queue, new Runnable() {
 
@@ -472,7 +476,7 @@ public class ExecutionQueue {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class};
+			return new Class[]{CRECastException.class, CRERangeException.class};
 		}
 
 		@Override
@@ -492,6 +496,9 @@ public class ExecutionQueue {
 				queue = Construct.nval(args[1]);
 			}
 			final long delay = ArgumentValidation.getInt(args[0], t, env);
+			if(delay < 0) {
+				throw new CRERangeException("Negative delay", t);
+			}
 			env.getEnv(StaticRuntimeEnv.class).getExecutionQueue().pushFront(
 					env.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), queue, new Runnable() {
 

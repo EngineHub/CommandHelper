@@ -38,9 +38,9 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCommand;
 import com.laytonsmith.abstraction.bukkit.BukkitMCServer;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.abstraction.enums.MCChatColor;
-import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCBiomeType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCLegacyMaterial;
@@ -298,20 +298,17 @@ public class CommandHelperPlugin extends JavaPlugin {
 		};
 		loadingThread.start();
 
-		SimpleVersion javaVersion = new SimpleVersion(System.getProperty("java.version"));
-		if(javaVersion.lt(new SimpleVersion("1.8"))) {
-			MSLog.GetLogger().e(MSLog.Tags.GENERAL, "CommandHelper does not support Java versions older than 8!",
-					Target.UNKNOWN);
-		}
-
 		myServer = BukkitMCServer.Get();
+
+		// Build dynamic enums
 		BukkitMCEntityType.build();
 		BukkitMCBiomeType.build();
 		BukkitMCSound.build();
 		BukkitMCParticle.build();
-		BukkitMCLegacyMaterial.build();
 		BukkitMCPotionEffectType.build();
 		BukkitMCProfession.build();
+		BukkitMCMaterial.build();
+		BukkitMCLegacyMaterial.build();
 	}
 
 	/**
@@ -329,23 +326,21 @@ public class CommandHelperPlugin extends JavaPlugin {
 		}
 
 		if(firstLoad) {
-			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_15_X)) {
-				// Add dependency on every loaded plugin on Spigot 1.15.2 and later.
-				// This suppresses warnings from the PluginClassLoader due to extensions using a plugin API.
-				// This should be done before ExtensionManager.Initialize().
-				try {
-					Object dependencyGraph = ReflectionUtils.get(SimplePluginManager.class, Bukkit.getPluginManager(),
-							"dependencyGraph");
-					for(Plugin plugin : Bukkit.getPluginManager().getPlugins()) {
-						if(plugin == self) {
-							continue;
-						}
-						ReflectionUtils.invokeMethod(dependencyGraph, "putEdge", self.getDescription().getName(),
-								plugin.getName());
+			// Add dependency on every loaded plugin on Spigot 1.15.2 and later.
+			// This suppresses warnings from the PluginClassLoader due to extensions using a plugin API.
+			// This should be done before ExtensionManager.Initialize().
+			try {
+				Object dependencyGraph = ReflectionUtils.get(SimplePluginManager.class, Bukkit.getPluginManager(),
+						"dependencyGraph");
+				for(Plugin plugin : Bukkit.getPluginManager().getPlugins()) {
+					if(plugin == self) {
+						continue;
 					}
-				} catch (ReflectionUtils.ReflectionException ex) {
-					// While this failed, nothing breaks. The server may still get class load warnings, though.
+					ReflectionUtils.invokeMethod(dependencyGraph, "putEdge", self.getDescription().getName(),
+							plugin.getName());
 				}
+			} catch (ReflectionUtils.ReflectionException ex) {
+				// While this failed, nothing breaks. The server may still get class load warnings, though.
 			}
 
 			ExtensionManager.Initialize(ClassDiscovery.getDefaultInstance());
@@ -361,14 +356,11 @@ public class CommandHelperPlugin extends JavaPlugin {
 			getLogger().log(Level.WARNING, "In your preferences, use-sudo-fallback is turned on."
 					+ " Consider turning this off if you can.");
 		}
-		MSLog.initialize(CommandHelperFileLocations.getDefault().getConfigDirectory());
 
 		version = new SimpleVersion(getDescription().getVersion());
 
-		boolean showSplashScreen = Prefs.ShowSplashScreen();
-		if(showSplashScreen) {
+		if(Prefs.ShowSplashScreen()) {
 			StreamUtils.GetSystemOut().println(TermColors.reset());
-			//StreamUtils.GetSystemOut().flush();
 			StreamUtils.GetSystemOut().println("\n\n" + Static.Logo());
 		}
 		ac = new AliasCore(CommandHelperFileLocations.getDefault());

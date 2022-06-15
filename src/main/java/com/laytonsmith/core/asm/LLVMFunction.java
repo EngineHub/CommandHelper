@@ -8,6 +8,7 @@ import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
+import com.laytonsmith.core.compiler.SelfStatement;
 import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.compiler.signature.FunctionSignatures;
@@ -49,7 +50,7 @@ public abstract class LLVMFunction implements FunctionBase, Function {
 
 	private FunctionBase getDefaultFunction() throws ConfigCompileException {
 		CFunction f = new CFunction(getName(), Target.UNKNOWN);
-		FunctionBase fb = FunctionList.getFunction(f, api.Platforms.COMPILER_LLVM, null);
+		FunctionBase fb = FunctionList.getFunction(f, api.Platforms.INTERPRETER_JAVA, null);
 		return fb;
 	}
 
@@ -60,6 +61,20 @@ public abstract class LLVMFunction implements FunctionBase, Function {
 		} catch (ConfigCompileException ex) {
 			return "mixed {...} This function is missing documentation. Please report it.";
 		}
+	}
+
+	@Override
+	public boolean isSelfStatement(Target t, Environment env, List<ParseTree> nodes,
+			Set<Class<? extends Environment.EnvironmentImpl>> envs) throws ConfigCompileException {
+		try {
+			FunctionBase fb = getDefaultFunction();
+			if(fb instanceof Function f) {
+				return f.isSelfStatement(t, env, nodes, envs);
+			}
+		} catch(ConfigCompileException ex) {
+			// Ignored, just check the annotation
+		}
+		return this.getClass().getAnnotation(SelfStatement.class) != null;
 	}
 
 	@Override

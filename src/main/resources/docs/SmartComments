@@ -29,6 +29,8 @@ Given the following example, we can see the general format.
 /**
  * This is the body.
  * This is part of the body, and contains an {@embedded annotation}.
+ * - This is the first item in a list
+ * - This is the second item in a list.
  * @standaloneAnnotation with comments
  * @standaloneAnnotation can repeat
  * @standaloneAnnotationWithNoComment
@@ -44,6 +46,9 @@ annotations may also have additional text following the annotation name.
 
 Standalone annotations are those that start with @. These are ended by a newline, and cannot contain newlines within
 them. Standalone annotations may repeat, or they may contain no additional text.
+
+The general body of the comment, as well as text based portions of annotations (where relevant) are rendered in
+markdown where supported.
 
 == Usage in the compiler ==
 

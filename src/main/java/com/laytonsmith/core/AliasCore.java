@@ -678,7 +678,7 @@ public class AliasCore {
 				}
 
 				if(parameter instanceof CString s) {
-					completions.add(() -> Arrays.asList(s.val()));
+					completions.add((alias, player, args) -> Arrays.asList(s.val()));
 				} else if(parameter instanceof Variable v) {
 					if(v.isFinal()) {
 						hasFinal = true;
@@ -695,7 +695,7 @@ public class AliasCore {
 					if(type.startsWith("[") && type.endsWith("]")) {
 						type = type.substring(1, type.length() - 1);
 						String finalType = type;
-						completions.add(() -> Arrays.asList(finalType.split(","))
+						completions.add((alias, player, args) -> Arrays.asList(finalType.split(","))
 								.stream().map(item -> item.trim()).toList());
 					} else if(type.equalsIgnoreCase("$none") || type.equalsIgnoreCase("none")
 							|| type.equalsIgnoreCase("string")) {
@@ -703,16 +703,38 @@ public class AliasCore {
 					} else if(type.equalsIgnoreCase("$player")) {
 						completions.add(new CompletionValues() {
 							@Override
-							public List<String> getCompletions() {
+							public List<String> getCompletions(CString alias, CString player, CArray args) {
 								return Static.getServer().getOnlinePlayers().stream()
-										.map(player -> player.getName()).toList();
+										.map(p -> p.getName()).toList();
 							}
 						});
 					} else if(type.equalsIgnoreCase("$offlineplayer")) {
-						completions.add(() -> Arrays.asList(Static.getServer().getOfflinePlayers())
-								.stream().map(player -> player.getName()).toList());
+						completions.add((alias, player, args) -> Arrays.asList(Static.getServer().getOfflinePlayers())
+								.stream().map(p -> p.getName()).toList());
 					} else if(type.equalsIgnoreCase("$boolean") || type.equalsIgnoreCase("boolean")) {
-						completions.add(() -> Arrays.asList("true", "false"));
+						completions.add((alias, player, args) -> Arrays.asList("true", "false"));
+					} else if(type.startsWith("$proc->")) {
+						String procName = type.substring(7);
+						Procedure completionProc = env.getEnv(GlobalEnv.class).GetProcs().get(procName);
+						// TODO: Typecheck the Callable type
+						if(completionProc == null) {
+							MSLog.GetLogger().w(MSLog.Tags.COMPILER,
+								"Could not find " + completionProc + ", the parameter autocompletion will not work.",
+								script.getTarget());
+							completions.add(NONE);
+						} else {
+							completions.add((alias, player, args) -> {
+								Mixed ret = completionProc.execute(Arrays.asList(alias, player, args),
+										env, Target.UNKNOWN);
+								if(ret instanceof CArray ca) {
+									return ca.asList(env).stream().map(i -> i.toString()).toList();
+								}
+								MSLog.GetLogger().w(MSLog.Tags.COMPILER,
+									"Completion proc " + completionProc + " returned a non-array value.",
+									script.getTarget());
+								return new ArrayList<>();
+							});
+						}
 					} else {
 						// MethodScript type. Check if it's an enum, and if so, pull the values from it.
 						// Otherwise disable completions.
@@ -721,7 +743,7 @@ public class AliasCore {
 							CClassType t = CClassType.get(fqcn, env);
 							if(t.isEnum(env)) {
 								MEnumType enumType = NativeTypeList.getNativeEnumType(fqcn);
-								completions.add(() -> enumType.values()
+								completions.add((alias, player, args) -> enumType.values()
 										.stream().map(value -> value.name()).toList());
 								continue;
 							}
@@ -749,7 +771,10 @@ public class AliasCore {
 						return new CArray(Target.UNKNOWN);
 					}
 				}
-				List<String> list = completion.getCompletions();
+				CString alias = (CString) args[0];
+				CString sender = (CString) args[1];
+				CArray a = (CArray) args[2];
+				List<String> list = completion.getCompletions(alias, sender, a);
 				String comparison = inputArgs.get(inputArgs.size() - 1);
 				Mixed[] toReturn = list.stream()
 						.filter(item -> item.startsWith(comparison))
@@ -768,10 +793,10 @@ public class AliasCore {
 	}
 
 	private static interface CompletionValues {
-		List<String> getCompletions();
+		List<String> getCompletions(CString alias, CString player, CArray args);
 	}
 
-	private static final CompletionValues NONE = () -> new ArrayList<>();
+	private static final CompletionValues NONE = (alias, player, args) -> new ArrayList<>();
 
 
 	/**

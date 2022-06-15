@@ -22,7 +22,7 @@ public class BukkitMCFallingBlock extends BukkitMCEntity implements MCFallingBlo
 
 	@Override
 	public MCMaterial getMaterial() {
-		return new BukkitMCMaterial(f.getBlockData().getMaterial());
+		return BukkitMCMaterial.valueOfConcrete(f.getBlockData().getMaterial());
 	}
 
 	@Override

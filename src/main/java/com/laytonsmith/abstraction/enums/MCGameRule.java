@@ -41,7 +41,8 @@ public enum MCGameRule {
 	SHOWDEATHMESSAGES("showDeathMessages"),
 	SPAWNRADIUS("spawnRadius", CInt.class),
 	SPECTATORSGENERATECHUNKS("spectatorsGenerateChunks"),
-	UNIVERSALANGER("universalAnger");
+	UNIVERSALANGER("universalAnger"),
+	DOWARDENSPAWNING("doWardenSpawning");
 
 	private final String gameRule;
 	private final Class<? extends Mixed> ruleType;

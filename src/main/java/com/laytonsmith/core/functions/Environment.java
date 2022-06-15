@@ -29,6 +29,7 @@ import com.laytonsmith.abstraction.enums.MCSound;
 import com.laytonsmith.abstraction.enums.MCSoundCategory;
 import com.laytonsmith.abstraction.enums.MCTone;
 import com.laytonsmith.abstraction.enums.MCTreeType;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.core.ArgumentValidation;
@@ -45,6 +46,7 @@ import com.laytonsmith.core.compiler.signature.FunctionSignatures;
 import com.laytonsmith.core.compiler.signature.SignatureBuilder;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
@@ -1030,10 +1032,11 @@ public class Environment {
 			Mixed c = children.get(children.size() - 1).getData();
 			if(c.isInstanceOf(CString.TYPE, null, env)) {
 				try {
-					MCBiomeType.valueOf(c.val());
+					MCBiomeType.MCVanillaBiomeType.valueOf(c.val());
 				} catch (IllegalArgumentException ex) {
-					env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
-							new CompilerWarning(ex.getMessage(), t, null));
+					env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions, new CompilerWarning(
+							c.val() + " is not a valid enum in com.commandhelper.BiomeType",
+							c.getTarget(), null));
 				}
 			}
 			return null;
@@ -1432,18 +1435,20 @@ public class Environment {
 					+ " meters will see the particle. The particle parameter can be a particle name or an associative"
 					+ " array defining the characteristics of the particle to be spawned. The array requires the"
 					+ " particle name under the key \"particle\". ----"
-					+ " Possible particle types: " + StringUtils.Join(MCParticle.types(), ", ", ", or ", " or ") + ".\n"
-					+ " Some particles have more specific keys and/or special behavior, but the common keys for the"
-					+ " particle array are \"count\" (usually the number of particles to be spawned), \"speed\""
+					+ " Possible particle types: " + StringUtils.Join(MCParticle.types(), ", ", ", or ", " or ") + "."
+					+ " <br><br>Some particles have more specific keys and/or special behavior, but the common keys for"
+					+ " the particle array are \"count\" (usually the number of particles to be spawned), \"speed\""
 					+ " (usually the velocity of the particle), \"xoffset\", \"yoffset\", and \"zoffset\""
-					+ " (usually the ranges from center within which the particle may be offset on that axis).\n"
-					+ " BLOCK_DUST, BLOCK_CRACK and FALLING_DUST particles can take a block type name parameter"
-					+ " under the key \"block\" (default: STONE).\n"
-					+ " ITEM_CRACK particles can take an item array or name under the key \"item\" (default: STONE).\n"
-					+ " REDSTONE particles take an RGB color array (each 0 - 255) or name under the key \"color\""
+					+ " (usually the ranges from center within which the particle may be offset on that axis)."
+					+ " <br>BLOCK_DUST, BLOCK_CRACK and FALLING_DUST particles can take a block type name parameter"
+					+ " under the key \"block\" (default: STONE)."
+					+ " <br>ITEM_CRACK particles can take an item array or name under the key \"item\" (default: STONE)."
+					+ " <br>REDSTONE particles take an RGB color array (each 0 - 255) or name under the key \"color\""
 					+ " (default: RED)."
-					+ " DUST_COLOR_TRANSITION particles take a \"tocolor\" in addition \"color\"."
-					+ " VIBRATION particles take a \"destination\" location array or entity UUID.";
+					+ " <br>DUST_COLOR_TRANSITION particles take a \"tocolor\" in addition \"color\"."
+					+ " <br>VIBRATION particles take a \"destination\" location array or entity UUID."
+					+ " <br>SCULK_CHARGE particles take an \"angle\" in radians. (defaults to 0.0)"
+					+ " <br>SHRIEK particles take an integer \"delay\" in ticks before playing. (defaults to 0)";
 		}
 
 		@Override
@@ -1557,6 +1562,22 @@ public class Environment {
 					} else {
 						data = Static.getEntity(d, t);
 					}
+
+				} else if(pa.containsKey("delay")) {
+					Mixed d = pa.get("delay", t);
+					if(d.isInstanceOf(CInt.TYPE, null, env)) {
+						data = d;
+					} else if(!(d instanceof CNull)) {
+						throw new CREIllegalArgumentException("Expected integer for delay but found " + d, t);
+					}
+
+				} else if(pa.containsKey("angle")) {
+					Mixed d = pa.get("angle", t);
+					if(d.isInstanceOf(CDouble.TYPE, null, env)) {
+						data = d;
+					} else if(!(d instanceof CNull)) {
+						throw new CREIllegalArgumentException("Expected double for angle but found " + d, t);
+					}
 				}
 
 			} else {
@@ -1616,7 +1637,15 @@ public class Environment {
 		@Override
 		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 
-			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t, env);
+			MCLocation loc = null;
+			MCEntity ent = null;
+			if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
+				loc = ObjectGenerator.GetGenerator().location(args[0], null, t, env);
+			} else if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_18_X)) {
+				ent = Static.getEntity(args[0], t);
+			} else {
+				throw new CREFormatException("Expecting a location array on versions prior to MC 1.18.2", t);
+			}
 			MCSound sound;
 			MCSoundCategory category = null;
 			float volume = 1;
@@ -1653,7 +1682,7 @@ public class Environment {
 			}
 
 			if(args.length == 3) {
-				java.util.List<MCPlayer> players = new java.util.ArrayList<MCPlayer>();
+				java.util.List<MCPlayer> players = new java.util.ArrayList<>();
 				if(args[2].isInstanceOf(CArray.TYPE, null, env)) {
 					for(String key : ((CArray) args[2]).stringKeySet()) {
 						players.add(Static.GetPlayer(((CArray) args[2]).get(key, t, env), t, env));
@@ -1662,9 +1691,9 @@ public class Environment {
 					players.add(Static.GetPlayer(args[2], t, env));
 				}
 
-				if(category == null) {
+				if(loc == null) {
 					for(MCPlayer p : players) {
-						p.playSound(loc, sound, volume, pitch);
+						p.playSound(ent, sound, category, volume, pitch);
 					}
 				} else {
 					for(MCPlayer p : players) {
@@ -1672,8 +1701,8 @@ public class Environment {
 					}
 				}
 
-			} else if(category == null) {
-				loc.getWorld().playSound(loc, sound, volume, pitch);
+			} else if(loc == null) {
+				ent.getWorld().playSound(ent, sound, category, volume, pitch);
 			} else {
 				loc.getWorld().playSound(loc, sound, category, volume, pitch);
 			}
@@ -1692,8 +1721,8 @@ public class Environment {
 
 		@Override
 		public String docs() {
-			return "void {locationArray, soundArray[, players]} Plays a sound at the"
-					+ " given location. SoundArray is in an associative array with"
+			return "void {source, soundArray[, players]} Plays a sound at the given source."
+					+ " Source can be a location array or entity UUID. SoundArray is in an associative array with"
 					+ " keys 'sound', 'category', 'volume', 'pitch', where all are optional except sound."
 					+ " Volume, if greater than 1.0 (default), is the distance in chunks players can hear the sound."
 					+ " Pitch has a range of 0.5 - 2.0, where where 1.0 is the middle pitch and default. Players can"
@@ -1729,7 +1758,8 @@ public class Environment {
 							} catch (IllegalArgumentException ex) {
 								env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
 										new CompilerWarning(children.get(1).getData().val()
-												+ " is not a valid enum in com.commandhelper.Sound", t, null));
+												+ " is not a valid enum in com.commandhelper.Sound",
+												children.get(1).getTarget(), null));
 							}
 						}
 					}

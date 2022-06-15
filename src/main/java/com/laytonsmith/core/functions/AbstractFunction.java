@@ -11,10 +11,12 @@ import com.laytonsmith.annotations.noprofile;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.LogLevel;
+import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.compiler.FileOptions;
+import com.laytonsmith.core.compiler.SelfStatement;
 import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.compiler.signature.FunctionSignatures;
@@ -525,6 +527,32 @@ public abstract class AbstractFunction implements Function {
 
 	public void link(Target t, List<ParseTree> children) throws ConfigCompileException {
 		// Do nothing, as a default
+	}
+
+	@Override
+	public boolean isSelfStatement(Target t, Environment env, List<ParseTree> nodes,
+			Set<Class<? extends Environment.EnvironmentImpl>> envs) throws ConfigCompileException {
+		return this.getClass().getAnnotation(SelfStatement.class) != null;
+	}
+
+	/**
+	 * Does an __autoconcat__ rewrite on just this one node, if necessary. This is generally used
+	 * in complex isSelfStatement calculations, but can be used anywhere necessary.
+	 * @param node
+	 * @param env
+	 * @param envs
+	 * @throws ConfigCompileException
+	 */
+	protected void doAutoconcatRewrite(ParseTree node, Environment env,
+			Set<Class<? extends Environment.EnvironmentImpl>> envs)
+			throws ConfigCompileException {
+		if(node.getData() instanceof CFunction cf && cf.val().equals(Compiler.__autoconcat__.NAME)) {
+			Set<ConfigCompileException> exceptions = new HashSet<>();
+			MethodScriptCompiler.rewriteAutoconcats(node, env, envs, exceptions, true);
+			if(!exceptions.isEmpty()) {
+				throw new ArrayList<>(exceptions).get(0);
+			}
+		}
 	}
 
 	@Override

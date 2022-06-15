@@ -440,6 +440,12 @@ public class MethodScriptCompilerTest {
 	}
 
 	@Test
+	public void testExecute22() throws Exception {
+		String script = "/* Empty script */";
+		SRun(script, fakePlayer);
+	}
+
+	@Test
 	public void testCompile1() {
 		try {
 			String config = "/cmd [$p] $q = msg('')";

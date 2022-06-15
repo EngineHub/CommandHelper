@@ -30,6 +30,7 @@ import com.laytonsmith.core.compiler.BranchStatement;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.compiler.FileOptions;
+import com.laytonsmith.core.compiler.SelfStatement;
 import com.laytonsmith.core.compiler.VariableScope;
 import com.laytonsmith.core.compiler.analysis.Declaration;
 import com.laytonsmith.core.compiler.analysis.IVariableAssignDeclaration;
@@ -1505,6 +1506,7 @@ public class DataHandling {
 
 	@api
 	@unbreakable
+	@SelfStatement
 	public static class proc extends AbstractFunction implements BranchStatement, VariableScope, DocumentSymbolProvider {
 
 		public static final String NAME = "proc";
@@ -3793,6 +3795,9 @@ public class DataHandling {
 				}
 				ParseTree root = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script.val(), env, t.file(), true),
 						env, env.getEnvClasses());
+				if(root == null) {
+					return new CString("", t);
+				}
 				StringBuilder b = new StringBuilder();
 				int count = 0;
 				for(ParseTree child : root.getChildren()) {

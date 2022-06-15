@@ -4223,7 +4223,7 @@ public class PlayerManagement {
 				data = loc.getBlock().getBlockData();
 			} else {
 				try {
-					data = StaticLayer.GetServer().createBlockData(cdata.val().toLowerCase());
+					data = Static.getServer().createBlockData(cdata.val().toLowerCase());
 				} catch (IllegalArgumentException ex) {
 					String value = cdata.val();
 					if(value.contains(":") && value.length() <= 6) {

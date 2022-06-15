@@ -4,7 +4,6 @@ import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCBossBar;
 import com.laytonsmith.abstraction.MCPlayer;
-import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.enums.MCBarColor;
 import com.laytonsmith.abstraction.enums.MCBarStyle;
 import com.laytonsmith.annotations.api;
@@ -166,7 +165,7 @@ public class BossBar {
 					}
 				}
 			}
-			MCBossBar bar = StaticLayer.GetServer().createBossBar(title, color, style);
+			MCBossBar bar = Static.getServer().createBossBar(title, color, style);
 			if(bar != null) { // if not tests
 				bar.setVisible(visible);
 				bar.setProgress(percent);

@@ -20,6 +20,7 @@ import com.laytonsmith.core.compiler.BranchStatement;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.compiler.FileOptions;
+import com.laytonsmith.core.compiler.SelfStatement;
 import com.laytonsmith.core.compiler.VariableScope;
 import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
@@ -308,6 +309,24 @@ public class ControlFlow {
 			return isBranch(children);
 		}
 
+		@Override
+		public boolean isSelfStatement(Target t, Environment env, List<ParseTree> nodes, Set<Class<? extends Environment.EnvironmentImpl>> envs) throws ConfigCompileException {
+			if(nodes.size() < 2) {
+				return true;
+			}
+			doAutoconcatRewrite(nodes.get(1), env, envs);
+			if(nodes.get(1).getData() instanceof CFunction cf && cf.val().equals(Compiler.__statements__.NAME)) {
+				return true;
+			}
+			if(nodes.size() > 2) {
+				doAutoconcatRewrite(nodes.get(2), env, envs);
+				if(nodes.get(2).getData() instanceof CFunction cf && cf.val().equals(Compiler.__statements__.NAME)) {
+					return true;
+				}
+			}
+			return false;
+		}
+
 	}
 
 	@api(environments = {GlobalEnv.class})
@@ -464,6 +483,26 @@ public class ControlFlow {
 			// It's the exact same logic as the branches
 			return isBranch(children);
 		}
+
+		@Override
+		public boolean isSelfStatement(Target t, Environment env, List<ParseTree> nodes, Set<Class<? extends Environment.EnvironmentImpl>> envs) throws ConfigCompileException {
+
+			for(int i = 1; i < nodes.size(); i += 2) {
+				doAutoconcatRewrite(nodes.get(i), env, envs);
+				if(nodes.get(i).getData() instanceof CFunction cf && cf.val().equals(Compiler.__statements__.NAME)) {
+					return true;
+				}
+			}
+
+			if(nodes.size() % 2 == 1) {
+				doAutoconcatRewrite(nodes.get(nodes.size() - 1), env, envs);
+				if(nodes.get(nodes.size() - 1).getData() instanceof CFunction cf
+						&& cf.val().equals(Compiler.__statements__.NAME)) {
+					return true;
+				}
+			}
+			return false;
+		}
 	}
 
 	@api
@@ -522,6 +561,27 @@ public class ControlFlow {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return CNull.NULL;
+		}
+
+		@Override
+		public boolean isSelfStatement(Target t, Environment env, List<ParseTree> nodes,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs) throws ConfigCompileException {
+			if(nodes.size() < 2) {
+				return true;
+			}
+			for(int i = 2; i < nodes.size(); i += 2) {
+				doAutoconcatRewrite(nodes.get(i), env, envs);
+				if(nodes.get(i).getData() instanceof CFunction cf && cf.val().equals(Compiler.__statements__.NAME)) {
+					return true;
+				}
+			}
+			if(nodes.size() % 2 == 0) {
+				if(nodes.get(nodes.size() - 1).getData() instanceof CFunction cf
+						&& cf.val().equals(Compiler.__statements__.NAME)) {
+					return true;
+				}
+			}
+			return false;
 		}
 
 		@Override
@@ -692,6 +752,10 @@ public class ControlFlow {
 				Set<Class<? extends Environment.EnvironmentImpl>> envs,
 				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
+
+			if(children.size() < 1) {
+				throw new ConfigCompileException("Too few arguments passed to " + this.getName() + "()", t);
+			}
 
 			//Loop through all the conditions and make sure each is unique. Also
 			//make sure that each value is not dynamic.
@@ -922,6 +986,7 @@ public class ControlFlow {
 	@breakable
 	@seealso({com.laytonsmith.tools.docgen.templates.Loops.class,
 		com.laytonsmith.tools.docgen.templates.ArrayIteration.class})
+	@SelfStatement
 	public static class _for extends AbstractFunction implements Optimizable, BranchStatement, VariableScope {
 
 		@Override
@@ -1079,6 +1144,7 @@ public class ControlFlow {
 	@api
 	@noboilerplate
 	@breakable
+	@SelfStatement
 	public static class forelse extends AbstractFunction implements BranchStatement, VariableScope {
 
 		public static final String NAME = "forelse";
@@ -1243,6 +1309,7 @@ public class ControlFlow {
 	@api
 	@breakable
 	@seealso({com.laytonsmith.tools.docgen.templates.Loops.class, ArrayIteration.class})
+	@SelfStatement
 	public static class foreach extends AbstractFunction implements BranchStatement, VariableScope {
 
 		@Override
@@ -1824,6 +1891,7 @@ public class ControlFlow {
 	@noboilerplate
 	@breakable
 	@seealso({com.laytonsmith.tools.docgen.templates.Loops.class})
+	@SelfStatement
 	public static class _while extends AbstractFunction implements BranchStatement, VariableScope {
 
 		public static final String NAME = "while";
@@ -1958,6 +2026,7 @@ public class ControlFlow {
 	@noboilerplate
 	@breakable
 	@seealso({com.laytonsmith.tools.docgen.templates.Loops.class})
+	@SelfStatement
 	public static class _dowhile extends AbstractFunction implements BranchStatement, VariableScope {
 
 		public static final String NAME = "dowhile";

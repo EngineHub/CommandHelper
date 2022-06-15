@@ -95,6 +95,8 @@ public interface MCWorld extends MCMetadatable {
 
 	void playSound(MCLocation l, MCSound sound, MCSoundCategory category, float volume, float pitch);
 
+	void playSound(MCEntity ent, MCSound sound, MCSoundCategory category, float volume, float pitch);
+
 	void playSound(MCLocation l, String sound, MCSoundCategory category, float volume, float pitch);
 
 	MCItem dropItemNaturally(MCLocation l, MCItemStack is);

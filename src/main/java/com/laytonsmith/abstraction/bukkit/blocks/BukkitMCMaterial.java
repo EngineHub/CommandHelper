@@ -2,129 +2,182 @@ package com.laytonsmith.abstraction.bukkit.blocks;
 
 import com.laytonsmith.abstraction.blocks.MCBlockData;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
+import com.laytonsmith.core.MSLog;
+import com.laytonsmith.core.Static;
+import com.laytonsmith.core.constructs.Target;
 import org.bukkit.Material;
 
-public class BukkitMCMaterial implements MCMaterial {
+import java.util.EnumMap;
+import java.util.Map;
 
-	Material m;
+public class BukkitMCMaterial extends MCMaterial<Material> {
+
+	private static final Map<Material, MCMaterial> BUKKIT_MAP = new EnumMap<>(Material.class);
 
 	public BukkitMCMaterial(Material type) {
-		this.m = type;
+		this(null, type);
+	}
+
+	private BukkitMCMaterial(MCVanillaMaterial vanillaMaterial, Material type) {
+		super(vanillaMaterial, type);
+	}
+
+	@Override
+	public String name() {
+		return getAbstracted() == null ? getConcrete().name() : getAbstracted().name();
+	}
+
+	public static MCMaterial valueOfConcrete(Material test) {
+		MCMaterial type = BUKKIT_MAP.get(test);
+		if(type == null) {
+			MSLog.GetLogger().e(MSLog.Tags.GENERAL, "Bukkit Material missing in BUKKIT_MAP: " + test.name(),
+					Target.UNKNOWN);
+			return new BukkitMCMaterial(null, test);
+		}
+		return type;
+	}
+
+	public static void build() {
+		for(MCVanillaMaterial v : MCVanillaMaterial.values()) {
+			if(v.existsIn(Static.getServer().getMinecraftVersion())) {
+				Material type;
+				try {
+					type = Material.valueOf(v.name());
+				} catch (IllegalArgumentException | NoSuchFieldError ex) {
+					// This means something was removed or changed; MCVanillaMaterial will need an update.
+					MSLog.GetLogger().e(MSLog.Tags.GENERAL, "Could not find a Bukkit Material for " + v.name(),
+							Target.UNKNOWN);
+					continue;
+				}
+				BukkitMCMaterial wrapper = new BukkitMCMaterial(v, type);
+				BY_STRING.put(v.name(), wrapper);
+				BUKKIT_MAP.put(type, wrapper);
+			}
+		}
+		// Add missing values from Concrete.
+		// These values will still be accepted on an MC server, but will be missing from cmdline.
+		for(Material m : Material.values()) {
+			if(!m.isLegacy() && !BUKKIT_MAP.containsKey(m)) {
+				BukkitMCMaterial wrapper = new BukkitMCMaterial(null, m);
+				BY_STRING.put(m.name(), wrapper);
+				BUKKIT_MAP.put(m, wrapper);
+			}
+		}
 	}
 
 	@Override
 	public MCBlockData createBlockData() {
-		return new BukkitMCBlockData(m.createBlockData());
+		return new BukkitMCBlockData(getHandle().createBlockData());
 	}
 
 	@Override
 	public short getMaxDurability() {
-		return this.m.getMaxDurability();
+		return getHandle().getMaxDurability();
 	}
 
 	@Override
 	public int getType() {
-		return m.getId();
+		return getHandle().getId();
 	}
 
 	@Override
 	public String getName() {
-		return m.name();
+		return name();
 	}
 
 	@Override
 	public int getMaxStackSize() {
-		return m.getMaxStackSize();
+		return getHandle().getMaxStackSize();
 	}
 
 	@Override
 	public boolean hasGravity() {
-		return m.hasGravity();
+		return getHandle().hasGravity();
 	}
 
 	@Override
 	public boolean isBlock() {
-		return m.isBlock();
+		return getHandle().isBlock();
 	}
 
 	@Override
 	public boolean isItem() {
-		return m.isItem();
+		return getHandle().isItem();
 	}
 
 	@Override
 	public boolean isBurnable() {
-		return m.isBurnable();
+		return getHandle().isBurnable();
 	}
 
 	@Override
 	public boolean isEdible() {
-		return m.isEdible();
+		return getHandle().isEdible();
 	}
 
 	@Override
 	public boolean isFlammable() {
-		return m.isFlammable();
+		return getHandle().isFlammable();
 	}
 
 	@Override
 	public boolean isOccluding() {
-		return m.isOccluding();
+		return getHandle().isOccluding();
 	}
 
 	@Override
 	public boolean isRecord() {
-		return m.isRecord();
+		return getHandle().isRecord();
 	}
 
 	@Override
 	public boolean isSolid() {
-		return m.isSolid();
+		return getHandle().isSolid();
 	}
 
 	@Override
 	public boolean isTransparent() {
-		return m.isTransparent();
+		return getHandle().isTransparent();
 	}
 
 	@Override
 	public boolean isInteractable() {
-		return m.isInteractable();
+		return getHandle().isInteractable();
 	}
 
 	@Override
 	public boolean isLegacy() {
-		return m.isLegacy();
+		return getHandle().isLegacy();
 	}
 
 	@Override
 	public float getHardness() {
-		return m.getHardness();
+		return getHandle().getHardness();
 	}
 
 	@Override
 	public float getBlastResistance() {
-		return m.getBlastResistance();
+		return getHandle().getBlastResistance();
 	}
 
 	@Override
 	public Material getHandle() {
-		return m;
+		return getConcrete();
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		return obj instanceof MCMaterial && m.equals(((MCMaterial) obj).getHandle());
+		return obj instanceof MCMaterial && getHandle().equals(((MCMaterial) obj).getHandle());
 	}
 
 	@Override
 	public int hashCode() {
-		return m.hashCode();
+		return getHandle().hashCode();
 	}
 
 	@Override
 	public String toString() {
-		return m.toString();
+		return name();
 	}
 
 }

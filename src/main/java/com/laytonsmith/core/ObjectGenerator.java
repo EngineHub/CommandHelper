@@ -65,7 +65,6 @@ import com.laytonsmith.abstraction.enums.MCPatternShape;
 import com.laytonsmith.abstraction.enums.MCPotionEffectType;
 import com.laytonsmith.abstraction.enums.MCPotionType;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
-import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CDouble;
@@ -492,12 +491,10 @@ public class ObjectGenerator {
 			ma.set("enchants", enchants(meta.getEnchants(), t, env), t, env);
 			ma.set("repair", new CInt(meta.getRepairCost(), t), t, env);
 
-			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_14)) {
-				if(meta.hasCustomModelData()) {
-					ma.set("model", new CInt(meta.getCustomModelData(), t), t, env);
-				} else {
-					ma.set("model", CNull.NULL, t, env);
-				}
+			if(meta.hasCustomModelData()) {
+				ma.set("model", new CInt(meta.getCustomModelData(), t), t, env);
+			} else {
+				ma.set("model", CNull.NULL, t, env);
 			}
 
 			Set<MCItemFlag> itemFlags = meta.getItemFlags();

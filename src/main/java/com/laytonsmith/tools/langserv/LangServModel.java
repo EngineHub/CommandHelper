@@ -2,6 +2,7 @@ package com.laytonsmith.tools.langserv;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
+import com.laytonsmith.PureUtilities.Common.OSUtils;
 import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
 import com.laytonsmith.PureUtilities.URIUtils;
 import com.laytonsmith.annotations.api;
@@ -11,6 +12,7 @@ import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Profiles;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.ScriptProvider;
@@ -194,6 +196,34 @@ public class LangServModel {
 			for(WorkspaceFolder folder : getWorkspaceFolders()) {
 				URI uuri = new URI(folder.getUri());
 				File ai = Paths.get(uuri).toFile();
+				File lp = new File(ai, "LocalPackages");
+				if(lp.exists()) {
+					// If this is the parent directory of LocalPackages,
+					// this may contain special files and directories.
+					File main = new File(ai, Prefs.MainFile());
+					if(main.exists()) {
+						mainFiles.add(main);
+					}
+					File aliases = new File(ai, Prefs.ScriptName());
+					if(aliases.exists()) {
+						mainFiles.add(aliases);
+					}
+					File autoInclude = new File(ai, "auto_include.ms");
+					if(autoInclude.exists()) {
+						autoIncludes.add(autoInclude);
+					}
+					File includes = new File(ai, "includes");
+					if(includes.exists() && includes.isDirectory()) {
+						FileUtil.recursiveFind(includes, (r) -> {
+							String path = r.getAbsolutePath().replace("\\", "/");
+							if(path.endsWith(".ms")) {
+								libraryFiles.add(r);
+							}
+						});
+					}
+					// Now process LocalPackages
+					ai = lp;
+				}
 				FileUtil.recursiveFind(ai, (r) -> {
 					String path = r.getAbsolutePath().replace("\\", "/");
 					if(!path.contains(".disabled/") && r.isFile()) {
@@ -229,7 +259,13 @@ public class LangServModel {
 		CompilerEnvironment compilerEnv = env.getEnv(CompilerEnvironment.class);
 		compilerEnv.setLogCompilerWarnings(false); // No one would see them
 		GlobalEnv gEnv = env.getEnv(GlobalEnv.class);
-		gEnv.SetScriptProvider((File file) -> getDocument(file.toURI().toString()));
+		gEnv.SetScriptProvider((File file) -> {
+			if(OSUtils.GetOS().isWindows()) {
+				// On Windows, canonical file paths have a capitalized drive letter.
+				file = new File(Character.toLowerCase(file.getPath().charAt(0)) + file.getPath().substring(1));
+			}
+			return getDocument(file.toURI().toString());
+		});
 		Set<ConfigCompileException> exceptions = new HashSet<>();
 
 		langServ.logv(() -> "Providing StaticAnalysis with auto includes: " + autoIncludes);
@@ -244,7 +280,7 @@ public class LangServModel {
 					parseTrees.put(uri, IncludeCache.get(cf1, env, env.getEnvClasses(), Target.UNKNOWN));
 					staticAnalysisMap.put(uri, includeCache.getStaticAnalysis(cf1));
 				} else {
-					parseTrees.put(f1.toURI().toString(), null);
+					parseTrees.put(uri, null);
 				}
 			} catch(IOException ex) {
 			}
@@ -288,7 +324,12 @@ public class LangServModel {
 				if(e.getTarget().file() == null) {
 					continue;
 				}
-				String uri = e.getTarget().file().toURI().toString().toLowerCase();
+				File file = e.getTarget().file();
+				if(OSUtils.GetOS().isWindows()) {
+					// On Windows, canonical file paths have a capitalized drive letter.
+					file = new File(Character.toLowerCase(file.getPath().charAt(0)) + file.getPath().substring(1));
+				}
+				String uri = file.toURI().toString();
 				d.setRange(convertTargetToRange(e.getTarget()));
 				d.setSeverity(DiagnosticSeverity.Error);
 				d.setMessage(e.getMessage());
@@ -308,7 +349,12 @@ public class LangServModel {
 				if(c.getTarget().file() == null) {
 					continue;
 				}
-				String uri = c.getTarget().file().toURI().toString().toLowerCase();
+				File file = c.getTarget().file();
+				if(OSUtils.GetOS().isWindows()) {
+					// On Windows, canonical file paths have a capitalized drive letter.
+					file = new File(Character.toLowerCase(file.getPath().charAt(0)) + file.getPath().substring(1));
+				}
+				String uri = file.toURI().toString();
 				d.setRange(convertTargetToRange(c.getTarget()));
 				d.setSeverity(LangServ.getSeverity(c));
 				d.setMessage(c.getMessage());
@@ -323,7 +369,7 @@ public class LangServModel {
 
 		// We need to report to the client always, with an empty list, implying that all problems are fixed.
 		for(String uri : toUpdate) {
-			List<Diagnostic> diagnosticsList = diagnosticsLists.get(uri.toLowerCase());
+			List<Diagnostic> diagnosticsList = diagnosticsLists.get(uri);
 			PublishDiagnosticsParams diagnostics
 					= new PublishDiagnosticsParams(uri, diagnosticsList != null ? diagnosticsList : new ArrayList<>());
 			client.publishDiagnostics(diagnostics);
@@ -507,9 +553,8 @@ public class LangServModel {
 	 * @throws java.io.IOException
 	 */
 	public String getDocument(String uri) throws IOException {
-		String lower = uri.toLowerCase();
-		if(documents.containsKey(lower)) {
-			return documents.get(lower);
+		if(documents.containsKey(uri)) {
+			return documents.get(uri);
 		}
 		File f;
 		try {
@@ -525,7 +570,7 @@ public class LangServModel {
 		// The document’s truth is now managed by the client and the server must not try to read the document’s truth
 		// using the document’s Uri.
 		langServ.logv(this.getClass().getName() + "." + StackTraceUtils.currentMethod() + " called");
-		String uri = URIUtils.canonicalize(params.getTextDocument().getUri()).toString().toLowerCase();
+		String uri = URIUtils.canonicalize(params.getTextDocument().getUri()).toString();
 		documents.put(uri, params.getTextDocument().getText());
 	}
 
@@ -540,7 +585,7 @@ public class LangServModel {
 		}
 		for(TextDocumentContentChangeEvent change : params.getContentChanges()) {
 			String newText = change.getText();
-			documents.put(uri.toLowerCase(), newText);
+			documents.put(uri, newText);
 		}
 //		dirtyAndRebuildTree(lowPriorityProcessors);
 	}
@@ -550,7 +595,7 @@ public class LangServModel {
 		// client. The document’s truth now exists where the document’s Uri points to (e.g. if the document’s Uri is
 		// a file Uri the truth now exists on disk).
 		langServ.logv(this.getClass().getName() + "." + StackTraceUtils.currentMethod() + " called");
-		String uri = URIUtils.canonicalize(params.getTextDocument().getUri()).toString().toLowerCase();
+		String uri = URIUtils.canonicalize(params.getTextDocument().getUri()).toString();
 		documents.remove(uri);
 	}
 

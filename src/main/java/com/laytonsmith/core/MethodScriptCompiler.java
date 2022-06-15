@@ -54,6 +54,7 @@ import com.laytonsmith.core.functions.Compiler;
 import com.laytonsmith.core.functions.Compiler.__autoconcat__;
 import com.laytonsmith.core.functions.Compiler.__cbrace__;
 import com.laytonsmith.core.functions.Compiler.__smart_string__;
+import com.laytonsmith.core.functions.Compiler.__statements__;
 import com.laytonsmith.core.functions.Compiler.p;
 import com.laytonsmith.core.functions.ControlFlow;
 import com.laytonsmith.core.functions.DataHandling;
@@ -1907,10 +1908,12 @@ public final class MethodScriptCompiler {
 		Stack<List<Procedure>> procs = new Stack<>();
 		procs.add(new ArrayList<>());
 		processKeywords(tree, environment, compilerErrors);
+		addSelfStatements(tree, environment, envs, compilerErrors);
 		rewriteAutoconcats(tree, environment, envs, compilerErrors, true);
 		processLateKeywords(tree, environment, compilerErrors);
 		checkLinearComponents(tree, environment, compilerErrors);
 		postParseRewrite(rootNode, environment, envs, compilerErrors); // Pass rootNode since this might rewrite 'tree'.
+		moveNodeModifiersOffSyntheticNodes(tree);
 		tree = rootNode.getChildAt(0);
 		staticAnalysis.analyze(tree, environment, envs, compilerErrors);
 		optimize(tree, environment, envs, procs, compilerErrors);
@@ -2055,19 +2058,69 @@ public final class MethodScriptCompiler {
 	}
 
 	/**
-	 * Rewrites __autoconcat__ AST nodes to executable AST nodes. This should be called before AST optimization,
-	 * static analysis and anything else that requires a fully executable AST.
-	 * When this method returns, any __autoconcat__ that did not contain compile errors has been rewritten.
+	 * In some steps, smart comments and other modifiers might need to be placed on synthetic nodes. These should
+	 * be moved up into the top level synthetic node. This should be one of the last transformations
+	 * called after tree rewrites are done.
+	 */
+	private static void moveNodeModifiersOffSyntheticNodes(ParseTree node) {
+		if(node.isSyntheticNode() && node.hasChildren() && node.getNodeModifiers() != null) {
+			node.getNodeModifiers().merge(node.getChildAt(0).getNodeModifiers());
+		}
+		for(ParseTree child : node.getChildren()) {
+			moveNodeModifiersOffSyntheticNodes(child);
+		}
+	}
+
+	private static void addSelfStatements(ParseTree root, Environment env,
+			Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> compilerErrors) {
+		for(int i = 0; i < root.numberOfChildren(); i++) {
+			ParseTree node = root.getChildAt(i);
+			boolean isSelfStatement;
+			try {
+				isSelfStatement = node.getData() instanceof CFunction cf
+						&& cf.getCachedFunction() != null
+						&& cf.getCachedFunction().isSelfStatement(node.getTarget(), env, node.getChildren(), envs);
+			} catch(ConfigCompileException ex) {
+				compilerErrors.add(ex);
+				return;
+			}
+			if(isSelfStatement) {
+				int offset = i + 1;
+				if(!(root.getData() instanceof CFunction cf && cf.val().equals(Compiler.__autoconcat__.NAME))) {
+					// We need to create an autoconcat node first, and put this and the semicolon in that
+					ParseTree newNode = new ParseTree(new CFunction(Compiler.__autoconcat__.NAME, Target.UNKNOWN), root.getFileOptions(), true);
+					newNode.addChild(root);
+					root = newNode;
+					offset = 1;
+				}
+				root.getChildren().add(offset, new ParseTree(new CSemicolon(Target.UNKNOWN),
+						node.getFileOptions(), true));
+			}
+			addSelfStatements(node, env, envs, compilerErrors);
+		}
+	}
+
+	/**
+	 * Rewrites __autoconcat__ AST nodes to executable AST nodes. This should be called before AST optimization, static
+	 * analysis and anything else that requires a fully executable AST. When this method returns, any __autoconcat__
+	 * that did not contain compile errors has been rewritten.
 	 *
 	 * @param root
 	 * @param env
 	 * @param envs
 	 * @param compilerExceptions
+	 * @param rewriteKeywords
 	 */
-	private static void rewriteAutoconcats(ParseTree root, Environment env,
+	public static void rewriteAutoconcats(ParseTree root, Environment env,
 			Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> compilerExceptions,
 			boolean rewriteKeywords) {
 		if(!root.hasChildren()) {
+			if(root.getData() instanceof CFunction && root.getData().val().equals(__autoconcat__.NAME)) {
+				ParseTree tree = new ParseTree(new CFunction(__statements__.NAME, root.getTarget()),
+						root.getFileOptions(), true);
+				tree.setOptimized(true);
+				root.replace(tree);
+			}
 			return;
 		}
 		List<List<ParseTree>> children = new ArrayList<>();
@@ -2079,6 +2132,7 @@ public final class MethodScriptCompiler {
 					env.getEnv(CompilerEnvironment.class).addCompilerWarning(child.getFileOptions(),
 							new CompilerWarning("Empty statement.", child.getTarget(),
 									SuppressWarning.UselessCode));
+					continue;
 				}
 				children.add(ongoingChildren);
 				ongoingChildren = new ArrayList<>();
@@ -2226,6 +2280,17 @@ public final class MethodScriptCompiler {
 
 				if(!statementsAllowed) {
 					String unexpectedStatement = "Unexpected statement, semicolon (;) not allowed in this context.";
+					try {
+						if(ast.getData() instanceof CFunction cf
+								&& cf.getCachedFunction().isSelfStatement(ast.getTarget(), env, ast.getChildren(), envs)) {
+							// We can give a better error message here, because the semicolon wasn't actually added
+							// by the user (probably) it's the self statement function that's the problem here.
+							unexpectedStatement = "Unexpected statement, " + ast.getData().val()
+									+ " not allowed in this context.";
+						}
+					} catch(ConfigCompileException ex) {
+						exceptions.add(ex);
+					}
 					if(ast.getFileOptions().isStrict()) {
 						exceptions.add(new ConfigCompileException(unexpectedStatement, child.getTarget()));
 					} else {

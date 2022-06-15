@@ -49,8 +49,7 @@ public class BukkitMCBlock extends BukkitMCMetadatable implements MCBlock {
 
 	@Override
 	public MCMaterial getType() {
-		Material type = b.getType();
-		return type == null ? null : new BukkitMCMaterial(type);
+		return BukkitMCMaterial.valueOfConcrete(b.getType());
 	}
 
 	@Override

@@ -114,6 +114,10 @@ public enum MCDamageCause {
 	 */
 	FREEZE,
 	/**
+	 * Damage caused by the Sonic Boom attack from Warden
+	 */
+	SONIC_BOOM,
+	/**
 	 * Custom damage.
 	 */
 	CUSTOM

@@ -133,6 +133,10 @@ without knowing the rotations on the other axis or of other body parts beforehan
 * %KEY_FOX_CROUCHING%: Whether or not the fox is crouching.
 * %KEY_FOX_TYPE%: The type of fox. (can be %FOX_TYPE%)
 |-
+| FROG
+|
+* %KEY_FROG_TYPE%: The type of frog. (can be %FROG_TYPE%)
+|-
 | GOAT
 |
 * %KEY_GOAT_SCREAMING%: Whether or not this is a screaming goat
