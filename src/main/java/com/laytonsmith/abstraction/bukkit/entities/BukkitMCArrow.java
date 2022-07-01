@@ -85,4 +85,14 @@ public class BukkitMCArrow extends BukkitMCProjectile implements MCArrow {
 	public void setBasePotionData(MCPotionData pd) {
 		arrow.setBasePotionData((PotionData) pd.getHandle());
 	}
+
+	@Override
+	public int getPierceLevel() {
+		return arrow.getPierceLevel();
+	}
+
+	@Override
+	public void setPierceLevel(int level) {
+		arrow.setPierceLevel(level);
+	}
 }
