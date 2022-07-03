@@ -1093,7 +1093,7 @@ public final class Interpreter {
 		}
 	}
 
-	public static void uninstall() {
+	public static void uninstall(String commandName) {
 		if(null == OSUtils.GetOS()) {
 			StreamUtils.GetSystemErr().println("Sorry, cmdline functionality is currently only supported on unix systems! Check back soon though!");
 			return;
@@ -1102,12 +1102,12 @@ public final class Interpreter {
 			case LINUX:
 			case MAC:
 				try {
-					File exe = new File(UNIX_INTERPRETER_INSTALLATION_LOCATION);
+					File exe = new File(UNIX_INTERPRETER_INSTALLATION_LOCATION + commandName);
 					if(!exe.delete()) {
 						throw new IOException();
 					}
 				} catch (IOException e) {
-					StreamUtils.GetSystemErr().println("Cannot uninstall. You must run the command with sudo for it to succeed, however, did you do that?");
+					StreamUtils.GetSystemErr().println("Cannot uninstall. You must specify the correct instance name and run the command with sudo for it to succeed, however, did you do that?");
 					return;
 				}
 				break;
