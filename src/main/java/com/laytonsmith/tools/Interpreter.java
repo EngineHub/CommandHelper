@@ -315,7 +315,7 @@ public final class Interpreter {
 					prompt = getPrompt();
 				}
 				String line = reader.readLine(prompt);
-				if(!textLine(line)) {
+				if(line == null || !textLine(line)) {
 					break;
 				}
 			}
