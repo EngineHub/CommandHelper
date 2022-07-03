@@ -486,6 +486,12 @@ public class ObjectGenerator {
 					MCCreatureSpawner mccs = (MCCreatureSpawner) bs;
 					ma.set("spawntype", mccs.getSpawnedType().name());
 					ma.set("delay", new CInt(mccs.getDelay(), t), t);
+					ma.set("mindelay", new CInt(mccs.getMinDelay(), t), t);
+					ma.set("maxdelay", new CInt(mccs.getMaxDelay(), t), t);
+					ma.set("spawncount", new CInt(mccs.getSpawnCount(), t), t);
+					ma.set("maxnearbyentities", new CInt(mccs.getMaxNearbyEntities(), t), t);
+					ma.set("playerrange", new CInt(mccs.getPlayerRange(), t), t);
+					ma.set("spawnrange", new CInt(mccs.getSpawnRange(), t), t);
 				} else if(bs instanceof MCBrewingStand) {
 					MCBrewingStand brewStand = (MCBrewingStand) bs;
 					ma.set("brewtime", new CInt(brewStand.getBrewingTime(), t), t);
@@ -864,6 +870,30 @@ public class ObjectGenerator {
 						if(ma.containsKey("delay")) {
 							int delay = ArgumentValidation.getInt32(ma.get("delay", t), t);
 							mccs.setDelay(delay);
+						}
+						if(ma.containsKey("mindelay")) {
+							int delay = ArgumentValidation.getInt32(ma.get("mindelay", t), t);
+							mccs.setMinDelay(delay);
+						}
+						if(ma.containsKey("maxdelay")) {
+							int delay = ArgumentValidation.getInt32(ma.get("maxdelay", t), t);
+							mccs.setMaxDelay(delay);
+						}
+						if(ma.containsKey("spawncount")) {
+							int count = ArgumentValidation.getInt32(ma.get("spawncount", t), t);
+							mccs.setSpawnCount(count);
+						}
+						if(ma.containsKey("maxnearbyentities")) {
+							int max = ArgumentValidation.getInt32(ma.get("maxnearbyentities", t), t);
+							mccs.setMaxNearbyEntities(max);
+						}
+						if(ma.containsKey("spawnrange")) {
+							int range = ArgumentValidation.getInt32(ma.get("spawnrange", t), t);
+							mccs.setSpawnRange(range);
+						}
+						if(ma.containsKey("playerrange")) {
+							int range = ArgumentValidation.getInt32(ma.get("playerrange", t), t);
+							mccs.setPlayerRange(range);
 						}
 						bsm.setBlockState(bs);
 					} else if(bs instanceof MCBrewingStand) {

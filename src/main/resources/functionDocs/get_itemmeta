@@ -94,7 +94,13 @@ Below are the available fields in the item meta array. Fields can be null when t
 | Spawners
 |
 * '''spawntype''' : (string) May be one of ''%ENTITY_TYPES%''. Not all entity types will spawn from spawners, and some require special conditions.
-* '''delay''' : (int) The time in ticks until the spawner will spawn the next entity.
+* '''delay''' : (int) The time in ticks until the spawner will spawn the next batch of entities.
+* '''mindelay''' : (int) The lower bounds of a new random delay chosen after each batch of entities spawn. (must be <= 'maxdelay')
+* '''maxdelay''' : (int) The upper bounds of a new random delay. (must be above zero and >= mindelay)
+* '''spawncount''' : (int) The number of entities to attempt to spawn in each batch.
+* '''maxnearbyentities''' : (int) The number of 'spawntype' entities within just over 'spawnrange' distance that'll prevent further spawns.
+* '''spawnrange''' : (int) The maximum distance in the x or z axis new entities will spawn from the spawner.
+* '''playerrange''' : (int) The maximum distance a player must be within to cause the spawner to spawn.
 |-
 | Maps
 |
