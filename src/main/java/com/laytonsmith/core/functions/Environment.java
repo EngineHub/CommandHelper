@@ -2966,4 +2966,52 @@ public class Environment {
 		}
 
 	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class bone_meal_block extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "bone_meal_block";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {locationArray} Applies bone meal to a block, if possible."
+					+ " Returns true if it was successfully applied, as some block types cannot be bone-mealed.";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class, CREInvalidWorldException.class,
+					CRERangeException.class};
+		}
+
+		@Override
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args)
+				throws ConfigRuntimeException {
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			return CBoolean.get(loc.getBlock().applyBoneMeal());
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+	}
 }
