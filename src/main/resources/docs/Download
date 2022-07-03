@@ -27,7 +27,7 @@ can use <code>mscript -- update-check</code> to see if a newer version is availa
 	specifically need something else.</p>
 	<div class="downloadList" id="commandhelperjar">
 		<div class="loadingSection">
-			<img src="%%cacheBuster|images/CommandHelper_IconAnimated.gif%%" style="width: 100px;">
+			<img src="%%cacheBuster|images/CommandHelper_IconAnimated.gif%%" style="width: 100px;" alt="">
 			<br>
 			Loading version information
 		</div>
@@ -36,7 +36,7 @@ can use <code>mscript -- update-check</code> to see if a newer version is availa
 	only download from this list if there is something specific that you need.</p>
 	<div class="downloadList" id="commandhelperpinned">
 		<div class="loadingSection">
-			<img src="%%cacheBuster|images/CommandHelper_IconAnimated.gif%%" style="width: 100px;">
+			<img src="%%cacheBuster|images/CommandHelper_IconAnimated.gif%%" style="width: 100px;" alt="">
 			<br>
 			Loading version information
 		</div>
@@ -49,7 +49,7 @@ block installation. Please click "More Info", then "Run anyway" to bypass this.
 </p>
 <div class="downloadList" id="commandhelperwindowsinstaller">
 	<div class="loadingSection">
-		<img src="%%cacheBuster|images/CommandHelper_IconAnimated.gif%%" style="width: 100px;">
+		<img src="%%cacheBuster|images/CommandHelper_IconAnimated.gif%%" style="width: 100px;" alt="">
 		<br>
 		Loading version information
 	</div>
