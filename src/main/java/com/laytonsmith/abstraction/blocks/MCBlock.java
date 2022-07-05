@@ -80,4 +80,6 @@ public interface MCBlock extends MCMetadatable {
 	MCBlockFace getFace(MCBlock get);
 
 	boolean isEmpty();
+
+	boolean applyBoneMeal();
 }

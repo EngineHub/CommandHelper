@@ -7,12 +7,16 @@ body {
 	background-color: #383838;
 }
 
+a {
+	color: #63c341;
+}
+
 h1, h2, h3, h4, h5, h6 {
 	color: #afafaf;
 }
 
 strong, b {
-	color: #888;
+	color: #a1a1a1;
 }
 
 #edit_this_page {

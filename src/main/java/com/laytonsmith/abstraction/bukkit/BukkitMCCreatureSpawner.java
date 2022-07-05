@@ -36,4 +36,64 @@ public class BukkitMCCreatureSpawner extends BukkitMCBlockState implements MCCre
 		cs.setDelay(delay);
 		cs.update();
 	}
+
+	@Override
+	public int getMinDelay() {
+		return cs.getMinSpawnDelay();
+	}
+
+	@Override
+	public void setMinDelay(int delay) {
+		cs.setMinSpawnDelay(delay);
+	}
+
+	@Override
+	public int getMaxDelay() {
+		return cs.getMaxSpawnDelay();
+	}
+
+	@Override
+	public void setMaxDelay(int delay) {
+		cs.setMaxSpawnDelay(delay);
+	}
+
+	@Override
+	public int getSpawnCount() {
+		return cs.getSpawnCount();
+	}
+
+	@Override
+	public void setSpawnCount(int count) {
+		cs.setSpawnCount(count);
+	}
+
+	@Override
+	public int getMaxNearbyEntities() {
+		return cs.getMaxNearbyEntities();
+	}
+
+	@Override
+	public void setMaxNearbyEntities(int max) {
+		cs.setMaxNearbyEntities(max);
+	}
+
+	@Override
+	public int getPlayerRange() {
+		return cs.getRequiredPlayerRange();
+	}
+
+	@Override
+	public void setPlayerRange(int range) {
+		cs.setRequiredPlayerRange(range);
+	}
+
+	@Override
+	public int getSpawnRange() {
+		return cs.getSpawnRange();
+	}
+
+	@Override
+	public void setSpawnRange(int range) {
+		cs.setSpawnRange(range);
+	}
 }

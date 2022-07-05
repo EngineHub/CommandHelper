@@ -167,7 +167,11 @@ public class Weather {
 			if(w != null) {
 				w.setStorm(b);
 				if(duration > 0) {
-					w.setWeatherDuration(duration);
+					if(b) {
+						w.setWeatherDuration(duration);
+					} else {
+						w.setClearWeatherDuration(duration);
+					}
 				}
 			} else {
 				throw new CREInvalidWorldException("World was not specified", t);

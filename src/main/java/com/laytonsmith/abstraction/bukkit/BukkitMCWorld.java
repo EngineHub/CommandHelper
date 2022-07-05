@@ -528,6 +528,11 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	}
 
 	@Override
+	public void setClearWeatherDuration(int time) {
+		w.setClearWeatherDuration(time);
+	}
+
+	@Override
 	public boolean isStorming() {
 		return w.hasStorm();
 	}

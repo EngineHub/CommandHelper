@@ -1860,6 +1860,7 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_ARROW_CRITICAL, CBoolean.get(arrow.isCritical()), t, env);
 					specArray.set(entity_spec.KEY_ARROW_KNOCKBACK, new CInt(arrow.getKnockbackStrength(), t), t, env);
 					specArray.set(entity_spec.KEY_ARROW_DAMAGE, new CDouble(arrow.getDamage(), t), t, env);
+					specArray.set(entity_spec.KEY_ARROW_PIERCE_LEVEL, new CInt(arrow.getPierceLevel(), t), t, env);
 					CArray tippedmeta = CArray.GetAssociativeArray(t, null, env);
 					CArray tippedeffects = ObjectGenerator.GetGenerator().potions(arrow.getCustomEffects(), t, env);
 					tippedmeta.set("potions", tippedeffects, t, env);
@@ -2251,6 +2252,7 @@ public class EntityManagement {
 		private static final String KEY_ARROW_CRITICAL = "critical";
 		private static final String KEY_ARROW_KNOCKBACK = "knockback";
 		private static final String KEY_ARROW_DAMAGE = "damage";
+		private static final String KEY_ARROW_PIERCE_LEVEL = "piercelevel";
 		private static final String KEY_ARMORSTAND_ARMS = "arms";
 		private static final String KEY_ARMORSTAND_BASEPLATE = "baseplate";
 		private static final String KEY_ARMORSTAND_GRAVITY = "gravity";
@@ -2529,6 +2531,13 @@ public class EntityManagement {
 									throw new CRERangeException("Damage cannot be negative.", t);
 								}
 								arrow.setDamage(d);
+							}
+							case entity_spec.KEY_ARROW_PIERCE_LEVEL -> {
+								int level = ArgumentValidation.getInt32(specArray.get(index, t, env), t, env);
+								if(level < 0 || level > 127) {
+									throw new CRERangeException("Pierce level must be 0 to 127.", t);
+								}
+								arrow.setPierceLevel(level);
 							}
 							case entity_spec.KEY_TIPPEDARROW_POTIONMETA -> {
 								Mixed c = specArray.get(index, t, env);

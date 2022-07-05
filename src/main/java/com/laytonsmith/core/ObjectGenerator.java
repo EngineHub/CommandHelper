@@ -545,6 +545,12 @@ public class ObjectGenerator {
 				} else if(bs instanceof MCCreatureSpawner mccs) {
 					ma.set("spawntype", mccs.getSpawnedType().name(), env);
 					ma.set("delay", new CInt(mccs.getDelay(), t), t, env);
+					ma.set("mindelay", new CInt(mccs.getMinDelay(), t), t, env);
+					ma.set("maxdelay", new CInt(mccs.getMaxDelay(), t), t, env);
+					ma.set("spawncount", new CInt(mccs.getSpawnCount(), t), t, env);
+					ma.set("maxnearbyentities", new CInt(mccs.getMaxNearbyEntities(), t), t, env);
+					ma.set("playerrange", new CInt(mccs.getPlayerRange(), t), t, env);
+					ma.set("spawnrange", new CInt(mccs.getSpawnRange(), t), t, env);
 				} else if(bs instanceof MCBrewingStand brewStand) {
 					ma.set("brewtime", new CInt(brewStand.getBrewingTime(), t), t, env);
 					ma.set("fuel", new CInt(brewStand.getFuelLevel(), t), t, env);
@@ -917,6 +923,30 @@ public class ObjectGenerator {
 						if(ma.containsKey("delay")) {
 							int delay = ArgumentValidation.getInt32(ma.get("delay", t, env), t, env);
 							mccs.setDelay(delay);
+						}
+						if(ma.containsKey("mindelay")) {
+							int delay = ArgumentValidation.getInt32(ma.get("mindelay", t, env), t, env);
+							mccs.setMinDelay(delay);
+						}
+						if(ma.containsKey("maxdelay")) {
+							int delay = ArgumentValidation.getInt32(ma.get("maxdelay", t, env), t, env);
+							mccs.setMaxDelay(delay);
+						}
+						if(ma.containsKey("spawncount")) {
+							int count = ArgumentValidation.getInt32(ma.get("spawncount", t, env), t, env);
+							mccs.setSpawnCount(count);
+						}
+						if(ma.containsKey("maxnearbyentities")) {
+							int max = ArgumentValidation.getInt32(ma.get("maxnearbyentities", t, env), t, env);
+							mccs.setMaxNearbyEntities(max);
+						}
+						if(ma.containsKey("spawnrange")) {
+							int range = ArgumentValidation.getInt32(ma.get("spawnrange", t, env), t, env);
+							mccs.setSpawnRange(range);
+						}
+						if(ma.containsKey("playerrange")) {
+							int range = ArgumentValidation.getInt32(ma.get("playerrange", t, env), t, env);
+							mccs.setPlayerRange(range);
 						}
 						bsm.setBlockState(bs);
 					} else if(bs instanceof MCBrewingStand brewStand) {

@@ -115,6 +115,8 @@ public interface MCWorld extends MCMetadatable {
 
 	void setThunderDuration(int time);
 
+	void setClearWeatherDuration(int time);
+
 	boolean isStorming();
 
 	boolean isThundering();

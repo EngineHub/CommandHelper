@@ -9,7 +9,6 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.constructs.CArray;
-import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
@@ -48,7 +47,7 @@ public abstract class LocationPrefilterMatcher<T extends BindableEvent> extends 
 					+ " For instance, if the event"
 					+ " location occurs at x = 64.5837, and the prefilter indicates array(x: 65, tolerance: 1), then"
 					+ " this would match. Missing keys in the prefilter are ignored and so will match any value in the"
-					+ " event. If tolerance is not explicitely provided in the prefilter, the default tolerance is used,"
+					+ " event. If tolerance is not explicitly provided in the prefilter, the default tolerance is used,"
 					+ " which itself defaults to 1.0, unless otherwise documented in the specific prefilter.";
 		}
 
@@ -66,7 +65,7 @@ public abstract class LocationPrefilterMatcher<T extends BindableEvent> extends 
 	@Override
 	public void validate(ParseTree node, LeftHandSideType nodeType, Environment env)
 			throws ConfigCompileException, ConfigCompileGroupException, ConfigRuntimeException {
-		if(!nodeType.doesExtend(CBoolean.TYPE, env)) {
+		if(!nodeType.doesExtend(CArray.TYPE, env)) {
 			env.getEnv(CompilerEnvironment.class).addCompilerWarning(node.getFileOptions(),
 					new CompilerWarning("Expected a location array here, this may not perform as expected.",
 							node.getTarget(), null));
