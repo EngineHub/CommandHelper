@@ -106,6 +106,7 @@ import com.laytonsmith.abstraction.enums.MCProfession;
 import com.laytonsmith.abstraction.enums.MCRabbitType;
 import com.laytonsmith.abstraction.enums.MCRotation;
 import com.laytonsmith.abstraction.enums.MCTreeSpecies;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.ArgumentValidation;
@@ -719,8 +720,7 @@ public class EntityManagement {
 		@Override
 		public String docs() {
 			return "void {entityUUID, int} Sets the age of the entity to the specified int,"
-					+ " represented by server ticks. Most entities cannot be less than 1 server tick,"
-					+ " with some exceptions like items, arrows and falling blocks.";
+					+ " represented by server ticks. Entity age cannot be less than 1 server tick,";
 		}
 
 		@Override
@@ -1942,6 +1942,11 @@ public class EntityManagement {
 					} else {
 						specArray.set(entity_spec.KEY_DROPPED_ITEM_THROWER, new CString(thrower.toString(), t), t);
 					}
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_18_X)) {
+						specArray.set(entity_spec.KEY_DROPPED_ITEM_DESPAWN, CBoolean.get(item.willDespawn()), t);
+					} else {
+						specArray.set(entity_spec.KEY_DROPPED_ITEM_DESPAWN, CBoolean.TRUE, t);
+					}
 					break;
 				case ENDER_CRYSTAL:
 					MCEnderCrystal endercrystal = (MCEnderCrystal) entity;
@@ -2273,6 +2278,7 @@ public class EntityManagement {
 		private static final String KEY_DROPPED_ITEM_PICKUPDELAY = "pickupdelay";
 		private static final String KEY_DROPPED_ITEM_OWNER = "owner";
 		private static final String KEY_DROPPED_ITEM_THROWER = "thrower";
+		private static final String KEY_DROPPED_ITEM_DESPAWN = "despawn";
 		private static final String KEY_ENDERCRYSTAL_BASE = "base";
 		private static final String KEY_ENDERCRYSTAL_BEAMTARGET = "beamtarget";
 		private static final String KEY_ENDEREYE_DESPAWNTICKS = "despawnticks";
@@ -2806,6 +2812,11 @@ public class EntityManagement {
 									item.setThrower(null);
 								} else {
 									item.setThrower(Static.GetUUID(thrower, t));
+								}
+								break;
+							case entity_spec.KEY_DROPPED_ITEM_DESPAWN:
+								if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_18_X)) {
+									item.setWillDespawn(ArgumentValidation.getBooleanObject(specArray.get(index, t), t));
 								}
 								break;
 							default:

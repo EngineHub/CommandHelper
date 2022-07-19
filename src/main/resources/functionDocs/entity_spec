@@ -85,6 +85,7 @@ without knowing the rotations on the other axis or of other body parts beforehan
 * %KEY_DROPPED_ITEM_PICKUPDELAY%: The delay before the item is available to be picked up.
 * %KEY_DROPPED_ITEM_OWNER%: The UUID of the player that owns this item, or null. Prevents other players from picking up item.
 * %KEY_DROPPED_ITEM_THROWER%: The UUID of the entity that threw this item, or null.
+* %KEY_DROPPED_ITEM_DESPAWN%: Whether or not the item will despawn after a time. (modifiable in MC 1.18.2 or later)
 |-
 | ENDER_CRYSTAL
 |
