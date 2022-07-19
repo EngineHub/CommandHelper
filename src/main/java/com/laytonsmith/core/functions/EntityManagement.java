@@ -698,14 +698,15 @@ public class EntityManagement {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			int age = ArgumentValidation.getInt32(args[1], t);
-			if(age < 1) {
-				throw new CRERangeException("Entity age can't be less than 1 server tick.", t);
-			}
 			MCEntity ent = Static.getEntity(args[0], t);
 			if(ent == null) {
 				return CNull.NULL;
 			} else {
-				ent.setTicksLived(age);
+				try {
+					ent.setTicksLived(age);
+				} catch (IllegalArgumentException ex) {
+					throw new CRERangeException(ex.getMessage(), t);
+				}
 				return CVoid.VOID;
 			}
 		}
@@ -718,7 +719,8 @@ public class EntityManagement {
 		@Override
 		public String docs() {
 			return "void {entityUUID, int} Sets the age of the entity to the specified int,"
-					+ " represented by server ticks.";
+					+ " represented by server ticks. Most entities cannot be less than 1 server tick,"
+					+ " with some exceptions like items, arrows and falling blocks.";
 		}
 
 		@Override
