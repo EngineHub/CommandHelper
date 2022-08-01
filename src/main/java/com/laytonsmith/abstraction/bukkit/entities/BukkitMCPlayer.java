@@ -425,6 +425,9 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 			ops = "n";
 			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_18)) {
 				getPlayerList = "ac";
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_X)) {
+					ops = "o";
+				}
 			}
 		} else { // 1.16.5 and prior
 			nms = "net.minecraft.server." + version;
