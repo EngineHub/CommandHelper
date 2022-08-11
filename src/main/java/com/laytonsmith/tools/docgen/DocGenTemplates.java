@@ -488,14 +488,14 @@ public class DocGenTemplates {
 			Main.CmdlineToolCollection collection = Main.GetCommandLineTools();
 			b.append("<pre style=\"white-space: pre-wrap;\">\n")
 					.append(HTMLUtils.escapeHTML(collection.getSuite().getBuiltDescription())).append("\n</pre>\n");
-			if(!colorsDisabled) {
-				TermColors.EnableColors();
-			}
 			for(Map.Entry<ArgumentParser, CommandLineTool> e : collection.getDynamicTools().entrySet()) {
 				b.append("==== ")
 						.append(e.getValue().getClass().getAnnotation(tool.class).value())
 						.append(" ====\n<pre style=\"white-space: pre-wrap;\">");
 				b.append(HTMLUtils.escapeHTML(e.getKey().getBuiltDescription())).append("</pre>\n\n");
+			}
+			if(!colorsDisabled) {
+				TermColors.EnableColors();
 			}
 			return b.toString();
 		}
