@@ -25,7 +25,7 @@ subject, and have their own [[Prefilters|page]]). Both the options parameter and
 parameter may be null. The information in the @event_object depends on the event. Each event sends different parameters.
 Finally, the custom params are discussed below in the scope section. So, let's look at the <code>player_interact</code>
 event, which occurs whenever the player left or right clicks a block or the air, and show a few use cases. First, we
-need to know the event's signature though, which can be looked up in the [[Event API|Event API]].
+need to know the event's signature though, which can be looked up in the [[Event_API|Event API]].
 
 player_interact:
 * @event['action']: One of either: left_click_block, right_click_block, left_click_air, or right_click_air
