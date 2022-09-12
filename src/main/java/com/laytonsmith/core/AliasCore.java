@@ -642,13 +642,22 @@ public class AliasCore {
 						script.getTarget());
 			} else {
 				Procedure p = env.getEnv(GlobalEnv.class).GetProcs().get(proc);
-				Mixed m = p.execute(new ArrayList<>(), env, script.getTarget());
-				if(!(m instanceof CClosure)) {
-					MSLog.GetLogger().e(MSLog.Tags.COMPILER, "Procedure " + proc + " returns a value other than"
-							+ " a closure. It must unconditionally return a closure.",
-						p.getTarget());
-				} else {
-					Commands.set_tabcompleter.customExec(script.getTarget(), env, cmd, m);
+				Mixed m = null;
+				try {
+					m = p.execute(new ArrayList<>(), env, script.getTarget());
+				} catch (ConfigRuntimeException ex) {
+					MSLog.GetLogger().e(MSLog.Tags.COMPILER, "Script defined at " + script.getTarget()
+							+ " threw an exception. Tabcompletion is being skipped for this alias.", p.getTarget());
+					ConfigRuntimeException.HandleUncaughtException(ex, env);
+				}
+				if(m != null) {
+					if(!(m instanceof CClosure)) {
+						MSLog.GetLogger().e(MSLog.Tags.COMPILER, "Procedure " + proc + " returns a value other than"
+								+ " a closure. It must unconditionally return a closure.",
+							p.getTarget());
+					} else {
+						Commands.set_tabcompleter.customExec(script.getTarget(), env, cmd, m);
+					}
 				}
 			}
 		} else {
