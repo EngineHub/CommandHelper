@@ -129,6 +129,7 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | 
 * %KEY_FIREWORK_STRENGTH%: The firework rocket's flight time.
 * %KEY_FIREWORK_EFFECTS%: An array of firework effect arrays. (see {{function|launch_firework}})
+* %KEY_FIREWORK_ANGLED%: Whether or not the rocket was fired at an angle. (i.e. from a crossbow or dispenser)
 |-
 | FOX
 | 

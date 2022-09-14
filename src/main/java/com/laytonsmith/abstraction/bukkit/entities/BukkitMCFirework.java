@@ -25,4 +25,19 @@ public class BukkitMCFirework extends BukkitMCProjectile implements MCFirework {
 		f.setFireworkMeta(((BukkitMCFireworkMeta) fm).asItemMeta());
 	}
 
+	@Override
+	public boolean isShotAtAngle() {
+		return f.isShotAtAngle();
+	}
+
+	@Override
+	public void setShotAtAngle(boolean shotAtAngle) {
+		f.setShotAtAngle(shotAtAngle);
+	}
+
+	@Override
+	public void detonate() {
+		f.detonate();
+	}
+
 }

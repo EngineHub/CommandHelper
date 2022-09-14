@@ -2009,6 +2009,7 @@ public class EntityManagement {
 						fe.push(ObjectGenerator.GetGenerator().fireworkEffect(effect, t), t);
 					}
 					specArray.set(entity_spec.KEY_FIREWORK_EFFECTS, fe, t);
+					specArray.set(entity_spec.KEY_FIREWORK_ANGLED, CBoolean.get(firework.isShotAtAngle()), t);
 					break;
 				case FOX:
 					MCFox fox = (MCFox) entity;
@@ -2295,6 +2296,7 @@ public class EntityManagement {
 		private static final String KEY_FIREBALL_DIRECTION = "direction";
 		private static final String KEY_FIREWORK_STRENGTH = "strength";
 		private static final String KEY_FIREWORK_EFFECTS = "effects";
+		private static final String KEY_FIREWORK_ANGLED = "angled";
 		private static final String KEY_FOX_CROUCHING = "crouching";
 		private static final String KEY_FOX_TYPE = "type";
 		private static final String KEY_FROG_TYPE = "type";
@@ -2986,6 +2988,9 @@ public class EntityManagement {
 										throw new CRECastException("Firework effect expected to be an array.", t);
 									}
 								}
+								break;
+							case entity_spec.KEY_FIREWORK_ANGLED:
+								firework.setShotAtAngle(ArgumentValidation.getBooleanObject(specArray.get(index, t), t));
 								break;
 							default:
 								throwException(index, t);
@@ -4469,8 +4474,8 @@ public class EntityManagement {
 			int strength = 2;
 			if(options.containsKey("strength")) {
 				strength = ArgumentValidation.getInt32(options.get("strength", t), t);
-				if(strength < 0 || strength > 128) {
-					throw new CRERangeException("Strength must be between 0 and 128", t);
+				if(strength > 127) {
+					throw new CRERangeException("Strength cannot be higher than 127", t);
 				}
 			}
 
@@ -4531,7 +4536,8 @@ public class EntityManagement {
 					+ "{| cellspacing=\"1\" cellpadding=\"1\" border=\"1\" class=\"wikitable\"\n"
 					+ "! Array key !! Description !! Default\n"
 					+ "|-\n"
-					+ "| strength || A number specifying how far up the firework should go || 2\n"
+					+ "| strength || A number indicating the flight duration of the rocket equal to the amount of"
+					+ " gunpowder used to craft a rocket. (negative numbers detonate immediately) || 2\n"
 					+ "|-\n"
 					+ "| flicker || A boolean, determining if the firework will flicker || false\n"
 					+ "|-\n"
