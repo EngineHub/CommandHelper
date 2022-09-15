@@ -258,7 +258,7 @@
 			<!-- Apache 2.0 -->
 			<groupId>org.yaml</groupId>
 			<artifactId>snakeyaml</artifactId>
-			<version>1.26</version>
+			<version>1.31</version>
 		</dependency>
 
 		<!-- Apache commons IO -->
