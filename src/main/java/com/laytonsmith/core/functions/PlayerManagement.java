@@ -5459,19 +5459,37 @@ public class PlayerManagement {
 
 			MCPlayer p = Static.GetPlayer(args[0], t);
 
-			MCSound sound;
-			try {
-				sound = MCSound.valueOf(args[1].val().toUpperCase());
-			} catch (IllegalArgumentException iae) {
-				throw new CREFormatException("Sound name '" + args[1].val() + "' is invalid.", t);
+			String soundName;
+			String categoryName = null;
+			if(args[1].isInstanceOf(CArray.TYPE)) {
+				CArray soundArray = (CArray) args[1];
+				if(!soundArray.isAssociative()) {
+					throw new CRECastException("Expected an associative array", t);
+				}
+				soundName = soundArray.get("sound", t).val();
+				if(soundArray.containsKey("category")) {
+					categoryName = soundArray.get("category", t).val();
+				}
+			} else {
+				soundName = args[1].val();
+			}
+			if(args.length == 3) {
+				categoryName = args[2].val();
 			}
 
-			if(args.length == 3) {
+			MCSound sound;
+			try {
+				sound = MCSound.valueOf(soundName.toUpperCase());
+			} catch (IllegalArgumentException iae) {
+				throw new CREFormatException("Sound name '" + soundName + "' is invalid.", t);
+			}
+
+			if(categoryName != null) {
 				MCSoundCategory category;
 				try {
-					category = MCSoundCategory.valueOf(args[2].val().toUpperCase());
+					category = MCSoundCategory.valueOf(categoryName.toUpperCase());
 				} catch (IllegalArgumentException iae) {
-					throw new CREFormatException("Sound category '" + args[2].val() + "' is invalid.", t);
+					throw new CREFormatException("Sound category '" + categoryName + "' is invalid.", t);
 				}
 				p.stopSound(sound, category);
 			} else {
@@ -5528,17 +5546,39 @@ public class PlayerManagement {
 				throws ConfigRuntimeException {
 
 			MCPlayer p = Static.GetPlayer(args[0], t);
-			String sound = args[1].val();
-			if(args.length == 3) {
-				MCSoundCategory category;
-				try {
-					category = MCSoundCategory.valueOf(args[2].val().toUpperCase());
-				} catch (IllegalArgumentException iae) {
-					throw new CREFormatException("Sound category '" + args[2].val() + "' is invalid.", t);
+			String soundName;
+			String categoryName = null;
+			if(args[1].isInstanceOf(CArray.TYPE)) {
+				CArray soundArray = (CArray) args[1];
+				if(!soundArray.isAssociative()) {
+					throw new CRECastException("Expected an associative array or sound string", t);
 				}
-				p.stopSound(sound, category);
+				soundName = soundArray.get("sound", t).val();
+				if(soundArray.containsKey("category")) {
+					categoryName = soundArray.get("category", t).val();
+				}
 			} else {
-				p.stopSound(sound);
+				soundName = args[1].val();
+			}
+			if(args.length == 3) {
+				categoryName = args[2].val();
+			}
+			MCSoundCategory category = null;
+			if(categoryName != null) {
+				try {
+					category = MCSoundCategory.valueOf(categoryName.toUpperCase());
+				} catch (IllegalArgumentException iae) {
+					throw new CREFormatException("Sound category '" + categoryName + "' is invalid.", t);
+				}
+			}
+			try {
+				if(category != null) {
+					p.stopSound(soundName, category);
+				} else {
+					p.stopSound(soundName);
+				}
+			} catch(Exception ex) {
+				throw new CREFormatException(ex.getMessage(), t);
 			}
 
 			return CVoid.VOID;

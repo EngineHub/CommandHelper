@@ -1809,7 +1809,7 @@ public class Environment {
 
 			CArray sa = (CArray) args[1];
 
-			path = sa.get("sound", t).val();
+			path = ArgumentValidation.getStringObject(sa.get("sound", t), t);
 
 			if(sa.containsKey("category")) {
 				try {
@@ -1828,7 +1828,7 @@ public class Environment {
 			}
 
 			if(args.length == 3) {
-				java.util.List<MCPlayer> players = new java.util.ArrayList<MCPlayer>();
+				java.util.List<MCPlayer> players = new java.util.ArrayList<>();
 				if(args[2].isInstanceOf(CArray.TYPE)) {
 					for(String key : ((CArray) args[2]).stringKeySet()) {
 						players.add(Static.GetPlayer(((CArray) args[2]).get(key, t), t));
@@ -1837,19 +1837,29 @@ public class Environment {
 					players.add(Static.GetPlayer(args[2], t));
 				}
 
-				if(category == null) {
-					for(MCPlayer p : players) {
-						p.playSound(loc, path, volume, pitch);
+				try {
+					if(category == null) {
+						for(MCPlayer p : players) {
+							p.playSound(loc, path, volume, pitch);
+						}
+					} else {
+						for(MCPlayer p : players) {
+							p.playSound(loc, path, category, volume, pitch);
+						}
 					}
-				} else {
-					for(MCPlayer p : players) {
-						p.playSound(loc, path, category, volume, pitch);
-					}
+				} catch(Exception ex) {
+					throw new CREFormatException(ex.getMessage(), t);
 				}
-			} else if(category == null) {
-				loc.getWorld().playSound(loc, path, volume, pitch);
 			} else {
-				loc.getWorld().playSound(loc, path, category, volume, pitch);
+				try {
+					if(category == null) {
+						loc.getWorld().playSound(loc, path, volume, pitch);
+					} else {
+						loc.getWorld().playSound(loc, path, category, volume, pitch);
+					}
+				} catch(Exception ex) {
+					throw new CREFormatException(ex.getMessage(), t);
+				}
 			}
 			return CVoid.VOID;
 		}
