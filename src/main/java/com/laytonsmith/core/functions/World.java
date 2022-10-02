@@ -2049,7 +2049,7 @@ public class World {
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			Vector3D v = ObjectGenerator.GetGenerator().location(args[0], p == null ? null : p.getWorld(), t).getDirection();
+			Vector3D v = ObjectGenerator.GetGenerator().location(args[0], null, t).getDirection();
 			if(args.length == 2) {
 				v = v.multiply(ArgumentValidation.getDouble(args[1], t));
 			}
