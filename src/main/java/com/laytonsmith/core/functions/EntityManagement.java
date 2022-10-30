@@ -1918,6 +1918,7 @@ public class EntityManagement {
 				case CREEPER:
 					MCCreeper creeper = (MCCreeper) entity;
 					specArray.set(entity_spec.KEY_CREEPER_POWERED, CBoolean.get(creeper.isPowered()), t);
+					specArray.set(entity_spec.KEY_CREEPER_FUSETICKS, new CInt(creeper.getFuseTicks(), t), t);
 					specArray.set(entity_spec.KEY_CREEPER_MAXFUSETICKS, new CInt(creeper.getMaxFuseTicks(), t), t);
 					specArray.set(entity_spec.KEY_CREEPER_EXPLOSIONRADIUS, new CInt(creeper.getExplosionRadius(), t), t);
 					break;
@@ -2097,6 +2098,12 @@ public class EntityManagement {
 					MCPanda panda = (MCPanda) entity;
 					specArray.set(entity_spec.KEY_PANDA_MAINGENE, new CString(panda.getMainGene().name(), t), t);
 					specArray.set(entity_spec.KEY_PANDA_HIDDENGENE, new CString(panda.getHiddenGene().name(), t), t);
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19)) {
+						specArray.set(entity_spec.KEY_PANDA_EATING, CBoolean.get(panda.isEating()), t);
+						specArray.set(entity_spec.KEY_PANDA_ONBACK, CBoolean.get(panda.isOnBack()), t);
+						specArray.set(entity_spec.KEY_PANDA_ROLLING, CBoolean.get(panda.isRolling()), t);
+						specArray.set(entity_spec.KEY_PANDA_SNEEZING, CBoolean.get(panda.isSneezing()), t);
+					}
 					break;
 				case PARROT:
 					MCParrot parrot = (MCParrot) entity;
@@ -2211,6 +2218,9 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_WOLF_ANGRY, CBoolean.get(wolf.isAngry()), t);
 					specArray.set(entity_spec.KEY_WOLF_COLOR, new CString(wolf.getCollarColor().name(), t), t);
 					specArray.set(entity_spec.KEY_GENERIC_SITTING, CBoolean.get(wolf.isSitting()), t);
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19)) {
+						specArray.set(entity_spec.KEY_WOLF_INTERESTED, CBoolean.get(wolf.isInterested()), t);
+					}
 					break;
 				case ZOGLIN:
 					MCZoglin zoglin = (MCZoglin) entity;
@@ -2277,6 +2287,7 @@ public class EntityManagement {
 		private static final String KEY_CAT_TYPE = "type";
 		private static final String KEY_CAT_COLOR = "color";
 		private static final String KEY_CREEPER_POWERED = "powered";
+		private static final String KEY_CREEPER_FUSETICKS = "fuseticks";
 		private static final String KEY_CREEPER_MAXFUSETICKS = "maxfuseticks";
 		private static final String KEY_CREEPER_EXPLOSIONRADIUS = "explosionradius";
 		private static final String KEY_DROPPED_ITEM_ITEMSTACK = "itemstack";
@@ -2327,6 +2338,10 @@ public class EntityManagement {
 		private static final String KEY_PAINTING_ART = "type";
 		private static final String KEY_PANDA_MAINGENE = "maingene";
 		private static final String KEY_PANDA_HIDDENGENE = "hiddengene";
+		private static final String KEY_PANDA_EATING = "eating";
+		private static final String KEY_PANDA_ONBACK = "onback";
+		private static final String KEY_PANDA_ROLLING = "rolling";
+		private static final String KEY_PANDA_SNEEZING = "sneezing";
 		private static final String KEY_PARROT_TYPE = "type";
 		private static final String KEY_PHANTOM_SIZE = "size";
 		private static final String KEY_PIGLIN_ZOMBIFICATION_IMMUNE = "zombificationimmune";
@@ -2356,6 +2371,7 @@ public class EntityManagement {
 		private static final String KEY_WITHER_SKULL_CHARGED = "charged";
 		private static final String KEY_WOLF_ANGRY = "angry";
 		private static final String KEY_WOLF_COLOR = "color";
+		private static final String KEY_WOLF_INTERESTED = "interested";
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
@@ -2747,6 +2763,13 @@ public class EntityManagement {
 									creeper.setMaxFuseTicks(ArgumentValidation.getInt32(specArray.get(index, t), t));
 								} catch (IllegalArgumentException ex) {
 									throw new CRERangeException("Ticks must not be negative.", t);
+								}
+								break;
+							case entity_spec.KEY_CREEPER_FUSETICKS:
+								try {
+									creeper.setFuseTicks(ArgumentValidation.getInt32(specArray.get(index, t), t));
+								} catch (IllegalArgumentException ex) {
+									throw new CRERangeException(ex.getMessage(), t);
 								}
 								break;
 							case entity_spec.KEY_CREEPER_EXPLOSIONRADIUS:
@@ -3283,6 +3306,18 @@ public class EntityManagement {
 									throw new CREFormatException("Invalid panda gene: " + specArray.get(index, t).val(), t);
 								}
 								break;
+							case entity_spec.KEY_PANDA_EATING:
+								panda.setEating(ArgumentValidation.getBooleanObject(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_PANDA_ONBACK:
+								panda.setOnBack(ArgumentValidation.getBooleanObject(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_PANDA_ROLLING:
+								panda.setRolling(ArgumentValidation.getBooleanObject(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_PANDA_SNEEZING:
+								panda.setSneezing(ArgumentValidation.getBooleanObject(specArray.get(index, t), t));
+								break;
 							default:
 								throwException(index, t);
 						}
@@ -3679,6 +3714,9 @@ public class EntityManagement {
 								break;
 							case entity_spec.KEY_GENERIC_SITTING:
 								wolf.setSitting(ArgumentValidation.getBoolean(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_WOLF_INTERESTED:
+								wolf.setInterested(ArgumentValidation.getBooleanObject(specArray.get(index, t), t));
 								break;
 							default:
 								throwException(index, t);

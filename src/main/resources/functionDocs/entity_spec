@@ -68,7 +68,8 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | CREEPER
 | 
 * %KEY_CREEPER_POWERED%: If the Creeper is powered or not.
-* %KEY_CREEPER_MAXFUSETICKS%: The max amount of time in server ticks that the Creeper can be primed before exploding.
+* %KEY_CREEPER_MAXFUSETICKS%: The max amount of time in server ticks that the Creeper can be primed before exploding. (must not be negative)
+* %KEY_CREEPER_FUSETICKS%: The amount of time in server ticks that the Creeper has been primed. (must below or equals maxfuseticks and not negative)
 * %KEY_CREEPER_EXPLOSIONRADIUS%: The radius of the Creeper's explosion.
 |-
 | DONKEY, MULE
@@ -206,6 +207,10 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | 
 * %KEY_PANDA_MAINGENE%: The dominant trait for this panda (can be %PANDA_GENE%).
 * %KEY_PANDA_HIDDENGENE%: The recessive trait for this panda.
+* %KEY_PANDA_EATING%: Whether the panda is eating. (1.19)
+* %KEY_PANDA_ONBACK%: Whether the panda is laying on its back. (1.19)
+* %KEY_PANDA_ROLLING%: Whether the panda is rolling. (1.19)
+* %KEY_PANDA_SNEEZING%: Whether the panda is sneezing. (1.19)
 |- 
 | PARROT
 | 
@@ -308,6 +313,7 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | 
 * %KEY_WOLF_ANGRY%: If the wolf is angry.
 * %KEY_WOLF_COLOR%: The collar color of the wolf (can be %DYE_COLOR%).
+* %KEY_WOLF_INTERESTED%: Whether the wolf is interested, tilting its head. (1.19)
 * %KEY_GENERIC_SITTING%: If the wolf is sitting.
 |- 
 | ZOMBIE, HUSK, DROWNED, ZOGLIN
