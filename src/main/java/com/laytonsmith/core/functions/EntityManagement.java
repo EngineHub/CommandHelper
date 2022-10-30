@@ -447,7 +447,7 @@ public class EntityManagement {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CREBadEntityException.class, CREFormatException.class, CRECastException.class,
-				CREInvalidWorldException.class, CRELengthException.class};
+				CREInvalidWorldException.class, CRELengthException.class, CREIllegalArgumentException.class};
 		}
 
 		@Override
@@ -455,11 +455,15 @@ public class EntityManagement {
 			MCEntity e = Static.getEntity(args[0], t);
 			MCLocation l;
 			if(args[1].isInstanceOf(CArray.TYPE)) {
-				l = ObjectGenerator.GetGenerator().location((CArray) args[1], e.getWorld(), t);
+				l = ObjectGenerator.GetGenerator().location(args[1], e.getWorld(), t);
 			} else {
 				throw new CREFormatException("An array was expected but received " + args[1], t);
 			}
-			return CBoolean.get(e.teleport(l));
+			try {
+				return CBoolean.get(e.teleport(l));
+			} catch (IllegalArgumentException ex) {
+				throw new CREIllegalArgumentException(ex.getMessage(), t);
+			}
 		}
 
 		@Override

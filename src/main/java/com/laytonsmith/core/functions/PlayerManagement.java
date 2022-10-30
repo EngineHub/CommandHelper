@@ -488,7 +488,7 @@ public class PlayerManagement {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRECastException.class, CRELengthException.class, CREPlayerOfflineException.class,
-				CREFormatException.class, CREInvalidWorldException.class};
+				CREFormatException.class, CREInvalidWorldException.class, CREIllegalArgumentException.class};
 		}
 
 		@Override
@@ -558,7 +558,11 @@ public class PlayerManagement {
 			}
 
 			l.add(0, 1, 0);
-			return CBoolean.get(p.teleport(l));
+			try {
+				return CBoolean.get(p.teleport(l));
+			} catch (IllegalArgumentException ex) {
+				throw new CREIllegalArgumentException(ex.getMessage(), t);
+			}
 		}
 	}
 

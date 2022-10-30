@@ -1910,7 +1910,8 @@ public class World {
 		public String docs() {
 			return "double {location_from, location_to} Calculate yaw from one location to another on the X-Z plane."
 					+ " The rotation is measured in degrees (0-359.99...) relative to the (x=0,z=1) vector, which"
-					+ " points south. Throws a FormatException if locations have differing worlds.";
+					+ " points south. Throws a FormatException if locations have differing worlds."
+					+ " Can return 'NaN' if the x and z coordinates are identical.";
 		}
 
 		@Override
