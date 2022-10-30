@@ -542,6 +542,7 @@ public class AliasCore {
 
 		// Everything else should be reloaded now, so execute successfully compiled scripts and register commands
 		if(options.reloadScripts() && env != null) {
+			env.getEnv(GlobalEnv.class).SetLabel(Static.GLOBAL_PERMISSION);
 			ProfilePoint executeAutoIncludes = profiler.start("Execution of auto includes", LogLevel.VERBOSE);
 			try {
 				includeCache.executeAutoIncludes(env, null);
@@ -550,7 +551,6 @@ public class AliasCore {
 			}
 			ProfilePoint executeMS = profiler.start("Execution of MS files in Local Packages", LogLevel.VERBOSE);
 			try {
-				env.getEnv(GlobalEnv.class).SetLabel(Static.GLOBAL_PERMISSION);
 				env.getEnv(CommandHelperEnvironment.class).SetCommandSender(Static.getServer().getConsole());
 				localPackages.executeMS(env);
 			} finally {
