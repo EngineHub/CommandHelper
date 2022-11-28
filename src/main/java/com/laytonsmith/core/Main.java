@@ -1206,6 +1206,7 @@ public class Main {
 			return ArgumentParser.GetParser()
 				.addDescription("Given a source file, runs it in cmdline mode. This is the \"main\" way"
 						+ " of executing source files.")
+				.setErrorOnUnknownArgs(false)
 				.addArgument(new ArgumentBuilder()
 						.setDescription("File path/arguments")
 						.setUsageName("file and args")
