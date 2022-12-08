@@ -40,7 +40,6 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Note;
 import org.bukkit.Particle;
-import org.bukkit.Server;
 import org.bukkit.SoundCategory;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
@@ -405,33 +404,25 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 
 	@Override
 	public void setTempOp(Boolean value) throws ClassNotFoundException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
-		Server server = Bukkit.getServer();
-		String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
-
-		Class serverClass = Class.forName("org.bukkit.craftbukkit." + version + ".CraftServer");
-
-		if(!server.getClass().isAssignableFrom(serverClass)) {
-			throw new IllegalStateException("Running server isn't CraftBukkit");
-		}
-
 		// Get some version specific strings
-		String nms;
-		String playersPackage;
-		String ops = "operators";
-		String getPlayerList = "getPlayerList";
-		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_17)) {
-			nms = "net.minecraft.server";
-			playersPackage = nms + ".players";
-			ops = "n";
-			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_18)) {
-				getPlayerList = "ac";
-				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_X)) {
-					ops = "o";
+		String nms = "net.minecraft.server";
+		String playersPackage = nms + ".players";
+		String ops = "o";
+		String getPlayerList = "ab";
+		if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_19_X)) {
+			getPlayerList = "ac";
+			if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_19_1)) {
+				ops = "n";
+				if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_18)) {
+					getPlayerList = "getPlayerList";
+					if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_17)) {
+						String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
+						nms = "net.minecraft.server." + version;
+						playersPackage = nms;
+						ops = "operators";
+					}
 				}
 			}
-		} else { // 1.16.5 and prior
-			nms = "net.minecraft.server." + version;
-			playersPackage = nms;
 		}
 
 		Class nmsMinecraftServerClass = Class.forName(nms + ".MinecraftServer");

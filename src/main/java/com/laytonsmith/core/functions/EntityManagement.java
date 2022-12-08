@@ -1267,10 +1267,14 @@ public class EntityManagement {
 						}
 						break;
 					default:
-						if(consumer != null) {
-							ent = l.getWorld().spawn(l, entType, consumer);
-						} else {
-							ent = l.getWorld().spawn(l, entType);
+						try {
+							if(consumer != null) {
+								ent = l.getWorld().spawn(l, entType, consumer);
+							} else {
+								ent = l.getWorld().spawn(l, entType);
+							}
+						} catch (IllegalArgumentException ex) {
+							throw new CREFormatException(ex.getMessage(), t);
 						}
 				}
 				ret.push(new CString(ent.getUniqueId().toString(), t), t);
@@ -1334,7 +1338,12 @@ public class EntityManagement {
 			Mixed c = children.get(0).getData();
 			if(c.isInstanceOf(CString.TYPE)) {
 				try {
-					MCEntityType.MCVanillaEntityType.valueOf(c.val().toUpperCase());
+					MCEntityType.MCVanillaEntityType type = MCEntityType.MCVanillaEntityType.valueOf(c.val().toUpperCase());
+					if(!type.isSpawnable()) {
+						env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions, new CompilerWarning(
+								"The entity type " + c.val() + " cannot be spawned by " + getName(),
+								c.getTarget(), null));
+					}
 				} catch (IllegalArgumentException ex) {
 					env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions, new CompilerWarning(
 							c.val() + " is not a valid enum in com.commandhelper.EntityType",

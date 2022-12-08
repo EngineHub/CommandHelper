@@ -8,6 +8,7 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 @MEnum("com.commandhelper.GameRule")
 public enum MCGameRule {
 	ANNOUNCEADVANCEMENTS("announceAdvancements"),
+	BLOCKEXPLOSIONDROPDECAY("blockExplosionDropDecay"),
 	COMMANDBLOCKOUTPUT("commandBlockOutput"),
 	DISABLEELYTRAMOVEMENTCHECK("disableElytraMovementCheck"),
 	DISABLERAIDS("disableRaids"),
@@ -22,16 +23,20 @@ public enum MCGameRule {
 	DOPATROLSPAWNING("doPatrolSpawning"),
 	DOTILEDROPS("doTileDrops"),
 	DOTRADERSPAWNING("doTraderSpawning"),
+	DOWARDENSPAWNING("doWardenSpawning"),
 	DOWEATHERCYCLE("doWeatherCycle"),
 	DROWNINGDAMAGE("drowningDamage"),
 	FALLDAMAGE("fallDamage"),
 	FIREDAMAGE("fireDamage"),
 	FORGIVEDEADPLAYERS("forgiveDeadPlayers"),
 	FREEZEDAMAGE("freezeDamage"),
+	GLOBALSOUNDEVENTS("globalSoundEvents"),
 	KEEPINVENTORY("keepInventory"),
+	LAVASOURCECONVERSION("lavaSourceConversion"),
 	LOGADMINCOMMANDS("logAdminCommands"),
 	MAXCOMMANDCHAINLENGTH("maxCommandChainLength", CInt.class),
 	MAXENTITYCRAMMING("maxEntityCramming", CInt.class),
+	MOBEXPLOSIONDROPDECAY("mobExplosionDropDecay"),
 	MOBGRIEFING("mobGriefing"),
 	NATURALREGENERATION("naturalRegeneration"),
 	PLAYERSSLEEPINGPERCENTAGE("playersSleepingPercentage", CInt.class),
@@ -41,8 +46,9 @@ public enum MCGameRule {
 	SHOWDEATHMESSAGES("showDeathMessages"),
 	SPAWNRADIUS("spawnRadius", CInt.class),
 	SPECTATORSGENERATECHUNKS("spectatorsGenerateChunks"),
+	TNTEXPLOSIONDROPDECAY("tntExplosionDropDecay"),
 	UNIVERSALANGER("universalAnger"),
-	DOWARDENSPAWNING("doWardenSpawning");
+	WATERSOURCECONVERSION("waterSourceConversion");
 
 	private final String gameRule;
 	private final Class<? extends Mixed> ruleType;
