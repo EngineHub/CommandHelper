@@ -44,6 +44,7 @@ public enum MCGameRule {
 	REDUCEDDEBUGINFO("reducedDebugInfo"),
 	SENDCOMMANDFEEDBACK("sendCommandFeedback"),
 	SHOWDEATHMESSAGES("showDeathMessages"),
+	SNOWACCUMULATIONHEIGHT("snowAccumulationHeight", CInt.class),
 	SPAWNRADIUS("spawnRadius", CInt.class),
 	SPECTATORSGENERATECHUNKS("spectatorsGenerateChunks"),
 	TNTEXPLOSIONDROPDECAY("tntExplosionDropDecay"),
