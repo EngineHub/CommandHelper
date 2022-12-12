@@ -333,9 +333,10 @@ public class BukkitMCServer implements MCServer {
 	@Override
 	public MCOfflinePlayer getOfflinePlayer(String player) {
 		OfflinePlayer ofp = s.getOfflinePlayer(player);
-		if(s.getOnlineMode() && ofp.getUniqueId().version() != 4) {
-			// Not an actual MC profile UUID.
-			// This can happen if the server generates a new UUID when it can't find an account by that name.
+		if(s.getOnlineMode() && ofp.getUniqueId().version() == 3) {
+			// Not a Mojang provided UUID.
+			// Bukkit will return a version 3 name-based UUID when it can't find an offline player by that name.
+			// This is fine for offline mode, but in online mode this means the player can't be found.
 			return null;
 		}
 		return new BukkitMCOfflinePlayer(ofp);
