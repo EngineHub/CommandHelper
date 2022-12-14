@@ -43,6 +43,7 @@ import com.laytonsmith.abstraction.MCShapelessRecipe;
 import com.laytonsmith.abstraction.MCSkullMeta;
 import com.laytonsmith.abstraction.MCSmithingRecipe;
 import com.laytonsmith.abstraction.MCStonecuttingRecipe;
+import com.laytonsmith.abstraction.MCSuspiciousStewMeta;
 import com.laytonsmith.abstraction.MCTropicalFishBucketMeta;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
@@ -657,6 +658,9 @@ public class ObjectGenerator {
 				} else {
 					ma.set("color", CNull.NULL, t);
 				}
+			} else if(meta instanceof MCSuspiciousStewMeta susstew) {
+				CArray effects = potions(susstew.getCustomEffects(), t);
+				ma.set("potions", effects, t);
 			} else if(meta instanceof MCBannerMeta) {
 				MCBannerMeta bannermeta = (MCBannerMeta) meta;
 				CArray patterns = new CArray(t, bannermeta.numberOfPatterns());
@@ -1147,6 +1151,18 @@ public class ObjectGenerator {
 							((MCPotionMeta) meta).setColor(color((CArray) color, t));
 						} else if(color.isInstanceOf(CString.TYPE)) {
 							((MCPotionMeta) meta).setColor(StaticLayer.GetConvertor().GetColor(color.val(), t));
+						}
+					}
+				} else if(meta instanceof MCSuspiciousStewMeta) {
+					if(ma.containsKey("potions")) {
+						Mixed effects = ma.get("potions", t);
+						if(effects.isInstanceOf(CArray.TYPE)) {
+							for(MCLivingEntity.MCEffect e : potions((CArray) effects, t)) {
+								((MCSuspiciousStewMeta) meta).addCustomEffect(e.getPotionEffectType(), e.getStrength(),
+										e.getTicksRemaining(), e.isAmbient(), e.hasParticles(), e.showIcon(), true, t);
+							}
+						} else {
+							throw new CREFormatException("Expected an array of potion arrays.", t);
 						}
 					}
 				} else if(meta instanceof MCBannerMeta) {

@@ -161,6 +161,7 @@ import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.MapMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.inventory.meta.SuspiciousStewMeta;
 import org.bukkit.inventory.meta.TropicalFishBucketMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionData;
@@ -597,6 +598,9 @@ public class BukkitConvertor extends AbstractConvertor {
 		}
 		if(im instanceof CompassMeta) {
 			return new BukkitMCCompassMeta((CompassMeta) im);
+		}
+		if(im instanceof SuspiciousStewMeta) {
+			return new BukkitMCSuspiciousStewMeta((SuspiciousStewMeta) im);
 		}
 		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_17)) {
 			if(im instanceof BundleMeta) {
