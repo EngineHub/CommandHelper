@@ -864,8 +864,11 @@ public class Minecraft {
 			}
 			MCLocation location = ObjectGenerator.GetGenerator().location(args[0], w, t);
 			if(location.getBlock().getState() instanceof MCCreatureSpawner) {
-				String type = ((MCCreatureSpawner) location.getBlock().getState()).getSpawnedType().name();
-				return new CString(type, t);
+				MCEntityType entityType = ((MCCreatureSpawner) location.getBlock().getState()).getSpawnedType();
+				if(entityType == null) {
+					return CNull.NULL;
+				}
+				return new CString(entityType.name(), t);
 			} else {
 				throw new CREFormatException("The block at " + location.toString() + " is not a spawner block", t);
 			}

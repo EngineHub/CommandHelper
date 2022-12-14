@@ -484,7 +484,12 @@ public class ObjectGenerator {
 					}
 				} else if(bs instanceof MCCreatureSpawner) {
 					MCCreatureSpawner mccs = (MCCreatureSpawner) bs;
-					ma.set("spawntype", mccs.getSpawnedType().name());
+					MCEntityType type = mccs.getSpawnedType();
+					if(type == null) {
+						ma.set("spawntype", CNull.NULL, t);
+					} else {
+						ma.set("spawntype", type.name());
+					}
 					ma.set("delay", new CInt(mccs.getDelay(), t), t);
 					ma.set("mindelay", new CInt(mccs.getMinDelay(), t), t);
 					ma.set("maxdelay", new CInt(mccs.getMaxDelay(), t), t);
@@ -864,8 +869,11 @@ public class ObjectGenerator {
 					} else if(bs instanceof MCCreatureSpawner) {
 						MCCreatureSpawner mccs = (MCCreatureSpawner) bs;
 						if(ma.containsKey("spawntype")) {
-							MCEntityType type = MCEntityType.valueOf(ma.get("spawntype", t).val().toUpperCase());
-							mccs.setSpawnedType(type);
+							Mixed m = ma.get("spawntype", t);
+							if(m != CNull.NULL) {
+								MCEntityType type = MCEntityType.valueOf(m.val().toUpperCase());
+								mccs.setSpawnedType(type);
+							}
 						}
 						if(ma.containsKey("delay")) {
 							int delay = ArgumentValidation.getInt32(ma.get("delay", t), t);
