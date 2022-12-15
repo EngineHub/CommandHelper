@@ -182,4 +182,6 @@ public interface MCServer extends AbstractionObject {
 	MCBlockData createBlockData(String data);
 
 	MCMerchant createMerchant(String title);
+
+	MCWorldBorder createWorldBorder();
 }

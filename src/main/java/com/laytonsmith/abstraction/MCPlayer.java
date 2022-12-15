@@ -186,4 +186,8 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity, MCOfflinePlaye
 	void setStatistic(MCPlayerStatistic stat, MCEntityType type, int amount);
 
 	void setStatistic(MCPlayerStatistic stat, MCMaterial type, int amount);
+
+	MCWorldBorder getWorldBorder();
+
+	void setWorldBorder(MCWorldBorder border);
 }

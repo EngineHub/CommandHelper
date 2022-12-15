@@ -14,6 +14,7 @@ import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.MCWorld;
+import com.laytonsmith.abstraction.MCWorldBorder;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockData;
@@ -6414,6 +6415,161 @@ public class PlayerManagement {
 		@Override
 		public MSVersion since() {
 			return MSVersion.V3_3_4;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({set_pborder.class, com.laytonsmith.core.functions.World.get_world_border.class,
+			com.laytonsmith.core.functions.World.set_world_border.class})
+	public static class pborder extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p;
+			if(args.length == 1) {
+				p = Static.GetPlayer(args[0], t);
+			} else {
+				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(p, t);
+			}
+			MCWorldBorder wb = p.getWorldBorder();
+			if(wb == null) {
+				return CNull.NULL;
+			}
+			CArray ret = CArray.GetAssociativeArray(t);
+			ret.set("width", new CDouble(wb.getSize(), t), t);
+			ret.set("center", ObjectGenerator.GetGenerator().location(wb.getCenter(), false), t);
+			ret.set("warningtime", new CInt(wb.getWarningTime(), t), t);
+			ret.set("warningdistance", new CInt(wb.getWarningDistance(), t), t);
+			return ret;
+		}
+
+		@Override
+		public String getName() {
+			return "pborder";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1};
+		}
+
+		@Override
+		public String docs() {
+			return "array {[player]} Returns an associative array for the player's virtual world border."
+					+ " The keys are 'width', 'center', 'warningtime', and 'warningdistance'."
+					+ " Returns null if the player is using the existing border for the world that they're in.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({pborder.class, com.laytonsmith.core.functions.World.get_world_border.class,
+			com.laytonsmith.core.functions.World.set_world_border.class})
+	public static class set_pborder extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CRECastException.class, CREFormatException.class,
+					CRERangeException.class, CREInvalidWorldException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p;
+			Mixed c;
+			if(args.length == 2) {
+				p = Static.GetPlayer(args[0], t);
+				c = args[1];
+			} else {
+				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(p, t);
+				c = args[0];
+			}
+			if(c instanceof CNull) {
+				p.setWorldBorder(null);
+				return CVoid.VOID;
+			}
+			MCWorldBorder wb = p.getWorldBorder();
+			if(wb == null) {
+				wb = Static.getServer().createWorldBorder();
+			}
+			if(!(c.isInstanceOf(CArray.TYPE))) {
+				throw new CREFormatException("Expected array or null but given \"" + c.val() + "\"", t);
+			}
+			CArray params = (CArray) c;
+			if(params.containsKey("width")) {
+				if(params.containsKey("seconds")) {
+					wb.setSize(ArgumentValidation.getDouble(params.get("width", t), t),
+							ArgumentValidation.getInt32(params.get("seconds", t), t));
+				} else {
+					wb.setSize(ArgumentValidation.getDouble(params.get("width", t), t));
+				}
+			}
+			if(params.containsKey("center")) {
+				wb.setCenter(ObjectGenerator.GetGenerator().location(params.get("center", t), p.getWorld(), t));
+			}
+			if(params.containsKey("warningtime")) {
+				wb.setWarningTime(ArgumentValidation.getInt32(params.get("warningtime", t), t));
+			}
+			if(params.containsKey("warningdistance")) {
+				wb.setWarningDistance(ArgumentValidation.getInt32(params.get("warningdistance", t), t));
+			}
+			p.setWorldBorder(wb);
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "set_pborder";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		@Override
+		public String docs() {
+			return "void {player, paramArray} Creates or updates a player's virtual world border."
+					+ " In addition to the keys returned by get_pborder(), you can also specify 'seconds'."
+					+ " This is the time in which the border will move from the previous width to the new 'width'."
+					+ " If give null instead of an array, this resets the player's visible world border to the one of"
+					+ " the world that they're in.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
 		}
 	}
 }

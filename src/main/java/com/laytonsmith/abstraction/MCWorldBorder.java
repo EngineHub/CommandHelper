@@ -1,6 +1,6 @@
 package com.laytonsmith.abstraction;
 
-public interface MCWorldBorder {
+public interface MCWorldBorder extends AbstractionObject {
 
 	void reset();
 

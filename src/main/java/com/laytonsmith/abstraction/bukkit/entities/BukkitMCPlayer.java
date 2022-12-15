@@ -10,6 +10,7 @@ import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCPlayerInventory;
 import com.laytonsmith.abstraction.MCScoreboard;
+import com.laytonsmith.abstraction.MCWorldBorder;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlockData;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
@@ -18,6 +19,7 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayerInventory;
 import com.laytonsmith.abstraction.bukkit.BukkitMCScoreboard;
+import com.laytonsmith.abstraction.bukkit.BukkitMCWorldBorder;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.enums.MCParticle;
@@ -41,6 +43,7 @@ import org.bukkit.Material;
 import org.bukkit.Note;
 import org.bukkit.Particle;
 import org.bukkit.SoundCategory;
+import org.bukkit.WorldBorder;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -692,6 +695,24 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	public void setStatistic(MCPlayerStatistic stat, MCMaterial type, int amount) {
 		Material bukkitType = (Material) type.getHandle();
 		p.setStatistic(BukkitMCPlayerStatistic.getConvertor().getConcreteEnum(stat), bukkitType, amount);
+	}
+
+	@Override
+	public MCWorldBorder getWorldBorder() {
+		WorldBorder wb = p.getWorldBorder();
+		if(wb == null) {
+			return null;
+		}
+		return new BukkitMCWorldBorder(wb);
+	}
+
+	@Override
+	public void setWorldBorder(MCWorldBorder border) {
+		if(border == null) {
+			p.setWorldBorder(null);
+		} else {
+			p.setWorldBorder((WorldBorder) border.getHandle());
+		}
 	}
 
 	@Override

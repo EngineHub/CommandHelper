@@ -19,6 +19,7 @@ import com.laytonsmith.abstraction.MCRecipe;
 import com.laytonsmith.abstraction.MCScoreboard;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.MCWorld;
+import com.laytonsmith.abstraction.MCWorldBorder;
 import com.laytonsmith.abstraction.blocks.MCBlockData;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlockData;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
@@ -615,5 +616,10 @@ public class BukkitMCServer implements MCServer {
 	@Override
 	public MCMerchant createMerchant(String title) {
 		return new BukkitMCMerchant(__Server().createMerchant(title), title);
+	}
+
+	@Override
+	public MCWorldBorder createWorldBorder() {
+		return new BukkitMCWorldBorder(s.createWorldBorder());
 	}
 }
