@@ -6561,10 +6561,10 @@ public class PlayerManagement {
 		@Override
 		public String docs() {
 			return "void {player, paramArray} Creates or updates a player's virtual world border."
-					+ " In addition to the keys returned by get_pborder(), you can also specify 'seconds'."
+					+ " In addition to the keys returned by pborder(), you can also specify 'seconds'."
 					+ " This is the time in which the border will move from the previous width to the new 'width'."
 					+ " If give null instead of an array, this resets the player's visible world border to the one of"
-					+ " the world that they're in.";
+					+ " the world that they're in. (MC 1.18.2)";
 		}
 
 		@Override

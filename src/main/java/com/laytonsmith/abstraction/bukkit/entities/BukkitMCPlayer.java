@@ -699,19 +699,28 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 
 	@Override
 	public MCWorldBorder getWorldBorder() {
-		WorldBorder wb = p.getWorldBorder();
-		if(wb == null) {
+		try {
+			WorldBorder wb = p.getWorldBorder();
+			if(wb == null) {
+				return null;
+			}
+			return new BukkitMCWorldBorder(wb);
+		} catch (NoSuchMethodError ex) {
+			// probably before 1.18.2
 			return null;
 		}
-		return new BukkitMCWorldBorder(wb);
 	}
 
 	@Override
 	public void setWorldBorder(MCWorldBorder border) {
-		if(border == null) {
-			p.setWorldBorder(null);
-		} else {
-			p.setWorldBorder((WorldBorder) border.getHandle());
+		try {
+			if(border == null) {
+				p.setWorldBorder(null);
+			} else {
+				p.setWorldBorder((WorldBorder) border.getHandle());
+			}
+		} catch (NoSuchMethodError ex) {
+			// probably before 1.18.2
 		}
 	}
 
