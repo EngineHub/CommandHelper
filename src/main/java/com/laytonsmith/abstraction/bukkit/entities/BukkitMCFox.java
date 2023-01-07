@@ -5,7 +5,7 @@ import com.laytonsmith.abstraction.enums.MCFoxType;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Fox;
 
-public class BukkitMCFox extends BukkitMCLivingEntity implements MCFox {
+public class BukkitMCFox extends BukkitMCAnimal implements MCFox {
 
 	Fox f;
 

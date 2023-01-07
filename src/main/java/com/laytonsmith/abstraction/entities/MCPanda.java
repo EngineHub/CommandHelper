@@ -2,7 +2,7 @@ package com.laytonsmith.abstraction.entities;
 
 import com.laytonsmith.annotations.MEnum;
 
-public interface MCPanda extends MCAgeable {
+public interface MCPanda extends MCAnimal {
 
 	@MEnum("com.commandhelper.PandaGene")
 	enum Gene {

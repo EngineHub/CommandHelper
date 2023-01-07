@@ -1,5 +1,5 @@
 package com.laytonsmith.abstraction.entities;
 
-public interface MCOcelot extends MCAgeable {
+public interface MCOcelot extends MCAnimal {
 
 }

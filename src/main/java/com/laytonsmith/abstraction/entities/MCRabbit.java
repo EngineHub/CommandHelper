@@ -2,7 +2,7 @@ package com.laytonsmith.abstraction.entities;
 
 import com.laytonsmith.abstraction.enums.MCRabbitType;
 
-public interface MCRabbit extends MCAgeable {
+public interface MCRabbit extends MCAnimal {
 
 	MCRabbitType getRabbitType();
 

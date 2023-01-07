@@ -43,6 +43,7 @@ import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCLectern;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCSkull;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCAgeable;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCAnimal;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCCommandMinecart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCComplexEntityPart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCComplexLivingEntity;
@@ -118,6 +119,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Ageable;
+import org.bukkit.entity.Animals;
 import org.bukkit.entity.ComplexEntityPart;
 import org.bukkit.entity.ComplexLivingEntity;
 import org.bukkit.entity.Entity;
@@ -443,6 +445,12 @@ public class BukkitConvertor extends AbstractConvertor {
 			// Must come before Ageable
 			type.setWrapperClass(BukkitMCTameable.class);
 			return new BukkitMCTameable(be);
+		}
+
+		if(be instanceof Animals) {
+			// Must come before Ageable
+			type.setWrapperClass(BukkitMCAnimal.class);
+			return new BukkitMCAnimal(be);
 		}
 
 		if(be instanceof Ageable) {

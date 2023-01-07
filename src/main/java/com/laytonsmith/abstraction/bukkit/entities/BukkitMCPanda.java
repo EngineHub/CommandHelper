@@ -7,7 +7,7 @@ import com.laytonsmith.annotations.abstractionenum;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Panda;
 
-public class BukkitMCPanda extends BukkitMCAgeable implements MCPanda {
+public class BukkitMCPanda extends BukkitMCAnimal implements MCPanda {
 
 	private Panda p;
 
