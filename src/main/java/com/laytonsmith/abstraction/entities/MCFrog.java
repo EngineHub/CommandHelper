@@ -1,10 +1,9 @@
 package com.laytonsmith.abstraction.entities;
 
 import com.laytonsmith.abstraction.MCEntity;
-import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.annotations.MEnum;
 
-public interface MCFrog extends MCLivingEntity {
+public interface MCFrog extends MCAnimal {
 
 	@MEnum("com.commandhelper.FrogType")
 	enum MCFrogType {

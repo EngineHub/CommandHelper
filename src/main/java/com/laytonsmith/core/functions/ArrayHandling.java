@@ -2346,7 +2346,7 @@ public final class ArrayHandling {
 			if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
 				((CArray) args[0]).reverse(t);
 			}
-			return CVoid.VOID;
+			return args[0];
 		}
 
 		@Override
@@ -2361,8 +2361,9 @@ public final class ArrayHandling {
 
 		@Override
 		public String docs() {
-			return "void {array} Reverses an array in place. However, if the array is associative, throws a"
-					+ " CastException, since associative arrays are more like a map.";
+			return "array {array} Reverses an array in place. However, if the array is associative, throws a"
+					+ " CastException, since associative arrays are more like a map. Returns the array for"
+					+ " easy chaining.";
 		}
 
 		@Override

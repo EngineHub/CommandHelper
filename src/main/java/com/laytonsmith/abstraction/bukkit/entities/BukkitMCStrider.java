@@ -4,7 +4,7 @@ import com.laytonsmith.abstraction.entities.MCStrider;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Strider;
 
-public class BukkitMCStrider extends BukkitMCAgeable implements MCStrider {
+public class BukkitMCStrider extends BukkitMCAnimal implements MCStrider {
 
 	private final Strider s;
 

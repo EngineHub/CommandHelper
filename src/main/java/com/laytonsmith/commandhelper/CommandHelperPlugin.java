@@ -348,7 +348,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 		}
 
 		//Metrics
-		Metrics m = new Metrics(this);
+		Metrics m = new Metrics(this, 2987);
 		m.addCustomChart(new Metrics.SingleLineChart("player_count",
 				() -> Static.getServer().getOnlinePlayers().size()));
 

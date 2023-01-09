@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.abstraction.MCAttributeModifier;
 import com.laytonsmith.abstraction.MCAxolotlBucketMeta;
 import com.laytonsmith.abstraction.MCBannerMeta;
+import com.laytonsmith.abstraction.MCBlockDataMeta;
 import com.laytonsmith.abstraction.MCBlockStateMeta;
 import com.laytonsmith.abstraction.MCBookMeta;
 import com.laytonsmith.abstraction.MCBrewerInventory;
@@ -43,6 +44,7 @@ import com.laytonsmith.abstraction.MCShapelessRecipe;
 import com.laytonsmith.abstraction.MCSkullMeta;
 import com.laytonsmith.abstraction.MCSmithingRecipe;
 import com.laytonsmith.abstraction.MCStonecuttingRecipe;
+import com.laytonsmith.abstraction.MCSuspiciousStewMeta;
 import com.laytonsmith.abstraction.MCTropicalFishBucketMeta;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
@@ -542,8 +544,14 @@ public class ObjectGenerator {
 						}
 						ma.set("patterns", patterns, t, env);
 					}
-				} else if(bs instanceof MCCreatureSpawner mccs) {
-					ma.set("spawntype", mccs.getSpawnedType().name(), env);
+				} else if(bs instanceof MCCreatureSpawner) {
+					MCCreatureSpawner mccs = (MCCreatureSpawner) bs;
+					MCEntityType type = mccs.getSpawnedType();
+					if(type == null) {
+						ma.set("spawntype", CNull.NULL, t, env);
+					} else {
+						ma.set("spawntype", type.name());
+					}
 					ma.set("delay", new CInt(mccs.getDelay(), t), t, env);
 					ma.set("mindelay", new CInt(mccs.getMinDelay(), t), t, env);
 					ma.set("maxdelay", new CInt(mccs.getMaxDelay(), t), t, env);
@@ -551,7 +559,8 @@ public class ObjectGenerator {
 					ma.set("maxnearbyentities", new CInt(mccs.getMaxNearbyEntities(), t), t, env);
 					ma.set("playerrange", new CInt(mccs.getPlayerRange(), t), t, env);
 					ma.set("spawnrange", new CInt(mccs.getSpawnRange(), t), t, env);
-				} else if(bs instanceof MCBrewingStand brewStand) {
+				} else if(bs instanceof MCBrewingStand) {
+					MCBrewingStand brewStand = (MCBrewingStand) bs;
 					ma.set("brewtime", new CInt(brewStand.getBrewingTime(), t), t, env);
 					ma.set("fuel", new CInt(brewStand.getFuelLevel(), t), t, env);
 					MCBrewerInventory inv = brewStand.getInventory();
@@ -605,6 +614,12 @@ public class ObjectGenerator {
 						}
 					}
 					ma.set("inventory", box, t, env);
+				}
+			} else if(meta instanceof MCBlockDataMeta mcbdm) {
+				if(mcbdm.hasBlockData()) {
+					ma.set("blockdata", blockData(mcbdm.getBlockData(is.getType()), t), t);
+				} else {
+					ma.set("blockdata", CNull.NULL, t);
 				}
 			} else if(meta instanceof MCFireworkEffectMeta mcfem) {
 				MCFireworkEffect effect = mcfem.getEffect();
@@ -705,8 +720,11 @@ public class ObjectGenerator {
 				} else {
 					ma.set("color", CNull.NULL, t, env);
 				}
+			} else if(meta instanceof MCSuspiciousStewMeta susstew) {
+				CArray effects = potions(susstew.getCustomEffects(), t);
+				ma.set("potions", effects, t);
 			} else if(meta instanceof MCBannerMeta bannermeta) {
-				CArray patterns = new CArray(t, bannermeta.numberOfPatterns(), null, env);
+				CArray patterns = new CArray(t, bannermeta.numberOfPatterns());
 				for(MCPattern p : bannermeta.getPatterns()) {
 					CArray pattern = CArray.GetAssociativeArray(t, null, env);
 					pattern.set("shape", new CString(p.getShape().toString(), t), t, env);
@@ -917,8 +935,11 @@ public class ObjectGenerator {
 						}
 					} else if(bs instanceof MCCreatureSpawner mccs) {
 						if(ma.containsKey("spawntype")) {
-							MCEntityType type = MCEntityType.valueOf(ma.get("spawntype", t, env).val().toUpperCase());
-							mccs.setSpawnedType(type);
+							Mixed m = ma.get("spawntype", t, env);
+							if(m != CNull.NULL) {
+								MCEntityType type = MCEntityType.valueOf(m.val().toUpperCase());
+								mccs.setSpawnedType(type);
+							}
 						}
 						if(ma.containsKey("delay")) {
 							int delay = ArgumentValidation.getInt32(ma.get("delay", t, env), t, env);
@@ -1034,6 +1055,13 @@ public class ObjectGenerator {
 								throw new CREFormatException(bs.getClass().getSimpleName().replaceFirst("MC", "")
 										+ " inventory expected to be an array or null.", t);
 							}
+						}
+					}
+				} else if(meta instanceof MCBlockDataMeta mcbdm) {
+					if(ma.containsKey("blockdata")) {
+						Mixed mBlockData = ma.get("blockdata", t);
+						if(mBlockData instanceof CArray) {
+							mcbdm.setBlockData(blockData((CArray) mBlockData, mat, t, env));
 						}
 					}
 				} else if(meta instanceof MCFireworkEffectMeta femeta) {
@@ -1187,6 +1215,18 @@ public class ObjectGenerator {
 							mCPotionMeta.setColor(color((CArray) color, t, env));
 						} else if(color.isInstanceOf(CString.TYPE, null, env)) {
 							mCPotionMeta.setColor(StaticLayer.GetConvertor().GetColor(color.val(), t));
+						}
+					}
+				} else if(meta instanceof MCSuspiciousStewMeta) {
+					if(ma.containsKey("potions")) {
+						Mixed effects = ma.get("potions", t);
+						if(effects.isInstanceOf(CArray.TYPE, null, env)) {
+							for(MCLivingEntity.MCEffect e : potions((CArray) effects, t)) {
+								((MCSuspiciousStewMeta) meta).addCustomEffect(e.getPotionEffectType(), e.getStrength(),
+										e.getTicksRemaining(), e.isAmbient(), e.hasParticles(), e.showIcon(), true, t);
+							}
+						} else {
+							throw new CREFormatException("Expected an array of potion arrays.", t);
 						}
 					}
 				} else if(meta instanceof MCBannerMeta mCBannerMeta) {
@@ -2222,20 +2262,20 @@ public class ObjectGenerator {
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public MCBlockData blockData(CArray ca, Target t) {
-		return blockData(ca, t, null);
+		return blockData(ca, null, t, null);
 	}
 
-	public MCBlockData blockData(CArray ca, Target t, Environment env) {
+	public MCBlockData blockData(CArray ca, MCMaterial blockType, Target t, Environment env) {
 		StringBuilder b = new StringBuilder().append("[");
 		boolean first = true;
+		String block = null;
 		for(String key : ca.stringKeySet()) {
 			if(key.equals("block")) {
-				String block = ca.get("block", t, env).val();
+				block = ca.get("block", t, env).val();
 				if(Character.isUpperCase(block.charAt(0))) {
 					// support material enum input
 					block = block.toLowerCase();
 				}
-				b.insert(0, block);
 			} else {
 				if(first) {
 					first = false;
@@ -2246,6 +2286,13 @@ public class ObjectGenerator {
 			}
 		}
 		b.append("]");
+		if(block == null) {
+			if(blockType == null) {
+				throw new CREFormatException("Missing block type for block data.", t);
+			}
+			block = blockType.name().toLowerCase();
+		}
+		b.insert(0, block);
 		return Static.getServer().createBlockData(b.toString());
 	}
 

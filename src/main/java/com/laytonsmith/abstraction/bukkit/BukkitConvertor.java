@@ -43,6 +43,7 @@ import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCLectern;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCSkull;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCAgeable;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCAnimal;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCCommandMinecart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCComplexEntityPart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCComplexLivingEntity;
@@ -118,6 +119,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Ageable;
+import org.bukkit.entity.Animals;
 import org.bukkit.entity.ComplexEntityPart;
 import org.bukkit.entity.ComplexLivingEntity;
 import org.bukkit.entity.Entity;
@@ -148,6 +150,7 @@ import org.bukkit.inventory.SmokingRecipe;
 import org.bukkit.inventory.StonecuttingRecipe;
 import org.bukkit.inventory.meta.AxolotlBucketMeta;
 import org.bukkit.inventory.meta.BannerMeta;
+import org.bukkit.inventory.meta.BlockDataMeta;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.BundleMeta;
@@ -161,6 +164,7 @@ import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.MapMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.inventory.meta.SuspiciousStewMeta;
 import org.bukkit.inventory.meta.TropicalFishBucketMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionData;
@@ -444,6 +448,12 @@ public class BukkitConvertor extends AbstractConvertor {
 			return new BukkitMCTameable(be);
 		}
 
+		if(be instanceof Animals) {
+			// Must come before Ageable
+			type.setWrapperClass(BukkitMCAnimal.class);
+			return new BukkitMCAnimal(be);
+		}
+
 		if(be instanceof Ageable) {
 			// Must come before LivingEntity
 			type.setWrapperClass(BukkitMCAgeable.class);
@@ -597,6 +607,12 @@ public class BukkitConvertor extends AbstractConvertor {
 		}
 		if(im instanceof CompassMeta) {
 			return new BukkitMCCompassMeta((CompassMeta) im);
+		}
+		if(im instanceof SuspiciousStewMeta) {
+			return new BukkitMCSuspiciousStewMeta((SuspiciousStewMeta) im);
+		}
+		if(im instanceof BlockDataMeta) {
+			return new BukkitMCBlockDataMeta((BlockDataMeta) im);
 		}
 		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_17)) {
 			if(im instanceof BundleMeta) {

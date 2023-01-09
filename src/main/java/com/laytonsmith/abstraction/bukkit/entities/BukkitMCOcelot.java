@@ -6,7 +6,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Ocelot;
 
-public class BukkitMCOcelot extends BukkitMCTameable implements MCOcelot {
+public class BukkitMCOcelot extends BukkitMCAnimal implements MCOcelot {
 
 	Ocelot o;
 

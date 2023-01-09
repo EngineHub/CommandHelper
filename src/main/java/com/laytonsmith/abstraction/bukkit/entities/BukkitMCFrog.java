@@ -7,7 +7,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Frog;
 import org.bukkit.entity.Frog.Variant;
 
-public class BukkitMCFrog extends BukkitMCLivingEntity implements MCFrog {
+public class BukkitMCFrog extends BukkitMCAnimal implements MCFrog {
 
 	Frog f;
 

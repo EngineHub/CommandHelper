@@ -39,6 +39,16 @@ public class BukkitMCCreeper extends BukkitMCLivingEntity implements MCCreeper {
 	}
 
 	@Override
+	public int getFuseTicks() {
+		return creeper.getFuseTicks();
+	}
+
+	@Override
+	public void setFuseTicks(int ticks) {
+		creeper.setFuseTicks(ticks);
+	}
+
+	@Override
 	public int getExplosionRadius() {
 		return creeper.getExplosionRadius();
 	}

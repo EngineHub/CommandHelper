@@ -5,6 +5,7 @@ import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlockState;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
 import org.bukkit.block.CreatureSpawner;
+import org.bukkit.entity.EntityType;
 
 public class BukkitMCCreatureSpawner extends BukkitMCBlockState implements MCCreatureSpawner {
 
@@ -17,11 +18,18 @@ public class BukkitMCCreatureSpawner extends BukkitMCBlockState implements MCCre
 
 	@Override
 	public MCEntityType getSpawnedType() {
-		return BukkitMCEntityType.valueOfConcrete(cs.getSpawnedType());
+		EntityType type = cs.getSpawnedType();
+		if(type == null) {
+			return null;
+		}
+		return BukkitMCEntityType.valueOfConcrete(type);
 	}
 
 	@Override
 	public void setSpawnedType(MCEntityType type) {
+		if(type == null) {
+			return; // unsupported at this time
+		}
 		cs.setSpawnedType(((BukkitMCEntityType) type).getConcrete());
 		cs.update();
 	}

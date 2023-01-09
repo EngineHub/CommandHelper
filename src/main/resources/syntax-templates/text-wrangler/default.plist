@@ -47,7 +47,7 @@
 		<key>Escape Char in Strings 2</key>
 		<string>\</string>
 		<key>Identifier and Keyword Characters</key>
-		<string>123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz.</string>
+		<string>0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz.</string>
 		<key>Open Block Comments</key>
 		<string>/*</string>
 		<key>Open Line Comments</key>

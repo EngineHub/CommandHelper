@@ -648,40 +648,42 @@ public class Compiler {
 		}
 
 		private static void rewriteParenthesis(List<ParseTree> list) throws ConfigCompileException {
-			Stack<ParseTree> executes = new Stack<>();
-			while(list.size() > 1) {
-				ParseTree lastNode = list.get(list.size() - 1);
-				if(lastNode.getData() instanceof CFunction cf
-						&& cf.hasFunction()
-						&& cf.getFunction() != null
-						&& cf.getFunction().getName().equals(Compiler.p.NAME)) {
-					executes.push(lastNode);
-					list.remove(list.size() - 1);
-				} else {
-					break;
-				}
-			}
-			if(!executes.isEmpty()) {
-				if(!list.isEmpty()) {
-					ParseTree lastNode = list.get(list.size() - 1);
-					// This is the core executable. Build statements in reverse order, then store this in place of
-					// list.size() - 1
-					// @x(@a)(@b) is execute(@a, execute(@b, @x))
-					ParseTree execute = new ParseTree(new CFunction(DataHandling.execute.NAME, lastNode.getTarget()),
-							lastNode.getFileOptions(), true);
-					while(!executes.empty()) {
-						execute.setChildren(executes.pop().getChildren());
-						execute.addChild(lastNode);
-						list.set(list.size() - 1, execute);
-						lastNode = execute;
-						execute = new ParseTree(new CFunction(DataHandling.execute.NAME, lastNode.getTarget()),
-							lastNode.getFileOptions(), true);
+			for(int listInd = list.size() - 1; listInd >= 1; listInd--) {
+				Stack<ParseTree> executes = new Stack<>();
+				while(listInd > 0) {
+					ParseTree lastNode = list.get(listInd);
+					if(lastNode.getData() instanceof CFunction cf
+							&& cf.hasFunction()
+							&& cf.getFunction() != null
+							&& cf.getFunction().getName().equals(Compiler.p.NAME)) {
+						executes.push(lastNode);
+						list.remove(listInd--);
+					} else {
+						break;
 					}
-				} else {
-					if(executes.size() != 1) {
+				}
+				if(!executes.isEmpty()) {
+					if(listInd >= 0) {
+						ParseTree executableNode = list.get(listInd);
+						// This is the core executable. Build statements in reverse order, then store this in place of
+						// list.size() - 1
+						// @x(@a)(@b) is execute(@a, execute(@b, @x))
+						ParseTree execute = new ParseTree(
+								new CFunction(DataHandling.execute.NAME, executableNode.getTarget()),
+								executableNode.getFileOptions(), true);
+						while(!executes.empty()) {
+							execute.setChildren(executes.pop().getChildren());
+							execute.addChild(executableNode);
+							list.set(listInd, execute);
+							executableNode = execute;
+							execute = new ParseTree(
+									new CFunction(DataHandling.execute.NAME, executableNode.getTarget()),
+									executableNode.getFileOptions(), true);
+						}
+					} else if(executes.size() != 1) {
 						throw new ConfigCompileException("Unexpected parenthesis", executes.peek().getTarget());
 					}
-					// else just a regular p statement that happens to be last.
+					// Else just a regular p statement that happens to be last.
 				}
 			}
 		}

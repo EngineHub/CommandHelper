@@ -13,6 +13,7 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.entities.MCAgeable;
+import com.laytonsmith.abstraction.entities.MCAnimal;
 import com.laytonsmith.abstraction.entities.MCTameable;
 import com.laytonsmith.abstraction.enums.MCAttribute;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
@@ -425,6 +426,80 @@ public class MobManagement {
 		@Override
 		public MSVersion since() {
 			return MSVersion.V3_3_1;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class get_mob_love_ticks extends EntityManagement.EntityGetterFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREBadEntityTypeException.class, CRELengthException.class,
+					CREBadEntityException.class};
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCLivingEntity ent = Static.getLivingEntity(args[0], t);
+			if(ent == null) {
+				return CNull.NULL;
+			} else if(ent instanceof MCAnimal animal) {
+				return new CInt(animal.getLoveTicks(), t);
+			} else {
+				throw new CREBadEntityTypeException("The specified entity cannot be in love.", t);
+			}
+		}
+
+		@Override
+		public String getName() {
+			return "get_mob_love_ticks";
+		}
+
+		@Override
+		public String docs() {
+			return "int {entityUUID} Returns the number of ticks remaining that this mob will be in love mode.";
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_5;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class set_mob_love_ticks extends EntityManagement.EntitySetterFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREBadEntityTypeException.class, CRECastException.class,
+					CREBadEntityException.class, CRELengthException.class};
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCLivingEntity ent = Static.getLivingEntity(args[0], t);
+			int ticks = ArgumentValidation.getInt32(args[1], t);
+			if(ent instanceof MCAnimal animal) {
+				animal.setLoveTicks(ticks);
+				return CVoid.VOID;
+			} else {
+				throw new CREBadEntityTypeException("The specified entity cannot be in love.", t);
+			}
+		}
+
+		@Override
+		public String getName() {
+			return "set_mob_love_ticks";
+		}
+
+		@Override
+		public String docs() {
+			return "void {entityUUID, int} Sets the number of ticks that this mob will be in love mode.";
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_5;
 		}
 	}
 

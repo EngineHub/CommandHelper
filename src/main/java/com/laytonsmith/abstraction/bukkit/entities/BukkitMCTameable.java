@@ -8,7 +8,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Tameable;
 
-public class BukkitMCTameable extends BukkitMCAgeable implements MCTameable {
+public class BukkitMCTameable extends BukkitMCAnimal implements MCTameable {
 
 	Tameable t;
 

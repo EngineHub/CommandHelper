@@ -7,7 +7,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Rabbit;
 
-public class BukkitMCRabbit extends BukkitMCAgeable implements MCRabbit {
+public class BukkitMCRabbit extends BukkitMCAnimal implements MCRabbit {
 
 	Rabbit r;
 

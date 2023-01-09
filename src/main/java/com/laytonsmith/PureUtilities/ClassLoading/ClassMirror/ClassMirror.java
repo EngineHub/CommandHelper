@@ -491,7 +491,7 @@ public class ClassMirror<T> implements Serializable {
 			}
 		}
 		String name = superClass.getName().replace('.', '/');
-		if(info.superClass.equals(name)) {
+		if(name.equals(info.superClass)) {
 			return true;
 		}
 		for(String in : info.interfaces) {

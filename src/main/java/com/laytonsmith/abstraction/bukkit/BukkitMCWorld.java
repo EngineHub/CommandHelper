@@ -469,11 +469,14 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	public MCFirework launchFirework(MCLocation l, int strength, List<MCFireworkEffect> effects) {
 		Firework firework = (Firework) w.spawnEntity(((BukkitMCLocation) l).asLocation(), EntityType.FIREWORK);
 		FireworkMeta meta = firework.getFireworkMeta();
-		meta.setPower(strength);
+		meta.setPower(Math.max(strength, 0));
 		for(MCFireworkEffect effect : effects) {
 			meta.addEffect((FireworkEffect) effect.getHandle());
 		}
 		firework.setFireworkMeta(meta);
+		if(strength < 0) {
+			firework.detonate();
+		}
 		return new BukkitMCFirework(firework);
 	}
 

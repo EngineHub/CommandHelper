@@ -392,6 +392,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 		}
 		data.get(d);
 		ba.data = ByteBuffer.wrap(d);
+		ba.maxValue = size;
 		return ba;
 	}
 

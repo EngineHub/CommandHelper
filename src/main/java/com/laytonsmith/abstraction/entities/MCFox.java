@@ -1,9 +1,8 @@
 package com.laytonsmith.abstraction.entities;
 
-import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.enums.MCFoxType;
 
-public interface MCFox extends MCLivingEntity {
+public interface MCFox extends MCAnimal {
 	MCFoxType getVariant();
 	void setVariant(MCFoxType type);
 	boolean isCrouching();

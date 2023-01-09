@@ -241,4 +241,12 @@ public class BukkitMCBlock extends BukkitMCMetadatable implements MCBlock {
 	public boolean applyBoneMeal() {
 		return b.applyBoneMeal(BlockFace.UP);
 	}
+
+	@Override
+	public boolean breakNaturally(MCItemStack item) {
+		if(item == null) {
+			return b.breakNaturally(null);
+		}
+		return b.breakNaturally((ItemStack) item.getHandle());
+	}
 }

@@ -1,5 +1,5 @@
 package com.laytonsmith.abstraction.entities;
 
-public interface MCHoglin extends MCAgeable {
+public interface MCHoglin extends MCAnimal {
 
 }

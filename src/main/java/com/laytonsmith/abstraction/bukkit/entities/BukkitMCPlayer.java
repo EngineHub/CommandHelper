@@ -10,6 +10,7 @@ import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCPlayerInventory;
 import com.laytonsmith.abstraction.MCScoreboard;
+import com.laytonsmith.abstraction.MCWorldBorder;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlockData;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
@@ -18,6 +19,7 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayerInventory;
 import com.laytonsmith.abstraction.bukkit.BukkitMCScoreboard;
+import com.laytonsmith.abstraction.bukkit.BukkitMCWorldBorder;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.enums.MCParticle;
@@ -40,8 +42,8 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Note;
 import org.bukkit.Particle;
-import org.bukkit.Server;
 import org.bukkit.SoundCategory;
+import org.bukkit.WorldBorder;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -405,30 +407,25 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 
 	@Override
 	public void setTempOp(Boolean value) throws ClassNotFoundException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
-		Server server = Bukkit.getServer();
-		String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
-
-		Class serverClass = Class.forName("org.bukkit.craftbukkit." + version + ".CraftServer");
-
-		if(!server.getClass().isAssignableFrom(serverClass)) {
-			throw new IllegalStateException("Running server isn't CraftBukkit");
-		}
-
 		// Get some version specific strings
-		String nms;
-		String playersPackage;
-		String ops = "operators";
-		String getPlayerList = "getPlayerList";
-		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_17)) {
-			nms = "net.minecraft.server";
-			playersPackage = nms + ".players";
-			ops = "n";
-			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_18)) {
-				getPlayerList = "ac";
+		String nms = "net.minecraft.server";
+		String playersPackage = nms + ".players";
+		String ops = "o";
+		String getPlayerList = "ab";
+		if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_19_X)) {
+			getPlayerList = "ac";
+			if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_19_1)) {
+				ops = "n";
+				if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_18)) {
+					getPlayerList = "getPlayerList";
+					if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_17)) {
+						String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
+						nms = "net.minecraft.server." + version;
+						playersPackage = nms;
+						ops = "operators";
+					}
+				}
 			}
-		} else { // 1.16.5 and prior
-			nms = "net.minecraft.server." + version;
-			playersPackage = nms;
 		}
 
 		Class nmsMinecraftServerClass = Class.forName(nms + ".MinecraftServer");
@@ -698,6 +695,33 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	public void setStatistic(MCPlayerStatistic stat, MCMaterial type, int amount) {
 		Material bukkitType = (Material) type.getHandle();
 		p.setStatistic(BukkitMCPlayerStatistic.getConvertor().getConcreteEnum(stat), bukkitType, amount);
+	}
+
+	@Override
+	public MCWorldBorder getWorldBorder() {
+		try {
+			WorldBorder wb = p.getWorldBorder();
+			if(wb == null) {
+				return null;
+			}
+			return new BukkitMCWorldBorder(wb);
+		} catch (NoSuchMethodError ex) {
+			// probably before 1.18.2
+			return null;
+		}
+	}
+
+	@Override
+	public void setWorldBorder(MCWorldBorder border) {
+		try {
+			if(border == null) {
+				p.setWorldBorder(null);
+			} else {
+				p.setWorldBorder((WorldBorder) border.getHandle());
+			}
+		} catch (NoSuchMethodError ex) {
+			// probably before 1.18.2
+		}
 	}
 
 	@Override

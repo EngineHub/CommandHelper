@@ -2,7 +2,7 @@ package com.laytonsmith.abstraction.entities;
 
 import com.laytonsmith.abstraction.MCAnimalTamer;
 
-public interface MCTameable extends MCAgeable {
+public interface MCTameable extends MCAnimal {
 
 	boolean isTamed();
 

@@ -1583,6 +1583,60 @@ public class InventoryManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	public static class has_inventory extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CREBadEntityException.class, CREInvalidWorldException.class,
+					CRECastException.class, CRERangeException.class, CREIllegalArgumentException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCWorld w = null;
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			if(p != null) {
+				w = p.getWorld();
+			}
+			MCInventory inv = GetInventoryOrNull(args[0], w, t, env);
+			return CBoolean.get(inv != null);
+		}
+
+		@Override
+		public String getName() {
+			return "has_inventory";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {specifier} Returns whether the specified entity or location has an inventory."
+					+ " The specifier can be an entity UUID, location array, or virtual inventory ID."
+					+ " If given the id of a virtual inventory that doesn't exist, false will be returned.";
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_5;
+		}
+
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_inventory_item extends AbstractFunction {
 
 		@Override
@@ -1751,7 +1805,8 @@ public class InventoryManagement {
 		@Override
 		public String docs() {
 			return "string {specifier} Returns the inventory type at the location specified, or of the entity specified."
-					+ " If the entity or location specified is not capable of having an inventory, a FormatException is thrown."
+					+ " If the entity or location specified is not capable of having an inventory,"
+					+ " an IllegalArgumentException is thrown."
 					+ " ---- Note that not all valid inventory types may actually be returnable, due to lack of support"
 					+ " in the server, but the valid return types are: " + StringUtils.Join(MCInventoryType.values(), ", ");
 		}
@@ -1805,7 +1860,7 @@ public class InventoryManagement {
 		@Override
 		public String docs() {
 			return "int {specifier} Returns the max size of the inventory specified."
-					+ " If the block or entity can't have an inventory, a FormatException is thrown.";
+					+ " If the block or entity can't have an inventory, an IllegalArgumentException is thrown.";
 		}
 
 		@Override
@@ -1944,9 +1999,10 @@ public class InventoryManagement {
 		@Override
 		public String docs() {
 			return "array {specifier, [index]} Gets an array of the specified inventory."
-					+ " If the block or entity can't have an inventory, a FormatException is thrown. If the index is specified,"
-					+ " only the slot given will be returned. The max index of the array in the array is different for"
-					+ " different types of inventories. If there is no item at the slot specified, null is returned."
+					+ " If the block or entity can't have an inventory, an IllegalArgumentException is thrown."
+					+ " If the index is specified, only the slot given will be returned."
+					+ " The max index of the array in the array is different for different types of inventories."
+					+ " If there is no item at the slot specified, null is returned."
 					+ " ---- If all slots are requested, an associative array of item objects is returned, and if"
 					+ " only one item is requested, just that single item object is returned." + ITEM_OBJECT;
 		}
@@ -2018,7 +2074,7 @@ public class InventoryManagement {
 		public String docs() {
 			return "void {specifier, invArray} Sets a block or entity inventory to the specified inventory object."
 					+ " The specifier can be an entity UUID, location array, or virtual inventory ID."
-					+ " If the block or entity can't have an inventory, a FormatException is thrown."
+					+ " If the block or entity can't have an inventory, an IllegalArgumentException is thrown."
 					+ " An inventory object invArray is one that matches what is returned by get_inventory(), so"
 					+ " set_inventory(123, get_inventory(123)) while pointless, would be a correct call."
 					+ " ---- The array must be associative, however, it may skip items, in which case, only the specified"
@@ -2866,32 +2922,30 @@ public class InventoryManagement {
 	 * @return
 	 */
 	private static MCInventory GetInventory(Mixed specifier, MCWorld w, Target t, Environment env) {
-		MCInventory inv;
-		if(specifier.isInstanceOf(CArray.TYPE, null, env)) {
-			MCLocation l = ObjectGenerator.GetGenerator().location(specifier, w, t, env);
-			inv = StaticLayer.GetConvertor().GetLocationInventory(l);
-			if(inv == null) {
+		MCInventory inv = GetInventoryOrNull(specifier, w, t, env);
+		if(inv == null) {
+			if(specifier.isInstanceOf(CArray.TYPE, null, env)) {
 				throw new CREIllegalArgumentException("The location specified is not capable of having an inventory.", t);
 			}
-			return inv;
+			throw new CREIllegalArgumentException("An inventory for \"" + specifier.val() + "\" does not exist.", t);
+		}
+		return inv;
+	}
+
+	private static MCInventory GetInventoryOrNull(Mixed specifier, MCWorld w, Target t, Environment env) {
+		if(specifier.isInstanceOf(CArray.TYPE, null, env)) {
+			MCLocation l = ObjectGenerator.GetGenerator().location(specifier, w, t);
+			return StaticLayer.GetConvertor().GetLocationInventory(l);
 		}
 		if(specifier.val().length() == 36 || specifier.val().length() == 32) {
 			try {
 				MCEntity entity = Static.getEntity(specifier, t);
-				inv = StaticLayer.GetConvertor().GetEntityInventory(entity);
-				if(inv == null) {
-					throw new CREIllegalArgumentException("The entity specified is not capable of having an inventory.", t);
-				}
-				return inv;
+				return StaticLayer.GetConvertor().GetEntityInventory(entity);
 			} catch (CREFormatException iae) {
 				// not a UUID
 			}
 		}
-		inv = VIRTUAL_INVENTORIES.get(specifier.val());
-		if(inv == null) {
-			throw new CREIllegalArgumentException("An inventory for \"" + specifier.val() + "\" does not exist.", t);
-		}
-		return inv;
+		return VIRTUAL_INVENTORIES.get(specifier.val());
 	}
 
 	/**

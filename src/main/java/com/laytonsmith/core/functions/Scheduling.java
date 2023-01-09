@@ -20,6 +20,8 @@ import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.FileOptions;
+import com.laytonsmith.core.compiler.signature.FunctionSignatures;
+import com.laytonsmith.core.compiler.signature.SignatureBuilder;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CInt;
@@ -43,6 +45,7 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
+import com.laytonsmith.core.natives.interfaces.Callable;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.profiler.ProfilePoint;
 import com.laytonsmith.core.taskmanager.CoreTaskType;
@@ -251,7 +254,7 @@ public class Scheduling {
 
 		@Override
 		public String docs() {
-			return "int {timeInMS, [initialDelayInMS,] closure} Sets a task to run every so often. This works similarly to set_timeout,"
+			return "int {int timeInMS, [int initialDelayInMS,] Callable task} Sets a task to run every so often. This works similarly to set_timeout,"
 					+ " except the task will automatically re-register itself to run again. Note that the resolution"
 					+ " of the time is in ms, however, the server will only have a resolution of up to 50 ms, meaning"
 					+ " that a time of 1-50ms is essentially the same as 50ms. The initial delay defaults to the same"
@@ -289,10 +292,10 @@ public class Scheduling {
 			if(time < 0) {
 				throw new CRERangeException("Negative repeating delay", t);
 			}
-			if(!(args[1 + offset].isInstanceOf(CClosure.TYPE, null, env))) {
-				throw new CRECastException(getName() + " expects a closure to be sent as the second argument", t);
+			if(!(args[1 + offset].isInstanceOf(Callable.TYPE, null, env))) {
+				throw new CRECastException(getName() + " expects a Callable to be sent as the second argument", t);
 			}
-			final CClosure c = (CClosure) args[1 + offset];
+			final Callable c = (Callable) args[1 + offset];
 			final AtomicInteger ret = new AtomicInteger(-1);
 
 			ret.set(StaticLayer.SetFutureRepeater(env.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), time, delay, () -> {
@@ -301,7 +304,7 @@ public class Scheduling {
 					ProfilePoint p = env.getEnv(StaticRuntimeEnv.class).GetProfiler().start("Executing timeout"
 							+ " with id " + ret.get() + " (defined at " + t.toString() + ")", LogLevel.ERROR);
 					try {
-						c.executeCallable();
+						c.executeCallable(env, t);
 					} finally {
 						p.stop();
 					}
@@ -333,6 +336,15 @@ public class Scheduling {
 			};
 		}
 
+		@Override
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CInt.TYPE)
+					.param(CInt.TYPE, "timeInMS", "The delay between runs, in milliseconds.")
+					.param(CInt.TYPE, "initialDelayInMS", "The delay before the first execution, in milliseconds."
+							+ " By default, the same as timeInMS.", true)
+					.param(Callable.TYPE, "callable", "The task to execute.")
+					.build();
+		}
 	}
 
 	@api(environments = {GlobalEnv.class})
@@ -378,10 +390,10 @@ public class Scheduling {
 			if(time < 0) {
 				throw new CRERangeException("Negative delay", t);
 			}
-			if(!(args[1].isInstanceOf(CClosure.TYPE, null, env))) {
-				throw new CRECastException(getName() + " expects a closure to be sent as the second argument", t);
+			if(!(args[1].isInstanceOf(Callable.TYPE, null, env))) {
+				throw new CRECastException(getName() + " expects a Callable to be sent as the second argument", t);
 			}
-			final CClosure c = (CClosure) args[1];
+			final Callable c = (Callable) args[1];
 			final AtomicInteger ret = new AtomicInteger(-1);
 			ret.set(StaticLayer.SetFutureRunnable(
 					env.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), time, () -> {
@@ -398,7 +410,7 @@ public class Scheduling {
 					ProfilePoint p = c.getEnv().getEnv(StaticRuntimeEnv.class).GetProfiler().start("Executing timeout"
 							+ " with id " + ret.get() + " (defined at " + t.toString() + ")", LogLevel.ERROR);
 					try {
-						c.executeCallable();
+						c.executeCallable(env, t);
 					} finally {
 						p.stop();
 					}
@@ -437,6 +449,13 @@ public class Scheduling {
 			};
 		}
 
+		@Override
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CInt.TYPE)
+					.param(CInt.TYPE, "timeInMS", "The delay before the task runs, in milliseconds.")
+					.param(Callable.TYPE, "callable", "The task to execute.")
+					.build();
+		}
 	}
 
 	@api(environments = {GlobalEnv.class})
@@ -520,6 +539,13 @@ public class Scheduling {
 				+ "});\n"
 				+ "clear_task(@id);", "<Nothing happens, as the timeout is cancelled before it runs>")
 			};
+		}
+
+		@Override
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CVoid.TYPE)
+					.param(CInt.TYPE, "id", "The id of the task. Optional if called from within a task.", true)
+					.build();
 		}
 
 	}

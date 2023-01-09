@@ -393,8 +393,8 @@ public class ByteArrays {
 
 		@Override
 		public String docs() {
-			return "byte_array {byte_array, length, [pos]} Returns a new byte_array primitive, starting from pos (or wherever the marker is"
-					+ " by default) to length.";
+			return "byte_array {byte_array, length, [pos]} Returns a new byte_array primitive containing 'length'"
+					+ " bytes starting from pos (or wherever the marker is by default) in the given byte array.";
 		}
 
 		@Override

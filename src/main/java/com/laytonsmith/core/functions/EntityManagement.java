@@ -106,6 +106,7 @@ import com.laytonsmith.abstraction.enums.MCProfession;
 import com.laytonsmith.abstraction.enums.MCRabbitType;
 import com.laytonsmith.abstraction.enums.MCRotation;
 import com.laytonsmith.abstraction.enums.MCTreeSpecies;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.ArgumentValidation;
@@ -450,7 +451,7 @@ public class EntityManagement {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CREBadEntityException.class, CREFormatException.class, CRECastException.class,
-				CREInvalidWorldException.class, CRELengthException.class};
+				CREInvalidWorldException.class, CRELengthException.class, CREIllegalArgumentException.class};
 		}
 
 		@Override
@@ -458,11 +459,15 @@ public class EntityManagement {
 			MCEntity e = Static.getEntity(args[0], t);
 			MCLocation l;
 			if(args[1].isInstanceOf(CArray.TYPE, null, env)) {
-				l = ObjectGenerator.GetGenerator().location(args[1], e.getWorld(), t, env);
+				l = ObjectGenerator.GetGenerator().location(args[1], e.getWorld(), t);
 			} else {
 				throw new CREFormatException("An array was expected but received " + args[1], t);
 			}
-			return CBoolean.get(e.teleport(l));
+			try {
+				return CBoolean.get(e.teleport(l));
+			} catch (IllegalArgumentException ex) {
+				throw new CREIllegalArgumentException(ex.getMessage(), t);
+			}
 		}
 
 		@Override
@@ -702,14 +707,15 @@ public class EntityManagement {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			int age = ArgumentValidation.getInt32(args[1], t, env);
-			if(age < 1) {
-				throw new CRERangeException("Entity age can't be less than 1 server tick.", t);
-			}
 			MCEntity ent = Static.getEntity(args[0], t);
 			if(ent == null) {
 				return CNull.NULL;
 			} else {
-				ent.setTicksLived(age);
+				try {
+					ent.setTicksLived(age);
+				} catch (IllegalArgumentException ex) {
+					throw new CRERangeException(ex.getMessage(), t);
+				}
 				return CVoid.VOID;
 			}
 		}
@@ -722,7 +728,7 @@ public class EntityManagement {
 		@Override
 		public String docs() {
 			return "void {entityUUID, int} Sets the age of the entity to the specified int,"
-					+ " represented by server ticks.";
+					+ " represented by server ticks. Entity age cannot be less than 1 server tick,";
 		}
 
 		@Override
@@ -1265,10 +1271,14 @@ public class EntityManagement {
 						}
 						break;
 					default:
-						if(consumer != null) {
-							ent = l.getWorld().spawn(l, entType, consumer);
-						} else {
-							ent = l.getWorld().spawn(l, entType);
+						try {
+							if(consumer != null) {
+								ent = l.getWorld().spawn(l, entType, consumer);
+							} else {
+								ent = l.getWorld().spawn(l, entType);
+							}
+						} catch (IllegalArgumentException ex) {
+							throw new CREFormatException(ex.getMessage(), t);
 						}
 				}
 				ret.push(new CString(ent.getUniqueId().toString(), t), t, env);
@@ -1332,7 +1342,12 @@ public class EntityManagement {
 			Mixed c = children.get(0).getData();
 			if(c.isInstanceOf(CString.TYPE, null, env)) {
 				try {
-					MCEntityType.MCVanillaEntityType.valueOf(c.val().toUpperCase());
+					MCEntityType.MCVanillaEntityType type = MCEntityType.MCVanillaEntityType.valueOf(c.val().toUpperCase());
+					if(!type.isSpawnable()) {
+						env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions, new CompilerWarning(
+								"The entity type " + c.val() + " cannot be spawned by " + getName(),
+								c.getTarget(), null));
+					}
 				} catch (IllegalArgumentException ex) {
 					env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions, new CompilerWarning(
 							c.val() + " is not a valid enum in com.commandhelper.EntityType",
@@ -1917,6 +1932,7 @@ public class EntityManagement {
 				case CREEPER:
 					MCCreeper creeper = (MCCreeper) entity;
 					specArray.set(entity_spec.KEY_CREEPER_POWERED, CBoolean.get(creeper.isPowered()), t, env);
+					specArray.set(entity_spec.KEY_CREEPER_FUSETICKS, new CInt(creeper.getFuseTicks(), t), t, env);
 					specArray.set(entity_spec.KEY_CREEPER_MAXFUSETICKS, new CInt(creeper.getMaxFuseTicks(), t), t, env);
 					specArray.set(entity_spec.KEY_CREEPER_EXPLOSIONRADIUS, new CInt(creeper.getExplosionRadius(), t), t, env);
 					break;
@@ -1944,6 +1960,11 @@ public class EntityManagement {
 						specArray.set(entity_spec.KEY_DROPPED_ITEM_THROWER, CNull.NULL, t, env);
 					} else {
 						specArray.set(entity_spec.KEY_DROPPED_ITEM_THROWER, new CString(thrower.toString(), t), t, env);
+					}
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_18_X)) {
+						specArray.set(entity_spec.KEY_DROPPED_ITEM_DESPAWN, CBoolean.get(item.willDespawn()), t);
+					} else {
+						specArray.set(entity_spec.KEY_DROPPED_ITEM_DESPAWN, CBoolean.TRUE, t);
 					}
 					break;
 				case ENDER_CRYSTAL:
@@ -2007,6 +2028,7 @@ public class EntityManagement {
 						fe.push(ObjectGenerator.GetGenerator().fireworkEffect(effect, t, env), t, env);
 					}
 					specArray.set(entity_spec.KEY_FIREWORK_EFFECTS, fe, t, env);
+					specArray.set(entity_spec.KEY_FIREWORK_ANGLED, CBoolean.get(firework.isShotAtAngle()), t, env);
 					break;
 				case FOX:
 					MCFox fox = (MCFox) entity;
@@ -2090,6 +2112,12 @@ public class EntityManagement {
 					MCPanda panda = (MCPanda) entity;
 					specArray.set(entity_spec.KEY_PANDA_MAINGENE, new CString(panda.getMainGene().name(), t), t, env);
 					specArray.set(entity_spec.KEY_PANDA_HIDDENGENE, new CString(panda.getHiddenGene().name(), t), t, env);
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19)) {
+						specArray.set(entity_spec.KEY_PANDA_EATING, CBoolean.get(panda.isEating()), t, env);
+						specArray.set(entity_spec.KEY_PANDA_ONBACK, CBoolean.get(panda.isOnBack()), t, env);
+						specArray.set(entity_spec.KEY_PANDA_ROLLING, CBoolean.get(panda.isRolling()), t, env);
+						specArray.set(entity_spec.KEY_PANDA_SNEEZING, CBoolean.get(panda.isSneezing()), t, env);
+					}
 					break;
 				case PARROT:
 					MCParrot parrot = (MCParrot) entity;
@@ -2204,6 +2232,9 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_WOLF_ANGRY, CBoolean.get(wolf.isAngry()), t, env);
 					specArray.set(entity_spec.KEY_WOLF_COLOR, new CString(wolf.getCollarColor().name(), t), t, env);
 					specArray.set(entity_spec.KEY_GENERIC_SITTING, CBoolean.get(wolf.isSitting()), t, env);
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19)) {
+						specArray.set(entity_spec.KEY_WOLF_INTERESTED, CBoolean.get(wolf.isInterested()), t, env);
+					}
 					break;
 				case ZOGLIN:
 					MCZoglin zoglin = (MCZoglin) entity;
@@ -2270,12 +2301,14 @@ public class EntityManagement {
 		private static final String KEY_CAT_TYPE = "type";
 		private static final String KEY_CAT_COLOR = "color";
 		private static final String KEY_CREEPER_POWERED = "powered";
+		private static final String KEY_CREEPER_FUSETICKS = "fuseticks";
 		private static final String KEY_CREEPER_MAXFUSETICKS = "maxfuseticks";
 		private static final String KEY_CREEPER_EXPLOSIONRADIUS = "explosionradius";
 		private static final String KEY_DROPPED_ITEM_ITEMSTACK = "itemstack";
 		private static final String KEY_DROPPED_ITEM_PICKUPDELAY = "pickupdelay";
 		private static final String KEY_DROPPED_ITEM_OWNER = "owner";
 		private static final String KEY_DROPPED_ITEM_THROWER = "thrower";
+		private static final String KEY_DROPPED_ITEM_DESPAWN = "despawn";
 		private static final String KEY_ENDERCRYSTAL_BASE = "base";
 		private static final String KEY_ENDERCRYSTAL_BEAMTARGET = "beamtarget";
 		private static final String KEY_ENDEREYE_DESPAWNTICKS = "despawnticks";
@@ -2292,6 +2325,7 @@ public class EntityManagement {
 		private static final String KEY_FIREBALL_DIRECTION = "direction";
 		private static final String KEY_FIREWORK_STRENGTH = "strength";
 		private static final String KEY_FIREWORK_EFFECTS = "effects";
+		private static final String KEY_FIREWORK_ANGLED = "angled";
 		private static final String KEY_FOX_CROUCHING = "crouching";
 		private static final String KEY_FOX_TYPE = "type";
 		private static final String KEY_FROG_TYPE = "type";
@@ -2318,6 +2352,10 @@ public class EntityManagement {
 		private static final String KEY_PAINTING_ART = "type";
 		private static final String KEY_PANDA_MAINGENE = "maingene";
 		private static final String KEY_PANDA_HIDDENGENE = "hiddengene";
+		private static final String KEY_PANDA_EATING = "eating";
+		private static final String KEY_PANDA_ONBACK = "onback";
+		private static final String KEY_PANDA_ROLLING = "rolling";
+		private static final String KEY_PANDA_SNEEZING = "sneezing";
 		private static final String KEY_PARROT_TYPE = "type";
 		private static final String KEY_PHANTOM_SIZE = "size";
 		private static final String KEY_PIGLIN_ZOMBIFICATION_IMMUNE = "zombificationimmune";
@@ -2347,6 +2385,7 @@ public class EntityManagement {
 		private static final String KEY_WITHER_SKULL_CHARGED = "charged";
 		private static final String KEY_WOLF_ANGRY = "angry";
 		private static final String KEY_WOLF_COLOR = "color";
+		private static final String KEY_WOLF_INTERESTED = "interested";
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
@@ -2700,6 +2739,13 @@ public class EntityManagement {
 									throw new CRERangeException("Ticks must not be negative.", t);
 								}
 								break;
+							case entity_spec.KEY_CREEPER_FUSETICKS:
+								try {
+									creeper.setFuseTicks(ArgumentValidation.getInt32(specArray.get(index, t), t));
+								} catch (IllegalArgumentException ex) {
+									throw new CRERangeException(ex.getMessage(), t);
+								}
+								break;
 							case entity_spec.KEY_CREEPER_EXPLOSIONRADIUS:
 								try {
 									creeper.setExplosionRadius(ArgumentValidation.getInt32(specArray.get(index, t, env), t, env));
@@ -2765,6 +2811,12 @@ public class EntityManagement {
 									item.setThrower(null);
 								} else {
 									item.setThrower(Static.GetUUID(thrower, t));
+								}
+								break;
+							}
+							case entity_spec.KEY_DROPPED_ITEM_DESPAWN -> {
+								if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_18_X)) {
+									item.setWillDespawn(ArgumentValidation.getBooleanObject(specArray.get(index, t), t));
 								}
 							}
 							default -> throwException(index, t);
@@ -2933,6 +2985,9 @@ public class EntityManagement {
 										throw new CRECastException("Firework effect expected to be an array.", t);
 									}
 								}
+								break;
+							case entity_spec.KEY_FIREWORK_ANGLED:
+								firework.setShotAtAngle(ArgumentValidation.getBooleanObject(specArray.get(index, t), t));
 								break;
 							default:
 								throwException(index, t);
@@ -3211,6 +3266,18 @@ public class EntityManagement {
 								} catch (IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid panda gene: " + specArray.get(index, t, env).val(), t);
 								}
+								break;
+							case entity_spec.KEY_PANDA_EATING:
+								panda.setEating(ArgumentValidation.getBooleanObject(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_PANDA_ONBACK:
+								panda.setOnBack(ArgumentValidation.getBooleanObject(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_PANDA_ROLLING:
+								panda.setRolling(ArgumentValidation.getBooleanObject(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_PANDA_SNEEZING:
+								panda.setSneezing(ArgumentValidation.getBooleanObject(specArray.get(index, t), t));
 								break;
 							default:
 								throwException(index, t);
@@ -3597,6 +3664,9 @@ public class EntityManagement {
 								break;
 							case entity_spec.KEY_GENERIC_SITTING:
 								wolf.setSitting(ArgumentValidation.getBoolean(specArray.get(index, t, env), t, env));
+								break;
+							case entity_spec.KEY_WOLF_INTERESTED:
+								wolf.setInterested(ArgumentValidation.getBooleanObject(specArray.get(index, t), t));
 								break;
 							default:
 								throwException(index, t);
@@ -4383,9 +4453,9 @@ public class EntityManagement {
 
 			int strength = 2;
 			if(options.containsKey("strength")) {
-				strength = ArgumentValidation.getInt32(options.get("strength", t, env), t, env);
-				if(strength < 0 || strength > 128) {
-					throw new CRERangeException("Strength must be between 0 and 128", t);
+				strength = ArgumentValidation.getInt32(options.get("strength", t), t, env);
+				if(strength > 127) {
+					throw new CRERangeException("Strength cannot be higher than 127", t);
 				}
 			}
 
@@ -4446,7 +4516,8 @@ public class EntityManagement {
 					+ "{| cellspacing=\"1\" cellpadding=\"1\" border=\"1\" class=\"wikitable\"\n"
 					+ "! Array key !! Description !! Default\n"
 					+ "|-\n"
-					+ "| strength || A number specifying how far up the firework should go || 2\n"
+					+ "| strength || A number indicating the flight duration of the rocket equal to the amount of"
+					+ " gunpowder used to craft a rocket. (negative numbers detonate immediately) || 2\n"
 					+ "|-\n"
 					+ "| flicker || A boolean, determining if the firework will flicker || false\n"
 					+ "|-\n"

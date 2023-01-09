@@ -5,6 +5,7 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCEntity;
+import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCNote;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
@@ -403,7 +404,7 @@ public class Environment {
 						b.setType(mat);
 						return CVoid.VOID;
 					}
-					bd = ObjectGenerator.GetGenerator().blockData((CArray) args[1], t, env);
+					bd = ObjectGenerator.GetGenerator().blockData((CArray) args[1], null, t, env);
 				} else {
 					bd = Static.getServer().createBlockData(args[1].val());
 				}
@@ -901,17 +902,22 @@ public class Environment {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{1};
+			return new Integer[]{1, 2};
 		}
 
 		@Override
 		public String docs() {
-			return "void {locationArray} Mostly simulates a block break at a location. Does not trigger an event.";
+			return "boolean {locationArray, [itemArray]} Mostly simulates a block break at a location."
+					+ " Optional item array to simulate tool used to break block."
+					+ " Returns true if block was not already air and either no tool was given, a correct tool was given,"
+					+ " or the block type does not require a specific tool."
+					+ " Does not trigger an event.";
 		}
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREFormatException.class};
+			return new Class[]{CREFormatException.class, CREInvalidWorldException.class, CRECastException.class,
+					CRERangeException.class};
 		}
 
 		@Override
@@ -930,14 +936,18 @@ public class Environment {
 		}
 
 		@Override
-		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCLocation l;
-			MCPlayer p;
-			p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCWorld w = (p != null ? p.getWorld() : null);
-			l = ObjectGenerator.GetGenerator().location(args[0], w, t, env);
-			l.breakBlock();
-			return CVoid.VOID;
+			MCBlock b = ObjectGenerator.GetGenerator().location(args[0], w, t).getBlock();
+			boolean success;
+			if(args.length == 2) {
+				MCItemStack item = ObjectGenerator.GetGenerator().item(args[1], t);
+				success = b.breakNaturally(item);
+			} else {
+				success = b.breakNaturally(null);
+			}
+			return CBoolean.get(success);
 		}
 	}
 
@@ -1809,7 +1819,7 @@ public class Environment {
 
 			CArray sa = (CArray) args[1];
 
-			path = sa.get("sound", t, env).val();
+			path = ArgumentValidation.getStringObject(sa.get("sound", t, env), t);
 
 			if(sa.containsKey("category")) {
 				try {
@@ -1828,7 +1838,7 @@ public class Environment {
 			}
 
 			if(args.length == 3) {
-				java.util.List<MCPlayer> players = new java.util.ArrayList<MCPlayer>();
+				java.util.List<MCPlayer> players = new java.util.ArrayList<>();
 				if(args[2].isInstanceOf(CArray.TYPE, null, env)) {
 					for(String key : ((CArray) args[2]).stringKeySet()) {
 						players.add(Static.GetPlayer(((CArray) args[2]).get(key, t, env), t, env));
@@ -1837,19 +1847,29 @@ public class Environment {
 					players.add(Static.GetPlayer(args[2], t, env));
 				}
 
-				if(category == null) {
-					for(MCPlayer p : players) {
-						p.playSound(loc, path, volume, pitch);
+				try {
+					if(category == null) {
+						for(MCPlayer p : players) {
+							p.playSound(loc, path, volume, pitch);
+						}
+					} else {
+						for(MCPlayer p : players) {
+							p.playSound(loc, path, category, volume, pitch);
+						}
 					}
-				} else {
-					for(MCPlayer p : players) {
-						p.playSound(loc, path, category, volume, pitch);
-					}
+				} catch(Exception ex) {
+					throw new CREFormatException(ex.getMessage(), t);
 				}
-			} else if(category == null) {
-				loc.getWorld().playSound(loc, path, volume, pitch);
 			} else {
-				loc.getWorld().playSound(loc, path, category, volume, pitch);
+				try {
+					if(category == null) {
+						loc.getWorld().playSound(loc, path, volume, pitch);
+					} else {
+						loc.getWorld().playSound(loc, path, category, volume, pitch);
+					}
+				} catch(Exception ex) {
+					throw new CREFormatException(ex.getMessage(), t);
+				}
 			}
 			return CVoid.VOID;
 		}
