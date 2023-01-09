@@ -16,6 +16,9 @@ public class BukkitMCAxolotlBucketMeta extends BukkitMCItemMeta implements MCAxo
 
 	@Override
 	public MCAxolotlType getAxolotlType() {
+		if(!sm.hasVariant()) {
+			return MCAxolotlType.LUCY;
+		}
 		return MCAxolotlType.valueOf(sm.getVariant().name());
 	}
 

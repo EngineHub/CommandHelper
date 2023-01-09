@@ -53,7 +53,7 @@ public class BukkitMCSmithingRecipe extends BukkitMCRecipe implements MCSmithing
 		List<Material> choices = ((RecipeChoice.MaterialChoice) recipe.getBase()).getChoices();
 		MCMaterial[] ret = new MCMaterial[choices.size()];
 		for(int i = 0; i < choices.size(); i++) {
-			ret[i] = new BukkitMCMaterial(choices.get(i));
+			ret[i] = BukkitMCMaterial.valueOfConcrete(choices.get(i));
 		}
 		return ret;
 	}
@@ -63,7 +63,7 @@ public class BukkitMCSmithingRecipe extends BukkitMCRecipe implements MCSmithing
 		List<Material> choices = ((RecipeChoice.MaterialChoice) recipe.getAddition()).getChoices();
 		MCMaterial[] ret = new MCMaterial[choices.size()];
 		for(int i = 0; i < choices.size(); i++) {
-			ret[i] = new BukkitMCMaterial(choices.get(i));
+			ret[i] = BukkitMCMaterial.valueOfConcrete(choices.get(i));
 		}
 		return ret;
 	}

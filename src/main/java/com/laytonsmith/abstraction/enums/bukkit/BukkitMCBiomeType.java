@@ -19,29 +19,21 @@ public class BukkitMCBiomeType extends MCBiomeType<Biome> {
 
 	@Override
 	public String name() {
-		return getAbstracted() == MCVanillaBiomeType.UNKNOWN ? concreteName() : getAbstracted().name();
-	}
-
-	@Override
-	public String concreteName() {
-		Biome b = getConcrete();
-		if(b == null) {
-			return "null";
-		}
-		return b.name();
+		return getAbstracted() == MCVanillaBiomeType.UNKNOWN ? getConcrete().name() : getAbstracted().name();
 	}
 
 	public static MCBiomeType valueOfConcrete(Biome test) {
 		MCBiomeType type = BUKKIT_MAP.get(test);
 		if(type == null) {
-			return NULL;
+			MSLog.GetLogger().e(MSLog.Tags.GENERAL, "Bukkit BiomeType missing in BUKKIT_MAP: " + test.name(),
+					Target.UNKNOWN);
+			return new BukkitMCBiomeType(MCVanillaBiomeType.UNKNOWN, test);
 		}
 		return type;
 	}
 
 	// This way we don't take up extra memory on non-bukkit implementations
 	public static void build() {
-		NULL = new BukkitMCBiomeType(MCVanillaBiomeType.UNKNOWN, null);
 		for(MCVanillaBiomeType v : MCVanillaBiomeType.values()) {
 			if(v.existsIn(Static.getServer().getMinecraftVersion())) {
 				Biome type;

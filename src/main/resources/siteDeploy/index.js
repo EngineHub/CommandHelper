@@ -24,11 +24,9 @@
 		if (!showLearningTrail) {
 			return;
 		}
-		var lt = "";
+		var lt = "<h1>Learning Trail</h1>";
 		if (asTable) {
-			lt += "<table><thead><tr><th colspan=\"2\">Learning Trail</th></tr></thead><tbody>";
-		} else {
-			lt += "<h1>Learning Trail</h1>";
+			lt += "<table><tbody>";
 		}
 		learningTrail.forEach(function (v) {
 			//{"category": []}

@@ -15,6 +15,7 @@ import com.laytonsmith.core.compiler.BranchStatement;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.compiler.FileOptions;
+import com.laytonsmith.core.compiler.SelfStatement;
 import com.laytonsmith.core.compiler.VariableScope;
 import com.laytonsmith.core.compiler.analysis.Namespace;
 import com.laytonsmith.core.compiler.analysis.Scope;
@@ -73,6 +74,7 @@ public class EventBinding {
 	private static final AtomicInteger BIND_COUNTER = new AtomicInteger(0);
 
 	@api
+	@SelfStatement
 	public static class bind extends AbstractFunction implements Optimizable, BranchStatement, VariableScope, DocumentSymbolProvider {
 
 		@Override

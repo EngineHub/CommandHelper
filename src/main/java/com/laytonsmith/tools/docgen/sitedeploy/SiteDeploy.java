@@ -553,7 +553,7 @@ public final class SiteDeploy {
 	private final TranslationMaster masterMemories;
 
 	private static final String EDIT_THIS_PAGE_PREAMBLE
-			= "Find a bug in this page? <a rel=\"noopener noreferrer\" target=\"_blank\" href=\"";
+			= "Find a bug in this page? <a rel=\"noopener noreferrer\" href=\"";
 	private static final String EDIT_THIS_PAGE_POSTAMBLE
 			= "\">Edit this page yourself, then submit a pull request.</a>";
 	private static final String DEFAULT_GITHUB_BASE_URL

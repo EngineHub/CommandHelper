@@ -26,7 +26,7 @@ For instance, take the following code:
 
 <%CODE|
 @a ++ @b
->
+%>
 
 In this case, it's not clear if this code is meant to increment the @a value or the @b value. Because order of
 operations are well defined, it will in fact actually increment @a, not @b, but it's not particularly obvious

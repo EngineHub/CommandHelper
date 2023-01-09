@@ -19,6 +19,7 @@ import com.laytonsmith.abstraction.MCRecipe;
 import com.laytonsmith.abstraction.MCScoreboard;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.MCWorld;
+import com.laytonsmith.abstraction.MCWorldBorder;
 import com.laytonsmith.abstraction.blocks.MCBlockData;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlockData;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
@@ -285,12 +286,8 @@ public class BukkitMCServer implements MCServer {
 	private int bukkitBroadcastMessage(String message, Set<CommandSender> recipients) {
 
 		// Fire a BroadcastMessageEvent for this broadcast.
-		BroadcastMessageEvent broadcastMessageEvent;
-		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_14)) {
-			broadcastMessageEvent = new BroadcastMessageEvent(!Bukkit.isPrimaryThread(), message, recipients);
-		} else {
-			broadcastMessageEvent = new BroadcastMessageEvent(message, recipients);
-		}
+		BroadcastMessageEvent broadcastMessageEvent = new BroadcastMessageEvent(!Bukkit.isPrimaryThread(), message,
+				recipients);
 		this.s.getPluginManager().callEvent(broadcastMessageEvent);
 
 		// Return if the event was cancelled.
@@ -337,9 +334,10 @@ public class BukkitMCServer implements MCServer {
 	@Override
 	public MCOfflinePlayer getOfflinePlayer(String player) {
 		OfflinePlayer ofp = s.getOfflinePlayer(player);
-		if(s.getOnlineMode() && ofp.getUniqueId().version() != 4) {
-			// Not an actual MC profile UUID.
-			// This can happen if the server generates a new UUID when it can't find an account by that name.
+		if(s.getOnlineMode() && ofp.getUniqueId().version() == 3) {
+			// Not a Mojang provided UUID.
+			// Bukkit will return a version 3 name-based UUID when it can't find an offline player by that name.
+			// This is fine for offline mode, but in online mode this means the player can't be found.
 			return null;
 		}
 		return new BukkitMCOfflinePlayer(ofp);
@@ -422,9 +420,6 @@ public class BukkitMCServer implements MCServer {
 
 	@Override
 	public String getServerName() {
-		if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_14)) {
-			return (String) ReflectionUtils.invokeMethod(Server.class, s, "getServerName");
-		}
 		return "";
 	}
 
@@ -575,12 +570,7 @@ public class BukkitMCServer implements MCServer {
 
 	@Override
 	public boolean removeRecipe(String key) {
-		try {
-			return s.removeRecipe(NamespacedKey.minecraft(key));
-		} catch (NoSuchMethodError ex) {
-			// probably before 1.15.2
-			return false;
-		}
+		return s.removeRecipe(NamespacedKey.minecraft(key));
 	}
 
 	@Override
@@ -626,5 +616,10 @@ public class BukkitMCServer implements MCServer {
 	@Override
 	public MCMerchant createMerchant(String title) {
 		return new BukkitMCMerchant(__Server().createMerchant(title), title);
+	}
+
+	@Override
+	public MCWorldBorder createWorldBorder() {
+		return new BukkitMCWorldBorder(s.createWorldBorder());
 	}
 }

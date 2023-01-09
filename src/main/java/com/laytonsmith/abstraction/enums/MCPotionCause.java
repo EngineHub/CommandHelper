@@ -24,5 +24,6 @@ public enum MCPotionCause {
 	TURTLE_HELMET,
 	UNKNOWN,
 	VILLAGER_TRADE,
+	WARDEN,
 	WITHER_ROSE
 }

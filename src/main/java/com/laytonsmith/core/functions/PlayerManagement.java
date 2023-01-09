@@ -14,6 +14,7 @@ import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.MCWorld;
+import com.laytonsmith.abstraction.MCWorldBorder;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockData;
@@ -488,7 +489,7 @@ public class PlayerManagement {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRECastException.class, CRELengthException.class, CREPlayerOfflineException.class,
-				CREFormatException.class, CREInvalidWorldException.class};
+				CREFormatException.class, CREInvalidWorldException.class, CREIllegalArgumentException.class};
 		}
 
 		@Override
@@ -558,7 +559,11 @@ public class PlayerManagement {
 			}
 
 			l.add(0, 1, 0);
-			return CBoolean.get(p.teleport(l));
+			try {
+				return CBoolean.get(p.teleport(l));
+			} catch (IllegalArgumentException ex) {
+				throw new CREIllegalArgumentException(ex.getMessage(), t);
+			}
 		}
 	}
 
@@ -4215,7 +4220,7 @@ public class PlayerManagement {
 				data = loc.getBlock().getBlockData();
 			} else {
 				try {
-					data = StaticLayer.GetServer().createBlockData(cdata.val().toLowerCase());
+					data = Static.getServer().createBlockData(cdata.val().toLowerCase());
 				} catch (IllegalArgumentException ex) {
 					String value = cdata.val();
 					if(value.contains(":") && value.length() <= 6) {
@@ -5459,19 +5464,37 @@ public class PlayerManagement {
 
 			MCPlayer p = Static.GetPlayer(args[0], t);
 
-			MCSound sound;
-			try {
-				sound = MCSound.valueOf(args[1].val().toUpperCase());
-			} catch (IllegalArgumentException iae) {
-				throw new CREFormatException("Sound name '" + args[1].val() + "' is invalid.", t);
+			String soundName;
+			String categoryName = null;
+			if(args[1].isInstanceOf(CArray.TYPE)) {
+				CArray soundArray = (CArray) args[1];
+				if(!soundArray.isAssociative()) {
+					throw new CRECastException("Expected an associative array", t);
+				}
+				soundName = soundArray.get("sound", t).val();
+				if(soundArray.containsKey("category")) {
+					categoryName = soundArray.get("category", t).val();
+				}
+			} else {
+				soundName = args[1].val();
+			}
+			if(args.length == 3) {
+				categoryName = args[2].val();
 			}
 
-			if(args.length == 3) {
+			MCSound sound;
+			try {
+				sound = MCSound.valueOf(soundName.toUpperCase());
+			} catch (IllegalArgumentException iae) {
+				throw new CREFormatException("Sound name '" + soundName + "' is invalid.", t);
+			}
+
+			if(categoryName != null) {
 				MCSoundCategory category;
 				try {
-					category = MCSoundCategory.valueOf(args[2].val().toUpperCase());
+					category = MCSoundCategory.valueOf(categoryName.toUpperCase());
 				} catch (IllegalArgumentException iae) {
-					throw new CREFormatException("Sound category '" + args[2].val() + "' is invalid.", t);
+					throw new CREFormatException("Sound category '" + categoryName + "' is invalid.", t);
 				}
 				p.stopSound(sound, category);
 			} else {
@@ -5528,17 +5551,39 @@ public class PlayerManagement {
 				throws ConfigRuntimeException {
 
 			MCPlayer p = Static.GetPlayer(args[0], t);
-			String sound = args[1].val();
-			if(args.length == 3) {
-				MCSoundCategory category;
-				try {
-					category = MCSoundCategory.valueOf(args[2].val().toUpperCase());
-				} catch (IllegalArgumentException iae) {
-					throw new CREFormatException("Sound category '" + args[2].val() + "' is invalid.", t);
+			String soundName;
+			String categoryName = null;
+			if(args[1].isInstanceOf(CArray.TYPE)) {
+				CArray soundArray = (CArray) args[1];
+				if(!soundArray.isAssociative()) {
+					throw new CRECastException("Expected an associative array or sound string", t);
 				}
-				p.stopSound(sound, category);
+				soundName = soundArray.get("sound", t).val();
+				if(soundArray.containsKey("category")) {
+					categoryName = soundArray.get("category", t).val();
+				}
 			} else {
-				p.stopSound(sound);
+				soundName = args[1].val();
+			}
+			if(args.length == 3) {
+				categoryName = args[2].val();
+			}
+			MCSoundCategory category = null;
+			if(categoryName != null) {
+				try {
+					category = MCSoundCategory.valueOf(categoryName.toUpperCase());
+				} catch (IllegalArgumentException iae) {
+					throw new CREFormatException("Sound category '" + categoryName + "' is invalid.", t);
+				}
+			}
+			try {
+				if(category != null) {
+					p.stopSound(soundName, category);
+				} else {
+					p.stopSound(soundName);
+				}
+			} catch(Exception ex) {
+				throw new CREFormatException(ex.getMessage(), t);
 			}
 
 			return CVoid.VOID;
@@ -6370,6 +6415,161 @@ public class PlayerManagement {
 		@Override
 		public MSVersion since() {
 			return MSVersion.V3_3_4;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({set_pborder.class, com.laytonsmith.core.functions.World.get_world_border.class,
+			com.laytonsmith.core.functions.World.set_world_border.class})
+	public static class pborder extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p;
+			if(args.length == 1) {
+				p = Static.GetPlayer(args[0], t);
+			} else {
+				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(p, t);
+			}
+			MCWorldBorder wb = p.getWorldBorder();
+			if(wb == null) {
+				return CNull.NULL;
+			}
+			CArray ret = CArray.GetAssociativeArray(t);
+			ret.set("width", new CDouble(wb.getSize(), t), t);
+			ret.set("center", ObjectGenerator.GetGenerator().location(wb.getCenter(), false), t);
+			ret.set("warningtime", new CInt(wb.getWarningTime(), t), t);
+			ret.set("warningdistance", new CInt(wb.getWarningDistance(), t), t);
+			return ret;
+		}
+
+		@Override
+		public String getName() {
+			return "pborder";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1};
+		}
+
+		@Override
+		public String docs() {
+			return "array {[player]} Returns an associative array for the player's virtual world border."
+					+ " The keys are 'width', 'center', 'warningtime', and 'warningdistance'."
+					+ " Returns null if the player is using the existing border for the world that they're in.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({pborder.class, com.laytonsmith.core.functions.World.get_world_border.class,
+			com.laytonsmith.core.functions.World.set_world_border.class})
+	public static class set_pborder extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CRECastException.class, CREFormatException.class,
+					CRERangeException.class, CREInvalidWorldException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p;
+			Mixed c;
+			if(args.length == 2) {
+				p = Static.GetPlayer(args[0], t);
+				c = args[1];
+			} else {
+				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(p, t);
+				c = args[0];
+			}
+			if(c instanceof CNull) {
+				p.setWorldBorder(null);
+				return CVoid.VOID;
+			}
+			MCWorldBorder wb = p.getWorldBorder();
+			if(wb == null) {
+				wb = Static.getServer().createWorldBorder();
+			}
+			if(!(c.isInstanceOf(CArray.TYPE))) {
+				throw new CREFormatException("Expected array or null but given \"" + c.val() + "\"", t);
+			}
+			CArray params = (CArray) c;
+			if(params.containsKey("width")) {
+				if(params.containsKey("seconds")) {
+					wb.setSize(ArgumentValidation.getDouble(params.get("width", t), t),
+							ArgumentValidation.getInt32(params.get("seconds", t), t));
+				} else {
+					wb.setSize(ArgumentValidation.getDouble(params.get("width", t), t));
+				}
+			}
+			if(params.containsKey("center")) {
+				wb.setCenter(ObjectGenerator.GetGenerator().location(params.get("center", t), p.getWorld(), t));
+			}
+			if(params.containsKey("warningtime")) {
+				wb.setWarningTime(ArgumentValidation.getInt32(params.get("warningtime", t), t));
+			}
+			if(params.containsKey("warningdistance")) {
+				wb.setWarningDistance(ArgumentValidation.getInt32(params.get("warningdistance", t), t));
+			}
+			p.setWorldBorder(wb);
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "set_pborder";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		@Override
+		public String docs() {
+			return "void {player, paramArray} Creates or updates a player's virtual world border."
+					+ " In addition to the keys returned by pborder(), you can also specify 'seconds'."
+					+ " This is the time in which the border will move from the previous width to the new 'width'."
+					+ " If give null instead of an array, this resets the player's visible world border to the one of"
+					+ " the world that they're in. (MC 1.18.2)";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
 		}
 	}
 }

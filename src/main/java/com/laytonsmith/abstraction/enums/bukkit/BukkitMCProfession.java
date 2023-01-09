@@ -19,16 +19,17 @@ public class BukkitMCProfession extends MCProfession<Villager.Profession> {
 
 	@Override
 	public String name() {
-		return getAbstracted() == MCVanillaProfession.NONE ? concreteName() : getAbstracted().name();
-	}
-
-	@Override
-	public String concreteName() {
-		return getConcrete().name();
+		return getAbstracted() == MCVanillaProfession.NONE ? getConcrete().name() : getAbstracted().name();
 	}
 
 	public static MCProfession valueOfConcrete(Villager.Profession test) {
-		return BUKKIT_MAP.get(test);
+		MCProfession profession = BUKKIT_MAP.get(test);
+		if(profession == null) {
+			MSLog.GetLogger().e(MSLog.Tags.GENERAL, "Bukkit Villager Profession missing in BUKKIT_MAP: "
+					+ test.name(), Target.UNKNOWN);
+			return new BukkitMCProfession(MCVanillaProfession.UNKNOWN, test);
+		}
+		return profession;
 	}
 
 	public static void build() {

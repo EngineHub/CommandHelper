@@ -6,7 +6,7 @@ import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDyeColor;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Sheep;
 
-public class BukkitMCSheep extends BukkitMCAgeable implements MCSheep {
+public class BukkitMCSheep extends BukkitMCAnimal implements MCSheep {
 
 	Sheep s;
 

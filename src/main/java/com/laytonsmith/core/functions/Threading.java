@@ -13,6 +13,7 @@ import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.compiler.BranchStatement;
+import com.laytonsmith.core.compiler.SelfStatement;
 import com.laytonsmith.core.compiler.VariableScope;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
@@ -349,6 +350,7 @@ public class Threading {
 	@api
 	@noboilerplate
 	@seealso({x_new_thread.class})
+	@SelfStatement
 	public static class _synchronized extends AbstractFunction implements VariableScope, BranchStatement {
 
 		private static final Map<Object, Integer> SYNC_OBJECT_MAP = new HashMap<Object, Integer>();

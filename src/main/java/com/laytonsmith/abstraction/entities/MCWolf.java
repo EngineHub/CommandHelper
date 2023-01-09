@@ -15,4 +15,8 @@ public interface MCWolf extends MCTameable {
 	void setSitting(boolean sitting);
 
 	void setCollarColor(MCDyeColor color);
+
+	boolean isInterested();
+
+	void setInterested(boolean interested);
 }

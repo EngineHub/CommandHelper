@@ -438,12 +438,19 @@ public class Main {
 		@Override
 		public ArgumentParser getArgumentParser() {
 			return ArgumentParser.GetParser()
-				.addDescription("Uninstalls the MethodScript interpreter from your system.");
+				.addDescription("Uninstalls the MethodScript interpreter from your system.")
+				.addArgument(new ArgumentBuilder()
+					.setDescription("Specify the name of instance to be uninstalled.")
+					.setUsageName("command name")
+					.setOptional()
+					.setName("command")
+					.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING)
+					.setDefaultVal("mscript"));
 		}
 
 		@Override
 		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
-			Interpreter.uninstall();
+			Interpreter.uninstall(parsedArgs.getStringArgument("command"));
 			System.exit(0);
 		}
 	}
@@ -1199,6 +1206,7 @@ public class Main {
 			return ArgumentParser.GetParser()
 				.addDescription("Given a source file, runs it in cmdline mode. This is the \"main\" way"
 						+ " of executing source files.")
+				.setErrorOnUnknownArgs(false)
 				.addArgument(new ArgumentBuilder()
 						.setDescription("File path/arguments")
 						.setUsageName("file and args")

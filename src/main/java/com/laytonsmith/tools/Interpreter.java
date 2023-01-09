@@ -62,6 +62,8 @@ import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Profiles;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.TokenStream;
+import com.laytonsmith.core.compiler.analysis.Declaration;
+import com.laytonsmith.core.compiler.analysis.Namespace;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
@@ -315,7 +317,7 @@ public final class Interpreter {
 					prompt = getPrompt();
 				}
 				String line = reader.readLine(prompt);
-				if(!textLine(line)) {
+				if(line == null || !textLine(line)) {
 					break;
 				}
 			}
@@ -775,6 +777,10 @@ public final class Interpreter {
 					+ ");";
 		}
 		isExecuting = true;
+		if(args != null) {
+			staticAnalysis.getStartScope().addDeclaration(
+					new Declaration(Namespace.IVARIABLE, "@arguments", CArray.TYPE, null, Target.UNKNOWN));
+		}
 		ProfilePoint compile = env.getEnv(StaticRuntimeEnv.class).GetProfiler().start("Compilation", LogLevel.VERBOSE);
 		final ParseTree tree;
 		try {
@@ -1093,7 +1099,7 @@ public final class Interpreter {
 		}
 	}
 
-	public static void uninstall() {
+	public static void uninstall(String commandName) {
 		if(null == OSUtils.GetOS()) {
 			StreamUtils.GetSystemErr().println("Sorry, cmdline functionality is currently only supported on unix systems! Check back soon though!");
 			return;
@@ -1102,12 +1108,12 @@ public final class Interpreter {
 			case LINUX:
 			case MAC:
 				try {
-					File exe = new File(UNIX_INTERPRETER_INSTALLATION_LOCATION);
+					File exe = new File(UNIX_INTERPRETER_INSTALLATION_LOCATION + commandName);
 					if(!exe.delete()) {
 						throw new IOException();
 					}
 				} catch (IOException e) {
-					StreamUtils.GetSystemErr().println("Cannot uninstall. You must run the command with sudo for it to succeed, however, did you do that?");
+					StreamUtils.GetSystemErr().println("Cannot uninstall. You must specify the correct instance name and run the command with sudo for it to succeed, however, did you do that?");
 					return;
 				}
 				break;

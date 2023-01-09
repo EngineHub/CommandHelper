@@ -516,16 +516,13 @@ public class Scoreboards {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRELengthException.class, CREScoreboardException.class};
+			return new Class[]{CREScoreboardException.class};
 		}
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(2, t, args);
 			String name = args[0].val();
-			if(name.length() > 16) {
-				throw new CRELengthException("Objective names should be no more than 16 characters", t);
-			}
 			MCCriteria criteria = MCCriteria.DUMMY;
 			if(args.length > 1) {
 				try {
@@ -537,7 +534,7 @@ public class Scoreboards {
 			try {
 				s.registerNewObjective(name, criteria.getCriteria());
 			} catch (IllegalArgumentException iae) {
-				throw new CREScoreboardException("An objective by that name already exists.", t);
+				throw new CREScoreboardException(iae.getMessage(), t);
 			}
 			return CVoid.VOID;
 		}
@@ -555,11 +552,10 @@ public class Scoreboards {
 		@Override
 		public String docs() {
 			return "void {name, [criteria, [scoreboard]]} Adds a new objective to the scoreboard, throwing a"
-					+ " CREScoreboardException if the name is already in use. The vanilla criteria names are "
-					+ StringUtils.Join(MCCriteria.values(), ", ", ", and ") + ". You can put anything,"
-					+ " but if none of the other values match, 'dummy' will be used."
-					+ " Those values which are not 'dummy' are server-managed."
-					+ " Throws a LengthException if the name is more than 16 characters. " + DEF_MSG;
+					+ " CREScoreboardException if the name is already in use or is too long. The vanilla criteria names"
+					+ " are " + StringUtils.Join(MCCriteria.values(), ", ", ", and ") + ". You can put"
+					+ " anything, but if none of the other values match, 'dummy' will be used."
+					+ " Those values which are not 'dummy' are server-managed." + DEF_MSG;
 		}
 
 		@Override
@@ -573,20 +569,17 @@ public class Scoreboards {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRELengthException.class, CREScoreboardException.class};
+			return new Class[]{CREScoreboardException.class};
 		}
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(1, t, args);
 			String name = args[0].val();
-			if(name.length() > 16) {
-				throw new CRELengthException("Team names should be no more than 16 characters.", t);
-			}
 			try {
 				s.registerNewTeam(name);
 			} catch (IllegalArgumentException iae) {
-				throw new CREScoreboardException("A team by that name already exists.", t);
+				throw new CREScoreboardException(iae.getMessage(), t);
 			}
 			return CVoid.VOID;
 		}
@@ -604,8 +597,8 @@ public class Scoreboards {
 		@Override
 		public String docs() {
 			return "void {name, [scoreboard]} Adds a new team to the scoreboard."
-					+ " Throws a ScoreboardException if a team already exists with the given name."
-					+ " Throws a LengthException if the team name is more than 16 characters. " + DEF_MSG;
+					+ " Throws a ScoreboardException if that team name already exists or is too long."
+					+ DEF_MSG;
 		}
 
 		@Override
@@ -805,7 +798,7 @@ public class Scoreboards {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRELengthException.class, CREScoreboardException.class};
+			return new Class[]{CREScoreboardException.class};
 		}
 
 		@Override
@@ -814,9 +807,6 @@ public class Scoreboards {
 			MCTeam team = s.getTeam(args[0].val());
 			if(team == null) {
 				throw new CREScoreboardException("No team by that name exists.", t);
-			}
-			if(args[1].val().length() > 40) {
-				throw new CRELengthException("Player name is too long.", t);
 			}
 			team.addEntry(args[1].val());
 			return CVoid.VOID;
@@ -834,8 +824,7 @@ public class Scoreboards {
 
 		@Override
 		public String docs() {
-			return "void {teamName, player, [scoreboard]} Adds a player to a team, given the team exists. This allows"
-					+ " you to add fake players with up to 40 characters. The player"
+			return "void {teamName, player, [scoreboard]} Adds a player to a team, given the team exists. The player"
 					+ " will be removed from any other team on the same scoreboard. " + DEF_MSG;
 		}
 
@@ -1064,10 +1053,11 @@ public class Scoreboards {
 			if(o == null) {
 				throw new CREScoreboardException("The given objective does not exist.", t);
 			}
-			if(args[1].val().length() > 40) {
-				throw new CRELengthException("Score name must be 40 characters or less.", t);
+			try {
+				return new CInt(o.getScore(args[1].val()).getScore(), t);
+			} catch (IllegalArgumentException ex) {
+				throw new CRELengthException(ex.getMessage(), t);
 			}
-			return new CInt(o.getScore(args[1].val()).getScore(), t);
 		}
 
 		@Override
@@ -1083,7 +1073,7 @@ public class Scoreboards {
 		@Override
 		public String docs() {
 			return "int {objectiveName, name, [scoreboard]} Returns the player's score for the given objective."
-					+ " A LengthException is thrown if the name is longer than 40 characters."
+					+ " A LengthException is thrown if the name is too long."
 					+ DEF_MSG;
 		}
 
@@ -1108,10 +1098,11 @@ public class Scoreboards {
 			if(o == null) {
 				throw new CREScoreboardException("The given objective does not exist.", t);
 			}
-			if(args[1].val().length() > 40) {
-				throw new CRELengthException("Score name must be 40 characters or less.", t);
+			try {
+				o.getScore(args[1].val()).setScore(ArgumentValidation.getInt32(args[2], t));
+			} catch (IllegalArgumentException ex) {
+				throw new CRELengthException(ex.getMessage(), t);
 			}
-			o.getScore(args[1].val()).setScore(ArgumentValidation.getInt32(args[2], t));
 			return CVoid.VOID;
 		}
 
@@ -1129,7 +1120,6 @@ public class Scoreboards {
 		public String docs() {
 			return "void {objectiveName, name, int, [scoreboard]} Sets the player's score for the given objective."
 					+ " The name can be anything, not just player names. A LengthException is thrown if it's too long."
-					+ " The max length may differ based on server implementation, but will probably be 128."
 					+ DEF_MSG;
 		}
 

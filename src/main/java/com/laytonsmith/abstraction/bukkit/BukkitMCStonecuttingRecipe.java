@@ -56,7 +56,7 @@ public class BukkitMCStonecuttingRecipe extends BukkitMCRecipe implements MCSton
 		List<Material> choices = ((RecipeChoice.MaterialChoice) recipe.getInputChoice()).getChoices();
 		MCMaterial[] ret = new MCMaterial[choices.size()];
 		for(int i = 0; i < choices.size(); i++) {
-			ret[i] = new BukkitMCMaterial(choices.get(i));
+			ret[i] = BukkitMCMaterial.valueOfConcrete(choices.get(i));
 		}
 		return ret;
 	}

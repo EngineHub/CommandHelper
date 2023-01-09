@@ -5,7 +5,7 @@ import com.laytonsmith.abstraction.enums.MCMushroomCowType;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.MushroomCow;
 
-public class BukkitMCMushroomCow extends BukkitMCLivingEntity implements MCMushroomCow {
+public class BukkitMCMushroomCow extends BukkitMCAnimal implements MCMushroomCow {
 
 	MushroomCow c;
 

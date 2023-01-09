@@ -1,6 +1,8 @@
 package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
+import com.laytonsmith.PureUtilities.ObjectHelpers;
+import com.laytonsmith.PureUtilities.ObjectHelpers.StandardField;
 import java.io.File;
 
 /**
@@ -17,9 +19,13 @@ public class Target implements Comparable<Target> {
 	 * elsewhere, an exception is thrown.
 	 */
 	public static final Target UNKNOWN = new Target(0, null, 0, null);
+	@StandardField
 	private final int line;
+	@StandardField
 	private final File file;
+	@StandardField
 	private final int col;
+	@StandardField
 	private int length = 1;
 	private boolean lengthSet = false;
 	private String originalSet = null;
@@ -146,4 +152,17 @@ public class Target implements Comparable<Target> {
 		}
 		return Integer.compare(this.col, t.col);
 	}
+
+	@Override
+	@SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
+	public boolean equals(Object obj) {
+		return ObjectHelpers.DoEquals(this, obj);
+	}
+
+	@Override
+	public int hashCode() {
+		return ObjectHelpers.DoHashCode(this);
+	}
+
+
 }

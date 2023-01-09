@@ -2,7 +2,6 @@ package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCChunk;
-import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCFireworkEffect;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
@@ -33,7 +32,6 @@ import com.laytonsmith.abstraction.enums.MCEffect;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCGameRule;
 import com.laytonsmith.abstraction.enums.MCParticle;
-import com.laytonsmith.abstraction.enums.MCParticle.MCVanillaParticle;
 import com.laytonsmith.abstraction.enums.MCSound;
 import com.laytonsmith.abstraction.enums.MCSoundCategory;
 import com.laytonsmith.abstraction.enums.MCTreeType;
@@ -42,6 +40,7 @@ import com.laytonsmith.abstraction.enums.MCWorldType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCBiomeType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDifficulty;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCParticle;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSound;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSoundCategory;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCTreeType;
@@ -52,12 +51,12 @@ import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
 import org.bukkit.Chunk;
-import org.bukkit.Color;
 import org.bukkit.Effect;
 import org.bukkit.FireworkEffect;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
+import org.bukkit.SoundCategory;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -67,7 +66,6 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.util.Consumer;
 
@@ -294,65 +292,8 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 
 	@Override
 	public void spawnParticle(MCLocation l, MCParticle pa, int count, double offsetX, double offsetY, double offsetZ, double velocity, Object data) {
-		Particle type = (Particle) pa.getConcrete();
-		Location loc = (Location) l.getHandle();
-		switch((MCParticle.MCVanillaParticle) pa.getAbstracted()) {
-			case BLOCK_DUST:
-			case BLOCK_CRACK:
-			case BLOCK_MARKER:
-			case FALLING_DUST:
-				BlockData bd;
-				if(data instanceof MCBlockData) {
-					bd = (BlockData) ((MCBlockData) data).getHandle();
-				} else if(pa.getAbstracted() == MCVanillaParticle.BLOCK_MARKER) {
-					// Barrier (and light) particles were replaced by block markers, so this is the best fallback.
-					bd = Material.BARRIER.createBlockData();
-				} else {
-					bd = Material.STONE.createBlockData();
-				}
-				w.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity, bd);
-				return;
-			case ITEM_CRACK:
-				ItemStack is;
-				if(data instanceof MCItemStack) {
-					is = (ItemStack) ((MCItemStack) data).getHandle();
-				} else {
-					is = new ItemStack(Material.STONE, 1);
-				}
-				w.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity, is);
-				return;
-			case REDSTONE:
-				Particle.DustOptions color;
-				if(data instanceof MCColor) {
-					color = new Particle.DustOptions(BukkitMCColor.GetColor((MCColor) data), 1.0F);
-				} else {
-					color =  new Particle.DustOptions(Color.RED, 1.0F);
-				}
-				w.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity, color);
-				return;
-			case DUST_COLOR_TRANSITION:
-				Particle.DustTransition dust;
-				if(data instanceof MCColor[]) {
-					MCColor[] c = (MCColor[]) data;
-					dust = new Particle.DustTransition(BukkitMCColor.GetColor(c[0]), BukkitMCColor.GetColor(c[1]), 1.0F);
-				} else {
-					dust = new Particle.DustTransition(Color.TEAL, Color.RED, 1.0F);
-				}
-				w.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity, dust);
-				return;
-			case VIBRATION:
-				BukkitMCVibration vibe;
-				if(data instanceof MCLocation) {
-					vibe = new BukkitMCVibration(l, (MCLocation) data, 5);
-				} else if(data instanceof MCEntity) {
-					vibe = new BukkitMCVibration(l, (MCEntity) data, 5);
-				} else {
-					vibe = new BukkitMCVibration(l, l, 5);
-				}
-				w.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity, vibe.getHandle());
-				return;
-		}
-		w.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity);
+		w.spawnParticle((Particle) pa.getConcrete(), (Location) l.getHandle(), count, offsetX, offsetY, offsetZ,
+				velocity, ((BukkitMCParticle) pa).getParticleData(l, data));
 	}
 
 	@Override
@@ -368,8 +309,24 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 
 	@Override
 	public void playSound(MCLocation l, MCSound sound, MCSoundCategory category, float volume, float pitch) {
-		w.playSound((Location) l.getHandle(), ((BukkitMCSound) sound).getConcrete(),
-				BukkitMCSoundCategory.getConvertor().getConcreteEnum(category), volume, pitch);
+		if(category == null) {
+			w.playSound((Location) l.getHandle(), ((BukkitMCSound) sound).getConcrete(),
+					SoundCategory.MASTER, volume, pitch);
+		} else {
+			w.playSound((Location) l.getHandle(), ((BukkitMCSound) sound).getConcrete(),
+					BukkitMCSoundCategory.getConvertor().getConcreteEnum(category), volume, pitch);
+		}
+	}
+
+	@Override
+	public void playSound(MCEntity ent, MCSound sound, MCSoundCategory category, float volume, float pitch) {
+		if(category == null) {
+			w.playSound((Entity) ent.getHandle(), ((BukkitMCSound) sound).getConcrete(),
+					SoundCategory.MASTER, volume, pitch);
+		} else {
+			w.playSound((Entity) ent.getHandle(), ((BukkitMCSound) sound).getConcrete(),
+					BukkitMCSoundCategory.getConvertor().getConcreteEnum(category), volume, pitch);
+		}
 	}
 
 	@Override
@@ -512,11 +469,14 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	public MCFirework launchFirework(MCLocation l, int strength, List<MCFireworkEffect> effects) {
 		Firework firework = (Firework) w.spawnEntity(((BukkitMCLocation) l).asLocation(), EntityType.FIREWORK);
 		FireworkMeta meta = firework.getFireworkMeta();
-		meta.setPower(strength);
+		meta.setPower(Math.max(strength, 0));
 		for(MCFireworkEffect effect : effects) {
 			meta.addEffect((FireworkEffect) effect.getHandle());
 		}
 		firework.setFireworkMeta(meta);
+		if(strength < 0) {
+			firework.detonate();
+		}
 		return new BukkitMCFirework(firework);
 	}
 
@@ -568,6 +528,11 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	@Override
 	public void setThunderDuration(int time) {
 		w.setThunderDuration(time);
+	}
+
+	@Override
+	public void setClearWeatherDuration(int time) {
+		w.setClearWeatherDuration(time);
 	}
 
 	@Override

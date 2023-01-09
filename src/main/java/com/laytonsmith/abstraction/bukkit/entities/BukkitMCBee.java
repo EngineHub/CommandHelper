@@ -7,7 +7,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Bee;
 import org.bukkit.entity.Entity;
 
-public class BukkitMCBee extends BukkitMCLivingEntity implements MCBee {
+public class BukkitMCBee extends BukkitMCAnimal implements MCBee {
 
 	Bee b;
 

@@ -28,4 +28,8 @@ public interface MCArrow extends MCProjectile {
 	void clearCustomEffects();
 
 	void setBasePotionData(MCPotionData pd);
+
+	int getPierceLevel();
+
+	void setPierceLevel(int level);
 }

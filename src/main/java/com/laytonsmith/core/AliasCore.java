@@ -6,11 +6,13 @@ import com.laytonsmith.PureUtilities.ExecutionQueue;
 import com.laytonsmith.PureUtilities.ExecutionQueueImpl;
 import com.laytonsmith.PureUtilities.SmartComment;
 import com.laytonsmith.abstraction.Implementation;
+import com.laytonsmith.abstraction.MCBlockCommandSender;
 import com.laytonsmith.abstraction.MCCommand;
 import com.laytonsmith.abstraction.MCCommandMap;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.StaticLayer;
+import com.laytonsmith.abstraction.entities.MCCommandMinecart;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
@@ -87,6 +89,7 @@ public class AliasCore {
 	private CompilerEnvironment compilerEnv;
 	private StaticRuntimeEnv staticRuntimeEnv;
 	private List<Script> scripts;
+	private boolean lastCompileFailed = false;
 
 	/**
 	 * This constructor accepts the constant file locations object for MethodScript.
@@ -140,8 +143,20 @@ public class AliasCore {
 	 */
 	public boolean alias(String command, final MCCommandSender sender) {
 		if(scripts == null) {
-			throw ConfigRuntimeException.CreateUncatchableException("Cannot run alias commands."
-					+ " No alias files are loaded.", Target.UNKNOWN);
+			String msg;
+			if(this.lastCompileFailed) {
+				msg = "CommandHelper failed to start correctly due to a script compilation error."
+						+ " Check server startup logs for more details. Enable halt-on-failure in preferences to"
+						+ " automatically shutdown the server when this happens on startup.";
+			} else {
+				msg = "CommandHelper failed to start correctly. Check server startup logs for more details.";
+			}
+			if(sender instanceof MCPlayer) {
+				sender.sendMessage(MCChatColor.RED + msg);
+			} else if(sender instanceof MCBlockCommandSender || sender instanceof MCCommandMinecart) {
+				return false;
+			}
+			throw ConfigRuntimeException.CreateUncatchableException(msg, Target.UNKNOWN);
 		}
 
 		if(sender instanceof MCPlayer && echoCommand.contains(sender.getName())) {
@@ -426,6 +441,7 @@ public class AliasCore {
 				if(player != null) {
 					player.sendMessage(MCChatColor.RED + "[CommandHelper] Execution halted due to compile errors.");
 				}
+				this.lastCompileFailed = true;
 				if(Prefs.HaltOnFailure() && firstLoad) {
 					Static.getLogger().log(Level.SEVERE, "Shutting down server (halt-on-failure)");
 					Static.getServer().shutdown();
@@ -526,6 +542,7 @@ public class AliasCore {
 
 		// Everything else should be reloaded now, so execute successfully compiled scripts and register commands
 		if(options.reloadScripts() && env != null) {
+			env.getEnv(GlobalEnv.class).SetLabel(Static.GLOBAL_PERMISSION);
 			ProfilePoint executeAutoIncludes = profiler.start("Execution of auto includes", LogLevel.VERBOSE);
 			try {
 				includeCache.executeAutoIncludes(env, null);
@@ -534,7 +551,6 @@ public class AliasCore {
 			}
 			ProfilePoint executeMS = profiler.start("Execution of MS files in Local Packages", LogLevel.VERBOSE);
 			try {
-				env.getEnv(GlobalEnv.class).SetLabel(Static.GLOBAL_PERMISSION);
 				env.getEnv(CommandHelperEnvironment.class).SetCommandSender(Static.getServer().getConsole());
 				localPackages.executeMS(env);
 			} finally {
@@ -626,13 +642,22 @@ public class AliasCore {
 						script.getTarget());
 			} else {
 				Procedure p = env.getEnv(GlobalEnv.class).GetProcs().get(proc);
-				Mixed m = p.execute(new ArrayList<>(), env, script.getTarget());
-				if(!(m instanceof CClosure)) {
-					MSLog.GetLogger().e(MSLog.Tags.COMPILER, "Procedure " + proc + " returns a value other than"
-							+ " a closure. It must unconditionally return a closure.",
-						p.getTarget());
-				} else {
-					Commands.set_tabcompleter.customExec(script.getTarget(), env, cmd, m);
+				Mixed m = null;
+				try {
+					m = p.execute(new ArrayList<>(), env, script.getTarget());
+				} catch (ConfigRuntimeException ex) {
+					MSLog.GetLogger().e(MSLog.Tags.COMPILER, "Script defined at " + script.getTarget()
+							+ " threw an exception. Tabcompletion is being skipped for this alias.", p.getTarget());
+					ConfigRuntimeException.HandleUncaughtException(ex, env);
+				}
+				if(m != null) {
+					if(!(m instanceof CClosure)) {
+						MSLog.GetLogger().e(MSLog.Tags.COMPILER, "Procedure " + proc + " returns a value other than"
+								+ " a closure. It must unconditionally return a closure.",
+							p.getTarget());
+					} else {
+						Commands.set_tabcompleter.customExec(script.getTarget(), env, cmd, m);
+					}
 				}
 			}
 		} else {
@@ -668,7 +693,7 @@ public class AliasCore {
 				}
 
 				if(parameter instanceof CString s) {
-					completions.add(() -> Arrays.asList(s.val()));
+					completions.add((alias, player, args) -> Arrays.asList(s.val()));
 				} else if(parameter instanceof Variable v) {
 					if(v.isFinal()) {
 						hasFinal = true;
@@ -685,7 +710,7 @@ public class AliasCore {
 					if(type.startsWith("[") && type.endsWith("]")) {
 						type = type.substring(1, type.length() - 1);
 						String finalType = type;
-						completions.add(() -> Arrays.asList(finalType.split(","))
+						completions.add((alias, player, args) -> Arrays.asList(finalType.split(","))
 								.stream().map(item -> item.trim()).toList());
 					} else if(type.equalsIgnoreCase("$none") || type.equalsIgnoreCase("none")
 							|| type.equalsIgnoreCase("string")) {
@@ -693,16 +718,38 @@ public class AliasCore {
 					} else if(type.equalsIgnoreCase("$player")) {
 						completions.add(new CompletionValues() {
 							@Override
-							public List<String> getCompletions() {
+							public List<String> getCompletions(CString alias, CString player, CArray args) {
 								return Static.getServer().getOnlinePlayers().stream()
-										.map(player -> player.getName()).toList();
+										.map(p -> p.getName()).toList();
 							}
 						});
 					} else if(type.equalsIgnoreCase("$offlineplayer")) {
-						completions.add(() -> Arrays.asList(Static.getServer().getOfflinePlayers())
-								.stream().map(player -> player.getName()).toList());
+						completions.add((alias, player, args) -> Arrays.asList(Static.getServer().getOfflinePlayers())
+								.stream().map(p -> p.getName()).toList());
 					} else if(type.equalsIgnoreCase("$boolean") || type.equalsIgnoreCase("boolean")) {
-						completions.add(() -> Arrays.asList("true", "false"));
+						completions.add((alias, player, args) -> Arrays.asList("true", "false"));
+					} else if(type.startsWith("$proc->")) {
+						String procName = type.substring(7);
+						Procedure completionProc = env.getEnv(GlobalEnv.class).GetProcs().get(procName);
+						// TODO: Typecheck the Callable type
+						if(completionProc == null) {
+							MSLog.GetLogger().w(MSLog.Tags.COMPILER,
+								"Could not find " + completionProc + ", the parameter autocompletion will not work.",
+								script.getTarget());
+							completions.add(NONE);
+						} else {
+							completions.add((alias, player, args) -> {
+								Mixed ret = completionProc.execute(Arrays.asList(alias, player, args),
+										env, Target.UNKNOWN);
+								if(ret instanceof CArray ca) {
+									return ca.asList().stream().map(i -> i.toString()).toList();
+								}
+								MSLog.GetLogger().w(MSLog.Tags.COMPILER,
+									"Completion proc " + completionProc + " returned a non-array value.",
+									script.getTarget());
+								return new ArrayList<>();
+							});
+						}
 					} else {
 						// MethodScript type. Check if it's an enum, and if so, pull the values from it.
 						// Otherwise disable completions.
@@ -711,7 +758,7 @@ public class AliasCore {
 							CClassType t = CClassType.get(fqcn);
 							if(t.isEnum()) {
 								MEnumType enumType = NativeTypeList.getNativeEnumType(fqcn);
-								completions.add(() -> enumType.values()
+								completions.add((alias, player, args) -> enumType.values()
 										.stream().map(value -> value.name()).toList());
 								continue;
 							}
@@ -739,7 +786,10 @@ public class AliasCore {
 						return new CArray(Target.UNKNOWN);
 					}
 				}
-				List<String> list = completion.getCompletions();
+				CString alias = (CString) args[0];
+				CString sender = (CString) args[1];
+				CArray a = (CArray) args[2];
+				List<String> list = completion.getCompletions(alias, sender, a);
 				String comparison = inputArgs.get(inputArgs.size() - 1);
 				Mixed[] toReturn = list.stream()
 						.filter(item -> item.startsWith(comparison))
@@ -758,10 +808,10 @@ public class AliasCore {
 	}
 
 	private static interface CompletionValues {
-		List<String> getCompletions();
+		List<String> getCompletions(CString alias, CString player, CArray args);
 	}
 
-	private static final CompletionValues NONE = () -> new ArrayList<>();
+	private static final CompletionValues NONE = (alias, player, args) -> new ArrayList<>();
 
 
 	/**

@@ -3,13 +3,11 @@ package com.laytonsmith.abstraction.bukkit.entities;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.entities.MCPanda;
 import com.laytonsmith.abstraction.enums.EnumConvertor;
-import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.annotations.abstractionenum;
-import com.laytonsmith.core.Static;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Panda;
 
-public class BukkitMCPanda extends BukkitMCAgeable implements MCPanda {
+public class BukkitMCPanda extends BukkitMCAnimal implements MCPanda {
 
 	private Panda p;
 
@@ -38,6 +36,62 @@ public class BukkitMCPanda extends BukkitMCAgeable implements MCPanda {
 		p.setHiddenGene(Panda.Gene.valueOf(gene.name()));
 	}
 
+	@Override
+	public boolean isRolling() {
+		return p.isRolling();
+	}
+
+	@Override
+	public void setRolling(boolean rolling) {
+		try {
+			p.setRolling(rolling);
+		} catch(NoSuchMethodError ex) {
+			// probably before 1.19
+		}
+	}
+
+	@Override
+	public boolean isSneezing() {
+		return p.isSneezing();
+	}
+
+	@Override
+	public void setSneezing(boolean sneezing) {
+		try {
+			p.setSneezing(sneezing);
+		} catch(NoSuchMethodError ex) {
+			// probably before 1.19
+		}
+	}
+
+	@Override
+	public boolean isEating() {
+		return p.isEating();
+	}
+
+	@Override
+	public void setEating(boolean eating) {
+		try {
+			p.setEating(eating);
+		} catch(NoSuchMethodError ex) {
+			// probably before 1.19
+		}
+	}
+
+	@Override
+	public boolean isOnBack() {
+		return p.isOnBack();
+	}
+
+	@Override
+	public void setOnBack(boolean onBack) {
+		try {
+			p.setOnBack(onBack);
+		} catch(NoSuchMethodError ex) {
+			// probably before 1.19
+		}
+	}
+
 	@abstractionenum(
 			implementation = Implementation.Type.BUKKIT,
 			forAbstractEnum = MCPanda.Gene.class,
@@ -52,14 +106,6 @@ public class BukkitMCPanda extends BukkitMCAgeable implements MCPanda {
 				instance = new BukkitMCPandaGene();
 			}
 			return instance;
-		}
-
-		@Override
-		protected Panda.Gene getConcreteEnumCustom(MCPanda.Gene abstracted) {
-			if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_14)) {
-				return null;
-			}
-			return super.getConcreteEnumCustom(abstracted);
 		}
 	}
 }

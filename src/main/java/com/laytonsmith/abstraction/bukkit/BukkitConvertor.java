@@ -43,6 +43,7 @@ import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCLectern;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCSkull;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCAgeable;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCAnimal;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCCommandMinecart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCComplexEntityPart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCComplexLivingEntity;
@@ -118,6 +119,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Ageable;
+import org.bukkit.entity.Animals;
 import org.bukkit.entity.ComplexEntityPart;
 import org.bukkit.entity.ComplexLivingEntity;
 import org.bukkit.entity.Entity;
@@ -148,6 +150,7 @@ import org.bukkit.inventory.SmokingRecipe;
 import org.bukkit.inventory.StonecuttingRecipe;
 import org.bukkit.inventory.meta.AxolotlBucketMeta;
 import org.bukkit.inventory.meta.BannerMeta;
+import org.bukkit.inventory.meta.BlockDataMeta;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.BundleMeta;
@@ -161,6 +164,7 @@ import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.MapMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.inventory.meta.SuspiciousStewMeta;
 import org.bukkit.inventory.meta.TropicalFishBucketMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionData;
@@ -230,7 +234,7 @@ public class BukkitConvertor extends AbstractConvertor {
 		Material[] mats = Material.values();
 		MCMaterial[] ret = new MCMaterial[mats.length];
 		for(int i = 0; i < mats.length; i++) {
-			ret[i] = new BukkitMCMaterial(mats[i]);
+			ret[i] = BukkitMCMaterial.valueOfConcrete(mats[i]);
 		}
 		return ret;
 	}
@@ -238,31 +242,30 @@ public class BukkitConvertor extends AbstractConvertor {
 	@Override
 	public MCMaterial GetMaterialFromLegacy(String mat, int data) {
 		Material m = BukkitMCLegacyMaterial.getMaterial(mat, data);
-		return m == null ? null : new BukkitMCMaterial(m);
+		return m == null ? null : BukkitMCMaterial.valueOfConcrete(m);
 	}
 
 	@Override
 	public MCMaterial GetMaterialFromLegacy(int id, int data) {
 		Material m = BukkitMCLegacyMaterial.getMaterial(id, data);
-		return m == null ? null : new BukkitMCMaterial(m);
+		return m == null ? null : BukkitMCMaterial.valueOfConcrete(m);
 	}
 
 	@Override
 	public MCMaterial GetMaterial(String name) {
-		// Fast match
-		Material match = Material.getMaterial(name);
-		if(match != null) {
-			return new BukkitMCMaterial(match);
+		MCMaterial ret = MCMaterial.get(name);
+		if(ret != null) {
+			return ret;
 		}
 		// Try fuzzy match
-		match = Material.matchMaterial(name);
+		Material match = Material.matchMaterial(name);
 		if(match != null) {
-			return new BukkitMCMaterial(match);
+			return BukkitMCMaterial.valueOfConcrete(match);
 		}
 		// Try legacy
 		match = BukkitMCLegacyMaterial.getMaterial(name);
 		if(match != null) {
-			return new BukkitMCMaterial(match);
+			return BukkitMCMaterial.valueOfConcrete(match);
 		}
 		return null;
 	}
@@ -416,7 +419,7 @@ public class BukkitConvertor extends AbstractConvertor {
 			return new BukkitMCMinecart(be);
 		}
 
-		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_15_X) && be instanceof SizedFireball) {
+		if(be instanceof SizedFireball) {
 			// Must come before Fireball
 			type.setWrapperClass(BukkitMCSizedFireball.class);
 			return new BukkitMCSizedFireball(be);
@@ -428,7 +431,7 @@ public class BukkitConvertor extends AbstractConvertor {
 			return new BukkitMCFireball(be);
 		}
 
-		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_15_X) && be instanceof ThrowableProjectile) {
+		if(be instanceof ThrowableProjectile) {
 			// Must come before Projectile
 			type.setWrapperClass(BukkitMCItemProjectile.class);
 			return new BukkitMCItemProjectile(be);
@@ -443,6 +446,12 @@ public class BukkitConvertor extends AbstractConvertor {
 			// Must come before Ageable
 			type.setWrapperClass(BukkitMCTameable.class);
 			return new BukkitMCTameable(be);
+		}
+
+		if(be instanceof Animals) {
+			// Must come before Ageable
+			type.setWrapperClass(BukkitMCAnimal.class);
+			return new BukkitMCAnimal(be);
 		}
 
 		if(be instanceof Ageable) {
@@ -550,10 +559,10 @@ public class BukkitConvertor extends AbstractConvertor {
 		if(bs instanceof Skull) {
 			return new BukkitMCSkull((Skull) bs);
 		}
-		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_14) && bs instanceof Lectern) {
+		if(bs instanceof Lectern) {
 			return new BukkitMCLectern((Lectern) bs);
 		}
-		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_15) && bs instanceof Beehive) {
+		if(bs instanceof Beehive) {
 			return new BukkitMCBeehive((Beehive) bs);
 		}
 		return new BukkitMCBlockState(bs);
@@ -593,22 +602,24 @@ public class BukkitConvertor extends AbstractConvertor {
 		if(im instanceof TropicalFishBucketMeta) {
 			return new BukkitMCTropicalFishBucketMeta((TropicalFishBucketMeta) im);
 		}
-		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_14)) {
-			if(im instanceof CrossbowMeta) {
-				return new BukkitMCCrossbowMeta((CrossbowMeta) im);
+		if(im instanceof CrossbowMeta) {
+			return new BukkitMCCrossbowMeta((CrossbowMeta) im);
+		}
+		if(im instanceof CompassMeta) {
+			return new BukkitMCCompassMeta((CompassMeta) im);
+		}
+		if(im instanceof SuspiciousStewMeta) {
+			return new BukkitMCSuspiciousStewMeta((SuspiciousStewMeta) im);
+		}
+		if(im instanceof BlockDataMeta) {
+			return new BukkitMCBlockDataMeta((BlockDataMeta) im);
+		}
+		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_17)) {
+			if(im instanceof BundleMeta) {
+				return new BukkitMCBundleMeta((BundleMeta) im);
 			}
-			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_16)) {
-				if(im instanceof CompassMeta) {
-					return new BukkitMCCompassMeta((CompassMeta) im);
-				}
-				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_17)) {
-					if(im instanceof BundleMeta) {
-						return new BukkitMCBundleMeta((BundleMeta) im);
-					}
-					if(im instanceof AxolotlBucketMeta) {
-						return new BukkitMCAxolotlBucketMeta((AxolotlBucketMeta) im);
-					}
-				}
+			if(im instanceof AxolotlBucketMeta) {
+				return new BukkitMCAxolotlBucketMeta((AxolotlBucketMeta) im);
 			}
 		}
 		return new BukkitMCItemMeta(im);
@@ -753,25 +764,19 @@ public class BukkitConvertor extends AbstractConvertor {
 	}
 
 	public static MCRecipe BukkitGetRecipe(Recipe r) {
-		MCVersion version = Static.getServer().getMinecraftVersion();
-		if(version.gte(MCVersion.MC1_14)) {
-			if(r instanceof BlastingRecipe) {
-				return new BukkitMCCookingRecipe(r, MCRecipeType.BLASTING);
-			} else if(r instanceof CampfireRecipe) {
-				return new BukkitMCCookingRecipe(r, MCRecipeType.CAMPFIRE);
-			} else if(r instanceof SmokingRecipe) {
-				return new BukkitMCCookingRecipe(r, MCRecipeType.SMOKING);
-			} else if(r instanceof StonecuttingRecipe) {
-				return new BukkitMCStonecuttingRecipe((StonecuttingRecipe) r);
-			} else if(version.gte(MCVersion.MC1_15)) {
-				if(r instanceof ComplexRecipe) {
-					return new BukkitMCComplexRecipe(r);
-				} else if(version.gte(MCVersion.MC1_16) && r instanceof SmithingRecipe) {
-					return new BukkitMCSmithingRecipe((SmithingRecipe) r);
-				}
-			}
-		}
-		if(r instanceof ShapelessRecipe) {
+		if(r instanceof BlastingRecipe) {
+			return new BukkitMCCookingRecipe(r, MCRecipeType.BLASTING);
+		} else if(r instanceof CampfireRecipe) {
+			return new BukkitMCCookingRecipe(r, MCRecipeType.CAMPFIRE);
+		} else if(r instanceof SmokingRecipe) {
+			return new BukkitMCCookingRecipe(r, MCRecipeType.SMOKING);
+		} else if(r instanceof StonecuttingRecipe) {
+			return new BukkitMCStonecuttingRecipe((StonecuttingRecipe) r);
+		} else if(r instanceof ComplexRecipe) {
+			return new BukkitMCComplexRecipe(r);
+		} else if(r instanceof SmithingRecipe) {
+			return new BukkitMCSmithingRecipe((SmithingRecipe) r);
+		} else if(r instanceof ShapelessRecipe) {
 			return new BukkitMCShapelessRecipe((ShapelessRecipe) r);
 		} else if(r instanceof ShapedRecipe) {
 			return new BukkitMCShapedRecipe((ShapedRecipe) r);

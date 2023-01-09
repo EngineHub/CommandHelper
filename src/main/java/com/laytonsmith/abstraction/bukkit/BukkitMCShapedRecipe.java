@@ -59,7 +59,7 @@ public class BukkitMCShapedRecipe extends BukkitMCRecipe implements MCShapedReci
 				List<Material> choices = ((RecipeChoice.MaterialChoice) e.getValue()).getChoices();
 				MCMaterial[] list = new MCMaterial[choices.size()];
 				for(int i = 0; i < choices.size(); i++) {
-					list[i] = new BukkitMCMaterial(choices.get(i));
+					list[i] = BukkitMCMaterial.valueOfConcrete(choices.get(i));
 				}
 				ret.put(e.getKey(), list);
 			}

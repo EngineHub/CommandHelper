@@ -75,9 +75,9 @@ public class BukkitMCItemStack implements MCItemStack {
 	@Override
 	public MCMaterial getType() {
 		if(is == null) {
-			return new BukkitMCMaterial(Material.AIR);
+			return BukkitMCMaterial.valueOfConcrete(Material.AIR);
 		}
-		return new BukkitMCMaterial(is.getType());
+		return BukkitMCMaterial.valueOfConcrete(is.getType());
 	}
 
 	@Override

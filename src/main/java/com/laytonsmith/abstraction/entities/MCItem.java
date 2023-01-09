@@ -22,4 +22,8 @@ public interface MCItem extends MCEntity {
 	UUID getThrower();
 
 	void setThrower(UUID thrower);
+
+	boolean willDespawn();
+
+	void setWillDespawn(boolean despawn);
 }

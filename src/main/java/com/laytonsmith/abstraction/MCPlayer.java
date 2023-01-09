@@ -136,6 +136,8 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity, MCOfflinePlaye
 
 	void playSound(MCLocation l, MCSound sound, MCSoundCategory category, float volume, float pitch);
 
+	void playSound(MCEntity ent, MCSound sound, MCSoundCategory category, float volume, float pitch);
+
 	void playSound(MCLocation l, String sound, MCSoundCategory category, float volume, float pitch);
 
 	void stopSound(MCSound sound);
@@ -184,4 +186,8 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity, MCOfflinePlaye
 	void setStatistic(MCPlayerStatistic stat, MCEntityType type, int amount);
 
 	void setStatistic(MCPlayerStatistic stat, MCMaterial type, int amount);
+
+	MCWorldBorder getWorldBorder();
+
+	void setWorldBorder(MCWorldBorder border);
 }

@@ -1,16 +1,15 @@
 package com.laytonsmith.abstraction.bukkit;
 
-import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCWorldBorder;
 import org.bukkit.Location;
 import org.bukkit.WorldBorder;
 
-public class BukkitMCWorldBorder implements AbstractionObject, MCWorldBorder {
+public class BukkitMCWorldBorder implements MCWorldBorder {
 
 	private final WorldBorder wb;
 
-	BukkitMCWorldBorder(WorldBorder wb) {
+	public BukkitMCWorldBorder(WorldBorder wb) {
 		this.wb = wb;
 	}
 
@@ -87,5 +86,20 @@ public class BukkitMCWorldBorder implements AbstractionObject, MCWorldBorder {
 	@Override
 	public Object getHandle() {
 		return wb;
+	}
+
+	@Override
+	public String toString() {
+		return wb.toString();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return (obj instanceof BukkitMCWorldBorder && wb.equals(((BukkitMCWorldBorder) obj).wb));
+	}
+
+	@Override
+	public int hashCode() {
+		return wb.hashCode();
 	}
 }

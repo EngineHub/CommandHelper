@@ -16,12 +16,8 @@ import java.util.Set;
 @MDynamicEnum("com.commandhelper.EntityType")
 public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MCVanillaEntityType, Concrete> {
 
-	// To be filled by the implementer
 	protected static final Map<String, MCEntityType> MAP = new HashMap<>();
 	protected static final Map<MCVanillaEntityType, MCEntityType> VANILLA_MAP = new HashMap<>();
-
-	@SuppressWarnings("checkstyle:staticvariablename") // Fixing this violation might break dependents.
-	public static MCEntityType NULL = null;
 
 	protected Class<? extends MCEntity> wrapperClass;
 
@@ -80,7 +76,7 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 	 * @return Names of available entity types
 	 */
 	public static Set<String> types() {
-		if(NULL == null) { // docs mode
+		if(MAP.isEmpty()) { // docs mode
 			Set<String> dummy = new HashSet<>();
 			for(final MCVanillaEntityType t : MCVanillaEntityType.values()) {
 				if(t.existsIn(MCVersion.CURRENT)) {
@@ -96,20 +92,15 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 	 * @return Our own EntityType list
 	 */
 	public static List<MCEntityType> values() {
-		if(NULL == null) { // docs mode
+		if(MAP.isEmpty()) { // docs mode
 			ArrayList<MCEntityType> dummy = new ArrayList<>();
 			for(final MCVanillaEntityType t : MCVanillaEntityType.values()) {
 				if(!t.existsIn(MCVersion.CURRENT)) {
 					continue;
 				}
-				dummy.add(new MCEntityType<Object>(t, null) {
+				dummy.add(new MCEntityType<>(t, null) {
 					@Override
 					public String name() {
-						return t.name();
-					}
-
-					@Override
-					public String concreteName() {
 						return t.name();
 					}
 
@@ -130,6 +121,7 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 	}
 
 	public enum MCVanillaEntityType {
+		ALLAY(true, false, MCVersion.MC1_19),
 		AREA_EFFECT_CLOUD,
 		ARMOR_STAND,
 		ARROW,
@@ -138,8 +130,10 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 		BEE(true, false, MCVersion.MC1_15),
 		BLAZE,
 		BOAT,
+		CAMEL(true, false, MCVersion.MC1_19_X),
 		CAT(true, false, MCVersion.MC1_14),
 		CAVE_SPIDER,
+		CHEST_BOAT(true, false, MCVersion.MC1_19),
 		CHICKEN,
 		COD,
 		COW,
@@ -165,6 +159,7 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 		FIREWORK,
 		FISHING_HOOK(false),
 		FOX(true, false, MCVersion.MC1_14),
+		FROG(true, false, MCVersion.MC1_19),
 		GHAST,
 		GIANT,
 		GLOW_ITEM_FRAME(true, false, MCVersion.MC1_17),
@@ -181,7 +176,6 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 		LLAMA_SPIT(true, true),
 		LEASH_HITCH,
 		LIGHTNING,
-		LINGERING_POTION(true, true, MCVersion.MC1_9, MCVersion.MC1_13_X),
 		MAGMA_CUBE,
 		MARKER(true, false, MCVersion.MC1_17),
 		MINECART,
@@ -199,7 +193,6 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 		PARROT,
 		PHANTOM,
 		PIG,
-		PIG_ZOMBIE(true, false, MCVersion.MC1_0, MCVersion.MC1_15_X),
 		PIGLIN(true, false, MCVersion.MC1_16),
 		PIGLIN_BRUTE(true, false, MCVersion.MC1_16_X),
 		PILLAGER(true, false, MCVersion.MC1_14),
@@ -226,8 +219,8 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 		SPLASH_POTION,
 		STRAY,
 		STRIDER(true, false, MCVersion.MC1_16),
+		TADPOLE(true, false, MCVersion.MC1_19),
 		THROWN_EXP_BOTTLE,
-		TIPPED_ARROW(true, true, MCVersion.MC1_9, MCVersion.MC1_13_X),
 		TRADER_LLAMA(true, false, MCVersion.MC1_14),
 		TRIDENT,
 		TROPICAL_FISH,
@@ -236,6 +229,7 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 		VILLAGER,
 		VINDICATOR,
 		WANDERING_TRADER(true, false, MCVersion.MC1_14),
+		WARDEN(true, false, MCVersion.MC1_19),
 		WITCH,
 		WITHER,
 		WITHER_SKELETON,

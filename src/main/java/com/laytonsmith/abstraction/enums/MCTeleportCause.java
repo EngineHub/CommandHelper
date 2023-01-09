@@ -12,5 +12,6 @@ public enum MCTeleportCause {
 	SPECTATE,
 	END_GATEWAY,
 	CHORUS_FRUIT,
+	DISMOUNT,
 	UNKNOWN
 }

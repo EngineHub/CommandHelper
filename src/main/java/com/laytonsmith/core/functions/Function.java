@@ -4,6 +4,7 @@ import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
+import com.laytonsmith.core.compiler.SelfStatement;
 import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.compiler.signature.FunctionSignatures;
@@ -201,6 +202,21 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 	 * @return
 	 */
 	public String profileMessageS(List<ParseTree> args);
+
+	/**
+	 * Returns true if this function is a self statement. The arguments are passed to the function in the case
+	 * of dynamic self-statements, but this generally not desirable, and instead should always be a self
+	 * statement, or always not be. For functions that are self statements and extend AbstractFunction, it
+	 * can simply be tagged with the {@link SelfStatement} annotation.
+	 * @param t The code target.
+	 * @param env The environment.
+	 * @param nodes The nodes being sent to this function. They may or may not contain types, depending on if typechecking
+	 * is enabled. If not enabled, the general rule is to look for statements.
+	 * @param envs The environments in this compilation.
+	 * @return
+	 */
+	public boolean isSelfStatement(Target t, Environment env, List<ParseTree> nodes,
+			Set<Class<? extends Environment.EnvironmentImpl>> envs) throws ConfigCompileException;
 
 	/**
 	 * In addition to being a function, an object may also be a code branch, that is, it conditionally will execute some

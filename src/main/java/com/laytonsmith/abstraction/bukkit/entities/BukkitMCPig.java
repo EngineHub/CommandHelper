@@ -4,7 +4,7 @@ import com.laytonsmith.abstraction.entities.MCPig;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Pig;
 
-public class BukkitMCPig extends BukkitMCAgeable implements MCPig {
+public class BukkitMCPig extends BukkitMCAnimal implements MCPig {
 
 	Pig p;
 

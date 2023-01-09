@@ -20,11 +20,13 @@ import com.laytonsmith.core.Main;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.compiler.FileOptions;
+import com.laytonsmith.core.compiler.SelfStatement;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.events.prefilters.PrefilterMatcher.PrefilterDocs;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.functions.Scheduling;
@@ -486,14 +488,14 @@ public class DocGenTemplates {
 			Main.CmdlineToolCollection collection = Main.GetCommandLineTools();
 			b.append("<pre style=\"white-space: pre-wrap;\">\n")
 					.append(HTMLUtils.escapeHTML(collection.getSuite().getBuiltDescription())).append("\n</pre>\n");
-			if(!colorsDisabled) {
-				TermColors.EnableColors();
-			}
 			for(Map.Entry<ArgumentParser, CommandLineTool> e : collection.getDynamicTools().entrySet()) {
 				b.append("==== ")
 						.append(e.getValue().getClass().getAnnotation(tool.class).value())
 						.append(" ====\n<pre style=\"white-space: pre-wrap;\">");
 				b.append(HTMLUtils.escapeHTML(e.getKey().getBuiltDescription())).append("</pre>\n\n");
+			}
+			if(!colorsDisabled) {
+				TermColors.EnableColors();
 			}
 			return b.toString();
 		}
@@ -855,7 +857,14 @@ public class DocGenTemplates {
 
 	public static final Generator SELF_STATEMENT_FUNCTIONS = (args) -> {
 		StringBuilder b = new StringBuilder();
-		// TODO
+		boolean first = true;
+		for(Class<? extends Function> f : ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(SelfStatement.class, Function.class)) {
+			if(!first) {
+				b.append(", ");
+			}
+			first = false;
+			b.append(ReflectionUtils.instantiateUnsafe(f).getName());
+		}
 		return b.toString();
 	};
 }
