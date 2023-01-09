@@ -127,4 +127,8 @@ Below are the available fields in the item meta array. Fields can be null when t
 | AxolotlBucket
 |
 * '''variant''' : (string) The type of axolotl, one of ''%AXOLOTL_TYPES%''.
+|-
+| BlockData
+|
+* '''blockdata''' : (array) An array of blockdata (known as block states in vanilla) like is returned from get_blockdata(), or null if none.
 |}

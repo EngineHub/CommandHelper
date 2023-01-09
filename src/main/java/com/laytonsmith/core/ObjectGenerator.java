@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.abstraction.MCAttributeModifier;
 import com.laytonsmith.abstraction.MCAxolotlBucketMeta;
 import com.laytonsmith.abstraction.MCBannerMeta;
+import com.laytonsmith.abstraction.MCBlockDataMeta;
 import com.laytonsmith.abstraction.MCBlockStateMeta;
 import com.laytonsmith.abstraction.MCBookMeta;
 import com.laytonsmith.abstraction.MCBrewerInventory;
@@ -556,6 +557,13 @@ public class ObjectGenerator {
 					}
 					ma.set("inventory", box, t);
 				}
+			} else if(meta instanceof MCBlockDataMeta) {
+				MCBlockDataMeta mcbdm = (MCBlockDataMeta) meta;
+				if(mcbdm.hasBlockData()) {
+					ma.set("blockdata", blockData(mcbdm.getBlockData(is.getType()), t), t);
+				} else {
+					ma.set("blockdata", CNull.NULL, t);
+				}
 			} else if(meta instanceof MCFireworkEffectMeta) {
 				MCFireworkEffectMeta mcfem = (MCFireworkEffectMeta) meta;
 				MCFireworkEffect effect = mcfem.getEffect();
@@ -996,6 +1004,14 @@ public class ObjectGenerator {
 								throw new CREFormatException(bs.getClass().getSimpleName().replaceFirst("MC", "")
 										+ " inventory expected to be an array or null.", t);
 							}
+						}
+					}
+				} else if(meta instanceof MCBlockDataMeta) {
+					MCBlockDataMeta mcbdm = (MCBlockDataMeta) meta;
+					if(ma.containsKey("blockdata")) {
+						Mixed mBlockData = ma.get("blockdata", t);
+						if(mBlockData instanceof CArray) {
+							mcbdm.setBlockData(blockData((CArray) mBlockData, mat, t));
 						}
 					}
 				} else if(meta instanceof MCFireworkEffectMeta) {
@@ -2070,16 +2086,20 @@ public class ObjectGenerator {
 	}
 
 	public MCBlockData blockData(CArray ca, Target t) {
+		return blockData(ca, null, t);
+	}
+
+	public MCBlockData blockData(CArray ca, MCMaterial blockType, Target t) {
 		StringBuilder b = new StringBuilder().append("[");
 		boolean first = true;
+		String block = null;
 		for(String key : ca.stringKeySet()) {
 			if(key.equals("block")) {
-				String block = ca.get("block", t).val();
+				block = ca.get("block", t).val();
 				if(Character.isUpperCase(block.charAt(0))) {
 					// support material enum input
 					block = block.toLowerCase();
 				}
-				b.insert(0, block);
 			} else {
 				if(first) {
 					first = false;
@@ -2090,6 +2110,13 @@ public class ObjectGenerator {
 			}
 		}
 		b.append("]");
+		if(block == null) {
+			if(blockType == null) {
+				throw new CREFormatException("Missing block type for block data.", t);
+			}
+			block = blockType.name().toLowerCase();
+		}
+		b.insert(0, block);
 		return Static.getServer().createBlockData(b.toString());
 	}
 
