@@ -82,4 +82,6 @@ public interface MCBlock extends MCMetadatable {
 	boolean isEmpty();
 
 	boolean applyBoneMeal();
+
+	boolean breakNaturally(MCItemStack item);
 }

@@ -5,6 +5,7 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCEntity;
+import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCNote;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
@@ -897,17 +898,22 @@ public class Environment {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{1};
+			return new Integer[]{1, 2};
 		}
 
 		@Override
 		public String docs() {
-			return "void {locationArray} Mostly simulates a block break at a location. Does not trigger an event.";
+			return "boolean {locationArray, [itemArray]} Mostly simulates a block break at a location."
+					+ " Optional item array to simulate tool used to break block."
+					+ " Returns true if block was not already air and either no tool was given, a correct tool was given,"
+					+ " or the block type does not require a specific tool."
+					+ " Does not trigger an event.";
 		}
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREFormatException.class};
+			return new Class[]{CREFormatException.class, CREInvalidWorldException.class, CRECastException.class,
+					CRERangeException.class};
 		}
 
 		@Override
@@ -927,13 +933,17 @@ public class Environment {
 
 		@Override
 		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCLocation l;
-			MCPlayer p;
-			p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCWorld w = (p != null ? p.getWorld() : null);
-			l = ObjectGenerator.GetGenerator().location(args[0], w, t);
-			l.breakBlock();
-			return CVoid.VOID;
+			MCBlock b = ObjectGenerator.GetGenerator().location(args[0], w, t).getBlock();
+			boolean success;
+			if(args.length == 2) {
+				MCItemStack item = ObjectGenerator.GetGenerator().item(args[1], t);
+				success = b.breakNaturally(item);
+			} else {
+				success = b.breakNaturally(null);
+			}
+			return CBoolean.get(success);
 		}
 	}
 
