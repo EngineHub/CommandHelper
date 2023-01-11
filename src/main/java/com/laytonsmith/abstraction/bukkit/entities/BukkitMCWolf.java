@@ -51,4 +51,18 @@ public class BukkitMCWolf extends BukkitMCTameable implements MCWolf {
 	public void setCollarColor(MCDyeColor color) {
 		w.setCollarColor(DyeColor.valueOf(color.name()));
 	}
+
+	@Override
+	public boolean isInterested() {
+		return w.isInterested();
+	}
+
+	@Override
+	public void setInterested(boolean interested) {
+		try {
+			w.setInterested(interested);
+		} catch(NoSuchMethodError ex) {
+			// probably before 1.19
+		}
+	}
 }

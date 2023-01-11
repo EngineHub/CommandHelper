@@ -3668,6 +3668,9 @@ public class DataHandling {
 				}
 				ParseTree root = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script.val(), env, t.file(), true),
 						env, env.getEnvClasses());
+				if(root == null) {
+					return new CString("", t);
+				}
 				StringBuilder b = new StringBuilder();
 				int count = 0;
 				for(ParseTree child : root.getChildren()) {

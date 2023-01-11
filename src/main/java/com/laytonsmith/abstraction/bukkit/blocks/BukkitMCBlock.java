@@ -19,6 +19,7 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCBlockFace;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.CommandBlock;
 import org.bukkit.block.Dispenser;
 import org.bukkit.block.Sign;
@@ -49,8 +50,7 @@ public class BukkitMCBlock extends BukkitMCMetadatable implements MCBlock {
 
 	@Override
 	public MCMaterial getType() {
-		Material type = b.getType();
-		return type == null ? null : new BukkitMCMaterial(type);
+		return BukkitMCMaterial.valueOfConcrete(b.getType());
 	}
 
 	@Override
@@ -235,5 +235,18 @@ public class BukkitMCBlock extends BukkitMCMetadatable implements MCBlock {
 	@Override
 	public boolean isEmpty() {
 		return b == null || b.isEmpty();
+	}
+
+	@Override
+	public boolean applyBoneMeal() {
+		return b.applyBoneMeal(BlockFace.UP);
+	}
+
+	@Override
+	public boolean breakNaturally(MCItemStack item) {
+		if(item == null) {
+			return b.breakNaturally(null);
+		}
+		return b.breakNaturally((ItemStack) item.getHandle());
 	}
 }

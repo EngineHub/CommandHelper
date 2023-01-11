@@ -12,6 +12,7 @@ import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Profiles;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.ScriptProvider;
@@ -195,6 +196,34 @@ public class LangServModel {
 			for(WorkspaceFolder folder : getWorkspaceFolders()) {
 				URI uuri = new URI(folder.getUri());
 				File ai = Paths.get(uuri).toFile();
+				File lp = new File(ai, "LocalPackages");
+				if(lp.exists()) {
+					// If this is the parent directory of LocalPackages,
+					// this may contain special files and directories.
+					File main = new File(ai, Prefs.MainFile());
+					if(main.exists()) {
+						mainFiles.add(main);
+					}
+					File aliases = new File(ai, Prefs.ScriptName());
+					if(aliases.exists()) {
+						mainFiles.add(aliases);
+					}
+					File autoInclude = new File(ai, "auto_include.ms");
+					if(autoInclude.exists()) {
+						autoIncludes.add(autoInclude);
+					}
+					File includes = new File(ai, "includes");
+					if(includes.exists() && includes.isDirectory()) {
+						FileUtil.recursiveFind(includes, (r) -> {
+							String path = r.getAbsolutePath().replace("\\", "/");
+							if(path.endsWith(".ms")) {
+								libraryFiles.add(r);
+							}
+						});
+					}
+					// Now process LocalPackages
+					ai = lp;
+				}
 				FileUtil.recursiveFind(ai, (r) -> {
 					String path = r.getAbsolutePath().replace("\\", "/");
 					if(!path.contains(".disabled/") && r.isFile()) {

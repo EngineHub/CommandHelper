@@ -4,7 +4,7 @@ import com.laytonsmith.abstraction.entities.MCGoat;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Goat;
 
-public class BukkitMCGoat extends BukkitMCAgeable implements MCGoat {
+public class BukkitMCGoat extends BukkitMCAnimal implements MCGoat {
 
 	Goat g;
 

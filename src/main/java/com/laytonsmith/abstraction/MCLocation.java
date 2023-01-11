@@ -57,8 +57,6 @@ public interface MCLocation extends AbstractionObject {
 
 	void setYaw(float y);
 
-	void breakBlock();
-
 	Vector3D getDirection();
 
 	MCLocation clone();

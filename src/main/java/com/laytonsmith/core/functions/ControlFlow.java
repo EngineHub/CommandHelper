@@ -328,6 +328,9 @@ public class ControlFlow {
 
 		@Override
 		public boolean isSelfStatement(Target t, Environment env, List<ParseTree> nodes, Set<Class<? extends Environment.EnvironmentImpl>> envs) throws ConfigCompileException {
+			if(nodes.size() < 2) {
+				return true;
+			}
 			doAutoconcatRewrite(nodes.get(1), env, envs);
 			if(nodes.get(1).getData() instanceof CFunction cf && cf.val().equals(Compiler.__statements__.NAME)) {
 				return true;
@@ -582,7 +585,7 @@ public class ControlFlow {
 		@Override
 		public boolean isSelfStatement(Target t, Environment env, List<ParseTree> nodes,
 				Set<Class<? extends Environment.EnvironmentImpl>> envs) throws ConfigCompileException {
-			if(nodes.size() == 1) {
+			if(nodes.size() < 2) {
 				return true;
 			}
 			for(int i = 2; i < nodes.size(); i += 2) {
@@ -768,6 +771,10 @@ public class ControlFlow {
 				Set<Class<? extends Environment.EnvironmentImpl>> envs,
 				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
+
+			if(children.size() < 1) {
+				throw new ConfigCompileException("Too few arguments passed to " + this.getName() + "()", t);
+			}
 
 			//Loop through all the conditions and make sure each is unique. Also
 			//make sure that each value is not dynamic.

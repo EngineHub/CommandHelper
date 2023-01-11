@@ -48,6 +48,10 @@ Below are the available fields in the item meta array. Fields can be null when t
 * '''potions''' : (array) An associative array of custom potion effect arrays, where each key is the vanilla potion effect name. Each effect array can contain the keys: '''"id"''' (int), '''"strength"''' (int), '''"seconds"''' remaining (int), whether the effect is '''"ambient"''', whether '''"particles"''' are enabled, and whether the '''"icon"''' is shown to the player.
 * '''color''' : (array) A color array, with '''"r"''', '''"g"''', and '''"b"''' keys that have values ranging from 0 to 255.
 |-
+| Suspicious Stew
+|
+* '''potions''' : (array) An associative array identical to the one for potion meta.
+|-
 | Banners
 |
 * '''patterns''' : (array) An array of pattern arrays. Each can contain the keys '''"color"''' (one of ''%DYE_COLORS%'') and '''"shape"''' (one of ''%PATTERN_SHAPES%'').
@@ -94,7 +98,13 @@ Below are the available fields in the item meta array. Fields can be null when t
 | Spawners
 |
 * '''spawntype''' : (string) May be one of ''%ENTITY_TYPES%''. Not all entity types will spawn from spawners, and some require special conditions.
-* '''delay''' : (int) The time in ticks until the spawner will spawn the next entity.
+* '''delay''' : (int) The time in ticks until the spawner will spawn the next batch of entities.
+* '''mindelay''' : (int) The lower bounds of a new random delay chosen after each batch of entities spawn. (must be <= 'maxdelay')
+* '''maxdelay''' : (int) The upper bounds of a new random delay. (must be above zero and >= mindelay)
+* '''spawncount''' : (int) The number of entities to attempt to spawn in each batch.
+* '''maxnearbyentities''' : (int) The number of 'spawntype' entities within just over 'spawnrange' distance that'll prevent further spawns.
+* '''spawnrange''' : (int) The maximum distance in the x or z axis new entities will spawn from the spawner.
+* '''playerrange''' : (int) The maximum distance a player must be within to cause the spawner to spawn.
 |-
 | Maps
 |
@@ -117,4 +127,8 @@ Below are the available fields in the item meta array. Fields can be null when t
 | AxolotlBucket
 |
 * '''variant''' : (string) The type of axolotl, one of ''%AXOLOTL_TYPES%''.
+|-
+| BlockData
+|
+* '''blockdata''' : (array) An array of blockdata (known as block states in vanilla) like is returned from get_blockdata(), or null if none.
 |}

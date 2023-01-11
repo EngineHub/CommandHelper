@@ -10,6 +10,10 @@ public interface MCCreeper {
 
 	void setMaxFuseTicks(int ticks);
 
+	int getFuseTicks();
+
+	void setFuseTicks(int ticks);
+
 	int getExplosionRadius();
 
 	void setExplosionRadius(int radius);

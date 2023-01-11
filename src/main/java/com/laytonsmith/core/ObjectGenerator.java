@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.abstraction.MCAttributeModifier;
 import com.laytonsmith.abstraction.MCAxolotlBucketMeta;
 import com.laytonsmith.abstraction.MCBannerMeta;
+import com.laytonsmith.abstraction.MCBlockDataMeta;
 import com.laytonsmith.abstraction.MCBlockStateMeta;
 import com.laytonsmith.abstraction.MCBookMeta;
 import com.laytonsmith.abstraction.MCBrewerInventory;
@@ -43,6 +44,7 @@ import com.laytonsmith.abstraction.MCShapelessRecipe;
 import com.laytonsmith.abstraction.MCSkullMeta;
 import com.laytonsmith.abstraction.MCSmithingRecipe;
 import com.laytonsmith.abstraction.MCStonecuttingRecipe;
+import com.laytonsmith.abstraction.MCSuspiciousStewMeta;
 import com.laytonsmith.abstraction.MCTropicalFishBucketMeta;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
@@ -65,7 +67,6 @@ import com.laytonsmith.abstraction.enums.MCPatternShape;
 import com.laytonsmith.abstraction.enums.MCPotionEffectType;
 import com.laytonsmith.abstraction.enums.MCPotionType;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
-import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CDouble;
@@ -432,12 +433,10 @@ public class ObjectGenerator {
 			ma.set("enchants", enchants(meta.getEnchants(), t), t);
 			ma.set("repair", new CInt(meta.getRepairCost(), t), t);
 
-			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_14)) {
-				if(meta.hasCustomModelData()) {
-					ma.set("model", new CInt(meta.getCustomModelData(), t), t);
-				} else {
-					ma.set("model", CNull.NULL, t);
-				}
+			if(meta.hasCustomModelData()) {
+				ma.set("model", new CInt(meta.getCustomModelData(), t), t);
+			} else {
+				ma.set("model", CNull.NULL, t);
 			}
 
 			Set<MCItemFlag> itemFlags = meta.getItemFlags();
@@ -487,8 +486,19 @@ public class ObjectGenerator {
 					}
 				} else if(bs instanceof MCCreatureSpawner) {
 					MCCreatureSpawner mccs = (MCCreatureSpawner) bs;
-					ma.set("spawntype", mccs.getSpawnedType().name());
+					MCEntityType type = mccs.getSpawnedType();
+					if(type == null) {
+						ma.set("spawntype", CNull.NULL, t);
+					} else {
+						ma.set("spawntype", type.name());
+					}
 					ma.set("delay", new CInt(mccs.getDelay(), t), t);
+					ma.set("mindelay", new CInt(mccs.getMinDelay(), t), t);
+					ma.set("maxdelay", new CInt(mccs.getMaxDelay(), t), t);
+					ma.set("spawncount", new CInt(mccs.getSpawnCount(), t), t);
+					ma.set("maxnearbyentities", new CInt(mccs.getMaxNearbyEntities(), t), t);
+					ma.set("playerrange", new CInt(mccs.getPlayerRange(), t), t);
+					ma.set("spawnrange", new CInt(mccs.getSpawnRange(), t), t);
 				} else if(bs instanceof MCBrewingStand) {
 					MCBrewingStand brewStand = (MCBrewingStand) bs;
 					ma.set("brewtime", new CInt(brewStand.getBrewingTime(), t), t);
@@ -546,6 +556,13 @@ public class ObjectGenerator {
 						}
 					}
 					ma.set("inventory", box, t);
+				}
+			} else if(meta instanceof MCBlockDataMeta) {
+				MCBlockDataMeta mcbdm = (MCBlockDataMeta) meta;
+				if(mcbdm.hasBlockData()) {
+					ma.set("blockdata", blockData(mcbdm.getBlockData(is.getType()), t), t);
+				} else {
+					ma.set("blockdata", CNull.NULL, t);
 				}
 			} else if(meta instanceof MCFireworkEffectMeta) {
 				MCFireworkEffectMeta mcfem = (MCFireworkEffectMeta) meta;
@@ -649,6 +666,9 @@ public class ObjectGenerator {
 				} else {
 					ma.set("color", CNull.NULL, t);
 				}
+			} else if(meta instanceof MCSuspiciousStewMeta susstew) {
+				CArray effects = potions(susstew.getCustomEffects(), t);
+				ma.set("potions", effects, t);
 			} else if(meta instanceof MCBannerMeta) {
 				MCBannerMeta bannermeta = (MCBannerMeta) meta;
 				CArray patterns = new CArray(t, bannermeta.numberOfPatterns());
@@ -861,12 +881,39 @@ public class ObjectGenerator {
 					} else if(bs instanceof MCCreatureSpawner) {
 						MCCreatureSpawner mccs = (MCCreatureSpawner) bs;
 						if(ma.containsKey("spawntype")) {
-							MCEntityType type = MCEntityType.valueOf(ma.get("spawntype", t).val().toUpperCase());
-							mccs.setSpawnedType(type);
+							Mixed m = ma.get("spawntype", t);
+							if(m != CNull.NULL) {
+								MCEntityType type = MCEntityType.valueOf(m.val().toUpperCase());
+								mccs.setSpawnedType(type);
+							}
 						}
 						if(ma.containsKey("delay")) {
 							int delay = ArgumentValidation.getInt32(ma.get("delay", t), t);
 							mccs.setDelay(delay);
+						}
+						if(ma.containsKey("mindelay")) {
+							int delay = ArgumentValidation.getInt32(ma.get("mindelay", t), t);
+							mccs.setMinDelay(delay);
+						}
+						if(ma.containsKey("maxdelay")) {
+							int delay = ArgumentValidation.getInt32(ma.get("maxdelay", t), t);
+							mccs.setMaxDelay(delay);
+						}
+						if(ma.containsKey("spawncount")) {
+							int count = ArgumentValidation.getInt32(ma.get("spawncount", t), t);
+							mccs.setSpawnCount(count);
+						}
+						if(ma.containsKey("maxnearbyentities")) {
+							int max = ArgumentValidation.getInt32(ma.get("maxnearbyentities", t), t);
+							mccs.setMaxNearbyEntities(max);
+						}
+						if(ma.containsKey("spawnrange")) {
+							int range = ArgumentValidation.getInt32(ma.get("spawnrange", t), t);
+							mccs.setSpawnRange(range);
+						}
+						if(ma.containsKey("playerrange")) {
+							int range = ArgumentValidation.getInt32(ma.get("playerrange", t), t);
+							mccs.setPlayerRange(range);
 						}
 						bsm.setBlockState(bs);
 					} else if(bs instanceof MCBrewingStand) {
@@ -957,6 +1004,14 @@ public class ObjectGenerator {
 								throw new CREFormatException(bs.getClass().getSimpleName().replaceFirst("MC", "")
 										+ " inventory expected to be an array or null.", t);
 							}
+						}
+					}
+				} else if(meta instanceof MCBlockDataMeta) {
+					MCBlockDataMeta mcbdm = (MCBlockDataMeta) meta;
+					if(ma.containsKey("blockdata")) {
+						Mixed mBlockData = ma.get("blockdata", t);
+						if(mBlockData instanceof CArray) {
+							mcbdm.setBlockData(blockData((CArray) mBlockData, mat, t));
 						}
 					}
 				} else if(meta instanceof MCFireworkEffectMeta) {
@@ -1112,6 +1167,18 @@ public class ObjectGenerator {
 							((MCPotionMeta) meta).setColor(color((CArray) color, t));
 						} else if(color.isInstanceOf(CString.TYPE)) {
 							((MCPotionMeta) meta).setColor(StaticLayer.GetConvertor().GetColor(color.val(), t));
+						}
+					}
+				} else if(meta instanceof MCSuspiciousStewMeta) {
+					if(ma.containsKey("potions")) {
+						Mixed effects = ma.get("potions", t);
+						if(effects.isInstanceOf(CArray.TYPE)) {
+							for(MCLivingEntity.MCEffect e : potions((CArray) effects, t)) {
+								((MCSuspiciousStewMeta) meta).addCustomEffect(e.getPotionEffectType(), e.getStrength(),
+										e.getTicksRemaining(), e.isAmbient(), e.hasParticles(), e.showIcon(), true, t);
+							}
+						} else {
+							throw new CREFormatException("Expected an array of potion arrays.", t);
 						}
 					}
 				} else if(meta instanceof MCBannerMeta) {
@@ -2019,16 +2086,20 @@ public class ObjectGenerator {
 	}
 
 	public MCBlockData blockData(CArray ca, Target t) {
+		return blockData(ca, null, t);
+	}
+
+	public MCBlockData blockData(CArray ca, MCMaterial blockType, Target t) {
 		StringBuilder b = new StringBuilder().append("[");
 		boolean first = true;
+		String block = null;
 		for(String key : ca.stringKeySet()) {
 			if(key.equals("block")) {
-				String block = ca.get("block", t).val();
+				block = ca.get("block", t).val();
 				if(Character.isUpperCase(block.charAt(0))) {
 					// support material enum input
 					block = block.toLowerCase();
 				}
-				b.insert(0, block);
 			} else {
 				if(first) {
 					first = false;
@@ -2039,6 +2110,13 @@ public class ObjectGenerator {
 			}
 		}
 		b.append("]");
+		if(block == null) {
+			if(blockType == null) {
+				throw new CREFormatException("Missing block type for block data.", t);
+			}
+			block = blockType.name().toLowerCase();
+		}
+		b.insert(0, block);
 		return Static.getServer().createBlockData(b.toString());
 	}
 

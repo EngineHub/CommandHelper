@@ -6,11 +6,13 @@ import com.laytonsmith.PureUtilities.ExecutionQueue;
 import com.laytonsmith.PureUtilities.ExecutionQueueImpl;
 import com.laytonsmith.PureUtilities.SmartComment;
 import com.laytonsmith.abstraction.Implementation;
+import com.laytonsmith.abstraction.MCBlockCommandSender;
 import com.laytonsmith.abstraction.MCCommand;
 import com.laytonsmith.abstraction.MCCommandMap;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.StaticLayer;
+import com.laytonsmith.abstraction.entities.MCCommandMinecart;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
@@ -87,6 +89,7 @@ public class AliasCore {
 	private CompilerEnvironment compilerEnv;
 	private StaticRuntimeEnv staticRuntimeEnv;
 	private List<Script> scripts;
+	private boolean lastCompileFailed = false;
 
 	/**
 	 * This constructor accepts the constant file locations object for MethodScript.
@@ -140,8 +143,20 @@ public class AliasCore {
 	 */
 	public boolean alias(String command, final MCCommandSender sender) {
 		if(scripts == null) {
-			throw ConfigRuntimeException.CreateUncatchableException("Cannot run alias commands."
-					+ " No alias files are loaded.", Target.UNKNOWN);
+			String msg;
+			if(this.lastCompileFailed) {
+				msg = "CommandHelper failed to start correctly due to a script compilation error."
+						+ " Check server startup logs for more details. Enable halt-on-failure in preferences to"
+						+ " automatically shutdown the server when this happens on startup.";
+			} else {
+				msg = "CommandHelper failed to start correctly. Check server startup logs for more details.";
+			}
+			if(sender instanceof MCPlayer) {
+				sender.sendMessage(MCChatColor.RED + msg);
+			} else if(sender instanceof MCBlockCommandSender || sender instanceof MCCommandMinecart) {
+				return false;
+			}
+			throw ConfigRuntimeException.CreateUncatchableException(msg, Target.UNKNOWN);
 		}
 
 		if(sender instanceof MCPlayer && echoCommand.contains(sender.getName())) {
@@ -426,6 +441,7 @@ public class AliasCore {
 				if(player != null) {
 					player.sendMessage(MCChatColor.RED + "[CommandHelper] Execution halted due to compile errors.");
 				}
+				this.lastCompileFailed = true;
 				if(Prefs.HaltOnFailure() && firstLoad) {
 					Static.getLogger().log(Level.SEVERE, "Shutting down server (halt-on-failure)");
 					Static.getServer().shutdown();
@@ -526,6 +542,7 @@ public class AliasCore {
 
 		// Everything else should be reloaded now, so execute successfully compiled scripts and register commands
 		if(options.reloadScripts() && env != null) {
+			env.getEnv(GlobalEnv.class).SetLabel(Static.GLOBAL_PERMISSION);
 			ProfilePoint executeAutoIncludes = profiler.start("Execution of auto includes", LogLevel.VERBOSE);
 			try {
 				includeCache.executeAutoIncludes(env, null);
@@ -534,7 +551,6 @@ public class AliasCore {
 			}
 			ProfilePoint executeMS = profiler.start("Execution of MS files in Local Packages", LogLevel.VERBOSE);
 			try {
-				env.getEnv(GlobalEnv.class).SetLabel(Static.GLOBAL_PERMISSION);
 				env.getEnv(CommandHelperEnvironment.class).SetCommandSender(Static.getServer().getConsole());
 				localPackages.executeMS(env);
 			} finally {
@@ -626,13 +642,22 @@ public class AliasCore {
 						script.getTarget());
 			} else {
 				Procedure p = env.getEnv(GlobalEnv.class).GetProcs().get(proc);
-				Mixed m = p.execute(new ArrayList<>(), env, script.getTarget());
-				if(!(m instanceof CClosure)) {
-					MSLog.GetLogger().e(MSLog.Tags.COMPILER, "Procedure " + proc + " returns a value other than"
-							+ " a closure. It must unconditionally return a closure.",
-						p.getTarget());
-				} else {
-					Commands.set_tabcompleter.customExec(script.getTarget(), env, cmd, m);
+				Mixed m = null;
+				try {
+					m = p.execute(new ArrayList<>(), env, script.getTarget());
+				} catch (ConfigRuntimeException ex) {
+					MSLog.GetLogger().e(MSLog.Tags.COMPILER, "Script defined at " + script.getTarget()
+							+ " threw an exception. Tabcompletion is being skipped for this alias.", p.getTarget());
+					ConfigRuntimeException.HandleUncaughtException(ex, env);
+				}
+				if(m != null) {
+					if(!(m instanceof CClosure)) {
+						MSLog.GetLogger().e(MSLog.Tags.COMPILER, "Procedure " + proc + " returns a value other than"
+								+ " a closure. It must unconditionally return a closure.",
+							p.getTarget());
+					} else {
+						Commands.set_tabcompleter.customExec(script.getTarget(), env, cmd, m);
+					}
 				}
 			}
 		} else {

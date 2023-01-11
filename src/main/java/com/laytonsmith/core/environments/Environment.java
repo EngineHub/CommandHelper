@@ -55,11 +55,11 @@ public final class Environment implements Cloneable {
 	 * @throws InvalidEnvironmentException If the environment doesn't exist
 	 */
 	public final <T extends EnvironmentImpl> T getEnv(Class<T> clazz) throws InvalidEnvironmentException {
-		if(environments.containsKey(clazz)) {
-			return (T) environments.get(clazz);
-		} else {
+		EnvironmentImpl envImpl = environments.get(clazz);
+		if(envImpl == null) {
 			throw new InvalidEnvironmentException(clazz.getSimpleName() + " is not included in this environment.");
 		}
+		return (T) envImpl;
 	}
 
 	private void addEnv(EnvironmentImpl mixin) {

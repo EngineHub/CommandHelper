@@ -1910,7 +1910,8 @@ public class World {
 		public String docs() {
 			return "double {location_from, location_to} Calculate yaw from one location to another on the X-Z plane."
 					+ " The rotation is measured in degrees (0-359.99...) relative to the (x=0,z=1) vector, which"
-					+ " points south. Throws a FormatException if locations have differing worlds.";
+					+ " points south. Throws a FormatException if locations have differing worlds."
+					+ " Can return 'NaN' if the x and z coordinates are identical.";
 		}
 
 		@Override
@@ -2037,7 +2038,7 @@ public class World {
 		@Override
 		public String docs() {
 			return "array {locationArray, [magnitude]} Returns a vector from the yaw and pitch in a location array."
-					+ " All other values in the location array are ignored."
+					+ " Only the yaw and pitch keys are required in the array."
 					+ " The second parameter, that defines the magnitude of the vector, defaults to 1.0.";
 		}
 
@@ -2048,8 +2049,23 @@ public class World {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			Vector3D v = ObjectGenerator.GetGenerator().location(args[0], p == null ? null : p.getWorld(), t).getDirection();
+			CArray loc = ArgumentValidation.getArray(args[0], t);
+			double yaw;
+			double pitch;
+			if(loc.isAssociative()) {
+				yaw = ArgumentValidation.getDouble(loc.get("yaw", t), t);
+				pitch = ArgumentValidation.getDouble(loc.get("pitch", t), t);
+			} else {
+				yaw = ArgumentValidation.getDouble(loc.get(4, t), t);
+				pitch = ArgumentValidation.getDouble(loc.get(5, t), t);
+			}
+			yaw = java.lang.Math.toRadians(yaw);
+			pitch = java.lang.Math.toRadians(pitch);
+			double cosPitch = java.lang.Math.cos(pitch);
+			double x = java.lang.Math.sin(yaw) * -cosPitch;
+			double y = -java.lang.Math.sin(pitch);
+			double z = java.lang.Math.cos(yaw) * cosPitch;
+			Vector3D v = new Vector3D(x, y, z);
 			if(args.length == 2) {
 				v = v.multiply(ArgumentValidation.getDouble(args[1], t));
 			}

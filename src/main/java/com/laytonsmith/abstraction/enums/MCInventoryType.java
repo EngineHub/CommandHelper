@@ -29,7 +29,8 @@ public enum MCInventoryType {
 	LOOM(false),
 	CARTOGRAPHY(false),
 	GRINDSTONE(false),
-	STONECUTTER(false);
+	STONECUTTER(false),
+	CHISELED_BOOKSHELF(false);
 
 	// Whether or not this inventory type can be created and used virtually
 	private final boolean canVirtualize;

@@ -20,7 +20,7 @@ public class BukkitMCBlockData implements MCBlockData {
 
 	@Override
 	public MCMaterial getMaterial() {
-		return new BukkitMCMaterial(bd.getMaterial());
+		return BukkitMCMaterial.valueOfConcrete(bd.getMaterial());
 	}
 
 	@Override

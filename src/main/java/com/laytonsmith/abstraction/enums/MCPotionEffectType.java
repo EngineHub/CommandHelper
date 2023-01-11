@@ -2,7 +2,6 @@ package com.laytonsmith.abstraction.enums;
 
 import com.laytonsmith.PureUtilities.ClassLoading.DynamicEnum;
 import com.laytonsmith.annotations.MDynamicEnum;
-import com.laytonsmith.core.Static;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -50,14 +49,9 @@ public abstract class MCPotionEffectType<Concrete> extends DynamicEnum<MCPotionE
 				if(s.equals(MCVanillaPotionEffectType.UNKNOWN)) {
 					continue;
 				}
-				dummy.add(new MCPotionEffectType<Object>(s, null) {
+				dummy.add(new MCPotionEffectType<>(s, null) {
 					@Override
 					public String name() {
-						return s.name();
-					}
-
-					@Override
-					public String concreteName() {
 						return s.name();
 					}
 				});
@@ -112,7 +106,8 @@ public abstract class MCPotionEffectType<Concrete> extends DynamicEnum<MCPotionE
 		CONDUIT_POWER(29),
 		DOLPHINS_GRACE(30, MCVersion.MC1_14),
 		BAD_OMEN(31, MCVersion.MC1_14),
-		HERO_OF_THE_VILLAGE(32, MCVersion.MC1_14);
+		HERO_OF_THE_VILLAGE(32, MCVersion.MC1_14),
+		DARKNESS(33, MCVersion.MC1_19);
 
 		private final int id;
 		private final MCVersion since;
@@ -131,8 +126,8 @@ public abstract class MCPotionEffectType<Concrete> extends DynamicEnum<MCPotionE
 			return this.id;
 		}
 
-		public boolean existsInCurrent() {
-			return Static.getServer().getMinecraftVersion().gte(since);
+		public boolean existsIn(MCVersion version) {
+			return version.gte(since);
 		}
 	}
 }

@@ -55,6 +55,7 @@ import com.laytonsmith.core.functions.Compiler;
 import com.laytonsmith.core.functions.Compiler.__autoconcat__;
 import com.laytonsmith.core.functions.Compiler.__cbrace__;
 import com.laytonsmith.core.functions.Compiler.__smart_string__;
+import com.laytonsmith.core.functions.Compiler.__statements__;
 import com.laytonsmith.core.functions.Compiler.p;
 import com.laytonsmith.core.functions.ControlFlow;
 import com.laytonsmith.core.functions.DataHandling;
@@ -2120,6 +2121,12 @@ public final class MethodScriptCompiler {
 			Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> compilerExceptions,
 			boolean rewriteKeywords) {
 		if(!root.hasChildren()) {
+			if(root.getData() instanceof CFunction && root.getData().val().equals(__autoconcat__.NAME)) {
+				ParseTree tree = new ParseTree(new CFunction(__statements__.NAME, root.getTarget()),
+						root.getFileOptions(), true);
+				tree.setOptimized(true);
+				root.replace(tree);
+			}
 			return;
 		}
 		List<List<ParseTree>> children = new ArrayList<>();
@@ -2299,18 +2306,20 @@ public final class MethodScriptCompiler {
 				i--; // Allow the new child to do a rewrite step as well.
 				continue;
 			}
-			// In strict mode throw compile errors when encountering child statements in function arguments where
+			// Add compile exceptions when encountering child statements in function arguments where
 			// statements are not acceptable because void would be an invalid argument type. This would otherwise be
 			// a runtime error in strict mode where auto-concat is not allowed and statements are used instead.
-			// This can be removed once a more comprehensive void return type check is implemented.
-			if(ast.getData() instanceof CNull || ast.getData() instanceof CFunction) {
-				Function function;
-				if(ast.getData() instanceof CFunction cFunction) {
-					function = cFunction.getCachedFunction();
-				} else {
-					function = null;
+			// This can be updated once a more comprehensive void return type check is done.
+			if(child.getData() instanceof CFunction
+					&& child.getData().val().equals(Compiler.__statements__.NAME)
+					&& ast.getData() instanceof CFunction cFunction) {
+
+				Function function = cFunction.getCachedFunction();
+				if(function == null) {
+					continue;
 				}
-				boolean statementsAllowed = topLevel;
+
+				boolean statementsAllowed = false;
 				if(function instanceof BranchStatement branchStatement) {
 					List<Boolean> branches = branchStatement.statementsAllowed(ast.getChildren());
 					if(branches.get(i)) {
@@ -2379,6 +2388,42 @@ public final class MethodScriptCompiler {
 					if(((topLevel && isStrict) || !topLevel) && (function == null
 							|| function.getClass().getAnnotation(ConditionalSelfStatement.class) == null)) {
 						exceptions.add(new ConfigCompileException("Not a statement.", child.getTarget()));
+=======
+				if(statementsAllowed) {
+					continue;
+				}
+
+				String unexpectedStatement = "Unexpected statement; ";
+				try {
+					if(function.isSelfStatement(ast.getTarget(), env, ast.getChildren(), envs)) {
+						// We can give a better error message here, because the semicolon wasn't actually added
+						// by the user (probably) it's the self statement function that's the problem here.
+						unexpectedStatement += cFunction.val() + " not allowed in this context.";
+					} else if(ast.getFileOptions().isStrict() && cFunction.getTarget() != child.getTarget()) {
+						unexpectedStatement += "auto concatenation not allowed in Strict mode. (or invalid semi-colon)";
+					} else {
+						unexpectedStatement += "semicolon (;) not allowed in this context.";
+					}
+				} catch(ConfigCompileException ex) {
+					exceptions.add(ex);
+				}
+
+				if(ast.getFileOptions().isStrict()) {
+					exceptions.add(new ConfigCompileException(unexpectedStatement, child.getTarget()));
+				} else {
+					// Statements aren't allowed here, but we aren't in strict mode, so
+					// pull up the value in the statement to here. sconcat is an exception to this rule, since
+					// it's entirely too special.
+					if(!cFunction.val().equals(StringHandling.sconcat.NAME)) {
+						if(child.getChildren().size() != 1) {
+							exceptions.add(new ConfigCompileException(unexpectedStatement, child.getTarget()));
+						} else {
+							CompilerWarning warning = new CompilerWarning(unexpectedStatement,
+									child.getTarget(), SuppressWarning.UnexpectedStatement);
+							env.getEnv(CompilerEnvironment.class).addCompilerWarning(ast.getFileOptions(), warning);
+							child.replace(child.getChildren().get(0));
+						}
+>>>>>>> origin/master
 					}
 				}
 			}

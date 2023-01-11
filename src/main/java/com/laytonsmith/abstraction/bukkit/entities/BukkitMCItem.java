@@ -56,4 +56,14 @@ public class BukkitMCItem extends BukkitMCEntity implements MCItem {
 	public void setThrower(UUID thrower) {
 		i.setThrower(thrower);
 	}
+
+	@Override
+	public boolean willDespawn() {
+		return !i.isUnlimitedLifetime();
+	}
+
+	@Override
+	public void setWillDespawn(boolean despawn) {
+		i.setUnlimitedLifetime(!despawn);
+	}
 }

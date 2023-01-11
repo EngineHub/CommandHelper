@@ -17,9 +17,6 @@ public abstract class MCParticle<Concrete> extends DynamicEnum<MCParticle.MCVani
 
 	protected static final Map<String, MCParticle> MAP = new HashMap<>();
 
-	@SuppressWarnings("checkstyle:staticvariablename") // Fixing this violation might break dependents.
-	public static MCParticle NULL = null;
-
 	public MCParticle(MCVanillaParticle mcVanillaParticle, Concrete concrete) {
 		super(mcVanillaParticle, concrete);
 	}
@@ -46,7 +43,7 @@ public abstract class MCParticle<Concrete> extends DynamicEnum<MCParticle.MCVani
 	 * @return Names of available particles
 	 */
 	public static Set<String> types() {
-		if(NULL == null) { // docs mode
+		if(MAP.isEmpty()) { // docs mode
 			Set<String> dummy = new HashSet<>();
 			for(final MCVanillaParticle t : MCVanillaParticle.values()) {
 				if(t.existsIn(MCVersion.CURRENT)) {
@@ -62,20 +59,15 @@ public abstract class MCParticle<Concrete> extends DynamicEnum<MCParticle.MCVani
 	 * @return Our own MCParticle list
 	 */
 	public static List<MCParticle> values() {
-		if(NULL == null) { // docs mode
+		if(MAP.isEmpty()) { // docs mode
 			ArrayList<MCParticle> dummy = new ArrayList<>();
 			for(final MCParticle.MCVanillaParticle p : MCParticle.MCVanillaParticle.values()) {
 				if(!p.existsIn(MCVersion.CURRENT)) {
 					continue;
 				}
-				dummy.add(new MCParticle<Object>(p, null) {
+				dummy.add(new MCParticle<>(p, null) {
 					@Override
 					public String name() {
-						return p.name();
-					}
-
-					@Override
-					public String concreteName() {
 						return p.name();
 					}
 				});
@@ -179,6 +171,11 @@ public abstract class MCParticle<Concrete> extends DynamicEnum<MCParticle.MCVani
 		ELECTRIC_SPARK(MCVersion.MC1_17),
 		SCRAPE(MCVersion.MC1_17),
 		BLOCK_MARKER(MCVersion.MC1_18),
+		SHRIEK(MCVersion.MC1_19),
+		SCULK_CHARGE(MCVersion.MC1_19),
+		SCULK_CHARGE_POP(MCVersion.MC1_19),
+		SCULK_SOUL(MCVersion.MC1_19),
+		SONIC_BOOM(MCVersion.MC1_19),
 		UNKNOWN(MCVersion.NEVER);
 
 		private final MCVersion since;

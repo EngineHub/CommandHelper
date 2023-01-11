@@ -1,9 +1,8 @@
 package com.laytonsmith.abstraction.entities;
 
-import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCLocation;
 
-public interface MCBee extends MCLivingEntity {
+public interface MCBee extends MCAnimal {
 	MCLocation getHiveLocation();
 	void setHiveLocation(MCLocation loc);
 	MCLocation getFlowerLocation();

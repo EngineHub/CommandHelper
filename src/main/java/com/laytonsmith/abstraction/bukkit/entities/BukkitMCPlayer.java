@@ -1,7 +1,6 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
-import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCItemStack;
@@ -11,20 +10,19 @@ import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCPlayerInventory;
 import com.laytonsmith.abstraction.MCScoreboard;
+import com.laytonsmith.abstraction.MCWorldBorder;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlockData;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
-import com.laytonsmith.abstraction.bukkit.BukkitMCColor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayerInventory;
 import com.laytonsmith.abstraction.bukkit.BukkitMCScoreboard;
-import com.laytonsmith.abstraction.bukkit.BukkitMCVibration;
+import com.laytonsmith.abstraction.bukkit.BukkitMCWorldBorder;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.enums.MCParticle;
-import com.laytonsmith.abstraction.enums.MCParticle.MCVanillaParticle;
 import com.laytonsmith.abstraction.enums.MCPlayerStatistic;
 import com.laytonsmith.abstraction.enums.MCPotionEffectType;
 import com.laytonsmith.abstraction.enums.MCSound;
@@ -32,6 +30,7 @@ import com.laytonsmith.abstraction.enums.MCSoundCategory;
 import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.enums.MCWeather;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCInstrument;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCParticle;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPlayerStatistic;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSound;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSoundCategory;
@@ -39,12 +38,12 @@ import com.laytonsmith.abstraction.enums.bukkit.BukkitMCWeather;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.Static;
 import org.bukkit.Bukkit;
-import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Note;
 import org.bukkit.Particle;
-import org.bukkit.Server;
+import org.bukkit.SoundCategory;
+import org.bukkit.WorldBorder;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -408,30 +407,25 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 
 	@Override
 	public void setTempOp(Boolean value) throws ClassNotFoundException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
-		Server server = Bukkit.getServer();
-		String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
-
-		Class serverClass = Class.forName("org.bukkit.craftbukkit." + version + ".CraftServer");
-
-		if(!server.getClass().isAssignableFrom(serverClass)) {
-			throw new IllegalStateException("Running server isn't CraftBukkit");
-		}
-
 		// Get some version specific strings
-		String nms;
-		String playersPackage;
-		String ops = "operators";
-		String getPlayerList = "getPlayerList";
-		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_17)) {
-			nms = "net.minecraft.server";
-			playersPackage = nms + ".players";
-			ops = "n";
-			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_18)) {
-				getPlayerList = "ac";
+		String nms = "net.minecraft.server";
+		String playersPackage = nms + ".players";
+		String ops = "o";
+		String getPlayerList = "ab";
+		if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_19_X)) {
+			getPlayerList = "ac";
+			if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_19_1)) {
+				ops = "n";
+				if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_18)) {
+					getPlayerList = "getPlayerList";
+					if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_17)) {
+						String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
+						nms = "net.minecraft.server." + version;
+						playersPackage = nms;
+						ops = "operators";
+					}
+				}
 			}
-		} else { // 1.16.5 and prior
-			nms = "net.minecraft.server." + version;
-			playersPackage = nms;
 		}
 
 		Class nmsMinecraftServerClass = Class.forName(nms + ".MinecraftServer");
@@ -546,8 +540,24 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 
 	@Override
 	public void playSound(MCLocation l, MCSound sound, MCSoundCategory category, float volume, float pitch) {
-		p.playSound((Location) l.getHandle(), ((BukkitMCSound) sound).getConcrete(),
-				BukkitMCSoundCategory.getConvertor().getConcreteEnum(category), volume, pitch);
+		if(category == null) {
+			p.playSound((Location) l.getHandle(), ((BukkitMCSound) sound).getConcrete(),
+					SoundCategory.MASTER, volume, pitch);
+		} else {
+			p.playSound((Location) l.getHandle(), ((BukkitMCSound) sound).getConcrete(),
+					BukkitMCSoundCategory.getConvertor().getConcreteEnum(category), volume, pitch);
+		}
+	}
+
+	@Override
+	public void playSound(MCEntity ent, MCSound sound, MCSoundCategory category, float volume, float pitch) {
+		if(category == null) {
+			p.playSound((Entity) ent.getHandle(), ((BukkitMCSound) sound).getConcrete(),
+					SoundCategory.MASTER, volume, pitch);
+		} else {
+			p.playSound((Entity) ent.getHandle(), ((BukkitMCSound) sound).getConcrete(),
+					BukkitMCSoundCategory.getConvertor().getConcreteEnum(category), volume, pitch);
+		}
 	}
 
 	@Override
@@ -579,65 +589,8 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 
 	@Override
 	public void spawnParticle(MCLocation l, MCParticle pa, int count, double offsetX, double offsetY, double offsetZ, double velocity, Object data) {
-		Particle type = (Particle) pa.getConcrete();
-		Location loc = (Location) l.getHandle();
-		switch((MCParticle.MCVanillaParticle) pa.getAbstracted()) {
-			case BLOCK_DUST:
-			case BLOCK_CRACK:
-			case BLOCK_MARKER:
-			case FALLING_DUST:
-				BlockData bd;
-				if(data instanceof MCBlockData) {
-					bd = (BlockData) ((MCBlockData) data).getHandle();
-				} else if(pa.getAbstracted() == MCVanillaParticle.BLOCK_MARKER) {
-					// Barrier (and light) particles were replaced by block markers, so this is the best fallback.
-					bd = Material.BARRIER.createBlockData();
-				} else {
-					bd = Material.STONE.createBlockData();
-				}
-				p.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity, bd);
-				return;
-			case ITEM_CRACK:
-				ItemStack is;
-				if(data instanceof MCItemStack) {
-					is = (ItemStack) ((MCItemStack) data).getHandle();
-				} else {
-					is = new ItemStack(Material.STONE, 1);
-				}
-				p.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity, is);
-				return;
-			case REDSTONE:
-				Particle.DustOptions color;
-				if(data instanceof MCColor) {
-					color = new Particle.DustOptions(BukkitMCColor.GetColor((MCColor) data), 1.0F);
-				} else {
-					color =  new Particle.DustOptions(Color.RED, 1.0F);
-				}
-				p.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity, color);
-				return;
-			case DUST_COLOR_TRANSITION:
-				Particle.DustTransition dust;
-				if(data instanceof MCColor[]) {
-					MCColor[] c = (MCColor[]) data;
-					dust = new Particle.DustTransition(BukkitMCColor.GetColor(c[0]), BukkitMCColor.GetColor(c[1]), 1.0F);
-				} else {
-					dust = new Particle.DustTransition(Color.TEAL, Color.RED, 1.0F);
-				}
-				p.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity, dust);
-				return;
-			case VIBRATION:
-				BukkitMCVibration vibe;
-				if(data instanceof MCLocation) {
-					vibe = new BukkitMCVibration(l, (MCLocation) data, 5);
-				} else if(data instanceof MCEntity) {
-					vibe = new BukkitMCVibration(l, (MCEntity) data, 5);
-				} else {
-					vibe = new BukkitMCVibration(l, l, 5);
-				}
-				p.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity, vibe.getHandle());
-				return;
-		}
-		p.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity);
+		p.spawnParticle((Particle) pa.getConcrete(), (Location) l.getHandle(), count, offsetX, offsetY, offsetZ,
+				velocity, ((BukkitMCParticle) pa).getParticleData(l, data));
 	}
 
 	@Override
@@ -742,6 +695,33 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	public void setStatistic(MCPlayerStatistic stat, MCMaterial type, int amount) {
 		Material bukkitType = (Material) type.getHandle();
 		p.setStatistic(BukkitMCPlayerStatistic.getConvertor().getConcreteEnum(stat), bukkitType, amount);
+	}
+
+	@Override
+	public MCWorldBorder getWorldBorder() {
+		try {
+			WorldBorder wb = p.getWorldBorder();
+			if(wb == null) {
+				return null;
+			}
+			return new BukkitMCWorldBorder(wb);
+		} catch (NoSuchMethodError ex) {
+			// probably before 1.18.2
+			return null;
+		}
+	}
+
+	@Override
+	public void setWorldBorder(MCWorldBorder border) {
+		try {
+			if(border == null) {
+				p.setWorldBorder(null);
+			} else {
+				p.setWorldBorder((WorldBorder) border.getHandle());
+			}
+		} catch (NoSuchMethodError ex) {
+			// probably before 1.18.2
+		}
 	}
 
 	@Override

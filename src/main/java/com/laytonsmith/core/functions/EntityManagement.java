@@ -45,6 +45,8 @@ import com.laytonsmith.abstraction.entities.MCFallingBlock;
 import com.laytonsmith.abstraction.entities.MCFireball;
 import com.laytonsmith.abstraction.entities.MCFirework;
 import com.laytonsmith.abstraction.entities.MCFox;
+import com.laytonsmith.abstraction.entities.MCFrog;
+import com.laytonsmith.abstraction.entities.MCFrog.MCFrogType;
 import com.laytonsmith.abstraction.entities.MCGoat;
 import com.laytonsmith.abstraction.entities.MCHanging;
 import com.laytonsmith.abstraction.entities.MCHorse;
@@ -59,7 +61,6 @@ import com.laytonsmith.abstraction.entities.MCLlama;
 import com.laytonsmith.abstraction.entities.MCLlama.MCLlamaColor;
 import com.laytonsmith.abstraction.entities.MCMinecart;
 import com.laytonsmith.abstraction.entities.MCMushroomCow;
-import com.laytonsmith.abstraction.entities.MCOcelot;
 import com.laytonsmith.abstraction.entities.MCPainting;
 import com.laytonsmith.abstraction.entities.MCPanda;
 import com.laytonsmith.abstraction.entities.MCParrot;
@@ -79,7 +80,6 @@ import com.laytonsmith.abstraction.entities.MCSpectralArrow;
 import com.laytonsmith.abstraction.entities.MCStrider;
 import com.laytonsmith.abstraction.entities.MCTNT;
 import com.laytonsmith.abstraction.entities.MCThrownPotion;
-import com.laytonsmith.abstraction.entities.MCTippedArrow;
 import com.laytonsmith.abstraction.entities.MCTrident;
 import com.laytonsmith.abstraction.entities.MCTropicalFish;
 import com.laytonsmith.abstraction.entities.MCVex;
@@ -100,7 +100,6 @@ import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCFireworkType;
 import com.laytonsmith.abstraction.enums.MCFoxType;
 import com.laytonsmith.abstraction.enums.MCMushroomCowType;
-import com.laytonsmith.abstraction.enums.MCOcelotType;
 import com.laytonsmith.abstraction.enums.MCParrotType;
 import com.laytonsmith.abstraction.enums.MCParticle;
 import com.laytonsmith.abstraction.enums.MCProfession;
@@ -116,12 +115,15 @@ import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.CompilerEnvironment;
+import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CDouble;
+import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
@@ -302,9 +304,8 @@ public class EntityManagement {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCEntity e;
 			try {
-				e = Static.getEntity(args[0], t);
+				Static.getEntity(args[0], t);
 			} catch (ConfigRuntimeException cre) {
 				return CBoolean.FALSE;
 			}
@@ -446,7 +447,7 @@ public class EntityManagement {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CREBadEntityException.class, CREFormatException.class, CRECastException.class,
-				CREInvalidWorldException.class, CRELengthException.class};
+				CREInvalidWorldException.class, CRELengthException.class, CREIllegalArgumentException.class};
 		}
 
 		@Override
@@ -454,11 +455,15 @@ public class EntityManagement {
 			MCEntity e = Static.getEntity(args[0], t);
 			MCLocation l;
 			if(args[1].isInstanceOf(CArray.TYPE)) {
-				l = ObjectGenerator.GetGenerator().location((CArray) args[1], e.getWorld(), t);
+				l = ObjectGenerator.GetGenerator().location(args[1], e.getWorld(), t);
 			} else {
 				throw new CREFormatException("An array was expected but received " + args[1], t);
 			}
-			return CBoolean.get(e.teleport(l));
+			try {
+				return CBoolean.get(e.teleport(l));
+			} catch (IllegalArgumentException ex) {
+				throw new CREIllegalArgumentException(ex.getMessage(), t);
+			}
 		}
 
 		@Override
@@ -698,14 +703,15 @@ public class EntityManagement {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			int age = ArgumentValidation.getInt32(args[1], t);
-			if(age < 1) {
-				throw new CRERangeException("Entity age can't be less than 1 server tick.", t);
-			}
 			MCEntity ent = Static.getEntity(args[0], t);
 			if(ent == null) {
 				return CNull.NULL;
 			} else {
-				ent.setTicksLived(age);
+				try {
+					ent.setTicksLived(age);
+				} catch (IllegalArgumentException ex) {
+					throw new CRERangeException(ex.getMessage(), t);
+				}
 				return CVoid.VOID;
 			}
 		}
@@ -718,7 +724,7 @@ public class EntityManagement {
 		@Override
 		public String docs() {
 			return "void {entityUUID, int} Sets the age of the entity to the specified int,"
-					+ " represented by server ticks.";
+					+ " represented by server ticks. Entity age cannot be less than 1 server tick,";
 		}
 
 		@Override
@@ -728,7 +734,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class shoot_projectile extends EntityFunction {
+	public static class shoot_projectile extends EntityFunction implements Optimizable {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -857,10 +863,37 @@ public class EntityManagement {
 		public MSVersion since() {
 			return MSVersion.V3_3_1;
 		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, com.laytonsmith.core.environments.Environment env,
+				Set<Class<? extends com.laytonsmith.core.environments.Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+
+			if(children.size() < 2) {
+				return null;
+			}
+			Mixed c = children.get(1).getData();
+			if(c.isInstanceOf(CString.TYPE)) {
+				try {
+					MCEntityType.MCVanillaEntityType.valueOf(c.val().toUpperCase());
+				} catch (IllegalArgumentException ex) {
+					env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions, new CompilerWarning(
+							c.val() + " is not a valid enum in com.commandhelper.EntityType",
+							c.getTarget(), null));
+				}
+			}
+			return null;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class entities_in_radius extends EntityFunction {
+	public static class entities_in_radius extends EntityFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -958,6 +991,45 @@ public class EntityManagement {
 		@Override
 		public MSVersion since() {
 			return MSVersion.V3_3_1;
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, com.laytonsmith.core.environments.Environment env,
+				Set<Class<? extends com.laytonsmith.core.environments.Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+
+			if(children.size() < 3) {
+				return null;
+			}
+			Mixed c = children.get(children.size() - 1).getData();
+			if(c.isInstanceOf(CString.TYPE)) {
+				try {
+					MCEntityType.MCVanillaEntityType.valueOf(c.val().toUpperCase());
+				} catch (IllegalArgumentException ex) {
+					env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions, new CompilerWarning(
+							c.val() + " is not a valid enum in com.commandhelper.EntityType",
+							c.getTarget(), null));
+				}
+			} else if(c instanceof CFunction && c.val().equals("array")) {
+				for(ParseTree node : children.get(children.size() - 1).getChildren()) {
+					if(node.getData().isInstanceOf(CString.TYPE)) {
+						try {
+							MCEntityType.MCVanillaEntityType.valueOf(node.getData().val().toUpperCase());
+						} catch (IllegalArgumentException ex) {
+							env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions, new CompilerWarning(
+									node.getData().val() + " is not a valid enum in com.commandhelper.EntityType",
+									node.getTarget(), null));
+						}
+					}
+				}
+			}
+			return null;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
 	}
 
@@ -1123,7 +1195,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class spawn_entity extends EntityFunction {
+	public static class spawn_entity extends EntityFunction implements Optimizable {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -1195,10 +1267,14 @@ public class EntityManagement {
 						}
 						break;
 					default:
-						if(consumer != null) {
-							ent = l.getWorld().spawn(l, entType, consumer);
-						} else {
-							ent = l.getWorld().spawn(l, entType);
+						try {
+							if(consumer != null) {
+								ent = l.getWorld().spawn(l, entType, consumer);
+							} else {
+								ent = l.getWorld().spawn(l, entType);
+							}
+						} catch (IllegalArgumentException ex) {
+							throw new CREFormatException(ex.getMessage(), t);
 						}
 				}
 				ret.push(new CString(ent.getUniqueId().toString(), t), t);
@@ -1248,6 +1324,38 @@ public class EntityManagement {
 							+ " closure(@id){ set_entity_spec(@id, array('baby': true)); set_entity_ai(@id, false); })",
 							"Creates a zombie, changes it to a baby zombie without AI, then adds it to the world."),
 			};
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, com.laytonsmith.core.environments.Environment env,
+				Set<Class<? extends com.laytonsmith.core.environments.Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+
+			if(children.size() < 1) {
+				return null;
+			}
+			Mixed c = children.get(0).getData();
+			if(c.isInstanceOf(CString.TYPE)) {
+				try {
+					MCEntityType.MCVanillaEntityType type = MCEntityType.MCVanillaEntityType.valueOf(c.val().toUpperCase());
+					if(!type.isSpawnable()) {
+						env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions, new CompilerWarning(
+								"The entity type " + c.val() + " cannot be spawned by " + getName(),
+								c.getTarget(), null));
+					}
+				} catch (IllegalArgumentException ex) {
+					env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions, new CompilerWarning(
+							c.val() + " is not a valid enum in com.commandhelper.EntityType",
+							c.getTarget(), null));
+				}
+			}
+			return null;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
 	}
 
@@ -1696,7 +1804,6 @@ public class EntityManagement {
 			docs = docs.replace("%HORSE_STYLE%", StringUtils.Join(MCHorsePattern.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%LLAMA_COLOR%", StringUtils.Join(MCLlamaColor.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%ROTATION%", StringUtils.Join(MCRotation.values(), ", ", ", or ", " or "));
-			docs = docs.replace("%OCELOT_TYPE%", StringUtils.Join(MCOcelotType.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%PARROT_TYPE%", StringUtils.Join(MCParrotType.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%ART%", StringUtils.Join(MCArt.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%DYE_COLOR%", StringUtils.Join(MCDyeColor.values(), ", ", ", or ", " or "));
@@ -1711,6 +1818,7 @@ public class EntityManagement {
 			docs = docs.replace("%MUSHROOM_COW_TYPE%", StringUtils.Join(MCMushroomCowType.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%PANDA_GENE%", StringUtils.Join(MCPanda.Gene.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%AXOLOTL_TYPE%", StringUtils.Join(MCAxolotlType.values(), ", ", ", or ", " or "));
+			docs = docs.replace("%FROG_TYPE%", StringUtils.Join(MCFrogType.values(), ", ", ", or ", " or "));
 			for(Field field : entity_spec.class.getDeclaredFields()) {
 				try {
 					String name = field.getName();
@@ -1762,13 +1870,12 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_ARROW_CRITICAL, CBoolean.get(arrow.isCritical()), t);
 					specArray.set(entity_spec.KEY_ARROW_KNOCKBACK, new CInt(arrow.getKnockbackStrength(), t), t);
 					specArray.set(entity_spec.KEY_ARROW_DAMAGE, new CDouble(arrow.getDamage(), t), t);
-					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_14)) {
-						CArray tippedmeta = CArray.GetAssociativeArray(t);
-						CArray tippedeffects = ObjectGenerator.GetGenerator().potions(arrow.getCustomEffects(), t);
-						tippedmeta.set("potions", tippedeffects, t);
-						tippedmeta.set("base", ObjectGenerator.GetGenerator().potionData(arrow.getBasePotionData(), t), t);
-						specArray.set(entity_spec.KEY_TIPPEDARROW_POTIONMETA, tippedmeta, t);
-					}
+					specArray.set(entity_spec.KEY_ARROW_PIERCE_LEVEL, new CInt(arrow.getPierceLevel(), t), t);
+					CArray tippedmeta = CArray.GetAssociativeArray(t);
+					CArray tippedeffects = ObjectGenerator.GetGenerator().potions(arrow.getCustomEffects(), t);
+					tippedmeta.set("potions", tippedeffects, t);
+					tippedmeta.set("base", ObjectGenerator.GetGenerator().potionData(arrow.getBasePotionData(), t), t);
+					specArray.set(entity_spec.KEY_TIPPEDARROW_POTIONMETA, tippedmeta, t);
 					break;
 				case ARMOR_STAND:
 					MCArmorStand stand = (MCArmorStand) entity;
@@ -1820,6 +1927,7 @@ public class EntityManagement {
 				case CREEPER:
 					MCCreeper creeper = (MCCreeper) entity;
 					specArray.set(entity_spec.KEY_CREEPER_POWERED, CBoolean.get(creeper.isPowered()), t);
+					specArray.set(entity_spec.KEY_CREEPER_FUSETICKS, new CInt(creeper.getFuseTicks(), t), t);
 					specArray.set(entity_spec.KEY_CREEPER_MAXFUSETICKS, new CInt(creeper.getMaxFuseTicks(), t), t);
 					specArray.set(entity_spec.KEY_CREEPER_EXPLOSIONRADIUS, new CInt(creeper.getExplosionRadius(), t), t);
 					break;
@@ -1847,6 +1955,11 @@ public class EntityManagement {
 						specArray.set(entity_spec.KEY_DROPPED_ITEM_THROWER, CNull.NULL, t);
 					} else {
 						specArray.set(entity_spec.KEY_DROPPED_ITEM_THROWER, new CString(thrower.toString(), t), t);
+					}
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_18_X)) {
+						specArray.set(entity_spec.KEY_DROPPED_ITEM_DESPAWN, CBoolean.get(item.willDespawn()), t);
+					} else {
+						specArray.set(entity_spec.KEY_DROPPED_ITEM_DESPAWN, CBoolean.TRUE, t);
 					}
 					break;
 				case ENDER_CRYSTAL:
@@ -1910,12 +2023,17 @@ public class EntityManagement {
 						fe.push(ObjectGenerator.GetGenerator().fireworkEffect(effect, t), t);
 					}
 					specArray.set(entity_spec.KEY_FIREWORK_EFFECTS, fe, t);
+					specArray.set(entity_spec.KEY_FIREWORK_ANGLED, CBoolean.get(firework.isShotAtAngle()), t);
 					break;
 				case FOX:
 					MCFox fox = (MCFox) entity;
 					specArray.set(entity_spec.KEY_GENERIC_SITTING, CBoolean.get(fox.isSitting()), t);
 					specArray.set(entity_spec.KEY_FOX_CROUCHING, CBoolean.get(fox.isCrouching()), t);
 					specArray.set(entity_spec.KEY_FOX_TYPE, fox.getVariant().name(), t);
+					break;
+				case FROG:
+					MCFrog frog = (MCFrog) entity;
+					specArray.set(entity_spec.KEY_FROG_TYPE, frog.getFrogType().name(), t);
 					break;
 				case GOAT:
 					MCGoat goat = (MCGoat) entity;
@@ -1978,17 +2096,8 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_MINECART_OFFSET, new CInt(commandminecart.getDisplayBlockOffset(), t), t);
 					break;
 				case MUSHROOM_COW:
-					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_14)) {
-						MCMushroomCow cow = (MCMushroomCow) entity;
-						specArray.set(entity_spec.KEY_MUSHROOM_COW_TYPE, cow.getVariant().name(), t);
-					}
-					break;
-				case OCELOT:
-					if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_14)) {
-						MCOcelot ocelot = (MCOcelot) entity;
-						specArray.set(entity_spec.KEY_OCELOT_TYPE, new CString(ocelot.getCatType().name(), t), t);
-						specArray.set(entity_spec.KEY_GENERIC_SITTING, CBoolean.get(ocelot.isSitting()), t);
-					}
+					MCMushroomCow cow = (MCMushroomCow) entity;
+					specArray.set(entity_spec.KEY_MUSHROOM_COW_TYPE, cow.getVariant().name(), t);
 					break;
 				case PAINTING:
 					MCPainting painting = (MCPainting) entity;
@@ -1998,6 +2107,12 @@ public class EntityManagement {
 					MCPanda panda = (MCPanda) entity;
 					specArray.set(entity_spec.KEY_PANDA_MAINGENE, new CString(panda.getMainGene().name(), t), t);
 					specArray.set(entity_spec.KEY_PANDA_HIDDENGENE, new CString(panda.getHiddenGene().name(), t), t);
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19)) {
+						specArray.set(entity_spec.KEY_PANDA_EATING, CBoolean.get(panda.isEating()), t);
+						specArray.set(entity_spec.KEY_PANDA_ONBACK, CBoolean.get(panda.isOnBack()), t);
+						specArray.set(entity_spec.KEY_PANDA_ROLLING, CBoolean.get(panda.isRolling()), t);
+						specArray.set(entity_spec.KEY_PANDA_SNEEZING, CBoolean.get(panda.isSneezing()), t);
+					}
 					break;
 				case PARROT:
 					MCParrot parrot = (MCParrot) entity;
@@ -2073,24 +2188,12 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_SPECTRAL_ARROW_GLOWING_TICKS, new CInt(spectral.getGlowingTicks(), t), t);
 					break;
 				case SPLASH_POTION:
-				case LINGERING_POTION: // 1.13 only
 					MCThrownPotion potion = (MCThrownPotion) entity;
 					specArray.set(entity_spec.KEY_SPLASH_POTION_ITEM, ObjectGenerator.GetGenerator().item(potion.getItem(), t), t);
 					break;
 				case STRIDER:
 					MCStrider strider = (MCStrider) entity;
 					specArray.set(entity_spec.KEY_STEERABLE_SADDLED, CBoolean.get(strider.isSaddled()), t);
-					break;
-				case TIPPED_ARROW: // 1.13 only
-					MCTippedArrow tippedarrow = (MCTippedArrow) entity;
-					specArray.set(entity_spec.KEY_ARROW_CRITICAL, CBoolean.get(tippedarrow.isCritical()), t);
-					specArray.set(entity_spec.KEY_ARROW_KNOCKBACK, new CInt(tippedarrow.getKnockbackStrength(), t), t);
-					specArray.set(entity_spec.KEY_ARROW_DAMAGE, new CDouble(tippedarrow.getDamage(), t), t);
-					CArray tippedmeta = CArray.GetAssociativeArray(t);
-					CArray tippedeffects = ObjectGenerator.GetGenerator().potions(tippedarrow.getCustomEffects(), t);
-					tippedmeta.set("potions", tippedeffects, t);
-					tippedmeta.set("base", ObjectGenerator.GetGenerator().potionData(tippedarrow.getBasePotionData(), t), t);
-					specArray.set(entity_spec.KEY_TIPPEDARROW_POTIONMETA, tippedmeta, t);
 					break;
 				case TRIDENT:
 					MCTrident trident = (MCTrident) entity;
@@ -2124,6 +2227,9 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_WOLF_ANGRY, CBoolean.get(wolf.isAngry()), t);
 					specArray.set(entity_spec.KEY_WOLF_COLOR, new CString(wolf.getCollarColor().name(), t), t);
 					specArray.set(entity_spec.KEY_GENERIC_SITTING, CBoolean.get(wolf.isSitting()), t);
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19)) {
+						specArray.set(entity_spec.KEY_WOLF_INTERESTED, CBoolean.get(wolf.isInterested()), t);
+					}
 					break;
 				case ZOGLIN:
 					MCZoglin zoglin = (MCZoglin) entity;
@@ -2141,7 +2247,6 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_VILLAGER_PROFESSION, new CString(zombievillager.getProfession().name(), t), t);
 					break;
 				case ZOMBIFIED_PIGLIN:
-				case PIG_ZOMBIE:
 					MCPigZombie pigZombie = (MCPigZombie) entity;
 					specArray.set(entity_spec.KEY_ZOMBIFIED_PIGLIN_ANGRY, CBoolean.get(pigZombie.isAngry()), t);
 					specArray.set(entity_spec.KEY_ZOMBIFIED_PIGLIN_ANGER, new CInt(pigZombie.getAnger(), t), t);
@@ -2173,6 +2278,7 @@ public class EntityManagement {
 		private static final String KEY_ARROW_CRITICAL = "critical";
 		private static final String KEY_ARROW_KNOCKBACK = "knockback";
 		private static final String KEY_ARROW_DAMAGE = "damage";
+		private static final String KEY_ARROW_PIERCE_LEVEL = "piercelevel";
 		private static final String KEY_ARMORSTAND_ARMS = "arms";
 		private static final String KEY_ARMORSTAND_BASEPLATE = "baseplate";
 		private static final String KEY_ARMORSTAND_GRAVITY = "gravity";
@@ -2190,12 +2296,14 @@ public class EntityManagement {
 		private static final String KEY_CAT_TYPE = "type";
 		private static final String KEY_CAT_COLOR = "color";
 		private static final String KEY_CREEPER_POWERED = "powered";
+		private static final String KEY_CREEPER_FUSETICKS = "fuseticks";
 		private static final String KEY_CREEPER_MAXFUSETICKS = "maxfuseticks";
 		private static final String KEY_CREEPER_EXPLOSIONRADIUS = "explosionradius";
 		private static final String KEY_DROPPED_ITEM_ITEMSTACK = "itemstack";
 		private static final String KEY_DROPPED_ITEM_PICKUPDELAY = "pickupdelay";
 		private static final String KEY_DROPPED_ITEM_OWNER = "owner";
 		private static final String KEY_DROPPED_ITEM_THROWER = "thrower";
+		private static final String KEY_DROPPED_ITEM_DESPAWN = "despawn";
 		private static final String KEY_ENDERCRYSTAL_BASE = "base";
 		private static final String KEY_ENDERCRYSTAL_BEAMTARGET = "beamtarget";
 		private static final String KEY_ENDEREYE_DESPAWNTICKS = "despawnticks";
@@ -2212,8 +2320,10 @@ public class EntityManagement {
 		private static final String KEY_FIREBALL_DIRECTION = "direction";
 		private static final String KEY_FIREWORK_STRENGTH = "strength";
 		private static final String KEY_FIREWORK_EFFECTS = "effects";
+		private static final String KEY_FIREWORK_ANGLED = "angled";
 		private static final String KEY_FOX_CROUCHING = "crouching";
 		private static final String KEY_FOX_TYPE = "type";
+		private static final String KEY_FROG_TYPE = "type";
 		private static final String KEY_GOAT_SCREAMING = "screaming";
 		private static final String KEY_HORSE_COLOR = "color";
 		private static final String KEY_HORSE_STYLE = "style";
@@ -2234,10 +2344,13 @@ public class EntityManagement {
 		private static final String KEY_MINECART_COMMAND_COMMAND = "command";
 		private static final String KEY_MINECART_COMMAND_CUSTOMNAME = "customname";
 		private static final String KEY_MUSHROOM_COW_TYPE = "type";
-		private static final String KEY_OCELOT_TYPE = "type";
 		private static final String KEY_PAINTING_ART = "type";
 		private static final String KEY_PANDA_MAINGENE = "maingene";
 		private static final String KEY_PANDA_HIDDENGENE = "hiddengene";
+		private static final String KEY_PANDA_EATING = "eating";
+		private static final String KEY_PANDA_ONBACK = "onback";
+		private static final String KEY_PANDA_ROLLING = "rolling";
+		private static final String KEY_PANDA_SNEEZING = "sneezing";
 		private static final String KEY_PARROT_TYPE = "type";
 		private static final String KEY_PHANTOM_SIZE = "size";
 		private static final String KEY_PIGLIN_ZOMBIFICATION_IMMUNE = "zombificationimmune";
@@ -2267,6 +2380,7 @@ public class EntityManagement {
 		private static final String KEY_WITHER_SKULL_CHARGED = "charged";
 		private static final String KEY_WOLF_ANGRY = "angry";
 		private static final String KEY_WOLF_COLOR = "color";
+		private static final String KEY_WOLF_INTERESTED = "interested";
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
@@ -2469,10 +2583,14 @@ public class EntityManagement {
 								}
 								arrow.setDamage(d);
 								break;
-							case entity_spec.KEY_TIPPEDARROW_POTIONMETA:
-								if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_14)) {
-									throwException(index, t);
+							case entity_spec.KEY_ARROW_PIERCE_LEVEL:
+								int level = ArgumentValidation.getInt32(specArray.get(index, t), t);
+								if(level < 0 || level > 127) {
+									throw new CRERangeException("Pierce level must be 0 to 127.", t);
 								}
+								arrow.setPierceLevel(level);
+								break;
+							case entity_spec.KEY_TIPPEDARROW_POTIONMETA:
 								Mixed c = specArray.get(index, t);
 								if(c.isInstanceOf(CArray.TYPE)) {
 									CArray meta = (CArray) c;
@@ -2656,6 +2774,13 @@ public class EntityManagement {
 									throw new CRERangeException("Ticks must not be negative.", t);
 								}
 								break;
+							case entity_spec.KEY_CREEPER_FUSETICKS:
+								try {
+									creeper.setFuseTicks(ArgumentValidation.getInt32(specArray.get(index, t), t));
+								} catch (IllegalArgumentException ex) {
+									throw new CRERangeException(ex.getMessage(), t);
+								}
+								break;
 							case entity_spec.KEY_CREEPER_EXPLOSIONRADIUS:
 								try {
 									creeper.setExplosionRadius(ArgumentValidation.getInt32(specArray.get(index, t), t));
@@ -2725,6 +2850,11 @@ public class EntityManagement {
 									item.setThrower(null);
 								} else {
 									item.setThrower(Static.GetUUID(thrower, t));
+								}
+								break;
+							case entity_spec.KEY_DROPPED_ITEM_DESPAWN:
+								if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_18_X)) {
+									item.setWillDespawn(ArgumentValidation.getBooleanObject(specArray.get(index, t), t));
 								}
 								break;
 							default:
@@ -2895,6 +3025,9 @@ public class EntityManagement {
 									}
 								}
 								break;
+							case entity_spec.KEY_FIREWORK_ANGLED:
+								firework.setShotAtAngle(ArgumentValidation.getBooleanObject(specArray.get(index, t), t));
+								break;
 							default:
 								throwException(index, t);
 						}
@@ -2916,6 +3049,22 @@ public class EntityManagement {
 									fox.setVariant(MCFoxType.valueOf(specArray.get(index, t).val().toUpperCase()));
 								} catch (IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid fox type: " + specArray.get(index, t).val(), t);
+								}
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
+				case FROG:
+					MCFrog frog = (MCFrog) entity;
+					for(String index : specArray.stringKeySet()) {
+						switch(index.toLowerCase()) {
+							case entity_spec.KEY_FROG_TYPE:
+								try {
+									frog.setFrogType(MCFrogType.valueOf(specArray.get(index, t).val().toUpperCase()));
+								} catch (IllegalArgumentException exception) {
+									throw new CREFormatException("Invalid frog type: " + specArray.get(index, t).val(), t);
 								}
 								break;
 							default:
@@ -3117,41 +3266,18 @@ public class EntityManagement {
 					}
 					break;
 				case MUSHROOM_COW:
-					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_14)) {
-						MCMushroomCow cow = (MCMushroomCow) entity;
-						for(String index : specArray.stringKeySet()) {
-							switch(index.toLowerCase()) {
-								case entity_spec.KEY_MUSHROOM_COW_TYPE:
-									try {
-										cow.setVariant(MCMushroomCowType.valueOf(specArray.get(index, t).val().toUpperCase()));
-									} catch (IllegalArgumentException exception) {
-										throw new CREFormatException("Invalid mushroom cow type: " + specArray.get(index, t).val(), t);
-									}
-									break;
-								default:
-									throwException(index, t);
-							}
-						}
-					}
-					break;
-				case OCELOT:
-					if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_14)) {
-						MCOcelot ocelot = (MCOcelot) entity;
-						for(String index : specArray.stringKeySet()) {
-							switch(index.toLowerCase()) {
-								case entity_spec.KEY_OCELOT_TYPE:
-									try {
-										ocelot.setCatType(MCOcelotType.valueOf(specArray.get(index, t).val().toUpperCase()));
-									} catch (IllegalArgumentException exception) {
-										throw new CREFormatException("Invalid ocelot type: " + specArray.get(index, t).val(), t);
-									}
-									break;
-								case entity_spec.KEY_GENERIC_SITTING:
-									ocelot.setSitting(ArgumentValidation.getBoolean(specArray.get(index, t), t));
-									break;
-								default:
-									throwException(index, t);
-							}
+					MCMushroomCow cow = (MCMushroomCow) entity;
+					for(String index : specArray.stringKeySet()) {
+						switch(index.toLowerCase()) {
+							case entity_spec.KEY_MUSHROOM_COW_TYPE:
+								try {
+									cow.setVariant(MCMushroomCowType.valueOf(specArray.get(index, t).val().toUpperCase()));
+								} catch (IllegalArgumentException exception) {
+									throw new CREFormatException("Invalid mushroom cow type: " + specArray.get(index, t).val(), t);
+								}
+								break;
+							default:
+								throwException(index, t);
 						}
 					}
 					break;
@@ -3188,6 +3314,18 @@ public class EntityManagement {
 								} catch (IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid panda gene: " + specArray.get(index, t).val(), t);
 								}
+								break;
+							case entity_spec.KEY_PANDA_EATING:
+								panda.setEating(ArgumentValidation.getBooleanObject(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_PANDA_ONBACK:
+								panda.setOnBack(ArgumentValidation.getBooleanObject(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_PANDA_ROLLING:
+								panda.setRolling(ArgumentValidation.getBooleanObject(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_PANDA_SNEEZING:
+								panda.setSneezing(ArgumentValidation.getBooleanObject(specArray.get(index, t), t));
 								break;
 							default:
 								throwException(index, t);
@@ -3424,7 +3562,6 @@ public class EntityManagement {
 						}
 					}
 					break;
-				case LINGERING_POTION:
 				case SPLASH_POTION:
 					MCThrownPotion potion = (MCThrownPotion) entity;
 					for(String index : specArray.stringKeySet()) {
@@ -3448,58 +3585,6 @@ public class EntityManagement {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_STEERABLE_SADDLED:
 								strider.setSaddled(ArgumentValidation.getBoolean(specArray.get(index, t), t));
-								break;
-							default:
-								throwException(index, t);
-						}
-					}
-					break;
-				case TIPPED_ARROW:
-					MCTippedArrow tippedarrow = (MCTippedArrow) entity;
-					for(String index : specArray.stringKeySet()) {
-						switch(index.toLowerCase()) {
-							case entity_spec.KEY_ARROW_CRITICAL:
-								tippedarrow.setCritical(ArgumentValidation.getBoolean(specArray.get(index, t), t));
-								break;
-							case entity_spec.KEY_ARROW_KNOCKBACK:
-								int k = ArgumentValidation.getInt32(specArray.get(index, t), t);
-								if(k < 0) {
-									throw new CRERangeException("Knockback can not be negative.", t);
-								} else {
-									tippedarrow.setKnockbackStrength(k);
-								}
-								break;
-							case entity_spec.KEY_ARROW_DAMAGE:
-								double d = ArgumentValidation.getDouble(specArray.get(index, t), t);
-								if(d < 0) {
-									throw new CRERangeException("Damage cannot be negative.", t);
-								}
-								tippedarrow.setDamage(d);
-								break;
-							case entity_spec.KEY_TIPPEDARROW_POTIONMETA:
-								Mixed c = specArray.get(index, t);
-								if(c.isInstanceOf(CArray.TYPE)) {
-									CArray meta = (CArray) c;
-									if(meta.containsKey("base")) {
-										Mixed base = meta.get("base", t);
-										if(base.isInstanceOf(CArray.TYPE)) {
-											MCPotionData pd = ObjectGenerator.GetGenerator().potionData((CArray) base, t);
-											tippedarrow.setBasePotionData(pd);
-										}
-									}
-									if(meta.containsKey("potions")) {
-										tippedarrow.clearCustomEffects();
-										Mixed potions = meta.get("potions", t);
-										if(potions.isInstanceOf(CArray.TYPE)) {
-											List<MCLivingEntity.MCEffect> list = ObjectGenerator.GetGenerator().potions((CArray) potions, t);
-											for(MCLivingEntity.MCEffect effect : list) {
-												tippedarrow.addCustomEffect(effect);
-											}
-										}
-									}
-								} else {
-									throw new CRECastException("TippedArrow potion meta must be an array", t);
-								}
 								break;
 							default:
 								throwException(index, t);
@@ -3639,6 +3724,9 @@ public class EntityManagement {
 							case entity_spec.KEY_GENERIC_SITTING:
 								wolf.setSitting(ArgumentValidation.getBoolean(specArray.get(index, t), t));
 								break;
+							case entity_spec.KEY_WOLF_INTERESTED:
+								wolf.setInterested(ArgumentValidation.getBooleanObject(specArray.get(index, t), t));
+								break;
 							default:
 								throwException(index, t);
 						}
@@ -3690,7 +3778,6 @@ public class EntityManagement {
 					}
 					break;
 				case ZOMBIFIED_PIGLIN:
-				case PIG_ZOMBIE:
 					MCPigZombie pigZombie = (MCPigZombie) entity;
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
@@ -4438,8 +4525,8 @@ public class EntityManagement {
 			int strength = 2;
 			if(options.containsKey("strength")) {
 				strength = ArgumentValidation.getInt32(options.get("strength", t), t);
-				if(strength < 0 || strength > 128) {
-					throw new CRERangeException("Strength must be between 0 and 128", t);
+				if(strength > 127) {
+					throw new CRERangeException("Strength cannot be higher than 127", t);
 				}
 			}
 
@@ -4500,7 +4587,8 @@ public class EntityManagement {
 					+ "{| cellspacing=\"1\" cellpadding=\"1\" border=\"1\" class=\"wikitable\"\n"
 					+ "! Array key !! Description !! Default\n"
 					+ "|-\n"
-					+ "| strength || A number specifying how far up the firework should go || 2\n"
+					+ "| strength || A number indicating the flight duration of the rocket equal to the amount of"
+					+ " gunpowder used to craft a rocket. (negative numbers detonate immediately) || 2\n"
 					+ "|-\n"
 					+ "| flicker || A boolean, determining if the firework will flicker || false\n"
 					+ "|-\n"

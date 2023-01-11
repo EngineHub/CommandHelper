@@ -14,16 +14,7 @@ public class BukkitMCSound extends MCSound<Sound> {
 
 	@Override
 	public String name() {
-		return getAbstracted() == MCVanillaSound.UNKNOWN ? concreteName() : getAbstracted().name();
-	}
-
-	@Override
-	public String concreteName() {
-		Sound concrete = getConcrete();
-		if(concrete == null) {
-			return "null";
-		}
-		return concrete.name();
+		return getAbstracted() == MCVanillaSound.UNKNOWN ? getConcrete().name() : getAbstracted().name();
 	}
 
 	// This way we don't take up extra memory on non-bukkit implementations

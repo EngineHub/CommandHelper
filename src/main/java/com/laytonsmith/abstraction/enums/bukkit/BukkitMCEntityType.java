@@ -3,7 +3,6 @@ package com.laytonsmith.abstraction.enums.bukkit;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCCommandMinecart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCEnderSignal;
-import com.laytonsmith.abstraction.bukkit.entities.BukkitMCFireball;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCFishHook;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCHopperMinecart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCItem;
@@ -15,7 +14,6 @@ import com.laytonsmith.abstraction.bukkit.entities.BukkitMCStorageMinecart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCTNT;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCThrownPotion;
 import com.laytonsmith.abstraction.enums.MCEntityType;
-import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
@@ -35,7 +33,6 @@ public class BukkitMCEntityType extends MCEntityType<EntityType> {
 
 	// This way we don't take up extra memory on non-bukkit implementations
 	public static void build() {
-		NULL = new BukkitMCEntityType(EntityType.UNKNOWN, MCVanillaEntityType.UNKNOWN);
 		for(MCVanillaEntityType v : MCVanillaEntityType.values()) {
 			if(v.existsIn(Static.getServer().getMinecraftVersion())) {
 				EntityType type;
@@ -66,11 +63,6 @@ public class BukkitMCEntityType extends MCEntityType<EntityType> {
 	}
 
 	@Override
-	public String concreteName() {
-		return getConcrete().name();
-	}
-
-	@Override
 	public boolean isSpawnable() {
 		if(getAbstracted() == MCVanillaEntityType.UNKNOWN) {
 			return getConcrete() != EntityType.UNKNOWN && getConcrete().isSpawnable();
@@ -90,15 +82,8 @@ public class BukkitMCEntityType extends MCEntityType<EntityType> {
 		if(type != null) {
 			return (BukkitMCEntityType) type;
 		}
-		return (BukkitMCEntityType) NULL;
-	}
-
-	public static BukkitMCEntityType valueOfConcrete(String test) {
-		try {
-			return valueOfConcrete(EntityType.valueOf(test));
-		} catch (IllegalArgumentException iae) {
-			return (BukkitMCEntityType) NULL;
-		}
+		MSLog.GetLogger().e(MSLog.Tags.GENERAL, "Bukkit EntityType missing in BUKKIT_MAP: " + test.name(), Target.UNKNOWN);
+		return new BukkitMCEntityType(test, MCVanillaEntityType.UNKNOWN);
 	}
 
 	// Add exceptions here
@@ -125,11 +110,7 @@ public class BukkitMCEntityType extends MCEntityType<EntityType> {
 				wrapperClass = BukkitMCEnderSignal.class;
 				break;
 			case FIREBALL:
-				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_15_X)) {
-					wrapperClass = BukkitMCSizedFireball.class;
-				} else {
-					wrapperClass = BukkitMCFireball.class;
-				}
+				wrapperClass = BukkitMCSizedFireball.class;
 				break;
 			case FISHING_HOOK:
 				wrapperClass = BukkitMCFishHook.class;
@@ -137,7 +118,6 @@ public class BukkitMCEntityType extends MCEntityType<EntityType> {
 			case LIGHTNING:
 				wrapperClass = BukkitMCLightningStrike.class;
 				break;
-			case LINGERING_POTION:
 			case SPLASH_POTION:
 				wrapperClass = BukkitMCThrownPotion.class;
 				break;

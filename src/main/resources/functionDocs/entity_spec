@@ -26,10 +26,12 @@ This particle array must contain a "particle" key, and supports the keys "block"
 * %KEY_ARROW_CRITICAL%: If this arrow is critical. (boolean)
 * %KEY_ARROW_KNOCKBACK%: The knockback strength. (int)
 * %KEY_ARROW_DAMAGE%: The amount of damage. (double)
+* %KEY_ARROW_PIERCE_LEVEL%: The remaining times that this arrow can pierce through an entity. (int from 0 and 127)
 * %KEY_TIPPEDARROW_POTIONMETA%: An associative array with a "base" potion array and a "potions" array of effect arrays for a tipped arrow.
 |-
 | ARMOR_STAND
 |
+Armor stands are sometimes treated like mobs. As such, get_mob_equipment() is used for getting the items in its slots.
 * %KEY_ARMORSTAND_ARMS%: Whether or not the ArmorStand has arms. Defaults to false.
 * %KEY_ARMORSTAND_BASEPLATE%: Whether or not the ArmorStand has a base plate. Defaults to true.
 * %KEY_ARMORSTAND_GRAVITY%: If the ArmorStand has gravity (falls) or not (floats in midair). Defaults to true.
@@ -37,7 +39,7 @@ This particle array must contain a "particle" key, and supports the keys "block"
 * %KEY_ARMORSTAND_SMALLSIZE%: Whether or not the ArmorStand is scaled to child-size. Defaults to false.
 * %KEY_ARMORSTAND_VISIBLE%: Whether or not the ArmorStand is visible. Defaults to true.
 * %KEY_ARMORSTAND_POSES%: An array where the keys are body parts, and the values are 3D vector arrays.
-Each component of those arrays is the angle (in radians) of the rotation of that body part around the corresponding axis,
+Each component of the 'poses' arrays is the angle (in radians) of the rotation of that body part around the corresponding axis,
 relative to the default position (where all angles are 0). Setting these values uses an update method,
 where only values specified will be changed. This allows you to rotate a single body part around a single axis
 without knowing the rotations on the other axis or of other body parts beforehand.
@@ -66,7 +68,8 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | CREEPER
 | 
 * %KEY_CREEPER_POWERED%: If the Creeper is powered or not.
-* %KEY_CREEPER_MAXFUSETICKS%: The max amount of time in server ticks that the Creeper can be primed before exploding.
+* %KEY_CREEPER_MAXFUSETICKS%: The max amount of time in server ticks that the Creeper can be primed before exploding. (must not be negative)
+* %KEY_CREEPER_FUSETICKS%: The amount of time in server ticks that the Creeper has been primed. (must below or equals maxfuseticks and not negative)
 * %KEY_CREEPER_EXPLOSIONRADIUS%: The radius of the Creeper's explosion.
 |-
 | DONKEY, MULE
@@ -83,6 +86,7 @@ without knowing the rotations on the other axis or of other body parts beforehan
 * %KEY_DROPPED_ITEM_PICKUPDELAY%: The delay before the item is available to be picked up.
 * %KEY_DROPPED_ITEM_OWNER%: The UUID of the player that owns this item, or null. Prevents other players from picking up item.
 * %KEY_DROPPED_ITEM_THROWER%: The UUID of the entity that threw this item, or null.
+* %KEY_DROPPED_ITEM_DESPAWN%: Whether or not the item will despawn after a time. (modifiable in MC 1.18.2 or later)
 |-
 | ENDER_CRYSTAL
 |
@@ -126,12 +130,17 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | 
 * %KEY_FIREWORK_STRENGTH%: The firework rocket's flight time.
 * %KEY_FIREWORK_EFFECTS%: An array of firework effect arrays. (see {{function|launch_firework}})
+* %KEY_FIREWORK_ANGLED%: Whether or not the rocket was fired at an angle. (i.e. from a crossbow or dispenser)
 |-
 | FOX
 | 
 * %KEY_GENERIC_SITTING%: Whether or not the fox is sitting.
 * %KEY_FOX_CROUCHING%: Whether or not the fox is crouching.
 * %KEY_FOX_TYPE%: The type of fox. (can be %FOX_TYPE%)
+|-
+| FROG
+|
+* %KEY_FROG_TYPE%: The type of frog. (can be %FROG_TYPE%)
 |-
 | GOAT
 |
@@ -198,6 +207,10 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | 
 * %KEY_PANDA_MAINGENE%: The dominant trait for this panda (can be %PANDA_GENE%).
 * %KEY_PANDA_HIDDENGENE%: The recessive trait for this panda.
+* %KEY_PANDA_EATING%: Whether the panda is eating. (1.19)
+* %KEY_PANDA_ONBACK%: Whether the panda is laying on its back. (1.19)
+* %KEY_PANDA_ROLLING%: Whether the panda is rolling. (1.19)
+* %KEY_PANDA_SNEEZING%: Whether the panda is sneezing. (1.19)
 |- 
 | PARROT
 | 
@@ -300,6 +313,7 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | 
 * %KEY_WOLF_ANGRY%: If the wolf is angry.
 * %KEY_WOLF_COLOR%: The collar color of the wolf (can be %DYE_COLOR%).
+* %KEY_WOLF_INTERESTED%: Whether the wolf is interested, tilting its head. (1.19)
 * %KEY_GENERIC_SITTING%: If the wolf is sitting.
 |- 
 | ZOMBIE, HUSK, DROWNED, ZOGLIN

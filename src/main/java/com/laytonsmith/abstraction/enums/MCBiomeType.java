@@ -17,9 +17,6 @@ public abstract class MCBiomeType<Concrete> extends DynamicEnum<MCBiomeType.MCVa
 
 	protected static final Map<String, MCBiomeType> MAP = new HashMap<>();
 
-	@SuppressWarnings("checkstyle:staticvariablename") // Fixing this violation might break dependents.
-	public static MCBiomeType NULL = null;
-
 	public MCBiomeType(MCVanillaBiomeType mcVanillaBiomeType, Concrete concrete) {
 		super(mcVanillaBiomeType, concrete);
 	}
@@ -42,7 +39,7 @@ public abstract class MCBiomeType<Concrete> extends DynamicEnum<MCBiomeType.MCVa
 	 * @return Names of available biome types
 	 */
 	public static Set<String> types() {
-		if(NULL == null) { // docs mode
+		if(MAP.isEmpty()) { // docs mode
 			Set<String> dummy = new HashSet<>();
 			for(final MCVanillaBiomeType t : MCVanillaBiomeType.values()) {
 				if(t.existsIn(MCVersion.CURRENT)) {
@@ -58,20 +55,15 @@ public abstract class MCBiomeType<Concrete> extends DynamicEnum<MCBiomeType.MCVa
 	 * @return Our own MCBiomeType list
 	 */
 	public static List<MCBiomeType> values() {
-		if(NULL == null) { // docs mode
+		if(MAP.isEmpty()) { // docs mode
 			ArrayList<MCBiomeType> dummy = new ArrayList<>();
 			for(final MCVanillaBiomeType t : MCVanillaBiomeType.values()) {
 				if(!t.existsIn(MCVersion.CURRENT)) {
 					continue;
 				}
-				dummy.add(new MCBiomeType<Object>(t, null) {
+				dummy.add(new MCBiomeType<>(t, null) {
 					@Override
 					public String name() {
-						return t.name();
-					}
-
-					@Override
-					public String concreteName() {
 						return t.name();
 					}
 				});
@@ -182,6 +174,8 @@ public abstract class MCBiomeType<Concrete> extends DynamicEnum<MCBiomeType.MCVa
 		WINDSWEPT_HILLS(MCVersion.MC1_18),
 		WINDSWEPT_SAVANNA(MCVersion.MC1_18),
 		WOODED_BADLANDS(MCVersion.MC1_18),
+		MANGROVE_SWAMP(MCVersion.MC1_19),
+		DEEP_DARK(MCVersion.MC1_19),
 		UNKNOWN(MCVersion.NEVER);
 
 		private final MCVersion since;

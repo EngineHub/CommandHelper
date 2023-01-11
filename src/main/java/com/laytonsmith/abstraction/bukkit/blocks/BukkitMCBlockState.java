@@ -25,7 +25,7 @@ public class BukkitMCBlockState extends BukkitMCMetadatable implements MCBlockSt
 
 	@Override
 	public MCMaterial getType() {
-		return new BukkitMCMaterial(bs.getType());
+		return BukkitMCMaterial.valueOfConcrete(bs.getType());
 	}
 
 	@Override
