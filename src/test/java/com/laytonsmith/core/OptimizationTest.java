@@ -2,6 +2,7 @@ package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.SimpleVersion;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
+import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
@@ -821,5 +822,17 @@ public class OptimizationTest {
 		} catch(ConfigCompileException ex) {
 			// pass
 		}
+	}
+
+	@Test
+	public void testIfWithMissingInnerStatement() throws Exception {
+		String script = "if(dyn(true)){\n"
+				+ "noop()\n"
+				+ "} else {\n"
+				+ "noop();\n"
+				+ "}";
+		optimize(script);
+		CompilerWarning warning = env.getEnv(CompilerEnvironment.class).getCompilerWarnings().get(0);
+		assertEquals(2, warning.getTarget().line());
 	}
 }
