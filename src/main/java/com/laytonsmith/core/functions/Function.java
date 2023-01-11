@@ -133,10 +133,10 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 	 * Allows functions to perform a rewrite step to rewrite the AST as received from the parser to a valid
 	 * executable AST. Optimizations should not yet be performed in this rewrite step.
 	 * Traversal is pre-order depth-first.
-	 * @param ast - The abstract syntax tree representing this function.
-	 * @param env - The environment.
-	 * @param envs - The set of expected environment classes at runtime.
-	 * @param exceptions - A set to put compile errors in.
+	 * @param ast The abstract syntax tree representing this function.
+	 * @param env The environment.
+	 * @param envs The set of expected environment classes at runtime.
+	 * @param exceptions A set to put compile errors in.
 	 * @return The rewritten AST node that should completely replace the AST node representing this function, or
 	 * {@code null} to not replace this AST node.
 	 */

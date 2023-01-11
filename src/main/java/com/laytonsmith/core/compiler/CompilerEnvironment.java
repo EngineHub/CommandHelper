@@ -134,6 +134,10 @@ public class CompilerEnvironment implements Environment.EnvironmentImpl {
 		this.logCompilerWarnings = logCompilerWarnings;
 	}
 
+	public void addFutureErrorCompilerWarning(String warning, Target t) {
+		addCompilerWarning(null, new CompilerWarning(warning, t, FileOptions.SuppressWarning.FutureError));
+	}
+
 	/**
 	 * Adds the compiler warning object to the environment, which can be used later by tools and such in a tool
 	 * specific way. Additionally, unless set in the environment otherwise, also logs the warning to the console.

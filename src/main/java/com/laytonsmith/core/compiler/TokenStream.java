@@ -74,7 +74,7 @@ public class TokenStream extends LinkedList<Token> {
 				} else if(c == ';') {
 					//We're done
 					inKey = true;
-					map.put(keyName.trim().toLowerCase(), buffer.toString());
+					map.put(keyName.trim().toLowerCase(), buffer.toString().trim());
 					buffer = new StringBuilder();
 				} else {
 					buffer.append(c);
@@ -83,7 +83,7 @@ public class TokenStream extends LinkedList<Token> {
 		}
 		if(buffer.length() > 0) {
 			if(!inKey) {
-				map.put(keyName.trim().toLowerCase(), buffer.toString());
+				map.put(keyName.trim().toLowerCase(), buffer.toString().trim());
 			} else {
 				if(!buffer.toString().trim().isEmpty()) {
 					map.put(buffer.toString().trim().toLowerCase(), "true");

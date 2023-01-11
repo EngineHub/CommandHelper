@@ -63,7 +63,7 @@ public abstract class SimpleBlockKeywordFunction extends Keyword {
 						}
 					}
 				}
-				list.get(keywordPosition).addChild(getArgumentOrNull(code));
+				list.get(keywordPosition).addChild(getArgumentOrNoop(code));
 				list.remove(keywordPosition + 1);
 			}
 		} else {

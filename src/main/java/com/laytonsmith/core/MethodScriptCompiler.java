@@ -1916,7 +1916,7 @@ public final class MethodScriptCompiler {
 		rewriteAutoconcats(tree, environment, envs, compilerErrors, true);
 		processLateKeywords(tree, environment, compilerErrors);
 		checkLinearComponents(tree, environment, compilerErrors);
-		postParseRewrite(rootNode, environment, envs, compilerErrors); // Pass rootNode since this might rewrite 'tree'.
+		postParseRewrite(rootNode, environment, envs, compilerErrors, true); // Pass rootNode since this might rewrite 'tree'.
 		moveNodeModifiersOffSyntheticNodes(tree);
 		tree = rootNode.getChildAt(0);
 		staticAnalysis.analyze(tree, environment, envs, compilerErrors);
@@ -2082,7 +2082,8 @@ public final class MethodScriptCompiler {
 			boolean isSelfStatement;
 			try {
 				isSelfStatement = node.getData() instanceof CFunction cf
-						&& cf.getCachedFunction() != null
+						&& cf.hasFunction()
+						&& cf.getFunction() != null
 						&& cf.getCachedFunction().isSelfStatement(node.getTarget(), env, node.getChildren(), envs);
 			} catch(ConfigCompileException ex) {
 				compilerErrors.add(ex);
@@ -2181,6 +2182,13 @@ public final class MethodScriptCompiler {
 			} else {
 				statements.addChild(autoconcat);
 			}
+			if(rewriteKeywords
+					&& autoconcat.getData() instanceof CFunction cf
+					&& autoconcat.getData().val().equals(Compiler.__statements__.NAME)
+					&& autoconcat.getChildren().size() > 1
+					&& root.getFileOptions().isStrict()) {
+				doMissingSemicolonError(autoconcat.getChildAt(0).getTarget(), compilerExceptions);
+			}
 		}
 		if(statements.getChildren().size() == 1 && statements.getChildAt(0).getData() instanceof CFunction cf) {
 			if(statements.getChildAt(0).isSyntheticNode()
@@ -2218,10 +2226,43 @@ public final class MethodScriptCompiler {
 			try {
 				ParseTree ret = __autoconcat__.rewrite(root.getChildren(), returnSConcat, envs);
 				root.replace(ret);
+				// TODO: Remove this. This is a stopgap measure, because some keyword handlers
+				// don't remove the keywords before this step, and they are handled in a postParseRewrite
+				// override. This goes against the idea of the keyword handlers, but in the meantime,
+				// it means that we can't always detect if it's supposed to be a statement or not,
+				// so just bypass the check in this case.
+				boolean hasKeyword = false;
+				for(ParseTree node : root.getChildren()) {
+					if(node.getData() instanceof CKeyword) {
+						hasKeyword = true;
+						break;
+					}
+				}
+				if(rewriteKeywords && !hasKeyword && root.getFileOptions().isStrict()
+						&& root.getData() instanceof CFunction cf
+						&& cf.val().equals(Compiler.__statements__.NAME)
+						&& ret.numberOfChildren() > 1
+						&& !ongoingChildren.isEmpty()) {
+					// The last statement was expected to have a semicolon, but didn't.
+					doMissingSemicolonError(root.getChildAt(root.numberOfChildren() - 1)
+							.getTarget(), compilerExceptions);
+				}
 			} catch (ConfigCompileException ex) {
 				compilerExceptions.add(ex);
 			}
 		}
+	}
+
+	private static void doMissingSemicolonError(Target target, Set<ConfigCompileException> exceptions) {
+		String message = "Semicolon ';' expected.";
+//		if(MSVersion.LATEST.lte(new SimpleVersion(3, 3, 6))) {
+//			// Warning
+//			message += " This will be an error in the next version.";
+//			env.getEnv(CompilerEnvironment.class).addFutureErrorCompilerWarning(message, target);
+//		} else {
+			// Error
+			exceptions.add(new ConfigCompileException(message, target));
+//		}
 	}
 
 	/**
@@ -2230,16 +2271,17 @@ public final class MethodScriptCompiler {
 	 * Additionally, this step traverses all {@link CFunction} nodes and ensures that they either have their represented
 	 * function cached or are unknown by the compiler.
 	 * Traversal is pre-order depth-first.
-	 * @param ast - The abstract syntax tree representing this function.
-	 * @param env - The environment.
-	 * @param envs - The set of expected environment classes at runtime.
-	 * @param exceptions - A set to put compile errors in.
+	 * @param ast The abstract syntax tree representing this function.
+	 * @param env The environment.
+	 * @param envs The set of expected environment classes at runtime.
+	 * @param exceptions A set to put compile errors in.
+	 * @param topLevel True if this is the top level of the parse tree. External code should always pass in true here.
 	 * @return The rewritten AST node that should completely replace the AST node representing this function, or
 	 * {@code null} to not replace this AST node. Note that the rewrite will be called on this newly returned AST node
 	 * if it is different from the passed node.
 	 */
 	private static ParseTree postParseRewrite(ParseTree ast, Environment env,
-			Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> exceptions) {
+			Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> exceptions, boolean topLevel) {
 		Mixed node = ast.getData();
 		if(node instanceof CFunction cFunc) {
 			if(cFunc.hasFunction()) {
@@ -2254,9 +2296,10 @@ public final class MethodScriptCompiler {
 				}
 			}
 		}
+		boolean isStrict = ast.getFileOptions().isStrict();
 		for(int i = 0; i < ast.numberOfChildren(); i++) {
 			ParseTree child = ast.getChildAt(i);
-			ParseTree newChild = postParseRewrite(child, env, envs, exceptions);
+			ParseTree newChild = postParseRewrite(child, env, envs, exceptions, false);
 			if(newChild != null && child != newChild) {
 				ast.getChildren().set(i, newChild);
 				i--; // Allow the new child to do a rewrite step as well.
@@ -2277,11 +2320,12 @@ public final class MethodScriptCompiler {
 
 				boolean statementsAllowed = false;
 				if(function instanceof BranchStatement branchStatement) {
-					List<Boolean> branches = branchStatement.isBranch(ast.getChildren());
+					List<Boolean> branches = branchStatement.statementsAllowed(ast.getChildren());
 					if(branches.get(i)) {
 						statementsAllowed = true;
 					}
 				}
+
 				if(statementsAllowed) {
 					continue;
 				}

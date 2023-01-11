@@ -9,11 +9,12 @@ import com.laytonsmith.core.compiler.Keyword;
 import com.laytonsmith.core.constructs.CBareString;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CKeyword;
-import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.DataHandling;
+import com.laytonsmith.core.functions.Meta;
+import com.laytonsmith.core.functions.Compiler;
 import java.util.List;
 
 /**
@@ -45,11 +46,15 @@ public class ProcKeyword extends Keyword {
 					if(list.get(keywordPosition + 2).getData() instanceof CFunction cf
 							&& com.laytonsmith.core.functions.Compiler.__cbrace__.NAME.equals(cf.val())) {
 						validateCodeBlock(list.get(keywordPosition + 2), "Expected braces to follow proc definition");
-						procNode.addChild(getArgumentOrNull(list.get(keywordPosition + 2)));
+						procNode.addChild(getArgumentOrNoop(list.get(keywordPosition + 2)));
 					} else {
-						// Forward declaration, add a null "implementation"
+						// Forward declaration, add a noop "implementation"
 						forwardDeclaration = true;
-						procNode.addChild(new ParseTree(CNull.NULL, list.get(keywordPosition + 1).getFileOptions(), true));
+						ParseTree statement = new ParseTree(new CFunction(Compiler.__statements__.NAME, Target.UNKNOWN),
+								list.get(keywordPosition + 1).getFileOptions(), true);
+						statement.addChild(new ParseTree(new CFunction(Meta.noop.NAME, Target.UNKNOWN),
+								list.get(keywordPosition + 1).getFileOptions(), true));
+						procNode.addChild(statement);
 					}
 				} else {
 					throw new ConfigCompileException("Expected braces to follow proc definition", list.get(keywordPosition + 1).getTarget());
@@ -75,7 +80,7 @@ public class ProcKeyword extends Keyword {
 			// It's the functional usage, possibly followed by a cbrace. If so, pull the cbrace in, and that's it
 			if(list.size() > keywordPosition + 1) {
 				if(isValidCodeBlock(list.get(keywordPosition + 1))) {
-					list.get(keywordPosition).addChild(getArgumentOrNull(list.get(keywordPosition + 1)));
+					list.get(keywordPosition).addChild(getArgumentOrNoop(list.get(keywordPosition + 1)));
 					list.remove(keywordPosition + 1);
 				}
 			}

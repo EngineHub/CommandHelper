@@ -150,13 +150,15 @@ while(true) {
 This is true whether or not you use the functional notation, though using the curly braces in cases like this is
 the preferred and modern format.
 
-There is one function, {{function|if}}, which has very special handling, and is unique. Normally, if has two forms,
-the regular one, and the tertiary form. When using the tertiary form, it is not considered a self-statement, and must
+There are a few functions, namely {{function|if}}, {{function|switch}}, and {{function|switch_ic}},
+which have special handling. These functions each have two forms,
+the regular one, and the tertiary form. When using the tertiary form, they are not considered a self-statement, and must
 be terminated with a semicolon (though if it is an argument to another function, which is the usual case for such a
 usage, it does not require termination, though the containing statement would). In the normal form, when using it
-as an if/else chain, where each branch contains its own statements, it is considered a self-statement.
+as an if/else or switch statement, where each branch contains its own statements, they are also
+considered a self-statement.
 
-The full list of functions that are considered self-statements is:
+The full list of functions that are unconditionally considered self-statements is:
 
 <%SELF_STATEMENT_FUNCTIONS%>
 

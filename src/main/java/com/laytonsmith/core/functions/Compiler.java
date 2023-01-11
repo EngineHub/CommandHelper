@@ -682,6 +682,17 @@ public class Compiler {
 		public boolean preResolveVariables() {
 			return false;
 		}
+
+		@Override
+		public ParseTree postParseRewrite(ParseTree ast, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> exceptions) {
+			for(ParseTree child : ast.getChildren()) {
+				if(!(child.getData() instanceof CFunction)) {
+					exceptions.add(new ConfigCompileException("Not a statement.", child.getTarget()));
+				}
+			}
+			return null;
+		}
 	}
 
 	@api

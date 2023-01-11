@@ -4,9 +4,10 @@ import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.constructs.CFunction;
-import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.Compiler.__cbrace__;
+import com.laytonsmith.core.functions.Compiler.__statements__;
+import com.laytonsmith.core.functions.Meta;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -96,14 +97,18 @@ public abstract class Keyword implements KeywordDocumentation {
 	}
 
 	/**
-	 * Returns a CNull, if the node is empty, or the first argument to the node
+	 * Returns a {@code noop();}, if the node is empty, or the first argument to the node if it isn't.
 	 *
 	 * @param node
 	 * @return
 	 */
-	protected static ParseTree getArgumentOrNull(ParseTree node) {
+	protected static ParseTree getArgumentOrNoop(ParseTree node) {
 		if(node.getChildren().isEmpty()) {
-			return new ParseTree(CNull.NULL, node.getFileOptions());
+			FileOptions options = node.getFileOptions();
+			ParseTree statement = new ParseTree(new CFunction(__statements__.NAME,
+					com.laytonsmith.core.constructs.Target.UNKNOWN), options, true);
+			statement.addChild(new ParseTree(new CFunction(Meta.noop.NAME, com.laytonsmith.core.constructs.Target.UNKNOWN), options, true));
+			return statement;
 		} else {
 			return node.getChildAt(0);
 		}

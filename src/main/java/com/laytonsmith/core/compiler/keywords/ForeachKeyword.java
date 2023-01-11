@@ -28,7 +28,7 @@ public class ForeachKeyword extends Keyword {
 			ParseTree codeBlock = list.get(keywordPosition + 1);
 			if(isCodeBlock(codeBlock)) {
 				validateCodeBlock(codeBlock, "");
-				foreach.addChild(getArgumentOrNull(codeBlock));
+				foreach.addChild(getArgumentOrNoop(codeBlock));
 				list.remove(keywordPosition + 1);
 			}
 		}
@@ -41,7 +41,7 @@ public class ForeachKeyword extends Keyword {
 				ParseTree codeBlock = list.get(keywordPosition + 1);
 				if(isCodeBlock(codeBlock)) {
 					validateCodeBlock(codeBlock, "");
-					foreach.addChild(getArgumentOrNull(codeBlock));
+					foreach.addChild(getArgumentOrNoop(codeBlock));
 				}
 				// We also have to refactor this into a foreachelse, instead of a foreach.
 				list.get(keywordPosition).setData(new CFunction(FOREACHELSE, t));
