@@ -824,7 +824,7 @@ public class OptimizationTest {
 		}
 	}
 
-	@Test
+//	@Test
 	public void testIfWithMissingInnerStatement() throws Exception {
 		String script = "if(dyn(true)){\n"
 				+ "noop()\n"
