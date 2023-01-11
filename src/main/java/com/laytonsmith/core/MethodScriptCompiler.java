@@ -12,7 +12,6 @@ import com.laytonsmith.core.Optimizable.OptimizationOption;
 import com.laytonsmith.core.compiler.BranchStatement;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
-import com.laytonsmith.core.compiler.ConditionalSelfStatement;
 import com.laytonsmith.core.compiler.EarlyBindingKeyword;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.FileOptions.SuppressWarning;
@@ -2326,69 +2325,7 @@ public final class MethodScriptCompiler {
 						statementsAllowed = true;
 					}
 				}
-				if(child.getData() instanceof CFunction) {
-					if(child.getData().val().equals(Compiler.__statements__.NAME)) {
-						if(!(ast.getData() instanceof CNull) && function == null) {
-							exceptions.add(new ConfigCompileException("Unknown function", ast.getTarget()));
-							continue;
-						}
 
-						if(!statementsAllowed) {
-							String unexpectedStatement = "Unexpected statement, semicolon (;) not allowed in this context.";
-							try {
-								if(ast.getData() instanceof CFunction cf
-										&& cf.getCachedFunction().isSelfStatement(ast.getTarget(), env, ast.getChildren(), envs)) {
-									// We can give a better error message here, because the semicolon wasn't actually added
-									// by the user (probably) it's the self statement function that's the problem here.
-									unexpectedStatement = "Unexpected statement, " + ast.getData().val()
-											+ " not allowed in this context.";
-								}
-							} catch(ConfigCompileException ex) {
-								exceptions.add(ex);
-							}
-							if(ast.getFileOptions().isStrict()) {
-								exceptions.add(new ConfigCompileException(unexpectedStatement, child.getTarget()));
-							} else {
-								// Statements aren't allowed here, but we aren't in strict mode, so
-								// pull up the value in the statement to here. sconcat is an exception to this rule, since
-								// it's entirely too special.
-								if(!(ast.getData() instanceof CFunction cf) || !cf.val().equals(StringHandling.sconcat.NAME)) {
-									if(child.getChildren().size() != 1) {
-										exceptions.add(new ConfigCompileException(unexpectedStatement, child.getTarget()));
-									} else {
-										CompilerWarning warning = new CompilerWarning(unexpectedStatement,
-												child.getTarget(), SuppressWarning.UnexpectedStatement);
-										env.getEnv(CompilerEnvironment.class).addCompilerWarning(ast.getFileOptions(), warning);
-										ast.getChildAt(i).replace(child.getChildren().get(0));
-									}
-								}
-							}
-						}
-						if(statementsAllowed) {
-							continue;
-						}
-						if(function.getName().equals(Compiler.__statements__.NAME)) {
-							ParseTree lastChild = child;
-							if(child.numberOfChildren() > 0) {
-								lastChild = child.getChildAt(child.numberOfChildren() - 1);
-							}
-							exceptions.add(new ConfigCompileException("Invalid comma after "
-									+ lastChild.getData().val(), lastChild.getTarget()));
-						} else if(ast.getFileOptions().isStrict()) {
-							exceptions.add(new ConfigCompileException("Invalid use of auto concat in "
-									+ function.getName() + "()", ast.getTarget()));
-						}
-					} else if(statementsAllowed) {
-						// It is a function, but it isn't a statement. Check for strict mode.
-						if(isStrict) {
-							doMissingSemicolonError(child.getTarget(), exceptions);
-						}
-					}
-				} else if(statementsAllowed) {
-					if(((topLevel && isStrict) || !topLevel) && (function == null
-							|| function.getClass().getAnnotation(ConditionalSelfStatement.class) == null)) {
-						exceptions.add(new ConfigCompileException("Not a statement.", child.getTarget()));
-=======
 				if(statementsAllowed) {
 					continue;
 				}
@@ -2423,7 +2360,6 @@ public final class MethodScriptCompiler {
 							env.getEnv(CompilerEnvironment.class).addCompilerWarning(ast.getFileOptions(), warning);
 							child.replace(child.getChildren().get(0));
 						}
->>>>>>> origin/master
 					}
 				}
 			}

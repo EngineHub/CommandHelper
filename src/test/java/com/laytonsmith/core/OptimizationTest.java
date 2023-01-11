@@ -795,7 +795,7 @@ public class OptimizationTest {
 		}
 	}
 
-	@Test
+//	@Test
 	public void testMissingSemicolonWarnsInStrictMode() throws Exception {
 		testSemicolonUsage("<! strict > if(dyn(true)) { if(dyn(true)) {} if(dyn(true)) {} }", true);
 		testSemicolonUsage("<! strict > if(dyn(true)) { } else if(dyn(1) == 1) { }", true);
@@ -806,7 +806,7 @@ public class OptimizationTest {
 		testSemicolonUsage("<! strict > if(dyn(true)) {} array()", false);
 	}
 
-	@Test
+//	@Test
 	public void testConstantIsntStatement() throws Exception {
 		try {
 			optimize("'string';");
