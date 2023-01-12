@@ -2254,14 +2254,14 @@ public final class MethodScriptCompiler {
 	}
 
 	private static void doMissingSemicolonError(Target target, Set<ConfigCompileException> exceptions) {
-		String message = "Semicolon ';' expected.";
+//		String message = "Semicolon ';' expected.";
 //		if(MSVersion.LATEST.lte(new SimpleVersion(3, 3, 6))) {
 //			// Warning
 //			message += " This will be an error in the next version.";
 //			env.getEnv(CompilerEnvironment.class).addFutureErrorCompilerWarning(message, target);
 //		} else {
-			// Error
-			exceptions.add(new ConfigCompileException(message, target));
+//			// Error
+//			exceptions.add(new ConfigCompileException(message, target));
 //		}
 	}
 
