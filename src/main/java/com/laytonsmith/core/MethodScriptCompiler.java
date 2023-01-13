@@ -1917,8 +1917,8 @@ public final class MethodScriptCompiler {
 		processLateKeywords(tree, environment, compilerErrors);
 		checkLinearComponents(tree, environment, compilerErrors);
 		postParseRewrite(rootNode, environment, envs, compilerErrors, true); // Pass rootNode since this might rewrite 'tree'.
-		moveNodeModifiersOffSyntheticNodes(tree);
 		tree = rootNode.getChildAt(0);
+		moveNodeModifiersOffSyntheticNodes(tree);
 		staticAnalysis.analyze(tree, environment, envs, compilerErrors);
 		optimize(tree, environment, envs, procs, compilerErrors);
 		link(tree, compilerErrors);
