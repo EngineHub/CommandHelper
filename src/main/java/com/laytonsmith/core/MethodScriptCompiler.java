@@ -1912,7 +1912,8 @@ public final class MethodScriptCompiler {
 		Stack<List<Procedure>> procs = new Stack<>();
 		procs.add(new ArrayList<>());
 		processKeywords(tree, environment, compilerErrors);
-		addSelfStatements(tree, environment, envs, compilerErrors);
+		addSelfStatements(rootNode, environment, envs, compilerErrors); // Pass rootNode since this might rewrite 'tree'.
+		tree = rootNode.getChildAt(0);
 		rewriteAutoconcats(tree, environment, envs, compilerErrors, true);
 		processLateKeywords(tree, environment, compilerErrors);
 		checkLinearComponents(tree, environment, compilerErrors);
@@ -2075,10 +2076,19 @@ public final class MethodScriptCompiler {
 		}
 	}
 
-	private static void addSelfStatements(ParseTree root, Environment env,
+	/**
+	 * Adds semicolon AST nodes after self statements within children of the given AST node (following
+	 * {@link Function#isSelfStatement(Target, Environment, List, Set)}).
+	 * When the self statement is not yet within an {@link __autoconcat__}, it is wrapped into one.
+	 * @param ast - The abstract syntax tree.
+	 * @param env - The environment.
+	 * @param envs - The set of expected environment classes at runtime.
+	 * @param compilerErrors - A set to put compile errors in.
+	 */
+	private static void addSelfStatements(ParseTree ast, Environment env,
 			Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> compilerErrors) {
-		for(int i = 0; i < root.numberOfChildren(); i++) {
-			ParseTree node = root.getChildAt(i);
+		for(int i = 0; i < ast.numberOfChildren(); i++) {
+			ParseTree node = ast.getChildAt(i);
 			boolean isSelfStatement;
 			try {
 				isSelfStatement = node.getData() instanceof CFunction cf
@@ -2090,16 +2100,21 @@ public final class MethodScriptCompiler {
 				return;
 			}
 			if(isSelfStatement) {
-				int offset = i + 1;
-				if(!(root.getData() instanceof CFunction cf && cf.val().equals(Compiler.__autoconcat__.NAME))) {
-					// We need to create an autoconcat node first, and put this and the semicolon in that
-					ParseTree newNode = new ParseTree(new CFunction(Compiler.__autoconcat__.NAME, Target.UNKNOWN), root.getFileOptions(), true);
-					newNode.addChild(root);
-					root = newNode;
-					offset = 1;
+				if(ast.getData() instanceof CFunction cf && cf.val().equals(Compiler.__autoconcat__.NAME)) {
+
+					// Add semicolon to existing autoconcat.
+					ast.getChildren().add(i + 1, new ParseTree(
+							new CSemicolon(Target.UNKNOWN), node.getFileOptions(), true));
+					i++; // Skip added semicolon.
+				} else {
+
+					// Replace node with an autoconcat that contains the node and a semicolon.
+					ParseTree newNode = new ParseTree(new CFunction(
+							Compiler.__autoconcat__.NAME, Target.UNKNOWN), ast.getFileOptions(), true);
+					newNode.addChild(node);
+					newNode.addChild(new ParseTree(new CSemicolon(Target.UNKNOWN), node.getFileOptions(), true));
+					ast.getChildren().set(i, newNode);
 				}
-				root.getChildren().add(offset, new ParseTree(new CSemicolon(Target.UNKNOWN),
-						node.getFileOptions(), true));
 			}
 			addSelfStatements(node, env, envs, compilerErrors);
 		}
