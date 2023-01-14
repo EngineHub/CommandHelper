@@ -30,6 +30,7 @@ import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCMapMeta;
 import com.laytonsmith.abstraction.MCMetadataValue;
+import com.laytonsmith.abstraction.MCMusicInstrumentMeta;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPattern;
 import com.laytonsmith.abstraction.MCPlayerProfile;
@@ -732,6 +733,13 @@ public class ObjectGenerator {
 				ma.set("items", arrayItems, t);
 			} else if(meta instanceof MCAxolotlBucketMeta) {
 				ma.set("variant", ((MCAxolotlBucketMeta) meta).getAxolotlType().name());
+			} else if(meta instanceof MCMusicInstrumentMeta) {
+				String instrumentKey = ((MCMusicInstrumentMeta) meta).getInstrument();
+				if(instrumentKey == null) {
+					ma.set("instrument", CNull.NULL, t);
+				} else {
+					ma.set("instrument", instrumentKey);
+				}
 			}
 			return ma;
 		}
@@ -1278,6 +1286,13 @@ public class ObjectGenerator {
 						Mixed value = ma.get("variant", t);
 						if(!(value instanceof CNull)) {
 							((MCAxolotlBucketMeta) meta).setAxolotlType(MCAxolotlType.valueOf(value.val().toUpperCase()));
+						}
+					}
+				} else if(meta instanceof MCMusicInstrumentMeta) {
+					if(ma.containsKey("instrument")) {
+						Mixed value = ma.get("instrument", t);
+						if(!(value instanceof CNull)) {
+							((MCMusicInstrumentMeta) meta).setInstrument(value.val());
 						}
 					}
 				}

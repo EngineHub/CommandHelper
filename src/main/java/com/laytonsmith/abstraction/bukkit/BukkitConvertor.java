@@ -161,6 +161,7 @@ import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.MapMeta;
+import org.bukkit.inventory.meta.MusicInstrumentMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.inventory.meta.SuspiciousStewMeta;
@@ -616,6 +617,9 @@ public class BukkitConvertor extends AbstractConvertor {
 			}
 			if(im instanceof AxolotlBucketMeta) {
 				return new BukkitMCAxolotlBucketMeta((AxolotlBucketMeta) im);
+			}
+			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_X) && im instanceof MusicInstrumentMeta) {
+				return new BukkitMCMusicInstrumentMeta((MusicInstrumentMeta) im);
 			}
 		}
 		return new BukkitMCItemMeta(im);
