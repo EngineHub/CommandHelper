@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.laytonsmith.abstraction.bukkit;
 
 import com.google.common.collect.LinkedHashMultimap;
@@ -10,6 +6,9 @@ import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCAttributeModifier;
 import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCItemMeta;
+import com.laytonsmith.abstraction.blocks.MCBlockData;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlockData;
 import com.laytonsmith.abstraction.enums.MCItemFlag;
 
 import java.util.ArrayList;
@@ -21,18 +20,17 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCAttribute;
+import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
+import org.bukkit.inventory.meta.BlockDataMeta;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.Repairable;
 
-/**
- *
- *
- */
 public class BukkitMCItemMeta implements MCItemMeta {
 
 	ItemMeta im;
@@ -173,6 +171,21 @@ public class BukkitMCItemMeta implements MCItemMeta {
 	@Override
 	public void setDamage(int damage) {
 		((Damageable) im).setDamage(damage);
+	}
+
+	@Override
+	public MCBlockData getBlockData(MCMaterial material) {
+		return new BukkitMCBlockData(((BlockDataMeta) this.im).getBlockData((Material) material.getHandle()));
+	}
+
+	@Override
+	public boolean hasBlockData() {
+		return ((BlockDataMeta) this.im).hasBlockData();
+	}
+
+	@Override
+	public void setBlockData(MCBlockData blockData) {
+		((BlockDataMeta) this.im).setBlockData((BlockData) blockData.getHandle());
 	}
 
 	@Override

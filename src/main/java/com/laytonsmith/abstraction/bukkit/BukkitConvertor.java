@@ -150,7 +150,6 @@ import org.bukkit.inventory.SmokingRecipe;
 import org.bukkit.inventory.StonecuttingRecipe;
 import org.bukkit.inventory.meta.AxolotlBucketMeta;
 import org.bukkit.inventory.meta.BannerMeta;
-import org.bukkit.inventory.meta.BlockDataMeta;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.BundleMeta;
@@ -610,9 +609,6 @@ public class BukkitConvertor extends AbstractConvertor {
 		}
 		if(im instanceof SuspiciousStewMeta) {
 			return new BukkitMCSuspiciousStewMeta((SuspiciousStewMeta) im);
-		}
-		if(im instanceof BlockDataMeta) {
-			return new BukkitMCBlockDataMeta((BlockDataMeta) im);
 		}
 		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_17)) {
 			if(im instanceof BundleMeta) {

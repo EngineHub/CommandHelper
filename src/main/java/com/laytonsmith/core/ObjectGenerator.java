@@ -4,7 +4,6 @@ import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.abstraction.MCAttributeModifier;
 import com.laytonsmith.abstraction.MCAxolotlBucketMeta;
 import com.laytonsmith.abstraction.MCBannerMeta;
-import com.laytonsmith.abstraction.MCBlockDataMeta;
 import com.laytonsmith.abstraction.MCBlockStateMeta;
 import com.laytonsmith.abstraction.MCBookMeta;
 import com.laytonsmith.abstraction.MCBrewerInventory;
@@ -459,10 +458,18 @@ public class ObjectGenerator {
 				ma.set("modifiers", modifiers, t);
 			}
 
-			// Damageable items only
-			if(is.getType().getMaxDurability() > 0) {
+			MCMaterial material = is.getType();
+			if(material.getMaxDurability() > 0) {
+				// Damageable items only
 				ma.set("damage", new CInt(meta.getDamage(), t), t);
 				ma.set("unbreakable", CBoolean.get(meta.isUnbreakable()), t);
+			} else if(material.isBlock()) {
+				// Block items only
+				if(meta.hasBlockData()) {
+					ma.set("blockdata", blockData(meta.getBlockData(is.getType()), t), t);
+				} else {
+					ma.set("blockdata", CNull.NULL, t);
+				}
 			}
 
 			// Specific ItemMeta
@@ -556,13 +563,6 @@ public class ObjectGenerator {
 						}
 					}
 					ma.set("inventory", box, t);
-				}
-			} else if(meta instanceof MCBlockDataMeta) {
-				MCBlockDataMeta mcbdm = (MCBlockDataMeta) meta;
-				if(mcbdm.hasBlockData()) {
-					ma.set("blockdata", blockData(mcbdm.getBlockData(is.getType()), t), t);
-				} else {
-					ma.set("blockdata", CNull.NULL, t);
 				}
 			} else if(meta instanceof MCFireworkEffectMeta) {
 				MCFireworkEffectMeta mcfem = (MCFireworkEffectMeta) meta;
@@ -837,6 +837,11 @@ public class ObjectGenerator {
 					if(ma.containsKey("unbreakable")) {
 						meta.setUnbreakable(ArgumentValidation.getBoolean(ma.get("unbreakable", t), t));
 					}
+				} else if(ma.containsKey("blockdata")) {
+					Mixed mBlockData = ma.get("blockdata", t);
+					if(mBlockData instanceof CArray) {
+						meta.setBlockData(blockData((CArray) mBlockData, mat, t));
+					}
 				}
 
 				// Specific ItemMeta
@@ -1004,14 +1009,6 @@ public class ObjectGenerator {
 								throw new CREFormatException(bs.getClass().getSimpleName().replaceFirst("MC", "")
 										+ " inventory expected to be an array or null.", t);
 							}
-						}
-					}
-				} else if(meta instanceof MCBlockDataMeta) {
-					MCBlockDataMeta mcbdm = (MCBlockDataMeta) meta;
-					if(ma.containsKey("blockdata")) {
-						Mixed mBlockData = ma.get("blockdata", t);
-						if(mBlockData instanceof CArray) {
-							mcbdm.setBlockData(blockData((CArray) mBlockData, mat, t));
 						}
 					}
 				} else if(meta instanceof MCFireworkEffectMeta) {
