@@ -2079,15 +2079,21 @@ public final class MethodScriptCompiler {
 			Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> compilerErrors) {
 		for(int i = 0; i < root.numberOfChildren(); i++) {
 			ParseTree node = root.getChildAt(i);
-			boolean isSelfStatement;
-			try {
-				isSelfStatement = node.getData() instanceof CFunction cf
-						&& cf.hasFunction()
-						&& cf.getFunction() != null
-						&& cf.getCachedFunction().isSelfStatement(node.getTarget(), env, node.getChildren(), envs);
-			} catch(ConfigCompileException ex) {
-				compilerErrors.add(ex);
-				return;
+			boolean isSelfStatement = false;
+			if(node.getData() instanceof CFunction cf && cf.hasFunction()) {
+				Function function = null;
+				try {
+					function = cf.getFunction();
+				} catch(ConfigCompileException ex) {
+					// Functions should be validated later, in case they're removed.
+				}
+				try {
+					isSelfStatement = function != null
+							&& function.isSelfStatement(node.getTarget(), env, node.getChildren(), envs);
+				} catch(ConfigCompileException ex) {
+					compilerErrors.add(ex);
+					return;
+				}
 			}
 			if(isSelfStatement) {
 				int offset = i + 1;
