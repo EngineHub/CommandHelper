@@ -181,6 +181,8 @@ public class Compiler {
 			//If any of our nodes are CSymbols, we have different behavior
 			boolean inSymbolMode = false; //caching this can save Xn
 
+			rewriteParenthesis(list);
+
 			//Assignment
 			//Note that we are walking the array in reverse, because multiple assignments,
 			//say @a = @b = 1 will break if they look like assign(assign(@a, @b), 1),
@@ -525,8 +527,6 @@ public class Compiler {
 				}
 			}
 
-			rewriteParenthesis(list);
-
 			//We've eliminated the need for __autoconcat__ either way, however, if there are still arguments
 			//left, it needs to go to sconcat, which MAY be able to be further optimized, but that will
 			//be handled in MethodScriptCompiler's optimize function. Also, we must scan for CPreIdentifiers,
@@ -612,6 +612,10 @@ public class Compiler {
 							&& cf.hasFunction()
 							&& cf.getFunction() != null
 							&& cf.getFunction().getName().equals(Compiler.p.NAME)) {
+						if(list.get(listInd - 1).getData() instanceof CSymbol) {
+							// It's just a parenthesis like @a = (1);, so we should leave it alone.
+							break;
+						}
 						executes.push(lastNode);
 						list.remove(listInd--);
 					} else {

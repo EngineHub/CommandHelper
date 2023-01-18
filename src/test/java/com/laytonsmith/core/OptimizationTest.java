@@ -778,6 +778,12 @@ public class OptimizationTest {
 		assertEquals("__statements__(msg('hi'))", optimize("msg('hi');;;;;;;;;;;;;"));
 	}
 
+	@Test
+	public void testCallableOrderOfOperations() throws Exception {
+		assertEquals("__statements__(assign(@c,closure(__statements__(return('test')))),msg(concat('test ',execute(@c))))",
+				optimize("@c = closure() { return 'test'; }; msg('test ' . @c());"));
+	}
+
 	private void testSemicolonUsage(String script, boolean passExpected) throws Exception {
 		try {
 			optimize(script);
