@@ -784,6 +784,11 @@ public class OptimizationTest {
 				optimize("@c = closure() { return 'test'; }; msg('test ' . @c());"));
 	}
 
+	@Test
+	public void testArrayValueInParenthesis() throws Exception {
+		assertEquals("array(centry(key:,'value'))", optimize("array('key': ('value'))"));
+	}
+
 	private void testSemicolonUsage(String script, boolean passExpected) throws Exception {
 		try {
 			optimize(script);
