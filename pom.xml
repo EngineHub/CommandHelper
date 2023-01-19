@@ -227,9 +227,9 @@
 		<!-- MySQL -->
 		<dependency>
 			<!-- GPL -->
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
-			<version>8.0.31</version>
+			<groupId>com.mysql</groupId>
+			<artifactId>mysql-connector-j</artifactId>
+			<version>8.0.32</version>
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
@@ -543,7 +543,7 @@
 									<include>org.xerial:sqlite-jdbc:jar:*</include>
 									<include>net.sourceforge.jchardet:jchardet:jar:*</include>
 									<include>redis.clients:jedis:jar:*</include>
-									<include>mysql:mysql-connector-java:jar:*</include>
+									<include>com.mysql:mysql-connector-j:jar:*</include>
 									<include>commons-codec:commons-codec:jar:*</include>
 									<!--<include>org.apache.bcel:bcel:jar:*</include>-->
 									<include>org.ow2.asm:asm:jar:*</include>
@@ -621,10 +621,6 @@
 								<relocation>
 									<pattern>com.mysql.cj</pattern>
 									<shadedPattern>com.laytonsmith.libs.com.mysql.cj</shadedPattern>
-								</relocation>
-								<relocation> <!-- part of the mysql lib -->
-									<pattern>org.gjt.mm.mysql</pattern>
-									<shadedPattern>com.laytonsmith.libs.org.gjt.mm.mysql</shadedPattern>
 								</relocation>
 								<relocation>
 									<pattern>org.apache.commons.codec</pattern>
@@ -746,7 +742,7 @@
 									</includes>
 								</filter>
 								<filter>
-									<artifact>mysql:mysql-connector-java:jar:*</artifact>
+									<artifact>com.mysql:mysql-connector-j:jar:*</artifact>
 									<includes>
 										<include>**</include>
 									</includes>
