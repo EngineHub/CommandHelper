@@ -480,7 +480,6 @@ public abstract class MCMaterial<Concrete> extends DynamicEnum<MCVanillaMaterial
 		PACKED_ICE,
 		ACACIA_STAIRS,
 		DARK_OAK_STAIRS,
-		DIRT_PATH,
 		SUNFLOWER,
 		LILAC,
 		ROSE_BUSH,
@@ -1162,8 +1161,6 @@ public abstract class MCMaterial<Concrete> extends DynamicEnum<MCVanillaMaterial
 		ATTACHED_MELON_STEM,
 		PUMPKIN_STEM,
 		MELON_STEM,
-		WATER_CAULDRON,
-		LAVA_CAULDRON,
 		END_PORTAL,
 		COCOA,
 		TRIPWIRE,
@@ -1393,6 +1390,9 @@ public abstract class MCMaterial<Concrete> extends DynamicEnum<MCVanillaMaterial
 		SPYGLASS(MCVersion.MC1_17),
 		TINTED_GLASS(MCVersion.MC1_17),
 		TUFF(MCVersion.MC1_17),
+		DIRT_PATH(MCVersion.MC1_17), // changed from GRASS_PATH
+		WATER_CAULDRON(MCVersion.MC1_17),
+		LAVA_CAULDRON(MCVersion.MC1_17),
 
 		// 1.18 additions
 		MUSIC_DISC_OTHERSIDE(MCVersion.MC1_18),
