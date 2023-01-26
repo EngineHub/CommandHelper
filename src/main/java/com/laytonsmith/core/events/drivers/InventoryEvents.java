@@ -794,11 +794,11 @@ public class InventoryEvents {
 		@Override
 		public String docs() {
 			return "{player: <macro>"
-					+ " | main_hand: <string match> The type of item being swapped from the main hand"
-					+ " | off_hand: <string match> The type of item being swapped from the off hand}"
-					+ " Fires when a player swaps the items in their main and off hands."
-					+ " {player | main_hand: the item array in the main hand before swapping"
-					+ " | off_hand: the item in the off hand}"
+					+ " | main_hand: <string match> The name of the item being swapped to the main hand (or AIR)"
+					+ " | off_hand: <string match> The name of the item being swapped to the off hand (or AIR)}"
+					+ " Fires when a player swaps the items between their main and off hands."
+					+ " {player | main_hand: The item array being swapped to the main hand (or null)"
+					+ " | off_hand: The item array being swapped to the off hand (or null)}"
 					+ " {main_hand | off_hand}"
 					+ " {}";
 		}
