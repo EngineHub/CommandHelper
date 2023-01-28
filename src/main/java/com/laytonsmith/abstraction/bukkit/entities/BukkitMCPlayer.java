@@ -115,9 +115,6 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 
 	@Override
 	public MCPlayerInventory getInventory() {
-		if(p == null || p.getInventory() == null) {
-			return null;
-		}
 		return new BukkitMCPlayerInventory(p.getInventory());
 	}
 

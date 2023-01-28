@@ -1890,17 +1890,21 @@ public class EntityEvents {
 
 		@Override
 		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event) throws PrefilterNonMatchException {
-			if(event instanceof MCHangingPlaceEvent) {
-				MCHangingPlaceEvent hangingPlaceEvent = (MCHangingPlaceEvent) event;
+			if(event instanceof MCHangingPlaceEvent hangingPlaceEvent) {
 				MCHanging hanging = hangingPlaceEvent.getEntity();
 				Prefilters.match(prefilter, "type", hanging.getType().name(), PrefilterType.MACRO);
-				Prefilters.match(prefilter, "player", hangingPlaceEvent.getPlayer().getName(), PrefilterType.MACRO);
-				Prefilters.match(prefilter, "world",
-						hangingPlaceEvent.getEntity().getLocation().getWorld().getName(), PrefilterType.MACRO);
+				MCPlayer player = hangingPlaceEvent.getPlayer();
+				if(player == null) {
+					if(prefilter.containsKey("player") && !(prefilter.get("player") instanceof CNull)) {
+						return false;
+					}
+				} else {
+					Prefilters.match(prefilter, "player", player.getName(), PrefilterType.MACRO);
+				}
+				Prefilters.match(prefilter, "world", hanging.getLocation().getWorld().getName(), PrefilterType.MACRO);
 				return true;
-			} else {
-				return false;
 			}
+			return false;
 		}
 
 		@Override
@@ -1910,14 +1914,18 @@ public class EntityEvents {
 
 		@Override
 		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
-			if(event instanceof MCHangingPlaceEvent) {
-				MCHangingPlaceEvent hangingPlaceEvent = (MCHangingPlaceEvent) event;
+			if(event instanceof MCHangingPlaceEvent hangingPlaceEvent) {
 				Map<String, Mixed> ret = evaluate_helper(event);
 				MCHanging hanging = hangingPlaceEvent.getEntity();
 
 				ret.put("type", new CString(hanging.getType().name(), Target.UNKNOWN));
 				ret.put("id", new CString(hanging.getUniqueId().toString(), Target.UNKNOWN));
-				ret.put("player", new CString(hangingPlaceEvent.getPlayer().getName(), Target.UNKNOWN));
+				MCPlayer player = hangingPlaceEvent.getPlayer();
+				if(player == null) {
+					ret.put("player", CNull.NULL);
+				} else {
+					ret.put("player", new CString(player.getName(), Target.UNKNOWN));
+				}
 				ret.put("location", ObjectGenerator.GetGenerator().location(hanging.getLocation()));
 				return ret;
 			} else {
