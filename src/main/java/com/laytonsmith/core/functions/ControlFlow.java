@@ -928,6 +928,7 @@ public class ControlFlow {
 	}
 
 	@api
+	@breakable
 	@ConditionalSelfStatement
 	public static class switch_ic extends _switch implements Optimizable, BranchStatement, VariableScope {
 
