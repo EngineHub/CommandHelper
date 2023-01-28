@@ -51,6 +51,13 @@ import org.objectweb.asm.ClassReader;
  * take up more PermGen space to the calling code, instead of this class.
  */
 public class ClassDiscovery {
+	public static interface FileReader {
+
+	}
+
+	private static class NormalFileReader implements FileReader {
+		
+	}
 
 	private static final boolean IS_DEBUG = java.lang.management.ManagementFactory.getRuntimeMXBean()
 			.getInputArguments().toString().contains("jdwp");

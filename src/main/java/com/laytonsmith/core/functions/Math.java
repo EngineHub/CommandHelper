@@ -16,6 +16,8 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.clientsupport.ClientPermission;
+import com.laytonsmith.core.clientsupport.permission;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.constructs.CArray;
@@ -62,6 +64,7 @@ public class Math {
 	@api
 	@seealso({subtract.class, multiply.class, divide.class})
 	@OperatorPreferred("+")
+	@permission(ClientPermission.NONE)
 	public static class add extends AbstractFunction implements Optimizable {
 
 		public static final String NAME = "add";
@@ -150,6 +153,7 @@ public class Math {
 	@api
 	@seealso({add.class, multiply.class, divide.class})
 	@OperatorPreferred("-")
+	@permission(ClientPermission.NONE)
 	public static class subtract extends AbstractFunction implements Optimizable {
 
 		public static final String NAME = "subtract";
@@ -226,6 +230,7 @@ public class Math {
 	@api
 	@seealso({divide.class, add.class, subtract.class})
 	@OperatorPreferred("*")
+	@permission(ClientPermission.NONE)
 	public static class multiply extends AbstractFunction implements Optimizable {
 
 		public static final String NAME = "multiply";
@@ -312,6 +317,7 @@ public class Math {
 	@api
 	@seealso({multiply.class, add.class, subtract.class})
 	@OperatorPreferred("/")
+	@permission(ClientPermission.NONE)
 	public static class divide extends AbstractFunction implements Optimizable {
 
 		public static final String NAME = "divide";
@@ -390,6 +396,7 @@ public class Math {
 
 	@api
 	@OperatorPreferred("%")
+	@permission(ClientPermission.NONE)
 	public static class mod extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -455,6 +462,7 @@ public class Math {
 
 	@api
 	@OperatorPreferred("**")
+	@permission(ClientPermission.NONE)
 	public static class pow extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -602,6 +610,7 @@ public class Math {
 	@api
 	@seealso({dec.class, postdec.class, postinc.class})
 	@OperatorPreferred("++")
+	@permission(ClientPermission.NONE)
 	public static class inc extends AbstractFunction implements Optimizable {
 
 		public static final String NAME = "inc";
@@ -722,6 +731,7 @@ public class Math {
 	@api
 	@seealso({postdec.class, inc.class, dec.class})
 	@OperatorPreferred("++")
+	@permission(ClientPermission.NONE)
 	public static class postinc extends AbstractFunction implements Optimizable {
 
 		public static final String NAME = "postinc";
@@ -852,6 +862,7 @@ public class Math {
 	@api
 	@seealso({inc.class, postdec.class, postinc.class})
 	@OperatorPreferred("--")
+	@permission(ClientPermission.NONE)
 	public static class dec extends AbstractFunction implements Optimizable {
 
 		public static final String NAME = "dec";
@@ -972,6 +983,7 @@ public class Math {
 	@api
 	@seealso({postinc.class, inc.class, dec.class})
 	@OperatorPreferred("--")
+	@permission(ClientPermission.NONE)
 	public static class postdec extends AbstractFunction implements Optimizable {
 
 		public static final String NAME = "postdec";
@@ -1099,6 +1111,7 @@ public class Math {
 	}
 
 	@api
+	@permission(ClientPermission.NONE)
 	public static class rand extends AbstractFunction {
 
 		Random r = new Random();
@@ -1189,6 +1202,7 @@ public class Math {
 	}
 
 	@api
+	@permission(ClientPermission.NONE)
 	public static class abs extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -1253,6 +1267,7 @@ public class Math {
 	}
 
 	@api
+	@permission(ClientPermission.NONE)
 	public static class floor extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -1305,6 +1320,7 @@ public class Math {
 	}
 
 	@api
+	@permission(ClientPermission.NONE)
 	public static class ceil extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -1357,6 +1373,7 @@ public class Math {
 	}
 
 	@api
+	@permission(ClientPermission.NONE)
 	public static class sqrt extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -1419,6 +1436,7 @@ public class Math {
 	}
 
 	@api
+	@permission(ClientPermission.NONE)
 	public static class min extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -1501,6 +1519,7 @@ public class Math {
 	}
 
 	@api
+	@permission(ClientPermission.NONE)
 	public static class max extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -1583,6 +1602,7 @@ public class Math {
 	}
 
 	@api
+	@permission(ClientPermission.NONE)
 	public static class sin extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -1635,6 +1655,7 @@ public class Math {
 	}
 
 	@api
+	@permission(ClientPermission.NONE)
 	public static class cos extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -1687,6 +1708,7 @@ public class Math {
 	}
 
 	@api
+	@permission(ClientPermission.NONE)
 	public static class tan extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -1739,6 +1761,7 @@ public class Math {
 	}
 
 	@api
+	@permission(ClientPermission.NONE)
 	public static class asin extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -1791,6 +1814,7 @@ public class Math {
 	}
 
 	@api
+	@permission(ClientPermission.NONE)
 	public static class acos extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -1843,6 +1867,7 @@ public class Math {
 	}
 
 	@api
+	@permission(ClientPermission.NONE)
 	public static class atan extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -1895,6 +1920,7 @@ public class Math {
 	}
 
 	@api
+	@permission(ClientPermission.NONE)
 	public static class sinh extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -1947,6 +1973,7 @@ public class Math {
 	}
 
 	@api
+	@permission(ClientPermission.NONE)
 	public static class cosh extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -1999,6 +2026,7 @@ public class Math {
 	}
 
 	@api
+	@permission(ClientPermission.NONE)
 	public static class tanh extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -2051,6 +2079,7 @@ public class Math {
 	}
 
 	@api
+	@permission(ClientPermission.NONE)
 	public static class to_radians extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -2103,6 +2132,7 @@ public class Math {
 	}
 
 	@api
+	@permission(ClientPermission.NONE)
 	public static class to_degrees extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -2155,6 +2185,7 @@ public class Math {
 	}
 
 	@api
+	@permission(ClientPermission.NONE)
 	public static class atan2 extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -2211,6 +2242,7 @@ public class Math {
 	}
 
 	@api
+	@permission(ClientPermission.NONE)
 	public static class round extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -2284,6 +2316,7 @@ public class Math {
 	}
 
 	@api
+	@permission(ClientPermission.NONE)
 	public static class round15 extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -2471,6 +2504,7 @@ public class Math {
 	}
 
 	@api
+	@permission(ClientPermission.NONE)
 	public static class neg extends AbstractFunction implements Optimizable {
 
 		public static final String NAME = "neg";
@@ -2529,6 +2563,7 @@ public class Math {
 	}
 
 	@api
+	@permission(ClientPermission.NONE)
 	public static class logarithm extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -2605,6 +2640,7 @@ public class Math {
 	}
 
 	@api
+	@permission(ClientPermission.NONE)
 	public static class math_const extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -2757,6 +2793,7 @@ public class Math {
 	}
 
 	@api
+	@permission(ClientPermission.NONE)
 	public static class clamp extends CompositeFunction implements Optimizable {
 
 		@Override
@@ -2828,6 +2865,7 @@ public class Math {
 	}
 
 	@api
+	@permission(ClientPermission.NONE)
 	public static class hypot extends CompositeFunction {
 
 		@Override

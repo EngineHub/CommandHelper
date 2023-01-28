@@ -5,7 +5,7 @@ import com.laytonsmith.abstraction.MCPlayer;
 
 public class CommandHelperEnvironment implements Environment.EnvironmentImpl, Cloneable {
 
-	private MCCommandSender commandSender = null;
+	protected MCCommandSender commandSender = null;
 	private String command = null;
 
 	/**

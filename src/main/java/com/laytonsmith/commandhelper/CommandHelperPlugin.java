@@ -364,7 +364,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 			StreamUtils.GetSystemOut().println("\n\n" + Static.Logo());
 		}
 		ac = new AliasCore(CommandHelperFileLocations.getDefault());
-		ac.reload(null, null, this.firstLoad);
+		ac.reload(null, null, null, this.firstLoad);
 
 		//Clear out our hostname cache
 		hostnameLookupCache = new ConcurrentHashMap<>();
@@ -542,7 +542,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 			if(sender instanceof Player) {
 				player = new BukkitMCPlayer((Player) sender);
 			}
-			ac.reload(player, args, false);
+			ac.reload(player, args, null, false);
 			return true;
 		} else if(cmdName.equalsIgnoreCase("commandhelper")) {
 			// Despite looking useless, this isn't. It's used for the server events and other

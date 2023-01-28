@@ -230,9 +230,10 @@ public class AliasCore {
 	 *
 	 * @param player The player to send messages to (can be null)
 	 * @param settings The argument list for the {@link ReloadOptions} (can be null)
+	 * @param chEnv The CommandHelperEnvironment to use. If null, a new one is generated.
 	 * @param firstLoad {@code true} if CommandHelper is loading
 	 */
-	public final void reload(MCPlayer player, String[] settings, final boolean firstLoad) {
+	public final void reload(MCPlayer player, String[] settings, CommandHelperEnvironment chEnv, final boolean firstLoad) {
 		final ReloadOptions options;
 		try {
 			options = new ReloadOptions(settings);
@@ -349,7 +350,10 @@ public class AliasCore {
 		if(options.reloadScripts()) {
 			// Create the new environment
 			GlobalEnv globalEnv = new GlobalEnv(fileLocations.getConfigDirectory(), EnumSet.of(RuntimeMode.EMBEDDED));
-			CommandHelperEnvironment commandHelperEnv = new CommandHelperEnvironment();
+			CommandHelperEnvironment commandHelperEnv = chEnv;
+			if(commandHelperEnv == null) {
+				commandHelperEnv = new CommandHelperEnvironment();
+			}
 			CompilerEnvironment compilerEnv = new CompilerEnvironment();
 			env = Environment.createEnvironment(globalEnv, newStaticRuntimeEnv, commandHelperEnv, compilerEnv);
 

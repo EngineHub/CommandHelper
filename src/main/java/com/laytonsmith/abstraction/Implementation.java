@@ -161,7 +161,8 @@ public final class Implementation {
 		TEST("test-backend"),
 		BUKKIT("CommandHelper"),
 		SHELL("MethodScript"),
-		SPONGE("CommandHelper");
+		SPONGE("CommandHelper"),
+		FORGE_CLIENT("CommandHelper");
 		//GLOWSTONE,
 		//SINGLE_PLAYER
 		private final String branding;

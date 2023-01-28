@@ -26,6 +26,8 @@ import com.laytonsmith.core.Procedure;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Security;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.clientsupport.ClientPermission;
+import com.laytonsmith.core.clientsupport.permission;
 import com.laytonsmith.core.compiler.BranchStatement;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
@@ -121,6 +123,7 @@ public class DataHandling {
 
 	@api
 	@seealso({com.laytonsmith.tools.docgen.templates.Arrays.class, ArrayIteration.class})
+	@permission(ClientPermission.NONE)
 	public static class array extends AbstractFunction implements Optimizable {
 
 		public static final String NAME = "array";
@@ -252,6 +255,7 @@ public class DataHandling {
 
 	@api
 	@seealso({com.laytonsmith.tools.docgen.templates.Arrays.class, ArrayIteration.class})
+	@permission(ClientPermission.NONE)
 	public static class associative_array extends AbstractFunction {
 
 		@Override
@@ -317,6 +321,7 @@ public class DataHandling {
 	@api
 	@seealso({com.laytonsmith.tools.docgen.templates.Variables.class})
 	@OperatorPreferred("=")
+	@permission(ClientPermission.NONE)
 	public static class assign extends AbstractFunction implements Optimizable {
 
 		public static final String NAME = "assign";
@@ -715,6 +720,7 @@ public class DataHandling {
 	}
 
 	@api
+	@permission(ClientPermission.NONE)
 	public static class is_stringable extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -775,6 +781,7 @@ public class DataHandling {
 	}
 
 	@api
+	@permission(ClientPermission.NONE)
 	public static class is_string extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -835,6 +842,7 @@ public class DataHandling {
 	}
 
 	@api
+	@permission(ClientPermission.NONE)
 	public static class is_bytearray extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -895,6 +903,7 @@ public class DataHandling {
 	}
 
 	@api
+	@permission(ClientPermission.NONE)
 	public static class is_array extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -955,6 +964,7 @@ public class DataHandling {
 	}
 
 	@api
+	@permission(ClientPermission.NONE)
 	public static class is_number extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -1018,6 +1028,7 @@ public class DataHandling {
 	}
 
 	@api
+	@permission(ClientPermission.NONE)
 	public static class is_double extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -1079,6 +1090,7 @@ public class DataHandling {
 	}
 
 	@api
+	@permission(ClientPermission.NONE)
 	public static class is_integer extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -1140,6 +1152,7 @@ public class DataHandling {
 	}
 
 	@api
+	@permission(ClientPermission.NONE)
 	public static class is_boolean extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -1200,6 +1213,7 @@ public class DataHandling {
 	}
 
 	@api
+	@permission(ClientPermission.NONE)
 	public static class is_null extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -1259,6 +1273,7 @@ public class DataHandling {
 	}
 
 	@api
+	@permission(ClientPermission.NONE)
 	public static class is_numeric extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -1329,6 +1344,7 @@ public class DataHandling {
 	}
 
 	@api
+	@permission(ClientPermission.NONE)
 	public static class is_integral extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -2249,6 +2265,7 @@ public class DataHandling {
 	}
 
 	@api
+	@permission(ClientPermission.NONE)
 	public static class is_proc extends AbstractFunction {
 
 		@Override
@@ -2294,6 +2311,7 @@ public class DataHandling {
 	}
 
 	@api
+	@permission(ClientPermission.NONE)
 	public static class is_associative extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -2357,6 +2375,7 @@ public class DataHandling {
 	}
 
 	@api
+	@permission(ClientPermission.NONE)
 	public static class is_closure extends AbstractFunction {
 
 		@Override
@@ -2410,6 +2429,7 @@ public class DataHandling {
 
 	@api
 	@seealso({_export.class})
+	@permission(ClientPermission.NONE)
 	public static class _import extends AbstractFunction {
 
 		@Override
@@ -2479,6 +2499,7 @@ public class DataHandling {
 
 	@api
 	@seealso({_import.class})
+	@permission(ClientPermission.NONE)
 	public static class _export extends AbstractFunction {
 
 		@Override
@@ -3131,6 +3152,7 @@ public class DataHandling {
 	}
 
 	@api
+	@permission(ClientPermission.NONE)
 	public static class _boolean extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -3197,6 +3219,7 @@ public class DataHandling {
 	}
 
 	@api
+	@permission(ClientPermission.NONE)
 	public static class _integer extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -3262,6 +3285,7 @@ public class DataHandling {
 	}
 
 	@api
+	@permission(ClientPermission.NONE)
 	public static class _double extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -3323,6 +3347,7 @@ public class DataHandling {
 	}
 
 	@api
+	@permission(ClientPermission.NONE)
 	public static class _string extends AbstractFunction implements Optimizable {
 
 		public static final String NAME = "string";
@@ -3396,6 +3421,7 @@ public class DataHandling {
 
 	@api
 	@seealso(parse_int.class)
+	@permission(ClientPermission.NONE)
 	public static class to_radix extends AbstractFunction {
 
 		@Override
@@ -3468,6 +3494,7 @@ public class DataHandling {
 
 	@api
 	@seealso(to_radix.class)
+	@permission(ClientPermission.NONE)
 	public static class parse_int extends AbstractFunction {
 
 		@Override
@@ -3553,6 +3580,7 @@ public class DataHandling {
 	}
 
 	@api
+	@permission(ClientPermission.NONE)
 	public static class typeof extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -3740,6 +3768,7 @@ public class DataHandling {
 	@api
 	@noprofile
 	@hide("This will eventually be replaced by ; statements.")
+	@permission(ClientPermission.NONE)
 	public static class g extends AbstractFunction {
 
 		public static final String NAME = "g";
@@ -3798,6 +3827,7 @@ public class DataHandling {
 	 */
 	@api
 	@hide("This is still experimental")
+	@permission(ClientPermission.NONE)
 	public static class mutable_primitive extends AbstractFunction {
 
 		@Override
@@ -3893,6 +3923,7 @@ public class DataHandling {
 	}
 
 	@api
+	@permission(ClientPermission.NONE)
 	public static class _instanceof extends AbstractFunction implements Optimizable {
 
 		public static final String NAME = "instanceof";
