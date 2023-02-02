@@ -251,7 +251,8 @@ public class DataTransformations {
 				cause = ex;
 			}
 			if(!(ret instanceof Map) && !(ret instanceof Collection)) {
-				throw new CREFormatException("Improperly formatted YML", t, cause);
+				throw new CREFormatException("Improperly formatted YML"
+						+ (cause != null ? ": " + cause.getMessage() : ""), t, cause);
 			}
 			return Construct.GetConstruct(ret);
 		}
