@@ -24,6 +24,7 @@ import com.laytonsmith.abstraction.events.MCExpChangeEvent;
 import com.laytonsmith.abstraction.events.MCFoodLevelChangeEvent;
 import com.laytonsmith.abstraction.events.MCGamemodeChangeEvent;
 import com.laytonsmith.abstraction.events.MCPlayerEnterBedEvent;
+import com.laytonsmith.abstraction.events.MCPlayerEvent;
 import com.laytonsmith.abstraction.events.MCPlayerLeaveBedEvent;
 import com.laytonsmith.abstraction.events.MCPlayerChatEvent;
 import com.laytonsmith.abstraction.events.MCPlayerCommandEvent;
@@ -115,8 +116,29 @@ public class PlayerEvents {
 		return "Contains events related to a player";
 	}
 
+	public abstract static class AbstractPlayerEvent extends AbstractEvent {
+
+		@Override
+		public void preExecution(Environment env, ActiveEvent activeEvent) {
+			if(activeEvent.getUnderlyingEvent() instanceof MCPlayerEvent) {
+
+				// Static lookups of the player might not work here, but the player is passed in with the event.
+				MCPlayer player = ((MCPlayerEvent) activeEvent.getUnderlyingEvent()).getPlayer();
+				Static.InjectPlayer(player);
+			}
+		}
+
+		@Override
+		public void postExecution(Environment env, ActiveEvent activeEvent) {
+			if(activeEvent.getUnderlyingEvent() instanceof MCPlayerEvent) {
+				MCPlayer player = ((MCPlayerEvent) activeEvent.getUnderlyingEvent()).getPlayer();
+				Static.UninjectPlayer(player);
+			}
+		}
+	}
+
 	@api
-	public static class food_level_changed extends AbstractEvent {
+	public static class food_level_changed extends AbstractPlayerEvent {
 
 		@Override
 		public String getName() {
@@ -193,7 +215,7 @@ public class PlayerEvents {
 	}
 
 	@api
-	public static class player_consume extends AbstractEvent {
+	public static class player_consume extends AbstractPlayerEvent {
 
 		@Override
 		public String getName() {
@@ -283,7 +305,7 @@ public class PlayerEvents {
 	}
 
 	@api
-	public static class player_kick extends AbstractEvent {
+	public static class player_kick extends AbstractPlayerEvent {
 
 		@Override
 		public String getName() {
@@ -361,7 +383,7 @@ public class PlayerEvents {
 	}
 
 	@api
-	public static class player_teleport extends AbstractEvent {
+	public static class player_teleport extends AbstractPlayerEvent {
 
 		@Override
 		public String getName() {
@@ -580,7 +602,7 @@ public class PlayerEvents {
 	}
 
 	@api
-	public static class player_login extends AbstractEvent {
+	public static class player_login extends AbstractPlayerEvent {
 
 		@Override
 		public String getName() {
@@ -661,29 +683,10 @@ public class PlayerEvents {
 		public MSVersion since() {
 			return MSVersion.V3_3_1;
 		}
-
-		@Override
-		public void preExecution(Environment env, ActiveEvent activeEvent) {
-			if(activeEvent.getUnderlyingEvent() instanceof MCPlayerLoginEvent) {
-				//Static lookups of the player don't seem to work here, but
-				//the player is passed in with the event.
-				MCPlayer player = ((MCPlayerLoginEvent) activeEvent.getUnderlyingEvent()).getPlayer();
-				Static.InjectPlayer(player);
-			}
-		}
-
-		@Override
-		public void postExecution(Environment env, ActiveEvent activeEvent) {
-			if(activeEvent.getUnderlyingEvent() instanceof MCPlayerLoginEvent) {
-				MCPlayer player = ((MCPlayerLoginEvent) activeEvent.getUnderlyingEvent()).getPlayer();
-				Static.UninjectPlayer(player);
-			}
-		}
-
 	}
 
 	@api
-	public static class player_join extends AbstractEvent {
+	public static class player_join extends AbstractPlayerEvent {
 
 		@Override
 		public String getName() {
@@ -769,29 +772,10 @@ public class PlayerEvents {
 					manual.get("join_message", Target.UNKNOWN).val());
 			return e;
 		}
-
-		@Override
-		public void preExecution(Environment env, ActiveEvent activeEvent) {
-			if(activeEvent.getUnderlyingEvent() instanceof MCPlayerJoinEvent) {
-				//Static lookups of the player as entity don't seem to work here, but
-				//the player is passed in with the event.
-				MCPlayer player = ((MCPlayerJoinEvent) activeEvent.getUnderlyingEvent()).getPlayer();
-				Static.InjectEntity(player);
-			}
-		}
-
-		@Override
-		public void postExecution(Environment env, ActiveEvent activeEvent) {
-			if(activeEvent.getUnderlyingEvent() instanceof MCPlayerJoinEvent) {
-				MCPlayer player = ((MCPlayerJoinEvent) activeEvent.getUnderlyingEvent()).getPlayer();
-				Static.UninjectEntity(player);
-			}
-		}
-
 	}
 
 	@api
-	public static class player_interact extends AbstractEvent {
+	public static class player_interact extends AbstractPlayerEvent {
 
 		@Override
 		public String getName() {
@@ -961,7 +945,7 @@ public class PlayerEvents {
 	}
 
 	@api
-	public static class player_enter_bed extends AbstractEvent {
+	public static class player_enter_bed extends AbstractPlayerEvent {
 
 		@Override
 		public String docs() {
@@ -1040,7 +1024,7 @@ public class PlayerEvents {
 	}
 
 	@api
-	public static class player_leave_bed extends AbstractEvent {
+	public static class player_leave_bed extends AbstractPlayerEvent {
 
 		@Override
 		public String docs() {
@@ -1107,7 +1091,7 @@ public class PlayerEvents {
 	}
 
 	@api
-	public static class pressure_plate_activated extends AbstractEvent {
+	public static class pressure_plate_activated extends AbstractPlayerEvent {
 
 		@Override
 		public String getName() {
@@ -1178,7 +1162,7 @@ public class PlayerEvents {
 	}
 
 	@api
-	public static class player_spawn extends AbstractEvent {
+	public static class player_spawn extends AbstractPlayerEvent {
 
 		@Override
 		public String getName() {
@@ -1286,24 +1270,6 @@ public class PlayerEvents {
 				}
 			}
 			return false;
-		}
-
-		@Override
-		public void preExecution(Environment env, ActiveEvent activeEvent) {
-			if(activeEvent.getUnderlyingEvent() instanceof MCPlayerRespawnEvent) {
-				//Static lookups of the player don't seem to work here, but
-				//the player is passed in with the event.
-				MCPlayer player = ((MCPlayerRespawnEvent) activeEvent.getUnderlyingEvent()).getPlayer();
-				Static.InjectPlayer(player);
-			}
-		}
-
-		@Override
-		public void postExecution(Environment env, ActiveEvent activeEvent) {
-			if(activeEvent.getUnderlyingEvent() instanceof MCPlayerRespawnEvent) {
-				MCPlayer player = ((MCPlayerRespawnEvent) activeEvent.getUnderlyingEvent()).getPlayer();
-				Static.UninjectPlayer(player);
-			}
 		}
 	}
 
@@ -1432,7 +1398,7 @@ public class PlayerEvents {
 	}
 
 	@api
-	public static class player_quit extends AbstractEvent {
+	public static class player_quit extends AbstractPlayerEvent {
 
 		@Override
 		public String getName() {
@@ -1499,28 +1465,10 @@ public class PlayerEvents {
 			}
 			return false;
 		}
-
-		@Override
-		public void preExecution(Environment env, ActiveEvent activeEvent) {
-			if(activeEvent.getUnderlyingEvent() instanceof MCPlayerQuitEvent) {
-				//Static lookups of the player don't seem to work here, but
-				//the player is passed in with the event.
-				MCPlayer player = ((MCPlayerQuitEvent) activeEvent.getUnderlyingEvent()).getPlayer();
-				Static.InjectPlayer(player);
-			}
-		}
-
-		@Override
-		public void postExecution(Environment env, ActiveEvent activeEvent) {
-			if(activeEvent.getUnderlyingEvent() instanceof MCPlayerQuitEvent) {
-				MCPlayer player = ((MCPlayerQuitEvent) activeEvent.getUnderlyingEvent()).getPlayer();
-				Static.UninjectPlayer(player);
-			}
-		}
 	}
 
 	@api
-	public static class player_chat extends AbstractEvent {
+	public static class player_chat extends AbstractPlayerEvent {
 
 		@Override
 		public String getName() {
@@ -1659,7 +1607,7 @@ public class PlayerEvents {
 
 	@api
 	@hide("Experimental until further notice")
-	public static class async_player_chat extends AbstractEvent {
+	public static class async_player_chat extends AbstractPlayerEvent {
 
 		@Override
 		public String getName() {
@@ -1779,7 +1727,7 @@ public class PlayerEvents {
 	}
 
 	@api
-	public static class player_command extends AbstractEvent {
+	public static class player_command extends AbstractPlayerEvent {
 
 		@Override
 		public String getName() {
@@ -1892,7 +1840,7 @@ public class PlayerEvents {
 	}
 
 	@api
-	public static class world_changed extends AbstractEvent {
+	public static class world_changed extends AbstractPlayerEvent {
 
 		@Override
 		public String getName() {
@@ -1991,7 +1939,7 @@ public class PlayerEvents {
 	}
 
 	@api
-	public static class player_move extends AbstractEvent {
+	public static class player_move extends AbstractPlayerEvent {
 
 		@Override
 		public String getName() {
@@ -2122,7 +2070,7 @@ public class PlayerEvents {
 	}
 
 	@api
-	public static class player_fish extends AbstractEvent {
+	public static class player_fish extends AbstractPlayerEvent {
 
 		@Override
 		public String getName() {
@@ -2258,7 +2206,7 @@ public class PlayerEvents {
 	}
 
 	@api
-	public static class gamemode_change extends AbstractEvent {
+	public static class gamemode_change extends AbstractPlayerEvent {
 
 		@Override
 		public String getName() {
@@ -2327,7 +2275,7 @@ public class PlayerEvents {
 	}
 
 	@api
-	public static class exp_change extends AbstractEvent {
+	public static class exp_change extends AbstractPlayerEvent {
 
 		@Override
 		public String getName() {
@@ -2390,7 +2338,7 @@ public class PlayerEvents {
 	}
 
 	@api
-	public static class book_edited extends AbstractEvent {
+	public static class book_edited extends AbstractPlayerEvent {
 
 		@Override
 		public String getName() {
@@ -2536,7 +2484,7 @@ public class PlayerEvents {
 	}
 
 	@api
-	public static class player_toggle_flight extends AbstractEvent {
+	public static class player_toggle_flight extends AbstractPlayerEvent {
 
 		@Override
 		public String getName() {
@@ -2607,7 +2555,7 @@ public class PlayerEvents {
 	}
 
 	@api
-	public static class player_toggle_sneak extends AbstractEvent {
+	public static class player_toggle_sneak extends AbstractPlayerEvent {
 
 		@Override
 		public String getName() {
@@ -2679,7 +2627,7 @@ public class PlayerEvents {
 	}
 
 	@api
-	public static class player_toggle_sprint extends AbstractEvent {
+	public static class player_toggle_sprint extends AbstractPlayerEvent {
 
 		@Override
 		public String getName() {
@@ -2750,7 +2698,7 @@ public class PlayerEvents {
 	}
 
 	@api
-	public static class resource_pack_status extends AbstractEvent {
+	public static class resource_pack_status extends AbstractPlayerEvent {
 
 		@Override
 		public String getName() {
