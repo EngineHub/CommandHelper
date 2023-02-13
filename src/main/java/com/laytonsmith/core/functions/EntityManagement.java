@@ -597,14 +597,11 @@ public class EntityManagement {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCEntity ent = Static.getEntity(args[0], t);
-			if(ent == null) {
-				return CVoid.VOID;
-			} else if(ent instanceof MCHumanEntity) {
+			if(ent instanceof MCHumanEntity) {
 				throw new CREBadEntityException("Cannot remove human entity (" + ent.getUniqueId() + ")!", t);
-			} else {
-				ent.remove();
-				return CVoid.VOID;
 			}
+			ent.remove();
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -667,12 +664,7 @@ public class EntityManagement {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCEntity ent = Static.getEntity(args[0], t);
-			if(ent == null) {
-				return CNull.NULL;
-			} else {
-				return new CInt(ent.getTicksLived(), t);
-			}
+			return new CInt(Static.getEntity(args[0], t).getTicksLived(), t);
 		}
 
 		@Override
@@ -704,16 +696,12 @@ public class EntityManagement {
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			int age = ArgumentValidation.getInt32(args[1], t);
 			MCEntity ent = Static.getEntity(args[0], t);
-			if(ent == null) {
-				return CNull.NULL;
-			} else {
-				try {
-					ent.setTicksLived(age);
-				} catch (IllegalArgumentException ex) {
-					throw new CRERangeException(ex.getMessage(), t);
-				}
-				return CVoid.VOID;
+			try {
+				ent.setTicksLived(age);
+			} catch (IllegalArgumentException ex) {
+				throw new CRERangeException(ex.getMessage(), t);
 			}
+			return CVoid.VOID;
 		}
 
 		@Override

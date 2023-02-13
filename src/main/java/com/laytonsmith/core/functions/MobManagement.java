@@ -349,10 +349,7 @@ public class MobManagement {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCLivingEntity ent = Static.getLivingEntity(args[0], t);
-			if(ent == null) {
-				return CNull.NULL;
-			} else if(ent instanceof MCAgeable) {
-				MCAgeable mob = ((MCAgeable) ent);
+			if(ent instanceof MCAgeable mob) {
 				return new CInt(mob.getAge(), t);
 			} else {
 				throw new CREUnageableMobException("The specified entity does not age", t);
@@ -393,10 +390,7 @@ public class MobManagement {
 				lock = ArgumentValidation.getBoolean(args[2], t);
 			}
 			MCLivingEntity ent = Static.getLivingEntity(args[0], t);
-			if(ent == null) {
-				return CNull.NULL;
-			} else if(ent instanceof MCAgeable) {
-				MCAgeable mob = ((MCAgeable) ent);
+			if(ent instanceof MCAgeable mob) {
 				mob.setAge(age);
 				mob.setAgeLock(lock);
 				return CVoid.VOID;
@@ -440,9 +434,7 @@ public class MobManagement {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCLivingEntity ent = Static.getLivingEntity(args[0], t);
-			if(ent == null) {
-				return CNull.NULL;
-			} else if(ent instanceof MCAnimal animal) {
+			if(ent instanceof MCAnimal animal) {
 				return new CInt(animal.getLoveTicks(), t);
 			} else {
 				throw new CREBadEntityTypeException("The specified entity cannot be in love.", t);
