@@ -547,16 +547,7 @@ public class InventoryEvents {
 				map.put("inventorytype", new CString(e.getInventory().getType().name(), Target.UNKNOWN));
 				map.put("levels", new CInt(e.getExpLevelCost(), Target.UNKNOWN));
 				map.put("enchants", ObjectGenerator.GetGenerator().enchants(e.getEnchantsToAdd(), Target.UNKNOWN));
-
-				CArray loc = ObjectGenerator.GetGenerator().location(e.getEnchantBlock().getLocation());
-
-				loc.remove(new CString("yaw", Target.UNKNOWN));
-				loc.remove(new CString("pitch", Target.UNKNOWN));
-				loc.remove(new CString("4", Target.UNKNOWN));
-				loc.remove(new CString("5", Target.UNKNOWN));
-
-				map.put("location", loc);
-
+				map.put("location", ObjectGenerator.GetGenerator().location(e.getEnchantBlock().getLocation(), false));
 				map.put("option", new CInt(e.whichButton(), Target.UNKNOWN));
 
 				return map;
@@ -645,22 +636,13 @@ public class InventoryEvents {
 				map.put("enchantmentbonus", new CInt(e.getEnchantmentBonus(), t));
 
 				CArray expCostsCArray = new CArray(t);
-
 				MCEnchantmentOffer[] offers = e.getOffers();
 				for(MCEnchantmentOffer offer : offers) {
 					expCostsCArray.push(new CInt(offer.getCost(), t), t);
 				}
-
 				map.put("expcosts", expCostsCArray);
 
-				CArray loc = ObjectGenerator.GetGenerator().location(e.getEnchantBlock().getLocation());
-
-				loc.remove(new CString("yaw", t));
-				loc.remove(new CString("pitch", t));
-				loc.remove(new CString("4", t));
-				loc.remove(new CString("5", t));
-
-				map.put("location", loc);
+				map.put("location", ObjectGenerator.GetGenerator().location(e.getEnchantBlock().getLocation(), false));
 
 				return map;
 			} else {

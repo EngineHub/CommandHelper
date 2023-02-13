@@ -289,7 +289,7 @@ public class VehicleEvents {
 				switch(e.getCollisionType()) {
 					case BLOCK:
 						block = ObjectGenerator.GetGenerator().location(
-								((MCVehicleBlockCollideEvent) e).getBlock().getLocation());
+								((MCVehicleBlockCollideEvent) e).getBlock().getLocation(), false);
 						break;
 					case ENTITY:
 						MCVehicleEntityCollideEvent vec = (MCVehicleEntityCollideEvent) e;
@@ -601,7 +601,7 @@ public class VehicleEvents {
 					} else if(shooter instanceof MCEntity) {
 						ret.put("shooter", new CString(((MCEntity) shooter).getUniqueId().toString(), Target.UNKNOWN));
 					} else if(shooter instanceof MCBlockProjectileSource) {
-						ret.put("shooter", ObjectGenerator.GetGenerator().location(((MCBlockProjectileSource) shooter).getBlock().getLocation()));
+						ret.put("shooter", ObjectGenerator.GetGenerator().location(((MCBlockProjectileSource) shooter).getBlock().getLocation(), false));
 					}
 				}
 				ret.put("location", ObjectGenerator.GetGenerator().location(e.getVehicle().getLocation()));

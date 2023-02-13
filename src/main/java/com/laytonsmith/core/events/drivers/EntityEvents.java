@@ -323,7 +323,7 @@ public class EntityEvents {
 				Map<String, Mixed> ret = evaluate_helper(e);
 				CArray blocks = new CArray(t);
 				for(MCBlock b : e.getBlocks()) {
-					blocks.push(ObjectGenerator.GetGenerator().location(b.getLocation()), t);
+					blocks.push(ObjectGenerator.GetGenerator().location(b.getLocation(), false), t);
 				}
 				ret.put("blocks", blocks);
 				MCEntity ent = e.getEntity();
@@ -441,7 +441,7 @@ public class EntityEvents {
 			MCProjectileSource shooter = pro.getShooter();
 			if(shooter instanceof MCBlockProjectileSource) {
 				ret.put("shooter", ObjectGenerator.GetGenerator().location(
-						((MCBlockProjectileSource) shooter).getBlock().getLocation()));
+						((MCBlockProjectileSource) shooter).getBlock().getLocation(), false));
 			} else if(shooter instanceof MCEntity) {
 				ret.put("shooter", new CString(((MCEntity) shooter).getUniqueId().toString(), t));
 			} else {
@@ -572,7 +572,7 @@ public class EntityEvents {
 					}
 				} else if(shooter instanceof MCBlockProjectileSource) {
 					mapEvent.put("shooter", ObjectGenerator.GetGenerator().location(
-							((MCBlockProjectileSource) shooter).getBlock().getLocation()));
+							((MCBlockProjectileSource) shooter).getBlock().getLocation(), false));
 					mapEvent.put("shootertype", new CString("BLOCK", Target.UNKNOWN));
 					mapEvent.put("player", CNull.NULL);
 				} else {
@@ -1344,7 +1344,7 @@ public class EntityEvents {
 					} else if(shooter instanceof MCEntity) {
 						data = new CString(((MCEntity) shooter).getType().name().toUpperCase(), t);
 					} else if(shooter instanceof MCBlockProjectileSource) {
-						data = ObjectGenerator.GetGenerator().location(((MCBlockProjectileSource) shooter).getBlock().getLocation());
+						data = ObjectGenerator.GetGenerator().location(((MCBlockProjectileSource) shooter).getBlock().getLocation(), false);
 					}
 				}
 				map.put("data", data);
@@ -1771,7 +1771,7 @@ public class EntityEvents {
 					} else if(shooter instanceof MCEntity) {
 						map.put("shooter", new CString(((MCEntity) shooter).getUniqueId().toString(), Target.UNKNOWN));
 					} else if(shooter instanceof MCBlockProjectileSource) {
-						map.put("shooter", ObjectGenerator.GetGenerator().location(((MCBlockProjectileSource) shooter).getBlock().getLocation()));
+						map.put("shooter", ObjectGenerator.GetGenerator().location(((MCBlockProjectileSource) shooter).getBlock().getLocation(), false));
 					}
 				}
 			}
