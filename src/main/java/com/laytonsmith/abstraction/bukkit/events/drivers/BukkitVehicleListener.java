@@ -13,7 +13,6 @@ import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.events.drivers.VehicleEvents;
 import org.bukkit.Location;
 import org.bukkit.entity.Animals;
-import org.bukkit.entity.Entity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -25,7 +24,6 @@ import org.bukkit.event.vehicle.VehicleMoveEvent;
 import org.bukkit.event.vehicle.VehicleDestroyEvent;
 import org.bukkit.util.Vector;
 
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -54,11 +52,8 @@ public class BukkitVehicleListener implements Listener {
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onEntityCollide(VehicleEntityCollisionEvent event) {
-		List<Entity> passengers = event.getVehicle().getPassengers();
-		if(passengers.isEmpty() || passengers.get(0) != event.getEntity()) {
-			BukkitMCVehicleEntityCollideEvent vec = new BukkitMCVehicleEntityCollideEvent(event);
-			EventUtils.TriggerListener(Driver.VEHICLE_COLLIDE, "vehicle_collide", vec);
-		}
+		BukkitMCVehicleEntityCollideEvent vec = new BukkitMCVehicleEntityCollideEvent(event);
+		EventUtils.TriggerListener(Driver.VEHICLE_COLLIDE, "vehicle_collide", vec);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
