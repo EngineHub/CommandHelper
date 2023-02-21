@@ -79,7 +79,6 @@ import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.plugin.EventExecutor;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredListener;
-import org.bukkit.plugin.SimplePluginManager;
 import org.bukkit.plugin.TimedRegisteredListener;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -87,6 +86,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -326,21 +326,18 @@ public class CommandHelperPlugin extends JavaPlugin {
 		}
 
 		if(firstLoad) {
-			// Add dependency on every loaded plugin on Spigot 1.15.2 and later.
-			// This suppresses warnings from the PluginClassLoader due to extensions using a plugin API.
+			// Suppress warnings from the PluginClassLoader when extensions load classes from another plugin.
 			// This should be done before ExtensionManager.Initialize().
 			try {
-				Object dependencyGraph = ReflectionUtils.get(SimplePluginManager.class, Bukkit.getPluginManager(),
-						"dependencyGraph");
+				Class cls = Class.forName("org.bukkit.plugin.java.PluginClassLoader");
+				Set<String> ignored = (Set<String>) ReflectionUtils.get(cls, getClassLoader(), "seenIllegalAccess");
 				for(Plugin plugin : Bukkit.getPluginManager().getPlugins()) {
-					if(plugin == self) {
-						continue;
+					if(plugin != self) {
+						ignored.add(plugin.getName());
 					}
-					ReflectionUtils.invokeMethod(dependencyGraph, "putEdge", self.getDescription().getName(),
-							plugin.getName());
 				}
-			} catch (ReflectionUtils.ReflectionException ex) {
-				// While this failed, nothing breaks. The server may still get class load warnings, though.
+			} catch (ReflectionUtils.ReflectionException | ClassNotFoundException ex) {
+				// The server may still log class load warnings for unlisted dependencies.
 			}
 
 			ExtensionManager.Initialize(ClassDiscovery.getDefaultInstance());
