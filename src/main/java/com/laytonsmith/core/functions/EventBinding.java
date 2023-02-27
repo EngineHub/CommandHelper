@@ -11,6 +11,7 @@ import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.BranchStatement;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
@@ -149,6 +150,11 @@ public class EventBinding {
 			try {
 				newEnv = env.clone();
 			} catch (Exception e) {
+			}
+			// Set the permission to global if it's null, since that means
+			// it wasn't set, and so we aren't in a secured environment anyway.
+			if(newEnv.getEnv(GlobalEnv.class).GetLabel() == null) {
+				newEnv.getEnv(GlobalEnv.class).SetLabel(Static.GLOBAL_PERMISSION);
 			}
 			newEnv.getEnv(GlobalEnv.class).SetVarList(custom_params);
 			ParseTree tree = nodes[nodes.length - 1];

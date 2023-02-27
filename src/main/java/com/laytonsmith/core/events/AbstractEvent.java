@@ -16,7 +16,6 @@ import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
-import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.events.prefilters.Prefilter;
 import com.laytonsmith.core.events.prefilters.PrefilterBuilder;
@@ -139,14 +138,6 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 		}
 		try {
 			try {
-				//Get the label from the bind time environment, and put it in the current environment.
-				String label = b.getEnvironment().getEnv(GlobalEnv.class).GetLabel();
-				if(label == null) {
-					//Set the permission to global if it's null, since that means
-					//it wasn't set, and so we aren't in a secured environment anyways.
-					label = Static.GLOBAL_PERMISSION;
-				}
-				env.getEnv(GlobalEnv.class).SetLabel(label);
 				MethodScriptCompiler.execute(tree, env, null, null);
 			} catch (CancelCommandException ex) {
 				if(ex.getMessage() != null && !ex.getMessage().isEmpty()) {
