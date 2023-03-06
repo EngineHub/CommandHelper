@@ -1959,19 +1959,39 @@ public class ObjectGenerator {
 					Mixed ingredient = shapedIngredients.get(key, t);
 					if(ingredient.isInstanceOf(CArray.TYPE)) {
 						if(((CArray) ingredient).isAssociative()) {
-							((MCShapedRecipe) ret).setIngredient(key.charAt(0), item(ingredient, t).getType());
+							// Single exact item ingredient
+							((MCShapedRecipe) ret).setIngredient(key.charAt(0), item(ingredient, t));
 						} else {
+							// Multiple ingredient choices
 							CArray list = (CArray) ingredient;
 							MCMaterial[] mats = new MCMaterial[(int) list.size()];
+							MCItemStack[] items = new MCItemStack[(int) list.size()];
+							boolean exactItemMatch = false;
 							for(int index = 0; index < list.size(); index++) {
-								MCMaterial mat = StaticLayer.GetMaterial(list.get(index, t).val());
-								if(mat == null) {
-									throw new CREIllegalArgumentException("Recipe input is invalid: "
-											+ list.get(index, t).val(), t);
+								Mixed choice = list.get(index, t);
+								if(choice.isInstanceOf(CArray.TYPE)) {
+									exactItemMatch = true;
+									items[index] = item(choice, t);
+								} else {
+									MCMaterial mat = StaticLayer.GetMaterial(choice.val());
+									if(mat == null) {
+										throw new CREIllegalArgumentException("Ingredient is invalid: " + choice.val(), t);
+									}
+									mats[index] = mat;
 								}
-								mats[index] = mat;
 							}
-							((MCShapedRecipe) ret).setIngredient(key.charAt(0), mats);
+							if(exactItemMatch) {
+								// Multiple exact item ingredient choices
+								for(int index = 0; index < items.length; index++) {
+									if(items[index] == null) {
+										items[index] = StaticLayer.GetItemStack(mats[index], 1);
+									}
+								}
+								((MCShapedRecipe) ret).setIngredient(key.charAt(0), items);
+							} else {
+								// Multiple material ingredient choices
+								((MCShapedRecipe) ret).setIngredient(key.charAt(0), mats);
+							}
 						}
 					} else if(ingredient instanceof CNull) {
 						((MCShapedRecipe) ret).setIngredient(key.charAt(0), EmptyItem());

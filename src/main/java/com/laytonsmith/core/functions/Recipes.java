@@ -117,7 +117,7 @@ public class Recipes {
 					+ "    result: {name: 'DIRT'},\n"
 					+ "    input: {'MYCELIUM', 'GRASS_BLOCK'},\n"
 					+ "    experience: 0.001,\n"
-					+ "    cookingtime: 200"
+					+ "    cookingtime: 200\n"
 					+ "}</pre>"
 					+ " StoneCutting Recipe Data. Turns diamond hoe into diamond. (single item type input)"
 					+ "<pre>"
@@ -136,12 +136,48 @@ public class Recipes {
 
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
-		return new ExampleScript[]{
-					new ExampleScript("Demonstrates adding a shaped recipe.",
-						"add_recipe(array(\n\t'key': 'player_head',\n\t'type': 'SHAPED',\n\t'result': "
-								+ "array('name': 'PLAYER_HEAD'),\n\t'shape': array('AAA', 'ABA', 'AAA'),\n\t"
-								+ "'ingredients': array('A': 'CLAY_BALL', 'B': 'SKELETON_SKULL')\n));",
-						"Creates recipe where a skeleton skull is surrounded by clay balls to creates a player head."),
+			return new ExampleScript[]{
+				new ExampleScript("Demonstrates adding a shaped recipe.",
+				"add_recipe(array(\n"
+				+ "\t'key': 'player_head',\n"
+				+ "\t'type': 'SHAPED',\n"
+				+ "\t'result': array('name': 'PLAYER_HEAD'),\n"
+				+ "\t'shape': array(\n"
+				+ "\t\t'AAA',\n"
+				+ "\t\t'ABA',\n"
+				+ "\t\t'AAA'),\n"
+				+ "\t'ingredients': array(\n"
+				+ "\t\t'A': 'CLAY_BALL',\n"
+				+ "\t\t'B': 'SKELETON_SKULL')));",
+				"Creates recipe where a skeleton skull is surrounded by clay balls to creates a player head."),
+
+				new ExampleScript("Demonstrates adding a shaped recipe with exact ingredients using item arrays."
+				+ " The item ingredient must match exactly, including unspecified meta. (except 'qty')"
+				+ " In this example, the regen potion ingredient must NOT be extended or upgraded for it to match,"
+				+ " because those are the default values.",
+				"add_recipe(array(\n"
+				+ "\t'key': 'regen_extended',\n"
+				+ "\t'type': 'SHAPED',\n"
+				+ "\t'result': array('name': 'POTION', 'meta': array('base': array('type': 'REGEN', 'extended': true))),\n"
+				+ "\t'shape': array(\n"
+				+ "\t\t'RRR',\n"
+				+ "\t\t'RPR',\n"
+				+ "\t\t'RRR'),\n"
+				+ "\t'ingredients': array(\n"
+				+ "\t\t'R': 'REDSTONE',\n"
+				+ "\t\t'P': array('name': 'POTION', 'meta': array('base': array('type': 'REGEN'))))));",
+				"Turns a normal regen potion surrounded by redstone into an extended regen potion."),
+
+				new ExampleScript("Demonstrates a shaped recipe with multiple ingredient choices."
+				+ " If just one of the ingredient choices is an item array (i.e. associative array instead of string),"
+				+ " all other ingredient choices for that key are also treated as exact ingredients.",
+				"add_recipe(array(\n"
+				+ "\t'key': 'mushroom_stem',\n"
+				+ "\t'type': 'SHAPED',\n"
+				+ "\t'result': array('name': 'MUSHROOM_STEM'),\n"
+				+ "\t'shape': array('X', 'X', 'X'),\n"
+				+ "\t'ingredients': array('X': array('RED_MUSHROOM', 'BROWN_MUSHROOM'))));",
+				"Crafts a mushroom stem block."),
 			};
 		}
 	}
