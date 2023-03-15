@@ -619,7 +619,7 @@ public class BukkitConvertor extends AbstractConvertor {
 				return new BukkitMCAxolotlBucketMeta((AxolotlBucketMeta) im);
 			}
 			try {
-				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_X) && im instanceof MusicInstrumentMeta) {
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_3) && im instanceof MusicInstrumentMeta) {
 					return new BukkitMCMusicInstrumentMeta((MusicInstrumentMeta) im);
 				}
 			} catch(NoClassDefFoundError ignored) {

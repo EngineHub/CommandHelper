@@ -176,6 +176,9 @@ public abstract class MCParticle<Concrete> extends DynamicEnum<MCParticle.MCVani
 		SCULK_CHARGE_POP(MCVersion.MC1_19),
 		SCULK_SOUL(MCVersion.MC1_19),
 		SONIC_BOOM(MCVersion.MC1_19),
+		DRIPPING_CHERRY_LEAVES(MCVersion.MC1_19_X),
+		FALLING_CHERRY_LEAVES(MCVersion.MC1_19_X),
+		LANDING_CHERRY_LEAVES(MCVersion.MC1_19_X),
 		UNKNOWN(MCVersion.NEVER);
 
 		private final MCVersion since;
