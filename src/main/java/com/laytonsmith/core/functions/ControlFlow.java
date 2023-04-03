@@ -1652,8 +1652,6 @@ public class ControlFlow {
 				Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> exceptions) {
 			List<ParseTree> children = ast.getChildren();
 			if(children.size() < 2) {
-				exceptions.add(new ConfigCompileException(
-						"Invalid number of arguments passed to " + getName(), ast.getTarget()));
 				return null;
 			}
 			if(isFunction(children.get(0), centry.NAME)) {
