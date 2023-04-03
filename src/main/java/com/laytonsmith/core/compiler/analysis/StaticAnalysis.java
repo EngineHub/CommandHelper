@@ -27,6 +27,7 @@ import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.functions.Compiler.__autoconcat__;
 import com.laytonsmith.core.functions.DataHandling;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.IncludeCache;
@@ -353,6 +354,8 @@ public class StaticAnalysis {
 	 * Traverses the parse tree, type checking functions through their
 	 * {@link Function#typecheck(StaticAnalysis, ParseTree, Environment, Set)} methods. When {@link IVariable}s are
 	 * traversed, a compile error is added when they do not resolve to a declaration.
+	 * Note that {@link __autoconcat__} functions are skipped in typechecking as having them in the AST implies that we
+	 * have a compile error on their children, and running a typecheck on that code could be senseless.
 	 *
 	 * @param ast - The parse tree.
 	 * @param env - The {@link Environment}, used for instanceof checks on types.
@@ -365,7 +368,7 @@ public class StaticAnalysis {
 			CFunction cFunc = (CFunction) node;
 			if(cFunc.hasFunction()) {
 				Function func = cFunc.getCachedFunction();
-				if(func != null) {
+				if(func != null && func.getClass() != __autoconcat__.class) {
 					return func.typecheck(this, ast, env, exceptions);
 				}
 				return CClassType.AUTO; // Unknown return type.
