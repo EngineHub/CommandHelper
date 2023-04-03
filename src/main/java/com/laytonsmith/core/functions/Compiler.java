@@ -608,19 +608,23 @@ public class Compiler {
 				Stack<ParseTree> executes = new Stack<>();
 				while(listInd > 0) {
 					ParseTree lastNode = list.get(listInd);
-					if(lastNode.getData() instanceof CFunction cf
-							&& cf.hasFunction()
-							&& cf.getFunction() != null
-							&& cf.getFunction().getName().equals(Compiler.p.NAME)) {
-						Mixed prevNode = list.get(listInd - 1).getData();
-						if(prevNode instanceof CSymbol || prevNode instanceof CLabel) {
-							// It's just a parenthesis like @a = (1); or key: (value), so we should leave it alone.
+					try {
+						if(lastNode.getData() instanceof CFunction cf
+								&& cf.hasFunction()
+								&& cf.getFunction() != null
+								&& cf.getFunction().getName().equals(Compiler.p.NAME)) {
+							Mixed prevNode = list.get(listInd - 1).getData();
+							if(prevNode instanceof CSymbol || prevNode instanceof CLabel) {
+								// It's just a parenthesis like @a = (1); or key: (value), so we should leave it alone.
+								break;
+							}
+							executes.push(lastNode);
+							list.remove(listInd--);
+						} else {
 							break;
 						}
-						executes.push(lastNode);
-						list.remove(listInd--);
-					} else {
-						break;
+					} catch (ConfigCompileException e) {
+						break; // The function does not exist. Ignore and handle as "not a p()".
 					}
 				}
 				if(!executes.isEmpty()) {
