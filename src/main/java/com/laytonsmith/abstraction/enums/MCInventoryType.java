@@ -15,11 +15,13 @@ public enum MCInventoryType {
 	ENDER_CHEST,
 	FURNACE,
 	HOPPER,
+	JUKEBOX(false),
 	MERCHANT(false),
 	PLAYER,
 	WORKBENCH,
 	ANVIL,
 	SMITHING,
+	SMITHING_NEW(false), // experimental 1.20 API
 	BEACON(false),
 	SHULKER_BOX,
 	BARREL,
