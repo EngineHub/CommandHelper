@@ -1057,11 +1057,12 @@ public class BlockEvents {
 
 		@Override
 		public String docs() {
-			return "{type: <string match> Type of dispenser | itemname: <string match> Item type which is dispensed}"
-					+ "This event is called when a dispenser dispense an item. Cancelling the event cancels dispensing."
-					+ "{type: Type of dispenser | item: Item which is dispensed | velocity: Returns an associative array"
-					+ " indicating the x/y/z components of item velocity. As a convenience, the magnitude is also included."
-					+ " | location: Location of dispenser} "
+			return "{type: <string match> Type of dispensing block | itemname: <string match> Item type to be dispensed}"
+					+ "This event is called when a block dispenses an item."
+					+ "{type | item: Item array of item to be dispensed. If the item type exists in the dispenser,"
+					+ " one will be removed from the block's inventory. (ignores item quantity)"
+					+ " | velocity: Returns an associative array with the x/y/z/magnitude components of item velocity."
+					+ " | location: Location array of dispensing block} "
 					+ "{item|velocity} "
 					+ "{}";
 		}

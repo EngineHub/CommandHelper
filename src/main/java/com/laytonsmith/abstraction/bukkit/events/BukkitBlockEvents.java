@@ -42,7 +42,6 @@ import com.laytonsmith.annotations.abstraction;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import org.bukkit.block.Block;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
@@ -454,13 +453,7 @@ public class BukkitBlockEvents {
 
 		@Override
 		public void setItem(MCItemStack item) {
-			if(item == null || "AIR".equals(item.getType().getName())) {
-				throw new CREIllegalArgumentException("Due to Bukkit's handling of this event, the item cannot be set to null."
-						+ " Until they change this, workaround by cancelling the event and manipulating the block"
-						+ " using inventory functions.", Target.UNKNOWN);
-			} else {
-				bde.setItem(((BukkitMCItemStack) item).asItemStack());
-			}
+			bde.setItem(((BukkitMCItemStack) item).asItemStack());
 		}
 
 		@Override
