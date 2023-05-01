@@ -315,19 +315,26 @@ without knowing the rotations on the other axis or of other body parts beforehan
 * %KEY_WOLF_COLOR%: The collar color of the wolf (can be %DYE_COLOR%).
 * %KEY_WOLF_INTERESTED%: Whether the wolf is interested, tilting its head. (1.19)
 * %KEY_GENERIC_SITTING%: If the wolf is sitting.
+|-
+| ZOGLIN
+|
+* %KEY_GENERIC_BABY%: Whether the zoglin is a baby.
 |- 
-| ZOMBIE, HUSK, DROWNED, ZOGLIN
+| ZOMBIE, HUSK, DROWNED
 | 
 * %KEY_GENERIC_BABY%: Whether the zombie is a baby.
+* %KEY_ZOMBIE_BREAK_DOORS%: Whether the zombie can break doors. (1.19)
 |-
 | ZOMBIE_VILLAGER
 |
 * %KEY_GENERIC_BABY%: Whether the zombie is a baby.
 * %KEY_VILLAGER_PROFESSION%: The profession of the villager (can be %PROFESSION%).
+* %KEY_ZOMBIE_BREAK_DOORS%: Whether the zombie villager can break doors. (1.19)
 |- 
 | ZOMBIFIED_PIGLIN (PIG_ZOMBIE before 1.16)
 | 
-* %KEY_ZOMBIFIED_PIGLIN_ANGER%: The piglin zombie's anger level.
-* %KEY_ZOMBIFIED_PIGLIN_ANGRY%: Whether the piglin zombie is angry.
-* %KEY_GENERIC_BABY%: Whether the pig zombie is a baby.
+* %KEY_ZOMBIFIED_PIGLIN_ANGER%: The zombified piglin's anger level.
+* %KEY_ZOMBIFIED_PIGLIN_ANGRY%: Whether the zombified piglin is angry.
+* %KEY_GENERIC_BABY%: Whether the zombified piglin is a baby.
+* %KEY_ZOMBIE_BREAK_DOORS%: Whether the zombified piglin can break doors. (1.19)
 |}

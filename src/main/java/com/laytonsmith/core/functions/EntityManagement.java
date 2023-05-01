@@ -2228,17 +2228,26 @@ public class EntityManagement {
 				case HUSK:
 					MCZombie zombie = (MCZombie) entity;
 					specArray.set(entity_spec.KEY_GENERIC_BABY, CBoolean.get(zombie.isBaby()), t);
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19)) {
+						specArray.set(entity_spec.KEY_ZOMBIE_BREAK_DOORS, CBoolean.get(zombie.canBreakDoors()), t);
+					}
 					break;
 				case ZOMBIE_VILLAGER:
 					MCZombieVillager zombievillager = (MCZombieVillager) entity;
 					specArray.set(entity_spec.KEY_GENERIC_BABY, CBoolean.get(zombievillager.isBaby()), t);
 					specArray.set(entity_spec.KEY_VILLAGER_PROFESSION, new CString(zombievillager.getProfession().name(), t), t);
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19)) {
+						specArray.set(entity_spec.KEY_ZOMBIE_BREAK_DOORS, CBoolean.get(zombievillager.canBreakDoors()), t);
+					}
 					break;
 				case ZOMBIFIED_PIGLIN:
 					MCPigZombie pigZombie = (MCPigZombie) entity;
 					specArray.set(entity_spec.KEY_ZOMBIFIED_PIGLIN_ANGRY, CBoolean.get(pigZombie.isAngry()), t);
 					specArray.set(entity_spec.KEY_ZOMBIFIED_PIGLIN_ANGER, new CInt(pigZombie.getAnger(), t), t);
 					specArray.set(entity_spec.KEY_GENERIC_BABY, CBoolean.get(pigZombie.isBaby()), t);
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19)) {
+						specArray.set(entity_spec.KEY_ZOMBIE_BREAK_DOORS, CBoolean.get(pigZombie.canBreakDoors()), t);
+					}
 					break;
 			}
 			return specArray;
@@ -2369,6 +2378,7 @@ public class EntityManagement {
 		private static final String KEY_WOLF_ANGRY = "angry";
 		private static final String KEY_WOLF_COLOR = "color";
 		private static final String KEY_WOLF_INTERESTED = "interested";
+		private static final String KEY_ZOMBIE_BREAK_DOORS = "breakdoors";
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
@@ -3741,6 +3751,9 @@ public class EntityManagement {
 							case entity_spec.KEY_GENERIC_BABY:
 								zombie.setBaby(ArgumentValidation.getBoolean(specArray.get(index, t), t));
 								break;
+							case entity_spec.KEY_ZOMBIE_BREAK_DOORS:
+								zombie.setCanBreakDoors(ArgumentValidation.getBooleanObject(specArray.get(index, t), t));
+								break;
 							default:
 								throwException(index, t);
 						}
@@ -3760,6 +3773,9 @@ public class EntityManagement {
 									throw new CREFormatException("Invalid profession: " + specArray.get(index, t).val(), t);
 								}
 								break;
+							case entity_spec.KEY_ZOMBIE_BREAK_DOORS:
+								zombievillager.setCanBreakDoors(ArgumentValidation.getBooleanObject(specArray.get(index, t), t));
+								break;
 							default:
 								throwException(index, t);
 						}
@@ -3777,6 +3793,9 @@ public class EntityManagement {
 								break;
 							case entity_spec.KEY_ZOMBIFIED_PIGLIN_ANGER:
 								pigZombie.setAnger(ArgumentValidation.getInt32(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_ZOMBIE_BREAK_DOORS:
+								pigZombie.setCanBreakDoors(ArgumentValidation.getBooleanObject(specArray.get(index, t), t));
 								break;
 							default:
 								throwException(index, t);

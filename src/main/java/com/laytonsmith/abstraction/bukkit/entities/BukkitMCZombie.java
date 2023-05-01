@@ -29,4 +29,18 @@ public class BukkitMCZombie extends BukkitMCLivingEntity implements MCZombie {
 	public void setBaby(boolean isBaby) {
 		getHandle().setBaby(isBaby);
 	}
+
+	@Override
+	public boolean canBreakDoors() {
+		return getHandle().canBreakDoors();
+	}
+
+	@Override
+	public void setCanBreakDoors(boolean canBreakDoors) {
+		try {
+			getHandle().setCanBreakDoors(canBreakDoors);
+		} catch(NoSuchMethodError ex) {
+			// probably before 1.19
+		}
+	}
 }
