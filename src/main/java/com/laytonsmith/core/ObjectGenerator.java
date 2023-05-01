@@ -51,10 +51,12 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBeehive;
 import com.laytonsmith.abstraction.blocks.MCBlockData;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
+import com.laytonsmith.abstraction.blocks.MCCommandBlock;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.blocks.MCBanner;
 import com.laytonsmith.abstraction.blocks.MCBrewingStand;
 import com.laytonsmith.abstraction.blocks.MCFurnace;
+import com.laytonsmith.abstraction.blocks.MCSign;
 import com.laytonsmith.abstraction.entities.MCTropicalFish;
 import com.laytonsmith.abstraction.enums.MCAttribute;
 import com.laytonsmith.abstraction.enums.MCAxolotlType;
@@ -564,6 +566,22 @@ public class ObjectGenerator {
 						}
 					}
 					ma.set("inventory", box, t);
+				} else if(bs instanceof MCSign sign) {
+					CArray lines = new CArray(t);
+					for(String line : sign.getLines()) {
+						lines.push(new CString(line, t), t);
+					}
+					ma.set("signtext", lines, t);
+					ma.set("glowing", CBoolean.get(sign.isGlowingText()), t);
+					MCDyeColor color = sign.getDyeColor();
+					if(color == null) {
+						ma.set("color", CNull.NULL, t);
+					} else {
+						ma.set("color", color.name(), t);
+					}
+				} else if(bs instanceof MCCommandBlock cmdBlock) {
+					ma.set("command", cmdBlock.getCommand());
+					ma.set("customname", cmdBlock.getName());
 				}
 			} else if(meta instanceof MCFireworkEffectMeta) {
 				MCFireworkEffectMeta mcfem = (MCFireworkEffectMeta) meta;
@@ -1018,6 +1036,36 @@ public class ObjectGenerator {
 										+ " inventory expected to be an array or null.", t);
 							}
 						}
+					} else if(bs instanceof MCSign sign) {
+						if(ma.containsKey("signtext")) {
+							Mixed possibleLines = ma.get("signtext", t);
+							if(possibleLines.isInstanceOf(CArray.TYPE)) {
+								CArray lines = (CArray) possibleLines;
+								for(int i = 0; i < lines.size(); i++) {
+									sign.setLine(i, lines.get(i, t).val());
+								}
+							} else {
+								throw new CREFormatException("Expected array for sign text", t);
+							}
+						}
+						if(ma.containsKey("glowing")) {
+							sign.setGlowingText(ArgumentValidation.getBooleanObject(ma.get("glowing", t), t));
+						}
+						if(ma.containsKey("color")) {
+							Mixed dye = ma.get("color", t);
+							if(!(dye instanceof CNull)) {
+								sign.setDyeColor(MCDyeColor.valueOf(dye.val()));
+							}
+						}
+						bsm.setBlockState(bs);
+					} else if(bs instanceof MCCommandBlock cmdBlock) {
+						if(ma.containsKey("command")) {
+							cmdBlock.setCommand(ma.get("command", t).val());
+						}
+						if(ma.containsKey("customname")) {
+							cmdBlock.setName(ma.get("customname", t).val());
+						}
+						bsm.setBlockState(bs);
 					}
 				} else if(meta instanceof MCFireworkEffectMeta) {
 					MCFireworkEffectMeta femeta = (MCFireworkEffectMeta) meta;

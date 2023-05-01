@@ -35,12 +35,14 @@ import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBeehive;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlockState;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBrewingStand;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCChest;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCCommandBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCContainer;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCDispenser;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCDropper;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCFurnace;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCLectern;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCSign;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCSkull;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCAgeable;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCAnimal;
@@ -106,12 +108,14 @@ import org.bukkit.block.Beehive;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.BrewingStand;
 import org.bukkit.block.Chest;
+import org.bukkit.block.CommandBlock;
 import org.bukkit.block.Container;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.block.Dispenser;
 import org.bukkit.block.Dropper;
 import org.bukkit.block.Furnace;
 import org.bukkit.block.Lectern;
+import org.bukkit.block.Sign;
 import org.bukkit.block.Skull;
 import org.bukkit.block.banner.Pattern;
 import org.bukkit.command.BlockCommandSender;
@@ -564,6 +568,12 @@ public class BukkitConvertor extends AbstractConvertor {
 		}
 		if(bs instanceof Beehive) {
 			return new BukkitMCBeehive((Beehive) bs);
+		}
+		if(bs instanceof Sign) {
+			return new BukkitMCSign((Sign) bs);
+		}
+		if(bs instanceof CommandBlock) {
+			return new BukkitMCCommandBlock((CommandBlock) bs);
 		}
 		return new BukkitMCBlockState(bs);
 	}
