@@ -3052,7 +3052,7 @@ public final class MethodScriptCompiler {
 		}
 		if(script == null) {
 			script = new Script(null, null, env.getEnv(GlobalEnv.class).GetLabel(), env.getEnvClasses(),
-					new FileOptions(new HashMap<>()), null);
+					root.getFileOptions(), null);
 		}
 		if(vars != null) {
 			Map<String, Variable> varMap = new HashMap<>();

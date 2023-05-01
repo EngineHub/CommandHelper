@@ -570,11 +570,13 @@ public class Compiler {
 					}
 				}
 				ParseTree tree;
-				FileOptions options = new FileOptions(new HashMap<>());
+				FileOptions options;
 				Target t = Target.UNKNOWN;
 				if(!list.isEmpty()) {
 					options = list.get(0).getFileOptions();
 					t = list.get(0).getTarget();
+				} else {
+					options = new FileOptions(new HashMap<>());
 				}
 
 				if(returnSConcat) {

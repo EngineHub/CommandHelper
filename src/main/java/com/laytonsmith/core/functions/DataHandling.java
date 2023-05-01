@@ -1638,9 +1638,11 @@ public class DataHandling {
 			if(myProc.isPossiblyConstant()) {
 				//Oooh, it's possibly constant. So, let's run it with our children.
 				try {
-					FileOptions options = new FileOptions(new HashMap<>());
+					FileOptions options;
 					if(!children.isEmpty()) {
 						options = children.get(0).getFileOptions();
+					} else {
+						options = new FileOptions(new HashMap<>());
 					}
 					ParseTree root = new ParseTree(new CFunction(__autoconcat__.NAME, Target.UNKNOWN), options);
 					Script fakeScript = Script.GenerateScript(root, Static.GLOBAL_PERMISSION, null);
