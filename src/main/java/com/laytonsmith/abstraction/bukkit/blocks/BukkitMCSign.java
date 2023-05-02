@@ -37,13 +37,22 @@ public class BukkitMCSign extends BukkitMCBlockState implements MCSign {
 
 	@Override
 	public boolean isGlowingText() {
-		return s.isGlowingText();
+		try {
+			return s.isGlowingText();
+		} catch (NoSuchMethodError ex) {
+			// probably before 1.17
+		}
+		return false;
 	}
 
 	@Override
 	public void setGlowingText(boolean glowing) {
-		s.setGlowingText(glowing);
-		s.update();
+		try {
+			s.setGlowingText(glowing);
+			s.update();
+		} catch (NoSuchMethodError ex) {
+			// probably before 1.17
+		}
 	}
 
 	@Override
