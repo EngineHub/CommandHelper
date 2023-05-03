@@ -32,6 +32,8 @@ import java.util.logging.Logger;
  */
 public class BoundEvent implements Comparable<BoundEvent> {
 
+	private static int eventId = 0;
+
 	private final String eventName;
 	private final String id;
 	private final Priority priority;
@@ -39,8 +41,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
 	private final String eventObjName;
 	private final Environment originalEnv;
 	private final ParseTree tree; //The code closure for this event
-	private final Driver driver; //For efficiency sake, cache it here
-	private static int eventId = 0;
+	private final Event eventDriver;
 	private final Target target;
 
 	/**
@@ -172,7 +173,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
 		if(ev == null) {
 			throw new EventException("No event named \"" + this.eventName + "\" is registered!");
 		}
-		this.driver = ev.driver();
+		this.eventDriver = ev;
 		this.eventObjName = eventObjName;
 
 		this.target = t;
@@ -204,7 +205,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
 	}
 
 	public Driver getDriver() {
-		return driver;
+		return eventDriver.driver();
 	}
 
 	public String getId() {
@@ -303,8 +304,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
 	private void execute(Environment env, ActiveEvent activeEvent) throws EventException {
 		ParseTree superRoot = new ParseTree(null);
 		superRoot.addChild(tree);
-		Event myDriver = this.getEventDriver();
-		myDriver.execute(superRoot, this, env, activeEvent);
+		eventDriver.execute(superRoot, this, env, activeEvent);
 	}
 
 	//TODO: Once ParseTree supports these again, we may bring this back
@@ -333,7 +333,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
 	 * @return
 	 */
 	public Event getEventDriver() {
-		return EventList.getEvent(this.getDriver(), this.getEventName());
+		return eventDriver;
 	}
 
 	/**
