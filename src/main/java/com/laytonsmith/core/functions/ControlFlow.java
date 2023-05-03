@@ -1424,11 +1424,11 @@ public class ControlFlow {
 					//If the key isn't null, set that in the variable table.
 					if(kkey != null) {
 						env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(kkey.getDefinedType(),
-								kkey.getVariableName(), c, t, env));
+								kkey.getVariableName(), c, kkey.getDefinedTarget(), env));
 					}
 					//Set the value in the variable table
 					env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(two.getDefinedType(),
-							two.getVariableName(), one.get(c.val(), t), t, env));
+							two.getVariableName(), one.get(c, t), two.getDefinedTarget(), env));
 					try {
 						//Execute the code
 						parent.eval(code, env);
@@ -1482,10 +1482,10 @@ public class ControlFlow {
 						if(!iterator.isBlacklisted(current)) {
 							if(kkey != null) {
 								env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(kkey.getDefinedType(),
-										kkey.getVariableName(), new CInt(current, t), t, env));
+										kkey.getVariableName(), new CInt(current, t), kkey.getDefinedTarget(), env));
 							}
 							env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(two.getDefinedType(),
-									two.getVariableName(), one.get(current, t), t, env));
+									two.getVariableName(), one.get(current, t), two.getDefinedTarget(), env));
 							try {
 								parent.eval(code, env);
 							} catch (LoopBreakException e) {
