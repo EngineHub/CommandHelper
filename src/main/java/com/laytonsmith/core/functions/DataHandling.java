@@ -368,9 +368,7 @@ public class DataHandling {
 				}
 				name = ((IVariable) args[offset]).getVariableName();
 				IVariable listVar = list.get(name, t, true, env);
-				if(listVar.ival() != CNull.UNDEFINED) {
-					t = listVar.getDefinedTarget();
-				}
+				t = listVar.getDefinedTarget();
 				type = listVar.getDefinedType();
 			}
 			Mixed c = args[offset + 1];
