@@ -616,7 +616,7 @@ public class Compiler {
 								&& cf.getFunction() != null
 								&& cf.getFunction().getName().equals(Compiler.p.NAME)) {
 							Mixed prevNode = list.get(listInd - 1).getData();
-							if(prevNode instanceof CSymbol || prevNode instanceof CLabel) {
+							if(prevNode instanceof CSymbol || prevNode instanceof CLabel || prevNode instanceof CString) {
 								// It's just a parenthesis like @a = (1); or key: (value), so we should leave it alone.
 								break;
 							}
