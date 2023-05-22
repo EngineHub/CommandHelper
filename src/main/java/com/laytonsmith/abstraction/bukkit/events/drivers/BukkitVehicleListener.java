@@ -43,7 +43,7 @@ public class BukkitVehicleListener implements Listener {
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onBlockCollide(VehicleBlockCollisionEvent event) {
-		if(event.getVehicle() instanceof Animals && event.getVehicle().getPassengers().isEmpty()) {
+		if(event.getVehicle() instanceof Animals && event.getVehicle().isEmpty()) {
 			return;
 		}
 		BukkitMCVehicleBlockCollideEvent vbc = new BukkitMCVehicleBlockCollideEvent(event);
