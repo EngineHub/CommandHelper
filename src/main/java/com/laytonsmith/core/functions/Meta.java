@@ -46,6 +46,7 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREIOException;
 import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
@@ -366,9 +367,13 @@ public class Meta {
 			if(Construct.nval(args[0]) == null || args[0].val().length() <= 0 || args[0].val().charAt(0) != '/') {
 				throw new CREFormatException("The first character of the command must be a forward slash (i.e. '/give')", t);
 			}
+			MCCommandSender sender = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+			if(sender == null) {
+				throw new CREException("No command sender in this context.", t);
+			}
 			String cmd = args[0].val().substring(1);
 			if(Prefs.DebugMode()) {
-				if(env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
+				if(sender instanceof MCPlayer) {
 					Static.getLogger().log(Level.INFO, "Executing command on " + env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName() + ": " + args[0].val().trim());
 				} else {
 					Static.getLogger().log(Level.INFO, "Executing command from console equivalent: " + args[0].val().trim());
@@ -378,7 +383,7 @@ public class Meta {
 				throw new CREFormatException("/interpreter-on cannot be run as apart of an alias for security reasons.", t);
 			}
 			try {
-				Static.getServer().dispatchCommand(env.getEnv(CommandHelperEnvironment.class).GetCommandSender(), cmd);
+				Static.getServer().dispatchCommand(sender, cmd);
 			} catch (Exception ex) {
 				throw new CREPluginInternalException("While running the command: \"" + cmd + "\""
 						+ " the plugin threw an unexpected exception (turn on debug mode to see the full"
@@ -436,6 +441,9 @@ public class Meta {
 			List<Mixed> argList;
 			if(args.length == 2) {
 				sender = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+				if(sender == null) {
+					throw new CREException("No command sender in this context.", t);
+				}
 				commandString = args[0].val();
 				argList = ArgumentValidation.getArray(args[1], t).asList();
 			} else {
@@ -594,16 +602,17 @@ public class Meta {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			boolean doRemoval = true;
-			if(!Static.getAliasCore().hasPlayerReference(env.getEnv(CommandHelperEnvironment.class).GetCommandSender())) {
-				doRemoval = false;
+			MCCommandSender sender = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+			if(sender == null) {
+				throw new CREException("No command sender in this context.", t);
 			}
+			boolean doRemoval = Static.getAliasCore().hasPlayerReference(sender);
 			if(doRemoval) {
-				Static.getAliasCore().removePlayerReference(env.getEnv(CommandHelperEnvironment.class).GetCommandSender());
+				Static.getAliasCore().removePlayerReference(sender);
 			}
-			boolean ret = Static.getAliasCore().alias(args[0].val(), env.getEnv(CommandHelperEnvironment.class).GetCommandSender());
+			boolean ret = Static.getAliasCore().alias(args[0].val(), sender);
 			if(doRemoval) {
-				Static.getAliasCore().addPlayerReference(env.getEnv(CommandHelperEnvironment.class).GetCommandSender());
+				Static.getAliasCore().addPlayerReference(sender);
 			}
 			return CBoolean.get(ret);
 		}
