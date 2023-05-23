@@ -721,6 +721,11 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	}
 
 	@Override
+	public String getLocale() {
+		return p.getLocale();
+	}
+
+	@Override
 	public MCScoreboard getScoreboard() {
 		return new BukkitMCScoreboard(p.getScoreboard());
 	}
