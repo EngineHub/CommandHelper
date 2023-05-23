@@ -256,7 +256,7 @@ public class AliasCore {
 		} else {
 			if(Prefs.AllowDynamicShell()) {
 				MSLog.GetLogger().Log(MSLog.Tags.GENERAL, LogLevel.WARNING, "allow-dynamic-shell is set to true in "
-						+ fileLocations.getProfilerConfigFile().getName()
+						+ fileLocations.getPreferencesFile().getName()
 						+ " you should set this to false, except during development.", Target.UNKNOWN);
 			}
 		}
