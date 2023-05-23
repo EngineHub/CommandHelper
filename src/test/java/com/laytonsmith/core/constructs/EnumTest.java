@@ -13,6 +13,8 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import static com.laytonsmith.testing.StaticTest.InstallFakeServerFrontend;
 import static org.junit.Assert.*;
 
 /**
@@ -26,6 +28,7 @@ public class EnumTest {
 
 	@BeforeClass
 	public static void setUpClass() {
+		InstallFakeServerFrontend();
 	}
 
 	@AfterClass
