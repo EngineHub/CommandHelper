@@ -3,6 +3,7 @@ package com.laytonsmith.core.constructs;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.natives.interfaces.Booleanish;
 import com.laytonsmith.core.natives.interfaces.Callable;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.MethodScriptCompiler;
@@ -33,7 +34,7 @@ import java.util.logging.Logger;
  * A closure is just an anonymous procedure.
  */
 @typeof("ms.lang.closure")
-public class CClosure extends Construct implements Callable {
+public class CClosure extends Construct implements Callable, Booleanish {
 
 	public static final long serialVersionUID = 1L;
 	protected ParseTree node;
@@ -339,7 +340,11 @@ public class CClosure extends Construct implements Callable {
 
 	@Override
 	public CClassType[] getInterfaces() {
-		return new CClassType[]{Callable.TYPE};
+		return new CClassType[]{Callable.TYPE, Booleanish.TYPE};
 	}
 
+	@Override
+	public boolean getBooleanValue(Target t) {
+		return true;
+	}
 }
