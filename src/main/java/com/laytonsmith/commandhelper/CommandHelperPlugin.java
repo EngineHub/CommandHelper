@@ -41,6 +41,7 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCServer;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.abstraction.enums.MCChatColor;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCBiomeType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCLegacyMaterial;
@@ -48,6 +49,8 @@ import com.laytonsmith.abstraction.enums.bukkit.BukkitMCParticle;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPotionEffectType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCProfession;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSound;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCTrimMaterial;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCTrimPattern;
 import com.laytonsmith.annotations.EventIdentifier;
 import com.laytonsmith.core.AliasCore;
 import com.laytonsmith.core.MSLog;
@@ -309,6 +312,10 @@ public class CommandHelperPlugin extends JavaPlugin {
 		BukkitMCProfession.build();
 		BukkitMCMaterial.build();
 		BukkitMCLegacyMaterial.build();
+		if(myServer.getMinecraftVersion().gte(MCVersion.MC1_20)) {
+			BukkitMCTrimMaterial.build();
+			BukkitMCTrimPattern.build();
+		}
 	}
 
 	/**

@@ -1,6 +1,7 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.Vector3D;
+import com.laytonsmith.abstraction.MCArmorMeta;
 import com.laytonsmith.abstraction.MCAttributeModifier;
 import com.laytonsmith.abstraction.MCAxolotlBucketMeta;
 import com.laytonsmith.abstraction.MCBannerMeta;
@@ -9,6 +10,7 @@ import com.laytonsmith.abstraction.MCBookMeta;
 import com.laytonsmith.abstraction.MCBrewerInventory;
 import com.laytonsmith.abstraction.MCBundleMeta;
 import com.laytonsmith.abstraction.MCColor;
+import com.laytonsmith.abstraction.MCColorableArmorMeta;
 import com.laytonsmith.abstraction.MCCompassMeta;
 import com.laytonsmith.abstraction.MCCreatureSpawner;
 import com.laytonsmith.abstraction.MCCrossbowMeta;
@@ -69,6 +71,8 @@ import com.laytonsmith.abstraction.enums.MCPatternShape;
 import com.laytonsmith.abstraction.enums.MCPotionEffectType;
 import com.laytonsmith.abstraction.enums.MCPotionType;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
+import com.laytonsmith.abstraction.enums.MCTrimMaterial;
+import com.laytonsmith.abstraction.enums.MCTrimPattern;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CDouble;
@@ -583,6 +587,18 @@ public class ObjectGenerator {
 					ma.set("command", cmdBlock.getCommand());
 					ma.set("customname", cmdBlock.getName());
 				}
+			} else if(meta instanceof MCArmorMeta armorMeta) { // Must be before MCLeatherArmorMeta
+				if(armorMeta.hasTrim()) {
+					CArray trim = CArray.GetAssociativeArray(t);
+					trim.set("material", armorMeta.getTrimMaterial().name());
+					trim.set("pattern", armorMeta.getTrimPattern().name());
+					ma.set("trim", trim, t);
+				} else {
+					ma.set("trim", CNull.NULL, t);
+				}
+				if(armorMeta instanceof MCColorableArmorMeta) {
+					ma.set("color", color(((MCColorableArmorMeta) armorMeta).getColor(), t), t);
+				}
 			} else if(meta instanceof MCFireworkEffectMeta) {
 				MCFireworkEffectMeta mcfem = (MCFireworkEffectMeta) meta;
 				MCFireworkEffect effect = mcfem.getEffect();
@@ -1066,6 +1082,35 @@ public class ObjectGenerator {
 							cmdBlock.setName(ma.get("customname", t).val());
 						}
 						bsm.setBlockState(bs);
+					}
+				} else if(meta instanceof MCArmorMeta armorMeta) { // Must be before MCLeatherArmorMeta
+					if(ma.containsKey("trim")) {
+						Mixed mtrim = ma.get("trim", t);
+						if(mtrim instanceof CNull) {
+							// nothing
+						} else if(mtrim.isInstanceOf(CArray.TYPE)) {
+							CArray trim = (CArray) mtrim;
+							if(!trim.isAssociative()) {
+								throw new CREFormatException("Expected associative array for armor trim meta.", t);
+							}
+							MCTrimPattern pattern = MCTrimPattern.valueOf(trim.get("pattern", t).val());
+							MCTrimMaterial material = MCTrimMaterial.valueOf(trim.get("material", t).val());
+							armorMeta.setTrim(pattern, material);
+						} else {
+							throw new CREFormatException("Expected an array or null for armor trim meta.", t);
+						}
+					}
+					if(armorMeta instanceof MCColorableArmorMeta) {
+						if(ma.containsKey("color")) {
+							Mixed ci = ma.get("color", t);
+							if(ci instanceof CNull) {
+								//nothing
+							} else if(ci.isInstanceOf(CArray.TYPE)) {
+								((MCColorableArmorMeta) armorMeta).setColor(color((CArray) ci, t));
+							} else {
+								throw new CREFormatException("Color was expected to be an array.", t);
+							}
+						}
 					}
 				} else if(meta instanceof MCFireworkEffectMeta) {
 					MCFireworkEffectMeta femeta = (MCFireworkEffectMeta) meta;

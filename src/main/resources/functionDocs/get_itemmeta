@@ -22,6 +22,10 @@ Below are the available fields in the item meta array. Fields can be null when t
 * '''damage''' : (int) The amount of damage on the item. 0 is undamaged. Maximum is determined by each item type's max durability.
 * '''unbreakable''' : (boolean) Whether or not the item can be damaged.
 |-
+| Armor Trim
+|
+* '''trim''' : (array) An array that contains the keys '''"pattern"''' and '''"material"'''. Pattern can be %TRIM_PATTERNS%. Material can be %TRIM_MATERIALS%.
+|-
 | AxolotlBucket
 |
 * '''variant''' : (string) The type of axolotl, one of ''%AXOLOTL_TYPES%''.

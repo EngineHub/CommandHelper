@@ -152,11 +152,13 @@ import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.inventory.SmithingRecipe;
 import org.bukkit.inventory.SmokingRecipe;
 import org.bukkit.inventory.StonecuttingRecipe;
+import org.bukkit.inventory.meta.ArmorMeta;
 import org.bukkit.inventory.meta.AxolotlBucketMeta;
 import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.BundleMeta;
+import org.bukkit.inventory.meta.ColorableArmorMeta;
 import org.bukkit.inventory.meta.CompassMeta;
 import org.bukkit.inventory.meta.CrossbowMeta;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
@@ -597,9 +599,6 @@ public class BukkitConvertor extends AbstractConvertor {
 		if(im instanceof FireworkMeta) {
 			return new BukkitMCFireworkMeta((FireworkMeta) im);
 		}
-		if(im instanceof LeatherArmorMeta) {
-			return new BukkitMCLeatherArmorMeta((LeatherArmorMeta) im);
-		}
 		if(im instanceof PotionMeta) {
 			return new BukkitMCPotionMeta((PotionMeta) im);
 		}
@@ -628,13 +627,22 @@ public class BukkitConvertor extends AbstractConvertor {
 			if(im instanceof AxolotlBucketMeta) {
 				return new BukkitMCAxolotlBucketMeta((AxolotlBucketMeta) im);
 			}
-			try {
-				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_3) && im instanceof MusicInstrumentMeta) {
+			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_3)) {
+				if(im instanceof MusicInstrumentMeta) {
 					return new BukkitMCMusicInstrumentMeta((MusicInstrumentMeta) im);
 				}
-			} catch(NoClassDefFoundError ignored) {
-				// Probably an outdated build of 1.19.3
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20)) {
+					if(im instanceof ColorableArmorMeta) { // Must be before ArmorMeta and LeatherArmorMeta
+						return new BukkitMCColorableArmorMeta((ColorableArmorMeta) im);
+					}
+					if(im instanceof ArmorMeta) {
+						return new BukkitMCArmorMeta((ArmorMeta) im);
+					}
+				}
 			}
+		}
+		if(im instanceof LeatherArmorMeta) { // Must be after ColorableArmorMeta
+			return new BukkitMCLeatherArmorMeta((LeatherArmorMeta) im);
 		}
 		return new BukkitMCItemMeta(im);
 	}
