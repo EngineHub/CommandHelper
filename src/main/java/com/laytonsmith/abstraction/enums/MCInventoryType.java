@@ -21,7 +21,6 @@ public enum MCInventoryType {
 	WORKBENCH,
 	ANVIL,
 	SMITHING,
-	SMITHING_NEW(false), // experimental 1.20 API
 	BEACON(false),
 	SHULKER_BOX,
 	BARREL,

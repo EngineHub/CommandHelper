@@ -118,6 +118,14 @@ public enum MCDamageCause {
 	 */
 	SONIC_BOOM,
 	/**
+	 * Damage caused by /kill command
+	 */
+	KILL,
+	/**
+	 * Damage caused by the World Border
+	 */
+	WORLD_BORDER,
+	/**
 	 * Custom damage.
 	 */
 	CUSTOM
