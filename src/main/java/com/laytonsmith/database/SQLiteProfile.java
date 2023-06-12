@@ -40,4 +40,9 @@ public class SQLiteProfile extends SQLProfile {
 		return "jdbc:sqlite:" + getFile();
 	}
 
+	@Override
+	public boolean providesParameterTypes() {
+		return false;
+	}
+
 }
