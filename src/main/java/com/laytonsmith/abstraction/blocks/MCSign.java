@@ -1,20 +1,17 @@
 package com.laytonsmith.abstraction.blocks;
 
-import com.laytonsmith.abstraction.enums.MCDyeColor;
+public interface MCSign extends MCBlockState, MCSignText {
 
-public interface MCSign extends MCBlockState {
+	/**
+	 * Gets the back text for this sign block.
+	 * Using the methods directly on the sign object will apply to the front text for backwards compatibility.
+	 *
+	 * @return Back sign text object (null if unavailable)
+	 */
+	MCSignText getBackText();
 
-	String[] getLines();
-
-	void setLine(int i, String line1);
-
-	String getLine(int i);
-
-	boolean isGlowingText();
-
-	void setGlowingText(boolean glowing);
-
-	MCDyeColor getDyeColor();
-
-	void setDyeColor(MCDyeColor color);
+	enum Side {
+		FRONT,
+		BACK
+	}
 }

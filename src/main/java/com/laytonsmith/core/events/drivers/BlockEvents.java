@@ -932,8 +932,9 @@ public class BlockEvents {
 		public String docs() {
 			return "{player: <string match> | 1: <regex> | 2: <regex> | 3: <regex> | 4: <regex> }"
 					+ "This event is called when a player changes a sign. Cancelling the event cancels any edits completely."
-					+ "{player: The player's name | location: an array usable as a locationArray while also compatible"
-					+ " with X,Y,Z,world indices | text: An array with keys 0 thru 3 defining every line on the sign}"
+					+ "{player: The player's name | location: A location array of the sign"
+					+ " | text: An array with keys 0 thru 3 defining every line on the sign"
+					+ " | side: The side of the sign the text was changed, FRONT or BACK}"
 					+ "{1|2|3|4|text: An array with keys 0 thru 3 defining every line on the sign}"
 					+ "{}";
 		}
@@ -980,6 +981,7 @@ public class BlockEvents {
 			map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
 			map.put("text", event.getLines());
 			map.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation(), false));
+			map.put("side", new CString(event.getSide().name(), Target.UNKNOWN));
 
 			return map;
 		}

@@ -130,9 +130,12 @@ Below are the available fields in the item meta array. Fields can be null when t
 |-
 | Signs
 |
-* '''signtext''' : (array) An array of strings, one for each line of sign text.
-* '''glowing''' : (boolean) Whether the sign has glowing text.
-* '''color''' : (string) The dye color for the sign. (default: 'BLACK')
+* '''signtext''' : (array) An array of 4 strings, one for each line of text on the front.
+* '''glowing''' : (boolean) Whether the sign has glowing text on the front.
+* '''color''' : (string) The dye color for the text on the front. (default: 'BLACK')
+* '''backtext''' : (array) An array of 4 strings, one for each line of text on the back. (MC 1.19.4+)
+* '''backglowing''' : (boolean) Whether the sign has glowing text on the back. (MC 1.19.4+)
+* '''backcolor''' : (string) The dye color for the text on the back. (default: 'BLACK') (MC 1.19.4+)
 |-
 | Spawners
 |

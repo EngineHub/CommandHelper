@@ -1,6 +1,7 @@
 package com.laytonsmith.abstraction.bukkit.blocks;
 
 import com.laytonsmith.abstraction.blocks.MCSign;
+import com.laytonsmith.abstraction.blocks.MCSignText;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDyeColor;
 import org.bukkit.block.Sign;
@@ -27,7 +28,6 @@ public class BukkitMCSign extends BukkitMCBlockState implements MCSign {
 	@Override
 	public void setLine(int i, String line1) {
 		s.setLine(i, line1);
-		s.update();
 	}
 
 	@Override
@@ -49,7 +49,6 @@ public class BukkitMCSign extends BukkitMCBlockState implements MCSign {
 	public void setGlowingText(boolean glowing) {
 		try {
 			s.setGlowingText(glowing);
-			s.update();
 		} catch (NoSuchMethodError ex) {
 			// probably before 1.17
 		}
@@ -63,6 +62,16 @@ public class BukkitMCSign extends BukkitMCBlockState implements MCSign {
 	@Override
 	public void setDyeColor(MCDyeColor color) {
 		s.setColor(BukkitMCDyeColor.getConvertor().getConcreteEnum(color));
+	}
+
+	@Override
+	public MCSignText getBackText() {
+		try {
+			return new BukkitMCSignText(s.getSide(org.bukkit.block.sign.Side.BACK));
+		} catch(NoSuchMethodError | NoClassDefFoundError ex) {
+			// was added in a later build of 1.19.4
+			return null;
+		}
 	}
 
 }

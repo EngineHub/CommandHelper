@@ -59,6 +59,7 @@ import com.laytonsmith.abstraction.blocks.MCBanner;
 import com.laytonsmith.abstraction.blocks.MCBrewingStand;
 import com.laytonsmith.abstraction.blocks.MCFurnace;
 import com.laytonsmith.abstraction.blocks.MCSign;
+import com.laytonsmith.abstraction.blocks.MCSignText;
 import com.laytonsmith.abstraction.entities.MCTropicalFish;
 import com.laytonsmith.abstraction.enums.MCAttribute;
 import com.laytonsmith.abstraction.enums.MCAxolotlType;
@@ -583,6 +584,21 @@ public class ObjectGenerator {
 					} else {
 						ma.set("color", color.name(), t);
 					}
+					MCSignText backText = sign.getBackText();
+					if(backText != null) {
+						CArray back = new CArray(t);
+						for(String line : backText.getLines()) {
+							back.push(new CString(line, t), t);
+						}
+						ma.set("backtext", back, t);
+						ma.set("backglowing", CBoolean.get(backText.isGlowingText()), t);
+						MCDyeColor backColor = backText.getDyeColor();
+						if(backColor == null) {
+							ma.set("backcolor", CNull.NULL, t);
+						} else {
+							ma.set("backcolor", backColor.name(), t);
+						}
+					}
 				} else if(bs instanceof MCCommandBlock cmdBlock) {
 					ma.set("command", cmdBlock.getCommand());
 					ma.set("customname", cmdBlock.getName());
@@ -1071,6 +1087,29 @@ public class ObjectGenerator {
 							Mixed dye = ma.get("color", t);
 							if(!(dye instanceof CNull)) {
 								sign.setDyeColor(MCDyeColor.valueOf(dye.val()));
+							}
+						}
+						MCSignText backText = sign.getBackText();
+						if(backText != null) {
+							if(ma.containsKey("backtext")) {
+								Mixed possibleLines = ma.get("backtext", t);
+								if(possibleLines.isInstanceOf(CArray.TYPE)) {
+									CArray lines = (CArray) possibleLines;
+									for(int i = 0; i < lines.size(); i++) {
+										backText.setLine(i, lines.get(i, t).val());
+									}
+								} else {
+									throw new CREFormatException("Expected array for sign back text", t);
+								}
+							}
+							if(ma.containsKey("backglowing")) {
+								backText.setGlowingText(ArgumentValidation.getBooleanObject(ma.get("backglowing", t), t));
+							}
+							if(ma.containsKey("backcolor")) {
+								Mixed dye = ma.get("backcolor", t);
+								if(!(dye instanceof CNull)) {
+									backText.setDyeColor(MCDyeColor.valueOf(dye.val()));
+								}
 							}
 						}
 						bsm.setBlockState(bs);

@@ -20,6 +20,8 @@ import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.abstraction.blocks.MCCommandBlock;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.blocks.MCSign;
+import com.laytonsmith.abstraction.blocks.MCSign.Side;
+import com.laytonsmith.abstraction.blocks.MCSignText;
 import com.laytonsmith.abstraction.blocks.MCSkull;
 import com.laytonsmith.abstraction.enums.MCBiomeType;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
@@ -451,9 +453,11 @@ public class Environment {
 
 		@Override
 		public String docs() {
-			return "void {locationArray, lineArray | locationArray, line1, [line2, [line3, [line4]]]}"
-					+ " Sets the text of the sign at the given location. If the block at x,y,z isn't a sign,"
-					+ " a RangeException is thrown. If a text line cannot fit on the sign, it'll be cut off.";
+			return "void {locationArray, [side], lineArray | locationArray, line1, [line2, [line3, [line4]]]}"
+					+ " Sets the text on the side of a sign at the given location."
+					+ " Side can be FRONT (default) or BACK. (MC 1.19.4+)"
+					+ " If the block at x,y,z isn't a sign, a RangeException is thrown."
+					+ " If a text line cannot fit on the sign, it'll be cut off.";
 		}
 
 		@Override
@@ -483,14 +487,22 @@ public class Environment {
 			if(sender instanceof MCPlayer) {
 				w = ((MCPlayer) sender).getWorld();
 			}
-			MCLocation l = ObjectGenerator.GetGenerator().location(args[0], w, t);
-			if(l.getBlock().isSign()) {
+			MCBlock b = ObjectGenerator.GetGenerator().location(args[0], w, t).getBlock();
+			if(b.isSign()) {
+				MCSign.Side side = Side.FRONT;
 				String line1 = "";
 				String line2 = "";
 				String line3 = "";
 				String line4 = "";
-				if(args.length == 2 && args[1].isInstanceOf(CArray.TYPE)) {
-					CArray ca = (CArray) args[1];
+				if((args.length == 2 || args.length == 3) && args[args.length - 1].isInstanceOf(CArray.TYPE)) {
+					if(args.length == 3) {
+						try {
+							side = MCSign.Side.valueOf(args[1].val());
+						} catch (IllegalArgumentException ex) {
+							throw new CREFormatException("Invalid sign side: " + args[1].val(), t);
+						}
+					}
+					CArray ca = (CArray) args[args.length - 1];
 					if(ca.size() >= 1) {
 						line1 = ca.get(0, t).val();
 					}
@@ -518,11 +530,19 @@ public class Environment {
 						line4 = args[4].val();
 					}
 				}
-				MCSign s = l.getBlock().getSign();
-				s.setLine(0, line1);
-				s.setLine(1, line2);
-				s.setLine(2, line3);
-				s.setLine(3, line4);
+				MCSign sign = b.getSign();
+				MCSignText text = sign;
+				if(side == Side.BACK) {
+					text = sign.getBackText();
+					if(text == null) {
+						throw new CRERangeException("Sign does not have back text.", t);
+					}
+				}
+				text.setLine(0, line1);
+				text.setLine(1, line2);
+				text.setLine(2, line3);
+				text.setLine(3, line4);
+				sign.update();
 				return CVoid.VOID;
 			} else {
 				throw new CRERangeException("The block at the specified location is not a sign", t);
@@ -540,13 +560,14 @@ public class Environment {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{1};
+			return new Integer[]{1, 2};
 		}
 
 		@Override
 		public String docs() {
-			return "array {locationArray} Given a location array, returns an array of 4 strings of the text in the sign"
-					+ " at that location. If the location given isn't a sign, then a RangeException is thrown.";
+			return "array {locationArray, [side]} Gets an array of 4 strings of the text on the side of a sign."
+					+ " Side can be FRONT (default) or BACK. (MC 1.19.4+)"
+					+ " If the location given isn't a sign, then a RangeException is thrown.";
 		}
 
 		@Override
@@ -576,13 +597,25 @@ public class Environment {
 			if(sender instanceof MCPlayer) {
 				w = ((MCPlayer) sender).getWorld();
 			}
-			MCLocation l = ObjectGenerator.GetGenerator().location(args[0], w, t);
-			if(l.getBlock().isSign()) {
-				MCSign s = l.getBlock().getSign();
-				CString line1 = new CString(s.getLine(0), t);
-				CString line2 = new CString(s.getLine(1), t);
-				CString line3 = new CString(s.getLine(2), t);
-				CString line4 = new CString(s.getLine(3), t);
+			MCBlock b = ObjectGenerator.GetGenerator().location(args[0], w, t).getBlock();
+			if(b.isSign()) {
+				MCSignText text = b.getSign();
+				if(args.length == 2) {
+					try {
+						if(MCSign.Side.valueOf(args[1].val()) == Side.BACK) {
+							text = ((MCSign) text).getBackText();
+							if(text == null) {
+								throw new CRERangeException("Sign does not have back text.", t);
+							}
+						}
+					} catch (IllegalArgumentException ex) {
+						throw new CREFormatException("Invalid sign side: " + args[1].val(), t);
+					}
+				}
+				CString line1 = new CString(text.getLine(0), t);
+				CString line2 = new CString(text.getLine(1), t);
+				CString line3 = new CString(text.getLine(2), t);
+				CString line4 = new CString(text.getLine(3), t);
 				return new CArray(t, line1, line2, line3, line4);
 			} else {
 				throw new CRERangeException("The block at the specified location is not a sign", t);
@@ -650,12 +683,13 @@ public class Environment {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{1};
+			return new Integer[]{1, 2};
 		}
 
 		@Override
 		public String docs() {
-			return "boolean {locationArray} Returns true if the sign at this location has glowing text.";
+			return "boolean {locationArray, [side]} Returns true if the sign side at this location has glowing text."
+					+ " Side can be FRONT (default) or BACK. (MC 1.19.4+)";
 		}
 
 		@Override
@@ -685,10 +719,22 @@ public class Environment {
 			if(sender instanceof MCPlayer) {
 				w = ((MCPlayer) sender).getWorld();
 			}
-			MCLocation l = ObjectGenerator.GetGenerator().location(args[0], w, t);
-			if(l.getBlock().isSign()) {
-				MCSign s = l.getBlock().getSign();
-				return CBoolean.get(s.isGlowingText());
+			MCBlock b = ObjectGenerator.GetGenerator().location(args[0], w, t).getBlock();
+			if(b.isSign()) {
+				MCSignText text = b.getSign();
+				if(args.length == 2) {
+					try {
+						if(MCSign.Side.valueOf(args[1].val()) == Side.BACK) {
+							text = ((MCSign) text).getBackText();
+							if(text == null) {
+								throw new CRERangeException("Sign does not have back text.", t);
+							}
+						}
+					} catch (IllegalArgumentException ex) {
+						throw new CREFormatException("Invalid sign side: " + args[1].val(), t);
+					}
+				}
+				return CBoolean.get(text.isGlowingText());
 			} else {
 				throw new CRERangeException("The block at the specified location is not a sign", t);
 			}
@@ -705,12 +751,13 @@ public class Environment {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{2};
+			return new Integer[]{2, 3};
 		}
 
 		@Override
 		public String docs() {
-			return "void {locationArray, isGlowing} Sets the text on a sign to be glowing or not.";
+			return "void {locationArray, [side], isGlowing} Sets the text on a sign side to be glowing or not."
+					+ " Side can be FRONT (default) or BACK. (MC 1.19.4+)";
 		}
 
 		@Override
@@ -741,10 +788,24 @@ public class Environment {
 			if(sender instanceof MCPlayer) {
 				w = ((MCPlayer) sender).getWorld();
 			}
-			MCLocation l = ObjectGenerator.GetGenerator().location(args[0], w, t);
-			if(l.getBlock().isSign()) {
-				MCSign s = l.getBlock().getSign();
-				s.setGlowingText(ArgumentValidation.getBooleanObject(args[1], t));
+			MCBlock b = ObjectGenerator.GetGenerator().location(args[0], w, t).getBlock();
+			if(b.isSign()) {
+				MCSign sign = b.getSign();
+				MCSignText text = sign;
+				if(args.length == 3) {
+					try {
+						if(MCSign.Side.valueOf(args[1].val()) == Side.BACK) {
+							text = sign.getBackText();
+							if(text == null) {
+								throw new CRERangeException("Sign does not have back text.", t);
+							}
+						}
+					} catch (IllegalArgumentException ex) {
+						throw new CREFormatException("Invalid sign side: " + args[1].val(), t);
+					}
+				}
+				text.setGlowingText(ArgumentValidation.getBooleanObject(args[args.length - 1], t));
+				sign.update();
 				return CVoid.VOID;
 			} else {
 				throw new CRERangeException("The block at the specified location is not a sign", t);
