@@ -455,7 +455,7 @@ public class Environment {
 		public String docs() {
 			return "void {locationArray, [side], lineArray | locationArray, line1, [line2, [line3, [line4]]]}"
 					+ " Sets the text on the side of a sign at the given location."
-					+ " Side can be FRONT (default) or BACK. (MC 1.19.4+)"
+					+ " Side can be FRONT (default) or BACK. (MC 1.20+)"
 					+ " If the block at x,y,z isn't a sign, a RangeException is thrown."
 					+ " If a text line cannot fit on the sign, it'll be cut off.";
 		}
@@ -566,7 +566,7 @@ public class Environment {
 		@Override
 		public String docs() {
 			return "array {locationArray, [side]} Gets an array of 4 strings of the text on the side of a sign."
-					+ " Side can be FRONT (default) or BACK. (MC 1.19.4+)"
+					+ " Side can be FRONT (default) or BACK. (MC 1.20+)"
 					+ " If the location given isn't a sign, then a RangeException is thrown.";
 		}
 
@@ -688,8 +688,8 @@ public class Environment {
 
 		@Override
 		public String docs() {
-			return "boolean {locationArray, [side]} Returns true if the sign side at this location has glowing text."
-					+ " Side can be FRONT (default) or BACK. (MC 1.19.4+)";
+			return "boolean {locationArray, [side]} Returns true if the sign side at this location has glowing text. (MC 1.17+)"
+					+ " Side can be FRONT (default) or BACK. (MC 1.20+)";
 		}
 
 		@Override
@@ -756,8 +756,8 @@ public class Environment {
 
 		@Override
 		public String docs() {
-			return "void {locationArray, [side], isGlowing} Sets the text on a sign side to be glowing or not."
-					+ " Side can be FRONT (default) or BACK. (MC 1.19.4+)";
+			return "void {locationArray, [side], isGlowing} Sets the text on a sign side to be glowing or not. (MC 1.17+)"
+					+ " Side can be FRONT (default) or BACK. (MC 1.20+)";
 		}
 
 		@Override

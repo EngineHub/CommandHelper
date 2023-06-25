@@ -4280,7 +4280,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "int {entityUUID} Returns the number of ticks the entity has been freezing in powdered snow."
+			return "int {entityUUID} Returns the number of ticks the entity has been freezing in powdered snow. (MC 1.17+)"
 					+ " Counts down by 2 every tick when entity is thawing.";
 		}
 
@@ -4306,7 +4306,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityUUID, int} Sets how many server ticks the entity has been freezing."
+			return "void {entityUUID, int} Sets how many server ticks the entity has been freezing. (MC 1.17+)"
 					+ " Must be above zero, and will clamp to the maximum the server allows.";
 		}
 

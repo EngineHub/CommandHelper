@@ -6471,7 +6471,7 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "array {[player]} Returns an associative array for the player's virtual world border."
+			return "array {[player]} Returns an associative array for the player's virtual world border. (MC 1.18.2+)"
 					+ " The keys are 'width', 'center', 'warningtime', and 'warningdistance'."
 					+ " Returns null if the player is using the existing border for the world that they're in.";
 		}
@@ -6560,11 +6560,11 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {player, paramArray} Creates or updates a player's virtual world border."
+			return "void {player, paramArray} Creates or updates a player's virtual world border. (MC 1.18.2+)"
 					+ " In addition to the keys returned by pborder(), you can also specify 'seconds'."
 					+ " This is the time in which the border will move from the previous width to the new 'width'."
 					+ " If give null instead of an array, this resets the player's visible world border to the one of"
-					+ " the world that they're in. (MC 1.18.2)";
+					+ " the world that they're in.";
 		}
 
 		@Override

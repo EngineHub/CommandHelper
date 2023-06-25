@@ -24,11 +24,11 @@ Below are the available fields in the item meta array. Fields can be null when t
 |-
 | Armor Trim
 |
-* '''trim''' : (array) An array that contains the keys '''"pattern"''' and '''"material"'''. Pattern can be %TRIM_PATTERNS%. Material can be %TRIM_MATERIALS%.
+* '''trim''' : (array) An array that contains the keys '''"pattern"''' and '''"material"'''. Pattern can be %TRIM_PATTERNS%. Material can be %TRIM_MATERIALS%. (MC 1.20+)
 |-
 | AxolotlBucket
 |
-* '''variant''' : (string) The type of axolotl, one of ''%AXOLOTL_TYPES%''.
+* '''variant''' : (string) The type of axolotl, one of ''%AXOLOTL_TYPES%''. (MC 1.17+)
 |-
 | Banners
 |
@@ -56,7 +56,7 @@ Below are the available fields in the item meta array. Fields can be null when t
 |-
 | Bundle
 |
-* '''items''' : (array) An array of item arrays that exist in this bundle.
+* '''items''' : (array) An array of item arrays that exist in this bundle. (MC 1.17+)
 |-
 | CommandBlocks
 |
@@ -92,7 +92,7 @@ Below are the available fields in the item meta array. Fields can be null when t
 |-
 | GoatHorns
 |
-* '''instrument''' : (string) The instrument name (can be ponder_goat_horn, sing_goat_horn, seek_goat_horn, feel_goat_horn, admire_goat_horn, call_goat_horn, yearn_goat_horn, dream_goat_horn).
+* '''instrument''' : (string) The instrument name (can be ponder_goat_horn, sing_goat_horn, seek_goat_horn, feel_goat_horn, admire_goat_horn, call_goat_horn, yearn_goat_horn, dream_goat_horn). (MC 1.19.3+)
 |-
 | Inventory Blocks
 |
@@ -133,9 +133,9 @@ Below are the available fields in the item meta array. Fields can be null when t
 * '''signtext''' : (array) An array of 4 strings, one for each line of text on the front.
 * '''glowing''' : (boolean) Whether the sign has glowing text on the front.
 * '''color''' : (string) The dye color for the text on the front. (default: 'BLACK')
-* '''backtext''' : (array) An array of 4 strings, one for each line of text on the back. (MC 1.19.4+)
-* '''backglowing''' : (boolean) Whether the sign has glowing text on the back. (MC 1.19.4+)
-* '''backcolor''' : (string) The dye color for the text on the back. (default: 'BLACK') (MC 1.19.4+)
+* '''backtext''' : (array) An array of 4 strings, one for each line of text on the back. (MC 1.20+)
+* '''backglowing''' : (boolean) Whether the sign has glowing text on the back. (MC 1.20+)
+* '''backcolor''' : (string) The dye color for the text on the back. (default: 'BLACK') (MC 1.20+)
 |-
 | Spawners
 |

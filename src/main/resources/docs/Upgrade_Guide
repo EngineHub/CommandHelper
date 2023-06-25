@@ -3,6 +3,13 @@ Below is a reverse chronological guide to help you with the most notable of thes
 
 ----
 
+== Minecraft 1.20 ==
+
+* Damage cause from the /kill command was changed from VOID to KILL, and damage cause from the world border was changed from SUFFOCATION to WORLD_BORDER.
+* Signs are editable and can have text on the back side. (affects 'sign_changed' event)
+
+----
+
 == Minecraft 1.18 ==
 
 * BARRIER and LIGHT particle types have been changed to the BLOCK_MARKER particle type with a 'block' parameter.
