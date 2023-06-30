@@ -4,7 +4,6 @@ import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCItemStack;
-import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCNote;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
@@ -12,7 +11,6 @@ import com.laytonsmith.abstraction.blocks.MCBlockFace;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.abstraction.blocks.MCSign;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
-import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCNote;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlockState;
@@ -141,18 +139,8 @@ public class BukkitBlockEvents {
 
 	@abstraction(type = Implementation.Type.BUKKIT)
 	public static class BukkitMCBlockPistonRetractEvent extends BukkitMCBlockPistonEvent implements MCBlockPistonRetractEvent {
-
-		BlockPistonRetractEvent event;
-
 		public BukkitMCBlockPistonRetractEvent(BlockPistonRetractEvent e) {
 			super(e);
-
-			event = e;
-		}
-
-		@Override
-		public MCLocation getRetractedLocation() {
-			return new BukkitMCLocation(event.getRetractLocation());
 		}
 	}
 

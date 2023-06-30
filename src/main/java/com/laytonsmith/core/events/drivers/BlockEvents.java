@@ -19,7 +19,6 @@ import com.laytonsmith.abstraction.events.MCBlockFormEvent;
 import com.laytonsmith.abstraction.events.MCBlockGrowEvent;
 import com.laytonsmith.abstraction.events.MCBlockIgniteEvent;
 import com.laytonsmith.abstraction.events.MCBlockPistonEvent;
-import com.laytonsmith.abstraction.events.MCBlockPistonRetractEvent;
 import com.laytonsmith.abstraction.events.MCBlockPlaceEvent;
 import com.laytonsmith.abstraction.events.MCNotePlayEvent;
 import com.laytonsmith.abstraction.events.MCSignChangeEvent;
@@ -149,9 +148,7 @@ public class BlockEvents {
 			return "{} "
 					+ "This event is called when a piston is retracted. Cancelling the event cancels the move."
 					+ "{location: the locationArray of this piston | direction: direction of travel"
-					+ " | sticky: true if the piston is sticky, false otherwise | affectedBlocks: blocks pushed/pulled"
-					+ " | retractedLocation: if the piston is sticky and attached to a block, where the attached"
-					+ " block would end up }"
+					+ " | sticky: true if the piston is sticky, false otherwise | affectedBlocks: blocks pushed/pulled}"
 					+ "{} "
 					+ "{} "
 					+ "{}";
@@ -164,10 +161,7 @@ public class BlockEvents {
 
 		@Override
 		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
-			MCBlockPistonRetractEvent event = (MCBlockPistonRetractEvent) e;
-			Map<String, Mixed> map = super.evaluate(e);
-			map.put("retractedLocation", ObjectGenerator.GetGenerator().location(event.getRetractedLocation(), false));
-			return map;
+			return super.evaluate(e);
 		}
 
 		@Override
