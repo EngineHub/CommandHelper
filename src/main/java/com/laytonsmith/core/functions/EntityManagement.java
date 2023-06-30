@@ -3378,7 +3378,11 @@ public class EntityManagement {
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_GENERIC_BABY:
-								piglin.setBaby(ArgumentValidation.getBoolean(specArray.get(index, t), t));
+								if(ArgumentValidation.getBooleanObject(specArray.get(index, t), t)) {
+									piglin.setBaby();
+								} else {
+									piglin.setAdult();
+								}
 								break;
 							case entity_spec.KEY_PIGLIN_ZOMBIFICATION_IMMUNE:
 								piglin.setImmuneToZombification(ArgumentValidation.getBooleanObject(specArray.get(index, t), t));
@@ -3735,7 +3739,11 @@ public class EntityManagement {
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_GENERIC_BABY:
-								zoglin.setBaby(ArgumentValidation.getBoolean(specArray.get(index, t), t));
+								if(ArgumentValidation.getBooleanObject(specArray.get(index, t), t)) {
+									zoglin.setBaby();
+								} else {
+									zoglin.setAdult();
+								}
 								break;
 							default:
 								throwException(index, t);
@@ -3749,7 +3757,11 @@ public class EntityManagement {
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_GENERIC_BABY:
-								zombie.setBaby(ArgumentValidation.getBoolean(specArray.get(index, t), t));
+								if(ArgumentValidation.getBooleanObject(specArray.get(index, t), t)) {
+									zombie.setBaby();
+								} else {
+									zombie.setAdult();
+								}
 								break;
 							case entity_spec.KEY_ZOMBIE_BREAK_DOORS:
 								zombie.setCanBreakDoors(ArgumentValidation.getBooleanObject(specArray.get(index, t), t));
@@ -3764,7 +3776,11 @@ public class EntityManagement {
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_GENERIC_BABY:
-								zombievillager.setBaby(ArgumentValidation.getBoolean(specArray.get(index, t), t));
+								if(ArgumentValidation.getBooleanObject(specArray.get(index, t), t)) {
+									zombievillager.setBaby();
+								} else {
+									zombievillager.setAdult();
+								}
 								break;
 							case entity_spec.KEY_VILLAGER_PROFESSION:
 								try {
@@ -3786,7 +3802,11 @@ public class EntityManagement {
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_GENERIC_BABY:
-								pigZombie.setBaby(ArgumentValidation.getBoolean(specArray.get(index, t), t));
+								if(ArgumentValidation.getBooleanObject(specArray.get(index, t), t)) {
+									pigZombie.setBaby();
+								} else {
+									pigZombie.setAdult();
+								}
 								break;
 							case entity_spec.KEY_ZOMBIFIED_PIGLIN_ANGRY:
 								pigZombie.setAngry(ArgumentValidation.getBoolean(specArray.get(index, t), t));

@@ -6,7 +6,7 @@ import org.bukkit.entity.Entity;
 
 import java.util.UUID;
 
-public class BukkitMCAnimal extends BukkitMCAgeable implements MCAnimal {
+public class BukkitMCAnimal extends BukkitMCBreedable implements MCAnimal {
 
 	private final Animals animal;
 

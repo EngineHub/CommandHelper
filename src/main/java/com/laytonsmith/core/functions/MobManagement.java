@@ -14,6 +14,7 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.entities.MCAgeable;
 import com.laytonsmith.abstraction.entities.MCAnimal;
+import com.laytonsmith.abstraction.entities.MCBreedable;
 import com.laytonsmith.abstraction.entities.MCTameable;
 import com.laytonsmith.abstraction.enums.MCAttribute;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
@@ -280,10 +281,10 @@ public class MobManagement {
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCEntity ent = Static.getEntity(args[0], t);
 
-			if(ent instanceof MCAgeable) {
-				return CBoolean.get(((MCAgeable) ent).getCanBreed());
+			if(ent instanceof MCBreedable) {
+				return CBoolean.get(((MCBreedable) ent).getCanBreed());
 			} else {
-				throw new CREBadEntityException("Entity ID must be from an ageable entity!", t);
+				throw new CREBadEntityException("Entity ID must be from an breedable entity!", t);
 			}
 		}
 
@@ -312,10 +313,10 @@ public class MobManagement {
 
 			MCEntity ent = Static.getEntity(args[0], t);
 
-			if(ent instanceof MCAgeable) {
-				((MCAgeable) ent).setCanBreed(breed);
+			if(ent instanceof MCBreedable) {
+				((MCBreedable) ent).setCanBreed(breed);
 			} else {
-				throw new CREBadEntityException("Entity ID must be from an ageable entity!", t);
+				throw new CREBadEntityException("Entity ID must be from an breedable entity!", t);
 			}
 
 			return CVoid.VOID;
@@ -392,7 +393,9 @@ public class MobManagement {
 			MCLivingEntity ent = Static.getLivingEntity(args[0], t);
 			if(ent instanceof MCAgeable mob) {
 				mob.setAge(age);
-				mob.setAgeLock(lock);
+				if(mob instanceof MCBreedable breedable) {
+					breedable.setAgeLock(lock);
+				}
 				return CVoid.VOID;
 			} else {
 				throw new CREUnageableMobException("The specified entity does not age", t);
@@ -412,7 +415,7 @@ public class MobManagement {
 		@Override
 		public String docs() {
 			return "void {entityUUID, int[, lockAge]} sets the age of the mob to the specified int, and locks it at"
-					+ " that age if lockAge is true, but by default it will not."
+					+ " that age if lockAge is true, but by default it will not. (locking only applies to breedable mobs)"
 					+ " Throws a UnageableMobException if the mob does not age naturally.";
 		}
 
