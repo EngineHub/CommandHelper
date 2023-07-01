@@ -177,13 +177,12 @@ public class JSONUtil {
 		return (T[]) getType(obj, arrayClass, null);
 	}
 
-	@SuppressWarnings("UnnecessaryBoxing") // Actually is necessary
 	private <T> T getType(Object o, Class<T> c, Field holder) {
 		if(o == null) {
 			if(c == int.class) {
-				return (T) new Integer(0);
+				return (T) Integer.valueOf(0);
 			} else if(c == double.class) {
-				return (T) new Double(0.0);
+				return (T) Double.valueOf(0.0);
 			} else if(c == boolean.class) {
 				return (T) Boolean.FALSE;
 			}
