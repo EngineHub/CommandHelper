@@ -69,7 +69,7 @@ public class BukkitMCSign extends BukkitMCBlockState implements MCSign {
 		try {
 			return new BukkitMCSignText(s.getSide(org.bukkit.block.sign.Side.BACK));
 		} catch(NoSuchMethodError | NoClassDefFoundError ex) {
-			// was added in a later build of 1.19.4
+			// probably before 1.20
 			return null;
 		}
 	}

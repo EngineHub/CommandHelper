@@ -19,7 +19,10 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockData;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
+import com.laytonsmith.abstraction.blocks.MCSign;
+import com.laytonsmith.abstraction.blocks.MCSignText;
 import com.laytonsmith.abstraction.entities.MCCommandMinecart;
+import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCGameMode;
 import com.laytonsmith.abstraction.enums.MCPlayerStatistic;
@@ -4115,7 +4118,7 @@ public class PlayerManagement {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREFormatException.class, CREPlayerOfflineException.class};
+			return new Class[]{CREFormatException.class, CREPlayerOfflineException.class, CRECastException.class};
 		}
 
 		@Override
@@ -4138,25 +4141,99 @@ public class PlayerManagement {
 			}
 			Static.AssertPlayerNonNull(p, t);
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[offset], p.getWorld(), t);
-
-			String[] lines = new String[4];
+			MCBlock block = loc.getBlock();
+			if(!block.isSign()) {
+				return CVoid.VOID;
+			}
+			MCSign sign = block.getSign();
+			String[] lines = sign.getLines();
 
 			if(args.length == 2 || args.length == 3) {
-				//Lines are in an array
-				CArray lineArray = ArgumentValidation.getArray(args[1 + offset], t);
-				if(lineArray.size() != 4) {
-					throw new CRECastException("Line array must have 4 elements.", t);
+				CArray signArray = ArgumentValidation.getArray(args[1 + offset], t);
+				if(signArray.isAssociative()) {
+					if(signArray.containsKey("signtext")) {
+						Mixed possibleLines = signArray.get("signtext", t);
+						if(possibleLines.isInstanceOf(CArray.TYPE)) {
+							CArray frontLines = (CArray) possibleLines;
+							if(frontLines.size() > 4) {
+								throw new CREFormatException("Sign text array cannot have more than 4 elements.", t);
+							}
+							for(int i = 0; i < frontLines.size(); i++) {
+								if(!(frontLines.get(i, t) instanceof CNull)) {
+									sign.setLine(i, frontLines.get(i, t).val());
+								}
+							}
+						} else {
+							throw new CREFormatException("Expected array for sign text", t);
+						}
+					}
+					if(signArray.containsKey("glowing")) {
+						sign.setGlowingText(ArgumentValidation.getBooleanObject(signArray.get("glowing", t), t));
+					}
+					if(signArray.containsKey("color")) {
+						Mixed dye = signArray.get("color", t);
+						if(!(dye instanceof CNull)) {
+							try {
+								sign.setDyeColor(MCDyeColor.valueOf(dye.val()));
+							} catch (IllegalArgumentException ex) {
+								throw new CREFormatException("Invalid color for sign text", t);
+							}
+						}
+					}
+					MCSignText backText = sign.getBackText();
+					if(backText != null) {
+						if(signArray.containsKey("backtext")) {
+							Mixed possibleLines = signArray.get("backtext", t);
+							if(possibleLines.isInstanceOf(CArray.TYPE)) {
+								CArray backLines = (CArray) possibleLines;
+								if(backLines.size() > 4) {
+									throw new CREFormatException("Sign back text array cannot have more than 4 elements.", t);
+								}
+								for(int i = 0; i < backLines.size(); i++) {
+									if(!(backLines.get(i, t) instanceof CNull)) {
+										backText.setLine(i, backLines.get(i, t).val());
+									}
+								}
+							} else {
+								throw new CREFormatException("Expected array for sign back text", t);
+							}
+						}
+						if(signArray.containsKey("backglowing")) {
+							backText.setGlowingText(ArgumentValidation.getBooleanObject(signArray.get("backglowing", t), t));
+						}
+						if(signArray.containsKey("backcolor")) {
+							Mixed dye = signArray.get("backcolor", t);
+							if(!(dye instanceof CNull)) {
+								try {
+									backText.setDyeColor(MCDyeColor.valueOf(dye.val()));
+								} catch (IllegalArgumentException ex) {
+									throw new CREFormatException("Invalid color for sign back text", t);
+								}
+							}
+						}
+					}
+					p.sendSignTextChange(sign);
+					return CVoid.VOID;
+				} else {
+					// Lines are in an array
+					if(signArray.size() > 4) {
+						throw new CREFormatException("Sign array cannot have more than 4 elements.", t);
+					}
+					for(int i = 0; i < signArray.size(); i++) {
+						Mixed line = signArray.get(i, t);
+						if(!(line instanceof CNull)) {
+							lines[i] = line.val();
+						}
+					}
 				}
-				lines[0] = lineArray.get(0, t).val();
-				lines[1] = lineArray.get(1, t).val();
-				lines[2] = lineArray.get(2, t).val();
-				lines[3] = lineArray.get(3, t).val();
 			} else {
-				//Lines are in different arguments
-				lines[0] = args[1 + offset].val();
-				lines[1] = args[2 + offset].val();
-				lines[2] = args[3 + offset].val();
-				lines[3] = args[4 + offset].val();
+				// Lines are in different arguments
+				for(int i = 0; i < 4; i++) {
+					Mixed line = args[i + 1 + offset];
+					if(!(line instanceof CNull)) {
+						lines[i] = line.val();
+					}
+				}
 			}
 
 			p.sendSignTextChange(loc, lines);
@@ -4175,9 +4252,13 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {[player], locationArray, 1, 2, 3, 4 | [player], locationArray, lineArray}"
-					+ " Changes a sign's text only for the specified player. This change does not persist."
-					+ " This can be used to \"fake\" sign text for a player. LineArray, if used, must have 4 elements.";
+			return "void {[player], locationArray, 1, 2, 3, 4 | [player], locationArray, array}"
+					+ " Changes a sign's text only for the specified player. This will not change the sign in the world."
+					+ " If a normal array is used it cannot have more than 4 elements."
+					+ " If a line is null, the existing line will still be displayed."
+					+ " An associative array of sign data may be sent instead. This is the same as sign item meta,"
+					+ " and can include the keys: 'signtext', 'color', 'glowing' (MC 1.17.1+),"
+					+ " 'backtext' (MC 1.20.1+), 'backcolor' (MC 1.20.1+), and 'backglowing' (MC 1.20.1+).";
 		}
 
 		@Override

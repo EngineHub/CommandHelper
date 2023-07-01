@@ -2,6 +2,7 @@ package com.laytonsmith.abstraction;
 
 import com.laytonsmith.abstraction.blocks.MCBlockData;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
+import com.laytonsmith.abstraction.blocks.MCSign;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.enums.MCParticle;
@@ -127,6 +128,8 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity, MCOfflinePlaye
 	void sendBlockDamage(MCLocation loc, double progress);
 
 	void sendSignTextChange(MCLocation loc, String[] lines);
+
+	void sendSignTextChange(MCSign sign);
 
 	void playNote(MCLocation loc, MCInstrument instrument, MCNote note);
 

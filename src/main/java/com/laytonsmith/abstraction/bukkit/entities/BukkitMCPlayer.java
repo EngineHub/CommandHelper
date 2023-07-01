@@ -14,6 +14,7 @@ import com.laytonsmith.abstraction.MCWorldBorder;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlockData;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
+import com.laytonsmith.abstraction.blocks.MCSign;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
@@ -44,6 +45,7 @@ import org.bukkit.Note;
 import org.bukkit.Particle;
 import org.bukkit.SoundCategory;
 import org.bukkit.WorldBorder;
+import org.bukkit.block.Sign;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -516,6 +518,22 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	@Override
 	public void sendSignTextChange(MCLocation loc, String[] lines) {
 		p.sendSignChange(((Location) loc.getHandle()), lines);
+	}
+
+	@Override
+	public void sendSignTextChange(MCSign sign) {
+		Sign s = (Sign) sign.getHandle();
+		try {
+			p.sendBlockUpdate(s.getLocation(), s);
+		} catch (NoSuchMethodError noBlockUpdate) {
+			// probably before 1.20.1
+			try {
+				p.sendSignChange(s.getLocation(), s.getLines(), s.getColor(), s.isGlowingText());
+			} catch (NoSuchMethodError noGlowingText) {
+				// probably before 1.17.1
+				p.sendSignChange(s.getLocation(), s.getLines(), s.getColor());
+			}
+		}
 	}
 
 	@Override
