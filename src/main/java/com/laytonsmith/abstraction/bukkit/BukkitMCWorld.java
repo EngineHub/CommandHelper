@@ -404,13 +404,18 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	}
 
 	@Override
-	public MCBiomeType getBiome(int x, int z) {
-		return BukkitMCBiomeType.valueOfConcrete(w.getBiome(x, z));
+	public MCBiomeType getBiome(MCLocation location) {
+		return BukkitMCBiomeType.valueOfConcrete(w.getBiome((Location) location.getHandle()));
 	}
 
 	@Override
 	public void setBiome(int x, int z, MCBiomeType type) {
 		w.setBiome(x, z, ((BukkitMCBiomeType) type).getConcrete());
+	}
+
+	@Override
+	public void setBiome(MCLocation location, MCBiomeType type) {
+		w.setBiome(((Location) location.getHandle()), ((BukkitMCBiomeType) type).getConcrete());
 	}
 
 	@Override

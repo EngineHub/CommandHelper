@@ -81,9 +81,6 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 
 	@Override
 	public MCLocation getLocation() {
-		if(e.getLocation() == null) {
-			return null;
-		}
 		return new BukkitMCLocation(e.getLocation());
 	}
 
@@ -146,9 +143,6 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 
 	@Override
 	public MCWorld getWorld() {
-		if(e == null || e.getWorld() == null) {
-			return null;
-		}
 		return new BukkitMCWorld(e.getWorld());
 	}
 

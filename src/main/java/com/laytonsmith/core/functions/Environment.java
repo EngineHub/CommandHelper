@@ -1023,15 +1023,17 @@ public class Environment {
 
 		@Override
 		public String docs() {
-			return "void {x, z, [world], biome | locationArray, biome} Sets the biome of the specified block column."
-					+ " The location array's y value is ignored. ----"
-					+ " Biome may be one of the following: " + StringUtils.Join(MCBiomeType.types(), ", ", ", or ");
+			return "void {x, z, [world], biome | locationArray, biome} Sets the biome at a block location."
+					+ " Minecraft only provides one quarter precision for three dimensional biomes, so this sets"
+					+ " the nearest center of a 4x4x4 region."
+					+ " When not using a location array, the entire column at the x and z coordinates are set."
+					+ " ---- Biome may be one of the following: " + StringUtils.Join(MCBiomeType.types(), ", ", ", or ");
 		}
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREFormatException.class, CRECastException.class,
-				CRENotFoundException.class};
+			return new Class[]{CREFormatException.class, CRECastException.class, CRENotFoundException.class,
+					CREInvalidWorldException.class};
 		}
 
 		@Override
@@ -1053,32 +1055,29 @@ public class Environment {
 			if(sender instanceof MCPlayer) {
 				w = ((MCPlayer) sender).getWorld();
 			}
-			if(args.length == 2) {
-				MCLocation l = ObjectGenerator.GetGenerator().location(args[0], w, t);
-				x = l.getBlockX();
-				z = l.getBlockZ();
-				w = l.getWorld();
-			} else {
-				x = ArgumentValidation.getInt32(args[0], t);
-				z = ArgumentValidation.getInt32(args[1], t);
-				if(args.length != 3) {
-					w = Static.getServer().getWorld(args[2].val());
-				}
-			}
-			MCBiomeType bt;
+			MCBiomeType biomeType;
 			try {
-				bt = MCBiomeType.valueOf(args[args.length - 1].val());
-				if(bt == null) {
+				biomeType = MCBiomeType.valueOf(args[args.length - 1].val());
+				if(biomeType == null) {
 					throw new CRENotFoundException(
 							"Could not find the internal biome type object (are you running in cmdline mode?)", t);
 				}
 			} catch (IllegalArgumentException e) {
-				throw new CREFormatException("The biome type \"" + args[1].val() + "\" does not exist.", t);
+				throw new CREFormatException("The biome type \"" + args[args.length - 1].val() + "\" does not exist.", t);
 			}
-			if(w == null) {
-				throw new CREInvalidWorldException("The specified world doesn't exist, or no world was provided", t);
+			if(args.length == 2) {
+				MCLocation location = ObjectGenerator.GetGenerator().location(args[0], w, t);
+				location.getWorld().setBiome(location, biomeType);
+			} else {
+				x = ArgumentValidation.getInt32(args[0], t);
+				z = ArgumentValidation.getInt32(args[1], t);
+				if(args.length == 4) {
+					w = Static.getServer().getWorld(args[2].val());
+				} else if(w == null) {
+					throw new CREInvalidWorldException("No world was provided", t);
+				}
+				w.setBiome(x, z, biomeType);
 			}
-			w.setBiome(x, z, bt);
 			return CVoid.VOID;
 		}
 
@@ -1093,7 +1092,7 @@ public class Environment {
 				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 
-			if(children.size() < 1) {
+			if(children.size() < 2) {
 				return null;
 			}
 			Mixed c = children.get(children.size() - 1).getData();
@@ -1125,20 +1124,19 @@ public class Environment {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{1, 2, 3};
+			return new Integer[]{1};
 		}
 
 		@Override
 		public String docs() {
-			return "string {x, z, [world] | locationArray} Returns the biome type of this block column. The location"
-					+ " array's y value is ignored. ---- The value returned"
-					+ " may be one of the following: " + StringUtils.Join(MCBiomeType.types(), ", ", ", or ");
+			return "string {locationArray} Returns the biome type at a block location."
+					+ " ---- The value returned may be one of the following: " + StringUtils.Join(MCBiomeType.types(), ", ", ", or ");
 		}
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREFormatException.class, CRECastException.class,
-				CREInvalidWorldException.class, CRENotFoundException.class};
+			return new Class[]{CREFormatException.class, CRECastException.class, CREInvalidWorldException.class,
+					CRENotFoundException.class};
 		}
 
 		@Override
@@ -1153,29 +1151,13 @@ public class Environment {
 
 		@Override
 		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args) throws ConfigRuntimeException {
-			int x;
-			int z;
 			MCCommandSender sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCWorld w = null;
 			if(sender instanceof MCPlayer) {
 				w = ((MCPlayer) sender).getWorld();
 			}
-			if(args.length == 1) {
-				MCLocation l = ObjectGenerator.GetGenerator().location(args[0], w, t);
-				x = l.getBlockX();
-				z = l.getBlockZ();
-				w = l.getWorld();
-			} else {
-				x = ArgumentValidation.getInt32(args[0], t);
-				z = ArgumentValidation.getInt32(args[1], t);
-				if(args.length != 2) {
-					w = Static.getServer().getWorld(args[2].val());
-				}
-			}
-			if(w == null) {
-				throw new CREInvalidWorldException("The specified world doesn't exist, or no world was provided", t);
-			}
-			MCBiomeType bt = w.getBiome(x, z);
+			MCLocation location = ObjectGenerator.GetGenerator().location(args[0], w, t);
+			MCBiomeType bt = location.getWorld().getBiome(location);
 			if(bt == null) {
 				throw new CRENotFoundException("Could not find the biome type (are you running in cmdline mode?)", t);
 			}
