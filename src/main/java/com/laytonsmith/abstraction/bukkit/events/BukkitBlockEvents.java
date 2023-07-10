@@ -60,6 +60,7 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.NotePlayEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.block.BlockFormEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
@@ -147,9 +148,9 @@ public class BukkitBlockEvents {
 	@abstraction(type = Implementation.Type.BUKKIT)
 	public static class BukkitMCBlockBreakEvent implements MCBlockBreakEvent {
 
-		BlockBreakEvent event;
-		boolean dropsModified = false;
-		List<MCItemStack> drops = null;
+		private final BlockBreakEvent event;
+		private boolean dropsModified = false;
+		private List<MCItemStack> drops;
 
 		public BukkitMCBlockBreakEvent(BlockBreakEvent e) {
 			event = e;
@@ -182,7 +183,13 @@ public class BukkitBlockEvents {
 
 		@Override
 		public List<MCItemStack> getDrops() {
-			return this.drops;
+			if(drops == null) {
+				drops = new ArrayList<>();
+				for(ItemStack item : event.getBlock().getDrops(event.getPlayer().getInventory().getItemInMainHand())) {
+					drops.add(new BukkitMCItemStack(item));
+				}
+			}
+			return drops;
 		}
 
 		@Override

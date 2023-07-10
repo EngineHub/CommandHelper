@@ -49,7 +49,6 @@ import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -269,11 +268,7 @@ public class BlockEvents {
 			map.put("block", new CString(block.getType().getName(), t));
 
 			CArray drops = new CArray(t);
-			Collection<MCItemStack> items = event.getDrops();
-			if(items == null) {
-				items = block.getDrops(event.getPlayer().getInventory().getItemInMainHand());
-			}
-			for(MCItemStack stack : items) {
+			for(MCItemStack stack : event.getDrops()) {
 				drops.push(ObjectGenerator.GetGenerator().item(stack, t), t);
 			}
 			map.put("drops", drops);
