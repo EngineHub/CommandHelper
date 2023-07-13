@@ -2483,7 +2483,7 @@ public final class MethodScriptCompiler {
 			return;
 		}
 		//If it is a proc definition, we need to go ahead and see if we can add it to the const proc stack
-		if(tree.getData().val().equals("proc")) {
+		if(tree.getData().val().equals(DataHandling.proc.NAME)) {
 			procs.push(new ArrayList<>());
 		}
 		CFunction cFunction = (CFunction) tree.getData();
@@ -2568,7 +2568,7 @@ public final class MethodScriptCompiler {
 			//so we can't for sure say, but we do know we can't optimize this
 			return;
 		}
-		if(tree.getData().val().equals("proc")) {
+		if(tree.getData().val().equals(DataHandling.proc.NAME)) {
 			//Check for too few arguments
 			if(children.size() < 2) {
 				compilerErrors.add(new ConfigCompileException("Incorrect number of arguments passed to proc",

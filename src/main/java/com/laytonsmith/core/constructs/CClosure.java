@@ -3,6 +3,7 @@ package com.laytonsmith.core.constructs;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.functions.Compiler;
 import com.laytonsmith.core.natives.interfaces.Booleanish;
 import com.laytonsmith.core.natives.interfaces.Callable;
 import com.laytonsmith.core.MSVersion;
@@ -97,7 +98,7 @@ public class CClosure extends Construct implements Callable, Booleanish {
 				b.append(func.val()).append("(");
 				for(int i = 0; i < node.numberOfChildren(); i++) {
 					condense(node.getChildAt(i), b);
-					if(i != node.numberOfChildren() - 1 && !((CFunction) node.getData()).val().equals("__autoconcat__")) {
+					if(i != node.numberOfChildren() - 1 && !((CFunction) node.getData()).val().equals(Compiler.__autoconcat__.NAME)) {
 						b.append(",");
 					}
 				}

@@ -1854,7 +1854,7 @@ public class DataHandling {
 
 		@Override
 		public String getName() {
-			return "get_proc";
+			return NAME;
 		}
 
 		@Override
@@ -2925,7 +2925,7 @@ public class DataHandling {
 
 		@Override
 		public String getName() {
-			return "execute";
+			return NAME;
 		}
 
 		@Override

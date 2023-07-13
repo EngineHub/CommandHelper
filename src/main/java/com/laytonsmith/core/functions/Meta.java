@@ -1048,7 +1048,7 @@ public class Meta {
 
 		@Override
 		public String getName() {
-			return "noop";
+			return NAME;
 		}
 
 		@Override

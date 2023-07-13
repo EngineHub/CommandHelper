@@ -798,7 +798,7 @@ public class ControlFlow {
 				}
 				//To standardize the rest of the code (and to optimize), go ahead and resolve array()
 				if(children.get(i).getData() instanceof CFunction
-						&& new DataHandling.array().getName().equals(children.get(i).getData().val())) {
+						&& children.get(i).getData().val().equals(DataHandling.array.NAME)) {
 					CArray data = new CArray(t);
 					for(ParseTree child : children.get(i).getChildren()) {
 						if(Construct.IsDynamicHelper(child.getData())) {
@@ -2275,7 +2275,7 @@ public class ControlFlow {
 
 		@Override
 		public String getName() {
-			return "continue";
+			return NAME;
 		}
 
 		@Override

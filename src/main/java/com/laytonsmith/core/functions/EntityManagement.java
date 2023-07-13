@@ -999,7 +999,7 @@ public class EntityManagement {
 							c.val() + " is not a valid enum in com.commandhelper.EntityType",
 							c.getTarget(), null));
 				}
-			} else if(c instanceof CFunction && c.val().equals("array")) {
+			} else if(c instanceof CFunction && c.val().equals(DataHandling.array.NAME)) {
 				for(ParseTree node : children.get(children.size() - 1).getChildren()) {
 					if(node.getData().isInstanceOf(CString.TYPE)) {
 						try {
