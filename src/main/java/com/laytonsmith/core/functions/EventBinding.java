@@ -240,7 +240,8 @@ public class EventBinding {
 
 			// Return if the prefilter parse tree is not a hard-coded "array(...)" node.
 			if(!(prefilterParseTree.getData() instanceof CFunction)
-					|| !prefilterParseTree.getData().val().equals(DataHandling.array.NAME)) {
+					|| (!prefilterParseTree.getData().val().equals(DataHandling.array.NAME)
+					&& !prefilterParseTree.getData().val().equals(DataHandling.associative_array.NAME))) {
 				return analysis.typecheck(prefilterParseTree, env, exceptions);
 			}
 
@@ -355,9 +356,10 @@ public class EventBinding {
 			Set<ConfigCompileException> exceptions = new HashSet<>();
 			// Validate options
 			ParseTree child = topChildren.get(1);
-			if(child.getData() instanceof CFunction && child.getData().val().equals("array")) {
+			if(child.getData() instanceof CFunction && (child.getData().val().equals(DataHandling.array.NAME)
+					|| child.getData().val().equals(DataHandling.associative_array.NAME))) {
 				for(ParseTree node : child.getChildren()) {
-					if(node.getData() instanceof CFunction && node.getData().val().equals("centry")) {
+					if(node.getData() instanceof CFunction && node.getData().val().equals(Compiler.centry.NAME)) {
 						List<ParseTree> children = node.getChildren();
 						if(children.get(0).getData().val().equals("id")
 								&& children.get(1).getData().isInstanceOf(CString.TYPE)) {

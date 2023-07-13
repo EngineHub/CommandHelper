@@ -1798,9 +1798,10 @@ public class Environment {
 				return null;
 			}
 			ParseTree child = children.get(1);
-			if(child.getData() instanceof CFunction && child.getData().val().equals("array")) {
+			if(child.getData() instanceof CFunction && (child.getData().val().equals(DataHandling.array.NAME)
+					|| child.getData().val().equals(DataHandling.associative_array.NAME))) {
 				for(ParseTree node : child.getChildren()) {
-					if(node.getData() instanceof CFunction && node.getData().val().equals("centry")) {
+					if(node.getData() instanceof CFunction && node.getData().val().equals(Compiler.centry.NAME)) {
 						children = node.getChildren();
 						if(children.get(0).getData().val().equals("sound")
 								&& children.get(1).getData().isInstanceOf(CString.TYPE)) {
@@ -2980,11 +2981,12 @@ public class Environment {
 				return null;
 			}
 			ParseTree child = children.get(1);
-			if(child.getData() instanceof CFunction && child.getData().val().equals("array")) {
+			if(child.getData() instanceof CFunction && child.getData().val().equals(DataHandling.array.NAME)) {
 				for(ParseTree node1 : child.getChildren()) {
-					if(node1.getData() instanceof CFunction && child.getData().val().equals("array")) {
+					if(node1.getData() instanceof CFunction && (child.getData().val().equals(DataHandling.array.NAME)
+							|| child.getData().val().equals(DataHandling.associative_array.NAME))) {
 						for(ParseTree node : node1.getChildren()) {
-							if(node.getData() instanceof CFunction && node.getData().val().equals("centry")) {
+							if(node.getData() instanceof CFunction && node.getData().val().equals(Compiler.centry.NAME)) {
 								children = node.getChildren();
 								if(children.get(0).getData().val().equals("color")
 										&& children.get(1).getData().isInstanceOf(CString.TYPE)) {

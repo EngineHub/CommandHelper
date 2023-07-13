@@ -254,6 +254,8 @@ public class DataHandling {
 	@seealso({com.laytonsmith.tools.docgen.templates.Arrays.class, ArrayIteration.class})
 	public static class associative_array extends AbstractFunction {
 
+		public static final String NAME = "associative_array";
+
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return null;
@@ -271,8 +273,7 @@ public class DataHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			CArray array = CArray.GetAssociativeArray(t, args);
-			return array;
+			return CArray.GetAssociativeArray(t, args);
 		}
 
 		@Override
@@ -283,7 +284,7 @@ public class DataHandling {
 
 		@Override
 		public String getName() {
-			return "associative_array";
+			return NAME;
 		}
 
 		@Override
