@@ -159,7 +159,7 @@ public class ProfilesImpl implements Profiles {
 			}
 		}
 		if(!profileTypes.containsKey(type)) {
-			throw new InvalidProfileException("Unknown type \"" + type + "\"");
+			throw new InvalidProfileException("Unknown profile type: \"" + type + "\"");
 		}
 		try {
 			return ReflectionUtils.newInstance(profileTypes.get(type), new Class[]{String.class, Map.class},
@@ -182,7 +182,7 @@ public class ProfilesImpl implements Profiles {
 	 */
 	public static Profile getProfile(Map<String, String> data) throws InvalidProfileException {
 		if(!data.containsKey("type")) {
-			throw new InvalidProfileException("Missing \"type\"");
+			throw new InvalidProfileException("Missing profile \"type\"");
 		}
 		String type = data.get("type");
 		data.remove("type");
