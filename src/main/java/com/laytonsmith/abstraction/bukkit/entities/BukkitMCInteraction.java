@@ -4,8 +4,6 @@ import com.laytonsmith.abstraction.entities.MCInteraction;
 import org.bukkit.entity.Interaction;
 import org.bukkit.entity.Interaction.PreviousInteraction;
 
-import java.util.UUID;
-
 public class BukkitMCInteraction extends BukkitMCEntity implements MCInteraction {
 	Interaction interaction;
 
