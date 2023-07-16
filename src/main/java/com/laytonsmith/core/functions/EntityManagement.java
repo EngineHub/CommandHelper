@@ -2039,6 +2039,30 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_HORSE_ARMOR, ObjectGenerator.GetGenerator().item(horse.getArmor(), t), t);
 					specArray.set(entity_spec.KEY_HORSE_SADDLE, ObjectGenerator.GetGenerator().item(horse.getSaddle(), t), t);
 					break;
+				case INTERACTION:
+					MCInteraction interaction = (MCInteraction) entity;
+					specArray.set(entity_spec.KEY_INTERACTION_WIDTH, new CDouble(interaction.getWidth(), t), t);
+					specArray.set(entity_spec.KEY_INTERACTION_HEIGHT, new CDouble(interaction.getHeight(), t), t);
+					specArray.set(entity_spec.KEY_INTERACTION_RESPONSE, CBoolean.get(interaction.isResponsive()), t);
+					MCPreviousInteraction attack = interaction.getLastAttack();
+					if(attack != null) {
+						CArray attackArray = CArray.GetAssociativeArray(t);
+						attackArray.set("player", attack.getPlayer().toString());
+						attackArray.set("timestamp", new CInt(attack.getTimestamp(), t), t);
+						specArray.set(entity_spec.KEY_INTERACTION_ATTACK, attackArray, t);
+					} else {
+						specArray.set(entity_spec.KEY_INTERACTION_ATTACK, CNull.NULL, t);
+					}
+					MCPreviousInteraction interact = interaction.getLastInteraction();
+					if(interact != null) {
+						CArray interactionArray = CArray.GetAssociativeArray(t);
+						interactionArray.set("player", interact.getPlayer().toString());
+						interactionArray.set("timestamp", new CInt(interact.getTimestamp(), t), t);
+						specArray.set(entity_spec.KEY_INTERACTION_INTERACTION, interactionArray, t);
+					} else {
+						specArray.set(entity_spec.KEY_INTERACTION_INTERACTION, CNull.NULL, t);
+					}
+					break;
 				case IRON_GOLEM:
 					MCIronGolem golem = (MCIronGolem) entity;
 					specArray.set(entity_spec.KEY_IRON_GOLEM_PLAYERCREATED, CBoolean.get(golem.isPlayerCreated()), t);
@@ -2249,30 +2273,6 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_GENERIC_BABY, CBoolean.get(pigZombie.isBaby()), t);
 					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19)) {
 						specArray.set(entity_spec.KEY_ZOMBIE_BREAK_DOORS, CBoolean.get(pigZombie.canBreakDoors()), t);
-					}
-					break;
-				case INTERACTION:
-					MCInteraction interaction = (MCInteraction) entity;
-					specArray.set(entity_spec.KEY_INTERACTION_WIDTH, new CDouble(interaction.getWidth(), t), t);
-					specArray.set(entity_spec.KEY_INTERACTION_HEIGHT, new CDouble(interaction.getHeight(), t), t);
-					specArray.set(entity_spec.KEY_INTERACTION_RESPONSE, CBoolean.get(interaction.isResponsive()), t);
-					MCPreviousInteraction attack = interaction.getLastAttack();
-					if(attack != null) {
-						CArray attackArray = CArray.GetAssociativeArray(t);
-						attackArray.set("player", attack.getPlayer().toString());
-						attackArray.set("timestamp", new CInt(attack.getTimestamp(), t), t);
-						specArray.set(entity_spec.KEY_INTERACTION_ATTACK, attackArray, t);
-					} else {
-						specArray.set(entity_spec.KEY_INTERACTION_ATTACK, CNull.NULL, t);
-					}
-					MCPreviousInteraction interact = interaction.getLastInteraction();
-					if(interact != null) {
-						CArray interactionArray = CArray.GetAssociativeArray(t);
-						interactionArray.set("player", interact.getPlayer().toString());
-						interactionArray.set("timestamp", new CInt(interact.getTimestamp(), t), t);
-						specArray.set(entity_spec.KEY_INTERACTION_INTERACTION, interactionArray, t);
-					} else {
-						specArray.set(entity_spec.KEY_INTERACTION_INTERACTION, CNull.NULL, t);
 					}
 					break;
 			}
@@ -3159,6 +3159,27 @@ public class EntityManagement {
 						}
 					}
 					break;
+				case INTERACTION:
+					MCInteraction interaction = (MCInteraction) entity;
+					for(String index : specArray.stringKeySet()) {
+						switch(index.toLowerCase()) {
+							case entity_spec.KEY_INTERACTION_HEIGHT:
+								interaction.setHeight(ArgumentValidation.getDouble(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_INTERACTION_WIDTH:
+								interaction.setWidth(ArgumentValidation.getDouble(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_INTERACTION_RESPONSE:
+								interaction.setResponsive(ArgumentValidation.getBooleanish(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_INTERACTION_ATTACK:
+							case entity_spec.KEY_INTERACTION_INTERACTION:
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
 				case IRON_GOLEM:
 					MCIronGolem golem = (MCIronGolem) entity;
 					for(String index : specArray.stringKeySet()) {
@@ -3853,26 +3874,6 @@ public class EntityManagement {
 						}
 					}
 					break;
-				case INTERACTION:
-					MCInteraction interaction = (MCInteraction) entity;
-					for(String index : specArray.stringKeySet()) {
-						switch(index.toLowerCase()) {
-							case entity_spec.KEY_INTERACTION_HEIGHT:
-								interaction.setHeight(ArgumentValidation.getDouble(specArray.get(index, t), t));
-								break;
-							case entity_spec.KEY_INTERACTION_WIDTH:
-								interaction.setWidth(ArgumentValidation.getDouble(specArray.get(index, t), t));
-								break;
-							case entity_spec.KEY_INTERACTION_RESPONSE:
-								interaction.setResponsive(ArgumentValidation.getBooleanish(specArray.get(index, t), t));
-								break;
-							case entity_spec.KEY_INTERACTION_ATTACK:
-							case entity_spec.KEY_INTERACTION_INTERACTION:
-								break;
-							default:
-								throwException(index, t);
-						}
-					}
 				default:
 					for(String index : specArray.stringKeySet()) {
 						throwException(index, t);

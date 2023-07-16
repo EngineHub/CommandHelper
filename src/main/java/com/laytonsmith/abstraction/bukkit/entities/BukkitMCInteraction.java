@@ -1,15 +1,16 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.abstraction.entities.MCInteraction;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Interaction;
 import org.bukkit.entity.Interaction.PreviousInteraction;
 
 public class BukkitMCInteraction extends BukkitMCEntity implements MCInteraction {
 	Interaction interaction;
 
-	public BukkitMCInteraction(Interaction i) {
+	public BukkitMCInteraction(Entity i) {
 		super(i);
-		this.interaction = i;
+		this.interaction = (Interaction) i;
 	}
 
 	@Override

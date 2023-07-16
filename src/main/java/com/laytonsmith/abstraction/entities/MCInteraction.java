@@ -1,9 +1,6 @@
 package com.laytonsmith.abstraction.entities;
 
 import com.laytonsmith.abstraction.MCEntity;
-import com.laytonsmith.abstraction.MCOfflinePlayer;
-import com.laytonsmith.core.functions.PlayerManagement.player;
-import org.bukkit.OfflinePlayer;
 
 import java.util.UUID;
 
