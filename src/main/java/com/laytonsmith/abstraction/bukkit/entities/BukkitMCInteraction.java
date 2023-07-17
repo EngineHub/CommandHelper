@@ -15,7 +15,7 @@ public class BukkitMCInteraction extends BukkitMCEntity implements MCInteraction
 
 	@Override
 	public double getWidth() {
-		return interaction.getWidth();
+		return interaction.getInteractionWidth();
 	}
 
 	@Override
@@ -25,7 +25,7 @@ public class BukkitMCInteraction extends BukkitMCEntity implements MCInteraction
 
 	@Override
 	public double getHeight() {
-		return interaction.getHeight();
+		return interaction.getInteractionHeight();
 	}
 
 	@Override
