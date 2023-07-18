@@ -2047,7 +2047,7 @@ public class EntityManagement {
 					MCPreviousInteraction attack = interaction.getLastAttack();
 					if(attack != null) {
 						CArray attackArray = CArray.GetAssociativeArray(t);
-						attackArray.set("player", attack.getPlayer().toString());
+						attackArray.set("player", attack.getUuid().toString());
 						attackArray.set("timestamp", new CInt(attack.getTimestamp(), t), t);
 						specArray.set(entity_spec.KEY_INTERACTION_ATTACK, attackArray, t);
 					} else {
@@ -2056,7 +2056,7 @@ public class EntityManagement {
 					MCPreviousInteraction interact = interaction.getLastInteraction();
 					if(interact != null) {
 						CArray interactionArray = CArray.GetAssociativeArray(t);
-						interactionArray.set("player", interact.getPlayer().toString());
+						interactionArray.set("player", interact.getUuid().toString());
 						interactionArray.set("timestamp", new CInt(interact.getTimestamp(), t), t);
 						specArray.set(entity_spec.KEY_INTERACTION_INTERACTION, interactionArray, t);
 					} else {
