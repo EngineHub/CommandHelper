@@ -15,16 +15,16 @@ public interface MCInteraction extends MCEntity {
 	MCPreviousInteraction getLastInteraction();
 
 	class MCPreviousInteraction {
-		private final UUID player;
+		private final UUID uuid;
 		private final long timestamp;
 
-		public MCPreviousInteraction(UUID player, long timestamp) {
-			this.player = player;
+		public MCPreviousInteraction(UUID uuid, long timestamp) {
+			this.uuid = uuid;
 			this.timestamp = timestamp;
 		}
 
-		public UUID getPlayer() {
-			return player;
+		public UUID getUuid() {
+			return uuid;
 		}
 
 		public long getTimestamp() {
