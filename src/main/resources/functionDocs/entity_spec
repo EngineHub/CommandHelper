@@ -161,7 +161,7 @@ without knowing the rotations on the other axis or of other body parts beforehan
 * %KEY_INTERACTION_WIDTH%: The width of the interaction's hit box on the X and Z axis.
 * %KEY_INTERACTION_HEIGHT%: The height of the interaction's hit box on the Y axis.
 * %KEY_INTERACTION_RESPONSE%: Whether vanilla responses occur such as sound and arm swing when interacting with the entity.
-* %KEY_INTERACTION_ATTACK%, %KEY_INTERACTION_INTERACTION%: An associative array containing the keys 'uuid' and 'timestamp' which is updated when a player attacks or right clicks the interaction respectively. Cannot be updated with set_entity_spec().
+* %KEY_INTERACTION_ATTACK%, %KEY_INTERACTION_INTERACTION%: An associative array containing the keys 'puuid' and 'timestamp' which is updated when a player attacks or right clicks the interaction respectively. Cannot be updated with set_entity_spec().
 |-
 | IRON_GOLEM
 | 
