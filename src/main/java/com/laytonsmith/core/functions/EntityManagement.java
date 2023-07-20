@@ -2047,7 +2047,7 @@ public class EntityManagement {
 					MCPreviousInteraction attack = interaction.getLastAttack();
 					if(attack != null) {
 						CArray attackArray = CArray.GetAssociativeArray(t);
-						attackArray.set("player", attack.getUuid().toString());
+						attackArray.set("puuid", attack.getUuid().toString());
 						attackArray.set("timestamp", new CInt(attack.getTimestamp(), t), t);
 						specArray.set(entity_spec.KEY_INTERACTION_ATTACK, attackArray, t);
 					} else {
@@ -2056,7 +2056,7 @@ public class EntityManagement {
 					MCPreviousInteraction interact = interaction.getLastInteraction();
 					if(interact != null) {
 						CArray interactionArray = CArray.GetAssociativeArray(t);
-						interactionArray.set("player", interact.getUuid().toString());
+						interactionArray.set("puuid", interact.getUuid().toString());
 						interactionArray.set("timestamp", new CInt(interact.getTimestamp(), t), t);
 						specArray.set(entity_spec.KEY_INTERACTION_INTERACTION, interactionArray, t);
 					} else {
@@ -2356,6 +2356,11 @@ public class EntityManagement {
 		private static final String KEY_HORSE_MAXDOMESTICATION = "maxdomestication";
 		private static final String KEY_HORSE_ARMOR = "armor";
 		private static final String KEY_HORSE_SADDLE = "saddle";
+		private static final String KEY_INTERACTION_WIDTH = "width";
+		private static final String KEY_INTERACTION_HEIGHT = "height";
+		private static final String KEY_INTERACTION_RESPONSE = "response";
+		private static final String KEY_INTERACTION_ATTACK = "lastattack";
+		private static final String KEY_INTERACTION_INTERACTION = "lastinteraction";
 		private static final String KEY_IRON_GOLEM_PLAYERCREATED = "playercreated";
 		private static final String KEY_ITEM_FRAME_FIXED = "fixed";
 		private static final String KEY_ITEM_FRAME_ITEM = "item";
@@ -2405,11 +2410,6 @@ public class EntityManagement {
 		private static final String KEY_WOLF_COLOR = "color";
 		private static final String KEY_WOLF_INTERESTED = "interested";
 		private static final String KEY_ZOMBIE_BREAK_DOORS = "breakdoors";
-		private static final String KEY_INTERACTION_WIDTH = "width";
-		private static final String KEY_INTERACTION_HEIGHT = "height";
-		private static final String KEY_INTERACTION_RESPONSE = "response";
-		private static final String KEY_INTERACTION_ATTACK = "lastattack";
-		private static final String KEY_INTERACTION_INTERACTION = "lastinteraction";
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
