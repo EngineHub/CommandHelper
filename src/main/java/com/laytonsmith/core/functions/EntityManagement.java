@@ -52,6 +52,8 @@ import com.laytonsmith.abstraction.entities.MCHanging;
 import com.laytonsmith.abstraction.entities.MCHorse;
 import com.laytonsmith.abstraction.entities.MCHorse.MCHorseColor;
 import com.laytonsmith.abstraction.entities.MCHorse.MCHorsePattern;
+import com.laytonsmith.abstraction.entities.MCInteraction;
+import com.laytonsmith.abstraction.entities.MCInteraction.MCPreviousInteraction;
 import com.laytonsmith.abstraction.entities.MCIronGolem;
 import com.laytonsmith.abstraction.entities.MCItem;
 import com.laytonsmith.abstraction.entities.MCItemFrame;
@@ -2037,6 +2039,30 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_HORSE_ARMOR, ObjectGenerator.GetGenerator().item(horse.getArmor(), t), t);
 					specArray.set(entity_spec.KEY_HORSE_SADDLE, ObjectGenerator.GetGenerator().item(horse.getSaddle(), t), t);
 					break;
+				case INTERACTION:
+					MCInteraction interaction = (MCInteraction) entity;
+					specArray.set(entity_spec.KEY_INTERACTION_WIDTH, new CDouble(interaction.getWidth(), t), t);
+					specArray.set(entity_spec.KEY_INTERACTION_HEIGHT, new CDouble(interaction.getHeight(), t), t);
+					specArray.set(entity_spec.KEY_INTERACTION_RESPONSE, CBoolean.get(interaction.isResponsive()), t);
+					MCPreviousInteraction attack = interaction.getLastAttack();
+					if(attack != null) {
+						CArray attackArray = CArray.GetAssociativeArray(t);
+						attackArray.set("puuid", attack.getUuid().toString());
+						attackArray.set("timestamp", new CInt(attack.getTimestamp(), t), t);
+						specArray.set(entity_spec.KEY_INTERACTION_ATTACK, attackArray, t);
+					} else {
+						specArray.set(entity_spec.KEY_INTERACTION_ATTACK, CNull.NULL, t);
+					}
+					MCPreviousInteraction interact = interaction.getLastInteraction();
+					if(interact != null) {
+						CArray interactionArray = CArray.GetAssociativeArray(t);
+						interactionArray.set("puuid", interact.getUuid().toString());
+						interactionArray.set("timestamp", new CInt(interact.getTimestamp(), t), t);
+						specArray.set(entity_spec.KEY_INTERACTION_INTERACTION, interactionArray, t);
+					} else {
+						specArray.set(entity_spec.KEY_INTERACTION_INTERACTION, CNull.NULL, t);
+					}
+					break;
 				case IRON_GOLEM:
 					MCIronGolem golem = (MCIronGolem) entity;
 					specArray.set(entity_spec.KEY_IRON_GOLEM_PLAYERCREATED, CBoolean.get(golem.isPlayerCreated()), t);
@@ -2330,6 +2356,11 @@ public class EntityManagement {
 		private static final String KEY_HORSE_MAXDOMESTICATION = "maxdomestication";
 		private static final String KEY_HORSE_ARMOR = "armor";
 		private static final String KEY_HORSE_SADDLE = "saddle";
+		private static final String KEY_INTERACTION_WIDTH = "width";
+		private static final String KEY_INTERACTION_HEIGHT = "height";
+		private static final String KEY_INTERACTION_RESPONSE = "response";
+		private static final String KEY_INTERACTION_ATTACK = "lastattack";
+		private static final String KEY_INTERACTION_INTERACTION = "lastinteraction";
 		private static final String KEY_IRON_GOLEM_PLAYERCREATED = "playercreated";
 		private static final String KEY_ITEM_FRAME_FIXED = "fixed";
 		private static final String KEY_ITEM_FRAME_ITEM = "item";
@@ -3122,6 +3153,27 @@ public class EntityManagement {
 								break;
 							case entity_spec.KEY_HORSE_ARMOR:
 								horse.setArmor(ObjectGenerator.GetGenerator().item(specArray.get(index, t), t));
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
+				case INTERACTION:
+					MCInteraction interaction = (MCInteraction) entity;
+					for(String index : specArray.stringKeySet()) {
+						switch(index.toLowerCase()) {
+							case entity_spec.KEY_INTERACTION_HEIGHT:
+								interaction.setHeight(ArgumentValidation.getDouble(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_INTERACTION_WIDTH:
+								interaction.setWidth(ArgumentValidation.getDouble(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_INTERACTION_RESPONSE:
+								interaction.setResponsive(ArgumentValidation.getBooleanish(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_INTERACTION_ATTACK:
+							case entity_spec.KEY_INTERACTION_INTERACTION:
 								break;
 							default:
 								throwException(index, t);
