@@ -369,9 +369,9 @@
 		</dependency>
 		<!-- Java Mail -->
 		<dependency>
-			<groupId>javax.mail</groupId>
-			<artifactId>mail</artifactId>
-			<version>1.5.0-b01</version>
+			<groupId>com.sun.mail</groupId>
+			<artifactId>javax.mail</artifactId>
+			<version>1.6.2</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.activation</groupId>
@@ -548,7 +548,7 @@
 									<!--<include>org.apache.bcel:bcel:jar:*</include>-->
 									<include>org.ow2.asm:asm:jar:*</include>
 									<include>jline:jline:jar:*</include>
-									<include>javax.mail:mail:jar:*</include>
+									<include>com.sun.mail:javax.mail:jar:*</include>
 									<include>javax.activation:activation:jar:*</include>
 									<include>postgresql:postgresql:jar:*</include>
 									<include>org.apache.oltu.oauth2:org.apache.oltu.oauth2.client:jar:*</include>
@@ -643,10 +643,6 @@
 										<pattern>org.fusesource</pattern>
 										<shadedPattern>com.laytonsmith.libs.org.fusesource</shadedPattern>
 								</relocation>-->
-								<relocation>
-									<pattern>jaxax.mail</pattern>
-									<shadedPattern>com.laytonsmith.libs.javax.mail</shadedPattern>
-								</relocation>
 								<!-- Cannot relocate this due to a Class.forName in the JavaMail API.
 								<relocation>
 										<pattern>com.sun.mail</pattern>
@@ -772,7 +768,7 @@
 									</includes>
 								</filter>
 								<filter>
-									<artifact>javax.mail:mail:jar:*</artifact>
+									<artifact>com.sun.mail:javax.mail:jar:*</artifact>
 									<includes>
 										<include>**</include>
 									</includes>
