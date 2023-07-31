@@ -4,7 +4,9 @@ import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCPotionData;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPotionData;
 import com.laytonsmith.abstraction.entities.MCArrow;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPotionEffectType;
+import com.laytonsmith.core.Static;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.potion.PotionData;
@@ -70,8 +72,16 @@ public class BukkitMCArrow extends BukkitMCProjectile implements MCArrow {
 
 	@Override
 	public void addCustomEffect(MCLivingEntity.MCEffect effect) {
+		int ticks = effect.getTicksRemaining();
+		if(ticks < 0) {
+			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_X)) {
+				ticks = -1;
+			} else {
+				ticks = Integer.MAX_VALUE;
+			}
+		}
 		PotionEffect pe = new PotionEffect((PotionEffectType) effect.getPotionEffectType().getConcrete(),
-				effect.getTicksRemaining(), effect.getStrength(), effect.isAmbient(), effect.hasParticles(),
+				ticks, effect.getStrength(), effect.isAmbient(), effect.hasParticles(),
 				effect.showIcon());
 		arrow.addCustomEffect(pe, true);
 	}

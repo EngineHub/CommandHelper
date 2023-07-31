@@ -552,7 +552,8 @@ public class MobManagement {
 					+ ". It also accepts an integer corresponding to the effect id listed on the Minecraft wiki."
 					+ " Strength is an integer representing the power level of the effect, starting at 0."
 					+ " Seconds defaults to 30.0. To remove an effect, set the seconds to 0."
-					+ " If seconds is less than 0 or greater than 107374182 a RangeException is thrown."
+					+ " If seconds is greater than 107374182 a RangeException is thrown."
+					+ " Negative seconds makes the effect infinite. (or max in versions prior to 1.19.4)"
 					+ " Ambient takes a boolean of whether the particles should be more transparent."
 					+ " Particles takes a boolean of whether the particles should be visible at all."
 					+ " The function returns whether or not the effect was modified.";
@@ -594,9 +595,7 @@ public class MobManagement {
 
 				if(args.length >= 4) {
 					seconds = ArgumentValidation.getDouble(args[3], t);
-					if(seconds < 0.0) {
-						throw new CRERangeException("Seconds cannot be less than 0.0", t);
-					} else if(seconds * 20 > Integer.MAX_VALUE) {
+					if(seconds * 20 > Integer.MAX_VALUE) {
 						throw new CRERangeException("Seconds cannot be greater than 107374182.0", t);
 					}
 

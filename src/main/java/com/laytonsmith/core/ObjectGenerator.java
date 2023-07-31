@@ -1763,9 +1763,7 @@ public class ObjectGenerator {
 				}
 				if(effect.containsKey("seconds")) {
 					seconds = ArgumentValidation.getDouble(effect.get("seconds", t), t);
-					if(seconds < 0.0) {
-						throw new CRERangeException("Seconds cannot be less than 0", t);
-					} else if(seconds * 20 > Integer.MAX_VALUE) {
+					if(seconds * 20 > Integer.MAX_VALUE) {
 						throw new CRERangeException("Seconds cannot be greater than 107374182", t);
 					}
 				}
