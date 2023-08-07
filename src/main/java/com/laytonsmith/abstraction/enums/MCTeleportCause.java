@@ -13,5 +13,6 @@ public enum MCTeleportCause {
 	END_GATEWAY,
 	CHORUS_FRUIT,
 	DISMOUNT,
+	EXIT_BED,
 	UNKNOWN
 }
