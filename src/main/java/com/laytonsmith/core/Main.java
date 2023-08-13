@@ -1723,6 +1723,10 @@ public class Main {
 			System.exit(0);
 		}
 
+		@Override
+		public boolean startupExtensionManager() {
+			return false;
+		}
 	}
 
 	public static String GetDirectoryTextEditor() {
