@@ -673,11 +673,11 @@ public class Scoreboards {
 					+ " Sets the display name and/or slot of the given objective. If arg 2 is not an array,"
 					+ " it is assumed to be the displayname, otherwise arg 2 should be an array"
 					+ " with keys 'displayname' and/or 'slot', affecting their respective properties."
-					+ " A null name resets it to the actual name, and null slot removes it from"
+					+ " A null displayname resets it to the actual name, and a null slot removes it from"
 					+ " all displays. Slot can be one of: " + StringUtils.Join(MCDisplaySlot.values(), ", ", ", or ")
-					+ " If the displayname is too long, a LengthException will be thrown."
-					+ " The max length may differ based on server implementation, but will probably be 128."
-					+ ". " + DEF_MSG;
+					+ " ---- If the displayname is too long, a LengthException will be thrown."
+					+ " The max length will differ based on server version, but this limit was removed in 1.20.1."
+					+ DEF_MSG;
 		}
 
 		@Override
@@ -774,17 +774,21 @@ public class Scoreboards {
 
 		@Override
 		public String docs() {
+			MCChatColor[] values = MCChatColor.values();
+			String[] colors = new String[values.length];
+			for(int i = 0; i < colors.length; i++) {
+				colors[i] = values[i].name();
+			}
 			return "void {teamName, array, [scoreboard] | teamName, displayname, [scoreboard]}"
 					+ " Sets the display name, color, prefix, and/or suffix of the given team."
 					+ " If arg 2 is not an array, it is assumed to be the displayname,"
 					+ " otherwise arg 2 should be an array with keys 'displayname', 'color', 'prefix',"
 					+ " and/or 'suffix', affecting their respective properties."
+					+ " A null displayname resets it to the actual name, and a null prefix or suffix removes it from"
+					+ " all displays. Color can be one of " + StringUtils.Join(colors, ", ", " or ") + "."
 					+ " ---- If the prefix, suffix, or displayname is too long, a LengthException will be thrown."
-					+ " The max length may differ based on server implementation,"
-					+ " but will probably be 64, 64, 128 respectively."
-					+ " Null name resets it to the actual name, and null prefix or suffix removes it from"
-					+ " all displays. Color can be one of "
-					+ StringUtils.Join(MCChatColor.values(), ", ", " or ") + ". " + DEF_MSG;
+					+ " The max length will differ based on server version, but these limits were removed in 1.20.1."
+					+ DEF_MSG;
 		}
 
 		@Override
