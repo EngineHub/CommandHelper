@@ -136,6 +136,7 @@ Below are the available fields in the item meta array. Fields can be null when t
 * '''backtext''' : (array) An array of 4 strings, one for each line of text on the back. (MC 1.20+)
 * '''backcolor''' : (string) The dye color for the text on the back. (default: 'BLACK') (MC 1.20+)
 * '''backglowing''' : (boolean) Whether the sign has glowing text on the back. (MC 1.20+)
+* '''waxed''' : (boolean) Whether the sign is waxed. (MC 1.20.1+)
 |-
 | Spawners
 |

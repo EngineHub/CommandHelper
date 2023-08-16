@@ -65,6 +65,25 @@ public class BukkitMCSign extends BukkitMCBlockState implements MCSign {
 	}
 
 	@Override
+	public boolean isWaxed() {
+		try {
+			return s.isWaxed();
+		} catch(NoSuchMethodError ex) {
+			// probably before 1.20.1
+			return false;
+		}
+	}
+
+	@Override
+	public void setWaxed(boolean waxed) {
+		try {
+			s.setWaxed(waxed);
+		} catch(NoSuchMethodError ignore) {
+			// probably before 1.20.1
+		}
+	}
+
+	@Override
 	public MCSignText getBackText() {
 		try {
 			return new BukkitMCSignText(s.getSide(org.bukkit.block.sign.Side.BACK));

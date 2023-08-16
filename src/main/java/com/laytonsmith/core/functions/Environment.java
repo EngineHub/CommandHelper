@@ -814,6 +814,118 @@ public class Environment {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	public static class is_sign_waxed extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "is_sign_waxed";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {locationArray} Returns whether a sign is waxed and uneditable. (MC 1.20.1+)";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CREInvalidWorldException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args) throws ConfigRuntimeException {
+			MCCommandSender sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+			MCWorld w = null;
+			if(sender instanceof MCPlayer) {
+				w = ((MCPlayer) sender).getWorld();
+			}
+			MCBlock b = ObjectGenerator.GetGenerator().location(args[0], w, t).getBlock();
+			if(!b.isSign()) {
+				throw new CRERangeException("The block at the specified location is not a sign", t);
+			}
+			MCSign sign = b.getSign();
+			return CBoolean.get(sign.isWaxed());
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class set_sign_waxed extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "set_sign_waxed";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "void {locationArray, boolean} Sets a sign to be waxed or not. (MC 1.20.1+)"
+					+ " If a sign is waxed, it is not editable by players.";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRERangeException.class, CREFormatException.class, CREInvalidWorldException.class,
+					CRECastException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args) throws ConfigRuntimeException {
+			MCCommandSender sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+			MCWorld w = null;
+			if(sender instanceof MCPlayer) {
+				w = ((MCPlayer) sender).getWorld();
+			}
+			MCBlock b = ObjectGenerator.GetGenerator().location(args[0], w, t).getBlock();
+			if(!b.isSign()) {
+				throw new CRERangeException("The block at the specified location is not a sign", t);
+			}
+			MCSign sign = b.getSign();
+			sign.setWaxed(ArgumentValidation.getBooleanObject(args[1], t));
+			sign.update();
+			return CVoid.VOID;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_skull_owner extends AbstractFunction {
 
 		@Override

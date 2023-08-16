@@ -572,6 +572,7 @@ public class ObjectGenerator {
 					}
 					ma.set("inventory", box, t);
 				} else if(bs instanceof MCSign sign) {
+					ma.set("waxed", CBoolean.get(sign.isWaxed()), t);
 					CArray lines = new CArray(t);
 					for(String line : sign.getLines()) {
 						lines.push(new CString(line, t), t);
@@ -1069,6 +1070,9 @@ public class ObjectGenerator {
 							}
 						}
 					} else if(bs instanceof MCSign sign) {
+						if(ma.containsKey("waxed")) {
+							sign.setWaxed(ArgumentValidation.getBooleanObject(ma.get("waxed", t), t));
+						}
 						if(ma.containsKey("signtext")) {
 							Mixed possibleLines = ma.get("signtext", t);
 							if(possibleLines.isInstanceOf(CArray.TYPE)) {
