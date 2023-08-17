@@ -34,10 +34,6 @@ Below are the available fields in the item meta array. Fields can be null when t
 |
 * '''patterns''' : (array) An array of pattern arrays. Each can contain the keys '''"color"''' (one of ''%DYE_COLORS%'') and '''"shape"''' (one of ''%PATTERN_SHAPES%'').
 |-
-| Beehive
-|
-* '''flowerlocation''' : (array) The location of a flower for bees to target, or null if there is none.
-|-
 | BlockData
 |
 * '''blockdata''' : (array) An array of blockdata (known as block states in vanilla) like is returned from get_blockdata(), or null if none.
