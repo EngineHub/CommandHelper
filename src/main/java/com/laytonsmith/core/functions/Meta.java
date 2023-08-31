@@ -778,7 +778,7 @@ public class Meta {
 				environment.getEnv(GlobalEnv.class).SetLabel(parent.getLabel());
 			}
 			environment.getEnv(CommandHelperEnvironment.class).SetCommandSender(sender);
-			parent.enforceLabelPermissions();
+			parent.enforceLabelPermissions(environment);
 			ParseTree tree = nodes[1 + offset];
 			parent.eval(tree, environment);
 			environment.getEnv(CommandHelperEnvironment.class).SetCommandSender(originalSender);
