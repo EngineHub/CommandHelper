@@ -52,6 +52,8 @@ import com.laytonsmith.abstraction.entities.MCHanging;
 import com.laytonsmith.abstraction.entities.MCHorse;
 import com.laytonsmith.abstraction.entities.MCHorse.MCHorseColor;
 import com.laytonsmith.abstraction.entities.MCHorse.MCHorsePattern;
+import com.laytonsmith.abstraction.entities.MCInteraction;
+import com.laytonsmith.abstraction.entities.MCInteraction.MCPreviousInteraction;
 import com.laytonsmith.abstraction.entities.MCIronGolem;
 import com.laytonsmith.abstraction.entities.MCItem;
 import com.laytonsmith.abstraction.entities.MCItemFrame;
@@ -601,14 +603,11 @@ public class EntityManagement {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCEntity ent = Static.getEntity(args[0], t);
-			if(ent == null) {
-				return CVoid.VOID;
-			} else if(ent instanceof MCHumanEntity) {
+			if(ent instanceof MCHumanEntity) {
 				throw new CREBadEntityException("Cannot remove human entity (" + ent.getUniqueId() + ")!", t);
-			} else {
-				ent.remove();
-				return CVoid.VOID;
 			}
+			ent.remove();
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -670,13 +669,8 @@ public class EntityManagement {
 	public static class get_entity_age extends EntityGetterFunction {
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCEntity ent = Static.getEntity(args[0], t);
-			if(ent == null) {
-				return CNull.NULL;
-			} else {
-				return new CInt(ent.getTicksLived(), t);
-			}
+		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			return new CInt(Static.getEntity(args[0], t).getTicksLived(), t);
 		}
 
 		@Override
@@ -708,16 +702,12 @@ public class EntityManagement {
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			int age = ArgumentValidation.getInt32(args[1], t, env);
 			MCEntity ent = Static.getEntity(args[0], t);
-			if(ent == null) {
-				return CNull.NULL;
-			} else {
-				try {
-					ent.setTicksLived(age);
-				} catch (IllegalArgumentException ex) {
-					throw new CRERangeException(ex.getMessage(), t);
-				}
-				return CVoid.VOID;
+			try {
+				ent.setTicksLived(age);
+			} catch (IllegalArgumentException ex) {
+				throw new CRERangeException(ex.getMessage(), t);
 			}
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -1015,7 +1005,7 @@ public class EntityManagement {
 							c.val() + " is not a valid enum in com.commandhelper.EntityType",
 							c.getTarget(), null));
 				}
-			} else if(c instanceof CFunction && c.val().equals("array")) {
+			} else if(c instanceof CFunction && c.val().equals(DataHandling.array.NAME)) {
 				for(ParseTree node : children.get(children.size() - 1).getChildren()) {
 					if(node.getData().isInstanceOf(CString.TYPE, null, env)) {
 						try {
@@ -2054,6 +2044,30 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_HORSE_ARMOR, ObjectGenerator.GetGenerator().item(horse.getArmor(), t, env), t, env);
 					specArray.set(entity_spec.KEY_HORSE_SADDLE, ObjectGenerator.GetGenerator().item(horse.getSaddle(), t, env), t, env);
 					break;
+				case INTERACTION:
+					MCInteraction interaction = (MCInteraction) entity;
+					specArray.set(entity_spec.KEY_INTERACTION_WIDTH, new CDouble(interaction.getWidth(), t), t);
+					specArray.set(entity_spec.KEY_INTERACTION_HEIGHT, new CDouble(interaction.getHeight(), t), t);
+					specArray.set(entity_spec.KEY_INTERACTION_RESPONSE, CBoolean.get(interaction.isResponsive()), t);
+					MCPreviousInteraction attack = interaction.getLastAttack();
+					if(attack != null) {
+						CArray attackArray = CArray.GetAssociativeArray(t);
+						attackArray.set("puuid", attack.getUuid().toString());
+						attackArray.set("timestamp", new CInt(attack.getTimestamp(), t), t);
+						specArray.set(entity_spec.KEY_INTERACTION_ATTACK, attackArray, t);
+					} else {
+						specArray.set(entity_spec.KEY_INTERACTION_ATTACK, CNull.NULL, t);
+					}
+					MCPreviousInteraction interact = interaction.getLastInteraction();
+					if(interact != null) {
+						CArray interactionArray = CArray.GetAssociativeArray(t);
+						interactionArray.set("puuid", interact.getUuid().toString());
+						interactionArray.set("timestamp", new CInt(interact.getTimestamp(), t), t);
+						specArray.set(entity_spec.KEY_INTERACTION_INTERACTION, interactionArray, t);
+					} else {
+						specArray.set(entity_spec.KEY_INTERACTION_INTERACTION, CNull.NULL, t);
+					}
+					break;
 				case IRON_GOLEM:
 					MCIronGolem golem = (MCIronGolem) entity;
 					specArray.set(entity_spec.KEY_IRON_GOLEM_PLAYERCREATED, CBoolean.get(golem.isPlayerCreated()), t, env);
@@ -2244,18 +2258,27 @@ public class EntityManagement {
 				case DROWNED:
 				case HUSK:
 					MCZombie zombie = (MCZombie) entity;
-					specArray.set(entity_spec.KEY_GENERIC_BABY, CBoolean.get(zombie.isBaby()), t, env);
+					specArray.set(entity_spec.KEY_GENERIC_BABY, CBoolean.get(zombie.isBaby()), t);
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19)) {
+						specArray.set(entity_spec.KEY_ZOMBIE_BREAK_DOORS, CBoolean.get(zombie.canBreakDoors()), t);
+					}
 					break;
 				case ZOMBIE_VILLAGER:
 					MCZombieVillager zombievillager = (MCZombieVillager) entity;
 					specArray.set(entity_spec.KEY_GENERIC_BABY, CBoolean.get(zombievillager.isBaby()), t, env);
 					specArray.set(entity_spec.KEY_VILLAGER_PROFESSION, new CString(zombievillager.getProfession().name(), t), t, env);
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19)) {
+						specArray.set(entity_spec.KEY_ZOMBIE_BREAK_DOORS, CBoolean.get(zombievillager.canBreakDoors()), t, env);
+					}
 					break;
 				case ZOMBIFIED_PIGLIN:
 					MCPigZombie pigZombie = (MCPigZombie) entity;
 					specArray.set(entity_spec.KEY_ZOMBIFIED_PIGLIN_ANGRY, CBoolean.get(pigZombie.isAngry()), t, env);
 					specArray.set(entity_spec.KEY_ZOMBIFIED_PIGLIN_ANGER, new CInt(pigZombie.getAnger(), t), t, env);
 					specArray.set(entity_spec.KEY_GENERIC_BABY, CBoolean.get(pigZombie.isBaby()), t, env);
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19)) {
+						specArray.set(entity_spec.KEY_ZOMBIE_BREAK_DOORS, CBoolean.get(pigZombie.canBreakDoors()), t, env);
+					}
 					break;
 			}
 			return specArray;
@@ -2338,6 +2361,11 @@ public class EntityManagement {
 		private static final String KEY_HORSE_MAXDOMESTICATION = "maxdomestication";
 		private static final String KEY_HORSE_ARMOR = "armor";
 		private static final String KEY_HORSE_SADDLE = "saddle";
+		private static final String KEY_INTERACTION_WIDTH = "width";
+		private static final String KEY_INTERACTION_HEIGHT = "height";
+		private static final String KEY_INTERACTION_RESPONSE = "response";
+		private static final String KEY_INTERACTION_ATTACK = "lastattack";
+		private static final String KEY_INTERACTION_INTERACTION = "lastinteraction";
 		private static final String KEY_IRON_GOLEM_PLAYERCREATED = "playercreated";
 		private static final String KEY_ITEM_FRAME_FIXED = "fixed";
 		private static final String KEY_ITEM_FRAME_ITEM = "item";
@@ -2386,6 +2414,7 @@ public class EntityManagement {
 		private static final String KEY_WOLF_ANGRY = "angry";
 		private static final String KEY_WOLF_COLOR = "color";
 		private static final String KEY_WOLF_INTERESTED = "interested";
+		private static final String KEY_ZOMBIE_BREAK_DOORS = "breakdoors";
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
@@ -3091,6 +3120,27 @@ public class EntityManagement {
 						}
 					}
 					break;
+				case INTERACTION:
+					MCInteraction interaction = (MCInteraction) entity;
+					for(String index : specArray.stringKeySet()) {
+						switch(index.toLowerCase()) {
+							case entity_spec.KEY_INTERACTION_HEIGHT:
+								interaction.setHeight(ArgumentValidation.getDouble(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_INTERACTION_WIDTH:
+								interaction.setWidth(ArgumentValidation.getDouble(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_INTERACTION_RESPONSE:
+								interaction.setResponsive(ArgumentValidation.getBooleanish(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_INTERACTION_ATTACK:
+							case entity_spec.KEY_INTERACTION_INTERACTION:
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
 				case IRON_GOLEM:
 					MCIronGolem golem = (MCIronGolem) entity;
 					for(String index : specArray.stringKeySet()) {
@@ -3332,7 +3382,11 @@ public class EntityManagement {
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_GENERIC_BABY:
-								piglin.setBaby(ArgumentValidation.getBoolean(specArray.get(index, t, env), t, env));
+								if(ArgumentValidation.getBooleanObject(specArray.get(index, t, env), t, env)) {
+									piglin.setBaby();
+								} else {
+									piglin.setAdult();
+								}
 								break;
 							case entity_spec.KEY_PIGLIN_ZOMBIFICATION_IMMUNE:
 								piglin.setImmuneToZombification(ArgumentValidation.getBooleanObject(specArray.get(index, t, env), t, env));
@@ -3677,8 +3731,15 @@ public class EntityManagement {
 					MCZoglin zoglin = (MCZoglin) entity;
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
-							case entity_spec.KEY_GENERIC_BABY -> zoglin.setBaby(ArgumentValidation.getBoolean(specArray.get(index, t, env), t, env));
-							default -> throwException(index, t);
+							case entity_spec.KEY_GENERIC_BABY:
+								if(ArgumentValidation.getBooleanObject(specArray.get(index, t, env), t, env)) {
+									zoglin.setBaby();
+								} else {
+									zoglin.setAdult();
+								}
+								break;
+							default:
+								throwException(index, t);
 						}
 					}
 					break;
@@ -3688,8 +3749,18 @@ public class EntityManagement {
 					MCZombie zombie = (MCZombie) entity;
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
-							case entity_spec.KEY_GENERIC_BABY -> zombie.setBaby(ArgumentValidation.getBoolean(specArray.get(index, t, env), t, env));
-							default -> throwException(index, t);
+							case entity_spec.KEY_GENERIC_BABY:
+								if(ArgumentValidation.getBooleanObject(specArray.get(index, t, env), t, env)) {
+									zombie.setBaby();
+								} else {
+									zombie.setAdult();
+								}
+								break;
+							case entity_spec.KEY_ZOMBIE_BREAK_DOORS:
+								zombie.setCanBreakDoors(ArgumentValidation.getBooleanObject(specArray.get(index, t, env), t, env));
+								break;
+							default:
+								throwException(index, t);
 						}
 					}
 					break;
@@ -3698,7 +3769,11 @@ public class EntityManagement {
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_GENERIC_BABY:
-								zombievillager.setBaby(ArgumentValidation.getBoolean(specArray.get(index, t, env), t, env));
+								if(ArgumentValidation.getBooleanObject(specArray.get(index, t, env), t, env)) {
+									zombievillager.setBaby();
+								} else {
+									zombievillager.setAdult();
+								}
 								break;
 							case entity_spec.KEY_VILLAGER_PROFESSION:
 								try {
@@ -3706,6 +3781,9 @@ public class EntityManagement {
 								} catch (IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid profession: " + specArray.get(index, t, env).val(), t);
 								}
+								break;
+							case entity_spec.KEY_ZOMBIE_BREAK_DOORS:
+								zombievillager.setCanBreakDoors(ArgumentValidation.getBooleanObject(specArray.get(index, t), t));
 								break;
 							default:
 								throwException(index, t);
@@ -3716,10 +3794,24 @@ public class EntityManagement {
 					MCPigZombie pigZombie = (MCPigZombie) entity;
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
-							case entity_spec.KEY_GENERIC_BABY -> pigZombie.setBaby(ArgumentValidation.getBoolean(specArray.get(index, t, env), t, env));
-							case entity_spec.KEY_ZOMBIFIED_PIGLIN_ANGRY -> pigZombie.setAngry(ArgumentValidation.getBoolean(specArray.get(index, t, env), t, env));
-							case entity_spec.KEY_ZOMBIFIED_PIGLIN_ANGER -> pigZombie.setAnger(ArgumentValidation.getInt32(specArray.get(index, t, env), t, env));
-							default -> throwException(index, t);
+							case entity_spec.KEY_GENERIC_BABY:
+								if(ArgumentValidation.getBooleanObject(specArray.get(index, t, env), t, env)) {
+									pigZombie.setBaby();
+								} else {
+									pigZombie.setAdult();
+								}
+								break;
+							case entity_spec.KEY_ZOMBIFIED_PIGLIN_ANGRY:
+								pigZombie.setAngry(ArgumentValidation.getBoolean(specArray.get(index, t, env), t, env));
+								break;
+							case entity_spec.KEY_ZOMBIFIED_PIGLIN_ANGER:
+								pigZombie.setAnger(ArgumentValidation.getInt32(specArray.get(index, t, env), t, env));
+								break;
+							case entity_spec.KEY_ZOMBIE_BREAK_DOORS:
+								pigZombie.setCanBreakDoors(ArgumentValidation.getBooleanObject(specArray.get(index, t, env), t, env));
+								break;
+							default:
+								throwException(index, t);
 						}
 					}
 					break;
@@ -4201,7 +4293,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "int {entityUUID} Returns the number of ticks the entity has been freezing in powdered snow."
+			return "int {entityUUID} Returns the number of ticks the entity has been freezing in powdered snow. (MC 1.17+)"
 					+ " Counts down by 2 every tick when entity is thawing.";
 		}
 
@@ -4227,7 +4319,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityUUID, int} Sets how many server ticks the entity has been freezing."
+			return "void {entityUUID, int} Sets how many server ticks the entity has been freezing. (MC 1.17+)"
 					+ " Must be above zero, and will clamp to the maximum the server allows.";
 		}
 

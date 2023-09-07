@@ -143,9 +143,11 @@ public interface MCWorld extends MCMetadatable {
 
 	MCFirework launchFirework(MCLocation l, int strength, List<MCFireworkEffect> effects);
 
-	MCBiomeType getBiome(int x, int z);
+	MCBiomeType getBiome(MCLocation location);
 
 	void setBiome(int x, int z, MCBiomeType type);
+
+	void setBiome(MCLocation location, MCBiomeType type);
 
 	MCBlock getHighestBlockAt(int x, int z);
 

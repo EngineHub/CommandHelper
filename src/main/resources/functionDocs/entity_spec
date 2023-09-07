@@ -86,7 +86,7 @@ without knowing the rotations on the other axis or of other body parts beforehan
 * %KEY_DROPPED_ITEM_PICKUPDELAY%: The delay before the item is available to be picked up.
 * %KEY_DROPPED_ITEM_OWNER%: The UUID of the player that owns this item, or null. Prevents other players from picking up item.
 * %KEY_DROPPED_ITEM_THROWER%: The UUID of the entity that threw this item, or null.
-* %KEY_DROPPED_ITEM_DESPAWN%: Whether or not the item will despawn after a time. (modifiable in MC 1.18.2 or later)
+* %KEY_DROPPED_ITEM_DESPAWN%: Whether or not the item will despawn after a time. (modifiable in MC 1.18.2+)
 |-
 | ENDER_CRYSTAL
 |
@@ -156,6 +156,13 @@ without knowing the rotations on the other axis or of other body parts beforehan
 * %KEY_HORSE_SADDLE%: An item pertaining to the saddle a horse has put on. Can be anything.
 * %KEY_HORSE_STYLE%: The horse's style (can be %HORSE_STYLE%).
 |-
+| INTERACTION
+|
+* %KEY_INTERACTION_WIDTH%: The width of the interaction's hit box on the X and Z axis.
+* %KEY_INTERACTION_HEIGHT%: The height of the interaction's hit box on the Y axis.
+* %KEY_INTERACTION_RESPONSE%: Whether vanilla responses occur such as sound and arm swing when interacting with the entity.
+* %KEY_INTERACTION_ATTACK%, %KEY_INTERACTION_INTERACTION%: An associative array containing the keys 'puuid' and 'timestamp' which is updated when a player attacks or right clicks the interaction respectively. Cannot be updated with set_entity_spec().
+|-
 | IRON_GOLEM
 | 
 * %KEY_IRON_GOLEM_PLAYERCREATED%: Whether the iron golem was built by a player or not.
@@ -207,10 +214,10 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | 
 * %KEY_PANDA_MAINGENE%: The dominant trait for this panda (can be %PANDA_GENE%).
 * %KEY_PANDA_HIDDENGENE%: The recessive trait for this panda.
-* %KEY_PANDA_EATING%: Whether the panda is eating. (1.19)
-* %KEY_PANDA_ONBACK%: Whether the panda is laying on its back. (1.19)
-* %KEY_PANDA_ROLLING%: Whether the panda is rolling. (1.19)
-* %KEY_PANDA_SNEEZING%: Whether the panda is sneezing. (1.19)
+* %KEY_PANDA_EATING%: Whether the panda is eating. (MC 1.19+)
+* %KEY_PANDA_ONBACK%: Whether the panda is laying on its back. (MC 1.19+)
+* %KEY_PANDA_ROLLING%: Whether the panda is rolling. (MC 1.19+)
+* %KEY_PANDA_SNEEZING%: Whether the panda is sneezing. (MC 1.19+)
 |- 
 | PARROT
 | 
@@ -313,21 +320,28 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | 
 * %KEY_WOLF_ANGRY%: If the wolf is angry.
 * %KEY_WOLF_COLOR%: The collar color of the wolf (can be %DYE_COLOR%).
-* %KEY_WOLF_INTERESTED%: Whether the wolf is interested, tilting its head. (1.19)
+* %KEY_WOLF_INTERESTED%: Whether the wolf is interested, tilting its head. (MC 1.19+)
 * %KEY_GENERIC_SITTING%: If the wolf is sitting.
+|-
+| ZOGLIN
+|
+* %KEY_GENERIC_BABY%: Whether the zoglin is a baby.
 |- 
-| ZOMBIE, HUSK, DROWNED, ZOGLIN
+| ZOMBIE, HUSK, DROWNED
 | 
 * %KEY_GENERIC_BABY%: Whether the zombie is a baby.
+* %KEY_ZOMBIE_BREAK_DOORS%: Whether the zombie can break doors. (MC 1.19+)
 |-
 | ZOMBIE_VILLAGER
 |
 * %KEY_GENERIC_BABY%: Whether the zombie is a baby.
 * %KEY_VILLAGER_PROFESSION%: The profession of the villager (can be %PROFESSION%).
+* %KEY_ZOMBIE_BREAK_DOORS%: Whether the zombie villager can break doors. (MC 1.19+)
 |- 
 | ZOMBIFIED_PIGLIN (PIG_ZOMBIE before 1.16)
 | 
-* %KEY_ZOMBIFIED_PIGLIN_ANGER%: The piglin zombie's anger level.
-* %KEY_ZOMBIFIED_PIGLIN_ANGRY%: Whether the piglin zombie is angry.
-* %KEY_GENERIC_BABY%: Whether the pig zombie is a baby.
+* %KEY_ZOMBIFIED_PIGLIN_ANGER%: The zombified piglin's anger level.
+* %KEY_ZOMBIFIED_PIGLIN_ANGRY%: Whether the zombified piglin is angry.
+* %KEY_GENERIC_BABY%: Whether the zombified piglin is a baby.
+* %KEY_ZOMBIE_BREAK_DOORS%: Whether the zombified piglin can break doors. (MC 1.19+)
 |}

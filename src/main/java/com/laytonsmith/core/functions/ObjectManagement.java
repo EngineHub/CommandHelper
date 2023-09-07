@@ -154,7 +154,7 @@ public class ObjectManagement {
 				return CNull.NULL;
 			}
 			CArray n = new CArray(t, null, env);
-			if(!(data.getData() instanceof CFunction) || !data.getData().val().equals("array")) {
+			if(!(data.getData() instanceof CFunction) || !data.getData().val().equals(DataHandling.array.NAME)) {
 				throw new CREClassDefinitionError("Expected array, but found " + data.getData() + " instead", t);
 			}
 			for(ParseTree child : data.getChildren()) {

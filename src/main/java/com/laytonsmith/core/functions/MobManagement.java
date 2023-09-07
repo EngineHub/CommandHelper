@@ -14,6 +14,7 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.entities.MCAgeable;
 import com.laytonsmith.abstraction.entities.MCAnimal;
+import com.laytonsmith.abstraction.entities.MCBreedable;
 import com.laytonsmith.abstraction.entities.MCTameable;
 import com.laytonsmith.abstraction.enums.MCAttribute;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
@@ -281,10 +282,10 @@ public class MobManagement {
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCEntity ent = Static.getEntity(args[0], t);
 
-			if(ent instanceof MCAgeable) {
-				return CBoolean.get(((MCAgeable) ent).getCanBreed());
+			if(ent instanceof MCBreedable) {
+				return CBoolean.get(((MCBreedable) ent).getCanBreed());
 			} else {
-				throw new CREBadEntityException("Entity ID must be from an ageable entity!", t);
+				throw new CREBadEntityException("Entity ID must be from an breedable entity!", t);
 			}
 		}
 
@@ -313,10 +314,10 @@ public class MobManagement {
 
 			MCEntity ent = Static.getEntity(args[0], t);
 
-			if(ent instanceof MCAgeable) {
-				((MCAgeable) ent).setCanBreed(breed);
+			if(ent instanceof MCBreedable) {
+				((MCBreedable) ent).setCanBreed(breed);
 			} else {
-				throw new CREBadEntityException("Entity ID must be from an ageable entity!", t);
+				throw new CREBadEntityException("Entity ID must be from an breedable entity!", t);
 			}
 
 			return CVoid.VOID;
@@ -350,10 +351,7 @@ public class MobManagement {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCLivingEntity ent = Static.getLivingEntity(args[0], t);
-			if(ent == null) {
-				return CNull.NULL;
-			} else if(ent instanceof MCAgeable) {
-				MCAgeable mob = ((MCAgeable) ent);
+			if(ent instanceof MCAgeable mob) {
 				return new CInt(mob.getAge(), t);
 			} else {
 				throw new CREUnageableMobException("The specified entity does not age", t);
@@ -394,12 +392,11 @@ public class MobManagement {
 				lock = ArgumentValidation.getBoolean(args[2], t, env);
 			}
 			MCLivingEntity ent = Static.getLivingEntity(args[0], t);
-			if(ent == null) {
-				return CNull.NULL;
-			} else if(ent instanceof MCAgeable) {
-				MCAgeable mob = ((MCAgeable) ent);
+			if(ent instanceof MCAgeable mob) {
 				mob.setAge(age);
-				mob.setAgeLock(lock);
+				if(mob instanceof MCBreedable breedable) {
+					breedable.setAgeLock(lock);
+				}
 				return CVoid.VOID;
 			} else {
 				throw new CREUnageableMobException("The specified entity does not age", t);
@@ -419,7 +416,7 @@ public class MobManagement {
 		@Override
 		public String docs() {
 			return "void {entityUUID, int[, lockAge]} sets the age of the mob to the specified int, and locks it at"
-					+ " that age if lockAge is true, but by default it will not."
+					+ " that age if lockAge is true, but by default it will not. (locking only applies to breedable mobs)"
 					+ " Throws a UnageableMobException if the mob does not age naturally.";
 		}
 
@@ -441,9 +438,7 @@ public class MobManagement {
 		@Override
 		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCLivingEntity ent = Static.getLivingEntity(args[0], t);
-			if(ent == null) {
-				return CNull.NULL;
-			} else if(ent instanceof MCAnimal animal) {
+			if(ent instanceof MCAnimal animal) {
 				return new CInt(animal.getLoveTicks(), t);
 			} else {
 				throw new CREBadEntityTypeException("The specified entity cannot be in love.", t);
@@ -558,7 +553,8 @@ public class MobManagement {
 					+ ". It also accepts an integer corresponding to the effect id listed on the Minecraft wiki."
 					+ " Strength is an integer representing the power level of the effect, starting at 0."
 					+ " Seconds defaults to 30.0. To remove an effect, set the seconds to 0."
-					+ " If seconds is less than 0 or greater than 107374182 a RangeException is thrown."
+					+ " If seconds is greater than 107374182 a RangeException is thrown."
+					+ " Negative seconds makes the effect infinite. (or max in versions prior to 1.19.4)"
 					+ " Ambient takes a boolean of whether the particles should be more transparent."
 					+ " Particles takes a boolean of whether the particles should be visible at all."
 					+ " The function returns whether or not the effect was modified.";
@@ -600,9 +596,7 @@ public class MobManagement {
 
 				if(args.length >= 4) {
 					seconds = ArgumentValidation.getDouble(args[3], t, env);
-					if(seconds < 0.0) {
-						throw new CRERangeException("Seconds cannot be less than 0.0", t);
-					} else if(seconds * 20 > Integer.MAX_VALUE) {
+					if(seconds * 20 > Integer.MAX_VALUE) {
 						throw new CRERangeException("Seconds cannot be greater than 107374182.0", t);
 					}
 

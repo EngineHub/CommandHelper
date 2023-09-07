@@ -4,14 +4,13 @@ import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCItemStack;
-import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCNote;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
+import com.laytonsmith.abstraction.blocks.MCSign;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
-import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCNote;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlockState;
@@ -19,6 +18,7 @@ import com.laytonsmith.abstraction.bukkit.entities.BukkitMCEntity;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.abstraction.enums.MCIgniteCause;
 import com.laytonsmith.abstraction.enums.MCInstrument;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCBlockFace;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCIgniteCause;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCInstrument;
@@ -39,12 +39,12 @@ import com.laytonsmith.abstraction.events.MCNotePlayEvent;
 import com.laytonsmith.abstraction.events.MCSignChangeEvent;
 import com.laytonsmith.abstraction.events.MCBlockFormEvent;
 import com.laytonsmith.annotations.abstraction;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
-import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import org.bukkit.block.Block;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
@@ -62,6 +62,7 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.NotePlayEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.block.BlockFormEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
@@ -141,27 +142,17 @@ public class BukkitBlockEvents {
 
 	@abstraction(type = Implementation.Type.BUKKIT)
 	public static class BukkitMCBlockPistonRetractEvent extends BukkitMCBlockPistonEvent implements MCBlockPistonRetractEvent {
-
-		BlockPistonRetractEvent event;
-
 		public BukkitMCBlockPistonRetractEvent(BlockPistonRetractEvent e) {
 			super(e);
-
-			event = e;
-		}
-
-		@Override
-		public MCLocation getRetractedLocation() {
-			return new BukkitMCLocation(event.getRetractLocation());
 		}
 	}
 
 	@abstraction(type = Implementation.Type.BUKKIT)
 	public static class BukkitMCBlockBreakEvent implements MCBlockBreakEvent {
 
-		BlockBreakEvent event;
-		boolean dropsModified = false;
-		List<MCItemStack> drops = null;
+		private final BlockBreakEvent event;
+		private boolean dropsModified = false;
+		private List<MCItemStack> drops;
 
 		public BukkitMCBlockBreakEvent(BlockBreakEvent e) {
 			event = e;
@@ -194,7 +185,13 @@ public class BukkitBlockEvents {
 
 		@Override
 		public List<MCItemStack> getDrops() {
-			return this.drops;
+			if(drops == null) {
+				drops = new ArrayList<>();
+				for(ItemStack item : event.getBlock().getDrops(event.getPlayer().getInventory().getItemInMainHand())) {
+					drops.add(new BukkitMCItemStack(item));
+				}
+			}
+			return drops;
 		}
 
 		@Override
@@ -389,6 +386,14 @@ public class BukkitBlockEvents {
 		}
 
 		@Override
+		public MCSign.Side getSide() {
+			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20)) {
+				return pie.getSide() == org.bukkit.block.sign.Side.FRONT ? MCSign.Side.FRONT : MCSign.Side.BACK;
+			}
+			return MCSign.Side.FRONT;
+		}
+
+		@Override
 		public void setLine(int index, String text) {
 			pie.setLine(index, text);
 		}
@@ -448,13 +453,7 @@ public class BukkitBlockEvents {
 
 		@Override
 		public void setItem(MCItemStack item) {
-			if(item == null || "AIR".equals(item.getType().getName())) {
-				throw new CREIllegalArgumentException("Due to Bukkit's handling of this event, the item cannot be set to null."
-						+ " Until they change this, workaround by cancelling the event and manipulating the block"
-						+ " using inventory functions.", Target.UNKNOWN);
-			} else {
-				bde.setItem(((BukkitMCItemStack) item).asItemStack());
-			}
+			bde.setItem(((BukkitMCItemStack) item).asItemStack());
 		}
 
 		@Override

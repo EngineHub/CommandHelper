@@ -61,6 +61,7 @@ public class BukkitMCScoreboard implements MCScoreboard {
 	@Override
 	public Set<MCObjective> getObjectivesByCriteria(String criteria) {
 		Set<MCObjective> ret = new HashSet<>();
+		// deprecated 1.19.2
 		for(Objective o : s.getObjectivesByCriteria(criteria)) {
 			ret.add(new BukkitMCObjective(o));
 		}
@@ -110,6 +111,7 @@ public class BukkitMCScoreboard implements MCScoreboard {
 
 	@Override
 	public MCObjective registerNewObjective(String name, String criteria) {
+		// deprecated 1.19.2
 		return new BukkitMCObjective(s.registerNewObjective(name, criteria));
 	}
 

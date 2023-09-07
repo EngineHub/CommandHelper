@@ -1,10 +1,6 @@
 package com.laytonsmith.abstraction.entities;
 
-import com.laytonsmith.abstraction.MCLivingEntity;
-
-public interface MCPiglin extends MCLivingEntity {
-	boolean isBaby();
-	void setBaby(boolean baby);
+public interface MCPiglin extends MCAgeable {
 	boolean isImmuneToZombification();
 	void setImmuneToZombification(boolean immune);
 }

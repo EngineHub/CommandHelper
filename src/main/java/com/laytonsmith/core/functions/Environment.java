@@ -20,6 +20,8 @@ import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.abstraction.blocks.MCCommandBlock;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.blocks.MCSign;
+import com.laytonsmith.abstraction.blocks.MCSign.Side;
+import com.laytonsmith.abstraction.blocks.MCSignText;
 import com.laytonsmith.abstraction.blocks.MCSkull;
 import com.laytonsmith.abstraction.enums.MCBiomeType;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
@@ -453,9 +455,11 @@ public class Environment {
 
 		@Override
 		public String docs() {
-			return "void {locationArray, lineArray | locationArray, line1, [line2, [line3, [line4]]]}"
-					+ " Sets the text of the sign at the given location. If the block at x,y,z isn't a sign,"
-					+ " a RangeException is thrown. If a text line cannot fit on the sign, it'll be cut off.";
+			return "void {locationArray, [side], lineArray | locationArray, line1, [line2, [line3, [line4]]]}"
+					+ " Sets the text on the side of a sign at the given location."
+					+ " Side can be FRONT (default) or BACK. (MC 1.20+)"
+					+ " If the block at x,y,z isn't a sign, a RangeException is thrown."
+					+ " If a text line cannot fit on the sign, it'll be cut off.";
 		}
 
 		@Override
@@ -485,15 +489,23 @@ public class Environment {
 			if(sender instanceof MCPlayer) {
 				w = ((MCPlayer) sender).getWorld();
 			}
-			MCLocation l = ObjectGenerator.GetGenerator().location(args[0], w, t, env);
-			if(l.getBlock().isSign()) {
+			MCBlock b = ObjectGenerator.GetGenerator().location(args[0], w, t, env).getBlock();
+			if(b.isSign()) {
+				MCSign.Side side = Side.FRONT;
 				String line1 = "";
 				String line2 = "";
 				String line3 = "";
 				String line4 = "";
-				if(args.length == 2 && args[1].isInstanceOf(CArray.TYPE, null, env)) {
-					CArray ca = (CArray) args[1];
-					if(ca.size(env) >= 1) {
+				if((args.length == 2 || args.length == 3) && args[args.length - 1].isInstanceOf(CArray.TYPE, null, env)) {
+					if(args.length == 3) {
+						try {
+							side = MCSign.Side.valueOf(args[1].val());
+						} catch (IllegalArgumentException ex) {
+							throw new CREFormatException("Invalid sign side: " + args[1].val(), t);
+						}
+					}
+					CArray ca = (CArray) args[args.length - 1];
+					if(ca.size() >= 1) {
 						line1 = ca.get(0, t, env).val();
 					}
 					if(ca.size(env) >= 2) {
@@ -520,11 +532,19 @@ public class Environment {
 						line4 = args[4].val();
 					}
 				}
-				MCSign s = l.getBlock().getSign();
-				s.setLine(0, line1);
-				s.setLine(1, line2);
-				s.setLine(2, line3);
-				s.setLine(3, line4);
+				MCSign sign = b.getSign();
+				MCSignText text = sign;
+				if(side == Side.BACK) {
+					text = sign.getBackText();
+					if(text == null) {
+						throw new CRERangeException("Sign does not have back text.", t);
+					}
+				}
+				text.setLine(0, line1);
+				text.setLine(1, line2);
+				text.setLine(2, line3);
+				text.setLine(3, line4);
+				sign.update();
 				return CVoid.VOID;
 			} else {
 				throw new CRERangeException("The block at the specified location is not a sign", t);
@@ -542,13 +562,14 @@ public class Environment {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{1};
+			return new Integer[]{1, 2};
 		}
 
 		@Override
 		public String docs() {
-			return "array {locationArray} Given a location array, returns an array of 4 strings of the text in the sign"
-					+ " at that location. If the location given isn't a sign, then a RangeException is thrown.";
+			return "array {locationArray, [side]} Gets an array of 4 strings of the text on the side of a sign."
+					+ " Side can be FRONT (default) or BACK. (MC 1.20+)"
+					+ " If the location given isn't a sign, then a RangeException is thrown.";
 		}
 
 		@Override
@@ -578,13 +599,25 @@ public class Environment {
 			if(sender instanceof MCPlayer) {
 				w = ((MCPlayer) sender).getWorld();
 			}
-			MCLocation l = ObjectGenerator.GetGenerator().location(args[0], w, t, env);
-			if(l.getBlock().isSign()) {
-				MCSign s = l.getBlock().getSign();
-				CString line1 = new CString(s.getLine(0), t);
-				CString line2 = new CString(s.getLine(1), t);
-				CString line3 = new CString(s.getLine(2), t);
-				CString line4 = new CString(s.getLine(3), t);
+			MCBlock b = ObjectGenerator.GetGenerator().location(args[0], w, t).getBlock();
+			if(b.isSign()) {
+				MCSignText text = b.getSign();
+				if(args.length == 2) {
+					try {
+						if(MCSign.Side.valueOf(args[1].val()) == Side.BACK) {
+							text = ((MCSign) text).getBackText();
+							if(text == null) {
+								throw new CRERangeException("Sign does not have back text.", t);
+							}
+						}
+					} catch (IllegalArgumentException ex) {
+						throw new CREFormatException("Invalid sign side: " + args[1].val(), t);
+					}
+				}
+				CString line1 = new CString(text.getLine(0), t);
+				CString line2 = new CString(text.getLine(1), t);
+				CString line3 = new CString(text.getLine(2), t);
+				CString line4 = new CString(text.getLine(3), t);
 				return new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
 						.addNativeParameter(CString.TYPE, null).buildNative(), env, line1, line2, line3, line4);
 			} else {
@@ -653,12 +686,13 @@ public class Environment {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{1};
+			return new Integer[]{1, 2};
 		}
 
 		@Override
 		public String docs() {
-			return "boolean {locationArray} Returns true if the sign at this location has glowing text.";
+			return "boolean {locationArray, [side]} Returns true if the sign side at this location has glowing text. (MC 1.17+)"
+					+ " Side can be FRONT (default) or BACK. (MC 1.20+)";
 		}
 
 		@Override
@@ -688,10 +722,22 @@ public class Environment {
 			if(sender instanceof MCPlayer) {
 				w = ((MCPlayer) sender).getWorld();
 			}
-			MCLocation l = ObjectGenerator.GetGenerator().location(args[0], w, t, env);
-			if(l.getBlock().isSign()) {
-				MCSign s = l.getBlock().getSign();
-				return CBoolean.get(s.isGlowingText());
+			MCBlock b = ObjectGenerator.GetGenerator().location(args[0], w, t, env).getBlock();
+			if(b.isSign()) {
+				MCSignText text = b.getSign();
+				if(args.length == 2) {
+					try {
+						if(MCSign.Side.valueOf(args[1].val()) == Side.BACK) {
+							text = ((MCSign) text).getBackText();
+							if(text == null) {
+								throw new CRERangeException("Sign does not have back text.", t);
+							}
+						}
+					} catch (IllegalArgumentException ex) {
+						throw new CREFormatException("Invalid sign side: " + args[1].val(), t);
+					}
+				}
+				return CBoolean.get(text.isGlowingText());
 			} else {
 				throw new CRERangeException("The block at the specified location is not a sign", t);
 			}
@@ -708,12 +754,13 @@ public class Environment {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{2};
+			return new Integer[]{2, 3};
 		}
 
 		@Override
 		public String docs() {
-			return "void {locationArray, isGlowing} Sets the text on a sign to be glowing or not.";
+			return "void {locationArray, [side], isGlowing} Sets the text on a sign side to be glowing or not. (MC 1.17+)"
+					+ " Side can be FRONT (default) or BACK. (MC 1.20+)";
 		}
 
 		@Override
@@ -744,14 +791,140 @@ public class Environment {
 			if(sender instanceof MCPlayer) {
 				w = ((MCPlayer) sender).getWorld();
 			}
-			MCLocation l = ObjectGenerator.GetGenerator().location(args[0], w, t, env);
-			if(l.getBlock().isSign()) {
-				MCSign s = l.getBlock().getSign();
-				s.setGlowingText(ArgumentValidation.getBooleanObject(args[1], t, env));
+			MCBlock b = ObjectGenerator.GetGenerator().location(args[0], w, t, env).getBlock();
+			if(b.isSign()) {
+				MCSign sign = b.getSign();
+				MCSignText text = sign;
+				if(args.length == 3) {
+					try {
+						if(MCSign.Side.valueOf(args[1].val()) == Side.BACK) {
+							text = sign.getBackText();
+							if(text == null) {
+								throw new CRERangeException("Sign does not have back text.", t);
+							}
+						}
+					} catch (IllegalArgumentException ex) {
+						throw new CREFormatException("Invalid sign side: " + args[1].val(), t);
+					}
+				}
+				text.setGlowingText(ArgumentValidation.getBooleanObject(args[args.length - 1], t));
+				sign.update();
 				return CVoid.VOID;
 			} else {
 				throw new CRERangeException("The block at the specified location is not a sign", t);
 			}
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class is_sign_waxed extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "is_sign_waxed";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {locationArray} Returns whether a sign is waxed and uneditable. (MC 1.20.1+)";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CREInvalidWorldException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCCommandSender sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+			MCWorld w = null;
+			if(sender instanceof MCPlayer) {
+				w = ((MCPlayer) sender).getWorld();
+			}
+			MCBlock b = ObjectGenerator.GetGenerator().location(args[0], w, t).getBlock();
+			if(!b.isSign()) {
+				throw new CRERangeException("The block at the specified location is not a sign", t);
+			}
+			MCSign sign = b.getSign();
+			return CBoolean.get(sign.isWaxed());
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class set_sign_waxed extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "set_sign_waxed";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "void {locationArray, boolean} Sets a sign to be waxed or not. (MC 1.20.1+)"
+					+ " If a sign is waxed, it is not editable by players.";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRERangeException.class, CREFormatException.class, CREInvalidWorldException.class,
+					CRECastException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCCommandSender sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+			MCWorld w = null;
+			if(sender instanceof MCPlayer) {
+				w = ((MCPlayer) sender).getWorld();
+			}
+			MCBlock b = ObjectGenerator.GetGenerator().location(args[0], w, t).getBlock();
+			if(!b.isSign()) {
+				throw new CRERangeException("The block at the specified location is not a sign", t);
+			}
+			MCSign sign = b.getSign();
+			sign.setWaxed(ArgumentValidation.getBooleanObject(args[1], t));
+			sign.update();
+			return CVoid.VOID;
 		}
 	}
 
@@ -966,15 +1139,17 @@ public class Environment {
 
 		@Override
 		public String docs() {
-			return "void {x, z, [world], biome | locationArray, biome} Sets the biome of the specified block column."
-					+ " The location array's y value is ignored. ----"
-					+ " Biome may be one of the following: " + StringUtils.Join(MCBiomeType.types(), ", ", ", or ");
+			return "void {x, z, [world], biome | locationArray, biome} Sets the biome at a block location."
+					+ " Minecraft only provides one quarter precision for three dimensional biomes, so this sets"
+					+ " the nearest center of a 4x4x4 region."
+					+ " When not using a location array, the entire column at the x and z coordinates are set."
+					+ " ---- Biome may be one of the following: " + StringUtils.Join(MCBiomeType.types(), ", ", ", or ");
 		}
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREFormatException.class, CRECastException.class,
-				CRENotFoundException.class};
+			return new Class[]{CREFormatException.class, CRECastException.class, CRENotFoundException.class,
+					CREInvalidWorldException.class};
 		}
 
 		@Override
@@ -996,32 +1171,30 @@ public class Environment {
 			if(sender instanceof MCPlayer) {
 				w = ((MCPlayer) sender).getWorld();
 			}
-			if(args.length == 2) {
-				MCLocation l = ObjectGenerator.GetGenerator().location(args[0], w, t, env);
-				x = l.getBlockX();
-				z = l.getBlockZ();
-				w = l.getWorld();
-			} else {
-				x = ArgumentValidation.getInt32(args[0], t, env);
-				z = ArgumentValidation.getInt32(args[1], t, env);
-				if(args.length != 3) {
-					w = Static.getServer().getWorld(args[2].val());
-				}
-			}
-			MCBiomeType bt;
+
+			MCBiomeType biomeType;
 			try {
-				bt = MCBiomeType.valueOf(args[args.length - 1].val());
-				if(bt == null) {
+				biomeType = MCBiomeType.valueOf(args[args.length - 1].val());
+				if(biomeType == null) {
 					throw new CRENotFoundException(
 							"Could not find the internal biome type object (are you running in cmdline mode?)", t);
 				}
 			} catch (IllegalArgumentException e) {
-				throw new CREFormatException("The biome type \"" + args[1].val() + "\" does not exist.", t);
+				throw new CREFormatException("The biome type \"" + args[args.length - 1].val() + "\" does not exist.", t);
 			}
-			if(w == null) {
-				throw new CREInvalidWorldException("The specified world doesn't exist, or no world was provided", t);
+			if(args.length == 2) {
+				MCLocation location = ObjectGenerator.GetGenerator().location(args[0], w, t);
+				location.getWorld().setBiome(location, biomeType);
+			} else {
+				x = ArgumentValidation.getInt32(args[0], t);
+				z = ArgumentValidation.getInt32(args[1], t);
+				if(args.length == 4) {
+					w = Static.getServer().getWorld(args[2].val());
+				} else if(w == null) {
+					throw new CREInvalidWorldException("No world was provided", t);
+				}
+				w.setBiome(x, z, biomeType);
 			}
-			w.setBiome(x, z, bt);
 			return CVoid.VOID;
 		}
 
@@ -1036,7 +1209,7 @@ public class Environment {
 				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 
-			if(children.size() < 1) {
+			if(children.size() < 2) {
 				return null;
 			}
 			Mixed c = children.get(children.size() - 1).getData();
@@ -1068,20 +1241,19 @@ public class Environment {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{1, 2, 3};
+			return new Integer[]{1};
 		}
 
 		@Override
 		public String docs() {
-			return "string {x, z, [world] | locationArray} Returns the biome type of this block column. The location"
-					+ " array's y value is ignored. ---- The value returned"
-					+ " may be one of the following: " + StringUtils.Join(MCBiomeType.types(), ", ", ", or ");
+			return "string {locationArray} Returns the biome type at a block location."
+					+ " ---- The value returned may be one of the following: " + StringUtils.Join(MCBiomeType.types(), ", ", ", or ");
 		}
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREFormatException.class, CRECastException.class,
-				CREInvalidWorldException.class, CRENotFoundException.class};
+			return new Class[]{CREFormatException.class, CRECastException.class, CREInvalidWorldException.class,
+					CRENotFoundException.class};
 		}
 
 		@Override
@@ -1095,30 +1267,14 @@ public class Environment {
 		}
 
 		@Override
-		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			int x;
-			int z;
-			MCCommandSender sender = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCCommandSender sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCWorld w = null;
 			if(sender instanceof MCPlayer) {
 				w = ((MCPlayer) sender).getWorld();
 			}
-			if(args.length == 1) {
-				MCLocation l = ObjectGenerator.GetGenerator().location(args[0], w, t, env);
-				x = l.getBlockX();
-				z = l.getBlockZ();
-				w = l.getWorld();
-			} else {
-				x = ArgumentValidation.getInt32(args[0], t, env);
-				z = ArgumentValidation.getInt32(args[1], t, env);
-				if(args.length != 2) {
-					w = Static.getServer().getWorld(args[2].val());
-				}
-			}
-			if(w == null) {
-				throw new CREInvalidWorldException("The specified world doesn't exist, or no world was provided", t);
-			}
-			MCBiomeType bt = w.getBiome(x, z);
+			MCLocation location = ObjectGenerator.GetGenerator().location(args[0], w, t, environment);
+			MCBiomeType bt = location.getWorld().getBiome(location);
 			if(bt == null) {
 				throw new CRENotFoundException("Could not find the biome type (are you running in cmdline mode?)", t);
 			}
@@ -1757,9 +1913,10 @@ public class Environment {
 				return null;
 			}
 			ParseTree child = children.get(1);
-			if(child.getData() instanceof CFunction && child.getData().val().equals("array")) {
+			if(child.getData() instanceof CFunction && (child.getData().val().equals(DataHandling.array.NAME)
+					|| child.getData().val().equals(DataHandling.associative_array.NAME))) {
 				for(ParseTree node : child.getChildren()) {
-					if(node.getData() instanceof CFunction && node.getData().val().equals("centry")) {
+					if(node.getData() instanceof CFunction && node.getData().val().equals(Compiler.centry.NAME)) {
 						children = node.getChildren();
 						if(children.get(0).getData().val().equals("sound")
 								&& children.get(1).getData().isInstanceOf(CString.TYPE, null, env)) {
@@ -2940,11 +3097,12 @@ public class Environment {
 				return null;
 			}
 			ParseTree child = children.get(1);
-			if(child.getData() instanceof CFunction && child.getData().val().equals("array")) {
+			if(child.getData() instanceof CFunction && child.getData().val().equals(DataHandling.array.NAME)) {
 				for(ParseTree node1 : child.getChildren()) {
-					if(node1.getData() instanceof CFunction && child.getData().val().equals("array")) {
+					if(node1.getData() instanceof CFunction && (child.getData().val().equals(DataHandling.array.NAME)
+							|| child.getData().val().equals(DataHandling.associative_array.NAME))) {
 						for(ParseTree node : node1.getChildren()) {
-							if(node.getData() instanceof CFunction && node.getData().val().equals("centry")) {
+							if(node.getData() instanceof CFunction && node.getData().val().equals(Compiler.centry.NAME)) {
 								children = node.getChildren();
 								if(children.get(0).getData().val().equals("color")
 										&& children.get(1).getData().isInstanceOf(CString.TYPE, null, env)) {

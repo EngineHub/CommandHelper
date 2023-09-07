@@ -1261,13 +1261,14 @@ public class BasicLogic {
 
 		@Override
 		public Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
+			Mixed lastValue = CBoolean.TRUE;
 			for(ParseTree tree : nodes) {
-				Mixed c = env.getEnv(GlobalEnv.class).GetScript().seval(tree, env);
-				if(!ArgumentValidation.getBoolean(c, t, env)) {
-					return c;
+				lastValue = env.getEnv(GlobalEnv.class).GetScript().seval(tree, env);
+				if(!ArgumentValidation.getBooleanish(lastValue, t)) {
+					return lastValue;
 				}
 			}
-			return CBoolean.TRUE;
+			return lastValue;
 		}
 
 		@Override
@@ -1353,9 +1354,9 @@ public class BasicLogic {
 
 		@Override
 		public String docs() {
-			return "mixed {...} Returns the first false value. The arguments to this function are lazily evaluated, so"
-					+ " if the first value evaluates to false, the rest of the arguments will not be evaluated."
-					+ " If none of the values are false, true is returned. Usage of"
+			return "mixed {...} Returns the first falsey value. The arguments to this function are lazily evaluated, so"
+					+ " if the first value evaluates to falsey, the rest of the arguments will not be evaluated."
+					+ " If none of the values are falsey, the last value is returned. Usage of"
 					+ " the operator is preferred: &&&";
 		}
 

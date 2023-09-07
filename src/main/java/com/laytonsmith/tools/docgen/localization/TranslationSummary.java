@@ -41,7 +41,7 @@ public class TranslationSummary {
 
 		@Override
 		public int compareTo(TranslationSummaryEntry t) {
-			return new Integer(this.id).compareTo(t.id);
+			return Integer.compare(this.id, t.id);
 		}
 
 		public String getEnglishKey() {

@@ -19,6 +19,7 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.BranchStatement;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
+import com.laytonsmith.core.compiler.ConditionalSelfStatement;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.SelfStatement;
 import com.laytonsmith.core.compiler.VariableScope;
@@ -92,6 +93,7 @@ public class ControlFlow {
 	}
 
 	@api
+	@ConditionalSelfStatement
 	public static class _if extends AbstractFunction implements Optimizable, BranchStatement, VariableScope {
 
 		public static final String NAME = "if";
@@ -330,6 +332,7 @@ public class ControlFlow {
 	}
 
 	@api(environments = {GlobalEnv.class})
+	@ConditionalSelfStatement
 	public static class ifelse extends AbstractFunction implements Optimizable, BranchStatement, VariableScope {
 
 		public static final String NAME = "ifelse";
@@ -507,6 +510,7 @@ public class ControlFlow {
 
 	@api
 	@breakable
+	@ConditionalSelfStatement
 	public static class _switch extends AbstractFunction implements Optimizable, BranchStatement, VariableScope {
 
 		@Override
@@ -779,7 +783,7 @@ public class ControlFlow {
 				}
 				//To standardize the rest of the code (and to optimize), go ahead and resolve array()
 				if(children.get(i).getData() instanceof CFunction
-						&& new DataHandling.array().getName().equals(children.get(i).getData().val())) {
+						&& children.get(i).getData().val().equals(DataHandling.array.NAME)) {
 					CArray data = new CArray(t, null, env);
 					for(ParseTree child : children.get(i).getChildren()) {
 						if(Construct.IsDynamicHelper(child.getData())) {
@@ -910,6 +914,8 @@ public class ControlFlow {
 	}
 
 	@api
+	@breakable
+	@ConditionalSelfStatement
 	public static class switch_ic extends _switch implements Optimizable, BranchStatement, VariableScope {
 
 		@Override
@@ -1125,6 +1131,16 @@ public class ControlFlow {
 			ret.add(false);
 			ret.add(false);
 			ret.add(true);
+			ret.add(true);
+			return ret;
+		}
+
+		@Override
+		public List<Boolean> statementsAllowed(List<ParseTree> children) {
+			List<Boolean> ret = new ArrayList<>();
+			ret.add(false);
+			ret.add(false);
+			ret.add(false);
 			ret.add(true);
 			return ret;
 		}
@@ -1395,7 +1411,7 @@ public class ControlFlow {
 					if(kkey != null) {
 						try {
 							env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(kkey.getDefinedType(),
-									kkey.getVariableName(), c, t, env));
+									kkey.getVariableName(), c, kkey.getDefinedTarget(), env));
 						}  catch (ConfigCompileException cce) {
 							throw new CREFormatException(cce.getMessage(), t);
 						}
@@ -1403,7 +1419,7 @@ public class ControlFlow {
 					//Set the value in the variable table
 					try {
 						env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(two.getDefinedType(),
-								two.getVariableName(), one.get(c.val(), t, env), t, env));
+								two.getVariableName(), one.get(c, t, env), two.getDefinedTarget(), env));
 					}  catch (ConfigCompileException cce) {
 						throw new CREFormatException(cce.getMessage(), t);
 					}
@@ -1461,14 +1477,14 @@ public class ControlFlow {
 							if(kkey != null) {
 								try {
 									env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(kkey.getDefinedType(),
-											kkey.getVariableName(), new CInt(current, t), t, env));
+											kkey.getVariableName(), new CInt(current, t), kkey.getDefinedTarget(), env));
 								} catch (ConfigCompileException cce) {
 									throw new CREFormatException(cce.getMessage(), t);
 								}
 							}
 							try {
 								env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(two.getDefinedType(),
-										two.getVariableName(), one.get(current, t, env), t, env));
+										two.getVariableName(), one.get(current, t, env), two.getDefinedTarget(), env));
 							} catch (ConfigCompileException cce) {
 								throw new CREFormatException(cce.getMessage(), t);
 							}
@@ -1641,8 +1657,6 @@ public class ControlFlow {
 				Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> exceptions) {
 			List<ParseTree> children = ast.getChildren();
 			if(children.size() < 2) {
-				exceptions.add(new ConfigCompileException(
-						"Invalid number of arguments passed to " + getName(), ast.getTarget()));
 				return null;
 			}
 			if(isFunction(children.get(0), centry.NAME)) {
@@ -2267,7 +2281,7 @@ public class ControlFlow {
 
 		@Override
 		public String getName() {
-			return "continue";
+			return NAME;
 		}
 
 		@Override

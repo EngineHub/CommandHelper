@@ -839,7 +839,11 @@ public class BukkitEntityEvents {
 
 		@Override
 		public MCPlayer getPlayer() {
-			return new BukkitMCPlayer(hpe.getPlayer());
+			Player hanger = hpe.getPlayer();
+			if(hanger == null) {
+				return null;
+			}
+			return new BukkitMCPlayer(hanger);
 		}
 	}
 

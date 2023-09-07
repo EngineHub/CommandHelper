@@ -5,6 +5,7 @@ import com.laytonsmith.PureUtilities.XMLDocument;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.noboilerplate;
+import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Static;
@@ -15,20 +16,17 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREPluginInternalException;
+import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
+import com.laytonsmith.core.functions.Meta.set_runtime_setting;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.MarshalException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
-import org.xml.sax.SAXException;
-import org.yaml.snakeyaml.DumperOptions;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.parser.ParserException;
-import org.yaml.snakeyaml.scanner.ScannerException;
-
-import javax.xml.xpath.XPathExpressionException;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
@@ -36,6 +34,14 @@ import java.io.StringWriter;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Properties;
+import javax.xml.xpath.XPathExpressionException;
+import org.xml.sax.SAXException;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.LoaderOptions;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.error.YAMLException;
+import org.yaml.snakeyaml.parser.ParserException;
+import org.yaml.snakeyaml.scanner.ScannerException;
 
 /**
  *
@@ -224,11 +230,12 @@ public class DataTransformations {
 	}
 
 	@api
+	@seealso({set_runtime_setting.class})
 	public static class yml_decode extends AbstractFunction {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREFormatException.class};
+			return new Class[]{CREFormatException.class, CREPluginInternalException.class};
 		}
 
 		@Override
@@ -244,16 +251,29 @@ public class DataTransformations {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String data = args[0].val();
-			Yaml yaml = new Yaml();
+			LoaderOptions options = new LoaderOptions();
+			Mixed codePointLimit = env.getEnv(GlobalEnv.class)
+					.GetRuntimeSettingOrCNull("function.yml_decode.code_point_limit", CNull.NULL);
+			if(!CNull.NULL.equals(codePointLimit)) {
+				try {
+					options.setCodePointLimit(ArgumentValidation.getInt32(codePointLimit, t));
+				} catch (CRERangeException | CRECastException e) {
+					// Ignore invalid value.
+				}
+			}
+			Yaml yaml = new Yaml(options);
 			Object ret = null;
 			Exception cause = null;
 			try {
 				ret = yaml.load(data);
 			} catch (ScannerException | ParserException ex) {
 				cause = ex;
+			} catch (YAMLException ex) {
+				throw new CREPluginInternalException(ex.getMessage(), t);
 			}
 			if(!(ret instanceof Map) && !(ret instanceof Collection)) {
-				throw new CREFormatException("Improperly formatted YML", t, cause);
+				throw new CREFormatException("Improperly formatted YML"
+						+ (cause != null ? ": " + cause.getMessage() : ""), t, cause);
 			}
 			return Construct.GetConstruct(ret, env);
 		}
@@ -272,7 +292,10 @@ public class DataTransformations {
 		public String docs() {
 			return "array {string} Takes a YML encoded string, and returns an associative array,"
 					+ " depending on the contents of the YML string. If the YML string is improperly formatted,"
-					+ " a FormatException is thrown.";
+					+ " a FormatException is thrown."
+					+ " If an exception occurs in the YML parsing library, a PluginInternalException is thrown."
+					+ " By default YML strings up to 3 * 1024 * 1024 (3 MB) code points can be parsed. This limit can"
+					+ " be exceeded through the 'function.yml_decode.code_point_limit' runtime setting.";
 		}
 
 		@Override

@@ -17,6 +17,9 @@ public final class URIUtils {
 	 * @return
 	 */
 	public static URI canonicalize(URI uri) {
+		if(uri.getScheme().equals("untitled")) {
+			return uri;
+		}
 		uri = uri.normalize();
 		URI newURI;
 		try {

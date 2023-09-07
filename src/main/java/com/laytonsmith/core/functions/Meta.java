@@ -28,8 +28,12 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.BranchStatement;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.VariableScope;
+import com.laytonsmith.core.compiler.signature.FunctionSignatures;
+import com.laytonsmith.core.compiler.signature.SignatureBuilder;
+import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CResource;
@@ -44,6 +48,7 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREIOException;
 import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
@@ -53,6 +58,7 @@ import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.functions.StringHandling.concat;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 
 import java.io.IOException;
@@ -77,6 +83,22 @@ public class Meta {
 	public static String docs() {
 		return "These functions provide a way to run other commands, and otherwise interact with the system in a meta"
 				+ " way.";
+	}
+
+	/**
+	 * A compile-time check for valid command formats.
+	 * Throws a FormatException if the provided argument starts with a string that does not start with a forward slash.
+	 * @param node The ParseTree of a command argument
+	 */
+	static void CheckValidCommand(ParseTree node) {
+		Mixed data = node.getData();
+		if(data instanceof CFunction && data.val().equals(concat.NAME) && node.numberOfChildren() > 0) {
+			data = node.getChildAt(0).getData();
+		}
+		if(data instanceof CString && (data.val().isEmpty() || data.val().charAt(0) != '/')) {
+			throw new CREFormatException("The first character of a command must be a forward slash (i.e. '/give')",
+					data.getTarget());
+		}
 	}
 
 	/*
@@ -118,7 +140,7 @@ public class Meta {
 	}
 	 */
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class runas extends AbstractFunction {
+	public static class runas extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -131,8 +153,8 @@ public class Meta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
-			if(Construct.nval(args[1]) == null || args[1].val().length() <= 0 || args[1].val().charAt(0) != '/') {
+		public Mixed exec(Target t, final Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+			if(Construct.nval(args[1]) == null || args[1].val().isEmpty() || args[1].val().charAt(0) != '/') {
 				throw new CREFormatException("The first character of the command must be a forward slash (i.e. '/give')", t);
 			}
 			String cmd = args[1].val().substring(1);
@@ -202,10 +224,25 @@ public class Meta {
 		public Boolean runAsync() {
 			return false;
 		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, com.laytonsmith.core.environments.Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs, List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+			if(children.size() > 1) {
+				CheckValidCommand(children.get(1));
+			}
+			return null;
+		}
+
+		@Override
+		public Set<Optimizable.OptimizationOption> optimizationOptions() {
+			return EnumSet.of(Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class sudo extends AbstractFunction {
+	public static class sudo extends AbstractFunction implements Optimizable {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -344,10 +381,25 @@ public class Meta {
 				}
 			});
 		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, com.laytonsmith.core.environments.Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs, List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+			if(children.size() > 0) {
+				CheckValidCommand(children.get(children.size() - 1));
+			}
+			return null;
+		}
+
+		@Override
+		public Set<Optimizable.OptimizationOption> optimizationOptions() {
+			return EnumSet.of(Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class run extends AbstractFunction {
+	public static class run extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -361,12 +413,16 @@ public class Meta {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
-			if(Construct.nval(args[0]) == null || args[0].val().length() <= 0 || args[0].val().charAt(0) != '/') {
+			if(Construct.nval(args[0]) == null || args[0].val().isEmpty() || args[0].val().charAt(0) != '/') {
 				throw new CREFormatException("The first character of the command must be a forward slash (i.e. '/give')", t);
+			}
+			MCCommandSender sender = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+			if(sender == null) {
+				throw new CREException("No command sender in this context.", t);
 			}
 			String cmd = args[0].val().substring(1);
 			if(Prefs.DebugMode()) {
-				if(env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
+				if(sender instanceof MCPlayer) {
 					Static.getLogger().log(Level.INFO, "Executing command on " + env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName() + ": " + args[0].val().trim());
 				} else {
 					Static.getLogger().log(Level.INFO, "Executing command from console equivalent: " + args[0].val().trim());
@@ -376,7 +432,7 @@ public class Meta {
 				throw new CREFormatException("/interpreter-on cannot be run as apart of an alias for security reasons.", t);
 			}
 			try {
-				Static.getServer().dispatchCommand(env.getEnv(CommandHelperEnvironment.class).GetCommandSender(), cmd);
+				Static.getServer().dispatchCommand(sender, cmd);
 			} catch (Exception ex) {
 				throw new CREPluginInternalException("While running the command: \"" + cmd + "\""
 						+ " the plugin threw an unexpected exception (turn on debug mode to see the full"
@@ -412,10 +468,25 @@ public class Meta {
 		public Boolean runAsync() {
 			return false;
 		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, com.laytonsmith.core.environments.Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs, List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+			if(children.size() > 0) {
+				CheckValidCommand(children.get(0));
+			}
+			return null;
+		}
+
+		@Override
+		public Set<Optimizable.OptimizationOption> optimizationOptions() {
+			return EnumSet.of(Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class get_cmd_completions extends AbstractFunction {
+	public static class get_cmd_completions extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -434,6 +505,9 @@ public class Meta {
 			List<Mixed> argList;
 			if(args.length == 2) {
 				sender = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+				if(sender == null) {
+					throw new CREException("No command sender in this context.", t);
+				}
 				commandString = args[0].val();
 				argList = ArgumentValidation.getArray(args[1], t, env).asList(env);
 			} else {
@@ -493,6 +567,21 @@ public class Meta {
 		public Boolean runAsync() {
 			return false;
 		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, com.laytonsmith.core.environments.Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs, List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+			if(children.size() > 1) {
+				CheckValidCommand(children.get(children.size() - 2));
+			}
+			return null;
+		}
+
+		@Override
+		public Set<Optimizable.OptimizationOption> optimizationOptions() {
+			return EnumSet.of(Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
@@ -548,7 +637,7 @@ public class Meta {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class call_alias extends AbstractFunction {
+	public static class call_alias extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -593,18 +682,34 @@ public class Meta {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			boolean doRemoval = true;
-			if(!Static.getAliasCore().hasPlayerReference(env.getEnv(CommandHelperEnvironment.class).GetCommandSender())) {
-				doRemoval = false;
+			MCCommandSender sender = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+			if(sender == null) {
+				throw new CREException("No command sender in this context.", t);
 			}
+			boolean doRemoval = Static.getAliasCore().hasPlayerReference(sender);
 			if(doRemoval) {
-				Static.getAliasCore().removePlayerReference(env.getEnv(CommandHelperEnvironment.class).GetCommandSender());
+				Static.getAliasCore().removePlayerReference(sender);
 			}
-			boolean ret = Static.getAliasCore().alias(args[0].val(), env.getEnv(CommandHelperEnvironment.class).GetCommandSender());
+			boolean ret = Static.getAliasCore().alias(args[0].val(), sender);
 			if(doRemoval) {
-				Static.getAliasCore().addPlayerReference(env.getEnv(CommandHelperEnvironment.class).GetCommandSender());
+				Static.getAliasCore().addPlayerReference(sender);
 			}
 			return CBoolean.get(ret);
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, com.laytonsmith.core.environments.Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs, List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+			if(children.size() > 0) {
+				CheckValidCommand(children.get(0));
+			}
+			return null;
+		}
+
+		@Override
+		public Set<Optimizable.OptimizationOption> optimizationOptions() {
+			return EnumSet.of(Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
 	}
 
@@ -675,7 +780,7 @@ public class Meta {
 				env.getEnv(GlobalEnv.class).SetLabel(parent.getLabel());
 			}
 			env.getEnv(CommandHelperEnvironment.class).SetCommandSender(sender);
-			parent.enforceLabelPermissions();
+			parent.enforceLabelPermissions(env);
 			ParseTree tree = nodes[1 + offset];
 			parent.eval(tree, env);
 			env.getEnv(CommandHelperEnvironment.class).SetCommandSender(originalSender);
@@ -761,7 +866,7 @@ public class Meta {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class, GlobalEnv.class})
-	public static class capture_runas extends AbstractFunction {
+	public static class capture_runas extends AbstractFunction implements Optimizable {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -783,7 +888,7 @@ public class Meta {
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String player = args[0].val();
 			String cmd = args[1].val();
-			if(!cmd.startsWith("/")) {
+			if(cmd.isEmpty() || cmd.charAt(0) != '/') {
 				throw new CREFormatException("Command must begin with a /", t);
 			}
 			cmd = cmd.substring(1);
@@ -823,6 +928,21 @@ public class Meta {
 		@Override
 		public MSVersion since() {
 			return MSVersion.V3_3_1;
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, com.laytonsmith.core.environments.Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs, List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+			if(children.size() > 1) {
+				CheckValidCommand(children.get(1));
+			}
+			return null;
+		}
+
+		@Override
+		public Set<Optimizable.OptimizationOption> optimizationOptions() {
+			return EnumSet.of(Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
 	}
 
@@ -941,7 +1061,7 @@ public class Meta {
 	}
 
 	@api(environments = CommandHelperEnvironment.class)
-	public static class run_cmd extends AbstractFunction {
+	public static class run_cmd extends AbstractFunction implements Optimizable {
 
 		// Variable is more clear when named after the function it represents.
 		@SuppressWarnings("checkstyle:constantname")
@@ -1009,10 +1129,26 @@ public class Meta {
 			return MSVersion.V3_3_1;
 		}
 
+		@Override
+		public ParseTree optimizeDynamic(Target t, com.laytonsmith.core.environments.Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs, List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+			if(children.size() > 0) {
+				CheckValidCommand(children.get(0));
+			}
+			return null;
+		}
+
+		@Override
+		public Set<Optimizable.OptimizationOption> optimizationOptions() {
+			return EnumSet.of(Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
 	}
 
 	@api
 	public static class noop extends AbstractFunction {
+
+		public static final String NAME = "noop";
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -1036,7 +1172,7 @@ public class Meta {
 
 		@Override
 		public String getName() {
-			return "noop";
+			return NAME;
 		}
 
 		@Override
@@ -1053,6 +1189,13 @@ public class Meta {
 		@Override
 		public Version since() {
 			return MSVersion.V3_3_1;
+		}
+
+		@Override
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CVoid.TYPE)
+					.varParam(Auto.TYPE, "params", "Any parameters. These are ignored, but evaluated.")
+					.build();
 		}
 
 	}

@@ -15,6 +15,7 @@ public enum MCInventoryType {
 	ENDER_CHEST,
 	FURNACE,
 	HOPPER,
+	JUKEBOX(false),
 	MERCHANT(false),
 	PLAYER,
 	WORKBENCH,

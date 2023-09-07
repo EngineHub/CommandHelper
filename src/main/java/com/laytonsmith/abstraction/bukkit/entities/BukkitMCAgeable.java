@@ -1,10 +1,8 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
-import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.entities.MCAgeable;
 import org.bukkit.entity.Ageable;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
 
 public class BukkitMCAgeable extends BukkitMCLivingEntity implements MCAgeable {
 
@@ -13,21 +11,6 @@ public class BukkitMCAgeable extends BukkitMCLivingEntity implements MCAgeable {
 	public BukkitMCAgeable(Entity be) {
 		super(be);
 		this.a = (Ageable) be;
-	}
-
-	public BukkitMCAgeable(AbstractionObject ao) {
-		super((LivingEntity) ao.getHandle());
-		this.a = ((Ageable) ao.getHandle());
-	}
-
-	@Override
-	public boolean getCanBreed() {
-		return a.canBreed();
-	}
-
-	@Override
-	public void setCanBreed(boolean breed) {
-		a.setBreed(breed);
 	}
 
 	@Override
@@ -41,16 +24,6 @@ public class BukkitMCAgeable extends BukkitMCLivingEntity implements MCAgeable {
 	}
 
 	@Override
-	public boolean getAgeLock() {
-		return a.getAgeLock();
-	}
-
-	@Override
-	public void setAgeLock(boolean lock) {
-		a.setAgeLock(lock);
-	}
-
-	@Override
 	public boolean isAdult() {
 		return a.isAdult();
 	}
@@ -58,6 +31,11 @@ public class BukkitMCAgeable extends BukkitMCLivingEntity implements MCAgeable {
 	@Override
 	public void setAdult() {
 		a.setAdult();
+	}
+
+	@Override
+	public boolean isBaby() {
+		return !a.isAdult();
 	}
 
 	@Override

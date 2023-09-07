@@ -18,6 +18,7 @@ public class BukkitMCObjective implements MCObjective {
 
 	@Override
 	public String getCriteria() {
+		// deprecated 1.19.2
 		return o.getCriteria();
 	}
 

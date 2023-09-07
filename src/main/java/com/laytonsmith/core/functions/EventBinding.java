@@ -11,6 +11,7 @@ import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.BranchStatement;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
@@ -152,6 +153,11 @@ public class EventBinding {
 				newEnv = env.clone();
 			} catch (Exception e) {
 			}
+			// Set the permission to global if it's null, since that means
+			// it wasn't set, and so we aren't in a secured environment anyway.
+			if(newEnv.getEnv(GlobalEnv.class).GetLabel() == null) {
+				newEnv.getEnv(GlobalEnv.class).SetLabel(Static.GLOBAL_PERMISSION);
+			}
 			newEnv.getEnv(GlobalEnv.class).SetVarList(custom_params);
 			ParseTree tree = nodes[nodes.length - 1];
 
@@ -238,7 +244,8 @@ public class EventBinding {
 
 			// Return if the prefilter parse tree is not a hard-coded "array(...)" node.
 			if(!(prefilterParseTree.getData() instanceof CFunction)
-					|| !prefilterParseTree.getData().val().equals(DataHandling.array.NAME)) {
+					|| (!prefilterParseTree.getData().val().equals(DataHandling.array.NAME)
+					&& !prefilterParseTree.getData().val().equals(DataHandling.associative_array.NAME))) {
 				return analysis.typecheck(prefilterParseTree, null, env, exceptions);
 			}
 
@@ -353,9 +360,10 @@ public class EventBinding {
 			Set<ConfigCompileException> exceptions = new HashSet<>();
 			// Validate options
 			ParseTree child = topChildren.get(1);
-			if(child.getData() instanceof CFunction && child.getData().val().equals("array")) {
+			if(child.getData() instanceof CFunction && (child.getData().val().equals(DataHandling.array.NAME)
+					|| child.getData().val().equals(DataHandling.associative_array.NAME))) {
 				for(ParseTree node : child.getChildren()) {
-					if(node.getData() instanceof CFunction && node.getData().val().equals("centry")) {
+					if(node.getData() instanceof CFunction && node.getData().val().equals(Compiler.centry.NAME)) {
 						List<ParseTree> children = node.getChildren();
 						if(children.get(0).getData().val().equals("id")
 								&& children.get(1).getData().isInstanceOf(CString.TYPE, null, env)) {

@@ -3,6 +3,8 @@ package com.laytonsmith.core.constructs;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.functions.Compiler;
+import com.laytonsmith.core.natives.interfaces.Booleanish;
 import com.laytonsmith.core.natives.interfaces.Callable;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.MethodScriptCompiler;
@@ -43,7 +45,7 @@ import java.util.logging.Logger;
  * A closure is just an anonymous procedure.
  */
 @typeof("ms.lang.closure")
-public class CClosure extends Construct implements Callable {
+public class CClosure extends Construct implements Callable, Booleanish {
 
 	public static final long serialVersionUID = 1L;
 	protected ParseTree node;
@@ -115,7 +117,7 @@ public class CClosure extends Construct implements Callable {
 				b.append(func.val()).append("(");
 				for(int i = 0; i < node.numberOfChildren(); i++) {
 					condense(node.getChildAt(i), b, env);
-					if(i != node.numberOfChildren() - 1 && !((CFunction) node.getData()).val().equals("__autoconcat__")) {
+					if(i != node.numberOfChildren() - 1 && !((CFunction) node.getData()).val().equals(Compiler.__autoconcat__.NAME)) {
 						b.append(",");
 					}
 				}
@@ -372,7 +374,7 @@ public class CClosure extends Construct implements Callable {
 
 	@Override
 	public CClassType[] getInterfaces() {
-		return new CClassType[]{Callable.TYPE};
+		return new CClassType[]{Callable.TYPE, Booleanish.TYPE};
 	}
 
 	@Override
@@ -385,4 +387,8 @@ public class CClosure extends Construct implements Callable {
 		return builder.buildWithoutValidation();
 	}
 
+	@Override
+	public boolean getBooleanValue(Environment env, Target t) {
+		return true;
+	}
 }

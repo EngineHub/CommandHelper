@@ -53,7 +53,7 @@ public class TryKeyword extends Keyword {
 
 		ParseTree complexTry = new ParseTree(new CFunction(complex_try.NAME,
 				list.get(keywordPosition).getTarget()), list.get(keywordPosition).getFileOptions());
-		complexTry.addChild(getArgumentOrNull(list.get(keywordPosition + 1)));
+		complexTry.addChild(getArgumentOrNoop(list.get(keywordPosition + 1)));
 
 		// For now, we won't allow try {}, so this must be followed by a catch keyword. This restriction is somewhat artificial, and
 		// if we want to remove it in the future, we can do so by removing this code block.
@@ -85,7 +85,7 @@ public class TryKeyword extends Keyword {
 							+ " Exactly one argument must be passed.", n.getTarget());
 				}
 				complexTry.addChild(n.getChildAt(0));
-				complexTry.addChild(getArgumentOrNull(list.get(i + 1)));
+				complexTry.addChild(getArgumentOrNoop(list.get(i + 1)));
 			} else {
 				// We have something like finally { }. In this case, this must be the final
 				// clause statement, and we need to verify that there isn't a catch following it.
@@ -96,7 +96,7 @@ public class TryKeyword extends Keyword {
 					}
 				}
 				// Passed the inspection.
-				complexTry.addChild(getArgumentOrNull(list.get(i + 1)));
+				complexTry.addChild(getArgumentOrNoop(list.get(i + 1)));
 			}
 
 			// Mark catch keyword and code block as handled.

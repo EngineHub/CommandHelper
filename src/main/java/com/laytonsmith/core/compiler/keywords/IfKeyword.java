@@ -10,7 +10,7 @@ import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CKeyword;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
-import com.laytonsmith.core.functions.ControlFlow.ifelse;
+import com.laytonsmith.core.functions.ControlFlow;
 
 /**
  *
@@ -36,14 +36,14 @@ public class IfKeyword extends Keyword {
 					if(nodeIsElseKeyword(list.get(keywordPosition + 2))
 							&& nodeIsIfFunction(list.get(keywordPosition + 3))) {
 						// It is, convert this into an ifelse
-						ParseTree newNode = new ParseTree(new CFunction(ifelse.NAME, t), node.getFileOptions());
+						ParseTree newNode = new ParseTree(new CFunction(ControlFlow.ifelse.NAME, t), node.getFileOptions());
 						newNode.setChildren(node.getChildren());
 						node = newNode;
 					}
 				} catch (IndexOutOfBoundsException ex) {
 					// Doesn't matter, we're apparently at the end of the stream
 				}
-				node.addChild(getArgumentOrNull(list.get(keywordPosition + 1)));
+				node.addChild(getArgumentOrNoop(list.get(keywordPosition + 1)));
 				list.remove(keywordPosition + 1);
 			}
 
@@ -54,7 +54,7 @@ public class IfKeyword extends Keyword {
 						if(isCodeBlock(list.get(keywordPosition + 2))) {
 							// So ends the chain
 							validateCodeBlock(list.get(keywordPosition + 2), "");
-							node.addChild(getArgumentOrNull(list.get(keywordPosition + 2)));
+							node.addChild(getArgumentOrNoop(list.get(keywordPosition + 2)));
 							// remove the else keyword + the brace
 							list.remove(keywordPosition + 1);
 							list.remove(keywordPosition + 1);
@@ -73,7 +73,7 @@ public class IfKeyword extends Keyword {
 							}
 							// Ok, checks are complete, so we can actually construct the arguments now
 							node.addChild(list.get(keywordPosition + 2).getChildAt(0));
-							node.addChild(getArgumentOrNull(list.get(keywordPosition + 3)));
+							node.addChild(getArgumentOrNoop(list.get(keywordPosition + 3)));
 							// Remove the else, if function, and braces
 							list.remove(keywordPosition + 1);
 							list.remove(keywordPosition + 1);
@@ -104,7 +104,7 @@ public class IfKeyword extends Keyword {
 	}
 
 	private boolean nodeIsIfFunction(ParseTree node) {
-		return node.getData() instanceof CFunction && node.getData().val().equals("if");
+		return node.getData() instanceof CFunction && node.getData().val().equals(ControlFlow._if.NAME);
 	}
 
 	@Override

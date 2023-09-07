@@ -1,5 +1,7 @@
 package com.laytonsmith.abstraction;
 
+import com.laytonsmith.abstraction.blocks.MCBlockData;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.enums.MCItemFlag;
 import java.util.List;
 import java.util.Map;
@@ -110,6 +112,12 @@ public interface MCItemMeta extends AbstractionObject {
 	int getDamage();
 
 	void setDamage(int damage);
+
+	MCBlockData getBlockData(MCMaterial material);
+
+	boolean hasBlockData();
+
+	void setBlockData(MCBlockData blockData);
 
 	boolean hasCustomModelData();
 

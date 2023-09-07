@@ -1,12 +1,21 @@
 package com.laytonsmith.abstraction.blocks;
 
-public interface MCSign extends MCBlockState {
+public interface MCSign extends MCBlockState, MCSignText {
 
-	void setLine(int i, String line1);
+	boolean isWaxed();
 
-	String getLine(int i);
+	void setWaxed(boolean waxed);
 
-	boolean isGlowingText();
+	/**
+	 * Gets the back text for this sign block.
+	 * Using the methods directly on the sign object will apply to the front text for backwards compatibility.
+	 *
+	 * @return Back sign text object (null if unavailable)
+	 */
+	MCSignText getBackText();
 
-	void setGlowingText(boolean glowing);
+	enum Side {
+		FRONT,
+		BACK
+	}
 }

@@ -7,7 +7,7 @@ In order to use varargs, the Callable needs to be specially defined.
 <%CODE|
 void proc _varargTest(string... @values) {
 	// Within the proc, @values is actually defined as an array of strings, not a single string object.
-	foreach(string @s in @values) {'
+	foreach(string @s in @values) {
 		msg(@s);
 	}
 }

@@ -14,6 +14,8 @@ import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.constructs.Token.TType;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.functions.DataHandling;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -169,7 +171,7 @@ public class SwitchKeyword extends EarlyBindingKeyword {
 				firstComma = true;
 				// Write out the case labels, we're actually done with them now
 				if(caseLabels.size() > 1) {
-					newStream.add(new Token(TType.FUNC_NAME, "array", Target.UNKNOWN));
+					newStream.add(new Token(TType.FUNC_NAME, DataHandling.array.NAME, Target.UNKNOWN));
 					newStream.add(new Token(TType.FUNC_START, "(", Target.UNKNOWN));
 				}
 

@@ -26,13 +26,16 @@ public abstract class MCParticle<Concrete> extends DynamicEnum<MCParticle.MCVani
 		if(ret == null) {
 			switch(test) {
 				case "BARRIER":
-					MSLog.GetLogger().e(MSLog.Tags.GENERAL,
-							"BARRIER particle type was changed in 1.18. Converted to BLOCK_MARKER.", Target.UNKNOWN);
-					return MAP.get("BLOCK_MARKER");
 				case "LIGHT":
 					MSLog.GetLogger().e(MSLog.Tags.GENERAL,
-							"LIGHT particle type was changed in 1.18. Converted to BLOCK_MARKER.", Target.UNKNOWN);
+							test + " particle type was changed in 1.18. Converted to BLOCK_MARKER.", Target.UNKNOWN);
 					return MAP.get("BLOCK_MARKER");
+				case "DRIPPING_CHERRY_LEAVES":
+				case "FALLING_CHERRY_LEAVES":
+				case "LANDING_CHERRY_LEAVES":
+					MSLog.GetLogger().e(MSLog.Tags.GENERAL,
+							test + " particle type was changed in 1.20. Converted to CHERRY_LEAVES.", Target.UNKNOWN);
+					return MAP.get("CHERRY_LEAVES");
 			}
 			throw new IllegalArgumentException("Unknown particle type: " + test);
 		}
@@ -176,6 +179,11 @@ public abstract class MCParticle<Concrete> extends DynamicEnum<MCParticle.MCVani
 		SCULK_CHARGE_POP(MCVersion.MC1_19),
 		SCULK_SOUL(MCVersion.MC1_19),
 		SONIC_BOOM(MCVersion.MC1_19),
+		DRIPPING_CHERRY_LEAVES(MCVersion.MC1_19_X, MCVersion.MC1_19_X),
+		FALLING_CHERRY_LEAVES(MCVersion.MC1_19_X, MCVersion.MC1_19_X),
+		LANDING_CHERRY_LEAVES(MCVersion.MC1_19_X, MCVersion.MC1_19_X),
+		CHERRY_LEAVES(MCVersion.MC1_20),
+		EGG_CRACK(MCVersion.MC1_20),
 		UNKNOWN(MCVersion.NEVER);
 
 		private final MCVersion since;

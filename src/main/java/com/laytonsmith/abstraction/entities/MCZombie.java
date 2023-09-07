@@ -1,10 +1,8 @@
 package com.laytonsmith.abstraction.entities;
 
-import com.laytonsmith.abstraction.MCLivingEntity;
+public interface MCZombie extends MCAgeable {
 
-public interface MCZombie extends MCLivingEntity {
+	boolean canBreakDoors();
 
-	boolean isBaby();
-
-	void setBaby(boolean isBaby);
+	void setCanBreakDoors(boolean canBreakDoors);
 }

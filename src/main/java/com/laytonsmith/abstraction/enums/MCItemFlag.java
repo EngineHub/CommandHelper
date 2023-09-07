@@ -34,5 +34,9 @@ public enum MCItemFlag {
 	/**
 	 * Setting to show/hide dyes from coloured leather armour
 	 */
-	HIDE_DYE;
+	HIDE_DYE,
+	/**
+	 * Setting to show/hide armor trim.
+	 */
+	HIDE_ARMOR_TRIM;
 }

@@ -19,7 +19,6 @@ import com.laytonsmith.abstraction.events.MCBlockFormEvent;
 import com.laytonsmith.abstraction.events.MCBlockGrowEvent;
 import com.laytonsmith.abstraction.events.MCBlockIgniteEvent;
 import com.laytonsmith.abstraction.events.MCBlockPistonEvent;
-import com.laytonsmith.abstraction.events.MCBlockPistonRetractEvent;
 import com.laytonsmith.abstraction.events.MCBlockPlaceEvent;
 import com.laytonsmith.abstraction.events.MCNotePlayEvent;
 import com.laytonsmith.abstraction.events.MCSignChangeEvent;
@@ -51,7 +50,6 @@ import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -150,9 +148,7 @@ public class BlockEvents {
 			return "{} "
 					+ "This event is called when a piston is retracted. Cancelling the event cancels the move."
 					+ "{location: the locationArray of this piston | direction: direction of travel"
-					+ " | sticky: true if the piston is sticky, false otherwise | affectedBlocks: blocks pushed/pulled"
-					+ " | retractedLocation: if the piston is sticky and attached to a block, where the attached"
-					+ " block would end up }"
+					+ " | sticky: true if the piston is sticky, false otherwise | affectedBlocks: blocks pushed/pulled}"
 					+ "{} "
 					+ "{} "
 					+ "{}";
@@ -165,10 +161,7 @@ public class BlockEvents {
 
 		@Override
 		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
-			MCBlockPistonRetractEvent event = (MCBlockPistonRetractEvent) e;
-			Map<String, Mixed> map = super.evaluate(e, env);
-			map.put("retractedLocation", ObjectGenerator.GetGenerator().location(event.getRetractedLocation(), false, env));
-			return map;
+			return super.evaluate(e, env);
 		}
 
 		@Override
@@ -276,12 +269,8 @@ public class BlockEvents {
 			map.put("block", new CString(block.getType().getName(), t));
 
 			CArray drops = new CArray(t, null, env);
-			Collection<MCItemStack> items = event.getDrops();
-			if(items == null) {
-				items = block.getDrops(event.getPlayer().getInventory().getItemInMainHand());
-			}
-			for(MCItemStack stack : items) {
-				drops.push(ObjectGenerator.GetGenerator().item(stack, t, env), t, env);
+			for(MCItemStack stack : event.getDrops()) {
+				drops.push(ObjectGenerator.GetGenerator().item(stack, t), t);
 			}
 			map.put("drops", drops);
 
@@ -933,8 +922,9 @@ public class BlockEvents {
 		public String docs() {
 			return "{player: <string match> | 1: <regex> | 2: <regex> | 3: <regex> | 4: <regex> }"
 					+ "This event is called when a player changes a sign. Cancelling the event cancels any edits completely."
-					+ "{player: The player's name | location: an array usable as a locationArray while also compatible"
-					+ " with X,Y,Z,world indices | text: An array with keys 0 thru 3 defining every line on the sign}"
+					+ "{player: The player's name | location: A location array of the sign"
+					+ " | text: An array with keys 0 thru 3 defining every line on the sign"
+					+ " | side: The side of the sign the text was changed, FRONT or BACK}"
 					+ "{1|2|3|4|text: An array with keys 0 thru 3 defining every line on the sign}"
 					+ "{}";
 		}
@@ -981,6 +971,7 @@ public class BlockEvents {
 			map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
 			map.put("text", event.getLines(env));
 			map.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation(), false, env));
+			map.put("side", new CString(event.getSide().name(), Target.UNKNOWN));
 
 			return map;
 		}
@@ -1058,11 +1049,12 @@ public class BlockEvents {
 
 		@Override
 		public String docs() {
-			return "{type: <string match> Type of dispenser | itemname: <string match> Item type which is dispensed}"
-					+ "This event is called when a dispenser dispense an item. Cancelling the event cancels dispensing."
-					+ "{type: Type of dispenser | item: Item which is dispensed | velocity: Returns an associative array"
-					+ " indicating the x/y/z components of item velocity. As a convenience, the magnitude is also included."
-					+ " | location: Location of dispenser} "
+			return "{type: <string match> Type of dispensing block | itemname: <string match> Item type to be dispensed}"
+					+ "This event is called when a block dispenses an item."
+					+ "{type | item: Item array of item to be dispensed. If the item type exists in the dispenser,"
+					+ " one will be removed from the block's inventory. (ignores item quantity)"
+					+ " | velocity: Returns an associative array with the x/y/z/magnitude components of item velocity."
+					+ " | location: Location array of dispensing block} "
 					+ "{item|velocity} "
 					+ "{}";
 		}

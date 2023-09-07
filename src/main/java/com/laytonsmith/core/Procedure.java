@@ -30,6 +30,7 @@ import com.laytonsmith.core.functions.ControlFlow;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
+import com.laytonsmith.core.functions.StringHandling;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 
 import java.util.ArrayList;
@@ -291,7 +292,7 @@ public class Procedure implements Cloneable {
 		stManager.addStackTraceElement(new ConfigRuntimeException.StackTraceElement("proc " + name, getTarget()));
 		try {
 			if(tree.getData() instanceof CFunction
-					&& "sconcat".equals(tree.getData().val())) {
+					&& tree.getData().val().equals(StringHandling.sconcat.NAME)) {
 				//If the inner tree is just an sconcat, we can optimize by
 				//simply running the arguments to the sconcat. We're not going
 				//to use the results, after all, and this is a common occurrence,

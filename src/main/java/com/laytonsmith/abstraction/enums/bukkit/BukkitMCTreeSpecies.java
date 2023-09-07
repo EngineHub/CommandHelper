@@ -36,6 +36,9 @@ public class BukkitMCTreeSpecies extends EnumConvertor<MCTreeSpecies, TreeSpecie
 	@Override
 	protected TreeSpecies getConcreteEnumCustom(MCTreeSpecies abstracted) {
 		switch(abstracted) {
+			case BAMBOO:
+			case CHERRY:
+			case MANGROVE:
 			case OAK:
 				return TreeSpecies.GENERIC;
 			case SPRUCE:

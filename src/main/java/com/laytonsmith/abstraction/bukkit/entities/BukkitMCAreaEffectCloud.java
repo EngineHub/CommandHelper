@@ -13,8 +13,10 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCPotionData;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlockProjectileSource;
 import com.laytonsmith.abstraction.entities.MCAreaEffectCloud;
 import com.laytonsmith.abstraction.enums.MCParticle;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCParticle;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPotionEffectType;
+import com.laytonsmith.core.Static;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -110,8 +112,16 @@ public class BukkitMCAreaEffectCloud extends BukkitMCEntity implements MCAreaEff
 
 	@Override
 	public void addCustomEffect(MCLivingEntity.MCEffect effect) {
+		int ticks = effect.getTicksRemaining();
+		if(ticks < 0) {
+			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_X)) {
+				ticks = -1;
+			} else {
+				ticks = Integer.MAX_VALUE;
+			}
+		}
 		PotionEffectType type = (PotionEffectType) effect.getPotionEffectType().getConcrete();
-		PotionEffect pe = new PotionEffect(type, effect.getTicksRemaining(), effect.getStrength(), effect.isAmbient(),
+		PotionEffect pe = new PotionEffect(type, ticks, effect.getStrength(), effect.isAmbient(),
 				effect.hasParticles(), effect.showIcon());
 		aec.addCustomEffect(pe, true);
 	}

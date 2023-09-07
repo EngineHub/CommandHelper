@@ -1,18 +1,13 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
-import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.entities.MCZombie;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Zombie;
 
-public class BukkitMCZombie extends BukkitMCLivingEntity implements MCZombie {
+public class BukkitMCZombie extends BukkitMCAgeable implements MCZombie {
 
 	public BukkitMCZombie(Entity zombie) {
 		super(zombie);
-	}
-
-	public BukkitMCZombie(AbstractionObject ao) {
-		this((Zombie) ao.getHandle());
 	}
 
 	@Override
@@ -21,12 +16,16 @@ public class BukkitMCZombie extends BukkitMCLivingEntity implements MCZombie {
 	}
 
 	@Override
-	public boolean isBaby() {
-		return getHandle().isBaby();
+	public boolean canBreakDoors() {
+		return getHandle().canBreakDoors();
 	}
 
 	@Override
-	public void setBaby(boolean isBaby) {
-		getHandle().setBaby(isBaby);
+	public void setCanBreakDoors(boolean canBreakDoors) {
+		try {
+			getHandle().setCanBreakDoors(canBreakDoors);
+		} catch(NoSuchMethodError ex) {
+			// probably before 1.19
+		}
 	}
 }

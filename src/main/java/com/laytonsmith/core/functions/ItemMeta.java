@@ -20,6 +20,8 @@ import com.laytonsmith.abstraction.enums.MCFireworkType;
 import com.laytonsmith.abstraction.enums.MCItemFlag;
 import com.laytonsmith.abstraction.enums.MCPatternShape;
 import com.laytonsmith.abstraction.enums.MCPotionType;
+import com.laytonsmith.abstraction.enums.MCTrimMaterial;
+import com.laytonsmith.abstraction.enums.MCTrimPattern;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
@@ -125,6 +127,8 @@ public class ItemMeta {
 			docs = docs.replace("%OPERATIONS%", StringUtils.Join(MCAttributeModifier.Operation.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%SLOTS%", StringUtils.Join(MCEquipmentSlot.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%AXOLOTL_TYPES%", StringUtils.Join(MCAxolotlType.values(), ", ", ", or ", " or "));
+			docs = docs.replace("%TRIM_PATTERNS%", StringUtils.Join(MCTrimPattern.values(), ", ", ", or ", " or "));
+			docs = docs.replace("%TRIM_MATERIALS%", StringUtils.Join(MCTrimMaterial.values(), ", ", ", or ", " or "));
 			return docs;
 		}
 

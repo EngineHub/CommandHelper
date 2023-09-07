@@ -9,6 +9,7 @@ import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noboilerplate;
+import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
@@ -36,13 +37,11 @@ import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
-import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
 
 public class Echoes {
 
@@ -323,19 +322,10 @@ public class Echoes {
 	}
 
 	@api
+	@seealso({colorize.class})
 	public static class color extends AbstractFunction implements Optimizable {
 
-		private final Map<String, CString> colors = new TreeMap<>();
-		private static final String SYMBOLS = "0123456789abcdefABCDEFmMnNoOlLkKrR";
-		public static final Set<Character> COLOR_SYMBOLS;
-
-		static {
-			Set<Character> temp = new TreeSet<>();
-			for(Character c : SYMBOLS.toCharArray()) {
-				temp.add(c);
-			}
-			COLOR_SYMBOLS = Collections.unmodifiableSet(temp);
-		}
+		private static final Map<String, CString> CACHED_COLORS = new HashMap<>();
 
 		@Override
 		public String getName() {
@@ -349,97 +339,66 @@ public class Echoes {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			String color = null;
 			String val = Construct.nval(args[0]);
 			if(val == null) {
 				return new CString(MCChatColor.WHITE.toString(), t);
 			}
-			if(colors.containsKey(val)) {
-				return colors.get(val);
+			CString cachedColor = CACHED_COLORS.get(val);
+			if(cachedColor != null) {
+				return cachedColor;
 			}
+			String color = null;
 			try {
 				color = MCChatColor.valueOf(val.toUpperCase()).toString();
 			} catch (IllegalArgumentException e) {
-			}
-			String a = val.toLowerCase();
-			switch(a) {
-				case "10":
-					a = "a";
-					break;
-				case "11":
-					a = "b";
-					break;
-				case "12":
-					a = "c";
-					break;
-				case "13":
-					a = "d";
-					break;
-				case "14":
-					a = "e";
-					break;
-				case "15":
-					a = "f";
-					break;
-				case "random":
-					a = "k";
-					break;
-				case "bold":
-					a = "l";
-					break;
-				case "strike":
-				case "strikethrough":
-					a = "m";
-					break;
-				case "underline":
-				case "underlined":
-					a = "n";
-					break;
-				case "italic":
-				case "italics":
-					a = "o";
-					break;
-				case "plain white":
-				case "plainwhite":
-				case "plain_white":
-					a = "r";
-					break;
-			}
+				if("".equals(val)) {
+					color = MCChatColor.WHITE.toString();
 
-			//////////////////////////////////////////////////////////////
-			// IMPORTANT                                                //
-			// Be sure to update COLOR_SYMBOLS if this list is updated! //
-			//////////////////////////////////////////////////////////////
-			if("".equals(a.trim())) {
-				//If the value is empty string, set the color to white.
-				color = MCChatColor.WHITE.toString();
-			}
+				} else if(val.charAt(0) == '#') {
+					// Hex color codes
+					color = MCChatColor.fromRGBValue(val);
 
-			if(a.startsWith("#")) {
-				color = MCChatColor.fromRGBValue(a);
-			}
-
-			if(color == null) {
-				try {
-					Character p = String.valueOf(a).charAt(0);
-					MCChatColor cc = MCChatColor.getByChar(p);
-					if(cc == null) {
-						cc = MCChatColor.WHITE;
+				} else {
+					// Simple color codes
+					String c = val.toLowerCase();
+					// Translate common alternatives to conventional color codes here
+					switch(c) {
+						case "10":
+							c = "a";
+							break;
+						case "11":
+							c = "b";
+							break;
+						case "12":
+							c = "c";
+							break;
+						case "13":
+							c = "d";
+							break;
+						case "14":
+							c = "e";
+							break;
+						case "strike":
+							c = "m";
+							break;
+						case "underlined":
+							c = "n";
+							break;
+						case "italics":
+							c = "o";
+							break;
 					}
-					color = cc.toString();
-				} catch (NumberFormatException e) {
+					MCChatColor cc = MCChatColor.getByChar(c.charAt(0));
+					if(cc != null) {
+						color = cc.toString();
+					}
+				}
+				if(color == null) {
+					color = MCChatColor.WHITE.toString();
 				}
 			}
-
-			if(color == null) {
-				color = MCChatColor.WHITE.toString();
-			}
-			//Until we get a compilation environment going, this must be removed so we can optimize it out.
-			//if(env.GetCustom("cmdline") instanceof Boolean && (Boolean)env.GetCustom("cmdline") == true){
-			//	color = Static.MCToANSIColors(color);
-			//}
 			CString ret = new CString(color, t);
-			colors.put(val, ret);
+			CACHED_COLORS.put(val, ret);
 			return ret;
 		}
 
@@ -450,13 +409,16 @@ public class Echoes {
 			for(int i = 0; i < colors.length; i++) {
 				colors[i] = values[i].name();
 			}
-			return "string {name} Returns the color modifier given a color name. If the given color name isn't valid,"
-					+ " white is used instead. The list of valid colors is: " + StringUtils.Join(colors, ", ", ", or ")
-					+ ", in addition the integers 0-15 will work, or the hex numbers from 0-F, and k, l, m, n, o, and r,"
-					+ " which represent styles. Additionally, any RGB colour can be used in the hex format '#rrggbb'."
-					+ " Unlike manually putting in the color symbol, using this function will"
-					+ " return the platform's color code, so if you are wanting to keep your scripts platform independent,"
-					+ " it is a much better idea to use this function as opposed to hard coding your own color codes.";
+			return "string {name} Returns the color (or style) code modifier for a given value."
+					+ " If the value isn't valid, white is used instead."
+					+ " The list of valid color names is: " + StringUtils.Join(colors, ", ", ", or ") + "."
+					+ " Other supported values include the color integers 0-15, the color hex numbers 0-F,"
+					+ " and the style values k, l, m, n, o, and r."
+					+ " Additionally, any RGB color can be used in the hex format '#rrggbb' (except in tellraw)."
+					+ " ---- Since the vanilla Minecraft client does not support RGB color codes, these are translated"
+					+ " to json text components by the server when passed to messaging functions. As such, these are"
+					+ " not directly supported in tellraw functions or commands. Instead, the color must be manually"
+					+ " specified under the 'color' key of the json text component.";
 		}
 
 		@Override
@@ -466,7 +428,7 @@ public class Echoes {
 
 		@Override
 		public boolean isRestricted() {
-			return true;
+			return false;
 		}
 
 		@Override
@@ -792,6 +754,7 @@ public class Echoes {
 	}
 
 	@api
+	@seealso({color.class})
 	public static class colorize extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -801,15 +764,13 @@ public class Echoes {
 
 		@Override
 		public boolean isRestricted() {
-			return true;
+			return false;
 		}
 
 		@Override
 		public Boolean runAsync() {
 			return null;
 		}
-
-		color color = new color();
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
@@ -818,66 +779,62 @@ public class Echoes {
 			if(args.length == 2) {
 				symbol = args[1].val();
 			}
-			if(text.isInstanceOf(CString.TYPE, null, env)) {
-				String stext = text.val();
-				StringBuilder b = new StringBuilder();
-				int sl = symbol.length();
-				for(int i = 0; i < stext.length(); i++) {
-					if(i + sl >= stext.length()) {
-						if(i < stext.length()) {
-							b.append(stext.substring(i));
-							break;
-						}
-					} else {
-						String subsequence1 = stext.substring(i, i + sl);
-						if(!symbol.equals(subsequence1)) {
-							b.append(stext.charAt(i));
-							continue;
-						}
-						try {
-							String subsequence2 = stext.substring(i + sl, i + (sl * 2));
-							if(subsequence2.equals(subsequence1)) {
-								b.append(subsequence1);
-								i += (sl * 2) - 1;
-								continue;
-							}
-						} catch (IndexOutOfBoundsException e) {
-							//Ignored, it just means there aren't enough characters to do a second subsequence
-						}
-						Character c;
-						try {
-							c = stext.charAt(i + sl);
-						} catch (IndexOutOfBoundsException e) {
-							b.append(stext.charAt(i + sl - 1));
-							break;
-						}
-						if(Echoes.color.COLOR_SYMBOLS.contains(c)) {
-							b.append(color.exec(t, env, null, new CString(c, t)));
-							i += sl;
-						} else {
-							if(c.equals('#')) {
-								try {
-									String subsequence2 = stext.substring(i + sl, i + sl + 7);
-									String rgbColor = MCChatColor.fromRGBValue(subsequence2);
-									if(rgbColor != null) {
-										b.append(rgbColor);
-										i += sl + 6;
-										continue;
-									}
-								} catch (IndexOutOfBoundsException e) {
-									// Not enough characters left for a full hex code
-								}
-							}
-
-							b.append(subsequence1);
-							i += sl - 1;
-						}
-					}
-				}
-				return new CString(b.toString(), t);
-			} else {
+			if(!(text.isInstanceOf(CString.TYPE, null, env))) {
 				return text;
 			}
+			String stext = text.val();
+			StringBuilder b = new StringBuilder();
+			int sl = symbol.length();
+			for(int i = 0; i < stext.length(); i++) {
+				if(i + sl >= stext.length()) {
+					b.append(stext.substring(i));
+					break;
+				}
+				String subsequence1 = stext.substring(i, i + sl);
+				if(!symbol.equals(subsequence1)) {
+					b.append(stext.charAt(i));
+					continue;
+				}
+				try {
+					String subsequence2 = stext.substring(i + sl, i + (sl * 2));
+					if(subsequence2.equals(subsequence1)) {
+						b.append(subsequence1);
+						i += (sl * 2) - 1;
+						continue;
+					}
+				} catch (IndexOutOfBoundsException e) {
+					//Ignored, it just means there aren't enough characters to do a second subsequence
+				}
+				Character c;
+				try {
+					c = stext.charAt(i + sl);
+				} catch (IndexOutOfBoundsException e) {
+					b.append(stext.charAt(i + sl - 1));
+					break;
+				}
+				MCChatColor color = MCChatColor.getByChar(Character.toLowerCase(c));
+				if(color != null) {
+					b.append(color);
+					i += sl;
+					continue;
+				}
+				if(c.equals('#')) {
+					try {
+						String subsequence2 = stext.substring(i + sl, i + sl + 7);
+						String rgbColor = MCChatColor.fromRGBValue(subsequence2);
+						if(rgbColor != null) {
+							b.append(rgbColor);
+							i += sl + 6;
+							continue;
+						}
+					} catch (IndexOutOfBoundsException e) {
+						// Not enough characters left for a full hex code
+					}
+				}
+				b.append(subsequence1);
+				i += sl - 1;
+			}
+			return new CString(b.toString(), t);
 		}
 
 		@Override
@@ -892,12 +849,17 @@ public class Echoes {
 
 		@Override
 		public String docs() {
-			return "mixed {text, [symbol]} Replaces all the colorizable text in the string. For instance,"
-					+ " colorize('&aText') would be equivalent to (color('a').'Text'). By default, the"
-					+ " symbol is '&', but that can be any arbitrary string that you specify. If text is not"
-					+ " a string, that value is simply returned. If you need to \"escape\" a symbol, (that is"
-					+ " have a literal symbol followed by a letter that is a valid color) just repeat the symbol"
-					+ " twice, for instance '&&c' would return a literal '&c' instead of a red modifier.";
+			return "mixed {text, [symbol]} Replaces all the colorizable character codes in the string."
+					+ " For instance, colorize('&aText') would be equivalent to (color('a').'Text')."
+					+ " By default, the symbol is '&', but that can be any arbitrary string that you specify."
+					+ " If text is not a string, that value is simply returned. If you need to \"escape\" a symbol,"
+					+ " (that is have a literal symbol followed by a letter that is a valid color) just repeat the"
+					+ " symbol twice, for instance '&&c' would return a literal '&c' instead of a red modifier."
+					+ " Additionally, any RGB color can be used in the hex format '&#rrggbb' (except in tellraw)."
+					+ " ---- Since the vanilla Minecraft client does not support RGB color codes, these are translated"
+					+ " to json text components by the server when passed to messaging functions. As such, these are"
+					+ " not directly supported in tellraw functions or commands. Instead, the color must be manually"
+					+ " specified under the 'color' key of the json text component.";
 		}
 
 		@Override

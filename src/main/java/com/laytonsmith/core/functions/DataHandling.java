@@ -274,6 +274,8 @@ public class DataHandling {
 	@seealso({com.laytonsmith.tools.docgen.templates.Arrays.class, ArrayIteration.class})
 	public static class associative_array extends AbstractFunction {
 
+		public static final String NAME = "associative_array";
+
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return null;
@@ -315,7 +317,7 @@ public class DataHandling {
 
 		@Override
 		public String getName() {
-			return "associative_array";
+			return NAME;
 		}
 
 		@Override
@@ -382,7 +384,7 @@ public class DataHandling {
 						MSLog.GetLogger().Log(MSLog.Tags.RUNTIME, LogLevel.ERROR,
 								"The variable " + name + " is hiding another value of the"
 								+ " same name in the main scope.", t);
-					} else if(t != list.get(name, t, true, env).getDefinedTarget()) {
+					} else if(!StaticAnalysis.enabled() && t != list.get(name, t, true, env).getDefinedTarget()) {
 						MSLog.GetLogger().Log(MSLog.Tags.RUNTIME, LogLevel.ERROR, name + " was already defined at "
 								+ list.get(name, t, true, env).getDefinedTarget() + " but is being redefined.", t);
 					}
@@ -396,9 +398,7 @@ public class DataHandling {
 				definedVar = (IVariable) args[offset];
 				name = definedVar.getVariableName();
 				IVariable listVar = list.get(name, t, true, env);
-				if(listVar.ival() != CNull.UNDEFINED) {
-					t = listVar.getDefinedTarget();
-				}
+				t = listVar.getDefinedTarget();
 				type = listVar.getDefinedType();
 			}
 
@@ -1750,9 +1750,11 @@ public class DataHandling {
 			if(myProc.isPossiblyConstant()) {
 				//Oooh, it's possibly constant. So, let's run it with our children.
 				try {
-					FileOptions options = new FileOptions(new HashMap<>());
+					FileOptions options;
 					if(!children.isEmpty()) {
 						options = children.get(0).getFileOptions();
+					} else {
+						options = new FileOptions(new HashMap<>());
 					}
 					ParseTree root = new ParseTree(new CFunction(__autoconcat__.NAME, Target.UNKNOWN), options);
 					Script fakeScript = Script.GenerateScript(root, Static.GLOBAL_PERMISSION, null);
@@ -1965,7 +1967,7 @@ public class DataHandling {
 
 		@Override
 		public String getName() {
-			return "get_proc";
+			return NAME;
 		}
 
 		@Override
@@ -3049,7 +3051,7 @@ public class DataHandling {
 
 		@Override
 		public String getName() {
-			return "execute";
+			return NAME;
 		}
 
 		@Override

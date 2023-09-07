@@ -36,4 +36,15 @@ public interface BranchStatement {
 	 * @return A list of booleans representing which children are branch statements.
 	 */
 	List<Boolean> isBranch(List<ParseTree> children);
+
+	/**
+	 * Returns a list of booleans for places where statements are allowed. By default, this is the same list as
+	 * isBranch, but there are a few places where this is an exception, for instance for(), where the third parameter
+	 * is a branch (that is, it might or might not run) but statements aren't allowed.
+	 * @param children
+	 * @return
+	 */
+	default List<Boolean> statementsAllowed(List<ParseTree> children) {
+		return isBranch(children);
+	}
 }

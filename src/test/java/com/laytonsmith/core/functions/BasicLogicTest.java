@@ -185,13 +185,13 @@ public class BasicLogicTest {
 		verify(fakePlayer, times(0)).sendMessage("lol");
 	}
 
-	@Test(timeout = 10000)
+	@Test
 	public void testOr1() throws Exception {
+		SRun("if(or(false, false), '', msg('pass'))", fakePlayer);
 		SRun("if(or(true, true, true), msg('pass'))", fakePlayer);
 		SRun("if(or(true, true, false), msg('pass'))", fakePlayer);
 		SRun("if(or(true, true), msg('pass'))", fakePlayer);
 		SRun("if(or(true, false), msg('pass'))", fakePlayer);
-		SRun("if(or(false, false), '', msg('pass'))", fakePlayer);
 		SRun("if(or(true), msg('pass'))", fakePlayer);
 		SRun("if(or(false), '', msg('pass'))", fakePlayer);
 		verify(fakePlayer, times(7)).sendMessage("pass");

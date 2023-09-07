@@ -210,6 +210,6 @@ public class TranslationMemory implements Comparable<TranslationMemory> {
 
 	@Override
 	public int compareTo(TranslationMemory t) {
-		return new Integer(this.translationId).compareTo(t.translationId);
+		return Integer.compare(this.translationId, t.translationId);
 	}
 }

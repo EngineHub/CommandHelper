@@ -223,6 +223,8 @@ public class Compiler {
 			//If any of our nodes are CSymbols, we have different behavior
 			boolean inSymbolMode = false; //caching this can save Xn
 
+			rewriteParenthesis(list);
+
 			//Assignment
 			//Note that we are walking the array in reverse, because multiple assignments,
 			//say @a = @b = 1 will break if they look like assign(assign(@a, @b), 1),
@@ -568,8 +570,6 @@ public class Compiler {
 				}
 			}
 
-			rewriteParenthesis(list);
-
 			//We've eliminated the need for __autoconcat__ either way, however, if there are still arguments
 			//left, it needs to go to sconcat, which MAY be able to be further optimized, but that will
 			//be handled in MethodScriptCompiler's optimize function. Also, we must scan for CPreIdentifiers,
@@ -614,11 +614,13 @@ public class Compiler {
 					}
 				}
 				ParseTree tree;
-				FileOptions options = new FileOptions(new HashMap<>());
+				FileOptions options;
 				Target t = Target.UNKNOWN;
 				if(!list.isEmpty()) {
 					options = list.get(0).getFileOptions();
 					t = list.get(0).getTarget();
+				} else {
+					options = new FileOptions(new HashMap<>());
 				}
 
 				if(returnSConcat) {
@@ -652,14 +654,23 @@ public class Compiler {
 				Stack<ParseTree> executes = new Stack<>();
 				while(listInd > 0) {
 					ParseTree lastNode = list.get(listInd);
-					if(lastNode.getData() instanceof CFunction cf
-							&& cf.hasFunction()
-							&& cf.getFunction() != null
-							&& cf.getFunction().getName().equals(Compiler.p.NAME)) {
-						executes.push(lastNode);
-						list.remove(listInd--);
-					} else {
-						break;
+					try {
+						if(lastNode.getData() instanceof CFunction cf
+								&& cf.hasFunction()
+								&& cf.getFunction() != null
+								&& cf.getFunction().getName().equals(Compiler.p.NAME)) {
+							Mixed prevNode = list.get(listInd - 1).getData();
+							if(prevNode instanceof CSymbol || prevNode instanceof CLabel || prevNode instanceof CString) {
+								// It's just a parenthesis like @a = (1); or key: (value), so we should leave it alone.
+								break;
+							}
+							executes.push(lastNode);
+							list.remove(listInd--);
+						} else {
+							break;
+						}
+					} catch (ConfigCompileException e) {
+						break; // The function does not exist. Ignore and handle as "not a p()".
 					}
 				}
 				if(!executes.isEmpty()) {
@@ -725,6 +736,17 @@ public class Compiler {
 		@Override
 		public boolean preResolveVariables() {
 			return false;
+		}
+
+		@Override
+		public ParseTree postParseRewrite(ParseTree ast, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> exceptions) {
+			for(ParseTree child : ast.getChildren()) {
+				if(!(child.getData() instanceof CFunction)) {
+					exceptions.add(new ConfigCompileException("Not a statement.", child.getTarget()));
+				}
+			}
+			return null;
 		}
 	}
 

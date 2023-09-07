@@ -17,7 +17,7 @@ import org.bukkit.inventory.ShapedRecipe;
 
 public class BukkitMCShapedRecipe extends BukkitMCRecipe implements MCShapedRecipe {
 
-	private ShapedRecipe recipe;
+	private final ShapedRecipe recipe;
 
 	public BukkitMCShapedRecipe(ShapedRecipe recipe) {
 		super(recipe);
@@ -79,20 +79,21 @@ public class BukkitMCShapedRecipe extends BukkitMCRecipe implements MCShapedReci
 
 	@Override
 	public void setIngredient(char key, MCItemStack ingredient) {
-		if(ingredient == null) {
-			recipe.setIngredient(key, (Material) null);
-		} else {
-			recipe.setIngredient(key, ((ItemStack) ingredient.getHandle()).getType());
+		recipe.setIngredient(key, new RecipeChoice.ExactChoice((ItemStack) ingredient.getHandle()));
+	}
+
+	@Override
+	public void setIngredient(char key, MCItemStack... ingredients) {
+		ItemStack[] concrete = new ItemStack[ingredients.length];
+		for(int i = 0; i < ingredients.length; i++) {
+			concrete[i] = (ItemStack) ingredients[i].getHandle();
 		}
+		recipe.setIngredient(key, new RecipeChoice.ExactChoice(concrete));
 	}
 
 	@Override
 	public void setIngredient(char key, MCMaterial mat) {
-		if(mat == null) {
-			recipe.setIngredient(key, (Material) null);
-		} else {
-			recipe.setIngredient(key, (Material) mat.getHandle());
-		}
+		recipe.setIngredient(key, (Material) mat.getHandle());
 	}
 
 	@Override

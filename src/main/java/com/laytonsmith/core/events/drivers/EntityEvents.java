@@ -323,7 +323,7 @@ public class EntityEvents {
 				Map<String, Mixed> ret = evaluate_helper(e);
 				CArray blocks = new CArray(t, null, env);
 				for(MCBlock b : e.getBlocks()) {
-					blocks.push(ObjectGenerator.GetGenerator().location(b.getLocation(), env), t, env);
+					blocks.push(ObjectGenerator.GetGenerator().location(b.getLocation(), false, env), t, env);
 				}
 				ret.put("blocks", blocks);
 				MCEntity ent = e.getEntity();
@@ -441,7 +441,7 @@ public class EntityEvents {
 			MCProjectileSource shooter = pro.getShooter();
 			if(shooter instanceof MCBlockProjectileSource) {
 				ret.put("shooter", ObjectGenerator.GetGenerator().location(
-						((MCBlockProjectileSource) shooter).getBlock().getLocation(), env));
+						((MCBlockProjectileSource) shooter).getBlock().getLocation(), false, env));
 			} else if(shooter instanceof MCEntity) {
 				ret.put("shooter", new CString(((MCEntity) shooter).getUniqueId().toString(), t));
 			} else {
@@ -572,7 +572,7 @@ public class EntityEvents {
 					}
 				} else if(shooter instanceof MCBlockProjectileSource) {
 					mapEvent.put("shooter", ObjectGenerator.GetGenerator().location(
-							((MCBlockProjectileSource) shooter).getBlock().getLocation(), env));
+							((MCBlockProjectileSource) shooter).getBlock().getLocation(), false, env));
 					mapEvent.put("shootertype", new CString("BLOCK", Target.UNKNOWN));
 					mapEvent.put("player", CNull.NULL);
 				} else {
@@ -1344,7 +1344,7 @@ public class EntityEvents {
 					} else if(shooter instanceof MCEntity) {
 						data = new CString(((MCEntity) shooter).getType().name().toUpperCase(), t);
 					} else if(shooter instanceof MCBlockProjectileSource) {
-						data = ObjectGenerator.GetGenerator().location(((MCBlockProjectileSource) shooter).getBlock().getLocation(), env);
+						data = ObjectGenerator.GetGenerator().location(((MCBlockProjectileSource) shooter).getBlock().getLocation(), false, env);
 					}
 				}
 				map.put("data", data);
@@ -1774,7 +1774,7 @@ public class EntityEvents {
 					} else if(shooter instanceof MCEntity) {
 						map.put("shooter", new CString(((MCEntity) shooter).getUniqueId().toString(), Target.UNKNOWN));
 					} else if(shooter instanceof MCBlockProjectileSource) {
-						map.put("shooter", ObjectGenerator.GetGenerator().location(((MCBlockProjectileSource) shooter).getBlock().getLocation(), env));
+						map.put("shooter", ObjectGenerator.GetGenerator().location(((MCBlockProjectileSource) shooter).getBlock().getLocation(), false, env));
 					}
 				}
 			}
@@ -1893,17 +1893,21 @@ public class EntityEvents {
 
 		@Override
 		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event, Environment env) throws PrefilterNonMatchException {
-			if(event instanceof MCHangingPlaceEvent) {
-				MCHangingPlaceEvent hangingPlaceEvent = (MCHangingPlaceEvent) event;
+			if(event instanceof MCHangingPlaceEvent hangingPlaceEvent) {
 				MCHanging hanging = hangingPlaceEvent.getEntity();
 				Prefilters.match(prefilter, "type", hanging.getType().name(), PrefilterType.MACRO, env);
-				Prefilters.match(prefilter, "player", hangingPlaceEvent.getPlayer().getName(), PrefilterType.MACRO, env);
-				Prefilters.match(prefilter, "world",
-						hangingPlaceEvent.getEntity().getLocation().getWorld().getName(), PrefilterType.MACRO, env);
+				MCPlayer player = hangingPlaceEvent.getPlayer();
+				if(player == null) {
+					if(prefilter.containsKey("player") && !(prefilter.get("player") instanceof CNull)) {
+						return false;
+					}
+				} else {
+					Prefilters.match(prefilter, "player", player.getName(), PrefilterType.MACRO, env);
+				}
+				Prefilters.match(prefilter, "world", hanging.getLocation().getWorld().getName(), PrefilterType.MACRO, env);
 				return true;
-			} else {
-				return false;
 			}
+			return false;
 		}
 
 		@Override
@@ -1913,14 +1917,18 @@ public class EntityEvents {
 
 		@Override
 		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
-			if(event instanceof MCHangingPlaceEvent) {
-				MCHangingPlaceEvent hangingPlaceEvent = (MCHangingPlaceEvent) event;
+			if(event instanceof MCHangingPlaceEvent hangingPlaceEvent) {
 				Map<String, Mixed> ret = evaluate_helper(event);
 				MCHanging hanging = hangingPlaceEvent.getEntity();
 
 				ret.put("type", new CString(hanging.getType().name(), Target.UNKNOWN));
 				ret.put("id", new CString(hanging.getUniqueId().toString(), Target.UNKNOWN));
-				ret.put("player", new CString(hangingPlaceEvent.getPlayer().getName(), Target.UNKNOWN));
+				MCPlayer player = hangingPlaceEvent.getPlayer();
+				if(player == null) {
+					ret.put("player", CNull.NULL);
+				} else {
+					ret.put("player", new CString(player.getName(), Target.UNKNOWN));
+				}
 				ret.put("location", ObjectGenerator.GetGenerator().location(hanging.getLocation(), env));
 				return ret;
 			} else {

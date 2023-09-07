@@ -34,7 +34,7 @@ public class Updater {
 	public static JsonObject getLatestVersionInfo() throws ApiException, ParseException {
 		Date maxVersion = new Date(0);
 		String jsonResponse = API.buildsArtifactGet(DEFAULT_UPDATE_CHANNEL);
-		JsonArray versions = new JsonParser().parse(jsonResponse).getAsJsonArray();
+		JsonArray versions = JsonParser.parseString(jsonResponse).getAsJsonArray();
 		JsonObject maxVersionObject = null;
 		for(int i = 0; i < versions.size(); i++) {
 			JsonElement version = versions.get(i);

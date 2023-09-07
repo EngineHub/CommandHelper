@@ -5,7 +5,9 @@ import com.laytonsmith.abstraction.MCLivingEntity.MCEffect;
 import com.laytonsmith.abstraction.MCPotionData;
 import com.laytonsmith.abstraction.MCPotionMeta;
 import com.laytonsmith.abstraction.enums.MCPotionEffectType;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPotionEffectType;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionData;
@@ -36,6 +38,13 @@ public class BukkitMCPotionMeta extends BukkitMCItemMeta implements MCPotionMeta
 
 	@Override
 	public boolean addCustomEffect(MCPotionEffectType type, int strength, int ticks, boolean ambient, boolean particles, boolean icon, boolean force, Target t) {
+		if(ticks < 0) {
+			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_X)) {
+				ticks = -1;
+			} else {
+				ticks = Integer.MAX_VALUE;
+			}
+		}
 		PotionEffect pe = new PotionEffect((PotionEffectType) type.getConcrete(), ticks, strength, ambient, particles, icon);
 		return pm.addCustomEffect(pe, force);
 	}

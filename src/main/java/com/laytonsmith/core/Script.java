@@ -86,7 +86,6 @@ public class Script {
 	boolean compilerError = false;
 	private final long compileTime;
 	private String label;
-	private Environment currentEnv;
 	private Set<Class<? extends Environment.EnvironmentImpl>> envs;
 	private FileOptions fileOptions;
 	private SmartComment smartComment;
@@ -101,14 +100,6 @@ public class Script {
 		}
 		b.append("; compiled: ").append(hasBeenCompiled).append("; errors? ").append(compilerError);
 		return b.toString();
-	}
-
-	private Procedure getProc(String name) {
-		return currentEnv.getEnv(GlobalEnv.class).GetProcs().get(name);
-	}
-
-	public Environment getCurrentEnv() {
-		return currentEnv;
 	}
 
 	public String getLabel() {
@@ -216,9 +207,8 @@ public class Script {
 
 	public void run(final List<Variable> vars, Environment myEnv, final MethodScriptComplete done) {
 		//Some things, such as the label are determined at compile time
-		this.currentEnv = myEnv;
-		this.currentEnv.getEnv(GlobalEnv.class).SetLabel(this.label);
-		this.currentEnv.getEnv(GlobalEnv.class).SetAliasComment(this.smartComment);
+		myEnv.getEnv(GlobalEnv.class).SetLabel(this.label);
+		myEnv.getEnv(GlobalEnv.class).SetAliasComment(this.smartComment);
 		MCCommandSender p = myEnv.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 		if(!hasBeenCompiled || compilerError) {
 			Target target = Target.UNKNOWN;
@@ -232,7 +222,7 @@ public class Script {
 			throw ConfigRuntimeException.CreateUncatchableException("Unable to run command, script not yet compiled,"
 					+ " or a compiler error occurred for that command. To see the compile error, run /reloadaliases", target);
 		}
-		enforceLabelPermissions();
+		enforceLabelPermissions(myEnv);
 
 		try {
 			for(ParseTree rootNode : cright) {
@@ -250,8 +240,8 @@ public class Script {
 					}
 				}
 
-				currentEnv.getEnv(StaticRuntimeEnv.class).getIncludeCache().executeAutoIncludes(currentEnv, this);
-				MethodScriptCompiler.execute(rootNode, currentEnv, done, this);
+				myEnv.getEnv(StaticRuntimeEnv.class).getIncludeCache().executeAutoIncludes(myEnv, this);
+				MethodScriptCompiler.execute(rootNode, myEnv, done, this);
 			}
 		} catch (ConfigRuntimeException ex) {
 			//We don't know how to handle this really, so let's pass it up the chain.
@@ -323,7 +313,6 @@ public class Script {
 		}
 
 		final Mixed m = c.getData();
-		currentEnv = env;
 		if(m instanceof Construct co) {
 			if(co.getCType() != ConstructType.FUNCTION) {
 				if(co.getCType() == ConstructType.VARIABLE) {
@@ -355,7 +344,7 @@ public class Script {
 
 			if(possibleFunction.hasProcedure()) {
 				//Not really a function, so we can't put it in Function.
-				Procedure p = getProc(m.val());
+				Procedure p = globalEnv.GetProcs().get(m.val());
 				if(p == null) {
 					throw new CREInvalidProcedureException("Unknown procedure \"" + m.val() + "\"", m.getTarget());
 				}
@@ -1032,7 +1021,7 @@ public class Script {
 		}
 	}
 
-	public void enforceLabelPermissions() {
+	public void enforceLabelPermissions(Environment currentEnv) {
 		String label = currentEnv.getEnv(GlobalEnv.class).GetLabel();
 		if(label == null || label.equals(Static.GLOBAL_PERMISSION)) {
 			return;

@@ -26,6 +26,9 @@ import com.laytonsmith.core.objects.ObjectModifier;
 import com.laytonsmith.core.objects.ObjectType;
 import com.laytonsmith.testing.StaticTest;
 import org.junit.Before;
+
+import static com.laytonsmith.testing.StaticTest.InstallFakeServerFrontend;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -51,9 +54,9 @@ public class InstanceofUtilTest {
 	}
 
 	@BeforeClass
-	public static void beforeClass() {
+	public static void setUpClass() {
 		Implementation.setServerType(Type.TEST);
-		StaticTest.InstallFakeServerFrontend();
+		InstallFakeServerFrontend();
 	}
 
 	@Test

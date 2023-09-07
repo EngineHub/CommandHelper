@@ -554,16 +554,7 @@ public class InventoryEvents {
 				map.put("inventorytype", new CString(e.getInventory().getType().name(), Target.UNKNOWN));
 				map.put("levels", new CInt(e.getExpLevelCost(), Target.UNKNOWN));
 				map.put("enchants", ObjectGenerator.GetGenerator().enchants(e.getEnchantsToAdd(), Target.UNKNOWN, env));
-
-				CArray loc = ObjectGenerator.GetGenerator().location(e.getEnchantBlock().getLocation(), env);
-
-				loc.remove(new CString("yaw", Target.UNKNOWN), env);
-				loc.remove(new CString("pitch", Target.UNKNOWN), env);
-				loc.remove(new CString("4", Target.UNKNOWN), env);
-				loc.remove(new CString("5", Target.UNKNOWN), env);
-
-				map.put("location", loc);
-
+				map.put("location", ObjectGenerator.GetGenerator().location(e.getEnchantBlock().getLocation(), false, env));
 				map.put("option", new CInt(e.whichButton(), Target.UNKNOWN));
 
 				return map;
@@ -658,17 +649,9 @@ public class InventoryEvents {
 				for(MCEnchantmentOffer offer : offers) {
 					expCostsCArray.push(new CInt(offer.getCost(), t), t, env);
 				}
-
 				map.put("expcosts", expCostsCArray);
 
-				CArray loc = ObjectGenerator.GetGenerator().location(e.getEnchantBlock().getLocation(), env);
-
-				loc.remove(new CString("yaw", t), env);
-				loc.remove(new CString("pitch", t), env);
-				loc.remove(new CString("4", t), env);
-				loc.remove(new CString("5", t), env);
-
-				map.put("location", loc);
+				map.put("location", ObjectGenerator.GetGenerator().location(e.getEnchantBlock().getLocation(), false, env));
 
 				return map;
 			} else {
@@ -802,11 +785,11 @@ public class InventoryEvents {
 		@Override
 		public String docs() {
 			return "{player: <macro>"
-					+ " | main_hand: <string match> The type of item being swapped from the main hand"
-					+ " | off_hand: <string match> The type of item being swapped from the off hand}"
-					+ " Fires when a player swaps the items in their main and off hands."
-					+ " {player | main_hand: the item array in the main hand before swapping"
-					+ " | off_hand: the item in the off hand}"
+					+ " | main_hand: <string match> The name of the item being swapped to the main hand (or AIR)"
+					+ " | off_hand: <string match> The name of the item being swapped to the off hand (or AIR)}"
+					+ " Fires when a player swaps the items between their main and off hands."
+					+ " {player | main_hand: The item array being swapped to the main hand (or null)"
+					+ " | off_hand: The item array being swapped to the off hand (or null)}"
 					+ " {main_hand | off_hand}"
 					+ " {}";
 		}

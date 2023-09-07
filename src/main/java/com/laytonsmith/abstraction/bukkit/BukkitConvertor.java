@@ -35,15 +35,18 @@ import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBeehive;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlockState;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBrewingStand;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCChest;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCCommandBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCContainer;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCDispenser;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCDropper;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCFurnace;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCLectern;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCSign;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCSkull;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCAgeable;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCAnimal;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCBreedable;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCCommandMinecart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCComplexEntityPart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCComplexLivingEntity;
@@ -106,12 +109,14 @@ import org.bukkit.block.Beehive;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.BrewingStand;
 import org.bukkit.block.Chest;
+import org.bukkit.block.CommandBlock;
 import org.bukkit.block.Container;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.block.Dispenser;
 import org.bukkit.block.Dropper;
 import org.bukkit.block.Furnace;
 import org.bukkit.block.Lectern;
+import org.bukkit.block.Sign;
 import org.bukkit.block.Skull;
 import org.bukkit.block.banner.Pattern;
 import org.bukkit.command.BlockCommandSender;
@@ -120,6 +125,7 @@ import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Ageable;
 import org.bukkit.entity.Animals;
+import org.bukkit.entity.Breedable;
 import org.bukkit.entity.ComplexEntityPart;
 import org.bukkit.entity.ComplexLivingEntity;
 import org.bukkit.entity.Entity;
@@ -148,12 +154,13 @@ import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.inventory.SmithingRecipe;
 import org.bukkit.inventory.SmokingRecipe;
 import org.bukkit.inventory.StonecuttingRecipe;
+import org.bukkit.inventory.meta.ArmorMeta;
 import org.bukkit.inventory.meta.AxolotlBucketMeta;
 import org.bukkit.inventory.meta.BannerMeta;
-import org.bukkit.inventory.meta.BlockDataMeta;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.BundleMeta;
+import org.bukkit.inventory.meta.ColorableArmorMeta;
 import org.bukkit.inventory.meta.CompassMeta;
 import org.bukkit.inventory.meta.CrossbowMeta;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
@@ -162,6 +169,7 @@ import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.MapMeta;
+import org.bukkit.inventory.meta.MusicInstrumentMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.inventory.meta.SuspiciousStewMeta;
@@ -454,6 +462,12 @@ public class BukkitConvertor extends AbstractConvertor {
 			return new BukkitMCAnimal(be);
 		}
 
+		if(be instanceof Breedable) {
+			// Must come before Ageable
+			type.setWrapperClass(BukkitMCBreedable.class);
+			return new BukkitMCBreedable(be);
+		}
+
 		if(be instanceof Ageable) {
 			// Must come before LivingEntity
 			type.setWrapperClass(BukkitMCAgeable.class);
@@ -565,6 +579,12 @@ public class BukkitConvertor extends AbstractConvertor {
 		if(bs instanceof Beehive) {
 			return new BukkitMCBeehive((Beehive) bs);
 		}
+		if(bs instanceof Sign) {
+			return new BukkitMCSign((Sign) bs);
+		}
+		if(bs instanceof CommandBlock) {
+			return new BukkitMCCommandBlock((CommandBlock) bs);
+		}
 		return new BukkitMCBlockState(bs);
 	}
 
@@ -587,9 +607,6 @@ public class BukkitConvertor extends AbstractConvertor {
 		if(im instanceof FireworkMeta) {
 			return new BukkitMCFireworkMeta((FireworkMeta) im);
 		}
-		if(im instanceof LeatherArmorMeta) {
-			return new BukkitMCLeatherArmorMeta((LeatherArmorMeta) im);
-		}
 		if(im instanceof PotionMeta) {
 			return new BukkitMCPotionMeta((PotionMeta) im);
 		}
@@ -611,9 +628,6 @@ public class BukkitConvertor extends AbstractConvertor {
 		if(im instanceof SuspiciousStewMeta) {
 			return new BukkitMCSuspiciousStewMeta((SuspiciousStewMeta) im);
 		}
-		if(im instanceof BlockDataMeta) {
-			return new BukkitMCBlockDataMeta((BlockDataMeta) im);
-		}
 		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_17)) {
 			if(im instanceof BundleMeta) {
 				return new BukkitMCBundleMeta((BundleMeta) im);
@@ -621,6 +635,22 @@ public class BukkitConvertor extends AbstractConvertor {
 			if(im instanceof AxolotlBucketMeta) {
 				return new BukkitMCAxolotlBucketMeta((AxolotlBucketMeta) im);
 			}
+			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_3)) {
+				if(im instanceof MusicInstrumentMeta) {
+					return new BukkitMCMusicInstrumentMeta((MusicInstrumentMeta) im);
+				}
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20)) {
+					if(im instanceof ColorableArmorMeta) { // Must be before ArmorMeta and LeatherArmorMeta
+						return new BukkitMCColorableArmorMeta((ColorableArmorMeta) im);
+					}
+					if(im instanceof ArmorMeta) {
+						return new BukkitMCArmorMeta((ArmorMeta) im);
+					}
+				}
+			}
+		}
+		if(im instanceof LeatherArmorMeta) { // Must be after ColorableArmorMeta
+			return new BukkitMCLeatherArmorMeta((LeatherArmorMeta) im);
 		}
 		return new BukkitMCItemMeta(im);
 	}
