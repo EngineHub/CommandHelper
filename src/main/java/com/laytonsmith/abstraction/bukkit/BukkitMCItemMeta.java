@@ -6,6 +6,7 @@ import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCAttributeModifier;
 import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCItemMeta;
+import com.laytonsmith.abstraction.MCTagContainer;
 import com.laytonsmith.abstraction.blocks.MCBlockData;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlockData;
@@ -224,5 +225,14 @@ public class BukkitMCItemMeta implements MCItemMeta {
 					(AttributeModifier) m.getHandle());
 		}
 		im.setAttributeModifiers(map);
+	}
+
+	@Override
+	public boolean hasCustomTags() {
+		return !im.getPersistentDataContainer().isEmpty();
+	}
+
+	public MCTagContainer getCustomTags() {
+		return new BukkitMCTagContainer(im.getPersistentDataContainer());
 	}
 }
