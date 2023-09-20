@@ -572,7 +572,6 @@
 									<include>io.gsonfire:gson-fire:jar:*</include>
 									<include>com.squareup.okhttp:logging-interceptor:jar:*</include>
 									<include>com.microsoft.sqlserver:mssql-jdbc:jar:*</include>
-									<include>org.spigotmc:spigot-api:jar:*</include>
 								</includes>
 							</artifactSet>
 							<relocations>
