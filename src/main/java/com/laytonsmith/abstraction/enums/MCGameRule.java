@@ -28,6 +28,7 @@ public enum MCGameRule {
 	DOWARDENSPAWNING("doWardenSpawning"),
 	DOWEATHERCYCLE("doWeatherCycle"),
 	DROWNINGDAMAGE("drowningDamage"),
+	ENDERPEARLSVANISHONDEATH("enderPearlsVanishOnDeath"),
 	FALLDAMAGE("fallDamage"),
 	FIREDAMAGE("fireDamage"),
 	FORGIVEDEADPLAYERS("forgiveDeadPlayers"),

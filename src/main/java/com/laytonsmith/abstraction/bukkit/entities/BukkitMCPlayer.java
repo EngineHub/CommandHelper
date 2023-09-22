@@ -409,19 +409,23 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 		// Get some version specific strings
 		String nms = "net.minecraft.server";
 		String playersPackage = nms + ".players";
-		String ops = "o";
+		String ops = "p";
 		String getPlayerList = "ac";
-		if(Static.getServer().getMinecraftVersion().equals(MCVersion.MC1_19_3)) {
-			getPlayerList = "ab";
-		} else if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_19_1)) {
-			ops = "n";
-			if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_18)) {
-				getPlayerList = "getPlayerList";
-				if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_17)) {
-					String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
-					nms = "net.minecraft.server." + version;
-					playersPackage = nms;
-					ops = "operators";
+		MCVersion mcversion = Static.getServer().getMinecraftVersion();
+		if(mcversion.lt(MCVersion.MC1_20_X)) {
+			ops = "o";
+			if(mcversion.equals(MCVersion.MC1_19_3)) {
+				getPlayerList = "ab";
+			} else if(mcversion.lt(MCVersion.MC1_19_1)) {
+				ops = "n";
+				if(mcversion.lt(MCVersion.MC1_18)) {
+					getPlayerList = "getPlayerList";
+					if(mcversion.lt(MCVersion.MC1_17)) {
+						String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
+						nms = "net.minecraft.server." + version;
+						playersPackage = nms;
+						ops = "operators";
+					}
 				}
 			}
 		}
