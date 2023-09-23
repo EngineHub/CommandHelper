@@ -30,6 +30,7 @@ import com.laytonsmith.abstraction.MCItemMeta;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCMetadataValue;
+import com.laytonsmith.abstraction.MCNamespacedKey;
 import com.laytonsmith.abstraction.MCNote;
 import com.laytonsmith.abstraction.MCPattern;
 import com.laytonsmith.abstraction.MCPlugin;
@@ -1290,6 +1291,11 @@ public final class Interpreter {
 		@Override
 		public String GetUser(Environment env) {
 			return System.getProperty("user.name");
+		}
+
+		@Override
+		public MCNamespacedKey GetNamespacedKey(String key) {
+			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 	}
 

@@ -1,13 +1,14 @@
 package com.laytonsmith.abstraction.bukkit;
 
+import com.laytonsmith.abstraction.MCNamespacedKey;
 import com.laytonsmith.abstraction.MCTagContainer;
 import com.laytonsmith.abstraction.enums.MCTagType;
-import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import org.bukkit.NamespacedKey;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
-import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 public class BukkitMCTagContainer implements MCTagContainer {
 
@@ -19,7 +20,7 @@ public class BukkitMCTagContainer implements MCTagContainer {
 
 	@Override
 	public MCTagContainer newContainer() {
-		return new BukkitMCTagContainer(pdc.getAdapterContext().newPersistentDataContainer());
+		return new BukkitMCTagContainer(this.pdc.getAdapterContext().newPersistentDataContainer());
 	}
 
 	@Override
@@ -28,46 +29,50 @@ public class BukkitMCTagContainer implements MCTagContainer {
 	}
 
 	@Override
-	public Collection getKeys() {
-		return pdc.getKeys();
+	public Set<MCNamespacedKey> getKeys() {
+		Set<MCNamespacedKey> keys = new HashSet<>();
+		for(NamespacedKey key : this.pdc.getKeys()) {
+			keys.add(new BukkitMCNamespacedKey(key));
+		}
+		return keys;
 	}
 
 	@Override
-	public MCTagType getType(Object key) {
-		NamespacedKey namespacedKey = NamespacedKey(key);
+	public MCTagType getType(MCNamespacedKey key) {
+		NamespacedKey namespacedKey = (NamespacedKey) key.getHandle();
 		// Check tag types in order of most frequently used
-		if(pdc.has(namespacedKey, PersistentDataType.STRING)) {
+		if(this.pdc.has(namespacedKey, PersistentDataType.STRING)) {
 			return MCTagType.STRING;
-		} else if(pdc.has(namespacedKey, PersistentDataType.INTEGER)) {
+		} else if(this.pdc.has(namespacedKey, PersistentDataType.INTEGER)) {
 			return MCTagType.INTEGER;
-		} else if(pdc.has(namespacedKey, PersistentDataType.BYTE)) {
+		} else if(this.pdc.has(namespacedKey, PersistentDataType.BYTE)) {
 			return MCTagType.BYTE;
-		} else if(pdc.has(namespacedKey, PersistentDataType.DOUBLE)) {
+		} else if(this.pdc.has(namespacedKey, PersistentDataType.DOUBLE)) {
 			return MCTagType.DOUBLE;
-		} else if(pdc.has(namespacedKey, PersistentDataType.LONG)) {
+		} else if(this.pdc.has(namespacedKey, PersistentDataType.LONG)) {
 			return MCTagType.LONG;
-		} else if(pdc.has(namespacedKey, PersistentDataType.FLOAT)) {
+		} else if(this.pdc.has(namespacedKey, PersistentDataType.FLOAT)) {
 			return MCTagType.FLOAT;
-		} else if(pdc.has(namespacedKey, PersistentDataType.TAG_CONTAINER)) {
+		} else if(this.pdc.has(namespacedKey, PersistentDataType.TAG_CONTAINER)) {
 			return MCTagType.TAG_CONTAINER;
-		} else if(pdc.has(namespacedKey, PersistentDataType.BYTE_ARRAY)) {
+		} else if(this.pdc.has(namespacedKey, PersistentDataType.BYTE_ARRAY)) {
 			return MCTagType.BYTE_ARRAY;
-		} else if(pdc.has(namespacedKey, PersistentDataType.SHORT)) {
+		} else if(this.pdc.has(namespacedKey, PersistentDataType.SHORT)) {
 			return MCTagType.SHORT;
-		} else if(pdc.has(namespacedKey, PersistentDataType.INTEGER_ARRAY)) {
+		} else if(this.pdc.has(namespacedKey, PersistentDataType.INTEGER_ARRAY)) {
 			return MCTagType.INTEGER_ARRAY;
-		} else if(pdc.has(namespacedKey, PersistentDataType.LONG_ARRAY)) {
+		} else if(this.pdc.has(namespacedKey, PersistentDataType.LONG_ARRAY)) {
 			return MCTagType.LONG_ARRAY;
-		} else if(pdc.has(namespacedKey, PersistentDataType.TAG_CONTAINER_ARRAY)) {
+		} else if(this.pdc.has(namespacedKey, PersistentDataType.TAG_CONTAINER_ARRAY)) {
 			return MCTagType.TAG_CONTAINER_ARRAY;
 		}
 		return null;
 	}
 
 	@Override
-	public Object get(Object key, MCTagType type) {
+	public Object get(MCNamespacedKey key, MCTagType type) {
 		PersistentDataType bukkitType = GetPersistentDataType(type);
-		Object value = pdc.get(NamespacedKey(key), bukkitType);
+		Object value = this.pdc.get((NamespacedKey) key.getHandle(), bukkitType);
 		if(value instanceof PersistentDataContainer) {
 			return new BukkitMCTagContainer((PersistentDataContainer) value);
 		} else if(value instanceof PersistentDataContainer[] concreteContainers) {
@@ -81,7 +86,7 @@ public class BukkitMCTagContainer implements MCTagContainer {
 	}
 
 	@Override
-	public void set(Object key, MCTagType type, Object value) {
+	public void set(MCNamespacedKey key, MCTagType type, Object value) {
 		PersistentDataType bukkitType = GetPersistentDataType(type);
 		if(value instanceof MCTagContainer) {
 			value = ((MCTagContainer) value).getHandle();
@@ -92,24 +97,12 @@ public class BukkitMCTagContainer implements MCTagContainer {
 			}
 			value = concreteContainers;
 		}
-		pdc.set(NamespacedKey(key), bukkitType, value);
+		this.pdc.set((NamespacedKey) key.getHandle(), bukkitType, value);
 	}
 
 	@Override
-	public void remove(Object key) {
-		pdc.remove(NamespacedKey(key));
-	}
-
-	private static NamespacedKey NamespacedKey(Object key) {
-		if(key instanceof NamespacedKey) {
-			return (NamespacedKey) key;
-		} else if(key instanceof String) {
-			NamespacedKey namespacedKey = NamespacedKey.fromString((String) key, CommandHelperPlugin.self);
-			if(namespacedKey != null) {
-				return namespacedKey;
-			}
-		}
-		throw new IllegalArgumentException("Invalid namespaced key.");
+	public void remove(MCNamespacedKey key) {
+		this.pdc.remove((NamespacedKey) key.getHandle());
 	}
 
 	private static PersistentDataType GetPersistentDataType(MCTagType type) {
@@ -144,7 +137,7 @@ public class BukkitMCTagContainer implements MCTagContainer {
 
 	@Override
 	public Object getHandle() {
-		return pdc;
+		return this.pdc;
 	}
 
 	@Override
@@ -154,11 +147,11 @@ public class BukkitMCTagContainer implements MCTagContainer {
 
 	@Override
 	public int hashCode() {
-		return pdc.hashCode();
+		return this.pdc.hashCode();
 	}
 
 	@Override
 	public String toString() {
-		return pdc.toString();
+		return this.pdc.toString();
 	}
 }

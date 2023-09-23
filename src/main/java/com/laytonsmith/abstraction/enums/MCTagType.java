@@ -1,6 +1,8 @@
 package com.laytonsmith.abstraction.enums;
 
+import com.laytonsmith.abstraction.MCNamespacedKey;
 import com.laytonsmith.abstraction.MCTagContainer;
+import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CDouble;
@@ -163,7 +165,7 @@ public enum MCTagType {
 					tagValue = tagType.convert(container, entryValue);
 				}
 				try {
-					container.set(key, tagType, tagValue);
+					container.set(StaticLayer.GetConvertor().GetNamespacedKey(key), tagType, tagValue);
 				} catch (ClassCastException ex) {
 					throw new CREFormatException("Tag value does not match expected type.", entryValue.getTarget());
 				} catch (IllegalArgumentException ex) {
@@ -199,7 +201,7 @@ public enum MCTagType {
 		if(this == TAG_CONTAINER) {
 			MCTagContainer container = (MCTagContainer) value;
 			CArray containerArray = CArray.GetAssociativeArray(Target.UNKNOWN);
-			for(Object key : container.getKeys()) {
+			for(MCNamespacedKey key : container.getKeys()) {
 				CArray entry = CArray.GetAssociativeArray(Target.UNKNOWN);
 				MCTagType type = container.getType(key);
 				entry.set("type", type.name(), Target.UNKNOWN);

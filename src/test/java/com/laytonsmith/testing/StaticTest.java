@@ -21,6 +21,7 @@ import com.laytonsmith.abstraction.MCItemMeta;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCMetadataValue;
+import com.laytonsmith.abstraction.MCNamespacedKey;
 import com.laytonsmith.abstraction.MCNote;
 import com.laytonsmith.abstraction.MCPattern;
 import com.laytonsmith.abstraction.MCPlayer;
@@ -889,6 +890,11 @@ public class StaticTest {
 		@Override
 		public String GetUser(Environment env) {
 			return "testUser";
+		}
+
+		@Override
+		public MCNamespacedKey GetNamespacedKey(String key) {
+			throw new UnsupportedOperationException("Not supported yet.");
 		}
 	}
 
