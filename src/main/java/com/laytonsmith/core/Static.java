@@ -91,6 +91,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -761,6 +762,7 @@ public final class Static {
 	}
 
 	private static final Map<String, MCCommandSender> INJECTED_PLAYERS = new HashMap<>();
+	private static final Map<String, AtomicInteger> PLAYER_INJECTION_COUNT_MAP = new HashMap<>();
 	private static MCEntity injectedEntity;
 	private static final Pattern DASHLESS_PATTERN = Pattern.compile("^([A-Fa-f0-9]{8})([A-Fa-f0-9]{4})([A-Fa-f0-9]{4})([A-Fa-f0-9]{4})([A-Fa-f0-9]{12})$");
 
@@ -1221,26 +1223,50 @@ public final class Static {
 		return INJECTED_PLAYERS.get(name.toLowerCase());
 	}
 
+	/**
+	 * Injects the given player into the global player proxy system,
+	 * or increments the injection count of the already injected player with that name.
+	 * @param player - The player to inject.
+	 */
 	public static void InjectPlayer(MCCommandSender player) {
 		String name = player.getName();
 		if("CONSOLE".equals(name)) {
 			name = "~console";
 		}
-		INJECTED_PLAYERS.put(name.toLowerCase(), player);
+		name = name.toLowerCase();
+		synchronized(INJECTED_PLAYERS) {
+			AtomicInteger count = PLAYER_INJECTION_COUNT_MAP.get(name);
+			if(count == null) {
+				INJECTED_PLAYERS.put(name, player);
+				PLAYER_INJECTION_COUNT_MAP.put(name, new AtomicInteger(1));
+			} else {
+				count.incrementAndGet();
+			}
+		}
 	}
 
 	/**
-	 * Removes a player into the global player proxy system. Returns the player removed (or null if none were injected).
-	 *
-	 * @param player
-	 * @return
+	 * Decrements the injection count of the injected player and
+	 * removes it from the global player proxy system if the count reaches 0.
+	 * @param player - The player to uninject.
+	 * @return The player, or {@code null} if the player was not injected.
 	 */
 	public static MCCommandSender UninjectPlayer(MCCommandSender player) {
 		String name = player.getName();
 		if("CONSOLE".equals(name)) {
 			name = "~console";
 		}
-		return INJECTED_PLAYERS.remove(name.toLowerCase());
+		name = name.toLowerCase();
+		synchronized(INJECTED_PLAYERS) {
+			AtomicInteger count = PLAYER_INJECTION_COUNT_MAP.get(name);
+			if(count == null) {
+				return null;
+			} else if(count.decrementAndGet() <= 0) {
+				PLAYER_INJECTION_COUNT_MAP.remove(name);
+				return INJECTED_PLAYERS.remove(name);
+			}
+			return INJECTED_PLAYERS.get(name);
+		}
 	}
 
 	public static void InjectEntity(MCEntity entity) {
