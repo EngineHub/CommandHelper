@@ -1395,6 +1395,24 @@ public class PlayerEvents {
 				return false;
 			}
 		}
+
+		@Override
+		public void preExecution(Environment env, ActiveEvent activeEvent) {
+			if(activeEvent.getUnderlyingEvent() instanceof MCPlayerEvent) {
+
+				// Static lookups of the player might not work here, but the player is passed in with the event.
+				MCPlayer player = ((MCPlayerEvent) activeEvent.getUnderlyingEvent()).getPlayer();
+				Static.InjectPlayer(player);
+			}
+		}
+
+		@Override
+		public void postExecution(Environment env, ActiveEvent activeEvent) {
+			if(activeEvent.getUnderlyingEvent() instanceof MCPlayerEvent) {
+				MCPlayer player = ((MCPlayerEvent) activeEvent.getUnderlyingEvent()).getPlayer();
+				Static.UninjectPlayer(player);
+			}
+		}
 	}
 
 	@api
