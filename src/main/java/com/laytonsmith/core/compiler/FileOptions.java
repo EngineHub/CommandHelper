@@ -68,7 +68,7 @@ public final class FileOptions {
 		compilerOptions = parseEnumSet(getDefault(parsedOptions, "compileroptions", ""), CompilerOption.class);
 		copyright = getDefault(parsedOptions, "copyright", "").trim();
 		license = getDefault(parsedOptions, "license", "").trim();
-		allDynamicProcs = parseBoolean(getDefault(parsedOptions, "allDynamicProcs", "false"));
+		allDynamicProcs = parseBoolean(getDefault(parsedOptions, "alldynamicprocs", "false"));
 	}
 
 	private String getDefault(Map<String, String> map, String key, String defaultIfNone) {
