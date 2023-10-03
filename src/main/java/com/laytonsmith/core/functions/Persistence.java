@@ -5,16 +5,26 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.annotations.seealso;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.LogLevel;
+import com.laytonsmith.core.compiler.signature.FunctionSignatures;
+import com.laytonsmith.core.compiler.signature.SignatureBuilder;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.InstanceofUtil;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.ConstraintLocation;
+import com.laytonsmith.core.constructs.generics.Constraints;
+import com.laytonsmith.core.constructs.generics.GenericDeclaration;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.constraints.UnboundedConstraint;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
@@ -91,11 +101,11 @@ public class Persistence {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			String key = GetNamespace(args, args.length - 1, getName(), t);
 			String value = null;
 			try {
-				value = Construct.json_encode(args[args.length - 1], t);
+				value = Construct.json_encode(args[args.length - 1], t, env);
 			} catch (MarshalException e) {
 				throw new CREFormatException(e.getMessage(), t);
 			}
@@ -153,9 +163,10 @@ public class Persistence {
 
 		@Override
 		public String docs() {
-			return "mixed {[namespace, ...,] key} Returns a stored value stored with store_value. If the key doesn't exist in storage, null"
-					+ " is returned. On a more detailed note: If the value stored in the persistence database is not actually a construct,"
-					+ " then null is also returned.";
+			return "auto {[namespace, ...,] key} Returns a stored value stored with store_value. If the key doesn't exist in storage, null"
+					+ " is returned. On a more detailed note: If the value stored in the persistence database is not actually a type known to MethodsScript,"
+					+ " then null is also returned. The type of the returned object can be specified with the type parameter. If the"
+					+ " stored type cannot be coerced into the specified type, a CastException is thrown.";
 		}
 
 		@Override
@@ -174,7 +185,7 @@ public class Persistence {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) {
 			Object o;
 			String namespace = GetNamespace(args, null, getName(), t);
 			MSLog.GetLogger().Log(MSLog.Tags.PERSISTENCE, LogLevel.DEBUG, "Getting value: " + namespace, t);
@@ -191,15 +202,37 @@ public class Persistence {
 				if(obj == null) {
 					return CNull.NULL;
 				}
-				o = Construct.json_decode(obj.toString(), t);
+				o = Construct.json_decode(obj.toString(), t, env);
 			} catch (MarshalException ex) {
 				throw ConfigRuntimeException.CreateUncatchableException(ex.getMessage(), t);
 			}
 			try {
-				return (Mixed) o;
+				Mixed ret = (Mixed) o;
+				if(generics == null) {
+					return ret;
+				}
+				LeftHandSideType expectedReturn = generics.getParameters().get(0);
+				if(InstanceofUtil.isInstanceof(ret, expectedReturn, env)) {
+					return ret;
+				} else {
+					return ArgumentValidation.typeCoerce(ret, expectedReturn, env, t);
+				}
 			} catch (ClassCastException e) {
 				return CNull.NULL;
 			}
+		}
+
+		@Override
+		public FunctionSignatures getSignatures() {
+			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN,
+				new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+					new UnboundedConstraint(Target.UNKNOWN, "T")));
+			LeftHandSideType t = LeftHandSideType.fromNativeGenericDefinitionType(genericDeclaration, "T", null);
+			return new SignatureBuilder(t)
+					.varParam(CString.TYPE, "namespace", "Automatically prepended namespace parameters.")
+					.param(CString.TYPE, "key", "The key to lookup.")
+					.setGenericDeclaration(genericDeclaration, "The type that should be returned, by default auto.")
+					.build();
 		}
 
 		@Override
@@ -264,8 +297,8 @@ public class Persistence {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			PersistenceNetwork p = environment.getEnv(StaticRuntimeEnv.class).GetPersistenceNetwork();
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			PersistenceNetwork p = env.getEnv(StaticRuntimeEnv.class).GetPersistenceNetwork();
 			List<String> keyChain = new ArrayList<String>();
 			keyChain.add("storage");
 			String namespace = GetNamespace(args, null, getName(), t);
@@ -279,13 +312,13 @@ public class Persistence {
 			} catch (IllegalArgumentException e) {
 				throw new CREFormatException(e.getMessage(), t, e);
 			}
-			CArray ca = CArray.GetAssociativeArray(t);
+			CArray ca = CArray.GetAssociativeArray(t, null, env);
 			MSLog.GetLogger().Log(MSLog.Tags.PERSISTENCE, LogLevel.DEBUG, list.size() + " value(s) are being returned", t);
 			for(String[] e : list.keySet()) {
 				try {
 					String key = StringUtils.Join(e, ".").replaceFirst("storage\\.", ""); //Get that junk out of here
 					ca.set(new CString(key, t),
-							Construct.json_decode(list.get(e), t), t);
+							Construct.json_decode(list.get(e), t, env), t, env);
 				} catch (MarshalException ex) {
 					Logger.getLogger(Persistence.class.getName()).log(Level.SEVERE, null, ex);
 				}
@@ -345,7 +378,7 @@ public class Persistence {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			try {
 				return CBoolean.get(env.getEnv(StaticRuntimeEnv.class).GetPersistenceNetwork()
 						.hasKey(("storage." + GetNamespace(args, null, getName(), t)).split("\\.")));
@@ -403,12 +436,12 @@ public class Persistence {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String namespace = GetNamespace(args, null, getName(), t);
 			MSLog.GetLogger().Log(MSLog.Tags.PERSISTENCE, LogLevel.DEBUG, "Clearing value: " + namespace, t);
 			try {
-				environment.getEnv(StaticRuntimeEnv.class).GetPersistenceNetwork().clearKey(
-						environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager(),
+				env.getEnv(StaticRuntimeEnv.class).GetPersistenceNetwork().clearKey(
+						env.getEnv(StaticRuntimeEnv.class).GetDaemonManager(),
 						("storage." + namespace).split("\\."));
 			} catch (DataSourceException | ReadOnlyException | IOException ex) {
 				throw new CREIOException(ex.getMessage(), t, ex);

@@ -1,6 +1,10 @@
 package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.core.constructs.generics.ConcreteGenericParameter;
+import com.laytonsmith.core.constructs.generics.ConstraintValidator;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -15,33 +19,52 @@ public class IVariable extends Construct implements Cloneable {
 	public static final long serialVersionUID = 1L;
 	private Mixed varValue;
 	private final String name;
-	private final CClassType type;
+	private final LeftHandSideType type;
 	private final Target definedTarget;
 	public static final String VARIABLE_NAME_REGEX = "@[\\p{L}0-9_]+";
 
 	public IVariable(String name, Target t) throws ConfigCompileException {
+		this(Auto.TYPE, name, new CString("", t), t, null);
+	}
+
+	public IVariable(CClassType checkedType, String name, Mixed checkedValue, Target t) throws ConfigCompileException {
+		this(checkedType, name, checkedValue, t, null);
+	}
+
+	/**
+	 * Temporary function that sets generic parameters to null. This will be removed in the future once the compiler
+	 * supports generics, at which point you should explicitely pass in null to the other constructor if there were
+	 * no generics defined.
+	 * @param type
+	 * @param name
+	 * @param value
+	 * @param t
+	 * @param env
+	 * @throws ConfigCompileException
+	 * @deprecated Use {@link #IVariable(CClassType, String, Mixed, Target, LeftHandGenericUse, Environment)}
+	 */
+	@Deprecated
+	public IVariable(CClassType type, String name, Mixed value, Target t, Environment env) throws ConfigCompileException {
+		this(type.asLeftHandSideType(), name, value, t, env);
+	}
+
+	/**
+	 * Constructs a new IVariable instance.
+	 * @param type The type of value, may be auto
+	 * @param name The name of the variable
+	 * @param value The value, if it was provided. May be CNull, but cannot be java null
+	 * @param t The code target where this value was defined
+	 * @param env The environment object
+	 * @throws ConfigCompileException If the name of the variable does not match the required regex, or the generic
+	 * parameters do not validate (either because they are wrong, or because they were provided when there isn't a
+	 * generic definition on the ClassType object).
+	 * @throws NullPointerException If the value was null
+	 */
+	public IVariable(LeftHandSideType type, String name, Mixed value, Target t,
+					Environment env) throws ConfigCompileException {
 		super(name, ConstructType.IVARIABLE, t);
 		if(!name.matches(VARIABLE_NAME_REGEX)) {
 			throw new ConfigCompileException("IVariables must match the regex: " + VARIABLE_NAME_REGEX, t);
-		}
-		this.varValue = new CString("", t);
-		this.name = name;
-		this.type = Auto.TYPE;
-		this.definedTarget = t;
-	}
-
-	public IVariable(CClassType checkedType, String name, Mixed checkedValue, Target t) {
-		super(name, ConstructType.IVARIABLE, t);
-		this.type = checkedType;
-		this.varValue = checkedValue;
-		this.name = name;
-		this.definedTarget = t;
-	}
-
-	public IVariable(CClassType type, String name, Mixed value, Target t, Environment env) {
-		super(name, ConstructType.IVARIABLE, t);
-		if(type.equals(CVoid.TYPE)) {
-			throw new CRECastException("Variables may not be of type void", t);
 		}
 		if(value == null) {
 			throw new NullPointerException();
@@ -49,12 +72,25 @@ public class IVariable extends Construct implements Cloneable {
 		if(value instanceof CVoid) {
 			throw new CRECastException("Void may not be assigned to a variable", t);
 		}
-		if(!type.equals(Auto.TYPE) && !(value instanceof CNull)) {
-			if(!InstanceofUtil.isInstanceof(value, type, env)) {
-				throw new CRECastException(name + " is of type " + type.val() + ", but a value of type "
-						+ value.typeof() + " was assigned to it.", t);
+		boolean hasValidType = true;
+		for(ConcreteGenericParameter types : type.getTypes()) {
+			LeftHandGenericUse genericDefinition = types.getLeftHandGenericUse();
+			CClassType subType = types.getType();
+			if(subType.equals(CVoid.TYPE)) {
+				throw new CRECastException("Variables may not be of type void", t);
+			}
+			ConstraintValidator.ValidateLHS(t, subType, genericDefinition, env);
+			if(env != null && (!subType.equals(Auto.TYPE) && !(value instanceof CNull))) {
+				if(!InstanceofUtil.isInstanceof(value, subType, env)) {
+					hasValidType = false;
+				}
 			}
 		}
+		if(!hasValidType) {
+			throw new CRECastException(name + " is of type " + type.val() + ", but a value of type "
+					+ value.typeof(env) + " was assigned to it.", t);
+		}
+
 		this.type = type;
 		this.varValue = value;
 		this.name = name;
@@ -108,7 +144,7 @@ public class IVariable extends Construct implements Cloneable {
 	 *
 	 * @return
 	 */
-	public CClassType getDefinedType() {
+	public LeftHandSideType getDefinedType() {
 		return type;
 	}
 
@@ -139,6 +175,11 @@ public class IVariable extends Construct implements Cloneable {
 	@Override
 	public CClassType[] getInterfaces() {
 		return new CClassType[]{};
+	}
+
+	@Override
+	public GenericParameters getGenericParameters() {
+		return null;
 	}
 
 }

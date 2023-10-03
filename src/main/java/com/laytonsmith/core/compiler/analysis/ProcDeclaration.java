@@ -1,10 +1,10 @@
 package com.laytonsmith.core.compiler.analysis;
 
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.NodeModifiers;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +28,7 @@ public class ProcDeclaration extends Declaration {
 	 * @param modifiers Node modifiers for this Procedure.
 	 * @param t - The procedure target.
 	 */
-	public ProcDeclaration(String identifier, CClassType type, List<ParamDeclaration> parameters, NodeModifiers modifiers, Target t) {
+	public ProcDeclaration(String identifier, LeftHandSideType type, List<ParamDeclaration> parameters, NodeModifiers modifiers, Target t) {
 		super(Namespace.PROCEDURE, identifier, type, modifiers, t);
 		this.parameters = parameters;
 	}

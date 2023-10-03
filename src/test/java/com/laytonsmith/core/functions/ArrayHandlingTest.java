@@ -14,20 +14,20 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.testing.C;
 import com.laytonsmith.testing.StaticTest;
+import org.junit.Before;
+import org.junit.Test;
+
 import static com.laytonsmith.testing.StaticTest.Run;
 import static com.laytonsmith.testing.StaticTest.SRun;
 import static com.laytonsmith.testing.StaticTest.TestClassDocs;
 import static com.laytonsmith.testing.StaticTest.assertCEquals;
 import static com.laytonsmith.testing.StaticTest.assertReturn;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
-import org.junit.Before;
-import org.junit.Test;
-
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.hamcrest.core.Is.*;
 
 /**
  *
@@ -48,7 +48,7 @@ public class ArrayHandlingTest {
 	@Before
 	public void setUp() {
 		fakePlayer = StaticTest.GetOnlinePlayer();
-		commonArray = new CArray(Target.UNKNOWN, new CInt(1, Target.UNKNOWN), new CInt(2, Target.UNKNOWN), new CInt(3, Target.UNKNOWN));
+		commonArray = new CArray(Target.UNKNOWN, null, env, new CInt(1, Target.UNKNOWN), new CInt(2, Target.UNKNOWN), new CInt(3, Target.UNKNOWN));
 		env.getEnv(CommandHelperEnvironment.class).SetPlayer(fakePlayer);
 	}
 
@@ -64,7 +64,7 @@ public class ArrayHandlingTest {
 	public void testArraySize() throws Exception, CancelCommandException {
 		ArrayHandling.array_size a = new ArrayHandling.array_size();
 		CArray arr = commonArray;
-		Mixed ret = a.exec(Target.UNKNOWN, env, arr);
+		Mixed ret = a.exec(Target.UNKNOWN, env, null, arr);
 		assertReturn(ret, C.INT);
 		assertCEquals(C.onstruct(3), ret);
 	}
@@ -72,7 +72,7 @@ public class ArrayHandlingTest {
 	@Test(expected = Exception.class, timeout = 10000)
 	public void testArraySizeEx() throws CancelCommandException {
 		ArrayHandling.array_size a = new ArrayHandling.array_size();
-		a.exec(Target.UNKNOWN, env, C.Int(0));
+		a.exec(Target.UNKNOWN, env, null, C.Int(0));
 	}
 
 	@Test//(timeout = 10000)
@@ -121,50 +121,50 @@ public class ArrayHandlingTest {
 	@Test(timeout = 10000)
 	public void testArrayContains() throws CancelCommandException {
 		ArrayHandling.array_contains a = new ArrayHandling.array_contains();
-		assertCEquals(C.onstruct(true), a.exec(Target.UNKNOWN, env, commonArray, C.onstruct(1)));
-		assertCEquals(C.onstruct(false), a.exec(Target.UNKNOWN, env, commonArray, C.onstruct(55)));
+		assertCEquals(C.onstruct(true), a.exec(Target.UNKNOWN, env, null, commonArray, C.onstruct(1)));
+		assertCEquals(C.onstruct(false), a.exec(Target.UNKNOWN, env, null, commonArray, C.onstruct(55)));
 	}
 
 	@Test(timeout = 10000)
 	public void testArraySContains() throws CancelCommandException {
 		ArrayHandling.array_scontains a = new ArrayHandling.array_scontains();
-		assertCEquals(C.onstruct(true), a.exec(Target.UNKNOWN, env, commonArray, C.onstruct(1)));
-		assertCEquals(C.onstruct(false), a.exec(Target.UNKNOWN, env, commonArray, C.onstruct(55)));
-		assertCEquals(C.onstruct(false), a.exec(Target.UNKNOWN, env, commonArray, new CString("2", Target.UNKNOWN)));
+		assertCEquals(C.onstruct(true), a.exec(Target.UNKNOWN, env, null, commonArray, C.onstruct(1)));
+		assertCEquals(C.onstruct(false), a.exec(Target.UNKNOWN, env, null, commonArray, C.onstruct(55)));
+		assertCEquals(C.onstruct(false), a.exec(Target.UNKNOWN, env, null, commonArray, new CString("2", Target.UNKNOWN)));
 	}
 
 	@Test(expected = Exception.class, timeout = 10000)
 	public void testArrayContainsEx() throws CancelCommandException {
 		ArrayHandling.array_contains a = new ArrayHandling.array_contains();
-		a.exec(Target.UNKNOWN, env, C.Int(0), C.Int(1));
+		a.exec(Target.UNKNOWN, env, null, C.Int(0), C.Int(1));
 	}
 
 	@Test(timeout = 10000)
 	public void testArrayGet() throws CancelCommandException {
 		ArrayHandling.array_get a = new ArrayHandling.array_get();
-		assertCEquals(C.onstruct(1), a.exec(Target.UNKNOWN, env, commonArray, C.onstruct(0)));
+		assertCEquals(C.onstruct(1), a.exec(Target.UNKNOWN, env, null, commonArray, C.onstruct(0)));
 	}
 
 	@Test(expected = Exception.class, timeout = 10000)
 	public void testArrayGetEx() throws CancelCommandException {
 		ArrayHandling.array_get a = new ArrayHandling.array_get();
-		a.exec(Target.UNKNOWN, env, C.Int(0), C.Int(1));
+		a.exec(Target.UNKNOWN, env, null, C.Int(0), C.Int(1));
 	}
 
 	@Test(expected = ConfigRuntimeException.class, timeout = 10000)
 	public void testArrayGetBad() throws CancelCommandException {
 		ArrayHandling.array_get a = new ArrayHandling.array_get();
-		a.exec(Target.UNKNOWN, env, commonArray, C.onstruct(55));
+		a.exec(Target.UNKNOWN, env, null, commonArray, C.onstruct(55));
 	}
 
 	@Test(timeout = 10000)
 	public void testArrayPush() throws CancelCommandException {
 		ArrayHandling.array_push a = new ArrayHandling.array_push();
-		assertReturn(a.exec(Target.UNKNOWN, env, commonArray, C.onstruct(4)), C.VOID);
-		assertCEquals(C.onstruct(1), commonArray.get(0, Target.UNKNOWN));
-		assertCEquals(C.onstruct(2), commonArray.get(1, Target.UNKNOWN));
-		assertCEquals(C.onstruct(3), commonArray.get(2, Target.UNKNOWN));
-		assertCEquals(C.onstruct(4), commonArray.get(3, Target.UNKNOWN));
+		assertReturn(a.exec(Target.UNKNOWN, env, null, commonArray, C.onstruct(4)), C.VOID);
+		assertCEquals(C.onstruct(1), commonArray.get(0, Target.UNKNOWN, env));
+		assertCEquals(C.onstruct(2), commonArray.get(1, Target.UNKNOWN, env));
+		assertCEquals(C.onstruct(3), commonArray.get(2, Target.UNKNOWN, env));
+		assertCEquals(C.onstruct(4), commonArray.get(3, Target.UNKNOWN, env));
 	}
 
 	@Test(timeout = 10000)
@@ -178,12 +178,17 @@ public class ArrayHandlingTest {
 	@Test(expected = Exception.class)
 	public void testArrayPushEx() throws CancelCommandException {
 		ArrayHandling.array_push a = new ArrayHandling.array_push();
-		a.exec(Target.UNKNOWN, env, C.Int(0), C.Int(1));
+		a.exec(Target.UNKNOWN, env, null, C.Int(0), C.Int(1));
 	}
 
 	@Test(timeout = 10000)
 	public void testArrayResize() throws Exception {
-		String script = "assign(@array, array(1)) msg(@array) array_resize(@array, 2) msg(@array) array_resize(@array, 3, 'hello') msg(@array)";
+		String script = "assign(@array, array(1))"
+				+ " msg(@array)"
+				+ " array_resize(@array, 2)"
+				+ " msg(@array)"
+				+ " array_resize(@array, 3, 'hello')"
+				+ " msg(@array)";
 		StaticTest.Run(script, fakePlayer);
 		verify(fakePlayer).sendMessage("{1}");
 		verify(fakePlayer).sendMessage("{1, null}");
@@ -391,7 +396,11 @@ public class ArrayHandlingTest {
 
 	@Test
 	public void testArrayGetClone() throws Exception { // This is expected to be a deep clone.
-		Run("@a = array(array(array('value'))); @b = @a[]; @b[0][0][0] = 'changedValue'; msg(@a[0][0][0]); msg(@b[0][0][0]);", fakePlayer);
+		Run("@a = array(array(array('value')));"
+				+ " @b = @a[];"
+				+ " @b[0][0][0] = 'changedValue';"
+				+ " msg(@a[0][0][0]);"
+				+ " msg(@b[0][0][0]);", fakePlayer);
 		verify(fakePlayer).sendMessage("value");
 		verify(fakePlayer).sendMessage("changedValue");
 	}
@@ -522,6 +531,8 @@ public class ArrayHandlingTest {
 
 	@Test
 	public void testArrayIntersect() throws Exception {
+		assertThat(SRun("array_intersect(array(1, 2, 3), array(4, 5, 6), closure(@a, @b) { return(true); })", fakePlayer),
+				is("{1, 2, 3}"));
 		assertThat(SRun("array_intersect(array(one: 1, two: 2), array(one: 1, three: 3))", fakePlayer), is("{one: 1}"));
 		try {
 			SRun("array_intersect(array(one: 1, two: 2), array(one: 1, three: 3), 'EQUALS')", fakePlayer);
@@ -540,8 +551,6 @@ public class ArrayHandlingTest {
 		assertThat(SRun("array_intersect(array('1', '2', '3'), array(1, 2, 3), 'STRICT_EQUALS')", fakePlayer), is("{}"));
 		assertThat(SRun("array_intersect(array('1', '2', '3'), array('1', 2, 3), 'STRICT_EQUALS')", fakePlayer), is("{1}"));
 
-		assertThat(SRun("array_intersect(array(1, 2, 3), array(4, 5, 6), closure(@a, @b) { return(true); })", fakePlayer),
-				is("{1, 2, 3}"));
 		assertThat(SRun("array_intersect(array(1, 2, 3), array(1, 2, 3), closure(@a, @b) { return(false); })", fakePlayer),
 				is("{}"));
 

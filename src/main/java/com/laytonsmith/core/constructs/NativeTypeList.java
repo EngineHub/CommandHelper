@@ -47,8 +47,6 @@ public class NativeTypeList {
 	 * Given a simple name of a class, attempts to resolve
 	 * within the native types (not user defined types). If the class can't be found, null is returned,
 	 * but that just means that it's not defined in the native types, not that it doesn't exist at all.
-	 *
-	 * Use {@link FullyQualifiedClassName#forDefaultClasses(java.lang.String)} instead.
 	 * @param simpleName
 	 * @return
 	 */
@@ -75,7 +73,7 @@ public class NativeTypeList {
 	}
 
 	/**
-	 * Returns a list of all the known native classes. This method is threadsafe.
+	 * Returns a list of all the known native classes. This method is threadsafe, and only runs once.
 	 *
 	 * @return
 	 */
@@ -104,14 +102,14 @@ public class NativeTypeList {
 							.getClassesWithAnnotationThatExtend(MEnum.class, Enum.class)) {
 						String name = (String) c.getAnnotation(MEnum.class).getValue("value");
 						nativeTypes.add(name);
-						fqNativeTypesPrivate.add(FullyQualifiedClassName.forFullyQualifiedClass(name));
+						fqNativeTypesPrivate.add(FullyQualifiedClassName.forNativeEnum(c.loadClass()));
 					}
 
 					for(ClassMirror<? extends DynamicEnum> c : ClassDiscovery.getDefaultInstance()
 							.getClassesWithAnnotationThatExtend(MDynamicEnum.class, DynamicEnum.class)) {
 						String name = (String) c.getAnnotation(MDynamicEnum.class).getValue("value");
 						nativeTypes.add(name);
-						fqNativeTypesPrivate.add(FullyQualifiedClassName.forFullyQualifiedClass(name));
+						fqNativeTypesPrivate.add(FullyQualifiedClassName.forDynamicEnum(c.loadClass()));
 					}
 					fqNativeTypes = fqNativeTypesPrivate;
 					NativeTypeList.nativeTypes = nativeTypes;
@@ -125,7 +123,7 @@ public class NativeTypeList {
 	private static final Map<FullyQualifiedClassName, Class<? extends Mixed>> NATIVE_CLASS_CACHE
 			= new ConcurrentHashMap<>();
 
-	private static interface NullClass extends Mixed {}
+	private interface NullClass extends Mixed {}
 
 	/**
 	 * ConcurrentHashMap cannot accept null values (or keys) so we have to use this to put into the
@@ -146,7 +144,7 @@ public class NativeTypeList {
 	 * be thrown.
 	 */
 	public static Class<? extends Mixed> getNativeClass(FullyQualifiedClassName fqcn) throws ClassNotFoundException {
-		if(fqcn.getNativeClass() != null) {
+		if(fqcn.isNativeClassLoaded() && fqcn.getNativeClass() != null) {
 			return fqcn.getNativeClass();
 		}
 		// This is super super expensive, so we cannot afford to run this more than once per class. Even more
@@ -214,7 +212,7 @@ public class NativeTypeList {
 		}
 		try {
 			Class<? extends Enum<?>> e = getNativeEnum(fqcn);
-			return MEnumType.FromEnum(fqcn, (Class<Enum<?>>) e, null, null);
+			return MEnumType.FromEnum(fqcn, (Class<Enum<?>>) e, null, null, null);
 		} catch (ClassNotFoundException ex) {
 			// Try DynamicEnums
 			for(ClassMirror<? extends DynamicEnum> c : ClassDiscovery.getDefaultInstance()
@@ -233,7 +231,7 @@ public class NativeTypeList {
 					Enum[] constants = values.stream()
 							.map((Object e) -> (Enum<?>) ReflectionUtils.get(DynamicEnum.class, e, "abstracted"))
 							.collect(Collectors.toList()).toArray(new Enum[values.size()]);
-					return MEnumType.FromPartialEnum(fqcn, c.loadClass(), constants, null, null);
+					return MEnumType.FromPartialEnum(fqcn, c.loadClass(), null, constants, null, null);
 				}
 			}
 		}

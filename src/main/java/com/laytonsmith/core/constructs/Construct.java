@@ -6,11 +6,21 @@ import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.constructs.generics.ConcreteGenericParameter;
+import com.laytonsmith.core.constructs.generics.Constraints;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.MarshalException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.objects.AccessModifier;
 import com.laytonsmith.core.objects.ObjectModifier;
 import com.laytonsmith.core.objects.ObjectType;
+import com.laytonsmith.core.objects.UserObject;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+
 import java.io.File;
 import java.math.BigInteger;
 import java.net.URL;
@@ -26,9 +36,6 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
 
 /**
  *
@@ -50,13 +57,21 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	private Target target;
 	private transient boolean wasIdentifier = false;
 
+	/**
+	 * Gets the ConstructType of this Construct
+	 * @return
+	 * @deprecated Nothing in general should be Construct specific, and should be replaced with more generic
+	 * instanceof checks, rather than getting the ConstructType.
+	 */
+	@Deprecated
 	public ConstructType getCType() {
 		return ctype;
 	}
 
 	/**
-	 * Convenience method to check if a Mixed value is of the specified type. If it is not, or it isn't a construct
-	 * in the first place, false is returned.
+	 * Convenience method to check if a Mixed value is of the specified type. If it is not, or it isn't a construct in
+	 * the first place, false is returned.
+	 *
 	 * @param m
 	 * @param type
 	 * @return
@@ -127,9 +142,10 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	}
 
 	/**
-	 * Sets the wasIdentifier property on the left side if and only if both values are constructs.
-	 * Default value can be provided if the left value is a construct, but not the right, then this value will
-	 * be set. If it is null, the default is preserved.
+	 * Sets the wasIdentifier property on the left side if and only if both values are constructs. Default value can be
+	 * provided if the left value is a construct, but not the right, then this value will be set. If it is null, the
+	 * default is preserved.
+	 *
 	 * @param left
 	 * @param right
 	 */
@@ -185,12 +201,12 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	 * @return
 	 * @throws com.laytonsmith.core.exceptions.MarshalException
 	 */
-	public static String json_encode(Mixed c, Target t) throws MarshalException {
-		return JSONValue.toJSONString(json_encode0(c, t));
+	public static String json_encode(Mixed c, Target t, Environment env) throws MarshalException {
+		return JSONValue.toJSONString(json_encode0(c, t, env));
 	}
 
-	private static Object json_encode0(Mixed c, Target t) throws MarshalException {
-		if(c.isInstanceOf(CString.TYPE) || c instanceof Command) {
+	private static Object json_encode0(Mixed c, Target t, Environment env) throws MarshalException {
+		if(c.isInstanceOf(CString.TYPE, null, env) || c instanceof Command) {
 			return c.val();
 		} else if(c instanceof CVoid) {
 			return "";
@@ -202,18 +218,18 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 			return ((CBoolean) c).getBoolean();
 		} else if(c instanceof CNull) {
 			return null;
-		} else if(c.isInstanceOf(CArray.TYPE)) {
+		} else if(c.isInstanceOf(CArray.TYPE, null, env)) {
 			CArray ca = (CArray) c;
 			if(!ca.inAssociativeMode()) {
 				List<Object> list = new ArrayList<Object>();
-				for(int i = 0; i < ca.size(); i++) {
-					list.add(json_encode0(ca.get(i, t), t));
+				for(int i = 0; i < ca.size(env); i++) {
+					list.add(json_encode0(ca.get(i, t, env), t, env));
 				}
 				return list;
 			} else {
 				Map<String, Object> map = new HashMap<String, Object>();
 				for(String key : ca.stringKeySet()) {
-					map.put(key, json_encode0(ca.get(key, t), t));
+					map.put(key, json_encode0(ca.get(key, t, env), t, env));
 				}
 				return map;
 			}
@@ -230,7 +246,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	 * @return
 	 * @throws com.laytonsmith.core.exceptions.MarshalException
 	 */
-	public static Construct json_decode(String s, Target t) throws MarshalException {
+	public static Construct json_decode(String s, Target t, Environment env) throws MarshalException {
 		if(s == null) {
 			return CNull.NULL;
 		}
@@ -240,15 +256,15 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 		if(s.startsWith("{")) {
 			//Object
 			JSONObject obj = (JSONObject) JSONValue.parse(s);
-			CArray ca = CArray.GetAssociativeArray(t);
+			CArray ca = CArray.GetAssociativeArray(t, null, env);
 			if(obj == null) {
 				//From what I can tell, this happens when the json object is improperly formatted,
 				//so go ahead and throw an exception
 				throw new MarshalException();
 			}
 			for(Object key : obj.keySet()) {
-				ca.set(convertJSON(key, t),
-						convertJSON(obj.get(key), t), t);
+				ca.set(convertJSON(key, t, env),
+						convertJSON(obj.get(key), t, env), t, env);
 			}
 			return ca;
 		} else if(s.startsWith("[")) {
@@ -257,9 +273,9 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 			if(array == null) {
 				throw new MarshalException();
 			}
-			CArray carray = new CArray(t);
+			CArray carray = new CArray(t, null, env);
 			for(int i = 0; i < array.size(); i++) {
-				carray.push(convertJSON(array.get(i), t), t);
+				carray.push(convertJSON(array.get(i), t, env), t, env);
 			}
 			return carray;
 		} else {
@@ -271,11 +287,11 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 				return CNull.NULL;
 			}
 			Object o = array.get(0);
-			return convertJSON(o, t);
+			return convertJSON(o, t, env);
 		}
 	}
 
-	private static Construct convertJSON(Object o, Target t) throws MarshalException {
+	private static Construct convertJSON(Object o, Target t, Environment env) throws MarshalException {
 		if(o instanceof String) {
 			return new CString((String) o, Target.UNKNOWN);
 		} else if(o instanceof Number) {
@@ -291,18 +307,18 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 			return CBoolean.get((Boolean) o);
 		} else if(o instanceof java.util.List) {
 			java.util.List l = (java.util.List) o;
-			CArray ca = new CArray(t);
+			CArray ca = new CArray(t, null, env);
 			for(Object l1 : l) {
-				ca.push(convertJSON(l1, t), t);
+				ca.push(convertJSON(l1, t, env), t, env);
 			}
 			return ca;
 		} else if(o == null) {
 			return CNull.NULL;
 		} else if(o instanceof java.util.Map) {
-			CArray ca = CArray.GetAssociativeArray(t);
+			CArray ca = CArray.GetAssociativeArray(t, null, env);
 			for(Object key : ((java.util.Map) o).keySet()) {
-				ca.set(convertJSON(key, t),
-						convertJSON(((java.util.Map) o).get(key), t), t);
+				ca.set(convertJSON(key, t, env),
+						convertJSON(((java.util.Map) o).get(key), t, env), t, env);
 			}
 			return ca;
 		} else {
@@ -320,7 +336,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 			Double d1 = Double.valueOf(this.value);
 			Double d2 = Double.valueOf(c.value);
 			return d1.compareTo(d2);
-		} catch (NumberFormatException e) {
+		} catch(NumberFormatException e) {
 			return this.value.compareTo(c.value);
 		}
 	}
@@ -333,8 +349,8 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	 * @return
 	 * @throws ClassCastException
 	 */
-	public static Construct GetConstruct(Object o) throws ClassCastException {
-		return Construct.GetConstruct(o, false);
+	public static Construct GetConstruct(Object o, Environment env) throws ClassCastException {
+		return Construct.GetConstruct(o, false, env);
 	}
 
 	/**
@@ -346,7 +362,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	 * @return
 	 * @throws ClassCastException
 	 */
-	public static Construct GetConstruct(Object o, boolean allowResources) throws ClassCastException {
+	public static Construct GetConstruct(Object o, boolean allowResources, Environment env) throws ClassCastException {
 		if(o == null) {
 			return CNull.NULL;
 		} else if(o instanceof CharSequence) {
@@ -364,18 +380,18 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 			return CBoolean.get((Boolean) o);
 		} else if(o instanceof Map) {
 			//associative array
-			CArray a = CArray.GetAssociativeArray(Target.UNKNOWN);
+			CArray a = CArray.GetAssociativeArray(Target.UNKNOWN, null, env);
 			Map m = (Map) o;
 			for(Entry<?, ?> entry : (Set<Entry<?, ?>>) m.entrySet()) {
-				a.set(entry.getKey().toString(), GetConstruct(entry.getValue(), allowResources), Target.UNKNOWN);
+				a.set(entry.getKey().toString(), GetConstruct(entry.getValue(), allowResources, env), Target.UNKNOWN, env);
 			}
 			return a;
 		} else if(o instanceof Collection) {
 			//normal array
-			CArray a = new CArray(Target.UNKNOWN);
+			CArray a = new CArray(Target.UNKNOWN, null, env);
 			Collection l = (Collection) o;
 			for(Object obj : l) {
-				a.push(GetConstruct(obj, allowResources), Target.UNKNOWN);
+				a.push(GetConstruct(obj, allowResources, env), Target.UNKNOWN, env);
 			}
 			return a;
 		} else {
@@ -401,7 +417,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	 * @return
 	 * @throws ClassCastException
 	 */
-	public static Object GetPOJO(Mixed c) throws ClassCastException {
+	public static Object GetPOJO(Mixed c, Environment env) throws ClassCastException {
 		if(c instanceof CNull) {
 			return null;
 		} else if(c instanceof CString) {
@@ -412,20 +428,20 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 			return Long.valueOf(((CInt) c).getInt());
 		} else if(c instanceof CDouble) {
 			return Double.valueOf(((CDouble) c).getDouble());
-		} else if(c.isInstanceOf(CArray.TYPE)) {
+		} else if(c.isInstanceOf(CArray.TYPE, null, env)) {
 			CArray ca = (CArray) c;
 			if(ca.inAssociativeMode()) {
 				//SortedMap
 				SortedMap<String, Object> map = new TreeMap<>();
 				for(Entry<String, Mixed> entry : ca.getAssociativeArray().entrySet()) {
-					map.put(entry.getKey(), GetPOJO(entry.getValue()));
+					map.put(entry.getKey(), GetPOJO(entry.getValue(), env));
 				}
 				return map;
 			} else {
 				//ArrayList
-				ArrayList<Object> list = new ArrayList<Object>((int) ca.size());
+				ArrayList<Object> list = new ArrayList<Object>((int) ca.size(env));
 				for(Mixed construct : ca.getArray()) {
-					list.add(GetPOJO(construct));
+					list.add(GetPOJO(construct, env));
 				}
 				return list;
 			}
@@ -450,6 +466,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 
 	/**
 	 * If the underlying Mixed value is a Construct, returns the value of isDynamic. Otherwise, returns true.
+	 *
 	 * @param m
 	 * @return
 	 */
@@ -484,22 +501,54 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	 * case, an IllegalArgumentException is thrown.
 	 *
 	 * This method may be overridden in special cases, such as dynamic types, but for most types, this
+	 *
 	 * @return
 	 * @throws IllegalArgumentException If the class isn't public facing.
 	 */
 	@Override
-	public CClassType typeof() {
-		return typeof(this);
+	public CClassType typeof(Environment env) {
+		return typeof(this, env);
 	}
 
 	/**
-	 * Returns the typeof for the given class, using the same mechanism as the default. (Whether or not that subtype
-	 * overrode the original typeof() method.
+	 * Returns the typeof for the given native class, using the same mechanism as the default. (Whether or not that
+	 * subtype overrode the original typeof() method.
+	 *
 	 * @param that
+	 * @param env
 	 * @return
 	 */
-	public static CClassType typeof(Mixed that) {
-		return CClassType.get(that.getClass());
+	public static CClassType typeof(Mixed that, Environment env) {
+		CClassType naked;
+		if(that instanceof UserObject uo) {
+			naked = uo.typeof(env);
+		} else {
+			naked = CClassType.get(that.getClass());
+		}
+		if(that.getGenericParameters() == null) {
+			if(naked.getGenericDeclaration() == null) {
+				return naked;
+			}
+			GenericParameters.GenericParametersBuilder builder = GenericParameters.emptyBuilder(naked);
+			for(Constraints c : naked.getGenericDeclaration().getConstraints()) {
+				builder.addParameter(c.convertFromNull(that.getTarget()).getType());
+			}
+			return CClassType.get(naked, that.getTarget(), builder.buildWithoutValidation()
+					.toGenericTypeParameters(naked, that.getTarget(), env), env);
+		}
+		return CClassType.get(naked, Target.UNKNOWN,
+				that.getGenericParameters().toGenericTypeParameters(naked, Target.UNKNOWN, env), env);
+	}
+
+	/**
+	 * Returns the generic parameters for this Construct. By default, null, but this MUST be overridden by objects which
+	 * have generics.
+	 *
+	 * @return
+	 */
+	@Override
+	public GenericParameters getGenericParameters() {
+		return null;
 	}
 
 	/**
@@ -558,6 +607,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 
 	/**
 	 * By default, all native methodscript objects have no modifiers.
+	 *
 	 * @return
 	 */
 	@Override
@@ -580,11 +630,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 		return null;
 	}
 
-	public static boolean isInstanceof(Mixed that, CClassType type) {
-		return that.getClass().isAnnotationPresent(typeof.class) && that.typeof().doesExtend(type);
-	}
-
-	public static boolean isInstanceof(Mixed that, Class<? extends Mixed> type) {
+	public static boolean isInstanceof(Mixed that, Class<? extends Mixed> type, Environment env) {
 		if(ClassDiscovery.GetClassAnnotation(that.getClass(), typeof.class) == null) {
 			// This can happen in cases where we are in the middle of optimization.
 			// This can perhaps be improved in the future, when we store the return
@@ -592,33 +638,31 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 			// but anyways, for now, just return false.
 			return false;
 		}
-		// TODO: We need the compiler environment here so we can look up custom types.
-		return that.typeof().doesExtend(CClassType.get(type));
+		return that.typeof(env).doesExtend(env, CClassType.get(type));
 	}
 
 	@Override
-	public boolean isInstanceOf(CClassType type) {
-		if(type.getNativeType() != null) {
-			return type.getNativeType().isAssignableFrom(this.getClass());
+	public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env) {
+		if(this.getClass().getAnnotation(typeof.class) == null) {
+			// TODO: This isn't ideal, but CFunction and other things extend Mixed. Maybe they shouldn't, or
+			// maybe they should have a typeof defined on them, but in general, that doesn't make sense, because
+			// they currently aren't first class, and can only be accessed by accident.
+			return false;
 		}
-		return isInstanceof(this, type);
-	}
-
-	@Override
-	public boolean isInstanceOf(Class<? extends Mixed> type) {
-		return type.isAssignableFrom(this.getClass());
+		return InstanceofUtil.isInstanceof(this,
+				LeftHandSideType.fromCClassType(
+						new ConcreteGenericParameter(type, lhsGenericParameters, Target.UNKNOWN, env), Target.UNKNOWN, env), env);
 	}
 
 	/**
-	 * Provides a default implementation of hashCode for all constructs. In this implementation, the type of the
-	 * object is taken into account, as well as the underlying value.
+	 * Provides a default implementation of hashCode for all constructs. In this implementation, the type of the object
+	 * is taken into account, as well as the underlying value.
+	 *
 	 * @return
 	 */
 	@Override
 	public int hashCode() {
 		return Objects.hash(ClassDiscovery.GetClassAnnotation(this.getClass(), typeof.class), val());
 	}
-
-
 
 }

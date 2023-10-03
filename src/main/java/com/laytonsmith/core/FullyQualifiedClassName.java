@@ -6,7 +6,9 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.PureUtilities.ClassLoading.DynamicEnum;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.annotations.MDynamicEnum;
 import com.laytonsmith.annotations.MEnum;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
@@ -24,13 +26,23 @@ import java.util.regex.Pattern;
 
 /**
  * This class represents a fully qualified class name. It is better to fully qualify the type once, and then pass that
- * around, rather than passing around a string.
+ * around, rather than passing around a string. Other than the static validation methods, this class is a fairly thin
+ * wrapper around a String containing the fully qualified class name, and the validation methods are trivial to bypass,
+ * because during the intermediate phases of compilation, the fully qualified class name may be used, but the actual
+ * class it represents isn't defined yet (but will be, eventually, in the non compile-error case). In general, it's
+ * only possible to use the fully qualified name based on user code in a few cases, namely during object definition,
+ * where the name of the object is by definition whatever the user input. In other cases based on user code,
+ * {@link UnqualifiedClassName} should be used instead, which can easily be converted to a FullyQualifiedClassName once
+ * the object table has been completed, and will throw the appropriate exceptions once the compilation stages are all
+ * complete, and object definitions have been completed entirely.
  */
 public final class FullyQualifiedClassName implements Comparable<FullyQualifiedClassName> {
 	public static final String PATH_SEPARATOR = ".";
 
 	private final String fullyQualifiedName;
 	private Class<? extends Mixed> nativeClass;
+	private boolean nativeClassLoaded = false;
+	private boolean isVariadicType = false;
 
 	private FullyQualifiedClassName(String name) {
 		Objects.requireNonNull(name, "The name passed in may not be null");
@@ -55,8 +67,7 @@ public final class FullyQualifiedClassName implements Comparable<FullyQualifiedC
 	 * @return The fully qualified class name.
 	 * @throws CRECastException If the class type can't be found
 	 */
-	public static FullyQualifiedClassName forName(String unqualified, Target t, Environment env)
-			throws CRECastException {
+	public static FullyQualifiedClassName forName(String unqualified, Target t, Environment env) {
 		ObjectDefinitionTable odt = env.getEnv(CompilerEnvironment.class).getObjectDefinitionTable();
 		try {
 			// Try first, if this is a fully qualified name
@@ -77,8 +88,8 @@ public final class FullyQualifiedClassName implements Comparable<FullyQualifiedC
 	/**
 	 * If the type represents an enum tagged with {@link MEnum}, then this method should be used, but is otherwise
 	 * identical to {@link #forNativeClass(java.lang.Class)}.
-	 * @param clazz
-	 * @return
+	 * @param clazz The Java Enum type. It must provide an MEnum annotation, as well as being a Java enum.
+	 * @return The FullyQualifiedClassName representing this enum object
 	 */
 	public static FullyQualifiedClassName forNativeEnum(Class<? extends Enum> clazz) {
 		MEnum m = clazz.getAnnotation(MEnum.class);
@@ -87,12 +98,16 @@ public final class FullyQualifiedClassName implements Comparable<FullyQualifiedC
 		}
 		String fqcn = m.value();
 		FullyQualifiedClassName f = new FullyQualifiedClassName(fqcn);
-		try {
-			f.nativeClass = NativeTypeList.getNativeEnumType(f).typeof().getNativeType();
-		} catch (ClassNotFoundException ex) {
-			// This can't happen, it would have already been the above error.
-			throw new Error(ex);
+		return f;
+	}
+
+	public static FullyQualifiedClassName forDynamicEnum(Class<? extends DynamicEnum> clazz) {
+		MDynamicEnum m = clazz.getAnnotation(MDynamicEnum.class);
+		if(m == null) {
+			throw new Error("Native dynamic enum " + clazz + " does not provide an MEnum annotation");
 		}
+		String fqcn = m.value();
+		FullyQualifiedClassName f = new FullyQualifiedClassName(fqcn);
 		return f;
 	}
 
@@ -100,17 +115,26 @@ public final class FullyQualifiedClassName implements Comparable<FullyQualifiedC
 	 * If the type represents a native class, this method can be used. Not only does it never throw an exception
 	 * (except an Error, if the class does not define a typeof annotation), getNativeClass will return a reference
 	 * to the Class object, which is useful for shortcutting various operations.
-	 * @param clazz
-	 * @return
+	 * @param clazz The native MethodScript class
+	 * @return The FullyQualifiedClassName for this native class (generally defined by the typeof annotation)
 	 */
 	public static FullyQualifiedClassName forNativeClass(Class<? extends Mixed> clazz) {
+		String fqcn = null;
 		typeof t = ClassDiscovery.GetClassAnnotation(clazz, typeof.class);
-		if(t == null) {
+		if(t != null) {
+			fqcn = t.value();
+		} else {
+			MEnum m = ClassDiscovery.GetClassAnnotation(clazz, MEnum.class);
+			if(m != null) {
+				fqcn = m.value();
+			}
+		}
+		if(fqcn == null) {
 			throw new Error("Native class " + clazz + " does not provide a typeof annotation");
 		}
-		String fqcn = t.value();
 		FullyQualifiedClassName f = new FullyQualifiedClassName(fqcn);
 		f.nativeClass = clazz;
+		f.nativeClassLoaded = true;
 		return f;
 	}
 
@@ -134,7 +158,7 @@ public final class FullyQualifiedClassName implements Comparable<FullyQualifiedC
 
 	/**
 	 * If you know for a fact that the name is already fully qualified, this step skips qualification. If you aren't
-	 * sure whether or not the name is fully qualified, don't use the method, the other methods will accept a fully
+	 * sure whether the name is fully qualified, don't use the method, the other methods will accept a fully
 	 * qualified class name, but not change it, but if it isn't fully qualified, then it will do so.
 	 * <p>
 	 * The class does not have to (yet) exist, though it should exist before usage anywhere else, such as in CClassType.
@@ -142,12 +166,16 @@ public final class FullyQualifiedClassName implements Comparable<FullyQualifiedC
 	 * between compilation and object specification encoding, so this can be used in the meantime to represent the
 	 * class.
 	 * <p>
-	 * If this represents a native class, use {@link #forNativeClass(java.lang.Class)} instead.
-	 * @param qualified
-	 * @return
+	 * If this for sure represents a native class, use {@link #forNativeClass(java.lang.Class)} instead.
+	 * This is especially important during bootstrapping, though post bootstrap, it's fine to use, particularly
+	 * if this represents user input.
+	 *
+	 * @param qualified The fully qualified class name as a string
+	 * @return A FullyQualifiedClassName object
 	 */
 	public static FullyQualifiedClassName forFullyQualifiedClass(String qualified) {
-		return new FullyQualifiedClassName(qualified);
+		FullyQualifiedClassName fqcn = new FullyQualifiedClassName(qualified);
+		return fqcn;
 	}
 
 	@Override
@@ -179,9 +207,15 @@ public final class FullyQualifiedClassName implements Comparable<FullyQualifiedC
 		return new UnqualifiedClassName(this);
 	}
 
+	public FullyQualifiedClassName asVariadicType() {
+		FullyQualifiedClassName fqcn = new FullyQualifiedClassName(fullyQualifiedName);
+		fqcn.isVariadicType = true;
+		return fqcn;
+	}
+
 	@Override
 	public String toString() {
-		return fullyQualifiedName;
+		return fullyQualifiedName + (isVariadicType ? "..." : "");
 	}
 
 	@Override
@@ -194,10 +228,28 @@ public final class FullyQualifiedClassName implements Comparable<FullyQualifiedC
 	}
 
 	/**
-	 * Returns the underlying native class, iff this is a native class.
+	 * Returns true if the native class has been attempted to be loaded. This is really only useful for calls
+	 * from NativeTypeList, in order to break the circular dependency. Calls from outside of that class can safely
+	 * call getNativeClass directly, and it will have the correct behavior.
 	 * @return
 	 */
+	public boolean isNativeClassLoaded() {
+		return this.nativeClassLoaded;
+	}
+
+	/**
+	 * Returns the underlying native class, iff this is a native class.
+	 * @return The native class, or null.
+	 */
 	public Class<? extends Mixed> getNativeClass() {
+		if(!nativeClassLoaded) {
+			try {
+				this.nativeClass = NativeTypeList.getNativeClass(this);
+			} catch (ClassNotFoundException ex) {
+				// Ignored, nativeClass will just stay null
+			}
+		}
+		this.nativeClassLoaded = true;
 		return nativeClass;
 	}
 

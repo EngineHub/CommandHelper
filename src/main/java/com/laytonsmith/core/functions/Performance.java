@@ -7,16 +7,18 @@ import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRESecurityException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import org.perf4j.StopWatch;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.perf4j.StopWatch;
 
 /**
  *
@@ -83,11 +85,11 @@ public class Performance {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(!Prefs.AllowProfiling()) {
 				throw new CRESecurityException("allow-profiling is currently off, you must set it to true in your preferences.", t);
 			}
-			performanceLogging = ArgumentValidation.getBoolean(args[0], t);
+			performanceLogging = ArgumentValidation.getBoolean(args[0], t, env);
 			return CVoid.VOID;
 		}
 

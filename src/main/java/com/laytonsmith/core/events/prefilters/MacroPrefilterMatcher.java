@@ -6,7 +6,7 @@ import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
-import com.laytonsmith.core.constructs.CClassType;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.BindableEvent;
@@ -61,7 +61,7 @@ public abstract class MacroPrefilterMatcher<T extends BindableEvent> extends Abs
 	}
 
 	@Override
-	public void validate(ParseTree node, CClassType nodeType, Environment env)
+	public void validate(ParseTree node, LeftHandSideType nodeType, Environment env)
 			throws ConfigCompileException, ConfigCompileGroupException, ConfigRuntimeException {
 		if(node.isConst()) {
 			if(node.getData().val().isEmpty()) {
@@ -72,7 +72,7 @@ public abstract class MacroPrefilterMatcher<T extends BindableEvent> extends Abs
 	}
 
 	@Override
-	public boolean matches(String key, Mixed value, T event, Target t) {
+	public boolean matches(String key, Mixed value, T event, Target t, Environment env) {
 		String expression = value.val();
 		Object javaObject = getProperty(event);
 		if(expression.isEmpty()) {

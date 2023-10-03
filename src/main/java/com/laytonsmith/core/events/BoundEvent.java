@@ -14,10 +14,13 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.profiler.ProfilePoint;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -141,7 +144,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
 		this.eventName = name;
 
 		if(options != null && options.containsKey("id")) {
-			this.id = options.get("id", t).val();
+			this.id = options.get("id", t, env).val();
 			if(this.id.matches(".*?:\\d*?")) {
 				throw new EventException("The id given may not match the format\"string:number\"");
 			}
@@ -151,7 +154,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
 		}
 		if(options != null && options.containsKey("priority")) {
 			try {
-				this.priority = Priority.valueOf(options.get("priority", t).val().toUpperCase());
+				this.priority = Priority.valueOf(options.get("priority", t, env).val().toUpperCase());
 			} catch (IllegalArgumentException e) {
 				throw new EventException("Priority must be one of: LOWEST, LOW, NORMAL, HIGH, HIGHEST, MONITOR");
 			}
@@ -162,7 +165,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
 		this.prefilter = new HashMap<>();
 		if(prefilter != null) {
 			for(String key : prefilter.stringKeySet()) {
-				this.prefilter.put(key, prefilter.get(key, prefilter.getTarget()));
+				this.prefilter.put(key, prefilter.get(key, prefilter.getTarget(), env));
 			}
 		}
 
@@ -250,11 +253,15 @@ public class BoundEvent implements Comparable<BoundEvent> {
 			//        root.setRoot(tree);
 			Environment env = originalEnv.clone();
 			Target t = activeEvent.getBoundEvent().getTarget();
-			CArray ca = CArray.GetAssociativeArray(t);
+			CArray ca = CArray.GetAssociativeArray(t, null, env);
 			for(Map.Entry<String, Mixed> entry : activeEvent.parsedEvent.entrySet()) {
-				ca.set(new CString(entry.getKey(), t), entry.getValue(), t);
+				ca.set(new CString(entry.getKey(), t), entry.getValue(), t, env);
 			}
-			env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, eventObjName, ca, t));
+			try {
+				env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, eventObjName, ca, t));
+			} catch (ConfigCompileException cce) {
+				throw new CREFormatException(cce.getMessage(), t);
+			}
 			env.getEnv(GlobalEnv.class).SetEvent(activeEvent);
 			activeEvent.addHistory("Triggering bound event: " + this);
 			try {
@@ -285,11 +292,15 @@ public class BoundEvent implements Comparable<BoundEvent> {
 	public void manual_trigger(CArray event) throws EventException {
 		try {
 			Environment env = originalEnv.clone();
-			env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, eventObjName, event, Target.UNKNOWN,
-					env));
+			try {
+				env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, eventObjName, event, Target.UNKNOWN,
+						env));
+			} catch (ConfigCompileException cce) {
+				throw new CREFormatException(cce.getMessage(), Target.UNKNOWN);
+			}
 			Map<String, Mixed> map = new HashMap<>();
 			for(String key : event.stringKeySet()) {
-				map.put(key, event.get(key, Target.UNKNOWN));
+				map.put(key, event.get(key, Target.UNKNOWN, env));
 			}
 			ActiveEvent activeEvent = new ActiveEvent(null);
 			activeEvent.setParsedEvent(map);

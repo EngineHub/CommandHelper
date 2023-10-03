@@ -8,7 +8,7 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.constructs.CBoolean;
-import com.laytonsmith.core.constructs.CClassType;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.BindableEvent;
@@ -55,9 +55,9 @@ public abstract class BooleanPrefilterMatcher<T extends BindableEvent> extends A
 
 
 	@Override
-	public void validate(ParseTree node, CClassType nodeType, Environment env)
+	public void validate(ParseTree node, LeftHandSideType nodeType, Environment env)
 			throws ConfigCompileException, ConfigCompileGroupException, ConfigRuntimeException {
-		if(!nodeType.doesExtend(CBoolean.TYPE)) {
+		if(!nodeType.doesExtend(CBoolean.TYPE, env)) {
 			env.getEnv(CompilerEnvironment.class).addCompilerWarning(node.getFileOptions(),
 				new CompilerWarning("Expected a boolean here, this may not perform as expected.",
 						node.getTarget(), null));
@@ -65,8 +65,11 @@ public abstract class BooleanPrefilterMatcher<T extends BindableEvent> extends A
 	}
 
 	@Override
-	public boolean matches(String key, Mixed value, T event, Target t) {
-		return ArgumentValidation.getBooleanish(value, t) == getProperty(event);
+	public boolean matches(String key, Mixed value, T event, Target t, Environment env) {
+		if(value instanceof CBoolean bool) {
+			return bool.getBoolean() == getProperty(event);
+		}
+		return ArgumentValidation.getBooleanish(value, t, env) == getProperty(event);
 	}
 
 	protected abstract boolean getProperty(T event);

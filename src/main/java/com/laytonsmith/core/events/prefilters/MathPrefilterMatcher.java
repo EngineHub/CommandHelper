@@ -9,10 +9,10 @@ import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.CArray;
-import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CEntry;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CNumber;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.BindableEvent;
@@ -77,7 +77,7 @@ public abstract class MathPrefilterMatcher<T extends BindableEvent> extends Abst
 	private static final List<String> VALID_KEYS = Arrays.asList("value", "tolerance");
 
 	@Override
-	public CClassType typecheck(StaticAnalysis analysis,
+	public LeftHandSideType typecheck(StaticAnalysis analysis,
 			ParseTree prefilterValueParseTree, Environment env, Set<ConfigCompileException> exceptions) {
 
 		// Add deep validation for hard-coded "array(...)" arguments.
@@ -87,7 +87,7 @@ public abstract class MathPrefilterMatcher<T extends BindableEvent> extends Abst
 				if(entry.getData() instanceof CEntry centry) {
 					String key = entry.getChildAt(0).getData().val();
 					ParseTree valParseTree = entry.getChildAt(1);
-					CClassType valType = analysis.typecheck(valParseTree, env, exceptions);
+					LeftHandSideType valType = analysis.typecheck(valParseTree, null, env, exceptions);
 					if(!VALID_KEYS.contains(key)) {
 						env.getEnv(CompilerEnvironment.class).addCompilerWarning(
 								prefilterValueParseTree.getFileOptions(),
@@ -95,21 +95,21 @@ public abstract class MathPrefilterMatcher<T extends BindableEvent> extends Abst
 										centry.ckey().getTarget(), null));
 						continue;
 					}
-					if(key.equals("value") && !valType.doesExtend(CNumber.TYPE)) {
+					if(key.equals("value") && !valType.doesExtend(CNumber.TYPE, env)) {
 						env.getEnv(CompilerEnvironment.class).addCompilerWarning(
 								prefilterValueParseTree.getFileOptions(),
 								new CompilerWarning("Value should be a double", centry.ckey().getTarget(), null));
 					}
-					if(key.equals("tolerance") && !valType.doesExtend(CNumber.TYPE)) {
+					if(key.equals("tolerance") && !valType.doesExtend(CNumber.TYPE, env)) {
 						env.getEnv(CompilerEnvironment.class).addCompilerWarning(
 								prefilterValueParseTree.getFileOptions(),
 								new CompilerWarning("Tolerance should be a number", centry.ckey().getTarget(), null));
 					}
 				} else {
-					analysis.typecheck(entry, env, exceptions);
+					analysis.typecheck(entry, null, env, exceptions);
 				}
 			}
-			return CArray.TYPE;
+			return CArray.TYPE.asLeftHandSideType();
 		}
 
 		// Handle other prefilter values as usual.
@@ -117,9 +117,9 @@ public abstract class MathPrefilterMatcher<T extends BindableEvent> extends Abst
 	}
 
 	@Override
-	public void validate(ParseTree node, CClassType nodeType, Environment env)
+	public void validate(ParseTree node, LeftHandSideType nodeType, Environment env)
 			throws ConfigCompileException, ConfigCompileGroupException, ConfigRuntimeException {
-		if(!nodeType.doesExtend(CNumber.TYPE) && !nodeType.doesExtend(CArray.TYPE)) {
+		if(!nodeType.doesExtend(CNumber.TYPE, env) && !nodeType.doesExtend(CArray.TYPE, env)) {
 			env.getEnv(CompilerEnvironment.class).addCompilerWarning(node.getFileOptions(),
 					new CompilerWarning("Expecting a number or array here, this may not perform as expected.",
 							node.getTarget(), null));
@@ -127,14 +127,14 @@ public abstract class MathPrefilterMatcher<T extends BindableEvent> extends Abst
 	}
 
 	@Override
-	public boolean matches(String key, Mixed value, T event, Target t) {
+	public boolean matches(String key, Mixed value, T event, Target t, Environment env) {
 		double val;
 		double tolerance = getTolerance();
 		if(value instanceof CArray array) {
-			val = ArgumentValidation.getDouble(array.get("value", t), t);
-			tolerance = ArgumentValidation.getDouble(array.get("tolerance", t), t);
+			val = ArgumentValidation.getDouble(array.get("value", t), t, env);
+			tolerance = ArgumentValidation.getDouble(array.get("tolerance", t), t, env);
 		} else {
-			val = ArgumentValidation.getDouble(value, t);
+			val = ArgumentValidation.getDouble(value, t, env);
 		}
 		return Math.abs(val - getProperty(event)) <= tolerance;
 	}

@@ -5,6 +5,13 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.constructs.generics.ConstraintLocation;
+import com.laytonsmith.core.constructs.generics.Constraints;
+import com.laytonsmith.core.constructs.generics.constraints.UnboundedConstraint;
+import com.laytonsmith.core.constructs.generics.GenericDeclaration;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.GenericTypeParameters;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREIndexOverflowException;
 import com.laytonsmith.core.exceptions.CRE.CREUnsupportedOperationException;
@@ -26,14 +33,22 @@ import java.util.Set;
 public class CFixedArray extends Construct implements
 		java.lang.Iterable<Mixed>, Booleanish, com.laytonsmith.core.natives.interfaces.Iterable {
 
-	public static final CClassType TYPE = CClassType.get(CFixedArray.class);
-	private Mixed[] data;
-	private CClassType allowedType;
-
-	public CFixedArray(Target t, CClassType type, int size) {
-		super(type.getSimpleName() + "[" + size + "]", ConstructType.ARRAY, t);
+	private static final GenericDeclaration GEN = new GenericDeclaration(Target.UNKNOWN,
+			new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+				new UnboundedConstraint(Target.UNKNOWN, "T")));
+	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
+	public static final CClassType TYPE = CClassType.getWithGenericDeclaration(CFixedArray.class, GEN)
+			.withSuperParameters(GenericTypeParameters.nativeBuilder(com.laytonsmith.core.natives.interfaces.Iterable.TYPE)
+				.addParameter("T", null))
+			.done();
+	private final Mixed[] data;
+	private final GenericParameters genericParameters;
+	private final LeftHandSideType allowedType;
+	public CFixedArray(Target t, GenericParameters parameters, int size) {
+		super(parameters.getParameters().get(0).toString() + "[" + size + "]", ConstructType.ARRAY, t);
 		data = new Mixed[size];
-		allowedType = type;
+		genericParameters = parameters;
+		this.allowedType = parameters.getParameters().get(0);
 	}
 
 	@Override
@@ -42,12 +57,12 @@ public class CFixedArray extends Construct implements
 	}
 
 	@Override
-	public Mixed get(String index, Target t) throws ConfigRuntimeException {
+	public Mixed get(String index, Target t, Environment env) throws ConfigRuntimeException {
 		return null;
 	}
 
 	@Override
-	public Mixed get(int index, Target t) throws ConfigRuntimeException {
+	public Mixed get(int index, Target t, Environment env) throws ConfigRuntimeException {
 		if(index < 0 || index >= data.length) {
 			throw new CREIndexOverflowException("Index overflows array size", t);
 		}
@@ -59,12 +74,12 @@ public class CFixedArray extends Construct implements
 	}
 
 	@Override
-	public Mixed get(Mixed index, Target t) throws ConfigRuntimeException {
-		return get(ArgumentValidation.getInt32(index, t), t);
+	public Mixed get(Mixed index, Target t, Environment env) throws ConfigRuntimeException {
+		return get(ArgumentValidation.getInt32(index, t, env), t, env);
 	}
 
 	@Override
-	public Set<Mixed> keySet() {
+	public Set<Mixed> keySet(Environment env) {
 		Set<Mixed> set = new LinkedHashSet<>(data.length);
 		for(int i = 0; i < data.length; i++) {
 			set.add(new CInt(i, Target.UNKNOWN));
@@ -72,14 +87,15 @@ public class CFixedArray extends Construct implements
 		return set;
 	}
 
-	private void validateSet(Mixed value, Target t) {
-		if(!value.typeof().doesExtend(allowedType)) {
-			throw new CRECastException("Cannot set value of type " + value.typeof().toString() + " into fixed_array of type " + allowedType.toString(), t);
+	private void validateSet(Mixed value, Target t, Environment env) {
+		if(!value.typeof(env).doesExtend(env, allowedType)) {
+			throw new CRECastException("Cannot set value of type "
+					+ value.typeof(env).toString() + " into fixed_array of type " + allowedType.toString(), t);
 		}
 	}
 
-	public void set(int index, Mixed value, Target t) {
-		validateSet(value, t);
+	public void set(int index, Mixed value, Target t, Environment env) {
+		validateSet(value, t, env);
 		if(index >= data.length || index < 0) {
 			throw new CREIndexOverflowException("Index under/overflow in fixed_array", t);
 		}
@@ -97,22 +113,22 @@ public class CFixedArray extends Construct implements
 	}
 
 	@Override
-	public Mixed slice(int begin, int end, Target t) {
+	public Mixed slice(int begin, int end, Target t, Environment env) {
 		throw new CREUnsupportedOperationException("slices are not yet implemented on fixed_array", t);
 	}
 
 	@Override
-	public boolean getBooleanValue(Target t) {
-		return size() > 0;
+	public boolean getBooleanValue(Environment env, Target t) {
+		return size(env) > 0;
 	}
 
 	@Override
-	public long size() {
+	public long size(Environment env) {
 		return data.length;
 	}
 
-	public void fill(Mixed value, Target t) {
-		validateSet(value, t);
+	public void fill(Mixed value, Target t, Environment env) {
+		validateSet(value, t, env);
 		ArrayUtils.fill(data, value);
 	}
 
@@ -143,5 +159,10 @@ public class CFixedArray extends Construct implements
 	@Override
 	public Version since() {
 		return MSVersion.V3_3_5;
+	}
+
+	@Override
+	public GenericParameters getGenericParameters() {
+		return genericParameters;
 	}
 }

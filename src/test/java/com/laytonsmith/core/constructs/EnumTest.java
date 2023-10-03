@@ -8,14 +8,15 @@ package com.laytonsmith.core.constructs;
 import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.natives.interfaces.MEnumType;
 import com.laytonsmith.core.natives.interfaces.MEnumTypeValue;
+import com.laytonsmith.testing.StaticTest;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import static com.laytonsmith.testing.StaticTest.InstallFakeServerFrontend;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  *
@@ -28,7 +29,7 @@ public class EnumTest {
 
 	@BeforeClass
 	public static void setUpClass() {
-		InstallFakeServerFrontend();
+		StaticTest.InstallFakeServerFrontend();
 	}
 
 	@AfterClass

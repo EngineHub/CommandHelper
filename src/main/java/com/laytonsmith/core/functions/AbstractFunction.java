@@ -1,6 +1,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.annotations.DocumentLink;
 import com.laytonsmith.annotations.MEnum;
@@ -19,6 +20,7 @@ import com.laytonsmith.core.compiler.SelfStatement;
 import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.compiler.signature.FunctionSignatures;
+import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CClosure;
@@ -27,7 +29,9 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.IVariableList;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
@@ -36,6 +40,7 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.snapins.PackagePermission;
 import com.laytonsmith.tools.docgen.DocGenTemplates;
 import com.laytonsmith.tools.docgen.DocGenTemplates.Generator.GenerateException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -44,6 +49,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
+import java.util.TreeSet;
 
 /**
  *
@@ -70,8 +76,39 @@ public abstract class AbstractFunction implements Function {
 	 * @return
 	 */
 	@Override
-	public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+	public Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
 		return CVoid.VOID;
+	}
+
+	private Set<Function> nagAlert = new TreeSet<>();
+
+	@Override
+	public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		boolean hasOld = ReflectionUtils.hasMethod(this.getClass(), "exec", null,
+				new Class[]{Target.class, Environment.class, Mixed[].class});
+		if(hasOld) {
+			if(!nagAlert.contains(this)) {
+				System.err.println("The extension function " + this.getName() + " is implementing an old version of the exec"
+						+ " method. This extension WILL break in the future, and needs code changes. Please alert"
+						+ " the author.");
+				nagAlert.add(this);
+			}
+			try {
+				return (Mixed) ReflectionUtils.invokeMethod(this.getClass(), this, "exec",
+						new Class[]{Target.class, Environment.class, Mixed[].class},
+						new Object[]{t, env, args});
+			} catch(ReflectionUtils.ReflectionException ex) {
+				if(ex.getCause() instanceof InvocationTargetException ite) {
+					if(ite.getCause() instanceof ConfigRuntimeException cre) {
+						// throw this one normally, so the rest of the framework can react accordingly
+						throw cre;
+					}
+				}
+				throw ex;
+			}
+		}
+		// It doesn't have the old method, nor does it override this method.
+		throw new Error(this.getClass() + " does not properly implement the exec method.");
 	}
 
 	/**
@@ -100,17 +137,63 @@ public abstract class AbstractFunction implements Function {
 	 * {@inheritDoc} By default, {@link CClassType#AUTO} is returned.
 	 */
 	@Override
-	public CClassType getReturnType(Target t, List<CClassType> argTypes,
-			List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+	public LeftHandSideType getReturnType(ParseTree node, Target t, List<LeftHandSideType> argTypes,
+			List<Target> argTargets, LeftHandSideType inferredReturnType,
+			Environment env, Set<ConfigCompileException> exceptions) {
 
 		// Match arguments to function signatures if available.
 		FunctionSignatures signatures = this.getCachedSignatures();
 		if(signatures != null) {
-			return signatures.getReturnType(t, argTypes, argTargets, env, exceptions);
+			return signatures.getReturnType(node, t, argTypes, argTargets, inferredReturnType, env, exceptions);
 		}
 
 		// No information is available about the return type.
-		return CClassType.AUTO;
+		return CClassType.AUTO.asLeftHandSideType();
+	}
+
+	@Override
+	public List<LeftHandSideType> getResolvedParameterTypes(StaticAnalysis analysis,
+			Target t, Environment env, GenericParameters generics,
+			LeftHandSideType inferredReturnType, List<ParseTree> children) {
+//		FunctionSignatures signatures = getCachedSignatures();
+		List<LeftHandSideType> ret = new ArrayList<>(children.size());
+		if(generics != null) {
+			// Explicit parameters were provided, just use those.
+			return generics.getParameters();
+		}
+		for(ParseTree child : children) {
+			ret.add(child.getDeclaredType(analysis, env, Auto.LHSTYPE));
+		}
+		return ret;
+//		if(signatures == null) {
+//			return ret;
+//		} else {
+//			List<FunctionSignature> matches = new ArrayList<>();
+//			for(FunctionSignature s : signatures.getSignatures()) {
+//				if(s.matches(ret, generics, env, inferredReturnType, false)) {
+//					matches.add(s);
+//				}
+//			}
+//			if(matches.size() != 1) {
+//				throw new CRECastException("Cannot infer argument types for " + getName() + ", "
+//						+ (matches.isEmpty()
+//								? "no signature matched." : "multiple signatures matched.")
+//						+ " Provide explicit type parameters, or use an", t);
+//			}
+//			FunctionSignature s = matches.get(0);
+//			for(Param p : s.getParams()) {
+//				if(p.getType() == null) {
+//					ret.add(null);
+//				} else {
+//					if(p.getType().isTypeName()) {
+//
+//					} else {
+//						ret.add(p.getType());
+//					}
+//				}
+//			}
+//		}
+//		return ret;
 	}
 
 	/**
@@ -118,20 +201,30 @@ public abstract class AbstractFunction implements Function {
 	 * and passes them to {@link #getReturnType(Target, List, List, Set)} to get this function's return type.
 	 */
 	@Override
-	public CClassType typecheck(StaticAnalysis analysis,
-			ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
-
-		// Get and check the types of the function's arguments.
-		List<ParseTree> children = ast.getChildren();
-		List<CClassType> argTypes = new ArrayList<>(children.size());
-		List<Target> argTargets = new ArrayList<>(children.size());
-		for(ParseTree child : children) {
-			argTypes.add(analysis.typecheck(child, env, exceptions));
-			argTargets.add(child.getTarget());
+	public LeftHandSideType typecheck(StaticAnalysis analysis,
+			ParseTree ast, LeftHandSideType inferredReturnType,
+			Environment env, Set<ConfigCompileException> exceptions) {
+		try {
+			// Get and check the types of the function's arguments.
+			List<ParseTree> children = ast.getChildren();
+			List<LeftHandSideType> argTypes = new ArrayList<>(children.size());
+			List<Target> argTargets = new ArrayList<>(children.size());
+			for(ParseTree child : children) {
+				LeftHandSideType inferredParameterType = child.getDeclaredType(analysis, env, Auto.LHSTYPE);
+				inferredParameterType = LeftHandSideType.resolveTypeFromGenerics(
+						Target.UNKNOWN, env, inferredParameterType, null, null, (Map) null);
+				argTypes.add(analysis.typecheck(child, inferredParameterType, env, exceptions));
+				argTargets.add(child.getTarget());
+			}
+			// Return the return type of this function.
+			return this.getReturnType(ast, ast.getTarget(),
+					argTypes, argTargets, inferredReturnType, env, exceptions);
+		} catch(RuntimeException t) {
+			// We can't recover from this, but at least we can give a more useful error message
+			String e = "While typechecking " + this.getName() + ", the attached Throwable occurred. This was"
+					+ " associated with the code at or around " + ast.getTarget() + ": " + t.getMessage();
+			throw new RuntimeException(e, t);
 		}
-
-		// Return the return type of this function.
-		return this.getReturnType(ast.getTarget(), argTypes, argTargets, env, exceptions);
 	}
 
 	/**
@@ -297,7 +390,7 @@ public abstract class AbstractFunction implements Function {
 	}
 
 	@Override
-	public String profileMessage(Mixed... args) {
+	public String profileMessage(Environment env, Mixed... args) {
 		StringBuilder b = new StringBuilder();
 		boolean first = true;
 		for(Mixed ccc : args) {
@@ -305,14 +398,14 @@ public abstract class AbstractFunction implements Function {
 				b.append(", ");
 			}
 			first = false;
-			if(ccc.isInstanceOf(CArray.TYPE)) {
+			if(ccc instanceof CArray || ccc.isInstanceOf(CArray.TYPE, null, env)) {
 				//Arrays take too long to toString, so we don't want to actually toString them here if
 				//we don't need to.
-				b.append("<arrayNotShown size:").append(((CArray) ccc).size()).append(">");
-			} else if(ccc.isInstanceOf(CClosure.TYPE)) {
+				b.append("<arrayNotShown size:").append(((CArray) ccc).size(env)).append(">");
+			} else if(ccc instanceof CClosure || ccc.isInstanceOf(CClosure.TYPE, null, env)) {
 				//The toString of a closure is too long, so let's not output them either.
 				b.append("<closureNotShown>");
-			} else if(ccc.isInstanceOf(CString.TYPE)) {
+			} else if(ccc instanceof CString || ccc.isInstanceOf(CString.TYPE, null, env)) {
 				String val = ccc.val().replace("\\", "\\\\").replace("'", "\\'");
 				int max = 1000;
 				if(val.length() > max) {

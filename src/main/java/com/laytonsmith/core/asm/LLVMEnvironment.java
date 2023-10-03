@@ -4,7 +4,7 @@ package com.laytonsmith.core.asm;
 import com.laytonsmith.PureUtilities.Common.OSUtils;
 import com.laytonsmith.core.asm.metadata.LLVMMetadataRegistry;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
-import com.laytonsmith.core.constructs.CClassType;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.environments.Environment;
 
 import java.util.HashMap;
@@ -23,7 +23,7 @@ public class LLVMEnvironment implements Environment.EnvironmentImpl {
 	private final AtomicInteger stringIdCounter = new AtomicInteger();
 	private final Map<String, String> strings = new HashMap<>();
 	private final Stack<Map<String, Integer>> variableTable = new Stack<>();
-	private final Stack<Map<String, CClassType>> variableTableType = new Stack<>();
+	private final Stack<Map<String, LeftHandSideType>> variableTableType = new Stack<>();
 	private final Stack<Map<Integer, IRType>> irVariableTableType = new Stack<>();
 	private final Set<String> globalDeclarations = new HashSet<>();
 	private final StaticAnalysis staticAnalysis = new StaticAnalysis(false);
@@ -209,7 +209,7 @@ public class LLVMEnvironment implements Environment.EnvironmentImpl {
 		irVariableTableType.pop();
 	}
 
-	public void addVariableMapping(String methodscriptVariableName, int llvmVariableName, CClassType type) {
+	public void addVariableMapping(String methodscriptVariableName, int llvmVariableName, LeftHandSideType type) {
 		variableTable.peek().put(methodscriptVariableName, llvmVariableName);
 		variableTableType.peek().put(methodscriptVariableName, type);
 	}
@@ -224,7 +224,7 @@ public class LLVMEnvironment implements Environment.EnvironmentImpl {
 		return variableTable.peek().get(methodscriptVariableName);
 	}
 
-	public CClassType getVariableType(String methodscriptVariableName) {
+	public LeftHandSideType getVariableType(String methodscriptVariableName) {
 		return variableTableType.peek().get(methodscriptVariableName);
 	}
 

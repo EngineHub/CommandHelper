@@ -1,6 +1,7 @@
 package com.laytonsmith.core.events;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
@@ -90,7 +91,38 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 	}
 
 	@Override
-	public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+	public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Environment env) throws PrefilterNonMatchException {
+		boolean hasOldMethod = ReflectionUtils.hasMethod(this.getClass(), "matches", boolean.class,
+				new Class[]{Map.class, BindableEvent.class});
+		if(hasOldMethod) {
+			return (boolean) ReflectionUtils.invokeMethod(this.getClass(), this, "matches",
+					new Class[]{Map.class, BindableEvent.class},
+					new Object[] {prefilter, e});
+		}
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
+		boolean hasOldMethod = ReflectionUtils.hasMethod(this.getClass(), "evaluate", Map.class,
+				new Class[]{BindableEvent.class});
+		if(hasOldMethod) {
+			return (Map<String, Mixed>) ReflectionUtils.invokeMethod(this.getClass(), this, "evaluate",
+					new Class[]{BindableEvent.class},
+					new Object[] {e});
+		}
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
+		boolean hasOldMethod = ReflectionUtils.hasMethod(this.getClass(), "modifyEvent", boolean.class,
+				new Class[]{String.class, Mixed.class, BindableEvent.class});
+		if(hasOldMethod) {
+			return (boolean) ReflectionUtils.invokeMethod(this.getClass(), this, "modifyEvent",
+					new Class[]{String.class, Mixed.class, BindableEvent.class},
+					new Object[] {key, value, event});
+		}
 		throw new UnsupportedOperationException();
 	}
 
@@ -210,7 +242,7 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 	 * @param manualObject
 	 * @return
 	 */
-	public static Object DoConvert(CArray manualObject) {
+	public static Object DoConvert(CArray manualObject, Environment env) {
 		Map<String, Mixed> map = new HashMap<>();
 		for(String key : manualObject.stringKeySet()) {
 			map.put(key, manualObject.get(key, Target.UNKNOWN));

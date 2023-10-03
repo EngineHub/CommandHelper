@@ -50,15 +50,19 @@ import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.MethodScriptComplete;
+import com.laytonsmith.core.MethodScriptFileLocations;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
+import com.laytonsmith.core.compiler.signature.FunctionSignature;
+import com.laytonsmith.core.compiler.signature.Param;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Token;
+import com.laytonsmith.core.constructs.generics.Constraints;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
@@ -116,6 +120,7 @@ public class StaticTest {
 		try {
 			envs.add(CommandHelperEnvironment.class);
 			Implementation.setServerType(Implementation.Type.TEST);
+			ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(StaticTest.class));
 			env = Static.GenerateStandaloneEnvironment();
 			env = env.cloneAndAdd(new CommandHelperEnvironment());
 		} catch (Exception ex) {
@@ -215,6 +220,48 @@ public class StaticTest {
 			}
 		}
 
+		if(f.getSignatures() != null) {
+			for(FunctionSignature fs : f.getSignatures().getSignatures()) {
+				for(Param p : fs.getParams()) {
+					if(p.getType() != null) {
+						if(p.getType().isTypeName()) {
+							// Ensure that a generics signature has been registered, and it contains this type parameter
+							if(fs.getGenericDeclaration() == null) {
+								fail(f.getName() + " is missing a generics declaration on one of the signatures");
+							}
+							boolean found = false;
+							for(Constraints c : fs.getGenericDeclaration().getConstraints()) {
+								if(c.getTypeName().equals(p.getType().getTypename())) {
+									found = true;
+									break;
+								}
+							}
+							if(!found) {
+								fail(f.getName() + " contains a parameter with a typename, but that typename is"
+										+ " not in the signature");
+							}
+						}
+					}
+				}
+				if(fs.getReturnType().getType() != null && fs.getReturnType().getType().isTypeName()) {
+					if(fs.getGenericDeclaration() == null) {
+						fail(f.getName() + " is missing a generics declaration on one of the signatures");
+					}
+					boolean found = false;
+					for(Constraints c : fs.getGenericDeclaration().getConstraints()) {
+						if(c.getTypeName().equals(fs.getReturnType().getType().getTypename())) {
+							found = true;
+							break;
+						}
+					}
+					if(!found) {
+						fail(f.getName() + "'s return type is a typename, but that typename is"
+								+ " not in the signature");
+					}
+				}
+			}
+		}
+
 		//now the only function left to test is exec. This cannot be abstracted, unfortunately.
 	}
 
@@ -284,7 +331,7 @@ public class StaticTest {
 					}
 				}
 				try {
-					f.exec(Target.UNKNOWN, env, con);
+					f.exec(Target.UNKNOWN, env, null, con);
 				} catch (CancelCommandException e) {
 				} catch (ConfigRuntimeException e) {
 					if(f.getName().equals("throw")) {
@@ -359,7 +406,7 @@ public class StaticTest {
 	 */
 	public static void assertCEquals(Mixed expected, Mixed actual) throws CancelCommandException {
 		equals e = new equals();
-		CBoolean ret = (CBoolean) e.exec(Target.UNKNOWN, null, expected, actual);
+		CBoolean ret = (CBoolean) e.exec(Target.UNKNOWN, null, null, expected, actual);
 		if(ret.getBoolean() == false) {
 			throw new AssertionError("Expected " + expected + " and " + actual + " to be equal to each other");
 		}
@@ -374,7 +421,7 @@ public class StaticTest {
 	 */
 	public static void assertCNotEquals(Mixed expected, Mixed actual) throws CancelCommandException {
 		equals e = new equals();
-		CBoolean ret = (CBoolean) e.exec(Target.UNKNOWN, null, expected, actual);
+		CBoolean ret = (CBoolean) e.exec(Target.UNKNOWN, null, null, expected, actual);
 		if(ret.getBoolean() == true) {
 			throw new AssertionError("Did not expect " + expected + " and " + actual + " to be equal to each other");
 		}
@@ -387,7 +434,7 @@ public class StaticTest {
 	 * @param actual
 	 */
 	public static void assertCTrue(Mixed actual) {
-		if(!ArgumentValidation.getBooleanish(actual, Target.UNKNOWN)) {
+		if(!ArgumentValidation.getBooleanish(actual, Target.UNKNOWN, env)) {
 			fail("Expected '" + actual.val() + "' to resolve to true, but it did not");
 		}
 	}
@@ -399,7 +446,7 @@ public class StaticTest {
 	 * @param actual
 	 */
 	public static void assertCFalse(Mixed actual) {
-		if(ArgumentValidation.getBooleanish(actual, Target.UNKNOWN)) {
+		if(ArgumentValidation.getBooleanish(actual, Target.UNKNOWN, env)) {
 			fail("Expected '" + actual.val() + "' to resolve to false, but it did not");
 		}
 	}
@@ -540,7 +587,9 @@ public class StaticTest {
 			env = StaticTest.env;
 		}
 		env.getEnv(GlobalEnv.class).GetVarList().clear();
-		env.getEnv(CommandHelperEnvironment.class).SetCommandSender(player);
+		if(env.hasEnv(CommandHelperEnvironment.class)) {
+			env.getEnv(CommandHelperEnvironment.class).SetCommandSender(player);
+		}
 		StaticAnalysis analysis = new StaticAnalysis(true);
 		analysis.setLocalEnable(false);
 		MethodScriptCompiler.execute(MethodScriptCompiler.compile(
@@ -640,6 +689,11 @@ public class StaticTest {
 		}
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(Static.class));
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(StaticTest.class));
+		try {
+			Prefs.init(MethodScriptFileLocations.getDefault().getPreferencesFile());
+		} catch(IOException ex) {
+			throw new RuntimeException(ex);
+		}
 		ExtensionManager.Initialize(ClassDiscovery.getDefaultInstance());
 		Implementation.setServerType(Implementation.Type.TEST);
 		AliasCore fakeCore = mock(AliasCore.class);

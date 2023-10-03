@@ -14,6 +14,7 @@ import com.laytonsmith.core.constructs.CByteArray;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
@@ -55,16 +56,16 @@ public class PluginMeta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPluginMeta meta = StaticLayer.GetConvertor().GetPluginMeta();
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int offset = 0;
 			if(args.length == 3) {
 				offset = 1;
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 			}
 			String channel = args[offset].val();
-			CByteArray ba = ArgumentValidation.getByteArray(args[1 + offset], t);
+			CByteArray ba = ArgumentValidation.getByteArray(args[1 + offset], t, env);
 			Static.AssertPlayerNonNull(p, t);
 			try {
 				meta.fakeIncomingMessage(p, channel, ba.asByteArrayCopy());
@@ -118,16 +119,16 @@ public class PluginMeta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int offset = 0;
 			if(args.length == 3) {
 				offset = 1;
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 			}
 			String channel = args[offset].val();
-			CByteArray ba = ArgumentValidation.getByteArray(args[1 + offset], t);
+			CByteArray ba = ArgumentValidation.getByteArray(args[1 + offset], t, env);
 			Static.AssertPlayerNonNull(p, t);
 			try {
 				p.sendPluginMessage(channel, ba.asByteArrayCopy());
@@ -183,7 +184,7 @@ public class PluginMeta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCMessenger messenger = Static.getServer().getMessenger();
 			if(messenger == null) {
 				throw new CRENotFoundException(
@@ -248,7 +249,7 @@ public class PluginMeta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCMessenger messenger = Static.getServer().getMessenger();
 			if(messenger == null) {
 				throw new CRENotFoundException(
@@ -309,7 +310,7 @@ public class PluginMeta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCMessenger messenger = Static.getServer().getMessenger();
 			if(messenger == null) {
 				throw new CRENotFoundException(
@@ -363,17 +364,18 @@ public class PluginMeta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCMessenger messenger = Static.getServer().getMessenger();
 			if(messenger == null) {
 				throw new CRENotFoundException(
 						"Could not find the internal Messenger object (are you running in cmdline mode?)", t);
 			}
 			Set<String> chans = messenger.getIncomingChannels();
-			CArray arr = new CArray(t);
+			CArray arr = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 
 			for(String chan : chans) {
-				arr.push(new CString(chan, t), t);
+				arr.push(new CString(chan, t), t, env);
 			}
 
 			return arr;
@@ -391,7 +393,7 @@ public class PluginMeta {
 
 		@Override
 		public String docs() {
-			return "array {} Returns an array of strings containing the channels"
+			return "array<string> {} Returns an array of strings containing the channels"
 					+ " CommandHelper is listening on.";
 		}
 

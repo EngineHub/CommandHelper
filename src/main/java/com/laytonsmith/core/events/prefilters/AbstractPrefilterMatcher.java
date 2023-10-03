@@ -6,6 +6,7 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.CClassType;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.BindableEvent;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -44,9 +45,9 @@ public abstract class AbstractPrefilterMatcher<T extends BindableEvent> implemen
 	 * @return The prefilter value type.
 	 */
 	@Override
-	public CClassType typecheck(StaticAnalysis analysis,
+	public LeftHandSideType typecheck(StaticAnalysis analysis,
 			ParseTree prefilterValueParseTree, Environment env, Set<ConfigCompileException> exceptions) {
-		CClassType prefilterValueType = analysis.typecheck(prefilterValueParseTree, env, exceptions);
+		LeftHandSideType prefilterValueType = analysis.typecheck(prefilterValueParseTree, null, env, exceptions);
 		try {
 			this.validate(prefilterValueParseTree, prefilterValueType, env);
 		} catch (ConfigCompileException e) {

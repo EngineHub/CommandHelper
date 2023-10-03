@@ -14,6 +14,7 @@ import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
+
 import java.io.File;
 import java.util.List;
 import java.util.Set;
@@ -87,10 +88,14 @@ public class OptimizationUtilities {
 	}
 
 	private static String optimize0(ParseTree node) {
-		if(node.getData() instanceof CFunction) {
+		if(node.getData() instanceof CFunction cFunction) {
 			StringBuilder b = new StringBuilder();
 			boolean first = true;
-			b.append(((CFunction) node.getData()).val()).append("(");
+			b.append(cFunction.val());
+			if(node.getNodeModifiers().getGenerics() != null) {
+				b.append(node.getNodeModifiers().getGenerics().toString());
+			}
+			b.append("(");
 			for(ParseTree child : node.getChildren()) {
 				if(!first) {
 					b.append(",");
@@ -105,20 +110,20 @@ public class OptimizationUtilities {
 			return new StringBuilder().append("'").append(node.getData().val()
 					.replace("\\", "\\\\").replace("\t", "\\t").replace("\n", "\\n")
 					.replace("'", "\\'")).append("'").toString();
-		} else if(node.getData() instanceof IVariable) {
-			return ((IVariable) node.getData()).getVariableName();
-		} else if(node.getData() instanceof Variable) {
-			return ((Variable) node.getData()).getVariableName();
+		} else if(node.getData() instanceof IVariable iVariable) {
+			return iVariable.getVariableName();
+		} else if(node.getData() instanceof Variable variable) {
+			return variable.getVariableName();
 		} else if(node.getData() instanceof CSlice) {
 			return node.getData().val();
-		} else if(node.getData().isInstanceOf(CArray.TYPE)) {
+		} else if(node.getData() instanceof CArray cArray) {
 			//It's a hardcoded array. This only happens in the course of optimization, if
 			//the optimizer adds a new array. We still need to handle it appropriately though.
 			//The values in the array will be constant, guaranteed.
 			StringBuilder b = new StringBuilder();
 			b.append("array(");
 			boolean first = true;
-			CArray n = (CArray) node.getData();
+			CArray n = cArray;
 			for(String key : n.stringKeySet()) {
 				if(!first) {
 					b.append(",");

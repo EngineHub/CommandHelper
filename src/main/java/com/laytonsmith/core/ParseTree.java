@@ -1,17 +1,18 @@
 package com.laytonsmith.core;
 
-import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.analysis.Declaration;
 import com.laytonsmith.core.compiler.analysis.Namespace;
+import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.Auto;
-import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.Function;
@@ -32,7 +33,7 @@ import java.util.WeakHashMap;
  * particular section of code.
  *
  */
-public class ParseTree implements Cloneable {
+public final class ParseTree implements Cloneable {
 
 	private enum CacheTypes {
 		IS_SYNC, IS_ASYNC, FUNCTIONS
@@ -44,8 +45,7 @@ public class ParseTree implements Cloneable {
 	 * so we also want to maintain a cache. But we ALSO don't want to have a memory leak by simply having tons of cached
 	 * references. So, we store a private cache of weak references to "this" instance.
 	 */
-	private static Map<ParseTree, Map<CacheTypes, Object>> cache
-			= new WeakHashMap<ParseTree, Map<CacheTypes, Object>>();
+	private static Map<ParseTree, Map<CacheTypes, Object>> cache = new WeakHashMap<>();
 
 	private static boolean isCached(ParseTree tree, CacheTypes type) {
 		if(!cache.containsKey(tree)) {
@@ -72,13 +72,9 @@ public class ParseTree implements Cloneable {
 
 	private static void setCache(ParseTree tree, CacheTypes type, Object value) {
 		if(!cache.containsKey(tree)) {
-			cache.put(tree, new EnumMap<CacheTypes, Object>(CacheTypes.class));
+			cache.put(tree, new EnumMap<>(CacheTypes.class));
 		}
 		cache.get(tree).put(type, value);
-	}
-
-	private static void clearCache(ParseTree tree) {
-		cache.remove(tree);
 	}
 
 	private Mixed data = null;
@@ -86,14 +82,16 @@ public class ParseTree implements Cloneable {
 	private final FileOptions fileOptions;
 	private List<ParseTree> children = null;
 	private boolean hasBeenMadeStatic = false;
-	private NodeModifiers nodeModifiers = new NodeModifiers();
+	private final NodeModifiers nodeModifiers = new NodeModifiers();
 	private boolean isSyntheticNode;
 
 	/**
 	 * Creates a new empty tree node
+	 *
+	 * @param options
 	 */
 	public ParseTree(FileOptions options) {
-		children = new ArrayList<ParseTree>();
+		children = new ArrayList<>();
 		this.fileOptions = options;
 	}
 
@@ -287,8 +285,8 @@ public class ParseTree implements Cloneable {
 	 */
 	public boolean isConst() {
 		// Constructs may or may not be const, everything else is dynamic. Enums are always const.
-		if(data instanceof Construct) {
-			return !((Construct) data).isDynamic();
+		if(data instanceof Construct construct) {
+			return !construct.isDynamic();
 		}
 		// TODO This will be changed once the concept of immutable objects are introduced
 		return data.getObjectType() == ObjectType.ENUM;
@@ -300,8 +298,8 @@ public class ParseTree implements Cloneable {
 	 * @return
 	 */
 	public boolean isDynamic() {
-		if(data instanceof Construct) {
-			return ((Construct) data).isDynamic();
+		if(data instanceof Construct construct) {
+			return construct.isDynamic();
 		}
 		return data.getObjectType() != ObjectType.ENUM;
 	}
@@ -367,21 +365,20 @@ public class ParseTree implements Cloneable {
 			List<Mixed> allChildren = getAllData();
 			loop:
 			for(Mixed c : allChildren) {
-				if(c instanceof CFunction) {
+				if(c instanceof CFunction cFunction) {
 					try {
-						FunctionBase f = FunctionList.getFunction((CFunction) c, null);
-						if(f instanceof Function) {
-							Function ff = (Function) f;
+						FunctionBase f = FunctionList.getFunction(cFunction, null);
+						if(f instanceof Function ff) {
 							functions.add(ff);
 						}
-					} catch (ConfigCompileException ex) {
+					} catch(ConfigCompileException ex) {
 						throw new Error(ex);
 					}
 
 				}
 			}
 			setCache(this, CacheTypes.FUNCTIONS, functions);
-			return new ArrayList<Function>(functions);
+			return new ArrayList<>(functions);
 		}
 	}
 
@@ -389,13 +386,18 @@ public class ParseTree implements Cloneable {
 	public ParseTree clone() throws CloneNotSupportedException {
 		ParseTree clone = (ParseTree) super.clone();
 		clone.data = data.clone();
-		clone.children = new ArrayList<ParseTree>(this.children);
+		clone.children = new ArrayList<>(this.children);
 		return clone;
 	}
 
 	@Override
 	public String toString() {
-		return data.toString();
+		StringBuilder builder = new StringBuilder();
+		builder.append(data.toString());
+		if(getNodeModifiers().getGenerics() != null) {
+			builder.append(getNodeModifiers().getGenerics().toString());
+		}
+		return builder.toString();
 	}
 
 	public String toStringVerbose() {
@@ -415,8 +417,8 @@ public class ParseTree implements Cloneable {
 		} else if(data instanceof CString) {
 			// Convert: \ -> \\ and ' -> \'
 			stringRepresentation.append("'").append(data.val().replaceAll("\t", "\\t").replaceAll("\n", "\\n").replace("\\", "\\\\").replace("'", "\\'")).append("'");
-		} else if(data instanceof IVariable) {
-			stringRepresentation.append(((IVariable) data).getVariableName());
+		} else if(data instanceof IVariable iVariable) {
+			stringRepresentation.append(iVariable.getVariableName());
 		} else {
 			stringRepresentation.append(data.val());
 		}
@@ -433,58 +435,91 @@ public class ParseTree implements Cloneable {
 
 	/**
 	 * Returns the declared CClassType of this node. For constants, this is just the type, for variables, this is the
-	 * defined type, and for functions and procs, this is the return type of the function. For many values,
-	 * the type will be AUTO. The type may be CNull for literal nulls, but will never be java null.
+	 * defined type, and for functions and procs, this is the return type of the function.For many values, the type will
+	 * be AUTO. The type may be CNull for literal nulls, but will never be java null.
 	 *
-	 * @param env
+	 * @param sa The static analysis object.
+	 * @param env The environment
+	 * @param inferredType The inferred type, if this is a function call, and the result of this value is being
+	 * used as an argument to another function. Otherwise, can be null.
 	 * @return
 	 */
-	public CClassType getDeclaredType(Environment env) {
+	public LeftHandSideType getDeclaredType(StaticAnalysis sa, Environment env, LeftHandSideType inferredType) {
 		if(isConst()) {
-			return getData().typeof();
+			if(!getFileOptions().isStrict()) {
+				return Auto.LHSTYPE;
+			} else {
+				return getData().typeof(env).asLeftHandSideType();
+			}
 		} else if(getData() instanceof IVariable ivar) {
-			StaticAnalysis sa = env.getEnv(CompilerEnvironment.class).getStaticAnalysis();
 			if(sa.isLocalEnabled()) {
-				List<Declaration> decls = new ArrayList<>(sa.getTermScope(this).getDeclarations(Namespace.IVARIABLE, ivar.getVariableName()));
+				Scope scope = sa.getTermScope(this);
+				if(scope == null) {
+					throw new RuntimeException("Could not determine scope for " + this.getTarget());
+				}
+				List<Declaration> decls = new ArrayList<>(scope.getDeclarations(Namespace.IVARIABLE, ivar.getVariableName()));
 				if(decls.size() == 1) {
 					return decls.get(0).getType();
 				} else {
-					return Auto.TYPE;
+					return Auto.LHSTYPE;
 				}
 			} else {
 				// This isn't possible to accurately get without static analysis enabled.
-				return Auto.TYPE;
+				return Auto.LHSTYPE;
 			}
 		} else if(getData() instanceof CFunction cf) {
 			if(cf.hasProcedure()) {
-				StaticAnalysis sa = env.getEnv(CompilerEnvironment.class).getStaticAnalysis();
 				if(sa.isLocalEnabled()) {
-					List<Declaration> decls = new ArrayList<>(sa.getTermScope(this).getDeclarations(Namespace.PROCEDURE, cf.val()));
+					Scope scope = sa.getTermScope(this);
+					if(scope == null) {
+						throw new RuntimeException("Could not determine scope for " + this.getTarget());
+					}
+					List<Declaration> decls = new ArrayList<>(scope.getDeclarations(Namespace.PROCEDURE, cf.val()));
 					if(decls.size() == 1) {
 						return decls.get(0).getType();
 					} else {
-						return Auto.TYPE;
+						return Auto.LHSTYPE;
 					}
 				} else {
-					return Auto.TYPE;
+					return Auto.LHSTYPE;
 				}
 			} else {
-				List<CClassType> argTypes = new ArrayList<>();
 				List<Target> argTargets = new ArrayList<>();
 				Set<ConfigCompileException> exceptions = new HashSet<>();
+				List<LeftHandSideType> argTypes;
+				try {
+					if(cf.getCachedFunction() == null) {
+						// Function doesn't exist, just make everything auto so that the rest of typechecking
+						// can continue running.
+						return Auto.LHSTYPE;
+					} else {
+						argTypes = cf.getFunction()
+								.getResolvedParameterTypes(sa, getTarget(), env, this.getNodeModifiers().getGenerics(),
+										inferredType, getChildren());
+					}
+				} catch(ConfigCompileException ex) {
+					throw new RuntimeException(getTarget().toString(), ex);
+				}
 				for(ParseTree child : getChildren()) {
-					argTypes.add(child.getDeclaredType(env));
 					argTargets.add(child.getTarget());
 				}
-				return cf.getCachedFunction().getReturnType(getTarget(), argTypes, argTargets, env, exceptions);
+				return cf.getCachedFunction().getReturnType(this, getTarget(),
+						argTypes, argTargets, inferredType, env, exceptions);
+			}
+		} else if(getData() instanceof Variable) {
+			if(getFileOptions().isStrict()) {
+				return CString.TYPE.asLeftHandSideType();
+			} else {
+				return Auto.LHSTYPE;
 			}
 		} else {
-			throw new Error("Unhandled type, please report this bug");
+			throw new Error("Unhandled type, please report this bug. Caused by code from " + getTarget());
 		}
 	}
 
 	/**
 	 * Returns the NodeModifiers object for this ParseTree node.
+	 *
 	 * @return
 	 */
 	public NodeModifiers getNodeModifiers() {

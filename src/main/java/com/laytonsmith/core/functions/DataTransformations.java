@@ -14,6 +14,7 @@ import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
@@ -72,10 +73,10 @@ public class DataTransformations {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			CArray ca = ArgumentValidation.getArray(args[0], t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			CArray ca = ArgumentValidation.getArray(args[0], t, env);
 			try {
-				return new CString(Construct.json_encode(ca, t), t);
+				return new CString(Construct.json_encode(ca, t, env), t);
 			} catch (MarshalException ex) {
 				throw new CRECastException(ex.getMessage(), t);
 			}
@@ -129,10 +130,10 @@ public class DataTransformations {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String s = args[0].val();
 			try {
-				return Construct.json_decode(s, t);
+				return Construct.json_decode(s, t, env);
 			} catch (MarshalException ex) {
 				throw new CREFormatException("The input JSON string is improperly formatted. Check your formatting and try again.", t, ex);
 			}
@@ -187,11 +188,11 @@ public class DataTransformations {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			CArray ca = ArgumentValidation.getArray(args[0], t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			CArray ca = ArgumentValidation.getArray(args[0], t, env);
 			boolean prettyPrint = false;
 			if(args.length == 2) {
-				prettyPrint = ArgumentValidation.getBoolean(args[1], t);
+				prettyPrint = ArgumentValidation.getBoolean(args[1], t, env);
 			}
 			DumperOptions options = new DumperOptions();
 			if(prettyPrint) {
@@ -200,7 +201,7 @@ public class DataTransformations {
 			}
 			Yaml yaml = new Yaml(options);
 			try {
-				return new CString(yaml.dump(Construct.GetPOJO(ca)), t);
+				return new CString(yaml.dump(Construct.GetPOJO(ca, env)), t);
 			} catch (ClassCastException ex) {
 				throw new CRECastException(ex.getMessage(), t);
 			}
@@ -248,7 +249,7 @@ public class DataTransformations {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String data = args[0].val();
 			LoaderOptions options = new LoaderOptions();
 			Mixed codePointLimit = env.getEnv(GlobalEnv.class)
@@ -274,7 +275,7 @@ public class DataTransformations {
 				throw new CREFormatException("Improperly formatted YML"
 						+ (cause != null ? ": " + cause.getMessage() : ""), t, cause);
 			}
-			return Construct.GetConstruct(ret);
+			return Construct.GetConstruct(ret, env);
 		}
 
 		@Override
@@ -322,9 +323,9 @@ public class DataTransformations {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			Properties props = new Properties();
-			CArray arr = ArgumentValidation.getArray(args[0], t);
+			CArray arr = ArgumentValidation.getArray(args[0], t, env);
 			String comment = null;
 			if(args.length == 2) {
 				comment = args[1].val();
@@ -333,11 +334,11 @@ public class DataTransformations {
 				throw new CRECastException("Expecting an associative array", t);
 			}
 			for(String key : arr.stringKeySet()) {
-				Mixed c = arr.get(key, t);
+				Mixed c = arr.get(key, t, env);
 				String val;
 				if(c instanceof CNull) {
 					val = "";
-				} else if(c.isInstanceOf(CArray.TYPE)) {
+				} else if(c.isInstanceOf(CArray.TYPE, null, env)) {
 					throw new CRECastException("Arrays cannot be encoded with ini_encode.", t);
 				} else {
 					val = c.val();
@@ -401,7 +402,7 @@ public class DataTransformations {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			Properties props = new Properties();
 			Reader reader = new StringReader(args[0].val());
 			try {
@@ -409,9 +410,10 @@ public class DataTransformations {
 			} catch (IOException ex) {
 				throw new CREFormatException(ex.getMessage(), t);
 			}
-			CArray arr = CArray.GetAssociativeArray(t);
+			CArray arr = CArray.GetAssociativeArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			for(String key : props.stringPropertyNames()) {
-				arr.set(key, props.getProperty(key));
+				arr.set(key, props.getProperty(key), env);
 			}
 			return arr;
 		}
@@ -468,7 +470,7 @@ public class DataTransformations {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			XMLDocument doc;
 			try {
 				doc = new XMLDocument(args[0].val());
@@ -476,7 +478,7 @@ public class DataTransformations {
 				throw new CREFormatException("Malformed XML.", t, ex);
 			}
 			try {
-				return Static.resolveConstruct(doc.getNode(args[1].val()), t);
+				return Static.resolveConstruct(doc.getNode(args[1].val()), t, env);
 			} catch (XPathExpressionException ex) {
 				throw new CREFormatException(ex.getMessage(), t, ex);
 			}
@@ -524,7 +526,7 @@ public class DataTransformations {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 

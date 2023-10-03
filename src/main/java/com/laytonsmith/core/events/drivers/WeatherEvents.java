@@ -51,31 +51,31 @@ public class WeatherEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event, Environment env) throws PrefilterNonMatchException {
 			if(event instanceof MCLightningStrikeEvent) {
 				MCLightningStrikeEvent e = (MCLightningStrikeEvent) event;
-				Prefilters.match(prefilter, "world", e.getWorld().getName(), Prefilters.PrefilterType.MACRO);
-				Prefilters.match(prefilter, "location", e.getLightning().getLocation(), Prefilters.PrefilterType.LOCATION_MATCH);
-				Prefilters.match(prefilter, "is_effect", e.getLightning().isEffect(), Prefilters.PrefilterType.BOOLEAN_MATCH);
+				Prefilters.match(prefilter, "world", e.getWorld().getName(), Prefilters.PrefilterType.MACRO, env);
+				Prefilters.match(prefilter, "location", e.getLightning().getLocation(), Prefilters.PrefilterType.LOCATION_MATCH, env);
+				Prefilters.match(prefilter, "is_effect", e.getLightning().isEffect(), Prefilters.PrefilterType.BOOLEAN_MATCH, env);
 				return true;
 			}
 			return false;
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
+		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
 			return null;
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			if(event instanceof MCLightningStrikeEvent) {
 				MCLightningStrikeEvent e = (MCLightningStrikeEvent) event;
 				Target t = Target.UNKNOWN;
 				Map<String, Mixed> ret = evaluate_helper(e);
 				ret.put("world", new CString(e.getWorld().getName(), t));
 				ret.put("id", new CString(e.getLightning().getUniqueId().toString(), t));
-				ret.put("location", ObjectGenerator.GetGenerator().location(e.getLightning().getLocation()));
+				ret.put("location", ObjectGenerator.GetGenerator().location(e.getLightning().getLocation(), env));
 				ret.put("is_effect", CBoolean.GenerateCBoolean(e.getLightning().isEffect(), t));
 				return ret;
 			} else {
@@ -89,7 +89,7 @@ public class WeatherEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			return false;
 		}
 
@@ -136,23 +136,23 @@ public class WeatherEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event, Environment env) throws PrefilterNonMatchException {
 			if(event instanceof MCThunderChangeEvent) {
 				MCThunderChangeEvent e = (MCThunderChangeEvent) event;
-				Prefilters.match(prefilter, "world", e.getWorld().getName(), Prefilters.PrefilterType.MACRO);
-				Prefilters.match(prefilter, "has_thunder", e.toThunderState(), Prefilters.PrefilterType.BOOLEAN_MATCH);
+				Prefilters.match(prefilter, "world", e.getWorld().getName(), Prefilters.PrefilterType.MACRO, env);
+				Prefilters.match(prefilter, "has_thunder", e.toThunderState(), Prefilters.PrefilterType.BOOLEAN_MATCH, env);
 				return true;
 			}
 			return false;
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
+		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
 			return null;
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			if(event instanceof MCThunderChangeEvent) {
 				MCThunderChangeEvent e = (MCThunderChangeEvent) event;
 				Target t = Target.UNKNOWN;
@@ -171,7 +171,7 @@ public class WeatherEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			return false;
 		}
 
@@ -200,23 +200,23 @@ public class WeatherEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event, Environment env) throws PrefilterNonMatchException {
 			if(event instanceof MCWeatherChangeEvent) {
 				MCWeatherChangeEvent e = (MCWeatherChangeEvent) event;
-				Prefilters.match(prefilter, "world", e.getWorld().getName(), Prefilters.PrefilterType.MACRO);
-				Prefilters.match(prefilter, "is_effect", e.toWeatherState(), Prefilters.PrefilterType.BOOLEAN_MATCH);
+				Prefilters.match(prefilter, "world", e.getWorld().getName(), Prefilters.PrefilterType.MACRO, env);
+				Prefilters.match(prefilter, "is_effect", e.toWeatherState(), Prefilters.PrefilterType.BOOLEAN_MATCH, env);
 				return true;
 			}
 			return false;
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
+		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
 			return null;
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			if(event instanceof MCWeatherChangeEvent) {
 				MCWeatherChangeEvent e = (MCWeatherChangeEvent) event;
 				Target t = Target.UNKNOWN;
@@ -235,7 +235,7 @@ public class WeatherEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			return false;
 		}
 

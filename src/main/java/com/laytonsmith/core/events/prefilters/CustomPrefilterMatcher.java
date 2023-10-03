@@ -3,7 +3,7 @@ package com.laytonsmith.core.events.prefilters;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ParseTree;
-import com.laytonsmith.core.constructs.CClassType;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.BindableEvent;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -46,7 +46,7 @@ public abstract class CustomPrefilterMatcher<T extends BindableEvent> extends Ab
 	}
 
 	@Override
-	public void validate(ParseTree node, CClassType nodeType, Environment env)
+	public void validate(ParseTree node, LeftHandSideType nodeType, Environment env)
 			throws ConfigCompileException, ConfigCompileGroupException, ConfigRuntimeException {
 		// No validation supported here by default, though it can be overridden if relevant.
 	}

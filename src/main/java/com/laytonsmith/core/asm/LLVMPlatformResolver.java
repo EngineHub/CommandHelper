@@ -40,6 +40,6 @@ public final class LLVMPlatformResolver {
 			builder.appendLine(c.getTarget(), "%" + gep + " = getelementptr inbounds [" + length + " x i8], [" + length + " x i8]* %" + alloca + ", i64 0, i64 0");
 			return IRDataBuilder.setReturnVariable(gep, IRType.STRING);
 		}
-		throw new UnsupportedOperationException("Unsupported data type " + c.typeof().getName());
+		throw new UnsupportedOperationException("Unsupported data type " + c.typeof(env).getName());
 	}
 }

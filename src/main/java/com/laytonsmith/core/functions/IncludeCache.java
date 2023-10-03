@@ -42,8 +42,8 @@ public class IncludeCache {
 	private final Map<Target, Scope> dynamicAnalysisParentScopeCache = new HashMap<>();
 
 	/**
-	 * Adds a single file and its associated compiled {@link ParseTree} to this cache.
-	 * To ensure only one ParseTree is stored per file, use a canonical file path.
+	 * Adds a single file and its associated compiled {@link ParseTree} to this cache. To ensure only one ParseTree is
+	 * stored per file, use a canonical file path.
 	 *
 	 * @param file The {@link File} that was compiled
 	 * @param tree The {@link ParseTree} to be cached
@@ -62,8 +62,7 @@ public class IncludeCache {
 	}
 
 	/**
-	 * Checks if this cache contains the compiled {@link ParseTree} for a file.
-	 * A canonical file path should be used.
+	 * Checks if this cache contains the compiled {@link ParseTree} for a file. A canonical file path should be used.
 	 *
 	 * @param file The {@link File} to check
 	 * @return {@code true} if the cache contains this file
@@ -216,19 +215,9 @@ public class IncludeCache {
 	}
 
 	/**
-	 * @param env
-	 * @param s
-	 * @deprecated The method was renamed to properly reflect what it does, which is to {@link #executeAutoIncludes}.
-	 */
-	@Deprecated
-	public void registerAutoIncludes(Environment env, Script s) {
-		executeAutoIncludes(env, s);
-	}
-
-	/**
-	 * Compiles and executes all the auto_include.ms files added to this object.
-	 * This will use a cached {@link ParseTree} for each {@link File} when available.
-	 * This effectively stores all the defined procedures within the given {@link Environment}.
+	 * Compiles and executes all the auto_include.ms files added to this object. This will use a cached
+	 * {@link ParseTree} for each {@link File} when available. This effectively stores all the defined procedures within
+	 * the given {@link Environment}.
 	 *
 	 * @param env The {@link Environment} to execute with
 	 * @param s The {@link Script} to execute with (can be null)
@@ -238,10 +227,10 @@ public class IncludeCache {
 			try {
 				MethodScriptCompiler.execute(
 						IncludeCache.get(f, env, env.getEnvClasses(), new Target(0, f, 0)), env, null, s);
-			} catch (ProgramFlowManipulationException e) {
+			} catch(ProgramFlowManipulationException e) {
 				ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.CreateUncatchableException(
 						"Cannot break program flow in auto include files.", e.getTarget()), env);
-			} catch (ConfigRuntimeException e) {
+			} catch(ConfigRuntimeException e) {
 				e.setEnv(env);
 				ConfigRuntimeException.HandleUncaughtException(e, env);
 			}

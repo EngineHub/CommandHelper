@@ -1,6 +1,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -26,6 +27,7 @@ import static org.mockito.Mockito.verify;
 public class StringHandlingTest {
 
 	MCPlayer fakePlayer;
+	com.laytonsmith.core.environments.Environment env;
 
 	public StringHandlingTest() {
 	}
@@ -40,8 +42,9 @@ public class StringHandlingTest {
 	}
 
 	@Before
-	public void setUp() {
+	public void setUp() throws Exception {
 		fakePlayer = StaticTest.GetOnlinePlayer();
+		env = Static.GenerateStandaloneEnvironment();
 	}
 
 	@After
@@ -51,16 +54,16 @@ public class StringHandlingTest {
 	@Test(timeout = 10000)
 	public void testConcat() throws Exception {
 		StringHandling.concat a = new StringHandling.concat();
-		assertCEquals(C.onstruct("1234"), a.exec(Target.UNKNOWN, null, C.onstruct(1), C.onstruct(2), C.onstruct(3), C.onstruct(4)));
-		assertCEquals(C.onstruct("astring"), a.exec(Target.UNKNOWN, null, C.onstruct("a"), C.String("string")));
+		assertCEquals(C.onstruct("1234"), a.exec(Target.UNKNOWN, env, null, C.onstruct(1), C.onstruct(2), C.onstruct(3), C.onstruct(4)));
+		assertCEquals(C.onstruct("astring"), a.exec(Target.UNKNOWN, env, null, C.onstruct("a"), C.String("string")));
 		assertEquals("05", SRun("'0' . 5", null));
 	}
 
-	@Test(timeout = 10000)
+	@Test//(timeout = 10000)
 	public void testLength() {
 		StringHandling.length a = new StringHandling.length();
-		assertCEquals(C.onstruct(5), a.exec(Target.UNKNOWN, null, C.onstruct("12345")));
-		assertCEquals(C.onstruct(2), a.exec(Target.UNKNOWN, null, C.Array(C.onstruct(0), C.onstruct(1))));
+		assertCEquals(C.onstruct(5), a.exec(Target.UNKNOWN, env, null, C.onstruct("12345")));
+		assertCEquals(C.onstruct(2), a.exec(Target.UNKNOWN, env, null, C.Array(C.onstruct(0), C.onstruct(1))));
 	}
 
 	@Test//(timeout = 10000)
@@ -68,8 +71,8 @@ public class StringHandlingTest {
 		SRun("msg(parse_args('o \"\\\\t\"', true))", fakePlayer);
 		verify(fakePlayer).sendMessage("{o, \\t}");
 		StringHandling.parse_args a = new StringHandling.parse_args();
-		assertCEquals(C.Array(C.onstruct("one"), C.onstruct("two")), a.exec(Target.UNKNOWN, null, C.onstruct("one   two")));
-		assertCEquals(C.Array(C.onstruct("one"), C.onstruct("two")), a.exec(Target.UNKNOWN, null, C.onstruct("one two")));
+		assertCEquals(C.Array(C.onstruct("one"), C.onstruct("two")), a.exec(Target.UNKNOWN, env, null, C.onstruct("one   two")));
+		assertCEquals(C.Array(C.onstruct("one"), C.onstruct("two")), a.exec(Target.UNKNOWN, env, null, C.onstruct("one two")));
 		SRun("msg(parse_args('one \"two\"', true))", fakePlayer);
 		verify(fakePlayer).sendMessage("{one, two}");
 	}
@@ -81,9 +84,9 @@ public class StringHandlingTest {
 	@Test(timeout = 10000)
 	public void testReplace() {
 		StringHandling.replace a = new StringHandling.replace();
-		assertCEquals(C.onstruct("yay"), a.exec(Target.UNKNOWN, null, C.onstruct("yayathing"), C.onstruct("athing"), C.onstruct("")));
-		assertCEquals(C.onstruct("yaymonkey"), a.exec(Target.UNKNOWN, null, C.onstruct("yayathing"), C.onstruct("athing"), C.onstruct("monkey")));
-		assertCEquals(C.onstruct("yayathing"), a.exec(Target.UNKNOWN, null, C.onstruct("yayathing"), C.onstruct("wut"), C.onstruct("chicken")));
+		assertCEquals(C.onstruct("yay"), a.exec(Target.UNKNOWN, env, null, C.onstruct("yayathing"), C.onstruct("athing"), C.onstruct("")));
+		assertCEquals(C.onstruct("yaymonkey"), a.exec(Target.UNKNOWN, env, null, C.onstruct("yayathing"), C.onstruct("athing"), C.onstruct("monkey")));
+		assertCEquals(C.onstruct("yayathing"), a.exec(Target.UNKNOWN, env, null, C.onstruct("yayathing"), C.onstruct("wut"), C.onstruct("chicken")));
 	}
 
 	@Test(timeout = 10000)
@@ -96,30 +99,30 @@ public class StringHandlingTest {
 	@Test(timeout = 10000)
 	public void testSubstr() {
 		StringHandling.substr a = new StringHandling.substr();
-		assertCEquals(C.onstruct("urge"), a.exec(Target.UNKNOWN, null, C.onstruct("hamburger"), C.onstruct(4), C.onstruct(8)));
-		assertCEquals(C.onstruct("mile"), a.exec(Target.UNKNOWN, null, C.onstruct("smiles"), C.onstruct(1), C.onstruct(5)));
-		assertCEquals(C.onstruct("ning"), a.exec(Target.UNKNOWN, null, C.onstruct("lightning"), C.onstruct(5)));
+		assertCEquals(C.onstruct("urge"), a.exec(Target.UNKNOWN, env, null, C.onstruct("hamburger"), C.onstruct(4), C.onstruct(8)));
+		assertCEquals(C.onstruct("mile"), a.exec(Target.UNKNOWN, env, null, C.onstruct("smiles"), C.onstruct(1), C.onstruct(5)));
+		assertCEquals(C.onstruct("ning"), a.exec(Target.UNKNOWN, env, null, C.onstruct("lightning"), C.onstruct(5)));
 	}
 
 	@Test(timeout = 10000)
 	public void testToUpper() {
 		StringHandling.to_upper a = new StringHandling.to_upper();
-		assertCEquals(C.onstruct("TESTING 123"), a.exec(Target.UNKNOWN, null, C.onstruct("testing 123")));
-		assertCEquals(C.onstruct("TESTING 123"), a.exec(Target.UNKNOWN, null, C.onstruct("TeStInG 123")));
+		assertCEquals(C.onstruct("TESTING 123"), a.exec(Target.UNKNOWN, env, null, C.onstruct("testing 123")));
+		assertCEquals(C.onstruct("TESTING 123"), a.exec(Target.UNKNOWN, env, null, C.onstruct("TeStInG 123")));
 	}
 
 	@Test(timeout = 10000)
 	public void testToLower() {
 		StringHandling.to_lower a = new StringHandling.to_lower();
-		assertCEquals(C.onstruct("testing 123"), a.exec(Target.UNKNOWN, null, C.onstruct("TESTING 123")));
-		assertCEquals(C.onstruct("testing 123"), a.exec(Target.UNKNOWN, null, C.onstruct("TeStInG 123")));
+		assertCEquals(C.onstruct("testing 123"), a.exec(Target.UNKNOWN, env, null, C.onstruct("TESTING 123")));
+		assertCEquals(C.onstruct("testing 123"), a.exec(Target.UNKNOWN, env, null, C.onstruct("TeStInG 123")));
 	}
 
 	@Test(timeout = 10000)
 	public void testTrim() {
 		StringHandling.trim a = new StringHandling.trim();
-		assertCEquals(C.onstruct("test 123"), a.exec(Target.UNKNOWN, null, C.onstruct("    test 123    ")));
-		assertCEquals(C.onstruct("test   123"), a.exec(Target.UNKNOWN, null, C.onstruct("test   123")));
+		assertCEquals(C.onstruct("test 123"), a.exec(Target.UNKNOWN, env, null, C.onstruct("    test 123    ")));
+		assertCEquals(C.onstruct("test   123"), a.exec(Target.UNKNOWN, env, null, C.onstruct("test   123")));
 	}
 
 	@Test

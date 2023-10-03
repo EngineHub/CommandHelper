@@ -7,8 +7,8 @@ import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.core.ArgumentValidation;
-import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.LogLevel;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Static;
@@ -24,6 +24,7 @@ import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
 import com.laytonsmith.core.exceptions.CRE.CRECausedByWrapper;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -122,7 +123,7 @@ public class ConfigRuntimeException extends RuntimeException {
 					return Reaction.REPORT; // Closure returned null or scream-errors was set in the config.
 				}
 				// Closure returned a boolean. TRUE -> IGNORE and FALSE -> FATAL.
-				return (ArgumentValidation.getBooleanObject(ret, Target.UNKNOWN) ? Reaction.IGNORE : Reaction.FATAL);
+				return (ArgumentValidation.getBooleanObject(ret, Target.UNKNOWN, env) ? Reaction.IGNORE : Reaction.FATAL);
 			} catch (ConfigRuntimeException cre) {
 
 				// A CRE occurred in the exception handler. Report both exceptions.
@@ -142,22 +143,22 @@ public class ConfigRuntimeException extends RuntimeException {
 	 * @param optionalMessage
 	 * @param player
 	 */
-	public static void HandleUncaughtException(ConfigCompileException e, String optionalMessage, MCPlayer player) {
+	public static void HandleUncaughtException(ConfigCompileException e, String optionalMessage, MCPlayer player, Environment env) {
 		if(optionalMessage != null) {
 			DoWarning(optionalMessage);
 		}
-		DoReport(e, player);
+		DoReport(e, player, env);
 	}
 
-	public static void HandleUncaughtException(ConfigCompileGroupException e, MCPlayer player) {
+	public static void HandleUncaughtException(ConfigCompileGroupException e, MCPlayer player, Environment env) {
 		for(ConfigCompileException ce : e.getList()) {
-			HandleUncaughtException(ce, null, player);
+			HandleUncaughtException(ce, null, player, env);
 		}
 	}
 
-	public static void HandleUncaughtException(ConfigCompileGroupException e, String optionalMessage, MCPlayer player) {
+	public static void HandleUncaughtException(ConfigCompileGroupException e, String optionalMessage, MCPlayer player, Environment env) {
 		DoWarning(optionalMessage);
-		HandleUncaughtException(e, player);
+		HandleUncaughtException(e, player, env);
 	}
 
 	/**
@@ -165,7 +166,7 @@ public class ConfigRuntimeException extends RuntimeException {
 	 * action for an uncaught exception.
 	 *
 	 * @param e
-	 * @param r
+	 * @param env
 	 */
 	public static void HandleUncaughtException(ConfigRuntimeException e, Environment env) {
 		HandleUncaughtException(e, env, GetReaction(e, env));
@@ -229,12 +230,10 @@ public class ConfigRuntimeException extends RuntimeException {
 	 * If the Reaction returned by GetReaction is to report the exception, this function should be used to standardize
 	 * the report format. If the error message wouldn't be very useful by itself, or if a hint is desired, an optional
 	 * message may be provided (null otherwise).
-	 *
-	 * @param e
-	 * @param optionalMessage
 	 */
 	@SuppressWarnings("ThrowableResultIgnored")
-	private static void DoReport(String message, String exceptionType, ConfigRuntimeException ex, List<StackTraceElement> stacktrace, MCPlayer currentPlayer) {
+	private static void DoReport(String message, String exceptionType, ConfigRuntimeException ex,
+			List<StackTraceElement> stacktrace, MCPlayer currentPlayer, Environment env) {
 		String type = exceptionType;
 		if(exceptionType == null) {
 			type = "FATAL";
@@ -269,19 +268,19 @@ public class ConfigRuntimeException extends RuntimeException {
 				console.append(TermColors.CYAN).append("Caused by:\n");
 				player.append(MCChatColor.AQUA).append("Caused by:\n");
 				CArray exception = ((CRECausedByWrapper) ex).getException();
-				CArray stackTrace = ArgumentValidation.getArray(exception.get("stackTrace", t), t);
+				CArray stackTrace = ArgumentValidation.getArray(exception.get("stackTrace", t, env), t, env);
 				List<StackTraceElement> newSt = new ArrayList<>();
-				for(Mixed consElement : stackTrace.asList()) {
-					CArray element = ArgumentValidation.getArray(consElement, t);
-					int line = ArgumentValidation.getInt32(element.get("line", t), t);
-					File file = new File(element.get("file", t).val());
-					int col = ArgumentValidation.getInt32(element.get("col", t), t);
+				for(Mixed consElement : stackTrace.asList(env)) {
+					CArray element = ArgumentValidation.getArray(consElement, t, env);
+					int line = ArgumentValidation.getInt32(element.get("line", t, env), t, env);
+					File file = new File(element.get("file", t, env).val());
+					int col = ArgumentValidation.getInt32(element.get("col", t, env), t, env);
 					Target stElementTarget = new Target(line, file, col);
-					newSt.add(new StackTraceElement(element.get("id", t).val(), stElementTarget));
+					newSt.add(new StackTraceElement(element.get("id", t, env).val(), stElementTarget));
 				}
 
-				String nType = exception.get("classType", t).val();
-				String nMessage = exception.get("message", t).val();
+				String nType = exception.get("classType", t, env).val();
+				String nMessage = exception.get("message", t, env).val();
 				if(!"".equals(nMessage.trim())) {
 					nMessage = ": " + nMessage;
 				}
@@ -311,7 +310,7 @@ public class ConfigRuntimeException extends RuntimeException {
 		if(e instanceof AbstractCREException) {
 			st = ((AbstractCREException) e).getCREStackTrace();
 		}
-		DoReport(e.getMessage(), AbstractCREException.getExceptionName(e), e, st, p);
+		DoReport(e.getMessage(), AbstractCREException.getExceptionName(e), e, st, p, env);
 		if(Prefs.DebugMode()) {
 			if(e.getCause() != null && !(e.getCause() instanceof CRECausedByWrapper)) {
 				//This is more of a system level exception, so if debug mode is on, we also want to print this stack trace
@@ -329,10 +328,10 @@ public class ConfigRuntimeException extends RuntimeException {
 		}
 	}
 
-	private static void DoReport(ConfigCompileException e, MCPlayer player) {
+	private static void DoReport(ConfigCompileException e, MCPlayer player, Environment env) {
 		List<StackTraceElement> st = new ArrayList<StackTraceElement>();
 		st.add(0, new StackTraceElement("", e.getTarget()));
-		DoReport(e.getMessage(), "COMPILE ERROR", null, st, player);
+		DoReport(e.getMessage(), "COMPILE ERROR", null, st, player, env);
 	}
 
 	/**
@@ -500,25 +499,25 @@ public class ConfigRuntimeException extends RuntimeException {
 			return procedureName + " (Defined at " + definedAt + ")";
 		}
 
-		public CArray getObjectFor() {
-			CArray element = CArray.GetAssociativeArray(Target.UNKNOWN);
-			element.set("id", getProcedureName());
+		public CArray getObjectFor(Environment env) {
+			CArray element = CArray.GetAssociativeArray(Target.UNKNOWN, null, env);
+			element.set("id", getProcedureName(), env);
 			try {
 				String name = "Unknown file";
 				if(getDefinedAt().file() != null) {
 					name = getDefinedAt().file().getCanonicalPath();
 				}
-				element.set("file", name);
+				element.set("file", name, env);
 			} catch (IOException ex) {
 				// This shouldn't happen, but if it does, we want to fall back to something marginally useful
 				String name = "Unknown file";
 				if(getDefinedAt().file() != null) {
 					name = getDefinedAt().file().getAbsolutePath();
 				}
-				element.set("file", name);
+				element.set("file", name, env);
 			}
-			element.set("line", new CInt(getDefinedAt().line(), Target.UNKNOWN), Target.UNKNOWN);
-			element.set("col", new CInt(getDefinedAt().col(), Target.UNKNOWN), Target.UNKNOWN);
+			element.set("line", new CInt(getDefinedAt().line(), Target.UNKNOWN), Target.UNKNOWN, env);
+			element.set("col", new CInt(getDefinedAt().col(), Target.UNKNOWN), Target.UNKNOWN, env);
 			return element;
 		}
 

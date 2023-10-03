@@ -1,22 +1,25 @@
 package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.annotations.ExposedElement;
 import com.laytonsmith.annotations.NonInheritImplements;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.GenericTypeParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.objects.ObjectType;
+
 import java.util.AbstractSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Set;
-import com.laytonsmith.annotations.ExposedElement;
 
 /**
  *
@@ -28,7 +31,11 @@ public class CString extends CPrimitive implements Cloneable,
 		com.laytonsmith.core.natives.interfaces.Iterable {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get(CString.class);
+	public static final CClassType TYPE = CClassType.get(CString.class)
+			.withSuperParameters(GenericTypeParameters
+					.nativeBuilder(com.laytonsmith.core.natives.interfaces.Iterable.TYPE)
+					.addParameter(CClassType.RECURSIVE_DEFINITION, null))
+			.done();
 
 	public CString(String value, Target t) {
 		super(value == null ? "" : value, ConstructType.STRING, t);
@@ -61,7 +68,7 @@ public class CString extends CPrimitive implements Cloneable,
 	}
 
 	@Override
-	public long size() {
+	public long size(Environment env) {
 		return val().length();
 	}
 
@@ -71,7 +78,7 @@ public class CString extends CPrimitive implements Cloneable,
 	}
 
 	@Override
-	public Mixed slice(int begin, int end, Target t) {
+	public Mixed slice(int begin, int end, Target t, Environment env) {
 		if(begin > end) {
 			return new CString("", t);
 		}
@@ -88,7 +95,7 @@ public class CString extends CPrimitive implements Cloneable,
 	}
 
 	@Override
-	public Mixed get(int index, Target t) throws ConfigRuntimeException {
+	public Mixed get(int index, Target t, Environment env) throws ConfigRuntimeException {
 		try {
 			return new CString(this.val().charAt(index), t);
 		} catch (StringIndexOutOfBoundsException e) {
@@ -97,16 +104,16 @@ public class CString extends CPrimitive implements Cloneable,
 	}
 
 	@Override
-	public final Mixed get(Mixed index, Target t) throws ConfigRuntimeException {
-		int i = ArgumentValidation.getInt32(index, t);
-		return get(i, t);
+	public final Mixed get(Mixed index, Target t, Environment env) throws ConfigRuntimeException {
+		int i = ArgumentValidation.getInt32(index, t, env);
+		return get(i, t, env);
 	}
 
 	@Override
-	public final Mixed get(String index, Target t) {
+	public final Mixed get(String index, Target t, Environment env) {
 		try {
 			int i = Integer.parseInt(index);
-			return get(i, t);
+			return get(i, t, env);
 		} catch (NumberFormatException e) {
 			throw new CREFormatException("Expecting numerical index, but received " + index, t);
 		}
@@ -118,7 +125,7 @@ public class CString extends CPrimitive implements Cloneable,
 	}
 
 	@Override
-	public Set<Mixed> keySet() {
+	public Set<Mixed> keySet(Environment env) {
 		return new AbstractSet<Mixed>() {
 			@Override
 			public int size() {
@@ -176,7 +183,7 @@ public class CString extends CPrimitive implements Cloneable,
 	}
 
 	@Override
-	public boolean getBooleanValue(Target t) {
+	public boolean getBooleanValue(Environment env, Target t) {
 		if(val().equals("false")) {
 			MSLog.GetLogger().e(MSLog.Tags.FALSESTRING, "String \"false\" evaluates as true (non-empty strings are"
 					+ " true). This is most likely not what you meant to do. This warning can globally be disabled"
@@ -208,5 +215,10 @@ public class CString extends CPrimitive implements Cloneable,
 
 	public String convert() {
 		return val();
+	}
+
+	@Override
+	public GenericParameters getGenericParameters() {
+		return null;
 	}
 }

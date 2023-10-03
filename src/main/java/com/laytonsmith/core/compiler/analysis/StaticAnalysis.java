@@ -1,16 +1,5 @@
 package com.laytonsmith.core.compiler.analysis;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.Stack;
-import java.util.TreeSet;
-
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
@@ -22,8 +11,10 @@ import com.laytonsmith.core.constructs.CLabel;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.InstanceofUtil;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Variable;
+import com.laytonsmith.core.constructs.generics.ConcreteGenericParameter;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -34,7 +25,18 @@ import com.laytonsmith.core.functions.IncludeCache;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.telemetry.DefaultTelemetry;
 import com.laytonsmith.core.telemetry.Telemetry;
+
+import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.Stack;
+import java.util.TreeSet;
 
 /**
  * This class can be used to perform static analysis.
@@ -121,7 +123,7 @@ public class StaticAnalysis {
 	 * available. Otherwise, only the scope graph will be generated and a full analysis is expected to be done
 	 * externally.
 	 *
-	 * @param ast - The {@link ParseTree} to analze.
+	 * @param ast - The {@link ParseTree} to analyze.
 	 * @param env - The {@link Environment}.
 	 * @param envs - The set of expected {@link Environment.EnvironmentImpl} classes to be available at runtime.
 	 * @param exceptions - Any compile exceptions will be added to this set.
@@ -187,7 +189,6 @@ public class StaticAnalysis {
 
 		// Create scope graph with an include for each auto include.
 		// This fakes the scope graph for a script with an include for each auto include file.
-
 		StaticAnalysis analysis = env.getEnv(StaticRuntimeEnv.class).getAutoIncludeAnalysis();
 		if(analysis.endScope != null) {
 			throw new IllegalStateException("setAndAnalyzeAutoIncludes called twice on autoIncludeAnalysis");
@@ -224,7 +225,8 @@ public class StaticAnalysis {
 					scope.addReference(new Reference(Namespace.IVARIABLE, decl.getIdentifier(), decl.getTarget()));
 				} else {
 					scope.addDeclaration(new Declaration(
-							Namespace.IVARIABLE, decl.getIdentifier(), CClassType.AUTO, decl.getNodeModifiers(),
+							Namespace.IVARIABLE, decl.getIdentifier(), CClassType.AUTO.asLeftHandSideType(),
+							decl.getNodeModifiers(),
 							decl.getTarget()));
 				}
 			}
@@ -345,7 +347,7 @@ public class StaticAnalysis {
 	private void typecheck(Environment env, Set<ConfigCompileException> exceptions) {
 		for(StaticAnalysis analysis : this.staticAnalyses) {
 			if(analysis.astRootNode != null) { // This is null for empty files, since those are not analyzed.
-				analysis.typecheck(analysis.astRootNode, env, exceptions);
+				analysis.typecheck(analysis.astRootNode, null, env, exceptions);
 			}
 		}
 	}
@@ -357,28 +359,38 @@ public class StaticAnalysis {
 	 * Note that {@link __autoconcat__} functions are skipped in typechecking as having them in the AST implies that we
 	 * have a compile error on their children, and running a typecheck on that code could be senseless.
 	 *
-	 * @param ast - The parse tree.
-	 * @param env - The {@link Environment}, used for instanceof checks on types.
-	 * @param exceptions - Any compile exceptions will be added to this set.
+	 * @param ast The parse tree.
+	 * @param inferredReturnType The inferred return type that this node should have. For instance, in the call
+	 * {@code primitive @s = function();}, the inferred return type is {@code primitive}, even though function
+	 * might return {@code int}. This is only used for generics with typenames, to infer the type of the typename
+	 * if the function type parameters have not been explicitly provided. In general, the calculation is simply
+	 * the LHS type of the parameter. That is, for a function defined as {@code void function(string @a)}, the
+	 * inferred return type when typechecking the first child of the call {@code function(g())} (that is,
+	 * {@code g()}), the type is {@code string}. This calculation may require recursion, as in some cases,
+	 * the parameter types of a function are typenames, which cannot be used to infer. If there is no inferred
+	 * return type (that is, this is a statement or other top level structure), null may be set.
+	 * @param env The {@link Environment}, used for instanceof checks on types.
+	 * @param exceptions Any compile exceptions will be added to this set.
 	 * @return The return type of the parse tree.
 	 */
-	public CClassType typecheck(ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+	@SuppressWarnings("null")
+	public LeftHandSideType typecheck(ParseTree ast, LeftHandSideType inferredReturnType,
+			Environment env, Set<ConfigCompileException> exceptions) {
 		Mixed node = ast.getData();
-		if(node instanceof CFunction) {
-			CFunction cFunc = (CFunction) node;
+		if(node instanceof CFunction cFunc) {
 			if(cFunc.hasFunction()) {
 				Function func = cFunc.getCachedFunction();
 				if(func != null && func.getClass() != __autoconcat__.class) {
-					return func.typecheck(this, ast, env, exceptions);
+					return func.typecheck(this, ast, inferredReturnType, env, exceptions);
 				}
-				return CClassType.AUTO; // Unknown return type.
 			} else if(cFunc.hasProcedure()) { // The function is a procedure reference.
 				String procName = cFunc.val();
 				Scope scope = this.getTermScope(ast);
 				if(scope != null) {
 					Set<Declaration> decls = scope.getDeclarations(Namespace.PROCEDURE, procName);
 					if(decls.isEmpty()) {
-						return CClassType.AUTO; // Proc cannot be resolved. Exception for this is already generated.
+						// Proc cannot be resolved. Exception for this is already generated.
+						return Auto.LHSTYPE;
 					} else {
 						// TODO - Get the most specific type when multiple declarations exist.
 						return decls.iterator().next().getType();
@@ -388,36 +400,39 @@ public class StaticAnalysis {
 					exceptions.add(new ConfigCompileException("Procedure cannot be resolved (missing procedure scope,"
 							+ " this is an internal error that should never happen): "
 							+ procName, cFunc.getTarget()));
-					return CClassType.AUTO;
+					return Auto.LHSTYPE;
 				}
 			} else {
 				throw new Error("Unsupported " + CFunction.class.getSimpleName()
 						+ " type in type checking for node with value: " + cFunc.val());
 			}
-		} else if(node instanceof IVariable) {
-			IVariable ivar = (IVariable) node;
+		} else if(node instanceof IVariable ivar) {
 			Scope scope = this.getTermScope(ast);
 			if(scope != null) {
 				Set<Declaration> decls = scope.getDeclarations(Namespace.IVARIABLE, ivar.getVariableName());
 				if(decls.isEmpty()) {
 					exceptions.add(new ConfigCompileException(
 							"Variable cannot be resolved: " + ivar.getVariableName(), ivar.getTarget()));
-					return CClassType.AUTO;
+					return Auto.LHSTYPE;
 				} else {
-					// TODO - Get the most specific type when multiple declarations exist.
-					return decls.iterator().next().getType();
+					LeftHandSideType[] types = new LeftHandSideType[decls.size()];
+					List<Declaration> declsList = new ArrayList<>(decls);
+					for(int i = 0; i < types.length; i++) {
+						types[i] = declsList.get(i).getType();
+					}
+					return LeftHandSideType.fromTypeUnion(Target.UNKNOWN, env, types);
 				}
 			} else {
 				// If this runs, then an IVariable reference was created without setting its Scope using setTermScope().
 				exceptions.add(new ConfigCompileException("Variable cannot be resolved (missing variable scope, this is"
 						+ " an internal error that should never happen): " + ivar.getVariableName(), ivar.getTarget()));
-				return CClassType.AUTO;
+				return Auto.LHSTYPE;
 			}
 		} else if(node instanceof Variable) {
 			if(ast.getFileOptions().isStrict()) {
-				return CString.TYPE;
+				return CString.TYPE.asLeftHandSideType();
 			} else {
-				return Auto.TYPE;
+				return Auto.LHSTYPE;
 			}
 		} else if(node instanceof CKeyword) {
 
@@ -426,26 +441,28 @@ public class StaticAnalysis {
 					= env.getEnv(CompilerEnvironment.class).potentialKeywordCompileErrors.get(node.getTarget());
 			exceptions.add(ex != null ? ex
 					: new ConfigCompileException("Unexpected keyword: " + node.val(), node.getTarget()));
-			return CClassType.AUTO;
-		} else if(node instanceof CLabel) {
+			return Auto.LHSTYPE;
+		} else if(node instanceof CLabel cLabel) {
 			exceptions.add(new ConfigCompileException(
-					"Unexpected label: " + ((CLabel) node).cVal().val(), node.getTarget()));
-			return CClassType.AUTO;
+					"Unexpected label: " + cLabel.cVal().val(), node.getTarget()));
+			return Auto.LHSTYPE;
 		}
 
 		// The node is some other Construct, so return its type.
 		// In non-strict mode, constants are defined as auto, to make things like `'123' > 10` work.
 		if(ast.isConst() && !ast.getFileOptions().isStrict()) {
-			return Auto.TYPE;
+			return Auto.LHSTYPE;
 		}
 		try {
-			return node.typeof();
+			// TODO - Add LHGU
+			return LeftHandSideType.fromCClassType(new ConcreteGenericParameter(node.typeof(env), null,
+					node.getTarget(), env), node.getTarget(), env);
 		} catch(Throwable t) {
 			// Functions that might contain these unsupported objects should make sure that they don't type check them.
 			// In case an unsupported object causes an error here, it likely means that we have a syntax error.
 			exceptions.add(new ConfigCompileException("Unsupported AST node implementation in type checking: "
 					+ node.getClass().getSimpleName(), node.getTarget()));
-			return CClassType.AUTO;
+			return Auto.LHSTYPE;
 		}
 	}
 
@@ -456,33 +473,100 @@ public class StaticAnalysis {
 	 * @param type - The type to check.
 	 * @param expected - The expected {@link CClassType}.
 	 * @param t
+	 * @param env
+	 * @param exceptions
+	 */
+	public static void requireType(LeftHandSideType type, CClassType expected,
+			Target t, Environment env, Set<ConfigCompileException> exceptions) {
+		requireType(type, LeftHandSideType.fromHardCodedType(expected), t, env, exceptions);
+	}
+
+	/**
+	 * Checks whether the given type is instance of the expected type, adding a compile error to the passed exceptions
+	 * set if it isn't. This never generates an error when the given type is {@link CClassType#AUTO}.
+	 *
+	 * @param type - The type to check.
+	 * @param expected - The expected {@link CClassType}.
+	 * @param t
+	 * @param env
 	 * @param exceptions
 	 */
 	public static void requireType(CClassType type, CClassType expected,
 			Target t, Environment env, Set<ConfigCompileException> exceptions) {
+		requireType(LeftHandSideType.fromHardCodedType(type),
+				LeftHandSideType.fromHardCodedType(expected), t, env, exceptions);
+	}
+
+	/**
+	 * Checks whether the given type is instance of the expected type, adding a compile error to the passed exceptions
+	 * set if it isn't. This never generates an error when the given type is {@link CClassType#AUTO}.
+	 *
+	 * @param type - The type to check.
+	 * @param expected - The expected {@link CClassType}.
+	 * @param t
+	 * @param env
+	 * @param exceptions
+	 */
+	public static void requireType(LeftHandSideType type, LeftHandSideType expected,
+			Target t, Environment env, Set<ConfigCompileException> exceptions) {
 
 		// Generate an exception if the given type is not instanceof the expected type.
-		if(!InstanceofUtil.isInstanceof(type, expected, env)) {
+		if(!InstanceofUtil.isAssignableTo(type, expected, env)) {
 			exceptions.add(new ConfigCompileException("Expected type " + expected.getSimpleName()
-				+ ", but received type " + (type == null ? "none" : type.getSimpleName()) + " instead.", t));
+					+ ", but received type " + (type == null ? "none" : type.getSimpleName()) + " instead.", t));
 		}
 	}
 
 	/**
 	 * Checks whether the given type is instance of any of the expected types, adding a compile error to the passed
-	 * exceptions set if it isn't. This never generates an error when the given type is {@link CClassType#AUTO}.
+	 * exceptions set if it isn't.This never generates an error when the given type is {@link CClassType#AUTO}.
 	 *
-	 * @param type - The type to check.
-	 * @param expected - The expected {@link CClassType}s, which should always be of at least size 1.
-	 * @param t
-	 * @param exceptions
+	 * @param type The type to check.
+	 * @param expected The expected {@link CClassType}s, which should always be of at least size 1.
+	 * @param t The code target
+	 * @param env The environment
+	 * @param exceptions The exceptions object, which can be added to if there are any problems with the code.
 	 */
-	public static void requireAnyType(CClassType type, CClassType[] expected,
+	public static void requireAnyType(CClassType type, LeftHandSideType[] expected,
+			Target t, Environment env, Set<ConfigCompileException> exceptions) {
+		requireAnyType(LeftHandSideType.fromHardCodedType(type), expected, t, env, exceptions);
+	}
+
+	/**
+	 * Checks whether the given type is instance of any of the expected types, adding a compile error to the passed
+	 * exceptions set if it isn't.This never generates an error when the given type is {@link CClassType#AUTO}.
+	 *
+	 * @param type The type to check.
+	 * @param expected The expected {@link CClassType}s, which should always be of at least size 1.
+	 * @param t The code target
+	 * @param env The environment
+	 * @param exceptions The exceptions object, which can be added to if there are any problems with the code.
+	 */
+	public static void requireAnyType(LeftHandSideType type, CClassType[] expected,
+			Target t, Environment env, Set<ConfigCompileException> exceptions) {
+		LeftHandSideType[] expectedLHS = new LeftHandSideType[expected.length];
+		for(int i = 0; i < expected.length; i++) {
+			expectedLHS[i] = expected[i].asLeftHandSideType();
+		}
+		requireAnyType(type, expectedLHS, t, env, exceptions);
+	}
+
+	/**
+	 * Checks whether the given type is instance of any of the expected types, adding a compile error to the passed
+	 * exceptions set if it isn't.This never generates an error when the given type is {@link CClassType#AUTO}.
+	 *
+	 * @param type The type to check.
+	 * @param expected The expected {@link CClassType}s, which should always be of at least size 1.
+	 * @param t The code target
+	 * @param env The environment
+	 * @param exceptions The exceptions object, which can be added to if there are any problems with the code.
+	 */
+	public static void requireAnyType(LeftHandSideType type, LeftHandSideType[] expected,
 			Target t, Environment env, Set<ConfigCompileException> exceptions) {
 		assert expected.length > 0 : "You must at least provide one expected type to requireAnyType().";
 
 		// Return if the type is instanceof any expected type.
-		for(CClassType exp : expected) {
+		for(LeftHandSideType exp : expected) {
 			if(InstanceofUtil.isInstanceof(type, exp, env)) {
 				return;
 			}
@@ -494,7 +578,7 @@ public class StaticAnalysis {
 					+ ", but received type " + (type == null ? "none" : type.getSimpleName()) + " instead.", t));
 		} else {
 			String types = "";
-			for(CClassType exp : expected) {
+			for(LeftHandSideType exp : expected) {
 				types += (types.isEmpty() ? exp.getSimpleName() : ", " + exp.getSimpleName());
 			}
 			exceptions.add(new ConfigCompileException("Expected any of types {" + types
@@ -525,8 +609,12 @@ public class StaticAnalysis {
 			exceptions.add(new ConfigCompileException(
 					"Expected ivariable, but received type " + node.getName() + " instead.", t));
 		} catch(NullPointerException e) {
+			String name = node.getClass().getSimpleName();
+			if(node instanceof CFunction cf) {
+				name = cf.getCachedFunction().getName() + "()";
+			}
 			exceptions.add(new ConfigCompileException(
-					"Expected ivariable, but received " + node.getClass().getSimpleName() + " instead.", t));
+					"Expected ivariable, but received " + name + " instead.", t));
 		}
 		return null;
 	}
@@ -541,9 +629,11 @@ public class StaticAnalysis {
 	 * @return The {@link CClasType} if it was one, or {@code null} if it wasn't.
 	 */
 	@SuppressWarnings("null")
-	public static CClassType requireClassType(Mixed node, Target t, Set<ConfigCompileException> exceptions) {
+	public static LeftHandSideType requireClassType(Mixed node, Target t, Set<ConfigCompileException> exceptions) {
 		if(node instanceof CClassType cClassType) {
-			return cClassType;
+			return cClassType.asLeftHandSideType();
+		} else if(node instanceof LeftHandSideType lhst) {
+			return lhst;
 		}
 
 		// The node can be anything. If it has a type, get that. If it doesn't, use the node's class name.
@@ -640,7 +730,7 @@ public class StaticAnalysis {
 			File file = Static.GetFileFromArgument(includeRef.getIdentifier(), env, includeRef.getTarget(), null);
 			try {
 				file = file.getCanonicalFile();
-			} catch (IOException ex) {
+			} catch(IOException ex) {
 
 				// The file might still read fine, so add a compile exception and hope for the best.
 				exceptions.add(new ConfigCompileException(ex.getMessage(), includeRef.getTarget()));
@@ -648,6 +738,9 @@ public class StaticAnalysis {
 			includeAnalysis = includeCache.getStaticAnalysis(file);
 			if(includeAnalysis == null) {
 				includeAnalysis = new StaticAnalysis(false);
+				// Carry over local enabled from the parent object
+				includeAnalysis.setLocalEnable(env.getEnv(StaticRuntimeEnv.class)
+						.getAutoIncludeAnalysis().isLocalEnabled());
 				boolean includeCompileSuccess = IncludeCache.get(
 						file, env, envs, includeAnalysis, includeRef.getTarget(), exceptions) != null;
 				if(!includeCompileSuccess) {
@@ -811,6 +904,7 @@ public class StaticAnalysis {
 			ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
 		return linkParamScope(paramScope, valScope, ast, env, exceptions, null);
 	}
+
 	/**
 	 * Handles parameter AST nodes, namely {@link IVariable}s or the {@code assign()} function (for typed parameters or
 	 * parameters with a default value).The parameter is declared in a new scope that is chained to paramScope. If the

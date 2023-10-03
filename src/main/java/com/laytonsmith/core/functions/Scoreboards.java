@@ -25,6 +25,7 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
@@ -36,6 +37,7 @@ import com.laytonsmith.core.exceptions.CRE.CREScoreboardException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -188,26 +190,27 @@ public class Scoreboards {
 		return getBoard(MAIN, t);
 	}
 
-	static CArray getTeam(MCTeam team, Target t) {
-		CArray to = CArray.GetAssociativeArray(t);
-		to.set("name", new CString(team.getName(), t), t);
-		to.set("displayname", new CString(team.getDisplayName(), t), t);
-		to.set("prefix", new CString(team.getPrefix(), t), t);
-		to.set("suffix", new CString(team.getSuffix(), t), t);
-		to.set("color", new CString(team.getColor().name(), t), t);
-		to.set("size", new CInt(team.getSize(), t), t);
-		CArray ops = CArray.GetAssociativeArray(t);
-		ops.set("friendlyfire", CBoolean.get(team.allowFriendlyFire()), t);
-		ops.set("friendlyinvisibles", CBoolean.get(team.canSeeFriendlyInvisibles()), t);
-		ops.set("nametagvisibility", new CString(team.getOption(MCOption.NAME_TAG_VISIBILITY).name(), t), t);
-		ops.set("collisionrule", new CString(team.getOption(MCOption.COLLISION_RULE).name(), t), t);
-		ops.set("deathmessagevisibility", new CString(team.getOption(MCOption.DEATH_MESSAGE_VISIBILITY).name(), t), t);
-		to.set("options", ops, t);
-		CArray pl = new CArray(t);
+	static CArray getTeam(MCTeam team, Target t, Environment env) {
+		CArray to = CArray.GetAssociativeArray(t, null, env);
+		to.set("name", new CString(team.getName(), t), t, env);
+		to.set("displayname", new CString(team.getDisplayName(), t), t, env);
+		to.set("prefix", new CString(team.getPrefix(), t), t, env);
+		to.set("suffix", new CString(team.getSuffix(), t), t, env);
+		to.set("color", new CString(team.getColor().name(), t), t, env);
+		to.set("size", new CInt(team.getSize(), t), t, env);
+		CArray ops = CArray.GetAssociativeArray(t, null, env);
+		ops.set("friendlyfire", CBoolean.get(team.allowFriendlyFire()), t, env);
+		ops.set("friendlyinvisibles", CBoolean.get(team.canSeeFriendlyInvisibles()), t, env);
+		ops.set("nametagvisibility", new CString(team.getOption(MCOption.NAME_TAG_VISIBILITY).name(), t), t, env);
+		ops.set("collisionrule", new CString(team.getOption(MCOption.COLLISION_RULE).name(), t), t, env);
+		ops.set("deathmessagevisibility", new CString(team.getOption(MCOption.DEATH_MESSAGE_VISIBILITY).name(), t), t, env);
+		to.set("options", ops, t, env);
+		CArray pl = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+				.addNativeParameter(CString.TYPE, null).buildNative(), env);
 		for(String entry : team.getEntries()) {
-			pl.push(new CString(entry, t), t);
+			pl.push(new CString(entry, t), t, env);
 		}
-		to.set("players", pl, t);
+		to.set("players", pl, t, env);
 		return to;
 	}
 
@@ -250,8 +253,8 @@ public class Scoreboards {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = Static.GetPlayer(args[0], t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = Static.GetPlayer(args[0], t, env);
 			String ret;
 			try {
 				ret = getBoardID(p.getScoreboard(), t);
@@ -294,9 +297,8 @@ public class Scoreboards {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment,
-				Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = Static.GetPlayer(args[0], t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = Static.GetPlayer(args[0], t, env);
 			p.setScoreboard(assignBoard(1, t, args));
 			return CVoid.VOID;
 		}
@@ -332,10 +334,11 @@ public class Scoreboards {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			CArray ret = new CArray(t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			CArray ret = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			for(String id : boards.keySet()) {
-				ret.push(new CString(id, t), t);
+				ret.push(new CString(id, t), t, env);
 			}
 			return ret;
 		}
@@ -367,7 +370,7 @@ public class Scoreboards {
 	public static class get_objectives extends SBFunction {
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCScoreboard s;
 			if(args.length == 0) {
 				s = getBoard(MAIN, t);
@@ -386,19 +389,20 @@ public class Scoreboards {
 			} else {
 				os = s.getObjectives();
 			}
-			CArray ret = new CArray(t);
+			CArray ret = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+				.addNativeParameter(CArray.TYPE, null).buildNative(), env);
 			for(MCObjective o : os) {
-				CArray obj = CArray.GetAssociativeArray(t);
-				obj.set("name", new CString(o.getName(), t), t);
-				obj.set("displayname", new CString(o.getDisplayName(), t), t);
+				CArray obj = CArray.GetAssociativeArray(t, null, env);
+				obj.set("name", new CString(o.getName(), t), t, env);
+				obj.set("displayname", new CString(o.getDisplayName(), t), t, env);
 				Construct slot = CNull.NULL;
 				if(o.getDisplaySlot() != null) {
 					slot = new CString(o.getDisplaySlot().name(), t);
 				}
-				obj.set("slot", slot, t);
-				obj.set("modifiable", CBoolean.get(o.isModifiable()), t);
-				obj.set("criteria", new CString(o.getCriteria(), t), t);
-				ret.push(obj, t);
+				obj.set("slot", slot, t, env);
+				obj.set("modifiable", CBoolean.get(o.isModifiable()), t, env);
+				obj.set("criteria", new CString(o.getCriteria(), t), t, env);
+				ret.push(obj, t, env);
 			}
 			return ret;
 		}
@@ -431,16 +435,16 @@ public class Scoreboards {
 	public static class get_teams extends SBFunction {
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCScoreboard s;
 			if(args.length == 0) {
 				s = getBoard(MAIN, t);
 			} else {
 				s = getBoard(args[0].val(), t);
 			}
-			CArray ret = CArray.GetAssociativeArray(t);
+			CArray ret = CArray.GetAssociativeArray(t, null, env);
 			for(MCTeam team : s.getTeams()) {
-				ret.set(team.getName(), getTeam(team, t), t);
+				ret.set(team.getName(), getTeam(team, t, env), t, env);
 			}
 			return ret;
 		}
@@ -478,7 +482,7 @@ public class Scoreboards {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCScoreboard newBoard = Static.getServer().getNewScoreboard();
 			if(newBoard == null) {
 				throw new CRENullPointerException(
@@ -520,7 +524,7 @@ public class Scoreboards {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(2, t, args);
 			String name = args[0].val();
 			MCCriteria criteria = MCCriteria.DUMMY;
@@ -573,7 +577,7 @@ public class Scoreboards {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(1, t, args);
 			String name = args[0].val();
 			try {
@@ -616,37 +620,37 @@ public class Scoreboards {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(2, t, args);
 			MCObjective o = s.getObjective(args[0].val());
 			if(o == null) {
 				throw new CREScoreboardException("No objective by that name exists.", t);
 			}
-			CArray dis = CArray.GetAssociativeArray(t);
-			if(args[1].isInstanceOf(CArray.TYPE)) {
+			CArray dis = CArray.GetAssociativeArray(t, null, env);
+			if(args[1].isInstanceOf(CArray.TYPE, null, env)) {
 				dis = (CArray) args[1];
 			} else {
-				dis.set("displayname", args[1], t);
+				dis.set("displayname", args[1], t, env);
 			}
 			if(dis.containsKey("slot")) {
 				MCDisplaySlot slot;
-				if(dis.get("slot", t) instanceof CNull) {
+				if(dis.get("slot", t, env) instanceof CNull) {
 					slot = null;
 				} else {
 					try {
-						slot = MCDisplaySlot.valueOf(dis.get("slot", t).val().toUpperCase());
+						slot = MCDisplaySlot.valueOf(dis.get("slot", t, env).val().toUpperCase());
 					} catch (IllegalArgumentException iae) {
-						throw new CREFormatException("Unknown displayslot: " + dis.get("slot", t).val(), t);
+						throw new CREFormatException("Unknown displayslot: " + dis.get("slot", t, env).val(), t);
 					}
 				}
 				o.setDisplaySlot(slot);
 			}
 			if(dis.containsKey("displayname")) {
 				String dname;
-				if(dis.get("displayname", t) instanceof CNull) {
+				if(dis.get("displayname", t, env) instanceof CNull) {
 					dname = o.getName();
 				} else {
-					dname = dis.get("displayname", t).val();
+					dname = dis.get("displayname", t, env).val();
 				}
 				try {
 					o.setDisplayName(dname);
@@ -696,24 +700,24 @@ public class Scoreboards {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(2, t, args);
 			MCTeam o = s.getTeam(args[0].val());
 			if(o == null) {
 				throw new CREScoreboardException("No team by that name exists.", t);
 			}
-			CArray dis = CArray.GetAssociativeArray(t);
-			if(args[1].isInstanceOf(CArray.TYPE)) {
+			CArray dis = CArray.GetAssociativeArray(t, null, env);
+			if(args[1].isInstanceOf(CArray.TYPE, null, env)) {
 				dis = (CArray) args[1];
 			} else {
-				dis.set("displayname", args[1], t);
+				dis.set("displayname", args[1], t, env);
 			}
 			if(dis.containsKey("displayname")) {
 				String dname;
-				if(dis.get("displayname", t) instanceof CNull) {
+				if(dis.get("displayname", t, env) instanceof CNull) {
 					dname = o.getName();
 				} else {
-					dname = dis.get("displayname", t).val();
+					dname = dis.get("displayname", t, env).val();
 				}
 				try {
 					o.setDisplayName(dname);
@@ -724,10 +728,10 @@ public class Scoreboards {
 			}
 			if(dis.containsKey("prefix")) {
 				String prefix;
-				if(dis.get("prefix", t) instanceof CNull) {
+				if(dis.get("prefix", t, env) instanceof CNull) {
 					prefix = "";
 				} else {
-					prefix = dis.get("prefix", t).val();
+					prefix = dis.get("prefix", t, env).val();
 				}
 				try {
 					o.setPrefix(prefix);
@@ -738,10 +742,10 @@ public class Scoreboards {
 			}
 			if(dis.containsKey("suffix")) {
 				String suffix;
-				if(dis.get("suffix", t) instanceof CNull) {
+				if(dis.get("suffix", t, env) instanceof CNull) {
 					suffix = "";
 				} else {
-					suffix = dis.get("suffix", t).val();
+					suffix = dis.get("suffix", t, env).val();
 				}
 				try {
 					o.setSuffix(suffix);
@@ -752,11 +756,11 @@ public class Scoreboards {
 			}
 			if(dis.containsKey("color")) {
 				try {
-					MCChatColor color = MCChatColor.valueOf(dis.get("color", t).val().toUpperCase());
+					MCChatColor color = MCChatColor.valueOf(dis.get("color", t, env).val().toUpperCase());
 					o.setColor(color);
 				} catch (IllegalArgumentException ex) {
 					throw new CREIllegalArgumentException("Invalid chat color: \""
-							+ dis.get("color", t).val() + "\"", t);
+							+ dis.get("color", t, env).val() + "\"", t);
 				}
 			}
 			return CVoid.VOID;
@@ -806,7 +810,7 @@ public class Scoreboards {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(2, t, args);
 			MCTeam team = s.getTeam(args[0].val());
 			if(team == null) {
@@ -842,7 +846,7 @@ public class Scoreboards {
 	public static class team_remove_player extends SBFunction {
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(2, t, args);
 			MCTeam team = s.getTeam(args[0].val());
 			if(team == null) {
@@ -877,13 +881,13 @@ public class Scoreboards {
 	public static class get_pteam extends SBFunction {
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(1, t, args);
 			MCTeam team = s.getPlayerTeam(args[0].val());
 			if(team == null) {
 				return CNull.NULL;
 			}
-			return getTeam(team, t);
+			return getTeam(team, t, env);
 		}
 
 		@Override
@@ -913,12 +917,11 @@ public class Scoreboards {
 	public static class remove_scoreboard extends SBFunction {
 
 		@Override
-		public Mixed exec(Target t, Environment environment,
-				Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String id = args[0].val();
 			boolean nullify = true;
 			if(args.length == 2) {
-				nullify = ArgumentValidation.getBoolean(args[1], t);
+				nullify = ArgumentValidation.getBoolean(args[1], t, env);
 			}
 			if(nullify) {
 				MCScoreboard s = getBoard(id, t);
@@ -970,7 +973,7 @@ public class Scoreboards {
 	public static class remove_objective extends SBFunction {
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(1, t, args);
 			MCObjective o = s.getObjective(args[0].val());
 			try {
@@ -1008,7 +1011,7 @@ public class Scoreboards {
 	public static class remove_team extends SBFunction {
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(1, t, args);
 			MCTeam team = s.getTeam(args[0].val());
 			try {
@@ -1051,7 +1054,7 @@ public class Scoreboards {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(2, t, args);
 			MCObjective o = s.getObjective(args[0].val());
 			if(o == null) {
@@ -1096,14 +1099,14 @@ public class Scoreboards {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(3, t, args);
 			MCObjective o = s.getObjective(args[0].val());
 			if(o == null) {
 				throw new CREScoreboardException("The given objective does not exist.", t);
 			}
 			try {
-				o.getScore(args[1].val()).setScore(ArgumentValidation.getInt32(args[2], t));
+				o.getScore(args[1].val()).setScore(ArgumentValidation.getInt32(args[2], t, env));
 			} catch (IllegalArgumentException ex) {
 				throw new CRELengthException(ex.getMessage(), t);
 			}
@@ -1137,7 +1140,7 @@ public class Scoreboards {
 	public static class reset_all_pscores extends SBFunction {
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			assignBoard(1, t, args).resetScores(args[0].val());
 			return CVoid.VOID;
 		}
@@ -1173,26 +1176,26 @@ public class Scoreboards {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(2, t, args);
 			MCTeam team = s.getTeam(args[0].val());
 			if(team == null) {
 				throw new CREScoreboardException("No team by that name exists.", t);
 			}
-			if(args[1].isInstanceOf(CArray.TYPE)) {
+			if(args[1].isInstanceOf(CArray.TYPE, null, env)) {
 				CArray options = (CArray) args[1];
 				if(options.containsKey("friendlyfire")) {
-					team.setAllowFriendlyFire(ArgumentValidation.getBoolean(options.get("friendlyfire", t), t));
+					team.setAllowFriendlyFire(ArgumentValidation.getBoolean(options.get("friendlyfire", t, env), t, env));
 				}
 				if(options.containsKey("friendlyinvisibles")) {
-					team.setCanSeeFriendlyInvisibles(ArgumentValidation.getBoolean(options.get("friendlyinvisibles", t), t));
+					team.setCanSeeFriendlyInvisibles(ArgumentValidation.getBoolean(options.get("friendlyinvisibles", t, env), t, env));
 				}
 				if(options.containsKey("nametagvisibility")) {
 					MCOptionStatus namevisibility;
 					try {
-						namevisibility = MCOptionStatus.valueOf(options.get("nametagvisibility", t).val().toUpperCase());
+						namevisibility = MCOptionStatus.valueOf(options.get("nametagvisibility", t, env).val().toUpperCase());
 					} catch (IllegalArgumentException iae) {
-						String name = options.get("nametagvisibility", t).val().toUpperCase();
+						String name = options.get("nametagvisibility", t, env).val().toUpperCase();
 						if(name.startsWith("HIDE_")) {
 							name = name.substring(5);
 							try {
@@ -1201,7 +1204,7 @@ public class Scoreboards {
 										+ "HIDE_" + name + "\". This should be: \"" + name + "\"", t);
 							} catch (IllegalArgumentException ex) {
 								throw new CREFormatException("Unknown nametagvisibility: "
-										+ options.get("nametagvisibility", t).val(), t);
+										+ options.get("nametagvisibility", t, env).val(), t);
 							}
 						} else {
 							throw new CREFormatException("Unknown nametagvisibility: " + name, t);
@@ -1212,20 +1215,20 @@ public class Scoreboards {
 				if(options.containsKey("collisionrule")) {
 					MCOptionStatus collision;
 					try {
-						collision = MCOptionStatus.valueOf(options.get("collisionrule", t).val().toUpperCase());
+						collision = MCOptionStatus.valueOf(options.get("collisionrule", t, env).val().toUpperCase());
 					} catch (IllegalArgumentException iae) {
 						throw new CREFormatException("Unknown collisionrule: "
-								+ options.get("collisionrule", t).val(), t);
+								+ options.get("collisionrule", t, env).val(), t);
 					}
 					team.setOption(MCOption.COLLISION_RULE, collision);
 				}
 				if(options.containsKey("deathmessagevisibility")) {
 					MCOptionStatus deathvisibility;
 					try {
-						deathvisibility = MCOptionStatus.valueOf(options.get("deathmessagevisibility", t).val().toUpperCase());
+						deathvisibility = MCOptionStatus.valueOf(options.get("deathmessagevisibility", t, env).val().toUpperCase());
 					} catch (IllegalArgumentException iae) {
 						throw new CREFormatException("Unknown deathmessagevisibility: "
-								+ options.get("deathmessagevisibility", t).val(), t);
+								+ options.get("deathmessagevisibility", t, env).val(), t);
 					}
 					team.setOption(MCOption.DEATH_MESSAGE_VISIBILITY, deathvisibility);
 				}

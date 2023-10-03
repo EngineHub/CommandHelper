@@ -19,8 +19,6 @@ import org.objectweb.asm.Type;
 
 import static org.objectweb.asm.Opcodes.ACC_ENUM;
 import static org.objectweb.asm.Opcodes.ACC_INTERFACE;
-import static org.objectweb.asm.Opcodes.ACC_VARARGS;
-import static org.objectweb.asm.Opcodes.ACC_SYNTHETIC;
 
 public class ClassMirrorVisitor extends ClassVisitor {
 
@@ -159,34 +157,9 @@ public class ClassMirrorVisitor extends ClassVisitor {
 			// Yes, technically a constructor really does return void, but.. not really.
 			desc = StringUtils.replaceLast(desc, "V", classInfo.classReferenceMirror.getJVMName());
 		}
-		List<ClassReferenceMirror> parameterMirrors = new ArrayList<>();
-		for(Type type : Type.getArgumentTypes(desc)) {
-			parameterMirrors.add(new ClassReferenceMirror(type.getDescriptor()));
-		}
-		final AbstractMethodMirror methodMirror;
-		if(ConstructorMirror.INIT.equals(name)) {
-			methodMirror = new ConstructorMirror(
-					classInfo.classReferenceMirror,
-					new ModifierMirror(ModifierMirror.Type.METHOD, access),
-					new ClassReferenceMirror(Type.getReturnType(desc).getDescriptor()),
-					name,
-					parameterMirrors,
-					(access & ACC_VARARGS) == ACC_VARARGS,
-					(access & ACC_SYNTHETIC) == ACC_SYNTHETIC,
-					signature
-			);
-		} else {
-			methodMirror = new MethodMirror(
-					classInfo.classReferenceMirror,
-					new ModifierMirror(ModifierMirror.Type.METHOD, access),
-					new ClassReferenceMirror(Type.getReturnType(desc).getDescriptor()),
-					name,
-					parameterMirrors,
-					(access & ACC_VARARGS) == ACC_VARARGS,
-					(access & ACC_SYNTHETIC) == ACC_SYNTHETIC,
-					signature
-			);
-		}
+
+		AbstractMethodMirror methodMirror = AbstractMethodMirror.fromVisitParameters(access, name, desc, signature,
+			exceptions, classInfo.classReferenceMirror);
 
 		return new MethodVisitor(Opcodes.ASM7, super.visitMethod(access, name, desc, signature, exceptions)) {
 			@Override

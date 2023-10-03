@@ -33,6 +33,7 @@ import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
@@ -102,7 +103,7 @@ public class MobManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCLivingEntity mob = Static.getLivingEntity(args[0], t);
 			if(!mob.isTameable()) {
 				throw new CREUntameableMobException("The specified entity is not tameable", t);
@@ -158,7 +159,7 @@ public class MobManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCLivingEntity mob = Static.getLivingEntity(args[0], t);
 			Mixed player = args[1];
 			if(!mob.isTameable()) {
@@ -216,9 +217,9 @@ public class MobManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCLivingEntity e = Static.getLivingEntity(args[0], t);
-			double percent = ArgumentValidation.getDouble(args[1], t);
+			double percent = ArgumentValidation.getDouble(args[1], t, env);
 			if(percent < 0 || percent > 100) {
 				throw new CRERangeException("Health was expected to be a percentage between 0 and 100", t);
 			} else {
@@ -268,7 +269,7 @@ public class MobManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCLivingEntity e = Static.getLivingEntity(args[0], t);
 			return new CDouble(e.getHealth() / e.getMaxHealth() * 100.0, t);
 		}
@@ -278,7 +279,7 @@ public class MobManagement {
 	public static class get_entity_breedable extends EntityManagement.EntityGetterFunction {
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCEntity ent = Static.getEntity(args[0], t);
 
 			if(ent instanceof MCBreedable) {
@@ -308,8 +309,8 @@ public class MobManagement {
 	public static class set_entity_breedable extends EntityManagement.EntitySetterFunction {
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			boolean breed = ArgumentValidation.getBoolean(args[1], t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			boolean breed = ArgumentValidation.getBoolean(args[1], t, env);
 
 			MCEntity ent = Static.getEntity(args[0], t);
 
@@ -348,7 +349,7 @@ public class MobManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCLivingEntity ent = Static.getLivingEntity(args[0], t);
 			if(ent instanceof MCAgeable mob) {
 				return new CInt(mob.getAge(), t);
@@ -384,11 +385,11 @@ public class MobManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			int age = ArgumentValidation.getInt32(args[1], t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			int age = ArgumentValidation.getInt32(args[1], t, env);
 			boolean lock = false;
 			if(args.length == 3) {
-				lock = ArgumentValidation.getBoolean(args[2], t);
+				lock = ArgumentValidation.getBoolean(args[2], t, env);
 			}
 			MCLivingEntity ent = Static.getLivingEntity(args[0], t);
 			if(ent instanceof MCAgeable mob) {
@@ -435,7 +436,7 @@ public class MobManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCLivingEntity ent = Static.getLivingEntity(args[0], t);
 			if(ent instanceof MCAnimal animal) {
 				return new CInt(animal.getLoveTicks(), t);
@@ -470,7 +471,7 @@ public class MobManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCLivingEntity ent = Static.getLivingEntity(args[0], t);
 			int ticks = ArgumentValidation.getInt32(args[1], t);
 			if(ent instanceof MCAnimal animal) {
@@ -501,9 +502,9 @@ public class MobManagement {
 	public static class get_mob_effects extends EntityManagement.EntityGetterFunction {
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCLivingEntity mob = Static.getLivingEntity(args[0], t);
-			return ObjectGenerator.GetGenerator().potions(mob.getEffects(), t);
+			return ObjectGenerator.GetGenerator().potions(mob.getEffects(), t, env);
 		}
 
 		@Override
@@ -566,11 +567,11 @@ public class MobManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCLivingEntity mob = Static.getLivingEntity(args[0], t);
 
 			MCPotionEffectType type = null;
-			if(args[1].isInstanceOf(CString.TYPE)) {
+			if(args[1].isInstanceOf(CString.TYPE, null, env)) {
 				try {
 					type = MCPotionEffectType.valueOf(args[1].val().toUpperCase());
 				} catch (IllegalArgumentException ex) {
@@ -579,7 +580,7 @@ public class MobManagement {
 			}
 			if(type == null) {
 				try {
-					type = MCPotionEffectType.getById(ArgumentValidation.getInt32(args[1], t));
+					type = MCPotionEffectType.getById(ArgumentValidation.getInt32(args[1], t, env));
 				} catch (IllegalArgumentException ex) {
 					throw new CREFormatException("Invalid potion effect type: " + args[1].val(), t);
 				}
@@ -591,22 +592,22 @@ public class MobManagement {
 			boolean particles = true;
 			boolean icon = true;
 			if(args.length >= 3) {
-				strength = ArgumentValidation.getInt32(args[2], t);
+				strength = ArgumentValidation.getInt32(args[2], t, env);
 
 				if(args.length >= 4) {
-					seconds = ArgumentValidation.getDouble(args[3], t);
+					seconds = ArgumentValidation.getDouble(args[3], t, env);
 					if(seconds * 20 > Integer.MAX_VALUE) {
 						throw new CRERangeException("Seconds cannot be greater than 107374182.0", t);
 					}
 
 					if(args.length >= 5) {
-						ambient = ArgumentValidation.getBoolean(args[4], t);
+						ambient = ArgumentValidation.getBoolean(args[4], t, env);
 
 						if(args.length >= 6) {
-							particles = ArgumentValidation.getBoolean(args[5], t);
+							particles = ArgumentValidation.getBoolean(args[5], t, env);
 
 							if(args.length == 7) {
-								icon = ArgumentValidation.getBoolean(args[6], t);
+								icon = ArgumentValidation.getBoolean(args[6], t, env);
 							}
 						}
 					}
@@ -630,7 +631,7 @@ public class MobManagement {
 	public static class get_mob_target extends EntityManagement.EntityGetterFunction {
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCLivingEntity le = Static.getLivingEntity(args[0], t);
 			if(le.getTarget(t) == null) {
 				return CNull.NULL;
@@ -665,7 +666,7 @@ public class MobManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCLivingEntity le = Static.getLivingEntity(args[0], t);
 			MCLivingEntity target = null;
 			if(!(args[1] instanceof CNull)) {
@@ -696,16 +697,16 @@ public class MobManagement {
 	public static class get_mob_equipment extends EntityManagement.EntityGetterFunction {
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCLivingEntity le = Static.getLivingEntity(args[0], t);
 			MCEntityEquipment eq = le.getEquipment();
 			if(eq == null) {
 				throw new CREBadEntityTypeException("Entities of type \"" + le.getType() + "\" do not have equipment.", t);
 			}
 			Map<MCEquipmentSlot, MCItemStack> eqmap = le.getEquipment().getAllEquipment();
-			CArray ret = CArray.GetAssociativeArray(t);
+			CArray ret = CArray.GetAssociativeArray(t, null, env);
 			for(MCEquipmentSlot key : eqmap.keySet()) {
-				ret.set(key.name().toLowerCase(), ObjectGenerator.GetGenerator().item(eqmap.get(key), t), t);
+				ret.set(key.name().toLowerCase(), ObjectGenerator.GetGenerator().item(eqmap.get(key), t, env), t, env);
 			}
 			return ret;
 		}
@@ -742,7 +743,7 @@ public class MobManagement {
 	public static class set_mob_equipment extends EntityManagement.EntitySetterFunction {
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCLivingEntity le = Static.getLivingEntity(args[0], t);
 			MCEntityEquipment ee = le.getEquipment();
 			if(ee == null) {
@@ -752,11 +753,11 @@ public class MobManagement {
 			if(args[1] instanceof CNull) {
 				ee.clearEquipment();
 				return CVoid.VOID;
-			} else if(args[1].isInstanceOf(CArray.TYPE)) {
+			} else if(args[1].isInstanceOf(CArray.TYPE, null, env)) {
 				CArray ea = (CArray) args[1];
 				for(String key : ea.stringKeySet()) {
 					try {
-						eq.put(MCEquipmentSlot.valueOf(key.toUpperCase()), ObjectGenerator.GetGenerator().item(ea.get(key, t), t));
+						eq.put(MCEquipmentSlot.valueOf(key.toUpperCase()), ObjectGenerator.GetGenerator().item(ea.get(key, t, env), t, env));
 					} catch (IllegalArgumentException iae) {
 						throw new CREFormatException("Not an equipment slot: " + key, t);
 					}
@@ -801,7 +802,7 @@ public class MobManagement {
 	public static class get_max_health extends EntityManagement.EntityGetterFunction {
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCLivingEntity le = Static.getLivingEntity(args[0], t);
 			return new CDouble(le.getMaxHealth(), t);
 		}
@@ -826,9 +827,9 @@ public class MobManagement {
 	public static class set_max_health extends EntityManagement.EntitySetterFunction {
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCLivingEntity le = Static.getLivingEntity(args[0], t);
-			le.setMaxHealth(ArgumentValidation.getDouble(args[1], t));
+			le.setMaxHealth(ArgumentValidation.getDouble(args[1], t, env));
 			return CVoid.VOID;
 		}
 
@@ -860,14 +861,15 @@ public class MobManagement {
 	public static class get_equipment_droprates extends EntityManagement.EntityGetterFunction {
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCEntityEquipment eq = Static.getLivingEntity(args[0], t).getEquipment();
 			if(eq.getHolder() instanceof MCPlayer) {
 				throw new CREBadEntityException(getName() + " does not work on players.", t);
 			}
-			CArray ret = CArray.GetAssociativeArray(t);
+			CArray ret = CArray.GetAssociativeArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+				.addNativeParameter(CDouble.TYPE, null).buildNative(), env);
 			for(Map.Entry<MCEquipmentSlot, Float> ent : eq.getAllDropChances().entrySet()) {
-				ret.set(ent.getKey().name(), new CDouble(ent.getValue(), t), t);
+				ret.set(ent.getKey().name(), new CDouble(ent.getValue(), t), t, env);
 			}
 			return ret;
 		}
@@ -879,7 +881,7 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "array {entityUUID} Returns an associative array of the drop rate for each equipment slot."
+			return "array<double> {entityUUID} Returns an associative array of the drop rate for each equipment slot."
 					+ " If the rate is 0, the equipment will not drop. If it is 1, it is guaranteed to drop.";
 		}
 
@@ -893,7 +895,7 @@ public class MobManagement {
 	public static class set_equipment_droprates extends EntityManagement.EntitySetterFunction {
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCEntityEquipment ee = Static.getLivingEntity(args[0], t).getEquipment();
 			Map<MCEquipmentSlot, Float> eq = ee.getAllDropChances();
 			if(ee.getHolder() instanceof MCPlayer) {
@@ -903,11 +905,11 @@ public class MobManagement {
 				for(Map.Entry<MCEquipmentSlot, Float> ent : eq.entrySet()) {
 					eq.put(ent.getKey(), 0F);
 				}
-			} else if(args[1].isInstanceOf(CArray.TYPE)) {
+			} else if(args[1].isInstanceOf(CArray.TYPE, null, env)) {
 				CArray ea = (CArray) args[1];
 				for(String key : ea.stringKeySet()) {
 					try {
-						eq.put(MCEquipmentSlot.valueOf(key.toUpperCase()), ArgumentValidation.getDouble32(ea.get(key, t), t));
+						eq.put(MCEquipmentSlot.valueOf(key.toUpperCase()), ArgumentValidation.getDouble32(ea.get(key, t, env), t, env));
 					} catch (IllegalArgumentException iae) {
 						throw new CREFormatException("Not an equipment slot: " + key, t);
 					}
@@ -941,7 +943,7 @@ public class MobManagement {
 	public static class can_pickup_items extends EntityManagement.EntityGetterFunction {
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return CBoolean.get(Static.getLivingEntity(args[0], t).getCanPickupItems());
 		}
 
@@ -965,8 +967,8 @@ public class MobManagement {
 	public static class set_can_pickup_items extends EntityManagement.EntitySetterFunction {
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			Static.getLivingEntity(args[0], t).setCanPickupItems(ArgumentValidation.getBoolean(args[1], t));
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			Static.getLivingEntity(args[0], t).setCanPickupItems(ArgumentValidation.getBoolean(args[1], t, env));
 			return CVoid.VOID;
 		}
 
@@ -990,7 +992,7 @@ public class MobManagement {
 	public static class get_entity_persistence extends EntityManagement.EntityGetterFunction {
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return CBoolean.get(!Static.getLivingEntity(args[0], t).getRemoveWhenFarAway());
 		}
 
@@ -1015,8 +1017,8 @@ public class MobManagement {
 	public static class set_entity_persistence extends EntityManagement.EntitySetterFunction {
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			Static.getLivingEntity(args[0], t).setRemoveWhenFarAway(!ArgumentValidation.getBoolean(args[1], t));
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			Static.getLivingEntity(args[0], t).setRemoveWhenFarAway(!ArgumentValidation.getBoolean(args[1], t, env));
 			return CVoid.VOID;
 		}
 
@@ -1040,7 +1042,7 @@ public class MobManagement {
 	public static class get_leashholder extends EntityManagement.EntityGetterFunction {
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCLivingEntity le = Static.getLivingEntity(args[0], t);
 			if(!le.isLeashed()) {
 				return CNull.NULL;
@@ -1069,7 +1071,7 @@ public class MobManagement {
 	public static class set_leashholder extends EntityManagement.EntitySetterFunction {
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCLivingEntity le = Static.getLivingEntity(args[0], t);
 			MCEntity holder;
 			if(args[1] instanceof CNull) {
@@ -1115,7 +1117,7 @@ public class MobManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return new CInt(Static.getLivingEntity(args[0], t).getRemainingAir(), t);
 		}
 
@@ -1139,8 +1141,8 @@ public class MobManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			Static.getLivingEntity(args[0], t).setRemainingAir(ArgumentValidation.getInt32(args[1], t));
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			Static.getLivingEntity(args[0], t).setRemainingAir(ArgumentValidation.getInt32(args[1], t, env));
 			return CVoid.VOID;
 		}
 
@@ -1164,7 +1166,7 @@ public class MobManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return new CInt(Static.getLivingEntity(args[0], t).getMaximumAir(), t);
 		}
 
@@ -1188,8 +1190,8 @@ public class MobManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			Static.getLivingEntity(args[0], t).setMaximumAir(ArgumentValidation.getInt32(args[1], t));
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			Static.getLivingEntity(args[0], t).setMaximumAir(ArgumentValidation.getInt32(args[1], t, env));
 			return CVoid.VOID;
 		}
 
@@ -1227,24 +1229,24 @@ public class MobManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCLivingEntity entity = Static.getLivingEntity(args[0], t);
 			HashSet<MCMaterial> transparents = null;
 			int maxDistance = 512;
 			if(args.length >= 2) {
-				CArray givenTransparents = ArgumentValidation.getArray(args[1], t);
+				CArray givenTransparents = ArgumentValidation.getArray(args[1], t, env);
 				if(givenTransparents.inAssociativeMode()) {
 					throw new CRECastException("The array must not be associative.", t);
 				}
 				transparents = new HashSet<>();
-				for(Mixed mat : givenTransparents.asList()) {
+				for(Mixed mat : givenTransparents.asList(env)) {
 					MCMaterial material = StaticLayer.GetMaterial(mat.val());
 					if(material != null) {
 						transparents.add(StaticLayer.GetMaterial(mat.val()));
 						continue;
 					}
 					try {
-						material = StaticLayer.GetMaterialFromLegacy(ArgumentValidation.getInt16(mat, t), 0);
+						material = StaticLayer.GetMaterialFromLegacy(ArgumentValidation.getInt16(mat, t, env), 0);
 						if(material != null) {
 							MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The id \"" + mat.val() + "\" is deprecated."
 									+ " Converted to \"" + material.getName() + "\"", t);
@@ -1258,11 +1260,11 @@ public class MobManagement {
 				}
 			}
 			if(args.length == 3) {
-				maxDistance = ArgumentValidation.getInt32(args[2], t);
+				maxDistance = ArgumentValidation.getInt32(args[2], t, env);
 			}
-			CArray lineOfSight = new CArray(t);
+			CArray lineOfSight = new CArray(t, null, env);
 			for(MCBlock block : entity.getLineOfSight(transparents, maxDistance)) {
-				lineOfSight.push(ObjectGenerator.GetGenerator().location(block.getLocation(), false), t);
+				lineOfSight.push(ObjectGenerator.GetGenerator().location(block.getLocation(), false, env), t, env);
 			}
 			return lineOfSight;
 		}
@@ -1301,7 +1303,7 @@ public class MobManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return CBoolean.get(Static.getLivingEntity(args[0], t).hasLineOfSight(Static.getEntity(args[1], t)));
 		}
 
@@ -1321,7 +1323,7 @@ public class MobManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCEntity entity = Static.getEntity(args[0], t);
 
 			if(!(entity instanceof MCLivingEntity)) {
@@ -1331,7 +1333,7 @@ public class MobManagement {
 
 			MCLivingEntity living = (MCLivingEntity) entity;
 
-			double damage = ArgumentValidation.getDouble(args[1], t);
+			double damage = ArgumentValidation.getDouble(args[1], t, env);
 			if(args.length == 3) {
 				MCEntity source = Static.getEntity(args[2], t);
 				living.damage(damage, source);
@@ -1378,9 +1380,9 @@ public class MobManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCLivingEntity e = Static.getLivingEntity(args[0], t);
-			boolean glide = ArgumentValidation.getBoolean(args[1], t);
+			boolean glide = ArgumentValidation.getBoolean(args[1], t, env);
 
 			e.setGliding(glide);
 
@@ -1407,7 +1409,7 @@ public class MobManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return CBoolean.GenerateCBoolean(Static.getLivingEntity(args[0], t).isGliding(), t);
 		}
 
@@ -1431,7 +1433,7 @@ public class MobManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return CBoolean.GenerateCBoolean(Static.getLivingEntity(args[0], t).hasAI(), t);
 		}
 
@@ -1455,9 +1457,9 @@ public class MobManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCLivingEntity e = Static.getLivingEntity(args[0], t);
-			boolean ai = ArgumentValidation.getBoolean(args[1], t);
+			boolean ai = ArgumentValidation.getBoolean(args[1], t, env);
 
 			e.setAI(ai);
 
@@ -1484,7 +1486,7 @@ public class MobManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return CBoolean.GenerateCBoolean(Static.getLivingEntity(args[0], t).isCollidable(), t);
 		}
 
@@ -1508,9 +1510,9 @@ public class MobManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCLivingEntity e = Static.getLivingEntity(args[0], t);
-			boolean collidable = ArgumentValidation.getBoolean(args[1], t);
+			boolean collidable = ArgumentValidation.getBoolean(args[1], t, env);
 			e.setCollidable(collidable);
 			return CVoid.VOID;
 		}
@@ -1558,7 +1560,7 @@ public class MobManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCLivingEntity e = Static.getLivingEntity(args[0], t);
 			MCAttribute attribute;
 			try {
@@ -1615,7 +1617,7 @@ public class MobManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCLivingEntity e = Static.getLivingEntity(args[0], t);
 			MCAttribute attribute;
 			try {
@@ -1672,7 +1674,7 @@ public class MobManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCLivingEntity e = Static.getLivingEntity(args[0], t);
 			MCAttribute attribute;
 			try {
@@ -1729,7 +1731,7 @@ public class MobManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCLivingEntity e = Static.getLivingEntity(args[0], t);
 			MCAttribute attribute;
 			try {
@@ -1738,9 +1740,9 @@ public class MobManagement {
 				throw new CREFormatException("Invalid attribute name: " + args[1].val(), t);
 			}
 			try {
-				CArray ret = new CArray(t);
+				CArray ret = new CArray(t, null, env);
 				for(MCAttributeModifier m : e.getAttributeModifiers(attribute)) {
-					ret.push(ObjectGenerator.GetGenerator().attributeModifier(m, t), t);
+					ret.push(ObjectGenerator.GetGenerator().attributeModifier(m, t, env), t, env);
 				}
 				return ret;
 			} catch (IllegalArgumentException ex) {
@@ -1791,7 +1793,7 @@ public class MobManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCLivingEntity e = Static.getLivingEntity(args[0], t);
 			MCAttribute attribute;
 			try {
@@ -1799,7 +1801,7 @@ public class MobManagement {
 			} catch (IllegalArgumentException ex) {
 				throw new CREFormatException("Invalid attribute name: " + args[1].val(), t);
 			}
-			double base = ArgumentValidation.getDouble(args[2], t);
+			double base = ArgumentValidation.getDouble(args[2], t, env);
 			try {
 				e.setAttributeBase(attribute, base);
 			} catch (IllegalArgumentException ex) {
@@ -1850,7 +1852,7 @@ public class MobManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCLivingEntity e = Static.getLivingEntity(args[0], t);
 			MCAttribute attribute;
 			try {
@@ -1909,9 +1911,9 @@ public class MobManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCLivingEntity e = Static.getLivingEntity(args[0], t);
-			MCAttributeModifier modifier = ObjectGenerator.GetGenerator().attributeModifier(ArgumentValidation.getArray(args[1], t), t);
+			MCAttributeModifier modifier = ObjectGenerator.GetGenerator().attributeModifier(ArgumentValidation.getArray(args[1], t, env), t, env);
 			try {
 				e.addAttributeModifier(modifier);
 			} catch (IllegalArgumentException ex) {
@@ -1963,11 +1965,11 @@ public class MobManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCLivingEntity e = Static.getLivingEntity(args[0], t);
 			MCAttributeModifier modifier = null;
 			if(args.length == 2) {
-				modifier = ObjectGenerator.GetGenerator().attributeModifier(ArgumentValidation.getArray(args[1], t), t);
+				modifier = ObjectGenerator.GetGenerator().attributeModifier(ArgumentValidation.getArray(args[1], t, env), t, env);
 			} else {
 				MCAttribute attribute;
 				try {
@@ -2025,7 +2027,7 @@ public class MobManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return new CInt(Static.getLivingEntity(args[0], t).getNoDamageTicks(), t);
 		}
 
@@ -2049,8 +2051,8 @@ public class MobManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			Static.getLivingEntity(args[0], t).setNoDamageTicks(ArgumentValidation.getInt32(args[1], t));
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			Static.getLivingEntity(args[0], t).setNoDamageTicks(ArgumentValidation.getInt32(args[1], t, env));
 			return CVoid.VOID;
 		}
 
@@ -2075,7 +2077,7 @@ public class MobManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return CBoolean.get(Static.getLivingEntity(args[0], t).isSleeping());
 		}
 

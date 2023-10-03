@@ -5,6 +5,14 @@ import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.ZipReader;
+import com.laytonsmith.core.Static;
+import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.functions.Persistence;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import com.laytonsmith.persistence.io.ReadWriteFileConnection;
 import com.laytonsmith.testing.StaticTest;
@@ -358,4 +366,20 @@ public class TestPersistence {
 		}
 		return "[" + StringUtils.Join(append, ", ") + "]";
 	}
+
+	@Test
+	public void testTypeCoercionWithParametersWorks() throws Exception {
+		// Since we don't have compiler support for generics yet, we have to do this
+		// manually, but that's ok for now.
+		Environment env = Static.GenerateStandaloneEnvironment();
+		Target t = Target.UNKNOWN;
+		new Persistence.store_value().exec(Target.UNKNOWN, env, null, new CString("testKey", t), new CString("007", t));
+		Mixed value = new Persistence.get_value().exec(Target.UNKNOWN, env, GenericParameters
+				.emptyBuilder(new Persistence.get_value().getSignatures().getSignatures().get(0))
+				.addNativeParameter(CInt.TYPE, null).buildNative(),
+				new CString("testKey", t));
+		assertEquals(CInt.TYPE, value.typeof(env));
+		assertEquals(7, ((CInt) value).getInt());
+	}
+
 }

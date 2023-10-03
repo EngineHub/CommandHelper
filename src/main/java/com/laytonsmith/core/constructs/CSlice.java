@@ -4,6 +4,9 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.GenericTypeParameters;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -24,7 +27,10 @@ import java.util.Stack;
 public class CSlice extends CArray {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get(CSlice.class);
+	public static final CClassType TYPE = CClassType.get(CSlice.class)
+			.withSuperParameters(GenericTypeParameters.nativeBuilder(CArray.TYPE)
+				.addParameter(CInt.TYPE, null))
+			.done();
 
 	private long start;
 	private long finish;
@@ -32,8 +38,10 @@ public class CSlice extends CArray {
 	private long max;
 	private long size;
 
-	public CSlice(String slice, Target t) throws ConfigCompileException {
-		super(t);
+	public CSlice(String slice, Target t, Environment env) throws ConfigCompileException {
+		super(t, GenericParameters.emptyBuilder(CArray.TYPE)
+				.addNativeParameter(CInt.TYPE, null)
+				.buildNative(), env);
 		String[] split = slice.split("\\.\\.");
 		if(split.length > 2) {
 			throw new ConfigCompileException("Invalid slice notation! (" + slice + ")", t);
@@ -60,17 +68,17 @@ public class CSlice extends CArray {
 		calculateCaches();
 	}
 
-	public CSlice(long from, long to, Target t) {
-		super(t);
+	public CSlice(long from, long to, Target t, Environment env) {
+		super(t, null, env);
 		this.start = from;
 		this.finish = to;
 		calculateCaches();
 	}
 
 	@Override
-	public List<Mixed> asList() {
-		CArray ca = new ArrayHandling.range().exec(Target.UNKNOWN, null, new CInt(start, Target.UNKNOWN), new CInt(finish, Target.UNKNOWN));
-		return ca.asList();
+	public List<Mixed> asList(Environment env) {
+		CArray ca = new ArrayHandling.range().exec(Target.UNKNOWN, env, null, new CInt(start, Target.UNKNOWN), new CInt(finish, Target.UNKNOWN));
+		return ca.asList(env);
 	}
 
 	private void calculateCaches() {
@@ -103,7 +111,7 @@ public class CSlice extends CArray {
 	}
 
 	@Override
-	protected String getString(Stack<CArray> arrays, Target t) {
+	protected String getString(Stack<CArray> arrays, Target t, Environment env) {
 		//We don't need to consider arrays, because we can't
 		//get stuck in an infinite loop.
 		return val();
@@ -115,13 +123,28 @@ public class CSlice extends CArray {
 	}
 
 	@Override
-	public void set(Mixed index, Mixed c, Target t) {
+	public void set(Mixed index, Mixed c, Target t, Environment env) {
 		throw new CRECastException("CSlices cannot set values", t);
 	}
 
 	@Override
-	public Mixed get(Mixed index, Target t) {
-		long i = ArgumentValidation.getInt(index, t);
+	public Mixed get(String index, Target t, Environment env) {
+		return get(new CString(index, t), t, env);
+	}
+
+	@Override
+	public Mixed get(int index, Target t) {
+		long i = index;
+		if(i > max) {
+			throw new CRERangeException("Index out of bounds. Index: " + i + " Size: " + max, t);
+		}
+		return new CInt(start + (direction * i), t);
+	}
+
+
+	@Override
+	public Mixed get(Mixed index, Target t, Environment env) {
+		long i = ArgumentValidation.getInt(index, t, env);
 		if(i > max) {
 			throw new CRERangeException("Index out of bounds. Index: " + i + " Size: " + max, t);
 		}
@@ -129,7 +152,7 @@ public class CSlice extends CArray {
 	}
 
 	@Override
-	public Set<Mixed> keySet() {
+	public Set<Mixed> keySet(Environment env) {
 		// To keep our memory footprint down, we create a "fake" keyset here, which doesn't
 		// require actually creating an entire Set. Removing items from the set isn't supported,
 		// but all iteration options are.
@@ -160,20 +183,20 @@ public class CSlice extends CArray {
 
 			@Override
 			public int size() {
-				return (int) CSlice.this.size();
+				return (int) CSlice.this.size(env);
 			}
 		};
 	}
 
 	@Override
-	public long size() {
+	public long size(Environment env) {
 		return size;
 	}
 
 	@Override
 	public boolean contains(Mixed c) {
 		try {
-			long i = ArgumentValidation.getInt(c, Target.UNKNOWN);
+			long i = ArgumentValidation.getInt(c, Target.UNKNOWN, fallbackEnv);
 			if(start < finish) {
 				return start <= i && i <= finish;
 			} else {
@@ -212,5 +235,19 @@ public class CSlice extends CArray {
 	@Override
 	public CClassType[] getInterfaces() {
 		return CClassType.EMPTY_CLASS_ARRAY;
+	}
+
+	@Override
+	public Mixed slice(int begin, int end, Target t, Environment env) {
+		if(begin < end) {
+			return new CSlice(start - begin, finish - end, t, env);
+		} else {
+			return new CSlice(finish - begin, start - end, t, env);
+		}
+	}
+
+	@Override
+	public GenericParameters getGenericParameters() {
+		return null;
 	}
 }

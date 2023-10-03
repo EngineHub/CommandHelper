@@ -3,6 +3,9 @@ package com.laytonsmith.PureUtilities.ClassLoading.ClassMirror;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.ClassUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.ZipReader;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.RetentionPolicy;
@@ -17,9 +20,8 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * This class gathers information about a class, without actually loading the
- * class into memory. Most of the methods in {@link java.lang.Class} are
- * available in this class (or have an equivalent Mirror version).
+ * This class gathers information about a class, without actually loading the class into memory. Most of the methods in
+ * {@link java.lang.Class} are available in this class (or have an equivalent Mirror version).
  *
  * @param <T>
  */
@@ -29,9 +31,8 @@ public class ClassMirror<T> implements Serializable {
 	private final ClassInfo<T> info;
 
 	/**
-	 * If this is just a wrapper for an already loaded Class, this will be
-	 * non-null, and should override all the existing methods with the wrapped
-	 * return.
+	 * If this is just a wrapper for an already loaded Class, this will be non-null, and should override all the
+	 * existing methods with the wrapped return.
 	 */
 	private final Class<?> underlyingClass;
 
@@ -47,13 +48,11 @@ public class ClassMirror<T> implements Serializable {
 	}
 
 	/**
-	 * Creates a ClassMirror object from an already loaded Class. While this
-	 * obviously defeats the purpose of not loading the Class into PermGen, this
-	 * does allow already loaded classes to fit into the ClassMirror ecosystem.
-	 * Essentially, calls to the ClassMirror are simply forwarded to the Class
-	 * and the return re-wrapped in sub mirror types. Some operations are not
-	 * possible, namely non-runtime annotation processing and generics
-	 * information, but in general, all other operations work the same.
+	 * Creates a ClassMirror object from an already loaded Class. While this obviously defeats the purpose of not
+	 * loading the Class into PermGen, this does allow already loaded classes to fit into the ClassMirror ecosystem.
+	 * Essentially, calls to the ClassMirror are simply forwarded to the Class and the return re-wrapped in sub mirror
+	 * types. Some operations are not possible, namely non-runtime annotation processing and generics information, but
+	 * in general, all other operations work the same.
 	 *
 	 * @param c
 	 */
@@ -84,23 +83,28 @@ public class ClassMirror<T> implements Serializable {
 		return info.modifiers;
 	}
 
+	private String jvmClassName = null;
+
 	/**
-	 * Returns the name of this class as recognized by the JVM, not the common
-	 * class name. Use {@link #getClassName()} instead, if you want the common
-	 * name.
+	 * Returns the name of this class as recognized by the JVM, not the common class name. Use {@link #getClassName()}
+	 * instead, if you want the common name.
 	 *
 	 * @return
 	 */
 	public String getJVMClassName() {
-		if(underlyingClass != null) {
-			return ClassUtils.getJVMName(underlyingClass);
+		if(jvmClassName == null) {
+			if(underlyingClass != null) {
+				jvmClassName = ClassUtils.getJVMName(underlyingClass);
+			} else {
+				jvmClassName = "L" + info.name + ";";
+			}
 		}
-		return "L" + info.name + ";";
+		return jvmClassName;
 	}
 
 	/**
-	 * Returns the class name of this class. This is the "normal" name, that is,
-	 * what you would type in code to reference a class, without / or $.
+	 * Returns the class name of this class. This is the "normal" name, that is, what you would type in code to
+	 * reference a class, without / or $.
 	 *
 	 * @return
 	 */
@@ -136,8 +140,7 @@ public class ClassMirror<T> implements Serializable {
 	}
 
 	/**
-	 * Returns true iff the underlying class is an abstract class (not an
-	 * interface).
+	 * Returns true iff the underlying class is an abstract class (not an interface).
 	 *
 	 * @return
 	 */
@@ -161,8 +164,7 @@ public class ClassMirror<T> implements Serializable {
 	}
 
 	/**
-	 * Returns a list of {@link ClassReferenceMirror}s of all the interfaces
-	 * that this implements.
+	 * Returns a list of {@link ClassReferenceMirror}s of all the interfaces that this implements.
 	 *
 	 * @return
 	 */
@@ -200,16 +202,12 @@ public class ClassMirror<T> implements Serializable {
 	}
 
 	/**
-	 * Because ClassMirror works with annotations that were declared as either
-	 * {@link RetentionPolicy#CLASS} or {@link RetentionPolicy#RUNTIME}, you may
-	 * also want to check visibility. If this returns false, then the class does
-	 * have the annotation, but {@link Class#getAnnotation(java.lang.Class)}
-	 * would return false. If the class doesn't have the annotation, null is
-	 * returned. Note that if this ClassMirror was initialized from a loaded
-	 * Class object, this may not return correct information, because it
-	 * essentially will be returning the result of
-	 * {@link #hasAnnotation(java.lang.Class)}, since there is no way to tell if
-	 * an annotation is anything but runtime.
+	 * Because ClassMirror works with annotations that were declared as either {@link RetentionPolicy#CLASS} or
+	 * {@link RetentionPolicy#RUNTIME}, you may also want to check visibility. If this returns false, then the class
+	 * does have the annotation, but {@link Class#getAnnotation(java.lang.Class)} would return false. If the class
+	 * doesn't have the annotation, null is returned. Note that if this ClassMirror was initialized from a loaded Class
+	 * object, this may not return correct information, because it essentially will be returning the result of
+	 * {@link #hasAnnotation(java.lang.Class)}, since there is no way to tell if an annotation is anything but runtime.
 	 *
 	 * @param annotation
 	 * @return
@@ -267,12 +265,10 @@ public class ClassMirror<T> implements Serializable {
 	}
 
 	/**
-	 * Loads the corresponding Annotation type for this field or method. This
-	 * actually loads the Annotation class into memory. This is equivalent to
-	 * getAnnotation(type).getProxy(type), however this checks for null first,
-	 * and returns null instead of causing a NPE. In the case that this is a
-	 * wrapper for a real Class object, this simply returns the real Annotation
-	 * object (or null).
+	 * Loads the corresponding Annotation type for this field or method. This actually loads the Annotation class into
+	 * memory. This is equivalent to getAnnotation(type).getProxy(type), however this checks for null first, and returns
+	 * null instead of causing a NPE. In the case that this is a wrapper for a real Class object, this simply returns
+	 * the real Annotation object (or null).
 	 *
 	 * @param <T>
 	 * @param type
@@ -290,9 +286,8 @@ public class ClassMirror<T> implements Serializable {
 	}
 
 	/**
-	 * Returns the fields in this class. This works like
-	 * {@link Class#getDeclaredFields()}, as only the methods in this class are
-	 * loaded.
+	 * Returns the fields in this class. This works like {@link Class#getDeclaredFields()}, as only the methods in this
+	 * class are loaded.
 	 *
 	 * @return
 	 */
@@ -309,19 +304,15 @@ public class ClassMirror<T> implements Serializable {
 	}
 
 	/**
-	 * This method returns a map for all classes which this class
-	 * extends/implements of the the generic parameters. For instance, if a
-	 * class has the signature
-	 * {@code class C extends E<String> implements J<Integer>, K} then this
-	 * method would return the map: {@code {E: [String], J[Integer], K:[]}}.
-	 * Note that for the purposes of this method, interfaces and classes are not
-	 * distinguished, and while the extended class will be first in the list,
-	 * the first item in the list is not necessarily a class.
+	 * This method returns a map for all classes which this class extends/implements of the the generic parameters. For
+	 * instance, if a class has the signature {@code class C extends E<String> implements J<Integer>, K} then this
+	 * method would return the map: {@code {E: [String], J[Integer], K:[]}}. Note that for the purposes of this method,
+	 * interfaces and classes are not distinguished, and while the extended class will be first in the list, the first
+	 * item in the list is not necessarily a class.
 	 *
 	 * @return
-	 * @throws IllegalArgumentException If the underlying mechanism backing this
-	 * ClassMirror object is a real loaded class, this method will throw an
-	 * IllegalArgumentException, because real classes don't know their generic types.
+	 * @throws IllegalArgumentException If the underlying mechanism backing this ClassMirror object is a real loaded
+	 * class, this method will throw an IllegalArgumentException, because real classes don't know their generic types.
 	 */
 	public Map<ClassReferenceMirror<?>, List<ClassReferenceMirror<?>>> getGenerics() throws IllegalArgumentException {
 		if(underlyingClass != null) {
@@ -335,8 +326,8 @@ public class ClassMirror<T> implements Serializable {
 	}
 
 	/**
-	 * Returns the field, given by name. This does not traverse the Object
-	 * hierarchy, unlike {@link Class#getField(java.lang.String)}.
+	 * Returns the field, given by name. This does not traverse the Object hierarchy, unlike
+	 * {@link Class#getField(java.lang.String)}.
 	 *
 	 * @param name
 	 * @return
@@ -352,9 +343,8 @@ public class ClassMirror<T> implements Serializable {
 	}
 
 	/**
-	 * Returns the methods in this class. This traverses the parent Object
-	 * hierarchy if the methods are apart of the visible interface, as well as
-	 * private methods in this class itself.
+	 * Returns the methods in this class. This traverses the parent Object hierarchy if the methods are apart of the
+	 * visible interface, as well as private methods in this class itself.
 	 *
 	 * @return
 	 */
@@ -401,9 +391,8 @@ public class ClassMirror<T> implements Serializable {
 	}
 
 	/**
-	 * Returns the method, given by name. This traverses the parent Object
-	 * hierarchy if the methods are apart of the visible interface, as well as
-	 * private methods in this class itself.
+	 * Returns the method, given by name. This traverses the parent Object hierarchy if the methods are apart of the
+	 * visible interface, as well as private methods in this class itself.
 	 *
 	 * @param name
 	 * @param params
@@ -419,9 +408,8 @@ public class ClassMirror<T> implements Serializable {
 	}
 
 	/**
-	 * Returns the method, given by name. This traverses the parent Object
-	 * hierarchy if the methods are apart of the visible interface, as well as
-	 * private methods in this class itself.
+	 * Returns the method, given by name. This traverses the parent Object hierarchy if the methods are apart of the
+	 * visible interface, as well as private methods in this class itself.
 	 *
 	 * @param name
 	 * @param params
@@ -441,10 +429,9 @@ public class ClassMirror<T> implements Serializable {
 	}
 
 	/**
-	 * Loads the class into memory and returns the class object. For this call
-	 * to succeed, the class must otherwise be on the class path. The standard
-	 * class loader is used, and the class is initialized. If this is a wrapper
-	 * for an already loaded Class object, that object is simply returned.
+	 * Loads the class into memory and returns the class object. For this call to succeed, the class must otherwise be
+	 * on the class path. The standard class loader is used, and the class is initialized. If this is a wrapper for an
+	 * already loaded Class object, that object is simply returned.
 	 *
 	 * @return
 	 */
@@ -455,16 +442,15 @@ public class ClassMirror<T> implements Serializable {
 		}
 		try {
 			return info.classReferenceMirror.loadClass();
-		} catch (ClassNotFoundException ex) {
+		} catch(ClassNotFoundException ex) {
 			throw new NoClassDefFoundError(ex.getMessage());
 		}
 	}
 
 	/**
-	 * Loads the class into memory and returns the class object. For this call
-	 * to succeed, the classloader specified must be able to find the class. If
-	 * this is a wrapper for an already loaded Class object, that object is
-	 * simply returned.
+	 * Loads the class into memory and returns the class object. For this call to succeed, the classloader specified
+	 * must be able to find the class. If this is a wrapper for an already loaded Class object, that object is simply
+	 * returned.
 	 *
 	 * @param loader
 	 * @param initialize
@@ -477,20 +463,18 @@ public class ClassMirror<T> implements Serializable {
 		}
 		try {
 			return info.classReferenceMirror.loadClass(loader, initialize);
-		} catch (ClassNotFoundException ex) {
+		} catch(ClassNotFoundException ex) {
 			throw new NoClassDefFoundError(ex.getMessage());
 		}
 	}
 
 	/**
-	 * Returns true if this class either extends or implements the class
-	 * specified, or is the same as that class. Note that if it transiently
-	 * extends from this class, it can't necessarily find that information
-	 * without actually loading the intermediate class, so this is a less useful
-	 * method than {@link Class#isAssignableFrom(java.lang.Class)}, however, in
-	 * combination with a system that is aware of all classes in a class
-	 * ecosystem, this can be used to piece together that information without
-	 * actually loading the classes.
+	 * Returns true if this class either extends or implements the class specified, or is the same as that class. Note
+	 * that if it transiently extends from this class, it can't necessarily find that information without actually
+	 * loading the intermediate class, so this is a less useful method than
+	 * {@link Class#isAssignableFrom(java.lang.Class)}, however, in combination with a system that is aware of all
+	 * classes in a class ecosystem, this can be used to piece together that information without actually loading the
+	 * classes.
 	 *
 	 * @param superClass
 	 * @return
@@ -519,8 +503,7 @@ public class ClassMirror<T> implements Serializable {
 	}
 
 	/**
-	 * Returns the Package this class is in. If this is not in a package, null
-	 * is returned.
+	 * Returns the Package this class is in. If this is not in a package, null is returned.
 	 *
 	 * @return
 	 */
@@ -543,8 +526,7 @@ public class ClassMirror<T> implements Serializable {
 	}
 
 	/**
-	 * Returns the simple name of this class. I.e. for java.lang.String,
-	 * "String" is returned.
+	 * Returns the simple name of this class. I.e. for java.lang.String, "String" is returned.
 	 *
 	 * @return
 	 */
@@ -557,8 +539,8 @@ public class ClassMirror<T> implements Serializable {
 	}
 
 	/**
-	 * Returns a string representation of this object. The string will match the
-	 * toString that would be generated by that of the Class object.
+	 * Returns a string representation of this object. The string will match the toString that would be generated by
+	 * that of the Class object.
 	 *
 	 * @return
 	 */
@@ -571,9 +553,8 @@ public class ClassMirror<T> implements Serializable {
 	}
 
 	/**
-	 * Returns a {@link ClassReferenceMirror} to the object. This is useful for
-	 * classes that may not exist, as it doesn't require an actual known
-	 * reference to the class to exist.
+	 * Returns a {@link ClassReferenceMirror} to the object. This is useful for classes that may not exist, as it
+	 * doesn't require an actual known reference to the class to exist.
 	 *
 	 * @return
 	 */
@@ -583,6 +564,44 @@ public class ClassMirror<T> implements Serializable {
 			return ClassReferenceMirror.fromClass(underlyingClass);
 		}
 		return new ClassReferenceMirror<>(getJVMClassName());
+	}
+
+	/**
+	 * Returns true if the underlying resource representing this jar can be written to, or if it's read only, either due
+	 * to being in a jar/zip or other inherently read only source, or if the file is read only.
+	 *
+	 * @return
+	 */
+	public boolean isReadOnly() {
+		return !new ZipReader(getContainer()).canWrite();
+	}
+
+	/**
+	 * Returns an InputStream pointed at the class file.This may be inside a jar or something, and thus read only, but
+	 * that can be checked for with {@link #isReadOnly()}.
+	 *
+	 * @return
+	 * @throws java.io.IOException
+	 */
+	public InputStream getClassStream() throws IOException {
+		URL classUrl = getClassLocation();
+		return new ZipReader(classUrl).getInputStream();
+	}
+
+	/**
+	 * Returns a URL to the class's location.
+	 * @return
+	 * @throws IOException
+	 */
+	public URL getClassLocation() throws IOException {
+		String url = getContainer().toString();
+		url = url.replaceFirst("^jar:", "");
+		if(url.endsWith("!/")) {
+			url = StringUtils.replaceLast(url, "!/", "");
+		}
+		String sUrl = url + "/" + StringUtils.replaceLast(getJVMClassName().replaceFirst("L", ""), ";", "") + ".class";
+		URL classUrl = new URL(sUrl);
+		return classUrl;
 	}
 
 	@Override
@@ -618,10 +637,9 @@ public class ClassMirror<T> implements Serializable {
 		public List<FieldMirror> fields = new ArrayList<>();
 		public List<AbstractMethodMirror> methods = new ArrayList<>();
 		/**
-		 * Maps inherited classes to the generic parameters passed along to the
-		 * inherited class. For instance, if we have {@code class Base implements
-		 * A<Integer, Long>, B<String> {...}} then this object would contain {A:
-		 * [Integer, Long], B: [String]}
+		 * Maps inherited classes to the generic parameters passed along to the inherited class. For instance, if we
+		 * have {@code class Base implements
+		 * A<Integer, Long>, B<String> {...}} then this object would contain {A: [Integer, Long], B: [String]}
 		 */
 		public Map<ClassReferenceMirror<?>, List<ClassReferenceMirror<?>>> genericParameters
 				= new HashMap<>();

@@ -11,6 +11,10 @@ import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.compiler.FileOptions;
+import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
+import com.laytonsmith.core.compiler.signature.FunctionSignatures;
+import com.laytonsmith.core.compiler.signature.SignatureBuilder;
+import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.CBracket;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CEntry;
@@ -22,7 +26,13 @@ import com.laytonsmith.core.constructs.CSymbol;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.ConstraintLocation;
+import com.laytonsmith.core.constructs.generics.Constraints;
+import com.laytonsmith.core.constructs.generics.GenericDeclaration;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.constraints.UnboundedConstraint;
 import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
@@ -42,6 +52,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
@@ -80,12 +91,12 @@ public class Compiler {
 		}
 
 		@Override
-		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
 			return (nodes.length == 1 ? parent.eval(nodes[0], env) : CVoid.VOID);
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return CVoid.VOID;
 		}
 
@@ -114,11 +125,13 @@ public class Compiler {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+		public LeftHandSideType getReturnType(ParseTree node, Target t, List<LeftHandSideType> argTypes,
+				List<Target> argTargets, LeftHandSideType inferredReturnType, Environment env,
+				Set<ConfigCompileException> exceptions) {
 			if(argTypes.size() == 1) {
 				return argTypes.get(0);
 			} else {
-				return CVoid.TYPE;
+				return CVoid.LHSTYPE;
 			}
 		}
 
@@ -138,9 +151,38 @@ public class Compiler {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return new CEntry(args[0], args[1], t);
 		}
+
+		@Override
+		public LeftHandSideType typecheck(StaticAnalysis analysis,
+				ParseTree ast, LeftHandSideType inferredReturnType,
+				Environment env, Set<ConfigCompileException> exceptions) {
+			if(!(ast.getChildAt(0).getData() instanceof CLabel)) {
+				exceptions.add(new ConfigCompileException("Expected label.", ast.getChildAt(0).getTarget()));
+			}
+			LeftHandSideType inferredParameterType = ast.getChildAt(1)
+					.getDeclaredType(analysis, env, Auto.LHSTYPE);
+			inferredParameterType = LeftHandSideType.resolveTypeFromGenerics(Target.UNKNOWN, env, inferredParameterType, null, null, (Map) null);
+			return analysis.typecheck(ast.getChildAt(1), inferredParameterType, env, exceptions);
+		}
+
+		@Override
+		public List<LeftHandSideType> getResolvedParameterTypes(StaticAnalysis analysis, Target t, Environment env, GenericParameters generics, LeftHandSideType inferredReturnType, List<ParseTree> children) {
+			List<LeftHandSideType> ret = new ArrayList<>();
+			ret.add(Auto.LHSTYPE);
+			ret.add(children.get(1).getDeclaredType(analysis, env, inferredReturnType));
+			return ret;
+		}
+
+		@Override
+		public LeftHandSideType getReturnType(ParseTree node, Target t, List<LeftHandSideType> argTypes, List<Target> argTargets, LeftHandSideType inferredReturnType, Environment env, Set<ConfigCompileException> exceptions) {
+			return argTypes.get(1);
+		}
+
+
+
 	}
 
 	@api
@@ -151,7 +193,7 @@ public class Compiler {
 		public static final String NAME = "__autoconcat__";
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			throw new Error("Should not have gotten here, " + __autoconcat__.NAME + " was not removed before runtime.");
 		}
 
@@ -459,7 +501,8 @@ public class Compiler {
 
 			// Look for typed assignments
 			for(int k = 0; k < list.size(); k++) {
-				if(list.get(k).getData().equals(CVoid.VOID) || list.get(k).getData().isInstanceOf(CClassType.TYPE)) {
+				if(list.get(k).getData().equals(CVoid.VOID)
+						|| list.get(k).getData() instanceof CClassType) {
 					if(k == list.size() - 1) {
 						// This is not a typed assignment
 						break;
@@ -503,7 +546,7 @@ public class Compiler {
 						list.set(k, labelNode);
 						list.remove(k + 1);
 					} else {
-						throw new ConfigCompileException("Unexpected data after ClassType", list.get(k + 1).getTarget());
+//						throw new ConfigCompileException("Unexpected data after ClassType", list.get(k + 1).getTarget());
 					}
 				}
 			}
@@ -552,8 +595,9 @@ public class Compiler {
 							}
 							try {
 								Function f = (Function) FunctionList.getFunction(identifier, envs);
+								// TODO: Determine if generics need to be supported here. Probably not.
 								ParseTree node = new ParseTree(
-										f.execs(identifier.getTarget(), null, null, child), child.getFileOptions());
+										f.execs(identifier.getTarget(), null, null, null, child), child.getFileOptions());
 								if(node.getData() instanceof CFunction
 										&& node.getData().val().equals(__autoconcat__.NAME)) {
 									node = rewrite(node.getChildren(), returnSConcat, envs);
@@ -674,19 +718,19 @@ public class Compiler {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return CVoid.VOID;
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes,
-				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
-			for(CClassType argType : argTypes) {
+		public LeftHandSideType getReturnType(ParseTree node, Target t, List<LeftHandSideType> argTypes,
+				List<Target> argTargets, LeftHandSideType inferredType, Environment env, Set<ConfigCompileException> exceptions) {
+			for(LeftHandSideType argType : argTypes) {
 				if(argType == null) {
 					return null; // An argument alters control flow, so this function will never return.
 				}
 			}
-			return CVoid.TYPE;
+			return CVoid.TYPE.asLeftHandSideType();
 		}
 
 		@Override
@@ -722,7 +766,7 @@ public class Compiler {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String s = null;
 			if(args.length == 1) {
 				s = args[0].val();
@@ -748,12 +792,26 @@ public class Compiler {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(args.length == 0) {
 				return CVoid.VOID;
 			}
 			return args[0];
 		}
+
+		@Override
+		public FunctionSignatures getSignatures() {
+			GenericDeclaration declaration = new GenericDeclaration(Target.UNKNOWN,
+				new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+					new UnboundedConstraint(Target.UNKNOWN, "T")));
+			LeftHandSideType t = LeftHandSideType.fromNativeGenericDefinitionType(declaration, "T", null);
+			return new SignatureBuilder(t)
+					.param(t, "argument", "The value to return.")
+					.setGenericDeclaration(declaration, "The type of the value.")
+					.newSignature(CVoid.TYPE)
+					.build();
+		}
+
 	}
 
 	@api
@@ -761,7 +819,7 @@ public class Compiler {
 	public static class __cbracket__ extends DummyFunction implements Optimizable {
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
@@ -797,7 +855,7 @@ public class Compiler {
 		public static final String NAME = "__cbrace__";
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
@@ -878,7 +936,7 @@ public class Compiler {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			throw new UnsupportedOperationException(getName() + " should have been compiled out. If you are reaching"
 					+ " this, an error has occurred in the parser. Please report this error to the developers.");
 		}
@@ -908,7 +966,7 @@ public class Compiler {
 				if(children.size() != 1) {
 					throw new ConfigCompileException(getName() + " can only take one parameter", t);
 				}
-				if(!(children.get(0).getData().isInstanceOf(CString.TYPE))) {
+				if(!(children.get(0).getData().isInstanceOf(CString.TYPE, null, env))) {
 					throw new ConfigCompileException("Only hardcoded strings may be passed into " + getName(), t);
 				}
 				String value = children.get(0).getData().val();

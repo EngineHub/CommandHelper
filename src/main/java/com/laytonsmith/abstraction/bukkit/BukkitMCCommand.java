@@ -12,7 +12,9 @@ import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.exceptions.CRE.CREPluginInternalException;
@@ -20,14 +22,15 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Commands;
 import com.laytonsmith.core.natives.interfaces.Callable;
 import com.laytonsmith.core.natives.interfaces.Mixed;
-import java.util.ArrayList;
-import java.util.List;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandException;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.command.PluginIdentifiableCommand;
 import org.bukkit.plugin.Plugin;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class BukkitMCCommand implements MCCommand {
 
@@ -211,24 +214,27 @@ public class BukkitMCCommand implements MCCommand {
 	public List<String> handleTabComplete(MCCommandSender sender, String alias, String[] args) {
 		if(Commands.onTabComplete.containsKey(cmd.getName().toLowerCase())) {
 			Target t = Target.UNKNOWN;
-			CArray cargs = new CArray(t);
-			for(String arg : args) {
-				cargs.push(new CString(arg, t), t);
-			}
 			Callable closure = Commands.onTabComplete.get(cmd.getName().toLowerCase());
+			Environment env = closure.getEnv();
+			CArray cargs = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
+			for(String arg : args) {
+				cargs.push(new CString(arg, t), t, env);
+			}
+
 			closure.getEnv().getEnv(CommandHelperEnvironment.class).SetCommandSender(sender);
 			try {
 				Mixed fret = closure.executeCallable(null, t, new CString(alias, t), new CString(sender.getName(), t), cargs,
-						new CArray(t) // reserved for an obgen style command array
+						new CArray(t, null, env) // reserved for an obgen style command array
 				);
-				if(fret.isInstanceOf(CArray.TYPE)) {
+				if(fret.isInstanceOf(CArray.TYPE, null, env)) {
 					List<String> ret = new ArrayList<>();
 					if(((CArray) fret).inAssociativeMode()) {
-						for(Mixed key : ((CArray) fret).keySet()) {
-							ret.add(((CArray) fret).get(key, Target.UNKNOWN).val());
+						for(Mixed key : ((CArray) fret).keySet(env)) {
+							ret.add(((CArray) fret).get(key, Target.UNKNOWN, env).val());
 						}
 					} else {
-						for(Mixed value : ((CArray) fret).asList()) {
+						for(Mixed value : ((CArray) fret).asList(env)) {
 							ret.add(value.val());
 						}
 					}
@@ -247,22 +253,24 @@ public class BukkitMCCommand implements MCCommand {
 	@Override
 	public boolean handleCustomCommand(MCCommandSender sender, String label, String[] args) {
 		if(Commands.onCommand.containsKey(cmd.getName().toLowerCase())) {
+			Callable closure = Commands.onCommand.get(cmd.getName().toLowerCase());
+			Environment env = closure.getEnv();
 			Target t = Target.UNKNOWN;
-			CArray cargs = new CArray(t);
+			CArray cargs = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			for(String arg : args) {
-				cargs.push(new CString(arg, t), t);
+				cargs.push(new CString(arg, t), t, env);
 			}
 
-			Callable closure = Commands.onCommand.get(cmd.getName().toLowerCase());
 			CommandHelperEnvironment cEnv = closure.getEnv().getEnv(CommandHelperEnvironment.class);
 			cEnv.SetCommandSender(sender);
 			cEnv.SetCommand("/" + label + StringUtils.Join(args, " "));
 
 			try {
 				Mixed fret = closure.executeCallable(null, t, new CString(label, t), new CString(sender.getName(), t), cargs,
-						new CArray(t) // reserved for an obgen style command array
+						new CArray(t, null, env) // reserved for an obgen style command array
 				);
-				if(fret.isInstanceOf(CBoolean.TYPE)) {
+				if(fret.isInstanceOf(CBoolean.TYPE, null, env)) {
 					return ((CBoolean) fret).getBoolean();
 				}
 			} catch (ConfigRuntimeException cre) {

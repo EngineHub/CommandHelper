@@ -22,6 +22,7 @@ import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
@@ -76,27 +77,27 @@ public class Threading {
 		}
 
 		@Override
-		public Mixed exec(final Target t, final Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			final String threadId = args[0].val();
-			if(!(args[1].isInstanceOf(CClosure.TYPE))) {
+			if(!(args[1].isInstanceOf(CClosure.TYPE, null, env))) {
 				throw new CRECastException("Expected closure for arg 2", t);
 			}
 			final CClosure closure = (CClosure) args[1];
 			Thread th = new Thread("(" + Implementation.GetServerType().getBranding() + ") " + threadId) {
 				@Override
 				public void run() {
-					DaemonManager dm = environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager();
+					DaemonManager dm = env.getEnv(StaticRuntimeEnv.class).GetDaemonManager();
 					dm.activateThread(Thread.currentThread());
 					try {
 						closure.executeCallable();
 					} catch (LoopManipulationException ex) {
 						ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.CreateUncatchableException("Unexpected loop manipulation"
-								+ " operation was triggered inside the closure.", t), environment);
+								+ " operation was triggered inside the closure.", t), env);
 					} catch (ConfigRuntimeException ex) {
-						ConfigRuntimeException.HandleUncaughtException(ex, environment);
+						ConfigRuntimeException.HandleUncaughtException(ex, env);
 					} catch (CancelCommandException ex) {
 						if(ex.getMessage() != null) {
-							new Echoes.console().exec(t, environment, new CString(ex.getMessage(), t), CBoolean.FALSE);
+							new Echoes.console().exec(t, env, null, new CString(ex.getMessage(), t), CBoolean.FALSE);
 						}
 					} finally {
 						dm.deactivateThread(Thread.currentThread());
@@ -177,7 +178,7 @@ public class Threading {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return new CString(Thread.currentThread().getName(), t);
 		}
 
@@ -231,17 +232,17 @@ public class Threading {
 		}
 
 		@Override
-		public Mixed exec(final Target t, final Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			final CClosure closure = ArgumentValidation.getObject(args[0], t, CClosure.class);
 			StaticLayer.GetConvertor().runOnMainThreadLater(
-					environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), new Runnable() {
+					env.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), new Runnable() {
 
 				@Override
 				public void run() {
 					try {
 						closure.executeCallable();
 					} catch (ConfigRuntimeException e) {
-						ConfigRuntimeException.HandleUncaughtException(e, environment);
+						ConfigRuntimeException.HandleUncaughtException(e, env);
 					} catch (ProgramFlowManipulationException e) {
 						// Ignored
 					}
@@ -295,7 +296,7 @@ public class Threading {
 		}
 
 		@Override
-		public Mixed exec(final Target t, final Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			final CClosure closure = ArgumentValidation.getObject(args[0], t, CClosure.class);
 			Object ret;
 			try {
@@ -381,7 +382,7 @@ public class Threading {
 		}
 
 		@Override
-		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
 
 			// Get the sync object tree and the code to synchronize.
 			ParseTree syncObjectTree = nodes[0];
@@ -393,7 +394,7 @@ public class Threading {
 				throw new CRENullPointerException("Synchronization object may not be null in " + getName() + "().", t);
 			}
 			Object syncObject;
-			if(cSyncObject.isInstanceOf(CArray.TYPE)) {
+			if(cSyncObject.isInstanceOf(CArray.TYPE, null, env)) {
 				syncObject = cSyncObject;
 			} else {
 				syncObject = cSyncObject.val();
@@ -447,7 +448,7 @@ public class Threading {
 		}
 
 		@Override
-		public Mixed exec(final Target t, final Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return CVoid.VOID;
 		}
 
@@ -559,7 +560,7 @@ public class Threading {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String threadId = args[0].val();
 			Thread th;
 			synchronized(THREAD_ID_MAP) {
@@ -570,7 +571,7 @@ public class Threading {
 			}
 			int wait = 0;
 			if(args.length > 1) {
-				wait = ArgumentValidation.getInt32(args[1], t);
+				wait = ArgumentValidation.getInt32(args[1], t, env);
 			}
 			try {
 				th.join(wait);
@@ -624,7 +625,7 @@ public class Threading {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String threadId = args[0].val();
 			Thread th;
 			synchronized(THREAD_ID_MAP) {
@@ -677,7 +678,7 @@ public class Threading {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			Thread th;
 			if(args.length == 1) {
 				String threadId = args[0].val();
@@ -737,7 +738,7 @@ public class Threading {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(args.length == 1) {
 				String threadId = args[0].val();
 				Thread th;
@@ -796,7 +797,7 @@ public class Threading {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return CBoolean.get(Thread.interrupted());
 		}
 

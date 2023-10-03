@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import java.net.URL;
 
@@ -33,11 +34,14 @@ public abstract class LateBindingKeyword implements KeywordDocumentation {
 		BOTH;
 	}
 
-	public abstract ParseTree processLeftAssociative(Target t, FileOptions fileOptions, ParseTree leftHandNode) throws ConfigCompileException;
+	public abstract ParseTree processLeftAssociative(Environment env, Target t, FileOptions fileOptions,
+			ParseTree leftHandNode) throws ConfigCompileException;
 
-	public abstract ParseTree processRightAssociative(Target t, FileOptions fileOptions, ParseTree rightHandNode) throws ConfigCompileException;
+	public abstract ParseTree processRightAssociative(Environment env, Target t, FileOptions fileOptions,
+			ParseTree rightHandNode) throws ConfigCompileException;
 
-	public abstract ParseTree processBothAssociative(Target t, FileOptions fileOptions, ParseTree leftHandNode, ParseTree rightHandNode) throws ConfigCompileException;
+	public abstract ParseTree processBothAssociative(Environment env, Target t, FileOptions fileOptions,
+			ParseTree leftHandNode, ParseTree rightHandNode) throws ConfigCompileException;
 
 	public abstract Associativity getAssociativity();
 

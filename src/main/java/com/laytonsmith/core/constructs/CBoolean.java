@@ -1,8 +1,11 @@
 package com.laytonsmith.core.constructs;
 
+import com.laytonsmith.PureUtilities.Common.Annotations.AggressiveDeprecation;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.objects.ObjectModifier;
 import java.util.EnumSet;
 import java.util.Set;
@@ -89,8 +92,14 @@ public final class CBoolean extends CPrimitive implements Cloneable {
 		return val;
 	}
 
-	@Override
+	@Deprecated
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	public boolean getBooleanValue(Target t) {
+		return val;
+	}
+
+	@Override
+	public boolean getBooleanValue(Environment env, Target t) {
 		return val;
 	}
 
@@ -144,6 +153,11 @@ public final class CBoolean extends CPrimitive implements Cloneable {
 	@Override
 	public CBoolean duplicate() {
 		return new CBoolean(val, getTarget());
+	}
+
+	@Override
+	public GenericParameters getGenericParameters() {
+		return null;
 	}
 
 }

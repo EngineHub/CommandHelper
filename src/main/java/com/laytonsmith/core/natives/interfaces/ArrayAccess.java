@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import java.util.Set;
 
@@ -14,54 +15,58 @@ import java.util.Set;
 public interface ArrayAccess extends Booleanish {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get(ArrayAccess.class);
+	public static final CClassType TYPE = CClassType.ARRAY_ACCESS_TYPE;
 
 	/**
-	 * Return the mixed at this location. This should throw an exception if the index does not exist. This method will
+	 * Return the mixed at this location.This should throw an exception if the index does not exist. This method will
 	 * not be called if {@link #isAssociative()} returns false.
 	 *
 	 * @param index
 	 * @param t
+	 * @param env
 	 * @return
 	 */
-	public Mixed get(String index, Target t) throws ConfigRuntimeException;
+	public Mixed get(String index, Target t, Environment env) throws ConfigRuntimeException;
 
 	/**
-	 * Returns the mixed at this location. This should throw an exception if the index does not exist. This method will
+	 * Returns the mixed at this location.This should throw an exception if the index does not exist. This method will
 	 * not be called if {@link #isAssociative()} returns true.
 	 *
 	 * @param index
 	 * @param t
+	 * @param env
 	 * @return
 	 * @throws ConfigRuntimeException
 	 */
-	public Mixed get(int index, Target t) throws ConfigRuntimeException;
+	public Mixed get(int index, Target t, Environment env) throws ConfigRuntimeException;
 
 	/**
-	 * Returns the mixed at this location. This should throw an exception if the index does not exist. This method may
-	 * be called whether or not it isAssociative returns true.
+	 * Returns the mixed at this location.This should throw an exception if the index does not exist. This method may be
+	 * called whether or not it isAssociative returns true.
 	 *
 	 * @param index
 	 * @param t
+	 * @param env
 	 * @return
 	 * @throws ConfigRuntimeException
 	 */
-	public Mixed get(Mixed index, Target t) throws ConfigRuntimeException;
+	public Mixed get(Mixed index, Target t, Environment env) throws ConfigRuntimeException;
 
 	/**
-	 * If {@link #isAssociative()} returns true, this should return a set of all keys. If {@link #isAssociative()}
+	 * If {@link #isAssociative()} returns true, this should return a set of all keys.If {@link #isAssociative()}
 	 * returns false, this method will not be called.
 	 *
+	 * @param env
 	 * @return
 	 */
-	public Set<Mixed> keySet();
+	public Set<Mixed> keySet(Environment env);
 
 	/**
 	 * Unlike {@link #canBeAssociative()}, this is a runtime flag. If the underlying object is associative (that is, it
 	 * is an unordered, non numeric key set), this should return true. If this is true, then
-	 * {@link #get(java.lang.String, com.laytonsmith.core.constructs.Target)} will not be called, and
-	 * {@link #get(int, com.laytonsmith.core.constructs.Target)} will be called instead. If this is false, the opposite
-	 * will occur.
+	 * {@link #get(java.lang.String, com.laytonsmith.core.constructs.Target, Environment)} will not be called, and
+	 * {@link #get(int, com.laytonsmith.core.constructs.Target, Environment)} will be called instead. If this is false,
+	 * the opposite will occur.
 	 *
 	 * @return
 	 */
@@ -77,15 +82,15 @@ public interface ArrayAccess extends Booleanish {
 	public boolean canBeAssociative();
 
 	/**
-	 * Returns a slice at the specified location. Should throw an exception if an element in the range doesn't exist.
+	 * Returns a slice at the specified location.Should throw an exception if an element in the range doesn't exist.
 	 *
 	 * @param begin
 	 * @param end
 	 * @param t
+	 * @param env
 	 * @return
 	 */
-	public Mixed slice(int begin, int end, Target t);
-
+	public Mixed slice(int begin, int end, Target t, Environment env);
 
 	@Override
 	public String docs();

@@ -1,25 +1,31 @@
 package com.laytonsmith.core.natives.interfaces;
 
-import com.laytonsmith.core.objects.ObjectType;
-import com.laytonsmith.core.objects.ObjectModifier;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.SimpleVersion;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.MDynamicEnum;
 import com.laytonsmith.annotations.MEnum;
 import com.laytonsmith.annotations.typeof;
-import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.FullyQualifiedClassName;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.constructs.CClassType;
-import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.InstanceofUtil;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.ConcreteGenericParameter;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CRE.CREIndexOverflowException;
 import com.laytonsmith.core.exceptions.CRE.CREUnsupportedOperationException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.objects.AccessModifier;
+import com.laytonsmith.core.objects.ObjectModifier;
+import com.laytonsmith.core.objects.ObjectType;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -34,27 +40,30 @@ import java.util.stream.Collectors;
  * real enum, or dynamically generated based on user code. Enums marked with {@link MEnum} or {@link MDynamicEnum} are
  * automatically added to the ecosystem, however.
  */
+// The fully qualified name of this class cannot be changed without breaking startup.
+// The good news is that it will be a very obvious breakage, but a difficult bug to track down.
 @typeof("ms.lang.enum")
 public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.interfaces.Iterable {
 
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get(MEnumType.class);
+	public static final CClassType TYPE = CClassType.MENUM_TYPE;
 
 	/**
 	 * Generates a new MEnumType subclass.
 	 * @param fqcn The fully qualified class name. Generally, this should be gathered from the typeof of the MEnum, if
 	 * applicable, but if this is an external enum, or dynamically generated, this may come from other sources.
 	 * @param enumClass The underlying java enum class
+	 * @param env The environment. Optional for native MethodScript types.
 	 * @param docs This may be null if the enum implements {@code public static String enumDocs()}, otherwise this
 	 * should be the docs for the enum class as a whole.
 	 * @param since This may be null if the enum implements {@code public static Version enumSince()}, otherwise this
 	 * should be the since tag for the enum class as a whole.
 	 * @return A subclass of MEnumType. This does not register it in the ecosystem.
 	 */
-	public static MEnumType FromEnum(FullyQualifiedClassName fqcn, final Class<Enum<?>> enumClass,
+	public static MEnumType FromEnum(FullyQualifiedClassName fqcn, final Class<Enum<?>> enumClass, Environment env,
 			String docs, Version since) {
-		return FromPartialEnum(fqcn, enumClass, enumClass.getEnumConstants(), docs, since);
+		return FromPartialEnum(fqcn, enumClass, env, enumClass.getEnumConstants(), docs, since);
 	}
 
 	/**
@@ -62,6 +71,7 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 	 * @param fqcn The fully qualified class name. Generally, this should be gathered from the typeof of the MEnum, if
 	 * applicable, but if this is an external enum, or dynamically generated, this may come from other sources.
 	 * @param enumClass The underlying java enum class
+	 * @param env The environment. Optional for native MethodScript types.
 	 * @param values The list of enum constants. This does not have to be the full list of Enum values in the type, or
 	 * indeed, even the enum values from the enumClass. It does have to be an Enum type, however, as we need a
 	 * customizable type for documentation purposes.
@@ -71,9 +81,13 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 	 * should be the since tag for the enum class as a whole.
 	 * @return A subclass of MEnumType. This does not register it in the ecosystem.
 	 */
-	public static MEnumType FromPartialEnum(FullyQualifiedClassName fqcn, final Class<?> enumClass,
+	public static MEnumType FromPartialEnum(FullyQualifiedClassName fqcn, final Class<?> enumClass, Environment env,
 			Enum<?>[] values, String docs, Version since) {
 		final Enum<?>[] constants = values;
+//		if(fqcn.getNativeClass() == null) {
+//			Objects.requireNonNull(env);
+//		}
+//		final CClassType typeof = CClassType.get(fqcn, env);
 		return new MEnumType() {
 			@Override
 			public String docs() {
@@ -138,22 +152,14 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 			}
 
 			@Override
-			public boolean isInstanceOf(CClassType type) {
-				return Mixed.TYPE.equals(type) || MEnumType.TYPE.equals(type) || this.typeof().equals(type);
+			public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env) {
+				return InstanceofUtil.isInstanceof(this, LeftHandSideType.fromCClassType(
+						new ConcreteGenericParameter(type, lhsGenericParameters, Target.UNKNOWN, env), Target.UNKNOWN, env), env);
 			}
 
 			@Override
-			public boolean isInstanceOf(Class<? extends Mixed> type) {
-				return type.isAssignableFrom(this.getClass());
-			}
-
-			@Override
-			public CClassType typeof() {
-				try {
-					return CClassType.get(fqcn);
-				} catch (ClassNotFoundException ex) {
-					throw new Error(ex);
-				}
+			public CClassType typeof(Environment env) {
+				return CClassType.get(fqcn, env);
 			}
 
 			@Override
@@ -163,7 +169,7 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 
 			@Override
 			public List<MEnumTypeValue> getValues() {
-				return new AbstractList<MEnumTypeValue>() {
+				return new AbstractList<>() {
 					@Override
 					public MEnumTypeValue get(int index) {
 						final Enum<?> v = constants[index];
@@ -247,27 +253,25 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 							}
 
 							@Override
-							public CClassType typeof() {
-								try {
-									return CClassType.get(fqcn);
-								} catch (ClassNotFoundException ex) {
-									throw new Error(ex);
-								}
+							public CClassType typeof(Environment env) {
+								return CClassType.get(fqcn, env);
 							}
 
 							@Override
-							public boolean isInstanceOf(CClassType type) {
-								return Construct.isInstanceof(this, type);
-							}
-
-							@Override
-							public boolean isInstanceOf(Class<? extends Mixed> type) {
-								return Construct.isInstanceof(this, type);
+							public GenericParameters getGenericParameters() {
+								return null;
 							}
 
 							@Override
 							public CClassType getContainingClass() {
 								return null;
+							}
+
+							@Override
+							public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env) {
+								return InstanceofUtil.isInstanceof(this, LeftHandSideType
+										.fromCClassType(new ConcreteGenericParameter(
+												type, lhsGenericParameters, Target.UNKNOWN, env), Target.UNKNOWN, env), env);
 							}
 
 							@Override
@@ -328,8 +332,13 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 			}
 
 			@Override
-			public boolean getBooleanValue(Target t) {
+			public boolean getBooleanValue(Environment env, Target t) {
 				return true;
+			}
+
+			@Override
+			public GenericParameters getGenericParameters() {
+				return null;
 			}
 
 		};
@@ -340,6 +349,26 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 		protected List<MEnumTypeValue> getValues() {
 			throw new UnsupportedOperationException("The root MEnumType is a meta object, and cannot be used normally."
 					+ " There are no values in the class.");
+		}
+
+		@Override
+		public String docs() {
+			return super.docs(); //To change body of generated methods, choose Tools | Templates.
+		}
+
+		@Override
+		public CClassType[] getInterfaces() {
+			return super.getInterfaces(); //To change body of generated methods, choose Tools | Templates.
+		}
+
+		@Override
+		public Version since() {
+			return super.since(); //To change body of generated methods, choose Tools | Templates.
+		}
+
+		@Override
+		public CClassType[] getSuperclasses() {
+			return super.getSuperclasses(); //To change body of generated methods, choose Tools | Templates.
 		}
 
 	};
@@ -429,18 +458,19 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 	}
 
 	@Override
-	public boolean isInstanceOf(CClassType type) {
-		return TYPE.equals(type);
+	public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env) {
+		return InstanceofUtil.isInstanceof(this, LeftHandSideType.fromCClassType(
+				new ConcreteGenericParameter(type, lhsGenericParameters, Target.UNKNOWN, env), Target.UNKNOWN, env), env);
 	}
 
 	@Override
-	public boolean isInstanceOf(Class<? extends Mixed> type) {
-		throw new UnsupportedOperationException("Not supported yet.");
-	}
-
-	@Override
-	public CClassType typeof() {
+	public CClassType typeof(Environment env) {
 		return TYPE;
+	}
+
+	@Override
+	public GenericParameters getGenericParameters() {
+		return null;
 	}
 
 	@Override
@@ -473,17 +503,17 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 		return values;
 	}
 	@Override
-	public Mixed get(String index, Target t) throws ConfigRuntimeException {
+	public Mixed get(String index, Target t, Environment env) throws ConfigRuntimeException {
 		for(MEnumTypeValue v : values()) {
 			if(v.name().equals(index)) {
 				return v;
 			}
 		}
-		throw new CREIllegalArgumentException(index + " cannot be found in " + typeof(), t);
+		throw new CREIllegalArgumentException(index + " cannot be found in " + typeof(env), t);
 	}
 
 	@Override
-	public Mixed get(int index, Target t) throws ConfigRuntimeException {
+	public Mixed get(int index, Target t, Environment env) throws ConfigRuntimeException {
 		if(index >= values().size()) {
 			throw new CREIndexOverflowException("The index " + index + " is out of bounds", t);
 		}
@@ -491,17 +521,17 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 	}
 
 	@Override
-	public Mixed get(Mixed index, Target t) throws ConfigRuntimeException {
-		return get(index.val(), t);
+	public Mixed get(Mixed index, Target t, Environment env) throws ConfigRuntimeException {
+		return get(index.val(), t, env);
 	}
 
 	@Override
-	public Set<Mixed> keySet() {
+	public Set<Mixed> keySet(Environment env) {
 		return values().stream().collect(Collectors.toSet());
 	}
 
 	@Override
-	public long size() {
+	public long size(Environment env) {
 		return values().size();
 	}
 
@@ -516,7 +546,7 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 	}
 
 	@Override
-	public Mixed slice(int begin, int end, Target t) {
+	public Mixed slice(int begin, int end, Target t, Environment env) {
 		throw new CREUnsupportedOperationException("Cannot slice an enum", t);
 	}
 
@@ -527,7 +557,7 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 	protected abstract List<MEnumTypeValue> getValues();
 
 	@Override
-	public boolean getBooleanValue(Target t) {
+	public boolean getBooleanValue(Environment env, Target t) {
 		return true;
 	}
 

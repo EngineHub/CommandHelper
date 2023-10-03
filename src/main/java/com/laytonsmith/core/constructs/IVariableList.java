@@ -6,6 +6,8 @@ import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 
 import java.util.ArrayList;
@@ -82,7 +84,11 @@ public class IVariableList {
 	public IVariable get(String name, Target t, boolean bypassAssignedCheck, Environment env) {
 		IVariable v = varList.get(name);
 		if(v == null) {
-			v = new IVariable(Auto.TYPE, name, CNull.UNDEFINED, t);
+			try {
+				v = new IVariable(Auto.TYPE, name, CNull.UNDEFINED, t);
+			} catch (ConfigCompileException cce) {
+				throw new CREFormatException(cce.getMessage(), t);
+			}
 			this.set(v);
 		}
 

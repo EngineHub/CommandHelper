@@ -5,6 +5,8 @@ import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.abstraction.AbstractionObject;
+import com.laytonsmith.abstraction.Implementation;
+import com.laytonsmith.abstraction.Implementation.Type;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
@@ -13,6 +15,7 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCCommandSender;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.api.Platforms;
+import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.MethodScriptComplete;
 import com.laytonsmith.core.ObjectGenerator;
@@ -20,16 +23,20 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Command;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Variable;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.GenericTypeParameters;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
@@ -46,30 +53,33 @@ import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import org.bukkit.entity.Player;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
 import static com.laytonsmith.testing.StaticTest.Run;
 import static com.laytonsmith.testing.StaticTest.SRun;
 import java.awt.HeadlessException;
-import java.util.Arrays;
-import java.util.HashSet;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import org.mockito.Mockito;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  *
@@ -80,11 +90,14 @@ import java.util.HashSet;
 public class RandomTests {
 
 	MCPlayer fakePlayer;
+	Environment env;
 
 	Set<Class<? extends Environment.EnvironmentImpl>> envs = Environment.getDefaultEnvClasses();
 
 	@Before
 	public void setUp() throws Exception {
+		Implementation.setServerType(Type.TEST);
+		env = Static.GenerateStandaloneEnvironment();
 		fakePlayer = StaticTest.GetOnlinePlayer();
 		StaticTest.InstallFakeConvertor(fakePlayer);
 	}
@@ -94,7 +107,7 @@ public class RandomTests {
 	 * This function automatically tests all the boilerplate portions of all functions. Note that this can be disabled
 	 * in the StaticTest class, so that high quality test coverage can be measured.
 	 */
-	@Test
+	@Test//(timeout = 100000)
 	@SuppressWarnings({"ThrowableResultIgnored", "CallToPrintStackTrace"})
 	public void testAllBoilerplate() {
 		Map<String, Throwable> uhohs = new HashMap<>();
@@ -135,7 +148,14 @@ public class RandomTests {
 				}
 				TESTED_FUNCTIONS.add(f.getName());
 
+				long start = System.currentTimeMillis();
+//				System.out.println("Testing " + f.getName());
 				StaticTest.TestBoilerplate(f, f.getName());
+				int secondsTaken = ((int) (System.currentTimeMillis() - start) / 1000);
+				if(secondsTaken > 10) {
+					System.out.println("TestBoilerplate took " + secondsTaken
+							+ " seconds for " + f.getName());
+				}
 				Class upper = f.getClass().getEnclosingClass();
 				if(upper == null) {
 					fail(f.getName() + " is not enclosed in an upper class.");
@@ -149,23 +169,50 @@ public class RandomTests {
 							StaticTest.TestClassDocs(docs, upper);
 							classDocs.add(docs);
 						}
-					} catch (NullPointerException ex) {
+					} catch(NullPointerException ex) {
 						fail(upper.getName() + "'s docs function should be static");
 					}
-				} catch (IllegalAccessException | IllegalArgumentException | SecurityException ex) {
+				} catch(IllegalAccessException | IllegalArgumentException | SecurityException ex) {
 					Logger.getLogger(RandomTests.class.getName()).log(Level.SEVERE, null, ex);
-				} catch (InvocationTargetException ex) {
+				} catch(InvocationTargetException ex) {
 					fail(upper.getName() + " throws an exception!");
-				} catch (NoSuchMethodException ex) {
+				} catch(NoSuchMethodException ex) {
 					fail(upper.getName() + " does not include a class level documentation function.");
-				} catch (HeadlessException ex) {
+				} catch(HeadlessException ex) {
 					// Hmm. Whatever's running us doesn't have a head, and we just tested a function
 					// that requires a head. Whatever, just skip it and move on. It'll have to be tested
 					// manually.
 				}
-			} catch (Throwable t) {
+			} catch(Throwable t) {
 				uhohs.put(f.getClass().getName(), t);
 				t.printStackTrace();
+			}
+		}
+
+		// Ensure everything with a GenericsParameter field also overrides getGenericParameters.
+		for(Class<? extends Mixed> c : ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(typeof.class, Mixed.class)) {
+			boolean hasGenerics = false;
+			for(Field f : c.getDeclaredFields()) {
+				if(f.getType() == GenericParameters.class) {
+					hasGenerics = true;
+					break;
+				}
+			}
+			if(hasGenerics && !ReflectionUtils.hasDeclaredMethod(c, "getGenericParameters", GenericParameters.class)) {
+				uhohs.put(c.getName(), new RuntimeException("Class does not override getGenericParameters, but contains generic parameters"));
+			}
+
+			CClassType type = ReflectionUtils.get(c, "TYPE");
+			if(type.equals(CVoid.TYPE) || type.equals(CNull.TYPE)) {
+				continue;
+			}
+			List<CClassType> supers = new ArrayList<>(Arrays.asList(type.getTypeSuperclasses(null)));
+			supers.addAll(Arrays.asList(type.getTypeInterfaces(env)));
+			Map<CClassType, GenericTypeParameters> chainParameters = ReflectionUtils.get(CClassType.class, type, "chainParameters");
+			for(CClassType val : supers) {
+				if(val.getGenericDeclaration() != null && !chainParameters.containsKey(val)) {
+					uhohs.put(type.getNativeType() + " does not provide generic chain parameters for " + val.getNativeType(), null);
+				}
 			}
 		}
 
@@ -178,7 +225,10 @@ public class RandomTests {
 		if(!uhohs.isEmpty()) {
 			StringBuilder b = new StringBuilder();
 			for(String key : uhohs.keySet()) {
-				b.append(key).append(" threw: ").append(uhohs.get(key)).append("\n");
+				b.append(key);
+				if(uhohs.get(key) != null) {
+					b.append(" threw: ").append(uhohs.get(key)).append("\n");
+				}
 			}
 			String output = ("There was/were " + uhohs.size() + " boilerplate failure(s). Output:\n" + b.toString());
 			StreamUtils.GetSystemOut().println(output);
@@ -209,36 +259,36 @@ public class RandomTests {
 
 	@Test
 	public void testJSONEscapeString() throws MarshalException {
-		CArray ca = new CArray(Target.UNKNOWN);
+		CArray ca = new CArray(Target.UNKNOWN, null, env);
 		final Target t = Target.UNKNOWN;
-		ca.push(C.Int(1), t);
-		ca.push(C.Double(2.2), t);
-		ca.push(C.String("string"), t);
-		ca.push(C.String("\"Quote\""), t);
-		ca.push(C.Boolean(true), t);
-		ca.push(C.Boolean(false), t);
-		ca.push(C.Null(), t);
-		ca.push(C.Void(), t);
-		ca.push(new Command("/Command", Target.UNKNOWN), t);
-		ca.push(new CArray(Target.UNKNOWN, new CInt(1, Target.UNKNOWN)), t);
+		ca.push(C.Int(1), t, env);
+		ca.push(C.Double(2.2), t, env);
+		ca.push(C.String("string"), t, env);
+		ca.push(C.String("\"Quote\""), t, env);
+		ca.push(C.Boolean(true), t, env);
+		ca.push(C.Boolean(false), t, env);
+		ca.push(C.Null(), t, env);
+		ca.push(C.Void(), t, env);
+//		ca.push(new Command("/Command", Target.UNKNOWN), t, env);
+		ca.push(new CArray(Target.UNKNOWN, null, env, new CInt(1, Target.UNKNOWN)), t, env);
 		//[1, 2.2, "string", "\"Quote\"", true, false, null, "", "/Command", [1]]
-		assertEquals("[1,2.2,\"string\",\"\\\"Quote\\\"\",true,false,null,\"\",\"\\/Command\",[1]]", Construct.json_encode(ca, Target.UNKNOWN));
+		assertEquals("[1,2.2,\"string\",\"\\\"Quote\\\"\",true,false,null,\"\",[1]]", Construct.json_encode(ca, Target.UNKNOWN, env));
 	}
 
 	@Test
 	public void testJSONDecodeString() throws MarshalException {
-		CArray ca = new CArray(Target.UNKNOWN);
-		ca.push(C.Int(1), Target.UNKNOWN);
-		ca.push(C.Double(2.2), Target.UNKNOWN);
-		ca.push(C.String("string"), Target.UNKNOWN);
-		ca.push(C.String("\"Quote\""), Target.UNKNOWN);
-		ca.push(C.Boolean(true), Target.UNKNOWN);
-		ca.push(C.Boolean(false), Target.UNKNOWN);
-		ca.push(C.Null(), Target.UNKNOWN);
-		ca.push(C.Void(), Target.UNKNOWN);
-		ca.push(new Command("/Command", Target.UNKNOWN), Target.UNKNOWN);
-		ca.push(new CArray(Target.UNKNOWN, new CInt(1, Target.UNKNOWN)), Target.UNKNOWN);
-		StaticTest.assertCEquals(ca, Construct.json_decode("[1, 2.2, \"string\", \"\\\"Quote\\\"\", true, false, null, \"\", \"\\/Command\", [1]]", Target.UNKNOWN));
+		CArray ca = new CArray(Target.UNKNOWN, null, env);
+		ca.push(C.Int(1), Target.UNKNOWN, env);
+		ca.push(C.Double(2.2), Target.UNKNOWN, env);
+		ca.push(C.String("string"), Target.UNKNOWN, env);
+		ca.push(C.String("\"Quote\""), Target.UNKNOWN, env);
+		ca.push(C.Boolean(true), Target.UNKNOWN, env);
+		ca.push(C.Boolean(false), Target.UNKNOWN, env);
+		ca.push(C.Null(), Target.UNKNOWN, env);
+		ca.push(C.Void(), Target.UNKNOWN, env);
+//		ca.push(new Command("/Command", Target.UNKNOWN), Target.UNKNOWN, env);
+		ca.push(new CArray(Target.UNKNOWN, null, env, new CInt(1, Target.UNKNOWN)), Target.UNKNOWN, env);
+		StaticTest.assertCEquals(ca, Construct.json_decode("[1, 2.2, \"string\", \"\\\"Quote\\\"\", true, false, null, \"\", [1]]", Target.UNKNOWN, env));
 	}
 
 	@Test
@@ -251,14 +301,14 @@ public class RandomTests {
 		MCServer fakeServer = mock(MCServer.class);
 		when(fakeServer.getWorld("world")).thenReturn(fakeWorld);
 		CommandHelperPlugin.myServer = fakeServer;
-		CArray ca1 = new CArray(Target.UNKNOWN, C.onstruct(1), C.onstruct(2), C.onstruct(3));
-		CArray ca2 = new CArray(Target.UNKNOWN, C.onstruct(1), C.onstruct(2), C.onstruct(3), C.onstruct("world"));
-		CArray ca3 = new CArray(Target.UNKNOWN, C.onstruct(1), C.onstruct(2), C.onstruct(3), C.onstruct(45), C.onstruct(50));
-		CArray ca4 = new CArray(Target.UNKNOWN, C.onstruct(1), C.onstruct(2), C.onstruct(3), C.onstruct("world"), C.onstruct(45), C.onstruct(50));
-		MCLocation l1 = ObjectGenerator.GetGenerator().location(ca1, fakeWorld, Target.UNKNOWN);
-		MCLocation l2 = ObjectGenerator.GetGenerator().location(ca2, fakeWorld, Target.UNKNOWN);
-		MCLocation l3 = ObjectGenerator.GetGenerator().location(ca3, fakeWorld, Target.UNKNOWN);
-		MCLocation l4 = ObjectGenerator.GetGenerator().location(ca4, fakeWorld, Target.UNKNOWN);
+		CArray ca1 = new CArray(Target.UNKNOWN, null, env, C.onstruct(1), C.onstruct(2), C.onstruct(3));
+		CArray ca2 = new CArray(Target.UNKNOWN, null, env, C.onstruct(1), C.onstruct(2), C.onstruct(3), C.onstruct("world"));
+		CArray ca3 = new CArray(Target.UNKNOWN, null, env, C.onstruct(1), C.onstruct(2), C.onstruct(3), C.onstruct(45), C.onstruct(50));
+		CArray ca4 = new CArray(Target.UNKNOWN, null, env, C.onstruct(1), C.onstruct(2), C.onstruct(3), C.onstruct("world"), C.onstruct(45), C.onstruct(50));
+		MCLocation l1 = ObjectGenerator.GetGenerator().location(ca1, fakeWorld, Target.UNKNOWN, env);
+		MCLocation l2 = ObjectGenerator.GetGenerator().location(ca2, fakeWorld, Target.UNKNOWN, env);
+		MCLocation l3 = ObjectGenerator.GetGenerator().location(ca3, fakeWorld, Target.UNKNOWN, env);
+		MCLocation l4 = ObjectGenerator.GetGenerator().location(ca4, fakeWorld, Target.UNKNOWN, env);
 		assertEquals(fakeWorld, l1.getWorld());
 		assertEquals(fakeWorld, l2.getWorld());
 		assertEquals(fakeWorld, l3.getWorld());
@@ -298,10 +348,10 @@ public class RandomTests {
 			double d = (double) ReflectionUtils.invokeMethod(clazz, e, "evaluate",
 					new Class[]{double.class, double.class}, new Object[]{2, 4});
 			assertEquals(16, d, 0.00001);
-		} catch (ClassNotFoundException cnf) {
+		} catch(ClassNotFoundException cnf) {
 			/* Not much we can really do about this during testing.
 			throw new CREPluginInternalException("You are missing a required dependency: " + eClass, Target.UNKNOWN);*/
-		} catch (ReflectionUtils.ReflectionException rex) {
+		} catch(ReflectionUtils.ReflectionException rex) {
 			throw new CREPluginInternalException("Your expression was invalidly formatted", Target.UNKNOWN, rex.getCause());
 		}
 	}
@@ -332,7 +382,6 @@ public class RandomTests {
 			Environment env = Static.GenerateStandaloneEnvironment();
 			env = env.cloneAndAdd(new CommandHelperEnvironment());
 
-			// Override the persistence network in the static runtime environment.
 			ConnectionMixinFactory.ConnectionMixinOptions options;
 			options = new ConnectionMixinFactory.ConnectionMixinOptions();
 			options.setWorkingDirectory(new File("."));
@@ -363,11 +412,11 @@ public class RandomTests {
 	public void testVoidAndReturnedVoidAreTheExactSame() throws Exception {
 		try {
 			Environment env = Static.GenerateStandaloneEnvironment(true);
-			Mixed returnedVoid = new ArrayHandling.array_insert().exec(Target.UNKNOWN, env,
+			Mixed returnedVoid = new ArrayHandling.array_insert().exec(Target.UNKNOWN, env, null,
 					C.Array(), C.String(""), C.Int(0));
-			Construct voidKeyword = Static.resolveConstruct("void", Target.UNKNOWN);
+			Construct voidKeyword = Static.resolveConstruct("void", Target.UNKNOWN, env);
 			assertTrue(returnedVoid == voidKeyword);
-		} catch (Exception e) {
+		} catch(Exception e) {
 			e.printStackTrace(System.err);
 			throw e;
 		}

@@ -1,6 +1,7 @@
 package com.laytonsmith.core.compiler.signature;
 
 import com.laytonsmith.core.constructs.CClassType;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 
 /**
  * Represents a parameter for a function, closure or procedure.
@@ -8,7 +9,7 @@ import com.laytonsmith.core.constructs.CClassType;
  */
 public class Param {
 
-	private final CClassType type;
+	private final LeftHandSideType type;
 	private final String name;
 	private final String desc;
 	private final boolean isVarParam;
@@ -25,7 +26,7 @@ public class Param {
 	 * Note that a varparam is only usable as type {@code array<type>}.
 	 * @param isOptional - {@code true} if the parameter is optional, {@code false} otherwise.
 	 */
-	public Param(CClassType type, String name, String desc, boolean isVarParam, boolean isOptional) {
+	public Param(LeftHandSideType type, String name, String desc, boolean isVarParam, boolean isOptional) {
 		assert !isVarParam || !isOptional : "A parameter cannot be variadic and optional at the same time.";
 		this.type = type;
 		this.name = name;
@@ -40,7 +41,7 @@ public class Param {
 	 * @param name - The name of the parameter.
 	 * @param desc - The description of the parameter.
 	 */
-	public Param(CClassType type, String name, String desc) {
+	public Param(LeftHandSideType type, String name, String desc) {
 		this(type, name, desc, false, false);
 	}
 
@@ -49,7 +50,7 @@ public class Param {
 	 * If this {@link Param} is a varparam, then the type in 'type name...' is returned (and not {@code array<type>}).
 	 * @return The type.
 	 */
-	public CClassType getType() {
+	public LeftHandSideType getType() {
 		return this.type;
 	}
 
@@ -84,5 +85,20 @@ public class Param {
 	 */
 	public boolean isOptional() {
 		return this.isOptional;
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder b = new StringBuilder();
+		if(isOptional) {
+			b.append("[");
+		}
+		b.append(getType() == null ? "any" : getType().val())
+				.append(isVarParam ? "..." : "")
+				.append(" @").append(getName());
+		if(isOptional) {
+			b.append("]");
+		}
+		return b.toString();
 	}
 }

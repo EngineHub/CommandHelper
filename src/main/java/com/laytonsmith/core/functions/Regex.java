@@ -16,6 +16,7 @@ import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
@@ -90,18 +91,18 @@ public class Regex {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			Pattern pattern = getPattern(args[0], t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			Pattern pattern = getPattern(args[0], t, env);
 			String subject = args[1].val();
-			CArray ret = CArray.GetAssociativeArray(t);
+			CArray ret = CArray.GetAssociativeArray(t, null, env);
 			Matcher m = pattern.matcher(subject);
 			if(m.find()) {
-				ret.set(0, new CString(m.group(0), t), t);
+				ret.set(0, new CString(m.group(0), t), t, env);
 				for(int i = 1; i <= m.groupCount(); i++) {
 					if(m.group(i) == null) {
-						ret.set(i, CNull.NULL, t);
+						ret.set(i, CNull.NULL, t, env);
 					} else {
-						ret.set(i, new CString(m.group(i), t), t);
+						ret.set(i, new CString(m.group(i), t), t, env);
 					}
 				}
 				//Named groups are only supported in Java 7, but we can
@@ -109,7 +110,7 @@ public class Regex {
 				Set<String> namedGroups = getNamedGroups(pattern.pattern());
 				try {
 					for(String key : namedGroups) {
-						ret.set(key, (String) ReflectionUtils.invokeMethod(Matcher.class, m, "group", new Class[]{String.class}, new Object[]{key}), t);
+						ret.set(key, (String) ReflectionUtils.invokeMethod(Matcher.class, m, "group", new Class[]{String.class}, new Object[]{key}), t, env);
 					}
 				} catch (ReflectionUtils.ReflectionException ex) {
 					throw new CREFormatException("Named captures are only supported with Java 7.", t);
@@ -124,7 +125,7 @@ public class Regex {
 				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(!Construct.IsDynamicHelper(children.get(0).getData())) {
-				getPattern(children.get(0).getData(), t);
+				getPattern(children.get(0).getData(), t, env);
 			}
 			return null;
 		}
@@ -193,29 +194,29 @@ public class Regex {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			Pattern pattern = getPattern(args[0], t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			Pattern pattern = getPattern(args[0], t, env);
 			String subject = args[1].val();
-			CArray fret = new CArray(t);
+			CArray fret = new CArray(t, null, env);
 			Matcher m = pattern.matcher(subject);
 			Set<String> namedGroups = getNamedGroups(pattern.pattern());
 			while(m.find()) {
-				CArray ret = CArray.GetAssociativeArray(t);
-				ret.set(0, new CString(m.group(0), t), t);
+				CArray ret = CArray.GetAssociativeArray(t, null, env);
+				ret.set(0, new CString(m.group(0), t), t, env);
 
 				for(int i = 1; i <= m.groupCount(); i++) {
-					ret.set(i, new CString(m.group(i), t), t);
+					ret.set(i, new CString(m.group(i), t), t, env);
 				}
 				//Named groups are only supported in Java 7, but we can
 				//dynamically enable this feature if they have it.
 				try {
 					for(String key : namedGroups) {
-						ret.set(key, (String) ReflectionUtils.invokeMethod(Matcher.class, m, "group", new Class[]{String.class}, new Object[]{key}), t);
+						ret.set(key, (String) ReflectionUtils.invokeMethod(Matcher.class, m, "group", new Class[]{String.class}, new Object[]{key}), t, env);
 					}
 				} catch (ReflectionUtils.ReflectionException e) {
 					throw new CREFormatException("Named captures are only supported with Java 7.", t);
 				}
-				fret.push(ret, t);
+				fret.push(ret, t, env);
 			}
 			return fret;
 		}
@@ -226,7 +227,7 @@ public class Regex {
 				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(!Construct.IsDynamicHelper(children.get(0).getData())) {
-				getPattern(children.get(0).getData(), t);
+				getPattern(children.get(0).getData(), t, env);
 			}
 			return null;
 		}
@@ -295,8 +296,8 @@ public class Regex {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			Pattern pattern = getPattern(args[0], t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			Pattern pattern = getPattern(args[0], t, env);
 			String replacement = args[1].val();
 			String subject = args[2].val();
 			String ret = "";
@@ -329,7 +330,7 @@ public class Regex {
 					replaceNode.addChildAt(2, children.get(1)); //replacement -> that
 					return replaceNode;
 				} else {
-					getPattern(data.getData(), t);
+					getPattern(data.getData(), t, env);
 				}
 			}
 			return null;
@@ -377,7 +378,7 @@ public class Regex {
 
 		@Override
 		public String docs() {
-			return "array {pattern, subject, [limit]} Splits a string on the given regex, and returns an array of the parts. If"
+			return "array<string> {pattern, subject, [limit]} Splits a string on the given regex, and returns an array of the parts. If"
 					+ " nothing matched, an array with one element, namely the original subject, is returned."
 					+ " Limit defaults to infinity, but if set, only"
 					+ " that number of splits will occur.";
@@ -404,8 +405,8 @@ public class Regex {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			Pattern pattern = getPattern(args[0], t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			Pattern pattern = getPattern(args[0], t, env);
 			String subject = args[1].val();
 			/**
 			 * We use a different indexing notation than Java's regex split. In the case of 0 for the limit, we will
@@ -416,12 +417,13 @@ public class Regex {
 			 */
 			int limit = Integer.MAX_VALUE - 1;
 			if(args.length >= 3) {
-				limit = ArgumentValidation.getInt32(args[2], t);
+				limit = ArgumentValidation.getInt32(args[2], t, env);
 			}
 			String[] rsplit = pattern.split(subject, limit + 1);
-			CArray ret = new CArray(t);
+			CArray ret = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			for(String split : rsplit) {
-				ret.push(new CString(split, t), t);
+				ret.push(new CString(split, t), t, env);
 			}
 			return ret;
 		}
@@ -441,7 +443,7 @@ public class Regex {
 					splitNode.addChildAt(1, children.get(1));
 					return splitNode;
 				} else {
-					getPattern(data.getData(), t);
+					getPattern(data.getData(), t, env);
 				}
 			}
 			return null;
@@ -504,8 +506,8 @@ public class Regex {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			Pattern pattern = getPattern(args[0], t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			Pattern pattern = getPattern(args[0], t, env);
 			String subject = args[1].val();
 			long ret = 0;
 			Matcher m = pattern.matcher(subject);
@@ -521,7 +523,7 @@ public class Regex {
 				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(!Construct.IsDynamicHelper(children.get(0).getData())) {
-				getPattern(children.get(0).getData(), t);
+				getPattern(children.get(0).getData(), t, env);
 			}
 			return null;
 		}
@@ -563,7 +565,7 @@ public class Regex {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return new CString(java.util.regex.Pattern.quote(args[0].val()), t);
 		}
 
@@ -607,14 +609,14 @@ public class Regex {
 
 	}
 
-	private static Pattern getPattern(Mixed c, Target t) throws ConfigRuntimeException {
+	private static Pattern getPattern(Mixed c, Target t, Environment env) throws ConfigRuntimeException {
 		String regex = "";
 		int flags = 0;
 		String sflags = "";
-		if(c.isInstanceOf(CArray.TYPE)) {
+		if(c.isInstanceOf(CArray.TYPE, null, env)) {
 			CArray ca = (CArray) c;
-			regex = ca.get(0, t).val();
-			sflags = ca.get(1, t).val();
+			regex = ca.get(0, t, env).val();
+			sflags = ca.get(1, t, env).val();
 			for(int i = 0; i < sflags.length(); i++) {
 				if(sflags.toLowerCase().charAt(i) == 'i') {
 					flags |= java.util.regex.Pattern.CASE_INSENSITIVE;

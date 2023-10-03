@@ -5,7 +5,7 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ParseTree;
-import com.laytonsmith.core.constructs.CClassType;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.BindableEvent;
@@ -54,13 +54,13 @@ public abstract class ExpressionPrefilterMatcher<T extends BindableEvent> extend
 	}
 
 	@Override
-	public void validate(ParseTree node, CClassType nodeType, Environment env)
+	public void validate(ParseTree node, LeftHandSideType nodeType, Environment env)
 			throws ConfigCompileException, ConfigCompileGroupException, ConfigRuntimeException {
 
 	}
 
 	@Override
-	public boolean matches(String key, Mixed value, T event, Target t) {
+	public boolean matches(String key, Mixed value, T event, Target t, Environment env) {
 		String expression = value.val();
 		double dvalue = getProperty(event);
 		String exp = expression.substring(1, expression.length() - 1);

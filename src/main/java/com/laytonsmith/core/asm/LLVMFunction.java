@@ -12,9 +12,12 @@ import com.laytonsmith.core.compiler.SelfStatement;
 import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.compiler.signature.FunctionSignatures;
+import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CFunction;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -106,7 +109,7 @@ public abstract class LLVMFunction implements FunctionBase, Function {
 	}
 
 	@Override
-	public final Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+	public final Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 		throw new UnsupportedOperationException("Not supported.");
 	}
 
@@ -115,14 +118,29 @@ public abstract class LLVMFunction implements FunctionBase, Function {
 		return null;
 	}
 
+	@Override
+	public List<LeftHandSideType> getResolvedParameterTypes(StaticAnalysis analysis,
+			Target t, Environment env, GenericParameters generics,
+			LeftHandSideType inferredReturnType, List<ParseTree> children) {
+		List<LeftHandSideType> ret = new ArrayList<>();
+		if(generics != null) {
+			// Explicit parameters were provided, just use those.
+			generics.getParameters();
+		}
+		for(ParseTree child : children) {
+			ret.add(child.getDeclaredType(analysis, env, Auto.LHSTYPE));
+		}
+		return ret;
+	}
+
 	/**
 	 * {@inheritDoc}
 	 * By default, null is returned.
 	 */
 	@Override
-	public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
-			Environment env, Set<ConfigCompileException> exceptions) {
-		return CClassType.AUTO; // No information is available about the return type.
+	public LeftHandSideType getReturnType(ParseTree node, Target t, List<LeftHandSideType> argTypes, List<Target> argTargets,
+			LeftHandSideType inferredType, Environment env, Set<ConfigCompileException> exceptions) {
+		return LeftHandSideType.fromNativeCClassType(CClassType.AUTO); // No information is available about the return type.
 	}
 
 	/**
@@ -131,20 +149,21 @@ public abstract class LLVMFunction implements FunctionBase, Function {
 	 * them to {@link #getReturnType(Target, List, List, Environment, Set)} (Target, List, List, Set)} to get this function's return type.
 	 */
 	@Override
-	public CClassType typecheck(StaticAnalysis analysis,
-			ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+	public LeftHandSideType typecheck(StaticAnalysis analysis,
+			ParseTree ast, LeftHandSideType inferredType, Environment env, Set<ConfigCompileException> exceptions) {
 
 		// Get and check the types of the function's arguments.
 		List<ParseTree> children = ast.getChildren();
-		List<CClassType> argTypes = new ArrayList<>(children.size());
+		List<LeftHandSideType> argTypes = new ArrayList<>(children.size());
 		List<Target> argTargets = new ArrayList<>(children.size());
 		for(ParseTree child : children) {
-			argTypes.add(analysis.typecheck(child, env, exceptions));
+			argTypes.add(analysis.typecheck(child, inferredType, env, exceptions));
 			argTargets.add(child.getTarget());
 		}
 
 		// Return the return type of this function.
-		return this.getReturnType(ast.getTarget(), argTypes, argTargets, env, exceptions);
+		return this.getReturnType(ast, ast.getTarget(),
+				argTypes, argTargets, inferredType, env, exceptions);
 	}
 
 	/**
@@ -193,7 +212,7 @@ public abstract class LLVMFunction implements FunctionBase, Function {
 	}
 
 	@Override
-	public String profileMessage(Mixed... args) {
+	public String profileMessage(Environment env, Mixed... args) {
 		throw new UnsupportedOperationException("Not supported.");
 	}
 
@@ -241,7 +260,7 @@ public abstract class LLVMFunction implements FunctionBase, Function {
 	}
 
 	@Override
-	public final Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+	public final Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
 		throw new UnsupportedOperationException("Not supported.");
 	}
 

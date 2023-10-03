@@ -43,6 +43,8 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.environments.Environment;
 import org.bukkit.block.Block;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
@@ -361,15 +363,6 @@ public class BukkitBlockEvents {
 			pie = e;
 		}
 
-		public static BukkitMCSignChangeEvent _instantiate(MCBlock sign, MCPlayer player, CArray signtext) {
-			String[] text = new String[4];
-			for(int i = 0; i < signtext.size(); i++) {
-				text[i] = signtext.get(i, Target.UNKNOWN).toString();
-			}
-			return new BukkitMCSignChangeEvent(new SignChangeEvent(((BukkitMCBlock) sign).__Block(), ((BukkitMCPlayer) player)._Player(),
-					text));
-		}
-
 		@Override
 		public MCPlayer getPlayer() {
 			return new BukkitMCPlayer(pie.getPlayer());
@@ -381,11 +374,12 @@ public class BukkitBlockEvents {
 		}
 
 		@Override
-		public CArray getLines() {
-			CArray retn = new CArray(Target.UNKNOWN);
+		public CArray getLines(Environment env) {
+			CArray retn = new CArray(Target.UNKNOWN, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 
 			for(int i = 0; i < 4; i++) {
-				retn.push(new CString(pie.getLine(i), Target.UNKNOWN), Target.UNKNOWN);
+				retn.push(new CString(pie.getLine(i), Target.UNKNOWN), Target.UNKNOWN, env);
 			}
 
 			return retn;

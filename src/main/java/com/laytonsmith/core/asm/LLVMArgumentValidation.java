@@ -5,12 +5,12 @@ import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.asm.IRType.Category;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
-import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.IVariable;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -90,7 +90,7 @@ public final class LLVMArgumentValidation {
 	public static IRData getInt64(IRBuilder builder, Environment env, ParseTree c, Target t) throws ConfigCompileException {
 		if(c.isConst()) {
 			Mixed data = c.getData();
-			long i = ArgumentValidation.getInt(data, t);
+			long i = ArgumentValidation.getInt(data, t, env);
 			return IRDataBuilder.asConstant(IRType.INTEGER64, Long.toString(i));
 		} else if(c.getData() instanceof CFunction) {
 			return handleFunction(t, IRType.INTEGER64, builder, env, c);
@@ -101,7 +101,7 @@ public final class LLVMArgumentValidation {
 	public static IRData getInt32(IRBuilder builder, Environment env, ParseTree c, Target t) throws ConfigCompileException {
 		if(c.isConst()) {
 			Mixed data = c.getData();
-			int i = ArgumentValidation.getInt32(data, t);
+			int i = ArgumentValidation.getInt32(data, t, env);
 			return IRDataBuilder.asConstant(IRType.INTEGER32, Integer.toString(i));
 		} else if(c.getData() instanceof CFunction) {
 			return handleFunction(t, IRType.INTEGER32, builder, env, c);
@@ -112,7 +112,7 @@ public final class LLVMArgumentValidation {
 	public static IRData getDouble(IRBuilder builder, Environment env, ParseTree c, Target t) throws ConfigCompileException {
 		if(c.isConst()) {
 			Mixed data = c.getData();
-			double i = ArgumentValidation.getDouble(data, t);
+			double i = ArgumentValidation.getDouble(data, t, env);
 			return IRDataBuilder.asConstant(IRType.DOUBLE, Double.toString(i));
 		} else if(c.getData() instanceof CFunction) {
 			return handleFunction(t, IRType.DOUBLE, builder, env, c);
@@ -143,7 +143,7 @@ public final class LLVMArgumentValidation {
 			return handleFunction(t, IRType.STRING, builder, env, c);
 		} else if(c.getData() instanceof IVariable ivar) {
 			String name = ivar.getVariableName();
-			IRType datatype = convertCClassTypeToIRType(e.getVariableType(name));
+			IRType datatype = convertCClassTypeToIRType(e.getVariableType(name), env);
 			int load = e.getVariableMapping(name);
 			IRData data = IRDataBuilder.setReturnVariable(load, datatype);
 			return convert(t, IRType.STRING, builder, env, data);
@@ -158,22 +158,20 @@ public final class LLVMArgumentValidation {
 	 * @return
 	 * @throws ClassNotFoundException
 	 */
-	public static IRType convertCClassTypeToIRType(CClassType type) {
-		try {
-			if(CInt.TYPE.isExtendedBy(type)) {
+	public static IRType convertCClassTypeToIRType(LeftHandSideType type, Environment env) {
+		if(!type.isTypeUnion()) {
+			if(type.doesExtend(CInt.TYPE, env)) {
 				return IRType.INTEGER64;
-			} else if(CDouble.TYPE.isExtendedBy(type)) {
+			} else if(type.doesExtend(CDouble.TYPE, env)) {
 				return IRType.DOUBLE;
-			} else if(CString.TYPE.isExtendedBy(type)) {
+			} else if(type.doesExtend(CString.TYPE, env)) {
 				return IRType.STRING;
 			}
-		} catch (ClassNotFoundException ex) {
-			throw new UnsupportedOperationException(ex);
 		}
 
 		// TODO: Eventually, this will just return the arbitrary data structure type. However, for native types,
 		// we should support all of them directly, so for the time being, this just throws.
-		throw new UnsupportedOperationException(type.getFQCN().getFQCN() + " is not yet supported");
+		throw new UnsupportedOperationException(type.val() + " is not yet supported");
 	}
 
 	public static String getValueFromConstant(IRBuilder builder, ParseTree data, Environment env) {
@@ -200,7 +198,7 @@ public final class LLVMArgumentValidation {
 	public static IRData getAny(IRBuilder builder, Environment env, ParseTree c, Target t) throws ConfigCompileException {
 		LLVMEnvironment e = env.getEnv(LLVMEnvironment.class);
 		if(c.isConst()) {
-			IRType datatype = convertCClassTypeToIRType(c.getData().typeof());
+			IRType datatype = convertCClassTypeToIRType(LeftHandSideType.fromCClassType(c.getData().typeof(env), t, env), env);
 			String data = getValueFromConstant(builder, c, env);
 			int alloca = e.getNewLocalVariableReference(datatype);
 			int load = e.getNewLocalVariableReference(datatype);
@@ -208,15 +206,15 @@ public final class LLVMArgumentValidation {
 			return IRDataBuilder.setReturnVariable(load, datatype);
 		} else if(c.getData() instanceof CFunction cf) {
 			Set<ConfigCompileException> exceptions = new HashSet<>();
-			CClassType retType = cf.getCachedFunction().typecheck(e.getStaticAnalysis(), c, env, exceptions);
-			IRData data = handleFunction(t, convertCClassTypeToIRType(retType), builder, env, c);
+			LeftHandSideType retType = cf.getCachedFunction().typecheck(e.getStaticAnalysis(), c, null, env, exceptions);
+			IRData data = handleFunction(t, convertCClassTypeToIRType(retType, env), builder, env, c);
 			int alloca = e.getNewLocalVariableReference(data.getResultType());
 			int load = e.getNewLocalVariableReference(data.getResultType());
 			builder.generator(t, env).allocaStoreAndLoad(alloca, data.getResultType(), data.getResultVariable(), load);
 			return IRDataBuilder.setReturnVariable(load, data.getResultType());
 		} else if(c.getData() instanceof IVariable ivar) {
 			String name = ivar.getVariableName();
-			IRType datatype = convertCClassTypeToIRType(e.getVariableType(name));
+			IRType datatype = convertCClassTypeToIRType(e.getVariableType(name), env);
 			int load = e.getNewLocalVariableReference(datatype);
 			builder.generator(t, env).load(load, datatype, e.getVariableMapping(name));
 			return IRDataBuilder.setReturnVariable(load, datatype);

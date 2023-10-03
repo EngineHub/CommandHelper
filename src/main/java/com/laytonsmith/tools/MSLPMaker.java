@@ -1,15 +1,11 @@
 package com.laytonsmith.tools;
 
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
-import static com.laytonsmith.PureUtilities.TermColors.GREEN;
-import static com.laytonsmith.PureUtilities.TermColors.RED;
-import static com.laytonsmith.PureUtilities.TermColors.pl;
-import static com.laytonsmith.PureUtilities.TermColors.prompt;
-import static com.laytonsmith.PureUtilities.TermColors.reset;
 import com.laytonsmith.PureUtilities.ZipMaker;
 import com.laytonsmith.core.LocalPackages;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.Profiles;
+import com.laytonsmith.core.Profiles.InvalidProfileException;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.environments.Environment;
@@ -24,6 +20,12 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+
+import static com.laytonsmith.PureUtilities.TermColors.GREEN;
+import static com.laytonsmith.PureUtilities.TermColors.RED;
+import static com.laytonsmith.PureUtilities.TermColors.pl;
+import static com.laytonsmith.PureUtilities.TermColors.prompt;
+import static com.laytonsmith.PureUtilities.TermColors.reset;
 
 /**
  *
@@ -51,28 +53,34 @@ public class MSLPMaker {
 		localPackages.search(start);
 		boolean error = false;
 		for(LocalPackages.FileInfo fi : localPackages.getMSFiles()) {
+			Environment fakeEnv = null;
+			try {
+				fakeEnv = Static.GenerateStandaloneEnvironment();
+			} catch (DataSourceException | URISyntaxException | InvalidProfileException e) {
+				throw new RuntimeException(e);
+			}
 			try {
 				MethodScriptCompiler.compile(
 						MethodScriptCompiler.lex(fi.contents(), null, fi.file(), true), null, envs);
 			} catch (ConfigCompileException e) {
 				error = true;
-				ConfigRuntimeException.HandleUncaughtException(e, "Compile error in script. Compilation will attempt to continue, however.", null);
+				ConfigRuntimeException.HandleUncaughtException(e, "Compile error in script. Compilation will attempt to continue, however.", null, fakeEnv);
 			} catch (ConfigCompileGroupException ex) {
 				error = true;
-				ConfigRuntimeException.HandleUncaughtException(ex, null);
+				ConfigRuntimeException.HandleUncaughtException(ex, null, fakeEnv);
 			}
 		}
 		List<Script> allScripts = new ArrayList<>();
 		for(LocalPackages.FileInfo fi : localPackages.getMSAFiles()) {
 			List<Script> tempScripts;
+			Environment env;
+			try {
+				env = Static.GenerateStandaloneEnvironment();
+			} catch (IOException | DataSourceException | URISyntaxException | Profiles.InvalidProfileException ex) {
+				throw new RuntimeException(ex);
+			}
 			try {
 				tempScripts = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(fi.contents(), null, fi.file(), false), envs);
-				Environment env;
-				try {
-					env = Static.GenerateStandaloneEnvironment();
-				} catch (IOException | DataSourceException | URISyntaxException | Profiles.InvalidProfileException ex) {
-					throw new RuntimeException(ex);
-				}
 				for(Script s : tempScripts) {
 					try {
 						s.compile(env.clone());
@@ -80,17 +88,17 @@ public class MSLPMaker {
 						allScripts.add(s);
 					} catch (ConfigCompileException e) {
 						error = true;
-						ConfigRuntimeException.HandleUncaughtException(e, "Compile error in script. Compilation will attempt to continue, however.", null);
+						ConfigRuntimeException.HandleUncaughtException(e, "Compile error in script. Compilation will attempt to continue, however.", null, env);
 					} catch (ConfigCompileGroupException e) {
 						error = true;
-						ConfigRuntimeException.HandleUncaughtException(e, "Compile errors in script. Compilation will attempt to continue, however.", null);
+						ConfigRuntimeException.HandleUncaughtException(e, "Compile errors in script. Compilation will attempt to continue, however.", null, env);
 					} catch (CloneNotSupportedException e) {
 						throw new Error("Environment wasn't clonable, while it should be.", e);
 					}
 				}
 			} catch (ConfigCompileException e) {
 				error = true;
-				ConfigRuntimeException.HandleUncaughtException(e, "Could not compile file " + fi.file() + " compilation will halt.", null);
+				ConfigRuntimeException.HandleUncaughtException(e, "Could not compile file " + fi.file() + " compilation will halt.", null, env);
 			}
 		}
 

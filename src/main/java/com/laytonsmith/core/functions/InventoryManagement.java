@@ -37,6 +37,7 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
@@ -120,7 +121,7 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			Integer index = -1;
 			boolean all;
 			MCPlayer m;
@@ -130,39 +131,39 @@ public class InventoryManagement {
 				Static.AssertPlayerNonNull(m, t);
 			} else if(args.length == 1) {
 				all = true;
-				m = Static.GetPlayer(args[0], t);
+				m = Static.GetPlayer(args[0], t, env);
 			} else {
 				if(args[1] instanceof CNull) {
 					index = null;
 				} else {
-					index = ArgumentValidation.getInt32(args[1], t);
+					index = ArgumentValidation.getInt32(args[1], t, env);
 				}
 				all = false;
-				m = Static.GetPlayer(args[0], t);
+				m = Static.GetPlayer(args[0], t, env);
 			}
 			if(all) {
-				CArray ret = CArray.GetAssociativeArray(t);
+				CArray ret = CArray.GetAssociativeArray(t, null, env);
 				for(int i = 0; i < 36; i++) {
-					ret.set(i, getInvSlot(m, i, t), t);
+					ret.set(i, getInvSlot(m, i, t, env), t, env);
 				}
 				for(int i = 100; i < 104; i++) {
-					ret.set(i, getInvSlot(m, i, t), t);
+					ret.set(i, getInvSlot(m, i, t, env), t, env);
 				}
-				ret.set(-106, getInvSlot(m, -106, t), t);
+				ret.set(-106, getInvSlot(m, -106, t, env), t, env);
 				return ret;
 			} else {
-				return getInvSlot(m, index, t);
+				return getInvSlot(m, index, t, env);
 			}
 		}
 
-		private Mixed getInvSlot(MCPlayer m, Integer slot, Target t) {
+		private Mixed getInvSlot(MCPlayer m, Integer slot, Target t, Environment env) {
 			MCPlayerInventory inv = m.getInventory();
 			if(inv == null) {
 				throw new CRENotFoundException(
 						"Could not find the inventory of the given player (are you running in cmdline mode?)", t);
 			}
 			if(slot == null) {
-				return ObjectGenerator.GetGenerator().item(inv.getItemInMainHand(), t);
+				return ObjectGenerator.GetGenerator().item(inv.getItemInMainHand(), t, env);
 			}
 			if(slot.equals(36)) {
 				slot = 100;
@@ -192,7 +193,7 @@ public class InventoryManagement {
 			} else {
 				throw new CRERangeException("Slot index must be 0-35, or 100-103, or -106", t);
 			}
-			return ObjectGenerator.GetGenerator().item(is, t);
+			return ObjectGenerator.GetGenerator().item(is, t, env);
 		}
 	}
 
@@ -215,13 +216,13 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 
 			if(args.length == 1) {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 			} else {
-				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			}
 
 			Static.AssertPlayerNonNull(p, t);
@@ -271,13 +272,13 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 
 			if(args.length == 1) {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 			} else {
-				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				if(p == null) {
 					throw new CREInsufficientArgumentsException(
 							"You have to specify a player when running " + this.getName() + " from console.", t);
@@ -330,18 +331,18 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer player;
 			MCPlayer other;
 
 			if(args.length == 1) {
-				player = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-				other = Static.GetPlayer(args[0], t);
+				player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				other = Static.GetPlayer(args[0], t, env);
 			} else if(args.length == 2) {
-				other = Static.GetPlayer(args[0], t);
-				player = Static.GetPlayer(args[1], t);
+				other = Static.GetPlayer(args[0], t, env);
+				player = Static.GetPlayer(args[1], t, env);
 			} else {
-				player = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				other = player;
 			}
 
@@ -394,13 +395,13 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 
 			if(args.length == 1) {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 			} else {
-				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			}
 
 			Static.AssertPlayerNonNull(p, t);
@@ -484,17 +485,17 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer m;
 			Mixed arg;
 			if(args.length == 3) {
 				// Single item
-				m = Static.GetPlayer(args[0], t);
-				MCItemStack is = ObjectGenerator.GetGenerator().item(args[2], t);
+				m = Static.GetPlayer(args[0], t, env);
+				MCItemStack is = ObjectGenerator.GetGenerator().item(args[2], t, env);
 				if(args[1] instanceof CNull) {
 					m.setItemInHand(is);
 				} else {
-					setInvSlot(m.getInventory(), ArgumentValidation.getInt32(args[1], t), is);
+					setInvSlot(m.getInventory(), ArgumentValidation.getInt32(args[1], t, env), is);
 				}
 				return CVoid.VOID;
 			} else if(args.length == 1) {
@@ -502,10 +503,10 @@ public class InventoryManagement {
 				Static.AssertPlayerNonNull(m, t);
 				arg = args[0];
 			} else {
-				m = Static.GetPlayer(args[0], t);
+				m = Static.GetPlayer(args[0], t, env);
 				arg = args[1];
 			}
-			if(!(arg.isInstanceOf(CArray.TYPE))) {
+			if(!(arg.isInstanceOf(CArray.TYPE, null, env))) {
 				throw new CRECastException("Expecting an array as the last argument.", t);
 			}
 			CArray array = (CArray) arg;
@@ -513,12 +514,12 @@ public class InventoryManagement {
 			for(String key : array.stringKeySet()) {
 				if(key.isEmpty() || key.equals("null")) {
 					//It was a null key
-					MCItemStack is = ObjectGenerator.GetGenerator().item(array.get("", t), t);
+					MCItemStack is = ObjectGenerator.GetGenerator().item(array.get("", t, env), t, env);
 					m.setItemInHand(is);
 				} else {
 					try {
 						int index = Integer.parseInt(key);
-						MCItemStack is = ObjectGenerator.GetGenerator().item(array.get(index, t), t);
+						MCItemStack is = ObjectGenerator.GetGenerator().item(array.get(index, t, env), t, env);
 						setInvSlot(inv, index, is);
 					} catch (NumberFormatException e) {
 						ConfigRuntimeException.DoWarning("Expecting integer value for key in array passed to"
@@ -588,13 +589,13 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			if(args.length == 0) {
 				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
 			} else {
-				p = Static.GetPlayer(args[0].val(), t);
+				p = Static.GetPlayer(args[0].val(), t, env);
 			}
 			MCPlayerInventory inv = p.getInventory();
 			if(inv == null) {
@@ -644,17 +645,17 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			MCItemStack is;
 			Mixed c;
 			CArray ca = null;
 			if(args.length == 1) {
-				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
 				c = args[0];
 			} else {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 				c = args[1];
 			}
 
@@ -662,9 +663,9 @@ public class InventoryManagement {
 				return new CInt(0, t);
 			}
 
-			if(c.isInstanceOf(CArray.TYPE)) {
+			if(c.isInstanceOf(CArray.TYPE, null, env)) {
 				ca = (CArray) c;
-				is = ObjectGenerator.GetGenerator().item(ca, t);
+				is = ObjectGenerator.GetGenerator().item(ca, t, env);
 			} else {
 				is = Static.ParseItemNotation(null, c.val(), 1, t);
 			}
@@ -678,18 +679,18 @@ public class InventoryManagement {
 			int total = 0;
 			for(int i = 0; i < 36; i++) {
 				MCItemStack iis = inv.getItem(i);
-				total += total(ca, is, iis, t);
+				total += total(ca, is, iis, t, env);
 			}
-			total += total(ca, is, inv.getBoots(), t);
-			total += total(ca, is, inv.getLeggings(), t);
-			total += total(ca, is, inv.getChestplate(), t);
-			total += total(ca, is, inv.getHelmet(), t);
-			total += total(ca, is, inv.getItemInOffHand(), t);
+			total += total(ca, is, inv.getBoots(), t, env);
+			total += total(ca, is, inv.getLeggings(), t, env);
+			total += total(ca, is, inv.getChestplate(), t, env);
+			total += total(ca, is, inv.getHelmet(), t, env);
+			total += total(ca, is, inv.getItemInOffHand(), t, env);
 			return new CInt(total, t);
 		}
 
-		private int total(CArray map, MCItemStack is, MCItemStack iis, Target t) {
-			if(IsMatch(map, is, iis, t)) {
+		private int total(CArray map, MCItemStack is, MCItemStack iis, Target t, Environment env) {
+			if(IsMatch(map, is, iis, t, env)) {
 				return iis.getAmount();
 			}
 			return 0;
@@ -705,7 +706,7 @@ public class InventoryManagement {
 				Set<Class<? extends Environment.EnvironmentImpl>> envs,
 				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
-			if(children.size() > 0 && children.get(children.size() - 1).getData().isInstanceOf(CString.TYPE)) {
+			if(children.size() > 0 && children.get(children.size() - 1).getData().isInstanceOf(CString.TYPE, null, env)) {
 				env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
 						new CompilerWarning("The string item format in " + getName() + " is deprecated.", t, null));
 			}
@@ -766,25 +767,25 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			Mixed item;
 			CArray ca = null;
 			if(args.length == 1) {
-				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
 				item = args[0];
 			} else {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 				item = args[1];
 			}
 			MCItemStack is;
 			if(item instanceof CNull) {
 				ca = null;
 				is = StaticLayer.GetItemStack("AIR", 1);
-			} else if(item.isInstanceOf(CArray.TYPE)) {
+			} else if(item.isInstanceOf(CArray.TYPE, null, env)) {
 				ca = (CArray) item;
-				is = ObjectGenerator.GetGenerator().item(ca, t);
+				is = ObjectGenerator.GetGenerator().item(ca, t, env);
 			} else {
 				is = Static.ParseItemNotation(null, item.val(), 1, t);
 			}
@@ -794,26 +795,27 @@ public class InventoryManagement {
 				throw new CRENotFoundException(
 						"Could not find the inventory of the given player (are you running in cmdline mode?)", t);
 			}
-			CArray ret = new CArray(t);
+			CArray ret = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CInt.TYPE, null).buildNative(), env);
 			for(int i = 0; i < 36; i++) {
-				if(IsMatch(ca, is, inv.getItem(i), t)) {
-					ret.push(new CInt(i, t), t);
+				if(IsMatch(ca, is, inv.getItem(i), t, env)) {
+					ret.push(new CInt(i, t), t, env);
 				}
 			}
-			if(IsMatch(ca, is, inv.getBoots(), t)) {
-				ret.push(new CInt(100, t), t);
+			if(IsMatch(ca, is, inv.getBoots(), t, env)) {
+				ret.push(new CInt(100, t), t, env);
 			}
-			if(IsMatch(ca, is, inv.getLeggings(), t)) {
-				ret.push(new CInt(101, t), t);
+			if(IsMatch(ca, is, inv.getLeggings(), t, env)) {
+				ret.push(new CInt(101, t), t, env);
 			}
-			if(IsMatch(ca, is, inv.getChestplate(), t)) {
-				ret.push(new CInt(102, t), t);
+			if(IsMatch(ca, is, inv.getChestplate(), t, env)) {
+				ret.push(new CInt(102, t), t, env);
 			}
-			if(IsMatch(ca, is, inv.getHelmet(), t)) {
-				ret.push(new CInt(103, t), t);
+			if(IsMatch(ca, is, inv.getHelmet(), t, env)) {
+				ret.push(new CInt(103, t), t, env);
 			}
-			if(IsMatch(ca, is, inv.getItemInOffHand(), t)) {
-				ret.push(new CInt(-106, t), t);
+			if(IsMatch(ca, is, inv.getItemInOffHand(), t, env)) {
+				ret.push(new CInt(-106, t), t, env);
 			}
 			return ret;
 		}
@@ -828,7 +830,7 @@ public class InventoryManagement {
 				Set<Class<? extends Environment.EnvironmentImpl>> envs,
 				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
-			if(children.size() > 0 && children.get(children.size() - 1).getData().isInstanceOf(CString.TYPE)) {
+			if(children.size() > 0 && children.get(children.size() - 1).getData().isInstanceOf(CString.TYPE, null, env)) {
 				env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
 						new CompilerWarning("The string item format in " + getName() + " is deprecated.", t, null));
 			}
@@ -899,7 +901,7 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			MCItemStack is;
 			int itemOffset = 0;
@@ -908,11 +910,11 @@ public class InventoryManagement {
 				if(args[1] instanceof CNull) {
 					return new CInt(0, t);
 				}
-				if(args[1].isInstanceOf(CArray.TYPE)) {
+				if(args[1].isInstanceOf(CArray.TYPE, null, env)) {
 					itemOffset = 1;
 				}
 			} else if(args.length == 3) {
-				if(args[0].isInstanceOf(CString.TYPE)) { // we assume player here, apparently
+				if(args[0].isInstanceOf(CString.TYPE, null, env)) { // we assume player here, apparently
 					itemOffset = 1;
 				}
 			} else if(args.length == 4) {
@@ -920,18 +922,18 @@ public class InventoryManagement {
 			}
 
 			if(itemOffset == 0) {
-				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
 			} else {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 			}
 
-			if(args[itemOffset].isInstanceOf(CArray.TYPE)) {
-				is = ObjectGenerator.GetGenerator().item(args[itemOffset], t);
+			if(args[itemOffset].isInstanceOf(CArray.TYPE, null, env)) {
+				is = ObjectGenerator.GetGenerator().item(args[itemOffset], t, env);
 			} else if(args.length > 1) {
-				is = Static.ParseItemNotation(null, args[itemOffset].val(), ArgumentValidation.getInt32(args[itemOffset + 1], t), t);
+				is = Static.ParseItemNotation(null, args[itemOffset].val(), ArgumentValidation.getInt32(args[itemOffset + 1], t, env), t);
 				if(args.length > itemOffset + 2) {
-					is.setItemMeta(ObjectGenerator.GetGenerator().itemMeta(args[itemOffset + 2], is.getType(), t));
+					is.setItemMeta(ObjectGenerator.GetGenerator().itemMeta(args[itemOffset + 2], is.getType(), t, env));
 				}
 			} else {
 				throw new CREInsufficientArgumentsException("Expecting a qty for string item format.", t);
@@ -963,7 +965,8 @@ public class InventoryManagement {
 				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() > 2 || children.size() == 2
-					&& (children.get(1).getData().isInstanceOf(CString.TYPE) || children.get(1).getData().isInstanceOf(CInt.TYPE))) {
+					&& (children.get(1).getData().isInstanceOf(CString.TYPE, null, env)
+					|| children.get(1).getData().isInstanceOf(CInt.TYPE, null, env))) {
 				env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
 						new CompilerWarning("The string item format in " + getName() + " is deprecated.", t, null));
 			}
@@ -1013,7 +1016,7 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			MCItemStack is;
 			int itemOffset = 0;
@@ -1023,7 +1026,7 @@ public class InventoryManagement {
 				if(args[1] instanceof CNull) {
 					return new CInt(0, t);
 				}
-				if(args[1].isInstanceOf(CArray.TYPE)) {
+				if(args[1].isInstanceOf(CArray.TYPE, null, env)) {
 					itemOffset = 1;
 				}
 			} else if(args.length == 3) {
@@ -1031,17 +1034,17 @@ public class InventoryManagement {
 			}
 
 			if(itemOffset == 0) {
-				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
 			} else {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 			}
 
-			if(args[itemOffset].isInstanceOf(CArray.TYPE)) {
+			if(args[itemOffset].isInstanceOf(CArray.TYPE, null, env)) {
 				ca = (CArray) args[itemOffset];
-				is = ObjectGenerator.GetGenerator().item(ca, t);
+				is = ObjectGenerator.GetGenerator().item(ca, t, env);
 			} else {
-				is = Static.ParseItemNotation(null, args[itemOffset].val(), ArgumentValidation.getInt32(args[itemOffset + 1], t), t);
+				is = Static.ParseItemNotation(null, args[itemOffset].val(), ArgumentValidation.getInt32(args[itemOffset + 1], t, env), t);
 			}
 
 			int total = is.getAmount();
@@ -1057,7 +1060,7 @@ public class InventoryManagement {
 				if(remaining <= 0) {
 					break;
 				}
-				if(IsMatch(ca, is, iis, t)) {
+				if(IsMatch(ca, is, iis, t, env)) {
 					//Take the minimum of either: remaining, or iis.getAmount()
 					int toTake = java.lang.Math.min(remaining, iis.getAmount());
 					remaining -= toTake;
@@ -1085,7 +1088,8 @@ public class InventoryManagement {
 				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() > 2 || children.size() == 2
-					&& (children.get(1).getData().isInstanceOf(CString.TYPE) || children.get(1).getData().isInstanceOf(CInt.TYPE))) {
+					&& (children.get(1).getData().isInstanceOf(CString.TYPE, null, env)
+					|| children.get(1).getData().isInstanceOf(CInt.TYPE, null, env))) {
 				env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
 						new CompilerWarning("The string item format in " + getName() + " is deprecated.", t, null));
 			}
@@ -1157,7 +1161,7 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			MCItemStack is;
 			int itemOffset = 0;
@@ -1166,11 +1170,11 @@ public class InventoryManagement {
 				if(args[1] instanceof CNull) {
 					return new CInt(0, t);
 				}
-				if(args[1].isInstanceOf(CArray.TYPE)) {
+				if(args[1].isInstanceOf(CArray.TYPE, null, env)) {
 					itemOffset = 1;
 				}
 			} else if(args.length == 3) {
-				if(args[0].isInstanceOf(CString.TYPE)) { // we assume player here, apparently
+				if(args[0].isInstanceOf(CString.TYPE, null, env)) { // we assume player here, apparently
 					itemOffset = 1;
 				}
 			} else if(args.length == 4) {
@@ -1178,18 +1182,18 @@ public class InventoryManagement {
 			}
 
 			if(itemOffset == 0) {
-				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
 			} else {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 			}
 
-			if(args[itemOffset].isInstanceOf(CArray.TYPE)) {
-				is = ObjectGenerator.GetGenerator().item(args[itemOffset], t);
+			if(args[itemOffset].isInstanceOf(CArray.TYPE, null, env)) {
+				is = ObjectGenerator.GetGenerator().item(args[itemOffset], t, env);
 			} else {
-				is = Static.ParseItemNotation(null, args[itemOffset].val(), ArgumentValidation.getInt32(args[itemOffset + 1], t), t);
+				is = Static.ParseItemNotation(null, args[itemOffset].val(), ArgumentValidation.getInt32(args[itemOffset + 1], t, env), t);
 				if(args.length > itemOffset + 2) {
-					is.setItemMeta(ObjectGenerator.GetGenerator().itemMeta(args[itemOffset + 2], is.getType(), t));
+					is.setItemMeta(ObjectGenerator.GetGenerator().itemMeta(args[itemOffset + 2], is.getType(), t, env));
 				}
 			}
 
@@ -1219,7 +1223,8 @@ public class InventoryManagement {
 				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() > 2 || children.size() == 2
-					&& (children.get(1).getData().isInstanceOf(CString.TYPE) || children.get(1).getData().isInstanceOf(CInt.TYPE))) {
+					&& (children.get(1).getData().isInstanceOf(CString.TYPE, null, env)
+					|| children.get(1).getData().isInstanceOf(CInt.TYPE, null, env))) {
 				env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
 						new CompilerWarning("The string item format in " + getName() + " is deprecated.", t, null));
 			}
@@ -1268,7 +1273,7 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			MCItemStack is;
 			int itemOffset = 0;
@@ -1278,7 +1283,7 @@ public class InventoryManagement {
 				if(args[1] instanceof CNull) {
 					return new CInt(0, t);
 				}
-				if(args[1].isInstanceOf(CArray.TYPE)) {
+				if(args[1].isInstanceOf(CArray.TYPE, null, env)) {
 					itemOffset = 1;
 				}
 			} else if(args.length == 3) {
@@ -1286,17 +1291,17 @@ public class InventoryManagement {
 			}
 
 			if(itemOffset == 0) {
-				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
 			} else {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 			}
 
-			if(args[itemOffset].isInstanceOf(CArray.TYPE)) {
+			if(args[itemOffset].isInstanceOf(CArray.TYPE, null, env)) {
 				ca = (CArray) args[itemOffset];
-				is = ObjectGenerator.GetGenerator().item(ca, t);
+				is = ObjectGenerator.GetGenerator().item(ca, t, env);
 			} else {
-				is = Static.ParseItemNotation(null, args[itemOffset].val(), ArgumentValidation.getInt32(args[itemOffset + 1], t), t);
+				is = Static.ParseItemNotation(null, args[itemOffset].val(), ArgumentValidation.getInt32(args[itemOffset + 1], t, env), t);
 			}
 
 			int total = is.getAmount();
@@ -1312,7 +1317,7 @@ public class InventoryManagement {
 				if(remaining <= 0) {
 					break;
 				}
-				if(IsMatch(ca, is, iis, t)) {
+				if(IsMatch(ca, is, iis, t, env)) {
 					//Take the minimum of either: remaining, or iis.getAmount()
 					int toTake = java.lang.Math.min(remaining, iis.getAmount());
 					remaining -= toTake;
@@ -1339,7 +1344,8 @@ public class InventoryManagement {
 				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() > 2 || children.size() == 2
-					&& (children.get(1).getData().isInstanceOf(CString.TYPE) || children.get(1).getData().isInstanceOf(CInt.TYPE))) {
+					&& (children.get(1).getData().isInstanceOf(CString.TYPE, null, env)
+					|| children.get(1).getData().isInstanceOf(CInt.TYPE, null, env))) {
 				env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
 						new CompilerWarning("The string item format in " + getName() + " is deprecated.", t, null));
 			}
@@ -1419,7 +1425,7 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 
 			MCPlayer m = null;
@@ -1431,13 +1437,13 @@ public class InventoryManagement {
 			Mixed arg;
 
 			if(args.length == 2) {
-				m = Static.GetPlayer(args[0], t);
+				m = Static.GetPlayer(args[0], t, env);
 				arg = args[1];
 			} else {
 				arg = args[0];
 			}
 
-			if(!(arg.isInstanceOf(CArray.TYPE))) {
+			if(!(arg.isInstanceOf(CArray.TYPE, null, env))) {
 				throw new CRECastException("Expecting an array as argument " + (args.length == 1 ? "1" : "2"), t);
 			}
 
@@ -1459,7 +1465,7 @@ public class InventoryManagement {
 						}
 					}
 
-					MCItemStack is = ObjectGenerator.GetGenerator().item(array.get(index, t), t);
+					MCItemStack is = ObjectGenerator.GetGenerator().item(array.get(index, t, env), t, env);
 
 					if(index >= 0 && index <= 26) {
 						m.getEnderChest().setItem(index, is);
@@ -1519,7 +1525,7 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 
 			Integer index = -1;
@@ -1535,34 +1541,34 @@ public class InventoryManagement {
 			} else if(args.length == 1) {
 				all = true;
 
-				m = Static.GetPlayer(args[0], t);
+				m = Static.GetPlayer(args[0], t, env);
 			} else if(args.length == 2) {
 				if(args[1] instanceof CNull) {
 					throw new CRERangeException("Slot index must be 0-26", t);
 				} else {
-					index = ArgumentValidation.getInt32(args[1], t);
+					index = ArgumentValidation.getInt32(args[1], t, env);
 				}
 
 				all = false;
-				m = Static.GetPlayer(args[0], t);
+				m = Static.GetPlayer(args[0], t, env);
 			}
 
 			Static.AssertPlayerNonNull(m, t);
 
 			if(all) {
-				CArray ret = CArray.GetAssociativeArray(t);
+				CArray ret = CArray.GetAssociativeArray(t, null, env);
 
 				for(int i = 0; i < 27; i++) {
-					ret.set(i, getInvSlot(m, i, t), t);
+					ret.set(i, getInvSlot(m, i, t, env), t, env);
 				}
 
 				return ret;
 			} else {
-				return getInvSlot(m, index, t);
+				return getInvSlot(m, index, t, env);
 			}
 		}
 
-		private Mixed getInvSlot(MCPlayer m, Integer slot, Target t) {
+		private Mixed getInvSlot(MCPlayer m, Integer slot, Target t, Environment env) {
 			MCInventory inv = m.getEnderChest();
 			if(inv == null) {
 				throw new CRENotFoundException(
@@ -1572,7 +1578,7 @@ public class InventoryManagement {
 				throw new CRERangeException("Slot index must be 0-26", t);
 			}
 			MCItemStack is = inv.getItem(slot);
-			return ObjectGenerator.GetGenerator().item(is, t);
+			return ObjectGenerator.GetGenerator().item(is, t, env);
 		}
 	}
 
@@ -1596,13 +1602,13 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCWorld w = null;
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(p != null) {
 				w = p.getWorld();
 			}
-			MCInventory inv = GetInventoryOrNull(args[0], w, t);
+			MCInventory inv = GetInventoryOrNull(args[0], w, t, env);
 			return CBoolean.get(inv != null);
 		}
 
@@ -1650,18 +1656,18 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCWorld w = null;
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(p != null) {
 				w = p.getWorld();
 			}
 
-			MCInventory inv = GetInventory(args[0], w, t);
-			int slot = ArgumentValidation.getInt32(args[1], t);
+			MCInventory inv = GetInventory(args[0], w, t, env);
+			int slot = ArgumentValidation.getInt32(args[1], t, env);
 			try {
 				MCItemStack is = inv.getItem(slot);
-				return ObjectGenerator.GetGenerator().item(is, t);
+				return ObjectGenerator.GetGenerator().item(is, t, env);
 			} catch (ArrayIndexOutOfBoundsException e) {
 				throw new CRERangeException("Index out of bounds for the inventory type.", t);
 			}
@@ -1713,16 +1719,16 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCWorld w = null;
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(p != null) {
 				w = p.getWorld();
 			}
 
-			MCInventory inv = GetInventory(args[0], w, t);
-			int slot = ArgumentValidation.getInt32(args[1], t);
-			MCItemStack is = ObjectGenerator.GetGenerator().item(args[2], t);
+			MCInventory inv = GetInventory(args[0], w, t, env);
+			int slot = ArgumentValidation.getInt32(args[1], t, env);
+			MCItemStack is = ObjectGenerator.GetGenerator().item(args[2], t, env);
 			try {
 				inv.setItem(slot, is);
 				return CVoid.VOID;
@@ -1775,14 +1781,14 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCWorld w = null;
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(p != null) {
 				w = p.getWorld();
 			}
 
-			MCInventory inv = GetInventory(args[0], w, t);
+			MCInventory inv = GetInventory(args[0], w, t, env);
 			return new CString(inv.getType().name(), t);
 		}
 
@@ -1832,12 +1838,12 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCWorld w = null;
-			if(environment.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
-				w = environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
+			if(env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
+				w = env.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
 			}
-			MCInventory inventory = InventoryManagement.GetInventory(args[0], w, t);
+			MCInventory inventory = InventoryManagement.GetInventory(args[0], w, t, env);
 			return new CInt(inventory.getSize(), t);
 		}
 
@@ -1884,13 +1890,13 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCWorld w = null;
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(p != null) {
 				w = p.getWorld();
 			}
-			MCInventory inventory = InventoryManagement.GetInventory(args[0], w, t);
+			MCInventory inventory = InventoryManagement.GetInventory(args[0], w, t, env);
 			try {
 				return new CString(inventory.getTitle(), t);
 			} catch (ClassCastException ex) {
@@ -1941,14 +1947,14 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p1 = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p1 = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCPlayer p2;
 			if(args.length == 2) {
-				p1 = Static.GetPlayer(args[0], t);
-				p2 = Static.GetPlayer(args[1], t);
+				p1 = Static.GetPlayer(args[0], t, env);
+				p2 = Static.GetPlayer(args[1], t, env);
 			} else {
-				p2 = Static.GetPlayer(args[0], t);
+				p2 = Static.GetPlayer(args[0], t, env);
 			}
 			Static.AssertPlayerNonNull(p1, t);
 			p1.openInventory(p2.getInventory());
@@ -2023,15 +2029,15 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 
-			MCInventory inventory = InventoryManagement.GetInventory(args[0], null, t);
+			MCInventory inventory = InventoryManagement.GetInventory(args[0], null, t, env);
 
 			Integer size = inventory.getSize();
 			Integer index = -1;
 
 			if(args.length == 2) {
-				index = ArgumentValidation.getInt32(args[1], t);
+				index = ArgumentValidation.getInt32(args[1], t, env);
 
 				if(index < 0 || index >= size) {
 					throw new CRERangeException("Slot index must be 0-" + (size - 1), t);
@@ -2039,14 +2045,14 @@ public class InventoryManagement {
 			}
 
 			if(index == -1) {
-				CArray ret = CArray.GetAssociativeArray(t);
+				CArray ret = CArray.GetAssociativeArray(t, null, env);
 				for(int i = 0; i < size; i++) {
-					ret.set(i, ObjectGenerator.GetGenerator().item(inventory.getItem(i), t), t);
+					ret.set(i, ObjectGenerator.GetGenerator().item(inventory.getItem(i), t, env), t, env);
 				}
 
 				return ret;
 			} else {
-				return ObjectGenerator.GetGenerator().item(inventory.getItem(index), t);
+				return ObjectGenerator.GetGenerator().item(inventory.getItem(index), t, env);
 			}
 		}
 	}
@@ -2102,12 +2108,12 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 
-			MCInventory inventory = InventoryManagement.GetInventory(args[0], null, t);
+			MCInventory inventory = InventoryManagement.GetInventory(args[0], null, t, env);
 			Integer size = inventory.getSize();
 
-			if(!(args[1].isInstanceOf(CArray.TYPE))) {
+			if(!(args[1].isInstanceOf(CArray.TYPE, null, env))) {
 				throw new CRECastException("Expecting an array as argument 2", t);
 			}
 
@@ -2119,7 +2125,7 @@ public class InventoryManagement {
 					if(index < 0 || index >= size) {
 						ConfigRuntimeException.DoWarning("Out of range value (" + index + ") found in array passed to set_inventory(), so ignoring.");
 					} else {
-						MCItemStack is = ObjectGenerator.GetGenerator().item(array.get(index, t), t);
+						MCItemStack is = ObjectGenerator.GetGenerator().item(array.get(index, t, env), t, env);
 						inventory.setItem(index, is);
 					}
 				} catch (NumberFormatException e) {
@@ -2192,15 +2198,15 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCInventory inventory = InventoryManagement.GetInventory(args[0], null, t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCInventory inventory = InventoryManagement.GetInventory(args[0], null, t, env);
 			MCItemStack is;
 			if(args.length == 2) {
-				is = ObjectGenerator.GetGenerator().item(args[1], t);
+				is = ObjectGenerator.GetGenerator().item(args[1], t, env);
 			} else {
-				is = Static.ParseItemNotation(this.getName(), args[1].val(), ArgumentValidation.getInt32(args[2], t), t);
+				is = Static.ParseItemNotation(this.getName(), args[1].val(), ArgumentValidation.getInt32(args[2], t, env), t);
 				if(args.length == 4) {
-					is.setItemMeta(ObjectGenerator.GetGenerator().itemMeta(args[3], is.getType(), t));
+					is.setItemMeta(ObjectGenerator.GetGenerator().itemMeta(args[3], is.getType(), t, env));
 				}
 			}
 
@@ -2279,17 +2285,17 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCInventory inventory = InventoryManagement.GetInventory(args[0], null, t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCInventory inventory = InventoryManagement.GetInventory(args[0], null, t, env);
 			Integer size = inventory.getSize();
 			CArray ca = null;
 
 			MCItemStack is;
 			if(args.length == 2) {
 				ca = (CArray) args[1];
-				is = ObjectGenerator.GetGenerator().item(ca, t);
+				is = ObjectGenerator.GetGenerator().item(ca, t, env);
 			} else {
-				is = Static.ParseItemNotation(this.getName(), args[1].val(), ArgumentValidation.getInt32(args[2], t), t);
+				is = Static.ParseItemNotation(this.getName(), args[1].val(), ArgumentValidation.getInt32(args[2], t, env), t);
 			}
 
 			int total = is.getAmount();
@@ -2299,7 +2305,7 @@ public class InventoryManagement {
 				if(remaining <= 0) {
 					break;
 				}
-				if(IsMatch(ca, is, iis, t)) {
+				if(IsMatch(ca, is, iis, t, env)) {
 					//Take the minimum of either: remaining, or iis.getAmount()
 					int toTake = java.lang.Math.min(remaining, iis.getAmount());
 					remaining -= toTake;
@@ -2391,11 +2397,11 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer player;
 			switch(args.length) {
 				case 1: {
-					MCCommandSender sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+					MCCommandSender sender = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 					if(sender instanceof MCPlayer) {
 						player = (MCPlayer) sender;
 					} else {
@@ -2404,7 +2410,7 @@ public class InventoryManagement {
 					break;
 				}
 				case 2: {
-					player = Static.GetPlayer(args[0], t);
+					player = Static.GetPlayer(args[0], t, env);
 					break;
 				}
 				default: {
@@ -2473,11 +2479,11 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer player;
 			switch(args.length) {
 				case 0: {
-					MCCommandSender sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+					MCCommandSender sender = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 					if(sender instanceof MCPlayer) {
 						player = (MCPlayer) sender;
 					} else {
@@ -2486,7 +2492,7 @@ public class InventoryManagement {
 					break;
 				}
 				case 1: {
-					player = Static.GetPlayer(args[0], t);
+					player = Static.GetPlayer(args[0], t, env);
 					break;
 				}
 				default: {
@@ -2529,16 +2535,16 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			MCInventory inv;
 			if(args.length == 2) {
-				p = Static.GetPlayer(args[0], t);
-				inv = GetInventory(args[1], p.getWorld(), t);
+				p = Static.GetPlayer(args[0], t, env);
+				inv = GetInventory(args[1], p.getWorld(), t, env);
 			} else {
 				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
-				inv = GetInventory(args[0], p.getWorld(), t);
+				inv = GetInventory(args[0], p.getWorld(), t, env);
 			}
 			p.openInventory(inv);
 			return CVoid.VOID;
@@ -2589,10 +2595,10 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			if(args.length == 1) {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 			} else {
 				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
@@ -2602,7 +2608,7 @@ public class InventoryManagement {
 				// probably tests
 				return CNull.NULL;
 			}
-			return GetInventoryHolder(view.getTopInventory(), t);
+			return GetInventoryHolder(view.getTopInventory(), t, env);
 		}
 
 		@Override
@@ -2647,11 +2653,12 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			MCInventory inv = GetInventory(args[0], null, t);
-			CArray list = new CArray(t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCInventory inv = GetInventory(args[0], null, t, env);
+			CArray list = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			for(MCHumanEntity viewer : inv.getViewers()) {
-				list.push(new CString(viewer.getName(), t), t);
+				list.push(new CString(viewer.getName(), t), t, env);
 			}
 			return list;
 		}
@@ -2697,10 +2704,11 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			CArray list = new CArray(t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			CArray list = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			for(String id : VIRTUAL_INVENTORIES.keySet()) {
-				list.push(new CString(id, t), t);
+				list.push(new CString(id, t), t, env);
 			}
 			return list;
 		}
@@ -2760,7 +2768,7 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String id = args[0].val();
 			if(VIRTUAL_INVENTORIES.get(id) != null) {
 				throw new CREIllegalArgumentException("An inventory using the id \"" + id + "\" already exists.", t);
@@ -2770,8 +2778,8 @@ public class InventoryManagement {
 			int size = 54;
 			String title = null;
 			if(args.length > 1) {
-				if(args[1].isInstanceOf(CNumber.TYPE)) {
-					size = ArgumentValidation.getInt32(args[1], t);
+				if(args[1].isInstanceOf(CNumber.TYPE, null, env)) {
+					size = ArgumentValidation.getInt32(args[1], t, env);
 					if(size < 9) {
 						size = 9; // minimum
 					} else {
@@ -2804,7 +2812,7 @@ public class InventoryManagement {
 			}
 
 			if(args.length == 4) {
-				if(!(args[3].isInstanceOf(CArray.TYPE))) {
+				if(!(args[3].isInstanceOf(CArray.TYPE, null, env))) {
 					throw new CRECastException("Inventory argument not an array in " + getName(), t);
 				}
 				CArray array = (CArray) args[3];
@@ -2815,7 +2823,7 @@ public class InventoryManagement {
 							ConfigRuntimeException.DoWarning("Out of range value (" + index + ") found in array passed to "
 									+ getName() + "(), so ignoring.");
 						} else {
-							MCItemStack is = ObjectGenerator.GetGenerator().item(array.get(index, t), t);
+							MCItemStack is = ObjectGenerator.GetGenerator().item(array.get(index, t, env), t, env);
 							inv.setItem(index, is);
 						}
 					} catch (NumberFormatException e) {
@@ -2871,7 +2879,7 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String id = args[0].val();
 			MCInventory inv = VIRTUAL_INVENTORIES.get(id);
 			if(inv != null) {
@@ -2913,10 +2921,10 @@ public class InventoryManagement {
 	 * @param t
 	 * @return
 	 */
-	private static MCInventory GetInventory(Mixed specifier, MCWorld w, Target t) {
-		MCInventory inv = GetInventoryOrNull(specifier, w, t);
+	private static MCInventory GetInventory(Mixed specifier, MCWorld w, Target t, Environment env) {
+		MCInventory inv = GetInventoryOrNull(specifier, w, t, env);
 		if(inv == null) {
-			if(specifier.isInstanceOf(CArray.TYPE)) {
+			if(specifier.isInstanceOf(CArray.TYPE, null, env)) {
 				throw new CREIllegalArgumentException("The location specified is not capable of having an inventory.", t);
 			}
 			throw new CREIllegalArgumentException("An inventory for \"" + specifier.val() + "\" does not exist.", t);
@@ -2924,8 +2932,8 @@ public class InventoryManagement {
 		return inv;
 	}
 
-	private static MCInventory GetInventoryOrNull(Mixed specifier, MCWorld w, Target t) {
-		if(specifier.isInstanceOf(CArray.TYPE)) {
+	private static MCInventory GetInventoryOrNull(Mixed specifier, MCWorld w, Target t, Environment env) {
+		if(specifier.isInstanceOf(CArray.TYPE, null, env)) {
 			MCLocation l = ObjectGenerator.GetGenerator().location(specifier, w, t);
 			return StaticLayer.GetConvertor().GetLocationInventory(l);
 		}
@@ -2947,14 +2955,14 @@ public class InventoryManagement {
 	 * @param t
 	 * @return The construct representation of the inventory holder
 	 */
-	public static Mixed GetInventoryHolder(MCInventory inv, Target t) {
+	public static Mixed GetInventoryHolder(MCInventory inv, Target t, Environment env) {
 		MCInventoryHolder h = inv.getHolder();
 		if(h instanceof MCEntity) {
 			return new CString(((MCEntity) h).getUniqueId().toString(), t);
 		} else if(h instanceof MCBlockState) {
-			return ObjectGenerator.GetGenerator().location(((MCBlockState) h).getLocation(), false);
+			return ObjectGenerator.GetGenerator().location(((MCBlockState) h).getLocation(), false, env);
 		} else if(h instanceof MCDoubleChest) {
-			return ObjectGenerator.GetGenerator().location(((MCDoubleChest) h).getLocation(), false);
+			return ObjectGenerator.GetGenerator().location(((MCDoubleChest) h).getLocation(), false, env);
 		} else if(h instanceof MCVirtualInventoryHolder) {
 			return new CString(((MCVirtualInventoryHolder) h).getID(), t);
 		}
@@ -2975,12 +2983,12 @@ public class InventoryManagement {
 	 * @param t
 	 * @return Whether or not the items are a match
 	 */
-	private static boolean IsMatch(CArray map, MCItemStack is, MCItemStack iis, Target t) {
+	private static boolean IsMatch(CArray map, MCItemStack is, MCItemStack iis, Target t, Environment env) {
 		if(!is.getType().equals(iis.getType())) {
 			return false;
 		}
 		if(map != null && map.containsKey("meta")) {
-			Mixed c = map.get("meta", t);
+			Mixed c = map.get("meta", t, env);
 			if(c instanceof CNull) {
 				if(iis.hasItemMeta()) {
 					return false;

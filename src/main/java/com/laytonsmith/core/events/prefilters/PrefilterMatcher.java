@@ -7,6 +7,7 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.CClassType;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.BindableEvent;
@@ -34,9 +35,10 @@ public interface PrefilterMatcher<T extends BindableEvent> extends SimpleDocumen
 	 * @param value The value of the prefilter
 	 * @param event The event
 	 * @param t The code target.
+	 * @param env The environment
 	 * @return False if the event doesn't match, true otherwise.
 	 */
-	boolean matches(String key, Mixed value, T event, Target t);
+	boolean matches(String key, Mixed value, T event, Target t, Environment env);
 
 	/**
 	 * Returns the filter type, which is used in text based documentation.
@@ -77,7 +79,7 @@ public interface PrefilterMatcher<T extends BindableEvent> extends SimpleDocumen
 	 * @param exceptions - Any compile exceptions will be added to this set.
 	 * @return The return type of this prefilter value.
 	 */
-	CClassType typecheck(StaticAnalysis analysis,
+	LeftHandSideType typecheck(StaticAnalysis analysis,
 			ParseTree prefilterValueParseTree, Environment env, Set<ConfigCompileException> exceptions);
 
 	/**
@@ -91,7 +93,7 @@ public interface PrefilterMatcher<T extends BindableEvent> extends SimpleDocumen
 	 * @throws com.laytonsmith.core.exceptions.ConfigCompileException
 	 * @throws com.laytonsmith.core.exceptions.ConfigCompileGroupException
 	 */
-	void validate(ParseTree node, CClassType nodeType, Environment env)
+	void validate(ParseTree node, LeftHandSideType nodeType, Environment env)
 			throws ConfigCompileException, ConfigCompileGroupException, ConfigRuntimeException;
 
 }

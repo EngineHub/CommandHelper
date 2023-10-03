@@ -3,6 +3,7 @@ package com.laytonsmith.core.constructs;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.objects.ObjectModifier;
 import java.util.EnumSet;
 import java.util.Set;
@@ -15,6 +16,7 @@ public final class CVoid extends Construct implements Cloneable {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
 	public static final CClassType TYPE = CClassType.get(CVoid.class);
+	public static final LeftHandSideType LHSTYPE = TYPE.asLeftHandSideType();
 
 	/**
 	 * Void values do not normally need to be duplicated, since they are immutable, and for values that have an unknown
@@ -78,5 +80,10 @@ public final class CVoid extends Construct implements Cloneable {
 	@Override
 	public Set<ObjectModifier> getObjectModifiers() {
 		return EnumSet.of(ObjectModifier.FINAL);
+	}
+
+	@Override
+	public GenericParameters getGenericParameters() {
+		return null;
 	}
 }

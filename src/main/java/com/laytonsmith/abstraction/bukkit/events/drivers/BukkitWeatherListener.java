@@ -14,16 +14,19 @@ public class BukkitWeatherListener implements Listener {
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onLightningStrike(LightningStrikeEvent event) {
-		EventUtils.TriggerListener(Driver.LIGHTNING_STRIKE, "lightning_strike", new BukkitWeatherEvents.BukkitMCLightningStrikeEvent(event));
+		EventUtils.TriggerListener(Driver.LIGHTNING_STRIKE, "lightning_strike",
+				new BukkitWeatherEvents.BukkitMCLightningStrikeEvent(event));
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onThunderChange(ThunderChangeEvent event) {
-		EventUtils.TriggerListener(Driver.THUNDER_CHANGE, "thunder_change", new BukkitWeatherEvents.BukkitMCThunderChangeEvent(event));
+		EventUtils.TriggerListener(Driver.THUNDER_CHANGE, "thunder_change",
+				new BukkitWeatherEvents.BukkitMCThunderChangeEvent(event));
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onWeatherChange(WeatherChangeEvent event) {
-		EventUtils.TriggerListener(Driver.WEATHER_CHANGE, "weather_change", new BukkitWeatherEvents.BukkitMCWeatherChangeEvent(event));
+		EventUtils.TriggerListener(Driver.WEATHER_CHANGE, "weather_change",
+				new BukkitWeatherEvents.BukkitMCWeatherChangeEvent(event));
 	}
 }

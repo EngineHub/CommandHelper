@@ -88,6 +88,7 @@ public class AliasCore {
 	private final Set<String> echoCommand = new HashSet<>();
 	private CompilerEnvironment compilerEnv;
 	private StaticRuntimeEnv staticRuntimeEnv;
+	private Environment env;
 	private List<Script> scripts;
 	private boolean lastCompileFailed = false;
 
@@ -426,7 +427,7 @@ public class AliasCore {
 								if(s1.getCommandName().equalsIgnoreCase(s2.getCommandName())) {
 									ConfigRuntimeException.HandleUncaughtException(
 											new ConfigCompileException("Duplicate command defined. (First occurrence found at "
-													+ s1.getTarget() + ")", s2.getTarget()), "Duplicate command.", player);
+													+ s1.getTarget() + ")", s2.getTarget()), "Duplicate command.", player, env);
 								}
 							}
 						}
@@ -482,6 +483,7 @@ public class AliasCore {
 			this.scripts = newScripts;
 			this.compilerEnv = compilerEnv;
 			this.staticRuntimeEnv = newStaticRuntimeEnv;
+			this.env = env;
 		} else {
 			// We're proceeding, so use the new StaticRuntimeEnv even if we don't reload scripts
 			this.staticRuntimeEnv = newStaticRuntimeEnv;
@@ -593,6 +595,10 @@ public class AliasCore {
 		if(player != null) {
 			player.sendMessage(MCChatColor.YELLOW + "[CommandHelper] " + output);
 		}
+	}
+
+	public Environment getLastLoadedEnv() {
+		return this.env;
 	}
 
 	private void registerCommand(Script script, Environment env) {
@@ -742,7 +748,7 @@ public class AliasCore {
 								Mixed ret = completionProc.execute(Arrays.asList(alias, player, args),
 										env, Target.UNKNOWN);
 								if(ret instanceof CArray ca) {
-									return ca.asList().stream().map(i -> i.toString()).toList();
+									return ca.asList(env).stream().map(i -> i.toString()).toList();
 								}
 								MSLog.GetLogger().w(MSLog.Tags.COMPILER,
 									"Completion proc " + completionProc + " returned a non-array value.",
@@ -755,8 +761,8 @@ public class AliasCore {
 						// Otherwise disable completions.
 						try {
 							FullyQualifiedClassName fqcn = FullyQualifiedClassName.forName(type, Target.UNKNOWN, env);
-							CClassType t = CClassType.get(fqcn);
-							if(t.isEnum()) {
+							CClassType t = CClassType.get(fqcn, env);
+							if(t.isEnum(env)) {
 								MEnumType enumType = NativeTypeList.getNativeEnumType(fqcn);
 								completions.add((alias, player, args) -> enumType.values()
 										.stream().map(value -> value.name()).toList());

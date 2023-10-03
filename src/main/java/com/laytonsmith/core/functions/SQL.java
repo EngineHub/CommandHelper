@@ -36,6 +36,7 @@ import com.laytonsmith.core.Profiles;
 import com.laytonsmith.core.ProfilesImpl;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CRESQLException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
@@ -150,17 +151,17 @@ public class SQL {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			try {
 				Profiles.Profile profile;
-				if(args[0].isInstanceOf(CArray.TYPE)) {
+				if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
 					Map<String, String> data = new HashMap<>();
 					for(String key : ((CArray) args[0]).stringKeySet()) {
-						data.put(key, ((CArray) args[0]).get(key, t).val());
+						data.put(key, ((CArray) args[0]).get(key, t, env).val());
 					}
 					profile = ProfilesImpl.getProfile(data);
 				} else {
-					Profiles profiles = environment.getEnv(StaticRuntimeEnv.class).getProfiles();
+					Profiles profiles = env.getEnv(StaticRuntimeEnv.class).getProfiles();
 					profile = profiles.getProfileById(args[0].val());
 				}
 				if(!(profile instanceof SQLProfile)) {
@@ -200,20 +201,20 @@ public class SQL {
 							continue;
 						}
 						try {
-							if(params[i].isInstanceOf(CInt.TYPE)) {
-								ps.setLong(i + 1, ArgumentValidation.getInt(params[i], t));
-							} else if(params[i].isInstanceOf(CDouble.TYPE)) {
-								ps.setDouble(i + 1, (Double) ArgumentValidation.getDouble(params[i], t));
-							} else if(params[i].isInstanceOf(CString.TYPE)) {
+							if(params[i].isInstanceOf(CInt.TYPE, null, env)) {
+								ps.setLong(i + 1, ArgumentValidation.getInt(params[i], t, env));
+							} else if(params[i].isInstanceOf(CDouble.TYPE, null, env)) {
+								ps.setDouble(i + 1, (Double) ArgumentValidation.getDouble(params[i], t, env));
+							} else if(params[i].isInstanceOf(CString.TYPE, null, env)) {
 								if(type == Types.NCHAR || type == Types.NVARCHAR || type == Types.LONGNVARCHAR) {
 									ps.setNString(i + 1, (String) params[i].val());
 								} else {
 									ps.setString(i + 1, (String) params[i].val());
 								}
-							} else if(params[i].isInstanceOf(CByteArray.TYPE)) {
+							} else if(params[i].isInstanceOf(CByteArray.TYPE, null, env)) {
 								ps.setBytes(i + 1, ((CByteArray) params[i]).asByteArrayCopy());
-							} else if(params[i].isInstanceOf(CBoolean.TYPE)) {
-								ps.setBoolean(i + 1, ArgumentValidation.getBoolean(params[i], t));
+							} else if(params[i].isInstanceOf(CBoolean.TYPE, null, env)) {
+								ps.setBoolean(i + 1, ArgumentValidation.getBoolean(params[i], t, env));
 							} else {
 								throw new CRECastException("The type " + params[i].getClass().getSimpleName()
 										+ " of parameter " + (i + 1) + " is not supported.", t);
@@ -227,11 +228,11 @@ public class SQL {
 					boolean isResultSet = ps.execute();
 					if(isResultSet) {
 						//Result set
-						CArray ret = new CArray(t);
+						CArray ret = new CArray(t, null, env);
 						ResultSetMetaData md = ps.getMetaData();
 						ResultSet rs = ps.getResultSet();
 						while(rs != null && rs.next()) {
-							CArray row = CArray.GetAssociativeArray(t);
+							CArray row = CArray.GetAssociativeArray(t, null, env);
 							for(int i = 1; i <= md.getColumnCount(); i++) {
 								Construct value;
 								int columnType = md.getColumnType(i);
@@ -263,7 +264,7 @@ public class SQL {
 									case Types.BINARY:
 									case Types.VARBINARY:
 									case Types.LONGVARBINARY:
-										value = CByteArray.wrap(rs.getBytes(i), t);
+										value = CByteArray.wrap(rs.getBytes(i), t, env);
 										break;
 
 									case Types.DATE:
@@ -297,9 +298,9 @@ public class SQL {
 								// for instance SELECT foo AS bar... then we would get "foo" from that. Instead,
 								// we use the column label, which in the example, would return "bar", which is what
 								// the user will expect in the results.
-								row.set(md.getColumnLabel(i), value, t);
+								row.set(md.getColumnLabel(i), value, t, env);
 							}
-							ret.push(row, t);
+							ret.push(row, t, env);
 						}
 						return ret;
 					} else {
@@ -346,7 +347,7 @@ public class SQL {
 					env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
 							new CompilerWarning(msg, t, null));
 				}
-			} else if(queryData.isInstanceOf(CString.TYPE)) {
+			} else if(queryData.isInstanceOf(CString.TYPE, null, env)) {
 				//It's a hard coded query, so we can double check parameter lengths and other things
 				String query = queryData.val();
 				int count = 0;
@@ -495,31 +496,31 @@ public class SQL {
 		}
 
 		@Override
-		public Mixed exec(final Target t, final Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			startup();
 			Mixed arg = args[args.length - 1];
-			if(!(arg.isInstanceOf(CClosure.TYPE))) {
+			if(!(arg.isInstanceOf(CClosure.TYPE, null, env))) {
 				throw new CRECastException("The last argument to " + getName() + " must be a closure.", t);
 			}
 			final CClosure closure = ((CClosure) arg);
 			final Mixed[] newArgs = new Mixed[args.length - 1];
 			//Make a new array minus the closure
 			System.arraycopy(args, 0, newArgs, 0, newArgs.length);
-			queue.invokeLater(environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), new Runnable() {
+			queue.invokeLater(env.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), new Runnable() {
 
 				@Override
 				public void run() {
 					Mixed returnValue = CNull.NULL;
 					Mixed exception = CNull.NULL;
 					try {
-						returnValue = new query().exec(t, environment, newArgs);
+						returnValue = new query().exec(t, env, null, newArgs);
 					} catch (ConfigRuntimeException ex) {
-						exception = ObjectGenerator.GetGenerator().exception(ex, environment, t);
+						exception = ObjectGenerator.GetGenerator().exception(ex, env, t);
 					}
 					final Mixed cret = returnValue;
 					final Mixed cex = exception;
 					StaticLayer.GetConvertor().runOnMainThreadLater(
-							environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), new Runnable() {
+							env.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), new Runnable() {
 
 						@Override
 						public void run() {

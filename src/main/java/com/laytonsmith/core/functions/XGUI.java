@@ -12,6 +12,7 @@ import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREIOException;
@@ -21,6 +22,7 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.Window;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -78,7 +80,7 @@ public class XGUI {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			JFrame frame = new JFrame();
 			int id = WINDOW_IDS.incrementAndGet();
 			String title = "";
@@ -88,10 +90,10 @@ public class XGUI {
 				title = args[0].val();
 			}
 			if(args.length > 1) {
-				width = ArgumentValidation.getInt32(args[1], t);
+				width = ArgumentValidation.getInt32(args[1], t, env);
 			}
 			if(args.length > 2) {
-				height = ArgumentValidation.getInt32(args[2], t);
+				height = ArgumentValidation.getInt32(args[2], t, env);
 			}
 			frame.setTitle(title);
 			frame.setSize(width, height);
@@ -148,11 +150,11 @@ public class XGUI {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			int id = ArgumentValidation.getInt32(args[0], t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			int id = ArgumentValidation.getInt32(args[0], t, env);
 			boolean show = true;
 			if(args.length > 1) {
-				show = ArgumentValidation.getBoolean(args[1], t);
+				show = ArgumentValidation.getBoolean(args[1], t, env);
 			}
 			Window w = windows.get(id);
 			w.setVisible(show);
@@ -202,13 +204,13 @@ public class XGUI {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			int windowID = ArgumentValidation.getInt32(args[0], t);
-			int x = ArgumentValidation.getInt32(args[1], t);
-			int y = ArgumentValidation.getInt32(args[2], t);
-			int red = ArgumentValidation.getInt32(args[3], t);
-			int green = ArgumentValidation.getInt32(args[4], t);
-			int blue = ArgumentValidation.getInt32(args[5], t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			int windowID = ArgumentValidation.getInt32(args[0], t, env);
+			int x = ArgumentValidation.getInt32(args[1], t, env);
+			int y = ArgumentValidation.getInt32(args[2], t, env);
+			int red = ArgumentValidation.getInt32(args[3], t, env);
+			int green = ArgumentValidation.getInt32(args[4], t, env);
+			int blue = ArgumentValidation.getInt32(args[5], t, env);
 			Window w = windows.get(windowID);
 			while(true) {
 				try {
@@ -267,7 +269,7 @@ public class XGUI {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String url = args[0].val();
 			try {
 				if(Desktop.isDesktopSupported()) {

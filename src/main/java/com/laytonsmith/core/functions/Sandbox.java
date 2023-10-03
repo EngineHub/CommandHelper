@@ -1,6 +1,5 @@
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.core.FileWriteMode;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.PureUtilities.Version;
@@ -11,6 +10,7 @@ import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.commandhelper.BukkitDirtyRegisteredListener;
 import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.FileWriteMode;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
@@ -24,6 +24,7 @@ import com.laytonsmith.core.constructs.CResource;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
@@ -40,6 +41,7 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import org.apache.commons.io.FileUtils;
 import org.bukkit.event.Cancellable;
 
 import java.io.File;
@@ -47,7 +49,6 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Random;
-import org.apache.commons.io.FileUtils;
 
 /**
  *
@@ -104,8 +105,8 @@ public class Sandbox {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			BoundEvent.ActiveEvent original = environment.getEnv(GlobalEnv.class).GetEvent();
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			BoundEvent.ActiveEvent original = env.getEnv(GlobalEnv.class).GetEvent();
 			if(original == null) {
 				throw new CREBindException("is_cancelled cannot be called outside an event handler", t);
 			}
@@ -114,7 +115,7 @@ public class Sandbox {
 				((Cancellable) original.getUnderlyingEvent()).setCancelled(true);
 				BukkitDirtyRegisteredListener.setCancelled((org.bukkit.event.Event) original.getUnderlyingEvent());
 			}
-			environment.getEnv(GlobalEnv.class).GetEvent().setCancelled(true);
+			env.getEnv(GlobalEnv.class).GetEvent().setCancelled(true);
 			return CVoid.VOID;
 		}
 	}
@@ -157,18 +158,18 @@ public class Sandbox {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer me;
 			boolean isVanished;
 			MCPlayer other;
 			if(args.length == 2) {
-				me = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-				isVanished = ArgumentValidation.getBoolean(args[0], t);
-				other = Static.GetPlayer(args[1], t);
+				me = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				isVanished = ArgumentValidation.getBoolean(args[0], t, env);
+				other = Static.GetPlayer(args[1], t, env);
 			} else {
-				me = Static.GetPlayer(args[0], t);
-				isVanished = ArgumentValidation.getBoolean(args[1], t);
-				other = Static.GetPlayer(args[2], t);
+				me = Static.GetPlayer(args[0], t, env);
+				isVanished = ArgumentValidation.getBoolean(args[1], t, env);
+				other = Static.GetPlayer(args[2], t, env);
 			}
 
 			other.setVanished(isVanished, me);
@@ -218,15 +219,15 @@ public class Sandbox {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer me;
 			MCPlayer other;
 			if(args.length == 1) {
-				me = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-				other = Static.GetPlayer(args[0], t);
+				me = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				other = Static.GetPlayer(args[0], t, env);
 			} else {
-				me = Static.GetPlayer(args[0], t);
-				other = Static.GetPlayer(args[1], t);
+				me = Static.GetPlayer(args[0], t, env);
+				other = Static.GetPlayer(args[1], t, env);
 			}
 			return CBoolean.get(me.canSee(other));
 		}
@@ -271,7 +272,7 @@ public class Sandbox {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return new CString(GenerateMooSaying(args[0].val())
 					+ " \\   ^__^\n"
 					+ "  \\  (oo)\\_______\n"
@@ -292,7 +293,7 @@ public class Sandbox {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return new CString(
 					GenerateMooSaying(args[0].val())
 					+ "              ^__^   /\n"
@@ -314,8 +315,9 @@ public class Sandbox {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			return new CString("  .-*)) `*-.\n"
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			return new CString(""
+					+ "   .-*)) `*-.\n"
 					+ " /*  ((*   *'.\n"
 					+ "|   *))  *   *\\\n"
 					+ "| *  ((*   *  /\n"
@@ -331,11 +333,11 @@ public class Sandbox {
 	public static class norway extends DummyFunction {
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			Function color = new Echoes.color();
-			String red = color.exec(t, environment, args.length == 3 ? args[0] : new CString("RED", t)).val();
-			String white = color.exec(t, environment, args.length == 3 ? args[1] : new CString("WHITE", t)).val();
-			String blue = color.exec(t, environment, args.length == 3 ? args[2] : new CString("BLUE", t)).val();
+			String red = color.exec(t, env, null, args.length == 3 ? args[0] : new CString("RED", t)).val();
+			String white = color.exec(t, env, null, args.length == 3 ? args[1] : new CString("WHITE", t)).val();
+			String blue = color.exec(t, env, null, args.length == 3 ? args[2] : new CString("BLUE", t)).val();
 			int multiplier = 2;
 			char c = '=';
 			String one = multiply(c, 1 * multiplier);
@@ -394,7 +396,7 @@ public class Sandbox {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			Random r;
 			try {
 				r = (Random) ArgumentValidation.getObject(args[0], t, CResource.class).getResource();
@@ -520,7 +522,7 @@ public class Sandbox {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			File file = Static.GetFileFromArgument(args[0].val(), env, t, null);
 			int num = 0;
 			try {
@@ -600,20 +602,20 @@ public class Sandbox {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			if(!Static.InCmdLine(environment, true)) {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			if(!Static.InCmdLine(env, true)) {
 				throw new CRESecurityException(getName() + " is only available in cmdline mode.", t);
 			}
-			File location = Static.GetFileFromArgument(args[0].val(), environment, t, null);
+			File location = Static.GetFileFromArgument(args[0].val(), env, t, null);
 			if(location.isDirectory()) {
 				throw new CREIOException("Path already exists, and is a directory", t);
 			}
 
 			byte[] content;
-			if(!(args[1].isInstanceOf(CByteArray.TYPE))) {
+			if(!(args[1].isInstanceOf(CByteArray.TYPE, null, env))) {
 				content = args[1].val().getBytes(Charset.forName("UTF-8"));
 			} else {
-				content = ArgumentValidation.getByteArray(args[1], t).asByteArrayCopy();
+				content = ArgumentValidation.getByteArray(args[1], t, env).asByteArrayCopy();
 			}
 			FileWriteMode mode = FileWriteMode.SAFE_WRITE;
 			if(args.length > 2) {

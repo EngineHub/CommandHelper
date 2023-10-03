@@ -2,7 +2,7 @@ package com.laytonsmith.core.compiler.analysis;
 
 import com.laytonsmith.core.NodeModifiers;
 import com.laytonsmith.core.ParseTree;
-import com.laytonsmith.core.constructs.CClassType;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
 
 /**
@@ -16,12 +16,12 @@ public class ParamDeclaration extends Declaration {
 	/**
 	 * Creates a new {@link ParamDeclaration} in the {@link Namespace#IVARIABLE} namespace.
 	 * @param identifier The parameter name.
-	 * @param type The parameter {@link CClassType}.
+	 * @param type The parameter {@link LeftHandSideType}.
 	 * @param defaultValue The default value. If not set, this should be java null.
 	 * @param modifiers The node modifiers.
 	 * @param t The parameter target.
 	 */
-	public ParamDeclaration(String identifier, CClassType type, ParseTree defaultValue, NodeModifiers modifiers, Target t) {
+	public ParamDeclaration(String identifier, LeftHandSideType type, ParseTree defaultValue, NodeModifiers modifiers, Target t) {
 		super(Namespace.IVARIABLE, identifier, type, modifiers, t);
 		this.defaultValue = defaultValue;
 	}

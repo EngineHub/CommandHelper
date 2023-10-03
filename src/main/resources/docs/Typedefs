@@ -1,0 +1,52 @@
+{{unimplemented}}
+
+Typedefs (type definitions) are a shorthand way of creating class aliases. Like <code>use</code> statements, they are
+syntax sugar, and do not provide any functionality, only a shortcut during code writing.
+
+At their simplest, a typedef is just another name for a ClassType.
+
+<%CODE|
+typedef S = string;
+msg(typeof(S)); // ms.lang.string
+%>
+
+By itself, this can be used to rename long classes or add disambiguation when dealing with classes with the same base
+name that are in different packages.
+
+<%CODE|
+typedef RLCNTIITT = ReallyLongClassNameThatIsInconvenientToType;
+
+typedef MyClass1 = org1.package.MyClass;
+typedef MyClass2 = org2.package.MyClass;
+%>
+
+Typedefs can also accept a GenericDeclaration with or without multiple constraints.
+
+<%CODE|
+typedef T = ? extends object & MyInterface & new(A, B, C);
+typedef U = number
+
+msg(typeof(T)); // GenericDeclaration<? extends ms.lang.object & my.package.MyInterface & new(A, B, C)>
+msg(typeof(U)); // GenericDeclaration<ms.lang.number>
+
+T proc _returnsT() {
+    return(new T(new A(), new B(), new C()));
+}
+%>
+
+Typedefs can rely on other typedefs, though the relationship cannot be circular, and they are defined in the declaration
+order.
+
+<%CODE|
+typedef V = T; // invalid, T not defined
+typedef T = int;
+typedef U = T;
+%>
+
+Typedefs are not actual objects and therefore may not be null.
+
+<%CODE|
+typedef D = null; // compile error
+%>
+
+Typedefs, like use statement are scoped to the file they are declared in, and must be declared at the top.

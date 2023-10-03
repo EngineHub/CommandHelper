@@ -1,6 +1,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.Pair;
 import com.laytonsmith.PureUtilities.SmartComment;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
@@ -22,8 +23,12 @@ import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.UnqualifiedGenericDeclaration;
+import com.laytonsmith.core.constructs.generics.UnqualifiedGenericTypeParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.CREClassDefinitionError;
@@ -42,10 +47,11 @@ import com.laytonsmith.core.objects.ObjectDefinitionTable;
 import com.laytonsmith.core.objects.ObjectModifier;
 import com.laytonsmith.core.objects.ObjectType;
 import com.laytonsmith.core.objects.UserObject;
+
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -80,7 +86,7 @@ public class ObjectManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 		}
 
@@ -131,7 +137,7 @@ public class ObjectManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			throw new Error();
 		}
 
@@ -143,11 +149,11 @@ public class ObjectManagement {
 		 * @param t
 		 * @return
 		 */
-		private Mixed evaluateArray(ParseTree data, Target t) {
+		private Mixed evaluateArray(ParseTree data, Target t, Environment env) {
 			if(data.getData() instanceof CNull) {
 				return CNull.NULL;
 			}
-			CArray n = new CArray(t);
+			CArray n = new CArray(t, null, env);
 			if(!(data.getData() instanceof CFunction) || !data.getData().val().equals(DataHandling.array.NAME)) {
 				throw new CREClassDefinitionError("Expected array, but found " + data.getData() + " instead", t);
 			}
@@ -155,37 +161,40 @@ public class ObjectManagement {
 				if(child.isDynamic()) {
 					throw new CREClassDefinitionError("Dynamic elements may not be used in a class definition", t);
 				}
-				n.push(child.getData(), t);
+				n.push(child.getData(), t, env);
 			}
 			return n;
 		}
 
-		private CArray evaluateArrayNoNull(ParseTree data, String component, Target t) {
-			Mixed d = evaluateArray(data, t);
+		private CArray evaluateArrayNoNull(ParseTree data, String component, Target t, Environment env) {
+			Mixed d = evaluateArray(data, t, env);
 			if(d instanceof CNull) {
 				throw new CREClassDefinitionError("Unexpected null value for " + component + ", expected an array", t);
 			}
 			return (CArray) d;
 		}
 
-		private Mixed evaluateString(ParseTree data, Target t) {
+		private Mixed evaluateString(ParseTree data, Target t, Environment env) {
 			if(data.getData() instanceof CNull) {
 				return CNull.NULL;
 			}
-			if(!(data.getData().isInstanceOf(CString.TYPE))) {
-				throw new CREClassDefinitionError("Expected a string, but found " + data.getData() + " instead", t);
+			if(data.getData() instanceof CClassType) {
+				return new CString(data.getData().val(), data.getTarget());
+			}
+			if(!(data.getData() instanceof CString)) {
+				throw new CREClassDefinitionError("Expected a string, but found " + data.getData() + " (" + data.getData().typeof(env) + ") instead", t);
 			}
 			return data.getData();
 		}
-		private CString evaluateStringNoNull(ParseTree data, Target t) {
-			Mixed d = evaluateString(data, t);
+		private CString evaluateStringNoNull(ParseTree data, Target t, Environment env) {
+			Mixed d = evaluateString(data, t, env);
 			if(d instanceof CNull) {
 				throw new CREClassDefinitionError("Expected a string, but found null instead", t);
 			}
 			return (CString) d;
 		}
 
-		private Mixed evaluateMixed(ParseTree data, Target t) {
+		private Mixed evaluateMixed(ParseTree data, Target t, Environment env) {
 			if(data.isDynamic()) {
 			// TODO: Since CClassType doesn't know about other classes yet, we can't allow hardcoding yet, as it's
 			// a chicken and egg problem. Eventually, when we get a two pass compiler, this can be re-allowed, but
@@ -197,7 +206,7 @@ public class ObjectManagement {
 					throw new CREClassDefinitionError("Expected __to_class_reference__, but found " + data.getData()
 							+ " instead", t);
 				}
-				return new __to_class_reference__().exec(t, null,
+				return new __to_class_reference__().exec(t, env, null,
 						data.getChildren().stream()
 								.map((parseTree -> parseTree.getData()))
 								.collect(Collectors.toList())
@@ -207,28 +216,28 @@ public class ObjectManagement {
 		}
 
 		@Override
-		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
 			// 0 - Access Modifier
-			AccessModifier accessModifier = ArgumentValidation.getEnum(evaluateStringNoNull(nodes[0], t),
+			AccessModifier accessModifier = ArgumentValidation.getEnum(evaluateStringNoNull(nodes[0], t, env),
 					AccessModifier.class, t);
 
 			// 1 - Object Modifiers
-			Set<ObjectModifier> objectModifiers = evaluateArrayNoNull(nodes[1], "object modifiers", t).asList().stream()
+			Set<ObjectModifier> objectModifiers = evaluateArrayNoNull(nodes[1], "object modifiers", t, env).asList(env).stream()
 					.map((item) -> ArgumentValidation.getEnum(item, ObjectModifier.class, t))
 					.collect(Collectors.toSet());
 
 			// 2 - Object Type
-			ObjectType type = ArgumentValidation.getEnum(evaluateStringNoNull(nodes[2], t), ObjectType.class, t);
+			ObjectType type = ArgumentValidation.getEnum(evaluateStringNoNull(nodes[2], t, env), ObjectType.class, t);
 
 			// 3 - Object Name
 			FullyQualifiedClassName name
-					= FullyQualifiedClassName.forFullyQualifiedClass(evaluateStringNoNull(nodes[3], t).val());
+					= FullyQualifiedClassName.forFullyQualifiedClass(evaluateStringNoNull(nodes[3], t, env).val());
 
 			// 4 - Superclasses
-			Set<UnqualifiedClassName> superclasses = new HashSet<>();
+			LinkedHashSet<Pair<UnqualifiedClassName, UnqualifiedGenericTypeParameters>> superclasses = new LinkedHashSet<>();
 			{
-				CArray su = evaluateArrayNoNull(nodes[4], "superclasses", t);
-				if(!type.canUseExtends() && !su.isEmpty()) {
+				CArray su = evaluateArrayNoNull(nodes[4], "superclasses", t, env);
+				if(!type.canUseExtends() && !su.isEmpty(env)) {
 					throw new CREClassDefinitionError("An object definition of type " + type.name().toLowerCase()
 							+ " may not extend"
 							+ " another object type" + (type.canUseImplements() ? " (though it can implement"
@@ -236,33 +245,37 @@ public class ObjectManagement {
 				}
 				for(Mixed m : su) {
 					if(m instanceof CClassType) {
-						superclasses.add(new UnqualifiedClassName(((CClassType) m).getFQCN()));
+						superclasses.add(new Pair<>(new UnqualifiedClassName(((CClassType) m).getFQCN()),
+								/*TODO*/ null));
 					} else {
-						superclasses.add(new UnqualifiedClassName(m.val(), t));
+						superclasses.add(new Pair<>(new UnqualifiedClassName(m.val(), t),
+								/*TODO*/ null));
 					}
 				}
 			}
 
 			if(type.extendsMixed() && superclasses.isEmpty()) {
-				superclasses.add(Mixed.TYPE.getFQCN().asUCN());
+				superclasses.add(new Pair<>(Mixed.TYPE.getFQCN().asUCN(), null));
 			}
 
 			// 5 - Interfaces
-			Set<UnqualifiedClassName> interfaces = new HashSet<>();
+			LinkedHashSet<Pair<UnqualifiedClassName, UnqualifiedGenericTypeParameters>> interfaces = new LinkedHashSet<>();
 			{
-				CArray su = evaluateArrayNoNull(nodes[5], "interfaces", t);
+				CArray su = evaluateArrayNoNull(nodes[5], "interfaces", t, env);
 				for(Mixed m : su) {
 					if(m instanceof CClassType) {
-						interfaces.add(new UnqualifiedClassName(((CClassType) m).getFQCN()));
+						interfaces.add(new Pair<>(new UnqualifiedClassName(((CClassType) m).getFQCN()),
+								/*TODO*/ null));
 					} else {
-						interfaces.add(new UnqualifiedClassName(m.val(), t));
+						interfaces.add(new Pair<>(new UnqualifiedClassName(m.val(), t),
+								/*TODO*/ null));
 					}
 				}
 
 			}
 
 			// 6- Enum list
-			Mixed el = evaluateArray(nodes[6], t);
+			Mixed el = evaluateArray(nodes[6], t, env);
 			if(type != ObjectType.ENUM && el != CNull.NULL) {
 				throw new CREClassDefinitionError("Only enum types may define an enum list", t);
 			} else if(type == ObjectType.ENUM && el == CNull.NULL) {
@@ -286,7 +299,11 @@ public class ObjectManagement {
 			if(nodes[9].getData() instanceof CNull) {
 				containingClass = null;
 			} else {
-				containingClass = ArgumentValidation.getClassType(evaluateMixed(nodes[9], t), t);
+				LeftHandSideType lhst = ArgumentValidation.getClassType(evaluateMixed(nodes[9], t, env), t, env);
+				if(lhst.isTypeUnion()) {
+					throw new CREClassDefinitionError("Containing class cannot be a type union.", t);
+				}
+				containingClass = lhst.getTypes().get(0).getType();
 			}
 
 			// 10 - Class Comment
@@ -305,9 +322,8 @@ public class ObjectManagement {
 			}
 
 			// 11 - Generic Parameter declarations
-			// TODO This should of course not be Object, but I need
-			// to create a new class first.
-			List<Object> genericDeclarations = new ArrayList<>();
+			// TODO This should of course not be null
+			UnqualifiedGenericDeclaration genericDeclarations = null;
 
 			// TODO Populate the native elements in the ElementDefinition
 
@@ -332,7 +348,8 @@ public class ObjectManagement {
 					accessModifier,
 					objectModifiers,
 					type,
-					CClassType.defineClass(name),
+					name,
+					genericDeclarations,
 					superclasses,
 					interfaces,
 					containingClass,
@@ -340,7 +357,6 @@ public class ObjectManagement {
 					elementDefinitions,
 					annotations,
 					classComment,
-					genericDeclarations,
 					nativeClass);
 			if(env == null) {
 				throw new Error("Environment may not be null");
@@ -360,14 +376,14 @@ public class ObjectManagement {
 					// However, during the course of normal runtime, new classes are allowed to be defined, but they
 					// are defined and qualified at the same time, so they are ready for immediate use. The bulk compilation
 					// option is set only at first load, and then unset, so normal runtime will not have this flag set.
-					def.qualifyClasses(env);
+					def.qualifyClasses(env, t);
 				} catch (ConfigCompileGroupException ex) {
 					List<String> msgs = new ArrayList<>();
 					for(ConfigCompileException e : ex.getList()) {
 						msgs.add(e.getMessage() + " - " + e.getTarget());
 					}
 					throw new CREClassDefinitionError("One or more compile errors occurred while trying to compile "
-							+ def.getName() + ":\n" + StringUtils.Join(msgs, "\n"), t);
+							+ def.getName() + ":\n" + StringUtils.Join(msgs, "\n"), t, ex);
 				}
 			}
 
@@ -380,7 +396,7 @@ public class ObjectManagement {
 				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			// Do the same thing as execs, but remove this call
-			execs(t, env, null, children.toArray(new ParseTree[children.size()]));
+			execs(t, env, null, null, children.toArray(new ParseTree[children.size()]));
 			return REMOVE_ME;
 		}
 
@@ -448,7 +464,7 @@ public class ObjectManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			throw new Error();
 		}
 
@@ -460,7 +476,7 @@ public class ObjectManagement {
 		private static final int UNDECIDEABLE = -2;
 
 		@Override
-		public Mixed execs(final Target t, final Environment env, Script parent, ParseTree... args)
+		public Mixed execs(final Target t, final Environment env, Script parent, GenericParameters generics, ParseTree... args)
 				throws ConfigRuntimeException {
 			ObjectDefinitionTable odt = env.getEnv(CompilerEnvironment.class).getObjectDefinitionTable();
 			CClassType clazz = ((CClassType) args[0].getData());
@@ -495,7 +511,8 @@ public class ObjectManagement {
 				// TODO If this is a native object, we need to intercept the call to the native constructor,
 				// and grab the object generated there.
 			}
-			Mixed obj = new UserObject(t, parent, env, od, null);
+			GenericParameters genericParameters = null; // TODO
+			Mixed obj = new UserObject(t, parent, env, od, genericParameters, null);
 			// This is the MethodScript construction.
 			if(constructor != null) {
 				Mixed[] values = new Mixed[args.length - 1];
@@ -520,21 +537,17 @@ public class ObjectManagement {
 			if(children.get(0).isDynamic()) {
 				throw new ConfigCompileException("The first parameter to new_object must be hardcoded.", t);
 			}
-			FullyQualifiedClassName fqcn = FullyQualifiedClassName.forName(children.get(0).getData().val(), t, env);
+			FullyQualifiedClassName fqcn;
 			ObjectDefinition od;
 			try {
+				fqcn = FullyQualifiedClassName.forName(children.get(0).getData().val(), t, env);
 				od = odt.get(fqcn);
 			} catch (ObjectDefinitionNotFoundException ex) {
-				throw new ConfigCompileException("Could not find class with name " + fqcn + ". Are you missing"
-						+ " a \"use\" statement?", t);
+				throw new ConfigCompileException("Could not find class with name " + children.get(0).getData().val()
+						+ ". Are you missing a \"use\" statement?", t);
 			}
-			try {
-				children.set(0, new ParseTree(CClassType.get(fqcn), fileOptions));
-			} catch (ClassNotFoundException ex) {
-				// This shouldn't happen, as we would have already thrown a CCE above if the class
-				// really didn't exist.
-				throw new Error(ex);
-			}
+
+			children.set(0, new ParseTree(CClassType.get(fqcn, env), fileOptions));
 			List<ElementDefinition> constructors = od.getElements().get("<constructor>");
 			int id;
 			if(constructors == null || constructors.isEmpty()) {
@@ -570,7 +583,7 @@ public class ObjectManagement {
 
 		@Override
 		public String docs() {
-			return "<T> T {ClassType<T> type, params...} Constructs a new object of the specified type. The type must"
+			return "<T> T {ClassType<T> type, array genericParameters, params...} Constructs a new object of the specified type. The type must"
 					+ " be hardcoded.";
 		}
 
@@ -597,12 +610,8 @@ public class ObjectManagement {
 
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			try {
-				return CClassType.get(FullyQualifiedClassName.forFullyQualifiedClass(args[0].val()));
-			} catch (ClassNotFoundException ex) {
-				throw new CREClassDefinitionError(ex.getMessage(), t, ex);
-			}
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			return CClassType.get(FullyQualifiedClassName.forFullyQualifiedClass(args[0].val()), env);
 		}
 
 	}

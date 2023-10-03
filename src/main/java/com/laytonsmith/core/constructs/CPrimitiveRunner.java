@@ -3,6 +3,7 @@ package com.laytonsmith.core.constructs;
 import com.laytonsmith.PureUtilities.Common.Annotations.InterfaceRunnerFor;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.natives.interfaces.AbstractMixedInterfaceRunner;
 import com.laytonsmith.core.natives.interfaces.Booleanish;
 import com.laytonsmith.core.natives.interfaces.Mixed;
@@ -40,6 +41,11 @@ public class CPrimitiveRunner extends AbstractMixedInterfaceRunner {
 	@Override
 	public ObjectType getObjectType() {
 		return ObjectType.ABSTRACT;
+	}
+
+	@Override
+	public GenericParameters getGenericParameters() {
+		return null;
 	}
 
 

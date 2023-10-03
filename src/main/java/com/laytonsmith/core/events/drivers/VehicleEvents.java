@@ -6,18 +6,18 @@ import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
-import com.laytonsmith.abstraction.entities.MCVehicle;
-import com.laytonsmith.abstraction.entities.MCProjectile;
 import com.laytonsmith.abstraction.MCProjectileSource;
 import com.laytonsmith.abstraction.blocks.MCBlockProjectileSource;
+import com.laytonsmith.abstraction.entities.MCProjectile;
+import com.laytonsmith.abstraction.entities.MCVehicle;
 import com.laytonsmith.abstraction.enums.MCCollisionType;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.events.MCVehicleBlockCollideEvent;
 import com.laytonsmith.abstraction.events.MCVehicleCollideEvent;
-import com.laytonsmith.abstraction.events.MCVehicleEntityCollideEvent;
-import com.laytonsmith.abstraction.events.MCVehicleEnterExitEvent;
-import com.laytonsmith.abstraction.events.MCVehicleMoveEvent;
 import com.laytonsmith.abstraction.events.MCVehicleDestroyEvent;
+import com.laytonsmith.abstraction.events.MCVehicleEnterExitEvent;
+import com.laytonsmith.abstraction.events.MCVehicleEntityCollideEvent;
+import com.laytonsmith.abstraction.events.MCVehicleMoveEvent;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSLog;
@@ -29,6 +29,7 @@ import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.AbstractEvent;
 import com.laytonsmith.core.events.BindableEvent;
 import com.laytonsmith.core.events.BoundEvent;
@@ -75,23 +76,23 @@ public class VehicleEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event, Environment env) throws PrefilterNonMatchException {
 			if(event instanceof MCVehicleEnterExitEvent) {
 				MCVehicleEnterExitEvent e = (MCVehicleEnterExitEvent) event;
-				Prefilters.match(prefilter, "vehicletype", e.getVehicle().getType().name(), PrefilterType.MACRO);
-				Prefilters.match(prefilter, "passengertype", e.getEntity().getType().name(), PrefilterType.MACRO);
+				Prefilters.match(prefilter, "vehicletype", e.getVehicle().getType().name(), PrefilterType.MACRO, env);
+				Prefilters.match(prefilter, "passengertype", e.getEntity().getType().name(), PrefilterType.MACRO, env);
 				return true;
 			}
 			return false;
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
+		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
 			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			if(event instanceof MCVehicleEnterExitEvent) {
 				MCVehicleEnterExitEvent e = (MCVehicleEnterExitEvent) event;
 				Target t = Target.UNKNOWN;
@@ -117,7 +118,7 @@ public class VehicleEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			return false;
 		}
 
@@ -146,23 +147,23 @@ public class VehicleEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event, Environment env) throws PrefilterNonMatchException {
 			if(event instanceof MCVehicleEnterExitEvent) {
 				MCVehicleEnterExitEvent e = (MCVehicleEnterExitEvent) event;
-				Prefilters.match(prefilter, "vehicletype", e.getVehicle().getType().name(), PrefilterType.MACRO);
-				Prefilters.match(prefilter, "passengertype", e.getEntity().getType().name(), PrefilterType.MACRO);
+				Prefilters.match(prefilter, "vehicletype", e.getVehicle().getType().name(), PrefilterType.MACRO, env);
+				Prefilters.match(prefilter, "passengertype", e.getEntity().getType().name(), PrefilterType.MACRO, env);
 				return true;
 			}
 			return false;
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
+		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
 			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			if(event instanceof MCVehicleEnterExitEvent) {
 				MCVehicleEnterExitEvent e = (MCVehicleEnterExitEvent) event;
 				Target t = Target.UNKNOWN;
@@ -188,7 +189,7 @@ public class VehicleEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			return false;
 		}
 
@@ -229,7 +230,8 @@ public class VehicleEvents {
 			Map<String, Mixed> prefilter = event.getPrefilter();
 			if(prefilter.containsKey("hittype")) {
 				Mixed type = prefilter.get("hittype");
-				if(type.isInstanceOf(CString.TYPE) && type.val().contains(":") || ArgumentValidation.isNumber(type)) {
+				if(type.isInstanceOf(CString.TYPE, null, event.getEnvironment())
+						&& type.val().contains(":") || ArgumentValidation.isNumber(type, event.getEnvironment())) {
 					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The 0:0 block format in " + getName()
 							+ " is deprecated in \"hittype\".", event.getTarget());
 					MCItemStack is = Static.ParseItemNotation(null, type.val(), 1, event.getTarget());
@@ -239,10 +241,10 @@ public class VehicleEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Environment env) throws PrefilterNonMatchException {
 			if(e instanceof MCVehicleCollideEvent) {
 				MCVehicleCollideEvent event = (MCVehicleCollideEvent) e;
-				Prefilters.match(prefilter, "type", event.getVehicle().getType().name(), PrefilterType.MACRO);
+				Prefilters.match(prefilter, "type", event.getVehicle().getType().name(), PrefilterType.MACRO, env);
 				if(prefilter.containsKey("collisiontype")) {
 					if(!event.getCollisionType().name().equals(prefilter.get("collisiontype").val())) {
 						return false;
@@ -252,11 +254,11 @@ public class VehicleEvents {
 					case BLOCK:
 						Prefilters.match(prefilter, "hittype",
 								((MCVehicleBlockCollideEvent) event).getBlock().getType().getName(),
-								PrefilterType.STRING_MATCH);
+								PrefilterType.STRING_MATCH, env);
 						break;
 					case ENTITY:
 						Prefilters.match(prefilter, "hittype", ((MCVehicleEntityCollideEvent) event)
-								.getEntity().getType().name(), PrefilterType.MACRO);
+								.getEntity().getType().name(), PrefilterType.MACRO, env);
 						break;
 					default:
 						throw ConfigRuntimeException.CreateUncatchableException("Greetings from the future! If you are seeing this message,"
@@ -269,12 +271,12 @@ public class VehicleEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
+		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
 			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			if(event instanceof MCVehicleCollideEvent) {
 				MCVehicleCollideEvent e = (MCVehicleCollideEvent) event;
 				Target t = Target.UNKNOWN;
@@ -289,7 +291,7 @@ public class VehicleEvents {
 				switch(e.getCollisionType()) {
 					case BLOCK:
 						block = ObjectGenerator.GetGenerator().location(
-								((MCVehicleBlockCollideEvent) e).getBlock().getLocation(), false);
+								((MCVehicleBlockCollideEvent) e).getBlock().getLocation(), false, env);
 						break;
 					case ENTITY:
 						MCVehicleEntityCollideEvent vec = (MCVehicleEntityCollideEvent) e;
@@ -318,15 +320,15 @@ public class VehicleEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			if(event instanceof MCVehicleEntityCollideEvent) {
 				MCVehicleEntityCollideEvent e = (MCVehicleEntityCollideEvent) event;
 				if(key.equals("collide")) {
-					e.setCollisionCancelled(!ArgumentValidation.getBoolean(value, Target.UNKNOWN));
+					e.setCollisionCancelled(!ArgumentValidation.getBoolean(value, Target.UNKNOWN, env));
 					return true;
 				}
 				if(key.equals("pickup")) {
-					e.setPickupCancelled(!ArgumentValidation.getBoolean(value, Target.UNKNOWN));
+					e.setPickupCancelled(!ArgumentValidation.getBoolean(value, Target.UNKNOWN, env));
 					return true;
 				}
 			}
@@ -392,7 +394,7 @@ public class VehicleEvents {
 			int threshold = 1;
 			Map<String, Mixed> prefilters = event.getPrefilter();
 			if(prefilters.containsKey("threshold")) {
-				threshold = ArgumentValidation.getInt32(prefilters.get("threshold"), Target.UNKNOWN);
+				threshold = ArgumentValidation.getInt32(prefilters.get("threshold"), Target.UNKNOWN, event.getEnvironment());
 			}
 			THRESHOLD_LIST.add(threshold);
 		}
@@ -402,14 +404,14 @@ public class VehicleEvents {
 			int threshold = 1;
 			Map<String, Mixed> prefilters = event.getPrefilter();
 			if(prefilters.containsKey("threshold")) {
-				threshold = ArgumentValidation.getInt32(prefilters.get("threshold"), Target.UNKNOWN);
+				threshold = ArgumentValidation.getInt32(prefilters.get("threshold"), Target.UNKNOWN, event.getEnvironment());
 			}
 			for(BoundEvent b : EventUtils.GetEvents(event.getDriver())) {
 				if(b.getId().equals(event.getId())) {
 					continue;
 				}
 				if(b.getPrefilter().containsKey("threshold")) {
-					if(threshold == ArgumentValidation.getInt(b.getPrefilter().get("threshold"), Target.UNKNOWN)) {
+					if(threshold == ArgumentValidation.getInt(b.getPrefilter().get("threshold"), Target.UNKNOWN, event.getEnvironment())) {
 						return;
 					}
 				}
@@ -436,11 +438,11 @@ public class VehicleEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Environment env) throws PrefilterNonMatchException {
 			if(e instanceof MCVehicleMoveEvent) {
 				MCVehicleMoveEvent event = (MCVehicleMoveEvent) e;
 				if(prefilter.containsKey("threshold")) {
-					if(ArgumentValidation.getInt(prefilter.get("threshold"), Target.UNKNOWN) != event.getThreshold()) {
+					if(ArgumentValidation.getInt(prefilter.get("threshold"), Target.UNKNOWN, env) != event.getThreshold()) {
 						return false;
 					}
 				} else if(event.getThreshold() != 1) {
@@ -451,24 +453,24 @@ public class VehicleEvents {
 					return false;
 				}
 				if(prefilter.containsKey("from")) {
-					MCLocation pLoc = ObjectGenerator.GetGenerator().location(prefilter.get("from"), event.getVehicle().getVehicle().getWorld(), Target.UNKNOWN);
+					MCLocation pLoc = ObjectGenerator.GetGenerator().location(prefilter.get("from"), event.getVehicle().getVehicle().getWorld(), Target.UNKNOWN, env);
 					MCLocation loc = event.getFrom();
 					if(loc.getBlockX() != pLoc.getBlockX() || loc.getBlockY() != pLoc.getBlockY() || loc.getBlockZ() != pLoc.getBlockZ()) {
 						return false;
 					}
 				}
 				if(prefilter.containsKey("to")) {
-					MCLocation pLoc = ObjectGenerator.GetGenerator().location(prefilter.get("to"), event.getVehicle().getVehicle().getWorld(), Target.UNKNOWN);
+					MCLocation pLoc = ObjectGenerator.GetGenerator().location(prefilter.get("to"), event.getVehicle().getVehicle().getWorld(), Target.UNKNOWN, env);
 					MCLocation loc = event.getFrom();
 					if(loc.getBlockX() != pLoc.getBlockX() || loc.getBlockY() != pLoc.getBlockY() || loc.getBlockZ() != pLoc.getBlockZ()) {
 						return false;
 					}
 				}
 
-				Prefilters.match(prefilter, "vehicletype", event.getVehicle().getType().name(), PrefilterType.MACRO);
+				Prefilters.match(prefilter, "vehicletype", event.getVehicle().getType().name(), PrefilterType.MACRO, env);
 				List<MCEntity> passengers = event.getVehicle().getPassengers();
 				if(!passengers.isEmpty()) {
-					Prefilters.match(prefilter, "passengertype", passengers.get(0).getType().name(), PrefilterType.MACRO);
+					Prefilters.match(prefilter, "passengertype", passengers.get(0).getType().name(), PrefilterType.MACRO, env);
 				}
 
 				return true;
@@ -477,27 +479,27 @@ public class VehicleEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
+		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
 
-			MCEntity e = Static.getEntity(manualObject.get("id", Target.UNKNOWN), Target.UNKNOWN);
+			MCEntity e = Static.getEntity(manualObject.get("id", Target.UNKNOWN, env), Target.UNKNOWN);
 			if(!(e instanceof MCVehicle)) {
 				throw new CREBadEntityException("The id was not a vehicle", Target.UNKNOWN);
 			}
 
-			MCLocation from = ObjectGenerator.GetGenerator().location(manualObject.get("from", Target.UNKNOWN), e.getWorld(), manualObject.getTarget());
-			MCLocation to = ObjectGenerator.GetGenerator().location(manualObject.get("to", Target.UNKNOWN), e.getWorld(), manualObject.getTarget());
+			MCLocation from = ObjectGenerator.GetGenerator().location(manualObject.get("from", Target.UNKNOWN, env), e.getWorld(), manualObject.getTarget(), env);
+			MCLocation to = ObjectGenerator.GetGenerator().location(manualObject.get("to", Target.UNKNOWN, env), e.getWorld(), manualObject.getTarget(), env);
 			return EventBuilder.instantiate(MCVehicleMoveEvent.class, e, from, to);
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			if(event instanceof MCVehicleMoveEvent) {
 				MCVehicleMoveEvent e = (MCVehicleMoveEvent) event;
 				Target t = Target.UNKNOWN;
 				Map<String, Mixed> ret = new HashMap<>();
 				ret.put("world", new CString(e.getFrom().getWorld().getName(), t));
-				ret.put("from", ObjectGenerator.GetGenerator().location(e.getFrom()));
-				ret.put("to", ObjectGenerator.GetGenerator().location(e.getTo()));
+				ret.put("from", ObjectGenerator.GetGenerator().location(e.getFrom(), env));
+				ret.put("to", ObjectGenerator.GetGenerator().location(e.getTo(), env));
 				ret.put("vehicletype", new CString(e.getVehicle().getType().name(), t));
 				ret.put("id", new CString(e.getVehicle().getUniqueId().toString(), t));
 
@@ -533,7 +535,7 @@ public class VehicleEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			//Nothing can be modified, so always return false
 			return false;
 		}
@@ -566,22 +568,22 @@ public class VehicleEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event, Environment env) throws PrefilterNonMatchException {
 			if(event instanceof MCVehicleDestroyEvent) {
 				MCVehicleDestroyEvent e = (MCVehicleDestroyEvent) event;
-				Prefilters.match(prefilter, "vehicletype", e.getVehicle().getType().name(), PrefilterType.MACRO);
+				Prefilters.match(prefilter, "vehicletype", e.getVehicle().getType().name(), PrefilterType.MACRO, env);
 				return true;
 			}
 			return false;
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
+		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
 			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			if(event instanceof MCVehicleDestroyEvent) {
 				MCVehicleDestroyEvent e = (MCVehicleDestroyEvent) event;
 				Target t = Target.UNKNOWN;
@@ -601,10 +603,10 @@ public class VehicleEvents {
 					} else if(shooter instanceof MCEntity) {
 						ret.put("shooter", new CString(((MCEntity) shooter).getUniqueId().toString(), Target.UNKNOWN));
 					} else if(shooter instanceof MCBlockProjectileSource) {
-						ret.put("shooter", ObjectGenerator.GetGenerator().location(((MCBlockProjectileSource) shooter).getBlock().getLocation(), false));
+						ret.put("shooter", ObjectGenerator.GetGenerator().location(((MCBlockProjectileSource) shooter).getBlock().getLocation(), false, env));
 					}
 				}
-				ret.put("location", ObjectGenerator.GetGenerator().location(e.getVehicle().getLocation()));
+				ret.put("location", ObjectGenerator.GetGenerator().location(e.getVehicle().getLocation(), env));
 				return ret;
 			} else {
 				throw new EventException("Could not convert to MCVehicleDestroyEvent");
@@ -617,7 +619,7 @@ public class VehicleEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			return false;
 		}
 

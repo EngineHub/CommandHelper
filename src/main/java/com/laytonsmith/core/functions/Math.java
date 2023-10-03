@@ -15,17 +15,18 @@ import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.SimpleDocumentation;
-import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
+import com.laytonsmith.core.compiler.signature.FunctionSignatures;
+import com.laytonsmith.core.compiler.signature.SignatureBuilder;
 import com.laytonsmith.core.constructs.CArray;
-import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CMutablePrimitive;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
@@ -39,8 +40,8 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.natives.interfaces.Mixed;
-import java.text.DecimalFormat;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -77,17 +78,17 @@ public class Math {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
-			if(ArgumentValidation.anyDoubles(args)) {
-				double tally = ArgumentValidation.getNumber(args[0], t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+			if(ArgumentValidation.anyDoubles(env, args)) {
+				double tally = ArgumentValidation.getNumber(args[0], t, env);
 				for(int i = 1; i < args.length; i++) {
-					tally += ArgumentValidation.getNumber(args[i], t);
+					tally += ArgumentValidation.getNumber(args[i], t, env);
 				}
 				return new CDouble(tally, t);
 			} else {
-				long tally = ArgumentValidation.getInt(args[0], t);
+				long tally = ArgumentValidation.getInt(args[0], t, env);
 				for(int i = 1; i < args.length; i++) {
-					tally += ArgumentValidation.getInt(args[i], t);
+					tally += ArgumentValidation.getInt(args[i], t, env);
 				}
 				return new CInt(tally, t);
 			}
@@ -165,17 +166,17 @@ public class Math {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
-			if(ArgumentValidation.anyDoubles(args)) {
-				double tally = ArgumentValidation.getNumber(args[0], t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+			if(ArgumentValidation.anyDoubles(env, args)) {
+				double tally = ArgumentValidation.getNumber(args[0], t, env);
 				for(int i = 1; i < args.length; i++) {
-					tally -= ArgumentValidation.getNumber(args[i], t);
+					tally -= ArgumentValidation.getNumber(args[i], t, env);
 				}
 				return new CDouble(tally, t);
 			} else {
-				long tally = ArgumentValidation.getInt(args[0], t);
+				long tally = ArgumentValidation.getInt(args[0], t, env);
 				for(int i = 1; i < args.length; i++) {
-					tally -= ArgumentValidation.getInt(args[i], t);
+					tally -= ArgumentValidation.getInt(args[i], t, env);
 				}
 				return new CInt(tally, t);
 			}
@@ -241,17 +242,17 @@ public class Math {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
-			if(ArgumentValidation.anyDoubles(args)) {
-				double tally = ArgumentValidation.getNumber(args[0], t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+			if(ArgumentValidation.anyDoubles(env, args)) {
+				double tally = ArgumentValidation.getNumber(args[0], t, env);
 				for(int i = 1; i < args.length; i++) {
-					tally *= ArgumentValidation.getNumber(args[i], t);
+					tally *= ArgumentValidation.getNumber(args[i], t, env);
 				}
 				return new CDouble(tally, t);
 			} else {
-				long tally = ArgumentValidation.getInt(args[0], t);
+				long tally = ArgumentValidation.getInt(args[0], t, env);
 				for(int i = 1; i < args.length; i++) {
-					tally *= ArgumentValidation.getInt(args[i], t);
+					tally *= ArgumentValidation.getInt(args[i], t, env);
 				}
 				return new CInt(tally, t);
 			}
@@ -327,10 +328,10 @@ public class Math {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
-			double tally = ArgumentValidation.getNumber(args[0], t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+			double tally = ArgumentValidation.getNumber(args[0], t, env);
 			for(int i = 1; i < args.length; i++) {
-				double next = ArgumentValidation.getNumber(args[i], t);
+				double next = ArgumentValidation.getNumber(args[i], t, env);
 				if(next == 0) {
 					throw new CRERangeException("Division by 0!", t);
 				}
@@ -403,9 +404,9 @@ public class Math {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
-			long arg1 = ArgumentValidation.getInt(args[0], t);
-			long arg2 = ArgumentValidation.getInt(args[1], t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+			long arg1 = ArgumentValidation.getInt(args[0], t, env);
+			long arg2 = ArgumentValidation.getInt(args[1], t, env);
 			if(arg2 == 0) {
 				throw new CRERangeException("Modulo by 0!", t);
 			}
@@ -468,9 +469,9 @@ public class Math {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
-			double arg1 = ArgumentValidation.getNumber(args[0], t);
-			double arg2 = ArgumentValidation.getNumber(args[1], t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+			double arg1 = ArgumentValidation.getNumber(args[0], t, env);
+			double arg2 = ArgumentValidation.getNumber(args[1], t, env);
 			return new CDouble(java.lang.Math.pow(arg1, arg2), t);
 		}
 
@@ -543,14 +544,15 @@ public class Math {
 				if(nodes.length == 2) {
 					cdelta = parent.seval(nodes[1], env);
 				}
-				long delta = ArgumentValidation.getInt(cdelta, t);
+				long delta = ArgumentValidation.getInt(cdelta, t, env);
 				//First, error check, then get the old value, and store it in temp.
-				if(!(array.isInstanceOf(CArray.TYPE)) && !(array.isInstanceOf(ArrayAccess.TYPE))) {
+				if(!(array.isInstanceOf(CArray.TYPE, null, env))
+						&& !(array.isInstanceOf(ArrayAccess.TYPE, null, env))) {
 					//Let's just evaluate this like normal with array_get, so it will
 					//throw the appropriate exception.
-					new ArrayHandling.array_get().exec(t, env, array, index);
+					new ArrayHandling.array_get().exec(t, env, null, array, index);
 					throw ConfigRuntimeException.CreateUncatchableException("Shouldn't have gotten here. Please report this error, and how you got here.", t);
-				} else if(!(array.isInstanceOf(CArray.TYPE))) {
+				} else if(!(array.isInstanceOf(CArray.TYPE, null, env))) {
 					//It's an ArrayAccess type, but we can't use that here, so, throw our
 					//own exception.
 					throw new CRECastException("Cannot increment/decrement a non-array array"
@@ -558,30 +560,30 @@ public class Math {
 				}
 				//Ok, we're good. Data types should all be correct.
 				CArray myArray = ((CArray) array);
-				Mixed value = myArray.get(index, t);
+				Mixed value = myArray.get(index, t, env);
 
 				//Alright, now let's actually perform the increment, and store that in the array.
-				if(value.isInstanceOf(CInt.TYPE)) {
+				if(value.isInstanceOf(CInt.TYPE, null, env)) {
 					CInt newVal;
 					if(inc) {
-						newVal = new CInt(ArgumentValidation.getInt(value, t) + delta, t);
+						newVal = new CInt(ArgumentValidation.getInt(value, t, env) + delta, t);
 					} else {
-						newVal = new CInt(ArgumentValidation.getInt(value, t) - delta, t);
+						newVal = new CInt(ArgumentValidation.getInt(value, t, env) - delta, t);
 					}
-					new ArrayHandling.array_set().exec(t, env, array, index, newVal);
+					new ArrayHandling.array_set().exec(t, env, null, array, index, newVal);
 					if(pre) {
 						return newVal;
 					} else {
 						return value;
 					}
-				} else if(value.isInstanceOf(CDouble.TYPE)) {
+				} else if(value.isInstanceOf(CDouble.TYPE, null, env)) {
 					CDouble newVal;
 					if(inc) {
-						newVal = new CDouble(ArgumentValidation.getDouble(value, t) + delta, t);
+						newVal = new CDouble(ArgumentValidation.getDouble(value, t, env) + delta, t);
 					} else {
-						newVal = new CDouble(ArgumentValidation.getDouble(value, t) - delta, t);
+						newVal = new CDouble(ArgumentValidation.getDouble(value, t, env) - delta, t);
 					}
-					new ArrayHandling.array_set().exec(t, env, array, index, newVal);
+					new ArrayHandling.array_set().exec(t, env, null, array, index, newVal);
 					if(pre) {
 						return newVal;
 					} else {
@@ -596,7 +598,7 @@ public class Math {
 		for(int i = 0; i < args.length; i++) {
 			args[i] = parent.eval(nodes[i], env);
 		}
-		return func.exec(t, env, args);
+		return func.exec(t, env, null, args);
 	}
 
 	@api
@@ -622,12 +624,12 @@ public class Math {
 		}
 
 		@Override
-		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
 			return doIncrementDecrement(nodes, parent, env, t, this, true, true);
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			long value = 1;
 			if(args.length == 2) {
 				if(args[1] instanceof IVariable) {
@@ -635,27 +637,31 @@ public class Math {
 					args[1] = env.getEnv(GlobalEnv.class).GetVarList().get(cur2.getVariableName(), cur2.getTarget(),
 							env);
 				}
-				value = ArgumentValidation.getInt(args[1], t);
+				value = ArgumentValidation.getInt(args[1], t, env);
 			}
 			if(args[0] instanceof IVariable) {
 				IVariable cur = (IVariable) args[0];
 				IVariable v = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getVariableName(), cur.getTarget(), env);
 				Mixed newVal;
-				if(ArgumentValidation.anyDoubles(v.ival())) {
-					newVal = new CDouble(ArgumentValidation.getDouble(v.ival(), t) + value, t);
+				if(ArgumentValidation.anyDoubles(env, v.ival())) {
+					newVal = new CDouble(ArgumentValidation.getDouble(v.ival(), t, env) + value, t);
 				} else {
-					newVal = new CInt(ArgumentValidation.getInt(v.ival(), t) + value, t);
+					newVal = new CInt(ArgumentValidation.getInt(v.ival(), t, env) + value, t);
 				}
 				if(v.ival() instanceof CMutablePrimitive) {
-					newVal = ((CMutablePrimitive) v.ival()).setAndReturn(newVal, t);
+					newVal = ((CMutablePrimitive) v.ival()).setAndReturn(newVal, t, env);
 				}
-				v = new IVariable(v.getDefinedType(), v.getVariableName(), newVal, v.getDefinedTarget(), env);
+				try {
+					v = new IVariable(v.getDefinedType(), v.getVariableName(), newVal, v.getDefinedTarget(), env);
+				} catch (ConfigCompileException cce) {
+					throw new CREFormatException(cce.getMessage(), t);
+				}
 				env.getEnv(GlobalEnv.class).GetVarList().set(v);
 				return v;
-			} else if(ArgumentValidation.anyDoubles(args[0])) {
-				return new CDouble(ArgumentValidation.getNumber(args[0], t) + value, t);
+			} else if(ArgumentValidation.anyDoubles(env, args[0])) {
+				return new CDouble(ArgumentValidation.getNumber(args[0], t, env) + value, t);
 			} else {
-				return new CInt(ArgumentValidation.getInt(args[0], t) + value, t);
+				return new CInt(ArgumentValidation.getInt(args[0], t, env) + value, t);
 			}
 
 		}
@@ -707,7 +713,7 @@ public class Math {
 			if(args[0] instanceof IVariable) {
 				return null;
 			} else {
-				return exec(t, null, args);
+				return exec(t, null, null, args);
 			}
 		}
 
@@ -742,12 +748,12 @@ public class Math {
 		}
 
 		@Override
-		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
 			return Math.doIncrementDecrement(nodes, parent, env, t, this, false, true);
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			long value = 1;
 			if(args.length == 2) {
 				if(args[1] instanceof IVariable) {
@@ -755,19 +761,19 @@ public class Math {
 					args[1] = env.getEnv(GlobalEnv.class).GetVarList().get(cur2.getVariableName(), cur2.getTarget(),
 							env);
 				}
-				value = ArgumentValidation.getInt(args[1], t);
+				value = ArgumentValidation.getInt(args[1], t, env);
 			}
 			if(args[0] instanceof IVariable) {
 				IVariable cur = (IVariable) args[0];
 				IVariable v = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getVariableName(), cur.getTarget(), env);
 				Mixed newVal;
-				if(ArgumentValidation.anyDoubles(v.ival())) {
-					newVal = new CDouble(ArgumentValidation.getDouble(v.ival(), t) + value, t);
+				if(ArgumentValidation.anyDoubles(env, v.ival())) {
+					newVal = new CDouble(ArgumentValidation.getDouble(v.ival(), t, env) + value, t);
 				} else {
-					newVal = new CInt(ArgumentValidation.getInt(v.ival(), t) + value, t);
+					newVal = new CInt(ArgumentValidation.getInt(v.ival(), t, env) + value, t);
 				}
 				if(v.ival() instanceof CMutablePrimitive) {
-					newVal = ((CMutablePrimitive) v.ival()).setAndReturn(newVal, t);
+					newVal = ((CMutablePrimitive) v.ival()).setAndReturn(newVal, t, env);
 				}
 				Mixed oldVal = null;
 				try {
@@ -775,13 +781,17 @@ public class Math {
 				} catch (CloneNotSupportedException ex) {
 					Logger.getLogger(Math.class.getName()).log(Level.SEVERE, null, ex);
 				}
-				v = new IVariable(v.getDefinedType(), v.getVariableName(), newVal, v.getDefinedTarget(), env);
+				try {
+					v = new IVariable(v.getDefinedType(), v.getVariableName(), newVal, v.getDefinedTarget(), env);
+				} catch (ConfigCompileException cce) {
+					throw new CREFormatException(cce.getMessage(), t);
+				}
 				env.getEnv(GlobalEnv.class).GetVarList().set(v);
 				return oldVal;
-			} else if(ArgumentValidation.anyDoubles(args[0])) {
-				return new CDouble(ArgumentValidation.getNumber(args[0], t) + value, t);
+			} else if(ArgumentValidation.anyDoubles(env, args[0])) {
+				return new CDouble(ArgumentValidation.getNumber(args[0], t, env) + value, t);
 			} else {
-				return new CInt(ArgumentValidation.getInt(args[0], t) + value, t);
+				return new CInt(ArgumentValidation.getInt(args[0], t, env) + value, t);
 			}
 		}
 
@@ -822,7 +832,7 @@ public class Math {
 			if(args[0] instanceof IVariable) {
 				return null;
 			} else {
-				return exec(t, null, args);
+				return exec(t, null, null, args);
 			}
 		}
 
@@ -872,12 +882,12 @@ public class Math {
 		}
 
 		@Override
-		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
 			return doIncrementDecrement(nodes, parent, env, t, this, true, false);
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			long value = 1;
 			if(args.length == 2) {
 				if(args[1] instanceof IVariable) {
@@ -885,27 +895,31 @@ public class Math {
 					args[1] = env.getEnv(GlobalEnv.class).GetVarList().get(cur2.getVariableName(), cur2.getTarget(),
 							env);
 				}
-				value = ArgumentValidation.getInt(args[1], t);
+				value = ArgumentValidation.getInt(args[1], t, env);
 			}
 			if(args[0] instanceof IVariable) {
 				IVariable cur = (IVariable) args[0];
 				IVariable v = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getVariableName(), cur.getTarget(), env);
 				Mixed newVal;
-				if(ArgumentValidation.anyDoubles(v.ival())) {
-					newVal = new CDouble(ArgumentValidation.getDouble(v.ival(), t) - value, t);
+				if(ArgumentValidation.anyDoubles(env, v.ival())) {
+					newVal = new CDouble(ArgumentValidation.getDouble(v.ival(), t, env) - value, t);
 				} else {
-					newVal = new CInt(ArgumentValidation.getInt(v.ival(), t) - value, t);
+					newVal = new CInt(ArgumentValidation.getInt(v.ival(), t, env) - value, t);
 				}
 				if(v.ival() instanceof CMutablePrimitive) {
-					newVal = ((CMutablePrimitive) v.ival()).setAndReturn(newVal, t);
+					newVal = ((CMutablePrimitive) v.ival()).setAndReturn(newVal, t, env);
 				}
-				v = new IVariable(v.getDefinedType(), v.getVariableName(), newVal, v.getDefinedTarget(), env);
+				try {
+					v = new IVariable(v.getDefinedType(), v.getVariableName(), newVal, v.getDefinedTarget(), env);
+				} catch (ConfigCompileException cce) {
+					throw new CREFormatException(cce.getMessage(), t);
+				}
 				env.getEnv(GlobalEnv.class).GetVarList().set(v);
 				return v;
-			} else if(ArgumentValidation.anyDoubles(args[0])) {
-				return new CDouble(ArgumentValidation.getNumber(args[0], t) - value, t);
+			} else if(ArgumentValidation.anyDoubles(env, args[0])) {
+				return new CDouble(ArgumentValidation.getNumber(args[0], t, env) - value, t);
 			} else {
-				return new CInt(ArgumentValidation.getInt(args[0], t) - value, t);
+				return new CInt(ArgumentValidation.getInt(args[0], t, env) - value, t);
 			}
 		}
 
@@ -946,7 +960,7 @@ public class Math {
 			if(args[0] instanceof IVariable) {
 				return null;
 			} else {
-				return exec(t, null, args);
+				return exec(t, null, null, args);
 			}
 		}
 
@@ -992,12 +1006,12 @@ public class Math {
 		}
 
 		@Override
-		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
 			return doIncrementDecrement(nodes, parent, env, t, this, false, false);
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			long value = 1;
 			if(args.length == 2) {
 				if(args[1] instanceof IVariable) {
@@ -1005,19 +1019,19 @@ public class Math {
 					args[1] = env.getEnv(GlobalEnv.class).GetVarList().get(cur2.getVariableName(), cur2.getTarget(),
 							env);
 				}
-				value = ArgumentValidation.getInt(args[1], t);
+				value = ArgumentValidation.getInt(args[1], t, env);
 			}
 			if(args[0] instanceof IVariable) {
 				IVariable cur = (IVariable) args[0];
 				IVariable v = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getVariableName(), cur.getTarget(), env);
 				Mixed newVal;
-				if(ArgumentValidation.anyDoubles(v.ival())) {
-					newVal = new CDouble(ArgumentValidation.getDouble(v.ival(), t) - value, t);
+				if(ArgumentValidation.anyDoubles(env, v.ival())) {
+					newVal = new CDouble(ArgumentValidation.getDouble(v.ival(), t, env) - value, t);
 				} else {
-					newVal = new CInt(ArgumentValidation.getInt(v.ival(), t) - value, t);
+					newVal = new CInt(ArgumentValidation.getInt(v.ival(), t, env) - value, t);
 				}
 				if(v.ival() instanceof CMutablePrimitive) {
-					newVal = ((CMutablePrimitive) v.ival()).setAndReturn(newVal, t);
+					newVal = ((CMutablePrimitive) v.ival()).setAndReturn(newVal, t, env);
 				}
 				Mixed oldVal = null;
 				try {
@@ -1025,13 +1039,17 @@ public class Math {
 				} catch (CloneNotSupportedException ex) {
 					Logger.getLogger(Math.class.getName()).log(Level.SEVERE, null, ex);
 				}
-				v = new IVariable(v.getDefinedType(), v.getVariableName(), newVal, v.getDefinedTarget(), env);
+				try {
+					v = new IVariable(v.getDefinedType(), v.getVariableName(), newVal, v.getDefinedTarget(), env);
+				} catch (ConfigCompileException cce) {
+					throw new CREFormatException(cce.getMessage(), t);
+				}
 				env.getEnv(GlobalEnv.class).GetVarList().set(v);
 				return oldVal;
-			} else if(ArgumentValidation.anyDoubles(args[0])) {
-				return new CDouble(ArgumentValidation.getNumber(args[0], t) - value, t);
+			} else if(ArgumentValidation.anyDoubles(env, args[0])) {
+				return new CDouble(ArgumentValidation.getNumber(args[0], t, env) - value, t);
 			} else {
-				return new CInt(ArgumentValidation.getInt(args[0], t) - value, t);
+				return new CInt(ArgumentValidation.getInt(args[0], t, env) - value, t);
 			}
 		}
 
@@ -1072,7 +1090,7 @@ public class Math {
 			if(args[0] instanceof IVariable) {
 				return null;
 			} else {
-				return exec(t, null, args);
+				return exec(t, null, null, args);
 			}
 		}
 
@@ -1136,17 +1154,17 @@ public class Math {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			if(args.length == 0) {
 				return new CDouble(java.lang.Math.random(), t);
 			} else {
 				long min = 0;
 				long max;
 				if(args.length == 1) {
-					max = ArgumentValidation.getInt(args[0], t);
+					max = ArgumentValidation.getInt(args[0], t, env);
 				} else {
-					min = ArgumentValidation.getInt(args[0], t);
-					max = ArgumentValidation.getInt(args[1], t);
+					min = ArgumentValidation.getInt(args[0], t, env);
+					max = ArgumentValidation.getInt(args[1], t, env);
 				}
 				if(max > Integer.MAX_VALUE || min > Integer.MAX_VALUE) {
 					throw new CRERangeException("max and min must be below int max, defined as " + Integer.MAX_VALUE,
@@ -1179,13 +1197,16 @@ public class Math {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
-			if(argTypes.size() == 0) {
-				return CDouble.TYPE;
-			} else {
-				return CInt.TYPE;
-			}
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CDouble.TYPE)
+					.newSignature(CInt.TYPE)
+					.param(CInt.TYPE, "max", "The maximum integer to return, exclusive")
+					.newSignature(CInt.TYPE)
+					.param(CInt.TYPE, "min", "The minimum integer to return, inclusive")
+					.param(CInt.TYPE, "max", "The maximum integer to return, exclusive")
+					.build();
 		}
+
 	}
 
 	@api
@@ -1227,11 +1248,11 @@ public class Math {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			if(args[0].isInstanceOf(CInt.TYPE)) {
-				return new CInt(java.lang.Math.abs(ArgumentValidation.getInt(args[0], t)), t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			if(args[0].isInstanceOf(CInt.TYPE, null, env)) {
+				return new CInt(java.lang.Math.abs(ArgumentValidation.getInt(args[0], t, env)), t);
 			} else {
-				return new CDouble(java.lang.Math.abs(ArgumentValidation.getDouble(args[0], t)), t);
+				return new CDouble(java.lang.Math.abs(ArgumentValidation.getDouble(args[0], t, env)), t);
 			}
 		}
 
@@ -1291,8 +1312,8 @@ public class Math {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			return new CInt((long) java.lang.Math.floor(ArgumentValidation.getNumber(args[0], t)), t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			return new CInt((long) java.lang.Math.floor(ArgumentValidation.getNumber(args[0], t, env)), t);
 		}
 
 		@Override
@@ -1343,8 +1364,8 @@ public class Math {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			return new CInt((long) java.lang.Math.ceil(ArgumentValidation.getNumber(args[0], t)), t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			return new CInt((long) java.lang.Math.ceil(ArgumentValidation.getNumber(args[0], t, env)), t);
 		}
 
 		@Override
@@ -1396,8 +1417,8 @@ public class Math {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			double d = ArgumentValidation.getNumber(args[0], t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			double d = ArgumentValidation.getNumber(args[0], t, env);
 			if(d < 0) {
 				throw new CRERangeException("sqrt expects a number >= 0", t);
 			}
@@ -1458,15 +1479,15 @@ public class Math {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(args.length == 0) {
 				throw new CREInsufficientArgumentsException("You must send at least one parameter to min", t);
 			}
 			double lowest = Double.POSITIVE_INFINITY;
 			List<Mixed> list = new ArrayList<>();
-			recList(list, args);
+			recList(list, env, args);
 			for(Mixed c : list) {
-				double d = ArgumentValidation.getNumber(c, t);
+				double d = ArgumentValidation.getNumber(c, t, env);
 				if(d < lowest) {
 					lowest = d;
 				}
@@ -1478,11 +1499,11 @@ public class Math {
 			}
 		}
 
-		public List<Mixed> recList(List<Mixed> list, Mixed... args) {
+		public List<Mixed> recList(List<Mixed> list, Environment env, Mixed... args) {
 			for(Mixed c : args) {
-				if(c.isInstanceOf(CArray.TYPE)) {
-					for(int i = 0; i < ((CArray) c).size(); i++) {
-						recList(list, ((CArray) c).get(i, Target.UNKNOWN));
+				if(c.isInstanceOf(CArray.TYPE, null, env)) {
+					for(int i = 0; i < ((CArray) c).size(env); i++) {
+						recList(list, env, ((CArray) c).get(i, Target.UNKNOWN, env));
 					}
 				} else {
 					list.add(c);
@@ -1540,15 +1561,15 @@ public class Math {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(args.length == 0) {
 				throw new CREInsufficientArgumentsException("You must send at least one parameter to max", t);
 			}
 			double highest = Double.NEGATIVE_INFINITY;
 			List<Mixed> list = new ArrayList<>();
-			recList(list, args);
+			recList(list, env, args);
 			for(Mixed c : list) {
-				double d = ArgumentValidation.getNumber(c, t);
+				double d = ArgumentValidation.getNumber(c, t, env);
 				if(d > highest) {
 					highest = d;
 				}
@@ -1560,11 +1581,11 @@ public class Math {
 			}
 		}
 
-		public List<Mixed> recList(List<Mixed> list, Mixed... args) {
+		public List<Mixed> recList(List<Mixed> list, Environment env, Mixed... args) {
 			for(Mixed c : args) {
-				if(c.isInstanceOf(CArray.TYPE)) {
-					for(int i = 0; i < ((CArray) c).size(); i++) {
-						recList(list, ((CArray) c).get(i, Target.UNKNOWN));
+				if(c.isInstanceOf(CArray.TYPE, null, env)) {
+					for(int i = 0; i < ((CArray) c).size(env); i++) {
+						recList(list, env, ((CArray) c).get(i, Target.UNKNOWN, env));
 					}
 				} else {
 					list.add(c);
@@ -1621,8 +1642,8 @@ public class Math {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			return new CDouble(java.lang.Math.sin(ArgumentValidation.getNumber(args[0], t)), t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			return new CDouble(java.lang.Math.sin(ArgumentValidation.getNumber(args[0], t, env)), t);
 		}
 
 		@Override
@@ -1673,8 +1694,8 @@ public class Math {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			return new CDouble(java.lang.Math.cos(ArgumentValidation.getNumber(args[0], t)), t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			return new CDouble(java.lang.Math.cos(ArgumentValidation.getNumber(args[0], t, env)), t);
 		}
 
 		@Override
@@ -1725,8 +1746,8 @@ public class Math {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			return new CDouble(java.lang.Math.tan(ArgumentValidation.getNumber(args[0], t)), t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			return new CDouble(java.lang.Math.tan(ArgumentValidation.getNumber(args[0], t, env)), t);
 		}
 
 		@Override
@@ -1777,8 +1798,8 @@ public class Math {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			return new CDouble(java.lang.Math.asin(ArgumentValidation.getNumber(args[0], t)), t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			return new CDouble(java.lang.Math.asin(ArgumentValidation.getNumber(args[0], t, env)), t);
 		}
 
 		@Override
@@ -1829,8 +1850,8 @@ public class Math {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			return new CDouble(java.lang.Math.acos(ArgumentValidation.getNumber(args[0], t)), t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			return new CDouble(java.lang.Math.acos(ArgumentValidation.getNumber(args[0], t, env)), t);
 		}
 
 		@Override
@@ -1881,8 +1902,8 @@ public class Math {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			return new CDouble(java.lang.Math.atan(ArgumentValidation.getNumber(args[0], t)), t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			return new CDouble(java.lang.Math.atan(ArgumentValidation.getNumber(args[0], t, env)), t);
 		}
 
 		@Override
@@ -1933,8 +1954,8 @@ public class Math {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			return Static.getNumber(java.lang.Math.sinh(ArgumentValidation.getNumber(args[0], t)), t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			return new CDouble(java.lang.Math.sinh(ArgumentValidation.getNumber(args[0], t, env)), t);
 		}
 
 		@Override
@@ -1985,8 +2006,8 @@ public class Math {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			return Static.getNumber(java.lang.Math.cosh(ArgumentValidation.getNumber(args[0], t)), t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			return new CDouble(java.lang.Math.cosh(ArgumentValidation.getNumber(args[0], t, env)), t);
 		}
 
 		@Override
@@ -2037,8 +2058,8 @@ public class Math {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			return Static.getNumber(java.lang.Math.tanh(ArgumentValidation.getNumber(args[0], t)), t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			return new CDouble(java.lang.Math.tanh(ArgumentValidation.getNumber(args[0], t, env)), t);
 		}
 
 		@Override
@@ -2089,8 +2110,8 @@ public class Math {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			return new CDouble(java.lang.Math.toRadians(ArgumentValidation.getNumber(args[0], t)), t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			return new CDouble(java.lang.Math.toRadians(ArgumentValidation.getNumber(args[0], t, env)), t);
 		}
 
 		@Override
@@ -2141,8 +2162,8 @@ public class Math {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			return new CDouble(java.lang.Math.toDegrees(ArgumentValidation.getNumber(args[0], t)), t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			return new CDouble(java.lang.Math.toDegrees(ArgumentValidation.getNumber(args[0], t, env)), t);
 		}
 
 		@Override
@@ -2197,8 +2218,9 @@ public class Math {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			return new CDouble(java.lang.Math.atan2(ArgumentValidation.getNumber(args[0], t), ArgumentValidation.getNumber(args[1], t)), t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			return new CDouble(java.lang.Math.atan2(ArgumentValidation.getNumber(args[0], t, env),
+					ArgumentValidation.getNumber(args[1], t, env)), t);
 		}
 
 		@Override
@@ -2250,11 +2272,11 @@ public class Math {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			double number = ArgumentValidation.getNumber(args[0], t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			double number = ArgumentValidation.getNumber(args[0], t, env);
 			int precision = 0;
 			if(args.length > 1) {
-				precision = ArgumentValidation.getInt32(args[1], t);
+				precision = ArgumentValidation.getInt32(args[1], t, env);
 			}
 			if(precision < 0) {
 				throw new CRERangeException("precision cannot be less than 0, was " + precision, t);
@@ -2302,8 +2324,8 @@ public class Math {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			double x = ArgumentValidation.getDouble(args[0], t) + 1;
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			double x = ArgumentValidation.getDouble(args[0], t, env) + 1;
 			DecimalFormat twoDForm = new DecimalFormat("0.##############E0");
 			String str = twoDForm.format(x);
 			double d = Double.valueOf(str) - 1;
@@ -2400,15 +2422,15 @@ public class Math {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String expr = args[0].val().trim();
 			if("".equals(expr)) {
 				throw new CREFormatException("Expression may not be empty", t);
 			}
 			CArray vars = null;
-			if(args.length == 2 && args[1].isInstanceOf(CArray.TYPE)) {
+			if(args.length == 2 && args[1].isInstanceOf(CArray.TYPE, null, env)) {
 				vars = (CArray) args[1];
-			} else if(args.length == 2 && !(args[1].isInstanceOf(CArray.TYPE))) {
+			} else if(args.length == 2 && !(args[1].isInstanceOf(CArray.TYPE, null, env))) {
 				throw new CRECastException("The second argument of expr() should be an array", t);
 			}
 			if(vars != null && !vars.inAssociativeMode()) {
@@ -2418,11 +2440,11 @@ public class Math {
 			String[] varNames;
 			if(vars != null) {
 				int i = 0;
-				da = new double[(int) vars.size()];
-				varNames = new String[(int) vars.size()];
+				da = new double[(int) vars.size(env)];
+				varNames = new String[(int) vars.size(env)];
 				for(String key : vars.stringKeySet()) {
 					varNames[i] = key;
-					da[i] = ArgumentValidation.getDouble(vars.get(key, t), t);
+					da[i] = ArgumentValidation.getDouble(vars.get(key, t, env), t, env);
 					i++;
 				}
 			} else {
@@ -2506,11 +2528,11 @@ public class Math {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			if(args[0].isInstanceOf(CInt.TYPE)) {
-				return new CInt(-(ArgumentValidation.getInt(args[0], t)), t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			if(args[0].isInstanceOf(CInt.TYPE, null, env)) {
+				return new CInt(-(ArgumentValidation.getInt(args[0], t, env)), t);
 			} else {
-				return new CDouble(-(ArgumentValidation.getDouble(args[0], t)), t);
+				return new CDouble(-(ArgumentValidation.getDouble(args[0], t, env)), t);
 			}
 		}
 
@@ -2547,8 +2569,8 @@ public class Math {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			double val = ArgumentValidation.getDouble(args[0], t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			double val = ArgumentValidation.getDouble(args[0], t, env);
 			if(val <= 0) {
 				throw new CRERangeException("val was <= 0", t);
 			}
@@ -2556,7 +2578,7 @@ public class Math {
 			if(args.length == 1) {
 				r = java.lang.Math.log(val);
 			} else { // if(args.length == 2) {
-				r = java.lang.Math.log(val) / java.lang.Math.log(ArgumentValidation.getDouble(args[1], t));
+				r = java.lang.Math.log(val) / java.lang.Math.log(ArgumentValidation.getDouble(args[1], t, env));
 			}
 			return new CDouble(r, t);
 		}
@@ -2692,7 +2714,7 @@ public class Math {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			try {
 				MathConstants c = MathConstants.valueOf(args[0].val());
 				Number v = c.getValue();
