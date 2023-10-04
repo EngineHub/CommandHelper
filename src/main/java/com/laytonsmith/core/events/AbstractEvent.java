@@ -4,10 +4,13 @@ import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.events.MCPlayerEvent;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.LogLevel;
+import com.laytonsmith.core.MSLog;
+import com.laytonsmith.core.MSLog.Tags;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
@@ -32,7 +35,6 @@ import com.laytonsmith.core.profiler.ProfilePoint;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
 
 /**
  * This helper class implements a few of the common functions in event, and most (all?) Events should extend this class.
@@ -105,32 +107,39 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 	@Override
 	public final void execute(ParseTree tree, BoundEvent b, Environment env, BoundEvent.ActiveEvent activeEvent) throws ConfigRuntimeException {
 		preExecution(env, activeEvent);
-		// Various events have a player to put into the env.
-		// Do this after preExecution() in case the particular event needs to inject the player first.
-		Mixed c = activeEvent.getParsedEvent().get("player");
-		if(c != null) {
-			if(c instanceof CNull) {
-				// This is a CNull "player", likely from an entity event, so we need to ensure player() does
-				// not return a player inherited from the bind's parent environment.
-				if(env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
-					env.getEnv(CommandHelperEnvironment.class).SetCommandSender(Static.getServer().getConsole());
-				}
-			} else {
-				MCCommandSender p = Static.getServer().getPlayer(c.val());
-				if(p == null) {
-					p = Static.GetInjectedPlayer(c.val());
-				}
-				if(p != null) {
-					env.getEnv(CommandHelperEnvironment.class).SetPlayer((MCPlayer) p);
-				} else {
-					Static.getLogger().log(Level.WARNING, "Player offline for event: " + b.getEventName());
-					// Set env CommandSender to prevent incorrect inherited player from being used in a player event.
+
+		// Events can have a player to put into the CommandHelperEnvironment.
+		if(activeEvent.getUnderlyingEvent() instanceof MCPlayerEvent playerEvent) {
+			env.getEnv(CommandHelperEnvironment.class).SetPlayer(playerEvent.getPlayer());
+		} else {
+			// Probably not a player event, but might still have a player context.
+			Mixed c = activeEvent.getParsedEvent().get("player");
+			if(c != null) {
+				if(c instanceof CNull) {
+					// This is a CNull "player", likely from an entity event, so we need to ensure player() does
+					// not return a player inherited from the bind's parent environment.
 					if(env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
-						env.getEnv(CommandHelperEnvironment.class).SetCommandSender(Static.getServer().getConsole());
+						env.getEnv(CommandHelperEnvironment.class).SetPlayer(null);
+					}
+				} else {
+					MCCommandSender p = Static.getServer().getPlayer(c.val());
+					if(p == null) {
+						// Check if event (possibly from an extension) injected the player but didn't extend MCPlayerEvent
+						p = Static.GetInjectedPlayer(c.val());
+					}
+					if(p != null) {
+						env.getEnv(CommandHelperEnvironment.class).SetPlayer((MCPlayer) p);
+					} else {
+						MSLog.GetLogger().w(Tags.GENERAL, c.val() + " offline for " + b.getEventName(), tree.getTarget());
+						// Set env CommandSender to prevent incorrect inherited player from being used in a player event.
+						if(env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
+							env.getEnv(CommandHelperEnvironment.class).SetPlayer(null);
+						}
 					}
 				}
 			}
 		}
+
 		ProfilePoint event = null;
 		if(env.getEnv(StaticRuntimeEnv.class).GetProfiler() != null) {
 			event = env.getEnv(StaticRuntimeEnv.class).GetProfiler().start(

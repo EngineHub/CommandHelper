@@ -828,9 +828,9 @@ public final class Static {
 	}
 
 	/**
-	 * Returns the player specified by name. Injected players also are returned in this list. If provided a string
+	 * Returns the player specified by name or UUID. Injected players are also returned in this list. If provided a string
 	 * between 1 and 16 characters, the lookup will be name-based. If provided a string that is 32 or 36 characters, the
-	 * lookup will be uuid-based.
+	 * lookup will be UUID-based. Throws CREPlayerOfflineException if the player is not online.
 	 *
 	 * @param player
 	 * @param t
@@ -838,35 +838,34 @@ public final class Static {
 	 * @throws ConfigRuntimeException
 	 */
 	public static MCPlayer GetPlayer(String player, Target t) throws ConfigRuntimeException {
-		MCCommandSender m;
-
 		if(player == null) {
 			throw new CREPlayerOfflineException("No player was specified!", t);
 		}
-
+		MCPlayer p;
 		if(player.length() > 0 && player.length() <= 16) {
-			m = GetCommandSender(player, t);
+			MCCommandSender sender = GetCommandSender(player, t);
+			if(!(sender instanceof MCPlayer)) {
+				throw new CREPlayerOfflineException("Expecting a player name, but \"" + player + "\" was found.", t);
+			}
+			p = (MCPlayer) sender;
+			// May be injected, so check if online.
+			if(!p.isOnline()) {
+				throw new CREPlayerOfflineException("The specified player (" + player + ") is not online", t);
+			}
 		} else {
 			try {
-				m = getServer().getPlayer(GetUUID(player, t));
-			} catch(ConfigRuntimeException cre) {
-				if(cre instanceof CREThrowable && ((CREThrowable) cre).isInstanceOf(CRELengthException.TYPE)) {
+				p = getServer().getPlayer(GetUUID(player, t));
+				if(p == null) {
+					throw new CREPlayerOfflineException("The specified player (" + player + ") is not online", t);
+				}
+			} catch(CREThrowable ex) {
+				if(ex.isInstanceOf(CRELengthException.TYPE)) {
 					throw new CRELengthException("The given string was the wrong size to identify a player."
-							+ " A player name is expected to be between 1 and 16 characters. " + cre.getMessage(), t);
+							+ " A player name is expected to be between 1 and 16 characters. " + ex.getMessage(), t);
 				} else {
-					throw cre;
+					throw ex;
 				}
 			}
-		}
-		if(m == null) {
-			throw new CREPlayerOfflineException("The specified player (" + player + ") is not online", t);
-		}
-		if(!(m instanceof MCPlayer)) {
-			throw new CREPlayerOfflineException("Expecting a player name, but \"" + player + "\" was found.", t);
-		}
-		MCPlayer p = (MCPlayer) m;
-		if(!p.isOnline()) {
-			throw new CREPlayerOfflineException("The specified player (" + player + ") is not online", t);
 		}
 		return p;
 	}
@@ -876,34 +875,27 @@ public final class Static {
 	}
 
 	/**
-	 * Returns the specified command sender. Players are supported, as is the special ~console user. The special
-	 * ~console user will always return a user.
+	 * Returns the specified command sender by name. Players are supported, as is the special ~console user. The special
+	 * ~console user will always return a user. Throws CREPlayerOfflineException if the player is not online or injected.
 	 *
-	 * @param player
+	 * @param name
 	 * @param t
 	 * @return
 	 * @throws ConfigRuntimeException
 	 */
-	public static MCCommandSender GetCommandSender(String player, Target t) throws ConfigRuntimeException {
-		MCCommandSender m = null;
-		if(INJECTED_PLAYERS.containsKey(player.toLowerCase())) {
-			m = INJECTED_PLAYERS.get(player.toLowerCase());
-		} else if(CONSOLE_NAME.equals(player)) {
-			m = Static.getServer().getConsole();
-		} else {
-			try {
-				m = Static.getServer().getPlayer(player);
-			} catch(Exception e) {
-				//Apparently the server can occasionally throw exceptions here, so instead of rethrowing
-				//a NPE or whatever, we'll assume that the player just isn't online, and
-				//throw a CRE instead.
-			}
+	public static MCCommandSender GetCommandSender(String name, Target t) throws ConfigRuntimeException {
+		MCCommandSender injectedPlayer = INJECTED_PLAYERS.get(name.toLowerCase());
+		if(injectedPlayer != null) {
+			return injectedPlayer;
 		}
-		if(m == null || (m instanceof MCPlayer && (!((MCPlayer) m).isOnline()
-				&& !INJECTED_PLAYERS.containsKey(player.toLowerCase())))) {
-			throw new CREPlayerOfflineException("The specified player (" + player + ") is not online", t);
+		if(CONSOLE_NAME.equals(name)) {
+			return getServer().getConsole();
 		}
-		return m;
+		MCPlayer p = getServer().getPlayer(name);
+		if(p == null) {
+			throw new CREPlayerOfflineException("The specified player (" + name + ") is not online", t);
+		}
+		return p;
 	}
 
 	/**

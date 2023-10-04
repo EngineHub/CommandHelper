@@ -664,24 +664,6 @@ public class PlayerEvents {
 			return MSVersion.V3_3_1;
 		}
 
-		@Override
-		public void preExecution(Environment env, ActiveEvent activeEvent) {
-			if(activeEvent.getUnderlyingEvent() instanceof MCPlayerLoginEvent) {
-				//Static lookups of the player don't seem to work here, but
-				//the player is passed in with the event.
-				MCPlayer player = ((MCPlayerLoginEvent) activeEvent.getUnderlyingEvent()).getPlayer();
-				Static.InjectPlayer(player);
-			}
-		}
-
-		@Override
-		public void postExecution(Environment env, ActiveEvent activeEvent) {
-			if(activeEvent.getUnderlyingEvent() instanceof MCPlayerLoginEvent) {
-				MCPlayer player = ((MCPlayerLoginEvent) activeEvent.getUnderlyingEvent()).getPlayer();
-				Static.UninjectPlayer(player);
-			}
-		}
-
 	}
 
 	@api
@@ -770,24 +752,6 @@ public class PlayerEvents {
 					Static.GetPlayer(manual.get("player", Target.UNKNOWN).val(), Target.UNKNOWN),
 					manual.get("join_message", Target.UNKNOWN).val());
 			return e;
-		}
-
-		@Override
-		public void preExecution(Environment env, ActiveEvent activeEvent) {
-			if(activeEvent.getUnderlyingEvent() instanceof MCPlayerJoinEvent) {
-				//Static lookups of the player as entity don't seem to work here, but
-				//the player is passed in with the event.
-				MCPlayer player = ((MCPlayerJoinEvent) activeEvent.getUnderlyingEvent()).getPlayer();
-				Static.InjectEntity(player);
-			}
-		}
-
-		@Override
-		public void postExecution(Environment env, ActiveEvent activeEvent) {
-			if(activeEvent.getUnderlyingEvent() instanceof MCPlayerJoinEvent) {
-				MCPlayer player = ((MCPlayerJoinEvent) activeEvent.getUnderlyingEvent()).getPlayer();
-				Static.UninjectEntity(player);
-			}
 		}
 
 	}
@@ -1500,24 +1464,6 @@ public class PlayerEvents {
 				return true;
 			}
 			return false;
-		}
-
-		@Override
-		public void preExecution(Environment env, ActiveEvent activeEvent) {
-			if(activeEvent.getUnderlyingEvent() instanceof MCPlayerQuitEvent) {
-				//Static lookups of the player don't seem to work here, but
-				//the player is passed in with the event.
-				MCPlayer player = ((MCPlayerQuitEvent) activeEvent.getUnderlyingEvent()).getPlayer();
-				Static.InjectPlayer(player);
-			}
-		}
-
-		@Override
-		public void postExecution(Environment env, ActiveEvent activeEvent) {
-			if(activeEvent.getUnderlyingEvent() instanceof MCPlayerQuitEvent) {
-				MCPlayer player = ((MCPlayerQuitEvent) activeEvent.getUnderlyingEvent()).getPlayer();
-				Static.UninjectPlayer(player);
-			}
 		}
 	}
 
