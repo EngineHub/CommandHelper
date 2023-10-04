@@ -71,6 +71,7 @@ import com.laytonsmith.abstraction.enums.MCPatternShape;
 import com.laytonsmith.abstraction.enums.MCPotionEffectType;
 import com.laytonsmith.abstraction.enums.MCPotionType;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
+import com.laytonsmith.abstraction.enums.MCTagType;
 import com.laytonsmith.abstraction.enums.MCTrimMaterial;
 import com.laytonsmith.abstraction.enums.MCTrimPattern;
 import com.laytonsmith.core.constructs.CArray;
@@ -463,6 +464,12 @@ public class ObjectGenerator {
 					modifiers.push(attributeModifier(m, t), t);
 				}
 				ma.set("modifiers", modifiers, t);
+			}
+
+			if(meta.hasCustomTags()) {
+				ma.set("tags", MCTagType.TAG_CONTAINER.construct(meta.getCustomTags()), t);
+			} else {
+				ma.set("tags", CNull.NULL, t);
 			}
 
 			MCMaterial material = is.getType();
@@ -876,6 +883,15 @@ public class ObjectGenerator {
 						meta.setAttributeModifiers(modifierList);
 					} else {
 						throw new CREFormatException("Attribute modifiers were expected to be an array.", t);
+					}
+				}
+
+				if(ma.containsKey("tags")) {
+					Mixed tagArray = ma.get("tags", t);
+					if(tagArray instanceof CNull) {
+						// no custom tags
+					} else {
+						MCTagType.TAG_CONTAINER.convert(meta.getCustomTags(), tagArray);
 					}
 				}
 

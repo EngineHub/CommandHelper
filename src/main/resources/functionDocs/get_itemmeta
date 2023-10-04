@@ -16,6 +16,7 @@ Below are the available fields in the item meta array. Fields can be null when t
 * '''flags''' : (array) Possible flags: ''%ITEM_FLAGS%''.
 * '''repair''' : (int) The cost to repair or combine this item in an anvil.
 * '''modifiers''' : (array) An array of attribute modifier arrays, each with keys: '''"attribute"''', '''"operation"''', '''"amount"''' (double), '''"uuid"''' (optional), '''"name"''' (optional), and '''"slot"''' (optional). Possible attributes: ''%ATTRIBUTES%''. Possible operations: ''%OPERATIONS%''. Possible slots: ''%SLOTS%''.
+* '''tags''' : (array) An associative array of custom tags. A tag's key is namespaced (e.g. "commandhelper:mytag") and the value is an associative array containing the '''"type"''' and '''"value"''' of the tag. Possible types: ''%TAG_TYPES%''.
 |-
 | All Damageable Items
 |

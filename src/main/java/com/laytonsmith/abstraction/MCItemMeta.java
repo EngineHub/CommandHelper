@@ -128,4 +128,8 @@ public interface MCItemMeta extends AbstractionObject {
 	List<MCAttributeModifier> getAttributeModifiers();
 
 	void setAttributeModifiers(List<MCAttributeModifier> modifiers);
+
+	boolean hasCustomTags();
+
+	MCTagContainer getCustomTags();
 }

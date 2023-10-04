@@ -269,4 +269,16 @@ public interface Convertor {
 	 * @return The username
 	 */
 	String GetUser(Environment env);
+
+	/**
+	 * Returns a Minecraft namespaced key object from a string.
+	 * The key can only alphanumeric characters, dots, underscores, and dashes.
+	 * A preceding namespace can be delimited with a single colon, which can also have forward slashes.
+	 * Example: "path/commandhelper:my_tag".
+	 * If no namespace is given, it will default to "commandhelper".
+	 *
+	 * @param key a string formatted key
+	 * @return a key object
+	 */
+	MCNamespacedKey GetNamespacedKey(String key);
 }
