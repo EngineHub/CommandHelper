@@ -371,8 +371,10 @@ public class PlayerEvents {
 		@Override
 		public String docs() {
 			return "{} "
-					+ "{player | from: The location the player is coming from | to: The location the player is now in |"
-					+ " type: the type of teleport occuring, one of "
+					+ " Fired when a player is teleported for any reason, except when respawning."
+					+ "{player | from: The location the player is teleporting from"
+					+ " | to: The location the player is teleporting to"
+					+ " | type: the type of teleport cause, one of "
 					+ StringUtils.Join(MCTeleportCause.values(), ", ") + "}"
 					+ "{to}"
 					+ "{}";
@@ -1904,8 +1906,9 @@ public class PlayerEvents {
 			return "{player: <macro> The player that switched worlds "
 					+ "| from: <string match> The world the player is coming from "
 					+ "| to: <string match> The world the player is now in}"
-					+ " This event is fired off when a player changes worlds. This event is not cancellable,"
-					+ " so to prevent it, the player_teleport event must be checked."
+					+ " This event is fired after a player changes worlds, so it is not cancellable."
+					+ " To prevent a player from changing worlds, consider cancelling or modifying player_teleport"
+					+ " and player_spawn events."
 					+ "{player | from: The world the player is coming from | to: The world the player is now in}"
 					+ "{}"
 					+ "{player, from}";
