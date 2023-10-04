@@ -541,7 +541,7 @@ Here's a full list of all the new functions. Check out the API for details on ea
 * %%NOWIKI|#%% comments work even if they aren't the first character on the line. C style block comments are also available. %%NOWIKI|/* */%%
 * Commands can be run from the console. If the command doesn't make sense to run without a player, the command should fail gracefully.
 * Added include and procedures. See [[Procedures|this page]] for more details.
-* Potion Effects can now be accessed with set_peffect. See [http://www.minecraftwiki.net/wiki/Potion_effects the guide] on the minecraft wiki for ID numbers and other information
+* Potion Effects can now be accessed with set_peffect. See [https://minecraft.wiki/w/Effect the guide] on the minecraft wiki for ID numbers and other information
 * Added case-sensitive option to make it possible to toggle command matching being case sensitive or not
 * [[Arrays|Arrays]] are much more flexible now
 * The \u escape sequence is implemented in the lexer. This allows insertion of arbitrary unicode characters into scripts.

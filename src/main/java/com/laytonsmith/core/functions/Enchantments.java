@@ -157,7 +157,7 @@ public class Enchantments {
 					+ " If an enchantment cannot be applied to the specified item, an EnchantmentException is thrown."
 					+ " The enchantment array must have the enchantment as keys and levels as the values."
 					+ " (eg. array('unbreaking': 1)) The minecraft names for enchantments may"
-					+ " be used: [http://www.minecraftwiki.net/wiki/Enchanting#Enchantment_Types],"
+					+ " be used: [https://minecraft.wiki/w/Enchanting#Enchantment_Types],"
 					+ " and the level parameter may be a roman numeral as well.";
 		}
 
