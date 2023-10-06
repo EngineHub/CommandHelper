@@ -240,9 +240,10 @@ public class VehicleEvents {
 
 		@Override
 		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			if(e instanceof MCVehicleCollideEvent) {
-				MCVehicleCollideEvent event = (MCVehicleCollideEvent) e;
-				Prefilters.match(prefilter, "type", event.getVehicle().getType().name(), PrefilterType.MACRO);
+			if(e instanceof MCVehicleCollideEvent event) {
+				if(prefilter.isEmpty()) {
+					return true;
+				}
 				if(prefilter.containsKey("collisiontype")) {
 					if(!event.getCollisionType().name().equals(prefilter.get("collisiontype").val())) {
 						return false;
@@ -250,9 +251,12 @@ public class VehicleEvents {
 				}
 				switch(event.getCollisionType()) {
 					case BLOCK:
-						Prefilters.match(prefilter, "hittype",
-								((MCVehicleBlockCollideEvent) event).getBlock().getType().getName(),
-								PrefilterType.STRING_MATCH);
+						if(prefilter.containsKey("hittype")) {
+							if(!((MCVehicleBlockCollideEvent) event).getBlock().getType().name()
+									.equals(prefilter.get("hittype").val())) {
+								return false;
+							}
+						}
 						break;
 					case ENTITY:
 						Prefilters.match(prefilter, "hittype", ((MCVehicleEntityCollideEvent) event)
@@ -263,6 +267,7 @@ public class VehicleEvents {
 								+ " Minecraft has reached the point where vehicles can hit things that are neither"
 								+ " a block nor an entity. Please report this error to developers.", Target.UNKNOWN);
 				}
+				Prefilters.match(prefilter, "type", event.getVehicle().getType().name(), PrefilterType.MACRO);
 				return true;
 			}
 			return false;
