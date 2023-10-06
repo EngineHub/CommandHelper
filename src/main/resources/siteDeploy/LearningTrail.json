@@ -51,10 +51,6 @@
 		{"Command_Line_Scripting": "Command Line Scripting"},
 		"Logging"
 	]},
-	{"Future/Next Version": [
-		"Roadmap",
-		{"Dev": "Development Versions"}
-	]},
 	{"Development": [
 		"Architecture",
 		"Contributing",
@@ -62,6 +58,7 @@
 		{"DesignEthos": "Design Ethos"},
 		{"Extension_Development": "Extension Development"},
 		{"api.json": "api.json"},
-		{"SiteDeployTool": "Site Deploy Tool"}
+		{"SiteDeployTool": "Site Deploy Tool"},
+		"Roadmap"
 	]}
 ]
