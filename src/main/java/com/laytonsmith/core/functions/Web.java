@@ -468,9 +468,9 @@ public class Web {
 							}
 						}
 						CArray headers = CArray.GetAssociativeArray(t);
-						for(String key : resp.getHeaderNames()) {
+						for(String key : resp.getHeaderObject().getHeaderNames()) {
 							CArray h = new CArray(t);
-							for(String val : resp.getHeaders(key)) {
+							for(String val : resp.getHeaderObject().getHeaders(key)) {
 								h.push(new CString(val, t), t);
 							}
 							headers.set(key, h, t);
