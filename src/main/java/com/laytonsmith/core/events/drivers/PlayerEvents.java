@@ -667,16 +667,16 @@ public class PlayerEvents {
 
 		@Override
 		public void preExecution(Environment env, ActiveEvent activeEvent) {
-			if(activeEvent.getUnderlyingEvent() instanceof MCPlayerRespawnEvent) {
-				MCPlayer player = ((MCPlayerRespawnEvent) activeEvent.getUnderlyingEvent()).getPlayer();
+			if(activeEvent.getUnderlyingEvent() instanceof MCPlayerLoginEvent) {
+				MCPlayer player = ((MCPlayerLoginEvent) activeEvent.getUnderlyingEvent()).getPlayer();
 				Static.InjectPlayer(player);
 			}
 		}
 
 		@Override
 		public void postExecution(Environment env, ActiveEvent activeEvent) {
-			if(activeEvent.getUnderlyingEvent() instanceof MCPlayerRespawnEvent) {
-				MCPlayer player = ((MCPlayerRespawnEvent) activeEvent.getUnderlyingEvent()).getPlayer();
+			if(activeEvent.getUnderlyingEvent() instanceof MCPlayerLoginEvent) {
+				MCPlayer player = ((MCPlayerLoginEvent) activeEvent.getUnderlyingEvent()).getPlayer();
 				Static.UninjectPlayer(player);
 			}
 		}
