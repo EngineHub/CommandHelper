@@ -664,6 +664,22 @@ public class PlayerEvents {
 			return MSVersion.V3_3_1;
 		}
 
+		@Override
+		public void preExecution(Environment env, ActiveEvent activeEvent) {
+			if(activeEvent.getUnderlyingEvent() instanceof MCPlayerRespawnEvent) {
+				MCPlayer player = ((MCPlayerRespawnEvent) activeEvent.getUnderlyingEvent()).getPlayer();
+				Static.InjectPlayer(player);
+			}
+		}
+
+		@Override
+		public void postExecution(Environment env, ActiveEvent activeEvent) {
+			if(activeEvent.getUnderlyingEvent() instanceof MCPlayerRespawnEvent) {
+				MCPlayer player = ((MCPlayerRespawnEvent) activeEvent.getUnderlyingEvent()).getPlayer();
+				Static.UninjectPlayer(player);
+			}
+		}
+
 	}
 
 	@api
