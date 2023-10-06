@@ -800,7 +800,7 @@ public class ObjectGenerator {
 			throw new CRENotFoundException("Could not find the internal MCItemFactory object (are you running in cmdline mode?)", t);
 		}
 		MCItemMeta meta = itemFactory.getItemMeta(mat);
-		if(c instanceof CNull) {
+		if(c instanceof CNull || meta == null) {
 			return meta;
 		}
 		CArray ma;

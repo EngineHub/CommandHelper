@@ -48,6 +48,9 @@ public class BukkitMCItemFactory implements MCItemFactory {
 			return null;
 		}
 		ItemMeta im = f.getItemMeta((Material) material.getHandle());
+		if(im == null) {
+			return null;
+		}
 		return BukkitConvertor.BukkitGetCorrectMeta(im);
 	}
 
