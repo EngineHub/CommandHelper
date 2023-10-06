@@ -1,6 +1,7 @@
 array {[player,] slot} Returns an associative array of known item meta for the slot given, or null if there isn't any. ----
 
-Below are the available fields in the item meta array. Fields can be null when the item meta doesn't have that value (except in some cases where the type is an array).
+Below are the available fields in the item meta array. Fields can be null when the item meta doesn't have that value.
+Some Minecraft NBT is not yet supported in item meta, and should be documented below.
 
 {| width="80%" cellspacing="1" cellpadding="1" border="1" class="wikitable"
 |-
@@ -9,14 +10,15 @@ Below are the available fields in the item meta array. Fields can be null when t
 |-
 | All Items
 |
+The "CanPlaceOn" tag for blocks and "CanDestroy" tag for tools are not yet supported.
 * '''display''' : (string) The display name seen when the item is selected.
-* '''lore''' : (array) An array of strings that is displayed when hovering the item.
+* '''lore''' : (array) An array of strings that is displayed when hovering the item. As lines are plain text, they do not yet support some advanced text components.
 * '''enchants''' : (array) An associative array of enchantments with the vanilla name of enchantment as the key, and value being an enchantment array with the key '''"elevel"''' for the level of the enchantment.
 * '''model''' : (int) Represents vanilla's CustomModelData tag for use with resource packs.
 * '''flags''' : (array) Possible flags: ''%ITEM_FLAGS%''.
 * '''repair''' : (int) The cost to repair or combine this item in an anvil.
 * '''modifiers''' : (array) An array of attribute modifier arrays, each with keys: '''"attribute"''', '''"operation"''', '''"amount"''' (double), '''"uuid"''' (optional), '''"name"''' (optional), and '''"slot"''' (optional). Possible attributes: ''%ATTRIBUTES%''. Possible operations: ''%OPERATIONS%''. Possible slots: ''%SLOTS%''.
-* '''tags''' : (array) An associative array of custom tags. A tag's key is namespaced (e.g. "commandhelper:mytag") and the value is an associative array containing the '''"type"''' and '''"value"''' of the tag. Possible types: ''%TAG_TYPES%''.
+* '''tags''' : (array) An associative array of custom tags used by plugins. A tag's key is namespaced (e.g. "commandhelper:mytag") and the value is an associative array containing the '''"type"''' and '''"value"''' of the tag. Possible types: ''%TAG_TYPES%''.
 |-
 | All Damageable Items
 |
@@ -29,6 +31,7 @@ Below are the available fields in the item meta array. Fields can be null when t
 |-
 | AxolotlBucket
 |
+The entity's custom name is derived from the item '''"display"''' string. All other axolotl NBT is not supported.
 * '''variant''' : (string) The type of axolotl, one of ''%AXOLOTL_TYPES%''. (MC 1.17+)
 |-
 | Banners
@@ -41,6 +44,7 @@ Below are the available fields in the item meta array. Fields can be null when t
 |-
 | Books
 |
+The "generation" tag is not yet supported. As pages are plain text, they do not yet support some advanced text components.
 * '''title''' : (string) The title of the book.
 * '''author''' : (string) The author of the book.
 * '''pages''' : (array) An array of pages as strings. New lines supported. 256 character limit per page. 50 page limit.
@@ -57,6 +61,7 @@ Below are the available fields in the item meta array. Fields can be null when t
 |-
 | CommandBlocks
 |
+Some tags not yet supported.
 * '''command''' : (string) The command set for this commandblock.
 * '''customname''' : (string) The name of this commandblock. (default: '@')
 |-
@@ -68,6 +73,10 @@ Below are the available fields in the item meta array. Fields can be null when t
 | Crossbows
 |
 * '''projectiles''' : (array) An array of item arrays that are loaded in the crossbow. Items must be arrows or fireworks. When fired, the first item is the middle projectile. (maximum of three projectiles)
+|-
+| Decorated Pots
+|
+Not yet supported due to an upstream bug.
 |-
 | Enchanted Books
 |
@@ -135,8 +144,13 @@ Below are the available fields in the item meta array. Fields can be null when t
 * '''backglowing''' : (boolean) Whether the sign has glowing text on the back. (MC 1.20+)
 * '''waxed''' : (boolean) Whether the sign is waxed. (MC 1.20.1+)
 |-
+| Spawn Eggs
+|
+The entity's custom name is derived from the item '''"display"''' string. Additional NBT for the entity spawned is not supported.
+|-
 | Spawners
 |
+NBT for spawn potentials other than entity type is not supported.
 * '''spawntype''' : (string) May be one of ''%ENTITY_TYPES%''. Not all entity types will spawn from spawners, and some require special conditions.
 * '''delay''' : (int) The time in ticks until the spawner will spawn the next batch of entities.
 * '''mindelay''' : (int) The lower bounds of a new random delay chosen after each batch of entities spawn. (must be <= 'maxdelay')
@@ -148,6 +162,7 @@ Below are the available fields in the item meta array. Fields can be null when t
 |-
 | Tropical Fish Buckets
 |
+The entity's custom name is derived from the item '''"display"''' string. All other tropical fish NBT is not supported.
 * '''fishcolor''' : (string) The color of the fish, can be one of ''%DYE_COLORS%''.
 * '''fishpatterncolor''' : (string) The color of the pattern on the fish.
 * '''fishpattern''' : (string) The pattern type on the fish, can be one of ''%FISH_PATTERNS%''.
