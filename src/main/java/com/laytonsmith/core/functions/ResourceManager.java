@@ -179,7 +179,7 @@ public class ResourceManager {
 					+ StringUtils.Join(ResourceTypes.values(), ", ", ", or ")
 					+ " It's worth noting that this function (and any function that relies on it) is a stopgap"
 					+ " measure, and will eventually be deprecated and removed. For certain types of operations,"
-					+ " it's completely unweildy to implement them in a procedural manner, so this is a temporary"
+					+ " it's completely unwieldy to implement them in a procedural manner, so this is a temporary"
 					+ " alternative to proper object support.";
 		}
 

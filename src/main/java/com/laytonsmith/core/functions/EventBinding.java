@@ -960,7 +960,7 @@ public class EventBinding {
 		@Override
 		public String docs() {
 			return "void {} Consumes an event, so that lower priority handlers don't even"
-					+ " recieve the event. Monitor level handlers will still recieve it, however,"
+					+ " receive the event. Monitor level handlers will still receive it, however,"
 					+ " and they can check to see if the event was consumed.";
 		}
 
@@ -1012,7 +1012,7 @@ public class EventBinding {
 			return "boolean {} Returns whether or not this event has been consumed. Usually only useful"
 					+ " for Monitor level handlers, it could also be used for highly robust code,"
 					+ " as an equal priority handler could have consumed the event, but this handler"
-					+ " would still recieve it.";
+					+ " would still receive it.";
 		}
 
 		@Override

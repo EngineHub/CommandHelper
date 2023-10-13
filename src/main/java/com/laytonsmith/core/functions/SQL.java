@@ -549,7 +549,7 @@ public class SQL {
 					+ " The callback should have the following signature: closure(@contents, @exception){ &lt;code&gt; }."
 					+ " @contents will contain the return value that query would normally return. If @exception is not"
 					+ " null, then an exception occurred during the query, and that exception will be passed in. If"
-					+ " @exception is null, then no error occured, though @contents may still be null if query() would"
+					+ " @exception is null, then no error occurred, though @contents may still be null if query() would"
 					+ " otherwise have returned null.";
 		}
 

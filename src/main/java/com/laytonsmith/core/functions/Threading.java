@@ -481,7 +481,7 @@ public class Threading {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Demonstrates two threads possibly overwriting eachother", ""
+				new ExampleScript("Demonstrates two threads possibly overwriting each other", ""
 				+ "export('log', '');\n"
 				+ "x_new_thread('Thread1', closure() {\n"
 				+ "\t@log = import('log');\n"
@@ -500,7 +500,7 @@ public class Threading {
 				+ "\nOR\nSome new log message from Thread1.\nSome new log message from Thread2.\n"
 				+ "\nOR\nSome new log message from Thread2.\nSome new log message from Thread1.\n"),
 				new ExampleScript("Demonstrates two threads modifying the same variable without the possibility of"
-				+ " overwriting eachother because they are synchronized.", ""
+				+ " overwriting each other because they are synchronized.", ""
 				+ "export('log', '');\n"
 				+ "x_new_thread('Thread1', closure() {\n"
 				+ "\tsynchronized('syncLog') {\n"

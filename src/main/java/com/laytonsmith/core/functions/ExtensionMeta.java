@@ -251,7 +251,7 @@ public class ExtensionMeta {
 
 		@Override
 		public String docs() {
-			return "boolean {name} Returns true if the extention is known to "
+			return "boolean {name} Returns true if the extension is known to "
 					+ Implementation.GetServerType().getBranding() + " and loaded."
 					+ " Like function_exists(), this function is resolved at compile time.";
 		}

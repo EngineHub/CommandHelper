@@ -295,7 +295,7 @@ public class DataHandling {
 		@Override
 		public String docs() {
 			return "array {[args...]} Works exactly like array(), except the array created will be an associative array, even"
-					+ " if the array has been created with no elements. This is the only use case where this is neccessary, vs"
+					+ " if the array has been created with no elements. This is the only use case where this is necessary, vs"
 					+ " using the normal array() function, or in the case where you assign sequential keys anyways, and the same"
 					+ " array could have been created using array().";
 		}
@@ -2495,7 +2495,7 @@ public class DataHandling {
 		@Override
 		public String docs() {
 			return "void {key, value} Stores a value in the global storage register."
-					+ " An arbitrary value is stored with the given key, and can be retreived using import."
+					+ " An arbitrary value is stored with the given key, and can be retrieved using import."
 					+ " If the value is already stored, it is overwritten. See {{function|import}}."
 					+ " The reference to the value is stored, not a copy of the value, so in the case of"
 					+ " arrays, manipulating the contents of the array will manipulate the stored value. An array may"

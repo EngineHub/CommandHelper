@@ -70,7 +70,7 @@ public class Debug {
 	public static String docs() {
 		return "Provides methods for viewing data about both CommandHelper and the other plugins in your server. Though not meant to"
 				+ " be called by normal scripts, these methods are available everywhere other methods are available. Note that for"
-				+ " some of these functions to even work, play-dirty mode must set to on. These are most useful in conjuction with"
+				+ " some of these functions to even work, play-dirty mode must set to on. These are most useful in conjunction with"
 				+ " interpreter mode.";
 	}
 

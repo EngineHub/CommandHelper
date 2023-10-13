@@ -348,7 +348,7 @@ public class FileHandling {
 
 		@Override
 		public String docs() {
-			return "void {file, [encoding], callback} Asyncronously reads in a file. ---- "
+			return "void {file, [encoding], callback} Asynchronously reads in a file. ---- "
 					+ " This may be a remote file accessed with an SCP style path. (See the [[SCP|wiki article]]"
 					+ " about SCP credentials for more information.) If the file is not found, or otherwise can't be read in, an IOException is thrown."
 					+ " If the file specified is not within base-dir (as specified in the preferences file), a SecurityException is thrown."

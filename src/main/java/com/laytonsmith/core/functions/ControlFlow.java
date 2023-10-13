@@ -545,7 +545,7 @@ public class ControlFlow {
 					+ " See the documentation on [[Logic|Logic]] for more information. ----"
 					+ " In addition, slices may be used to indicate ranges of integers that should trigger the"
 					+ " specified case. Slices embedded in an array are fine as well. Switch statements also support"
-					+ " brace/case/default syntax, as in most languages, althrough unlike most languages, fallthrough"
+					+ " brace/case/default syntax, as in most languages, although unlike most languages, fallthrough"
 					+ " isn't supported. Breaking with break() isn't required, but recommended. A number greater than 1"
 					+ " may be sent to break, and breaking out of the switch will consume a \"break counter\" and the"
 					+ " break will continue up the chain. If you do use break(), the return value of switch is ignored."

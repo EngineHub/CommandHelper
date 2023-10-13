@@ -247,7 +247,7 @@ public class Cmdline {
 		public String docs() {
 			return "void {text} Writes the text to the system's std out, but does not automatically add a newline at the end."
 					+ " Unlike console(), this does not use anything else to format the output, though in many"
-					+ " cases they will behave the same. Unlike other print methdods, colors and other formatting characters WILL"
+					+ " cases they will behave the same. Unlike other print methods, colors and other formatting characters WILL"
 					+ " \"bleed\" through, so"
 					+ " print_out(color(RED) . 'This is red') will also cause the next line to also be red,"
 					+ " so if you need to print multiple lines out, you should manually reset the color with print_out(color(RESET)),"
@@ -303,7 +303,7 @@ public class Cmdline {
 		public String docs() {
 			return "void {text} Writes the text to the system's std err, but does not automatically add a newline at the end."
 					+ " Unlike console(), this does not use anything else to format the output, though in many"
-					+ " cases they will behave the same. Unlike other print methdods, colors and other formatting characters WILL"
+					+ " cases they will behave the same. Unlike other print methods, colors and other formatting characters WILL"
 					+ " \"bleed\" through, so"
 					+ " print_err(color(RED) . 'This is red') will also cause the next line to also be red,"
 					+ " so if you need to print multiple lines out, you should manually reset the color with print_out(color(RESET)),"

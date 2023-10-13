@@ -1870,7 +1870,7 @@ public class ArrayHandling {
 					+ ", or it may be a closure, if the sort should follow custom rules (explained below). A regular"
 					+ " sort sorts the elements without changing types first. A numeric sort always converts numeric"
 					+ " values to numbers first (so 001 becomes 1). A string sort compares values as strings, and a"
-					+ " string_ic sort is the same as a string sort, but the comparision is case-insensitive. If the"
+					+ " string_ic sort is the same as a string sort, but the comparison is case-insensitive. If the"
 					+ " array contains array values, a CastException is thrown; inner arrays cannot be sorted against"
 					+ " each other. If the array is associative, a warning will be raised if the General logging"
 					+ " channel is set to verbose, because the array's keys will all be lost in the process. To avoid"

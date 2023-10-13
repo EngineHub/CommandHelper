@@ -1848,7 +1848,7 @@ public class Meta {
 			return "array {} Returns the smart comment on the currently running alias. The array returned will contain"
 					+ " the comment body in the 'body' element, and the annotations in the 'annotations' element as"
 					+ " an associative array. Each key in the annotation will contain an at symbol, so for instance"
-					+ " '@annotation' and the value is an array of all occurances. ";
+					+ " '@annotation' and the value is an array of all occurrences. ";
 		}
 
 		@Override

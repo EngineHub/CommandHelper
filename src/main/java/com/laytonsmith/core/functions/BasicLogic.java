@@ -227,7 +227,7 @@ public class BasicLogic {
 					+ " equals('1', 1) returns true, sequals('1', 1) returns false, because"
 					+ " the first one is a string, and the second one is an int. More often"
 					+ " than not, you want to use plain equals(). In addition, type juggling is"
-					+ " explicitely not performed on strings. Thus '2' !== '2.0', despite those"
+					+ " explicitly not performed on strings. Thus '2' !== '2.0', despite those"
 					+ " being ==. Operator syntax is also"
 					+ " supported: @a === @b";
 		}
