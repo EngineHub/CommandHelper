@@ -346,7 +346,7 @@ public class DataHandling {
 				name = ((IVariable) args[offset]).getVariableName();
 				if(list.has(name) && env.getEnv(GlobalEnv.class).GetFlag("no-check-duplicate-assign") == null) {
 					if(env.getEnv(GlobalEnv.class).GetFlag("closure-warn-overwrite") != null) {
-						MSLog.GetLogger().Log(MSLog.Tags.RUNTIME, LogLevel.ERROR,
+						MSLog.GetLogger().Log(MSLog.Tags.RUNTIME, LogLevel.WARNING,
 								"The variable " + name + " is hiding another value of the"
 								+ " same name in the main scope.", t);
 					} else if(!StaticAnalysis.enabled() && t != list.get(name, t, true, env).getDefinedTarget()) {
