@@ -38,6 +38,7 @@ import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBrewingStand;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCChest;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCCommandBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCContainer;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCDecoratedPot;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCDispenser;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCDropper;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCFurnace;
@@ -113,6 +114,7 @@ import org.bukkit.block.Chest;
 import org.bukkit.block.CommandBlock;
 import org.bukkit.block.Container;
 import org.bukkit.block.CreatureSpawner;
+import org.bukkit.block.DecoratedPot;
 import org.bukkit.block.Dispenser;
 import org.bukkit.block.Dropper;
 import org.bukkit.block.Furnace;
@@ -585,6 +587,9 @@ public class BukkitConvertor extends AbstractConvertor {
 		}
 		if(bs instanceof CommandBlock) {
 			return new BukkitMCCommandBlock((CommandBlock) bs);
+		}
+		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_1) && bs instanceof DecoratedPot) {
+			return new BukkitMCDecoratedPot((DecoratedPot) bs);
 		}
 		return new BukkitMCBlockState(bs);
 	}

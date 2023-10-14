@@ -18,6 +18,7 @@ import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockData;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.abstraction.blocks.MCCommandBlock;
+import com.laytonsmith.abstraction.blocks.MCDecoratedPot;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.blocks.MCSign;
 import com.laytonsmith.abstraction.blocks.MCSign.Side;
@@ -75,6 +76,7 @@ import java.util.Arrays;
 
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class Environment {
@@ -3189,6 +3191,138 @@ public class Environment {
 		@Override
 		public Boolean runAsync() {
 			return false;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class get_decorated_pot_sherds extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "get_decorated_pot_sherds";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class, CREInvalidWorldException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public String docs() {
+			return "array {locationArray} Returns an associative array of sherds for each side of a decorated pot."
+					+ " The keys for each side are 'front', 'back', 'left', and 'right'."
+					+ " The values are one of any sherd materials or a brick if there's no decoration on that side.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args)
+				throws ConfigRuntimeException {
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			MCBlockState bs = loc.getBlock().getState();
+			if(bs instanceof MCDecoratedPot decoratedPot) {
+				CArray sherds = CArray.GetAssociativeArray(t);
+				Map<MCDecoratedPot.Side, MCMaterial> potSherds = decoratedPot.getSherds();
+				for(Map.Entry<MCDecoratedPot.Side, MCMaterial> side : potSherds.entrySet()) {
+					sherds.set(side.getKey().name().toLowerCase(), side.getValue().name());
+				}
+				return sherds;
+			} else {
+				throw new CREFormatException("The block at the specified location is not a decorated pot", t);
+			}
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class set_decorated_pot_sherds extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "set_decorated_pot_sherds";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class, CREInvalidWorldException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public String docs() {
+			return "void {locationArray, array} Set the sherds on the sides of a decorated pot."
+					+ " Takes an associative array with a key for each side: 'front', 'back', 'left', and 'right'."
+					+ " Each side accepts a sherd material name, or if no decoration is desired on that side, a brick."
+					+ " Throws a FormatException if a side or material is not valid.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args)
+				throws ConfigRuntimeException {
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			MCBlockState bs = loc.getBlock().getState();
+			if(!(bs instanceof MCDecoratedPot decoratedPot)) {
+				throw new CREFormatException("The block at the specified location is not a decorated pot", t);
+			}
+			Mixed sherds = args[1];
+			if(sherds.isInstanceOf(CArray.TYPE)) {
+				CArray sherdArray = (CArray) sherds;
+				if(sherdArray.isAssociative()) {
+					for(String key : sherdArray.stringKeySet()) {
+						MCDecoratedPot.Side side;
+						try {
+							side = MCDecoratedPot.Side.valueOf(key.toUpperCase());
+						} catch (IllegalArgumentException ex) {
+							throw new CREFormatException("Invalid decorated pot side: " + key, t);
+						}
+						try {
+							decoratedPot.setSherd(side, MCMaterial.valueOf(sherdArray.get(key, t).val()));
+						} catch (IllegalArgumentException ex) {
+							throw new CREFormatException(ex.getMessage(), t);
+						}
+					}
+					bs.update();
+					return CVoid.VOID;
+				}
+			}
+			throw new CREFormatException("Expected associative array for decorated pots.", t);
 		}
 	}
 }
