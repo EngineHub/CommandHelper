@@ -60,12 +60,14 @@ import java.util.UUID;
 
 public class BukkitMCServer implements MCServer {
 
-	Server s;
-	MCVersion version;
-	boolean isPaper = false;
+	private final Server s;
+	private MCVersion version;
+	private String craftBukkitPackage;
+	private boolean isPaper = false;
 
 	public BukkitMCServer() {
 		this.s = Bukkit.getServer();
+		craftBukkitPackage = this.s.getClass().getPackage().getName();
 		try {
 			Class.forName("com.destroystokyo.paper.PaperConfig");
 			this.isPaper = true;
@@ -87,6 +89,10 @@ public class BukkitMCServer implements MCServer {
 
 	public boolean isPaper() {
 		return this.isPaper;
+	}
+
+	public String getCraftBukkitPackage() {
+		return this.craftBukkitPackage;
 	}
 
 	@Override

@@ -51,7 +51,7 @@ public class BukkitMCBlockStateMeta extends BukkitMCItemMeta implements MCBlockS
 			// Workaround upstream bug with decorated pots missing the "id" tag in the BlockEntityTag when broken.
 			// Without this fix, getting the BlockState from this meta may result in a default decorated pot.
 			try {
-				Class craftMetaBlockStateClass = Class.forName(BukkitConvertor.CRAFTBUKKIT_PACKAGE
+				Class craftMetaBlockStateClass = Class.forName(((BukkitMCServer) Static.getServer()).getCraftBukkitPackage()
 						+ ".inventory.CraftMetaBlockState");
 				Class nbtTagCompoundClass = Class.forName("net.minecraft.nbt.NBTTagCompound");
 				Object nbt = ReflectionUtils.get(craftMetaBlockStateClass, meta, "blockEntityTag");

@@ -20,6 +20,7 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayerInventory;
 import com.laytonsmith.abstraction.bukkit.BukkitMCScoreboard;
+import com.laytonsmith.abstraction.bukkit.BukkitMCServer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorldBorder;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCInstrument;
@@ -420,7 +421,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 				if(mcversion.lt(MCVersion.MC1_18)) {
 					getPlayerList = "getPlayerList";
 					if(mcversion.lt(MCVersion.MC1_17)) {
-						String version = BukkitConvertor.CRAFTBUKKIT_PACKAGE.split("\\.")[3];
+						String version = ((BukkitMCServer) Static.getServer()).getCraftBukkitPackage().split("\\.")[3];
 						nms = "net.minecraft.server." + version;
 						playersPackage = nms;
 						ops = "operators";
