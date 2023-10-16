@@ -38,7 +38,6 @@ import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSoundCategory;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCWeather;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.Static;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Note;
@@ -421,7 +420,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 				if(mcversion.lt(MCVersion.MC1_18)) {
 					getPlayerList = "getPlayerList";
 					if(mcversion.lt(MCVersion.MC1_17)) {
-						String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
+						String version = BukkitConvertor.CRAFTBUKKIT_PACKAGE.split("\\.")[3];
 						nms = "net.minecraft.server." + version;
 						playersPackage = nms;
 						ops = "operators";

@@ -196,6 +196,8 @@ import org.bukkit.command.RemoteConsoleCommandSender;
 @convert(type = Implementation.Type.BUKKIT)
 public class BukkitConvertor extends AbstractConvertor {
 
+	public static final String CRAFTBUKKIT_PACKAGE = Bukkit.getServer().getClass().getPackage().getName();
+
 	private static BukkitMCPluginMeta pluginMeta = null;
 
 	@Override

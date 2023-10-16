@@ -1805,10 +1805,10 @@ public class Environment {
 			MCEntity ent = null;
 			if(args[0].isInstanceOf(CArray.TYPE)) {
 				loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
-			} else if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_18_X)) {
+			} else if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_18_1)) {
 				ent = Static.getEntity(args[0], t);
 			} else {
-				throw new CREFormatException("Expecting a location array on versions prior to MC 1.18.2", t);
+				throw new CREFormatException("Expecting a location array on versions prior to MC 1.18.1", t);
 			}
 
 			MCSound sound;

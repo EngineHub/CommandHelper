@@ -9,6 +9,8 @@ import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BlockStateMeta;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -142,7 +144,11 @@ public class BukkitMCItemStack implements MCItemStack {
 
 	@Override
 	public MCItemMeta getItemMeta() {
-		return BukkitConvertor.BukkitGetCorrectMeta(is.getItemMeta());
+		ItemMeta im = is.getItemMeta();
+		if(im instanceof BlockStateMeta) {
+			return new BukkitMCBlockStateMeta((BlockStateMeta) im, is.getType());
+		}
+		return BukkitConvertor.BukkitGetCorrectMeta(im);
 	}
 
 	@Override

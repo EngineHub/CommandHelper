@@ -53,6 +53,7 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlockData;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.abstraction.blocks.MCCommandBlock;
+import com.laytonsmith.abstraction.blocks.MCDecoratedPot;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.blocks.MCBanner;
 import com.laytonsmith.abstraction.blocks.MCBrewingStand;
@@ -558,6 +559,13 @@ public class ObjectGenerator {
 						invData.set("smelting", ObjectGenerator.GetGenerator().item(inv.getSmelting(), t), t);
 					}
 					ma.set("inventory", invData, t);
+				} else if(bs instanceof MCDecoratedPot decoratedPot) {
+					CArray sherds = CArray.GetAssociativeArray(t);
+					Map<MCDecoratedPot.Side, MCMaterial> potSherds = decoratedPot.getSherds();
+					for(Map.Entry<MCDecoratedPot.Side, MCMaterial> side : potSherds.entrySet()) {
+						sherds.set(side.getKey().name().toLowerCase(), side.getValue().name());
+					}
+					ma.set("sherds", sherds, t);
 				} else if(bs instanceof MCInventoryHolder) {
 					// Finally, handle InventoryHolders with inventory slots that do not have a special meaning.
 					MCInventory inv = ((MCInventoryHolder) bs).getInventory();
@@ -1037,6 +1045,23 @@ public class ObjectGenerator {
 							}
 						}
 						bsm.setBlockState(bs);
+					} else if(bs instanceof MCDecoratedPot decoratedPot) {
+						if(ma.containsKey("sherds")) {
+							Mixed sherds = ma.get("sherds", t);
+							if(sherds.isInstanceOf(CArray.TYPE)) {
+								CArray sherdArray = (CArray) sherds;
+								if(!sherdArray.isAssociative()) {
+									throw new CREFormatException("Expected associative array for decorated pot meta.", t);
+								}
+								for(String key : sherdArray.stringKeySet()) {
+									decoratedPot.setSherd(MCDecoratedPot.Side.valueOf(key.toUpperCase()),
+											MCMaterial.valueOf(sherdArray.get(key, t).val()));
+								}
+							} else {
+								throw new CREFormatException("Expected associative array for decorated pot meta.", t);
+							}
+							bsm.setBlockState(bs);
+						}
 					} else if(bs instanceof MCInventoryHolder) {
 						// Finally, handle InventoryHolders with inventory slots that do not have a special meaning.
 						if(ma.containsKey("inventory")) {
