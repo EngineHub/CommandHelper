@@ -27,6 +27,7 @@ This particle array must contain a "particle" key, and supports the keys "block"
 * %KEY_ARROW_KNOCKBACK%: The knockback strength. (int)
 * %KEY_ARROW_DAMAGE%: The amount of damage. (double)
 * %KEY_ARROW_PIERCE_LEVEL%: The remaining times that this arrow can pierce through an entity. (int from 0 and 127)
+* %KEY_ARROW_PICKUP%: Whether picking up this arrow is ALLOWED, DISALLOWED, or CREATIVE_ONLY.
 * %KEY_TIPPEDARROW_POTIONMETA%: An associative array with a "base" potion array and a "potions" array of effect arrays for a tipped arrow.
 |-
 | ARMOR_STAND

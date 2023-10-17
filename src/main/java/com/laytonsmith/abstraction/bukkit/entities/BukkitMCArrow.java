@@ -7,6 +7,7 @@ import com.laytonsmith.abstraction.entities.MCArrow;
 import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPotionEffectType;
 import com.laytonsmith.core.Static;
+import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.potion.PotionData;
@@ -104,5 +105,15 @@ public class BukkitMCArrow extends BukkitMCProjectile implements MCArrow {
 	@Override
 	public void setPierceLevel(int level) {
 		arrow.setPierceLevel(level);
+	}
+
+	@Override
+	public MCArrow.PickupStatus getPickupStatus() {
+		return MCArrow.PickupStatus.valueOf(arrow.getPickupStatus().name());
+	}
+
+	@Override
+	public void setPickupStatus(MCArrow.PickupStatus status) {
+		arrow.setPickupStatus(AbstractArrow.PickupStatus.valueOf(status.name()));
 	}
 }

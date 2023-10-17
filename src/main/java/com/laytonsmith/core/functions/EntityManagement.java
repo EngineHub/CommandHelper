@@ -1866,6 +1866,7 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_ARROW_KNOCKBACK, new CInt(arrow.getKnockbackStrength(), t), t);
 					specArray.set(entity_spec.KEY_ARROW_DAMAGE, new CDouble(arrow.getDamage(), t), t);
 					specArray.set(entity_spec.KEY_ARROW_PIERCE_LEVEL, new CInt(arrow.getPierceLevel(), t), t);
+					specArray.set(entity_spec.KEY_ARROW_PICKUP, new CString(arrow.getPickupStatus().name(), t), t);
 					CArray tippedmeta = CArray.GetAssociativeArray(t);
 					CArray tippedeffects = ObjectGenerator.GetGenerator().potions(arrow.getCustomEffects(), t);
 					tippedmeta.set("potions", tippedeffects, t);
@@ -2329,6 +2330,7 @@ public class EntityManagement {
 		private static final String KEY_ARROW_KNOCKBACK = "knockback";
 		private static final String KEY_ARROW_DAMAGE = "damage";
 		private static final String KEY_ARROW_PIERCE_LEVEL = "piercelevel";
+		private static final String KEY_ARROW_PICKUP = "pickup";
 		private static final String KEY_ARMORSTAND_ARMS = "arms";
 		private static final String KEY_ARMORSTAND_BASEPLATE = "baseplate";
 		private static final String KEY_ARMORSTAND_GRAVITY = "gravity";
@@ -2654,6 +2656,14 @@ public class EntityManagement {
 									throw new CRERangeException("Pierce level must be 0 to 127.", t);
 								}
 								arrow.setPierceLevel(level);
+								break;
+							case entity_spec.KEY_ARROW_PICKUP:
+								try {
+									arrow.setPickupStatus(MCArrow.PickupStatus.valueOf(specArray.get(index, t).val()));
+								} catch (IllegalArgumentException ex) {
+									throw new CREFormatException("Invalid arrow pickup status: "
+											+ specArray.get(index, t).val(), t);
+								}
 								break;
 							case entity_spec.KEY_TIPPEDARROW_POTIONMETA:
 								Mixed c = specArray.get(index, t);

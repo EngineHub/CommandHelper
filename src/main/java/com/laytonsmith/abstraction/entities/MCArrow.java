@@ -32,4 +32,14 @@ public interface MCArrow extends MCProjectile {
 	int getPierceLevel();
 
 	void setPierceLevel(int level);
+
+	PickupStatus getPickupStatus();
+
+	void setPickupStatus(PickupStatus status);
+
+	enum PickupStatus {
+		ALLOWED,
+		DISALLOWED,
+		CREATIVE_ONLY
+	}
 }
