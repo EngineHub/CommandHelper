@@ -30,6 +30,7 @@ import com.laytonsmith.abstraction.entities.MCArmorStand;
 import com.laytonsmith.abstraction.entities.MCArrow;
 import com.laytonsmith.abstraction.entities.MCAxolotl;
 import com.laytonsmith.abstraction.entities.MCBee;
+import com.laytonsmith.abstraction.entities.MCBlockDisplay;
 import com.laytonsmith.abstraction.entities.MCBoat;
 import com.laytonsmith.abstraction.entities.MCCat;
 import com.laytonsmith.abstraction.entities.MCChestedHorse;
@@ -56,6 +57,8 @@ import com.laytonsmith.abstraction.entities.MCInteraction;
 import com.laytonsmith.abstraction.entities.MCInteraction.MCPreviousInteraction;
 import com.laytonsmith.abstraction.entities.MCIronGolem;
 import com.laytonsmith.abstraction.entities.MCItem;
+import com.laytonsmith.abstraction.entities.MCItemDisplay;
+import com.laytonsmith.abstraction.entities.MCItemDisplay.ModelTransform;
 import com.laytonsmith.abstraction.entities.MCItemFrame;
 import com.laytonsmith.abstraction.entities.MCItemProjectile;
 import com.laytonsmith.abstraction.entities.MCLightningStrike;
@@ -81,6 +84,7 @@ import com.laytonsmith.abstraction.entities.MCSnowman;
 import com.laytonsmith.abstraction.entities.MCSpectralArrow;
 import com.laytonsmith.abstraction.entities.MCStrider;
 import com.laytonsmith.abstraction.entities.MCTNT;
+import com.laytonsmith.abstraction.entities.MCTextDisplay;
 import com.laytonsmith.abstraction.entities.MCThrownPotion;
 import com.laytonsmith.abstraction.entities.MCTrident;
 import com.laytonsmith.abstraction.entities.MCTropicalFish;
@@ -1809,6 +1813,7 @@ public class EntityManagement {
 			docs = docs.replace("%PANDA_GENE%", StringUtils.Join(MCPanda.Gene.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%AXOLOTL_TYPE%", StringUtils.Join(MCAxolotlType.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%FROG_TYPE%", StringUtils.Join(MCFrogType.values(), ", ", ", or ", " or "));
+			docs = docs.replace("%ITEM_DISPLAY%", StringUtils.Join(ModelTransform.values(), ", ", ", or "));
 			for(Field field : entity_spec.class.getDeclaredFields()) {
 				try {
 					String name = field.getName();
@@ -1903,6 +1908,10 @@ public class EntityManagement {
 					} else {
 						specArray.set(entity_spec.KEY_BEE_HIVE_LOCATION, ObjectGenerator.GetGenerator().location(hive), t);
 					}
+					break;
+				case BLOCK_DISPLAY:
+					MCBlockDisplay blockDisplay = (MCBlockDisplay) entity;
+					specArray.set(KEY_DISPLAY_BLOCK, ObjectGenerator.GetGenerator().blockData(blockDisplay.getBlockData(), t), t);
 					break;
 				case BOAT:
 					MCBoat boat = (MCBoat) entity;
@@ -2067,6 +2076,11 @@ public class EntityManagement {
 					MCIronGolem golem = (MCIronGolem) entity;
 					specArray.set(entity_spec.KEY_IRON_GOLEM_PLAYERCREATED, CBoolean.get(golem.isPlayerCreated()), t);
 					break;
+				case ITEM_DISPLAY:
+					MCItemDisplay itemDisplay = (MCItemDisplay) entity;
+					specArray.set(KEY_DISPLAY_ITEM, ObjectGenerator.GetGenerator().item(itemDisplay.getItem(), t), t);
+					specArray.set(KEY_DISPLAY_ITEM_DISPLAY, itemDisplay.getItemModelTransform().name(), t);
+					break;
 				case ITEM_FRAME:
 				case GLOW_ITEM_FRAME:
 					MCItemFrame frame = (MCItemFrame) entity;
@@ -2209,6 +2223,19 @@ public class EntityManagement {
 					MCStrider strider = (MCStrider) entity;
 					specArray.set(entity_spec.KEY_STEERABLE_SADDLED, CBoolean.get(strider.isSaddled()), t);
 					break;
+				case TEXT_DISPLAY:
+					MCTextDisplay tDisplay = (MCTextDisplay) entity;
+					specArray.set(entity_spec.KEY_DISPLAY_TEXT, tDisplay.getText());
+					specArray.set(entity_spec.KEY_DISPLAY_TEXT_ALIGNMENT, tDisplay.getAlignment().name());
+					specArray.set(entity_spec.KEY_DISPLAY_TEXT_LINE_WIDTH, new CInt(tDisplay.getLineWidth(), t), t);
+					specArray.set(entity_spec.KEY_DISPLAY_TEXT_SEE_THROUGH, CBoolean.get(tDisplay.isVisibleThroughBlocks()), t);
+					specArray.set(entity_spec.KEY_DISPLAY_TEXT_SHADOW, CBoolean.get(tDisplay.hasShadow()), t);
+					long opacity = tDisplay.getOpacity();
+					if(opacity < 0) {
+						opacity += 256;
+					}
+					specArray.set(entity_spec.KEY_DISPLAY_TEXT_OPACITY, new CInt(opacity, t), t);
+					break;
 				case TRIDENT:
 					MCTrident trident = (MCTrident) entity;
 					specArray.set(entity_spec.KEY_ARROW_CRITICAL, CBoolean.get(trident.isCritical()), t);
@@ -2322,6 +2349,15 @@ public class EntityManagement {
 		private static final String KEY_CREEPER_FUSETICKS = "fuseticks";
 		private static final String KEY_CREEPER_MAXFUSETICKS = "maxfuseticks";
 		private static final String KEY_CREEPER_EXPLOSIONRADIUS = "explosionradius";
+		private static final String KEY_DISPLAY_BLOCK = "blockdata";
+		private static final String KEY_DISPLAY_ITEM = "item";
+		private static final String KEY_DISPLAY_ITEM_DISPLAY = "itemdisplay";
+		private static final String KEY_DISPLAY_TEXT = "text";
+		private static final String KEY_DISPLAY_TEXT_ALIGNMENT = "alignment";
+		private static final String KEY_DISPLAY_TEXT_LINE_WIDTH = "linewidth";
+		private static final String KEY_DISPLAY_TEXT_SEE_THROUGH = "seethrough";
+		private static final String KEY_DISPLAY_TEXT_SHADOW = "shadow";
+		private static final String KEY_DISPLAY_TEXT_OPACITY = "opacity";
 		private static final String KEY_DROPPED_ITEM_ITEMSTACK = "itemstack";
 		private static final String KEY_DROPPED_ITEM_PICKUPDELAY = "pickupdelay";
 		private static final String KEY_DROPPED_ITEM_OWNER = "owner";
@@ -2741,6 +2777,25 @@ public class EntityManagement {
 								} else {
 									bee.setHiveLocation(ObjectGenerator.GetGenerator().location(hive, null, t));
 								}
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
+				case BLOCK_DISPLAY:
+					MCBlockDisplay bDisplay = (MCBlockDisplay) entity;
+					for(String index : specArray.stringKeySet()) {
+						switch(index.toLowerCase()) {
+							case entity_spec.KEY_DISPLAY_BLOCK:
+								MCBlockData bd;
+								Mixed m = specArray.get(index, t);
+								if(m.isInstanceOf(CArray.TYPE)) {
+									bd = ObjectGenerator.GetGenerator().blockData((CArray) m, t);
+								} else {
+									bd = Static.getServer().createBlockData(m.val());
+								}
+								bDisplay.setBlockData(bd);
 								break;
 							default:
 								throwException(index, t);
@@ -3186,6 +3241,26 @@ public class EntityManagement {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_IRON_GOLEM_PLAYERCREATED:
 								golem.setPlayerCreated(ArgumentValidation.getBoolean(specArray.get(index, t), t));
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
+				case ITEM_DISPLAY:
+					MCItemDisplay itemDisplay = (MCItemDisplay) entity;
+					for(String index : specArray.stringKeySet()) {
+						switch(index.toLowerCase()) {
+							case entity_spec.KEY_DISPLAY_ITEM:
+								itemDisplay.setItem(ObjectGenerator.GetGenerator().item(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_DISPLAY_ITEM_DISPLAY:
+								try {
+									itemDisplay.setItemModelTransform(ModelTransform.valueOf(specArray.get(index, t).val()));
+								} catch (IllegalArgumentException ex) {
+									throw new CREFormatException("Invalid display item model transform: "
+											+ specArray.get(index, t).val(), t);
+								}
 								break;
 							default:
 								throwException(index, t);
@@ -3639,6 +3714,41 @@ public class EntityManagement {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_STEERABLE_SADDLED:
 								strider.setSaddled(ArgumentValidation.getBoolean(specArray.get(index, t), t));
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
+				case TEXT_DISPLAY:
+					MCTextDisplay tDisplay = (MCTextDisplay) entity;
+					for(String index : specArray.stringKeySet()) {
+						switch(index.toLowerCase()) {
+							case entity_spec.KEY_DISPLAY_TEXT:
+								tDisplay.setText(specArray.get(index, t).val());
+								break;
+							case entity_spec.KEY_DISPLAY_TEXT_ALIGNMENT:
+								try {
+									tDisplay.setAlignment(MCTextDisplay.Alignment.valueOf(specArray.get(index, t).val()));
+								} catch (IllegalArgumentException ex) {
+									throw new CREFormatException("Invalid text alignment: " + specArray.get(index, t).val(), t);
+								}
+								break;
+							case entity_spec.KEY_DISPLAY_TEXT_LINE_WIDTH:
+								tDisplay.setLineWidth(ArgumentValidation.getInt32(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_DISPLAY_TEXT_SEE_THROUGH:
+								tDisplay.setVisibleThroughBlocks(ArgumentValidation.getBooleanObject(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_DISPLAY_TEXT_SHADOW:
+								tDisplay.setHasShadow(ArgumentValidation.getBooleanObject(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_DISPLAY_TEXT_OPACITY:
+								long opacity = ArgumentValidation.getInt(specArray.get(index, t), t);
+								if(opacity < 0 || opacity > 255) {
+									throw new CRERangeException("Text opacity outside valid range.", t);
+								}
+								tDisplay.setOpacity((byte) opacity);
 								break;
 							default:
 								throwException(index, t);

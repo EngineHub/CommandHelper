@@ -56,6 +56,10 @@ without knowing the rotations on the other axis or of other body parts beforehan
 * %KEY_BEE_NECTAR%: Whether or not the bee is carrying pollen.
 * %KEY_BEE_STUNG%: Whether or not the bee has stung something.
 |-
+| BLOCK_DISPLAY
+|
+* %KEY_DISPLAY_BLOCK%: A blockdata array (or optionally string) for the block to be displayed.
+|-
 | BOAT
 |
 * %KEY_BOAT_TYPE%: Which tree species the boat is composed of. (can be %TREE_SPECIES%)
@@ -166,6 +170,11 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | IRON_GOLEM
 | 
 * %KEY_IRON_GOLEM_PLAYERCREATED%: Whether the iron golem was built by a player or not.
+|-
+| ITEM_DISPLAY
+|
+* %KEY_DISPLAY_ITEM%: The item array for the item to be displayed.
+* %KEY_DISPLAY_ITEM_DISPLAY%: The item display model transform to use. Can be %ITEM_DISPLAY%.
 |-
 | ITEM_FRAME, GLOW_ITEM_FRAME
 | 
@@ -288,6 +297,15 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | SPLASH_POTION
 | 
 * %KEY_SPLASH_POTION_ITEM%: The item for the thrown potion.
+|-
+| TEXT_DISPLAY
+|
+* %KEY_DISPLAY_TEXT_ALIGNMENT%: The text alignment. Can be CENTER (default), LEFT or RIGHT.
+* %KEY_DISPLAY_TEXT%: The text for this display entity.
+* %KEY_DISPLAY_TEXT_LINE_WIDTH%: The max width for a line of text before splitting. (default: 200)
+* %KEY_DISPLAY_TEXT_SEE_THROUGH%: Whether the text is visible through blocks. (default: false)
+* %KEY_DISPLAY_TEXT_SHADOW%: Whether the text has a shadow. (default: false) Not to be confused with an entity shadow.
+* %KEY_DISPLAY_TEXT_OPACITY%: The alpha opacity of the text from 0 to 255. (default: 255)
 |-
 | TRIDENT
 | 
