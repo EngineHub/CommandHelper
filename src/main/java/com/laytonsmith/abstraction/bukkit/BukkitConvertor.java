@@ -170,6 +170,7 @@ import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.FireworkEffectMeta;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.KnowledgeBookMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.MapMeta;
 import org.bukkit.inventory.meta.MusicInstrumentMeta;
@@ -633,6 +634,9 @@ public class BukkitConvertor extends AbstractConvertor {
 		}
 		if(im instanceof SuspiciousStewMeta) {
 			return new BukkitMCSuspiciousStewMeta((SuspiciousStewMeta) im);
+		}
+		if(im instanceof KnowledgeBookMeta) {
+			return new BukkitMCKnowledgeBookMeta((KnowledgeBookMeta) im);
 		}
 		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_17)) {
 			if(im instanceof BundleMeta) {

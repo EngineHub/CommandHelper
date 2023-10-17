@@ -104,6 +104,10 @@ Some tags not yet supported.
 |
 * '''inventory''' : (array) An array of item arrays, where each index is an inventory slot. (exceptions exist for furnaces and brewing stands)
 |-
+| Knowledge Books
+|
+* '''recipes''' : (array) A list of namespaced recipe keys. (or null)
+|-
 | Leather Armor
 |
 * '''color''' : (array) A color array, with '''"r"''', '''"g"''', and '''"b"''' keys that have values ranging from 0 to 255.

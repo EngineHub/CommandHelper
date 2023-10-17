@@ -27,12 +27,14 @@ import com.laytonsmith.abstraction.MCInventoryHolder;
 import com.laytonsmith.abstraction.MCItemFactory;
 import com.laytonsmith.abstraction.MCItemMeta;
 import com.laytonsmith.abstraction.MCItemStack;
+import com.laytonsmith.abstraction.MCKnowledgeBookMeta;
 import com.laytonsmith.abstraction.MCLeatherArmorMeta;
 import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCMapMeta;
 import com.laytonsmith.abstraction.MCMetadataValue;
 import com.laytonsmith.abstraction.MCMusicInstrumentMeta;
+import com.laytonsmith.abstraction.MCNamespacedKey;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPattern;
 import com.laytonsmith.abstraction.MCPlayerProfile;
@@ -797,6 +799,16 @@ public class ObjectGenerator {
 				} else {
 					ma.set("instrument", instrumentKey);
 				}
+			} else if(meta instanceof MCKnowledgeBookMeta knowledgeBookMeta) {
+				if(knowledgeBookMeta.hasRecipes()) {
+					CArray recipes = new CArray(t);
+					for(MCNamespacedKey key : knowledgeBookMeta.getRecipes()) {
+						recipes.push(new CString(key.toString(), t), t);
+					}
+					ma.set("recipes", recipes, t);
+				} else {
+					ma.set("recipes", CNull.NULL, t);
+				}
 			}
 			return ma;
 		}
@@ -1451,6 +1463,20 @@ public class ObjectGenerator {
 						Mixed value = ma.get("instrument", t);
 						if(!(value instanceof CNull)) {
 							((MCMusicInstrumentMeta) meta).setInstrument(value.val());
+						}
+					}
+				} else if(meta instanceof MCKnowledgeBookMeta knowledgeBookMeta) {
+					if(ma.containsKey("recipes")) {
+						Mixed value = ma.get("recipes", t);
+						if(value.isInstanceOf(CArray.TYPE)) {
+							CArray array = ((CArray) value);
+							List<MCNamespacedKey> keys = new ArrayList<>((int) array.size());
+							for(Mixed entry : ((CArray) value).asList()) {
+								keys.add(StaticLayer.GetConvertor().GetNamespacedKey(entry.val()));
+							}
+							knowledgeBookMeta.setRecipes(keys);
+						} else if(!(value instanceof CNull)) {
+							throw new CREFormatException("Expected array or null for recipes but got " + value.val(), t);
 						}
 					}
 				}
