@@ -41,6 +41,7 @@ import org.bukkit.boss.BarStyle;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.command.SimpleCommandMap;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.server.BroadcastMessageEvent;
@@ -627,5 +628,15 @@ public class BukkitMCServer implements MCServer {
 	@Override
 	public MCWorldBorder createWorldBorder() {
 		return new BukkitMCWorldBorder(s.createWorldBorder());
+	}
+
+	@Override
+	public List<UUID> selectEntites(MCCommandSender sender, String selector) {
+		List<Entity> selectedEntities = s.selectEntities((CommandSender) sender.getHandle(), selector);
+		List<UUID> result = new ArrayList<>(selectedEntities.size());
+		for(Entity e : selectedEntities) {
+			result.add(e.getUniqueId());
+		}
+		return result;
 	}
 }

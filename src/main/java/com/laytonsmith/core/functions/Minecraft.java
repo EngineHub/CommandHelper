@@ -2,6 +2,7 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCCreatureSpawner;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
@@ -40,8 +41,10 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.drivers.ServerEvents;
 import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
+import com.laytonsmith.core.exceptions.CRE.CRELengthException;
 import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
 import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
@@ -62,6 +65,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -1407,6 +1411,73 @@ public class Minecraft {
 		@Override
 		public String docs() {
 			return "array {} Returns an array of all material names.";
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class select_entities extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "select_entities";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		@Override
+		public String docs() {
+			return "array {[player], selector} Returns an array of all matching entities for a Minecraft target selector."
+					+ " The selector will use the current command sender context unless a player is specified."
+					+ " Selector must be a valid vanilla target selector for the current version of Minecraft or a"
+					+ " FormatException will be thrown.";
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			MCCommandSender sender;
+			String selector;
+			if(args.length == 2) {
+				sender = Static.GetPlayer(args[0], t);
+				selector = args[1].val();
+			} else {
+				sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+				if(sender == null) {
+					throw new CREException("No command sender in this context.", t);
+				}
+				selector = args[0].val();
+			}
+			try {
+				CArray result = new CArray(t);
+				for(UUID id : Static.getServer().selectEntites(sender, selector)) {
+					result.push(new CString(id.toString(), t), t);
+				}
+				return result;
+			} catch(IllegalArgumentException ex) {
+				throw new CREFormatException(ex.getMessage(), t);
+			}
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CRELengthException.class, CREPlayerOfflineException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return Boolean.FALSE;
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
 		}
 	}
 }

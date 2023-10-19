@@ -184,4 +184,6 @@ public interface MCServer extends AbstractionObject {
 	MCMerchant createMerchant(String title);
 
 	MCWorldBorder createWorldBorder();
+
+	List<UUID> selectEntites(MCCommandSender sender, String selector);
 }
