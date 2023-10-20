@@ -393,7 +393,7 @@ public class DataHandling {
 					// Typecheck declaration type.
 					ParseTree typeNode = ast.getChildAt(ind++);
 					declaredType = StaticAnalysis.requireClassType(
-							typeNode.getData(), typeNode.getTarget(), exceptions);
+							typeNode.getData(), ast.getTarget(), exceptions);
 					// Intentional fallthrough.
 				case 2:
 					// Typecheck variable.

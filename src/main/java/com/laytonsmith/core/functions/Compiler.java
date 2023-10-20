@@ -476,7 +476,7 @@ public class Compiler {
 								if(list.get(k + 1).getData().val().equals(assign.NAME)
 										&& list.get(k).getData().equals(CVoid.VOID)) {
 									throw new ConfigCompileException("Variables may not be of type void",
-											list.get(k).getTarget());
+											list.get(k + 1).getTarget());
 								}
 								ParseTree type = list.remove(k);
 								List<ParseTree> children = list.get(k).getChildren();
@@ -488,14 +488,14 @@ public class Compiler {
 						}
 					} else if(list.get(k + 1).getData() instanceof IVariable) {
 						// Not an assignment, a random variable declaration though.
-						ParseTree node = new ParseTree(new CFunction(assign.NAME, list.get(k).getTarget()), list.get(k).getFileOptions());
+						ParseTree node = new ParseTree(new CFunction(assign.NAME, list.get(k + 1).getTarget()), list.get(k).getFileOptions());
 						node.addChild(list.get(k));
 						node.addChild(list.get(k + 1));
 						node.addChild(new ParseTree(CNull.UNDEFINED, list.get(k).getFileOptions()));
 						list.set(k, node);
 						list.remove(k + 1);
 					} else if(list.get(k + 1).getData() instanceof CLabel) {
-						ParseTree node = new ParseTree(new CFunction(assign.NAME, list.get(k).getTarget()), list.get(k).getFileOptions());
+						ParseTree node = new ParseTree(new CFunction(assign.NAME, list.get(k + 1).getTarget()), list.get(k).getFileOptions());
 						ParseTree labelNode = new ParseTree(new CLabel(node.getData()), list.get(k).getFileOptions());
 						labelNode.addChild(list.get(k));
 						labelNode.addChild(new ParseTree(((CLabel) list.get(k + 1).getData()).cVal(), list.get(k).getFileOptions()));
