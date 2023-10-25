@@ -880,7 +880,8 @@ public class MobManagement {
 		@Override
 		public String docs() {
 			return "array {entityUUID} Returns an associative array of the drop rate for each equipment slot."
-					+ " If the rate is 0, the equipment will not drop. If it is 1, it is guaranteed to drop.";
+					+ " If the rate is 0.0, the equipment will not drop. A rate of 1.0 will guarantee a drop"
+					+ " if the entity is killed by a player. A rate above 1.0 will guarantee a drop by any cause.";
 		}
 
 		@Override
@@ -928,7 +929,8 @@ public class MobManagement {
 		public String docs() {
 			return "void {entityUUID, array} Sets the drop chances for each equipment slot on a mob,"
 					+ " but does not work on players. Passing null instead of an array will automatically"
-					+ " set all rates to 0, which will cause nothing to drop. A rate of 1 will guarantee a drop.";
+					+ " set all rates to 0.0, which will cause nothing to drop. A rate of 1.0 will guarantee a drop"
+					+ " if the entity is killed by a player. A rate above 1.0 will guarantee a drop by any cause.";
 		}
 
 		@Override
