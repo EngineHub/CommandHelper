@@ -103,6 +103,16 @@ public class BukkitMCDisplay extends BukkitMCEntity implements MCDisplay {
 	}
 
 	@Override
+	public int getTeleportDuration() {
+		return this.d.getTeleportDuration();
+	}
+
+	@Override
+	public void setTeleportDuration(int ticks) {
+		this.d.setTeleportDuration(ticks);
+	}
+
+	@Override
 	public float getShadowRadius() {
 		return this.d.getShadowRadius();
 	}

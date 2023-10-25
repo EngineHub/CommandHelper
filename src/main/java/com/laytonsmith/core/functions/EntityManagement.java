@@ -4100,7 +4100,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "boolean {entityUUID} Returns if the given projectile should bounce when it hits something.";
+			return "boolean {entityUUID} Returns if the given projectile should bounce when it hits something. (deprecated)";
 		}
 
 		@Override
@@ -4129,7 +4129,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityUUID, boolean} Sets if the given projectile should bounce when it hits something.";
+			return "void {entityUUID, boolean} Sets if the given projectile should bounce when it hits something. (deprecated)";
 		}
 
 		@Override

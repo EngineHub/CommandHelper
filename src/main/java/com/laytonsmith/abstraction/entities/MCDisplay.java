@@ -33,6 +33,18 @@ public interface MCDisplay extends MCEntity {
 
 	void setInterpolationDelayTicks(int ticks);
 
+	/**
+	 * Added in MC 1.20.2
+	 * @return ticks
+	 */
+	int getTeleportDuration();
+
+	/**
+	 * Added in MC 1.20.2
+	 * @param ticks
+	 */
+	void setTeleportDuration(int ticks);
+
 	float getShadowRadius();
 
 	void setShadowRadius(float radius);

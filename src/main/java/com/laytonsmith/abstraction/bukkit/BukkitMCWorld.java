@@ -35,6 +35,7 @@ import com.laytonsmith.abstraction.enums.MCParticle;
 import com.laytonsmith.abstraction.enums.MCSound;
 import com.laytonsmith.abstraction.enums.MCSoundCategory;
 import com.laytonsmith.abstraction.enums.MCTreeType;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.enums.MCWorldEnvironment;
 import com.laytonsmith.abstraction.enums.MCWorldType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCBiomeType;
@@ -50,6 +51,7 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.exceptions.CRE.CREPluginInternalException;
 import org.bukkit.Chunk;
 import org.bukkit.Effect;
 import org.bukkit.FireworkEffect;
@@ -69,6 +71,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.util.Consumer;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -238,31 +242,38 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	}
 
 	@Override
-	public MCEntity spawn(MCLocation l, MCEntityType entType, final CClosure closure) {
-		EntityType type = (EntityType) entType.getConcrete();
-		Consumer<? extends Entity> consumer = (Consumer<Entity>) entity -> {
-			MCEntity temp = BukkitConvertor.BukkitGetCorrectEntity(entity);
-			Static.InjectEntity(temp);
-			try {
-				closure.executeCallable(null, Target.UNKNOWN, new CString(entity.getUniqueId().toString(), Target.UNKNOWN));
-			} finally {
-				Static.UninjectEntity(temp);
-			}
-		};
-		Entity ent = this.spawn((Location) l.getHandle(), type.getEntityClass(), consumer);
-		return BukkitConvertor.BukkitGetCorrectEntity(ent);
-	}
-
-	@SuppressWarnings("unchecked")
-	private <T extends Entity> Entity spawn(Location location, Class<T> clazz, Consumer<? extends Entity> consumer) {
-		return w.spawn(location, clazz, (Consumer<T>) consumer);
-	}
-
-	@Override
 	public MCEntity spawn(MCLocation l, MCEntityType.MCVanillaEntityType entityType) {
 		return BukkitConvertor.BukkitGetCorrectEntity(w.spawnEntity(
 				((BukkitMCLocation) l).asLocation(),
 				(EntityType) MCEntityType.valueOfVanillaType(entityType).getConcrete()));
+	}
+
+	@Override
+	public MCEntity spawn(MCLocation l, MCEntityType entType, final CClosure closure) {
+		Location location = (Location) l.getHandle();
+		Class<? extends Entity> entityClass = ((EntityType) entType.getConcrete()).getEntityClass();
+		Entity entity;
+		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_2)) {
+			entity = w.spawn(location, entityClass, e -> beforeSpawn(e, closure));
+		} else {
+			try {
+				Method m = w.getClass().getMethod("spawn", Location.class, Class.class, Consumer.class);
+				entity = (Entity) m.invoke(w, location, entityClass, (Consumer<Entity>) e -> beforeSpawn(e, closure));
+			} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+				throw new CREPluginInternalException(e.getMessage(), Target.UNKNOWN, e);
+			}
+		}
+		return BukkitConvertor.BukkitGetCorrectEntity(entity);
+	}
+
+	private void beforeSpawn(Entity entity, CClosure closure) {
+		MCEntity temp = BukkitConvertor.BukkitGetCorrectEntity(entity);
+		Static.InjectEntity(temp);
+		try {
+			closure.executeCallable(new CString(entity.getUniqueId().toString(), Target.UNKNOWN));
+		} finally {
+			Static.UninjectEntity(temp);
+		}
 	}
 
 	@Override

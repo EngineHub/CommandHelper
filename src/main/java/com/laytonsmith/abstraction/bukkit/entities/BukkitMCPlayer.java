@@ -412,7 +412,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 		String ops = "p";
 		String getPlayerList = "ac";
 		MCVersion mcversion = Static.getServer().getMinecraftVersion();
-		if(mcversion.lt(MCVersion.MC1_20_X)) {
+		if(mcversion.lt(MCVersion.MC1_20_2)) {
 			ops = "o";
 			if(mcversion.equals(MCVersion.MC1_19_3)) {
 				getPlayerList = "ab";
