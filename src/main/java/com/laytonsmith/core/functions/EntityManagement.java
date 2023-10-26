@@ -36,6 +36,7 @@ import com.laytonsmith.abstraction.entities.MCCat;
 import com.laytonsmith.abstraction.entities.MCChestedHorse;
 import com.laytonsmith.abstraction.entities.MCCommandMinecart;
 import com.laytonsmith.abstraction.entities.MCCreeper;
+import com.laytonsmith.abstraction.entities.MCDisplay;
 import com.laytonsmith.abstraction.entities.MCEnderCrystal;
 import com.laytonsmith.abstraction.entities.MCEnderDragon;
 import com.laytonsmith.abstraction.entities.MCEnderSignal;
@@ -4970,6 +4971,230 @@ public class EntityManagement {
 		@Override
 		public Set<Optimizable.OptimizationOption> optimizationOptions() {
 			return EnumSet.of(Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({set_display_entity.class})
+	public static class get_display_entity extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "get_display_entity";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "array {entityUUID} Returns an associative array of display entity data."
+					+ " Array keys are: 'billboard', 'brightness', 'glowcolor', 'height', 'width',"
+					+ " 'viewrange', 'shadowradius', and 'shadowstrength'. ---- "
+					+ " The following values are common to all display entity types. Data about specific display entity"
+					+ " types (block, text, and item display entities) can be found in {{function|entity_spec}}."
+					+ " * '''billboard''' (string) : Controls which axes the rendered entity rotates around the entity"
+					+ " location when the viewing player's position or facing changes. FIXED (default) will not rotate."
+					+ " HORIZONTAL or VERTICAL rotate on their respective axes. CENTER rotates on both axes."
+					+ " * '''brightness''' (array) : Controls the brightness when rendering the display entity."
+					+ " A null value (default) will render the entity based on the environment."
+					+ " An array with int values for the keys '''\"block\"''' and '''\"sky\"''' simulate the rendering"
+					+ " brightness from those respective light sources. Each must be from 0 - 15."
+					+ " Optionally a single int can be provided and will be used for both sky and block sources."
+					+ " * '''glowcolor''' (array) : An RGB array for the entity glow color. If null (default), the"
+					+ " entity will use its scoreboard team color, if it has one."
+					+ " * '''height''' (double) : The maximum height of the entity's bounding box. (default: 0.0)"
+					+ " Spans vertically from the entity's y location to (y+height), and is used for culling."
+					+ " If the client's field of view does not include this box, the entity will not be rendered."
+					+ " If either width or height is 0.0, culling is disabled."
+					+ " * '''width''' (double) : The maximum width of the entity's bounding box. (default: 0.0)"
+					+ " Spans horizontally (width/2) from entity location."
+					+ " * '''viewrange''' (double) : The relative distance the entity will be viewable."
+					+ " The default is 1.0, which is 64 meters multiplied by the player's entity distance scaling."
+					+ " This can also be limited by the world's entity-tracking-range for display entities."
+					+ " * '''shadowradius''' (double) : The visible radius in meters of the entity's shadow."
+					+ " Effective range is from 0.0 (default) to 64.0."
+					+ " * '''shadowstrength''' (double) : The opacity of the entity's shadow as a function of distance"
+					+ " to a block below the entity within shadowradius. (default: 1.0)"
+					+ " * '''teleportduration''' (int) : The duration in ticks a teleport is interpolated on the client."
+					+ " Range is strictly from 0 - 59. (default: 0) (MC 1.20.2+)";
+		}
+
+		@Override
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args) throws ConfigRuntimeException {
+			MCEntity entity = Static.getEntity(args[0], t);
+			if(!(entity instanceof MCDisplay display)) {
+				throw new CREBadEntityException("Not a display entity.", t);
+			}
+			CArray info = CArray.GetAssociativeArray(t);
+			info.set("billboard", display.getBillboard().name());
+			MCDisplay.Brightness brightness = display.getBrightness();
+			if(brightness != null) {
+				CArray brightnessArray = CArray.GetAssociativeArray(t);
+				brightnessArray.set("block", new CInt(brightness.block(), t), t);
+				brightnessArray.set("sky", new CInt(brightness.block(), t), t);
+				info.set("brightness", brightnessArray, t);
+			} else {
+				info.set("brightness", CNull.NULL, t);
+			}
+			MCColor color = display.getGlowColorOverride();
+			if(color != null) {
+				info.set("glowcolor", ObjectGenerator.GetGenerator().color(color, t), t);
+			} else {
+				info.set("glowcolor", CNull.NULL, t);
+			}
+			info.set("height", new CDouble(display.getDisplayHeight(), t), t);
+			info.set("width", new CDouble(display.getDisplayWidth(), t), t);
+			info.set("viewrange", new CDouble(display.getViewRange(), t), t);
+			info.set("shadowradius", new CDouble(display.getShadowRadius(), t), t);
+			info.set("shadowstrength", new CDouble(display.getShadowStrength(), t), t);
+			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_2)) {
+				info.set("teleportduration", new CInt(display.getTeleportDuration(), t), t);
+			}
+			return info;
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[] {CREBadEntityException.class, CRELengthException.class, CREFormatException.class};
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({get_display_entity.class})
+	public static class set_display_entity extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "set_display_entity";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "void {entityUUID, array} Sets the data for a display entity."
+					+ " See {{function|get_display_entity}} for details about the array format.";
+		}
+
+		@Override
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args) throws ConfigRuntimeException {
+			MCEntity entity = Static.getEntity(args[0], t);
+			if(!(entity instanceof MCDisplay display)) {
+				throw new CREBadEntityException("Not a display entity.", t);
+			}
+			CArray info = ArgumentValidation.getArray(args[1], t);
+			if(!info.isAssociative()) {
+				throw new CREIllegalArgumentException("Expected an associative array but found a normal array.", t);
+			}
+			if(info.containsKey("billboard")) {
+				try {
+					MCDisplay.Billboard billboard = MCDisplay.Billboard.valueOf(info.get("billboard", t).val());
+					display.setBillboard(billboard);
+				} catch (IllegalArgumentException ex) {
+					throw new CREFormatException("Invalid billboard type for display entity.", t);
+				}
+			}
+			if(info.containsKey("brightness"))  {
+				Mixed m = info.get("brightness", t);
+				if(m instanceof CNull) {
+					display.setBrightness(null);
+				} else {
+					MCDisplay.Brightness brightness;
+					if(m.isInstanceOf(CArray.TYPE)) {
+						CArray brightnessArray = (CArray) m;
+						if(!brightnessArray.isAssociative()) {
+							throw new CREIllegalArgumentException(
+									"Expected an associative array for brightness but found a normal array.", t);
+						}
+						int blockBrightness = ArgumentValidation.getInt32(brightnessArray.get("block", t), t);
+						int skyBrightness = ArgumentValidation.getInt32(brightnessArray.get("sky", t), t);
+						brightness = new MCDisplay.Brightness(blockBrightness, skyBrightness);
+						display.setBrightness(new MCDisplay.Brightness(blockBrightness, skyBrightness));
+					} else {
+						int level = ArgumentValidation.getInt32(m, t);
+						brightness = new MCDisplay.Brightness(level, level);
+					}
+					try {
+						display.setBrightness(brightness);
+					} catch (IllegalArgumentException ex) {
+						throw new CREIllegalArgumentException(ex.getMessage(), t);
+					}
+				}
+			}
+			if(info.containsKey("glowcolor")) {
+				Mixed m = info.get("glowcolor", t);
+				if(!(m instanceof CNull)) {
+					MCColor color = ObjectGenerator.GetGenerator().color(ArgumentValidation.getArray(m, t), t);
+					display.setGlowColorOverride(color);
+				}
+			}
+			if(info.containsKey("height")) {
+				display.setDisplayHeight((float) ArgumentValidation.getDouble(info.get("height", t), t));
+			}
+			if(info.containsKey("width")) {
+				display.setDisplayWidth((float) ArgumentValidation.getDouble(info.get("width", t), t));
+			}
+			if(info.containsKey("viewrange")) {
+				display.setViewRange((float) ArgumentValidation.getDouble(info.get("viewrange", t), t));
+			}
+			if(info.containsKey("shadowradius")) {
+				display.setShadowRadius((float) ArgumentValidation.getDouble(info.get("shadowradius", t), t));
+			}
+			if(info.containsKey("shadowstrength")) {
+				display.setShadowStrength((float) ArgumentValidation.getDouble(info.get("shadowstrength", t), t));
+			}
+			if(info.containsKey("teleportduration") && Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_2)) {
+				int ticks = ArgumentValidation.getInt32(info.get("teleportduration", t), t);
+				if(ticks < 0 || ticks > 59) {
+					throw new CRERangeException("Teleport duration must be from 0 - 59, but got " + ticks, t);
+				}
+				display.setTeleportDuration(ticks);
+			}
+			return CVoid.VOID;
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[] {CREBadEntityException.class, CRELengthException.class, CREFormatException.class,
+					CREIllegalArgumentException.class, CRECastException.class, CRERangeException.class};
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
 		}
 
 	}
