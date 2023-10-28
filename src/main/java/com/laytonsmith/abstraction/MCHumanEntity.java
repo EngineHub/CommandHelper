@@ -44,4 +44,8 @@ public interface MCHumanEntity extends MCInventoryHolder, MCLivingEntity, MCAnim
 	//boolean setWindowProperty(MCInventoryView.Property prop, int value);
 
 	float getAttackCooldown();
+
+	boolean discoverRecipe(MCNamespacedKey recipe);
+
+	boolean hasDiscoveredRecipe(MCNamespacedKey recipe);
 }

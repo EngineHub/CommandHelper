@@ -10,6 +10,7 @@ import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCHumanEntity;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.abstraction.MCNamespacedKey;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
@@ -6686,6 +6687,137 @@ public class PlayerManagement {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CREPlayerOfflineException.class};
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+	}
+
+	@api
+	public static class phas_recipe extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "phas_recipe";
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {[player], recipeKey} Gets whether a player has a recipe in their recipe book.";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p;
+			String stringKey;
+			if(args.length == 1) {
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(p, t);
+				stringKey = args[0].val();
+			} else {
+				p = Static.GetPlayer(args[0], t);
+				stringKey = args[1].val();
+			}
+			MCNamespacedKey key = StaticLayer.GetConvertor().GetNamespacedKey(stringKey);
+			if(key == null) {
+				throw new CREFormatException("Invalid namespaced key format: " + stringKey, t);
+			}
+			return CBoolean.get(p.hasDiscoveredRecipe(key));
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CRELengthException.class, CREFormatException.class};
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+	}
+
+	@api
+	public static class pgive_recipe extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "pgive_recipe";
+		}
+
+		@Override
+		public String docs() {
+			return "int {[player], recipeKey(s)} Adds one or more recipes to a player's recipe book."
+					+ " Can take a single recipe key or an array of keys."
+					+ " Returns how many recipes were newly discovered.";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p;
+			Mixed value;
+			if(args.length == 1) {
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(p, t);
+				value = args[0];
+			} else {
+				p = Static.GetPlayer(args[0], t);
+				value = args[1];
+			}
+			if(value.isInstanceOf(CArray.TYPE)) {
+				int result = 0;
+				for(Mixed element : ((CArray) value).asList()) {
+					MCNamespacedKey key = StaticLayer.GetConvertor().GetNamespacedKey(element.val());
+					if(key == null) {
+						throw new CREFormatException("Invalid namespaced key format: " + element.val(), t);
+					}
+					boolean success = p.discoverRecipe(key);
+					result += success ? 1 : 0;
+				}
+				return new CInt(result, t);
+			}
+			MCNamespacedKey key = StaticLayer.GetConvertor().GetNamespacedKey(value.val());
+			if(key == null) {
+				throw new CREFormatException("Invalid namespaced key format: " + value.val(), t);
+			}
+			boolean success = p.discoverRecipe(key);
+			return new CInt(success ? 1 : 0, t);
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CRELengthException.class, CREFormatException.class};
 		}
 
 		@Override

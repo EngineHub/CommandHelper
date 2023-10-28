@@ -6,6 +6,7 @@ import com.laytonsmith.abstraction.MCInventoryView;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCMerchant;
+import com.laytonsmith.abstraction.MCNamespacedKey;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.BukkitMCInventory;
 import com.laytonsmith.abstraction.bukkit.BukkitMCInventoryView;
@@ -13,10 +14,10 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.enums.MCGameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Merchant;
 
 public class BukkitMCHumanEntity extends BukkitMCLivingEntity implements MCHumanEntity {
@@ -49,8 +50,7 @@ public class BukkitMCHumanEntity extends BukkitMCLivingEntity implements MCHuman
 
 	@Override
 	public MCItemStack getItemInHand() {
-		ItemStack is = he.getInventory().getItemInMainHand();
-		return is == null ? null : new BukkitMCItemStack(is);
+		return new BukkitMCItemStack(he.getInventory().getItemInMainHand());
 	}
 
 	@Override
@@ -131,5 +131,15 @@ public class BukkitMCHumanEntity extends BukkitMCLivingEntity implements MCHuman
 	@Override
 	public MCInventoryView openEnchanting(MCLocation loc, boolean force) {
 		return new BukkitMCInventoryView(he.openEnchanting((Location) loc.getHandle(), force));
+	}
+
+	@Override
+	public boolean discoverRecipe(MCNamespacedKey recipe) {
+		return he.discoverRecipe((NamespacedKey) recipe.getHandle());
+	}
+
+	@Override
+	public boolean hasDiscoveredRecipe(MCNamespacedKey recipe) {
+		return he.hasDiscoveredRecipe((NamespacedKey) recipe.getHandle());
 	}
 }
