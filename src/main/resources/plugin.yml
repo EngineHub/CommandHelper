@@ -2,6 +2,8 @@ name: CommandHelper
 main: com.laytonsmith.commandhelper.CommandHelperPlugin
 api-version: 1.16
 version: "${project.version}"
+author: MethodScript Contributors
+website: https://MethodScript.com
 commands:
     reloadaliases:
         description: Reloads aliases
