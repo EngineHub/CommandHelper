@@ -37,6 +37,9 @@ public class BukkitMCTrimPattern extends MCTrimPattern<TrimPattern> {
 
 	public static void build() {
 		for(MCVanillaTrimPattern v : MCVanillaTrimPattern.values()) {
+			if(v == MCVanillaTrimPattern.UNKNOWN) {
+				continue;
+			}
 			TrimPattern trimPattern;
 			try {
 				trimPattern = getBukkitType(v);

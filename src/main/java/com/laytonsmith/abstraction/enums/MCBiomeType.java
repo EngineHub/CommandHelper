@@ -92,7 +92,7 @@ public abstract class MCBiomeType<Concrete> extends DynamicEnum<MCBiomeType.MCVa
 		MUSHROOM_FIELD_SHORE(MCVersion.MC1_0, MCVersion.MC1_17_X),
 		BEACH,
 		DESERT_HILLS(MCVersion.MC1_1, MCVersion.MC1_17_X),
-		WOODED_HILLS,
+		WOODED_HILLS(MCVersion.MC1_13, MCVersion.MC1_17_X),
 		TAIGA_HILLS(MCVersion.MC1_1, MCVersion.MC1_17_X),
 		MOUNTAIN_EDGE(MCVersion.MC1_1, MCVersion.MC1_17_X),
 		JUNGLE,

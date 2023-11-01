@@ -37,6 +37,9 @@ public class BukkitMCTrimMaterial extends MCTrimMaterial<TrimMaterial> {
 
 	public static void build() {
 		for(MCVanillaTrimMaterial v : MCVanillaTrimMaterial.values()) {
+			if(v == MCVanillaTrimMaterial.UNKNOWN) {
+				continue;
+			}
 			TrimMaterial trimMaterial;
 			try {
 				trimMaterial = getBukkitType(v);
