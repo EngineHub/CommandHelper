@@ -1,6 +1,5 @@
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.seealso;
@@ -44,8 +43,7 @@ public class Regex {
 				+ "[[Regex|regular expressions]]. Note that all the functions are just passthroughs"
 				+ " to the Java regex mechanism. If you need to set a flag on the regex, where the api calls"
 				+ " for a pattern, instead send array('pattern', 'flags') where flags is any of i, m, or s."
-				+ " Alternatively, using the embedded flag system that Java provides is also valid. Named captures are"
-				+ " also supported if you are using Java 7, otherwise they are not supported.";
+				+ " Alternatively, using the embedded flag system that Java provides is also valid.";
 	}
 
 	@api
@@ -104,15 +102,8 @@ public class Regex {
 						ret.set(i, new CString(m.group(i), t), t);
 					}
 				}
-				//Named groups are only supported in Java 7, but we can
-				//dynamically enable this feature if they have it.
-				Set<String> namedGroups = getNamedGroups(pattern.pattern());
-				try {
-					for(String key : namedGroups) {
-						ret.set(key, (String) ReflectionUtils.invokeMethod(Matcher.class, m, "group", new Class[]{String.class}, new Object[]{key}), t);
-					}
-				} catch (ReflectionUtils.ReflectionException ex) {
-					throw new CREFormatException("Named captures are only supported with Java 7.", t);
+				for(String key : getNamedGroups(pattern.pattern())) {
+					ret.set(key, m.group(key), t);
 				}
 			}
 			return ret;
@@ -143,10 +134,9 @@ public class Regex {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "reg_match('(\\\\d)(\\\\d)(\\\\d)', 'abc123')"),
-				//Java 7 can't be assumed to be working on the system running the doc gen, so we'll hardcode these.
-				new ExampleScript("Named captures (Only works if your system is running Java 7)",
+				new ExampleScript("Named captures ",
 				"reg_match('abc(?<foo>\\\\d+)(xyz)', 'abc123xyz')", "{0: abc123xyz, 1: 123, 2: xyz, foo: 123}"),
-				new ExampleScript("Named captures with backreferences (Only works if your system is running Java 7)",
+				new ExampleScript("Named captures with backreferences",
 				"reg_match('abc(?<foo>\\\\d+)def\\\\k<foo>', 'abc123def123')['foo']", "123")
 			};
 		}
@@ -206,14 +196,8 @@ public class Regex {
 				for(int i = 1; i <= m.groupCount(); i++) {
 					ret.set(i, new CString(m.group(i), t), t);
 				}
-				//Named groups are only supported in Java 7, but we can
-				//dynamically enable this feature if they have it.
-				try {
-					for(String key : namedGroups) {
-						ret.set(key, (String) ReflectionUtils.invokeMethod(Matcher.class, m, "group", new Class[]{String.class}, new Object[]{key}), t);
-					}
-				} catch (ReflectionUtils.ReflectionException e) {
-					throw new CREFormatException("Named captures are only supported with Java 7.", t);
+				for(String key : namedGroups) {
+					ret.set(key, m.group(key), t);
 				}
 				fret.push(ret, t);
 			}
@@ -245,10 +229,9 @@ public class Regex {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "reg_match_all('(\\\\d{3})', 'abc123456')"),
-				//Same thing here, can't guarantee we're running Java 7 when these are generated.
-				new ExampleScript("Named captures (Only works if your system is running Java 7)",
+				new ExampleScript("Named captures",
 				"reg_match_all('abc(?<foo>\\\\d+)(xyz)', 'abc123xyz')[0]['foo']", "123"),
-				new ExampleScript("Named captures with backreferences (Only works if your system is running Java 7)",
+				new ExampleScript("Named captures with backreferences",
 				"reg_match_all('abc(?<foo>\\\\d+)def\\\\k<foo>', 'abc123def123')[0]['foo']", "123")
 			};
 		}
@@ -354,7 +337,7 @@ public class Regex {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "reg_replace('\\\\d', 'Z', '123abc')"),
 				new ExampleScript("Using backreferences", "reg_replace('abc(\\\\d+)', '$1', 'abc123')"),
-				new ExampleScript("Using backreferences with named captures (Only works if your system is running Java 7)",
+				new ExampleScript("Using backreferences with named captures",
 				"reg_replace('abc(?<foo>\\\\d+)', '${foo}', 'abc123')", "123")
 			};
 		}
