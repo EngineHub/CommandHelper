@@ -700,10 +700,22 @@
 								<filter>
 									<artifact>org.xerial:sqlite-jdbc:jar:*</artifact>
 									<includes>
-										<include>native/**</include>
-										<include>org/ibex/**</include>
 										<include>org/sqlite/**</include>
 									</includes>
+									<!-- Native library exclusions for os/arch that are not officially supported -->
+									<!-- Can still be added by users using the sqlite/native directory -->
+									<excludes>
+										<exclude>org/sqlite/native/FreeBSD/**</exclude>
+										<exclude>org/sqlite/native/Linux-Android/**</exclude>
+										<exclude>org/sqlite/native/Linux/ppc64/*</exclude>
+										<exclude>org/sqlite/native/Linux/arm/*</exclude>
+										<exclude>org/sqlite/native/Linux/armv6/*</exclude>
+										<exclude>org/sqlite/native/Linux/armv7/*</exclude>
+										<exclude>org/sqlite/native/Linux/x86/*</exclude>
+										<exclude>org/sqlite/native/Linux-Musl/x86/*</exclude>
+										<exclude>org/sqlite/native/Windows/x86/*</exclude>
+										<exclude>org/sqlite/native/Windows/armv7/*</exclude>
+									</excludes>
 								</filter>
 								<filter>
 									<artifact>org.apache.commons:commons-io:jar:*</artifact>
