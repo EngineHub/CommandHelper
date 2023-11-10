@@ -27,7 +27,6 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -54,7 +53,8 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	private BoundEvent.ActiveEvent event = null;
 	private boolean interrupt = false;
 	private final List<Iterator> arrayAccessList = Collections.synchronizedList(new ArrayList<>());
-	private final WeakHashMap<Thread, StackTraceManager> stackTraceManagers = new WeakHashMap<>();
+	private Thread stackTraceManagerThread = null;
+	private StackTraceManager stackTraceManager = null;
 	private final MutableObject<Map<String, Mixed>> runtimeSettings
 			= new MutableObject<>(new ConcurrentHashMap<>());
 	private FileOptions fileOptions;
@@ -155,6 +155,8 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 		} else if(!cloneVars) {
 			clone.iVariableList = new IVariableList(clone.iVariableList);
 		}
+		clone.stackTraceManager = this.stackTraceManager;
+		clone.stackTraceManagerThread = this.stackTraceManagerThread;
 		return clone;
 	}
 
@@ -344,14 +346,11 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	 */
 	public StackTraceManager GetStackTraceManager() {
 		Thread currentThread = Thread.currentThread();
-		synchronized(stackTraceManagers) {
-			StackTraceManager manager = stackTraceManagers.get(currentThread);
-			if(manager == null) {
-				manager = new StackTraceManager();
-				stackTraceManagers.put(currentThread, manager);
-			}
-			return manager;
+		if(this.stackTraceManager == null || currentThread != this.stackTraceManagerThread) {
+			this.stackTraceManager = new StackTraceManager();
+			this.stackTraceManagerThread = currentThread;
 		}
+		return this.stackTraceManager;
 	}
 
 	/**
