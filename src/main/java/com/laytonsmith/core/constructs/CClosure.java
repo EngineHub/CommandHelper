@@ -207,13 +207,18 @@ public class CClosure extends Construct implements Callable, Booleanish {
 		if(node == null) {
 			return;
 		}
-		StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
-		stManager.addStackTraceElement(new ConfigRuntimeException.StackTraceElement("<<closure>>", getTarget()));
+		Environment environment;
 		try {
-			Environment environment;
 			synchronized(this) {
 				environment = env.clone();
 			}
+		} catch (CloneNotSupportedException ex) {
+			Logger.getLogger(CClosure.class.getName()).log(Level.SEVERE, null, ex);
+			return;
+		}
+		StackTraceManager stManager = environment.getEnv(GlobalEnv.class).GetStackTraceManager();
+		stManager.addStackTraceElement(new ConfigRuntimeException.StackTraceElement("<<closure>>", getTarget()));
+		try {
 			CArray arguments = new CArray(node.getData().getTarget());
 			CArray vararg = null;
 			CClassType varargType = null;
