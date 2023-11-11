@@ -38,7 +38,8 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 
 	public static final String PATH_SEPARATOR = FullyQualifiedClassName.PATH_SEPARATOR;
 
-	private static final Map<FullyQualifiedClassName, CClassType> CACHE = new HashMap<>();
+	private static final Map<FullyQualifiedClassName, CClassType> FQCN_CCLASSTYPE_CACHE = new HashMap<>();
+	private static final Map<Class<? extends Mixed>, CClassType> CLASS_CCLASSTYPE_CACHE = new HashMap<>();
 
 	// The only types that can be created here are the ones that don't have a real class associated with them, or the
 	// TYPE value itself
@@ -68,7 +69,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	public static final CClassType[] EMPTY_CLASS_ARRAY = new CClassType[0];
 
 	static {
-		CACHE.put(FullyQualifiedClassName.forNativeClass(CClassType.class), TYPE);
+		FQCN_CCLASSTYPE_CACHE.put(FullyQualifiedClassName.forNativeClass(CClassType.class), TYPE);
 	}
 
 	private final boolean isTypeUnion;
@@ -112,13 +113,21 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	 * @return
 	 */
 	public static CClassType get(Class<? extends Mixed> type) {
-		try {
-			CClassType t = get(FullyQualifiedClassName.forNativeClass(type));
-			t.nativeClass = type;
-			return t;
-		} catch (ClassNotFoundException ex) {
-			throw new Error(ex);
+
+		// Get cached result or compute and cache result.
+		CClassType cclassType = CLASS_CCLASSTYPE_CACHE.get(type);
+		if(cclassType == null) {
+			try {
+				cclassType = get(FullyQualifiedClassName.forNativeClass(type));
+				cclassType.nativeClass = type;
+			} catch (ClassNotFoundException ex) {
+				throw new Error(ex);
+			}
+			CLASS_CCLASSTYPE_CACHE.put(type, cclassType);
 		}
+
+		// Return the result.
+		return cclassType;
 	}
 
 	/**
@@ -129,13 +138,13 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	 */
 	public static CClassType get(FullyQualifiedClassName type) throws ClassNotFoundException {
 		assert type != null;
-		CClassType ctype = CACHE.get(type);
+		CClassType ctype = FQCN_CCLASSTYPE_CACHE.get(type);
 		if(ctype == null) {
-			synchronized(CACHE) {
-				ctype = CACHE.get(type);
+			synchronized(FQCN_CCLASSTYPE_CACHE) {
+				ctype = FQCN_CCLASSTYPE_CACHE.get(type);
 				if(ctype == null) {
 					ctype = new CClassType(type, Target.UNKNOWN, false);
-					CACHE.put(type, ctype);
+					FQCN_CCLASSTYPE_CACHE.put(type, ctype);
 				}
 			}
 		}
@@ -157,13 +166,13 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		SortedSet<FullyQualifiedClassName> t = new TreeSet<>(Arrays.asList(types));
 		FullyQualifiedClassName type
 				= FullyQualifiedClassName.forFullyQualifiedClass(StringUtils.Join(t, "|", e -> e.getFQCN()));
-		CClassType ctype = CACHE.get(type);
+		CClassType ctype = FQCN_CCLASSTYPE_CACHE.get(type);
 		if(ctype == null) {
-			synchronized(CACHE) {
-				ctype = CACHE.get(type);
+			synchronized(FQCN_CCLASSTYPE_CACHE) {
+				ctype = FQCN_CCLASSTYPE_CACHE.get(type);
 				if(ctype == null) {
 					ctype = new CClassType(type, Target.UNKNOWN, false);
-					CACHE.put(type, ctype);
+					FQCN_CCLASSTYPE_CACHE.put(type, ctype);
 				}
 			}
 		}
@@ -195,7 +204,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	public static CClassType defineClass(FullyQualifiedClassName fqcn) {
 		try {
 			CClassType type = new CClassType(fqcn, Target.UNKNOWN, true);
-			CACHE.put(fqcn, type);
+			FQCN_CCLASSTYPE_CACHE.put(fqcn, type);
 			return type;
 		} catch (ClassNotFoundException ex) {
 			throw new Error(ex);
