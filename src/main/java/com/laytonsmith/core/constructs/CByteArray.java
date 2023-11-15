@@ -100,7 +100,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 		maxValue = Math.max(maxValue, spos + need);
 		//Reallocate if needed
 		if(spos + need >= data.limit()) {
-			int newSize = data.limit() * SCALE_MULTIPLIER;
+			int newSize = Math.max(data.limit() * SCALE_MULTIPLIER, spos + need);
 			if(newSize <= 0) {
 				//Protect from this happening
 				newSize = 1;
