@@ -16,7 +16,9 @@ import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.compiler.FileOptions;
-import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
+import com.laytonsmith.core.compiler.signature.FunctionSignatures;
+import com.laytonsmith.core.compiler.signature.FunctionSignatures.MatchType;
+import com.laytonsmith.core.compiler.signature.SignatureBuilder;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CClassType;
@@ -100,12 +102,8 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
-				Environment env, Set<ConfigCompileException> exceptions) {
-			if(argTypes.size() == 1) {
-				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);
-			}
-			return CInt.TYPE;
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CInt.TYPE).param(CArray.TYPE, "array", "The array to get the size of.").build();
 		}
 
 		@Override
@@ -264,22 +262,19 @@ public class ArrayHandling {
 			} else if(args[0].isInstanceOf(ArrayAccess.TYPE)) {
 				com.laytonsmith.core.natives.interfaces.Iterable aa
 						= (com.laytonsmith.core.natives.interfaces.Iterable) args[0];
-				if(index instanceof CSlice) {
+				if(index instanceof CSlice cslice) {
 					//It's a range
-					int start = (int) ((CSlice) index).getStart();
-					int finish = (int) ((CSlice) index).getFinish();
-					try {
-						//Convert negative indexes
-						if(start < 0) {
-							start = (int) aa.size() + start;
-						}
-						if(finish < 0) {
-							finish = (int) aa.size() + finish;
-						}
-						return aa.slice(start, finish + 1, t);
-					} catch (NumberFormatException e) {
-						throw new CRECastException("Ranges must be integer numbers, i.e., [0..5]", t);
+					int start = (int) cslice.getStart();
+					int finish = (int) cslice.getFinish();
+
+					//Convert negative indexes
+					if(start < 0) {
+						start = (int) aa.size() + start;
 					}
+					if(finish < 0) {
+						finish = (int) aa.size() + finish;
+					}
+					return aa.slice(start, finish + 1, t);
 				} else if(index.isInstanceOf(CInt.TYPE)) {
 					return aa.get(ArgumentValidation.getInt32(index, t), t);
 				} else {
@@ -291,17 +286,27 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
-				Environment env, Set<ConfigCompileException> exceptions) {
-			if(argTypes.size() == 2 || argTypes.size() == 3) {
-				StaticAnalysis.requireType(argTypes.get(0), ArrayAccess.TYPE, argTargets.get(0), env, exceptions);
-				StaticAnalysis.requireAnyType(argTypes.get(1),
-						new CClassType[] {CInt.TYPE, CSlice.TYPE, CString.TYPE}, argTargets.get(1), env, exceptions);
-				if(argTypes.size() == 3) {
-					StaticAnalysis.requireType(argTypes.get(2), Mixed.TYPE, argTargets.get(2), env, exceptions);
-				}
-			}
-			return CClassType.AUTO;
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CClassType.AUTO)
+					.param(ArrayAccess.TYPE, "array", "The array.")
+					.param(CInt.TYPE, "index", "The array index.")
+					.param(Mixed.TYPE, "default",
+							"The value that is returned if no element at the given index exists.", true)
+					.throwsEx(CREIndexOverflowException.class,
+							"When no element exists at the given index, and no default value is given.")
+					.newSignature(CClassType.AUTO)
+					.param(ArrayAccess.TYPE, "array", "The array.")
+					.param(CString.TYPE, "key", "The array index key.")
+					.param(Mixed.TYPE, "default",
+							"The value that is returned if no element at the given index exists.", true)
+					.throwsEx(CREIndexOverflowException.class,
+							"When no element exists at the given index, and no default value is given.")
+					.newSignature(CArray.TYPE, "An array containing the values selected by the slice.")
+					.param(ArrayAccess.TYPE, "array", "The array.")
+					.param(CSlice.TYPE, "indexRange", "The array index range slice.")
+					.throwsEx(CREIndexOverflowException.class,
+							"When no element exists at an index within the given range.")
+					.build();
 		}
 
 		@Override
@@ -413,38 +418,30 @@ public class ArrayHandling {
 			if(!(array.isInstanceOf(CArray.TYPE))) {
 				throw new CRECastException("Argument 1 of " + this.getName() + " must be an array", t);
 			}
-			try {
-				((CArray) array).set(index, value, t);
-			} catch (IndexOutOfBoundsException e) {
-				throw new CREIndexOverflowException("The index " + new CString(index).getQuote() + " is out of bounds", t);
-			}
+			((CArray) array).set(index, value, t);
 			return value;
 		}
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			if(args[0].isInstanceOf(CArray.TYPE)) {
-				try {
-					((CArray) args[0]).set(args[1], args[2], t);
-				} catch (IndexOutOfBoundsException e) {
-					throw new CREIndexOverflowException("The index " + args[1].val() + " is out of bounds", t);
-				}
+				((CArray) args[0]).set(args[1], args[2], t);
 				return args[2];
 			}
 			throw new CRECastException("Argument 1 of " + this.getName() + " must be an array", t);
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
-				Environment env, Set<ConfigCompileException> exceptions) {
-			if(argTypes.size() == 3) {
-				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);
-				StaticAnalysis.requireAnyType(argTypes.get(1),
-						new CClassType[] {CInt.TYPE, CSlice.TYPE, CString.TYPE}, argTargets.get(1), env, exceptions);
-				StaticAnalysis.requireType(argTypes.get(2), Mixed.TYPE, argTargets.get(2), env, exceptions);
-				return argTypes.get(2);
-			}
-			return CClassType.AUTO;
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CClassType.AUTO, "The value that was set, to allow for chaining.")
+					.param(CArray.TYPE, "array", "The array.")
+					.param(CInt.TYPE, "index", "The array index.")
+					.param(Mixed.TYPE, "value", "The value to set.")
+					.newSignature(CClassType.AUTO, "The value that was set, to allow for chaining.")
+					.param(CArray.TYPE, "array", "The array.")
+					.param(CString.TYPE, "key", "The array index key.")
+					.param(Mixed.TYPE, "value", "The value to set.")
+					.build();
 		}
 
 		@Override
@@ -530,15 +527,12 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
-				Environment env, Set<ConfigCompileException> exceptions) {
-			if(argTypes.size() >= 2) {
-				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);
-				for(int i = 1; i < argTypes.size(); i++) {
-					StaticAnalysis.requireType(argTypes.get(i), Mixed.TYPE, argTargets.get(i), env, exceptions);
-				}
-			}
-			return CVoid.TYPE;
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CVoid.TYPE)
+					.param(CArray.TYPE, "array", "The array.")
+					.param(Mixed.TYPE, "value", "The first value to push.")
+					.varParam(Mixed.TYPE, "values", "Additional values to push.")
+					.build();
 		}
 
 		@Override
@@ -638,14 +632,12 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
-				Environment env, Set<ConfigCompileException> exceptions) {
-			if(argTypes.size() == 3) {
-				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);
-				StaticAnalysis.requireType(argTypes.get(1), Mixed.TYPE, argTargets.get(1), env, exceptions);
-				StaticAnalysis.requireType(argTypes.get(2), CInt.TYPE, argTargets.get(2), env, exceptions);
-			}
-			return CVoid.TYPE;
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CVoid.TYPE)
+					.param(CArray.TYPE, "array", "The array.")
+					.param(Mixed.TYPE, "value", "The value to insert.")
+					.param(CInt.TYPE, "index", "The array index at which to insert the value.")
+					.build();
 		}
 
 		@Override
@@ -719,13 +711,12 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
-				Environment env, Set<ConfigCompileException> exceptions) {
-			if(argTypes.size() == 2) {
-				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);
-				StaticAnalysis.requireType(argTypes.get(1), Mixed.TYPE, argTargets.get(1), env, exceptions);
-			}
-			return CBoolean.TYPE;
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CBoolean.TYPE, "{@code true} if a value {@code v} is in the array for"
+					+ " which {@code v == value}, {@code false} otherwise.")
+					.param(CArray.TYPE, "array", "The array.")
+					.param(Mixed.TYPE, "value", "The value to check for.")
+					.build();
 		}
 
 		@Override
@@ -829,13 +820,12 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
-				Environment env, Set<ConfigCompileException> exceptions) {
-			if(argTypes.size() == 2) {
-				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);
-				StaticAnalysis.requireType(argTypes.get(1), Mixed.TYPE, argTargets.get(1), env, exceptions);
-			}
-			return CBoolean.TYPE;
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CBoolean.TYPE, "{@code true} if a value {@code v} is in the array for"
+					+ " which {@code equals_ic(v, value)}, {@code false} otherwise.")
+					.param(CArray.TYPE, "array", "The array.")
+					.param(Mixed.TYPE, "value", "The value to check for.")
+					.build();
 		}
 
 		@Override
@@ -883,13 +873,12 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
-				Environment env, Set<ConfigCompileException> exceptions) {
-			if(argTypes.size() == 2) {
-				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);
-				StaticAnalysis.requireType(argTypes.get(1), Mixed.TYPE, argTargets.get(1), env, exceptions);
-			}
-			return CBoolean.TYPE;
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CBoolean.TYPE, "{@code true} if a value {@code v} is in the array for"
+					+ " which {@code v === value}, {@code false} otherwise.")
+					.param(CArray.TYPE, "array", "The array.")
+					.param(Mixed.TYPE, "value", "The value to check for.")
+					.build();
 		}
 
 		@Override
@@ -1015,15 +1004,13 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
-				Environment env, Set<ConfigCompileException> exceptions) {
-			if(argTypes.size() >= 1) {
-				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);
-				for(int i = 1; i < argTypes.size(); i++) {
-					StaticAnalysis.requireType(argTypes.get(i), Mixed.TYPE, argTargets.get(i), env, exceptions);
-				}
-			}
-			return CBoolean.TYPE;
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CBoolean.TYPE,
+					"{@code true} if the index or indices exist(s), {@code false} otherwise.")
+					.param(CArray.TYPE, "array", "The array.")
+					.param(Mixed.TYPE, "index", "The array index to check for.")
+					.varParam(Mixed.TYPE, "index", "Additional nested array indices to check for.")
+					.build();
 		}
 
 		@Override
@@ -1121,16 +1108,13 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
-				Environment env, Set<ConfigCompileException> exceptions) {
-			if(argTypes.size() == 2 || argTypes.size() == 3) {
-				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);
-				StaticAnalysis.requireType(argTypes.get(1), CInt.TYPE, argTargets.get(1), env, exceptions);
-				if(argTypes.size() == 3) {
-					StaticAnalysis.requireType(argTypes.get(2), Mixed.TYPE, argTargets.get(2), env, exceptions);
-				}
-			}
-			return CArray.TYPE;
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CArray.TYPE, "A reference to the passed array, to allow for chaining.")
+					.param(CArray.TYPE, "array", "The array.")
+					.param(CInt.TYPE, "size", "The size to enlarge the array to.")
+					.param(Mixed.TYPE, "fill",
+							"The value to fill the new indices with. Defaults to {@code null}.", true)
+					.build();
 		}
 
 		@Override
@@ -1216,6 +1200,15 @@ public class ArrayHandling {
 		}
 
 		@Override
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CArray.TYPE)
+					.param(CInt.TYPE, "start", "The start value. Defaults to 0.", true)
+					.param(CInt.TYPE, "finish", "The finish value.")
+					.param(CInt.TYPE, "increment", "The value increment. Defaults to 1.", true)
+					.build();
+		}
+
+		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "range(10)"),
@@ -1287,6 +1280,13 @@ public class ArrayHandling {
 		}
 
 		@Override
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CArray.TYPE, "An array containing the array keys.")
+					.param(ArrayAccess.TYPE, "array", "The array.")
+					.build();
+		}
+
+		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "array_keys(array('a', 'b', 'c'))"),
@@ -1350,6 +1350,13 @@ public class ArrayHandling {
 			} else {
 				throw new CRECastException(this.getName() + " expects arg 1 to be an array", t);
 			}
+		}
+
+		@Override
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CArray.TYPE, "The normalized array.")
+					.param(ArrayAccess.TYPE, "array", "The array to generate the normalized array for.")
+					.build();
 		}
 
 		@Override
@@ -1437,6 +1444,15 @@ public class ArrayHandling {
 		}
 
 		@Override
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CArray.TYPE, "The array containing all entries from the given arrays.")
+					.param(ArrayAccess.TYPE, "array1", "The first array.")
+					.param(ArrayAccess.TYPE, "array2", "The second array.")
+					.varParam(ArrayAccess.TYPE, "arrays", "Additional arrays.")
+					.build();
+		}
+
+		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "array_merge(array(1), array(2), array(3))"),
@@ -1511,6 +1527,15 @@ public class ArrayHandling {
 		}
 
 		@Override
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(Mixed.TYPE, "The removed value, or {@code null} if nothing was removed.")
+					.param(CArray.TYPE, "array", "The array.")
+					.param(Mixed.TYPE, "index", "The array index.")
+					.throwsEx(CRECastException.class, "When the array is non-associative and the index is not an int.")
+					.build();
+		}
+
+		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage",
@@ -1581,6 +1606,14 @@ public class ArrayHandling {
 		}
 
 		@Override
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CString.TYPE, "The imploded array string.")
+					.param(ArrayAccess.TYPE, "array", "The array.")
+					.param(CString.TYPE, "glue", "The glue to place between glued values. Defaults to ' '.", true)
+					.build();
+		}
+
+		@Override
 		public MSVersion since() {
 			return MSVersion.V3_3_0;
 		}
@@ -1634,6 +1667,16 @@ public class ArrayHandling {
 			}
 
 			return new CString(b.toString(), t);
+		}
+
+		@Override
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CString.TYPE, "The imploded associative array string.")
+					.param(CArray.TYPE, "array", "The associative array.")
+					.param(CString.TYPE, "innerGlue", "The glue to place between the array keys and their values.")
+					.param(CString.TYPE, "outerGlue", "The glue to place between different key-value pairs.")
+					.throwsEx(CRECastException.class, "When a non-associative array is passed.")
+					.build();
 		}
 
 		@Override
@@ -1713,6 +1756,14 @@ public class ArrayHandling {
 		}
 
 		@Override
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CSlice.TYPE)
+					.param(CInt.TYPE, "start", "The start value.")
+					.param(CInt.TYPE, "end", "The end value.")
+					.build();
+		}
+
+		@Override
 		public MSVersion since() {
 			return MSVersion.V3_3_1;
 		}
@@ -1786,6 +1837,21 @@ public class ArrayHandling {
 				ca.sort(sortType);
 			}
 			return ca;
+		}
+
+		@Override
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CArray.TYPE,
+					"A reference to the passed array, to allow for chaining.", MatchType.MATCH_FIRST)
+					.param(CArray.TYPE, "array", "The array.")
+					.param(CClosure.TYPE, "sortClosure", "A closure to which two values v1 and v2 are passed."
+							+ " It should return {@code true} if {@code v1 > v2}, {@code true} if {@code v1 < v2}"
+							+ " and {@code null} if {@code v1 == v2}.")
+					.newSignature(CArray.TYPE, "A reference to the passed array, to allow for chaining.")
+					.param(CArray.TYPE, "array", "The array.")
+					// TODO - Make this CArray.ArraySortType once this is a valid CClassType, and remove MATCH_FIRST.
+					.param(Mixed.TYPE, "sortType", "The array sort type.", true)
+					.build();
 		}
 
 		private CArray customSort(CArray ca, CClosure closure, Target t) {
@@ -1997,6 +2063,21 @@ public class ArrayHandling {
 				}
 			});
 			return CVoid.VOID;
+		}
+
+		@Override
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CArray.TYPE,
+					"A reference to the passed array, to allow for chaining.", MatchType.MATCH_FIRST)
+					.param(CArray.TYPE, "array", "The array.")
+					.param(CClosure.TYPE, "sortClosure", "A closure to which two values v1 and v2 are passed."
+							+ " It should return {@code true} if {@code v1 > v2}, {@code true} if {@code v1 < v2}"
+							+ " and {@code null} if {@code v1 == v2}.")
+					.newSignature(CArray.TYPE, "A reference to the passed array, to allow for chaining.")
+					.param(CArray.TYPE, "array", "The array.")
+					// TODO - Make this CArray.ArraySortType once this is a valid CClassType, and remove MATCH_FIRST.
+					.param(Mixed.TYPE, "sortType", "The array sort type.", true)
+					.build();
 		}
 
 		@Override
