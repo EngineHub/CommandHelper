@@ -4993,7 +4993,7 @@ public class EntityManagement {
 		public String docs() {
 			return "array {entityUUID} Returns an associative array of display entity data."
 					+ " Array keys are: 'billboard', 'brightness', 'glowcolor', 'height', 'width',"
-					+ " 'viewrange', 'shadowradius', and 'shadowstrength'. ---- "
+					+ " 'viewrange', 'shadowradius', 'shadowstrength', and 'teleportduration'. ---- "
 					+ " The following values are common to all display entity types. Data about specific display entity"
 					+ " types (block, text, and item display entities) can be found in {{function|entity_spec}}."
 					+ " * '''billboard''' (string) : Controls which axes the rendered entity rotates around the entity"

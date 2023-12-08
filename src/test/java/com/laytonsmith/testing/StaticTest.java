@@ -696,14 +696,12 @@ public class StaticTest {
 
 		@Override
 		public MCEnchantment[] GetEnchantmentValues() {
-			Convertor c = new BukkitConvertor();
-			return c.GetEnchantmentValues();
+			throw new UnsupportedOperationException();
 		}
 
 		@Override
 		public MCEnchantment GetEnchantmentByName(String name) {
-			Convertor c = new BukkitConvertor();
-			return c.GetEnchantmentByName(name);
+			throw new UnsupportedOperationException();
 		}
 
 		@Override

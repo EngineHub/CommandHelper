@@ -184,6 +184,12 @@ public abstract class MCParticle<Concrete> extends DynamicEnum<MCParticle.MCVani
 		LANDING_CHERRY_LEAVES(MCVersion.MC1_19_X, MCVersion.MC1_19_X),
 		CHERRY_LEAVES(MCVersion.MC1_20),
 		EGG_CRACK(MCVersion.MC1_20),
+		DUST_PLUME(MCVersion.MC1_20_X),
+		WHITE_SMOKE(MCVersion.MC1_20_X),
+		GUST(MCVersion.MC1_20_X),
+		GUST_EMITTER(MCVersion.MC1_20_X),
+		GUST_DUST(MCVersion.MC1_20_X),
+		TRIAL_SPAWNER_DETECTION(MCVersion.MC1_20_X),
 		UNKNOWN(MCVersion.NEVER);
 
 		private final MCVersion since;

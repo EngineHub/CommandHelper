@@ -258,7 +258,8 @@ public abstract class MCMaterial<Concrete> extends DynamicEnum<MCVanillaMaterial
 		CHISELED_SANDSTONE,
 		CUT_SANDSTONE,
 		COBWEB,
-		GRASS,
+		GRASS(MCVersion.MC1_0, MCVersion.MC1_20_2),
+		SHORT_GRASS(MCVersion.MC1_20_X), // changed from GRASS
 		FERN,
 		DEAD_BUSH,
 		SEAGRASS,
@@ -1390,6 +1391,7 @@ public abstract class MCMaterial<Concrete> extends DynamicEnum<MCVanillaMaterial
 		SPYGLASS(MCVersion.MC1_17),
 		TINTED_GLASS(MCVersion.MC1_17),
 		TUFF(MCVersion.MC1_17),
+		GRASS_PATH(MCVersion.MC1_9, MCVersion.MC1_16_X),
 		DIRT_PATH(MCVersion.MC1_17), // changed from GRASS_PATH
 		WATER_CAULDRON(MCVersion.MC1_17),
 		LAVA_CAULDRON(MCVersion.MC1_17),
@@ -1579,20 +1581,87 @@ public abstract class MCMaterial<Concrete> extends DynamicEnum<MCVanillaMaterial
 		SHEAF_POTTERY_SHERD(MCVersion.MC1_20),
 		SHELTER_POTTERY_SHERD(MCVersion.MC1_20),
 		SKULL_POTTERY_SHERD(MCVersion.MC1_20),
-		SNORT_POTTERY_SHERD(MCVersion.MC1_20);
+		SNORT_POTTERY_SHERD(MCVersion.MC1_20),
+
+		// 1.20.3 experimental additions for 1.21
+		CRAFTER(MCVersion.MC1_20_X),
+		CHISELED_COPPER(MCVersion.MC1_20_X),
+		EXPOSED_CHISELED_COPPER(MCVersion.MC1_20_X),
+		WEATHERED_CHISELED_COPPER(MCVersion.MC1_20_X),
+		OXIDIZED_CHISELED_COPPER(MCVersion.MC1_20_X),
+		WAXED_CHISELED_COPPER(MCVersion.MC1_20_X),
+		WAXED_EXPOSED_CHISELED_COPPER(MCVersion.MC1_20_X),
+		WAXED_WEATHERED_CHISELED_COPPER(MCVersion.MC1_20_X),
+		WAXED_OXIDIZED_CHISELED_COPPER(MCVersion.MC1_20_X),
+		COPPER_BULB(MCVersion.MC1_20_X),
+		EXPOSED_COPPER_BULB(MCVersion.MC1_20_X),
+		WEATHERED_COPPER_BULB(MCVersion.MC1_20_X),
+		OXIDIZED_COPPER_BULB(MCVersion.MC1_20_X),
+		WAXED_COPPER_BULB(MCVersion.MC1_20_X),
+		WAXED_EXPOSED_COPPER_BULB(MCVersion.MC1_20_X),
+		WAXED_WEATHERED_COPPER_BULB(MCVersion.MC1_20_X),
+		WAXED_OXIDIZED_COPPER_BULB(MCVersion.MC1_20_X),
+		COPPER_DOOR(MCVersion.MC1_20_X),
+		EXPOSED_COPPER_DOOR(MCVersion.MC1_20_X),
+		WEATHERED_COPPER_DOOR(MCVersion.MC1_20_X),
+		OXIDIZED_COPPER_DOOR(MCVersion.MC1_20_X),
+		WAXED_COPPER_DOOR(MCVersion.MC1_20_X),
+		WAXED_EXPOSED_COPPER_DOOR(MCVersion.MC1_20_X),
+		WAXED_WEATHERED_COPPER_DOOR(MCVersion.MC1_20_X),
+		WAXED_OXIDIZED_COPPER_DOOR(MCVersion.MC1_20_X),
+		COPPER_GRATE(MCVersion.MC1_20_X),
+		EXPOSED_COPPER_GRATE(MCVersion.MC1_20_X),
+		WEATHERED_COPPER_GRATE(MCVersion.MC1_20_X),
+		OXIDIZED_COPPER_GRATE(MCVersion.MC1_20_X),
+		WAXED_COPPER_GRATE(MCVersion.MC1_20_X),
+		WAXED_EXPOSED_COPPER_GRATE(MCVersion.MC1_20_X),
+		WAXED_WEATHERED_COPPER_GRATE(MCVersion.MC1_20_X),
+		WAXED_OXIDIZED_COPPER_GRATE(MCVersion.MC1_20_X),
+		COPPER_TRAPDOOR(MCVersion.MC1_20_X),
+		EXPOSED_COPPER_TRAPDOOR(MCVersion.MC1_20_X),
+		WEATHERED_COPPER_TRAPDOOR(MCVersion.MC1_20_X),
+		OXIDIZED_COPPER_TRAPDOOR(MCVersion.MC1_20_X),
+		WAXED_COPPER_TRAPDOOR(MCVersion.MC1_20_X),
+		WAXED_EXPOSED_COPPER_TRAPDOOR(MCVersion.MC1_20_X),
+		WAXED_WEATHERED_COPPER_TRAPDOOR(MCVersion.MC1_20_X),
+		WAXED_OXIDIZED_COPPER_TRAPDOOR(MCVersion.MC1_20_X),
+		BREEZE_SPAWN_EGG(MCVersion.MC1_20_X),
+		TRIAL_SPAWNER(MCVersion.MC1_20_X),
+		TRIAL_KEY(MCVersion.MC1_20_X),
+		TUFF_BRICKS(MCVersion.MC1_20_X),
+		TUFF_BRICK_SLAB(MCVersion.MC1_20_X),
+		TUFF_BRICK_STAIRS(MCVersion.MC1_20_X),
+		TUFF_BRICK_WALL(MCVersion.MC1_20_X),
+		TUFF_SLAB(MCVersion.MC1_20_X),
+		TUFF_STAIRS(MCVersion.MC1_20_X),
+		TUFF_WALL(MCVersion.MC1_20_X),
+		CHISELED_TUFF(MCVersion.MC1_20_X),
+		POLISHED_TUFF(MCVersion.MC1_20_X),
+		CHISELED_TUFF_BRICKS(MCVersion.MC1_20_X),
+		POLISHED_TUFF_SLAB(MCVersion.MC1_20_X),
+		POLISHED_TUFF_STAIRS(MCVersion.MC1_20_X),
+		POLISHED_TUFF_WALL(MCVersion.MC1_20_X);
 
 		private final MCVersion since;
+		private final MCVersion until;
 
 		MCVanillaMaterial() {
 			this.since = MCVersion.MC1_0;
+			this.until = MCVersion.FUTURE;
 		}
 
-		MCVanillaMaterial(MCVersion ver) {
-			this.since = ver;
+		MCVanillaMaterial(MCVersion since) {
+			this.since = since;
+			this.until = MCVersion.FUTURE;
+		}
+
+		MCVanillaMaterial(MCVersion since, MCVersion until) {
+			this.since = since;
+			this.until = until;
 		}
 
 		public boolean existsIn(MCVersion version) {
-			return version.gte(since);
+			return version.gte(since) && version.lte(until);
 		}
 	}
 }
