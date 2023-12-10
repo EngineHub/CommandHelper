@@ -645,23 +645,23 @@ public class ObjectGenerator {
 			} else if(meta instanceof MCLeatherArmorMeta) {
 				CArray color = color(((MCLeatherArmorMeta) meta).getColor(), t);
 				ma.set("color", color, t);
-			} else if(meta instanceof MCBookMeta) {
+			} else if(meta instanceof MCBookMeta bookMeta) {
 				Construct title;
 				Construct author;
 				Construct pages;
-				if(((MCBookMeta) meta).hasTitle()) {
-					title = new CString(((MCBookMeta) meta).getTitle(), t);
+				if(bookMeta.hasTitle()) {
+					title = new CString(bookMeta.getTitle(), t);
 				} else {
 					title = CNull.NULL;
 				}
-				if(((MCBookMeta) meta).hasAuthor()) {
-					author = new CString(((MCBookMeta) meta).getAuthor(), t);
+				if(bookMeta.hasAuthor()) {
+					author = new CString(bookMeta.getAuthor(), t);
 				} else {
 					author = CNull.NULL;
 				}
-				if(((MCBookMeta) meta).hasPages()) {
+				if(bookMeta.hasPages()) {
 					pages = new CArray(t);
-					for(String p : ((MCBookMeta) meta).getPages()) {
+					for(String p : bookMeta.getPages()) {
 						((CArray) pages).push(new CString(p, t), t);
 					}
 				} else {
@@ -670,6 +670,7 @@ public class ObjectGenerator {
 				ma.set("title", title, t);
 				ma.set("author", author, t);
 				ma.set("pages", pages, t);
+				ma.set("generation", bookMeta.getGeneration().name(), t);
 			} else if(meta instanceof MCSkullMeta) {
 				MCPlayerProfile profile = ((MCSkullMeta) meta).getProfile();
 				// If a profile doesn't exist, it either doesn't have one (plain head) or it's not supported by server.
@@ -1241,18 +1242,25 @@ public class ObjectGenerator {
 							throw new CREFormatException("Color was expected to be an array.", t);
 						}
 					}
-				} else if(meta instanceof MCBookMeta) {
+				} else if(meta instanceof MCBookMeta bookMeta) {
+					// written books must have a title and author
+					bookMeta.setTitle("");
+					bookMeta.setAuthor("");
 					if(ma.containsKey("title")) {
 						Mixed title = ma.get("title", t);
 						if(!(title instanceof CNull)) {
-							((MCBookMeta) meta).setTitle(title.val());
+							bookMeta.setTitle(title.val());
 						}
 					}
 					if(ma.containsKey("author")) {
 						Mixed author = ma.get("author", t);
 						if(!(author instanceof CNull)) {
-							((MCBookMeta) meta).setAuthor(author.val());
+							bookMeta.setAuthor(author.val());
 						}
+					}
+					if(ma.containsKey("generation")) {
+						Mixed generation = ma.get("generation", t);
+						bookMeta.setGeneration(MCBookMeta.Generation.valueOf(generation.val()));
 					}
 					if(ma.containsKey("pages")) {
 						Mixed pages = ma.get("pages", t);
@@ -1264,7 +1272,7 @@ public class ObjectGenerator {
 							for(int j = 0; j < pa.size(); j++) {
 								pl.add(pa.get(j, t).val());
 							}
-							((MCBookMeta) meta).setPages(pl);
+							bookMeta.setPages(pl);
 						} else {
 							throw new CREFormatException("Pages field was expected to be an array.", t);
 						}

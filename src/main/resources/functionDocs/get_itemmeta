@@ -44,10 +44,11 @@ The entity's custom name is derived from the item '''"display"''' string. All ot
 |-
 | Books
 |
-The "generation" tag is not yet supported. As pages are plain text, they do not yet support some advanced text components.
+As pages are plain text, they do not yet support some advanced text components.
 * '''title''' : (string) The title of the book.
 * '''author''' : (string) The author of the book.
 * '''pages''' : (array) An array of pages as strings. New lines supported. 256 character limit per page. 50 page limit.
+* '''generation''' : (string) The generation of the book. Can be ORIGINAL, COPY_OF_ORIGINAL, COPY_OF_COPY, or TATTERED (the last two cannot be copied).
 |-
 | Brewing Stands
 |
