@@ -2299,6 +2299,67 @@ public class StringHandling {
 	}
 
 	@api
+	public static class string_compare extends AbstractFunction {
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			return new CInt(args[0].val().compareTo(args[1].val()), t);
+		}
+
+		@Override
+		public String getName() {
+			return "string_compare";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "int {string s1, string s2} Compares two strings lexicographically."
+					+ " The comparison is based on the Unicode value of each character in the strings."
+					+ " Returns 0 if s1 is equal to s2, a negative value if s1 is lexographically less than s2,"
+					+ " and a positive value if s1 is lexigraphically greater than s2."
+					+ " The magnitude of non-zero return values is the difference between the char values at the first"
+					+ " index at which a different char was found in both strings."
+					+ " If all chars match but the strings differ in length, then the magnitude is this difference.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("", "string_compare('axx', 'bxx')"),
+				new ExampleScript("", "string_compare('xbx', 'xax')"),
+				new ExampleScript("", "string_compare('abc', 'abc')"),
+				new ExampleScript("", "string_compare('abc', 'abcde')")
+			};
+		}
+	}
+
+	@api
 	public static class string_multiply extends AbstractFunction {
 
 		@Override
