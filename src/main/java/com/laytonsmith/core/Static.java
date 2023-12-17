@@ -93,6 +93,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.yaml.snakeyaml.Yaml;
@@ -1178,12 +1179,20 @@ public final class Static {
 	 * @return
 	 */
 	public static String MCToANSIColors(String mes) {
-		//Pull out the MC colors
 		if(mes == null) {
 			return null;
 		}
+
+		// Convert RGB color codes to ANSI RGB color codes. Note that Windows command prompt ignores this.
+		mes = Pattern.compile("(?i)§x(?:§([a-f0-9])){6}").matcher(mes).replaceAll((MatchResult res) -> {
+			int red = Integer.parseInt(res.group(1) + res.group(2), 16);
+			int green = Integer.parseInt(res.group(3) + res.group(4), 16);
+			int blue = Integer.parseInt(res.group(5) + res.group(6), 16);
+			return "\u001B[38;2;" + red + ";" + green + ";" + blue + "m";
+		});
+
+		// Convert preset MC color codes and markup codes to ANSI codes.
 		return mes
-				.replaceAll("(?i)§x(§[a-f0-9]){6}", "")
 				.replaceAll("§0", TermColors.BLACK)
 				.replaceAll("§1", TermColors.BLUE)
 				.replaceAll("§2", TermColors.GREEN)
@@ -1206,7 +1215,6 @@ public final class Static {
 				.replaceAll("§n", TermColors.UNDERLINE)
 				.replaceAll("§o", TermColors.ITALIC)
 				.replaceAll("§r", TermColors.RESET);
-
 	}
 
 	public static MCCommandSender GetInjectedPlayer(String name) {
