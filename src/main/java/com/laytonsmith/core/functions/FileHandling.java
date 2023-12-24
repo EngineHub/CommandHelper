@@ -453,7 +453,9 @@ public class FileHandling {
 					}
 				}
 				InputStream stream = new GZIPInputStream(new FileInputStream(location));
-				return CByteArray.wrap(StreamUtils.GetBytes(stream), t);
+				byte[] fileBytes = StreamUtils.GetBytes(stream);
+				stream.close();
+				return CByteArray.wrap(fileBytes, t);
 			} catch (IOException ex) {
 				Static.getLogger().log(Level.SEVERE, "Could not read in file while attempting to find " + location.getAbsolutePath()
 						+ "\nFile " + (location.exists() ? "exists" : "does not exist"));
@@ -514,7 +516,9 @@ public class FileHandling {
 					throw new CRESecurityException("You do not have permission to access the file '" + location + "'", t);
 				}
 				InputStream stream = new BufferedInputStream(new FileInputStream(location));
-				return CByteArray.wrap(StreamUtils.GetBytes(stream), t);
+				byte[] fileBytes = StreamUtils.GetBytes(stream);
+				stream.close();
+				return CByteArray.wrap(fileBytes, t);
 			} catch (IOException ex) {
 				Static.getLogger().log(Level.SEVERE, "Could not read in file while attempting to find " + location.getAbsolutePath()
 						+ "\nFile " + (location.exists() ? "exists" : "does not exist"));
