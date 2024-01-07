@@ -523,6 +523,145 @@ public class World {
 
 	}
 
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class set_chunk_force_loaded extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "set_chunk_force_loaded";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3, 4};
+		}
+
+		@Override
+		public String docs() {
+			return "void {[world], x, z, forced | locationArray, forced} Sets a chunk to be persistently loaded.";
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCWorld world;
+			int x;
+			int z;
+			boolean forced;
+			if(args.length == 2) {
+				MCLocation l = ObjectGenerator.GetGenerator().location(args[0], m != null ? m.getWorld() : null, t);
+				world = l.getWorld();
+				x = l.getBlockX();
+				z = l.getBlockZ();
+				forced = ArgumentValidation.getBooleanObject(args[1], t);
+			} else if(args.length == 3) {
+				if(m == null) {
+					throw new CREInvalidWorldException("No world specified", t);
+				}
+				world = m.getWorld();
+				x = ArgumentValidation.getInt32(args[0], t);
+				z = ArgumentValidation.getInt32(args[1], t);
+				forced = ArgumentValidation.getBooleanObject(args[2], t);
+			} else {
+				world = Static.getServer().getWorld(args[0].val());
+				if(world == null) {
+					throw new CREInvalidWorldException("The given world (" + args[0].val() + ") does not exist.", t);
+				}
+				x = ArgumentValidation.getInt32(args[1], t);
+				z = ArgumentValidation.getInt32(args[2], t);
+				forced = ArgumentValidation.getBooleanObject(args[3], t);
+			}
+			world.setChunkForceLoaded(x, z, forced);
+			return CVoid.VOID;
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class, CREInvalidWorldException.class};
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class get_force_loaded_chunks extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "get_force_loaded_chunks";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1};
+		}
+
+		@Override
+		public String docs() {
+			return "array {[world]} Gets an array of all chunk coordinates that are persistently loaded.";
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			MCWorld world;
+			if(args.length == 1) {
+				world = Static.getServer().getWorld(args[0].val());
+			} else {
+				MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				if(m == null) {
+					throw new CREInvalidWorldException("No world specified", t);
+				}
+				world = m.getWorld();
+			}
+			if(world == null) {
+				throw new CREInvalidWorldException("World does not exist", t);
+			}
+			MCChunk[] chunks = world.getForceLoadedChunks();
+			CArray ret = new CArray(t);
+			for(MCChunk c : chunks) {
+				CArray chunk = CArray.GetAssociativeArray(t);
+				chunk.set("x", new CInt(c.getX(), t), t);
+				chunk.set("z", new CInt(c.getZ(), t), t);
+				chunk.set("world", c.getWorld().getName(), t);
+				ret.push(chunk, t);
+			}
+			return ret;
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInvalidWorldException.class};
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+	}
+
 	@api(environments = CommandHelperEnvironment.class)
 	public static class regen_chunk extends AbstractFunction {
 

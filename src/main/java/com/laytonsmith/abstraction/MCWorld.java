@@ -131,6 +131,12 @@ public interface MCWorld extends MCMetadatable {
 
 	void unloadChunk(int x, int z);
 
+	boolean isChunkForceLoaded(int x, int z);
+
+	void setChunkForceLoaded(int x, int z, boolean forced);
+
+	MCChunk[] getForceLoadedChunks();
+
 	void setTime(long time);
 
 	long getTime();

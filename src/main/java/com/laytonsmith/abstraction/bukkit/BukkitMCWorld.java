@@ -74,6 +74,7 @@ import org.bukkit.util.Consumer;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
@@ -392,6 +393,27 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	@Override
 	public void unloadChunk(int x, int z) {
 		w.unloadChunk(x, z);
+	}
+
+	@Override
+	public boolean isChunkForceLoaded(int x, int z) {
+		return w.isChunkForceLoaded(x, z);
+	}
+
+	@Override
+	public void setChunkForceLoaded(int x, int z, boolean forced) {
+		w.setChunkForceLoaded(x, z, forced);
+	}
+
+	@Override
+	public MCChunk[] getForceLoadedChunks() {
+		Collection<Chunk> chunks = w.getForceLoadedChunks();
+		MCChunk[] mcChunks = new MCChunk[chunks.size()];
+		int i = 0;
+		for(Chunk c : chunks) {
+			mcChunks[i++] = new BukkitMCChunk(c);
+		}
+		return mcChunks;
 	}
 
 	@Override
