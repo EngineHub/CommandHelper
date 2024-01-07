@@ -2,6 +2,7 @@ package com.laytonsmith.abstraction.bukkit.events.drivers;
 
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
+import com.laytonsmith.abstraction.bukkit.BukkitMCServer;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCExpChangeEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCFoodLevelChangeEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCGamemodeChangeEvent;
@@ -96,6 +97,11 @@ public class BukkitPlayerListener implements Listener {
 	public void onPlayerLogin(PlayerLoginEvent e) {
 		BukkitMCPlayerLoginEvent ple = new BukkitMCPlayerLoginEvent(e);
 		EventUtils.TriggerListener(Driver.PLAYER_LOGIN, "player_login", ple);
+		if(e.getResult() == PlayerLoginEvent.Result.ALLOWED) {
+			// store UUID for fallback player lookups by name
+			BukkitMCServer server = (BukkitMCServer) CommandHelperPlugin.myServer;
+			server.playerUUIDsByName.put(e.getPlayer().getName(), e.getPlayer().getUniqueId());
+		}
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
@@ -228,6 +234,8 @@ public class BukkitPlayerListener implements Listener {
 	public void onPlayerQuit(PlayerQuitEvent event) {
 		BukkitMCPlayerQuitEvent pqe = new BukkitMCPlayerQuitEvent(event);
 		EventUtils.TriggerListener(Driver.PLAYER_QUIT, "player_quit", pqe);
+		// clear UUID for fallback player lookups by name
+		((BukkitMCServer) CommandHelperPlugin.myServer).playerUUIDsByName.remove(event.getPlayer().getName());
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
