@@ -677,6 +677,7 @@ public class Scoreboards {
 					+ " all displays. Slot can be one of: " + StringUtils.Join(MCDisplaySlot.values(), ", ", ", or ")
 					+ " ---- If the displayname is too long, a LengthException will be thrown."
 					+ " The max length will differ based on server version, but this limit was removed in 1.20.1."
+					+ " Sidebar display slots for teams was added to Spigot in 1.19.2 and Paper in 1.17.1."
 					+ DEF_MSG;
 		}
 
