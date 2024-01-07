@@ -1,24 +1,26 @@
-Updating to new versions of CommandHelper or Minecraft can sometimes require updates to your scripts and/or extensions.
+Updating to new versions of Minecraft can sometimes require updates to your scripts.
 Below is a reverse chronological guide to help you with the most notable of these changes to quickly update your code.
 
 ----
 
-== Minecraft 1.20 ==
+== Minecraft 1.20.3 ==
+* GRASS changed to SHORT_GRASS (converted automatically where possible)
 
+----
+
+== Minecraft 1.20 ==
 * Damage cause from the /kill command was changed from VOID to KILL, and damage cause from the world border was changed from SUFFOCATION to WORLD_BORDER.
 * Signs are editable and can have text on the back side. (affects 'sign_changed' event)
 
 ----
 
 == Minecraft 1.18 ==
-
 * BARRIER and LIGHT particle types have been changed to the BLOCK_MARKER particle type with a 'block' parameter.
 * There are many removals and name changes to biomes.
 
 ----
 
 == Minecraft 1.17 ==
-
 * GRASS_PATH changed to DIRT_PATH (converted automatically where possible)
 * Cauldrons are split into 4 materials: CAULDRON, WATER_CAULDRON, LAVA_CAULDRON, POWDERED_SNOW_CAULDRON
 * GLOW_ITEM_FRAME is a separate entity type that behaves exactly as item frames
@@ -27,8 +29,6 @@ Below is a reverse chronological guide to help you with the most notable of thes
 ----
 
 == Minecraft 1.16.1 ==
-The following breaking changes exist:
-
 * PIG_ZOMBIE entity type was changed to ZOMBIFIED_PIGLIN. This matches the material change from ZOMBIE_PIGMAN_SPAWN_EGG to ZOMBIFIED_PIGLIN_SPAWN_EGG.
 * NETHER biome type was changed to NETHER_WASTES.
 
@@ -38,8 +38,6 @@ when reading in a comparison. (eg. entity_type() == 'PIG_ZOMBIE')
 ----
 
 == Minecraft 1.14.4 ==
-The following breaking changes exist:
-
 * Villager professions have completely changed.
 * Ocelots can no longer be tamed or sit.
 * The following materials are removed but will be converted in legacy item arrays or when using set_block(): CACTUS_GREEN, DANDELION_YELLOW, ROSE_RED, SIGN, WALL_SIGN.
@@ -47,7 +45,7 @@ The following breaking changes exist:
 
 ----
 
-== Minecraft 1.13.2 / CommandHelper 3.3.3 ==
+== Minecraft 1.13 ==
 Updating to 1.13 is a major overhaul, and there was no easy way around this. Fallback behavior was created where
 reasonably possible to make the transition somewhat smoother, but this will still be a large undertaking.
 
