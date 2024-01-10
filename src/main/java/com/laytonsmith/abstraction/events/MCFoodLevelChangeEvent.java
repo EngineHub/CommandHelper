@@ -1,6 +1,7 @@
 package com.laytonsmith.abstraction.events;
 
 import com.laytonsmith.abstraction.MCHumanEntity;
+import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.core.events.BindableEvent;
 
 public interface MCFoodLevelChangeEvent extends BindableEvent {
@@ -12,6 +13,8 @@ public interface MCFoodLevelChangeEvent extends BindableEvent {
 	int getFoodLevel();
 
 	void setFoodLevel(int level);
+
+	MCItemStack getItem();
 
 	boolean isCancelled();
 

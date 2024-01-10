@@ -123,7 +123,7 @@ public class BukkitInventoryEvents {
 		}
 
 		@Override
-		public boolean isCanceled() {
+		public boolean isCancelled() {
 			return iie.isCancelled();
 		}
 
@@ -385,6 +385,16 @@ public class BukkitInventoryEvents {
 		@Override
 		public int whichButton() {
 			return ei.whichButton();
+		}
+
+		@Override
+		public int getLevelHint() {
+			return ei.getLevelHint();
+		}
+
+		@Override
+		public MCEnchantment getEnchantmentHint() {
+			return new BukkitMCEnchantment(ei.getEnchantmentHint());
 		}
 	}
 

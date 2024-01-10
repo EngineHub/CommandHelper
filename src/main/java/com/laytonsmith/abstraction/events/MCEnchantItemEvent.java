@@ -25,4 +25,9 @@ public interface MCEnchantItemEvent extends MCInventoryEvent {
 	int getExpLevelCost();
 
 	int whichButton();
+
+	int getLevelHint();
+
+	MCEnchantment getEnchantmentHint();
+
 }

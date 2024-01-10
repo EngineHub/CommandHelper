@@ -11,6 +11,7 @@ import com.laytonsmith.abstraction.enums.MCClickType;
 import com.laytonsmith.abstraction.enums.MCDragType;
 import com.laytonsmith.abstraction.enums.MCInventoryAction;
 import com.laytonsmith.abstraction.enums.MCSlotType;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.events.MCEnchantItemEvent;
 import com.laytonsmith.abstraction.events.MCInventoryClickEvent;
 import com.laytonsmith.abstraction.events.MCInventoryCloseEvent;
@@ -519,7 +520,9 @@ public class InventoryEvents {
 					+ "levels: The amount of levels the player used | "
 					+ "enchants: Array of added enchantments | "
 					+ "location: Location of the used enchantment table | "
-					+ "option: The enchantment option the player clicked}"
+					+ "option: The enchantment option the player clicked | "
+					+ "levelhint: The level displayed as a hint to the player (MC 1.20.1+) | "
+					+ "enchanthint: The enchantment displayed as a hint to the player (MC 1.20.1+)}"
 					+ "{levels: The amount of levels to use | "
 					+ "item: The item to be enchanted | "
 					+ "enchants: The enchants to add to the item}"
@@ -549,6 +552,10 @@ public class InventoryEvents {
 				map.put("enchants", ObjectGenerator.GetGenerator().enchants(e.getEnchantsToAdd(), Target.UNKNOWN));
 				map.put("location", ObjectGenerator.GetGenerator().location(e.getEnchantBlock().getLocation(), false));
 				map.put("option", new CInt(e.whichButton(), Target.UNKNOWN));
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_1)) {
+					map.put("levelhint", new CInt(e.getLevelHint(), Target.UNKNOWN));
+					map.put("enchanthint", new CString(e.getEnchantmentHint().getKey(), Target.UNKNOWN));
+				}
 
 				return map;
 			} else {

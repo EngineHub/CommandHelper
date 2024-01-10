@@ -267,6 +267,14 @@ public class BukkitBlockEvents {
 		public MCBlock getBlock() {
 			return new BukkitMCBlock(event.getBlock());
 		}
+
+		@Override
+		public MCBlock getFireBlock() {
+			if(event.getIgnitingBlock() == null) {
+				return null;
+			}
+			return new BukkitMCBlock(event.getIgnitingBlock());
+		}
 	}
 
 	@abstraction(type = Implementation.Type.BUKKIT)

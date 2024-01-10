@@ -45,7 +45,8 @@ public class WeatherEvents {
 					+ " | is_effect: <boolean match> whether the strike was real or just an effect}"
 					+ " Fires when lightning strikes or the lightning strike effect occurs."
 					+ " {world: the name of the world in which the strike occurred | id: the lightning entityID"
-					+ " | location: locationArray of the event | is_effect: the data value for the block being changed}"
+					+ " | location: locationArray of the event | is_effect: the data value for the block being changed"
+					+ " | cause: The cause of the strike (COMMAND, CUSTOM, SPAWNER, TRIDENT, TRAP, WEATHER, or UNKNOWN)}"
 					+ " {}"
 					+ " {world|location|is_effect}";
 		}
@@ -77,6 +78,7 @@ public class WeatherEvents {
 				ret.put("id", new CString(e.getLightning().getUniqueId().toString(), t));
 				ret.put("location", ObjectGenerator.GetGenerator().location(e.getLightning().getLocation()));
 				ret.put("is_effect", CBoolean.GenerateCBoolean(e.getLightning().isEffect(), t));
+				ret.put("cause", new CString(e.getCause().name(), t));
 				return ret;
 			} else {
 				throw new EventException("Could not convert to MCLightningStrikeEvent");

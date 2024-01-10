@@ -6,4 +6,7 @@ import com.laytonsmith.core.events.BindableEvent;
 public interface MCBlockBurnEvent extends BindableEvent {
 
 	MCBlock getBlock();
+
+	MCBlock getFireBlock();
+
 }

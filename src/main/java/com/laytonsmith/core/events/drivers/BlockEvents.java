@@ -473,10 +473,11 @@ public class BlockEvents {
 		@Override
 		public String docs() {
 			return "{block: <string match>}"
-					+ "This event is called when a block is burned. Cancelling the event cancels the burn. "
+					+ "This event is called when a block is burned away."
 					+ "{block: the block type that was burned"
-					+ " | location: the locationArray of this block}"
-					+ "{block}"
+					+ " | location: the location array of the burned block"
+					+ " | firelocation: the location array of the fire (or null)}"
+					+ "{}"
 					+ "{}";
 		}
 
@@ -552,6 +553,13 @@ public class BlockEvents {
 
 			map.put("block", new CString(block.getType().getName(), t));
 			map.put("location", ObjectGenerator.GetGenerator().location(block.getLocation(), false));
+
+			MCBlock source = event.getFireBlock();
+			if(source == null) {
+				map.put("firelocation", CNull.NULL);
+			} else {
+				map.put("firelocation", ObjectGenerator.GetGenerator().location(source.getLocation(), false));
+			}
 
 			return map;
 		}

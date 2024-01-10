@@ -1,5 +1,6 @@
 package com.laytonsmith.abstraction.events;
 
+import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
@@ -17,4 +18,7 @@ public interface MCPlayerInteractEvent extends MCPlayerEvent {
 	MCItemStack getItem();
 
 	MCEquipmentSlot getHand();
+
+	Vector3D getClickedPosition();
+
 }

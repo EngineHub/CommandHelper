@@ -1,5 +1,6 @@
 package com.laytonsmith.abstraction.bukkit.events;
 
+import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCBookMeta;
 import com.laytonsmith.abstraction.MCEntity;
@@ -95,10 +96,12 @@ import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.event.player.PlayerToggleSprintEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.UUID;
 
 public class BukkitPlayerEvents {
 
@@ -118,7 +121,7 @@ public class BukkitPlayerEvents {
 
 		@Override
 		public int getDifference() {
-			return ((Player) event.getEntity()).getFoodLevel() - getFoodLevel();
+			return event.getEntity().getFoodLevel() - getFoodLevel();
 		}
 
 		@Override
@@ -129,6 +132,14 @@ public class BukkitPlayerEvents {
 		@Override
 		public void setFoodLevel(int level) {
 			event.setFoodLevel(level);
+		}
+
+		@Override
+		public MCItemStack getItem() {
+			if(event.getItem() == null) {
+				return null;
+			}
+			return new BukkitMCItemStack(event.getItem());
 		}
 
 		@Override
@@ -184,6 +195,14 @@ public class BukkitPlayerEvents {
 		@Override
 		public void setItem(MCItemStack item) {
 			pic.setItem(((BukkitMCItemStack) item).asItemStack());
+		}
+
+		@Override
+		public MCEquipmentSlot getHand() {
+			if(pic.getHand() == EquipmentSlot.HAND) {
+				return MCEquipmentSlot.WEAPON;
+			}
+			return MCEquipmentSlot.OFF_HAND;
 		}
 
 		public static BukkitMCPlayerItemConsumeEvent _instantiate(MCPlayer player, MCItemStack item) {
@@ -580,6 +599,15 @@ public class BukkitPlayerEvents {
 			}
 			return MCEquipmentSlot.OFF_HAND;
 		}
+
+		@Override
+		public Vector3D getClickedPosition() {
+			Vector v = pie.getClickedPosition();
+			if(v == null) {
+				return null;
+			}
+			return new Vector3D(v.getX(), v.getY(), v.getZ());
+		}
 	}
 
 	@abstraction(type = Implementation.Type.BUKKIT)
@@ -614,12 +642,12 @@ public class BukkitPlayerEvents {
 
 		@Override
 		public boolean isAnchorSpawn() {
-			try {
-				return pre.isAnchorSpawn();
-			} catch (NoSuchMethodError ex) {
-				// probably before 1.16.1
-				return false;
-			}
+			return pre.isAnchorSpawn();
+		}
+
+		@Override
+		public Reason getReason() {
+			return Reason.valueOf(pre.getRespawnReason().name());
 		}
 	}
 
@@ -810,6 +838,16 @@ public class BukkitPlayerEvents {
 		public void setExpToDrop(int exp) {
 			e.setExpToDrop(exp);
 		}
+
+		@Override
+		public MCEquipmentSlot getHand() {
+			if(e.getHand() == null) {
+				return null;
+			} else if(e.getHand() == EquipmentSlot.HAND) {
+				return MCEquipmentSlot.WEAPON;
+			}
+			return MCEquipmentSlot.OFF_HAND;
+		}
 	}
 
 	public static class BukkitMCGamemodeChangeEvent extends BukkitMCPlayerEvent implements MCGamemodeChangeEvent {
@@ -984,6 +1022,11 @@ public class BukkitPlayerEvents {
 		@Override
 		public MCResourcePackStatus getStatus() {
 			return BukkitMCResourcePackStatus.getConvertor().getAbstractedEnum(this.e.getStatus());
+		}
+
+		@Override
+		public UUID getId() {
+			return this.e.getID();
 		}
 	}
 

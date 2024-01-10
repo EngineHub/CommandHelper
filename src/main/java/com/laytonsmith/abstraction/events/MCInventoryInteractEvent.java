@@ -11,7 +11,7 @@ public interface MCInventoryInteractEvent extends MCInventoryEvent {
 
 	MCResult getResult();
 
-	boolean isCanceled();
+	boolean isCancelled();
 
 	void setCancelled(boolean toCancel);
 }

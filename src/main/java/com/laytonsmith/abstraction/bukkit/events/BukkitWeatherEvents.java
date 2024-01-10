@@ -47,6 +47,11 @@ public final class BukkitWeatherEvents {
 		public MCLightningStrike getLightning() {
 			return new BukkitMCLightningStrike(this.event.getLightning());
 		}
+
+		@Override
+		public Cause getCause() {
+			return Cause.valueOf(event.getCause().name());
+		}
 	}
 
 	public static class BukkitMCThunderChangeEvent extends BukkitMCWeatherEvent implements MCThunderChangeEvent {
