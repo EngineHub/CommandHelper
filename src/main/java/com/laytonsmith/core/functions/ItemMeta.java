@@ -141,16 +141,17 @@ public class ItemMeta {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Demonstrates generic meta for an item in your main hand.",
+				new ExampleScript("Demonstrates generic meta for a tool in your main hand.",
 					"msg(get_itemmeta(null))",
 					"{display: AmazingSword, enchants: {}, lore: {Look at my sword, my sword is amazing}, repair: 0,"
-							+ " model: null, flags: {}}"),
+							+ " model: null, flags: {}, modifiers: null, tags: null, damage: 0, unbreakable: false}"),
 				new ExampleScript("Demonstrates a written book (excluding generic meta)",
 					"msg(get_itemmeta(null))",
-					"{author: Notch, pages: {This is page 1, This is page 2}, title: Example Book}"),
+					"{author: PseudoKnight, pages: {Once upon a time..., The End.}, title: Short Story,"
+							+ " generation: ORIGINAL}"),
 				new ExampleScript("Demonstrates an EnchantedBook (excluding generic meta)",
 					"msg(get_itemmeta(null))",
-					"{stored: {flame: 1}}"),
+					"{stored: {flame: {elevel: 1, etype: ARROW_FIRE}}}"),
 				new ExampleScript("Demonstrates a custom firework (excluding generic meta)",
 					"msg(get_itemmeta(null))",
 					"{firework: {effects: {{colors: {{b: 240, g: 240, r: 240}, {b: 44, g: 49, r: 179},"
@@ -223,7 +224,8 @@ public class ItemMeta {
 			return "void {[player,] slot, ItemMetaArray} Applies the data from the given array to the item at the"
 					+ " specified slot. Unused fields will be ignored. If null or an empty array is supplied, or if"
 					+ " none of the given fields are applicable, the item will become default, as this function"
-					+ " overwrites any existing data. See {{function|get_itemmeta}} for available fields.";
+					+ " overwrites any existing data. See {{function|get_itemmeta}} for available fields."
+					+ " If the item does not yet exist, use {{function|set_pinv}} instead.";
 		}
 
 		@Override
@@ -238,33 +240,36 @@ public class ItemMeta {
 				"This will make the item in your hand completely ordinary"),
 				new ExampleScript("Demonstrates a generic item with meta",
 				"set_itemmeta(null, array(display: 'Amazing Sword', lore: array('Look at my sword', 'my sword is amazing')))",
-				"The item in your hands is now amazing"),
+				"The item in your hands is now amazing, but has no other meta."),
 				new ExampleScript("Demonstrates a written book",
 				"set_itemmeta(null, array(author: 'Writer', pages: array('Once upon a time', 'The end.'), title: 'Epic Story'))",
-				"This will write a very short story"),
+				"This will write a very short story in a book"),
 				new ExampleScript("Demonstrates an EnchantedBook",
-				"set_itemmeta(null, array('stored': array('sharpness': 25, 'unbreaking': 3)))",
-				"This book now contains Unbreaking 3 and Sharpness 25"),
+				"set_itemmeta(null, array(stored: array(sharpness: 25, 'unbreaking': 3)))",
+				"This enchanted book now contains Unbreaking 3 and Sharpness 25"),
 				new ExampleScript("Demonstrates coloring leather armor",
 				"set_itemmeta(102, array(color: array(r: 50, b: 150, g: 100)))",
-				"This will make your chestplate blue-ish"),
-				new ExampleScript("Demonstrates a skull", "set_itemmeta(103, array(owner: 'Notch'))",
-				"This puts Notch's skin on the skull you are wearing"),
+				"This will make your leather chestplate blue-ish"),
+				new ExampleScript("Demonstrates a player head", "set_itemmeta(103, array(owneruuid: puuid()))",
+				"This puts your skin on the player head you are wearing"),
 				new ExampleScript("Demonstrates making a custom potion",
-				"set_itemmeta(5, array(potions: array(array(id: 8, strength: 4, seconds: 90, ambient: true))))",
-				"Turns the potion in slot 5 into a Potion of Leaping V"),
+				"set_itemmeta(5, array(display: Potion of Frog Leaping, potions: array(speed: array(strength: 4,"
+						+ " seconds: 90, ambient: true, particles: false, icon: true))))",
+				"Turns the potion in slot 5 into a Potion of Leaping V with no potion particles."),
 				new ExampleScript("Demonstrates hiding a potion effect",
-				"set_itemmeta(4, array(flags: array('HIDE_POTION_EFFECTS')))",
+				"@meta = get_itemmeta(4);"
+						+ "@meta['flags'] = array('HIDE_POTION_EFFECTS');"
+						+ "set_itemmeta(4, @meta);",
 				"Hides the text indicating meta information for the item in slot 4."
 				+ " The flag HIDE_POTION_EFFECTS hides specific item meta like book meta, potion effects,"
 				+ " a music disc's author and name, firework meta, map meta, and stored enchantments."),
 				new ExampleScript("Demonstrates making a custom banner",
 				"set_itemmeta(0, array(basecolor: 'SILVER', patterns: array(array(color: 'BLACK', shape: 'SKULL'))))",
-				"This banner will be silver with a black skull."),
+				"This banner will now be silver with a black skull."),
 				new ExampleScript("Demonstrates making a custom firework",
 				"set_itemmeta(null, array('firework': array('strength': 1, 'effects': array(array("
 				+ "'type': 'CREEPER', colors: array(array('r': 0, 'g': 255, 'b': 0)))))));",
-				"This firework will store a green creeper face effect.")
+				"This firework will now store a green creeper face effect.")
 			};
 		}
 

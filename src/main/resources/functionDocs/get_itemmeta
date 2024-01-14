@@ -10,7 +10,6 @@ Some Minecraft NBT is not yet supported in item meta, and should be documented b
 |-
 | All Items
 |
-The "CanPlaceOn" tag for blocks and "CanDestroy" tag for tools are not yet supported.
 * '''display''' : (string) The display name seen when the item is selected.
 * '''lore''' : (array) An array of strings that is displayed when hovering the item. As lines are plain text, they do not yet support some advanced text components.
 * '''enchants''' : (array) An associative array of enchantments with the vanilla name of enchantment as the key, and value being an enchantment array with the key '''"elevel"''' for the level of the enchantment.
@@ -19,6 +18,7 @@ The "CanPlaceOn" tag for blocks and "CanDestroy" tag for tools are not yet suppo
 * '''repair''' : (int) The cost to repair or combine this item in an anvil.
 * '''modifiers''' : (array) An array of attribute modifier arrays, each with keys: '''"attribute"''', '''"operation"''', '''"amount"''' (double), '''"uuid"''' (optional), '''"name"''' (optional), and '''"slot"''' (optional). Possible attributes: ''%ATTRIBUTES%''. Possible operations: ''%OPERATIONS%''. Possible slots: ''%SLOTS%''.
 * '''tags''' : (array) An associative array of custom tags used by plugins. A tag's key is namespaced (e.g. "commandhelper:mytag") and the value is an associative array containing the '''"type"''' and '''"value"''' of the tag. Possible types: ''%TAG_TYPES%''.
+The "CanPlaceOn" tag for blocks and "CanDestroy" tag for tools are not yet supported.
 |-
 | All Damageable Items
 |
@@ -31,8 +31,8 @@ The "CanPlaceOn" tag for blocks and "CanDestroy" tag for tools are not yet suppo
 |-
 | AxolotlBucket
 |
-The entity's custom name is derived from the item '''"display"''' string. All other axolotl NBT is not supported.
 * '''variant''' : (string) The type of axolotl, one of ''%AXOLOTL_TYPES%''. (MC 1.17+)
+The entity's custom name is derived from the item '''"display"''' string. All other axolotl NBT is not yet supported.
 |-
 | Banners
 |
@@ -44,11 +44,11 @@ The entity's custom name is derived from the item '''"display"''' string. All ot
 |-
 | Books
 |
-As pages are plain text, they do not yet support some advanced text components.
 * '''title''' : (string) The title of the book.
 * '''author''' : (string) The author of the book.
 * '''pages''' : (array) An array of pages as strings. New lines supported. 256 character limit per page. 50 page limit.
 * '''generation''' : (string) The generation of the book. Can be ORIGINAL, COPY_OF_ORIGINAL, COPY_OF_COPY, or TATTERED (the last two cannot be copied).
+As pages are plain text, they do not yet support some advanced text components.
 |-
 | Brewing Stands
 |
@@ -62,9 +62,9 @@ As pages are plain text, they do not yet support some advanced text components.
 |-
 | CommandBlocks
 |
-Some tags not yet supported.
 * '''command''' : (string) The command set for this commandblock.
 * '''customname''' : (string) The name of this commandblock. (default: '@')
+The remaining tags are not yet supported.
 |-
 | Compass
 |
@@ -155,7 +155,6 @@ The entity's custom name is derived from the item '''"display"''' string. Additi
 |-
 | Spawners
 |
-NBT for spawn potentials other than entity type is not supported.
 * '''spawntype''' : (string) May be one of ''%ENTITY_TYPES%''. Not all entity types will spawn from spawners, and some require special conditions.
 * '''delay''' : (int) The time in ticks until the spawner will spawn the next batch of entities.
 * '''mindelay''' : (int) The lower bounds of a new random delay chosen after each batch of entities spawn. (must be <= 'maxdelay')
@@ -164,11 +163,12 @@ NBT for spawn potentials other than entity type is not supported.
 * '''maxnearbyentities''' : (int) The number of 'spawntype' entities within just over 'spawnrange' distance that'll prevent further spawns.
 * '''spawnrange''' : (int) The maximum distance in the x or z axis new entities will spawn from the spawner.
 * '''playerrange''' : (int) The maximum distance a player must be within to cause the spawner to spawn.
+NBT for spawn potentials other than entity type is not yet supported.
 |-
 | Tropical Fish Buckets
 |
-The entity's custom name is derived from the item '''"display"''' string. All other tropical fish NBT is not supported.
 * '''fishcolor''' : (string) The color of the fish, can be one of ''%DYE_COLORS%''.
 * '''fishpatterncolor''' : (string) The color of the pattern on the fish.
 * '''fishpattern''' : (string) The pattern type on the fish, can be one of ''%FISH_PATTERNS%''.
+The entity's custom name is derived from the item '''"display"''' string. All other tropical fish NBT is not yet supported.
 |}
