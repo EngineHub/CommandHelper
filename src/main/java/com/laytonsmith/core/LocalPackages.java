@@ -1,7 +1,6 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.abstraction.MCPlayer;
-import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
@@ -201,10 +200,7 @@ public class LocalPackages {
 	 */
 	public void executeMS(Environment env) {
 		@SuppressWarnings("deprecation") // Remove as soon as static analysis is enforced.
-		boolean staticAnalysisEnabled = StaticAnalysis.enabled()
-				|| (env.hasEnv(CompilerEnvironment.class)
-				&& env.getEnv(CompilerEnvironment.class).getStaticAnalysis() != null
-				&& env.getEnv(CompilerEnvironment.class).getStaticAnalysis().isLocalEnabled());
+		boolean staticAnalysisEnabled = StaticAnalysis.enabled();
 		for(ParseTree pt : msCompiled) {
 			try {
 				// Clone base environment for this ms file to potentially make changes to.
@@ -224,7 +220,7 @@ public class LocalPackages {
 			} catch (ConfigRuntimeException e) {
 				ConfigRuntimeException.HandleUncaughtException(e, env);
 			} catch (CancelCommandException e) {
-				if(e.getMessage() != null && !"".equals(e.getMessage().trim())) {
+				if(e.getMessage() != null && !e.getMessage().trim().isEmpty()) {
 					Static.getLogger().log(Level.INFO, e.getMessage());
 				}
 			} catch (ProgramFlowManipulationException e) {
