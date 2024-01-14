@@ -29,6 +29,7 @@ import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.MCWorldCreator;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
+import com.laytonsmith.abstraction.blocks.MCEndGateway;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBanner;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBeacon;
@@ -41,6 +42,7 @@ import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCContainer;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCDecoratedPot;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCDispenser;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCDropper;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCEndGateway;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCFurnace;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCLectern;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
@@ -117,6 +119,7 @@ import org.bukkit.block.CreatureSpawner;
 import org.bukkit.block.DecoratedPot;
 import org.bukkit.block.Dispenser;
 import org.bukkit.block.Dropper;
+import org.bukkit.block.EndGateway;
 import org.bukkit.block.Furnace;
 import org.bukkit.block.Lectern;
 import org.bukkit.block.Sign;
@@ -588,6 +591,9 @@ public class BukkitConvertor extends AbstractConvertor {
 		}
 		if(bs instanceof CommandBlock) {
 			return new BukkitMCCommandBlock((CommandBlock) bs);
+		}
+		if(bs instanceof EndGateway) {
+			return new BukkitMCEndGateway((EndGateway) bs);
 		}
 		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_1) && bs instanceof DecoratedPot) {
 			return new BukkitMCDecoratedPot((DecoratedPot) bs);

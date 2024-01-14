@@ -19,6 +19,7 @@ import com.laytonsmith.abstraction.blocks.MCBlockData;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.abstraction.blocks.MCCommandBlock;
 import com.laytonsmith.abstraction.blocks.MCDecoratedPot;
+import com.laytonsmith.abstraction.blocks.MCEndGateway;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.blocks.MCSign;
 import com.laytonsmith.abstraction.blocks.MCSign.Side;
@@ -3323,6 +3324,128 @@ public class Environment {
 				}
 			}
 			throw new CREFormatException("Expected associative array for decorated pots.", t);
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class set_end_gateway_exit extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "set_end_gateway_exit";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3};
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class, CREInvalidWorldException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public String docs() {
+			return "void {gatewayLocation, exitLocation, [exactTeleport]} Sets an end gateways teleport exit location."
+					+ " The exit location must be null or a location array with the same world as the end gateway."
+					+ " Optionally change whether the end gateway teleports to the exact location or finds a nearby one.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args)
+				throws ConfigRuntimeException {
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			MCBlockState bs = loc.getBlock().getState();
+			if(!(bs instanceof MCEndGateway endGateway)) {
+				throw new CREFormatException("The block at the specified location is not an end gateway", t);
+			}
+			if(args[1] instanceof CNull) {
+				endGateway.setExitLocation(null);
+			} else {
+				MCLocation exit = ObjectGenerator.GetGenerator().location(args[1], loc.getWorld(), t);
+				try {
+					endGateway.setExitLocation(exit);
+				} catch (IllegalArgumentException ex) {
+					throw new CREInvalidWorldException(ex.getMessage(), t);
+				}
+			}
+			if(args.length == 3) {
+				boolean exact = ArgumentValidation.getBooleanObject(args[2], t);
+				endGateway.setExactTeleport(exact);
+			}
+			endGateway.update();
+			return CVoid.VOID;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class set_end_gateway_age extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "set_end_gateway_age";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class, CREInvalidWorldException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public String docs() {
+			return "void {gatewayLocation, ticks} Sets an end gateway's age in ticks."
+					+ " A magenta beam is emitted from 0 to 200 ticks (10 seconds)."
+					+ " Also a purple beam is emitted very 2400 positive ticks (2 minutes)."
+					+ " Setting this to a negative number, like math_const('LONG_MIN'), can be used to prevent beams.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args)
+				throws ConfigRuntimeException {
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			MCBlockState bs = loc.getBlock().getState();
+			if(!(bs instanceof MCEndGateway endGateway)) {
+				throw new CREFormatException("The block at the specified location is not an end gateway", t);
+			}
+			endGateway.setAge(ArgumentValidation.getInt(args[1], t));
+			endGateway.update();
+			return CVoid.VOID;
 		}
 	}
 }
