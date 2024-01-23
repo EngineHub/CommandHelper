@@ -77,6 +77,7 @@ import com.laytonsmith.abstraction.enums.MCRecipeType;
 import com.laytonsmith.abstraction.enums.MCTagType;
 import com.laytonsmith.abstraction.enums.MCTrimMaterial;
 import com.laytonsmith.abstraction.enums.MCTrimPattern;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CDouble;
@@ -568,6 +569,9 @@ public class ObjectGenerator {
 						sherds.set(side.getKey().name().toLowerCase(), side.getValue().name());
 					}
 					ma.set("sherds", sherds, t);
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_X)) {
+						ma.set("item", item(decoratedPot.getItemStack(), t), t);
+					}
 				} else if(bs instanceof MCInventoryHolder) {
 					// Finally, handle InventoryHolders with inventory slots that do not have a special meaning.
 					MCInventory inv = ((MCInventoryHolder) bs).getInventory();
@@ -1073,8 +1077,13 @@ public class ObjectGenerator {
 							} else {
 								throw new CREFormatException("Expected associative array for decorated pot meta.", t);
 							}
-							bsm.setBlockState(bs);
 						}
+						if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_X)) {
+							if(ma.containsKey("item")) {
+								decoratedPot.setItemStack(item(ma.get("item", t), t));
+							}
+						}
+						bsm.setBlockState(bs);
 					} else if(bs instanceof MCInventoryHolder) {
 						// Finally, handle InventoryHolders with inventory slots that do not have a special meaning.
 						if(ma.containsKey("inventory")) {

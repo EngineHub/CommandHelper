@@ -78,6 +78,7 @@ The remaining tags are not yet supported.
 | Decorated Pots
 |
 * '''sherds''' : (array) An associative array of pottery sherds for the '''"front"''', '''"back"''', '''"left"''', and '''"right"''' sides of the decorated pot. Brick is used for empty sides.
+* '''item''' : (array) An item array for the stack contained in the decorated pot, or null if empty. (MC 1.20.4+)
 |-
 | Enchanted Books
 |
