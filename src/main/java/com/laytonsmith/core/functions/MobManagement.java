@@ -14,6 +14,7 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.entities.MCAgeable;
 import com.laytonsmith.abstraction.entities.MCAnimal;
+import com.laytonsmith.abstraction.entities.MCArmorStand;
 import com.laytonsmith.abstraction.entities.MCBreedable;
 import com.laytonsmith.abstraction.entities.MCTameable;
 import com.laytonsmith.abstraction.enums.MCAttribute;
@@ -702,7 +703,7 @@ public class MobManagement {
 			if(eq == null) {
 				throw new CREBadEntityTypeException("Entities of type \"" + le.getType() + "\" do not have equipment.", t);
 			}
-			Map<MCEquipmentSlot, MCItemStack> eqmap = le.getEquipment().getAllEquipment();
+			Map<MCEquipmentSlot, MCItemStack> eqmap = eq.getAllEquipment();
 			CArray ret = CArray.GetAssociativeArray(t);
 			for(MCEquipmentSlot key : eqmap.keySet()) {
 				ret.set(key.name().toLowerCase(), ObjectGenerator.GetGenerator().item(eqmap.get(key), t), t);
@@ -718,7 +719,7 @@ public class MobManagement {
 		@Override
 		public String docs() {
 			return "array {entityUUID} Returns an associative array showing the equipment this mob is wearing."
-					+ " This does not work on most \"dumb\" entities, only mobs (entities with AI).";
+					+ " This only works on mobs and armor stands.";
 		}
 
 		@Override
@@ -776,8 +777,8 @@ public class MobManagement {
 		@Override
 		public String docs() {
 			return "void {entityUUID, array} Takes an associative array with keys representing equipment slots and"
-					+ " values of itemArrays, the same used by set_pinv. This does not work on most \"dumb\" entities,"
-					+ " only mobs (entities with AI). Unless a mod, plugin, or future update changes vanilla functionality,"
+					+ " values of itemArrays, the same used by set_pinv(). This only works on mobs and armor stands."
+					+ " Unless a mod, plugin, or future update changes vanilla functionality,"
 					+ " only humanoid mobs will render their equipment slots. The equipment slots are: "
 					+ StringUtils.Join(MCEquipmentSlot.values(), ", ", ", or ", " or ");
 		}
@@ -861,9 +862,13 @@ public class MobManagement {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCEntityEquipment eq = Static.getLivingEntity(args[0], t).getEquipment();
-			if(eq.getHolder() instanceof MCPlayer) {
-				throw new CREBadEntityException(getName() + " does not work on players.", t);
+			MCLivingEntity le = Static.getLivingEntity(args[0], t);
+			if(le instanceof MCPlayer || le instanceof MCArmorStand) {
+				throw new CREBadEntityException(getName() + "() does not work on type: " + le.getType(), t);
+			}
+			MCEntityEquipment eq = le.getEquipment();
+			if(eq == null) {
+				throw new CREBadEntityTypeException("Entities of type \"" + le.getType() + "\" do not have equipment.", t);
 			}
 			CArray ret = CArray.GetAssociativeArray(t);
 			for(Map.Entry<MCEquipmentSlot, Float> ent : eq.getAllDropChances().entrySet()) {
@@ -881,7 +886,8 @@ public class MobManagement {
 		public String docs() {
 			return "array {entityUUID} Returns an associative array of the drop rate for each equipment slot."
 					+ " If the rate is 0.0, the equipment will not drop. A rate of 1.0 will guarantee a drop"
-					+ " if the entity is killed by a player. A rate above 1.0 will guarantee a drop by any cause.";
+					+ " if the entity is killed by a player. A rate above 1.0 will guarantee a drop by any cause."
+					+ " Non-mobs, like players and armor stands, cannot have their drop-rates modified.";
 		}
 
 		@Override
@@ -895,11 +901,15 @@ public class MobManagement {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCEntityEquipment ee = Static.getLivingEntity(args[0], t).getEquipment();
-			Map<MCEquipmentSlot, Float> eq = ee.getAllDropChances();
-			if(ee.getHolder() instanceof MCPlayer) {
-				throw new CREBadEntityException(getName() + " does not work on players.", t);
+			MCLivingEntity le = Static.getLivingEntity(args[0], t);
+			if(le instanceof MCPlayer || le instanceof MCArmorStand) {
+				throw new CREBadEntityException(getName() + "() does not work on type: " + le.getType(), t);
 			}
+			MCEntityEquipment ee = le.getEquipment();
+			if(ee == null) {
+				throw new CREBadEntityTypeException("Entities of type \"" + le.getType() + "\" do not have equipment.", t);
+			}
+			Map<MCEquipmentSlot, Float> eq = ee.getAllDropChances();
 			if(args[1] instanceof CNull) {
 				for(Map.Entry<MCEquipmentSlot, Float> ent : eq.entrySet()) {
 					eq.put(ent.getKey(), 0F);
@@ -930,7 +940,8 @@ public class MobManagement {
 			return "void {entityUUID, array} Sets the drop chances for each equipment slot on a mob,"
 					+ " but does not work on players. Passing null instead of an array will automatically"
 					+ " set all rates to 0.0, which will cause nothing to drop. A rate of 1.0 will guarantee a drop"
-					+ " if the entity is killed by a player. A rate above 1.0 will guarantee a drop by any cause.";
+					+ " if the entity is killed by a player. A rate above 1.0 will guarantee a drop by any cause."
+					+ " Non-mobs, like players and armor stands, cannot have their drop-rates modified.";
 		}
 
 		@Override
