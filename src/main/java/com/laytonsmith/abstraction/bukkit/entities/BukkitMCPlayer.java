@@ -759,4 +759,9 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	public void setScoreboard(MCScoreboard board) {
 		p.setScoreboard(((BukkitMCScoreboard) board)._scoreboard());
 	}
+
+	@Override
+	public void respawn() {
+		p.spigot().respawn();
+	}
 }
