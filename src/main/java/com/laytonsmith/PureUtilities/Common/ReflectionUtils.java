@@ -66,7 +66,8 @@ public final class ReflectionUtils {
 			Constructor<T> c = clazz.getDeclaredConstructor(argTypes);
 			c.setAccessible(true);
 			return c.newInstance(args);
-		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException ex) {
+		} catch(InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+				| NoSuchMethodException | SecurityException ex) {
 			throw new ReflectionException(ex);
 		}
 	}
@@ -113,7 +114,7 @@ public final class ReflectionUtils {
 				f.setAccessible(true);
 				return f.get(instance);
 			}
-		} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException ex) {
+		} catch(IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException ex) {
 			throw new ReflectionException(ex);
 		}
 	}
@@ -171,16 +172,15 @@ public final class ReflectionUtils {
 				f.set(instance, value);
 
 			}
-		} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException ex) {
+		} catch(IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException ex) {
 			throw new ReflectionException(ex);
 		}
 	}
 
 	/**
-	 * Invokes a no argument method, disregarding access restrictions, and returns the result.
-	 * Note that internally this uses {@link Class#getDeclaredMethod} which does not walk the
-	 * class hierarchy, meaning that the clazz parameter must be
-	 * of the class that declares the method, perhaps a supertype of the instance type.
+	 * Invokes a no argument method, disregarding access restrictions, and returns the result. Note that internally this
+	 * uses {@link Class#getDeclaredMethod} which does not walk the class hierarchy, meaning that the clazz parameter
+	 * must be of the class that declares the method, perhaps a supertype of the instance type.
 	 *
 	 * @param clazz The class which declares the method intending on being called.
 	 * @param instance The instance of the object to call the method on.
@@ -237,20 +237,20 @@ public final class ReflectionUtils {
 							m.setAccessible(true);
 							return m.invoke(instance, params);
 						}
-					} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+					} catch(IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
 						throw new ReflectionException(ex);
 					}
 				}
 			}
 			c = c.getSuperclass();
 		}
-		throw new ReflectionException(new NoSuchMethodException(methodName + " was not found in any of the searched classes."));
+		throw new ReflectionException(new NoSuchMethodException(methodName
+				+ " was not found in any of the searched classes."));
 	}
 
 	/**
-	 * Grabs the method from the instance object automatically. {@code instance} may not be null. This walks
-	 * the superclass hierarchy if necessary to find the correct method. This only works for argument-less
-	 * methods.
+	 * Grabs the method from the instance object automatically. {@code instance} may not be null. This walks the
+	 * superclass hierarchy if necessary to find the correct method. This only works for argument-less methods.
 	 *
 	 * @param instance The instance to call the method on.
 	 * @param methodName The method to call.
@@ -265,21 +265,21 @@ public final class ReflectionUtils {
 				if(methodName.equals(m.getName())) {
 					try {
 						return m.invoke(instance);
-					} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+					} catch(IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
 						throw new ReflectionException(ex);
 					}
 				}
 			}
 			c = c.getSuperclass();
 		}
-		throw new ReflectionException(new NoSuchMethodException(methodName + " was not found in any of the searched classes."));
+		throw new ReflectionException(new NoSuchMethodException(methodName
+				+ " was not found in any of the searched classes."));
 	}
 
 	/**
-	 * Invokes a method with the parameters specified, disregarding access restrictions, and returns the result.
-	 * Note that internally this uses {@link Class#getDeclaredMethod} which does not walk the
-	 * class hierarchy, meaning that the clazz parameter must be
-	 * of the class that declares the method, perhaps a supertype of the instance type.
+	 * Invokes a method with the parameters specified, disregarding access restrictions, and returns the result. Note
+	 * that internally this uses {@link Class#getDeclaredMethod} which does not walk the class hierarchy, meaning that
+	 * the clazz parameter must be of the class that declares the method, perhaps a supertype of the instance type.
 	 *
 	 * @param clazz The class which declares the method intending on being called.
 	 * @param instance The instance of the object to call the method on.
@@ -288,12 +288,14 @@ public final class ReflectionUtils {
 	 * @param args The arguments.
 	 * @return The invocation result, null if void.
 	 */
-	public static Object invokeMethod(Class clazz, Object instance, String methodName, Class[] argTypes, Object[] args) throws ReflectionException {
+	public static Object invokeMethod(Class clazz, Object instance, String methodName, Class[] argTypes, Object[] args)
+			throws ReflectionException {
 		try {
 			Method m = clazz.getDeclaredMethod(methodName, argTypes);
 			m.setAccessible(true);
 			return m.invoke(instance, args);
-		} catch (InvocationTargetException | NoSuchMethodException | IllegalArgumentException | IllegalAccessException | SecurityException ex) {
+		} catch(InvocationTargetException | NoSuchMethodException | IllegalArgumentException
+				| IllegalAccessException | SecurityException ex) {
 			throw new ReflectionException(ex);
 		}
 	}
@@ -340,7 +342,7 @@ public final class ReflectionUtils {
 					if(o != null) {
 						value = o.toString();
 					}
-				} catch (SecurityException e) {
+				} catch(SecurityException e) {
 					value = "Could not access value due to a SecurityException";
 				}
 				output.println("(" + f.getType() + ") " + f.getName() + ": " + value);
@@ -385,13 +387,14 @@ public final class ReflectionUtils {
 	 * @throws ReflectionException If a SecurityException is thrown by the underlying code, this will be thrown.
 	 */
 	@SuppressWarnings("unchecked")
-	public static boolean hasMethod(Class<?> c, String methodName, Class returnType, Class... params) throws ReflectionException {
+	public static boolean hasMethod(Class<?> c, String methodName, Class returnType, Class... params)
+			throws ReflectionException {
 		Method m;
 		try {
 			m = c.getMethod(methodName, params);
-		} catch (NoSuchMethodException ex) {
+		} catch(NoSuchMethodException ex) {
 			return false;
-		} catch (SecurityException ex) {
+		} catch(SecurityException ex) {
 			throw new ReflectionException(ex);
 		}
 		if(returnType != null) {
@@ -410,7 +413,7 @@ public final class ReflectionUtils {
 		Object unsafe;
 		try {
 			unsafe = ReflectionUtils.get(Class.forName("sun.misc.Unsafe"), "theUnsafe");
-		} catch (ClassNotFoundException ex) {
+		} catch(ClassNotFoundException ex) {
 			throw new RuntimeException(ex);
 		}
 		return unsafe;
@@ -440,111 +443,92 @@ public final class ReflectionUtils {
 	}
 
 	/**
-	 * Returns the {@code Class} object associated with the class or
-     * interface with the given string name.  Invoking this method is
-     * equivalent to:
-     *
-     * <blockquote>
-     *  {@code Class.forName(className, true, currentLoader)}
-     * </blockquote>
-     *
-     * where {@code currentLoader} denotes the defining class loader of
-     * the current class.
-     *
-     * <p> For example, the following code fragment returns the
-     * runtime {@code Class} descriptor for the class named
-     * {@code java.lang.Thread}:
-     *
-     * <blockquote>
-     *   {@code Class t = Class.forName("java.lang.Thread")}
-     * </blockquote>
-     * <p>
-     * A call to {@code forName("X")} causes the class named
-     * {@code X} to be initialized.
-     *
-     * @param      className   the fully qualified name of the desired class.
-     * @return     the {@code Class} object for the class with the
-     *             specified name.
-     * @throws    LinkageError if the linkage fails
-     * @throws    ExceptionInInitializerError if the initialization provoked
-     *            by this method fails
-     * @throws    ReflectionException if the class cannot be located
+	 * Returns the {@code Class} object associated with the class or interface with the given string name. Invoking this
+	 * method is equivalent to:
+	 *
+	 * <blockquote> {@code Class.forName(className, true, currentLoader)}
+	 * </blockquote>
+	 *
+	 * where {@code currentLoader} denotes the defining class loader of the current class.
+	 *
+	 * <p>
+	 * For example, the following code fragment returns the runtime {@code Class} descriptor for the class named
+	 * {@code java.lang.Thread}:
+	 *
+	 * <blockquote> {@code Class t = Class.forName("java.lang.Thread")}
+	 * </blockquote>
+	 * <p>
+	 * A call to {@code forName("X")} causes the class named {@code X} to be initialized.
+	 *
+	 * @param className the fully qualified name of the desired class.
+	 * @return the {@code Class} object for the class with the specified name.
+	 * @throws LinkageError if the linkage fails
+	 * @throws ExceptionInInitializerError if the initialization provoked by this method fails
+	 * @throws ReflectionException if the class cannot be located
 	 */
 	public static Class forName(String className) {
 		try {
 			return Class.forName(className);
-		} catch (ClassNotFoundException ex) {
+		} catch(ClassNotFoundException ex) {
 			throw new ReflectionException(ex);
 		}
 	}
 
 	/**
-     * Returns the {@code Class} object associated with the class or
-     * interface with the given string name, using the given class loader.
-     * Given the fully qualified name for a class or interface (in the same
-     * format returned by {@code getName}) this method attempts to
-     * locate and load the class or interface.  The specified class
-     * loader is used to load the class or interface.  If the parameter
-     * {@code loader} is null, the class is loaded through the bootstrap
-     * class loader.  The class is initialized only if the
-     * {@code initialize} parameter is {@code true} and if it has
-     * not been initialized earlier.
-     *
-     * <p> If {@code name} denotes a primitive type or void, an attempt
-     * will be made to locate a user-defined class in the unnamed package whose
-     * name is {@code name}. Therefore, this method cannot be used to
-     * obtain any of the {@code Class} objects representing primitive
-     * types or void.
-     *
-     * <p> If {@code name} denotes an array class, the component type of
-     * the array class is loaded but not initialized.
-     *
-     * <p> For example, in an instance method the expression:
-     *
-     * <blockquote>
-     *  {@code Class.forName("Foo")}
-     * </blockquote>
-     *
-     * is equivalent to:
-     *
-     * <blockquote>
-     *  {@code Class.forName("Foo", true, this.getClass().getClassLoader())}
-     * </blockquote>
-     *
-     * Note that this method throws errors related to loading, linking
-     * or initializing as specified in Sections {@jls 12.2}, {@jls
-     * 12.3}, and {@jls 12.4} of <cite>The Java Language
-     * Specification</cite>.
-     * Note that this method does not check whether the requested class
-     * is accessible to its caller.
-     *
-     * @param name       fully qualified name of the desired class
-
-     * @param initialize if {@code true} the class will be initialized
-     *                   (which implies linking). See Section {@jls
-     *                   12.4} of <cite>The Java Language
-     *                   Specification</cite>.
-     * @param loader     class loader from which the class must be loaded
-     * @return           class object representing the desired class
-     *
-     * @throws    LinkageError if the linkage fails
-     * @throws    ExceptionInInitializerError if the initialization provoked
-     *            by this method fails
-     * @throws    ReflectionException if the class cannot be located by
-     *            the specified class loader
-     * @throws    SecurityException
-     *            if a security manager is present, and the {@code loader} is
-     *            {@code null}, and the caller's class loader is not
-     *            {@code null}, and the caller does not have the
-     *            {@link RuntimePermission}{@code ("getClassLoader")}
-     *
-     * @see       java.lang.Class#forName(String, boolean, ClassLoader)
-     * @see       java.lang.ClassLoader
+	 * Returns the {@code Class} object associated with the class or interface with the given string name, using the
+	 * given class loader. Given the fully qualified name for a class or interface (in the same format returned by
+	 * {@code getName}) this method attempts to locate and load the class or interface. The specified class loader is
+	 * used to load the class or interface. If the parameter {@code loader} is null, the class is loaded through the
+	 * bootstrap class loader. The class is initialized only if the {@code initialize} parameter is {@code true} and if
+	 * it has not been initialized earlier.
+	 *
+	 * <p>
+	 * If {@code name} denotes a primitive type or void, an attempt will be made to locate a user-defined class in the
+	 * unnamed package whose name is {@code name}. Therefore, this method cannot be used to obtain any of the
+	 * {@code Class} objects representing primitive types or void.
+	 *
+	 * <p>
+	 * If {@code name} denotes an array class, the component type of the array class is loaded but not initialized.
+	 *
+	 * <p>
+	 * For example, in an instance method the expression:
+	 *
+	 * <blockquote> {@code Class.forName("Foo")}
+	 * </blockquote>
+	 *
+	 * is equivalent to:
+	 *
+	 * <blockquote> {@code Class.forName("Foo", true, this.getClass().getClassLoader())}
+	 * </blockquote>
+	 *
+	 * Note that this method throws errors related to loading, linking or initializing as specified in Sections {
+	 *
+	 * @jls 12.2}, {
+	 * @jls 12.3}, and {
+	 * @jls 12.4} of <cite>The Java Language Specification</cite>. Note that this method does not check whether the
+	 * requested class is accessible to its caller.
+	 *
+	 * @param name fully qualified name of the desired class
+	 *
+	 * @param initialize if {@code true} the class will be initialized (which implies linking). See Section {
+	 * @jls 12.4} of <cite>The Java Language Specification</cite>.
+	 * @param loader class loader from which the class must be loaded
+	 * @return class object representing the desired class
+	 *
+	 * @throws LinkageError if the linkage fails
+	 * @throws ExceptionInInitializerError if the initialization provoked by this method fails
+	 * @throws ReflectionException if the class cannot be located by the specified class loader
+	 * @throws SecurityException if a security manager is present, and the {@code loader} is {@code null}, and the
+	 * caller's class loader is not {@code null}, and the caller does not have the
+	 * {@link RuntimePermission}{@code ("getClassLoader")}
+	 *
+	 * @see java.lang.Class#forName(String, boolean, ClassLoader)
+	 * @see java.lang.ClassLoader
 	 */
 	public static Class forName(String name, boolean initialize, ClassLoader loader) {
 		try {
 			return Class.forName(name, initialize, loader);
-		} catch (ClassNotFoundException ex) {
+		} catch(ClassNotFoundException ex) {
 			throw new ReflectionException(ex);
 		}
 	}

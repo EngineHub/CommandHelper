@@ -38,7 +38,7 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 
 	Entity e;
 	private static volatile Boolean isPaperTeleportFlag = null;
-	private static final Object isPaperTeleportFlagLock = new Object();
+	private static final Object IS_PAPER_TELEPORT_FLAG_LOCK = new Object();
 
 	public BukkitMCEntity(Entity e) {
 		super(e);
@@ -245,7 +245,7 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 		@SuppressWarnings("LocalVariableHidesMemberVariable")
 		Boolean isPaperTeleportFlag = BukkitMCEntity.isPaperTeleportFlag;
 		if(isPaperTeleportFlag == null) {
-			synchronized(isPaperTeleportFlagLock) {
+			synchronized(IS_PAPER_TELEPORT_FLAG_LOCK) {
 				isPaperTeleportFlag = BukkitMCEntity.isPaperTeleportFlag;
 				if(isPaperTeleportFlag == null) {
 					try {
@@ -265,7 +265,7 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 			TeleportFlag teleportFlag = TeleportFlag.EntityState.RETAIN_PASSENGERS;
 			// Paper only method:
 			// e.teleport(l, c, teleportFlag);
-			return (boolean)ReflectionUtils.invokeMethod(Entity.class, e, "teleport",
+			return (boolean) ReflectionUtils.invokeMethod(Entity.class, e, "teleport",
 					new Class[] {
 						org.bukkit.Location.class,
 						org.bukkit.event.player.PlayerTeleportEvent.TeleportCause.class,
