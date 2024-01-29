@@ -152,6 +152,10 @@
 			<id>spigot-repo</id>
 			<url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
 		</repository>
+		<repository>
+			<id>papermc-repo</id>
+			<url>https://repo.papermc.io/repository/maven-public/</url>
+		</repository>
 
 		<!-- Other repositories -->
 		<repository>
@@ -175,6 +179,11 @@
 			<!-- GPL -->
 			<groupId>org.spigotmc</groupId>
 			<artifactId>spigot-api</artifactId>
+			<version>1.20.4-R0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>io.papermc.paper</groupId>
+			<artifactId>paper-api</artifactId>
 			<version>1.20.4-R0.1-SNAPSHOT</version>
 		</dependency>
 
@@ -482,7 +491,6 @@
 						<arg>-parameters</arg>
 					</compilerArgs>
 					<fork>true</fork>
-					<optimize>true</optimize>
 				</configuration>
 			</plugin>
 
@@ -970,9 +978,6 @@
 					</execution>
 				</executions>
 				<configuration>
-					<argLine>
-						--illegal-access=permit
-					</argLine>
 					<outputDirectory>src/main/generated</outputDirectory>
 					<processors>
 						<processor>com.laytonsmith.PureUtilities.Common.Annotations.CheckOverrides</processor>

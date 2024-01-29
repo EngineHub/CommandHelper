@@ -591,7 +591,8 @@ public class PlayerManagement {
 					+ " If the block is too far, a RangeException is thrown. An array of block types to be considered"
 					+ " transparent can be supplied, otherwise only air will be considered transparent."
 					+ " Providing an empty array will cause air to be considered a potential target, allowing a way to"
-					+ " get the block containing the player's head.";
+					+ " get the block containing the player's head. On paper servers, this teleports passengers of"
+					+ " the player as well.";
 		}
 
 		@Override
