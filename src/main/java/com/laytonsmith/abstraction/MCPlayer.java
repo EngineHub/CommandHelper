@@ -195,4 +195,6 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity, MCOfflinePlaye
 	void setWorldBorder(MCWorldBorder border);
 
 	String getLocale();
+
+	void respawn();
 }

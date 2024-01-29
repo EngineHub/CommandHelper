@@ -144,8 +144,6 @@ public class BukkitMCEntityEquipment implements MCEntityEquipment {
 		}
 	}
 
-	// For the purposes of faking a normal inventory, we most likely will not be accessing
-	// anything below this line, but they are here for flexibility and completion
 	@Override
 	public MCItemStack getWeapon() {
 		return new BukkitMCItemStack(ee.getItemInMainHand());
