@@ -1952,7 +1952,7 @@ public class World {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{2, 3};
+			return new Integer[]{2, 3, 4};
 		}
 
 		@Override
@@ -2023,7 +2023,7 @@ public class World {
 				if(clamp) {
 					// Need to check if the shift would go beyond the target, if so, just return the final
 					// destination.
-					if(loc.distance(to) > distance) {
+					if(loc.distance(to) < distance) {
 						return ObjectGenerator.GetGenerator().location(to);
 					}
 				}
