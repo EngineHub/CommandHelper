@@ -29,6 +29,8 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.compiler.FileOptions;
+import com.laytonsmith.core.compiler.signature.FunctionSignatures;
+import com.laytonsmith.core.compiler.signature.SignatureBuilder;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CDouble;
@@ -50,6 +52,7 @@ import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.natives.interfaces.Booleanish;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 
 import java.io.IOException;
@@ -1969,11 +1972,32 @@ public class World {
 
 		@Override
 		public String docs() {
-			return "array {origin, target, [distance] | origin, direction, [distance]} Returns a location array that"
+			return "array {origin, target, [distance], [clamp] | origin, direction, [distance]} Returns a location array that"
 					+ " is the specified distance from the origin location along a vector. ---- If a target location is"
-					+ " specified, the vector is gotten from that. (the target's world is ignored) If a direction is"
-					+ " specified, that vector is use instead. Distance defaults to 1.0. Direction can be one of "
-					+ StringUtils.Join(MCBlockFace.values(), ", ", ", or ", " or ") + ".";
+					+ " specified, the vector is obtained from that. The target's world is ignored. If a direction is"
+					+ " specified, that vector is used instead. Distance defaults to 1.0. Direction can be one of "
+					+ StringUtils.Join(MCBlockFace.values(), ", ", ", or ", " or ") + ". If the distance is greater"
+					+ " than the target (when using the first mode), the entity will move past the target if the"
+					+ " distance is greater than the actual distance to the point, unless clamp is set to true.";
+		}
+
+		@Override
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CArray.TYPE)
+					.param(CArray.TYPE, "origin", "The original location.")
+					.param(CArray.TYPE, "target", "The final target location.")
+					.param(CDouble.TYPE, "distance", "Defaults to 1.0. The distance to move. If clamp is true,"
+							+ " the maximum distance to move.", true)
+					.param(Booleanish.TYPE, "clamp", "Defaults to false. If true, and the target location is closer"
+							+ " than the distance provided, the final destination is returned, instead of a location"
+							+ " beyond the target.", true)
+
+					.newSignature(CArray.TYPE)
+					.param(CArray.TYPE, "origin", "The original location.")
+					.param(CString.TYPE, "direction", "The direction to move, a BlockFace value.")
+					.param(CDouble.TYPE, "distance", "Defaults to 1.0. The distance to move.", true)
+					.build();
+
 		}
 
 		@Override
@@ -1986,12 +2010,23 @@ public class World {
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], p != null ? p.getWorld() : null, t);
 			double distance = 1;
-			if(args.length == 3) {
+			boolean clamp = false;
+			if(args.length >= 3) {
 				distance = ArgumentValidation.getNumber(args[2], t);
+			}
+			if(args.length >= 4) {
+				clamp = ArgumentValidation.getBooleanish(args[3], t);
 			}
 			Vector3D vector;
 			if(args[1].isInstanceOf(CArray.TYPE)) {
 				MCLocation to = ObjectGenerator.GetGenerator().location(args[1], loc.getWorld(), t);
+				if(clamp) {
+					// Need to check if the shift would go beyond the target, if so, just return the final
+					// destination.
+					if(loc.distance(to) > distance) {
+						return ObjectGenerator.GetGenerator().location(to);
+					}
+				}
 				vector = to.toVector().subtract(loc.toVector()).normalize();
 			} else {
 				try {
