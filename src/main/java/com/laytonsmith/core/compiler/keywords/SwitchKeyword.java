@@ -36,11 +36,15 @@ public class SwitchKeyword extends EarlyBindingKeyword {
 		int codeStart = -1;
 		{
 			int parenthesisStack = 0;
-			for(int i = keywordPosition; i < stream.size(); i++) {
-				Token token = stream.get(i);
+			for(ListIterator<Token> it = stream.listIterator(keywordPosition); it.hasNext(); ) {
+				int ind = it.nextIndex();
+				Token token = it.next();
 				Token next = null;
-				if(i + 1 < stream.size()) {
-					next = stream.get(i + 1);
+				if(it.hasNext()) {
+					next = it.next();
+					it.previous(); // Switch iteration direction.
+					it.previous(); // Return to previous element.
+					it.next(); // Switch iteration direction.
 				}
 				if(token.type == TType.FUNC_START) {
 					parenthesisStack++;
@@ -48,7 +52,7 @@ public class SwitchKeyword extends EarlyBindingKeyword {
 				if(token.type == TType.FUNC_END) {
 					parenthesisStack--;
 					if(parenthesisStack == 0 && next != null && next.type == TType.LCURLY_BRACKET) {
-						codeStart = i + 1;
+						codeStart = ind + 1;
 						break;
 					} else if(parenthesisStack == 0) {
 						// Functional usage, do nothing
@@ -67,7 +71,7 @@ public class SwitchKeyword extends EarlyBindingKeyword {
 		// First token should be case or default
 		List<Token> newStream = new ArrayList<>();
 		int codeEnd = -1;
-		Comparator<List> tokenComparator = (List o1, List o2) -> {
+		Comparator<List<Token>> tokenComparator = (List<Token> o1, List<Token> o2) -> {
 			// Order doesn't matter, just needs to be deterministic
 			return o1.toString().compareTo(o2.toString());
 		};
@@ -81,8 +85,9 @@ public class SwitchKeyword extends EarlyBindingKeyword {
 		int braceStack = 0;
 		int bracketStack = 0;
 		OUTER:
-		for(int i = codeStart + 1; i < stream.size(); i++) {
-			Token t = stream.get(i);
+		for(ListIterator<Token> it = stream.listIterator(codeStart + 1); it.hasNext(); ) {
+			int i = it.nextIndex();
+			Token t = it.next();
 			if(inCode) {
 				if(null != t.type) {
 					// If we're in code, we need to balance all parenthesis, braces, and brackets, and not parse
@@ -155,11 +160,13 @@ public class SwitchKeyword extends EarlyBindingKeyword {
 					// Ignore these case labels, they are being removed
 					caseLabels = new TreeSet<>(tokenComparator);
 				}
-				if(i + 1 >= stream.size() || stream.get(i + 1).type != TType.LABEL) {
-					throw new ConfigCompileException("Expected colon after default keyword",
-							(i + 1 >= stream.size() ? t.target : stream.get(i + 1).target));
+				if(!it.hasNext()) {
+					throw new ConfigCompileException("Expected colon after default keyword", t.target);
 				}
-				i++;
+				Token next = it.next();
+				if(next.type != TType.LABEL) {
+					throw new ConfigCompileException("Expected colon after default keyword", next.target);
+				}
 				inDefault = true;
 				inCode = true;
 				continue;
@@ -217,11 +224,10 @@ public class SwitchKeyword extends EarlyBindingKeyword {
 						throw new ConfigCompileException("Unsupported type in case clause", t.target);
 					}
 					caseTokens.add(t);
-					i++;
-					if(i >= stream.size()) {
+					if(!it.hasNext()) {
 						throw new ConfigCompileException("Incomplete case clause", t.target);
 					}
-					t = stream.get(i);
+					t = it.next();
 				}
 				caseLabels.add(caseTokens);
 				inCase = false;
@@ -249,18 +255,26 @@ public class SwitchKeyword extends EarlyBindingKeyword {
 		}
 		// Replace code start - 1 with a comma, and then the whole code block with the new tokens, and finally a right
 		// parenthesis.
+		ListIterator<Token> it;
 		if(!newStream.isEmpty()) {
-			stream.set(codeStart - 1, new Token(TType.COMMA, ",", stream.get(codeStart - 1).target.copy()));
+			it = stream.listIterator(codeStart - 1);
+			Token token = it.next();
+			it.set(new Token(TType.COMMA, ",", token.target.copy()));
+		} else {
+			it = stream.listIterator(codeStart);
 		}
 		for(int i = codeStart; i <= codeEnd; i++) {
-			stream.remove(codeStart);
+			it.next(); // Select index codeStart.
+			it.remove(); // Remove index codeStart.
 		}
 		if(!newStream.isEmpty()) {
-			stream.add(codeStart, new Token(TType.FUNC_END, ")", Target.UNKNOWN));
+			it.add(new Token(TType.FUNC_END, ")", Target.UNKNOWN)); // Add at index codeStart.
+			it.previous(); // Select index codeStart + 1 <---.
+			it.previous(); // Select index codeStart <---.
+			it.next(); // Select index codeStart --->.
 		}
-		ListIterator<Token> it = newStream.listIterator(newStream.size());
-		while(it.hasPrevious()) {
-			stream.add(codeStart, it.previous());
+		for(ListIterator<Token> it2 = newStream.listIterator(); it2.hasNext(); ) {
+			it.add(it2.next());
 		}
 
 		return keywordPosition;
@@ -275,6 +289,4 @@ public class SwitchKeyword extends EarlyBindingKeyword {
 	public Version since() {
 		return MSVersion.V3_3_1;
 	}
-
-
 }
