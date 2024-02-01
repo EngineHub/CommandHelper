@@ -155,9 +155,9 @@ public class SwitchKeyword extends EarlyBindingKeyword {
 					// Ignore these case labels, they are being removed
 					caseLabels = new TreeSet<>(tokenComparator);
 				}
-				if(i + 1 > stream.size() || stream.get(i + 1).type != TType.LABEL) {
+				if(i + 1 >= stream.size() || stream.get(i + 1).type != TType.LABEL) {
 					throw new ConfigCompileException("Expected colon after default keyword",
-							stream.get(i + 1).target);
+							(i + 1 >= stream.size() ? t.target : stream.get(i + 1).target));
 				}
 				i++;
 				inDefault = true;
@@ -218,6 +218,9 @@ public class SwitchKeyword extends EarlyBindingKeyword {
 					}
 					caseTokens.add(t);
 					i++;
+					if(i >= stream.size()) {
+						throw new ConfigCompileException("Incomplete case clause", t.target);
+					}
 					t = stream.get(i);
 				}
 				caseLabels.add(caseTokens);
