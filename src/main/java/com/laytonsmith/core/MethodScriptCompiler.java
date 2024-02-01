@@ -2940,13 +2940,10 @@ public final class MethodScriptCompiler {
 
 	@SuppressWarnings("ThrowableResultIgnored")
 	private static void processEarlyKeywords(TokenStream stream, Environment env, Set<ConfigCompileException> compileErrors) {
-		for(int i = 0; i < stream.size(); i++) {
-			Token token = stream.get(i);
-
-			// Some keywords look like function names, we need those too.
-			if(token.type != TType.KEYWORD && token.type != TType.FUNC_NAME) {
-				continue;
-			}
+		Token token;
+		for(ListIterator<Token> it = stream.listIterator(); it.hasNext(); ) {
+			int ind = it.nextIndex();
+			token = it.next();
 
 			EarlyBindingKeyword keyword = KeywordList.getEarlyBindingKeywordByName(token.val());
 			if(keyword == null) {
@@ -2954,11 +2951,19 @@ public final class MethodScriptCompiler {
 			}
 
 			// Now that all the children of the rest of the chain are processed, we can do the processing of this level.
+			int newInd;
 			try {
-				i = keyword.process(stream, env, i);
+				newInd = keyword.process(stream, env, ind);
 			} catch (ConfigCompileException ex) {
 				compileErrors.add(ex);
+				continue;
 			}
+
+			// Create iterator at new index. Required in all cases to prevent ConcurrentModificationExceptions.
+			if(newInd >= stream.size()) {
+				break;
+			}
+			it = stream.listIterator(newInd + 1); // +1 to let the next .next() call select that index.
 		}
 	}
 
