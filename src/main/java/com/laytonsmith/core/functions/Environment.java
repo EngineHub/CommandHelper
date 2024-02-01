@@ -1323,26 +1323,26 @@ public class Environment {
 
 		@Override
 		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
-			double x = 0;
-			double z = 0;
+			int x = 0;
+			int z = 0;
 			MCWorld w = null;
 			String world = null;
-			MCCommandSender sender = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
-			if(sender instanceof MCPlayer) {
-				w = ((MCPlayer) sender).getWorld();
+			MCPlayer player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			if(player != null) {
+				w = player.getWorld();
 			}
 
-			if(args[0].isInstanceOf(CArray.TYPE) && !(args.length == 3)) {
+			if(args.length < 3 && args[0].isInstanceOf(CArray.TYPE)) {
 				MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
-				x = loc.getX();
-				z = loc.getZ();
-				world = loc.getWorld().getName();
+				x = loc.getBlockX();
+				z = loc.getBlockZ();
+				w = loc.getWorld();
 				if(args.length == 2) {
 					world = args[1].val();
 				}
-			} else if(args.length == 2 || args.length == 3) {
-				x = ArgumentValidation.getDouble(args[0], t);
-				z = ArgumentValidation.getDouble(args[1], t);
+			} else if(args.length > 1) {
+				x = (int) java.lang.Math.floor(ArgumentValidation.getDouble(args[0], t));
+				z = (int) java.lang.Math.floor(ArgumentValidation.getDouble(args[1], t));
 				if(args.length == 3) {
 					world = args[2].val();
 				}
@@ -1353,7 +1353,7 @@ public class Environment {
 			if(w == null) {
 				throw new CREInvalidWorldException("The specified world " + world + " doesn't exist", t);
 			}
-			MCBlock highestBlock = w.getHighestBlockAt((int) java.lang.Math.floor(x), (int) java.lang.Math.floor(z));
+			MCBlock highestBlock = w.getHighestBlockAt(x, z);
 			if(highestBlock == null) {
 				throw new CRENotFoundException(
 						"Could not find the highest block in " + this.getName() + " (are you running in cmdline mode?)", t);

@@ -55,12 +55,11 @@ import com.laytonsmith.core.exceptions.CRE.CREPluginInternalException;
 import org.bukkit.Chunk;
 import org.bukkit.Effect;
 import org.bukkit.FireworkEffect;
+import org.bukkit.HeightMap;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.SoundCategory;
 import org.bukkit.World;
-import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
@@ -453,13 +452,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 
 	@Override
 	public MCBlock getHighestBlockAt(int x, int z) {
-		//Workaround for getHighestBlockAt, since it doesn't like transparent
-		//blocks.
-		Block b = w.getBlockAt(x, w.getMaxHeight() - 1, z);
-		while(b.getType() == Material.AIR && b.getY() > 0) {
-			b = b.getRelative(BlockFace.DOWN);
-		}
-		return new BukkitMCBlock(b);
+		return new BukkitMCBlock(w.getHighestBlockAt(x, z, HeightMap.WORLD_SURFACE));
 	}
 
 	@Override
