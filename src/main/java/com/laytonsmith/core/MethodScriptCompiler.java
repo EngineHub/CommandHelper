@@ -2945,6 +2945,11 @@ public final class MethodScriptCompiler {
 			int ind = it.nextIndex();
 			token = it.next();
 
+			// Some keywords look like function names, we need those too.
+			if(token.type != TType.KEYWORD && token.type != TType.FUNC_NAME) {
+				continue;
+			}
+
 			EarlyBindingKeyword keyword = KeywordList.getEarlyBindingKeywordByName(token.val());
 			if(keyword == null) {
 				continue;
