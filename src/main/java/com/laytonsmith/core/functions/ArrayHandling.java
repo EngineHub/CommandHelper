@@ -17,6 +17,8 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
+import com.laytonsmith.core.compiler.signature.FunctionSignatures;
+import com.laytonsmith.core.compiler.signature.SignatureBuilder;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CClassType;
@@ -3843,6 +3845,68 @@ public class ArrayHandling {
 					+ " associative, a cast exception is thrown. This fills"
 					+ " the entire array. The change is made in place, but a reference to the array is returned"
 					+ " for easy chaining.";
+		}
+	}
+
+	@api
+	public static class array_clear extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			ArgumentValidation.getArray(args[0], t).clear();
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "array_clear";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "void {array} Clears the array of all values. This keeps the array reference the same, but"
+					+ " empties it. Both normal and associative arrays are supported, but the internal type (normal"
+					+ " or associative) is not reset.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CVoid.TYPE)
+					.param(CArray.TYPE, "array", "The array to clear.")
+					.build();
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "@array = array(1, 2, 3);\narray_clear(@array);\nmsg(@array);"),
+				new ExampleScript("Associative arrays", "@array = array(one: 1, two: 2, three: 3);\narray_clear(@array);\nmsg(@array);"),
+			};
 		}
 	}
 }
