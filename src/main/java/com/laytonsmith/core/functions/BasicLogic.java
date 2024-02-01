@@ -2753,23 +2753,24 @@ public class BasicLogic {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Demonstrates why equals doesn't always work", """
-																				 @d1 = 0.8;
-																				 @d2 = 0;
-																				 for(@i = 0, @i < 8, @i++) {
+																				@d1 = 0.8;
+																				@d2 = 0;
+																				for(@i = 0, @i < 8, @i++) {
 																					@d2 += 0.1;
-																				 }
-																				 msg(@d1);
-																				 msg(@d2);
-																				 msg(@d1 == @d2);"""),
+																				}
+																				msg(@d1);
+																				msg(@d2);
+																				msg(@d1 == @d2);"""),
 				new ExampleScript("Same example, this time with a precision.", """
-																				 @d1 = 0.8;
-																				 @d2 = 0;
-																				 for(@i = 0, @i < 8, @i++) {
+																				@d1 = 0.8;
+																				@d2 = 0;
+																				for(@i = 0, @i < 8, @i++) {
 																					@d2 += 0.1;
-																				 }
-																				 msg(@d1);
-																				 msg(@d2);
-																				 msg(equals_epsilon(@d1, @d2, 0.0001));"""),};
+																				}
+																				msg(@d1);
+																				msg(@d2);
+																				msg(equals_epsilon(@d1, @d2, 0.0001));"""),
+			};
 		}
 
 		@Override
