@@ -87,6 +87,7 @@ import com.laytonsmith.abstraction.entities.MCStrider;
 import com.laytonsmith.abstraction.entities.MCTNT;
 import com.laytonsmith.abstraction.entities.MCTextDisplay;
 import com.laytonsmith.abstraction.entities.MCThrownPotion;
+import com.laytonsmith.abstraction.entities.MCTransformation;
 import com.laytonsmith.abstraction.entities.MCTrident;
 import com.laytonsmith.abstraction.entities.MCTropicalFish;
 import com.laytonsmith.abstraction.entities.MCVex;
@@ -163,6 +164,8 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 public class EntityManagement {
 
@@ -4996,32 +4999,37 @@ public class EntityManagement {
 					+ " Array keys are: 'billboard', 'brightness', 'glowcolor', 'height', 'width',"
 					+ " 'viewrange', 'shadowradius', 'shadowstrength', and 'teleportduration'. ---- "
 					+ " The following values are common to all display entity types. Data about specific display entity"
-					+ " types (block, text, and item display entities) can be found in {{function|entity_spec}}."
+					+ " types (block, text, and item display entities) can be found in {{function|entity_spec}}.\n"
 					+ " * '''billboard''' (string) : Controls which axes the rendered entity rotates around the entity"
 					+ " location when the viewing player's position or facing changes. FIXED (default) will not rotate."
-					+ " HORIZONTAL or VERTICAL rotate on their respective axes. CENTER rotates on both axes."
+					+ " HORIZONTAL or VERTICAL rotate on their respective axes. CENTER rotates on both axes.\n"
 					+ " * '''brightness''' (array) : Controls the brightness when rendering the display entity."
 					+ " A null value (default) will render the entity based on the environment."
 					+ " An array with int values for the keys '''\"block\"''' and '''\"sky\"''' simulate the rendering"
 					+ " brightness from those respective light sources. Each must be from 0 - 15."
-					+ " Optionally a single int can be provided and will be used for both sky and block sources."
+					+ " Optionally a single int can be provided and will be used for both sky and block sources.\n"
 					+ " * '''glowcolor''' (array) : An RGB array for the entity glow color. If null (default), the"
-					+ " entity will use its scoreboard team color, if it has one."
+					+ " entity will use its scoreboard team color, if it has one.\n"
 					+ " * '''height''' (double) : The maximum height of the entity's bounding box. (default: 0.0)"
 					+ " Spans vertically from the entity's y location to (y+height), and is used for culling."
 					+ " If the client's field of view does not include this box, the entity will not be rendered."
-					+ " If either width or height is 0.0, culling is disabled."
+					+ " If either width or height is 0.0, culling is disabled.\n"
 					+ " * '''width''' (double) : The maximum width of the entity's bounding box. (default: 0.0)"
-					+ " Spans horizontally (width/2) from entity location."
+					+ " Spans horizontally (width/2) from entity location.\n"
 					+ " * '''viewrange''' (double) : The relative distance the entity will be viewable."
 					+ " The default is 1.0, which is 64 meters multiplied by the player's entity distance scaling."
-					+ " This can also be limited by the world's entity-tracking-range for display entities."
+					+ " This can also be limited by the world's entity-tracking-range for display entities.\n"
 					+ " * '''shadowradius''' (double) : The visible radius in meters of the entity's shadow."
-					+ " Effective range is from 0.0 (default) to 64.0."
+					+ " Effective range is from 0.0 (default) to 64.0.\n"
 					+ " * '''shadowstrength''' (double) : The opacity of the entity's shadow as a function of distance"
-					+ " to a block below the entity within shadowradius. (default: 1.0)"
+					+ " to a block below the entity within shadowradius. (default: 1.0)\n"
 					+ " * '''teleportduration''' (int) : The duration in ticks a teleport is interpolated on the client."
-					+ " Range is strictly from 0 - 59. (default: 0) (MC 1.20.2+)";
+					+ " Range is strictly from 0 - 59. (default: 0) (MC 1.20.2+)\n"
+					+ " * '''translation''' (array) : An associative array that includes 4 values, leftRotation,"
+					+ " rightRotation, scale, and translation. Both leftRotation and rightRotation have x, y, z, and w"
+					+ " values, and scale and translation have x, y, and z values. For leftRotation and rightRotation,"
+					+ " these are full width 64 bit doubles, but scale and translation are only 32 bit floats."
+					+ " (MC 1.19.4+)";
 		}
 
 		@Override
@@ -5054,6 +5062,37 @@ public class EntityManagement {
 			info.set("shadowstrength", new CDouble(display.getShadowStrength(), t), t);
 			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_2)) {
 				info.set("teleportduration", new CInt(display.getTeleportDuration(), t), t);
+			}
+			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_4)) {
+				CArray transformation = new CArray(t, 16);
+				MCTransformation tr = display.getTransformation();
+				Quaternionf leftRotationT = tr.getLeftRotation();
+				Quaternionf rightRotationT = tr.getRightRotation();
+				Vector3f scaleT = tr.getScale();
+				Vector3f translationT = tr.getTranslation();
+				CArray leftRotation = new CArray(t, 4);
+				leftRotation.set("w", leftRotationT.w);
+				leftRotation.set("x", leftRotationT.x);
+				leftRotation.set("y", leftRotationT.y);
+				leftRotation.set("z", leftRotationT.z);
+				CArray rightRotation = new CArray(t, 4);
+				rightRotation.set("w", rightRotationT.w);
+				rightRotation.set("x", rightRotationT.x);
+				rightRotation.set("y", rightRotationT.y);
+				rightRotation.set("z", rightRotationT.z);
+				CArray scale = new CArray(t, 3);
+				scale.set("x", scaleT.x);
+				scale.set("y", scaleT.y);
+				scale.set("z", scaleT.z);
+				CArray translation = new CArray(t, 3);
+				translation.set("x", translationT.x);
+				translation.set("y", translationT.y);
+				translation.set("z", translationT.z);
+				transformation.set("leftRotation", leftRotation, t);
+				transformation.set("rightRotation", rightRotation, t);
+				transformation.set("scale", scale, t);
+				transformation.set("translation", translation, t);
+				info.set("transformation", transformation, t);
 			}
 			return info;
 		}
@@ -5173,6 +5212,33 @@ public class EntityManagement {
 					throw new CRERangeException("Teleport duration must be from 0 - 59, but got " + ticks, t);
 				}
 				display.setTeleportDuration(ticks);
+			}
+			if(info.containsKey("transformation") && Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_4)) {
+				CArray transformation = ArgumentValidation.getArray(info.get("transformation", t), t);
+				CArray leftRotationC = ArgumentValidation.getArray(transformation.get("leftRotation", t), t);
+				Quaternionf leftRotation = new Quaternionf(
+						ArgumentValidation.getDouble(leftRotationC.get("x", t), t),
+						ArgumentValidation.getDouble(leftRotationC.get("y", t), t),
+						ArgumentValidation.getDouble(leftRotationC.get("z", t), t),
+						ArgumentValidation.getDouble(leftRotationC.get("w", t), t));
+				CArray rightRotationC = ArgumentValidation.getArray(transformation.get("rightRotation", t), t);
+				Quaternionf rightRotation = new Quaternionf(
+						ArgumentValidation.getDouble(rightRotationC.get("x", t), t),
+						ArgumentValidation.getDouble(rightRotationC.get("y", t), t),
+						ArgumentValidation.getDouble(rightRotationC.get("z", t), t),
+						ArgumentValidation.getDouble(rightRotationC.get("w", t), t));
+				CArray scaleC = ArgumentValidation.getArray(transformation.get("scale", t), t);
+				Vector3f scale = new Vector3f(
+						ArgumentValidation.getDouble32(scaleC.get("x", t), t),
+						ArgumentValidation.getDouble32(scaleC.get("y", t), t),
+						ArgumentValidation.getDouble32(scaleC.get("z", t), t));
+				CArray translationC = ArgumentValidation.getArray(transformation.get("translation", t), t);
+				Vector3f translation = new Vector3f(
+						ArgumentValidation.getDouble32(translationC.get("x", t), t),
+						ArgumentValidation.getDouble32(translationC.get("y", t), t),
+						ArgumentValidation.getDouble32(translationC.get("z", t), t));
+				MCTransformation tr = StaticLayer.GetTransformation(leftRotation, rightRotation, scale, translation);
+				display.setTransformation(tr);
 			}
 			return CVoid.VOID;
 		}

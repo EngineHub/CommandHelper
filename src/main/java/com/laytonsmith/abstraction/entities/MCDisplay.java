@@ -57,6 +57,12 @@ public interface MCDisplay extends MCEntity {
 
 	void setViewRange(float range);
 
+	public MCTransformation getTransformation();
+
+	public void setTransformation(MCTransformation transformation);
+
+	public void setTransformationMatrix(float[] mtrxf);
+
 	enum Billboard {
 		CENTER,
 		FIXED,

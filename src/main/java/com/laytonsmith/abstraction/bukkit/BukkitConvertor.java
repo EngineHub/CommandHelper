@@ -64,6 +64,7 @@ import com.laytonsmith.abstraction.bukkit.entities.BukkitMCProjectile;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCSizedFireball;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCTameable;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCItemProjectile;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCTransformation;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCVehicle;
 import com.laytonsmith.abstraction.bukkit.events.BukkitAbstractEventMixin;
 import com.laytonsmith.abstraction.bukkit.events.drivers.BukkitBlockListener;
@@ -74,6 +75,7 @@ import com.laytonsmith.abstraction.bukkit.events.drivers.BukkitServerListener;
 import com.laytonsmith.abstraction.bukkit.events.drivers.BukkitVehicleListener;
 import com.laytonsmith.abstraction.bukkit.events.drivers.BukkitWeatherListener;
 import com.laytonsmith.abstraction.bukkit.events.drivers.BukkitWorldListener;
+import com.laytonsmith.abstraction.entities.MCTransformation;
 import com.laytonsmith.abstraction.enums.MCAttribute;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
@@ -195,6 +197,9 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import org.bukkit.command.RemoteConsoleCommandSender;
+import org.bukkit.util.Transformation;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 @convert(type = Implementation.Type.BUKKIT)
 public class BukkitConvertor extends AbstractConvertor {
@@ -890,5 +895,10 @@ public class BukkitConvertor extends AbstractConvertor {
 	@Override
 	public MCNamespacedKey GetNamespacedKey(String key) {
 		return new BukkitMCNamespacedKey(NamespacedKey.fromString(key, CommandHelperPlugin.self));
+	}
+
+	@Override
+	public MCTransformation GetTransformation(Quaternionf leftRotation, Quaternionf rightRotation, Vector3f scale, Vector3f translation) {
+		return new BukkitMCTransformation(new Transformation(translation, leftRotation, scale, rightRotation));
 	}
 }

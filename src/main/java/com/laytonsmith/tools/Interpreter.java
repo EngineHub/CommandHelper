@@ -131,6 +131,9 @@ import static com.laytonsmith.PureUtilities.TermColors.YELLOW;
 import static com.laytonsmith.PureUtilities.TermColors.p;
 import static com.laytonsmith.PureUtilities.TermColors.pl;
 import static com.laytonsmith.PureUtilities.TermColors.reset;
+import com.laytonsmith.abstraction.entities.MCTransformation;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 /**
  * This is a command line implementation of the in game interpreter mode. This should only be run while the server is
@@ -1295,6 +1298,11 @@ public final class Interpreter {
 
 		@Override
 		public MCNamespacedKey GetNamespacedKey(String key) {
+			throw new UnsupportedOperationException("This method is not supported from a shell.");
+		}
+
+		@Override
+		public MCTransformation GetTransformation(Quaternionf leftRotation, Quaternionf rightRotation, Vector3f scale, Vector3f translation) {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 	}

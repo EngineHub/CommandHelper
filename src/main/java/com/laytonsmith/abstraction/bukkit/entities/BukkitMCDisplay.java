@@ -3,9 +3,11 @@ package com.laytonsmith.abstraction.bukkit.entities;
 import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCColor;
 import com.laytonsmith.abstraction.entities.MCDisplay;
+import com.laytonsmith.abstraction.entities.MCTransformation;
 import org.bukkit.Color;
 import org.bukkit.entity.Display;
 import org.bukkit.entity.Entity;
+import org.joml.Matrix4f;
 
 public class BukkitMCDisplay extends BukkitMCEntity implements MCDisplay {
 
@@ -140,5 +142,25 @@ public class BukkitMCDisplay extends BukkitMCEntity implements MCDisplay {
 	@Override
 	public void setViewRange(float range) {
 		this.d.setViewRange(range);
+	}
+
+	@Override
+	public MCTransformation getTransformation() {
+		return new BukkitMCTransformation(this.d.getTransformation());
+	}
+
+	@Override
+	public void setTransformation(MCTransformation transformation) {
+		this.d.setTransformation(((BukkitMCTransformation) transformation).transformation);
+	}
+
+	@Override
+	public void setTransformationMatrix(float[] mtrxf) {
+		Matrix4f matrix = new Matrix4f(
+				mtrxf[0], mtrxf[1], mtrxf[2], mtrxf[3],
+				mtrxf[4], mtrxf[5], mtrxf[6], mtrxf[7],
+				mtrxf[8], mtrxf[9], mtrxf[10], mtrxf[11],
+				mtrxf[12], mtrxf[13], mtrxf[14], mtrxf[15]);
+		this.d.setTransformationMatrix(matrix);
 	}
 }

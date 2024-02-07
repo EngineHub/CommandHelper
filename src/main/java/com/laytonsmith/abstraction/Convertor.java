@@ -2,6 +2,7 @@ package com.laytonsmith.abstraction;
 
 import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
+import com.laytonsmith.abstraction.entities.MCTransformation;
 import com.laytonsmith.abstraction.enums.MCAttribute;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
@@ -17,6 +18,8 @@ import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 /**
  * This should be implemented once for each server type. It mostly wraps static methods, but also provides methods for
@@ -281,4 +284,14 @@ public interface Convertor {
 	 * @return a key object
 	 */
 	MCNamespacedKey GetNamespacedKey(String key);
+
+	/**
+	 * Returns a new Transformation object.
+	 * @param leftRotation
+	 * @param rightRotation
+	 * @param scale
+	 * @param translation
+	 * @return
+	 */
+	public MCTransformation GetTransformation(Quaternionf leftRotation, Quaternionf rightRotation, Vector3f scale, Vector3f translation);
 }

@@ -392,6 +392,10 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		set(index, value, Target.UNKNOWN);
 	}
 
+	public final void set(String index, float value) {
+		set(index, new CDouble(value, Target.UNKNOWN), Target.UNKNOWN);
+	}
+
 	@Override
 	public Mixed get(Mixed index, Target t) {
 		if(!associativeMode) {

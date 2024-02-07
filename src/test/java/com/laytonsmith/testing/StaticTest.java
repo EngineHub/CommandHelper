@@ -35,6 +35,7 @@ import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
+import com.laytonsmith.abstraction.entities.MCTransformation;
 import com.laytonsmith.abstraction.enums.MCAttribute;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
@@ -99,6 +100,8 @@ import java.util.TreeSet;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
@@ -892,6 +895,11 @@ public class StaticTest {
 
 		@Override
 		public MCNamespacedKey GetNamespacedKey(String key) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public MCTransformation GetTransformation(Quaternionf leftRotation, Quaternionf rightRotation, Vector3f scale, Vector3f translation) {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 	}
