@@ -3237,7 +3237,38 @@ public class DataHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			return new CInt((long) ArgumentValidation.getNumber(args[0], t), t);
+			Mixed arg = args[0];
+			if(arg instanceof CMutablePrimitive) {
+				arg = ((CMutablePrimitive) arg).get();
+			}
+			if(arg instanceof CInt) {
+				return arg;
+			}
+			long i;
+			if(arg instanceof CDouble) {
+				i = (long) ((CDouble) arg).getDouble();
+			} else if(arg instanceof CString) {
+				try {
+					if(arg.val().indexOf('.') > -1) {
+						i = (long) Double.parseDouble(arg.val());
+					} else {
+						i = Long.parseLong(arg.val());
+					}
+				} catch (NumberFormatException e) {
+					throw new CRECastException("Expecting a number, but received \"" + arg.val() + "\" instead", t);
+				}
+			} else if(arg instanceof CBoolean) {
+				if(((CBoolean) arg).getBoolean()) {
+					i = 1;
+				} else {
+					i = 0;
+				}
+			} else if(arg instanceof CNull) {
+				i = 0;
+			} else {
+				throw new CRECastException("Expecting a number, but received type " + arg.getName() + " instead", t);
+			}
+			return new CInt(i, t);
 		}
 
 		@Override
