@@ -36,6 +36,7 @@ import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
+import com.laytonsmith.core.constructs.CNumber;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
@@ -1986,7 +1987,7 @@ public class World {
 			return new SignatureBuilder(CArray.TYPE)
 					.param(CArray.TYPE, "origin", "The original location.")
 					.param(CArray.TYPE, "target", "The final target location.")
-					.param(CDouble.TYPE, "distance", "Defaults to 1.0. The distance to move. If clamp is true,"
+					.param(CNumber.TYPE, "distance", "Defaults to 1.0. The distance to move. If clamp is true,"
 							+ " the maximum distance to move.", true)
 					.param(Booleanish.TYPE, "clamp", "Defaults to false. If true, and the target location is closer"
 							+ " than the distance provided, the final destination is returned, instead of a location"
@@ -1995,7 +1996,7 @@ public class World {
 					.newSignature(CArray.TYPE)
 					.param(CArray.TYPE, "origin", "The original location.")
 					.param(CString.TYPE, "direction", "The direction to move, a BlockFace value.")
-					.param(CDouble.TYPE, "distance", "Defaults to 1.0. The distance to move.", true)
+					.param(CNumber.TYPE, "distance", "Defaults to 1.0. The distance to move.", true)
 					.build();
 
 		}
