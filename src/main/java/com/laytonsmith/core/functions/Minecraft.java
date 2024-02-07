@@ -18,6 +18,7 @@ import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.enums.MCEffect;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.hide;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSVersion;
@@ -59,12 +60,11 @@ import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -75,24 +75,11 @@ public class Minecraft {
 		return "These functions provide a hook into game functionality.";
 	}
 
-	private static final SortedMap<String, Mixed> DATA_VALUE_LOOKUP = new TreeMap<>();
-
-	static {
-		Properties p1 = new Properties();
-		try {
-			p1.load(Minecraft.class.getResourceAsStream("/data_values.txt"));
-			Enumeration e = p1.propertyNames();
-			while(e.hasMoreElements()) {
-				String name = e.nextElement().toString();
-				DATA_VALUE_LOOKUP.put(name, new CString(p1.getProperty(name), Target.UNKNOWN));
-			}
-		} catch (IOException ex) {
-			Logger.getLogger(Minecraft.class.getName()).log(Level.SEVERE, null, ex);
-		}
-	}
-
 	@api(environments = {CommandHelperEnvironment.class})
+	@hide("deprecated")
 	public static class data_values extends AbstractFunction implements Optimizable {
+
+		private static final Map<String, Mixed> DATA_VALUE_LOOKUP = new HashMap<>();
 
 		@Override
 		public String getName() {
@@ -117,7 +104,7 @@ public class Minecraft {
 			String changed = c;
 			if(changed.contains(":")) {
 				//Split on that, and reverse. Change wool:red to redwool
-				String split[] = changed.split(":");
+				String[] split = changed.split(":");
 				if(split.length == 2) {
 					changed = split[1] + split[0];
 				}
@@ -125,20 +112,23 @@ public class Minecraft {
 			//Remove anything that isn't a letter or a number
 			changed = changed.replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
 			//Do a lookup in the DataLookup table
-			if(DATA_VALUE_LOOKUP.containsKey(changed)) {
-				String split[] = DATA_VALUE_LOOKUP.get(changed).toString().split(":");
-				if(split[1].equals("0")) {
-					return new CInt(split[0], t);
-				}
-				return new CString(split[0] + ":" + split[1], t);
+			Mixed result = DATA_VALUE_LOOKUP.get(changed);
+			if(result == null) {
+				return CNull.NULL;
 			}
-			return CNull.NULL;
+			String[] split = result.val().split(":");
+			if(split[1].equals("0")) {
+				return new CInt(split[0], t);
+			}
+			return new CString(split[0] + ":" + split[1], t);
 		}
 
 		@Override
 		public String docs() {
-			return "int {var1} Does a lookup to return the data value of a name. For instance, returns 1 for 'stone'."
-					+ " If the data value cannot be found, null is returned.";
+			return "int {var1} Does a lookup to return the legacy data value of a name. For instance, returns 1 for 'stone'."
+					+ " If the data value cannot be found, null is returned. This function is deprecated and should"
+					+ " only be used to convert legacy data that used CommandHelper's old material aliases."
+					+ " To be removed in version 3.3.6.";
 		}
 
 		@Override
@@ -168,6 +158,19 @@ public class Minecraft {
 				throws ConfigCompileException, ConfigRuntimeException {
 			env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
 					new CompilerWarning(getName() + " is deprecated.", t, null));
+			if(DATA_VALUE_LOOKUP.isEmpty()) {
+				Properties p1 = new Properties();
+				try {
+					p1.load(Minecraft.class.getResourceAsStream("/data_values.txt"));
+					Enumeration e = p1.propertyNames();
+					while(e.hasMoreElements()) {
+						String name = e.nextElement().toString();
+						DATA_VALUE_LOOKUP.put(name, new CString(p1.getProperty(name), Target.UNKNOWN));
+					}
+				} catch (IOException ex) {
+					Logger.getLogger(Minecraft.class.getName()).log(Level.SEVERE, null, ex);
+				}
+			}
 			return null;
 		}
 
