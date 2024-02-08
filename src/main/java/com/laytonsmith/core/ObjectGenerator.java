@@ -569,7 +569,7 @@ public class ObjectGenerator {
 						sherds.set(side.getKey().name().toLowerCase(), side.getValue().name());
 					}
 					ma.set("sherds", sherds, t);
-					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_X)) {
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_4)) {
 						ma.set("item", item(decoratedPot.getItemStack(), t), t);
 					}
 				} else if(bs instanceof MCInventoryHolder) {
@@ -1078,7 +1078,7 @@ public class ObjectGenerator {
 								throw new CREFormatException("Expected associative array for decorated pot meta.", t);
 							}
 						}
-						if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_X)) {
+						if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_4)) {
 							if(ma.containsKey("item")) {
 								decoratedPot.setItemStack(item(ma.get("item", t), t));
 							}

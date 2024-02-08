@@ -225,7 +225,7 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 	@Override
 	public boolean addEffect(MCPotionEffectType type, int strength, int ticks, boolean ambient, boolean particles, boolean icon) {
 		if(ticks < 0) {
-			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_X)) {
+			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_4)) {
 				ticks = -1;
 			} else {
 				ticks = Integer.MAX_VALUE;

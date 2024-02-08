@@ -176,7 +176,7 @@ public abstract class MCBiomeType<Concrete> extends DynamicEnum<MCBiomeType.MCVa
 		WOODED_BADLANDS(MCVersion.MC1_18),
 		MANGROVE_SWAMP(MCVersion.MC1_19),
 		DEEP_DARK(MCVersion.MC1_19),
-		CHERRY_GROVE(MCVersion.MC1_19_X),
+		CHERRY_GROVE(MCVersion.MC1_19_4),
 		UNKNOWN(MCVersion.NEVER);
 
 		private final MCVersion since;

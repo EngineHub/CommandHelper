@@ -114,7 +114,7 @@ public class BukkitMCAreaEffectCloud extends BukkitMCEntity implements MCAreaEff
 	public void addCustomEffect(MCLivingEntity.MCEffect effect) {
 		int ticks = effect.getTicksRemaining();
 		if(ticks < 0) {
-			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_X)) {
+			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_4)) {
 				ticks = -1;
 			} else {
 				ticks = Integer.MAX_VALUE;

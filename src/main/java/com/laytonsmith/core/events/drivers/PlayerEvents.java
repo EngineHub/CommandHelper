@@ -1258,7 +1258,7 @@ public class PlayerEvents {
 				map.put("location", location);
 				map.put("bed_spawn", CBoolean.get(event.isBedSpawn()));
 				map.put("anchor_spawn", CBoolean.get(event.isAnchorSpawn()));
-				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_X)) {
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_4)) {
 					map.put("reason", new CString(event.getReason().name(), Target.UNKNOWN));
 				}
 				return map;
@@ -2763,7 +2763,7 @@ public class PlayerEvents {
 		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
 			Map<String, Mixed> map = evaluate_helper(event);
 			map.put("status", new CString(((MCPlayerResourcePackEvent) event).getStatus().name(), Target.UNKNOWN));
-			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_X)) {
+			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_4)) {
 				map.put("id", new CString(((MCPlayerResourcePackEvent) event).getId().toString(), Target.UNKNOWN));
 			}
 			return map;

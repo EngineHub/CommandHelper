@@ -501,7 +501,7 @@ public class BukkitMCLegacyMaterial {
 		POTTERY_SHARD_ARMS_UP("ARMS_UP_POTTERY_SHERD", MCVersion.MC1_20),
 		POTTERY_SHARD_PRIZE("PRIZE_POTTERY_SHERD", MCVersion.MC1_20),
 		POTTERY_SHARD_SKULL("SKULL_POTTERY_SHERD", MCVersion.MC1_20),
-		GRASS("SHORT_GRASS", MCVersion.MC1_20_X);
+		GRASS("SHORT_GRASS", MCVersion.MC1_20_4);
 
 		private final String mat;
 		private final MCVersion version;
