@@ -4997,9 +4997,9 @@ public class EntityManagement {
 		public String docs() {
 			return "array {entityUUID} Returns an associative array of display entity data."
 					+ " Array keys are: 'billboard', 'brightness', 'glowcolor', 'height', 'width',"
-					+ " 'viewrange', 'shadowradius', 'shadowstrength', and 'teleportduration'. ---- "
+					+ " 'viewrange', 'shadowradius', 'shadowstrength', 'teleportduration', and 'transformation'. ---- "
 					+ " The following values are common to all display entity types. Data about specific display entity"
-					+ " types (block, text, and item display entities) can be found in {{function|entity_spec}}.\n"
+					+ " types (block, text, and item display entities) can be found in {{function|entity_spec}}.\n\n"
 					+ " * '''billboard''' (string) : Controls which axes the rendered entity rotates around the entity"
 					+ " location when the viewing player's position or facing changes. FIXED (default) will not rotate."
 					+ " HORIZONTAL or VERTICAL rotate on their respective axes. CENTER rotates on both axes.\n"
@@ -5025,7 +5025,7 @@ public class EntityManagement {
 					+ " to a block below the entity within shadowradius. (default: 1.0)\n"
 					+ " * '''teleportduration''' (int) : The duration in ticks a teleport is interpolated on the client."
 					+ " Range is strictly from 0 - 59. (default: 0) (MC 1.20.2+)\n"
-					+ " * '''translation''' (array) : An associative array that includes 4 values, leftRotation,"
+					+ " * '''transformation''' (array) : An associative array that includes 4 values, leftRotation,"
 					+ " rightRotation, scale, and translation. Both leftRotation and rightRotation have x, y, z, and w"
 					+ " values, and scale and translation have x, y, and z values. For leftRotation and rightRotation,"
 					+ " these are full width 64 bit doubles, but scale and translation are only 32 bit floats."
@@ -5215,30 +5215,38 @@ public class EntityManagement {
 			}
 			if(info.containsKey("transformation") && Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_4)) {
 				CArray transformation = ArgumentValidation.getArray(info.get("transformation", t), t);
-				CArray leftRotationC = ArgumentValidation.getArray(transformation.get("leftRotation", t), t);
-				Quaternionf leftRotation = new Quaternionf(
-						ArgumentValidation.getDouble(leftRotationC.get("x", t), t),
-						ArgumentValidation.getDouble(leftRotationC.get("y", t), t),
-						ArgumentValidation.getDouble(leftRotationC.get("z", t), t),
-						ArgumentValidation.getDouble(leftRotationC.get("w", t), t));
-				CArray rightRotationC = ArgumentValidation.getArray(transformation.get("rightRotation", t), t);
-				Quaternionf rightRotation = new Quaternionf(
-						ArgumentValidation.getDouble(rightRotationC.get("x", t), t),
-						ArgumentValidation.getDouble(rightRotationC.get("y", t), t),
-						ArgumentValidation.getDouble(rightRotationC.get("z", t), t),
-						ArgumentValidation.getDouble(rightRotationC.get("w", t), t));
-				CArray scaleC = ArgumentValidation.getArray(transformation.get("scale", t), t);
-				Vector3f scale = new Vector3f(
-						ArgumentValidation.getDouble32(scaleC.get("x", t), t),
-						ArgumentValidation.getDouble32(scaleC.get("y", t), t),
-						ArgumentValidation.getDouble32(scaleC.get("z", t), t));
-				CArray translationC = ArgumentValidation.getArray(transformation.get("translation", t), t);
-				Vector3f translation = new Vector3f(
-						ArgumentValidation.getDouble32(translationC.get("x", t), t),
-						ArgumentValidation.getDouble32(translationC.get("y", t), t),
-						ArgumentValidation.getDouble32(translationC.get("z", t), t));
-				MCTransformation tr = StaticLayer.GetTransformation(leftRotation, rightRotation, scale, translation);
-				display.setTransformation(tr);
+				if(transformation.size() == 16) {
+					float[] f = new float[16];
+					for(int i = 0; i < 16; i++) {
+						f[i] = ArgumentValidation.getDouble32(transformation.get(i, t), t);
+					}
+					display.setTransformationMatrix(f);
+				} else {
+					CArray leftRotationC = ArgumentValidation.getArray(transformation.get("leftRotation", t), t);
+					Quaternionf leftRotation = new Quaternionf(
+							ArgumentValidation.getDouble(leftRotationC.get("x", t), t),
+							ArgumentValidation.getDouble(leftRotationC.get("y", t), t),
+							ArgumentValidation.getDouble(leftRotationC.get("z", t), t),
+							ArgumentValidation.getDouble(leftRotationC.get("w", t), t));
+					CArray rightRotationC = ArgumentValidation.getArray(transformation.get("rightRotation", t), t);
+					Quaternionf rightRotation = new Quaternionf(
+							ArgumentValidation.getDouble(rightRotationC.get("x", t), t),
+							ArgumentValidation.getDouble(rightRotationC.get("y", t), t),
+							ArgumentValidation.getDouble(rightRotationC.get("z", t), t),
+							ArgumentValidation.getDouble(rightRotationC.get("w", t), t));
+					CArray scaleC = ArgumentValidation.getArray(transformation.get("scale", t), t);
+					Vector3f scale = new Vector3f(
+							ArgumentValidation.getDouble32(scaleC.get("x", t), t),
+							ArgumentValidation.getDouble32(scaleC.get("y", t), t),
+							ArgumentValidation.getDouble32(scaleC.get("z", t), t));
+					CArray translationC = ArgumentValidation.getArray(transformation.get("translation", t), t);
+					Vector3f translation = new Vector3f(
+							ArgumentValidation.getDouble32(translationC.get("x", t), t),
+							ArgumentValidation.getDouble32(translationC.get("y", t), t),
+							ArgumentValidation.getDouble32(translationC.get("z", t), t));
+					MCTransformation tr = StaticLayer.GetTransformation(leftRotation, rightRotation, scale, translation);
+					display.setTransformation(tr);
+				}
 			}
 			return CVoid.VOID;
 		}
