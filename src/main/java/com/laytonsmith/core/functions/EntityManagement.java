@@ -5029,7 +5029,8 @@ public class EntityManagement {
 					+ " rightRotation, scale, and translation. Both leftRotation and rightRotation have x, y, z, and w"
 					+ " values, and scale and translation have x, y, and z values. For leftRotation and rightRotation,"
 					+ " these are full width 64 bit doubles, but scale and translation are only 32 bit floats."
-					+ " (MC 1.19.4+)";
+					+ " (MC 1.19.4+)\n"
+					+ "\n";
 		}
 
 		@Override
