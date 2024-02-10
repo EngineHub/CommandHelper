@@ -5137,7 +5137,13 @@ public class EntityManagement {
 		@Override
 		public String docs() {
 			return "void {entityUUID, array} Sets the data for a display entity."
-					+ " See {{function|get_display_entity}} for details about the array format.";
+					+ " See {{function|get_display_entity}} for details about the array format. ---- "
+					+ " Note that there is one additional point for setting the data that is unique to"
+					+ " the set function, the '''transformation''' property can be provided in the same"
+					+ " format as recieved (i.e. with the leftRotation, rightRotation, scale, and translation"
+					+ " properties) but you can also provide it as a length 16 array of floats. These are"
+					+ " accepted in the same order that the /data command would accept them. Regardless of"
+					+ " how they are input, the function will always return the complex object.";
 		}
 
 		@Override
