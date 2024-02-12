@@ -604,7 +604,7 @@ public class BukkitPlayerEvents {
 		public Vector3D getClickedPosition() {
 			Vector v = pie.getClickedPosition();
 			if(v == null) {
-				return null;
+				return Vector3D.ZERO;
 			}
 			return new Vector3D(v.getX(), v.getY(), v.getZ());
 		}
