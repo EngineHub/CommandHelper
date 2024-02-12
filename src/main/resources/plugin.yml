@@ -4,6 +4,7 @@ api-version: 1.16
 version: "${project.version}"
 author: MethodScript Contributors
 website: https://MethodScript.com
+soft-depends: [ ProtocolLib ]
 commands:
     reloadaliases:
         description: Reloads aliases

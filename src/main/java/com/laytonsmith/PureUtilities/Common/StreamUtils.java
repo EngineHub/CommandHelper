@@ -2,14 +2,13 @@ package com.laytonsmith.PureUtilities.Common;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Streams are hard sometimes. This class abstracts most of the functionality that is commonly used.
@@ -93,12 +92,14 @@ public class StreamUtils {
 	 */
 	public static byte[] GetBytes(InputStream in) throws IOException {
 		BufferedInputStream bis = new BufferedInputStream(in);
-		List<Byte> bytes = new ArrayList<>();
-		int i;
-		while((i = bis.read()) != -1) {
-			bytes.add(((byte) i));
+		try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+			int i;
+			byte[] buffer = new byte[8 * 1024];
+			while((i = bis.read(buffer)) != -1) {
+				out.write(buffer, 0, i);
+			}
+			return out.toByteArray();
 		}
-		return ArrayUtils.unbox(bytes.toArray(new Byte[bytes.size()]));
 	}
 
 	/**

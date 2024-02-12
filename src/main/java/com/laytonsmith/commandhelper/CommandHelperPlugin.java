@@ -62,6 +62,7 @@ import com.laytonsmith.core.UpgradeLog;
 import com.laytonsmith.core.apps.AppsApiUtil;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.extensions.ExtensionManager;
+import com.laytonsmith.core.protocollib.PacketJumper;
 import com.laytonsmith.core.telemetry.DefaultTelemetry;
 import com.laytonsmith.core.telemetry.Telemetry;
 import org.bukkit.Bukkit;
@@ -95,6 +96,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.bukkit.entity.minecart.CommandMinecart;
 
 public class CommandHelperPlugin extends JavaPlugin {
@@ -109,6 +111,8 @@ public class CommandHelperPlugin extends JavaPlugin {
 	private boolean firstLoad = true;
 	private long interpreterUnlockedUntil = 0;
 	private Thread loadingThread;
+	private Thread protocolThread;
+
 	/**
 	 * Listener for the plugin system.
 	 */
@@ -301,6 +305,18 @@ public class CommandHelperPlugin extends JavaPlugin {
 		};
 		loadingThread.start();
 
+		protocolThread = new Thread("PacketJumperLoader") {
+			@Override
+			public void run() {
+				try {
+					PacketJumper.Startup();
+				} catch(IOException ex) {
+					Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
+				}
+			}
+		};
+		protocolThread.start();
+
 		myServer = BukkitMCServer.Get();
 
 		// Build dynamic enums
@@ -327,6 +343,14 @@ public class CommandHelperPlugin extends JavaPlugin {
 			getLogger().log(Level.INFO, "Waiting for extension caching to complete...");
 			try {
 				loadingThread.join();
+			} catch (InterruptedException ex) {
+				getLogger().log(Level.SEVERE, null, ex);
+			}
+		}
+		if(protocolThread.isAlive()) {
+			getLogger().log(Level.INFO, "Waiting for protocol mapping to complete...");
+			try {
+				protocolThread.join();
 			} catch (InterruptedException ex) {
 				getLogger().log(Level.SEVERE, null, ex);
 			}

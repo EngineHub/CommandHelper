@@ -1,0 +1,313 @@
+Packet Jumper is an extremely advanced system that allows direct Minecraft protocol access via MethodScript.
+In general, in order to successfully use this system, you must have a basic understanding of Java, and also
+of the actual Minecraft protocol, though this tutorial can help bridge any gaps you might have in your understanding.
+Code that uses this functionality is liable to break on every Minecraft version, and so should be avoided as best
+as possible. Some tooling exists to help mitigate this churn, but it is always better to use other, existing API
+methods if they exist, and this should only be used as a last resort.
+
+Also note that this guide has been written for 1.20.4, and while the overall procedures outlined will likely be
+relevant for all versions, the specifics (particularly packet ids and names) are likely to quickly become outdated.
+
+Packet Jumper heavily re-uses code from the original [https://github.com/steakteam/CHProtocol CHProtocol] extension,
+but builds on additional features such as additional compile time type safety, and support for Mojang mapping names,
+which are generally easier to read and understand. This obsoletes the CHProtocol extension. Big thanks to steakteam and
+entrypointkr for creating the original CHProtocol.
+
+== Installation ==
+
+Packet Jumper does not work out of the box. As this is an advanced feature that can cause your server to crash,
+cause clients connected to your server to crash, and generally cause havok, this is disabled by default, and won't
+enabled if the current version of CommandHelper can't look up the correct mappings.
+
+In general, to enable Packet Jumper, you need to do three things.
+# Install the correct version of ProtocolLib for your server.
+# In preferences.ini, set the use-protocol-lib value to true/on.
+# Set the correct takenaka-mapping if you are running on a newer version than CommandHelper supports.
+
+Step 3 is handled automatically if you are using a version of CommandHelper that supports your current server version,
+but you can manually fill this in if you need to.
+
+On first run, the mappings file specified (either internally or via takenaka-mappings) will be downloaded. This will
+take a moment, as it is a large file.
+
+== Version Differences ==
+Note that in general, the Minecraft versions makes changes to the raw protocol on a regular basis, though it tends
+to be rarer that established packets get major incompatible overhauls. However, as the protocol itself is not
+officially supported, there is nothing stopping Mojang from changing the protocol, and completely breaking your code.
+CommandHelper exposes the protocol to you dynamically, which means that CommandHelper itself only needs minor updates
+on each version, and in general the same CommandHelper jar will work across versions. Your code however, will not
+necessarily.
+
+== Research Phase ==
+
+At the base level, the entire Minecraft server simply exists to send and receive ''packets'' from the client. However,
+the underlying APIs don't always expose direct access to do the things that you may wish to do. For instance, if you
+wanted to cause an entity to have different movements depending on which player is seeing the entity, this is not
+currently possible, as {{function|set_entity_loc}} actually moves the entity for all players. Under the hood,
+however, the server is simply sending the "entity move" packet to each player individually. If we instead take over
+on tracking the entity (or indeed, not even creating a real entity, and just having a "ghost" entity that we manually
+track) we can instead send raw packets to whichever individual players we like. This has the effect of requiring us
+to implement entity movement ourselves, in addition to using raw packets, but it is technically possible.
+
+Before we can even begin writing code however, we need to understand exactly what task we are trying to accomplish,
+and which packets will need to be used to make the player see what we are wanting. The first step is to figure out
+which packet to use. In general, you'll want to familiarize yourself with
+[https://wiki.vg/Protocol https://wiki.vg/Protocol], which is the community's primary documentation on the Minecraft
+protocol. The wiki here is hand written, so in general, this isn't guaranteed to be accurate, but the guide is good
+enough to give you an idea of what fields do what. Additionally, you can use
+[https://mappings.cephx.dev/ https://mappings.cephx.dev/] to cross check packet information across various mappings.
+CommandHelper exclusively exposes the Mojang mappings.
+
+In our example of having entities move differently for different players, we are want to find something that can
+update an entity position. We're also wanting to run this during normal gameplay, and we want to send something
+from the server to the client. Given that, looking at wiki.vg, we're needing to look in the Play and Clientbound
+section. The "Play" section represents a "protocol", which is used at different phases of the client connection
+lifecycle, but the Play category outlines most of the packets that are interesting once the client is connected and
+playing the game. Since we're wanting to tell the client that the entity has moved, this is Clientbound, but when
+listening for packets send from the client, we're interested in the Serverbound ones. Scanning through, we can
+see a packet called "Update Entity Position". Reading the docs, it states that this is sent by the server when an
+entity moves less than 8 blocks.
+
+{{TakeNote=The ids and packet names change from version to version, so don't rely on the specific names and ids in this
+guide.}}
+
+The PacketId is 0x2C, the state is Play, and it is bound towards the client. There are 5 fields, entity id, delta x,
+delta y, delta z, and on ground. The entity id is a VarInt, X, Y, and Z deltas are shorts, and on ground is a boolean.
+The notes detail specific information about each field.
+
+This information tells us everything we need to know to properly create the packet, though we need to convert this to
+specific data to use in code.
+
+Efforts have been made to standardize as much as possible across server versions, but that means that you need to use
+naming conventions that CommandHelper recognizes. This full list can be obtained by calling {{function|all_packets}},
+which returns an array of data that we can use to program against. Create an alias or otherwise grab the output of this
+code, and put it in a text editor, preferably one that supports json syntax formatting and highlighting.
+
+<%CODE|
+console(json_encode(all_packets()));
+%>
+
+This provides a huge list of packet information, which is specific to the currently running server, and is subject
+to change across server types and versions. The first step is to cross check and find the packet we are interested in
+in this list. On wiki.vg, we saw that the packet id is 0x2C. In decimal, this is 44. In the list of packets
+returned by all_packets(), find the packet with id 44, where the protocol is "PLAY". Note that there may be
+multiple packets with the same id across different protocols, so you need to ensure you've found the right one.
+
+There is a bunch of information in this object, which tells us specifics about the packet. Let's take a look at this:
+
+<%SYNTAX|json|
+"REL_ENTITY_MOVE": {
+	"protocol": "PLAY",
+	"sender": "SERVER",
+	"superclass": "net.minecraft.network.protocol.game.PacketPlayOutEntity",
+	"deprecated": false,
+	"name": "REL_ENTITY_MOVE",
+	"id": 44,
+	"fields": {
+		"onGround": {
+			"field": 6,
+			"name": "onGround",
+			"type": {
+				"originalType": "boolean",
+				"type": "ms.lang.boolean"
+			}
+		},
+		"yRot": {
+			"field": 4,
+			"name": "yRot",
+			"type": {
+				"originalType": "byte",
+				"type": "ms.lang.int"
+			}
+		},
+		"za": {
+			"field": 3,
+			"name": "za",
+			"type": {
+				"originalType": "short",
+				"type": "ms.lang.int"
+			}
+		},
+		"xRot": {
+			"field": 5,
+			"name": "xRot",
+			"type": {
+				"originalType": "byte",
+				"type": "ms.lang.int"
+			}
+		},
+		"ya": {
+			"field": 2,
+			"name": "ya",
+			"type": {
+				"originalType": "short",
+				"type": "ms.lang.int"
+			}
+		},
+		"hasRot": {
+			"field": 7,
+			"name": "hasRot",
+			"type": {
+				"originalType": "boolean",
+				"type": "ms.lang.boolean"
+			}
+		},
+		"xa": {
+			"field": 1,
+			"name": "xa",
+			"type": {
+				"originalType": "short",
+				"type": "ms.lang.int"
+			}
+		},
+		"entityId": {
+			"field": 0,
+			"name": "entityId",
+			"type": {
+				"originalType": "int",
+				"type": "ms.lang.int"
+			}
+		},
+		"hasPos": {
+			"field": 8,
+			"name": "hasPos",
+			"type": {
+				"originalType": "boolean",
+				"type": "ms.lang.boolean"
+			}
+		}
+	},
+	"class": "net.minecraft.network.protocol.game.ClientboundMoveEntityPacket$Pos"
+}
+%>
+
+The ''protocol'' field tells you which of the protocols this packet belongs to, and is needed both for the method
+calls, and also for cross checking along with the id on wiki.vg. ''sender'' tells which direction the packet is going,
+in this case it's clientbound because the server is sending it. ''superclass'' denotes the Java superclass of this
+packet, and is only used for reference. If ''deprecated'' is true, you probably shouldn't be using this packet. Search
+to find a better packet. Most often, these are packets which have just been replaced by another class which has
+effectively the same functionality, but you may be forced to use the deprecated class anyways if there is no equivalent.
+''name'' is the name of the packet that you will use in code, so make note of this. ''id'' is only for reference, and
+should not be used except to compare with other references to the exact same version of the protocol. ''class'' denotes
+the Java class of this packet, and is only used for reference.
+
+''fields'' is the most interesting property. This defines the different fields that are available in the packet.
+Each of the field objects contains the following properties:
+
+''name'' is the name of the field. This is the name you'll use in your code. ''type'' shows what type is expected.
+The inner ''type'' shows the MethodScript type, which is the type you'll use, but the ''originalType'' shows the actual
+Java type of the field. This is important to note, because it's up to you to ensure that for instance in the case of
+a Java short, your value is in fact within -32768 and 32767, because otherwise you'll get a runtime error when
+CommandHelper tries to shove the MethodScript integer (which is 32 bit) into the short (which is 16 bits). ''field''
+is the field position, and is just for reference.
+
+In this example, there are no generics, but let's look at a field where that is the case:
+
+<%SYNTAX|json|
+"profileIds": {
+	"field": 0,
+	"name": "profileIds",
+	"type": {
+		"originalType": "java.util.List",
+		"genericType": {
+			"originalType": "java.util.UUID",
+			"type": "ms.lang.string"
+		},
+		"type": "ms.lang.array"
+	}
+}
+%>
+
+In this example, we also have a generic subtype. The top level object is an array, but it should be filled with
+strings, which are in fact UUIDs. This information can't inherently be encoded in the MethodScript type system,
+so it's up to you to ensure that you've populated it with the correct information. Generic types can have further
+subtypes, so for instance you could have a list of lists of strings, in which case you would need an array of arrays
+of strings in MethodScript.
+
+Enums are another type that has special support:
+
+<%SYNTAX|json|
+"source": {
+	"field": 2,
+	"name": "source",
+	"type": {
+		"originalType": "net.minecraft.sounds.SoundSource",
+		"enumType": "net.minecraft.sounds.SoundSource",
+		"type": "ms.lang.string",
+		"enumValues": [
+			"MASTER",
+			"MUSIC",
+			"RECORDS",
+			"WEATHER",
+			"BLOCKS",
+			"HOSTILE",
+			"NEUTRAL",
+			"PLAYERS",
+			"AMBIENT",
+			"VOICE"
+		]
+	}
+}
+%>
+
+The ''enumType'' is just a reference type, but the ''enumValues'' list the valid enum values that can be sent. The
+type is still a string though, and it will automatically be converted into the correct enum type.
+
+Another thing to note is that some types are not (yet) supported. This could be due to the type only being supported
+in newer versions of CommandHelper, or because support simply hasn't been coded in at all yet.
+In those cases, the type will be "<UNSUPPORTED>", which means that this field cannot actually be used. However,
+the plan is that all types will eventually be supported, and PRs that add support for missing types will generally
+be accepted. Even if the field is unsupported, it may be possible to write the packet anyways, if the field's default
+value (usually null or nullish values) will work, and for incoming packets, for reading the other fields, if the
+unsupported types don't matter to your use case.
+
+The list of unsupported types is added to a top level ''__UnsupportedTypes'' array. This is only for reference.
+
+== Implementation ==
+Once all the necessary packet and field information has been determined, we can begin implementation.
+
+When sending packets out, the first step is to create a packet of the desired type. You'll need the protocol, direction,
+and packet name.
+
+<%CODE|
+@packet = create_packet('PLAY', 'OUT', 'REL_ENTITY_MOVE');
+%>
+
+The protocol for this packet is PLAY, we're sending it out (as opposed to in), and the packet name is
+''REL_ENTITY_MOVE''. Next, we need to write to the relevant fields with packet_write. Say we want to move
+the entity one block in the x direction.
+
+<%CODE|
+packet_write(@packet, 'entityId', get_entity_transient_id(@entityUuid)); // Packets require the transient id, not uuid
+packet_write(@packet, 'xa', 4096); // One block in the positive x direction, there are 128 * 32 steps in one block
+packet_write(@packet, 'onGround', true);
+%>
+
+Finally, we need to send the packet to the appropriate player.
+
+<%CODE|
+send_packet(@player, @packet);
+%>
+
+This will send this packet to the single player, which will cause the entity to move forward one block in the x
+direction.
+
+== Conversions ==
+
+For some types, conversions are obvious, a field with a Java int type accepts a MethodScript int type. However,
+for more complex type conversions, it is not always obvious. This table lists the supported conversions.
+
+== Unannounced Packets ==
+Actually, the packet creation and packet logic doesn't strictly need to use known packets. Servers can dynamically
+create packets, as well as extensions and other packets that are unknown to CommandHelper. For these packet types,
+you can't actually use the string field names, but you can instead pass an integer, based on the field index, and
+an attempt will anyways be made to set the value. You can use arbitrary strings in create_packet, and it will fail
+if the system can't find the packet, but it will attempt to find the packet even if it's not one of the ones returned
+in all_packets().
+
+<%CODE|
+// Sends the input directly to ProtocolLib to try to find the packet. This should be the java class name of the
+// server implementation you're running.
+@packet = create_packet('PLAY', 'OUT', 'net.minecraft.packetname');
+packet_write(@packet, 3, 1.0); // Will send the input directly to ProtocolLib as is.
+%>

@@ -108,4 +108,6 @@ public interface MCEntity extends MCMetadatable {
 	int getFreezingTicks();
 
 	void setFreezingTicks(int ticks);
+
+	int getEntityId();
 }
