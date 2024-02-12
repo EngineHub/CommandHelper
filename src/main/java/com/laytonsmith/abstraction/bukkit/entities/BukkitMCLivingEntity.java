@@ -1,5 +1,6 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
+import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.abstraction.MCAttributeModifier;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCEntityEquipment;
@@ -26,11 +27,14 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.block.Block;
+import org.bukkit.damage.DamageSource;
+import org.bukkit.damage.DamageType;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.BlockIterator;
@@ -346,8 +350,16 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 
 	@Override
 	public void kill() {
-		le.setLastDamageCause(new EntityDamageEvent(le, EntityDamageEvent.DamageCause.CUSTOM, le.getHealth()));
-		le.setHealth(0D);
+		try {
+			le.damage(le.getHealth(), DamageSource.builder(DamageType.GENERIC_KILL).build());
+		} catch (NoClassDefFoundError | NoSuchMethodError ex) {
+			// probably before 1.20.4
+			EntityDamageEvent event = ReflectionUtils.newInstance(EntityDamageEvent.class,
+					new Class[]{Entity.class, DamageCause.class, double.class},
+					new Object[]{le, EntityDamageEvent.DamageCause.CUSTOM, le.getHealth()});
+			le.setLastDamageCause(event);
+			le.setHealth(0);
+		}
 	}
 
 	@Override
