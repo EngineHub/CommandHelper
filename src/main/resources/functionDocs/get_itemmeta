@@ -44,9 +44,9 @@ The entity's custom name is derived from the item '''"display"''' string. All ot
 |-
 | Books
 |
-* '''title''' : (string) The title of the book.
+* '''title''' : (string) The title of the book. (32 character limit)
 * '''author''' : (string) The author of the book.
-* '''pages''' : (array) An array of pages as strings. New lines supported. 256 character limit per page. 50 page limit.
+* '''pages''' : (array) An array of pages as strings. New lines supported. (100 page limit)
 * '''generation''' : (string) The generation of the book. Can be ORIGINAL, COPY_OF_ORIGINAL, COPY_OF_COPY, or TATTERED (the last two cannot be copied).
 As pages are plain text, they do not yet support some advanced text components.
 |-
