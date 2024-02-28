@@ -466,6 +466,34 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	}
 
 	@Override
+	public void hideEntity(MCEntity entity) {
+		try {
+			p.hideEntity(CommandHelperPlugin.self, (Entity) entity.getHandle());
+		} catch(NoSuchMethodError ex) {
+			// probably before 1.18
+		}
+	}
+
+	@Override
+	public void showEntity(MCEntity entity) {
+		try {
+			p.showEntity(CommandHelperPlugin.self, (Entity) entity.getHandle());
+		} catch(NoSuchMethodError ex) {
+			// probably before 1.18
+		}
+	}
+
+	@Override
+	public boolean canSeeEntity(MCEntity entity) {
+		try {
+			return p.canSee((Entity) entity.getHandle());
+		} catch(NoSuchMethodError ex) {
+			// probably before 1.18
+			return true;
+		}
+	}
+
+	@Override
 	public void setWhitelisted(boolean value) {
 		p.setWhitelisted(value);
 	}

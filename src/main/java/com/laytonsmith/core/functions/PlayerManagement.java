@@ -6888,4 +6888,171 @@ public class PlayerManagement {
 			return false;
 		}
 	}
+
+	@api
+	public static class phide_entity extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "phide_entity";
+		}
+
+		@Override
+		public String docs() {
+			return "void {[player], entityUUID} Sets an entity to no longer be seen or tracked by the player's client."
+					+ " Resets to default on player rejoin."
+					+ " (MC 1.18+)";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p;
+			MCEntity e;
+			if(args.length == 1) {
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(p, t);
+				e = Static.getEntity(args[0], t);
+			} else {
+				p = Static.GetPlayer(args[0], t);
+				e = Static.getEntity(args[1], t);
+			}
+			p.hideEntity(e);
+			return CVoid.VOID;
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CRELengthException.class, CREBadEntityException.class};
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+	}
+
+	@api
+	public static class pshow_entity extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "pshow_entity";
+		}
+
+		@Override
+		public String docs() {
+			return "void {[player], entityUUID} Sets an entity to be sent to the player's client again. (MC 1.18+)";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p;
+			MCEntity e;
+			if(args.length == 1) {
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(p, t);
+				e = Static.getEntity(args[0], t);
+			} else {
+				p = Static.GetPlayer(args[0], t);
+				e = Static.getEntity(args[1], t);
+			}
+			p.showEntity(e);
+			return CVoid.VOID;
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CRELengthException.class, CREBadEntityException.class};
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+	}
+
+	@api
+	public static class pcan_see_entity extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "pcan_see_entity";
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {[player], entityUUID} Gets whether the entity is known by the player's client or"
+					+ " hidden by a plugin. (MC 1.18+)";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p;
+			MCEntity e;
+			if(args.length == 1) {
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(p, t);
+				e = Static.getEntity(args[0], t);
+			} else {
+				p = Static.GetPlayer(args[0], t);
+				e = Static.getEntity(args[1], t);
+			}
+			return CBoolean.get(p.canSeeEntity(e));
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CRELengthException.class, CREBadEntityException.class};
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+	}
 }
