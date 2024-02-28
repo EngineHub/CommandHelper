@@ -3087,10 +3087,13 @@ public final class MethodScriptCompiler {
 			Mixed retc = script.eval(gg, env);
 			if(root.numberOfChildren() == 1) {
 				returnable = retc;
+				if(done == null) {
+					// string builder is not needed, so return immediately
+					return returnable;
+				}
 			}
-			@SuppressWarnings("null")
-			String ret = retc instanceof CNull ? "null" : retc.val();
-			if(ret != null && !ret.trim().isEmpty()) {
+			String ret = retc.val();
+			if(!ret.trim().isEmpty()) {
 				b.append(ret).append(" ");
 			}
 		}
