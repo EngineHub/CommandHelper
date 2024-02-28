@@ -9,7 +9,7 @@ pool:
 steps:
 - task: JavaToolInstaller@0
   inputs:
-    versionSpec: '16' 
+    versionSpec: '17' 
     jdkArchitectureOption: x64
     jdkSourceOption: 'AzureStorage'
     azureResourceManagerEndpoint: Azure Resource Manager
@@ -22,7 +22,7 @@ steps:
   inputs:
     mavenPomFile: 'pom.xml'
     javaHomeOption: 'JDKVersion'
-    jdkVersionOption: '1.16'
+    jdkVersionOption: '1.17'
     jdkArchitectureOption: 'x64'
     publishJUnitResults: true
     testResultsFiles: '**/TEST-*.xml'
