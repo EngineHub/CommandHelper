@@ -9,12 +9,15 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.exceptions.CRE.CREPluginInternalException;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.natives.interfaces.Mixed;
-import com.laytonsmith.core.protocollib.Conversions;
-import com.laytonsmith.core.protocollib.PacketKind;
-import com.laytonsmith.core.protocollib.PacketUtils;
+import com.laytonsmith.core.packetjumper.Conversions;
+import com.laytonsmith.core.packetjumper.PacketJumper;
+import com.laytonsmith.core.packetjumper.PacketKind;
+import com.laytonsmith.core.packetjumper.PacketUtils;
 import java.lang.reflect.Field;
+import net.fabricmc.mappingio.tree.MappingTree;
 
 /**
  * Created by JunHyung Im on 2020-07-05
@@ -82,32 +85,40 @@ public class CPacket extends Construct {
 		return CClassType.EMPTY_CLASS_ARRAY;
 	}
 
+	public int indexFromString(String field, Target t) {
+		CArray packetData = (CArray)((ArrayAccess)((ArrayAccess)PacketUtils.getAllPackets()
+				.get(protocol.name(), t))
+				.get(sender == PacketType.Sender.CLIENT ? "IN" : "OUT", t))
+				.get(packetType, t);
+		CArray fieldData = (CArray)((ArrayAccess)packetData.get("fields", t)).get(field, t);
+		int index = (int)((CInt)fieldData.get("field", t)).getInt();
+		return index;
+	}
+
 	public Object read(int index) {
 		return packet.getModifier().read(index);
 	}
 
 	public Mixed readMixed(int index, Target target) {
-		return Conversions.convertObjectToMixed(read(index), target);
+		return Conversions.convertObjectToMixed(read(index));
+	}
+
+	public Mixed readMixed(String index, Target target) {
+		return readMixed(indexFromString(index, target), target);
 	}
 
 	public void write(int index, Object object) {
 		packet.getModifier().write(index, object);
 	}
 
-	public void writeMixed(int index, Mixed mixed) {
+	public void writeMixed(int index, Mixed mixed, Target t) {
 		Field field = packet.getModifier().getField(index);
 		Class<?> type = field.getType();
-		write(index, Conversions.adjustObject(Conversions.convertMixedToObject(mixed, type), type));
+		write(index, Conversions.adjustObject(Conversions.convertMixedToObject(mixed, type, t), type));
 	}
 
 	public void writeMixed(String field, Mixed mixed, Target t) {
-		CArray packetData = (CArray)((ArrayAccess)((ArrayAccess)PacketUtils.getAllPackets()
-				.get(protocol.name(), t))
-				.get(sender == PacketType.Sender.CLIENT ? "IN" : "OUT", t))
-				.get(packetType, t);
-		CArray fieldData = (CArray)((CArray)packetData.get("fields", t)).get(field, t);
-		int index = (int)((CInt)fieldData.get("field", t)).getInt();
-		writeMixed(index, mixed);
+		writeMixed(indexFromString(field, t), mixed, t);
 	}
 
 	public CArray getFields(Target target) {
@@ -127,6 +138,50 @@ public class CPacket extends Construct {
 
 	public PacketKind getKind() {
 		return PacketUtils.getPacketKind(packet.getType());
+	}
+
+	public CArray toCArray() {
+		CArray array = new CArray(Target.UNKNOWN);
+		MappingTree tree = PacketJumper.GetMappingTree();
+		for(FieldAccessor field : packet.getModifier().getFields()) {
+			Mixed value;
+			Object instance = field.get(packet.getHandle());
+			String type = field.getField().getType().getSimpleName();
+			String name;
+			Class clazz = packet.getHandle().getClass();
+			MappingTree.ClassMapping classMapping
+						= tree.getClass(clazz.getName().replace(".", "/"), PacketJumper.GetServerNamespace());
+			MappingTree.FieldMapping fm;
+			do {
+				fm = classMapping.getField(field.getField().getName(), null);
+				if(fm != null) {
+					break;
+				}
+				clazz = clazz.getSuperclass();
+				if(clazz == Object.class || clazz == Record.class) {
+					break;
+				}
+				classMapping = tree.getClass(clazz.getName().replace(".", "/"),
+						PacketJumper.GetServerNamespace());
+				if(classMapping == null) {
+					throw new CREPluginInternalException("Cannot find packet superclass.", Target.UNKNOWN);
+				}
+			} while(true);
+			name = fm.getDstName(PacketJumper.GetMojangNamespace());
+			if(instance == null) {
+				value = CNull.NULL;
+			} else if(Conversions.getTypeConversion(field.getField().getType()) == null) {
+				value = new CString("<UNSUPPORTED:" + instance.toString() + ">", Target.UNKNOWN);
+			} else {
+				value = Conversions.convertObjectToMixed(instance);
+			}
+			CArray descriptor = new CArray(Target.UNKNOWN);
+			descriptor.set("name", name);
+			descriptor.set("type", type);
+			descriptor.set("value", value, Target.UNKNOWN);
+			array.set(name, descriptor, Target.UNKNOWN);
+		}
+		return array;
 	}
 
 }

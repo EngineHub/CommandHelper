@@ -3,7 +3,8 @@ In general, in order to successfully use this system, you must have a basic unde
 of the actual Minecraft protocol, though this tutorial can help bridge any gaps you might have in your understanding.
 Code that uses this functionality is liable to break on every Minecraft version, and so should be avoided as best
 as possible. Some tooling exists to help mitigate this churn, but it is always better to use other, existing API
-methods if they exist, and this should only be used as a last resort.
+methods if they exist, and this should only be used as a last resort. Scoreboard operations, for instance, are fully
+covered by the API, and therefore should generally use packets to accomplish goals.
 
 Also note that this guide has been written for 1.20.4, and while the overall procedures outlined will likely be
 relevant for all versions, the specifics (particularly packet ids and names) are likely to quickly become outdated.
@@ -47,7 +48,7 @@ currently possible, as {{function|set_entity_loc}} actually moves the entity for
 however, the server is simply sending the "entity move" packet to each player individually. If we instead take over
 on tracking the entity (or indeed, not even creating a real entity, and just having a "ghost" entity that we manually
 track) we can instead send raw packets to whichever individual players we like. This has the effect of requiring us
-to implement entity movement ourselves, in addition to using raw packets, but it is technically possible.
+to implement entity movement and interaction ourselves, in addition to using raw packets, but it is technically possible.
 
 Before we can even begin writing code however, we need to understand exactly what task we are trying to accomplish,
 and which packets will need to be used to make the player see what we are wanting. The first step is to figure out
@@ -56,7 +57,8 @@ which packet to use. In general, you'll want to familiarize yourself with
 protocol. The wiki here is hand written, so in general, this isn't guaranteed to be accurate, but the guide is good
 enough to give you an idea of what fields do what. Additionally, you can use
 [https://mappings.cephx.dev/ https://mappings.cephx.dev/] to cross check packet information across various mappings.
-CommandHelper exclusively exposes the Mojang mappings.
+CommandHelper exclusively exposes the Mojang mappings, regardless of what server you are running, and what mappings
+it uses (it is dynamically determined and translated into the appropriate mapping for you).
 
 In our example of having entities move differently for different players, we are want to find something that can
 update an entity position. We're also wanting to run this during normal gameplay, and we want to send something
@@ -102,11 +104,13 @@ There is a bunch of information in this object, which tells us specifics about t
 	"superclass": "net.minecraft.network.protocol.game.PacketPlayOutEntity",
 	"deprecated": false,
 	"name": "REL_ENTITY_MOVE",
+	"comment": "",
 	"id": 44,
 	"fields": {
 		"onGround": {
 			"field": 6,
 			"name": "onGround",
+			"comment": "",
 			"type": {
 				"originalType": "boolean",
 				"type": "ms.lang.boolean"
@@ -115,6 +119,7 @@ There is a bunch of information in this object, which tells us specifics about t
 		"yRot": {
 			"field": 4,
 			"name": "yRot",
+			"comment": "",
 			"type": {
 				"originalType": "byte",
 				"type": "ms.lang.int"
@@ -123,6 +128,7 @@ There is a bunch of information in this object, which tells us specifics about t
 		"za": {
 			"field": 3,
 			"name": "za",
+			"comment": "",
 			"type": {
 				"originalType": "short",
 				"type": "ms.lang.int"
@@ -131,6 +137,7 @@ There is a bunch of information in this object, which tells us specifics about t
 		"xRot": {
 			"field": 5,
 			"name": "xRot",
+			"comment": "",
 			"type": {
 				"originalType": "byte",
 				"type": "ms.lang.int"
@@ -139,6 +146,7 @@ There is a bunch of information in this object, which tells us specifics about t
 		"ya": {
 			"field": 2,
 			"name": "ya",
+			"comment": "",
 			"type": {
 				"originalType": "short",
 				"type": "ms.lang.int"
@@ -147,6 +155,7 @@ There is a bunch of information in this object, which tells us specifics about t
 		"hasRot": {
 			"field": 7,
 			"name": "hasRot",
+			"comment": "",
 			"type": {
 				"originalType": "boolean",
 				"type": "ms.lang.boolean"
@@ -155,6 +164,7 @@ There is a bunch of information in this object, which tells us specifics about t
 		"xa": {
 			"field": 1,
 			"name": "xa",
+			"comment": "",
 			"type": {
 				"originalType": "short",
 				"type": "ms.lang.int"
@@ -163,6 +173,7 @@ There is a bunch of information in this object, which tells us specifics about t
 		"entityId": {
 			"field": 0,
 			"name": "entityId",
+			"comment": "",
 			"type": {
 				"originalType": "int",
 				"type": "ms.lang.int"
@@ -171,6 +182,7 @@ There is a bunch of information in this object, which tells us specifics about t
 		"hasPos": {
 			"field": 8,
 			"name": "hasPos",
+			"comment": "",
 			"type": {
 				"originalType": "boolean",
 				"type": "ms.lang.boolean"
@@ -189,7 +201,8 @@ to find a better packet. Most often, these are packets which have just been repl
 effectively the same functionality, but you may be forced to use the deprecated class anyways if there is no equivalent.
 ''name'' is the name of the packet that you will use in code, so make note of this. ''id'' is only for reference, and
 should not be used except to compare with other references to the exact same version of the protocol. ''class'' denotes
-the Java class of this packet, and is only used for reference.
+the Java class of this packet, and is only used for reference. You'll also notice a blank ''comment'' field. This
+is rarely populated, but when present, offers useful additional information about the field or class.
 
 ''fields'' is the most interesting property. This defines the different fields that are available in the packet.
 Each of the field objects contains the following properties:
@@ -207,6 +220,7 @@ In this example, there are no generics, but let's look at a field where that is 
 "profileIds": {
 	"field": 0,
 	"name": "profileIds",
+	"comment": "",
 	"type": {
 		"originalType": "java.util.List",
 		"genericType": {
@@ -230,6 +244,7 @@ Enums are another type that has special support:
 "source": {
 	"field": 2,
 	"name": "source",
+	"comment": "",
 	"type": {
 		"originalType": "net.minecraft.sounds.SoundSource",
 		"enumType": "net.minecraft.sounds.SoundSource",
@@ -263,6 +278,13 @@ unsupported types don't matter to your use case.
 
 The list of unsupported types is added to a top level ''__UnsupportedTypes'' array. This is only for reference.
 
+You also generally need to understand how the entire server works together, in order to provide a complete solution
+to the problem you're trying to solve. For instance, in our example, even if we successfully send the packet to
+move an entity for the individual player, the server will occasionally try to reset the entity position. You may not
+inherently know what packets the server is sending or receiving, so you may need to use a tool such as
+[https://github.com/adepierre/SniffCraft SniffCraft] which works as a proxy between the client and server, and can
+log packets in both directions, which can give you an idea of what kind of packets you need to emulate and/or modify.
+
 == Implementation ==
 Once all the necessary packet and field information has been determined, we can begin implementation.
 
@@ -292,10 +314,100 @@ send_packet(@player, @packet);
 This will send this packet to the single player, which will cause the entity to move forward one block in the x
 direction.
 
+However, after a few seconds, the entity will move back to its original position!
+
+This is because the server occasionally sends an ENTITY_TELEPORT packet to the client. We must intercept that packet,
+and ideally overwrite the position in the packet to that of our "fake" entity position. In this case you could also
+cancel the packet (all packet send and receive events are cancellable) but in this case it's probably a better idea to
+overwrite the values, but for example's sake here's how simply cancelling it would look:
+
+<%CODE|
+bind('packet_sent', null, array(protocol: 'PLAY', type: 'ENTITY_TELEPORT', values:
+		array(id: get_entity_transient_id(@entityUuid))), @event) {
+	cancel();
+}
+// We also have to register for the events to start firing for these packet types.
+register_packet('PLAY', 'ENTITY_TELEPORT');
+%>
+
+By default, CommandHelper doesn't actually register to listen to any packets, as this would be unnecessarily
+inefficient. The {{function|register_packet}} function tells CommandHelper that it needs to start processing events
+of the given type, and is required before the binds for these packets will start to be triggered.
+
+{{TakeNote=In the REL_ENTITY_MOVE event, the id was named "entityId" and in ENTITY_TELEPORT, it's just "id". Luckily,
+CommandHelper offers some additional compile time checks on the values array, if you hardcode the protocol and type
+parameters, which is highly recommended. This will make it easier to quickly see if you have errors in your
+prefilters.}}
+
+We also need to handle the case where the player logs out and logs back in. In this case, the entity will be reset
+back to the original location, because the server sends the SPAWN_ENTITY packet to cause the player to load in the
+entities at first, but the trouble is, this includes the server-controlled position location, which is not where we
+want the entity to be for this player. Also, in this case, we can't simply cancel the packet as we did for the
+ENTITY_TELEPORT packet, if we did, the client wouldn't see the entity at all, we instead have to modify the
+contents of the packet individually. In this case, we'll keep it simple, and only modify the x, y, and z parameters,
+but there are others that you may need to modify as well, such as the velocity and angle, etc.
+
+Unlike most events, we can't use the {{function|modify_event}} function, but we can write directly to the packet with
+{{function|packet_write}}.
+
+<%CODE|
+bind('packet_sent', null, array(protocol: 'PLAY', type: 'SPAWN_ENTITY',
+		values: array(id: get_entity_transient_id(@entityId))), @event, @entityId) {
+	// This is up to whatever your logic is, to get the location for the entity on the per player basis
+	@pos = _getEntityPosition(@entityId, @event['player']);
+	packet_write(@event['packet'], 'x', @pos['x']);
+	packet_write(@event['packet'], 'y', @pos['y']);
+	packet_write(@event['packet'], 'z', @pos['z']);
+}
+// Don't forget, we have to register to get events for this packet type.
+register_packet('PLAY', 'SPAWN_ENTITY');
+%>
+
+This is likely the best handling for the TELEPORT_ENTITY packet as well, rather than cancelling it, since this will
+prevent desyncs from moving the entity without any way to recover.
+
+So, if you don't know which packet events you need to intercept, how can you find that? One of the easiest ways is to
+use a packet sniffer, which will log incoming and outgoing packets to your client. This can be used to zero in on the
+packets you need to care about, but will take a bit of sleuthing. Using
+[https://github.com/adepierre/SniffCraft SniffCraft] for instance, we can intercept the packets, and print the packet
+data for relevant looking packets, compare that to the wiki.vg and other docs, and see if that is the packet we're
+interested in intercepting. A warning, this is not necessarily easy, and you may not find answers for what you're
+looking to do, instead requiring reverse engineering to get there. Hopefully with the tools provided in this guide,
+you will be able to get a head start on any detective work.
+
 == Conversions ==
 
 For some types, conversions are obvious, a field with a Java int type accepts a MethodScript int type. However,
 for more complex type conversions, it is not always obvious. This table lists the supported conversions.
+Implicit conversions: All numeric types (floating point, integers, including bytes), Strings and UUIDs (to string),
+List/Collection/Set/EnumSet/Map/arrays except byte arrays to array, and byte arrays to byte_array.
+
+Different servers have different class names, and so this list only gives you an indication of the specific class
+name, the specific class name is obtained via ProtocolLib. More classes will be supported over time, see the
+__UnsupportedTypes value in the return of {{function|all_packets}} for a list of types which CommandHelper does not
+currently support.
+
+{|
+|-
+! scope="col" width="40%" | Java Type
+! scope="col" width="60%" | Conversion
+|-
+| Optional
+| NOT SUPPORTED YET. An array with 0 items if the item isn't present, otherwise an array with the item at index 0. When writing, \
+must be an array of length 0 or 1.
+|-
+| IChatBaseComponent
+| A json string.
+|-
+| ItemStack
+| The same item stack array used elsewhere
+|-
+| BlockPos
+| An array containing 'x', 'y', and 'z' integers.
+|}
+
+Also note that double comparisons are done with a delta of 0.0001. If you need something more or less precise,
+you must do so inside the event handler, not inside the prefilter.
 
 == Unannounced Packets ==
 Actually, the packet creation and packet logic doesn't strictly need to use known packets. Servers can dynamically

@@ -1,4 +1,4 @@
-package com.laytonsmith.core.protocollib;
+package com.laytonsmith.core.packetjumper;
 
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CString;

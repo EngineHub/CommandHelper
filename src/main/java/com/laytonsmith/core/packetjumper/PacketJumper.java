@@ -1,155 +1,171 @@
 package com.laytonsmith.core.packetjumper;
 
+import com.comphenix.protocol.ProtocolLibrary;
+import com.laytonsmith.PureUtilities.Common.FileWriteMode;
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
-import com.laytonsmith.PureUtilities.Common.StreamUtils;
-import com.laytonsmith.abstraction.MCPlayer;
-import com.laytonsmith.core.constructs.Construct;
-import org.bukkit.Bukkit;
-
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.PureUtilities.Web.RequestSettings;
+import com.laytonsmith.PureUtilities.Web.WebUtility;
+import com.laytonsmith.PureUtilities.ZipReader;
+import com.laytonsmith.abstraction.enums.MCVersion;
+import com.laytonsmith.commandhelper.CommandHelperFileLocations;
+import com.laytonsmith.commandhelper.CommandHelperPlugin;
+import com.laytonsmith.core.Prefs;
+import com.laytonsmith.core.Static;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import net.fabricmc.mappingio.format.tiny.Tiny2FileReader;
+import net.fabricmc.mappingio.tree.MappingTree;
+import net.fabricmc.mappingio.tree.MemoryMappingTree;
 
 /**
  *
- *
  */
-public class PacketJumper {
+public final class PacketJumper {
 
-	@SuppressWarnings("FieldMayBeFinal")
-	private static boolean started = false;
-	private static SortedSet<PacketInfo> packetInfo;
-	@SuppressWarnings("FieldMayBeFinal")
-	private static Thread initializingThread = null;
-	private static final String PROTOCOL_DOCS = "";
-
-	public static void startup() {
-		if(true) {
-			return; //TODO:
-		}
-		if(started) {
-			return;
-		}
-		packetInfo = new TreeSet<>();
-		initializingThread = new Thread(new Runnable() {
-
-			@Override
-			public void run() {
-//				try {
-//					protocolDocs = WebUtility.GetPageContents("http://mc.kev009.com/Protocol");
-//				} catch (IOException ex) {
-//					Logger.getLogger(PacketJumper.class.getName()).log(Level.SEVERE, null, ex);
-//				}
-				String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
-				try {
-					Class packetClass = Class.forName("net.minecraft.server." + version + ".Packet");
-					Set<Class> packets = ReflectionUtils.getAllExtensions(packetClass);
-					for(Class packet : packets) {
-						packetInfo.add(new PacketInfo(packet));
-					}
-					started = true;
-				} catch (ClassNotFoundException ex) {
-					StreamUtils.GetSystemOut().println("[CommandHelper] Failed to find Minecraft Packet classes.");
-				}
-			}
-		}, "PacketJumperInitializer");
-		initializingThread.start();
-		for(PacketInfo p : getPacketInfo()) {
-			StreamUtils.GetSystemOut().println(p);
-		}
-	}
-
-	public static boolean started() {
-		return started;
-	}
-
-	private static void waitForInitialization() throws InterruptedException {
-		if(initializingThread == null) {
-			startup();
-		}
-		if(initializingThread.isAlive()) {
-			//Wait for the startup thread, if it's running
-			initializingThread.join();
-		}
-	}
-
-	public static Set<PacketInfo> getPacketInfo() {
-		try {
-			waitForInitialization();
-		} catch (InterruptedException ex) {
-			Logger.getLogger(PacketJumper.class.getName()).log(Level.SEVERE, null, ex);
-		}
-		return new TreeSet<>(packetInfo);
-	}
-
-	public static void fakePacketToPlayer(MCPlayer player, PacketInstance packet) {
-		try {
-			waitForInitialization();
-		} catch (InterruptedException ex) {
-			Logger.getLogger(PacketJumper.class.getName()).log(Level.SEVERE, null, ex);
-		}
-		//TODO:
-		throw new UnsupportedOperationException("Not supported yet.");
-	}
-
-	public static void fakePacketFromPlayer(MCPlayer player, PacketInstance packet) {
-		try {
-			waitForInitialization();
-		} catch (InterruptedException ex) {
-			Logger.getLogger(PacketJumper.class.getName()).log(Level.SEVERE, null, ex);
-		}
-		//TODO:
-		throw new UnsupportedOperationException("Not supported yet.");
-	}
-
-	//TODO: Add interceptor listeners, and make this support more than one. It should
-	//probably support binds even.
-	public static void setPacketReceivedInterceptor(int id, PacketHandler handler) {
-		try {
-			waitForInitialization();
-		} catch (InterruptedException ex) {
-			Logger.getLogger(PacketJumper.class.getName()).log(Level.SEVERE, null, ex);
-		}
-		//TODO:
-		throw new UnsupportedOperationException("Not supported yet.");
-	}
-
-	public static void setPacketSentInterceptor(int id, PacketHandler handler) {
-		try {
-			waitForInitialization();
-		} catch (InterruptedException ex) {
-			Logger.getLogger(PacketJumper.class.getName()).log(Level.SEVERE, null, ex);
-		}
-		//TODO:
-		throw new UnsupportedOperationException("Not supported yet.");
-	}
-
-	public static PacketInstance getPacket(int id, Construct... args) {
-		try {
-			waitForInitialization();
-		} catch (InterruptedException ex) {
-			Logger.getLogger(PacketJumper.class.getName()).log(Level.SEVERE, null, ex);
-		}
-		//TODO:
-		throw new UnsupportedOperationException("Not supported yet.");
+	private PacketJumper() {
 	}
 
 	/**
-	 * Used for packet interceptors, this allows an opportunity for a class to manipulate a packet before it is
-	 * processed/sent
+	 * The current server mapping type.
 	 */
-	public static interface PacketHandler {
+	private static int ServerType = -1;
 
-		/**
-		 * The packet to be processed/sent is passed to this method, and it is expected that this method returns a
-		 * packet (which is actually going to be sent) or null, which cancels the packet send entirely.
-		 *
-		 * @param player The player sending/receiving the packet
-		 * @param packet The packet in question
-		 * @return
-		 */
-		PacketInstance Handle(MCPlayer player, PacketInstance packet);
+	/**
+	 * A mapping from minecraft versions to takenaka urls.
+	 */
+	private static final Map<Version, String> VERSION_MAP = new HashMap<>() {
+		{
+			put(MCVersion.MC1_20_4, "https://repo.screamingsandals.org/releases/me/kcra/takenaka/mappings/1.8.8+1.20.4/mappings-1.8.8+1.20.4.jar");
+		}
+	};
+
+	private static final MemoryMappingTree MINECRAFT_MAPPINGS = new MemoryMappingTree();
+	private static int SpigotNamespace;
+	private static int MojangNamespace;
+
+	private static Optional<PacketEventNotifier> packetEventNotifier = Optional.empty();
+
+	/**
+	 * Returns the best url for the current version of minecraft, or null if this version is not supported. Reads from
+	 * the settings if applicable.
+	 *
+	 * @return
+	 */
+	private static String GetUrl() {
+		String pref = Prefs.TakenakaMapping();
+		if(!"".equals(pref)) {
+			return pref;
+		}
+		Version currentVersion = Static.getServer().getMinecraftVersion();
+		Version bestCandidate = null;
+		for(Version v : VERSION_MAP.keySet()) {
+			// Get the highest version that supports the current version.
+			if(v.lt(bestCandidate)) {
+				continue;
+			}
+			if(v.gte(currentVersion)) {
+				bestCandidate = v;
+			}
+		}
+		return VERSION_MAP.get(bestCandidate);
+	}
+
+	public static void Startup() throws MalformedURLException, IOException {
+		if(!Prefs.UseProtocolLib()) {
+			return;
+		}
+		long time = System.currentTimeMillis();
+		boolean downloading = false;
+		File protocolLibCache = new File(CommandHelperFileLocations.getDefault().getCacheDirectory(), "ProtocolLib");
+		URL url = new URL(GetUrl());
+		String[] parts = url.getPath().split("/");
+		String filename = parts[parts.length - 1];
+		protocolLibCache.mkdirs();
+		File mappingsJar = new File(protocolLibCache, filename);
+		if(!mappingsJar.exists()) {
+			downloading = true;
+			RequestSettings requestSettings = new RequestSettings()
+					.setDownloadTo(mappingsJar)
+					.setDownloadStrategy(FileWriteMode.SAFE_WRITE)
+					.setBlocking(true);
+			WebUtility.GetPage(url, requestSettings);
+		}
+		Version currentVersion = Static.getServer().getMinecraftVersion();
+		String mcVersion = currentVersion.getMajor() + "." + currentVersion.getMinor() + "." + currentVersion.getSupplemental();
+		ZipReader tinyFileReader = new ZipReader(new File(mappingsJar, mcVersion + ".tiny"));
+		Reader reader = new BufferedReader(new InputStreamReader(tinyFileReader.getInputStream(), StandardCharsets.UTF_8));
+		Tiny2FileReader.read(reader, MINECRAFT_MAPPINGS);
+		SpigotNamespace = MINECRAFT_MAPPINGS.getNamespaceId("spigot");
+		MojangNamespace = MINECRAFT_MAPPINGS.getNamespaceId("mojang");
+		long ms = System.currentTimeMillis() - time;
+		Static.getLogger().log(Level.INFO,
+				"Loading {0}mappings took {1}ms",
+				new Object[]{
+					downloading ? "and downloading " : "",
+					ms
+				});
+		packetEventNotifier = Optional.of(new PacketEventNotifier(CommandHelperPlugin.self, ProtocolLibrary.getProtocolManager()));
+	}
+
+	public static void Shutdown() {
+		packetEventNotifier.ifPresent(e -> e.unregister());
+	}
+
+	public static Optional<PacketEventNotifier> GetPacketEventNotifier() {
+		return packetEventNotifier;
+	}
+
+	/**
+	 * Returns the mapping tree, if loaded, null otherwise.
+	 *
+	 * @return
+	 */
+	public static MappingTree GetMappingTree() {
+		return MINECRAFT_MAPPINGS;
+	}
+
+	/**
+	 * Returns the server namespace. This value can be sent to the MappingTree to get the actual class that
+	 * is running.
+	 * @return
+	 */
+	public static int GetServerNamespace() {
+		if(ServerType == -1) {
+			// Paper has 2 versions, "moj-mapped" and "spigot" mapped. As we support paper and also spigot, we need
+			// to check which mapping version the server is running, and select the correct mapping segment.
+			ServerType = PacketJumper.GetMojangNamespace();
+			// This class is named net.minecraft.network.protocol.status.ServerboundStatusRequestPacket in mojang mappings
+			if(ReflectionUtils.classExists("net.minecraft.network.protocol.status.PacketStatusInStart")) {
+				ServerType = PacketJumper.GetSpigotNamespace();
+			}
+		}
+		return ServerType;
+	}
+
+	/**
+	 * Returns the Spigot namespace. Generally, one shouls use GetServerNamespace() instead.
+	 * @return
+	 */
+	public static int GetSpigotNamespace() {
+		return SpigotNamespace;
+	}
+
+	/**
+	 * Returns the Mojang namespace. This should be used when sending and receiving names from users.
+	 * @return
+	 */
+	public static int GetMojangNamespace() {
+		return MojangNamespace;
 	}
 }

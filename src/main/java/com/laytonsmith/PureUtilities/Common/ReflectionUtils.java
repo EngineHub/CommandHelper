@@ -189,7 +189,7 @@ public final class ReflectionUtils {
 	 * @param methodName The name of the method.
 	 * @return The invocation result, null if void.
 	 */
-	public static Object invokeMethod(Class clazz, Object instance, String methodName) throws ReflectionException {
+	public static <T> T invokeMethod(Class clazz, Object instance, String methodName) throws ReflectionException {
 		return invokeMethod(clazz, instance, methodName, new Class[]{}, new Object[]{});
 	}
 
@@ -204,7 +204,7 @@ public final class ReflectionUtils {
 	 * @throws ReflectionException
 	 */
 	@SuppressWarnings({"ThrowableInstanceNotThrown", "ThrowableInstanceNeverThrown"})
-	public static Object invokeMethod(Object instance, String methodName, Object... params) throws ReflectionException {
+	public static <T> T invokeMethod(Object instance, String methodName, Object... params) throws ReflectionException {
 		Class c = instance.getClass();
 		Class[] argTypes;
 		{
@@ -237,7 +237,7 @@ public final class ReflectionUtils {
 								}
 							}
 							m.setAccessible(true);
-							return m.invoke(instance, params);
+							return (T) m.invoke(instance, params);
 						}
 					} catch(IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
 						throw new ReflectionException(ex);
@@ -260,13 +260,13 @@ public final class ReflectionUtils {
 	 * @throws ReflectionException
 	 */
 	@SuppressWarnings({"ThrowableInstanceNotThrown", "ThrowableInstanceNeverThrown"})
-	public static Object invokeMethod(Object instance, String methodName) throws ReflectionException {
+	public static <T> T invokeMethod(Object instance, String methodName) throws ReflectionException {
 		Class c = instance.getClass();
 		while(c != null) {
 			for(Method m : c.getDeclaredMethods()) {
-				if(methodName.equals(m.getName())) {
+				if(methodName.equals(m.getName()) && m.getParameterCount() == 0) {
 					try {
-						return m.invoke(instance);
+						return (T) m.invoke(instance);
 					} catch(IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
 						throw new ReflectionException(ex);
 					}
@@ -290,12 +290,12 @@ public final class ReflectionUtils {
 	 * @param args The arguments.
 	 * @return The invocation result, null if void.
 	 */
-	public static Object invokeMethod(Class clazz, Object instance, String methodName, Class[] argTypes, Object[] args)
+	public static <T> T invokeMethod(Class clazz, Object instance, String methodName, Class[] argTypes, Object[] args)
 			throws ReflectionException {
 		try {
 			Method m = clazz.getDeclaredMethod(methodName, argTypes);
 			m.setAccessible(true);
-			return m.invoke(instance, args);
+			return (T) m.invoke(instance, args);
 		} catch(InvocationTargetException | NoSuchMethodException | IllegalArgumentException
 				| IllegalAccessException | SecurityException ex) {
 			throw new ReflectionException(ex);

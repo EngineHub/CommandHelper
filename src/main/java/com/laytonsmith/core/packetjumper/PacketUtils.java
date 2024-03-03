@@ -1,4 +1,4 @@
-package com.laytonsmith.core.protocollib;
+package com.laytonsmith.core.packetjumper;
 
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
@@ -19,6 +19,7 @@ import com.laytonsmith.core.functions.XPacketJumper;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.WildcardType;
@@ -51,6 +52,27 @@ public final class PacketUtils {
 	}
 
 	/**
+	 * Returns a list of PacketTypes that are supported by the system.
+	 * @return
+	 */
+	public static List<PacketType> SupportedPackets() {
+		List<PacketType> output = new ArrayList<>();
+		for(Set<PacketType> set : new Set[]{PacketRegistry.getServerPacketTypes(), PacketRegistry.getClientPacketTypes()}) {
+			for(PacketType type : set) {
+				if(type.name() == null) {
+					// Not sure how to deal with these types of packets.
+					continue;
+				}
+				if(type.isDynamic()) {
+					continue;
+				}
+				output.add(type);
+			}
+		}
+		return output;
+	}
+
+	/**
 	 * Gets the packet structure, but does not clone it. Don't change the structure.
 	 * @return
 	 */
@@ -68,18 +90,9 @@ public final class PacketUtils {
 						subtypes.set("OUT", new CArray(Target.UNKNOWN), Target.UNKNOWN);
 						packetTypeArray.set(protocol.name(), subtypes, Target.UNKNOWN);
 					}
-					List<PacketType> output = new ArrayList<>();
-					output.addAll(PacketRegistry.getServerPacketTypes());
-					output.addAll(PacketRegistry.getClientPacketTypes());
+					List<PacketType> output = SupportedPackets();
 					Set<String> unsupportedTypes = new HashSet<>();
 					for(PacketType type : output) {
-						if(type.name() == null) {
-							// Not sure how to deal with these types of packets.
-							continue;
-						}
-						if(type.isDynamic()) {
-							continue;
-						}
 						try {
 							CArray array = (CArray)((ArrayAccess)packetTypeArray.get(type.getProtocol().name(), Target.UNKNOWN))
 									.get(type.getSender() == PacketType.Sender.CLIENT ? "IN" : "OUT", Target.UNKNOWN);
@@ -112,10 +125,14 @@ public final class PacketUtils {
 		Class clazz = ClassUtils.forCanonicalName(mapping.getName(serverType).replace("/", "."));
 		arr.set("class", mapping.getName(PacketJumper.GetMojangNamespace()).replace("/", "."));
 		arr.set("superclass", clazz.getSuperclass().getName());
+		arr.set("comment", mapping.getComment());
 		CArray fields = new CArray(Target.UNKNOWN);
 		int index = 0;
 		do {
 			for(MappingTree.FieldMapping fieldMapping : mapping.getFields()) {
+				if((getJavaField(fieldMapping, clazz).getModifiers() & Modifier.STATIC) > 0) {
+					continue;
+				}
 				CArray field = new CArray(Target.UNKNOWN);
 				field.set("name", fieldMapping.getName(PacketJumper.GetMojangNamespace()));
 				Mixed typeData = CNull.NULL;
@@ -131,6 +148,7 @@ public final class PacketUtils {
 				field.set("type", typeData, Target.UNKNOWN);
 				int currentId = index++;
 				field.set("field", currentId);
+				field.set("comment", fieldMapping.getComment());
 				fields.set(fieldMapping.getName(PacketJumper.GetMojangNamespace()), field, Target.UNKNOWN);
 			}
 			clazz = clazz.getSuperclass();
@@ -213,6 +231,21 @@ public final class PacketUtils {
 		return array;
 	}
 
+	public static Field getJavaField(MappingTree.FieldMapping fm, Class clazz) {
+		String field = fm.getSrcName();
+		do {
+			try {
+				return clazz.getDeclaredField(field);
+			} catch (NoSuchFieldException ex) {
+				clazz = clazz.getSuperclass();
+				if(clazz == Object.class || clazz == Record.class) {
+					break;
+				}
+			}
+		} while(true);
+		return null;
+	}
+
 	public static PacketType.Sender getSide(String name, Target target) {
 		switch(name) {
 			case "IN":
@@ -223,33 +256,45 @@ public final class PacketUtils {
 		throw new CREIllegalArgumentException("Unknown sender type: " + name, target);
 	}
 
-	public static PacketType findPacketType(String protocol, String name, Target target) {
+	public static PacketType findPacketTypeByCommonName(String protocol, String name, Target target) {
+		for(PacketType type : SupportedPackets()) {
+			if(type.getProtocol().name().equals(protocol) && type.name().equals(name)) {
+				return type;
+			}
+		}
+		throw new CREIllegalArgumentException("Error while finding the packet of type"
+					+ " \"" + protocol + "\":\"" + name + "\"."
+					+ " Check the results of all_packets() for information about valid packet types.", target);
+	}
+
+	public static PacketType findPacketTypeByClassName(String protocol, String className, Target target) {
 		try {
 			// Convert the packet class name into the current server version name, since this will always
 			// be the mojang version, not necessarily the current server version.
 			MappingTree tree = PacketJumper.GetMappingTree();
-			name = tree.getClass(name.replace(".", "/"), PacketJumper.GetMojangNamespace())
+			className = tree.getClass(className.replace(".", "/"), PacketJumper.GetMojangNamespace())
 					.getDstName(PacketJumper.GetServerNamespace()).replace("/", ".");
-			return PacketRegistry.getPacketType(PacketType.Protocol.valueOf(protocol), Class.forName(name));
+			return PacketRegistry.getPacketType(PacketType.Protocol.valueOf(protocol), Class.forName(className));
 		} catch(Exception exception) {
-			throw new CREIllegalArgumentException("Error while finding the packet of type \"" + name + "\"."
+			throw new CREIllegalArgumentException("Error while finding the packet of type"
+					+ " \"" + protocol + "\":\"" + className + "\"."
 					+ " Check the results of all_packets() for information about valid packet types.", target, exception);
 		}
 	}
 
-	public static CPacket createPacket(String protocol, String side, String name, Target target) {
+	public static CPacket createPacket(String protocol, PacketDirection side, String name, Target target) {
 		try {
 			CArray packetData = (CArray)((ArrayAccess)((ArrayAccess)getAllPacketsInternal().get(protocol, target))
-					.get(side, target))
+					.get(side.name(), target))
 					.get(name, target);
 			String clazz = packetData.get("class", target).val();
 			name = clazz;
 		} catch(CREIndexOverflowException ioe) {
 			// Do nothing, use the name exactly as is.
 		}
-		PacketContainer container = ProtocolLibrary.getProtocolManager().createPacket(findPacketType(protocol, name, target));
+		PacketContainer container = ProtocolLibrary.getProtocolManager().createPacket(findPacketTypeByClassName(protocol, name, target));
 		return CPacket.create(container, name, target, PacketType.Protocol.valueOf(protocol),
-				(side.equals("IN") ? PacketType.Sender.CLIENT : PacketType.Sender.SERVER));
+				(side == PacketDirection.IN ? PacketType.Sender.CLIENT : PacketType.Sender.SERVER));
 	}
 
 	public static PacketKind getPacketKind(PacketType type) {

@@ -48,4 +48,9 @@ public abstract class WorldPrefilterMatcher<T extends BindableEvent> extends Str
 	}
 
 	protected abstract MCWorld getWorld(T event);
+
+	@Override
+	public int getPriority() {
+		return -1;
+	}
 }

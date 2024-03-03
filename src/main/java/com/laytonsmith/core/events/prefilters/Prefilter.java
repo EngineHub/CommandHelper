@@ -12,13 +12,14 @@ import java.util.Set;
  * @param <T>
  */
 @StandardField
-public class Prefilter<T extends BindableEvent> {
+public class Prefilter<T extends BindableEvent> implements Comparable<Prefilter<? extends BindableEvent>>{
 	private final String prefilterName;
 	private final String docs;
 	private final PrefilterMatcher<T> matcher;
 	private final Set<PrefilterStatus> status;
+	private final int priority;
 
-	public Prefilter(String prefilterName, String docs, PrefilterMatcher<T> matcher, Set<PrefilterStatus> status) {
+	public Prefilter(String prefilterName, String docs, PrefilterMatcher<T> matcher, Set<PrefilterStatus> status, int priority) {
 		Objects.requireNonNull(prefilterName);
 		Objects.requireNonNull(docs);
 		Objects.requireNonNull(matcher);
@@ -26,6 +27,7 @@ public class Prefilter<T extends BindableEvent> {
 		this.docs = docs;
 		this.matcher = matcher;
 		this.status = status == null ? EnumSet.noneOf(PrefilterStatus.class) : status;
+		this.priority = priority;
 	}
 
 	public String getDocs() {
@@ -58,6 +60,23 @@ public class Prefilter<T extends BindableEvent> {
 	@Override
 	public String toString() {
 		return ObjectHelpers.DoToString(this);
+	}
+
+	/**
+	 * The priority is the order in which prefilters should be matched against. Some prefilters are more expensive
+	 * than others, and so should not be run if a cheaper prefilter doesn't match. Prefilter types can define
+	 * their own default priority, but if they don't, the default is 0, where prefilters with a lower value (i.e.
+	 * negative) are run after prefilters that have a higher priority. For prefilters with
+	 * the same priority, the ordering is deterministic but undefined.
+	 * @return
+	 */
+	public int getPriority() {
+		return priority;
+	}
+
+	@Override
+	public int compareTo(Prefilter<? extends BindableEvent> o) {
+		return Integer.compare(this.priority, o.priority);
 	}
 
 }

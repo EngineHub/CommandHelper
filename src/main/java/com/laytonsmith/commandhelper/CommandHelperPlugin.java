@@ -62,7 +62,7 @@ import com.laytonsmith.core.UpgradeLog;
 import com.laytonsmith.core.apps.AppsApiUtil;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.extensions.ExtensionManager;
-import com.laytonsmith.core.protocollib.PacketJumper;
+import com.laytonsmith.core.packetjumper.PacketJumper;
 import com.laytonsmith.core.telemetry.DefaultTelemetry;
 import com.laytonsmith.core.telemetry.Telemetry;
 import org.bukkit.Bukkit;
@@ -443,6 +443,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 		}
 
 		ExtensionManager.Cleanup();
+		PacketJumper.Shutdown();
 
 		ac = null;
 	}

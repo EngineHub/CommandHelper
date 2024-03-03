@@ -44,6 +44,7 @@ import com.laytonsmith.core.functions.IncludeCache;
 import com.laytonsmith.core.functions.Scheduling;
 import com.laytonsmith.core.natives.interfaces.MEnumType;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import com.laytonsmith.core.packetjumper.PacketJumper;
 import com.laytonsmith.core.profiler.ProfilePoint;
 import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.core.taskmanager.TaskManagerImpl;
@@ -260,6 +261,8 @@ public class AliasCore {
 						+ " you should set this to false, except during development.", Target.UNKNOWN);
 			}
 		}
+
+		PacketJumper.Shutdown();
 
 		MSLog.initialize(fileLocations.getConfigDirectory());
 
