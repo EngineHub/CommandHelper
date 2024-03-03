@@ -19,6 +19,7 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
+import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
 import com.laytonsmith.core.exceptions.CRE.CREPluginInternalException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
@@ -218,7 +219,8 @@ public final class XPacketJumper {
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{
 				CRECastException.class,
-				CREIllegalArgumentException.class
+				CREIllegalArgumentException.class,
+				CREPlayerOfflineException.class,
 			};
 		}
 
