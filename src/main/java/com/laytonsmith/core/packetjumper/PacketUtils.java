@@ -37,7 +37,8 @@ import net.fabricmc.mappingio.tree.MappingTree;
  */
 public final class PacketUtils {
 
-	private PacketUtils() {}
+	private PacketUtils() {
+	}
 
 	private static volatile CArray allPackets = null;
 	private static final Object ALL_PACKETS_LOCK = new Object();
@@ -53,6 +54,7 @@ public final class PacketUtils {
 
 	/**
 	 * Returns a list of PacketTypes that are supported by the system.
+	 *
 	 * @return
 	 */
 	public static List<PacketType> SupportedPackets() {
@@ -74,6 +76,7 @@ public final class PacketUtils {
 
 	/**
 	 * Gets the packet structure, but does not clone it. Don't change the structure.
+	 *
 	 * @return
 	 */
 	private static CArray getAllPacketsInternal() {
@@ -94,7 +97,7 @@ public final class PacketUtils {
 					Set<String> unsupportedTypes = new HashSet<>();
 					for(PacketType type : output) {
 						try {
-							CArray array = (CArray)((ArrayAccess)packetTypeArray.get(type.getProtocol().name(), Target.UNKNOWN))
+							CArray array = (CArray) ((ArrayAccess) packetTypeArray.get(type.getProtocol().name(), Target.UNKNOWN))
 									.get(type.getSender() == PacketType.Sender.CLIENT ? "IN" : "OUT", Target.UNKNOWN);
 							array.set(type.name().toUpperCase(), getPacketInfo(type, unsupportedTypes), Target.UNKNOWN);
 						} catch(ClassNotFoundException ex) {
@@ -236,7 +239,7 @@ public final class PacketUtils {
 		do {
 			try {
 				return clazz.getDeclaredField(field);
-			} catch (NoSuchFieldException ex) {
+			} catch(NoSuchFieldException ex) {
 				clazz = clazz.getSuperclass();
 				if(clazz == Object.class || clazz == Record.class) {
 					break;
@@ -263,8 +266,8 @@ public final class PacketUtils {
 			}
 		}
 		throw new CREIllegalArgumentException("Error while finding the packet of type"
-					+ " \"" + protocol + "\":\"" + name + "\"."
-					+ " Check the results of all_packets() for information about valid packet types.", target);
+				+ " \"" + protocol + "\":\"" + name + "\"."
+				+ " Check the results of all_packets() for information about valid packet types.", target);
 	}
 
 	public static PacketType findPacketTypeByClassName(String protocol, String className, Target target) {
@@ -284,7 +287,7 @@ public final class PacketUtils {
 
 	public static CPacket createPacket(String protocol, PacketDirection side, String name, Target target) {
 		try {
-			CArray packetData = (CArray)((ArrayAccess)((ArrayAccess)getAllPacketsInternal().get(protocol, target))
+			CArray packetData = (CArray) ((ArrayAccess) ((ArrayAccess) getAllPacketsInternal().get(protocol, target))
 					.get(side.name(), target))
 					.get(name, target);
 			String clazz = packetData.get("class", target).val();

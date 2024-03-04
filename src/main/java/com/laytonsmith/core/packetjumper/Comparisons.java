@@ -3,13 +3,16 @@ package com.laytonsmith.core.packetjumper;
 /**
  *
  */
-public class Comparisons {
-	private Comparisons() {}
+public final class Comparisons {
+
+	private Comparisons() {
+	}
 
 	/**
-	 * Returns true if the methodscript object is effectively equal to the packet object. This is not necessarily
-	 * a completely straightforward equals check as the values are both boxed and sometimes of disparate types,
-	 * such as Long and Integer, which requires more detailed handling.
+	 * Returns true if the methodscript object is effectively equal to the packet object. This is not necessarily a
+	 * completely straightforward equals check as the values are both boxed and sometimes of disparate types, such as
+	 * Long and Integer, which requires more detailed handling.
+	 *
 	 * @param msObject
 	 * @param packetObject
 	 * @return

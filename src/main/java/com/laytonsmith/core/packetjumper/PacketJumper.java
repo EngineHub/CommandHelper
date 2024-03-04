@@ -39,7 +39,7 @@ public final class PacketJumper {
 	/**
 	 * The current server mapping type.
 	 */
-	private static int ServerType = -1;
+	private static int serverType = -1;
 
 	/**
 	 * A mapping from minecraft versions to takenaka urls.
@@ -51,8 +51,8 @@ public final class PacketJumper {
 	};
 
 	private static final MemoryMappingTree MINECRAFT_MAPPINGS = new MemoryMappingTree();
-	private static int SpigotNamespace;
-	private static int MojangNamespace;
+	private static int spigotNamespace;
+	private static int mojangNamespace;
 
 	private static Optional<PacketEventNotifier> packetEventNotifier = Optional.empty();
 
@@ -106,8 +106,8 @@ public final class PacketJumper {
 		ZipReader tinyFileReader = new ZipReader(new File(mappingsJar, mcVersion + ".tiny"));
 		Reader reader = new BufferedReader(new InputStreamReader(tinyFileReader.getInputStream(), StandardCharsets.UTF_8));
 		Tiny2FileReader.read(reader, MINECRAFT_MAPPINGS);
-		SpigotNamespace = MINECRAFT_MAPPINGS.getNamespaceId("spigot");
-		MojangNamespace = MINECRAFT_MAPPINGS.getNamespaceId("mojang");
+		spigotNamespace = MINECRAFT_MAPPINGS.getNamespaceId("spigot");
+		mojangNamespace = MINECRAFT_MAPPINGS.getNamespaceId("mojang");
 		long ms = System.currentTimeMillis() - time;
 		Static.getLogger().log(Level.INFO,
 				"Loading {0}mappings took {1}ms",
@@ -136,36 +136,38 @@ public final class PacketJumper {
 	}
 
 	/**
-	 * Returns the server namespace. This value can be sent to the MappingTree to get the actual class that
-	 * is running.
+	 * Returns the server namespace. This value can be sent to the MappingTree to get the actual class that is running.
+	 *
 	 * @return
 	 */
 	public static int GetServerNamespace() {
-		if(ServerType == -1) {
+		if(serverType == -1) {
 			// Paper has 2 versions, "moj-mapped" and "spigot" mapped. As we support paper and also spigot, we need
 			// to check which mapping version the server is running, and select the correct mapping segment.
-			ServerType = PacketJumper.GetMojangNamespace();
+			serverType = PacketJumper.GetMojangNamespace();
 			// This class is named net.minecraft.network.protocol.status.ServerboundStatusRequestPacket in mojang mappings
 			if(ReflectionUtils.classExists("net.minecraft.network.protocol.status.PacketStatusInStart")) {
-				ServerType = PacketJumper.GetSpigotNamespace();
+				serverType = PacketJumper.GetSpigotNamespace();
 			}
 		}
-		return ServerType;
+		return serverType;
 	}
 
 	/**
 	 * Returns the Spigot namespace. Generally, one shouls use GetServerNamespace() instead.
+	 *
 	 * @return
 	 */
 	public static int GetSpigotNamespace() {
-		return SpigotNamespace;
+		return spigotNamespace;
 	}
 
 	/**
 	 * Returns the Mojang namespace. This should be used when sending and receiving names from users.
+	 *
 	 * @return
 	 */
 	public static int GetMojangNamespace() {
-		return MojangNamespace;
+		return mojangNamespace;
 	}
 }

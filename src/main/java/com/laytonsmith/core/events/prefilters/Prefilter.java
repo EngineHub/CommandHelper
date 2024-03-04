@@ -12,7 +12,7 @@ import java.util.Set;
  * @param <T>
  */
 @StandardField
-public class Prefilter<T extends BindableEvent> implements Comparable<Prefilter<? extends BindableEvent>>{
+public class Prefilter<T extends BindableEvent> implements Comparable<Prefilter<? extends BindableEvent>> {
 	private final String prefilterName;
 	private final String docs;
 	private final PrefilterMatcher<T> matcher;

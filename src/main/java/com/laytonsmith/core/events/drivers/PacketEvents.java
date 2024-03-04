@@ -47,7 +47,7 @@ import net.fabricmc.mappingio.tree.MappingTree;
 /**
  *
  */
-public class PacketEvents {
+public final class PacketEvents {
 
 	private PacketEvents() {
 	}
@@ -235,7 +235,8 @@ public class PacketEvents {
 
 	}
 
-	public static abstract class PacketEvent extends AbstractGenericEvent<ProtocolLibPacketEvent> {
+	public abstract static class PacketEvent extends AbstractGenericEvent<ProtocolLibPacketEvent> {
+
 		@Override
 		public ProtocolLibPacketEvent convert(CArray manualObject, Target t) {
 			throw new UnsupportedOperationException("Not supported yet.");

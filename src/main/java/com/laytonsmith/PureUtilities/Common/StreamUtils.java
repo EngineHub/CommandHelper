@@ -43,7 +43,7 @@ public class StreamUtils {
 	public static String GetString(InputStream in) {
 		try {
 			return GetString(in, "UTF-8");
-		} catch (UnsupportedEncodingException ex) {
+		} catch(UnsupportedEncodingException ex) {
 			throw new Error(ex);
 		}
 	}
@@ -75,7 +75,7 @@ public class StreamUtils {
 					read = input.read(buffer, 0, buffer.length)) {
 				output.append(buffer, 0, read);
 			}
-		} catch (IOException ignore) {
+		} catch(IOException ignore) {
 		}
 
 		return output.toString();
@@ -83,8 +83,8 @@ public class StreamUtils {
 	}
 
 	/**
-	 * Fully reads in a stream, as efficiently as possible, and returns a byte array.
-	 * The input stream is not closed afterwards.
+	 * Fully reads in a stream, as efficiently as possible, and returns a byte array. The input stream is not closed
+	 * afterwards.
 	 *
 	 * @param in
 	 * @return
@@ -92,7 +92,7 @@ public class StreamUtils {
 	 */
 	public static byte[] GetBytes(InputStream in) throws IOException {
 		BufferedInputStream bis = new BufferedInputStream(in);
-		try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+		try(ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 			int i;
 			byte[] buffer = new byte[8 * 1024];
 			while((i = bis.read(buffer)) != -1) {
@@ -111,7 +111,7 @@ public class StreamUtils {
 	public static InputStream GetInputStream(String contents) {
 		try {
 			return GetInputStream(contents, "UTF-8");
-		} catch (UnsupportedEncodingException ex) {
+		} catch(UnsupportedEncodingException ex) {
 			throw new Error(ex);
 		}
 	}
@@ -147,7 +147,7 @@ public class StreamUtils {
 	public static PrintStream GetSystemOut() {
 		try {
 			return new PrintStream(System.out, true, "UTF-8");
-		} catch (UnsupportedEncodingException ex) {
+		} catch(UnsupportedEncodingException ex) {
 			throw new Error(ex);
 		}
 	}
@@ -161,13 +161,14 @@ public class StreamUtils {
 	public static PrintStream GetSystemErr() {
 		try {
 			return new PrintStream(System.err, true, "UTF-8");
-		} catch (UnsupportedEncodingException ex) {
+		} catch(UnsupportedEncodingException ex) {
 			throw new Error(ex);
 		}
 	}
 
 	/**
 	 * Gets a resource string with the specified encoding, relative to the class that is calling this method.
+	 *
 	 * @param name The name of the resource. The name should follow the same naming conventions used by
 	 * {@link Class#getResource(java.lang.String)}.
 	 * @param encoding The encoding to use on the resource.
@@ -186,6 +187,7 @@ public class StreamUtils {
 
 	/**
 	 * Gets a resource as a UTF-8 encoded string, relative to the class that is calling this method.
+	 *
 	 * @param name The name of the resource. The name should follow the same naming conventions used by
 	 * {@link Class#getResource(java.lang.String)}.
 	 * @return A string depiction of the specified resource.
@@ -194,7 +196,7 @@ public class StreamUtils {
 	public static final String GetResource(String name) throws IllegalArgumentException {
 		try {
 			return GetResource(name, "UTF-8");
-		} catch (UnsupportedEncodingException ex) {
+		} catch(UnsupportedEncodingException ex) {
 			throw new Error(ex);
 		}
 	}

@@ -27,7 +27,8 @@ import org.bukkit.inventory.ItemStack;
  */
 public final class Conversions {
 
-	private Conversions() {}
+	private Conversions() {
+	}
 
 	public static Object convertMixedToObject(Mixed mixed, Class<?> type, Target t) {
 		// When adding to this list, ensure you update the Packet_Jumper docs,
@@ -65,9 +66,8 @@ public final class Conversions {
 	}
 
 	/**
-	 * Returns the CClassType which the given java class would be converted to. For instance,
-	 * java.lang.String returns CString.TYPE. Null is returned if the object type is not supported by the conversion
-	 * methods in this class.
+	 * Returns the CClassType which the given java class would be converted to. For instance, java.lang.String returns
+	 * CString.TYPE. Null is returned if the object type is not supported by the conversion methods in this class.
 	 *
 	 * @param clazz
 	 * @return
@@ -168,7 +168,7 @@ public final class Conversions {
 		} else if(MinecraftReflection.getBlockPositionClass().isAssignableFrom(clazz)) {
 			java.util.List<String> list = java.util.stream.Stream.of(object.getClass().getDeclaredMethods()).map(x -> x.getName())
 					.toList();
- 			System.out.println(list);
+			System.out.println(list);
 			MappingTree tree = PacketJumper.GetMappingTree();
 			MappingTree.ClassMapping vec3i
 					= tree.getClass(object.getClass().getSuperclass().getName().replace(".", "/"), PacketJumper.GetServerNamespace());

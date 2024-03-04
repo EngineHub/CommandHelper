@@ -23,7 +23,7 @@ import net.fabricmc.mappingio.tree.MappingTree;
  * Created by JunHyung Im on 2020-07-05
  */
 @typeof("com.commandhelper.Packet")
-public class CPacket extends Construct {
+public final class CPacket extends Construct {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
 	public static final CClassType TYPE = CClassType.get(CPacket.class);
@@ -51,6 +51,7 @@ public class CPacket extends Construct {
 
 	/**
 	 * Returns the packet name.
+	 *
 	 * @return
 	 */
 	public String getPacketName() {
@@ -86,12 +87,12 @@ public class CPacket extends Construct {
 	}
 
 	public int indexFromString(String field, Target t) {
-		CArray packetData = (CArray)((ArrayAccess)((ArrayAccess)PacketUtils.getAllPackets()
+		CArray packetData = (CArray) ((ArrayAccess) ((ArrayAccess) PacketUtils.getAllPackets()
 				.get(protocol.name(), t))
 				.get(sender == PacketType.Sender.CLIENT ? "IN" : "OUT", t))
 				.get(packetType, t);
-		CArray fieldData = (CArray)((ArrayAccess)packetData.get("fields", t)).get(field, t);
-		int index = (int)((CInt)fieldData.get("field", t)).getInt();
+		CArray fieldData = (CArray) ((ArrayAccess) packetData.get("fields", t)).get(field, t);
+		int index = (int) ((CInt) fieldData.get("field", t)).getInt();
 		return index;
 	}
 
@@ -150,7 +151,7 @@ public class CPacket extends Construct {
 			String name;
 			Class clazz = packet.getHandle().getClass();
 			MappingTree.ClassMapping classMapping
-						= tree.getClass(clazz.getName().replace(".", "/"), PacketJumper.GetServerNamespace());
+					= tree.getClass(clazz.getName().replace(".", "/"), PacketJumper.GetServerNamespace());
 			MappingTree.FieldMapping fm;
 			do {
 				fm = classMapping.getField(field.getField().getName(), null);

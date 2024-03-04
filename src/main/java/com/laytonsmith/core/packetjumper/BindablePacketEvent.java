@@ -9,11 +9,12 @@ import com.laytonsmith.core.events.BindableEvent;
  * Created by JunHyung Im on 2020-07-05
  */
 public interface BindablePacketEvent extends BindableEvent {
-    MCPlayer getPlayer();
 
-    PacketKind getKind();
+	MCPlayer getPlayer();
 
-    CPacket getPacket(Target target);
+	PacketKind getKind();
 
-    Object getInternalPacket();
+	CPacket getPacket(Target target);
+
+	Object getInternalPacket();
 }
