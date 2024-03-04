@@ -699,7 +699,7 @@ public class StaticTest {
 
 		@Override
 		public MCEnchantment[] GetEnchantmentValues() {
-			throw new UnsupportedOperationException();
+			return new MCEnchantment[]{};
 		}
 
 		@Override
