@@ -262,7 +262,7 @@ public final class XPacketJumper {
 
 		@Override
 		public Version since() {
-			throw new UnsupportedOperationException("Not supported yet.");
+			return MSVersion.V3_3_5;
 		}
 
 	}
