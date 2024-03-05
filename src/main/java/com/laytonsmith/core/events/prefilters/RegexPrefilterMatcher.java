@@ -77,4 +77,9 @@ public abstract class RegexPrefilterMatcher<T extends BindableEvent> extends Abs
 
 	protected abstract String getProperty(T event);
 
+	@Override
+	public int getPriority() {
+		return 0;
+	}
+
 }

@@ -23,8 +23,11 @@ import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
@@ -199,15 +202,25 @@ public final class EventUtils {
 				return false;
 			}
 		} else {
-			for(Map.Entry<String, Mixed> prefilter : userPrefilters.entrySet()) {
-				if(!prefilters.containsKey(prefilter.getKey())) {
+			// Sort our prefilters based on prefilter priority
+			List<Map.Entry<String, Prefilter<? extends BindableEvent>>> list = new ArrayList<>(prefilters.entrySet());
+			list.sort(Map.Entry.comparingByValue());
+			Map<String, Prefilter<? extends BindableEvent>> sortedPrefilters = new LinkedHashMap<>(userPrefilters.size());
+			for(Map.Entry<String, Prefilter<? extends BindableEvent>> entry : list) {
+				sortedPrefilters.put(entry.getKey(), entry.getValue());
+			}
+
+
+			for(Map.Entry<String, Prefilter<? extends BindableEvent>> prefilter : sortedPrefilters.entrySet()) {
+				String key = prefilter.getKey();
+				if(!userPrefilters.containsKey(key)) {
 					// The compiler should have already warned about this
 					continue;
 				}
-				Prefilter<? extends BindableEvent> pf = prefilters.get(prefilter.getKey());
+				Prefilter<? extends BindableEvent> pf = prefilter.getValue();
 				PrefilterMatcher matcher = pf.getMatcher();
-				Mixed value = prefilter.getValue();
-				if(!matcher.matches(prefilter.getKey(), value, e, b.getTarget())) {
+				Mixed value = userPrefilters.get(key);
+				if(!matcher.matches(key, value, e, b.getTarget())) {
 					return false;
 				}
 			}
@@ -323,7 +336,7 @@ public final class EventUtils {
 		if(driver == null) {
 			throw ConfigRuntimeException.CreateUncatchableException("Tried to fire an unknown event: " + eventName, Target.UNKNOWN);
 		}
-		if(!(driver instanceof AbstractEvent) || ((AbstractEvent) driver).shouldFire(e)) {
+		if(!(driver instanceof AbstractGenericEvent) || ((AbstractGenericEvent) driver).shouldFire(e)) {
 			FireListeners(GetMatchingEvents(bounded, eventName, e, driver), driver, e);
 		}
 	}
