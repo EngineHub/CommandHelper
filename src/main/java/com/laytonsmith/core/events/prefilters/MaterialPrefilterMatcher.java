@@ -85,4 +85,9 @@ public abstract class MaterialPrefilterMatcher<T extends BindableEvent> extends 
 
 	protected abstract MCMaterial getMaterial(T event);
 
+	@Override
+	public int getPriority() {
+		return -1;
+	}
+
 }

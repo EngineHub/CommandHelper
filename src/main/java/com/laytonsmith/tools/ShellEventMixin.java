@@ -1,6 +1,6 @@
 package com.laytonsmith.tools;
 
-import com.laytonsmith.core.events.AbstractEvent;
+import com.laytonsmith.core.events.AbstractGenericEvent;
 import com.laytonsmith.core.events.BindableEvent;
 import com.laytonsmith.core.events.CancellableEvent;
 import com.laytonsmith.core.events.EventMixinInterface;
@@ -14,9 +14,9 @@ import java.util.Map;
  */
 public class ShellEventMixin implements EventMixinInterface {
 
-	AbstractEvent event;
+	AbstractGenericEvent event;
 
-	public ShellEventMixin(AbstractEvent e) {
+	public ShellEventMixin(AbstractGenericEvent e) {
 		this.event = e;
 	}
 

@@ -55,6 +55,7 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -219,8 +220,14 @@ public class EventBinding {
 
 				// Perform prefilter validation for known events.
 				if(i == 2 && eventName != null) {
-					argTypes.add(this.typecheckPrefilterParseTree(
-							analysis, eventName, child, env, ast.getFileOptions(), exceptions));
+					try {
+						argTypes.add(this.typecheckPrefilterParseTree(
+								analysis, eventName, child, env, ast.getFileOptions(), exceptions));
+					} catch(ConfigCompileException ex) {
+						exceptions.add(ex);
+					} catch(ConfigCompileGroupException ex) {
+						exceptions.addAll(ex.getList());
+					}
 					argTargets.add(child.getTarget());
 				} else {
 
@@ -236,7 +243,8 @@ public class EventBinding {
 
 		private CClassType typecheckPrefilterParseTree(
 				StaticAnalysis analysis, String eventName, ParseTree prefilterParseTree,
-				Environment env, FileOptions fileOptions, Set<ConfigCompileException> exceptions) {
+				Environment env, FileOptions fileOptions, Set<ConfigCompileException> exceptions)
+				throws ConfigCompileException, ConfigCompileGroupException {
 
 			// Return if the prefilter parse tree is not a hard-coded "array(...)" node.
 			if(!(prefilterParseTree.getData() instanceof CFunction)
@@ -258,6 +266,7 @@ public class EventBinding {
 			}
 
 			// Validate prefilters.
+			Map<Prefilter<? extends BindableEvent>, ParseTree> fullPrefilters = new HashMap<>();
 			for(ParseTree node : prefilterParseTree.getChildren()) {
 				if(node.getData() instanceof CFunction && node.getData().val().equals(Compiler.centry.NAME)) {
 					List<ParseTree> children = node.getChildren();
@@ -266,6 +275,7 @@ public class EventBinding {
 					if(prefilters.containsKey(prefilterKey)) {
 						Prefilter<? extends BindableEvent> prefilter = prefilters.get(prefilterKey);
 						prefilter.getMatcher().typecheck(analysis, prefilterEntryValParseTree, env, exceptions);
+						fullPrefilters.put(prefilter, prefilterEntryValParseTree);
 						if(prefilter.getStatus().contains(PrefilterStatus.REMOVED)) {
 							exceptions.add(new ConfigCompileException("This prefilter has been removed,"
 									+ " and is no longer available.", prefilterEntryValParseTree.getTarget()));
@@ -288,6 +298,8 @@ public class EventBinding {
 					analysis.typecheck(node, env, exceptions);
 				}
 			}
+
+			ev.validatePrefilters(fullPrefilters, env);
 
 			// All array entries have been typechecked, so we can just return the array type here.
 			return CArray.TYPE;

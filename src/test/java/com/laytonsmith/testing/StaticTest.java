@@ -64,7 +64,7 @@ import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
-import com.laytonsmith.core.events.AbstractEvent;
+import com.laytonsmith.core.events.AbstractGenericEvent;
 import com.laytonsmith.core.events.BindableEvent;
 import com.laytonsmith.core.events.EventMixinInterface;
 import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
@@ -909,7 +909,7 @@ public class StaticTest {
 		public static MCPlayer fakePlayer;
 		public boolean cancelled = false;
 
-		public FakeServerMixin(AbstractEvent e) {
+		public FakeServerMixin(AbstractGenericEvent e) {
 
 		}
 

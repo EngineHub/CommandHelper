@@ -143,4 +143,9 @@ public abstract class MathPrefilterMatcher<T extends BindableEvent> extends Abst
 
 	protected abstract double getTolerance();
 
+	@Override
+	public int getPriority() {
+		return -1;
+	}
+
 }

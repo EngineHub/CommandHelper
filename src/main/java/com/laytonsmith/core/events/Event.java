@@ -8,6 +8,8 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.BoundEvent.ActiveEvent;
 import com.laytonsmith.core.events.prefilters.Prefilter;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
@@ -16,8 +18,9 @@ import java.util.Map;
 /**
  * This interface should be implemented to allow the bind() function to bind to a particular event type. To be
  * recognized as an event type, it should also tag itself with @api, and it will be included in the EventList.
+ * @param <TBindableEvent> The underlying event type.
  */
-public interface Event extends Comparable<Event>, Documentation {
+public interface Event<TBindableEvent extends BindableEvent> extends Comparable<Event<TBindableEvent>>, Documentation {
 
 	/**
 	 * This should return the name of the event.
@@ -59,7 +62,7 @@ public interface Event extends Comparable<Event>, Documentation {
 	 * Error.
 	 */
 	@Deprecated
-	public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException;
+	public boolean matches(Map<String, Mixed> prefilter, TBindableEvent e) throws PrefilterNonMatchException;
 
 	/**
 	 * If an event is manually triggered, then it may be required for an event object to be faked, so the rest of the
@@ -69,7 +72,7 @@ public interface Event extends Comparable<Event>, Documentation {
 	 * @param t
 	 * @return
 	 */
-	public BindableEvent convert(CArray manualObject, Target t);
+	public TBindableEvent convert(CArray manualObject, Target t);
 
 	/**
 	 * This function is called when an event is triggered. It passes the event, and expects back a Map, which will be
@@ -80,7 +83,7 @@ public interface Event extends Comparable<Event>, Documentation {
 	 * @return The map build from the event
 	 * @throws com.laytonsmith.core.exceptions.EventException If some exception occurs during map building
 	 */
-	public Map<String, Mixed> evaluate(BindableEvent e) throws EventException;
+	public Map<String, Mixed> evaluate(TBindableEvent e) throws EventException;
 
 	/**
 	 * This is called to determine if an event is cancellable in the first place
@@ -88,7 +91,7 @@ public interface Event extends Comparable<Event>, Documentation {
 	 * @param e
 	 * @return
 	 */
-	public boolean isCancellable(BindableEvent e);
+	public boolean isCancellable(TBindableEvent e);
 
 	/**
 	 * This is called if the script attempts to cancel the event, so the underlying event can also be cancelled. If the
@@ -99,7 +102,7 @@ public interface Event extends Comparable<Event>, Documentation {
 	 * @param state True, if the event should be cancelled, false if it should be uncancelled.
 	 * @throws com.laytonsmith.core.exceptions.EventException If the event isn't cancellable
 	 */
-	public void cancel(BindableEvent e, boolean state) throws EventException;
+	public void cancel(TBindableEvent e, boolean state) throws EventException;
 
 	/**
 	 * This function returns the "driver" class of the event needed to trigger it. Though not strictly needed, this
@@ -156,7 +159,7 @@ public interface Event extends Comparable<Event>, Documentation {
 	 *
 	 * @param e
 	 */
-	public void manualTrigger(BindableEvent e);
+	public void manualTrigger(TBindableEvent e);
 
 	/**
 	 * If the event is an external event, and there is no reason to attempt a serverwide manual triggering, this
@@ -176,7 +179,7 @@ public interface Event extends Comparable<Event>, Documentation {
 	 * @param event
 	 * @return
 	 */
-	public boolean modifyEvent(String key, Mixed value, BindableEvent event);
+	public boolean modifyEvent(String key, Mixed value, TBindableEvent event);
 
 	/**
 	 * Returns if this event is cancelled. If the event is not cancellable, false should be returned, though this case
@@ -185,7 +188,7 @@ public interface Event extends Comparable<Event>, Documentation {
 	 * @param underlyingEvent
 	 * @return
 	 */
-	public boolean isCancelled(BindableEvent underlyingEvent);
+	public boolean isCancelled(TBindableEvent underlyingEvent);
 
 	/**
 	 * Some events don't need to show up in documentation. Maybe they are experimental, or magic functions. If they
@@ -229,6 +232,18 @@ public interface Event extends Comparable<Event>, Documentation {
 	 *
 	 * @return
 	 */
-	public Map<String, Prefilter<? extends BindableEvent>> getPrefilters();
+	public Map<String, Prefilter<? extends TBindableEvent>> getPrefilters();
+
+	/**
+	 * Called after prefilters are individually validated, and can be used when there is additional validation
+	 * that can be done across multiple prefilters, i.e. when the value of one prefilter is as such, then
+	 * another prefilter may have different behavior.
+	 * @param prefilters The full set of prefilters.
+	 * @param env The environment.
+	 * @throws com.laytonsmith.core.exceptions.ConfigCompileException
+	 * @throws com.laytonsmith.core.exceptions.ConfigCompileGroupException
+	 */
+	public void validatePrefilters(Map<Prefilter<TBindableEvent>, ParseTree> prefilters, Environment env)
+			throws ConfigCompileException, ConfigCompileGroupException;
 
 }
