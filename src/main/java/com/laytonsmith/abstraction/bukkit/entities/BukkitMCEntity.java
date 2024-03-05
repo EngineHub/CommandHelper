@@ -387,4 +387,10 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 	public int hashCode() {
 		return e.hashCode();
 	}
+
+	@Override
+	public int getEntityId() {
+		return e.getEntityId();
+	}
+
 }

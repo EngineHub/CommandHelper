@@ -5280,4 +5280,41 @@ public class EntityManagement {
 		}
 
 	}
+
+	@api
+	public static class get_entity_transient_id extends EntityGetterFunction {
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCEntity entity = Static.getEntity(args[0], t);
+			return new CInt(entity.getEntityId(), t);
+		}
+
+		@Override
+		public String getName() {
+			return "get_entity_transient_id";
+		}
+
+		@Override
+		public String docs() {
+			return "int {uuid} Given a permanent entity uuid, returns the transient entity id. This should not"
+					+ " be stored, as it is reset every restart, and is only useful for dealing with low level packets.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+	}
 }
