@@ -119,6 +119,12 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity, MCOfflinePlaye
 
 	void setVanished(boolean set, MCPlayer to);
 
+	void hideEntity(MCEntity entity);
+
+	void showEntity(MCEntity entity);
+
+	boolean canSeeEntity(MCEntity entity);
+
 	boolean isNewPlayer();
 
 	String getHost();
