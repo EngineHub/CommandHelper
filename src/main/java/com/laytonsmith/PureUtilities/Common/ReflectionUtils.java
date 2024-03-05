@@ -7,8 +7,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -187,7 +189,7 @@ public final class ReflectionUtils {
 	 * @param methodName The name of the method.
 	 * @return The invocation result, null if void.
 	 */
-	public static Object invokeMethod(Class clazz, Object instance, String methodName) throws ReflectionException {
+	public static <T> T invokeMethod(Class clazz, Object instance, String methodName) throws ReflectionException {
 		return invokeMethod(clazz, instance, methodName, new Class[]{}, new Object[]{});
 	}
 
@@ -202,7 +204,7 @@ public final class ReflectionUtils {
 	 * @throws ReflectionException
 	 */
 	@SuppressWarnings({"ThrowableInstanceNotThrown", "ThrowableInstanceNeverThrown"})
-	public static Object invokeMethod(Object instance, String methodName, Object... params) throws ReflectionException {
+	public static <T> T invokeMethod(Object instance, String methodName, Object... params) throws ReflectionException {
 		Class c = instance.getClass();
 		Class[] argTypes;
 		{
@@ -235,7 +237,7 @@ public final class ReflectionUtils {
 								}
 							}
 							m.setAccessible(true);
-							return m.invoke(instance, params);
+							return (T) m.invoke(instance, params);
 						}
 					} catch(IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
 						throw new ReflectionException(ex);
@@ -258,13 +260,13 @@ public final class ReflectionUtils {
 	 * @throws ReflectionException
 	 */
 	@SuppressWarnings({"ThrowableInstanceNotThrown", "ThrowableInstanceNeverThrown"})
-	public static Object invokeMethod(Object instance, String methodName) throws ReflectionException {
+	public static <T> T invokeMethod(Object instance, String methodName) throws ReflectionException {
 		Class c = instance.getClass();
 		while(c != null) {
 			for(Method m : c.getDeclaredMethods()) {
-				if(methodName.equals(m.getName())) {
+				if(methodName.equals(m.getName()) && m.getParameterCount() == 0) {
 					try {
-						return m.invoke(instance);
+						return (T) m.invoke(instance);
 					} catch(IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
 						throw new ReflectionException(ex);
 					}
@@ -288,12 +290,12 @@ public final class ReflectionUtils {
 	 * @param args The arguments.
 	 * @return The invocation result, null if void.
 	 */
-	public static Object invokeMethod(Class clazz, Object instance, String methodName, Class[] argTypes, Object[] args)
+	public static <T> T invokeMethod(Class clazz, Object instance, String methodName, Class[] argTypes, Object[] args)
 			throws ReflectionException {
 		try {
 			Method m = clazz.getDeclaredMethod(methodName, argTypes);
 			m.setAccessible(true);
-			return m.invoke(instance, args);
+			return (T) m.invoke(instance, args);
 		} catch(InvocationTargetException | NoSuchMethodException | IllegalArgumentException
 				| IllegalAccessException | SecurityException ex) {
 			throw new ReflectionException(ex);
@@ -462,9 +464,8 @@ public final class ReflectionUtils {
 	 *
 	 * @param className the fully qualified name of the desired class.
 	 * @return the {@code Class} object for the class with the specified name.
-	 * @throws LinkageError if the linkage fails
-	 * @throws ExceptionInInitializerError if the initialization provoked by this method fails
-	 * @throws ReflectionException if the class cannot be located
+	 * @throws ReflectionException wraps a LinkageError if the linkage fails, ExceptionInInitializerError if the
+	 * initialization provoked by this method fails, or ClassNotFoundException if the class is not found.
 	 */
 	public static Class forName(String className) {
 		try {
@@ -515,12 +516,11 @@ public final class ReflectionUtils {
 	 * @param loader class loader from which the class must be loaded
 	 * @return class object representing the desired class
 	 *
-	 * @throws LinkageError if the linkage fails
-	 * @throws ExceptionInInitializerError if the initialization provoked by this method fails
-	 * @throws ReflectionException if the class cannot be located by the specified class loader
-	 * @throws SecurityException if a security manager is present, and the {@code loader} is {@code null}, and the
+	 * @throws ReflectionException wraps a LinkageError if the linkage fails, ExceptionInInitializerError if the
+	 * initialization provoked by this method fails, SecurityException if a security manager is present,
+	 * and the {@code loader} is {@code null}, and the
 	 * caller's class loader is not {@code null}, and the caller does not have the
-	 * {@link RuntimePermission}{@code ("getClassLoader")}
+	 * {@link RuntimePermission}{@code ("getClassLoader")}, or ClassNotFoundException if the class is not found.
 	 *
 	 * @see java.lang.Class#forName(String, boolean, ClassLoader)
 	 * @see java.lang.ClassLoader
@@ -530,6 +530,28 @@ public final class ReflectionUtils {
 			return Class.forName(name, initialize, loader);
 		} catch(ClassNotFoundException ex) {
 			throw new ReflectionException(ex);
+		}
+	}
+
+	// Exceptions are expensive, so cache this.
+	private static Map<String, Boolean> classExistsMap = new HashMap<>();
+
+	/**
+	 * Checks if a class exists, according to Class.forName(). This is cached.
+	 * @param name The class name.
+	 * @return True if the class exists.
+	 */
+	public static boolean classExists(String name) {
+		if(classExistsMap.containsKey(name)) {
+			return classExistsMap.get(name);
+		}
+		try {
+			Class.forName(name);
+			classExistsMap.put(name, Boolean.TRUE);
+			return true;
+		} catch(ClassNotFoundException ex) {
+			classExistsMap.put(name, Boolean.FALSE);
+			return false;
 		}
 	}
 

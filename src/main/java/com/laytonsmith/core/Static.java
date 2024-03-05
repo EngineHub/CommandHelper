@@ -1487,9 +1487,18 @@ public final class Static {
 			return CNull.NULL;
 		} else if(object instanceof Boolean) {
 			return CBoolean.get((boolean) object);
-		} else if((object instanceof Byte) || (object instanceof Short) || (object instanceof Integer) || (object instanceof Long)) {
+		} else if(object instanceof Byte b) {
+			// These are required due to unboxing
+			return new CInt(b.longValue(), t);
+		} else if(object instanceof Short s) {
+			return new CInt(s.longValue(), t);
+		} else if(object instanceof Integer i) {
+			return new CInt(i.longValue(), t);
+		} else if(object instanceof Long) {
 			return new CInt((long) object, t);
-		} else if((object instanceof Float) || (object instanceof Double)) {
+		} else if(object instanceof Float f) {
+			return new CDouble(f.doubleValue(), t);
+		} else if(object instanceof Double) {
 			return new CDouble((double) object, t);
 		} else if(object instanceof Character) {
 			return new CString((char) object, t);
