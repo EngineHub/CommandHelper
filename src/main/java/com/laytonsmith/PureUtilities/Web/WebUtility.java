@@ -469,6 +469,7 @@ public final class WebUtility {
 			});
 		}
 		conn.setConnectTimeout(timeout);
+		conn.setReadTimeout(timeout);
 		conn.setInstanceFollowRedirects(followRedirects);
 		if(cookieStash != null) {
 			String cookies = cookieStash.getCookies(url);
