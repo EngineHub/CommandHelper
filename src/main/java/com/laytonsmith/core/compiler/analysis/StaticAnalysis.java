@@ -373,6 +373,13 @@ public class StaticAnalysis {
 				}
 				return CClassType.AUTO; // Unknown return type.
 			} else if(cFunc.hasProcedure()) { // The function is a procedure reference.
+
+				// Type check procedure arguments.
+				for(ParseTree child : ast.getChildren()) {
+					this.typecheck(child, env, exceptions);
+				}
+
+				// Return procedure return type.
 				String procName = cFunc.val();
 				Scope scope = this.getTermScope(ast);
 				if(scope != null) {
