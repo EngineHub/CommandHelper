@@ -1184,7 +1184,8 @@ public final class Static {
 		}
 
 		// Convert RGB color codes to ANSI RGB color codes. Note that Windows command prompt ignores this.
-		mes = Pattern.compile("(?i)§x(?:§([a-f0-9])){6}").matcher(mes).replaceAll((MatchResult res) -> {
+		mes = Pattern.compile("(?i)§x§([a-f0-9])§([a-f0-9])§([a-f0-9])§([a-f0-9])§([a-f0-9])§([a-f0-9])")
+				.matcher(mes).replaceAll((MatchResult res) -> {
 			int red = Integer.parseInt(res.group(1) + res.group(2), 16);
 			int green = Integer.parseInt(res.group(3) + res.group(4), 16);
 			int blue = Integer.parseInt(res.group(5) + res.group(6), 16);
