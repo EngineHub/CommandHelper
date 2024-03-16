@@ -2360,6 +2360,43 @@ public class StringHandling {
 	}
 
 	@api
+	public static class string_compare_ic extends string_compare {
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			return new CInt(args[0].val().compareToIgnoreCase(args[1].val()), t);
+		}
+
+		@Override
+		public String getName() {
+			return "string_compare_ic";
+		}
+
+		@Override
+		public String docs() {
+			return "int {string s1, string s2} Compares two strings lexicographically ignoring casing."
+					+ " The comparison is based on the Unicode value of each character in the strings."
+					+ " Returns 0 if s1 is equal to s2, a negative value if s1 is lexographically less than s2,"
+					+ " and a positive value if s1 is lexigraphically greater than s2."
+					+ " The magnitude of non-zero return values is the difference between the char values at the first"
+					+ " index at which a different char was found in both strings."
+					+ " If all chars match but the strings differ in length, then the magnitude is this difference.";
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("", "string_compare_ic('axx', 'bxx')"),
+				new ExampleScript("", "string_compare_ic('Axx', 'bxx')"),
+				new ExampleScript("", "string_compare_ic('axx', 'Bxx')"),
+				new ExampleScript("", "string_compare_ic('xbx', 'xax')"),
+				new ExampleScript("", "string_compare_ic('abc', 'abc')"),
+				new ExampleScript("", "string_compare_ic('abc', 'abcde')")
+			};
+		}
+	}
+
+	@api
 	public static class string_multiply extends AbstractFunction {
 
 		@Override
