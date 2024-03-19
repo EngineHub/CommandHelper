@@ -5317,4 +5317,32 @@ public class EntityManagement {
 		}
 
 	}
+
+	@api
+	public static class entity_in_water extends EntityGetterFunction {
+
+		@Override
+		public String getName() {
+			return "entity_in_water";
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {entityUUID} Returns whether an entity is colliding with water."
+					+ " This accounts for waterlogged blocks, bubble columns, and fluid height."
+					+ " It does not account for water cauldrons.";
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCEntity entity = Static.getEntity(args[0], t);
+			return CBoolean.get(entity.isInWater());
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+	}
 }

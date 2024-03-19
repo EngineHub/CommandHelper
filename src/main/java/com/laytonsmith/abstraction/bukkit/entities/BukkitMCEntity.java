@@ -393,4 +393,9 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 		return e.getEntityId();
 	}
 
+	@Override
+	public boolean isInWater() {
+		return e.isInWater();
+	}
+
 }

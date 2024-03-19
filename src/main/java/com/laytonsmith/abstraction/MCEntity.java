@@ -110,4 +110,6 @@ public interface MCEntity extends MCMetadatable {
 	void setFreezingTicks(int ticks);
 
 	int getEntityId();
+
+	boolean isInWater();
 }
