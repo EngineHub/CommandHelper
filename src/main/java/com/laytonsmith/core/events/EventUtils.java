@@ -23,11 +23,8 @@ import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
@@ -202,24 +199,14 @@ public final class EventUtils {
 				return false;
 			}
 		} else {
-			// Sort our prefilters based on prefilter priority
-			List<Map.Entry<String, Prefilter<? extends BindableEvent>>> list = new ArrayList<>(prefilters.entrySet());
-			list.sort(Map.Entry.comparingByValue());
-			Map<String, Prefilter<? extends BindableEvent>> sortedPrefilters = new LinkedHashMap<>(userPrefilters.size());
-			for(Map.Entry<String, Prefilter<? extends BindableEvent>> entry : list) {
-				sortedPrefilters.put(entry.getKey(), entry.getValue());
-			}
-
-
-			for(Map.Entry<String, Prefilter<? extends BindableEvent>> prefilter : sortedPrefilters.entrySet()) {
+			for(Map.Entry<String, Prefilter<? extends BindableEvent>> prefilter : prefilters.entrySet()) {
 				String key = prefilter.getKey();
-				if(!userPrefilters.containsKey(key)) {
-					// The compiler should have already warned about this
+				Mixed value = userPrefilters.get(key);
+				if(value == null) {
 					continue;
 				}
 				Prefilter<? extends BindableEvent> pf = prefilter.getValue();
 				PrefilterMatcher matcher = pf.getMatcher();
-				Mixed value = userPrefilters.get(key);
 				if(!matcher.matches(key, value, e, b.getTarget())) {
 					return false;
 				}
