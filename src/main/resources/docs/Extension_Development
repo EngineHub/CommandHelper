@@ -1,14 +1,12 @@
 == Developing an extension ==
 
-Extensions provide a means of adding functionality to CommandHelper and the MethodScript engine. While the API used is
-under construction still, it is still deemed stable enough for production use. Any breakages will be minimal, and
-deprecation will be used where it applies.
+Extensions provide a means of adding functionality to CommandHelper and the MethodScript engine.
 
 An extension currently consists of three core parts:
 
-# The lifecycle class, which takes care of the life and identity of the extension.
-# Events, which add new events that MethodScript can use, and
-# Functions, which add new functionality to MethodScript.
+# LifeCycle
+# Functions
+# Events
 
 === LifeCycles ===
 
@@ -29,11 +27,13 @@ public class MyExtension extends AbstractExtension {
 }
 %%
 
-The class name given by the definition doesn't matter, but does assist with debugging in case of a stacktrace. See the source code of <code>AbstractExtension</code> for the full set of methods available to this class.
+The class name given by the definition doesn't matter, but does assist with debugging in case of a stacktrace.
+See the source code of <code>AbstractExtension</code> for the full set of methods available to this class.
 
 === Functions ===
 
-Functions will usually be the first thing a simpler extension will be used for. Usually, functions are "wrapped" in a parent class, which provides general documentation for that group of functions. The full class definition for functions is as follows:
+Functions will usually be the first thing a simpler extension will be used for. Functions should be "wrapped" in a parent class,
+which provides general documentation for that group of functions. The full class definition for functions is as follows:
 
 %%SYNTAX|java|
 public class FunctionGroup {
@@ -58,7 +58,9 @@ Events are a three part thing:
 # The actual extension point, which converts the bindable object into a MethodScript enabled event, with supporting methods.
 # The actual call to fire the event.
 
-The bindable event layout is simply a class that extends <code>BindableEvent</code>, with one override, <code>_GetObject()</code>. If wrapping a Bukkit event, the Bukkit event should be returned here, given that the <code>BindableEvent</code> instance has been instantiated/provide with one. Otherwise, just return null.
+The bindable event layout is simply a class that extends <code>BindableEvent</code>, with one override, <code>_GetObject()</code>.
+If wrapping a Bukkit event, the Bukkit event should be returned here, given that the <code>BindableEvent</code> instance
+has been instantiated/provide with one. Otherwise, just return null.
 
 The actual extension point is laid out as follows:
 
@@ -79,7 +81,8 @@ public class EventGroup {
 
 Notice that the event classes extend <code>AbstractEvent</code>. As one can see, the layout is very similar to that of functions.
 
-Events can be triggered from anywhere, with a call to <code>EventUtils.TriggerListener(Driver.EXTENSION, &lt;event name&gt;, &lt;event instance&gt;);</code>. The event name given must be the same as given in the event that has been defined, and the event instance an instance of that event.
+Events can be triggered from anywhere, with a call to <code>EventUtils.TriggerListener(Driver.EXTENSION, &lt;event name&gt;, &lt;event instance&gt;);</code>.
+The event name given must be the same as given in the event that has been defined, and the event instance an instance of that event.
 
 === Other Extension Points ===
 
@@ -95,31 +98,28 @@ annotation.
 
 === Maven ===
 
-Our build and dependency manager of choice is maven. While a quick and dirty setup with a bare-minimal pom is possible, run-time speedups and compile-time checks will be missed out on if a few details aren't included.
+Our build and dependency manager of choice is maven. While a quick and dirty setup with a bare-minimal pom is possible,
+run-time speedups and compile-time checks will be missed out on if a few details aren't included.
 
-Please include the following snippit under the <code>&lt;build&gt;&lt;plugins&gt;</code> section in the project's pom:
+Please include the following snippet under the <code>&lt;build&gt;&lt;plugins&gt;</code> section in the project's pom:
 
 %%SYNTAX|xml|
 <!-- Leave this alone! Compile-time checks so that your extension works. -->
 <plugin>
     <groupId>org.bsc.maven</groupId>
     <artifactId>maven-processor-plugin</artifactId>
-    <version>2.2.4</version>
-
+    <version>5.0-jdk8-rc1</version>
     <executions>
         <execution>
             <id>process</id>
             <phase>process-classes</phase>
-
             <goals>
                 <goal>process</goal>
             </goals>
         </execution>
     </executions>
-
     <configuration>
         <outputDirectory>src/main/generated</outputDirectory>
-
         <processors>
             <processor>com.laytonsmith.core.extensions.ExtensionAnnotationProcessor</processor>
         </processors>
@@ -130,8 +130,7 @@ Please include the following snippit under the <code>&lt;build&gt;&lt;plugins&gt
 <plugin>
     <groupId>org.codehaus.mojo</groupId>
     <artifactId>exec-maven-plugin</artifactId>
-    <version>1.2.1</version>
-
+    <version>3.0.0</version>
     <executions>
         <execution>
             <id>cache-annotations</id>
@@ -141,10 +140,8 @@ Please include the following snippit under the <code>&lt;build&gt;&lt;plugins&gt
             </goals>
         </execution>
     </executions>
-
     <configuration>
         <mainClass>com.laytonsmith.PureUtilities.ClassLoading.Annotations.CacheAnnotations</mainClass>
-
         <arguments>
             <argument>${basedir}/target/classes</argument>
             <argument>${basedir}/target/classes</argument>
@@ -171,7 +168,7 @@ To prevent issues in the future, here are a few rules you should follow when cre
 Names of functions/events should be all lowercase and use underscores as spaces. The function name may NOT start with
 a single underscore, and functions that start with two underscores are highly discouraged, except for meta functions
 that deal with the compiler directly. Documentation should follow the same conventions, so that functions like
-{{function|reflect_docs}} will work. The version that you return does not need to correspond to the MethodScript version, it may
-be your extension's version number. If your function can be optimized, you are encouraged to do so.
+{{function|reflect_docs}} will work. The version that you return does not need to correspond to the MethodScript version,
+it may be your extension's version number. If your function can be optimized, you are encouraged to do so.
 
 {{LearningTrail}}
