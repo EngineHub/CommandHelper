@@ -96,10 +96,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	}
 
 	public Construct(String value, ConstructType ctype, int lineNum, File file, int column) {
-		this.value = value;
-		Static.AssertNonNull(value, "The string value may not be null.");
-		this.ctype = ctype;
-		this.target = new Target(lineNum, file, column);
+		this(value, ctype, new Target(lineNum, file, column));
 	}
 
 	public Construct(String value, ConstructType ctype, Target t) {
@@ -218,6 +215,8 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 				}
 				return map;
 			}
+		} else if(c.isInstanceOf(CClassType.TYPE)) {
+			return c.val();
 		} else {
 			throw new MarshalException("The type of " + c.getClass().getSimpleName() + " is not currently supported", c);
 		}

@@ -109,6 +109,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 	private boolean firstLoad = true;
 	private long interpreterUnlockedUntil = 0;
 	private Thread loadingThread;
+
 	/**
 	 * Listener for the plugin system.
 	 */
@@ -301,6 +302,8 @@ public class CommandHelperPlugin extends JavaPlugin {
 		};
 		loadingThread.start();
 
+		ExtensionManager.OnLoad();
+
 		myServer = BukkitMCServer.Get();
 
 		// Build dynamic enums
@@ -419,7 +422,6 @@ public class CommandHelperPlugin extends JavaPlugin {
 		}
 
 		ExtensionManager.Cleanup();
-
 		ac = null;
 	}
 

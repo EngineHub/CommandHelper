@@ -128,8 +128,8 @@
 		<connection>scm:git:git://github.com/sk89q/commandhelper.git</connection>
 		<url>https://github.com/sk89q/commandhelper</url>
 		<developerConnection>scm:git:git@github.com:sk89q/commandhelper.git</developerConnection>
-	  <tag>HEAD</tag>
-  </scm>
+		<tag>HEAD</tag>
+	</scm>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.test.failure.ignore>true</maven.test.failure.ignore>

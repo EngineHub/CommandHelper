@@ -69,6 +69,14 @@ public abstract class AbstractExtension implements Extension {
 	}
 
 	// Lifetime functions
+
+	/**
+	 * Called the very first time the extension is loaded, before user code is executed.
+	 */
+	@Override
+	public void onLoad() {
+	}
+
 	/**
 	 * Called when server is loading, or during a /reloadaliases call.
 	 */
