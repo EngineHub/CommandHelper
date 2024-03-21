@@ -48,7 +48,7 @@ public interface Extension {
 	 * Called the very first time the extension is loaded, before user code is executed.
 	 */
 	void onLoad();
-	
+
 	/**
 	 * Called when server is loading, or during a /reloadaliases call.
 	 */
