@@ -82,9 +82,7 @@ public final class Prefs {
 		TELEMETRY_ON("telemetry-on", Preferences.Type.STRING),
 		TELEMETRY_PREF_DEFAULT_COLLECT("telemetry-pref-default-collect", Preferences.Type.BOOLEAN),
 		TELEMETRY_AUDIT("telemetry-audit", Preferences.Type.BOOLEAN),
-		CHECK_FOR_UPDATES("check-for-updates", Preferences.Type.BOOLEAN),
-		USE_PROTOCOL_LIB("use-protocol-lib", Preferences.Type.BOOLEAN),
-		TAKENAKA_MAPPING("takenaka-mapping", Preferences.Type.STRING);
+		CHECK_FOR_UPDATES("check-for-updates", Preferences.Type.BOOLEAN);
 		private final String name;
 		private final Preferences.Type type;
 
@@ -120,8 +118,6 @@ public final class Prefs {
 			.setDescription("Help make MethodScript better! These settings control the telemetry mechanism."
 					+ " Your privacy is extremely important, see the telemetry.ini config file for more information.");
 	private static final GroupData UPDATE_GROUP = new GroupData("Update settings");
-	private static final GroupData PROTOCOL_LIB_GROUP = new GroupData("Protocol Lib Settings")
-			.setDescription("Enabling this group allows for use of the raw packet functions/events.");
 	/**
 	 * Initializes the global Prefs to this file.
 	 *
@@ -243,19 +239,6 @@ public final class Prefs {
 				+ " execution context, so in all cases, you can check for updates manually with the check-update"
 				+ " command.",
 				UPDATE_GROUP));
-		a.add(new Preference(PNames.USE_PROTOCOL_LIB.config(), "off", PNames.USE_PROTOCOL_LIB.type(),
-				"If enabled, allows for use of the Packet functions and events. When enabled, has an additional"
-				+ " startup cost of first run, which downloads additional information needed to run. You also"
-				+ " need to install ProtocolLib into your server.",
-				PROTOCOL_LIB_GROUP));
-		a.add(new Preference(PNames.TAKENAKA_MAPPING.config(), "", PNames.TAKENAKA_MAPPING.type(),
-				"Internally, CommandHelper downloads the appropriate version of the mapping jar, if it has"
-				+ " been updated. You can anyways override this url here, to support newer versions without"
-				+ " strictly having to wait for CommandHelper to update the internal listing. If you have"
-				+ " a value here, it is always used, even if the mapping would otherwise be available. Should"
-				+ " be something like https://repo.screamingsandals.org/releases/me/kcra/takenaka/mappings/1.8.8+1.20.4/mappings-1.8.8+1.20.4.jar,"
-				+ " which can be found via https://repo.screamingsandals.org/#/releases/me/kcra/takenaka/mappings/",
-				PROTOCOL_LIB_GROUP));
 		prefs = new Preferences("CommandHelper", Static.getLogger(), a);
 		prefs.init(f);
 	}
@@ -397,13 +380,5 @@ public final class Prefs {
 
 	public static Boolean CheckForUpdates() {
 		return prefB(Prefs.PNames.CHECK_FOR_UPDATES);
-	}
-
-	public static Boolean UseProtocolLib() {
-		return prefB(Prefs.PNames.USE_PROTOCOL_LIB);
-	}
-
-	public static String TakenakaMapping() {
-		return prefS(Prefs.PNames.TAKENAKA_MAPPING);
 	}
 }

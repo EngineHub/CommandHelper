@@ -135,11 +135,6 @@ public enum Driver {
 	CMDLINE_PROMPT_INPUT,
 	SHUTDOWN,
 	/**
-	 * Packet events
-	 */
-	PACKET_RECEIVED,
-	PACKET_SENT,
-	/**
 	 * Extension events, used by events fired from the extension system.
 	 */
 	EXTENSION;

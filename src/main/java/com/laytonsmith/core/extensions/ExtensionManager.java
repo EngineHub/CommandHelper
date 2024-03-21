@@ -582,6 +582,24 @@ public class ExtensionManager {
 	}
 
 	/**
+	 * This should be run once, on server first startup.
+	 */
+	public static void OnLoad() {
+		for(ExtensionTracker trk : EXTENSIONS.values()) {
+			for(Extension ext : trk.getExtensions()) {
+				try {
+					ext.onLoad();
+				} catch (Throwable e) {
+					Logger log = Static.getLogger();
+					log.log(Level.SEVERE, ext.getClass().getName()
+							+ "'s onStartup caused an exception:");
+					log.log(Level.SEVERE, StackTraceUtils.GetStacktrace(e));
+				}
+			}
+		}
+	}
+
+	/**
 	 * This should be run each time the "startup" of the runtime occurs or extensions are reloaded.
 	 */
 	public static void Startup() {
