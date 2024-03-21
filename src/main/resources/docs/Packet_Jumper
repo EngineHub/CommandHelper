@@ -17,26 +17,19 @@ entrypointkr for creating the original CHProtocol.
 == Installation ==
 
 Packet Jumper does not work out of the box. As this is an advanced feature that can cause your server to crash,
-cause clients connected to your server to crash, and generally cause havok, this is disabled by default, and won't
-enabled if the current version of CommandHelper can't look up the correct mappings.
+cause clients connected to your server to crash, and generally cause havok, this broken out into a separate extension.
+You may find the extension for download from the [https://letsbuild.net/jenkins/job/PacketJumper/ community run Jenkins],
+or if you have git, maven, and the jdk installed, build it yourself via
+<code>mscript -- build-extension -s https://github.com/LadyCailin/PacketJumper.git</code>.
 
-In general, to enable Packet Jumper, you need to do three things.
-# Install the correct version of ProtocolLib for your server.
-# In preferences.ini, set the use-protocol-lib value to true/on.
-# Set the correct takenaka-mapping if you are running on a newer version than CommandHelper supports.
-
-Step 3 is handled automatically if you are using a version of CommandHelper that supports your current server version,
-but you can manually fill this in if you need to.
-
-On first run, the mappings file specified (either internally or via takenaka-mappings) will be downloaded. This will
-take a moment, as it is a large file.
+On first run, the mappings file will be downloaded. This will take a moment, as it is a large file.
 
 == Version Differences ==
 Note that in general, the Minecraft versions makes changes to the raw protocol on a regular basis, though it tends
 to be rarer that established packets get major incompatible overhauls. However, as the protocol itself is not
 officially supported, there is nothing stopping Mojang from changing the protocol, and completely breaking your code.
-CommandHelper exposes the protocol to you dynamically, which means that CommandHelper itself only needs minor updates
-on each version, and in general the same CommandHelper jar will work across versions. Your code however, will not
+PacketJumper exposes the protocol to you dynamically, which means that PacketJumper itself only needs minor updates
+on each version, and in general the same PacketJumper jar will work across versions. Your code however, will not
 necessarily.
 
 == Research Phase ==
@@ -57,7 +50,7 @@ which packet to use. In general, you'll want to familiarize yourself with
 protocol. The wiki here is hand written, so in general, this isn't guaranteed to be accurate, but the guide is good
 enough to give you an idea of what fields do what. Additionally, you can use
 [https://mappings.cephx.dev/ https://mappings.cephx.dev/] to cross check packet information across various mappings.
-CommandHelper exclusively exposes the Mojang mappings, regardless of what server you are running, and what mappings
+PacketJumper exclusively exposes the Mojang mappings, regardless of what server you are running, and what mappings
 it uses (it is dynamically determined and translated into the appropriate mapping for you).
 
 In our example of having entities move differently for different players, we are want to find something that can
@@ -81,7 +74,7 @@ This information tells us everything we need to know to properly create the pack
 specific data to use in code.
 
 Efforts have been made to standardize as much as possible across server versions, but that means that you need to use
-naming conventions that CommandHelper recognizes. This full list can be obtained by calling {{function|all_packets}},
+naming conventions that PacketJumper recognizes. This full list can be obtained by calling {{function|all_packets}},
 which returns an array of data that we can use to program against. Create an alias or otherwise grab the output of this
 code, and put it in a text editor, preferably one that supports json syntax formatting and highlighting.
 
@@ -211,7 +204,7 @@ Each of the field objects contains the following properties:
 The inner ''type'' shows the MethodScript type, which is the type you'll use, but the ''originalType'' shows the actual
 Java type of the field. This is important to note, because it's up to you to ensure that for instance in the case of
 a Java short, your value is in fact within -32768 and 32767, because otherwise you'll get a runtime error when
-CommandHelper tries to shove the MethodScript integer (which is 32 bit) into the short (which is 16 bits). ''field''
+PacketJumper tries to shove the MethodScript integer (which is 32 bit) into the short (which is 16 bits). ''field''
 is the field position, and is just for reference.
 
 In this example, there are no generics, but let's look at a field where that is the case:
@@ -269,7 +262,7 @@ The ''enumType'' is just a reference type, but the ''enumValues'' list the valid
 type is still a string though, and it will automatically be converted into the correct enum type.
 
 Another thing to note is that some types are not (yet) supported. This could be due to the type only being supported
-in newer versions of CommandHelper, or because support simply hasn't been coded in at all yet.
+in newer versions of PacketJumper, or because support simply hasn't been coded in at all yet.
 In those cases, the type will be "<UNSUPPORTED>", which means that this field cannot actually be used. However,
 the plan is that all types will eventually be supported, and PRs that add support for missing types will generally
 be accepted. Even if the field is unsupported, it may be possible to write the packet anyways, if the field's default
@@ -330,12 +323,12 @@ bind('packet_sent', null, array(protocol: 'PLAY', type: 'ENTITY_TELEPORT', value
 register_packet('PLAY', 'ENTITY_TELEPORT');
 %>
 
-By default, CommandHelper doesn't actually register to listen to any packets, as this would be unnecessarily
-inefficient. The {{function|register_packet}} function tells CommandHelper that it needs to start processing events
+By default, PacketJumper doesn't actually register to listen to any packets, as this would be unnecessarily
+inefficient. The {{function|register_packet}} function tells PacketJumper that it needs to start processing events
 of the given type, and is required before the binds for these packets will start to be triggered.
 
 {{TakeNote=In the REL_ENTITY_MOVE event, the id was named "entityId" and in ENTITY_TELEPORT, it's just "id". Luckily,
-CommandHelper offers some additional compile time checks on the values array, if you hardcode the protocol and type
+PacketJumper offers some additional compile time checks on the values array, if you hardcode the protocol and type
 parameters, which is highly recommended. This will make it easier to quickly see if you have errors in your
 prefilters.}}
 
@@ -384,7 +377,7 @@ List/Collection/Set/EnumSet/Map/arrays except byte arrays to array, and byte arr
 
 Different servers have different class names, and so this list only gives you an indication of the specific class
 name, the specific class name is obtained via ProtocolLib. More classes will be supported over time, see the
-__UnsupportedTypes value in the return of {{function|all_packets}} for a list of types which CommandHelper does not
+__UnsupportedTypes value in the return of {{function|all_packets}} for a list of types which PacketJumper does not
 currently support.
 
 {|
@@ -411,7 +404,7 @@ you must do so inside the event handler, not inside the prefilter.
 
 == Unannounced Packets ==
 Actually, the packet creation and packet logic doesn't strictly need to use known packets. Servers can dynamically
-create packets, as well as extensions and other packets that are unknown to CommandHelper. For these packet types,
+create packets, as well as extensions and other packets that are unknown to PacketJumper. For these packet types,
 you can't actually use the string field names, but you can instead pass an integer, based on the field index, and
 an attempt will anyways be made to set the value. You can use arbitrary strings in create_packet, and it will fail
 if the system can't find the packet, but it will attempt to find the packet even if it's not one of the ones returned

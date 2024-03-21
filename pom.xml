@@ -162,10 +162,6 @@
 			<id>maven-central</id>
 			<url>https://repo.maven.apache.org/maven2/</url>
 		</repository>
-		<repository>
-			<id>dmulloy2-repo</id>
-			<url>https://repo.dmulloy2.net/repository/public/</url>
-		</repository>
 
 	</repositories>
 	<dependencies>
@@ -427,18 +423,6 @@
 			<artifactId>threetenbp</artifactId>
 			<version>${threetenbp-version}</version>
 		</dependency>
-		<!-- GPL-2.0 -->
-		<dependency>
-			<groupId>com.comphenix.protocol</groupId>
-			<artifactId>ProtocolLib</artifactId>
-			<version>5.2.0-SNAPSHOT</version>
-		</dependency>
-		<!-- Apache 2.0 -->
-		<dependency>
-			<groupId>net.fabricmc</groupId>
-			<artifactId>mapping-io</artifactId>
-			<version>0.5.1</version>
-		</dependency>
 	</dependencies>
 	<distributionManagement>
 		<repository>
@@ -596,7 +580,6 @@
 									<include>io.gsonfire:gson-fire:jar:*</include>
 									<include>com.squareup.okhttp:logging-interceptor:jar:*</include>
 									<include>com.microsoft.sqlserver:mssql-jdbc:jar:*</include>
-									<include>net.fabricmc:mapping-io:jar:*</include>
 								</includes>
 							</artifactSet>
 							<relocations>
@@ -719,10 +702,6 @@
 								<relocation>
 									<pattern>io.gsonfire</pattern>
 									<shadedPattern>com.laytonsmith.libs.io.gsonfire</shadedPattern>
-								</relocation>
-								<relocation>
-									<pattern>net.fabricmc</pattern>
-									<shadedPattern>com.laytonsmith.libs.net.fabricmc</shadedPattern>
 								</relocation>
 							</relocations>
 							<filters>
@@ -952,15 +931,6 @@
 								</filter>
 								<filter>
 									<artifact>com.microsoft.sqlserver:mssql-jdbc:jar:*</artifact>
-									<includes>
-										<include>**</include>
-									</includes>
-									<excludes>
-										<exclude>META-INF/**</exclude>
-									</excludes>
-								</filter>
-								<filter>
-									<artifact>net.fabricmc:mapping-io:jar:*</artifact>
 									<includes>
 										<include>**</include>
 									</includes>
