@@ -536,6 +536,8 @@ public class ExtensionManager {
 		} catch (Throwable e) {
 			// Prefs weren't loaded, probably caused by running tests.
 		}
+
+		OnLoad();
 	}
 
 	/**

@@ -302,8 +302,6 @@ public class CommandHelperPlugin extends JavaPlugin {
 		};
 		loadingThread.start();
 
-		ExtensionManager.OnLoad();
-
 		myServer = BukkitMCServer.Get();
 
 		// Build dynamic enums
