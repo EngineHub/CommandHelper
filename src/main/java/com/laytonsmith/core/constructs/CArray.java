@@ -396,11 +396,11 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		set(index, value, Target.UNKNOWN);
 	}
 
-	public final void set(String index, float value) {
+	public final void set(String index, double value) {
 		set(index, new CDouble(value, Target.UNKNOWN), Target.UNKNOWN);
 	}
 
-	public final void set(String index, int value) {
+	public final void set(String index, long value) {
 		set(index, new CInt(value, Target.UNKNOWN), Target.UNKNOWN);
 	}
 

@@ -195,6 +195,20 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	}
 
 	/**
+	 * Returns the CClassType for a native enum. This will fail with a runtime error if this
+	 * class is not tagged with MEnum.
+	 * @param menum
+	 * @return
+	 */
+	public static CClassType getForEnum(Class<? extends Enum<?>> menum) {
+		try {
+			return get(FullyQualifiedClassName.forNativeEnum(menum));
+		} catch(ClassNotFoundException ex) {
+			throw new RuntimeException(ex);
+		}
+	}
+
+	/**
 	 * This function defines a brand new class type. This should exclusively be used in a class
 	 * definition scenario, and never when simply looking up an existing class. The created
 	 * CClassType is returned.
