@@ -28,6 +28,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.Compiler.__autoconcat__;
+import com.laytonsmith.core.functions.Compiler.__type_ref__;
 import com.laytonsmith.core.functions.DataHandling;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.IncludeCache;
@@ -539,7 +540,7 @@ public class StaticAnalysis {
 	}
 
 	/**
-	 * Checks whether the given AST node is an {@link CClassType}, adding a compile error to the passed exceptions set
+	 * Checks whether the given AST node is a {@link CClassType}, adding a compile error to the passed exceptions set
 	 * if it isn't.
 	 *
 	 * @param node - The AST node to check.
@@ -548,19 +549,24 @@ public class StaticAnalysis {
 	 * @return The {@link CClasType} if it was one, or {@code null} if it wasn't.
 	 */
 	@SuppressWarnings("null")
-	public static CClassType requireClassType(Mixed node, Target t, Set<ConfigCompileException> exceptions) {
-		if(node instanceof CClassType cClassType) {
+	public static CClassType requireClassType(ParseTree node, Set<ConfigCompileException> exceptions) {
+		Mixed data = node.getData();
+		if(data instanceof CClassType cClassType) {
 			return cClassType;
+		} else if(data instanceof CFunction && data.val().equals(__type_ref__.NAME)) {
+			exceptions.add(new ConfigCompileException(
+					"\"" + node.getChildAt(0).getData().val() + "\" cannot be resolved to a type.", node.getTarget()));
+			return null;
 		}
 
 		// The node can be anything. If it has a type, get that. If it doesn't, use the node's class name.
 		// TODO - Remove this try catch when syntax errors are caught by the parser and terminate compilation there.
 		try {
 			exceptions.add(new ConfigCompileException(
-					"Expected classtype, but received type " + node.getName() + " instead.", t));
+					"Expected classtype, but received type " + data.getName() + " instead.", node.getTarget()));
 		} catch(NullPointerException e) {
-			exceptions.add(new ConfigCompileException(
-					"Expected classtype, but received " + node.getClass().getSimpleName() + " instead.", t));
+			exceptions.add(new ConfigCompileException("Expected classtype, but received "
+					+ data.getClass().getSimpleName() + " instead.", node.getTarget()));
 		}
 		return null;
 	}
