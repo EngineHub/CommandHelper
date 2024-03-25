@@ -93,6 +93,7 @@ import com.laytonsmith.core.functions.ArrayHandling.array_get;
 import com.laytonsmith.core.functions.ArrayHandling.array_push;
 import com.laytonsmith.core.functions.ArrayHandling.array_set;
 import com.laytonsmith.core.functions.Compiler.__autoconcat__;
+import com.laytonsmith.core.functions.Compiler.__type_ref__;
 import com.laytonsmith.core.functions.Compiler.centry;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.tools.docgen.templates.ArrayIteration;
@@ -392,8 +393,7 @@ public class DataHandling {
 				case 3:
 					// Typecheck declaration type.
 					ParseTree typeNode = ast.getChildAt(ind++);
-					declaredType = StaticAnalysis.requireClassType(
-							typeNode.getData(), ast.getTarget(), exceptions);
+					declaredType = StaticAnalysis.requireClassType(typeNode, exceptions);
 					// Intentional fallthrough.
 				case 2:
 					// Typecheck variable.
@@ -613,7 +613,8 @@ public class DataHandling {
 			int offset = 0;
 			if(args.length == 3) {
 				offset = 1;
-				if(!(args[0].isInstanceOf(CClassType.TYPE))) {
+				if(!args[0].isInstanceOf(CClassType.TYPE)
+						&& (!(args[0] instanceof CFunction) || !args[0].val().equals(__type_ref__.NAME))) {
 					throw new ConfigCompileException("Expecting a ClassType for parameter 1 to assign", t);
 				}
 			}

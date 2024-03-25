@@ -27,6 +27,7 @@ import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.functions.DataHandling._string;
 import com.laytonsmith.core.functions.DataHandling.assign;
@@ -461,7 +462,9 @@ public class Compiler {
 
 			// Look for typed assignments
 			for(int k = 0; k < list.size(); k++) {
-				if(list.get(k).getData().equals(CVoid.VOID) || list.get(k).getData().isInstanceOf(CClassType.TYPE)) {
+				if(list.get(k).getData().equals(CVoid.VOID) || list.get(k).getData().isInstanceOf(CClassType.TYPE)
+						|| (list.get(k).getData().getClass().equals(CBareString.class)
+								&& list.get(k).getData().val().matches("[a-zA-Z0-9\\-_\\.]+"))) {
 					if(k == list.size() - 1) {
 						// This is not a typed assignment
 						break;
@@ -481,6 +484,14 @@ public class Compiler {
 											list.get(k + 1).getTarget());
 								}
 								ParseTree type = list.remove(k);
+
+								// Convert bare string to type reference as it is used like that in syntax.
+								// Type name regex is applied above.
+								if(type.getData().getClass().equals(CBareString.class)) {
+									type = __type_ref__.createASTNode(
+											type.getData().val(), type.getTarget(), type.getFileOptions());
+								}
+
 								List<ParseTree> children = list.get(k).getChildren();
 								children.add(0, type);
 								list.get(k).setChildren(children);
@@ -491,19 +502,39 @@ public class Compiler {
 					} else if(list.get(k + 1).getData() instanceof IVariable) {
 						// Not an assignment, a random variable declaration though.
 						ParseTree node = new ParseTree(new CFunction(assign.NAME, list.get(k + 1).getTarget()), list.get(k).getFileOptions());
-						node.addChild(list.get(k));
+						ParseTree typeNode = list.get(k);
+
+						// Convert bare string to type reference as it is used like that in syntax.
+						// Type name regex is applied above.
+						if(typeNode.getData().getClass().equals(CBareString.class)) {
+							typeNode = __type_ref__.createASTNode(
+									typeNode.getData().val(), typeNode.getTarget(), typeNode.getFileOptions());
+						}
+
+						node.addChild(typeNode);
 						node.addChild(list.get(k + 1));
 						node.addChild(new ParseTree(CNull.UNDEFINED, list.get(k).getFileOptions()));
 						list.set(k, node);
 						list.remove(k + 1);
 					} else if(list.get(k + 1).getData() instanceof CLabel) {
 						ParseTree node = new ParseTree(new CFunction(assign.NAME, list.get(k + 1).getTarget()), list.get(k).getFileOptions());
-						ParseTree labelNode = new ParseTree(new CLabel(node.getData()), list.get(k).getFileOptions());
-						labelNode.addChild(list.get(k));
-						labelNode.addChild(new ParseTree(((CLabel) list.get(k + 1).getData()).cVal(), list.get(k).getFileOptions()));
-						labelNode.addChild(new ParseTree(CNull.UNDEFINED, list.get(k).getFileOptions()));
+						ParseTree typeNode = list.get(k);
+
+						// Convert bare string to type reference as it is used like that in syntax.
+						// Type name regex is applied above.
+						if(typeNode.getData().getClass().equals(CBareString.class)) {
+							typeNode = __type_ref__.createASTNode(
+									typeNode.getData().val(), typeNode.getTarget(), typeNode.getFileOptions());
+						}
+
+						ParseTree labelNode = new ParseTree(new CLabel(node.getData()), typeNode.getFileOptions());
+						labelNode.addChild(typeNode);
+						labelNode.addChild(new ParseTree(((CLabel) list.get(k + 1).getData()).cVal(), typeNode.getFileOptions()));
+						labelNode.addChild(new ParseTree(CNull.UNDEFINED, typeNode.getFileOptions()));
 						list.set(k, labelNode);
 						list.remove(k + 1);
+					} else if(list.get(k).getData().getClass().equals(CBareString.class)) {
+						continue; // Bare string was not used as a type.
 					} else {
 						throw new ConfigCompileException("Unexpected data after ClassType", list.get(k + 1).getTarget());
 					}
@@ -708,6 +739,52 @@ public class Compiler {
 				}
 			}
 			return null;
+		}
+	}
+
+	@api
+	@noprofile
+	@hide("This is only used internally by the compiler.")
+	public static class __type_ref__ extends DummyFunction {
+
+		public static final String NAME = "__type_ref__";
+
+		@Override
+		public String getName() {
+			return NAME;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRENotFoundException.class};
+		}
+
+		@Override
+		public String docs() {
+			return "mixed {string} Used internally by the compiler. You shouldn't use it.";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			throw new CRENotFoundException("\"" + args[0].val() + "\" cannot be resolved to a type.", t);
+		}
+
+		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes,
+				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+			return CClassType.TYPE;
+		}
+
+		public static ParseTree createASTNode(String typeName, Target t, FileOptions fileOptions) {
+			ParseTree node = new ParseTree(new CFunction(NAME, t), fileOptions);
+			node.addChild(new ParseTree(new CString(typeName, t), fileOptions, true));
+			return node;
 		}
 	}
 
