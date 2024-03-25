@@ -747,6 +747,7 @@ public final class Interpreter {
 			}
 			env.getEnv(StaticRuntimeEnv.class).getExecutionQueue().stopAll();
 			env.getEnv(StaticRuntimeEnv.class).getIncludeCache().clear();
+			staticAnalysis = new StaticAnalysis(true);
 			return;
 		}
 		if(fromFile == null) {
