@@ -616,6 +616,17 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	}
 
 	@Override
+	public void playSound(MCEntity ent, String sound, MCSoundCategory category, float volume, float pitch) {
+		p.playSound(((Entity) ent.getHandle()), sound,
+				BukkitMCSoundCategory.getConvertor().getConcreteEnum(category), volume, pitch);
+	}
+
+	@Override
+	public void playSound(MCEntity ent, String sound, float volume, float pitch) {
+		p.playSound(((Entity) ent.getHandle()), sound, volume, pitch);
+	}
+
+	@Override
 	public void stopSound(MCSound sound) {
 		p.stopSound(((BukkitMCSound) sound).getConcrete());
 	}

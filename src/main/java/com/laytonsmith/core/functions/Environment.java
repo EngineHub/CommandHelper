@@ -1966,7 +1966,16 @@ public class Environment {
 				com.laytonsmith.core.environments.Environment environment,
 				Mixed... args) throws ConfigRuntimeException {
 
-			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			MCLocation loc = null;
+			MCEntity ent = null;
+			if(args[0].isInstanceOf(CArray.TYPE)) {
+				loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			} else if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_18_1)) {
+				ent = Static.getEntity(args[0], t);
+			} else {
+				throw new CREFormatException("Expecting a location array on versions prior to MC 1.18.1", t);
+			}
+
 			String path;
 			MCSoundCategory category = null;
 			float volume = 1;
@@ -2009,11 +2018,19 @@ public class Environment {
 				try {
 					if(category == null) {
 						for(MCPlayer p : players) {
-							p.playSound(loc, path, volume, pitch);
+							if(loc == null) {
+								p.playSound(ent, path, volume, pitch);
+							} else {
+								p.playSound(loc, path, volume, pitch);
+							}
 						}
 					} else {
 						for(MCPlayer p : players) {
-							p.playSound(loc, path, category, volume, pitch);
+							if(loc == null) {
+								p.playSound(ent, path, category, volume, pitch);
+							} else {
+								p.playSound(loc, path, category, volume, pitch);
+							}
 						}
 					}
 				} catch(Exception ex) {
@@ -2045,8 +2062,9 @@ public class Environment {
 
 		@Override
 		public String docs() {
-			return "void {locationArray, soundArray[, players]} Plays a sound at the"
-					+ " given location. SoundArray is in an associative array with"
+			return "void {source, soundArray[, players]} Plays a sound at the"
+					+ " given source. Source can be a location array or entity UUID."
+					+ " SoundArray is in an associative array with"
 					+ " keys 'sound', 'category', 'volume', 'pitch', where all are optional except sound."
 					+ " Volume, if greater than 1.0 (default), is the distance in chunks players can hear the sound."
 					+ " Pitch has a range of 0.5 - 2.0, where where 1.0 is the middle pitch and default. Players can"

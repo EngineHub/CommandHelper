@@ -149,6 +149,10 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity, MCOfflinePlaye
 
 	void playSound(MCLocation l, String sound, MCSoundCategory category, float volume, float pitch);
 
+	void playSound(MCEntity ent, String sound, float volume, float pitch);
+
+	void playSound(MCEntity ent, String sound, MCSoundCategory category, float volume, float pitch);
+
 	void stopSound(MCSound sound);
 
 	void stopSound(String sound);
