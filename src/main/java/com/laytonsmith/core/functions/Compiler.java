@@ -11,6 +11,7 @@ import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.compiler.FileOptions;
+import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.CBareString;
 import com.laytonsmith.core.constructs.CBracket;
 import com.laytonsmith.core.constructs.CClassType;
@@ -745,7 +746,7 @@ public class Compiler {
 	@api
 	@noprofile
 	@hide("This is only used internally by the compiler.")
-	public static class __type_ref__ extends DummyFunction {
+	public static class __type_ref__ extends DummyFunction implements Optimizable {
 
 		public static final String NAME = "__type_ref__";
 
@@ -785,6 +786,29 @@ public class Compiler {
 			ParseTree node = new ParseTree(new CFunction(NAME, t), fileOptions);
 			node.addChild(new ParseTree(new CString(typeName, t), fileOptions, true));
 			return node;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+
+			/*
+			 * With static analysis enabled, the typechecker has already taken care of this AST node.
+			 * Until MethodScript supports user types, we know that custom types cannot be resolved regardless of the
+			 * outcome of static analysis. So we can generate an exception here until user type support is added.
+			 */
+			if(!StaticAnalysis.enabled()) {
+				throw new ConfigCompileException(
+						"\"" + children.get(0).getData().val() + "\" cannot be resolved to a type.", t);
+			}
+			return null;
 		}
 	}
 
