@@ -108,7 +108,6 @@ public class CommandHelperPlugin extends JavaPlugin {
 	private static int hostnameThreadPoolID = 0;
 	private boolean firstLoad = true;
 	private long interpreterUnlockedUntil = 0;
-	private Thread loadingThread;
 
 	/**
 	 * Listener for the plugin system.
@@ -128,6 +127,8 @@ public class CommandHelperPlugin extends JavaPlugin {
 		AppsApiUtil.ConfigureDefaults();
 		Implementation.setServerType(Implementation.Type.BUKKIT);
 
+		myServer = BukkitMCServer.Get();
+		version = new SimpleVersion(getDescription().getVersion());
 		self = this;
 
 		CommandHelperFileLocations.setDefault(new CommandHelperFileLocations());
@@ -142,7 +143,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 			@Override
 			public boolean doRun() {
 				try {
-					version = "versionUpgrade-" + Static.loadSelfVersion();
+					version = "versionUpgrade-" + CommandHelperPlugin.version;
 					return !hasBreadcrumb(version);
 				} catch (Exception ex) {
 					getLogger().log(Level.SEVERE, null, ex);
@@ -269,12 +270,12 @@ public class CommandHelperPlugin extends JavaPlugin {
 
 		try {
 			Prefs.init(CommandHelperFileLocations.getDefault().getPreferencesFile());
+			Prefs.SetColors();
 		} catch (IOException ex) {
 			getLogger().log(Level.SEVERE, null, ex);
 			return;
 		}
 
-		Prefs.SetColors();
 		Installer.Install(CommandHelperFileLocations.getDefault().getConfigDirectory());
 
 		ClassDiscoveryCache cdc = new ClassDiscoveryCache(CommandHelperFileLocations.getDefault().getCacheDirectory());
@@ -289,7 +290,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 		Telemetry.GetDefault().log(DefaultTelemetry.StartupModeMetric.class,
 				MapBuilder.start("mode", Implementation.GetServerType().getBranding()), null);
 
-		loadingThread = new Thread("extensionloader") {
+		Thread loadingThread = new Thread("extensionloader") {
 			@Override
 			public void run() {
 				ExtensionManager.AddDiscoveryLocation(CommandHelperFileLocations.getDefault().getExtensionsDirectory());
@@ -301,8 +302,6 @@ public class CommandHelperPlugin extends JavaPlugin {
 			}
 		};
 		loadingThread.start();
-
-		myServer = BukkitMCServer.Get();
 
 		// Build dynamic enums
 		BukkitMCEntityType.build();
@@ -317,13 +316,21 @@ public class CommandHelperPlugin extends JavaPlugin {
 			BukkitMCTrimMaterial.build();
 			BukkitMCTrimPattern.build();
 		}
-	}
 
-	/**
-	 * Called on plugin enable.
-	 */
-	@Override
-	public void onEnable() {
+		// Suppress warnings from the PluginClassLoader when extensions load classes from another plugin.
+		// This should be done before ExtensionManager.Initialize().
+		try {
+			Class cls = Class.forName("org.bukkit.plugin.java.PluginClassLoader");
+			Set<String> ignored = (Set<String>) ReflectionUtils.get(cls, getClassLoader(), "seenIllegalAccess");
+			for(Plugin plugin : Bukkit.getPluginManager().getPlugins()) {
+				if(plugin != self) {
+					ignored.add(plugin.getName());
+				}
+			}
+		} catch (ReflectionUtils.ReflectionException | ClassNotFoundException ex) {
+			// The server may still log class load warnings for unlisted dependencies.
+		}
+
 		if(loadingThread.isAlive()) {
 			getLogger().log(Level.INFO, "Waiting for extension caching to complete...");
 			try {
@@ -332,25 +339,15 @@ public class CommandHelperPlugin extends JavaPlugin {
 				getLogger().log(Level.SEVERE, null, ex);
 			}
 		}
+		ExtensionManager.Initialize(ClassDiscovery.getDefaultInstance());
+		getLogger().log(Level.INFO, "Extensions initialized.");
+	}
 
-		if(firstLoad) {
-			// Suppress warnings from the PluginClassLoader when extensions load classes from another plugin.
-			// This should be done before ExtensionManager.Initialize().
-			try {
-				Class cls = Class.forName("org.bukkit.plugin.java.PluginClassLoader");
-				Set<String> ignored = (Set<String>) ReflectionUtils.get(cls, getClassLoader(), "seenIllegalAccess");
-				for(Plugin plugin : Bukkit.getPluginManager().getPlugins()) {
-					if(plugin != self) {
-						ignored.add(plugin.getName());
-					}
-				}
-			} catch (ReflectionUtils.ReflectionException | ClassNotFoundException ex) {
-				// The server may still log class load warnings for unlisted dependencies.
-			}
-
-			ExtensionManager.Initialize(ClassDiscovery.getDefaultInstance());
-			getLogger().log(Level.INFO, "Extensions initialized.");
-		}
+	/**
+	 * Called on plugin enable.
+	 */
+	@Override
+	public void onEnable() {
 
 		//Metrics
 		Metrics m = new Metrics(this, 2987);
@@ -361,8 +358,6 @@ public class CommandHelperPlugin extends JavaPlugin {
 			getLogger().log(Level.WARNING, "In your preferences, use-sudo-fallback is turned on."
 					+ " Consider turning this off if you can.");
 		}
-
-		version = new SimpleVersion(getDescription().getVersion());
 
 		if(Prefs.ShowSplashScreen()) {
 			StreamUtils.GetSystemOut().println(TermColors.reset());
