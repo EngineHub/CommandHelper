@@ -11,10 +11,12 @@ import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.compiler.FileOptions;
+import com.laytonsmith.core.constructs.CBareString;
 import com.laytonsmith.core.constructs.CBracket;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CEntry;
 import com.laytonsmith.core.constructs.CFunction;
+import com.laytonsmith.core.constructs.CKeyword;
 import com.laytonsmith.core.constructs.CLabel;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
@@ -698,7 +700,10 @@ public class Compiler {
 		public ParseTree postParseRewrite(ParseTree ast, Environment env,
 				Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> exceptions) {
 			for(ParseTree child : ast.getChildren()) {
-				if(!(child.getData() instanceof CFunction)) {
+				// We only expect functions here.
+				// Bare strings already have a better exception from MethodScriptCompiler.checkLinearComponents()
+				if(!(child.getData() instanceof CFunction)
+						&& (!(child.getData() instanceof CBareString) || child.getData() instanceof CKeyword)) {
 					exceptions.add(new ConfigCompileException("Not a statement.", child.getTarget()));
 				}
 			}

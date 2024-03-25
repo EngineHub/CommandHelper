@@ -1944,11 +1944,12 @@ public final class MethodScriptCompiler {
 		for(ParseTree m : tree.getAllNodes()) {
 			if(m.getData() instanceof CBareString && !(m.getData() instanceof CKeyword)) {
 				if(m.getFileOptions().isStrict()) {
-					compilerErrors.add(new ConfigCompileException("Use of bare strings in strict mode is not"
-							+ " allowed.", m.getTarget()));
+					compilerErrors.add(new ConfigCompileException("Use of bare (unquoted) string: "
+							+ m.getData().val(), m.getTarget()));
 				} else {
 					env.getEnv(CompilerEnvironment.class).addCompilerWarning(m.getFileOptions(),
-							new CompilerWarning("Use of bare string", m.getTarget(),
+							new CompilerWarning("Use of bare (unquoted) string: "
+									+ m.getData().val(), m.getTarget(),
 									FileOptions.SuppressWarning.UseBareStrings));
 					return; // for now, only one warning per file
 				}
