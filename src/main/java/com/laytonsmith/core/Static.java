@@ -1080,11 +1080,16 @@ public final class Static {
 	 */
 	public static synchronized void LogDebug(File root, String message, LogLevel level, boolean printScreen) throws IOException {
 		//If debug mode is on in the prefs, we want to log this to the screen too
-		if(Prefs.DebugMode() || Prefs.ShowWarnings() || level == LogLevel.ERROR) {
+		if(Prefs.DebugMode() || Prefs.ShowWarnings() || level == LogLevel.ERROR || level == LogLevel.ALWAYS) {
 			String color = "";
 			Level lev = Level.INFO;
 			boolean show = false;
 			switch(level) {
+				case ALWAYS:
+					color = TermColors.WHITE;
+					lev = Level.INFO;
+					show = true;
+					break;
 				case ERROR:
 					color = TermColors.RED;
 					lev = Level.SEVERE;
