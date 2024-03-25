@@ -247,4 +247,11 @@ public class IncludeCache {
 			}
 		}
 	}
+
+	public void clear() {
+		this.analysisCache.clear();
+		this.autoIncludes.clear();
+		this.dynamicAnalysisParentScopeCache.clear();
+		this.cache.clear();
+	}
 }
