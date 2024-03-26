@@ -1970,10 +1970,10 @@ public class Environment {
 			MCEntity ent = null;
 			if(args[0].isInstanceOf(CArray.TYPE)) {
 				loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
-			} else if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_18_1)) {
+			} else if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_3)) {
 				ent = Static.getEntity(args[0], t);
 			} else {
-				throw new CREFormatException("Expecting a location array on versions prior to MC 1.18.1", t);
+				throw new CREFormatException("Expecting a location array on versions prior to MC 1.19.3", t);
 			}
 
 			String path;
@@ -2038,7 +2038,9 @@ public class Environment {
 				}
 			} else {
 				try {
-					if(category == null) {
+					if(loc == null) {
+						ent.getWorld().playSound(ent, path, category, volume, pitch);
+					} else if(category == null) {
 						loc.getWorld().playSound(loc, path, volume, pitch);
 					} else {
 						loc.getWorld().playSound(loc, path, category, volume, pitch);

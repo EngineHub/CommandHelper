@@ -341,6 +341,15 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	}
 
 	@Override
+	public void playSound(MCEntity ent, String sound, MCSoundCategory category, float volume, float pitch) {
+		if(category == null) {
+			w.playSound((Entity) ent.getHandle(), sound, SoundCategory.MASTER, volume, pitch);
+		} else {
+			w.playSound((Entity) ent.getHandle(), sound, BukkitMCSoundCategory.getConvertor().getConcreteEnum(category), volume, pitch);
+		}
+	}
+
+	@Override
 	public void playSound(MCLocation l, String sound, MCSoundCategory category, float volume, float pitch) {
 		w.playSound((Location) l.getHandle(), sound,
 				BukkitMCSoundCategory.getConvertor().getConcreteEnum(category), volume, pitch);
