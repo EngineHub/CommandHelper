@@ -2805,10 +2805,14 @@ public class EntityManagement {
 							case entity_spec.KEY_DISPLAY_BLOCK:
 								MCBlockData bd;
 								Mixed m = specArray.get(index, t);
-								if(m.isInstanceOf(CArray.TYPE)) {
-									bd = ObjectGenerator.GetGenerator().blockData((CArray) m, t);
-								} else {
-									bd = Static.getServer().createBlockData(m.val());
+								try {
+									if(m.isInstanceOf(CArray.TYPE)) {
+										bd = ObjectGenerator.GetGenerator().blockData((CArray) m, t);
+									} else {
+										bd = Static.getServer().createBlockData(m.val().toLowerCase());
+									}
+								} catch(IllegalArgumentException ex) {
+									throw new CREFormatException("Cannot create block data from: " + m.val(), t);
 								}
 								bDisplay.setBlockData(bd);
 								break;
