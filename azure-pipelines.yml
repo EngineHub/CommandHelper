@@ -21,7 +21,8 @@ steps:
 - task: Maven@3
   inputs:
     mavenPomFile: 'pom.xml'
-    javaHomeOption: 'JDKVersion'
+    javaHomeOption: 'Path'
+    jdkDirectory: 'C:\hostedtoolcache\windows\jdk17\JAVA_HOME_17_X64_OpenJDK-jdk_x64_linux_hotspot_2021-05-06-23-30_tar.gz\jdk-17+20'
     jdkVersionOption: '1.17'
     jdkArchitectureOption: 'x64'
     publishJUnitResults: true
