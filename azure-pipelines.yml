@@ -15,14 +15,13 @@ steps:
     azureResourceManagerEndpoint: Azure Resource Manager
     azureStorageAccountName: methodscriptjdkbuilds
     azureContainerName: jdks
-    azureCommonVirtualFile: 'OpenJDK-jdk_x64_linux_hotspot_2021-05-06-23-30.tar.gz'
+    azureCommonVirtualFile: 'OpenJDK17U-jdk_x64_windows_hotspot_17.0.10_7.zip'
     jdkDestinationDirectory: '$(agent.toolsDirectory)/jdk17'
     cleanDestinationDirectory: true
 - task: Maven@3
   inputs:
     mavenPomFile: 'pom.xml'
-    javaHomeOption: 'Path'
-    jdkDirectory: 'C:\hostedtoolcache\windows\jdk17\JAVA_HOME_17_X64_OpenJDK-jdk_x64_linux_hotspot_2021-05-06-23-30_tar.gz\jdk-17+20'
+    javaHomeOption: 'JDKVersion'
     jdkVersionOption: '1.17'
     jdkArchitectureOption: 'x64'
     publishJUnitResults: true
