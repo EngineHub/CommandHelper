@@ -694,6 +694,16 @@ public class DataHandling {
 					return tree;
 				}
 			}
+
+			// Convert concatenated types such as "concat(concat(ms, lang), int)" to "ms.lang.int".
+			if(children.size() == 3) {
+				ParseTree typeRefNode = __type_ref__.createFromBareStringOrConcats(children.get(0));
+				if(typeRefNode != null) {
+					children.set(0, typeRefNode);
+					return ast;
+				}
+			}
+
 			return null;
 		}
 

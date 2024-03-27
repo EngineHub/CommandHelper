@@ -6,6 +6,7 @@ import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.annotations.noprofile;
+import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
@@ -28,6 +29,7 @@ import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.functions.DataHandling._string;
@@ -464,8 +466,9 @@ public class Compiler {
 			// Look for typed assignments
 			for(int k = 0; k < list.size(); k++) {
 				if(list.get(k).getData().equals(CVoid.VOID) || list.get(k).getData().isInstanceOf(CClassType.TYPE)
-						|| (list.get(k).getData().getClass().equals(CBareString.class)
-								&& list.get(k).getData().val().matches("[a-zA-Z0-9\\-_\\.]+"))) {
+						|| (list.get(k).getData().getClass().equals(CBareString.class))
+						|| (list.get(k).getData() instanceof CFunction
+								&& list.get(k).getData().val().equals(concat.NAME))) {
 					if(k == list.size() - 1) {
 						// This is not a typed assignment
 						break;
@@ -484,17 +487,16 @@ public class Compiler {
 									throw new ConfigCompileException("Variables may not be of type void",
 											list.get(k + 1).getTarget());
 								}
-								ParseTree type = list.remove(k);
+								ParseTree typeNode = list.remove(k);
 
-								// Convert bare string to type reference as it is used like that in syntax.
-								// Type name regex is applied above.
-								if(type.getData().getClass().equals(CBareString.class)) {
-									type = __type_ref__.createASTNode(
-											type.getData().val(), type.getTarget(), type.getFileOptions());
+								// Convert bare string or concat() to type reference as it is used like that in syntax.
+								ParseTree typeRefNode = __type_ref__.createFromBareStringOrConcats(typeNode);
+								if(typeRefNode != null) {
+									typeNode = typeRefNode;
 								}
 
 								List<ParseTree> children = list.get(k).getChildren();
-								children.add(0, type);
+								children.add(0, typeNode);
 								list.get(k).setChildren(children);
 								break;
 							default:
@@ -505,11 +507,10 @@ public class Compiler {
 						ParseTree node = new ParseTree(new CFunction(assign.NAME, list.get(k + 1).getTarget()), list.get(k).getFileOptions());
 						ParseTree typeNode = list.get(k);
 
-						// Convert bare string to type reference as it is used like that in syntax.
-						// Type name regex is applied above.
-						if(typeNode.getData().getClass().equals(CBareString.class)) {
-							typeNode = __type_ref__.createASTNode(
-									typeNode.getData().val(), typeNode.getTarget(), typeNode.getFileOptions());
+						// Convert bare string or concat() to type reference as it is used like that in syntax.
+						ParseTree typeRefNode = __type_ref__.createFromBareStringOrConcats(typeNode);
+						if(typeRefNode != null) {
+							typeNode = typeRefNode;
 						}
 
 						node.addChild(typeNode);
@@ -521,11 +522,10 @@ public class Compiler {
 						ParseTree node = new ParseTree(new CFunction(assign.NAME, list.get(k + 1).getTarget()), list.get(k).getFileOptions());
 						ParseTree typeNode = list.get(k);
 
-						// Convert bare string to type reference as it is used like that in syntax.
-						// Type name regex is applied above.
-						if(typeNode.getData().getClass().equals(CBareString.class)) {
-							typeNode = __type_ref__.createASTNode(
-									typeNode.getData().val(), typeNode.getTarget(), typeNode.getFileOptions());
+						// Convert bare string or concat() to type reference as it is used like that in syntax.
+						ParseTree typeRefNode = __type_ref__.createFromBareStringOrConcats(typeNode);
+						if(typeRefNode != null) {
+							typeNode = typeRefNode;
 						}
 
 						ParseTree labelNode = new ParseTree(new CLabel(node.getData()), typeNode.getFileOptions());
@@ -750,6 +750,8 @@ public class Compiler {
 
 		public static final String NAME = "__type_ref__";
 
+		public static final String TYPE_REGEX = "[a-zA-Z0-9\\-_\\.]+";
+
 		@Override
 		public String getName() {
 			return NAME;
@@ -786,6 +788,71 @@ public class Compiler {
 			ParseTree node = new ParseTree(new CFunction(NAME, t), fileOptions);
 			node.addChild(new ParseTree(new CString(typeName, t), fileOptions, true));
 			return node;
+		}
+
+		public static ParseTree createFromBareStringOrConcats(ParseTree typeNode) {
+
+			// Convert bare string types to __type_ref__.
+			if(typeNode.getData().getClass().equals(CBareString.class)
+					&& typeNode.getData().val().matches(TYPE_REGEX)) {
+				return __type_ref__.createASTNode(
+						typeNode.getData().val(), typeNode.getTarget(), typeNode.getFileOptions());
+			}
+
+			// Convert concatenated bare string types such as "concat(concat(ms, lang), int)" to "ms.lang.int".
+			if(typeNode.getData() instanceof CFunction
+					&& typeNode.getData().val().equals(concat.NAME)
+					&& typeNode.getChildren().size() == 2) {
+				String typeName = null;
+				ParseTree node = typeNode;
+				while(true) {
+					ParseTree child1 = node.getChildAt(0);
+					ParseTree child2 = node.getChildAt(1);
+
+					if(child2.getData() instanceof CBareString) {
+						typeName = child2.getData().val() + (typeName == null ? "" : "." + typeName);
+					} else if(child2.getData() instanceof CClassType) {
+						// "ms.lang.int" will have "int" parsed as CClassType. Convert to original string.
+						String[] cClassTypeStrSplit = child2.getData().val().split("\\.");
+						typeName = cClassTypeStrSplit[cClassTypeStrSplit.length - 1]
+								+ (typeName == null ? "" : "." + typeName);
+					} else {
+						return null;
+					}
+					if(child1.getData() instanceof CBareString) {
+						typeName = child1.getData().val() + "." + typeName;
+						break;
+					} else if(child1.getData() instanceof CClassType) {
+						// "int.my.type" will have "int" parsed as CClassType. Convert to original string.
+						String[] cClassTypeStrSplit = child1.getData().val().split("\\.");
+						typeName = cClassTypeStrSplit[cClassTypeStrSplit.length - 1] + "." + typeName;
+						break;
+					} else if(!(child1.getData() instanceof CFunction) || !concat.NAME.equals(child1.getData().val())
+							|| child1.getChildren().size() != 2) {
+						return null;
+					}
+					node = child1;
+				}
+				if(typeName.matches(TYPE_REGEX)) {
+					return __type_ref__.createASTNode(typeName, typeNode.getTarget(), typeNode.getFileOptions());
+				}
+			}
+
+			return null;
+		}
+
+		@Override
+		public ParseTree postParseRewrite(ParseTree ast, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> exceptions) {
+
+			// Attempt to resolve type reference to CClassType.
+			String typeName = ast.getChildAt(0).getData().val();
+			try {
+				CClassType classType = CClassType.get(FullyQualifiedClassName.forName(typeName, ast.getTarget(), env));
+				return new ParseTree(classType, ast.getFileOptions());
+			} catch (CRECastException | ClassNotFoundException e) {
+				return null;
+			}
 		}
 
 		@Override
