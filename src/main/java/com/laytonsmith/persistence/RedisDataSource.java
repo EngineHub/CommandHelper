@@ -12,8 +12,10 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import redis.clients.jedis.DefaultJedisClientConfig;
+import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisShardInfo;
+import redis.clients.jedis.JedisClientConfig;
 import redis.clients.jedis.Transaction;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 
@@ -26,7 +28,7 @@ public class RedisDataSource extends AbstractDataSource {
 
 	private Jedis connection;
 	private Transaction transaction;
-	private JedisShardInfo shardInfo;
+	private JedisClientConfig shardInfo;
 	private String host;
 	private int port;
 	private int timeout;
@@ -44,19 +46,16 @@ public class RedisDataSource extends AbstractDataSource {
 			host = uri.getHost();
 			port = uri.getPort();
 			Map<String, String> queryString = WebUtility.getQueryMap(uri.getQuery());
-			if(port == -1) {
-				shardInfo = new JedisShardInfo(host);
-			} else {
-				shardInfo = new JedisShardInfo(host, port);
-			}
+			DefaultJedisClientConfig.Builder builder = DefaultJedisClientConfig.builder();
 			if(queryString.containsKey("timeout")) {
 				timeout = Integer.parseInt(queryString.get("timeout"));
-				shardInfo.setSoTimeout(timeout);
+				builder.socketTimeoutMillis(timeout);
 			}
 			if(queryString.containsKey("password")) {
 				password = queryString.get("password");
-				shardInfo.setPassword(password);
+				builder.password(password);
 			}
+			shardInfo = builder.build();
 			connect();
 		} catch (Exception e) {
 			throw new DataSourceException(e.getMessage(), e);
@@ -87,7 +86,11 @@ public class RedisDataSource extends AbstractDataSource {
 			}
 		}
 		if(needToConnect) {
-			connection = new Jedis(shardInfo);
+			int oPort = 6379;
+			if(port != -1) {
+				oPort = port;
+			}
+			connection = new Jedis(new HostAndPort(host, oPort), shardInfo);
 		}
 	}
 
