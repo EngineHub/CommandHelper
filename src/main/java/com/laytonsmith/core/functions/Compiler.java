@@ -6,11 +6,13 @@ import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.annotations.noprofile;
+import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.compiler.FileOptions;
+import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.CBareString;
 import com.laytonsmith.core.constructs.CBracket;
 import com.laytonsmith.core.constructs.CClassType;
@@ -27,6 +29,8 @@ import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.functions.DataHandling._string;
 import com.laytonsmith.core.functions.DataHandling.assign;
@@ -461,7 +465,10 @@ public class Compiler {
 
 			// Look for typed assignments
 			for(int k = 0; k < list.size(); k++) {
-				if(list.get(k).getData().equals(CVoid.VOID) || list.get(k).getData().isInstanceOf(CClassType.TYPE)) {
+				if(list.get(k).getData().equals(CVoid.VOID) || list.get(k).getData().isInstanceOf(CClassType.TYPE)
+						|| (list.get(k).getData().getClass().equals(CBareString.class))
+						|| (list.get(k).getData() instanceof CFunction
+								&& list.get(k).getData().val().equals(concat.NAME))) {
 					if(k == list.size() - 1) {
 						// This is not a typed assignment
 						break;
@@ -480,9 +487,16 @@ public class Compiler {
 									throw new ConfigCompileException("Variables may not be of type void",
 											list.get(k + 1).getTarget());
 								}
-								ParseTree type = list.remove(k);
+								ParseTree typeNode = list.remove(k);
+
+								// Convert bare string or concat() to type reference as it is used like that in syntax.
+								ParseTree typeRefNode = __type_ref__.createFromBareStringOrConcats(typeNode);
+								if(typeRefNode != null) {
+									typeNode = typeRefNode;
+								}
+
 								List<ParseTree> children = list.get(k).getChildren();
-								children.add(0, type);
+								children.add(0, typeNode);
 								list.get(k).setChildren(children);
 								break;
 							default:
@@ -491,19 +505,37 @@ public class Compiler {
 					} else if(list.get(k + 1).getData() instanceof IVariable) {
 						// Not an assignment, a random variable declaration though.
 						ParseTree node = new ParseTree(new CFunction(assign.NAME, list.get(k + 1).getTarget()), list.get(k).getFileOptions());
-						node.addChild(list.get(k));
+						ParseTree typeNode = list.get(k);
+
+						// Convert bare string or concat() to type reference as it is used like that in syntax.
+						ParseTree typeRefNode = __type_ref__.createFromBareStringOrConcats(typeNode);
+						if(typeRefNode != null) {
+							typeNode = typeRefNode;
+						}
+
+						node.addChild(typeNode);
 						node.addChild(list.get(k + 1));
 						node.addChild(new ParseTree(CNull.UNDEFINED, list.get(k).getFileOptions()));
 						list.set(k, node);
 						list.remove(k + 1);
 					} else if(list.get(k + 1).getData() instanceof CLabel) {
 						ParseTree node = new ParseTree(new CFunction(assign.NAME, list.get(k + 1).getTarget()), list.get(k).getFileOptions());
-						ParseTree labelNode = new ParseTree(new CLabel(node.getData()), list.get(k).getFileOptions());
-						labelNode.addChild(list.get(k));
-						labelNode.addChild(new ParseTree(((CLabel) list.get(k + 1).getData()).cVal(), list.get(k).getFileOptions()));
-						labelNode.addChild(new ParseTree(CNull.UNDEFINED, list.get(k).getFileOptions()));
+						ParseTree typeNode = list.get(k);
+
+						// Convert bare string or concat() to type reference as it is used like that in syntax.
+						ParseTree typeRefNode = __type_ref__.createFromBareStringOrConcats(typeNode);
+						if(typeRefNode != null) {
+							typeNode = typeRefNode;
+						}
+
+						ParseTree labelNode = new ParseTree(new CLabel(node.getData()), typeNode.getFileOptions());
+						labelNode.addChild(typeNode);
+						labelNode.addChild(new ParseTree(((CLabel) list.get(k + 1).getData()).cVal(), typeNode.getFileOptions()));
+						labelNode.addChild(new ParseTree(CNull.UNDEFINED, typeNode.getFileOptions()));
 						list.set(k, labelNode);
 						list.remove(k + 1);
+					} else if(list.get(k).getData().getClass().equals(CBareString.class)) {
+						continue; // Bare string was not used as a type.
 					} else {
 						throw new ConfigCompileException("Unexpected data after ClassType", list.get(k + 1).getTarget());
 					}
@@ -706,6 +738,142 @@ public class Compiler {
 						&& (!(child.getData() instanceof CBareString) || child.getData() instanceof CKeyword)) {
 					exceptions.add(new ConfigCompileException("Not a statement.", child.getTarget()));
 				}
+			}
+			return null;
+		}
+	}
+
+	@api
+	@noprofile
+	@hide("This is only used internally by the compiler.")
+	public static class __type_ref__ extends DummyFunction implements Optimizable {
+
+		public static final String NAME = "__type_ref__";
+
+		public static final String TYPE_REGEX = "[a-zA-Z0-9\\-_\\.]+";
+
+		@Override
+		public String getName() {
+			return NAME;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRENotFoundException.class};
+		}
+
+		@Override
+		public String docs() {
+			return "mixed {string} Used internally by the compiler. You shouldn't use it.";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			throw new CRENotFoundException("\"" + args[0].val() + "\" cannot be resolved to a type.", t);
+		}
+
+		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes,
+				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+			return CClassType.TYPE;
+		}
+
+		public static ParseTree createASTNode(String typeName, Target t, FileOptions fileOptions) {
+			ParseTree node = new ParseTree(new CFunction(NAME, t), fileOptions);
+			node.addChild(new ParseTree(new CString(typeName, t), fileOptions, true));
+			return node;
+		}
+
+		public static ParseTree createFromBareStringOrConcats(ParseTree typeNode) {
+
+			// Convert bare string types to __type_ref__.
+			if(typeNode.getData().getClass().equals(CBareString.class)
+					&& typeNode.getData().val().matches(TYPE_REGEX)) {
+				return __type_ref__.createASTNode(
+						typeNode.getData().val(), typeNode.getTarget(), typeNode.getFileOptions());
+			}
+
+			// Convert concatenated bare string types such as "concat(concat(ms, lang), int)" to "ms.lang.int".
+			if(typeNode.getData() instanceof CFunction
+					&& typeNode.getData().val().equals(concat.NAME)
+					&& typeNode.getChildren().size() == 2) {
+				String typeName = null;
+				ParseTree node = typeNode;
+				while(true) {
+					ParseTree child1 = node.getChildAt(0);
+					ParseTree child2 = node.getChildAt(1);
+
+					if(child2.getData() instanceof CBareString) {
+						typeName = child2.getData().val() + (typeName == null ? "" : "." + typeName);
+					} else if(child2.getData() instanceof CClassType) {
+						// "ms.lang.int" will have "int" parsed as CClassType. Convert to original string.
+						String[] cClassTypeStrSplit = child2.getData().val().split("\\.");
+						typeName = cClassTypeStrSplit[cClassTypeStrSplit.length - 1]
+								+ (typeName == null ? "" : "." + typeName);
+					} else {
+						return null;
+					}
+					if(child1.getData() instanceof CBareString) {
+						typeName = child1.getData().val() + "." + typeName;
+						break;
+					} else if(child1.getData() instanceof CClassType) {
+						// "int.my.type" will have "int" parsed as CClassType. Convert to original string.
+						String[] cClassTypeStrSplit = child1.getData().val().split("\\.");
+						typeName = cClassTypeStrSplit[cClassTypeStrSplit.length - 1] + "." + typeName;
+						break;
+					} else if(!(child1.getData() instanceof CFunction) || !concat.NAME.equals(child1.getData().val())
+							|| child1.getChildren().size() != 2) {
+						return null;
+					}
+					node = child1;
+				}
+				if(typeName.matches(TYPE_REGEX)) {
+					return __type_ref__.createASTNode(typeName, typeNode.getTarget(), typeNode.getFileOptions());
+				}
+			}
+
+			return null;
+		}
+
+		@Override
+		public ParseTree postParseRewrite(ParseTree ast, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> exceptions) {
+
+			// Attempt to resolve type reference to CClassType.
+			String typeName = ast.getChildAt(0).getData().val();
+			try {
+				CClassType classType = CClassType.get(FullyQualifiedClassName.forName(typeName, ast.getTarget(), env));
+				return new ParseTree(classType, ast.getFileOptions());
+			} catch (CRECastException | ClassNotFoundException e) {
+				return null;
+			}
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+
+			/*
+			 * With static analysis enabled, the typechecker has already taken care of this AST node.
+			 * Until MethodScript supports user types, we know that custom types cannot be resolved regardless of the
+			 * outcome of static analysis. So we can generate an exception here until user type support is added.
+			 */
+			if(!StaticAnalysis.enabled()) {
+				throw new ConfigCompileException(
+						"\"" + children.get(0).getData().val() + "\" cannot be resolved to a type.", t);
 			}
 			return null;
 		}
