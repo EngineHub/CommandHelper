@@ -412,7 +412,7 @@
 		</dependency>
 		<dependency>
 			<groupId>com.squareup.okio</groupId>
-			<artifactId>okio</artifactId>
+			<artifactId>okio-jvm</artifactId>
 			<version>3.9.0</version>
 		</dependency>
 		<dependency>
@@ -582,7 +582,7 @@
 									<include>com.google.guava:guava:jar:*</include>
 									<!-- Swagger dependencies -->
 									<include>com.squareup.okhttp:okhttp:jar:*</include>
-									<include>com.squareup.okio:okio:jar:*</include>
+									<include>com.squareup.okio:okio-jvm:jar:*</include>
 									<include>org.threeten:threetenbp:jar:*</include>
 									<include>io.gsonfire:gson-fire:jar:*</include>
 									<include>com.squareup.okhttp:logging-interceptor:jar:*</include>
@@ -901,7 +901,7 @@
 									</excludes>
 								</filter>
 								<filter>
-									<artifact>com.squareup.okio:okio:jar:*</artifact>
+									<artifact>com.squareup.okio:okio-jvm:jar:*</artifact>
 									<includes>
 										<include>**</include>
 									</includes>
