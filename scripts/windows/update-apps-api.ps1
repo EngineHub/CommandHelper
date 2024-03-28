@@ -7,7 +7,7 @@ $ErrorActionPreference = "Stop"
 
 # This is the checkout which we build against for the swagger-codegen project. This can be a tag or a commit (or technically a branch)
 # but is meant to be relatively stable, and regardless only intentionally updated, so that builds are generally speaking reproducable.
-$CheckoutId = "ddca76e4f8402630e78f1cd1378c894100092111"
+$CheckoutId = "129235049ab062492c75cc193ecfada84633cc56"
 
 [bool] $SkipBuild = $false;
 [bool] $SkipUpdate = $false;
@@ -35,7 +35,9 @@ function New-Software($Name, $Exe, $Instructions) {
 function Test-Software {
 	$softwares = (New-Software -Name "Java" -Exe "java.exe" -Instructions "https://adoptopenjdk.net/"), `
 		(New-Software -Name "Git" -Exe "git.exe" -Instructions "https://git-scm.com/download/win"), `
-		(New-Software -Name "Maven" -Exe "mvn.cmd" -Instructions "https://maven.apache.org/guides/getting-started/windows-prerequisites.html")
+		(New-Software -Name "Maven" -Exe "mvn.cmd" -Instructions "https://maven.apache.org/guides/getting-started/windows-prerequisites.html"), `
+		(New-Software -Name "NPM" -Exe "npm.ps1" -Instructions "https://docs.npmjs.com/downloading-and-installing-node-js-and-npm"), `
+		(New-Software -Name "TSP" -Exe "tsp.ps1" -Instructions "https://typespec.io/docs")
 
 
 	$notFound = @()
@@ -135,10 +137,18 @@ function Start-Main([string] $SwaggerGenerator,
 	$GeneratorJar = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath(".\modules\swagger-codegen-cli\target\swagger-codegen-cli.jar")
 	CheckFileOrExit $GeneratorJar
 
-	Status "Using $InputSpec as the input spec"
+	Status "Generating OpenAPI spec from $InputSpec"
+
+	Set-Location $InputSpec
+	npm install
+	tsp compile main.tsp --emit @typespec/openapi3
+
+	$InputSpec = "$InputSpec\tsp-output\@typespec\openapi3\openapi.yaml"
+
+	Status "Using $InputSpec as the OpenAPI input"
 
 	Status "Generating Java Client"
-	java --illegal-access=permit -jar $GeneratorJar generate -i $InputSpec -l java -o $JavaRepo -DhideGenerationTimestamp=true "--template-dir" "$MethodScriptDirectory/mustacheTemplates"
+	java -jar $GeneratorJar generate -i $InputSpec -l java -o $JavaRepo -DhideGenerationTimestamp=true "--template-dir" "$MethodScriptDirectory/mustacheTemplates"
 
 	# Copy in src/main/java
 	Status "Moving API files into MethodScript"
@@ -157,7 +167,7 @@ function Start-Main([string] $SwaggerGenerator,
 $SwaggerGeneratorDirectory = "$PSScriptRoot\..\..\..\SwaggerGenerator"
 $JavaRepoDirectory = "$PSScriptRoot\..\..\..\MethodScriptAppsJavaApi"
 $NodeRepoDirectory = "$PSScriptRoot\..\..\..\apps.methodscript.com"
-$InputSpec = (Resolve-Path "$PSScriptRoot\..\..\src\main\resources\apps.methodscript.com.yaml").Path
+$InputSpec = (Resolve-Path "$PSScriptRoot\..\..\src\main\resources\apps.methodscript.com\").Path
 $TemplateDir = Join-Path -Path $NodeRepoDirectory -ChildPath 'mustacheTemplates'
 
 Start-Main -SwaggerGenerator $SwaggerGeneratorDirectory `

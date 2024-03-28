@@ -113,7 +113,7 @@ public class TelemetryApi {
     }
 
     /**
-     * Obtains a telemetry key, which is used for future requests
+     * Obtains a telemetry key, which is used for future requests.
      * 
      * @return String
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
@@ -124,7 +124,7 @@ public class TelemetryApi {
     }
 
     /**
-     * Obtains a telemetry key, which is used for future requests
+     * Obtains a telemetry key, which is used for future requests.
      * 
      * @return ApiResponse&lt;String&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
@@ -136,7 +136,7 @@ public class TelemetryApi {
     }
 
     /**
-     * Obtains a telemetry key, which is used for future requests (asynchronously)
+     * Obtains a telemetry key, which is used for future requests. (asynchronously)
      * 
      * @param callback The callback to be executed when the API call finishes
      * @return The request call
@@ -170,8 +170,10 @@ public class TelemetryApi {
     }
     /**
      * Build call for telemetryKeyPost
-     * @param body The telemetry event. The content should be text/plain, even though it will actually be json, as server merely forwards the content on to ApplicationInsights. (required)
-     * @param key The previously obtained key (required)
+     * @param body The telemetry event. The content should be text/plain, even though
+it will actually be json, as server merely forwards the content on to
+ApplicationInsights. (required)
+     * @param key The previously obtained key. (required)
      * @param progressListener Progress listener
      * @param progressRequestListener Progress request listener
      * @return Call to execute
@@ -242,8 +244,10 @@ public class TelemetryApi {
     /**
      * Submits a telemetry event.
      * Submits a telemetry event, which is forwarded to the Application Insights application.
-     * @param body The telemetry event. The content should be text/plain, even though it will actually be json, as server merely forwards the content on to ApplicationInsights. (required)
-     * @param key The previously obtained key (required)
+     * @param body The telemetry event. The content should be text/plain, even though
+it will actually be json, as server merely forwards the content on to
+ApplicationInsights. (required)
+     * @param key The previously obtained key. (required)
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
     public void telemetryKeyPost(String body, String key) throws ApiException {
@@ -253,8 +257,10 @@ public class TelemetryApi {
     /**
      * Submits a telemetry event.
      * Submits a telemetry event, which is forwarded to the Application Insights application.
-     * @param body The telemetry event. The content should be text/plain, even though it will actually be json, as server merely forwards the content on to ApplicationInsights. (required)
-     * @param key The previously obtained key (required)
+     * @param body The telemetry event. The content should be text/plain, even though
+it will actually be json, as server merely forwards the content on to
+ApplicationInsights. (required)
+     * @param key The previously obtained key. (required)
      * @return ApiResponse&lt;Void&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
@@ -266,8 +272,10 @@ public class TelemetryApi {
     /**
      * Submits a telemetry event. (asynchronously)
      * Submits a telemetry event, which is forwarded to the Application Insights application.
-     * @param body The telemetry event. The content should be text/plain, even though it will actually be json, as server merely forwards the content on to ApplicationInsights. (required)
-     * @param key The previously obtained key (required)
+     * @param body The telemetry event. The content should be text/plain, even though
+it will actually be json, as server merely forwards the content on to
+ApplicationInsights. (required)
+     * @param key The previously obtained key. (required)
      * @param callback The callback to be executed when the API call finishes
      * @return The request call
      * @throws ApiException If fail to process the API call, e.g. serializing the request body object

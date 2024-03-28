@@ -26,6 +26,7 @@ import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
 
 
+import io.swagger.client.model.BuildArtifact;
 import java.io.File;
 
 import java.lang.reflect.Type;
@@ -55,7 +56,7 @@ public class BuildsApi {
 
     /**
      * Build call for buildsArtifactGet
-     * @param artifact The artifact type to list builds for (required)
+     * @param artifact The artifact type to list builds for. (required)
      * @param progressListener Progress listener
      * @param progressRequestListener Progress request listener
      * @return Call to execute
@@ -120,39 +121,39 @@ public class BuildsApi {
     }
 
     /**
-     * Provides a list of builds of the specified artifact available for download
-     * 
-     * @param artifact The artifact type to list builds for (required)
-     * @return String
+     * Provides a list of builds of the specified artifact available for download.
+     * Provides a list of builds of the specified artifact available for download. Note that the order of the returned artifacts is arbitrary.
+     * @param artifact The artifact type to list builds for. (required)
+     * @return List&lt;BuildArtifact&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
-    public String buildsArtifactGet(String artifact) throws ApiException {
-        ApiResponse<String> resp = buildsArtifactGetWithHttpInfo(artifact);
+    public List<BuildArtifact> buildsArtifactGet(String artifact) throws ApiException {
+        ApiResponse<List<BuildArtifact>> resp = buildsArtifactGetWithHttpInfo(artifact);
         return resp.getData();
     }
 
     /**
-     * Provides a list of builds of the specified artifact available for download
-     * 
-     * @param artifact The artifact type to list builds for (required)
-     * @return ApiResponse&lt;String&gt;
+     * Provides a list of builds of the specified artifact available for download.
+     * Provides a list of builds of the specified artifact available for download. Note that the order of the returned artifacts is arbitrary.
+     * @param artifact The artifact type to list builds for. (required)
+     * @return ApiResponse&lt;List&lt;BuildArtifact&gt;&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
-    public ApiResponse<String> buildsArtifactGetWithHttpInfo(String artifact) throws ApiException {
+    public ApiResponse<List<BuildArtifact>> buildsArtifactGetWithHttpInfo(String artifact) throws ApiException {
         com.squareup.okhttp.Call call = buildsArtifactGetValidateBeforeCall(artifact, null, null);
-        Type localVarReturnType = new TypeToken<String>(){}.getType();
+        Type localVarReturnType = new TypeToken<List<BuildArtifact>>(){}.getType();
         return apiClient.execute(call, localVarReturnType);
     }
 
     /**
-     * Provides a list of builds of the specified artifact available for download (asynchronously)
-     * 
-     * @param artifact The artifact type to list builds for (required)
+     * Provides a list of builds of the specified artifact available for download. (asynchronously)
+     * Provides a list of builds of the specified artifact available for download. Note that the order of the returned artifacts is arbitrary.
+     * @param artifact The artifact type to list builds for. (required)
      * @param callback The callback to be executed when the API call finishes
      * @return The request call
      * @throws ApiException If fail to process the API call, e.g. serializing the request body object
      */
-    public com.squareup.okhttp.Call buildsArtifactGetAsync(String artifact, final ApiCallback<String> callback) throws ApiException {
+    public com.squareup.okhttp.Call buildsArtifactGetAsync(String artifact, final ApiCallback<List<BuildArtifact>> callback) throws ApiException {
 
         ProgressResponseBody.ProgressListener progressListener = null;
         ProgressRequestBody.ProgressRequestListener progressRequestListener = null;
@@ -174,14 +175,14 @@ public class BuildsApi {
         }
 
         com.squareup.okhttp.Call call = buildsArtifactGetValidateBeforeCall(artifact, progressListener, progressRequestListener);
-        Type localVarReturnType = new TypeToken<String>(){}.getType();
+        Type localVarReturnType = new TypeToken<List<BuildArtifact>>(){}.getType();
         apiClient.executeAsync(call, localVarReturnType, callback);
         return call;
     }
     /**
      * Build call for buildsArtifactIdGet
      * @param artifact The artifact type to download (required)
-     * @param id The previously obtained id of the build you wish to download (required)
+     * @param id The previously obtained id of the build you wish to download. (required)
      * @param progressListener Progress listener
      * @param progressRequestListener Progress request listener
      * @return Call to execute
@@ -251,10 +252,10 @@ public class BuildsApi {
     }
 
     /**
-     * Downloads a specific build
+     * Downloads a specific build of the specified artifact type.
      * 
      * @param artifact The artifact type to download (required)
-     * @param id The previously obtained id of the build you wish to download (required)
+     * @param id The previously obtained id of the build you wish to download. (required)
      * @return File
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
@@ -264,10 +265,10 @@ public class BuildsApi {
     }
 
     /**
-     * Downloads a specific build
+     * Downloads a specific build of the specified artifact type.
      * 
      * @param artifact The artifact type to download (required)
-     * @param id The previously obtained id of the build you wish to download (required)
+     * @param id The previously obtained id of the build you wish to download. (required)
      * @return ApiResponse&lt;File&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
@@ -278,10 +279,10 @@ public class BuildsApi {
     }
 
     /**
-     * Downloads a specific build (asynchronously)
+     * Downloads a specific build of the specified artifact type. (asynchronously)
      * 
      * @param artifact The artifact type to download (required)
-     * @param id The previously obtained id of the build you wish to download (required)
+     * @param id The previously obtained id of the build you wish to download. (required)
      * @param callback The callback to be executed when the API call finishes
      * @return The request call
      * @throws ApiException If fail to process the API call, e.g. serializing the request body object
@@ -373,36 +374,36 @@ public class BuildsApi {
     }
 
     /**
-     * Provides a list of artifact types available for download
+     * Provides a list of artifact types available for download.
      * 
-     * @return String
+     * @return List&lt;String&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
-    public String buildsGet() throws ApiException {
-        ApiResponse<String> resp = buildsGetWithHttpInfo();
+    public List<String> buildsGet() throws ApiException {
+        ApiResponse<List<String>> resp = buildsGetWithHttpInfo();
         return resp.getData();
     }
 
     /**
-     * Provides a list of artifact types available for download
+     * Provides a list of artifact types available for download.
      * 
-     * @return ApiResponse&lt;String&gt;
+     * @return ApiResponse&lt;List&lt;String&gt;&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
-    public ApiResponse<String> buildsGetWithHttpInfo() throws ApiException {
+    public ApiResponse<List<String>> buildsGetWithHttpInfo() throws ApiException {
         com.squareup.okhttp.Call call = buildsGetValidateBeforeCall(null, null);
-        Type localVarReturnType = new TypeToken<String>(){}.getType();
+        Type localVarReturnType = new TypeToken<List<String>>(){}.getType();
         return apiClient.execute(call, localVarReturnType);
     }
 
     /**
-     * Provides a list of artifact types available for download (asynchronously)
+     * Provides a list of artifact types available for download. (asynchronously)
      * 
      * @param callback The callback to be executed when the API call finishes
      * @return The request call
      * @throws ApiException If fail to process the API call, e.g. serializing the request body object
      */
-    public com.squareup.okhttp.Call buildsGetAsync(final ApiCallback<String> callback) throws ApiException {
+    public com.squareup.okhttp.Call buildsGetAsync(final ApiCallback<List<String>> callback) throws ApiException {
 
         ProgressResponseBody.ProgressListener progressListener = null;
         ProgressRequestBody.ProgressRequestListener progressRequestListener = null;
@@ -424,7 +425,7 @@ public class BuildsApi {
         }
 
         com.squareup.okhttp.Call call = buildsGetValidateBeforeCall(progressListener, progressRequestListener);
-        Type localVarReturnType = new TypeToken<String>(){}.getType();
+        Type localVarReturnType = new TypeToken<List<String>>(){}.getType();
         apiClient.executeAsync(call, localVarReturnType, callback);
         return call;
     }

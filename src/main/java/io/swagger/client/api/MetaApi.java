@@ -113,7 +113,7 @@ public class MetaApi {
     }
 
     /**
-     * Pings the server to check its status
+     * Pings the server to check its status.
      * 
      * @return String
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
@@ -124,7 +124,7 @@ public class MetaApi {
     }
 
     /**
-     * Pings the server to check its status
+     * Pings the server to check its status.
      * 
      * @return ApiResponse&lt;String&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
@@ -136,7 +136,7 @@ public class MetaApi {
     }
 
     /**
-     * Pings the server to check its status (asynchronously)
+     * Pings the server to check its status. (asynchronously)
      * 
      * @param callback The callback to be executed when the API call finishes
      * @return The request call
@@ -229,7 +229,7 @@ public class MetaApi {
     }
 
     /**
-     * List services on this server
+     * List services on this server.
      * Lists the services that are available on this server. In general, clients must load this page first to determine supported services, and ensure that graceful fallbacks are provided if expected services are missing.
      * @return List&lt;String&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
@@ -240,7 +240,7 @@ public class MetaApi {
     }
 
     /**
-     * List services on this server
+     * List services on this server.
      * Lists the services that are available on this server. In general, clients must load this page first to determine supported services, and ensure that graceful fallbacks are provided if expected services are missing.
      * @return ApiResponse&lt;List&lt;String&gt;&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
@@ -252,7 +252,7 @@ public class MetaApi {
     }
 
     /**
-     * List services on this server (asynchronously)
+     * List services on this server. (asynchronously)
      * Lists the services that are available on this server. In general, clients must load this page first to determine supported services, and ensure that graceful fallbacks are provided if expected services are missing.
      * @param callback The callback to be executed when the API call finishes
      * @return The request call
