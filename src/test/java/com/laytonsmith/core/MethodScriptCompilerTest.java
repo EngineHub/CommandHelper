@@ -1378,4 +1378,56 @@ public class MethodScriptCompilerTest {
 		Collections.sort(names);
 		assertEquals(Arrays.asList("_a", "_b", "_c", "_d", "_e"), names);
 	}
+
+	@Test
+	public void testFQCNTypingCompiles() throws Exception {
+		String script = """
+				ms.lang.string @a = 'test';
+				ms.lang.array @b;
+				try {} catch (ms.lang.Exception @ex) {}
+				proc _a(ms.lang.int @c) {}
+				""";
+		Environment env = Static.GenerateStandaloneEnvironment();
+		StaticAnalysis sa = new StaticAnalysis(true);
+		sa.setLocalEnable(true);
+		MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, env, null, true), env, env.getEnvClasses(), sa);
+	}
+
+	@Test
+	public void testFQCNTypingCompilesStrict() throws Exception {
+		String script = """
+				<!strict>
+				ms.lang.string @a = 'test';
+				ms.lang.array @b;
+				try {} catch (ms.lang.Exception @ex) {}
+				proc _a(ms.lang.int @c) {}
+				""";
+		Environment env = Static.GenerateStandaloneEnvironment();
+		StaticAnalysis sa = new StaticAnalysis(true);
+		sa.setLocalEnable(true);
+		MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, env, null, true), env, env.getEnvClasses(), sa);
+	}
+
+	@Test(expected = ConfigCompileException.class)
+	public void testInvalidFQCNTypingCompileFails() throws Exception {
+		String script = """
+				ms.lang.invalidtype @a = null;
+				""";
+		Environment env = Static.GenerateStandaloneEnvironment();
+		StaticAnalysis sa = new StaticAnalysis(true);
+		sa.setLocalEnable(true);
+		MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, env, null, true), env, env.getEnvClasses(), sa);
+	}
+
+	@Test(expected = ConfigCompileException.class)
+	public void testInvalidFQCNTypingCompileFailsStrict() throws Exception {
+		String script = """
+				<!strict>
+				ms.lang.invalidtype @a = null;
+				""";
+		Environment env = Static.GenerateStandaloneEnvironment();
+		StaticAnalysis sa = new StaticAnalysis(true);
+		sa.setLocalEnable(true);
+		MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, env, null, true), env, env.getEnvClasses(), sa);
+	}
 }
