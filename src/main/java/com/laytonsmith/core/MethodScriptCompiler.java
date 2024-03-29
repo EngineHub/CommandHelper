@@ -1951,7 +1951,6 @@ public final class MethodScriptCompiler {
 							new CompilerWarning("Use of bare (unquoted) string: "
 									+ m.getData().val(), m.getTarget(),
 									FileOptions.SuppressWarning.UseBareStrings));
-					return; // for now, only one warning per file
 				}
 			}
 		}

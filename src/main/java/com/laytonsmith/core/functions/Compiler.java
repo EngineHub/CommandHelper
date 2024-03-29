@@ -464,11 +464,34 @@ public class Compiler {
 			}
 
 			// Look for typed assignments
-			for(int k = 0; k < list.size(); k++) {
-				if(list.get(k).getData().equals(CVoid.VOID) || list.get(k).getData().isInstanceOf(CClassType.TYPE)
-						|| (list.get(k).getData().getClass().equals(CBareString.class))
-						|| (list.get(k).getData() instanceof CFunction
-								&& list.get(k).getData().val().equals(concat.NAME))) {
+			typedAssignmentLoop: for(int k = 0; k < list.size(); k++) {
+				ParseTree typeNode = list.get(k);
+				if(typeNode.getData().equals(CVoid.VOID) || typeNode.getData().isInstanceOf(CClassType.TYPE)
+						|| (typeNode.getData().getClass().equals(CBareString.class))
+						|| (typeNode.getData() instanceof CFunction
+								&& typeNode.getData().val().equals(concat.NAME))) {
+
+					// If concat, ensure only CClassType or CBareString are being concatenated.
+					// This can be nested once: concat(concat(ms, lang), string)
+					if(typeNode.getData() instanceof CFunction) {
+						for(ParseTree concatChild : typeNode.getChildren()) {
+							if(concatChild.getData() instanceof CFunction) {
+								if(!concatChild.getData().val().equals(concat.NAME)) {
+									continue typedAssignmentLoop;
+								}
+								for(ParseTree innerConcatChild : concatChild.getChildren()) {
+									if(!innerConcatChild.getData().isInstanceOf(CClassType.TYPE)
+											&& !innerConcatChild.getData().getClass().equals(CBareString.class)) {
+										continue typedAssignmentLoop;
+									}
+								}
+							} else if(!concatChild.getData().isInstanceOf(CClassType.TYPE)
+									&& !concatChild.getData().getClass().equals(CBareString.class)) {
+								continue typedAssignmentLoop;
+							}
+						}
+					}
+
 					if(k == list.size() - 1) {
 						// This is not a typed assignment
 						break;
@@ -483,11 +506,11 @@ public class Compiler {
 							case "proc":
 								// Typed assign/closure
 								if(list.get(k + 1).getData().val().equals(assign.NAME)
-										&& list.get(k).getData().equals(CVoid.VOID)) {
+										&& typeNode.getData().equals(CVoid.VOID)) {
 									throw new ConfigCompileException("Variables may not be of type void",
 											list.get(k + 1).getTarget());
 								}
-								ParseTree typeNode = list.remove(k);
+								typeNode = list.remove(k);
 
 								// Convert bare string or concat() to type reference as it is used like that in syntax.
 								ParseTree typeRefNode = __type_ref__.createFromBareStringOrConcats(typeNode);
@@ -500,12 +523,11 @@ public class Compiler {
 								list.get(k).setChildren(children);
 								break;
 							default:
-								throw new ConfigCompileException("Unexpected ClassType \"" + list.get(k).getData().val() + "\"", list.get(k).getTarget());
+								throw new ConfigCompileException("Unexpected ClassType \"" + typeNode.getData().val() + "\"", typeNode.getTarget());
 						}
 					} else if(list.get(k + 1).getData() instanceof IVariable) {
 						// Not an assignment, a random variable declaration though.
-						ParseTree node = new ParseTree(new CFunction(assign.NAME, list.get(k + 1).getTarget()), list.get(k).getFileOptions());
-						ParseTree typeNode = list.get(k);
+						ParseTree node = new ParseTree(new CFunction(assign.NAME, list.get(k + 1).getTarget()), typeNode.getFileOptions());
 
 						// Convert bare string or concat() to type reference as it is used like that in syntax.
 						ParseTree typeRefNode = __type_ref__.createFromBareStringOrConcats(typeNode);
@@ -515,12 +537,11 @@ public class Compiler {
 
 						node.addChild(typeNode);
 						node.addChild(list.get(k + 1));
-						node.addChild(new ParseTree(CNull.UNDEFINED, list.get(k).getFileOptions()));
+						node.addChild(new ParseTree(CNull.UNDEFINED, typeNode.getFileOptions()));
 						list.set(k, node);
 						list.remove(k + 1);
 					} else if(list.get(k + 1).getData() instanceof CLabel) {
-						ParseTree node = new ParseTree(new CFunction(assign.NAME, list.get(k + 1).getTarget()), list.get(k).getFileOptions());
-						ParseTree typeNode = list.get(k);
+						ParseTree node = new ParseTree(new CFunction(assign.NAME, list.get(k + 1).getTarget()), typeNode.getFileOptions());
 
 						// Convert bare string or concat() to type reference as it is used like that in syntax.
 						ParseTree typeRefNode = __type_ref__.createFromBareStringOrConcats(typeNode);
@@ -534,7 +555,7 @@ public class Compiler {
 						labelNode.addChild(new ParseTree(CNull.UNDEFINED, typeNode.getFileOptions()));
 						list.set(k, labelNode);
 						list.remove(k + 1);
-					} else if(list.get(k).getData().getClass().equals(CBareString.class)) {
+					} else if(typeNode.getData().getClass().equals(CBareString.class)) {
 						continue; // Bare string was not used as a type.
 					} else {
 						throw new ConfigCompileException("Unexpected data after ClassType", list.get(k + 1).getTarget());
