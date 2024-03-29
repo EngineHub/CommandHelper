@@ -583,6 +583,7 @@
 									<!-- Swagger dependencies -->
 									<include>com.squareup.okhttp:okhttp:jar:*</include>
 									<include>com.squareup.okio:okio-jvm:jar:*</include>
+									<include>org.jetbrains.kotlin:kotlin-stdlib:jar:*</include>
 									<include>org.threeten:threetenbp:jar:*</include>
 									<include>io.gsonfire:gson-fire:jar:*</include>
 									<include>com.squareup.okhttp:logging-interceptor:jar:*</include>
@@ -701,6 +702,10 @@
 								<relocation>
 									<pattern>okio</pattern>
 									<shadedPattern>com.laytonsmith.libs.okio</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>kotlin</pattern>
+									<shadedPattern>com.laytonsmith.libs.kotlin</shadedPattern>
 								</relocation>
 								<relocation>
 									<pattern>org.threeten</pattern>
