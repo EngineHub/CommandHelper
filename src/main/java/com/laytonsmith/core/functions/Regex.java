@@ -5,13 +5,13 @@ import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
-import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
@@ -23,6 +23,7 @@ import com.laytonsmith.core.functions.StringHandling.replace;
 import com.laytonsmith.core.functions.StringHandling.split;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.natives.interfaces.Callable;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.EnumSet;
 import java.util.HashSet;
@@ -91,22 +92,15 @@ public class Regex {
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			Pattern pattern = getPattern(args[0], t);
 			String subject = args[1].val();
-			CArray ret = CArray.GetAssociativeArray(t);
 			Matcher m = pattern.matcher(subject);
 			if(m.find()) {
-				ret.set(0, new CString(m.group(0), t), t);
-				for(int i = 1; i <= m.groupCount(); i++) {
-					if(m.group(i) == null) {
-						ret.set(i, CNull.NULL, t);
-					} else {
-						ret.set(i, new CString(m.group(i), t), t);
-					}
-				}
+				CArray ret = ObjectGenerator.GetGenerator().regMatchValue(m, t);
 				for(String key : getNamedGroups(pattern.pattern())) {
 					ret.set(key, m.group(key), t);
 				}
+				return ret;
 			}
-			return ret;
+			return CArray.GetAssociativeArray(t);
 		}
 
 		@Override
@@ -190,12 +184,8 @@ public class Regex {
 			Matcher m = pattern.matcher(subject);
 			Set<String> namedGroups = getNamedGroups(pattern.pattern());
 			while(m.find()) {
-				CArray ret = CArray.GetAssociativeArray(t);
-				ret.set(0, new CString(m.group(0), t), t);
+				CArray ret = ObjectGenerator.GetGenerator().regMatchValue(m, t);
 
-				for(int i = 1; i <= m.groupCount(); i++) {
-					ret.set(i, new CString(m.group(i), t), t);
-				}
 				for(String key : namedGroups) {
 					ret.set(key, m.group(key), t);
 				}
@@ -254,12 +244,14 @@ public class Regex {
 		@Override
 		public String docs() {
 			return "string {pattern, replacement, subject} Replaces any occurrences of pattern with the replacement in subject."
-					+ " Back references are allowed.";
+					+ " Back references are allowed."
+					+ " 'replacement' can be a closure that accepts a found"
+					+ " occurrence of pattern and necessarily returns a string value as a replacement";
 		}
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREFormatException.class};
+			return new Class[]{CREFormatException.class, CRECastException.class};
 		}
 
 		@Override
@@ -280,12 +272,17 @@ public class Regex {
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			Pattern pattern = getPattern(args[0], t);
-			String replacement = args[1].val();
+			Mixed replacement = args[1];
 			String subject = args[2].val();
 			String ret = "";
 
 			try {
-				ret = pattern.matcher(subject).replaceAll(replacement);
+				if(replacement instanceof Callable replacer) {
+					ret = pattern.matcher(subject).replaceAll(mr -> ArgumentValidation.getStringObject(
+							replacer.executeCallable(env, t, ObjectGenerator.GetGenerator().regMatchValue(mr, t)), t));
+				} else {
+					ret = pattern.matcher(subject).replaceAll(replacement.val());
+				}
 			} catch (IndexOutOfBoundsException e) {
 				throw new CREFormatException("Expecting a regex group at parameter 1 of reg_replace", t);
 			} catch (IllegalArgumentException e) {
@@ -301,7 +298,8 @@ public class Regex {
 				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			ParseTree data = children.get(0);
-			if(!Construct.IsDynamicHelper(data.getData())) {
+			ParseTree replacement = children.get(1);
+			if(!(replacement.getData() instanceof CFunction) && !Construct.IsDynamicHelper(data.getData())) {
 				String pattern = data.getData().val();
 				if(isLiteralRegex(pattern)) {
 					//We want to replace this with replace()
@@ -338,7 +336,10 @@ public class Regex {
 				new ExampleScript("Basic usage", "reg_replace('\\\\d', 'Z', '123abc')"),
 				new ExampleScript("Using backreferences", "reg_replace('abc(\\\\d+)', '$1', 'abc123')"),
 				new ExampleScript("Using backreferences with named captures",
-				"reg_replace('abc(?<foo>\\\\d+)', '${foo}', 'abc123')", "123")
+				"reg_replace('abc(?<foo>\\\\d+)', '${foo}', 'abc123')", "123"),
+				new ExampleScript("Using closure as replacement function",
+				"reg_replace('cat|dog', closure(@match) {return array('dog': 'cat', 'cat': 'dog')[@match[0]]},"
+				+ " 'Oscar is a cat. Lucy is a dog.')", "Oscar is a dog. Lucy is a cat.")
 			};
 		}
 

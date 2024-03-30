@@ -104,6 +104,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.regex.MatchResult;
 
 /**
  * This file is responsible for converting CH objects into server objects, and vice versa
@@ -2403,5 +2404,26 @@ public class ObjectGenerator {
 	 */
 	public MCMetadataValue metadataValue(Object value, MCPlugin plugin) {
 		return StaticLayer.GetMetadataValue(value, plugin);
+	}
+	
+	/**
+	 * Return match result in MethodScript variable value presentaion
+	 * 
+	 * @param matchResult match result
+	 * @param t the target
+	 * @return match array
+	 */
+	public CArray regMatchValue(MatchResult matchResult, Target t) {
+		CArray ret = CArray.GetAssociativeArray(t);
+		ret.set(0, new CString(matchResult.group(0), t), t);
+		for(int i = 1; i <= matchResult.groupCount(); i++) {
+			if(matchResult.group(i) == null) {
+				ret.set(i, CNull.NULL, t);
+			} else {
+				ret.set(i, new CString(matchResult.group(i), t), t);
+			}
+		}
+
+		return ret;
 	}
 }
