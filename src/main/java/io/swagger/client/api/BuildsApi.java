@@ -57,12 +57,13 @@ public class BuildsApi {
     /**
      * Build call for buildsArtifactGet
      * @param artifact The artifact type to list builds for. (required)
+     * @param latest  (optional)
      * @param progressListener Progress listener
      * @param progressRequestListener Progress request listener
      * @return Call to execute
      * @throws ApiException If fail to serialize the request body object
      */
-    public com.squareup.okhttp.Call buildsArtifactGetCall(String artifact, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+    public com.squareup.okhttp.Call buildsArtifactGetCall(String artifact, Boolean latest, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
         Object localVarPostBody = null;
         
         // create path and map variables
@@ -71,6 +72,8 @@ public class BuildsApi {
 
         List<Pair> localVarQueryParams = new ArrayList<Pair>();
         List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        if (latest != null)
+        localVarQueryParams.addAll(apiClient.parameterToPair("latest", latest));
 
         Map<String, String> localVarHeaderParams = new HashMap<String, String>();
 
@@ -105,13 +108,13 @@ public class BuildsApi {
     }
     
     @SuppressWarnings("rawtypes")
-    private com.squareup.okhttp.Call buildsArtifactGetValidateBeforeCall(String artifact, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+    private com.squareup.okhttp.Call buildsArtifactGetValidateBeforeCall(String artifact, Boolean latest, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
         // verify the required parameter 'artifact' is set
         if (artifact == null) {
             throw new ApiException("Missing the required parameter 'artifact' when calling buildsArtifactGet(Async)");
         }
         
-        com.squareup.okhttp.Call call = buildsArtifactGetCall(artifact, progressListener, progressRequestListener);
+        com.squareup.okhttp.Call call = buildsArtifactGetCall(artifact, latest, progressListener, progressRequestListener);
         return call;
 
         
@@ -124,11 +127,12 @@ public class BuildsApi {
      * Provides a list of builds of the specified artifact available for download.
      * Provides a list of builds of the specified artifact available for download. Note that the order of the returned artifacts is arbitrary.
      * @param artifact The artifact type to list builds for. (required)
+     * @param latest  (optional)
      * @return List&lt;BuildArtifact&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
-    public List<BuildArtifact> buildsArtifactGet(String artifact) throws ApiException {
-        ApiResponse<List<BuildArtifact>> resp = buildsArtifactGetWithHttpInfo(artifact);
+    public List<BuildArtifact> buildsArtifactGet(String artifact, Boolean latest) throws ApiException {
+        ApiResponse<List<BuildArtifact>> resp = buildsArtifactGetWithHttpInfo(artifact, latest);
         return resp.getData();
     }
 
@@ -136,11 +140,12 @@ public class BuildsApi {
      * Provides a list of builds of the specified artifact available for download.
      * Provides a list of builds of the specified artifact available for download. Note that the order of the returned artifacts is arbitrary.
      * @param artifact The artifact type to list builds for. (required)
+     * @param latest  (optional)
      * @return ApiResponse&lt;List&lt;BuildArtifact&gt;&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
-    public ApiResponse<List<BuildArtifact>> buildsArtifactGetWithHttpInfo(String artifact) throws ApiException {
-        com.squareup.okhttp.Call call = buildsArtifactGetValidateBeforeCall(artifact, null, null);
+    public ApiResponse<List<BuildArtifact>> buildsArtifactGetWithHttpInfo(String artifact, Boolean latest) throws ApiException {
+        com.squareup.okhttp.Call call = buildsArtifactGetValidateBeforeCall(artifact, latest, null, null);
         Type localVarReturnType = new TypeToken<List<BuildArtifact>>(){}.getType();
         return apiClient.execute(call, localVarReturnType);
     }
@@ -149,11 +154,12 @@ public class BuildsApi {
      * Provides a list of builds of the specified artifact available for download. (asynchronously)
      * Provides a list of builds of the specified artifact available for download. Note that the order of the returned artifacts is arbitrary.
      * @param artifact The artifact type to list builds for. (required)
+     * @param latest  (optional)
      * @param callback The callback to be executed when the API call finishes
      * @return The request call
      * @throws ApiException If fail to process the API call, e.g. serializing the request body object
      */
-    public com.squareup.okhttp.Call buildsArtifactGetAsync(String artifact, final ApiCallback<List<BuildArtifact>> callback) throws ApiException {
+    public com.squareup.okhttp.Call buildsArtifactGetAsync(String artifact, Boolean latest, final ApiCallback<List<BuildArtifact>> callback) throws ApiException {
 
         ProgressResponseBody.ProgressListener progressListener = null;
         ProgressRequestBody.ProgressRequestListener progressRequestListener = null;
@@ -174,7 +180,7 @@ public class BuildsApi {
             };
         }
 
-        com.squareup.okhttp.Call call = buildsArtifactGetValidateBeforeCall(artifact, progressListener, progressRequestListener);
+        com.squareup.okhttp.Call call = buildsArtifactGetValidateBeforeCall(artifact, latest, progressListener, progressRequestListener);
         Type localVarReturnType = new TypeToken<List<BuildArtifact>>(){}.getType();
         apiClient.executeAsync(call, localVarReturnType, callback);
         return call;
