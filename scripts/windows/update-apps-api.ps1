@@ -160,6 +160,7 @@ function Start-Main([string] $SwaggerGenerator,
 
 	Status "Generating Node Server"
 	java -jar $GeneratorJar generate -i $InputSpec -l nodejs-server -o $NodeRepo "--disable-examples" "--template-dir" $TemplateDir
+	npx swagger-typescript-api -p $InputSpec -o "$NodeRepo\models" --clean-output --no-client
 
 	Status "Done!"
 }

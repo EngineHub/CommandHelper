@@ -30,7 +30,7 @@ public class Updater {
 	}
 
 	public static BuildArtifact getLatestVersionInfo() throws ApiException, ParseException {
-		List<BuildArtifact> versions = API.buildsArtifactGet(DEFAULT_UPDATE_CHANNEL);
+		List<BuildArtifact> versions = API.buildsArtifactGet(DEFAULT_UPDATE_CHANNEL, true);
 		BuildArtifact maxVersion = null;
 		for(int i = 0; i < versions.size(); i++) {
 			BuildArtifact version = versions.get(i);

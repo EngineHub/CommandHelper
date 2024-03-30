@@ -226,7 +226,8 @@ interface builds {
   @operationId("buildsArtifactGet")
   @get buildsArtifact(
     @doc("The artifact type to list builds for.")
-    artifact: string
+    artifact: string,
+    @query latest?: boolean,
     ) : Array<BuildArtifact> | Build404;
 
   @summary("Downloads a specific build of the specified artifact type.")
