@@ -95,6 +95,7 @@ public class StaticAnalysis {
 	 * @param isMainAnalysis - If {@code true}, full analyses will be performed with auto includes if present. If
 	 * {@code false}, only the scope graph will be generated and a full analysis is expected to be done externally.
 	 */
+	@SuppressWarnings("LeakingThisInConstructor")
 	public StaticAnalysis(Scope parentScope, boolean isMainAnalysis) {
 		this.startScope = (parentScope != null ? parentScope : new Scope());
 		this.scopes = new HashSet<>();
@@ -103,6 +104,7 @@ public class StaticAnalysis {
 		this.staticAnalyses.add(this);
 	}
 
+	@SuppressWarnings("LeakingThisInConstructor")
 	private StaticAnalysis(Scope startScope, Scope endScope, Set<Scope> scopes,
 			boolean isMainAnalysis, Scope globalScope, ParseTree astRootNode,
 			Set<StaticAnalysis> staticAnalyses, Map<ParseTree, Scope> astScopeMap) {
@@ -131,7 +133,7 @@ public class StaticAnalysis {
 			Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> exceptions) {
 
 		// Don't perform static analysis if it's disabled.
-		if(!enabled() && !isLocalEnabled()) {
+		if(localDisabled || (!enabled() && !isLocalEnabled())) {
 			return;
 		}
 
@@ -234,6 +236,7 @@ public class StaticAnalysis {
 		// Generate compile error for duplicate ivariable declarations.
 		for(Scope scope : this.scopes) {
 			for(Declaration decl : scope.getAllDeclarationsLocal(Namespace.IVARIABLE)) {
+				assert decl != null;
 				if(decl instanceof ParamDeclaration) {
 					continue; // Allow parameter declarations to shadow previous declarations.
 				}
@@ -365,8 +368,8 @@ public class StaticAnalysis {
 	 */
 	public CClassType typecheck(ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
 		Mixed node = ast.getData();
-		if(node instanceof CFunction) {
-			CFunction cFunc = (CFunction) node;
+		assert node != null;
+		if(node instanceof CFunction cFunc) {
 			if(cFunc.hasFunction()) {
 				Function func = cFunc.getCachedFunction();
 				if(func != null && func.getClass() != __autoconcat__.class) {
@@ -402,8 +405,7 @@ public class StaticAnalysis {
 				throw new Error("Unsupported " + CFunction.class.getSimpleName()
 						+ " type in type checking for node with value: " + cFunc.val());
 			}
-		} else if(node instanceof IVariable) {
-			IVariable ivar = (IVariable) node;
+		} else if(node instanceof IVariable ivar) {
 			Scope scope = this.getTermScope(ast);
 			if(scope != null) {
 				Set<Declaration> decls = scope.getDeclarations(Namespace.IVARIABLE, ivar.getVariableName());
@@ -435,9 +437,9 @@ public class StaticAnalysis {
 			exceptions.add(ex != null ? ex
 					: new ConfigCompileException("Unexpected keyword: " + node.val(), node.getTarget()));
 			return CClassType.AUTO;
-		} else if(node instanceof CLabel) {
+		} else if(node instanceof CLabel cLabel) {
 			exceptions.add(new ConfigCompileException(
-					"Unexpected label: " + ((CLabel) node).cVal().val(), node.getTarget()));
+					"Unexpected label: " + cLabel.cVal().val(), node.getTarget()));
 			return CClassType.AUTO;
 		}
 
@@ -464,6 +466,7 @@ public class StaticAnalysis {
 	 * @param type - The type to check.
 	 * @param expected - The expected {@link CClassType}.
 	 * @param t
+	 * @param env
 	 * @param exceptions
 	 */
 	public static void requireType(CClassType type, CClassType expected,
@@ -483,6 +486,7 @@ public class StaticAnalysis {
 	 * @param type - The type to check.
 	 * @param expected - The expected {@link CClassType}s, which should always be of at least size 1.
 	 * @param t
+	 * @param env
 	 * @param exceptions
 	 */
 	public static void requireAnyType(CClassType type, CClassType[] expected,
@@ -520,8 +524,9 @@ public class StaticAnalysis {
 	 * @return The {@link IVariable} if it was one, or {@code null} if it wasn't.
 	 */
 	public static IVariable requireIVariable(Mixed node, Target t, Set<ConfigCompileException> exceptions) {
-		if(node instanceof IVariable) {
-			return (IVariable) node;
+		assert node != null;
+		if(node instanceof IVariable iVariable) {
+			return iVariable;
 		} else if(node instanceof Variable) {
 			exceptions.add(new ConfigCompileException("Expected ivariable, but received variable instead.", t));
 			return null;
@@ -544,7 +549,6 @@ public class StaticAnalysis {
 	 * if it isn't.
 	 *
 	 * @param node - The AST node to check.
-	 * @param t
 	 * @param exceptions
 	 * @return The {@link CClasType} if it was one, or {@code null} if it wasn't.
 	 */
@@ -649,7 +653,7 @@ public class StaticAnalysis {
 			}
 
 			// Resolve and compile the include.
-			StaticAnalysis includeAnalysis = null;
+			StaticAnalysis includeAnalysis;
 			File file = Static.GetFileFromArgument(includeRef.getIdentifier(), env, includeRef.getTarget(), null);
 			try {
 				file = file.getCanonicalFile();
@@ -996,6 +1000,18 @@ public class StaticAnalysis {
 		this.localEnable = enabled;
 	}
 
+	private boolean localDisabled = false;
+
+	/**
+	 * Sets whether or not to disable static analysis. This should only be used in niche situations, such
+	 * as running in interpreter mode, or other places where static analysis is more expensive than it's
+	 * worth, and the code being submitted simply won't be reused anyways.
+	 * @param disabled
+	 */
+	public void setLocalDisabled(boolean disabled) {
+		this.localDisabled = disabled;
+	}
+
 	/**
 	 * Returns true if this specific instance of the SA object is enabled (or it's globally enabled). This is useful in
 	 * unit tests to override the global value.
@@ -1006,7 +1022,7 @@ public class StaticAnalysis {
 	 */
 	@Deprecated
 	public boolean isLocalEnabled() {
-		return this.localEnable || enabled();
+		return !localDisabled && (this.localEnable || enabled());
 	}
 
 	/**

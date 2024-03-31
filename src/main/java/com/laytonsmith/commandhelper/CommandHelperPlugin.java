@@ -116,7 +116,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 	/**
 	 * Interpreter listener
 	 */
-	public final CommandHelperInterpreterListener interpreterListener = new CommandHelperInterpreterListener(this);
+	public final CommandHelperInterpreterListener interpreterListener = new CommandHelperInterpreterListener();
 	/**
 	 * Server Command Listener, for console commands
 	 */
@@ -594,7 +594,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 			} else {
 				interpreterListener.startInterpret(sender.getName());
 				sender.sendMessage(MCChatColor.YELLOW + "You are now in interpreter mode. Type a dash (-) on a"
-						+ " line by itself to exit, and >>> to enter multiline mode.");
+						+ " line by itself to exit, >>> to enter multiline mode, and ~ to clear the environment.");
 			}
 			return true;
 		} else {
