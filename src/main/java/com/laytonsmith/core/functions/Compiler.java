@@ -523,7 +523,10 @@ public class Compiler {
 								list.get(k).setChildren(children);
 								break;
 							default:
-								throw new ConfigCompileException("Unexpected ClassType \"" + typeNode.getData().val() + "\"", typeNode.getTarget());
+								if(typeNode.getData().equals(CVoid.VOID) || typeNode.getData().isInstanceOf(CClassType.TYPE)) {
+									throw new ConfigCompileException("Unexpected ClassType \""
+											+ typeNode.getData().val() + "\"", typeNode.getTarget());
+								}
 						}
 					} else if(list.get(k + 1).getData() instanceof IVariable) {
 						// Not an assignment, a random variable declaration though.
