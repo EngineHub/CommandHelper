@@ -51,6 +51,9 @@ public class BuildArtifact {
   @SerializedName("commitDetails")
   private String commitDetails = null;
 
+  @SerializedName("poisoned")
+  private Boolean poisoned = null;
+
   public BuildArtifact artifact(String artifact) {
     this.artifact = artifact;
     return this;
@@ -195,6 +198,24 @@ public class BuildArtifact {
     this.commitDetails = commitDetails;
   }
 
+  public BuildArtifact poisoned(Boolean poisoned) {
+    this.poisoned = poisoned;
+    return this;
+  }
+
+   /**
+   * A poisoned build shouldn&#x27;t be recommended. This is a build that is known to have had problems, but was already published, and will not be taken down.
+   * @return poisoned
+  **/
+  @Schema(required = true, description = "A poisoned build shouldn't be recommended. This is a build that is known to have had problems, but was already published, and will not be taken down.")
+  public Boolean isPoisoned() {
+    return poisoned;
+  }
+
+  public void setPoisoned(Boolean poisoned) {
+    this.poisoned = poisoned;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -212,12 +233,13 @@ public class BuildArtifact {
         Objects.equals(this.link, buildArtifact.link) &&
         Objects.equals(this.fullLink, buildArtifact.fullLink) &&
         Objects.equals(this.sha, buildArtifact.sha) &&
-        Objects.equals(this.commitDetails, buildArtifact.commitDetails);
+        Objects.equals(this.commitDetails, buildArtifact.commitDetails) &&
+        Objects.equals(this.poisoned, buildArtifact.poisoned);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(artifact, buildId, name, date, link, fullLink, sha, commitDetails);
+    return Objects.hash(artifact, buildId, name, date, link, fullLink, sha, commitDetails, poisoned);
   }
 
 
@@ -234,6 +256,7 @@ public class BuildArtifact {
     sb.append("    fullLink: ").append(toIndentedString(fullLink)).append("\n");
     sb.append("    sha: ").append(toIndentedString(sha)).append("\n");
     sb.append("    commitDetails: ").append(toIndentedString(commitDetails)).append("\n");
+    sb.append("    poisoned: ").append(toIndentedString(poisoned)).append("\n");
     sb.append("}");
     return sb.toString();
   }

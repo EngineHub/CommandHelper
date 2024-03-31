@@ -950,6 +950,15 @@
 										<exclude>META-INF/**</exclude>
 									</excludes>
 								</filter>
+								<filter>
+									<artifact>org.jetbrains.kotlin:kotlin-stdlib:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+									<excludes>
+										<exclude>META-INF/**</exclude>
+									</excludes>
+								</filter>
 							</filters>
 						</configuration>
 					</execution>
