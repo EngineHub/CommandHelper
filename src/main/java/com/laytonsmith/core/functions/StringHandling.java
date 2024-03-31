@@ -13,6 +13,7 @@ import com.laytonsmith.annotations.noprofile;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
@@ -48,6 +49,7 @@ import com.laytonsmith.core.functions.DataHandling.g;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.natives.interfaces.Callable;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
@@ -64,6 +66,8 @@ import java.util.Set;
 import com.laytonsmith.core.natives.interfaces.Sizeable;
 import java.lang.reflect.InaccessibleObjectException;
 import java.util.UUID;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 /**
  *
@@ -302,15 +306,35 @@ public class StringHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
-			String thing = args[0].val();
-			String what = args[1].val();
-			String that = args[2].val();
-			return new CString(thing.replace(what, that), t);
+			String subject = args[0].val();
+			String search = args[1].val();
+			Mixed replacement = args[2];
+			String ret = "";
+
+			if(replacement instanceof Callable replacer) {
+				try {
+					Pattern pattern = Pattern.compile(search);
+					ret = pattern.matcher(subject).replaceAll(mr -> ArgumentValidation.getStringObject(
+						replacer.executeCallable(env, t, ObjectGenerator.GetGenerator().regMatchValue(mr, t)), t));
+				} catch (PatternSyntaxException e) {
+					throw new CREFormatException(e.getMessage(), args[0].getTarget());
+				} catch (IndexOutOfBoundsException e) {
+					throw new CREFormatException("Expecting a regex group at parameter 2 of replace", t);
+				} catch (IllegalArgumentException e) {
+					throw new CREFormatException(e.getMessage(), t);
+				}
+			} else {
+				ret = subject.replace(search, replacement.val());
+			}
+
+			return new CString(ret, t);
 		}
 
 		@Override
 		public String docs() {
-			return "string {subject, search, replacement} Replaces all instances of 'search' with 'replacement' in 'subject'";
+			return "string {subject, search, replacement} Replaces all instances of 'search' with 'replacement' in 'subject'."
+			+ " 'replacement' can be a closure that necessarily returns a string value as a replacement"
+			+ " and search will be read as a regular expression.";
 		}
 
 		@Override
@@ -337,7 +361,9 @@ public class StringHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("", "replace('Where in the world is Carmen Sandiego?', 'Carmen Sandiego', 'Waldo')"),
-				new ExampleScript("No match found", "replace('The same thing', 'not found', '404')")};
+				new ExampleScript("No match found", "replace('The same thing', 'not found', '404')"),
+				new ExampleScript("Using closure as replacement function",
+				"replace('I love dogs', 'dogs', closure() {return 'cats'},", "I love cats")};
 		}
 
 		@Override

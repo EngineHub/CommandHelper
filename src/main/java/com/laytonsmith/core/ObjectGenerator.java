@@ -2405,7 +2405,7 @@ public class ObjectGenerator {
 	public MCMetadataValue metadataValue(Object value, MCPlugin plugin) {
 		return StaticLayer.GetMetadataValue(value, plugin);
 	}
-	
+
 	/**
 	 * Return match result in MethodScript variable value presentaion
 	 * 

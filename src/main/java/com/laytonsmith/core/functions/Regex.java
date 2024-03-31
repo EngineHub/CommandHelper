@@ -246,7 +246,7 @@ public class Regex {
 			return "string {pattern, replacement, subject} Replaces any occurrences of pattern with the replacement in subject."
 					+ " Back references are allowed."
 					+ " 'replacement' can be a closure that accepts a found"
-					+ " occurrence of pattern and necessarily returns a string value as a replacement";
+					+ " occurrence of pattern and necessarily returns a string value as a replacement.";
 		}
 
 		@Override
@@ -298,8 +298,7 @@ public class Regex {
 				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			ParseTree data = children.get(0);
-			ParseTree replacement = children.get(1);
-			if(!(replacement.getData() instanceof CFunction) && !Construct.IsDynamicHelper(data.getData())) {
+			if(!Construct.IsDynamicHelper(data.getData())) {
 				String pattern = data.getData().val();
 				if(isLiteralRegex(pattern)) {
 					//We want to replace this with replace()

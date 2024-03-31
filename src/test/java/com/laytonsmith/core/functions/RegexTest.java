@@ -72,8 +72,12 @@ public class RegexTest {
 		assertEquals("Oscar is a dog. Lucy is a cat.", SRun("""
 				reg_replace('cat|dog', closure(@match) {return array('dog': 'cat', 'cat': 'dog')[@match[0]]}, 'Oscar is a cat. Lucy is a dog.')
 				""", null));
+		assertEquals("Lucy pushed the mug down.", SRun("""
+				reg_replace('plate', closure(@match) {return 'mug'}, 'Lucy pushed the plate down.')
+				""", null));
 		assertThrows(CRECastException.class, () -> SRun("""
-				reg_replace('fine', closure() {}, 'This is fine')
+				@subject = '' // for disable optimization
+				reg_replace(@subject, closure() {}, 'This is fine')
 				""", null));
 	}
 

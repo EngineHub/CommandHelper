@@ -2,6 +2,7 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
@@ -13,6 +14,7 @@ import java.util.Locale;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -79,11 +81,13 @@ public class StringHandlingTest {
 	}
 
 	@Test(timeout = 10000)
-	public void testReplace() {
+	public void testReplace() throws Exception {
 		StringHandling.replace a = new StringHandling.replace();
 		assertCEquals(C.onstruct("yay"), a.exec(Target.UNKNOWN, null, C.onstruct("yayathing"), C.onstruct("athing"), C.onstruct("")));
 		assertCEquals(C.onstruct("yaymonkey"), a.exec(Target.UNKNOWN, null, C.onstruct("yayathing"), C.onstruct("athing"), C.onstruct("monkey")));
 		assertCEquals(C.onstruct("yayathing"), a.exec(Target.UNKNOWN, null, C.onstruct("yayathing"), C.onstruct("wut"), C.onstruct("chicken")));
+		assertEquals("ya ya oh no wow", SRun("replace('ya ya oh no', 'oh no', closure(@match) {return @match[0].' wow'})", null));
+		assertThrows(CRECastException.class, () -> SRun("replace('ya ya oh no', 'oh no', closure() {})", null));
 	}
 
 	@Test(timeout = 10000)
