@@ -149,7 +149,8 @@ public class CommandHelperInterpreterListener implements Listener {
 							Static.SendMessage(p, MCChatColor.RED + ex.getMessage());
 						}
 					}
-				}	break;
+				}
+				break;
 		}
 	}
 
