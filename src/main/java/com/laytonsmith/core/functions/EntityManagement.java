@@ -5147,7 +5147,8 @@ public class EntityManagement {
 					+ " format as recieved (i.e. with the leftRotation, rightRotation, scale, and translation"
 					+ " properties) but you can also provide it as a length 16 array of floats. These are"
 					+ " accepted in the same order that the /data command would accept them. Regardless of"
-					+ " how they are input, the function will always return the complex object.";
+					+ " how they are input, the function will always return the complex object. Sub-properties"
+					+ " of the '''transformation''' property are optional - missing values will not be changed.";
 		}
 
 		@Override
@@ -5233,28 +5234,49 @@ public class EntityManagement {
 					}
 					display.setTransformationMatrix(f);
 				} else {
-					CArray leftRotationC = ArgumentValidation.getArray(transformation.get("leftRotation", t), t);
-					Quaternionf leftRotation = new Quaternionf(
-							ArgumentValidation.getDouble(leftRotationC.get("x", t), t),
-							ArgumentValidation.getDouble(leftRotationC.get("y", t), t),
-							ArgumentValidation.getDouble(leftRotationC.get("z", t), t),
-							ArgumentValidation.getDouble(leftRotationC.get("w", t), t));
-					CArray rightRotationC = ArgumentValidation.getArray(transformation.get("rightRotation", t), t);
-					Quaternionf rightRotation = new Quaternionf(
-							ArgumentValidation.getDouble(rightRotationC.get("x", t), t),
-							ArgumentValidation.getDouble(rightRotationC.get("y", t), t),
-							ArgumentValidation.getDouble(rightRotationC.get("z", t), t),
-							ArgumentValidation.getDouble(rightRotationC.get("w", t), t));
-					CArray scaleC = ArgumentValidation.getArray(transformation.get("scale", t), t);
-					Vector3f scale = new Vector3f(
-							ArgumentValidation.getDouble32(scaleC.get("x", t), t),
-							ArgumentValidation.getDouble32(scaleC.get("y", t), t),
-							ArgumentValidation.getDouble32(scaleC.get("z", t), t));
-					CArray translationC = ArgumentValidation.getArray(transformation.get("translation", t), t);
-					Vector3f translation = new Vector3f(
-							ArgumentValidation.getDouble32(translationC.get("x", t), t),
-							ArgumentValidation.getDouble32(translationC.get("y", t), t),
-							ArgumentValidation.getDouble32(translationC.get("z", t), t));
+					MCTransformation existingTransformation = display.getTransformation();
+					Quaternionf leftRotation;
+					if(transformation.containsKey("leftRotation")) {
+						CArray leftRotationC = ArgumentValidation.getArray(transformation.get("leftRotation", t), t);
+						leftRotation = new Quaternionf(
+								ArgumentValidation.getDouble(leftRotationC.get("x", t), t),
+								ArgumentValidation.getDouble(leftRotationC.get("y", t), t),
+								ArgumentValidation.getDouble(leftRotationC.get("z", t), t),
+								ArgumentValidation.getDouble(leftRotationC.get("w", t), t));
+					} else {
+						leftRotation = existingTransformation.getLeftRotation();
+					}
+					Quaternionf rightRotation;
+					if(transformation.containsKey("rightRotation")) {
+						CArray rightRotationC = ArgumentValidation.getArray(transformation.get("rightRotation", t), t);
+						rightRotation = new Quaternionf(
+								ArgumentValidation.getDouble(rightRotationC.get("x", t), t),
+								ArgumentValidation.getDouble(rightRotationC.get("y", t), t),
+								ArgumentValidation.getDouble(rightRotationC.get("z", t), t),
+								ArgumentValidation.getDouble(rightRotationC.get("w", t), t));
+					} else {
+						rightRotation = existingTransformation.getRightRotation();
+					}
+					Vector3f scale;
+					if(transformation.containsKey("scale")) {
+						CArray scaleC = ArgumentValidation.getArray(transformation.get("scale", t), t);
+						scale = new Vector3f(
+								ArgumentValidation.getDouble32(scaleC.get("x", t), t),
+								ArgumentValidation.getDouble32(scaleC.get("y", t), t),
+								ArgumentValidation.getDouble32(scaleC.get("z", t), t));
+					} else {
+						scale = existingTransformation.getScale();
+					}
+					Vector3f translation;
+					if(transformation.containsKey("translation")) {
+						CArray translationC = ArgumentValidation.getArray(transformation.get("translation", t), t);
+						translation = new Vector3f(
+								ArgumentValidation.getDouble32(translationC.get("x", t), t),
+								ArgumentValidation.getDouble32(translationC.get("y", t), t),
+								ArgumentValidation.getDouble32(translationC.get("z", t), t));
+					} else {
+						translation = existingTransformation.getTranslation();
+					}
 					MCTransformation tr = StaticLayer.GetTransformation(leftRotation, rightRotation, scale, translation);
 					display.setTransformation(tr);
 				}
