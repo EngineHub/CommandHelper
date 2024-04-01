@@ -297,19 +297,21 @@ public class Regex {
 				Set<Class<? extends Environment.EnvironmentImpl>> envs,
 				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
-			ParseTree data = children.get(0);
-			if(!Construct.IsDynamicHelper(data.getData())) {
-				String pattern = data.getData().val();
-				if(isLiteralRegex(pattern)) {
+			ParseTree patternArg = children.get(0);
+			ParseTree replacementArg = children.get(1);
+			if(!Construct.IsDynamicHelper(patternArg.getData()) && !Construct.IsDynamicHelper(replacementArg.getData())) {
+				String pattern = patternArg.getData().val();
+				String replacement = replacementArg.getData().val();
+				if(isLiteralRegex(pattern) && !isBackreference(replacement)) {
 					//We want to replace this with replace()
 					//Note the alternative order of arguments
-					ParseTree replaceNode = new ParseTree(new CFunction(replace.NAME, t), data.getFileOptions());
+					ParseTree replaceNode = new ParseTree(new CFunction(replace.NAME, t), patternArg.getFileOptions());
 					replaceNode.addChildAt(0, children.get(2)); //subject -> main
 					replaceNode.addChildAt(1, new ParseTree(new CString(getLiteralRegex(pattern), t), replaceNode.getFileOptions())); //pattern -> what
 					replaceNode.addChildAt(2, children.get(1)); //replacement -> that
 					return replaceNode;
 				} else {
-					getPattern(data.getData(), t);
+					getPattern(patternArg.getData(), t);
 				}
 			}
 			return null;
@@ -617,6 +619,10 @@ public class Regex {
 		} catch (PatternSyntaxException e) {
 			throw new CREFormatException(e.getMessage(), c.getTarget());
 		}
+	}
+
+	private static boolean isBackreference(String replacement) {
+		return replacement.length() > 0 && replacement.charAt(0) == '$';
 	}
 
 	private static boolean isLiteralRegex(String regex) {

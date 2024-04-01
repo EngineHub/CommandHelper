@@ -76,8 +76,7 @@ public class RegexTest {
 				reg_replace('plate', closure(@match) {return 'mug'}, 'Lucy pushed the plate down.')
 				""", null));
 		assertThrows(CRECastException.class, () -> SRun("""
-				@subject = '' // for disable optimization
-				reg_replace(@subject, closure() {}, 'This is fine')
+				reg_replace('', closure() {}, 'This is fine')
 				""", null));
 	}
 
