@@ -723,7 +723,16 @@ public class BukkitConvertor extends AbstractConvertor {
 			throw new CancelCommandException(Implementation.GetServerType().getBranding()
 					+ " tried to schedule a task while the plugin was disabled (is the server shutting down?).", Target.UNKNOWN);
 		}
-		return Bukkit.getServer().getScheduler().callSyncMethod(CommandHelperPlugin.self, callable).get();
+
+		if(Bukkit.isPrimaryThread()) {
+			try {
+				return callable.call();
+			} catch(Exception e) {
+				throw new ExecutionException(e);
+			}
+		} else {
+			return Bukkit.getServer().getScheduler().callSyncMethod(CommandHelperPlugin.self, callable).get();
+		}
 	}
 
 	@Override

@@ -17,7 +17,6 @@ import com.laytonsmith.core.compiler.SelfStatement;
 import com.laytonsmith.core.compiler.VariableScope;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
-import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
@@ -46,7 +45,9 @@ import java.util.concurrent.Callable;
  *
  */
 @core
-public class Threading {
+public final class Threading {
+
+	private Threading() {}
 
 	public static String docs() {
 		return "This experimental and private API is subject to removal, or incompatible changes, and should not"
@@ -76,27 +77,25 @@ public class Threading {
 		}
 
 		@Override
-		public Mixed exec(final Target t, final Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(final Target t, final Environment env, Mixed... args) throws ConfigRuntimeException {
 			final String threadId = args[0].val();
-			if(!(args[1].isInstanceOf(CClosure.TYPE))) {
-				throw new CRECastException("Expected closure for arg 2", t);
-			}
-			final CClosure closure = (CClosure) args[1];
+			final com.laytonsmith.core.natives.interfaces.Callable closure
+					= ArgumentValidation.getObject(args[1], t, com.laytonsmith.core.natives.interfaces.Callable.class);
 			Thread th = new Thread("(" + Implementation.GetServerType().getBranding() + ") " + threadId) {
 				@Override
 				public void run() {
-					DaemonManager dm = environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager();
+					DaemonManager dm = env.getEnv(StaticRuntimeEnv.class).GetDaemonManager();
 					dm.activateThread(Thread.currentThread());
 					try {
-						closure.executeCallable();
+						closure.executeCallable(env, t);
 					} catch (LoopManipulationException ex) {
 						ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.CreateUncatchableException("Unexpected loop manipulation"
-								+ " operation was triggered inside the closure.", t), environment);
+								+ " operation was triggered inside the closure.", t), env);
 					} catch (ConfigRuntimeException ex) {
-						ConfigRuntimeException.HandleUncaughtException(ex, environment);
+						ConfigRuntimeException.HandleUncaughtException(ex, env);
 					} catch (CancelCommandException ex) {
 						if(ex.getMessage() != null) {
-							new Echoes.console().exec(t, environment, new CString(ex.getMessage(), t), CBoolean.FALSE);
+							new Echoes.console().exec(t, env, new CString(ex.getMessage(), t), CBoolean.FALSE);
 						}
 					} finally {
 						dm.deactivateThread(Thread.currentThread());
@@ -231,17 +230,18 @@ public class Threading {
 		}
 
 		@Override
-		public Mixed exec(final Target t, final Environment environment, Mixed... args) throws ConfigRuntimeException {
-			final CClosure closure = ArgumentValidation.getObject(args[0], t, CClosure.class);
+		public Mixed exec(final Target t, final Environment env, Mixed... args) throws ConfigRuntimeException {
+			final com.laytonsmith.core.natives.interfaces.Callable closure
+					= ArgumentValidation.getObject(args[0], t, com.laytonsmith.core.natives.interfaces.Callable.class);
 			StaticLayer.GetConvertor().runOnMainThreadLater(
-					environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), new Runnable() {
+					env.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), new Runnable() {
 
 				@Override
 				public void run() {
 					try {
-						closure.executeCallable();
+						closure.executeCallable(env, t);
 					} catch (ConfigRuntimeException e) {
-						ConfigRuntimeException.HandleUncaughtException(e, environment);
+						ConfigRuntimeException.HandleUncaughtException(e, env);
 					} catch (ProgramFlowManipulationException e) {
 						// Ignored
 					}
@@ -295,8 +295,9 @@ public class Threading {
 		}
 
 		@Override
-		public Mixed exec(final Target t, final Environment environment, Mixed... args) throws ConfigRuntimeException {
-			final CClosure closure = ArgumentValidation.getObject(args[0], t, CClosure.class);
+		public Mixed exec(final Target t, final Environment env, Mixed... args) throws ConfigRuntimeException {
+			final com.laytonsmith.core.natives.interfaces.Callable closure = ArgumentValidation.getObject(args[0], t,
+					com.laytonsmith.core.natives.interfaces.Callable.class);
 			Object ret;
 			try {
 				ret = StaticLayer.GetConvertor().runOnMainThreadAndWait(new Callable<Object>() {
@@ -304,7 +305,7 @@ public class Threading {
 					@Override
 					public Object call() throws Exception {
 						try {
-							return closure.executeCallable();
+							return closure.executeCallable(env, t);
 						} catch (ConfigRuntimeException | ProgramFlowManipulationException e) {
 							return e;
 						}
@@ -314,8 +315,8 @@ public class Threading {
 			} catch (Exception ex) {
 				throw new RuntimeException(ex);
 			}
-			if(ret instanceof RuntimeException) {
-				throw (RuntimeException) ret;
+			if(ret instanceof RuntimeException runtimeException) {
+				throw runtimeException;
 			} else {
 				return (Mixed) ret;
 			}
@@ -353,7 +354,7 @@ public class Threading {
 	@SelfStatement
 	public static class _synchronized extends AbstractFunction implements VariableScope, BranchStatement {
 
-		private static final Map<Object, Integer> SYNC_OBJECT_MAP = new HashMap<Object, Integer>();
+		private static final Map<Object, Integer> SYNC_OBJECT_MAP = new HashMap<>();
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -389,7 +390,7 @@ public class Threading {
 
 			// Get the sync object (CArray or String value of the Mixed).
 			Mixed cSyncObject = parent.seval(syncObjectTree, env);
-			if(cSyncObject instanceof CNull) {
+			if(cSyncObject instanceof CNull || cSyncObject == null) {
 				throw new CRENullPointerException("Synchronization object may not be null in " + getName() + "().", t);
 			}
 			Object syncObject;
