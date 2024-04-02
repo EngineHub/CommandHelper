@@ -5609,6 +5609,61 @@ public class PlayerManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({com.laytonsmith.core.functions.Environment.play_sound.class})
+	public static class stop_sound_category extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRELengthException.class, CREFormatException.class, CREPlayerOfflineException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args)
+				throws ConfigRuntimeException {
+
+			MCPlayer p = Static.GetPlayer(args[0], t);
+			MCSoundCategory category;
+			try {
+				category = MCSoundCategory.valueOf(args[1].val().toUpperCase());
+			} catch (IllegalArgumentException ex) {
+				throw new CREFormatException("Sound category '" + args[1].val() + "' is invalid.", t);
+			}
+			p.stopSound(category);
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "stop_sound_category";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "void {player, category} Stops all sounds in a category for the given player. (MC 1.19)";
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_5;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
 	@seealso({com.laytonsmith.core.functions.Environment.play_named_sound.class})
 	public static class stop_named_sound extends AbstractFunction {
 
