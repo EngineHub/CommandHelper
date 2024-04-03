@@ -10,6 +10,7 @@ import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CString;
@@ -298,10 +299,12 @@ public class Regex {
 				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			ParseTree patternArg = children.get(0);
+			Mixed patternData = patternArg.getData();
 			ParseTree replacementArg = children.get(1);
-			if(!Construct.IsDynamicHelper(patternArg.getData()) && !Construct.IsDynamicHelper(replacementArg.getData())) {
-				String pattern = patternArg.getData().val();
-				String replacement = replacementArg.getData().val();
+			Mixed replacementData = replacementArg.getData();
+			if(!Construct.IsDynamicHelper(patternData) && !(replacementData instanceof CClosure) && !Construct.IsDynamicHelper(replacementData)) {
+				String pattern = patternData.val();
+				String replacement = replacementData.val();
 				if(isLiteralRegex(pattern) && !isBackreference(replacement)) {
 					//We want to replace this with replace()
 					//Note the alternative order of arguments
