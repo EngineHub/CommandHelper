@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.Common.MutableObject;
 import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.Implementation;
@@ -15,6 +16,8 @@ import com.laytonsmith.core.Script;
 import com.laytonsmith.core.compiler.BranchStatement;
 import com.laytonsmith.core.compiler.SelfStatement;
 import com.laytonsmith.core.compiler.VariableScope;
+import com.laytonsmith.core.compiler.signature.FunctionSignatures;
+import com.laytonsmith.core.compiler.signature.SignatureBuilder;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CNull;
@@ -39,7 +42,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Random;
 import java.util.concurrent.Callable;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  *
@@ -348,13 +354,71 @@ public final class Threading {
 
 	}
 
+	private static final Map<Object, Integer> SYNC_OBJECT_MAP = new HashMap<>();
+	private static final Map<Object, Lock> SYNC_OBJECT_LOCKS = new HashMap<>();
+
+	private static Lock getSyncObject(Mixed cSyncObject, Function f, Target t) {
+
+		if(cSyncObject instanceof CNull || cSyncObject == null) {
+			throw new CRENullPointerException("Synchronization object may not be null in " + f.getName() + "().", t);
+		}
+		Object syncObject;
+		if(cSyncObject.isInstanceOf(CArray.TYPE)) {
+			syncObject = cSyncObject;
+		} else {
+			syncObject = cSyncObject.val();
+		}
+
+		// Add String sync objects to the map to be able to synchronize by value.
+		if(syncObject instanceof String) {
+			synchronized(SYNC_OBJECT_MAP) {
+				searchLabel:
+				{
+					for(Entry<Object, Integer> entry : SYNC_OBJECT_MAP.entrySet()) {
+						Object key = entry.getKey();
+						if(key instanceof String && key.equals(syncObject)) {
+							syncObject = key; // Get reference, value of this assign is the same.
+							entry.setValue(entry.getValue() + 1);
+							break searchLabel;
+						}
+					}
+					SYNC_OBJECT_MAP.put(syncObject, 1);
+				}
+			}
+		}
+
+		return SYNC_OBJECT_LOCKS.computeIfAbsent(syncObject, (x) -> {
+			return new ReentrantLock();
+		});
+	}
+
+	private static void cleanupSync(Object syncObject) {
+		// Remove 1 from the call count or remove the sync object from the map if it was a sync-by-value.
+		if(syncObject instanceof String) {
+			synchronized(SYNC_OBJECT_MAP) {
+				int count = SYNC_OBJECT_MAP.get(syncObject); // This should never return null.
+				if(count <= 1) {
+					SYNC_OBJECT_MAP.remove(syncObject);
+					SYNC_OBJECT_LOCKS.remove(syncObject);
+				} else {
+					for(Entry<Object, Integer> entry : SYNC_OBJECT_MAP.entrySet()) {
+						if(entry.getKey() == syncObject) { // Equals by reference.
+							entry.setValue(count - 1);
+							break;
+						}
+					}
+				}
+			}
+		}
+	}
+
 	@api
 	@noboilerplate
-	@seealso({x_new_thread.class})
+	@seealso({x_new_thread.class, x_get_lock.class})
 	@SelfStatement
 	public static class _synchronized extends AbstractFunction implements VariableScope, BranchStatement {
 
-		private static final Map<Object, Integer> SYNC_OBJECT_MAP = new HashMap<>();
+
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -390,59 +454,15 @@ public final class Threading {
 
 			// Get the sync object (CArray or String value of the Mixed).
 			Mixed cSyncObject = parent.seval(syncObjectTree, env);
-			if(cSyncObject instanceof CNull || cSyncObject == null) {
-				throw new CRENullPointerException("Synchronization object may not be null in " + getName() + "().", t);
-			}
-			Object syncObject;
-			if(cSyncObject.isInstanceOf(CArray.TYPE)) {
-				syncObject = cSyncObject;
-			} else {
-				syncObject = cSyncObject.val();
-			}
-
-			// Add String sync objects to the map to be able to synchronize by value.
-			if(syncObject instanceof String) {
-				synchronized(SYNC_OBJECT_MAP) {
-					searchLabel:
-					{
-						for(Entry<Object, Integer> entry : SYNC_OBJECT_MAP.entrySet()) {
-							Object key = entry.getKey();
-							if(key instanceof String && key.equals(syncObject)) {
-								syncObject = key; // Get reference, value of this assign is the same.
-								entry.setValue(entry.getValue() + 1);
-								break searchLabel;
-							}
-						}
-						SYNC_OBJECT_MAP.put(syncObject, 1);
-					}
-				}
-			}
+			Lock syncObject = getSyncObject(cSyncObject, this, t);
 
 			// Evaluate the code, synchronized by the passed sync object.
 			try {
-				synchronized(syncObject) {
-					parent.eval(code, env);
-				}
-			} catch (RuntimeException e) {
-				throw e;
+				syncObject.lock();
+				parent.eval(code, env);
 			} finally {
-
-				// Remove 1 from the call count or remove the sync object from the map if it was a sync-by-value.
-				if(syncObject instanceof String) {
-					synchronized(SYNC_OBJECT_MAP) {
-						int count = SYNC_OBJECT_MAP.get(syncObject); // This should never return null.
-						if(count <= 1) {
-							SYNC_OBJECT_MAP.remove(syncObject);
-						} else {
-							for(Entry<Object, Integer> entry : SYNC_OBJECT_MAP.entrySet()) {
-								if(entry.getKey() == syncObject) { // Equals by reference.
-									entry.setValue(count - 1);
-									break;
-								}
-							}
-						}
-					}
-				}
+				syncObject.unlock();
+				cleanupSync(syncObject);
 			}
 			return CVoid.VOID;
 		}
@@ -469,7 +489,9 @@ public final class Threading {
 					+ " This means that if two threads will call " + getName() + "('example', &lt;code&gt;), the second"
 					+ " call will hang the thread until the passed code of the first call has finished executing."
 					+ " If you call this function from within this function on the same thread using the same"
-					+ " syncObject, the code will simply be executed."
+					+ " syncObject, the code will simply be executed. Note that this uses the same pool of lock"
+					+ " objects as x_get_lock, except this can be used off the main thread, whereas x_get_lock can"
+					+ " only run on the main thread."
 					+ " For more information about synchronization, see:"
 					+ " https://en.wikipedia.org/wiki/Synchronization_(computer_science)";
 		}
@@ -539,6 +561,93 @@ public final class Threading {
 			ret.add(true);
 			return ret;
 		}
+	}
+
+	@api
+	@noboilerplate
+	@seealso({_synchronized.class, x_get_lock.class})
+	public static class x_get_lock extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRENullPointerException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			// Get the sync object tree and the code to synchronize.
+			Mixed cSyncObject = args[0];
+			com.laytonsmith.core.natives.interfaces.Callable callable
+					= ArgumentValidation.getObject(args[1], t, com.laytonsmith.core.natives.interfaces.Callable.class);
+
+			// Get the sync object (CArray or String value of the Mixed).
+			Lock syncObject = getSyncObject(cSyncObject, this, t);
+
+			// Evaluate the code, synchronized by the passed sync object.
+			final MutableObject<Runnable> r = new MutableObject<>();
+			r.setObject(() -> {
+				if(syncObject.tryLock()) {
+					try {
+						callable.executeCallable(env, t, args);
+					} finally {
+						cleanupSync(syncObject);
+					}
+				} else {
+					int backoff = new Random().nextInt() % 100;
+					StaticLayer.SetFutureRunnable(env.getEnv(StaticRuntimeEnv.class).GetDaemonManager(),
+							backoff, r.getObject());
+				}
+			});
+			StaticLayer.SetFutureRunnable(env.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), 0, r.getObject());
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "x_get_lock";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "void {mixed lock, Callable action} Runs the specified action on the main thread once the lock is obtained. Note that"
+					+ " this lock is the same object as used in synchronized(). The primary difference being that this"
+					+ " function always returns immediately, scheduling the task for later (as soon as possible, but"
+					+ " with a small, random backoff), whereas synchronized blocks until the lock is obtained. This"
+					+ " is an appropriate call to use when running on the main thread, though it can also be used"
+					+ " off the main thread as well, though note that regardless of what thread this is started"
+					+ " on, it always runs the Callable on the main thread. The lock is re-entrant, but as the"
+					+ " function always runs the Callable at some future point, this only matters when used in"
+					+ " conjunction with synchronized().";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CVoid.TYPE)
+					.param(Mixed.TYPE, "syncObject", "The object to sync on. This uses the same object pool as synchronized().")
+					.param(com.laytonsmith.core.natives.interfaces.Callable.TYPE, "action", "The action to run once the lock is obtained.")
+					.build();
+		}
+
 	}
 
 	@api
