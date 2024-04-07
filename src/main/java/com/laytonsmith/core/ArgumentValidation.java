@@ -207,7 +207,7 @@ public final class ArgumentValidation {
 	 */
 	public static float getDouble32(Mixed c, Target t) {
 		double l = getDouble(c, t);
-		if(l > Float.MAX_VALUE || l < Float.MIN_VALUE) {
+		if(Math.abs(l) > Float.MAX_VALUE) {
 			throw new CRERangeException("Expecting a 32 bit float, but a larger value was found: " + l, t);
 		}
 		return (float) l;
