@@ -1327,9 +1327,9 @@ public class MethodScriptCompilerTest {
 	@Test
 	public void testGettingSmartCommentFromReferenceWorks() throws Exception {
 		String[] scripts = new String[]{
-			"/** smart comment */ proc _test() {}; _test();",
-			"/** smart comment */ void proc _test(){}; _test();",
-			"/** smart comment */ proc _test(){}; _test();",
+			"/** smart comment */ proc _test() {} _test();",
+			"/** smart comment */ void proc _test(){} _test();",
+			"/** smart comment */ proc _test(){} _test();",
 		};
 		for(String script : scripts) {
 			Environment env = Static.GenerateStandaloneEnvironment();
