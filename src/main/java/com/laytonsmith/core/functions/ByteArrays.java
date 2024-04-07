@@ -478,6 +478,11 @@ public class ByteArrays {
 			return "ba_put_byte";
 		}
 
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CRERangeException.class};
+		}
+
 	}
 
 	@api
@@ -542,6 +547,11 @@ public class ByteArrays {
 			return "ba_put_short";
 		}
 
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CRERangeException.class};
+		}
+
 	}
 
 	@api
@@ -570,6 +580,11 @@ public class ByteArrays {
 		@Override
 		public String getName() {
 			return "ba_put_int";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CRERangeException.class};
 		}
 	}
 
@@ -629,6 +644,11 @@ public class ByteArrays {
 		@Override
 		public String getName() {
 			return "ba_put_float";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CRERangeException.class};
 		}
 
 	}

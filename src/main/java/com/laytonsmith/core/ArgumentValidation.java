@@ -197,26 +197,20 @@ public final class ArgumentValidation {
 	}
 
 	/**
-	 * Returns a 32 bit float from the construct. Since the backing value is actually a double, if the number contained
-	 * in the construct is not the same after truncating, an exception is thrown (fail fast). When needing an float from
-	 * a construct, this method is much preferred over silently truncating.
+	 * Returns a 32-bit float from the construct. Since the backing value is actually a double, if the number contained
+	 * in the construct is not within range after truncating, an exception is thrown (fail fast). When needing a float
+	 * from a construct, this method is much preferred over silently truncating.
 	 *
 	 * @param c
 	 * @param t
 	 * @return
 	 */
 	public static float getDouble32(Mixed c, Target t) {
-		if(c instanceof CMutablePrimitive) {
-			c = ((CMutablePrimitive) c).get();
-		}
-		// Use 6 places at most else the imprecisions of float makes this function throw the exception.
-		double delta = 0.0000001;
 		double l = getDouble(c, t);
-		float f = (float) l;
-		if(Math.abs(f - l) > delta) {
+		if(l > Float.MAX_VALUE || l < Float.MIN_VALUE) {
 			throw new CRERangeException("Expecting a 32 bit float, but a larger value was found: " + l, t);
 		}
-		return f;
+		return (float) l;
 	}
 
 	/**
