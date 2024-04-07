@@ -2696,7 +2696,7 @@ public class Math {
 			try {
 				MathConstants c = MathConstants.valueOf(args[0].val());
 				Number v = c.getValue();
-				if(v instanceof Double) {
+				if(v instanceof Double || v instanceof Float) {
 					return new CDouble(c.getValue().doubleValue(), t);
 				} else {
 					return new CInt(c.getValue().longValue(), t);
