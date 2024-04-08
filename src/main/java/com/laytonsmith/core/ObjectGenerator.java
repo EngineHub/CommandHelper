@@ -2407,7 +2407,7 @@ public class ObjectGenerator {
 	}
 
 	/**
-	 * Return match result in MethodScript variable value presentaion
+	 * Return match result in MethodScript variable value presentation
 	 * 
 	 * @param matchResult match result
 	 * @param t the target
