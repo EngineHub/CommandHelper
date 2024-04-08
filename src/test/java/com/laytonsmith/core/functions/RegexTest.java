@@ -3,12 +3,15 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+
 import static com.laytonsmith.testing.StaticTest.SRun;
 import java.util.Set;
 import org.hamcrest.Matcher;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -66,6 +69,15 @@ public class RegexTest {
 	public void testRegReplace() throws Exception {
 		assertEquals("word", SRun("reg_replace('This is a (word)', '$1', 'This is a word')", null));
 		assertEquals("It's a wordy day!", SRun("reg_replace('sunn', 'word', 'It\\'s a sunny day!')", null));
+		assertEquals("Oscar is a dog. Lucy is a cat.", SRun("""
+				reg_replace('cat|dog', closure(@match) {return array('dog': 'cat', 'cat': 'dog')[@match[0]]}, 'Oscar is a cat. Lucy is a dog.')
+				""", null));
+		assertEquals("Lucy pushed the mug down.", SRun("""
+				reg_replace('plate', closure(@match) {return 'mug'}, 'Lucy pushed the plate down.')
+				""", null));
+		assertThrows(CRECastException.class, () -> SRun("""
+				reg_replace('', closure() {}, 'This is fine')
+				""", null));
 	}
 
 	@Test(timeout = 10000)

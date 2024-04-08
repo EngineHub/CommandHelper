@@ -216,7 +216,7 @@ public class OptimizationTest {
 
 	@Test
 	public void testRegReplaceOptimization1() throws Exception {
-		assertEquals("replace('this is a thing','thing',dyn('hi'))", optimize("reg_replace('thing', dyn('hi'), 'this is a thing')"));
+		assertEquals("replace('this is a thing','thing','hi')", optimize("reg_replace('thing', 'hi', 'this is a thing')"));
 	}
 
 	@Test

@@ -341,3 +341,6 @@ persistence.json
 
 # TSP
 src/main/resources/apps.methodscript.com/tsp-output
+
+# VSCode
+.vscode
