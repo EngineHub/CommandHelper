@@ -246,8 +246,8 @@ public class Regex {
 		public String docs() {
 			return "string {pattern, replacement, subject} Replaces any occurrences of pattern with the replacement in subject."
 					+ " Back references are allowed."
-					+ " 'replacement' can be a closure that accepts a found"
-					+ " occurrence of pattern and necessarily returns a string value as a replacement.";
+					+ " 'replacement' can be a string, or a closure that accepts a found occurrence of 'pattern'"
+					+ " and returns the replacement string value.";
 		}
 
 		@Override
@@ -343,7 +343,7 @@ public class Regex {
 				"reg_replace('abc(?<foo>\\\\d+)', '${foo}', 'abc123')", "123"),
 				new ExampleScript("Using closure as replacement function",
 				"reg_replace('cat|dog', closure(@match) {return array('dog': 'cat', 'cat': 'dog')[@match[0]]},"
-				+ " 'Oscar is a cat. Lucy is a dog.')", "Oscar is a dog. Lucy is a cat.")
+				+ " 'Oscar is a cat. Lucy is a dog.')")
 			};
 		}
 
