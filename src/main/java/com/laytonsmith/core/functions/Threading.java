@@ -1,6 +1,5 @@
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.PureUtilities.Common.MutableObject;
 import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.Triplet;
 import com.laytonsmith.PureUtilities.Version;
@@ -19,7 +18,6 @@ import com.laytonsmith.core.compiler.SelfStatement;
 import com.laytonsmith.core.compiler.VariableScope;
 import com.laytonsmith.core.compiler.signature.FunctionSignatures;
 import com.laytonsmith.core.compiler.signature.SignatureBuilder;
-import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
@@ -28,6 +26,7 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CRE.CREInterruptedException;
 import com.laytonsmith.core.exceptions.CRE.CRENullPointerException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
@@ -37,12 +36,12 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.LoopManipulationException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
-
-import java.util.List;
+import com.laytonsmith.core.natives.interfaces.ValueType;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 import java.util.Random;
 import java.util.concurrent.Callable;
@@ -356,12 +355,19 @@ public final class Threading {
 
 	}
 
-	// Contains the queue of callables that are waiting on the lock
+	/**
+	 * Contains the queue of callables that are waiting on the lock.
+	 */
 	private static final Map<Lock, Queue<Triplet<com.laytonsmith.core.natives.interfaces.Callable,
 			Environment, Target>>> SYNC_OBJECT_QUEUE = new HashMap<>();
-	// Contains a mapping from Lock object, to references to the lock
+	/**
+	 * Contains a mapping from Lock object, to references to the lock. For internal synchronization purposes,
+	 * this value should always be used for synchronization.
+	 */
 	private static final Map<Lock, Integer> SYNC_OBJECT_MAP = new HashMap<>();
-	// Contains a mapping from code object to lock.
+	/**
+	 * Contains a mapping from code object to lock.
+	 */
 	private static final Map<Object, Lock> SYNC_OBJECT_LOCKS = new HashMap<>();
 
 	private static Lock getSyncObject(Mixed cSyncObject, Function f, Target t) {
@@ -369,10 +375,11 @@ public final class Threading {
 		if(cSyncObject instanceof CNull || cSyncObject == null) {
 			throw new CRENullPointerException("Synchronization object may not be null in " + f.getName() + "().", t);
 		}
-		Object syncObject;
-		if(cSyncObject.isInstanceOf(CArray.TYPE)) {
-			syncObject = cSyncObject;
-		} else {
+		Object syncObject = cSyncObject;
+		if(cSyncObject.isInstanceOf(ValueType.TYPE)) {
+			if(!(cSyncObject instanceof CString)) {
+				throw new CREIllegalArgumentException("Only strings and non-value types can be used for synchronization.", t);
+			}
 			syncObject = cSyncObject.val();
 		}
 
@@ -391,11 +398,12 @@ public final class Threading {
 		// Remove 1 from the call count or remove the sync object from the map if it was a sync-by-value.
 		synchronized(SYNC_OBJECT_MAP) {
 			int count = SYNC_OBJECT_MAP.get(syncObject); // This should never return null.
-			SYNC_OBJECT_MAP.put(syncObject, count - 1);
 			if(count <= 1) {
 				SYNC_OBJECT_MAP.remove(syncObject);
 				SYNC_OBJECT_LOCKS.remove(syncObject);
 				SYNC_OBJECT_QUEUE.remove(syncObject);
+			} else {
+				SYNC_OBJECT_MAP.put(syncObject, count - 1);
 			}
 
 		}
@@ -413,10 +421,15 @@ public final class Threading {
 			if(syncObject.tryLock()) {
 				try {
 					Triplet<com.laytonsmith.core.natives.interfaces.Callable,
-							Environment, Target> triplet = SYNC_OBJECT_QUEUE.get(syncObject).poll();
+							Environment, Target> triplet;
+					synchronized(SYNC_OBJECT_MAP) {
+						triplet = SYNC_OBJECT_QUEUE.get(syncObject).poll();
+					}
 					triplet.getFirst().executeCallable(triplet.getSecond(), triplet.getThird());
-					if(!SYNC_OBJECT_QUEUE.get(syncObject).isEmpty()) {
-						StaticLayer.SetFutureRunnable(dm, 0, () -> PumpQueue(syncObject, dm));
+					synchronized(SYNC_OBJECT_MAP) {
+						if(!SYNC_OBJECT_QUEUE.get(syncObject).isEmpty()) {
+							StaticLayer.SetFutureRunnable(dm, 0, () -> PumpQueue(syncObject, dm));
+						}
 					}
 				} finally {
 					cleanupSync(syncObject);
@@ -512,10 +525,11 @@ public final class Threading {
 					+ " call will hang the thread until the passed code of the first call has finished executing."
 					+ " If you call this function from within this function on the same thread using the same"
 					+ " syncObject, the code will simply be executed. Note that this uses the same pool of lock"
-					+ " objects as x_get_lock, except this can be used off the main thread, whereas x_get_lock can"
-					+ " only run on the main thread. Generally speaking, it is almost always incorrect to use this"
-					+ " on the main thread, though there is no technical restriction to doing so. A runtime warning"
-					+ " is issued if this occurs, though it can be suppressed with the appropriate file option."
+					+ " objects as x_get_lock, except this can be used off the main thread, whereas x_get_lock is"
+					+ " preferred on the main thread. Generally speaking, it is almost always incorrect to use this"
+					+ " on the main thread, though there is no technical restriction to doing so. Other than strings,"
+					+ " ValueTypes cannot be used as the lock object, and reference types such as an array or other"
+					+ " object is required."
 					+ " For more information about synchronization, see:"
 					+ " https://en.wikipedia.org/wiki/Synchronization_(computer_science)";
 		}
@@ -618,16 +632,16 @@ public final class Threading {
 			Lock syncObject = getSyncObject(cSyncObject, this, t);
 
 			// Evaluate the code, synchronized by the passed sync object.
-			final MutableObject<Runnable> r = new MutableObject<>();
 			DaemonManager dm = env.getEnv(StaticRuntimeEnv.class).GetDaemonManager();
-			r.setObject(() -> {
-				PumpQueue(syncObject, dm);
-			});
 			Triplet<com.laytonsmith.core.natives.interfaces.Callable, Environment, Target> triplet
 					= new Triplet<>(callable, env, t);
-			SYNC_OBJECT_QUEUE.computeIfAbsent(syncObject, k -> new LinkedList<>())
-					.add(triplet);
-			StaticLayer.SetFutureRunnable(dm, 0, r.getObject());
+			synchronized(SYNC_OBJECT_MAP) {
+				SYNC_OBJECT_QUEUE.computeIfAbsent(syncObject, k -> new LinkedList<>())
+						.add(triplet);
+			}
+			StaticLayer.SetFutureRunnable(dm, 0, () -> {
+				PumpQueue(syncObject, dm);
+			});
 			return CVoid.VOID;
 		}
 
@@ -659,7 +673,9 @@ public final class Threading {
 					+ " pattern. This is prone to overflowing though, and should not be used for large amounts of"
 					+ " inputs. A good example of use for this function is when there is a synchronized block that runs"
 					+ " on an external thread, but some sort of relatively infrequent player input has critical sections"
-					+ " that must be locked against the same lock. ";
+					+ " that must be locked against the same lock. Other than strings,"
+					+ " ValueTypes cannot be used as the lock object, and reference types such as an array or other"
+					+ " object is required.";
 		}
 
 		@Override
