@@ -294,4 +294,13 @@ public interface Convertor {
 	 * @return
 	 */
 	public MCTransformation GetTransformation(Quaternionf leftRotation, Quaternionf rightRotation, Vector3f scale, Vector3f translation);
+
+	/**
+	 * Returns true if this is the main thread of the application. This is only applicable in some managed environments,
+	 * in other environments where this doesn't matter, this will always return false (i.e. all threads are considered
+	 * equally important/unimportant). If this returns true, this means that the current thread is for instance the
+	 * UI thread, and thus should not be blocked on.
+	 * @return
+	 */
+	public boolean IsMainThread();
 }

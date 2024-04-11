@@ -166,6 +166,10 @@ public final class StaticLayer {
 		return convertor.GetPlugin();
 	}
 
+	public static boolean IsMainThread() {
+		return convertor.IsMainThread();
+	}
+
 	public static synchronized Convertor GetConvertor() {
 		return convertor;
 	}

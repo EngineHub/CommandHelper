@@ -910,4 +910,10 @@ public class BukkitConvertor extends AbstractConvertor {
 	public MCTransformation GetTransformation(Quaternionf leftRotation, Quaternionf rightRotation, Vector3f scale, Vector3f translation) {
 		return new BukkitMCTransformation(new Transformation(translation, leftRotation, scale, rightRotation));
 	}
+
+	@Override
+	public boolean IsMainThread() {
+		return Bukkit.isPrimaryThread();
+	}
+
 }

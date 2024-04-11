@@ -902,6 +902,12 @@ public class StaticTest {
 		public MCTransformation GetTransformation(Quaternionf leftRotation, Quaternionf rightRotation, Vector3f scale, Vector3f translation) {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
+
+		@Override
+		public boolean IsMainThread() {
+			return false;
+		}
+
 	}
 
 	public static class FakeServerMixin implements EventMixinInterface {

@@ -40,8 +40,10 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Queue;
 import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.locks.Lock;
@@ -354,6 +356,7 @@ public final class Threading {
 
 	}
 
+	private static final Map<Object, Queue<Runnable>> SYNC_OBJECT_QUEUE = new HashMap<>();
 	private static final Map<Object, Integer> SYNC_OBJECT_MAP = new HashMap<>();
 	private static final Map<Object, Lock> SYNC_OBJECT_LOCKS = new HashMap<>();
 
@@ -370,26 +373,24 @@ public final class Threading {
 		}
 
 		// Add String sync objects to the map to be able to synchronize by value.
-		if(syncObject instanceof String) {
-			synchronized(SYNC_OBJECT_MAP) {
-				searchLabel:
-				{
-					for(Entry<Object, Integer> entry : SYNC_OBJECT_MAP.entrySet()) {
-						Object key = entry.getKey();
-						if(key instanceof String && key.equals(syncObject)) {
-							syncObject = key; // Get reference, value of this assign is the same.
-							entry.setValue(entry.getValue() + 1);
-							break searchLabel;
-						}
+		synchronized(SYNC_OBJECT_MAP) {
+			if(syncObject instanceof String) {
+				for(Entry<Object, Integer> entry : SYNC_OBJECT_MAP.entrySet()) {
+					Object key = entry.getKey();
+					if(key instanceof String && key.equals(syncObject)) {
+						syncObject = key; // Get reference, value of this assign is the same.
+						entry.setValue(entry.getValue() + 1);
+						break;
 					}
-					SYNC_OBJECT_MAP.put(syncObject, 1);
 				}
 			}
+			SYNC_OBJECT_MAP.put(syncObject, 1);
+			SYNC_OBJECT_LOCKS.computeIfAbsent(syncObject, (x) -> {
+				return new ReentrantLock();
+			});
 		}
 
-		return SYNC_OBJECT_LOCKS.computeIfAbsent(syncObject, (x) -> {
-			return new ReentrantLock();
-		});
+		return SYNC_OBJECT_LOCKS.get(syncObject);
 	}
 
 	private static void cleanupSync(Object syncObject) {
@@ -491,7 +492,9 @@ public final class Threading {
 					+ " If you call this function from within this function on the same thread using the same"
 					+ " syncObject, the code will simply be executed. Note that this uses the same pool of lock"
 					+ " objects as x_get_lock, except this can be used off the main thread, whereas x_get_lock can"
-					+ " only run on the main thread."
+					+ " only run on the main thread. Generally speaking, it is almost always incorrect to use this"
+					+ " on the main thread, though there is no technical restriction to doing so. A runtime warning"
+					+ " is issued if this occurs, though it can be suppressed with the appropriate file option."
 					+ " For more information about synchronization, see:"
 					+ " https://en.wikipedia.org/wiki/Synchronization_(computer_science)";
 		}
@@ -563,6 +566,13 @@ public final class Threading {
 		}
 	}
 
+	private static Queue<com.laytonsmith.core.natives.interfaces.Callable> CALLABLES = new LinkedList<>();
+	{
+		StaticLayer.GetConvertor().addShutdownHook(() -> {
+			CALLABLES.clear();
+		});
+	}
+
 	@api
 	@noboilerplate
 	@seealso({_synchronized.class, x_get_lock.class})
@@ -598,19 +608,24 @@ public final class Threading {
 			r.setObject(() -> {
 				if(syncObject.tryLock()) {
 					try {
-						callable.executeCallable(env, t, args);
+						CALLABLES.poll().executeCallable(env, t, args);
+						if(!CALLABLES.isEmpty()) {
+							int backoff = new Random().nextInt() % 100;
+							StaticLayer.SetFutureRunnable(env.getEnv(StaticRuntimeEnv.class).GetDaemonManager(),
+									backoff, r.getObject());
+						}
 					} finally {
 						cleanupSync(syncObject);
 					}
-				} else {
-					int backoff = new Random().nextInt() % 100;
-					StaticLayer.SetFutureRunnable(env.getEnv(StaticRuntimeEnv.class).GetDaemonManager(),
-							backoff, r.getObject());
 				}
+
 			});
+			CALLABLES.add(callable);
 			StaticLayer.SetFutureRunnable(env.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), 0, r.getObject());
 			return CVoid.VOID;
 		}
+
+
 
 		@Override
 		public String getName() {
@@ -625,14 +640,20 @@ public final class Threading {
 		@Override
 		public String docs() {
 			return "void {mixed lock, Callable action} Runs the specified action on the main thread once the lock is obtained. Note that"
-					+ " this lock is the same object as used in synchronized(). The primary difference being that this"
+					+ " this lock is the same object as used in synchronized(). ---- "
+					+ " The primary difference being that this"
 					+ " function always returns immediately, scheduling the task for later (as soon as possible, but"
 					+ " with a small, random backoff), whereas synchronized blocks until the lock is obtained. This"
 					+ " is an appropriate call to use when running on the main thread, though it can also be used"
 					+ " off the main thread as well, though note that regardless of what thread this is started"
 					+ " on, it always runs the Callable on the main thread. The lock is re-entrant, but as the"
 					+ " function always runs the Callable at some future point, this only matters when used in"
-					+ " conjunction with synchronized().";
+					+ " conjunction with synchronized().\n\n"
+					+ "Note that in general, the queue of actions is unbounded, but will perform operations in a FIFO"
+					+ " pattern. This is prone to overflowing though, and should not be used for large amounts of"
+					+ " inputs. A good example of use for this function is when there is a synchronized block that runs"
+					+ " on an external thread, but some sort of relatively infrequent player input has critical sections"
+					+ " that must be locked against the same lock. ";
 		}
 
 		@Override

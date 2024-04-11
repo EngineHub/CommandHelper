@@ -1306,6 +1306,12 @@ public final class Interpreter {
 		public MCTransformation GetTransformation(Quaternionf leftRotation, Quaternionf rightRotation, Vector3f scale, Vector3f translation) {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
+
+		@Override
+		public boolean IsMainThread() {
+			return false;
+		}
+
 	}
 
 }
