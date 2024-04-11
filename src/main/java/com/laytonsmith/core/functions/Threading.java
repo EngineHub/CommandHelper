@@ -2,6 +2,7 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Common.MutableObject;
 import com.laytonsmith.PureUtilities.DaemonManager;
+import com.laytonsmith.PureUtilities.Triplet;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.StaticLayer;
@@ -42,7 +43,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Random;
 import java.util.concurrent.Callable;
@@ -356,8 +356,12 @@ public final class Threading {
 
 	}
 
-	private static final Map<Object, Queue<Runnable>> SYNC_OBJECT_QUEUE = new HashMap<>();
-	private static final Map<Object, Integer> SYNC_OBJECT_MAP = new HashMap<>();
+	// Contains the queue of callables that are waiting on the lock
+	private static final Map<Lock, Queue<Triplet<com.laytonsmith.core.natives.interfaces.Callable,
+			Environment, Target>>> SYNC_OBJECT_QUEUE = new HashMap<>();
+	// Contains a mapping from Lock object, to references to the lock
+	private static final Map<Lock, Integer> SYNC_OBJECT_MAP = new HashMap<>();
+	// Contains a mapping from code object to lock.
 	private static final Map<Object, Lock> SYNC_OBJECT_LOCKS = new HashMap<>();
 
 	private static Lock getSyncObject(Mixed cSyncObject, Function f, Target t) {
@@ -374,42 +378,59 @@ public final class Threading {
 
 		// Add String sync objects to the map to be able to synchronize by value.
 		synchronized(SYNC_OBJECT_MAP) {
-			if(syncObject instanceof String) {
-				for(Entry<Object, Integer> entry : SYNC_OBJECT_MAP.entrySet()) {
-					Object key = entry.getKey();
-					if(key instanceof String && key.equals(syncObject)) {
-						syncObject = key; // Get reference, value of this assign is the same.
-						entry.setValue(entry.getValue() + 1);
-						break;
-					}
-				}
-			}
-			SYNC_OBJECT_MAP.put(syncObject, 1);
-			SYNC_OBJECT_LOCKS.computeIfAbsent(syncObject, (x) -> {
+			Lock lock = SYNC_OBJECT_LOCKS.computeIfAbsent(syncObject, (x) -> {
 				return new ReentrantLock();
 			});
+			int currentCount = SYNC_OBJECT_MAP.computeIfAbsent(lock, x -> 0);
+			SYNC_OBJECT_MAP.put(lock, currentCount + 1);
+			return lock;
 		}
-
-		return SYNC_OBJECT_LOCKS.get(syncObject);
 	}
 
-	private static void cleanupSync(Object syncObject) {
+	private static void cleanupSync(Lock syncObject) {
 		// Remove 1 from the call count or remove the sync object from the map if it was a sync-by-value.
-		if(syncObject instanceof String) {
-			synchronized(SYNC_OBJECT_MAP) {
-				int count = SYNC_OBJECT_MAP.get(syncObject); // This should never return null.
-				if(count <= 1) {
-					SYNC_OBJECT_MAP.remove(syncObject);
-					SYNC_OBJECT_LOCKS.remove(syncObject);
-				} else {
-					for(Entry<Object, Integer> entry : SYNC_OBJECT_MAP.entrySet()) {
-						if(entry.getKey() == syncObject) { // Equals by reference.
-							entry.setValue(count - 1);
-							break;
-						}
-					}
-				}
+		synchronized(SYNC_OBJECT_MAP) {
+			int count = SYNC_OBJECT_MAP.get(syncObject); // This should never return null.
+			SYNC_OBJECT_MAP.put(syncObject, count - 1);
+			if(count <= 1) {
+				SYNC_OBJECT_MAP.remove(syncObject);
+				SYNC_OBJECT_LOCKS.remove(syncObject);
+				SYNC_OBJECT_QUEUE.remove(syncObject);
 			}
+
+		}
+	}
+
+	static {
+		StaticLayer.GetConvertor().addPersistentShutdownHook(() -> {
+			SYNC_OBJECT_QUEUE.clear();
+		});
+	}
+
+	private static void PumpQueue(Lock syncObject, DaemonManager dm) {
+		dm.activateThread(Thread.currentThread());
+		try {
+			if(syncObject.tryLock()) {
+				try {
+					Triplet<com.laytonsmith.core.natives.interfaces.Callable,
+							Environment, Target> triplet = SYNC_OBJECT_QUEUE.get(syncObject).poll();
+					triplet.getFirst().executeCallable(triplet.getSecond(), triplet.getThird());
+					if(!SYNC_OBJECT_QUEUE.get(syncObject).isEmpty()) {
+						StaticLayer.SetFutureRunnable(dm, 0, () -> PumpQueue(syncObject, dm));
+					}
+				} finally {
+					cleanupSync(syncObject);
+					syncObject.unlock();
+				}
+			} else {
+				int backoff = java.lang.Math.abs(new Random().nextInt()) % 100;
+				StaticLayer.SetFutureRunnable(dm,
+						backoff, () -> {
+							PumpQueue(syncObject, dm);
+						});
+			}
+		} finally {
+			dm.deactivateThread(Thread.currentThread());
 		}
 	}
 
@@ -566,13 +587,6 @@ public final class Threading {
 		}
 	}
 
-	private static Queue<com.laytonsmith.core.natives.interfaces.Callable> CALLABLES = new LinkedList<>();
-	{
-		StaticLayer.GetConvertor().addShutdownHook(() -> {
-			CALLABLES.clear();
-		});
-	}
-
 	@api
 	@noboilerplate
 	@seealso({_synchronized.class, x_get_lock.class})
@@ -605,23 +619,15 @@ public final class Threading {
 
 			// Evaluate the code, synchronized by the passed sync object.
 			final MutableObject<Runnable> r = new MutableObject<>();
+			DaemonManager dm = env.getEnv(StaticRuntimeEnv.class).GetDaemonManager();
 			r.setObject(() -> {
-				if(syncObject.tryLock()) {
-					try {
-						CALLABLES.poll().executeCallable(env, t, args);
-						if(!CALLABLES.isEmpty()) {
-							int backoff = new Random().nextInt() % 100;
-							StaticLayer.SetFutureRunnable(env.getEnv(StaticRuntimeEnv.class).GetDaemonManager(),
-									backoff, r.getObject());
-						}
-					} finally {
-						cleanupSync(syncObject);
-					}
-				}
-
+				PumpQueue(syncObject, dm);
 			});
-			CALLABLES.add(callable);
-			StaticLayer.SetFutureRunnable(env.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), 0, r.getObject());
+			Triplet<com.laytonsmith.core.natives.interfaces.Callable, Environment, Target> triplet
+					= new Triplet<>(callable, env, t);
+			SYNC_OBJECT_QUEUE.computeIfAbsent(syncObject, k -> new LinkedList<>())
+					.add(triplet);
+			StaticLayer.SetFutureRunnable(dm, 0, r.getObject());
 			return CVoid.VOID;
 		}
 

@@ -62,7 +62,7 @@ public class ResourceManager {
 	private static final Map<Long, CResource<?>> RESOURCES = new HashMap<>();
 
 	static {
-		StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
+		StaticLayer.GetConvertor().addPersistentShutdownHook(new Runnable() {
 
 			@Override
 			public void run() {

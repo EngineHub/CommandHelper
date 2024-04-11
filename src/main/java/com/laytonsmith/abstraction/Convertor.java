@@ -131,13 +131,25 @@ public interface Convertor {
 	MCInventoryHolder CreateInventoryHolder(String id, String title);
 
 	/**
-	 * Run whenever the server is shutting down (or restarting). There is no guarantee provided as to what thread the
+	 * Runs whenever the server is shutting down (or reloading). There is no guarantee provided as to what thread the
 	 * runnables actually run on, so you should ensure that the runnable executes it's actions on the appropriate thread
-	 * yourself.
+	 * yourself. Note that this shutdown hook will only run once, so if multiple reload events occur, this will not
+	 * be registered for the second run, unless you specifically add it yourself. If you need a shutdown hook to run
+	 * every time, and only want to register it once, see {@link #addPersistentShutdownHook}.
 	 *
 	 * @param r
 	 */
 	void addShutdownHook(Runnable r);
+
+	/**
+	 * Runs whenever the server is shutting down (or reloading). There is no guarantee provided as to what thread the
+	 * runnables actually run on, so you should ensure that the runnable executes it's actions on the appropriate thread
+	 * yourself. Note that this shutdown hook will never dequeue, so if multiple reload events occur, this will run
+	 * every time, and so you should only call this once (i.e. from a static context). If you need a shutdown hook to
+	 * dequeue after run, see {@link #addShutdownHook}.
+	 * @param r
+	 */
+	void addPersistentShutdownHook(Runnable r);
 
 	/**
 	 * Runs all the registered shutdown hooks. This should only be called by the shutdown mechanism. After running, each
