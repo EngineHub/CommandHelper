@@ -639,9 +639,7 @@ public final class Threading {
 				SYNC_OBJECT_QUEUE.computeIfAbsent(syncObject, k -> new LinkedList<>())
 						.add(triplet);
 			}
-			StaticLayer.SetFutureRunnable(dm, 0, () -> {
-				PumpQueue(syncObject, dm);
-			});
+			StaticLayer.SetFutureRunnable(dm, 0, () -> PumpQueue(syncObject, dm));
 			return CVoid.VOID;
 		}
 
