@@ -657,7 +657,7 @@ public final class Threading {
 
 		@Override
 		public String docs() {
-			return "void {mixed lock, Callable action} Runs the specified action on the main thread once the lock is obtained. Note that"
+			return "void {mixed lock, Callable action} Runs the specified action on the main thread (or a timer thread in cmdline) once the lock is obtained. Note that"
 					+ " this lock is the same object as used in synchronized(). ---- "
 					+ " The primary difference being that this"
 					+ " function always returns immediately, scheduling the task for later (as soon as possible, but"
