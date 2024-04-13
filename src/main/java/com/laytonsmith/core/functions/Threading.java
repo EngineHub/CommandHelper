@@ -416,6 +416,14 @@ public final class Threading {
 	}
 
 	private static void PumpQueue(Lock syncObject, DaemonManager dm) {
+		synchronized(SYNC_OBJECT_MAP) {
+			if(!SYNC_OBJECT_MAP.containsKey(syncObject)) {
+				// Lock was disposed of, we have an extra Pump on a now expired object.
+				// This can happen if x_get_lock is called inside x_get_lock, for instance,
+				// though it could also happen due to bugs in our code.
+				return;
+			}
+		}
 		dm.activateThread(Thread.currentThread());
 		try {
 			if(syncObject.tryLock()) {
@@ -428,7 +436,7 @@ public final class Threading {
 					triplet.getFirst().executeCallable(triplet.getSecond(), triplet.getThird());
 					synchronized(SYNC_OBJECT_MAP) {
 						if(!SYNC_OBJECT_QUEUE.get(syncObject).isEmpty()) {
-							StaticLayer.SetFutureRunnable(dm, 0, () -> PumpQueue(syncObject, dm));
+							StaticLayer.SetFutureRunnable(dm, 1, () -> PumpQueue(syncObject, dm));
 						}
 					}
 				} finally {
@@ -525,7 +533,8 @@ public final class Threading {
 					+ " call will hang the thread until the passed code of the first call has finished executing."
 					+ " If you call this function from within this function on the same thread using the same"
 					+ " syncObject, the code will simply be executed. Note that this uses the same pool of lock"
-					+ " objects as x_get_lock, except this can be used off the main thread, whereas x_get_lock is"
+					+ " objects as x_get_lock, except this is preferred to be used off the main thread,"
+					+ " whereas x_get_lock is"
 					+ " preferred on the main thread. Generally speaking, it is almost always incorrect to use this"
 					+ " on the main thread, though there is no technical restriction to doing so. Other than strings,"
 					+ " ValueTypes cannot be used as the lock object, and reference types such as an array or other"
@@ -639,7 +648,7 @@ public final class Threading {
 				SYNC_OBJECT_QUEUE.computeIfAbsent(syncObject, k -> new LinkedList<>())
 						.add(triplet);
 			}
-			StaticLayer.SetFutureRunnable(dm, 0, () -> PumpQueue(syncObject, dm));
+			StaticLayer.SetFutureRunnable(dm, 1, () -> PumpQueue(syncObject, dm));
 			return CVoid.VOID;
 		}
 
@@ -657,23 +666,7 @@ public final class Threading {
 
 		@Override
 		public String docs() {
-			return "void {mixed lock, Callable action} Runs the specified action on the main thread (or a timer thread in cmdline) once the lock is obtained. Note that"
-					+ " this lock is the same object as used in synchronized(). ---- "
-					+ " The primary difference being that this"
-					+ " function always returns immediately, scheduling the task for later (as soon as possible, but"
-					+ " with a small, random backoff), whereas synchronized blocks until the lock is obtained. This"
-					+ " is an appropriate call to use when running on the main thread, though it can also be used"
-					+ " off the main thread as well, though note that regardless of what thread this is started"
-					+ " on, it always runs the Callable on the main thread. The lock is re-entrant, but as the"
-					+ " function always runs the Callable at some future point, this only matters when used in"
-					+ " conjunction with synchronized().\n\n"
-					+ "Note that in general, the queue of actions is unbounded, but will perform operations in a FIFO"
-					+ " pattern. This is prone to overflowing though, and should not be used for large amounts of"
-					+ " inputs. A good example of use for this function is when there is a synchronized block that runs"
-					+ " on an external thread, but some sort of relatively infrequent player input has critical sections"
-					+ " that must be locked against the same lock. Other than strings,"
-					+ " ValueTypes cannot be used as the lock object, and reference types such as an array or other"
-					+ " object is required.";
+			return getBundledDocs();
 		}
 
 		@Override
@@ -687,6 +680,29 @@ public final class Threading {
 					.param(Mixed.TYPE, "syncObject", "The object to sync on. This uses the same object pool as synchronized().")
 					.param(com.laytonsmith.core.natives.interfaces.Callable.TYPE, "action", "The action to run once the lock is obtained.")
 					.build();
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[] {
+				new ExampleScript("Usage across the main and off thread.",
+						"// Create a new thread\n"
+							+ "x_new_thread('offthread', closure() {\n"
+							+ "\twhile(true) {\n"
+							+ "\t\tsynchronized('lock') {\n"
+							+ "\t\t\tsleep(10); // Simulate a long running, off thread activity\n"
+							+ "\t\t}\n"
+							+ "\t}\n"
+							+ "});\n\n"
+							+ "// Main thread\n"
+							+ "sleep(1); // Simulate other main thread activity\n"
+							+ "// Note that if we used synchronized() here, this call would block the main thread\n"
+							+ "// for 10 seconds, while the off thread performed its activities."
+							+ "x_get_lock('lock', closure() {\n"
+							+ "\tmsg('Main thread activity');\n"
+							+ "});\n",
+						"<Action would run after off thread releases lock, without blocking main thread>")
+			};
 		}
 
 	}

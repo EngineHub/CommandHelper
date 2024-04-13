@@ -1,0 +1,23 @@
+
+void {mixed lock, Callable action} Runs the specified action once the lock is obtained. Note that this lock is the
+same underlying lock object as used in synchronized(). The action is run on the main thread (or a timer thread
+in cmdline).
+----
+The primary difference between this function and synchronized() is that this function always returns immediately,
+scheduling the task for later (as soon as possible, but with a small, random backoff if the lock is not currently
+available), obtaining the lock in the process, whereas synchronized blocks until the lock is obtained. This
+is an appropriate call to use when running on the main thread for instance. Regardless of what thread this is started
+on, it always runs the Callable on the main thread (or a timer thread in cmdline mode). The lock is re-entrant,
+(meaning if the current thread has the lock, trying to obtain the lock again will immediately go through)
+but as the function always runs the Callable at some future point, and only one action at a time, this only matters
+when used in conjunction with synchronized() blocks.
+
+The queue of actions is unbounded, but will perform operations in a FIFO pattern. Only one action is performed at once.
+This means that code running on the main thread should usually always use this function, and code running on an off
+thread should usually use synchronized(), which can help prevent queue overload and main thread starvation.
+
+A good example of use for this function is when there is a synchronized block that runs on an external thread, but
+code that runs on the main thread has critical sections that must be locked against the same lock.
+
+Other than strings, ValueTypes cannot be used as the lock object, and reference types such as an array or other object
+is required.
