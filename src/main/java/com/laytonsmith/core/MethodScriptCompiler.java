@@ -266,7 +266,8 @@ public final class MethodScriptCompiler {
 								buf.append("/*");
 								inComment = true;
 								commentIsBlock = true;
-								if(i < script.length() - 2 && script.charAt(i + 2) == '*') { // "/**".
+								if(i + 2 < script.length() && script.charAt(i + 2) == '*'
+										&& (i + 3 >= script.length() || script.charAt(i + 3) != '/')) { // "/**".
 									inSmartComment = true;
 									buf.append("*");
 									i++;
