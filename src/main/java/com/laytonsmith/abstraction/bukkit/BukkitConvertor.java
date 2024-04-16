@@ -301,6 +301,9 @@ public class BukkitConvertor extends AbstractConvertor {
 			mat = BukkitMCLegacyMaterial.getMaterial(type);
 		}
 		if(mat == null) {
+			mat = Material.matchMaterial(type);
+		}
+		if(mat == null) {
 			return null;
 		}
 		return new BukkitMCItemStack(new ItemStack(mat, qty));
@@ -679,8 +682,8 @@ public class BukkitConvertor extends AbstractConvertor {
 	public MCInventory GetEntityInventory(MCEntity e) {
 		Entity entity = ((BukkitMCEntity) e).getHandle();
 		if(entity instanceof InventoryHolder) {
-			if(entity instanceof Player) {
-				return new BukkitMCPlayerInventory(((Player) entity).getInventory());
+			if(entity instanceof Player p) {
+				return new BukkitMCPlayerInventory(p.getInventory());
 			}
 			return new BukkitMCInventory(((InventoryHolder) entity).getInventory());
 		}

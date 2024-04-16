@@ -470,6 +470,9 @@ public class EntityManagement {
 				throw new CREFormatException("An array was expected but received " + args[1], t);
 			}
 			try {
+				if(!Float.isFinite(l.getPitch())) {
+					throw new CREIllegalArgumentException("pitch not finite", t);
+				}
 				return CBoolean.get(e.teleport(l));
 			} catch (IllegalArgumentException ex) {
 				throw new CREIllegalArgumentException(ex.getMessage(), t);

@@ -2148,7 +2148,7 @@ public class InventoryManagement {
 
 		@Override
 		public String docs() {
-			return "int {specifier, itemArray} Add to inventory the specified item."
+			return "int {mixed specifier, array itemArray} Add to inventory the specified item."
 					+ " The specifier must be a location array, entity UUID, or virtual inventory id."
 					+ " The items are distributed in the inventory, first filling up slots that have the same item type,"
 					+ " up to the max stack size, then fills up empty slots, until either the entire inventory is filled,"
