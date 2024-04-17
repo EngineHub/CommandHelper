@@ -101,7 +101,7 @@ public class BukkitMCDisplay extends BukkitMCEntity implements MCDisplay {
 
 	@Override
 	public void setInterpolationDelayTicks(int ticks) {
-		this.d.setInterpolationDuration(ticks);
+		this.d.setInterpolationDelay(ticks);
 	}
 
 	@Override

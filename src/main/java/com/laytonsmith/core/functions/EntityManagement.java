@@ -5032,11 +5032,10 @@ public class EntityManagement {
 					+ " to a block below the entity within shadowradius. (default: 1.0)\n"
 					+ "* '''teleportduration''' (int) : The duration in ticks a teleport is interpolated on the client."
 					+ " Range is strictly from 0 - 59. (default: 0) (MC 1.20.2+)\n"
+					+ "* '''interpolationduration''' (int) : The duration in ticks of interpolations. (non-teleport)\n"
 					+ "* '''transformation''' (array) : An associative array that includes 4 values, leftRotation,"
 					+ " rightRotation, scale, and translation. Both leftRotation and rightRotation have x, y, z, and w"
-					+ " values, and scale and translation have x, y, and z values. For leftRotation and rightRotation,"
-					+ " these are full width 64 bit doubles, but scale and translation are only 32 bit floats."
-					+ " (MC 1.19.4+)\n"
+					+ " values, and scale and translation have x, y, and z values. All are 32 bit floats.\n"
 					+ "\n";
 		}
 
@@ -5071,37 +5070,36 @@ public class EntityManagement {
 			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_2)) {
 				info.set("teleportduration", new CInt(display.getTeleportDuration(), t), t);
 			}
-			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_4)) {
-				CArray transformation = new CArray(t, 16);
-				MCTransformation tr = display.getTransformation();
-				Quaternionf leftRotationT = tr.getLeftRotation();
-				Quaternionf rightRotationT = tr.getRightRotation();
-				Vector3f scaleT = tr.getScale();
-				Vector3f translationT = tr.getTranslation();
-				CArray leftRotation = new CArray(t, 4);
-				leftRotation.set("w", leftRotationT.w);
-				leftRotation.set("x", leftRotationT.x);
-				leftRotation.set("y", leftRotationT.y);
-				leftRotation.set("z", leftRotationT.z);
-				CArray rightRotation = new CArray(t, 4);
-				rightRotation.set("w", rightRotationT.w);
-				rightRotation.set("x", rightRotationT.x);
-				rightRotation.set("y", rightRotationT.y);
-				rightRotation.set("z", rightRotationT.z);
-				CArray scale = new CArray(t, 3);
-				scale.set("x", scaleT.x);
-				scale.set("y", scaleT.y);
-				scale.set("z", scaleT.z);
-				CArray translation = new CArray(t, 3);
-				translation.set("x", translationT.x);
-				translation.set("y", translationT.y);
-				translation.set("z", translationT.z);
-				transformation.set("leftRotation", leftRotation, t);
-				transformation.set("rightRotation", rightRotation, t);
-				transformation.set("scale", scale, t);
-				transformation.set("translation", translation, t);
-				info.set("transformation", transformation, t);
-			}
+			info.set("interpolationduration", new CInt(display.getInterpolationDurationTicks(), t), t);
+			CArray transformation = new CArray(t, 4);
+			MCTransformation tr = display.getTransformation();
+			Quaternionf leftRotationT = tr.getLeftRotation();
+			Quaternionf rightRotationT = tr.getRightRotation();
+			Vector3f scaleT = tr.getScale();
+			Vector3f translationT = tr.getTranslation();
+			CArray leftRotation = new CArray(t, 4);
+			leftRotation.set("w", leftRotationT.w);
+			leftRotation.set("x", leftRotationT.x);
+			leftRotation.set("y", leftRotationT.y);
+			leftRotation.set("z", leftRotationT.z);
+			CArray rightRotation = new CArray(t, 4);
+			rightRotation.set("w", rightRotationT.w);
+			rightRotation.set("x", rightRotationT.x);
+			rightRotation.set("y", rightRotationT.y);
+			rightRotation.set("z", rightRotationT.z);
+			CArray scale = new CArray(t, 3);
+			scale.set("x", scaleT.x);
+			scale.set("y", scaleT.y);
+			scale.set("z", scaleT.z);
+			CArray translation = new CArray(t, 3);
+			translation.set("x", translationT.x);
+			translation.set("y", translationT.y);
+			translation.set("z", translationT.z);
+			transformation.set("leftRotation", leftRotation, t);
+			transformation.set("rightRotation", rightRotation, t);
+			transformation.set("scale", scale, t);
+			transformation.set("translation", translation, t);
+			info.set("transformation", transformation, t);
 			return info;
 		}
 
@@ -5145,13 +5143,23 @@ public class EntityManagement {
 		public String docs() {
 			return "void {entityUUID, array} Sets the data for a display entity."
 					+ " See {{function|get_display_entity}} for details about the array format. ---- "
-					+ " Note that there is one additional point for setting the data that is unique to"
-					+ " the set function, the '''transformation''' property can be provided in the same"
-					+ " format as recieved (i.e. with the leftRotation, rightRotation, scale, and translation"
+					+ " Note that there a couple additional points for setting the data that is unique to"
+					+ " the set function:\n\n"
+					+ "The '''transformation''' property can be provided in the same"
+					+ " format as received (i.e. with the leftRotation, rightRotation, scale, and translation"
 					+ " properties) but you can also provide it as a length 16 array of floats. These are"
 					+ " accepted in the same order that the /data command would accept them. Regardless of"
 					+ " how they are input, the function will always return the complex object. Sub-properties"
-					+ " of the '''transformation''' property are optional - missing values will not be changed.";
+					+ " of the transformation property are optional - missing values will not be changed.\n\n"
+					+ "The '''startinterpolation''' (int) property, if given, interpolates from the current values on"
+					+ " the client to any changed values the server sent this tick. It halts existing interpolations,"
+					+ " then starts interpolating on the current tick plus the given number of ticks (can be negative),"
+					+ " and finishes after 'interpolationduration' ticks."
+					+ " The following values are interpolated if changed:"
+					+ " transformation, shadow radius, shadow strength, text background, and text opacity."
+					+ " If none of those values are changed, it will use the last set again for interpolation."
+					+ " If the values are changed but 'startinterpolation' isn't sent, it will continue interpolation"
+					+ " for the remaining duration but with the new values.";
 		}
 
 		@Override
@@ -5172,7 +5180,7 @@ public class EntityManagement {
 					throw new CREFormatException("Invalid billboard type for display entity.", t);
 				}
 			}
-			if(info.containsKey("brightness"))  {
+			if(info.containsKey("brightness")) {
 				Mixed m = info.get("brightness", t);
 				if(m instanceof CNull) {
 					display.setBrightness(null);
@@ -5187,7 +5195,6 @@ public class EntityManagement {
 						int blockBrightness = ArgumentValidation.getInt32(brightnessArray.get("block", t), t);
 						int skyBrightness = ArgumentValidation.getInt32(brightnessArray.get("sky", t), t);
 						brightness = new MCDisplay.Brightness(blockBrightness, skyBrightness);
-						display.setBrightness(new MCDisplay.Brightness(blockBrightness, skyBrightness));
 					} else {
 						int level = ArgumentValidation.getInt32(m, t);
 						brightness = new MCDisplay.Brightness(level, level);
@@ -5228,7 +5235,13 @@ public class EntityManagement {
 				}
 				display.setTeleportDuration(ticks);
 			}
-			if(info.containsKey("transformation") && Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_4)) {
+			if(info.containsKey("interpolationduration")) {
+				display.setInterpolationDurationTicks(ArgumentValidation.getInt32(info.get("interpolationduration", t), t));
+			}
+			if(info.containsKey("startinterpolation")) {
+				display.setInterpolationDelayTicks(ArgumentValidation.getInt32(info.get("startinterpolation", t), t));
+			}
+			if(info.containsKey("transformation")) {
 				CArray transformation = ArgumentValidation.getArray(info.get("transformation", t), t);
 				if(transformation.size() == 16) {
 					float[] f = new float[16];
