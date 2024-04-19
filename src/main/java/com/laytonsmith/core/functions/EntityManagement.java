@@ -1328,7 +1328,8 @@ public class EntityManagement {
 				new ExampleScript("Applying entity attributes before adding it to the world.",
 				"spawn_entity('ZOMBIE', 1, ptarget_space(),"
 				+ " closure(@id){ set_entity_spec(@id, array('baby': true)); set_entity_ai(@id, false); })",
-				"Creates a zombie, changes it to a baby zombie without AI, then adds it to the world."),};
+				"Creates a zombie, changes it to a baby zombie without AI, then adds it to the world."),
+			};
 		}
 
 		@Override
