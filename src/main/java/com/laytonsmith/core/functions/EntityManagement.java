@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.PureUtilities.Version;
@@ -164,6 +165,9 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.tuple.Triple;
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
@@ -5248,7 +5252,40 @@ public class EntityManagement {
 					for(int i = 0; i < 16; i++) {
 						f[i] = ArgumentValidation.getDouble32(transformation.get(i, t), t);
 					}
-					display.setTransformationMatrix(f);
+					Matrix4f matrix4f = new Matrix4f(
+							f[0], f[1], f[2], f[3],
+							f[4], f[5], f[6], f[7],
+							f[8], f[9], f[10], f[11],
+							f[12], f[13], f[14], f[15]);
+					matrix4f.transpose();
+					Matrix3f matrix3f = new Matrix3f(matrix4f);
+					Vector3f translation = matrix4f.getTranslation(new Vector3f());
+
+					float multiplier = 1.0F / matrix4f.m33();
+					if (multiplier != 1.0F) {
+						matrix3f.scale(multiplier);
+						translation.mul(multiplier);
+					}
+
+					Triple<Quaternionf, Vector3f, Quaternionf> triple = null;
+					Class MatrixUtil = ReflectionUtils.forName("com.mojang.math.MatrixUtil");
+					for(String method : new String[]{"svdDecompose", "a"}) {
+						if(ReflectionUtils.hasMethod(MatrixUtil, method, Triple.class, Matrix3f.class)) {
+							 triple = (Triple) ReflectionUtils.invokeMethod(MatrixUtil, null, method,
+									 new Class[]{Matrix3f.class},
+									 new Object[]{matrix3f});
+							 break;
+						}
+					}
+					if(triple == null) {
+						throw new Error("Cannot find svdDecompose method.");
+					}
+
+					Vector3f scale = triple.getMiddle();
+					Quaternionf leftRotation = triple.getLeft().rotateY((float) java.lang.Math.PI); // 180 deg
+					Quaternionf rightRotation = triple.getRight();
+					MCTransformation tr = StaticLayer.GetTransformation(leftRotation, rightRotation, scale, translation);
+					display.setTransformation(tr);
 				} else {
 					MCTransformation existingTransformation = display.getTransformation();
 					Quaternionf leftRotation;
