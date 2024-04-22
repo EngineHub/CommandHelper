@@ -1828,9 +1828,12 @@ public class ArrayHandling {
 						} else {
 							value = -1;
 						}
+					} else if(c.isInstanceOf(CInt.TYPE)) {
+						long longVal = ((CInt) c).getInt();
+						value = (longVal > 0 ? 1 : (longVal < 0 ? -1 : 0));
 					} else {
 						throw new CRECastException("The custom closure did not return a value (or returned an invalid"
-								+ " type). It must always return true, false, or null.", t);
+								+ " type). It must always return true, false, null, or an integer.", t);
 					}
 					if(value <= 0) {
 						result.push(left.get(0, t), t);
@@ -1882,10 +1885,10 @@ public class ArrayHandling {
 					+ " operation. Due to this, it has slightly different behavior than array_normalize, which could"
 					+ " have also been implemented in place.\n\nIf the sortType is a closure, it will perform a"
 					+ " custom sort type, and the array may contain any values, including sub array values. The closure"
-					+ " should accept two values, @left and @right, and should return true if the left value is larger"
-					+ " than the right, and false if the left value is smaller than the right, and null if they are"
-					+ " equal. The array will then be re-ordered using a merge sort, using your custom comparator to"
-					+ " determine the sort order.";
+					+ " should accept two values, @left and @right, and should return true or a positive integer if the"
+					+ " left value is larger than the right, and false or a negative integer if the left value is"
+					+ " smaller than the right, and null or 0 if they are equal. The array will then be re-ordered"
+					+ " using a merge sort, using your custom comparator to determine the sort order.";
 		}
 
 		@Override
