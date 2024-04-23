@@ -440,6 +440,12 @@
 			<artifactId>slf4j-simple</artifactId>
 			<version>1.7.36</version>
 		</dependency>
+		<!-- MIT -->
+		<dependency>
+			<groupId>org.joml</groupId>
+			<artifactId>joml</artifactId>
+			<version>1.10.5</version>
+		</dependency>
 	</dependencies>
 	<distributionManagement>
 		<repository>
@@ -600,6 +606,7 @@
 									<include>com.microsoft.sqlserver:mssql-jdbc:jar:*</include>
 									<include>org.slf4j:slf4j-api:jar:*</include>
 									<include>org.slf4j:slf4j-simple:jar:*</include>
+									<include>org.joml:joml:jar:*</include>
 								</includes>
 							</artifactSet>
 							<relocations>
@@ -983,6 +990,12 @@
 								</filter>
 								<filter>
 									<artifact>org.slf4j:slf4j-simple:*</artifact>
+									<excludes>
+										<exclude>META-INF/**</exclude>
+									</excludes>
+								</filter>
+								<filter>
+									<artifact>org.joml:joml:*</artifact>
 									<excludes>
 										<exclude>META-INF/**</exclude>
 									</excludes>
