@@ -5074,34 +5074,8 @@ public class EntityManagement {
 				info.set("teleportduration", new CInt(display.getTeleportDuration(), t), t);
 			}
 			info.set("interpolationduration", new CInt(display.getInterpolationDurationTicks(), t), t);
-			CArray transformation = new CArray(t, 4);
 			MCTransformation tr = display.getTransformation();
-			Quaternionf leftRotationT = tr.getLeftRotation();
-			Quaternionf rightRotationT = tr.getRightRotation();
-			Vector3f scaleT = tr.getScale();
-			Vector3f translationT = tr.getTranslation();
-			CArray leftRotation = new CArray(t, 4);
-			leftRotation.set("w", leftRotationT.w);
-			leftRotation.set("x", leftRotationT.x);
-			leftRotation.set("y", leftRotationT.y);
-			leftRotation.set("z", leftRotationT.z);
-			CArray rightRotation = new CArray(t, 4);
-			rightRotation.set("w", rightRotationT.w);
-			rightRotation.set("x", rightRotationT.x);
-			rightRotation.set("y", rightRotationT.y);
-			rightRotation.set("z", rightRotationT.z);
-			CArray scale = new CArray(t, 3);
-			scale.set("x", scaleT.x);
-			scale.set("y", scaleT.y);
-			scale.set("z", scaleT.z);
-			CArray translation = new CArray(t, 3);
-			translation.set("x", translationT.x);
-			translation.set("y", translationT.y);
-			translation.set("z", translationT.z);
-			transformation.set("leftRotation", leftRotation, t);
-			transformation.set("rightRotation", rightRotation, t);
-			transformation.set("scale", scale, t);
-			transformation.set("translation", translation, t);
+			CArray transformation = GetArrayFromTransformation(tr);
 			info.set("transformation", transformation, t);
 			return info;
 		}
@@ -5124,6 +5098,138 @@ public class EntityManagement {
 		@Override
 		public Boolean runAsync() {
 			return false;
+		}
+
+	}
+
+	public static CArray GetArrayFromTransformation(MCTransformation tr) {
+		Target t = Target.UNKNOWN;
+		Quaternionf leftRotationT = tr.getLeftRotation();
+		Quaternionf rightRotationT = tr.getRightRotation();
+		Vector3f scaleT = tr.getScale();
+		Vector3f translationT = tr.getTranslation();
+		CArray leftRotation = new CArray(t, 4);
+		leftRotation.set("w", leftRotationT.w);
+		leftRotation.set("x", leftRotationT.x);
+		leftRotation.set("y", leftRotationT.y);
+		leftRotation.set("z", leftRotationT.z);
+		CArray rightRotation = new CArray(t, 4);
+		rightRotation.set("w", rightRotationT.w);
+		rightRotation.set("x", rightRotationT.x);
+		rightRotation.set("y", rightRotationT.y);
+		rightRotation.set("z", rightRotationT.z);
+		CArray scale = new CArray(t, 3);
+		scale.set("x", scaleT.x);
+		scale.set("y", scaleT.y);
+		scale.set("z", scaleT.z);
+		CArray translation = new CArray(t, 3);
+		translation.set("x", translationT.x);
+		translation.set("y", translationT.y);
+		translation.set("z", translationT.z);
+		CArray transformation = new CArray(t, 4);
+		transformation.set("leftRotation", leftRotation, t);
+		transformation.set("rightRotation", rightRotation, t);
+		transformation.set("scale", scale, t);
+		transformation.set("translation", translation, t);
+		return transformation;
+	}
+
+	public static MCTransformation GetTransformationFromMatrix(float[] f) {
+		Matrix4f matrix4f = new Matrix4f(
+				f[0], f[1], f[2], f[3],
+				f[4], f[5], f[6], f[7],
+				f[8], f[9], f[10], f[11],
+				f[12], f[13], f[14], f[15]);
+		matrix4f.transpose();
+		Matrix3f matrix3f = new Matrix3f(matrix4f);
+		Vector3f translation = matrix4f.getTranslation(new Vector3f());
+
+		float multiplier = 1.0F / matrix4f.m33();
+		if(multiplier != 1.0F) {
+			matrix3f.scale(multiplier);
+			translation.mul(multiplier);
+		}
+
+		Triple<Quaternionf, Vector3f, Quaternionf> triple = null;
+		Class MatrixUtil = ReflectionUtils.forName("com.mojang.math.MatrixUtil");
+		for(String method : new String[]{"svdDecompose", "a"}) {
+			if(ReflectionUtils.hasMethod(MatrixUtil, method, Triple.class, Matrix3f.class)) {
+				triple = (Triple) ReflectionUtils.invokeMethod(MatrixUtil, null, method,
+						new Class[]{Matrix3f.class},
+						new Object[]{matrix3f});
+				break;
+			}
+		}
+		if(triple == null) {
+			throw new Error("Cannot find svdDecompose method.");
+		}
+
+		Vector3f scale = triple.getMiddle();
+		Quaternionf leftRotation = triple.getLeft().rotateY((float) java.lang.Math.PI); // 180 deg
+		Quaternionf rightRotation = triple.getRight();
+		MCTransformation tr = StaticLayer.GetTransformation(leftRotation, rightRotation, scale, translation);
+		return tr;
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class get_transformation_from_matrix extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRELengthException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			float f[] = new float[16];
+			if(args.length == 1) {
+				CArray array = ArgumentValidation.getArray(args[0], t);
+				if(array.size() != 16) {
+					throw new CRELengthException("Input array expected to have length 16", t);
+				}
+				for(int i = 0; i < 16; i++) {
+					f[i] = ArgumentValidation.getDouble32(array.get(i, t), t);
+				}
+			} else {
+				for(int i = 0; i < 16; i++) {
+					f[i] = ArgumentValidation.getDouble32(args[i], t);
+				}
+			}
+			MCTransformation tr = GetTransformationFromMatrix(f);
+			return GetArrayFromTransformation(tr);
+		}
+
+		@Override
+		public String getName() {
+			return "get_transformation_from_matrix";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 16};
+		}
+
+		@Override
+		public String docs() {
+			return "array {array matrix | float f0, float f1, float f2, float f3, float f4, float f5, float f6, float"
+					+ " f7, float f8, float f9, float f10, float f11, float f12, float f13, float f14, float f15}"
+					+ " Converts a Minecraft transformation matrix into a transformation object. This is the same"
+					+ " underlying algorithm that set_display_entity uses when accepting a transformation matrix.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
 		}
 
 	}
@@ -5251,39 +5357,7 @@ public class EntityManagement {
 					for(int i = 0; i < 16; i++) {
 						f[i] = ArgumentValidation.getDouble32(transformation.get(i, t), t);
 					}
-					Matrix4f matrix4f = new Matrix4f(
-							f[0], f[1], f[2], f[3],
-							f[4], f[5], f[6], f[7],
-							f[8], f[9], f[10], f[11],
-							f[12], f[13], f[14], f[15]);
-					matrix4f.transpose();
-					Matrix3f matrix3f = new Matrix3f(matrix4f);
-					Vector3f translation = matrix4f.getTranslation(new Vector3f());
-
-					float multiplier = 1.0F / matrix4f.m33();
-					if(multiplier != 1.0F) {
-						matrix3f.scale(multiplier);
-						translation.mul(multiplier);
-					}
-
-					Triple<Quaternionf, Vector3f, Quaternionf> triple = null;
-					Class MatrixUtil = ReflectionUtils.forName("com.mojang.math.MatrixUtil");
-					for(String method : new String[]{"svdDecompose", "a"}) {
-						if(ReflectionUtils.hasMethod(MatrixUtil, method, Triple.class, Matrix3f.class)) {
-							triple = (Triple) ReflectionUtils.invokeMethod(MatrixUtil, null, method,
-									new Class[]{Matrix3f.class},
-									new Object[]{matrix3f});
-							break;
-						}
-					}
-					if(triple == null) {
-						throw new Error("Cannot find svdDecompose method.");
-					}
-
-					Vector3f scale = triple.getMiddle();
-					Quaternionf leftRotation = triple.getLeft().rotateY((float) java.lang.Math.PI); // 180 deg
-					Quaternionf rightRotation = triple.getRight();
-					MCTransformation tr = StaticLayer.GetTransformation(leftRotation, rightRotation, scale, translation);
+					MCTransformation tr = GetTransformationFromMatrix(f);
 					display.setTransformation(tr);
 				} else {
 					MCTransformation existingTransformation = display.getTransformation();
