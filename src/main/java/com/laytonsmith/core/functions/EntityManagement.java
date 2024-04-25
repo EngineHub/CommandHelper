@@ -151,6 +151,7 @@ import com.laytonsmith.core.exceptions.CRE.CRELengthException;
 import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
+import com.laytonsmith.core.exceptions.CRE.CREUnsupportedOperationException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
@@ -5489,6 +5490,78 @@ public class EntityManagement {
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCEntity entity = Static.getEntity(args[0], t);
 			return CBoolean.get(entity.isInWater());
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+	}
+
+	@api
+	public static class set_entity_rotation extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREUnsupportedOperationException.class, CRELengthException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCEntity entity = Static.getEntity(args[0], t);
+
+			if(entity instanceof MCPlayer) {
+				throw new CREUnsupportedOperationException(getName() + " cannot be used on players.", t);
+			}
+
+			float yaw = (float) ArgumentValidation.getDouble(args[1], t);
+			yaw %= 360.0F;
+			if(yaw >= 180.0) {
+				yaw -= 360.0F;
+			} else if(yaw < -180.0) {
+				yaw += 360.0F;
+			}
+
+			float pitch;
+			if(args.length == 3) {
+				pitch = (float) ArgumentValidation.getDouble(args[2], t);
+				if(pitch > 90.0) {
+					pitch = 90.0F;
+				} else if(pitch < -90.0) {
+					pitch = -90.0F;
+				}
+			} else {
+				pitch = entity.getLocation().getPitch();
+			}
+
+			entity.setRotation(yaw, pitch);
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "set_entity_rotation";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3};
+		}
+
+		@Override
+		public String docs() {
+			return "void {entityUUID, yaw, [pitch]} Sets an entity's yaw and pitch without teleporting or ejecting. If used"
+					+ " on a player, an UnsupportedOperationException is thrown.";
 		}
 
 		@Override

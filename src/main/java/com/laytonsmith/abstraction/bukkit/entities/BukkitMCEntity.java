@@ -398,4 +398,8 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 		return e.isInWater();
 	}
 
+	@Override
+	public void setRotation(float yaw, float pitch) {
+		e.setRotation(yaw, pitch);
+	}
 }

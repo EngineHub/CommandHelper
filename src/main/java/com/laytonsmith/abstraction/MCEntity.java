@@ -112,4 +112,6 @@ public interface MCEntity extends MCMetadatable {
 	int getEntityId();
 
 	boolean isInWater();
+
+	void setRotation(float yaw, float pitch);
 }
