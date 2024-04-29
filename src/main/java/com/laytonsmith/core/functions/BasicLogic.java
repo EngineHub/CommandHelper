@@ -2706,8 +2706,8 @@ public class BasicLogic {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			double d1 = ArgumentValidation.getDouble(args[0], t);
-			double d2 = ArgumentValidation.getDouble(args[1], t);
+			double d1 = ArgumentValidation.getNumber(args[0], t);
+			double d2 = ArgumentValidation.getNumber(args[1], t);
 			double epsilon = ArgumentValidation.getDouble(args[2], t);
 			return CBoolean.get(java.lang.Math.abs(d1 - d2) < epsilon);
 		}
@@ -2724,7 +2724,7 @@ public class BasicLogic {
 
 		@Override
 		public String docs() {
-			return "boolean {double d1, double d2, double epsilon}"
+			return "boolean {double d1, number d2, double epsilon | number d1, double d2, double epsilon}"
 					+ " When comparing the equality of floating point numbers, it is often impossible to directly"
 					+ " compare via == (equals) since two floating point numbers that might be actually semantically"
 					+ " equivalent, are represented slightly differently in the computer, thus making them not actually"
@@ -2742,10 +2742,16 @@ public class BasicLogic {
 		@Override
 		public FunctionSignatures getSignatures() {
 			return new SignatureBuilder(CBoolean.TYPE)
-					.param(CDouble.TYPE, "d1", "The first double to compare.")
+					.param(CNumber.TYPE, "d1", "The first number to compare.")
 					.param(CDouble.TYPE, "d2", "The second double to compare.")
 					.param(CDouble.TYPE, "epsilon",
 							"The degree of difference to use to determine equality, for instance 0.00001")
+					.newSignature(CBoolean.TYPE)
+					.param(CDouble.TYPE, "d1", "The first double to compare.")
+					.param(CNumber.TYPE, "d2", "The second number to compare.")
+					.param(CDouble.TYPE, "epsilon",
+							"The degree of difference to use to determine equality, for instance 0.00001")
+
 					.build();
 		}
 
