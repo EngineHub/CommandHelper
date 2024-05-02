@@ -9,9 +9,12 @@
 import "@typespec/openapi";
 import "@typespec/openapi3";
 import "@typespec/http";
+import "@typespec/versioning";
 
 using TypeSpec.Http;
 using TypeSpec.OpenAPI;
+using TypeSpec.Versioning;
+
 
 /**
  * This is the api for the apps.methodscript.com server. This provides
@@ -31,8 +34,13 @@ using TypeSpec.OpenAPI;
     url: "https://opensource.org/licenses/MIT"
   },
 })
-@service({title: "MethodScript Apps", version: "1.0.0"})
+@service({title: "MethodScript Apps"})
+@versioned(Service.Version)
 namespace Service;
+
+enum Version {
+  v1_0_0: "1.0.0",
+}
 
 /**
  * This call should always be successful.
@@ -45,6 +53,7 @@ model Ping200 {
  * Service related calls.
  */
 @tag("meta")
+@added(Version.v1_0_0)
 interface meta {
   /**
    * Lists the services that are available on this server. In general,
@@ -121,6 +130,7 @@ model Telemetry403 {
  * Telemetry related services.
  */
 @tag("telemetry")
+@added(Version.v1_0_0)
 interface telemetry {
 
   @summary("Obtains a telemetry key, which is used for future requests.")
@@ -216,6 +226,7 @@ model Build200 {
  * Build system services.
  */
 @tag("builds")
+@added(Version.v1_0_0)
 interface builds {
   @summary("Provides a list of artifact types available for download.")
   @route("/builds")
