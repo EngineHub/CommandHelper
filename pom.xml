@@ -151,6 +151,10 @@
 			<id>papermc-repo</id>
 			<url>https://repo.papermc.io/repository/maven-public/</url>
 		</repository>
+		<repository>
+			<id>sonatype-oss-snapshots1</id>
+			<url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
+		</repository>
 
 		<!-- Other repositories -->
 		<repository>
