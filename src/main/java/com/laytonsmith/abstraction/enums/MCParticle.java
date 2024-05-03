@@ -30,12 +30,26 @@ public abstract class MCParticle<Concrete> extends DynamicEnum<MCParticle.MCVani
 					MSLog.GetLogger().e(MSLog.Tags.GENERAL,
 							test + " particle type was changed in 1.18. Converted to BLOCK_MARKER.", Target.UNKNOWN);
 					return MAP.get("BLOCK_MARKER");
+				case "SPELL_MOB_AMBIENT":
+					MSLog.GetLogger().e(MSLog.Tags.GENERAL,
+							test + " particle type was removed in 1.20.5. Converted to SPELL_MOB.", Target.UNKNOWN);
+					return MAP.get("SPELL_MOB");
+
+				// The following only existed briefly as experimental API
 				case "DRIPPING_CHERRY_LEAVES":
 				case "FALLING_CHERRY_LEAVES":
 				case "LANDING_CHERRY_LEAVES":
 					MSLog.GetLogger().e(MSLog.Tags.GENERAL,
 							test + " particle type was changed in 1.20. Converted to CHERRY_LEAVES.", Target.UNKNOWN);
 					return MAP.get("CHERRY_LEAVES");
+				case "GUST_EMITTER":
+					MSLog.GetLogger().e(MSLog.Tags.GENERAL,
+							test + " particle type was changed in 1.20.5. Converted to GUST_EMITTER_SMALL.", Target.UNKNOWN);
+					return MAP.get("GUST_EMITTER_SMALL");
+				case "GUST_DUST":
+					MSLog.GetLogger().e(MSLog.Tags.GENERAL,
+							test + " particle type was removed in 1.20.5. Converted to SMALL_GUST.", Target.UNKNOWN);
+					return MAP.get("SMALL_GUST");
 			}
 			throw new IllegalArgumentException("Unknown particle type: " + test);
 		}
@@ -97,7 +111,7 @@ public abstract class MCParticle<Concrete> extends DynamicEnum<MCParticle.MCVani
 		SPELL,
 		SPELL_INSTANT,
 		SPELL_MOB,
-		SPELL_MOB_AMBIENT,
+		SPELL_MOB_AMBIENT(MCVersion.MC1_0, MCVersion.MC1_20_4),
 		SPELL_WITCH,
 		DRIP_WATER,
 		DRIP_LAVA,
@@ -187,9 +201,20 @@ public abstract class MCParticle<Concrete> extends DynamicEnum<MCParticle.MCVani
 		DUST_PLUME(MCVersion.MC1_20_4),
 		WHITE_SMOKE(MCVersion.MC1_20_4),
 		GUST(MCVersion.MC1_20_4),
-		GUST_EMITTER(MCVersion.MC1_20_4),
-		GUST_DUST(MCVersion.MC1_20_4),
+		GUST_EMITTER(MCVersion.MC1_20_4, MCVersion.MC1_20_4),
+		GUST_DUST(MCVersion.MC1_20_4, MCVersion.MC1_20_4),
+		SMALL_GUST(MCVersion.MC1_20_6),
+		GUST_EMITTER_LARGE(MCVersion.MC1_20_6),
+		GUST_EMITTER_SMALL(MCVersion.MC1_20_6),
 		TRIAL_SPAWNER_DETECTION(MCVersion.MC1_20_4),
+		TRIAL_SPAWNER_DETECTION_OMINOUS(MCVersion.MC1_20_6),
+		VAULT_CONNECTION(MCVersion.MC1_20_6),
+		INFESTED(MCVersion.MC1_20_6),
+		ITEM_COBWEB(MCVersion.MC1_20_6),
+		DUST_PILLAR(MCVersion.MC1_20_6),
+		OMINOUS_SPAWNING(MCVersion.MC1_20_6),
+		RAID_OMEN(MCVersion.MC1_20_6),
+		TRIAL_OMEN(MCVersion.MC1_20_6),
 		UNKNOWN(MCVersion.NEVER);
 
 		private final MCVersion since;

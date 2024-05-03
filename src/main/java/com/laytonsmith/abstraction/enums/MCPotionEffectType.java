@@ -107,7 +107,13 @@ public abstract class MCPotionEffectType<Concrete> extends DynamicEnum<MCPotionE
 		DOLPHINS_GRACE(30, MCVersion.MC1_14),
 		BAD_OMEN(31, MCVersion.MC1_14),
 		HERO_OF_THE_VILLAGE(32, MCVersion.MC1_14),
-		DARKNESS(33, MCVersion.MC1_19);
+		DARKNESS(33, MCVersion.MC1_19),
+		TRIAL_OMEN(34, MCVersion.MC1_20_6),
+		RAID_OMEN(35, MCVersion.MC1_20_6),
+		WIND_CHARGED(36, MCVersion.MC1_20_6),
+		WEAVING(37, MCVersion.MC1_20_6),
+		OOZING(38, MCVersion.MC1_20_6),
+		INFESTED(39, MCVersion.MC1_20_6);
 
 		private final int id;
 		private final MCVersion since;

@@ -1795,7 +1795,7 @@ public class World {
 			return "mixed {world, [gameRule]} Returns an associative array containing the values of all existing"
 					+ " gamerules for the given world. If the gameRule parameter is specified, the function only"
 					+ " returns that one value instead of an array."
-					+ " The gameRule can be " + StringUtils.Join(MCGameRule.values(), ", ", ", or ", " or ") + ".";
+					+ " The gameRule can be " + StringUtils.Join(MCGameRule.getGameRules(), ", ", ", or ", " or ") + ".";
 		}
 
 		@Override
@@ -1819,7 +1819,7 @@ public class World {
 			} else {
 				try {
 					MCGameRule gameRule = MCGameRule.valueOf(args[1].val().toUpperCase());
-					String value = world.getGameRuleValue(gameRule.getGameRule());
+					String value = world.getGameRuleValue(gameRule.getRuleName());
 					if(value.isEmpty()) {
 						throw new CREFormatException("The gamerule \"" + args[1].val()
 								+ "\" does not exist in this version.", t);
@@ -1863,8 +1863,8 @@ public class World {
 		@Override
 		public String docs() {
 			return "boolean {[world], gameRule, value} Sets the value of the gamerule for the specified world. If world is"
-					+ " not given the value is set for all worlds. Returns true if successful. gameRule can be "
-					+ StringUtils.Join(MCGameRule.values(), ", ", ", or ", " or ") + ".";
+					+ " not given the value is set for all worlds. Returns true if successful. The gameRule can be "
+					+ StringUtils.Join(MCGameRule.getGameRules(), ", ", ", or ", " or ") + ".";
 		}
 
 		@Override
@@ -1876,19 +1876,24 @@ public class World {
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCGameRule gameRule;
 			boolean success = false;
+			int offset = args.length - 2;
+			try {
+				gameRule = MCGameRule.valueOf(args[offset].val().toUpperCase());
+			} catch(IllegalArgumentException ex) {
+				throw new CREFormatException("The gamerule \"" + (args.length == 2 ? args[0].val() : args[1].val())
+						+ "\" does not exist.", t);
+			}
+			String value = ArgumentValidation.getObject(args[offset + 1], t, gameRule.getRuleType()).val();
 			if(args.length == 2) {
-				gameRule = ArgumentValidation.getEnum(args[0], MCGameRule.class, t);
-				String value = ArgumentValidation.getObject(args[1], t, gameRule.getRuleType()).val();
 				for(MCWorld world : Static.getServer().getWorlds()) {
 					success = world.setGameRuleValue(gameRule, value);
 				}
 			} else {
-				gameRule = ArgumentValidation.getEnum(args[1], MCGameRule.class, t);
 				MCWorld world = Static.getServer().getWorld(args[0].val());
 				if(world == null) {
 					throw new CREInvalidWorldException("Unknown world: " + args[0].val(), t);
 				}
-				success = world.setGameRuleValue(gameRule, ArgumentValidation.getObject(args[2], t, gameRule.getRuleType()).val());
+				success = world.setGameRuleValue(gameRule, value);
 			}
 			return CBoolean.get(success);
 		}

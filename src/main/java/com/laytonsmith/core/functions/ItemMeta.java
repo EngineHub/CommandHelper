@@ -16,6 +16,7 @@ import com.laytonsmith.abstraction.enums.MCAxolotlType;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
+import com.laytonsmith.abstraction.enums.MCEquipmentSlotGroup;
 import com.laytonsmith.abstraction.enums.MCFireworkType;
 import com.laytonsmith.abstraction.enums.MCItemFlag;
 import com.laytonsmith.abstraction.enums.MCPatternShape;
@@ -126,6 +127,7 @@ public class ItemMeta {
 			docs = docs.replace("%ATTRIBUTES%", StringUtils.Join(MCAttribute.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%OPERATIONS%", StringUtils.Join(MCAttributeModifier.Operation.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%SLOTS%", StringUtils.Join(MCEquipmentSlot.values(), ", ", ", or ", " or "));
+			docs = docs.replace("%SLOTGROUPS%", StringUtils.Join(MCEquipmentSlotGroup.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%AXOLOTL_TYPES%", StringUtils.Join(MCAxolotlType.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%TRIM_PATTERNS%", StringUtils.Join(MCTrimPattern.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%TRIM_MATERIALS%", StringUtils.Join(MCTrimMaterial.values(), ", ", ", or ", " or "));

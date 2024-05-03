@@ -357,7 +357,7 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 			EntityDamageEvent event = ReflectionUtils.newInstance(EntityDamageEvent.class,
 					new Class[]{Entity.class, DamageCause.class, double.class},
 					new Object[]{le, EntityDamageEvent.DamageCause.CUSTOM, le.getHealth()});
-			le.setLastDamageCause(event);
+			ReflectionUtils.invokeMethod(le, "setLastDamageCause", event);
 			le.setHealth(0);
 		}
 	}

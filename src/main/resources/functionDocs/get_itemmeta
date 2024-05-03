@@ -8,16 +8,16 @@ Some Minecraft NBT is not yet supported in item meta, and should be documented b
 ! scope="col" width="15%" | Item Type
 ! scope="col" width="85%" | Meta
 |-
-| All Items
+| All
 |
-* '''display''' : (string) The display name seen when the item is selected.
+* '''display''' : (string) The display name seen when renamed in an anvil.
 * '''lore''' : (array) An array of strings that is displayed when hovering the item. As lines are plain text, they do not yet support some advanced text components.
 * '''enchants''' : (array) An associative array of enchantments with the vanilla name of enchantment as the key, and value being an enchantment array with the key '''"elevel"''' for the level of the enchantment.
 * '''model''' : (int) Represents vanilla's CustomModelData tag for use with resource packs.
-* '''flags''' : (array) Possible flags: ''%ITEM_FLAGS%''.
+* '''flags''' : (array) A list of flags used to hide meta in the item tooltip: ''%ITEM_FLAGS%''.
 * '''repair''' : (int) The cost to repair or combine this item in an anvil.
-* '''modifiers''' : (array) An array of attribute modifier arrays, each with keys: '''"attribute"''', '''"operation"''', '''"amount"''' (double), '''"uuid"''' (optional), '''"name"''' (optional), and '''"slot"''' (optional). Possible attributes: ''%ATTRIBUTES%''. Possible operations: ''%OPERATIONS%''. Possible slots: ''%SLOTS%''.
-* '''tags''' : (array) An associative array of custom tags used by plugins. A tag's key is namespaced (e.g. "commandhelper:mytag") and the value is an associative array containing the '''"type"''' and '''"value"''' of the tag. Possible types: ''%TAG_TYPES%''.
+* '''modifiers''' : (array) An array of attribute modifier arrays, each with keys: '''"attribute"''', '''"operation"''', '''"amount"''' (double), '''"uuid"''' (optional), '''"name"''' (optional), and '''"slot"''' (optional). Possible attributes: ''%ATTRIBUTES%''. Possible operations: ''%OPERATIONS%''. Possible slots are ''%SLOTS%'' or one of the slot groups ''%SLOTGROUPS%''.
+* '''tags''' : (array) An associative array of custom tags used by plugins (or null). A tag's key is namespaced (e.g. "commandhelper:mytag") and the value is an associative array containing the '''"type"''' and '''"value"''' of the tag. Possible types: ''%TAG_TYPES%''.
 The "CanPlaceOn" tag for blocks and "CanDestroy" tag for tools are not yet supported.
 |-
 | All Damageable Items
@@ -127,7 +127,8 @@ The remaining tags are not yet supported.
 |-
 | Potions
 |
-* '''base''' : (array) Defines the base potion effect. Has the keys '''"extended"''', '''"upgraded"''', and '''"type"''' which can be: ''%POTION_TYPES%''.
+* '''potiontype'''' : (string) The base potion type, which can be one of: ''%POTION_TYPES%''. (MC 1.20.6+)
+* '''base''' : (array) Defined a base potion. Had the keys '''"extended"''', '''"upgraded"''', and '''"type"'''. This was used prior to MC 1.20.6 and is converted in later versions.
 * '''potions''' : (array) An associative array of custom potion effect arrays, where each key is the vanilla potion effect name. Each effect array can contain the keys: '''"id"''' (int), '''"strength"''' (int), '''"seconds"''' remaining (int), whether the effect is '''"ambient"''', whether '''"particles"''' are enabled, and whether the '''"icon"''' is shown to the player.
 * '''color''' : (array) A color array, with '''"r"''', '''"g"''', and '''"b"''' keys that have values ranging from 0 to 255.
 |-
@@ -166,7 +167,7 @@ The entity's custom name is derived from the item '''"display"''' string. Additi
 * '''playerrange''' : (int) The maximum distance a player must be within to cause the spawner to spawn.
 NBT for spawn potentials other than entity type is not yet supported.
 |-
-| Tropical Fish Buckets
+| Tropical Fish Bucket
 |
 * '''fishcolor''' : (string) The color of the fish, can be one of ''%DYE_COLORS%''.
 * '''fishpatterncolor''' : (string) The color of the pattern on the fish.

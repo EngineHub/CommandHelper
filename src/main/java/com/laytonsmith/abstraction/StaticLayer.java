@@ -91,20 +91,12 @@ public final class StaticLayer {
 		return convertor.GetServer();
 	}
 
-	public static MCEnchantment GetEnchantmentByName(String name) {
-		return convertor.GetEnchantmentByName(name);
-	}
-
 	public static MCMaterial[] GetMaterialValues() {
 		return convertor.GetMaterialValues();
 	}
 
 	public static MCMaterial GetMaterial(String name) {
 		return convertor.GetMaterial(name);
-	}
-
-	public static MCEnchantment[] GetEnchantmentValues() {
-		return convertor.GetEnchantmentValues();
 	}
 
 	public static void Startup(CommandHelperPlugin chp) {

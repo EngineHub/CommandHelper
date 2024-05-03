@@ -2,6 +2,7 @@ package com.laytonsmith.abstraction;
 
 import com.laytonsmith.abstraction.blocks.MCBlockData;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
+import com.laytonsmith.abstraction.enums.MCEnchantment;
 import com.laytonsmith.abstraction.enums.MCItemFlag;
 import java.util.List;
 import java.util.Map;
@@ -113,6 +114,12 @@ public interface MCItemMeta extends AbstractionObject {
 
 	void setDamage(int damage);
 
+	boolean hasMaxDamage();
+
+	int getMaxDamage();
+
+	void setMaxDamage(int damage);
+
 	MCBlockData getBlockData(MCMaterial material);
 
 	boolean hasBlockData();
@@ -132,4 +139,30 @@ public interface MCItemMeta extends AbstractionObject {
 	boolean hasCustomTags();
 
 	MCTagContainer getCustomTags();
+
+	boolean hasItemName();
+
+	String getItemName();
+
+	void setItemName(String name);
+
+	boolean isHideTooltip();
+
+	void setHideTooltip(boolean hide);
+
+	boolean hasEnchantmentGlintOverride();
+
+	boolean getEnchantmentGlintOverride();
+
+	void setEnchantmentGlintOverride(boolean glint);
+
+	boolean isFireResistant();
+
+	void setFireResistant(boolean fireResistant);
+
+	boolean hasMaxStackSize();
+
+	int getMaxStackSize();
+
+	void setMaxStackSize(int size);
 }

@@ -1,10 +1,17 @@
 Updating to new versions of Minecraft can sometimes require updates to your scripts.
 Below is a reverse chronological guide to help you with the most notable of these changes to quickly update your code.
+Where possible, any value changes are converted for backwards compatibility with saved data, but any script that checks output for equality will need to be updated.
+----
+
+== Minecraft 1.20.5 ==
+* SCUTE item has been renamed to TURTLE_SCUTE
+* In potion item meta, the potion array under the "base" key was replaced by a "potiontype" string
+* In enchantment item meta, the arrays under the "enchants" key have had the "etype" key removed
 
 ----
 
 == Minecraft 1.20.3 ==
-* GRASS changed to SHORT_GRASS (converted automatically where possible)
+* GRASS changed to SHORT_GRASS
 
 ----
 
@@ -21,7 +28,7 @@ Below is a reverse chronological guide to help you with the most notable of thes
 ----
 
 == Minecraft 1.17 ==
-* GRASS_PATH changed to DIRT_PATH (converted automatically where possible)
+* GRASS_PATH changed to DIRT_PATH
 * Cauldrons are split into 4 materials: CAULDRON, WATER_CAULDRON, LAVA_CAULDRON, POWDERED_SNOW_CAULDRON
 * GLOW_ITEM_FRAME is a separate entity type that behaves exactly as item frames
 * All ores now have a deepslate variant (eg. DEEPSLATE_COAL_ORE)

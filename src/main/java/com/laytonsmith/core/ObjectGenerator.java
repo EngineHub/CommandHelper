@@ -14,7 +14,6 @@ import com.laytonsmith.abstraction.MCColorableArmorMeta;
 import com.laytonsmith.abstraction.MCCompassMeta;
 import com.laytonsmith.abstraction.MCCreatureSpawner;
 import com.laytonsmith.abstraction.MCCrossbowMeta;
-import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCEnchantmentStorageMeta;
 import com.laytonsmith.abstraction.MCFireworkBuilder;
 import com.laytonsmith.abstraction.MCFireworkEffect;
@@ -66,8 +65,10 @@ import com.laytonsmith.abstraction.entities.MCTropicalFish;
 import com.laytonsmith.abstraction.enums.MCAttribute;
 import com.laytonsmith.abstraction.enums.MCAxolotlType;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
+import com.laytonsmith.abstraction.enums.MCEnchantment;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
+import com.laytonsmith.abstraction.enums.MCEquipmentSlotGroup;
 import com.laytonsmith.abstraction.enums.MCFireworkType;
 import com.laytonsmith.abstraction.enums.MCItemFlag;
 import com.laytonsmith.abstraction.enums.MCPatternShape;
@@ -453,7 +454,7 @@ public class ObjectGenerator {
 
 			Set<MCItemFlag> itemFlags = meta.getItemFlags();
 			CArray flagArray = new CArray(t);
-			if(itemFlags.size() > 0) {
+			if(!itemFlags.isEmpty()) {
 				for(MCItemFlag flag : itemFlags) {
 					flagArray.push(new CString(flag.name(), t), t);
 				}
@@ -723,9 +724,18 @@ public class ObjectGenerator {
 				MCPotionMeta potionmeta = (MCPotionMeta) meta;
 				CArray effects = potions(potionmeta.getCustomEffects(), t);
 				ma.set("potions", effects, t);
-				MCPotionData potiondata = potionmeta.getBasePotionData();
-				if(potiondata != null) {
-					ma.set("base", potionData(potiondata, t), t);
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
+					MCPotionType potionType = potionmeta.getBasePotionType();
+					if(potionType == null) {
+						ma.set("potiontype", CNull.NULL, t);
+					} else {
+						ma.set("potiontype", potionType.name());
+					}
+				} else {
+					MCPotionData potiondata = potionmeta.getBasePotionData();
+					if(potiondata != null) {
+						ma.set("base", potionData(potiondata, t), t);
+					}
 				}
 				if(potionmeta.hasColor()) {
 					ma.set("color", color(potionmeta.getColor(), t), t);
@@ -1348,10 +1358,19 @@ public class ObjectGenerator {
 							throw new CREFormatException("Effects was expected to be an array of potion arrays.", t);
 						}
 					}
-					if(ma.containsKey("base")) {
+					if(ma.containsKey("potiontype") && Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_2)) {
+						Mixed potiontype = ma.get("potiontype", t);
+						if(!(potiontype instanceof CNull)) {
+							((MCPotionMeta) meta).setBasePotionType(MCPotionType.valueOf(potiontype.val()));
+						}
+					} else if(ma.containsKey("base")) {
 						Mixed potiondata = ma.get("base", t);
 						if(potiondata.isInstanceOf(CArray.TYPE)) {
-							((MCPotionMeta) meta).setBasePotionData(potionData((CArray) potiondata, t));
+							if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
+								((MCPotionMeta) meta).setBasePotionType(legacyPotionData((CArray) potiondata, t));
+							} else {
+								((MCPotionMeta) meta).setBasePotionData(potionData((CArray) potiondata, t));
+							}
 						}
 					}
 					if(ma.containsKey("color")) {
@@ -1673,9 +1692,8 @@ public class ObjectGenerator {
 		CArray ret = CArray.GetAssociativeArray(t);
 		for(Map.Entry<MCEnchantment, Integer> entry : map.entrySet()) {
 			CArray enchant = CArray.GetAssociativeArray(t);
-			enchant.set("etype", new CString(entry.getKey().getName(), t), t);
 			enchant.set("elevel", new CInt(entry.getValue(), t), t);
-			ret.set(entry.getKey().getKey(), enchant, t);
+			ret.set(entry.getKey().name().toLowerCase(), enchant, t);
 		}
 		return ret;
 	}
@@ -1688,28 +1706,30 @@ public class ObjectGenerator {
 
 			Mixed value = enchantArray.get(key, t);
 			if(enchantArray.isAssociative()) {
-				etype = StaticLayer.GetEnchantmentByName(key);
-				if(etype != null && value.isInstanceOf(CInt.TYPE)) {
-					ret.put(etype, ArgumentValidation.getInt32(value, t));
-					continue;
+				try {
+					etype = MCEnchantment.valueOf(key.toUpperCase());
+					if(value.isInstanceOf(CInt.TYPE)) {
+						ret.put(etype, ArgumentValidation.getInt32(value, t));
+						continue;
+					}
+				} catch(IllegalArgumentException ex) {
+					throw new CREEnchantmentException("Unknown enchantment type: " + key, t);
 				}
 			}
 
-			CArray ea = ArgumentValidation.getArray(value, t);
-			if(etype == null) {
-				String setype = ea.get("etype", t).val();
-				etype = StaticLayer.GetEnchantmentByName(setype);
+			// legacy format
+			if(value.isInstanceOf(CArray.TYPE)) {
+				CArray ea = (CArray) value;
 				if(etype == null) {
-					if(setype.equals("SWEEPING")) {
-						// data from 1.11.2, changed in 1.12
-						etype = StaticLayer.GetEnchantmentByName("SWEEPING_EDGE");
-					} else {
+					String setype = ea.get("etype", t).val();
+					etype = MCEnchantment.valueOf(setype);
+					if(etype == null) {
 						throw new CREEnchantmentException("Unknown enchantment type: " + setype, t);
 					}
 				}
+				elevel = ArgumentValidation.getInt32(ea.get("elevel", t), t);
+				ret.put(etype, elevel);
 			}
-			elevel = ArgumentValidation.getInt32(ea.get("elevel", t), t);
-			ret.put(etype, elevel);
 		}
 		return ret;
 	}
@@ -1722,12 +1742,20 @@ public class ObjectGenerator {
 		modifier.set("uuid", m.getUniqueId().toString());
 		modifier.set("amount", new CDouble(m.getAmount(), t), t);
 
-		MCEquipmentSlot slot = m.getEquipmentSlot();
-		if(slot == null) {
-			modifier.set("slot", CNull.NULL, t);
-		} else {
-			modifier.set("slot", slot.name());
+		Mixed slot = CNull.NULL;
+		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
+			MCEquipmentSlotGroup equipmentSlotGroup = m.getEquipmentSlotGroup();
+			if(equipmentSlotGroup != null) {
+				slot = new CString(equipmentSlotGroup.name(), t);
+			}
 		}
+		if(slot == CNull.NULL) {
+			MCEquipmentSlot equipmentSlot = m.getEquipmentSlot();
+			if(equipmentSlot != null) {
+				slot = new CString(equipmentSlot.name(), t);
+			}
+		}
+		modifier.set("slot", slot, t);
 		return modifier;
 	}
 
@@ -1740,7 +1768,7 @@ public class ObjectGenerator {
 		MCAttributeModifier.Operation operation;
 		double amount;
 		UUID uuid = null;
-		String name = null;
+		String name = "";
 		MCEquipmentSlot slot = null;
 
 		try {
@@ -1772,6 +1800,20 @@ public class ObjectGenerator {
 		if(m.containsKey("slot")) {
 			Mixed s = m.get("slot", t);
 			if(!(s instanceof CNull)) {
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
+					MCEquipmentSlotGroup slotGroup = null;
+					if(s.val().equals("ANY")) {
+						slotGroup = MCEquipmentSlotGroup.ANY;
+					} else if(s.val().equals("HAND")) {
+						slotGroup = MCEquipmentSlotGroup.HAND;
+					} else if(s.val().equals("ARMOR")) {
+						slotGroup = MCEquipmentSlotGroup.ARMOR;
+					}
+					if(slotGroup != null) {
+						return StaticLayer.GetConvertor().GetAttributeModifier(attribute, uuid, name, amount, operation,
+								slotGroup);
+					}
+				}
 				try {
 					slot = MCEquipmentSlot.valueOf(s.val());
 				} catch (IllegalArgumentException ex) {
@@ -1894,6 +1936,46 @@ public class ObjectGenerator {
 		} catch (IllegalArgumentException ex) {
 			throw new CREFormatException(ex.getMessage(), t, ex);
 		}
+	}
+
+	public MCPotionType legacyPotionData(CArray potionArray, Target t) {
+		MCPotionType type;
+		try {
+			// need to get converted type first before extending/upgrading
+			type = MCPotionType.valueOf(potionArray.get("type", t).val().toUpperCase());
+		} catch (IllegalArgumentException ex) {
+			throw new CREFormatException("Invalid potion type: " + potionArray.get("type", t).val(), t);
+		}
+		boolean extended = false;
+		boolean upgraded = false;
+		if(potionArray.containsKey("extended")) {
+			Mixed cext = potionArray.get("extended", t);
+			if(cext.isInstanceOf(CBoolean.TYPE)) {
+				extended = ((CBoolean) cext).getBoolean();
+			}
+		}
+		if(potionArray.containsKey("upgraded")) {
+			Mixed cupg = potionArray.get("upgraded", t);
+			if(cupg.isInstanceOf(CBoolean.TYPE)) {
+				upgraded = ((CBoolean) cupg).getBoolean();
+			}
+		}
+		if(extended) {
+			try {
+				type = MCPotionType.valueOf("LONG_" + type.name());
+			} catch (IllegalArgumentException ex) {
+				throw new CREFormatException("Could not find extended potion type for: "
+						+ potionArray.get("type", t).val(), t);
+			}
+		} else if(upgraded) {
+			try {
+				type = MCPotionType.valueOf("STRONG_" + type.name());
+			} catch (IllegalArgumentException ex) {
+				throw new CREFormatException("Could not find upgraded potion type for: "
+						+ potionArray.get("type", t).val(), t);
+			}
+		}
+		return type;
 	}
 
 	public CArray fireworkEffect(MCFireworkEffect mcfe, Target t) {

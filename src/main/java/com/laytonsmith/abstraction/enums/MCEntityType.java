@@ -111,7 +111,7 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 
 					@Override
 					public boolean isProjectile() {
-						return t.isProjectile();
+						return false;
 					}
 				});
 			}
@@ -121,21 +121,24 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 	}
 
 	public enum MCVanillaEntityType {
-		ALLAY(true, false, MCVersion.MC1_19),
+		ALLAY(true, MCVersion.MC1_19),
 		AREA_EFFECT_CLOUD,
+		ARMADILLO(true, MCVersion.MC1_20_6),
 		ARMOR_STAND,
 		ARROW,
-		AXOLOTL(true, false, MCVersion.MC1_17),
+		AXOLOTL(true, MCVersion.MC1_17),
 		BAT,
-		BEE(true, false, MCVersion.MC1_15),
+		BEE(true, MCVersion.MC1_15),
 		BLAZE,
-		BLOCK_DISPLAY(true, false, MCVersion.MC1_19_4),
+		BLOCK_DISPLAY(true, MCVersion.MC1_19_4),
 		BOAT,
-		BREEZE(true, false, MCVersion.MC1_20_4),
-		CAMEL(true, false, MCVersion.MC1_19_3),
-		CAT(true, false, MCVersion.MC1_14),
+		BOGGED(true, MCVersion.MC1_20_6),
+		BREEZE(true, MCVersion.MC1_20_4),
+		BREEZE_WIND_CHARGE(true, MCVersion.MC1_20_6),
+		CAMEL(true, MCVersion.MC1_19_3),
+		CAT(true, MCVersion.MC1_14),
 		CAVE_SPIDER,
-		CHEST_BOAT(true, false, MCVersion.MC1_19),
+		CHEST_BOAT(true, MCVersion.MC1_19),
 		CHICKEN,
 		COD,
 		COW,
@@ -160,28 +163,28 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 		FIREBALL,
 		FIREWORK,
 		FISHING_HOOK(false),
-		FOX(true, false, MCVersion.MC1_14),
-		FROG(true, false, MCVersion.MC1_19),
+		FOX(true, MCVersion.MC1_14),
+		FROG(true, MCVersion.MC1_19),
 		GHAST,
 		GIANT,
-		GLOW_ITEM_FRAME(true, false, MCVersion.MC1_17),
-		GLOW_SQUID(true, false, MCVersion.MC1_17),
-		GOAT(true, false, MCVersion.MC1_17),
+		GLOW_ITEM_FRAME(true, MCVersion.MC1_17),
+		GLOW_SQUID(true, MCVersion.MC1_17),
+		GOAT(true, MCVersion.MC1_17),
 		GUARDIAN,
-		HOGLIN(true, false, MCVersion.MC1_16),
+		HOGLIN(true, MCVersion.MC1_16),
 		HORSE,
 		HUSK,
 		ILLUSIONER,
-		INTERACTION(true, false, MCVersion.MC1_19_4),
+		INTERACTION(true, MCVersion.MC1_19_4),
 		IRON_GOLEM,
-		ITEM_DISPLAY(true, false, MCVersion.MC1_19_4),
+		ITEM_DISPLAY(true, MCVersion.MC1_19_4),
 		ITEM_FRAME,
 		LLAMA,
-		LLAMA_SPIT(true, true),
+		LLAMA_SPIT,
 		LEASH_HITCH,
 		LIGHTNING,
 		MAGMA_CUBE,
-		MARKER(true, false, MCVersion.MC1_17),
+		MARKER(true, MCVersion.MC1_17),
 		MINECART,
 		MINECART_CHEST,
 		MINECART_COMMAND,
@@ -192,20 +195,21 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 		MULE,
 		MUSHROOM_COW,
 		OCELOT,
+		OMINOUS_ITEM_SPAWNER(true, MCVersion.MC1_20_6),
 		PAINTING,
-		PANDA(true, false, MCVersion.MC1_14),
+		PANDA(true, MCVersion.MC1_14),
 		PARROT,
 		PHANTOM,
 		PIG,
-		PIGLIN(true, false, MCVersion.MC1_16),
-		PIGLIN_BRUTE(true, false, MCVersion.MC1_16_X),
-		PILLAGER(true, false, MCVersion.MC1_14),
+		PIGLIN(true, MCVersion.MC1_16),
+		PIGLIN_BRUTE(true, MCVersion.MC1_16_X),
+		PILLAGER(true, MCVersion.MC1_14),
 		PLAYER(false),
 		POLAR_BEAR,
 		PRIMED_TNT,
 		PUFFERFISH,
 		RABBIT,
-		RAVAGER(true, false, MCVersion.MC1_14),
+		RAVAGER(true, MCVersion.MC1_14),
 		SALMON,
 		SHEEP,
 		SILVERFISH,
@@ -215,7 +219,7 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 		SKELETON_HORSE,
 		SLIME,
 		SMALL_FIREBALL,
-		SNIFFER(true, false, MCVersion.MC1_19_4),
+		SNIFFER(true, MCVersion.MC1_19_4),
 		SNOWBALL,
 		SNOWMAN,
 		SQUID,
@@ -223,43 +227,41 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 		SPIDER,
 		SPLASH_POTION,
 		STRAY,
-		STRIDER(true, false, MCVersion.MC1_16),
-		TADPOLE(true, false, MCVersion.MC1_19),
-		TEXT_DISPLAY(true, false, MCVersion.MC1_19_4),
+		STRIDER(true, MCVersion.MC1_16),
+		TADPOLE(true, MCVersion.MC1_19),
+		TEXT_DISPLAY(true, MCVersion.MC1_19_4),
 		THROWN_EXP_BOTTLE,
-		TRADER_LLAMA(true, false, MCVersion.MC1_14),
+		TRADER_LLAMA(true, MCVersion.MC1_14),
 		TRIDENT,
 		TROPICAL_FISH,
 		TURTLE,
 		VEX,
 		VILLAGER,
 		VINDICATOR,
-		WANDERING_TRADER(true, false, MCVersion.MC1_14),
-		WARDEN(true, false, MCVersion.MC1_19),
-		WIND_CHARGE(true, true, MCVersion.MC1_20_4),
+		WANDERING_TRADER(true, MCVersion.MC1_14),
+		WARDEN(true, MCVersion.MC1_19),
+		WIND_CHARGE(true, MCVersion.MC1_20_4),
 		WITCH,
 		WITHER,
 		WITHER_SKELETON,
 		WITHER_SKULL,
 		WOLF,
-		ZOGLIN(true, false, MCVersion.MC1_16),
+		ZOGLIN(true, MCVersion.MC1_16),
 		ZOMBIE,
 		ZOMBIE_HORSE,
 		ZOMBIE_VILLAGER,
-		ZOMBIFIED_PIGLIN(true, false, MCVersion.MC1_16),
+		ZOMBIFIED_PIGLIN(true, MCVersion.MC1_16),
 		/**
 		 * An unknown entity without an Entity Class
 		 */
 		UNKNOWN(false);
 
 		private final boolean canSpawn;
-		private final boolean canShoot;
 		private final MCVersion from;
 		private final MCVersion to;
 
 		MCVanillaEntityType() {
 			this.canSpawn = true;
-			this.canShoot = false;
 			this.from = MCVersion.MC1_0;
 			this.to = MCVersion.FUTURE;
 		}
@@ -269,43 +271,27 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 		 */
 		MCVanillaEntityType(boolean spawnable) {
 			this.canSpawn = spawnable;
-			this.canShoot = false;
 			this.from = MCVersion.MC1_0;
 			this.to = MCVersion.FUTURE;
 		}
 
 		/**
 		 * @param spawnable true if the entity is spawnable
-		 * @param projectile true if the entity is a projectile
-		 */
-		MCVanillaEntityType(boolean spawnable, boolean projectile) {
-			this.canSpawn = spawnable;
-			this.canShoot = projectile;
-			this.from = MCVersion.MC1_0;
-			this.to = MCVersion.FUTURE;
-		}
-
-		/**
-		 * @param spawnable true if the entity is spawnable
-		 * @param projectile true if the entity is a projectile
 		 * @param added the version this entity was added
 		 */
-		MCVanillaEntityType(boolean spawnable, boolean projectile, MCVersion added) {
+		MCVanillaEntityType(boolean spawnable, MCVersion added) {
 			this.canSpawn = spawnable;
-			this.canShoot = projectile;
 			this.from = added;
 			this.to = MCVersion.FUTURE;
 		}
 
 		/**
 		 * @param spawnable true if the entity is spawnable
-		 * @param projectile true if the entity is a projectile
 		 * @param added the version this entity was added
-		 * @param removed the version this entity was removed
+		 * @param removed the version this entity was removed or renamed
 		 */
-		MCVanillaEntityType(boolean spawnable, boolean projectile, MCVersion added, MCVersion removed) {
+		MCVanillaEntityType(boolean spawnable, MCVersion added, MCVersion removed) {
 			this.canSpawn = spawnable;
-			this.canShoot = projectile;
 			this.from = added;
 			this.to = removed;
 		}
@@ -313,10 +299,6 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 		// This is here only for site-based documentation of some functions
 		public boolean isSpawnable() {
 			return this.canSpawn;
-		}
-
-		public boolean isProjectile() {
-			return this.canShoot;
 		}
 
 		public boolean existsIn(MCVersion version) {

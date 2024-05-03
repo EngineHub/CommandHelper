@@ -52,6 +52,7 @@ public enum MCGameRule {
 	SENDCOMMANDFEEDBACK("sendCommandFeedback"),
 	SHOWDEATHMESSAGES("showDeathMessages"),
 	SNOWACCUMULATIONHEIGHT("snowAccumulationHeight", CInt.class),
+	SPAWNCHUNKRADIUS("spawnChunkRadius", CInt.class),
 	SPAWNRADIUS("spawnRadius", CInt.class),
 	SPECTATORSGENERATECHUNKS("spectatorsGenerateChunks"),
 	TNTEXPLOSIONDROPDECAY("tntExplosionDropDecay"),
@@ -71,7 +72,16 @@ public enum MCGameRule {
 		this.ruleType = type;
 	}
 
-	public String getGameRule() {
+	public static String[] getGameRules() {
+		MCGameRule[] values = MCGameRule.values();
+		String[] names = new String[values.length];
+		for(int i = 0; i < values.length; i++) {
+			names[i] = values[i].getRuleName();
+		}
+		return names;
+	}
+
+	public String getRuleName() {
 		return this.gameRule;
 	}
 

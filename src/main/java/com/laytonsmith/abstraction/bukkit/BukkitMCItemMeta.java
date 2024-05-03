@@ -4,12 +4,12 @@ import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCAttributeModifier;
-import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCItemMeta;
 import com.laytonsmith.abstraction.MCTagContainer;
 import com.laytonsmith.abstraction.blocks.MCBlockData;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlockData;
+import com.laytonsmith.abstraction.enums.MCEnchantment;
 import com.laytonsmith.abstraction.enums.MCItemFlag;
 
 import java.util.ArrayList;
@@ -21,6 +21,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCAttribute;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEnchantment;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCItemFlag;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
@@ -83,19 +85,19 @@ public class BukkitMCItemMeta implements MCItemMeta {
 	public Map<MCEnchantment, Integer> getEnchants() {
 		Map<MCEnchantment, Integer> map = new HashMap<>();
 		for(Entry<Enchantment, Integer> entry : im.getEnchants().entrySet()) {
-			map.put(new BukkitMCEnchantment(entry.getKey()), entry.getValue());
+			map.put(BukkitMCEnchantment.valueOfConcrete(entry.getKey()), entry.getValue());
 		}
 		return map;
 	}
 
 	@Override
 	public boolean addEnchant(MCEnchantment ench, int level, boolean ignoreLevelRestriction) {
-		return im.addEnchant(((BukkitMCEnchantment) ench).__Enchantment(), level, ignoreLevelRestriction);
+		return im.addEnchant((Enchantment) ench.getConcrete(), level, ignoreLevelRestriction);
 	}
 
 	@Override
 	public boolean removeEnchant(MCEnchantment ench) {
-		return im.removeEnchant(((BukkitMCEnchantment) ench).__Enchantment());
+		return im.removeEnchant((Enchantment) ench.getConcrete());
 	}
 
 	@Override
@@ -140,7 +142,7 @@ public class BukkitMCItemMeta implements MCItemMeta {
 	@Override
 	public void addItemFlags(MCItemFlag... flags) {
 		for(MCItemFlag flag : flags) {
-			im.addItemFlags(ItemFlag.valueOf(flag.name()));
+			im.addItemFlags(BukkitMCItemFlag.getConvertor().getConcreteEnum(flag));
 		}
 	}
 
@@ -172,6 +174,21 @@ public class BukkitMCItemMeta implements MCItemMeta {
 	@Override
 	public void setDamage(int damage) {
 		((Damageable) im).setDamage(damage);
+	}
+
+	@Override
+	public boolean hasMaxDamage() {
+		return ((Damageable) im).hasMaxDamage();
+	}
+
+	@Override
+	public int getMaxDamage() {
+		return ((Damageable) im).getMaxDamage();
+	}
+
+	@Override
+	public void setMaxDamage(int damage) {
+		((Damageable) im).setMaxDamage(damage);
 	}
 
 	@Override
@@ -234,5 +251,70 @@ public class BukkitMCItemMeta implements MCItemMeta {
 
 	public MCTagContainer getCustomTags() {
 		return new BukkitMCTagContainer(im.getPersistentDataContainer());
+	}
+
+	@Override
+	public boolean hasItemName() {
+		return im.hasItemName();
+	}
+
+	@Override
+	public String getItemName() {
+		return im.getItemName();
+	}
+
+	@Override
+	public void setItemName(String name) {
+		im.setItemName(name);
+	}
+
+	@Override
+	public boolean isHideTooltip() {
+		return im.isHideTooltip();
+	}
+
+	@Override
+	public void setHideTooltip(boolean hide) {
+		im.setHideTooltip(hide);
+	}
+
+	@Override
+	public boolean hasEnchantmentGlintOverride() {
+		return im.hasEnchantmentGlintOverride();
+	}
+
+	@Override
+	public boolean getEnchantmentGlintOverride() {
+		return im.getEnchantmentGlintOverride();
+	}
+
+	@Override
+	public void setEnchantmentGlintOverride(boolean glint) {
+		im.setEnchantmentGlintOverride(glint);
+	}
+
+	@Override
+	public boolean isFireResistant() {
+		return im.isFireResistant();
+	}
+
+	@Override
+	public void setFireResistant(boolean fireResistant) {
+		im.setFireResistant(fireResistant);
+	}
+
+	@Override
+	public boolean hasMaxStackSize() {
+		return im.hasMaxStackSize();
+	}
+
+	@Override
+	public int getMaxStackSize() {
+		return im.getMaxStackSize();
+	}
+
+	@Override
+	public void setMaxStackSize(int size) {
+		im.setMaxStackSize(size);
 	}
 }

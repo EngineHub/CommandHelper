@@ -1,7 +1,6 @@
 package com.laytonsmith.abstraction.bukkit.events;
 
 import com.laytonsmith.abstraction.MCCraftingInventory;
-import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCEnchantmentOffer;
 import com.laytonsmith.abstraction.MCHumanEntity;
 import com.laytonsmith.abstraction.MCInventory;
@@ -12,7 +11,6 @@ import com.laytonsmith.abstraction.MCRecipe;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCraftingInventory;
-import com.laytonsmith.abstraction.bukkit.BukkitMCEnchantment;
 import com.laytonsmith.abstraction.bukkit.BukkitMCEnchantmentOffer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCInventory;
 import com.laytonsmith.abstraction.bukkit.BukkitMCInventoryView;
@@ -22,10 +20,12 @@ import com.laytonsmith.abstraction.bukkit.entities.BukkitMCHumanEntity;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.abstraction.enums.MCClickType;
 import com.laytonsmith.abstraction.enums.MCDragType;
+import com.laytonsmith.abstraction.enums.MCEnchantment;
 import com.laytonsmith.abstraction.enums.MCInventoryAction;
 import com.laytonsmith.abstraction.enums.MCResult;
 import com.laytonsmith.abstraction.enums.MCSlotType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCClickType;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEnchantment;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCInventoryAction;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCResult;
 import com.laytonsmith.abstraction.events.MCEnchantItemEvent;
@@ -330,7 +330,7 @@ public class BukkitInventoryEvents {
 			for(Map.Entry<Enchantment, Integer> ea : ei.getEnchantsToAdd().entrySet()) {
 				Enchantment key = ea.getKey();
 				Integer value = ea.getValue();
-				ret.put(new BukkitMCEnchantment(key), value);
+				ret.put(BukkitMCEnchantment.valueOfConcrete(key), value);
 			}
 			return ret;
 		}
@@ -350,7 +350,7 @@ public class BukkitInventoryEvents {
 			for(Map.Entry<MCEnchantment, Integer> ea : enchants.entrySet()) {
 				MCEnchantment key = ea.getKey();
 				Integer value = ea.getValue();
-				enchantments.put(((BukkitMCEnchantment) key).asEnchantment(), value);
+				enchantments.put((Enchantment) key.getConcrete(), value);
 			}
 
 			ItemStack item = ei.getItem();
@@ -394,7 +394,7 @@ public class BukkitInventoryEvents {
 
 		@Override
 		public MCEnchantment getEnchantmentHint() {
-			return new BukkitMCEnchantment(ei.getEnchantmentHint());
+			return BukkitMCEnchantment.valueOfConcrete(ei.getEnchantmentHint());
 		}
 	}
 

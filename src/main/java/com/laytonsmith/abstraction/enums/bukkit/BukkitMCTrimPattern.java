@@ -2,6 +2,7 @@ package com.laytonsmith.abstraction.enums.bukkit;
 
 import com.laytonsmith.abstraction.enums.MCTrimPattern;
 import com.laytonsmith.core.MSLog;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
 import org.bukkit.inventory.meta.trim.TrimPattern;
 
@@ -37,7 +38,7 @@ public class BukkitMCTrimPattern extends MCTrimPattern<TrimPattern> {
 
 	public static void build() {
 		for(MCVanillaTrimPattern v : MCVanillaTrimPattern.values()) {
-			if(v == MCVanillaTrimPattern.UNKNOWN) {
+			if(v == MCVanillaTrimPattern.UNKNOWN || !v.existsIn(Static.getServer().getMinecraftVersion())) {
 				continue;
 			}
 			TrimPattern trimPattern;

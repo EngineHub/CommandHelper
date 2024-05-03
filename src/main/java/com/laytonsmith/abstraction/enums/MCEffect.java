@@ -22,7 +22,7 @@ public enum MCEffect {
 	LAVA_INTERACT,
 	MOBSPAWNER_FLAMES,
 	OXIDISED_COPPER_SCRAPE,
-	POTION_BREAK, // Potion data
+	POTION_BREAK, // Color
 	REDSTONE_TORCH_BURNOUT,
 	SMOKE, // BlockFace for the direction of the smoke particles
 	SPONGE_DRY,

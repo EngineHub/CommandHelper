@@ -205,11 +205,6 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 	}
 
 	@Override
-	public void setLastDamageCause(MCEntityDamageEvent event) {
-		e.setLastDamageCause((EntityDamageEvent) event._GetObject());
-	}
-
-	@Override
 	public boolean setPassenger(MCEntity passenger) {
 		return e.addPassenger((Entity) passenger.getHandle());
 	}
@@ -265,11 +260,11 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 			TeleportFlag teleportFlag = TeleportFlag.EntityState.RETAIN_PASSENGERS;
 			// Paper only method:
 			// e.teleport(l, c, teleportFlag);
-			return (boolean) ReflectionUtils.invokeMethod(Entity.class, e, "teleport",
+			return ReflectionUtils.invokeMethod(Entity.class, e, "teleport",
 					new Class[] {
 						org.bukkit.Location.class,
 						org.bukkit.event.player.PlayerTeleportEvent.TeleportCause.class,
-						ReflectionUtils.forName("io.papermc.paper.entity.TeleportFlag").arrayType()
+						TeleportFlag[].class
 					},
 					new Object[] { l, c, new TeleportFlag[] { teleportFlag } });
 		}

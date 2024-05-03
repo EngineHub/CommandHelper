@@ -174,12 +174,12 @@
 			<!-- GPL -->
 			<groupId>org.spigotmc</groupId>
 			<artifactId>spigot-api</artifactId>
-			<version>1.20.4-R0.1-SNAPSHOT</version>
+			<version>1.20.6-R0.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>io.papermc.paper</groupId>
 			<artifactId>paper-api</artifactId>
-			<version>1.20.4-R0.1-SNAPSHOT</version>
+			<version>1.20.6-R0.1-SNAPSHOT</version>
 		</dependency>
 
 		<!-- Used for storing and retreiving Constructs in a storage transparent medium: JSONs -->
@@ -513,7 +513,6 @@
 						<arg>-XDignore.symbol.file</arg>
 						<arg>-parameters</arg>
 					</compilerArgs>
-					<fork>true</fork>
 				</configuration>
 			</plugin>
 
@@ -533,6 +532,7 @@
 							<!--<mainClass>com.laytonsmith.core.MainSandbox</mainClass>-->
 						</manifest>
 						<manifestEntries>
+							<paperweight-mappings-namespace>mojang</paperweight-mappings-namespace>
 							<Class-Path>../bukkit.jar CommandHelper/bukkit.jar</Class-Path>
 						</manifestEntries>
 					</archive>

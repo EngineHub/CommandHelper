@@ -187,7 +187,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 
 	@Override
 	public boolean setGameRuleValue(MCGameRule gameRule, String value) {
-		return w.setGameRuleValue(gameRule.getGameRule(), value);
+		return w.setGameRuleValue(gameRule.getRuleName(), value);
 	}
 
 	@Override
@@ -507,7 +507,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 
 	@Override
 	public MCFirework launchFirework(MCLocation l, int strength, List<MCFireworkEffect> effects) {
-		Firework firework = (Firework) w.spawnEntity(((BukkitMCLocation) l).asLocation(), EntityType.FIREWORK);
+		Firework firework = w.spawn(((BukkitMCLocation) l).asLocation(), Firework.class);
 		FireworkMeta meta = firework.getFireworkMeta();
 		meta.setPower(Math.max(strength, 0));
 		for(MCFireworkEffect effect : effects) {

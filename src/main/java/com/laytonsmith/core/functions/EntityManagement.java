@@ -111,6 +111,7 @@ import com.laytonsmith.abstraction.enums.MCFoxType;
 import com.laytonsmith.abstraction.enums.MCMushroomCowType;
 import com.laytonsmith.abstraction.enums.MCParrotType;
 import com.laytonsmith.abstraction.enums.MCParticle;
+import com.laytonsmith.abstraction.enums.MCPotionType;
 import com.laytonsmith.abstraction.enums.MCProfession;
 import com.laytonsmith.abstraction.enums.MCRabbitType;
 import com.laytonsmith.abstraction.enums.MCRotation;
@@ -165,7 +166,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.Triple;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
@@ -856,14 +856,12 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "string {[entity[, projectile]] | player, projectile, target[, speed]} shoots an entity from the"
+			return "string {[entity[, projectile]] | player, projectile, target[, speed]} Shoots an entity from the"
 					+ " specified location (can be an entity UUID, player name or location array), or the current"
 					+ " player if no arguments are passed. If no entity type is specified, it defaults to a fireball."
 					+ " If provide three arguments, with target (entity UUID, player name or location array), entity"
 					+ " will shoot to target location. Last, fourth argument, is double and specifies the speed"
-					+ " of projectile. Returns the UUID of the entity. Valid projectile types: "
-					+ StringUtils.Join(MCEntityType.values().stream().filter(MCEntityType::isProjectile)
-							.collect(Collectors.toList()), ", ", ", or ", " or ");
+					+ " of projectile. Returns the UUID of the entity.";
 		}
 
 		@Override
@@ -1827,6 +1825,7 @@ public class EntityManagement {
 			docs = docs.replace("%AXOLOTL_TYPE%", StringUtils.Join(MCAxolotlType.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%FROG_TYPE%", StringUtils.Join(MCFrogType.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%ITEM_DISPLAY%", StringUtils.Join(ModelTransform.values(), ", ", ", or "));
+			docs = docs.replace("%WOLF_TYPE%", StringUtils.Join(MCWolf.Variant.values(), ", ", ", or "));
 			for(Field field : entity_spec.class.getDeclaredFields()) {
 				try {
 					String name = field.getName();
@@ -1854,7 +1853,16 @@ public class EntityManagement {
 					CArray meta = CArray.GetAssociativeArray(t);
 					CArray effects = ObjectGenerator.GetGenerator().potions(cloud.getCustomEffects(), t);
 					meta.set("potions", effects, t);
-					meta.set("base", ObjectGenerator.GetGenerator().potionData(cloud.getBasePotionData(), t), t);
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
+						MCPotionType potionType = cloud.getBasePotionType();
+						if(potionType == null) {
+							meta.set("potiontype", CNull.NULL, t);
+						} else {
+							meta.set("potiontype", potionType.name());
+						}
+					} else {
+						meta.set("base", ObjectGenerator.GetGenerator().potionData(cloud.getBasePotionData(), t), t);
+					}
 					specArray.set(entity_spec.KEY_AREAEFFECTCLOUD_POTIONMETA, meta, t);
 					specArray.set(entity_spec.KEY_AREAEFFECTCLOUD_RADIUS, new CDouble(cloud.getRadius(), t), t);
 					specArray.set(entity_spec.KEY_AREAEFFECTCLOUD_RADIUSONUSE, new CDouble(cloud.getRadiusOnUse(), t), t);
@@ -1883,7 +1891,16 @@ public class EntityManagement {
 					CArray tippedmeta = CArray.GetAssociativeArray(t);
 					CArray tippedeffects = ObjectGenerator.GetGenerator().potions(arrow.getCustomEffects(), t);
 					tippedmeta.set("potions", tippedeffects, t);
-					tippedmeta.set("base", ObjectGenerator.GetGenerator().potionData(arrow.getBasePotionData(), t), t);
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
+						MCPotionType potionType = arrow.getBasePotionType();
+						if(potionType == null) {
+							tippedmeta.set("potiontype", CNull.NULL, t);
+						} else {
+							tippedmeta.set("potiontype", potionType.name());
+						}
+					} else {
+						tippedmeta.set("base", ObjectGenerator.GetGenerator().potionData(arrow.getBasePotionData(), t), t);
+					}
 					specArray.set(entity_spec.KEY_TIPPEDARROW_POTIONMETA, tippedmeta, t);
 					break;
 				case ARMOR_STAND:
@@ -2284,6 +2301,9 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_GENERIC_SITTING, CBoolean.get(wolf.isSitting()), t);
 					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19)) {
 						specArray.set(entity_spec.KEY_WOLF_INTERESTED, CBoolean.get(wolf.isInterested()), t);
+						if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
+							specArray.set(entity_spec.KEY_WOLF_TYPE, new CString(wolf.getWolfVariant().name(), t), t);
+						}
 					}
 					break;
 				case ZOGLIN:
@@ -2460,6 +2480,7 @@ public class EntityManagement {
 		private static final String KEY_WOLF_ANGRY = "angry";
 		private static final String KEY_WOLF_COLOR = "color";
 		private static final String KEY_WOLF_INTERESTED = "interested";
+		private static final String KEY_WOLF_TYPE = "type";
 		private static final String KEY_ZOMBIE_BREAK_DOORS = "breakdoors";
 	}
 
@@ -2585,11 +2606,24 @@ public class EntityManagement {
 								Mixed c = specArray.get(index, t);
 								if(c.isInstanceOf(CArray.TYPE)) {
 									CArray meta = (CArray) c;
-									if(meta.containsKey("base")) {
+									if(meta.containsKey("potiontype")
+											&& Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
+										Mixed potiontype = meta.get("potiontype", t);
+										if(potiontype instanceof CNull) {
+											cloud.setBasePotionType(null);
+										} else {
+											cloud.setBasePotionType(MCPotionType.valueOf(potiontype.val()));
+										}
+									} else if(meta.containsKey("base")) {
 										Mixed base = meta.get("base", t);
 										if(base.isInstanceOf(CArray.TYPE)) {
-											MCPotionData pd = ObjectGenerator.GetGenerator().potionData((CArray) base, t);
-											cloud.setBasePotionData(pd);
+											if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
+												MCPotionType type = ObjectGenerator.GetGenerator().legacyPotionData((CArray) base, t);
+												cloud.setBasePotionType(type);
+											} else {
+												MCPotionData pd = ObjectGenerator.GetGenerator().potionData((CArray) base, t);
+												cloud.setBasePotionData(pd);
+											}
 										}
 									}
 									if(meta.containsKey("potions")) {
@@ -2682,11 +2716,24 @@ public class EntityManagement {
 								Mixed c = specArray.get(index, t);
 								if(c.isInstanceOf(CArray.TYPE)) {
 									CArray meta = (CArray) c;
-									if(meta.containsKey("base")) {
+									if(meta.containsKey("potiontype")
+											&& Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
+										Mixed potiontype = meta.get("potiontype", t);
+										if(potiontype instanceof CNull) {
+											arrow.setBasePotionType(null);
+										} else {
+											arrow.setBasePotionType(MCPotionType.valueOf(potiontype.val()));
+										}
+									} else if(meta.containsKey("base")) {
 										Mixed base = meta.get("base", t);
 										if(base.isInstanceOf(CArray.TYPE)) {
-											MCPotionData pd = ObjectGenerator.GetGenerator().potionData((CArray) base, t);
-											arrow.setBasePotionData(pd);
+											if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
+												MCPotionType type = ObjectGenerator.GetGenerator().legacyPotionData((CArray) base, t);
+												arrow.setBasePotionType(type);
+											} else {
+												MCPotionData pd = ObjectGenerator.GetGenerator().potionData((CArray) base, t);
+												arrow.setBasePotionData(pd);
+											}
 										}
 									}
 									if(meta.containsKey("potions")) {
@@ -3916,7 +3963,19 @@ public class EntityManagement {
 								wolf.setSitting(ArgumentValidation.getBoolean(specArray.get(index, t), t));
 								break;
 							case entity_spec.KEY_WOLF_INTERESTED:
-								wolf.setInterested(ArgumentValidation.getBooleanObject(specArray.get(index, t), t));
+								if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
+									wolf.setInterested(ArgumentValidation.getBooleanObject(specArray.get(index, t), t));
+								}
+								break;
+							case entity_spec.KEY_WOLF_TYPE:
+								if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
+									try {
+										MCWolf.Variant type = MCWolf.Variant.valueOf(specArray.get(index, t).val());
+										wolf.setWolfVariant(type);
+									} catch (IllegalArgumentException ex) {
+										throw new CREFormatException("Invalid wolf type: " + specArray.get(index, t).val(), t);
+									}
+								}
 								break;
 							default:
 								throwException(index, t);
@@ -5525,21 +5584,9 @@ public class EntityManagement {
 			}
 
 			float yaw = (float) ArgumentValidation.getDouble(args[1], t);
-			yaw %= 360.0F;
-			if(yaw >= 180.0) {
-				yaw -= 360.0F;
-			} else if(yaw < -180.0) {
-				yaw += 360.0F;
-			}
-
 			float pitch;
 			if(args.length == 3) {
 				pitch = (float) ArgumentValidation.getDouble(args[2], t);
-				if(pitch > 90.0) {
-					pitch = 90.0F;
-				} else if(pitch < -90.0) {
-					pitch = -90.0F;
-				}
 			} else {
 				pitch = entity.getLocation().getPitch();
 			}

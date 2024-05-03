@@ -8,6 +8,7 @@ import com.laytonsmith.abstraction.blocks.MCBlockData;
 import com.laytonsmith.abstraction.bukkit.BukkitMCColor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCVibration;
 import com.laytonsmith.abstraction.enums.MCParticle;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CDouble;
@@ -78,6 +79,7 @@ public class BukkitMCParticle extends MCParticle<Particle> {
 			case BLOCK_DUST:
 			case BLOCK_CRACK:
 			case BLOCK_MARKER:
+			case DUST_PILLAR:
 			case FALLING_DUST:
 				BlockData bd;
 				if(data instanceof MCBlockData) {
@@ -97,6 +99,15 @@ public class BukkitMCParticle extends MCParticle<Particle> {
 					is = new ItemStack(Material.STONE, 1);
 				}
 				return is;
+			case SPELL_MOB:
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
+					if(data instanceof MCColor) {
+						return BukkitMCColor.GetColor((MCColor) data);
+					} else {
+						return Color.WHITE;
+					}
+				}
+				break;
 			case REDSTONE:
 				Particle.DustOptions color;
 				if(data instanceof MCColor) {

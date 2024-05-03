@@ -8,35 +8,44 @@ import com.laytonsmith.annotations.MEnum;
 @MEnum("com.commandhelper.ItemFlag")
 public enum MCItemFlag {
 	/**
-	 * Setting to show/hide enchants
+	 * Hides enchantments
 	 */
 	HIDE_ENCHANTS,
 	/**
-	 * Setting to show/hide Attributes like Damage
+	 * Hides Attributes like Damage
 	 */
 	HIDE_ATTRIBUTES,
 	/**
-	 * Setting to show/hide the unbreakable State
+	 * Hides unbreakable state
 	 */
 	HIDE_UNBREAKABLE,
 	/**
-	 * Setting to show/hide what the ItemStack can break/destroy
+	 * Hides what the ItemStack can break/destroy
 	 */
 	HIDE_DESTROYS,
 	/**
-	 * Setting to show/hide where this ItemStack can be build/placed on
+	 * Hides where this ItemStack can be built/placed on
 	 */
 	HIDE_PLACED_ON,
 	/**
-	 * Setting to show/hide potion effects on this ItemStack
+	 * Hides potion effects (and additional tooltips)
+	 * Deprecated for HIDE_ADDITIONAL_TOOLTIP
 	 */
 	HIDE_POTION_EFFECTS,
 	/**
-	 * Setting to show/hide dyes from coloured leather armour
+	 * Hides any additional tooltips (like HIDE_POTION_EFFECTS)
+	 */
+	HIDE_ADDITIONAL_TOOLTIP,
+	/**
+	 * Hide dyes from coloured leather armour
 	 */
 	HIDE_DYE,
 	/**
-	 * Setting to show/hide armor trim.
+	 * Hides armor trim
 	 */
-	HIDE_ARMOR_TRIM;
+	HIDE_ARMOR_TRIM,
+	/**
+	 * Hides enchantments on enchanted books
+	 */
+	HIDE_STORED_ENCHANTS
 }

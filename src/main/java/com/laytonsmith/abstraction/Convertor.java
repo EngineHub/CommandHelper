@@ -6,6 +6,7 @@ import com.laytonsmith.abstraction.entities.MCTransformation;
 import com.laytonsmith.abstraction.enums.MCAttribute;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
+import com.laytonsmith.abstraction.enums.MCEquipmentSlotGroup;
 import com.laytonsmith.abstraction.enums.MCPatternShape;
 import com.laytonsmith.abstraction.enums.MCPotionType;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
@@ -32,17 +33,6 @@ public interface Convertor {
 
 	Class GetServerEventMixin();
 
-	MCEnchantment[] GetEnchantmentValues();
-
-	/**
-	 * Returns the enchantment, given an enchantment name (or a string'd number). Returns null if no such enchantment
-	 * exists.
-	 *
-	 * @param name
-	 * @return
-	 */
-	MCEnchantment GetEnchantmentByName(String name);
-
 	MCServer GetServer();
 
 	MCItemStack GetItemStack(MCMaterial type, int qty);
@@ -52,6 +42,8 @@ public interface Convertor {
 	MCPotionData GetPotionData(MCPotionType type, boolean extended, boolean upgraded);
 
 	MCAttributeModifier GetAttributeModifier(MCAttribute attr, UUID id, String name, double amt, MCAttributeModifier.Operation op, MCEquipmentSlot slot);
+
+	MCAttributeModifier GetAttributeModifier(MCAttribute attr, UUID id, String name, double amt, MCAttributeModifier.Operation op, MCEquipmentSlotGroup slot);
 
 	void Startup(CommandHelperPlugin chp);
 

@@ -485,71 +485,72 @@ public class Environment {
 
 		@Override
 		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCWorld w = null;
-			MCCommandSender sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
-			if(sender instanceof MCPlayer) {
-				w = ((MCPlayer) sender).getWorld();
+			MCPlayer player = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCWorld world = null;
+			if(player != null) {
+				world = player.getWorld();
 			}
-			MCBlock b = ObjectGenerator.GetGenerator().location(args[0], w, t).getBlock();
-			if(b.isSign()) {
-				MCSign.Side side = Side.FRONT;
-				String line1 = "";
-				String line2 = "";
-				String line3 = "";
-				String line4 = "";
-				if((args.length == 2 || args.length == 3) && args[args.length - 1].isInstanceOf(CArray.TYPE)) {
-					if(args.length == 3) {
-						try {
-							side = MCSign.Side.valueOf(args[1].val());
-						} catch (IllegalArgumentException ex) {
-							throw new CREFormatException("Invalid sign side: " + args[1].val(), t);
-						}
+			MCBlock block = ObjectGenerator.GetGenerator().location(args[0], world, t).getBlock();
+			MCSign.Side side = Side.FRONT;
+			String line1 = "";
+			String line2 = "";
+			String line3 = "";
+			String line4 = "";
+			if((args.length == 2 || args.length == 3) && args[args.length - 1].isInstanceOf(CArray.TYPE)) {
+				if(args.length == 3) {
+					try {
+						side = MCSign.Side.valueOf(args[1].val());
+					} catch (IllegalArgumentException ex) {
+						throw new CREFormatException("Invalid sign side: " + args[1].val(), t);
 					}
-					CArray ca = (CArray) args[args.length - 1];
-					if(ca.size() >= 1) {
-						line1 = ca.get(0, t).val();
-					}
-					if(ca.size() >= 2) {
-						line2 = ca.get(1, t).val();
-					}
-					if(ca.size() >= 3) {
-						line3 = ca.get(2, t).val();
-					}
-					if(ca.size() >= 4) {
-						line4 = ca.get(3, t).val();
-					}
+				}
+				CArray ca = (CArray) args[args.length - 1];
+				if(ca.size() >= 1) {
+					line1 = ca.get(0, t).val();
+				}
+				if(ca.size() >= 2) {
+					line2 = ca.get(1, t).val();
+				}
+				if(ca.size() >= 3) {
+					line3 = ca.get(2, t).val();
+				}
+				if(ca.size() >= 4) {
+					line4 = ca.get(3, t).val();
+				}
 
-				} else {
-					if(args.length >= 2) {
-						line1 = args[1].val();
-					}
-					if(args.length >= 3) {
-						line2 = args[2].val();
-					}
-					if(args.length >= 4) {
-						line3 = args[3].val();
-					}
-					if(args.length >= 5) {
-						line4 = args[4].val();
-					}
-				}
-				MCSign sign = b.getSign();
-				MCSignText text = sign;
-				if(side == Side.BACK) {
-					text = sign.getBackText();
-					if(text == null) {
-						throw new CRERangeException("Sign does not have back text.", t);
-					}
-				}
-				text.setLine(0, line1);
-				text.setLine(1, line2);
-				text.setLine(2, line3);
-				text.setLine(3, line4);
-				sign.update();
-				return CVoid.VOID;
 			} else {
+				if(args.length >= 2) {
+					line1 = args[1].val();
+				}
+				if(args.length >= 3) {
+					line2 = args[2].val();
+				}
+				if(args.length >= 4) {
+					line3 = args[3].val();
+				}
+				if(args.length >= 5) {
+					line4 = args[4].val();
+				}
+			}
+			MCSign sign;
+			try {
+				sign = block.getSign();
+			} catch (ClassCastException ex) {
 				throw new CRERangeException("The block at the specified location is not a sign", t);
 			}
+			MCSignText text = sign;
+			if(side == Side.BACK) {
+				text = sign.getBackText();
+				if(text == null) {
+					throw new CRERangeException("Sign does not have back text.", t);
+				}
+			}
+			text.setLine(0, line1);
+			text.setLine(1, line2);
+			text.setLine(2, line3);
+			text.setLine(3, line4);
+			sign.update();
+			return CVoid.VOID;
 		}
 	}
 
@@ -595,34 +596,35 @@ public class Environment {
 
 		@Override
 		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCCommandSender sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
-			MCWorld w = null;
-			if(sender instanceof MCPlayer) {
-				w = ((MCPlayer) sender).getWorld();
+			MCPlayer player = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCWorld world = null;
+			if(player != null) {
+				world = player.getWorld();
 			}
-			MCBlock b = ObjectGenerator.GetGenerator().location(args[0], w, t).getBlock();
-			if(b.isSign()) {
-				MCSignText text = b.getSign();
-				if(args.length == 2) {
-					try {
-						if(MCSign.Side.valueOf(args[1].val()) == Side.BACK) {
-							text = ((MCSign) text).getBackText();
-							if(text == null) {
-								throw new CRERangeException("Sign does not have back text.", t);
-							}
-						}
-					} catch (IllegalArgumentException ex) {
-						throw new CREFormatException("Invalid sign side: " + args[1].val(), t);
-					}
-				}
-				CString line1 = new CString(text.getLine(0), t);
-				CString line2 = new CString(text.getLine(1), t);
-				CString line3 = new CString(text.getLine(2), t);
-				CString line4 = new CString(text.getLine(3), t);
-				return new CArray(t, line1, line2, line3, line4);
-			} else {
+			MCBlock block = ObjectGenerator.GetGenerator().location(args[0], world, t).getBlock();
+			MCSignText text;
+			try {
+				text = block.getSign();
+			} catch (ClassCastException ex) {
 				throw new CRERangeException("The block at the specified location is not a sign", t);
 			}
+			if(args.length == 2) {
+				try {
+					if(MCSign.Side.valueOf(args[1].val()) == Side.BACK) {
+						text = ((MCSign) text).getBackText();
+						if(text == null) {
+							throw new CRERangeException("Sign does not have back text.", t);
+						}
+					}
+				} catch (IllegalArgumentException ex) {
+					throw new CREFormatException("Invalid sign side: " + args[1].val(), t);
+				}
+			}
+			CString line1 = new CString(text.getLine(0), t);
+			CString line2 = new CString(text.getLine(1), t);
+			CString line3 = new CString(text.getLine(2), t);
+			CString line4 = new CString(text.getLine(3), t);
+			return new CArray(t, line1, line2, line3, line4);
 		}
 	}
 
@@ -1606,8 +1608,8 @@ public class Environment {
 					+ " <br>BLOCK_DUST, BLOCK_CRACK and FALLING_DUST particles can take a block type name parameter"
 					+ " under the key \"block\" (default: STONE)."
 					+ " <br>ITEM_CRACK particles can take an item array or name under the key \"item\" (default: STONE)."
-					+ " <br>REDSTONE particles take an RGB color array (each 0 - 255) or name under the key \"color\""
-					+ " (default: RED)."
+					+ " <br>REDSTONE and SPELL_MOB particles take an RGB color array (each 0 - 255) or name under the key \"color\""
+					+ " (defaults to RED for REDSTONE, WHITE for SPELL_MOB)."
 					+ " <br>DUST_COLOR_TRANSITION particles take a \"tocolor\" in addition \"color\"."
 					+ " <br>VIBRATION particles take a \"destination\" location array or entity UUID."
 					+ " <br>SCULK_CHARGE particles take an \"angle\" in radians. (defaults to 0.0)"
@@ -1895,7 +1897,7 @@ public class Environment {
 					+ " be a single player or an array of players to play the sound to, if"
 					+ " not given, all players can potentially hear it. ---- Possible categories: "
 					+ StringUtils.Join(MCSoundCategory.values(), ", ", ", or ", " or ") + "."
-					+ " \n\nPossible sounds: " + StringUtils.Join(MCSound.types(), "<br>");
+					+ " \n\nPossible sounds: " + StringUtils.Join(MCSound.values(), "<br>");
 		}
 
 		@Override

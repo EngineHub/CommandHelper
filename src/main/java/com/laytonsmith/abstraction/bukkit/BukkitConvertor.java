@@ -9,7 +9,6 @@ import com.laytonsmith.abstraction.MCAttributeModifier;
 import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.MCCommand;
 import com.laytonsmith.abstraction.MCCommandSender;
-import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCFireworkBuilder;
 import com.laytonsmith.abstraction.MCInventory;
@@ -79,6 +78,7 @@ import com.laytonsmith.abstraction.entities.MCTransformation;
 import com.laytonsmith.abstraction.enums.MCAttribute;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
+import com.laytonsmith.abstraction.enums.MCEquipmentSlotGroup;
 import com.laytonsmith.abstraction.enums.MCPatternShape;
 import com.laytonsmith.abstraction.enums.MCPotionType;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
@@ -90,7 +90,6 @@ import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCLegacyMaterial;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPatternShape;
-import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPotionType;
 import com.laytonsmith.annotations.convert;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.LogLevel;
@@ -129,7 +128,6 @@ import org.bukkit.block.banner.Pattern;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Ageable;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.Breedable;
@@ -151,6 +149,7 @@ import org.bukkit.entity.minecart.CommandMinecart;
 import org.bukkit.inventory.BlastingRecipe;
 import org.bukkit.inventory.CampfireRecipe;
 import org.bukkit.inventory.ComplexRecipe;
+import org.bukkit.inventory.EquipmentSlotGroup;
 import org.bukkit.inventory.FurnaceRecipe;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -183,7 +182,7 @@ import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.inventory.meta.SuspiciousStewMeta;
 import org.bukkit.inventory.meta.TropicalFishBucketMeta;
 import org.bukkit.metadata.FixedMetadataValue;
-import org.bukkit.potion.PotionData;
+import org.bukkit.potion.PotionType;
 import org.yaml.snakeyaml.Yaml;
 
 import java.util.ArrayList;
@@ -218,29 +217,6 @@ public class BukkitConvertor extends AbstractConvertor {
 	@Override
 	public Class GetServerEventMixin() {
 		return BukkitAbstractEventMixin.class;
-	}
-
-	@Override
-	public MCEnchantment[] GetEnchantmentValues() {
-		MCEnchantment[] ea = new MCEnchantment[Enchantment.values().length];
-		Enchantment[] oea = Enchantment.values();
-		for(int i = 0; i < ea.length; i++) {
-			ea[i] = new BukkitMCEnchantment(oea[i]);
-		}
-		return ea;
-
-	}
-
-	@Override
-	public MCEnchantment GetEnchantmentByName(String name) {
-		Enchantment enchant = Enchantment.getByKey(NamespacedKey.minecraft(name.toLowerCase()));
-		if(enchant == null) {
-			enchant = Enchantment.getByName(name.toUpperCase());
-			if(enchant == null) {
-				return null;
-			}
-		}
-		return new BukkitMCEnchantment(enchant);
 	}
 
 	@Override
@@ -311,21 +287,37 @@ public class BukkitConvertor extends AbstractConvertor {
 
 	@Override
 	public MCPotionData GetPotionData(MCPotionType type, boolean extended, boolean upgraded) {
-		return new BukkitMCPotionData(new PotionData(
-				BukkitMCPotionType.getConvertor().getConcreteEnum(type), extended, upgraded));
+		try {
+			Class clz = Class.forName("org.bukkit.potion.PotionData");
+			return new BukkitMCPotionData(ReflectionUtils.newInstance(clz,
+					new Class[]{PotionType.class, boolean.class, boolean.class},
+					new Object[]{type.getConcrete(), extended, upgraded}));
+		} catch (ClassNotFoundException ex) {
+			// probably before 1.20.5
+			// use PotionType instead
+			return null;
+		}
 	}
 
 	@Override
 	public MCAttributeModifier GetAttributeModifier(MCAttribute attr, UUID id, String name, double amt, MCAttributeModifier.Operation op, MCEquipmentSlot slot) {
-		if(name == null) {
-			name = " "; // Spigot does not allow an empty name even though Minecraft and Paper allow it
-		}
 		if(id == null) {
 			id = UUID.randomUUID();
 		}
 		AttributeModifier mod = new AttributeModifier(id, name, amt,
 				BukkitMCAttributeModifier.Operation.getConvertor().getConcreteEnum(op),
 				BukkitMCEquipmentSlot.getConvertor().getConcreteEnum(slot));
+		return new BukkitMCAttributeModifier(BukkitMCAttribute.getConvertor().getConcreteEnum(attr), mod);
+	}
+
+	@Override
+	public MCAttributeModifier GetAttributeModifier(MCAttribute attr, UUID id, String name, double amt, MCAttributeModifier.Operation op, MCEquipmentSlotGroup slot) {
+		if(id == null) {
+			id = UUID.randomUUID();
+		}
+		AttributeModifier mod = new AttributeModifier(id, name, amt,
+				BukkitMCAttributeModifier.Operation.getConvertor().getConcreteEnum(op),
+				EquipmentSlotGroup.getByName(slot.name()));
 		return new BukkitMCAttributeModifier(BukkitMCAttribute.getConvertor().getConcreteEnum(attr), mod);
 	}
 

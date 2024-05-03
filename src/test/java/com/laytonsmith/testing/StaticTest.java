@@ -12,7 +12,6 @@ import com.laytonsmith.abstraction.MCAttributeModifier;
 import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCConsoleCommandSender;
-import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCFireworkBuilder;
 import com.laytonsmith.abstraction.MCInventory;
@@ -39,6 +38,7 @@ import com.laytonsmith.abstraction.entities.MCTransformation;
 import com.laytonsmith.abstraction.enums.MCAttribute;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
+import com.laytonsmith.abstraction.enums.MCEquipmentSlotGroup;
 import com.laytonsmith.abstraction.enums.MCPatternShape;
 import com.laytonsmith.abstraction.enums.MCPotionType;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
@@ -698,16 +698,6 @@ public class StaticTest {
 		}
 
 		@Override
-		public MCEnchantment[] GetEnchantmentValues() {
-			return new MCEnchantment[]{};
-		}
-
-		@Override
-		public MCEnchantment GetEnchantmentByName(String name) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
 		public MCServer GetServer() {
 			return fakeServer;
 		}
@@ -738,6 +728,11 @@ public class StaticTest {
 		@Override
 		public MCAttributeModifier GetAttributeModifier(MCAttribute attr, UUID id, String name, double amt, MCAttributeModifier.Operation op, MCEquipmentSlot slot) {
 			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public MCAttributeModifier GetAttributeModifier(MCAttribute attr, UUID id, String name, double amt, MCAttributeModifier.Operation op, MCEquipmentSlotGroup slot) {
+			throw new UnsupportedOperationException();
 		}
 
 		@Override

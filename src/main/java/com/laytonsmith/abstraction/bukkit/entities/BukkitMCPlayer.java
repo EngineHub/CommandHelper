@@ -406,27 +406,31 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 
 	@Override
 	public void setTempOp(Boolean value) throws ClassNotFoundException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
+		boolean isPaper = ((BukkitMCServer) Static.getServer()).isPaper();
 		// Get some version specific mappings
 		String nms = "net.minecraft.server";
 		String playersPackage = nms + ".players";
 		String ops = "p";
-		String getPlayerList = "ae";
+		String getPlayerList = isPaper ? "getPlayerList" : "ah";
 		MCVersion mcversion = Static.getServer().getMinecraftVersion();
-		if(mcversion.lt(MCVersion.MC1_20_4)) {
-			getPlayerList = "ac";
-			if(mcversion.lt(MCVersion.MC1_20_2)) {
-				ops = "o";
-				if(mcversion.equals(MCVersion.MC1_19_3)) {
-					getPlayerList = "ab";
-				} else if(mcversion.lt(MCVersion.MC1_19_1)) {
-					ops = "n";
-					if(mcversion.lt(MCVersion.MC1_18)) {
-						getPlayerList = "getPlayerList";
-						if(mcversion.lt(MCVersion.MC1_17)) {
-							String version = ((BukkitMCServer) Static.getServer()).getCraftBukkitPackage().split("\\.")[3];
-							nms = "net.minecraft.server." + version;
-							playersPackage = nms;
-							ops = "operators";
+		if(mcversion.lt(MCVersion.MC1_20_6)) {
+			getPlayerList = "ae";
+			if(mcversion.lt(MCVersion.MC1_20_4)) {
+				getPlayerList = "ac";
+				if(mcversion.lt(MCVersion.MC1_20_2)) {
+					ops = "o";
+					if(mcversion.equals(MCVersion.MC1_19_3)) {
+						getPlayerList = "ab";
+					} else if(mcversion.lt(MCVersion.MC1_19_1)) {
+						ops = "n";
+						if(mcversion.lt(MCVersion.MC1_18)) {
+							getPlayerList = "getPlayerList";
+							if(mcversion.lt(MCVersion.MC1_17)) {
+								String version = ((BukkitMCServer) Static.getServer()).getCraftBukkitPackage().split("\\.")[3];
+								nms = "net.minecraft.server." + version;
+								playersPackage = nms;
+								ops = "operators";
+							}
 						}
 					}
 				}

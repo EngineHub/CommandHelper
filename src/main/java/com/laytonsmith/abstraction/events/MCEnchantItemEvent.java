@@ -1,9 +1,10 @@
 package com.laytonsmith.abstraction.events;
 
-import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
+import com.laytonsmith.abstraction.enums.MCEnchantment;
+
 import java.util.Map;
 
 public interface MCEnchantItemEvent extends MCInventoryEvent {

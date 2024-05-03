@@ -1,31 +1,31 @@
 package com.laytonsmith.abstraction.bukkit;
 
+import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.abstraction.MCPotionData;
 import com.laytonsmith.abstraction.enums.MCPotionType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPotionType;
-import org.bukkit.potion.PotionData;
 
 public class BukkitMCPotionData implements MCPotionData {
 
-	PotionData pd;
+	Object pd;
 
-	public BukkitMCPotionData(PotionData poda) {
+	public BukkitMCPotionData(Object poda) {
 		pd = poda;
 	}
 
 	@Override
 	public MCPotionType getType() {
-		return BukkitMCPotionType.getConvertor().getAbstractedEnum(pd.getType());
+		return BukkitMCPotionType.valueOfConcrete(ReflectionUtils.invokeMethod(pd, "getType"));
 	}
 
 	@Override
 	public boolean isExtended() {
-		return pd.isExtended();
+		return ReflectionUtils.invokeMethod(pd, "isExtended");
 	}
 
 	@Override
 	public boolean isUpgraded() {
-		return pd.isUpgraded();
+		return ReflectionUtils.invokeMethod(pd, "isUpgraded");
 	}
 
 	@Override

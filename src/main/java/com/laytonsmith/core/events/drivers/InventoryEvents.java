@@ -554,7 +554,7 @@ public class InventoryEvents {
 				map.put("option", new CInt(e.whichButton(), Target.UNKNOWN));
 				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_1)) {
 					map.put("levelhint", new CInt(e.getLevelHint(), Target.UNKNOWN));
-					map.put("enchanthint", new CString(e.getEnchantmentHint().getKey(), Target.UNKNOWN));
+					map.put("enchanthint", new CString(e.getEnchantmentHint().name().toLowerCase(), Target.UNKNOWN));
 				}
 
 				return map;

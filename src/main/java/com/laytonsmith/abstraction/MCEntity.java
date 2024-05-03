@@ -61,8 +61,6 @@ public interface MCEntity extends MCMetadatable {
 
 	void setFireTicks(int ticks);
 
-	void setLastDamageCause(MCEntityDamageEvent event);
-
 	boolean setPassenger(MCEntity passenger);
 
 	void setTicksLived(int value);

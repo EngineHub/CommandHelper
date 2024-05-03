@@ -756,7 +756,8 @@ public abstract class MCMaterial<Concrete> extends DynamicEnum<MCVanillaMaterial
 		STRUCTURE_BLOCK,
 		JIGSAW,
 		TURTLE_HELMET,
-		SCUTE,
+		SCUTE(MCVersion.MC1_13, MCVersion.MC1_20_4),
+		TURTLE_SCUTE(MCVersion.MC1_20_6), // changed from SCUTE
 		FLINT_AND_STEEL,
 		APPLE,
 		BOW,
@@ -1640,7 +1641,29 @@ public abstract class MCMaterial<Concrete> extends DynamicEnum<MCVanillaMaterial
 		CHISELED_TUFF_BRICKS(MCVersion.MC1_20_4),
 		POLISHED_TUFF_SLAB(MCVersion.MC1_20_4),
 		POLISHED_TUFF_STAIRS(MCVersion.MC1_20_4),
-		POLISHED_TUFF_WALL(MCVersion.MC1_20_4);
+		POLISHED_TUFF_WALL(MCVersion.MC1_20_4),
+
+		// 1.20.5 additions
+		ARMADILLO_SCUTE(MCVersion.MC1_20_6),
+		ARMADILLO_SPAWN_EGG(MCVersion.MC1_20_6),
+		WOLF_ARMOR(MCVersion.MC1_20_6),
+
+		// 1.20.5 experimental additions for 1.21
+		BREEZE_ROD(MCVersion.MC1_20_6),
+		BOGGED_SPAWN_EGG(MCVersion.MC1_20_6),
+		HEAVY_CORE(MCVersion.MC1_20_6),
+		MACE(MCVersion.MC1_20_6),
+		OMINOUS_BOTTLE(MCVersion.MC1_20_6),
+		OMINOUS_TRIAL_KEY(MCVersion.MC1_20_6),
+		FLOW_BANNER_PATTERN(MCVersion.MC1_20_6),
+		GUSTER_BANNER_PATTERN(MCVersion.MC1_20_6),
+		FLOW_ARMOR_TRIM_SMITHING_TEMPLATE(MCVersion.MC1_20_6),
+		BOLT_ARMOR_TRIM_SMITHING_TEMPLATE(MCVersion.MC1_20_6),
+		FLOW_POTTERY_SHERD(MCVersion.MC1_20_6),
+		GUSTER_POTTERY_SHERD(MCVersion.MC1_20_6),
+		SCRAPE_POTTERY_SHERD(MCVersion.MC1_20_6),
+		VAULT(MCVersion.MC1_20_6),
+		WIND_CHARGE(MCVersion.MC1_20_6);
 
 		private final MCVersion since;
 		private final MCVersion until;

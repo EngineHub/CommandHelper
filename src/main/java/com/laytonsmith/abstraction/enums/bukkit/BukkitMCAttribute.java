@@ -21,4 +21,9 @@ public class BukkitMCAttribute extends EnumConvertor<MCAttribute, Attribute> {
 		}
 		return instance;
 	}
+
+	@Override
+	protected Attribute getConcreteEnumCustom(MCAttribute abstracted) {
+		return Attribute.valueOf(abstracted.name());
+	}
 }
