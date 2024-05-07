@@ -18,6 +18,11 @@ Regardless, only the most current builds are officially supported.
 ! scope="col" width="60%" | Milestone
 ! scope="col" width="21%" | Compatibility
 |-
+| 3.3.5 build-467
+| [https://github.com/EngineHub/CommandHelper/commit/84f1af4764fa93fc4809696969fdbce2112ec4ac 84f1af4]
+| Added support for Spigot 1.20.6
+| Spigot 1.16.5 - 1.20.6
+|-
 | 3.3.5 build-382
 | [https://github.com/EngineHub/CommandHelper/commit/f2b77ca36793c745249e48144ff26175125ff37a f2b77ca]
 | Added support for Spigot 1.20.4

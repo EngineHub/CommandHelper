@@ -44,8 +44,8 @@ public abstract class MCParticle<Concrete> extends DynamicEnum<MCParticle.MCVani
 					return MAP.get("CHERRY_LEAVES");
 				case "GUST_EMITTER":
 					MSLog.GetLogger().e(MSLog.Tags.GENERAL,
-							test + " particle type was changed in 1.20.5. Converted to GUST_EMITTER_SMALL.", Target.UNKNOWN);
-					return MAP.get("GUST_EMITTER_SMALL");
+							test + " particle type was changed in 1.20.5. Converted to GUST_EMITTER_LARGE.", Target.UNKNOWN);
+					return MAP.get("GUST_EMITTER_LARGE");
 				case "GUST_DUST":
 					MSLog.GetLogger().e(MSLog.Tags.GENERAL,
 							test + " particle type was removed in 1.20.5. Converted to SMALL_GUST.", Target.UNKNOWN);

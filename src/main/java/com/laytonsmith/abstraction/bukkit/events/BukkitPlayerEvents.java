@@ -66,6 +66,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.BlockFace;
+import org.bukkit.damage.DamageSource;
+import org.bukkit.damage.DamageType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
@@ -665,7 +667,8 @@ public class BukkitPlayerEvents {
 				int droppedExp, String deathMessage) {
 			List<ItemStack> drops = new ArrayList<>();
 
-			return new BukkitMCPlayerDeathEvent(new PlayerDeathEvent(((BukkitMCPlayer) entity)._Player(), drops, droppedExp, deathMessage));
+			return new BukkitMCPlayerDeathEvent(new PlayerDeathEvent(((BukkitMCPlayer) entity)._Player(),
+					DamageSource.builder(DamageType.GENERIC).build(), drops, droppedExp, deathMessage));
 		}
 
 		@Override
