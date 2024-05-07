@@ -5509,7 +5509,7 @@ public class PlayerManagement {
 			if(args[offset] instanceof CNull) {
 				p.setSpectatorTarget(null);
 			} else {
-				p.setSpectatorTarget(Static.getLivingEntity(args[offset], t));
+				p.setSpectatorTarget(Static.getEntity(args[offset], t));
 			}
 			return CVoid.VOID;
 		}
