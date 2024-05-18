@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCItemStack;
+import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCNote;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
@@ -23,6 +24,7 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCScoreboard;
 import com.laytonsmith.abstraction.bukkit.BukkitMCServer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorldBorder;
 import com.laytonsmith.abstraction.enums.MCEntityType;
+import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.enums.MCParticle;
 import com.laytonsmith.abstraction.enums.MCPlayerStatistic;
@@ -49,7 +51,9 @@ import org.bukkit.block.Sign;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.potion.PotionEffect;
@@ -815,5 +819,33 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	@Override
 	public void respawn() {
 		p.spigot().respawn();
+	}
+
+	@Override
+	public void sendEquipmentChange(MCLivingEntity entity, MCEquipmentSlot slot, MCItemStack item) {
+		LivingEntity le = (LivingEntity) entity.getHandle();
+		ItemStack is;
+		if(item == null) {
+			if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_19_3)) {
+				// null isn't supported prior to 1.19.3
+				is = new ItemStack(Material.AIR);
+			} else {
+				is = null;
+			}
+		} else {
+			is = (ItemStack) item.getHandle();
+		}
+		try {
+			switch(slot) {
+				case WEAPON -> p.sendEquipmentChange(le, EquipmentSlot.HAND, is);
+				case OFF_HAND -> p.sendEquipmentChange(le, EquipmentSlot.OFF_HAND, is);
+				case BOOTS -> p.sendEquipmentChange(le, EquipmentSlot.FEET, is);
+				case LEGGINGS -> p.sendEquipmentChange(le, EquipmentSlot.LEGS, is);
+				case CHESTPLATE -> p.sendEquipmentChange(le, EquipmentSlot.CHEST, is);
+				case HELMET -> p.sendEquipmentChange(le, EquipmentSlot.HEAD, is);
+			}
+		} catch(NoSuchMethodError ex) {
+			// probably before 1.18, which is unsupported
+		}
 	}
 }

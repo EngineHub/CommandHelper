@@ -9,6 +9,7 @@ import com.laytonsmith.abstraction.MCConsoleCommandSender;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCHumanEntity;
 import com.laytonsmith.abstraction.MCItemStack;
+import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCNamespacedKey;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
@@ -25,6 +26,7 @@ import com.laytonsmith.abstraction.blocks.MCSignText;
 import com.laytonsmith.abstraction.entities.MCCommandMinecart;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.MCEntityType;
+import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCGameMode;
 import com.laytonsmith.abstraction.enums.MCPlayerStatistic;
 import com.laytonsmith.abstraction.enums.MCPotionEffectType;
@@ -2233,7 +2235,7 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "boolean {player, potionEffect, [strength], [seconds], [ambient], [particles]}"
+			return "boolean {player, potionEffect, [strength], [seconds], [ambient], [particles], [icon]}"
 					+ " Adds one, or modifies an existing, potion effect on a mob."
 					+ " The potionEffect can be " + StringUtils.Join(MCPotionEffectType.types(), ", ", ", or ", " or ")
 					+ ". It also accepts an integer corresponding to the effect id listed on the Minecraft wiki."
@@ -2243,6 +2245,7 @@ public class PlayerManagement {
 					+ " Negative seconds makes the effect infinite. (or max in versions prior to 1.19.4)"
 					+ " Ambient takes a boolean of whether the particles should be more transparent."
 					+ " Particles takes a boolean of whether the particles should be visible at all."
+					+ " Icon argument takes a boolean of whether the effect icon should be displayed."
 					+ " The function returns whether or not the effect was modified.";
 		}
 
@@ -6710,7 +6713,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class plocale extends AbstractFunction {
 
 		@Override
@@ -6761,7 +6764,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class phas_recipe extends AbstractFunction {
 
 		@Override
@@ -6819,7 +6822,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class pgive_recipe extends AbstractFunction {
 
 		@Override
@@ -6892,7 +6895,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class pforce_respawn extends AbstractFunction {
 
 		@Override
@@ -6944,7 +6947,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class phide_entity extends AbstractFunction {
 
 		@Override
@@ -7001,7 +7004,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class pshow_entity extends AbstractFunction {
 
 		@Override
@@ -7056,7 +7059,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class pcan_see_entity extends AbstractFunction {
 
 		@Override
@@ -7088,6 +7091,84 @@ public class PlayerManagement {
 				e = Static.getEntity(args[1], t);
 			}
 			return CBoolean.get(p.canSeeEntity(e));
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CRELengthException.class, CREBadEntityException.class};
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class psend_equipment extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "psend_equipment";
+		}
+
+		@Override
+		public String docs() {
+			return "void {[player], entityUUID, equipmentArray} Changes a living entity's equipment only for the"
+					+ " specified player. (MC 1.18+) Equipment array can be null to make all equipment not visible."
+					+ " Otherwise equipment array must be an associative array where the keys are equipment slots and"
+					+ " the values are item arrays or null. The equipment slots are: "
+					+ StringUtils.Join(MCEquipmentSlot.values(), ", ", ", or ", " or ");
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3};
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p;
+			MCLivingEntity le;
+			Mixed equipment;
+			if(args.length == 2) {
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(p, t);
+				le = Static.getLivingEntity(args[0], t);
+				equipment = args[1];
+			} else {
+				p = Static.GetPlayer(args[0], t);
+				le = Static.getLivingEntity(args[1], t);
+				equipment = args[2];
+			}
+			if(equipment instanceof CNull) {
+				for(MCEquipmentSlot slot : MCEquipmentSlot.values()) {
+					p.sendEquipmentChange(le, slot, null);
+				}
+			} else if(equipment.isInstanceOf(CArray.TYPE)) {
+				CArray ea = (CArray) equipment;
+				for(String key : ea.stringKeySet()) {
+					try {
+						p.sendEquipmentChange(le, MCEquipmentSlot.valueOf(key.toUpperCase()),
+								ObjectGenerator.GetGenerator().item(ea.get(key, t), t));
+					} catch (IllegalArgumentException iae) {
+						throw new CREFormatException("Not an equipment slot: " + key, t);
+					}
+				}
+			} else {
+				throw new CREFormatException("Expected last argument to be an array or null", t);
+			}
+			return CVoid.VOID;
 		}
 
 		@Override
