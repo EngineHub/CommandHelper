@@ -413,6 +413,9 @@ public class Script {
 					}
 				}
 
+				// Reset stacktrace manager to current function (argument evaluation might have changed this).
+				stManager.setCurrentTarget(c.getTarget());
+
 				{
 					//It takes a moment to generate the toString of some things, so lets not do it
 					//if we actually aren't going to profile
