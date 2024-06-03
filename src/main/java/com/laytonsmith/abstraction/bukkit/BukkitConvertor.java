@@ -787,19 +787,19 @@ public class BukkitConvertor extends AbstractConvertor {
 		try {
 			switch(type) {
 				case BLASTING:
-					return new BukkitMCCookingRecipe(new BlastingRecipe(nskey, is, Material.AIR, 0.0F, 100), type);
+					return new BukkitMCCookingRecipe(new BlastingRecipe(nskey, is, Material.STRUCTURE_VOID, 0.0F, 100), type);
 				case CAMPFIRE:
-					return new BukkitMCCookingRecipe(new CampfireRecipe(nskey, is, Material.AIR, 0.0F, 100), type);
+					return new BukkitMCCookingRecipe(new CampfireRecipe(nskey, is, Material.STRUCTURE_VOID, 0.0F, 100), type);
 				case FURNACE:
-					return new BukkitMCFurnaceRecipe(new FurnaceRecipe(nskey, is, Material.AIR, 0.0F, 200));
+					return new BukkitMCFurnaceRecipe(new FurnaceRecipe(nskey, is, Material.STRUCTURE_VOID, 0.0F, 200));
 				case SHAPED:
 					return new BukkitMCShapedRecipe(new ShapedRecipe(nskey, is));
 				case SHAPELESS:
 					return new BukkitMCShapelessRecipe(new ShapelessRecipe(nskey, is));
 				case SMOKING:
-					return new BukkitMCCookingRecipe(new SmokingRecipe(nskey, is, Material.AIR, 0.0F, 200), type);
+					return new BukkitMCCookingRecipe(new SmokingRecipe(nskey, is, Material.STRUCTURE_VOID, 0.0F, 200), type);
 				case STONECUTTING:
-					return new BukkitMCStonecuttingRecipe(new StonecuttingRecipe(nskey, is, Material.AIR));
+					return new BukkitMCStonecuttingRecipe(new StonecuttingRecipe(nskey, is, Material.STRUCTURE_VOID));
 				case SMITHING:
 				case COMPLEX:
 					throw new IllegalArgumentException("Unable to generate recipe type: " + type.name());

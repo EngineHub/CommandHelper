@@ -146,6 +146,11 @@ public class BukkitMCMaterial extends MCMaterial<Material> {
 	}
 
 	@Override
+	public boolean isAir() {
+		return getHandle().isAir();
+	}
+
+	@Override
 	public boolean isLegacy() {
 		return getHandle().isLegacy();
 	}

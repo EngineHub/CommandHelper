@@ -146,6 +146,10 @@ public abstract class MCMaterial<Concrete> extends DynamicEnum<MCVanillaMaterial
 		throw new UnsupportedOperationException();
 	}
 
+	public boolean isAir() {
+		return getAbstracted() == MCVanillaMaterial.AIR || getAbstracted() == MCVanillaMaterial.VOID_AIR;
+	}
+
 	public boolean isLegacy() {
 		return false;
 	}

@@ -166,6 +166,6 @@ public class BukkitMCItemStack implements MCItemStack {
 
 	@Override
 	public boolean isEmpty() {
-		return is == null || is.getAmount() == 0 || is.getType() == Material.AIR;
+		return is == null || is.getAmount() == 0 || is.getType().isAir();
 	}
 }
