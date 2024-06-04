@@ -22,7 +22,7 @@ steps:
   inputs:
     mavenPomFile: 'pom.xml'
     javaHomeOption: 'Path'
-    jdkDirectory: '$(agent.toolsDirectory)/jdk21'
+    jdkDirectory: '$(agent.toolsDirectory)/jdk21/bin'
     jdkArchitectureOption: 'x64'
     publishJUnitResults: true
     testResultsFiles: '**/TEST-*.xml'
