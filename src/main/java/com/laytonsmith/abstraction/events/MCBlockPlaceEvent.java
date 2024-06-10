@@ -4,6 +4,7 @@ import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
+import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.core.events.BindableEvent;
 
 public interface MCBlockPlaceEvent extends BindableEvent {
@@ -17,6 +18,8 @@ public interface MCBlockPlaceEvent extends BindableEvent {
 	MCBlockState getBlockReplacedState();
 
 	MCItemStack getItemInHand();
+
+	MCEquipmentSlot getHand();
 
 	boolean canBuild();
 }
