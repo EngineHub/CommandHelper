@@ -7,6 +7,7 @@ import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
+import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCIgniteCause;
 import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.events.MCBlockBreakEvent;
@@ -326,7 +327,9 @@ public class BlockEvents {
 					+ "{player: The player's name | block: the block type that was placed"
 					+ " | against: a block array of the block being placed against"
 					+ " | oldblock: the old block type that was replaced"
-					+ " | location: A locationArray for this block} "
+					+ " | location: A locationArray for this block "
+					+ " | item: the item used to the place the block "
+					+ " | hand: hand used to place the block} "
 					+ "{block} "
 					+ "{}";
 		}
@@ -411,6 +414,12 @@ public class BlockEvents {
 			map.put("player", new CString(event.getPlayer().getName(), t));
 			map.put("block", new CString(mat.getName(), t));
 			map.put("location", ObjectGenerator.GetGenerator().location(block.getLocation(), false));
+			map.put("item", ObjectGenerator.GetGenerator().item(event.getItemInHand(), Target.UNKNOWN));
+			if(event.getHand() == MCEquipmentSlot.WEAPON) {
+				map.put("hand", new CString("main_hand", Target.UNKNOWN));
+			} else {
+				map.put("hand", new CString("off_hand", Target.UNKNOWN));
+			}
 
 			MCBlock agstblock = event.getBlockAgainst();
 			MCMaterial agstmat = agstblock.getType();
