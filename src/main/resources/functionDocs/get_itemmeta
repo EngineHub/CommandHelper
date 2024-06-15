@@ -16,7 +16,7 @@ Some Minecraft NBT is not yet supported in item meta, and should be documented b
 * '''model''' : (int) Represents vanilla's CustomModelData tag for use with resource packs.
 * '''flags''' : (array) A list of flags used to hide meta in the item tooltip: ''%ITEM_FLAGS%''.
 * '''repair''' : (int) The cost to repair or combine this item in an anvil.
-* '''modifiers''' : (array) An array of attribute modifier arrays, each with keys: '''"attribute"''', '''"operation"''', '''"amount"''' (double), '''"uuid"''' (optional), '''"name"''' (optional), and '''"slot"''' (optional). Possible attributes: ''%ATTRIBUTES%''. Possible operations: ''%OPERATIONS%''. Possible slots are ''%SLOTS%'' or one of the slot groups ''%SLOTGROUPS%''.
+* '''modifiers''' : (array) An array of attribute modifier arrays, each with keys: '''"attribute"''', '''"operation"''', '''"amount"''' (double), '''"id"''' (optional), and '''"slot"''' (optional). Possible attributes: %ATTRIBUTES%. Possible operations: %OPERATIONS%. Possible slots are %SLOTS% or one of the slot groups %SLOTGROUPS%. An item can only have one modifier with the same id.
 * '''tags''' : (array) An associative array of custom tags used by plugins (or null). A tag's key is namespaced (e.g. "commandhelper:mytag") and the value is an associative array containing the '''"type"''' and '''"value"''' of the tag. Possible types: ''%TAG_TYPES%''.
 The "CanPlaceOn" tag for blocks and "CanDestroy" tag for tools are not yet supported.
 |-

@@ -8,6 +8,7 @@ import com.laytonsmith.annotations.MEnum;
 import java.util.UUID;
 
 public interface MCAttributeModifier extends AbstractionObject {
+	MCNamespacedKey getKey();
 	String getAttributeName();
 	MCAttribute getAttribute();
 	MCEquipmentSlot getEquipmentSlot();

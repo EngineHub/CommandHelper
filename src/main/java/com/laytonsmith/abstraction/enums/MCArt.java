@@ -4,6 +4,7 @@ import com.laytonsmith.annotations.MEnum;
 
 @MEnum("com.commandhelper.Art")
 public enum MCArt {
+	// 1x1
 	KEBAB,
 	AZTEC,
 	ALBAN,
@@ -11,27 +12,55 @@ public enum MCArt {
 	BOMB,
 	PLANT,
 	WASTELAND,
+	MEDITATIVE,
+	// 2x1
 	POOL,
 	COURBET,
 	SEA,
 	SUNSET,
 	CREEBET,
+	// 1x2
 	WANDERER,
 	GRAHAM,
+	PRAIRIE_RIDE,
+	// 2x2
 	MATCH,
 	BUST,
 	STAGE,
 	VOID,
 	SKULL_AND_ROSES,
 	WITHER,
-	FIGHTERS,
-	POINTER,
-	PIGSCENE,
-	BURNING_SKULL,
-	SKELETON,
-	DONKEY_KONG,
+	BAROQUE,
+	HUMBLE,
 	EARTH,
 	WIND,
 	WATER,
-	FIRE
+	FIRE,
+	// 4x2
+	FIGHTERS,
+	CHANGING,
+	FINDING,
+	LOWMIST,
+	PASSAGE,
+	// 3x3
+	BOUQUET,
+	CAVEBIRD,
+	COTAN,
+	ENDBOSS,
+	FERN,
+	OWLEMONS,
+	SUNFLOWERS,
+	TIDES,
+	// 4x3
+	SKELETON,
+	DONKEY_KONG,
+	// 3x4
+	BACKYARD,
+	POND,
+	// 4x4
+	POINTER,
+	PIGSCENE,
+	BURNING_SKULL,
+	ORB,
+	UNPACKED,
 }

@@ -3,6 +3,7 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCAttributeModifier;
+import com.laytonsmith.abstraction.MCNamespacedKey;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.MCAnimalTamer;
 import com.laytonsmith.abstraction.MCEntity;
@@ -20,6 +21,7 @@ import com.laytonsmith.abstraction.entities.MCTameable;
 import com.laytonsmith.abstraction.enums.MCAttribute;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCPotionEffectType;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSLog;
@@ -1954,9 +1956,8 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityUUID, modifier | entityUUID, attribute, id} Removes an attribute modifier from an"
-					+ " entity. A modifier array can be provided, or both an attribute name and either the UUID or"
-					+ " name (if it's unique) for the modifier can be provided as the identifier.";
+			return "void {entityUUID, modifier | entityUUID, attribute, id} Removes an attribute modifier from an entity."
+					+ " Can provide either a modifier array or just the attribute and namespaced id of the modifier.";
 		}
 
 		@Override
@@ -1989,20 +1990,41 @@ public class MobManagement {
 					throw new CREFormatException("Invalid attribute name: " + args[1].val(), t);
 				}
 				List<MCAttributeModifier> modifiers = e.getAttributeModifiers(attribute);
-				String name = args[2].val();
-				UUID id = null;
-				if(name.length() == 36 || name.length() == 32) {
-					try {
-						id = UUID.fromString(name);
-					} catch (IllegalArgumentException ex) {
-						// not UUID
+				String id = args[2].val();
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_21)) {
+					MCNamespacedKey key = null;
+					if(id.length() == 36) {
+						try {
+							UUID.fromString(id);
+							key = StaticLayer.GetConvertor().GetNamespacedKey("minecraft:" + id);
+						} catch (IllegalArgumentException ex) {
+							// not legacy UUID
+						}
 					}
-				}
-				for(MCAttributeModifier m : modifiers) {
-					if(id != null && m.getUniqueId().compareTo(id) == 0
-							|| id == null && name.equals(m.getAttributeName())) {
-						modifier = m;
-						break;
+					if(key == null) {
+						key = StaticLayer.GetConvertor().GetNamespacedKey(id);
+					}
+					for(MCAttributeModifier m : modifiers) {
+						if(m.getKey().equals(key)) {
+							modifier = m;
+							break;
+						}
+					}
+				} else {
+					UUID uuid = null;
+					if(id.length() == 36) {
+						try {
+							uuid = UUID.fromString(id);
+						} catch (IllegalArgumentException ex) {
+							// not UUID
+						}
+					}
+					for(MCAttributeModifier m : modifiers) {
+						if(uuid != null && m.getUniqueId().compareTo(uuid) == 0
+								|| uuid == null && id.equals(m.getAttributeName())) {
+							modifier = m;
+							break;
+						}
 					}
 				}
 				if(modifier == null) {

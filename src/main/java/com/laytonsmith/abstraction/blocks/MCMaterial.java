@@ -1667,7 +1667,12 @@ public abstract class MCMaterial<Concrete> extends DynamicEnum<MCVanillaMaterial
 		GUSTER_POTTERY_SHERD(MCVersion.MC1_20_6),
 		SCRAPE_POTTERY_SHERD(MCVersion.MC1_20_6),
 		VAULT(MCVersion.MC1_20_6),
-		WIND_CHARGE(MCVersion.MC1_20_6);
+		WIND_CHARGE(MCVersion.MC1_20_6),
+
+		// 1.21 additions
+		MUSIC_DISC_CREATOR(MCVersion.MC1_21),
+		MUSIC_DISC_CREATOR_MUSIC_BOX(MCVersion.MC1_21),
+		MUSIC_DISC_PRECIPICE(MCVersion.MC1_21);
 
 		private final MCVersion since;
 		private final MCVersion until;

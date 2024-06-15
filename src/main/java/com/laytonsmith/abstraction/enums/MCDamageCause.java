@@ -98,6 +98,10 @@ public enum MCDamageCause {
 	 */
 	HOT_FLOOR,
 	/**
+	 * Damage caused when an entity is on top a campfire.
+	 */
+	CAMPFIRE,
+	/**
 	 * Damage caused when an entity is colliding with too many entities due to the maxEntityCramming game rule.
 	 */
 	CRAMMING,

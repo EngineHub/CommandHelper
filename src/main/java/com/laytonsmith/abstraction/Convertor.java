@@ -45,6 +45,10 @@ public interface Convertor {
 
 	MCAttributeModifier GetAttributeModifier(MCAttribute attr, UUID id, String name, double amt, MCAttributeModifier.Operation op, MCEquipmentSlotGroup slot);
 
+	MCAttributeModifier GetAttributeModifier(MCAttribute attr, MCNamespacedKey key, double amt, MCAttributeModifier.Operation op, MCEquipmentSlot slot);
+
+	MCAttributeModifier GetAttributeModifier(MCAttribute attr, MCNamespacedKey key, double amt, MCAttributeModifier.Operation op, MCEquipmentSlotGroup slot);
+
 	void Startup(CommandHelperPlugin chp);
 
 	MCMaterial[] GetMaterialValues();

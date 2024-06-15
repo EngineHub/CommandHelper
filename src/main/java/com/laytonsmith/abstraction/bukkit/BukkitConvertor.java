@@ -149,6 +149,7 @@ import org.bukkit.entity.minecart.CommandMinecart;
 import org.bukkit.inventory.BlastingRecipe;
 import org.bukkit.inventory.CampfireRecipe;
 import org.bukkit.inventory.ComplexRecipe;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.EquipmentSlotGroup;
 import org.bukkit.inventory.FurnaceRecipe;
 import org.bukkit.inventory.InventoryHolder;
@@ -316,6 +317,23 @@ public class BukkitConvertor extends AbstractConvertor {
 			id = UUID.randomUUID();
 		}
 		AttributeModifier mod = new AttributeModifier(id, name, amt,
+				BukkitMCAttributeModifier.Operation.getConvertor().getConcreteEnum(op),
+				EquipmentSlotGroup.getByName(slot.name()));
+		return new BukkitMCAttributeModifier(BukkitMCAttribute.getConvertor().getConcreteEnum(attr), mod);
+	}
+
+	@Override
+	public MCAttributeModifier GetAttributeModifier(MCAttribute attr, MCNamespacedKey key, double amt, MCAttributeModifier.Operation op, MCEquipmentSlot slot) {
+		EquipmentSlot es = BukkitMCEquipmentSlot.getConvertor().getConcreteEnum(slot);
+		AttributeModifier mod = new AttributeModifier((NamespacedKey) key.getHandle(), amt,
+				BukkitMCAttributeModifier.Operation.getConvertor().getConcreteEnum(op),
+				es == null ? EquipmentSlotGroup.ANY : es.getGroup());
+		return new BukkitMCAttributeModifier(BukkitMCAttribute.getConvertor().getConcreteEnum(attr), mod);
+	}
+
+	@Override
+	public MCAttributeModifier GetAttributeModifier(MCAttribute attr, MCNamespacedKey key, double amt, MCAttributeModifier.Operation op, MCEquipmentSlotGroup slot) {
+		AttributeModifier mod = new AttributeModifier((NamespacedKey) key.getHandle(), amt,
 				BukkitMCAttributeModifier.Operation.getConvertor().getConcreteEnum(op),
 				EquipmentSlotGroup.getByName(slot.name()));
 		return new BukkitMCAttributeModifier(BukkitMCAttribute.getConvertor().getConcreteEnum(attr), mod);

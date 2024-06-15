@@ -1736,10 +1736,16 @@ public class ObjectGenerator {
 
 	public CArray attributeModifier(MCAttributeModifier m, Target t) {
 		CArray modifier = CArray.GetAssociativeArray(t);
+
+		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_21)) {
+			modifier.set("id", m.getKey().toString());
+		} else {
+			modifier.set("name", m.getAttributeName());
+			modifier.set("uuid", m.getUniqueId().toString());
+		}
+
 		modifier.set("attribute", m.getAttribute().name());
-		modifier.set("name", m.getAttributeName());
 		modifier.set("operation", m.getOperation().name());
-		modifier.set("uuid", m.getUniqueId().toString());
 		modifier.set("amount", new CDouble(m.getAmount(), t), t);
 
 		Mixed slot = CNull.NULL;
@@ -1767,8 +1773,10 @@ public class ObjectGenerator {
 		MCAttribute attribute;
 		MCAttributeModifier.Operation operation;
 		double amount;
+		MCNamespacedKey id = null;
 		UUID uuid = null;
 		String name = "";
+		MCEquipmentSlotGroup slotGroup = null;
 		MCEquipmentSlot slot = null;
 
 		try {
@@ -1785,15 +1793,18 @@ public class ObjectGenerator {
 
 		amount = ArgumentValidation.getDouble(m.get("amount", t), t);
 
-		if(m.containsKey("name")) {
-			name = m.get("name", t).val();
-		}
-
-		if(m.containsKey("uuid")) {
-			try {
-				uuid = UUID.fromString(m.get("uuid", t).val());
-			} catch (IllegalArgumentException ex) {
-				throw new CREFormatException("Invalid UUID format: " + m.get("uuid", t), t);
+		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_21) && m.containsKey("id")) {
+			id = StaticLayer.GetConvertor().GetNamespacedKey(m.get("id", t).val());
+		} else {
+			if(m.containsKey("name")) {
+				name = m.get("name", t).val();
+			}
+			if(m.containsKey("uuid")) {
+				try {
+					uuid = UUID.fromString(m.get("uuid", t).val());
+				} catch (IllegalArgumentException ex) {
+					throw new CREFormatException("Invalid UUID format: " + m.get("uuid", t), t);
+				}
 			}
 		}
 
@@ -1801,7 +1812,6 @@ public class ObjectGenerator {
 			Mixed s = m.get("slot", t);
 			if(!(s instanceof CNull)) {
 				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
-					MCEquipmentSlotGroup slotGroup = null;
 					if(s.val().equals("ANY")) {
 						slotGroup = MCEquipmentSlotGroup.ANY;
 					} else if(s.val().equals("HAND")) {
@@ -1809,19 +1819,26 @@ public class ObjectGenerator {
 					} else if(s.val().equals("ARMOR")) {
 						slotGroup = MCEquipmentSlotGroup.ARMOR;
 					}
-					if(slotGroup != null) {
-						return StaticLayer.GetConvertor().GetAttributeModifier(attribute, uuid, name, amount, operation,
-								slotGroup);
-					}
 				}
-				try {
-					slot = MCEquipmentSlot.valueOf(s.val());
-				} catch (IllegalArgumentException ex) {
-					throw new CREFormatException("Invalid equipment slot name: " + m.get("slot", t), t);
+				if(slotGroup == null) {
+					try {
+						slot = MCEquipmentSlot.valueOf(s.val());
+					} catch (IllegalArgumentException ex) {
+						throw new CREFormatException("Invalid equipment slot name: " + m.get("slot", t), t);
+					}
 				}
 			}
 		}
 
+		if(slotGroup != null) {
+			if(id != null) {
+				return StaticLayer.GetConvertor().GetAttributeModifier(attribute, id, amount, operation, slotGroup);
+			}
+			return StaticLayer.GetConvertor().GetAttributeModifier(attribute, uuid, name, amount, operation, slotGroup);
+		}
+		if(id != null) {
+			return StaticLayer.GetConvertor().GetAttributeModifier(attribute, id, amount, operation, slot);
+		}
 		return StaticLayer.GetConvertor().GetAttributeModifier(attribute, uuid, name, amount, operation, slot);
 	}
 

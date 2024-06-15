@@ -3,7 +3,7 @@ In general, the compatibility requirements, if not listed, are the same as the p
 The minimum requirements for the current builds are:
 
 * Java 16
-* Spigot or Paper 1.16.5 - 1.20.4 (when used as a plugin)
+* Spigot or Paper 1.16.5 - 1.21 (when used as a plugin)
 
 CommandHelper may still be backwards and forward compatible to a large degree. Many of the advanced features that
 normally have hard dependencies on certain versions of external dependencies have been configured to "soft" fail.
@@ -17,6 +17,11 @@ Regardless, only the most current builds are officially supported.
 ! scope="col" width="8%" | Source
 ! scope="col" width="60%" | Milestone
 ! scope="col" width="21%" | Compatibility
+|-
+| 3.3.5 build-478
+|
+| Added support for Spigot 1.21
+| Spigot 1.16.5 - 1.21
 |-
 | 3.3.5 build-467
 | [https://github.com/EngineHub/CommandHelper/commit/84f1af4764fa93fc4809696969fdbce2112ec4ac 84f1af4]

@@ -702,7 +702,7 @@ public final class Interpreter {
 	 * @param args
 	 * @throws ConfigCompileException
 	 * @throws IOException
-	 * @throws cConfigCompileGroupException
+	 * @throws ConfigCompileGroupException
 	 */
 	public void execute(String script, List<String> args) throws ConfigCompileException, IOException, ConfigCompileGroupException {
 		execute(script, args, null);
@@ -1174,6 +1174,16 @@ public final class Interpreter {
 
 		@Override
 		public MCAttributeModifier GetAttributeModifier(MCAttribute attr, UUID id, String name, double amt, MCAttributeModifier.Operation op, MCEquipmentSlotGroup slot) {
+			throw new UnsupportedOperationException("This method is not supported from a shell.");
+		}
+
+		@Override
+		public MCAttributeModifier GetAttributeModifier(MCAttribute attr, MCNamespacedKey key, double amt, MCAttributeModifier.Operation op, MCEquipmentSlot slot) {
+			throw new UnsupportedOperationException("This method is not supported from a shell.");
+		}
+
+		@Override
+		public MCAttributeModifier GetAttributeModifier(MCAttribute attr, MCNamespacedKey key, double amt, MCAttributeModifier.Operation op, MCEquipmentSlotGroup slot) {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 

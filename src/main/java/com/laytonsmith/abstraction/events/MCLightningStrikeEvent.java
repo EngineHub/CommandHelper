@@ -11,6 +11,7 @@ public interface MCLightningStrikeEvent extends MCWeatherEvent {
 	enum Cause {
 		COMMAND,
 		CUSTOM,
+		ENCHANTMENT,
 		SPAWNER,
 		TRIDENT,
 		TRAP,

@@ -736,6 +736,16 @@ public class StaticTest {
 		}
 
 		@Override
+		public MCAttributeModifier GetAttributeModifier(MCAttribute attr, MCNamespacedKey key, double amt, MCAttributeModifier.Operation op, MCEquipmentSlot slot) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public MCAttributeModifier GetAttributeModifier(MCAttribute attr, MCNamespacedKey key, double amt, MCAttributeModifier.Operation op, MCEquipmentSlotGroup slot) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
 		public int SetFutureRunnable(DaemonManager dm, long ms, Runnable r) {
 			//This needs fixing later
 			queue.invokeLater(dm, r);

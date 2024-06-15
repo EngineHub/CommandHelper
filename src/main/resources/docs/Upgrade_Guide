@@ -3,10 +3,17 @@ Below is a reverse chronological guide to help you with the most notable of thes
 Where possible, any value changes are converted for backwards compatibility with saved data, but any script that checks output for equality will need to be updated.
 ----
 
+== Minecraft 1.21 ==
+* Attribute modifiers' optional "name" and "uuid" keys have been replaced with a namespaced key under "id".
+Old attribute modifiers will use the UUID to generate a namespaced key.
+
+----
+
 == Minecraft 1.20.5 ==
 * SCUTE item has been renamed to TURTLE_SCUTE
 * In potion item meta, the potion array under the "base" key was replaced by a "potiontype" string
 * In enchantment item meta, the arrays under the "enchants" key have had the "etype" key removed
+* HORSE_JUMP_STRENGTH attribute was changed to GENERIC_JUMP_STRENGTH
 
 ----
 
@@ -110,7 +117,7 @@ Two paintings just had a space added to them: BURNING_SKULL and DONKEY_KONG.
 === Item/Block String Format Deprecated ===
 The "0:0" format is no longer guaranteed to be accurate, so it's deprecated wherever it's used. In most cases you will
 be warned on compile time if you use these anywhere. If not, you will be warned in the log at runtime, but the
-item/block will be attempted to be converted. Notably, get|set_block_at() has been deprecated for get|set_block(). If
+item/block will be attempted to be converted. Notably, get|set_block_at() have been replaced with get|set_block(). If
 you need to read or write block data, the get|set_blockdata_string() functions are available until further functionality
 is added. These use the same format as vanilla block commands.
 
@@ -125,7 +132,8 @@ use item arrays instead of the string formats.
 
 === CommandBlock Changes ===
 In addition the vanilla changes to commands, they no longer automatically process vanilla selectors for plugin commands.
-You will have to implement selectors yourself if you need this behavior.
+You will have to implement selectors yourself if you need this behavior. If upgrading to 3.3.5, you can use the
+select_entites() function.
 
 === Event Removals ===
 The event tab_complete_chat is removed because clients no longer send these to the server. The event
@@ -136,8 +144,7 @@ player_login.
 Pre-1.9 sound names are all removed and some post 1.9 sounds have been updated to reflect 1.13. However, these will no
 longer cause play_sound() to throw an exception. Instead, it will warn in the log and continue running.
 play_named_sound() always behaved like this, but did so silently. play_sound() will now simply warn you if the sound
-didn't play because the name is incorrect. You can refer the Minecraft wiki or the Spigot documentation for the complete
-list. You can also use reflect_pull('enum', 'Sound') to get the list in a script.
+didn't play because the name is incorrect.
 
 === Event Data Changes ===
 The following events' prefilters, event data, and/or mutable data were updated: piston_retract, piston_extend,

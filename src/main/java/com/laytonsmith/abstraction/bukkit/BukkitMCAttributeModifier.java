@@ -2,6 +2,7 @@ package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCAttributeModifier;
+import com.laytonsmith.abstraction.MCNamespacedKey;
 import com.laytonsmith.abstraction.enums.EnumConvertor;
 import com.laytonsmith.abstraction.enums.MCAttribute;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
@@ -29,6 +30,11 @@ public class BukkitMCAttributeModifier implements MCAttributeModifier {
 	@Override
 	public Object getHandle() {
 		return am;
+	}
+
+	@Override
+	public MCNamespacedKey getKey() {
+		return new BukkitMCNamespacedKey(am.getKey());
 	}
 
 	@Override

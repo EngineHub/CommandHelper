@@ -54,4 +54,5 @@ public enum MCSpawnReason {
 	SPELL,
 	METAMORPHOSIS,
 	DUPLICATION,
+	ENCHANTMENT,
 }
