@@ -13,7 +13,7 @@
 
 # Echo out a server greeting to the console
 console('CommandHelper successfully installed! To get started, visit https://methodscript.com, and visit the learning'
-			. ' trail at the bottom, and particularly the Beginner's and Advanced Guides.'
+			. ' trail at the bottom, and particularly the Beginner\'s and Advanced Guides.'
 			. ' (Change this message in plugins/CommandHelper/main.ms)');
 
 # Bind an event to the player join, and tell ops hello.
