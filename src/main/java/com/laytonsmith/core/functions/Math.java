@@ -2636,7 +2636,7 @@ public class Math {
 			INTEGER_MAX(Integer.MAX_VALUE, "The highest number that can be represented as a integer"),
 			INTEGER_MIN(Integer.MIN_VALUE, "The lowest number that can be represented as an integer"),
 			FLOAT_MAX(Float.MAX_VALUE, "The highest number that can be represented as a float"),
-			FLOAT_MIN(Float.MIN_VALUE, "The lowest number that can be represented as a float"),
+			FLOAT_MIN(Float.MIN_VALUE, "The smallest positive nonzero number that can be represented as a float"),
 			BYTE_MAX(Byte.MAX_VALUE, "The highest number that can be represented as a byte"),
 			BYTE_MIN(Byte.MIN_VALUE, "The lowest number that can be represented as a byte"),
 			E(java.lang.Math.E, "The mathematical constant e, also known as Euler's number (not to be confused with the Euler-Mascheroni constant)"),
