@@ -2,6 +2,7 @@ package com.laytonsmith.core.events.drivers;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.abstraction.MCAnvilInventory;
 import com.laytonsmith.abstraction.MCEnchantmentOffer;
 import com.laytonsmith.abstraction.MCHumanEntity;
 import com.laytonsmith.abstraction.MCInventory;
@@ -19,6 +20,7 @@ import com.laytonsmith.abstraction.events.MCInventoryDragEvent;
 import com.laytonsmith.abstraction.events.MCInventoryOpenEvent;
 import com.laytonsmith.abstraction.events.MCItemHeldEvent;
 import com.laytonsmith.abstraction.events.MCItemSwapEvent;
+import com.laytonsmith.abstraction.events.MCPrepareAnvilEvent;
 import com.laytonsmith.abstraction.events.MCPrepareItemCraftEvent;
 import com.laytonsmith.abstraction.events.MCPrepareItemEnchantEvent;
 import com.laytonsmith.annotations.api;
@@ -985,6 +987,92 @@ public class InventoryEvents {
 		@Override
 		public Version since() {
 			return MSVersion.V3_3_1;
+		}
+	}
+
+	@api
+	public static class item_pre_anvil extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "item_pre_anvil";
+		}
+
+		@Override
+		public String docs() {
+			return "{}"
+					+ " Fires when a recipe is formed in an anvil, but the result has not yet been clicked."
+					+ " { viewers: all human entities looking at this anvil "
+					+ " | first_item: the first item in the anvil"
+					+ "	| second_item: the second item in the anvil"
+					+ " | result: the result of the anvil"
+					+ " | max_repair_cost: the maximum possible cost of this repair."
+					+ " | level_repair_cost: how many levels are needed to perform this repair?"
+					+ " | item_repair_cost: how many items are needed to perform this repair? }"
+					+ " { result: the result of the anvil }"
+					+ " {}";
+		}
+
+		@Override
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+			if(event instanceof MCPrepareAnvilEvent) {
+				return true;
+			}
+			return false;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			throw ConfigRuntimeException.CreateUncatchableException("Unsupported operation.", Target.UNKNOWN);
+		}
+
+		@Override
+		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+			if(event instanceof MCPrepareAnvilEvent) {
+				MCPrepareAnvilEvent e = (MCPrepareAnvilEvent) event;
+				MCAnvilInventory anvil = (MCAnvilInventory) e.getInventory();
+				Map<String, Mixed> ret = evaluate_helper(e);
+
+				CArray viewers = new CArray(Target.UNKNOWN);
+				for(MCHumanEntity viewer : e.getViewers()) {
+					viewers.push(new CString(viewer.getName(), Target.UNKNOWN), Target.UNKNOWN);
+				}
+
+				ret.put("viewers", viewers);
+				ret.put("first_item", ObjectGenerator.GetGenerator().item(anvil.getFirstItem(), Target.UNKNOWN));
+				ret.put("second_item", ObjectGenerator.GetGenerator().item(anvil.getSecondItem(), Target.UNKNOWN));
+				ret.put("result", ObjectGenerator.GetGenerator().item(anvil.getResult(), Target.UNKNOWN));
+				ret.put("max_repair_cost", new CInt(anvil.getMaximumRepairCost(), Target.UNKNOWN));
+				ret.put("level_repair_cost", new CInt(anvil.getRepairCost(), Target.UNKNOWN));
+				ret.put("item_repair_cost", new CInt(anvil.getRepairCostAmount(), Target.UNKNOWN));
+
+				return ret;
+			} else {
+				throw new EventException("Event received was not an MCPrepareAnvilEvent.");
+			}
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.ITEM_PRE_ANVIL;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+			if(event instanceof MCPrepareAnvilEvent) {
+				Target t = value.getTarget();
+				MCPrepareAnvilEvent e = (MCPrepareAnvilEvent) event;
+				if(key.equalsIgnoreCase("result")) {
+					e.setResult(ObjectGenerator.GetGenerator().item(value, t));
+					return true;
+				}
+			}
+			return false;
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
 		}
 	}
 }

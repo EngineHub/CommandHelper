@@ -8,6 +8,7 @@ import com.laytonsmith.abstraction.bukkit.events.BukkitInventoryEvents.BukkitMCI
 import com.laytonsmith.abstraction.bukkit.events.BukkitInventoryEvents.BukkitMCInventoryOpenEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitInventoryEvents.BukkitMCItemHeldEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitInventoryEvents.BukkitMCItemSwapEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitInventoryEvents.BukkitMCPrepareAnvilEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitInventoryEvents.BukkitMCPrepareItemCraftEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitInventoryEvents.BukkitMCPrepareItemEnchantEvent;
 import com.laytonsmith.core.events.Driver;
@@ -21,6 +22,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
+import org.bukkit.event.inventory.PrepareAnvilEvent;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
@@ -79,5 +81,11 @@ public class BukkitInventoryListener implements Listener {
 	public void onPreCraft(PrepareItemCraftEvent event) {
 		BukkitMCPrepareItemCraftEvent pc = new BukkitInventoryEvents.BukkitMCPrepareItemCraftEvent(event);
 		EventUtils.TriggerListener(Driver.ITEM_PRE_CRAFT, "item_pre_craft", pc);
+	}
+
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onPreAnvil(PrepareAnvilEvent event) {
+		BukkitMCPrepareAnvilEvent pa = new BukkitInventoryEvents.BukkitMCPrepareAnvilEvent(event);
+		EventUtils.TriggerListener(Driver.ITEM_PRE_ANVIL, "item_pre_anvil", pa);
 	}
 }
