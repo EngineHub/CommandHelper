@@ -1002,10 +1002,10 @@ public class InventoryEvents {
 		public String docs() {
 			return "{}"
 					+ " Fires when a recipe is formed in an anvil, but the result has not yet been clicked."
-					+ " { viewers: all human entities looking at this anvil "
-					+ " | first_item: the first item in the anvil"
-					+ "	| second_item: the second item in the anvil"
-					+ " | result: the result of the anvil"
+					+ " { viewers: all players viewing this anvil's interface."
+					+ " | first_item: the first item being used in the recipe."
+					+ " | second_item: the second item being used in the recipe."
+					+ " | result: the result of the recipe."
 					+ " | max_repair_cost: the maximum possible cost of this repair."
 					+ " | level_repair_cost: how many levels are needed to perform this repair?"
 					+ " | item_repair_cost: how many items are needed to perform this repair? }"
@@ -1028,8 +1028,7 @@ public class InventoryEvents {
 
 		@Override
 		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
-			if(event instanceof MCPrepareAnvilEvent) {
-				MCPrepareAnvilEvent e = (MCPrepareAnvilEvent) event;
+			if(event instanceof MCPrepareAnvilEvent e) {
 				MCAnvilInventory anvil = (MCAnvilInventory) e.getInventory();
 				Map<String, Mixed> ret = evaluate_helper(e);
 
@@ -1059,9 +1058,8 @@ public class InventoryEvents {
 
 		@Override
 		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
-			if(event instanceof MCPrepareAnvilEvent) {
+			if(event instanceof MCPrepareAnvilEvent e) {
 				Target t = value.getTarget();
-				MCPrepareAnvilEvent e = (MCPrepareAnvilEvent) event;
 				if(key.equalsIgnoreCase("result")) {
 					e.setResult(ObjectGenerator.GetGenerator().item(value, t));
 					return true;

@@ -40,7 +40,7 @@ public class BukkitMCAnvilInventory extends BukkitMCInventory implements MCAnvil
 
 	@Override
 	public int getRepairCostAmount() {
-		return ai.getRepairCost();
+		return ai.getRepairCostAmount();
 	}
 
 	@Override
