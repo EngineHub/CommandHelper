@@ -1,5 +1,6 @@
 package com.laytonsmith.abstraction.bukkit.events;
 
+import com.laytonsmith.abstraction.MCAnvilInventory;
 import com.laytonsmith.abstraction.MCCraftingInventory;
 import com.laytonsmith.abstraction.MCEnchantmentOffer;
 import com.laytonsmith.abstraction.MCHumanEntity;
@@ -10,6 +11,7 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCRecipe;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
+import com.laytonsmith.abstraction.bukkit.BukkitMCAnvilInventory;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCraftingInventory;
 import com.laytonsmith.abstraction.bukkit.BukkitMCEnchantmentOffer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCInventory;
@@ -37,6 +39,7 @@ import com.laytonsmith.abstraction.events.MCInventoryInteractEvent;
 import com.laytonsmith.abstraction.events.MCInventoryOpenEvent;
 import com.laytonsmith.abstraction.events.MCItemHeldEvent;
 import com.laytonsmith.abstraction.events.MCItemSwapEvent;
+import com.laytonsmith.abstraction.events.MCPrepareAnvilEvent;
 import com.laytonsmith.abstraction.events.MCPrepareItemCraftEvent;
 import com.laytonsmith.abstraction.events.MCPrepareItemEnchantEvent;
 import org.bukkit.enchantments.Enchantment;
@@ -52,6 +55,7 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryEvent;
 import org.bukkit.event.inventory.InventoryInteractEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
+import org.bukkit.event.inventory.PrepareAnvilEvent;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
@@ -542,6 +546,30 @@ public class BukkitInventoryEvents {
 		@Override
 		public MCCraftingInventory getInventory() {
 			return new BukkitMCCraftingInventory(e.getInventory());
+		}
+	}
+
+	public static class BukkitMCPrepareAnvilEvent extends BukkitMCInventoryEvent implements MCPrepareAnvilEvent {
+		PrepareAnvilEvent e;
+
+		public BukkitMCPrepareAnvilEvent(PrepareAnvilEvent event) {
+			super(event);
+			e = event;
+		}
+
+		@Override
+		public void setResult(MCItemStack i) {
+			e.setResult(((BukkitMCItemStack) i).asItemStack());
+		}
+
+		@Override
+		public MCPlayer getPlayer() {
+			return new BukkitMCPlayer(e.getViewers().get(0));
+		}
+
+		@Override
+		public MCAnvilInventory getInventory() {
+			return new BukkitMCAnvilInventory(e.getInventory());
 		}
 	}
 }
