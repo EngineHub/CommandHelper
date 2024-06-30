@@ -563,12 +563,8 @@ public class BukkitInventoryEvents {
 		}
 
 		@Override
-		public List<MCHumanEntity> getViewers() {
-			List<MCHumanEntity> viewers = new ArrayList<>();
-			for(HumanEntity viewer : e.getViewers()) {
-				viewers.add(new BukkitMCHumanEntity(viewer));
-			}
-			return viewers;
+		public MCPlayer getPlayer() {
+			return new BukkitMCPlayer(e.getViewers().get(0));
 		}
 
 		@Override

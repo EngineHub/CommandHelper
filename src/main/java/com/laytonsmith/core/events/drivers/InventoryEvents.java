@@ -1002,7 +1002,7 @@ public class InventoryEvents {
 		public String docs() {
 			return "{}"
 					+ " Fires when a recipe is formed in an anvil, but the result has not yet been clicked."
-					+ " { viewers: all players viewing this anvil's interface."
+					+ " { player: the player using the anvil."
 					+ " | first_item: the first item being used in the recipe."
 					+ " | second_item: the second item being used in the recipe."
 					+ " | result: the result of the recipe."
@@ -1032,12 +1032,7 @@ public class InventoryEvents {
 				MCAnvilInventory anvil = (MCAnvilInventory) e.getInventory();
 				Map<String, Mixed> ret = evaluate_helper(e);
 
-				CArray viewers = new CArray(Target.UNKNOWN);
-				for(MCHumanEntity viewer : e.getViewers()) {
-					viewers.push(new CString(viewer.getName(), Target.UNKNOWN), Target.UNKNOWN);
-				}
-
-				ret.put("viewers", viewers);
+				ret.put("player", new CString(e.getPlayer().getName(), Target.UNKNOWN));
 				ret.put("first_item", ObjectGenerator.GetGenerator().item(anvil.getFirstItem(), Target.UNKNOWN));
 				ret.put("second_item", ObjectGenerator.GetGenerator().item(anvil.getSecondItem(), Target.UNKNOWN));
 				ret.put("result", ObjectGenerator.GetGenerator().item(anvil.getResult(), Target.UNKNOWN));
