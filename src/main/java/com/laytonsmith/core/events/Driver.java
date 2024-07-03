@@ -67,6 +67,7 @@ public enum Driver {
 	ITEM_SWAP,
 	ITEM_PRE_CRAFT,
 	ITEM_PRE_ENCHANT,
+	ITEM_PRE_ANVIL,
 	/**
 	 * Player events
 	 */
