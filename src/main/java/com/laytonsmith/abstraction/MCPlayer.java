@@ -212,4 +212,6 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity, MCOfflinePlaye
 	void respawn();
 
 	void sendEquipmentChange(MCLivingEntity entity, MCEquipmentSlot slot, MCItemStack item);
+
+	int getPing();
 }

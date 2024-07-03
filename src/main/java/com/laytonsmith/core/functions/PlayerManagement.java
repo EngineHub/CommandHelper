@@ -7173,7 +7173,8 @@ public class PlayerManagement {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREPlayerOfflineException.class, CRELengthException.class, CREBadEntityException.class};
+			return new Class[]{CREPlayerOfflineException.class, CRELengthException.class, CREBadEntityException.class,
+					CREFormatException.class};
 		}
 
 		@Override
@@ -7187,6 +7188,50 @@ public class PlayerManagement {
 		}
 
 		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+	}
+
+	@api
+	public static class get_player_ping extends AbstractFunction {
+
+		public String getName() {
+			return "get_player_ping";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1};
+		}
+
+		public String docs() {
+			return "int {[player]} Returns a player's average response time to ping packets in milliseconds."
+					+ " This is an indicator of the quality of the player's connection, as represented in the tab list.";
+		}
+
+		public Construct exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p;
+			if(args.length == 1) {
+				p = Static.GetPlayer(args[0].val(), t);
+			} else {
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(p, t);
+			}
+			return new CInt(p.getPing(), t);
+		}
+
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CRELengthException.class};
+		}
+
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		public boolean isRestricted() {
+			return false;
+		}
+
 		public Boolean runAsync() {
 			return false;
 		}

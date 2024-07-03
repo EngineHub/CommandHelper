@@ -848,4 +848,9 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 			// probably before 1.18, which is unsupported
 		}
 	}
+
+	@Override
+	public int getPing() {
+		return p.getPing();
+	}
 }
