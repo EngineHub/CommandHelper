@@ -9,6 +9,7 @@ import com.laytonsmith.abstraction.bukkit.entities.BukkitMCHumanEntity;
 import com.laytonsmith.abstraction.enums.MCInventoryType;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.InventoryView;
+import org.bukkit.inventory.ItemStack;
 
 public class BukkitMCInventoryView implements MCInventoryView {
 
@@ -60,7 +61,7 @@ public class BukkitMCInventoryView implements MCInventoryView {
 
 	@Override
 	public MCItemStack getItem(int slot) {
-		return new BukkitMCItemStack(iv.getItem(slot));
+		return new BukkitMCItemStack((ItemStack) ReflectionUtils.invokeMethod(iv, "getItem", slot));
 	}
 
 	@Override
