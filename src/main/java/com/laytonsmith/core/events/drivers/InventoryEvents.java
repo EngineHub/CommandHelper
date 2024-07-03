@@ -1007,8 +1007,8 @@ public class InventoryEvents {
 					+ " | second_item: the second item being used in the recipe."
 					+ " | result: the result of the recipe."
 					+ " | max_repair_cost: the maximum possible cost of this repair."
-					+ " | level_repair_cost: how many levels are needed to perform this repair?"
-					+ " | item_repair_cost: how many items are needed to perform this repair? }"
+					+ " | level_repair_cost: how many levels are needed to perform this repair."
+					+ " | item_repair_cost: how many items are needed to perform this repair. }"
 					+ " { result: the result of the anvil }"
 					+ " {}";
 		}
