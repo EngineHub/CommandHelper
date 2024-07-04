@@ -1059,6 +1059,17 @@ public class InventoryEvents {
 					e.setResult(ObjectGenerator.GetGenerator().item(value, t));
 					return true;
 				}
+
+				MCAnvilInventory anvil = (MCAnvilInventory) e.getInventory();
+				if(key.equalsIgnoreCase("level_repair_cost")) {
+					anvil.setRepairCost(ArgumentValidation.getInt32(value, t));
+					return true;
+				}
+
+				if(key.equalsIgnoreCase("item_repair_cost")) {
+					anvil.setRepairCostAmount(ArgumentValidation.getInt32(value, t));
+					return true;
+				}
 			}
 			return false;
 		}
