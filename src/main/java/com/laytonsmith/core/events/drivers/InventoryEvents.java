@@ -32,6 +32,7 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.events.AbstractEvent;
@@ -41,6 +42,7 @@ import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
 import com.laytonsmith.core.exceptions.CRE.CREBindException;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
@@ -903,7 +905,7 @@ public class InventoryEvents {
 					+ " {viewers: all humanentities viewing the screen this event takes place in | matrix | result"
 					+ " | isRepair: true if this event was triggered by a repair operation (different than normal crafting)"
 					+ " | recipe: information about the formed recipe, or null if there is not one}"
-					+ " {}"/*" {matrix: the slots that make up the crafting grid | result: the result slot of crafting}"*/
+					+ " { result: the product of the recipe. }"
 					+ " {}";
 		}
 
@@ -938,6 +940,7 @@ public class InventoryEvents {
 				for(int i = 0; i < mi.length; i++) {
 					matrix.set(i, ObjectGenerator.GetGenerator().item(mi[i], t), t);
 				}
+				ret.put("inventorytype", new CString(e.getInventory().getType().toString(), t));
 				ret.put("matrix", matrix);
 				ret.put("result", ObjectGenerator.GetGenerator().item(e.getInventory().getResult(), t));
 				return ret;
@@ -953,34 +956,13 @@ public class InventoryEvents {
 
 		@Override
 		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
-			/*if(event instanceof MCPrepareItemCraftEvent) {
-				MCPrepareItemCraftEvent e = (MCPrepareItemCraftEvent) event;
+			if(event instanceof MCPrepareItemCraftEvent e) {
+				Target t = Target.UNKNOWN;
 				if("result".equals(key)) {
-					e.getInventory().setResult(ObjectGenerator.GetGenerator().item(value, Target.UNKNOWN));
+					e.getInventory().setResult(ObjectGenerator.GetGenerator().item(value, t));
 					return true;
 				}
-				if("matrix".equals(key)) {
-					if(value.isInstanceOf(CArray.TYPE)) {
-						CArray va = (CArray) value;
-						MCItemStack[] old = e.getInventory().getMatrix();
-						MCItemStack[] repl = new MCItemStack[old.length];
-						for(int i=0; i<repl.length; i++) {
-							if(va.containsKey(i)) {
-								repl[i] = ObjectGenerator.GetGenerator().item(va, Target.UNKNOWN);
-							}
-						}
-						e.getInventory().setMatrix(repl);
-						return true;
-					} else if(value instanceof CNull) {
-						MCItemStack[] old = e.getInventory().getMatrix();
-						MCItemStack[] repl = new MCItemStack[old.length];
-						e.getInventory().setMatrix(repl);
-						return true;
-					} else {
-						throw new CRECastException("Expected an array but received " + value, Target.UNKNOWN);
-					}
-				}
-			} */
+			}
 			return false;
 		}
 
