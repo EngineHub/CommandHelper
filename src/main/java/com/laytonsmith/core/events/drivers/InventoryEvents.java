@@ -1008,8 +1008,12 @@ public class InventoryEvents {
 					+ " | result: the result of the recipe."
 					+ " | max_repair_cost: the maximum possible cost of this repair."
 					+ " | level_repair_cost: how many levels are needed to perform this repair."
-					+ " | item_repair_cost: how many items are needed to perform this repair. }"
-					+ " { result: the result of the anvil }"
+					+ " | item_repair_cost: how many items are needed to perform this repair (MC 1.18.1+). }"
+					+ " { result: the result of the recipe."
+					+ " | level_repair_cost: how many levels are needed to perform this repair."
+					+ " | item_repair_cost: how many items are needed to perform this repair (MC 1.18.1+)."
+					+ " | max_repair_cost: the maximum possible cost of this repair. Values exceeding 40 will be"
+					+ " respected, but may still show as too expensive on the client. }"
 					+ " {}";
 		}
 
@@ -1036,9 +1040,11 @@ public class InventoryEvents {
 				ret.put("first_item", ObjectGenerator.GetGenerator().item(anvil.getFirstItem(), Target.UNKNOWN));
 				ret.put("second_item", ObjectGenerator.GetGenerator().item(anvil.getSecondItem(), Target.UNKNOWN));
 				ret.put("result", ObjectGenerator.GetGenerator().item(anvil.getResult(), Target.UNKNOWN));
-				ret.put("max_repair_cost", new CInt(anvil.getMaximumRepairCost(), Target.UNKNOWN));
 				ret.put("level_repair_cost", new CInt(anvil.getRepairCost(), Target.UNKNOWN));
-				ret.put("item_repair_cost", new CInt(anvil.getRepairCostAmount(), Target.UNKNOWN));
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_18_1)) {
+					ret.put("item_repair_cost", new CInt(anvil.getRepairCostAmount(), Target.UNKNOWN));
+				}
+				ret.put("max_repair_cost", new CInt(anvil.getMaximumRepairCost(), Target.UNKNOWN));
 
 				return ret;
 			} else {
@@ -1057,6 +1063,26 @@ public class InventoryEvents {
 				Target t = value.getTarget();
 				if(key.equalsIgnoreCase("result")) {
 					e.setResult(ObjectGenerator.GetGenerator().item(value, t));
+					return true;
+				}
+
+				MCAnvilInventory anvil = (MCAnvilInventory) e.getInventory();
+				if(key.equalsIgnoreCase("level_repair_cost")) {
+					anvil.setRepairCost(ArgumentValidation.getInt32(value, t));
+					return true;
+				}
+
+				if(key.equalsIgnoreCase("item_repair_cost")) {
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_18_1)) {
+						anvil.setRepairCostAmount(ArgumentValidation.getInt32(value, t));
+						return true;
+					} else {
+						return false;
+					}
+				}
+
+				if(key.equalsIgnoreCase("max_repair_cost")) {
+					anvil.setMaximumRepairCost(ArgumentValidation.getInt32(value, t));
 					return true;
 				}
 			}
