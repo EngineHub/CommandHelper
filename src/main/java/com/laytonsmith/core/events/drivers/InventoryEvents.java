@@ -4,9 +4,11 @@ import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCAnvilInventory;
 import com.laytonsmith.abstraction.MCEnchantmentOffer;
+import com.laytonsmith.abstraction.MCGrindstoneInventory;
 import com.laytonsmith.abstraction.MCHumanEntity;
 import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCItemStack;
+import com.laytonsmith.abstraction.MCSmithingInventory;
 import com.laytonsmith.abstraction.MCVirtualInventoryHolder;
 import com.laytonsmith.abstraction.enums.MCClickType;
 import com.laytonsmith.abstraction.enums.MCDragType;
@@ -21,8 +23,10 @@ import com.laytonsmith.abstraction.events.MCInventoryOpenEvent;
 import com.laytonsmith.abstraction.events.MCItemHeldEvent;
 import com.laytonsmith.abstraction.events.MCItemSwapEvent;
 import com.laytonsmith.abstraction.events.MCPrepareAnvilEvent;
+import com.laytonsmith.abstraction.events.MCPrepareGrindstoneEvent;
 import com.laytonsmith.abstraction.events.MCPrepareItemCraftEvent;
 import com.laytonsmith.abstraction.events.MCPrepareItemEnchantEvent;
+import com.laytonsmith.abstraction.events.MCPrepareSmithingEvent;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSLog;
@@ -1036,6 +1040,161 @@ public class InventoryEvents {
 		@Override
 		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			if(event instanceof MCPrepareAnvilEvent e) {
+				Target t = value.getTarget();
+				if(key.equalsIgnoreCase("result")) {
+					e.setResult(ObjectGenerator.GetGenerator().item(value, t));
+					return true;
+				}
+			}
+			return false;
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+	}
+
+	@api
+	public static class item_pre_smithing extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "item_pre_smithing";
+		}
+
+		@Override
+		public String docs() {
+			return "{}"
+					+ " Fires when a recipe is formed in a smithing table, but the result has not yet been clicked."
+					+ " { player: the player using the smithing table."
+					+ " | first_item: the first item being used in the recipe."
+					+ " | second_item: the second item being used in the recipe."
+					+ " | third_item: the third item being used in the recipe."
+					+ " | recipe: information about the formed recipe, or null if there's not one."
+					+ " | result: the result of the recipe. }"
+					+ " { result: the result of the smithing table recipe. While the result will appear on the"
+					+ " client-side, all items must be populated before a recipe can be executed. }"
+					+ " {}";
+		}
+
+		@Override
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+			if(event instanceof MCPrepareSmithingEvent) {
+				return true;
+			}
+			return false;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			throw ConfigRuntimeException.CreateUncatchableException("Unsupported operation.", Target.UNKNOWN);
+		}
+
+		@Override
+		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+			if(event instanceof MCPrepareSmithingEvent e) {
+				MCSmithingInventory smithing = (MCSmithingInventory) e.getInventory();
+				Map<String, Mixed> ret = evaluate_helper(e);
+
+				ret.put("player", new CString(e.getPlayer().getName(), Target.UNKNOWN));
+				ret.put("first_item", ObjectGenerator.GetGenerator().item(smithing.getInputTemplate(), Target.UNKNOWN));
+				ret.put("second_item", ObjectGenerator.GetGenerator().item(smithing.getInputEquipment(), Target.UNKNOWN));
+				ret.put("third_item", ObjectGenerator.GetGenerator().item(smithing.getInputMaterial(), Target.UNKNOWN));
+				try {
+					ret.put("recipe", ObjectGenerator.GetGenerator().recipe(smithing.getRecipe(), Target.UNKNOWN));
+				} catch(NullPointerException ex) {
+					ret.put("recipe", CNull.NULL);
+				}
+				ret.put("result", ObjectGenerator.GetGenerator().item(smithing.getResult(), Target.UNKNOWN));
+
+				return ret;
+			} else {
+				throw new EventException("Event received was not an MCPrepareSmithingEvent.");
+			}
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.ITEM_PRE_SMITHING;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+			if(event instanceof MCPrepareSmithingEvent e) {
+				Target t = value.getTarget();
+				if(key.equalsIgnoreCase("result")) {
+					e.setResult(ObjectGenerator.GetGenerator().item(value, t));
+					return true;
+				}
+			}
+			return false;
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+	}
+
+	@api
+	public static class item_pre_grindstone extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "item_pre_grindstone";
+		}
+
+		@Override
+		public String docs() {
+			return "{}"
+					+ " Fires when a recipe is formed in a grindstone, but the result has not yet been clicked."
+					+ " { player: the player using the grindstone."
+					+ " | upper_item: the first item being used in the recipe."
+					+ " | lower_item: the second item being used in the recipe."
+					+ " | result: the result of the recipe. }"
+					+ " { result: the result of the grindstone recipe. }"
+					+ " {}";
+		}
+
+		@Override
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+			if(event instanceof MCPrepareGrindstoneEvent) {
+				return true;
+			}
+			return false;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			throw ConfigRuntimeException.CreateUncatchableException("Unsupported operation.", Target.UNKNOWN);
+		}
+
+		@Override
+		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+			if(event instanceof MCPrepareGrindstoneEvent e) {
+				MCGrindstoneInventory grindstone = (MCGrindstoneInventory) e.getInventory();
+				Map<String, Mixed> ret = evaluate_helper(e);
+
+				ret.put("player", new CString(e.getPlayer().getName(), Target.UNKNOWN));
+				ret.put("upper_item", ObjectGenerator.GetGenerator().item(grindstone.getUpperItem(), Target.UNKNOWN));
+				ret.put("lower_item", ObjectGenerator.GetGenerator().item(grindstone.getLowerItem(), Target.UNKNOWN));
+				ret.put("result", ObjectGenerator.GetGenerator().item(grindstone.getResult(), Target.UNKNOWN));
+
+				return ret;
+			} else {
+				throw new EventException("Event received was not an MCPrepareGrindstoneEvent.");
+			}
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.ITEM_PRE_GRINDSTONE;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+			if(event instanceof MCPrepareGrindstoneEvent e) {
 				Target t = value.getTarget();
 				if(key.equalsIgnoreCase("result")) {
 					e.setResult(ObjectGenerator.GetGenerator().item(value, t));
