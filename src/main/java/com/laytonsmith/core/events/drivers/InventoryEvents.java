@@ -943,7 +943,6 @@ public class InventoryEvents {
 				for(int i = 0; i < mi.length; i++) {
 					matrix.set(i, ObjectGenerator.GetGenerator().item(mi[i], t), t);
 				}
-				ret.put("inventorytype", new CString(e.getInventory().getType().toString(), t));
 				ret.put("matrix", matrix);
 				ret.put("result", ObjectGenerator.GetGenerator().item(e.getInventory().getResult(), t));
 				return ret;
@@ -1100,11 +1099,7 @@ public class InventoryEvents {
 				ret.put("first_item", ObjectGenerator.GetGenerator().item(smithing.getInputTemplate(), Target.UNKNOWN));
 				ret.put("second_item", ObjectGenerator.GetGenerator().item(smithing.getInputEquipment(), Target.UNKNOWN));
 				ret.put("third_item", ObjectGenerator.GetGenerator().item(smithing.getInputMaterial(), Target.UNKNOWN));
-				try {
-					ret.put("recipe", ObjectGenerator.GetGenerator().recipe(smithing.getRecipe(), Target.UNKNOWN));
-				} catch(NullPointerException ex) {
-					ret.put("recipe", CNull.NULL);
-				}
+				ret.put("recipe", ObjectGenerator.GetGenerator().recipe(smithing.getRecipe(), Target.UNKNOWN));
 				ret.put("result", ObjectGenerator.GetGenerator().item(smithing.getResult(), Target.UNKNOWN));
 
 				return ret;
