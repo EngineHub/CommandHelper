@@ -1,12 +1,17 @@
 package com.laytonsmith.abstraction.enums.bukkit;
 
+import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.abstraction.enums.MCProfession;
 import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
+import org.bukkit.Keyed;
+import org.bukkit.NamespacedKey;
+import org.bukkit.Registry;
 import org.bukkit.entity.Villager;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class BukkitMCProfession extends MCProfession<Villager.Profession> {
@@ -19,14 +24,20 @@ public class BukkitMCProfession extends MCProfession<Villager.Profession> {
 
 	@Override
 	public String name() {
-		return getAbstracted() == MCVanillaProfession.NONE ? getConcrete().name() : getAbstracted().name();
+		if(getAbstracted() == MCVanillaProfession.UNKNOWN) {
+			// changed from enum to interface in 1.21
+			NamespacedKey key = ReflectionUtils.invokeMethod(Keyed.class, getConcrete(), "getKey");
+			return key.getKey().toUpperCase(Locale.ROOT);
+		}
+		return getAbstracted().name();
 	}
 
 	public static MCProfession valueOfConcrete(Villager.Profession test) {
 		MCProfession profession = BUKKIT_MAP.get(test);
 		if(profession == null) {
+			NamespacedKey key = ReflectionUtils.invokeMethod(Keyed.class, test, "getKey");
 			MSLog.GetLogger().e(MSLog.Tags.GENERAL, "Bukkit Villager Profession missing in BUKKIT_MAP: "
-					+ test.name(), Target.UNKNOWN);
+					+ key.getKey().toUpperCase(Locale.ROOT), Target.UNKNOWN);
 			return new BukkitMCProfession(MCVanillaProfession.UNKNOWN, test);
 		}
 		return profession;
@@ -48,15 +59,16 @@ public class BukkitMCProfession extends MCProfession<Villager.Profession> {
 				BUKKIT_MAP.put(profession, wrapper);
 			}
 		}
-		for(Villager.Profession pr : Villager.Profession.values()) {
+		for(Villager.Profession pr : Registry.VILLAGER_PROFESSION) {
 			if(pr != null && !BUKKIT_MAP.containsKey(pr)) {
-				MAP.put(pr.name(), new BukkitMCProfession(MCVanillaProfession.UNKNOWN, pr));
+				NamespacedKey key = ReflectionUtils.invokeMethod(Keyed.class, pr, "getKey");
+				MAP.put(key.getKey().toUpperCase(Locale.ROOT), new BukkitMCProfession(MCVanillaProfession.UNKNOWN, pr));
 				BUKKIT_MAP.put(pr, new BukkitMCProfession(MCVanillaProfession.UNKNOWN, pr));
 			}
 		}
 	}
 
 	private static Villager.Profession getBukkitType(MCVanillaProfession v) {
-		return Villager.Profession.valueOf(v.name());
+		return Registry.VILLAGER_PROFESSION.get(NamespacedKey.minecraft(v.name().toLowerCase(Locale.ROOT)));
 	}
 }
