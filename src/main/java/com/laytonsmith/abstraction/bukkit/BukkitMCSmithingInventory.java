@@ -32,7 +32,7 @@ public class BukkitMCSmithingInventory extends BukkitMCInventory implements MCSm
 
 	@Override
 	public MCRecipe getRecipe() {
-		if (si.getRecipe() == null) {
+		if(si.getRecipe() == null) {
 			return null;
 		} else {
 			return new BukkitMCSmithingRecipe((SmithingRecipe) si.getRecipe());
