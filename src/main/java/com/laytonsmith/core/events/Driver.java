@@ -68,6 +68,8 @@ public enum Driver {
 	ITEM_PRE_CRAFT,
 	ITEM_PRE_ENCHANT,
 	ITEM_PRE_ANVIL,
+	ITEM_PRE_SMITHING,
+	ITEM_PRE_GRINDSTONE,
 	/**
 	 * Player events
 	 */
