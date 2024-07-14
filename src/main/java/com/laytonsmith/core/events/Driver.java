@@ -69,7 +69,7 @@ public enum Driver {
 	ITEM_PRE_ENCHANT,
 	ITEM_PRE_ANVIL,
 	ITEM_PRE_SMITHING,
-	ITEM_PRE_GRINDSTONE,
+	ITEM_PRE_GRINDSTONE(MCVersion.MC1_19_3),
 	/**
 	 * Player events
 	 */

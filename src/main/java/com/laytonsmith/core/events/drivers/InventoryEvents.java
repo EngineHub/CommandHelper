@@ -83,7 +83,8 @@ public class InventoryEvents {
 					+ " | creativeclick: true/false if this action could only be performed in creative mode"
 					+ " | slot: the slot number | rawslot: the slot number in whole inventory window | slottype"
 					+ " | slotitem | inventorytype | inventorysize: number of slots in opened inventory | cursoritem"
-					+ " | inventory: all the items in the (top) inventory | clicktype | action}"
+					+ " | inventory: all the items in the (top) inventory | clicktype | action"
+					+ " | hotbarbutton: the hotbar slot (0-8) corresponding to the number key pressed, or -1 if none.}"
 					+ " {slotitem: the item currently in the clicked slot | cursoritem: the item on the cursor"
 					+ " (may cause unexpected behavior)}"
 					+ " {}";
@@ -1089,11 +1090,12 @@ public class InventoryEvents {
 		@Override
 		public String docs() {
 			return "{}"
-					+ " Fires when a recipe is formed in a smithing table, but the result has not yet been clicked."
+					+ " Fires when a slot is clicked in a smithing table other than the result."
+					+ " Can fire multiple times per click."
 					+ " { player: the player using the smithing table."
 					+ " | first_item: the first item being used in the recipe."
 					+ " | second_item: the second item being used in the recipe."
-					+ " | third_item: the third item being used in the recipe."
+					+ " | third_item: the third item being used in the recipe. (MC 1.20+)"
 					+ " | recipe: information about the formed recipe, or null if there's not one."
 					+ " | result: the result of the recipe. }"
 					+ " { result: the result of the smithing table recipe. While the result will appear on the"
@@ -1123,7 +1125,9 @@ public class InventoryEvents {
 				ret.put("player", new CString(e.getPlayer().getName(), Target.UNKNOWN));
 				ret.put("first_item", ObjectGenerator.GetGenerator().item(smithing.getInputTemplate(), Target.UNKNOWN));
 				ret.put("second_item", ObjectGenerator.GetGenerator().item(smithing.getInputEquipment(), Target.UNKNOWN));
-				ret.put("third_item", ObjectGenerator.GetGenerator().item(smithing.getInputMaterial(), Target.UNKNOWN));
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20)) {
+					ret.put("third_item", ObjectGenerator.GetGenerator().item(smithing.getInputMaterial(), Target.UNKNOWN));
+				}
 				ret.put("recipe", ObjectGenerator.GetGenerator().recipe(smithing.getRecipe(), Target.UNKNOWN));
 				ret.put("result", ObjectGenerator.GetGenerator().item(smithing.getResult(), Target.UNKNOWN));
 
@@ -1167,7 +1171,8 @@ public class InventoryEvents {
 		@Override
 		public String docs() {
 			return "{}"
-					+ " Fires when a recipe is formed in a grindstone, but the result has not yet been clicked."
+					+ " Fires when a slot is clicked in a grindstone other than the result. (MC 1.19.3+)"
+					+ " Can fire multiple times per click."
 					+ " { player: the player using the grindstone."
 					+ " | upper_item: the first item being used in the recipe."
 					+ " | lower_item: the second item being used in the recipe."

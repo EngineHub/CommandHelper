@@ -431,20 +431,26 @@ public class CommandHelperPlugin extends JavaPlugin {
 		getServer().getPluginManager().registerEvents(listener, this);
 	}
 
-	/*
-	 * This method is based on Bukkit's JavaPluginLoader:createRegisteredListeners
-	 * Part of this code would be run normally using the other register method
+	/**
+	 * Dynamically registers events in a Listener class.
+	 * Registers all methods annotated with @EventHandler.
+	 * Registers methods annotated with @EventIdentifier if the event exists in this version according to the Driver.
+	 * This method is based on Bukkit's JavaPluginLoader:createRegisteredListeners.
+	 * Part of this code would be run normally using the other register method.
+	 *
+	 * @param listener
 	 */
 	public void registerEventsDynamic(Listener listener) {
 		for(final java.lang.reflect.Method method : listener.getClass().getMethods()) {
 			EventIdentifier identifier = method.getAnnotation(EventIdentifier.class);
 			EventHandler defaultHandler = method.getAnnotation(EventHandler.class);
 			EventPriority priority = EventPriority.LOWEST;
-			Class<? extends Event> eventClass;
+			final Class<? extends Event> eventClass;
 			if(defaultHandler != null) {
 				priority = defaultHandler.priority();
 			}
 			if(identifier == null) {
+				// Look for normal EventHandler
 				if(defaultHandler != null && method.getParameterTypes().length == 1) {
 					try {
 						eventClass = (Class<? extends Event>) method.getParameterTypes()[0];
@@ -455,6 +461,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 					continue;
 				}
 			} else {
+				// Dynamically register EventIdentifier
 				if(!identifier.event().existsInCurrent()) {
 					continue;
 				}
@@ -468,47 +475,32 @@ public class CommandHelperPlugin extends JavaPlugin {
 					continue;
 				}
 			}
-			HandlerList handler;
-			try {
-				handler = (HandlerList) ReflectionUtils.invokeMethod(eventClass, null, "getHandlerList");
-			} catch (ReflectionUtils.ReflectionException ref) {
-				Class eventSuperClass = eventClass.getSuperclass();
-				if(eventSuperClass != null) {
-					try {
-						handler = (HandlerList) ReflectionUtils.invokeMethod(eventSuperClass, null, "getHandlerList");
-					} catch (ReflectionUtils.ReflectionException refInner) {
-						MSLog.GetLogger().e(MSLog.Tags.RUNTIME, "Could not listen for " + identifier.event().name()
-								+ " because the handler for class " + identifier.className()
-								+ " could not be found. An attempt has already been made to find the"
-								+ " correct handler, but" + eventSuperClass.getName()
-								+ " did not have it either. Please report this on the bug tracker.",
-								Target.UNKNOWN);
-						continue;
-					}
-				} else {
-					MSLog.GetLogger().e(MSLog.Tags.RUNTIME, "Could not listen for " + identifier.event().name()
-							+ " because the handler for class " + identifier.className()
-							+ " could not be found. An attempt has already been made to find the"
-							+ " correct handler, but no superclass could be found."
-							+ " Please report this on the bug tracker.",
-							Target.UNKNOWN);
-					continue;
+			HandlerList handler = null;
+			Class handlerClass = eventClass;
+			while(handlerClass != null) {
+				try {
+					handler = ReflectionUtils.invokeMethod(handlerClass, null, "getHandlerList");
+					break;
+				} catch (ReflectionUtils.ReflectionException ref) {
+					handlerClass = handlerClass.getSuperclass();
 				}
 			}
-			final Class<? extends Event> finalEventClass = eventClass;
-			EventExecutor executor = new EventExecutor() {
-				@Override
-				public void execute(Listener listener, Event event) throws EventException {
-					try {
-						if(!finalEventClass.isAssignableFrom(event.getClass())) {
-							return;
-						}
-						method.invoke(listener, event);
-					} catch (InvocationTargetException ex) {
-						throw new EventException(ex.getCause());
-					} catch (Throwable t) {
-						throw new EventException(t);
+			if(handler == null) {
+				MSLog.GetLogger().e(MSLog.Tags.RUNTIME, "Could not listen for " + eventClass.getName()
+						+ " because the handler could not be found. Please report this on the bug tracker.",
+						Target.UNKNOWN);
+				continue;
+			}
+			EventExecutor executor = (thisListener, event) -> {
+				try {
+					if(!eventClass.isAssignableFrom(event.getClass())) {
+						return;
 					}
+					method.invoke(thisListener, event);
+				} catch (InvocationTargetException ex) {
+					throw new EventException(ex.getCause());
+				} catch (Throwable t) {
+					throw new EventException(t);
 				}
 			};
 			if(this.getServer().getPluginManager().useTimings()) {
