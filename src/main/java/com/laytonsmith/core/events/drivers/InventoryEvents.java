@@ -904,11 +904,14 @@ public class InventoryEvents {
 		@Override
 		public String docs() {
 			return "{}"
-					+ " Fires when a recipe is formed in a crafting matrix, but the result has not yet been clicked."
-					+ " {viewers: all humanentities viewing the screen this event takes place in | matrix | result"
-					+ " | isRepair: true if this event was triggered by a repair operation (different than normal crafting)"
-					+ " | recipe: information about the formed recipe, or null if there is not one}"
-					+ " { result: the product of the recipe. }"
+					+ " Fires when a slot is clicked in a crafting matrix."
+					+ " Can also fire when clearing an inventory with the the /clear command or shift-clicking the"
+					+ " 'Destroy Item' button in creative mode."
+					+ " {player: the name of the player who clicked"
+					+ " | viewers | matrix: an array of item arrays in the crafting matrix | result"
+					+ " | isRepair: true if this event was triggered by a repair operation"
+					+ " | recipe: an array of data about the formed recipe, or null if there is not one}"
+					+ " { result: the item array product of the recipe. }"
 					+ " {}";
 		}
 
@@ -927,8 +930,7 @@ public class InventoryEvents {
 
 		@Override
 		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
-			if(event instanceof MCPrepareItemCraftEvent) {
-				MCPrepareItemCraftEvent e = (MCPrepareItemCraftEvent) event;
+			if(event instanceof MCPrepareItemCraftEvent e) {
 				Map<String, Mixed> ret = evaluate_helper(e);
 				Target t = Target.UNKNOWN;
 				CArray viewers = new CArray(t);
@@ -936,6 +938,7 @@ public class InventoryEvents {
 					viewers.push(new CString(v.getName(), t), t);
 				}
 				ret.put("viewers", viewers);
+				ret.put("player", new CString(e.getPlayer().getName(), t));
 				ret.put("recipe", ObjectGenerator.GetGenerator().recipe(e.getRecipe(), t));
 				ret.put("isRepair", CBoolean.get(e.isRepair()));
 				CArray matrix = CArray.GetAssociativeArray(t);
@@ -985,7 +988,8 @@ public class InventoryEvents {
 		@Override
 		public String docs() {
 			return "{}"
-					+ " Fires when a recipe is formed in an anvil, but the result has not yet been clicked."
+					+ " Fires when a slot other than the result is clicked in an anvil."
+					+ " Can fire multiple times per click."
 					+ " { player: the player using the anvil."
 					+ " | first_item: the first item being used in the recipe."
 					+ " | second_item: the second item being used in the recipe."
@@ -1090,7 +1094,7 @@ public class InventoryEvents {
 		@Override
 		public String docs() {
 			return "{}"
-					+ " Fires when a slot is clicked in a smithing table other than the result."
+					+ " Fires when a slot other than the result is clicked in a smithing table."
 					+ " Can fire multiple times per click."
 					+ " { player: the player using the smithing table."
 					+ " | first_item: the first item being used in the recipe."
@@ -1171,7 +1175,7 @@ public class InventoryEvents {
 		@Override
 		public String docs() {
 			return "{}"
-					+ " Fires when a slot is clicked in a grindstone other than the result. (MC 1.19.3+)"
+					+ " Fires when a slot other than the result is clicked in a grindstone. (MC 1.19.3+)"
 					+ " Can fire multiple times per click."
 					+ " { player: the player using the grindstone."
 					+ " | upper_item: the first item being used in the recipe."

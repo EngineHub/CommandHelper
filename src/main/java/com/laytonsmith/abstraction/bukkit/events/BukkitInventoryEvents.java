@@ -542,6 +542,11 @@ public class BukkitInventoryEvents {
 		}
 
 		@Override
+		public MCPlayer getPlayer() {
+			return new BukkitMCPlayer(e.getViewers().get(0));
+		}
+
+		@Override
 		public MCRecipe getRecipe() {
 			return BukkitConvertor.BukkitGetRecipe(e.getRecipe());
 		}
