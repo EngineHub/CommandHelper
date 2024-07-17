@@ -6,6 +6,8 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCServer;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCExpChangeEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCFoodLevelChangeEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCGamemodeChangeEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerBucketEmptyEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerBucketFillEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerEnterBedEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerLeaveBedEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerChatEvent;
@@ -40,6 +42,8 @@ import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerBedLeaveEvent;
+import org.bukkit.event.player.PlayerBucketEmptyEvent;
+import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerEditBookEvent;
 import org.bukkit.event.player.PlayerExpChangeEvent;
@@ -368,5 +372,17 @@ public class BukkitPlayerListener implements Listener {
 				PlayerEvents.GetLastLocations(i).put(event.getPlayer().getName(), new BukkitMCLocation(event.getTo()));
 			}
 		}
+	}
+
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onBucketFill(PlayerBucketFillEvent event) {
+		BukkitMCPlayerBucketFillEvent pbfe = new BukkitMCPlayerBucketFillEvent(event);
+		EventUtils.TriggerListener(Driver.PLAYER_BUCKET_FILL, "player_bucket_fill", pbfe);
+	}
+
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onBucketEmpty(PlayerBucketEmptyEvent event) {
+		BukkitMCPlayerBucketEmptyEvent pbee = new BukkitMCPlayerBucketEmptyEvent(event);
+		EventUtils.TriggerListener(Driver.PLAYER_BUCKET_EMPTY, "player_bucket_empty", pbee);
 	}
 }

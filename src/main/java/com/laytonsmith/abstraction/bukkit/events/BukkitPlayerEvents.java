@@ -11,12 +11,14 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCBookMeta;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCFishHook;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCHumanEntity;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
@@ -38,6 +40,9 @@ import com.laytonsmith.abstraction.enums.bukkit.BukkitMCTeleportCause;
 import com.laytonsmith.abstraction.events.MCExpChangeEvent;
 import com.laytonsmith.abstraction.events.MCFoodLevelChangeEvent;
 import com.laytonsmith.abstraction.events.MCGamemodeChangeEvent;
+import com.laytonsmith.abstraction.events.MCPlayerBucketEmptyEvent;
+import com.laytonsmith.abstraction.events.MCPlayerBucketEvent;
+import com.laytonsmith.abstraction.events.MCPlayerBucketFillEvent;
 import com.laytonsmith.abstraction.events.MCPlayerEnterBedEvent;
 import com.laytonsmith.abstraction.events.MCPlayerLeaveBedEvent;
 import com.laytonsmith.abstraction.events.MCPlayerChatEvent;
@@ -75,6 +80,9 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerBedLeaveEvent;
+import org.bukkit.event.player.PlayerBucketEmptyEvent;
+import org.bukkit.event.player.PlayerBucketEvent;
+import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerEditBookEvent;
@@ -1070,6 +1078,73 @@ public class BukkitPlayerEvents {
 		@Override
 		public void setCancelled(boolean bln) {
 			pme.setCancelled(bln);
+		}
+	}
+
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public abstract static class BukkitMCPlayerBucketEvent extends BukkitMCPlayerEvent implements MCPlayerBucketEvent {
+
+		PlayerBucketEvent pbe;
+
+		public BukkitMCPlayerBucketEvent(PlayerBucketEvent event) {
+			super(event);
+			this.pbe = event;
+		}
+
+		@Override
+		public MCBlock getBlock() {
+			return new BukkitMCBlock(pbe.getBlock());
+		}
+
+		@Override
+		public MCBlock getBlockClicked() {
+			return new BukkitMCBlock(pbe.getBlockClicked());
+		}
+
+		@Override
+		public MCBlockFace getBlockFace() {
+			return MCBlockFace.valueOf(pbe.getBlockFace().name());
+		}
+
+		@Override
+		public MCMaterial getBucket() {
+			return new BukkitMCMaterial(pbe.getBucket());
+		}
+
+		@Override
+		public MCEquipmentSlot getHand() {
+			if(pbe.getHand() == EquipmentSlot.HAND) {
+				return MCEquipmentSlot.WEAPON;
+			}
+			return MCEquipmentSlot.OFF_HAND;
+		}
+
+		@Override
+		public MCItemStack getItemStack() {
+			return new BukkitMCItemStack(pbe.getItemStack());
+		}
+	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCPlayerBucketFillEvent extends BukkitMCPlayerBucketEvent implements MCPlayerBucketFillEvent {
+
+		PlayerBucketFillEvent pbfe;
+
+		public BukkitMCPlayerBucketFillEvent(PlayerBucketFillEvent event) {
+			super(event);
+			this.pbfe = event;
+		}
+	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCPlayerBucketEmptyEvent extends BukkitMCPlayerBucketEvent implements MCPlayerBucketEmptyEvent {
+
+		PlayerBucketEmptyEvent pbee;
+
+		public BukkitMCPlayerBucketEmptyEvent(PlayerBucketEmptyEvent event) {
+			super(event);
+			this.pbee = event;
 		}
 	}
 }
