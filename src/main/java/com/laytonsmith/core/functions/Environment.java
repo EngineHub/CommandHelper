@@ -11,6 +11,8 @@ import com.laytonsmith.abstraction.MCNote;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPattern;
 import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.MCPlayerProfile;
+import com.laytonsmith.abstraction.MCProfileProperty;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBanner;
@@ -940,15 +942,16 @@ public class Environment {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{2};
+			return new Integer[]{2, 3};
 		}
 
 		@Override
 		public String docs() {
-			return "void {locationArray, owner}"
+			return "void {locationArray, owner, [texture]}"
 					+ " Sets the owner of the skull at the given location by name or uuid."
 					+ " Supplying null will clear the skull owner, but due to limitations in Bukkit, clients will only"
 					+ " see this change after reloading the block."
+					+ " If owner is not null, the texture value as a Base64 encoded string may be provided. (Paper only)"
 					+ " If no world is provided and the function is executed by a player, the player's world is used."
 					+ " If the block at the given location isn't a skull, a RangeException is thrown.";
 		}
@@ -976,23 +979,30 @@ public class Environment {
 		@Override
 		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args)
 				throws ConfigRuntimeException {
-			MCWorld defaultWorld = null;
-			MCCommandSender sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
-			if(sender instanceof MCPlayer) {
-				defaultWorld = ((MCPlayer) sender).getWorld();
-			}
-			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], defaultWorld, t);
+			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], p != null ? p.getWorld() : null, t);
 			MCBlock block = loc.getBlock();
 			MCBlockState blockState = block.getState();
-			if(blockState instanceof MCSkull) {
-				MCSkull skull = (MCSkull) blockState;
-				MCOfflinePlayer owner = (args[1] instanceof CNull ? null : Static.GetUser(args[1], t));
-				skull.setOwningPlayer(owner);
-				skull.update();
-				return CVoid.VOID;
-			} else {
+			if(!(blockState instanceof MCSkull skull)) {
 				throw new CRERangeException("The block at the specified location is not a skull", t);
 			}
+			MCOfflinePlayer owner = (args[1] instanceof CNull ? null : Static.GetUser(args[1], t));
+			if(owner != null && args.length == 3) {
+				MCPlayerProfile profile = Static.getServer().getPlayerProfile(owner.getUniqueID(), owner.getName());
+				if(profile != null) {
+					if(args[2] instanceof CNull) {
+						profile.removeProperty("textures");
+					} else {
+						profile.setProperty(new MCProfileProperty("textures", args[2].val(), null));
+					}
+					skull.setPlayerProfile(profile);
+					skull.update();
+					return CVoid.VOID;
+				}
+			}
+			skull.setOwningPlayer(owner);
+			skull.update();
+			return CVoid.VOID;
 		}
 	}
 
@@ -1013,8 +1023,9 @@ public class Environment {
 		public String docs() {
 			return "array {locationArray}"
 					+ " Returns the owner name and uuid of the skull at the given location as an array in format:"
-					+ " {name: NAME, uuid: UUID}, or null if the skull does not have an owner. The value at the 'name'"
-					+ " key will be an empty string if the server does not know the player's name."
+					+ " {name: string, uuid: string, texture: string}, or null if the skull does not have an owner."
+					+ " The value at the 'name' key will be an empty string if the server does not know the player's name."
+					+ " The 'texture' value is the Base64 encoded string of the textures property, or null. (Paper only)"
 					+ " If no world is provided and the function is executed by a player, the player's world is used."
 					+ " If the block at the given location isn't a skull, a RangeException is thrown.";
 		}
@@ -1042,27 +1053,29 @@ public class Environment {
 		@Override
 		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args)
 				throws ConfigRuntimeException {
-			MCWorld defaultWorld = null;
-			MCCommandSender sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
-			if(sender instanceof MCPlayer) {
-				defaultWorld = ((MCPlayer) sender).getWorld();
-			}
-			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], defaultWorld, t);
+			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], p != null ? p.getWorld() : null, t);
 			MCBlockState blockState = loc.getBlock().getState();
-			if(blockState instanceof MCSkull) {
-				MCSkull skull = (MCSkull) blockState;
-				MCOfflinePlayer owner = skull.getOwningPlayer();
-				if(owner == null) {
-					return CNull.NULL;
-				} else {
-					CArray ret = new CArray(t);
-					ret.set("name", owner.getName());
-					ret.set("uuid", owner.getUniqueID().toString());
-					return ret;
-				}
-			} else {
+			if(!(blockState instanceof MCSkull skull)) {
 				throw new CRERangeException("The block at the specified location is not a skull", t);
 			}
+			MCOfflinePlayer owner = skull.getOwningPlayer();
+			if(owner == null) {
+				return CNull.NULL;
+			}
+			CArray ret = new CArray(t);
+			ret.set("name", owner.getName());
+			ret.set("uuid", owner.getUniqueID().toString());
+			MCPlayerProfile playerProfile = skull.getPlayerProfile();
+			if(playerProfile != null) {
+				MCProfileProperty textureProperty = playerProfile.getProperty("textures");
+				if(textureProperty != null) {
+					ret.set("texture", skull.getPlayerProfile().getProperty("textures").getValue());
+				} else {
+					ret.set("texture", CNull.NULL, t);
+				}
+			}
+			return ret;
 		}
 	}
 

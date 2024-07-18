@@ -1,6 +1,7 @@
 package com.laytonsmith.abstraction.blocks;
 
 import com.laytonsmith.abstraction.MCOfflinePlayer;
+import com.laytonsmith.abstraction.MCPlayerProfile;
 
 public interface MCSkull extends MCBlockState {
 
@@ -21,4 +22,8 @@ public interface MCSkull extends MCBlockState {
 	 * @param player - The new skull owner or {@code null} to clear the current owner.
 	 */
 	void setOwningPlayer(MCOfflinePlayer player);
+
+	MCPlayerProfile getPlayerProfile();
+
+	void setPlayerProfile(MCPlayerProfile profile);
 }
