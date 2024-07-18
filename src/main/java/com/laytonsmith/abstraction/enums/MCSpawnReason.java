@@ -56,4 +56,5 @@ public enum MCSpawnReason {
 	DUPLICATION,
 	ENCHANTMENT,
 	TRIAL_SPAWNER,
+	POTION_EFFECT,
 }
