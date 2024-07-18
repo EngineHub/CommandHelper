@@ -6,10 +6,12 @@ import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
+import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class BukkitMCEnchantment extends MCEnchantment<Enchantment> {
@@ -75,6 +77,6 @@ public class BukkitMCEnchantment extends MCEnchantment<Enchantment> {
 				return Enchantment.SWEEPING_EDGE;
 			}
 		}
-		return Enchantment.getByName(v.name());
+		return Enchantment.getByKey(NamespacedKey.minecraft(v.name().toLowerCase(Locale.ROOT)));
 	}
 }
