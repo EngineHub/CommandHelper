@@ -2814,10 +2814,13 @@ public class PlayerEvents {
 
 				ret.put("player", new CString(e.getPlayer().getName(), t));
 				ret.put("location", ObjectGenerator.GetGenerator().location(e.getBlock().getLocation(), false));
-				if(e.getHand() == MCEquipmentSlot.WEAPON) {
-					ret.put("hand", new CString("main_hand", t));
-				} else {
-					ret.put("hand", new CString("off_hand", t));
+
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_2)) {
+					if(e.getHand() == MCEquipmentSlot.WEAPON) {
+						ret.put("hand", new CString("main_hand", t));
+					} else {
+						ret.put("hand", new CString("off_hand", t));
+					}
 				}
 				ret.put("item", ObjectGenerator.GetGenerator().item(e.getItemStack(), t));
 
@@ -2840,9 +2843,9 @@ public class PlayerEvents {
 		public String docs() {
 			return "{} "
 					+ "Fired when a player fills a bucket in their hand from the world."
-					+ " { player: the player who used the bucket. "
+					+ " { player: the player who used the bucket."
 					+ " | location: where the bucket was filled from."
-					+ " | hand: hand the player was holding the bucket in. "
+					+ " | hand: hand the player was holding the bucket in, either main_hand or off_hand (MC 1.19.2+)."
 					+ " | item: the bucket item the player ended up with. }"
 					+ "{} "
 					+ "{} "
@@ -2871,10 +2874,10 @@ public class PlayerEvents {
 		@Override
 		public String docs() {
 			return "{} "
-					+ "Fired when a player empties a bucket in their hand to the world."
-					+ " { player: the player who used the bucket. "
+					+ "Fired when a player empties a bucket in their hand into the world."
+					+ " { player: the player who used the bucket."
 					+ " | location: where the bucket was emptied to."
-					+ " | hand: hand the player was holding the bucket in. "
+					+ " | hand: hand the player was holding the bucket in, either main_hand or off_hand (MC 1.19.2+)."
 					+ " | item: the bucket item the player ended up with. }"
 					+ "{} "
 					+ "{} "
