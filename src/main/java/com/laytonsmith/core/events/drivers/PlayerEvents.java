@@ -24,6 +24,7 @@ import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.events.MCExpChangeEvent;
 import com.laytonsmith.abstraction.events.MCFoodLevelChangeEvent;
 import com.laytonsmith.abstraction.events.MCGamemodeChangeEvent;
+import com.laytonsmith.abstraction.events.MCPlayerBucketEvent;
 import com.laytonsmith.abstraction.events.MCPlayerEnterBedEvent;
 import com.laytonsmith.abstraction.events.MCPlayerLeaveBedEvent;
 import com.laytonsmith.abstraction.events.MCPlayerChatEvent;
@@ -2782,6 +2783,115 @@ public class PlayerEvents {
 		@Override
 		public BindableEvent convert(CArray manualObject, Target t) {
 			return null;
+		}
+	}
+
+	public abstract static class player_bucket_event extends AbstractEvent {
+
+		@Override
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			if(e instanceof MCPlayerBucketEvent) {
+				return true;
+			}
+			return false;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			throw ConfigRuntimeException.CreateUncatchableException("Unsupported operation.", Target.UNKNOWN);
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Mixed value, BindableEvent e) {
+			return false;
+		}
+
+		@Override
+		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+			if(event instanceof MCPlayerBucketEvent e) {
+				Map<String, Mixed> ret = evaluate_helper(e);
+				Target t = Target.UNKNOWN;
+
+				ret.put("player", new CString(e.getPlayer().getName(), t));
+				ret.put("location", ObjectGenerator.GetGenerator().location(e.getBlock().getLocation(), false));
+
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_2)) {
+					if(e.getHand() == MCEquipmentSlot.WEAPON) {
+						ret.put("hand", new CString("main_hand", t));
+					} else {
+						ret.put("hand", new CString("off_hand", t));
+					}
+				}
+				ret.put("item", ObjectGenerator.GetGenerator().item(e.getItemStack(), t));
+
+				return ret;
+			} else {
+				throw new EventException("Event received was not an MCPlayerBucketEvent.");
+			}
+		}
+	}
+
+	@api
+	public static class player_bucket_fill extends player_bucket_event {
+
+		@Override
+		public String getName() {
+			return "player_bucket_fill";
+		}
+
+		@Override
+		public String docs() {
+			return "{} "
+					+ "Fired when a player fills a bucket in their hand from the world."
+					+ " { player: the player who used the bucket."
+					+ " | location: where the bucket was filled from."
+					+ " | hand: hand the player was holding the bucket in, either main_hand or off_hand (MC 1.19.2+)."
+					+ " | item: the bucket item the player ended up with. }"
+					+ "{} "
+					+ "{} "
+					+ "{}";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.PLAYER_BUCKET_FILL;
+		}
+	}
+
+	@api
+	public static class player_bucket_empty extends player_bucket_event {
+
+		@Override
+		public String getName() {
+			return "player_bucket_empty";
+		}
+
+		@Override
+		public String docs() {
+			return "{} "
+					+ "Fired when a player empties a bucket in their hand into the world."
+					+ " { player: the player who used the bucket."
+					+ " | location: where the bucket was emptied to."
+					+ " | hand: hand the player was holding the bucket in, either main_hand or off_hand (MC 1.19.2+)."
+					+ " | item: the bucket item the player ended up with. }"
+					+ "{} "
+					+ "{} "
+					+ "{}";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.PLAYER_BUCKET_EMPTY;
 		}
 	}
 }
