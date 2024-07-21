@@ -554,8 +554,20 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	}
 
 	@Override
-	public void sendBlockDamage(MCLocation loc, double progress) {
-		p.sendBlockDamage((Location) loc.getHandle(), (float) progress);
+	public void sendBlockDamage(MCLocation loc, float progress, MCEntity entity) {
+		Location location = (Location) loc.getHandle();
+		try {
+			if(entity == null) {
+				// Using a block position hashCode as the sourceId allows independent control of each block's state.
+				int sourceId = (location.getBlockY() + location.getBlockZ() * 31) * 31 + location.getBlockX();
+				p.sendBlockDamage(location, progress, sourceId);
+			} else {
+				p.sendBlockDamage(location, progress, ((Entity) entity.getHandle()).getEntityId());
+			}
+		} catch (NoSuchMethodError er) {
+			// probably prior to 1.19.2 on Paper or 1.19.4 on Spigot
+			p.sendBlockDamage(location, progress);
+		}
 	}
 
 	@Override

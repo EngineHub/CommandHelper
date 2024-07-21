@@ -4379,13 +4379,20 @@ public class PlayerManagement {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{2, 3};
+			return new Integer[]{2, 3, 4};
 		}
 
 		@Override
 		public String docs() {
-			return "void {[player], locationArray, progress} Sends the player fake block break progress for a location."
-					+ " Progress is a percentage from 0.0 to 1.0.";
+			return "void {[player], locationArray, progress, [entity]} Sends the player fake block damage progress."
+					+ " Progress is a percentage from 0.0 to 1.0, with 0.0 clearing any block damage."
+					+ " Alternatively you can specify the discrete damage state as an integer from 0 to 10."
+					+ " If a source entity UUID is specified, it will be as if that entity is damaging the block,"
+					+ " otherwise the player will be used. If given null, damage will disregard source entity."
+					+ " If that entity damages a different block, the previous block's damage will be cleared."
+					+ " If unchanged, the damage will clear on its own after 20 seconds."
+					+ " On versions prior to Spigot 1.19.4 or Paper 1.19.2, the source entity will always be the"
+					+ " player this block damage is being sent to.";
 		}
 
 		@Override
@@ -4397,20 +4404,35 @@ public class PlayerManagement {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
-			int offset = 0;
-			if(args.length == 3) {
-				p = Static.GetPlayer(args[0], t);
-				offset = 1;
-			} else {
+			MCLocation location;
+			float progress;
+			MCEntity entity;
+			int argOffset = 0;
+			if(args.length == 2 || args.length == 3 && args[0] instanceof CArray) {
 				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
+			} else {
+				p = Static.GetPlayer(args[0], t);
+				argOffset = 1;
 			}
-			MCLocation loc = ObjectGenerator.GetGenerator().location(args[offset], p.getWorld(), t);
-			double progress = ArgumentValidation.getDouble(args[offset + 1], t);
+			location = ObjectGenerator.GetGenerator().location(args[argOffset], p.getWorld(), t);
+			Mixed progressArg = args[1 + argOffset];
+			if(progressArg instanceof CInt) {
+				progress = ArgumentValidation.getInt(progressArg, t) / 10.0F;
+			} else {
+				progress = (float) ArgumentValidation.getDouble(progressArg, t);
+			}
 			if(progress < 0.0 || progress > 1.0) {
-				throw new CRERangeException("Block damage progress must be 0.0 to 1.0.", t);
+				throw new CRERangeException("Block damage progress must be 0.0 to 1.0 (or 0 - 10).", t);
 			}
-			p.sendBlockDamage(loc, progress);
+			if(args.length < 3 + argOffset) {
+				entity = p;
+			} else if(args[2 + argOffset] instanceof CNull) {
+				entity = null;
+			} else {
+				entity = Static.getEntity(args[2 + argOffset], t);
+			}
+			p.sendBlockDamage(location, progress, entity);
 			return CVoid.VOID;
 		}
 

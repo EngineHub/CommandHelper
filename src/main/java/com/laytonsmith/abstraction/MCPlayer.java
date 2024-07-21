@@ -132,7 +132,7 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity, MCOfflinePlaye
 
 	void sendBlockChange(MCLocation loc, MCBlockData data);
 
-	void sendBlockDamage(MCLocation loc, double progress);
+	void sendBlockDamage(MCLocation loc, float progress, MCEntity entity);
 
 	void sendSignTextChange(MCLocation loc, String[] lines);
 
