@@ -86,7 +86,6 @@ public class BukkitBlockListener implements Listener {
 				Block block = chevent.getBlock();
 				block.setType(Material.AIR);
 				Location loc = block.getLocation();
-				loc.add(0.5, 0.5, 0.5);
 				if(chevent.isDropItems()) {
 					for(MCItemStack item : bbe.getDrops()) {
 						block.getWorld().dropItemNaturally(loc, (ItemStack) item.getHandle());
