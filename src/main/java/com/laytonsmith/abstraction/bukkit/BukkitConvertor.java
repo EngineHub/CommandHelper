@@ -89,7 +89,6 @@ import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDyeColor;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCLegacyMaterial;
-import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPatternShape;
 import com.laytonsmith.annotations.convert;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.LogLevel;
@@ -125,6 +124,7 @@ import org.bukkit.block.Lectern;
 import org.bukkit.block.Sign;
 import org.bukkit.block.Skull;
 import org.bukkit.block.banner.Pattern;
+import org.bukkit.block.banner.PatternType;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
@@ -771,7 +771,7 @@ public class BukkitConvertor extends AbstractConvertor {
 	@Override
 	public MCPattern GetPattern(MCDyeColor color, MCPatternShape shape) {
 		return new BukkitMCPattern(new Pattern(BukkitMCDyeColor.getConvertor().getConcreteEnum(color),
-				BukkitMCPatternShape.getConvertor().getConcreteEnum(shape)));
+				(PatternType) shape.getConcrete()));
 	}
 
 	@Override

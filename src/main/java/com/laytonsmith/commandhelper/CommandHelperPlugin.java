@@ -47,6 +47,7 @@ import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEnchantment;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCLegacyMaterial;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCParticle;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPatternShape;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPotionEffectType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPotionType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCProfession;
@@ -316,6 +317,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 		BukkitMCLegacyMaterial.build();
 		BukkitMCPotionType.build();
 		BukkitMCEnchantment.build();
+		BukkitMCPatternShape.build();
 		if(myServer.getMinecraftVersion().gte(MCVersion.MC1_20)) {
 			BukkitMCTrimMaterial.build();
 			BukkitMCTrimPattern.build();
