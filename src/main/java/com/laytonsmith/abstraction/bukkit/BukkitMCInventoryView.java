@@ -36,22 +36,22 @@ public class BukkitMCInventoryView implements MCInventoryView {
 
 	@Override
 	public MCInventory getBottomInventory() {
-		return new BukkitMCInventory(ReflectionUtils.invokeMethod(iv, "getBottomInventory"));
+		return new BukkitMCInventory(ReflectionUtils.invokeMethod(InventoryView.class, iv, "getBottomInventory"));
 	}
 
 	@Override
 	public MCInventory getTopInventory() {
-		return new BukkitMCInventory(ReflectionUtils.invokeMethod(iv, "getTopInventory"));
+		return new BukkitMCInventory(ReflectionUtils.invokeMethod(InventoryView.class, iv, "getTopInventory"));
 	}
 
 	@Override
 	public void close() {
-		ReflectionUtils.invokeMethod(iv, "close");
+		ReflectionUtils.invokeMethod(InventoryView.class, iv, "close");
 	}
 
 	@Override
 	public int countSlots() {
-		return ReflectionUtils.invokeMethod(iv, "countSlots");
+		return ReflectionUtils.invokeMethod(InventoryView.class, iv, "countSlots");
 	}
 
 	@Override
@@ -66,17 +66,17 @@ public class BukkitMCInventoryView implements MCInventoryView {
 
 	@Override
 	public MCHumanEntity getPlayer() {
-		return new BukkitMCHumanEntity(ReflectionUtils.invokeMethod(iv, "getPlayer"));
+		return new BukkitMCHumanEntity(ReflectionUtils.invokeMethod(InventoryView.class, iv, "getPlayer"));
 	}
 
 	@Override
 	public String getTitle() {
-		return ReflectionUtils.invokeMethod(iv, "getTitle");
+		return ReflectionUtils.invokeMethod(InventoryView.class, iv, "getTitle");
 	}
 
 	@Override
 	public MCInventoryType getType() {
-		return MCInventoryType.valueOf(((InventoryType) ReflectionUtils.invokeMethod(iv, "getType")).name());
+		return MCInventoryType.valueOf(((InventoryType) ReflectionUtils.invokeMethod(InventoryView.class, iv, "getType")).name());
 	}
 
 	@Override
