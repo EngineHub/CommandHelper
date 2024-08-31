@@ -239,7 +239,7 @@ public class Commands {
 			MCCommand cmd = map.getCommand(cmdStr);
 			String prefix = Implementation.GetServerType().getBranding().toLowerCase(Locale.ENGLISH);
 			boolean register = false;
-			if(cmd == null) {
+			if(cmd == null || cmd.getPlugin() == null) {
 				register = true;
 				cmd = StaticLayer.GetConvertor().getNewCommand(cmdStr);
 			}
