@@ -836,7 +836,8 @@ public final class Interpreter {
 					@Override
 					public void run() {
 						try {
-							if(tree.getChildren().size() == 1 && tree.getChildAt(0).getData() instanceof IVariable ivar) {
+							if(tree != null && tree.getChildren().size() == 1
+									&& tree.getChildAt(0).getData() instanceof IVariable ivar) {
 								Mixed i = env.getEnv(GlobalEnv.class).GetVarList()
 										.get(ivar.getVariableName(), ivar.getTarget(), env).ival();
 								StreamUtils.GetSystemOut().println(i.val());
