@@ -294,7 +294,7 @@ public class BukkitConvertor extends AbstractConvertor {
 					new Class[]{PotionType.class, boolean.class, boolean.class},
 					new Object[]{type.getConcrete(), extended, upgraded}));
 		} catch (ClassNotFoundException ex) {
-			// probably before 1.20.5
+			// probably after 1.20.5
 			// use PotionType instead
 			return null;
 		}
@@ -313,6 +313,12 @@ public class BukkitConvertor extends AbstractConvertor {
 
 	@Override
 	public MCAttributeModifier GetAttributeModifier(MCAttribute attr, UUID id, String name, double amt, MCAttributeModifier.Operation op, MCEquipmentSlotGroup slot) {
+		if(!((BukkitMCServer) Static.getServer()).isPaper()) {
+			// BODY is missing from Spigot, so this falls back to ARMOR just like EquipmentSlot.BODY
+			if(slot == MCEquipmentSlotGroup.BODY) {
+				slot = MCEquipmentSlotGroup.ARMOR;
+			}
+		}
 		if(id == null) {
 			id = UUID.randomUUID();
 		}
@@ -333,6 +339,12 @@ public class BukkitConvertor extends AbstractConvertor {
 
 	@Override
 	public MCAttributeModifier GetAttributeModifier(MCAttribute attr, MCNamespacedKey key, double amt, MCAttributeModifier.Operation op, MCEquipmentSlotGroup slot) {
+		if(!((BukkitMCServer) Static.getServer()).isPaper()) {
+			// BODY is missing from Spigot, so this falls back to ARMOR just like EquipmentSlot.BODY
+			if(slot == MCEquipmentSlotGroup.BODY) {
+				slot = MCEquipmentSlotGroup.ARMOR;
+			}
+		}
 		AttributeModifier mod = new AttributeModifier((NamespacedKey) key.getHandle(), amt,
 				BukkitMCAttributeModifier.Operation.getConvertor().getConcreteEnum(op),
 				EquipmentSlotGroup.getByName(slot.name()));

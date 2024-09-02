@@ -1812,13 +1812,14 @@ public class ObjectGenerator {
 			Mixed s = m.get("slot", t);
 			if(!(s instanceof CNull)) {
 				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
-					if(s.val().equals("ANY")) {
-						slotGroup = MCEquipmentSlotGroup.ANY;
-					} else if(s.val().equals("HAND")) {
-						slotGroup = MCEquipmentSlotGroup.HAND;
-					} else if(s.val().equals("ARMOR")) {
-						slotGroup = MCEquipmentSlotGroup.ARMOR;
-					}
+					// check new slots groups first
+					slotGroup = switch(s.val()) {
+						case "ANY" -> MCEquipmentSlotGroup.ANY;
+						case "HAND" -> MCEquipmentSlotGroup.HAND;
+						case "ARMOR" -> MCEquipmentSlotGroup.ARMOR;
+						case "BODY" -> MCEquipmentSlotGroup.BODY;
+						default -> null;
+					};
 				}
 				if(slotGroup == null) {
 					try {
