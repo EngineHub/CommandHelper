@@ -222,7 +222,7 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 
 	@Override
 	public boolean teleport(MCEntity destination) {
-		return this.teleport(destination.getLocation(), MCTeleportCause.UNKNOWN);
+		return this.teleport(destination.getLocation(), MCTeleportCause.PLUGIN);
 	}
 
 	@Override
@@ -232,7 +232,7 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 
 	@Override
 	public boolean teleport(MCLocation location) {
-		return this.teleport(location, MCTeleportCause.UNKNOWN);
+		return this.teleport(location, MCTeleportCause.PLUGIN);
 	}
 
 	@Override
