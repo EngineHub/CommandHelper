@@ -14,7 +14,6 @@ public class BukkitMCPotionEffectType extends MCPotionEffectType<PotionEffectTyp
 
 	private static final Map<PotionEffectType, MCPotionEffectType> BUKKIT_MAP = new HashMap<>();
 
-
 	public BukkitMCPotionEffectType(MCVanillaPotionEffectType vanillaEffect, PotionEffectType effect) {
 		super(vanillaEffect, effect);
 	}
@@ -39,7 +38,7 @@ public class BukkitMCPotionEffectType extends MCPotionEffectType<PotionEffectTyp
 			if(v.existsIn(Static.getServer().getMinecraftVersion())) {
 				PotionEffectType effect = getBukkitType(v);
 				if(effect == null) {
-					MSLog.GetLogger().w(MSLog.Tags.RUNTIME, "Could not find a Bukkit potion effect type for " + v.name(), Target.UNKNOWN);
+					MSLog.GetLogger().w(MSLog.Tags.GENERAL, "Could not find a Bukkit potion effect type for " + v.name(), Target.UNKNOWN);
 					continue;
 				}
 				BukkitMCPotionEffectType wrapper = new BukkitMCPotionEffectType(v, effect);
@@ -50,9 +49,11 @@ public class BukkitMCPotionEffectType extends MCPotionEffectType<PotionEffectTyp
 		}
 		for(PotionEffectType pe : PotionEffectType.values()) {
 			if(pe != null && !BUKKIT_MAP.containsKey(pe)) {
-				MAP.put(pe.getName(), new BukkitMCPotionEffectType(MCVanillaPotionEffectType.UNKNOWN, pe));
-				ID_MAP.put(pe.getId(), new BukkitMCPotionEffectType(MCVanillaPotionEffectType.UNKNOWN, pe));
-				BUKKIT_MAP.put(pe, new BukkitMCPotionEffectType(MCVanillaPotionEffectType.UNKNOWN, pe));
+				MSLog.GetLogger().w(MSLog.Tags.GENERAL, "Could not find MCPotionEffectTYpe for " + pe.getName(), Target.UNKNOWN);
+				MCPotionEffectType wrapper = new BukkitMCPotionEffectType(MCVanillaPotionEffectType.UNKNOWN, pe);
+				MAP.put(pe.getName(), wrapper);
+				ID_MAP.put(pe.getId(), wrapper);
+				BUKKIT_MAP.put(pe, wrapper);
 			}
 		}
 	}

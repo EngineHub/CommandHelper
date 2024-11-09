@@ -17,7 +17,6 @@ import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import com.laytonsmith.abstraction.enums.MCAttribute;
 import com.laytonsmith.abstraction.enums.MCPotionEffectType;
 import com.laytonsmith.abstraction.enums.MCVersion;
-import com.laytonsmith.abstraction.enums.bukkit.BukkitMCAttribute;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPotionEffectType;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
@@ -415,7 +414,7 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 	}
 
 	private AttributeInstance getAttributeInstance(MCAttribute attr) {
-		AttributeInstance instance = le.getAttribute(BukkitMCAttribute.getConvertor().getConcreteEnum(attr));
+		AttributeInstance instance = le.getAttribute((Attribute) attr.getConcrete());
 		if(instance == null) {
 			throw new IllegalArgumentException("This attribute is not applicable to this entity type.");
 		}
@@ -450,7 +449,7 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 
 	@Override
 	public List<MCAttributeModifier> getAttributeModifiers(MCAttribute attr) {
-		Attribute bukkitAttribute = BukkitMCAttribute.getConvertor().getConcreteEnum(attr);
+		Attribute bukkitAttribute = (Attribute) attr.getConcrete();
 		AttributeInstance instance = le.getAttribute(bukkitAttribute);
 		if(instance == null) {
 			throw new IllegalArgumentException("This attribute is not applicable to this entity type.");

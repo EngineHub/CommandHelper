@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import com.laytonsmith.abstraction.enums.bukkit.BukkitMCAttribute;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEnchantment;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCItemFlag;
 import org.bukkit.Material;
@@ -238,8 +237,7 @@ public class BukkitMCItemMeta implements MCItemMeta {
 	public void setAttributeModifiers(List<MCAttributeModifier> modifiers) {
 		Multimap<Attribute, AttributeModifier> map = LinkedHashMultimap.create();
 		for(MCAttributeModifier m : modifiers) {
-			map.put(BukkitMCAttribute.getConvertor().getConcreteEnum(m.getAttribute()),
-					(AttributeModifier) m.getHandle());
+			map.put((Attribute) m.getAttribute().getConcrete(), (AttributeModifier) m.getHandle());
 		}
 		im.setAttributeModifiers(map);
 	}

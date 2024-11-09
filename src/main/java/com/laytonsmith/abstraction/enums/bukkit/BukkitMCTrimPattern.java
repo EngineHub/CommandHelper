@@ -45,7 +45,7 @@ public class BukkitMCTrimPattern extends MCTrimPattern<TrimPattern> {
 			try {
 				trimPattern = getBukkitType(v);
 			} catch (IllegalAccessException | NoSuchFieldException ex) {
-				MSLog.GetLogger().w(MSLog.Tags.RUNTIME, "Could not find a Bukkit trim pattern type for "
+				MSLog.GetLogger().w(MSLog.Tags.GENERAL, "Could not find a Bukkit trim pattern type for "
 						+ v.name(), Target.UNKNOWN);
 				continue;
 			}
@@ -57,8 +57,11 @@ public class BukkitMCTrimPattern extends MCTrimPattern<TrimPattern> {
 			try {
 				TrimPattern trimPattern = (TrimPattern) field.get(null);
 				if(!BUKKIT_MAP.containsKey(trimPattern)) {
-					MAP.put(field.getName(), new BukkitMCTrimPattern(MCVanillaTrimPattern.UNKNOWN, trimPattern));
-					BUKKIT_MAP.put(trimPattern, new BukkitMCTrimPattern(MCVanillaTrimPattern.UNKNOWN, trimPattern));
+					MSLog.GetLogger().w(MSLog.Tags.GENERAL, "Could not find MCTrimPattern for "
+							+ field.getName(), Target.UNKNOWN);
+					MCTrimPattern wrapper = new BukkitMCTrimPattern(MCVanillaTrimPattern.UNKNOWN, trimPattern);
+					MAP.put(field.getName(), wrapper);
+					BUKKIT_MAP.put(trimPattern, wrapper);
 				}
 			} catch (IllegalAccessException | ClassCastException ignore) {}
 		}

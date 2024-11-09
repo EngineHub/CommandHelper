@@ -84,7 +84,6 @@ import com.laytonsmith.abstraction.enums.MCPotionType;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
 import com.laytonsmith.abstraction.enums.MCTone;
 import com.laytonsmith.abstraction.enums.MCVersion;
-import com.laytonsmith.abstraction.enums.bukkit.BukkitMCAttribute;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDyeColor;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEquipmentSlot;
@@ -105,6 +104,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.World;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.block.Banner;
 import org.bukkit.block.Beacon;
@@ -308,7 +308,7 @@ public class BukkitConvertor extends AbstractConvertor {
 		AttributeModifier mod = new AttributeModifier(id, name, amt,
 				BukkitMCAttributeModifier.Operation.getConvertor().getConcreteEnum(op),
 				BukkitMCEquipmentSlot.getConvertor().getConcreteEnum(slot));
-		return new BukkitMCAttributeModifier(BukkitMCAttribute.getConvertor().getConcreteEnum(attr), mod);
+		return new BukkitMCAttributeModifier((Attribute) attr.getConcrete(), mod);
 	}
 
 	@Override
@@ -325,7 +325,7 @@ public class BukkitConvertor extends AbstractConvertor {
 		AttributeModifier mod = new AttributeModifier(id, name, amt,
 				BukkitMCAttributeModifier.Operation.getConvertor().getConcreteEnum(op),
 				EquipmentSlotGroup.getByName(slot.name()));
-		return new BukkitMCAttributeModifier(BukkitMCAttribute.getConvertor().getConcreteEnum(attr), mod);
+		return new BukkitMCAttributeModifier((Attribute) attr.getConcrete(), mod);
 	}
 
 	@Override
@@ -334,7 +334,7 @@ public class BukkitConvertor extends AbstractConvertor {
 		AttributeModifier mod = new AttributeModifier((NamespacedKey) key.getHandle(), amt,
 				BukkitMCAttributeModifier.Operation.getConvertor().getConcreteEnum(op),
 				es == null ? EquipmentSlotGroup.ANY : es.getGroup());
-		return new BukkitMCAttributeModifier(BukkitMCAttribute.getConvertor().getConcreteEnum(attr), mod);
+		return new BukkitMCAttributeModifier((Attribute) attr.getConcrete(), mod);
 	}
 
 	@Override
@@ -348,7 +348,7 @@ public class BukkitConvertor extends AbstractConvertor {
 		AttributeModifier mod = new AttributeModifier((NamespacedKey) key.getHandle(), amt,
 				BukkitMCAttributeModifier.Operation.getConvertor().getConcreteEnum(op),
 				EquipmentSlotGroup.getByName(slot.name()));
-		return new BukkitMCAttributeModifier(BukkitMCAttribute.getConvertor().getConcreteEnum(attr), mod);
+		return new BukkitMCAttributeModifier((Attribute) attr.getConcrete(), mod);
 	}
 
 	@Override

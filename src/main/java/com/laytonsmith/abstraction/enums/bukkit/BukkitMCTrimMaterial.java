@@ -44,7 +44,7 @@ public class BukkitMCTrimMaterial extends MCTrimMaterial<TrimMaterial> {
 			try {
 				trimMaterial = (TrimMaterial) TrimMaterial.class.getField(v.name()).get(null);
 			} catch (IllegalAccessException | NoSuchFieldException ex) {
-				MSLog.GetLogger().w(MSLog.Tags.RUNTIME, "Could not find a Bukkit trim material type for "
+				MSLog.GetLogger().w(MSLog.Tags.GENERAL, "Could not find a Bukkit trim material type for "
 						+ v.name(), Target.UNKNOWN);
 				continue;
 			}
@@ -56,8 +56,11 @@ public class BukkitMCTrimMaterial extends MCTrimMaterial<TrimMaterial> {
 			try {
 				TrimMaterial trimMaterial = (TrimMaterial) field.get(null);
 				if(!BUKKIT_MAP.containsKey(trimMaterial)) {
-					MAP.put(field.getName(), new BukkitMCTrimMaterial(MCVanillaTrimMaterial.UNKNOWN, trimMaterial));
-					BUKKIT_MAP.put(trimMaterial, new BukkitMCTrimMaterial(MCVanillaTrimMaterial.UNKNOWN, trimMaterial));
+					MSLog.GetLogger().w(MSLog.Tags.GENERAL, "Could not find MCTrimMaterial for "
+							+ field.getName(), Target.UNKNOWN);
+					MCTrimMaterial wrapper = new BukkitMCTrimMaterial(MCVanillaTrimMaterial.UNKNOWN, trimMaterial);
+					MAP.put(field.getName(), wrapper);
+					BUKKIT_MAP.put(trimMaterial, wrapper);
 				}
 			} catch (IllegalAccessException | ClassCastException ignore) {}
 		}

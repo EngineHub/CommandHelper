@@ -25,7 +25,7 @@ public class BukkitMCEnchantment extends MCEnchantment<Enchantment> {
 	@Override
 	public String name() {
 		if(getAbstracted() == MCVanillaEnchantment.UNKNOWN) {
-			return getConcrete().getKey().getKey().toUpperCase();
+			return getConcrete().getKey().getKey().toUpperCase(Locale.ROOT);
 		}
 		return getAbstracted().name();
 	}
@@ -34,7 +34,7 @@ public class BukkitMCEnchantment extends MCEnchantment<Enchantment> {
 		MCEnchantment type = BUKKIT_MAP.get(test);
 		if(type == null) {
 			MSLog.GetLogger().e(MSLog.Tags.GENERAL, "Bukkit Enchantment missing in BUKKIT_MAP: "
-					+ test.getKey().getKey().toUpperCase(), Target.UNKNOWN);
+					+ test.getKey().getKey().toUpperCase(Locale.ROOT), Target.UNKNOWN);
 			return new BukkitMCEnchantment(MCVanillaEnchantment.UNKNOWN, test);
 		}
 		return type;
@@ -55,7 +55,7 @@ public class BukkitMCEnchantment extends MCEnchantment<Enchantment> {
 			if(v.existsIn(Static.getServer().getMinecraftVersion())) {
 				Enchantment type = getBukkitType(v);
 				if(type == null) {
-					MSLog.GetLogger().w(MSLog.Tags.RUNTIME, "Could not find a Bukkit enchantment for " + v.name(), Target.UNKNOWN);
+					MSLog.GetLogger().w(MSLog.Tags.GENERAL, "Could not find a Bukkit enchantment for " + v.name(), Target.UNKNOWN);
 					continue;
 				}
 				BukkitMCEnchantment wrapper = new BukkitMCEnchantment(v, type);
@@ -65,8 +65,12 @@ public class BukkitMCEnchantment extends MCEnchantment<Enchantment> {
 		}
 		for(Enchantment pt : Enchantment.values()) {
 			if(pt != null && !BUKKIT_MAP.containsKey(pt)) {
-				MAP.put(pt.getKey().getKey().toUpperCase(), new BukkitMCEnchantment(MCVanillaEnchantment.UNKNOWN, pt));
-				BUKKIT_MAP.put(pt, new BukkitMCEnchantment(MCVanillaEnchantment.UNKNOWN, pt));
+				String name = pt.getKey().getKey().toUpperCase(Locale.ROOT);
+				MSLog.GetLogger().w(MSLog.Tags.GENERAL, "Could not find MCEnchantment for "
+						+ name, Target.UNKNOWN);
+				MCEnchantment wrapper = new BukkitMCEnchantment(MCVanillaEnchantment.UNKNOWN, pt);
+				MAP.put(name, wrapper);
+				BUKKIT_MAP.put(pt, wrapper);
 			}
 		}
 	}

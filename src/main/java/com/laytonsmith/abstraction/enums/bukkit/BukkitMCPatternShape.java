@@ -66,9 +66,12 @@ public class BukkitMCPatternShape extends MCPatternShape<PatternType> {
 		try {
 			for(PatternType type : Registry.BANNER_PATTERN) {
 				if(!BUKKIT_MAP.containsKey(type)) {
-					MAP.put(type.getKey().getKey().toUpperCase(Locale.ROOT),
-							new BukkitMCPatternShape(MCVanillaPatternShape.UNKNOWN, type));
-					BUKKIT_MAP.put(type, new BukkitMCPatternShape(MCVanillaPatternShape.UNKNOWN, type));
+					String name = type.getKey().getKey().toUpperCase(Locale.ROOT);
+					MSLog.GetLogger().w(MSLog.Tags.GENERAL, "Could not find MCPatternShape for " + name,
+							Target.UNKNOWN);
+					MCPatternShape wrapper = new BukkitMCPatternShape(MCVanillaPatternShape.UNKNOWN, type);
+					MAP.put(name, wrapper);
+					BUKKIT_MAP.put(type, wrapper);
 				}
 			}
 		} catch (IncompatibleClassChangeError ignore) {

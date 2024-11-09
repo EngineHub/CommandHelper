@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.ClassLoading.DynamicEnum;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.annotations.MDynamicEnum;
 import com.laytonsmith.core.MSLog;
+import com.laytonsmith.core.MSLog.Tags;
 import com.laytonsmith.core.constructs.Target;
 
 import java.util.ArrayList;
@@ -62,6 +63,16 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 							"PIG_ZOMBIE entity type was renamed in 1.16. Converted to ZOMBIFIED_PIGLIN.",
 							Target.UNKNOWN);
 					return MAP.get("ZOMBIFIED_PIGLIN");
+				case "BOAT":
+					MSLog.GetLogger().e(Tags.GENERAL,
+							"BOAT entity type was split into wood types. Converted to OAK_BOAT.",
+							Target.UNKNOWN);
+					return MAP.get("OAK_BOAT");
+				case "CHEST_BOAT":
+					MSLog.GetLogger().e(Tags.GENERAL,
+							"CHEST_BOAT entity type was split into wood types. Converted to OAK_CHEST_BOAT.",
+							Target.UNKNOWN);
+					return MAP.get("OAK_CHEST_BOAT");
 			}
 			throw new IllegalArgumentException("Unknown entity type: " + test);
 		}
@@ -131,17 +142,42 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 		BEE(true, MCVersion.MC1_15),
 		BLAZE,
 		BLOCK_DISPLAY(true, MCVersion.MC1_19_4),
-		BOAT,
+
+		// Boat types
+		BOAT(true, MCVersion.MC1_0, MCVersion.MC1_21_1),
+		CHEST_BOAT(true, MCVersion.MC1_19, MCVersion.MC1_21_1),
+		ACACIA_BOAT(true, MCVersion.MC1_21_3),
+		ACACIA_CHEST_BOAT(true, MCVersion.MC1_21_3),
+		BAMBOO_RAFT(true, MCVersion.MC1_21_3),
+		BAMBOO_CHEST_RAFT(true, MCVersion.MC1_21_3),
+		BIRCH_BOAT(true, MCVersion.MC1_21_3),
+		BIRCH_CHEST_BOAT(true, MCVersion.MC1_21_3),
+		CHERRY_BOAT(true, MCVersion.MC1_21_3),
+		CHERRY_CHEST_BOAT(true, MCVersion.MC1_21_3),
+		DARK_OAK_BOAT(true, MCVersion.MC1_21_3),
+		DARK_OAK_CHEST_BOAT(true, MCVersion.MC1_21_3),
+		JUNGLE_BOAT(true, MCVersion.MC1_21_3),
+		JUNGLE_CHEST_BOAT(true, MCVersion.MC1_21_3),
+		MANGROVE_BOAT(true, MCVersion.MC1_21_3),
+		MANGROVE_CHEST_BOAT(true, MCVersion.MC1_21_3),
+		OAK_BOAT(true, MCVersion.MC1_21_3),
+		OAK_CHEST_BOAT(true, MCVersion.MC1_21_3),
+		PALE_OAK_BOAT(true, MCVersion.MC1_21_3),
+		PALE_OAK_CHEST_BOAT(true, MCVersion.MC1_21_3),
+		SPRUCE_BOAT(true, MCVersion.MC1_21_3),
+		SPRUCE_CHEST_BOAT(true, MCVersion.MC1_21_3),
+
 		BOGGED(true, MCVersion.MC1_20_6),
 		BREEZE(true, MCVersion.MC1_20_4),
 		BREEZE_WIND_CHARGE(true, MCVersion.MC1_20_6),
 		CAMEL(true, MCVersion.MC1_19_3),
 		CAT(true, MCVersion.MC1_14),
 		CAVE_SPIDER,
-		CHEST_BOAT(true, MCVersion.MC1_19),
 		CHICKEN,
 		COD,
 		COW,
+		CREAKING(true, MCVersion.MC1_21_3),
+		CREAKING_TRANSIENT(true, MCVersion.MC1_21_3),
 		CREEPER,
 		DOLPHIN,
 		DRAGON_FIREBALL,

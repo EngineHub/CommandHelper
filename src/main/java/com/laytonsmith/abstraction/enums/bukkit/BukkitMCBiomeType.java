@@ -40,7 +40,7 @@ public class BukkitMCBiomeType extends MCBiomeType<Biome> {
 				try {
 					type = getBukkitType(v);
 				} catch (IllegalArgumentException | NoSuchFieldError ex) {
-					MSLog.GetLogger().w(MSLog.Tags.RUNTIME, "Could not find a Bukkit BiomeType for " + v.name(),
+					MSLog.GetLogger().w(MSLog.Tags.GENERAL, "Could not find a Bukkit BiomeType for " + v.name(),
 							Target.UNKNOWN);
 					continue;
 				}
@@ -51,8 +51,10 @@ public class BukkitMCBiomeType extends MCBiomeType<Biome> {
 		}
 		for(Biome b : Biome.values()) {
 			if(!BUKKIT_MAP.containsKey(b)) {
-				MAP.put(b.name(), new BukkitMCBiomeType(MCVanillaBiomeType.UNKNOWN, b));
-				BUKKIT_MAP.put(b, new BukkitMCBiomeType(MCVanillaBiomeType.UNKNOWN, b));
+				MSLog.GetLogger().w(MSLog.Tags.GENERAL, "Could not find MCBiomeType for " + b.name(), Target.UNKNOWN);
+				MCBiomeType wrapper = new BukkitMCBiomeType(MCVanillaBiomeType.UNKNOWN, b);
+				MAP.put(b.name(), wrapper);
+				BUKKIT_MAP.put(b, wrapper);
 			}
 		}
 	}

@@ -32,7 +32,6 @@ public class BukkitMCEntityType extends MCEntityType<EntityType> {
 		super(abstractedType, concreteType);
 	}
 
-	// This way we don't take up extra memory on non-bukkit implementations
 	public static void build() {
 		for(MCVanillaEntityType v : MCVanillaEntityType.values()) {
 			if(v.existsIn(Static.getServer().getMinecraftVersion())) {
@@ -40,7 +39,7 @@ public class BukkitMCEntityType extends MCEntityType<EntityType> {
 				try {
 					type = getBukkitType(v);
 				} catch (IllegalArgumentException | NoSuchFieldError ex) {
-					MSLog.GetLogger().w(MSLog.Tags.RUNTIME, "Could not find a Bukkit EntityType for " + v.name(), Target.UNKNOWN);
+					MSLog.GetLogger().w(MSLog.Tags.GENERAL, "Could not find a Bukkit EntityType for " + v.name(), Target.UNKNOWN);
 					continue;
 				}
 				BukkitMCEntityType wrapper = new BukkitMCEntityType(type, v);
@@ -52,8 +51,10 @@ public class BukkitMCEntityType extends MCEntityType<EntityType> {
 		}
 		for(EntityType b : EntityType.values()) {
 			if(!BUKKIT_MAP.containsKey(b)) {
-				MAP.put(b.name(), new BukkitMCEntityType(b, MCVanillaEntityType.UNKNOWN));
-				BUKKIT_MAP.put(b, new BukkitMCEntityType(b, MCVanillaEntityType.UNKNOWN));
+				MSLog.GetLogger().w(MSLog.Tags.GENERAL, "Could not find MCEntityType for " + b.name(), Target.UNKNOWN);
+				MCEntityType wrapper = new BukkitMCEntityType(b, MCVanillaEntityType.UNKNOWN);
+				MAP.put(b.name(), wrapper);
+				BUKKIT_MAP.put(b, wrapper);
 			}
 		}
 	}

@@ -16,9 +16,6 @@ public abstract class MCSound<Concrete> extends DynamicEnum<MCSound.MCVanillaSou
 
 	protected static final Map<String, MCSound> MAP = new HashMap<>();
 
-	@SuppressWarnings("checkstyle:staticvariablename") // Fixing this violation might break dependents.
-	public static MCSound NULL = null;
-
 	public MCSound(MCVanillaSound mcVanillaSound, Concrete concrete) {
 		super(mcVanillaSound, concrete);
 	}
@@ -32,7 +29,7 @@ public abstract class MCSound<Concrete> extends DynamicEnum<MCSound.MCVanillaSou
 	}
 
 	public static Set<String> types() {
-		if(NULL == null) { // docs mode
+		if(MAP.isEmpty()) { // docs mode
 			Set<String> dummy = new HashSet<>();
 			for(final MCVanillaSound s : MCVanillaSound.values()) {
 				if(s.existsIn(MCVersion.CURRENT)) {
@@ -45,7 +42,7 @@ public abstract class MCSound<Concrete> extends DynamicEnum<MCSound.MCVanillaSou
 	}
 
 	public static List<MCSound> values() {
-		if(NULL == null) { // docs mode
+		if(MAP.isEmpty()) { // docs mode
 			ArrayList<MCSound> dummy = new ArrayList<>();
 			for(final MCVanillaSound s : MCVanillaSound.values()) {
 				if(!s.existsIn(MCVersion.CURRENT)) {
@@ -1363,7 +1360,6 @@ public abstract class MCSound<Concrete> extends DynamicEnum<MCSound.MCVanillaSou
 		ENTITY_FROG_STEP(MCVersion.MC1_19),
 		ENTITY_FROG_TONGUE(MCVersion.MC1_19),
 		ENTITY_GOAT_HORN_BREAK(MCVersion.MC1_19),
-		ENTITY_GOAT_SCREAMING_HORN_BREAK(MCVersion.MC1_19),
 		ENTITY_PARROT_IMITATE_WARDEN(MCVersion.MC1_19),
 		ENTITY_TADPOLE_DEATH(MCVersion.MC1_19),
 		ENTITY_TADPOLE_FLOP(MCVersion.MC1_19),
@@ -1391,7 +1387,6 @@ public abstract class MCSound<Concrete> extends DynamicEnum<MCSound.MCVanillaSou
 		ENTITY_WARDEN_TENDRIL_CLICKS(MCVersion.MC1_19),
 		ITEM_BUCKET_EMPTY_TADPOLE(MCVersion.MC1_19),
 		ITEM_BUCKET_FILL_TADPOLE(MCVersion.MC1_19),
-		ITEM_GOAT_HORN_PLAY(MCVersion.MC1_19),
 		ITEM_GOAT_HORN_SOUND_0(MCVersion.MC1_19),
 		ITEM_GOAT_HORN_SOUND_1(MCVersion.MC1_19),
 		ITEM_GOAT_HORN_SOUND_2(MCVersion.MC1_19),
@@ -1714,6 +1709,35 @@ public abstract class MCSound<Concrete> extends DynamicEnum<MCSound.MCVanillaSou
 		MUSIC_DISC_CREATOR(MCVersion.MC1_21),
 		MUSIC_DISC_CREATOR_MUSIC_BOX(MCVersion.MC1_21),
 		MUSIC_DISC_PRECIPICE(MCVersion.MC1_21),
+
+		// 1.21.2 additions
+		BLOCK_CREAKING_HEART_BREAK(MCVersion.MC1_21_3),
+		BLOCK_CREAKING_HEART_FALL(MCVersion.MC1_21_3),
+		BLOCK_CREAKING_HEART_HIT(MCVersion.MC1_21_3),
+		BLOCK_CREAKING_HEART_HURT(MCVersion.MC1_21_3),
+		BLOCK_CREAKING_HEART_IDLE(MCVersion.MC1_21_3),
+		BLOCK_CREAKING_HEART_PLACE(MCVersion.MC1_21_3),
+		BLOCK_CREAKING_HEART_SPAWN(MCVersion.MC1_21_3),
+		BLOCK_CREAKING_HEART_STEP(MCVersion.MC1_21_3),
+		BLOCK_PALE_HANGING_MOSS_IDLE(MCVersion.MC1_21_3),
+		BLOCK_SPAWNER_BREAK(MCVersion.MC1_21_3),
+		BLOCK_SPAWNER_FALL(MCVersion.MC1_21_3),
+		BLOCK_SPAWNER_HIT(MCVersion.MC1_21_3),
+		BLOCK_SPAWNER_PLACE(MCVersion.MC1_21_3),
+		BLOCK_SPAWNER_STEP(MCVersion.MC1_21_3),
+		ENTITY_CREAKING_ACTIVATE(MCVersion.MC1_21_3),
+		ENTITY_CREAKING_AMBIENT(MCVersion.MC1_21_3),
+		ENTITY_CREAKING_ATTACK(MCVersion.MC1_21_3),
+		ENTITY_CREAKING_DEACTIVATE(MCVersion.MC1_21_3),
+		ENTITY_CREAKING_DEATH(MCVersion.MC1_21_3),
+		ENTITY_CREAKING_FREEZE(MCVersion.MC1_21_3),
+		ENTITY_CREAKING_SPAWN(MCVersion.MC1_21_3),
+		ENTITY_CREAKING_STEP(MCVersion.MC1_21_3),
+		ENTITY_CREAKING_SWAY(MCVersion.MC1_21_3),
+		ENTITY_CREAKING_UNFREEZE(MCVersion.MC1_21_3),
+		ENTITY_PARROT_IMITATE_CREAKING(MCVersion.MC1_21_3),
+		ITEM_BUNDLE_INSERT_FAIL(MCVersion.MC1_21_3),
+		UI_HUD_BUBBLE_POP(MCVersion.MC1_21_3),
 
 		UNKNOWN(MCVersion.NEVER);
 

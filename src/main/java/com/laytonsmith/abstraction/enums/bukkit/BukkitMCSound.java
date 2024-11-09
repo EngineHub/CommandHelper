@@ -17,9 +17,7 @@ public class BukkitMCSound extends MCSound<Sound> {
 		return getAbstracted() == MCVanillaSound.UNKNOWN ? getConcrete().name() : getAbstracted().name();
 	}
 
-	// This way we don't take up extra memory on non-bukkit implementations
 	public static void build() {
-		NULL = new BukkitMCSound(MCVanillaSound.UNKNOWN, null);
 		for(MCVanillaSound v : MCVanillaSound.values()) {
 			if(v.existsIn(Static.getServer().getMinecraftVersion())) {
 				Sound sound;

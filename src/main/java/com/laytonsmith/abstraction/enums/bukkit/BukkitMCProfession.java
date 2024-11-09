@@ -46,11 +46,10 @@ public class BukkitMCProfession extends MCProfession<Villager.Profession> {
 	public static void build() {
 		for(MCVanillaProfession v : MCVanillaProfession.values()) {
 			if(v.existsIn(Static.getServer().getMinecraftVersion())) {
-				Villager.Profession profession;
-				try {
-					profession = getBukkitType(v);
-				} catch (IllegalArgumentException | NoSuchFieldError ex) {
-					MSLog.GetLogger().w(MSLog.Tags.RUNTIME, "Could not find a Bukkit villager profession type for "
+				Villager.Profession profession = Registry.VILLAGER_PROFESSION.get(
+						NamespacedKey.minecraft(v.name().toLowerCase(Locale.ROOT)));
+				if(profession == null) {
+					MSLog.GetLogger().w(MSLog.Tags.GENERAL, "Could not find a Bukkit villager profession type for "
 							+ v.name(), Target.UNKNOWN);
 					continue;
 				}
@@ -62,13 +61,12 @@ public class BukkitMCProfession extends MCProfession<Villager.Profession> {
 		for(Villager.Profession pr : Registry.VILLAGER_PROFESSION) {
 			if(pr != null && !BUKKIT_MAP.containsKey(pr)) {
 				NamespacedKey key = ReflectionUtils.invokeMethod(Keyed.class, pr, "getKey");
-				MAP.put(key.getKey().toUpperCase(Locale.ROOT), new BukkitMCProfession(MCVanillaProfession.UNKNOWN, pr));
+				MSLog.GetLogger().w(MSLog.Tags.GENERAL, "Could not find an MCProfession for "
+						+ key.getKey().toUpperCase(Locale.ROOT), Target.UNKNOWN);
+				MCProfession wrapper = new BukkitMCProfession(MCVanillaProfession.UNKNOWN, pr);
+				MAP.put(key.getKey().toUpperCase(Locale.ROOT), wrapper);
 				BUKKIT_MAP.put(pr, new BukkitMCProfession(MCVanillaProfession.UNKNOWN, pr));
 			}
 		}
-	}
-
-	private static Villager.Profession getBukkitType(MCVanillaProfession v) {
-		return Registry.VILLAGER_PROFESSION.get(NamespacedKey.minecraft(v.name().toLowerCase(Locale.ROOT)));
 	}
 }

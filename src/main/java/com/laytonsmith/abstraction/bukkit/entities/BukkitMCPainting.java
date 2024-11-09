@@ -2,9 +2,13 @@ package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.abstraction.entities.MCPainting;
 import com.laytonsmith.abstraction.enums.MCArt;
-import com.laytonsmith.abstraction.enums.bukkit.BukkitMCArt;
+import org.bukkit.Art;
+import org.bukkit.NamespacedKey;
+import org.bukkit.Registry;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Painting;
+
+import java.util.Locale;
 
 public class BukkitMCPainting extends BukkitMCHanging implements MCPainting {
 
@@ -17,7 +21,7 @@ public class BukkitMCPainting extends BukkitMCHanging implements MCPainting {
 
 	@Override
 	public MCArt getArt() {
-		return BukkitMCArt.getConvertor().getAbstractedEnum(p.getArt());
+		return MCArt.valueOf(p.getArt().getKey().getKey().toUpperCase(Locale.ROOT));
 	}
 
 	@Override
@@ -27,7 +31,11 @@ public class BukkitMCPainting extends BukkitMCHanging implements MCPainting {
 
 	@Override
 	public boolean setArt(MCArt art, boolean force) {
-		return p.setArt(BukkitMCArt.getConvertor().getConcreteEnum(art), force);
+		Art concreteArt = Registry.ART.get(NamespacedKey.minecraft(art.name().toLowerCase(Locale.ROOT)));
+		if(concreteArt != null) {
+			return p.setArt(concreteArt, force);
+		}
+		return false;
 	}
 
 }

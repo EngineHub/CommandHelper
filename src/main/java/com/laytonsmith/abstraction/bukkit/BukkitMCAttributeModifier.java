@@ -44,7 +44,7 @@ public class BukkitMCAttributeModifier implements MCAttributeModifier {
 
 	@Override
 	public MCAttribute getAttribute() {
-		return BukkitMCAttribute.getConvertor().getAbstractedEnum(a);
+		return BukkitMCAttribute.valueOfConcrete(a);
 	}
 
 	@Override

@@ -2,7 +2,6 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
-import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCItemStack;
@@ -52,7 +51,6 @@ import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CClassType;
-import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
@@ -1618,15 +1616,16 @@ public class Environment {
 					+ " the particle array are \"count\" (usually the number of particles to be spawned), \"speed\""
 					+ " (usually the velocity of the particle), \"xoffset\", \"yoffset\", and \"zoffset\""
 					+ " (usually the ranges from center within which the particle may be offset on that axis)."
-					+ " <br>BLOCK_DUST, BLOCK_CRACK and FALLING_DUST particles can take a block type name parameter"
-					+ " under the key \"block\" (default: STONE)."
+					+ " <br><br>BLOCK_DUST, BLOCK_CRACK, BLOCK_CRUMBLE, BLOCK_MARKER, DUST_PILLAR, and FALLING_DUST"
+					+ " particles can take a block type name parameter under the key \"block\" (default: STONE)."
 					+ " <br>ITEM_CRACK particles can take an item array or name under the key \"item\" (default: STONE)."
 					+ " <br>REDSTONE and SPELL_MOB particles take an RGB color array (each 0 - 255) or name under the key \"color\""
 					+ " (defaults to RED for REDSTONE, WHITE for SPELL_MOB)."
 					+ " <br>DUST_COLOR_TRANSITION particles take a \"tocolor\" in addition \"color\"."
 					+ " <br>VIBRATION particles take a \"destination\" location array or entity UUID."
 					+ " <br>SCULK_CHARGE particles take an \"angle\" in radians. (defaults to 0.0)"
-					+ " <br>SHRIEK particles take an integer \"delay\" in ticks before playing. (defaults to 0)";
+					+ " <br>SHRIEK particles take an integer \"delay\" in ticks before playing. (defaults to 0)"
+					+ " <br>TRAIL particles take a \"target\" location array and a \"color\".";
 		}
 
 		@Override
@@ -1681,82 +1680,7 @@ public class Environment {
 					speed = ArgumentValidation.getDouble(pa.get("speed", t), t);
 				}
 
-				if(pa.containsKey("block")) {
-					String value = pa.get("block", t).val();
-					MCMaterial mat = StaticLayer.GetMaterial(value);
-					if(mat != null) {
-						try {
-							data = mat.createBlockData();
-						} catch (IllegalArgumentException ex) {
-							throw new CREIllegalArgumentException(value + " is not a block.", t);
-						}
-					} else {
-						throw new CREIllegalArgumentException("Could not find material from " + value, t);
-					}
-
-				} else if(pa.containsKey("item")) {
-					Mixed value = pa.get("item", t);
-					if(value.isInstanceOf(CArray.TYPE)) {
-						data = ObjectGenerator.GetGenerator().item(pa.get("item", t), t);
-					} else {
-						MCMaterial mat = StaticLayer.GetMaterial(value.val());
-						if(mat != null) {
-							if(mat.isItem()) {
-								data = StaticLayer.GetItemStack(mat, 1);
-							} else {
-								throw new CREIllegalArgumentException(value + " is not an item type.", t);
-							}
-						} else {
-							throw new CREIllegalArgumentException("Could not find material from " + value, t);
-						}
-					}
-
-				} else if(pa.containsKey("color")) {
-					Mixed c = pa.get("color", t);
-					MCColor color;
-					if(c.isInstanceOf(CArray.TYPE)) {
-						color = ObjectGenerator.GetGenerator().color((CArray) c, t);
-					} else {
-						color = StaticLayer.GetConvertor().GetColor(c.val(), t);
-					}
-					if(pa.containsKey("tocolor")) {
-						Mixed sc = pa.get("tocolor", t);
-						MCColor[] colors = new MCColor[2];
-						colors[0] = color;
-						if(sc.isInstanceOf(CArray.TYPE)) {
-							colors[1] = ObjectGenerator.GetGenerator().color((CArray) sc, t);
-						} else {
-							colors[1] = StaticLayer.GetConvertor().GetColor(sc.val(), t);
-						}
-						data = colors;
-					} else {
-						data = color;
-					}
-
-				} else if(pa.containsKey("destination")) {
-					Mixed d = pa.get("destination", t);
-					if(d.isInstanceOf(CArray.TYPE)) {
-						data = ObjectGenerator.GetGenerator().location(d, l.getWorld(), t);
-					} else {
-						data = Static.getEntity(d, t);
-					}
-
-				} else if(pa.containsKey("delay")) {
-					Mixed d = pa.get("delay", t);
-					if(d.isInstanceOf(CInt.TYPE)) {
-						data = d;
-					} else if(!(d instanceof CNull)) {
-						throw new CREIllegalArgumentException("Expected integer for delay but found " + d, t);
-					}
-
-				} else if(pa.containsKey("angle")) {
-					Mixed d = pa.get("angle", t);
-					if(d.isInstanceOf(CDouble.TYPE)) {
-						data = d;
-					} else if(!(d instanceof CNull)) {
-						throw new CREIllegalArgumentException("Expected double for angle but found " + d, t);
-					}
-				}
+				data = ObjectGenerator.GetGenerator().particleData(p, l, pa, t);
 
 			} else {
 				try {
@@ -1769,8 +1693,7 @@ public class Environment {
 			try {
 				if(args.length == 3) {
 					MCPlayer player;
-					if(args[2] instanceof CArray) {
-						CArray players = (CArray) args[2];
+					if(args[2] instanceof CArray players) {
 						if(players.isAssociative()) {
 							throw new CREIllegalArgumentException("Players argument must be a normal array.", t);
 						}

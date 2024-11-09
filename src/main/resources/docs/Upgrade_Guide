@@ -3,6 +3,11 @@ Below is a reverse chronological guide to help you with the most notable of thes
 Where possible, any value changes are converted for backwards compatibility with saved data, but any script that checks output for equality will need to be updated.
 ----
 
+== Minecraft 1.21.2 ==
+* BOAT and CHEST_BOAT entity types have been split into wood types. ("OAK_BOAT", "ACACIA_CHEST_BOAT", etc.)
+
+----
+
 == Minecraft 1.21 ==
 * Attribute modifiers' optional "name" and "uuid" keys have been replaced with a namespaced key under "id".
 Old attribute modifiers will use the UUID to generate a namespaced key.

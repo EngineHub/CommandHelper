@@ -1,23 +1,23 @@
 package com.laytonsmith.abstraction.enums.bukkit;
 
 import com.laytonsmith.abstraction.MCColor;
-import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.abstraction.MCParticleData;
 import com.laytonsmith.abstraction.blocks.MCBlockData;
 import com.laytonsmith.abstraction.bukkit.BukkitMCColor;
-import com.laytonsmith.abstraction.bukkit.BukkitMCVibration;
 import com.laytonsmith.abstraction.enums.MCParticle;
 import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.core.MSLog;
+import com.laytonsmith.core.MSLog.Tags;
 import com.laytonsmith.core.Static;
-import com.laytonsmith.core.constructs.CDouble;
-import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.Target;
 import org.bukkit.Color;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
-import org.bukkit.block.data.BlockData;
+import org.bukkit.Vibration;
+import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.EnumMap;
@@ -45,7 +45,6 @@ public class BukkitMCParticle extends MCParticle<Particle> {
 		return type;
 	}
 
-	// This way we don't take up extra memory on non-bukkit implementations
 	public static void build() {
 		for(MCVanillaParticle v : MCVanillaParticle.values()) {
 			if(v.existsIn(Static.getServer().getMinecraftVersion())) {
@@ -61,10 +60,12 @@ public class BukkitMCParticle extends MCParticle<Particle> {
 				MAP.put(v.name(), wrapper);
 			}
 		}
-		for(Particle b : Particle.values()) {
-			if(!BUKKIT_MAP.containsKey(b)) {
-				MAP.put(b.name(), new BukkitMCParticle(MCVanillaParticle.UNKNOWN, b));
-				BUKKIT_MAP.put(b, new BukkitMCParticle(MCVanillaParticle.UNKNOWN, b));
+		for(Particle p : Particle.values()) {
+			if(!BUKKIT_MAP.containsKey(p)) {
+				MSLog.GetLogger().w(Tags.GENERAL, "Could not find MCParticle for " + p.name(), Target.UNKNOWN);
+				MCParticle wrapper = new BukkitMCParticle(MCVanillaParticle.UNKNOWN, p);
+				MAP.put(p.name(), wrapper);
+				BUKKIT_MAP.put(p, wrapper);
 			}
 		}
 	}
@@ -78,19 +79,18 @@ public class BukkitMCParticle extends MCParticle<Particle> {
 		switch(getAbstracted()) {
 			case BLOCK_DUST:
 			case BLOCK_CRACK:
+			case BLOCK_CRUMBLE:
 			case BLOCK_MARKER:
 			case DUST_PILLAR:
 			case FALLING_DUST:
-				BlockData bd;
 				if(data instanceof MCBlockData) {
-					bd = (BlockData) ((MCBlockData) data).getHandle();
+					return ((MCBlockData) data).getHandle();
 				} else if(getAbstracted() == MCVanillaParticle.BLOCK_MARKER) {
 					// Barrier (and light) particles were replaced by block markers, so this is the best fallback.
-					bd = Material.BARRIER.createBlockData();
+					return Material.BARRIER.createBlockData();
 				} else {
-					bd = Material.STONE.createBlockData();
+					return Material.STONE.createBlockData();
 				}
-				return bd;
 			case ITEM_CRACK:
 				ItemStack is;
 				if(data instanceof MCItemStack) {
@@ -109,48 +109,50 @@ public class BukkitMCParticle extends MCParticle<Particle> {
 				}
 				break;
 			case REDSTONE:
-				Particle.DustOptions color;
 				if(data instanceof MCColor) {
-					color = new Particle.DustOptions(BukkitMCColor.GetColor((MCColor) data), 1.0F);
+					return new Particle.DustOptions(BukkitMCColor.GetColor((MCColor) data), 1.0F);
 				} else {
-					color =  new Particle.DustOptions(Color.RED, 1.0F);
+					return new Particle.DustOptions(Color.RED, 1.0F);
 				}
-				return color;
 			case DUST_COLOR_TRANSITION:
-				Particle.DustTransition dust;
-				if(data instanceof MCColor[]) {
-					MCColor[] c = (MCColor[]) data;
-					dust = new Particle.DustTransition(BukkitMCColor.GetColor(c[0]), BukkitMCColor.GetColor(c[1]), 1.0F);
+				if(data instanceof MCParticleData.DustTransition transition) {
+					return new Particle.DustTransition(BukkitMCColor.GetColor(transition.from()),
+							BukkitMCColor.GetColor(transition.to()), 1.0F);
 				} else {
-					dust = new Particle.DustTransition(Color.TEAL, Color.RED, 1.0F);
+					return new Particle.DustTransition(Color.TEAL, Color.RED, 1.0F);
 				}
-				return dust;
 			case VIBRATION:
-				BukkitMCVibration vibe;
-				if(data instanceof MCLocation) {
-					vibe = new BukkitMCVibration(l, (MCLocation) data, 5);
-				} else if(data instanceof MCEntity) {
-					vibe = new BukkitMCVibration(l, (MCEntity) data, 5);
+				if(data instanceof MCParticleData.VibrationBlockDestination destination) {
+					return new Vibration((Location) l.getHandle(),
+							new Vibration.Destination.BlockDestination((Location) destination.location().getHandle()),
+							destination.arrivalTime());
+				} else if(data instanceof MCParticleData.VibrationEntityDestination destination) {
+					return new Vibration((Location) l.getHandle(),
+							new Vibration.Destination.EntityDestination((Entity) destination.entity().getHandle()),
+							destination.arrivalTime());
 				} else {
-					vibe = new BukkitMCVibration(l, l, 5);
+					return new Vibration((Location) l.getHandle(),
+							new Vibration.Destination.BlockDestination((Location) l.getHandle()), 5);
 				}
-				return vibe.getHandle();
 			case SCULK_CHARGE:
-				Float f;
-				if(data instanceof CDouble) {
-					f = (float) ((CDouble) data).getDouble();
+				if(data instanceof Float) {
+					return data;
 				} else {
-					f = 1.0F;
+					return 0.0F;
 				}
-				return f;
 			case SHRIEK:
-				Integer i;
-				if(data instanceof CInt) {
-					i = (int) ((CInt) data).getInt();
+				if(data instanceof Integer) {
+					return data;
 				} else {
-					i = 0;
+					return 0;
 				}
-				return i;
+			case TRAIL:
+				if(data instanceof MCParticleData.TargetColor target) {
+					return new Particle.TargetColor((Location) target.location().getHandle(),
+							BukkitMCColor.GetColor(target.color()));
+				} else {
+					return new Particle.TargetColor((Location) l.getHandle(), Color.fromRGB(252, 120, 18));
+				}
 		}
 		return null;
 	}

@@ -37,7 +37,7 @@ public class BukkitMCPotionType extends MCPotionType<PotionType> {
 			if(v.existsIn(Static.getServer().getMinecraftVersion())) {
 				PotionType type = getBukkitType(v);
 				if(type == null) {
-					MSLog.GetLogger().w(MSLog.Tags.RUNTIME, "Could not find a Bukkit potion type for " + v.name(), Target.UNKNOWN);
+					MSLog.GetLogger().w(MSLog.Tags.GENERAL, "Could not find a Bukkit potion type for " + v.name(), Target.UNKNOWN);
 					continue;
 				}
 				BukkitMCPotionType wrapper = new BukkitMCPotionType(v, type);
@@ -47,8 +47,10 @@ public class BukkitMCPotionType extends MCPotionType<PotionType> {
 		}
 		for(PotionType pt : PotionType.values()) {
 			if(pt != null && !BUKKIT_MAP.containsKey(pt)) {
-				MAP.put(pt.name(), new BukkitMCPotionType(MCVanillaPotionType.UNKNOWN, pt));
-				BUKKIT_MAP.put(pt, new BukkitMCPotionType(MCVanillaPotionType.UNKNOWN, pt));
+				MSLog.GetLogger().w(MSLog.Tags.GENERAL, "Could not find MCPotionType for " + pt.name(), Target.UNKNOWN);
+				MCPotionType wrapper = new BukkitMCPotionType(MCVanillaPotionType.UNKNOWN, pt);
+				MAP.put(pt.name(), wrapper);
+				BUKKIT_MAP.put(pt, wrapper);
 			}
 		}
 	}

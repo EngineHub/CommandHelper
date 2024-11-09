@@ -42,6 +42,7 @@ import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.abstraction.enums.MCVersion;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCAttribute;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCBiomeType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEnchantment;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
@@ -318,6 +319,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 		BukkitMCPotionType.build();
 		BukkitMCEnchantment.build();
 		BukkitMCPatternShape.build();
+		BukkitMCAttribute.build();
 		if(myServer.getMinecraftVersion().gte(MCVersion.MC1_20)) {
 			BukkitMCTrimMaterial.build();
 			BukkitMCTrimPattern.build();
@@ -334,6 +336,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 				}
 			}
 		} catch (ReflectionUtils.ReflectionException | ClassNotFoundException ex) {
+			getLogger().log(Level.INFO, "Failed to suppress classloader warnings.");
 			// The server may still log class load warnings for unlisted dependencies.
 		}
 

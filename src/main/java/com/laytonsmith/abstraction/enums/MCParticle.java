@@ -21,6 +21,11 @@ public abstract class MCParticle<Concrete> extends DynamicEnum<MCParticle.MCVani
 		super(mcVanillaParticle, concrete);
 	}
 
+	@Override
+	public MCVanillaParticle getAbstracted() {
+		return super.getAbstracted();
+	}
+
 	public static MCParticle valueOf(String test) throws IllegalArgumentException {
 		MCParticle ret = MAP.get(test);
 		if(ret == null) {
@@ -215,6 +220,8 @@ public abstract class MCParticle<Concrete> extends DynamicEnum<MCParticle.MCVani
 		OMINOUS_SPAWNING(MCVersion.MC1_20_6),
 		RAID_OMEN(MCVersion.MC1_20_6),
 		TRIAL_OMEN(MCVersion.MC1_20_6),
+		BLOCK_CRUMBLE(MCVersion.MC1_21_3),
+		TRAIL(MCVersion.MC1_21_3),
 		UNKNOWN(MCVersion.NEVER);
 
 		private final MCVersion since;

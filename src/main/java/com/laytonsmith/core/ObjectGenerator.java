@@ -35,6 +35,7 @@ import com.laytonsmith.abstraction.MCMetadataValue;
 import com.laytonsmith.abstraction.MCMusicInstrumentMeta;
 import com.laytonsmith.abstraction.MCNamespacedKey;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
+import com.laytonsmith.abstraction.MCParticleData;
 import com.laytonsmith.abstraction.MCPattern;
 import com.laytonsmith.abstraction.MCPlayerProfile;
 import com.laytonsmith.abstraction.MCPlugin;
@@ -71,6 +72,7 @@ import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlotGroup;
 import com.laytonsmith.abstraction.enums.MCFireworkType;
 import com.laytonsmith.abstraction.enums.MCItemFlag;
+import com.laytonsmith.abstraction.enums.MCParticle;
 import com.laytonsmith.abstraction.enums.MCPatternShape;
 import com.laytonsmith.abstraction.enums.MCPotionEffectType;
 import com.laytonsmith.abstraction.enums.MCPotionType;
@@ -2478,6 +2480,141 @@ public class ObjectGenerator {
 			return CBoolean.FALSE;
 		}
 		return new CString(value, Target.UNKNOWN);
+	}
+
+	public Object particleData(MCParticle particleType, MCLocation l, CArray pa, Target t) {
+		switch(particleType.getAbstracted()) {
+			case BLOCK_DUST:
+			case BLOCK_CRACK:
+			case BLOCK_CRUMBLE:
+			case BLOCK_MARKER:
+			case DUST_PILLAR:
+			case FALLING_DUST:
+				if(pa.containsKey("block")) {
+					String value = pa.get("block", t).val();
+					MCMaterial mat = StaticLayer.GetMaterial(value);
+					if(mat != null) {
+						try {
+							return mat.createBlockData();
+						} catch (IllegalArgumentException ex) {
+							throw new CREIllegalArgumentException(value + " is not a block.", t);
+						}
+					} else {
+						throw new CREIllegalArgumentException("Could not find material from " + value, t);
+					}
+				}
+				break;
+			case ITEM_CRACK:
+				if(pa.containsKey("item")) {
+					Mixed value = pa.get("item", t);
+					if(value.isInstanceOf(CArray.TYPE)) {
+						return item(pa.get("item", t), t);
+					} else {
+						MCMaterial mat = StaticLayer.GetMaterial(value.val());
+						if(mat != null) {
+							if(mat.isItem()) {
+								return StaticLayer.GetItemStack(mat, 1);
+							} else {
+								throw new CREIllegalArgumentException(value + " is not an item type.", t);
+							}
+						} else {
+							throw new CREIllegalArgumentException("Could not find material from " + value, t);
+						}
+					}
+				}
+				break;
+			case SPELL_MOB:
+			case REDSTONE:
+				if(pa.containsKey("color")) {
+					Mixed c = pa.get("color", t);
+					if(c.isInstanceOf(CArray.TYPE)) {
+						return color((CArray) c, t);
+					} else {
+						return StaticLayer.GetConvertor().GetColor(c.val(), t);
+					}
+				}
+				break;
+			case DUST_COLOR_TRANSITION:
+				if(pa.containsKey("color")) {
+					Mixed c = pa.get("color", t);
+					MCColor fromColor;
+					if(c.isInstanceOf(CArray.TYPE)) {
+						fromColor = color((CArray) c, t);
+					} else {
+						fromColor = StaticLayer.GetConvertor().GetColor(c.val(), t);
+					}
+					if(pa.containsKey("tocolor")) {
+						Mixed sc = pa.get("tocolor", t);
+						if(sc.isInstanceOf(CArray.TYPE)) {
+							return new MCParticleData.DustTransition(fromColor, color((CArray) sc, t));
+						} else {
+							return new MCParticleData.DustTransition(fromColor,
+									StaticLayer.GetConvertor().GetColor(sc.val(), t));
+						}
+					}
+					return new MCParticleData.DustTransition(fromColor, MCColor.WHITE);
+				} else if(pa.containsKey("tocolor")) {
+					Mixed sc = pa.get("tocolor", t);
+					if(sc.isInstanceOf(CArray.TYPE)) {
+						return new MCParticleData.DustTransition(MCColor.WHITE, color((CArray) sc, t));
+					} else {
+						return new MCParticleData.DustTransition(MCColor.WHITE,
+								StaticLayer.GetConvertor().GetColor(sc.val(), t));
+					}
+				}
+				break;
+			case VIBRATION:
+				if(pa.containsKey("destination")) {
+					Mixed d = pa.get("destination", t);
+					if(d.isInstanceOf(CArray.TYPE)) {
+						return new MCParticleData.VibrationBlockDestination(location(d, l.getWorld(), t), 5);
+					} else {
+						return new MCParticleData.VibrationEntityDestination(Static.getEntity(d, t), 5);
+					}
+				}
+				break;
+			case SHRIEK:
+				if(pa.containsKey("delay")) {
+					Mixed d = pa.get("delay", t);
+					if(d.isInstanceOf(CInt.TYPE)) {
+						return (int) ((CInt) d).getInt();
+					} else if(!(d instanceof CNull)) {
+						throw new CREIllegalArgumentException("Expected integer for delay but found " + d, t);
+					}
+				}
+				break;
+			case SCULK_CHARGE:
+				if(pa.containsKey("angle")) {
+					Mixed d = pa.get("angle", t);
+					if(d.isInstanceOf(CDouble.TYPE)) {
+						return (float) ((CDouble) d).getDouble();
+					} else if(!(d instanceof CNull)) {
+						throw new CREIllegalArgumentException("Expected double for angle but found " + d, t);
+					}
+				}
+				break;
+			case TRAIL:
+				MCLocation target = l;
+				if(pa.containsKey("target")) {
+					Mixed d = pa.get("target", t);
+					if(d.isInstanceOf(CArray.TYPE)) {
+						target = location(d, l.getWorld(), t);
+					}
+				}
+				MCColor color;
+				if(pa.containsKey("color")) {
+					Mixed c = pa.get("color", t);
+					if(c.isInstanceOf(CArray.TYPE)) {
+						color = color((CArray) c, t);
+					} else {
+						color = StaticLayer.GetConvertor().GetColor(c.val(), t);
+					}
+				} else {
+					color = StaticLayer.GetConvertor().GetColor(0xFC, 0x78, 0x12);
+				}
+				return new MCParticleData.TargetColor(target, color);
+		}
+		return null;
 	}
 
 	/**
