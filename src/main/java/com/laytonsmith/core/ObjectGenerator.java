@@ -52,6 +52,7 @@ import com.laytonsmith.abstraction.MCSuspiciousStewMeta;
 import com.laytonsmith.abstraction.MCTropicalFishBucketMeta;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
+import com.laytonsmith.abstraction.blocks.MCBeehive;
 import com.laytonsmith.abstraction.blocks.MCBlockData;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.abstraction.blocks.MCCommandBlock;
@@ -619,6 +620,8 @@ public class ObjectGenerator {
 				} else if(bs instanceof MCCommandBlock cmdBlock) {
 					ma.set("command", cmdBlock.getCommand());
 					ma.set("customname", cmdBlock.getName());
+				} else if(bs instanceof MCBeehive beehive) {
+					ma.set("beecount", new CInt(beehive.getEntityCount(), t), t);
 				}
 			} else if(meta instanceof MCArmorMeta armorMeta) { // Must be before MCLeatherArmorMeta
 				if(armorMeta.hasTrim()) {
@@ -1180,6 +1183,13 @@ public class ObjectGenerator {
 						}
 						if(ma.containsKey("customname")) {
 							cmdBlock.setName(ma.get("customname", t).val());
+						}
+						bsm.setBlockState(bs);
+					} else if(bs instanceof MCBeehive beehive
+							&& Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
+						if(ma.containsKey("beecount")) {
+							int beeCount = ArgumentValidation.getInt32(ma.get("beecount", t), t);
+							beehive.addBees(beeCount);
 						}
 						bsm.setBlockState(bs);
 					}

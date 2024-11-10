@@ -38,6 +38,11 @@ The entity's custom name is derived from the item '''"display"''' string. All ot
 |
 * '''patterns''' : (array) An array of pattern arrays. Each can contain the keys '''"color"''' (one of ''%DYE_COLORS%'') and '''"shape"''' (one of ''%PATTERN_SHAPES%'').
 |-
+| Bee Hives/Nests
+|
+* '''beecount''' : (int) The number of bees stored in this hive or nest (0 - 3). (requires MC 1.20.6+ to set)
+Stored Bee NBT is not yet supported.
+|-
 | BlockData
 |
 * '''blockdata''' : (array) An array of blockdata (known as block states in vanilla) like is returned from get_blockdata(), or null if none.
