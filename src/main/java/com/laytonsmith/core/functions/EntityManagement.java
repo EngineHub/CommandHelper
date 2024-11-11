@@ -4591,11 +4591,16 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class has_scoreboard_tag extends EntityGetterFunction {
+	public static class has_scoreboard_tag extends AbstractFunction {
 
 		@Override
 		public String getName() {
 			return "has_scoreboard_tag";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
 		}
 
 		@Override
@@ -4607,6 +4612,21 @@ public class EntityManagement {
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCEntity e = Static.getEntity(args[0], t);
 			return CBoolean.get(e.hasScoreboardTag(args[1].val()));
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREBadEntityException.class, CRELengthException.class, CREFormatException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
 		}
 
 		@Override
