@@ -108,7 +108,7 @@ Please include the following snippet under the <code>&lt;build&gt;&lt;plugins&gt
 <plugin>
     <groupId>org.bsc.maven</groupId>
     <artifactId>maven-processor-plugin</artifactId>
-    <version>5.0-jdk8-rc1</version>
+    <version>5.0</version>
     <executions>
         <execution>
             <id>process</id>
@@ -130,7 +130,7 @@ Please include the following snippet under the <code>&lt;build&gt;&lt;plugins&gt
 <plugin>
     <groupId>org.codehaus.mojo</groupId>
     <artifactId>exec-maven-plugin</artifactId>
-    <version>3.0.0</version>
+    <version>3.2.0</version>
     <executions>
         <execution>
             <id>cache-annotations</id>
