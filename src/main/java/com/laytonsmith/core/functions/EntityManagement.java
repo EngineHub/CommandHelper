@@ -4591,6 +4591,31 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	public static class has_scoreboard_tag extends EntityGetterFunction {
+
+		@Override
+		public String getName() {
+			return "has_scoreboard_tag";
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {entityUUID, tag} Returns whether this entity has a specific tag.";
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			MCEntity e = Static.getEntity(args[0], t);
+			return CBoolean.get(e.hasScoreboardTag(args[1].val()));
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class add_scoreboard_tag extends EntitySetterFunction {
 
 		@Override

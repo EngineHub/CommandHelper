@@ -337,6 +337,11 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 	}
 
 	@Override
+	public boolean hasScoreboardTag(String tag) {
+		return e.getScoreboardTags().contains(tag);
+	}
+
+	@Override
 	public boolean addScoreboardTag(String tag) {
 		return e.addScoreboardTag(tag);
 	}

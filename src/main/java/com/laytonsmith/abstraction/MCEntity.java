@@ -99,6 +99,8 @@ public interface MCEntity extends MCMetadatable {
 
 	Set<String> getScoreboardTags();
 
+	boolean hasScoreboardTag(String tag);
+
 	boolean addScoreboardTag(String tag);
 
 	boolean removeScoreboardTag(String tag);
