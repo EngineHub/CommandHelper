@@ -89,17 +89,13 @@ public interface MCWorld extends MCMetadatable {
 
 	void spawnParticle(MCLocation l, MCParticle pa, int count, double offsetX, double offsetY, double offsetZ, double velocity, Object data);
 
-	void playSound(MCLocation l, MCSound sound, float volume, float pitch);
+	void playSound(MCLocation l, MCSound sound, MCSoundCategory category, float volume, float pitch, Long seed);
 
-	void playSound(MCLocation l, String sound, float volume, float pitch);
+	void playSound(MCEntity ent, MCSound sound, MCSoundCategory category, float volume, float pitch, Long seed);
 
-	void playSound(MCLocation l, MCSound sound, MCSoundCategory category, float volume, float pitch);
+	void playSound(MCEntity ent, String sound, MCSoundCategory category, float volume, float pitch, Long seed);
 
-	void playSound(MCEntity ent, MCSound sound, MCSoundCategory category, float volume, float pitch);
-
-	void playSound(MCEntity ent, String sound, MCSoundCategory category, float volume, float pitch);
-
-	void playSound(MCLocation l, String sound, MCSoundCategory category, float volume, float pitch);
+	void playSound(MCLocation l, String sound, MCSoundCategory category, float volume, float pitch, Long seed);
 
 	MCItem dropItemNaturally(MCLocation l, MCItemStack is);
 

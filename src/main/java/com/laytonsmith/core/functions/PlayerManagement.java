@@ -5596,17 +5596,15 @@ public class PlayerManagement {
 				throw new CREFormatException("Sound name '" + soundName + "' is invalid.", t);
 			}
 
+			MCSoundCategory category = null;
 			if(categoryName != null) {
-				MCSoundCategory category;
 				try {
 					category = MCSoundCategory.valueOf(categoryName.toUpperCase());
 				} catch (IllegalArgumentException iae) {
 					throw new CREFormatException("Sound category '" + categoryName + "' is invalid.", t);
 				}
-				p.stopSound(sound, category);
-			} else {
-				p.stopSound(sound);
 			}
+			p.stopSound(sound, category);
 
 			return CVoid.VOID;
 		}
@@ -5623,7 +5621,7 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {player, sound, [category]} Stops the specified sound for the given player.";
+			return "void {player, sound, [category]} Stops the specified sound for a player.";
 		}
 
 		@Override
@@ -5679,7 +5677,7 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {player, category} Stops all sounds in a category for the given player. (MC 1.19)";
+			return "void {player, category} Stops all sounds in a category for a player. (MC 1.19+)";
 		}
 
 		@Override
@@ -5739,11 +5737,7 @@ public class PlayerManagement {
 				}
 			}
 			try {
-				if(category != null) {
-					p.stopSound(soundName, category);
-				} else {
-					p.stopSound(soundName);
-				}
+				p.stopSound(soundName, category);
 			} catch(Exception ex) {
 				throw new CREFormatException(ex.getMessage(), t);
 			}

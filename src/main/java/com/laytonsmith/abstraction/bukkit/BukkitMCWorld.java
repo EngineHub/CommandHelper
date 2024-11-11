@@ -308,51 +308,55 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	}
 
 	@Override
-	public void playSound(MCLocation l, MCSound sound, float volume, float pitch) {
-		w.playSound(((BukkitMCLocation) l).asLocation(),
-				((BukkitMCSound) sound).getConcrete(), volume, pitch);
-	}
-
-	@Override
-	public void playSound(MCLocation l, String sound, float volume, float pitch) {
-		w.playSound((Location) l.getHandle(), sound, volume, pitch);
-	}
-
-	@Override
-	public void playSound(MCLocation l, MCSound sound, MCSoundCategory category, float volume, float pitch) {
-		if(category == null) {
-			w.playSound((Location) l.getHandle(), ((BukkitMCSound) sound).getConcrete(),
-					SoundCategory.MASTER, volume, pitch);
+	public void playSound(MCLocation l, MCSound sound, MCSoundCategory category, float volume, float pitch, Long seed) {
+		SoundCategory cat = BukkitMCSoundCategory.getConvertor().getConcreteEnum(category);
+		if(cat == null) {
+			cat = SoundCategory.MASTER;
+		}
+		if(seed == null) {
+			w.playSound((Location) l.getHandle(), ((BukkitMCSound) sound).getConcrete(), cat, volume, pitch);
 		} else {
-			w.playSound((Location) l.getHandle(), ((BukkitMCSound) sound).getConcrete(),
-					BukkitMCSoundCategory.getConvertor().getConcreteEnum(category), volume, pitch);
+			w.playSound((Location) l.getHandle(), ((BukkitMCSound) sound).getConcrete(), cat, volume, pitch, seed);
 		}
 	}
 
 	@Override
-	public void playSound(MCEntity ent, MCSound sound, MCSoundCategory category, float volume, float pitch) {
-		if(category == null) {
-			w.playSound((Entity) ent.getHandle(), ((BukkitMCSound) sound).getConcrete(),
-					SoundCategory.MASTER, volume, pitch);
+	public void playSound(MCEntity ent, MCSound sound, MCSoundCategory category, float volume, float pitch, Long seed) {
+		SoundCategory cat = BukkitMCSoundCategory.getConvertor().getConcreteEnum(category);
+		if(cat == null) {
+			cat = SoundCategory.MASTER;
+		}
+		if(seed == null) {
+			w.playSound((Entity) ent.getHandle(), ((BukkitMCSound) sound).getConcrete(), cat, volume, pitch);
 		} else {
-			w.playSound((Entity) ent.getHandle(), ((BukkitMCSound) sound).getConcrete(),
-					BukkitMCSoundCategory.getConvertor().getConcreteEnum(category), volume, pitch);
+			w.playSound((Entity) ent.getHandle(), ((BukkitMCSound) sound).getConcrete(), cat, volume, pitch, seed);
 		}
 	}
 
 	@Override
-	public void playSound(MCEntity ent, String sound, MCSoundCategory category, float volume, float pitch) {
-		if(category == null) {
-			w.playSound((Entity) ent.getHandle(), sound, SoundCategory.MASTER, volume, pitch);
+	public void playSound(MCEntity ent, String sound, MCSoundCategory category, float volume, float pitch, Long seed) {
+		SoundCategory cat = BukkitMCSoundCategory.getConvertor().getConcreteEnum(category);
+		if(cat == null) {
+			cat = SoundCategory.MASTER;
+		}
+		if(seed == null) {
+			w.playSound((Entity) ent.getHandle(), sound, cat, volume, pitch);
 		} else {
-			w.playSound((Entity) ent.getHandle(), sound, BukkitMCSoundCategory.getConvertor().getConcreteEnum(category), volume, pitch);
+			w.playSound((Entity) ent.getHandle(), sound, cat, volume, pitch, seed);
 		}
 	}
 
 	@Override
-	public void playSound(MCLocation l, String sound, MCSoundCategory category, float volume, float pitch) {
-		w.playSound((Location) l.getHandle(), sound,
-				BukkitMCSoundCategory.getConvertor().getConcreteEnum(category), volume, pitch);
+	public void playSound(MCLocation l, String sound, MCSoundCategory category, float volume, float pitch, Long seed) {
+		SoundCategory cat = BukkitMCSoundCategory.getConvertor().getConcreteEnum(category);
+		if(cat == null) {
+			cat = SoundCategory.MASTER;
+		}
+		if(seed == null) {
+			w.playSound((Location) l.getHandle(), sound, cat, volume, pitch);
+		} else {
+			w.playSound((Location) l.getHandle(), sound, cat, volume, pitch, seed);
+		}
 	}
 
 	@Override

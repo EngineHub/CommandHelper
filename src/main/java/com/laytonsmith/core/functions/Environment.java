@@ -1754,6 +1754,7 @@ public class Environment {
 			MCSoundCategory category = null;
 			float volume = 1;
 			float pitch = 1;
+			Long seed = null;
 
 			if(!(args[1].isInstanceOf(CArray.TYPE))) {
 				throw new CREFormatException("An array was expected but received " + args[1], t);
@@ -1785,30 +1786,33 @@ public class Environment {
 				pitch = ArgumentValidation.getDouble32(sa.get("pitch", t), t);
 			}
 
+			if(sa.containsKey("seed") && Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_2)) {
+				seed = ArgumentValidation.getInt(sa.get("seed", t), t);
+			}
+
 			if(args.length == 3) {
-				java.util.List<MCPlayer> players = new java.util.ArrayList<>();
 				if(args[2].isInstanceOf(CArray.TYPE)) {
-					for(String key : ((CArray) args[2]).stringKeySet()) {
-						players.add(Static.GetPlayer(((CArray) args[2]).get(key, t), t));
+					CArray players = (CArray) args[2];
+					for(String key : players.stringKeySet()) {
+						MCPlayer p = Static.GetPlayer(players.get(key, t), t);
+						if(ent != null) {
+							p.playSound(ent, sound, category, volume, pitch, seed);
+						} else {
+							p.playSound(loc, sound, category, volume, pitch, seed);
+						}
 					}
 				} else {
-					players.add(Static.GetPlayer(args[2], t));
-				}
-
-				if(loc == null) {
-					for(MCPlayer p : players) {
-						p.playSound(ent, sound, category, volume, pitch);
-					}
-				} else {
-					for(MCPlayer p : players) {
-						p.playSound(loc, sound, category, volume, pitch);
+					MCPlayer p = Static.GetPlayer(args[2], t);
+					if(ent != null) {
+						p.playSound(ent, sound, category, volume, pitch, seed);
+					} else {
+						p.playSound(loc, sound, category, volume, pitch, seed);
 					}
 				}
-
 			} else if(loc == null) {
-				ent.getWorld().playSound(ent, sound, category, volume, pitch);
+				ent.getWorld().playSound(ent, sound, category, volume, pitch, seed);
 			} else {
-				loc.getWorld().playSound(loc, sound, category, volume, pitch);
+				loc.getWorld().playSound(loc, sound, category, volume, pitch, seed);
 			}
 			return CVoid.VOID;
 		}
@@ -1826,14 +1830,17 @@ public class Environment {
 		@Override
 		public String docs() {
 			return "void {source, soundArray[, players]} Plays a sound at the given source."
-					+ " Source can be a location array or entity UUID. SoundArray is in an associative array with"
-					+ " keys 'sound', 'category', 'volume', 'pitch', where all are optional except sound."
-					+ " Volume, if greater than 1.0 (default), is the distance in chunks players can hear the sound."
-					+ " Pitch has a range of 0.5 - 2.0, where where 1.0 is the middle pitch and default. Players can"
-					+ " be a single player or an array of players to play the sound to, if"
-					+ " not given, all players can potentially hear it. ---- Possible categories: "
+					+ " Source can be a location array (or entity UUID on MC 1.18.1+)."
+					+ " The soundArray is in an associative array with the keys:"
+					+ " 'sound' 'category', 'volume' (float), 'pitch' (float), 'seed' (int; MC 1.20.2+)"
+					+ " -- all are optional except sound."
+					+ " Volume, if greater than 1.0 (default), controls the distance players can hear the sound."
+					+ " Pitch has a clamped range of 0.5 - 2.0, where where 1.0 is the middle pitch and default."
+					+ " Seed is an integer that determines which sound variant is played."
+					+ " Players can be a single player or an array of players to play the sound to, if not given,"
+					+ " all players can potentially hear it. ---- Possible categories: "
 					+ StringUtils.Join(MCSoundCategory.values(), ", ", ", or ", " or ") + "."
-					+ " \n\nPossible sounds: " + StringUtils.Join(MCSound.values(), "<br>");
+					+ " \n\nPossible sounds:\n" + StringUtils.Join(MCSound.values(), "<br>");
 		}
 
 		@Override
@@ -1918,6 +1925,7 @@ public class Environment {
 			MCSoundCategory category = null;
 			float volume = 1;
 			float pitch = 1;
+			Long seed = null;
 
 			if(!(args[1].isInstanceOf(CArray.TYPE))) {
 				throw new CREFormatException("An array was expected but received " + args[1], t);
@@ -1943,6 +1951,10 @@ public class Environment {
 				pitch = ArgumentValidation.getDouble32(sa.get("pitch", t), t);
 			}
 
+			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_2) && sa.containsKey("seed")) {
+				seed = ArgumentValidation.getInt(sa.get("seed", t), t);
+			}
+
 			if(args.length == 3) {
 				java.util.List<MCPlayer> players = new java.util.ArrayList<>();
 				if(args[2].isInstanceOf(CArray.TYPE)) {
@@ -1954,21 +1966,11 @@ public class Environment {
 				}
 
 				try {
-					if(category == null) {
-						for(MCPlayer p : players) {
-							if(loc == null) {
-								p.playSound(ent, path, volume, pitch);
-							} else {
-								p.playSound(loc, path, volume, pitch);
-							}
-						}
-					} else {
-						for(MCPlayer p : players) {
-							if(loc == null) {
-								p.playSound(ent, path, category, volume, pitch);
-							} else {
-								p.playSound(loc, path, category, volume, pitch);
-							}
+					for(MCPlayer p : players) {
+						if(loc == null) {
+							p.playSound(ent, path, category, volume, pitch, seed);
+						} else {
+							p.playSound(loc, path, category, volume, pitch, seed);
 						}
 					}
 				} catch(Exception ex) {
@@ -1977,11 +1979,9 @@ public class Environment {
 			} else {
 				try {
 					if(loc == null) {
-						ent.getWorld().playSound(ent, path, category, volume, pitch);
-					} else if(category == null) {
-						loc.getWorld().playSound(loc, path, volume, pitch);
+						ent.getWorld().playSound(ent, path, category, volume, pitch, seed);
 					} else {
-						loc.getWorld().playSound(loc, path, category, volume, pitch);
+						loc.getWorld().playSound(loc, path, category, volume, pitch, seed);
 					}
 				} catch(Exception ex) {
 					throw new CREFormatException(ex.getMessage(), t);
@@ -2002,15 +2002,17 @@ public class Environment {
 
 		@Override
 		public String docs() {
-			return "void {source, soundArray[, players]} Plays a sound at the"
-					+ " given source. Source can be a location array or entity UUID."
-					+ " SoundArray is in an associative array with"
-					+ " keys 'sound', 'category', 'volume', 'pitch', where all are optional except sound."
-					+ " Volume, if greater than 1.0 (default), is the distance in chunks players can hear the sound."
-					+ " Pitch has a range of 0.5 - 2.0, where where 1.0 is the middle pitch and default. Players can"
-					+ " be a single player or an array of players to play the sound to, if"
-					+ " not given, all players can potentially hear it. Sound is"
-					+ " a sound path, separated by periods. ---- Possible categories: "
+			return "void {source, soundArray[, players]} Plays a sound at the given source."
+					+ " Source can be a location array (or entity UUID on MC 1.19.3+)."
+					+ " The soundArray is in an associative array with the keys:"
+					+ " 'sound', 'category', 'volume' (float), 'pitch' (float), 'seed' (int; MC 1.20.2+)"
+					+ " -- all are optional except sound."
+					+ " Volume, if greater than 1.0 (default), controls the distance players can hear the sound."
+					+ " Pitch has a clamped range of 0.5 - 2.0, where where 1.0 is the middle pitch and default."
+					+ " Seed is an integer that determines which sound variant is played."
+					+ " Players can be a single player or an array of players to play the sound to, if not given,"
+					+ " all players can potentially hear it. Sound is a sound path, separated by periods."
+					+ " ---- Possible categories: "
 					+ StringUtils.Join(MCSoundCategory.values(), ", ", ", or ", " or ") + ".";
 		}
 

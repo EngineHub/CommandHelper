@@ -140,23 +140,13 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity, MCOfflinePlaye
 
 	void playNote(MCLocation loc, MCInstrument instrument, MCNote note);
 
-	void playSound(MCLocation l, MCSound sound, float volume, float pitch);
+	void playSound(MCLocation l, MCSound sound, MCSoundCategory category, float volume, float pitch, Long seed);
 
-	void playSound(MCLocation l, String sound, float volume, float pitch);
+	void playSound(MCEntity ent, MCSound sound, MCSoundCategory category, float volume, float pitch, Long seed);
 
-	void playSound(MCLocation l, MCSound sound, MCSoundCategory category, float volume, float pitch);
+	void playSound(MCLocation l, String sound, MCSoundCategory category, float volume, float pitch, Long seed);
 
-	void playSound(MCEntity ent, MCSound sound, MCSoundCategory category, float volume, float pitch);
-
-	void playSound(MCLocation l, String sound, MCSoundCategory category, float volume, float pitch);
-
-	void playSound(MCEntity ent, String sound, float volume, float pitch);
-
-	void playSound(MCEntity ent, String sound, MCSoundCategory category, float volume, float pitch);
-
-	void stopSound(MCSound sound);
-
-	void stopSound(String sound);
+	void playSound(MCEntity ent, String sound, MCSoundCategory category, float volume, float pitch, Long seed);
 
 	void stopSound(MCSound sound, MCSoundCategory category);
 
