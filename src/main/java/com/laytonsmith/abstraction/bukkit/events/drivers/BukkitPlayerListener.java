@@ -254,7 +254,7 @@ public class BukkitPlayerListener implements Listener {
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerTeleport(PlayerTeleportEvent event) {
-		if(event.getFrom().equals(event.getTo())) {
+		if(event.getFrom().equals(event.getTo()) || event.getTo() == null) {
 			return;
 		}
 
