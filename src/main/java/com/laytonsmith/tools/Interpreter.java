@@ -1224,6 +1224,11 @@ public final class Interpreter {
 		}
 
 		@Override
+		public MCColor GetColor(int red, int green, int blue, int alpha) {
+			throw new UnsupportedOperationException("This method is not supported from a shell.");
+		}
+
+		@Override
 		public MCColor GetColor(String colorName, Target t) throws CREFormatException {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}

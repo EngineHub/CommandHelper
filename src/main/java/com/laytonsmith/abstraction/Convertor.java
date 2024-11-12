@@ -202,6 +202,17 @@ public interface Convertor {
 	MCColor GetColor(int red, int green, int blue);
 
 	/**
+	 * Returns a transparent color object for this server.
+	 *
+	 * @param red
+	 * @param green
+	 * @param blue
+	 * @param alpha
+	 * @return
+	 */
+	MCColor GetColor(int red, int green, int blue, int alpha);
+
+	/**
 	 * Returns a color object given the color name. The color name must come from the standard color types, or a
 	 * FormatException is thrown.
 	 *

@@ -1,6 +1,9 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
+import com.laytonsmith.abstraction.MCColor;
+import com.laytonsmith.abstraction.bukkit.BukkitMCColor;
 import com.laytonsmith.abstraction.entities.MCTextDisplay;
+import org.bukkit.Color;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.TextDisplay;
 import org.bukkit.entity.TextDisplay.TextAlignment;
@@ -25,13 +28,26 @@ public class BukkitMCTextDisplay extends BukkitMCDisplay implements MCTextDispla
 	}
 
 	@Override
-	public boolean usesDefaultBackground() {
-		return td.isDefaultBackground();
+	public MCColor getBackgroundColor() {
+		if(td.isDefaultBackground()) {
+			return null;
+		}
+		Color color = td.getBackgroundColor();
+		if(color == null) {
+			return null;
+		}
+		return BukkitMCColor.GetMCColor(color);
 	}
 
 	@Override
-	public void setUsesDefaultBackground(boolean defaultBackground) {
-		td.setDefaultBackground(defaultBackground);
+	public void setBackgroundColor(MCColor color) {
+		if(color == null) {
+			td.setDefaultBackground(true);
+			td.setBackgroundColor(null);
+		} else {
+			td.setDefaultBackground(false);
+			td.setBackgroundColor(BukkitMCColor.GetColor(color));
+		}
 	}
 
 	@Override

@@ -2260,6 +2260,13 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_DISPLAY_TEXT_LINE_WIDTH, new CInt(tDisplay.getLineWidth(), t), t);
 					specArray.set(entity_spec.KEY_DISPLAY_TEXT_SEE_THROUGH, CBoolean.get(tDisplay.isVisibleThroughBlocks()), t);
 					specArray.set(entity_spec.KEY_DISPLAY_TEXT_SHADOW, CBoolean.get(tDisplay.hasShadow()), t);
+					MCColor color = tDisplay.getBackgroundColor();
+					if(color == null) {
+						specArray.set(entity_spec.KEY_DISPLAY_TEXT_BACKGROUND_COLOR, CNull.NULL, t);
+					} else {
+						specArray.set(entity_spec.KEY_DISPLAY_TEXT_BACKGROUND_COLOR,
+								ObjectGenerator.GetGenerator().transparentColor(color, t), t);
+					}
 					long opacity = tDisplay.getOpacity();
 					if(opacity < 0) {
 						opacity += 256;
@@ -2391,6 +2398,7 @@ public class EntityManagement {
 		private static final String KEY_DISPLAY_TEXT_LINE_WIDTH = "linewidth";
 		private static final String KEY_DISPLAY_TEXT_SEE_THROUGH = "seethrough";
 		private static final String KEY_DISPLAY_TEXT_SHADOW = "shadow";
+		private static final String KEY_DISPLAY_TEXT_BACKGROUND_COLOR = "bgcolor";
 		private static final String KEY_DISPLAY_TEXT_OPACITY = "opacity";
 		private static final String KEY_DROPPED_ITEM_ITEMSTACK = "itemstack";
 		private static final String KEY_DROPPED_ITEM_PICKUPDELAY = "pickupdelay";
@@ -3776,6 +3784,16 @@ public class EntityManagement {
 								break;
 							case entity_spec.KEY_DISPLAY_TEXT_SHADOW:
 								tDisplay.setHasShadow(ArgumentValidation.getBooleanObject(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_DISPLAY_TEXT_BACKGROUND_COLOR:
+								Mixed color = specArray.get(index, t);
+								if(color.isInstanceOf(CArray.TYPE)) {
+									tDisplay.setBackgroundColor(ObjectGenerator.GetGenerator().color((CArray) color, t));
+								} else if(color instanceof CNull) {
+									tDisplay.setBackgroundColor(null);
+								} else {
+									throw new CRECastException("Expected a color array for text display background color.", t);
+								}
 								break;
 							case entity_spec.KEY_DISPLAY_TEXT_OPACITY:
 								long opacity = ArgumentValidation.getInt(specArray.get(index, t), t);

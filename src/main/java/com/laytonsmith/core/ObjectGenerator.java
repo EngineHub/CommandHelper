@@ -1564,7 +1564,8 @@ public class ObjectGenerator {
 
 	/**
 	 * Returns an MCColor given a colorArray, which supports the following three format recipeTypes (in this order of
-	 * priority) array(r: 0, g: 0, b: 0) array(red: 0, green: 0, blue: 0) array(0, 0, 0)
+	 * priority) array(r: 0, g: 0, b: 0) array(red: 0, green: 0, blue: 0) array(0, 0, 0).
+	 * Optionally accepts an alpha channel for the keys: 'a', 'alpha', and 3 respectively.
 	 *
 	 * @param color
 	 * @param t
@@ -1595,11 +1596,42 @@ public class ObjectGenerator {
 		} else {
 			blue = ArgumentValidation.getInt32(color.get(2, t), t);
 		}
+		if(color.size() > 3) {
+			int alpha;
+			if(color.containsKey("a")) {
+				alpha = ArgumentValidation.getInt32(color.get("a", t), t);
+			} else if(color.containsKey("alpha")) {
+				alpha = ArgumentValidation.getInt32(color.get("alpha", t), t);
+			} else {
+				alpha = ArgumentValidation.getInt32(color.get(3, t), t);
+			}
+			try {
+				return StaticLayer.GetConvertor().GetColor(red, green, blue, alpha);
+			} catch (IllegalArgumentException ex) {
+				throw new CRERangeException(ex.getMessage(), t, ex);
+			}
+		}
 		try {
 			return StaticLayer.GetConvertor().GetColor(red, green, blue);
 		} catch (IllegalArgumentException ex) {
 			throw new CRERangeException(ex.getMessage(), t, ex);
 		}
+	}
+
+	/**
+	 * Returns a CArray with an alpha channel from a given MCColor. It will be in the format array(a: 0, r: 0, g: 0, b: 0)
+	 *
+	 * @param color
+	 * @param t
+	 * @return
+	 */
+	public CArray transparentColor(MCColor color, Target t) {
+		CArray ca = CArray.GetAssociativeArray(t);
+		ca.set("r", new CInt(color.getRed(), t), t);
+		ca.set("g", new CInt(color.getGreen(), t), t);
+		ca.set("b", new CInt(color.getBlue(), t), t);
+		ca.set("a", new CInt(color.getAlpha(), t), t);
+		return ca;
 	}
 
 	/**

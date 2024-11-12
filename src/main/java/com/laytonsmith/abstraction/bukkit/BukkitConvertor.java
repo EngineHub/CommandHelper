@@ -776,6 +776,11 @@ public class BukkitConvertor extends AbstractConvertor {
 	}
 
 	@Override
+	public MCColor GetColor(int red, int green, int blue, int alpha) {
+		return BukkitMCColor.GetMCColor(Color.fromARGB(alpha, red, green, blue));
+	}
+
+	@Override
 	public MCColor GetColor(String colorName, Target t) throws CREFormatException {
 		return ConvertorHelper.GetColor(colorName, t);
 	}

@@ -303,9 +303,10 @@ without knowing the rotations on the other axis or of other body parts beforehan
 * %KEY_DISPLAY_TEXT_ALIGNMENT%: The text alignment. Can be CENTER (default), LEFT or RIGHT.
 * %KEY_DISPLAY_TEXT%: The text for this display entity.
 * %KEY_DISPLAY_TEXT_LINE_WIDTH%: The max width for a line of text before splitting. (default: 200)
-* %KEY_DISPLAY_TEXT_SEE_THROUGH%: Whether the text is visible through blocks. (default: false)
+* %KEY_DISPLAY_TEXT_SEE_THROUGH%: Whether the text is visible through blocks and entities are visible through the background. (default: false)
 * %KEY_DISPLAY_TEXT_SHADOW%: Whether the text has a shadow. (default: false) Not to be confused with an entity shadow.
-* %KEY_DISPLAY_TEXT_OPACITY%: The alpha opacity of the text from 0 to 255. (default: 255)
+* %KEY_DISPLAY_TEXT_OPACITY%: The alpha opacity of the text from 0 to 255. (default: 255) If value is less than 26, the text will not be rendered.
+* %KEY_DISPLAY_TEXT_BACKGROUND_COLOR%: An transparent color array for the background. ("r", "g", "b" and "a" keys with 0-255 integer values) If null, it will use the default text background. If alpha channel is less than 26, the background will not be rendered.
 |-
 | TRIDENT
 | 

@@ -797,6 +797,11 @@ public class StaticTest {
 			return new MCColor() {
 
 				@Override
+				public int getAlpha() {
+					return 255;
+				}
+
+				@Override
 				public int getRed() {
 					return red;
 				}
@@ -814,6 +819,47 @@ public class StaticTest {
 				@Override
 				public MCColor build(int red, int green, int blue) {
 					return GetColor(red, green, blue);
+				}
+
+				@Override
+				public MCColor build(int alpha, int red, int green, int blue) {
+					return GetColor(red, green, blue, alpha);
+				}
+			};
+		}
+
+		@Override
+		public MCColor GetColor(final int red, final int green, final int blue, final int alpha) {
+			return new MCColor() {
+
+				@Override
+				public int getAlpha() {
+					return alpha;
+				}
+
+				@Override
+				public int getRed() {
+					return red;
+				}
+
+				@Override
+				public int getGreen() {
+					return green;
+				}
+
+				@Override
+				public int getBlue() {
+					return blue;
+				}
+
+				@Override
+				public MCColor build(int red, int green, int blue) {
+					return GetColor(red, green, blue);
+				}
+
+				@Override
+				public MCColor build(int alpha, int red, int green, int blue) {
+					return GetColor(red, green, blue, alpha);
 				}
 			};
 		}
