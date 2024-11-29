@@ -111,8 +111,9 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 			int position = data.position();
 			data.rewind();
 			temp.put(data);
+			temp.order(data.order());
+			temp.position(position);
 			data = temp;
-			data.position(position);
 		}
 		value = null;
 	}
