@@ -537,14 +537,14 @@ public final class Static {
 	/**
 	 * Regex patterns
 	 */
-	private static final Pattern INVALID_HEX = Pattern.compile("-?0x[a-fA-F0-9]*[^a-fA-F0-9]+[a-fA-F0-9]*");
-	private static final Pattern VALID_HEX = Pattern.compile("-?0x[a-fA-F0-9]+");
-	private static final Pattern INVALID_BINARY = Pattern.compile("-?0b[01]*[^01]+[01]*");
-	private static final Pattern VALID_BINARY = Pattern.compile("-?0b[01]+");
-	private static final Pattern INVALID_OCTAL = Pattern.compile("-?0o[0-7]*[^0-7]+[0-7]*");
-	private static final Pattern VALID_OCTAL = Pattern.compile("-?0o[0-7]+");
-	private static final Pattern VALID_DECIMAL = Pattern.compile("-?0m[0-9]+");
-	private static final Pattern INVALID_DECIMAL = Pattern.compile("-?0m[0-9]*[^0-9]+[0-9]*");
+	private static final Pattern INVALID_HEX = Pattern.compile("0x[a-fA-F0-9]*[^a-fA-F0-9]+[a-fA-F0-9]*");
+	private static final Pattern VALID_HEX = Pattern.compile("0x[a-fA-F0-9]+");
+	private static final Pattern INVALID_BINARY = Pattern.compile("0b[01]*[^01]+[01]*");
+	private static final Pattern VALID_BINARY = Pattern.compile("0b[01]+");
+	private static final Pattern INVALID_OCTAL = Pattern.compile("0o[0-7]*[^0-7]+[0-7]*");
+	private static final Pattern VALID_OCTAL = Pattern.compile("0o[0-7]+");
+	private static final Pattern VALID_DECIMAL = Pattern.compile("0m[0-9]+");
+	private static final Pattern INVALID_DECIMAL = Pattern.compile("0m[0-9]*[^0-9]+[0-9]*");
 
 	/**
 	 * Given a string input, creates and returns a Construct of the appropriate type. This takes into account that null,
