@@ -111,6 +111,22 @@ public class TestStatic {
 		assertTrue(Static.resolveConstruct("1.1", Target.UNKNOWN) instanceof CDouble);
 		assertTrue(Static.resolveConstruct("astring", Target.UNKNOWN) instanceof CString);
 		assertTrue(Static.resolveConstruct("string", Target.UNKNOWN) instanceof CClassType);
+		assertTrue(getResolveConstructLong("0xFF") == 0xFF);
+		assertTrue(getResolveConstructLong("0xABCDEF0123456789") == 0xABCDEF0123456789L); // All chars.
+		assertTrue(getResolveConstructLong("0xFFAFFFFFFFF0FFFF") == 0xFFAFFFFFFFF0FFFFL);
+		assertTrue(getResolveConstructLong("0xFFFFFFFFFFFFFFFF") == 0xFFFFFFFFFFFFFFFFL); // Max value.
+		assertTrue(getResolveConstructLong("0b100") == 0b100);
+		assertTrue(getResolveConstructLong("0b1111011111111011111111111011111111111111111111110111111111111110")
+				== 0b1111011111111011111111111011111111111111111111110111111111111110L);
+		assertTrue(getResolveConstructLong("0b1111111111111111111111111111111111111111111111111111111111111111")
+				== 0b1111111111111111111111111111111111111111111111111111111111111111L); // Max value.
+		assertTrue(getResolveConstructLong("0o76543210") == 076543210L); // All chars.
+		assertTrue(getResolveConstructLong("0o1737745677477125767277") == 01737745677477125767277L);
+		assertTrue(getResolveConstructLong("0o1777777777777777777777") == 01777777777777777777777L); // Max value.
+	}
+
+	private static long getResolveConstructLong(String val) {
+		return ((CInt) Static.resolveConstruct(val, Target.UNKNOWN)).getInt();
 	}
 
 }
