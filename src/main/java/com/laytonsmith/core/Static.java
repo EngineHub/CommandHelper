@@ -592,21 +592,52 @@ public final class Static {
 			throw new CREFormatException("Hex numbers must only contain digits 0-9, and the letters A-F, but \"" + val + "\" was found.", t);
 		}
 		if(VALID_HEX.matcher(val).matches()) {
-			//Hex number
-			return new CInt(Long.parseLong(val.substring(2), 16), t);
+
+			// Parse hex number. Special handling for 16-digit numbers to support setting all 64 bits of the value.
+			long longVal;
+			if(val.length() > 16 + 2) {
+				throw new CREFormatException("Hex numbers must contain at most 16 digits, but \"" + val + "\" was found.", t);
+			} else if(val.length() == 16 + 2) {
+				longVal = (Long.parseLong(val.substring(2, 10), 16) << 32) | Long.parseLong(val.substring(10, 18), 16);
+			} else {
+				longVal = Long.parseLong(val.substring(2), 16);
+			}
+			return new CInt(longVal, t);
 		}
 		if(INVALID_BINARY.matcher(val).matches()) {
 			throw new CREFormatException("Binary numbers must only contain digits 0 and 1, but \"" + val + "\" was found.", t);
 		}
 		if(VALID_BINARY.matcher(val).matches()) {
-			//Binary number
-			return new CInt(Long.parseLong(val.substring(2), 2), t);
+
+			// Parse binary number. Special handling for 64-digit numbers to support setting all 64 bits of the value.
+			long longVal;
+			if(val.length() > 64 + 2) {
+				throw new CREFormatException("Binary numbers must contain at most 64 digits, but \"" + val + "\" was found.", t);
+			} else if(val.length() == 64 + 2) {
+				longVal = (Long.parseLong(val.substring(2, 34), 2) << 32) | Long.parseLong(val.substring(34, 66), 2);
+			} else {
+				longVal = Long.parseLong(val.substring(2), 2);
+			}
+			return new CInt(longVal, t);
 		}
 		if(INVALID_OCTAL.matcher(val).matches()) {
 			throw new CREFormatException("Octal numbers must only contain digits 0-7, but \"" + val + "\" was found.", t);
 		}
 		if(VALID_OCTAL.matcher(val).matches()) {
-			return new CInt(Long.parseLong(val.substring(2), 8), t);
+
+			// Parse octal number. Special handling for 8-digit numbers to support setting all 64 bits of the value.
+			long longVal;
+			if(val.length() > 22 + 2) {
+				throw new CREFormatException("Octal numbers must contain at most 22 digits, but \"" + val + "\" was found.", t);
+			} else if(val.length() == 22 + 2) {
+				if(val.charAt(2) != '1') {
+					throw new CREFormatException("Octal number exceeds maximum 64-bit value 0o1777777777777777777777. Found \"" + val + "\".", t);
+				}
+				longVal = Long.parseLong(val.substring(3), 8) | (1L << 63);
+			} else {
+				longVal = Long.parseLong(val.substring(2), 8);
+			}
+			return new CInt(longVal, t);
 		}
 		if(INVALID_DECIMAL.matcher(val).matches()) {
 			throw new CREFormatException("Decimal numbers must only contain digits, but \"" + val + "\" was found.", t);
