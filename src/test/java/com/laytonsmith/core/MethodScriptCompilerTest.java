@@ -238,7 +238,7 @@ public class MethodScriptCompilerTest {
 					= "[";
 			MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, null, true), null, envs), env, null, null);
 			fail("Test passed, but wasn't supposed to");
-		} catch (ConfigCompileException | ConfigCompileGroupException ex) {
+		} catch (AbstractCompileException ex) {
 			//Passed
 		}
 		try {
@@ -246,7 +246,7 @@ public class MethodScriptCompilerTest {
 					= "]";
 			MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, null, true), null, envs), env, null, null);
 			fail("Test passed, but wasn't supposed to");
-		} catch (ConfigCompileException | ConfigCompileGroupException ex) {
+		} catch (AbstractCompileException ex) {
 			//Passed
 		}
 	}
@@ -450,7 +450,7 @@ public class MethodScriptCompilerTest {
 			String config = "/cmd [$p] $q = msg('')";
 			MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null, null, false), envs).get(0).compile(env);
 			fail("Test passed, but wasn't supposed to");
-		} catch (ConfigCompileException | ConfigCompileGroupException ex) {
+		} catch (AbstractCompileException ex) {
 			//Passed
 		}
 	}
@@ -495,7 +495,7 @@ public class MethodScriptCompilerTest {
 			String config = "/cmd [$p=player()] = msg('')";
 			MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null, null, false), envs).get(0).compile(env);
 			fail("Test passed, but wasn't supposed to");
-		} catch (ConfigCompileException | ConfigCompileGroupException ex) {
+		} catch (AbstractCompileException ex) {
 			//Passed
 		}
 	}
