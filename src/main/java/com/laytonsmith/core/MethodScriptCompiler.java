@@ -1763,7 +1763,12 @@ public final class MethodScriptCompiler {
 				}
 				continue;
 			} else if(t.type == TType.LIT) {
-				Construct c = Static.resolveConstruct(t.val(), t.target, true);
+				Construct c;
+				try {
+					c = Static.resolveConstruct(t.val(), t.target, true);
+				} catch (ConfigRuntimeException ex) {
+					throw new ConfigCompileException(ex);
+				}
 				if((c instanceof CInt || c instanceof CDecimal) && next1.type == TType.DOT && next2.type == TType.LIT) {
 					// make CDouble/CDecimal here because otherwise Long.parseLong() will remove
 					// minus zero before decimals and leading zeroes after decimals
