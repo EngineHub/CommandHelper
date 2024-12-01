@@ -20,7 +20,6 @@ import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.AbstractCompileException;
-import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -1019,7 +1018,7 @@ public class MethodScriptCompilerTest {
 		assertEquals("ms.lang.decimal", SRun("typeof(0m1234567890987654321.1234567890987654321)", fakePlayer));
 	}
 
-	@Test(expected = CREFormatException.class)
+	@Test(expected = AbstractCompileException.class)
 	public void testLiteralBinary() throws Exception {
 		SRun("0b2", fakePlayer);
 	}
