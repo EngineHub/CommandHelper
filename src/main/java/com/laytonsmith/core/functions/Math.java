@@ -1115,9 +1115,9 @@ public class Math {
 
 		@Override
 		public String docs() {
-			return "mixed {[] | min/max, [max]} Returns a random number from 0 to max, or min to max, depending on usage. Max is exclusive. Min must"
-					+ " be less than max, and both numbers must be >= 0. This will return an integer. Alternatively, you can pass no arguments, and a random"
-					+ " double, from 0 to 1 will be returned.";
+			return "mixed {[] | min/max, [max]} Returns a random number from 0 to max or min to max, depending on usage."
+					+ " Max is exclusive. Min must be less than max. This will return an integer."
+					+ " If no arguments are given, a random double from 0.0 to 1.0 (exclusive) will be returned.";
 		}
 
 		@Override
@@ -1148,17 +1148,13 @@ public class Math {
 					min = ArgumentValidation.getInt(args[0], t);
 					max = ArgumentValidation.getInt(args[1], t);
 				}
-				if(max > Integer.MAX_VALUE || min > Integer.MAX_VALUE) {
-					throw new CRERangeException("max and min must be below int max, defined as " + Integer.MAX_VALUE,
-							t);
+				if(max <= min) {
+					throw new CRERangeException("max must be greater than min", t);
 				}
 
 				long range = max - min;
-				if(range <= 0) {
-					throw new CRERangeException("max - min must be greater than 0", t);
-				}
-				long rand = java.lang.Math.abs(r.nextLong());
-				long i = (rand % (range)) + min;
+				long rand = r.nextLong();
+				long i = Long.remainderUnsigned(rand, range) + min;
 
 				return new CInt(i, t);
 			}
