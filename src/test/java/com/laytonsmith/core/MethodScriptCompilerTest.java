@@ -1005,7 +1005,6 @@ public class MethodScriptCompilerTest {
 //		verify(fakePlayer).sendMessage("yep yep");
 //	}
 	@Test
-	@Ignore("Ignore for now, until the feature is implemented")
 	public void testLiteralDecimal() throws Exception {
 		assertEquals("123.4", SRun("0m123.4", fakePlayer));
 		assertEquals("123", SRun("0m123", fakePlayer));
@@ -1024,11 +1023,10 @@ public class MethodScriptCompilerTest {
 	}
 
 	@Test
-	@Ignore("Ignore for now, until the feature is implemented")
 	public void testLiteralBinary2() throws Exception {
 		assertEquals("6", SRun("0b0110", fakePlayer));
 		assertEquals("-6", SRun("-0b0110", fakePlayer));
-		assertEquals("int", SRun("typeof(-0b0110)", fakePlayer));
+		assertEquals("ms.lang.int", SRun("typeof(-0b0110)", fakePlayer));
 	}
 
 	@Test

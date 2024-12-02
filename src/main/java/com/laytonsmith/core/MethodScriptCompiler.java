@@ -103,6 +103,8 @@ public final class MethodScriptCompiler {
 
 	private static final Pattern VAR_PATTERN = Pattern.compile("\\$[\\p{L}0-9_]+");
 	private static final Pattern IVAR_PATTERN = Pattern.compile(IVariable.VARIABLE_NAME_REGEX);
+	private static final Pattern NUM_PATTERN = Pattern.compile("[0-9]+");
+	private static final Pattern FUNC_NAME_PATTERN = Pattern.compile("[_a-zA-Z0-9]+");
 
 	/**
 	 * Lexes the script, and turns it into a token stream.This looks through the script character by character.
@@ -593,7 +595,7 @@ public final class MethodScriptCompiler {
 								} else {
 									// It's not a keyword, but a normal function.
 									String funcName = buf.toString();
-									if(funcName.matches("[_a-zA-Z0-9]+")) {
+									if(FUNC_NAME_PATTERN.matcher(funcName).matches()) {
 										tokenList.add(new Token(TType.FUNC_NAME, funcName, target));
 									} else {
 										tokenList.add(new Token(TType.UNKNOWN, funcName, target));
@@ -911,8 +913,7 @@ public final class MethodScriptCompiler {
 						if(!prevNonWhitespace.type.isIdentifier() // Don't convert "number/string/var ± ...".
 								&& prevNonWhitespace.type != TType.FUNC_END // Don't convert "func() ± ...".
 								&& prevNonWhitespace.type != TType.RSQUARE_BRACKET // Don't convert "] ± ..." (arrays).
-								&& !IVAR_PATTERN.matcher(t.val()).matches() // Don't convert "± @var".
-								&& !VAR_PATTERN.matcher(t.val()).matches()) { // Don't convert "± $var".
+								&& NUM_PATTERN.matcher(t.val()).matches()) { // Only convert numbers
 							// It is a negative/positive number: Absorb the sign.
 							t.value = prev1.value + t.value;
 							it.remove(); // Remove 'prev1'.
@@ -1769,28 +1770,35 @@ public final class MethodScriptCompiler {
 				} catch (ConfigRuntimeException ex) {
 					throw new ConfigCompileException(ex);
 				}
-				if((c instanceof CInt || c instanceof CDecimal) && next1.type == TType.DOT && next2.type == TType.LIT) {
-					// make CDouble/CDecimal here because otherwise Long.parseLong() will remove
-					// minus zero before decimals and leading zeroes after decimals
+				// make CDouble/CDecimal here because otherwise Long.parseLong() will remove
+				// minus zero before decimals and leading zeroes after decimals
+				if(c instanceof CInt && next1.type == TType.DOT && next2.type == TType.LIT) {
 					try {
-						if(t.value.startsWith("0m")) {
-							// CDecimal
-							String neg = "";
-							if(prev1.value.equals("-")) {
-								neg = "-";
-							}
-							c = new CDecimal(neg + t.value.substring(2) + '.' + next2.value, t.target);
-						} else {
-							// CDouble
-							c = new CDouble(Double.parseDouble(t.val() + '.' + next2.val()), t.target);
-						}
+						c = new CDouble(Double.parseDouble(t.val() + '.' + next2.val()), t.target);
 						i += 2;
 					} catch (NumberFormatException e) {
 						// Not a double
 					}
+					constructCount.peek().incrementAndGet();
+				} else if(c instanceof CDecimal) {
+					String neg = "";
+					if(prev1.value.equals("-")) {
+						// Absorb sign unless neg() becomes compatible with CDecimal
+						neg = "-";
+						tree.removeChildAt(tree.getChildren().size() - 1);
+					} else {
+						constructCount.peek().incrementAndGet();
+					}
+					if(next1.type == TType.DOT && next2.type == TType.LIT) {
+						c = new CDecimal(neg + t.value.substring(2) + '.' + next2.value, t.target);
+						i += 2;
+					} else {
+						c = new CDecimal(neg + t.value.substring(2), t.target);
+					}
+				} else {
+					constructCount.peek().incrementAndGet();
 				}
 				tree.addChild(new ParseTree(c, fileOptions));
-				constructCount.peek().incrementAndGet();
 			} else if(t.type.equals(TType.STRING) || t.type.equals(TType.COMMAND)) {
 				tree.addChild(new ParseTree(new CString(t.val(), t.target), fileOptions));
 				constructCount.peek().incrementAndGet();
