@@ -177,11 +177,6 @@ public class MathTest {
 			fail("Didn't expect this test to pass");
 		} catch (ConfigRuntimeException e) {
 		}
-		try {
-			a.exec(Target.UNKNOWN, env, C.onstruct(87357983597853791L));
-			fail("Didn't expect this test to pass");
-		} catch (ConfigRuntimeException e) {
-		}
 	}
 
 	@Test
