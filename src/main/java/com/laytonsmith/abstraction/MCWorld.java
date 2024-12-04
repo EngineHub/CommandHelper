@@ -53,9 +53,9 @@ public interface MCWorld extends MCMetadatable {
 
 	String[] getGameRules();
 
-	String getGameRuleValue(String gameRule);
+	Object getGameRuleValue(MCGameRule gameRule);
 
-	boolean setGameRuleValue(MCGameRule gameRule, String value);
+	boolean setGameRuleValue(MCGameRule gameRule, Object value);
 
 	MCWorldBorder getWorldBorder();
 

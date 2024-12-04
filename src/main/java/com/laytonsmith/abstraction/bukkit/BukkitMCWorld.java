@@ -55,6 +55,7 @@ import com.laytonsmith.core.exceptions.CRE.CREPluginInternalException;
 import org.bukkit.Chunk;
 import org.bukkit.Effect;
 import org.bukkit.FireworkEffect;
+import org.bukkit.GameRule;
 import org.bukkit.HeightMap;
 import org.bukkit.Location;
 import org.bukkit.Particle;
@@ -181,13 +182,21 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	}
 
 	@Override
-	public String getGameRuleValue(String gameRule) {
-		return w.getGameRuleValue(gameRule);
+	public Object getGameRuleValue(MCGameRule gameRule) {
+		GameRule gr = GameRule.getByName(gameRule.getRuleName());
+		if(gr == null) {
+			return null;
+		}
+		return w.getGameRuleValue(gr);
 	}
 
 	@Override
-	public boolean setGameRuleValue(MCGameRule gameRule, String value) {
-		return w.setGameRuleValue(gameRule.getRuleName(), value);
+	public boolean setGameRuleValue(MCGameRule gameRule, Object value) {
+		GameRule gr = GameRule.getByName(gameRule.getRuleName());
+		if(gr == null) {
+			return false;
+		}
+		return w.setGameRule(gr, value);
 	}
 
 	@Override

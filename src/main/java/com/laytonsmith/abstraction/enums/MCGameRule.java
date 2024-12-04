@@ -1,8 +1,12 @@
 package com.laytonsmith.abstraction.enums;
 
 import com.laytonsmith.annotations.MEnum;
+import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 
 @MEnum("com.commandhelper.GameRule")
@@ -10,7 +14,7 @@ public enum MCGameRule {
 	ANNOUNCEADVANCEMENTS("announceAdvancements"),
 	BLOCKEXPLOSIONDROPDECAY("blockExplosionDropDecay"),
 	COMMANDBLOCKOUTPUT("commandBlockOutput"),
-	COMMANDMODIFICATIONBLOCKLIMIT("commandModificationBlockLimit"),
+	COMMANDMODIFICATIONBLOCKLIMIT("commandModificationBlockLimit", CInt.class),
 	DISABLEELYTRAMOVEMENTCHECK("disableElytraMovementCheck"),
 	DISABLEPLAYERMOVEMENTCHECK("disablePlayerMovementCheck"),
 	DISABLERAIDS("disableRaids"),
@@ -87,7 +91,27 @@ public enum MCGameRule {
 		return this.gameRule;
 	}
 
-	public Class<? extends Mixed> getRuleType() {
-		return this.ruleType;
+	public Object convertValue(Mixed value, Target t) {
+		if(this.ruleType == CBoolean.class) {
+			return ArgumentValidation.getBooleanish(value, t);
+		} else if(this.ruleType == CInt.class) {
+			return ArgumentValidation.getInt(value, t);
+		}
+		MSLog.GetLogger().e(MSLog.Tags.RUNTIME, "The gamerule \"" + this.gameRule + "\""
+				+ " has an invalid type.", t);
+		return null;
+	}
+
+	public Mixed constructValue(Object value, Target t) {
+		try {
+			if(this.ruleType == CBoolean.class) {
+				return CBoolean.get((Boolean) value);
+			} else if(this.ruleType == CInt.class) {
+				return new CInt((Integer) value, t);
+			}
+		} catch(ClassCastException ex) {}
+		MSLog.GetLogger().e(MSLog.Tags.RUNTIME, "The gamerule \"" + this.gameRule + "\""
+				+ " has an invalid type.", t);
+		return new CString(value.toString(), t);
 	}
 }

@@ -21,6 +21,7 @@ import com.laytonsmith.abstraction.enums.MCWorldType;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Optimizable;
@@ -1811,20 +1812,25 @@ public class World {
 			}
 			if(args.length == 1) {
 				CArray gameRules = CArray.GetAssociativeArray(t);
-				for(String gameRule : world.getGameRules()) {
-					gameRules.set(new CString(gameRule, t),
-							Static.resolveConstruct(world.getGameRuleValue(gameRule), t), t);
+				for(String name : world.getGameRules()) {
+					try {
+						MCGameRule gameRule = MCGameRule.valueOf(name.toUpperCase());
+						gameRules.set(name, gameRule.constructValue(world.getGameRuleValue(gameRule), t), t);
+					} catch(IllegalArgumentException skip) {
+						MSLog.GetLogger().w(MSLog.Tags.RUNTIME, "The server gamerule \"" + name + "\""
+								+ " is missing in CommandHelper.", t);
+					}
 				}
 				return gameRules;
 			} else {
 				try {
 					MCGameRule gameRule = MCGameRule.valueOf(args[1].val().toUpperCase());
-					String value = world.getGameRuleValue(gameRule.getRuleName());
-					if(value.isEmpty()) {
+					Object value = world.getGameRuleValue(gameRule);
+					if(value == null) {
 						throw new CREFormatException("The gamerule \"" + args[1].val()
 								+ "\" does not exist in this version.", t);
 					}
-					return Static.resolveConstruct(value, t);
+					return gameRule.constructValue(value, t);
 				} catch (IllegalArgumentException exception) {
 					throw new CREFormatException("The gamerule \"" + args[1].val() + "\" does not exist.", t);
 				}
@@ -1862,9 +1868,9 @@ public class World {
 
 		@Override
 		public String docs() {
-			return "boolean {[world], gameRule, value} Sets the value of the gamerule for the specified world. If world is"
-					+ " not given the value is set for all worlds. Returns true if successful. The gameRule can be "
-					+ StringUtils.Join(MCGameRule.getGameRules(), ", ", ", or ", " or ") + ".";
+			return "boolean {[world], gameRule, value} Sets the value of the gamerule for the specified world."
+					+ " If world is not given the value is set for all worlds. Returns true if successful."
+					+ " The gameRule can be " + StringUtils.Join(MCGameRule.getGameRules(), ", ", ", or ", " or ") + ".";
 		}
 
 		@Override
@@ -1883,7 +1889,10 @@ public class World {
 				throw new CREFormatException("The gamerule \"" + (args.length == 2 ? args[0].val() : args[1].val())
 						+ "\" does not exist.", t);
 			}
-			String value = ArgumentValidation.getObject(args[offset + 1], t, gameRule.getRuleType()).val();
+			Object value = gameRule.convertValue(args[offset + 1], t);
+			if(value == null) {
+				return CBoolean.FALSE;
+			}
 			if(args.length == 2) {
 				for(MCWorld world : Static.getServer().getWorlds()) {
 					success = world.setGameRuleValue(gameRule, value);
