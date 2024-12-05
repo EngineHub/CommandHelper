@@ -59,7 +59,6 @@ import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
@@ -408,8 +407,14 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 		return BukkitConvertor.BukkitGetCorrectEntity(p.getSpectatorTarget());
 	}
 
-	@Override
-	public void setTempOp(Boolean value) throws ClassNotFoundException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
+	private static Class gameProfileClass = null;
+	private static Class opListEntryClass = null;
+	private static Map<String, Object> opMap = null;
+
+	private static void SetupTempOp() throws ClassNotFoundException {
+		if(gameProfileClass != null) {
+			return;
+		}
 		boolean isPaper = ((BukkitMCServer) Static.getServer()).isPaper();
 		// Get some version specific mappings
 		String nms = "net.minecraft.server";
@@ -446,18 +451,25 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 
 		Class nmsMinecraftServerClass = Class.forName(nms + ".MinecraftServer");
 		/*n.m.s.MinecraftServer*/ Object nmsServer = ReflectionUtils.invokeMethod(nmsMinecraftServerClass, null, "getServer");
-		/*n.m.s.PlayerList*/ Object nmsPlayerList = ReflectionUtils.invokeMethod(nmsServer, getPlayerList);
-		/*n.m.s.OpList*/ Object opSet = ReflectionUtils.get(Class.forName(playersPackage + ".PlayerList"), nmsPlayerList, ops);
-		//opSet.getClass().getSuperclass() == n.m.s.JsonList
-		Map/*<String, n.m.s.OpListEntry>*/ d = (Map) ReflectionUtils.get(opSet.getClass().getSuperclass(), opSet, "d");
+		/*n.m.s.players.PlayerList*/ Object nmsPlayerList = ReflectionUtils.invokeMethod(nmsServer, getPlayerList);
+		/*n.m.s.players.OpList*/ Object opSet = ReflectionUtils.get(Class.forName(playersPackage + ".PlayerList"), nmsPlayerList, ops);
+		//opSet.getClass().getSuperclass() == n.m.s.players.JsonList
+		/*Map<String, n.m.s.players.OpListEntry>*/ opMap = (Map) ReflectionUtils.get(opSet.getClass().getSuperclass(), opSet, "d");
+		/*n.m.s.players.OpListEntry*/ opListEntryClass = Class.forName(playersPackage + ".OpListEntry");
+		/*com.mojang.authlib.GameProfile*/ gameProfileClass = Class.forName("com.mojang.authlib.GameProfile");
+	}
+
+	@Override
+	public void setTempOp(Boolean value) throws ClassNotFoundException {
+		SetupTempOp();
 		if(value) {
-			/*n.m.s.OpListEntry*/ Class nmsOpListEntry = Class.forName(playersPackage + ".OpListEntry");
-			/*com.mojang.authlib.GameProfile*/ Class nmsGameProfile = Class.forName("com.mojang.authlib.GameProfile");
 			Object gameProfile = ReflectionUtils.invokeMethod(p, "getProfile");
-			Object opListEntry = ReflectionUtils.newInstance(nmsOpListEntry, new Class[]{nmsGameProfile, int.class, boolean.class}, new Object[]{gameProfile, 4, false});
-			d.put(p.getUniqueId().toString(), opListEntry);
+			Object opListEntry = ReflectionUtils.newInstance(opListEntryClass,
+					new Class[]{gameProfileClass, int.class, boolean.class},
+					new Object[]{gameProfile, 4, false});
+			opMap.put(p.getUniqueId().toString(), opListEntry);
 		} else {
-			d.remove(p.getUniqueId().toString());
+			opMap.remove(p.getUniqueId().toString());
 		}
 		p.recalculatePermissions();
 	}
