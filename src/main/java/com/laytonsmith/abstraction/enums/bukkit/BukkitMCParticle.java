@@ -20,8 +20,11 @@ import org.bukkit.Vibration;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.Random;
 
 public class BukkitMCParticle extends MCParticle<Particle> {
 
@@ -147,11 +150,28 @@ public class BukkitMCParticle extends MCParticle<Particle> {
 					return 0;
 				}
 			case TRAIL:
-				if(data instanceof MCParticleData.TargetColor target) {
-					return new Particle.TargetColor((Location) target.location().getHandle(),
-							BukkitMCColor.GetColor(target.color()));
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_21_4)) {
+					try {
+						Class clazz = Class.forName("org.bukkit.Particle$Trail");
+						Constructor constructor = clazz.getConstructor(Location.class, Color.class, int.class);
+						constructor.setAccessible(true);
+						if(data instanceof MCParticleData.Trail trail) {
+							return constructor.newInstance((Location) trail.location().getHandle(),
+									BukkitMCColor.GetColor(trail.color()), trail.duration());
+						} else {
+							return constructor.newInstance((Location) l.getHandle(), Color.fromRGB(252, 120, 18),
+									new Random().nextInt(40) + 10);
+						}
+					} catch (ClassNotFoundException | NoSuchMethodException | InstantiationException
+							| IllegalAccessException | InvocationTargetException ignore) {}
 				} else {
-					return new Particle.TargetColor((Location) l.getHandle(), Color.fromRGB(252, 120, 18));
+					// 1.21.3 only
+					if(data instanceof MCParticleData.Trail trail) {
+						return new Particle.TargetColor((Location) trail.location().getHandle(),
+								BukkitMCColor.GetColor(trail.color()));
+					} else {
+						return new Particle.TargetColor((Location) l.getHandle(), Color.fromRGB(252, 120, 18));
+					}
 				}
 		}
 		return null;

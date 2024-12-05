@@ -106,6 +106,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.regex.MatchResult;
@@ -2652,9 +2653,18 @@ public class ObjectGenerator {
 						color = StaticLayer.GetConvertor().GetColor(c.val(), t);
 					}
 				} else {
+					// Default colors are 0xFC,0x78,0x12 (orange) and 0x5F,0x5F,0x5F (gray)
+					// when moving towards or away from the Creaking, respectively.
 					color = StaticLayer.GetConvertor().GetColor(0xFC, 0x78, 0x12);
 				}
-				return new MCParticleData.TargetColor(target, color);
+				int duration;
+				if(pa.containsKey("duration")) {
+					duration = ArgumentValidation.getInt32(pa.get("duration", t), t);
+				} else {
+					// Default duration is a random value from 0.5 to 2.5 seconds
+					duration = new Random().nextInt(40) + 10;
+				}
+				return new MCParticleData.Trail(target, color, duration);
 		}
 		return null;
 	}

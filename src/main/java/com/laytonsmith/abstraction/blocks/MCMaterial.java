@@ -1721,7 +1721,21 @@ public abstract class MCMaterial<Concrete> extends DynamicEnum<MCVanillaMaterial
 		PALE_OAK_WOOD(MCVersion.MC1_21_3),
 		POTTED_PALE_OAK_SAPLING(MCVersion.MC1_21_3),
 		STRIPPED_PALE_OAK_LOG(MCVersion.MC1_21_3),
-		STRIPPED_PALE_OAK_WOOD(MCVersion.MC1_21_3);
+		STRIPPED_PALE_OAK_WOOD(MCVersion.MC1_21_3),
+
+		// 1.21.4 additions
+		CLOSED_EYEBLOSSOM(MCVersion.MC1_21_4),
+		OPEN_EYEBLOSSOM(MCVersion.MC1_21_4),
+		POTTED_CLOSED_EYEBLOSSOM(MCVersion.MC1_21_4),
+		POTTED_OPEN_EYEBLOSSOM(MCVersion.MC1_21_4),
+		RESIN_BLOCK(MCVersion.MC1_21_4),
+		RESIN_BRICK(MCVersion.MC1_21_4),
+		RESIN_BRICKS(MCVersion.MC1_21_4),
+		RESIN_BRICK_SLAB(MCVersion.MC1_21_4),
+		RESIN_BRICK_STAIRS(MCVersion.MC1_21_4),
+		RESIN_BRICK_WALL(MCVersion.MC1_21_4),
+		RESIN_CLUMP(MCVersion.MC1_21_4),
+		CHISELED_RESIN_BRICKS(MCVersion.MC1_21_4);
 
 		private final MCVersion since;
 		private final MCVersion until;

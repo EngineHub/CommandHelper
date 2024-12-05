@@ -222,6 +222,7 @@ public abstract class MCParticle<Concrete> extends DynamicEnum<MCParticle.MCVani
 		TRIAL_OMEN(MCVersion.MC1_20_6),
 		BLOCK_CRUMBLE(MCVersion.MC1_21_3),
 		TRAIL(MCVersion.MC1_21_3),
+		PALE_OAK_LEAVES(MCVersion.MC1_21_4),
 		UNKNOWN(MCVersion.NEVER);
 
 		private final MCVersion since;

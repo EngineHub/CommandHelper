@@ -177,7 +177,6 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 		COD,
 		COW,
 		CREAKING(true, MCVersion.MC1_21_3),
-		CREAKING_TRANSIENT(true, MCVersion.MC1_21_3),
 		CREEPER,
 		DOLPHIN,
 		DRAGON_FIREBALL,

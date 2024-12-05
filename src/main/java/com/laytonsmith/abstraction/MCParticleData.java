@@ -20,13 +20,15 @@ public class MCParticleData {
 		}
 	}
 
-	public static class TargetColor {
+	public static class Trail {
 		MCLocation location;
 		MCColor color;
+		int duration;
 
-		public TargetColor(MCLocation location, MCColor color) {
+		public Trail(MCLocation location, MCColor color, int duration) {
 			this.location = location;
 			this.color = color;
+			this.duration = duration;
 		}
 
 		public MCLocation location() {
@@ -35,6 +37,10 @@ public class MCParticleData {
 
 		public MCColor color() {
 			return this.color;
+		}
+
+		public int duration() {
+			return this.duration;
 		}
 	}
 

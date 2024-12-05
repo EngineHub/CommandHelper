@@ -1625,7 +1625,7 @@ public class Environment {
 					+ " <br>VIBRATION particles take a \"destination\" location array or entity UUID."
 					+ " <br>SCULK_CHARGE particles take an \"angle\" in radians. (defaults to 0.0)"
 					+ " <br>SHRIEK particles take an integer \"delay\" in ticks before playing. (defaults to 0)"
-					+ " <br>TRAIL particles take a \"target\" location array and a \"color\".";
+					+ " <br>TRAIL particles take a \"target\" location array, a \"color\", and a \"duration\" integer in ticks.";
 		}
 
 		@Override

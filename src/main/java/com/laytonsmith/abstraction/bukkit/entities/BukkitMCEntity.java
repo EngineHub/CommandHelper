@@ -244,6 +244,7 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 				isPaperTeleportFlag = BukkitMCEntity.isPaperTeleportFlag;
 				if(isPaperTeleportFlag == null) {
 					try {
+						// 1.19.3
 						Class.forName("io.papermc.paper.entity.TeleportFlag$EntityState");
 						BukkitMCEntity.isPaperTeleportFlag = isPaperTeleportFlag = true;
 					} catch(ClassNotFoundException ex) {
