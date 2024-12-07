@@ -53,7 +53,7 @@ public class BukkitMCParticle extends MCParticle<Particle> {
 			if(v.existsIn(Static.getServer().getMinecraftVersion())) {
 				Particle type;
 				try {
-					type = getBukkitType(v);
+					type = Particle.valueOf(v.name());
 				} catch (IllegalArgumentException | NoSuchFieldError ex) {
 					MSLog.GetLogger().w(MSLog.Tags.RUNTIME, "Could not find a Bukkit Particle for " + v.name(), Target.UNKNOWN);
 					continue;
@@ -64,18 +64,13 @@ public class BukkitMCParticle extends MCParticle<Particle> {
 			}
 		}
 		for(Particle p : Particle.values()) {
-			if(!BUKKIT_MAP.containsKey(p)) {
+			if(!p.name().startsWith("LEGACY_") && !BUKKIT_MAP.containsKey(p)) {
 				MSLog.GetLogger().w(Tags.GENERAL, "Could not find MCParticle for " + p.name(), Target.UNKNOWN);
 				MCParticle wrapper = new BukkitMCParticle(MCVanillaParticle.UNKNOWN, p);
 				MAP.put(p.name(), wrapper);
 				BUKKIT_MAP.put(p, wrapper);
 			}
 		}
-	}
-
-	private static Particle getBukkitType(MCVanillaParticle v) {
-		// remap name changes
-		return Particle.valueOf(v.name());
 	}
 
 	public Object getParticleData(MCLocation l, Object data) {
