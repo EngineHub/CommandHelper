@@ -1756,7 +1756,7 @@ public class DataHandling {
 									if(value instanceof CString) {
 										builder.append("'")
 												.append(value.val().replace("\\", "\\\\")
-														.replaceAll("\t", "\\\\t").replaceAll("\n", "\\\\n")
+														.replace("\t", "\\t").replace("\n", "\\n")
 														.replace("'", "\\'"))
 												.append("'");
 									} else {

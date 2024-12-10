@@ -107,7 +107,7 @@ public class CClosure extends Construct implements Callable, Booleanish {
 		} else if(node.getData().isInstanceOf(CString.TYPE)) {
 			String data = ArgumentValidation.getString(node.getData(), node.getTarget());
 			// Convert: \ -> \\ and ' -> \'
-			b.append("'").append(data.replace("\\", "\\\\").replaceAll("\t", "\\\\t").replaceAll("\n", "\\\\n")
+			b.append("'").append(data.replace("\\", "\\\\").replace("\t", "\\t").replace("\n", "\\n")
 					.replace("'", "\\'")).append("'");
 		} else if(node.getData() instanceof IVariable) {
 			b.append(((IVariable) node.getData()).getVariableName());

@@ -774,7 +774,7 @@ public class ClassDiscovery {
 		ClassMirror<?> cm = classToMirrorCache.get(clazz);
 		if(cm == null) {
 			for(ClassMirror<?> m : getKnownClasses()) {
-				if(m.getClassName().equals(clazz.getName().replace("$", "."))) {
+				if(m.getClassName().equals(clazz.getName().replace('$', '.'))) {
 					cm = m;
 					classToMirrorCache.put(clazz, cm);
 					break;
@@ -1171,7 +1171,7 @@ public class ClassDiscovery {
 		String thisClass = c.getResource(c.getSimpleName() + ".class").toString();
 		try {
 			try {
-				packageRoot = StringUtils.replaceLast(thisClass, Pattern.quote(c.getName().replaceAll("\\.", "/") + ".class"), "");
+				packageRoot = StringUtils.replaceLast(thisClass, Pattern.quote(c.getName().replace('.', '/') + ".class"), "");
 			} catch (Exception e) {
 				//Hmm, ok, try this then
 				packageRoot = c.getProtectionDomain().getCodeSource().getLocation().toString();

@@ -1534,7 +1534,7 @@ public class Environment {
 				}
 				String ttone = ((CArray) args[noteOffset]).get("tone", t).val().toUpperCase().trim();
 				try {
-					tone = MCTone.valueOf(ttone.trim().replaceAll("#", ""));
+					tone = MCTone.valueOf(ttone.trim().replace("#", ""));
 				} catch (IllegalArgumentException e) {
 					throw new CREFormatException("Expected the tone parameter to be one of: "
 							+ StringUtils.Join(MCTone.values(), ", ", ", or ") + " but it was " + ttone, t);

@@ -330,7 +330,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	@Override
 	public void sendMessage(String string) {
 		//The client doesn't like tabs
-		string = string.replaceAll("\t", "    ");
+		string = string.replace("\t", "    ");
 		p.sendMessage(string);
 	}
 

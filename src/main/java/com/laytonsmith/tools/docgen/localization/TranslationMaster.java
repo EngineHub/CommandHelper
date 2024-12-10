@@ -483,14 +483,14 @@ public class TranslationMaster {
 	public static Set<String> findSegments(String inputString, boolean forSearch) {
 		Set<String> segments = new HashSet<>();
 		// First, remove all things that shouldn't be translated, code blocks, html, etc
-		inputString = inputString.replaceAll("\r", "");
+		inputString = inputString.replace("\r", "");
 		inputString = inputString.replaceAll("\\\\\n", "");
 		inputString = inputString.replaceAll("(?s)<script.*?</script>", "");
 		{
 			// Some templates are immune to this, because it breaks the segments otherwise. So we need to first %s a few
 			// special templates.
-			inputString = inputString.replaceAll("%%CURRENT_VERSION%%", "%s");
-			inputString = inputString.replaceAll("<%CURRENT_VERSION%>", "%s");
+			inputString = inputString.replace("%%CURRENT_VERSION%%", "%s");
+			inputString = inputString.replace("<%CURRENT_VERSION%>", "%s");
 			inputString = inputString.replaceAll("(?s)%%.*?%%", "");
 			// Template removal. We can't use regex here, because <% %> templates can be nested. Eventually, we want
 			// to use the whitelist, but for now, just remove all templates.

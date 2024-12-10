@@ -1183,8 +1183,8 @@ public final class Static {
 	public static String Logo() {
 		String logo = Installer.parseISToString(Static.class.getResourceAsStream("/mainlogo"));
 		logo = logo.replaceAll("( +)", TermColors.BG_BLACK + "$1");
-		logo = logo.replaceAll("_", TermColors.BG_RED + TermColors.RED + "_");
-		logo = logo.replaceAll("/", TermColors.BG_BRIGHT_WHITE + TermColors.WHITE + "/");
+		logo = logo.replace("_", TermColors.BG_RED + TermColors.RED + "_");
+		logo = logo.replace("/", TermColors.BG_BRIGHT_WHITE + TermColors.WHITE + "/");
 		logo = logo.replace("\n", TermColors.reset() + "\n");
 		String s = logo + TermColors.reset();
 		return s;
@@ -1193,8 +1193,8 @@ public final class Static {
 	public static String DataManagerLogo() {
 		String logo = Installer.parseISToString(Static.class.getResourceAsStream("/datamanagerlogo"));
 		logo = logo.replaceAll("( +)", TermColors.BG_BLACK + "$1");
-		logo = logo.replaceAll("_", TermColors.CYAN + TermColors.BG_CYAN + "_");
-		logo = logo.replaceAll("/", TermColors.BG_WHITE + TermColors.WHITE + "/");
+		logo = logo.replace("_", TermColors.CYAN + TermColors.BG_CYAN + "_");
+		logo = logo.replace("/", TermColors.BG_WHITE + TermColors.WHITE + "/");
 		String s = logo + TermColors.reset();
 		return s;
 	}
@@ -1220,28 +1220,28 @@ public final class Static {
 		}
 		return mes
 				.replaceAll("(?i)§x(§[a-f0-9]){6}", "")
-				.replaceAll("§0", TermColors.BLACK)
-				.replaceAll("§1", TermColors.BLUE)
-				.replaceAll("§2", TermColors.GREEN)
-				.replaceAll("§3", TermColors.CYAN)
-				.replaceAll("§4", TermColors.RED)
-				.replaceAll("§5", TermColors.MAGENTA)
-				.replaceAll("§6", TermColors.YELLOW)
-				.replaceAll("§7", TermColors.WHITE)
-				.replaceAll("§8", TermColors.BRIGHT_BLACK)
-				.replaceAll("§9", TermColors.BRIGHT_BLUE)
-				.replaceAll("§a", TermColors.BRIGHT_GREEN)
-				.replaceAll("§b", TermColors.BRIGHT_CYAN)
-				.replaceAll("§c", TermColors.BRIGHT_RED)
-				.replaceAll("§d", TermColors.BRIGHT_MAGENTA)
-				.replaceAll("§e", TermColors.BRIGHT_YELLOW)
-				.replaceAll("§f", TermColors.BRIGHT_WHITE)
-				.replaceAll("§k", "") //Uh, no equivalent for "random"
-				.replaceAll("§l", TermColors.BOLD)
-				.replaceAll("§m", TermColors.STRIKE)
-				.replaceAll("§n", TermColors.UNDERLINE)
-				.replaceAll("§o", TermColors.ITALIC)
-				.replaceAll("§r", TermColors.RESET);
+				.replace("§0", TermColors.BLACK)
+				.replace("§1", TermColors.BLUE)
+				.replace("§2", TermColors.GREEN)
+				.replace("§3", TermColors.CYAN)
+				.replace("§4", TermColors.RED)
+				.replace("§5", TermColors.MAGENTA)
+				.replace("§6", TermColors.YELLOW)
+				.replace("§7", TermColors.WHITE)
+				.replace("§8", TermColors.BRIGHT_BLACK)
+				.replace("§9", TermColors.BRIGHT_BLUE)
+				.replace("§a", TermColors.BRIGHT_GREEN)
+				.replace("§b", TermColors.BRIGHT_CYAN)
+				.replace("§c", TermColors.BRIGHT_RED)
+				.replace("§d", TermColors.BRIGHT_MAGENTA)
+				.replace("§e", TermColors.BRIGHT_YELLOW)
+				.replace("§f", TermColors.BRIGHT_WHITE)
+				.replace("§k", "") //Uh, no equivalent for "random"
+				.replace("§l", TermColors.BOLD)
+				.replace("§m", TermColors.STRIKE)
+				.replace("§n", TermColors.UNDERLINE)
+				.replace("§o", TermColors.ITALIC)
+				.replace("§r", TermColors.RESET);
 
 	}
 

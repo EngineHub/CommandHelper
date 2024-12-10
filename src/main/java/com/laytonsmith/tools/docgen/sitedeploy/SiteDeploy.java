@@ -963,7 +963,7 @@ public final class SiteDeploy {
 				if(!bW.contains(EDIT_THIS_PAGE_PREAMBLE)) {
 					bW += "<p id=\"edit_this_page\">"
 							+ EDIT_THIS_PAGE_PREAMBLE
-							+ String.format(githubBaseUrl, "java/" + SiteDeploy.class.getName().replace(".", "/"))
+							+ String.format(githubBaseUrl, "java/" + SiteDeploy.class.getName().replace('.', '/'))
 							+ ".java"
 							+ EDIT_THIS_PAGE_POSTAMBLE
 							+ "</p>";
@@ -1219,8 +1219,8 @@ public final class SiteDeploy {
 				for(File r : zReader.listFiles()) {
 					String filename = r.getAbsolutePath().replaceFirst(path, "");
 					writePageFromResource(r.getName(), "/docs" + filename, r.getName() + ".html",
-							Arrays.asList(new String[]{r.getName().replace("_", " ")}), "Learning trail page for "
-									+ r.getName().replace("_", " "));
+							Arrays.asList(new String[]{r.getName().replace('_', ' ')}), "Learning trail page for "
+									+ r.getName().replace('_', ' '));
 				}
 			} catch (IOException ex) {
 				writeLog(null, ex);
@@ -1526,7 +1526,7 @@ public final class SiteDeploy {
 		}
 		String bW = "<p id=\"edit_this_page\">"
 				+ EDIT_THIS_PAGE_PREAMBLE
-				+ String.format(githubBaseUrl, "java/" + container.getName().replace(".", "/")) + ".java#L"
+				+ String.format(githubBaseUrl, "java/" + container.getName().replace('.', '/')) + ".java#L"
 				+ (lineNum < 10 ? lineNum : lineNum + 10) // Add 10, so we scroll a bit more in view
 				+ EDIT_THIS_PAGE_POSTAMBLE
 				+ " (Note this page is automatically generated from the documentation in the source code.)</p>";

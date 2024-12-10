@@ -165,7 +165,7 @@ public final class MethodScriptCompiler {
 		 * this variable, to allow the lexer to make use of the file options already.
 		 */
 		FileOptions builtFileOptions = null;
-		script = script.replaceAll("\r\n", "\n");
+		script = script.replace("\r\n", "\n");
 		script = script + "\n";
 		final Set<String> keywords = KeywordList.getKeywordNames();
 		final TokenStream tokenList = new TokenStream();
@@ -1016,7 +1016,7 @@ public final class MethodScriptCompiler {
 			// Filename check
 			String fileName = tokenList.getFileOptions().getName();
 			if(!fileName.isEmpty()) {
-				if(!file.getAbsolutePath().replace("\\", "/").endsWith(fileName.replace("\\", "/"))) {
+				if(!file.getAbsolutePath().replace('\\', '/').endsWith(fileName.replace('\\', '/'))) {
 					CompilerWarning warning = new CompilerWarning(file + " has the wrong file name in the file options ("
 							+ fileName + ")", new Target(0, file, 0), null);
 					env.getEnv(CompilerEnvironment.class).addCompilerWarning(null, warning);
