@@ -946,25 +946,22 @@ public final class MethodScriptCompiler {
 				}
 			}
 
-			// Skip this check if we're not in pure mscript.
-			if(inPureMScript) {
-				if(it.hasNext()) {
-					Token next = it.next(); // Select 'next' -->.
-					it.previous(); // Select 'next' <--.
-					it.previous(); // Select 't' <--.
-					if(t.type.isSymbol() && !t.type.isUnary() && !next.type.isUnary()) {
-						if(it.hasPrevious()) {
-							Token prev1 = it.previous(); // Select 'prev1' <--.
-							if(prev1.type.equals(TType.FUNC_START) || prev1.type.equals(TType.COMMA)
-									|| next.type.equals(TType.FUNC_END) || next.type.equals(TType.COMMA)
-									|| prev1.type.isSymbol() || next.type.isSymbol()) {
-								throw new ConfigCompileException("Unexpected symbol (" + t.val() + ")", t.getTarget());
-							}
-							it.next(); // Select 'prev1' -->.
+			if(it.hasNext()) {
+				Token next = it.next(); // Select 'next' -->.
+				it.previous(); // Select 'next' <--.
+				it.previous(); // Select 't' <--.
+				if(t.type.isSymbol() && !t.type.isUnary() && !next.type.isUnary()) {
+					if(it.hasPrevious()) {
+						Token prev1 = it.previous(); // Select 'prev1' <--.
+						if(prev1.type.equals(TType.FUNC_START) || prev1.type.equals(TType.COMMA)
+								|| next.type.equals(TType.FUNC_END) || next.type.equals(TType.COMMA)
+								|| prev1.type.isSymbol() || next.type.isSymbol()) {
+							throw new ConfigCompileException("Unexpected symbol token (" + t.val() + ")", t.getTarget());
 						}
+						it.next(); // Select 'prev1' -->.
 					}
-					it.next(); // Select 't' -->.
 				}
+				it.next(); // Select 't' -->.
 			}
 		}
 

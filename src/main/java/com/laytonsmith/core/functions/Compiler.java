@@ -330,136 +330,69 @@ public class Compiler {
 					//Exponential
 					for(int i = 0; i < list.size() - 1; i++) {
 						ParseTree next = list.get(i + 1);
-						if(next.getData() instanceof CSymbol) {
-							if(((CSymbol) next.getData()).isExponential()) {
-								ParseTree conversion = new ParseTree(new CFunction(((CSymbol) next.getData()).convert(), next.getTarget()), next.getFileOptions());
-								conversion.addChild(list.get(i));
-								conversion.addChild(list.get(i + 2));
-								list.set(i, conversion);
-								list.remove(i + 1);
-								list.remove(i + 1);
-								i--;
-							}
+						if(next.getData() instanceof CSymbol sy && sy.isExponential()) {
+							rewriteBinaryOperator(list, sy, i--);
 						}
 					}
-
 					//Multiplicative
 					for(int i = 0; i < list.size() - 1; i++) {
 						ParseTree next = list.get(i + 1);
-						if(next.getData() instanceof CSymbol) {
-							CSymbol nextData = (CSymbol) next.getData();
-							if(nextData.isMultaplicative() && !nextData.isAssignment()) {
-								ParseTree conversion = new ParseTree(new CFunction(((CSymbol) next.getData()).convert(), next.getTarget()), next.getFileOptions());
-								conversion.addChild(list.get(i));
-								conversion.addChild(list.get(i + 2));
-								list.set(i, conversion);
-								list.remove(i + 1);
-								list.remove(i + 1);
-								i--;
-							}
+						if(next.getData() instanceof CSymbol sy && sy.isMultaplicative() && !sy.isAssignment()) {
+							rewriteBinaryOperator(list, sy, i--);
 						}
 					}
 					//Additive
 					for(int i = 0; i < list.size() - 1; i++) {
 						ParseTree next = list.get(i + 1);
-						if(next.getData() instanceof CSymbol && ((CSymbol) next.getData()).isAdditive() && !((CSymbol) next.getData()).isAssignment()) {
-							ParseTree conversion = new ParseTree(new CFunction(((CSymbol) next.getData()).convert(), next.getTarget()), next.getFileOptions());
-							conversion.addChild(list.get(i));
-							conversion.addChild(list.get(i + 2));
-							list.set(i, conversion);
-							list.remove(i + 1);
-							list.remove(i + 1);
-							i--;
+						if(next.getData() instanceof CSymbol sy && sy.isAdditive() && !sy.isAssignment()) {
+							rewriteBinaryOperator(list, sy, i--);
 						}
 					}
 					//relational
 					for(int i = 0; i < list.size() - 1; i++) {
-						ParseTree node = list.get(i + 1);
-						if(node.getData() instanceof CSymbol && ((CSymbol) node.getData()).isRelational()) {
-							CSymbol sy = (CSymbol) node.getData();
-							ParseTree conversion = new ParseTree(new CFunction(sy.convert(), node.getTarget()), node.getFileOptions());
-							conversion.addChild(list.get(i));
-							conversion.addChild(list.get(i + 2));
-							list.set(i, conversion);
-							list.remove(i + 1);
-							list.remove(i + 1);
-							i--;
+						ParseTree next = list.get(i + 1);
+						if(next.getData() instanceof CSymbol sy && sy.isRelational()) {
+							rewriteBinaryOperator(list, sy, i--);
 						}
 					}
 					//equality
 					for(int i = 0; i < list.size() - 1; i++) {
-						ParseTree node = list.get(i + 1);
-						if(node.getData() instanceof CSymbol && ((CSymbol) node.getData()).isEquality()) {
-							CSymbol sy = (CSymbol) node.getData();
-							ParseTree conversion = new ParseTree(new CFunction(sy.convert(), node.getTarget()), node.getFileOptions());
-							conversion.addChild(list.get(i));
-							conversion.addChild(list.get(i + 2));
-							list.set(i, conversion);
-							list.remove(i + 1);
-							list.remove(i + 1);
-							i--;
+						ParseTree next = list.get(i + 1);
+						if(next.getData() instanceof CSymbol sy && sy.isEquality()) {
+							rewriteBinaryOperator(list, sy, i--);
 						}
 					}
 					// default and
 					for(int i = 0; i < list.size() - 1; i++) {
-						ParseTree node = list.get(i + 1);
-						if(node.getData() instanceof CSymbol && ((CSymbol) node.getData()).isDefaultAnd()) {
-							CSymbol sy = (CSymbol) node.getData();
-							ParseTree conversion = new ParseTree(new CFunction(sy.convert(), node.getTarget()), node.getFileOptions());
-							conversion.addChild(list.get(i));
-							conversion.addChild(list.get(i + 2));
-							list.set(i, conversion);
-							list.remove(i + 1);
-							list.remove(i + 1);
-							i--;
+						ParseTree next = list.get(i + 1);
+						if(next.getData() instanceof CSymbol sy && sy.isDefaultAnd()) {
+							rewriteBinaryOperator(list, sy, i--);
 						}
 					}
-
 					// default or
 					for(int i = 0; i < list.size() - 1; i++) {
-						ParseTree node = list.get(i + 1);
-						if(node.getData() instanceof CSymbol && ((CSymbol) node.getData()).isDefaultOr()) {
-							CSymbol sy = (CSymbol) node.getData();
-							ParseTree conversion = new ParseTree(new CFunction(sy.convert(), node.getTarget()), node.getFileOptions());
-							conversion.addChild(list.get(i));
-							conversion.addChild(list.get(i + 2));
-							list.set(i, conversion);
-							list.remove(i + 1);
-							list.remove(i + 1);
-							i--;
+						ParseTree next = list.get(i + 1);
+						if(next.getData() instanceof CSymbol sy && sy.isDefaultOr()) {
+							rewriteBinaryOperator(list, sy, i--);
 						}
 					}
-
 					//logical and
 					for(int i = 0; i < list.size() - 1; i++) {
-						ParseTree node = list.get(i + 1);
-						if(node.getData() instanceof CSymbol && ((CSymbol) node.getData()).isLogicalAnd()) {
-							CSymbol sy = (CSymbol) node.getData();
-							ParseTree conversion = new ParseTree(new CFunction(sy.convert(), node.getTarget()), node.getFileOptions());
-							conversion.addChild(list.get(i));
-							conversion.addChild(list.get(i + 2));
-							list.set(i, conversion);
-							list.remove(i + 1);
-							list.remove(i + 1);
-							i--;
+						ParseTree next = list.get(i + 1);
+						if(next.getData() instanceof CSymbol sy && sy.isLogicalAnd()) {
+							rewriteBinaryOperator(list, sy, i--);
 						}
 					}
 					//logical or
 					for(int i = 0; i < list.size() - 1; i++) {
-						ParseTree node = list.get(i + 1);
-						if(node.getData() instanceof CSymbol && ((CSymbol) node.getData()).isLogicalOr()) {
-							CSymbol sy = (CSymbol) node.getData();
-							ParseTree conversion = new ParseTree(new CFunction(sy.convert(), node.getTarget()), node.getFileOptions());
-							conversion.addChild(list.get(i));
-							conversion.addChild(list.get(i + 2));
-							list.set(i, conversion);
-							list.remove(i + 1);
-							list.remove(i + 1);
-							i--;
+						ParseTree next = list.get(i + 1);
+						if(next.getData() instanceof CSymbol sy && sy.isLogicalOr()) {
+							rewriteBinaryOperator(list, sy, i--);
 						}
 					}
 				} catch (IndexOutOfBoundsException e) {
-					throw new ConfigCompileException("Unexpected symbol (" + list.get(list.size() - 1).getData().val() + "). Did you forget to quote your symbols?", list.get(list.size() - 1).getTarget());
+					throw new ConfigCompileException("Unexpected symbol (" + list.get(list.size() - 1).getData().val() + ")",
+							list.get(list.size() - 1).getTarget());
 				}
 			}
 
@@ -628,6 +561,25 @@ public class Compiler {
 				}
 				return tree;
 			}
+		}
+
+		private static void rewriteBinaryOperator(List<ParseTree> list, CSymbol symbol, int leftIndex) throws ConfigCompileException {
+			ParseTree left = list.get(leftIndex);
+			if(left.getData() instanceof CSymbol) {
+				throw new ConfigCompileException("Unexpected symbol (" + left.getData().val() + ") before binary operator ("
+						+ list.get(leftIndex + 1).getData().val() + ")", left.getTarget());
+			}
+			ParseTree right = list.get(leftIndex + 2);
+			if(right.getData() instanceof CSymbol) {
+				throw new ConfigCompileException("Unexpected symbol (" + right.getData().val() + ") after binary operator ("
+						+ list.get(leftIndex + 1).getData().val() + ")", right.getTarget());
+			}
+			ParseTree conversion = new ParseTree(new CFunction(symbol.convert(), symbol.getTarget()), left.getFileOptions());
+			conversion.addChild(left);
+			conversion.addChild(right);
+			list.set(leftIndex, conversion);
+			list.remove(leftIndex + 1);
+			list.remove(leftIndex + 1);
 		}
 
 		private static void rewriteParenthesis(List<ParseTree> list) throws ConfigCompileException {
