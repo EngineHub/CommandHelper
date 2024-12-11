@@ -77,7 +77,7 @@ public class Script {
 	private List<Token> left;
 	private List<Token> fullRight;
 	private List<Construct> cleft;
-	private List<ParseTree> cright;
+	private final List<ParseTree> cright = new ArrayList<>();
 	private boolean nolog = false;
 	//This should be null if we are running in non-alias mode
 	private Map<String, Variable> leftVars;
@@ -192,7 +192,6 @@ public class Script {
 
 		s.hasBeenCompiled = true;
 		s.compilerError = false;
-		s.cright = new ArrayList<>();
 		s.cright.add(tree);
 		s.label = label;
 		s.smartComment = comment;
@@ -929,7 +928,6 @@ public class Script {
 			}
 		}
 		right.add(temp);
-		cright = new ArrayList<>();
 		for(List<Token> l : right) {
 			StaticAnalysis analysis = new StaticAnalysis(true);
 			cright.add(MethodScriptCompiler.compile(new TokenStream(l, fileOptions), env, envs, analysis));
