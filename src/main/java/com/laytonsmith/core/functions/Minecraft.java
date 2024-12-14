@@ -13,6 +13,7 @@ import com.laytonsmith.abstraction.MCPluginManager;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
+import com.laytonsmith.abstraction.blocks.MCBlockData;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.enums.MCEffect;
@@ -62,6 +63,7 @@ import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -427,12 +429,13 @@ public class Minecraft {
 					+ " for all players within the radius (or 64 by default). The effect can be one of the following: "
 					+ StringUtils.Join(MCEffect.values(), ", ", ", or ", " or ")
 					+ ". ---- Some effects may require an applicable block at the specified location."
-					+ " Additional data can be supplied with the syntax EFFECT:DATA."
-					+ "<br>The STEP_SOUND takes a block material name."
+					+ " Additional data can be supplied with the syntax EFFECT:DATA.<br>"
+					+ "<br>STEP_SOUND and PARTICLES_AND_SOUND_BRUSH_BLOCK_COMPLETE (Paper) take a block material name."
 					+ "<br>RECORD_PLAY takes a record material name."
-					+ "<br>SMOKE takes a facing, one of " + StringUtils.Join(MCBlockFace.values(), ", ", ", or ", " or ")
+					+ "<br>SHOOT_WHITE_SMOKE (Paper) and SMOKE take a facing, one of " + StringUtils.Join(MCBlockFace.values(), ", ", ", or ", " or ")
 					+ "<br>POTION_BREAK takes an int (represents color)."
-					+ "<br>VILLAGER_PLANT_GROW and BONE_MEAL_USE take an int for the number of particles.";
+					+ "<br>BONE_MEAL_USE, BEE_GROWTH (Paper), SMASH_ATTACK (Paper) and"
+					+ " TURTLE_EGG_PLACEMENT (Paper) take an int for the number of particles.";
 		}
 
 		@Override
@@ -478,7 +481,7 @@ public class Minecraft {
 			if(args.length > 2) {
 				radius = ArgumentValidation.getInt32(args[args.length - 1], t);
 			}
-			if(!dataString.equals("")) {
+			if(!dataString.isEmpty()) {
 				switch(effect) {
 					case RECORD_PLAY:
 					case STEP_SOUND:
@@ -494,6 +497,7 @@ public class Minecraft {
 						// Fall back to integer
 						break;
 					case SMOKE:
+					case SHOOT_WHITE_SMOKE:
 						try {
 							MCBlockFace facing = MCBlockFace.valueOf(dataString.toUpperCase());
 							try {
@@ -502,6 +506,19 @@ public class Minecraft {
 							} catch (IllegalArgumentException ex) {
 								throw new CREIllegalArgumentException(ex.getMessage(), t);
 							}
+						} catch (IllegalArgumentException ex) {
+							// Fall back to integer
+						}
+						break;
+					case PARTICLES_AND_SOUND_BRUSH_BLOCK_COMPLETE:
+						try {
+							MCBlockData blockData = Static.getServer().createBlockData(dataString.toLowerCase(Locale.ROOT));
+							try {
+								l.getWorld().playEffect(l, effect, blockData, radius);
+							} catch (IllegalArgumentException ex) {
+								throw new CREIllegalArgumentException(ex.getMessage(), t);
+							}
+							return CVoid.VOID;
 						} catch (IllegalArgumentException ex) {
 							// Fall back to integer
 						}

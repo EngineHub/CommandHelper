@@ -298,13 +298,17 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	@Override
 	public void playEffect(MCLocation l, MCEffect mcEffect, Object data, int radius) {
 		Effect effect = Effect.valueOf(mcEffect.name());
-		switch(effect) {
+		switch(mcEffect) {
 			case RECORD_PLAY:
 			case STEP_SOUND:
 				w.playEffect((Location) l.getHandle(), effect, ((MCMaterial) data).getHandle(), radius);
 				return;
 			case SMOKE:
+			case SHOOT_WHITE_SMOKE:
 				w.playEffect((Location) l.getHandle(), effect, BlockFace.valueOf(((MCBlockFace) data).name()), radius);
+				return;
+			case PARTICLES_AND_SOUND_BRUSH_BLOCK_COMPLETE:
+				w.playEffect((Location) l.getHandle(), effect, ((MCBlockData) data).getHandle(), radius);
 				return;
 		}
 		w.playEffect((Location) l.getHandle(), effect, data, radius);
