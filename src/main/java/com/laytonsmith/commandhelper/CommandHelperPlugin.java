@@ -42,6 +42,7 @@ import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.abstraction.enums.MCVersion;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCArt;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCAttribute;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCBiomeType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEnchantment;
@@ -320,6 +321,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 		BukkitMCEnchantment.build();
 		BukkitMCPatternShape.build();
 		BukkitMCAttribute.build();
+		BukkitMCArt.build();
 		if(myServer.getMinecraftVersion().gte(MCVersion.MC1_20)) {
 			BukkitMCTrimMaterial.build();
 			BukkitMCTrimPattern.build();

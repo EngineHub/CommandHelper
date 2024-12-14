@@ -14,7 +14,7 @@ public class BukkitMCSound extends MCSound<Sound> {
 
 	@Override
 	public String name() {
-		return getAbstracted() == MCVanillaSound.UNKNOWN ? getConcrete().name() : getAbstracted().name();
+		return getAbstracted().name();
 	}
 
 	public static void build() {
@@ -22,8 +22,8 @@ public class BukkitMCSound extends MCSound<Sound> {
 			if(v.existsIn(Static.getServer().getMinecraftVersion())) {
 				Sound sound;
 				try {
-					sound = getBukkitType(v);
-				} catch (IllegalArgumentException | NoSuchFieldError ex) {
+					sound = (Sound) Sound.class.getDeclaredField(v.name()).get(null);
+				} catch (IllegalAccessException | NoSuchFieldException e) {
 					MSLog.GetLogger().w(MSLog.Tags.RUNTIME, "Could not find a Bukkit Sound for " + v.name(), Target.UNKNOWN);
 					continue;
 				}
@@ -31,9 +31,5 @@ public class BukkitMCSound extends MCSound<Sound> {
 				MAP.put(v.name(), wrapper);
 			}
 		}
-	}
-
-	private static Sound getBukkitType(MCVanillaSound v) {
-		return Sound.valueOf(v.name());
 	}
 }

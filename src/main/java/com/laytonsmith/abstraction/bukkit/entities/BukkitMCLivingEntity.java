@@ -65,7 +65,8 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 
 	@Override
 	public double getMaxHealth() {
-		AttributeInstance maxHealth = le.getAttribute(Attribute.GENERIC_MAX_HEALTH);
+		Attribute attribute = (Attribute) MCAttribute.valueOf("GENERIC_MAX_HEALTH").getConcrete();
+		AttributeInstance maxHealth = le.getAttribute(attribute);
 		if(maxHealth == null) {
 			return le.getHealth();
 		}
@@ -74,7 +75,8 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 
 	@Override
 	public void setMaxHealth(double health) {
-		AttributeInstance maxHealth = le.getAttribute(Attribute.GENERIC_MAX_HEALTH);
+		Attribute attribute = (Attribute) MCAttribute.valueOf("GENERIC_MAX_HEALTH").getConcrete();
+		AttributeInstance maxHealth = le.getAttribute(attribute);
 		if(maxHealth == null) {
 			le.setHealth(health);
 			return;
@@ -87,7 +89,8 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 
 	@Override
 	public void resetMaxHealth() {
-		AttributeInstance maxHealth = le.getAttribute(Attribute.GENERIC_MAX_HEALTH);
+		Attribute attribute = (Attribute) MCAttribute.valueOf("GENERIC_MAX_HEALTH").getConcrete();
+		AttributeInstance maxHealth = le.getAttribute(attribute);
 		if(maxHealth == null) {
 			return;
 		}
