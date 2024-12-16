@@ -300,9 +300,10 @@ public class Exceptions {
 			exceptions += StringUtils.Join(ee, ", ", ", and ");
 
 			return "nothing {exceptionType, msg, [causedBy] | exception} This function causes an exception to be thrown."
-					+ " The exceptionType may be any valid exception type."
-					+ "\n\nThe core exception types are: " + exceptions
-					+ "\n\nThere may be other exception types as well, refer to the documentation of any extensions you have installed.";
+					+ " The exceptionType may be any valid exception type. ---- "
+					+ "The core exception types are: " + exceptions
+					+ "\n\nThere may be other exception types as well,"
+					+ " refer to the documentation of any extensions you have installed.";
 		}
 
 		@Override
@@ -512,9 +513,6 @@ public class Exceptions {
 							// We need to define the exception in the variable table
 							IVariableList varList = env.getEnv(GlobalEnv.class).GetVarList();
 							IVariable var = (IVariable) assign.getChildAt(1).getData();
-							// This should eventually be changed to be of the appropriate type. Unfortunately, that will
-							// require reworking basically everything. We need all functions to accept Mixed, instead of Mixed.
-							// This will have to do in the meantime.
 							varList.set(new IVariable(CArray.TYPE, var.getVariableName(), e.getExceptionObject(), t));
 							parent.eval(nodes[i + 1], env);
 							varList.remove(var.getVariableName());

@@ -983,7 +983,7 @@ public class EntityManagement {
 		public String docs() {
 			return "array {locationArray, distance, [type] | locationArray, distance, [arrayTypes]} Returns an array of"
 					+ " all entities within the given distance from the location. Set type argument to filter entities"
-					+ " to a specific entity type. You can pass an array of types. Valid types (case doesn't matter): "
+					+ " to a specific entity type. You can pass an array of types. ---- Valid types: "
 					+ StringUtils.Join(MCEntityType.types(), ", ", ", or ", " or ");
 		}
 
@@ -1128,7 +1128,7 @@ public class EntityManagement {
 					+ " the death effect makes the mob invisible to players and"
 					+ " immune to melee attacks. When used on players, they are"
 					+ " shown the respawn menu, but because they are not actually"
-					+ " dead, they can only log out. Possible effects are: "
+					+ " dead, they can only log out. ---- Possible effects are: "
 					+ StringUtils.Join(MCEntityEffect.values(), ", ", ", or ", " or ");
 		}
 

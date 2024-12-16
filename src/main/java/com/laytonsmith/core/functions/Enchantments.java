@@ -156,7 +156,7 @@ public class Enchantments {
 					+ " enchantment array may be given. If slot is null, the currently selected slot is used."
 					+ " If an enchantment cannot be applied to the specified item, an EnchantmentException is thrown."
 					+ " The enchantment array must have the enchantment as keys and levels as the values."
-					+ " (eg. array('unbreaking': 1)) The level parameter can be a number or a roman numeral."
+					+ " (eg. array('unbreaking': 1)) The level parameter can be a number or a roman numeral. ---- "
 					+ " The available enchantments are: " + StringUtils.Join(MCEnchantment.values(), ", ", ", and ")
 					+ ".";
 		}

@@ -1795,7 +1795,7 @@ public class World {
 		public String docs() {
 			return "mixed {world, [gameRule]} Returns an associative array containing the values of all existing"
 					+ " gamerules for the given world. If the gameRule parameter is specified, the function only"
-					+ " returns that one value instead of an array."
+					+ " returns that one value instead of an array. ---- "
 					+ " The gameRule can be " + StringUtils.Join(MCGameRule.getGameRules(), ", ", ", or ", " or ") + ".";
 		}
 
@@ -1869,7 +1869,7 @@ public class World {
 		@Override
 		public String docs() {
 			return "boolean {[world], gameRule, value} Sets the value of the gamerule for the specified world."
-					+ " If world is not given the value is set for all worlds. Returns true if successful."
+					+ " If world is not given the value is set for all worlds. Returns true if successful. ---- "
 					+ " The gameRule can be " + StringUtils.Join(MCGameRule.getGameRules(), ", ", ", or ", " or ") + ".";
 		}
 

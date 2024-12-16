@@ -426,9 +426,10 @@ public class Minecraft {
 		@Override
 		public String docs() {
 			return "void {locationArray, effect, [radius]} Plays the specified effect at the given location"
-					+ " for all players within the radius (or 64 by default). The effect can be one of the following: "
-					+ StringUtils.Join(MCEffect.values(), ", ", ", or ", " or ")
-					+ ". ---- Some effects may require an applicable block at the specified location."
+					+ " for all players within the radius (or 64 by default)."
+					+ " ---- The effect can be one of the following: "
+					+ StringUtils.Join(MCEffect.values(), ", ", ", or ", " or ") + "."
+					+ " Some effects may require an applicable block at the specified location."
 					+ " Additional data can be supplied with the syntax EFFECT:DATA.<br>"
 					+ "<br>STEP_SOUND and PARTICLES_AND_SOUND_BRUSH_BLOCK_COMPLETE (Paper) take a block material name."
 					+ "<br>RECORD_PLAY takes a record material name."
