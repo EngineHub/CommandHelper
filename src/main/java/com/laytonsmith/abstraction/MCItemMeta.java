@@ -122,6 +122,8 @@ public interface MCItemMeta extends AbstractionObject {
 
 	MCBlockData getBlockData(MCMaterial material);
 
+	Map<String, String> getExistingBlockData();
+
 	boolean hasBlockData();
 
 	void setBlockData(MCBlockData blockData);

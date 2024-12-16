@@ -105,7 +105,9 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
@@ -490,7 +492,17 @@ public class ObjectGenerator {
 			} else if(material.isBlock()) {
 				// Block items only
 				if(meta.hasBlockData()) {
-					ma.set("blockdata", blockData(meta.getBlockData(is.getType()), t), t);
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
+						// return only existing states
+						Map<String, String> blockData = meta.getExistingBlockData();
+						if(blockData != null) {
+							ma.set("blockdata", blockData(is.getType(), blockData, t), t);
+						} else {
+							ma.set("blockdata", CNull.NULL, t);
+						}
+					} else {
+						ma.set("blockdata", blockData(meta.getBlockData(is.getType()), t), t);
+					}
 				} else {
 					ma.set("blockdata", CNull.NULL, t);
 				}
@@ -2510,9 +2522,18 @@ public class ObjectGenerator {
 		return ca;
 	}
 
+	public CArray blockData(MCMaterial mat, Map<String, String> blockData, Target t) {
+		CArray ca = CArray.GetAssociativeArray(t);
+		ca.set("block", new CString(mat.getName().toLowerCase(Locale.ROOT), t), t);
+		for(Entry<String, String> entry : blockData.entrySet()) {
+			ca.set(entry.getKey(), blockState(entry.getValue()), t);
+		}
+		return ca;
+	}
+
 	private Construct blockState(String value) {
-		if(value.length() < 3 && Character.isDigit(value.charAt(0))) {
-			// integer states range from 0-25
+		int ch = value.charAt(0);
+		if(ch >= '0' && ch <= '9') {
 			try {
 				return new CInt(Long.parseLong(value), Target.UNKNOWN);
 			} catch (NumberFormatException e) {

@@ -2,6 +2,8 @@ package com.laytonsmith.abstraction.bukkit;
 
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
+import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
+import com.laytonsmith.PureUtilities.Common.ReflectionUtils.ReflectionException;
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCAttributeModifier;
 import com.laytonsmith.abstraction.MCItemMeta;
@@ -22,6 +24,10 @@ import java.util.Set;
 
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEnchantment;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCItemFlag;
+import com.laytonsmith.core.MSLog;
+import com.laytonsmith.core.MSLog.Tags;
+import com.laytonsmith.core.constructs.Target;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
@@ -193,6 +199,20 @@ public class BukkitMCItemMeta implements MCItemMeta {
 	@Override
 	public MCBlockData getBlockData(MCMaterial material) {
 		return new BukkitMCBlockData(((BlockDataMeta) this.im).getBlockData((Material) material.getHandle()));
+	}
+
+	@Override
+	public Map<String, String> getExistingBlockData() {
+		try {
+			Class clz = Class.forName(Bukkit.getServer().getClass().getPackage().getName() + ".inventory.CraftMetaItem");
+			return (Map<String, String>) ReflectionUtils.get(clz, this.im, "blockData");
+		} catch (ClassNotFoundException e) {
+			MSLog.GetLogger().e(Tags.GENERAL, "Failed to get CraftMetaItem class.", Target.UNKNOWN);
+			return null;
+		} catch (ReflectionException ex) {
+			MSLog.GetLogger().e(Tags.GENERAL, "Failed to get blockData from CraftMetaItem.", Target.UNKNOWN);
+			return null;
+		}
 	}
 
 	@Override
