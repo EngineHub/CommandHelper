@@ -1,53 +1,82 @@
 array {[player,] slot} Returns an associative array of known item meta for the slot given, or null if there isn't any. ----
 
-Below are the available fields in the item meta array. Fields can be null when the item meta doesn't have that value.
-Some Minecraft NBT is not yet supported in item meta, and should be documented below.
+Below are the available fields in the item meta array. Most fields can be null when the item meta doesn't have that value.
+Some data is not yet supported in item meta, and should be documented below. In addition, as of 1.20.5, many of the new
+data components are not yet supported:
+
+From 1.20.5+: "enchantment_glint_override", "food", "hide_tooltip", "instrument", "intangible_projectile", "item_name",
+"lock", "lodestone_tracker", "max_damage", "max_stack_size", "note_block_sound", "ominous_bottle_amplifier", "rarity",
+and "tool".
+
+From 1.21.0+: "jukebox_playable".
+
+From 1.21.2+: "consumable", "damage_resistant", "death_protection", "enchantable", "equippable", "item_model", "glider",
+"repairable", "tooltip_style", "use_cooldown", and "use_remainder".
+
+From 1.21.4+: "custom_model_data" for anything other than a single float.
 
 {| width="80%" cellspacing="1" cellpadding="1" border="1" class="wikitable"
 |-
-! scope="col" width="15%" | Item Type
-! scope="col" width="85%" | Meta
+! scope="col" width="14%" | Item Type
+! scope="col" width="86%" | Meta
 |-
-| All
+! All
 |
-* '''display''' : (string) The display name seen when renamed in an anvil.
-* '''lore''' : (array) An array of strings that is displayed when hovering the item. As lines are plain text, they do not yet support some advanced text components.
-* '''enchants''' : (array) An associative array of enchantments with the vanilla name of enchantment as the key, and value being an enchantment array with the key '''"elevel"''' for the level of the enchantment.
-* '''model''' : (int) Represents vanilla's CustomModelData tag for use with resource packs.
-* '''flags''' : (array) A list of flags used to hide meta in the item tooltip: ''%ITEM_FLAGS%''.
-* '''repair''' : (int) The cost to repair or combine this item in an anvil.
-* '''modifiers''' : (array) An array of attribute modifier arrays, each with keys: '''"attribute"''', '''"operation"''', '''"amount"''' (double), '''"id"''' (optional), and '''"slot"''' (optional). Possible attributes: %ATTRIBUTES%. Possible operations: %OPERATIONS%. Possible slots are %SLOTS% or one of the slot groups %SLOTGROUPS%. An item can only have one modifier with the same id.
-* '''tags''' : (array) An associative array of custom tags used by plugins (or null). A tag's key is namespaced (e.g. "commandhelper:mytag") and the value is an associative array containing the '''"type"''' and '''"value"''' of the tag. Possible types: ''%TAG_TYPES%''.
-The "CanPlaceOn" tag for blocks and "CanDestroy" tag for tools are not yet supported.
+* '''display''' : (string) The display name seen when renamed in an anvil (or null).
+* '''lore''' : (array) An array of strings that is displayed when hovering the item (or null). As lines are plain text, they do not yet support some advanced text components, but color codes are supported.
+* '''enchants''' : (associative array) Defines enchantments with the vanilla name of enchantment as the key, and value being an enchantment array with the key "elevel" for the level of the enchantment. An integer for the level can be used as the value instead.
+* '''model''' : (int) Represents vanilla's CustomModelData tag for use with resource packs (or null). Is converted to a float for the custom_model_data component in 1.21.4+.
+* '''flags''' : (array) Flags used to hide meta in the item tooltip: %ITEM_FLAGS%.
+* '''repair''' : (int) The additional cost to repair or combine this item in an anvil.
+* '''modifiers''' : (array) An array of attribute modifier arrays (or null).
+  * (associative array)
+    * '''attribute''' : (string) One of %ATTRIBUTES%.
+    * '''operation''' : (string) One of %OPERATIONS%.
+    * '''amount''' : (double) The value used in the modifier operation.
+    * '''id''' : (string) An item can only have one modifier with the same id.
+    * '''slot''' : (string) Possible slots are %SLOTS% or one of the slot groups %SLOTGROUPS%.
+* '''tags''' : (associative array) Custom tags used by plugins (or null).
+  * '''&lt;custom_key&gt;''' : (associative array) Each tag's key is namespaced (e.g. "commandhelper:mytag").
+    * '''type''' : (string) Possible types: %TAG_TYPES%.
+    * '''value''' : (mixed) A valid value for the given tag type.
+The "CanPlaceOn" tag for blocks and "CanDestroy" tag for tools in adventure mode are not yet supported.
 |-
-| All Damageable Items
+| Damageable Items
 |
 * '''damage''' : (int) The amount of damage on the item. 0 is undamaged. Maximum is determined by each item type's max durability.
 * '''unbreakable''' : (boolean) Whether or not the item can be damaged.
 |-
-| Armor Trim
+! Armor
 |
-* '''trim''' : (array) An array that contains the keys '''"pattern"''' and '''"material"'''. Pattern can be %TRIM_PATTERNS%. Material can be %TRIM_MATERIALS%. (MC 1.20+)
+* '''trim''' : (associative array) Defines an armor trim. (MC 1.20+)
+  * '''pattern''' : Pattern can be %TRIM_PATTERNS%.
+  * '''material''' : Material can be %TRIM_MATERIALS%.
 |-
-| AxolotlBucket
+! AxolotlBucket
 |
-* '''variant''' : (string) The type of axolotl, one of ''%AXOLOTL_TYPES%''. (MC 1.17+)
-The entity's custom name is derived from the item '''"display"''' string. All other axolotl NBT is not yet supported.
+* '''variant''' : (string) The type of axolotl, one of %AXOLOTL_TYPES%. (MC 1.17+)
+The entity's custom name is derived from the item "display" string. All other axolotl NBT is not yet supported.
 |-
-| Banners
+! Banners
 |
-* '''patterns''' : (array) An array of pattern arrays. Each can contain the keys '''"color"''' (one of ''%DYE_COLORS%'') and '''"shape"''' (one of ''%PATTERN_SHAPES%'').
+* '''patterns''' : (array) An array of pattern associative arrays for each layer.
+  * (associative array)
+    * '''color''' : One of %DYE_COLORS%.
+    * '''shape''' : One of %PATTERN_SHAPES%.
 |-
-| Bee Hives/Nests
+! Bee Hives/Nests
 |
 * '''beecount''' : (int) The number of bees stored in this hive or nest (0 - 3). (requires MC 1.20.6+ to set)
 Stored Bee NBT is not yet supported.
 |-
-| BlockData
+! BlockData
 |
-* '''blockdata''' : (array) An array of blockdata (known as block states in vanilla) like is returned from get_blockdata(), or null if none.
+* '''blockdata''' : (associative array) Block data, also known as block states in vanilla, like is returned from get_blockdata() (or null).
+  * '''block''' : (string) Block material name
+  * '''&lt;state_name&gt;''' : (int, boolean, string) The state value.
+Only returns specified states as of 1.20.6. Prior versions return all states. Can only set specific states without defaults as of 1.21.3.
 |-
-| Books
+! Books
 |
 * '''title''' : (string) The title of the book. (32 character limit)
 * '''author''' : (string) The author of the book.
@@ -55,98 +84,136 @@ Stored Bee NBT is not yet supported.
 * '''generation''' : (string) The generation of the book. Can be ORIGINAL, COPY_OF_ORIGINAL, COPY_OF_COPY, or TATTERED (the last two cannot be copied).
 As pages are plain text, they do not yet support some advanced text components.
 |-
-| Brewing Stands
+! Brewing Stands
 |
 * '''brewtime''' : (int) The amount of time left in ticks before brewing completes.
 * '''fuel''' : (int) The amount of fuel left.
-* '''inventory''' : (array) An associative array with the slots for '''"fuel"''', '''"ingredient"''', '''"leftbottle"''', '''"middlebottle"''', and '''"rightbottle"'''.
+* '''inventory''' : (associative array) Defines items in each slot
+  * '''fuel''' : (item array) The item that will consumed when brewing stand fuel is empty. Typically blaze powder or null.
+  * '''ingredient''' : (item array) The top slot item ingredient or null.
+  * '''leftbottle''' : (item array) Bottle slots are typically a type of potion or null, but can also be a glass bottle.
+  * '''middlebottle''' : (item array)
+  * '''rightbottle''' : (item array)
 |-
-| Bundle
+! Bundle
 |
 * '''items''' : (array) An array of item arrays that exist in this bundle. (MC 1.17+)
 |-
-| CommandBlocks
+! CommandBlocks
 |
 * '''command''' : (string) The command set for this commandblock.
 * '''customname''' : (string) The name of this commandblock. (default: '@')
 The remaining tags are not yet supported.
 |-
-| Compass
+! Compass
 |
-* '''target''' : (array) The location this compass will point to, or null to use normal compass target.
+* '''target''' : (associative array) The location this compass will point to, or null to use normal compass target.
 * '''lodestone''' : (boolean) If the target location is a tracked lodestone. If true, compass spins if no lodestone exists there.
 |-
-| Crossbows
+! Crossbows
 |
 * '''projectiles''' : (array) An array of item arrays that are loaded in the crossbow. Items must be arrows or fireworks. When fired, the first item is the middle projectile. (maximum of three projectiles)
 |-
-| Decorated Pots
+! Decorated Pots
 |
-* '''sherds''' : (array) An associative array of pottery sherds for the '''"front"''', '''"back"''', '''"left"''', and '''"right"''' sides of the decorated pot. Brick is used for empty sides.
-* '''item''' : (array) An item array for the stack contained in the decorated pot, or null if empty. (MC 1.20.4+)
+* '''sherds''' : (associative array) Pottery sherds for each side of the decorated pot.
+  * '''front''' : (string) Can only be a sherd material name or brick if empty.
+  * '''back''' : (string)
+  * '''left''' : (string)
+  * '''right''' : (string)
+* '''item''' : (associative array) An item array for the stack contained in the decorated pot, or null if empty. (MC 1.20.4+)
 |-
-| Enchanted Books
+! Enchanted Books
 |
-* '''stored''' : (array) An associative array of enchantments, just like "enchants".
+* '''stored''' : (associative array) An array of enchantments, in the same format as "enchants".
 |-
-| Firework Charges
+! Firework Star
 |
-* '''effect''' : (array) A firework effect array, can have the keys '''"flicker"''' (boolean), '''"trail"''' (boolean), '''"type"''' (one of ''%FIREWORK_TYPES%''), '''"colors"''' (array of color names or color arrays), and '''"fade"''' (array of color names or color arrays).
+* '''effect''' : (associative array) A firework star effect that can be used to craft fireworks
+  * '''flicker''' : (boolean) Whether the sparks twinkle and pop. (default: false)
+  * '''trail''' : (boolean) Whether the sparks leave particle trails. (default: false)
+  * '''type''' : (string) One of %FIREWORK_TYPES%. (default: BALL)
+  * '''colors''' : (array) The starting colors of the sparks as multiple color arrays. (can use color names; can be set to one color) (default: WHITE)
+  * '''fade''' : (array) The ending colors of the sparks as multiple color arrays. (can use color names; can be set to one color)
 |-
-| Fireworks
+! Firework Rockets
 |
-* '''firework''' : (array) An array with the keys '''"strength"''' (int), how long in seconds the rocket will last, and '''"effects"''', an array of effect arrays (see Firework Charges).
+* '''firework''' : (associative array) A firework rocket's attributes.
+  * '''strength''' : (int) How long in seconds the rocket will last. (-1 for instant detonation)
+  * '''effects''' : (array) Multiple firework star effect arrays. (see Firework Star above)
 |-
-| Furnaces
+! Furnaces
 |
 * '''burntime''' : (int) The amount of time left in ticks before the furnace extinguishes.
 * '''cooktime''' : (int) The amount of time in ticks the item has been cooking for.
-* '''inventory''' : (array) An associative array with the slots for '''"result"''', '''"fuel"''', and '''"smelting"'''.
+* '''inventory''' : (associative array) Defines items in each slot
+  * '''result''' : (associative array) The resulting smelted item, or null.
+  * '''fuel''' : (associative array) The item stack that will be consumed when "burntime" reaches zero, or null.
+  * '''smelting''' : (associative array) The current item stack being smelted, or null.
 |-
-| GoatHorns
+! GoatHorns
 |
 * '''instrument''' : (string) The instrument name (can be ponder_goat_horn, sing_goat_horn, seek_goat_horn, feel_goat_horn, admire_goat_horn, call_goat_horn, yearn_goat_horn, dream_goat_horn). (MC 1.19.3+)
 |-
-| Inventory Blocks
+! Inventory Blocks
 |
-* '''inventory''' : (array) An array of item arrays, where each index is an inventory slot. (exceptions exist for furnaces and brewing stands)
+* '''inventory''' : (associative array) An array of item arrays, where each existing index is an inventory slot. (exceptions exist for furnaces and brewing stands)
 |-
-| Knowledge Books
+! Knowledge Books
 |
 * '''recipes''' : (array) A list of namespaced recipe keys. (or null)
 |-
-| Leather Armor
+! Leather Armor
 |
-* '''color''' : (array) A color array, with '''"r"''', '''"g"''', and '''"b"''' keys that have values ranging from 0 to 255.
+* '''color''' : (associative array) An RGB color array for the dye in the leather armor.
+  * '''r''' : (int) Red value ranging from 0 to 255
+  * '''g''' : (int) Green value
+  * '''b''' : (int) Blue value
 |-
-| Maps
+! Filled Maps
 |
 * '''mapid''' : (int) The unique id for a map on the server.
-* '''color''' : (array) An array of the map item's color, with '''"r"''', '''"g"''', and '''"b"''' keys that have values ranging from 0 to 255.
+* '''color''' : (associative array) An RGB color array for the ink used on the map item.
+  * '''r''' : (int) Red value ranging from 0 to 255
+  * '''g''' : (int) Green value
+  * '''b''' : (int) Blue value
 |-
-| Player Heads
+! Player Heads
 |
 * '''owner''' : (string) The user name. Can be null if there is no owner.
 * '''owneruuid''' : (string) The user UUID. Can be null if there is no owner.
 * '''texture''' : (string) The texture property value used for custom heads. This is a base64 encoded JSON object seen under the "Value" key in vanilla. It contains the skin texture URL among other things. Requires an owner. (Paper only)
 |-
-| Potions
+! Potions
 |
-* '''potiontype'''' : (string) The base potion type, which can be one of: ''%POTION_TYPES%''. (MC 1.20.6+)
-* '''base''' : (array) Defined a base potion. Had the keys '''"extended"''', '''"upgraded"''', and '''"type"'''. This was used prior to MC 1.20.6 and is converted in later versions.
-* '''potions''' : (array) An associative array of custom potion effect arrays, where each key is the vanilla potion effect name. Each effect array can contain the keys: '''"id"''' (int), '''"strength"''' (int), '''"seconds"''' remaining (int), whether the effect is '''"ambient"''', whether '''"particles"''' are enabled, and whether the '''"icon"''' is shown to the player.
-* '''color''' : (array) A color array, with '''"r"''', '''"g"''', and '''"b"''' keys that have values ranging from 0 to 255.
+* '''potiontype''' : (string) The base potion type, which can be one of: %POTION_TYPES%. (MC 1.20.6+)
+* '''base''' : (associative array) Legacy base potion effect. This was used prior to MC 1.20.6 and is converted in later versions. Use "potiontype" on later versions.
+  * '''extended''' : (boolean)
+  * '''upgraded''' : (boolean)
+  * '''type''' : (string)
+* '''potions''' : (associative array) A list of effects that get applied with this potion.
+  * '''&lt;effect_name&gt;''' : (associative array)
+    * '''id''' : (int) Legacy effect id. Only used if potions array is not associative.
+    * '''strength''' : (int) The level of the potion effect, starting with zero. (default: 0)
+    * '''seconds''' : (int) The number of seconds the effect lasts for. (default: 30)
+    * '''ambient''' : (boolean) Whether the particles are more transparent. (default: false)
+    * '''particles''' : (boolean) Whether the particles are visible at all. (default: true)
+    * '''icon''' : (boolean) Whether the effect icon is visible for the player. (default: true)
+* '''color''' : (array) An RGB color array for the tint of the potion item.
+  * '''r''' : (int) Red value ranging from 0 to 255
+  * '''g''' : (int) Green value
+  * '''b''' : (int) Blue value
 |-
-| Suspicious Stew
+! Suspicious Stew
 |
-* '''potions''' : (array) An associative array identical to the one for potion meta.
+* '''potions''' : (associative array) See potion meta.
 |-
-| Shields
+! Shields
 |
-* '''basecolor''' : (string) A color name, one of ''%DYE_COLORS%''.
+* '''basecolor''' : (string) A color name, one of %DYE_COLORS%.
 * '''patterns''' : (array) See Banner "patterns".
 |-
-| Signs
+! Signs
 |
 * '''signtext''' : (array) An array of 4 strings, one for each line of text on the front.
 * '''color''' : (string) The dye color for the text on the front. (default: 'BLACK')
@@ -156,26 +223,26 @@ The remaining tags are not yet supported.
 * '''backglowing''' : (boolean) Whether the sign has glowing text on the back. (MC 1.20+)
 * '''waxed''' : (boolean) Whether the sign is waxed. (MC 1.20.1+)
 |-
-| Spawn Eggs
+! Spawn Eggs
 |
-The entity's custom name is derived from the item '''"display"''' string. Additional NBT for the entity spawned is not supported.
+The entity's custom name is derived from the item "display" string. Additional NBT for the entity spawned is not supported.
 |-
-| Spawners
+! Spawners
 |
-* '''spawntype''' : (string) May be one of ''%ENTITY_TYPES%''. Not all entity types will spawn from spawners, and some require special conditions.
+* '''spawntype''' : (string) May be one of %ENTITY_TYPES%. Not all entity types will spawn from spawners, and some require special conditions.
 * '''delay''' : (int) The time in ticks until the spawner will spawn the next batch of entities.
-* '''mindelay''' : (int) The lower bounds of a new random delay chosen after each batch of entities spawn. (must be <= 'maxdelay')
+* '''mindelay''' : (int) The lower bounds of a new random delay chosen after each batch of entities spawn. (must be <= "maxdelay")
 * '''maxdelay''' : (int) The upper bounds of a new random delay. (must be above zero and >= mindelay)
 * '''spawncount''' : (int) The number of entities to attempt to spawn in each batch.
-* '''maxnearbyentities''' : (int) The number of 'spawntype' entities within just over 'spawnrange' distance that'll prevent further spawns.
+* '''maxnearbyentities''' : (int) The number of "spawntype" entities within just over "spawnrange" distance that'll prevent further spawns.
 * '''spawnrange''' : (int) The maximum distance in the x or z axis new entities will spawn from the spawner.
 * '''playerrange''' : (int) The maximum distance a player must be within to cause the spawner to spawn.
 NBT for spawn potentials other than entity type is not yet supported.
 |-
-| Tropical Fish Bucket
+! Tropical Fish Bucket
 |
-* '''fishcolor''' : (string) The color of the fish, can be one of ''%DYE_COLORS%''.
+* '''fishcolor''' : (string) The color of the fish, can be one of %DYE_COLORS%.
 * '''fishpatterncolor''' : (string) The color of the pattern on the fish.
-* '''fishpattern''' : (string) The pattern type on the fish, can be one of ''%FISH_PATTERNS%''.
-The entity's custom name is derived from the item '''"display"''' string. All other tropical fish NBT is not yet supported.
+* '''fishpattern''' : (string) The pattern type on the fish, can be one of %FISH_PATTERNS%.
+The entity's custom name is derived from the item "display" string. All other tropical fish NBT is not yet supported.
 |}
