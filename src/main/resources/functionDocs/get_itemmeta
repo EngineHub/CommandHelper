@@ -29,19 +29,19 @@ From 1.21.4+: "custom_model_data" for anything other than a single float.
 * '''flags''' : (array) Flags used to hide meta in the item tooltip: %ITEM_FLAGS%.
 * '''repair''' : (int) The additional cost to repair or combine this item in an anvil.
 * '''modifiers''' : (array) An array of attribute modifier arrays (or null).
-  * (associative array)
-    * '''attribute''' : (string) One of %ATTRIBUTES%.
-    * '''operation''' : (string) One of %OPERATIONS%.
-    * '''amount''' : (double) The value used in the modifier operation.
-    * '''id''' : (string) An item can only have one modifier with the same id.
-    * '''slot''' : (string) Possible slots are %SLOTS% or one of the slot groups %SLOTGROUPS%.
+** (associative array)
+*** '''attribute''' : (string) One of %ATTRIBUTES%.
+*** '''operation''' : (string) One of %OPERATIONS%.
+*** '''amount''' : (double) The value used in the modifier operation.
+*** '''id''' : (string) An item can only have one modifier with the same id.
+*** '''slot''' : (string) Possible slots are %SLOTS% or one of the slot groups %SLOTGROUPS%.
 * '''tags''' : (associative array) Custom tags used by plugins (or null).
-  * '''&lt;custom_key&gt;''' : (associative array) Each tag's key is namespaced (e.g. "commandhelper:mytag").
-    * '''type''' : (string) Possible types: %TAG_TYPES%.
-    * '''value''' : (mixed) A valid value for the given tag type.
+** '''&lt;custom_key&gt;''' : (associative array) Each tag's key is namespaced (e.g. "commandhelper:mytag").
+*** '''type''' : (string) Possible types: %TAG_TYPES%.
+*** '''value''' : (mixed) A valid value for the given tag type.
 The "CanPlaceOn" tag for blocks and "CanDestroy" tag for tools in adventure mode are not yet supported.
 |-
-| Damageable Items
+! Damageable Items
 |
 * '''damage''' : (int) The amount of damage on the item. 0 is undamaged. Maximum is determined by each item type's max durability.
 * '''unbreakable''' : (boolean) Whether or not the item can be damaged.
@@ -49,8 +49,8 @@ The "CanPlaceOn" tag for blocks and "CanDestroy" tag for tools in adventure mode
 ! Armor
 |
 * '''trim''' : (associative array) Defines an armor trim. (MC 1.20+)
-  * '''pattern''' : Pattern can be %TRIM_PATTERNS%.
-  * '''material''' : Material can be %TRIM_MATERIALS%.
+** '''pattern''' : Pattern can be %TRIM_PATTERNS%.
+** '''material''' : Material can be %TRIM_MATERIALS%.
 |-
 ! AxolotlBucket
 |
@@ -60,9 +60,9 @@ The entity's custom name is derived from the item "display" string. All other ax
 ! Banners
 |
 * '''patterns''' : (array) An array of pattern associative arrays for each layer.
-  * (associative array)
-    * '''color''' : One of %DYE_COLORS%.
-    * '''shape''' : One of %PATTERN_SHAPES%.
+** (associative array)
+*** '''color''' : One of %DYE_COLORS%.
+*** '''shape''' : One of %PATTERN_SHAPES%.
 |-
 ! Bee Hives/Nests
 |
@@ -72,8 +72,8 @@ Stored Bee NBT is not yet supported.
 ! BlockData
 |
 * '''blockdata''' : (associative array) Block data, also known as block states in vanilla, like is returned from get_blockdata() (or null).
-  * '''block''' : (string) Block material name
-  * '''&lt;state_name&gt;''' : (int, boolean, string) The state value.
+** '''block''' : (string) Block material name
+** '''&lt;state_name&gt;''' : (int, boolean, string) The state value.
 Only returns specified states as of 1.20.6. Prior versions return all states. Can only set specific states without defaults as of 1.21.3.
 |-
 ! Books
@@ -89,11 +89,11 @@ As pages are plain text, they do not yet support some advanced text components.
 * '''brewtime''' : (int) The amount of time left in ticks before brewing completes.
 * '''fuel''' : (int) The amount of fuel left.
 * '''inventory''' : (associative array) Defines items in each slot
-  * '''fuel''' : (item array) The item that will consumed when brewing stand fuel is empty. Typically blaze powder or null.
-  * '''ingredient''' : (item array) The top slot item ingredient or null.
-  * '''leftbottle''' : (item array) Bottle slots are typically a type of potion or null, but can also be a glass bottle.
-  * '''middlebottle''' : (item array)
-  * '''rightbottle''' : (item array)
+** '''fuel''' : (item array) The item that will consumed when brewing stand fuel is empty. Typically blaze powder or null.
+** '''ingredient''' : (item array) The top slot item ingredient or null.
+** '''leftbottle''' : (item array) Bottle slots are typically a type of potion or null, but can also be a glass bottle.
+** '''middlebottle''' : (item array)
+** '''rightbottle''' : (item array)
 |-
 ! Bundle
 |
@@ -117,10 +117,10 @@ The remaining tags are not yet supported.
 ! Decorated Pots
 |
 * '''sherds''' : (associative array) Pottery sherds for each side of the decorated pot.
-  * '''front''' : (string) Can only be a sherd material name or brick if empty.
-  * '''back''' : (string)
-  * '''left''' : (string)
-  * '''right''' : (string)
+** '''front''' : (string) Can only be a sherd material name or brick if empty.
+** '''back''' : (string)
+** '''left''' : (string)
+** '''right''' : (string)
 * '''item''' : (associative array) An item array for the stack contained in the decorated pot, or null if empty. (MC 1.20.4+)
 |-
 ! Enchanted Books
@@ -130,26 +130,26 @@ The remaining tags are not yet supported.
 ! Firework Star
 |
 * '''effect''' : (associative array) A firework star effect that can be used to craft fireworks
-  * '''flicker''' : (boolean) Whether the sparks twinkle and pop. (default: false)
-  * '''trail''' : (boolean) Whether the sparks leave particle trails. (default: false)
-  * '''type''' : (string) One of %FIREWORK_TYPES%. (default: BALL)
-  * '''colors''' : (array) The starting colors of the sparks as multiple color arrays. (can use color names; can be set to one color) (default: WHITE)
-  * '''fade''' : (array) The ending colors of the sparks as multiple color arrays. (can use color names; can be set to one color)
+** '''flicker''' : (boolean) Whether the sparks twinkle and pop. (default: false)
+** '''trail''' : (boolean) Whether the sparks leave particle trails. (default: false)
+** '''type''' : (string) One of %FIREWORK_TYPES%. (default: BALL)
+** '''colors''' : (array) The starting colors of the sparks as multiple color arrays. (can use color names; can be set to one color) (default: WHITE)
+** '''fade''' : (array) The ending colors of the sparks as multiple color arrays. (can use color names; can be set to one color)
 |-
 ! Firework Rockets
 |
 * '''firework''' : (associative array) A firework rocket's attributes.
-  * '''strength''' : (int) How long in seconds the rocket will last. (-1 for instant detonation)
-  * '''effects''' : (array) Multiple firework star effect arrays. (see Firework Star above)
+** '''strength''' : (int) How long in seconds the rocket will last. (-1 for instant detonation)
+** '''effects''' : (array) Multiple firework star effect arrays. (see Firework Star above)
 |-
 ! Furnaces
 |
 * '''burntime''' : (int) The amount of time left in ticks before the furnace extinguishes.
 * '''cooktime''' : (int) The amount of time in ticks the item has been cooking for.
 * '''inventory''' : (associative array) Defines items in each slot
-  * '''result''' : (associative array) The resulting smelted item, or null.
-  * '''fuel''' : (associative array) The item stack that will be consumed when "burntime" reaches zero, or null.
-  * '''smelting''' : (associative array) The current item stack being smelted, or null.
+** '''result''' : (associative array) The resulting smelted item, or null.
+** '''fuel''' : (associative array) The item stack that will be consumed when "burntime" reaches zero, or null.
+** '''smelting''' : (associative array) The current item stack being smelted, or null.
 |-
 ! GoatHorns
 |
@@ -166,17 +166,17 @@ The remaining tags are not yet supported.
 ! Leather Armor
 |
 * '''color''' : (associative array) An RGB color array for the dye in the leather armor.
-  * '''r''' : (int) Red value ranging from 0 to 255
-  * '''g''' : (int) Green value
-  * '''b''' : (int) Blue value
+** '''r''' : (int) Red value ranging from 0 to 255
+** '''g''' : (int) Green value
+** '''b''' : (int) Blue value
 |-
 ! Filled Maps
 |
 * '''mapid''' : (int) The unique id for a map on the server.
 * '''color''' : (associative array) An RGB color array for the ink used on the map item.
-  * '''r''' : (int) Red value ranging from 0 to 255
-  * '''g''' : (int) Green value
-  * '''b''' : (int) Blue value
+** '''r''' : (int) Red value ranging from 0 to 255
+** '''g''' : (int) Green value
+** '''b''' : (int) Blue value
 |-
 ! Player Heads
 |
@@ -188,21 +188,21 @@ The remaining tags are not yet supported.
 |
 * '''potiontype''' : (string) The base potion type, which can be one of: %POTION_TYPES%. (MC 1.20.6+)
 * '''base''' : (associative array) Legacy base potion effect. This was used prior to MC 1.20.6 and is converted in later versions. Use "potiontype" on later versions.
-  * '''extended''' : (boolean)
-  * '''upgraded''' : (boolean)
-  * '''type''' : (string)
+** '''extended''' : (boolean)
+** '''upgraded''' : (boolean)
+** '''type''' : (string)
 * '''potions''' : (associative array) A list of effects that get applied with this potion.
-  * '''&lt;effect_name&gt;''' : (associative array)
-    * '''id''' : (int) Legacy effect id. Only used if potions array is not associative.
-    * '''strength''' : (int) The level of the potion effect, starting with zero. (default: 0)
-    * '''seconds''' : (int) The number of seconds the effect lasts for. (default: 30)
-    * '''ambient''' : (boolean) Whether the particles are more transparent. (default: false)
-    * '''particles''' : (boolean) Whether the particles are visible at all. (default: true)
-    * '''icon''' : (boolean) Whether the effect icon is visible for the player. (default: true)
+** '''&lt;effect_name&gt;''' : (associative array)
+*** '''id''' : (int) Legacy effect id. Only used if potions array is not associative.
+*** '''strength''' : (int) The level of the potion effect, starting with zero. (default: 0)
+*** '''seconds''' : (int) The number of seconds the effect lasts for. (default: 30)
+*** '''ambient''' : (boolean) Whether the particles are more transparent. (default: false)
+*** '''particles''' : (boolean) Whether the particles are visible at all. (default: true)
+*** '''icon''' : (boolean) Whether the effect icon is visible for the player. (default: true)
 * '''color''' : (array) An RGB color array for the tint of the potion item.
-  * '''r''' : (int) Red value ranging from 0 to 255
-  * '''g''' : (int) Green value
-  * '''b''' : (int) Blue value
+** '''r''' : (int) Red value ranging from 0 to 255
+** '''g''' : (int) Green value
+** '''b''' : (int) Blue value
 |-
 ! Suspicious Stew
 |
