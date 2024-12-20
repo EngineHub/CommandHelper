@@ -6,6 +6,7 @@ import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCParticleData;
 import com.laytonsmith.abstraction.blocks.MCBlockData;
 import com.laytonsmith.abstraction.bukkit.BukkitMCColor;
+import com.laytonsmith.abstraction.bukkit.BukkitMCVibration;
 import com.laytonsmith.abstraction.enums.MCParticle;
 import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.core.MSLog;
@@ -16,8 +17,6 @@ import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
-import org.bukkit.Vibration;
-import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 
 import java.lang.reflect.Constructor;
@@ -120,18 +119,15 @@ public class BukkitMCParticle extends MCParticle<Particle> {
 					return new Particle.DustTransition(Color.TEAL, Color.RED, 1.0F);
 				}
 			case VIBRATION:
+				BukkitMCVibration vibe;
 				if(data instanceof MCParticleData.VibrationBlockDestination destination) {
-					return new Vibration((Location) l.getHandle(),
-							new Vibration.Destination.BlockDestination((Location) destination.location().getHandle()),
-							destination.arrivalTime());
+					vibe = new BukkitMCVibration(l, destination.location(), destination.arrivalTime());
 				} else if(data instanceof MCParticleData.VibrationEntityDestination destination) {
-					return new Vibration((Location) l.getHandle(),
-							new Vibration.Destination.EntityDestination((Entity) destination.entity().getHandle()),
-							destination.arrivalTime());
+					vibe = new BukkitMCVibration(l, destination.entity(), destination.arrivalTime());
 				} else {
-					return new Vibration((Location) l.getHandle(),
-							new Vibration.Destination.BlockDestination((Location) l.getHandle()), 5);
+					vibe = new BukkitMCVibration(l, l, 5);
 				}
+				return vibe.getHandle();
 			case SCULK_CHARGE:
 				if(data instanceof Float) {
 					return data;
