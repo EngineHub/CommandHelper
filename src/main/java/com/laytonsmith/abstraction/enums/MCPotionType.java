@@ -26,6 +26,8 @@ public abstract class MCPotionType<Concrete> extends DynamicEnum<MCPotionType.MC
 			MCVanillaPotionType oldType = MCVanillaPotionType.valueOf(test);
 			if(oldType.rename != null) {
 				return MAP.get(oldType.rename);
+			} else if(oldType == MCVanillaPotionType.UNCRAFTABLE) {
+				return null;
 			}
 			throw new IllegalArgumentException("Unknown potion type: " + test);
 		}

@@ -2021,6 +2021,9 @@ public class ObjectGenerator {
 		} catch (IllegalArgumentException ex) {
 			throw new CREFormatException("Invalid potion type: " + potionArray.get("type", t).val(), t);
 		}
+		if(type == null) {
+			return null;
+		}
 		boolean extended = false;
 		boolean upgraded = false;
 		if(potionArray.containsKey("extended")) {
