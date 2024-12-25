@@ -1623,6 +1623,7 @@ public class StringHandling {
 				me.setChildren(children);
 				me.setOptimized(true); //After this run, we will be, anyways.
 				if(children.size() == 3 && children.get(2).getData() instanceof CFunction
+						&& ((CFunction) children.get(2).getData()).hasFunction()
 						&& ((CFunction) children.get(2).getData()).getFunction().getName().equals(array.NAME)) {
 					//Normally we can't do anything with a hardcoded array, it's considered dynamic. But in this case, we can at least pull up the arguments,
 					//because the array's size is constant, even if the arguments in it aren't.
