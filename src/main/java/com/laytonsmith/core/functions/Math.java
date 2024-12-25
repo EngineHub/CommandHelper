@@ -524,7 +524,7 @@ public class Math {
 	protected static Mixed doIncrementDecrement(ParseTree[] nodes,
 			Script parent, Environment env, Target t,
 			Function func, boolean pre, boolean inc) {
-		if(nodes[0].getData() instanceof CFunction) {
+		if(nodes[0].getData() instanceof CFunction && ((CFunction) nodes[0].getData()).hasFunction()) {
 			Function f;
 			try {
 				f = ((CFunction) nodes[0].getData()).getFunction();
