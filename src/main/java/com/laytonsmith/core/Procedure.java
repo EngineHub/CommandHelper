@@ -239,8 +239,8 @@ public class Procedure implements Cloneable {
 					throw new CRECastException("Procedure \"" + name + "\" expects a value of type "
 							+ var.getDefinedType().val() + " in argument " + (varInd + 1) + ", but"
 							+ " a void value was found instead.", c.getTarget());
-				} else if(!(c instanceof CVoid) && c instanceof CNull || var.getDefinedType().equals(Auto.TYPE)
-						|| InstanceofUtil.isInstanceof(c, var.getDefinedType(), env)) {
+				} else if((!(c instanceof CVoid) && c instanceof CNull) || var.getDefinedType().equals(Auto.TYPE)
+						|| InstanceofUtil.isInstanceof(c.typeof(), var.getDefinedType(), env)) {
 					if(isVarArg) {
 						vararg.push(c, t);
 					} else {
@@ -291,7 +291,7 @@ public class Procedure implements Cloneable {
 			}
 			if(returnType.equals(CVoid.TYPE) != ret.equals(CVoid.VOID)
 					|| !ret.equals(CNull.NULL) && !ret.equals(CVoid.VOID)
-					&& !InstanceofUtil.isInstanceof(ret, returnType, env)) {
+					&& !InstanceofUtil.isInstanceof(ret.typeof(), returnType, env)) {
 				throw new CRECastException("Expected procedure \"" + name + "\" to return a value of type "
 						+ returnType.val() + " but a value of type " + ret.typeof() + " was returned instead",
 						ret.getTarget());
