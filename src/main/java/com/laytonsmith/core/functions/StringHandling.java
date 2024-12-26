@@ -2071,7 +2071,7 @@ public class StringHandling {
 
 		@Override
 		public String docs() {
-			return "void {resource, toAppend...} Appends any number of values to the underlying"
+			return "void {Resource, toAppend...} Appends any number of values to the underlying"
 					+ " string builder. This is much more efficient than doing normal concatenation"
 					+ " with a string when building a string in a loop. The underlying resource may"
 					+ " be converted to a string via a cast, string(@res).";

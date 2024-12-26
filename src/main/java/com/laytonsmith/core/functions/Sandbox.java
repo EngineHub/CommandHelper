@@ -419,7 +419,8 @@ public class Sandbox {
 
 		@Override
 		public String docs() {
-			return "double {randomResource} Returns a new rand value. If the seed used to create the resource is the same, each resulting"
+			return "double {Resource} Returns a new rand value using the provided a RANDOM Resource."
+					+ " If the seed used to create the resource is the same, each resulting"
 					+ " series of numbers will be the same.";
 		}
 
