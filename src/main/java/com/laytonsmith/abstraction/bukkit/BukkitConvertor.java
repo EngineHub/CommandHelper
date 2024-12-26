@@ -280,7 +280,7 @@ public class BukkitConvertor extends AbstractConvertor {
 		if(mat == null) {
 			mat = Material.matchMaterial(type);
 		}
-		if(mat == null) {
+		if(mat == null || !mat.isItem()) {
 			return null;
 		}
 		return new BukkitMCItemStack(new ItemStack(mat, qty));

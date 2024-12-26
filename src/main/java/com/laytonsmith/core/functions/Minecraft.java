@@ -1165,6 +1165,8 @@ public class Minecraft {
 						return CBoolean.get(mat.hasGravity());
 					case "isBlock":
 						return CBoolean.get(mat.isBlock());
+					case "isItem":
+						return CBoolean.get(mat.isItem());
 					case "isBurnable":
 						return CBoolean.get(mat.isBurnable());
 					case "isEdible":
@@ -1202,6 +1204,7 @@ public class Minecraft {
 			ret.set("maxDurability", new CInt(mat.getMaxDurability(), t), t);
 			ret.set("hasGravity", CBoolean.get(mat.hasGravity()), t);
 			ret.set("isBlock", CBoolean.get(mat.isBlock()), t);
+			ret.set("isItem", CBoolean.get(mat.isItem()), t);
 			ret.set("isBurnable", CBoolean.get(mat.isBurnable()), t);
 			ret.set("isEdible", CBoolean.get(mat.isEdible()), t);
 			ret.set("isFlammable", CBoolean.get(mat.isFlammable()), t);
@@ -1230,7 +1233,7 @@ public class Minecraft {
 		@Override
 		public String docs() {
 			return "mixed {material, [trait]} Returns an array of info about the material. If a trait is specified,"
-					+ " it returns only that trait. Available traits: hasGravity, isBlock, isBurnable, isEdible,"
+					+ " it returns only that trait. Available traits: hasGravity, isBlock, isItem, isBurnable, isEdible,"
 					+ " isFlammable, isOccluding, isRecord, isSolid, isTransparent, isInteractable, maxDurability,"
 					+ " hardness (for block materials only), blastResistance (for block materials only),"
 					+ " and maxStacksize. The accuracy of these values depend on the server implementation.";

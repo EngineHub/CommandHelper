@@ -785,6 +785,9 @@ public final class Static {
 		if(mat == null) {
 			throw new CREFormatException("Invalid item format: " + notation, t);
 		}
+		if(!mat.isItem()) {
+			mat = MCMaterial.get("AIR");
+		}
 		MCItemStack is = StaticLayer.GetItemStack(mat, qty);
 		MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "Item notation is deprecated."
 				+ " Converting '" + notation + "' to '" + is.getType().getName() + "'.", t);

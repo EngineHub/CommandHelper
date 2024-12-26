@@ -373,6 +373,9 @@ public class ObjectGenerator {
 				}
 			}
 
+			if(!material.isItem()) {
+				material = MCMaterial.get("AIR");
+			}
 			ret = StaticLayer.GetItemStack(material, qty);
 			MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "Converted \"" + mat + "\" with data \""
 					+ data + "\" to " + material.getName(), t);
@@ -472,7 +475,7 @@ public class ObjectGenerator {
 				ma.set("modifiers", CNull.NULL, t);
 			} else {
 				CArray modifiers = new CArray(t);
-				for(MCAttributeModifier m : meta.getAttributeModifiers()) {
+				for(MCAttributeModifier m : modifierList) {
 					modifiers.push(attributeModifier(m, t), t);
 				}
 				ma.set("modifiers", modifiers, t);
@@ -2421,7 +2424,7 @@ public class ObjectGenerator {
 	 */
 	private MCMaterial recipeMaterial(Mixed arg, Target t) {
 		MCMaterial mat = StaticLayer.GetMaterial(arg.val());
-		if(mat == null || mat.isAir()) {
+		if(mat == null || mat.isAir() || !mat.isItem()) {
 			throw new CREIllegalArgumentException("Recipe input ingredient is invalid: " + arg.val(), t);
 		}
 		return mat;
