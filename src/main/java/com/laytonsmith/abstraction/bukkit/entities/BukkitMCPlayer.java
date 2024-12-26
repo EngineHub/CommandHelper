@@ -9,6 +9,7 @@ import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCNote;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.MCPlayerInput;
 import com.laytonsmith.abstraction.MCPlayerInventory;
 import com.laytonsmith.abstraction.MCScoreboard;
 import com.laytonsmith.abstraction.MCWorldBorder;
@@ -19,6 +20,7 @@ import com.laytonsmith.abstraction.blocks.MCSign;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
+import com.laytonsmith.abstraction.bukkit.BukkitMCPlayerInput;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayerInventory;
 import com.laytonsmith.abstraction.bukkit.BukkitMCScoreboard;
 import com.laytonsmith.abstraction.bukkit.BukkitMCServer;
@@ -871,5 +873,10 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	@Override
 	public int getPing() {
 		return p.getPing();
+	}
+
+	@Override
+	public MCPlayerInput getCurrentInput() {
+		return new BukkitMCPlayerInput(p.getCurrentInput());
 	}
 }

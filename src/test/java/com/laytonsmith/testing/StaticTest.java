@@ -24,6 +24,7 @@ import com.laytonsmith.abstraction.MCNamespacedKey;
 import com.laytonsmith.abstraction.MCNote;
 import com.laytonsmith.abstraction.MCPattern;
 import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.MCPlayerInput;
 import com.laytonsmith.abstraction.MCPlugin;
 import com.laytonsmith.abstraction.MCPluginMeta;
 import com.laytonsmith.abstraction.MCPotionData;
@@ -466,6 +467,7 @@ public class StaticTest {
 		when(p.isOnline()).thenReturn(true);
 		when(p.getName()).thenReturn(name);
 		when(p.getServer()).thenReturn(s);
+		when(p.getCurrentInput()).thenReturn(mock(MCPlayerInput.class));
 		when(p.isOp()).thenReturn(true);
 		if(s != null && s.getOnlinePlayers() != null) {
 			Collection<MCPlayer> online = s.getOnlinePlayers();

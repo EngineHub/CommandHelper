@@ -14,6 +14,7 @@ import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCNamespacedKey;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.MCPlayerInput;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.MCWorldBorder;
@@ -7246,6 +7247,60 @@ public class PlayerManagement {
 
 		public boolean isRestricted() {
 			return false;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+	}
+
+	@api
+	public static class get_player_input extends AbstractFunction {
+
+		public String getName() {
+			return "get_player_input";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1};
+		}
+
+		public String docs() {
+			return "array {[player]} Returns a player's current input. (MC 1.21.3+)"
+					+ " This can be used to detect which movement keys the player is pressing."
+					+ " Array contains the following keys: forward, backward, left, right, jump, sneak, and sprint.";
+		}
+
+		public Construct exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p;
+			if(args.length == 1) {
+				p = Static.GetPlayer(args[0].val(), t);
+			} else {
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(p, t);
+			}
+			CArray ret = CArray.GetAssociativeArray(t);
+			MCPlayerInput input = p.getCurrentInput();
+			ret.set("forward", CBoolean.get(input.forward()), t);
+			ret.set("backward", CBoolean.get(input.backward()), t);
+			ret.set("left", CBoolean.get(input.left()), t);
+			ret.set("right", CBoolean.get(input.right()), t);
+			ret.set("jump", CBoolean.get(input.jump()), t);
+			ret.set("sneak", CBoolean.get(input.sneak()), t);
+			ret.set("sprint", CBoolean.get(input.sprint()), t);
+			return ret;
+		}
+
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CRELengthException.class};
+		}
+
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		public boolean isRestricted() {
+			return true;
 		}
 
 		public Boolean runAsync() {
