@@ -251,7 +251,7 @@ public class CClosure extends Construct implements Callable, Booleanish {
 							isVarArg = true;
 						}
 						if(isVarArg) {
-							if(!InstanceofUtil.isInstanceof(value, varargType, env)) {
+							if(!InstanceofUtil.isInstanceof(value.typeof(), varargType.getVarargsBaseType(), env)) {
 								throw new CRECastException("Expected type " + varargType + " but found " + value.typeof(),
 										getTarget());
 							}
