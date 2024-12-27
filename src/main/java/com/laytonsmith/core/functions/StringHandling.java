@@ -1434,15 +1434,16 @@ public class StringHandling {
 				}
 			}
 
-			if(requiredArgs(parsed) != flattenedArgs.size()) {
+			int requiredArgs = requiredArgs(parsed);
+			if(requiredArgs != flattenedArgs.size()) {
 				throw new CREInsufficientArgumentsException("The specified format string: \"" + formatString + "\""
-						+ " expects " + requiredArgs(parsed) + " argument(s),"
+						+ " expects " + requiredArgs + " argument(s),"
 						+ " but " + flattenedArgs.size() + " were provided.", t);
 			}
 
 			//Now figure out how to cast things, now that we know our argument numbers will match up
 			Object[] params = new Object[flattenedArgs.size()];
-			for(int i = 0; i < requiredArgs(parsed); i++) {
+			for(int i = 0; i < requiredArgs; i++) {
 				Mixed arg = flattenedArgs.get(i);
 				FormatString fs = parsed.get(i);
 				Character c = fs.getExpectedType();
