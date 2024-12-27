@@ -294,7 +294,7 @@ public class CClosure extends Construct implements Callable, Booleanish {
 				// Check the return type of the closure to see if it matches the defined type
 				// Normal execution.
 				Mixed ret = ex.getReturn();
-				if(!InstanceofUtil.isInstanceof(ret, returnType, environment)) {
+				if(!InstanceofUtil.isInstanceof(ret.typeof(), returnType, environment)) {
 					throw new CRECastException("Expected closure to return a value of type " + returnType.val()
 							+ " but a value of type " + ret.typeof() + " was returned instead", ret.getTarget());
 				}
