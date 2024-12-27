@@ -680,4 +680,19 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		return this.isVararg;
 	}
 
+	/**
+	 * Returns the base type of this varargs type.
+	 * @return The base {@link CClassType} of this type (e.g. `string` for `string...`).
+	 * @throws IllegalStateException - If this is not a vararg type.
+	 */
+	public CClassType getVarargsBaseType() throws IllegalStateException {
+		if(!this.isVararg) {
+			throw new IllegalStateException("CClassType is not a vararg type.");
+		}
+		try {
+			return CClassType.get(this.fqcn);
+		} catch (ClassNotFoundException e) {
+			throw new Error(e); // Existence of this vararg type implies that its base type exists.
+		}
+	}
 }

@@ -220,7 +220,6 @@ public class Procedure implements Cloneable {
 					|| (!this.varIndex.isEmpty()
 						&& this.varIndex.get(this.varIndex.size() - 1).getDefinedType().isVarargs())) {
 				IVariable var;
-				boolean isVarArg = false;
 				if(varInd < this.varIndex.size() - 1
 						|| !this.varIndex.get(this.varIndex.size() - 1).getDefinedType().isVarargs()) {
 					var = this.varIndex.get(varInd);
@@ -232,21 +231,33 @@ public class Procedure implements Cloneable {
 						env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE,
 								var.getVariableName(), vararg, c.getTarget()));
 					}
-					isVarArg = true;
 				}
+
+				// Type check "void" value.
 				if(c instanceof CVoid
 						&& !(var.getDefinedType().equals(Auto.TYPE) || var.getDefinedType().equals(CVoid.TYPE))) {
 					throw new CRECastException("Procedure \"" + name + "\" expects a value of type "
 							+ var.getDefinedType().val() + " in argument " + (varInd + 1) + ", but"
 							+ " a void value was found instead.", c.getTarget());
-				} else if((!(c instanceof CVoid) && c instanceof CNull) || var.getDefinedType().equals(Auto.TYPE)
-						|| InstanceofUtil.isInstanceof(c.typeof(), var.getDefinedType(), env)) {
-					if(isVarArg) {
+				}
+
+				// Type check vararg parameter.
+				if(var.getDefinedType().isVarargs()) {
+					if(InstanceofUtil.isInstanceof(c.typeof(), var.getDefinedType().getVarargsBaseType(), env)) {
 						vararg.push(c, t);
+						continue;
 					} else {
-						env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(var.getDefinedType(),
-								var.getVariableName(), c, c.getTarget()));
+						throw new CRECastException("Procedure \"" + name + "\" expects a value of type "
+								+ var.getDefinedType().val() + " in argument " + (varInd + 1) + ", but"
+								+ " a value of type " + c.typeof() + " was found instead.", c.getTarget());
 					}
+				}
+
+				// Type check non-vararg parameter.
+				if(InstanceofUtil.isInstanceof(c.typeof(), var.getDefinedType(), env)) {
+					env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(var.getDefinedType(),
+							var.getVariableName(), c, c.getTarget()));
+					continue;
 				} else {
 					throw new CRECastException("Procedure \"" + name + "\" expects a value of type "
 							+ var.getDefinedType().val() + " in argument " + (varInd + 1) + ", but"
