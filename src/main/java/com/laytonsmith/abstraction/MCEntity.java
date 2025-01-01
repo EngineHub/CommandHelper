@@ -57,6 +57,10 @@ public interface MCEntity extends MCMetadatable {
 
 	void remove();
 
+	boolean savesOnUnload();
+
+	void setSavesOnUnload(boolean remove);
+
 	void setFallDistance(float distance);
 
 	void setFireTicks(int ticks);

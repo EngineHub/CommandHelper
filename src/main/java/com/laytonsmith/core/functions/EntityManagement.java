@@ -643,6 +643,61 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	public static class get_entity_saves_on_unload extends EntityGetterFunction {
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			MCEntity ent = Static.getEntity(args[0], t);
+			return CBoolean.get(ent.savesOnUnload());
+		}
+
+		@Override
+		public String getName() {
+			return "get_entity_saves_on_unload";
+		}
+
+		@Override
+		public String docs() {
+			return "void {entityUUID} Gets whether the entity will be saved to disk when it is unloaded.";
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_5;
+		}
+
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class set_entity_saves_on_unload extends EntitySetterFunction {
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			MCEntity ent = Static.getEntity(args[0], t);
+			ent.setSavesOnUnload(ArgumentValidation.getBooleanObject(args[1], t));
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "set_entity_saves_on_unload";
+		}
+
+		@Override
+		public String docs() {
+			return "void {entityUUID, boolean} Sets whether the entity is saved to disk when it is unloaded."
+					+ " By default an entity is saved. Setting this to false disables that."
+					+ " Can be used on players to disable player data saving on quit.";
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_5;
+		}
+
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class entity_type extends EntityGetterFunction {
 
 		@Override

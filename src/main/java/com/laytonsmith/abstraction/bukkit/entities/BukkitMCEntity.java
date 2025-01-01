@@ -195,6 +195,16 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 	}
 
 	@Override
+	public boolean savesOnUnload() {
+		return e.isPersistent();
+	}
+
+	@Override
+	public void setSavesOnUnload(boolean saves) {
+		e.setPersistent(saves);
+	}
+
+	@Override
 	public void setFallDistance(float distance) {
 		e.setFallDistance(distance);
 	}
