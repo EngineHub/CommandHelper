@@ -24,6 +24,7 @@ import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.events.MCExpChangeEvent;
 import com.laytonsmith.abstraction.events.MCFoodLevelChangeEvent;
 import com.laytonsmith.abstraction.events.MCGamemodeChangeEvent;
+import com.laytonsmith.abstraction.events.MCPlayerAdvancementDoneEvent;
 import com.laytonsmith.abstraction.events.MCPlayerBucketEvent;
 import com.laytonsmith.abstraction.events.MCPlayerEnterBedEvent;
 import com.laytonsmith.abstraction.events.MCPlayerLeaveBedEvent;
@@ -2892,6 +2893,68 @@ public class PlayerEvents {
 		@Override
 		public Driver driver() {
 			return Driver.PLAYER_BUCKET_EMPTY;
+		}
+	}
+
+	@api
+	public static class player_advancement_done extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "player_advancement_done";
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.PLAYER_ADVANCEMENT_DONE;
+		}
+
+		@Override
+		public String docs() {
+			return "{}"
+					+ " Fires when a player completes all criteria to unlock an advancement or recipe."
+					+ " {player | advancement | title: The advancement display title, if one exists (MC 1.18.2+)}"
+					+ " {}"
+					+ " {}";
+		}
+
+		@Override
+		protected PrefilterBuilder getPrefilterBuilder() {
+			return new PrefilterBuilder<MCPlayerAdvancementDoneEvent>()
+					.set("advancement", "The namespaced key of the advancement completed", new MacroPrefilterMatcher<>() {
+						@Override
+						protected String getProperty(MCPlayerAdvancementDoneEvent event) {
+							return event.getAdvancementKey().toString();
+						}
+					});
+		}
+
+		@Override
+		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+			if(event instanceof MCPlayerAdvancementDoneEvent e) {
+				Map<String, Mixed> map = new HashMap<>();
+				map.put("player", new CString(e.getPlayer().getName(), Target.UNKNOWN));
+				map.put("advancement", new CString(e.getAdvancementKey().toString(), Target.UNKNOWN));
+				map.put("title", new CString(e.getTitle(), Target.UNKNOWN));
+				return map;
+			} else {
+				throw new EventException("Event received was not an MCPlayerAdvancementDoneEvent.");
+			}
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+			return false;
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
 		}
 	}
 }

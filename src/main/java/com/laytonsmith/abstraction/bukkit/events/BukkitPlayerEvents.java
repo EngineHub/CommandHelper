@@ -7,6 +7,7 @@ import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCHumanEntity;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.abstraction.MCNamespacedKey;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.blocks.MCBlock;
@@ -16,6 +17,7 @@ import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCBookMeta;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
+import com.laytonsmith.abstraction.bukkit.BukkitMCNamespacedKey;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
@@ -31,6 +33,7 @@ import com.laytonsmith.abstraction.enums.MCFishingState;
 import com.laytonsmith.abstraction.enums.MCGameMode;
 import com.laytonsmith.abstraction.enums.MCResourcePackStatus;
 import com.laytonsmith.abstraction.enums.MCTeleportCause;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCAction;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEnterBedResult;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCFishingState;
@@ -40,6 +43,7 @@ import com.laytonsmith.abstraction.enums.bukkit.BukkitMCTeleportCause;
 import com.laytonsmith.abstraction.events.MCExpChangeEvent;
 import com.laytonsmith.abstraction.events.MCFoodLevelChangeEvent;
 import com.laytonsmith.abstraction.events.MCGamemodeChangeEvent;
+import com.laytonsmith.abstraction.events.MCPlayerAdvancementDoneEvent;
 import com.laytonsmith.abstraction.events.MCPlayerBucketEmptyEvent;
 import com.laytonsmith.abstraction.events.MCPlayerBucketEvent;
 import com.laytonsmith.abstraction.events.MCPlayerBucketFillEvent;
@@ -67,9 +71,11 @@ import com.laytonsmith.abstraction.events.MCPlayerToggleSneakEvent;
 import com.laytonsmith.abstraction.events.MCPlayerToggleSprintEvent;
 import com.laytonsmith.abstraction.events.MCWorldChangedEvent;
 import com.laytonsmith.annotations.abstraction;
+import com.laytonsmith.core.Static;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.advancement.AdvancementDisplay;
 import org.bukkit.block.BlockFace;
 import org.bukkit.damage.DamageSource;
 import org.bukkit.damage.DamageType;
@@ -78,6 +84,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerAdvancementDoneEvent;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerBedLeaveEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
@@ -1145,6 +1152,33 @@ public class BukkitPlayerEvents {
 		public BukkitMCPlayerBucketEmptyEvent(PlayerBucketEmptyEvent event) {
 			super(event);
 			this.pbee = event;
+		}
+	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCPlayerAdvancementDoneEvent extends BukkitMCPlayerEvent implements MCPlayerAdvancementDoneEvent {
+
+		PlayerAdvancementDoneEvent e;
+
+		public BukkitMCPlayerAdvancementDoneEvent(PlayerAdvancementDoneEvent event) {
+			super(event);
+			this.e = event;
+		}
+
+		@Override
+		public MCNamespacedKey getAdvancementKey() {
+			return new BukkitMCNamespacedKey(e.getAdvancement().getKey());
+		}
+
+		@Override
+		public String getTitle() {
+			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_18_X)) {
+				AdvancementDisplay display = e.getAdvancement().getDisplay();
+				if(display != null) {
+					return display.getTitle();
+				}
+			}
+			return null;
 		}
 	}
 }

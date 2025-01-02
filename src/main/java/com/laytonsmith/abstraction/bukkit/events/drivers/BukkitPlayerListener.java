@@ -6,6 +6,7 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCServer;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCExpChangeEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCFoodLevelChangeEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCGamemodeChangeEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerAdvancementDoneEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerBucketEmptyEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerBucketFillEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerEnterBedEvent;
@@ -40,6 +41,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerAdvancementDoneEvent;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerBedLeaveEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
@@ -384,5 +386,11 @@ public class BukkitPlayerListener implements Listener {
 	public void onBucketEmpty(PlayerBucketEmptyEvent event) {
 		BukkitMCPlayerBucketEmptyEvent pbee = new BukkitMCPlayerBucketEmptyEvent(event);
 		EventUtils.TriggerListener(Driver.PLAYER_BUCKET_EMPTY, "player_bucket_empty", pbee);
+	}
+
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onPlayerAdvancementDoneEvent(PlayerAdvancementDoneEvent event) {
+		BukkitMCPlayerAdvancementDoneEvent pade = new BukkitMCPlayerAdvancementDoneEvent(event);
+		EventUtils.TriggerListener(Driver.PLAYER_ADVANCEMENT_DONE, "player_advancement_done", pade);
 	}
 }
