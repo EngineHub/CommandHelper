@@ -103,6 +103,7 @@ public enum Driver {
 	WORLD_CHANGED,
 	FOOD_LEVEL_CHANGED,
 	RESOURCE_PACK_STATUS,
+	PLAYER_ADVANCEMENT_DONE,
 	/**
 	 * Plugin events
 	 */
