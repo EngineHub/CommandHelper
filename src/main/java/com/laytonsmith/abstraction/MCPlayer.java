@@ -86,6 +86,8 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity, MCOfflinePlaye
 
 	void sendTitle(String title, String subtitle, int fadein, int stay, int fadeout);
 
+	void sendActionMessage(String message);
+
 	void setAllowFlight(boolean flight);
 
 	void setCompassTarget(MCLocation l);

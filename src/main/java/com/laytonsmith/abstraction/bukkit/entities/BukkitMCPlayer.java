@@ -43,6 +43,7 @@ import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSoundCategory;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCWeather;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.Static;
+import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Note;
@@ -349,6 +350,12 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 			title = " ";
 		}
 		p.sendTitle(title, subtitle, fadein, stay, fadeout);
+	}
+
+	@Override
+	public void sendActionMessage(String message) {
+		BaseComponent txt = net.md_5.bungee.api.chat.TextComponent.fromLegacy(message);
+		p.spigot().sendMessage(net.md_5.bungee.api.ChatMessageType.ACTION_BAR, txt);
 	}
 
 	@Override
