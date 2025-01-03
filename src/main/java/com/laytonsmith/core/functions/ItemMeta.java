@@ -77,24 +77,18 @@ public class ItemMeta {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCPlayer p;
 			MCItemStack is;
 			Mixed slot;
 			if(args.length == 2) {
 				p = Static.GetPlayer(args[0], t);
 				slot = args[1];
 			} else {
+				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(p, t);
 				slot = args[0];
 			}
-			Static.AssertPlayerNonNull(p, t);
-			if(slot instanceof CNull) {
-				is = p.getItemAt(null);
-			} else {
-				is = p.getItemAt(ArgumentValidation.getInt32(slot, t));
-			}
-			if(is == null) {
-				throw new CRECastException("There is no item at slot " + slot, t);
-			}
+			is = p.getItemAt(slot instanceof CNull ? null : ArgumentValidation.getInt32(slot, t));
 			return ObjectGenerator.GetGenerator().itemMeta(is, t);
 		}
 
@@ -186,7 +180,7 @@ public class ItemMeta {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCPlayer p;
 			Mixed slot;
 			Mixed meta;
 			MCItemStack is;
@@ -195,15 +189,12 @@ public class ItemMeta {
 				slot = args[1];
 				meta = args[2];
 			} else {
+				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(p, t);
 				slot = args[0];
 				meta = args[1];
 			}
-			Static.AssertPlayerNonNull(p, t);
-			if(slot instanceof CNull) {
-				is = p.getItemAt(null);
-			} else {
-				is = p.getItemAt(ArgumentValidation.getInt32(slot, t));
-			}
+			is = p.getItemAt(slot instanceof CNull ? null : ArgumentValidation.getInt32(slot, t));
 			if(is == null) {
 				throw new CRECastException("There is no item at slot " + slot, t);
 			}
@@ -441,16 +432,21 @@ public class ItemMeta {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			int slot;
+			MCPlayer p;
+			Mixed slot;
 			if(args.length == 2) {
 				p = Static.GetPlayer(args[0], t);
-				slot = ArgumentValidation.getInt32(args[1], t);
+				slot = args[1];
 			} else {
-				slot = ArgumentValidation.getInt32(args[0], t);
+				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(p, t);
+				slot = args[0];
 			}
-			Static.AssertPlayerNonNull(p, t);
-			return CBoolean.get(p.getItemAt(slot).getItemMeta() instanceof MCLeatherArmorMeta);
+			MCItemStack is = p.getItemAt(slot instanceof CNull ? null : ArgumentValidation.getInt32(slot, t));
+			if(is == null) {
+				return CBoolean.FALSE;
+			}
+			return CBoolean.get(is.getItemMeta() instanceof MCLeatherArmorMeta);
 		}
 
 		@Override

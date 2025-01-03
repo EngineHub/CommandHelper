@@ -343,7 +343,7 @@ public class Enchantments {
 			}
 			MCItemStack is = p.getItemAt(slot instanceof CNull ? null : ArgumentValidation.getInt32(slot, t));
 			if(is == null) {
-				throw new CRECastException("There is no item at slot " + slot, t);
+				return new CArray(t);
 			}
 			return ObjectGenerator.GetGenerator().enchants(is.getEnchantments(), t);
 		}
