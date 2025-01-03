@@ -13,7 +13,7 @@ There are several supported formats, and there is the potential to add more in t
 In your configuration file, a connection can be aliased, to make re-specifying a connection 
 easier, but the actual connection specification is a URI that maps to a specific data source. 
 For instance, the default SQLite format is simply a pointer to a file:
-%%PRE|sqlite:///home/data/persistence.db%%
+%%PRE|sqlite://home/data/persistence.db%%
 
 There are several different connection types supported, and each has a slightly different requirement:
 
@@ -44,7 +44,7 @@ applicable to all connection types.
 Invalid modifiers will cause a warning to be raised during startup, but will otherwise be ignored.
 
 A note on file based URIs: The file path is specified after two forward slashes, so an absolute 
-path on unix looks like this: yml:///path/to/file, and an absolute path on windows looks like 
+path on unix looks like this: yml://path/to/file, and an absolute path on windows looks like
 this: yml://C:/path/to/file (alternatively yml://C:\path\to\file will also work). On all 
 platforms, a relative path would look like this: yml://path/to/file. Additionally, file based
 connections are '''usually''' going to be much faster, but less reliable than SQL based

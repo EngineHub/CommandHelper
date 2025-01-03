@@ -1,5 +1,5 @@
 # This file sets up the Persistence Network.
 # For more details, see the documentation at
-# https://methodscript.com/docs/3.3.4/Persistence_Network.html
+# https://methodscript.com/docs/3.3.5/Persistence_Network.html
 
 **=sqlite://persistence.db
