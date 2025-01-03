@@ -430,7 +430,7 @@ public class ObjectGenerator {
 	}
 
 	public Construct itemMeta(MCItemStack is, Target t) {
-		if(!is.hasItemMeta()) {
+		if(is == null || !is.hasItemMeta()) {
 			return CNull.NULL;
 		} else {
 			Construct display;
