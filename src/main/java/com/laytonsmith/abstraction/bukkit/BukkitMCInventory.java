@@ -111,7 +111,7 @@ public class BukkitMCInventory implements MCInventory {
 
 	@Override
 	public Map<Integer, MCItemStack> addItem(MCItemStack stack) {
-		Map<Integer, ItemStack> h = i.addItem(stack == null ? null : ((BukkitMCItemStack) stack).is);
+		Map<Integer, ItemStack> h = i.addItem(((BukkitMCItemStack) stack).is);
 		Map<Integer, MCItemStack> m = new HashMap<>();
 		for(Map.Entry<Integer, ItemStack> entry : h.entrySet()) {
 			Integer key = entry.getKey();

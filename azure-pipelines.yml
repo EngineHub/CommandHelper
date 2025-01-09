@@ -9,20 +9,20 @@ pool:
 steps:
 - task: JavaToolInstaller@0
   inputs:
-    versionSpec: '16' 
+    versionSpec: '21' 
     jdkArchitectureOption: x64
     jdkSourceOption: 'AzureStorage'
     azureResourceManagerEndpoint: Azure Resource Manager
     azureStorageAccountName: methodscriptjdkbuilds
     azureContainerName: jdks
-    azureCommonVirtualFile: 'OpenJDK16U-jdk_x86-32_windows_hotspot_16.0.1_9.zip'
-    jdkDestinationDirectory: '$(agent.toolsDirectory)/jdk16'
+    azureCommonVirtualFile: 'OpenJDK21U-jdk_x64_windows_hotspot_21.0.3_9.zip'
+    jdkDestinationDirectory: '$(agent.toolsDirectory)/jdk21'
     cleanDestinationDirectory: true
 - task: Maven@3
   inputs:
     mavenPomFile: 'pom.xml'
-    javaHomeOption: 'JDKVersion'
-    jdkVersionOption: '1.16'
+    javaHomeOption: 'Path'
+    jdkDirectory: '$(agent.toolsDirectory)\jdk21\JAVA_HOME_21_X64_OpenJDK21U-jdk_x64_windows_hotspot_21.0.3_9_zip\jdk-21.0.3+9'
     jdkArchitectureOption: 'x64'
     publishJUnitResults: true
     testResultsFiles: '**/TEST-*.xml'

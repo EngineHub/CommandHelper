@@ -45,7 +45,7 @@ public class XGUI {
 	private static final AtomicInteger WINDOW_IDS = new AtomicInteger(0);
 
 	static {
-		StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
+		StaticLayer.GetConvertor().addPersistentShutdownHook(new Runnable() {
 
 			@Override
 			public void run() {

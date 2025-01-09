@@ -134,7 +134,7 @@ public class DataTransformations {
 			try {
 				return Construct.json_decode(s, t);
 			} catch (MarshalException ex) {
-				throw new CREFormatException("The input JSON string is improperly formatted. Check your formatting and try again.", t, ex);
+				throw new CREFormatException("JSON is improperly formatted. " + ex.getMessage(), t);
 			}
 		}
 

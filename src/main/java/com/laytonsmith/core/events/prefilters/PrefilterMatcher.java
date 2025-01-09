@@ -94,4 +94,10 @@ public interface PrefilterMatcher<T extends BindableEvent> extends SimpleDocumen
 	void validate(ParseTree node, CClassType nodeType, Environment env)
 			throws ConfigCompileException, ConfigCompileGroupException, ConfigRuntimeException;
 
+	/**
+	 * Returns the default priority for this matcher. This can be overridden on a per event basis regardless.
+	 * @return
+	 */
+	int getPriority();
+
 }

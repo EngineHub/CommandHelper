@@ -2,15 +2,18 @@ package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCAttributeModifier;
+import com.laytonsmith.abstraction.MCNamespacedKey;
 import com.laytonsmith.abstraction.enums.EnumConvertor;
 import com.laytonsmith.abstraction.enums.MCAttribute;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
+import com.laytonsmith.abstraction.enums.MCEquipmentSlotGroup;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCAttribute;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEquipmentSlot;
 import com.laytonsmith.annotations.abstractionenum;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.EquipmentSlotGroup;
 
 import java.util.UUID;
 
@@ -30,13 +33,18 @@ public class BukkitMCAttributeModifier implements MCAttributeModifier {
 	}
 
 	@Override
+	public MCNamespacedKey getKey() {
+		return new BukkitMCNamespacedKey(am.getKey());
+	}
+
+	@Override
 	public String getAttributeName() {
 		return am.getName();
 	}
 
 	@Override
 	public MCAttribute getAttribute() {
-		return BukkitMCAttribute.getConvertor().getAbstractedEnum(a);
+		return BukkitMCAttribute.valueOfConcrete(a);
 	}
 
 	@Override
@@ -46,6 +54,21 @@ public class BukkitMCAttributeModifier implements MCAttributeModifier {
 			return null;
 		}
 		return BukkitMCEquipmentSlot.getConvertor().getAbstractedEnum(slot);
+	}
+
+	@Override
+	public MCEquipmentSlotGroup getEquipmentSlotGroup() {
+		EquipmentSlotGroup slotGroup = am.getSlotGroup();
+		if(slotGroup == EquipmentSlotGroup.ANY) {
+			return MCEquipmentSlotGroup.ANY;
+		} else if(slotGroup == EquipmentSlotGroup.ARMOR) {
+			return MCEquipmentSlotGroup.ARMOR;
+		} else if(slotGroup == EquipmentSlotGroup.HAND) {
+			return MCEquipmentSlotGroup.HAND;
+		} else if(slotGroup.toString().equals("body")) { // BODY slot group is missing from Spigot
+			return MCEquipmentSlotGroup.BODY;
+		}
+		return null;
 	}
 
 	@Override

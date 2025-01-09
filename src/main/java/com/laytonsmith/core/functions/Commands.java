@@ -239,7 +239,7 @@ public class Commands {
 			MCCommand cmd = map.getCommand(cmdStr);
 			String prefix = Implementation.GetServerType().getBranding().toLowerCase(Locale.ENGLISH);
 			boolean register = false;
-			if(cmd == null) {
+			if(cmd == null || cmd.getPlugin() == null) {
 				register = true;
 				cmd = StaticLayer.GetConvertor().getNewCommand(cmdStr);
 			}
@@ -313,7 +313,8 @@ public class Commands {
 					+ " or updates an existing one. Options is an associative array that can have the following keys:"
 					+ " description, usage, permission, noPermMsg, aliases, tabcompleter, and/or executor. ---- "
 					+ " The 'noPermMsg' argument is the message displayed when the user doesn't have the permission"
-					+ " specified in 'permission'. The 'usage' is the message shown when the 'executor' returns false."
+					+ " specified in 'permission' (unused as of Spigot 1.19)."
+					+ " The 'usage' is the message shown when the 'executor' returns false."
 					+ " The 'executor' is the closure run when the command is executed,"
 					+ " and can return true or false (by default is treated as true). The 'tabcompleter' is the closure"
 					+ " run when a user hits tab while the command is entered and ready for args."
@@ -341,7 +342,6 @@ public class Commands {
 				+ "\t'description': 'Spread the love!',\n"
 				+ "\t'usage': '/hug <player>',\n"
 				+ "\t'permission': 'perms.hugs',\n"
-				+ "\t'noPermMsg': 'You do not have permission to give hugs to players (Sorry :o).',\n"
 				+ "\t'tabcompleter':\n"
 				+ "\t\tclosure(@alias, @sender, @args) {\n"
 				+ "\t\t\t// This replicates the default tabcompleter for registered commands.\n"

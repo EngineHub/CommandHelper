@@ -1,6 +1,5 @@
 package com.laytonsmith.abstraction.bukkit.events.drivers;
 
-import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCCreatureSpawnEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityChangeBlockEvent;
@@ -114,12 +113,10 @@ public class BukkitEntityListener implements Listener {
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onTargetLiving(EntityTargetEvent event) {
-		BukkitMCTargetEvent ete = new BukkitMCTargetEvent(event);
-		MCEntity target = ete.getTarget();
-		if(target == null || !(target instanceof MCPlayer)) {
-			return;
+		if(event.getTarget() instanceof Player) {
+			BukkitMCTargetEvent ete = new BukkitMCTargetEvent(event);
+			EventUtils.TriggerListener(Driver.TARGET_ENTITY, "target_player", ete);
 		}
-		EventUtils.TriggerListener(Driver.TARGET_ENTITY, "target_player", ete);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)

@@ -1434,15 +1434,16 @@ public class StringHandling {
 				}
 			}
 
-			if(requiredArgs(parsed) != flattenedArgs.size()) {
+			int requiredArgs = requiredArgs(parsed);
+			if(requiredArgs != flattenedArgs.size()) {
 				throw new CREInsufficientArgumentsException("The specified format string: \"" + formatString + "\""
-						+ " expects " + requiredArgs(parsed) + " argument(s),"
+						+ " expects " + requiredArgs + " argument(s),"
 						+ " but " + flattenedArgs.size() + " were provided.", t);
 			}
 
 			//Now figure out how to cast things, now that we know our argument numbers will match up
 			Object[] params = new Object[flattenedArgs.size()];
-			for(int i = 0; i < requiredArgs(parsed); i++) {
+			for(int i = 0; i < requiredArgs; i++) {
 				Mixed arg = flattenedArgs.get(i);
 				FormatString fs = parsed.get(i);
 				Character c = fs.getExpectedType();
@@ -1623,6 +1624,7 @@ public class StringHandling {
 				me.setChildren(children);
 				me.setOptimized(true); //After this run, we will be, anyways.
 				if(children.size() == 3 && children.get(2).getData() instanceof CFunction
+						&& ((CFunction) children.get(2).getData()).hasFunction()
 						&& ((CFunction) children.get(2).getData()).getFunction().getName().equals(array.NAME)) {
 					//Normally we can't do anything with a hardcoded array, it's considered dynamic. But in this case, we can at least pull up the arguments,
 					//because the array's size is constant, even if the arguments in it aren't.
@@ -2070,7 +2072,7 @@ public class StringHandling {
 
 		@Override
 		public String docs() {
-			return "void {resource, toAppend...} Appends any number of values to the underlying"
+			return "void {Resource, toAppend...} Appends any number of values to the underlying"
 					+ " string builder. This is much more efficient than doing normal concatenation"
 					+ " with a string when building a string in a loop. The underlying resource may"
 					+ " be converted to a string via a cast, string(@res).";
@@ -2296,6 +2298,104 @@ public class StringHandling {
 			};
 		}
 
+	}
+
+	@api
+	public static class string_compare extends AbstractFunction {
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			return new CInt(args[0].val().compareTo(args[1].val()), t);
+		}
+
+		@Override
+		public String getName() {
+			return "string_compare";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "int {string s1, string s2} Compares two strings lexicographically."
+					+ " The comparison is based on the Unicode value of each character in the strings."
+					+ " Returns 0 if s1 is equal to s2, a negative value if s1 is lexographically less than s2,"
+					+ " and a positive value if s1 is lexigraphically greater than s2."
+					+ " The magnitude of non-zero return values is the difference between the char values at the first"
+					+ " index at which a different char was found in both strings."
+					+ " If all chars match but the strings differ in length, then the magnitude is this difference.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("", "string_compare('axx', 'bxx')"),
+				new ExampleScript("", "string_compare('xbx', 'xax')"),
+				new ExampleScript("", "string_compare('abc', 'abc')"),
+				new ExampleScript("", "string_compare('abc', 'abcde')")
+			};
+		}
+	}
+
+	@api
+	public static class string_compare_ic extends string_compare {
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			return new CInt(args[0].val().compareToIgnoreCase(args[1].val()), t);
+		}
+
+		@Override
+		public String getName() {
+			return "string_compare_ic";
+		}
+
+		@Override
+		public String docs() {
+			return "int {string s1, string s2} Compares two strings lexicographically ignoring casing."
+					+ " The comparison is based on the Unicode value of each character in the strings."
+					+ " Returns 0 if s1 is equal to s2, a negative value if s1 is lexographically less than s2,"
+					+ " and a positive value if s1 is lexigraphically greater than s2."
+					+ " The magnitude of non-zero return values is the difference between the char values at the first"
+					+ " index at which a different char was found in both strings."
+					+ " If all chars match but the strings differ in length, then the magnitude is this difference.";
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("", "string_compare_ic('axx', 'bxx')"),
+				new ExampleScript("", "string_compare_ic('Axx', 'bxx')"),
+				new ExampleScript("", "string_compare_ic('axx', 'Bxx')"),
+				new ExampleScript("", "string_compare_ic('xbx', 'xax')"),
+				new ExampleScript("", "string_compare_ic('abc', 'abc')"),
+				new ExampleScript("", "string_compare_ic('abc', 'abcde')")
+			};
+		}
 	}
 
 	@api

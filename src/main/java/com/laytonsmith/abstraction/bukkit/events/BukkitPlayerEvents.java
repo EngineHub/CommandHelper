@@ -1,21 +1,26 @@
 package com.laytonsmith.abstraction.bukkit.events;
 
+import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCBookMeta;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCHumanEntity;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.abstraction.MCNamespacedKey;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCBookMeta;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
+import com.laytonsmith.abstraction.bukkit.BukkitMCNamespacedKey;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCFishHook;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCHumanEntity;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
@@ -28,6 +33,7 @@ import com.laytonsmith.abstraction.enums.MCFishingState;
 import com.laytonsmith.abstraction.enums.MCGameMode;
 import com.laytonsmith.abstraction.enums.MCResourcePackStatus;
 import com.laytonsmith.abstraction.enums.MCTeleportCause;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCAction;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEnterBedResult;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCFishingState;
@@ -37,6 +43,10 @@ import com.laytonsmith.abstraction.enums.bukkit.BukkitMCTeleportCause;
 import com.laytonsmith.abstraction.events.MCExpChangeEvent;
 import com.laytonsmith.abstraction.events.MCFoodLevelChangeEvent;
 import com.laytonsmith.abstraction.events.MCGamemodeChangeEvent;
+import com.laytonsmith.abstraction.events.MCPlayerAdvancementDoneEvent;
+import com.laytonsmith.abstraction.events.MCPlayerBucketEmptyEvent;
+import com.laytonsmith.abstraction.events.MCPlayerBucketEvent;
+import com.laytonsmith.abstraction.events.MCPlayerBucketFillEvent;
 import com.laytonsmith.abstraction.events.MCPlayerEnterBedEvent;
 import com.laytonsmith.abstraction.events.MCPlayerLeaveBedEvent;
 import com.laytonsmith.abstraction.events.MCPlayerChatEvent;
@@ -61,17 +71,25 @@ import com.laytonsmith.abstraction.events.MCPlayerToggleSneakEvent;
 import com.laytonsmith.abstraction.events.MCPlayerToggleSprintEvent;
 import com.laytonsmith.abstraction.events.MCWorldChangedEvent;
 import com.laytonsmith.annotations.abstraction;
+import com.laytonsmith.core.Static;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.advancement.AdvancementDisplay;
 import org.bukkit.block.BlockFace;
+import org.bukkit.damage.DamageSource;
+import org.bukkit.damage.DamageType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerAdvancementDoneEvent;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerBedLeaveEvent;
+import org.bukkit.event.player.PlayerBucketEmptyEvent;
+import org.bukkit.event.player.PlayerBucketEvent;
+import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerEditBookEvent;
@@ -95,10 +113,12 @@ import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.event.player.PlayerToggleSprintEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.UUID;
 
 public class BukkitPlayerEvents {
 
@@ -118,7 +138,7 @@ public class BukkitPlayerEvents {
 
 		@Override
 		public int getDifference() {
-			return ((Player) event.getEntity()).getFoodLevel() - getFoodLevel();
+			return event.getEntity().getFoodLevel() - getFoodLevel();
 		}
 
 		@Override
@@ -129,6 +149,14 @@ public class BukkitPlayerEvents {
 		@Override
 		public void setFoodLevel(int level) {
 			event.setFoodLevel(level);
+		}
+
+		@Override
+		public MCItemStack getItem() {
+			if(event.getItem() == null) {
+				return null;
+			}
+			return new BukkitMCItemStack(event.getItem());
 		}
 
 		@Override
@@ -184,6 +212,14 @@ public class BukkitPlayerEvents {
 		@Override
 		public void setItem(MCItemStack item) {
 			pic.setItem(((BukkitMCItemStack) item).asItemStack());
+		}
+
+		@Override
+		public MCEquipmentSlot getHand() {
+			if(pic.getHand() == EquipmentSlot.HAND) {
+				return MCEquipmentSlot.WEAPON;
+			}
+			return MCEquipmentSlot.OFF_HAND;
 		}
 
 		public static BukkitMCPlayerItemConsumeEvent _instantiate(MCPlayer player, MCItemStack item) {
@@ -580,6 +616,15 @@ public class BukkitPlayerEvents {
 			}
 			return MCEquipmentSlot.OFF_HAND;
 		}
+
+		@Override
+		public Vector3D getClickedPosition() {
+			Vector v = pie.getClickedPosition();
+			if(v == null) {
+				return Vector3D.ZERO;
+			}
+			return new Vector3D(v.getX(), v.getY(), v.getZ());
+		}
 	}
 
 	@abstraction(type = Implementation.Type.BUKKIT)
@@ -614,12 +659,12 @@ public class BukkitPlayerEvents {
 
 		@Override
 		public boolean isAnchorSpawn() {
-			try {
-				return pre.isAnchorSpawn();
-			} catch (NoSuchMethodError ex) {
-				// probably before 1.16.1
-				return false;
-			}
+			return pre.isAnchorSpawn();
+		}
+
+		@Override
+		public Reason getReason() {
+			return Reason.valueOf(pre.getRespawnReason().name());
 		}
 	}
 
@@ -637,7 +682,8 @@ public class BukkitPlayerEvents {
 				int droppedExp, String deathMessage) {
 			List<ItemStack> drops = new ArrayList<>();
 
-			return new BukkitMCPlayerDeathEvent(new PlayerDeathEvent(((BukkitMCPlayer) entity)._Player(), drops, droppedExp, deathMessage));
+			return new BukkitMCPlayerDeathEvent(new PlayerDeathEvent(((BukkitMCPlayer) entity)._Player(),
+					DamageSource.builder(DamageType.GENERIC).build(), drops, droppedExp, deathMessage));
 		}
 
 		@Override
@@ -809,6 +855,16 @@ public class BukkitPlayerEvents {
 		@Override
 		public void setExpToDrop(int exp) {
 			e.setExpToDrop(exp);
+		}
+
+		@Override
+		public MCEquipmentSlot getHand() {
+			if(e.getHand() == null) {
+				return null;
+			} else if(e.getHand() == EquipmentSlot.HAND) {
+				return MCEquipmentSlot.WEAPON;
+			}
+			return MCEquipmentSlot.OFF_HAND;
 		}
 	}
 
@@ -985,6 +1041,11 @@ public class BukkitPlayerEvents {
 		public MCResourcePackStatus getStatus() {
 			return BukkitMCResourcePackStatus.getConvertor().getAbstractedEnum(this.e.getStatus());
 		}
+
+		@Override
+		public UUID getId() {
+			return this.e.getID();
+		}
 	}
 
 	@abstraction(type = Implementation.Type.BUKKIT)
@@ -1024,6 +1085,100 @@ public class BukkitPlayerEvents {
 		@Override
 		public void setCancelled(boolean bln) {
 			pme.setCancelled(bln);
+		}
+	}
+
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public abstract static class BukkitMCPlayerBucketEvent extends BukkitMCPlayerEvent implements MCPlayerBucketEvent {
+
+		PlayerBucketEvent pbe;
+
+		public BukkitMCPlayerBucketEvent(PlayerBucketEvent event) {
+			super(event);
+			this.pbe = event;
+		}
+
+		@Override
+		public MCBlock getBlock() {
+			return new BukkitMCBlock(pbe.getBlock());
+		}
+
+		@Override
+		public MCBlock getBlockClicked() {
+			return new BukkitMCBlock(pbe.getBlockClicked());
+		}
+
+		@Override
+		public MCBlockFace getBlockFace() {
+			return MCBlockFace.valueOf(pbe.getBlockFace().name());
+		}
+
+		@Override
+		public MCMaterial getBucket() {
+			return new BukkitMCMaterial(pbe.getBucket());
+		}
+
+		@Override
+		public MCEquipmentSlot getHand() {
+			if(pbe.getHand() == EquipmentSlot.HAND) {
+				return MCEquipmentSlot.WEAPON;
+			}
+			return MCEquipmentSlot.OFF_HAND;
+		}
+
+		@Override
+		public MCItemStack getItemStack() {
+			return new BukkitMCItemStack(pbe.getItemStack());
+		}
+	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCPlayerBucketFillEvent extends BukkitMCPlayerBucketEvent implements MCPlayerBucketFillEvent {
+
+		PlayerBucketFillEvent pbfe;
+
+		public BukkitMCPlayerBucketFillEvent(PlayerBucketFillEvent event) {
+			super(event);
+			this.pbfe = event;
+		}
+	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCPlayerBucketEmptyEvent extends BukkitMCPlayerBucketEvent implements MCPlayerBucketEmptyEvent {
+
+		PlayerBucketEmptyEvent pbee;
+
+		public BukkitMCPlayerBucketEmptyEvent(PlayerBucketEmptyEvent event) {
+			super(event);
+			this.pbee = event;
+		}
+	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCPlayerAdvancementDoneEvent extends BukkitMCPlayerEvent implements MCPlayerAdvancementDoneEvent {
+
+		PlayerAdvancementDoneEvent e;
+
+		public BukkitMCPlayerAdvancementDoneEvent(PlayerAdvancementDoneEvent event) {
+			super(event);
+			this.e = event;
+		}
+
+		@Override
+		public MCNamespacedKey getAdvancementKey() {
+			return new BukkitMCNamespacedKey(e.getAdvancement().getKey());
+		}
+
+		@Override
+		public String getTitle() {
+			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_18_X)) {
+				AdvancementDisplay display = e.getAdvancement().getDisplay();
+				if(display != null) {
+					return display.getTitle();
+				}
+			}
+			return null;
 		}
 	}
 }

@@ -6,6 +6,10 @@ import com.laytonsmith.abstraction.enums.MCTreeSpecies;
 import com.laytonsmith.annotations.abstractionenum;
 import org.bukkit.TreeSpecies;
 
+/**
+ * @deprecated To be removed when MC versions prior to 1.21.2 are no longer supported
+ */
+@Deprecated
 @abstractionenum(
 		implementation = Implementation.Type.BUKKIT,
 		forAbstractEnum = MCTreeSpecies.class,
@@ -40,6 +44,7 @@ public class BukkitMCTreeSpecies extends EnumConvertor<MCTreeSpecies, TreeSpecie
 			case CHERRY:
 			case MANGROVE:
 			case OAK:
+			case PALE_OAK:
 				return TreeSpecies.GENERIC;
 			case SPRUCE:
 				return TreeSpecies.REDWOOD;

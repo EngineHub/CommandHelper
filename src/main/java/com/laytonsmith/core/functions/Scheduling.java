@@ -989,7 +989,7 @@ public class Scheduling {
 			//Our goal here is to remove all ranges, predefined names, including @hourly and January.
 			format = format.trim();
 			//Changes tabs to spaces
-			format = format.replace("\t", " ");
+			format = format.replace('\t', ' ');
 			//Change multiple spaces to one space
 			format = format.replaceAll("( )+", " ");
 			//Lowercase everything

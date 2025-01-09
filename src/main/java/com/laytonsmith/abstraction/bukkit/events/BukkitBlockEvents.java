@@ -16,6 +16,7 @@ import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlockState;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCEntity;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
+import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCIgniteCause;
 import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.enums.MCVersion;
@@ -60,6 +61,7 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.NotePlayEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.block.BlockFormEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
@@ -239,6 +241,14 @@ public class BukkitBlockEvents {
 		}
 
 		@Override
+		public MCEquipmentSlot getHand() {
+			if(event.getHand() == EquipmentSlot.HAND) {
+				return MCEquipmentSlot.WEAPON;
+			}
+			return MCEquipmentSlot.OFF_HAND;
+		}
+
+		@Override
 		public boolean canBuild() {
 			return event.canBuild();
 		}
@@ -266,6 +276,14 @@ public class BukkitBlockEvents {
 		@Override
 		public MCBlock getBlock() {
 			return new BukkitMCBlock(event.getBlock());
+		}
+
+		@Override
+		public MCBlock getFireBlock() {
+			if(event.getIgnitingBlock() == null) {
+				return null;
+			}
+			return new BukkitMCBlock(event.getIgnitingBlock());
 		}
 	}
 

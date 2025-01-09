@@ -1402,7 +1402,7 @@ public class Meta {
 
 		@Override
 		public String docs() {
-			return "resource {} Returns a copy of the underlying engine's environment object. This is only useful to embedded scripting"
+			return "Resource {} Returns a copy of the underlying engine's environment object. This is only useful to embedded scripting"
 					+ " engines that are attempting to call back into " + Implementation.GetServerType().getBranding() + ". The object returned"
 					+ " is a CResource.";
 		}

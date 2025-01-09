@@ -1,9 +1,9 @@
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.abstraction.MCEnchantment;
+import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCPlayer;
-import com.laytonsmith.abstraction.StaticLayer;
+import com.laytonsmith.abstraction.enums.MCEnchantment;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
@@ -55,11 +55,11 @@ public class Enchantments {
 	 * @return
 	 */
 	public static MCEnchantment GetEnchantment(String name, Target t) {
-		MCEnchantment e = StaticLayer.GetEnchantmentByName(name);
-		if(e == null) {
+		try {
+			return MCEnchantment.valueOf(name.toUpperCase());
+		} catch(IllegalArgumentException ex) {
 			throw new CREEnchantmentException(name + " is not a valid enchantment type", t);
 		}
-		return e;
 	}
 
 	/**
@@ -156,9 +156,9 @@ public class Enchantments {
 					+ " enchantment array may be given. If slot is null, the currently selected slot is used."
 					+ " If an enchantment cannot be applied to the specified item, an EnchantmentException is thrown."
 					+ " The enchantment array must have the enchantment as keys and levels as the values."
-					+ " (eg. array('unbreaking': 1)) The minecraft names for enchantments may"
-					+ " be used: [https://minecraft.wiki/w/Enchanting#Enchantment_Types],"
-					+ " and the level parameter may be a roman numeral as well.";
+					+ " (eg. array('unbreaking': 1)) The level parameter can be a number or a roman numeral. ---- "
+					+ " The available enchantments are: " + StringUtils.Join(MCEnchantment.values(), ", ", ", and ")
+					+ ".";
 		}
 
 		@Override
@@ -343,7 +343,7 @@ public class Enchantments {
 			}
 			MCItemStack is = p.getItemAt(slot instanceof CNull ? null : ArgumentValidation.getInt32(slot, t));
 			if(is == null) {
-				throw new CRECastException("There is no item at slot " + slot, t);
+				return new CArray(t);
 			}
 			return ObjectGenerator.GetGenerator().enchants(is.getEnchantments(), t);
 		}
@@ -503,9 +503,9 @@ public class Enchantments {
 				return CACHE.get(name).clone();
 			}
 			CArray ca = new CArray(t);
-			for(MCEnchantment e : StaticLayer.GetEnchantmentValues()) {
+			for(MCEnchantment e : MCEnchantment.values()) {
 				if(e.canEnchantItem(is)) {
-					ca.push(new CString(e.getKey(), t), t);
+					ca.push(new CString(e.name().toLowerCase(), t), t);
 				}
 			}
 			CACHE.put(name, ca);
@@ -600,10 +600,9 @@ public class Enchantments {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCEnchantment[] enchantments = StaticLayer.GetEnchantmentValues();
 			CArray ret = new CArray(t);
-			for(MCEnchantment e : enchantments) {
-				ret.push(new CString(e.getKey(), t), t);
+			for(MCEnchantment e : MCEnchantment.values()) {
+				ret.push(new CString(e.name().toLowerCase(), t), t);
 			}
 			return ret;
 		}

@@ -199,15 +199,15 @@ public final class EventUtils {
 				return false;
 			}
 		} else {
-			for(Map.Entry<String, Mixed> prefilter : userPrefilters.entrySet()) {
-				if(!prefilters.containsKey(prefilter.getKey())) {
-					// The compiler should have already warned about this
+			for(Map.Entry<String, Prefilter<? extends BindableEvent>> prefilter : prefilters.entrySet()) {
+				String key = prefilter.getKey();
+				Mixed value = userPrefilters.get(key);
+				if(value == null) {
 					continue;
 				}
-				Prefilter<? extends BindableEvent> pf = prefilters.get(prefilter.getKey());
+				Prefilter<? extends BindableEvent> pf = prefilter.getValue();
 				PrefilterMatcher matcher = pf.getMatcher();
-				Mixed value = prefilter.getValue();
-				if(!matcher.matches(prefilter.getKey(), value, e, b.getTarget())) {
+				if(!matcher.matches(key, value, e, b.getTarget())) {
 					return false;
 				}
 			}
@@ -323,7 +323,7 @@ public final class EventUtils {
 		if(driver == null) {
 			throw ConfigRuntimeException.CreateUncatchableException("Tried to fire an unknown event: " + eventName, Target.UNKNOWN);
 		}
-		if(!(driver instanceof AbstractEvent) || ((AbstractEvent) driver).shouldFire(e)) {
+		if(!(driver instanceof AbstractGenericEvent) || ((AbstractGenericEvent) driver).shouldFire(e)) {
 			FireListeners(GetMatchingEvents(bounded, eventName, e, driver), driver, e);
 		}
 	}

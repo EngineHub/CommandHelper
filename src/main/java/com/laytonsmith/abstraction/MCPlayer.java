@@ -4,6 +4,7 @@ import com.laytonsmith.abstraction.blocks.MCBlockData;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.blocks.MCSign;
 import com.laytonsmith.abstraction.enums.MCEntityType;
+import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.enums.MCParticle;
 import com.laytonsmith.abstraction.enums.MCPlayerStatistic;
@@ -85,6 +86,8 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity, MCOfflinePlaye
 
 	void sendTitle(String title, String subtitle, int fadein, int stay, int fadeout);
 
+	void sendActionMessage(String message);
+
 	void setAllowFlight(boolean flight);
 
 	void setCompassTarget(MCLocation l);
@@ -119,13 +122,19 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity, MCOfflinePlaye
 
 	void setVanished(boolean set, MCPlayer to);
 
+	void hideEntity(MCEntity entity);
+
+	void showEntity(MCEntity entity);
+
+	boolean canSeeEntity(MCEntity entity);
+
 	boolean isNewPlayer();
 
 	String getHost();
 
 	void sendBlockChange(MCLocation loc, MCBlockData data);
 
-	void sendBlockDamage(MCLocation loc, double progress);
+	void sendBlockDamage(MCLocation loc, float progress, MCEntity entity);
 
 	void sendSignTextChange(MCLocation loc, String[] lines);
 
@@ -133,23 +142,19 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity, MCOfflinePlaye
 
 	void playNote(MCLocation loc, MCInstrument instrument, MCNote note);
 
-	void playSound(MCLocation l, MCSound sound, float volume, float pitch);
+	void playSound(MCLocation l, MCSound sound, MCSoundCategory category, float volume, float pitch, Long seed);
 
-	void playSound(MCLocation l, String sound, float volume, float pitch);
+	void playSound(MCEntity ent, MCSound sound, MCSoundCategory category, float volume, float pitch, Long seed);
 
-	void playSound(MCLocation l, MCSound sound, MCSoundCategory category, float volume, float pitch);
+	void playSound(MCLocation l, String sound, MCSoundCategory category, float volume, float pitch, Long seed);
 
-	void playSound(MCEntity ent, MCSound sound, MCSoundCategory category, float volume, float pitch);
-
-	void playSound(MCLocation l, String sound, MCSoundCategory category, float volume, float pitch);
-
-	void stopSound(MCSound sound);
-
-	void stopSound(String sound);
+	void playSound(MCEntity ent, String sound, MCSoundCategory category, float volume, float pitch, Long seed);
 
 	void stopSound(MCSound sound, MCSoundCategory category);
 
 	void stopSound(String sound, MCSoundCategory category);
+
+	void stopSound(MCSoundCategory category);
 
 	void spawnParticle(MCLocation l, MCParticle pa, int count, double offsetX, double offsetY, double offsetZ, double velocity, Object data);
 
@@ -195,4 +200,12 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity, MCOfflinePlaye
 	void setWorldBorder(MCWorldBorder border);
 
 	String getLocale();
+
+	void respawn();
+
+	void sendEquipmentChange(MCLivingEntity entity, MCEquipmentSlot slot, MCItemStack item);
+
+	int getPing();
+
+	MCPlayerInput getCurrentInput();
 }

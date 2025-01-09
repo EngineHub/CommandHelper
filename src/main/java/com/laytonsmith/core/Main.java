@@ -1537,9 +1537,15 @@ public class Main {
 		@Override
 		@SuppressWarnings("UseSpecificCatch")
 		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
+			String mvnCommand = "mvn";
 			try {
 				new CommandExecutor("git --version").start().waitFor();
-				new CommandExecutor("mvn --version").start().waitFor();
+				try {
+					new CommandExecutor("mvn --version").start().waitFor();
+				} catch(IOException e) {
+					new CommandExecutor("mvn.cmd --version").start().waitFor();
+					mvnCommand = "mvn.cmd";
+				}
 			} catch (IOException e)  {
 				System.err.println("Git and Maven are required (and Maven requires the JDK). These three"
 						+ " components must be already installed to use this tool.");
@@ -1593,7 +1599,7 @@ public class Main {
 						.setSystemInputsAndOutputs()
 						.start().waitFor();
 				System.out.println("Building extension...");
-				int mvnBuild = new CommandExecutor(new String[]{"mvn", "package", "-DskipTests"})
+				int mvnBuild = new CommandExecutor(new String[]{mvnCommand, "package", "-DskipTests"})
 						.setSystemInputsAndOutputs()
 						.setWorkingDir(checkoutPath)
 						.start().waitFor();

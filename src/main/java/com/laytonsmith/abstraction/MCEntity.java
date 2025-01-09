@@ -57,11 +57,13 @@ public interface MCEntity extends MCMetadatable {
 
 	void remove();
 
+	boolean savesOnUnload();
+
+	void setSavesOnUnload(boolean remove);
+
 	void setFallDistance(float distance);
 
 	void setFireTicks(int ticks);
-
-	void setLastDamageCause(MCEntityDamageEvent event);
 
 	boolean setPassenger(MCEntity passenger);
 
@@ -101,6 +103,8 @@ public interface MCEntity extends MCMetadatable {
 
 	Set<String> getScoreboardTags();
 
+	boolean hasScoreboardTag(String tag);
+
 	boolean addScoreboardTag(String tag);
 
 	boolean removeScoreboardTag(String tag);
@@ -108,4 +112,10 @@ public interface MCEntity extends MCMetadatable {
 	int getFreezingTicks();
 
 	void setFreezingTicks(int ticks);
+
+	int getEntityId();
+
+	boolean isInWater();
+
+	void setRotation(float yaw, float pitch);
 }

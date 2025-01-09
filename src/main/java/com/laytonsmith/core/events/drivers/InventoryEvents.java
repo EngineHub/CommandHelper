@@ -2,15 +2,19 @@ package com.laytonsmith.core.events.drivers;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.abstraction.MCAnvilInventory;
 import com.laytonsmith.abstraction.MCEnchantmentOffer;
+import com.laytonsmith.abstraction.MCGrindstoneInventory;
 import com.laytonsmith.abstraction.MCHumanEntity;
 import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCItemStack;
+import com.laytonsmith.abstraction.MCSmithingInventory;
 import com.laytonsmith.abstraction.MCVirtualInventoryHolder;
 import com.laytonsmith.abstraction.enums.MCClickType;
 import com.laytonsmith.abstraction.enums.MCDragType;
 import com.laytonsmith.abstraction.enums.MCInventoryAction;
 import com.laytonsmith.abstraction.enums.MCSlotType;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.events.MCEnchantItemEvent;
 import com.laytonsmith.abstraction.events.MCInventoryClickEvent;
 import com.laytonsmith.abstraction.events.MCInventoryCloseEvent;
@@ -18,8 +22,11 @@ import com.laytonsmith.abstraction.events.MCInventoryDragEvent;
 import com.laytonsmith.abstraction.events.MCInventoryOpenEvent;
 import com.laytonsmith.abstraction.events.MCItemHeldEvent;
 import com.laytonsmith.abstraction.events.MCItemSwapEvent;
+import com.laytonsmith.abstraction.events.MCPrepareAnvilEvent;
+import com.laytonsmith.abstraction.events.MCPrepareGrindstoneEvent;
 import com.laytonsmith.abstraction.events.MCPrepareItemCraftEvent;
 import com.laytonsmith.abstraction.events.MCPrepareItemEnchantEvent;
+import com.laytonsmith.abstraction.events.MCPrepareSmithingEvent;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSLog;
@@ -76,7 +83,8 @@ public class InventoryEvents {
 					+ " | creativeclick: true/false if this action could only be performed in creative mode"
 					+ " | slot: the slot number | rawslot: the slot number in whole inventory window | slottype"
 					+ " | slotitem | inventorytype | inventorysize: number of slots in opened inventory | cursoritem"
-					+ " | inventory: all the items in the (top) inventory | clicktype | action}"
+					+ " | inventory: all the items in the (top) inventory | clicktype | action"
+					+ " | hotbarbutton: the hotbar slot (0-8) corresponding to the number key pressed, or -1 if none.}"
 					+ " {slotitem: the item currently in the clicked slot | cursoritem: the item on the cursor"
 					+ " (may cause unexpected behavior)}"
 					+ " {}";
@@ -519,7 +527,9 @@ public class InventoryEvents {
 					+ "levels: The amount of levels the player used | "
 					+ "enchants: Array of added enchantments | "
 					+ "location: Location of the used enchantment table | "
-					+ "option: The enchantment option the player clicked}"
+					+ "option: The enchantment option the player clicked | "
+					+ "levelhint: The level displayed as a hint to the player (MC 1.20.1+) | "
+					+ "enchanthint: The enchantment displayed as a hint to the player (MC 1.20.1+)}"
 					+ "{levels: The amount of levels to use | "
 					+ "item: The item to be enchanted | "
 					+ "enchants: The enchants to add to the item}"
@@ -549,6 +559,10 @@ public class InventoryEvents {
 				map.put("enchants", ObjectGenerator.GetGenerator().enchants(e.getEnchantsToAdd(), Target.UNKNOWN));
 				map.put("location", ObjectGenerator.GetGenerator().location(e.getEnchantBlock().getLocation(), false));
 				map.put("option", new CInt(e.whichButton(), Target.UNKNOWN));
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_1)) {
+					map.put("levelhint", new CInt(e.getLevelHint(), Target.UNKNOWN));
+					map.put("enchanthint", new CString(e.getEnchantmentHint().name().toLowerCase(), Target.UNKNOWN));
+				}
 
 				return map;
 			} else {
@@ -890,11 +904,14 @@ public class InventoryEvents {
 		@Override
 		public String docs() {
 			return "{}"
-					+ " Fires when a recipe is formed in a crafting matrix, but the result has not yet been clicked."
-					+ " {viewers: all humanentities viewing the screen this event takes place in | matrix | result"
-					+ " | isRepair: true if this event was triggered by a repair operation (different than normal crafting)"
-					+ " | recipe: information about the formed recipe, or null if there is not one}"
-					+ " {}"/*" {matrix: the slots that make up the crafting grid | result: the result slot of crafting}"*/
+					+ " Fires when a slot is clicked in a crafting matrix."
+					+ " Can also fire when clearing an inventory with the the /clear command or shift-clicking the"
+					+ " 'Destroy Item' button in creative mode."
+					+ " {player: the name of the player who clicked"
+					+ " | viewers | matrix: an array of item arrays in the crafting matrix | result"
+					+ " | isRepair: true if this event was triggered by a repair operation"
+					+ " | recipe: an array of data about the formed recipe, or null if there is not one}"
+					+ " { result: the item array product of the recipe. }"
 					+ " {}";
 		}
 
@@ -913,8 +930,7 @@ public class InventoryEvents {
 
 		@Override
 		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
-			if(event instanceof MCPrepareItemCraftEvent) {
-				MCPrepareItemCraftEvent e = (MCPrepareItemCraftEvent) event;
+			if(event instanceof MCPrepareItemCraftEvent e) {
 				Map<String, Mixed> ret = evaluate_helper(e);
 				Target t = Target.UNKNOWN;
 				CArray viewers = new CArray(t);
@@ -922,6 +938,7 @@ public class InventoryEvents {
 					viewers.push(new CString(v.getName(), t), t);
 				}
 				ret.put("viewers", viewers);
+				ret.put("player", new CString(e.getPlayer().getName(), t));
 				ret.put("recipe", ObjectGenerator.GetGenerator().recipe(e.getRecipe(), t));
 				ret.put("isRepair", CBoolean.get(e.isRepair()));
 				CArray matrix = CArray.GetAssociativeArray(t);
@@ -944,40 +961,280 @@ public class InventoryEvents {
 
 		@Override
 		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
-			/*if(event instanceof MCPrepareItemCraftEvent) {
-				MCPrepareItemCraftEvent e = (MCPrepareItemCraftEvent) event;
+			if(event instanceof MCPrepareItemCraftEvent e) {
+				Target t = Target.UNKNOWN;
 				if("result".equals(key)) {
-					e.getInventory().setResult(ObjectGenerator.GetGenerator().item(value, Target.UNKNOWN));
+					e.getInventory().setResult(ObjectGenerator.GetGenerator().item(value, t));
 					return true;
 				}
-				if("matrix".equals(key)) {
-					if(value.isInstanceOf(CArray.TYPE)) {
-						CArray va = (CArray) value;
-						MCItemStack[] old = e.getInventory().getMatrix();
-						MCItemStack[] repl = new MCItemStack[old.length];
-						for(int i=0; i<repl.length; i++) {
-							if(va.containsKey(i)) {
-								repl[i] = ObjectGenerator.GetGenerator().item(va, Target.UNKNOWN);
-							}
-						}
-						e.getInventory().setMatrix(repl);
-						return true;
-					} else if(value instanceof CNull) {
-						MCItemStack[] old = e.getInventory().getMatrix();
-						MCItemStack[] repl = new MCItemStack[old.length];
-						e.getInventory().setMatrix(repl);
-						return true;
-					} else {
-						throw new CRECastException("Expected an array but received " + value, Target.UNKNOWN);
-					}
-				}
-			} */
+			}
 			return false;
 		}
 
 		@Override
 		public Version since() {
 			return MSVersion.V3_3_1;
+		}
+	}
+
+	@api
+	public static class item_pre_anvil extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "item_pre_anvil";
+		}
+
+		@Override
+		public String docs() {
+			return "{}"
+					+ " Fires when a slot other than the result is clicked in an anvil."
+					+ " Can fire multiple times per click."
+					+ " { player: the player using the anvil."
+					+ " | first_item: the first item being used in the recipe."
+					+ " | second_item: the second item being used in the recipe."
+					+ " | result: the result of the recipe."
+					+ " | max_repair_cost: the maximum possible cost of this repair."
+					+ " | level_repair_cost: how many levels are needed to perform this repair."
+					+ " | item_repair_cost: how many items are needed to perform this repair (MC 1.18.1+). }"
+					+ " { result: the result of the recipe."
+					+ " | level_repair_cost: how many levels are needed to perform this repair."
+					+ " | item_repair_cost: how many items are needed to perform this repair (MC 1.18.1+)."
+					+ " | max_repair_cost: the maximum possible cost of this repair. Values exceeding 40 will be"
+					+ " respected, but may still show as too expensive on the client. }"
+					+ " {}";
+		}
+
+		@Override
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+			if(event instanceof MCPrepareAnvilEvent) {
+				return true;
+			}
+			return false;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			throw ConfigRuntimeException.CreateUncatchableException("Unsupported operation.", Target.UNKNOWN);
+		}
+
+		@Override
+		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+			if(event instanceof MCPrepareAnvilEvent e) {
+				MCAnvilInventory anvil = (MCAnvilInventory) e.getInventory();
+				Map<String, Mixed> ret = evaluate_helper(e);
+
+				ret.put("player", new CString(e.getPlayer().getName(), Target.UNKNOWN));
+				ret.put("first_item", ObjectGenerator.GetGenerator().item(anvil.getFirstItem(), Target.UNKNOWN));
+				ret.put("second_item", ObjectGenerator.GetGenerator().item(anvil.getSecondItem(), Target.UNKNOWN));
+				ret.put("result", ObjectGenerator.GetGenerator().item(anvil.getResult(), Target.UNKNOWN));
+				ret.put("level_repair_cost", new CInt(anvil.getRepairCost(), Target.UNKNOWN));
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_18_1)) {
+					ret.put("item_repair_cost", new CInt(anvil.getRepairCostAmount(), Target.UNKNOWN));
+				}
+				ret.put("max_repair_cost", new CInt(anvil.getMaximumRepairCost(), Target.UNKNOWN));
+
+				return ret;
+			} else {
+				throw new EventException("Event received was not an MCPrepareAnvilEvent.");
+			}
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.ITEM_PRE_ANVIL;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+			if(event instanceof MCPrepareAnvilEvent e) {
+				Target t = value.getTarget();
+				if(key.equalsIgnoreCase("result")) {
+					e.setResult(ObjectGenerator.GetGenerator().item(value, t));
+					return true;
+				}
+
+				MCAnvilInventory anvil = (MCAnvilInventory) e.getInventory();
+				if(key.equalsIgnoreCase("level_repair_cost")) {
+					anvil.setRepairCost(ArgumentValidation.getInt32(value, t));
+					return true;
+				}
+
+				if(key.equalsIgnoreCase("item_repair_cost")) {
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_18_1)) {
+						anvil.setRepairCostAmount(ArgumentValidation.getInt32(value, t));
+						return true;
+					} else {
+						return false;
+					}
+				}
+
+				if(key.equalsIgnoreCase("max_repair_cost")) {
+					anvil.setMaximumRepairCost(ArgumentValidation.getInt32(value, t));
+					return true;
+				}
+			}
+			return false;
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+	}
+
+	@api
+	public static class item_pre_smithing extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "item_pre_smithing";
+		}
+
+		@Override
+		public String docs() {
+			return "{}"
+					+ " Fires when a slot other than the result is clicked in a smithing table."
+					+ " Can fire multiple times per click."
+					+ " { player: the player using the smithing table."
+					+ " | first_item: the first item being used in the recipe."
+					+ " | second_item: the second item being used in the recipe."
+					+ " | third_item: the third item being used in the recipe. (MC 1.20+)"
+					+ " | recipe: information about the formed recipe, or null if there's not one."
+					+ " | result: the result of the recipe. }"
+					+ " { result: the result of the smithing table recipe. While the result will appear on the"
+					+ " client-side, all items must be populated before a recipe can be executed. }"
+					+ " {}";
+		}
+
+		@Override
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+			if(event instanceof MCPrepareSmithingEvent) {
+				return true;
+			}
+			return false;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			throw ConfigRuntimeException.CreateUncatchableException("Unsupported operation.", Target.UNKNOWN);
+		}
+
+		@Override
+		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+			if(event instanceof MCPrepareSmithingEvent e) {
+				MCSmithingInventory smithing = (MCSmithingInventory) e.getInventory();
+				Map<String, Mixed> ret = evaluate_helper(e);
+
+				ret.put("player", new CString(e.getPlayer().getName(), Target.UNKNOWN));
+				ret.put("first_item", ObjectGenerator.GetGenerator().item(smithing.getInputTemplate(), Target.UNKNOWN));
+				ret.put("second_item", ObjectGenerator.GetGenerator().item(smithing.getInputEquipment(), Target.UNKNOWN));
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20)) {
+					ret.put("third_item", ObjectGenerator.GetGenerator().item(smithing.getInputMaterial(), Target.UNKNOWN));
+				}
+				ret.put("recipe", ObjectGenerator.GetGenerator().recipe(smithing.getRecipe(), Target.UNKNOWN));
+				ret.put("result", ObjectGenerator.GetGenerator().item(smithing.getResult(), Target.UNKNOWN));
+
+				return ret;
+			} else {
+				throw new EventException("Event received was not an MCPrepareSmithingEvent.");
+			}
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.ITEM_PRE_SMITHING;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+			if(event instanceof MCPrepareSmithingEvent e) {
+				Target t = value.getTarget();
+				if(key.equalsIgnoreCase("result")) {
+					e.setResult(ObjectGenerator.GetGenerator().item(value, t));
+					return true;
+				}
+			}
+			return false;
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+	}
+
+	@api
+	public static class item_pre_grindstone extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "item_pre_grindstone";
+		}
+
+		@Override
+		public String docs() {
+			return "{}"
+					+ " Fires when a slot other than the result is clicked in a grindstone. (MC 1.19.3+)"
+					+ " Can fire multiple times per click."
+					+ " { player: the player using the grindstone."
+					+ " | upper_item: the first item being used in the recipe."
+					+ " | lower_item: the second item being used in the recipe."
+					+ " | result: the result of the recipe. }"
+					+ " { result: the result of the grindstone recipe. }"
+					+ " {}";
+		}
+
+		@Override
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+			if(event instanceof MCPrepareGrindstoneEvent) {
+				return true;
+			}
+			return false;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			throw ConfigRuntimeException.CreateUncatchableException("Unsupported operation.", Target.UNKNOWN);
+		}
+
+		@Override
+		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+			if(event instanceof MCPrepareGrindstoneEvent e) {
+				MCGrindstoneInventory grindstone = (MCGrindstoneInventory) e.getInventory();
+				Map<String, Mixed> ret = evaluate_helper(e);
+
+				ret.put("player", new CString(e.getPlayer().getName(), Target.UNKNOWN));
+				ret.put("upper_item", ObjectGenerator.GetGenerator().item(grindstone.getUpperItem(), Target.UNKNOWN));
+				ret.put("lower_item", ObjectGenerator.GetGenerator().item(grindstone.getLowerItem(), Target.UNKNOWN));
+				ret.put("result", ObjectGenerator.GetGenerator().item(grindstone.getResult(), Target.UNKNOWN));
+
+				return ret;
+			} else {
+				throw new EventException("Event received was not an MCPrepareGrindstoneEvent.");
+			}
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.ITEM_PRE_GRINDSTONE;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+			if(event instanceof MCPrepareGrindstoneEvent e) {
+				Target t = value.getTarget();
+				if(key.equalsIgnoreCase("result")) {
+					e.setResult(ObjectGenerator.GetGenerator().item(value, t));
+					return true;
+				}
+			}
+			return false;
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
 		}
 	}
 }

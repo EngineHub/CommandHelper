@@ -537,14 +537,14 @@ public final class Static {
 	/**
 	 * Regex patterns
 	 */
-	private static final Pattern INVALID_HEX = Pattern.compile("-?0x[a-fA-F0-9]*[^a-fA-F0-9]+[a-fA-F0-9]*");
-	private static final Pattern VALID_HEX = Pattern.compile("-?0x[a-fA-F0-9]+");
-	private static final Pattern INVALID_BINARY = Pattern.compile("-?0b[01]*[^01]+[01]*");
-	private static final Pattern VALID_BINARY = Pattern.compile("-?0b[01]+");
-	private static final Pattern INVALID_OCTAL = Pattern.compile("-?0o[0-7]*[^0-7]+[0-7]*");
-	private static final Pattern VALID_OCTAL = Pattern.compile("-?0o[0-7]+");
-	private static final Pattern VALID_DECIMAL = Pattern.compile("-?0m[0-9]+");
-	private static final Pattern INVALID_DECIMAL = Pattern.compile("-?0m[0-9]*[^0-9]+[0-9]*");
+	private static final Pattern INVALID_HEX = Pattern.compile("0x[a-fA-F0-9]*[^a-fA-F0-9]+[a-fA-F0-9]*");
+	private static final Pattern VALID_HEX = Pattern.compile("0x[a-fA-F0-9]+");
+	private static final Pattern INVALID_BINARY = Pattern.compile("0b[01]*[^01]+[01]*");
+	private static final Pattern VALID_BINARY = Pattern.compile("0b[01]+");
+	private static final Pattern INVALID_OCTAL = Pattern.compile("0o[0-7]*[^0-7]+[0-7]*");
+	private static final Pattern VALID_OCTAL = Pattern.compile("0o[0-7]+");
+	private static final Pattern VALID_DECIMAL = Pattern.compile("0m[0-9]+");
+	private static final Pattern INVALID_DECIMAL = Pattern.compile("0m[0-9]*[^0-9]+[0-9]*");
 
 	/**
 	 * Given a string input, creates and returns a Construct of the appropriate type. This takes into account that null,
@@ -592,21 +592,52 @@ public final class Static {
 			throw new CREFormatException("Hex numbers must only contain digits 0-9, and the letters A-F, but \"" + val + "\" was found.", t);
 		}
 		if(VALID_HEX.matcher(val).matches()) {
-			//Hex number
-			return new CInt(Long.parseLong(val.substring(2), 16), t);
+
+			// Parse hex number. Special handling for 16-digit numbers to support setting all 64 bits of the value.
+			long longVal;
+			if(val.length() > 16 + 2) {
+				throw new CREFormatException("Hex numbers must contain at most 16 digits, but \"" + val + "\" was found.", t);
+			} else if(val.length() == 16 + 2) {
+				longVal = (Long.parseLong(val.substring(2, 10), 16) << 32) | Long.parseLong(val.substring(10, 18), 16);
+			} else {
+				longVal = Long.parseLong(val.substring(2), 16);
+			}
+			return new CInt(longVal, t);
 		}
 		if(INVALID_BINARY.matcher(val).matches()) {
 			throw new CREFormatException("Binary numbers must only contain digits 0 and 1, but \"" + val + "\" was found.", t);
 		}
 		if(VALID_BINARY.matcher(val).matches()) {
-			//Binary number
-			return new CInt(Long.parseLong(val.substring(2), 2), t);
+
+			// Parse binary number. Special handling for 64-digit numbers to support setting all 64 bits of the value.
+			long longVal;
+			if(val.length() > 64 + 2) {
+				throw new CREFormatException("Binary numbers must contain at most 64 digits, but \"" + val + "\" was found.", t);
+			} else if(val.length() == 64 + 2) {
+				longVal = (Long.parseLong(val.substring(2, 34), 2) << 32) | Long.parseLong(val.substring(34, 66), 2);
+			} else {
+				longVal = Long.parseLong(val.substring(2), 2);
+			}
+			return new CInt(longVal, t);
 		}
 		if(INVALID_OCTAL.matcher(val).matches()) {
 			throw new CREFormatException("Octal numbers must only contain digits 0-7, but \"" + val + "\" was found.", t);
 		}
 		if(VALID_OCTAL.matcher(val).matches()) {
-			return new CInt(Long.parseLong(val.substring(2), 8), t);
+
+			// Parse octal number. Special handling for 8-digit numbers to support setting all 64 bits of the value.
+			long longVal;
+			if(val.length() > 22 + 2) {
+				throw new CREFormatException("Octal numbers must contain at most 22 digits, but \"" + val + "\" was found.", t);
+			} else if(val.length() == 22 + 2) {
+				if(val.charAt(2) != '1') {
+					throw new CREFormatException("Octal number exceeds maximum 64-bit value 0o1777777777777777777777. Found \"" + val + "\".", t);
+				}
+				longVal = Long.parseLong(val.substring(3), 8) | (1L << 63);
+			} else {
+				longVal = Long.parseLong(val.substring(2), 8);
+			}
+			return new CInt(longVal, t);
 		}
 		if(INVALID_DECIMAL.matcher(val).matches()) {
 			throw new CREFormatException("Decimal numbers must only contain digits, but \"" + val + "\" was found.", t);
@@ -753,6 +784,9 @@ public final class Static {
 		MCMaterial mat = StaticLayer.GetMaterialFromLegacy(type, data);
 		if(mat == null) {
 			throw new CREFormatException("Invalid item format: " + notation, t);
+		}
+		if(!mat.isItem()) {
+			mat = MCMaterial.get("AIR");
 		}
 		MCItemStack is = StaticLayer.GetItemStack(mat, qty);
 		MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "Item notation is deprecated."
@@ -1080,11 +1114,16 @@ public final class Static {
 	 */
 	public static synchronized void LogDebug(File root, String message, LogLevel level, boolean printScreen) throws IOException {
 		//If debug mode is on in the prefs, we want to log this to the screen too
-		if(Prefs.DebugMode() || Prefs.ShowWarnings() || level == LogLevel.ERROR) {
+		if(Prefs.DebugMode() || Prefs.ShowWarnings() || level == LogLevel.ERROR || level == LogLevel.ALWAYS) {
 			String color = "";
 			Level lev = Level.INFO;
 			boolean show = false;
 			switch(level) {
+				case ALWAYS:
+					color = TermColors.WHITE;
+					lev = Level.INFO;
+					show = true;
+					break;
 				case ERROR:
 					color = TermColors.RED;
 					lev = Level.SEVERE;
@@ -1147,8 +1186,8 @@ public final class Static {
 	public static String Logo() {
 		String logo = Installer.parseISToString(Static.class.getResourceAsStream("/mainlogo"));
 		logo = logo.replaceAll("( +)", TermColors.BG_BLACK + "$1");
-		logo = logo.replaceAll("_", TermColors.BG_RED + TermColors.RED + "_");
-		logo = logo.replaceAll("/", TermColors.BG_BRIGHT_WHITE + TermColors.WHITE + "/");
+		logo = logo.replace("_", TermColors.BG_RED + TermColors.RED + "_");
+		logo = logo.replace("/", TermColors.BG_BRIGHT_WHITE + TermColors.WHITE + "/");
 		logo = logo.replace("\n", TermColors.reset() + "\n");
 		String s = logo + TermColors.reset();
 		return s;
@@ -1157,8 +1196,8 @@ public final class Static {
 	public static String DataManagerLogo() {
 		String logo = Installer.parseISToString(Static.class.getResourceAsStream("/datamanagerlogo"));
 		logo = logo.replaceAll("( +)", TermColors.BG_BLACK + "$1");
-		logo = logo.replaceAll("_", TermColors.CYAN + TermColors.BG_CYAN + "_");
-		logo = logo.replaceAll("/", TermColors.BG_WHITE + TermColors.WHITE + "/");
+		logo = logo.replace("_", TermColors.CYAN + TermColors.BG_CYAN + "_");
+		logo = logo.replace("/", TermColors.BG_WHITE + TermColors.WHITE + "/");
 		String s = logo + TermColors.reset();
 		return s;
 	}
@@ -1184,28 +1223,28 @@ public final class Static {
 		}
 		return mes
 				.replaceAll("(?i)§x(§[a-f0-9]){6}", "")
-				.replaceAll("§0", TermColors.BLACK)
-				.replaceAll("§1", TermColors.BLUE)
-				.replaceAll("§2", TermColors.GREEN)
-				.replaceAll("§3", TermColors.CYAN)
-				.replaceAll("§4", TermColors.RED)
-				.replaceAll("§5", TermColors.MAGENTA)
-				.replaceAll("§6", TermColors.YELLOW)
-				.replaceAll("§7", TermColors.WHITE)
-				.replaceAll("§8", TermColors.BRIGHT_BLACK)
-				.replaceAll("§9", TermColors.BRIGHT_BLUE)
-				.replaceAll("§a", TermColors.BRIGHT_GREEN)
-				.replaceAll("§b", TermColors.BRIGHT_CYAN)
-				.replaceAll("§c", TermColors.BRIGHT_RED)
-				.replaceAll("§d", TermColors.BRIGHT_MAGENTA)
-				.replaceAll("§e", TermColors.BRIGHT_YELLOW)
-				.replaceAll("§f", TermColors.BRIGHT_WHITE)
-				.replaceAll("§k", "") //Uh, no equivalent for "random"
-				.replaceAll("§l", TermColors.BOLD)
-				.replaceAll("§m", TermColors.STRIKE)
-				.replaceAll("§n", TermColors.UNDERLINE)
-				.replaceAll("§o", TermColors.ITALIC)
-				.replaceAll("§r", TermColors.RESET);
+				.replace("§0", TermColors.BLACK)
+				.replace("§1", TermColors.BLUE)
+				.replace("§2", TermColors.GREEN)
+				.replace("§3", TermColors.CYAN)
+				.replace("§4", TermColors.RED)
+				.replace("§5", TermColors.MAGENTA)
+				.replace("§6", TermColors.YELLOW)
+				.replace("§7", TermColors.WHITE)
+				.replace("§8", TermColors.BRIGHT_BLACK)
+				.replace("§9", TermColors.BRIGHT_BLUE)
+				.replace("§a", TermColors.BRIGHT_GREEN)
+				.replace("§b", TermColors.BRIGHT_CYAN)
+				.replace("§c", TermColors.BRIGHT_RED)
+				.replace("§d", TermColors.BRIGHT_MAGENTA)
+				.replace("§e", TermColors.BRIGHT_YELLOW)
+				.replace("§f", TermColors.BRIGHT_WHITE)
+				.replace("§k", "") //Uh, no equivalent for "random"
+				.replace("§l", TermColors.BOLD)
+				.replace("§m", TermColors.STRIKE)
+				.replace("§n", TermColors.UNDERLINE)
+				.replace("§o", TermColors.ITALIC)
+				.replace("§r", TermColors.RESET);
 
 	}
 
@@ -1487,9 +1526,18 @@ public final class Static {
 			return CNull.NULL;
 		} else if(object instanceof Boolean) {
 			return CBoolean.get((boolean) object);
-		} else if((object instanceof Byte) || (object instanceof Short) || (object instanceof Integer) || (object instanceof Long)) {
+		} else if(object instanceof Byte b) {
+			// These are required due to unboxing
+			return new CInt(b.longValue(), t);
+		} else if(object instanceof Short s) {
+			return new CInt(s.longValue(), t);
+		} else if(object instanceof Integer i) {
+			return new CInt(i.longValue(), t);
+		} else if(object instanceof Long) {
 			return new CInt((long) object, t);
-		} else if((object instanceof Float) || (object instanceof Double)) {
+		} else if(object instanceof Float f) {
+			return new CDouble(f.doubleValue(), t);
+		} else if(object instanceof Double) {
 			return new CDouble((double) object, t);
 		} else if(object instanceof Character) {
 			return new CString((char) object, t);

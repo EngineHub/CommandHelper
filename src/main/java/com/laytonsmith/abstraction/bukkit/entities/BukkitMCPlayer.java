@@ -4,10 +4,12 @@ import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCItemStack;
+import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCNote;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.MCPlayerInput;
 import com.laytonsmith.abstraction.MCPlayerInventory;
 import com.laytonsmith.abstraction.MCScoreboard;
 import com.laytonsmith.abstraction.MCWorldBorder;
@@ -18,11 +20,13 @@ import com.laytonsmith.abstraction.blocks.MCSign;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
+import com.laytonsmith.abstraction.bukkit.BukkitMCPlayerInput;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayerInventory;
 import com.laytonsmith.abstraction.bukkit.BukkitMCScoreboard;
 import com.laytonsmith.abstraction.bukkit.BukkitMCServer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorldBorder;
 import com.laytonsmith.abstraction.enums.MCEntityType;
+import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.enums.MCParticle;
 import com.laytonsmith.abstraction.enums.MCPlayerStatistic;
@@ -39,6 +43,7 @@ import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSoundCategory;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCWeather;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.Static;
+import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Note;
@@ -49,13 +54,14 @@ import org.bukkit.block.Sign;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
@@ -122,12 +128,15 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 
 	@Override
 	public MCItemStack getItemAt(Integer slot) {
-		if(slot == null) {
-			return new BukkitMCItemStack(p.getInventory().getItemInMainHand());
-		}
 		ItemStack is = null;
-		//Special slots
-		if(slot == 100) {
+		if(slot == null) {
+			is = p.getInventory().getItemInMainHand();
+			// Empty slots should return null, but unlike other PlayerInventory methods,
+			// getItemInMainHand() never returns null.
+			if(is.getType() == Material.AIR) {
+				return null;
+			}
+		} else if(slot == 100) {
 			is = p.getInventory().getBoots();
 		} else if(slot == 101) {
 			is = p.getInventory().getLeggings();
@@ -137,15 +146,13 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 			is = p.getInventory().getHelmet();
 		} else if(slot == -106) {
 			is = p.getInventory().getItemInOffHand();
-		}
-		if(slot >= 0 && slot <= 35) {
+		} else if(slot >= 0 && slot <= 35) {
 			is = p.getInventory().getItem(slot);
 		}
 		if(is == null) {
 			return null;
-		} else {
-			return new BukkitMCItemStack(is);
 		}
+		return new BukkitMCItemStack(is);
 	}
 
 	@Override
@@ -327,7 +334,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	@Override
 	public void sendMessage(String string) {
 		//The client doesn't like tabs
-		string = string.replaceAll("\t", "    ");
+		string = string.replace("\t", "    ");
 		p.sendMessage(string);
 	}
 
@@ -343,6 +350,12 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 			title = " ";
 		}
 		p.sendTitle(title, subtitle, fadein, stay, fadeout);
+	}
+
+	@Override
+	public void sendActionMessage(String message) {
+		BaseComponent txt = net.md_5.bungee.api.chat.TextComponent.fromLegacy(message);
+		p.spigot().sendMessage(net.md_5.bungee.api.ChatMessageType.ACTION_BAR, txt);
 	}
 
 	@Override
@@ -404,27 +417,43 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 		return BukkitConvertor.BukkitGetCorrectEntity(p.getSpectatorTarget());
 	}
 
-	@Override
-	public void setTempOp(Boolean value) throws ClassNotFoundException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
-		// Get some version specific strings
+	private static Class gameProfileClass = null;
+	private static Class opListEntryClass = null;
+	private static Map<String, Object> opMap = null;
+
+	private static void SetupTempOp() throws ClassNotFoundException {
+		if(gameProfileClass != null) {
+			return;
+		}
+		boolean isPaper = ((BukkitMCServer) Static.getServer()).isPaper();
+		// Get some version specific mappings
 		String nms = "net.minecraft.server";
 		String playersPackage = nms + ".players";
 		String ops = "p";
-		String getPlayerList = "ac";
+		String getPlayerList = isPaper ? "getPlayerList" : "ag";
 		MCVersion mcversion = Static.getServer().getMinecraftVersion();
-		if(mcversion.lt(MCVersion.MC1_20_2)) {
-			ops = "o";
-			if(mcversion.equals(MCVersion.MC1_19_3)) {
-				getPlayerList = "ab";
-			} else if(mcversion.lt(MCVersion.MC1_19_1)) {
-				ops = "n";
-				if(mcversion.lt(MCVersion.MC1_18)) {
-					getPlayerList = "getPlayerList";
-					if(mcversion.lt(MCVersion.MC1_17)) {
-						String version = ((BukkitMCServer) Static.getServer()).getCraftBukkitPackage().split("\\.")[3];
-						nms = "net.minecraft.server." + version;
-						playersPackage = nms;
-						ops = "operators";
+		if(mcversion.lt(MCVersion.MC1_21_3)) {
+			getPlayerList = isPaper ? "getPlayerList" : "ah";
+			if(mcversion.lt(MCVersion.MC1_20_6)) {
+				getPlayerList = "ae";
+				if(mcversion.lt(MCVersion.MC1_20_4)) {
+					getPlayerList = "ac";
+					if(mcversion.lt(MCVersion.MC1_20_2)) {
+						ops = "o";
+						if(mcversion.equals(MCVersion.MC1_19_3)) {
+							getPlayerList = "ab";
+						} else if(mcversion.lt(MCVersion.MC1_19_1)) {
+							ops = "n";
+							if(mcversion.lt(MCVersion.MC1_18)) {
+								getPlayerList = "getPlayerList";
+								if(mcversion.lt(MCVersion.MC1_17)) {
+									String version = ((BukkitMCServer) Static.getServer()).getCraftBukkitPackage().split("\\.")[3];
+									nms = "net.minecraft.server." + version;
+									playersPackage = nms;
+									ops = "operators";
+								}
+							}
+						}
 					}
 				}
 			}
@@ -432,18 +461,25 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 
 		Class nmsMinecraftServerClass = Class.forName(nms + ".MinecraftServer");
 		/*n.m.s.MinecraftServer*/ Object nmsServer = ReflectionUtils.invokeMethod(nmsMinecraftServerClass, null, "getServer");
-		/*n.m.s.PlayerList*/ Object nmsPlayerList = ReflectionUtils.invokeMethod(nmsServer, getPlayerList);
-		/*n.m.s.OpList*/ Object opSet = ReflectionUtils.get(Class.forName(playersPackage + ".PlayerList"), nmsPlayerList, ops);
-		//opSet.getClass().getSuperclass() == n.m.s.JsonList
-		Map/*<String, n.m.s.OpListEntry>*/ d = (Map) ReflectionUtils.get(opSet.getClass().getSuperclass(), opSet, "d");
+		/*n.m.s.players.PlayerList*/ Object nmsPlayerList = ReflectionUtils.invokeMethod(nmsServer, getPlayerList);
+		/*n.m.s.players.OpList*/ Object opSet = ReflectionUtils.get(Class.forName(playersPackage + ".PlayerList"), nmsPlayerList, ops);
+		//opSet.getClass().getSuperclass() == n.m.s.players.JsonList
+		/*Map<String, n.m.s.players.OpListEntry>*/ opMap = (Map) ReflectionUtils.get(opSet.getClass().getSuperclass(), opSet, "d");
+		/*n.m.s.players.OpListEntry*/ opListEntryClass = Class.forName(playersPackage + ".OpListEntry");
+		/*com.mojang.authlib.GameProfile*/ gameProfileClass = Class.forName("com.mojang.authlib.GameProfile");
+	}
+
+	@Override
+	public void setTempOp(Boolean value) throws ClassNotFoundException {
+		SetupTempOp();
 		if(value) {
-			/*n.m.s.OpListEntry*/ Class nmsOpListEntry = Class.forName(playersPackage + ".OpListEntry");
-			/*com.mojang.authlib.GameProfile*/ Class nmsGameProfile = Class.forName("com.mojang.authlib.GameProfile");
 			Object gameProfile = ReflectionUtils.invokeMethod(p, "getProfile");
-			Object opListEntry = ReflectionUtils.newInstance(nmsOpListEntry, new Class[]{nmsGameProfile, int.class, boolean.class}, new Object[]{gameProfile, 4, false});
-			d.put(p.getUniqueId().toString(), opListEntry);
+			Object opListEntry = ReflectionUtils.newInstance(opListEntryClass,
+					new Class[]{gameProfileClass, int.class, boolean.class},
+					new Object[]{gameProfile, 4, false});
+			opMap.put(p.getUniqueId().toString(), opListEntry);
 		} else {
-			d.remove(p.getUniqueId().toString());
+			opMap.remove(p.getUniqueId().toString());
 		}
 		p.recalculatePermissions();
 	}
@@ -459,6 +495,34 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 			p.showPlayer(CommandHelperPlugin.self, ((BukkitMCPlayer) to)._Player());
 		} else {
 			p.hidePlayer(CommandHelperPlugin.self, ((BukkitMCPlayer) to)._Player());
+		}
+	}
+
+	@Override
+	public void hideEntity(MCEntity entity) {
+		try {
+			p.hideEntity(CommandHelperPlugin.self, (Entity) entity.getHandle());
+		} catch(NoSuchMethodError ex) {
+			// probably before 1.18
+		}
+	}
+
+	@Override
+	public void showEntity(MCEntity entity) {
+		try {
+			p.showEntity(CommandHelperPlugin.self, (Entity) entity.getHandle());
+		} catch(NoSuchMethodError ex) {
+			// probably before 1.18
+		}
+	}
+
+	@Override
+	public boolean canSeeEntity(MCEntity entity) {
+		try {
+			return p.canSee((Entity) entity.getHandle());
+		} catch(NoSuchMethodError ex) {
+			// probably before 1.18
+			return true;
 		}
 	}
 
@@ -515,8 +579,20 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	}
 
 	@Override
-	public void sendBlockDamage(MCLocation loc, double progress) {
-		p.sendBlockDamage((Location) loc.getHandle(), (float) progress);
+	public void sendBlockDamage(MCLocation loc, float progress, MCEntity entity) {
+		Location location = (Location) loc.getHandle();
+		try {
+			if(entity == null) {
+				// Using a block position hashCode as the sourceId allows independent control of each block's state.
+				int sourceId = (location.getBlockY() + location.getBlockZ() * 31) * 31 + location.getBlockX();
+				p.sendBlockDamage(location, progress, sourceId);
+			} else {
+				p.sendBlockDamage(location, progress, ((Entity) entity.getHandle()).getEntityId());
+			}
+		} catch (NoSuchMethodError er) {
+			// probably prior to 1.19.2 on Paper or 1.19.4 on Spigot
+			p.sendBlockDamage(location, progress);
+		}
 	}
 
 	@Override
@@ -546,52 +622,55 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	}
 
 	@Override
-	public void playSound(MCLocation l, MCSound sound, float volume, float pitch) {
-		p.playSound(((BukkitMCLocation) l).asLocation(),
-				((BukkitMCSound) sound).getConcrete(), volume, pitch);
-	}
-
-	@Override
-	public void playSound(MCLocation l, String sound, float volume, float pitch) {
-		p.playSound(((BukkitMCLocation) l).asLocation(), sound, volume, pitch);
-	}
-
-	@Override
-	public void playSound(MCLocation l, MCSound sound, MCSoundCategory category, float volume, float pitch) {
-		if(category == null) {
-			p.playSound((Location) l.getHandle(), ((BukkitMCSound) sound).getConcrete(),
-					SoundCategory.MASTER, volume, pitch);
+	public void playSound(MCLocation l, MCSound sound, MCSoundCategory category, float volume, float pitch, Long seed) {
+		SoundCategory cat = BukkitMCSoundCategory.getConvertor().getConcreteEnum(category);
+		if(cat == null) {
+			cat = SoundCategory.MASTER;
+		}
+		if(seed == null) {
+			p.playSound((Location) l.getHandle(), ((BukkitMCSound) sound).getConcrete(), cat, volume, pitch);
 		} else {
-			p.playSound((Location) l.getHandle(), ((BukkitMCSound) sound).getConcrete(),
-					BukkitMCSoundCategory.getConvertor().getConcreteEnum(category), volume, pitch);
+			p.playSound((Location) l.getHandle(), ((BukkitMCSound) sound).getConcrete(), cat, volume, pitch, seed);
 		}
 	}
 
 	@Override
-	public void playSound(MCEntity ent, MCSound sound, MCSoundCategory category, float volume, float pitch) {
+	public void playSound(MCEntity ent, MCSound sound, MCSoundCategory category, float volume, float pitch, Long seed) {
+		SoundCategory cat = BukkitMCSoundCategory.getConvertor().getConcreteEnum(category);
+		if(cat == null) {
+			cat = SoundCategory.MASTER;
+		}
 		if(category == null) {
-			p.playSound((Entity) ent.getHandle(), ((BukkitMCSound) sound).getConcrete(),
-					SoundCategory.MASTER, volume, pitch);
+			p.playSound((Entity) ent.getHandle(), ((BukkitMCSound) sound).getConcrete(), cat, volume, pitch);
 		} else {
-			p.playSound((Entity) ent.getHandle(), ((BukkitMCSound) sound).getConcrete(),
-					BukkitMCSoundCategory.getConvertor().getConcreteEnum(category), volume, pitch);
+			p.playSound((Entity) ent.getHandle(), ((BukkitMCSound) sound).getConcrete(), cat, volume, pitch, seed);
 		}
 	}
 
 	@Override
-	public void playSound(MCLocation l, String sound, MCSoundCategory category, float volume, float pitch) {
-		p.playSound((Location) l.getHandle(), sound,
-				BukkitMCSoundCategory.getConvertor().getConcreteEnum(category), volume, pitch);
+	public void playSound(MCLocation l, String sound, MCSoundCategory category, float volume, float pitch, Long seed) {
+		SoundCategory cat = BukkitMCSoundCategory.getConvertor().getConcreteEnum(category);
+		if(cat == null) {
+			cat = SoundCategory.MASTER;
+		}
+		if(seed == null) {
+			p.playSound((Location) l.getHandle(), sound, cat, volume, pitch);
+		} else {
+			p.playSound((Location) l.getHandle(), sound, cat, volume, pitch, seed);
+		}
 	}
 
 	@Override
-	public void stopSound(MCSound sound) {
-		p.stopSound(((BukkitMCSound) sound).getConcrete());
-	}
-
-	@Override
-	public void stopSound(String sound) {
-		p.stopSound(sound);
+	public void playSound(MCEntity ent, String sound, MCSoundCategory category, float volume, float pitch, Long seed) {
+		SoundCategory cat = BukkitMCSoundCategory.getConvertor().getConcreteEnum(category);
+		if(cat == null) {
+			cat = SoundCategory.MASTER;
+		}
+		if(seed == null) {
+			p.playSound((Entity) ent.getHandle(), sound, cat, volume, pitch);
+		} else {
+			p.playSound((Entity) ent.getHandle(), sound, cat, volume, pitch, seed);
+		}
 	}
 
 	@Override
@@ -603,6 +682,15 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	@Override
 	public void stopSound(String sound, MCSoundCategory category) {
 		p.stopSound(sound, BukkitMCSoundCategory.getConvertor().getConcreteEnum(category));
+	}
+
+	@Override
+	public void stopSound(MCSoundCategory category) {
+		try {
+			p.stopSound(BukkitMCSoundCategory.getConvertor().getConcreteEnum(category));
+		} catch (NoSuchMethodError ex) {
+			// probably before 1.19.0
+		}
 	}
 
 	@Override
@@ -755,5 +843,48 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	@Override
 	public void setScoreboard(MCScoreboard board) {
 		p.setScoreboard(((BukkitMCScoreboard) board)._scoreboard());
+	}
+
+	@Override
+	public void respawn() {
+		p.spigot().respawn();
+	}
+
+	@Override
+	public void sendEquipmentChange(MCLivingEntity entity, MCEquipmentSlot slot, MCItemStack item) {
+		LivingEntity le = (LivingEntity) entity.getHandle();
+		ItemStack is;
+		if(item == null) {
+			if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_19_3)) {
+				// null isn't supported prior to 1.19.3
+				is = new ItemStack(Material.AIR);
+			} else {
+				is = null;
+			}
+		} else {
+			is = (ItemStack) item.getHandle();
+		}
+		try {
+			switch(slot) {
+				case WEAPON -> p.sendEquipmentChange(le, EquipmentSlot.HAND, is);
+				case OFF_HAND -> p.sendEquipmentChange(le, EquipmentSlot.OFF_HAND, is);
+				case BOOTS -> p.sendEquipmentChange(le, EquipmentSlot.FEET, is);
+				case LEGGINGS -> p.sendEquipmentChange(le, EquipmentSlot.LEGS, is);
+				case CHESTPLATE -> p.sendEquipmentChange(le, EquipmentSlot.CHEST, is);
+				case HELMET -> p.sendEquipmentChange(le, EquipmentSlot.HEAD, is);
+			}
+		} catch(NoSuchMethodError ex) {
+			// probably before 1.18, which is unsupported
+		}
+	}
+
+	@Override
+	public int getPing() {
+		return p.getPing();
+	}
+
+	@Override
+	public MCPlayerInput getCurrentInput() {
+		return new BukkitMCPlayerInput(p.getCurrentInput());
 	}
 }

@@ -71,6 +71,7 @@ public abstract class MCTrimMaterial<Concrete> extends DynamicEnum<MCTrimMateria
 		NETHERITE,
 		QUARTZ,
 		REDSTONE,
+		RESIN,
 		UNKNOWN
 	}
 }

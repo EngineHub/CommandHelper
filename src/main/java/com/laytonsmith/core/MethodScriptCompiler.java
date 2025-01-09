@@ -103,6 +103,8 @@ public final class MethodScriptCompiler {
 
 	private static final Pattern VAR_PATTERN = Pattern.compile("\\$[\\p{L}0-9_]+");
 	private static final Pattern IVAR_PATTERN = Pattern.compile(IVariable.VARIABLE_NAME_REGEX);
+	private static final Pattern NUM_PATTERN = Pattern.compile("[0-9]+");
+	private static final Pattern FUNC_NAME_PATTERN = Pattern.compile("[_a-zA-Z0-9]+");
 
 	/**
 	 * Lexes the script, and turns it into a token stream.This looks through the script character by character.
@@ -163,7 +165,7 @@ public final class MethodScriptCompiler {
 		 * this variable, to allow the lexer to make use of the file options already.
 		 */
 		FileOptions builtFileOptions = null;
-		script = script.replaceAll("\r\n", "\n");
+		script = script.replace("\r\n", "\n");
 		script = script + "\n";
 		final Set<String> keywords = KeywordList.getKeywordNames();
 		final TokenStream tokenList = new TokenStream();
@@ -266,7 +268,8 @@ public final class MethodScriptCompiler {
 								buf.append("/*");
 								inComment = true;
 								commentIsBlock = true;
-								if(i < script.length() - 2 && script.charAt(i + 2) == '*') { // "/**".
+								if(i + 2 < script.length() && script.charAt(i + 2) == '*'
+										&& (i + 3 >= script.length() || script.charAt(i + 3) != '/')) { // "/**".
 									inSmartComment = true;
 									buf.append("*");
 									i++;
@@ -592,7 +595,7 @@ public final class MethodScriptCompiler {
 								} else {
 									// It's not a keyword, but a normal function.
 									String funcName = buf.toString();
-									if(funcName.matches("[_a-zA-Z0-9]+")) {
+									if(FUNC_NAME_PATTERN.matcher(funcName).matches()) {
 										tokenList.add(new Token(TType.FUNC_NAME, funcName, target));
 									} else {
 										tokenList.add(new Token(TType.UNKNOWN, funcName, target));
@@ -910,8 +913,7 @@ public final class MethodScriptCompiler {
 						if(!prevNonWhitespace.type.isIdentifier() // Don't convert "number/string/var ± ...".
 								&& prevNonWhitespace.type != TType.FUNC_END // Don't convert "func() ± ...".
 								&& prevNonWhitespace.type != TType.RSQUARE_BRACKET // Don't convert "] ± ..." (arrays).
-								&& !IVAR_PATTERN.matcher(t.val()).matches() // Don't convert "± @var".
-								&& !VAR_PATTERN.matcher(t.val()).matches()) { // Don't convert "± $var".
+								&& NUM_PATTERN.matcher(t.val()).matches()) { // Only convert numbers
 							// It is a negative/positive number: Absorb the sign.
 							t.value = prev1.value + t.value;
 							it.remove(); // Remove 'prev1'.
@@ -944,25 +946,22 @@ public final class MethodScriptCompiler {
 				}
 			}
 
-			// Skip this check if we're not in pure mscript.
-			if(inPureMScript) {
-				if(it.hasNext()) {
-					Token next = it.next(); // Select 'next' -->.
-					it.previous(); // Select 'next' <--.
-					it.previous(); // Select 't' <--.
-					if(t.type.isSymbol() && !t.type.isUnary() && !next.type.isUnary()) {
-						if(it.hasPrevious()) {
-							Token prev1 = it.previous(); // Select 'prev1' <--.
-							if(prev1.type.equals(TType.FUNC_START) || prev1.type.equals(TType.COMMA)
-									|| next.type.equals(TType.FUNC_END) || next.type.equals(TType.COMMA)
-									|| prev1.type.isSymbol() || next.type.isSymbol()) {
-								throw new ConfigCompileException("Unexpected symbol (" + t.val() + ")", t.getTarget());
-							}
-							it.next(); // Select 'prev1' -->.
+			if(it.hasNext()) {
+				Token next = it.next(); // Select 'next' -->.
+				it.previous(); // Select 'next' <--.
+				it.previous(); // Select 't' <--.
+				if(t.type.isSymbol() && !t.type.isUnary() && !next.type.isUnary()) {
+					if(it.hasPrevious()) {
+						Token prev1 = it.previous(); // Select 'prev1' <--.
+						if(prev1.type.equals(TType.FUNC_START) || prev1.type.equals(TType.COMMA)
+								|| next.type.equals(TType.FUNC_END) || next.type.equals(TType.COMMA)
+								|| prev1.type.isSymbol() || next.type.isSymbol()) {
+							throw new ConfigCompileException("Unexpected symbol token (" + t.val() + ")", t.getTarget());
 						}
+						it.next(); // Select 'prev1' -->.
 					}
-					it.next(); // Select 't' -->.
 				}
+				it.next(); // Select 't' -->.
 			}
 		}
 
@@ -1014,7 +1013,7 @@ public final class MethodScriptCompiler {
 			// Filename check
 			String fileName = tokenList.getFileOptions().getName();
 			if(!fileName.isEmpty()) {
-				if(!file.getAbsolutePath().replace("\\", "/").endsWith(fileName.replace("\\", "/"))) {
+				if(!file.getAbsolutePath().replace('\\', '/').endsWith(fileName.replace('\\', '/'))) {
 					CompilerWarning warning = new CompilerWarning(file + " has the wrong file name in the file options ("
 							+ fileName + ")", new Target(0, file, 0), null);
 					env.getEnv(CompilerEnvironment.class).addCompilerWarning(null, warning);
@@ -1762,29 +1761,41 @@ public final class MethodScriptCompiler {
 				}
 				continue;
 			} else if(t.type == TType.LIT) {
-				Construct c = Static.resolveConstruct(t.val(), t.target, true);
-				if((c instanceof CInt || c instanceof CDecimal) && next1.type == TType.DOT && next2.type == TType.LIT) {
-					// make CDouble/CDecimal here because otherwise Long.parseLong() will remove
-					// minus zero before decimals and leading zeroes after decimals
+				Construct c;
+				try {
+					c = Static.resolveConstruct(t.val(), t.target, true);
+				} catch (ConfigRuntimeException ex) {
+					throw new ConfigCompileException(ex);
+				}
+				// make CDouble/CDecimal here because otherwise Long.parseLong() will remove
+				// minus zero before decimals and leading zeroes after decimals
+				if(c instanceof CInt && next1.type == TType.DOT && next2.type == TType.LIT) {
 					try {
-						if(t.value.startsWith("0m")) {
-							// CDecimal
-							String neg = "";
-							if(prev1.value.equals("-")) {
-								neg = "-";
-							}
-							c = new CDecimal(neg + t.value.substring(2) + '.' + next2.value, t.target);
-						} else {
-							// CDouble
-							c = new CDouble(Double.parseDouble(t.val() + '.' + next2.val()), t.target);
-						}
+						c = new CDouble(Double.parseDouble(t.val() + '.' + next2.val()), t.target);
 						i += 2;
 					} catch (NumberFormatException e) {
 						// Not a double
 					}
+					constructCount.peek().incrementAndGet();
+				} else if(c instanceof CDecimal) {
+					String neg = "";
+					if(prev1.value.equals("-")) {
+						// Absorb sign unless neg() becomes compatible with CDecimal
+						neg = "-";
+						tree.removeChildAt(tree.getChildren().size() - 1);
+					} else {
+						constructCount.peek().incrementAndGet();
+					}
+					if(next1.type == TType.DOT && next2.type == TType.LIT) {
+						c = new CDecimal(neg + t.value.substring(2) + '.' + next2.value, t.target);
+						i += 2;
+					} else {
+						c = new CDecimal(neg + t.value.substring(2), t.target);
+					}
+				} else {
+					constructCount.peek().incrementAndGet();
 				}
 				tree.addChild(new ParseTree(c, fileOptions));
-				constructCount.peek().incrementAndGet();
 			} else if(t.type.equals(TType.STRING) || t.type.equals(TType.COMMAND)) {
 				tree.addChild(new ParseTree(new CString(t.val(), t.target), fileOptions));
 				constructCount.peek().incrementAndGet();
@@ -1944,13 +1955,13 @@ public final class MethodScriptCompiler {
 		for(ParseTree m : tree.getAllNodes()) {
 			if(m.getData() instanceof CBareString && !(m.getData() instanceof CKeyword)) {
 				if(m.getFileOptions().isStrict()) {
-					compilerErrors.add(new ConfigCompileException("Use of bare strings in strict mode is not"
-							+ " allowed.", m.getTarget()));
+					compilerErrors.add(new ConfigCompileException("Use of bare (unquoted) string: "
+							+ m.getData().val(), m.getTarget()));
 				} else {
 					env.getEnv(CompilerEnvironment.class).addCompilerWarning(m.getFileOptions(),
-							new CompilerWarning("Use of bare string", m.getTarget(),
+							new CompilerWarning("Use of bare (unquoted) string: "
+									+ m.getData().val(), m.getTarget(),
 									FileOptions.SuppressWarning.UseBareStrings));
-					return; // for now, only one warning per file
 				}
 			}
 		}
@@ -2940,8 +2951,10 @@ public final class MethodScriptCompiler {
 
 	@SuppressWarnings("ThrowableResultIgnored")
 	private static void processEarlyKeywords(TokenStream stream, Environment env, Set<ConfigCompileException> compileErrors) {
-		for(int i = 0; i < stream.size(); i++) {
-			Token token = stream.get(i);
+		Token token;
+		for(ListIterator<Token> it = stream.listIterator(); it.hasNext(); ) {
+			int ind = it.nextIndex();
+			token = it.next();
 
 			// Some keywords look like function names, we need those too.
 			if(token.type != TType.KEYWORD && token.type != TType.FUNC_NAME) {
@@ -2954,11 +2967,19 @@ public final class MethodScriptCompiler {
 			}
 
 			// Now that all the children of the rest of the chain are processed, we can do the processing of this level.
+			int newInd;
 			try {
-				i = keyword.process(stream, env, i);
+				newInd = keyword.process(stream, env, ind);
 			} catch (ConfigCompileException ex) {
 				compileErrors.add(ex);
+				continue;
 			}
+
+			// Create iterator at new index. Required in all cases to prevent ConcurrentModificationExceptions.
+			if(newInd >= stream.size()) {
+				break;
+			}
+			it = stream.listIterator(newInd + 1); // +1 to let the next .next() call select that index.
 		}
 	}
 
@@ -3077,10 +3098,13 @@ public final class MethodScriptCompiler {
 			Mixed retc = script.eval(gg, env);
 			if(root.numberOfChildren() == 1) {
 				returnable = retc;
+				if(done == null) {
+					// string builder is not needed, so return immediately
+					return returnable;
+				}
 			}
-			@SuppressWarnings("null")
-			String ret = retc instanceof CNull ? "null" : retc.val();
-			if(ret != null && !ret.trim().isEmpty()) {
+			String ret = retc.val();
+			if(!ret.trim().isEmpty()) {
 				b.append(ret).append(" ");
 			}
 		}

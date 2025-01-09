@@ -5,14 +5,11 @@ import com.laytonsmith.PureUtilities.CommandExecutor;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.FileWriteMode;
 import com.laytonsmith.PureUtilities.Common.HTMLUtils;
-import com.laytonsmith.PureUtilities.Common.MutableObject;
 import com.laytonsmith.PureUtilities.Common.OSUtils;
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Common.WinRegistry;
-import com.laytonsmith.PureUtilities.LimitedQueue;
-import com.laytonsmith.PureUtilities.RunnableQueue;
 import com.laytonsmith.PureUtilities.SignalHandler;
 import com.laytonsmith.PureUtilities.SignalType;
 import com.laytonsmith.PureUtilities.Signals;
@@ -21,7 +18,6 @@ import com.laytonsmith.abstraction.AbstractConvertor;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCAttributeModifier;
 import com.laytonsmith.abstraction.MCColor;
-import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCFireworkBuilder;
 import com.laytonsmith.abstraction.MCInventory;
@@ -43,6 +39,7 @@ import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.enums.MCAttribute;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
+import com.laytonsmith.abstraction.enums.MCEquipmentSlotGroup;
 import com.laytonsmith.abstraction.enums.MCPatternShape;
 import com.laytonsmith.abstraction.enums.MCPotionType;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
@@ -109,14 +106,12 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.NoSuchElementException;
-import java.util.Queue;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.UUID;
@@ -131,6 +126,10 @@ import static com.laytonsmith.PureUtilities.TermColors.YELLOW;
 import static com.laytonsmith.PureUtilities.TermColors.p;
 import static com.laytonsmith.PureUtilities.TermColors.pl;
 import static com.laytonsmith.PureUtilities.TermColors.reset;
+import com.laytonsmith.abstraction.entities.MCTransformation;
+import com.laytonsmith.core.natives.interfaces.Mixed;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 /**
  * This is a command line implementation of the in game interpreter mode. This should only be run while the server is
@@ -144,14 +143,8 @@ public final class Interpreter {
 	 *
 	 * BAD THINGS WILL HAPPEN TO EVERYBODY YOU LOVE IF THIS IS CHANGED!
 	 */
-	private static final String UNIX_INTERPRETER_INSTALLATION_LOCATION = "/usr/local/bin/";
+	private static final String UNIX_INTERPRETER_INSTALLATION_LOC = "/usr/local/bin/";
 
-	/**
-	 * Be sure to update this if the powershell.psm1 file changes.
-	 */
-	private static final String POWERSHELL_MODULE_VERSION = "1.0.0";
-
-	private boolean inTTYMode = false;
 	private boolean multilineMode = false;
 	private boolean inShellMode = false;
 	private String script = "";
@@ -160,8 +153,6 @@ public final class Interpreter {
 	private Thread scriptThread = null;
 
 	private volatile boolean isExecuting = false;
-
-	private final Queue<String> commandHistory = new LimitedQueue<>(MAX_COMMAND_HISTORY);
 
 	/**
 	 * If they mash ctrlC a bunch, they probably really want to quit, so we'll keep track of this, and reset it only if
@@ -173,11 +164,6 @@ public final class Interpreter {
 	 * After this many mashes of Ctrl+C, clearly they want to exit, so we'll exit the shell.
 	 */
 	private static final int MAX_CTRL_C_MASHES = 5;
-
-	/**
-	 * Max commands that are tracked.
-	 */
-	private static final int MAX_COMMAND_HISTORY = 100;
 
 	public static void startWithTTY(File file, List<String> args, boolean systemExitOnFailure) throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
 		startWithTTY(file.getCanonicalPath(), args, systemExitOnFailure);
@@ -216,7 +202,8 @@ public final class Interpreter {
 				+ "If the line starts with $$, then the rest of the line is taken to be a shell command. The command is taken as a string, wrapped\n"
 				+ "in shell_adv(), (where system out and system err are piped to the corresponding outputs).\n"
 				+ "If $$ is on a line by itself, it puts the shell in shell_adv mode, and each line is taken as if it started\n"
-				+ "with $$. Use - on a line by itself to exit this mode as well.\n\n"
+				+ "with $$. Use - on a line by itself to exit this mode as well. Using ~ on a line by itself clears\n"
+				+ "the environment (i.e. unsets all variables and procs, etc).\n\n"
 				+ "For more information about a specific function, type \"help function\"\n"
 				+ "and for documentation plus examples, type \"examples function\". See the api tool\n"
 				+ "for more information about this feature.";
@@ -237,6 +224,7 @@ public final class Interpreter {
 	 * @throws IOException
 	 * @throws DataSourceException
 	 * @throws URISyntaxException
+	 * @throws Profiles.InvalidProfileException
 	 */
 	public Interpreter(List<String> args, String cwd) throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
 		this(args, cwd, false);
@@ -253,17 +241,17 @@ public final class Interpreter {
 		if(System.console() == null) {
 			Scanner scanner = new Scanner(System.in);
 			//We need to read in everything, it's basically in multiline mode
-			StringBuilder script = new StringBuilder();
+			StringBuilder s = new StringBuilder();
 			String line;
 			try {
 				while((line = scanner.nextLine()) != null) {
-					script.append(line).append("\n");
+					s.append(line).append("\n");
 				}
 			} catch (NoSuchElementException e) {
 				//Done
 			}
 			try {
-				execute(script.toString(), args);
+				execute(s.toString(), args);
 				StreamUtils.GetSystemOut().print(TermColors.reset());
 				System.exit(0);
 			} catch (ConfigCompileException ex) {
@@ -505,7 +493,7 @@ public final class Interpreter {
 	 * @throws IOException
 	 * @throws DataSourceException
 	 * @throws URISyntaxException
-	 * @throws com.laytonsmith.tools.docgen.DocGenTemplates.Generator.GenerateException
+	 * @throws DocGenTemplates.Generator.GenerateException
 	 */
 	public static String formatDocsForCmdline(String function, boolean showExamples) throws ConfigCompileException,
 			IOException, DataSourceException, URISyntaxException, DocGenTemplates.Generator.GenerateException {
@@ -515,8 +503,8 @@ public final class Interpreter {
 		b.append(TermColors.CYAN).append(d.ret).append(" ");
 		b.append(TermColors.RESET).append(f.getName()).append("(")
 				.append(TermColors.MAGENTA).append(d.originalArgs).append(TermColors.RESET).append(")\n");
-		if(f instanceof Function) {
-			Class<? extends CREThrowable>[] thrown = ((Function) f).thrown();
+		if(f instanceof Function function1) {
+			Class<? extends CREThrowable>[] thrown = function1.thrown();
 			if(thrown != null && thrown.length > 0) {
 				b.append("Throws: ");
 				Set<String> th = new HashSet<>();
@@ -538,16 +526,15 @@ public final class Interpreter {
 			String desc = reverseHTML(d.extendedDesc);
 			b.append(TermColors.WHITE).append(desc).append("\n");
 		}
-		if(f instanceof Function) {
+		if(f instanceof Function function1) {
 			if(f.getClass().getAnnotation(seealso.class) != null) {
 				List<String> seeAlso = new ArrayList<>();
-				for(Class c : ((Function) f).seeAlso()) {
+				for(Class c : function1.seeAlso()) {
 					Object i = ReflectionUtils.newInstance(c);
-					if(i instanceof Documentation) {
-						Documentation seeAlsoDocumentation = (Documentation) i;
+					if(i instanceof Documentation seeAlsoDocumentation) {
 						String color = TermColors.YELLOW;
 						if(i instanceof Function) {
-							if(((Function) f).isRestricted()) {
+							if(function1.isRestricted()) {
 								color = TermColors.CYAN;
 							} else {
 								color = TermColors.GREEN;
@@ -606,8 +593,8 @@ public final class Interpreter {
 				String color;
 				try {
 					FunctionBase f = FunctionList.getFunction(function, null, Target.UNKNOWN);
-					if(f instanceof Function) {
-						if(((Function) f).isRestricted()) {
+					if(f instanceof Function function1) {
+						if(function1.isRestricted()) {
 							color = TermColors.CYAN;
 						} else {
 							color = TermColors.GREEN;
@@ -715,6 +702,7 @@ public final class Interpreter {
 	 * @param args
 	 * @throws ConfigCompileException
 	 * @throws IOException
+	 * @throws ConfigCompileGroupException
 	 */
 	public void execute(String script, List<String> args) throws ConfigCompileException, IOException, ConfigCompileGroupException {
 		execute(script, args, null);
@@ -729,6 +717,7 @@ public final class Interpreter {
 	 * @param fromFile
 	 * @throws ConfigCompileException
 	 * @throws IOException
+	 * @throws ConfigCompileGroupException
 	 */
 	public void execute(String script, List<String> args, File fromFile) throws ConfigCompileException, IOException, ConfigCompileGroupException {
 		CmdlineEvents.cmdline_prompt_input.CmdlinePromptInput input = new CmdlineEvents.cmdline_prompt_input.CmdlinePromptInput(script, inShellMode);
@@ -747,6 +736,18 @@ public final class Interpreter {
 		}
 		if("help".equals(script)) {
 			pl(getHelpMsg());
+			return;
+		}
+		if("~".equals(script)) {
+			pl("Clearing environment.");
+			env.getEnv(GlobalEnv.class).GetProcs().clear();
+			env.getEnv(GlobalEnv.class).GetVarList().clear();
+			for(Thread t : env.getEnv(StaticRuntimeEnv.class).GetDaemonManager().getActiveThreads()) {
+				t.interrupt();
+			}
+			env.getEnv(StaticRuntimeEnv.class).getExecutionQueue().stopAll();
+			env.getEnv(StaticRuntimeEnv.class).getIncludeCache().clear();
+			staticAnalysis = new StaticAnalysis(true);
 			return;
 		}
 		if(fromFile == null) {
@@ -830,12 +831,18 @@ public final class Interpreter {
 			ProfilePoint p = this.env.getEnv(StaticRuntimeEnv.class)
 					.GetProfiler().start("Interpreter Script", LogLevel.ERROR);
 			try {
-				final MutableObject<Throwable> wasThrown = new MutableObject<>();
 				scriptThread = new Thread(new Runnable() {
 
 					@Override
 					public void run() {
 						try {
+							if(tree != null && tree.getChildren().size() == 1
+									&& tree.getChildAt(0).getData() instanceof IVariable ivar) {
+								Mixed i = env.getEnv(GlobalEnv.class).GetVarList()
+										.get(ivar.getVariableName(), ivar.getTarget(), env).ival();
+								StreamUtils.GetSystemOut().println(i.val());
+								return;
+							}
 							MethodScriptCompiler.execute(tree, env, new MethodScriptComplete() {
 								@Override
 								public void done(String output) {
@@ -903,6 +910,7 @@ public final class Interpreter {
 	 * @param args Arguments to be passed to the script
 	 * @throws ConfigCompileException If there is a compile error in the script
 	 * @throws IOException
+	 * @throws ConfigCompileGroupException
 	 */
 	public void execute(File script, List<String> args) throws ConfigCompileException, IOException, ConfigCompileGroupException {
 		String scriptString = FileUtil.read(script);
@@ -911,7 +919,7 @@ public final class Interpreter {
 
 	public boolean doBuiltin(String script) {
 		List<String> args = StringUtils.ArgParser(script);
-		if(args.size() > 0) {
+		if(!args.isEmpty()) {
 			String command = args.get(0);
 			args.remove(0);
 			command = command.toLowerCase(Locale.ENGLISH);
@@ -960,7 +968,7 @@ public final class Interpreter {
 					// is actually useful as is, because this is not supposed to be a scripting environment.. that's
 					// what the normal shell is for.
 					boolean colorize = false;
-					if(args.size() > 0 && "-e".equals(args.get(0))) {
+					if(!args.isEmpty() && "-e".equals(args.get(0))) {
 						colorize = true;
 						args.remove(0);
 					}
@@ -981,12 +989,12 @@ public final class Interpreter {
 			case MAC: {
 				try {
 					URL jar = Interpreter.class.getProtectionDomain().getCodeSource().getLocation();
-					File exe = new File(UNIX_INTERPRETER_INSTALLATION_LOCATION + commandName);
+					File exe = new File(UNIX_INTERPRETER_INSTALLATION_LOC + commandName);
 					String bashScript = Static.GetStringResource("/interpreter-helpers/bash.sh");
 					try {
 						bashScript = bashScript.replaceAll("%%LOCATION%%", jar.toURI().getPath());
 					} catch (URISyntaxException ex) {
-						ex.printStackTrace();
+						ex.printStackTrace(System.err);
 					}
 					exe.createNewFile();
 					if(!exe.canWrite()) {
@@ -1013,7 +1021,6 @@ public final class Interpreter {
 				break;
 			}
 			case WINDOWS: {
-				Path tmp = null;
 				try {
 					// C# installer, not really uninstallable, so temporarily removing this, so the other installer
 					// can be used with no risk.
@@ -1082,7 +1089,7 @@ public final class Interpreter {
 			}
 		}
 		StreamUtils.GetSystemOut().println("MethodScript has successfully been installed on your system. Note that you may need to rerun the install command"
-				+ " if you change locations of the jar, or rename it. Be sure to put \"#!" + UNIX_INTERPRETER_INSTALLATION_LOCATION + commandName + "\" at the top of all your scripts,"
+				+ " if you change locations of the jar, or rename it. Be sure to put \"#!" + UNIX_INTERPRETER_INSTALLATION_LOC + commandName + "\" at the top of all your scripts,"
 				+ " if you wish them to be executable on unix systems, and set the execution bit with chmod +x <script name> on unix systems. (Or use the '" + commandName + " -- new' cmdline utility.)");
 		StreamUtils.GetSystemOut().println("Try this script to test out the basic features of the scripting system:\n");
 		StreamUtils.GetSystemOut().println(Static.GetStringResource("/interpreter-helpers/sample.ms"));
@@ -1109,7 +1116,7 @@ public final class Interpreter {
 			case LINUX:
 			case MAC:
 				try {
-					File exe = new File(UNIX_INTERPRETER_INSTALLATION_LOCATION + commandName);
+					File exe = new File(UNIX_INTERPRETER_INSTALLATION_LOC + commandName);
 					if(!exe.delete()) {
 						throw new IOException();
 					}
@@ -1131,8 +1138,6 @@ public final class Interpreter {
 	@convert(type = Implementation.Type.SHELL)
 	public static class ShellConvertor extends AbstractConvertor {
 
-		RunnableQueue queue = new RunnableQueue("ShellInterpreter-userland");
-
 		@Override
 		public MCLocation GetLocation(MCWorld w, double x, double y, double z, float yaw, float pitch) {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
@@ -1141,16 +1146,6 @@ public final class Interpreter {
 		@Override
 		public Class GetServerEventMixin() {
 			return ShellEventMixin.class;
-		}
-
-		@Override
-		public MCEnchantment[] GetEnchantmentValues() {
-			throw new UnsupportedOperationException("This method is not supported from a shell.");
-		}
-
-		@Override
-		public MCEnchantment GetEnchantmentByName(String name) {
-			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 
 		@Override
@@ -1175,6 +1170,21 @@ public final class Interpreter {
 
 		@Override
 		public MCAttributeModifier GetAttributeModifier(MCAttribute attr, UUID id, String name, double amt, MCAttributeModifier.Operation op, MCEquipmentSlot slot) {
+			throw new UnsupportedOperationException("This method is not supported from a shell.");
+		}
+
+		@Override
+		public MCAttributeModifier GetAttributeModifier(MCAttribute attr, UUID id, String name, double amt, MCAttributeModifier.Operation op, MCEquipmentSlotGroup slot) {
+			throw new UnsupportedOperationException("This method is not supported from a shell.");
+		}
+
+		@Override
+		public MCAttributeModifier GetAttributeModifier(MCAttribute attr, MCNamespacedKey key, double amt, MCAttributeModifier.Operation op, MCEquipmentSlot slot) {
+			throw new UnsupportedOperationException("This method is not supported from a shell.");
+		}
+
+		@Override
+		public MCAttributeModifier GetAttributeModifier(MCAttribute attr, MCNamespacedKey key, double amt, MCAttributeModifier.Operation op, MCEquipmentSlotGroup slot) {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 
@@ -1210,6 +1220,11 @@ public final class Interpreter {
 
 		@Override
 		public MCColor GetColor(int red, int green, int blue) {
+			throw new UnsupportedOperationException("This method is not supported from a shell.");
+		}
+
+		@Override
+		public MCColor GetColor(int red, int green, int blue, int alpha) {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 
@@ -1297,6 +1312,17 @@ public final class Interpreter {
 		public MCNamespacedKey GetNamespacedKey(String key) {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
+
+		@Override
+		public MCTransformation GetTransformation(Quaternionf leftRotation, Quaternionf rightRotation, Vector3f scale, Vector3f translation) {
+			throw new UnsupportedOperationException("This method is not supported from a shell.");
+		}
+
+		@Override
+		public boolean IsMainThread() {
+			return false;
+		}
+
 	}
 
 }

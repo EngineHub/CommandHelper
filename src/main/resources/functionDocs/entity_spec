@@ -11,9 +11,8 @@ array {entityID} Returns an associative array containing all the data of the giv
 * %KEY_AREAEFFECTCLOUD_DURATION%: The duration of the cloud in ticks.
 * %KEY_AREAEFFECTCLOUD_DURATIONONUSE%: The amount the duration will change when the effects are applied.
 * %KEY_AREAEFFECTCLOUD_PARTICLE%: The particle type which comprises the cloud (can be %PARTICLE%).
-Can accept a particle array for setting index data required for specific particle types.
-This particle array must contain a "particle" key, and supports the keys "block", "item", or "color" when applicable.
-* %KEY_AREAEFFECTCLOUD_POTIONMETA%: An array of potion effect arrays for the cloud.
+Can also accept a particle array for specific particle data. See spawn_particle().
+* %KEY_AREAEFFECTCLOUD_POTIONMETA%: An associative array of potion item meta.
 * %KEY_AREAEFFECTCLOUD_RADIUS%: The radius of the cloud.
 * %KEY_AREAEFFECTCLOUD_RADIUSONUSE%: The distance the radius will change when the effects are applied.
 * %KEY_AREAEFFECTCLOUD_RADIUSPERTICK%: The distance the radius will change per tick.
@@ -24,11 +23,11 @@ This particle array must contain a "particle" key, and supports the keys "block"
 | ARROW
 | 
 * %KEY_ARROW_CRITICAL%: If this arrow is critical. (boolean)
-* %KEY_ARROW_KNOCKBACK%: The knockback strength. (int)
+* %KEY_ARROW_KNOCKBACK%: The knockback strength. (int) (before MC 1.21)
 * %KEY_ARROW_DAMAGE%: The amount of damage. (double)
 * %KEY_ARROW_PIERCE_LEVEL%: The remaining times that this arrow can pierce through an entity. (int from 0 and 127)
 * %KEY_ARROW_PICKUP%: Whether picking up this arrow is ALLOWED, DISALLOWED, or CREATIVE_ONLY.
-* %KEY_TIPPEDARROW_POTIONMETA%: An associative array with a "base" potion array and a "potions" array of effect arrays for a tipped arrow.
+* %KEY_TIPPEDARROW_POTIONMETA%: An associative array of potion item meta for a tipped arrow.
 |-
 | ARMOR_STAND
 |
@@ -63,7 +62,7 @@ without knowing the rotations on the other axis or of other body parts beforehan
 |-
 | BOAT
 |
-* %KEY_BOAT_TYPE%: Which tree species the boat is composed of. (can be %TREE_SPECIES%)
+* %KEY_BOAT_TYPE%: Which tree species the boat is composed of. (can be ACACIA, BIRCH, DARK_OAK, JUNGLE, OAK, or SPRUCE) (prior to MC 1.21.2)
 |-
 | CAT
 |
@@ -304,9 +303,10 @@ without knowing the rotations on the other axis or of other body parts beforehan
 * %KEY_DISPLAY_TEXT_ALIGNMENT%: The text alignment. Can be CENTER (default), LEFT or RIGHT.
 * %KEY_DISPLAY_TEXT%: The text for this display entity.
 * %KEY_DISPLAY_TEXT_LINE_WIDTH%: The max width for a line of text before splitting. (default: 200)
-* %KEY_DISPLAY_TEXT_SEE_THROUGH%: Whether the text is visible through blocks. (default: false)
+* %KEY_DISPLAY_TEXT_SEE_THROUGH%: Whether the text is visible through blocks and entities are visible through the background. (default: false)
 * %KEY_DISPLAY_TEXT_SHADOW%: Whether the text has a shadow. (default: false) Not to be confused with an entity shadow.
-* %KEY_DISPLAY_TEXT_OPACITY%: The alpha opacity of the text from 0 to 255. (default: 255)
+* %KEY_DISPLAY_TEXT_OPACITY%: The alpha opacity of the text from 0 to 255. (default: 255) If value is less than 26, the text will not be rendered.
+* %KEY_DISPLAY_TEXT_BACKGROUND_COLOR%: An transparent color array for the background. ("r", "g", "b" and "a" keys with 0-255 integer values) If null, it will use the default text background. If alpha channel is less than 26, the background will not be rendered.
 |-
 | TRIDENT
 | 
@@ -341,6 +341,7 @@ without knowing the rotations on the other axis or of other body parts beforehan
 * %KEY_WOLF_COLOR%: The collar color of the wolf (can be %DYE_COLOR%).
 * %KEY_WOLF_INTERESTED%: Whether the wolf is interested, tilting its head. (MC 1.19+)
 * %KEY_GENERIC_SITTING%: If the wolf is sitting.
+* %KEY_WOLF_TYPE%: The type of wolf (can be %WOLF_TYPE%) (MC 1.20.5+)
 |-
 | ZOGLIN
 |

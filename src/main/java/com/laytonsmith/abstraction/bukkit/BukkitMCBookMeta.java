@@ -83,4 +83,18 @@ public class BukkitMCBookMeta extends BukkitMCItemMeta implements MCBookMeta {
 		bm.setPages(pages);
 	}
 
+	@Override
+	public Generation getGeneration() {
+		BookMeta.Generation gen = bm.getGeneration();
+		if(gen == null) {
+			return Generation.ORIGINAL;
+		}
+		return Generation.valueOf(gen.name());
+	}
+
+	@Override
+	public void setGeneration(Generation gen) {
+		bm.setGeneration(BookMeta.Generation.valueOf(gen.name()));
+	}
+
 }

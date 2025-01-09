@@ -1,0 +1,13 @@
+{
+  "name": "apps.methodscript.com",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "@typespec/compiler": "latest",
+    "@typespec/http": "^0.55.0",
+    "@typespec/openapi": "^0.55.0",
+    "@typespec/openapi3": "^0.55.0",
+    "@typespec/versioning": "^0.55.0"
+  },
+  "private": true
+}

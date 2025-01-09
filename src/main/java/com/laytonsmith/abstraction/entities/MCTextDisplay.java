@@ -1,14 +1,16 @@
 package com.laytonsmith.abstraction.entities;
 
+import com.laytonsmith.abstraction.MCColor;
+
 public interface MCTextDisplay extends MCDisplay {
 
 	Alignment getAlignment();
 
 	void setAlignment(Alignment alignment);
 
-	boolean usesDefaultBackground();
+	MCColor getBackgroundColor();
 
-	void setUsesDefaultBackground(boolean defaultBackground);
+	void setBackgroundColor(MCColor color);
 
 	int getLineWidth();
 

@@ -27,4 +27,15 @@ public interface MCBookMeta extends MCItemMeta {
 	void setPages(List<String> pages);
 
 	void setPages(String... pages);
+
+	Generation getGeneration();
+
+	void setGeneration(Generation gen);
+
+	enum Generation {
+		ORIGINAL,
+		COPY_OF_ORIGINAL,
+		COPY_OF_COPY,
+		TATTERED
+	}
 }

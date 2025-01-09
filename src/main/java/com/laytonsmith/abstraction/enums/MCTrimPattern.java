@@ -61,9 +61,11 @@ public abstract class MCTrimPattern<Concrete> extends DynamicEnum<MCTrimPattern.
 	}
 
 	public enum MCVanillaTrimPattern {
+		BOLT(MCVersion.MC1_20_6),
 		COAST,
 		DUNE,
 		EYE,
+		FLOW(MCVersion.MC1_20_6),
 		HOST,
 		RAISER,
 		RIB,
@@ -77,6 +79,20 @@ public abstract class MCTrimPattern<Concrete> extends DynamicEnum<MCTrimPattern.
 		WARD,
 		WAYFINDER,
 		WILD,
-		UNKNOWN
+		UNKNOWN;
+
+		private final MCVersion since;
+
+		MCVanillaTrimPattern() {
+			this(MCVersion.MC1_19_4);
+		}
+
+		MCVanillaTrimPattern(MCVersion since) {
+			this.since = since;
+		}
+
+		public boolean existsIn(MCVersion version) {
+			return version.gte(this.since);
+		}
 	}
 }

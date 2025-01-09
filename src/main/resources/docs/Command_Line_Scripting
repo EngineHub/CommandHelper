@@ -35,12 +35,12 @@ throwing a stack trace or something. This is not a bug per-se, you must simply n
 
 To use the cmdline tools, there are three methods. First, the cmdline interpreter can be accessed by simply running 
 <code>mscript</code>. This simply runs the command line interpreter, which is in fact the engine for all the other 
-methods. The second method is to use <code>mscript <filename></code>. This executes the file, assuming it is a valid 
+methods. The second method is to use <code>mscript &gt;filename&lt;</code>. This executes the file, assuming it is a valid
 pure mscript file.
 
 Finally, you may execute a MethodScript file on unix systems by executing it directly. To do so, be sure to put 
 <code>#!/usr/bin/env /usr/local/bin/mscript</code> at the top of your file, then set the file's execution bit, 
-using <code>chmod +x <filename></code>. Then, you may simply run <code>./script.ms</code> (assuming the filename is 
+using <code>chmod +x &gt;filename&lt;</code>. Then, you may simply run <code>./script.ms</code> (assuming the filename is
 script.ms). Using the cmdline tool "new" you can create a blank file with the file set up correctly. 
 [[CommandLineTools#Tool listing|See this page]]
 

@@ -26,6 +26,7 @@ import com.laytonsmith.abstraction.enums.MCRemoveCause;
 import com.laytonsmith.abstraction.enums.MCSpawnReason;
 import com.laytonsmith.abstraction.enums.MCTargetReason;
 import com.laytonsmith.abstraction.enums.MCUnleashReason;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.events.MCCreatureSpawnEvent;
 import com.laytonsmith.abstraction.events.MCEntityChangeBlockEvent;
 import com.laytonsmith.abstraction.events.MCEntityDamageByEntityEvent;
@@ -383,14 +384,14 @@ public class EntityEvents {
 
 		@Override
 		public String docs() {
-			return "{id: <macro> The entityID | type: <macro> the entity type of the projectile"
+			return "{id: <macro> The UUID of the projectile | type: <macro> the entity type of the projectile"
 					+ " | hittype: <string match> the type of object hit, either ENTITY or BLOCK}"
 					+ " Fires when a projectile collides with something."
-					+ " {type | id: the entityID of the projectile |"
-					+ " location: where it makes contact | shooter | hittype | hit: the entity id or block"
-					+ " location array of the hit object.}"
+					+ " {type | id | location: the projectile's location upon impact"
+					+ " | shooter | hittype | hit: the entity id or block location array of the hit object."
+					+ " | hitface: the face that was hit on the block, if a block was hit}"
 					+ " {shooter: the entityID of the mob/player that fired"
-					+ " the projectile, or null if it is from a dispenser}"
+					+ " the projectile, or location array if it is from a dispenser}"
 					+ " {id}";
 		}
 
@@ -451,6 +452,7 @@ public class EntityEvents {
 			if(hitblock != null) {
 				ret.put("hit", ObjectGenerator.GetGenerator().location(hitblock.getLocation(), false));
 				ret.put("hittype", new CString("BLOCK", t));
+				ret.put("hitface", new CString(e.getHitFace().name(), t));
 			} else {
 				MCEntity hitentity = e.getHitEntity();
 				if(hitentity != null) {
@@ -1873,12 +1875,16 @@ public class EntityEvents {
 
 		@Override
 		public String docs() {
-			return "{type: <macro> The entity type of the entity | player: <macro> The player triggering the event"
+			return "{type: <macro> The type of hanging entity | player: <macro> The player placing the entity"
 					+ " | world: <macro> The world the entity is in}"
 					+ " This event is called when a player attempts to place an item frame, painting, or leash."
-					+ " {id: The entity ID of the entity. | type: The type of the hanging entity; can be ITEM_FRAME,"
-					+ " PAINTING, or LEASE_HITCH | location: Where the entity was placed. |"
-					+ " player: The name of the player which placed this entity. }"
+					+ " {id: The UUID of the hanging entity. | type: The type of the hanging entity (ITEM_FRAME,"
+					+ " GLOW_ITEM_FRAME, PAINTING, or LEASE_HITCH) | location: Where the entity was placed."
+					+ " | against: The location array of the block the hanging is being placed on."
+					+ " | face: The face of the block the hanging is being placed."
+					+ " | player: The name of the player placing the entity, or null."
+					+ " | item: The item array of the hanging being placed, or null. (MC 1.17.1+)"
+					+ " | hand: The hand used to place the item, or null. Can be main_hand or off_hand. (MC 1.19.2+)}"
 					+ " {}"
 					+ " {}";
 		}
@@ -1914,19 +1920,39 @@ public class EntityEvents {
 
 		@Override
 		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
-			if(event instanceof MCHangingPlaceEvent hangingPlaceEvent) {
+			if(event instanceof MCHangingPlaceEvent e) {
 				Map<String, Mixed> ret = evaluate_helper(event);
-				MCHanging hanging = hangingPlaceEvent.getEntity();
+				MCHanging hanging = e.getEntity();
 
 				ret.put("type", new CString(hanging.getType().name(), Target.UNKNOWN));
 				ret.put("id", new CString(hanging.getUniqueId().toString(), Target.UNKNOWN));
-				MCPlayer player = hangingPlaceEvent.getPlayer();
+				MCPlayer player = e.getPlayer();
 				if(player == null) {
 					ret.put("player", CNull.NULL);
 				} else {
 					ret.put("player", new CString(player.getName(), Target.UNKNOWN));
 				}
 				ret.put("location", ObjectGenerator.GetGenerator().location(hanging.getLocation()));
+				ret.put("against", ObjectGenerator.GetGenerator().location(e.getBlock().getLocation(), false));
+				ret.put("face", new CString(e.getBlockFace().name(), Target.UNKNOWN));
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_17_X)) {
+					MCItemStack item = e.getItem();
+					if(item != null) {
+						ret.put("item", ObjectGenerator.GetGenerator().item(item, Target.UNKNOWN));
+					} else {
+						ret.put("item", CNull.NULL);
+					}
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_2)) {
+						MCEquipmentSlot hand = e.getHand();
+						if(hand == null) {
+							ret.put("hand", CNull.NULL);
+						} else if(hand == MCEquipmentSlot.WEAPON) {
+							ret.put("hand", new CString("main_hand", Target.UNKNOWN));
+						} else {
+							ret.put("hand", new CString("off_hand", Target.UNKNOWN));
+						}
+					}
+				}
 				return ret;
 			} else {
 				throw new EventException("Cannot convert event to HangingPlaceEvent");

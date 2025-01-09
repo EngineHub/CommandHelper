@@ -14,6 +14,7 @@ import com.laytonsmith.abstraction.bukkit.entities.BukkitMCStorageMinecart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCTNT;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCThrownPotion;
 import com.laytonsmith.abstraction.enums.MCEntityType;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
@@ -31,7 +32,6 @@ public class BukkitMCEntityType extends MCEntityType<EntityType> {
 		super(abstractedType, concreteType);
 	}
 
-	// This way we don't take up extra memory on non-bukkit implementations
 	public static void build() {
 		for(MCVanillaEntityType v : MCVanillaEntityType.values()) {
 			if(v.existsIn(Static.getServer().getMinecraftVersion())) {
@@ -39,7 +39,7 @@ public class BukkitMCEntityType extends MCEntityType<EntityType> {
 				try {
 					type = getBukkitType(v);
 				} catch (IllegalArgumentException | NoSuchFieldError ex) {
-					MSLog.GetLogger().w(MSLog.Tags.RUNTIME, "Could not find a Bukkit EntityType for " + v.name(), Target.UNKNOWN);
+					MSLog.GetLogger().w(MSLog.Tags.GENERAL, "Could not find a Bukkit EntityType for " + v.name(), Target.UNKNOWN);
 					continue;
 				}
 				BukkitMCEntityType wrapper = new BukkitMCEntityType(type, v);
@@ -51,8 +51,10 @@ public class BukkitMCEntityType extends MCEntityType<EntityType> {
 		}
 		for(EntityType b : EntityType.values()) {
 			if(!BUKKIT_MAP.containsKey(b)) {
-				MAP.put(b.name(), new BukkitMCEntityType(b, MCVanillaEntityType.UNKNOWN));
-				BUKKIT_MAP.put(b, new BukkitMCEntityType(b, MCVanillaEntityType.UNKNOWN));
+				MSLog.GetLogger().w(MSLog.Tags.GENERAL, "Could not find MCEntityType for " + b.name(), Target.UNKNOWN);
+				MCEntityType wrapper = new BukkitMCEntityType(b, MCVanillaEntityType.UNKNOWN);
+				MAP.put(b.name(), wrapper);
+				BUKKIT_MAP.put(b, wrapper);
 			}
 		}
 	}
@@ -88,9 +90,45 @@ public class BukkitMCEntityType extends MCEntityType<EntityType> {
 
 	// Add exceptions here
 	private static EntityType getBukkitType(MCVanillaEntityType v) {
-		switch(v) {
-			case ENDER_EYE:
-				return EntityType.ENDER_SIGNAL;
+		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
+			switch(v) {
+				case ENDER_EYE:
+					return EntityType.EYE_OF_ENDER;
+				case DROPPED_ITEM:
+					return EntityType.ITEM;
+				case LEASH_HITCH:
+					return EntityType.LEASH_KNOT;
+				case SPLASH_POTION:
+					return EntityType.POTION;
+				case THROWN_EXP_BOTTLE:
+					return EntityType.EXPERIENCE_BOTTLE;
+				case PRIMED_TNT:
+					return EntityType.TNT;
+				case FIREWORK:
+					return EntityType.FIREWORK_ROCKET;
+				case MINECART_COMMAND:
+					return EntityType.COMMAND_BLOCK_MINECART;
+				case MINECART_CHEST:
+					return EntityType.CHEST_MINECART;
+				case MINECART_FURNACE:
+					return EntityType.FURNACE_MINECART;
+				case MINECART_TNT:
+					return EntityType.TNT_MINECART;
+				case MINECART_HOPPER:
+					return EntityType.HOPPER_MINECART;
+				case MUSHROOM_COW:
+					return EntityType.MOOSHROOM;
+				case SNOWMAN:
+					return EntityType.SNOW_GOLEM;
+				case ENDER_CRYSTAL:
+					return EntityType.END_CRYSTAL;
+				case FISHING_HOOK:
+					return EntityType.FISHING_BOBBER;
+				case LIGHTNING:
+					return EntityType.LIGHTNING_BOLT;
+			}
+		} else if(v == MCVanillaEntityType.ENDER_EYE) {
+			return EntityType.valueOf("ENDER_SIGNAL");
 		}
 		return EntityType.valueOf(v.name());
 	}

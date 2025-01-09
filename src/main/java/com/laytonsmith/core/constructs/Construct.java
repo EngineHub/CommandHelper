@@ -29,6 +29,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
+import org.json.simple.parser.ParseException;
 
 /**
  *
@@ -95,10 +96,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	}
 
 	public Construct(String value, ConstructType ctype, int lineNum, File file, int column) {
-		this.value = value;
-		Static.AssertNonNull(value, "The string value may not be null.");
-		this.ctype = ctype;
-		this.target = new Target(lineNum, file, column);
+		this(value, ctype, new Target(lineNum, file, column));
 	}
 
 	public Construct(String value, ConstructType ctype, Target t) {
@@ -217,6 +215,8 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 				}
 				return map;
 			}
+		} else if(c.isInstanceOf(CClassType.TYPE)) {
+			return c.val();
 		} else {
 			throw new MarshalException("The type of " + c.getClass().getSimpleName() + " is not currently supported", c);
 		}
@@ -235,17 +235,17 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 			return CNull.NULL;
 		}
 		if("".equals(s.trim())) {
-			throw new MarshalException();
+			throw new MarshalException("Empty string.");
 		}
 		if(s.startsWith("{")) {
 			//Object
-			JSONObject obj = (JSONObject) JSONValue.parse(s);
-			CArray ca = CArray.GetAssociativeArray(t);
-			if(obj == null) {
-				//From what I can tell, this happens when the json object is improperly formatted,
-				//so go ahead and throw an exception
-				throw new MarshalException();
+			JSONObject obj;
+			try {
+				obj = (JSONObject) JSONValue.parseWithException(s);
+			} catch (ParseException e) {
+				throw new MarshalException(e.toString());
 			}
+			CArray ca = CArray.GetAssociativeArray(t);
 			for(Object key : obj.keySet()) {
 				ca.set(convertJSON(key, t),
 						convertJSON(obj.get(key), t), t);
@@ -253,9 +253,11 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 			return ca;
 		} else if(s.startsWith("[")) {
 			//It's an array
-			JSONArray array = (JSONArray) JSONValue.parse(s);
-			if(array == null) {
-				throw new MarshalException();
+			JSONArray array;
+			try {
+				array = (JSONArray) JSONValue.parseWithException(s);
+			} catch (ParseException e) {
+				throw new MarshalException(e.toString());
 			}
 			CArray carray = new CArray(t);
 			for(int i = 0; i < array.size(); i++) {
@@ -306,7 +308,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 			}
 			return ca;
 		} else {
-			throw new MarshalException(o.getClass().getSimpleName() + " are not currently supported");
+			throw new MarshalException(o.getClass().getSimpleName() + " are not currently supported.");
 		}
 	}
 

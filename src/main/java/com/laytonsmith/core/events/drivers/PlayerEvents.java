@@ -20,9 +20,12 @@ import com.laytonsmith.abstraction.enums.MCFishingState;
 import com.laytonsmith.abstraction.enums.MCGameMode;
 import com.laytonsmith.abstraction.enums.MCResourcePackStatus;
 import com.laytonsmith.abstraction.enums.MCTeleportCause;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.events.MCExpChangeEvent;
 import com.laytonsmith.abstraction.events.MCFoodLevelChangeEvent;
 import com.laytonsmith.abstraction.events.MCGamemodeChangeEvent;
+import com.laytonsmith.abstraction.events.MCPlayerAdvancementDoneEvent;
+import com.laytonsmith.abstraction.events.MCPlayerBucketEvent;
 import com.laytonsmith.abstraction.events.MCPlayerEnterBedEvent;
 import com.laytonsmith.abstraction.events.MCPlayerLeaveBedEvent;
 import com.laytonsmith.abstraction.events.MCPlayerChatEvent;
@@ -129,7 +132,8 @@ public class PlayerEvents {
 					+ " Fires when a player's food level changes."
 					+ " Cancelling the event will cause the change to not be applied."
 					+ " {player: the player | level: the new food level to be applied"
-					+ " | difference: the difference between the old level and the new }"
+					+ " | difference: the difference between the old level and the new"
+					+ " | item: The item array for the item that caused this change, or null if none}"
 					+ " {level: A different level to be applied }"
 					+ " {}";
 		}
@@ -159,6 +163,13 @@ public class PlayerEvents {
 				ret.put("player", new CString(event.getEntity().getName(), Target.UNKNOWN));
 				ret.put("level", new CInt(event.getFoodLevel(), Target.UNKNOWN));
 				ret.put("difference", new CInt(event.getDifference(), Target.UNKNOWN));
+
+				MCItemStack item = event.getItem();
+				if(item != null) {
+					ret.put("item", ObjectGenerator.GetGenerator().item(item, Target.UNKNOWN));
+				} else {
+					ret.put("item", CNull.NULL);
+				}
 
 				return ret;
 			} else {
@@ -205,7 +216,8 @@ public class PlayerEvents {
 					+ " Fires when a player is finishes eating/drinking an item."
 					+ " Cancelling the event will cause any effects to not be"
 					+ " applied and the item to not be taken from the player."
-					+ " {player: The player consuming the item | item: The item being consumed}"
+					+ " {player: The player consuming the item | item: The item being consumed"
+					+ " | hand: Either the main_hand or off_hand from which the item is consumed (MC 1.19.2+)}"
 					+ " {item: A different item to be consumed, changing this will"
 					+ " cause the original item to remain in the inventory}"
 					+ " {}";
@@ -251,6 +263,13 @@ public class PlayerEvents {
 				Map<String, Mixed> ret = evaluate_helper(e);
 				Mixed item = ObjectGenerator.GetGenerator().item(e.getItem(), Target.UNKNOWN);
 				ret.put("item", item);
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_2)) {
+					if(e.getHand() == MCEquipmentSlot.WEAPON) {
+						ret.put("hand", new CString("main_hand", Target.UNKNOWN));
+					} else {
+						ret.put("hand", new CString("off_hand", Target.UNKNOWN));
+					}
+				}
 				return ret;
 			} else {
 				throw new EventException("Cannot convert to MCPlayerItemConsumeEvent");
@@ -787,13 +806,14 @@ public class PlayerEvents {
 					+ " is clicked. If you don't want multiple events, you can prefilter on hand. If you want to remove"
 					+ " the item that is being used, you must also cancel the event."
 					+ "{action: One of either left_click_block, right_click_block, left_click_air, or right_click_air."
-					+ " If left or right_click_air, neither facing nor location will be present."
+					+ " If left or right_click_air, neither facing, location, nor position will be present."
 					+ " | block: The type of block they clicked, or null if clicked air or if the block is now empty."
 					+ " | item: The item array the player used to click, or null if not holding anything in that hand"
 					+ " | player: The player associated with this event"
 					+ " | facing: The (lowercase) face of the block they clicked. (One of "
 					+ StringUtils.Join(MCBlockFace.values(), ", ", ", or ") + ") |"
-					+ "location: The (x, y, z, world) location of the block they clicked |"
+					+ "location: The location array of the block they clicked |"
+					+ "position: Vector array of the position on the block that was right clicked (MC 1.20.1+) |"
 					+ "hand: The hand used to click with, can be either main_hand or off_hand}"
 					+ "{}"
 					+ "{}";
@@ -903,6 +923,9 @@ public class PlayerEvents {
 					map.put("facing", new CString(pie.getBlockFace().name().toLowerCase(), Target.UNKNOWN));
 					map.put("location", ObjectGenerator.GetGenerator().location(pie.getClickedBlock().getLocation(),
 							false));
+					if(a == MCAction.RIGHT_CLICK_BLOCK && Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_1)) {
+						map.put("position", ObjectGenerator.GetGenerator().vector(pie.getClickedPosition(), Target.UNKNOWN));
+					}
 				}
 				map.put("world", new CString(pie.getPlayer().getWorld().getName(), Target.UNKNOWN));
 				map.put("item", ObjectGenerator.GetGenerator().item(pie.getItem(), Target.UNKNOWN));
@@ -1174,8 +1197,9 @@ public class PlayerEvents {
 					+ "Fires when a player respawns. The player may not exist in the player list during this event."
 					+ "{player: The player that is respawning | "
 					+ "location: The location they are going to respawn at | "
-					+ "bed_spawn: If the respawn location is the player's bed"
-					+ "anchor_spawn: If the respawn location is the player's respawn anchor}"
+					+ "bed_spawn: If the respawn location is the player's bed | "
+					+ "anchor_spawn: If the respawn location is the player's respawn anchor | "
+					+ "reason: One of DEATH, END_PORTAL, or PLUGIN (MC 1.19.4+)}"
 					+ "{location}"
 					+ "{}";
 		}
@@ -1236,6 +1260,9 @@ public class PlayerEvents {
 				map.put("location", location);
 				map.put("bed_spawn", CBoolean.get(event.isBedSpawn()));
 				map.put("anchor_spawn", CBoolean.get(event.isAnchorSpawn()));
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_4)) {
+					map.put("reason", new CString(event.getReason().name(), Target.UNKNOWN));
+				}
 				return map;
 			} else {
 				throw new EventException("Cannot convert e to PlayerRespawnEvent");
@@ -1265,24 +1292,6 @@ public class PlayerEvents {
 				}
 			}
 			return false;
-		}
-
-		@Override
-		public void preExecution(Environment env, ActiveEvent activeEvent) {
-			if(activeEvent.getUnderlyingEvent() instanceof MCPlayerRespawnEvent) {
-				//Static lookups of the player don't seem to work here, but
-				//the player is passed in with the event.
-				MCPlayer player = ((MCPlayerRespawnEvent) activeEvent.getUnderlyingEvent()).getPlayer();
-				Static.InjectPlayer(player);
-			}
-		}
-
-		@Override
-		public void postExecution(Environment env, ActiveEvent activeEvent) {
-			if(activeEvent.getUnderlyingEvent() instanceof MCPlayerRespawnEvent) {
-				MCPlayer player = ((MCPlayerRespawnEvent) activeEvent.getUnderlyingEvent()).getPlayer();
-				Static.UninjectPlayer(player);
-			}
 		}
 	}
 
@@ -2089,7 +2098,8 @@ public class PlayerEvents {
 			return "{}"
 					+ " Fires when a player casts or reels a fishing rod."
 					+ " {player | world | state | xp | hook: the fishhook entity id"
-					+ " | caught: the id of the snared entity, can be a fish item}"
+					+ " | caught: the id of the snared entity, can be a fish item"
+					+ " | hand: the hand the fishing rod is in, only when state is FISHING (MC 1.19.2+)}"
 					+ " {xp: the exp the player will get from catching a fish}"
 					+ " {}";
 		}
@@ -2138,7 +2148,8 @@ public class PlayerEvents {
 				Target t = Target.UNKNOWN;
 				Map<String, Mixed> ret = evaluate_helper(event);
 				ret.put("world", new CString(event.getPlayer().getWorld().getName(), t));
-				ret.put("state", new CString(event.getState().name(), t));
+				MCFishingState state = event.getState();
+				ret.put("state", new CString(state.name(), t));
 				ret.put("hook", new CString(event.getHook().getUniqueId().toString(), t));
 				ret.put("xp", new CInt(event.getExpToDrop(), t));
 				Mixed caught = CNull.NULL;
@@ -2146,6 +2157,13 @@ public class PlayerEvents {
 					caught = new CString(event.getCaught().getUniqueId().toString(), t);
 				}
 				ret.put("caught", caught);
+				if(state == MCFishingState.FISHING && Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_2)) {
+					if(event.getHand() == MCEquipmentSlot.WEAPON) {
+						ret.put("hand", new CString("main_hand", Target.UNKNOWN));
+					} else {
+						ret.put("hand", new CString("off_hand", Target.UNKNOWN));
+					}
+				}
 				return ret;
 			} else {
 				throw new EventException("Could not convert to MCPlayerFishEvent");
@@ -2722,7 +2740,8 @@ public class PlayerEvents {
 					+ " Fires when a player's client responds to a request to download and load a resource pack."
 					+ " Two of these events may be fired for each request: first when the client accepts the pack,"
 					+ " and later when the client successfully loads (or fails to download) the pack."
-					+ " {player | status: The resource pack status received from the client, one of: "
+					+ " {player | id: The UUID of the resource pack (MC 1.20.4+)"
+					+ " | status: The resource pack status received from the client, one of: "
 					+ StringUtils.Join(MCResourcePackStatus.values(), ", ", ", or ") + "}"
 					+ " {}"
 					+ " {}";
@@ -2746,6 +2765,9 @@ public class PlayerEvents {
 		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
 			Map<String, Mixed> map = evaluate_helper(event);
 			map.put("status", new CString(((MCPlayerResourcePackEvent) event).getStatus().name(), Target.UNKNOWN));
+			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_4)) {
+				map.put("id", new CString(((MCPlayerResourcePackEvent) event).getId().toString(), Target.UNKNOWN));
+			}
 			return map;
 		}
 
@@ -2757,6 +2779,177 @@ public class PlayerEvents {
 		@Override
 		public MSVersion since() {
 			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
+	}
+
+	public abstract static class player_bucket_event extends AbstractEvent {
+
+		@Override
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			if(e instanceof MCPlayerBucketEvent) {
+				return true;
+			}
+			return false;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			throw ConfigRuntimeException.CreateUncatchableException("Unsupported operation.", Target.UNKNOWN);
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Mixed value, BindableEvent e) {
+			return false;
+		}
+
+		@Override
+		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+			if(event instanceof MCPlayerBucketEvent e) {
+				Map<String, Mixed> ret = evaluate_helper(e);
+				Target t = Target.UNKNOWN;
+
+				ret.put("player", new CString(e.getPlayer().getName(), t));
+				ret.put("location", ObjectGenerator.GetGenerator().location(e.getBlock().getLocation(), false));
+
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_2)) {
+					if(e.getHand() == MCEquipmentSlot.WEAPON) {
+						ret.put("hand", new CString("main_hand", t));
+					} else {
+						ret.put("hand", new CString("off_hand", t));
+					}
+				}
+				ret.put("item", ObjectGenerator.GetGenerator().item(e.getItemStack(), t));
+
+				return ret;
+			} else {
+				throw new EventException("Event received was not an MCPlayerBucketEvent.");
+			}
+		}
+	}
+
+	@api
+	public static class player_bucket_fill extends player_bucket_event {
+
+		@Override
+		public String getName() {
+			return "player_bucket_fill";
+		}
+
+		@Override
+		public String docs() {
+			return "{} "
+					+ "Fired when a player fills a bucket in their hand from the world."
+					+ " { player: the player who used the bucket."
+					+ " | location: where the bucket was filled from."
+					+ " | hand: hand the player was holding the bucket in, either main_hand or off_hand (MC 1.19.2+)."
+					+ " | item: the bucket item the player ended up with. }"
+					+ "{} "
+					+ "{} "
+					+ "{}";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.PLAYER_BUCKET_FILL;
+		}
+	}
+
+	@api
+	public static class player_bucket_empty extends player_bucket_event {
+
+		@Override
+		public String getName() {
+			return "player_bucket_empty";
+		}
+
+		@Override
+		public String docs() {
+			return "{} "
+					+ "Fired when a player empties a bucket in their hand into the world."
+					+ " { player: the player who used the bucket."
+					+ " | location: where the bucket was emptied to."
+					+ " | hand: hand the player was holding the bucket in, either main_hand or off_hand (MC 1.19.2+)."
+					+ " | item: the bucket item the player ended up with. }"
+					+ "{} "
+					+ "{} "
+					+ "{}";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.PLAYER_BUCKET_EMPTY;
+		}
+	}
+
+	@api
+	public static class player_advancement_done extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "player_advancement_done";
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.PLAYER_ADVANCEMENT_DONE;
+		}
+
+		@Override
+		public String docs() {
+			return "{}"
+					+ " Fires when a player completes all criteria to unlock an advancement or recipe."
+					+ " {player | advancement | title: The advancement display title, if one exists (MC 1.18.2+)}"
+					+ " {}"
+					+ " {}";
+		}
+
+		@Override
+		protected PrefilterBuilder getPrefilterBuilder() {
+			return new PrefilterBuilder<MCPlayerAdvancementDoneEvent>()
+					.set("advancement", "The namespaced key of the advancement completed", new MacroPrefilterMatcher<>() {
+						@Override
+						protected String getProperty(MCPlayerAdvancementDoneEvent event) {
+							return event.getAdvancementKey().toString();
+						}
+					});
+		}
+
+		@Override
+		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+			if(event instanceof MCPlayerAdvancementDoneEvent e) {
+				Map<String, Mixed> map = new HashMap<>();
+				map.put("player", new CString(e.getPlayer().getName(), Target.UNKNOWN));
+				map.put("advancement", new CString(e.getAdvancementKey().toString(), Target.UNKNOWN));
+				map.put("title", new CString(e.getTitle(), Target.UNKNOWN));
+				return map;
+			} else {
+				throw new EventException("Event received was not an MCPlayerAdvancementDoneEvent.");
+			}
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+			return false;
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_5;
 		}
 
 		@Override

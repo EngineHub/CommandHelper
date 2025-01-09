@@ -57,6 +57,12 @@ public interface MCDisplay extends MCEntity {
 
 	void setViewRange(float range);
 
+	MCTransformation getTransformation();
+
+	void setTransformation(MCTransformation transformation);
+
+	void setTransformationMatrix(float[] mtrxf);
+
 	enum Billboard {
 		CENTER,
 		FIXED,
@@ -64,22 +70,5 @@ public interface MCDisplay extends MCEntity {
 		VERTICAL
 	}
 
-	class Brightness {
-
-		final int block;
-		final int sky;
-
-		public Brightness(int block, int sky) {
-			this.block = block;
-			this.sky = sky;
-		}
-
-		public int block() {
-			return this.block;
-		}
-
-		public int sky() {
-			return this.sky;
-		}
-	}
+	record Brightness(int block, int sky) {}
 }

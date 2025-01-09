@@ -67,10 +67,10 @@ public class InventoryManagement {
 		return "Provides methods for managing inventory related tasks.";
 	}
 
-	private static final String ITEM_OBJECT = " An item is an associative array with the following keys,"
-			+ " name: the string id of the item,"
-			+ " qty: The number of items in their inventory,"
-			+ " meta: An array of item meta or null if none exists (see {{function|get_itemmeta}} for details).";
+	private static final String ITEM_OBJECT = " An item is an associative array with the following keys:"
+			+ " 'name' (the string id of the item),"
+			+ " 'qty' (the number of items in the stack),"
+			+ " and 'meta' (an array of item meta or null if none exists; see {{function|get_itemmeta}} for details).";
 
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class pinv extends AbstractFunction {
@@ -87,15 +87,15 @@ public class InventoryManagement {
 
 		@Override
 		public String docs() {
-			return "array {[player, [slot]]} Gets the inventory information for the specified player, or the current "
-					+ " player if none specified. If the index is specified, only the slot given will be returned."
-					+ " The index of the array in the array is 0 - 35, 100 - 103, -106, which corresponds to the slot"
-					+ " in the player's inventory. To access armor slots, you may also specify the index. (100 - 103)."
-					+ " The quick bar is 0 - 8. If index is null, the item in the player's hand is returned, regardless"
+			return "array {[player, [slot]]} Gets the inventory for a player, or the current player if none specified."
+					+ " If the slot is specified, only the item in the slot given will be returned."
+					+ " The indexes of the array are 0 - 35, 100 - 103, -106, which corresponds to the slots in the"
+					+ " player's inventory. To access armor slots, you may also specify the slot index. (100 - 103)."
+					+ " The quick bar is 0 - 8. If slot is null, the item in the player's hand is returned, regardless"
 					+ " of what slot is selected. If index is -106, the player's off-hand item is returned. If there is"
 					+ " no item at the slot specified, null is returned."
 					+ " ---- If all slots are requested, an associative array of item objects is returned, and if"
-					+ " only one item is requested, just that single item object is returned." + ITEM_OBJECT;
+					+ " only one item is requested, just that single item array is returned." + ITEM_OBJECT;
 		}
 
 		@Override
@@ -448,17 +448,20 @@ public class InventoryManagement {
 		@Override
 		public String docs() {
 			return "void {[player, [slot]], array} Sets a player's inventory to the specified inventory array."
-					+ " An inventory array is one that matches what is returned by pinv(), so set_pinv(pinv()),"
-					+ " while pointless, would be a correct call. If a slot is specified as the second argument,"
-					+ " only that slot is set with the given item array. ---- An inventory array must be associative,"
-					+ " however, it may skip items, in which case, only the specified values will be changed. If"
-					+ " a key is out of range, or otherwise improper, a warning is emitted, and it is skipped,"
+					+ " An inventory array is one that matches what is returned by {{function|pinv}}, so set_pinv(pinv()),"
+					+ " while pointless, would be a correct call (though some item meta may not yet be supported)."
+					+ " If a slot is specified as the second argument, only that slot is set with the given item array."
+					+ " ---- An inventory array must be associative, however, it may skip items,"
+					+ " in which case, only the specified slots will be changed."
+					+ " If a key is out of range, or otherwise improper, a warning is logged, and it is skipped,"
 					+ " but the function will not fail as a whole. A simple way to set one item in a player's"
-					+ " inventory would be: set_pinv(player(), 2, array(name: STONE, qty: 64)). This sets the player's"
-					+ " second slot to be a stack of stone. set_pinv(array(103: array(type: 298))) gives them a hat."
-					+ " To set the item in hand, use something like set_pinv(player(), null, array(type: 298))."
-					+ " If you set a null key in an inventory array, only one of the items will be used (which one is"
-					+ " undefined). Use an index of -106 to set the item in the player's off-hand.";
+					+ " inventory would be: set_pinv(player(), 2, array(name: 'STONE', qty: 64))."
+					+ " This sets the player's second slot to be a stack of stone."
+					+ " Whereas set_pinv(array(103: array(name: 'LEATHER_HELMET'))) gives them a hat."
+					+ " To set the item in hand, use something like set_pinv(player(), null, array(name: 'TORCH'))."
+					+ " Use an index of -106 to set the item in the player's off-hand."
+					+ " If you set a null key in an inventory array, this will set the item in your main hand,"
+					+ " but it will conflict with the slot number for that hand.";
 
 		}
 
@@ -2145,7 +2148,7 @@ public class InventoryManagement {
 
 		@Override
 		public String docs() {
-			return "int {specifier, itemArray} Add to inventory the specified item."
+			return "int {mixed specifier, array itemArray} Add to inventory the specified item."
 					+ " The specifier must be a location array, entity UUID, or virtual inventory id."
 					+ " The items are distributed in the inventory, first filling up slots that have the same item type,"
 					+ " up to the max stack size, then fills up empty slots, until either the entire inventory is filled,"

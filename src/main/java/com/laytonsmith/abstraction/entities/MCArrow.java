@@ -2,6 +2,7 @@ package com.laytonsmith.abstraction.entities;
 
 import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCPotionData;
+import com.laytonsmith.abstraction.enums.MCPotionType;
 
 import java.util.List;
 
@@ -21,6 +22,8 @@ public interface MCArrow extends MCProjectile {
 
 	MCPotionData getBasePotionData();
 
+	MCPotionType getBasePotionType();
+
 	List<MCLivingEntity.MCEffect> getCustomEffects();
 
 	void addCustomEffect(MCLivingEntity.MCEffect effect);
@@ -28,6 +31,8 @@ public interface MCArrow extends MCProjectile {
 	void clearCustomEffects();
 
 	void setBasePotionData(MCPotionData pd);
+
+	void setBasePotionType(MCPotionType type);
 
 	int getPierceLevel();
 

@@ -342,7 +342,7 @@ public class CheckOverrides extends AbstractProcessor {
 			List<ClassMirror<?>> classes = ClassDiscovery.getDefaultInstance().getKnownClasses(ClassDiscovery.GetClassContainer(CheckOverrides.class));
 			for(ClassMirror cm : classes) {
 				Class c = cm.loadClass(CheckOverrides.class.getClassLoader(), false);
-				if(c.isInterface()) {
+				if(c.isInterface() || c.isRecord()) {
 					continue;
 				}
 				Set<Method> mm = getPotentiallyOverridingMethods(c);

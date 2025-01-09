@@ -247,6 +247,22 @@ public class ControlFlowTest {
 		verify(fakePlayer).sendMessage("two:2");
 	}
 
+	@Test(timeout = 10000)
+	public void testForeachInKeyword1() throws Exception {
+		SRun("@array = array('one': 1, 'two': 2)"
+				+ "\nforeach(@value in @array){\n\tmsg(@value)\n}", fakePlayer);
+		verify(fakePlayer).sendMessage("1");
+		verify(fakePlayer).sendMessage("2");
+	}
+
+	@Test(timeout = 10000)
+	public void testForeachInKeyword2() throws Exception {
+		SRun("@array = array('one': 1, 'two': 2)"
+				+ "\nforeach(@key: @value in @array){\n\tmsg(@key.':'.@value)\n}", fakePlayer);
+		verify(fakePlayer).sendMessage("one:1");
+		verify(fakePlayer).sendMessage("two:2");
+	}
+
 	@Test
 	public void testForelse() throws Exception {
 		SRun("forelse(assign(@i, 0), @i < 0, @i++, msg('fail'), msg('pass'))", fakePlayer);

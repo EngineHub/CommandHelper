@@ -53,7 +53,8 @@ public class DataSourceFactory {
 	public static DataSource GetDataSource(URI uri, ConnectionMixinFactory.ConnectionMixinOptions options)
 			throws DataSourceException {
 		init();
-		DataSource source = DATA_SOURCE_POOL.get(uri);
+		URI uriKey = uri;
+		DataSource source = DATA_SOURCE_POOL.get(uriKey);
 		if(source != null) {
 			return source;
 		}
@@ -91,7 +92,7 @@ public class DataSourceFactory {
 			if(!ds.getModifiers().contains(DataSource.DataSourceModifier.TRANSIENT)) {
 				ds.populate();
 			}
-			DATA_SOURCE_POOL.put(uri, ds);
+			DATA_SOURCE_POOL.put(uriKey, ds);
 			return ds;
 		} catch (InvocationTargetException | NoSuchMethodException | SecurityException | InstantiationException
 				| IllegalAccessException | IllegalArgumentException | DataSourceException ex) {

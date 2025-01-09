@@ -107,7 +107,7 @@ public class CClosure extends Construct implements Callable, Booleanish {
 		} else if(node.getData().isInstanceOf(CString.TYPE)) {
 			String data = ArgumentValidation.getString(node.getData(), node.getTarget());
 			// Convert: \ -> \\ and ' -> \'
-			b.append("'").append(data.replace("\\", "\\\\").replaceAll("\t", "\\\\t").replaceAll("\n", "\\\\n")
+			b.append("'").append(data.replace("\\", "\\\\").replace("\t", "\\t").replace("\n", "\\n")
 					.replace("'", "\\'")).append("'");
 		} else if(node.getData() instanceof IVariable) {
 			b.append(((IVariable) node.getData()).getVariableName());
@@ -251,7 +251,7 @@ public class CClosure extends Construct implements Callable, Booleanish {
 							isVarArg = true;
 						}
 						if(isVarArg) {
-							if(!InstanceofUtil.isInstanceof(value, varargType, env)) {
+							if(!InstanceofUtil.isInstanceof(value.typeof(), varargType.getVarargsBaseType(), env)) {
 								throw new CRECastException("Expected type " + varargType + " but found " + value.typeof(),
 										getTarget());
 							}
@@ -294,7 +294,7 @@ public class CClosure extends Construct implements Callable, Booleanish {
 				// Check the return type of the closure to see if it matches the defined type
 				// Normal execution.
 				Mixed ret = ex.getReturn();
-				if(!InstanceofUtil.isInstanceof(ret, returnType, environment)) {
+				if(!InstanceofUtil.isInstanceof(ret.typeof(), returnType, environment)) {
 					throw new CRECastException("Expected closure to return a value of type " + returnType.val()
 							+ " but a value of type " + ret.typeof() + " was returned instead", ret.getTarget());
 				}

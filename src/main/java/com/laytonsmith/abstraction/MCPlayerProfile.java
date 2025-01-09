@@ -12,4 +12,6 @@ public interface MCPlayerProfile extends AbstractionObject {
 
 	void setProperty(MCProfileProperty property);
 
+	boolean removeProperty(String key);
+
 }

@@ -1,7 +1,8 @@
 package com.laytonsmith.abstraction.bukkit;
 
-import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCEnchantmentOffer;
+import com.laytonsmith.abstraction.enums.MCEnchantment;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEnchantment;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentOffer;
 
@@ -14,12 +15,12 @@ public class BukkitMCEnchantmentOffer implements MCEnchantmentOffer {
 
 	@Override
 	public MCEnchantment getEnchantment() {
-		return new BukkitMCEnchantment(handle.getEnchantment());
+		return BukkitMCEnchantment.valueOfConcrete(handle.getEnchantment());
 	}
 
 	@Override
 	public void setEnchantment(MCEnchantment enchant) {
-		handle.setEnchantment((Enchantment) enchant.getHandle());
+		handle.setEnchantment((Enchantment) enchant.getConcrete());
 	}
 
 	@Override

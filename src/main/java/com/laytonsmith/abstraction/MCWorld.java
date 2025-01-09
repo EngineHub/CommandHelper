@@ -53,9 +53,9 @@ public interface MCWorld extends MCMetadatable {
 
 	String[] getGameRules();
 
-	String getGameRuleValue(String gameRule);
+	Object getGameRuleValue(MCGameRule gameRule);
 
-	boolean setGameRuleValue(MCGameRule gameRule, String value);
+	boolean setGameRuleValue(MCGameRule gameRule, Object value);
 
 	MCWorldBorder getWorldBorder();
 
@@ -89,15 +89,13 @@ public interface MCWorld extends MCMetadatable {
 
 	void spawnParticle(MCLocation l, MCParticle pa, int count, double offsetX, double offsetY, double offsetZ, double velocity, Object data);
 
-	void playSound(MCLocation l, MCSound sound, float volume, float pitch);
+	void playSound(MCLocation l, MCSound sound, MCSoundCategory category, float volume, float pitch, Long seed);
 
-	void playSound(MCLocation l, String sound, float volume, float pitch);
+	void playSound(MCEntity ent, MCSound sound, MCSoundCategory category, float volume, float pitch, Long seed);
 
-	void playSound(MCLocation l, MCSound sound, MCSoundCategory category, float volume, float pitch);
+	void playSound(MCEntity ent, String sound, MCSoundCategory category, float volume, float pitch, Long seed);
 
-	void playSound(MCEntity ent, MCSound sound, MCSoundCategory category, float volume, float pitch);
-
-	void playSound(MCLocation l, String sound, MCSoundCategory category, float volume, float pitch);
+	void playSound(MCLocation l, String sound, MCSoundCategory category, float volume, float pitch, Long seed);
 
 	MCItem dropItemNaturally(MCLocation l, MCItemStack is);
 
@@ -130,6 +128,12 @@ public interface MCWorld extends MCMetadatable {
 	void loadChunk(int x, int z);
 
 	void unloadChunk(int x, int z);
+
+	boolean isChunkForceLoaded(int x, int z);
+
+	void setChunkForceLoaded(int x, int z, boolean forced);
+
+	MCChunk[] getForceLoadedChunks();
 
 	void setTime(long time);
 

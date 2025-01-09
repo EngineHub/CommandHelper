@@ -12,7 +12,6 @@ import com.laytonsmith.abstraction.MCAttributeModifier;
 import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCConsoleCommandSender;
-import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCFireworkBuilder;
 import com.laytonsmith.abstraction.MCInventory;
@@ -25,6 +24,7 @@ import com.laytonsmith.abstraction.MCNamespacedKey;
 import com.laytonsmith.abstraction.MCNote;
 import com.laytonsmith.abstraction.MCPattern;
 import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.MCPlayerInput;
 import com.laytonsmith.abstraction.MCPlugin;
 import com.laytonsmith.abstraction.MCPluginMeta;
 import com.laytonsmith.abstraction.MCPotionData;
@@ -35,9 +35,11 @@ import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
+import com.laytonsmith.abstraction.entities.MCTransformation;
 import com.laytonsmith.abstraction.enums.MCAttribute;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
+import com.laytonsmith.abstraction.enums.MCEquipmentSlotGroup;
 import com.laytonsmith.abstraction.enums.MCPatternShape;
 import com.laytonsmith.abstraction.enums.MCPotionType;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
@@ -63,7 +65,7 @@ import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
-import com.laytonsmith.core.events.AbstractEvent;
+import com.laytonsmith.core.events.AbstractGenericEvent;
 import com.laytonsmith.core.events.BindableEvent;
 import com.laytonsmith.core.events.EventMixinInterface;
 import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
@@ -99,6 +101,8 @@ import java.util.TreeSet;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
@@ -463,6 +467,7 @@ public class StaticTest {
 		when(p.isOnline()).thenReturn(true);
 		when(p.getName()).thenReturn(name);
 		when(p.getServer()).thenReturn(s);
+		when(p.getCurrentInput()).thenReturn(mock(MCPlayerInput.class));
 		when(p.isOp()).thenReturn(true);
 		if(s != null && s.getOnlinePlayers() != null) {
 			Collection<MCPlayer> online = s.getOnlinePlayers();
@@ -695,18 +700,6 @@ public class StaticTest {
 		}
 
 		@Override
-		public MCEnchantment[] GetEnchantmentValues() {
-			Convertor c = new BukkitConvertor();
-			return c.GetEnchantmentValues();
-		}
-
-		@Override
-		public MCEnchantment GetEnchantmentByName(String name) {
-			Convertor c = new BukkitConvertor();
-			return c.GetEnchantmentByName(name);
-		}
-
-		@Override
 		public MCServer GetServer() {
 			return fakeServer;
 		}
@@ -737,6 +730,21 @@ public class StaticTest {
 		@Override
 		public MCAttributeModifier GetAttributeModifier(MCAttribute attr, UUID id, String name, double amt, MCAttributeModifier.Operation op, MCEquipmentSlot slot) {
 			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public MCAttributeModifier GetAttributeModifier(MCAttribute attr, UUID id, String name, double amt, MCAttributeModifier.Operation op, MCEquipmentSlotGroup slot) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public MCAttributeModifier GetAttributeModifier(MCAttribute attr, MCNamespacedKey key, double amt, MCAttributeModifier.Operation op, MCEquipmentSlot slot) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public MCAttributeModifier GetAttributeModifier(MCAttribute attr, MCNamespacedKey key, double amt, MCAttributeModifier.Operation op, MCEquipmentSlotGroup slot) {
+			throw new UnsupportedOperationException();
 		}
 
 		@Override
@@ -791,6 +799,11 @@ public class StaticTest {
 			return new MCColor() {
 
 				@Override
+				public int getAlpha() {
+					return 255;
+				}
+
+				@Override
 				public int getRed() {
 					return red;
 				}
@@ -808,6 +821,47 @@ public class StaticTest {
 				@Override
 				public MCColor build(int red, int green, int blue) {
 					return GetColor(red, green, blue);
+				}
+
+				@Override
+				public MCColor build(int alpha, int red, int green, int blue) {
+					return GetColor(red, green, blue, alpha);
+				}
+			};
+		}
+
+		@Override
+		public MCColor GetColor(final int red, final int green, final int blue, final int alpha) {
+			return new MCColor() {
+
+				@Override
+				public int getAlpha() {
+					return alpha;
+				}
+
+				@Override
+				public int getRed() {
+					return red;
+				}
+
+				@Override
+				public int getGreen() {
+					return green;
+				}
+
+				@Override
+				public int getBlue() {
+					return blue;
+				}
+
+				@Override
+				public MCColor build(int red, int green, int blue) {
+					return GetColor(red, green, blue);
+				}
+
+				@Override
+				public MCColor build(int alpha, int red, int green, int blue) {
+					return GetColor(red, green, blue, alpha);
 				}
 			};
 		}
@@ -896,6 +950,17 @@ public class StaticTest {
 		public MCNamespacedKey GetNamespacedKey(String key) {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
+
+		@Override
+		public MCTransformation GetTransformation(Quaternionf leftRotation, Quaternionf rightRotation, Vector3f scale, Vector3f translation) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public boolean IsMainThread() {
+			return false;
+		}
+
 	}
 
 	public static class FakeServerMixin implements EventMixinInterface {
@@ -903,7 +968,7 @@ public class StaticTest {
 		public static MCPlayer fakePlayer;
 		public boolean cancelled = false;
 
-		public FakeServerMixin(AbstractEvent e) {
+		public FakeServerMixin(AbstractGenericEvent e) {
 
 		}
 

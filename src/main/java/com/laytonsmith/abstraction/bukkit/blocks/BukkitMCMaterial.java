@@ -58,6 +58,7 @@ public class BukkitMCMaterial extends MCMaterial<Material> {
 		// These values will still be accepted on an MC server, but will be missing from cmdline.
 		for(Material m : Material.values()) {
 			if(!m.isLegacy() && !BUKKIT_MAP.containsKey(m)) {
+				MSLog.GetLogger().w(MSLog.Tags.GENERAL, "Could not find MCMaterial for " + m.name(), Target.UNKNOWN);
 				BukkitMCMaterial wrapper = new BukkitMCMaterial(null, m);
 				BY_STRING.put(m.name(), wrapper);
 				BUKKIT_MAP.put(m, wrapper);
@@ -143,6 +144,11 @@ public class BukkitMCMaterial extends MCMaterial<Material> {
 	@Override
 	public boolean isInteractable() {
 		return getHandle().isInteractable();
+	}
+
+	@Override
+	public boolean isAir() {
+		return getHandle().isAir();
 	}
 
 	@Override

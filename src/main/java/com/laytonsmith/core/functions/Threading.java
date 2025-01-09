@@ -1,6 +1,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.DaemonManager;
+import com.laytonsmith.PureUtilities.Triplet;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.StaticLayer;
@@ -15,9 +16,9 @@ import com.laytonsmith.core.Script;
 import com.laytonsmith.core.compiler.BranchStatement;
 import com.laytonsmith.core.compiler.SelfStatement;
 import com.laytonsmith.core.compiler.VariableScope;
-import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.compiler.signature.FunctionSignatures;
+import com.laytonsmith.core.compiler.signature.SignatureBuilder;
 import com.laytonsmith.core.constructs.CBoolean;
-import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
@@ -25,6 +26,7 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CRE.CREInterruptedException;
 import com.laytonsmith.core.exceptions.CRE.CRENullPointerException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
@@ -34,19 +36,25 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.LoopManipulationException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
-
-import java.util.List;
+import com.laytonsmith.core.natives.interfaces.ValueType;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+import java.util.Random;
 import java.util.concurrent.Callable;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  *
  */
 @core
-public class Threading {
+public final class Threading {
+
+	private Threading() {}
 
 	public static String docs() {
 		return "This experimental and private API is subject to removal, or incompatible changes, and should not"
@@ -76,27 +84,25 @@ public class Threading {
 		}
 
 		@Override
-		public Mixed exec(final Target t, final Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(final Target t, final Environment env, Mixed... args) throws ConfigRuntimeException {
 			final String threadId = args[0].val();
-			if(!(args[1].isInstanceOf(CClosure.TYPE))) {
-				throw new CRECastException("Expected closure for arg 2", t);
-			}
-			final CClosure closure = (CClosure) args[1];
+			final com.laytonsmith.core.natives.interfaces.Callable closure
+					= ArgumentValidation.getObject(args[1], t, com.laytonsmith.core.natives.interfaces.Callable.class);
 			Thread th = new Thread("(" + Implementation.GetServerType().getBranding() + ") " + threadId) {
 				@Override
 				public void run() {
-					DaemonManager dm = environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager();
+					DaemonManager dm = env.getEnv(StaticRuntimeEnv.class).GetDaemonManager();
 					dm.activateThread(Thread.currentThread());
 					try {
-						closure.executeCallable();
+						closure.executeCallable(env, t);
 					} catch (LoopManipulationException ex) {
 						ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.CreateUncatchableException("Unexpected loop manipulation"
-								+ " operation was triggered inside the closure.", t), environment);
+								+ " operation was triggered inside the closure.", t), env);
 					} catch (ConfigRuntimeException ex) {
-						ConfigRuntimeException.HandleUncaughtException(ex, environment);
+						ConfigRuntimeException.HandleUncaughtException(ex, env);
 					} catch (CancelCommandException ex) {
 						if(ex.getMessage() != null) {
-							new Echoes.console().exec(t, environment, new CString(ex.getMessage(), t), CBoolean.FALSE);
+							new Echoes.console().exec(t, env, new CString(ex.getMessage(), t), CBoolean.FALSE);
 						}
 					} finally {
 						dm.deactivateThread(Thread.currentThread());
@@ -231,17 +237,18 @@ public class Threading {
 		}
 
 		@Override
-		public Mixed exec(final Target t, final Environment environment, Mixed... args) throws ConfigRuntimeException {
-			final CClosure closure = ArgumentValidation.getObject(args[0], t, CClosure.class);
+		public Mixed exec(final Target t, final Environment env, Mixed... args) throws ConfigRuntimeException {
+			final com.laytonsmith.core.natives.interfaces.Callable closure
+					= ArgumentValidation.getObject(args[0], t, com.laytonsmith.core.natives.interfaces.Callable.class);
 			StaticLayer.GetConvertor().runOnMainThreadLater(
-					environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), new Runnable() {
+					env.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), new Runnable() {
 
 				@Override
 				public void run() {
 					try {
-						closure.executeCallable();
+						closure.executeCallable(env, t);
 					} catch (ConfigRuntimeException e) {
-						ConfigRuntimeException.HandleUncaughtException(e, environment);
+						ConfigRuntimeException.HandleUncaughtException(e, env);
 					} catch (ProgramFlowManipulationException e) {
 						// Ignored
 					}
@@ -295,8 +302,9 @@ public class Threading {
 		}
 
 		@Override
-		public Mixed exec(final Target t, final Environment environment, Mixed... args) throws ConfigRuntimeException {
-			final CClosure closure = ArgumentValidation.getObject(args[0], t, CClosure.class);
+		public Mixed exec(final Target t, final Environment env, Mixed... args) throws ConfigRuntimeException {
+			final com.laytonsmith.core.natives.interfaces.Callable closure = ArgumentValidation.getObject(args[0], t,
+					com.laytonsmith.core.natives.interfaces.Callable.class);
 			Object ret;
 			try {
 				ret = StaticLayer.GetConvertor().runOnMainThreadAndWait(new Callable<Object>() {
@@ -304,7 +312,7 @@ public class Threading {
 					@Override
 					public Object call() throws Exception {
 						try {
-							return closure.executeCallable();
+							return closure.executeCallable(env, t);
 						} catch (ConfigRuntimeException | ProgramFlowManipulationException e) {
 							return e;
 						}
@@ -314,8 +322,8 @@ public class Threading {
 			} catch (Exception ex) {
 				throw new RuntimeException(ex);
 			}
-			if(ret instanceof RuntimeException) {
-				throw (RuntimeException) ret;
+			if(ret instanceof RuntimeException runtimeException) {
+				throw runtimeException;
 			} else {
 				return (Mixed) ret;
 			}
@@ -347,13 +355,113 @@ public class Threading {
 
 	}
 
+	/**
+	 * Contains the queue of callables that are waiting on the lock.
+	 */
+	private static final Map<Lock, Queue<Triplet<com.laytonsmith.core.natives.interfaces.Callable,
+			Environment, Target>>> SYNC_OBJECT_QUEUE = new HashMap<>();
+	/**
+	 * Contains a mapping from Lock object, to references to the lock. For internal synchronization purposes,
+	 * this value should always be used for synchronization.
+	 */
+	private static final Map<Lock, Integer> SYNC_OBJECT_MAP = new HashMap<>();
+	/**
+	 * Contains a mapping from code object to lock.
+	 */
+	private static final Map<Object, Lock> SYNC_OBJECT_LOCKS = new HashMap<>();
+
+	private static Lock getSyncObject(Mixed cSyncObject, Function f, Target t) {
+
+		if(cSyncObject instanceof CNull || cSyncObject == null) {
+			throw new CRENullPointerException("Synchronization object may not be null in " + f.getName() + "().", t);
+		}
+		Object syncObject = cSyncObject;
+		if(cSyncObject.isInstanceOf(ValueType.TYPE)) {
+			if(!(cSyncObject instanceof CString)) {
+				throw new CREIllegalArgumentException("Only strings and non-value types can be used for synchronization.", t);
+			}
+			syncObject = cSyncObject.val();
+		}
+
+		// Add String sync objects to the map to be able to synchronize by value.
+		synchronized(SYNC_OBJECT_MAP) {
+			Lock lock = SYNC_OBJECT_LOCKS.computeIfAbsent(syncObject, (x) -> {
+				return new ReentrantLock();
+			});
+			int currentCount = SYNC_OBJECT_MAP.computeIfAbsent(lock, x -> 0);
+			SYNC_OBJECT_MAP.put(lock, currentCount + 1);
+			return lock;
+		}
+	}
+
+	private static void cleanupSync(Lock syncObject) {
+		// Remove 1 from the call count or remove the sync object from the map if it was a sync-by-value.
+		synchronized(SYNC_OBJECT_MAP) {
+			int count = SYNC_OBJECT_MAP.get(syncObject); // This should never return null.
+			if(count <= 1) {
+				SYNC_OBJECT_MAP.remove(syncObject);
+				SYNC_OBJECT_LOCKS.remove(syncObject);
+				SYNC_OBJECT_QUEUE.remove(syncObject);
+			} else {
+				SYNC_OBJECT_MAP.put(syncObject, count - 1);
+			}
+
+		}
+	}
+
+	static {
+		StaticLayer.GetConvertor().addPersistentShutdownHook(() -> {
+			SYNC_OBJECT_QUEUE.clear();
+		});
+	}
+
+	private static void PumpQueue(Lock syncObject, DaemonManager dm) {
+		synchronized(SYNC_OBJECT_MAP) {
+			if(!SYNC_OBJECT_MAP.containsKey(syncObject)) {
+				// Lock was disposed of, we have an extra Pump on a now expired object.
+				// This can happen if x_get_lock is called inside x_get_lock, for instance,
+				// though it could also happen due to bugs in our code.
+				return;
+			}
+		}
+		dm.activateThread(Thread.currentThread());
+		try {
+			if(syncObject.tryLock()) {
+				try {
+					Triplet<com.laytonsmith.core.natives.interfaces.Callable,
+							Environment, Target> triplet;
+					synchronized(SYNC_OBJECT_MAP) {
+						triplet = SYNC_OBJECT_QUEUE.get(syncObject).poll();
+					}
+					triplet.getFirst().executeCallable(triplet.getSecond(), triplet.getThird());
+					synchronized(SYNC_OBJECT_MAP) {
+						if(!SYNC_OBJECT_QUEUE.get(syncObject).isEmpty()) {
+							StaticLayer.SetFutureRunnable(dm, 1, () -> PumpQueue(syncObject, dm));
+						}
+					}
+				} finally {
+					cleanupSync(syncObject);
+					syncObject.unlock();
+				}
+			} else {
+				int backoff = java.lang.Math.abs(new Random().nextInt()) % 100;
+				StaticLayer.SetFutureRunnable(dm,
+						backoff, () -> {
+							PumpQueue(syncObject, dm);
+						});
+			}
+		} finally {
+			dm.deactivateThread(Thread.currentThread());
+		}
+	}
+
 	@api
 	@noboilerplate
-	@seealso({x_new_thread.class})
+	@seealso({x_new_thread.class, x_get_lock.class})
 	@SelfStatement
 	public static class _synchronized extends AbstractFunction implements VariableScope, BranchStatement {
 
-		private static final Map<Object, Integer> SYNC_OBJECT_MAP = new HashMap<Object, Integer>();
+
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -389,59 +497,15 @@ public class Threading {
 
 			// Get the sync object (CArray or String value of the Mixed).
 			Mixed cSyncObject = parent.seval(syncObjectTree, env);
-			if(cSyncObject instanceof CNull) {
-				throw new CRENullPointerException("Synchronization object may not be null in " + getName() + "().", t);
-			}
-			Object syncObject;
-			if(cSyncObject.isInstanceOf(CArray.TYPE)) {
-				syncObject = cSyncObject;
-			} else {
-				syncObject = cSyncObject.val();
-			}
-
-			// Add String sync objects to the map to be able to synchronize by value.
-			if(syncObject instanceof String) {
-				synchronized(SYNC_OBJECT_MAP) {
-					searchLabel:
-					{
-						for(Entry<Object, Integer> entry : SYNC_OBJECT_MAP.entrySet()) {
-							Object key = entry.getKey();
-							if(key instanceof String && key.equals(syncObject)) {
-								syncObject = key; // Get reference, value of this assign is the same.
-								entry.setValue(entry.getValue() + 1);
-								break searchLabel;
-							}
-						}
-						SYNC_OBJECT_MAP.put(syncObject, 1);
-					}
-				}
-			}
+			Lock syncObject = getSyncObject(cSyncObject, this, t);
 
 			// Evaluate the code, synchronized by the passed sync object.
 			try {
-				synchronized(syncObject) {
-					parent.eval(code, env);
-				}
-			} catch (RuntimeException e) {
-				throw e;
+				syncObject.lock();
+				parent.eval(code, env);
 			} finally {
-
-				// Remove 1 from the call count or remove the sync object from the map if it was a sync-by-value.
-				if(syncObject instanceof String) {
-					synchronized(SYNC_OBJECT_MAP) {
-						int count = SYNC_OBJECT_MAP.get(syncObject); // This should never return null.
-						if(count <= 1) {
-							SYNC_OBJECT_MAP.remove(syncObject);
-						} else {
-							for(Entry<Object, Integer> entry : SYNC_OBJECT_MAP.entrySet()) {
-								if(entry.getKey() == syncObject) { // Equals by reference.
-									entry.setValue(count - 1);
-									break;
-								}
-							}
-						}
-					}
-				}
+				syncObject.unlock();
+				cleanupSync(syncObject);
 			}
 			return CVoid.VOID;
 		}
@@ -468,7 +532,13 @@ public class Threading {
 					+ " This means that if two threads will call " + getName() + "('example', &lt;code&gt;), the second"
 					+ " call will hang the thread until the passed code of the first call has finished executing."
 					+ " If you call this function from within this function on the same thread using the same"
-					+ " syncObject, the code will simply be executed."
+					+ " syncObject, the code will simply be executed. Note that this uses the same pool of lock"
+					+ " objects as x_get_lock, except this is preferred to be used off the main thread,"
+					+ " whereas x_get_lock is"
+					+ " preferred on the main thread. Generally speaking, it is almost always incorrect to use this"
+					+ " on the main thread, though there is no technical restriction to doing so. Other than strings,"
+					+ " ValueTypes cannot be used as the lock object, and reference types such as an array or other"
+					+ " object is required."
 					+ " For more information about synchronization, see:"
 					+ " https://en.wikipedia.org/wiki/Synchronization_(computer_science)";
 		}
@@ -538,6 +608,103 @@ public class Threading {
 			ret.add(true);
 			return ret;
 		}
+	}
+
+	@api
+	@noboilerplate
+	@seealso({_synchronized.class, x_get_lock.class})
+	public static class x_get_lock extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRENullPointerException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			// Get the sync object tree and the code to synchronize.
+			Mixed cSyncObject = args[0];
+			com.laytonsmith.core.natives.interfaces.Callable callable
+					= ArgumentValidation.getObject(args[1], t, com.laytonsmith.core.natives.interfaces.Callable.class);
+
+			// Get the sync object (CArray or String value of the Mixed).
+			Lock syncObject = getSyncObject(cSyncObject, this, t);
+
+			// Evaluate the code, synchronized by the passed sync object.
+			DaemonManager dm = env.getEnv(StaticRuntimeEnv.class).GetDaemonManager();
+			Triplet<com.laytonsmith.core.natives.interfaces.Callable, Environment, Target> triplet
+					= new Triplet<>(callable, env, t);
+			synchronized(SYNC_OBJECT_MAP) {
+				SYNC_OBJECT_QUEUE.computeIfAbsent(syncObject, k -> new LinkedList<>())
+						.add(triplet);
+			}
+			StaticLayer.SetFutureRunnable(dm, 1, () -> PumpQueue(syncObject, dm));
+			return CVoid.VOID;
+		}
+
+
+
+		@Override
+		public String getName() {
+			return "x_get_lock";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return getBundledDocs();
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CVoid.TYPE)
+					.param(Mixed.TYPE, "syncObject", "The object to sync on. This uses the same object pool as synchronized().")
+					.param(com.laytonsmith.core.natives.interfaces.Callable.TYPE, "action", "The action to run once the lock is obtained.")
+					.build();
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[] {
+				new ExampleScript("Usage across the main and off thread.",
+						"// Create a new thread\n"
+							+ "x_new_thread('offthread', closure() {\n"
+							+ "\twhile(true) {\n"
+							+ "\t\tsynchronized('lock') {\n"
+							+ "\t\t\tsleep(10); // Simulate a long running, off thread activity\n"
+							+ "\t\t}\n"
+							+ "\t}\n"
+							+ "});\n\n"
+							+ "// Main thread\n"
+							+ "sleep(1); // Simulate other main thread activity\n"
+							+ "// Note that if we used synchronized() here, this call would block the main thread\n"
+							+ "// for 10 seconds, while the off thread performed its activities."
+							+ "x_get_lock('lock', closure() {\n"
+							+ "\tmsg('Main thread activity');\n"
+							+ "});\n",
+						"<Action would run after off thread releases lock, without blocking main thread>")
+			};
+		}
+
 	}
 
 	@api

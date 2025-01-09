@@ -1,6 +1,8 @@
 package com.laytonsmith.abstraction;
 
 import com.laytonsmith.abstraction.blocks.MCMaterial;
+import com.laytonsmith.abstraction.enums.MCEnchantment;
+
 import java.util.Map;
 
 public interface MCItemStack extends AbstractionObject {

@@ -21,6 +21,7 @@ import com.laytonsmith.abstraction.enums.MCWorldType;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Optimizable;
@@ -29,11 +30,14 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.compiler.FileOptions;
+import com.laytonsmith.core.compiler.signature.FunctionSignatures;
+import com.laytonsmith.core.compiler.signature.SignatureBuilder;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
+import com.laytonsmith.core.constructs.CNumber;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
@@ -50,6 +54,7 @@ import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.natives.interfaces.Booleanish;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 
 import java.io.IOException;
@@ -521,6 +526,145 @@ public class World {
 			return MSVersion.V3_3_1;
 		}
 
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class set_chunk_force_loaded extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "set_chunk_force_loaded";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3, 4};
+		}
+
+		@Override
+		public String docs() {
+			return "void {[world], x, z, forced | locationArray, forced} Sets a chunk to be persistently loaded.";
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCWorld world;
+			int x;
+			int z;
+			boolean forced;
+			if(args.length == 2) {
+				MCLocation l = ObjectGenerator.GetGenerator().location(args[0], m != null ? m.getWorld() : null, t);
+				world = l.getWorld();
+				x = l.getBlockX();
+				z = l.getBlockZ();
+				forced = ArgumentValidation.getBooleanObject(args[1], t);
+			} else if(args.length == 3) {
+				if(m == null) {
+					throw new CREInvalidWorldException("No world specified", t);
+				}
+				world = m.getWorld();
+				x = ArgumentValidation.getInt32(args[0], t);
+				z = ArgumentValidation.getInt32(args[1], t);
+				forced = ArgumentValidation.getBooleanObject(args[2], t);
+			} else {
+				world = Static.getServer().getWorld(args[0].val());
+				if(world == null) {
+					throw new CREInvalidWorldException("The given world (" + args[0].val() + ") does not exist.", t);
+				}
+				x = ArgumentValidation.getInt32(args[1], t);
+				z = ArgumentValidation.getInt32(args[2], t);
+				forced = ArgumentValidation.getBooleanObject(args[3], t);
+			}
+			world.setChunkForceLoaded(x, z, forced);
+			return CVoid.VOID;
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class, CREInvalidWorldException.class};
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class get_force_loaded_chunks extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "get_force_loaded_chunks";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1};
+		}
+
+		@Override
+		public String docs() {
+			return "array {[world]} Gets an array of all chunk coordinates that are persistently loaded.";
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			MCWorld world;
+			if(args.length == 1) {
+				world = Static.getServer().getWorld(args[0].val());
+			} else {
+				MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				if(m == null) {
+					throw new CREInvalidWorldException("No world specified", t);
+				}
+				world = m.getWorld();
+			}
+			if(world == null) {
+				throw new CREInvalidWorldException("World does not exist", t);
+			}
+			MCChunk[] chunks = world.getForceLoadedChunks();
+			CArray ret = new CArray(t);
+			for(MCChunk c : chunks) {
+				CArray chunk = CArray.GetAssociativeArray(t);
+				chunk.set("x", new CInt(c.getX(), t), t);
+				chunk.set("z", new CInt(c.getZ(), t), t);
+				chunk.set("world", c.getWorld().getName(), t);
+				ret.push(chunk, t);
+			}
+			return ret;
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInvalidWorldException.class};
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
 	}
 
 	@api(environments = CommandHelperEnvironment.class)
@@ -1651,8 +1795,8 @@ public class World {
 		public String docs() {
 			return "mixed {world, [gameRule]} Returns an associative array containing the values of all existing"
 					+ " gamerules for the given world. If the gameRule parameter is specified, the function only"
-					+ " returns that one value instead of an array."
-					+ " The gameRule can be " + StringUtils.Join(MCGameRule.values(), ", ", ", or ", " or ") + ".";
+					+ " returns that one value instead of an array. ---- "
+					+ " The gameRule can be " + StringUtils.Join(MCGameRule.getGameRules(), ", ", ", or ", " or ") + ".";
 		}
 
 		@Override
@@ -1668,20 +1812,25 @@ public class World {
 			}
 			if(args.length == 1) {
 				CArray gameRules = CArray.GetAssociativeArray(t);
-				for(String gameRule : world.getGameRules()) {
-					gameRules.set(new CString(gameRule, t),
-							Static.resolveConstruct(world.getGameRuleValue(gameRule), t), t);
+				for(String name : world.getGameRules()) {
+					try {
+						MCGameRule gameRule = MCGameRule.valueOf(name.toUpperCase());
+						gameRules.set(name, gameRule.constructValue(world.getGameRuleValue(gameRule), t), t);
+					} catch(IllegalArgumentException skip) {
+						MSLog.GetLogger().w(MSLog.Tags.RUNTIME, "The server gamerule \"" + name + "\""
+								+ " is missing in CommandHelper.", t);
+					}
 				}
 				return gameRules;
 			} else {
 				try {
 					MCGameRule gameRule = MCGameRule.valueOf(args[1].val().toUpperCase());
-					String value = world.getGameRuleValue(gameRule.getGameRule());
-					if(value.isEmpty()) {
+					Object value = world.getGameRuleValue(gameRule);
+					if(value == null) {
 						throw new CREFormatException("The gamerule \"" + args[1].val()
 								+ "\" does not exist in this version.", t);
 					}
-					return Static.resolveConstruct(value, t);
+					return gameRule.constructValue(value, t);
 				} catch (IllegalArgumentException exception) {
 					throw new CREFormatException("The gamerule \"" + args[1].val() + "\" does not exist.", t);
 				}
@@ -1719,9 +1868,9 @@ public class World {
 
 		@Override
 		public String docs() {
-			return "boolean {[world], gameRule, value} Sets the value of the gamerule for the specified world. If world is"
-					+ " not given the value is set for all worlds. Returns true if successful. gameRule can be "
-					+ StringUtils.Join(MCGameRule.values(), ", ", ", or ", " or ") + ".";
+			return "boolean {[world], gameRule, value} Sets the value of the gamerule for the specified world."
+					+ " If world is not given the value is set for all worlds. Returns true if successful. ---- "
+					+ " The gameRule can be " + StringUtils.Join(MCGameRule.getGameRules(), ", ", ", or ", " or ") + ".";
 		}
 
 		@Override
@@ -1733,19 +1882,27 @@ public class World {
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCGameRule gameRule;
 			boolean success = false;
+			int offset = args.length - 2;
+			try {
+				gameRule = MCGameRule.valueOf(args[offset].val().toUpperCase());
+			} catch(IllegalArgumentException ex) {
+				throw new CREFormatException("The gamerule \"" + (args.length == 2 ? args[0].val() : args[1].val())
+						+ "\" does not exist.", t);
+			}
+			Object value = gameRule.convertValue(args[offset + 1], t);
+			if(value == null) {
+				return CBoolean.FALSE;
+			}
 			if(args.length == 2) {
-				gameRule = ArgumentValidation.getEnum(args[0], MCGameRule.class, t);
-				String value = ArgumentValidation.getObject(args[1], t, gameRule.getRuleType()).val();
 				for(MCWorld world : Static.getServer().getWorlds()) {
 					success = world.setGameRuleValue(gameRule, value);
 				}
 			} else {
-				gameRule = ArgumentValidation.getEnum(args[1], MCGameRule.class, t);
 				MCWorld world = Static.getServer().getWorld(args[0].val());
 				if(world == null) {
 					throw new CREInvalidWorldException("Unknown world: " + args[0].val(), t);
 				}
-				success = world.setGameRuleValue(gameRule, ArgumentValidation.getObject(args[2], t, gameRule.getRuleType()).val());
+				success = world.setGameRuleValue(gameRule, value);
 			}
 			return CBoolean.get(success);
 		}
@@ -1810,7 +1967,7 @@ public class World {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{2, 3};
+			return new Integer[]{2, 3, 4};
 		}
 
 		@Override
@@ -1830,11 +1987,32 @@ public class World {
 
 		@Override
 		public String docs() {
-			return "array {origin, target, [distance] | origin, direction, [distance]} Returns a location array that"
+			return "array {origin, target, [distance], [clamp] | origin, direction, [distance]} Returns a location array that"
 					+ " is the specified distance from the origin location along a vector. ---- If a target location is"
-					+ " specified, the vector is gotten from that. (the target's world is ignored) If a direction is"
-					+ " specified, that vector is use instead. Distance defaults to 1.0. Direction can be one of "
-					+ StringUtils.Join(MCBlockFace.values(), ", ", ", or ", " or ") + ".";
+					+ " specified, the vector is obtained from that. The target's world is ignored. If a direction is"
+					+ " specified, that vector is used instead. Distance defaults to 1.0. Direction can be one of "
+					+ StringUtils.Join(MCBlockFace.values(), ", ", ", or ", " or ") + ". If the distance is greater"
+					+ " than the target (when using the first mode), the entity will move past the target if the"
+					+ " distance is greater than the actual distance to the point, unless clamp is set to true.";
+		}
+
+		@Override
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CArray.TYPE)
+					.param(CArray.TYPE, "origin", "The original location.")
+					.param(CArray.TYPE, "target", "The final target location.")
+					.param(CNumber.TYPE, "distance", "Defaults to 1.0. The distance to move. If clamp is true,"
+							+ " the maximum distance to move.", true)
+					.param(Booleanish.TYPE, "clamp", "Defaults to false. If true, and the target location is closer"
+							+ " than the distance provided, the final destination is returned, instead of a location"
+							+ " beyond the target.", true)
+
+					.newSignature(CArray.TYPE)
+					.param(CArray.TYPE, "origin", "The original location.")
+					.param(CString.TYPE, "direction", "The direction to move, a BlockFace value.")
+					.param(CNumber.TYPE, "distance", "Defaults to 1.0. The distance to move.", true)
+					.build();
+
 		}
 
 		@Override
@@ -1847,12 +2025,23 @@ public class World {
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], p != null ? p.getWorld() : null, t);
 			double distance = 1;
-			if(args.length == 3) {
+			boolean clamp = false;
+			if(args.length >= 3) {
 				distance = ArgumentValidation.getNumber(args[2], t);
+			}
+			if(args.length >= 4) {
+				clamp = ArgumentValidation.getBooleanish(args[3], t);
 			}
 			Vector3D vector;
 			if(args[1].isInstanceOf(CArray.TYPE)) {
 				MCLocation to = ObjectGenerator.GetGenerator().location(args[1], loc.getWorld(), t);
+				if(clamp) {
+					// Need to check if the shift would go beyond the target, if so, just return the final
+					// destination.
+					if(loc.distance(to) < distance) {
+						return ObjectGenerator.GetGenerator().location(to);
+					}
+				}
 				vector = to.toVector().subtract(loc.toVector()).normalize();
 			} else {
 				try {

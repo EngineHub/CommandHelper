@@ -93,6 +93,7 @@ import com.laytonsmith.core.functions.ArrayHandling.array_get;
 import com.laytonsmith.core.functions.ArrayHandling.array_push;
 import com.laytonsmith.core.functions.ArrayHandling.array_set;
 import com.laytonsmith.core.functions.Compiler.__autoconcat__;
+import com.laytonsmith.core.functions.Compiler.__type_ref__;
 import com.laytonsmith.core.functions.Compiler.centry;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.tools.docgen.templates.ArrayIteration;
@@ -392,8 +393,7 @@ public class DataHandling {
 				case 3:
 					// Typecheck declaration type.
 					ParseTree typeNode = ast.getChildAt(ind++);
-					declaredType = StaticAnalysis.requireClassType(
-							typeNode.getData(), ast.getTarget(), exceptions);
+					declaredType = StaticAnalysis.requireClassType(typeNode, exceptions);
 					// Intentional fallthrough.
 				case 2:
 					// Typecheck variable.
@@ -613,7 +613,8 @@ public class DataHandling {
 			int offset = 0;
 			if(args.length == 3) {
 				offset = 1;
-				if(!(args[0].isInstanceOf(CClassType.TYPE))) {
+				if(!args[0].isInstanceOf(CClassType.TYPE)
+						&& (!(args[0] instanceof CFunction) || !args[0].val().equals(__type_ref__.NAME))) {
 					throw new ConfigCompileException("Expecting a ClassType for parameter 1 to assign", t);
 				}
 			}
@@ -693,6 +694,16 @@ public class DataHandling {
 					return tree;
 				}
 			}
+
+			// Convert concatenated types such as "concat(concat(ms, lang), int)" to "ms.lang.int".
+			if(children.size() == 3) {
+				ParseTree typeRefNode = __type_ref__.createFromBareStringOrConcats(children.get(0));
+				if(typeRefNode != null) {
+					children.set(0, typeRefNode);
+					return ast;
+				}
+			}
+
 			return null;
 		}
 
@@ -1745,7 +1756,7 @@ public class DataHandling {
 									if(value instanceof CString) {
 										builder.append("'")
 												.append(value.val().replace("\\", "\\\\")
-														.replaceAll("\t", "\\\\t").replaceAll("\n", "\\\\n")
+														.replace("\t", "\\t").replace("\n", "\\n")
 														.replace("'", "\\'"))
 												.append("'");
 									} else {
@@ -3237,7 +3248,38 @@ public class DataHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			return new CInt((long) ArgumentValidation.getNumber(args[0], t), t);
+			Mixed arg = args[0];
+			if(arg instanceof CMutablePrimitive) {
+				arg = ((CMutablePrimitive) arg).get();
+			}
+			if(arg instanceof CInt) {
+				return arg;
+			}
+			long i;
+			if(arg instanceof CDouble) {
+				i = (long) ((CDouble) arg).getDouble();
+			} else if(arg instanceof CString) {
+				try {
+					if(arg.val().indexOf('.') > -1) {
+						i = (long) Double.parseDouble(arg.val());
+					} else {
+						i = Long.parseLong(arg.val());
+					}
+				} catch (NumberFormatException e) {
+					throw new CRECastException("Expecting a number, but received \"" + arg.val() + "\" instead", t);
+				}
+			} else if(arg instanceof CBoolean) {
+				if(((CBoolean) arg).getBoolean()) {
+					i = 1;
+				} else {
+					i = 0;
+				}
+			} else if(arg instanceof CNull) {
+				i = 0;
+			} else {
+				throw new CRECastException("Expecting a number, but received type " + arg.getName() + " instead", t);
+			}
+			return new CInt(i, t);
 		}
 
 		@Override

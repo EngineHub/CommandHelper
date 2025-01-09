@@ -128,16 +128,11 @@
 		<connection>scm:git:git://github.com/sk89q/commandhelper.git</connection>
 		<url>https://github.com/sk89q/commandhelper</url>
 		<developerConnection>scm:git:git@github.com:sk89q/commandhelper.git</developerConnection>
-	  <tag>HEAD</tag>
-  </scm>
+		<tag>HEAD</tag>
+	</scm>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.test.failure.ignore>true</maven.test.failure.ignore>
-		<swagger-core-version>2.0.0</swagger-core-version>
-		<okhttp-version>2.7.5</okhttp-version>
-		<gson-version>2.8.9</gson-version>
-		<gson-fire-version>1.8.3</gson-fire-version>
-		<threetenbp-version>1.3.5</threetenbp-version>
 		<maven.compiler.source>16</maven.compiler.source>
 		<maven.compiler.target>16</maven.compiler.target>
 	</properties>
@@ -151,6 +146,14 @@
 		<repository>
 			<id>spigot-repo</id>
 			<url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
+		</repository>
+		<repository>
+			<id>papermc-repo</id>
+			<url>https://repo.papermc.io/repository/maven-public/</url>
+		</repository>
+		<repository>
+			<id>sonatype-oss-snapshots1</id>
+			<url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
 		</repository>
 
 		<!-- Other repositories -->
@@ -175,7 +178,12 @@
 			<!-- GPL -->
 			<groupId>org.spigotmc</groupId>
 			<artifactId>spigot-api</artifactId>
-			<version>1.20.2-R0.1-SNAPSHOT</version>
+			<version>1.21.3-R0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>io.papermc.paper</groupId>
+			<artifactId>paper-api</artifactId>
+			<version>1.21.3-R0.1-SNAPSHOT</version>
 		</dependency>
 
 		<!-- Used for storing and retreiving Constructs in a storage transparent medium: JSONs -->
@@ -210,7 +218,7 @@
 			<!-- Apache 2.0 -->
 			<groupId>org.xerial</groupId>
 			<artifactId>sqlite-jdbc</artifactId>
-			<version>3.41.2.2</version>
+			<version>3.45.2.0</version>
 			<scope>compile</scope>
 		</dependency>
 
@@ -219,7 +227,7 @@
 			<!-- MIT -->
 			<groupId>redis.clients</groupId>
 			<artifactId>jedis</artifactId>
-			<version>2.9.0</version>
+			<version>5.2.0-beta1</version>
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
@@ -229,7 +237,7 @@
 			<!-- GPL -->
 			<groupId>com.mysql</groupId>
 			<artifactId>mysql-connector-j</artifactId>
-			<version>8.2.0</version>
+			<version>8.3.0</version>
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
@@ -250,7 +258,7 @@
 			<!-- NOTE: If you change this version, you also have to change the install-mssql-auth command to
 			download the corresponding version of the mssql-auth dll. This will also require users to re-install
 			it, so an upgrade routine will need to be released as well. -->
-			<version>8.2.2.jre8</version>
+			<version>12.6.1.jre11</version>
 		</dependency>
 
 		<!-- Yaml parsing -->
@@ -258,7 +266,7 @@
 			<!-- Apache 2.0 -->
 			<groupId>org.yaml</groupId>
 			<artifactId>snakeyaml</artifactId>
-			<version>2.0</version>
+			<version>2.2</version>
 		</dependency>
 
 		<!-- Apache commons IO -->
@@ -288,7 +296,7 @@
 			<!-- BSD -->
 			<groupId>com.jcraft</groupId>
 			<artifactId>jsch</artifactId>
-			<version>0.1.54</version>
+			<version>0.1.55</version>
 		</dependency>
 
 		<!-- Charset detection library -->
@@ -317,7 +325,14 @@
 			<artifactId>hamcrest-core</artifactId>
 			<groupId>org.hamcrest</groupId>
 			<type>jar</type>
-			<version>1.3</version>
+			<version>2.2</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<artifactId>hamcrest-library</artifactId>
+			<groupId>org.hamcrest</groupId>
+			<type>jar</type>
+			<version>2.2</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -329,7 +344,7 @@
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
-			<version>3.10.0</version>
+			<version>5.11.0</version>
 			<scope>test</scope>
 		</dependency>
 		<!--<dependency>
@@ -355,17 +370,17 @@
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
 			<type>jar</type>
-			<version>1.13</version>
+			<version>1.16.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.ow2.asm</groupId>
 			<artifactId>asm</artifactId>
-			<version>9.1</version>
+			<version>9.7.1</version>
 		</dependency>
 		<dependency>
 			<groupId>jline</groupId>
 			<artifactId>jline</artifactId>
-			<version>2.14.5</version>
+			<version>2.14.6</version>
 		</dependency>
 		<!-- Java Mail -->
 		<dependency>
@@ -382,37 +397,58 @@
 		<dependency>
 			<groupId>org.eclipse.lsp4j</groupId>
 			<artifactId>org.eclipse.lsp4j</artifactId>
-			<version>0.21.0</version>
+			<version>0.22.0</version>
 		</dependency>
 		<dependency>
 			<groupId>io.swagger.core.v3</groupId>
 			<artifactId>swagger-annotations</artifactId>
-			<version>${swagger-core-version}</version>
+			<version>2.2.20</version>
 		</dependency>
 		<dependency>
 			<groupId>com.squareup.okhttp</groupId>
 			<artifactId>okhttp</artifactId>
-			<version>${okhttp-version}</version>
+			<version>2.7.5</version>
 		</dependency>
 		<dependency>
 			<groupId>com.squareup.okhttp</groupId>
 			<artifactId>logging-interceptor</artifactId>
-			<version>${okhttp-version}</version>
+			<version>2.7.5</version>
+		</dependency>
+		<dependency>
+			<groupId>com.squareup.okio</groupId>
+			<artifactId>okio-jvm</artifactId>
+			<version>3.10.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
-			<version>${gson-version}</version>
+			<version>2.10.1</version>
 		</dependency>
 		<dependency>
 			<groupId>io.gsonfire</groupId>
 			<artifactId>gson-fire</artifactId>
-			<version>${gson-fire-version}</version>
+			<version>1.9.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.threeten</groupId>
 			<artifactId>threetenbp</artifactId>
-			<version>${threetenbp-version}</version>
+			<version>1.6.8</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.7.36</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+			<version>1.7.36</version>
+		</dependency>
+		<!-- MIT -->
+		<dependency>
+			<groupId>org.joml</groupId>
+			<artifactId>joml</artifactId>
+			<version>1.10.5</version>
 		</dependency>
 	</dependencies>
 	<distributionManagement>
@@ -473,7 +509,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.8.1</version>
+				<version>3.12.1</version>
 				<configuration>
 					<showDeprecation>true</showDeprecation>
 					<release>16</release>
@@ -481,8 +517,6 @@
 						<arg>-XDignore.symbol.file</arg>
 						<arg>-parameters</arg>
 					</compilerArgs>
-					<fork>true</fork>
-					<optimize>true</optimize>
 				</configuration>
 			</plugin>
 
@@ -490,7 +524,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
-				<version>3.2.0</version>
+				<version>3.3.0</version>
 				<configuration>
 					<archive>
 						<addMavenDescriptor>true</addMavenDescriptor>
@@ -502,6 +536,7 @@
 							<!--<mainClass>com.laytonsmith.core.MainSandbox</mainClass>-->
 						</manifest>
 						<manifestEntries>
+							<paperweight-mappings-namespace>mojang</paperweight-mappings-namespace>
 							<Class-Path>../bukkit.jar CommandHelper/bukkit.jar</Class-Path>
 						</manifestEntries>
 					</archive>
@@ -512,7 +547,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
-				<version>3.3.0</version>
+				<version>3.5.2</version>
 				<executions>
 					<execution>
 						<id>ShadedBundle</id>
@@ -567,11 +602,15 @@
 									<include>com.google.guava:guava:jar:*</include>
 									<!-- Swagger dependencies -->
 									<include>com.squareup.okhttp:okhttp:jar:*</include>
-									<include>com.squareup.okio:okio:jar:*</include>
+									<include>com.squareup.okio:okio-jvm:jar:*</include>
+									<include>org.jetbrains.kotlin:kotlin-stdlib:jar:*</include>
 									<include>org.threeten:threetenbp:jar:*</include>
 									<include>io.gsonfire:gson-fire:jar:*</include>
 									<include>com.squareup.okhttp:logging-interceptor:jar:*</include>
 									<include>com.microsoft.sqlserver:mssql-jdbc:jar:*</include>
+									<include>org.slf4j:slf4j-api:jar:*</include>
+									<include>org.slf4j:slf4j-simple:jar:*</include>
+									<include>org.joml:joml:jar:*</include>
 								</includes>
 							</artifactSet>
 							<relocations>
@@ -688,12 +727,20 @@
 									<shadedPattern>com.laytonsmith.libs.okio</shadedPattern>
 								</relocation>
 								<relocation>
+									<pattern>kotlin</pattern>
+									<shadedPattern>com.laytonsmith.libs.kotlin</shadedPattern>
+								</relocation>
+								<relocation>
 									<pattern>org.threeten</pattern>
 									<shadedPattern>com.laytonsmith.libs.threeten</shadedPattern>
 								</relocation>
 								<relocation>
 									<pattern>io.gsonfire</pattern>
 									<shadedPattern>com.laytonsmith.libs.io.gsonfire</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>org.slf4j</pattern>
+									<shadedPattern>com.laytonsmith.libs.org.slf4j</shadedPattern>
 								</relocation>
 							</relocations>
 							<filters>
@@ -886,7 +933,7 @@
 									</excludes>
 								</filter>
 								<filter>
-									<artifact>com.squareup.okio:okio:jar:*</artifact>
+									<artifact>com.squareup.okio:okio-jvm:jar:*</artifact>
 									<includes>
 										<include>**</include>
 									</includes>
@@ -930,6 +977,33 @@
 										<exclude>META-INF/**</exclude>
 									</excludes>
 								</filter>
+								<filter>
+									<artifact>org.jetbrains.kotlin:kotlin-stdlib:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+									<excludes>
+										<exclude>META-INF/**</exclude>
+									</excludes>
+								</filter>
+								<filter>
+									<artifact>org.slf4j:slf4j-api:*</artifact>
+									<excludes>
+										<exclude>META-INF/**</exclude>
+									</excludes>
+								</filter>
+								<filter>
+									<artifact>org.slf4j:slf4j-simple:*</artifact>
+									<excludes>
+										<exclude>META-INF/**</exclude>
+									</excludes>
+								</filter>
+								<filter>
+									<artifact>org.joml:joml:*</artifact>
+									<excludes>
+										<exclude>META-INF/**</exclude>
+									</excludes>
+								</filter>
 							</filters>
 						</configuration>
 					</execution>
@@ -938,7 +1012,7 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
-				<version>3.0.0</version>
+				<version>3.2.0</version>
 				<executions>
 					<execution>
 						<id>cache-annotations</id>
@@ -959,7 +1033,7 @@
 			<plugin>
 				<groupId>org.bsc.maven</groupId>
 				<artifactId>maven-processor-plugin</artifactId>
-				<version>5.0-jdk8-rc1</version>
+				<version>5.0-jdk8-rc3</version>
 				<executions>
 					<execution>
 						<id>process</id>
@@ -970,9 +1044,6 @@
 					</execution>
 				</executions>
 				<configuration>
-					<argLine>
-						--illegal-access=permit
-					</argLine>
 					<outputDirectory>src/main/generated</outputDirectory>
 					<processors>
 						<processor>com.laytonsmith.PureUtilities.Common.Annotations.CheckOverrides</processor>
@@ -985,7 +1056,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.0.0-M5</version>
+				<version>3.2.5</version>
 				<configuration>
 					<trimStackTrace>false</trimStackTrace>
 					<includes>
@@ -1005,7 +1076,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-release-plugin</artifactId>
-				<version>3.0.0-M4</version>
+				<version>3.0.1</version>
 				<configuration>
 					<pushChanges>false</pushChanges>
 					<localCheckout>true</localCheckout>
@@ -1017,37 +1088,37 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.3.0</version>
+				<version>3.6.3</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-deploy-plugin</artifactId>
-				<version>3.0.0-M1</version>
+				<version>3.1.1</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
-				<version>3.2.1</version>
+				<version>3.3.0</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-clean-plugin</artifactId>
-				<version>3.1.0</version>
+				<version>3.3.2</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-install-plugin</artifactId>
-				<version>3.0.0-M1</version>
+				<version>3.1.1</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-resources-plugin</artifactId>
-				<version>3.2.0</version>
+				<version>3.3.1</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-site-plugin</artifactId>
-				<version>3.9.1</version>
+				<version>4.0.0-M13</version>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
@@ -1059,7 +1130,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
-				<version>3.1.2</version>
+				<version>3.3.1</version>
 				<executions>
 					<execution>
 						<id>checkstyle</id>
@@ -1091,7 +1162,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-enforcer-plugin</artifactId>
-				<version>3.0.0-M3</version>
+				<version>3.4.1</version>
 				<executions>
 					<execution>
 						<id>enforce-maven</id>
@@ -1101,7 +1172,7 @@
 						<configuration>
 							<rules>
 								<requireMavenVersion>
-									<version>3.5.2</version>
+									<version>3.6.3</version>
 								</requireMavenVersion>
 							</rules>
 						</configuration>
@@ -1142,7 +1213,7 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-compiler-plugin</artifactId>
-						<version>3.8.1</version>
+						<version>3.13.0</version>
 						<configuration>
 							<showDeprecation>false</showDeprecation>
 						</configuration>

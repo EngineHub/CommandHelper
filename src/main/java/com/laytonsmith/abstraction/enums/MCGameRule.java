@@ -1,8 +1,12 @@
 package com.laytonsmith.abstraction.enums;
 
 import com.laytonsmith.annotations.MEnum;
+import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 
 @MEnum("com.commandhelper.GameRule")
@@ -10,8 +14,9 @@ public enum MCGameRule {
 	ANNOUNCEADVANCEMENTS("announceAdvancements"),
 	BLOCKEXPLOSIONDROPDECAY("blockExplosionDropDecay"),
 	COMMANDBLOCKOUTPUT("commandBlockOutput"),
-	COMMANDMODIFICATIONBLOCKLIMIT("commandModificationBlockLimit"),
+	COMMANDMODIFICATIONBLOCKLIMIT("commandModificationBlockLimit", CInt.class),
 	DISABLEELYTRAMOVEMENTCHECK("disableElytraMovementCheck"),
+	DISABLEPLAYERMOVEMENTCHECK("disablePlayerMovementCheck"),
 	DISABLERAIDS("disableRaids"),
 	DODAYLIGHTCYCLE("doDaylightCycle"),
 	DOENTITYDROPS("doEntityDrops"),
@@ -38,16 +43,22 @@ public enum MCGameRule {
 	LAVASOURCECONVERSION("lavaSourceConversion"),
 	LOGADMINCOMMANDS("logAdminCommands"),
 	MAXCOMMANDCHAINLENGTH("maxCommandChainLength", CInt.class),
+	MAXCOMMANDFORKCOUNT("maxCommandForkCount", CInt.class),
 	MAXENTITYCRAMMING("maxEntityCramming", CInt.class),
+	MINECARTMAXSPEED("minecartMaxSpeed", CInt.class),
 	MOBEXPLOSIONDROPDECAY("mobExplosionDropDecay"),
 	MOBGRIEFING("mobGriefing"),
 	NATURALREGENERATION("naturalRegeneration"),
+	PLAYERSNETHERPORTALCREATIVEDELAY("playersNetherPortalCreativeDelay", CInt.class),
+	PLAYERSNETHERPORTALDEFAULTDELAY("playersNetherPortalDefaultDelay", CInt.class),
 	PLAYERSSLEEPINGPERCENTAGE("playersSleepingPercentage", CInt.class),
+	PROJECTILESCANBREAKBLOCKS("projectilesCanBreakBlocks"),
 	RANDOMTICKSPEED("randomTickSpeed", CInt.class),
 	REDUCEDDEBUGINFO("reducedDebugInfo"),
 	SENDCOMMANDFEEDBACK("sendCommandFeedback"),
 	SHOWDEATHMESSAGES("showDeathMessages"),
 	SNOWACCUMULATIONHEIGHT("snowAccumulationHeight", CInt.class),
+	SPAWNCHUNKRADIUS("spawnChunkRadius", CInt.class),
 	SPAWNRADIUS("spawnRadius", CInt.class),
 	SPECTATORSGENERATECHUNKS("spectatorsGenerateChunks"),
 	TNTEXPLOSIONDROPDECAY("tntExplosionDropDecay"),
@@ -67,11 +78,40 @@ public enum MCGameRule {
 		this.ruleType = type;
 	}
 
-	public String getGameRule() {
+	public static String[] getGameRules() {
+		MCGameRule[] values = MCGameRule.values();
+		String[] names = new String[values.length];
+		for(int i = 0; i < values.length; i++) {
+			names[i] = values[i].getRuleName();
+		}
+		return names;
+	}
+
+	public String getRuleName() {
 		return this.gameRule;
 	}
 
-	public Class<? extends Mixed> getRuleType() {
-		return this.ruleType;
+	public Object convertValue(Mixed value, Target t) {
+		if(this.ruleType == CBoolean.class) {
+			return ArgumentValidation.getBooleanish(value, t);
+		} else if(this.ruleType == CInt.class) {
+			return ArgumentValidation.getInt(value, t);
+		}
+		MSLog.GetLogger().e(MSLog.Tags.RUNTIME, "The gamerule \"" + this.gameRule + "\""
+				+ " has an invalid type.", t);
+		return null;
+	}
+
+	public Mixed constructValue(Object value, Target t) {
+		try {
+			if(this.ruleType == CBoolean.class) {
+				return CBoolean.get((Boolean) value);
+			} else if(this.ruleType == CInt.class) {
+				return new CInt((Integer) value, t);
+			}
+		} catch(ClassCastException ex) {}
+		MSLog.GetLogger().e(MSLog.Tags.RUNTIME, "The gamerule \"" + this.gameRule + "\""
+				+ " has an invalid type.", t);
+		return new CString(value.toString(), t);
 	}
 }

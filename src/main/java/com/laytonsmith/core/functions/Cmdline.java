@@ -951,7 +951,8 @@ public class Cmdline {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREInsufficientPermissionException.class, CREIOException.class};
+			return new Class[]{CREInsufficientPermissionException.class,
+					CREIOException.class, CREIllegalArgumentException.class};
 		}
 
 		@Override
@@ -988,6 +989,9 @@ public class Cmdline {
 				}
 			} else {
 				command = StringUtils.ArgParser(args[0].val()).toArray(new String[0]);
+			}
+			if(command.length == 0) {
+				throw new CREIllegalArgumentException("Empty command passed to " + this.getName() + "().", t);
 			}
 			if(args.length > 1) {
 				CArray options = ArgumentValidation.getArray(args[1], t);
@@ -1123,7 +1127,9 @@ public class Cmdline {
 		public String docs() {
 			return "void {command, [options]} Runs a shell command. <code>command</code> can either be a string or an array of string arguments,"
 					+ " which are run as an external process. Requires the allow-shell-commands option to be enabled in preferences, or run from command line, otherwise"
-					+ " an InsufficientPermissionException is thrown. ---- <code>options</code> is an associative array with zero or more"
+					+ " an InsufficientPermissionException is thrown."
+					+ "When the passed command results in an empty shell command, an IllegalArgumentException is thrown."
+					+ " ---- <code>options</code> is an associative array with zero or more"
 					+ " of the following options:\n\n"
 					+ "{| border=\"1\" class=\"wikitable\" cellspacing=\"1\" cellpadding=\"1\"\n"
 					+ "|-\n| workingDir || Sets the working directory for"
@@ -1153,7 +1159,8 @@ public class Cmdline {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREInsufficientPermissionException.class, CREShellException.class, CREIOException.class};
+			return new Class[]{CREInsufficientPermissionException.class,
+					CREShellException.class, CREIOException.class, CREIllegalArgumentException.class};
 		}
 
 		@Override
@@ -1187,6 +1194,9 @@ public class Cmdline {
 				}
 			} else {
 				command = StringUtils.ArgParser(args[0].val()).toArray(new String[0]);
+			}
+			if(command.length == 0) {
+				throw new CREIllegalArgumentException("Empty command passed to " + this.getName() + "().", t);
 			}
 			if(args.length > 1) {
 				CArray options = ArgumentValidation.getArray(args[1], t);
@@ -1259,7 +1269,9 @@ public class Cmdline {
 					+ " that return output and don't need very complicated usage, and failures don't need to check the exact error code."
 					+ " If the underlying command throws an IOException, it is"
 					+ " passed through. Requires the allow-shell-commands option to be enabled in preferences, or run from command line, otherwise"
-					+ " an InsufficientPermissionException is thrown. Options is an associative array which expects zero or more"
+					+ " an InsufficientPermissionException is thrown."
+					+ " When the passed command results in an empty shell command, an IllegalArgumentException is thrown."
+					+ " Options is an associative array which expects zero or more"
 					+ " of the following options: expectedErrorCode - The expected error code indicating successful command completion. Defaults to 0."
 					+ " workingDir - Sets the working directory for the sub process. By default null, which represents the directory of this script."
 					+ " If the path is relative, it is relative to the directory of this script.";

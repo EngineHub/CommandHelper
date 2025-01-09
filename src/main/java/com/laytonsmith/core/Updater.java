@@ -1,9 +1,5 @@
 package com.laytonsmith.core;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import com.laytonsmith.PureUtilities.ArgumentParser;
 import com.laytonsmith.core.apps.AppsApiUtil;
@@ -13,10 +9,12 @@ import com.laytonsmith.core.functions.Meta;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import io.swagger.client.ApiException;
 import io.swagger.client.api.BuildsApi;
+import io.swagger.client.model.BuildArtifact;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Contains command line tools and other tools to handle self-updating.
@@ -31,21 +29,17 @@ public class Updater {
 		return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").parse(date);
 	}
 
-	public static JsonObject getLatestVersionInfo() throws ApiException, ParseException {
-		Date maxVersion = new Date(0);
-		String jsonResponse = API.buildsArtifactGet(DEFAULT_UPDATE_CHANNEL);
-		JsonArray versions = JsonParser.parseString(jsonResponse).getAsJsonArray();
-		JsonObject maxVersionObject = null;
+	public static BuildArtifact getLatestVersionInfo() throws ApiException, ParseException {
+		List<BuildArtifact> versions = API.buildsArtifactGet(DEFAULT_UPDATE_CHANNEL, true);
+		BuildArtifact maxVersion = null;
 		for(int i = 0; i < versions.size(); i++) {
-			JsonElement version = versions.get(i);
-			JsonObject versionObj = version.getAsJsonObject();
-			Date versionDate = getDateFromString(versionObj.get("date").getAsString());
-			if(versionDate.after(maxVersion)) {
-				maxVersion = versionDate;
-				maxVersionObject = versionObj;
+			BuildArtifact version = versions.get(i);
+			Date versionDate = getDateFromString(version.getDate());
+			if(maxVersion == null || versionDate.after(getDateFromString(maxVersion.getDate()))) {
+				maxVersion = version;
 			}
 		}
-		return maxVersionObject;
+		return maxVersion;
 	}
 
 	public static Boolean isUpdateAvailable() {
@@ -57,7 +51,7 @@ public class Updater {
 		long iBuildDate = ((CInt) buildDate).getInt();
 		Date time = new Date(iBuildDate);
 		try {
-			JsonObject latestVersion = getLatestVersionInfo();
+			BuildArtifact latestVersion = getLatestVersionInfo();
 			if(latestVersion != null) {
 				// date, buildId, and name point to the latest version. Check if it's earlier than our
 				// build date. Note we add 5 minutes to the build time, because the engine build date and
@@ -67,7 +61,7 @@ public class Updater {
 				// this shouldn't be a problem in most cases. In any case, the newest build will be grabbed
 				// if a forced update is done, regardless of the mismatch in resolution.
 
-				Date versionDate = getDateFromString(latestVersion.get("date").getAsString());
+				Date versionDate = getDateFromString(latestVersion.getDate());
 				Calendar cal = Calendar.getInstance();
 				cal.setTime(versionDate);
 				cal.add(Calendar.MINUTE, 5);

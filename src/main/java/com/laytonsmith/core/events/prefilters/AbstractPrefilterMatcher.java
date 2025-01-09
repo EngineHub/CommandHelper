@@ -58,4 +58,9 @@ public abstract class AbstractPrefilterMatcher<T extends BindableEvent> implemen
 		}
 		return prefilterValueType;
 	}
+
+	@Override
+	public int getPriority() {
+		return 0;
+	}
 }

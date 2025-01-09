@@ -1,5 +1,6 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
+import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCLivingEntity;
@@ -17,6 +18,7 @@ import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCTeleportCause;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
 import com.laytonsmith.abstraction.events.MCEntityDamageEvent;
+import io.papermc.paper.entity.TeleportFlag;
 import org.bukkit.EntityEffect;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -30,10 +32,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import org.bukkit.Location;
 
 public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 
 	Entity e;
+	private static volatile Boolean isPaperTeleportFlag = null;
+	private static final Object IS_PAPER_TELEPORT_FLAG_LOCK = new Object();
 
 	public BukkitMCEntity(Entity e) {
 		super(e);
@@ -190,6 +195,16 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 	}
 
 	@Override
+	public boolean savesOnUnload() {
+		return e.isPersistent();
+	}
+
+	@Override
+	public void setSavesOnUnload(boolean saves) {
+		e.setPersistent(saves);
+	}
+
+	@Override
 	public void setFallDistance(float distance) {
 		e.setFallDistance(distance);
 	}
@@ -197,11 +212,6 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 	@Override
 	public void setFireTicks(int ticks) {
 		e.setFireTicks(ticks);
-	}
-
-	@Override
-	public void setLastDamageCause(MCEntityDamageEvent event) {
-		e.setLastDamageCause((EntityDamageEvent) event._GetObject());
 	}
 
 	@Override
@@ -222,23 +232,54 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 
 	@Override
 	public boolean teleport(MCEntity destination) {
-		Entity ent = ((BukkitMCEntity) destination).getHandle();
-		return e.teleport(ent.getLocation());
+		return this.teleport(destination.getLocation(), MCTeleportCause.PLUGIN);
 	}
 
 	@Override
 	public boolean teleport(MCEntity destination, MCTeleportCause cause) {
-		return e.teleport(((BukkitMCEntity) destination).getHandle(), TeleportCause.valueOf(cause.name()));
+		return this.teleport(destination.getLocation(), cause);
 	}
 
 	@Override
 	public boolean teleport(MCLocation location) {
-		return e.teleport(((BukkitMCLocation) location).asLocation());
+		return this.teleport(location, MCTeleportCause.PLUGIN);
 	}
 
 	@Override
 	public boolean teleport(MCLocation location, MCTeleportCause cause) {
-		return e.teleport(((BukkitMCLocation) location).asLocation(), TeleportCause.valueOf(cause.name()));
+		@SuppressWarnings("LocalVariableHidesMemberVariable")
+		Boolean isPaperTeleportFlag = BukkitMCEntity.isPaperTeleportFlag;
+		if(isPaperTeleportFlag == null) {
+			synchronized(IS_PAPER_TELEPORT_FLAG_LOCK) {
+				isPaperTeleportFlag = BukkitMCEntity.isPaperTeleportFlag;
+				if(isPaperTeleportFlag == null) {
+					try {
+						// 1.19.3
+						Class.forName("io.papermc.paper.entity.TeleportFlag$EntityState");
+						BukkitMCEntity.isPaperTeleportFlag = isPaperTeleportFlag = true;
+					} catch(ClassNotFoundException ex) {
+						BukkitMCEntity.isPaperTeleportFlag = isPaperTeleportFlag = false;
+					}
+				}
+			}
+		}
+		Location l = ((BukkitMCLocation) location).asLocation();
+		TeleportCause c = TeleportCause.valueOf(cause.name());
+		if(isPaperTeleportFlag) {
+			// Paper requires a third parameter to maintain consistent behavior when teleporting
+			// entities with passengers.
+			TeleportFlag teleportFlag = TeleportFlag.EntityState.RETAIN_PASSENGERS;
+			// Paper only method:
+			// e.teleport(l, c, teleportFlag);
+			return ReflectionUtils.invokeMethod(Entity.class, e, "teleport",
+					new Class[] {
+						org.bukkit.Location.class,
+						org.bukkit.event.player.PlayerTeleportEvent.TeleportCause.class,
+						TeleportFlag[].class
+					},
+					new Object[] { l, c, new TeleportFlag[] { teleportFlag } });
+		}
+		return e.teleport(l, c);
 	}
 
 	@Override
@@ -307,6 +348,11 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 	}
 
 	@Override
+	public boolean hasScoreboardTag(String tag) {
+		return e.getScoreboardTags().contains(tag);
+	}
+
+	@Override
 	public boolean addScoreboardTag(String tag) {
 		return e.addScoreboardTag(tag);
 	}
@@ -351,5 +397,20 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 	@Override
 	public int hashCode() {
 		return e.hashCode();
+	}
+
+	@Override
+	public int getEntityId() {
+		return e.getEntityId();
+	}
+
+	@Override
+	public boolean isInWater() {
+		return e.isInWater();
+	}
+
+	@Override
+	public void setRotation(float yaw, float pitch) {
+		e.setRotation(yaw, pitch);
 	}
 }

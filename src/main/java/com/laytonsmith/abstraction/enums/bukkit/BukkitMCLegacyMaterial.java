@@ -500,7 +500,9 @@ public class BukkitMCLegacyMaterial {
 		POTTERY_SHARD_ARCHER("ARCHER_POTTERY_SHERD", MCVersion.MC1_20),
 		POTTERY_SHARD_ARMS_UP("ARMS_UP_POTTERY_SHERD", MCVersion.MC1_20),
 		POTTERY_SHARD_PRIZE("PRIZE_POTTERY_SHERD", MCVersion.MC1_20),
-		POTTERY_SHARD_SKULL("SKULL_POTTERY_SHERD", MCVersion.MC1_20);
+		POTTERY_SHARD_SKULL("SKULL_POTTERY_SHERD", MCVersion.MC1_20),
+		GRASS("SHORT_GRASS", MCVersion.MC1_20_4),
+		SCUTE("TURTLE_SCUTE", MCVersion.MC1_20_6);
 
 		private final String mat;
 		private final MCVersion version;
@@ -543,10 +545,13 @@ public class BukkitMCLegacyMaterial {
 	}
 
 	public static Material getMaterial(String name) {
-		Material mat = Material.getMaterial(name, true);
-		// we should never get air here since we're checking for legacy materials only
-		if(mat == null || mat == Material.AIR) {
-			mat = BY_NAME.get(name);
+		Material mat = BY_NAME.get(name);
+		if(mat == null) {
+			mat = Material.getMaterial(name, true);
+			// we should never get air here since we're checking for legacy materials only
+			if(mat == Material.AIR) {
+				return null;
+			}
 		}
 		return mat;
 	}

@@ -17,6 +17,8 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
+import com.laytonsmith.core.compiler.signature.FunctionSignatures;
+import com.laytonsmith.core.compiler.signature.SignatureBuilder;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CClassType;
@@ -1826,9 +1828,12 @@ public class ArrayHandling {
 						} else {
 							value = -1;
 						}
+					} else if(c.isInstanceOf(CInt.TYPE)) {
+						long longVal = ((CInt) c).getInt();
+						value = (longVal > 0 ? 1 : (longVal < 0 ? -1 : 0));
 					} else {
 						throw new CRECastException("The custom closure did not return a value (or returned an invalid"
-								+ " type). It must always return true, false, or null.", t);
+								+ " type). It must always return true, false, null, or an integer.", t);
 					}
 					if(value <= 0) {
 						result.push(left.get(0, t), t);
@@ -1880,10 +1885,10 @@ public class ArrayHandling {
 					+ " operation. Due to this, it has slightly different behavior than array_normalize, which could"
 					+ " have also been implemented in place.\n\nIf the sortType is a closure, it will perform a"
 					+ " custom sort type, and the array may contain any values, including sub array values. The closure"
-					+ " should accept two values, @left and @right, and should return true if the left value is larger"
-					+ " than the right, and false if the left value is smaller than the right, and null if they are"
-					+ " equal. The array will then be re-ordered using a merge sort, using your custom comparator to"
-					+ " determine the sort order.";
+					+ " should accept two values, @left and @right, and should return true or a positive integer if the"
+					+ " left value is larger than the right, and false or a negative integer if the left value is"
+					+ " smaller than the right, and null or 0 if they are equal. The array will then be re-ordered"
+					+ " using a merge sort, using your custom comparator to determine the sort order.";
 		}
 
 		@Override
@@ -3843,6 +3848,68 @@ public class ArrayHandling {
 					+ " associative, a cast exception is thrown. This fills"
 					+ " the entire array. The change is made in place, but a reference to the array is returned"
 					+ " for easy chaining.";
+		}
+	}
+
+	@api
+	public static class array_clear extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			ArgumentValidation.getArray(args[0], t).clear();
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "array_clear";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "void {array} Clears the array of all values. This keeps the array reference the same, but"
+					+ " empties it. Both normal and associative arrays are supported, but the internal type (normal"
+					+ " or associative) is not reset.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CVoid.TYPE)
+					.param(CArray.TYPE, "array", "The array to clear.")
+					.build();
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "@array = array(1, 2, 3);\narray_clear(@array);\nmsg(@array);"),
+				new ExampleScript("Associative arrays", "@array = array(one: 1, two: 2, three: 3);\narray_clear(@array);\nmsg(@array);"),
+			};
 		}
 	}
 }

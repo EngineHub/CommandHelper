@@ -154,7 +154,7 @@ public abstract class MCBiomeType<Concrete> extends DynamicEnum<MCBiomeType.MCVa
 		CRIMSON_FOREST(MCVersion.MC1_16),
 		WARPED_FOREST(MCVersion.MC1_16),
 		BASALT_DELTAS(MCVersion.MC1_16),
-		CUSTOM(MCVersion.MC1_16_X),
+		CUSTOM(MCVersion.MC1_16_X, MCVersion.MC1_21_1),
 		DRIPSTONE_CAVES(MCVersion.MC1_17),
 		LUSH_CAVES(MCVersion.MC1_17),
 		FROZEN_PEAKS(MCVersion.MC1_18),
@@ -176,7 +176,8 @@ public abstract class MCBiomeType<Concrete> extends DynamicEnum<MCBiomeType.MCVa
 		WOODED_BADLANDS(MCVersion.MC1_18),
 		MANGROVE_SWAMP(MCVersion.MC1_19),
 		DEEP_DARK(MCVersion.MC1_19),
-		CHERRY_GROVE(MCVersion.MC1_19_X),
+		CHERRY_GROVE(MCVersion.MC1_19_4),
+		PALE_GARDEN(MCVersion.MC1_21_3),
 		UNKNOWN(MCVersion.NEVER);
 
 		private final MCVersion since;

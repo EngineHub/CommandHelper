@@ -2,6 +2,7 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCObjective;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCScoreboard;
@@ -17,6 +18,8 @@ import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.NotInitializedYetException;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.signature.FunctionSignatures;
+import com.laytonsmith.core.compiler.signature.SignatureBuilder;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CInt;
@@ -44,10 +47,13 @@ import java.util.Set;
  *
  * @author jb_aero
  */
-public class Scoreboards {
+public final class Scoreboards {
 
 	public static String docs() {
 		return "A class of functions for manipulating the server scoreboard.";
+	}
+
+	private Scoreboards() {
 	}
 
 	/**
@@ -55,7 +61,7 @@ public class Scoreboards {
 	 */
 	public static final String MAIN = "main";
 	private static final String DEF_MSG = "Scoreboard defaults to '" + MAIN + "' if not given.";
-	private static Map<String, MCScoreboard> boards = new HashMap<String, MCScoreboard>();
+	private static Map<String, MCScoreboard> boards = new HashMap<>();
 
 	static {
 		if(!isBoard(MAIN)) {
@@ -677,6 +683,7 @@ public class Scoreboards {
 					+ " all displays. Slot can be one of: " + StringUtils.Join(MCDisplaySlot.values(), ", ", ", or ")
 					+ " ---- If the displayname is too long, a LengthException will be thrown."
 					+ " The max length will differ based on server version, but this limit was removed in 1.20.1."
+					+ " Sidebar display slots for teams was added to Spigot in 1.19.2 and Paper in 1.17.1."
 					+ DEF_MSG;
 		}
 
@@ -1258,5 +1265,48 @@ public class Scoreboards {
 		public MSVersion since() {
 			return MSVersion.V3_3_1;
 		}
+	}
+
+	@api
+	public static class get_scoreboard_entries extends SBFunction {
+
+		@Override
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCScoreboard s = assignBoard(0, t, args);
+			Set<String> entries = s.getEntries();
+			CArray ret = new CArray(t, entries.size());
+			for(String r : entries) {
+				ret.push(new CString(r, t), t);
+			}
+			return ret;
+		}
+
+		@Override
+		public String getName() {
+			return "get_scoreboard_entries";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1};
+		}
+
+		@Override
+		public String docs() {
+			return "array {[scoreboardName]} Gets a list of all the entries in the given scoreboard.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CArray.TYPE)
+					.param(CString.TYPE, "scoreboardName", "The name of the scoreboard", true)
+					.build();
+		}
+
 	}
 }

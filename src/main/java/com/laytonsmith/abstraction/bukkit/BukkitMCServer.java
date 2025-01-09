@@ -53,9 +53,11 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -184,17 +186,28 @@ public class BukkitMCServer implements MCServer {
 
 	@Override
 	public MCPluginManager getPluginManager() {
-		if(s.getPluginManager() == null) {
-			return null;
-		}
 		return new BukkitMCPluginManager(s.getPluginManager());
 	}
+
+	/**
+	 * This player Name-to-UUID fallback is used to work around an issue in Minecraft/Spigot where players are
+	 * incorrectly removed from the by-name map in PlayerList (and the list of online players) but not the UUID keyed
+	 * map (which is used to determine if they're considered online by the Bukkit API).
+	 * This occurs during the respawn event or when a player is teleported between worlds during the quit event.
+	 * Versions of Spigot up to at least 1.20.4 are known to be affected by this issue.
+	 * This map should only be updated after the login and quit events in BukkitPlayerListener.
+	 */
+	public final Map<String, UUID> playerUUIDsByName = new HashMap<>();
 
 	@Override
 	public MCPlayer getPlayerExact(String name) {
 		Player p = s.getPlayerExact(name);
 		if(p == null) {
-			return null;
+			UUID id = playerUUIDsByName.get(name);
+			if(id == null) {
+				return null;
+			}
+			return getPlayer(id);
 		}
 		return new BukkitMCPlayer(p);
 	}
@@ -203,7 +216,11 @@ public class BukkitMCServer implements MCServer {
 	public MCPlayer getPlayer(String name) {
 		Player p = s.getPlayer(name);
 		if(p == null) {
-			return null;
+			UUID id = playerUUIDsByName.get(name);
+			if(id == null) {
+				return null;
+			}
+			return getPlayer(id);
 		}
 		return new BukkitMCPlayer(p);
 	}

@@ -247,6 +247,10 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		push(c, null, t);
 	}
 
+	public final void push(String s) {
+		push(new CString(s, Target.UNKNOWN), Target.UNKNOWN);
+	}
+
 	/**
 	 * Pushes a new Construct onto the end of the array. If the index is specified, this works like a "insert"
 	 * operation, in that all values are shifted to the right, starting with the value at that index. If the array is
@@ -390,6 +394,14 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 
 	public final void set(String index, String value) {
 		set(index, value, Target.UNKNOWN);
+	}
+
+	public final void set(String index, double value) {
+		set(index, new CDouble(value, Target.UNKNOWN), Target.UNKNOWN);
+	}
+
+	public final void set(String index, long value) {
+		set(index, new CInt(value, Target.UNKNOWN), Target.UNKNOWN);
 	}
 
 	@Override

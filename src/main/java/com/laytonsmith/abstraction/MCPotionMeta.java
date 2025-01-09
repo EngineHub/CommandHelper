@@ -2,6 +2,7 @@ package com.laytonsmith.abstraction;
 
 import com.laytonsmith.abstraction.MCLivingEntity.MCEffect;
 import com.laytonsmith.abstraction.enums.MCPotionEffectType;
+import com.laytonsmith.abstraction.enums.MCPotionType;
 import com.laytonsmith.core.constructs.Target;
 import java.util.List;
 
@@ -10,6 +11,10 @@ public interface MCPotionMeta extends MCItemMeta {
 	MCPotionData getBasePotionData();
 
 	void setBasePotionData(MCPotionData pd);
+
+	MCPotionType getBasePotionType();
+
+	void setBasePotionType(MCPotionType pt);
 
 	boolean addCustomEffect(MCPotionEffectType type, int strength, int ticks, boolean ambient, boolean particles, boolean icon, boolean force, Target t);
 

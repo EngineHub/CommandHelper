@@ -3,9 +3,11 @@ package com.laytonsmith.abstraction.bukkit.entities;
 import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCColor;
 import com.laytonsmith.abstraction.entities.MCDisplay;
+import com.laytonsmith.abstraction.entities.MCTransformation;
 import org.bukkit.Color;
 import org.bukkit.entity.Display;
 import org.bukkit.entity.Entity;
+import org.joml.Matrix4f;
 
 public class BukkitMCDisplay extends BukkitMCEntity implements MCDisplay {
 
@@ -99,7 +101,7 @@ public class BukkitMCDisplay extends BukkitMCEntity implements MCDisplay {
 
 	@Override
 	public void setInterpolationDelayTicks(int ticks) {
-		this.d.setInterpolationDuration(ticks);
+		this.d.setInterpolationDelay(ticks);
 	}
 
 	@Override
@@ -140,5 +142,28 @@ public class BukkitMCDisplay extends BukkitMCEntity implements MCDisplay {
 	@Override
 	public void setViewRange(float range) {
 		this.d.setViewRange(range);
+	}
+
+	@Override
+	public MCTransformation getTransformation() {
+		return new BukkitMCTransformation(this.d.getTransformation());
+	}
+
+	@Override
+	public void setTransformation(MCTransformation transformation) {
+		this.d.setTransformation(((BukkitMCTransformation) transformation).transformation);
+	}
+
+	@Override
+	public void setTransformationMatrix(float[] mtrxf) {
+		// Note that the order of the matrix is flipped about the identity of the
+		// matrix. This allows us to accept inputs that are the same order as the
+		// /data command would accept.
+		Matrix4f matrix = new Matrix4f(
+				mtrxf[0], mtrxf[4], mtrxf[8], mtrxf[12],
+				mtrxf[1], mtrxf[5], mtrxf[9], mtrxf[13],
+				mtrxf[2], mtrxf[6], mtrxf[10], mtrxf[14],
+				mtrxf[3], mtrxf[7], mtrxf[11], mtrxf[15]);
+		this.d.setTransformationMatrix(matrix);
 	}
 }

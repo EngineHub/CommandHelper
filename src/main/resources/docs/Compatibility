@@ -1,139 +1,205 @@
-This page lists compatibility of various milestone versions of CommandHelper. Note that this chart was created starting
-with build 1498, so earlier builds may not be accurate. In general, the compatibility requirements, if not listed, are
-the same as the previous milestone build. The minimum requirements for the current builds are:
+This page lists compatibility changes of milestone versions of CommandHelper.
+In general, the compatibility requirements, if not listed, are the same as the previous milestone build.
+The minimum requirements for the current builds are:
 
 * Java 16
-* Spigot/Paper 1.16.5 - 1.20.2 (when CH is used as a plugin)
+* Spigot or Paper 1.16.5 - 1.21.4 (when used as a plugin)
 
-Also note that CommandHelper may still be backwards and forward compatible to a large degree, many of the advanced
-features that normally have hard dependencies on certain versions of external dependencies have been configured to
-"soft" fail, that is, individual components may not work, but in general the plugin should continue to function.
-Regardless, only the most current dev builds are officially supported.
+CommandHelper may still be backwards and forward compatible to a large degree. Many of the advanced features that
+normally have hard dependencies on certain versions of external dependencies have been configured to "soft" fail.
+Individual components may not work, but in general CommandHelper should continue to function.
+Regardless, only the most current builds are officially supported.
 
 <!-- Note that in this table builds are newest to oldest -->
 {| width="100%" cellspacing="1" cellpadding="1" border="1" class="wikitable"
 |-
-! scope="col" width="5%" | Build
-! scope="col" width="5%" | Source
-! scope="col" width="40%" | Milestone
-! scope="col" width="50%" | Compatibility
+! scope="col" width="11%" | Build
+! scope="col" width="8%" | Source
+! scope="col" width="60%" | Milestone
+! scope="col" width="21%" | Compatibility
 |-
-| build-334
+|
+|
+| Added support for Spigot 1.21.4
+| Spigot 1.16.5 - 1.21.4
+|-
+| 3.3.5 build-500
+| [https://github.com/EngineHub/CommandHelper/commit/62e47f3912789598ca41578e263b03207bccda49 62e47f3]
+| Added support for Spigot 1.21.3
+| Spigot 1.16.5 - 1.21.3
+|-
+| 3.3.5 build-478
+| [https://github.com/EngineHub/CommandHelper/commit/5b137ff87b1f7560722e0a462bb36fa67d79e2f5 5b137ff]
+| Added support for Spigot 1.21
+| Spigot 1.16.5 - 1.21.1
+|-
+| 3.3.5 build-467
+| [https://github.com/EngineHub/CommandHelper/commit/84f1af4764fa93fc4809696969fdbce2112ec4ac 84f1af4]
+| Added support for Spigot 1.20.6
+| Spigot 1.16.5 - 1.20.6
+|-
+| 3.3.5 build-382
+| [https://github.com/EngineHub/CommandHelper/commit/f2b77ca36793c745249e48144ff26175125ff37a f2b77ca]
+| Added support for Spigot 1.20.4
+| Spigot 1.16.5 - 1.20.4
+|-
+| 3.3.5 build-354
+| [https://github.com/EngineHub/CommandHelper/commit/d91224879a1b0a468d01c60a0075ff51eaf8dfee d911248]
+| Added support for Spigot 1.20.2
+| Spigot 1.16.5 - 1.20.2
+|-
+| 3.3.5 build-334
 | [https://github.com/EngineHub/CommandHelper/commit/24fd9708578fcc16636ee35fe305099a9fb4f04b 24fd970]
-| Updated for Spigot 1.20
-| Spigot 1.16.5 - 1.20
+| Added support for Spigot 1.20
+| Spigot 1.16.5 - 1.20.1
 |-
-| build-256
+| 3.3.5 build-320
+| [https://github.com/EngineHub/CommandHelper/commit/bbfa3c88850e31e4c20cf348d7164a794c74f5e2 bbfa3c8]
+| Added support for Spigot 1.19.4
+| Spigot 1.16.5 - 1.19.4
+|-
+| 3.3.5 build-285
+| [https://github.com/EngineHub/CommandHelper/commit/7c4917844dbdc1aeca229e92748e11b3f5237053 7c49178]
+| Added support for Spigot 1.19.3
+| Spigot 1.16.5 - 1.19.3
+|-
+| 3.3.5 build-268
+| [https://github.com/EngineHub/CommandHelper/commit/0cdc115c4df67412e937d2c4ff231b14a757596e 0cdc115]
+| Added support for Spigot 1.19.1
+| Spigot 1.16.5 - 1.19.2
+|-
+| 3.3.5 build-256
 | [https://github.com/EngineHub/CommandHelper/commit/918bd125fa45c69ff30dfa072daef94a5212fd1c 918bd12]
-| Updated for Spigot 1.19
+| Added support for Spigot 1.19
 | Spigot 1.16.5 - 1.19
 |-
-| build-149
+| 3.3.5 build-149
 | [https://github.com/EngineHub/CommandHelper/commit/4eebc877104a80aa0cecf4bf5fa8aa540c9fdc6c 4eebc87]
-| Updated for Spigot 1.18
+| Added support for Spigot 1.18
 | Spigot 1.16.5 - 1.18
 |-
-| build-48
+| 3.3.5 build-48
 | [https://github.com/EngineHub/CommandHelper/commit/c6db71e383eb3e65f36d8557c7e45dc006c2c37a c6db71e]
-| Updated for Spigot 1.17
+| Added support for Spigot 1.17
 | Spigot 1.16.5 - 1.17
 |-
-| build-38
+| 3.3.5 build-38
 | [https://github.com/EngineHub/CommandHelper/commit/02fa3b8eca89504b8f380eddf524d3aa169de5c1 02fa3b8]
-| Updated to Java 16
-| Spigot 1.16.5 / Java 16
+| Updated to Java 16.
+Dropped support for Spigot versions prior to 1.16.5.
+Extensions built on CommandHelper 3.3.4 and Java 8 are still supported.
+| Spigot 1.16.5
 |-
 | 3.3.4-final
 | [https://github.com/EngineHub/CommandHelper/commit/37ef777678f85ee2e21b3e090c35fb25f21bc11d 37ef777]
-| CommandHelper 3.3.4 Release
-| Spigot 1.13.2 - 1.16.5 / Java 8
+| CommandHelper 3.3.4 Final
+| Spigot 1.13.2 - 1.16.5
 |-
 |
 | [https://github.com/EngineHub/CommandHelper/commit/0fe660dbf2f72dfcdfaab1938ff697939bdaa009 0fe660d]
-| Updated for Spigot 1.16
+| Added support for Spigot 1.16
 | Spigot 1.13.2 - 1.16.1
 |-
 |
 | [https://github.com/EngineHub/CommandHelper/commit/7f0017181a7a9fd186dcde6b75319cc8194dec0d 7f00171]
-| Updated for Spigot 1.15
+| Added support for Spigot 1.15
 | Spigot 1.13.2 - 1.15
 |-
-| #3653
-| [https://github.com/EngineHub/CommandHelper/commit/7cbdf86fff691c45746641543edd530cc3b517cd 7cbdf86f]
-| Updated for Spigot 1.14
+| 3.3.4 #3653
+| [https://github.com/EngineHub/CommandHelper/commit/7cbdf86fff691c45746641543edd530cc3b517cd 7cbdf86]
+| Added support for Spigot 1.14
 | Spigot 1.13.2 - 1.14.1
 |-
-| #3500
-| [https://github.com/EngineHub/CommandHelper/commit/676db513a5fbf489688d81ac5e62caf0053c5eb6 676db513]
+| 3.3.4 #3506
+| [https://github.com/EngineHub/CommandHelper/commit/4964181d782ecda71fb1846ba64e02477d28bcee 4964181]
+| All extensions must be updated for 3.3.4
+| Bukkit 1.13.1
+|-
+| 3.3.3-final
+| [https://github.com/EngineHub/CommandHelper/commit/676db513a5fbf489688d81ac5e62caf0053c5eb6 676db51]
 | CommandHelper 3.3.3 Final
 | Bukkit 1.13.1
 |-
-| #3427
-| [https://github.com/EngineHub/CommandHelper/commit/7277e87c4bb988b0244e258f4e478b01a4f29a01 7277e87c]
-| Updated for Bukkit 1.13
+| 3.3.3 #3427
+| [https://github.com/EngineHub/CommandHelper/commit/7277e87c4bb988b0244e258f4e478b01a4f29a01 7277e87]
+| Updated to Bukkit 1.13.
+Breaking changes require many scripts to be updated. See the [[Upgrade_Guide#Minecraft 1.13|upgrade guide]].
 | Bukkit 1.13.1
 |-
-| #3426
-| [https://github.com/EngineHub/CommandHelper/commit/90d3bc1b979bb5b2f2a3d8a32dec8cccd7502e75 90d3bc1b]
-| CommandHelper 3.3.2 Release
+| 3.3.2-final
+| [https://github.com/EngineHub/CommandHelper/commit/90d3bc1b979bb5b2f2a3d8a32dec8cccd7502e75 90d3bc1]
+| CommandHelper 3.3.2 Final
 | Bukkit 1.7.10 - 1.12.2
 |-
-| #3345
-| [https://github.com/EngineHub/CommandHelper/commit/40dc779ee121f771b1ac643e5d180365bec2ac80 40dc779e]
-| Updated several dependencies
-* com.jcraft:jsch ..................................... 0.1.51 -> 0.1.54
-* commons-codec:commons-codec .............................. 1.9 -> 1.11
-* jline:jline ........................................... 2.11 -> 2.14.5
-* junit:junit ............................................. 4.11 -> 4.12
-* mysql:mysql-connector-java ........................ 5.1.30 -> 8.0.9-rc
-* org.mockito:mockito-core ............................. 1.9.5 -> 2.15.0
-* org.ow2.asm:asm-all ................................ 5.0.4 -> 6.0_BETA
-* org.xerial:sqlite-jdbc ......................... 3.7.15-M1 -> 3.21.0.1
-* org.yaml:snakeyaml ...................................... 1.13 -> 1.20
-* redis.clients:jedis ................................... 2.5.1 -> 2.9.0
+| 3.3.2 #3345
+| [https://github.com/EngineHub/CommandHelper/commit/40dc779ee121f771b1ac643e5d180365bec2ac80 40dc779]
+| Updated dependencies:
+* com.jcraft:jsch 0.1.51 -> 0.1.54
+* commons-codec:commons-codec 1.9 -> 1.11
+* jline:jline 2.11 -> 2.14.5
+* junit:junit 4.11 -> 4.12
+* mysql:mysql-connector-java 5.1.30 -> 8.0.9-rc
+* org.mockito:mockito-core 1.9.5 -> 2.15.0
+* org.ow2.asm:asm-all 5.0.4 -> 6.0_BETA
+* org.xerial:sqlite-jdbc 3.7.15-M1 -> 3.21.0.1
+* org.yaml:snakeyaml 1.13 -> 1.20
+* redis.clients:jedis 2.5.1 -> 2.9.0
+| Bukkit 1.7.10 - 1.12.2
 |-
-| #3260
-| [https://github.com/EngineHub/commandhelper/commit/7450f62119a36d03c12620913e4ede4728da68e1 7450f621]
+|
+| [https://github.com/EngineHub/CommandHelper/commit/43b1b9b66e063c5d2260e87608076ca35080e9af 43b1b9b]
+| Updated to Java 8
+| Bukkit 1.7.10 - 1.12.2
+|-
+| 3.3.2 #3260
+| [https://github.com/EngineHub/commandhelper/commit/7450f62119a36d03c12620913e4ede4728da68e1 7450f62]
 | Removed remaining backwards compatibility for versions prior to 1.7.10
 | Bukkit 1.7.10 - 1.12.2
 |-
-| #3219
+| 3.3.2 #3219
 | [https://github.com/EngineHub/CommandHelper/commit/4d970d0dc2edb1a7a648904df01af148bba761e1 4d970d0]
-| Updated for Bukkit 1.12.1
+| Added support for Bukkit 1.12.1
 | Bukkit 1.7.8 - 1.12.1
 |-
-| #3091
-| [https://github.com/EngineHub/CommandHelper/commit/8086fe6a80b7ee2b2250d775a7f0c4a711127aa2 8086fe]
+| 3.3.2 #3091
+| [https://github.com/EngineHub/CommandHelper/commit/8086fe6a80b7ee2b2250d775a7f0c4a711127aa2 8086fe6]
 | Finished updating for Bukkit 1.9
 | Bukkit 1.7.8 - 1.9.0
 |-
-| #3040
-| [https://github.com/EngineHub/CommandHelper/commit/8b08d139216fd13519ceb5d85ca195c77e41aca1 8b08d139]
-| 3.3.2 snapshots start. All extensions need to be updated.
+| 3.3.2 #3040
+| [https://github.com/EngineHub/CommandHelper/commit/8b08d139216fd13519ceb5d85ca195c77e41aca1 8b08d13]
+| All extensions need to be updated for 3.3.2
 | Bukkit 1.7.8 - 1.8.8
 |-
-| #2895
+| 3.3.1-final
+| [https://github.com/EngineHub/CommandHelper/commit/d5a4321d2394ca70d888196c1657a099fb940a4b d5a4321]
+| CommandHelper 3.3.1 Final
+| Bukkit 1.7.8 - 1.8.8
+|-
+| 3.3.1 #2895
 | [https://github.com/EngineHub/CommandHelper/commit/6304f912f0be41e3522e0ae4191b1319ef8a8b89 6304f91]
-| Updated for Bukkit 1.8.6
+| Added support for Bukkit 1.8.6
 | Bukkit 1.7.6 - 1.8.6
 |-
-| #2857
+| 3.3.1 #2857
 | [https://github.com/EngineHub/CommandHelper/commit/f8953eb485a6689299381c8f644ea16fb92e9853 f8953eb]
-| Removed WorldEdit dependency (See https://letsbuild.net/jenkins/job/SKCompat/ SKCompat] extension)
+| Removed WorldEdit dependency (See [https://github.com/jb-aero/SKCompat SKCompat] extension)
+|
 |-
-| #2842
+| 3.3.1 #2842
 | [https://github.com/EngineHub/CommandHelper/commit/4b485fd208f2b43d0e5bae71c74b48b212dc0140 4b485fd]
-| Removed vault dependency (See [https://letsbuild.net/jenkins/job/CHVault/ CHVault] extension)
+| Removed vault dependency (See [https://github.com/jb-aero/CHVault CHVault] extension)
+|
 |-
-| #2802
+| 3.3.1 #2802
 | [https://github.com/EngineHub/CommandHelper/commit/cc0f80e9983b13c2ff6f643fbbc441f8f86268e8 cc0f80e]
-| Updated for Bukkit 1.8
+| Added support for Bukkit 1.8
 * Vault 1.4
 | Bukkit 1.7.2 - 1.8.0
 |-
-| #2717
+| 3.3.1 #2717
 | [https://github.com/EngineHub/CommandHelper/commit/aca997cf7a09f00a92cd46aefc3a8f44f478a3d5 aca997c]
-| Updated several dependencies:
+| Updated dependencies:
 * jsch: 0.1.51
 * WorldEdit: 5.6.2
 * WorldGuard 5.9
@@ -142,43 +208,47 @@ Regardless, only the most current dev builds are officially supported.
 * mail: 1.5.0-b01
 * mysql-connector-java 5.1.30
 * jedis: 2.5.1
+|
 |-
-| #2716
+| 3.3.1 #2716
 | [https://github.com/EngineHub/CommandHelper/commit/484c0645d302e22b8eec815acb54b91ea31c3b10 484c064]
-| Updated for Minecraft 1.7.9 (should still be compatible with 1.7.2 builds, excepting that Sound.BREATH and Sound.HURT have been removed).
+| Added support for Bukkit 1.7.9
 | Bukkit 1.7.2 - 1.7.9
 |-
-| #2681
+| 3.3.1 #2681
 | [https://github.com/EngineHub/CommandHelper/commit/773d877048514bb422b1e8755c9520ac99d9852a 773d877]
-| Updated to Minecraft 1.7.8 (should still be compatible with 1.7.2 builds, however)
+| Added support to Bukkit 1.7.8
 | Bukkit 1.7.2 - 1.7.8
 |-
-| #2445
+| 3.3.1 #2445
 | [https://github.com/EngineHub/CommandHelper/commit/8c4b1652ed5c43dddb95c7e6612aea072716aea5 8c4b165]
-| Updated to Minecraft 1.7.2
+| Updated to Bukkit 1.7.2
 | Bukkit 1.7.2
 |-
-| #1561-
+|
+| [https://github.com/EngineHub/CommandHelper/commit/fee9a1dd4a02b6a3c624918ddfb2632c639fe1a9 fee9a1d]
+| Updated to Java 7
+| Bukkit 1.6.4
+|-
+| 3.3.1 #1561
 | [https://github.com/EngineHub/CommandHelper/commit/896165ce2e003557441510667a76527977af536d 896165c]
-| Updated to Minecraft 1.6
+| Updated to Bukkit 1.6
 | Bukkit 1.6.1
 |-
-| #1556-
+| 3.3.1 #1556
 | [https://github.com/EngineHub/CommandHelper/commit/c14f67adf5d9d95ebf7840502bdc8ec110681adc c14f67a]
-| Updated third party dependencies
-|
+| Updated dependencies:
 * commons-codec: 1.8
 * mysql-connector-java: 5.1.25
 * sqlite-jdbc: 3.7.15-M1
 * snakeyaml: 1.12
 Testing only:
 * powermock: 1.5.1
-|-
-| #1502-
-| [https://github.com/EngineHub/CommandHelper/commit/cda686f377a38e9bbfd1d525783f8b9fca1b766a cda686f]
-| Updated bukkit (Many other deps were updated at this time as well)
 |
-* Bukkit: 1.5.2
+|-
+| 3.3.1 #1502
+| [https://github.com/EngineHub/CommandHelper/commit/cda686f377a38e9bbfd1d525783f8b9fca1b766a cda686f]
+| Updated dependencies:
 * WorldEdit: 5.5.6
 * WorldGuard: 5.7.3
 * json-simple: 1.1.1
@@ -189,29 +259,26 @@ Testing only:
 * mockito-core: 1.9.5
 * powermock-module-junit4: 1.5
 * powermock-api-mockito: 1.5
+| Bukkit: 1.5.2
 |-
-| #1498-
+| 3.3.1 #1498
 | [https://github.com/EngineHub/CommandHelper/commit/765e75fd6243755fc1094d31cb9279e7093f130a 765e75f]
 | First tracked compatibility
 | Bukkit: 1.5.1
 |-
-| #1425-
+| 3.3.1 #1425
 | [https://github.com/EngineHub/CommandHelper/commit/279381fe46793cbf206396a0133262a64258b55b 279381f]
 | Added optional redis dependency
-| [http://redis.io/ Redis 2.6.13]
-|-
+[http://redis.io/ Redis 2.6.13]
 |
-| [https://github.com/EntityReborn/commandhelper/tree/backport-1.4.7 1.4.7 Backport]
-| Backport of the latest build of CH, backported to be compatible with 1.4.7. Not officially supported, community maintained.
-| Bukkit: 1.4.7
 |-
-| #1337-
+| 3.3.1 #1337
 | [https://github.com/EngineHub/CommandHelper/commit/fd35d2e2d942e8edc20c2610df5ecc8d1506d7c9 fd35d2e]
-| Updated to bukkit 1.4.7
+| Updated to Bukkit 1.4.7
 | Bukkit: 1.4.7
 |-
 |
 | [https://github.com/EngineHub/CommandHelper/commit/01237564243b0f73a5526ed7433a46e55a400d46 0123756]
-| Updated to bukkit 1.4.6
+| Updated to Bukkit 1.4.6
 | Bukkit: 1.4.6
 |}

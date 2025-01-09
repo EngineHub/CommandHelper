@@ -98,4 +98,9 @@ public abstract class MacroPrefilterMatcher<T extends BindableEvent> extends Abs
 	 */
 	protected abstract Object getProperty(T event);
 
+	@Override
+	public int getPriority() {
+		return -1;
+	}
+
 }

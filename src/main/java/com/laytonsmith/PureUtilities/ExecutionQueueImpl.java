@@ -287,8 +287,10 @@ public class ExecutionQueueImpl implements ExecutionQueue {
 	 */
 	@Override
 	public synchronized void stopAll() {
-		service.shutdown();
-		service = null;
+		if(service != null) {
+			service.shutdown();
+			service = null;
+		}
 	}
 
 }

@@ -1,11 +1,12 @@
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.AbstractionObject;
-import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCItemMeta;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
+import com.laytonsmith.abstraction.enums.MCEnchantment;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEnchantment;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
@@ -42,7 +43,7 @@ public class BukkitMCItemStack implements MCItemStack {
 		if(is == null) {
 			return;
 		}
-		is.addEnchantment(((BukkitMCEnchantment) e).__Enchantment(), level);
+		is.addEnchantment((Enchantment) e.getConcrete(), level);
 	}
 
 	@Override
@@ -50,7 +51,7 @@ public class BukkitMCItemStack implements MCItemStack {
 		if(is == null) {
 			return;
 		}
-		is.addUnsafeEnchantment(((BukkitMCEnchantment) e).__Enchantment(), level);
+		is.addUnsafeEnchantment((Enchantment) e.getConcrete(), level);
 	}
 
 	@Override
@@ -58,7 +59,7 @@ public class BukkitMCItemStack implements MCItemStack {
 		Map<MCEnchantment, Integer> map = new HashMap<>();
 		try {
 			for(Map.Entry<Enchantment, Integer> entry : is.getEnchantments().entrySet()) {
-				map.put(new BukkitMCEnchantment(entry.getKey()), entry.getValue());
+				map.put(BukkitMCEnchantment.valueOfConcrete(entry.getKey()), entry.getValue());
 			}
 		} catch (NullPointerException npe) {
 			// Probably invalid enchantment, always return map
@@ -71,7 +72,7 @@ public class BukkitMCItemStack implements MCItemStack {
 		if(is == null) {
 			return;
 		}
-		is.removeEnchantment(((BukkitMCEnchantment) e).__Enchantment());
+		is.removeEnchantment((Enchantment) e.getConcrete());
 	}
 
 	@Override
@@ -165,6 +166,6 @@ public class BukkitMCItemStack implements MCItemStack {
 
 	@Override
 	public boolean isEmpty() {
-		return is == null || is.getAmount() == 0 || is.getType() == Material.AIR;
+		return is == null || is.getAmount() == 0 || is.getType().isAir();
 	}
 }

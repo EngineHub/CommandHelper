@@ -2,9 +2,11 @@ package com.laytonsmith.abstraction;
 
 import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
+import com.laytonsmith.abstraction.entities.MCTransformation;
 import com.laytonsmith.abstraction.enums.MCAttribute;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
+import com.laytonsmith.abstraction.enums.MCEquipmentSlotGroup;
 import com.laytonsmith.abstraction.enums.MCPatternShape;
 import com.laytonsmith.abstraction.enums.MCPotionType;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
@@ -17,6 +19,8 @@ import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 /**
  * This should be implemented once for each server type. It mostly wraps static methods, but also provides methods for
@@ -29,17 +33,6 @@ public interface Convertor {
 
 	Class GetServerEventMixin();
 
-	MCEnchantment[] GetEnchantmentValues();
-
-	/**
-	 * Returns the enchantment, given an enchantment name (or a string'd number). Returns null if no such enchantment
-	 * exists.
-	 *
-	 * @param name
-	 * @return
-	 */
-	MCEnchantment GetEnchantmentByName(String name);
-
 	MCServer GetServer();
 
 	MCItemStack GetItemStack(MCMaterial type, int qty);
@@ -49,6 +42,12 @@ public interface Convertor {
 	MCPotionData GetPotionData(MCPotionType type, boolean extended, boolean upgraded);
 
 	MCAttributeModifier GetAttributeModifier(MCAttribute attr, UUID id, String name, double amt, MCAttributeModifier.Operation op, MCEquipmentSlot slot);
+
+	MCAttributeModifier GetAttributeModifier(MCAttribute attr, UUID id, String name, double amt, MCAttributeModifier.Operation op, MCEquipmentSlotGroup slot);
+
+	MCAttributeModifier GetAttributeModifier(MCAttribute attr, MCNamespacedKey key, double amt, MCAttributeModifier.Operation op, MCEquipmentSlot slot);
+
+	MCAttributeModifier GetAttributeModifier(MCAttribute attr, MCNamespacedKey key, double amt, MCAttributeModifier.Operation op, MCEquipmentSlotGroup slot);
 
 	void Startup(CommandHelperPlugin chp);
 
@@ -128,13 +127,25 @@ public interface Convertor {
 	MCInventoryHolder CreateInventoryHolder(String id, String title);
 
 	/**
-	 * Run whenever the server is shutting down (or restarting). There is no guarantee provided as to what thread the
+	 * Runs whenever the server is shutting down (or reloading). There is no guarantee provided as to what thread the
 	 * runnables actually run on, so you should ensure that the runnable executes it's actions on the appropriate thread
-	 * yourself.
+	 * yourself. Note that this shutdown hook will only run once, so if multiple reload events occur, this will not
+	 * be registered for the second run, unless you specifically add it yourself. If you need a shutdown hook to run
+	 * every time, and only want to register it once, see {@link #addPersistentShutdownHook}.
 	 *
 	 * @param r
 	 */
 	void addShutdownHook(Runnable r);
+
+	/**
+	 * Runs whenever the server is shutting down (or reloading). There is no guarantee provided as to what thread the
+	 * runnables actually run on, so you should ensure that the runnable executes it's actions on the appropriate thread
+	 * yourself. Note that this shutdown hook will never dequeue, so if multiple reload events occur, this will run
+	 * every time, and so you should only call this once (i.e. from a static context). If you need a shutdown hook to
+	 * dequeue after run, see {@link #addShutdownHook}.
+	 * @param r
+	 */
+	void addPersistentShutdownHook(Runnable r);
 
 	/**
 	 * Runs all the registered shutdown hooks. This should only be called by the shutdown mechanism. After running, each
@@ -189,6 +200,17 @@ public interface Convertor {
 	 * @return
 	 */
 	MCColor GetColor(int red, int green, int blue);
+
+	/**
+	 * Returns a transparent color object for this server.
+	 *
+	 * @param red
+	 * @param green
+	 * @param blue
+	 * @param alpha
+	 * @return
+	 */
+	MCColor GetColor(int red, int green, int blue, int alpha);
 
 	/**
 	 * Returns a color object given the color name. The color name must come from the standard color types, or a
@@ -281,4 +303,23 @@ public interface Convertor {
 	 * @return a key object
 	 */
 	MCNamespacedKey GetNamespacedKey(String key);
+
+	/**
+	 * Returns a new Transformation object.
+	 * @param leftRotation
+	 * @param rightRotation
+	 * @param scale
+	 * @param translation
+	 * @return
+	 */
+	public MCTransformation GetTransformation(Quaternionf leftRotation, Quaternionf rightRotation, Vector3f scale, Vector3f translation);
+
+	/**
+	 * Returns true if this is the main thread of the application. This is only applicable in some managed environments,
+	 * in other environments where this doesn't matter, this will always return false (i.e. all threads are considered
+	 * equally important/unimportant). If this returns true, this means that the current thread is for instance the
+	 * UI thread, and thus should not be blocked on.
+	 * @return
+	 */
+	public boolean IsMainThread();
 }

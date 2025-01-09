@@ -20,7 +20,6 @@ import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.AbstractCompileException;
-import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -239,7 +238,7 @@ public class MethodScriptCompilerTest {
 					= "[";
 			MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, null, true), null, envs), env, null, null);
 			fail("Test passed, but wasn't supposed to");
-		} catch (ConfigCompileException | ConfigCompileGroupException ex) {
+		} catch (AbstractCompileException ex) {
 			//Passed
 		}
 		try {
@@ -247,7 +246,7 @@ public class MethodScriptCompilerTest {
 					= "]";
 			MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, null, true), null, envs), env, null, null);
 			fail("Test passed, but wasn't supposed to");
-		} catch (ConfigCompileException | ConfigCompileGroupException ex) {
+		} catch (AbstractCompileException ex) {
 			//Passed
 		}
 	}
@@ -451,7 +450,7 @@ public class MethodScriptCompilerTest {
 			String config = "/cmd [$p] $q = msg('')";
 			MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null, null, false), envs).get(0).compile(env);
 			fail("Test passed, but wasn't supposed to");
-		} catch (ConfigCompileException | ConfigCompileGroupException ex) {
+		} catch (AbstractCompileException ex) {
 			//Passed
 		}
 	}
@@ -496,7 +495,7 @@ public class MethodScriptCompilerTest {
 			String config = "/cmd [$p=player()] = msg('')";
 			MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null, null, false), envs).get(0).compile(env);
 			fail("Test passed, but wasn't supposed to");
-		} catch (ConfigCompileException | ConfigCompileGroupException ex) {
+		} catch (AbstractCompileException ex) {
 			//Passed
 		}
 	}
@@ -1006,7 +1005,6 @@ public class MethodScriptCompilerTest {
 //		verify(fakePlayer).sendMessage("yep yep");
 //	}
 	@Test
-	@Ignore("Ignore for now, until the feature is implemented")
 	public void testLiteralDecimal() throws Exception {
 		assertEquals("123.4", SRun("0m123.4", fakePlayer));
 		assertEquals("123", SRun("0m123", fakePlayer));
@@ -1019,17 +1017,16 @@ public class MethodScriptCompilerTest {
 		assertEquals("ms.lang.decimal", SRun("typeof(0m1234567890987654321.1234567890987654321)", fakePlayer));
 	}
 
-	@Test(expected = CREFormatException.class)
+	@Test(expected = AbstractCompileException.class)
 	public void testLiteralBinary() throws Exception {
 		SRun("0b2", fakePlayer);
 	}
 
 	@Test
-	@Ignore("Ignore for now, until the feature is implemented")
 	public void testLiteralBinary2() throws Exception {
 		assertEquals("6", SRun("0b0110", fakePlayer));
 		assertEquals("-6", SRun("-0b0110", fakePlayer));
-		assertEquals("int", SRun("typeof(-0b0110)", fakePlayer));
+		assertEquals("ms.lang.int", SRun("typeof(-0b0110)", fakePlayer));
 	}
 
 	@Test
@@ -1327,9 +1324,9 @@ public class MethodScriptCompilerTest {
 	@Test
 	public void testGettingSmartCommentFromReferenceWorks() throws Exception {
 		String[] scripts = new String[]{
-			"/** smart comment */ proc _test() {}; _test();",
-			"/** smart comment */ void proc _test(){}; _test();",
-			"/** smart comment */ proc _test(){}; _test();",
+			"/** smart comment */ proc _test() {} _test();",
+			"/** smart comment */ void proc _test(){} _test();",
+			"/** smart comment */ proc _test(){} _test();",
 		};
 		for(String script : scripts) {
 			Environment env = Static.GenerateStandaloneEnvironment();
@@ -1377,5 +1374,57 @@ public class MethodScriptCompilerTest {
 		}
 		Collections.sort(names);
 		assertEquals(Arrays.asList("_a", "_b", "_c", "_d", "_e"), names);
+	}
+
+	@Test
+	public void testFQCNTypingCompiles() throws Exception {
+		String script = """
+				ms.lang.string @a = 'test';
+				ms.lang.array @b;
+				try {} catch (ms.lang.Exception @ex) {}
+				proc _a(ms.lang.int @c) {}
+				""";
+		Environment env = Static.GenerateStandaloneEnvironment();
+		StaticAnalysis sa = new StaticAnalysis(true);
+		sa.setLocalEnable(true);
+		MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, env, null, true), env, env.getEnvClasses(), sa);
+	}
+
+	@Test
+	public void testFQCNTypingCompilesStrict() throws Exception {
+		String script = """
+				<!strict>
+				ms.lang.string @a = 'test';
+				ms.lang.array @b;
+				try {} catch (ms.lang.Exception @ex) {}
+				proc _a(ms.lang.int @c) {}
+				""";
+		Environment env = Static.GenerateStandaloneEnvironment();
+		StaticAnalysis sa = new StaticAnalysis(true);
+		sa.setLocalEnable(true);
+		MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, env, null, true), env, env.getEnvClasses(), sa);
+	}
+
+	@Test(expected = ConfigCompileException.class)
+	public void testInvalidFQCNTypingCompileFails() throws Exception {
+		String script = """
+				ms.lang.invalidtype @a = null;
+				""";
+		Environment env = Static.GenerateStandaloneEnvironment();
+		StaticAnalysis sa = new StaticAnalysis(true);
+		sa.setLocalEnable(true);
+		MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, env, null, true), env, env.getEnvClasses(), sa);
+	}
+
+	@Test(expected = ConfigCompileException.class)
+	public void testInvalidFQCNTypingCompileFailsStrict() throws Exception {
+		String script = """
+				<!strict>
+				ms.lang.invalidtype @a = null;
+				""";
+		Environment env = Static.GenerateStandaloneEnvironment();
+		StaticAnalysis sa = new StaticAnalysis(true);
+		sa.setLocalEnable(true);
+		MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, env, null, true), env, env.getEnvClasses(), sa);
 	}
 }

@@ -17,6 +17,7 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Security;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.CByteArray;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CInt;
@@ -46,6 +47,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 import org.apache.commons.io.FileUtils;
 
@@ -417,7 +419,8 @@ public class Sandbox {
 
 		@Override
 		public String docs() {
-			return "double {randomResource} Returns a new rand value. If the seed used to create the resource is the same, each resulting"
+			return "double {Resource} Returns a new rand value using the provided a RANDOM Resource."
+					+ " If the seed used to create the resource is the same, each resulting"
 					+ " series of numbers will be the same.";
 		}
 
@@ -491,8 +494,9 @@ public class Sandbox {
 
 		@Override
 		public String docs() {
-			return "int {path} Reads and compiles specified *.ms files. This can be used for files already compiled"
-					+ " with include(). Scripts that then include() these files will use the updated code."
+			return "int {path} Recompiles specified files already compiled with include()."
+					+ " If there's no compile errors, scripts that then include() these files will use the updated code."
+					+ " Note that this bypasses Static Analysis, even if you have it enabled."
 					+ " The path can be a directory or file. It is executed recursively through all subdirectories."
 					+ " If there's a compile error in any of the files, the function will throw an exception and other"
 					+ " scripts will continue to use the previous version of the code when included. Returns number"
@@ -521,49 +525,48 @@ public class Sandbox {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			File file = Static.GetFileFromArgument(args[0].val(), env, t, null);
-			int num = 0;
 			try {
-				if(Static.InCmdLine(env, true) || Security.CheckSecurity(file)) {
-					IncludeCache includeCache = env.getEnv(StaticRuntimeEnv.class).getIncludeCache();
-					if(file.isDirectory()) {
-						HashMap<File, ParseTree> files = compileDirectory(file, env, t);
-						includeCache.addAll(files);
-						num = files.size();
-					} else if(includeCache.has(file)) {
-						includeCache.add(file, compileFile(file, env, t));
-						num = 1;
-					}
-				} else {
+				File file = Static.GetFileFromArgument(args[0].val(), env, t, null).getCanonicalFile();
+				if(!Static.InCmdLine(env, true) && !Security.CheckSecurity(file)) {
 					throw new CRESecurityException("The script cannot access " + file
 							+ " due to restrictions imposed by the base-dir setting.", t);
 				}
+				IncludeCache cache = env.getEnv(StaticRuntimeEnv.class).getIncludeCache();
+				if(file.isDirectory()) {
+					Map<File, ParseTree> includes = new HashMap<>();
+					compileDirectory(includes, file, env, cache, t);
+					cache.addAll(includes);
+					return new CInt(includes.size(), t);
+				} else if(cache.has(file)) {
+					cache.add(file, compileFile(file, env, t));
+					return new CInt(1, t);
+				}
+				return new CInt(0, t);
 			} catch (IOException ex) {
 				throw new CREIOException(ex.getMessage(), t, ex);
 			}
-			return new CInt(num, t);
 		}
 
-		private HashMap<File, ParseTree> compileDirectory(File file, Environment env, Target t) {
-			HashMap<File, ParseTree> newFiles = new HashMap<>();
-			File[] files = file.listFiles();
+		private void compileDirectory(Map<File, ParseTree> includes, File dir, Environment env, IncludeCache cache, Target t) {
+			File[] files = dir.listFiles();
 			if(files != null) {
-				IncludeCache includeCache = env.getEnv(StaticRuntimeEnv.class).getIncludeCache();
 				for(File f : files) {
 					if(f.isDirectory()) {
-						newFiles.putAll(compileDirectory(f, env, t));
-					} else if(includeCache.has(f)) {
-						newFiles.put(f, compileFile(f, env, t));
+						compileDirectory(includes, f, env, cache, t);
+					} else if(cache.has(f)) {
+						includes.put(f, compileFile(f, env, t));
 					}
 				}
 			}
-			return newFiles;
 		}
 
 		private ParseTree compileFile(File file, Environment env, Target t) {
 			try {
 				String s = new ZipReader(file).getFileContents();
-				return MethodScriptCompiler.compile(MethodScriptCompiler.lex(s, env, file, true), env, env.getEnvClasses());
+				StaticAnalysis staticAnalysis = new StaticAnalysis(true);
+				staticAnalysis.setLocalDisabled(true);
+				return MethodScriptCompiler.compile(MethodScriptCompiler.lex(s, env, file, true), env, env.getEnvClasses(),
+						staticAnalysis);
 			} catch (ConfigCompileException ex) {
 				throw new CREIncludeException("There was a compile error when trying to recompile the script at "
 						+ file + "\n" + ex.getMessage() + " :: " + file.getName() + ":" + ex.getLineNum(), t);

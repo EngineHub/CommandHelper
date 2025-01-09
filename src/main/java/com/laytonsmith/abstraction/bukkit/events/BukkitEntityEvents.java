@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.blocks.MCBlockData;
+import com.laytonsmith.abstraction.blocks.MCBlockFace;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlockData;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCThrownPotion;
 import com.laytonsmith.abstraction.entities.MCHanging;
@@ -39,6 +40,7 @@ import com.laytonsmith.abstraction.enums.MCRemoveCause;
 import com.laytonsmith.abstraction.enums.MCSpawnReason;
 import com.laytonsmith.abstraction.enums.MCTargetReason;
 import com.laytonsmith.abstraction.enums.MCUnleashReason;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCBlockFace;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDamageCause;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCRegainReason;
@@ -80,6 +82,7 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -262,6 +265,15 @@ public class BukkitEntityEvents {
 				return null;
 			}
 			return new BukkitMCBlock(blk);
+		}
+
+		@Override
+		public MCBlockFace getHitFace() {
+			BlockFace bf = phe.getHitBlockFace();
+			if(bf == null) {
+				return null;
+			}
+			return BukkitMCBlockFace.getConvertor().getAbstractedEnum(phe.getHitBlockFace());
 		}
 
 		public static BukkitMCProjectileHitEvent _instantiate(MCProjectile p) {
@@ -844,6 +856,34 @@ public class BukkitEntityEvents {
 				return null;
 			}
 			return new BukkitMCPlayer(hanger);
+		}
+
+		@Override
+		public MCBlock getBlock() {
+			return new BukkitMCBlock(hpe.getBlock());
+		}
+
+		@Override
+		public MCBlockFace getBlockFace() {
+			return BukkitMCBlockFace.getConvertor().getAbstractedEnum(hpe.getBlockFace());
+		}
+
+		@Override
+		public MCItemStack getItem() {
+			if(hpe.getItemStack() == null) {
+				return null;
+			}
+			return new BukkitMCItemStack(hpe.getItemStack());
+		}
+
+		@Override
+		public MCEquipmentSlot getHand() {
+			if(hpe.getHand() == null) {
+				return null;
+			} else if(hpe.getHand() == EquipmentSlot.HAND) {
+				return MCEquipmentSlot.WEAPON;
+			}
+			return MCEquipmentSlot.OFF_HAND;
 		}
 	}
 

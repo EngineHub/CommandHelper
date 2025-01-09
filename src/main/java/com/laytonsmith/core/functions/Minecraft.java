@@ -13,11 +13,13 @@ import com.laytonsmith.abstraction.MCPluginManager;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
+import com.laytonsmith.abstraction.blocks.MCBlockData;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.enums.MCEffect;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.hide;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSVersion;
@@ -59,12 +61,12 @@ import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -75,24 +77,11 @@ public class Minecraft {
 		return "These functions provide a hook into game functionality.";
 	}
 
-	private static final SortedMap<String, Mixed> DATA_VALUE_LOOKUP = new TreeMap<>();
-
-	static {
-		Properties p1 = new Properties();
-		try {
-			p1.load(Minecraft.class.getResourceAsStream("/data_values.txt"));
-			Enumeration e = p1.propertyNames();
-			while(e.hasMoreElements()) {
-				String name = e.nextElement().toString();
-				DATA_VALUE_LOOKUP.put(name, new CString(p1.getProperty(name), Target.UNKNOWN));
-			}
-		} catch (IOException ex) {
-			Logger.getLogger(Minecraft.class.getName()).log(Level.SEVERE, null, ex);
-		}
-	}
-
 	@api(environments = {CommandHelperEnvironment.class})
+	@hide("deprecated")
 	public static class data_values extends AbstractFunction implements Optimizable {
+
+		private static final Map<String, Mixed> DATA_VALUE_LOOKUP = new HashMap<>();
 
 		@Override
 		public String getName() {
@@ -117,7 +106,7 @@ public class Minecraft {
 			String changed = c;
 			if(changed.contains(":")) {
 				//Split on that, and reverse. Change wool:red to redwool
-				String split[] = changed.split(":");
+				String[] split = changed.split(":");
 				if(split.length == 2) {
 					changed = split[1] + split[0];
 				}
@@ -125,20 +114,23 @@ public class Minecraft {
 			//Remove anything that isn't a letter or a number
 			changed = changed.replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
 			//Do a lookup in the DataLookup table
-			if(DATA_VALUE_LOOKUP.containsKey(changed)) {
-				String split[] = DATA_VALUE_LOOKUP.get(changed).toString().split(":");
-				if(split[1].equals("0")) {
-					return new CInt(split[0], t);
-				}
-				return new CString(split[0] + ":" + split[1], t);
+			Mixed result = DATA_VALUE_LOOKUP.get(changed);
+			if(result == null) {
+				return CNull.NULL;
 			}
-			return CNull.NULL;
+			String[] split = result.val().split(":");
+			if(split[1].equals("0")) {
+				return new CInt(split[0], t);
+			}
+			return new CString(split[0] + ":" + split[1], t);
 		}
 
 		@Override
 		public String docs() {
-			return "int {var1} Does a lookup to return the data value of a name. For instance, returns 1 for 'stone'."
-					+ " If the data value cannot be found, null is returned.";
+			return "int {var1} Does a lookup to return the legacy data value of a name. For instance, returns 1 for 'stone'."
+					+ " If the data value cannot be found, null is returned. This function is deprecated and should"
+					+ " only be used to convert legacy data that used CommandHelper's old material aliases."
+					+ " To be removed in version 3.3.6.";
 		}
 
 		@Override
@@ -168,6 +160,19 @@ public class Minecraft {
 				throws ConfigCompileException, ConfigRuntimeException {
 			env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
 					new CompilerWarning(getName() + " is deprecated.", t, null));
+			if(DATA_VALUE_LOOKUP.isEmpty()) {
+				Properties p1 = new Properties();
+				try {
+					p1.load(Minecraft.class.getResourceAsStream("/data_values.txt"));
+					Enumeration e = p1.propertyNames();
+					while(e.hasMoreElements()) {
+						String name = e.nextElement().toString();
+						DATA_VALUE_LOOKUP.put(name, new CString(p1.getProperty(name), Target.UNKNOWN));
+					}
+				} catch (IOException ex) {
+					Logger.getLogger(Minecraft.class.getName()).log(Level.SEVERE, null, ex);
+				}
+			}
 			return null;
 		}
 
@@ -421,15 +426,17 @@ public class Minecraft {
 		@Override
 		public String docs() {
 			return "void {locationArray, effect, [radius]} Plays the specified effect at the given location"
-					+ " for all players within the radius (or 64 by default). The effect can be one of the following: "
-					+ StringUtils.Join(MCEffect.values(), ", ", ", or ", " or ")
-					+ ". ---- Some effects may require an applicable block at the specified location."
-					+ " Additional data can be supplied with the syntax EFFECT:DATA."
-					+ "<br>The STEP_SOUND takes a block material name."
+					+ " for all players within the radius (or 64 by default)."
+					+ " ---- The effect can be one of the following: "
+					+ StringUtils.Join(MCEffect.values(), ", ", ", or ", " or ") + "."
+					+ " Some effects may require an applicable block at the specified location."
+					+ " Additional data can be supplied with the syntax EFFECT:DATA.<br>"
+					+ "<br>STEP_SOUND and PARTICLES_AND_SOUND_BRUSH_BLOCK_COMPLETE (Paper) take a block material name."
 					+ "<br>RECORD_PLAY takes a record material name."
-					+ "<br>SMOKE takes a facing, one of " + StringUtils.Join(MCBlockFace.values(), ", ", ", or ", " or ")
+					+ "<br>SHOOT_WHITE_SMOKE (Paper) and SMOKE take a facing, one of " + StringUtils.Join(MCBlockFace.values(), ", ", ", or ", " or ")
 					+ "<br>POTION_BREAK takes an int (represents color)."
-					+ "<br>VILLAGER_PLANT_GROW and BONE_MEAL_USE take an int for the number of particles.";
+					+ "<br>BONE_MEAL_USE, BEE_GROWTH (Paper), SMASH_ATTACK (Paper) and"
+					+ " TURTLE_EGG_PLACEMENT (Paper) take an int for the number of particles.";
 		}
 
 		@Override
@@ -475,7 +482,7 @@ public class Minecraft {
 			if(args.length > 2) {
 				radius = ArgumentValidation.getInt32(args[args.length - 1], t);
 			}
-			if(!dataString.equals("")) {
+			if(!dataString.isEmpty()) {
 				switch(effect) {
 					case RECORD_PLAY:
 					case STEP_SOUND:
@@ -491,6 +498,7 @@ public class Minecraft {
 						// Fall back to integer
 						break;
 					case SMOKE:
+					case SHOOT_WHITE_SMOKE:
 						try {
 							MCBlockFace facing = MCBlockFace.valueOf(dataString.toUpperCase());
 							try {
@@ -499,6 +507,19 @@ public class Minecraft {
 							} catch (IllegalArgumentException ex) {
 								throw new CREIllegalArgumentException(ex.getMessage(), t);
 							}
+						} catch (IllegalArgumentException ex) {
+							// Fall back to integer
+						}
+						break;
+					case PARTICLES_AND_SOUND_BRUSH_BLOCK_COMPLETE:
+						try {
+							MCBlockData blockData = Static.getServer().createBlockData(dataString.toLowerCase(Locale.ROOT));
+							try {
+								l.getWorld().playEffect(l, effect, blockData, radius);
+							} catch (IllegalArgumentException ex) {
+								throw new CREIllegalArgumentException(ex.getMessage(), t);
+							}
+							return CVoid.VOID;
 						} catch (IllegalArgumentException ex) {
 							// Fall back to integer
 						}
@@ -1144,6 +1165,8 @@ public class Minecraft {
 						return CBoolean.get(mat.hasGravity());
 					case "isBlock":
 						return CBoolean.get(mat.isBlock());
+					case "isItem":
+						return CBoolean.get(mat.isItem());
 					case "isBurnable":
 						return CBoolean.get(mat.isBurnable());
 					case "isEdible":
@@ -1181,6 +1204,7 @@ public class Minecraft {
 			ret.set("maxDurability", new CInt(mat.getMaxDurability(), t), t);
 			ret.set("hasGravity", CBoolean.get(mat.hasGravity()), t);
 			ret.set("isBlock", CBoolean.get(mat.isBlock()), t);
+			ret.set("isItem", CBoolean.get(mat.isItem()), t);
 			ret.set("isBurnable", CBoolean.get(mat.isBurnable()), t);
 			ret.set("isEdible", CBoolean.get(mat.isEdible()), t);
 			ret.set("isFlammable", CBoolean.get(mat.isFlammable()), t);
@@ -1209,7 +1233,7 @@ public class Minecraft {
 		@Override
 		public String docs() {
 			return "mixed {material, [trait]} Returns an array of info about the material. If a trait is specified,"
-					+ " it returns only that trait. Available traits: hasGravity, isBlock, isBurnable, isEdible,"
+					+ " it returns only that trait. Available traits: hasGravity, isBlock, isItem, isBurnable, isEdible,"
 					+ " isFlammable, isOccluding, isRecord, isSolid, isTransparent, isInteractable, maxDurability,"
 					+ " hardness (for block materials only), blastResistance (for block materials only),"
 					+ " and maxStacksize. The accuracy of these values depend on the server implementation.";

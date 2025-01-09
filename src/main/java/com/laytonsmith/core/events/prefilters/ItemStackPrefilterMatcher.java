@@ -26,4 +26,9 @@ public abstract class ItemStackPrefilterMatcher<T extends BindableEvent> extends
 
 
 	protected abstract MCItemStack getItemStack(T event);
+
+	@Override
+	public int getPriority() {
+		return -1;
+	}
 }

@@ -55,12 +55,12 @@ import com.laytonsmith.core.exceptions.CRE.CREPluginInternalException;
 import org.bukkit.Chunk;
 import org.bukkit.Effect;
 import org.bukkit.FireworkEffect;
+import org.bukkit.GameRule;
+import org.bukkit.HeightMap;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.SoundCategory;
 import org.bukkit.World;
-import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
@@ -74,6 +74,7 @@ import org.bukkit.util.Consumer;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
@@ -181,13 +182,21 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	}
 
 	@Override
-	public String getGameRuleValue(String gameRule) {
-		return w.getGameRuleValue(gameRule);
+	public Object getGameRuleValue(MCGameRule gameRule) {
+		GameRule gr = GameRule.getByName(gameRule.getRuleName());
+		if(gr == null) {
+			return null;
+		}
+		return w.getGameRuleValue(gr);
 	}
 
 	@Override
-	public boolean setGameRuleValue(MCGameRule gameRule, String value) {
-		return w.setGameRuleValue(gameRule.getGameRule(), value);
+	public boolean setGameRuleValue(MCGameRule gameRule, Object value) {
+		GameRule gr = GameRule.getByName(gameRule.getRuleName());
+		if(gr == null) {
+			return false;
+		}
+		return w.setGameRule(gr, value);
 	}
 
 	@Override
@@ -289,13 +298,17 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	@Override
 	public void playEffect(MCLocation l, MCEffect mcEffect, Object data, int radius) {
 		Effect effect = Effect.valueOf(mcEffect.name());
-		switch(effect) {
+		switch(mcEffect) {
 			case RECORD_PLAY:
 			case STEP_SOUND:
 				w.playEffect((Location) l.getHandle(), effect, ((MCMaterial) data).getHandle(), radius);
 				return;
 			case SMOKE:
+			case SHOOT_WHITE_SMOKE:
 				w.playEffect((Location) l.getHandle(), effect, BlockFace.valueOf(((MCBlockFace) data).name()), radius);
+				return;
+			case PARTICLES_AND_SOUND_BRUSH_BLOCK_COMPLETE:
+				w.playEffect((Location) l.getHandle(), effect, ((MCBlockData) data).getHandle(), radius);
 				return;
 		}
 		w.playEffect((Location) l.getHandle(), effect, data, radius);
@@ -308,42 +321,55 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	}
 
 	@Override
-	public void playSound(MCLocation l, MCSound sound, float volume, float pitch) {
-		w.playSound(((BukkitMCLocation) l).asLocation(),
-				((BukkitMCSound) sound).getConcrete(), volume, pitch);
-	}
-
-	@Override
-	public void playSound(MCLocation l, String sound, float volume, float pitch) {
-		w.playSound((Location) l.getHandle(), sound, volume, pitch);
-	}
-
-	@Override
-	public void playSound(MCLocation l, MCSound sound, MCSoundCategory category, float volume, float pitch) {
-		if(category == null) {
-			w.playSound((Location) l.getHandle(), ((BukkitMCSound) sound).getConcrete(),
-					SoundCategory.MASTER, volume, pitch);
+	public void playSound(MCLocation l, MCSound sound, MCSoundCategory category, float volume, float pitch, Long seed) {
+		SoundCategory cat = BukkitMCSoundCategory.getConvertor().getConcreteEnum(category);
+		if(cat == null) {
+			cat = SoundCategory.MASTER;
+		}
+		if(seed == null) {
+			w.playSound((Location) l.getHandle(), ((BukkitMCSound) sound).getConcrete(), cat, volume, pitch);
 		} else {
-			w.playSound((Location) l.getHandle(), ((BukkitMCSound) sound).getConcrete(),
-					BukkitMCSoundCategory.getConvertor().getConcreteEnum(category), volume, pitch);
+			w.playSound((Location) l.getHandle(), ((BukkitMCSound) sound).getConcrete(), cat, volume, pitch, seed);
 		}
 	}
 
 	@Override
-	public void playSound(MCEntity ent, MCSound sound, MCSoundCategory category, float volume, float pitch) {
-		if(category == null) {
-			w.playSound((Entity) ent.getHandle(), ((BukkitMCSound) sound).getConcrete(),
-					SoundCategory.MASTER, volume, pitch);
+	public void playSound(MCEntity ent, MCSound sound, MCSoundCategory category, float volume, float pitch, Long seed) {
+		SoundCategory cat = BukkitMCSoundCategory.getConvertor().getConcreteEnum(category);
+		if(cat == null) {
+			cat = SoundCategory.MASTER;
+		}
+		if(seed == null) {
+			w.playSound((Entity) ent.getHandle(), ((BukkitMCSound) sound).getConcrete(), cat, volume, pitch);
 		} else {
-			w.playSound((Entity) ent.getHandle(), ((BukkitMCSound) sound).getConcrete(),
-					BukkitMCSoundCategory.getConvertor().getConcreteEnum(category), volume, pitch);
+			w.playSound((Entity) ent.getHandle(), ((BukkitMCSound) sound).getConcrete(), cat, volume, pitch, seed);
 		}
 	}
 
 	@Override
-	public void playSound(MCLocation l, String sound, MCSoundCategory category, float volume, float pitch) {
-		w.playSound((Location) l.getHandle(), sound,
-				BukkitMCSoundCategory.getConvertor().getConcreteEnum(category), volume, pitch);
+	public void playSound(MCEntity ent, String sound, MCSoundCategory category, float volume, float pitch, Long seed) {
+		SoundCategory cat = BukkitMCSoundCategory.getConvertor().getConcreteEnum(category);
+		if(cat == null) {
+			cat = SoundCategory.MASTER;
+		}
+		if(seed == null) {
+			w.playSound((Entity) ent.getHandle(), sound, cat, volume, pitch);
+		} else {
+			w.playSound((Entity) ent.getHandle(), sound, cat, volume, pitch, seed);
+		}
+	}
+
+	@Override
+	public void playSound(MCLocation l, String sound, MCSoundCategory category, float volume, float pitch, Long seed) {
+		SoundCategory cat = BukkitMCSoundCategory.getConvertor().getConcreteEnum(category);
+		if(cat == null) {
+			cat = SoundCategory.MASTER;
+		}
+		if(seed == null) {
+			w.playSound((Location) l.getHandle(), sound, cat, volume, pitch);
+		} else {
+			w.playSound((Location) l.getHandle(), sound, cat, volume, pitch, seed);
+		}
 	}
 
 	@Override
@@ -395,6 +421,27 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	}
 
 	@Override
+	public boolean isChunkForceLoaded(int x, int z) {
+		return w.isChunkForceLoaded(x, z);
+	}
+
+	@Override
+	public void setChunkForceLoaded(int x, int z, boolean forced) {
+		w.setChunkForceLoaded(x, z, forced);
+	}
+
+	@Override
+	public MCChunk[] getForceLoadedChunks() {
+		Collection<Chunk> chunks = w.getForceLoadedChunks();
+		MCChunk[] mcChunks = new MCChunk[chunks.size()];
+		int i = 0;
+		for(Chunk c : chunks) {
+			mcChunks[i++] = new BukkitMCChunk(c);
+		}
+		return mcChunks;
+	}
+
+	@Override
 	public void setTime(long time) {
 		w.setTime(time);
 	}
@@ -431,13 +478,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 
 	@Override
 	public MCBlock getHighestBlockAt(int x, int z) {
-		//Workaround for getHighestBlockAt, since it doesn't like transparent
-		//blocks.
-		Block b = w.getBlockAt(x, w.getMaxHeight() - 1, z);
-		while(b.getType() == Material.AIR && b.getY() > 0) {
-			b = b.getRelative(BlockFace.DOWN);
-		}
-		return new BukkitMCBlock(b);
+		return new BukkitMCBlock(w.getHighestBlockAt(x, z, HeightMap.WORLD_SURFACE));
 	}
 
 	@Override
@@ -483,7 +524,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 
 	@Override
 	public MCFirework launchFirework(MCLocation l, int strength, List<MCFireworkEffect> effects) {
-		Firework firework = (Firework) w.spawnEntity(((BukkitMCLocation) l).asLocation(), EntityType.FIREWORK);
+		Firework firework = w.spawn(((BukkitMCLocation) l).asLocation(), Firework.class);
 		FireworkMeta meta = firework.getFireworkMeta();
 		meta.setPower(Math.max(strength, 0));
 		for(MCFireworkEffect effect : effects) {

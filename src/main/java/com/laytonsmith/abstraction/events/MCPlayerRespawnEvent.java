@@ -11,4 +11,12 @@ public interface MCPlayerRespawnEvent extends MCPlayerEvent {
 	Boolean isBedSpawn();
 
 	boolean isAnchorSpawn();
+
+	Reason getReason();
+
+	enum Reason {
+		DEATH,
+		END_PORTAL,
+		PLUGIN
+	}
 }

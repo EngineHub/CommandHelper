@@ -315,6 +315,53 @@ public class Echoes {
 		}
 	}
 
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class action_msg extends AbstractFunction {
+
+		public String getName() {
+			return "action_msg";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		public String docs() {
+			return "void {[player], message} Sends a message to the action bar above the hot bar.";
+		}
+
+		public Construct exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer player;
+			String message;
+			if(args.length == 2) {
+				player = Static.GetPlayer(args[0], t);
+				message = args[1].val();
+			} else {
+				player = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(player, t);
+				message = args[0].val();
+			}
+			player.sendActionMessage(message);
+			return CVoid.VOID;
+		}
+
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CRELengthException.class};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public MSVersion since() {
+			return MSVersion.V3_3_5;
+		}
+	}
+
 	@api
 	@seealso({colorize.class})
 	public static class color extends AbstractFunction implements Optimizable {

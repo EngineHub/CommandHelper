@@ -27,7 +27,7 @@ public class ClassMirrorVisitor extends ClassVisitor {
 	private final ClassMirror.ClassInfo<Object> classInfo;
 
 	ClassMirrorVisitor(ClassMirror.ClassInfo<Object> info) {
-		super(Opcodes.ASM7);
+		super(Opcodes.ASM9);
 		this.classInfo = info;
 	}
 
@@ -126,7 +126,7 @@ public class ClassMirrorVisitor extends ClassVisitor {
 				value,
 				signature
 		);
-		return new FieldVisitor(Opcodes.ASM7, super.visitField(access, name, desc, signature, value)) {
+		return new FieldVisitor(Opcodes.ASM9, super.visitField(access, name, desc, signature, value)) {
 			@Override
 			public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
 				final AnnotationMirror annotationMirror = new AnnotationMirror(new ClassReferenceMirror(desc), visible);
@@ -188,7 +188,7 @@ public class ClassMirrorVisitor extends ClassVisitor {
 			);
 		}
 
-		return new MethodVisitor(Opcodes.ASM7, super.visitMethod(access, name, desc, signature, exceptions)) {
+		return new MethodVisitor(Opcodes.ASM9, super.visitMethod(access, name, desc, signature, exceptions)) {
 			@Override
 			public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
 				final AnnotationMirror annotationMirror = new AnnotationMirror(new ClassReferenceMirror<>(desc), visible);
@@ -231,7 +231,7 @@ public class ClassMirrorVisitor extends ClassVisitor {
 		private final AnnotationMirror mirror;
 
 		public AnnotationMirrorVisitor(AnnotationVisitor next, AnnotationMirror mirror) {
-			super(Opcodes.ASM7, next);
+			super(Opcodes.ASM9, next);
 			this.mirror = mirror;
 		}
 
@@ -258,7 +258,7 @@ public class ClassMirrorVisitor extends ClassVisitor {
 		private Class<?> type;
 
 		public ArrayAnnotationVisitor(String name, AnnotationMirror mirror) {
-			super(Opcodes.ASM7);
+			super(Opcodes.ASM9);
 			this.name = name;
 			this.mirror = mirror;
 		}

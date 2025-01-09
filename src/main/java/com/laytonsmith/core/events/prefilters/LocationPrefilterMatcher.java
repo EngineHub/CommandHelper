@@ -143,4 +143,9 @@ public abstract class LocationPrefilterMatcher<T extends BindableEvent> extends 
 		return 1.0;
 	}
 
+	@Override
+	public int getPriority() {
+		return 1;
+	}
+
 }

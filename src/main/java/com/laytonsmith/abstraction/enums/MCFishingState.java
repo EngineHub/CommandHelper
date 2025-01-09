@@ -10,5 +10,6 @@ public enum MCFishingState {
 	FISHING,
 	IN_GROUND,
 	BITE,
-	REEL_IN
+	REEL_IN,
+	LURED
 }
