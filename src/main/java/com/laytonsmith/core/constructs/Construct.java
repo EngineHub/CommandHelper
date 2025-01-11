@@ -419,6 +419,8 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 			return Long.valueOf(((CInt) c).getInt());
 		} else if(c instanceof CDouble) {
 			return Double.valueOf(((CDouble) c).getDouble());
+		} else if(c.isInstanceOf(CByteArray.TYPE)) {
+			return ((CByteArray) c).asByteArrayCopy();
 		} else if(c.isInstanceOf(CArray.TYPE)) {
 			CArray ca = (CArray) c;
 			if(ca.inAssociativeMode()) {
