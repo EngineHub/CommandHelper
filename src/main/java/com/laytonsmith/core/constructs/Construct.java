@@ -380,6 +380,11 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 				a.push(GetConstruct(obj, allowResources), Target.UNKNOWN);
 			}
 			return a;
+		} else if(o instanceof byte[]) {
+			byte[] data = (byte[]) o;
+			CByteArray ba = new CByteArray(Target.UNKNOWN, data.length);
+			ba.putBytes(data, 0);
+			return ba;
 		} else {
 			throw new ClassCastException(o.getClass().getName() + " cannot be cast to a Construct type");
 		}
