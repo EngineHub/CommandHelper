@@ -712,9 +712,17 @@ public class ArrayHandling {
 				CArray ca = ArgumentValidation.getArray(args[0], t);
 				aa = ca;
 			}
-			for(Mixed key : aa.keySet()) {
-				if(new equals().exec(t, env, aa.get(key, t), args[1]).getBoolean()) {
-					return CBoolean.TRUE;
+			if(aa instanceof CArray ca) {
+				for(Mixed val : ca) {
+					if(new equals().exec(t, env, val, args[1]).getBoolean()) {
+						return CBoolean.TRUE;
+					}
+				}
+			} else {
+				for(Mixed key : aa.keySet()) {
+					if(new equals().exec(t, env, aa.get(key, t), args[1]).getBoolean()) {
+						return CBoolean.TRUE;
+					}
 				}
 			}
 			return CBoolean.FALSE;
@@ -822,9 +830,17 @@ public class ArrayHandling {
 			} else {
 				aa = ArgumentValidation.getArray(args[0], t);
 			}
-			for(Mixed key : aa.keySet()) {
-				if(new equals_ic().exec(t, environment, aa.get(key, t), args[1]).getBoolean()) {
-					return CBoolean.TRUE;
+			if(aa instanceof CArray ca) {
+				for(Mixed val : ca) {
+					if(new equals_ic().exec(t, environment, val, args[1]).getBoolean()) {
+						return CBoolean.TRUE;
+					}
+				}
+			} else {
+				for(Mixed key : aa.keySet()) {
+					if(new equals_ic().exec(t, environment, aa.get(key, t), args[1]).getBoolean()) {
+						return CBoolean.TRUE;
+					}
 				}
 			}
 			return CBoolean.FALSE;
@@ -876,9 +892,17 @@ public class ArrayHandling {
 			} else {
 				aa = ArgumentValidation.getArray(args[0], t);
 			}
-			for(Mixed key : aa.keySet()) {
-				if(new sequals().exec(t, env, aa.get(key, t), args[1]).getBoolean()) {
-					return CBoolean.TRUE;
+			if(aa instanceof CArray ca) {
+				for(Mixed val : ca) {
+					if(new sequals().exec(t, env, val, args[1]).getBoolean()) {
+						return CBoolean.TRUE;
+					}
+				}
+			} else {
+				for(Mixed key : aa.keySet()) {
+					if(new sequals().exec(t, env, aa.get(key, t), args[1]).getBoolean()) {
+						return CBoolean.TRUE;
+					}
 				}
 			}
 			return CBoolean.FALSE;
