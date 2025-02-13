@@ -186,7 +186,12 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 
 	@Override
 	public void playEffect(MCEntityEffect type) {
-		e.playEffect(EntityEffect.valueOf(type.name()));
+		try {
+			e.playEffect(EntityEffect.valueOf(type.name()));
+		} catch(IllegalArgumentException ignore) {
+			// Likely a non-applicable effect (enforced in Paper 1.21.4+)
+			// Do nothing, as per documentation.
+		}
 	}
 
 	@Override
