@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Streams are hard sometimes. This class abstracts most of the functionality that is commonly used.
@@ -145,11 +146,7 @@ public class StreamUtils {
 	 * @return A new PrintStream object, based on System.out
 	 */
 	public static PrintStream GetSystemOut() {
-		try {
-			return new PrintStream(System.out, true, "UTF-8");
-		} catch(UnsupportedEncodingException ex) {
-			throw new Error(ex);
-		}
+		return new PrintStream(System.out, true, StandardCharsets.UTF_8);
 	}
 
 	/**
@@ -159,11 +156,7 @@ public class StreamUtils {
 	 * @return A new PrintStream object, based on System.err
 	 */
 	public static PrintStream GetSystemErr() {
-		try {
-			return new PrintStream(System.err, true, "UTF-8");
-		} catch(UnsupportedEncodingException ex) {
-			throw new Error(ex);
-		}
+		return new PrintStream(System.err, true, StandardCharsets.UTF_8);
 	}
 
 	/**

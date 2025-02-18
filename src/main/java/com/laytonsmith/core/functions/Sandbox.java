@@ -1,5 +1,7 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
+import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.core.FileWriteMode;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.TermColors;
@@ -45,6 +47,7 @@ import org.bukkit.event.Cancellable;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
@@ -334,10 +337,9 @@ public class Sandbox {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			Function color = new Echoes.color();
-			String red = color.exec(t, environment, args.length == 3 ? args[0] : new CString("RED", t)).val();
-			String white = color.exec(t, environment, args.length == 3 ? args[1] : new CString("WHITE", t)).val();
-			String blue = color.exec(t, environment, args.length == 3 ? args[2] : new CString("BLUE", t)).val();
+			MCChatColor red = MCChatColor.RED;
+			MCChatColor white = MCChatColor.WHITE;
+			MCChatColor blue = MCChatColor.BLUE;
 			int multiplier = 2;
 			char c = '=';
 			String one = multiply(c, 1 * multiplier);
@@ -347,16 +349,18 @@ public class Sandbox {
 			String twelve = multiply(c, 12 * multiplier);
 			String thirteen = multiply(c, 13 * multiplier);
 			String twentytwo = multiply(c, 22 * multiplier);
+			PrintStream out = StreamUtils.GetSystemOut();
+			String vertical = Static.MCToANSIColors(red + six + white + one + blue + two + white + one + red + twelve);
 			for(int i = 0; i < 6; ++i) {
-				System.out.println(Static.MCToANSIColors(red + six + white + one + blue + two + white + one + red + twelve) + TermColors.RESET);
+				out.println(vertical + TermColors.RESET);
 			}
-			System.out.println(Static.MCToANSIColors(white + seven + blue + two + white + thirteen) + TermColors.RESET);
+			out.println(Static.MCToANSIColors(white + seven + blue + two + white + thirteen) + TermColors.RESET);
 			for(int i = 0; i < 2; ++i) {
-				System.out.println(Static.MCToANSIColors(blue + twentytwo) + TermColors.RESET);
+				out.println(Static.MCToANSIColors(blue + twentytwo) + TermColors.RESET);
 			}
-			System.out.println(Static.MCToANSIColors(white + seven + blue + two + white + thirteen) + TermColors.RESET);
+			out.println(Static.MCToANSIColors(white + seven + blue + two + white + thirteen) + TermColors.RESET);
 			for(int i = 0; i < 6; ++i) {
-				System.out.println(Static.MCToANSIColors(red + six + white + one + blue + two + white + one + red + twelve) + TermColors.RESET);
+				out.println(vertical + TermColors.RESET);
 			}
 
 			return CVoid.VOID;

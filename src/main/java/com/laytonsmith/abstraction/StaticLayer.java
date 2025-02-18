@@ -41,7 +41,7 @@ public final class StaticLayer {
 				try {
 					if(convertor != null) {
 						//Uh... There are more than one implementations for this server type
-						System.out.println("More than one Convertor for this server type was detected!");
+						StreamUtils.GetSystemErr().println("More than one Convertor for this server type was detected!");
 					}
 					convertor = (Convertor) c.newInstance();
 					//At this point we are all set

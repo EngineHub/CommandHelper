@@ -548,7 +548,7 @@ public class Script {
 						+ TermColors.CYAN + brand + TermColors.RED + " version: " + TermColors.RESET + version + TermColors.RED + ";\n"
 						+ "Loaded extensions and versions:\n" + extensionData
 						+ "Here's the stacktrace:\n" + TermColors.RESET + Static.GetStacktraceString(e);
-				System.err.println(emsg);
+				StreamUtils.GetSystemErr().println(emsg);
 				throw new CancelCommandException(null, Target.UNKNOWN);
 			}
 		} finally {

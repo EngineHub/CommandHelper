@@ -99,12 +99,13 @@ public class Cmdline {
 		@Override
 		public CVoid exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String msg = Static.MCToANSIColors(args[0].val());
-			StreamUtils.GetSystemOut().print(msg);
+			PrintStream out = StreamUtils.GetSystemOut();
+			out.print(msg);
 			if(msg.contains("\033")) {
 				//We have color codes in it, we need to reset them
-				StreamUtils.GetSystemOut().print(TermColors.reset());
+				out.print(TermColors.reset());
 			}
-			StreamUtils.GetSystemOut().println();
+			out.println();
 			return CVoid.VOID;
 		}
 
