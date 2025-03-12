@@ -246,7 +246,7 @@ public class ItemMeta {
 				new ExampleScript("Demonstrates a player head", "set_itemmeta(103, array(owneruuid: puuid()))",
 				"This puts your skin on the player head you are wearing"),
 				new ExampleScript("Demonstrates making a custom potion",
-				"set_itemmeta(5, array(display: Potion of Frog Leaping, potions: array(speed: array(strength: 4,"
+				"set_itemmeta(5, array(display: 'Potion of Frog Leaping', potions: array(speed: array(strength: 4,"
 						+ " seconds: 90, ambient: true, particles: false, icon: true))))",
 				"Turns the potion in slot 5 into a Potion of Leaping V with no potion particles."),
 				new ExampleScript("Demonstrates hiding a potion effect",

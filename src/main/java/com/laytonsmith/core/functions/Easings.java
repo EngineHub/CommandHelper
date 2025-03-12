@@ -201,12 +201,12 @@ public class Easings {
 				new ExampleScript("Usage with a LINEAR interpolation.", "@start = array(x: 0, y: 0, z: 0);\n"
 						+ "@finish = array(x: 0, y: 100, z: 0);\n"
 						+ "for(@i = 0, @i <= 1, @i += 0.1) {\n"
-						+ "\tmsg(ease_between_loc(@start, @finish, 'LINEAR', @i);\n"
+						+ "\tmsg(ease_between_loc(@start, @finish, 'LINEAR', @i));\n"
 						+ "}"),
 				new ExampleScript("Usage with a EASE_IN_CUBIC interpolation.", "@start = array(x: 0, y: 0, z: 0);\n"
 						+ "@finish = array(x: 0, y: 100, z: 0);\n"
 						+ "for(@i = 0, @i <= 1, @i += 0.1) {\n"
-						+ "\tmsg(ease_between_loc(@start, @finish, 'EASE_IN_CUBIC', @i);\n"
+						+ "\tmsg(ease_between_loc(@start, @finish, 'EASE_IN_CUBIC', @i));\n"
 						+ "}")
 			};
 		}

@@ -697,7 +697,7 @@ public final class Threading {
 							+ "// Main thread\n"
 							+ "sleep(1); // Simulate other main thread activity\n"
 							+ "// Note that if we used synchronized() here, this call would block the main thread\n"
-							+ "// for 10 seconds, while the off thread performed its activities."
+							+ "// for 10 seconds, while the off thread performed its activities.\n"
 							+ "x_get_lock('lock', closure() {\n"
 							+ "\tmsg('Main thread activity');\n"
 							+ "});\n",
