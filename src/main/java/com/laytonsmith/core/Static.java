@@ -1615,7 +1615,7 @@ public final class Static {
 			return getMSObject(((Collection) object).toArray(), t);
 		} else if(object instanceof Map) {
 			Map map = ((Map) object);
-			CArray r = new CArray(t);
+			CArray r = CArray.GetAssociativeArray(t);
 			for(Object key : map.keySet()) {
 				Object o = map.get(key);
 				r.set(key.toString(), (o == object) ? r : getMSObject(o, t), t);

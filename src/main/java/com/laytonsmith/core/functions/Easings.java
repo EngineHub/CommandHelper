@@ -149,7 +149,7 @@ public class Easings {
 					= ArgumentValidation.getEnum(args[2], com.laytonsmith.core.Easings.EasingType.class, t);
 			double x = ArgumentValidation.getDouble(args[3], t);
 			double percentage = com.laytonsmith.core.Easings.GetEasing(type, x);
-			CArray result = new CArray(Target.UNKNOWN);
+			CArray result = CArray.GetAssociativeArray(Target.UNKNOWN);
 			result.set("x", startX + (finishX - startX) * percentage);
 			result.set("y", startY + (finishY - startY) * percentage);
 			result.set("z", startZ + (finishZ - startZ) * percentage);

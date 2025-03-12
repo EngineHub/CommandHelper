@@ -1061,7 +1061,7 @@ public class Environment {
 			if(owner == null) {
 				return CNull.NULL;
 			}
-			CArray ret = new CArray(t);
+			CArray ret = CArray.GetAssociativeArray(t);
 			ret.set("name", owner.getName());
 			ret.set("uuid", owner.getUniqueID().toString());
 			MCPlayerProfile playerProfile = skull.getPlayerProfile();
