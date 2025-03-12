@@ -2913,7 +2913,8 @@ public class PlayerEvents {
 		public String docs() {
 			return "{}"
 					+ " Fires when a player completes all criteria to unlock an advancement or recipe."
-					+ " {player | advancement | title: The advancement display title, if one exists (MC 1.18.2+)}"
+					+ " {player | advancement | title: The advancement display title, if one exists (MC 1.17.1+ on"
+					+ " Paper, 1.18.2+ on Spigot)}"
 					+ " {}"
 					+ " {}";
 		}

@@ -1,6 +1,6 @@
 package com.laytonsmith.abstraction.bukkit;
 
-import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
+import com.destroystokyo.paper.profile.PlayerProfile;
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPlayerProfile;
@@ -58,7 +58,7 @@ public class BukkitMCSkullMeta extends BukkitMCItemMeta implements MCSkullMeta {
 	@Override
 	public MCPlayerProfile getProfile() {
 		if(((BukkitMCServer) Static.getServer()).isPaper()) {
-			Object profile = ReflectionUtils.invokeMethod(SkullMeta.class, sm, "getPlayerProfile");
+			PlayerProfile profile = this.sm.getPlayerProfile();
 			if(profile != null) {
 				return new BukkitMCPlayerProfile(profile);
 			}
@@ -69,6 +69,6 @@ public class BukkitMCSkullMeta extends BukkitMCItemMeta implements MCSkullMeta {
 	@Override
 	public void setProfile(MCPlayerProfile profile) {
 		// Completes the profile from user cache.
-		ReflectionUtils.invokeMethod(sm, "setPlayerProfile", profile.getHandle());
+		this.sm.setPlayerProfile((PlayerProfile) profile.getHandle());
 	}
 }

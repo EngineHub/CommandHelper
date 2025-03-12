@@ -2916,7 +2916,7 @@ public class InventoryManagement {
 	 * @param t
 	 * @return
 	 */
-	private static MCInventory GetInventory(Mixed specifier, MCWorld w, Target t) {
+	static MCInventory GetInventory(Mixed specifier, MCWorld w, Target t) {
 		MCInventory inv = GetInventoryOrNull(specifier, w, t);
 		if(inv == null) {
 			if(specifier.isInstanceOf(CArray.TYPE)) {

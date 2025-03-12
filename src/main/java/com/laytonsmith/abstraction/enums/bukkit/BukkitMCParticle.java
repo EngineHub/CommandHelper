@@ -142,27 +142,28 @@ public class BukkitMCParticle extends MCParticle<Particle> {
 				}
 			case TRAIL:
 				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_21_4)) {
+					if(data instanceof MCParticleData.Trail trail) {
+						return new Particle.Trail((Location) trail.location().getHandle(),
+								BukkitMCColor.GetColor(trail.color()), trail.duration());
+					} else {
+						return new Particle.Trail((Location) l.getHandle(), Color.fromRGB(252, 120, 18),
+								new Random().nextInt(40) + 10);
+					}
+				} else {
+					// 1.21.3 only
+					Class clazz = null;
 					try {
-						Class clazz = Class.forName("org.bukkit.Particle$Trail");
-						Constructor constructor = clazz.getConstructor(Location.class, Color.class, int.class);
+						clazz = Class.forName("org.bukkit.Particle$TargetColor");
+						Constructor constructor = clazz.getConstructor(Location.class, Color.class);
 						constructor.setAccessible(true);
 						if(data instanceof MCParticleData.Trail trail) {
 							return constructor.newInstance((Location) trail.location().getHandle(),
-									BukkitMCColor.GetColor(trail.color()), trail.duration());
+									BukkitMCColor.GetColor(trail.color()));
 						} else {
-							return constructor.newInstance((Location) l.getHandle(), Color.fromRGB(252, 120, 18),
-									new Random().nextInt(40) + 10);
+							return constructor.newInstance((Location) l.getHandle(), Color.fromRGB(252, 120, 18));
 						}
 					} catch (ClassNotFoundException | NoSuchMethodException | InstantiationException
 							| IllegalAccessException | InvocationTargetException ignore) {}
-				} else {
-					// 1.21.3 only
-					if(data instanceof MCParticleData.Trail trail) {
-						return new Particle.TargetColor((Location) trail.location().getHandle(),
-								BukkitMCColor.GetColor(trail.color()));
-					} else {
-						return new Particle.TargetColor((Location) l.getHandle(), Color.fromRGB(252, 120, 18));
-					}
 				}
 		}
 		return null;

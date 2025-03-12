@@ -162,10 +162,13 @@ public class BukkitMCInventory implements MCInventory {
 
 	@Override
 	public String getTitle() {
-		Nameable n = ((Nameable) i.getHolder());
-		if(n == null) {
-			return null;
+		InventoryHolder h = i.getHolder();
+		if(h instanceof Nameable) {
+			return ((Nameable) h).getCustomName();
 		}
-		return n.getCustomName();
+		if(h instanceof BukkitMCVirtualInventoryHolder.VirtualHolder) {
+			return ((BukkitMCVirtualInventoryHolder.VirtualHolder) h).getTitle();
+		}
+		return null;
 	}
 }

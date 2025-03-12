@@ -1,5 +1,6 @@
 package com.laytonsmith.abstraction.bukkit.events;
 
+import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCBookMeta;
@@ -18,6 +19,7 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCBookMeta;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCNamespacedKey;
+import com.laytonsmith.abstraction.bukkit.BukkitMCServer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
@@ -72,10 +74,11 @@ import com.laytonsmith.abstraction.events.MCPlayerToggleSprintEvent;
 import com.laytonsmith.abstraction.events.MCWorldChangedEvent;
 import com.laytonsmith.annotations.abstraction;
 import com.laytonsmith.core.Static;
+import io.papermc.paper.advancement.AdvancementDisplay;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.advancement.AdvancementDisplay;
 import org.bukkit.block.BlockFace;
 import org.bukkit.damage.DamageSource;
 import org.bukkit.damage.DamageType;
@@ -1172,8 +1175,16 @@ public class BukkitPlayerEvents {
 
 		@Override
 		public String getTitle() {
-			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_18_X)) {
-				AdvancementDisplay display = e.getAdvancement().getDisplay();
+			if(((BukkitMCServer) Static.getServer()).isPaper()) {
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_17_X)) {
+					AdvancementDisplay display = e.getAdvancement().getDisplay();
+					if(display != null) {
+						return PlainTextComponentSerializer.plainText().serialize(display.title());
+					}
+				}
+			} else if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_18_X)) {
+				org.bukkit.advancement.AdvancementDisplay display = ReflectionUtils.invokeMethod(e.getAdvancement(),
+						"getDisplay");
 				if(display != null) {
 					return display.getTitle();
 				}
