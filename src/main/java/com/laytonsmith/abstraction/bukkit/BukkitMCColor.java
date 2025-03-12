@@ -1,6 +1,8 @@
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.MCColor;
+import com.laytonsmith.abstraction.enums.MCVersion;
+import com.laytonsmith.core.Static;
 import org.bukkit.Color;
 
 public final class BukkitMCColor implements MCColor {
@@ -8,11 +10,19 @@ public final class BukkitMCColor implements MCColor {
 	private static final BukkitMCColor BUILDER = new BukkitMCColor();
 
 	public static MCColor GetMCColor(Color c) {
-		return BUILDER.build(c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
+		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_4)) {
+			return BUILDER.build(c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
+		} else {
+			return BUILDER.build(c.getRed(), c.getGreen(), c.getBlue());
+		}
 	}
 
 	public static Color GetColor(MCColor c) {
-		return Color.fromARGB(c.getAlpha(), c.getRed(), c.getGreen(), c.getBlue());
+		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_4)) {
+			return Color.fromARGB(c.getAlpha(), c.getRed(), c.getGreen(), c.getBlue());
+		} else {
+			return Color.fromRGB(c.getRed(), c.getGreen(), c.getBlue());
+		}
 	}
 
 	private BukkitMCColor() {
