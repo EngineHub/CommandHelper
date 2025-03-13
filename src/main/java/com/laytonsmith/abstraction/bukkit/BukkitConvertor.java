@@ -48,7 +48,9 @@ import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCSign;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCSkull;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCAgeable;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCAnimal;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCBoat;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCBreedable;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCChestBoat;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCCommandMinecart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCComplexEntityPart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCComplexLivingEntity;
@@ -130,7 +132,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Ageable;
 import org.bukkit.entity.Animals;
+import org.bukkit.entity.Boat;
 import org.bukkit.entity.Breedable;
+import org.bukkit.entity.ChestBoat;
 import org.bukkit.entity.ComplexEntityPart;
 import org.bukkit.entity.ComplexLivingEntity;
 import org.bukkit.entity.Entity;
@@ -461,6 +465,21 @@ public class BukkitConvertor extends AbstractConvertor {
 			// Must come before Vehicle
 			type.setWrapperClass(BukkitMCMinecart.class);
 			return new BukkitMCMinecart(be);
+		}
+
+		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_21_3)) {
+			// boats were split into different classes by wood type
+			if(be instanceof ChestBoat) {
+				// Must come before Boat
+				type.setWrapperClass(BukkitMCChestBoat.class);
+				return new BukkitMCChestBoat(be);
+			}
+
+			if(be instanceof Boat) {
+				// Must come before Vehicle
+				type.setWrapperClass(BukkitMCBoat.class);
+				return new BukkitMCBoat(be);
+			}
 		}
 
 		if(be instanceof SizedFireball) {
