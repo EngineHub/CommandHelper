@@ -8,5 +8,6 @@ public interface MCShapelessRecipe extends MCRecipe {
 	void addIngredient(MCItemStack ingredient);
 	void addIngredient(MCMaterial ingredient);
 	void addIngredient(MCMaterial... ingredients);
+	void addIngredient(MCItemStack... ingredients);
 	List<MCMaterial[]> getIngredients();
 }

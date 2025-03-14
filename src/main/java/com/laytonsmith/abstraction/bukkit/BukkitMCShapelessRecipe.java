@@ -85,4 +85,13 @@ public class BukkitMCShapelessRecipe extends BukkitMCRecipe implements MCShapele
 		}
 		recipe.addIngredient(new RecipeChoice.MaterialChoice(concrete));
 	}
+
+	@Override
+	public void addIngredient(MCItemStack... ingredients) {
+		ItemStack[] concrete = new ItemStack[ingredients.length];
+		for(int i = 0; i < ingredients.length; i++) {
+			concrete[i] = (ItemStack) ingredients[i].getHandle();
+		}
+		recipe.addIngredient(new RecipeChoice.ExactChoice(concrete));
+	}
 }

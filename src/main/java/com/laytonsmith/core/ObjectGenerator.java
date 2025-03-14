@@ -2363,11 +2363,44 @@ public class ObjectGenerator {
 				for(Mixed ingredient : ingredients.asList()) {
 					if(ingredient.isInstanceOf(CArray.TYPE)) {
 						if(((CArray) ingredient).isAssociative()) {
-							((MCShapelessRecipe) ret).addIngredient(recipeItem(ingredient, t));
+							// Single ingredient item array
+							if(((CArray) ingredient).containsKey("meta")) {
+								// Single exact ingredient item choice
+								((MCShapelessRecipe) ret).addIngredient(new MCItemStack[]{recipeItem(ingredient, t)});
+							} else {
+								// Single ingredient material with optional qty
+								((MCShapelessRecipe) ret).addIngredient(recipeItem(ingredient, t));
+							}
 						} else {
-							((MCShapelessRecipe) ret).addIngredient(recipeMaterialChoice((CArray) ingredient, t));
+							// Multiple ingredient choices
+							CArray list = (CArray) ingredient;
+							MCMaterial[] mats = new MCMaterial[(int) list.size()];
+							MCItemStack[] items = new MCItemStack[(int) list.size()];
+							boolean exactItemMatch = false;
+							for(int index = 0; index < list.size(); index++) {
+								Mixed choice = list.get(index, t);
+								if(choice.isInstanceOf(CArray.TYPE)) {
+									exactItemMatch = true;
+									items[index] = recipeItem(choice, t);
+								} else {
+									mats[index] = recipeMaterial(choice, t);
+								}
+							}
+							if(exactItemMatch) {
+								// Multiple exact item ingredient choices
+								for(int index = 0; index < items.length; index++) {
+									if(items[index] == null) {
+										items[index] = StaticLayer.GetItemStack(mats[index], 1);
+									}
+								}
+								((MCShapelessRecipe) ret).addIngredient(items);
+							} else {
+								// Multiple material ingredient choices
+								((MCShapelessRecipe) ret).addIngredient(mats);
+							}
 						}
 					} else {
+						// single ingredient material
 						((MCShapelessRecipe) ret).addIngredient(recipeMaterial(ingredient, t));
 					}
 				}
