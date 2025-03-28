@@ -67,6 +67,7 @@ import com.laytonsmith.abstraction.events.MCPlayerPortalEvent;
 import com.laytonsmith.abstraction.events.MCPlayerQuitEvent;
 import com.laytonsmith.abstraction.events.MCPlayerResourcePackEvent;
 import com.laytonsmith.abstraction.events.MCPlayerRespawnEvent;
+import com.laytonsmith.abstraction.events.MCPlayerStopUsingItemEvent;
 import com.laytonsmith.abstraction.events.MCPlayerTeleportEvent;
 import com.laytonsmith.abstraction.events.MCPlayerToggleFlightEvent;
 import com.laytonsmith.abstraction.events.MCPlayerToggleSneakEvent;
@@ -75,6 +76,7 @@ import com.laytonsmith.abstraction.events.MCWorldChangedEvent;
 import com.laytonsmith.annotations.abstraction;
 import com.laytonsmith.core.Static;
 import io.papermc.paper.advancement.AdvancementDisplay;
+import io.papermc.paper.event.player.PlayerStopUsingItemEvent;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -1191,5 +1193,27 @@ public class BukkitPlayerEvents {
 			}
 			return null;
 		}
+	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCPlayerStopUsingItemEvent extends BukkitMCPlayerEvent implements MCPlayerStopUsingItemEvent {
+
+		PlayerStopUsingItemEvent e;
+
+		public BukkitMCPlayerStopUsingItemEvent(PlayerStopUsingItemEvent event) {
+			super(event);
+			this.e = event;
+		}
+
+		@Override
+		public MCItemStack getItem() {
+			return new BukkitMCItemStack(this.e.getItem());
+		}
+
+		@Override
+		public int getTicksHeldFor() {
+			return this.e.getTicksHeldFor();
+		}
+
 	}
 }

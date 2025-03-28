@@ -24,17 +24,21 @@ import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlay
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerQuitEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerRespawnEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerResourcePackEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerStopUsingItemEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerTeleportEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerToggleFlightEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerToggleSneakEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerToggleSprintEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCWorldChangedEvent;
+import com.laytonsmith.annotations.EventIdentifier;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.events.drivers.PlayerEvents;
+import io.papermc.paper.event.player.PlayerStopUsingItemEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -392,5 +396,11 @@ public class BukkitPlayerListener implements Listener {
 	public void onPlayerAdvancementDoneEvent(PlayerAdvancementDoneEvent event) {
 		BukkitMCPlayerAdvancementDoneEvent pade = new BukkitMCPlayerAdvancementDoneEvent(event);
 		EventUtils.TriggerListener(Driver.PLAYER_ADVANCEMENT_DONE, "player_advancement_done", pade);
+	}
+
+	@EventIdentifier(event = Driver.PLAYER_STOP_USING_ITEM, className = "io.papermc.paper.event.player.PlayerStopUsingItemEvent")
+	public void onPlayerStopUsingItemEvent(Event event) {
+		BukkitMCPlayerStopUsingItemEvent psuie = new BukkitMCPlayerStopUsingItemEvent((PlayerStopUsingItemEvent) event);
+		EventUtils.TriggerListener(Driver.PLAYER_STOP_USING_ITEM, "player_stop_using_item", psuie);
 	}
 }

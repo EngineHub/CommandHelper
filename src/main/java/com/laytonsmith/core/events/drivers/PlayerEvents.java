@@ -43,6 +43,7 @@ import com.laytonsmith.abstraction.events.MCPlayerPortalEvent;
 import com.laytonsmith.abstraction.events.MCPlayerQuitEvent;
 import com.laytonsmith.abstraction.events.MCPlayerResourcePackEvent;
 import com.laytonsmith.abstraction.events.MCPlayerRespawnEvent;
+import com.laytonsmith.abstraction.events.MCPlayerStopUsingItemEvent;
 import com.laytonsmith.abstraction.events.MCPlayerTeleportEvent;
 import com.laytonsmith.abstraction.events.MCPlayerToggleFlightEvent;
 import com.laytonsmith.abstraction.events.MCPlayerToggleSneakEvent;
@@ -2940,6 +2941,71 @@ public class PlayerEvents {
 				return map;
 			} else {
 				throw new EventException("Event received was not an MCPlayerAdvancementDoneEvent.");
+			}
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+			return false;
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
+	}
+
+	@api
+	public static class player_stop_using_item extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "player_stop_using_item";
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.PLAYER_STOP_USING_ITEM;
+		}
+
+		@Override
+		public String docs() {
+			return "{}"
+					+ " Fires when a player stops using an item, such as shields, bows, crossbows, tridents, brushes,"
+					+ " goat horns, or spyglasses. Edible items will also fire this if the player stops consuming"
+					+ " before completion. This event cannot be cancelled and is only available on Paper 1.18.2+."
+					+ " {player | item: The item that was used. | ticks: The number of ticks the item was used.)}"
+					+ " {}"
+					+ " {}";
+		}
+
+		@Override
+		protected PrefilterBuilder getPrefilterBuilder() {
+			return new PrefilterBuilder<MCPlayerStopUsingItemEvent>()
+					.set("player", "The player that was using the item.", new PlayerPrefilterMatcher<>())
+					.set("itemname", "The item type being used", new ItemStackPrefilterMatcher<>() {
+						@Override
+						protected MCItemStack getItemStack(MCPlayerStopUsingItemEvent event) {
+							return event.getItem();
+						}
+					});
+		}
+
+		@Override
+		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+			if(event instanceof MCPlayerStopUsingItemEvent e) {
+				Map<String, Mixed> map = new HashMap<>();
+				map.put("player", new CString(e.getPlayer().getName(), Target.UNKNOWN));
+				map.put("item", ObjectGenerator.GetGenerator().item(e.getItem(), Target.UNKNOWN));
+				map.put("ticks", new CInt(e.getTicksHeldFor(), Target.UNKNOWN));
+				return map;
+			} else {
+				throw new EventException("Event received was not an MCPlayerStopUsingItemEvent.");
 			}
 		}
 

@@ -475,10 +475,14 @@ public class CommandHelperPlugin extends JavaPlugin {
 				try {
 					eventClass = (Class<? extends Event>) Class.forName(identifier.className());
 				} catch (ClassNotFoundException | ClassCastException e) {
-					MSLog.GetLogger().e(MSLog.Tags.RUNTIME, "Could not listen for " + identifier.event().name()
-							+ " because the class " + identifier.className() + " could not be found."
-							+ " This problem is not expected to occur, so please report it on the bug"
-							+ " tracker if it does.", Target.UNKNOWN);
+					// Event may only exist in Paper (io.papermc.paper or com.destroytokyo.paper)
+					// so when running Spigot, ignore events that are not in org.bukkit.event or org.spigotmc.event.
+					if(identifier.className().startsWith("org") || ((BukkitMCServer) myServer).isPaper()) {
+						MSLog.GetLogger().e(MSLog.Tags.RUNTIME, "Could not listen for " + identifier.event().name()
+								+ " because the class " + identifier.className() + " could not be found."
+								+ " This problem is not expected to occur, so please report it on the bug"
+								+ " tracker if it does.", Target.UNKNOWN);
+					}
 					continue;
 				}
 			}
