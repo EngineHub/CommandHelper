@@ -2976,10 +2976,11 @@ public class PlayerEvents {
 		@Override
 		public String docs() {
 			return "{}"
-					+ " Fires when a player stops using an item, such as shields, bows, crossbows, tridents, brushes,"
-					+ " goat horns, or spyglasses. Edible items will also fire this if the player stops consuming"
-					+ " before completion. This event cannot be cancelled and is only available on Paper 1.18.2+."
-					+ " {player | item: The item that was used. | ticks: The number of ticks the item was used.)}"
+					+ " Fires when a player stops using an item such as shields, bows, crossbows, tridents, brushes,"
+					+ " goat horns, or spyglasses (not including when changing the held item)."
+					+ " Edible items will also fire this if the player stops consuming before completion."
+					+ " This event is only available on Paper 1.18.2+."
+					+ " {player | item: The item that was used. | ticks: The number of ticks the item was used.}"
 					+ " {}"
 					+ " {}";
 		}
