@@ -6,6 +6,7 @@ import com.laytonsmith.annotations.MEnum;
 public enum MCSpawnReason {
 	BEEHIVE,
 	BREEDING,
+	BUCKET,
 	BUILD_IRONGOLEM,
 	BUILD_SNOWMAN,
 	BUILD_WITHER,
