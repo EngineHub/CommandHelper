@@ -694,9 +694,14 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	}
 
 	@Override
-	public void spawnParticle(MCLocation l, MCParticle pa, int count, double offsetX, double offsetY, double offsetZ, double velocity, Object data) {
-		p.spawnParticle((Particle) pa.getConcrete(), (Location) l.getHandle(), count, offsetX, offsetY, offsetZ,
-				velocity, ((BukkitMCParticle) pa).getParticleData(l, data));
+	public void spawnParticle(MCLocation l, MCParticle pa, int count, double offsetX, double offsetY, double offsetZ, double velocity, boolean force, Object data) {
+		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
+			p.spawnParticle((Particle) pa.getConcrete(), (Location) l.getHandle(), count, offsetX, offsetY, offsetZ,
+					velocity, ((BukkitMCParticle) pa).getParticleData(l, data), force);
+		} else {
+			p.spawnParticle((Particle) pa.getConcrete(), (Location) l.getHandle(), count, offsetX, offsetY, offsetZ,
+					velocity, ((BukkitMCParticle) pa).getParticleData(l, data));
+		}
 	}
 
 	@Override

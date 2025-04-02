@@ -87,7 +87,7 @@ public interface MCWorld extends MCMetadatable {
 
 	void playEffect(MCLocation l, MCEffect mCEffect, Object data, int radius);
 
-	void spawnParticle(MCLocation l, MCParticle pa, int count, double offsetX, double offsetY, double offsetZ, double velocity, Object data);
+	void spawnParticle(MCLocation l, MCParticle pa, int count, double offsetX, double offsetY, double offsetZ, double velocity, boolean force, Object data);
 
 	void playSound(MCLocation l, MCSound sound, MCSoundCategory category, float volume, float pitch, Long seed);
 

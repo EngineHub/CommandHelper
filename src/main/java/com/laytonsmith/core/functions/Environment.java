@@ -1612,20 +1612,33 @@ public class Environment {
 					+ " array defining the characteristics of the particle to be spawned. The array requires the"
 					+ " particle name under the key \"particle\". ----"
 					+ " Possible particle types: " + StringUtils.Join(MCParticle.types(), ", ", ", or ", " or ") + "."
-					+ " <br><br>Some particles have more specific keys and/or special behavior, but the common keys for"
-					+ " the particle array are \"count\" (usually the number of particles to be spawned), \"speed\""
-					+ " (usually the velocity of the particle), \"xoffset\", \"yoffset\", and \"zoffset\""
-					+ " (usually the ranges from center within which the particle may be offset on that axis)."
-					+ " <br><br>BLOCK_DUST, BLOCK_CRACK, BLOCK_CRUMBLE, BLOCK_MARKER, DUST_PILLAR, and FALLING_DUST"
+					+ "<br>"
+					+ "<br>Some particles have more specific keys and/or special behavior, but the common keys for"
+					+ " the particle array are:"
+					+ "<br>"
+					+ "<br>'''count''' : (int) Usually the number of particles to be spawned. A value of 0 (default)"
+					+ " can create different particle data behavior than larger numbers."
+					+ "<br>'''speed''' : (double) Usually the velocity of the particle. Can be other things (size for"
+					+ " EXPLOSION_LARGE) depending on other values, like the particle type and count."
+					+ "<br>'''xoffset''' : (double) Usually the random offset width on the x-axis. An offset can also"
+					+ " be other things (velocity vector's x component for SMOKE_NORMAL) depending on other values,"
+					+ " like the particle type and count."
+					+ "<br>'''yoffset''' : (double) Usually the random offset width on the y-axis."
+					+ "<br>'''zoffset''' : (double) Usually the random offset width on the z-axis."
+					+ "<br>'''force''' : (boolean) Extends visibility range from 32 to 512 meters and encourages"
+					+ " clients to render it despite client settings."
+					+ "<br>"
+					+ "<br>BLOCK_DUST, BLOCK_CRACK, BLOCK_CRUMBLE, BLOCK_MARKER, DUST_PILLAR, and FALLING_DUST"
 					+ " particles can take a block type name parameter under the key \"block\" (default: STONE)."
-					+ " <br>ITEM_CRACK particles can take an item array or name under the key \"item\" (default: STONE)."
-					+ " <br>REDSTONE and SPELL_MOB particles take an RGB color array (each 0 - 255) or name under the key \"color\""
-					+ " (defaults to RED for REDSTONE, WHITE for SPELL_MOB)."
-					+ " <br>DUST_COLOR_TRANSITION particles take a \"tocolor\" in addition \"color\"."
-					+ " <br>VIBRATION particles take a \"destination\" location array or entity UUID."
-					+ " <br>SCULK_CHARGE particles take an \"angle\" in radians. (defaults to 0.0)"
-					+ " <br>SHRIEK particles take an integer \"delay\" in ticks before playing. (defaults to 0)"
-					+ " <br>TRAIL particles take a \"target\" location array, a \"color\", and a \"duration\" integer in ticks.";
+					+ "<br>ITEM_CRACK particles can take an item array or name under the key \"item\" (default: STONE)."
+					+ "<br>REDSTONE and SPELL_MOB particles take an RGB color array (each 0 - 255) or name under the key"
+					+ " \"color\" (defaults to RED for REDSTONE, WHITE for SPELL_MOB)."
+					+ "<br>DUST_COLOR_TRANSITION particles take a \"tocolor\" in addition \"color\"."
+					+ "<br>VIBRATION particles take a \"destination\" location array or entity UUID."
+					+ "<br>SCULK_CHARGE particles take an \"angle\" in radians. (defaults to 0.0)"
+					+ "<br>SHRIEK particles take an integer \"delay\" in ticks before playing. (defaults to 0)"
+					+ "<br>TRAIL particles take a \"target\" location array, a \"color\" as an RGB array or name, and a"
+					+ " \"duration\" integer in ticks.";
 		}
 
 		@Override
@@ -1653,6 +1666,7 @@ public class Environment {
 			double offsetY = 0.0;
 			double offsetZ = 0.0;
 			double speed = 0.0;
+			boolean force = false;
 			Object data = null;
 
 			if(args[1].isInstanceOf(CArray.TYPE)) {
@@ -1679,6 +1693,9 @@ public class Environment {
 				if(pa.containsKey("speed")) {
 					speed = ArgumentValidation.getDouble(pa.get("speed", t), t);
 				}
+				if(pa.containsKey("force")) {
+					force = ArgumentValidation.getBooleanObject(pa.get("force", t), t);
+				}
 
 				data = ObjectGenerator.GetGenerator().particleData(p, l, pa, t);
 
@@ -1699,14 +1716,14 @@ public class Environment {
 						}
 						for(Mixed playerName : players.asList()) {
 							player = Static.GetPlayer(playerName, t);
-							player.spawnParticle(l, p, count, offsetX, offsetY, offsetZ, speed, data);
+							player.spawnParticle(l, p, count, offsetX, offsetY, offsetZ, speed, force, data);
 						}
 					} else {
 						player = Static.GetPlayer(args[2], t);
-						player.spawnParticle(l, p, count, offsetX, offsetY, offsetZ, speed, data);
+						player.spawnParticle(l, p, count, offsetX, offsetY, offsetZ, speed, force, data);
 					}
 				} else {
-					l.getWorld().spawnParticle(l, p, count, offsetX, offsetY, offsetZ, speed, data);
+					l.getWorld().spawnParticle(l, p, count, offsetX, offsetY, offsetZ, speed, force, data);
 				}
 			} catch (IllegalArgumentException ex) {
 				throw new CREIllegalArgumentException("Given unsupported data for particle type " + p.name(), t);

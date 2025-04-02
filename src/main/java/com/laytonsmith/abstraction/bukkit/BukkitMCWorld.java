@@ -315,9 +315,9 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	}
 
 	@Override
-	public void spawnParticle(MCLocation l, MCParticle pa, int count, double offsetX, double offsetY, double offsetZ, double velocity, Object data) {
+	public void spawnParticle(MCLocation l, MCParticle pa, int count, double offsetX, double offsetY, double offsetZ, double velocity, boolean force, Object data) {
 		w.spawnParticle((Particle) pa.getConcrete(), (Location) l.getHandle(), count, offsetX, offsetY, offsetZ,
-				velocity, ((BukkitMCParticle) pa).getParticleData(l, data));
+				velocity, ((BukkitMCParticle) pa).getParticleData(l, data), force);
 	}
 
 	@Override
