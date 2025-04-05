@@ -814,7 +814,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	@Override
 	public Iterator<Mixed> iterator() {
 		if(associativeMode) {
-			throw new RuntimeException("iterator() cannot be called on an associative array");
+			return associativeArray.values().iterator();
 		} else {
 			return array.iterator();
 		}
