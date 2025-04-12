@@ -839,6 +839,7 @@ public class EntityEvents {
 					+ " | cause: The type of damage | amount | finalamount: health entity will lose after modifiers"
 					+ " | damager: If the source of damage is a player this will contain their name, otherwise it will be"
 					+ " the entityID of the damager (only available when an entity causes damage)"
+					+ " | damagertype: The type of entity that caused the damage, if there's a damager."
 					+ " | shooter: The name of the player who shot, otherwise the entityID"
 					+ " (only available when damager is a projectile)}"
 					+ " {amount: raw amount of damage (in half hearts)}"
@@ -1766,6 +1767,7 @@ public class EntityEvents {
 				} else {
 					map.put("damager", new CString(damager.getUniqueId().toString(), Target.UNKNOWN));
 				}
+				map.put("damagertype", new CString(damager.getType().name(), Target.UNKNOWN));
 				if(damager instanceof MCProjectile) {
 					MCProjectileSource shooter = ((MCProjectile) damager).getShooter();
 					if(shooter instanceof MCPlayer) {
