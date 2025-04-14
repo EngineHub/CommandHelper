@@ -68,6 +68,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.util.Consumer;
 
@@ -211,11 +212,11 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 
 	@Override
 	public String getGenerator() {
-		try {
-			return w.getGenerator().toString();
-		} catch (NullPointerException npe) {
+		ChunkGenerator generator = w.getGenerator();
+		if(generator == null) {
 			return "default";
 		}
+		return generator.toString();
 	}
 
 	@Override

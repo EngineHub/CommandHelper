@@ -294,7 +294,7 @@ without knowing the rotations on the other axis or of other body parts beforehan
 * %KEY_ARROW_DAMAGE%: The amount of damage. (double)
 * %KEY_SPECTRAL_ARROW_GLOWING_TICKS%: The number of ticks the hit entity will glow. (int)
 |-
-| SPLASH_POTION
+| SPLASH_POTION, LINGERING_POTION
 | 
 * %KEY_SPLASH_POTION_ITEM%: The item for the thrown potion.
 |-

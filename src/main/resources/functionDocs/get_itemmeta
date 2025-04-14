@@ -20,15 +20,18 @@ From 1.21.4+: "custom_model_data" for anything other than a single float.
 ! scope="col" width="14%" | Item Type
 ! scope="col" width="86%" | Meta
 |-
-! All
+! All Items
 |
+These fields are present in all items with meta.
 * '''display''' : (string) The display name seen when renamed in an anvil (or null).
-* '''lore''' : (array) An array of strings that is displayed when hovering the item (or null). As lines are plain text, they do not yet support some advanced text components, but color codes are supported.
-* '''enchants''' : (associative array) Defines enchantments with the vanilla name of enchantment as the key, and value being an enchantment array with the key "elevel" for the level of the enchantment. An integer for the level can be used as the value instead.
+* '''lore''' : (array) A list of strings that is displayed when hovering the item (or null). As lines are plain text, they do not yet support some advanced text components, but color codes are supported.
 * '''model''' : (int) Represents vanilla's CustomModelData tag for use with resource packs (or null). Is converted to a float for the custom_model_data component in 1.21.4+.
 * '''flags''' : (array) Flags used to hide meta in the item tooltip: %ITEM_FLAGS%.
 * '''repair''' : (int) The additional cost to repair or combine this item in an anvil.
-* '''modifiers''' : (array) An array of attribute modifier arrays (or null).
+* '''enchants''' : (associative array) The enchantments on this item.
+** '''&lt;enchantment_name&gtl;''' : (associative array) Name of enchantment as the key (e.g. "fire_aspect") An integer for the level can be used as the value instead of an array.
+*** '''elevel''' : (int) The level of the enchantment.
+* '''modifiers''' : (array) A list of attribute modifier arrays (or null).
 ** (associative array)
 *** '''attribute''' : (string) One of %ATTRIBUTES%.
 *** '''operation''' : (string) One of %OPERATIONS%.
@@ -72,15 +75,16 @@ Stored Bee NBT is not yet supported.
 ! BlockData
 |
 * '''blockdata''' : (associative array) Block data, also known as block states in vanilla, like is returned from get_blockdata() (or null).
-** '''block''' : (string) Block material name
+** '''block''' : (string) Block material name (optional)
 ** '''&lt;state_name&gt;''' : (int, boolean, string) The state value.
 Only returns specified states as of 1.20.6. Prior versions return all states. Can only set specific states without defaults as of 1.21.3.
 |-
 ! Books
 |
+* '''pages''' : (array) An array of pages as strings. New lines supported. (100 page limit)
+In addition, signed Written Books have the following keys:
 * '''title''' : (string) The title of the book. (32 character limit)
 * '''author''' : (string) The author of the book.
-* '''pages''' : (array) An array of pages as strings. New lines supported. (100 page limit)
 * '''generation''' : (string) The generation of the book. Can be ORIGINAL, COPY_OF_ORIGINAL, COPY_OF_COPY, or TATTERED (the last two cannot be copied).
 As pages are plain text, they do not yet support some advanced text components.
 |-

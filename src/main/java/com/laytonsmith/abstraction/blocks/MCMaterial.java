@@ -1735,7 +1735,20 @@ public abstract class MCMaterial<Concrete> extends DynamicEnum<MCVanillaMaterial
 		RESIN_BRICK_STAIRS(MCVersion.MC1_21_4),
 		RESIN_BRICK_WALL(MCVersion.MC1_21_4),
 		RESIN_CLUMP(MCVersion.MC1_21_4),
-		CHISELED_RESIN_BRICKS(MCVersion.MC1_21_4);
+		CHISELED_RESIN_BRICKS(MCVersion.MC1_21_4),
+
+		// 1.21.5 additions
+		BLUE_EGG(MCVersion.MC1_21_5),
+		BROWN_EGG(MCVersion.MC1_21_5),
+		BUSH(MCVersion.MC1_21_5),
+		CACTUS_FLOWER(MCVersion.MC1_21_5),
+		FIREFLY_BUSH(MCVersion.MC1_21_5),
+		LEAF_LITTER(MCVersion.MC1_21_5),
+		SHORT_DRY_GRASS(MCVersion.MC1_21_5),
+		TALL_DRY_GRASS(MCVersion.MC1_21_5),
+		TEST_BLOCK(MCVersion.MC1_21_5),
+		TEST_INSTANCE_BLOCK(MCVersion.MC1_21_5),
+		WILDFLOWERS(MCVersion.MC1_21_5);
 
 		private final MCVersion since;
 		private final MCVersion until;

@@ -156,7 +156,9 @@ public class BukkitMCItemMeta implements MCItemMeta {
 		Set<ItemFlag> flags = im.getItemFlags();
 		Set<MCItemFlag> ret = new HashSet<>(flags.size());
 		for(ItemFlag flag : flags) {
-			ret.add(MCItemFlag.valueOf(flag.name()));
+			try {
+				ret.add(MCItemFlag.valueOf(flag.name()));
+			} catch(IllegalArgumentException ignore) {}
 		}
 		return ret;
 	}
@@ -309,16 +311,6 @@ public class BukkitMCItemMeta implements MCItemMeta {
 	@Override
 	public void setEnchantmentGlintOverride(boolean glint) {
 		im.setEnchantmentGlintOverride(glint);
-	}
-
-	@Override
-	public boolean isFireResistant() {
-		return im.isFireResistant();
-	}
-
-	@Override
-	public void setFireResistant(boolean fireResistant) {
-		im.setFireResistant(fireResistant);
 	}
 
 	@Override

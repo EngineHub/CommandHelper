@@ -11,6 +11,7 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 
 @MEnum("com.commandhelper.GameRule")
 public enum MCGameRule {
+	ALLOWFIRETICKSAWAYFROMPLAYER("allowFireTicksAwayFromPlayer"),
 	ANNOUNCEADVANCEMENTS("announceAdvancements"),
 	BLOCKEXPLOSIONDROPDECAY("blockExplosionDropDecay"),
 	COMMANDBLOCKOUTPUT("commandBlockOutput"),
@@ -61,6 +62,7 @@ public enum MCGameRule {
 	SPAWNCHUNKRADIUS("spawnChunkRadius", CInt.class),
 	SPAWNRADIUS("spawnRadius", CInt.class),
 	SPECTATORSGENERATECHUNKS("spectatorsGenerateChunks"),
+	TNTEXPLODES("tntExplodes"),
 	TNTEXPLOSIONDROPDECAY("tntExplosionDropDecay"),
 	UNIVERSALANGER("universalAnger"),
 	WATERSOURCECONVERSION("waterSourceConversion");

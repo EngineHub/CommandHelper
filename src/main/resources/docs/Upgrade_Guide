@@ -3,6 +3,18 @@ Below is a reverse chronological guide to help you with the most notable of thes
 Where possible, any value changes are converted for backwards compatibility with saved data, but any script that checks output for equality will need to be updated.
 ----
 
+== Minecraft 1.21.5 ==
+* SPLASH_POTION entity type has been split into LINGERING_POTION and SPLASH_POTION again.
+* Some vanilla keys passed to the tellraw functions and commands have changed.
+    * "clickEvent" is now "click_event"
+    * The actions "run_command" and "suggest_command" have had their "value" field renamed to "command"
+    * The action "open_url" has had their "value" field renamed to "url"
+    * The action "change_page" has had their "value" field renamed to "page"
+    * "hoverEvent" is now "hover_event"
+    * The actions "show_item" and "show_entity" have had their fields and value formats modified
+
+----
+
 == Minecraft 1.21.2 ==
 * BOAT and CHEST_BOAT entity types have been split into wood types. ("OAK_BOAT", "ACACIA_CHEST_BOAT", etc.)
 

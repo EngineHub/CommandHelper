@@ -55,7 +55,7 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 					return MAP.get("ARROW");
 				case "LINGERING_POTION":
 					MSLog.GetLogger().e(MSLog.Tags.GENERAL,
-							"LINGERING_POTION entity type was removed in 1.14. Converted to SPLASH_POTION.",
+							"LINGERING_POTION entity type was removed from 1.14 to 1.21.4. Converted to SPLASH_POTION.",
 							Target.UNKNOWN);
 					return MAP.get("SPLASH_POTION");
 				case "PIG_ZOMBIE":
@@ -65,12 +65,12 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 					return MAP.get("ZOMBIFIED_PIGLIN");
 				case "BOAT":
 					MSLog.GetLogger().e(Tags.GENERAL,
-							"BOAT entity type was split into wood types. Converted to OAK_BOAT.",
+							"BOAT entity type was split by wood types in 1.21.3. Converted to OAK_BOAT.",
 							Target.UNKNOWN);
 					return MAP.get("OAK_BOAT");
 				case "CHEST_BOAT":
 					MSLog.GetLogger().e(Tags.GENERAL,
-							"CHEST_BOAT entity type was split into wood types. Converted to OAK_CHEST_BOAT.",
+							"CHEST_BOAT entity type was split by wood types in 1.21.3. Converted to OAK_CHEST_BOAT.",
 							Target.UNKNOWN);
 					return MAP.get("OAK_CHEST_BOAT");
 			}
@@ -218,6 +218,7 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 		LLAMA_SPIT,
 		LEASH_HITCH,
 		LIGHTNING,
+		LINGERING_POTION(true, MCVersion.MC1_21_5),
 		MAGMA_CUBE,
 		MARKER(true, MCVersion.MC1_17),
 		MINECART,

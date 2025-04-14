@@ -97,6 +97,7 @@ public class BukkitMCParticle extends MCParticle<Particle> {
 				}
 				return is;
 			case SPELL_MOB:
+			case TINTED_LEAVES:
 				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
 					if(data instanceof MCColor) {
 						return BukkitMCColor.GetColor((MCColor) data);

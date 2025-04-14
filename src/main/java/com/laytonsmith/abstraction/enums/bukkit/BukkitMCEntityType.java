@@ -91,6 +91,11 @@ public class BukkitMCEntityType extends MCEntityType<EntityType> {
 	// Add exceptions here
 	private static EntityType getBukkitType(MCVanillaEntityType v) {
 		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
+			if(Static.getServer().getMinecraftVersion().lte(MCVersion.MC1_21_4)) {
+				if(v == MCVanillaEntityType.SPLASH_POTION) {
+					return EntityType.valueOf("POTION");
+				}
+			}
 			switch(v) {
 				case ENDER_EYE:
 					return EntityType.EYE_OF_ENDER;
@@ -98,8 +103,6 @@ public class BukkitMCEntityType extends MCEntityType<EntityType> {
 					return EntityType.ITEM;
 				case LEASH_HITCH:
 					return EntityType.LEASH_KNOT;
-				case SPLASH_POTION:
-					return EntityType.POTION;
 				case THROWN_EXP_BOTTLE:
 					return EntityType.EXPERIENCE_BOTTLE;
 				case PRIMED_TNT:
@@ -156,6 +159,7 @@ public class BukkitMCEntityType extends MCEntityType<EntityType> {
 			case LIGHTNING:
 				wrapperClass = BukkitMCLightningStrike.class;
 				break;
+			case LINGERING_POTION:
 			case SPLASH_POTION:
 				wrapperClass = BukkitMCThrownPotion.class;
 				break;

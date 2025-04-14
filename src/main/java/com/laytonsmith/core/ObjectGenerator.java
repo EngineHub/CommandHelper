@@ -417,6 +417,7 @@ public class ObjectGenerator {
 				for(Map.Entry<MCEnchantment, Integer> entry : enchants.entrySet()) {
 					ret.addUnsafeEnchantment(entry.getKey(), entry.getValue());
 				}
+				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "Converted legacy enchants array not in meta.", t);
 			} catch (ClassCastException ex) {
 				throw new CREFormatException("Enchants must be an array of enchantment arrays.", t);
 			}
@@ -515,7 +516,7 @@ public class ObjectGenerator {
 			if(meta instanceof MCBlockStateMeta) {
 				MCBlockState bs = ((MCBlockStateMeta) meta).getBlockState(true);
 				if(bs instanceof MCBanner) {
-					// This is a shield that may or may not have a banner attached, but if get get the BlockState when
+					// This is a shield that may or may not have a banner attached, but if we get the BlockState when
 					// no banner exists, it gives us a default one. By first checking hasBlockState(),
 					// we can ensure we don't populate this meta array with the default banner data.
 					if(((MCBlockStateMeta) meta).hasBlockState()) {
@@ -1878,6 +1879,7 @@ public class ObjectGenerator {
 						case "HAND" -> MCEquipmentSlotGroup.HAND;
 						case "ARMOR" -> MCEquipmentSlotGroup.ARMOR;
 						case "BODY" -> MCEquipmentSlotGroup.BODY;
+						case "SADDLE" -> MCEquipmentSlotGroup.SADDLE;
 						default -> null;
 					};
 				}

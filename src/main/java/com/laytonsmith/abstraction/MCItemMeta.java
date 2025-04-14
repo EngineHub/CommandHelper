@@ -158,10 +158,6 @@ public interface MCItemMeta extends AbstractionObject {
 
 	void setEnchantmentGlintOverride(boolean glint);
 
-	boolean isFireResistant();
-
-	void setFireResistant(boolean fireResistant);
-
 	boolean hasMaxStackSize();
 
 	int getMaxStackSize();

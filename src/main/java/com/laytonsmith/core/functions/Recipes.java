@@ -92,7 +92,7 @@ public class Recipes {
 					+ " ingredient item or material or an array of possible ingredient items or material."
 					+ " Shapeless recipes are a normal array of ingredients, where each element can be a single item or"
 					+ " material, or each element can be an array of possible items or materials."
-					+ " Ingredients that are item arrays with meta will require exact ingredient matches."
+					+ " Ingredients that are item arrays with meta will require exact ingredient matches.<br>"
 					+ "'''input''' : (cooking and stonecutting recipes) The input item type or array of possible types"
 					+ " for this recipe.<br>"
 					+ "'''cookingtime''' : (cooking) An integer amount of time in ticks for the input item to cook.<br>"

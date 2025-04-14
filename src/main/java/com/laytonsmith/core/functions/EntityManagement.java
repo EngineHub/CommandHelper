@@ -2300,6 +2300,7 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_ARROW_DAMAGE, new CDouble(spectral.getDamage(), t), t);
 					specArray.set(entity_spec.KEY_SPECTRAL_ARROW_GLOWING_TICKS, new CInt(spectral.getGlowingTicks(), t), t);
 					break;
+				case LINGERING_POTION:
 				case SPLASH_POTION:
 					MCThrownPotion potion = (MCThrownPotion) entity;
 					specArray.set(entity_spec.KEY_SPLASH_POTION_ITEM, ObjectGenerator.GetGenerator().item(potion.getItem(), t), t);
@@ -3788,6 +3789,7 @@ public class EntityManagement {
 						}
 					}
 					break;
+				case LINGERING_POTION:
 				case SPLASH_POTION:
 					MCThrownPotion potion = (MCThrownPotion) entity;
 					for(String index : specArray.stringKeySet()) {
@@ -4938,7 +4940,7 @@ public class EntityManagement {
 					+ " Returns the firework rocket entity's UUID. ----"
 					+ " The options array may have the following keys:\n"
 					+ "{| cellspacing=\"1\" cellpadding=\"1\" border=\"1\" class=\"wikitable\"\n"
-					+ "! Array key !! Description !! Default\n"
+					+ "! Key !! Description !! Default\n"
 					+ "|-\n"
 					+ "| strength || A number indicating the flight duration of the rocket equal to the amount of"
 					+ " gunpowder used to craft a rocket. (negative numbers detonate immediately) || 2\n"

@@ -67,6 +67,8 @@ public class BukkitMCAttributeModifier implements MCAttributeModifier {
 			return MCEquipmentSlotGroup.HAND;
 		} else if(slotGroup.toString().equals("body")) { // BODY slot group is missing from Spigot
 			return MCEquipmentSlotGroup.BODY;
+		} else if(slotGroup.toString().equals("saddle")) { // 1.21.5
+			return MCEquipmentSlotGroup.SADDLE;
 		}
 		return null;
 	}

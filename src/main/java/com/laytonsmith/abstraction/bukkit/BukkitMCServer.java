@@ -350,7 +350,7 @@ public class BukkitMCServer implements MCServer {
 	@Override
 	public MCPlayerProfile getPlayerProfile(UUID id, String name) {
 		if(isPaper()) {
-			return new BukkitMCPlayerProfile(ReflectionUtils.invokeMethod(s, "createProfile", id, name));
+			return new BukkitMCPlayerProfile(this.s.createProfile(id, name));
 		}
 		return null;
 	}

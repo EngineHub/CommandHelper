@@ -4,5 +4,6 @@ public enum MCEquipmentSlotGroup {
 	ANY,
 	HAND,
 	ARMOR,
-	BODY
+	BODY,
+	SADDLE,
 }
