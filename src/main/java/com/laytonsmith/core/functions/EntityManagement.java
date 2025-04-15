@@ -5659,10 +5659,6 @@ public class EntityManagement {
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCEntity entity = Static.getEntity(args[0], t);
 
-			if(entity instanceof MCPlayer) {
-				throw new CREUnsupportedOperationException(getName() + " cannot be used on players.", t);
-			}
-
 			float yaw = (float) ArgumentValidation.getDouble(args[1], t);
 			float pitch;
 			if(args.length == 3) {
@@ -5671,7 +5667,11 @@ public class EntityManagement {
 				pitch = entity.getLocation().getPitch();
 			}
 
-			entity.setRotation(yaw, pitch);
+			try {
+				entity.setRotation(yaw, pitch);
+			} catch(UnsupportedOperationException ex) {
+				throw new CREUnsupportedOperationException(getName() + " cannot be used on players.", t);
+			}
 			return CVoid.VOID;
 		}
 
@@ -5687,8 +5687,9 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityUUID, yaw, [pitch]} Sets an entity's yaw and pitch without teleporting or ejecting. If used"
-					+ " on a player, an UnsupportedOperationException is thrown.";
+			return "void {entityUUID, yaw, [pitch]} Sets an entity's yaw and pitch without teleporting or ejecting."
+					+ " Can only be used on players when on Paper 1.19 or above, otherwise will throw an"
+					+ " UnsupportedOperationException.";
 		}
 
 		@Override
