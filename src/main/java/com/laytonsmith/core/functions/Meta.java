@@ -605,8 +605,9 @@ public class Meta {
 				throws ConfigRuntimeException {
 			AliasCore ac = Static.getAliasCore();
 
+			String[] cmdArgs = args[0].val().split(" ");
 			for(Script s : ac.getScripts()) {
-				if(s.match(args[0].val())) {
+				if(s.match(cmdArgs)) {
 					return CBoolean.TRUE;
 				}
 			}

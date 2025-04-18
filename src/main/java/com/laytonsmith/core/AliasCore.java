@@ -166,8 +166,9 @@ public class AliasCore {
 		}
 
 		Script script = null;
+		String[] args = command.split(" ");
 		for(Script s : scripts) {
-			if(s.match(command)) {
+			if(s.match(args)) {
 				script = s;
 				break;
 			}
