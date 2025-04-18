@@ -1238,7 +1238,12 @@ public final class SiteDeploy {
 						(Class<? extends Function> o1, Class<? extends Function> o2) -> {
 					Function f1 = ReflectionUtils.instantiateUnsafe(o1);
 					Function f2 = ReflectionUtils.instantiateUnsafe(o2);
-					return f1.getName().compareTo(f2.getName());
+					int result = f1.compareTo(f2);
+					if(result == 0) {
+						// Functions with the same name
+						return o1.getPackageName().compareTo(o2.getPackageName());
+					}
+					return result;
 				});
 				functionClasses.addAll(ClassDiscovery.getDefaultInstance()
 						.loadClassesWithAnnotationThatExtend(api.class, Function.class));
