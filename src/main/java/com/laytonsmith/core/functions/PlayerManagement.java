@@ -7324,13 +7324,13 @@ public class PlayerManagement {
 				throws ConfigRuntimeException {
 			final MCPlayer player;
 			final boolean  value;
-			if(args.length == 1) {                       // no explicit player
+			if(args.length == 1) {
 				player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
-				Static.AssertPlayerNonNull(player, t);   // may throw CREInsufficientArgumentsException
+				Static.AssertPlayerNonNull(player, t);
 				value  = ArgumentValidation.getBoolean(args[0], t);
-			} else {                                     // player supplied
-				player = Static.GetPlayer(args[0], t);   // may throw CREPlayerOfflineException
-				value  = ArgumentValidation.getBoolean(args[1], t); // may throw CRECastException
+			} else {
+				player = Static.GetPlayer(args[0], t);
+				value  = ArgumentValidation.getBoolean(args[1], t);
 			}
 			player.setSleepingIgnored(value);
 			return CVoid.VOID;
@@ -7379,11 +7379,11 @@ public class PlayerManagement {
 		public Mixed exec(Target t, Environment env, Mixed... args)
 				throws ConfigRuntimeException {
 			final MCPlayer player;
-			if(args.length == 0) {                       // no explicit player
+			if(args.length == 0) {
 				player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
-				Static.AssertPlayerNonNull(player, t);   // may throw CREInsufficientArgumentsException
+				Static.AssertPlayerNonNull(player, t);
 			} else {
-				player = Static.GetPlayer(args[0], t);   // may throw CREPlayerOfflineException
+				player = Static.GetPlayer(args[0], t);
 			}
 			return CBoolean.get(player.isSleepingIgnored());
 		}
