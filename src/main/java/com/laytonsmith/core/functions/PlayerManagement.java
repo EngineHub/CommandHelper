@@ -7323,14 +7323,14 @@ public class PlayerManagement {
 		public Mixed exec(Target t, Environment env, Mixed... args)
 				throws ConfigRuntimeException {
 			final MCPlayer player;
-			final boolean  value;
+			final boolean value;
 			if(args.length == 1) {
 				player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(player, t);
-				value  = ArgumentValidation.getBoolean(args[0], t);
+				value = ArgumentValidation.getBoolean(args[0], t);
 			} else {
 				player = Static.GetPlayer(args[0], t);
-				value  = ArgumentValidation.getBoolean(args[1], t);
+				value = ArgumentValidation.getBoolean(args[1], t);
 			}
 			player.setSleepingIgnored(value);
 			return CVoid.VOID;
@@ -7349,11 +7349,11 @@ public class PlayerManagement {
 			return false;
 		}
 
-		@Override public Boolean runAsync()  {
+		@Override public Boolean runAsync() {
 			return false;
 		}
 
-		@Override public MSVersion since()   {
+		@Override public MSVersion since() {
 			return MSVersion.V3_3_5;
 		}
 
@@ -7400,11 +7400,11 @@ public class PlayerManagement {
 			return false;
 		}
 
-		@Override public Boolean runAsync()  {
+		@Override public Boolean runAsync() {
 			return false;
 		}
 
-		@Override public MSVersion since()   {
+		@Override public MSVersion since() {
 			return MSVersion.V3_3_5;
 		}
 
