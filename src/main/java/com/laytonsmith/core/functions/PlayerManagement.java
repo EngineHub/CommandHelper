@@ -7307,4 +7307,111 @@ public class PlayerManagement {
 			return false;
 		}
 	}
+
+	@api
+	public static class set_player_sleeping_ignored extends AbstractFunction {
+
+		@Override public String getName() {
+			return "set_player_sleeping_ignored";
+		}
+
+		@Override public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, Mixed... args)
+				throws ConfigRuntimeException {
+			final MCPlayer player;
+			final boolean value;
+			if(args.length == 1) {
+				player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(player, t);
+				value = ArgumentValidation.getBoolean(args[0], t);
+			} else {
+				player = Static.GetPlayer(args[0], t);
+				value = ArgumentValidation.getBoolean(args[1], t);
+			}
+			player.setSleepingIgnored(value);
+			return CVoid.VOID;
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{
+					CREPlayerOfflineException.class,
+					CREInsufficientArgumentsException.class,
+					CRECastException.class
+			};
+		}
+
+		@Override public boolean isRestricted() {
+			return false;
+		}
+
+		@Override public Boolean runAsync() {
+			return false;
+		}
+
+		@Override public MSVersion since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public String docs() {
+			return "void {[player], boolean} Sets whether <player> is ignored when "
+					+ "counting sleepers to skip night.";
+		}
+	}
+
+	@api
+	public static class is_player_sleeping_ignored extends AbstractFunction {
+
+		@Override public String getName() {
+			return "is_player_sleeping_ignored";
+		}
+
+		@Override public Integer[] numArgs() {
+			return new Integer[]{0, 1};
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, Mixed... args)
+				throws ConfigRuntimeException {
+			final MCPlayer player;
+			if(args.length == 0) {
+				player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(player, t);
+			} else {
+				player = Static.GetPlayer(args[0], t);
+			}
+			return CBoolean.get(player.isSleepingIgnored());
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[] {
+					CREPlayerOfflineException.class,
+					CREInsufficientArgumentsException.class
+			};
+		}
+
+		@Override public boolean isRestricted() {
+			return false;
+		}
+
+		@Override public Boolean runAsync() {
+			return false;
+		}
+
+		@Override public MSVersion since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {[player]} Returns whether <player> is currently ignored "
+					+ "by the night-skip sleep check.";
+		}
+	}
 }

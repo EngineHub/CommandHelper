@@ -16,6 +16,10 @@ import java.net.InetSocketAddress;
 
 public interface MCPlayer extends MCCommandSender, MCHumanEntity, MCOfflinePlayer {
 
+	void setSleepingIgnored(boolean value);
+
+	boolean isSleepingIgnored();
+
 	boolean canSee(MCPlayer p);
 
 	void chat(String chat);

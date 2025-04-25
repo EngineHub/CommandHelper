@@ -82,6 +82,16 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	}
 
 	@Override
+	public void setSleepingIgnored(boolean value) {
+		p.setSleepingIgnored(value);
+	}
+
+	@Override
+	public boolean isSleepingIgnored() {
+		return p.isSleepingIgnored();
+	}
+
+	@Override
 	public boolean canSee(MCPlayer p) {
 		return this.p.canSee(((BukkitMCPlayer) p)._Player());
 	}
