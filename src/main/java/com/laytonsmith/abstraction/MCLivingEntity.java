@@ -43,6 +43,8 @@ public interface MCLivingEntity extends MCEntity, MCProjectileSource {
 
 	MCPlayer getKiller();
 
+	void setKiller(MCPlayer killer);
+
 	double getLastDamage();
 
 	MCEntity getLeashHolder();

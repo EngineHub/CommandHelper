@@ -5698,4 +5698,108 @@ public class EntityManagement {
 		}
 
 	}
+
+	@api
+	public static class get_entity_killer extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CRELengthException.class, CREBadEntityException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCLivingEntity entity = Static.getLivingEntity(args[0], t);
+			MCPlayer killer = entity.getKiller();
+			if(killer == null) {
+				return CNull.NULL;
+			} else {
+				return new CString(killer.getName(), t);
+			}
+		}
+
+		@Override
+		public String getName() {
+			return "get_entity_killer";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "string {entityUUID} Gets the player killer of a living entity. Can be null."
+					+ " Usually indicates the last player that damaged the entity within the last five seconds.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+	}
+
+	@api
+	public static class set_entity_killer extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CRELengthException.class, CREBadEntityException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCLivingEntity entity = Static.getLivingEntity(args[0], t);
+			if(args[1] instanceof CNull) {
+				entity.setKiller(null);
+			} else {
+				MCPlayer killer = Static.GetPlayer(args[1], t);
+				entity.setKiller(killer);
+			}
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "set_entity_killer";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "void {entityUUID, player} Sets the player killer of a living entity. (Paper only)"
+					+ " Can be set at any time before the entity dies to change kill attribution for the next five"
+					+ " seconds or until it's changed again. Can be set to null.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+	}
 }

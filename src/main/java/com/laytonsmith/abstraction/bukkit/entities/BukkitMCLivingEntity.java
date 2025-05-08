@@ -136,6 +136,19 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 	}
 
 	@Override
+	public void setKiller(MCPlayer killer) {
+		try {
+			if(killer == null) {
+				le.setKiller(null);
+			} else {
+				le.setKiller((Player) killer.getHandle());
+			}
+		} catch(NoSuchMethodError ignore) {
+			// probably not Paper
+		}
+	}
+
+	@Override
 	public double getLastDamage() {
 		return le.getLastDamage();
 	}
