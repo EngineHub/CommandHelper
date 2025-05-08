@@ -588,7 +588,7 @@ public class Minecraft {
 					+ " and only that information for that index will be returned."
 					+ " ---- Otherwise if value is not specified (or is -1), it returns an array of"
 					+ " information with the following pieces of information in the specified index: "
-					+ "<ul><li>0 - Server name; the name of the server in server.properties.</li>"
+					+ "<ul><li>0 - Empty.</li>"
 					+ "<li>1 - API version; The version of the plugin API this server is implementing.</li>"
 					+ "<li>2 - Server version; The bare version string of the server implementation.</li>"
 					+ "<li>3 - Allow flight; If true, Minecraft's inbuilt anti fly check is disabled.</li>"
@@ -645,8 +645,7 @@ public class Minecraft {
 			ArrayList<Mixed> retVals = new ArrayList<>();
 
 			if(index == 0 || index == -1) {
-				//Server name
-				retVals.add(new CString(server.getServerName(), t));
+				retVals.add(new CString("", t));
 			}
 
 			if(index == 1 || index == -1) {

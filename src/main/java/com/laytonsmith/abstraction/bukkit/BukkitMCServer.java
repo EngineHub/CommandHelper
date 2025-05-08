@@ -443,11 +443,6 @@ public class BukkitMCServer implements MCServer {
 	}
 
 	@Override
-	public String getServerName() {
-		return "";
-	}
-
-	@Override
 	public String getMotd() {
 		return s.getMotd();
 	}

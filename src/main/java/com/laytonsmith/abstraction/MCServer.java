@@ -96,9 +96,6 @@ public interface MCServer extends AbstractionObject {
 
 	MCOfflinePlayer[] getOfflinePlayers();
 
-	/* Boring information get methods -.- */
-	String getServerName();
-
 	String getMotd();
 
 	String getAPIVersion();
