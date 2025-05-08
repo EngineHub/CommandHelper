@@ -7415,4 +7415,117 @@ public class PlayerManagement {
 					+ "by the night-skip sleep check.";
 		}
 	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({raw_pcan_see.class})
+	public static class raw_set_pvanish extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "raw_set_pvanish";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3};
+		}
+
+		@Override
+		public String docs() {
+			return "void {[player], isVanished, otherPlayer} Sets the visibility of this player to another player.";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CRELengthException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer thisPlayer;
+			boolean isVanished;
+			MCPlayer otherPlayer;
+			if(args.length == 2) {
+				thisPlayer = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				isVanished = ArgumentValidation.getBooleanObject(args[0], t);
+				otherPlayer = Static.GetPlayer(args[1], t);
+			} else {
+				thisPlayer = Static.GetPlayer(args[0], t);
+				isVanished = ArgumentValidation.getBooleanObject(args[1], t);
+				otherPlayer = Static.GetPlayer(args[2], t);
+			}
+			otherPlayer.setVanished(isVanished, thisPlayer);
+			return CVoid.VOID;
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({raw_set_pvanish.class})
+	public static class raw_pcan_see extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "raw_pcan_see";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {[player], otherPlayer} Returns whether this player can see another player or not."
+					+ " Hidden players are sometimes called vanished players.";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CRELengthException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer thisPlayer;
+			MCPlayer otherPlayer;
+			if(args.length == 1) {
+				thisPlayer = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				otherPlayer = Static.GetPlayer(args[0], t);
+			} else {
+				thisPlayer = Static.GetPlayer(args[0], t);
+				otherPlayer = Static.GetPlayer(args[1], t);
+			}
+			return CBoolean.get(thisPlayer.canSee(otherPlayer));
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
+		}
+	}
 }

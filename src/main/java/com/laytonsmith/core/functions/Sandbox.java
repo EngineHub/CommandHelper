@@ -7,7 +7,6 @@ import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.PureUtilities.ZipReader;
-import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.noboilerplate;
@@ -18,7 +17,6 @@ import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Security;
 import com.laytonsmith.core.Static;
-import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.CByteArray;
 import com.laytonsmith.core.constructs.CDouble;
@@ -36,7 +34,6 @@ import com.laytonsmith.core.exceptions.CRE.CREBindException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREIOException;
 import com.laytonsmith.core.exceptions.CRE.CREIncludeException;
-import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
 import com.laytonsmith.core.exceptions.CRE.CRESecurityException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -121,124 +118,6 @@ public class Sandbox {
 			}
 			environment.getEnv(GlobalEnv.class).GetEvent().setCancelled(true);
 			return CVoid.VOID;
-		}
-	}
-
-	@api(environments = {CommandHelperEnvironment.class})
-	public static class raw_set_pvanish extends AbstractFunction {
-
-		@Override
-		public String getName() {
-			return "raw_set_pvanish";
-		}
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{2, 3};
-		}
-
-		@Override
-		public String docs() {
-			return "void {[player], isVanished, otherPlayer} Sets the visibility"
-					+ " of the current player (or the one specified) to visible or invisible"
-					+ " (based on the value of isVanished) from the view of the otherPlayer."
-					+ " This is the raw access function, you probably shouldn't use this, as"
-					+ " the CommandHelper vanish api functions will probably be easier to use.";
-		}
-
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREPlayerOfflineException.class};
-		}
-
-		@Override
-		public boolean isRestricted() {
-			return true; //lol, very
-		}
-
-		@Override
-		public Boolean runAsync() {
-			return false;
-		}
-
-		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer me;
-			boolean isVanished;
-			MCPlayer other;
-			if(args.length == 2) {
-				me = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-				isVanished = ArgumentValidation.getBoolean(args[0], t);
-				other = Static.GetPlayer(args[1], t);
-			} else {
-				me = Static.GetPlayer(args[0], t);
-				isVanished = ArgumentValidation.getBoolean(args[1], t);
-				other = Static.GetPlayer(args[2], t);
-			}
-
-			other.setVanished(isVanished, me);
-
-			return CVoid.VOID;
-		}
-
-		@Override
-		public MSVersion since() {
-			return MSVersion.V3_3_0;
-		}
-	}
-
-	@api(environments = {CommandHelperEnvironment.class})
-	public static class raw_pcan_see extends AbstractFunction {
-
-		@Override
-		public String getName() {
-			return "raw_pcan_see";
-		}
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{1, 2};
-		}
-
-		@Override
-		public String docs() {
-			return "boolean {[player], other} Returns a boolean stating if the other player can"
-					+ " see this player or not. This is the raw access function, you probably shouldn't use this, as"
-					+ " the CommandHelper vanish api functions will probably be easier to use.";
-		}
-
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREPlayerOfflineException.class};
-		}
-
-		@Override
-		public boolean isRestricted() {
-			return true;
-		}
-
-		@Override
-		public Boolean runAsync() {
-			return false;
-		}
-
-		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer me;
-			MCPlayer other;
-			if(args.length == 1) {
-				me = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-				other = Static.GetPlayer(args[0], t);
-			} else {
-				me = Static.GetPlayer(args[0], t);
-				other = Static.GetPlayer(args[1], t);
-			}
-			return CBoolean.get(me.canSee(other));
-		}
-
-		@Override
-		public MSVersion since() {
-			return MSVersion.V3_3_0;
 		}
 	}
 
