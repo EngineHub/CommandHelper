@@ -3,7 +3,9 @@ package com.laytonsmith.abstraction.bukkit;
 import com.laytonsmith.abstraction.MCCreatureSpawner;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlockState;
 import com.laytonsmith.abstraction.enums.MCEntityType;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
+import com.laytonsmith.core.Static;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.EntityType;
 
@@ -28,9 +30,14 @@ public class BukkitMCCreatureSpawner extends BukkitMCBlockState implements MCCre
 	@Override
 	public void setSpawnedType(MCEntityType type) {
 		if(type == null) {
-			return; // unsupported at this time
+			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20)) {
+				cs.setSpawnedType(null);
+			} else {
+				cs.setSpawnedType(EntityType.PIG); // null unsupported
+			}
+		} else {
+			cs.setSpawnedType(((BukkitMCEntityType) type).getConcrete());
 		}
-		cs.setSpawnedType(((BukkitMCEntityType) type).getConcrete());
 		cs.update();
 	}
 

@@ -15,6 +15,7 @@ import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlockData;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
+import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.enums.MCEffect;
 import com.laytonsmith.abstraction.enums.MCEntityType;
@@ -888,15 +889,15 @@ public class Minecraft {
 				w = p.getWorld();
 			}
 			MCLocation location = ObjectGenerator.GetGenerator().location(args[0], w, t);
-			if(location.getBlock().getState() instanceof MCCreatureSpawner) {
-				MCEntityType entityType = ((MCCreatureSpawner) location.getBlock().getState()).getSpawnedType();
-				if(entityType == null) {
-					return CNull.NULL;
-				}
-				return new CString(entityType.name(), t);
-			} else {
-				throw new CREFormatException("The block at " + location.toString() + " is not a spawner block", t);
+			MCBlockState state = location.getBlock().getState();
+			if(!(state instanceof MCCreatureSpawner)) {
+				throw new CREFormatException("The block at " + location + " is not a spawner block", t);
 			}
+			MCEntityType entityType = ((MCCreatureSpawner) state).getSpawnedType();
+			if(entityType == null) {
+				return CNull.NULL;
+			}
+			return new CString(entityType.name(), t);
 		}
 
 		@Override
@@ -911,7 +912,8 @@ public class Minecraft {
 
 		@Override
 		public String docs() {
-			return "string {locationArray} Gets the entity type that will spawn from the specified mob spawner.";
+			return "string {locationArray} Gets the entity type that will spawn from the specified mob spawner."
+					+ " May be null.";
 		}
 
 		@Override
@@ -947,18 +949,21 @@ public class Minecraft {
 				w = p.getWorld();
 			}
 			MCLocation location = ObjectGenerator.GetGenerator().location(args[0], w, t);
-			MCEntityType type;
-			try {
-				type = MCEntityType.valueOf(args[1].val().toUpperCase());
-			} catch (IllegalArgumentException iae) {
-				throw new CREBadEntityException("Not a registered entity type: " + args[1].val(), t);
+			MCBlockState state = location.getBlock().getState();
+			if(!(state instanceof MCCreatureSpawner)) {
+				throw new CREFormatException("The block at " + location + " is not a spawner block", t);
 			}
-			if(location.getBlock().getState() instanceof MCCreatureSpawner) {
-				((MCCreatureSpawner) location.getBlock().getState()).setSpawnedType(type);
+			if(args[1] instanceof CNull) {
+				((MCCreatureSpawner) state).setSpawnedType(null);
 				return CVoid.VOID;
-			} else {
-				throw new CREFormatException("The block at " + location.toString() + " is not a spawner block", t);
 			}
+			try {
+				MCEntityType type = MCEntityType.valueOf(args[1].val().toUpperCase());
+				((MCCreatureSpawner) state).setSpawnedType(type);
+			} catch (IllegalArgumentException iae) {
+				throw new CREBadEntityException("Not a valid entity type: " + args[1].val(), t);
+			}
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -974,7 +979,8 @@ public class Minecraft {
 		@Override
 		public String docs() {
 			return "void {locationArray, type} Sets the mob spawner's entity type at the location specified."
-					+ " If the location is not a mob spawner, or if the type is invalid, a FormatException is thrown."
+					+ " If the location is not a mob spawner, a FormatException is thrown."
+					+ " Entity type may be set to null. If the entity type is invalid, a BadEntityException is thrown."
 					+ " ---- The type may be one of either "
 					+ StringUtils.Join(MCEntityType.MCVanillaEntityType.values(), ", ", ", or ");
 		}
