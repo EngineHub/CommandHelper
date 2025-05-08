@@ -177,6 +177,7 @@ public class Echoes {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(PlayerManagement.ptellraw.class)
 	public static class tellraw extends AbstractFunction {
 
 		@Override
@@ -221,10 +222,10 @@ public class Echoes {
 		@Override
 		public String docs() {
 			return "void {[string selector], array raw} A thin wrapper around the tellraw command from console context,"
-					+ " this simply passes the input to the command. The raw is passed in as a normal"
-					+ " (possibly associative) array, and json encoded. No validation is done on the input, so the"
-					+ " command may fail. If not provided, the selector defaults to @a. Do not use double quotes"
-					+ " (smart string) when providing the selector. See {{function|ptellraw}} if you need player"
+					+ " this simply passes the input to the command. The raw is passed in as an array and json encoded."
+					+ " No validation is done on the input, so the command may fail."
+					+ " Do not use double quotes (smart string) when providing the selector."
+					+ " If not provided, the selector defaults to @a. See {{function|ptellraw}} if you need player"
 					+ " context. ---- The specification of the array may change from version to version of Minecraft,"
 					+ " but is documented here https://minecraft.gamepedia.com/Commands#Raw_JSON_text."
 					+ " This function is simply written in terms of json_encode and runas, and is otherwise equivalent"
@@ -241,7 +242,10 @@ public class Echoes {
 			return new ExampleScript[] {
 				new ExampleScript("Simple usage with a plain message",
 						"tellraw(array('text': 'Hello World!'));",
-						"<<Would output the plain message to all players.>>")
+						"<<Would output the plain message to all players.>>"),
+				new ExampleScript("Using a selector",
+						"tellraw('@a[gamemode=spectator]', array('text': 'Hello World!'));",
+						"<<Would output the message to all spectators.>>")
 			};
 		}
 

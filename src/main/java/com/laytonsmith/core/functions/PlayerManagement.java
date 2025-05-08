@@ -6175,6 +6175,7 @@ public class PlayerManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(Echoes.tellraw.class)
 	public static class ptellraw extends AbstractFunction {
 
 		@Override
