@@ -115,6 +115,8 @@ public class ConfigRuntimeException extends RuntimeException {
 			if(e.getEnv() != null) {
 				MCCommandSender sender = e.getEnv().getEnv(CommandHelperEnvironment.class).GetCommandSender();
 				c.getEnv().getEnv(CommandHelperEnvironment.class).SetCommandSender(sender);
+			} else {
+				c.getEnv().getEnv(CommandHelperEnvironment.class).SetCommandSender(null);
 			}
 			try {
 				Mixed ret = c.executeCallable(env, Target.UNKNOWN, new Mixed[]{ex});

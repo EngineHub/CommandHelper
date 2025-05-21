@@ -303,6 +303,7 @@ public class CClosure extends Construct implements Callable, Booleanish {
 			} catch (CancelCommandException e) {
 				// die()
 			} catch (ConfigRuntimeException ex) {
+				ex.setEnv(environment);
 				if(ex instanceof AbstractCREException) {
 					((AbstractCREException) ex).freezeStackTraceElements(stManager);
 				}
