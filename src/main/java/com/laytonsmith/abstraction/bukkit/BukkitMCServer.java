@@ -589,7 +589,15 @@ public class BukkitMCServer implements MCServer {
 
 	@Override
 	public boolean removeRecipe(String key) {
-		return s.removeRecipe(NamespacedKey.minecraft(key));
+		if(key.indexOf(':') > -1) {
+			NamespacedKey nsKey = NamespacedKey.fromString(key);
+			if(nsKey == null) {
+				return false;
+			}
+			return s.removeRecipe(nsKey);
+		} else {
+			return s.removeRecipe(NamespacedKey.minecraft(key));
+		}
 	}
 
 	@Override

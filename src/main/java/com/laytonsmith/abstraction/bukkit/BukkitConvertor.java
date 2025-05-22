@@ -845,7 +845,7 @@ public class BukkitConvertor extends AbstractConvertor {
 				case CAMPFIRE:
 					return new BukkitMCCookingRecipe(new CampfireRecipe(nskey, is, Material.STRUCTURE_VOID, 0.0F, 100), type);
 				case FURNACE:
-					return new BukkitMCFurnaceRecipe(new FurnaceRecipe(nskey, is, Material.STRUCTURE_VOID, 0.0F, 200));
+					return new BukkitMCCookingRecipe(new FurnaceRecipe(nskey, is, Material.STRUCTURE_VOID, 0.0F, 200), type);
 				case SHAPED:
 					return new BukkitMCShapedRecipe(new ShapedRecipe(nskey, is));
 				case SHAPELESS:
@@ -878,6 +878,8 @@ public class BukkitConvertor extends AbstractConvertor {
 			return new BukkitMCCookingRecipe(r, MCRecipeType.CAMPFIRE);
 		} else if(r instanceof SmokingRecipe) {
 			return new BukkitMCCookingRecipe(r, MCRecipeType.SMOKING);
+		} else if(r instanceof FurnaceRecipe) {
+			return new BukkitMCCookingRecipe(r, MCRecipeType.FURNACE);
 		} else if(r instanceof StonecuttingRecipe) {
 			return new BukkitMCStonecuttingRecipe((StonecuttingRecipe) r);
 		} else if(r instanceof ComplexRecipe) {
@@ -888,8 +890,6 @@ public class BukkitConvertor extends AbstractConvertor {
 			return new BukkitMCShapelessRecipe((ShapelessRecipe) r);
 		} else if(r instanceof ShapedRecipe) {
 			return new BukkitMCShapedRecipe((ShapedRecipe) r);
-		} else if(r instanceof FurnaceRecipe) {
-			return new BukkitMCFurnaceRecipe((FurnaceRecipe) r);
 		} else if(r instanceof MerchantRecipe) {
 			return new BukkitMCMerchantRecipe((MerchantRecipe) r);
 		} else {

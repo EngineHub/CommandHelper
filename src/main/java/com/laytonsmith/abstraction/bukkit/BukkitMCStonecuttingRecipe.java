@@ -1,6 +1,9 @@
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.MCItemStack;
+import com.laytonsmith.abstraction.MCRecipeChoice;
+import com.laytonsmith.abstraction.MCRecipeChoice.ExactChoice;
+import com.laytonsmith.abstraction.MCRecipeChoice.MaterialChoice;
 import com.laytonsmith.abstraction.MCStonecuttingRecipe;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
@@ -10,11 +13,12 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.RecipeChoice;
 import org.bukkit.inventory.StonecuttingRecipe;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class BukkitMCStonecuttingRecipe extends BukkitMCRecipe implements MCStonecuttingRecipe {
 
-	private StonecuttingRecipe recipe;
+	private final StonecuttingRecipe recipe;
 
 	public BukkitMCStonecuttingRecipe(StonecuttingRecipe recipe) {
 		super(recipe);
@@ -52,18 +56,27 @@ public class BukkitMCStonecuttingRecipe extends BukkitMCRecipe implements MCSton
 	}
 
 	@Override
-	public MCMaterial[] getInput() {
-		List<Material> choices = ((RecipeChoice.MaterialChoice) recipe.getInputChoice()).getChoices();
-		MCMaterial[] ret = new MCMaterial[choices.size()];
-		for(int i = 0; i < choices.size(); i++) {
-			ret[i] = BukkitMCMaterial.valueOfConcrete(choices.get(i));
+	public MCRecipeChoice getInput() {
+		RecipeChoice recipeChoice = recipe.getInputChoice();
+		if(recipeChoice instanceof RecipeChoice.MaterialChoice materialChoice) {
+			MCRecipeChoice.MaterialChoice choice = new MCRecipeChoice.MaterialChoice();
+			for(Material material : materialChoice.getChoices()) {
+				choice.addMaterial(BukkitMCMaterial.valueOfConcrete(material));
+			}
+			return choice;
+		} else if(recipeChoice instanceof RecipeChoice.ExactChoice exactChoice) {
+			MCRecipeChoice.ExactChoice choice = new MCRecipeChoice.ExactChoice();
+			for(ItemStack itemStack : exactChoice.getChoices()) {
+				choice.addItem(new BukkitMCItemStack(itemStack));
+			}
+			return choice;
 		}
-		return ret;
+		throw new UnsupportedOperationException("Unsupported recipe choice");
 	}
 
 	@Override
 	public void setInput(MCItemStack input) {
-		recipe.setInput(((ItemStack) input.getHandle()).getType());
+		recipe.setInputChoice(new RecipeChoice.ExactChoice((ItemStack) input.getHandle()));
 	}
 
 	@Override
@@ -72,11 +85,19 @@ public class BukkitMCStonecuttingRecipe extends BukkitMCRecipe implements MCSton
 	}
 
 	@Override
-	public void setInput(MCMaterial... mats) {
-		Material[] concrete = new Material[mats.length];
-		for(int i = 0; i < mats.length; i++) {
-			concrete[i] = (Material) mats[i].getHandle();
+	public void setInput(MCRecipeChoice choice) {
+		if(choice instanceof MCRecipeChoice.ExactChoice) {
+			List<ItemStack> itemChoice = new ArrayList<>();
+			for(MCItemStack itemStack : ((ExactChoice) choice).getItems()) {
+				itemChoice.add((ItemStack) itemStack.getHandle());
+			}
+			recipe.setInputChoice(new RecipeChoice.ExactChoice(itemChoice));
+		} else if(choice instanceof MCRecipeChoice.MaterialChoice) {
+			List<Material> materialChoice = new ArrayList<>();
+			for(MCMaterial material : ((MaterialChoice) choice).getMaterials()) {
+				materialChoice.add((Material) material.getHandle());
+			}
+			recipe.setInputChoice(new RecipeChoice.MaterialChoice(materialChoice));
 		}
-		recipe.setInputChoice(new RecipeChoice.MaterialChoice(concrete));
 	}
 }
