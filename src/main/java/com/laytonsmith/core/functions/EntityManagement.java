@@ -179,6 +179,10 @@ public class EntityManagement {
 	}
 
 	public abstract static class EntityFunction extends AbstractFunction {
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRELengthException.class, CREBadEntityException.class, CREFormatException.class};
+		}
 
 		@Override
 		public boolean isRestricted() {
@@ -192,12 +196,6 @@ public class EntityManagement {
 	}
 
 	public abstract static class EntityGetterFunction extends EntityFunction {
-
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRELengthException.class, CREBadEntityException.class};
-		}
-
 		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
@@ -205,12 +203,6 @@ public class EntityManagement {
 	}
 
 	public abstract static class EntitySetterFunction extends EntityFunction {
-
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREFormatException.class, CRELengthException.class, CREBadEntityException.class};
-		}
-
 		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
@@ -376,16 +368,12 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class is_tameable extends AbstractFunction {
+	@seealso({MobManagement.set_mob_owner.class, MobManagement.get_mob_owner.class})
+	public static class is_tameable extends EntityGetterFunction {
 
 		@Override
 		public String getName() {
 			return "is_tameable";
-		}
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{1};
 		}
 
 		@Override
@@ -394,23 +382,8 @@ public class EntityManagement {
 		}
 
 		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRELengthException.class, CREBadEntityException.class};
-		}
-
-		@Override
-		public boolean isRestricted() {
-			return true;
-		}
-
-		@Override
 		public MSVersion since() {
 			return MSVersion.V3_3_0;
-		}
-
-		@Override
-		public Boolean runAsync() {
-			return false;
 		}
 
 		@Override
@@ -421,6 +394,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(set_entity_loc.class)
 	public static class entity_loc extends EntityGetterFunction {
 
 		@Override
@@ -457,6 +431,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(entity_loc.class)
 	public static class set_entity_loc extends EntitySetterFunction {
 
 		@Override
@@ -522,6 +497,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(set_entity_velocity.class)
 	public static class entity_velocity extends EntityGetterFunction {
 
 		@Override
@@ -560,6 +536,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(entity_velocity.class)
 	public static class set_entity_velocity extends EntitySetterFunction {
 
 		@Override
@@ -643,6 +620,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(set_entity_saves_on_unload.class)
 	public static class get_entity_saves_on_unload extends EntityGetterFunction {
 
 		@Override
@@ -669,6 +647,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(get_entity_saves_on_unload.class)
 	public static class set_entity_saves_on_unload extends EntitySetterFunction {
 
 		@Override
@@ -734,6 +713,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(set_entity_age.class)
 	public static class get_entity_age extends EntityGetterFunction {
 
 		@Override
@@ -758,6 +738,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(get_entity_age.class)
 	public static class set_entity_age extends EntitySetterFunction {
 
 		@Override
@@ -1094,6 +1075,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(set_entity_onfire.class)
 	public static class entity_onfire extends EntityGetterFunction {
 
 		@Override
@@ -1121,6 +1103,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(entity_onfire.class)
 	public static class set_entity_onfire extends EntitySetterFunction {
 
 		@Override
@@ -1195,6 +1178,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(set_mob_name.class)
 	public static class get_mob_name extends EntityGetterFunction {
 
 		@Override
@@ -1224,6 +1208,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(get_mob_name.class)
 	public static class set_mob_name extends EntitySetterFunction {
 
 		@Override
@@ -1255,6 +1240,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({World.spawn_falling_block.class, launch_firework.class, drop_item.class, shoot_projectile.class})
 	public static class spawn_entity extends EntityFunction implements Optimizable {
 
 		@Override
@@ -1420,6 +1406,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({get_entity_rider.class, get_entity_riders.class, get_entity_vehicle.class})
 	public static class set_entity_rider extends EntitySetterFunction {
 
 		@Override
@@ -1476,6 +1463,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({get_entity_riders.class, set_entity_rider.class, get_entity_vehicle.class})
 	public static class get_entity_rider extends EntityGetterFunction {
 
 		@Override
@@ -1506,6 +1494,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({set_entity_rider.class, get_entity_rider.class, get_entity_vehicle.class})
 	public static class get_entity_riders extends EntityGetterFunction {
 
 		@Override
@@ -1536,6 +1525,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({set_entity_rider.class, get_entity_riders.class, get_entity_rider.class})
 	public static class get_entity_vehicle extends EntityGetterFunction {
 
 		@Override
@@ -1564,6 +1554,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(set_entity_max_speed.class)
 	public static class get_entity_max_speed extends EntityGetterFunction {
 
 		@Override
@@ -1587,7 +1578,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "double {entityUUID} Returns a max speed for given entity. Make sure that the entity is a minecart.";
+			return "double {entityUUID} Returns a max speed for a minecart.";
 		}
 
 		@Override
@@ -1597,6 +1588,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(get_entity_max_speed.class)
 	public static class set_entity_max_speed extends EntitySetterFunction {
 
 		@Override
@@ -1624,7 +1616,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityUUID} Sets a max speed for given entity. Make sure that the entity is a minecart.";
+			return "void {entityUUID} Sets a max speed for a minecart.";
 		}
 
 		@Override
@@ -1634,6 +1626,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(set_name_visible.class)
 	public static class get_name_visible extends EntityGetterFunction {
 
 		@Override
@@ -1664,6 +1657,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(get_name_visible.class)
 	public static class set_name_visible extends EntitySetterFunction {
 
 		@Override
@@ -1695,22 +1689,8 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class get_art_at extends AbstractFunction {
-
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREBadEntityException.class, CREFormatException.class};
-		}
-
-		@Override
-		public boolean isRestricted() {
-			return true;
-		}
-
-		@Override
-		public Boolean runAsync() {
-			return false;
-		}
+	@seealso(set_art_at.class)
+	public static class get_art_at extends EntityGetterFunction {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
@@ -1733,11 +1713,6 @@ public class EntityManagement {
 		}
 
 		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{1};
-		}
-
-		@Override
 		public String docs() {
 			return "string {locationArray} Gets the specified art at the given location. If the item"
 					+ " at the specified location isn't a painting, an ----"
@@ -1752,22 +1727,8 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class set_art_at extends AbstractFunction {
-
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREFormatException.class};
-		}
-
-		@Override
-		public boolean isRestricted() {
-			return true;
-		}
-
-		@Override
-		public Boolean runAsync() {
-			return false;
-		}
+	@seealso(get_art_at.class)
+	public static class set_art_at extends EntitySetterFunction {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
@@ -1803,11 +1764,6 @@ public class EntityManagement {
 		@Override
 		public String getName() {
 			return "set_art_at";
-		}
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{2, 3};
 		}
 
 		@Override
@@ -4121,6 +4077,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(set_projectile_shooter.class)
 	public static class get_projectile_shooter extends EntityGetterFunction {
 
 		@Override
@@ -4160,6 +4117,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(get_projectile_shooter.class)
 	public static class set_projectile_shooter extends EntitySetterFunction {
 
 		@Override
@@ -4202,6 +4160,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(set_projectile_bounce.class)
 	public static class get_projectile_bounce extends EntityGetterFunction {
 
 		@Override
@@ -4231,6 +4190,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(get_projectile_bounce.class)
 	public static class set_projectile_bounce extends EntitySetterFunction {
 
 		@Override
@@ -4261,6 +4221,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(set_projectile_item.class)
 	public static class get_projectile_item extends EntityGetterFunction {
 
 		@Override
@@ -4292,6 +4253,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(get_projectile_item.class)
 	public static class set_projectile_item extends EntitySetterFunction {
 
 		@Override
@@ -4324,6 +4286,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(set_entity_fall_distance.class)
 	public static class entity_fall_distance extends EntityGetterFunction {
 
 		@Override
@@ -4348,6 +4311,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(entity_fall_distance.class)
 	public static class set_entity_fall_distance extends EntitySetterFunction {
 
 		@Override
@@ -4373,6 +4337,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(get_entity_glowing.class)
 	public static class set_entity_glowing extends EntitySetterFunction {
 
 		@Override
@@ -4398,6 +4363,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(set_entity_glowing.class)
 	public static class get_entity_glowing extends EntityGetterFunction {
 
 		@Override
@@ -4423,6 +4389,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(set_entity_silent.class)
 	public static class get_entity_silent extends EntityGetterFunction {
 
 		@Override
@@ -4447,6 +4414,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(get_entity_silent.class)
 	public static class set_entity_silent extends EntitySetterFunction {
 
 		@Override
@@ -4473,6 +4441,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(set_entity_gravity.class)
 	public static class get_entity_gravity extends EntityGetterFunction {
 
 		@Override
@@ -4497,6 +4466,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(get_entity_gravity.class)
 	public static class set_entity_gravity extends EntitySetterFunction {
 
 		@Override
@@ -4523,6 +4493,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(set_entity_invulnerable.class)
 	public static class get_entity_invulnerable extends EntityGetterFunction {
 
 		@Override
@@ -4547,6 +4518,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(get_entity_invulnerable.class)
 	public static class set_entity_invulnerable extends EntitySetterFunction {
 
 		@Override
@@ -4574,6 +4546,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(set_entity_freezing.class)
 	public static class get_entity_freezing extends EntityGetterFunction {
 
 		@Override
@@ -4600,6 +4573,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(get_entity_freezing.class)
 	public static class set_entity_freezing extends EntitySetterFunction {
 
 		@Override
@@ -4637,6 +4611,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({add_scoreboard_tag.class, has_scoreboard_tag.class, remove_scoreboard_tag.class})
 	public static class get_scoreboard_tags extends EntityGetterFunction {
 
 		@Override
@@ -4666,7 +4641,8 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class has_scoreboard_tag extends AbstractFunction {
+	@seealso({get_scoreboard_tags.class, add_scoreboard_tag.class, remove_scoreboard_tag.class})
+	public static class has_scoreboard_tag extends EntityFunction {
 
 		@Override
 		public String getName() {
@@ -4690,27 +4666,13 @@ public class EntityManagement {
 		}
 
 		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREBadEntityException.class, CRELengthException.class, CREFormatException.class};
-		}
-
-		@Override
-		public boolean isRestricted() {
-			return true;
-		}
-
-		@Override
-		public Boolean runAsync() {
-			return false;
-		}
-
-		@Override
 		public Version since() {
 			return MSVersion.V3_3_5;
 		}
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({remove_scoreboard_tag.class, has_scoreboard_tag.class, get_scoreboard_tags.class})
 	public static class add_scoreboard_tag extends EntitySetterFunction {
 
 		@Override
@@ -4736,6 +4698,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({add_scoreboard_tag.class, has_scoreboard_tag.class, get_scoreboard_tags.class})
 	public static class remove_scoreboard_tag extends EntitySetterFunction {
 
 		@Override
@@ -4973,22 +4936,8 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class get_hanging_direction extends AbstractFunction {
-
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREBadEntityException.class, CRELengthException.class, CREFormatException.class};
-		}
-
-		@Override
-		public boolean isRestricted() {
-			return true;
-		}
-
-		@Override
-		public Boolean runAsync() {
-			return false;
-		}
+	@seealso(set_hanging_direction.class)
+	public static class get_hanging_direction extends EntityGetterFunction {
 
 		@Override
 		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args) throws ConfigRuntimeException {
@@ -5002,11 +4951,6 @@ public class EntityManagement {
 		@Override
 		public String getName() {
 			return "get_hanging_direction";
-		}
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{1};
 		}
 
 		@Override
@@ -5028,6 +4972,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(get_hanging_direction.class)
 	public static class set_hanging_direction extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -5131,16 +5076,11 @@ public class EntityManagement {
 
 	@api(environments = {CommandHelperEnvironment.class})
 	@seealso({set_display_entity.class})
-	public static class get_display_entity extends AbstractFunction {
+	public static class get_display_entity extends EntityGetterFunction {
 
 		@Override
 		public String getName() {
 			return "get_display_entity";
-		}
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{1};
 		}
 
 		@Override
@@ -5221,23 +5161,8 @@ public class EntityManagement {
 		}
 
 		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREBadEntityException.class, CRELengthException.class, CREFormatException.class};
-		}
-
-		@Override
 		public Version since() {
 			return MSVersion.V3_3_5;
-		}
-
-		@Override
-		public boolean isRestricted() {
-			return true;
-		}
-
-		@Override
-		public Boolean runAsync() {
-			return false;
 		}
 
 	}
@@ -5376,16 +5301,11 @@ public class EntityManagement {
 
 	@api(environments = {CommandHelperEnvironment.class})
 	@seealso({get_display_entity.class})
-	public static class set_display_entity extends AbstractFunction {
+	public static class set_display_entity extends EntitySetterFunction {
 
 		@Override
 		public String getName() {
 			return "set_display_entity";
-		}
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{2};
 		}
 
 		@Override
@@ -5561,16 +5481,6 @@ public class EntityManagement {
 			return MSVersion.V3_3_5;
 		}
 
-		@Override
-		public boolean isRestricted() {
-			return true;
-		}
-
-		@Override
-		public Boolean runAsync() {
-			return false;
-		}
-
 	}
 
 	@api
@@ -5578,11 +5488,6 @@ public class EntityManagement {
 
 		@Override
 		public boolean isRestricted() {
-			return false;
-		}
-
-		@Override
-		public Boolean runAsync() {
 			return false;
 		}
 
@@ -5700,22 +5605,8 @@ public class EntityManagement {
 	}
 
 	@api
-	public static class get_entity_killer extends AbstractFunction {
-
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREFormatException.class, CRELengthException.class, CREBadEntityException.class};
-		}
-
-		@Override
-		public boolean isRestricted() {
-			return true;
-		}
-
-		@Override
-		public Boolean runAsync() {
-			return false;
-		}
+	@seealso(set_entity_killer.class)
+	public static class get_entity_killer extends EntityGetterFunction {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
@@ -5734,11 +5625,6 @@ public class EntityManagement {
 		}
 
 		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{1};
-		}
-
-		@Override
 		public String docs() {
 			return "string {entityUUID} Gets the player killer of a living entity. Can be null."
 					+ " Usually indicates the last player that damaged the entity within the last five seconds.";
@@ -5751,21 +5637,12 @@ public class EntityManagement {
 	}
 
 	@api
-	public static class set_entity_killer extends AbstractFunction {
+	@seealso(get_entity_killer.class)
+	public static class set_entity_killer extends EntitySetterFunction {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CREFormatException.class, CRELengthException.class, CREBadEntityException.class};
-		}
-
-		@Override
-		public boolean isRestricted() {
-			return true;
-		}
-
-		@Override
-		public Boolean runAsync() {
-			return false;
 		}
 
 		@Override
@@ -5783,11 +5660,6 @@ public class EntityManagement {
 		@Override
 		public String getName() {
 			return "set_entity_killer";
-		}
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{2};
 		}
 
 		@Override
