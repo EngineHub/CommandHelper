@@ -5677,25 +5677,25 @@ public class EntityManagement {
 
 	@api
 	@seealso({PlayerManagement.pshow_entity.class, PlayerManagement.phide_entity.class,
-			PlayerManagement.pcan_see_entity.class, set_entity_visible_by_default.class})
-	public static class is_entity_visible_by_default extends EntityGetterFunction {
+			PlayerManagement.pcan_see_entity.class, set_entity_hidden_by_default.class})
+	public static class is_entity_hidden_by_default extends EntityGetterFunction {
 
 		@Override
 		public String getName() {
-			return "is_entity_visible_by_default";
+			return "is_entity_hidden_by_default";
 		}
 
 		@Override
 		public String docs() {
-			return "boolean {entityUUID} Returns an entity's default visibility to a client. (MC 1.19.3+)"
-					+ " Unrelated to the invisibility potion effect. If false,"
-					+ " pshow_entity() must be used before a player's client can see this entity.";
+			return "boolean {entityUUID} Returns whether an entity is hidden by default to clients. (MC 1.19.3+)"
+					+ " If true, pshow_entity() must be used before a player's client can see this entity."
+					+ " Unrelated to the invisibility potion effect.";
 		}
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCEntity entity = Static.getEntity(args[0], t);
-			return CBoolean.get(entity.isVisibleByDefault());
+			return CBoolean.get(!entity.isVisibleByDefault());
 		}
 
 		@Override
@@ -5706,25 +5706,25 @@ public class EntityManagement {
 
 	@api
 	@seealso({PlayerManagement.pshow_entity.class, PlayerManagement.phide_entity.class,
-			PlayerManagement.pcan_see_entity.class, is_entity_visible_by_default.class})
-	public static class set_entity_visible_by_default extends EntitySetterFunction {
+			PlayerManagement.pcan_see_entity.class, is_entity_hidden_by_default.class})
+	public static class set_entity_hidden_by_default extends EntitySetterFunction {
 
 		@Override
 		public String getName() {
-			return "set_entity_visible_by_default";
+			return "set_entity_hidden_by_default";
 		}
 
 		@Override
 		public String docs() {
-			return "void {entityUUID, visibility} Sets an entity's default visibility to a client. (MC 1.19.3+)"
-					+ " Unrelated to the invisibility potion effect. If visibility is false,"
-					+ " pshow_entity() must be used before a player's client can see this entity.";
+			return "void {entityUUID, hidden} Sets whether an entity's is hidden by default to clients. (MC 1.19.3+)"
+					+ " If set to true, pshow_entity() must be used before a player's client can see this entity."
+					+ " Unrelated to the invisibility potion effect.";
 		}
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCEntity entity = Static.getEntity(args[0], t);
-			entity.setVisibleByDefault(ArgumentValidation.getBooleanObject(args[1], t));
+			entity.setVisibleByDefault(!ArgumentValidation.getBooleanObject(args[1], t));
 			return CVoid.VOID;
 		}
 
