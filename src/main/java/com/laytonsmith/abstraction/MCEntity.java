@@ -118,4 +118,8 @@ public interface MCEntity extends MCMetadatable {
 	boolean isInWater();
 
 	void setRotation(float yaw, float pitch);
+
+	boolean isVisibleByDefault();
+
+	void setVisibleByDefault(boolean visible);
 }

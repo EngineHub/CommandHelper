@@ -418,4 +418,23 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 	public void setRotation(float yaw, float pitch) {
 		e.setRotation(yaw, pitch);
 	}
+
+	@Override
+	public boolean isVisibleByDefault() {
+		try {
+			return e.isVisibleByDefault();
+		} catch (NoSuchMethodError ex) {
+			// probably before 1.19.3
+			return true;
+		}
+	}
+
+	@Override
+	public void setVisibleByDefault(boolean visible) {
+		try {
+			e.setVisibleByDefault(visible);
+		} catch (NoSuchMethodError ex) {
+			// probably before 1.19.3
+		}
+	}
 }

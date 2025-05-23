@@ -5674,4 +5674,63 @@ public class EntityManagement {
 			return MSVersion.V3_3_5;
 		}
 	}
+
+	@api
+	@seealso({PlayerManagement.pshow_entity.class, PlayerManagement.phide_entity.class,
+			PlayerManagement.pcan_see_entity.class, set_entity_visible_by_default.class})
+	public static class is_entity_visible_by_default extends EntityGetterFunction {
+
+		@Override
+		public String getName() {
+			return "is_entity_visible_by_default";
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {entityUUID} Returns an entity's default visibility to a client. (MC 1.19.3+)"
+					+ " Unrelated to the invisibility potion effect. If false,"
+					+ " pshow_entity() must be used before a player's client can see this entity.";
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCEntity entity = Static.getEntity(args[0], t);
+			return CBoolean.get(entity.isVisibleByDefault());
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+	}
+
+	@api
+	@seealso({PlayerManagement.pshow_entity.class, PlayerManagement.phide_entity.class,
+			PlayerManagement.pcan_see_entity.class, is_entity_visible_by_default.class})
+	public static class set_entity_visible_by_default extends EntitySetterFunction {
+
+		@Override
+		public String getName() {
+			return "set_entity_visible_by_default";
+		}
+
+		@Override
+		public String docs() {
+			return "void {entityUUID, visibility} Sets an entity's default visibility to a client. (MC 1.19.3+)"
+					+ " Unrelated to the invisibility potion effect. If visibility is false,"
+					+ " pshow_entity() must be used before a player's client can see this entity.";
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCEntity entity = Static.getEntity(args[0], t);
+			entity.setVisibleByDefault(ArgumentValidation.getBooleanObject(args[1], t));
+			return CVoid.VOID;
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+	}
 }
