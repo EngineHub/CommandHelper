@@ -17,6 +17,7 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CClassType;
+import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
@@ -687,7 +688,7 @@ public class Echoes {
 			final MCServer server = Static.getServer();
 
 			// Handle "broadcast(message, [null])".
-			if(args.length == 1 || Construct.nval(args[1]) == null) { // args.length can only be 1 or 2 due to the numArgs().
+			if(args.length == 1 || args[1] instanceof CNull) {
 				server.broadcastMessage(args[0].val());
 				return CVoid.VOID;
 			}

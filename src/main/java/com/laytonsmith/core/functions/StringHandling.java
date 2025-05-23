@@ -896,8 +896,8 @@ public class StringHandling {
 		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			Static.AssertNonCNull(t, args);
 
-			String teststring = Construct.nval(args[0]);
-			String keyword = Construct.nval(args[1]);
+			String teststring = args[0].val();
+			String keyword = args[1].val();
 			boolean ret = teststring.startsWith(keyword);
 
 			return CBoolean.get(ret);
@@ -964,8 +964,8 @@ public class StringHandling {
 		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			Static.AssertNonCNull(t, args);
 
-			String teststring = Construct.nval(args[0]);
-			String keyword = Construct.nval(args[1]);
+			String teststring = args[0].val();
+			String keyword = args[1].val();
 			boolean ret = teststring.endsWith(keyword);
 
 			return CBoolean.get(ret);
@@ -1022,11 +1022,10 @@ public class StringHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
-			if(!(Construct.nval(args[0]) instanceof String)) {
-				throw new CRECastException(this.getName() + " expects a string as first argument, but type "
-						+ args[0].typeof() + " was found.", t);
+			if(args[0] instanceof CNull) {
+				throw new CRECastException(this.getName() + " expects a string as first argument, but found null.", t);
 			}
-			String text = Construct.nval(args[0]);
+			String text = args[0].val();
 			// Enforce the fact we are only taking the first character here
 			// Do not let the user pass an entire string (or an empty string, d'oh). Only a single character.
 			if(text.length() != 1) {
@@ -1127,9 +1126,9 @@ public class StringHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
-			String haystack = Construct.nval(args[0]);
-			String needle = Construct.nval(args[1]);
 			Static.AssertNonCNull(t, args);
+			String haystack = args[0].val();
+			String needle = args[1].val();
 			return new CInt(haystack.indexOf(needle), t);
 		}
 
