@@ -70,23 +70,28 @@ public class InventoryEvents {
 
 		@Override
 		public String docs() {
-			return "{virtual: <boolean match> Whether or not this inventory is virtually stored in CH"
-					+ " | slottype: <macro> The type of slot being clicked, can be "
-					+ StringUtils.Join(MCSlotType.values(), ", ", ", or ")
-					+ " | clicktype: <macro> One of " + StringUtils.Join(MCClickType.values(), ", ", ", or ")
-					+ " | action: <macro> One of " + StringUtils.Join(MCInventoryAction.values(), ", ", ", or ")
-					+ " | slotitem: <string match> | player: <macro>}"
-					+ " Fired when a player clicks a slot in any inventory. "
-					+ " {player: The player who clicked | viewers: everyone looking in this inventory"
-					+ " | leftclick: if this was a left click | keyboardclick: true/false if a key was pressed"
-					+ " | rightclick: if this was a right click | shiftclick: true/false if shift was being held"
-					+ " | creativeclick: true/false if this action could only be performed in creative mode"
-					+ " | slot: the slot number | rawslot: the slot number in whole inventory window | slottype"
-					+ " | slotitem | inventorytype | inventorysize: number of slots in opened inventory | cursoritem"
-					+ " | inventory: all the items in the (top) inventory | clicktype | action"
-					+ " | hotbarbutton: the hotbar slot (0-8) corresponding to the number key pressed, or -1 if none.}"
-					+ " {slotitem: the item currently in the clicked slot | cursoritem: the item on the cursor"
-					+ " (may cause unexpected behavior)}"
+			return "{virtual: <boolean match> If the inventory is virtually held in CH"
+					+ " | slottype: <macro> " + StringUtils.Join(MCSlotType.values(), ", ", ", or ")
+					+ " | clicktype: <macro> " + StringUtils.Join(MCClickType.values(), ", ", ", or ")
+					+ " | action: <macro> " + StringUtils.Join(MCInventoryAction.values(), ", ", ", or ")
+					+ " | slotitem: <string match> The item type | player: <macro>}"
+					+ " Fired when a player interacts with any inventory GUI. See also inventory_drag."
+					+ " {slottype: The type of slot being clicked | clicktype: The type of input"
+					+ " | action: The resulting action | slotitem: The item in the clicked slot"
+					+ " | player: The player who clicked | viewers: Every player looking at this inventory"
+					+ " | leftclick: If left mouse click | rightclick: If right mouse click"
+					+ " | keyboardclick: If key press | shiftclick: If shift held"
+					+ " | creativeclick: If action could only be performed in creative mode, like clone stack."
+					+ " | slot: The slot number clicked. Will be -999 if the click occurred outside the window."
+					+ " | rawslot: The slot number clicked in the whole inventory window. This will be higher than"
+					+ " inventorysize if the click did not occur in the open inventory."
+					+ " | inventorytype: The type of open inventory (if self-inventory, this will be CRAFTING)"
+					+ " | inventorysize: Number of slots in the open inventory"
+					+ " | cursoritem: The item on the cursor"
+					+ " | inventory: An array of all the items in the open inventory"
+					+ " | hotbarbutton: The hotbar slot (0-8) if a number key was pressed, or -1 none.}"
+					+ " {slotitem: The item to put in the clicked slot"
+					+ " | cursoritem: The item to put on the cursor}"
 					+ " {}";
 		}
 
