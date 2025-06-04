@@ -19,6 +19,7 @@ import com.laytonsmith.abstraction.MCFireworkBuilder;
 import com.laytonsmith.abstraction.MCFireworkEffect;
 import com.laytonsmith.abstraction.MCFireworkEffectMeta;
 import com.laytonsmith.abstraction.MCFireworkMeta;
+import com.laytonsmith.abstraction.MCFoodComponent;
 import com.laytonsmith.abstraction.MCFurnaceInventory;
 import com.laytonsmith.abstraction.MCCookingRecipe;
 import com.laytonsmith.abstraction.MCInventory;
@@ -35,6 +36,7 @@ import com.laytonsmith.abstraction.MCMetadataValue;
 import com.laytonsmith.abstraction.MCMusicInstrumentMeta;
 import com.laytonsmith.abstraction.MCNamespacedKey;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
+import com.laytonsmith.abstraction.MCOminousBottleMeta;
 import com.laytonsmith.abstraction.MCParticleData;
 import com.laytonsmith.abstraction.MCPattern;
 import com.laytonsmith.abstraction.MCPlayerProfile;
@@ -62,6 +64,7 @@ import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.blocks.MCBanner;
 import com.laytonsmith.abstraction.blocks.MCBrewingStand;
 import com.laytonsmith.abstraction.blocks.MCFurnace;
+import com.laytonsmith.abstraction.blocks.MCMaterial.MCVanillaMaterial;
 import com.laytonsmith.abstraction.blocks.MCSign;
 import com.laytonsmith.abstraction.blocks.MCSignText;
 import com.laytonsmith.abstraction.entities.MCTropicalFish;
@@ -74,6 +77,7 @@ import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlotGroup;
 import com.laytonsmith.abstraction.enums.MCFireworkType;
 import com.laytonsmith.abstraction.enums.MCItemFlag;
+import com.laytonsmith.abstraction.enums.MCItemRarity;
 import com.laytonsmith.abstraction.enums.MCParticle;
 import com.laytonsmith.abstraction.enums.MCPatternShape;
 import com.laytonsmith.abstraction.enums.MCPotionEffectType;
@@ -98,7 +102,6 @@ import com.laytonsmith.core.exceptions.CRE.CREEnchantmentException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CRE.CREInvalidWorldException;
-import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
@@ -439,6 +442,7 @@ public class ObjectGenerator {
 			Construct lore;
 			CArray ma = CArray.GetAssociativeArray(t);
 			MCItemMeta meta = is.getItemMeta();
+			MCMaterial material = is.getType();
 			if(meta.hasDisplayName()) {
 				display = new CString(meta.getDisplayName(), t);
 			} else {
@@ -489,27 +493,69 @@ public class ObjectGenerator {
 				ma.set("tags", CNull.NULL, t);
 			}
 
-			MCMaterial material = is.getType();
-			if(material.getMaxDurability() > 0) {
-				// Damageable items only
-				ma.set("damage", new CInt(meta.getDamage(), t), t);
-				ma.set("unbreakable", CBoolean.get(meta.isUnbreakable()), t);
-			} else if(material.isBlock()) {
-				// Block items only
-				if(meta.hasBlockData()) {
-					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
-						// return only existing states
+			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
+				if(meta.hasMaxStackSize()) {
+					ma.set("maxstacksize", new CInt(meta.getMaxStackSize(), t), t);
+				}
+				if(meta.hasEnchantmentGlintOverride()) {
+					ma.set("glint", CBoolean.get(meta.getEnchantmentGlintOverride()), t);
+				}
+				if(meta.hasRarity()) {
+					ma.set("rarity", new CString(meta.getRarity().name(), t), t);
+				}
+				if(meta.hasMaxDamage()) {
+					ma.set("maxdamage", new CInt(meta.getMaxDamage(), t), t);
+				}
+				if(meta.hasDamage() || material.getMaxDurability() > 0) {
+					ma.set("damage", new CInt(meta.getDamage(), t), t);
+					ma.set("unbreakable", CBoolean.get(meta.isUnbreakable()), t);
+				} else if(meta.isUnbreakable()) {
+					ma.set("unbreakable", CBoolean.TRUE, t);
+				}
+				if(material.isBlock()) {
+					if(meta.hasBlockData()) {
 						Map<String, String> blockData = meta.getExistingBlockData();
 						if(blockData != null) {
-							ma.set("blockdata", blockData(is.getType(), blockData, t), t);
+							ma.set("blockdata", blockData(material, blockData, t), t);
 						} else {
 							ma.set("blockdata", CNull.NULL, t);
 						}
 					} else {
-						ma.set("blockdata", blockData(meta.getBlockData(is.getType()), t), t);
+						ma.set("blockdata", CNull.NULL, t);
 					}
-				} else {
-					ma.set("blockdata", CNull.NULL, t);
+				}
+
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_21)) {
+					if(meta.hasJukeboxPlayable()) {
+						ma.set("jukeboxsong", new CString(meta.getJukeboxPlayable(), t), t);
+					}
+				}
+
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_21_3)) {
+					if(meta.hasEnchantable()) {
+						ma.set("enchantability", new CInt(meta.getEnchantable(), t), t);
+					}
+					if(meta.hasFood()) {
+						MCFoodComponent foodComponent = meta.getFood();
+						CArray food = CArray.GetAssociativeArray(t);
+						food.set("nutrition", new CInt(foodComponent.getNutrition(), t), t);
+						food.set("saturation", new CDouble(foodComponent.getSaturation(), t), t);
+						food.set("always", CBoolean.get(foodComponent.getCanAlwaysEat()), t);
+						ma.set("food", food, t);
+					}
+				}
+
+			} else { // versions before 1.20.6
+				if(material.getMaxDurability() > 0) {
+					// Damageable items only
+					ma.set("damage", new CInt(meta.getDamage(), t), t);
+					ma.set("unbreakable", CBoolean.get(meta.isUnbreakable()), t);
+				} else if(material.isBlock()) {
+					if(meta.hasBlockData()) {
+						ma.set("blockdata", blockData(meta.getBlockData(material), t), t);
+					} else {
+						ma.set("blockdata", CNull.NULL, t);
+					}
 				}
 			}
 
@@ -675,19 +721,24 @@ public class ObjectGenerator {
 				CArray color = color(((MCLeatherArmorMeta) meta).getColor(), t);
 				ma.set("color", color, t);
 			} else if(meta instanceof MCBookMeta bookMeta) {
-				Construct title;
-				Construct author;
+				if(material.getAbstracted() == MCVanillaMaterial.WRITTEN_BOOK) {
+					Construct title;
+					Construct author;
+					if(bookMeta.hasTitle()) {
+						title = new CString(bookMeta.getTitle(), t);
+					} else {
+						title = CNull.NULL;
+					}
+					if(bookMeta.hasAuthor()) {
+						author = new CString(bookMeta.getAuthor(), t);
+					} else {
+						author = CNull.NULL;
+					}
+					ma.set("title", title, t);
+					ma.set("author", author, t);
+					ma.set("generation", bookMeta.getGeneration().name(), t);
+				}
 				Construct pages;
-				if(bookMeta.hasTitle()) {
-					title = new CString(bookMeta.getTitle(), t);
-				} else {
-					title = CNull.NULL;
-				}
-				if(bookMeta.hasAuthor()) {
-					author = new CString(bookMeta.getAuthor(), t);
-				} else {
-					author = CNull.NULL;
-				}
 				if(bookMeta.hasPages()) {
 					pages = new CArray(t);
 					for(String p : bookMeta.getPages()) {
@@ -696,10 +747,7 @@ public class ObjectGenerator {
 				} else {
 					pages = CNull.NULL;
 				}
-				ma.set("title", title, t);
-				ma.set("author", author, t);
 				ma.set("pages", pages, t);
-				ma.set("generation", bookMeta.getGeneration().name(), t);
 			} else if(meta instanceof MCSkullMeta) {
 				MCPlayerProfile profile = ((MCSkullMeta) meta).getProfile();
 				// If a profile doesn't exist, it either doesn't have one (plain head) or it's not supported by server.
@@ -848,23 +896,42 @@ public class ObjectGenerator {
 				} else {
 					ma.set("recipes", CNull.NULL, t);
 				}
+			} else if(meta instanceof MCOminousBottleMeta ominousBottleMeta) {
+				if(ominousBottleMeta.hasAmplifier()) {
+					ma.set("ominousamplifier", new CInt(ominousBottleMeta.getAmplifier(), t), t);
+				} else {
+					ma.set("ominousamplifier", CNull.NULL, t);
+				}
 			}
 			return ma;
 		}
 	}
 
+	/**
+	 * Generates item meta from the provided item material before applying the data from the specified fields
+	 * in the provided array. Returns null when given null data.
+	 * @param c an associative CArray representation of item meta
+	 * @param mat the item material from which to generate the item meta
+	 * @param t
+	 * @return abstract item meta
+	 * @throws ConfigRuntimeException
+	 */
 	public MCItemMeta itemMeta(Mixed c, MCMaterial mat, Target t) throws ConfigRuntimeException {
-		MCItemFactory itemFactory = Static.getServer().getItemFactory();
-		if(itemFactory == null) {
-			throw new CRENotFoundException("Could not find the internal MCItemFactory object (are you running in cmdline mode?)", t);
+		if(c instanceof CNull) {
+			return null;
 		}
-		MCItemMeta meta = itemFactory.getItemMeta(mat);
-		if(c instanceof CNull || meta == null) {
-			return meta;
-		}
-		CArray ma;
-		if(c.isInstanceOf(CArray.TYPE)) {
-			ma = (CArray) c;
+		if(!c.isInstanceOf(CArray.TYPE)) {
+			throw new CREFormatException("An array was expected but received " + c + " instead.", t);
+		} else {
+			MCItemFactory itemFactory = Static.getServer().getItemFactory();
+			MCItemMeta meta = itemFactory.getItemMeta(mat);
+			if(meta == null) {
+				return null;
+			}
+			CArray ma = (CArray) c;
+			if(!ma.isAssociative()) {
+				return meta;
+			}
 			try {
 				if(ma.containsKey("display")) {
 					Mixed dni = ma.get("display", t);
@@ -954,15 +1021,101 @@ public class ObjectGenerator {
 					}
 				}
 
-				// Damageable items only
-				if(mat.getMaxDurability() > 0) {
-					if(ma.containsKey("damage")) {
-						meta.setDamage(ArgumentValidation.getInt32(ma.get("damage", t), t));
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
+					// Item data components
+					if(ma.containsKey("maxstacksize")) {
+						Mixed maxstacksize = ma.get("maxstacksize", t);
+						if(maxstacksize instanceof CNull) {
+							// not yet supported
+						} else {
+							meta.setMaxStackSize(ArgumentValidation.getInt32(maxstacksize, t));
+						}
 					}
-					if(ma.containsKey("unbreakable")) {
-						meta.setUnbreakable(ArgumentValidation.getBoolean(ma.get("unbreakable", t), t));
+					if(ma.containsKey("glint")) {
+						Mixed glint = ma.get("glint", t);
+						if(glint instanceof CNull) {
+							// not yet supported
+						} else {
+							meta.setEnchantmentGlintOverride(ArgumentValidation.getBooleanObject(glint, t));
+						}
 					}
-				} else if(ma.containsKey("blockdata")) {
+					if(ma.containsKey("maxdamage")) {
+						Mixed maxdamage = ma.get("maxdamage", t);
+						if(maxdamage instanceof CNull) {
+							// not yet supported
+						} else {
+							meta.setMaxDamage(ArgumentValidation.getInt32(maxdamage, t));
+						}
+					}
+					if(ma.containsKey("rarity")) {
+						Mixed rarity = ma.get("rarity", t);
+						if(rarity instanceof CNull) {
+							// not yet supported
+						} else {
+							try {
+								meta.setRarity(MCItemRarity.valueOf(rarity.val()));
+							} catch (IllegalArgumentException ex) {
+								throw new CREFormatException("Rarity does not exist: " + rarity.val(), t);
+							}
+						}
+					}
+				}
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_21)) {
+					if(ma.containsKey("jukeboxsong")) {
+						Mixed playable = ma.get("jukeboxsong", t);
+						if(playable instanceof CNull) {
+							// not yet supported
+						} else {
+							meta.setJukeboxPlayable(playable.val());
+						}
+					}
+				}
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_21_3)) {
+					if(ma.containsKey("enchantability")) {
+						Mixed enchantability = ma.get("enchantability", t);
+						if(enchantability instanceof CNull) {
+							// not yet supported
+						} else {
+							meta.setEnchantable(ArgumentValidation.getInt32(enchantability, t));
+						}
+					}
+					if(ma.containsKey("food")) {
+						Mixed mixedFood = ma.get("food", t);
+						if(mixedFood instanceof CNull) {
+							// not supported yet
+						} else if(mixedFood.isInstanceOf(CArray.TYPE)) {
+							CArray foodArray = (CArray) mixedFood;
+							if(!foodArray.isAssociative()) {
+								throw new CREFormatException("Food array must be associative.", t);
+							}
+							MCFoodComponent food = meta.getFood();
+							if(foodArray.containsKey("nutrition")) {
+								food.setNutrition(ArgumentValidation.getInt32(foodArray.get("nutrition", t), t));
+							}
+							if(foodArray.containsKey("saturation")) {
+								food.setSaturation(ArgumentValidation.getDouble32(foodArray.get("saturation", t), t));
+							}
+							if(foodArray.containsKey("always")) {
+								food.setCanAlwaysEat(ArgumentValidation.getBooleanObject(foodArray.get("always", t), t));
+							}
+							meta.setFood(food);
+						} else {
+							throw new CREFormatException("Expected food to be an associative array.", t);
+						}
+					}
+				}
+				if(ma.containsKey("damage")) {
+					Mixed damage = ma.get("damage", t);
+					if(damage instanceof CNull) {
+						// not yet supported
+					} else {
+						meta.setDamage(ArgumentValidation.getInt32(damage, t));
+					}
+				}
+				if(ma.containsKey("unbreakable")) {
+					meta.setUnbreakable(ArgumentValidation.getBooleanish(ma.get("unbreakable", t), t));
+				}
+				if(ma.containsKey("blockdata")) {
 					Mixed mBlockData = ma.get("blockdata", t);
 					if(mBlockData instanceof CArray) {
 						meta.setBlockData(blockData((CArray) mBlockData, mat, t));
@@ -1133,8 +1286,7 @@ public class ObjectGenerator {
 													+ " in " + bs.getClass().getSimpleName().replaceFirst("MC", "")
 													+ " inventory array, so ignoring.");
 										}
-										MCItemStack is = ObjectGenerator.GetGenerator().item(cinv.get(key, t), t);
-										inv.setItem(index, is);
+										inv.setItem(index, ObjectGenerator.GetGenerator().item(cinv.get(key, t), t));
 									} catch (NumberFormatException ex) {
 										ConfigRuntimeException.DoWarning("Expecting integer value for key in "
 												+ bs.getClass().getSimpleName().replaceFirst("MC", "")
@@ -1293,24 +1445,26 @@ public class ObjectGenerator {
 						}
 					}
 				} else if(meta instanceof MCBookMeta bookMeta) {
-					// written books must have a title and author
-					bookMeta.setTitle("");
-					bookMeta.setAuthor("");
-					if(ma.containsKey("title")) {
-						Mixed title = ma.get("title", t);
-						if(!(title instanceof CNull)) {
-							bookMeta.setTitle(title.val());
+					if(mat.getAbstracted() == MCVanillaMaterial.WRITTEN_BOOK) {
+						// written books must have a title and author
+						bookMeta.setTitle("");
+						bookMeta.setAuthor("");
+						if(ma.containsKey("title")) {
+							Mixed title = ma.get("title", t);
+							if(!(title instanceof CNull)) {
+								bookMeta.setTitle(title.val());
+							}
 						}
-					}
-					if(ma.containsKey("author")) {
-						Mixed author = ma.get("author", t);
-						if(!(author instanceof CNull)) {
-							bookMeta.setAuthor(author.val());
+						if(ma.containsKey("author")) {
+							Mixed author = ma.get("author", t);
+							if(!(author instanceof CNull)) {
+								bookMeta.setAuthor(author.val());
+							}
 						}
-					}
-					if(ma.containsKey("generation")) {
-						Mixed generation = ma.get("generation", t);
-						bookMeta.setGeneration(MCBookMeta.Generation.valueOf(generation.val()));
+						if(ma.containsKey("generation")) {
+							Mixed generation = ma.get("generation", t);
+							bookMeta.setGeneration(MCBookMeta.Generation.valueOf(generation.val()));
+						}
 					}
 					if(ma.containsKey("pages")) {
 						Mixed pages = ma.get("pages", t);
@@ -1546,14 +1700,19 @@ public class ObjectGenerator {
 							throw new CREFormatException("Expected array or null for recipes but got " + value.val(), t);
 						}
 					}
+				} else if(meta instanceof MCOminousBottleMeta) {
+					if(ma.containsKey("ominousamplifier")) {
+						Mixed value = ma.get("ominousamplifier", t);
+						if(!(value instanceof CNull)) {
+							((MCOminousBottleMeta) meta).setAmplifier(ArgumentValidation.getInt32(value, t));
+						}
+					}
 				}
 			} catch (Exception ex) {
 				throw new CREFormatException(ex.getMessage(), t, ex);
 			}
-		} else {
-			throw new CREFormatException("An array was expected but received " + c + " instead.", t);
+			return meta;
 		}
-		return meta;
 	}
 
 	public CArray exception(ConfigRuntimeException e, Environment env, Target t) {

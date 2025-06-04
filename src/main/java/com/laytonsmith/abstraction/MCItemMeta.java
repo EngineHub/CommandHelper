@@ -4,6 +4,8 @@ import com.laytonsmith.abstraction.blocks.MCBlockData;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.enums.MCEnchantment;
 import com.laytonsmith.abstraction.enums.MCItemFlag;
+import com.laytonsmith.abstraction.enums.MCItemRarity;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -110,6 +112,8 @@ public interface MCItemMeta extends AbstractionObject {
 
 	void setUnbreakable(boolean unbreakable);
 
+	boolean hasDamage();
+
 	int getDamage();
 
 	void setDamage(int damage);
@@ -118,7 +122,7 @@ public interface MCItemMeta extends AbstractionObject {
 
 	int getMaxDamage();
 
-	void setMaxDamage(int damage);
+	void setMaxDamage(Integer damage);
 
 	MCBlockData getBlockData(MCMaterial material);
 
@@ -162,5 +166,30 @@ public interface MCItemMeta extends AbstractionObject {
 
 	int getMaxStackSize();
 
-	void setMaxStackSize(int size);
+	void setMaxStackSize(Integer size);
+
+	boolean hasRarity();
+
+	MCItemRarity getRarity();
+
+	void setRarity(MCItemRarity rarity);
+
+	boolean hasEnchantable();
+
+	int getEnchantable();
+
+	void setEnchantable(Integer enchantability);
+
+	boolean hasJukeboxPlayable();
+
+	String getJukeboxPlayable();
+
+	void setJukeboxPlayable(String playable);
+
+	boolean hasFood();
+
+	MCFoodComponent getFood();
+
+	void setFood(MCFoodComponent component);
+
 }

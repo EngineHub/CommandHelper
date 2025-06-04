@@ -84,14 +84,6 @@ public class BukkitMCItemStack implements MCItemStack {
 	}
 
 	@Override
-	public void setType(MCMaterial type) {
-		if(is == null) {
-			return;
-		}
-		is.setType((Material) type.getHandle());
-	}
-
-	@Override
 	public int getAmount() {
 		if(is == null) {
 			return 0;

@@ -182,6 +182,7 @@ import org.bukkit.inventory.meta.KnowledgeBookMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.MapMeta;
 import org.bukkit.inventory.meta.MusicInstrumentMeta;
+import org.bukkit.inventory.meta.OminousBottleMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.inventory.meta.SuspiciousStewMeta;
@@ -692,23 +693,31 @@ public class BukkitConvertor extends AbstractConvertor {
 		if(im instanceof KnowledgeBookMeta) {
 			return new BukkitMCKnowledgeBookMeta((KnowledgeBookMeta) im);
 		}
-		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_17)) {
+		MCVersion version = Static.getServer().getMinecraftVersion();
+		if(version.gte(MCVersion.MC1_17)) {
 			if(im instanceof BundleMeta) {
 				return new BukkitMCBundleMeta((BundleMeta) im);
 			}
-			if(im instanceof AxolotlBucketMeta) {
-				return new BukkitMCAxolotlBucketMeta((AxolotlBucketMeta) im);
-			}
-			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_3)) {
-				if(im instanceof MusicInstrumentMeta) {
-					return new BukkitMCMusicInstrumentMeta((MusicInstrumentMeta) im);
+			if(version.gte(MCVersion.MC1_17_X)) {
+				if(im instanceof AxolotlBucketMeta) {
+					return new BukkitMCAxolotlBucketMeta((AxolotlBucketMeta) im);
 				}
-				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20)) {
-					if(im instanceof ColorableArmorMeta) { // Must be before ArmorMeta and LeatherArmorMeta
-						return new BukkitMCColorableArmorMeta((ColorableArmorMeta) im);
+				if(version.gte(MCVersion.MC1_19_3)) {
+					if(im instanceof MusicInstrumentMeta) {
+						return new BukkitMCMusicInstrumentMeta((MusicInstrumentMeta) im);
 					}
-					if(im instanceof ArmorMeta) {
-						return new BukkitMCArmorMeta((ArmorMeta) im);
+					if(version.gte(MCVersion.MC1_20)) {
+						if(im instanceof ColorableArmorMeta) { // Must be before ArmorMeta and LeatherArmorMeta
+							return new BukkitMCColorableArmorMeta((ColorableArmorMeta) im);
+						}
+						if(im instanceof ArmorMeta) {
+							return new BukkitMCArmorMeta((ArmorMeta) im);
+						}
+						if(version.gte(MCVersion.MC1_20_6)) {
+							if(im instanceof OminousBottleMeta) {
+								return new BukkitMCOminousBottleMeta((OminousBottleMeta) im);
+							}
+						}
 					}
 				}
 			}

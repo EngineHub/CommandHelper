@@ -69,6 +69,7 @@ import org.bukkit.entity.Firework;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.generator.ChunkGenerator;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.util.Consumer;
 
@@ -375,12 +376,12 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 
 	@Override
 	public MCItem dropItemNaturally(MCLocation l, MCItemStack is) {
-		return new BukkitMCItem(w.dropItemNaturally(((BukkitMCLocation) l).l, ((BukkitMCItemStack) is).is));
+		return new BukkitMCItem(w.dropItemNaturally(((BukkitMCLocation) l).l, (ItemStack) is.getHandle()));
 	}
 
 	@Override
 	public MCItem dropItem(MCLocation l, MCItemStack is) {
-		return new BukkitMCItem(w.dropItem(((BukkitMCLocation) l).l, ((BukkitMCItemStack) is).is));
+		return new BukkitMCItem(w.dropItem(((BukkitMCLocation) l).l, (ItemStack) is.getHandle()));
 	}
 
 	@Override

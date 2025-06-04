@@ -1,35 +1,13 @@
 array {[player,] slot} Returns an associative array of known item meta for the slot given, or null if there isn't any. ----
 
-Below are the available fields in the item meta array. Most fields can be null when the item meta doesn't have that value.
-Some data is not yet supported in item meta, and should be documented below. In addition, as of 1.20.5, many of the new
-data components are not yet supported:
-
-From 1.20.5+: "enchantment_glint_override", "food", "hide_tooltip", "instrument", "intangible_projectile", "item_name",
-"lock", "lodestone_tracker", "max_damage", "max_stack_size", "note_block_sound", "ominous_bottle_amplifier", "rarity",
-and "tool".
-
-From 1.21.0+: "jukebox_playable".
-
-From 1.21.2+: "consumable", "damage_resistant", "death_protection", "enchantable", "equippable", "item_model", "glider",
-"repairable", "tooltip_style", "use_cooldown", and "use_remainder".
-
-From 1.21.4+: "custom_model_data" for anything other than a single float.
-
-{| width="80%" cellspacing="1" cellpadding="1" border="1" class="wikitable"
-|-
-! scope="col" width="14%" | Item Type
-! scope="col" width="86%" | Meta
-|-
-! All Items
-|
-These fields are present in all items with meta.
+These fields exist for all items with meta.
 * '''display''' : (string) The display name seen when renamed in an anvil (or null).
 * '''lore''' : (array) A list of strings that is displayed when hovering the item (or null). As lines are plain text, they do not yet support some advanced text components, but color codes are supported.
 * '''model''' : (int) Represents vanilla's CustomModelData tag for use with resource packs (or null). Is converted to a float for the custom_model_data component in 1.21.4+.
 * '''flags''' : (array) Flags used to hide meta in the item tooltip: %ITEM_FLAGS%.
 * '''repair''' : (int) The additional cost to repair or combine this item in an anvil.
 * '''enchants''' : (associative array) The enchantments on this item.
-** '''&lt;enchantment_name&gtl;''' : (associative array) Name of enchantment as the key (e.g. "fire_aspect") An integer for the level can be used as the value instead of an array.
+** '''&lt;enchantment_name&gt;''' : (associative array) Name of enchantment as the key (e.g. "fire_aspect") An integer for the level can be used as the value instead of an array.
 *** '''elevel''' : (int) The level of the enchantment.
 * '''modifiers''' : (array) A list of attribute modifier arrays (or null).
 ** (associative array)
@@ -39,15 +17,29 @@ These fields are present in all items with meta.
 *** '''id''' : (string) An item can only have one modifier with the same id.
 *** '''slot''' : (string) Possible slots are %SLOTS% or one of the slot groups %SLOTGROUPS%.
 * '''tags''' : (associative array) Custom tags used by plugins (or null).
-** '''&lt;custom_key&gt;''' : (associative array) Each tag's key is namespaced (e.g. "commandhelper:mytag").
+** '''&lt;custom_key&gt;''' : (associative array) Each tag's key is namespaced (e.g. "commandhelper:mytag"). If not provided, "commandhelper" will be used as a namespace.
 *** '''type''' : (string) Possible types: %TAG_TYPES%.
 *** '''value''' : (mixed) A valid value for the given tag type.
-The "CanPlaceOn" tag for blocks and "CanDestroy" tag for tools in adventure mode are not yet supported.
+
+These fields optionally exist for any item type.
+* '''damage''' : (int) The amount of damage on the durability of the item. 0 is undamaged. The max value is determined by the item type's default durability or "maxdamage" if set.
+* '''unbreakable''' : (boolean) If the item cannot be damaged when used. Also hides item durability bar. Field always exists if "damage" exists.
+* '''maxstacksize''' : (int) Overrides the maximum quantity of items with identical meta that will stack. Must be from 1 to 99. (MC 1.20.6+)
+* '''maxdamage''' : (int) Overrides an item's max durability. Value must be positive. (MC 1.20.6+)
+* '''glint''' : (boolean) Overrides an item's enchantment glint state. (MC 1.20.6+)
+* '''rarity''' : (string) Overrides an item's rarity, which affects the item name color. Can be COMMON (white), UNCOMMON (yellow), RARE (aqua), or EPIC (light purple). (MC 1.20.6+)
+* '''jukeboxsong''' : (string) Overrides an item's playable jukebox song. (MC 1.21+)
+* '''enchantability''' : (int) Overrides an item's enchantability in an enchanting table. Value must be positive. Higher values allow applicable enchantments with higher costs to be picked. (MC 1.21.3+)
+* '''food''' : (associative array) Overrides a consumable item's food stats. (MC 1.21.3+)
+** '''nutrition''' : (int) Food restored on the hunger bar when consumed. (default: 0)
+** '''saturation''' : (double) The amount of saturation that is increased when consumed. (default: 0.0)
+** '''always''' : (boolean) Whether the food can be consumed even if the hunger bar is full. (default: false)
+
+These fields only exist for specific item types.
+{| width="80%" cellspacing="1" cellpadding="1" border="1" class="wikitable"
 |-
-! Damageable Items
-|
-* '''damage''' : (int) The amount of damage on the item. 0 is undamaged. Maximum is determined by each item type's max durability.
-* '''unbreakable''' : (boolean) Whether or not the item can be damaged.
+! scope="col" width="14%" | Item Type
+! scope="col" width="86%" | Meta
 |-
 ! Armor
 |
@@ -57,8 +49,9 @@ The "CanPlaceOn" tag for blocks and "CanDestroy" tag for tools in adventure mode
 |-
 ! AxolotlBucket
 |
+This field may only return the default value on 1.21.5 due to a server API implementation bug.
 * '''variant''' : (string) The type of axolotl, one of %AXOLOTL_TYPES%. (MC 1.17+)
-The entity's custom name is derived from the item "display" string. All other axolotl NBT is not yet supported.
+The entity's custom name is derived from the item "display" string. All other axolotl data is not yet supported.
 |-
 ! Banners
 |
@@ -70,9 +63,9 @@ The entity's custom name is derived from the item "display" string. All other ax
 ! Bee Hives/Nests
 |
 * '''beecount''' : (int) The number of bees stored in this hive or nest (0 - 3). (requires MC 1.20.6+ to set)
-Stored Bee NBT is not yet supported.
+Stored Bee data is not yet supported.
 |-
-! BlockData
+! Blocks
 |
 * '''blockdata''' : (associative array) Block data, also known as block states in vanilla, like is returned from get_blockdata() (or null).
 ** '''block''' : (string) Block material name (optional)
@@ -182,6 +175,10 @@ The remaining tags are not yet supported.
 ** '''g''' : (int) Green value
 ** '''b''' : (int) Blue value
 |-
+! Ominous Bottle
+|
+* '''ominousamplifier''' : (int) The bad omen potion effect amplifier for this ominous bottle. (0 - 4)
+|-
 ! Player Heads
 |
 * '''owner''' : (string) The user name. Can be null if there is no owner.
@@ -229,7 +226,7 @@ The remaining tags are not yet supported.
 |-
 ! Spawn Eggs
 |
-The entity's custom name is derived from the item "display" string. Additional NBT for the entity spawned is not supported.
+The entity's custom name is derived from the item "display" string. Additional data for the entity spawned is not supported.
 |-
 ! Spawners
 |
@@ -241,12 +238,21 @@ The entity's custom name is derived from the item "display" string. Additional N
 * '''maxnearbyentities''' : (int) The number of "spawntype" entities within just over "spawnrange" distance that'll prevent further spawns.
 * '''spawnrange''' : (int) The maximum distance in the x or z axis new entities will spawn from the spawner.
 * '''playerrange''' : (int) The maximum distance a player must be within to cause the spawner to spawn.
-NBT for spawn potentials other than entity type is not yet supported.
+Spawn potentials other than entity type is not yet supported.
 |-
 ! Tropical Fish Bucket
 |
+These fields may be null on 1.21.5 due to a server API implementation bug.
 * '''fishcolor''' : (string) The color of the fish, can be one of %DYE_COLORS%.
 * '''fishpatterncolor''' : (string) The color of the pattern on the fish.
 * '''fishpattern''' : (string) The pattern type on the fish, can be one of %FISH_PATTERNS%.
-The entity's custom name is derived from the item "display" string. All other tropical fish NBT is not yet supported.
+The entity's custom name is derived from the item "display" string. All other tropical fish data is not yet supported.
 |}
+
+Other data not yet supported in item meta:
+
+MC 1.13.2+: "can_break", "can_place_on"
+MC 1.20.6+: "hide_tooltip", "instrument", "intangible_projectile", "item_name", "lock", "note_block_sound", "tool"
+MC 1.21.3+: "consumable", "damage_resistant", "death_protection", "equippable", "item_model", "glider", "repairable", "tooltip_style", "use_cooldown", "use_remainder"
+MC 1.21.4+: "custom_model_data" for anything other than a single float
+MC 1.21.5+: "weapon", "potion_duration_scale", "blocks_attacks", "break_sound", "provides_banner_patterns", "provides_trim_material", "tooltip_display"

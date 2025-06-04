@@ -361,7 +361,7 @@ public class Minecraft {
 			Mixed id = args[0];
 			if(id.isInstanceOf(CArray.TYPE)) {
 				MCItemStack is = ObjectGenerator.GetGenerator().item(id, t);
-				return new CInt(is.getType().getMaxStackSize(), t);
+				return new CInt(is.maxStackSize(), t);
 			}
 			// legacy
 			int type;

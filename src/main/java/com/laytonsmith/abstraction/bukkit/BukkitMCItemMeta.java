@@ -6,6 +6,7 @@ import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils.ReflectionException;
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCAttributeModifier;
+import com.laytonsmith.abstraction.MCFoodComponent;
 import com.laytonsmith.abstraction.MCItemMeta;
 import com.laytonsmith.abstraction.MCTagContainer;
 import com.laytonsmith.abstraction.blocks.MCBlockData;
@@ -22,22 +23,31 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.laytonsmith.abstraction.enums.MCItemRarity;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEnchantment;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCItemFlag;
 import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSLog.Tags;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
 import org.bukkit.Bukkit;
+import org.bukkit.JukeboxSong;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.Registry;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
+import org.bukkit.inventory.ItemRarity;
 import org.bukkit.inventory.meta.BlockDataMeta;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.Repairable;
+import org.bukkit.inventory.meta.components.FoodComponent;
+import org.bukkit.inventory.meta.components.JukeboxPlayableComponent;
 
 public class BukkitMCItemMeta implements MCItemMeta {
 
@@ -174,6 +184,15 @@ public class BukkitMCItemMeta implements MCItemMeta {
 	}
 
 	@Override
+	public boolean hasDamage() {
+		if(((BukkitMCServer) Static.getServer()).isPaper()
+				&& Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_21)) {
+			return ((Damageable) im).hasDamageValue();
+		}
+		return ((Damageable) im).hasDamage();
+	}
+
+	@Override
 	public int getDamage() {
 		return ((Damageable) im).getDamage();
 	}
@@ -194,7 +213,7 @@ public class BukkitMCItemMeta implements MCItemMeta {
 	}
 
 	@Override
-	public void setMaxDamage(int damage) {
+	public void setMaxDamage(Integer damage) {
 		((Damageable) im).setMaxDamage(damage);
 	}
 
@@ -324,7 +343,76 @@ public class BukkitMCItemMeta implements MCItemMeta {
 	}
 
 	@Override
-	public void setMaxStackSize(int size) {
+	public void setMaxStackSize(Integer size) {
 		im.setMaxStackSize(size);
+	}
+
+	@Override
+	public boolean hasRarity() {
+		return im.hasRarity();
+	}
+
+	@Override
+	public MCItemRarity getRarity() {
+		return MCItemRarity.valueOf(im.getRarity().name());
+	}
+
+	@Override
+	public void setRarity(MCItemRarity rarity) {
+		im.setRarity(ItemRarity.valueOf(rarity.name()));
+	}
+
+	@Override
+	public boolean hasEnchantable() {
+		return im.hasEnchantable();
+	}
+
+	@Override
+	public int getEnchantable() {
+		return im.getEnchantable();
+	}
+
+	@Override
+	public void setEnchantable(Integer enchantability) {
+		im.setEnchantable(enchantability);
+	}
+
+	@Override
+	public boolean hasJukeboxPlayable() {
+		return im.hasJukeboxPlayable();
+	}
+
+	@Override
+	public String getJukeboxPlayable() {
+		return im.getJukeboxPlayable().getSongKey().toString();
+	}
+
+	@Override
+	public void setJukeboxPlayable(String playable) {
+		if(playable == null) {
+			im.setJukeboxPlayable(null);
+		} else {
+			JukeboxSong song = Registry.JUKEBOX_SONG.get(NamespacedKey.fromString(playable));
+			if(song != null) {
+				JukeboxPlayableComponent component = im.getJukeboxPlayable();
+				component.setSong(song);
+				im.setJukeboxPlayable(component);
+			}
+		}
+	}
+
+	@Override
+	public boolean hasFood() {
+		return im.hasFood();
+	}
+
+	@Override
+	public MCFoodComponent getFood() {
+		return new BukkitMCFoodComponent(im.getFood());
+	}
+
+	@Override
+	public void setFood(MCFoodComponent component) {
+		im.setFood((FoodComponent) component.getHandle());
 	}
 }
