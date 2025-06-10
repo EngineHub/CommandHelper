@@ -186,6 +186,16 @@ public interface MCItemMeta extends AbstractionObject {
 
 	void setJukeboxPlayable(String playable);
 
+	boolean isGlider();
+
+	void setGlider(boolean glider);
+
+	boolean hasUseRemainder();
+
+	MCItemStack getUseRemainder();
+
+	void setUseRemainder(MCItemStack remainder);
+
 	boolean hasFood();
 
 	MCFoodComponent getFood();

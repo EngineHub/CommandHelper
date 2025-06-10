@@ -524,6 +524,14 @@ public class ObjectGenerator {
 						ma.set("blockdata", CNull.NULL, t);
 					}
 				}
+				if(meta.hasFood()) {
+					MCFoodComponent foodComponent = meta.getFood();
+					CArray food = CArray.GetAssociativeArray(t);
+					food.set("nutrition", new CInt(foodComponent.getNutrition(), t), t);
+					food.set("saturation", new CDouble(foodComponent.getSaturation(), t), t);
+					food.set("always", CBoolean.get(foodComponent.getCanAlwaysEat()), t);
+					ma.set("food", food, t);
+				}
 
 				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_21)) {
 					if(meta.hasJukeboxPlayable()) {
@@ -535,13 +543,11 @@ public class ObjectGenerator {
 					if(meta.hasEnchantable()) {
 						ma.set("enchantability", new CInt(meta.getEnchantable(), t), t);
 					}
-					if(meta.hasFood()) {
-						MCFoodComponent foodComponent = meta.getFood();
-						CArray food = CArray.GetAssociativeArray(t);
-						food.set("nutrition", new CInt(foodComponent.getNutrition(), t), t);
-						food.set("saturation", new CDouble(foodComponent.getSaturation(), t), t);
-						food.set("always", CBoolean.get(foodComponent.getCanAlwaysEat()), t);
-						ma.set("food", food, t);
+					if(meta.isGlider()) {
+						ma.set("glider", CBoolean.TRUE, t);
+					}
+					if(meta.hasUseRemainder()) {
+						ma.set("remainder", item(meta.getUseRemainder(), t), t);
 					}
 				}
 
@@ -1059,26 +1065,6 @@ public class ObjectGenerator {
 							}
 						}
 					}
-				}
-				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_21)) {
-					if(ma.containsKey("jukeboxsong")) {
-						Mixed playable = ma.get("jukeboxsong", t);
-						if(playable instanceof CNull) {
-							// not yet supported
-						} else {
-							meta.setJukeboxPlayable(playable.val());
-						}
-					}
-				}
-				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_21_3)) {
-					if(ma.containsKey("enchantability")) {
-						Mixed enchantability = ma.get("enchantability", t);
-						if(enchantability instanceof CNull) {
-							// not yet supported
-						} else {
-							meta.setEnchantable(ArgumentValidation.getInt32(enchantability, t));
-						}
-					}
 					if(ma.containsKey("food")) {
 						Mixed mixedFood = ma.get("food", t);
 						if(mixedFood instanceof CNull) {
@@ -1101,6 +1087,42 @@ public class ObjectGenerator {
 							meta.setFood(food);
 						} else {
 							throw new CREFormatException("Expected food to be an associative array.", t);
+						}
+					}
+				}
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_21)) {
+					if(ma.containsKey("jukeboxsong")) {
+						Mixed playable = ma.get("jukeboxsong", t);
+						if(playable instanceof CNull) {
+							// not yet supported
+						} else {
+							meta.setJukeboxPlayable(playable.val());
+						}
+					}
+				}
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_21_3)) {
+					if(ma.containsKey("enchantability")) {
+						Mixed enchantability = ma.get("enchantability", t);
+						if(enchantability instanceof CNull) {
+							// not yet supported
+						} else {
+							meta.setEnchantable(ArgumentValidation.getInt32(enchantability, t));
+						}
+					}
+					if(ma.containsKey("glider")) {
+						Mixed glider = ma.get("glider", t);
+						if(glider instanceof CNull) {
+							meta.setGlider(false);
+						} else {
+							meta.setGlider(ArgumentValidation.getBooleanObject(glider, t));
+						}
+					}
+					if(ma.containsKey("remainder")) {
+						Mixed remainder = ma.get("remainder", t);
+						if(remainder instanceof CNull) {
+							// not yet supported
+						} else {
+							meta.setUseRemainder(item(remainder, t));
 						}
 					}
 				}

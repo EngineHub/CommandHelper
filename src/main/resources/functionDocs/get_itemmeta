@@ -1,39 +1,112 @@
-array {[player,] slot} Returns an associative array of known item meta for the slot given, or null if there isn't any. ----
+array {[player,] slot} Returns an associative array of known item data in the slot given, or null if there isn't any.
+
+----
 
 These fields exist for all items with meta.
-* '''display''' : (string) The display name seen when renamed in an anvil (or null).
-* '''lore''' : (array) A list of strings that is displayed when hovering the item (or null). As lines are plain text, they do not yet support some advanced text components, but color codes are supported.
-* '''model''' : (int) Represents vanilla's CustomModelData tag for use with resource packs (or null). Is converted to a float for the custom_model_data component in 1.21.4+.
-* '''flags''' : (array) Flags used to hide meta in the item tooltip: %ITEM_FLAGS%.
-* '''repair''' : (int) The additional cost to repair or combine this item in an anvil.
-* '''enchants''' : (associative array) The enchantments on this item.
-** '''&lt;enchantment_name&gt;''' : (associative array) Name of enchantment as the key (e.g. "fire_aspect") An integer for the level can be used as the value instead of an array.
-*** '''elevel''' : (int) The level of the enchantment.
-* '''modifiers''' : (array) A list of attribute modifier arrays (or null).
-** (associative array)
-*** '''attribute''' : (string) One of %ATTRIBUTES%.
-*** '''operation''' : (string) One of %OPERATIONS%.
-*** '''amount''' : (double) The value used in the modifier operation.
-*** '''id''' : (string) An item can only have one modifier with the same id.
-*** '''slot''' : (string) Possible slots are %SLOTS% or one of the slot groups %SLOTGROUPS%.
-* '''tags''' : (associative array) Custom tags used by plugins (or null).
-** '''&lt;custom_key&gt;''' : (associative array) Each tag's key is namespaced (e.g. "commandhelper:mytag"). If not provided, "commandhelper" will be used as a namespace.
-*** '''type''' : (string) Possible types: %TAG_TYPES%.
-*** '''value''' : (mixed) A valid value for the given tag type.
+{| width="100%" cellspacing="1" cellpadding="1" border="1" class="wikitable"
+|-
+! scope="col" width="15%" | Field
+! scope="col" width="15%" | Type
+! scope="col" width="70%" | Description
+|-
+! display
+| string
+| The display name seen when renamed in an anvil (or null).
+|-
+! lore
+| array
+| A list of strings that is displayed when hovering the item (or null). As lines are plain text, they do not yet support some advanced text components, but color codes are supported.
+|-
+! model
+| int
+| Represents vanilla's CustomModelData tag for use with resource packs (or null). In 1.21.4+, this represents the first float in custom_model_data rounded down.
+|-
+! flags
+| array
+| Flags used to hide meta in the item tooltip: %ITEM_FLAGS%.
+|-
+! repair
+| int
+| The additional cost to repair or combine this item in an anvil.
+|-
+! enchants
+| associative array
+| The enchantments on this item.
+* '''&lt;enchantment_name&gt;''' : (associative array) The name of the enchantment as the key (e.g. "fire_aspect") An integer for the level can be used as the value instead of an array.
+** '''elevel''' : (int) The level of the enchantment.
+|-
+! modifiers
+| array
+| A list of attribute modifier arrays (or null).
+* (associative array)
+** '''attribute''' : (string) One of %ATTRIBUTES%.
+** '''operation''' : (string) One of %OPERATIONS%.
+** '''amount''' : (double) The value used in the modifier operation.
+** '''id''' : (string) An item can only have one modifier with the same id.
+** '''slot''' : (string) Possible slots are %SLOTS% or one of the slot groups %SLOTGROUPS%.
+|-
+! tags
+| associative array
+| Custom tags used by plugins (or null).
+* '''&lt;custom_key&gt;''' : (associative array) Each tag's key is namespaced (e.g. "commandhelper:mytag"). If not provided, "commandhelper" will be used as a namespace.
+** '''type''' : (string) Possible types: %TAG_TYPES%.
+** '''value''' : (mixed) A valid value for the given tag type.
+|}
 
 These fields optionally exist for any item type.
-* '''damage''' : (int) The amount of damage on the durability of the item. 0 is undamaged. The max value is determined by the item type's default durability or "maxdamage" if set.
-* '''unbreakable''' : (boolean) If the item cannot be damaged when used. Also hides item durability bar. Field always exists if "damage" exists.
-* '''maxstacksize''' : (int) Overrides the maximum quantity of items with identical meta that will stack. Must be from 1 to 99. (MC 1.20.6+)
-* '''maxdamage''' : (int) Overrides an item's max durability. Value must be positive. (MC 1.20.6+)
-* '''glint''' : (boolean) Overrides an item's enchantment glint state. (MC 1.20.6+)
-* '''rarity''' : (string) Overrides an item's rarity, which affects the item name color. Can be COMMON (white), UNCOMMON (yellow), RARE (aqua), or EPIC (light purple). (MC 1.20.6+)
-* '''jukeboxsong''' : (string) Overrides an item's playable jukebox song. (MC 1.21+)
-* '''enchantability''' : (int) Overrides an item's enchantability in an enchanting table. Value must be positive. Higher values allow applicable enchantments with higher costs to be picked. (MC 1.21.3+)
-* '''food''' : (associative array) Overrides a consumable item's food stats. (MC 1.21.3+)
-** '''nutrition''' : (int) Food restored on the hunger bar when consumed. (default: 0)
-** '''saturation''' : (double) The amount of saturation that is increased when consumed. (default: 0.0)
-** '''always''' : (boolean) Whether the food can be consumed even if the hunger bar is full. (default: false)
+{| width="100%" cellspacing="1" cellpadding="1" border="1" class="wikitable"
+|-
+! scope="col" width="12%" | Field
+! scope="col" width="23%" | Type
+! scope="col" width="65%" | Description
+|-
+! damage
+| int
+| The amount of damage on the durability of the item. 0 is undamaged. The max value is determined by the item type's default durability or "maxdamage" if set.
+|-
+! unbreakable
+| boolean
+| If the item cannot be damaged when used. Also hides item durability bar. Field always exists if "damage" exists.
+|-
+! maxstacksize
+| int
+| Overrides the maximum quantity of items with identical meta that will stack. Must be from 1 to 99. (MC 1.20.6+)
+|-
+! maxdamage
+| int
+| Overrides the item's max durability. Value must be positive. (MC 1.20.6+)
+|-
+! glint
+| boolean
+| Overrides the item's enchantment glint state. (MC 1.20.6+)
+|-
+! rarity
+| string
+| Overrides the item's rarity, which affects the item name color. Can be COMMON (white), UNCOMMON (yellow), RARE (aqua), or EPIC (light purple). (MC 1.20.6+)
+|-
+! food
+| associative array
+| Overrides the consumable item's food stats. (MC 1.20.6+)
+* '''nutrition''' : (int) Food restored on the hunger bar when consumed. (default: 0)
+* '''saturation''' : (double) The amount of saturation that is increased when consumed. (default: 0.0)
+* '''always''' : (boolean) Whether the food can be consumed even if the hunger bar is full. (default: false)
+|-
+! jukeboxsong
+| string
+| Overrides the item's playable jukebox song. (MC 1.21+)
+|-
+! enchantability
+| int
+| Overrides the item's enchantability in an enchanting table. Value must be positive. Higher values allow applicable enchantments with higher costs to be picked. (MC 1.21.3+)
+|-
+! glider
+| boolean
+| Overrides if the item allows gliding when equipped like an elytra. (MC 1.21.3+)
+|-
+! remainder
+| associative array
+| Overrides the remaining item when the this item is used. (MC 1.21.3+)
+|}
 
 These fields only exist for specific item types.
 {| width="80%" cellspacing="1" cellpadding="1" border="1" class="wikitable"
@@ -251,8 +324,8 @@ The entity's custom name is derived from the item "display" string. All other tr
 
 Other data not yet supported in item meta:
 
-MC 1.13.2+: "can_break", "can_place_on"
-MC 1.20.6+: "hide_tooltip", "instrument", "intangible_projectile", "item_name", "lock", "note_block_sound", "tool"
-MC 1.21.3+: "consumable", "damage_resistant", "death_protection", "equippable", "item_model", "glider", "repairable", "tooltip_style", "use_cooldown", "use_remainder"
-MC 1.21.4+: "custom_model_data" for anything other than a single float
-MC 1.21.5+: "weapon", "potion_duration_scale", "blocks_attacks", "break_sound", "provides_banner_patterns", "provides_trim_material", "tooltip_display"
+* MC 1.13.2 : "can_break" and "can_place_on" (Paper only)
+* MC 1.20.5 : "item_name", "note_block_sound", "intangible_projectile" (Paper 1.21.3 only), "instrument" (partial support due to partial server API), "tool" (partial server API), "hide_tooltip" (later integrated into "tooltip_display"), "lock" (insufficient server API)
+* MC 1.21.2 : "damage_resistant", "tooltip_style", "use_cooldown", "item_model", "death_protection" (Paper only), "repairable" (Paper only), "consumable" (added in Spigot 1.21.4 API), "equippable" (added in Spigot 1.21.5 API)
+* MC 1.21.4 : "custom_model_data" (for anything other than a single float rounded down)
+* MC 1.21.5 : "weapon", "blocks_attacks", "break_sound", "provides_banner_patterns", "provides_trim_material", "potion_duration_scale" (Paper only), "tooltip_display" (partially supported with "flags")

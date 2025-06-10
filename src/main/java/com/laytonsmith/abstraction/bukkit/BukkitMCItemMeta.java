@@ -8,6 +8,7 @@ import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCAttributeModifier;
 import com.laytonsmith.abstraction.MCFoodComponent;
 import com.laytonsmith.abstraction.MCItemMeta;
+import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCTagContainer;
 import com.laytonsmith.abstraction.blocks.MCBlockData;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
@@ -42,6 +43,7 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemRarity;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockDataMeta;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -399,6 +401,31 @@ public class BukkitMCItemMeta implements MCItemMeta {
 				im.setJukeboxPlayable(component);
 			}
 		}
+	}
+
+	@Override
+	public boolean isGlider() {
+		return im.isGlider();
+	}
+
+	@Override
+	public void setGlider(boolean glider) {
+		im.setGlider(glider);
+	}
+
+	@Override
+	public boolean hasUseRemainder() {
+		return im.hasUseRemainder();
+	}
+
+	@Override
+	public MCItemStack getUseRemainder() {
+		return new BukkitMCItemStack(im.getUseRemainder());
+	}
+
+	@Override
+	public void setUseRemainder(MCItemStack remainder) {
+		im.setUseRemainder((ItemStack) remainder.getHandle());
 	}
 
 	@Override
