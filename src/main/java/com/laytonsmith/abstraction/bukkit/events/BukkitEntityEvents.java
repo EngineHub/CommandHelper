@@ -62,6 +62,7 @@ import com.laytonsmith.abstraction.events.MCEntityPortalEvent;
 import com.laytonsmith.abstraction.events.MCEntityRegainHealthEvent;
 import com.laytonsmith.abstraction.events.MCEntityTargetEvent;
 import com.laytonsmith.abstraction.events.MCEntityToggleGlideEvent;
+import com.laytonsmith.abstraction.events.MCEntityToggleSwimEvent;
 import com.laytonsmith.abstraction.events.MCEntityUnleashEvent;
 import com.laytonsmith.abstraction.events.MCEntityPotionEffectEvent;
 import com.laytonsmith.abstraction.events.MCFireworkExplodeEvent;
@@ -102,6 +103,7 @@ import org.bukkit.event.entity.EntityPortalEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.EntityToggleGlideEvent;
+import org.bukkit.event.entity.EntityToggleSwimEvent;
 import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.event.entity.FireworkExplodeEvent;
 import org.bukkit.event.entity.ItemDespawnEvent;
@@ -904,6 +906,36 @@ public class BukkitEntityEvents {
 		@Override
 		public boolean isGliding() {
 			return e.isGliding();
+		}
+
+		@Override
+		public MCEntity getEntity() {
+			return BukkitConvertor.BukkitGetCorrectEntity(e.getEntity());
+		}
+
+		@Override
+		public MCEntityType getEntityType() {
+			return BukkitConvertor.BukkitGetCorrectEntity(e.getEntity()).getType();
+		}
+	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCEntityToggleSwimEvent implements MCEntityToggleSwimEvent {
+
+		EntityToggleSwimEvent e;
+
+		public BukkitMCEntityToggleSwimEvent(Event e) {
+			this.e = (EntityToggleSwimEvent) e;
+		}
+
+		@Override
+		public Object _GetObject() {
+			return e;
+		}
+
+		@Override
+		public boolean isSwimming() {
+			return e.isSwimming();
 		}
 
 		@Override
