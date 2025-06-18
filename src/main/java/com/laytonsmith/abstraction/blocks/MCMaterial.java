@@ -1748,7 +1748,28 @@ public abstract class MCMaterial<Concrete> extends DynamicEnum<MCVanillaMaterial
 		TALL_DRY_GRASS(MCVersion.MC1_21_5),
 		TEST_BLOCK(MCVersion.MC1_21_5),
 		TEST_INSTANCE_BLOCK(MCVersion.MC1_21_5),
-		WILDFLOWERS(MCVersion.MC1_21_5);
+		WILDFLOWERS(MCVersion.MC1_21_5),
+
+		// 1.21.6 additions
+		BLACK_HARNESS(MCVersion.MC1_21_6),
+		BLUE_HARNESS(MCVersion.MC1_21_6),
+		BROWN_HARNESS(MCVersion.MC1_21_6),
+		CYAN_HARNESS(MCVersion.MC1_21_6),
+		GRAY_HARNESS(MCVersion.MC1_21_6),
+		GREEN_HARNESS(MCVersion.MC1_21_6),
+		LIGHT_BLUE_HARNESS(MCVersion.MC1_21_6),
+		LIGHT_GRAY_HARNESS(MCVersion.MC1_21_6),
+		LIME_HARNESS(MCVersion.MC1_21_6),
+		MAGENTA_HARNESS(MCVersion.MC1_21_6),
+		ORANGE_HARNESS(MCVersion.MC1_21_6),
+		PINK_HARNESS(MCVersion.MC1_21_6),
+		PURPLE_HARNESS(MCVersion.MC1_21_6),
+		RED_HARNESS(MCVersion.MC1_21_6),
+		WHITE_HARNESS(MCVersion.MC1_21_6),
+		YELLOW_HARNESS(MCVersion.MC1_21_6),
+		DRIED_GHAST(MCVersion.MC1_21_6),
+		HAPPY_GHAST_SPAWN_EGG(MCVersion.MC1_21_6),
+		MUSIC_DISC_TEARS(MCVersion.MC1_21_6);
 
 		private final MCVersion since;
 		private final MCVersion until;

@@ -4,5 +4,7 @@ public enum MCUnleashReason {
 	HOLDER_GONE,
 	PLAYER_UNLEASH,
 	DISTANCE,
+	SHEAR,
+	FIREWORK,
 	UNKNOWN
 }

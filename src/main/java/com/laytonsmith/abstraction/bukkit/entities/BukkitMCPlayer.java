@@ -439,7 +439,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 		// Get some version specific mappings
 		String nms = "net.minecraft.server";
 		String playersPackage = nms + ".players";
-		String ops = "p";
+		String ops = isPaper ? "ops" : "p";
 		String getPlayerList = isPaper ? "getPlayerList" : "ag";
 		MCVersion mcversion = Static.getServer().getMinecraftVersion();
 		if(mcversion.lt(MCVersion.MC1_21_3)) {

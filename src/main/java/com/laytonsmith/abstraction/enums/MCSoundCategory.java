@@ -13,5 +13,6 @@ public enum MCSoundCategory {
 	NEUTRAL,
 	PLAYERS,
 	AMBIENT,
-	VOICE
+	VOICE,
+	UI
 }

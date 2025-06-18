@@ -206,6 +206,7 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 		GLOW_SQUID(true, MCVersion.MC1_17),
 		GOAT(true, MCVersion.MC1_17),
 		GUARDIAN,
+		HAPPY_GHAST(true, MCVersion.MC1_21_6),
 		HOGLIN(true, MCVersion.MC1_16),
 		HORSE,
 		HUSK,

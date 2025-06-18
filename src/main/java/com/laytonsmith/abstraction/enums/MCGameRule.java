@@ -42,6 +42,7 @@ public enum MCGameRule {
 	GLOBALSOUNDEVENTS("globalSoundEvents"),
 	KEEPINVENTORY("keepInventory"),
 	LAVASOURCECONVERSION("lavaSourceConversion"),
+	LOCATORBAR("locatorBar"),
 	LOGADMINCOMMANDS("logAdminCommands"),
 	MAXCOMMANDCHAINLENGTH("maxCommandChainLength", CInt.class),
 	MAXCOMMANDFORKCOUNT("maxCommandForkCount", CInt.class),

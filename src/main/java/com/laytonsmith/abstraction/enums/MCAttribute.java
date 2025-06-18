@@ -101,6 +101,9 @@ public abstract class MCAttribute<Concrete> extends DynamicEnum<MCAttribute.MCVa
 		PLAYER_SUBMERGED_MINING_SPEED(MCVersion.MC1_21),
 		PLAYER_SWEEPING_DAMAGE_RATIO(MCVersion.MC1_21),
 		TEMPT_RANGE(MCVersion.MC1_21_3),
+		CAMERA_DISTANCE(MCVersion.MC1_21_6),
+		WAYPOINT_TRANSMIT_RANGE(MCVersion.MC1_21_6),
+		WAYPOINT_RECEIVE_RANGE(MCVersion.MC1_21_6),
 
 		UNKNOWN(MCVersion.NEVER);
 
