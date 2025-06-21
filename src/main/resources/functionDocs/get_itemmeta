@@ -5,9 +5,9 @@ array {[player,] slot} Returns an associative array of known item data in the sl
 These fields exist for all items with meta.
 {| width="100%" cellspacing="1" cellpadding="1" border="1" class="wikitable"
 |-
-! scope="col" width="15%" | Field
+! scope="col" width="12%" | Field
 ! scope="col" width="15%" | Type
-! scope="col" width="70%" | Description
+! scope="col" width="73%" | Description
 |-
 ! display
 | string
@@ -57,8 +57,8 @@ These fields optionally exist for any item type.
 {| width="100%" cellspacing="1" cellpadding="1" border="1" class="wikitable"
 |-
 ! scope="col" width="12%" | Field
-! scope="col" width="23%" | Type
-! scope="col" width="65%" | Description
+! scope="col" width="15%" | Type
+! scope="col" width="73%" | Description
 |-
 ! damage
 | int
@@ -101,11 +101,11 @@ These fields optionally exist for any item type.
 |-
 ! glider
 | boolean
-| Overrides if the item allows gliding when equipped like an elytra. (MC 1.21.3+)
+| Overrides if the item allows gliding like an elytra when equipped. (MC 1.21.3+)
 |-
 ! remainder
 | associative array
-| Overrides the remaining item when the this item is used. (MC 1.21.3+)
+| Overrides the remaining item when the quantity of this item decreases after use. (e.g. a bucket after drinking a milk bucket) (MC 1.21.3+)
 |}
 
 These fields only exist for specific item types.
@@ -224,6 +224,7 @@ The remaining tags are not yet supported.
 ! GoatHorns
 |
 * '''instrument''' : (string) The instrument name (can be ponder_goat_horn, sing_goat_horn, seek_goat_horn, feel_goat_horn, admire_goat_horn, call_goat_horn, yearn_goat_horn, dream_goat_horn). (MC 1.19.3+)
+Custom instrument definitions featuring a different sound event, description, duration and range are not yet supported. (missing server API)
 |-
 ! Inventory Blocks
 |
@@ -257,6 +258,7 @@ The remaining tags are not yet supported.
 * '''owner''' : (string) The user name. Can be null if there is no owner.
 * '''owneruuid''' : (string) The user UUID. Can be null if there is no owner.
 * '''texture''' : (string) The texture property value used for custom heads. This is a base64 encoded JSON object seen under the "Value" key in vanilla. It contains the skin texture URL among other things. Requires an owner. (Paper only)
+* '''noteblocksound''' : (string) The namespaced sound id played when player head is on top of a noteblock. (MC 1.19.3+)
 |-
 ! Potions
 |
@@ -325,7 +327,7 @@ The entity's custom name is derived from the item "display" string. All other tr
 Other data not yet supported in item meta:
 
 * MC 1.13.2 : "can_break" and "can_place_on" (Paper only)
-* MC 1.20.5 : "item_name", "note_block_sound", "intangible_projectile" (Paper 1.21.3 only), "instrument" (partial support due to partial server API), "tool" (partial server API), "hide_tooltip" (later integrated into "tooltip_display"), "lock" (insufficient server API)
-* MC 1.21.2 : "damage_resistant", "tooltip_style", "use_cooldown", "item_model", "death_protection" (Paper only), "repairable" (Paper only), "consumable" (added in Spigot 1.21.4 API), "equippable" (added in Spigot 1.21.5 API)
+* MC 1.20.5 : "item_name", "intangible_projectile" (Paper 1.21.3 only), "instrument" (can only get custom definitions in Paper, not set), "tool" (cannot get tags in 'rules', can_destroy_blocks_in_creative field only in Paper), "hide_tooltip" (later integrated into "tooltip_display"), "lock" (can only set with server API)
+* MC 1.21.2 : "damage_resistant", "tooltip_style", "use_cooldown", "item_model", "death_protection" (Paper only), "repairable" (Paper only), "consumable" (added in Spigot 1.21.4 API, Paper API separate), "equippable" (added in Spigot 1.21.5 API)
 * MC 1.21.4 : "custom_model_data" (for anything other than a single float rounded down)
-* MC 1.21.5 : "weapon", "blocks_attacks", "break_sound", "provides_banner_patterns", "provides_trim_material", "potion_duration_scale" (Paper only), "tooltip_display" (partially supported with "flags")
+* MC 1.21.5 : "weapon" (separate Paper/Spigot API), "blocks_attacks" (separate Paper/Spigot API), "break_sound" (separate Paper/Spigot API), "provides_banner_patterns" (Paper only), "provides_trim_material" (Paper only), "potion_duration_scale" (Paper only), "tooltip_display" (partially supported with "flags")

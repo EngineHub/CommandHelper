@@ -16,4 +16,8 @@ public interface MCSkullMeta extends MCItemMeta {
 
 	void setProfile(MCPlayerProfile profile);
 
+	String getNoteBlockSound();
+
+	void setNoteBlockSound(String noteBlockSound);
+
 }

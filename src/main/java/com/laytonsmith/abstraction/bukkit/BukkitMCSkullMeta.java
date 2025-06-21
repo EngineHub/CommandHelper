@@ -6,6 +6,7 @@ import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPlayerProfile;
 import com.laytonsmith.abstraction.MCSkullMeta;
 import com.laytonsmith.core.Static;
+import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.inventory.meta.SkullMeta;
 
@@ -70,5 +71,19 @@ public class BukkitMCSkullMeta extends BukkitMCItemMeta implements MCSkullMeta {
 	public void setProfile(MCPlayerProfile profile) {
 		// Completes the profile from user cache.
 		this.sm.setPlayerProfile((PlayerProfile) profile.getHandle());
+	}
+
+	@Override
+	public String getNoteBlockSound() {
+		NamespacedKey sound = this.sm.getNoteBlockSound();
+		if(sound == null) {
+			return null;
+		}
+		return sound.toString();
+	}
+
+	@Override
+	public void setNoteBlockSound(String noteBlockSound) {
+		this.sm.setNoteBlockSound(NamespacedKey.fromString(noteBlockSound));
 	}
 }

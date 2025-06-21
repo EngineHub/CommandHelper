@@ -789,6 +789,14 @@ public class ObjectGenerator {
 						ma.set("owneruuid", CNull.NULL, t);
 					}
 				}
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_3)) {
+					String sound = ((MCSkullMeta) meta).getNoteBlockSound();
+					if(sound == null) {
+						ma.set("noteblocksound", CNull.NULL, t);
+					} else {
+						ma.set("noteblocksound", new CString(sound, t), t);
+					}
+				}
 			} else if(meta instanceof MCEnchantmentStorageMeta) {
 				Construct stored;
 				if(((MCEnchantmentStorageMeta) meta).hasStoredEnchants()) {
@@ -1536,6 +1544,14 @@ public class ObjectGenerator {
 							} else if(name != null && !name.isEmpty()) {
 								// No offline player found by UUID, but we can fallback to owner by name.
 								((MCSkullMeta) meta).setOwner(name);
+							}
+						}
+					}
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_3)) {
+						if(ma.containsKey("noteblocksound")) {
+							Mixed sound = ma.get("noteblocksound", t);
+							if(!(sound instanceof CNull)) {
+								((MCSkullMeta) meta).setNoteBlockSound(sound.val());
 							}
 						}
 					}
