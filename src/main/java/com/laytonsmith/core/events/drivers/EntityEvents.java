@@ -77,6 +77,9 @@ import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventBuilder;
 import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
+import com.laytonsmith.core.events.prefilters.OptionalPlayerPrefilterMatcher;
+import com.laytonsmith.core.events.prefilters.PrefilterBuilder;
+import com.laytonsmith.core.events.prefilters.StringICPrefilterMatcher;
 import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
 import com.laytonsmith.core.exceptions.CRE.CREBindException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
@@ -2074,16 +2077,23 @@ public class EntityEvents {
 					+ " {}";
 		}
 
-		@Override
-		public boolean matches(Map<String, Mixed> filter, MCEntityToggleSwimEvent e) throws PrefilterNonMatchException {
-			MCEntity entity = e.getEntity();
-			Prefilters.match(filter, "type", entity.getType().name(), Prefilters.PrefilterType.MACRO);
-			Prefilters.match(filter, "id", entity.getUniqueId().toString(), Prefilters.PrefilterType.MACRO);
 
-			if(entity instanceof MCPlayer) {
-				Prefilters.match(filter, "player", ((MCPlayer) entity).getName(), Prefilters.PrefilterType.MACRO);
-			}
-			return true;
+		@Override
+		protected PrefilterBuilder getPrefilterBuilder() {
+			return new PrefilterBuilder<MCEntityToggleSwimEvent>()
+					.set("player", "The player that toggle swime", new OptionalPlayerPrefilterMatcher<>())
+					.set("type", "The entity type of the entity that toggle swime", new StringICPrefilterMatcher<>() {
+						@Override
+						protected String getProperty(MCEntityToggleSwimEvent event) {
+							return event.getEntityType().name();
+						}
+					})
+					.set("id", "The ID of the entity that toggle swime", new StringICPrefilterMatcher<>() {
+						@Override
+						protected String getProperty(MCEntityToggleSwimEvent event) {
+							return event.getEntity().getUniqueId().toString();
+						}
+					});
 		}
 
 		@Override
@@ -2125,7 +2135,8 @@ public class EntityEvents {
 		}
 
 		@Override
-		public void cancel(MCEntityToggleSwimEvent o, boolean state) {}
+		public void cancel(MCEntityToggleSwimEvent o, boolean state) {
+		}
 
 		@Override
 		public boolean isCancellable(MCEntityToggleSwimEvent o) {
