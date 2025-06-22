@@ -1016,8 +1016,7 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "boolean {entityUUID} Returns whether the specified living entity will despawn."
-					+ " True means it will not.";
+			return "boolean {entityUUID} Returns whether a living entity will despawn when players are far enough away.";
 		}
 
 		@Override
@@ -1042,7 +1041,7 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityUUID, boolean} Sets whether a living entity will despawn. True means it will not.";
+			return "void {entityUUID, boolean} Sets whether a living entity will despawn when players are far enough away.";
 		}
 
 		@Override

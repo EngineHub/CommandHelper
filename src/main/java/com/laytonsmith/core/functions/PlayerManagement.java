@@ -231,6 +231,7 @@ public class PlayerManagement {
 		@Override
 		public String docs() {
 			return "string {[player], [dashless]} Returns the UUID of the current player or the specified player."
+					+ " If dashless is set to true, the returned UUID format will not have any dashes."
 					+ " This will attempt to find an offline player, but if that also fails,"
 					+ " a PlayerOfflineException will be thrown. ---- It is not recommended to give this user input."
 					+ " If the player is offline and hasn't visited the server recently (so that they're not in the"
@@ -7432,7 +7433,8 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {[player], isVanished, otherPlayer} Sets the visibility of this player to another player.";
+			return "void {[player], isVanished, otherPlayer} Sets the visibility of this player to another player."
+					+ " If isVanished is true, the player's model and tablist name will not be visible to the other player.";
 		}
 
 		@Override

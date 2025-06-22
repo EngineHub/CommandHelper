@@ -263,7 +263,8 @@ public class Environment {
 		@Override
 		public String docs() {
 			return "void {locationArray, data, [physics]} Sets the block at the location from a blockdata string."
-					+ " Forward compatibility is not ensured.";
+					+ " Forward compatibility is not ensured."
+					+ " The physics boolean determines whether or not this causes a block update. Defaults to true.";
 		}
 
 		@Override
@@ -379,7 +380,8 @@ public class Environment {
 			return "void {locationArray, data, [physics]} Sets the block at the location from a blockdata object."
 					+ " Blockdata can be an associative array or string format."
 					+ " If an array, a 'block' key must exist with the block material."
-					+ " All the other keys must be a blockstate and its value.";
+					+ " All the other keys must be a blockstate and its value."
+					+ " The physics boolean determines whether or not this causes a block update. Defaults to true.";
 		}
 
 		@Override
@@ -3336,7 +3338,8 @@ public class Environment {
 		public String docs() {
 			return "void {gatewayLocation, exitLocation, [exactTeleport]} Sets an end gateways teleport exit location."
 					+ " The exit location must be null or a location array with the same world as the end gateway."
-					+ " Optionally change whether the end gateway teleports to the exact location or finds a nearby one.";
+					+ " If exactTeleport is set to true, entities will teleport to the exit's exact block location."
+					+ " Otherwise a teleport location will be found near the exit location.";
 		}
 
 		@Override

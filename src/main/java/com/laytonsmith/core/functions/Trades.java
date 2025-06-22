@@ -329,9 +329,8 @@ public class Trades {
 			return "boolean {specifier, [player], [force]} Opens a trading interface for the current player,"
 					+ " or the one specified. Only one player can trade with a merchant at a time."
 					+ " If the merchant is already being traded with, the function will do nothing."
-					+ " When true, force will make the merchant trade with the player, closing the trade with"
-					+ " the previous player if there was one. Function returns true if trading was successfully"
-					+ " opened, and false if not.";
+					+ " When force is set to true, this function will first close trading with any other player."
+					+ " Function returns true if trading was successfully opened, and false if not.";
 		}
 	}
 
