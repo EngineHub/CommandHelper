@@ -23,11 +23,11 @@ import com.laytonsmith.core.exceptions.AbstractCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.testing.AbstractIntegrationTest;
 import com.laytonsmith.testing.StaticTest;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -61,7 +61,7 @@ import static org.mockito.Mockito.verify;
 //@RunWith(PowerMockRunner.class)
 //@PrepareForTest(CommandHelperPlugin.class)
 //@PowerMockIgnore({"javax.xml.parsers.*", "com.sun.org.apache.xerces.internal.jaxp.*"})
-public class MethodScriptCompilerTest {
+public class MethodScriptCompilerTest extends AbstractIntegrationTest {
 
 	MCServer fakeServer;
 	MCPlayer fakePlayer;
@@ -70,11 +70,6 @@ public class MethodScriptCompilerTest {
 
 	public MethodScriptCompilerTest() {
 		//StaticTest.InstallFakeServerFrontend();
-	}
-
-	@BeforeClass
-	public static void setUpClass() throws Exception {
-		StaticTest.InstallFakeServerFrontend();
 	}
 
 	@AfterClass

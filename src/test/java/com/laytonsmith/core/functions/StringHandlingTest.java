@@ -5,17 +5,16 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
+import com.laytonsmith.testing.AbstractIntegrationTest;
 import com.laytonsmith.testing.C;
 import com.laytonsmith.testing.StaticTest;
 import static com.laytonsmith.testing.StaticTest.SRun;
 import static com.laytonsmith.testing.StaticTest.assertCEquals;
 import java.util.Locale;
 import org.junit.After;
-import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.mockito.Mockito.verify;
 
@@ -23,20 +22,11 @@ import static org.mockito.Mockito.verify;
  *
  *
  */
-public class StringHandlingTest {
+public class StringHandlingTest extends AbstractIntegrationTest {
 
 	MCPlayer fakePlayer;
 
 	public StringHandlingTest() {
-	}
-
-	@BeforeClass
-	public static void setUpClass() throws Exception {
-		StaticTest.InstallFakeServerFrontend();
-	}
-
-	@AfterClass
-	public static void tearDownClass() throws Exception {
 	}
 
 	@Before

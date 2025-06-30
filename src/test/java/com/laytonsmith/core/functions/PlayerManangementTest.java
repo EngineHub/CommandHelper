@@ -10,6 +10,7 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
+import com.laytonsmith.testing.AbstractIntegrationTest;
 import com.laytonsmith.testing.StaticTest;
 import static com.laytonsmith.testing.StaticTest.GetFakeConsoleCommandSender;
 import static com.laytonsmith.testing.StaticTest.GetFakeServer;
@@ -36,7 +37,7 @@ import static org.mockito.Mockito.when;
  *
  *
  */
-public class PlayerManangementTest {
+public class PlayerManangementTest extends AbstractIntegrationTest {
 
 	MCServer fakeServer;
 	MCPlayer fakePlayer;

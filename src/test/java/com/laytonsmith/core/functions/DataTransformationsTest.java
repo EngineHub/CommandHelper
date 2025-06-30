@@ -7,6 +7,8 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import static com.laytonsmith.testing.CustomMatchers.regexMatch;
+
+import com.laytonsmith.testing.AbstractIntegrationTest;
 import com.laytonsmith.testing.StaticTest;
 import static com.laytonsmith.testing.StaticTest.SRun;
 import static org.hamcrest.CoreMatchers.is;
@@ -20,14 +22,13 @@ import org.junit.Test;
 /**
  *
  */
-public class DataTransformationsTest {
+public class DataTransformationsTest extends AbstractIntegrationTest {
 
 	MCServer fakeServer;
 	MCPlayer fakePlayer;
 	com.laytonsmith.core.environments.Environment env;
 
 	public DataTransformationsTest() throws Exception {
-		StaticTest.InstallFakeServerFrontend();
 		env = Static.GenerateStandaloneEnvironment();
 		env = env.cloneAndAdd(new CommandHelperEnvironment());
 	}

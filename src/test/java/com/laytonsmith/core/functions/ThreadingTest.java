@@ -6,6 +6,7 @@ import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.testing.AbstractIntegrationTest;
 import com.laytonsmith.testing.StaticTest;
 import org.junit.*;
 
@@ -14,18 +15,13 @@ import java.util.Set;
 
 import static org.mockito.Mockito.verify;
 
-public class ThreadingTest {
+public class ThreadingTest extends AbstractIntegrationTest {
 
 
 	MCServer fakeServer;
 	MCPlayer fakePlayer;
 	com.laytonsmith.core.environments.Environment env;
 	static Set<Class<? extends com.laytonsmith.core.environments.Environment.EnvironmentImpl>> envs = Environment.getDefaultEnvClasses();
-
-	@BeforeClass
-	public static void setUpClass() throws Exception {
-		StaticTest.InstallFakeServerFrontend();
-	}
 
 	@AfterClass
 	public static void tearDownClass() throws Exception {

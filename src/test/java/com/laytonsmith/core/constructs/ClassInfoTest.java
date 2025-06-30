@@ -5,27 +5,20 @@ import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.objects.ObjectModifier;
 import com.laytonsmith.core.objects.ObjectType;
-import com.laytonsmith.testing.StaticTest;
-
+import com.laytonsmith.testing.AbstractIntegrationTest;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
-import org.junit.Before;
 import org.junit.Test;
 
 /**
  *
  * @author cailin
  */
-public class ClassInfoTest {
-
-	@Before
-	public void before() {
-		StaticTest.InstallFakeServerFrontend();
-	}
+public class ClassInfoTest extends AbstractIntegrationTest {
 
 	@Test
 	public void testAllInterfacesReturnNothingForGetInterfaces() throws Exception {

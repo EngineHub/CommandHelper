@@ -4,23 +4,17 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.natives.interfaces.Booleanish;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import com.laytonsmith.testing.AbstractIntegrationTest;
 
-import static com.laytonsmith.testing.StaticTest.InstallFakeServerFrontend;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
 
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
  *
  */
-public class InstanceofUtilTest {
-
-	@BeforeClass
-	public static void setUpClass() {
-		InstallFakeServerFrontend();
-	}
+public class InstanceofUtilTest extends AbstractIntegrationTest {
 
 	@Test
 	public void testInstanceofUtil() throws Exception {

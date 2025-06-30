@@ -8,6 +8,7 @@ import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.testing.AbstractIntegrationTest;
 import com.laytonsmith.testing.StaticTest;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -19,7 +20,7 @@ import org.junit.Test;
  *
  *
  */
-public class MinecraftTest {
+public class MinecraftTest extends AbstractIntegrationTest {
 
 	MCServer fakeServer;
 	MCPlayer fakePlayer;

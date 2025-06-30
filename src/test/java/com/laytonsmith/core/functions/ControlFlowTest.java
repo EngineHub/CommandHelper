@@ -9,9 +9,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.laytonsmith.abstraction.MCPlayer;
@@ -19,9 +17,9 @@ import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.testing.StaticTest;
+import com.laytonsmith.testing.AbstractIntegrationTest;
 
-public class ControlFlowTest {
+public class ControlFlowTest extends AbstractIntegrationTest {
 
 	MCPlayer fakePlayer;
 	MCServer fakeServer;
@@ -30,15 +28,6 @@ public class ControlFlowTest {
 	public ControlFlowTest() throws Exception {
 		env = Static.GenerateStandaloneEnvironment();
 		env = env.cloneAndAdd(new CommandHelperEnvironment());
-	}
-
-	@BeforeClass
-	public static void setUpClass() throws Exception {
-		StaticTest.InstallFakeServerFrontend();
-	}
-
-	@AfterClass
-	public static void tearDownClass() throws Exception {
 	}
 
 	@Before

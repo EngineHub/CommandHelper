@@ -112,7 +112,7 @@ import static org.mockito.Mockito.when;
  *
  *
  */
-public class StaticTest {
+public class StaticTest extends AbstractIntegrationTest {
 
 	static com.laytonsmith.core.environments.Environment env;
 	static Set<Class<? extends Environment.EnvironmentImpl>> envs = Environment.getDefaultEnvClasses();
@@ -541,7 +541,6 @@ public class StaticTest {
 	}
 
 	public static void Run(String script, MCCommandSender player, MethodScriptComplete done, Environment env) throws Exception {
-		InstallFakeServerFrontend();
 		if(env == null) {
 			env = StaticTest.env;
 		}
@@ -558,7 +557,6 @@ public class StaticTest {
 	}
 
 	public static void RunCommand(String combinedScript, MCCommandSender player, String command, Environment env) throws Exception {
-		InstallFakeServerFrontend();
 		if(env == null) {
 			env = StaticTest.env;
 		}
@@ -573,7 +571,6 @@ public class StaticTest {
 	}
 
 	public static String SRun(String script, MCCommandSender player, Environment env) throws Exception {
-		InstallFakeServerFrontend();
 		final StringBuffer b = new StringBuffer();
 		Run(script, player, new MethodScriptComplete() {
 
@@ -667,7 +664,6 @@ public class StaticTest {
 	 * @throws java.lang.Exception
 	 */
 	public static void InstallFakeConvertor(MCPlayer fakePlayer) throws Exception {
-		InstallFakeServerFrontend();
 		try {
 			//We need to add the test directory to the ClassDiscovery path
 			//This should probably not be hard coded at some point.

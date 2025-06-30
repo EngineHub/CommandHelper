@@ -7,7 +7,7 @@ import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.ZipReader;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import com.laytonsmith.persistence.io.ReadWriteFileConnection;
-import com.laytonsmith.testing.StaticTest;
+import com.laytonsmith.testing.AbstractIntegrationTest;
 import static com.laytonsmith.testing.StaticTest.GetPrivate;
 import java.io.File;
 import java.net.URI;
@@ -27,13 +27,12 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
  *
  */
-public class TestPersistence {
+public class TestPersistence extends AbstractIntegrationTest {
 
 	/**
 	 * TODO: Need to test the following: Ensuring correct behavior with hidden keys that conflict
@@ -44,11 +43,6 @@ public class TestPersistence {
 	List<File> toDelete = new ArrayList<File>();
 	ConnectionMixinFactory.ConnectionMixinOptions options;
 	DaemonManager dm;
-
-	@BeforeClass
-	public static void setUpClass() throws Exception {
-		StaticTest.InstallFakeServerFrontend();
-	}
 
 	@Before
 	public void setUp() throws Exception {

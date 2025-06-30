@@ -8,6 +8,7 @@ import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.testing.AbstractIntegrationTest;
 import com.laytonsmith.testing.C;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
@@ -23,7 +24,7 @@ import org.junit.Test;
  *
  *
  */
-public class TestStatic {
+public class TestStatic extends AbstractIntegrationTest {
 
 	Target t = Target.UNKNOWN;
 

@@ -9,24 +9,20 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.RuntimeMode;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
-import com.laytonsmith.testing.StaticTest;
+import com.laytonsmith.testing.AbstractIntegrationTest;
+
 import java.io.File;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashSet;
 import static org.junit.Assert.*;
-import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
 /**
  *
  */
-public class StaticAnalysisTest {
-	@BeforeClass
-	public static void beforeClass() {
-		StaticTest.InstallFakeServerFrontend();
-	}
+public class StaticAnalysisTest extends AbstractIntegrationTest {
 
 	public void runScript(String script) throws Exception {
 		runScript(script, null);

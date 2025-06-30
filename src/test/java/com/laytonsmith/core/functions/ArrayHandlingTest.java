@@ -12,6 +12,7 @@ import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import com.laytonsmith.testing.AbstractIntegrationTest;
 import com.laytonsmith.testing.C;
 import com.laytonsmith.testing.StaticTest;
 import static com.laytonsmith.testing.StaticTest.Run;
@@ -33,14 +34,13 @@ import static org.hamcrest.core.Is.*;
  *
  *
  */
-public class ArrayHandlingTest {
+public class ArrayHandlingTest extends AbstractIntegrationTest {
 
 	MCPlayer fakePlayer;
 	CArray commonArray;
 	com.laytonsmith.core.environments.Environment env;
 
 	public ArrayHandlingTest() throws Exception {
-		StaticTest.InstallFakeServerFrontend();
 		env = Static.GenerateStandaloneEnvironment();
 		env = env.cloneAndAdd(new CommandHelperEnvironment());
 	}

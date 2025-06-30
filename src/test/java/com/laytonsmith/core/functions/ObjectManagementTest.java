@@ -14,7 +14,7 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.objects.ObjectDefinition;
 import com.laytonsmith.core.objects.ObjectType;
-import com.laytonsmith.testing.StaticTest;
+import com.laytonsmith.testing.AbstractIntegrationTest;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Set;
@@ -24,7 +24,7 @@ import static org.junit.Assert.*;
 /**
  *
  */
-public class ObjectManagementTest {
+public class ObjectManagementTest extends AbstractIntegrationTest {
 
 	static Set<Class<? extends Environment.EnvironmentImpl>> envs = Environment.getDefaultEnvClasses();
 
@@ -40,7 +40,6 @@ public class ObjectManagementTest {
 	}
 
 	public ObjectManagementTest() {
-		StaticTest.InstallFakeServerFrontend();
 	}
 
 	@Test
