@@ -13,6 +13,7 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.testing.AbstractIntegrationTest;
 import com.laytonsmith.testing.C;
 import com.laytonsmith.testing.StaticTest;
 import org.junit.After;
@@ -33,7 +34,7 @@ import static org.mockito.Mockito.verify;
  *
  *
  */
-public class MathTest {
+public class MathTest extends AbstractIntegrationTest {
 
 	Target t = Target.UNKNOWN;
 	MCServer fakeServer;
@@ -54,7 +55,6 @@ public class MathTest {
 
 	@Before
 	public void setUp() throws Exception {
-		StaticTest.InstallFakeServerFrontend();
 		fakePlayer = GetOnlinePlayer();
 		fakeServer = GetFakeServer();
 

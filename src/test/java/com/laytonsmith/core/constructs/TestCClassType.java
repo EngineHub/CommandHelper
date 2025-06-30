@@ -6,6 +6,7 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import com.laytonsmith.testing.AbstractIntegrationTest;
 import com.laytonsmith.testing.StaticTest;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,13 +26,12 @@ import org.junit.Ignore;
  *
  * @author cailin
  */
-public class TestCClassType {
+public class TestCClassType extends AbstractIntegrationTest {
 
 	static Environment env;
 
 	@Before
 	public void load() throws Exception {
-		StaticTest.InstallFakeServerFrontend();
 		env = Static.GenerateStandaloneEnvironment(false);
 		env = env.cloneAndAdd(new CommandHelperEnvironment());
 	}

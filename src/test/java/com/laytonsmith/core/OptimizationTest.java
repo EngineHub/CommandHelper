@@ -8,7 +8,7 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
-import com.laytonsmith.testing.StaticTest;
+import com.laytonsmith.testing.AbstractIntegrationTest;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,7 +17,6 @@ import java.util.Set;
 import org.junit.Assert;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -25,15 +24,10 @@ import org.junit.Test;
  *
  * This is also used to test the lexer/compiler at a low level
  */
-public class OptimizationTest {
+public class OptimizationTest extends AbstractIntegrationTest {
 
 	static Set<Class<? extends Environment.EnvironmentImpl>> envs = Environment.getDefaultEnvClasses();
 	static Environment env;
-
-	@BeforeClass
-	public static void setUpClass() {
-		StaticTest.InstallFakeServerFrontend();
-	}
 
 	public static String optimize(String script, boolean pureMethodScript, Environment env) throws Exception {
 		try {

@@ -4,6 +4,7 @@ import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.testing.AbstractIntegrationTest;
 
 import static com.laytonsmith.testing.StaticTest.SRun;
 import java.util.Set;
@@ -21,7 +22,7 @@ import org.junit.Test;
  *
  *
  */
-public class RegexTest {
+public class RegexTest extends AbstractIntegrationTest {
 
 	static Set<Class<? extends com.laytonsmith.core.environments.Environment.EnvironmentImpl>> envs = com.laytonsmith.core.environments.Environment.getDefaultEnvClasses();
 

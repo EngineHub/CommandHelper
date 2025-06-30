@@ -4,7 +4,7 @@ import com.laytonsmith.core.asm.metadata.IRMetadata;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.asm.metadata.IRMetadata.PrototypeBuilder;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
-import com.laytonsmith.testing.StaticTest;
+import com.laytonsmith.testing.AbstractIntegrationTest;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -14,12 +14,11 @@ import static org.junit.Assert.assertEquals;
  *
  * @author Cailin
  */
-public class IRMetadataTest {
+public class IRMetadataTest extends AbstractIntegrationTest {
 
 	com.laytonsmith.core.environments.Environment env;
 
 	public IRMetadataTest() throws Exception {
-		StaticTest.InstallFakeServerFrontend();
 		env = Static.GenerateStandaloneEnvironment();
 		env = env.cloneAndAdd(new CommandHelperEnvironment(), new LLVMEnvironment());
 	}

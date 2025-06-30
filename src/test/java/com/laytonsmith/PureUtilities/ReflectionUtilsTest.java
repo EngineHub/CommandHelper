@@ -2,23 +2,17 @@ package com.laytonsmith.PureUtilities;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
-import com.laytonsmith.testing.StaticTest;
+import com.laytonsmith.testing.AbstractIntegrationTest;
 import static org.junit.Assert.assertEquals;
-import org.junit.Before;
 import org.junit.Test;
 
 /**
  *
  *
  */
-public class ReflectionUtilsTest {
+public class ReflectionUtilsTest extends AbstractIntegrationTest {
 
 	public ReflectionUtilsTest() {
-	}
-
-	@Before
-	public void setUp() {
-		StaticTest.InstallFakeServerFrontend();
 	}
 
 	class A {

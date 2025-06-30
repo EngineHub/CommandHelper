@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.laytonsmith.core.Static;
@@ -27,16 +26,11 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREIndexOverflowException;
-import com.laytonsmith.testing.StaticTest;
+import com.laytonsmith.testing.AbstractIntegrationTest;
 
-public class FunctionSignaturesTest {
+public class FunctionSignaturesTest extends AbstractIntegrationTest {
 
 	private Environment env;
-
-	@BeforeClass
-	public static void setUpClass() throws Exception {
-		StaticTest.InstallFakeServerFrontend();
-	}
 
 	@Before
 	public void setUp() throws Exception {
