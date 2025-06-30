@@ -21,15 +21,6 @@ import com.laytonsmith.core.environments.Environment;
  */
 public class C {
 
-	private static final Environment ENV;
-
-	static {
-		try {
-			ENV = Static.GenerateStandaloneEnvironment(false);
-		} catch (Exception ex) {
-			throw new Error(ex);
-		}
-	}
 	//Shortcut to Construct.class
 	public static final Class<CArray> ARRAY = CArray.class;
 	public static final Class<CBoolean> BOOLEAN = CBoolean.class;
@@ -69,8 +60,8 @@ public class C {
 		return CVoid.VOID;
 	}
 
-	public static IVariable IVariable(String name, Construct val) {
-		return new IVariable(Auto.TYPE, name, val, Target.UNKNOWN, ENV);
+	public static IVariable IVariable(String name, Construct val, Environment env) {
+		return new IVariable(Auto.TYPE, name, val, Target.UNKNOWN, env);
 	}
 
 	public static Variable Variable(String name, String val) {
