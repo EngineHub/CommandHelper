@@ -1769,7 +1769,10 @@ public abstract class MCMaterial<Concrete> extends DynamicEnum<MCVanillaMaterial
 		YELLOW_HARNESS(MCVersion.MC1_21_6),
 		DRIED_GHAST(MCVersion.MC1_21_6),
 		HAPPY_GHAST_SPAWN_EGG(MCVersion.MC1_21_6),
-		MUSIC_DISC_TEARS(MCVersion.MC1_21_6);
+		MUSIC_DISC_TEARS(MCVersion.MC1_21_6),
+
+		// 1.21.7 additions
+		MUSIC_DISC_LAVA_CHICKEN(MCVersion.MC1_21_7);
 
 		private final MCVersion since;
 		private final MCVersion until;

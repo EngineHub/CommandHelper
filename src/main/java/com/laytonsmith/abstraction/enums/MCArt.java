@@ -109,6 +109,7 @@ public abstract class MCArt<Concrete> extends DynamicEnum<MCVanillaArt, Concrete
 		OWLEMONS(MCVersion.MC1_21),
 		SUNFLOWERS(MCVersion.MC1_21),
 		TIDES(MCVersion.MC1_21),
+		DENNIS(MCVersion.MC1_21_7),
 		// 4x3
 		SKELETON,
 		DONKEY_KONG,

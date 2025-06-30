@@ -1841,6 +1841,9 @@ public abstract class MCSound<Concrete> extends DynamicEnum<MCSound.MCVanillaSou
 		ITEM_SHEARS_SNIP(MCVersion.MC1_21_6),
 		MUSIC_DISC_TEARS(MCVersion.MC1_21_6),
 
+		// 1.21.7 additions
+		MUSIC_DISC_LAVA_CHICKEN(MCVersion.MC1_21_7),
+
 		UNKNOWN(MCVersion.NEVER);
 
 		private final MCVersion since;
