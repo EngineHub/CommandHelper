@@ -6,6 +6,7 @@ import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
+import com.laytonsmith.testing.AbstractIntegrationTest;
 import com.laytonsmith.testing.StaticTest;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -27,7 +28,7 @@ import static org.mockito.Mockito.mock;
  */
 //@RunWith(PowerMockRunner.class)
 //@PrepareForTest({Static.class, CommandHelperPlugin.class})
-public class PermissionsTest {
+public class PermissionsTest extends AbstractIntegrationTest {
 
 	MCServer fakeServer;
 	MCPlayer fakePlayer;
