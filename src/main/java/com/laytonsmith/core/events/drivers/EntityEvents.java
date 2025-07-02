@@ -2081,14 +2081,14 @@ public class EntityEvents {
 		@Override
 		protected PrefilterBuilder getPrefilterBuilder() {
 			return new PrefilterBuilder<MCEntityToggleSwimEvent>()
-					.set("player", "The player that toggle swime", new OptionalPlayerPrefilterMatcher<>())
-					.set("type", "The entity type of the entity that toggle swime", new StringICPrefilterMatcher<>() {
+					.set("player", "The player that toggled swimming", new OptionalPlayerPrefilterMatcher<>())
+					.set("type", "The entity type of the entity that toggled swimming", new StringICPrefilterMatcher<>() {
 						@Override
 						protected String getProperty(MCEntityToggleSwimEvent event) {
 							return event.getEntityType().name();
 						}
 					})
-					.set("id", "The ID of the entity that toggle swime", new StringICPrefilterMatcher<>() {
+					.set("id", "The ID of the entity that toggled swimming", new StringICPrefilterMatcher<>() {
 						@Override
 						protected String getProperty(MCEntityToggleSwimEvent event) {
 							return event.getEntity().getUniqueId().toString();
