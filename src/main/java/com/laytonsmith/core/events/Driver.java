@@ -54,6 +54,7 @@ public enum Driver {
 	PROJECTILE_LAUNCH,
 	TARGET_ENTITY,
 	ENTITY_TOGGLE_GLIDE,
+	ENTITY_TOGGLE_SWIM,
 	FIREWORK_EXPLODE,
 	/**
 	 * Inventory events

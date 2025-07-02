@@ -39,6 +39,7 @@ import com.laytonsmith.abstraction.events.MCEntityPortalEvent;
 import com.laytonsmith.abstraction.events.MCEntityRegainHealthEvent;
 import com.laytonsmith.abstraction.events.MCEntityTargetEvent;
 import com.laytonsmith.abstraction.events.MCEntityToggleGlideEvent;
+import com.laytonsmith.abstraction.events.MCEntityToggleSwimEvent;
 import com.laytonsmith.abstraction.events.MCEntityUnleashEvent;
 import com.laytonsmith.abstraction.events.MCEntityPotionEffectEvent;
 import com.laytonsmith.abstraction.events.MCFireworkExplodeEvent;
@@ -68,6 +69,7 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.AbstractEvent;
+import com.laytonsmith.core.events.AbstractGenericEvent;
 import com.laytonsmith.core.events.BindableEvent;
 import com.laytonsmith.core.events.BoundEvent;
 import com.laytonsmith.core.events.BoundEvent.ActiveEvent;
@@ -75,6 +77,9 @@ import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventBuilder;
 import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
+import com.laytonsmith.core.events.prefilters.OptionalPlayerPrefilterMatcher;
+import com.laytonsmith.core.events.prefilters.PrefilterBuilder;
+import com.laytonsmith.core.events.prefilters.StringICPrefilterMatcher;
 import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
 import com.laytonsmith.core.exceptions.CRE.CREBindException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
@@ -2050,6 +2055,99 @@ public class EntityEvents {
 		@Override
 		public Driver driver() {
 			return Driver.ENTITY_TOGGLE_GLIDE;
+		}
+	}
+
+	@api
+	public static class entity_toggle_swim extends AbstractGenericEvent<MCEntityToggleSwimEvent> {
+
+		@Override
+		public String getName() {
+			return "entity_toggle_swim";
+		}
+
+		@Override
+		public String docs() {
+			return "{type: <macro> The entity type of the entity | id: <macro> The entity id of the entity"
+					+ " | player: <macro> The player triggering the event}"
+					+ " This event is called when an entity's swimming status is toggled"
+					+ " {id: The entityID of the entity | type: The entity type of the entity |"
+					+ " swimming: true if the entity is entering swimming mode, false if the entity is leaving it |"
+					+ " player: If the entity is a player, this will contain their name, otherwise null}" + " {}"
+					+ " {}";
+		}
+
+
+		@Override
+		protected PrefilterBuilder getPrefilterBuilder() {
+			return new PrefilterBuilder<MCEntityToggleSwimEvent>()
+					.set("player", "The player that toggled swimming", new OptionalPlayerPrefilterMatcher<>())
+					.set("type", "The entity type of the entity that toggled swimming", new StringICPrefilterMatcher<>() {
+						@Override
+						protected String getProperty(MCEntityToggleSwimEvent event) {
+							return event.getEntityType().name();
+						}
+					})
+					.set("id", "The ID of the entity that toggled swimming", new StringICPrefilterMatcher<>() {
+						@Override
+						protected String getProperty(MCEntityToggleSwimEvent event) {
+							return event.getEntity().getUniqueId().toString();
+						}
+					});
+		}
+
+		@Override
+		public MCEntityToggleSwimEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
+
+		@Override
+		public Map<String, Mixed> evaluate(MCEntityToggleSwimEvent e) throws EventException {
+			Map<String, Mixed> ret = evaluate_helper(e);
+			Target t = Target.UNKNOWN;
+
+			ret.put("swimming", CBoolean.GenerateCBoolean(e.isSwimming(), t));
+			ret.put("id", new CString(e.getEntity().getUniqueId().toString(), t));
+			ret.put("type", new CString(e.getEntityType().name(), t));
+
+			if(e.getEntity() instanceof MCPlayer) {
+				ret.put("player", new CString(((MCPlayer) e.getEntity()).getName(), t));
+			} else {
+				ret.put("player", CNull.NULL);
+			}
+
+			return ret;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Mixed value, MCEntityToggleSwimEvent event) throws ConfigRuntimeException {
+			return false;
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.ENTITY_TOGGLE_SWIM;
+		}
+
+		@Override
+		public void cancel(MCEntityToggleSwimEvent o, boolean state) {
+		}
+
+		@Override
+		public boolean isCancellable(MCEntityToggleSwimEvent o) {
+			// Deprecated
+			// https://jd.papermc.io/paper/1.21.5/org/bukkit/event/entity/EntityToggleSwimEvent.html#setCancelled(boolean)
+			return false;
+		}
+
+		@Override
+		public boolean isCancelled(MCEntityToggleSwimEvent o) {
+			return false;
 		}
 	}
 
