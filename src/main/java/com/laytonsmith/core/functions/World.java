@@ -1456,11 +1456,13 @@ public class World {
 			}
 			CArray ret = CArray.GetAssociativeArray(t);
 			ret.set("name", new CString(w.getName(), t), t);
+			ret.set("uuid", new CString(w.getUniqueID().toString(), t), t);
 			ret.set("seed", new CInt(w.getSeed(), t), t);
 			ret.set("environment", new CString(w.getEnvironment().name(), t), t);
 			ret.set("generator", new CString(w.getGenerator(), t), t);
 			ret.set("worldtype", new CString(w.getWorldType().name(), t), t);
 			ret.set("sealevel", new CInt(w.getSeaLevel(), t), t);
+			ret.set("minheight", new CInt(w.getMinHeight(), t), t);
 			ret.set("maxheight", new CInt(w.getMaxHeight(), t), t);
 			return ret;
 		}
@@ -1477,9 +1479,9 @@ public class World {
 
 		@Override
 		public String docs() {
-			return "array {world} Returns an associative array of all the info needed to duplicate the world."
-					+ " The keys are name, seed, environment, generator, worldtype, sealevel and maxheight."
-					+ " ---- The worldtype is deprecated in 1.16 and is only applicable when creating a world.";
+			return "array {world} Returns an associative array of immutable info about the world."
+					+ " The keys are name, uuid, seed, environment, generator, sealevel, minheight and maxheight."
+					+ " The worldtype key is deprecated as of 1.16.";
 		}
 
 		@Override

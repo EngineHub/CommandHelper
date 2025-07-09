@@ -20,6 +20,7 @@ import com.laytonsmith.abstraction.enums.MCWorldType;
 import com.laytonsmith.core.constructs.CClosure;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface MCWorld extends MCMetadatable {
 
@@ -30,6 +31,8 @@ public interface MCWorld extends MCMetadatable {
 	List<MCLivingEntity> getLivingEntities();
 
 	String getName();
+
+	UUID getUniqueID();
 
 	long getSeed();
 
@@ -42,6 +45,8 @@ public interface MCWorld extends MCMetadatable {
 	int getSeaLevel();
 
 	int getMaxHeight();
+
+	int getMinHeight();
 
 	MCDifficulty getDifficulty();
 

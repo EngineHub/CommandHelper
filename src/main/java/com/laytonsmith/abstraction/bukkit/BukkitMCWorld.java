@@ -78,6 +78,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 
@@ -151,6 +152,11 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	@Override
 	public String getName() {
 		return w.getName();
+	}
+
+	@Override
+	public UUID getUniqueID() {
+		return w.getUID();
 	}
 
 	@Override
@@ -233,6 +239,11 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	@Override
 	public int getMaxHeight() {
 		return getHandle().getMaxHeight();
+	}
+
+	@Override
+	public int getMinHeight() {
+		return w.getMinHeight();
 	}
 
 	@Override
