@@ -215,6 +215,11 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | 
 * %KEY_MUSHROOM_COW_TYPE%: The type of mushroom cow. (can be %MUSHROOM_COW_TYPE%).
 |-
+| OMINOUS_ITEM_SPAWNER
+|
+* %KEY_OMINOUS_SPAWNER_ITEM%: The item that will be shown and then spawned after a delay (can be null). If the item is a projectile type, it will be shot as one downwards.
+* %KEY_OMINOUS_SPAWNER_DELAY%: The number of ticks before the item will be spawned. (will play "about_to_spawn_item" sound at 37 ticks)
+|-
 | PAINTING
 | 
 * %KEY_PAINTING_ART%: The art on the painting (can be %ART%).

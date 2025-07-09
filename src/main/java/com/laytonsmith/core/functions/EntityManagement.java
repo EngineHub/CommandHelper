@@ -68,6 +68,7 @@ import com.laytonsmith.abstraction.entities.MCLlama;
 import com.laytonsmith.abstraction.entities.MCLlama.MCLlamaColor;
 import com.laytonsmith.abstraction.entities.MCMinecart;
 import com.laytonsmith.abstraction.entities.MCMushroomCow;
+import com.laytonsmith.abstraction.entities.MCOminousItemSpawner;
 import com.laytonsmith.abstraction.entities.MCPainting;
 import com.laytonsmith.abstraction.entities.MCPanda;
 import com.laytonsmith.abstraction.entities.MCParrot;
@@ -2168,6 +2169,11 @@ public class EntityManagement {
 					MCMushroomCow cow = (MCMushroomCow) entity;
 					specArray.set(entity_spec.KEY_MUSHROOM_COW_TYPE, cow.getVariant().name(), t);
 					break;
+				case OMINOUS_ITEM_SPAWNER:
+					MCOminousItemSpawner spawner = (MCOminousItemSpawner) entity;
+					specArray.set(entity_spec.KEY_OMINOUS_SPAWNER_ITEM, ObjectGenerator.GetGenerator().item(spawner.getItem(), t), t);
+					specArray.set(entity_spec.KEY_OMINOUS_SPAWNER_DELAY, new CInt(spawner.getDelay(), t), t);
+					break;
 				case PAINTING:
 					MCPainting painting = (MCPainting) entity;
 					specArray.set(entity_spec.KEY_PAINTING_ART, new CString(painting.getArt().name(), t), t);
@@ -2462,6 +2468,8 @@ public class EntityManagement {
 		private static final String KEY_MINECART_COMMAND_COMMAND = "command";
 		private static final String KEY_MINECART_COMMAND_CUSTOMNAME = "customname";
 		private static final String KEY_MUSHROOM_COW_TYPE = "type";
+		private static final String KEY_OMINOUS_SPAWNER_ITEM = "item";
+		private static final String KEY_OMINOUS_SPAWNER_DELAY = "delay";
 		private static final String KEY_PAINTING_ART = "type";
 		private static final String KEY_PANDA_MAINGENE = "maingene";
 		private static final String KEY_PANDA_HIDDENGENE = "hiddengene";
@@ -3454,6 +3462,21 @@ public class EntityManagement {
 								} catch(IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid mushroom cow type: " + specArray.get(index, t).val(), t);
 								}
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
+				case OMINOUS_ITEM_SPAWNER:
+					MCOminousItemSpawner spawner = (MCOminousItemSpawner) entity;
+					for(String index : specArray.stringKeySet()) {
+						switch(index.toLowerCase()) {
+							case entity_spec.KEY_OMINOUS_SPAWNER_ITEM:
+								spawner.setItem(ObjectGenerator.GetGenerator().item(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_OMINOUS_SPAWNER_DELAY:
+								spawner.setDelay(ArgumentValidation.getInt(specArray.get(index, t), t));
 								break;
 							default:
 								throwException(index, t);
