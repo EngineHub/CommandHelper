@@ -58,4 +58,5 @@ public enum MCSpawnReason {
 	ENCHANTMENT,
 	TRIAL_SPAWNER,
 	POTION_EFFECT,
+	REHYDRATION,
 }
