@@ -93,6 +93,7 @@ import com.laytonsmith.core.functions.ArrayHandling.array_get;
 import com.laytonsmith.core.functions.ArrayHandling.array_push;
 import com.laytonsmith.core.functions.ArrayHandling.array_set;
 import com.laytonsmith.core.functions.Compiler.__autoconcat__;
+import com.laytonsmith.core.functions.Compiler.__statements__;
 import com.laytonsmith.core.functions.Compiler.__type_ref__;
 import com.laytonsmith.core.functions.Compiler.centry;
 import com.laytonsmith.core.natives.interfaces.Mixed;
@@ -3714,6 +3715,15 @@ public class DataHandling {
 				if(root == null) {
 					return new CString("", t);
 				}
+
+				// Unwrap single value in __statements__() and return its string value.
+				if(root.getChildren().size() == 1 && root.getChildAt(0).getData() instanceof CFunction
+						&& ((CFunction) root.getChildAt(0).getData()).getFunction().getName().equals(__statements__.NAME)
+						&& root.getChildAt(0).getChildren().size() == 1) {
+					return new CString(parent.seval(root.getChildAt(0).getChildAt(0), env).val(), t);
+				}
+
+				// Concat string values of all children and return the result.
 				StringBuilder b = new StringBuilder();
 				int count = 0;
 				for(ParseTree child : root.getChildren()) {
