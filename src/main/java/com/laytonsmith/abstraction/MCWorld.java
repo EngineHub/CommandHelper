@@ -128,6 +128,8 @@ public interface MCWorld extends MCMetadatable {
 
 	void setSpawnLocation(int x, int y, int z);
 
+	void setSpawnLocation(MCLocation location);
+
 	void refreshChunk(int x, int z);
 
 	void loadChunk(int x, int z);

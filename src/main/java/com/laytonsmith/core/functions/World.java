@@ -118,20 +118,20 @@ public class World {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			String world;
+			MCWorld w;
 			if(args.length == 1) {
-				world = args[0].val();
+				w = Static.getServer().getWorld(args[0].val());
 			} else {
-				if(environment.getEnv(CommandHelperEnvironment.class).GetPlayer() == null) {
+				MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				if(p == null) {
 					throw new CREInvalidWorldException("A world must be specified in a context with no player.", t);
 				}
-				world = environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld().getName();
+				w = p.getWorld();
 			}
-			MCWorld w = Static.getServer().getWorld(world);
 			if(w == null) {
-				throw new CREInvalidWorldException("The specified world \"" + world + "\" is not a valid world.", t);
+				throw new CREInvalidWorldException("The specified world \"" + args[0].val() + "\" is not a valid world.", t);
 			}
-			return ObjectGenerator.GetGenerator().location(w.getSpawnLocation(), false);
+			return ObjectGenerator.GetGenerator().location(w.getSpawnLocation());
 		}
 	}
 
@@ -155,21 +155,30 @@ public class World {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCWorld w = null;
-			if(p != null) {
-				w = p.getWorld();
+			if(args.length == 1) {
+				MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				if(p != null) {
+					w = p.getWorld();
+				}
+				MCLocation l = ObjectGenerator.GetGenerator().location(args[0], w, t);
+				l.getWorld().setSpawnLocation(l);
+				return CVoid.VOID;
+			} else if(args.length == 2) {
+				w = Static.getServer().getWorld(args[0].val());
+				MCLocation l = ObjectGenerator.GetGenerator().location(args[1], w, t);
+				w.setSpawnLocation(l);
+				return CVoid.VOID;
 			}
+
 			int x = 0;
 			int y = 0;
 			int z = 0;
-			if(args.length == 1) {
-				MCLocation l = ObjectGenerator.GetGenerator().location(args[0], w, t);
-				w = l.getWorld();
-				x = l.getBlockX();
-				y = l.getBlockY();
-				z = l.getBlockZ();
-			} else if(args.length == 3) {
+			if(args.length == 3) {
+				MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				if(p != null) {
+					w = p.getWorld();
+				}
 				x = ArgumentValidation.getInt32(args[0], t);
 				y = ArgumentValidation.getInt32(args[1], t);
 				z = ArgumentValidation.getInt32(args[2], t);
@@ -193,14 +202,13 @@ public class World {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{1, 3, 4};
+			return new Integer[]{1, 2, 3, 4};
 		}
 
 		@Override
 		public String docs() {
-			return "void {locationArray | [world], x, y, z} Sets the spawn of the world. Note that in some cases"
-					+ " a plugin may override the spawn, and this method will do nothing. In that case,"
-					+ " you should use the plugin's commands to set the spawn.";
+			return "void {[world], locationArray | [world], x, y, z} Sets the spawn of the world."
+					+ " Note that in some cases a plugin may override the spawn.";
 		}
 
 		@Override

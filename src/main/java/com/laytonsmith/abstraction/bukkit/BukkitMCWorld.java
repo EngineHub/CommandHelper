@@ -510,6 +510,11 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	}
 
 	@Override
+	public void setSpawnLocation(MCLocation location) {
+		w.setSpawnLocation((Location) location.getHandle());
+	}
+
+	@Override
 	public boolean exists() {
 		//I dunno how well this will work, but it's worth a shot.
 		try {
