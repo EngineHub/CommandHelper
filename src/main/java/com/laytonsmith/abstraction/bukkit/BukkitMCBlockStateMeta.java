@@ -47,8 +47,8 @@ public class BukkitMCBlockStateMeta extends BukkitMCItemMeta implements MCBlockS
 			// For example, when getting a shulker box's BlockState on BlockPlaceEvent, it can duplicate the item.
 			// Copying the meta before getting the block state ensures the original tags are unaffected.
 			meta = (BlockStateMeta) meta.clone();
-		} else if(mat == Material.DECORATED_POT
-				&& Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_1)
+		} else if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_1)
+				&& mat == Material.DECORATED_POT
 				&& Static.getServer().getMinecraftVersion().lte(MCVersion.MC1_20_4)) {
 			// Workaround upstream bug with decorated pots missing the "id" tag in the BlockEntityTag when broken.
 			// Without this fix, getting the BlockState from this meta may result in a default decorated pot.
