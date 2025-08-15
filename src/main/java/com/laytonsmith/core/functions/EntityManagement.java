@@ -2232,7 +2232,12 @@ public class EntityManagement {
 					break;
 				case SHULKER:
 					MCShulker shulker = (MCShulker) entity;
-					specArray.set(entity_spec.KEY_SHULKER_COLOR, new CString(shulker.getColor().name(), t), t);
+					MCDyeColor shulkerColor = shulker.getColor();
+					if(shulkerColor == null) {
+						specArray.set(entity_spec.KEY_SHULKER_COLOR, CNull.NULL, t);
+					} else {
+						specArray.set(entity_spec.KEY_SHULKER_COLOR, new CString(shulker.getColor().name(), t), t);
+					}
 					break;
 				case SHULKER_BULLET:
 					MCShulkerBullet bullet = (MCShulkerBullet) entity;
@@ -3668,8 +3673,13 @@ public class EntityManagement {
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_SHULKER_COLOR:
+								Mixed value = specArray.get(index, t);
+								if(value instanceof CNull) {
+									shulker.setColor(null);
+									break;
+								}
 								try {
-									shulker.setColor(MCDyeColor.valueOf(specArray.get(index, t).val().toUpperCase()));
+									shulker.setColor(MCDyeColor.valueOf(value.val().toUpperCase()));
 								} catch(IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid shulker color: " + specArray.get(index, t).val(), t);
 								}

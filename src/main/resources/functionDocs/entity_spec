@@ -271,7 +271,7 @@ without knowing the rotations on the other axis or of other body parts beforehan
 |-
 | SHULKER
 |
-* %KEY_SHULKER_COLOR%: The color of the shulker (can be %DYE_COLOR%).
+* %KEY_SHULKER_COLOR%: The color of the shulker or null (can be %DYE_COLOR%).
 |-
 | SHULKER_BULLET
 |
