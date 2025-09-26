@@ -355,9 +355,15 @@ public class Compiler {
 
 					// Convert bare string or concat() to type reference if needed.
 					ParseTree typeNode = node.getChildAt(0);
-					ParseTree convertedTypeNode = __type_ref__.createFromBareStringOrConcats(typeNode);
-					if(convertedTypeNode != null) {
-						typeNode = convertedTypeNode;
+					if(!typeNode.getData().isInstanceOf(CClassType.TYPE)) {
+						ParseTree convertedTypeNode = __type_ref__.createFromBareStringOrConcats(typeNode);
+						if(convertedTypeNode != null) {
+							typeNode = convertedTypeNode;
+						} else {
+
+							// This is not a "(classtype)" format. Skip node.
+							continue;
+						}
 					}
 
 					// Rewrite p(A) and the next list entry B to __cast__(B, A).
