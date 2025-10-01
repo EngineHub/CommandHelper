@@ -163,7 +163,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 		});
 		upgradeLog.addUpgradeTask(new UpgradeLog.UpgradeTask() {
 
-			File oldPreferences = new File(CommandHelperFileLocations.getDefault().getConfigDirectory(),
+			private final File oldPreferences = new File(CommandHelperFileLocations.getDefault().getConfigDirectory(),
 					"preferences.txt");
 
 			@Override
@@ -190,7 +190,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 		});
 		upgradeLog.addUpgradeTask(new UpgradeLog.UpgradeTask() {
 
-			File cd = CommandHelperFileLocations.getDefault().getConfigDirectory();
+			private final File cd = CommandHelperFileLocations.getDefault().getConfigDirectory();
 			private final String breadcrumb = "move-preference-files-v1.0";
 
 			@Override
@@ -269,7 +269,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 		} catch (IOException ex) {
 			getLogger().log(Level.SEVERE, null, ex);
 		} catch (NoClassDefFoundError ex) {
-			MSLog.GetLogger().e(MSLog.Tags.GENERAL, "Failed to load CommandHelper. Incorrect jar?", Target.UNKNOWN);
+			getLogger().log(Level.SEVERE, "Failed to load CommandHelper. Incorrect jar?", ex);
 			return;
 		}
 

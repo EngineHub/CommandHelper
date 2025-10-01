@@ -225,6 +225,7 @@ public abstract class MCParticle<Concrete> extends DynamicEnum<MCParticle.MCVani
 		PALE_OAK_LEAVES(MCVersion.MC1_21_4),
 		FIREFLY(MCVersion.MC1_21_5),
 		TINTED_LEAVES(MCVersion.MC1_21_5),
+		COPPER_FIRE_FLAME(MCVersion.MC1_21_9),
 		UNKNOWN(MCVersion.NEVER);
 
 		private final MCVersion since;

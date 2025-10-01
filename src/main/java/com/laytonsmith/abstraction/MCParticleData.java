@@ -79,4 +79,22 @@ public class MCParticleData {
 			return this.arrivalTime;
 		}
 	}
+
+	public static class Spell {
+		float power;
+		MCColor color;
+
+		public Spell(MCColor color, float power) {
+			this.power = power;
+			this.color = color;
+		}
+
+		public float power() {
+			return this.power;
+		}
+
+		public MCColor color() {
+			return this.color;
+		}
+	}
 }

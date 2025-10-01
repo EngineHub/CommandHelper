@@ -627,6 +627,10 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 
 	@Override
 	public void setKeepSpawnInMemory(boolean keepLoaded) {
-		w.setKeepSpawnInMemory(keepLoaded);
+		try {
+			w.setKeepSpawnInMemory(keepLoaded);
+		} catch(NoSuchMethodError ex) {
+			// some version after 1.21.9
+		}
 	}
 }

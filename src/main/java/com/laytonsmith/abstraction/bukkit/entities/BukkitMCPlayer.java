@@ -429,6 +429,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 
 	private static Class gameProfileClass = null;
 	private static Class opListEntryClass = null;
+	private static Class nameAndIdClass = null;
 	private static Map<String, Object> opMap = null;
 
 	private static void SetupTempOp() throws ClassNotFoundException {
@@ -439,28 +440,44 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 		// Get some version specific mappings
 		String nms = "net.minecraft.server";
 		String playersPackage = nms + ".players";
-		String ops = isPaper ? "ops" : "p";
-		String getPlayerList = isPaper ? "getPlayerList" : "ag";
+
+		String ops = "ops";
+		String getPlayerList = "getPlayerList";
+		String map = "map";
+		String serverOpListEntry = ".ServerOpListEntry";
+		if(!isPaper) {
+			ops = "o";
+			getPlayerList = "am";
+			map = "e";
+			serverOpListEntry = ".OpListEntry";
+		}
+
 		MCVersion mcversion = Static.getServer().getMinecraftVersion();
-		if(mcversion.lt(MCVersion.MC1_21_3)) {
-			getPlayerList = isPaper ? "getPlayerList" : "ah";
-			if(mcversion.lt(MCVersion.MC1_20_6)) {
-				getPlayerList = "ae";
-				if(mcversion.lt(MCVersion.MC1_20_4)) {
-					getPlayerList = "ac";
-					if(mcversion.lt(MCVersion.MC1_20_2)) {
-						ops = "o";
-						if(mcversion.equals(MCVersion.MC1_19_3)) {
-							getPlayerList = "ab";
-						} else if(mcversion.lt(MCVersion.MC1_19_1)) {
-							ops = "n";
-							if(mcversion.lt(MCVersion.MC1_18)) {
-								getPlayerList = "getPlayerList";
-								if(mcversion.lt(MCVersion.MC1_17)) {
-									String version = ((BukkitMCServer) Static.getServer()).getCraftBukkitPackage().split("\\.")[3];
-									nms = "net.minecraft.server." + version;
-									playersPackage = nms;
-									ops = "operators";
+		if(mcversion.lt(MCVersion.MC1_21_9)) {
+			ops = isPaper ? "ops" : "p";
+			getPlayerList = isPaper ? "getPlayerList" : "ag";
+			map = "d";
+			serverOpListEntry = ".OpListEntry";
+			if(mcversion.lt(MCVersion.MC1_21_3)) {
+				getPlayerList = isPaper ? "getPlayerList" : "ah";
+				if(mcversion.lt(MCVersion.MC1_20_6)) {
+					getPlayerList = "ae";
+					if(mcversion.lt(MCVersion.MC1_20_4)) {
+						getPlayerList = "ac";
+						if(mcversion.lt(MCVersion.MC1_20_2)) {
+							ops = "o";
+							if(mcversion.equals(MCVersion.MC1_19_3)) {
+								getPlayerList = "ab";
+							} else if(mcversion.lt(MCVersion.MC1_19_1)) {
+								ops = "n";
+								if(mcversion.lt(MCVersion.MC1_18)) {
+									getPlayerList = "getPlayerList";
+									if(mcversion.lt(MCVersion.MC1_17)) {
+										String version = ((BukkitMCServer) Static.getServer()).getCraftBukkitPackage().split("\\.")[3];
+										nms = "net.minecraft.server." + version;
+										playersPackage = nms;
+										ops = "operators";
+									}
 								}
 							}
 						}
@@ -474,9 +491,12 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 		/*n.m.s.players.PlayerList*/ Object nmsPlayerList = ReflectionUtils.invokeMethod(nmsServer, getPlayerList);
 		/*n.m.s.players.OpList*/ Object opSet = ReflectionUtils.get(Class.forName(playersPackage + ".PlayerList"), nmsPlayerList, ops);
 		//opSet.getClass().getSuperclass() == n.m.s.players.JsonList
-		/*Map<String, n.m.s.players.OpListEntry>*/ opMap = (Map) ReflectionUtils.get(opSet.getClass().getSuperclass(), opSet, "d");
-		/*n.m.s.players.OpListEntry*/ opListEntryClass = Class.forName(playersPackage + ".OpListEntry");
+		/*Map<String, n.m.s.players.OpListEntry>*/ opMap = (Map) ReflectionUtils.get(opSet.getClass().getSuperclass(), opSet, map);
+		/*n.m.s.players.OpListEntry*/ opListEntryClass = Class.forName(playersPackage + serverOpListEntry);
 		/*com.mojang.authlib.GameProfile*/ gameProfileClass = Class.forName("com.mojang.authlib.GameProfile");
+		if(mcversion.gte(MCVersion.MC1_21_9)) {
+			nameAndIdClass = Class.forName(playersPackage + ".NameAndId");
+		}
 	}
 
 	@Override
@@ -484,9 +504,19 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 		SetupTempOp();
 		if(value) {
 			Object gameProfile = ReflectionUtils.invokeMethod(p, "getProfile");
-			Object opListEntry = ReflectionUtils.newInstance(opListEntryClass,
-					new Class[]{gameProfileClass, int.class, boolean.class},
-					new Object[]{gameProfile, 4, false});
+			Object opListEntry;
+			if(nameAndIdClass != null) {
+				Object nameAndId = ReflectionUtils.newInstance(nameAndIdClass,
+						new Class[]{gameProfileClass},
+						new Object[]{gameProfile});
+				opListEntry = ReflectionUtils.newInstance(opListEntryClass,
+						new Class[]{nameAndIdClass, int.class, boolean.class},
+						new Object[]{nameAndId, 4, false});
+			} else {
+				opListEntry = ReflectionUtils.newInstance(opListEntryClass,
+						new Class[]{gameProfileClass, int.class, boolean.class},
+						new Object[]{gameProfile, 4, false});
+			}
 			opMap.put(p.getUniqueId().toString(), opListEntry);
 		} else {
 			opMap.remove(p.getUniqueId().toString());

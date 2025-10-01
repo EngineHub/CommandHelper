@@ -2798,6 +2798,7 @@ public class ObjectGenerator {
 				break;
 			case SPELL_MOB:
 			case REDSTONE:
+			case FLASH:
 				if(pa.containsKey("color")) {
 					Mixed c = pa.get("color", t);
 					if(c.isInstanceOf(CArray.TYPE)) {
@@ -2807,6 +2808,37 @@ public class ObjectGenerator {
 					}
 				}
 				break;
+			case DRAGON_BREATH:
+				if(pa.containsKey("power")) {
+					Mixed d = pa.get("power", t);
+					if(d.isInstanceOf(CDouble.TYPE)) {
+						return (float) ((CDouble) d).getDouble();
+					} else if(!(d instanceof CNull)) {
+						throw new CREIllegalArgumentException("Expected double for power but found " + d, t);
+					}
+				}
+				break;
+			case SPELL:
+			case SPELL_INSTANT:
+				MCColor spellColor = MCColor.WHITE;
+				if(pa.containsKey("color")) {
+					Mixed c = pa.get("color", t);
+					if(c.isInstanceOf(CArray.TYPE)) {
+						spellColor = color((CArray) c, t);
+					} else {
+						spellColor = StaticLayer.GetConvertor().GetColor(c.val(), t);
+					}
+				}
+				float power = 1.0F;
+				if(pa.containsKey("power")) {
+					Mixed d = pa.get("power", t);
+					if(d.isInstanceOf(CDouble.TYPE)) {
+						power = (float) ((CDouble) d).getDouble();
+					} else if(!(d instanceof CNull)) {
+						throw new CREIllegalArgumentException("Expected double for power but found " + d, t);
+					}
+				}
+				return new MCParticleData.Spell(spellColor, power);
 			case DUST_COLOR_TRANSITION:
 				if(pa.containsKey("color")) {
 					Mixed c = pa.get("color", t);

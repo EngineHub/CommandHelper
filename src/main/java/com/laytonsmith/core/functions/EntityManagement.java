@@ -66,6 +66,7 @@ import com.laytonsmith.abstraction.entities.MCItemProjectile;
 import com.laytonsmith.abstraction.entities.MCLightningStrike;
 import com.laytonsmith.abstraction.entities.MCLlama;
 import com.laytonsmith.abstraction.entities.MCLlama.MCLlamaColor;
+import com.laytonsmith.abstraction.entities.MCMannequin;
 import com.laytonsmith.abstraction.entities.MCMinecart;
 import com.laytonsmith.abstraction.entities.MCMushroomCow;
 import com.laytonsmith.abstraction.entities.MCOminousItemSpawner;
@@ -2149,6 +2150,10 @@ public class EntityManagement {
 					MCSlime cube = (MCSlime) entity;
 					specArray.set(entity_spec.KEY_SLIME_SIZE, new CInt(cube.getSize(), t), t);
 					break;
+				case MANNEQUIN:
+					MCMannequin mannequin = (MCMannequin) entity;
+					specArray.set(entity_spec.KEY_MANNEQUIN_IMMOVABLE, CBoolean.get(mannequin.isImmovable()), t);
+					break;
 				case MINECART:
 				case MINECART_FURNACE:
 				case MINECART_HOPPER:
@@ -2468,6 +2473,7 @@ public class EntityManagement {
 		private static final String KEY_ITEM_FRAME_ROTATION = "rotation";
 		private static final String KEY_ITEM_FRAME_VISIBLE = "visible";
 		private static final String KEY_LIGHTNING_EFFECT = "effect";
+		private static final String KEY_MANNEQUIN_IMMOVABLE = "immovable";
 		private static final String KEY_MINECART_BLOCK = "block";
 		private static final String KEY_MINECART_OFFSET = "offset";
 		private static final String KEY_MINECART_COMMAND_COMMAND = "command";
@@ -3399,6 +3405,18 @@ public class EntityManagement {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_SLIME_SIZE:
 								cube.setSize(ArgumentValidation.getInt32(specArray.get(index, t), t));
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
+				case MANNEQUIN:
+					MCMannequin mannequin = (MCMannequin) entity;
+					for(String index : specArray.stringKeySet()) {
+						switch(index.toLowerCase()) {
+							case entity_spec.KEY_MANNEQUIN_IMMOVABLE:
+								mannequin.setImmovable(ArgumentValidation.getBooleanObject(specArray.get(index, t), t));
 								break;
 							default:
 								throwException(index, t);

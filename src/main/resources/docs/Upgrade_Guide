@@ -3,6 +3,9 @@ Below is a reverse chronological guide to help you with the most notable of thes
 Where possible, any value changes are converted for backwards compatibility with saved data, but any script that checks output for equality will need to be updated.
 ----
 
+== Minecraft 1.21.9 ==
+* CHAIN renamed to IRON_CHAIN
+
 == Minecraft 1.21.5 ==
 * SPLASH_POTION entity type has been split into LINGERING_POTION and SPLASH_POTION again.
 * Some vanilla keys passed to the tellraw functions and commands have changed.

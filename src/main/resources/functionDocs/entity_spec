@@ -199,6 +199,10 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | 
 * %KEY_SLIME_SIZE%: The size of the magma cube.
 |-
+| MANNEQUIN
+|
+* %KEY_MANNEQUIN_IMMOVABLE%: Whether the mannequin cannot be moved.
+|-
 | MINECART, MINECART_FURNACE, MINECART_HOPPER, MINECART_MOB_SPAWNER, MINECART_TNT
 |
 * %KEY_MINECART_BLOCK%: The material name of the block being displayed.

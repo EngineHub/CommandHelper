@@ -11,10 +11,12 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 
 @MEnum("com.commandhelper.GameRule")
 public enum MCGameRule {
+	ALLOWENTERINGNETHERUSINGPORTALS("allowEnteringNetherUsingPortals"),
 	ALLOWFIRETICKSAWAYFROMPLAYER("allowFireTicksAwayFromPlayer"),
 	ANNOUNCEADVANCEMENTS("announceAdvancements"),
 	BLOCKEXPLOSIONDROPDECAY("blockExplosionDropDecay"),
 	COMMANDBLOCKOUTPUT("commandBlockOutput"),
+	COMMANDBLOCKSENABLED("commandBlocksEnabled"),
 	COMMANDMODIFICATIONBLOCKLIMIT("commandModificationBlockLimit", CInt.class),
 	DISABLEELYTRAMOVEMENTCHECK("disableElytraMovementCheck"),
 	DISABLEPLAYERMOVEMENTCHECK("disablePlayerMovementCheck"),
@@ -55,12 +57,15 @@ public enum MCGameRule {
 	PLAYERSNETHERPORTALDEFAULTDELAY("playersNetherPortalDefaultDelay", CInt.class),
 	PLAYERSSLEEPINGPERCENTAGE("playersSleepingPercentage", CInt.class),
 	PROJECTILESCANBREAKBLOCKS("projectilesCanBreakBlocks"),
+	PVP("pvp"),
 	RANDOMTICKSPEED("randomTickSpeed", CInt.class),
 	REDUCEDDEBUGINFO("reducedDebugInfo"),
 	SENDCOMMANDFEEDBACK("sendCommandFeedback"),
 	SHOWDEATHMESSAGES("showDeathMessages"),
 	SNOWACCUMULATIONHEIGHT("snowAccumulationHeight", CInt.class),
-	SPAWNCHUNKRADIUS("spawnChunkRadius", CInt.class),
+	SPAWNCHUNKRADIUS("spawnChunkRadius", CInt.class), // removed in 1.21.9
+	SPAWNERBLOCKSENABLED("spawnerBlocksEnabled"),
+	SPAWNMONSTERS("spawnMonsters"),
 	SPAWNRADIUS("spawnRadius", CInt.class),
 	SPECTATORSGENERATECHUNKS("spectatorsGenerateChunks"),
 	TNTEXPLODES("tntExplodes"),

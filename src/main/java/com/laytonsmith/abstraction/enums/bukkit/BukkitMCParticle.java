@@ -106,6 +106,15 @@ public class BukkitMCParticle extends MCParticle<Particle> {
 					}
 				}
 				break;
+			case FLASH:
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_21_9)) {
+					if(data instanceof MCColor) {
+						return BukkitMCColor.GetColor((MCColor) data);
+					} else {
+						return Color.WHITE;
+					}
+				}
+				break;
 			case REDSTONE:
 				if(data instanceof MCColor) {
 					return new Particle.DustOptions(BukkitMCColor.GetColor((MCColor) data), 1.0F);
@@ -135,6 +144,15 @@ public class BukkitMCParticle extends MCParticle<Particle> {
 				} else {
 					return 0.0F;
 				}
+			case DRAGON_BREATH:
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_21_9)) {
+					if(data instanceof Float) {
+						return data;
+					} else {
+						return 1.0F;
+					}
+				}
+				break;
 			case SHRIEK:
 				if(data instanceof Integer) {
 					return data;
@@ -152,9 +170,8 @@ public class BukkitMCParticle extends MCParticle<Particle> {
 					}
 				} else {
 					// 1.21.3 only
-					Class clazz = null;
 					try {
-						clazz = Class.forName("org.bukkit.Particle$TargetColor");
+						Class clazz = Class.forName("org.bukkit.Particle$TargetColor");
 						Constructor constructor = clazz.getConstructor(Location.class, Color.class);
 						constructor.setAccessible(true);
 						if(data instanceof MCParticleData.Trail trail) {
@@ -166,6 +183,17 @@ public class BukkitMCParticle extends MCParticle<Particle> {
 					} catch (ClassNotFoundException | NoSuchMethodException | InstantiationException
 							| IllegalAccessException | InvocationTargetException ignore) {}
 				}
+				break;
+			case SPELL:
+			case SPELL_INSTANT:
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_21_9)) {
+					if(data instanceof MCParticleData.Spell spellData) {
+						return new Particle.Spell(BukkitMCColor.GetColor(spellData.color()), spellData.power());
+					} else {
+						return new Particle.Spell(Color.WHITE, 1.0F);
+					}
+				}
+				break;
 		}
 		return null;
 	}

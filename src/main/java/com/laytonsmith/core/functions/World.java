@@ -1747,7 +1747,7 @@ public class World {
 		@Override
 		public String docs() {
 			return "void {[world], boolean} Sets if PVP is allowed in the world with the given name,"
-					+ " or all worlds if the name is not given.";
+					+ " or all worlds if the name is not given. (uses gamerule in 1.21.9+)";
 		}
 
 		@Override
@@ -1933,7 +1933,8 @@ public class World {
 
 		@Override
 		public String docs() {
-			return "void {world, boolean} Sets whether or not the spawn chunks in the given world should stay loaded.";
+			return "void {world, boolean} Sets whether or not the spawn chunks in the given world should stay loaded."
+					+ " Spawn chunks are never kept loaded starting from MC 1.21.9.";
 		}
 
 		@Override
