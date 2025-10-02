@@ -15,8 +15,10 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents;
 import com.laytonsmith.abstraction.enums.MCEntityEffect;
 import com.laytonsmith.abstraction.enums.MCEntityType;
+import com.laytonsmith.abstraction.enums.MCPose;
 import com.laytonsmith.abstraction.enums.MCTeleportCause;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPose;
 import com.laytonsmith.abstraction.events.MCEntityDamageEvent;
 import io.papermc.paper.entity.TeleportFlag;
 import org.bukkit.EntityEffect;
@@ -436,5 +438,15 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 		} catch (NoSuchMethodError ex) {
 			// probably before 1.19.3
 		}
+	}
+
+	@Override
+	public MCPose getPose() {
+		return BukkitMCPose.getConvertor().getAbstractedEnum(e.getPose());
+	}
+
+	@Override
+	public void setPose(MCPose pose) {
+		e.setPose(BukkitMCPose.getConvertor().getConcreteEnum(pose));
 	}
 }

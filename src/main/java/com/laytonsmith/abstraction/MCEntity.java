@@ -3,6 +3,7 @@ package com.laytonsmith.abstraction;
 import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.abstraction.enums.MCEntityEffect;
 import com.laytonsmith.abstraction.enums.MCEntityType;
+import com.laytonsmith.abstraction.enums.MCPose;
 import com.laytonsmith.abstraction.enums.MCTeleportCause;
 import com.laytonsmith.abstraction.events.MCEntityDamageEvent;
 import java.util.List;
@@ -122,4 +123,9 @@ public interface MCEntity extends MCMetadatable {
 	boolean isVisibleByDefault();
 
 	void setVisibleByDefault(boolean visible);
+
+	MCPose getPose();
+
+	void setPose(MCPose pose);
+
 }

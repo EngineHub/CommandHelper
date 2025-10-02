@@ -113,6 +113,7 @@ import com.laytonsmith.abstraction.enums.MCFoxType;
 import com.laytonsmith.abstraction.enums.MCMushroomCowType;
 import com.laytonsmith.abstraction.enums.MCParrotType;
 import com.laytonsmith.abstraction.enums.MCParticle;
+import com.laytonsmith.abstraction.enums.MCPose;
 import com.laytonsmith.abstraction.enums.MCPotionType;
 import com.laytonsmith.abstraction.enums.MCProfession;
 import com.laytonsmith.abstraction.enums.MCRabbitType;
@@ -5776,6 +5777,109 @@ public class EntityManagement {
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCEntity entity = Static.getEntity(args[0], t);
 			entity.setVisibleByDefault(!ArgumentValidation.getBooleanObject(args[1], t));
+			return CVoid.VOID;
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+	}
+
+	@api
+	@seealso(set_entity_pose.class)
+	public static class get_entity_pose extends EntityGetterFunction {
+
+		@Override
+		public String getName() {
+			return "get_entity_pose";
+		}
+
+		@Override
+		public String docs() {
+			return """
+					string {entityUUID} Returns the pose of an entity. Poses are desynchronized from entity state,
+					as the pose is set at the end of a tick and can be set to anything by a plugin.
+					----
+					Known poses:
+					{| class="wikitable"
+					|-
+					! scope="col" width="20%" | Entity Types
+					! scope="col" width="80%" | Poses
+					|-
+					! All Entities
+					| STANDING (default pose)
+					|-
+					! Living Entities
+					| DYING, SLEEPING
+					|-
+					! Most Humanoid Entities
+					| SNEAKING, SWIMMING, FALL_FLYING
+					|-
+					! Breeze
+					| INHALING, LONG_JUMPING, SHOOTING, SLIDING
+					|-
+					! Camel
+					| SITTING
+					|-
+					! Cat/Ocelot
+					| SNEAKING
+					|-
+					! Frog
+					| CROAKING, LONG_JUMPING, USING_TONGUE
+					|-
+					! Goat
+					| LONG_JUMPING
+					|-
+					! Player
+					| SPIN_ATTACK
+					|-
+					! Warden
+					| DIGGING, EMERGING, ROARING, SNIFFING
+					|}
+					""";
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCEntity entity = Static.getEntity(args[0], t);
+			return new CString(entity.getPose().name(), t);
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+	}
+
+	@api
+	@seealso(get_entity_pose.class)
+	public static class set_entity_pose extends EntitySetterFunction {
+
+		@Override
+		public String getName() {
+			return "set_entity_pose";
+		}
+
+		@Override
+		public String docs() {
+			return """
+					void {entityUUID, pose} Sets an entity's pose. While you can set any pose to any entity, only
+					certain poses will result in a visual change for a particular entity type. Poses can affect entity
+					hitboxes but do not change entity state. See {{function|get_entity_pose}} for a list of poses.
+					""";
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCEntity entity = Static.getEntity(args[0], t);
+			MCPose pose;
+			try {
+				pose = MCPose.valueOf(args[1].val().toUpperCase());
+			} catch(IllegalArgumentException ex) {
+				throw new CREFormatException("Invalid pose: " + args[1].val(), t);
+			}
+			entity.setPose(pose);
 			return CVoid.VOID;
 		}
 
