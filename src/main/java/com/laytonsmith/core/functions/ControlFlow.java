@@ -488,6 +488,9 @@ public class ControlFlow {
 		@Override
 		public List<Boolean> isBranch(List<ParseTree> children) {
 			List<Boolean> branches = new ArrayList<>(children.size());
+			if(children.size() == 0) {
+				return branches;
+			}
 			// Only the first child is not a branch. Everything else is a branch.
 			branches.add(false);
 			for(int i = 1; i < children.size(); i++) {
