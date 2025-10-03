@@ -4,7 +4,7 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/java
 
 pool:
-  vmImage: 'windows-2019'
+  vmImage: 'windows-2025'
 
 steps:
 - task: JavaToolInstaller@0
@@ -18,7 +18,7 @@ steps:
     azureCommonVirtualFile: 'OpenJDK21U-jdk_x64_windows_hotspot_21.0.3_9.zip'
     jdkDestinationDirectory: '$(agent.toolsDirectory)/jdk21'
     cleanDestinationDirectory: true
-- task: Maven@3
+- task: Maven@4
   inputs:
     mavenPomFile: 'pom.xml'
     javaHomeOption: 'Path'
