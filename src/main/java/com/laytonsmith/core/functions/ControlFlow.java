@@ -478,7 +478,7 @@ public class ControlFlow {
 
 			// Optimize per condition code pair for constant conditions.
 			boolean foundDynamicCond = false;
-			for(int i = 0; i < children.size(); i += 2) {
+			for(int i = 0; i < children.size() - 1; i += 2) {
 				ParseTree condNode = children.get(i);
 				if(condNode.isConst()) {
 					if(ArgumentValidation.getBooleanish(condNode.getData(), t)) {
