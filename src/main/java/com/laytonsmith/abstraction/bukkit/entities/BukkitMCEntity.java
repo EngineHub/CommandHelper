@@ -446,7 +446,11 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 	}
 
 	@Override
-	public void setPose(MCPose pose) {
-		e.setPose(BukkitMCPose.getConvertor().getConcreteEnum(pose));
+	public void setPose(MCPose pose, boolean fixed) {
+		try {
+			e.setPose(BukkitMCPose.getConvertor().getConcreteEnum(pose), fixed);
+		} catch (NoSuchMethodError ex) {
+			// either Spigot or prior to 1.20.1
+		}
 	}
 }

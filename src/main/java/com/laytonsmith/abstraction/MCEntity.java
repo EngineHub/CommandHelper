@@ -126,6 +126,6 @@ public interface MCEntity extends MCMetadatable {
 
 	MCPose getPose();
 
-	void setPose(MCPose pose);
+	void setPose(MCPose pose, boolean fixed);
 
 }

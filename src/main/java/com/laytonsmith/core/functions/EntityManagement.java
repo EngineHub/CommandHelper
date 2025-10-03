@@ -5831,6 +5831,9 @@ public class EntityManagement {
 					! Goat
 					| LONG_JUMPING
 					|-
+					! Mannequin
+					| Only FALL_FLYING, SLEEPING, SNEAKING, STANDING, SWIMMING
+					|-
 					! Player
 					| SPIN_ATTACK
 					|-
@@ -5862,11 +5865,19 @@ public class EntityManagement {
 		}
 
 		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3};
+		}
+
+		@Override
 		public String docs() {
 			return """
-					void {entityUUID, pose} Sets an entity's pose. While you can set any pose to any entity, only
-					certain poses will result in a visual change for a particular entity type. Poses can affect entity
-					hitboxes but do not change entity state. See {{function|get_entity_pose}} for a list of poses.
+					void {entityUUID, pose, [fixed]} Sets an entity's pose. (only Mannequins on Spigot)
+					The fixed argument is a boolean for whether the pose should stay unless manually changed.
+					(defaults to false) While in most cases you can set any pose to any entity,
+					only certain poses will result in a noticable change for a particular entity type.
+					Poses can affect entity hitboxes but do not otherwise change entity state.
+					See {{function|get_entity_pose}} for a list of poses.
 					""";
 		}
 
@@ -5876,10 +5887,14 @@ public class EntityManagement {
 			MCPose pose;
 			try {
 				pose = MCPose.valueOf(args[1].val().toUpperCase());
+				boolean fixed = false;
+				if(args.length == 3) {
+					fixed = ArgumentValidation.getBooleanObject(args[2], t);
+				}
+				entity.setPose(pose, fixed);
 			} catch(IllegalArgumentException ex) {
-				throw new CREFormatException("Invalid pose: " + args[1].val(), t);
+				throw new CREFormatException("Invalid pose for this entity: " + args[1].val(), t);
 			}
-			entity.setPose(pose);
 			return CVoid.VOID;
 		}
 
