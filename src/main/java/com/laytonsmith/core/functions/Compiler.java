@@ -639,18 +639,30 @@ public class Compiler {
 			for(int listInd = list.size() - 1; listInd >= 1; listInd--) {
 				Stack<ParseTree> executes = new Stack<>();
 				while(listInd > 0) {
-					ParseTree lastNode = list.get(listInd);
+					ParseTree node = list.get(listInd);
 					try {
-						if(lastNode.getData() instanceof CFunction cf
+						if(node.getData() instanceof CFunction cf
 								&& cf.hasFunction()
 								&& cf.getFunction() != null
 								&& cf.getFunction().getName().equals(Compiler.p.NAME)) {
-							Mixed prevNode = list.get(listInd - 1).getData();
-							if(prevNode instanceof CSymbol || prevNode instanceof CLabel || prevNode instanceof CString) {
-								// It's just a parenthesis like @a = (1); or key: (value), so we should leave it alone.
+							ParseTree prevNode = list.get(listInd - 1);
+							Mixed prevNodeVal = prevNode.getData();
+
+							// Do not rewrite parenthesis like "@a = (1);" or "key: (value)" to execute().
+							if(prevNodeVal instanceof CSymbol
+									|| prevNodeVal instanceof CLabel || prevNodeVal instanceof CString) {
 								break;
 							}
-							executes.push(lastNode);
+
+							// Do not rewrite casts to execute() if the callable is the cast (i.e. "(type) (val)").
+							if(prevNodeVal instanceof CFunction cfunc && cfunc.hasFunction() && cfunc.getFunction() != null
+									&& cfunc.getFunction().getName().equals(Compiler.p.NAME) && prevNode.numberOfChildren() == 1
+									&& (prevNode.getChildAt(0).getData().isInstanceOf(CClassType.TYPE)
+											|| __type_ref__.createFromBareStringOrConcats(prevNode.getChildAt(0)) != null)) {
+								break;
+							}
+
+							executes.push(node);
 							list.remove(listInd--);
 						} else {
 							break;
