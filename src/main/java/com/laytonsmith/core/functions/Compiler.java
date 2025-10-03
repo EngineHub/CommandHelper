@@ -1244,7 +1244,7 @@ public class Compiler {
 			CClassType type = ArgumentValidation.getClassType(args[1], t);
 			if(!InstanceofUtil.isInstanceof(value, type, env)) {
 				throw new CRECastException(
-						"Cannot cast " + value.typeof().getName() + " to " + type.getName() + ".", t);
+						"Cannot cast from " + value.typeof().getSimpleName() + " to " + type.getSimpleName() + ".", t);
 			}
 			// TODO - Perform runtime conversion to 'type' when necessary (cross-cast handling).
 			return value;
