@@ -469,9 +469,52 @@ public class ControlFlow {
 		@Override
 		public ParseTree optimizeDynamic(Target t, Environment env,
 				Set<Class<? extends Environment.EnvironmentImpl>> envs,
-				List<ParseTree> children, FileOptions fileOptions)
-				throws ConfigCompileException, ConfigRuntimeException {
-			// TODO: Redo this optimization.
+				List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException {
+
+			// Check for too few arguments.
+			if(children.size() < 2) {
+				throw new ConfigCompileException("Too few arguments passed to " + this.getName() + "()", t);
+			}
+
+			// Optimize per condition code pair for constant conditions.
+			boolean foundDynamicCond = false;
+			for(int i = 0; i < children.size(); i += 2) {
+				ParseTree condNode = children.get(i);
+				if(condNode.isConst()) {
+					if(ArgumentValidation.getBooleanish(condNode.getData(), t)) {
+
+						// Optimize to true condition code block if no dynamic condition was present before this.
+						if(!foundDynamicCond) {
+							ParseTree codeNode = children.get(i + 1);
+							return codeNode;
+						}
+
+						// Remove condition code block pairs and else code block after this static true condition.
+						for(int j = children.size() - 1; j >= i + 2; j--) {
+							children.remove(j);
+						}
+						return null;
+					} else {
+
+						// Remove this constant false condition and its code block.
+						children.remove(i + 1);
+						children.remove(i);
+						i -= 2; // Compensate for next loop increment.
+					}
+				} else {
+					foundDynamicCond = true;
+				}
+			}
+
+			// Remove this ifelse() if no children are left.
+			if(children.size() == 0) {
+				return Optimizable.REMOVE_ME;
+			}
+
+			// Optimize this ifelse() to its else code block if only that code block is remaining.
+			if(children.size() == 1) {
+				return children.get(0);
+			}
 			return null;
 		}
 
