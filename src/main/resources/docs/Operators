@@ -62,6 +62,7 @@ still uses array_get). Sub-strings within strings may be pulled out using the br
 <code>array(1, 2, 3)[1..2]</code> returns an array with 2 elements in it, namely 2 and 3. <code>'string'[0]</code> returns
 's', and <code>'string'[0..1]</code> returns 'st'.
 |-
+| ''Execute''
 | %%NOWIKI|( )%%
 | {{function|execute}}
 | Left
