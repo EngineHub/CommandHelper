@@ -19,6 +19,7 @@ import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.SelfStatement;
 import com.laytonsmith.core.compiler.VariableScope;
 import com.laytonsmith.core.compiler.analysis.Namespace;
+import com.laytonsmith.core.compiler.analysis.ReturnableDeclaration;
 import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.CArray;
@@ -336,6 +337,9 @@ public class EventBinding {
 				valScope = scopes[1];
 			}
 			analysis.linkScope(paramScope, code, env, exceptions);
+
+			// Create returnable declaration in the inner root scope.
+			paramScope.addDeclaration(new ReturnableDeclaration(CVoid.TYPE, ast.getNodeModifiers(), ast.getTarget()));
 
 			// Allow code after bind() to access declarations in assigned values, but not parameters themselves.
 			return valScope;

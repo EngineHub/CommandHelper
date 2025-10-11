@@ -40,6 +40,7 @@ import com.laytonsmith.core.compiler.analysis.ParamDeclaration;
 import com.laytonsmith.core.compiler.analysis.ProcDeclaration;
 import com.laytonsmith.core.compiler.analysis.ProcRootDeclaration;
 import com.laytonsmith.core.compiler.analysis.Reference;
+import com.laytonsmith.core.compiler.analysis.ReturnableDeclaration;
 import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.compiler.signature.FunctionSignatures;
@@ -1626,6 +1627,9 @@ public class DataHandling {
 			// Allow procedures to perform lookups in the decl scope.
 			paramScope.addSpecificParent(declScope, Namespace.PROCEDURE);
 
+			// Create returnable declaration in the inner root scope.
+			paramScope.addDeclaration(new ReturnableDeclaration(retType, ast.getNodeModifiers(), ast.getTarget()));
+
 			// Return the declaration scope. Parameters and their default values are not accessible after the procedure.
 			return declScope;
 		}
@@ -2703,10 +2707,16 @@ public class DataHandling {
 				return parentScope;
 			}
 
-			// Handle optional return type argument.
+			// Handle optional return type argument (CClassType or CVoid, default to AUTO).
 			int ind = 0;
-			if(ast.getChildAt(ind).getData().isInstanceOf(CClassType.TYPE)) {
-				analysis.linkScope(parentScope, ast.getChildAt(ind++), env, exceptions);
+			CClassType retType;
+			if(ast.getChildAt(ind).getData() instanceof CClassType) {
+				retType = (CClassType) ast.getChildAt(ind++).getData();
+			} else if(ast.getChildAt(ind).getData().equals(CVoid.VOID)) {
+				ind++;
+				retType = CVoid.TYPE;
+			} else {
+				retType = CClassType.AUTO;
 			}
 
 			// Create parameter scope. Set parent scope if this closure type is allowed to resolve in the parent scope.
@@ -2731,6 +2741,9 @@ public class DataHandling {
 				valScope = scopes[1];
 				paramScope = scopes[0];
 			}
+
+			// Create returnable declaration in the inner root scope.
+			paramScope.addDeclaration(new ReturnableDeclaration(retType, ast.getNodeModifiers(), ast.getTarget()));
 
 			// Handle closure code.
 			ParseTree code = ast.getChildAt(ast.numberOfChildren() - 1);

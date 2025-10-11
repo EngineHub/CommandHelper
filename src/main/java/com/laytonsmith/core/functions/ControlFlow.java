@@ -23,6 +23,9 @@ import com.laytonsmith.core.compiler.ConditionalSelfStatement;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.SelfStatement;
 import com.laytonsmith.core.compiler.VariableScope;
+import com.laytonsmith.core.compiler.analysis.Declaration;
+import com.laytonsmith.core.compiler.analysis.Namespace;
+import com.laytonsmith.core.compiler.analysis.ReturnableReference;
 import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.compiler.signature.FunctionSignatures;
@@ -2412,8 +2415,63 @@ public class ControlFlow {
 		}
 
 		@Override
+		public CClassType typecheck(StaticAnalysis analysis,
+				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+
+			// Get value type.
+			CClassType valType;
+			Target valTarget;
+			if(ast.numberOfChildren() == 0) {
+				valType = CVoid.TYPE;
+				valTarget = ast.getTarget();
+			} else if(ast.numberOfChildren() == 1) {
+				ParseTree valNode = ast.getChildAt(0);
+				valType = analysis.typecheck(valNode, env, exceptions);
+				valTarget = valNode.getTarget();
+			} else {
+
+				// Fall back to default behavior for invalid usage.
+				return super.typecheck(analysis, ast, env, exceptions);
+			}
+
+			// Resolve this returnable reference to its returnable declaration to get its required return type.
+			Scope scope = analysis.getTermScope(ast);
+			if(scope != null) {
+				Set<Declaration> decls = scope.getDeclarations(Namespace.RETURNABLE, null);
+				if(decls.size() == 0) {
+					exceptions.add(new ConfigCompileException("Return is not valid in this context.", ast.getTarget()));
+				} else {
+
+					// Type check return value for all found declared return types.
+					for(Declaration decl : decls) {
+						StaticAnalysis.requireType(valType, decl.getType(), valTarget, env, exceptions);
+					}
+				}
+			}
+
+			// Return void.
+			return CVoid.TYPE;
+		}
+
+		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return null;
+		}
+
+		@Override
+		public Scope linkScope(StaticAnalysis analysis, Scope parentScope, ParseTree ast,
+				Environment env, Set<ConfigCompileException> exceptions) {
+
+			// Handle children. These will execute before this return().
+			Scope scope = super.linkScope(analysis, parentScope, ast, env, exceptions);
+
+			// Add returnable reference in new scope.
+			scope = analysis.createNewScope(scope);
+			scope.addReference(new ReturnableReference(ast.getTarget()));
+			analysis.setTermScope(ast, scope);
+
+			// Return scope.
+			return scope;
 		}
 
 		@Override
