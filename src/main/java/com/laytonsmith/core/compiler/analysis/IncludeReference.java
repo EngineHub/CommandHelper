@@ -18,7 +18,7 @@ public class IncludeReference extends Reference {
 	 * @param identifier - The include identifier (the path passed to include(), which should resolve to a file).
 	 * @param inScope - The parent scope which the include should be linked to.
 	 * @param outScope - The scope in which the include should be usable.
-	 * @param t - The target of the declaration.
+	 * @param t - The target of the reference.
 	 */
 	public IncludeReference(String identifier, Scope inScope, Scope outScope, Target t) {
 		super(Namespace.INCLUDE, identifier, t);
