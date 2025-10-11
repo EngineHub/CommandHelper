@@ -32,6 +32,8 @@ import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.SelfStatement;
 import com.laytonsmith.core.compiler.VariableScope;
+import com.laytonsmith.core.compiler.analysis.BreakableBoundDeclaration;
+import com.laytonsmith.core.compiler.analysis.ContinuableBoundDeclaration;
 import com.laytonsmith.core.compiler.analysis.Declaration;
 import com.laytonsmith.core.compiler.analysis.IVariableAssignDeclaration;
 import com.laytonsmith.core.compiler.analysis.IncludeReference;
@@ -2745,9 +2747,14 @@ public class DataHandling {
 			// Create returnable declaration in the inner root scope.
 			paramScope.addDeclaration(new ReturnableDeclaration(retType, ast.getNodeModifiers(), ast.getTarget()));
 
+			// Create breakable and continuable bound declarations to prevent resolving to parent scope.
+			Scope codeParentScope = analysis.createNewScope(paramScope);
+			codeParentScope.addDeclaration(new BreakableBoundDeclaration(ast.getNodeModifiers(), ast.getTarget()));
+			codeParentScope.addDeclaration(new ContinuableBoundDeclaration(ast.getNodeModifiers(), ast.getTarget()));
+
 			// Handle closure code.
 			ParseTree code = ast.getChildAt(ast.numberOfChildren() - 1);
-			analysis.linkScope(paramScope, code, env, exceptions);
+			analysis.linkScope(codeParentScope, code, env, exceptions);
 
 			// Return the parent scope, as parameters and their default values are not accessible after the closure.
 			return parentScope;

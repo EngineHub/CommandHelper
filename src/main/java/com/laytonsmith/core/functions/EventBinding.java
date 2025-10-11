@@ -18,6 +18,8 @@ import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.SelfStatement;
 import com.laytonsmith.core.compiler.VariableScope;
+import com.laytonsmith.core.compiler.analysis.BreakableBoundDeclaration;
+import com.laytonsmith.core.compiler.analysis.ContinuableBoundDeclaration;
 import com.laytonsmith.core.compiler.analysis.Namespace;
 import com.laytonsmith.core.compiler.analysis.ReturnableDeclaration;
 import com.laytonsmith.core.compiler.analysis.Scope;
@@ -336,10 +338,15 @@ public class EventBinding {
 				paramScope = scopes[0];
 				valScope = scopes[1];
 			}
-			analysis.linkScope(paramScope, code, env, exceptions);
+			Scope codeParentScope = analysis.createNewScope(paramScope);
+			analysis.linkScope(codeParentScope, code, env, exceptions);
 
 			// Create returnable declaration in the inner root scope.
-			paramScope.addDeclaration(new ReturnableDeclaration(CVoid.TYPE, ast.getNodeModifiers(), ast.getTarget()));
+			codeParentScope.addDeclaration(new ReturnableDeclaration(CVoid.TYPE, ast.getNodeModifiers(), ast.getTarget()));
+
+			// Create breakable and continuable bound declarations to prevent resolving to parent scope.
+			codeParentScope.addDeclaration(new BreakableBoundDeclaration(ast.getNodeModifiers(), ast.getTarget()));
+			codeParentScope.addDeclaration(new ContinuableBoundDeclaration(ast.getNodeModifiers(), ast.getTarget()));
 
 			// Allow code after bind() to access declarations in assigned values, but not parameters themselves.
 			return valScope;
