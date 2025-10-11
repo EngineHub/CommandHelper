@@ -173,7 +173,7 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 		if(ex instanceof AbstractCREException) {
 			return (AbstractCREException) ex;
 		}
-		throw new Error("Unexpected CRE exception that isn't convertable to AbstractCREException");
+		throw new Error("Unexpected CRE exception that isn't convertable to AbstractCREException", ex);
 	}
 
 	@Override
