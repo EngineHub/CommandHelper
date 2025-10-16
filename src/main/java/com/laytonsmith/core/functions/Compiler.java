@@ -12,6 +12,8 @@ import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
+import com.laytonsmith.core.compiler.CompilerEnvironment;
+import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.compiler.signature.FunctionSignatures;
@@ -1246,7 +1248,6 @@ public class Compiler {
 				throw new CRECastException(
 						"Cannot cast from " + value.typeof().getSimpleName() + " to " + type.getSimpleName() + ".", t);
 			}
-			// TODO - Perform runtime conversion to 'type' when necessary (cross-cast handling).
 			return value;
 		}
 
@@ -1254,14 +1255,42 @@ public class Compiler {
 		public CClassType typecheck(StaticAnalysis analysis,
 				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
 
-			// Typecheck children and validate function signature through super call.
-			super.typecheck(analysis, ast, env, exceptions);
+			// Fall back to default behavior for invalid usage.
+			if(ast.numberOfChildren() != 2) {
+				return super.typecheck(analysis, ast, env, exceptions);
+			}
 
-			// Return type that is being cast to.
-			if(ast.numberOfChildren() != 2 || !(ast.getChildAt(1).getData() instanceof CClassType)) {
+			// Typecheck value and type nodes.
+			ParseTree valNode = ast.getChildAt(0);
+			CClassType valType = analysis.typecheck(valNode, env, exceptions);
+			StaticAnalysis.requireType(valType, Mixed.TYPE, valType.getTarget(), env, exceptions);
+			ParseTree typeNode = ast.getChildAt(1);
+			CClassType typeType = analysis.typecheck(typeNode, env, exceptions);
+			StaticAnalysis.requireType(typeType, CClassType.TYPE, typeNode.getTarget(), env, exceptions);
+
+			// Get cast-to type.
+			if(!(typeNode.getData() instanceof CClassType)) {
+				assert !exceptions.isEmpty() : "Missing compile-time type error for cast type argument.";
 				return CClassType.AUTO;
 			}
-			return (CClassType) ast.getChildAt(1).getData();
+			CClassType castToType = (CClassType) typeNode.getData();
+
+			// Generate redundancy warning for casts to the value type.
+			if(castToType.equals(valType)) {
+				env.getEnv(CompilerEnvironment.class).addCompilerWarning(ast.getFileOptions(),
+						new CompilerWarning("Redundant cast to " + castToType.getSimpleName(), ast.getTarget(),
+								FileOptions.SuppressWarning.UselessCode));
+			}
+
+			// Generate compile error for impossible casts.
+			if(!InstanceofUtil.isInstanceof(valType, castToType, env)
+					&& !InstanceofUtil.isInstanceof(castToType, valType, env)) {
+				exceptions.add(new ConfigCompileException("Cannot cast from "
+						+ valType.getSimpleName() + " to " + castToType.getSimpleName() + ".", ast.getTarget()));
+			}
+
+			// Return type that is being cast to.
+			return castToType;
 		}
 	}
 }
