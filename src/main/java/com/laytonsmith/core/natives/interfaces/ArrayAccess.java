@@ -87,7 +87,7 @@ public interface ArrayAccess extends Booleanish {
 	 * int start = Math.min(begin, end);
 	 * int stop = Math.max(begin, end);
 	 * int step = (begin &lt;= end) ? 1 : -1;
-	 * for (int i = start; i != stop; i += step) { ... }
+	 * for(int i = start; i != stop; i += step) { ... }
 	 * </code></pre>
 	 *
 	 * @param begin

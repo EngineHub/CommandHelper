@@ -296,7 +296,7 @@ public class ArrayHandling {
 		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
 				Environment env, Set<ConfigCompileException> exceptions) {
 			if(argTypes.size() == 2 || argTypes.size() == 3) {
-				StaticAnalysis.requireType(argTypes.get(0), ArrayAccess.TYPE, argTargets.get(0), env, exceptions);
+				StaticAnalysis.requireType(argTypes.get(0), com.laytonsmith.core.natives.interfaces.Iterable.TYPE, argTargets.get(0), env, exceptions);
 				StaticAnalysis.requireAnyType(argTypes.get(1),
 						new CClassType[] {CInt.TYPE, CSlice.TYPE, CString.TYPE}, argTargets.get(1), env, exceptions);
 				if(argTypes.size() == 3) {
