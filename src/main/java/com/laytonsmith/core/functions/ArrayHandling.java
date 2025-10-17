@@ -263,13 +263,13 @@ public class ArrayHandling {
 						throw e;
 					}
 				}
-			} else if(args[0].isInstanceOf(ArrayAccess.TYPE)) {
+			} else if(args[0].isInstanceOf(com.laytonsmith.core.natives.interfaces.Iterable.TYPE)) {
 				com.laytonsmith.core.natives.interfaces.Iterable aa
 						= (com.laytonsmith.core.natives.interfaces.Iterable) args[0];
-				if(index instanceof CSlice) {
+				if(index instanceof CSlice cSlice) {
 					//It's a range
-					int start = (int) ((CSlice) index).getStart();
-					int finish = (int) ((CSlice) index).getFinish();
+					int start = (int) cSlice.getStart();
+					int finish = (int) cSlice.getFinish();
 					try {
 						//Convert negative indexes
 						if(start < 0) {
@@ -288,7 +288,7 @@ public class ArrayHandling {
 					return aa.get(index, t);
 				}
 			} else {
-				throw new CRECastException("Argument 1 of " + this.getName() + " must be an array", t);
+				throw new CRECastException("Argument 1 of " + this.getName() + " must be an Iterable object, such as an array.", t);
 			}
 		}
 

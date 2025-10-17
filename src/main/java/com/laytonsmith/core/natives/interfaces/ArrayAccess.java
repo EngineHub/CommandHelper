@@ -78,6 +78,17 @@ public interface ArrayAccess extends Booleanish {
 
 	/**
 	 * Returns a slice at the specified location. Should throw an exception if an element in the range doesn't exist.
+	 * The range is inclusive.
+	 *
+	 * @implNote In general, MethodScript supports undefined begin and end slices, as well as reverse slices. For
+	 * CArray type only, this is fully covered, but for other slice types, only negative slice numbers are converted,
+	 * and subclasses must handle both forward and reverse slices if applicable. A good way to handle that is as such:
+	 * <pre><code>
+	 * int start = Math.min(begin, end);
+	 * int stop = Math.max(begin, end);
+	 * int step = (begin &lt;= end) ? 1 : -1;
+	 * for (int i = start; i != stop; i += step) { ... }
+	 * </code></pre>
 	 *
 	 * @param begin
 	 * @param end
