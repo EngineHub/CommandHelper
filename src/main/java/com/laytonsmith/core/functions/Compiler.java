@@ -12,6 +12,7 @@ import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
+import com.laytonsmith.core.Optimizable.OptimizationOption;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.compiler.FileOptions;
@@ -35,6 +36,7 @@ import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.Environment.EnvironmentImpl;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
@@ -1206,7 +1208,7 @@ public class Compiler {
 	@api
 	@noprofile
 	@hide("This is only used internally by the compiler.")
-	public static class __cast__ extends DummyFunction {
+	public static class __cast__ extends DummyFunction implements Optimizable {
 
 		public static final String NAME = "__cast__";
 
@@ -1291,6 +1293,36 @@ public class Compiler {
 
 			// Return type that is being cast to.
 			return castToType;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+					OptimizationOption.OPTIMIZE_DYNAMIC,
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.CACHE_RETURN
+			);
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, Environment env, Set<Class<? extends EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException, ConfigCompileGroupException {
+
+			// Optimize __cast__(__cast__(val, type1), type2) to __cast__(val, type1) if the cast to type2 will always
+			// pass given that the cast to type1 has passed.
+			ParseTree valNode = children.get(0);
+			if(valNode.getData() instanceof CFunction cf && cf.getCachedFunction() != null
+					&& cf.getCachedFunction().getName().equals(__cast__.NAME) && valNode.numberOfChildren() == 2) {
+				ParseTree typeNode = children.get(1);
+				ParseTree childTypeNode = valNode.getChildAt(1);
+				if(typeNode.getData() instanceof CClassType type
+						&& childTypeNode.getData() instanceof CClassType childType
+						&& InstanceofUtil.isInstanceof(childType, type, env)) {
+					return valNode;
+				}
+			}
+			return null;
 		}
 	}
 }
