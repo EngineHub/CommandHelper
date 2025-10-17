@@ -1579,7 +1579,7 @@ public final class MethodScriptCompiler {
 						environment.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions, warning);
 						f = new ParseTree(new CFunction(Compiler.__autoconcat__.NAME, unknown), fileOptions);
 					} else {
-						f = new ParseTree(new CFunction(Compiler.p.NAME, unknown), fileOptions);
+						f = new ParseTree(new CFunction(Compiler.p.NAME, t.getTarget()), fileOptions);
 					}
 					constructCount.push(new AtomicInteger(0));
 					tree.addChild(f);
