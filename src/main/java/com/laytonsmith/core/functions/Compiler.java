@@ -350,7 +350,7 @@ public class Compiler {
 			}
 
 			// Rewrite cast operator.
-			for(int i = 0; i < list.size() - 1; i++) {
+			for(int i = list.size() - 1; i >= 0; i--) {
 				ParseTree node = list.get(i);
 				if(node.getData() instanceof CFunction cf && cf.hasFunction() && cf.getFunction() != null
 						&& cf.getFunction().getName().equals(Compiler.p.NAME) && node.numberOfChildren() == 1) {
