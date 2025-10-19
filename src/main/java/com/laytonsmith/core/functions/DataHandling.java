@@ -342,26 +342,27 @@ public class DataHandling {
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			IVariableList list = env.getEnv(GlobalEnv.class).GetVarList();
-			int offset;
-			CClassType type;
-			String name;
+			IVariable var;
 			if(args.length == 3) {
-				offset = 1;
-				if(!(args[offset] instanceof IVariable)) {
+
+				// Get and validate variable name.
+				if(!(args[1] instanceof IVariable)) {
 					throw new CRECastException(getName() + " with 3 arguments only accepts an ivariable as the second argument.", t);
 				}
-				name = ((IVariable) args[offset]).getVariableName();
-				if(list.has(name) && env.getEnv(GlobalEnv.class).GetFlag(GlobalEnv.FLAG_NO_CHECK_DUPLICATE_ASSIGN) == null) {
+				String varName = ((IVariable) args[1]).getVariableName();
+				if(list.has(varName) && env.getEnv(GlobalEnv.class).GetFlag(GlobalEnv.FLAG_NO_CHECK_DUPLICATE_ASSIGN) == null) {
 					if(env.getEnv(GlobalEnv.class).GetFlag(GlobalEnv.FLAG_CLOSURE_WARN_OVERWRITE) != null) {
 						MSLog.GetLogger().Log(MSLog.Tags.RUNTIME, LogLevel.WARNING,
-								"The variable " + name + " is hiding another value of the"
+								"The variable " + varName + " is hiding another value of the"
 								+ " same name in the main scope.", t);
-					} else if(!StaticAnalysis.enabled() && t != list.get(name, t, true, env).getDefinedTarget()) {
-						MSLog.GetLogger().Log(MSLog.Tags.RUNTIME, LogLevel.ERROR, name + " was already defined at "
-								+ list.get(name, t, true, env).getDefinedTarget() + " but is being redefined.", t);
+					} else if(!StaticAnalysis.enabled() && t != list.get(varName, t, true, env).getDefinedTarget()) {
+						MSLog.GetLogger().Log(MSLog.Tags.RUNTIME, LogLevel.ERROR, varName + " was already defined at "
+								+ list.get(varName, t, true, env).getDefinedTarget() + " but is being redefined.", t);
 					}
 				}
-				type = ArgumentValidation.getClassType(args[0], t);
+
+				// Get and validate variable type.
+				CClassType type = ArgumentValidation.getClassType(args[0], t);
 				Boolean varArgsAllowed = env.getEnv(GlobalEnv.class).GetFlag(GlobalEnv.FLAG_VAR_ARGS_ALLOWED);
 				if(varArgsAllowed == null) {
 					varArgsAllowed = false;
@@ -369,24 +370,64 @@ public class DataHandling {
 				if(type.isVarargs() && !varArgsAllowed) {
 					throw new CRECastException("Cannot use varargs type in this context", t);
 				}
+				if(type.equals(CVoid.TYPE)) {
+					throw new CRECastException("Variables may not be of type void", t);
+				}
+
+				// Get assigned value.
+				Mixed val = args[2];
+
+				// Unwrap assigned value from IVariable if an IVariable is passed.
+				if(val instanceof IVariable ivar) {
+					val = list.get(ivar.getVariableName(), ivar.getTarget(), env).ival();
+				}
+
+				// Validate assigned value.
+				if(val instanceof CVoid) {
+					throw new CRECastException("Void may not be assigned to a variable", t);
+				}
+				if(!InstanceofUtil.isInstanceof(val.typeof(), type, env)) {
+					throw new CRECastException(varName + " is of type " + type.val() + ", but a value of type "
+							+ val.typeof() + " was assigned to it.", t);
+				}
+
+				// Set variable in variable list.
+				var = new IVariable(type, varName, val, t);
+				list.set(var);
+
 			} else {
-				offset = 0;
-				if(!(args[offset] instanceof IVariable)) {
+
+				// Get and validate variable name.
+				if(!(args[0] instanceof IVariable)) {
 					throw new CRECastException(getName() + " with 2 arguments only accepts an ivariable as the first argument.", t);
 				}
-				name = ((IVariable) args[offset]).getVariableName();
-				IVariable listVar = list.get(name, t, true, env);
-				t = listVar.getDefinedTarget();
-				type = listVar.getDefinedType();
+				String varName = ((IVariable) args[0]).getVariableName();
+
+				// Get assigned value.
+				Mixed val = args[1];
+
+				// Unwrap assigned value from IVariable if an IVariable is passed.
+				if(val instanceof IVariable ivar) {
+					val = list.get(ivar.getVariableName(), ivar.getTarget(), env).ival();
+				}
+
+				// Validate assigned value and set variable in variable list.
+				if(val instanceof CVoid) {
+					throw new CRECastException("Void may not be assigned to a variable", t);
+				}
+				var = list.get(varName);
+				if(var == null) {
+					var = new IVariable(Auto.TYPE, varName, val, t);
+					list.set(var);
+				} else {
+					if(!InstanceofUtil.isInstanceof(val.typeof(), var.getDefinedType(), env)) {
+						throw new CRECastException(varName + " is of type " + var.getDefinedType()
+								+ ", but a value of type " + val.typeof() + " was assigned to it.", t);
+					}
+					var.setIval(val);
+				}
 			}
-			Mixed c = args[offset + 1];
-			while(c instanceof IVariable) {
-				IVariable cur = (IVariable) c;
-				c = list.get(cur.getVariableName(), cur.getTarget(), env).ival();
-			}
-			IVariable v = new IVariable(type, name, c, t, env);
-			list.set(v);
-			return v;
+			return var;
 		}
 
 		@Override
