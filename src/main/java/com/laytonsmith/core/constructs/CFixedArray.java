@@ -9,6 +9,7 @@ import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREIndexOverflowException;
 import com.laytonsmith.core.exceptions.CRE.CREUnsupportedOperationException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.natives.interfaces.ArrayAccessSet;
 import com.laytonsmith.core.natives.interfaces.Booleanish;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 
@@ -18,13 +19,14 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
- * This data type is meant to be used for low level systems programming. The API doesn't use it directly, though in
- * the interpreter implementation, it does use an actual fixed size array. For native code, however, this uses native
- * fixed size arrays, which assists with code mapping and is a required primitive for bootstrapping purposes.
+ * This data type is meant to be used for low level systems programming. The API doesn't use it directly, though in the
+ * interpreter implementation, it does use an actual fixed size array. For native code, however, this uses native fixed
+ * size arrays, which assists with code mapping and is a required primitive for bootstrapping purposes.
  */
 @typeof("ms.lang.fixed_array")
 public class CFixedArray extends Construct implements
-		java.lang.Iterable<Mixed>, Booleanish, com.laytonsmith.core.natives.interfaces.Iterable {
+		java.lang.Iterable<Mixed>, Booleanish, com.laytonsmith.core.natives.interfaces.Iterable,
+		ArrayAccessSet {
 
 	public static final CClassType TYPE = CClassType.get(CFixedArray.class);
 	private Mixed[] data;
@@ -78,6 +80,12 @@ public class CFixedArray extends Construct implements
 		}
 	}
 
+	@Override
+	public void set(Mixed index, Mixed value, Target t) {
+		int in = ArgumentValidation.getInt32(index, t);
+		set(in, value, t);
+	}
+
 	public void set(int index, Mixed value, Target t) {
 		validateSet(value, t);
 		if(index >= data.length || index < 0) {
@@ -123,7 +131,8 @@ public class CFixedArray extends Construct implements
 
 	@Override
 	public CClassType[] getInterfaces() {
-		return new CClassType[]{Booleanish.TYPE, com.laytonsmith.core.natives.interfaces.Iterable.TYPE};
+		return new CClassType[]{Booleanish.TYPE, com.laytonsmith.core.natives.interfaces.Iterable.TYPE,
+			ArrayAccessSet.TYPE};
 	}
 
 	@Override

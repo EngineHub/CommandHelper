@@ -91,7 +91,7 @@ public class IVariableList {
 		// non-strict mode it will be a compiler warning.
 		// ==, not .equals
 		if(v.ival() == CNull.UNDEFINED && !bypassAssignedCheck
-				&& env.getEnv(GlobalEnv.class).GetFlag("no-check-undefined") == null) {
+				&& env.getEnv(GlobalEnv.class).GetFlag(GlobalEnv.FLAG_NO_CHECK_UNDEFINED) == null) {
 			MSLog.GetLogger().Log(MSLog.Tags.RUNTIME, LogLevel.ERROR, "Using undefined variable: " + name, t);
 		}
 		v.setTarget(t);

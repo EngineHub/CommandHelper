@@ -218,6 +218,59 @@ public class MatrixHandling {
 	}
 
 	@api
+	public static class matrix_clone extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			CReal2dMatrix matrix = getMatrixOnly(args[0], t, 1);
+			return matrix.deepClone();
+		}
+
+		@Override
+		public String getName() {
+			return "matrix_clone";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		@Override
+		public String docs() {
+			return "Real2dMatrix {Real2dMatrix matrix} Clones the matrix. This clone is a deep copy, fully independent"
+					+ " from the source matrix.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CString.TYPE)
+					.param(CReal2dMatrix.TYPE, "matrix", "The matrix to clone.")
+					.build();
+		}
+	}
+
+	@api
 	@seealso(StringHandling.sprintf.class)
 	public static class matrix_format extends AbstractFunction {
 

@@ -349,8 +349,8 @@ public class DataHandling {
 					throw new CRECastException(getName() + " with 3 arguments only accepts an ivariable as the second argument.", t);
 				}
 				name = ((IVariable) args[offset]).getVariableName();
-				if(list.has(name) && env.getEnv(GlobalEnv.class).GetFlag("no-check-duplicate-assign") == null) {
-					if(env.getEnv(GlobalEnv.class).GetFlag("closure-warn-overwrite") != null) {
+				if(list.has(name) && env.getEnv(GlobalEnv.class).GetFlag(GlobalEnv.FLAG_NO_CHECK_DUPLICATE_ASSIGN) == null) {
+					if(env.getEnv(GlobalEnv.class).GetFlag(GlobalEnv.FLAG_CLOSURE_WARN_OVERWRITE) != null) {
 						MSLog.GetLogger().Log(MSLog.Tags.RUNTIME, LogLevel.WARNING,
 								"The variable " + name + " is hiding another value of the"
 								+ " same name in the main scope.", t);
@@ -360,7 +360,7 @@ public class DataHandling {
 					}
 				}
 				type = ArgumentValidation.getClassType(args[0], t);
-				Boolean varArgsAllowed = env.getEnv(GlobalEnv.class).GetFlag("var-args-allowed");
+				Boolean varArgsAllowed = env.getEnv(GlobalEnv.class).GetFlag(GlobalEnv.FLAG_VAR_ARGS_ALLOWED);
 				if(varArgsAllowed == null) {
 					varArgsAllowed = false;
 				}
@@ -1515,11 +1515,15 @@ public class DataHandling {
 							throw new CREInvalidProcedureException("Invalid arguments defined for procedure", t);
 						}
 					}
-					env.getEnv(GlobalEnv.class).SetFlag("no-check-duplicate-assign", true);
-					env.getEnv(GlobalEnv.class).SetFlag("var-args-allowed", true);
-					Mixed cons = parent.eval(nodes[i], env);
-					env.getEnv(GlobalEnv.class).ClearFlag("var-args-allowed");
-					env.getEnv(GlobalEnv.class).ClearFlag("no-check-duplicate-assign");
+					env.getEnv(GlobalEnv.class).SetFlag(GlobalEnv.FLAG_NO_CHECK_DUPLICATE_ASSIGN, true);
+					env.getEnv(GlobalEnv.class).SetFlag(GlobalEnv.FLAG_VAR_ARGS_ALLOWED, true);
+					Mixed cons;
+					try {
+						cons = parent.eval(nodes[i], env);
+					} finally {
+						env.getEnv(GlobalEnv.class).ClearFlag(GlobalEnv.FLAG_VAR_ARGS_ALLOWED);
+						env.getEnv(GlobalEnv.class).ClearFlag(GlobalEnv.FLAG_NO_CHECK_DUPLICATE_ASSIGN);
+					}
 					if(i == 0) {
 						if(cons instanceof IVariable) {
 							throw new CREInvalidProcedureException("Anonymous Procedures are not allowed", t);
@@ -2674,11 +2678,15 @@ public class DataHandling {
 				children.add(node);
 				newNode.setChildren(children);
 				Script fakeScript = Script.GenerateScript(newNode, myEnv.getEnv(GlobalEnv.class).GetLabel(), null);
-				myEnv.getEnv(GlobalEnv.class).SetFlag("closure-warn-overwrite", true);
-				myEnv.getEnv(GlobalEnv.class).SetFlag("var-args-allowed", true);
-				Mixed ret = MethodScriptCompiler.execute(newNode, myEnv, null, fakeScript);
-				myEnv.getEnv(GlobalEnv.class).ClearFlag("var-args-allowed");
-				myEnv.getEnv(GlobalEnv.class).ClearFlag("closure-warn-overwrite");
+				myEnv.getEnv(GlobalEnv.class).SetFlag(GlobalEnv.FLAG_CLOSURE_WARN_OVERWRITE, true);
+				myEnv.getEnv(GlobalEnv.class).SetFlag(GlobalEnv.FLAG_VAR_ARGS_ALLOWED, true);
+				Mixed ret;
+				try {
+					ret = MethodScriptCompiler.execute(newNode, myEnv, null, fakeScript);
+				} finally {
+					myEnv.getEnv(GlobalEnv.class).ClearFlag(GlobalEnv.FLAG_VAR_ARGS_ALLOWED);
+					myEnv.getEnv(GlobalEnv.class).ClearFlag(GlobalEnv.FLAG_CLOSURE_WARN_OVERWRITE);
+				}
 				if(!(ret instanceof IVariable)) {
 					throw new CRECastException("Arguments sent to " + getName() + " barring the last) must be ivariables", t);
 				}
@@ -2865,11 +2873,15 @@ public class DataHandling {
 				children.add(node);
 				newNode.setChildren(children);
 				Script fakeScript = Script.GenerateScript(newNode, myEnv.getEnv(GlobalEnv.class).GetLabel(), null);
-				myEnv.getEnv(GlobalEnv.class).SetFlag("closure-warn-overwrite", true);
-				myEnv.getEnv(GlobalEnv.class).SetFlag("var-args-allowed", true);
-				Mixed ret = MethodScriptCompiler.execute(newNode, myEnv, null, fakeScript);
-				myEnv.getEnv(GlobalEnv.class).ClearFlag("var-args-allowed");
-				myEnv.getEnv(GlobalEnv.class).ClearFlag("closure-warn-overwrite");
+				myEnv.getEnv(GlobalEnv.class).SetFlag(GlobalEnv.FLAG_CLOSURE_WARN_OVERWRITE, true);
+				myEnv.getEnv(GlobalEnv.class).SetFlag(GlobalEnv.FLAG_VAR_ARGS_ALLOWED, true);
+				Mixed ret;
+				try {
+					ret = MethodScriptCompiler.execute(newNode, myEnv, null, fakeScript);
+				} finally {
+					myEnv.getEnv(GlobalEnv.class).ClearFlag(GlobalEnv.FLAG_VAR_ARGS_ALLOWED);
+					myEnv.getEnv(GlobalEnv.class).ClearFlag(GlobalEnv.FLAG_CLOSURE_WARN_OVERWRITE);
+				}
 				if(!(ret instanceof IVariable)) {
 					throw new CRECastException("Arguments sent to " + getName() + " barring the last) must be ivariables", t);
 				}

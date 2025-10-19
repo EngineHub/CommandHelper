@@ -74,6 +74,36 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	}
 
 	/**
+	 * Puts array_get in a special mode, to create a new sub-array if necessary. Set in array_set.
+	 */
+	public static final String FLAG_ARRAY_SPECIAL_GET = "array-special-get";
+
+	/**
+	 * Disables checking if a variable is undefined. This is used in proc definitions.
+	 */
+	public static final String FLAG_NO_CHECK_UNDEFINED = "no-check-undefined";
+
+	/**
+	 * Disables duplicate assignment checking (i.e. @a = @a). This is used in proc definitions, because the rhs is the
+	 * current scope, and the lhs is the proc scope, so they aren't actually the same variable, even if they are named
+	 * the same.
+	 */
+	public static final String FLAG_NO_CHECK_DUPLICATE_ASSIGN = "no-check-duplicate-assign";
+
+	/**
+	 * Used in assign, to determine if varargs are allowed in this context. This is set in proc/closure/etc definitions
+	 * since the compiler creates an assignment for default values for parameters. Normal uses of assign don't allow
+	 * vararg creation.
+	 */
+	public static final String FLAG_VAR_ARGS_ALLOWED = "var-args-allowed";
+
+	/**
+	 * Variable declaration inside of a closure will hide values in the parent scope, but is otherwise not an error,
+	 * like a duplicate assignment would be. This is set before going into a closure, to ensure we warn, not error.
+	 */
+	public static final String FLAG_CLOSURE_WARN_OVERWRITE = "closure-warn-overwrite";
+
+	/**
 	 * Sets the value of a flag
 	 *
 	 * @param name
@@ -301,9 +331,9 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	}
 
 	/**
-	 * Returns true if this script has been interrupted, and should immediately halt execution. This is monitored
-	 * in the core execution engine, however, if a function could be particularly long running, this value should
-	 * be manually checked, since the engine is not pre-emptive.
+	 * Returns true if this script has been interrupted, and should immediately halt execution. This is monitored in the
+	 * core execution engine, however, if a function could be particularly long running, this value should be manually
+	 * checked, since the engine is not pre-emptive.
 	 *
 	 * @return
 	 */
@@ -355,17 +385,16 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 
 	/**
 	 * Returns the runtime setting for a particular value. Runtime settings are a collection of free settings, which
-	 * individual functions can define setting
-	 * names and values, though in general, to prevent stepping over each other, the following guidelines should be
-	 * used for the names:
+	 * individual functions can define setting names and values, though in general, to prevent stepping over each other,
+	 * the following guidelines should be used for the names:
 	 * <p>
 	 * The general format of the setting should be hierarchical, with dots separating the setting name categories, i.e.
 	 * {@code function.function_name.setting_name} where the following top level hierarchies are defined:
 	 * <ul>
-	 *	<li>function - settings relating to functions. The second category should be the function name.</li>
-	 *  <li>event - settings relating to events. The second category should be the event name.</li>
-	 *  <li>extension - settings relating to extensions, that don't fit in the previous two categories.</li>
-	 *  <li>system - settings related to the system that aren't based on functions or events</li>
+	 * <li>function - settings relating to functions. The second category should be the function name.</li>
+	 * <li>event - settings relating to events. The second category should be the event name.</li>
+	 * <li>extension - settings relating to extensions, that don't fit in the previous two categories.</li>
+	 * <li>system - settings related to the system that aren't based on functions or events</li>
 	 * </ul>
 	 * <p>
 	 * Given that these settings can change at any time, it is important that these values be re-read each time. Due to
@@ -379,6 +408,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	 * The values are defined globally, and cannot be scoped down to other scopes, so these should be used only in cases
 	 * where such global settings make sense, usually in regards to setting the default value for a particular parameter
 	 * or option.
+	 *
 	 * @param name The setting name
 	 * @return The Mixed value, or null, if it is not contained in the set.
 	 */
@@ -390,6 +420,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	 * Works like {@link #GetRuntimeSetting(java.lang.String)} but if the value is not set, or is set to CNull, the
 	 * default value is returned. If a totally missing value has a different meaning than a CNull value, you should use
 	 * {@link #GetRuntimeSettingOrCNull(java.lang.String, com.laytonsmith.core.natives.interfaces.Mixed)}.
+	 *
 	 * @param name The setting name. See the stipulations for naming conventions in
 	 * {@link #GetRuntimeSetting(java.lang.String)}
 	 * @param defaultValue The value to return if the value was totally missing from the map or was set to CNull.
@@ -406,8 +437,9 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 
 	/**
 	 * As many runtime settings are just booleans, this convenience method can be used to deal directly with java
-	 * booleans. If the value supplied is not a Booleanish though, the default value is returned, with a warning
-	 * issued. See {@link #GetRuntimeSetting(java.lang.String)} for details on the parameters.
+	 * booleans. If the value supplied is not a Booleanish though, the default value is returned, with a warning issued.
+	 * See {@link #GetRuntimeSetting(java.lang.String)} for details on the parameters.
+	 *
 	 * @param name
 	 * @param defaultValue
 	 * @param t
@@ -417,7 +449,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 		Mixed b = GetRuntimeSetting(name, CBoolean.get(defaultValue));
 		try {
 			return ArgumentValidation.getBooleanish(b, t);
-		} catch (CRECastException ex) {
+		} catch(CRECastException ex) {
 			MSLog.GetLogger().w(MSLog.Tags.RUNTIME, "Runtime setting \"" + name + "\" is not a boolean value, but was"
 					+ " expected to be. The default value is being used instead.", t);
 			return defaultValue;
@@ -429,6 +461,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	 * is returned. Note that if the value is set to CNull by the user, this will return CNull, not your default value.
 	 * If you want CNull to be considered the same as totally missing, use
 	 * {@link #GetRuntimeSetting(java.lang.String, com.laytonsmith.core.natives.interfaces.Mixed)}.
+	 *
 	 * @param name The setting name. See the stipulations for naming conventions in
 	 * {@link #GetRuntimeSetting(java.lang.String)}
 	 * @param defaultValue The value to return if the value was totally missing from the map.
@@ -446,6 +479,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	 * Sets the value of a runtime setting. If value is java null (CNull.NULL is different), then the value is simply
 	 * removed from the settings list. In general, this method should only be called by set/remove_runtime_setting, and
 	 * should never be modified by java code otherwise.
+	 *
 	 * @param name The setting name.
 	 * @param value The value to set in the map
 	 */
@@ -458,8 +492,9 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	}
 
 	/**
-	 * The file options should be set before execution of each function, so the function can have
-	 * access to the current parse tree's file options.
+	 * The file options should be set before execution of each function, so the function can have access to the current
+	 * parse tree's file options.
+	 *
 	 * @param options
 	 */
 	public void SetFileOptions(FileOptions options) {
@@ -467,8 +502,9 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	}
 
 	/**
-	 * The FileOptions are set for each function, so calling this returns the file options for the current
-	 * function execution, which will vary from place to place.
+	 * The FileOptions are set for each function, so calling this returns the file options for the current function
+	 * execution, which will vary from place to place.
+	 *
 	 * @return
 	 */
 	public FileOptions GetFileOptions() {

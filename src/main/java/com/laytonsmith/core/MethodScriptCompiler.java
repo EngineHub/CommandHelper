@@ -2598,12 +2598,12 @@ public final class MethodScriptCompiler {
 
 				if(env.hasEnv(GlobalEnv.class)) {
 					// For testing, we frequently set this to null, so check this first.
-					env.getEnv(GlobalEnv.class).SetFlag("no-check-undefined", true);
+					env.getEnv(GlobalEnv.class).SetFlag(GlobalEnv.FLAG_NO_CHECK_UNDEFINED, true);
 				}
 				Procedure myProc = DataHandling.proc.getProcedure(tree.getTarget(), env, fakeScript, children.toArray(ParseTree[]::new));
 				tree.getNodeModifiers().merge(children.get(0).getNodeModifiers());
 				if(env.hasEnv(GlobalEnv.class)) {
-					env.getEnv(GlobalEnv.class).ClearFlag("no-check-undefined");
+					env.getEnv(GlobalEnv.class).ClearFlag(GlobalEnv.FLAG_NO_CHECK_UNDEFINED);
 				}
 				procs.peek().add(myProc); //Yep. So, we can move on with our lives now, and if it's used later, it could possibly be static.
 			} catch (ConfigRuntimeException e) {

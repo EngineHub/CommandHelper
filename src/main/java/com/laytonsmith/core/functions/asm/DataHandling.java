@@ -41,8 +41,8 @@ public class DataHandling {
 				name = ((IVariable) nodes[offset].getData()).getVariableName();
 				type = ArgumentValidation.getClassType(nodes[0].getData(), t);
 				// TODO: Add duplicate check here, or remove if not needed
-//				if(list.has(name) && env.getEnv(GlobalEnv.class).GetFlag("no-check-duplicate-assign") == null) {
-//					if(env.getEnv(GlobalEnv.class).GetFlag("closure-warn-overwrite") != null) {
+//				if(list.has(name) && env.getEnv(GlobalEnv.class).GetFlag(GlobalEnv.FLAG_NO_CHECK_DUPLICATE_ASSIGN) == null) {
+//					if(env.getEnv(GlobalEnv.class).GetFlag(GlobalEnv.FLAG_CLOSURE_WARN_OVERWRITE) != null) {
 //						MSLog.GetLogger().Log(MSLog.Tags.RUNTIME, LogLevel.ERROR,
 //								"The variable " + name + " is hiding another value of the"
 //										+ " same name in the main scope.", t);

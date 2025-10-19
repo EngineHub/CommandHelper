@@ -155,7 +155,7 @@ public class CReal2dMatrix extends AbstractMixedClass implements Matrix<Double>,
 	}
 
 	@Override
-	public CArray get(Mixed index, Target t) throws ConfigRuntimeException {
+	public CReal2dMatrixRow get(Mixed index, Target t) throws ConfigRuntimeException {
 		return get(ArgumentValidation.getInt32(index, t), t);
 	}
 
@@ -165,16 +165,11 @@ public class CReal2dMatrix extends AbstractMixedClass implements Matrix<Double>,
 	}
 
 	@Override
-	public CArray get(int index, Target t) throws ConfigRuntimeException {
+	public CReal2dMatrixRow get(int index, Target t) throws ConfigRuntimeException {
 		if(index >= getRowCount() || index < 0) {
 			throw new CRERangeException("Matrix range out of bounds.", t);
 		}
-		double[] d = getRow(index, t);
-		CArray ret = new CArray(t);
-		for(int i = 0; i < d.length; i++) {
-			ret.push(new CDouble(d[i], t), t);
-		}
-		return ret;
+		return new CReal2dMatrixRow(this, index);
 	}
 
 	@Override
@@ -212,6 +207,13 @@ public class CReal2dMatrix extends AbstractMixedClass implements Matrix<Double>,
 	@Override
 	public long size() {
 		return getRowCount();
+	}
+
+	public CReal2dMatrix deepClone() {
+		double[] cloneData = new double[this.data.length];
+		System.arraycopy(this.data, 0, cloneData, 0, this.data.length);
+		CReal2dMatrix clone = new CReal2dMatrix(this.rows, this.columns, cloneData);
+		return clone;
 	}
 
 	private int getPosition(int row, int column) {
