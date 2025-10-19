@@ -79,6 +79,10 @@ public class IVariableList {
 		varList.put(v.getVariableName(), v);
 	}
 
+	public IVariable get(String name) {
+		return varList.get(name);
+	}
+
 	public IVariable get(String name, Target t, boolean bypassAssignedCheck, Environment env) {
 		IVariable v = varList.get(name);
 		if(v == null) {

@@ -96,8 +96,10 @@ import com.laytonsmith.core.functions.ArrayHandling.array_get;
 import com.laytonsmith.core.functions.ArrayHandling.array_push;
 import com.laytonsmith.core.functions.ArrayHandling.array_set;
 import com.laytonsmith.core.functions.Compiler.__autoconcat__;
+import com.laytonsmith.core.functions.Compiler.__cast__;
 import com.laytonsmith.core.functions.Compiler.__statements__;
 import com.laytonsmith.core.functions.Compiler.__type_ref__;
+import com.laytonsmith.core.functions.Compiler.__unsafe_assign__;
 import com.laytonsmith.core.functions.Compiler.centry;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.tools.docgen.templates.ArrayIteration;
@@ -637,6 +639,8 @@ public class DataHandling {
 			if(children.size() < 2) {
 				return null;
 			}
+
+			// Generate warning for assigning a variable to itself.
 			if(children.get(0).getData() instanceof IVariable
 					&& children.get(1).getData() instanceof IVariable) {
 				if(((IVariable) children.get(0).getData()).getVariableName().equals(
@@ -646,18 +650,49 @@ public class DataHandling {
 							new CompilerWarning(msg, t, null));
 				}
 			}
-			{
-				// Check for declaration of variables named "pass" or "password" and see if it's defined as a
-				// secure_string. If not, warn.
-				if(children.get(0).getData() instanceof CClassType && children.get(1).getData() instanceof IVariable) {
-					boolean isString
-							= ((CClassType) children.get(0).getData()).getNativeType() == CString.class;
-					String varName = ((IVariable) children.get(1).getData()).getVariableName();
-					if((varName.equalsIgnoreCase("pass") || varName.equalsIgnoreCase("password"))
-							&& isString) {
-						String msg = "";
-						env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
-								new CompilerWarning(msg, t, FileOptions.SuppressWarning.CodeUpgradeNotices));
+
+			// Check for declaration of variables named "pass" or "password" and see if it's defined as a
+			// secure_string. If not, warn.
+			if(children.get(0).getData() instanceof CClassType && children.get(1).getData() instanceof IVariable) {
+				boolean isString
+						= ((CClassType) children.get(0).getData()).getNativeType() == CString.class;
+				String varName = ((IVariable) children.get(1).getData()).getVariableName();
+				if((varName.equalsIgnoreCase("pass") || varName.equalsIgnoreCase("password"))
+						&& isString) {
+					String msg = "";
+					env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
+							new CompilerWarning(msg, t, FileOptions.SuppressWarning.CodeUpgradeNotices));
+				}
+			}
+
+			// Rewrite "assign(type, var, val)" to "__unsafe_assign__(type, var, val)" if the typecheck cannot fail.
+			if(children.size() == 3) {
+				ParseTree typeNode = children.get(0);
+				ParseTree varNode = children.get(1);
+				ParseTree valNode = children.get(2);
+				if(typeNode.getData() instanceof CClassType declaredType
+						&& varNode.getData() instanceof IVariable) {
+					if(valNode.isConst()) {
+						CClassType valType = valNode.getData().typeof();
+						if((valType != CClassType.AUTO || declaredType == CClassType.AUTO)
+								&& InstanceofUtil.isInstanceof(valType, declaredType, env)) {
+							ParseTree newAssignNode = new ParseTree(new CFunction(__unsafe_assign__.NAME, t), fileOptions);
+							newAssignNode.addChild(typeNode);
+							newAssignNode.addChild(varNode);
+							newAssignNode.addChild(valNode);
+							return newAssignNode;
+						}
+					}
+					if(valNode.getData() instanceof CFunction cf && cf.getCachedFunction() != null
+							&& cf.getCachedFunction().getName().equals(__cast__.NAME) && valNode.numberOfChildren() == 2
+							&& valNode.getChildAt(1).getData() instanceof CClassType castType
+							&& (castType != CClassType.AUTO || declaredType == CClassType.AUTO)
+							&& InstanceofUtil.isInstanceof(castType, declaredType, env)) {
+						ParseTree newAssignNode = new ParseTree(new CFunction(__unsafe_assign__.NAME, t), fileOptions);
+						newAssignNode.addChild(typeNode);
+						newAssignNode.addChild(varNode);
+						newAssignNode.addChild(valNode);
+						return newAssignNode;
 					}
 				}
 			}
@@ -1505,13 +1540,14 @@ public class DataHandling {
 				} else {
 					boolean thisNodeIsAssign = false;
 					if(nodes[i].getData() instanceof CFunction) {
-						if((nodes[i].getData()).val().equals(assign.NAME)) {
+						String funcName = nodes[i].getData().val();
+						if(funcName.equals(assign.NAME) || funcName.equals(__unsafe_assign__.NAME)) {
 							thisNodeIsAssign = true;
 							if((nodes[i].getChildren().size() == 3 && Construct.IsDynamicHelper(nodes[i].getChildAt(0).getData()))
 									|| Construct.IsDynamicHelper(nodes[i].getChildAt(1).getData())) {
 								usesAssign = true;
 							}
-						} else if((nodes[i].getData()).val().equals(__autoconcat__.NAME)) {
+						} else if(funcName.equals(__autoconcat__.NAME)) {
 							throw new CREInvalidProcedureException("Invalid arguments defined for procedure", t);
 						}
 					}
