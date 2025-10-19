@@ -45,8 +45,8 @@ public class NewExceptionHandlingTest extends AbstractIntegrationTest {
 
 	@Test
 	public void testBasicKeywordUsage() throws Exception {
-		assertEquals("__statements__(complex_try(__statements__(noop()),assign(ms.lang.IOException,@e,null),__statements__(noop()),"
-				+ "assign(ms.lang.Exception,@e,null),__statements__(noop()),__statements__(noop())))",
+		assertEquals("__statements__(complex_try(__statements__(noop()),__unsafe_assign__(ms.lang.IOException,@e,null),__statements__(noop()),"
+				+ "__unsafe_assign__(ms.lang.Exception,@e,null),__statements__(noop()),__statements__(noop())))",
 				optimize("try { } catch (IOException @e){ } catch (Exception @e){ } finally { }"));
 	}
 

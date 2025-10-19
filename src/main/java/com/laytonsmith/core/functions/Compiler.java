@@ -32,10 +32,12 @@ import com.laytonsmith.core.constructs.CSymbol;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
+import com.laytonsmith.core.constructs.IVariableList;
 import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.Environment.EnvironmentImpl;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
@@ -1205,6 +1207,7 @@ public class Compiler {
 			}
 		}
 	}
+
 	@api
 	@noprofile
 	@hide("This is only used internally by the compiler.")
@@ -1323,6 +1326,57 @@ public class Compiler {
 				}
 			}
 			return null;
+		}
+	}
+
+	@api
+	@noprofile
+	@noboilerplate
+	@hide("This is only used internally by the compiler.")
+	public static class __unsafe_assign__ extends assign {
+
+		public static final String NAME = "__unsafe_assign__";
+
+		@Override
+		public String getName() {
+			return NAME;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+
+			// Get arguments.
+			CClassType type;
+			String varName;
+			Mixed val;
+			if(args.length == 3) {
+				type = (CClassType) args[0];
+				varName = ((IVariable) args[1]).getVariableName();
+				val = args[2];
+			} else {
+				type = null;
+				varName = ((IVariable) args[0]).getVariableName();
+				val = args[1];
+			}
+
+			// Get variable list.
+			IVariableList list = env.getEnv(GlobalEnv.class).GetVarList();
+
+			// Unwrap assigned value from IVariable if an IVariable is passed.
+			if(val instanceof IVariable ivar) {
+				val = list.get(ivar.getVariableName(), ivar.getTarget(), env).ival();
+			}
+
+			// Assign value to variable.
+			// Overwrite variable if the type differs (can occur during proc parameter assignment in cloned outer scope).
+			IVariable var = list.get(varName);
+			if(var == null || (type != null && !type.equals(var.getDefinedType()))) {
+				var = new IVariable(type, varName, val, t);
+				list.set(var);
+			} else {
+				var.setIval(val);
+			}
+			return var;
 		}
 	}
 }
