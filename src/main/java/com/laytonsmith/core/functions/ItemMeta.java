@@ -25,6 +25,7 @@ import com.laytonsmith.abstraction.enums.MCTagType;
 import com.laytonsmith.abstraction.enums.MCTrimMaterial;
 import com.laytonsmith.abstraction.enums.MCTrimPattern;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ObjectGenerator;
@@ -58,6 +59,7 @@ public class ItemMeta {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({set_itemmeta.class})
 	public static class get_itemmeta extends AbstractFunction {
 
 		@Override
@@ -160,6 +162,7 @@ public class ItemMeta {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({get_itemmeta.class})
 	public static class set_itemmeta extends AbstractFunction {
 
 		@Override
@@ -214,8 +217,8 @@ public class ItemMeta {
 
 		@Override
 		public String docs() {
-			return "void {[player,] slot, ItemMetaArray} Applies the data from the given array to the item at the"
-					+ " specified slot. Unused fields will be ignored. If null or an empty array is supplied, or if"
+			return "void {[player,] slot, itemMetaArray} Applies the data from the given array to the item at the"
+					+ " specified slot. Unused fields will use defaults. If null or an empty array is supplied, or if"
 					+ " none of the given fields are applicable, the item will become default, as this function"
 					+ " overwrites any existing data. See {{function|get_itemmeta}} for available fields."
 					+ " If the item does not yet exist, use {{function|set_pinv}} instead.";

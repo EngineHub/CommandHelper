@@ -1721,8 +1721,7 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "int {[player]} Gets the experience of a player within this level, as a percentage, from 0 to 99."
-					+ " (100 would be next level, therefore, 0.)";
+			return "int {[player]} Gets the experience of a player within this level, as a percentage, from 0 to 100.";
 		}
 
 		@Override
@@ -1776,7 +1775,7 @@ public class PlayerManagement {
 		@Override
 		public String docs() {
 			return "void {[player], xp} Sets the experience of a player within the current level, as a percentage,"
-					+ " from 0 to 99. 100 resets the experience to zero and adds a level to the player.";
+					+ " from 0 to 100. 100 will sometimes reset the experience to zero and add a level to the player.";
 		}
 
 		@Override

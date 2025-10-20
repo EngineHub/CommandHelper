@@ -59,6 +59,21 @@ public enum MCSpawnReason {
 	ENCHANTMENT,
 	TRIAL_SPAWNER,
 	POTION_EFFECT,
-	REHYDRATION, // Paper
-	REANIMATE, // Spigot
+	REHYDRATION("Paper"), // Happy Ghast
+	REANIMATE("Spigot"); // Copper Golem
+
+	final String mcImplementation;
+
+	MCSpawnReason() {
+		this.mcImplementation = null;
+	}
+
+	MCSpawnReason(String mcImplementation) {
+		this.mcImplementation = mcImplementation;
+	}
+
+	@Deprecated
+	public String getImplementation() {
+		return this.mcImplementation;
+	}
 }

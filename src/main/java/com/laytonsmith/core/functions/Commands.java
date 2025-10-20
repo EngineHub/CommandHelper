@@ -338,36 +338,37 @@ public class Commands {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Register the /hug <player> command.",
-				"register_command('hug', array(\n"
-				+ "\t'description': 'Spread the love!',\n"
-				+ "\t'usage': '/hug <player>',\n"
-				+ "\t'permission': 'perms.hugs',\n"
-				+ "\t'tabcompleter':\n"
-				+ "\t\tclosure(@alias, @sender, @args) {\n"
-				+ "\t\t\t// This replicates the default tabcompleter for registered commands.\n"
-				+ "\t\t\t// If no tabcompleter is set, this behavior is used.\n"
-				+ "\t\t\t@input = @args[-1];\n"
-				+ "\t\t\treturn(array_filter(all_players(), closure(@key, @value) {\n"
-				+ "\t\t\t\treturn(length(@input) <= length(@value)\n"
-				+ "\t\t\t\t\t\t&& equals_ic(@input, substr(@value, 0, length(@input))));\n"
-				+ "\t\t\t}));\n"
-				+ "\t\t},\n"
-				+ "\t'aliases': array('hugg', 'hugs'),\n"
-				+ "\t'executor':\n"
-				+ "\t\tclosure(@alias, @sender, @args) {\n"
-				+ "\t\t\tif(array_size(@args) == 1) {\n"
-				+ "\t\t\t\t@target = @args[0];\n"
-				+ "\t\t\t\tif(ponline(@target)) {\n"
-				+ "\t\t\t\t\tbroadcast(colorize('&4'.@sender.' &6hugs &4'.@target));\n"
-				+ "\t\t\t\t} else {\n"
-				+ "\t\t\t\t\tmsg(colorize('&cThe given player is not online.'));\n"
-				+ "\t\t\t\t}\n"
-				+ "\t\t\t\treturn(true);\n"
-				+ "\t\t\t}\n"
-				+ "\t\t\treturn(false); // prints usage\n"
-				+ "\t\t}\n"
-				+ "));",
-				"Registers the /hug command.")
+						"""
+								register_command('hug', array(
+									'description': 'Spread the love!',
+									'usage': '/hug <player>',
+									'permission': 'perms.hugs',
+									'aliases': array('hugg', 'hugs'),
+									'tabcompleter':
+										closure(@alias, @sender, @args) {
+											// This replicates the default tabcompleter for registered commands.
+											// If no tabcompleter is set, this behavior is used.
+											@input = @args[-1];
+											return(array_filter(all_players(), closure(@key, @value) {
+												return(length(@input) <= length(@value)
+														&& equals_ic(@input, substr(@value, 0, length(@input))));
+											}));
+										},
+									'executor':
+										closure(@alias, @sender, @args) {
+											if(array_size(@args) == 1) {
+												@target = @args[0];
+												if(ponline(@target)) {
+													broadcast(colorize('&4'.@sender.' &6hugs &4'.@target));
+												} else {
+													msg(colorize('&cThe given player is not online.'));
+												}
+												return(true);
+											}
+											return(false); // prints usage
+										}
+								));""",
+						"Registers the /hug command.")
 			};
 		}
 	}

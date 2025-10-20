@@ -25,7 +25,6 @@ import com.laytonsmith.abstraction.enums.MCRegainReason;
 import com.laytonsmith.abstraction.enums.MCRemoveCause;
 import com.laytonsmith.abstraction.enums.MCSpawnReason;
 import com.laytonsmith.abstraction.enums.MCTargetReason;
-import com.laytonsmith.abstraction.enums.MCUnleashReason;
 import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.events.MCCreatureSpawnEvent;
 import com.laytonsmith.abstraction.events.MCEntityChangeBlockEvent;
@@ -741,7 +740,19 @@ public class EntityEvents {
 
 		@Override
 		public String docs() {
-			return "{type: <macro> | reason: <macro> One of " + StringUtils.Join(MCSpawnReason.values(), ", ", ", or ", " or ") + "}"
+			StringBuilder reasons = new StringBuilder();
+			for(MCSpawnReason value : MCSpawnReason.values()) {
+				if(!reasons.isEmpty()) {
+					reasons.append(", ");
+				}
+				reasons.append(value.name());
+				if(value.getImplementation() != null) {
+					reasons.append(" (");
+					reasons.append(value.getImplementation());
+					reasons.append(")");
+				}
+			}
+			return "{type: <macro> | reason: <macro> One of: " + reasons + "}"
 					+ " Fired when a living entity spawns on the server."
 					+ " {type: the type of creature spawning | id: the entityID of the creature"
 					+ " | reason: the reason this creature is spawning | location: locationArray of the event}"
@@ -2384,8 +2395,8 @@ public class EntityEvents {
 			return "{type: <macro> | reason: <macro>}"
 					+ " This event is called when a leash is broken."
 					+ " {id: The entityID of the entity | type: The entity type of the entity"
-					+ " | reason: The reason the leash broke. Can be one of "
-					+ StringUtils.Join(MCUnleashReason.values(), ", ", ", or ", " or ") + "}"
+					+ " | reason: The reason the leash broke. Can be one of HOLDER_GONE, PLAYER_UNLEASH, DISTANCE,"
+					+ " SHEAR (Spigot-only 1.21.6+), FIREWORK (Spigot-only 1.21.6+), UNKNOWN}"
 					+ " {}";
 		}
 

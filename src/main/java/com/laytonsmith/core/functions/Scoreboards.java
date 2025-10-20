@@ -61,7 +61,7 @@ public final class Scoreboards {
 	 */
 	public static final String MAIN = "main";
 	private static final String DEF_MSG = "Scoreboard defaults to '" + MAIN + "' if not given.";
-	private static Map<String, MCScoreboard> boards = new HashMap<>();
+	private static final Map<String, MCScoreboard> BOARDS = new HashMap<>();
 
 	static {
 		if(!isBoard(MAIN)) {
@@ -88,7 +88,7 @@ public final class Scoreboards {
 	 * @return if there is a scoreboard with the given id
 	 */
 	public static boolean isBoard(String id) {
-		return boards.containsKey(id);
+		return BOARDS.containsKey(id);
 	}
 
 	/**
@@ -98,7 +98,7 @@ public final class Scoreboards {
 	 * @return if the given scoreboard is already being tracked
 	 */
 	public static boolean isBoard(MCScoreboard board) {
-		for(MCScoreboard s : boards.values()) {
+		for(MCScoreboard s : BOARDS.values()) {
 			if(s.equals(board)) {
 				return true;
 			}
@@ -122,7 +122,7 @@ public final class Scoreboards {
 		if(isBoard(board)) {
 			throw new CREScoreboardException("That Scoreboard is already added.", t);
 		}
-		boards.put(id, board);
+		BOARDS.put(id, board);
 	}
 
 	/**
@@ -137,7 +137,7 @@ public final class Scoreboards {
 		if(!isBoard(id)) {
 			throw new CREScoreboardException("The specified scoreboard does not exist.", t);
 		}
-		MCScoreboard ret = boards.get(id);
+		MCScoreboard ret = BOARDS.get(id);
 		if(ret == null) {
 			throw new CREScoreboardException("The specified scoreboard is null. Are you running from cmdline mode?", t);
 		}
@@ -153,7 +153,7 @@ public final class Scoreboards {
 	 * @throws CREScoreboardException if the cache does not contain the given scoreboard
 	 */
 	public static String getBoardID(MCScoreboard board, Target t) throws CREScoreboardException {
-		for(Map.Entry<String, MCScoreboard> e : boards.entrySet()) {
+		for(Map.Entry<String, MCScoreboard> e : BOARDS.entrySet()) {
 			if(board.equals(e.getValue())) {
 				return e.getKey();
 			}
@@ -175,7 +175,7 @@ public final class Scoreboards {
 		if(!isBoard(id)) {
 			throw new CREScoreboardException("The specified scoreboard does not exist.", t);
 		}
-		boards.remove(id);
+		BOARDS.remove(id);
 	}
 
 	/**
@@ -300,8 +300,7 @@ public final class Scoreboards {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment,
-				Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = Static.GetPlayer(args[0], t);
 			p.setScoreboard(assignBoard(1, t, args));
 			return CVoid.VOID;
@@ -340,7 +339,7 @@ public final class Scoreboards {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			CArray ret = new CArray(t);
-			for(String id : boards.keySet()) {
+			for(String id : BOARDS.keySet()) {
 				ret.push(new CString(id, t), t);
 			}
 			return ret;
@@ -521,11 +520,6 @@ public final class Scoreboards {
 	public static class create_objective extends SBFunction {
 
 		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREScoreboardException.class};
-		}
-
-		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(2, t, args);
 			String name = args[0].val();
@@ -572,11 +566,6 @@ public final class Scoreboards {
 
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class create_team extends SBFunction {
-
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREScoreboardException.class};
-		}
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
@@ -808,11 +797,6 @@ public final class Scoreboards {
 	public static class team_add_player extends SBFunction {
 
 		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREScoreboardException.class};
-		}
-
-		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(2, t, args);
 			MCTeam team = s.getTeam(args[0].val());
@@ -835,8 +819,8 @@ public final class Scoreboards {
 
 		@Override
 		public String docs() {
-			return "void {teamName, player, [scoreboard]} Adds a player to a team, given the team exists. The player"
-					+ " will be removed from any other team on the same scoreboard. " + DEF_MSG;
+			return "void {teamName, entry, [scoreboard]} Adds a player (or entity UUID) to a team, given the team exists."
+					+ " It will be removed from any other team on the same scoreboard. " + DEF_MSG;
 		}
 
 		@Override
@@ -870,8 +854,8 @@ public final class Scoreboards {
 
 		@Override
 		public String docs() {
-			return "boolean {teamname, player, [scoreboard]} Attempts to remove a player from a team,"
-					+ " and returns true if successful, for false if the player was not part of the team." + DEF_MSG;
+			return "boolean {teamname, entry, [scoreboard]} Attempts to remove a player (or entity UUID) from a team,"
+					+ " and returns true if successful, for false if it was not part of the team." + DEF_MSG;
 		}
 
 		@Override
@@ -920,8 +904,7 @@ public final class Scoreboards {
 	public static class remove_scoreboard extends SBFunction {
 
 		@Override
-		public Mixed exec(Target t, Environment environment,
-				Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String id = args[0].val();
 			boolean nullify = true;
 			if(args.length == 2) {

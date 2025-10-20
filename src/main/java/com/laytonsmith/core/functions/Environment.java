@@ -1589,8 +1589,7 @@ public class Environment {
 
 
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class spawn_particle extends AbstractFunction {
-
+	public static class spawn_particle extends AbstractFunction implements Optimizable {
 		@Override
 		public MSVersion since() {
 			return MSVersion.V3_3_3;
@@ -1633,12 +1632,12 @@ public class Environment {
 					+ "<br>BLOCK_DUST, BLOCK_CRACK, BLOCK_CRUMBLE, BLOCK_MARKER, DUST_PILLAR, and FALLING_DUST"
 					+ " particles can take a block type name parameter under the key \"block\" (default: STONE)."
 					+ "<br>ITEM_CRACK particles can take an item array or name under the key \"item\" (default: STONE)."
-					+ "<br>REDSTONE, SPELL, and SPELL_INSTANT particles take an RGB color array"
+					+ "<br>REDSTONE, SPELL (1.21.9+), and SPELL_INSTANT (1.21.9+) particles take an RGB color array"
 					+ " (each 0 - 255) or name under the key \"color\" (defaults to RED for REDSTONE, WHITE for others)."
-					+ "<br>SPELL_MOB and FLASH particles take an ARGB color array"
-					+ " (each 0 - 255) or name under the key \"color\" (defaults to opaque WHITE)."
-					+ "<br>SPELL, SPELL_INSTANT and DRAGON_BREATH particles take a \"power\" value that scales velocity."
-					+ " (defaults to 1.0)"
+					+ "<br>SPELL_MOB (1.20.6+), TINTED_LEAVES (1.20.6+) and FLASH (1.21.9+) particles take an ARGB color"
+					+ " array (each 0 - 255) or name under the key \"color\" (defaults to opaque WHITE)."
+					+ "<br>SPELL, SPELL_INSTANT and DRAGON_BREATH (1.21.9+) particles take a \"power\" value that scales"
+					+ " velocity. (defaults to 1.0)"
 					+ "<br>DUST_COLOR_TRANSITION particles take a \"tocolor\" in addition \"color\"."
 					+ "<br>VIBRATION particles take a \"destination\" location array or entity UUID."
 					+ "<br>SCULK_CHARGE particles take an \"angle\" in radians. (defaults to 0.0)"
@@ -1735,6 +1734,43 @@ public class Environment {
 				throw new CREIllegalArgumentException("Given unsupported data for particle type " + p.name(), t);
 			}
 			return CVoid.VOID;
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, com.laytonsmith.core.environments.Environment env,
+				Set<Class<? extends com.laytonsmith.core.environments.Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+
+			if(children.size() < 2) {
+				return null;
+			}
+			ParseTree child = children.get(1);
+			if(child.getData() instanceof CFunction && (child.getData().val().equals(DataHandling.array.NAME)
+					|| child.getData().val().equals(DataHandling.associative_array.NAME))) {
+				for(ParseTree node : child.getChildren()) {
+					if(node.getData() instanceof CFunction && node.getData().val().equals(Compiler.centry.NAME)) {
+						children = node.getChildren();
+						if(children.get(0).getData().val().equals("particle")
+								&& children.get(1).getData().isInstanceOf(CString.TYPE)) {
+							try {
+								MCParticle.MCVanillaParticle.valueOf(children.get(1).getData().val().toUpperCase());
+							} catch (IllegalArgumentException ex) {
+								env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
+										new CompilerWarning(children.get(1).getData().val()
+												+ " is not a valid enum in com.commandhelper.Particle",
+												children.get(1).getTarget(), null));
+							}
+						}
+					}
+				}
+			}
+			return null;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
 	}
 

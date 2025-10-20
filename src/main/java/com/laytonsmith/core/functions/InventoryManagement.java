@@ -19,6 +19,7 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.abstraction.enums.MCInventoryType;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ObjectGenerator;
@@ -73,6 +74,7 @@ public class InventoryManagement {
 			+ " and 'meta' (an array of item meta or null if none exists; see {{function|get_itemmeta}} for details).";
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({set_pinv.class, ptake_item.class})
 	public static class pinv extends AbstractFunction {
 
 		@Override
@@ -433,6 +435,7 @@ public class InventoryManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({ptake_item.class, pgive_item.class})
 	public static class set_pinv extends AbstractFunction {
 
 		@Override
@@ -610,6 +613,7 @@ public class InventoryManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({pinv.class})
 	public static class phas_item extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -861,6 +865,7 @@ public class InventoryManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({set_pinv.class})
 	public static class pgive_item extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -981,6 +986,7 @@ public class InventoryManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({pinv.class})
 	public static class ptake_item extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -1119,6 +1125,7 @@ public class InventoryManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({set_penderchest.class})
 	public static class pgive_enderchest_item extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -1133,13 +1140,13 @@ public class InventoryManagement {
 
 		@Override
 		public String docs() {
-			return "int {[player], itemArray} Adds the specified item to a player's"
-					+ " enderchest. Unlike set_penderchest(), this does not specify a slot. The items are distributed"
-					+ " in the player's inventory, first filling up slots that have the same item type, up to the max"
-					+ " stack size, then fills up empty slots, until either the entire inventory is filled or the"
-					+ " entire amount has been given. If the player's enderchest is full, the number of items that were"
-					+ " not added is returned, which will be less than or equal to the quantity provided. Otherwise,"
-					+ " returns 0.";
+			return "int {[player], itemArray} Adds the specified item to a player's enderchest."
+					+ " Unlike {{function|set_penderchest}}, this does not use a specific slot. The items are"
+					+ " distributed in the player's inventory, first filling up slots that have the same items, up to"
+					+ " the max stack size, then fills up empty slots, until either the entire inventory is filled or"
+					+ " the entire amount has been given. If the player's enderchest is full, the number of items that"
+					+ " were not added is returned, which will be less than or equal to the quantity provided."
+					+ " Otherwise, returns 0.";
 		}
 
 		@Override
@@ -1236,6 +1243,7 @@ public class InventoryManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({set_penderchest.class})
 	public static class ptake_enderchest_item extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -1373,6 +1381,7 @@ public class InventoryManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({penderchest.class, ptake_enderchest_item.class, pgive_enderchest_item.class})
 	public static class set_penderchest extends AbstractFunction {
 
 		@Override
@@ -1478,6 +1487,7 @@ public class InventoryManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({set_penderchest.class, ptake_enderchest_item.class, pgive_enderchest_item.class})
 	public static class penderchest extends AbstractFunction {
 
 		@Override
@@ -1634,6 +1644,7 @@ public class InventoryManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({set_inventory_item.class, get_inventory_size.class})
 	public static class get_inventory_item extends AbstractFunction {
 
 		@Override
@@ -1697,6 +1708,7 @@ public class InventoryManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({get_inventory_item.class, get_inventory_size.class, take_from_inventory.class, add_to_inventory.class})
 	public static class set_inventory_item extends AbstractFunction {
 
 		@Override
@@ -1816,6 +1828,7 @@ public class InventoryManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({set_inventory.class, set_inventory_item.class, take_from_inventory.class, get_inventory.class})
 	public static class get_inventory_size extends AbstractFunction {
 
 		@Override
@@ -1981,6 +1994,7 @@ public class InventoryManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({set_inventory.class, set_inventory_item.class, take_from_inventory.class})
 	public static class get_inventory extends AbstractFunction {
 
 		@Override
@@ -2055,6 +2069,7 @@ public class InventoryManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({get_inventory.class, get_inventory_size.class, set_inventory_item.class, add_to_inventory.class})
 	public static class set_inventory extends AbstractFunction {
 
 		@Override
@@ -2134,6 +2149,7 @@ public class InventoryManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({set_inventory_item.class})
 	public static class add_to_inventory extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -2245,6 +2261,7 @@ public class InventoryManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({get_inventory.class})
 	public static class take_from_inventory extends AbstractFunction implements Optimizable {
 
 		@Override

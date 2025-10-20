@@ -5872,7 +5872,7 @@ public class EntityManagement {
 		@Override
 		public String docs() {
 			return """
-					void {entityUUID, pose, [fixed]} Sets an entity's pose. (only Mannequins on Spigot)
+					void {entityUUID, pose, [fixed]} Sets an entity's pose. (only Mannequins on Spigot, 1.20.1+ on Paper)
 					The fixed argument is a boolean for whether the pose should stay unless manually changed.
 					(defaults to false) While in most cases you can set any pose to any entity,
 					only certain poses will result in a noticable change for a particular entity type.
