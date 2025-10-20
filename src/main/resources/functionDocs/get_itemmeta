@@ -2,8 +2,9 @@ array {[player,] slot} Returns an associative array of known item data in the sl
 
 ----
 
+==== Basic Fields ====
 These fields exist for all items with meta.
-{| width="100%" cellspacing="1" cellpadding="1" border="1" class="wikitable"
+{| class="wikitable"
 |-
 ! scope="col" width="12%" | Field
 ! scope="col" width="15%" | Type
@@ -53,8 +54,9 @@ These fields exist for all items with meta.
 ** '''value''' : (mixed) A valid value for the given tag type.
 |}
 
+==== Optional Fields ====
 These fields optionally exist for any item type.
-{| width="100%" cellspacing="1" cellpadding="1" border="1" class="wikitable"
+{| class="wikitable"
 |-
 ! scope="col" width="12%" | Field
 ! scope="col" width="15%" | Type
@@ -106,10 +108,25 @@ These fields optionally exist for any item type.
 ! remainder
 | associative array
 | Overrides the remaining item when the quantity of this item decreases after use. (e.g. a bucket after drinking a milk bucket) (MC 1.21.3+)
+|-
+! cooldown
+| associative array
+| Overrides the item's cooldown on use. The cooldown temporarily prevents any right-click actions for items of the same type or with the same cooldown group, if set. Not all item types activate cooldowns on use. (MC 1.21.3+)
+* '''seconds''' : (double) The number of seconds the cooldown lasts when the item is used. (default: 1.0)
+* '''group''' : (string) If this namespaced id is present, it shares cooldowns with items with the same cooldown group instead of by item type. (optional)
+|-
+! itemmodel
+| string
+| Overrides the item's model using a namespaced resource location. (MC 1.21.3+)
+|-
+! tooltipstyle
+| string
+| Overrides the item's tooltip style using a namespaced resource location. (MC 1.21.3+)
 |}
 
+==== Type Specific Fields ====
 These fields only exist for specific item types.
-{| width="80%" cellspacing="1" cellpadding="1" border="1" class="wikitable"
+{| class="wikitable"
 |-
 ! scope="col" width="14%" | Item Type
 ! scope="col" width="86%" | Meta
@@ -324,10 +341,87 @@ These fields may be null on 1.21.5 due to a server API implementation bug.
 The entity's custom name is derived from the item "display" string. All other tropical fish data is not yet supported.
 |}
 
-Other data not yet supported in item meta:
-
-* MC 1.13.2 : "can_break" and "can_place_on" (Paper only)
-* MC 1.20.5 : "item_name", "intangible_projectile" (Paper 1.21.3 only), "instrument" (can only get custom definitions in Paper, not set), "tool" (cannot get tags in 'rules', can_destroy_blocks_in_creative field only in Paper), "hide_tooltip" (later integrated into "tooltip_display"), "lock" (can only set with server API)
-* MC 1.21.2 : "damage_resistant", "tooltip_style", "use_cooldown", "item_model", "death_protection" (Paper only), "repairable" (Paper only), "consumable" (added in Spigot 1.21.4 API, Paper API separate), "equippable" (added in Spigot 1.21.5 API)
-* MC 1.21.4 : "custom_model_data" (for anything other than a single float rounded down)
-* MC 1.21.5 : "weapon" (separate Paper/Spigot API), "blocks_attacks" (separate Paper/Spigot API), "break_sound" (separate Paper/Spigot API), "provides_banner_patterns" (Paper only), "provides_trim_material" (Paper only), "potion_duration_scale" (Paper only), "tooltip_display" (partially supported with "flags")
+==== Unsupported Fields ====
+Data components not yet supported in item meta:
+{| class="wikitable"
+|-
+! scope="col" width="20%" | Field
+! scope="col" width="10%" | MCVersion
+! scope="col" width="70%" | Notes
+|-
+! can_break
+| 1.13.2
+| Paper only
+|-
+! can_place_on
+| 1.13.2
+| Paper only
+|-
+! item_name
+| 1.20.5
+|
+|-
+! intangible_projectile
+| 1.20.5
+| Paper 1.21.3+ only
+|-
+! tool
+| 1.20.5
+| Cannot read tags in 'rules' field; 'can_destroy_blocks_in_creative' field only in Paper
+|-
+! lock
+| 1.20.5
+| Server API is write only
+|-
+! damage_resistant
+| 1.21.2
+|
+|-
+! death_protection
+| 1.21.2
+| Paper only
+|-
+! repairable
+| 1.21.2
+| Paper only
+|-
+! consumable
+| 1.21.2
+| Added in Spigot 1.21.4 API; Paper API separate
+|-
+! equippable
+| 1.21.2
+| Added in Spigot 1.21.5 API
+|-
+! custom_model_data
+| 1.21.4
+| Needed for anything other than a single float rounded down in the 'model' field
+|-
+! weapon
+| 1.21.5
+| Separate Paper/Spigot API
+|-
+! blocks_attacks
+| 1.21.5
+| Separate Paper/Spigot API
+|-
+! break_sound
+| 1.21.5
+| Separate Paper/Spigot API
+|-
+! provides_banner_patterns
+| 1.21.5
+| Paper only
+|-
+! provides_trim_material
+| 1.21.5
+| Paper only
+|-
+! potion_duration_scale
+| 1.21.5
+| Paper only
+|-
+! tooltip_display
+| 1.21.5
+| Partially supported with 'flags' field
+|}

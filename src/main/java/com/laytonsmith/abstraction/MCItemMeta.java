@@ -202,4 +202,22 @@ public interface MCItemMeta extends AbstractionObject {
 
 	void setFood(MCFoodComponent component);
 
+	boolean hasItemModel();
+
+	String getItemModel();
+
+	void setItemModel(String key);
+
+	boolean hasTooltipStyle();
+
+	String getTooltipStyle();
+
+	void setTooltipStyle(String key);
+
+	boolean hasUseCooldown();
+
+	MCCooldownComponent getUseCooldown();
+
+	void setUseCooldown(MCCooldownComponent component);
+
 }

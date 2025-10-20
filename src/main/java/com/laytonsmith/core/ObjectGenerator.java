@@ -12,6 +12,7 @@ import com.laytonsmith.abstraction.MCBundleMeta;
 import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.MCColorableArmorMeta;
 import com.laytonsmith.abstraction.MCCompassMeta;
+import com.laytonsmith.abstraction.MCCooldownComponent;
 import com.laytonsmith.abstraction.MCCreatureSpawner;
 import com.laytonsmith.abstraction.MCCrossbowMeta;
 import com.laytonsmith.abstraction.MCEnchantmentStorageMeta;
@@ -548,6 +549,22 @@ public class ObjectGenerator {
 					}
 					if(meta.hasUseRemainder()) {
 						ma.set("remainder", item(meta.getUseRemainder(), t), t);
+					}
+					if(meta.hasUseCooldown()) {
+						MCCooldownComponent cooldownComponent = meta.getUseCooldown();
+						CArray cooldown = CArray.GetAssociativeArray(t);
+						cooldown.set("seconds", new CDouble(cooldownComponent.getSeconds(), t), t);
+						String group = cooldownComponent.getCooldownGroup();
+						if(group != null) {
+							cooldown.set("group", new CString(group, t), t);
+						}
+						ma.set("cooldown", cooldown, t);
+					}
+					if(meta.hasItemModel()) {
+						ma.set("itemmodel", new CString(meta.getItemModel(), t), t);
+					}
+					if(meta.hasTooltipStyle()) {
+						ma.set("tooltipstyle", new CString(meta.getTooltipStyle(), t), t);
 					}
 				}
 
@@ -1131,6 +1148,46 @@ public class ObjectGenerator {
 							// not yet supported
 						} else {
 							meta.setUseRemainder(item(remainder, t));
+						}
+					}
+					if(ma.containsKey("cooldown")) {
+						Mixed mixedCooldown =  ma.get("cooldown", t);
+						if(mixedCooldown instanceof CNull) {
+							// not yet supported
+						} else if(mixedCooldown.isInstanceOf(CArray.TYPE)) {
+							CArray cooldownArray = (CArray) mixedCooldown;
+							if(!cooldownArray.isAssociative()) {
+								throw new CREFormatException("Cooldown array must be associative.", t);
+							}
+							MCCooldownComponent cooldown = meta.getUseCooldown();
+							if(cooldownArray.containsKey("seconds")) {
+								cooldown.setSeconds(ArgumentValidation.getDouble32(cooldownArray.get("seconds", t), t));
+							}
+							if(cooldownArray.containsKey("group")) {
+								Mixed group = cooldownArray.get("group", t);
+								if(!(group instanceof CNull)) {
+									cooldown.setCooldownGroup(group.val());
+								}
+							}
+							meta.setUseCooldown(cooldown);
+						} else {
+							throw new CREFormatException("Expected an array for item cooldown.", t);
+						}
+					}
+					if(ma.containsKey("itemmodel")) {
+						Mixed itemmodel = ma.get("itemmodel", t);
+						if(itemmodel instanceof CNull) {
+							// not yet supported
+						} else {
+							meta.setItemModel(itemmodel.val());
+						}
+					}
+					if(ma.containsKey("tooltipstyle")) {
+						Mixed tooltipstyle = ma.get("tooltipstyle", t);
+						if(tooltipstyle instanceof CNull) {
+							// not yet supported
+						} else {
+							meta.setTooltipStyle(tooltipstyle.val());
 						}
 					}
 				}

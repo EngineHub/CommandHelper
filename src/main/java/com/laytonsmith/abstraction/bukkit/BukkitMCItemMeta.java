@@ -6,6 +6,7 @@ import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils.ReflectionException;
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCAttributeModifier;
+import com.laytonsmith.abstraction.MCCooldownComponent;
 import com.laytonsmith.abstraction.MCFoodComponent;
 import com.laytonsmith.abstraction.MCItemMeta;
 import com.laytonsmith.abstraction.MCItemStack;
@@ -50,6 +51,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.Repairable;
 import org.bukkit.inventory.meta.components.FoodComponent;
 import org.bukkit.inventory.meta.components.JukeboxPlayableComponent;
+import org.bukkit.inventory.meta.components.UseCooldownComponent;
 
 public class BukkitMCItemMeta implements MCItemMeta {
 
@@ -442,4 +444,50 @@ public class BukkitMCItemMeta implements MCItemMeta {
 	public void setFood(MCFoodComponent component) {
 		im.setFood((FoodComponent) component.getHandle());
 	}
+
+	@Override
+	public boolean hasItemModel() {
+		return im.hasItemModel();
+	}
+
+	@Override
+	public String getItemModel() {
+		return im.getItemModel().toString();
+	}
+
+	@Override
+	public void setItemModel(String key) {
+		im.setItemModel(NamespacedKey.fromString(key));
+	}
+
+	@Override
+	public boolean hasTooltipStyle() {
+		return im.hasTooltipStyle();
+	}
+
+	@Override
+	public String getTooltipStyle() {
+		return im.getTooltipStyle().toString();
+	}
+
+	@Override
+	public void setTooltipStyle(String key) {
+		im.setTooltipStyle(NamespacedKey.fromString(key));
+	}
+
+	@Override
+	public boolean hasUseCooldown() {
+		return im.hasUseCooldown();
+	}
+
+	@Override
+	public MCCooldownComponent getUseCooldown() {
+		return new BukkitMCCooldownComponent(im.getUseCooldown());
+	}
+
+	@Override
+	public void setUseCooldown(MCCooldownComponent component) {
+		im.setUseCooldown((UseCooldownComponent) component.getHandle());
+	}
+
 }
