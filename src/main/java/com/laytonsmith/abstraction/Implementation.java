@@ -2,13 +2,16 @@ package com.laytonsmith.abstraction;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
+import com.laytonsmith.PureUtilities.Common.ReflectionUtils.ReflectionException;
 import com.laytonsmith.abstraction.enums.EnumConvertor;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.annotations.abstractionenum;
-import com.laytonsmith.core.Prefs;
+import com.laytonsmith.core.LogLevel;
+import com.laytonsmith.core.MSLog;
+import com.laytonsmith.core.MSLog.Tags;
+import com.laytonsmith.core.constructs.Target;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Set;
 
 /**
  * This class dynamically detects the server version being run, using various checks as needed.
@@ -67,89 +70,110 @@ public final class Implementation {
 			}
 		}
 
+		if(type == Type.TEST || type == Type.SHELL || !useAbstractEnumThread) {
+			return;
+		}
 		//Fire off our abstractionenum checks in a new Thread
-		if(type != Type.TEST && type != Type.SHELL && useAbstractEnumThread) {
-			Thread abstractionenumsThread;
-			abstractionenumsThread = new Thread(() -> {
+		Thread abstractionenumsThread = new Thread(() -> {
+			try {
 				try {
+					//Let the server startup data blindness go by first, so we display any error messages prominently,
+					//since an Error is a case of very bad code that shouldn't have been released to begin with.
+					Thread.sleep(15000);
+				} catch (InterruptedException ex) {
+					//
+				}
+				for(Class c : ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(abstractionenum.class)) {
+					abstractionenum annotation = (abstractionenum) c.getAnnotation(abstractionenum.class);
+					if(!EnumConvertor.class.isAssignableFrom(c)) {
+						throw new Error("Only classes that extend EnumConvertor may use @abstractionenum. "
+								+ c.getName() + " does not, yet it uses the annotation.");
+					}
+					//Now, if this is not the current server type, skip it
+					if(annotation.implementation() != serverType) {
+						continue;
+					}
+					EnumConvertor<Enum, Enum> convertor;
 					try {
-						//Let the server startup data blindness go by first, so we display any error messages prominently,
-						//since an Error is a case of very bad code that shouldn't have been released to begin with.
-						Thread.sleep(15000);
-					} catch (InterruptedException ex) {
-						//
+						//Next, verify usage of the annotation (it is an error if not used properly)
+						//All EnumConvertor subclasses should have public static getConvertor methods, let's grab it now
+						Method m = c.getDeclaredMethod("getConvertor");
+						convertor = (EnumConvertor<Enum, Enum>) m.invoke(null);
+					} catch (NoSuchMethodException ex) {
+						throw new Error("The method with signature public static " + c.getName()
+								+ " getConvertor() was not found in " + c.getName() + "."
+								+ " Please add the following code: \n"
+								+ "private static " + c.getName() + " instance;\n"
+								+ "public static " + c.getName() + " getConvertor(){\n"
+								+ "\tif(instance == null){\n"
+								+ "\t\tinstance = new " + c.getName() + "();\n"
+								+ "\t}\n"
+								+ "\treturn instance;\n"
+								+ "}\n"
+								+ "If you do not know what error is, please report this to the developers.");
 					}
-					Set<Class<?>> abstractionenums = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(abstractionenum.class);
-					for(Class c : abstractionenums) {
-						abstractionenum annotation = (abstractionenum) c.getAnnotation(abstractionenum.class);
-						if(EnumConvertor.class.isAssignableFrom(c)) {
-							EnumConvertor<Enum, Enum> convertor;
-							try {
-								//Now, if this is not the current server type, skip it
-								if(annotation.implementation() != serverType) {
-									continue;
-								}
-								//Next, verify usage of the annotation (it is an error if not used properly)
-								//All EnumConvertor subclasses should have public static getConvertor methods, let's grab it now
-								Method m = c.getDeclaredMethod("getConvertor");
-								convertor = (EnumConvertor<Enum, Enum>) m.invoke(null);
-								//Go through and check for a proper mapping both ways, from concrete to abstract, and vice versa.
-								//At this point, if there is an error, it is only a warning, NOT an error.
-								Class abstractEnum = annotation.forAbstractEnum();
-								Class concreteEnum = annotation.forConcreteEnum();
-								checkEnumConvertors(convertor, abstractEnum, concreteEnum, false);
-								checkEnumConvertors(convertor, concreteEnum, abstractEnum, true);
-
-							} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-								throw new Error(ex);
-							} catch (NoSuchMethodException ex) {
-								throw new Error(serverType.getBranding() + ": The method with signature public static " + c.getName() + " getConvertor() was not found in " + c.getName()
-										+ " Please add the following code: \n"
-												+ "private static " + c.getName() + " instance;\n"
-														+ "public static " + c.getName() + " getConvertor(){\n"
-																+ "\tif(instance == null){\n"
-																+ "\t\tinstance = new " + c.getName() + "();\n"
-																		+ "\t}\n"
-																		+ "\treturn instance;\n"
-																		+ "}\n"
-																		+ "If you do not know what  error is, please report this to the developers.");
-							}
-						} else {
-							throw new Error("Only classes that extend EnumConvertor may use @abstractionenum. " + c.getName() + " does not, yet it uses the annotation.");
-						}
-
-					}
-				} catch (Exception e) {
-					boolean debugMode;
-					try {
-						debugMode = Prefs.DebugMode();
-					} catch (RuntimeException ex) {
-						//Set it to true if we fail to load prefs, which can happen
-						//with a buggy front end.
-						debugMode = true;
-					}
-					if(debugMode) {
-						//If we're in debug mode, sure, go ahead and print the stack trace,
-						//but otherwise we don't want to bother the user.
-						e.printStackTrace();
+					//Go through and check for a proper mapping both ways, from concrete to abstract, and vice versa.
+					//At this point, if there is an error, it is only a warning, NOT an error.
+					if(MSLog.GetLogger().WillLog(Tags.GENERAL, LogLevel.WARNING)) {
+						Class abstractEnum = annotation.forAbstractEnum();
+						Class concreteEnum = annotation.forConcreteEnum();
+						checkAbstractEnumConversion(convertor, abstractEnum, concreteEnum);
+						checkConcreteEnumConversion(convertor, concreteEnum, abstractEnum);
 					}
 				}
-			}, "Abstraction Enum Verification Thread");
-			abstractionenumsThread.setPriority(Thread.MIN_PRIORITY);
-			abstractionenumsThread.setDaemon(true);
-			abstractionenumsThread.start();
+			} catch (Exception e) {
+				MSLog.GetLogger().e(Tags.GENERAL, e, Target.UNKNOWN);
+			}
+		}, "Abstraction Enum Verification Thread");
+		abstractionenumsThread.setPriority(Thread.MIN_PRIORITY);
+		abstractionenumsThread.setDaemon(true);
+		abstractionenumsThread.start();
+	}
+
+	private static void checkAbstractEnumConversion(EnumConvertor convertor, Class<? extends Enum> abstracted, Class<? extends Enum> concrete) {
+		for(Enum abstractValue : abstracted.getEnumConstants()) {
+			Enum enumConcrete;
+			Deprecated deprecated;
+			try {
+				enumConcrete = ReflectionUtils.invokeMethod(convertor, "getConcreteEnumCustom", abstractValue);
+				deprecated = concrete.getField(enumConcrete.name()).getAnnotation(Deprecated.class);
+			} catch (NoSuchFieldException | ReflectionException ex) {
+				// Log missing concrete values for existing abstract values.
+				// These can mean implementation differences, removed values, or we're running an older MC version.
+				MSLog.GetLogger().w(Tags.GENERAL, abstracted.getSimpleName() + "." + abstractValue.name()
+						+ " cannot be converted to " + concrete.getSimpleName(), Target.UNKNOWN);
+				continue;
+			}
+			// Log deprecations of concrete values.
+			if(deprecated == null) {
+				continue;
+			}
+			if(deprecated.since().isEmpty()) {
+				MSLog.GetLogger().i(Tags.GENERAL, concrete.getSimpleName() + "." + enumConcrete.name()
+						+ " is deprecated", Target.UNKNOWN);
+			} else if(MCVersion.match(deprecated.since().split("\\.")).lte(MCVersion.EARLIEST_SUPPORTED)) {
+				MSLog.GetLogger().w(Tags.GENERAL, concrete.getSimpleName() + "." + enumConcrete.name()
+						+ " is deprecated since " + deprecated.since(), Target.UNKNOWN);
+			} else {
+				MSLog.GetLogger().i(Tags.GENERAL, concrete.getSimpleName() + "." + enumConcrete.name()
+						+ " is deprecated since " + deprecated.since(), Target.UNKNOWN);
+			}
 		}
 	}
 
-	private static void checkEnumConvertors(EnumConvertor convertor, Class to, Class from, boolean isToConcrete) {
-		for(Object enumConst : from.getEnumConstants()) {
-			ReflectionUtils.set(EnumConvertor.class, convertor, "useError", false);
-			if(isToConcrete) {
-				convertor.getConcreteEnum((Enum) enumConst);
-			} else {
-				convertor.getAbstractedEnum((Enum) enumConst);
+	private static void checkConcreteEnumConversion(EnumConvertor convertor, Class<? extends Enum> concrete, Class<? extends Enum> abstracted) {
+		for(Enum concreteValue : concrete.getEnumConstants()) {
+			try {
+				ReflectionUtils.invokeMethod(convertor, "getAbstractedEnumCustom", concreteValue);
+			} catch (ReflectionException ex) {
+				try {
+					// Log missing abstract values for concrete values that are not deprecated.
+					if(concrete.getField(concreteValue.name()).getAnnotation(Deprecated.class) == null) {
+						MSLog.GetLogger().w(Tags.GENERAL, concrete.getSimpleName() + "." + concreteValue.name()
+								+ " cannot be converted to " + abstracted.getSimpleName(), Target.UNKNOWN);
+					}
+				} catch (NoSuchFieldException ignore) {}
 			}
-			ReflectionUtils.set(EnumConvertor.class, convertor, "useError", true);
 		}
 	}
 

@@ -290,6 +290,16 @@ public class CommandHelperPlugin extends JavaPlugin {
 
 		MSLog.initialize(CommandHelperFileLocations.getDefault().getConfigDirectory());
 
+		if(myServer.getMinecraftVersion().lt(MCVersion.EARLIEST_SUPPORTED)) {
+			MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "Server is running an older unsupported Minecraft version."
+					+ " Many features may still function, but it is recommended to use an earlier version of"
+					+ " CommandHelper.", Target.UNKNOWN);
+		} else if(myServer.getMinecraftVersion().gt(MCVersion.LATEST_SUPPORTED)) {
+			MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "Server is running a newer unsupported Minecraft version."
+					+ " Most features should continue to function, but it is recommended to update CommandHelper to a"
+					+ " later build if one is available.", Target.UNKNOWN);
+		}
+
 		Telemetry.GetDefault().initializeTelemetry();
 		Telemetry.GetDefault().doNag();
 		Telemetry.GetDefault().log(DefaultTelemetry.StartupModeMetric.class,

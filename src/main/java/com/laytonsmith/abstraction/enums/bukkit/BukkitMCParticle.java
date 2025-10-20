@@ -54,7 +54,7 @@ public class BukkitMCParticle extends MCParticle<Particle> {
 				try {
 					type = Particle.valueOf(v.name());
 				} catch (IllegalArgumentException | NoSuchFieldError ex) {
-					MSLog.GetLogger().w(MSLog.Tags.RUNTIME, "Could not find a Bukkit Particle for " + v.name(), Target.UNKNOWN);
+					MSLog.GetLogger().w(Tags.GENERAL, "Could not find a Bukkit Particle for " + v.name(), Target.UNKNOWN);
 					continue;
 				}
 				BukkitMCParticle wrapper = new BukkitMCParticle(v, type);

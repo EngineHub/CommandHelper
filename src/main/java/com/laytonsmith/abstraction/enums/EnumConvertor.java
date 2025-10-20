@@ -2,7 +2,6 @@ package com.laytonsmith.abstraction.enums;
 
 import com.laytonsmith.annotations.abstractionenum;
 import com.laytonsmith.core.MSLog;
-import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.constructs.Target;
 
 /**
@@ -19,11 +18,6 @@ public abstract class EnumConvertor<Abstracted extends Enum, Concrete extends En
 
 	private Class<? extends Abstracted> abstractedClass;
 	private Class<? extends Concrete> concreteClass;
-
-	/**
-	 * This is changed reflectively by the startup mechanism. Please do not change the name of this variable.
-	 */
-	private boolean useError = true;
 
 	protected EnumConvertor() {
 		abstractionenum annotation = this.getClass().getAnnotation(abstractionenum.class);
@@ -102,11 +96,7 @@ public abstract class EnumConvertor<Abstracted extends Enum, Concrete extends En
 	}
 
 	private void doLog(Class from, Class to, Enum value) {
-		String message = from.getSimpleName() + "." + value.name() + " missing a match in " + to.getName();
-		LogLevel level = LogLevel.WARNING;
-		if(useError) {
-			level = LogLevel.ERROR;
-		}
-		MSLog.GetLogger().Log(MSLog.Tags.RUNTIME, level, message, Target.UNKNOWN);
+		MSLog.GetLogger().e(MSLog.Tags.RUNTIME, from.getSimpleName() + "." + value.name() + " missing a match in "
+				+ to.getSimpleName(), Target.UNKNOWN);
 	}
 }

@@ -1142,7 +1142,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class play_entity_effect extends EntitySetterFunction {
+	public static class play_entity_effect extends EntitySetterFunction implements Optimizable {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
@@ -1178,6 +1178,32 @@ public class EntityManagement {
 			return MSVersion.V3_3_1;
 		}
 
+		@Override
+		public ParseTree optimizeDynamic(Target t, com.laytonsmith.core.environments.Environment env,
+				Set<Class<? extends com.laytonsmith.core.environments.Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+
+			if(children.size() < 2) {
+				return null;
+			}
+			Mixed c = children.get(1).getData();
+			if(c.isInstanceOf(CString.TYPE)) {
+				try {
+					MCEntityEffect.valueOf(c.val().toUpperCase());
+				} catch(IllegalArgumentException ex) {
+					env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions, new CompilerWarning(
+							c.val() + " is not a valid enum in com.commandhelper.EntityEffect",
+							c.getTarget(), null));
+				}
+			}
+			return null;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
