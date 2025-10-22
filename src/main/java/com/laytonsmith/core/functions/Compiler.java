@@ -222,7 +222,10 @@ public class Compiler {
 								|| (list.get(index).getData() instanceof CFunction cf
 										&& cf.hasFunction() && cf.getFunction() != null
 										&& cf.getFunction().getName().equals(Compiler.p.NAME)
-										&& list.get(index).numberOfChildren() == 1))) {
+										&& list.get(index).numberOfChildren() == 1
+										&& (list.get(index).getChildAt(0).getData() instanceof CClassType
+												|| __type_ref__.createFromBareStringOrConcats(
+														list.get(index).getChildAt(0)) != null)))) {
 							valChildren.add(list.get(index));
 							list.remove(index);
 						}
