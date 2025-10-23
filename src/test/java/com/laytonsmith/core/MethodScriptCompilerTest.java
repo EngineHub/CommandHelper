@@ -1422,4 +1422,26 @@ public class MethodScriptCompilerTest extends AbstractIntegrationTest {
 		sa.setLocalEnable(true);
 		MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, env, null, true), env, env.getEnvClasses(), sa);
 	}
+
+	@Test
+	public void testSoftCastSyntaxCompiles() throws Exception {
+		String script = """
+				<!strict>
+				int @a = (int) 1;
+				number @b = (int) 1;
+				mixed @c = (ms.lang.int) 1;
+				int @d = (int) (1);
+				int @e = (ms.lang.int) 1;
+				int @f = (int) (1 + 2);
+				int @g = (int) 1 + 2;
+				msg((string) 'Hello World!');
+				msg((string) 'Hello '.(string) 'World!');
+				mixed @h = (number) (int) 1;
+				mixed @i = (mixed) (number) (int) (int) (int) 1;
+				""";
+		Environment env = Static.GenerateStandaloneEnvironment();
+		StaticAnalysis sa = new StaticAnalysis(true);
+		sa.setLocalEnable(true);
+		MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, env, null, true), env, env.getEnvClasses(), sa);
+	}
 }
