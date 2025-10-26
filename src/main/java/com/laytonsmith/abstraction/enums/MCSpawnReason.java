@@ -60,7 +60,7 @@ public enum MCSpawnReason {
 	TRIAL_SPAWNER,
 	POTION_EFFECT,
 	REHYDRATION("Paper"), // Happy Ghast
-	REANIMATE("Spigot"); // Copper Golem
+	REANIMATE; // Copper Golem
 
 	final String mcImplementation;
 

@@ -752,7 +752,7 @@ public class EntityEvents {
 					reasons.append(")");
 				}
 			}
-			return "{type: <macro> | reason: <macro> One of: " + reasons + "}"
+			return "{type: <macro> | reason: <macro> One of " + reasons + "}"
 					+ " Fired when a living entity spawns on the server."
 					+ " {type: the type of creature spawning | id: the entityID of the creature"
 					+ " | reason: the reason this creature is spawning | location: locationArray of the event}"
