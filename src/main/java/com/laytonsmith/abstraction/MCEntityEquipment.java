@@ -7,8 +7,6 @@ public interface MCEntityEquipment {
 
 	void clearEquipment();
 
-	int getSize();
-
 	MCEntity getHolder();
 
 	Map<MCEquipmentSlot, MCItemStack> getAllEquipment();

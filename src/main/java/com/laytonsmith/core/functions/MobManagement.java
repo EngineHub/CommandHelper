@@ -23,6 +23,7 @@ import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCPotionEffectType;
 import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSVersion;
@@ -696,6 +697,7 @@ public class MobManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(set_mob_equipment.class)
 	public static class get_mob_equipment extends EntityManagement.EntityGetterFunction {
 
 		@Override
@@ -721,7 +723,9 @@ public class MobManagement {
 		@Override
 		public String docs() {
 			return "array {entityUUID} Returns an associative array showing the equipment this mob is wearing."
-					+ " This only works on mobs and armor stands.";
+					+ " The equipment slots are: weapon, off_hand, helmet, chestplate, leggings, boots,"
+					+ " body (MC 1.20.6+), and saddle (MC 1.21.5+)."
+					+ " This works on mobs, players, mannequins, and armor stands.";
 		}
 
 		@Override
@@ -742,6 +746,7 @@ public class MobManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(get_mob_equipment.class)
 	public static class set_mob_equipment extends EntityManagement.EntitySetterFunction {
 
 		@Override
@@ -751,11 +756,12 @@ public class MobManagement {
 			if(ee == null) {
 				throw new CREBadEntityTypeException("Entities of type \"" + le.getType() + "\" do not have equipment.", t);
 			}
-			Map<MCEquipmentSlot, MCItemStack> eq = ee.getAllEquipment();
 			if(args[1] instanceof CNull) {
 				ee.clearEquipment();
 				return CVoid.VOID;
-			} else if(args[1].isInstanceOf(CArray.TYPE)) {
+			}
+			Map<MCEquipmentSlot, MCItemStack> eq = ee.getAllEquipment();
+			if(args[1].isInstanceOf(CArray.TYPE)) {
 				CArray ea = (CArray) args[1];
 				for(String key : ea.stringKeySet()) {
 					try {
@@ -779,17 +785,18 @@ public class MobManagement {
 		@Override
 		public String docs() {
 			return "void {entityUUID, array} Takes an associative array with keys representing equipment slots and"
-					+ " values of itemArrays, the same used by set_pinv(). This only works on mobs and armor stands."
-					+ " Unless a mod, plugin, or future update changes vanilla functionality,"
-					+ " only humanoid mobs will render their equipment slots. The equipment slots are: "
-					+ StringUtils.Join(MCEquipmentSlot.values(), ", ", ", or ", " or ");
+					+ " values of item arrays. The equipment slots are: weapon, off_hand, helmet, chestplate, leggings,"
+					+ " boots, body (MC 1.20.6+), and saddle (MC 1.21.5+)."
+					+ " This works on mobs, players, mannequins, and armor stands."
+					+ " While you may set any slot for any of these entities, some slots are not used by some entities."
+					+ " Setting unused slots is not officially supported behavior, so your results may vary.";
 		}
 
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage",
-				"set_mob_equipment(spawn_entity('SKELETON')[0], array(WEAPON: array(name: 'BOW')))",
+				"set_mob_equipment(spawn_entity('SKELETON')[0], array(weapon: array(name: 'BOW')))",
 				"Gives a bow to a skeleton")
 			};
 		}
@@ -874,7 +881,7 @@ public class MobManagement {
 			}
 			CArray ret = CArray.GetAssociativeArray(t);
 			for(Map.Entry<MCEquipmentSlot, Float> ent : eq.getAllDropChances().entrySet()) {
-				ret.set(ent.getKey().name(), new CDouble(ent.getValue(), t), t);
+				ret.set(ent.getKey().name().toLowerCase(), new CDouble(ent.getValue(), t), t);
 			}
 			return ret;
 		}

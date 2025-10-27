@@ -34,6 +34,7 @@ import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.BlockIterator;
@@ -313,10 +314,11 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 
 	@Override
 	public MCEntityEquipment getEquipment() {
-		if(le.getEquipment() == null) {
+		EntityEquipment eq = le.getEquipment();
+		if(eq == null) {
 			return null;
 		}
-		return new BukkitMCEntityEquipment(le.getEquipment());
+		return new BukkitMCEntityEquipment(eq);
 	}
 
 	@Override

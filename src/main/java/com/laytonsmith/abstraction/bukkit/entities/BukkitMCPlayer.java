@@ -917,6 +917,16 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 				case LEGGINGS -> p.sendEquipmentChange(le, EquipmentSlot.LEGS, is);
 				case CHESTPLATE -> p.sendEquipmentChange(le, EquipmentSlot.CHEST, is);
 				case HELMET -> p.sendEquipmentChange(le, EquipmentSlot.HEAD, is);
+				case BODY -> {
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
+						p.sendEquipmentChange(le, EquipmentSlot.BODY, is);
+					}
+				}
+				case SADDLE -> {
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_21_5)) {
+						p.sendEquipmentChange(le, EquipmentSlot.SADDLE, is);
+					}
+				}
 			}
 		} catch(NoSuchMethodError ex) {
 			// probably before 1.18, which is unsupported

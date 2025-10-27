@@ -7146,8 +7146,8 @@ public class PlayerManagement {
 			return "void {[player], entityUUID, equipmentArray} Changes a living entity's equipment only for the"
 					+ " specified player. (MC 1.18+) Equipment array can be null to make all equipment not visible."
 					+ " Otherwise equipment array must be an associative array where the keys are equipment slots and"
-					+ " the values are item arrays or null. The equipment slots are: "
-					+ StringUtils.Join(MCEquipmentSlot.values(), ", ", ", or ", " or ");
+					+ " the values are item arrays or null. The equipment slots are: weapon, off_hand, helmet,"
+					+ " chestplate, leggings, boots, body (MC 1.20.6+), and saddle (MC 1.21.5+).";
 		}
 
 		@Override

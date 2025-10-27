@@ -4,7 +4,11 @@ import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCEntityEquipment;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
+import com.laytonsmith.abstraction.enums.MCVersion;
+import com.laytonsmith.core.Static;
 import org.bukkit.inventory.EntityEquipment;
+import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -23,11 +27,6 @@ public class BukkitMCEntityEquipment implements MCEntityEquipment {
 	}
 
 	@Override
-	public int getSize() {
-		return MCEquipmentSlot.values().length;
-	}
-
-	@Override
 	public MCEntity getHolder() {
 		return BukkitConvertor.BukkitGetCorrectEntity(ee.getHolder());
 	}
@@ -35,26 +34,23 @@ public class BukkitMCEntityEquipment implements MCEntityEquipment {
 	@Override
 	public Map<MCEquipmentSlot, MCItemStack> getAllEquipment() {
 		Map<MCEquipmentSlot, MCItemStack> slots = new EnumMap<>(MCEquipmentSlot.class);
-		for(MCEquipmentSlot key : MCEquipmentSlot.values()) {
-			switch(key) {
-				case WEAPON:
-					slots.put(key, getWeapon());
-					break;
-				case OFF_HAND:
-					slots.put(key, getItemInOffHand());
-					break;
-				case HELMET:
-					slots.put(key, getHelmet());
-					break;
-				case CHESTPLATE:
-					slots.put(key, getChestplate());
-					break;
-				case LEGGINGS:
-					slots.put(key, getLeggings());
-					break;
-				case BOOTS:
-					slots.put(key, getBoots());
-					break;
+		slots.put(MCEquipmentSlot.WEAPON, getWeapon());
+		slots.put(MCEquipmentSlot.OFF_HAND, getItemInOffHand());
+		slots.put(MCEquipmentSlot.HELMET, getHelmet());
+		slots.put(MCEquipmentSlot.CHESTPLATE, getChestplate());
+		slots.put(MCEquipmentSlot.LEGGINGS, getLeggings());
+		slots.put(MCEquipmentSlot.BOOTS, getBoots());
+		BukkitMCServer server = (BukkitMCServer) Static.getServer();
+		if(server.getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
+			try {
+				slots.put(MCEquipmentSlot.BODY, new BukkitMCItemStack(ee.getItem(EquipmentSlot.BODY)));
+			} catch(IllegalArgumentException ignored) {
+				// API says it can throw an exception here, but it never seems to do so.
+			}
+			if(server.getMinecraftVersion().gte(MCVersion.MC1_21_5)) {
+				try {
+					slots.put(MCEquipmentSlot.SADDLE, new BukkitMCItemStack(ee.getItem(EquipmentSlot.SADDLE)));
+				} catch(IllegalArgumentException ignored) {}
 			}
 		}
 		return slots;
@@ -84,6 +80,22 @@ public class BukkitMCEntityEquipment implements MCEntityEquipment {
 				case BOOTS:
 					setBoots(stack);
 					break;
+				case BODY:
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
+						try {
+							ee.setItem(EquipmentSlot.BODY, (ItemStack) stack.getHandle());
+						} catch(IllegalArgumentException ignored) {
+							// API says it can throw an exception here, but it never seems to do so.
+						}
+					}
+					break;
+				case SADDLE:
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_21_5)) {
+						try {
+							ee.setItem(EquipmentSlot.SADDLE, (ItemStack) stack.getHandle());
+						} catch(IllegalArgumentException ignored) {}
+					}
+					break;
 			}
 		}
 	}
@@ -91,26 +103,17 @@ public class BukkitMCEntityEquipment implements MCEntityEquipment {
 	@Override
 	public Map<MCEquipmentSlot, Float> getAllDropChances() {
 		Map<MCEquipmentSlot, Float> slots = new EnumMap<>(MCEquipmentSlot.class);
-		for(MCEquipmentSlot key : MCEquipmentSlot.values()) {
-			switch(key) {
-				case WEAPON:
-					slots.put(key, getWeaponDropChance());
-					break;
-				case OFF_HAND:
-					slots.put(key, getOffHandDropChance());
-					break;
-				case HELMET:
-					slots.put(key, getHelmetDropChance());
-					break;
-				case CHESTPLATE:
-					slots.put(key, getChestplateDropChance());
-					break;
-				case LEGGINGS:
-					slots.put(key, getLeggingsDropChance());
-					break;
-				case BOOTS:
-					slots.put(key, getBootsDropChance());
-					break;
+		slots.put(MCEquipmentSlot.WEAPON, getWeaponDropChance());
+		slots.put(MCEquipmentSlot.OFF_HAND, getOffHandDropChance());
+		slots.put(MCEquipmentSlot.HELMET, getHelmetDropChance());
+		slots.put(MCEquipmentSlot.CHESTPLATE, getChestplateDropChance());
+		slots.put(MCEquipmentSlot.LEGGINGS, getLeggingsDropChance());
+		slots.put(MCEquipmentSlot.BOOTS, getBootsDropChance());
+		BukkitMCServer server = (BukkitMCServer) Static.getServer();
+		if(server.getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
+			slots.put(MCEquipmentSlot.BODY, ee.getDropChance(EquipmentSlot.BODY));
+			if(server.getMinecraftVersion().gte(MCVersion.MC1_21_5)) {
+				slots.put(MCEquipmentSlot.SADDLE, ee.getDropChance(EquipmentSlot.SADDLE));
 			}
 		}
 		return slots;
@@ -139,6 +142,16 @@ public class BukkitMCEntityEquipment implements MCEntityEquipment {
 					break;
 				case BOOTS:
 					setBootsDropChance(chance);
+					break;
+				case BODY:
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
+						ee.setDropChance(EquipmentSlot.BODY, chance);
+					}
+					break;
+				case SADDLE:
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_21_5)) {
+						ee.setDropChance(EquipmentSlot.SADDLE, chance);
+					}
 					break;
 			}
 		}
