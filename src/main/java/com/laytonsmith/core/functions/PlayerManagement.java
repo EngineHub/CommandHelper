@@ -490,8 +490,9 @@ public class PlayerManagement {
 		public String docs() {
 			return "boolean {[player], locationArray | [player], x, y, z} Sets the location of the player to the"
 					+ " specified coordinates. If the coordinates are not valid, or the player was otherwise prevented"
-					+ " from teleporting, false is returned, otherwise true. If player is omitted, the current player"
-					+ " is used. Note that 1 is automatically added to the y coordinate.";
+					+ " from teleporting, false is returned, otherwise true. On Paper 1.19.3+, passengers do not"
+					+ " automatically prevent teleports. If player is omitted, the current player is used. Important:"
+					+ " unlike {{function|set_entity_loc}}, 1.0 is automatically added to the y coordinate.";
 		}
 
 		@Override

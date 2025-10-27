@@ -470,8 +470,8 @@ public class EntityManagement {
 		@Override
 		public String docs() {
 			return "boolean {entityUUID, locationArray} Teleports the entity to the given location and returns whether"
-					+ " the action was successful. Note this can set both location and direction. On paper servers,"
-					+ " this teleports passengers along with the entity.";
+					+ " the action was successful. Note this can set both location and direction. On Paper 1.19.3+"
+					+ " servers, this teleports passengers along with the entity instead of canceling the teleport.";
 		}
 
 		@Override

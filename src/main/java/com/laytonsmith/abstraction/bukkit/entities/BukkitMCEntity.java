@@ -38,9 +38,20 @@ import org.bukkit.Location;
 
 public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 
-	Entity e;
-	private static volatile Boolean isPaperTeleportFlag = null;
-	private static final Object IS_PAPER_TELEPORT_FLAG_LOCK = new Object();
+	private static final boolean USE_RETAIN_PASSENGERS;
+
+	static {
+		boolean useRetainPassengers = false;
+		try {
+			Class<?> clz = Class.forName("io.papermc.paper.entity.TeleportFlag$EntityState");
+			if(clz.getAnnotation(Deprecated.class) == null) {
+				useRetainPassengers = true;
+			}
+		} catch(ClassNotFoundException ignored) {}
+		USE_RETAIN_PASSENGERS = useRetainPassengers;
+	}
+
+	private final Entity e;
 
 	public BukkitMCEntity(Entity e) {
 		super(e);
@@ -254,30 +265,13 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 
 	@Override
 	public boolean teleport(MCLocation location, MCTeleportCause cause) {
-		@SuppressWarnings("LocalVariableHidesMemberVariable")
-		Boolean isPaperTeleportFlag = BukkitMCEntity.isPaperTeleportFlag;
-		if(isPaperTeleportFlag == null) {
-			synchronized(IS_PAPER_TELEPORT_FLAG_LOCK) {
-				isPaperTeleportFlag = BukkitMCEntity.isPaperTeleportFlag;
-				if(isPaperTeleportFlag == null) {
-					try {
-						// 1.19.3
-						Class.forName("io.papermc.paper.entity.TeleportFlag$EntityState");
-						BukkitMCEntity.isPaperTeleportFlag = isPaperTeleportFlag = true;
-					} catch(ClassNotFoundException ex) {
-						BukkitMCEntity.isPaperTeleportFlag = isPaperTeleportFlag = false;
-					}
-				}
-			}
-		}
-		Location l = ((BukkitMCLocation) location).asLocation();
+		Location l = (Location) location.getHandle();
 		TeleportCause c = TeleportCause.valueOf(cause.name());
-		if(isPaperTeleportFlag) {
-			// Paper requires a third parameter to maintain consistent behavior when teleporting
-			// entities with passengers.
+		if(USE_RETAIN_PASSENGERS) {
+			// Paper requires a third parameter to maintain consistent behavior when teleporting entities with passengers.
+			// TeleportFlag.EntityState added in 1.19.3 but RETAIN_PASSENGERS was made default in 1.21.10.
 			TeleportFlag teleportFlag = TeleportFlag.EntityState.RETAIN_PASSENGERS;
-			// Paper only method:
-			// e.teleport(l, c, teleportFlag);
+			// Paper only method: e.teleport(l, c, teleportFlag);
 			return ReflectionUtils.invokeMethod(Entity.class, e, "teleport",
 					new Class[] {
 						org.bukkit.Location.class,
