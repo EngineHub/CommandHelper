@@ -986,7 +986,15 @@ public class Environment {
 			if(!(blockState instanceof MCSkull skull)) {
 				throw new CRERangeException("The block at the specified location is not a skull", t);
 			}
-			MCOfflinePlayer owner = (args[1] instanceof CNull ? null : Static.GetUser(args[1], t));
+			MCOfflinePlayer owner;
+			if(args[1] instanceof CNull) {
+				owner = null;
+			} else {
+				owner = Static.GetUser(args[1], t);
+				if(owner == null) {
+					throw new CRENotFoundException(this.getName() + " could not get offline player: " + args[1].val(), t);
+				}
+			}
 			if(owner != null && args.length == 3) {
 				MCPlayerProfile profile = Static.getServer().getPlayerProfile(owner.getUniqueID(), owner.getName());
 				if(profile != null) {

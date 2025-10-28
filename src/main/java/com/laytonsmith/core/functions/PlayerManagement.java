@@ -5096,12 +5096,15 @@ public class PlayerManagement {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCCommandSender cs = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
-			MCOfflinePlayer op = null;
+			MCOfflinePlayer op;
 			if(args.length == 1) {
 				op = Static.GetUser(args[0].val(), t);
-			} else if(cs != null) {
-				op = Static.GetUser(cs.getName(), t);
+			} else {
+				op = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				if(op == null) {
+					throw new CREInsufficientArgumentsException(this.getName()
+							+ " requires a player argument when ran from a non-player", t);
+				}
 			}
 			return new CInt((op == null ? 0 : op.getFirstPlayed()), t); // Return 0 for fake/null command senders.
 		}
@@ -5160,12 +5163,15 @@ public class PlayerManagement {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCCommandSender cs = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
-			MCOfflinePlayer op = null;
+			MCOfflinePlayer op;
 			if(args.length == 1) {
 				op = Static.GetUser(args[0].val(), t);
-			} else if(cs != null) {
-				op = Static.GetUser(cs.getName(), t);
+			} else {
+				op = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				if(op == null) {
+					throw new CREInsufficientArgumentsException(this.getName()
+							+ " requires a player argument when ran from a non-player", t);
+				}
 			}
 			return new CInt((op == null ? 0 : op.getLastPlayed()), t); // Return 0 for fake/null command senders.
 		}

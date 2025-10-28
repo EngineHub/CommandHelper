@@ -845,7 +845,11 @@ public final class Static {
 	public static MCOfflinePlayer GetUser(String search, Target t) {
 		MCOfflinePlayer ofp;
 		if(search.length() > 0 && search.length() <= 16) {
-			ofp = getServer().getOfflinePlayer(search);
+			if(CONSOLE_NAME.equals(search)) {
+				ofp = null;
+			} else {
+				ofp = getServer().getOfflinePlayer(search);
+			}
 		} else {
 			try {
 				ofp = getServer().getOfflinePlayer(GetUUID(search, t));
