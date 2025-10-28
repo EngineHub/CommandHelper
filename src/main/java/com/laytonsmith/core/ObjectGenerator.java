@@ -16,6 +16,7 @@ import com.laytonsmith.abstraction.MCCooldownComponent;
 import com.laytonsmith.abstraction.MCCreatureSpawner;
 import com.laytonsmith.abstraction.MCCrossbowMeta;
 import com.laytonsmith.abstraction.MCEnchantmentStorageMeta;
+import com.laytonsmith.abstraction.MCEquippableComponent;
 import com.laytonsmith.abstraction.MCFireworkBuilder;
 import com.laytonsmith.abstraction.MCFireworkEffect;
 import com.laytonsmith.abstraction.MCFireworkEffectMeta;
@@ -108,6 +109,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -565,6 +567,39 @@ public class ObjectGenerator {
 					}
 					if(meta.hasTooltipStyle()) {
 						ma.set("tooltipstyle", new CString(meta.getTooltipStyle(), t), t);
+					}
+					if(meta.hasEquippable()) {
+						MCEquippableComponent equippableComponent = meta.getEquippable();
+						CArray equippable = CArray.GetAssociativeArray(t);
+						MCEquipmentSlot slot = equippableComponent.getSlot();
+						equippable.set("slot", new CString(slot.name(), t), t);
+						String asset = equippableComponent.getAssetId();
+						if(asset != null) {
+							equippable.set("asset", new CString(asset, t), t);
+						}
+						String cameraOverlay = equippableComponent.getCameraOverlay();
+						if(cameraOverlay != null) {
+							equippable.set("overlay", new CString(cameraOverlay, t), t);
+						}
+						Collection<MCEntityType> allowedEntities = equippableComponent.getAllowedEntities();
+						if(allowedEntities != null) {
+							CArray entities = new CArray(t);
+							for(MCEntityType type : allowedEntities) {
+								entities.push(new CString(type.name(), t), t);
+							}
+							equippable.set("entities", entities, t);
+						}
+						String sound = equippableComponent.getEquipSound();
+						if(sound != null) {
+							equippable.set("sound", new CString(sound, t), t);
+						}
+						equippable.set("dispensable", CBoolean.get(equippableComponent.isDispensable()), t);
+						equippable.set("swappable", CBoolean.get(equippableComponent.isSwappable()), t);
+						equippable.set("damageable", CBoolean.get(equippableComponent.isDamageOnHurt()), t);
+						if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_21_5)) {
+							equippable.set("interactable", CBoolean.get(equippableComponent.isEquipOnInteract()), t);
+						}
+						ma.set("equippable", equippable, t);
 					}
 				}
 
@@ -1188,6 +1223,78 @@ public class ObjectGenerator {
 							// not yet supported
 						} else {
 							meta.setTooltipStyle(tooltipstyle.val());
+						}
+					}
+					if(ma.containsKey("equippable")) {
+						Mixed equippableMixed = ma.get("equippable", t);
+						if(equippableMixed instanceof CNull) {
+							// not yet supported
+						} else if(equippableMixed.isInstanceOf(CArray.TYPE)) {
+							CArray equippableArray = (CArray) equippableMixed;
+							if(!equippableArray.isAssociative()) {
+								throw new CREFormatException("Equippable array must be associative.", t);
+							}
+							MCEquippableComponent equippable = meta.getEquippable();
+							try {
+								String slotName = equippableArray.get("slot", t).val().toUpperCase();
+								equippable.setSlot(MCEquipmentSlot.valueOf(slotName));
+							} catch (IllegalArgumentException ex) {
+								throw new CREFormatException("Not a valid equipment slot: "
+										+ equippableArray.get("slot", t).val(), t);
+							}
+							if(equippableArray.containsKey("entities")) {
+								Mixed entitiesMixed = equippableArray.get("entities", t);
+								if(entitiesMixed instanceof CNull) {
+									// ignored
+								} else if(entitiesMixed.isInstanceOf(CArray.TYPE)) {
+									CArray entitiesArray = (CArray) entitiesMixed;
+									if(entitiesArray.isAssociative()) {
+										throw new CREFormatException("Allowed entities array must not be associative.", t);
+									}
+									Collection<MCEntityType> allowedEntities = new ArrayList<>();
+									for(Mixed type : entitiesArray) {
+										allowedEntities.add(MCEntityType.valueOf(type.val()));
+									}
+									equippable.setAllowedEntities(allowedEntities);
+								}
+							}
+							if(equippableArray.containsKey("overlay")) {
+								Mixed cameraOverlayMixed = equippableArray.get("overlay", t);
+								if(!(cameraOverlayMixed instanceof CNull)) {
+									equippable.setCameraOverlay(cameraOverlayMixed.val());
+								}
+							}
+							if(equippableArray.containsKey("damageable")) {
+								equippable.setDamageOnHurt(ArgumentValidation.getBooleanObject(
+										equippableArray.get("damageable", t), t));
+							}
+							if(equippableArray.containsKey("dispensable")) {
+								equippable.setDispensable(ArgumentValidation.getBooleanObject(
+										equippableArray.get("dispensable", t), t));
+							}
+							if(equippableArray.containsKey("asset")) {
+								Mixed assetMixed = equippableArray.get("asset", t);
+								if(!(assetMixed instanceof CNull)) {
+									equippable.setAssetId(assetMixed.val());
+								}
+							}
+							if(equippableArray.containsKey("sound")) {
+								Mixed soundMixed = equippableArray.get("sound", t);
+								if(!(soundMixed instanceof CNull)) {
+									equippable.setEquipSound(soundMixed.val());
+								}
+							}
+							if(equippableArray.containsKey("swappable")) {
+								equippable.setSwappable(ArgumentValidation.getBooleanObject(equippableArray.get("swappable", t), t));
+							}
+							if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_21_5)) {
+								if(equippableArray.containsKey("interactable")) {
+									equippable.setEquipOnInteract(ArgumentValidation.getBooleanObject(equippableArray.get("interactable", t), t));
+								}
+							}
+							meta.setEquippable(equippable);
+						} else {
+							throw new CREFormatException("Expected an array for item equippable component.", t);
 						}
 					}
 				}

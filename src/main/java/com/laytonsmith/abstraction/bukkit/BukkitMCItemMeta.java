@@ -7,6 +7,7 @@ import com.laytonsmith.PureUtilities.Common.ReflectionUtils.ReflectionException;
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCAttributeModifier;
 import com.laytonsmith.abstraction.MCCooldownComponent;
+import com.laytonsmith.abstraction.MCEquippableComponent;
 import com.laytonsmith.abstraction.MCFoodComponent;
 import com.laytonsmith.abstraction.MCItemMeta;
 import com.laytonsmith.abstraction.MCItemStack;
@@ -49,6 +50,7 @@ import org.bukkit.inventory.meta.BlockDataMeta;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.Repairable;
+import org.bukkit.inventory.meta.components.EquippableComponent;
 import org.bukkit.inventory.meta.components.FoodComponent;
 import org.bukkit.inventory.meta.components.JukeboxPlayableComponent;
 import org.bukkit.inventory.meta.components.UseCooldownComponent;
@@ -488,6 +490,21 @@ public class BukkitMCItemMeta implements MCItemMeta {
 	@Override
 	public void setUseCooldown(MCCooldownComponent component) {
 		im.setUseCooldown((UseCooldownComponent) component.getHandle());
+	}
+
+	@Override
+	public boolean hasEquippable() {
+		return im.hasEquippable();
+	}
+
+	@Override
+	public MCEquippableComponent getEquippable() {
+		return new BukkitMCEquippableComponent(im.getEquippable());
+	}
+
+	@Override
+	public void setEquippable(MCEquippableComponent component) {
+		im.setEquippable((EquippableComponent) component.getHandle());
 	}
 
 }

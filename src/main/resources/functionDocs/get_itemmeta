@@ -2,7 +2,14 @@ array {[player,] slot} Returns an associative array of known item data in the sl
 
 ----
 
-==== Basic Fields ====
+Below is a reference for all the fields that can be found in an item meta array.
+Not all vanilla data is fully supported, though, whether due to limitations in the server API or missing support in CH.
+So if you use other plugins or vanilla commands to create unique items with fields unsupported here, then modifying,
+storing, and restoring those item meta arrays using CH functions can lead to data loss.
+However, in those cases CH functions can still safely create new items or be used to check data on existing items.
+See at the bottom for a list of unsupported fields. Supported fields or item types may have additional notes on limitations.
+
+==== Common Fields ====
 These fields exist for all items with meta.
 {| class="wikitable"
 |-
@@ -117,11 +124,25 @@ These fields optionally exist for any item type.
 |-
 ! itemmodel
 | string
-| Overrides the item's model using a namespaced resource location. (MC 1.21.3+)
+| Overrides the item's model using a namespaced resource location. (/assets/<namespace>/items/<id>) (MC 1.21.3+)
 |-
 ! tooltipstyle
 | string
-| Overrides the item's tooltip style using a namespaced resource location. (MC 1.21.3+)
+| Overrides the item's tooltip style using a namespaced resource location. (/assets/<namespace>/textures/gui/sprites/tooltip/<id>) (MC 1.21.3+)
+|-
+! equippable
+| associative array
+| Overrides the item's equippable component. Requires a slot. (MC 1.21.3+)
+* '''asset''' : (string) If this namespaced resource location is present, the equipment asset will be used to determine the model when the item is equipped. (assets/<namespace>/equipment/<id>.json)
+* '''damageable''' : (boolean) Whether the durability is damaged when the wearer is damaged. (defaults to true)
+* '''dispensable''' : (boolean) Whether the item can be equipped using a dispenser. (defaults to true)
+* '''entities''' : (array) If present, only the listed living entity types can equip this item. Entity tags cannot be set and are converted to an array of types when read.
+* '''overlay''' : (string) If this namespaced resource location is present, the texture will be used as a camera overlay when the item is equipped. (assets/<namespace>/textures/<id>)
+* '''slot''' : (string) The slot to put the item on. Can be %SLOTS%.
+* '''sound''' : (string) The namespaced id of the sound played when the item is equipped. (defaults to 'item.armor.equip_generic') New sound event definitions are not supported here.
+* '''swappable''' : (boolean) Whether the item can be equipped into the slot by right-clicking. (defaults to true)
+* '''interactable''' : (boolean) Whether the item can be equipped onto a valid entity by right-clicking them. (defaults to false) (MC 1.21.5+)
+The component fields "can_be_sheared" and "shearing_sound" are not yet supported.
 |}
 
 ==== Type Specific Fields ====
@@ -388,10 +409,6 @@ Data components not yet supported in item meta:
 ! consumable
 | 1.21.2
 | Added in Spigot 1.21.4 API; Paper API separate
-|-
-! equippable
-| 1.21.2
-| Added in Spigot 1.21.5 API
 |-
 ! custom_model_data
 | 1.21.4

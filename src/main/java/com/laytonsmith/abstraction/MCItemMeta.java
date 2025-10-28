@@ -220,4 +220,10 @@ public interface MCItemMeta extends AbstractionObject {
 
 	void setUseCooldown(MCCooldownComponent component);
 
+	boolean hasEquippable();
+
+	MCEquippableComponent getEquippable();
+
+	void setEquippable(MCEquippableComponent component);
+
 }
