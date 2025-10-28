@@ -123,6 +123,8 @@ import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.MSLog;
+import com.laytonsmith.core.MSLog.Tags;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Optimizable;
@@ -1147,13 +1149,12 @@ public class EntityManagement {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCEntity ent = Static.getEntity(args[0], t);
-			MCEntityEffect mee;
 			try {
-				mee = MCEntityEffect.valueOf(args[1].val().toUpperCase());
+				MCEntityEffect mee = MCEntityEffect.valueOf(args[1].val().toUpperCase());
+				ent.playEffect(mee);
 			} catch(IllegalArgumentException iae) {
-				throw new CREFormatException("Unknown entity effect: " + args[1].val(), t);
+				MSLog.GetLogger().e(Tags.GENERAL, "Invalid EntityEffect: " + args[1].val(), t);
 			}
-			ent.playEffect(mee);
 			return CVoid.VOID;
 		}
 
