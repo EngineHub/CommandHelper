@@ -124,20 +124,20 @@ These fields optionally exist for any item type.
 |-
 ! itemmodel
 | string
-| Overrides the item's model using a namespaced resource location. (/assets/<namespace>/items/<id>) (MC 1.21.3+)
+| Overrides the item's model using a namespaced resource location. (/assets/&lt;namespace&gt;/items/&lt;id&gt;) (MC 1.21.3+)
 |-
 ! tooltipstyle
 | string
-| Overrides the item's tooltip style using a namespaced resource location. (/assets/<namespace>/textures/gui/sprites/tooltip/<id>) (MC 1.21.3+)
+| Overrides the item's tooltip style using a namespaced resource location. (/assets/&lt;namespace&gt;/textures/gui/sprites/tooltip/&lt;id&gt;) (MC 1.21.3+)
 |-
 ! equippable
 | associative array
 | Overrides the item's equippable component. Requires a slot. (MC 1.21.3+)
-* '''asset''' : (string) If this namespaced resource location is present, the equipment asset will be used to determine the model when the item is equipped. (assets/<namespace>/equipment/<id>.json)
+* '''asset''' : (string) If this namespaced resource location is present, the equipment asset will be used to determine the model when the item is equipped. (assets/&lt;namespace&gt;/equipment/&lt;id&gt;.json)
 * '''damageable''' : (boolean) Whether the durability is damaged when the wearer is damaged. (defaults to true)
 * '''dispensable''' : (boolean) Whether the item can be equipped using a dispenser. (defaults to true)
 * '''entities''' : (array) If present, only the listed living entity types can equip this item. Entity tags cannot be set and are converted to an array of types when read.
-* '''overlay''' : (string) If this namespaced resource location is present, the texture will be used as a camera overlay when the item is equipped. (assets/<namespace>/textures/<id>)
+* '''overlay''' : (string) If this namespaced resource location is present, the texture will be used as a camera overlay when the item is equipped. (assets/&lt;namespace&gt;/textures/&lt;id&gt;)
 * '''slot''' : (string) The slot to put the item on. Can be %SLOTS%.
 * '''sound''' : (string) The namespaced id of the sound played when the item is equipped. (defaults to 'item.armor.equip_generic') New sound event definitions are not supported here.
 * '''swappable''' : (boolean) Whether the item can be equipped into the slot by right-clicking. (defaults to true)
