@@ -511,7 +511,9 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 
 	@Override
 	public void setSpawnLocation(MCLocation location) {
-		w.setSpawnLocation((Location) location.getHandle());
+		Location loc = (Location) location.getHandle();
+		loc.setYaw(Location.normalizeYaw(loc.getYaw()));
+		w.setSpawnLocation(loc);
 	}
 
 	@Override
