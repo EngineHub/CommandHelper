@@ -133,7 +133,9 @@ public class IVariableList {
 	@Override
 	public IVariableList clone() {
 		IVariableList clone = new IVariableList(this);
-		clone.varList = new HashMap<>(varList);
+		for(IVariable var : varList.values()) {
+			clone.set(var.shallowClone());
+		}
 		return clone;
 	}
 
