@@ -8,6 +8,7 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.compiler.analysis.ParamDeclaration;
+import com.laytonsmith.core.compiler.analysis.ReturnableDeclaration;
 import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.CArray;
@@ -56,6 +57,7 @@ public abstract class CompositeFunction extends AbstractFunction {
 				rootScope.addDeclaration(new ParamDeclaration("@arguments", CArray.TYPE, null,
 						new NodeModifiers(),
 						Target.UNKNOWN));
+				rootScope.addDeclaration(new ReturnableDeclaration(null, new NodeModifiers(), Target.UNKNOWN));
 				tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, env, debugFile, true),
 						env, env.getEnvClasses(), new StaticAnalysis(rootScope, true))
 						// the root of the tree is null, so go ahead and pull it up
