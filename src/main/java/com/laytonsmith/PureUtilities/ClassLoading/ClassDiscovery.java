@@ -414,6 +414,14 @@ public class ClassDiscovery {
 		if(url == null) {
 			throw new NullPointerException("url cannot be null");
 		}
+
+		// Encode "+" character in URL, which is not encoded in URL creation like other special characters.
+		try {
+			url = new URL(url.toString().replace("+", "%2B"));
+		} catch (MalformedURLException e) {
+			throw new Error(e);
+		}
+
 		if(urlCache.contains(url) && classCache.containsKey(url)) {
 			//Already here, so just return.
 			return;
@@ -1173,17 +1181,21 @@ public class ClassDiscovery {
 			try {
 				packageRoot = StringUtils.replaceLast(thisClass, Pattern.quote(c.getName().replace('.', '/') + ".class"), "");
 			} catch (Exception e) {
-				//Hmm, ok, try this then
+
+				// Get location through protection domain.
 				packageRoot = c.getProtectionDomain().getCodeSource().getLocation().toString();
 			}
-			packageRoot = URLDecoder.decode(packageRoot, "UTF-8");
-			if(packageRoot.matches("jar:file:.*!/")) {
-				packageRoot = StringUtils.replaceLast(packageRoot, "!/", "");
-				packageRoot = packageRoot.replaceFirst("jar:", "");
+
+			// Encode "+" character in URL, which is not encoded in URL creation like other special characters.
+			packageRoot = packageRoot.replace("+", "%2B");
+
+			// Strip jar file label and suffix.
+			if(packageRoot.matches("jar:.*!/")) {
+				packageRoot = packageRoot.substring("jar:".length(), packageRoot.length() - "!/".length());
 			}
+
+			// Return encoded URL.
 			return new URL(packageRoot);
-		} catch (UnsupportedEncodingException e) {
-			throw new RuntimeException("While interrogating " + c.getName() + ", an unexpected exception was thrown.", e);
 		} catch (MalformedURLException e) {
 			throw new RuntimeException("While interrogating " + c.getName() + ", an unexpected exception was thrown for potential URL: \"" + packageRoot + "\"", e);
 		}

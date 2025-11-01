@@ -45,7 +45,9 @@ public class MethodScriptFileLocations extends FileLocations {
 			return new File(s);
 		} else {
 			try {
-				return new File(URLDecoder.decode(MethodScriptFileLocations.class.getProtectionDomain().getCodeSource().getLocation().getFile(), "UTF-8"));
+				// Encode "+" character in URL, which is not encoded in URL creation like other special characters.
+				return new File(URLDecoder.decode(MethodScriptFileLocations.class
+						.getProtectionDomain().getCodeSource().getLocation().getFile().replace("+", "%2B"), "UTF-8"));
 			} catch (UnsupportedEncodingException ex) {
 				throw new Error(ex);
 			}
