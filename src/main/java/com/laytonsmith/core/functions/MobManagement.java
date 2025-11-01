@@ -3,6 +3,7 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCAttributeModifier;
+import com.laytonsmith.abstraction.MCLeashable;
 import com.laytonsmith.abstraction.MCNamespacedKey;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.MCAnimalTamer;
@@ -1062,11 +1063,14 @@ public class MobManagement {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCLivingEntity le = Static.getLivingEntity(args[0], t);
-			if(!le.isLeashed()) {
+			MCEntity e = Static.getEntity(args[0], t);
+			if(!(e instanceof MCLeashable)) {
+				throw new CREBadEntityException("Entity type is not leashable.", t);
+			}
+			if(!((MCLeashable) e).isLeashed()) {
 				return CNull.NULL;
 			}
-			return new CString(le.getLeashHolder().getUniqueId().toString(), t);
+			return new CString(((MCLeashable) e).getLeashHolder().getUniqueId().toString(), t);
 		}
 
 		@Override
@@ -1076,8 +1080,9 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "string {entityUUID} Returns the UUID of the entity that is holding the given living entity's leash,"
-					+ " or null if it isn't being held.";
+			return "string {entityUUID} Returns the UUID of the entity that is holding the given entity's leash,"
+					+ " or null if it isn't being held. Only mobs and boats can be leashed, otherwise a"
+					+ " BadEntityException is thrown. Boats are only supported on Paper 1.21.3+ and Spigot 1.21.10+.";
 		}
 
 		@Override
@@ -1091,14 +1096,17 @@ public class MobManagement {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCLivingEntity le = Static.getLivingEntity(args[0], t);
+			MCEntity e = Static.getEntity(args[0], t);
 			MCEntity holder;
 			if(args[1] instanceof CNull) {
 				holder = null;
 			} else {
 				holder = Static.getEntity(args[1], t);
 			}
-			le.setLeashHolder(holder);
+			if(!(e instanceof MCLeashable)) {
+				throw new CREBadEntityException("Entity type is not leashable.", t);
+			}
+			((MCLeashable) e).setLeashHolder(holder);
 			return CVoid.VOID;
 		}
 
@@ -1109,11 +1117,10 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityUUID, entityUUID} The first argument is the entity to be held on a leash,"
-					+ " and must be living. The second is the holder of the leash. This does not have to be living,"
-					+ " but the only non-living entity that will persist as a holder across restarts is the leash hitch."
-					+ " Players, bats, enderdragons, withers and certain other entities can not be held by leashes due"
-					+ " to minecraft limitations.";
+			return "void {entityUUID, holderUUID} The first argument is the entity to be held on a leash, and must be a"
+					+ " mob or a boat. The second is the holder of the leash and can be many types of entities,"
+					+ " notably a leash hitch. Certain entity types may be excluded from being leashed depending on the"
+					+ " Minecraft version. Boats are only supported on Paper 1.21.3+ and Spigot 1.21.10+.";
 		}
 
 		@Override

@@ -1,5 +1,7 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
+import com.laytonsmith.abstraction.MCEntity;
+import com.laytonsmith.abstraction.bukkit.BukkitMCServer;
 import com.laytonsmith.abstraction.entities.MCBoat;
 import com.laytonsmith.abstraction.enums.MCTreeSpecies;
 import com.laytonsmith.abstraction.enums.MCVersion;
@@ -34,4 +36,31 @@ public class BukkitMCBoat extends BukkitMCVehicle implements MCBoat {
 		}
 	}
 
+	@Override
+	public MCEntity getLeashHolder() {
+		return new BukkitMCEntity(b.getLeashHolder());
+	}
+
+	@Override
+	public boolean isLeashed() {
+		if(((BukkitMCServer) Static.getServer()).isPaper()
+				&& Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_21_3)
+				|| Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_21_10)) {
+			return b.isLeashed();
+		}
+		return false;
+	}
+
+	@Override
+	public void setLeashHolder(MCEntity holder) {
+		if(((BukkitMCServer) Static.getServer()).isPaper()
+				&& Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_21_3)
+				|| Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_21_10)) {
+			if(holder == null) {
+				b.setLeashHolder(null);
+			} else {
+				b.setLeashHolder((Entity) holder.getHandle());
+			}
+		}
+	}
 }

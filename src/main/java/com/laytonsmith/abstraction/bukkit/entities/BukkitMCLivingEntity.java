@@ -381,10 +381,7 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 
 	@Override
 	public MCEntity getLeashHolder() {
-		if(le.isLeashed()) {
-			return BukkitConvertor.BukkitGetCorrectEntity(le.getLeashHolder());
-		}
-		return null;
+		return new BukkitMCEntity(le.getLeashHolder());
 	}
 
 	@Override
