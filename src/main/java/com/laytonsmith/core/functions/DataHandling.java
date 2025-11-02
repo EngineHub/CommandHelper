@@ -96,8 +96,10 @@ import com.laytonsmith.core.functions.ArrayHandling.array_get;
 import com.laytonsmith.core.functions.ArrayHandling.array_push;
 import com.laytonsmith.core.functions.ArrayHandling.array_set;
 import com.laytonsmith.core.functions.Compiler.__autoconcat__;
+import com.laytonsmith.core.functions.Compiler.__cast__;
 import com.laytonsmith.core.functions.Compiler.__statements__;
 import com.laytonsmith.core.functions.Compiler.__type_ref__;
+import com.laytonsmith.core.functions.Compiler.__unsafe_assign__;
 import com.laytonsmith.core.functions.Compiler.centry;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.tools.docgen.templates.ArrayIteration;
@@ -340,26 +342,27 @@ public class DataHandling {
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			IVariableList list = env.getEnv(GlobalEnv.class).GetVarList();
-			int offset;
-			CClassType type;
-			String name;
+			IVariable var;
 			if(args.length == 3) {
-				offset = 1;
-				if(!(args[offset] instanceof IVariable)) {
+
+				// Get and validate variable name.
+				if(!(args[1] instanceof IVariable)) {
 					throw new CRECastException(getName() + " with 3 arguments only accepts an ivariable as the second argument.", t);
 				}
-				name = ((IVariable) args[offset]).getVariableName();
-				if(list.has(name) && env.getEnv(GlobalEnv.class).GetFlag(GlobalEnv.FLAG_NO_CHECK_DUPLICATE_ASSIGN) == null) {
+				String varName = ((IVariable) args[1]).getVariableName();
+				if(list.has(varName) && env.getEnv(GlobalEnv.class).GetFlag(GlobalEnv.FLAG_NO_CHECK_DUPLICATE_ASSIGN) == null) {
 					if(env.getEnv(GlobalEnv.class).GetFlag(GlobalEnv.FLAG_CLOSURE_WARN_OVERWRITE) != null) {
 						MSLog.GetLogger().Log(MSLog.Tags.RUNTIME, LogLevel.WARNING,
-								"The variable " + name + " is hiding another value of the"
+								"The variable " + varName + " is hiding another value of the"
 								+ " same name in the main scope.", t);
-					} else if(!StaticAnalysis.enabled() && t != list.get(name, t, true, env).getDefinedTarget()) {
-						MSLog.GetLogger().Log(MSLog.Tags.RUNTIME, LogLevel.ERROR, name + " was already defined at "
-								+ list.get(name, t, true, env).getDefinedTarget() + " but is being redefined.", t);
+					} else if(!StaticAnalysis.enabled() && t != list.get(varName, t, true, env).getDefinedTarget()) {
+						MSLog.GetLogger().Log(MSLog.Tags.RUNTIME, LogLevel.ERROR, varName + " was already defined at "
+								+ list.get(varName, t, true, env).getDefinedTarget() + " but is being redefined.", t);
 					}
 				}
-				type = ArgumentValidation.getClassType(args[0], t);
+
+				// Get and validate variable type.
+				CClassType type = ArgumentValidation.getClassType(args[0], t);
 				Boolean varArgsAllowed = env.getEnv(GlobalEnv.class).GetFlag(GlobalEnv.FLAG_VAR_ARGS_ALLOWED);
 				if(varArgsAllowed == null) {
 					varArgsAllowed = false;
@@ -367,24 +370,64 @@ public class DataHandling {
 				if(type.isVarargs() && !varArgsAllowed) {
 					throw new CRECastException("Cannot use varargs type in this context", t);
 				}
+				if(type.equals(CVoid.TYPE)) {
+					throw new CRECastException("Variables may not be of type void", t);
+				}
+
+				// Get assigned value.
+				Mixed val = args[2];
+
+				// Unwrap assigned value from IVariable if an IVariable is passed.
+				if(val instanceof IVariable ivar) {
+					val = list.get(ivar.getVariableName(), ivar.getTarget(), env).ival();
+				}
+
+				// Validate assigned value.
+				if(val instanceof CVoid) {
+					throw new CRECastException("Void may not be assigned to a variable", t);
+				}
+				if(!InstanceofUtil.isInstanceof(val.typeof(), type, env)) {
+					throw new CRECastException(varName + " is of type " + type.val() + ", but a value of type "
+							+ val.typeof() + " was assigned to it.", t);
+				}
+
+				// Set variable in variable list.
+				var = new IVariable(type, varName, val, t);
+				list.set(var);
+
 			} else {
-				offset = 0;
-				if(!(args[offset] instanceof IVariable)) {
+
+				// Get and validate variable name.
+				if(!(args[0] instanceof IVariable)) {
 					throw new CRECastException(getName() + " with 2 arguments only accepts an ivariable as the first argument.", t);
 				}
-				name = ((IVariable) args[offset]).getVariableName();
-				IVariable listVar = list.get(name, t, true, env);
-				t = listVar.getDefinedTarget();
-				type = listVar.getDefinedType();
+				String varName = ((IVariable) args[0]).getVariableName();
+
+				// Get assigned value.
+				Mixed val = args[1];
+
+				// Unwrap assigned value from IVariable if an IVariable is passed.
+				if(val instanceof IVariable ivar) {
+					val = list.get(ivar.getVariableName(), ivar.getTarget(), env).ival();
+				}
+
+				// Validate assigned value and set variable in variable list.
+				if(val instanceof CVoid) {
+					throw new CRECastException("Void may not be assigned to a variable", t);
+				}
+				var = list.get(varName);
+				if(var == null) {
+					var = new IVariable(Auto.TYPE, varName, val, t);
+					list.set(var);
+				} else {
+					if(!InstanceofUtil.isInstanceof(val.typeof(), var.getDefinedType(), env)) {
+						throw new CRECastException(varName + " is of type " + var.getDefinedType()
+								+ ", but a value of type " + val.typeof() + " was assigned to it.", t);
+					}
+					var.setIval(val);
+				}
 			}
-			Mixed c = args[offset + 1];
-			while(c instanceof IVariable) {
-				IVariable cur = (IVariable) c;
-				c = list.get(cur.getVariableName(), cur.getTarget(), env).ival();
-			}
-			IVariable v = new IVariable(type, name, c, t, env);
-			list.set(v);
-			return v;
+			return var;
 		}
 
 		@Override
@@ -637,6 +680,8 @@ public class DataHandling {
 			if(children.size() < 2) {
 				return null;
 			}
+
+			// Generate warning for assigning a variable to itself.
 			if(children.get(0).getData() instanceof IVariable
 					&& children.get(1).getData() instanceof IVariable) {
 				if(((IVariable) children.get(0).getData()).getVariableName().equals(
@@ -646,18 +691,49 @@ public class DataHandling {
 							new CompilerWarning(msg, t, null));
 				}
 			}
-			{
-				// Check for declaration of variables named "pass" or "password" and see if it's defined as a
-				// secure_string. If not, warn.
-				if(children.get(0).getData() instanceof CClassType && children.get(1).getData() instanceof IVariable) {
-					boolean isString
-							= ((CClassType) children.get(0).getData()).getNativeType() == CString.class;
-					String varName = ((IVariable) children.get(1).getData()).getVariableName();
-					if((varName.equalsIgnoreCase("pass") || varName.equalsIgnoreCase("password"))
-							&& isString) {
-						String msg = "";
-						env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
-								new CompilerWarning(msg, t, FileOptions.SuppressWarning.CodeUpgradeNotices));
+
+			// Check for declaration of variables named "pass" or "password" and see if it's defined as a
+			// secure_string. If not, warn.
+			if(children.get(0).getData() instanceof CClassType && children.get(1).getData() instanceof IVariable) {
+				boolean isString
+						= ((CClassType) children.get(0).getData()).getNativeType() == CString.class;
+				String varName = ((IVariable) children.get(1).getData()).getVariableName();
+				if((varName.equalsIgnoreCase("pass") || varName.equalsIgnoreCase("password"))
+						&& isString) {
+					String msg = "";
+					env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
+							new CompilerWarning(msg, t, FileOptions.SuppressWarning.CodeUpgradeNotices));
+				}
+			}
+
+			// Rewrite "assign(type, var, val)" to "__unsafe_assign__(type, var, val)" if the typecheck cannot fail.
+			if(children.size() == 3) {
+				ParseTree typeNode = children.get(0);
+				ParseTree varNode = children.get(1);
+				ParseTree valNode = children.get(2);
+				if(typeNode.getData() instanceof CClassType declaredType
+						&& varNode.getData() instanceof IVariable) {
+					if(valNode.isConst()) {
+						CClassType valType = valNode.getData().typeof();
+						if((valType != CClassType.AUTO || declaredType == CClassType.AUTO)
+								&& InstanceofUtil.isInstanceof(valType, declaredType, env)) {
+							ParseTree newAssignNode = new ParseTree(new CFunction(__unsafe_assign__.NAME, t), fileOptions);
+							newAssignNode.addChild(typeNode);
+							newAssignNode.addChild(varNode);
+							newAssignNode.addChild(valNode);
+							return newAssignNode;
+						}
+					}
+					if(valNode.getData() instanceof CFunction cf && cf.getCachedFunction() != null
+							&& cf.getCachedFunction().getName().equals(__cast__.NAME) && valNode.numberOfChildren() == 2
+							&& valNode.getChildAt(1).getData() instanceof CClassType castType
+							&& (castType != CClassType.AUTO || declaredType == CClassType.AUTO)
+							&& InstanceofUtil.isInstanceof(castType, declaredType, env)) {
+						ParseTree newAssignNode = new ParseTree(new CFunction(__unsafe_assign__.NAME, t), fileOptions);
+						newAssignNode.addChild(typeNode);
+						newAssignNode.addChild(varNode);
+						newAssignNode.addChild(valNode);
+						return newAssignNode;
 					}
 				}
 			}
@@ -1505,13 +1581,14 @@ public class DataHandling {
 				} else {
 					boolean thisNodeIsAssign = false;
 					if(nodes[i].getData() instanceof CFunction) {
-						if((nodes[i].getData()).val().equals(assign.NAME)) {
+						String funcName = nodes[i].getData().val();
+						if(funcName.equals(assign.NAME) || funcName.equals(__unsafe_assign__.NAME)) {
 							thisNodeIsAssign = true;
 							if((nodes[i].getChildren().size() == 3 && Construct.IsDynamicHelper(nodes[i].getChildAt(0).getData()))
 									|| Construct.IsDynamicHelper(nodes[i].getChildAt(1).getData())) {
 								usesAssign = true;
 							}
-						} else if((nodes[i].getData()).val().equals(__autoconcat__.NAME)) {
+						} else if(funcName.equals(__autoconcat__.NAME)) {
 							throw new CREInvalidProcedureException("Invalid arguments defined for procedure", t);
 						}
 					}
