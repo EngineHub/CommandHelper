@@ -71,6 +71,12 @@ are for instance closures and proc references, among a few others. These are fir
 in a number of ways, for instance if we define @c as <code>closure @c = closure() { msg('hi'); };</code> then we can
 execute it as <code>@c();</code>.
 |-
+| ''Soft cast''
+| %%NOWIKI|( )%%
+| {{function|__cast__}}
+| Right
+| Soft (checking / non-converting) cast. Syntax <code>(type) value</code>.
+|-
 | ''Unary''
 | ! ++ --
 | {{function|not}}/{{function|inc}}/{{function|dec}}
