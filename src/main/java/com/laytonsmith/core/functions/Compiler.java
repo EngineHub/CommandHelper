@@ -1371,8 +1371,9 @@ public class Compiler {
 			}
 
 			// Assign value to variable.
+			// Overwrite variable if the type differs (can occur during proc parameter assignment in cloned outer scope).
 			IVariable var = list.get(varName);
-			if(var == null) {
+			if(var == null || (type != null && !type.equals(var.getDefinedType()))) {
 				var = new IVariable(type, varName, val, t);
 				list.set(var);
 			} else {
