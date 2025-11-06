@@ -1554,9 +1554,8 @@ public class DataHandling {
 		public static Procedure getProcedure(Target t, Environment env, Script parent, ParseTree... nodes) {
 			String name = "";
 			List<IVariable> vars = new ArrayList<>();
-			ParseTree tree = null;
 			List<String> varNames = new ArrayList<>();
-			boolean usesAssign = false;
+			boolean procDefinitelyNotConstant = false;
 			CClassType returnType = Auto.TYPE;
 			NodeModifiers modifiers = null;
 			if(nodes[0].getData().equals(CVoid.VOID) || nodes[0].getData().isInstanceOf(CClassType.TYPE)) {
@@ -1575,71 +1574,120 @@ public class DataHandling {
 			nodes[0].getNodeModifiers().merge(modifiers);
 			// We have to restore the variable list once we're done
 			IVariableList originalList = env.getEnv(GlobalEnv.class).GetVarList().clone();
-			for(int i = 0; i < nodes.length; i++) {
-				if(i == nodes.length - 1) {
-					tree = nodes[i];
-				} else {
-					boolean thisNodeIsAssign = false;
-					if(nodes[i].getData() instanceof CFunction) {
-						String funcName = nodes[i].getData().val();
-						if(funcName.equals(assign.NAME) || funcName.equals(__unsafe_assign__.NAME)) {
-							thisNodeIsAssign = true;
-							if((nodes[i].getChildren().size() == 3 && Construct.IsDynamicHelper(nodes[i].getChildAt(0).getData()))
-									|| Construct.IsDynamicHelper(nodes[i].getChildAt(1).getData())) {
-								usesAssign = true;
-							}
-						} else if(funcName.equals(__autoconcat__.NAME)) {
-							throw new CREInvalidProcedureException("Invalid arguments defined for procedure", t);
+
+			// Get code block node.
+			ParseTree code = nodes[nodes.length - 1];
+
+			// Execute default parameter values.
+			Mixed[] paramDefaultValues = new Mixed[nodes.length - 1];
+			for(int i = 1; i < nodes.length - 1; i++) { // Skip proc name and code block nodes.
+				ParseTree node = nodes[i];
+				if(node.getData() instanceof CFunction cf) {
+					if(cf.val().equals(assign.NAME) || cf.val().equals(__unsafe_assign__.NAME)) {
+						ParseTree paramDefaultValueNode = node.getChildAt(node.numberOfChildren() - 1);
+						env.getEnv(GlobalEnv.class).SetFlag(GlobalEnv.FLAG_VAR_ARGS_ALLOWED, true);
+						try {
+							paramDefaultValues[i] = parent.eval(paramDefaultValueNode, env);
+						} finally {
+							env.getEnv(GlobalEnv.class).ClearFlag(GlobalEnv.FLAG_VAR_ARGS_ALLOWED);
 						}
+						if(paramDefaultValues[i] instanceof IVariable ivar) {
+							paramDefaultValues[i] = env.getEnv(GlobalEnv.class)
+									.GetVarList().get(ivar.getVariableName(), t, true, env).ival();
+						}
+
+						// Mark proc as not constant if a default parameter is not a constant.
+						if(Construct.IsDynamicHelper(paramDefaultValueNode.getData())) {
+							procDefinitelyNotConstant = true;
+						}
+						continue;
+					} else if(cf.val().equals(__autoconcat__.NAME)) {
+						throw new CREInvalidProcedureException("Invalid arguments defined for procedure", t);
 					}
+				}
+				paramDefaultValues[i] = null;
+			}
+
+			// Collect parameter IVariable objects with default parameter value assigned.
+			for(int i = 0; i < nodes.length - 1; i++) {
+				IVariable ivar;
+
+				// Get IVariable from parameter with type and/or default value.
+				Mixed paramDefaultValue = paramDefaultValues[i];
+				if(paramDefaultValue != null) {
+
+					// Construct temporary assign node to assign resulting default parameter value.
+					ParseTree assignNode = nodes[i];
+					CFunction assignFunc = (CFunction) assignNode.getData();
+					ParseTree tempAssignNode = new ParseTree(new CFunction(assignFunc.val(),
+							assignNode.getTarget()), assignNode.getFileOptions());
+					if(assignNode.numberOfChildren() == 3) {
+						tempAssignNode.addChild(assignNode.getChildAt(0));
+						tempAssignNode.addChild(assignNode.getChildAt(1));
+						tempAssignNode.addChild(new ParseTree(paramDefaultValue, assignNode.getFileOptions()));
+					} else {
+						tempAssignNode.addChild(assignNode.getChildAt(0));
+						tempAssignNode.addChild(new ParseTree(paramDefaultValue, assignNode.getFileOptions()));
+					}
+
+					// Assign resulting default parameter value to IVariable.
 					env.getEnv(GlobalEnv.class).SetFlag(GlobalEnv.FLAG_NO_CHECK_DUPLICATE_ASSIGN, true);
 					env.getEnv(GlobalEnv.class).SetFlag(GlobalEnv.FLAG_VAR_ARGS_ALLOWED, true);
-					Mixed cons;
 					try {
-						cons = parent.eval(nodes[i], env);
+						ivar = (IVariable) parent.eval(tempAssignNode, env);
 					} finally {
 						env.getEnv(GlobalEnv.class).ClearFlag(GlobalEnv.FLAG_VAR_ARGS_ALLOWED);
 						env.getEnv(GlobalEnv.class).ClearFlag(GlobalEnv.FLAG_NO_CHECK_DUPLICATE_ASSIGN);
 					}
+				} else {
+
+					// Execute node to obtain proc name or IVariable object.
+					env.getEnv(GlobalEnv.class).SetFlag(GlobalEnv.FLAG_NO_CHECK_DUPLICATE_ASSIGN, true);
+					env.getEnv(GlobalEnv.class).SetFlag(GlobalEnv.FLAG_VAR_ARGS_ALLOWED, true);
+					Mixed val;
+					try {
+						val = parent.eval(nodes[i], env);
+					} finally {
+						env.getEnv(GlobalEnv.class).ClearFlag(GlobalEnv.FLAG_VAR_ARGS_ALLOWED);
+						env.getEnv(GlobalEnv.class).ClearFlag(GlobalEnv.FLAG_NO_CHECK_DUPLICATE_ASSIGN);
+					}
+
+					// Handle proc name node.
 					if(i == 0) {
-						if(cons instanceof IVariable) {
+						if(val instanceof IVariable) {
 							throw new CREInvalidProcedureException("Anonymous Procedures are not allowed", t);
 						}
-						name = cons.val();
-					} else {
-						if(!(cons instanceof IVariable)) {
-							throw new CREInvalidProcedureException("You must use IVariables as the arguments", t);
-						}
-						IVariable ivar = null;
-						try {
-							Mixed c = cons;
-							String varName = ((IVariable) c).getVariableName();
-							if(varNames.contains(varName)) {
-								throw new CREInvalidProcedureException("Same variable name defined twice in " + name, t);
-							}
-							varNames.add(varName);
-							while(c instanceof IVariable) {
-								c = env.getEnv(GlobalEnv.class).GetVarList().get(((IVariable) c).getVariableName(), t,
-										true, env).ival();
-							}
-							if(!thisNodeIsAssign) {
-								//This is required because otherwise a default value that's already in the environment
-								//would end up getting set to the existing value, thereby leaking in the global env
-								//into this proc, if the call to the proc didn't have a value in this slot.
-								c = new CString("", t);
-							}
-							ivar = new IVariable(((IVariable) cons).getDefinedType(),
-									((IVariable) cons).getVariableName(), c.clone(), t, env);
-						} catch (CloneNotSupportedException ex) {
-							//
-						}
-						vars.add(ivar);
+						name = val.val();
+						continue;
 					}
+
+					// Handle proc parameter node.
+					if(!(val instanceof IVariable)) {
+						throw new CREInvalidProcedureException("You must use IVariables as the arguments", t);
+					}
+					ivar = (IVariable) val;
 				}
+
+				// Check for duplicate parameter names.
+				String varName = ivar.getVariableName();
+				if(varNames.contains(varName)) {
+					throw new CREInvalidProcedureException("Same variable name defined twice in " + name, t);
+				}
+				varNames.add(varName);
+
+				// Get IVariable value.
+				Mixed ivarVal = (paramDefaultValue != null ? paramDefaultValue : new CString("", t));
+
+				// Store IVariable object clone.
+				vars.add(new IVariable(ivar.getDefinedType(), ivar.getVariableName(), ivarVal, ivar.getTarget()));
 			}
+
+			// Restore variable list.
 			env.getEnv(GlobalEnv.class).SetVarList(originalList);
-			Procedure myProc = new Procedure(name, returnType, vars, nodes[0].getNodeModifiers().getComment(), tree, t);
-			if(usesAssign) {
+
+			// Create and return procedure.
+			Procedure myProc = new Procedure(name, returnType, vars, nodes[0].getNodeModifiers().getComment(), code, t);
+			if(procDefinitelyNotConstant) {
 				myProc.definitelyNotConstant();
 			}
 			return myProc;
