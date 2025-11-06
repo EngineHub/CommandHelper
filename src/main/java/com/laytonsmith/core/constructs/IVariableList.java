@@ -79,6 +79,10 @@ public class IVariableList {
 		varList.put(v.getVariableName(), v);
 	}
 
+	public IVariable get(String name) {
+		return varList.get(name);
+	}
+
 	public IVariable get(String name, Target t, boolean bypassAssignedCheck, Environment env) {
 		IVariable v = varList.get(name);
 		if(v == null) {
@@ -133,7 +137,9 @@ public class IVariableList {
 	@Override
 	public IVariableList clone() {
 		IVariableList clone = new IVariableList(this);
-		clone.varList = new HashMap<>(varList);
+		for(IVariable var : varList.values()) {
+			clone.set(var.shallowClone());
+		}
 		return clone;
 	}
 

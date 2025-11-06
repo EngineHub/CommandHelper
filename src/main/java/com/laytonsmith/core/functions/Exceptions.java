@@ -623,7 +623,10 @@ public class Exceptions {
 				}
 
 				// Validate that the node is an assign with 3 arguments.
-				if(!CFunction.IsFunction(assign, DataHandling.assign.class) || assign.numberOfChildren() != 3) {
+				if(!(assign.getData() instanceof CFunction cf && cf.getFunction() != null
+						&& (cf.getFunction().getName().equals(DataHandling.assign.NAME)
+								|| cf.getFunction().getName().equals(Compiler.__unsafe_assign__.NAME)))
+						|| assign.numberOfChildren() != 3) {
 					throw new ConfigCompileException("Expecting a variable declaration, but instead "
 						+ assign.getData().val() + " was found", t);
 				}

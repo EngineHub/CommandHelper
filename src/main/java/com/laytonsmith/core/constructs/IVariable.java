@@ -96,6 +96,14 @@ public class IVariable extends Construct implements Cloneable {
 		return clone;
 	}
 
+	/**
+	 * Create a clone of this {@link IVariable} using the same variable value reference.
+	 * @return The clone.
+	 */
+	public IVariable shallowClone() {
+		return new IVariable(type, name, varValue, definedTarget);
+	}
+
 	@Override
 	public boolean isDynamic() {
 		return true;
