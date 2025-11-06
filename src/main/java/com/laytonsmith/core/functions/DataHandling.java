@@ -1577,8 +1577,9 @@ public class DataHandling {
 		public Scope linkScope(StaticAnalysis analysis, Scope parentScope, ParseTree ast,
 				Environment env, Set<ConfigCompileException> exceptions) {
 
-			// Handle not enough arguments.
+			// Handle not enough arguments. Link child scopes, but return parent scope.
 			if(ast.numberOfChildren() < 2) {
+				super.linkScope(analysis, parentScope, ast, env, exceptions);
 				return parentScope;
 			}
 

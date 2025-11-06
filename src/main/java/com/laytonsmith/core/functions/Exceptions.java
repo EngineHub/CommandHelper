@@ -216,7 +216,12 @@ public class Exceptions {
 			int numArgs = ast.numberOfChildren();
 			Scope catchParentScope = parentScope;
 			switch(numArgs) {
-				default: // Too many arguments, just analyze the first 4, this will cause a compile error later.
+				default: { // Too many arguments. Analyze the first 4 as usual and handle the rest generically.
+					Scope scope = parentScope;
+					for(int i = 4; i < ast.numberOfChildren(); i++) {
+						scope = analysis.linkScope(scope, ast.getChildAt(i), env, exceptions);
+					}
+				}
 				case 4: { // try(tryCode, exParam, catchCode, exTypes).
 					ParseTree exTypes = ast.getChildAt(3);
 					analysis.linkScope(parentScope, exTypes, env, exceptions);
