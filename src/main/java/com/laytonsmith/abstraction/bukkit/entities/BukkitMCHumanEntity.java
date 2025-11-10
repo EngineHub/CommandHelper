@@ -20,6 +20,8 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.Merchant;
 
+import java.util.UUID;
+
 public class BukkitMCHumanEntity extends BukkitMCLivingEntity implements MCHumanEntity {
 
 	HumanEntity he;
@@ -36,6 +38,11 @@ public class BukkitMCHumanEntity extends BukkitMCLivingEntity implements MCHuman
 	@Override
 	public String getName() {
 		return he.getName();
+	}
+
+	@Override
+	public UUID getUniqueID() {
+		return he.getUniqueId();
 	}
 
 	@Override

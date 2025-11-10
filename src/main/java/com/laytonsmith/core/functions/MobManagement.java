@@ -67,6 +67,7 @@ public class MobManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({get_mob_owner_uuid.class, set_mob_owner.class})
 	public static class get_mob_owner extends AbstractFunction {
 
 		@Override
@@ -82,13 +83,14 @@ public class MobManagement {
 		@Override
 		public String docs() {
 			return "string {entityUUID} Returns the owner's name, or null if the mob is unowned."
-					+ "An UntameableMobException is thrown if mob isn't tameable to begin with.";
+					+ " Use {{function|get_mob_owner_uuid}} to get the owner's unique id."
+					+ " An UntameableMobException is thrown if mob isn't tameable to begin with.";
 		}
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CREUntameableMobException.class, CRELengthException.class,
-				CREBadEntityException.class, CREIllegalArgumentException.class};
+					CREBadEntityException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -122,6 +124,63 @@ public class MobManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({get_mob_owner.class, set_mob_owner.class})
+	public static class get_mob_owner_uuid extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "get_mob_owner_uuid";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "string {entityUUID} Returns the owner's UUID, or null if the mob is unowned."
+					+ "An UntameableMobException is thrown if mob isn't tameable to begin with.";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREUntameableMobException.class, CRELengthException.class,
+					CREBadEntityException.class, CREFormatException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			MCLivingEntity mob = Static.getLivingEntity(args[0], t);
+			if(!mob.isTameable()) {
+				throw new CREUntameableMobException("The specified entity is not tameable", t);
+			}
+			MCAnimalTamer owner = ((MCTameable) mob).getOwner();
+			if(owner == null) {
+				return CNull.NULL;
+			} else {
+				return new CString(owner.getUniqueID().toString(), t);
+			}
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({get_mob_owner.class, get_mob_owner_uuid.class})
 	public static class set_mob_owner extends AbstractFunction {
 
 		@Override
@@ -136,15 +195,15 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityUUID, player} Sets the tameable mob to the specified player. Offline players are"
-					+ " supported, but this means that partial matches are NOT supported. You must type the player's"
-					+ " name exactly. Setting the player to null will untame the mob.";
+			return "void {entityUUID, player} Sets the tameable mob to the specified player."
+					+ " The player argument supports offline players, so it should be a UUID or an exact player name."
+					+ " Setting the player to null will untame the mob.";
 		}
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CREUntameableMobException.class, CRELengthException.class,
-				CREBadEntityException.class, CREIllegalArgumentException.class};
+					CREBadEntityException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -173,7 +232,7 @@ public class MobManagement {
 			if(player instanceof CNull) {
 				mct.setOwner(null);
 			} else {
-				mct.setOwner(Static.getServer().getOfflinePlayer(player.val()));
+				mct.setOwner(Static.GetUser(player, t));
 			}
 			return CVoid.VOID;
 		}
