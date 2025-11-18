@@ -790,7 +790,9 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 
 	@Override
 	public void setBedSpawnLocation(MCLocation l, boolean forced) {
-		p.setBedSpawnLocation((Location) l.getHandle(), forced);
+		Location loc = (Location) l.getHandle();
+		loc.setYaw(Location.normalizeYaw(loc.getYaw()));
+		p.setBedSpawnLocation(loc, forced);
 	}
 
 	@Override
