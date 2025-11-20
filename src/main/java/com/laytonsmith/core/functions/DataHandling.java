@@ -574,7 +574,8 @@ public class DataHandling {
 
 					// Add the new variable declaration.
 					paramScope = analysis.createNewScope(paramScope);
-					ParamDeclaration pDecl = new ParamDeclaration(iVar.getVariableName(), type, ast.getChildAt(2),
+					ParamDeclaration pDecl = new ParamDeclaration(iVar.getVariableName(), type,
+							(ast.getChildAt(2).getData() == CNull.UNDEFINED ? null : ast.getChildAt(2)),
 							ast.getNodeModifiers(),
 							ast.getTarget());
 					params.add(pDecl);
@@ -602,8 +603,9 @@ public class DataHandling {
 					// Add the new variable declaration.
 					paramScope = analysis.createNewScope(paramScope);
 					ParamDeclaration pDecl = new ParamDeclaration(
-							iVar.getVariableName(), CClassType.AUTO, null, ast.getNodeModifiers(),
-							ast.getTarget());
+							iVar.getVariableName(), CClassType.AUTO,
+							(ast.getChildAt(1).getData() == CNull.UNDEFINED ? null : ast.getChildAt(1)),
+							ast.getNodeModifiers(), ast.getTarget());
 					params.add(pDecl);
 					paramScope.addDeclaration(pDecl);
 					analysis.setTermScope(ivarAst, paramScope);
