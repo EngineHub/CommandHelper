@@ -14,6 +14,8 @@ import java.util.TreeSet;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
+import com.laytonsmith.core.compiler.signature.FunctionSignatures;
+import com.laytonsmith.core.compiler.signature.SignatureBuilder;
 import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CFunction;
@@ -379,28 +381,68 @@ public class StaticAnalysis {
 			} else if(cFunc.hasProcedure()) { // The function is a procedure reference.
 
 				// Type check procedure arguments.
+				List<CClassType> argTypes = new ArrayList<>(ast.numberOfChildren());
+				List<Target> argTargets = new ArrayList<>(ast.numberOfChildren());
 				for(ParseTree child : ast.getChildren()) {
-					this.typecheck(child, env, exceptions);
+					argTypes.add(this.typecheck(child, env, exceptions));
+					argTargets.add(child.getTarget());
 				}
 
-				// Return procedure return type.
+				// Get procedure declaration.
 				String procName = cFunc.val();
-				Scope scope = this.getTermScope(ast);
-				if(scope != null) {
-					Set<Declaration> decls = scope.getDeclarations(Namespace.PROCEDURE, procName);
-					if(decls.isEmpty()) {
-						return CClassType.AUTO; // Proc cannot be resolved. Exception for this is already generated.
-					} else {
-						// TODO - Get the most specific type when multiple declarations exist.
-						return decls.iterator().next().getType();
-					}
-				} else {
+				Target procTarget = cFunc.getTarget();
+				Scope procRefScope = this.getTermScope(ast);
+				if(procRefScope == null) {
+
 					// If this runs, then a proc reference was created without setting its Scope using setTermScope().
 					exceptions.add(new ConfigCompileException("Procedure cannot be resolved (missing procedure scope,"
 							+ " this is an internal error that should never happen): "
-							+ procName, cFunc.getTarget()));
+							+ procName, procTarget));
 					return CClassType.AUTO;
 				}
+				Set<Declaration> decls = procRefScope.getDeclarations(Namespace.PROCEDURE, procName);
+				if(decls.isEmpty()) {
+					return CClassType.AUTO; // Proc cannot be resolved. Exception already generated.
+				}
+
+				// Create procedure signatures.
+				// TODO - Consider creating one SignatureBuilder per declaration. With the current implementation, matching any possible declaration is sufficient. We want it to match all instead.
+				List<CClassType> procReturnTypes = new ArrayList<>(1);
+				for(Declaration decl : decls) {
+					if(decl instanceof ProcDeclaration procDecl) {
+
+						// Create new procedure signature.
+						SignatureBuilder signatureBuilder = new SignatureBuilder(procDecl.getType());
+						for(ParamDeclaration paramDecl : procDecl.getParameters()) {
+							CClassType paramType = paramDecl.getType();
+							if(paramType.isVariadicType()) {
+								signatureBuilder.varParam(
+										paramType.getVarargsBaseType(), paramDecl.getIdentifier(), null);
+							} else {
+								signatureBuilder.param(paramType,
+										paramDecl.getIdentifier(), null, paramDecl.getDefaultValue() != null);
+							}
+						}
+
+						// Typecheck arguments against new procedure signature.
+						FunctionSignatures procSignature = signatureBuilder.build();
+						procReturnTypes.add(procSignature.getReturnType(
+								procTarget, argTypes, argTargets, env, exceptions));
+					} else {
+
+						// If this runs, then a wrong declaration type proc declaration was created.
+						exceptions.add(new ConfigCompileException("Procedure resolves to non-procedure declaration"
+								+ " (this is an internal error that should never happen): "
+								+ procName + " -> " + decl.getIdentifier(), procTarget));
+					}
+				}
+				if(procReturnTypes.isEmpty()) {
+					return CClassType.AUTO; // No ProcDeclarations found. Exception already generated.
+				}
+
+				// Return procedure return type.
+				// TODO - Get the most specific type when multiple declarations exist.
+				return procReturnTypes.get(0);
 			} else {
 				throw new Error("Unsupported " + CFunction.class.getSimpleName()
 						+ " type in type checking for node with value: " + cFunc.val());
