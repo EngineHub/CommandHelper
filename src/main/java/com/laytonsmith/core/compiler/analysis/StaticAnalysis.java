@@ -406,21 +406,31 @@ public class StaticAnalysis {
 				}
 
 				// Create procedure signatures.
-				// TODO - Consider creating one SignatureBuilder per declaration. With the current implementation, matching any possible declaration is sufficient. We want it to match all instead.
 				List<CClassType> procReturnTypes = new ArrayList<>(1);
 				for(Declaration decl : decls) {
 					if(decl instanceof ProcDeclaration procDecl) {
 
 						// Create new procedure signature.
 						SignatureBuilder signatureBuilder = new SignatureBuilder(procDecl.getType());
+						boolean optionalParamDetected = false;
+						boolean varargsParamDetected = false;
 						for(ParamDeclaration paramDecl : procDecl.getParameters()) {
 							CClassType paramType = paramDecl.getType();
+							if(varargsParamDetected) {
+								return CClassType.AUTO; // Invalid procedure signature. Exception(s) already generated.
+							}
 							if(paramType.isVariadicType()) {
 								signatureBuilder.varParam(
 										paramType.getVarargsBaseType(), paramDecl.getIdentifier(), null);
+								varargsParamDetected = true;
 							} else {
-								signatureBuilder.param(paramType,
-										paramDecl.getIdentifier(), null, paramDecl.getDefaultValue() != null);
+								boolean paramOptional = paramDecl.getDefaultValue() != null;
+								signatureBuilder.param(paramType, paramDecl.getIdentifier(), null, paramOptional);
+								if(paramOptional) {
+									optionalParamDetected = true;
+								} else if(optionalParamDetected) {
+									return CClassType.AUTO; // Invalid procedure signature. Exception(s) already generated.
+								}
 							}
 						}
 

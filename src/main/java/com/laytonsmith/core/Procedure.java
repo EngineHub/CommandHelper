@@ -66,10 +66,12 @@ public class Procedure implements Cloneable {
 		this.definedAt = t;
 		this.varList = new HashMap<>();
 		this.procComment = procComment;
+		boolean optionalParamDetected = false;
 		for(int i = 0; i < varList.size(); i++) {
 			IVariable var = varList.get(i);
 			if(var.getDefinedType().isVariadicType() && i != varList.size() - 1) {
-				throw new CREFormatException("Varargs can only be added to the last argument.", t);
+				throw new CREFormatException(
+						"Varargs can only be added to the last parameter in a procedure.", var.getTarget());
 			}
 			try {
 				this.varList.put(var.getVariableName(), var.clone());
@@ -77,14 +79,22 @@ public class Procedure implements Cloneable {
 				this.varList.put(var.getVariableName(), var);
 			}
 			this.varIndex.add(var);
-			if(var.getDefinedType().isVariadicType() && var.ival() != CNull.UNDEFINED) {
-				throw new CREFormatException("Varargs may not have default values", t);
+			boolean paramOptional = (var.ival() != CNull.UNDEFINED);
+			if(paramOptional) {
+				if(var.getDefinedType().isVariadicType()) {
+					throw new CREFormatException("Varargs may not have default values.", var.getTarget());
+				}
+				optionalParamDetected = true;
+			} else if(optionalParamDetected && !var.getDefinedType().isVariadicType()) {
+				throw new CREFormatException(
+						"Procedure parameters after optional parameters must be optional or varargs.", var.getTarget());
 			}
 			this.originals.put(var.getVariableName(), var.ival());
 		}
 		this.tree = tree;
 		if(!PROCEDURE_NAME_REGEX.matcher(name).matches()) {
-			throw new CREFormatException("Procedure names must start with an underscore, and may only contain letters, underscores, and digits. (Found " + this.name + ")", t);
+			throw new CREFormatException("Procedure names must start with an underscore,"
+					+ " and may only contain letters, underscores, and digits. (Found " + this.name + ")", t);
 		}
 		//Let's look through the tree now, and see if this is possibly constant or not.
 		//If it is, it may or may not help us during compilation, but if it's not,
