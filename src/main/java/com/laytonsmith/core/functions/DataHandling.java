@@ -1594,8 +1594,7 @@ public class DataHandling {
 							env.getEnv(GlobalEnv.class).ClearFlag(GlobalEnv.FLAG_VAR_ARGS_ALLOWED);
 						}
 						if(paramDefaultValues[i] instanceof IVariable ivar) {
-							paramDefaultValues[i] = env.getEnv(GlobalEnv.class)
-									.GetVarList().get(ivar.getVariableName(), t, true, env).ival();
+							paramDefaultValues[i] = originalList.get(ivar.getVariableName(), t, env).ival();
 						}
 
 						// Mark proc as not constant if a default parameter is not a constant.
@@ -1678,7 +1677,7 @@ public class DataHandling {
 				varNames.add(varName);
 
 				// Get IVariable value.
-				Mixed ivarVal = (paramDefaultValue != null ? paramDefaultValue : new CString("", t));
+				Mixed ivarVal = (paramDefaultValue != null ? paramDefaultValue : CNull.UNDEFINED);
 
 				// Store IVariable object clone.
 				vars.add(new IVariable(ivar.getDefinedType(), ivar.getVariableName(), ivarVal, ivar.getTarget()));
