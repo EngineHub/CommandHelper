@@ -84,6 +84,7 @@ import com.laytonsmith.tools.docgen.templates.Loops;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -439,6 +440,56 @@ public class ControlFlow {
 		}
 
 		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes,
+				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+
+			// Get return type based on the function signatures. This generates all necessary compile errors.
+			CClassType retType = super.getReturnType(t, argTypes, argTargets, env, exceptions);
+
+			// Override return type with null if the first condition (or lonely else code) is terminating.
+			if(argTypes.size() >= 1 && argTypes.get(0) == null) {
+				return null;
+			}
+
+			// Override return type with null if all code branches (including the else code branch) are terminating.
+			if((argTypes.size() & 0x01) != 0x00) { // (size % 2) != 0.
+
+				// Get all code branch return types.
+				boolean allBranchesTerminate = true;
+				Set<CClassType> returnTypes = new HashSet<>();
+				for(int i = 1; i < argTypes.size(); i += 2) {
+					CClassType argType = argTypes.get(i);
+					returnTypes.add(argType);
+					allBranchesTerminate &= (argType == null);
+				}
+				CClassType defaultArgType = argTypes.get(argTypes.size() - 1);
+				returnTypes.add(defaultArgType);
+				allBranchesTerminate &= (defaultArgType == null);
+
+				// Return null if all branches (including the else code branch) are terminating.
+				if(allBranchesTerminate) {
+					return null;
+				}
+
+				// Return an occurring return type if all return types extend that type.
+				// TODO - Make this return a multitype instead as soon as all typechecking code supports multitypes.
+				for(CClassType type1 : returnTypes) {
+					if(type1 != null) {
+						for(CClassType type2 : returnTypes) {
+							if(!InstanceofUtil.isInstanceof(type2, type1, env)) {
+								break;
+							}
+						}
+						return type1;
+					}
+				}
+			}
+
+			// Return the super result.
+			return retType;
+		}
+
+		@Override
 		public boolean useSpecialExec() {
 			return true;
 		}
@@ -724,6 +775,56 @@ public class ControlFlow {
 			 * Also check ifelse() and switch_ic(), as they need the same feature.
 			 */
 			return super.getSignatures();
+		}
+
+		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes,
+				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+
+			// Get return type based on the function signatures. This generates all necessary compile errors.
+			CClassType retType = super.getReturnType(t, argTypes, argTargets, env, exceptions);
+
+			// Override return type with null if the value is terminating.
+			if(argTypes.size() >= 1 && argTypes.get(0) == null) {
+				return null;
+			}
+
+			// Override return type with null if all cases (including the default case) are terminating.
+			if((argTypes.size() & 0x01) == 0x00) { // (size % 2) == 0.
+
+				// Get all case/default code branch return types.
+				boolean allBranchesTerminate = true;
+				Set<CClassType> returnTypes = new HashSet<>();
+				for(int i = 2; i < argTypes.size(); i += 2) {
+					CClassType argType = argTypes.get(i);
+					returnTypes.add(argType);
+					allBranchesTerminate &= (argType == null);
+				}
+				CClassType defaultArgType = argTypes.get(argTypes.size() - 1);
+				returnTypes.add(defaultArgType);
+				allBranchesTerminate &= (defaultArgType == null);
+
+				// Return null if all cases (including the default case) are terminating.
+				if(allBranchesTerminate) {
+					return null;
+				}
+
+				// Return an occurring return type if all return types extend that type.
+				// TODO - Make this return a multitype instead as soon as all typechecking code supports multitypes.
+				for(CClassType type1 : returnTypes) {
+					if(type1 != null) {
+						for(CClassType type2 : returnTypes) {
+							if(!InstanceofUtil.isInstanceof(type2, type1, env)) {
+								break;
+							}
+						}
+					}
+					return type1;
+				}
+			}
+
+			// Return the super result.
+			return retType;
 		}
 
 		@Override
@@ -1120,6 +1221,22 @@ public class ControlFlow {
 		}
 
 		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes,
+				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+
+			// Get return type based on the function signatures. This generates all necessary compile errors.
+			CClassType retType = super.getReturnType(t, argTypes, argTargets, env, exceptions);
+
+			// Override return type with null if the assign or condition is terminating.
+			if(argTypes.size() == 4 && (argTypes.get(0) == null || argTypes.get(1) == null)) {
+				return null;
+			}
+
+			// Return the super result.
+			return retType;
+		}
+
+		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRECastException.class};
 		}
@@ -1381,6 +1498,22 @@ public class ControlFlow {
 					.param(null, "loopCode", "The code that is executed in the loop.")
 					.param(null, "elseCode", "The code that is executed when the condition returns"
 							+ " false in the first iteration of the loop.").build();
+		}
+
+		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes,
+				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+
+			// Get return type based on the function signatures. This generates all necessary compile errors.
+			CClassType retType = super.getReturnType(t, argTypes, argTargets, env, exceptions);
+
+			// Override return type with null if the assign or condition is terminating.
+			if(argTypes.size() == 5 && (argTypes.get(0) == null || argTypes.get(1) == null)) {
+				return null;
+			}
+
+			// Return the super result.
+			return retType;
 		}
 
 		@Override
@@ -2118,6 +2251,22 @@ public class ControlFlow {
 		}
 
 		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes,
+				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+
+			// Get return type based on the function signatures. This generates all necessary compile errors.
+			CClassType retType = super.getReturnType(t, argTypes, argTargets, env, exceptions);
+
+			// Override return type with null if the condition is terminating.
+			if(argTypes.size() == 2 && argTypes.get(0) == null) {
+				return null;
+			}
+
+			// Return the super result.
+			return retType;
+		}
+
+		@Override
 		public boolean useSpecialExec() {
 			return true;
 		}
@@ -2239,6 +2388,22 @@ public class ControlFlow {
 					.param(null, "code", "The code that is executed in the loop.")
 					.param(Booleanish.TYPE, "cond",
 							"The loop condition that is checked each time after the code is executed.").build();
+		}
+
+		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes,
+				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+
+			// Get return type based on the function signatures. This generates all necessary compile errors.
+			CClassType retType = super.getReturnType(t, argTypes, argTargets, env, exceptions);
+
+			// Override return type with null if the code branch or condition is terminating.
+			if(argTypes.size() == 2 && (argTypes.get(0) == null || argTypes.get(1) == null)) {
+				return null;
+			}
+
+			// Return the super result.
+			return retType;
 		}
 
 		@Override
