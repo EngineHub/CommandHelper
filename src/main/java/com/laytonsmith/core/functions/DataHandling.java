@@ -1700,6 +1700,34 @@ public class DataHandling {
 		}
 
 		@Override
+		public CClassType typecheck(StaticAnalysis analysis,
+				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+
+			// Fall back to super implementation for invalid usage.
+			if(ast.numberOfChildren() < 2) {
+				return super.typecheck(analysis, ast, env, exceptions);
+			}
+
+			// Get procedure declared return type (not the proc() return type).
+			CClassType returnType = (ast.getChildAt(0).getData() instanceof CClassType type ? type : CClassType.AUTO);
+
+			// Typecheck arguments excluding code block.
+			for(int i = 0; i < ast.numberOfChildren() - 1; i++) {
+				analysis.typecheck(ast.getChildAt(i), env, exceptions);
+			}
+
+			// Typecheck code block.
+			CClassType codeBlockType = analysis.typecheck(ast.getChildAt(ast.numberOfChildren() - 1), env, exceptions);
+			if(returnType != CClassType.AUTO && returnType != CVoid.TYPE && codeBlockType != null) {
+				exceptions.add(new ConfigCompileException(
+						"Missing return statement; Not all code paths return a value.", ast.getTarget()));
+			}
+
+			// Return void.
+			return CVoid.TYPE;
+		}
+
+		@Override
 		public Scope linkScope(StaticAnalysis analysis, Scope parentScope, ParseTree ast,
 				Environment env, Set<ConfigCompileException> exceptions) {
 

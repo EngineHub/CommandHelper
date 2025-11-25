@@ -2708,8 +2708,8 @@ public class ControlFlow {
 				}
 			}
 
-			// Return void.
-			return CVoid.TYPE;
+			// Return null to indicate that this call does not result in a value.
+			return null;
 		}
 
 		@Override
