@@ -28,6 +28,8 @@ import com.laytonsmith.core.compiler.SelfStatement;
 import com.laytonsmith.core.compiler.VariableScope;
 import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
+import com.laytonsmith.core.compiler.signature.FunctionSignatures;
+import com.laytonsmith.core.compiler.signature.SignatureBuilder;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CClosure;
@@ -374,6 +376,29 @@ public class Exceptions {
 				CREThrowable throwable = (CREThrowable) ReflectionUtils.newInstance(c, classes.toArray(new Class[classes.size()]), arguments.toArray());
 				throw throwable;
 			}
+		}
+
+		@Override
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(null).param(CArray.TYPE, "exception", "The exception to throw.")
+					.newSignature(null).param(CREThrowable.TYPE, "exception", "The exception to throw.")
+					.newSignature(null)
+						.param(CString.TYPE, "exceptionType", "The exception type string.")
+						.param(CString.TYPE, "msg", "The exception message.")
+						.param(CArray.TYPE, "causedBy", "The causing exception object.", true)
+					.newSignature(null)
+						.param(CString.TYPE, "exceptionType", "The exception type string.")
+						.param(CString.TYPE, "msg", "The exception message.")
+						.param(CREThrowable.TYPE, "causedBy", "The causing exception object.", true)
+					.newSignature(null)
+						.param(CClassType.TYPE, "exceptionType", "The exception type.")
+						.param(CString.TYPE, "msg", "The exception message.")
+						.param(CArray.TYPE, "causedBy", "The causing exception object.", true)
+					.newSignature(null)
+						.param(CClassType.TYPE, "exceptionType", "The exception type.")
+						.param(CString.TYPE, "msg", "The exception message.")
+						.param(CREThrowable.TYPE, "causedBy", "The causing exception object.", true)
+					.build();
 		}
 	}
 
