@@ -12,8 +12,9 @@ import com.laytonsmith.core.constructs.CKeyword;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.exceptions.CRE.CREInvalidProcedureException;
 import com.laytonsmith.core.functions.DataHandling;
-import com.laytonsmith.core.functions.Meta;
+import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.functions.Compiler;
 import java.util.List;
 
@@ -71,11 +72,19 @@ public class ProcKeyword extends Keyword {
 					list.remove(keywordPosition); // Remove __cbrace__ function node.
 				} else {
 
-					// Define as forward declaration by add a "noop()" as code block.
+					// Define as forward declaration by adding an exception throw as code block.
+					FileOptions forwardImplFileOptions = list.get(keywordPosition + 1).getFileOptions();
+					ParseTree throwNode = new ParseTree(new CFunction(Exceptions._throw.NAME, Target.UNKNOWN),
+							forwardImplFileOptions, true);
+					throwNode.addChild(new ParseTree(
+							new CString(CREInvalidProcedureException.TYPE.getSimpleName(), Target.UNKNOWN),
+							options, true));
+					throwNode.addChild(new ParseTree(
+							new CString("Cannot invoke procedure forward declaration.", Target.UNKNOWN),
+							options, true));
 					ParseTree statement = new ParseTree(new CFunction(Compiler.__statements__.NAME, Target.UNKNOWN),
-							list.get(keywordPosition + 1).getFileOptions(), true);
-					statement.addChild(new ParseTree(new CFunction(Meta.noop.NAME, Target.UNKNOWN),
-							list.get(keywordPosition + 1).getFileOptions(), true));
+							forwardImplFileOptions, true);
+					statement.addChild(throwNode);
 					procNode.addChild(statement);
 
 					// Remove processed nodes from AST.

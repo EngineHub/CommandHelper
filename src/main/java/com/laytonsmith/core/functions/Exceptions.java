@@ -284,9 +284,11 @@ public class Exceptions {
 	@seealso({_try.class, com.laytonsmith.tools.docgen.templates.Exceptions.class})
 	public static class _throw extends AbstractFunction {
 
+		public static final String NAME = "throw";
+
 		@Override
 		public String getName() {
-			return "throw";
+			return NAME;
 		}
 
 		@Override
