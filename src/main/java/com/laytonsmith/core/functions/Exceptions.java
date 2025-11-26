@@ -358,6 +358,9 @@ public class Exceptions {
 				} catch (ClassNotFoundException ex) {
 					throw new CREFormatException("Expected a valid exception type, but found \"" + args[0].val() + "\"", t);
 				}
+				if(!CREThrowable.class.isAssignableFrom(c)) {
+					throw new CREFormatException("Expected a valid exception type, but found \"" + args[0].val() + "\"", t);
+				}
 				List<Class> classes = new ArrayList<>();
 				List<Object> arguments = new ArrayList<>();
 				classes.add(String.class);
