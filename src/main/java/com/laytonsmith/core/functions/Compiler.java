@@ -220,8 +220,7 @@ public class Compiler {
 						// add all preceding symbols
 						while(list.size() > index + 1 && (list.get(index).getData() instanceof CSymbol
 								|| (list.get(index).getData() instanceof CFunction cf
-										&& cf.hasFunction() && cf.getFunction() != null
-										&& cf.getFunction().getName().equals(Compiler.p.NAME)
+										&& cf.val().equals(Compiler.p.NAME)
 										&& list.get(index).numberOfChildren() == 1
 										&& (list.get(index).getChildAt(0).getData() instanceof CClassType
 												|| __type_ref__.createFromBareStringOrConcats(
@@ -359,8 +358,8 @@ public class Compiler {
 			// Rewrite cast operator.
 			for(int i = list.size() - 2; i >= 0; i--) {
 				ParseTree node = list.get(i);
-				if(node.getData() instanceof CFunction cf && cf.hasFunction() && cf.getFunction() != null
-						&& cf.getFunction().getName().equals(Compiler.p.NAME) && node.numberOfChildren() == 1) {
+				if(node.getData() instanceof CFunction cf && cf.val().equals(Compiler.p.NAME)
+						&& node.numberOfChildren() == 1) {
 
 					// Convert bare string or concat() to type reference if needed.
 					ParseTree typeNode = node.getChildAt(0);
@@ -649,36 +648,28 @@ public class Compiler {
 				Stack<ParseTree> executes = new Stack<>();
 				while(listInd > 0) {
 					ParseTree node = list.get(listInd);
-					try {
-						if(node.getData() instanceof CFunction cf
-								&& cf.hasFunction()
-								&& cf.getFunction() != null
-								&& cf.getFunction().getName().equals(Compiler.p.NAME)) {
-							ParseTree prevNode = list.get(listInd - 1);
-							Mixed prevNodeVal = prevNode.getData();
-
-							// Do not rewrite parenthesis like "@a = (1);" or "key: (value)" to execute().
-							if(prevNodeVal instanceof CSymbol
-									|| prevNodeVal instanceof CLabel || prevNodeVal instanceof CString) {
-								break;
-							}
-
-							// Do not rewrite casts to execute() if the callable is the cast (i.e. "(type) (val)").
-							if(prevNodeVal instanceof CFunction cfunc && cfunc.hasFunction() && cfunc.getFunction() != null
-									&& cfunc.getFunction().getName().equals(Compiler.p.NAME) && prevNode.numberOfChildren() == 1
-									&& (prevNode.getChildAt(0).getData().isInstanceOf(CClassType.TYPE)
-											|| __type_ref__.createFromBareStringOrConcats(prevNode.getChildAt(0)) != null)) {
-								break;
-							}
-
-							executes.push(node);
-							list.remove(listInd--);
-						} else {
-							break;
-						}
-					} catch (ConfigCompileException e) {
-						break; // The function does not exist. Ignore and handle as "not a p()".
+					if(!(node.getData() instanceof CFunction cf && cf.val().equals(Compiler.p.NAME))) {
+						break;
 					}
+					ParseTree prevNode = list.get(listInd - 1);
+					Mixed prevNodeVal = prevNode.getData();
+
+					// Do not rewrite parenthesis like "@a = (1);" or "key: (value)" to execute().
+					if(prevNodeVal instanceof CSymbol
+							|| prevNodeVal instanceof CLabel || prevNodeVal instanceof CString) {
+						break;
+					}
+
+					// Do not rewrite casts to execute() if the callable is the cast (i.e. "(type) (val)").
+					if(prevNodeVal instanceof CFunction cfunc && cfunc.val().equals(Compiler.p.NAME)
+							&& prevNode.numberOfChildren() == 1
+							&& (prevNode.getChildAt(0).getData().isInstanceOf(CClassType.TYPE)
+									|| __type_ref__.createFromBareStringOrConcats(prevNode.getChildAt(0)) != null)) {
+						break;
+					}
+
+					executes.push(node);
+					list.remove(listInd--);
 				}
 				if(!executes.isEmpty()) {
 					if(listInd >= 0) {
