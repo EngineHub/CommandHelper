@@ -80,6 +80,7 @@ import com.laytonsmith.abstraction.entities.MCPigZombie;
 import com.laytonsmith.abstraction.entities.MCProjectile;
 import com.laytonsmith.abstraction.entities.MCPufferfish;
 import com.laytonsmith.abstraction.entities.MCRabbit;
+import com.laytonsmith.abstraction.entities.MCSalmon;
 import com.laytonsmith.abstraction.entities.MCSheep;
 import com.laytonsmith.abstraction.entities.MCShulker;
 import com.laytonsmith.abstraction.entities.MCShulkerBullet;
@@ -2258,6 +2259,12 @@ public class EntityManagement {
 					MCRabbit rabbit = (MCRabbit) entity;
 					specArray.set(entity_spec.KEY_RABBIT_TYPE, new CString(rabbit.getRabbitType().name(), t), t);
 					break;
+				case SALMON:
+					MCSalmon salmon = (MCSalmon) entity;
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_21_3)) {
+						specArray.set(entity_spec.KEY_SALMON_TYPE, new CString(salmon.getVariant().name(), t), t);
+					}
+					break;
 				case SHEEP:
 					MCSheep sheep = (MCSheep) entity;
 					specArray.set(entity_spec.KEY_SHEEP_COLOR, new CString(sheep.getColor().name(), t), t);
@@ -2525,6 +2532,7 @@ public class EntityManagement {
 		private static final String KEY_RABBIT_TYPE = "type";
 		private static final String KEY_PRIMED_TNT_FUSETICKS = "fuseticks";
 		private static final String KEY_PRIMED_TNT_SOURCE = "source";
+		private static final String KEY_SALMON_TYPE = "type";
 		private static final String KEY_SHEEP_COLOR = "color";
 		private static final String KEY_SHEEP_SHEARED = "sheared";
 		private static final String KEY_SHULKER_COLOR = "color";
@@ -3689,6 +3697,24 @@ public class EntityManagement {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_PUFFERFISH_SIZE:
 								puffer.setPuffState(ArgumentValidation.getInt32(specArray.get(index, t), t));
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
+				case SALMON:
+					MCSalmon salmon = (MCSalmon) entity;
+					for(String index : specArray.stringKeySet()) {
+						switch(index.toLowerCase()) {
+							case entity_spec.KEY_SALMON_TYPE:
+								if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_21_3)) {
+									try {
+										salmon.setVariant(MCSalmon.Variant.valueOf(specArray.get(index, t).val()));
+									} catch (IllegalArgumentException exception) {
+										throw new CREFormatException("Invalid salmon type: " + specArray.get(index, t).val(), t);
+									}
+								}
 								break;
 							default:
 								throwException(index, t);

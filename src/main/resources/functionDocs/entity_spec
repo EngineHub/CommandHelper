@@ -268,6 +268,10 @@ without knowing the rotations on the other axis or of other body parts beforehan
 |
 * %KEY_RABBIT_TYPE%: The type of the rabbit (can be %RABBIT_TYPE%).
 |-
+| SALMON
+|
+* %KEY_SALMON_TYPE%: The size type of salmon. Must be one of the sizes: SMALL, MEDIUM, or LARGE. (MC 1.21.3+)
+|-
 | SHEEP
 | 
 * %KEY_SHEEP_COLOR%: The color of the sheep (can be %DYE_COLOR%).
@@ -290,7 +294,7 @@ without knowing the rotations on the other axis or of other body parts beforehan
 |-
 | SLIME
 | 
-* %KEY_SLIME_SIZE%: The size of the slime.
+* %KEY_SLIME_SIZE%: The size of the slime. Must be an integer (0 - 126) where 0 is small, 1 is medium, and 3 is large.
 |-
 | SNOWMAN
 | 
