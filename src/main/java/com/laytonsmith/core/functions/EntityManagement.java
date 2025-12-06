@@ -1942,7 +1942,13 @@ public class EntityManagement {
 					} else {
 						tippedmeta.set("base", ObjectGenerator.GetGenerator().potionData(arrow.getBasePotionData(), t), t);
 					}
-					specArray.set(entity_spec.KEY_TIPPEDARROW_POTIONMETA, tippedmeta, t);
+					specArray.set(entity_spec.KEY_ARROW_POTIONMETA, tippedmeta, t);
+					MCColor arrowColor = arrow.getColor();
+					if(arrowColor == null) {
+						specArray.set(entity_spec.KEY_ARROW_COLOR, CNull.NULL, t);
+					} else {
+						specArray.set(entity_spec.KEY_ARROW_COLOR, ObjectGenerator.GetGenerator().color(arrowColor, t), t);
+					}
 					break;
 				case ARMOR_STAND:
 					MCArmorStand stand = (MCArmorStand) entity;
@@ -2433,6 +2439,8 @@ public class EntityManagement {
 		private static final String KEY_ARROW_DAMAGE = "damage";
 		private static final String KEY_ARROW_PIERCE_LEVEL = "piercelevel";
 		private static final String KEY_ARROW_PICKUP = "pickup";
+		private static final String KEY_ARROW_POTIONMETA = "potionmeta";
+		private static final String KEY_ARROW_COLOR = "color";
 		private static final String KEY_ARMORSTAND_ARMS = "arms";
 		private static final String KEY_ARMORSTAND_BASEPLATE = "baseplate";
 		private static final String KEY_ARMORSTAND_GRAVITY = "gravity";
@@ -2542,7 +2550,6 @@ public class EntityManagement {
 		private static final String KEY_SPECTRAL_ARROW_GLOWING_TICKS = "glowingticks";
 		private static final String KEY_SPLASH_POTION_ITEM = "item";
 		private static final String KEY_STEERABLE_SADDLED = "saddled";
-		private static final String KEY_TIPPEDARROW_POTIONMETA = "potionmeta";
 		private static final String KEY_TROPICALFISH_COLOR = "color";
 		private static final String KEY_TROPICALFISH_PATTERN = "pattern";
 		private static final String KEY_TROPICALFISH_PATTERNCOLOR = "patterncolor";
@@ -2747,7 +2754,7 @@ public class EntityManagement {
 											+ specArray.get(index, t).val(), t);
 								}
 								break;
-							case entity_spec.KEY_TIPPEDARROW_POTIONMETA:
+							case entity_spec.KEY_ARROW_POTIONMETA:
 								Mixed c = specArray.get(index, t);
 								if(c.isInstanceOf(CArray.TYPE)) {
 									CArray meta = (CArray) c;
@@ -2782,7 +2789,18 @@ public class EntityManagement {
 										}
 									}
 								} else {
-									throw new CRECastException("TippedArrow potion meta must be an array", t);
+									throw new CRECastException("Arrow potion meta must be an array", t);
+								}
+								break;
+							case entity_spec.KEY_ARROW_COLOR:
+								Mixed colorMixed = specArray.get(index, t);
+								if(colorMixed instanceof CNull) {
+									arrow.setColor(null);
+								} else if(colorMixed.isInstanceOf(CArray.TYPE)) {
+									CArray color = (CArray) colorMixed;
+									arrow.setColor(ObjectGenerator.GetGenerator().color(color, t));
+								} else {
+									throw new CRECastException("Arrow color must be an array", t);
 								}
 								break;
 							default:

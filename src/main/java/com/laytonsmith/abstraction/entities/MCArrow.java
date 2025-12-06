@@ -1,5 +1,6 @@
 package com.laytonsmith.abstraction.entities;
 
+import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCPotionData;
 import com.laytonsmith.abstraction.enums.MCPotionType;
@@ -41,6 +42,10 @@ public interface MCArrow extends MCProjectile {
 	PickupStatus getPickupStatus();
 
 	void setPickupStatus(PickupStatus status);
+
+	MCColor getColor();
+
+	void setColor(MCColor color);
 
 	enum PickupStatus {
 		ALLOWED,

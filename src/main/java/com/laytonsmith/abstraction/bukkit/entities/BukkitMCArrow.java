@@ -1,8 +1,10 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
+import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCPotionData;
+import com.laytonsmith.abstraction.bukkit.BukkitMCColor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPotionData;
 import com.laytonsmith.abstraction.entities.MCArrow;
 import com.laytonsmith.abstraction.enums.MCPotionType;
@@ -10,6 +12,7 @@ import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPotionEffectType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPotionType;
 import com.laytonsmith.core.Static;
+import org.bukkit.Color;
 import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
@@ -136,5 +139,23 @@ public class BukkitMCArrow extends BukkitMCProjectile implements MCArrow {
 	@Override
 	public void setPickupStatus(MCArrow.PickupStatus status) {
 		arrow.setPickupStatus(AbstractArrow.PickupStatus.valueOf(status.name()));
+	}
+
+	@Override
+	public MCColor getColor() {
+		Color c = arrow.getColor();
+		if(c == null) {
+			return null;
+		}
+		return BukkitMCColor.GetMCColor(c);
+	}
+
+	@Override
+	public void setColor(MCColor color) {
+		if(color == null) {
+			arrow.setColor(null);
+		} else {
+			arrow.setColor(BukkitMCColor.GetColor(color));
+		}
 	}
 }
