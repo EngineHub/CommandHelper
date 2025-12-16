@@ -16,12 +16,14 @@ import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.entities.MCFallingBlock;
 import com.laytonsmith.abstraction.enums.MCDifficulty;
 import com.laytonsmith.abstraction.enums.MCGameRule;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.enums.MCWorldEnvironment;
 import com.laytonsmith.abstraction.enums.MCWorldType;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSLog;
+import com.laytonsmith.core.MSLog.Tags;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Optimizable;
@@ -1806,7 +1808,7 @@ public class World {
 			return "mixed {world, [gameRule]} Returns an associative array containing the values of all existing"
 					+ " gamerules for the given world. If the gameRule parameter is specified, the function only"
 					+ " returns that one value instead of an array. ---- "
-					+ " The gameRule can be " + StringUtils.Join(MCGameRule.getGameRules(), ", ", ", or ", " or ") + ".";
+					+ " The gamerules for MC 1.21.11+ are: " + StringUtils.Join(MCGameRule.getGameRules(), ", ", ", or ", " or ") + ".";
 		}
 
 		@Override
@@ -1822,28 +1824,45 @@ public class World {
 			}
 			if(args.length == 1) {
 				CArray gameRules = CArray.GetAssociativeArray(t);
-				for(String name : world.getGameRules()) {
-					try {
-						MCGameRule gameRule = MCGameRule.valueOf(name.toUpperCase());
-						gameRules.set(name, gameRule.constructValue(world.getGameRuleValue(gameRule), t), t);
-					} catch(IllegalArgumentException skip) {
-						MSLog.GetLogger().w(MSLog.Tags.RUNTIME, "The server gamerule \"" + name + "\""
-								+ " is missing in CommandHelper.", t);
+				for(String ruleName : world.getGameRules()) {
+					ruleName = ruleName.replace("minecraft:", ""); // Spigot adds this, but not Paper
+					Object value = world.getGameRuleValue(ruleName);
+					if(value instanceof Boolean bool) {
+						gameRules.set(ruleName, CBoolean.get(bool), t);
+					} else {
+						gameRules.set(ruleName, new CInt((int) value, t), t);
 					}
 				}
 				return gameRules;
-			} else {
-				try {
-					MCGameRule gameRule = MCGameRule.valueOf(args[1].val().toUpperCase());
-					Object value = world.getGameRuleValue(gameRule);
-					if(value == null) {
-						throw new CREFormatException("The gamerule \"" + args[1].val()
-								+ "\" does not exist in this version.", t);
-					}
-					return gameRule.constructValue(value, t);
-				} catch (IllegalArgumentException exception) {
-					throw new CREFormatException("The gamerule \"" + args[1].val() + "\" does not exist.", t);
+			}
+
+			String ruleName = args[1].val();
+			boolean inverted = false;
+			if(!world.isGameRule(ruleName)) {
+				String convertedName = MCGameRule.getByLegacyName(ruleName);
+				if(convertedName == null) {
+					throw new CREFormatException("The gamerule \"" + ruleName + "\" does not exist.", t);
 				}
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_21_11)) {
+					MSLog.GetLogger().w(Tags.DEPRECATION, "The Gamerule \"" + ruleName + "\" was changed to \""
+							+ convertedName + "\".", t);
+					inverted = MCGameRule.isBoolInvertedFromLegacy(convertedName);
+				}
+				ruleName = convertedName;
+			}
+			Object value;
+			try {
+				value = world.getGameRuleValue(ruleName);
+			} catch(IllegalArgumentException ex) {
+				throw new CREFormatException("The gamerule \"" + ruleName + "\" is not available on this server.", t);
+			}
+			if(value == null) {
+				throw new CREFormatException("The gamerule \"" + ruleName + "\" does not exist on this version.", t);
+			}
+			if(value instanceof Boolean bool) {
+				return CBoolean.get(inverted != bool);
+			} else {
+				return new CInt((int) value, t);
 			}
 		}
 	}
@@ -1880,7 +1899,7 @@ public class World {
 		public String docs() {
 			return "boolean {[world], gameRule, value} Sets the value of the gamerule for the specified world."
 					+ " If world is not given the value is set for all worlds. Returns true if successful. ---- "
-					+ " The gameRule can be " + StringUtils.Join(MCGameRule.getGameRules(), ", ", ", or ", " or ") + ".";
+					+ " The gamerules for MC 1.21.11+ are: " + StringUtils.Join(MCGameRule.getGameRules(), ", ", ", or ", " or ") + ".";
 		}
 
 		@Override
@@ -1890,31 +1909,46 @@ public class World {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCGameRule gameRule;
-			boolean success = false;
 			int offset = args.length - 2;
+			List<MCWorld> worlds = Static.getServer().getWorlds();
+			MCWorld world = worlds.get(0);
+			String ruleName = args[offset].val();
+			boolean inverted = false;
+			if(!world.isGameRule(ruleName)) {
+				String convertedName = MCGameRule.getByLegacyName(ruleName);
+				if(convertedName == null) {
+					throw new CREFormatException("The gamerule \"" + ruleName + "\" does not exist.", t);
+				}
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_21_11)) {
+					MSLog.GetLogger().w(Tags.DEPRECATION, "The Gamerule \"" + ruleName + "\" was changed to \""
+							+ convertedName + "\".", t);
+					inverted = MCGameRule.isBoolInvertedFromLegacy(convertedName);
+				}
+				ruleName = convertedName;
+			}
 			try {
-				gameRule = MCGameRule.valueOf(args[offset].val().toUpperCase());
+				boolean success = false;
+				Object value = world.getGameRuleValue(ruleName);
+				if(value instanceof Boolean) {
+					value = inverted != ArgumentValidation.getBooleanish(args[offset + 1], t);
+				} else {
+					value = ArgumentValidation.getInt32(args[offset + 1], t);
+				}
+				if(args.length == 2) {
+					for(MCWorld w : Static.getServer().getWorlds()) {
+						success = w.setGameRuleValue(ruleName, value);
+					}
+				} else {
+					world = Static.getServer().getWorld(args[0].val());
+					if(world == null) {
+						throw new CREInvalidWorldException("Unknown world: " + args[0].val(), t);
+					}
+					success = world.setGameRuleValue(ruleName, value);
+				}
+				return CBoolean.get(success);
 			} catch(IllegalArgumentException ex) {
-				throw new CREFormatException("The gamerule \"" + (args.length == 2 ? args[0].val() : args[1].val())
-						+ "\" does not exist.", t);
+				throw new CREFormatException(ex.getMessage(), t);
 			}
-			Object value = gameRule.convertValue(args[offset + 1], t);
-			if(value == null) {
-				return CBoolean.FALSE;
-			}
-			if(args.length == 2) {
-				for(MCWorld world : Static.getServer().getWorlds()) {
-					success = world.setGameRuleValue(gameRule, value);
-				}
-			} else {
-				MCWorld world = Static.getServer().getWorld(args[0].val());
-				if(world == null) {
-					throw new CREInvalidWorldException("Unknown world: " + args[0].val(), t);
-				}
-				success = world.setGameRuleValue(gameRule, value);
-			}
-			return CBoolean.get(success);
 		}
 	}
 

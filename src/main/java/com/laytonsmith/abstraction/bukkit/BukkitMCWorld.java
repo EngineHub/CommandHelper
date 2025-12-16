@@ -30,7 +30,6 @@ import com.laytonsmith.abstraction.enums.MCBiomeType;
 import com.laytonsmith.abstraction.enums.MCDifficulty;
 import com.laytonsmith.abstraction.enums.MCEffect;
 import com.laytonsmith.abstraction.enums.MCEntityType;
-import com.laytonsmith.abstraction.enums.MCGameRule;
 import com.laytonsmith.abstraction.enums.MCParticle;
 import com.laytonsmith.abstraction.enums.MCSound;
 import com.laytonsmith.abstraction.enums.MCSoundCategory;
@@ -58,7 +57,9 @@ import org.bukkit.FireworkEffect;
 import org.bukkit.GameRule;
 import org.bukkit.HeightMap;
 import org.bukkit.Location;
+import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
+import org.bukkit.Registry;
 import org.bukkit.SoundCategory;
 import org.bukkit.World;
 import org.bukkit.block.BlockFace;
@@ -190,8 +191,22 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	}
 
 	@Override
-	public Object getGameRuleValue(MCGameRule gameRule) {
-		GameRule gr = GameRule.getByName(gameRule.getRuleName());
+	public boolean isGameRule(String gameRule) {
+		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_21_11)) {
+			// Paper and Spigot differ in GameRule interfaces/implementation
+			// This forces Spigot to be as case-sensitive as Paper for new rule names
+			NamespacedKey key = NamespacedKey.fromString(gameRule);
+			if(key == null) {
+				return false;
+			}
+			return Registry.GAME_RULE.get(key) != null;
+		}
+		return w.isGameRule(gameRule);
+	}
+
+	@Override
+	public Object getGameRuleValue(String gameRule) {
+		GameRule gr = GameRule.getByName(gameRule);
 		if(gr == null) {
 			return null;
 		}
@@ -199,8 +214,8 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	}
 
 	@Override
-	public boolean setGameRuleValue(MCGameRule gameRule, Object value) {
-		GameRule gr = GameRule.getByName(gameRule.getRuleName());
+	public boolean setGameRuleValue(String gameRule, Object value) {
+		GameRule gr = GameRule.getByName(gameRule);
 		if(gr == null) {
 			return false;
 		}

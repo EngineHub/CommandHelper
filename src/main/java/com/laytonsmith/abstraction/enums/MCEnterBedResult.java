@@ -10,5 +10,6 @@ public enum MCEnterBedResult {
 	OK,
 	OTHER_PROBLEM,
 	TOO_FAR_AWAY,
-	OBSTRUCTED // Paper
+	OBSTRUCTED, // Paper
+	EXPLOSION, // Paper
 }

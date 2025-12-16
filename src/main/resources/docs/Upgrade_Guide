@@ -3,6 +3,12 @@ Below is a reverse chronological guide to help you with the most notable of thes
 Where possible, any value changes are converted for backwards compatibility with saved data, but any script that checks output for equality will need to be updated.
 ----
 
+== Minecraft 1.21.11 ==
+* GameRule names have been changed and are now snake_case. While old names are converted at runtime, this is not possible when using the array from get_gamerule(world)
+* Old GameRules starting with "disable" have been inverted. These are inverted at runtime when using the old names.
+* Old GameRules "doFireTick" and "allowFireTicksAwayFromPlayer" have been replaced with "fire_spread_radius_around_player".
+* Several GameRules have new integer limits. (these appear to reset the next time the world attempts to save, but may case exceptions in the future)
+
 == Minecraft 1.21.9 ==
 * CHAIN renamed to IRON_CHAIN
 

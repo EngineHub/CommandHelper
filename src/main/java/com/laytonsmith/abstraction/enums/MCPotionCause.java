@@ -15,6 +15,7 @@ public enum MCPotionCause {
 	FOOD,
 	ILLUSION,
 	MILK,
+	NAUTILUS,
 	PATROL_CAPTAIN, // unused as of 1.21
 	PLUGIN,
 	POTION_DRINK,

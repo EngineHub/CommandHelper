@@ -142,6 +142,7 @@ public abstract class MCEnchantment<Concrete> extends DynamicEnum<MCEnchantment.
 		BREACH(MCVersion.MC1_20_6),
 		DENSITY(MCVersion.MC1_20_6),
 		WIND_BURST(MCVersion.MC1_20_6),
+		LUNGE(MCVersion.MC1_21_11),
 		UNKNOWN(MCVersion.NEVER);
 
 		private final MCVersion since;

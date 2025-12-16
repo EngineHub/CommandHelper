@@ -10,7 +10,6 @@ import com.laytonsmith.abstraction.enums.MCBiomeType;
 import com.laytonsmith.abstraction.enums.MCDifficulty;
 import com.laytonsmith.abstraction.enums.MCEffect;
 import com.laytonsmith.abstraction.enums.MCEntityType;
-import com.laytonsmith.abstraction.enums.MCGameRule;
 import com.laytonsmith.abstraction.enums.MCParticle;
 import com.laytonsmith.abstraction.enums.MCSound;
 import com.laytonsmith.abstraction.enums.MCSoundCategory;
@@ -58,9 +57,11 @@ public interface MCWorld extends MCMetadatable {
 
 	String[] getGameRules();
 
-	Object getGameRuleValue(MCGameRule gameRule);
+	boolean isGameRule(String gameRule);
 
-	boolean setGameRuleValue(MCGameRule gameRule, Object value);
+	Object getGameRuleValue(String gameRule);
+
+	boolean setGameRuleValue(String gameRule, Object value);
 
 	MCWorldBorder getWorldBorder();
 

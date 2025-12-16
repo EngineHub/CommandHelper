@@ -430,6 +430,8 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	private static Class gameProfileClass = null;
 	private static Class opListEntryClass = null;
 	private static Class nameAndIdClass = null;
+	private static Class levelBasedPermissionSetClass = null;
+	private static Object opPermissionSet = null;
 	private static Map<String, Object> opMap = null;
 
 	private static void SetupTempOp() throws ClassNotFoundException {
@@ -445,38 +447,43 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 		String getPlayerList = "getPlayerList";
 		String map = "map";
 		String serverOpListEntry = ".ServerOpListEntry";
+		String owner = "OWNER";
 		if(!isPaper) {
 			ops = "o";
-			getPlayerList = "am";
+			getPlayerList = "aj";
 			map = "e";
 			serverOpListEntry = ".OpListEntry";
+			owner = "e";
 		}
 
 		MCVersion mcversion = Static.getServer().getMinecraftVersion();
-		if(mcversion.lt(MCVersion.MC1_21_9)) {
-			ops = isPaper ? "ops" : "p";
-			getPlayerList = isPaper ? "getPlayerList" : "ag";
-			map = "d";
-			serverOpListEntry = ".OpListEntry";
-			if(mcversion.lt(MCVersion.MC1_21_3)) {
-				getPlayerList = isPaper ? "getPlayerList" : "ah";
-				if(mcversion.lt(MCVersion.MC1_20_6)) {
-					getPlayerList = "ae";
-					if(mcversion.lt(MCVersion.MC1_20_4)) {
-						getPlayerList = "ac";
-						if(mcversion.lt(MCVersion.MC1_20_2)) {
-							ops = "o";
-							if(mcversion.equals(MCVersion.MC1_19_3)) {
-								getPlayerList = "ab";
-							} else if(mcversion.lt(MCVersion.MC1_19_1)) {
-								ops = "n";
-								if(mcversion.lt(MCVersion.MC1_18)) {
-									getPlayerList = "getPlayerList";
-									if(mcversion.lt(MCVersion.MC1_17)) {
-										String version = ((BukkitMCServer) Static.getServer()).getCraftBukkitPackage().split("\\.")[3];
-										nms = "net.minecraft.server." + version;
-										playersPackage = nms;
-										ops = "operators";
+		if(mcversion.lt(MCVersion.MC1_21_11)) {
+			getPlayerList = isPaper ? "getPlayerList" : "am";
+			if(mcversion.lt(MCVersion.MC1_21_9)) {
+				ops = isPaper ? "ops" : "p";
+				getPlayerList = isPaper ? "getPlayerList" : "ag";
+				map = "d";
+				serverOpListEntry = ".OpListEntry";
+				if(mcversion.lt(MCVersion.MC1_21_3)) {
+					getPlayerList = isPaper ? "getPlayerList" : "ah";
+					if(mcversion.lt(MCVersion.MC1_20_6)) {
+						getPlayerList = "ae";
+						if(mcversion.lt(MCVersion.MC1_20_4)) {
+							getPlayerList = "ac";
+							if(mcversion.lt(MCVersion.MC1_20_2)) {
+								ops = "o";
+								if(mcversion.equals(MCVersion.MC1_19_3)) {
+									getPlayerList = "ab";
+								} else if(mcversion.lt(MCVersion.MC1_19_1)) {
+									ops = "n";
+									if(mcversion.lt(MCVersion.MC1_18)) {
+										getPlayerList = "getPlayerList";
+										if(mcversion.lt(MCVersion.MC1_17)) {
+											String version = ((BukkitMCServer) Static.getServer()).getCraftBukkitPackage().split("\\.")[3];
+											nms = "net.minecraft.server." + version;
+											playersPackage = nms;
+											ops = "operators";
+										}
 									}
 								}
 							}
@@ -496,6 +503,10 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 		/*com.mojang.authlib.GameProfile*/ gameProfileClass = Class.forName("com.mojang.authlib.GameProfile");
 		if(mcversion.gte(MCVersion.MC1_21_9)) {
 			nameAndIdClass = Class.forName(playersPackage + ".NameAndId");
+			if(mcversion.gte(MCVersion.MC1_21_11)) {
+				levelBasedPermissionSetClass = Class.forName(nms + ".permissions.LevelBasedPermissionSet");
+				opPermissionSet = ReflectionUtils.get(levelBasedPermissionSetClass, null, owner);
+			}
 		}
 	}
 
@@ -509,9 +520,15 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 				Object nameAndId = ReflectionUtils.newInstance(nameAndIdClass,
 						new Class[]{gameProfileClass},
 						new Object[]{gameProfile});
-				opListEntry = ReflectionUtils.newInstance(opListEntryClass,
-						new Class[]{nameAndIdClass, int.class, boolean.class},
-						new Object[]{nameAndId, 4, false});
+				if(opPermissionSet != null) {
+					opListEntry = ReflectionUtils.newInstance(opListEntryClass,
+							new Class[]{nameAndIdClass, levelBasedPermissionSetClass, boolean.class},
+							new Object[]{nameAndId, opPermissionSet, false});
+				} else {
+					opListEntry = ReflectionUtils.newInstance(opListEntryClass,
+							new Class[]{nameAndIdClass, int.class, boolean.class},
+							new Object[]{nameAndId, 4, false});
+				}
 			} else {
 				opListEntry = ReflectionUtils.newInstance(opListEntryClass,
 						new Class[]{gameProfileClass, int.class, boolean.class},

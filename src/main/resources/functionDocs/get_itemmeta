@@ -441,4 +441,32 @@ Data components not yet supported in item meta:
 ! tooltip_display
 | 1.21.5
 | Partially supported with 'flags' field
+|-
+! damage_type
+| 1.21.11
+|
+|-
+! kinetic_weapon
+| 1.21.11
+|
+|-
+! minimum_attack_charge
+| 1.21.11
+|
+|-
+! piercing_weapon
+| 1.21.11
+|
+|-
+! swing_animation
+| 1.21.11
+|
+|-
+! use_effects
+| 1.21.11
+|
+|-
+! attack_range
+| 1.21.11
+|
 |}

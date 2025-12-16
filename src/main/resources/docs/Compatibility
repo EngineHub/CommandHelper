@@ -1,9 +1,9 @@
 This page lists compatibility changes of milestone versions of CommandHelper.
 In general, the compatibility requirements, if not listed, are the same as the previous milestone build.
-The minimum requirements for the current builds are:
+The requirements for the latest builds are:
 
-* Java 16
-* Spigot or Paper 1.16.5 - 1.21.10 (when used as a plugin)
+* Java 16+
+* Spigot or Paper 1.16.5 - 1.21.11 (when used as a plugin)
 
 CommandHelper may still be backwards and forward compatible to a large degree. Many of the advanced features that
 normally have hard dependencies on certain versions of external dependencies have been configured to "soft" fail.
@@ -17,6 +17,11 @@ Regardless, only the most current builds are officially supported.
 ! scope="col" width="8%" | Source
 ! scope="col" width="63%" | Milestone
 ! scope="col" width="18%" | Compatibility
+|-
+| 3.3.5 build-615
+|
+| Added support for Spigot 1.21.11
+| Spigot 1.16.5 - 1.21.11
 |-
 | 3.3.5 build-576
 | [https://github.com/EngineHub/CommandHelper/commit/261a1e83f526e34d41d09239fdd7e1b2e8e418f8 261a1e8]

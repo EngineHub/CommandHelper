@@ -113,7 +113,8 @@ public abstract class MCPotionEffectType<Concrete> extends DynamicEnum<MCPotionE
 		WIND_CHARGED(36, MCVersion.MC1_20_6),
 		WEAVING(37, MCVersion.MC1_20_6),
 		OOZING(38, MCVersion.MC1_20_6),
-		INFESTED(39, MCVersion.MC1_20_6);
+		INFESTED(39, MCVersion.MC1_20_6),
+		BREATH_OF_THE_NAUTILUS(40, MCVersion.MC1_21_11);
 
 		private final int id;
 		private final MCVersion since;
