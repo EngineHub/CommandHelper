@@ -348,7 +348,7 @@ public class ArrayHandling {
 			}
 			if(args[0].isInstanceOf(ArrayAccess.TYPE)) {
 				ArrayAccess aa = (ArrayAccess) args[0];
-				if(!aa.canBeAssociative()) {
+				if(args.length > 1 && !aa.canBeAssociative()) {
 					if(!(args[1].isInstanceOf(CInt.TYPE)) && !(args[1] instanceof CSlice)) {
 						throw new ConfigCompileException("Accessing an element as an associative array,"
 								+ " when it can only accept integers.", t);
