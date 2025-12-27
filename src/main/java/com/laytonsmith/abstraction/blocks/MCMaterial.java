@@ -1848,7 +1848,7 @@ public abstract class MCMaterial<Concrete> extends DynamicEnum<MCVanillaMaterial
 		OAK_SHELF(MCVersion.MC1_21_9),
 		PALE_OAK_SHELF(MCVersion.MC1_21_9),
 		SPRUCE_SHELF(MCVersion.MC1_21_9),
-		WARPED_SHELF,
+		WARPED_SHELF(MCVersion.MC1_21_9),
 
 		// 1.21.11 additions
 		CAMEL_HUSK_SPAWN_EGG(MCVersion.MC1_21_11),
