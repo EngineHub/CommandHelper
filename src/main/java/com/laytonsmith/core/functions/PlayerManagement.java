@@ -1,5 +1,8 @@
 package com.laytonsmith.core.functions;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonIOException;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.PureUtilities.Version;
@@ -63,6 +66,7 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREIOException;
 import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
 import com.laytonsmith.core.exceptions.CRE.CREInvalidWorldException;
@@ -6187,7 +6191,8 @@ public class PlayerManagement {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class};
+			return new Class[]{CRECastException.class, CREFormatException.class, CREIOException.class,
+					CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -6202,15 +6207,31 @@ public class PlayerManagement {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			if(p == null) {
+				throw new CREPlayerOfflineException("ptellraw() requires player context. Consider tellraw().", t);
+			}
 			String selector = "@s";
 			String json;
-			if(args.length == 1) {
-				json = new DataTransformations.json_encode().exec(t, environment, args[0]).val();
-			} else {
-				selector = ArgumentValidation.getString(args[0], t);
-				json = new DataTransformations.json_encode().exec(t, environment, args[1]).val();
+			try {
+				Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+				if(args.length == 1) {
+					json = gson.toJson(Construct.GetPOJO(args[0]));
+				} else {
+					selector = ArgumentValidation.getString(args[0], t);
+					json = gson.toJson(Construct.GetPOJO(args[1]));
+				}
+			} catch(ClassCastException ex) {
+				throw new CRECastException(ex.getMessage(), t);
+			} catch(JsonIOException ex) {
+				throw new CREIOException(ex.getMessage(), t);
 			}
-			new Meta.sudo().exec(t, environment, new CString("/minecraft:tellraw " + selector + " " + json, t));
+			try {
+				Static.getServer().runasConsole("minecraft:execute as " + p.getName() + " at @s"
+						+ " run minecraft:tellraw " + selector + " " + json);
+			} catch(Exception ex) {
+				throw new CREFormatException(ex.getMessage(), t, ex.getCause());
+			}
 			return CVoid.VOID;
 		}
 
@@ -6230,11 +6251,12 @@ public class PlayerManagement {
 					+ " this simply passes the input to the command. The raw is passed in as a normal"
 					+ " (possibly associative) array, and json encoded. No validation is done on the input,"
 					+ " so the command may fail. If not provided, the selector defaults to @s. Do not use double quotes"
-					+ " (smart string) when providing the selector. See {{function|tellraw}} if you don't need player"
-					+ " context. ---- The specification of the array may change from version to version of Minecraft,"
-					+ " but is documented here https://minecraft.gamepedia.com/Commands#Raw_JSON_text."
-					+ " This function is simply written in terms of json_encode and sudo, and is otherwise equivalent"
-					+ " to sudo('/minecraft:tellraw ' . @selector . ' ' . json_encode(@raw))";
+					+ " (smart string) when providing the selector. See {{function|tellraw}} if you don't need the @s"
+					+ " selector with player context. ---- The specification of the array may change from version to"
+					+ " version of Minecraft, but is documented here: https://minecraft.wiki/w/Text_component_format."
+					+ " This function is roughly equivalent to"
+					+ " runas('~console', '/execute as '.player().' at @s tellraw '.@selector.' '.json_encode(@raw))"
+					+ " but uses the Gson serializer instead.";
 		}
 
 		@Override
@@ -6251,8 +6273,7 @@ public class PlayerManagement {
 				new ExampleScript("Advanced usage with embedded selectors.",
 						"ptellraw('@a', array(\n"
 								+ "\tarray('selector': '@s'), // prints current player\n"
-								+ "\tarray('text': ': Hello '),\n"
-								+ "\tarray('selector': '@p') // prints receiving player\n"
+								+ "\tarray('text': ': Hello World!')\n"
 								+ "));",
 						"<<Would output a message from the current player to all players.>>"),
 				new ExampleScript("Complex object",
