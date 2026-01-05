@@ -483,26 +483,26 @@ public class Web {
 						if(arrayJar != null) {
 							getCookieJar(arrayJar, settings.getCookieJar(), t);
 						}
-						StaticLayer.GetConvertor().runOnMainThreadLater(
-								environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), new Runnable() {
-
-							@Override
-							public void run() {
-								executeFinish(success, array, t, environment);
-							}
-						});
+						if(settings.getBlocking()) {
+							executeFinish(success, array, t, environment);
+						} else {
+							StaticLayer.GetConvertor().runOnMainThreadLater(
+									environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager(),
+									() -> executeFinish(success, array, t, environment));
+						}
 					} catch (IOException e) {
 						final CREIOException ex = new CREIOException((e instanceof UnknownHostException ? "Unknown host: " : "")
 							+ e.getMessage(), t);
 						ex.setStackTraceElements(st);
 						if(error != null) {
-							StaticLayer.GetConvertor().runOnMainThreadLater(
-									environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), new Runnable() {
-								@Override
-								public void run() {
-									executeFinish(error, ObjectGenerator.GetGenerator().exception(ex, environment, t), t, environment);
-								}
-							});
+							final CArray cException = ObjectGenerator.GetGenerator().exception(ex, environment, t);
+							if(settings.getBlocking()) {
+								executeFinish(error, cException, t, environment);
+							} else {
+								StaticLayer.GetConvertor().runOnMainThreadLater(
+										environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager(),
+										() -> executeFinish(error, cException, t, environment));
+							}
 						} else {
 							ConfigRuntimeException.HandleUncaughtException(ex, environment);
 						}

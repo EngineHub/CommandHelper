@@ -99,8 +99,8 @@ yourself.
 | error
 | closure
 | null
-| If the request fails for whatever reason, this receives the exception generated. By default, the exception
-is logged using the default uncaught exception handler.
+| If the request fails for whatever reason, this receives the [[Exceptions#The exception object|exception object]]
+generated. By default, the exception is logged using the default uncaught exception handler.
 |-
 | timeout
 | int
@@ -171,7 +171,10 @@ decides on the encoding format to use.
 | blocking
 | boolean
 | false
-| If this is true, the method will block until it is complete, and it also won't use the internal thread pool.
+| If this is true, the function will block and execute the success or error callback on the current thread. Otherwise
+the request will be executed asynchronously and the success or error callback will be executed on the main thread on a
+Minecraft server or a new thread when in cmdline mode. Note that blocking on the main Minecraft thread may disrupt any
+online players.
 |-
 | log
 | boolean
