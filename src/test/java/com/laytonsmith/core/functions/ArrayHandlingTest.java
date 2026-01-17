@@ -425,6 +425,12 @@ public class ArrayHandlingTest extends AbstractIntegrationTest {
 	}
 
 	@Test
+	public void testArrayGetDefault() throws Exception {
+		assertEquals("default", SRun("array_get(associative_array(), 'key', 'default')", null));
+		assertEquals("default", SRun("array_get(array(), 1, 'default')", null));
+	}
+
+	@Test
 	public void testArrayIterate() throws Exception {
 		Run("@a = array(1, 2, 3); array_iterate(@a, closure(@k, @v){ msg(@v); });", fakePlayer);
 		verify(fakePlayer).sendMessage("1");

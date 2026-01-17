@@ -235,21 +235,23 @@ public class ArrayHandling {
 								//negative index, convert to positive index
 								iindex = ca.size() + iindex;
 								if(iindex < 0) {
+									if(defaultConstruct != null) {
+										return defaultConstruct;
+									}
 									throw new CREIndexOverflowException("The element at index \"" + index.val()
 											+ "\" does not exist", t);
 								}
+							} else if(defaultConstruct != null && iindex >= ca.size()) {
+								return defaultConstruct;
 							}
 							return ca.get(iindex, t);
 						} else {
+							if(defaultConstruct != null && !ca.containsKey(index.val())) {
+								return defaultConstruct;
+							}
 							return ca.get(index, t);
 						}
 					} catch(ConfigRuntimeException e) {
-						if(e instanceof CREThrowable
-								&& ((CREThrowable) e).isInstanceOf(CREIndexOverflowException.TYPE)) {
-							if(defaultConstruct != null) {
-								return defaultConstruct;
-							}
-						}
 						if(env.getEnv(GlobalEnv.class).GetFlag(GlobalEnv.FLAG_ARRAY_SPECIAL_GET) != null) {
 							//They are asking for an array that doesn't exist yet, so let's create it now.
 							CArray c;
