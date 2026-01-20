@@ -583,7 +583,20 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 
 	@Override
 	public Iterator<Mixed> iterator() {
-		throw new CREUnsupportedOperationException("Iterating a byte array is not supported.", getTarget());
+		return new Iterator<Mixed>() {
+
+			private int index = 0;
+
+			@Override
+			public boolean hasNext() {
+				return this.index <= maxValue;
+			}
+
+			@Override
+			public Mixed next() {
+				return new CInt(data.get(this.index++), Target.UNKNOWN);
+			}
+		};
 	}
 
 	@Override
@@ -694,6 +707,24 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 		protected SortedMap<String, Mixed> getAssociativeArray() {
 			//This is even more serious, because it shouldn't ever happen.
 			throw new Error("This error should not happen. Please report this bug to the developers");
+		}
+
+		@Override
+		public Iterator<Mixed> iterator() {
+			return new Iterator<Mixed>() {
+
+				private int index = 0;
+
+				@Override
+				public boolean hasNext() {
+					return this.index <= backing.length;
+				}
+
+				@Override
+				public Mixed next() {
+					return new CInt(backing[this.index++], Target.UNKNOWN);
+				}
+			};
 		}
 
 		@Override
