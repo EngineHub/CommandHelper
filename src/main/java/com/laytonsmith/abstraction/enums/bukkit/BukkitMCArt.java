@@ -62,17 +62,14 @@ public class BukkitMCArt extends MCArt<Art> {
 		}
 		for(Field f : Art.class.getFields()) {
 			try {
-				Art a = (Art) f.get(null);
-				if(!BUKKIT_MAP.containsKey(a)) {
+				if(f.get(null) instanceof Art a && !BUKKIT_MAP.containsKey(a)) {
 					MSLog.GetLogger().w(MSLog.Tags.GENERAL, "Could not find an MCArt for " + f.getName(),
 							Target.UNKNOWN);
 					MCArt wrapper = new BukkitMCArt(MCVanillaArt.UNKNOWN, a);
 					MAP.put(f.getName(), wrapper);
 					BUKKIT_MAP.put(a, wrapper);
 				}
-			} catch (IllegalAccessException | ClassCastException e) {
-				throw new RuntimeException(e);
-			}
+			} catch (IllegalAccessException ignore) {}
 		}
 	}
 }

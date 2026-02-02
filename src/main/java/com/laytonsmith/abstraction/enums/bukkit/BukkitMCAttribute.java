@@ -70,17 +70,14 @@ public class BukkitMCAttribute extends MCAttribute<Attribute> {
 		}
 		for(Field f : Attribute.class.getFields()) {
 			try {
-				Attribute a = (Attribute) f.get(null);
-				if(!BUKKIT_MAP.containsKey(a)) {
+				if(f.get(null) instanceof Attribute a && !BUKKIT_MAP.containsKey(a)) {
 					MSLog.GetLogger().w(MSLog.Tags.GENERAL, "Could not find an MCAttribute for " + f.getName(),
 							Target.UNKNOWN);
 					MCAttribute wrapper = new BukkitMCAttribute(MCVanillaAttribute.UNKNOWN, a);
 					MAP.put(f.getName(), wrapper);
 					BUKKIT_MAP.put(a, wrapper);
 				}
-			} catch (IllegalAccessException | ClassCastException e) {
-				throw new RuntimeException(e);
-			}
+			} catch (IllegalAccessException ignore) {}
 		}
 	}
 }

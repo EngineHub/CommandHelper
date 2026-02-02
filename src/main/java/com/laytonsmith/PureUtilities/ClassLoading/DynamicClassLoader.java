@@ -144,7 +144,7 @@ public class DynamicClassLoader extends ClassLoader {
 	private void checkDestroy() {
 		if(destroyed) {
 			throw new RuntimeException("Cannot access this instance of " + DynamicClassLoader.class.getSimpleName()
-					+ ", as it has already been destroyed.");
+					+ ", as it has already been destroyed. This may be caused by an earlier loading error.");
 		}
 	}
 
