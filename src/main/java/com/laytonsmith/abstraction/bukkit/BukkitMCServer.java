@@ -72,9 +72,15 @@ public class BukkitMCServer implements MCServer {
 		this.s = Bukkit.getServer();
 		craftBukkitPackage = this.s.getClass().getPackage().getName();
 		try {
-			Class.forName("com.destroystokyo.paper.PaperConfig");
+			Class.forName("io.papermc.paper.configuration.Configuration");
 			this.isPaper = true;
-		} catch (ClassNotFoundException e) {}
+		} catch (ClassNotFoundException e) {
+			// check for below 1.19
+			try {
+				Class.forName("com.destroystokyo.paper.PaperConfig");
+				this.isPaper = true;
+			} catch (ClassNotFoundException ignore) {}
+		}
 	}
 
 	public BukkitMCServer(Server server) {
