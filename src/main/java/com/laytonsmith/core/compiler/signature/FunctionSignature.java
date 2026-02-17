@@ -8,6 +8,7 @@ import java.util.Stack;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.InstanceofUtil;
+import com.laytonsmith.core.constructs.generics.GenericDeclaration;
 import com.laytonsmith.core.environments.Environment;
 
 /**
@@ -42,6 +43,13 @@ public class FunctionSignature {
 	 */
 	public FunctionSignature(ReturnType returnType) {
 		this(returnType, new ArrayList<>(), new ArrayList<>(), false);
+	}
+
+	/**
+	 * Stub for generics support — not yet implemented.
+	 */
+	public GenericDeclaration getGenericDeclaration() {
+		throw new UnsupportedOperationException("Not yet implemented");
 	}
 
 	protected void addParam(Param param) {

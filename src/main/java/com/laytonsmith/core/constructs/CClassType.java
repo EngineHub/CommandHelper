@@ -7,6 +7,9 @@ import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
+import com.laytonsmith.core.constructs.generics.GenericDeclaration;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.GenericTypeParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREUnsupportedOperationException;
@@ -34,7 +37,7 @@ import java.util.stream.Stream;
  */
 @typeof("ms.lang.ClassType")
 @SuppressWarnings("checkstyle:overloadmethodsdeclarationorder")
-public final class CClassType extends Construct implements com.laytonsmith.core.natives.interfaces.Iterable {
+public final class CClassType extends Construct implements com.laytonsmith.core.natives.interfaces.Iterable, SourceType {
 
 	public static final String PATH_SEPARATOR = FullyQualifiedClassName.PATH_SEPARATOR;
 
@@ -46,6 +49,10 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
 	public static final CClassType TYPE;
 	public static final CClassType AUTO;
+	/**
+	 * Sentinel value for recursive type definitions in generics.
+	 */
+	public static final CClassType RECURSIVE_DEFINITION;
 	/**
 	 * Used to differentiate between null and uninitialized.
 	 *
@@ -60,6 +67,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		} catch (ClassNotFoundException e) {
 			throw new Error(e);
 		}
+		RECURSIVE_DEFINITION = defineClass(FullyQualifiedClassName.forFullyQualifiedClass("ms.lang.RecursiveDefinition"));
 	}
 
 	/**
@@ -96,9 +104,9 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	private final SortedSet<FullyQualifiedClassName> types = new TreeSet<>();
 
 	/**
-	 * If this represents a vararg type, which is actually an array type.
+	 * If this represents a variadic type, which is actually an array type.
 	 */
-	private boolean isVararg = false;
+	private boolean isVariadicType = false;
 
 	/**
 	 * Returns the singular instance of CClassType that represents this type.
@@ -149,6 +157,24 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 			}
 		}
 		return ctype;
+	}
+
+	public static CClassType get(FullyQualifiedClassName type, Target t) throws ClassNotFoundException {
+		return get(type);
+	}
+
+	/**
+	 * Stub for generics support — returns the naked type, ignoring generic parameters for now.
+	 */
+	public static CClassType get(FullyQualifiedClassName type, Target t, GenericTypeParameters generics, Environment env) throws ClassNotFoundException {
+		return get(type);
+	}
+
+	/**
+	 * Stub for generics support — returns the naked type, ignoring generic parameters for now.
+	 */
+	public static CClassType get(Class<? extends Mixed> type, Target t, GenericTypeParameters generics, Environment env) {
+		return get(type);
 	}
 
 	/**
@@ -657,42 +683,107 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	}
 
 	/**
-	 * Returns a new type based on the parent type, which is a vararg variant.
-	 * @return A new vararg type.
+	 * Returns a new type based on the parent type, which is a variadic variant.
+	 * @return A new variadic type.
 	 */
-	public CClassType asVarargs() {
+	@Override
+	public SourceType asVariadicType(Environment env) {
 		CClassType newType;
 		try {
 			newType = new CClassType(fqcn, Target.UNKNOWN, isTypeUnion);
 		} catch(ClassNotFoundException ex) {
 			throw new Error(ex);
 		}
-		newType.isVararg = true;
+		newType.isVariadicType = true;
 		return newType;
 	}
 
 	/**
-	 * Returns true if this is a var arg type, for instance `string...`. This is actually an array type in most
-	 * cases.
+	 * Returns true if this is a variadic (varargs) type, for instance `string...`.
 	 * @return
 	 */
-	public boolean isVarargs() {
-		return this.isVararg;
+	@Override
+	public boolean isVariadicType() {
+		return this.isVariadicType;
 	}
 
 	/**
-	 * Returns the base type of this varargs type.
+	 * Returns the base type of this variadic type. Note that if the type has generics, those are included
+	 * in the returned result.
 	 * @return The base {@link CClassType} of this type (e.g. `string` for `string...`).
-	 * @throws IllegalStateException - If this is not a vararg type.
+	 * @throws IllegalStateException - If this is not a variadic type.
 	 */
 	public CClassType getVarargsBaseType() throws IllegalStateException {
-		if(!this.isVararg) {
+		if(!this.isVariadicType) {
 			throw new IllegalStateException("CClassType is not a vararg type.");
 		}
 		try {
 			return CClassType.get(this.fqcn);
 		} catch (ClassNotFoundException e) {
-			throw new Error(e); // Existence of this vararg type implies that its base type exists.
+			throw new Error(e);
 		}
+	}
+
+	/**
+	 * Stub for generics support — returns null until generics are fully implemented.
+	 */
+	public GenericDeclaration getGenericDeclaration() {
+		return null;
+	}
+
+	/**
+	 * Stub for generics support — returns null until generics are fully implemented.
+	 */
+	public GenericTypeParameters getTypeGenericParameters() {
+		return null;
+	}
+
+	/**
+	 * Stub for generics support — not yet implemented.
+	 */
+	public GenericParameters getGenericParameters() {
+		throw new UnsupportedOperationException("Not yet implemented");
+	}
+
+	/**
+	 * Returns a LeftHandSideType equivalent of this CClassType.
+	 */
+	public LeftHandSideType asLeftHandSideType() {
+		return LeftHandSideType.fromHardCodedType(this);
+	}
+
+	/**
+	 * Returns the naked (non-generic) version of this type. Stub — not yet implemented.
+	 */
+	public CClassType getNakedType(Environment env) {
+		throw new UnsupportedOperationException("Not yet implemented");
+	}
+
+	/**
+	 * Gets the naked CClassType for the given FQCN. Stub — not yet implemented.
+	 */
+	public static CClassType getNakedClassType(FullyQualifiedClassName type, Environment env) {
+		throw new UnsupportedOperationException("Not yet implemented");
+	}
+
+	/**
+	 * Checks whether this type extends the given superClass, with environment context. Stub — not yet implemented.
+	 */
+	public static boolean doesExtend(Environment env, CClassType checkClass, CClassType superClass) {
+		throw new UnsupportedOperationException("Not yet implemented");
+	}
+
+	/**
+	 * Checks whether this type extends the given superClass, with environment context. Stub — not yet implemented.
+	 */
+	public boolean doesExtend(Environment env, CClassType superClass) {
+		throw new UnsupportedOperationException("Not yet implemented");
+	}
+
+	/**
+	 * Stub for generics support — not yet implemented.
+	 */
+	public static CClassType getFromGenericTypeName(String genericTypeName, Target t) {
+		throw new UnsupportedOperationException("Not yet implemented");
 	}
 }
