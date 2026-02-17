@@ -7,6 +7,8 @@ import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.LogLevel;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREIndexOverflowException;
@@ -56,6 +58,27 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 
 	public CArray(Target t) {
 		this(t, 0, (Mixed[]) null);
+	}
+
+	/**
+	 * Constructor with generic parameters and environment. GenericParameters are ignored for now.
+	 */
+	public CArray(Target t, GenericParameters genericParameters, Environment env) {
+		this(t);
+	}
+
+	/**
+	 * Constructor with initial capacity, generic parameters and environment. GenericParameters are ignored for now.
+	 */
+	public CArray(Target t, int initialCapacity, GenericParameters genericParameters, Environment env) {
+		this(t, initialCapacity);
+	}
+
+	/**
+	 * Constructor with items, generic parameters and environment. GenericParameters are ignored for now.
+	 */
+	public CArray(Target t, GenericParameters genericParameters, Environment env, Mixed... items) {
+		this(t, items);
 	}
 
 	public CArray(Target t, Mixed... items) {

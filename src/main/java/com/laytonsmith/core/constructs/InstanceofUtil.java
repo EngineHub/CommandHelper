@@ -168,6 +168,19 @@ public class InstanceofUtil {
 		return castableClasses.contains(instanceofThis);
 	}
 
+	public static boolean isInstanceof(CClassType type, LeftHandSideType instanceofThis, Environment env) {
+		// TODO: Stopgap — asConcreteType won't error in practice now, but needs proper LeftHandSideType support later
+		CClassType target = instanceofThis.asConcreteType(Target.UNKNOWN);
+		return isInstanceof(type, target, env);
+	}
+
+	public static boolean isInstanceof(LeftHandSideType type, LeftHandSideType instanceofThis, Environment env) {
+		// TODO: Stopgap — asConcreteType won't error in practice now, but needs proper LeftHandSideType support later
+		CClassType concreteType = type.asConcreteType(Target.UNKNOWN);
+		CClassType concreteInstanceof = instanceofThis.asConcreteType(Target.UNKNOWN);
+		return isInstanceof(concreteType, concreteInstanceof, env);
+	}
+
 	private static FullyQualifiedClassName typeof(Class<? extends Mixed> c) {
 		typeof type = ClassDiscovery.GetClassAnnotation(c, typeof.class);
 		if(type == null) {

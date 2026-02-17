@@ -367,7 +367,7 @@ public class DataHandling {
 				if(varArgsAllowed == null) {
 					varArgsAllowed = false;
 				}
-				if(type.isVarargs() && !varArgsAllowed) {
+				if(type.isVariadicType() && !varArgsAllowed) {
 					throw new CRECastException("Cannot use varargs type in this context", t);
 				}
 				if(type.equals(CVoid.TYPE)) {

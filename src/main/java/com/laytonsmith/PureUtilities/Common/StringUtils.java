@@ -304,6 +304,30 @@ public final class StringUtils {
 	}
 
 	/**
+	 * Joins a list together, rendering each item with the custom renderer.
+	 * @param <T> The list type
+	 * @param list The list to concatenate
+	 * @param glue The glue to use
+	 * @param renderer The item renderer. If null, toString will be used by default on each item.
+	 * @return The concatenated string
+	 */
+	public static <T> String Join(List<T> list, String glue, Renderer<T> renderer) {
+		return Join(list, glue, null, null, null, renderer);
+	}
+
+	/**
+	 * Joins an array together, rendering each item with the custom renderer.
+	 * @param <T> The array type
+	 * @param list The array to concatenate
+	 * @param glue The glue to use
+	 * @param renderer The item renderer. If null, toString will be used by default on each item.
+	 * @return The concatenated string
+	 */
+	public static <T> String Join(T[] list, String glue, Renderer<T> renderer) {
+		return Join(list, glue, null, null, null, renderer);
+	}
+
+	/**
 	 * Joins a list together (using StringBuilder's {@link StringBuilder#append(Object)} method
 	 * to "toString" the Object) using the specified string for glue.
 	 * If lastGlue is null, it is the same as glue, but otherwise it is used to glue just the last two items together,

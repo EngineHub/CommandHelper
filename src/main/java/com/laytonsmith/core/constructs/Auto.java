@@ -8,4 +8,5 @@ package com.laytonsmith.core.constructs;
 public class Auto {
 
 	public static final CClassType TYPE = CClassType.AUTO;
+	public static final LeftHandSideType LHSTYPE = TYPE.asLeftHandSideType();
 }
