@@ -189,11 +189,11 @@ public class MSLog {
 				if(o instanceof Tag) {
 					tags.add((Tag) o);
 				} else {
-					System.err.println("Element tagged with LogTag, but is not an instance of Tag: "
+					StreamUtils.GetSystemErr().println("Element tagged with LogTag, but is not an instance of Tag: "
 						+ f.getDeclaringClass() + "." + f.getName());
 				}
 			} catch (IllegalArgumentException | IllegalAccessException ex) {
-				System.err.println("Could not properly configure logger tag: " + ex.getMessage());
+				StreamUtils.GetSystemErr().println("Could not properly configure logger tag: " + ex.getMessage());
 			}
 		}
 		for(Tag t : tags) {
@@ -220,7 +220,7 @@ public class MSLog {
 					+ ". Tags must be registered with the @LogTag annotation, otherwise they"
 					+ " are not configurable by the user!";
 			// Log this everywhere, since this is a problem for the developer.
-			System.err.println(message);
+			StreamUtils.GetSystemErr().println(message);
 			GetLogger().e(Tags.GENERAL, message, Target.UNKNOWN);
 		}
 		if(LOOKUP.containsKey(tag)) {

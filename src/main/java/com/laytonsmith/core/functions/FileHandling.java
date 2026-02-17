@@ -349,7 +349,7 @@ public class FileHandling {
 
 		@Override
 		public String docs() {
-			return "void {file, [encoding], callback} Asyncronously reads in a file. ---- "
+			return "void {file, [encoding], callback} Asynchronously reads in a file. ---- "
 					+ " This may be a remote file accessed with an SCP style path. (See the [[SCP|wiki article]]"
 					+ " about SCP credentials for more information.) If the file is not found, or otherwise can't be read in, an IOException is thrown."
 					+ " If the file specified is not within base-dir (as specified in the preferences file), a SecurityException is thrown."
@@ -454,7 +454,9 @@ public class FileHandling {
 					}
 				}
 				InputStream stream = new GZIPInputStream(new FileInputStream(location));
-				return CByteArray.wrap(StreamUtils.GetBytes(stream), t, env);
+				byte[] fileBytes = StreamUtils.GetBytes(stream);
+				stream.close();
+				return CByteArray.wrap(fileBytes, t, env);
 			} catch (IOException ex) {
 				Static.getLogger().log(Level.SEVERE, "Could not read in file while attempting to find " + location.getAbsolutePath()
 						+ "\nFile " + (location.exists() ? "exists" : "does not exist"));
@@ -515,7 +517,9 @@ public class FileHandling {
 					throw new CRESecurityException("You do not have permission to access the file '" + location + "'", t);
 				}
 				InputStream stream = new BufferedInputStream(new FileInputStream(location));
-				return CByteArray.wrap(StreamUtils.GetBytes(stream), t, env);
+				byte[] fileBytes = StreamUtils.GetBytes(stream);
+				stream.close();
+				return CByteArray.wrap(fileBytes, t, env);
 			} catch (IOException ex) {
 				Static.getLogger().log(Level.SEVERE, "Could not read in file while attempting to find " + location.getAbsolutePath()
 						+ "\nFile " + (location.exists() ? "exists" : "does not exist"));

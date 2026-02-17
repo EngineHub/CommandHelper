@@ -97,6 +97,18 @@ public class IVariable extends Construct implements Cloneable {
 		this.definedTarget = t;
 	}
 
+	/**
+	 * Private constructor for cloning that skips validation, since the original IVariable was already validated
+	 * at creation time.
+	 */
+	private IVariable(LeftHandSideType type, String name, Mixed value, Target t, boolean skipValidation) {
+		super(name, ConstructType.IVARIABLE, t);
+		this.type = type;
+		this.varValue = value;
+		this.name = name;
+		this.definedTarget = t;
+	}
+
 	@Override
 	public String val() {
 		return varValue.val();
@@ -132,6 +144,14 @@ public class IVariable extends Construct implements Cloneable {
 			clone.varValue = this.varValue.clone();
 		}
 		return clone;
+	}
+
+	/**
+	 * Create a clone of this {@link IVariable} using the same variable value reference.
+	 * @return The clone.
+	 */
+	public IVariable shallowClone() {
+		return new IVariable(type, name, varValue, definedTarget, true);
 	}
 
 	@Override

@@ -1,11 +1,16 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
+import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.entities.MCFrog;
+import org.bukkit.Keyed;
+import org.bukkit.NamespacedKey;
+import org.bukkit.Registry;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Frog;
-import org.bukkit.entity.Frog.Variant;
+
+import java.util.Locale;
 
 public class BukkitMCFrog extends BukkitMCAnimal implements MCFrog {
 
@@ -23,12 +28,17 @@ public class BukkitMCFrog extends BukkitMCAnimal implements MCFrog {
 
 	@Override
 	public MCFrogType getFrogType() {
-		return MCFrogType.valueOf(f.getVariant().name());
+		// changed from enum to interface in 1.21
+		NamespacedKey key = ReflectionUtils.invokeMethod(Keyed.class, f.getVariant(), "getKey");
+		return MCFrogType.valueOf(key.getKey().toUpperCase(Locale.ROOT));
 	}
 
 	@Override
 	public void setFrogType(MCFrogType type) {
-		f.setVariant(Variant.valueOf(type.name()));
+		Frog.Variant v = Registry.FROG_VARIANT.get(NamespacedKey.minecraft(type.name().toLowerCase(Locale.ROOT)));
+		if(v != null) {
+			f.setVariant(v);
+		}
 	}
 
 	@Override

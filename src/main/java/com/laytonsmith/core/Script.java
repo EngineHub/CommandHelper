@@ -78,7 +78,7 @@ public class Script {
 	private List<Token> left;
 	private List<Token> fullRight;
 	private List<Construct> cleft;
-	private List<ParseTree> cright;
+	private final List<ParseTree> cright = new ArrayList<>();
 	private boolean nolog = false;
 	//This should be null if we are running in non-alias mode
 	private Map<String, Variable> leftVars;
@@ -193,7 +193,6 @@ public class Script {
 
 		s.hasBeenCompiled = true;
 		s.compilerError = false;
-		s.cright = new ArrayList<>();
 		s.cright.add(tree);
 		s.label = label;
 		s.smartComment = comment;
@@ -416,6 +415,9 @@ public class Script {
 					}
 				}
 
+				// Reset stacktrace manager to current function (argument evaluation might have changed this).
+				stManager.setCurrentTarget(c.getTarget());
+
 				{
 					//It takes a moment to generate the toString of some things, so lets not do it
 					//if we actually aren't going to profile
@@ -550,7 +552,7 @@ public class Script {
 						+ TermColors.CYAN + brand + TermColors.RED + " version: " + TermColors.RESET + version + TermColors.RED + ";\n"
 						+ "Loaded extensions and versions:\n" + extensionData
 						+ "Here's the stacktrace:\n" + TermColors.RESET + Static.GetStacktraceString(e);
-				System.err.println(emsg);
+				StreamUtils.GetSystemErr().println(emsg);
 				throw new CancelCommandException(null, Target.UNKNOWN);
 			}
 		} finally {
@@ -582,82 +584,35 @@ public class Script {
 	}
 
 	public boolean match(String command) {
+		String[] cmds = command.split(" ");
+		return match(cmds);
+	}
+
+	public boolean match(String[] args) {
 		if(cleft == null) {
 			//The compilation error happened during the signature declaration, so
 			//we can't match it, nor can we even tell if it's what they intended for us to run.
 			return false;
 		}
 		boolean caseSensitive = Prefs.CaseSensitive();
-		String[] cmds = command.split(" ");
-		List<String> args = new ArrayList<>(Arrays.asList(cmds));
-		boolean isAMatch = true;
-		StringBuilder lastVar = new StringBuilder();
-		int lastJ = 0;
 		for(int j = 0; j < cleft.size(); j++) {
-			if(!isAMatch) {
-				break;
-			}
-			lastJ = j;
 			Mixed c = cleft.get(j);
-			if(args.size() <= j) {
-				if(!Construct.IsCType(c, ConstructType.VARIABLE) || !((Variable) c).isOptional()) {
-					isAMatch = false;
-				}
-				break;
+			if(args.length <= j) {
+				// If this optional, the rest are too.
+				return c instanceof Variable v && v.isOptional();
 			}
-			String arg = args.get(j);
-			if(!Construct.IsCType(c, ConstructType.VARIABLE)) {
+			if(!(c instanceof Variable)) {
+				String arg = args[j];
 				if(caseSensitive && !c.val().equals(arg) || !caseSensitive && !c.val().equalsIgnoreCase(arg)) {
-					isAMatch = false;
-					continue;
+					return false;
 				}
-			} else {
+			} else if(((Variable) c).isOptional()) {
 				//It's a variable. If it's optional, the rest of them are optional too, so as long as the size of
 				//args isn't greater than the size of cleft, it's a match
-				if(((Variable) c).isOptional()) {
-					if(args.size() <= cleft.size()) {
-						return true;
-					} else {
-						Mixed fin = cleft.get(cleft.size() - 1);
-						if(fin instanceof Variable) {
-							if(((Variable) fin).isFinal()) {
-								return true;
-							}
-						}
-						return false;
-					}
-				}
-			}
-			if(j == cleft.size() - 1) {
-				if(Construct.IsCType(cleft.get(j), ConstructType.VARIABLE)) {
-					Variable lv = (Variable) cleft.get(j);
-					if(lv.isFinal()) {
-						for(int a = j; a < args.size(); a++) {
-							if(lastVar.length() == 0) {
-								lastVar.append(args.get(a));
-							} else {
-								lastVar.append(" ").append(args.get(a));
-							}
-						}
-					}
-				}
+				return args.length <= cleft.size() || cleft.get(cleft.size() - 1) instanceof Variable v && v.isFinal();
 			}
 		}
-		boolean lastIsFinal = false;
-		if(cleft.get(cleft.size() - 1) instanceof Variable) {
-			Variable v = (Variable) cleft.get(cleft.size() - 1);
-			if(v.isFinal()) {
-				lastIsFinal = true;
-			}
-		}
-		if((cleft.get(lastJ) instanceof Variable && ((Variable) cleft.get(lastJ)).isOptional())) {
-			return true;
-		}
-
-		if(cleft.size() != cmds.length && !lastIsFinal) {
-			isAMatch = false;
-		}
-		return isAMatch;
+		return args.length == cleft.size() || cleft.get(cleft.size() - 1) instanceof Variable v && v.isFinal();
 	}
 
 	public List<Variable> getVariables(String command) {
@@ -930,7 +885,6 @@ public class Script {
 			}
 		}
 		right.add(temp);
-		cright = new ArrayList<>();
 		for(List<Token> l : right) {
 			StaticAnalysis analysis = new StaticAnalysis(true);
 			cright.add(MethodScriptCompiler.compile(new TokenStream(l, fileOptions), env, envs, analysis));

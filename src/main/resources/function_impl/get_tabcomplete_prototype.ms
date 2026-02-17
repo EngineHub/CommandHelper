@@ -22,8 +22,7 @@ return(closure(@alias, @sender, @args) {
 		// figure out which key to use, based on previous arguments.
 		@transform = null;
 		foreach(@keys in array_keys(@p)) {
-			@keys = split(@keys, '|');
-			foreach(@key in @keys) {
+			foreach(@key in split('|', @keys)) {
 				if(@key == "<" && @transform == null) {
 					@transform = @p[@key];
 				} else {
@@ -44,7 +43,8 @@ return(closure(@alias, @sender, @args) {
 					}
 					// Check if the args[current - prev] matches @key
 					if(@args[length(@args) - 1 - @prev] == @pKey) {
-						@transform = @p[@key];
+						@transform = @p[@keys];
+						break();
 					}
 				}
 			}

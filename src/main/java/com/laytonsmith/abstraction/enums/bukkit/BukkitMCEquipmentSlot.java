@@ -27,8 +27,6 @@ public class BukkitMCEquipmentSlot extends EnumConvertor<MCEquipmentSlot, Equipm
 		switch(concrete) {
 			case HAND:
 				return MCEquipmentSlot.WEAPON;
-			case OFF_HAND:
-				return MCEquipmentSlot.OFF_HAND;
 			case FEET:
 				return MCEquipmentSlot.BOOTS;
 			case LEGS:
@@ -46,8 +44,6 @@ public class BukkitMCEquipmentSlot extends EnumConvertor<MCEquipmentSlot, Equipm
 		switch(abstracted) {
 			case WEAPON:
 				return EquipmentSlot.HAND;
-			case OFF_HAND:
-				return EquipmentSlot.OFF_HAND;
 			case BOOTS:
 				return EquipmentSlot.FEET;
 			case LEGGINGS:

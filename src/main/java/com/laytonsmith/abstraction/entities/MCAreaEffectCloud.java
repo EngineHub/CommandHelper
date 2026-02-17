@@ -6,12 +6,15 @@ import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCPotionData;
 import com.laytonsmith.abstraction.MCProjectileSource;
 import com.laytonsmith.abstraction.enums.MCParticle;
+import com.laytonsmith.abstraction.enums.MCPotionType;
 
 import java.util.List;
 
 public interface MCAreaEffectCloud extends MCEntity {
 
 	MCPotionData getBasePotionData();
+
+	MCPotionType getBasePotionType();
 
 	MCColor getColor();
 
@@ -40,6 +43,8 @@ public interface MCAreaEffectCloud extends MCEntity {
 	void clearCustomEffects();
 
 	void setBasePotionData(MCPotionData data);
+
+	void setBasePotionType(MCPotionType type);
 
 	void setColor(MCColor color);
 

@@ -4,12 +4,15 @@ import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
+import com.laytonsmith.abstraction.entities.MCTransformation;
 import com.laytonsmith.abstraction.enums.MCPotionType;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
 import com.laytonsmith.annotations.convert;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 
 import java.util.Set;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 /**
  * Unfortunately some methods just can't be overridden.
@@ -38,7 +41,7 @@ public final class StaticLayer {
 				try {
 					if(convertor != null) {
 						//Uh... There are more than one implementations for this server type
-						System.out.println("More than one Convertor for this server type was detected!");
+						StreamUtils.GetSystemErr().println("More than one Convertor for this server type was detected!");
 					}
 					convertor = (Convertor) c.newInstance();
 					//At this point we are all set
@@ -88,20 +91,12 @@ public final class StaticLayer {
 		return convertor.GetServer();
 	}
 
-	public static MCEnchantment GetEnchantmentByName(String name) {
-		return convertor.GetEnchantmentByName(name);
-	}
-
 	public static MCMaterial[] GetMaterialValues() {
 		return convertor.GetMaterialValues();
 	}
 
 	public static MCMaterial GetMaterial(String name) {
 		return convertor.GetMaterial(name);
-	}
-
-	public static MCEnchantment[] GetEnchantmentValues() {
-		return convertor.GetEnchantmentValues();
 	}
 
 	public static void Startup(CommandHelperPlugin chp) {
@@ -151,12 +146,20 @@ public final class StaticLayer {
 		return convertor.GetNewRecipe(key, type, result);
 	}
 
+	public static MCTransformation GetTransformation(Quaternionf leftRotation, Quaternionf rightRotation, Vector3f scale, Vector3f translation) {
+		return convertor.GetTransformation(leftRotation, rightRotation, scale, translation);
+	}
+
 	public static String GetPluginName() {
 		return convertor.GetPluginName();
 	}
 
 	public static MCPlugin GetPlugin() {
 		return convertor.GetPlugin();
+	}
+
+	public static boolean IsMainThread() {
+		return convertor.IsMainThread();
 	}
 
 	public static synchronized Convertor GetConvertor() {

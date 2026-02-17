@@ -30,11 +30,11 @@ import com.laytonsmith.abstraction.enums.MCBiomeType;
 import com.laytonsmith.abstraction.enums.MCDifficulty;
 import com.laytonsmith.abstraction.enums.MCEffect;
 import com.laytonsmith.abstraction.enums.MCEntityType;
-import com.laytonsmith.abstraction.enums.MCGameRule;
 import com.laytonsmith.abstraction.enums.MCParticle;
 import com.laytonsmith.abstraction.enums.MCSound;
 import com.laytonsmith.abstraction.enums.MCSoundCategory;
 import com.laytonsmith.abstraction.enums.MCTreeType;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.enums.MCWorldEnvironment;
 import com.laytonsmith.abstraction.enums.MCWorldType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCBiomeType;
@@ -50,15 +50,18 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.exceptions.CRE.CREPluginInternalException;
 import org.bukkit.Chunk;
 import org.bukkit.Effect;
 import org.bukkit.FireworkEffect;
+import org.bukkit.GameRule;
+import org.bukkit.HeightMap;
 import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
+import org.bukkit.Registry;
 import org.bukkit.SoundCategory;
 import org.bukkit.World;
-import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
@@ -66,11 +69,17 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.generator.ChunkGenerator;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.util.Consumer;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 
@@ -147,6 +156,11 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	}
 
 	@Override
+	public UUID getUniqueID() {
+		return w.getUID();
+	}
+
+	@Override
 	public long getSeed() {
 		return w.getSeed();
 	}
@@ -177,13 +191,35 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	}
 
 	@Override
-	public String getGameRuleValue(String gameRule) {
-		return w.getGameRuleValue(gameRule);
+	public boolean isGameRule(String gameRule) {
+		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_21_11)) {
+			// Paper and Spigot differ in GameRule interfaces/implementation
+			// This forces Spigot to be as case-sensitive as Paper for new rule names
+			NamespacedKey key = NamespacedKey.fromString(gameRule);
+			if(key == null) {
+				return false;
+			}
+			return Registry.GAME_RULE.get(key) != null;
+		}
+		return w.isGameRule(gameRule);
 	}
 
 	@Override
-	public boolean setGameRuleValue(MCGameRule gameRule, String value) {
-		return w.setGameRuleValue(gameRule.getGameRule(), value);
+	public Object getGameRuleValue(String gameRule) {
+		GameRule gr = GameRule.getByName(gameRule);
+		if(gr == null) {
+			return null;
+		}
+		return w.getGameRuleValue(gr);
+	}
+
+	@Override
+	public boolean setGameRuleValue(String gameRule, Object value) {
+		GameRule gr = GameRule.getByName(gameRule);
+		if(gr == null) {
+			return false;
+		}
+		return w.setGameRule(gr, value);
 	}
 
 	@Override
@@ -198,11 +234,11 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 
 	@Override
 	public String getGenerator() {
-		try {
-			return w.getGenerator().toString();
-		} catch (NullPointerException npe) {
+		ChunkGenerator generator = w.getGenerator();
+		if(generator == null) {
 			return "default";
 		}
+		return generator.toString();
 	}
 
 	@Override
@@ -218,6 +254,11 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	@Override
 	public int getMaxHeight() {
 		return getHandle().getMaxHeight();
+	}
+
+	@Override
+	public int getMinHeight() {
+		return w.getMinHeight();
 	}
 
 	@Override
@@ -238,31 +279,38 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	}
 
 	@Override
-	public MCEntity spawn(MCLocation l, MCEntityType entType, final CClosure closure) {
-		EntityType type = (EntityType) entType.getConcrete();
-		Consumer<? extends Entity> consumer = (Consumer<Entity>) entity -> {
-			MCEntity temp = BukkitConvertor.BukkitGetCorrectEntity(entity);
-			Static.InjectEntity(temp);
-			try {
-				closure.executeCallable(null, Target.UNKNOWN, new CString(entity.getUniqueId().toString(), Target.UNKNOWN));
-			} finally {
-				Static.UninjectEntity(temp);
-			}
-		};
-		Entity ent = this.spawn((Location) l.getHandle(), type.getEntityClass(), consumer);
-		return BukkitConvertor.BukkitGetCorrectEntity(ent);
-	}
-
-	@SuppressWarnings("unchecked")
-	private <T extends Entity> Entity spawn(Location location, Class<T> clazz, Consumer<? extends Entity> consumer) {
-		return w.spawn(location, clazz, (Consumer<T>) consumer);
-	}
-
-	@Override
 	public MCEntity spawn(MCLocation l, MCEntityType.MCVanillaEntityType entityType) {
 		return BukkitConvertor.BukkitGetCorrectEntity(w.spawnEntity(
 				((BukkitMCLocation) l).asLocation(),
 				(EntityType) MCEntityType.valueOfVanillaType(entityType).getConcrete()));
+	}
+
+	@Override
+	public MCEntity spawn(MCLocation l, MCEntityType entType, final CClosure closure) {
+		Location location = (Location) l.getHandle();
+		Class<? extends Entity> entityClass = ((EntityType) entType.getConcrete()).getEntityClass();
+		Entity entity;
+		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_2)) {
+			entity = w.spawn(location, entityClass, e -> beforeSpawn(e, closure));
+		} else {
+			try {
+				Method m = w.getClass().getMethod("spawn", Location.class, Class.class, Consumer.class);
+				entity = (Entity) m.invoke(w, location, entityClass, (Consumer<Entity>) e -> beforeSpawn(e, closure));
+			} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+				throw new CREPluginInternalException(e.getMessage(), Target.UNKNOWN, e);
+			}
+		}
+		return BukkitConvertor.BukkitGetCorrectEntity(entity);
+	}
+
+	private void beforeSpawn(Entity entity, CClosure closure) {
+		MCEntity temp = BukkitConvertor.BukkitGetCorrectEntity(entity);
+		Static.InjectEntity(temp);
+		try {
+			closure.executeCallable(new CString(entity.getUniqueId().toString(), Target.UNKNOWN));
+		} finally {
+			Static.UninjectEntity(temp);
+		}
 	}
 
 	@Override
@@ -278,71 +326,88 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	@Override
 	public void playEffect(MCLocation l, MCEffect mcEffect, Object data, int radius) {
 		Effect effect = Effect.valueOf(mcEffect.name());
-		switch(effect) {
+		switch(mcEffect) {
 			case RECORD_PLAY:
 			case STEP_SOUND:
 				w.playEffect((Location) l.getHandle(), effect, ((MCMaterial) data).getHandle(), radius);
 				return;
 			case SMOKE:
+			case SHOOT_WHITE_SMOKE:
 				w.playEffect((Location) l.getHandle(), effect, BlockFace.valueOf(((MCBlockFace) data).name()), radius);
+				return;
+			case PARTICLES_AND_SOUND_BRUSH_BLOCK_COMPLETE:
+				w.playEffect((Location) l.getHandle(), effect, ((MCBlockData) data).getHandle(), radius);
 				return;
 		}
 		w.playEffect((Location) l.getHandle(), effect, data, radius);
 	}
 
 	@Override
-	public void spawnParticle(MCLocation l, MCParticle pa, int count, double offsetX, double offsetY, double offsetZ, double velocity, Object data) {
+	public void spawnParticle(MCLocation l, MCParticle pa, int count, double offsetX, double offsetY, double offsetZ, double velocity, boolean force, Object data) {
 		w.spawnParticle((Particle) pa.getConcrete(), (Location) l.getHandle(), count, offsetX, offsetY, offsetZ,
-				velocity, ((BukkitMCParticle) pa).getParticleData(l, data));
+				velocity, ((BukkitMCParticle) pa).getParticleData(l, data), force);
 	}
 
 	@Override
-	public void playSound(MCLocation l, MCSound sound, float volume, float pitch) {
-		w.playSound(((BukkitMCLocation) l).asLocation(),
-				((BukkitMCSound) sound).getConcrete(), volume, pitch);
-	}
-
-	@Override
-	public void playSound(MCLocation l, String sound, float volume, float pitch) {
-		w.playSound((Location) l.getHandle(), sound, volume, pitch);
-	}
-
-	@Override
-	public void playSound(MCLocation l, MCSound sound, MCSoundCategory category, float volume, float pitch) {
-		if(category == null) {
-			w.playSound((Location) l.getHandle(), ((BukkitMCSound) sound).getConcrete(),
-					SoundCategory.MASTER, volume, pitch);
+	public void playSound(MCLocation l, MCSound sound, MCSoundCategory category, float volume, float pitch, Long seed) {
+		SoundCategory cat = BukkitMCSoundCategory.getConvertor().getConcreteEnum(category);
+		if(cat == null) {
+			cat = SoundCategory.MASTER;
+		}
+		if(seed == null) {
+			w.playSound((Location) l.getHandle(), ((BukkitMCSound) sound).getConcrete(), cat, volume, pitch);
 		} else {
-			w.playSound((Location) l.getHandle(), ((BukkitMCSound) sound).getConcrete(),
-					BukkitMCSoundCategory.getConvertor().getConcreteEnum(category), volume, pitch);
+			w.playSound((Location) l.getHandle(), ((BukkitMCSound) sound).getConcrete(), cat, volume, pitch, seed);
 		}
 	}
 
 	@Override
-	public void playSound(MCEntity ent, MCSound sound, MCSoundCategory category, float volume, float pitch) {
-		if(category == null) {
-			w.playSound((Entity) ent.getHandle(), ((BukkitMCSound) sound).getConcrete(),
-					SoundCategory.MASTER, volume, pitch);
+	public void playSound(MCEntity ent, MCSound sound, MCSoundCategory category, float volume, float pitch, Long seed) {
+		SoundCategory cat = BukkitMCSoundCategory.getConvertor().getConcreteEnum(category);
+		if(cat == null) {
+			cat = SoundCategory.MASTER;
+		}
+		if(seed == null) {
+			w.playSound((Entity) ent.getHandle(), ((BukkitMCSound) sound).getConcrete(), cat, volume, pitch);
 		} else {
-			w.playSound((Entity) ent.getHandle(), ((BukkitMCSound) sound).getConcrete(),
-					BukkitMCSoundCategory.getConvertor().getConcreteEnum(category), volume, pitch);
+			w.playSound((Entity) ent.getHandle(), ((BukkitMCSound) sound).getConcrete(), cat, volume, pitch, seed);
 		}
 	}
 
 	@Override
-	public void playSound(MCLocation l, String sound, MCSoundCategory category, float volume, float pitch) {
-		w.playSound((Location) l.getHandle(), sound,
-				BukkitMCSoundCategory.getConvertor().getConcreteEnum(category), volume, pitch);
+	public void playSound(MCEntity ent, String sound, MCSoundCategory category, float volume, float pitch, Long seed) {
+		SoundCategory cat = BukkitMCSoundCategory.getConvertor().getConcreteEnum(category);
+		if(cat == null) {
+			cat = SoundCategory.MASTER;
+		}
+		if(seed == null) {
+			w.playSound((Entity) ent.getHandle(), sound, cat, volume, pitch);
+		} else {
+			w.playSound((Entity) ent.getHandle(), sound, cat, volume, pitch, seed);
+		}
+	}
+
+	@Override
+	public void playSound(MCLocation l, String sound, MCSoundCategory category, float volume, float pitch, Long seed) {
+		SoundCategory cat = BukkitMCSoundCategory.getConvertor().getConcreteEnum(category);
+		if(cat == null) {
+			cat = SoundCategory.MASTER;
+		}
+		if(seed == null) {
+			w.playSound((Location) l.getHandle(), sound, cat, volume, pitch);
+		} else {
+			w.playSound((Location) l.getHandle(), sound, cat, volume, pitch, seed);
+		}
 	}
 
 	@Override
 	public MCItem dropItemNaturally(MCLocation l, MCItemStack is) {
-		return new BukkitMCItem(w.dropItemNaturally(((BukkitMCLocation) l).l, ((BukkitMCItemStack) is).is));
+		return new BukkitMCItem(w.dropItemNaturally(((BukkitMCLocation) l).l, (ItemStack) is.getHandle()));
 	}
 
 	@Override
 	public MCItem dropItem(MCLocation l, MCItemStack is) {
-		return new BukkitMCItem(w.dropItem(((BukkitMCLocation) l).l, ((BukkitMCItemStack) is).is));
+		return new BukkitMCItem(w.dropItem(((BukkitMCLocation) l).l, (ItemStack) is.getHandle()));
 	}
 
 	@Override
@@ -384,6 +449,27 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	}
 
 	@Override
+	public boolean isChunkForceLoaded(int x, int z) {
+		return w.isChunkForceLoaded(x, z);
+	}
+
+	@Override
+	public void setChunkForceLoaded(int x, int z, boolean forced) {
+		w.setChunkForceLoaded(x, z, forced);
+	}
+
+	@Override
+	public MCChunk[] getForceLoadedChunks() {
+		Collection<Chunk> chunks = w.getForceLoadedChunks();
+		MCChunk[] mcChunks = new MCChunk[chunks.size()];
+		int i = 0;
+		for(Chunk c : chunks) {
+			mcChunks[i++] = new BukkitMCChunk(c);
+		}
+		return mcChunks;
+	}
+
+	@Override
 	public void setTime(long time) {
 		w.setTime(time);
 	}
@@ -420,13 +506,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 
 	@Override
 	public MCBlock getHighestBlockAt(int x, int z) {
-		//Workaround for getHighestBlockAt, since it doesn't like transparent
-		//blocks.
-		Block b = w.getBlockAt(x, w.getMaxHeight() - 1, z);
-		while(b.getType() == Material.AIR && b.getY() > 0) {
-			b = b.getRelative(BlockFace.DOWN);
-		}
-		return new BukkitMCBlock(b);
+		return new BukkitMCBlock(w.getHighestBlockAt(x, z, HeightMap.WORLD_SURFACE));
 	}
 
 	@Override
@@ -442,6 +522,13 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	@Override
 	public void setSpawnLocation(int x, int y, int z) {
 		w.setSpawnLocation(x, y, z);
+	}
+
+	@Override
+	public void setSpawnLocation(MCLocation location) {
+		Location loc = (Location) location.getHandle();
+		loc.setYaw(Location.normalizeYaw(loc.getYaw()));
+		w.setSpawnLocation(loc);
 	}
 
 	@Override
@@ -472,7 +559,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 
 	@Override
 	public MCFirework launchFirework(MCLocation l, int strength, List<MCFireworkEffect> effects) {
-		Firework firework = (Firework) w.spawnEntity(((BukkitMCLocation) l).asLocation(), EntityType.FIREWORK);
+		Firework firework = w.spawn(((BukkitMCLocation) l).asLocation(), Firework.class);
 		FireworkMeta meta = firework.getFireworkMeta();
 		meta.setPower(Math.max(strength, 0));
 		for(MCFireworkEffect effect : effects) {
@@ -557,6 +644,10 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 
 	@Override
 	public void setKeepSpawnInMemory(boolean keepLoaded) {
-		w.setKeepSpawnInMemory(keepLoaded);
+		try {
+			w.setKeepSpawnInMemory(keepLoaded);
+		} catch(NoSuchMethodError ex) {
+			// some version after 1.21.9
+		}
 	}
 }

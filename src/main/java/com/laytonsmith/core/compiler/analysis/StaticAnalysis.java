@@ -19,6 +19,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.Compiler.__autoconcat__;
+import com.laytonsmith.core.functions.Compiler.__type_ref__;
 import com.laytonsmith.core.functions.DataHandling;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.IncludeCache;
@@ -96,6 +97,7 @@ public class StaticAnalysis {
 	 * @param isMainAnalysis - If {@code true}, full analyses will be performed with auto includes if present. If
 	 * {@code false}, only the scope graph will be generated and a full analysis is expected to be done externally.
 	 */
+	@SuppressWarnings("LeakingThisInConstructor")
 	public StaticAnalysis(Scope parentScope, boolean isMainAnalysis) {
 		this.startScope = (parentScope != null ? parentScope : new Scope());
 		this.scopes = new HashSet<>();
@@ -104,6 +106,7 @@ public class StaticAnalysis {
 		this.staticAnalyses.add(this);
 	}
 
+	@SuppressWarnings("LeakingThisInConstructor")
 	private StaticAnalysis(Scope startScope, Scope endScope, Set<Scope> scopes,
 			boolean isMainAnalysis, Scope globalScope, ParseTree astRootNode,
 			Set<StaticAnalysis> staticAnalyses, Map<ParseTree, Scope> astScopeMap) {
@@ -132,7 +135,7 @@ public class StaticAnalysis {
 			Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> exceptions) {
 
 		// Don't perform static analysis if it's disabled.
-		if(!enabled() && !isLocalEnabled()) {
+		if(localDisabled || (!enabled() && !isLocalEnabled())) {
 			return;
 		}
 
@@ -235,6 +238,7 @@ public class StaticAnalysis {
 		// Generate compile error for duplicate ivariable declarations.
 		for(Scope scope : this.scopes) {
 			for(Declaration decl : scope.getAllDeclarationsLocal(Namespace.IVARIABLE)) {
+				assert decl != null;
 				if(decl instanceof ParamDeclaration) {
 					continue; // Allow parameter declarations to shadow previous declarations.
 				}
@@ -377,6 +381,7 @@ public class StaticAnalysis {
 	public LeftHandSideType typecheck(ParseTree ast, LeftHandSideType inferredReturnType,
 			Environment env, Set<ConfigCompileException> exceptions) {
 		Mixed node = ast.getData();
+		assert node != null;
 		if(node instanceof CFunction cFunc) {
 			if(cFunc.hasFunction()) {
 				Function func = cFunc.getCachedFunction();
@@ -384,6 +389,13 @@ public class StaticAnalysis {
 					return func.typecheck(this, ast, inferredReturnType, env, exceptions);
 				}
 			} else if(cFunc.hasProcedure()) { // The function is a procedure reference.
+
+				// Type check procedure arguments.
+				for(ParseTree child : ast.getChildren()) {
+					this.typecheck(child, inferredReturnType, env, exceptions);
+				}
+
+				// Return procedure return type.
 				String procName = cFunc.val();
 				Scope scope = this.getTermScope(ast);
 				if(scope != null) {
@@ -596,8 +608,9 @@ public class StaticAnalysis {
 	 * @return The {@link IVariable} if it was one, or {@code null} if it wasn't.
 	 */
 	public static IVariable requireIVariable(Mixed node, Target t, Set<ConfigCompileException> exceptions) {
-		if(node instanceof IVariable) {
-			return (IVariable) node;
+		assert node != null;
+		if(node instanceof IVariable iVariable) {
+			return iVariable;
 		} else if(node instanceof Variable) {
 			exceptions.add(new ConfigCompileException("Expected ivariable, but received variable instead.", t));
 			return null;
@@ -620,30 +633,34 @@ public class StaticAnalysis {
 	}
 
 	/**
-	 * Checks whether the given AST node is an {@link CClassType}, adding a compile error to the passed exceptions set
+	 * Checks whether the given AST node is a {@link CClassType}, adding a compile error to the passed exceptions set
 	 * if it isn't.
 	 *
 	 * @param node - The AST node to check.
-	 * @param t
 	 * @param exceptions
 	 * @return The {@link CClasType} if it was one, or {@code null} if it wasn't.
 	 */
 	@SuppressWarnings("null")
-	public static LeftHandSideType requireClassType(Mixed node, Target t, Set<ConfigCompileException> exceptions) {
-		if(node instanceof CClassType cClassType) {
+	public static LeftHandSideType requireClassType(ParseTree node, Target t, Set<ConfigCompileException> exceptions) {
+		Mixed data = node.getData();
+		if(data instanceof CClassType cClassType) {
 			return cClassType.asLeftHandSideType();
-		} else if(node instanceof LeftHandSideType lhst) {
+		} else if(data instanceof LeftHandSideType lhst) {
 			return lhst;
+		} else if(data instanceof CFunction && data.val().equals(__type_ref__.NAME)) {
+			exceptions.add(new ConfigCompileException(
+					"\"" + node.getChildAt(0).getData().val() + "\" cannot be resolved to a type.", node.getTarget()));
+			return null;
 		}
 
 		// The node can be anything. If it has a type, get that. If it doesn't, use the node's class name.
 		// TODO - Remove this try catch when syntax errors are caught by the parser and terminate compilation there.
 		try {
 			exceptions.add(new ConfigCompileException(
-					"Expected classtype, but received type " + node.getName() + " instead.", t));
+					"Expected classtype, but received type " + data.getName() + " instead.", node.getTarget()));
 		} catch(NullPointerException e) {
-			exceptions.add(new ConfigCompileException(
-					"Expected classtype, but received " + node.getClass().getSimpleName() + " instead.", t));
+			exceptions.add(new ConfigCompileException("Expected classtype, but received "
+					+ data.getClass().getSimpleName() + " instead.", node.getTarget()));
 		}
 		return null;
 	}
@@ -726,7 +743,7 @@ public class StaticAnalysis {
 			}
 
 			// Resolve and compile the include.
-			StaticAnalysis includeAnalysis = null;
+			StaticAnalysis includeAnalysis;
 			File file = Static.GetFileFromArgument(includeRef.getIdentifier(), env, includeRef.getTarget(), null);
 			try {
 				file = file.getCanonicalFile();
@@ -1077,6 +1094,18 @@ public class StaticAnalysis {
 		this.localEnable = enabled;
 	}
 
+	private boolean localDisabled = false;
+
+	/**
+	 * Sets whether or not to disable static analysis. This should only be used in niche situations, such
+	 * as running in interpreter mode, or other places where static analysis is more expensive than it's
+	 * worth, and the code being submitted simply won't be reused anyways.
+	 * @param disabled
+	 */
+	public void setLocalDisabled(boolean disabled) {
+		this.localDisabled = disabled;
+	}
+
 	/**
 	 * Returns true if this specific instance of the SA object is enabled (or it's globally enabled). This is useful in
 	 * unit tests to override the global value.
@@ -1087,7 +1116,7 @@ public class StaticAnalysis {
 	 */
 	@Deprecated
 	public boolean isLocalEnabled() {
-		return this.localEnable || enabled();
+		return !localDisabled && (this.localEnable || enabled());
 	}
 
 	/**

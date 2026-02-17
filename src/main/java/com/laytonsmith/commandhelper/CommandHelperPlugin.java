@@ -42,11 +42,16 @@ import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.abstraction.enums.MCVersion;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCArt;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCAttribute;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCBiomeType;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEnchantment;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCLegacyMaterial;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCParticle;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPatternShape;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPotionEffectType;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPotionType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCProfession;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSound;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCTrimMaterial;
@@ -108,7 +113,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 	private static int hostnameThreadPoolID = 0;
 	private boolean firstLoad = true;
 	private long interpreterUnlockedUntil = 0;
-	private Thread loadingThread;
+
 	/**
 	 * Listener for the plugin system.
 	 */
@@ -116,7 +121,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 	/**
 	 * Interpreter listener
 	 */
-	public final CommandHelperInterpreterListener interpreterListener = new CommandHelperInterpreterListener(this);
+	public final CommandHelperInterpreterListener interpreterListener = new CommandHelperInterpreterListener();
 	/**
 	 * Server Command Listener, for console commands
 	 */
@@ -127,6 +132,8 @@ public class CommandHelperPlugin extends JavaPlugin {
 		AppsApiUtil.ConfigureDefaults();
 		Implementation.setServerType(Implementation.Type.BUKKIT);
 
+		myServer = BukkitMCServer.Get();
+		version = new SimpleVersion(getDescription().getVersion());
 		self = this;
 
 		CommandHelperFileLocations.setDefault(new CommandHelperFileLocations());
@@ -141,7 +148,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 			@Override
 			public boolean doRun() {
 				try {
-					version = "versionUpgrade-" + Static.loadSelfVersion();
+					version = "versionUpgrade-" + CommandHelperPlugin.version;
 					return !hasBreadcrumb(version);
 				} catch (Exception ex) {
 					getLogger().log(Level.SEVERE, null, ex);
@@ -156,7 +163,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 		});
 		upgradeLog.addUpgradeTask(new UpgradeLog.UpgradeTask() {
 
-			File oldPreferences = new File(CommandHelperFileLocations.getDefault().getConfigDirectory(),
+			private final File oldPreferences = new File(CommandHelperFileLocations.getDefault().getConfigDirectory(),
 					"preferences.txt");
 
 			@Override
@@ -183,7 +190,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 		});
 		upgradeLog.addUpgradeTask(new UpgradeLog.UpgradeTask() {
 
-			File cd = CommandHelperFileLocations.getDefault().getConfigDirectory();
+			private final File cd = CommandHelperFileLocations.getDefault().getConfigDirectory();
 			private final String breadcrumb = "move-preference-files-v1.0";
 
 			@Override
@@ -262,18 +269,18 @@ public class CommandHelperPlugin extends JavaPlugin {
 		} catch (IOException ex) {
 			getLogger().log(Level.SEVERE, null, ex);
 		} catch (NoClassDefFoundError ex) {
-			MSLog.GetLogger().e(MSLog.Tags.GENERAL, "Failed to load CommandHelper. Incorrect jar?", Target.UNKNOWN);
+			getLogger().log(Level.SEVERE, "Failed to load CommandHelper. Incorrect jar?", ex);
 			return;
 		}
 
 		try {
 			Prefs.init(CommandHelperFileLocations.getDefault().getPreferencesFile());
+			Prefs.SetColors();
 		} catch (IOException ex) {
 			getLogger().log(Level.SEVERE, null, ex);
 			return;
 		}
 
-		Prefs.SetColors();
 		Installer.Install(CommandHelperFileLocations.getDefault().getConfigDirectory());
 
 		ClassDiscoveryCache cdc = new ClassDiscoveryCache(CommandHelperFileLocations.getDefault().getCacheDirectory());
@@ -283,12 +290,22 @@ public class CommandHelperPlugin extends JavaPlugin {
 
 		MSLog.initialize(CommandHelperFileLocations.getDefault().getConfigDirectory());
 
+		if(myServer.getMinecraftVersion().lt(MCVersion.EARLIEST_SUPPORTED)) {
+			MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "Server is running an older unsupported Minecraft version."
+					+ " Many features may still function, but it is recommended to use an earlier version of"
+					+ " CommandHelper.", Target.UNKNOWN);
+		} else if(myServer.getMinecraftVersion().gt(MCVersion.LATEST_SUPPORTED)) {
+			MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "Server is running a newer unsupported Minecraft version."
+					+ " Most features should continue to function, but it is recommended to update CommandHelper to a"
+					+ " later build if one is available.", Target.UNKNOWN);
+		}
+
 		Telemetry.GetDefault().initializeTelemetry();
 		Telemetry.GetDefault().doNag();
 		Telemetry.GetDefault().log(DefaultTelemetry.StartupModeMetric.class,
 				MapBuilder.start("mode", Implementation.GetServerType().getBranding()), null);
 
-		loadingThread = new Thread("extensionloader") {
+		Thread loadingThread = new Thread("extensionloader") {
 			@Override
 			public void run() {
 				ExtensionManager.AddDiscoveryLocation(CommandHelperFileLocations.getDefault().getExtensionsDirectory());
@@ -301,8 +318,6 @@ public class CommandHelperPlugin extends JavaPlugin {
 		};
 		loadingThread.start();
 
-		myServer = BukkitMCServer.Get();
-
 		// Build dynamic enums
 		BukkitMCEntityType.build();
 		BukkitMCBiomeType.build();
@@ -312,17 +327,31 @@ public class CommandHelperPlugin extends JavaPlugin {
 		BukkitMCProfession.build();
 		BukkitMCMaterial.build();
 		BukkitMCLegacyMaterial.build();
+		BukkitMCPotionType.build();
+		BukkitMCEnchantment.build();
+		BukkitMCPatternShape.build();
+		BukkitMCAttribute.build();
+		BukkitMCArt.build();
 		if(myServer.getMinecraftVersion().gte(MCVersion.MC1_20)) {
 			BukkitMCTrimMaterial.build();
 			BukkitMCTrimPattern.build();
 		}
-	}
 
-	/**
-	 * Called on plugin enable.
-	 */
-	@Override
-	public void onEnable() {
+		// Suppress warnings from the PluginClassLoader when extensions load classes from another plugin.
+		// This should be done before ExtensionManager.Initialize().
+		try {
+			Class cls = Class.forName("org.bukkit.plugin.java.PluginClassLoader");
+			Set<String> ignored = (Set<String>) ReflectionUtils.get(cls, getClassLoader(), "seenIllegalAccess");
+			for(Plugin plugin : Bukkit.getPluginManager().getPlugins()) {
+				if(plugin != self) {
+					ignored.add(plugin.getName());
+				}
+			}
+		} catch (ReflectionUtils.ReflectionException | ClassNotFoundException ex) {
+			getLogger().log(Level.INFO, "Failed to suppress classloader warnings.");
+			// The server may still log class load warnings for unlisted dependencies.
+		}
+
 		if(loadingThread.isAlive()) {
 			getLogger().log(Level.INFO, "Waiting for extension caching to complete...");
 			try {
@@ -331,25 +360,15 @@ public class CommandHelperPlugin extends JavaPlugin {
 				getLogger().log(Level.SEVERE, null, ex);
 			}
 		}
+		ExtensionManager.Initialize(ClassDiscovery.getDefaultInstance());
+		getLogger().log(Level.INFO, "Extensions initialized.");
+	}
 
-		if(firstLoad) {
-			// Suppress warnings from the PluginClassLoader when extensions load classes from another plugin.
-			// This should be done before ExtensionManager.Initialize().
-			try {
-				Class cls = Class.forName("org.bukkit.plugin.java.PluginClassLoader");
-				Set<String> ignored = (Set<String>) ReflectionUtils.get(cls, getClassLoader(), "seenIllegalAccess");
-				for(Plugin plugin : Bukkit.getPluginManager().getPlugins()) {
-					if(plugin != self) {
-						ignored.add(plugin.getName());
-					}
-				}
-			} catch (ReflectionUtils.ReflectionException | ClassNotFoundException ex) {
-				// The server may still log class load warnings for unlisted dependencies.
-			}
-
-			ExtensionManager.Initialize(ClassDiscovery.getDefaultInstance());
-			getLogger().log(Level.INFO, "Extensions initialized.");
-		}
+	/**
+	 * Called on plugin enable.
+	 */
+	@Override
+	public void onEnable() {
 
 		//Metrics
 		Metrics m = new Metrics(this, 2987);
@@ -360,8 +379,6 @@ public class CommandHelperPlugin extends JavaPlugin {
 			getLogger().log(Level.WARNING, "In your preferences, use-sudo-fallback is turned on."
 					+ " Consider turning this off if you can.");
 		}
-
-		version = new SimpleVersion(getDescription().getVersion());
 
 		if(Prefs.ShowSplashScreen()) {
 			StreamUtils.GetSystemOut().println(TermColors.reset());
@@ -419,7 +436,6 @@ public class CommandHelperPlugin extends JavaPlugin {
 		}
 
 		ExtensionManager.Cleanup();
-
 		ac = null;
 	}
 
@@ -432,20 +448,26 @@ public class CommandHelperPlugin extends JavaPlugin {
 		getServer().getPluginManager().registerEvents(listener, this);
 	}
 
-	/*
-	 * This method is based on Bukkit's JavaPluginLoader:createRegisteredListeners
-	 * Part of this code would be run normally using the other register method
+	/**
+	 * Dynamically registers events in a Listener class.
+	 * Registers all methods annotated with @EventHandler.
+	 * Registers methods annotated with @EventIdentifier if the event exists in this version according to the Driver.
+	 * This method is based on Bukkit's JavaPluginLoader:createRegisteredListeners.
+	 * Part of this code would be run normally using the other register method.
+	 *
+	 * @param listener
 	 */
 	public void registerEventsDynamic(Listener listener) {
 		for(final java.lang.reflect.Method method : listener.getClass().getMethods()) {
 			EventIdentifier identifier = method.getAnnotation(EventIdentifier.class);
 			EventHandler defaultHandler = method.getAnnotation(EventHandler.class);
 			EventPriority priority = EventPriority.LOWEST;
-			Class<? extends Event> eventClass;
+			final Class<? extends Event> eventClass;
 			if(defaultHandler != null) {
 				priority = defaultHandler.priority();
 			}
 			if(identifier == null) {
+				// Look for normal EventHandler
 				if(defaultHandler != null && method.getParameterTypes().length == 1) {
 					try {
 						eventClass = (Class<? extends Event>) method.getParameterTypes()[0];
@@ -456,60 +478,50 @@ public class CommandHelperPlugin extends JavaPlugin {
 					continue;
 				}
 			} else {
+				// Dynamically register EventIdentifier
 				if(!identifier.event().existsInCurrent()) {
 					continue;
 				}
 				try {
 					eventClass = (Class<? extends Event>) Class.forName(identifier.className());
 				} catch (ClassNotFoundException | ClassCastException e) {
-					MSLog.GetLogger().e(MSLog.Tags.RUNTIME, "Could not listen for " + identifier.event().name()
-							+ " because the class " + identifier.className() + " could not be found."
-							+ " This problem is not expected to occur, so please report it on the bug"
-							+ " tracker if it does.", Target.UNKNOWN);
-					continue;
-				}
-			}
-			HandlerList handler;
-			try {
-				handler = (HandlerList) ReflectionUtils.invokeMethod(eventClass, null, "getHandlerList");
-			} catch (ReflectionUtils.ReflectionException ref) {
-				Class eventSuperClass = eventClass.getSuperclass();
-				if(eventSuperClass != null) {
-					try {
-						handler = (HandlerList) ReflectionUtils.invokeMethod(eventSuperClass, null, "getHandlerList");
-					} catch (ReflectionUtils.ReflectionException refInner) {
+					// Event may only exist in Paper (io.papermc.paper or com.destroytokyo.paper)
+					// so when running Spigot, ignore events that are not in org.bukkit.event or org.spigotmc.event.
+					if(identifier.className().startsWith("org") || ((BukkitMCServer) myServer).isPaper()) {
 						MSLog.GetLogger().e(MSLog.Tags.RUNTIME, "Could not listen for " + identifier.event().name()
-								+ " because the handler for class " + identifier.className()
-								+ " could not be found. An attempt has already been made to find the"
-								+ " correct handler, but" + eventSuperClass.getName()
-								+ " did not have it either. Please report this on the bug tracker.",
-								Target.UNKNOWN);
-						continue;
+								+ " because the class " + identifier.className() + " could not be found."
+								+ " This problem is not expected to occur, so please report it on the bug"
+								+ " tracker if it does.", Target.UNKNOWN);
 					}
-				} else {
-					MSLog.GetLogger().e(MSLog.Tags.RUNTIME, "Could not listen for " + identifier.event().name()
-							+ " because the handler for class " + identifier.className()
-							+ " could not be found. An attempt has already been made to find the"
-							+ " correct handler, but no superclass could be found."
-							+ " Please report this on the bug tracker.",
-							Target.UNKNOWN);
 					continue;
 				}
 			}
-			final Class<? extends Event> finalEventClass = eventClass;
-			EventExecutor executor = new EventExecutor() {
-				@Override
-				public void execute(Listener listener, Event event) throws EventException {
-					try {
-						if(!finalEventClass.isAssignableFrom(event.getClass())) {
-							return;
-						}
-						method.invoke(listener, event);
-					} catch (InvocationTargetException ex) {
-						throw new EventException(ex.getCause());
-					} catch (Throwable t) {
-						throw new EventException(t);
+			HandlerList handler = null;
+			Class handlerClass = eventClass;
+			while(handlerClass != null) {
+				try {
+					handler = ReflectionUtils.invokeMethod(handlerClass, null, "getHandlerList");
+					break;
+				} catch (ReflectionUtils.ReflectionException ref) {
+					handlerClass = handlerClass.getSuperclass();
+				}
+			}
+			if(handler == null) {
+				MSLog.GetLogger().e(MSLog.Tags.RUNTIME, "Could not listen for " + eventClass.getName()
+						+ " because the handler could not be found. Please report this on the bug tracker.",
+						Target.UNKNOWN);
+				continue;
+			}
+			EventExecutor executor = (thisListener, event) -> {
+				try {
+					if(!eventClass.isAssignableFrom(event.getClass())) {
+						return;
 					}
+					method.invoke(thisListener, event);
+				} catch (InvocationTargetException ex) {
+					throw new EventException(ex.getCause());
+				} catch (Throwable t) {
+					throw new EventException(t);
 				}
 			};
 			if(this.getServer().getPluginManager().useTimings()) {
@@ -599,7 +611,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 			} else {
 				interpreterListener.startInterpret(sender.getName());
 				sender.sendMessage(MCChatColor.YELLOW + "You are now in interpreter mode. Type a dash (-) on a"
-						+ " line by itself to exit, and >>> to enter multiline mode.");
+						+ " line by itself to exit, >>> to enter multiline mode, and ~ to clear the environment.");
 			}
 			return true;
 		} else {

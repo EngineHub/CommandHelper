@@ -174,7 +174,7 @@ public class DataSourceFilter {
 	public static String toRegex(String key) {
 		// We need to change * into [^\.]*? and ** into .*? and . into \.
 		// Parenthesis are kept as is.
-		String newKey = key.replaceAll("\\.", "\\\\.");
+		String newKey = key.replace(".", "\\.");
 		StringBuilder b = new StringBuilder("^");
 		for(int i = 0; i < newKey.length(); i++) {
 			Character c1 = newKey.charAt(i);

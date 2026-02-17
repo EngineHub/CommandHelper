@@ -1,24 +1,61 @@
 package com.laytonsmith.abstraction.enums.bukkit;
 
-import com.laytonsmith.abstraction.Implementation;
-import com.laytonsmith.abstraction.enums.EnumConvertor;
 import com.laytonsmith.abstraction.enums.MCPotionType;
-import com.laytonsmith.annotations.abstractionenum;
+import com.laytonsmith.core.MSLog;
+import com.laytonsmith.core.Static;
+import com.laytonsmith.core.constructs.Target;
 import org.bukkit.potion.PotionType;
 
-@abstractionenum(
-		implementation = Implementation.Type.BUKKIT,
-		forAbstractEnum = MCPotionType.class,
-		forConcreteEnum = PotionType.class
-)
-public class BukkitMCPotionType extends EnumConvertor<MCPotionType, PotionType> {
+import java.util.HashMap;
+import java.util.Map;
 
-	private static BukkitMCPotionType instance;
+public class BukkitMCPotionType extends MCPotionType<PotionType> {
 
-	public static BukkitMCPotionType getConvertor() {
-		if(instance == null) {
-			instance = new BukkitMCPotionType();
+	private static final Map<PotionType, MCPotionType> BUKKIT_MAP = new HashMap<>();
+
+	public BukkitMCPotionType(MCVanillaPotionType vanillaEffect, PotionType effect) {
+		super(vanillaEffect, effect);
+	}
+
+	@Override
+	public String name() {
+		return getAbstracted() == MCVanillaPotionType.UNKNOWN ? getConcrete().name() : getAbstracted().name();
+	}
+
+	public static MCPotionType valueOfConcrete(PotionType test) {
+		MCPotionType type = BUKKIT_MAP.get(test);
+		if(type == null) {
+			MSLog.GetLogger().e(MSLog.Tags.GENERAL, "Bukkit PotionType missing in BUKKIT_MAP: " + test.name(),
+					Target.UNKNOWN);
+			return new BukkitMCPotionType(MCVanillaPotionType.UNKNOWN, test);
 		}
-		return instance;
+		return type;
+	}
+
+	public static void build() {
+		for(MCVanillaPotionType v : MCVanillaPotionType.values()) {
+			if(v.existsIn(Static.getServer().getMinecraftVersion())) {
+				PotionType type = getBukkitType(v);
+				if(type == null) {
+					MSLog.GetLogger().w(MSLog.Tags.GENERAL, "Could not find a Bukkit potion type for " + v.name(), Target.UNKNOWN);
+					continue;
+				}
+				BukkitMCPotionType wrapper = new BukkitMCPotionType(v, type);
+				MAP.put(v.name(), wrapper);
+				BUKKIT_MAP.put(type, wrapper);
+			}
+		}
+		for(PotionType pt : PotionType.values()) {
+			if(pt != null && !BUKKIT_MAP.containsKey(pt)) {
+				MSLog.GetLogger().w(MSLog.Tags.GENERAL, "Could not find MCPotionType for " + pt.name(), Target.UNKNOWN);
+				MCPotionType wrapper = new BukkitMCPotionType(MCVanillaPotionType.UNKNOWN, pt);
+				MAP.put(pt.name(), wrapper);
+				BUKKIT_MAP.put(pt, wrapper);
+			}
+		}
+	}
+
+	private static PotionType getBukkitType(MCVanillaPotionType v) {
+		return PotionType.valueOf(v.name());
 	}
 }

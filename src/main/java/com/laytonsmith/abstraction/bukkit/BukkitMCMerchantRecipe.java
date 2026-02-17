@@ -11,7 +11,8 @@ import java.util.List;
 
 public class BukkitMCMerchantRecipe extends BukkitMCRecipe implements MCMerchantRecipe {
 
-	private MerchantRecipe handle;
+	private final MerchantRecipe handle;
+
 	public BukkitMCMerchantRecipe(MerchantRecipe recipe) {
 		super(recipe);
 		handle = recipe;
@@ -29,7 +30,7 @@ public class BukkitMCMerchantRecipe extends BukkitMCRecipe implements MCMerchant
 
 	@Override
 	public boolean equals(Object obj) {
-		return getHandle().equals(obj);
+		return obj instanceof BukkitMCMerchantRecipe && getHandle().equals(((BukkitMCMerchantRecipe) obj).getHandle());
 	}
 
 	@Override

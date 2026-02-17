@@ -58,6 +58,7 @@ import com.laytonsmith.core.functions.BasicLogic.equals_ic;
 import com.laytonsmith.core.functions.BasicLogic.sequals;
 import com.laytonsmith.core.functions.DataHandling.array;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
+import com.laytonsmith.core.natives.interfaces.ArrayAccessSet;
 import com.laytonsmith.core.natives.interfaces.Iterator;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.natives.interfaces.Sizeable;
@@ -221,12 +222,12 @@ public final class ArrayHandling {
 						for(long i = start; i <= finish; i++) {
 							try {
 								na.push(ca.get((int) i, t, env).clone(), t, env);
-							} catch (CloneNotSupportedException e) {
+							} catch(CloneNotSupportedException e) {
 								na.push(ca.get((int) i, t, env), t, env);
 							}
 						}
 						return na;
-					} catch (NumberFormatException e) {
+					} catch(NumberFormatException e) {
 						throw new CRECastException("Ranges must be integer numbers, i.e., [0..5]", t);
 					}
 				} else {
@@ -240,22 +241,24 @@ public final class ArrayHandling {
 								//negative index, convert to positive index
 								iindex = ca.size(env) + iindex;
 								if(iindex < 0) {
+									if(defaultConstruct != null) {
+										return defaultConstruct;
+									}
 									throw new CREIndexOverflowException("The element at index \"" + index.val()
 											+ "\" does not exist", t);
 								}
+							} else if(defaultConstruct != null && iindex >= ca.size(env)) {
+								return defaultConstruct;
 							}
 							return ca.get(iindex, t);
 						} else {
-							return ca.get(index, t, env);
-						}
-					} catch (ConfigRuntimeException e) {
-						if(e instanceof CREThrowable
-								&& ((CREThrowable) e).isInstanceOf(CREIndexOverflowException.TYPE, null, env)) {
-							if(defaultConstruct != null) {
+							if(defaultConstruct != null && !ca.containsKey(index.val())) {
 								return defaultConstruct;
 							}
+							return ca.get(index, t, env);
 						}
-						if(env.getEnv(GlobalEnv.class).GetFlag("array-special-get") != null) {
+					} catch(ConfigRuntimeException e) {
+						if(env.getEnv(GlobalEnv.class).GetFlag(GlobalEnv.FLAG_ARRAY_SPECIAL_GET) != null) {
 							//They are asking for an array that doesn't exist yet, so let's create it now.
 							CArray c;
 							if(ca.inAssociativeMode()) {
@@ -269,13 +272,13 @@ public final class ArrayHandling {
 						throw e;
 					}
 				}
-			} else if(args[0].isInstanceOf(ArrayAccess.TYPE, null, env)) {
+			} else if(args[0].isInstanceOf(com.laytonsmith.core.natives.interfaces.Iterable.TYPE, null, env)) {
 				com.laytonsmith.core.natives.interfaces.Iterable aa
 						= (com.laytonsmith.core.natives.interfaces.Iterable) args[0];
-				if(index instanceof CSlice) {
+				if(index instanceof CSlice cSlice) {
 					//It's a range
-					int start = (int) ((CSlice) index).getStart();
-					int finish = (int) ((CSlice) index).getFinish();
+					int start = (int) cSlice.getStart();
+					int finish = (int) cSlice.getFinish();
 					try {
 						//Convert negative indexes
 						if(start < 0) {
@@ -285,7 +288,7 @@ public final class ArrayHandling {
 							finish = (int) aa.size(env) + finish;
 						}
 						return aa.slice(start, finish + 1, t, env);
-					} catch (NumberFormatException e) {
+					} catch(NumberFormatException e) {
 						throw new CRECastException("Ranges must be integer numbers, i.e., [0..5]", t);
 					}
 				} else if(index.isInstanceOf(CInt.TYPE, null, env)) {
@@ -294,7 +297,7 @@ public final class ArrayHandling {
 					return aa.get(index, t, env);
 				}
 			} else {
-				throw new CRECastException("Argument 1 of " + this.getName() + " must be an array", t);
+				throw new CRECastException("Argument 1 of " + this.getName() + " must be an Iterable object, such as an array.", t);
 			}
 		}
 
@@ -357,7 +360,7 @@ public final class ArrayHandling {
 			}
 			if(args[0].isInstanceOf(ArrayAccess.TYPE, null, env)) {
 				ArrayAccess aa = (ArrayAccess) args[0];
-				if(!aa.canBeAssociative()) {
+				if(args.length > 1 && !aa.canBeAssociative()) {
 					if(!(args[1].isInstanceOf(CInt.TYPE, null, env)) && !(args[1] instanceof CSlice)) {
 						throw new ConfigCompileException("Accessing an element as an associative array,"
 								+ " when it can only accept integers.", t);
@@ -414,21 +417,22 @@ public final class ArrayHandling {
 
 		@Override
 		public Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
-			env.getEnv(GlobalEnv.class).SetFlag("array-special-get", true);
-			Mixed array = parent.seval(nodes[0], env);
-			env.getEnv(GlobalEnv.class).ClearFlag("array-special-get");
+			env.getEnv(GlobalEnv.class).SetFlag(GlobalEnv.FLAG_ARRAY_SPECIAL_GET, true);
+			Mixed array;
+			try {
+				array = parent.seval(nodes[0], env);
+			} finally {
+				env.getEnv(GlobalEnv.class).ClearFlag(GlobalEnv.FLAG_ARRAY_SPECIAL_GET);
+			}
 			Mixed index = parent.seval(nodes[1], env);
 			Mixed value = parent.seval(nodes[2], env);
-			if(array instanceof CFixedArray) {
-				((CFixedArray) array).set(ArgumentValidation.getInt32(index, t, env), value, t, env);
-				return value;
+			if(!(array.isInstanceOf(ArrayAccessSet.TYPE, null, env))) {
+				throw new CRECastException("Argument 1 of " + this.getName() + " must be an array, or implement ArrayAccessSet.", t);
 			}
-			if(!(array.isInstanceOf(CArray.TYPE, null, env))) {
-				throw new CRECastException("Argument 1 of " + this.getName() + " must be an array", t);
-			}
+
 			try {
-				((CArray) array).set(index, value, t, env);
-			} catch (IndexOutOfBoundsException e) {
+				((ArrayAccessSet) array).set(index, value, t, env);
+			} catch(IndexOutOfBoundsException e) {
 				throw new CREIndexOverflowException("The index " + new CString(index).getQuote() + " is out of bounds", t);
 			}
 			return value;
@@ -439,7 +443,7 @@ public final class ArrayHandling {
 			if(args[0] instanceof CArray) {
 				try {
 					((CArray) args[0]).set(args[1], args[2], t, env);
-				} catch (IndexOutOfBoundsException e) {
+				} catch(IndexOutOfBoundsException e) {
 					throw new CREIndexOverflowException("The index " + args[1].val() + " is out of bounds", t);
 				}
 				return args[2];
@@ -649,9 +653,9 @@ public final class ArrayHandling {
 						iterator.addToBlacklist(index);
 					}
 				}
-			} catch (IllegalArgumentException e) {
+			} catch(IllegalArgumentException e) {
 				throw new CRECastException(e.getMessage(), t);
-			} catch (IndexOutOfBoundsException ex) {
+			} catch(IndexOutOfBoundsException ex) {
 				throw new CREIndexOverflowException(ex.getMessage(), t);
 			}
 			return CVoid.VOID;
@@ -1033,7 +1037,7 @@ public final class ArrayHandling {
 							if(index >= ca.size(env) || index < 0) {
 								return CBoolean.FALSE;
 							}
-						} catch (ConfigRuntimeException e) {
+						} catch(ConfigRuntimeException e) {
 							//They probably sent a key that can't be translated into an int, so it doesn't exist here.
 							return CBoolean.FALSE;
 						}
@@ -1090,9 +1094,9 @@ public final class ArrayHandling {
 				+ "@array = array(a: array(b: array(c: null)));\n"
 				+ "msg(array_index_exists(@array, 'a', 'b', 'c'));"),
 				new ExampleScript("Demonstrates nested arrays, where the value is not an array (if the first element is"
-						+ " not an array an exception will be thrown, but inner values need not be arrays).",
-						"@array = array(a: array(b: 1));\n"
-						+ "msg(array_index_exists(@array, 'a', 'b', 'c'));")
+				+ " not an array an exception will be thrown, but inner values need not be arrays).",
+				"@array = array(a: array(b: 1));\n"
+				+ "msg(array_index_exists(@array, 'a', 'b', 'c'));")
 			};
 		}
 
@@ -1712,11 +1716,9 @@ public final class ArrayHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Single element", "map_implode(array('a': 'b'), '=', '&')"),
-				new ExampleScript("Multiple elements", "map_implode(array('a': '1', 'b': '2'), '=', '&')"),
+				new ExampleScript("Multiple elements", "map_implode(array('a': '1', 'b': '2'), '=', '&')")
 			};
 		}
-
-
 
 	}
 
@@ -1817,7 +1819,7 @@ public final class ArrayHandling {
 						sortType = ArgumentValidation.getEnum(args[1], CArray.ArraySortType.class, t);
 					}
 				}
-			} catch (IllegalArgumentException e) {
+			} catch(IllegalArgumentException e) {
 				throw new CREFormatException("The sort type must be one of either: " + StringUtils.Join(CArray.ArraySortType.values(), ", ", " or "), t);
 			}
 			if(sortType == null) {
@@ -1875,9 +1877,12 @@ public final class ArrayHandling {
 						} else {
 							value = -1;
 						}
+					} else if(c.isInstanceOf(CInt.TYPE, null, env)) {
+						long longVal = ((CInt) c).getInt();
+						value = (longVal > 0 ? 1 : (longVal < 0 ? -1 : 0));
 					} else {
 						throw new CRECastException("The custom closure did not return a value (or returned an invalid"
-								+ " type). It must always return true, false, or null.", t);
+								+ " type). It must always return true, false, null, or an integer.", t);
 					}
 					if(value <= 0) {
 						result.push(left.get(0, t, env), t, env);
@@ -1919,7 +1924,7 @@ public final class ArrayHandling {
 					+ ", or it may be a closure, if the sort should follow custom rules (explained below). A regular"
 					+ " sort sorts the elements without changing types first. A numeric sort always converts numeric"
 					+ " values to numbers first (so 001 becomes 1). A string sort compares values as strings, and a"
-					+ " string_ic sort is the same as a string sort, but the comparision is case-insensitive. If the"
+					+ " string_ic sort is the same as a string sort, but the comparison is case-insensitive. If the"
 					+ " array contains array values, a CastException is thrown; inner arrays cannot be sorted against"
 					+ " each other. If the array is associative, a warning will be raised if the General logging"
 					+ " channel is set to verbose, because the array's keys will all be lost in the process. To avoid"
@@ -1929,10 +1934,10 @@ public final class ArrayHandling {
 					+ " operation. Due to this, it has slightly different behavior than array_normalize, which could"
 					+ " have also been implemented in place.\n\nIf the sortType is a closure, it will perform a"
 					+ " custom sort type, and the array may contain any values, including sub array values. The closure"
-					+ " should accept two values, @left and @right, and should return true if the left value is larger"
-					+ " than the right, and false if the left value is smaller than the right, and null if they are"
-					+ " equal. The array will then be re-ordered using a merge sort, using your custom comparator to"
-					+ " determine the sort order.";
+					+ " should accept two values, @left and @right, and should return true or a positive integer if the"
+					+ " left value is larger than the right, and false or a negative integer if the left value is"
+					+ " smaller than the right, and null or 0 if they are equal. The array will then be re-ordered"
+					+ " using a merge sort, using your custom comparator to determine the sort order.";
 		}
 
 		@Override
@@ -1955,7 +1960,7 @@ public final class ArrayHandling {
 				if(!Construct.IsDynamicHelper(children.get(1).getData())) {
 					try {
 						CArray.ArraySortType.valueOf(children.get(1).getData().val().toUpperCase());
-					} catch (IllegalArgumentException e) {
+					} catch(IllegalArgumentException e) {
 						throw new ConfigCompileException("The sort type must be one of either: " + StringUtils.Join(CArray.ArraySortType.values(), ", ", " or "), t);
 					}
 				}
@@ -2850,7 +2855,7 @@ public final class ArrayHandling {
 			for(Mixed key : aa.keySet(env)) {
 				try {
 					closure.executeCallable(env, t, key, aa.get(key, t, env));
-				} catch (ProgramFlowManipulationException ex) {
+				} catch(ProgramFlowManipulationException ex) {
 					// Ignored
 				}
 			}
@@ -3300,6 +3305,7 @@ public final class ArrayHandling {
 		HASH(null);
 
 		private final Function comparisonFunction;
+
 		private ArrayValueComparisonMode(Function f) {
 			this.comparisonFunction = f;
 		}
@@ -3312,7 +3318,6 @@ public final class ArrayHandling {
 	@api
 	@seealso({array_merge.class, array_subtract.class})
 	public static class array_intersect extends AbstractFunction {
-
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -3369,7 +3374,8 @@ public final class ArrayHandling {
 				two.keySet(env).toArray(k2);
 				equals equals = new equals();
 				Function comparisonFunction = mode.getComparisonFunction();
-				i: for(int i = 0; i < k1.length; i++) {
+				i:
+				for(int i = 0; i < k1.length; i++) {
 					for(int j = 0; j < k2.length; j++) {
 						if(associativeMode) {
 							if(equals.exec(t, env, null, k1[i], k2[j]).getBoolean()) {
@@ -3442,39 +3448,38 @@ public final class ArrayHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Usage with associative array",
-						"array_intersect(array(one: 1, five: 5), array(one: 1, three: 3))"),
+				"array_intersect(array(one: 1, five: 5), array(one: 1, three: 3))"),
 				new ExampleScript("Usage with normal arrays. The default comparison method is HASH",
-						"array_intersect(array(1, 2, 3), array(2, 3, 4))"),
+				"array_intersect(array(1, 2, 3), array(2, 3, 4))"),
 				new ExampleScript("Demonstrates that STRICT_EQUALS does not consider different types to be equal",
-						"array_intersect(array('1', '2', '3'), array(1, 2, 3), 'STRICT_EQUALS')"),
+				"array_intersect(array('1', '2', '3'), array(1, 2, 3), 'STRICT_EQUALS')"),
 				new ExampleScript("Note that the results of this method are the same as the previous example,"
-						+ " but this version would be faster, and is preferred in all but the most exceptional cases.",
-						"array_intersect(array('1', '2', '3'), array(1, 2, 3), 'HASH')"),
+				+ " but this version would be faster, and is preferred in all but the most exceptional cases.",
+				"array_intersect(array('1', '2', '3'), array(1, 2, 3), 'HASH')"),
 				new ExampleScript("Demonstrates usage with equals. Note that '1' == 1 (but does not === 1) but since"
-						+ " the comparison method uses equals, not sequals, these arrays are considered equivalent.",
-						"array_intersect(array('1', '2', '3'), array(1, 2, 3), 'EQUALS')"),
+				+ " the comparison method uses equals, not sequals, these arrays are considered equivalent.",
+				"array_intersect(array('1', '2', '3'), array(1, 2, 3), 'EQUALS')"),
 				new ExampleScript("Usage with a custom closure", "array_intersect(\n"
-						+ "\tarray(array(id: 1, qty: 2), array(id: 2, qty: 5)),\n"
-						+ "\tarray(array(id: 1, qty: 2), array(id: 5, qty: 10)),\n"
-						+ "\tclosure(@a, @b) {\n"
-						+ "\t\treturn(@a['id'] == @b['id']);\n"
-						+ "})"),
+				+ "\tarray(array(id: 1, qty: 2), array(id: 2, qty: 5)),\n"
+				+ "\tarray(array(id: 1, qty: 2), array(id: 5, qty: 10)),\n"
+				+ "\tclosure(@a, @b) {\n"
+				+ "\t\treturn(@a['id'] == @b['id']);\n"
+				+ "})"),
 				new ExampleScript("The value is taken from the left array. This is not important for primitives, but"
-						+ " when using arrays and a custom closure, it may make a difference.", "array_intersect(\n"
-						+ "\tarray(array(id: 1, pos: 'left')),\n"
-						+ "\tarray(array(id: 1, pos: 'right')),\n"
-						+ "\tclosure(@a, @b) {\n"
-						+ "\t\treturn(@a['id'] == @b['id']);\n"
-						+ "})"),
+				+ " when using arrays and a custom closure, it may make a difference.", "array_intersect(\n"
+				+ "\tarray(array(id: 1, pos: 'left')),\n"
+				+ "\tarray(array(id: 1, pos: 'right')),\n"
+				+ "\tclosure(@a, @b) {\n"
+				+ "\t\treturn(@a['id'] == @b['id']);\n"
+				+ "})"),
 				new ExampleScript("Demonstrates behavior with duplicate values", "msg(array_intersect(\n"
-						+ "\tarray(1, 1, 1, 2, 3),\n"
-						+ "\tarray(1, 2)));\n"
-						+ "msg(array_intersect(\n"
-						+ "\tarray(1, 2, 3),\n"
-						+ "\tarray(1, 1, 1)));")
+				+ "\tarray(1, 1, 1, 2, 3),\n"
+				+ "\tarray(1, 2)));\n"
+				+ "msg(array_intersect(\n"
+				+ "\tarray(1, 2, 3),\n"
+				+ "\tarray(1, 1, 1)));")
 			};
 		}
-
 
 	}
 
@@ -3695,10 +3700,10 @@ public final class ArrayHandling {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-					new ExampleScript("Normal array usage",
-							"array_get_rand(array(1, 2, 3, 4, 5))"),
-					new ExampleScript("Associative array usage",
-							"array_get_rand(array(one: 1, two: 2, three: 3, four: 4, five: 5))"),
+				new ExampleScript("Normal array usage",
+				"array_get_rand(array(1, 2, 3, 4, 5))"),
+				new ExampleScript("Associative array usage",
+				"array_get_rand(array(one: 1, two: 2, three: 3, four: 4, five: 5))")
 			};
 		}
 	}
@@ -3896,6 +3901,68 @@ public final class ArrayHandling {
 					+ " associative, a cast exception is thrown. This fills"
 					+ " the entire array. The change is made in place, but a reference to the array is returned"
 					+ " for easy chaining.";
+		}
+	}
+
+	@api
+	public static class array_clear extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			ArgumentValidation.getArray(args[0], t, env).clear();
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "array_clear";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "void {array} Clears the array of all values. This keeps the array reference the same, but"
+					+ " empties it. Both normal and associative arrays are supported, but the internal type (normal"
+					+ " or associative) is not reset.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CVoid.TYPE)
+					.param(CArray.TYPE, "array", "The array to clear.")
+					.build();
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "@array = array(1, 2, 3);\narray_clear(@array);\nmsg(@array);"),
+				new ExampleScript("Associative arrays", "@array = array(one: 1, two: 2, three: 3);\narray_clear(@array);\nmsg(@array);")
+			};
 		}
 	}
 }

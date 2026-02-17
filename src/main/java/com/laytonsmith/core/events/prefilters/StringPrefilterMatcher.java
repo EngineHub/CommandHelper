@@ -73,4 +73,9 @@ public abstract class StringPrefilterMatcher<T extends BindableEvent> extends Ab
 
 	protected abstract String getProperty(T event);
 
+	@Override
+	public int getPriority() {
+		return -1;
+	}
+
 }

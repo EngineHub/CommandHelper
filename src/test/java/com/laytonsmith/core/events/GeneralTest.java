@@ -2,10 +2,10 @@ package com.laytonsmith.core.events;
 
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.testing.AbstractIntegrationTest;
 import com.laytonsmith.testing.StaticTest;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 //import static org.powermock.api.mockito.PowerMockito.when;
 //import org.powermock.core.classloader.annotations.PrepareForTest;
 //import org.powermock.modules.junit4.PowerMockRunner;
@@ -16,16 +16,11 @@ import org.junit.BeforeClass;
  */
 //@RunWith(PowerMockRunner.class)
 //@PrepareForTest(Static.class)
-public class GeneralTest {
+public class GeneralTest extends AbstractIntegrationTest {
 
 	MCPlayer fakePlayer;
 
 	public GeneralTest() {
-	}
-
-	@BeforeClass
-	public static void setUpClass() {
-
 	}
 
 	@Before

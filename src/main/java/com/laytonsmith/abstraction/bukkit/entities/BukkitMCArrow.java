@@ -1,17 +1,24 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
+import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
+import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCPotionData;
+import com.laytonsmith.abstraction.bukkit.BukkitMCColor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPotionData;
 import com.laytonsmith.abstraction.entities.MCArrow;
+import com.laytonsmith.abstraction.enums.MCPotionType;
 import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPotionEffectType;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPotionType;
 import com.laytonsmith.core.Static;
+import org.bukkit.Color;
+import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
-import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.potion.PotionType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,7 +64,16 @@ public class BukkitMCArrow extends BukkitMCProjectile implements MCArrow {
 
 	@Override
 	public MCPotionData getBasePotionData() {
-		return new BukkitMCPotionData(arrow.getBasePotionData());
+		return new BukkitMCPotionData(ReflectionUtils.invokeMethod(arrow, "getBasePotionData"));
+	}
+
+	@Override
+	public MCPotionType getBasePotionType() {
+		PotionType type = this.arrow.getBasePotionType();
+		if(type == null) {
+			return null;
+		}
+		return BukkitMCPotionType.valueOfConcrete(type);
 	}
 
 	@Override
@@ -74,7 +90,7 @@ public class BukkitMCArrow extends BukkitMCProjectile implements MCArrow {
 	public void addCustomEffect(MCLivingEntity.MCEffect effect) {
 		int ticks = effect.getTicksRemaining();
 		if(ticks < 0) {
-			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_X)) {
+			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_4)) {
 				ticks = -1;
 			} else {
 				ticks = Integer.MAX_VALUE;
@@ -93,7 +109,16 @@ public class BukkitMCArrow extends BukkitMCProjectile implements MCArrow {
 
 	@Override
 	public void setBasePotionData(MCPotionData pd) {
-		arrow.setBasePotionData((PotionData) pd.getHandle());
+		ReflectionUtils.invokeMethod(arrow, "setBasePotionData", pd.getHandle());
+	}
+
+	@Override
+	public void setBasePotionType(MCPotionType type) {
+		if(type == null) {
+			this.arrow.setBasePotionType(null);
+		} else {
+			this.arrow.setBasePotionType((PotionType) type.getConcrete());
+		}
 	}
 
 	@Override
@@ -104,5 +129,33 @@ public class BukkitMCArrow extends BukkitMCProjectile implements MCArrow {
 	@Override
 	public void setPierceLevel(int level) {
 		arrow.setPierceLevel(level);
+	}
+
+	@Override
+	public MCArrow.PickupStatus getPickupStatus() {
+		return MCArrow.PickupStatus.valueOf(arrow.getPickupStatus().name());
+	}
+
+	@Override
+	public void setPickupStatus(MCArrow.PickupStatus status) {
+		arrow.setPickupStatus(AbstractArrow.PickupStatus.valueOf(status.name()));
+	}
+
+	@Override
+	public MCColor getColor() {
+		Color c = arrow.getColor();
+		if(c == null) {
+			return null;
+		}
+		return BukkitMCColor.GetMCColor(c);
+	}
+
+	@Override
+	public void setColor(MCColor color) {
+		if(color == null) {
+			arrow.setColor(null);
+		} else {
+			arrow.setColor(BukkitMCColor.GetColor(color));
+		}
 	}
 }

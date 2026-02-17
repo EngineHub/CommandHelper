@@ -227,7 +227,6 @@ public class Procedure implements Cloneable {
 					|| (!this.varIndex.isEmpty()
 						&& this.isVarArg.get(this.varIndex.size() - 1))) {
 				IVariable var;
-				boolean isVarArg = false;
 				if(varInd < this.varIndex.size() - 1
 						|| !this.isVarArg.get(this.varIndex.size() - 1)) {
 					var = this.varIndex.get(varInd);
@@ -243,25 +242,37 @@ public class Procedure implements Cloneable {
 							throw new CREError(ex.getMessage(), t, ex);
 						}
 					}
-					isVarArg = true;
 				}
+
+				// Type check "void" value.
 				if(c instanceof CVoid
 						&& !(var.getDefinedType().isAuto() || var.getDefinedType().isVoid())) {
 					throw new CRECastException("Procedure \"" + name + "\" expects a value of type "
 							+ var.getDefinedType().val() + " in argument " + (varInd + 1) + ", but"
 							+ " a void value was found instead.", c.getTarget());
-				} else if(!(c instanceof CVoid) && c instanceof CNull || var.getDefinedType().equals(Auto.TYPE)
-						|| InstanceofUtil.isInstanceof(c, var.getDefinedType(), env)) {
-					if(isVarArg) {
-						vararg.push(c, t);
+				}
+
+				// Type check vararg parameter.
+				if(var.getDefinedType().isVariadicType()) {
+					if(InstanceofUtil.isInstanceof(c.typeof(env), var.getDefinedType().getNakedType(t, env), env)) {
+						vararg.push(c, t, env);
+						continue;
 					} else {
-						try {
-							env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(var.getDefinedType(),
-									var.getVariableName(), c, c.getTarget(), env));
-						} catch(ConfigCompileException ex) {
-							throw new CREError(ex.getMessage(), t, ex);
-						}
+						throw new CRECastException("Procedure \"" + name + "\" expects a value of type "
+								+ var.getDefinedType().val() + " in argument " + (varInd + 1) + ", but"
+								+ " a value of type " + c.typeof(env) + " was found instead.", c.getTarget());
 					}
+				}
+
+				// Type check non-vararg parameter.
+				if(InstanceofUtil.isInstanceof(c.typeof(env), var.getDefinedType(), env)) {
+					try {
+						env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(var.getDefinedType(),
+								var.getVariableName(), c, c.getTarget(), env));
+					} catch(ConfigCompileException ex) {
+						throw ex.asRuntimeException();
+					}
+					continue;
 				} else {
 					throw new CRECastException("Procedure \"" + name + "\" expects a value of type "
 							+ var.getDefinedType().val() + " in argument " + (varInd + 1) + ", but"
@@ -315,7 +326,7 @@ public class Procedure implements Cloneable {
 			}
 			if(returnType.equals(CVoid.TYPE) != ret.equals(CVoid.VOID)
 					|| !ret.equals(CNull.NULL) && !ret.equals(CVoid.VOID)
-					&& !InstanceofUtil.isInstanceof(ret, returnType, env)) {
+					&& !InstanceofUtil.isInstanceof(ret.typeof(env), returnType, env)) {
 				throw new CRECastException("Expected procedure \"" + name + "\" to return a value of type "
 						+ returnType.val() + " but a value of type " + ret.typeof(env) + " was returned instead",
 						ret.getTarget());

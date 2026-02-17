@@ -10,8 +10,8 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.testing.AbstractIntegrationTest;
 import com.laytonsmith.testing.C;
-import com.laytonsmith.testing.StaticTest;
 import static com.laytonsmith.testing.StaticTest.GetFakeServer;
 import static com.laytonsmith.testing.StaticTest.GetOnlinePlayer;
 import static com.laytonsmith.testing.StaticTest.SRun;
@@ -32,7 +32,7 @@ import static org.mockito.Mockito.verify;
  *
  *
  */
-public class BasicLogicTest {
+public class BasicLogicTest extends AbstractIntegrationTest {
 
 	MCPlayer fakePlayer;
 	MCServer fakeServer;
@@ -53,7 +53,6 @@ public class BasicLogicTest {
 
 	@BeforeClass
 	public static void setUpClass() throws Exception {
-		StaticTest.InstallFakeServerFrontend();
 	}
 
 	@AfterClass

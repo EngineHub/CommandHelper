@@ -6,7 +6,7 @@ import org.bukkit.inventory.Recipe;
 
 public abstract class BukkitMCRecipe implements MCRecipe {
 
-	private Recipe r;
+	private final Recipe r;
 
 	protected BukkitMCRecipe(Recipe rec) {
 		r = rec;
@@ -24,7 +24,7 @@ public abstract class BukkitMCRecipe implements MCRecipe {
 
 	@Override
 	public boolean equals(Object obj) {
-		return r.equals(obj);
+		return obj instanceof BukkitMCRecipe && r.equals(((BukkitMCRecipe) obj).r);
 	}
 
 	@Override

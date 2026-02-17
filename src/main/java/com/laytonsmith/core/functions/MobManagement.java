@@ -3,6 +3,8 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCAttributeModifier;
+import com.laytonsmith.abstraction.MCLeashable;
+import com.laytonsmith.abstraction.MCNamespacedKey;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.MCAnimalTamer;
 import com.laytonsmith.abstraction.MCEntity;
@@ -14,12 +16,15 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.entities.MCAgeable;
 import com.laytonsmith.abstraction.entities.MCAnimal;
+import com.laytonsmith.abstraction.entities.MCArmorStand;
 import com.laytonsmith.abstraction.entities.MCBreedable;
 import com.laytonsmith.abstraction.entities.MCTameable;
 import com.laytonsmith.abstraction.enums.MCAttribute;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCPotionEffectType;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSVersion;
@@ -40,7 +45,6 @@ import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
 import com.laytonsmith.core.exceptions.CRE.CREBadEntityTypeException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
-import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CRE.CRELengthException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
@@ -63,6 +67,7 @@ public class MobManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({get_mob_owner_uuid.class, set_mob_owner.class})
 	public static class get_mob_owner extends AbstractFunction {
 
 		@Override
@@ -78,13 +83,14 @@ public class MobManagement {
 		@Override
 		public String docs() {
 			return "string {entityUUID} Returns the owner's name, or null if the mob is unowned."
-					+ "An UntameableMobException is thrown if mob isn't tameable to begin with.";
+					+ " Use {{function|get_mob_owner_uuid}} to get the owner's unique id."
+					+ " An UntameableMobException is thrown if mob isn't tameable to begin with.";
 		}
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CREUntameableMobException.class, CRELengthException.class,
-				CREBadEntityException.class, CREIllegalArgumentException.class};
+					CREBadEntityException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -118,6 +124,63 @@ public class MobManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({get_mob_owner.class, set_mob_owner.class})
+	public static class get_mob_owner_uuid extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "get_mob_owner_uuid";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "string {entityUUID} Returns the owner's UUID, or null if the mob is unowned."
+					+ "An UntameableMobException is thrown if mob isn't tameable to begin with.";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREUntameableMobException.class, CRELengthException.class,
+					CREBadEntityException.class, CREFormatException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCLivingEntity mob = Static.getLivingEntity(args[0], t);
+			if(!mob.isTameable()) {
+				throw new CREUntameableMobException("The specified entity is not tameable", t);
+			}
+			MCAnimalTamer owner = ((MCTameable) mob).getOwner();
+			if(owner == null) {
+				return CNull.NULL;
+			} else {
+				return new CString(owner.getUniqueID().toString(), t);
+			}
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({get_mob_owner.class, get_mob_owner_uuid.class})
 	public static class set_mob_owner extends AbstractFunction {
 
 		@Override
@@ -132,15 +195,15 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityUUID, player} Sets the tameable mob to the specified player. Offline players are"
-					+ " supported, but this means that partial matches are NOT supported. You must type the player's"
-					+ " name exactly. Setting the player to null will untame the mob.";
+			return "void {entityUUID, player} Sets the tameable mob to the specified player."
+					+ " The player argument supports offline players, so it should be a UUID or an exact player name."
+					+ " Setting the player to null will untame the mob.";
 		}
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CREUntameableMobException.class, CRELengthException.class,
-				CREBadEntityException.class, CREIllegalArgumentException.class};
+					CREBadEntityException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -169,7 +232,7 @@ public class MobManagement {
 			if(player instanceof CNull) {
 				mct.setOwner(null);
 			} else {
-				mct.setOwner(Static.getServer().getOfflinePlayer(player.val()));
+				mct.setOwner(Static.GetUser(player, t));
 			}
 			return CVoid.VOID;
 		}
@@ -694,6 +757,7 @@ public class MobManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(set_mob_equipment.class)
 	public static class get_mob_equipment extends EntityManagement.EntityGetterFunction {
 
 		@Override
@@ -703,7 +767,7 @@ public class MobManagement {
 			if(eq == null) {
 				throw new CREBadEntityTypeException("Entities of type \"" + le.getType() + "\" do not have equipment.", t);
 			}
-			Map<MCEquipmentSlot, MCItemStack> eqmap = le.getEquipment().getAllEquipment();
+			Map<MCEquipmentSlot, MCItemStack> eqmap = eq.getAllEquipment();
 			CArray ret = CArray.GetAssociativeArray(t, null, env);
 			for(MCEquipmentSlot key : eqmap.keySet()) {
 				ret.set(key.name().toLowerCase(), ObjectGenerator.GetGenerator().item(eqmap.get(key), t, env), t, env);
@@ -719,7 +783,9 @@ public class MobManagement {
 		@Override
 		public String docs() {
 			return "array {entityUUID} Returns an associative array showing the equipment this mob is wearing."
-					+ " This does not work on most \"dumb\" entities, only mobs (entities with AI).";
+					+ " The equipment slots are: weapon, off_hand, helmet, chestplate, leggings, boots,"
+					+ " body (MC 1.20.6+), and saddle (MC 1.21.5+)."
+					+ " This works on mobs, players, mannequins, and armor stands.";
 		}
 
 		@Override
@@ -740,6 +806,7 @@ public class MobManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(get_mob_equipment.class)
 	public static class set_mob_equipment extends EntityManagement.EntitySetterFunction {
 
 		@Override
@@ -749,11 +816,12 @@ public class MobManagement {
 			if(ee == null) {
 				throw new CREBadEntityTypeException("Entities of type \"" + le.getType() + "\" do not have equipment.", t);
 			}
-			Map<MCEquipmentSlot, MCItemStack> eq = ee.getAllEquipment();
 			if(args[1] instanceof CNull) {
 				ee.clearEquipment();
 				return CVoid.VOID;
-			} else if(args[1].isInstanceOf(CArray.TYPE, null, env)) {
+			}
+			Map<MCEquipmentSlot, MCItemStack> eq = ee.getAllEquipment();
+			if(args[1].isInstanceOf(CArray.TYPE, null, env)) {
 				CArray ea = (CArray) args[1];
 				for(String key : ea.stringKeySet()) {
 					try {
@@ -777,17 +845,18 @@ public class MobManagement {
 		@Override
 		public String docs() {
 			return "void {entityUUID, array} Takes an associative array with keys representing equipment slots and"
-					+ " values of itemArrays, the same used by set_pinv. This does not work on most \"dumb\" entities,"
-					+ " only mobs (entities with AI). Unless a mod, plugin, or future update changes vanilla functionality,"
-					+ " only humanoid mobs will render their equipment slots. The equipment slots are: "
-					+ StringUtils.Join(MCEquipmentSlot.values(), ", ", ", or ", " or ");
+					+ " values of item arrays. The equipment slots are: weapon, off_hand, helmet, chestplate, leggings,"
+					+ " boots, body (MC 1.20.6+), and saddle (MC 1.21.5+)."
+					+ " This works on mobs, players, mannequins, and armor stands."
+					+ " While you may set any slot for any of these entities, some slots are not used by some entities."
+					+ " Setting unused slots is not officially supported behavior, so your results may vary.";
 		}
 
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage",
-				"set_mob_equipment(spawn_entity('SKELETON')[0], array(WEAPON: array(name: 'BOW')))",
+				"set_mob_equipment(spawn_entity('SKELETON')[0], array(weapon: array(name: 'BOW')))",
 				"Gives a bow to a skeleton")
 			};
 		}
@@ -862,14 +931,18 @@ public class MobManagement {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCEntityEquipment eq = Static.getLivingEntity(args[0], t).getEquipment();
-			if(eq.getHolder() instanceof MCPlayer) {
-				throw new CREBadEntityException(getName() + " does not work on players.", t);
+			MCLivingEntity le = Static.getLivingEntity(args[0], t);
+			if(le instanceof MCPlayer || le instanceof MCArmorStand) {
+				throw new CREBadEntityException(getName() + "() does not work on type: " + le.getType(), t);
+			}
+			MCEntityEquipment eq = le.getEquipment();
+			if(eq == null) {
+				throw new CREBadEntityTypeException("Entities of type \"" + le.getType() + "\" do not have equipment.", t);
 			}
 			CArray ret = CArray.GetAssociativeArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
 				.addNativeParameter(CDouble.TYPE, null).buildNative(), env);
 			for(Map.Entry<MCEquipmentSlot, Float> ent : eq.getAllDropChances().entrySet()) {
-				ret.set(ent.getKey().name(), new CDouble(ent.getValue(), t), t, env);
+				ret.set(ent.getKey().name().toLowerCase(), new CDouble(ent.getValue(), t), t, env);
 			}
 			return ret;
 		}
@@ -881,8 +954,10 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "array<double> {entityUUID} Returns an associative array of the drop rate for each equipment slot."
-					+ " If the rate is 0, the equipment will not drop. If it is 1, it is guaranteed to drop.";
+			return "array {entityUUID} Returns an associative array of the drop rate for each equipment slot."
+					+ " If the rate is 0.0, the equipment will not drop. A rate of 1.0 will guarantee a drop"
+					+ " if the entity is killed by a player. A rate above 1.0 will guarantee a drop by any cause."
+					+ " Non-mobs, like players and armor stands, cannot have their drop-rates modified.";
 		}
 
 		@Override
@@ -896,11 +971,15 @@ public class MobManagement {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCEntityEquipment ee = Static.getLivingEntity(args[0], t).getEquipment();
-			Map<MCEquipmentSlot, Float> eq = ee.getAllDropChances();
-			if(ee.getHolder() instanceof MCPlayer) {
-				throw new CREBadEntityException(getName() + " does not work on players.", t);
+			MCLivingEntity le = Static.getLivingEntity(args[0], t);
+			if(le instanceof MCPlayer || le instanceof MCArmorStand) {
+				throw new CREBadEntityException(getName() + "() does not work on type: " + le.getType(), t);
 			}
+			MCEntityEquipment ee = le.getEquipment();
+			if(ee == null) {
+				throw new CREBadEntityTypeException("Entities of type \"" + le.getType() + "\" do not have equipment.", t);
+			}
+			Map<MCEquipmentSlot, Float> eq = ee.getAllDropChances();
 			if(args[1] instanceof CNull) {
 				for(Map.Entry<MCEquipmentSlot, Float> ent : eq.entrySet()) {
 					eq.put(ent.getKey(), 0F);
@@ -930,7 +1009,9 @@ public class MobManagement {
 		public String docs() {
 			return "void {entityUUID, array} Sets the drop chances for each equipment slot on a mob,"
 					+ " but does not work on players. Passing null instead of an array will automatically"
-					+ " set all rates to 0, which will cause nothing to drop. A rate of 1 will guarantee a drop.";
+					+ " set all rates to 0.0, which will cause nothing to drop. A rate of 1.0 will guarantee a drop"
+					+ " if the entity is killed by a player. A rate above 1.0 will guarantee a drop by any cause."
+					+ " Non-mobs, like players and armor stands, cannot have their drop-rates modified.";
 		}
 
 		@Override
@@ -1003,8 +1084,7 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "boolean {entityUUID} Returns whether the specified living entity will despawn."
-					+ " True means it will not.";
+			return "boolean {entityUUID} Returns whether a living entity will despawn when players are far enough away.";
 		}
 
 		@Override
@@ -1029,7 +1109,7 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityUUID, boolean} Sets whether a living entity will despawn. True means it will not.";
+			return "void {entityUUID, boolean} Sets whether a living entity will despawn when players are far enough away.";
 		}
 
 		@Override
@@ -1043,11 +1123,14 @@ public class MobManagement {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCLivingEntity le = Static.getLivingEntity(args[0], t);
-			if(!le.isLeashed()) {
+			MCEntity e = Static.getEntity(args[0], t);
+			if(!(e instanceof MCLeashable)) {
+				throw new CREBadEntityException("Entity type is not leashable.", t);
+			}
+			if(!((MCLeashable) e).isLeashed()) {
 				return CNull.NULL;
 			}
-			return new CString(le.getLeashHolder().getUniqueId().toString(), t);
+			return new CString(((MCLeashable) e).getLeashHolder().getUniqueId().toString(), t);
 		}
 
 		@Override
@@ -1057,8 +1140,9 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "string {entityUUID} Returns the UUID of the entity that is holding the given living entity's leash,"
-					+ " or null if it isn't being held.";
+			return "string {entityUUID} Returns the UUID of the entity that is holding the given entity's leash,"
+					+ " or null if it isn't being held. Only mobs and boats can be leashed, otherwise a"
+					+ " BadEntityException is thrown. Boats are only supported on Paper 1.21.3+ and Spigot 1.21.10+.";
 		}
 
 		@Override
@@ -1072,14 +1156,17 @@ public class MobManagement {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCLivingEntity le = Static.getLivingEntity(args[0], t);
+			MCEntity e = Static.getEntity(args[0], t);
 			MCEntity holder;
 			if(args[1] instanceof CNull) {
 				holder = null;
 			} else {
 				holder = Static.getEntity(args[1], t);
 			}
-			le.setLeashHolder(holder);
+			if(!(e instanceof MCLeashable)) {
+				throw new CREBadEntityException("Entity type is not leashable.", t);
+			}
+			((MCLeashable) e).setLeashHolder(holder);
 			return CVoid.VOID;
 		}
 
@@ -1090,11 +1177,10 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityUUID, entityUUID} The first argument is the entity to be held on a leash,"
-					+ " and must be living. The second is the holder of the leash. This does not have to be living,"
-					+ " but the only non-living entity that will persist as a holder across restarts is the leash hitch."
-					+ " Players, bats, enderdragons, withers and certain other entities can not be held by leashes due"
-					+ " to minecraft limitations.";
+			return "void {entityUUID, holderUUID} The first argument is the entity to be held on a leash, and must be a"
+					+ " mob or a boat. The second is the holder of the leash and can be many types of entities,"
+					+ " notably a leash hitch. Certain entity types may be excluded from being leashed depending on the"
+					+ " Minecraft version. Boats are only supported on Paper 1.21.3+ and Spigot 1.21.10+.";
 		}
 
 		@Override
@@ -1943,9 +2029,8 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityUUID, modifier | entityUUID, attribute, id} Removes an attribute modifier from an"
-					+ " entity. A modifier array can be provided, or both an attribute name and either the UUID or"
-					+ " name (if it's unique) for the modifier can be provided as the identifier.";
+			return "void {entityUUID, modifier | entityUUID, attribute, id} Removes an attribute modifier from an entity."
+					+ " Can provide either a modifier array or just the attribute and namespaced id of the modifier.";
 		}
 
 		@Override
@@ -1978,20 +2063,41 @@ public class MobManagement {
 					throw new CREFormatException("Invalid attribute name: " + args[1].val(), t);
 				}
 				List<MCAttributeModifier> modifiers = e.getAttributeModifiers(attribute);
-				String name = args[2].val();
-				UUID id = null;
-				if(name.length() == 36 || name.length() == 32) {
-					try {
-						id = UUID.fromString(name);
-					} catch (IllegalArgumentException ex) {
-						// not UUID
+				String id = args[2].val();
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_21)) {
+					MCNamespacedKey key = null;
+					if(id.length() == 36) {
+						try {
+							UUID.fromString(id);
+							key = StaticLayer.GetConvertor().GetNamespacedKey("minecraft:" + id);
+						} catch (IllegalArgumentException ex) {
+							// not legacy UUID
+						}
 					}
-				}
-				for(MCAttributeModifier m : modifiers) {
-					if(id != null && m.getUniqueId().compareTo(id) == 0
-							|| id == null && name.equals(m.getAttributeName())) {
-						modifier = m;
-						break;
+					if(key == null) {
+						key = StaticLayer.GetConvertor().GetNamespacedKey(id);
+					}
+					for(MCAttributeModifier m : modifiers) {
+						if(m.getKey().equals(key)) {
+							modifier = m;
+							break;
+						}
+					}
+				} else {
+					UUID uuid = null;
+					if(id.length() == 36) {
+						try {
+							uuid = UUID.fromString(id);
+						} catch (IllegalArgumentException ex) {
+							// not UUID
+						}
+					}
+					for(MCAttributeModifier m : modifiers) {
+						if(uuid != null && m.getUniqueId().compareTo(uuid) == 0
+								|| uuid == null && id.equals(m.getAttributeName())) {
+							modifier = m;
+							break;
+						}
 					}
 				}
 				if(modifier == null) {

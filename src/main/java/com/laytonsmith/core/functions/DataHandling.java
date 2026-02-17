@@ -32,6 +32,8 @@ import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.SelfStatement;
 import com.laytonsmith.core.compiler.VariableScope;
+import com.laytonsmith.core.compiler.analysis.BreakableBoundDeclaration;
+import com.laytonsmith.core.compiler.analysis.ContinuableBoundDeclaration;
 import com.laytonsmith.core.compiler.analysis.Declaration;
 import com.laytonsmith.core.compiler.analysis.IVariableAssignDeclaration;
 import com.laytonsmith.core.compiler.analysis.IncludeReference;
@@ -40,6 +42,7 @@ import com.laytonsmith.core.compiler.analysis.ParamDeclaration;
 import com.laytonsmith.core.compiler.analysis.ProcDeclaration;
 import com.laytonsmith.core.compiler.analysis.ProcRootDeclaration;
 import com.laytonsmith.core.compiler.analysis.Reference;
+import com.laytonsmith.core.compiler.analysis.ReturnableDeclaration;
 import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.compiler.signature.FunctionSignatures;
@@ -99,6 +102,10 @@ import com.laytonsmith.core.functions.ArrayHandling.array_get;
 import com.laytonsmith.core.functions.ArrayHandling.array_push;
 import com.laytonsmith.core.functions.ArrayHandling.array_set;
 import com.laytonsmith.core.functions.Compiler.__autoconcat__;
+import com.laytonsmith.core.functions.Compiler.__cast__;
+import com.laytonsmith.core.functions.Compiler.__statements__;
+import com.laytonsmith.core.functions.Compiler.__type_ref__;
+import com.laytonsmith.core.functions.Compiler.__unsafe_assign__;
 import com.laytonsmith.core.functions.Compiler.centry;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.tools.docgen.templates.ArrayIteration;
@@ -328,7 +335,7 @@ public class DataHandling {
 		@Override
 		public String docs() {
 			return "array {[args...]} Works exactly like array(), except the array created will be an associative array, even"
-					+ " if the array has been created with no elements. This is the only use case where this is neccessary, vs"
+					+ " if the array has been created with no elements. This is the only use case where this is necessary, vs"
 					+ " using the normal array() function, or in the case where you assign sequential keys anyways, and the same"
 					+ " array could have been created using array().";
 		}
@@ -368,62 +375,99 @@ public class DataHandling {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			IVariableList list = env.getEnv(GlobalEnv.class).GetVarList();
-			int offset;
-			LeftHandSideType type;
-			String name;
-			IVariable definedVar;
+			IVariable var;
 			if(args.length == 3) {
-				offset = 1;
-				if(!(args[offset] instanceof IVariable)) {
+
+				// Get and validate variable name.
+				if(!(args[1] instanceof IVariable)) {
 					throw new CRECastException(getName() + " with 3 arguments only accepts an ivariable as the second argument.", t);
 				}
-				definedVar = (IVariable) args[offset];
-				name = definedVar.getVariableName();
-				if(list.has(name) && env.getEnv(GlobalEnv.class).GetFlag("no-check-duplicate-assign") == null) {
-					if(env.getEnv(GlobalEnv.class).GetFlag("closure-warn-overwrite") != null) {
-						MSLog.GetLogger().Log(MSLog.Tags.RUNTIME, LogLevel.ERROR,
-								"The variable " + name + " is hiding another value of the"
+				String varName = ((IVariable) args[1]).getVariableName();
+				if(list.has(varName) && env.getEnv(GlobalEnv.class).GetFlag(GlobalEnv.FLAG_NO_CHECK_DUPLICATE_ASSIGN) == null) {
+					if(env.getEnv(GlobalEnv.class).GetFlag(GlobalEnv.FLAG_CLOSURE_WARN_OVERWRITE) != null) {
+						MSLog.GetLogger().Log(MSLog.Tags.RUNTIME, LogLevel.WARNING,
+								"The variable " + varName + " is hiding another value of the"
 								+ " same name in the main scope.", t);
-					} else if(!StaticAnalysis.enabled() && t != list.get(name, t, true, env).getDefinedTarget()) {
-						MSLog.GetLogger().Log(MSLog.Tags.RUNTIME, LogLevel.ERROR, name + " was already defined at "
-								+ list.get(name, t, true, env).getDefinedTarget() + " but is being redefined.", t);
+					} else if(!StaticAnalysis.enabled() && t != list.get(varName, t, true, env).getDefinedTarget()) {
+						MSLog.GetLogger().Log(MSLog.Tags.RUNTIME, LogLevel.ERROR, varName + " was already defined at "
+								+ list.get(varName, t, true, env).getDefinedTarget() + " but is being redefined.", t);
 					}
 				}
-				type = ArgumentValidation.getClassType(args[0], t, env);
+
+				// Get and validate variable type.
+				LeftHandSideType type = ArgumentValidation.getClassType(args[0], t, env);
+				Boolean varArgsAllowed = env.getEnv(GlobalEnv.class).GetFlag(GlobalEnv.FLAG_VAR_ARGS_ALLOWED);
+				if(varArgsAllowed == null) {
+					varArgsAllowed = false;
+				}
+				if(type.isVariadicType() && !varArgsAllowed) {
+					throw new CRECastException("Cannot use varargs type in this context", t);
+				}
+				if(type.equals(CVoid.TYPE)) {
+					throw new CRECastException("Variables may not be of type void", t);
+				}
+
+				// Get assigned value.
+				Mixed val = args[2];
+
+				// Unwrap assigned value from IVariable if an IVariable is passed.
+				if(val instanceof IVariable ivar) {
+					val = list.get(ivar.getVariableName(), ivar.getTarget(), env).ival();
+				}
+
+				// Validate assigned value.
+				if(val instanceof CVoid) {
+					throw new CRECastException("Void may not be assigned to a variable", t);
+				}
+				if(!InstanceofUtil.isInstanceof(val.typeof(env), type, env)) {
+					throw new CRECastException(varName + " is of type " + type.val() + ", but a value of type "
+							+ val.typeof(env) + " was assigned to it.", t);
+				}
+
+				try {
+					// Set variable in variable list.
+					var = new IVariable(type, varName, val, t, env);
+				} catch(ConfigCompileException ex) {
+					throw ex.asRuntimeException();
+				}
+				list.set(var);
 			} else {
-				offset = 0;
-				if(!(args[offset] instanceof IVariable)) {
+
+				// Get and validate variable name.
+				if(!(args[0] instanceof IVariable)) {
 					throw new CRECastException(getName() + " with 2 arguments only accepts an ivariable as the first argument.", t);
 				}
-				definedVar = (IVariable) args[offset];
-				name = definedVar.getVariableName();
-				IVariable listVar = list.get(name, t, true, env);
-				t = listVar.getDefinedTarget();
-				type = listVar.getDefinedType();
-			}
+				String varName = ((IVariable) args[0]).getVariableName();
 
-			// TODO: Move this into the compiler, not runtime.
-			Boolean varArgsAllowed = env.getEnv(GlobalEnv.class).GetFlag("var-args-allowed");
-			if(varArgsAllowed == null) {
-				varArgsAllowed = false;
-			}
-			if(!varArgsAllowed && type.isVariadicType()) {
-				throw new CRECastException("Varargs not allowed here.", t);
-			}
+				// Get assigned value.
+				Mixed val = args[1];
 
-			Mixed c = args[offset + 1];
+				// Unwrap assigned value from IVariable if an IVariable is passed.
+				if(val instanceof IVariable ivar) {
+					val = list.get(ivar.getVariableName(), ivar.getTarget(), env).ival();
+				}
 
-			while(c instanceof IVariable cur) {
-				c = list.get(cur.getVariableName(), cur.getTarget(), env).ival();
+				// Validate assigned value and set variable in variable list.
+				if(val instanceof CVoid) {
+					throw new CRECastException("Void may not be assigned to a variable", t);
+				}
+				var = list.get(varName);
+				if(var == null) {
+					try {
+						var = new IVariable(Auto.TYPE.asLeftHandSideType(), varName, val, t, env);
+					} catch(ConfigCompileException ex) {
+						throw ex.asRuntimeException();
+					}
+					list.set(var);
+				} else {
+					if(!InstanceofUtil.isInstanceof(val.typeof(env), var.getDefinedType(), env)) {
+						throw new CRECastException(varName + " is of type " + var.getDefinedType()
+								+ ", but a value of type " + val.typeof(env) + " was assigned to it.", t);
+					}
+					var.setIval(val);
+				}
 			}
-			IVariable v;
-			try {
-				v = new IVariable(type, name, c, t, env);
-			} catch(ConfigCompileException cce) {
-				throw new CREFormatException(cce.getMessage(), t);
-			}
-			list.set(v);
-			return v;
+			return var;
 		}
 
 		@Override
@@ -437,8 +481,7 @@ public class DataHandling {
 				case 3:
 					// Typecheck declaration type.
 					ParseTree typeNode = ast.getChildAt(ind++);
-					declaredType = StaticAnalysis.requireClassType(
-							typeNode.getData(), typeNode.getTarget(), exceptions);
+					declaredType = StaticAnalysis.requireClassType(typeNode, ast.getTarget(), exceptions);
 					// Intentional fallthrough.
 				case 2:
 					// Typecheck variable.
@@ -580,7 +623,8 @@ public class DataHandling {
 					}
 					// Add the new variable declaration.
 					paramScope = analysis.createNewScope(paramScope);
-					ParamDeclaration pDecl = new ParamDeclaration(iVar.getVariableName(), type, ast.getChildAt(2),
+					ParamDeclaration pDecl = new ParamDeclaration(iVar.getVariableName(), type,
+							(ast.getChildAt(2).getData() == CNull.UNDEFINED ? null : ast.getChildAt(2)),
 							ast.getNodeModifiers(),
 							ast.getTarget());
 					params.add(pDecl);
@@ -607,8 +651,9 @@ public class DataHandling {
 					// Add the new variable declaration.
 					paramScope = analysis.createNewScope(paramScope);
 					ParamDeclaration pDecl = new ParamDeclaration(
-							iVar.getVariableName(), CClassType.AUTO.asLeftHandSideType(), null, ast.getNodeModifiers(),
-							ast.getTarget());
+							iVar.getVariableName(), Auto.LHSTYPE,
+							(ast.getChildAt(1).getData() == CNull.UNDEFINED ? null : ast.getChildAt(1)),
+							ast.getNodeModifiers(), ast.getTarget());
 					params.add(pDecl);
 					paramScope.addDeclaration(pDecl);
 					analysis.setTermScope(ivarAst, paramScope);
@@ -707,7 +752,8 @@ public class DataHandling {
 			int offset = 0;
 			if(args.length == 3) {
 				offset = 1;
-				if(!(args[0].isInstanceOf(CClassType.TYPE, null, env))) {
+				if(!args[0].isInstanceOf(CClassType.TYPE, null, env)
+						&& (!(args[0] instanceof CFunction) || !args[0].val().equals(__type_ref__.NAME))) {
 					throw new ConfigCompileException("Expecting a ClassType for parameter 1 to assign", t);
 				}
 			}
@@ -726,6 +772,8 @@ public class DataHandling {
 			if(children.size() < 2) {
 				return null;
 			}
+
+			// Generate warning for assigning a variable to itself.
 			if(children.get(0).getData() instanceof IVariable
 					&& children.get(1).getData() instanceof IVariable) {
 				if(((IVariable) children.get(0).getData()).getVariableName().equals(
@@ -735,18 +783,49 @@ public class DataHandling {
 							new CompilerWarning(msg, t, null));
 				}
 			}
-			{
-				// Check for declaration of variables named "pass" or "password" and see if it's defined as a
-				// secure_string. If not, warn.
-				if(children.get(0).getData() instanceof CClassType && children.get(1).getData() instanceof IVariable) {
-					boolean isString
-							= ((CClassType) children.get(0).getData()).getNativeType() == CString.class;
-					String varName = ((IVariable) children.get(1).getData()).getVariableName();
-					if((varName.equalsIgnoreCase("pass") || varName.equalsIgnoreCase("password"))
-							&& isString) {
-						String msg = "";
-						env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
-								new CompilerWarning(msg, t, FileOptions.SuppressWarning.CodeUpgradeNotices));
+
+			// Check for declaration of variables named "pass" or "password" and see if it's defined as a
+			// secure_string. If not, warn.
+			if(children.get(0).getData() instanceof CClassType && children.get(1).getData() instanceof IVariable) {
+				boolean isString
+						= ((CClassType) children.get(0).getData()).getNativeType() == CString.class;
+				String varName = ((IVariable) children.get(1).getData()).getVariableName();
+				if((varName.equalsIgnoreCase("pass") || varName.equalsIgnoreCase("password"))
+						&& isString) {
+					String msg = "";
+					env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
+							new CompilerWarning(msg, t, FileOptions.SuppressWarning.CodeUpgradeNotices));
+				}
+			}
+
+			// Rewrite "assign(type, var, val)" to "__unsafe_assign__(type, var, val)" if the typecheck cannot fail.
+			if(children.size() == 3) {
+				ParseTree typeNode = children.get(0);
+				ParseTree varNode = children.get(1);
+				ParseTree valNode = children.get(2);
+				if(typeNode.getData() instanceof CClassType declaredType
+						&& varNode.getData() instanceof IVariable) {
+					if(valNode.isConst()) {
+						CClassType valType = valNode.getData().typeof(env);
+						if((valType != CClassType.AUTO || declaredType == CClassType.AUTO)
+								&& InstanceofUtil.isInstanceof(valType, declaredType, env)) {
+							ParseTree newAssignNode = new ParseTree(new CFunction(__unsafe_assign__.NAME, t), fileOptions);
+							newAssignNode.addChild(typeNode);
+							newAssignNode.addChild(varNode);
+							newAssignNode.addChild(valNode);
+							return newAssignNode;
+						}
+					}
+					if(valNode.getData() instanceof CFunction cf && cf.getCachedFunction() != null
+							&& cf.getCachedFunction().getName().equals(__cast__.NAME) && valNode.numberOfChildren() == 2
+							&& valNode.getChildAt(1).getData() instanceof CClassType castType
+							&& (castType != CClassType.AUTO || declaredType == CClassType.AUTO)
+							&& InstanceofUtil.isInstanceof(castType, declaredType, env)) {
+						ParseTree newAssignNode = new ParseTree(new CFunction(__unsafe_assign__.NAME, t), fileOptions);
+						newAssignNode.addChild(typeNode);
+						newAssignNode.addChild(varNode);
+						newAssignNode.addChild(valNode);
+						return newAssignNode;
 					}
 				}
 			}
@@ -787,6 +866,16 @@ public class DataHandling {
 					return tree;
 				}
 			}
+
+			// Convert concatenated types such as "concat(concat(ms, lang), int)" to "ms.lang.int".
+			if(children.size() == 3) {
+				ParseTree typeRefNode = __type_ref__.createFromBareStringOrConcats(children.get(0));
+				if(typeRefNode != null) {
+					children.set(0, typeRefNode);
+					return ast;
+				}
+			}
+
 			return null;
 		}
 
@@ -1566,9 +1655,9 @@ public class DataHandling {
 		public static Procedure getProcedure(Target t, Environment env, Script parent, ParseTree... nodes) {
 			String name = "";
 			List<IVariable> vars = new ArrayList<>();
-			ParseTree tree = null;
+			List<Boolean> isVarArgs = new ArrayList<>();
 			List<String> varNames = new ArrayList<>();
-			boolean usesAssign = false;
+			boolean procDefinitelyNotConstant = false;
 			CClassType returnType = Auto.TYPE;
 			NodeModifiers modifiers = null;
 			if(nodes[0].getData().equals(CVoid.VOID) || nodes[0].getData().isInstanceOf(CClassType.TYPE, null, env)) {
@@ -1587,74 +1676,125 @@ public class DataHandling {
 			nodes[0].getNodeModifiers().merge(modifiers);
 			// We have to restore the variable list once we're done
 			IVariableList originalList = env.getEnv(GlobalEnv.class).GetVarList().clone();
-			List<Boolean> isVarArgs = new ArrayList<>();
-			for(int i = 0; i < nodes.length; i++) {
-				if(i == nodes.length - 1) {
-					tree = nodes[i];
-				} else {
-					boolean thisNodeIsAssign = false;
-					if(nodes[i].getData() instanceof CFunction) {
-						if((nodes[i].getData()).val().equals(assign.NAME)) {
-							thisNodeIsAssign = true;
-							if((nodes[i].getChildren().size() == 3 && Construct.IsDynamicHelper(nodes[i].getChildAt(0).getData()))
-									|| Construct.IsDynamicHelper(nodes[i].getChildAt(1).getData())) {
-								usesAssign = true;
-							}
-						} else if((nodes[i].getData()).val().equals(__autoconcat__.NAME)) {
-							throw new CREInvalidProcedureException("Invalid arguments defined for procedure", t);
-						}
-					}
-					env.getEnv(GlobalEnv.class).SetFlag("no-check-duplicate-assign", true);
-					env.getEnv(GlobalEnv.class).SetFlag("var-args-allowed", true);
-					Mixed cons = parent.eval(nodes[i], env);
 
-					env.getEnv(GlobalEnv.class).ClearFlag("var-args-allowed");
-					env.getEnv(GlobalEnv.class).ClearFlag("no-check-duplicate-assign");
-					if(i == 0) {
-						if(cons instanceof IVariable) {
-							throw new CREInvalidProcedureException("Anonymous Procedures are not allowed", t);
-						}
-						name = cons.val();
-					} else {
-						if(!(cons instanceof IVariable)) {
-							throw new CREInvalidProcedureException("You must use IVariables as the arguments", t);
-						}
-						IVariable ivar = null;
+			// Get code block node.
+			ParseTree code = nodes[nodes.length - 1];
+
+			// Execute default parameter values.
+			Mixed[] paramDefaultValues = new Mixed[nodes.length - 1];
+			for(int i = 1; i < nodes.length - 1; i++) { // Skip proc name and code block nodes.
+				ParseTree node = nodes[i];
+				if(node.getData() instanceof CFunction cf) {
+					if(cf.val().equals(assign.NAME) || cf.val().equals(__unsafe_assign__.NAME)) {
+						ParseTree paramDefaultValueNode = node.getChildAt(node.numberOfChildren() - 1);
+						env.getEnv(GlobalEnv.class).SetFlag(GlobalEnv.FLAG_VAR_ARGS_ALLOWED, true);
 						try {
-							Mixed c = cons;
-							String varName = ((IVariable) c).getVariableName();
-							isVarArgs.add(((IVariable) c).getDefinedType().isVariadicType());
-							if(varNames.contains(varName)) {
-								throw new CREInvalidProcedureException("Same variable name defined twice in " + name, t);
-							}
-							varNames.add(varName);
-							while(c instanceof IVariable) {
-								c = env.getEnv(GlobalEnv.class).GetVarList().get(((IVariable) c).getVariableName(), t,
-										true, env).ival();
-							}
-							if(!thisNodeIsAssign) {
-								//This is required because otherwise a default value that's already in the environment
-								//would end up getting set to the existing value, thereby leaking in the global env
-								//into this proc, if the call to the proc didn't have a value in this slot.
-								c = new CString("", t);
-							}
-							try {
-								ivar = new IVariable(((IVariable) cons).getDefinedType(),
-										((IVariable) cons).getVariableName(), c.clone(), t, env);
-							} catch (ConfigCompileException cce) {
-								throw new CREFormatException(cce.getMessage(), t);
-							}
-						} catch (CloneNotSupportedException ex) {
-							//
+							paramDefaultValues[i] = parent.eval(paramDefaultValueNode, env);
+						} finally {
+							env.getEnv(GlobalEnv.class).ClearFlag(GlobalEnv.FLAG_VAR_ARGS_ALLOWED);
 						}
-						vars.add(ivar);
+						if(paramDefaultValues[i] instanceof IVariable ivar) {
+							paramDefaultValues[i] = env.getEnv(GlobalEnv.class)
+									.GetVarList().get(ivar.getVariableName(), t, true, env).ival();
+						}
+
+						// Mark proc as not constant if a default parameter is not a constant.
+						if(Construct.IsDynamicHelper(paramDefaultValueNode.getData())) {
+							procDefinitelyNotConstant = true;
+						}
+						continue;
+					} else if(cf.val().equals(__autoconcat__.NAME)) {
+						throw new CREInvalidProcedureException("Invalid arguments defined for procedure", t);
 					}
 				}
+				paramDefaultValues[i] = null;
 			}
+
+			// Collect parameter IVariable objects with default parameter value assigned.
+			for(int i = 0; i < nodes.length - 1; i++) {
+				IVariable ivar;
+
+				// Get IVariable from parameter with type and/or default value.
+				Mixed paramDefaultValue = paramDefaultValues[i];
+				if(paramDefaultValue != null) {
+
+					// Construct temporary assign node to assign resulting default parameter value.
+					ParseTree assignNode = nodes[i];
+					CFunction assignFunc = (CFunction) assignNode.getData();
+					ParseTree tempAssignNode = new ParseTree(new CFunction(assignFunc.val(),
+							assignNode.getTarget()), assignNode.getFileOptions());
+					if(assignNode.numberOfChildren() == 3) {
+						tempAssignNode.addChild(assignNode.getChildAt(0));
+						tempAssignNode.addChild(assignNode.getChildAt(1));
+						tempAssignNode.addChild(new ParseTree(paramDefaultValue, assignNode.getFileOptions()));
+					} else {
+						tempAssignNode.addChild(assignNode.getChildAt(0));
+						tempAssignNode.addChild(new ParseTree(paramDefaultValue, assignNode.getFileOptions()));
+					}
+
+					// Assign resulting default parameter value to IVariable.
+					env.getEnv(GlobalEnv.class).SetFlag(GlobalEnv.FLAG_NO_CHECK_DUPLICATE_ASSIGN, true);
+					env.getEnv(GlobalEnv.class).SetFlag(GlobalEnv.FLAG_VAR_ARGS_ALLOWED, true);
+					try {
+						ivar = (IVariable) parent.eval(tempAssignNode, env);
+					} finally {
+						env.getEnv(GlobalEnv.class).ClearFlag(GlobalEnv.FLAG_VAR_ARGS_ALLOWED);
+						env.getEnv(GlobalEnv.class).ClearFlag(GlobalEnv.FLAG_NO_CHECK_DUPLICATE_ASSIGN);
+					}
+				} else {
+
+					// Execute node to obtain proc name or IVariable object.
+					env.getEnv(GlobalEnv.class).SetFlag(GlobalEnv.FLAG_NO_CHECK_DUPLICATE_ASSIGN, true);
+					env.getEnv(GlobalEnv.class).SetFlag(GlobalEnv.FLAG_VAR_ARGS_ALLOWED, true);
+					Mixed val;
+					try {
+						val = parent.eval(nodes[i], env);
+					} finally {
+						env.getEnv(GlobalEnv.class).ClearFlag(GlobalEnv.FLAG_VAR_ARGS_ALLOWED);
+						env.getEnv(GlobalEnv.class).ClearFlag(GlobalEnv.FLAG_NO_CHECK_DUPLICATE_ASSIGN);
+					}
+
+					// Handle proc name node.
+					if(i == 0) {
+						if(val instanceof IVariable) {
+							throw new CREInvalidProcedureException("Anonymous Procedures are not allowed", t);
+						}
+						name = val.val();
+						continue;
+					}
+
+					// Handle proc parameter node.
+					if(!(val instanceof IVariable)) {
+						throw new CREInvalidProcedureException("You must use IVariables as the arguments", t);
+					}
+					ivar = (IVariable) val;
+				}
+
+				// Check for duplicate parameter names.
+				String varName = ivar.getVariableName();
+				if(varNames.contains(varName)) {
+					throw new CREInvalidProcedureException("Same variable name defined twice in " + name, t);
+				}
+				varNames.add(varName);
+
+				// Get IVariable value.
+				Mixed ivarVal = (paramDefaultValue != null ? paramDefaultValue : new CString("", t));
+
+				try {
+					// Store IVariable object clone.
+					vars.add(new IVariable(ivar.getDefinedType(), ivar.getVariableName(), ivarVal, ivar.getTarget(), env));
+					isVarArgs.add(ivar.getDefinedType().isVariadicType());
+				} catch(ConfigCompileException ex) {
+					throw ex.asRuntimeException();
+				}
+			}
+
+			// Restore variable list.
 			env.getEnv(GlobalEnv.class).SetVarList(originalList);
-			Procedure myProc = new Procedure(name, returnType, vars, isVarArgs,
-					nodes[0].getNodeModifiers().getComment(), tree, t);
-			if(usesAssign) {
+
+			// Create and return procedure.
+			Procedure myProc = new Procedure(name, returnType, vars, isVarArgs, nodes[0].getNodeModifiers().getComment(), code, t);
+			if(procDefinitelyNotConstant) {
 				myProc.definitelyNotConstant();
 			}
 			return myProc;
@@ -1669,8 +1809,9 @@ public class DataHandling {
 		public Scope linkScope(StaticAnalysis analysis, Scope parentScope, ParseTree ast,
 				Environment env, Set<ConfigCompileException> exceptions) {
 
-			// Handle not enough arguments.
+			// Handle not enough arguments. Link child scopes, but return parent scope.
 			if(ast.numberOfChildren() < 2) {
+				super.linkScope(analysis, parentScope, ast, env, exceptions);
 				return parentScope;
 			}
 
@@ -1726,6 +1867,9 @@ public class DataHandling {
 
 			// Allow procedures to perform lookups in the decl scope.
 			paramScope.addSpecificParent(declScope, Namespace.PROCEDURE);
+
+			// Create returnable declaration in the inner root scope.
+			paramScope.addDeclaration(new ReturnableDeclaration(retType, ast.getNodeModifiers(), ast.getTarget()));
 
 			// Return the declaration scope. Parameters and their default values are not accessible after the procedure.
 			return declScope;
@@ -1857,7 +2001,7 @@ public class DataHandling {
 									if(value instanceof CString) {
 										builder.append("'")
 												.append(value.val().replace("\\", "\\\\")
-														.replaceAll("\t", "\\\\t").replaceAll("\n", "\\\\n")
+														.replace("\t", "\\t").replace("\n", "\\n")
 														.replace("'", "\\'"))
 												.append("'");
 									} else {
@@ -2608,7 +2752,7 @@ public class DataHandling {
 		@Override
 		public String docs() {
 			return "void {key, value} Stores a value in the global storage register."
-					+ " An arbitrary value is stored with the given key, and can be retreived using import."
+					+ " An arbitrary value is stored with the given key, and can be retrieved using import."
 					+ " If the value is already stored, it is overwritten. See {{function|import}}."
 					+ " The reference to the value is stored, not a copy of the value, so in the case of"
 					+ " arrays, manipulating the contents of the array will manipulate the stored value. An array may"
@@ -2774,11 +2918,15 @@ public class DataHandling {
 				children.add(node);
 				newNode.setChildren(children);
 				Script fakeScript = Script.GenerateScript(newNode, myEnv.getEnv(GlobalEnv.class).GetLabel(), null);
-				myEnv.getEnv(GlobalEnv.class).SetFlag("closure-warn-overwrite", true);
-				myEnv.getEnv(GlobalEnv.class).SetFlag("var-args-allowed", true);
-				Mixed ret = MethodScriptCompiler.execute(newNode, myEnv, null, fakeScript);
-				myEnv.getEnv(GlobalEnv.class).ClearFlag("var-args-allowed");
-				myEnv.getEnv(GlobalEnv.class).ClearFlag("closure-warn-overwrite");
+				myEnv.getEnv(GlobalEnv.class).SetFlag(GlobalEnv.FLAG_CLOSURE_WARN_OVERWRITE, true);
+				myEnv.getEnv(GlobalEnv.class).SetFlag(GlobalEnv.FLAG_VAR_ARGS_ALLOWED, true);
+				Mixed ret;
+				try {
+					ret = MethodScriptCompiler.execute(newNode, myEnv, null, fakeScript);
+				} finally {
+					myEnv.getEnv(GlobalEnv.class).ClearFlag(GlobalEnv.FLAG_VAR_ARGS_ALLOWED);
+					myEnv.getEnv(GlobalEnv.class).ClearFlag(GlobalEnv.FLAG_CLOSURE_WARN_OVERWRITE);
+				}
 				if(!(ret instanceof IVariable)) {
 					throw new CRECastException("Arguments sent to " + getName() + " barring the last) must be ivariables", t);
 				}
@@ -2810,10 +2958,19 @@ public class DataHandling {
 				return parentScope;
 			}
 
-			// Handle optional return type argument.
+			// Handle optional return type argument (CClassType or CVoid, default to AUTO).
 			int ind = 0;
-			if(ast.getChildAt(ind).getData().isInstanceOf(CClassType.TYPE, null, env)) {
-				analysis.linkScope(parentScope, ast.getChildAt(ind++), env, exceptions);
+			LeftHandSideType retType;
+			if(ast.getChildAt(ind).getData() instanceof CClassType) {
+				retType = ((CClassType) ast.getChildAt(ind++).getData()).asLeftHandSideType();
+			} else if(ast.getChildAt(ind).getData() instanceof LeftHandSideType lhst) {
+				retType = lhst;
+				ind++;
+			} else if(ast.getChildAt(ind).getData().equals(CVoid.VOID)) {
+				ind++;
+				retType = CVoid.TYPE.asLeftHandSideType();
+			} else {
+				retType = Auto.LHSTYPE;
 			}
 
 			// Create parameter scope. Set parent scope if this closure type is allowed to resolve in the parent scope.
@@ -2839,9 +2996,17 @@ public class DataHandling {
 				paramScope = scopes[0];
 			}
 
+			// Create returnable declaration in the inner root scope.
+			paramScope.addDeclaration(new ReturnableDeclaration(retType, ast.getNodeModifiers(), ast.getTarget()));
+
+			// Create breakable and continuable bound declarations to prevent resolving to parent scope.
+			Scope codeParentScope = analysis.createNewScope(paramScope);
+			codeParentScope.addDeclaration(new BreakableBoundDeclaration(ast.getNodeModifiers(), ast.getTarget()));
+			codeParentScope.addDeclaration(new ContinuableBoundDeclaration(ast.getNodeModifiers(), ast.getTarget()));
+
 			// Handle closure code.
 			ParseTree code = ast.getChildAt(ast.numberOfChildren() - 1);
-			analysis.linkScope(paramScope, code, env, exceptions);
+			analysis.linkScope(codeParentScope, code, env, exceptions);
 
 			// Return the parent scope, as parameters and their default values are not accessible after the closure.
 			return parentScope;
@@ -2958,11 +3123,15 @@ public class DataHandling {
 				children.add(node);
 				newNode.setChildren(children);
 				Script fakeScript = Script.GenerateScript(newNode, myEnv.getEnv(GlobalEnv.class).GetLabel(), null);
-				myEnv.getEnv(GlobalEnv.class).SetFlag("closure-warn-overwrite", true);
-				myEnv.getEnv(GlobalEnv.class).SetFlag("var-args-allowed", true);
-				Mixed ret = MethodScriptCompiler.execute(newNode, myEnv, null, fakeScript);
-				myEnv.getEnv(GlobalEnv.class).ClearFlag("var-args-allowed");
-				myEnv.getEnv(GlobalEnv.class).ClearFlag("closure-warn-overwrite");
+				myEnv.getEnv(GlobalEnv.class).SetFlag(GlobalEnv.FLAG_CLOSURE_WARN_OVERWRITE, true);
+				myEnv.getEnv(GlobalEnv.class).SetFlag(GlobalEnv.FLAG_VAR_ARGS_ALLOWED, true);
+				Mixed ret;
+				try {
+					ret = MethodScriptCompiler.execute(newNode, myEnv, null, fakeScript);
+				} finally {
+					myEnv.getEnv(GlobalEnv.class).ClearFlag(GlobalEnv.FLAG_VAR_ARGS_ALLOWED);
+					myEnv.getEnv(GlobalEnv.class).ClearFlag(GlobalEnv.FLAG_CLOSURE_WARN_OVERWRITE);
+				}
 				if(!(ret instanceof IVariable)) {
 					throw new CRECastException("Arguments sent to " + getName() + " barring the last) must be ivariables", t);
 				}
@@ -3365,7 +3534,38 @@ public class DataHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			return new CInt((long) ArgumentValidation.getNumber(args[0], t, env), t);
+			Mixed arg = args[0];
+			if(arg instanceof CMutablePrimitive) {
+				arg = ((CMutablePrimitive) arg).get();
+			}
+			if(arg instanceof CInt) {
+				return arg;
+			}
+			long i;
+			if(arg instanceof CDouble) {
+				i = (long) ((CDouble) arg).getDouble();
+			} else if(arg instanceof CString) {
+				try {
+					if(arg.val().indexOf('.') > -1) {
+						i = (long) Double.parseDouble(arg.val());
+					} else {
+						i = Long.parseLong(arg.val());
+					}
+				} catch (NumberFormatException e) {
+					throw new CRECastException("Expecting a number, but received \"" + arg.val() + "\" instead", t);
+				}
+			} else if(arg instanceof CBoolean) {
+				if(((CBoolean) arg).getBoolean()) {
+					i = 1;
+				} else {
+					i = 0;
+				}
+			} else if(arg instanceof CNull) {
+				i = 0;
+			} else {
+				throw new CRECastException("Expecting a number, but received type " + arg.getName() + " instead", t);
+			}
+			return new CInt(i, t);
 		}
 
 		@Override
@@ -3800,6 +4000,15 @@ public class DataHandling {
 				if(root == null) {
 					return new CString("", t);
 				}
+
+				// Unwrap single value in __statements__() and return its string value.
+				if(root.getChildren().size() == 1 && root.getChildAt(0).getData() instanceof CFunction
+						&& ((CFunction) root.getChildAt(0).getData()).getFunction().getName().equals(__statements__.NAME)
+						&& root.getChildAt(0).getChildren().size() == 1) {
+					return new CString(parent.seval(root.getChildAt(0).getChildAt(0), env).val(), t);
+				}
+
+				// Concat string values of all children and return the result.
 				StringBuilder b = new StringBuilder();
 				int count = 0;
 				for(ParseTree child : root.getChildren()) {

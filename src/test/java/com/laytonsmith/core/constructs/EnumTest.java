@@ -8,11 +8,7 @@ package com.laytonsmith.core.constructs;
 import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.natives.interfaces.MEnumType;
 import com.laytonsmith.core.natives.interfaces.MEnumTypeValue;
-import com.laytonsmith.testing.StaticTest;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
+import com.laytonsmith.testing.AbstractIntegrationTest;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -22,26 +18,9 @@ import static org.junit.Assert.fail;
  *
  * @author Cailin
  */
-public class EnumTest {
+public class EnumTest extends AbstractIntegrationTest {
 
 	public EnumTest() {
-	}
-
-	@BeforeClass
-	public static void setUpClass() {
-		StaticTest.InstallFakeServerFrontend();
-	}
-
-	@AfterClass
-	public static void tearDownClass() {
-	}
-
-	@Before
-	public void setUp() {
-	}
-
-	@After
-	public void tearDown() {
 	}
 
 	@Test(expected = ClassNotFoundException.class)

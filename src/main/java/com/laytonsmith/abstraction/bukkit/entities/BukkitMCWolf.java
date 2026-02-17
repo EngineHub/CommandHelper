@@ -4,6 +4,8 @@ import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.entities.MCWolf;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
 import org.bukkit.DyeColor;
+import org.bukkit.NamespacedKey;
+import org.bukkit.Registry;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Wolf;
@@ -59,10 +61,19 @@ public class BukkitMCWolf extends BukkitMCTameable implements MCWolf {
 
 	@Override
 	public void setInterested(boolean interested) {
-		try {
-			w.setInterested(interested);
-		} catch(NoSuchMethodError ex) {
-			// probably before 1.19
+		w.setInterested(interested);
+	}
+
+	@Override
+	public Variant getWolfVariant() {
+		return Variant.valueOf(w.getVariant().getKey().getKey().toUpperCase());
+	}
+
+	@Override
+	public void setWolfVariant(Variant variant) {
+		Wolf.Variant v = Registry.WOLF_VARIANT.get(NamespacedKey.minecraft(variant.name().toLowerCase()));
+		if(v != null) {
+			w.setVariant(v);
 		}
 	}
 }

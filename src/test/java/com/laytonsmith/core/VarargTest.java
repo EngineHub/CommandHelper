@@ -3,6 +3,7 @@ package com.laytonsmith.core;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.testing.AbstractIntegrationTest;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import static com.laytonsmith.testing.StaticTest.*;
 import org.junit.Before;
@@ -12,14 +13,13 @@ import static org.mockito.Mockito.*;
 /**
  *
  */
-public class VarargTest {
+public class VarargTest extends AbstractIntegrationTest {
 
 	Environment env;
 	MCPlayer fakePlayer;
 
 	@Before
 	public void setup() throws Exception {
-		InstallFakeServerFrontend();
 		env = Static.GenerateStandaloneEnvironment();
 		fakePlayer = GetOnlinePlayer();
 	}

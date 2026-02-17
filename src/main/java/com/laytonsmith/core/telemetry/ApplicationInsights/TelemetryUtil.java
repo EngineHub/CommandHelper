@@ -22,7 +22,7 @@ public class TelemetryUtil {
 
 	public TelemetryUtil(String instrumentationKey) {
 		this.instrumentationKey = instrumentationKey;
-		this.iKeyDashless = instrumentationKey.replaceAll("-", "");
+		this.iKeyDashless = instrumentationKey.replace("-", "");
 	}
 
 	private String sessionName = "untracked";

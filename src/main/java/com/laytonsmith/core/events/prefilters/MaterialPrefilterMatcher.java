@@ -3,7 +3,6 @@ package com.laytonsmith.core.events.prefilters;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.blocks.MCMaterial.MCVanillaMaterial;
-import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ParseTree;
@@ -66,12 +65,7 @@ public abstract class MaterialPrefilterMatcher<T extends BindableEvent> extends 
 			throws ConfigCompileException, ConfigCompileGroupException, ConfigRuntimeException {
 		if(node.isConst() && !node.getData().equals(CNull.NULL)) {
 			try {
-				MCVanillaMaterial mat = MCVanillaMaterial.valueOf(node.getData().val());
-				if(!mat.existsIn(MCVersion.CURRENT)) {
-					env.getEnv(CompilerEnvironment.class).addCompilerWarning(node.getFileOptions(),
-							new CompilerWarning("\"" + node.getData() + "\" is no longer a valid material type",
-									node.getTarget(), null));
-				}
+				MCVanillaMaterial.valueOf(node.getData().val());
 			} catch (IllegalArgumentException ex) {
 				env.getEnv(CompilerEnvironment.class).addCompilerWarning(node.getFileOptions(),
 						new CompilerWarning("\"" + node.getData() + "\" is not a valid material type, this will never match."
@@ -90,5 +84,10 @@ public abstract class MaterialPrefilterMatcher<T extends BindableEvent> extends 
 	}
 
 	protected abstract MCMaterial getMaterial(T event);
+
+	@Override
+	public int getPriority() {
+		return -1;
+	}
 
 }

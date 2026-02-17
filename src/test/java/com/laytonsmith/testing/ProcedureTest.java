@@ -18,7 +18,7 @@ import static org.mockito.Mockito.verify;
  *
  *
  */
-public class ProcedureTest {
+public class ProcedureTest extends AbstractIntegrationTest {
 
 	MCPlayer fakePlayer;
 

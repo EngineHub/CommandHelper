@@ -12,6 +12,7 @@ import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import com.laytonsmith.testing.AbstractIntegrationTest;
 import com.laytonsmith.testing.C;
 import com.laytonsmith.testing.StaticTest;
 import org.junit.Before;
@@ -33,14 +34,13 @@ import static org.mockito.Mockito.verify;
  *
  *
  */
-public class ArrayHandlingTest {
+public class ArrayHandlingTest extends AbstractIntegrationTest {
 
 	MCPlayer fakePlayer;
 	CArray commonArray;
 	com.laytonsmith.core.environments.Environment env;
 
 	public ArrayHandlingTest() throws Exception {
-		StaticTest.InstallFakeServerFrontend();
 		env = Static.GenerateStandaloneEnvironment();
 		env = env.cloneAndAdd(new CommandHelperEnvironment());
 	}
@@ -431,6 +431,12 @@ public class ArrayHandlingTest {
 	public void testArrayGetCloneRecursiveArray() throws Exception {
 		Run("@a = array(); @b = array(); @a[0] = @b; @b[0] = @a; @c = @a[]; msg((ref_equals(@c[0], @c[0][0][0]) && ref_equals(@c, @c[0][0])));", fakePlayer);
 		verify(fakePlayer).sendMessage("true");
+	}
+
+	@Test
+	public void testArrayGetDefault() throws Exception {
+		assertEquals("default", SRun("array_get(associative_array(), 'key', 'default')", null));
+		assertEquals("default", SRun("array_get(array(), 1, 'default')", null));
 	}
 
 	@Test

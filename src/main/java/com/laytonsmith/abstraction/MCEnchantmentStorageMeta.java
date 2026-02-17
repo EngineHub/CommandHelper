@@ -1,5 +1,7 @@
 package com.laytonsmith.abstraction;
 
+import com.laytonsmith.abstraction.enums.MCEnchantment;
+
 import java.util.Map;
 
 public interface MCEnchantmentStorageMeta extends MCItemMeta {

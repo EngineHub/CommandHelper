@@ -5,9 +5,14 @@ import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.annotations.datasource;
 import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.MethodScriptFileLocations;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.persistence.io.ConnectionMixin;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
+import org.sqlite.SQLiteJDBCLoader;
+import org.sqlite.util.OSInfo;
+
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.sql.DriverManager;
@@ -61,6 +66,22 @@ public class SQLiteDataSource extends SQLDataSource {
 		mixin = getConnectionMixin();
 		try {
 			Class.forName(org.sqlite.JDBC.class.getName());
+			// Set native library override path if not already set. (e.g. -Dorg.sqlite.lib.path="/path/to/lib")
+			if(System.getProperty("org.sqlite.lib.path") == null) {
+				System.setProperty("org.sqlite.lib.path", new File(MethodScriptFileLocations.getDefault().getConfigDirectory(),
+						"sqlite/native/" + OSInfo.getNativeLibFolderPathForCurrentOS()).getAbsolutePath());
+			}
+			try {
+				// Load native library before connection to detect when the library is missing.
+				// This is done in SQLiteProfile as well.
+				SQLiteJDBCLoader.initialize();
+			} catch (Exception ex) {
+				throw new DataSourceException("Failed to load a native sqlite library for your platform."
+						+ " You can download the library file from"
+						+ " https://github.com/xerial/sqlite-jdbc/tree/master/src/main/resources/org/sqlite/native/"
+						+ OSInfo.getNativeLibFolderPathForCurrentOS() + " and place it into "
+						+ System.getProperty("org.sqlite.lib.path"));
+			}
 			path = mixin.getPath();
 			connect();
 			long startTime = System.currentTimeMillis();
@@ -88,7 +109,7 @@ public class SQLiteDataSource extends SQLDataSource {
 				}
 			}
 		} catch (ClassNotFoundException | UnsupportedOperationException | IOException | SQLException ex) {
-			throw new DataSourceException("An error occured while setting up a connection to the SQLite database", ex);
+			throw new DataSourceException("An error occurred while setting up a connection to the SQLite database", ex);
 		} finally {
 			if(DO_DISCONNECTS) {
 				disconnect();

@@ -7,9 +7,9 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.AbstractCompileException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.functions.Exceptions;
+import com.laytonsmith.testing.AbstractIntegrationTest;
 import com.laytonsmith.testing.StaticTest;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -28,14 +28,9 @@ import static org.mockito.Mockito.verify;
 /**
  *
  */
-public class NewExceptionHandlingTest {
+public class NewExceptionHandlingTest extends AbstractIntegrationTest {
 
 	static Set<Class<? extends Environment.EnvironmentImpl>> envs = Environment.getDefaultEnvClasses();
-
-	@BeforeClass
-	public static void setUpClass() {
-		StaticTest.InstallFakeServerFrontend();
-	}
 
 	public String optimize(String script) throws Exception {
 		return OptimizationUtilities.optimize(script, null, envs, null, true, true);
@@ -50,8 +45,8 @@ public class NewExceptionHandlingTest {
 
 	@Test
 	public void testBasicKeywordUsage() throws Exception {
-		assertEquals("__statements__(complex_try(__statements__(noop()),assign(ms.lang.IOException,@e,null),__statements__(noop()),"
-				+ "assign(ms.lang.Exception,@e,null),__statements__(noop()),__statements__(noop())))",
+		assertEquals("__statements__(complex_try(__statements__(noop()),__unsafe_assign__(ms.lang.IOException,@e,null),__statements__(noop()),"
+				+ "__unsafe_assign__(ms.lang.Exception,@e,null),__statements__(noop()),__statements__(noop())))",
 				optimize("try { } catch (IOException @e){ } catch (Exception @e){ } finally { }"));
 	}
 

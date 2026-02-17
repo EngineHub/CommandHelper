@@ -26,7 +26,7 @@ public class BukkitMCSuspiciousStewMeta extends BukkitMCItemMeta implements MCSu
 	@Override
 	public boolean addCustomEffect(MCPotionEffectType type, int strength, int ticks, boolean ambient, boolean particles, boolean icon, boolean force, Target t) {
 		if(ticks < 0) {
-			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_X)) {
+			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_4)) {
 				ticks = -1;
 			} else {
 				ticks = Integer.MAX_VALUE;

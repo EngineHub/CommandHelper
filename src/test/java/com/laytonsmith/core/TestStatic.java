@@ -9,6 +9,7 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.testing.AbstractIntegrationTest;
 import com.laytonsmith.testing.C;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -25,7 +26,7 @@ import static org.junit.Assert.fail;
  *
  *
  */
-public class TestStatic {
+public class TestStatic extends AbstractIntegrationTest {
 
 	Target t = Target.UNKNOWN;
 	Environment env;
@@ -115,6 +116,22 @@ public class TestStatic {
 		assertTrue(Static.resolveConstruct("1.1", Target.UNKNOWN, env) instanceof CDouble);
 		assertTrue(Static.resolveConstruct("astring", Target.UNKNOWN, env) instanceof CString);
 		assertTrue(Static.resolveConstruct("string", Target.UNKNOWN, env) instanceof CClassType);
+		assertTrue(getResolveConstructLong("0xFF", env) == 0xFF);
+		assertTrue(getResolveConstructLong("0xABCDEF0123456789", env) == 0xABCDEF0123456789L); // All chars.
+		assertTrue(getResolveConstructLong("0xFFAFFFFFFFF0FFFF", env) == 0xFFAFFFFFFFF0FFFFL);
+		assertTrue(getResolveConstructLong("0xFFFFFFFFFFFFFFFF", env) == 0xFFFFFFFFFFFFFFFFL); // Max value.
+		assertTrue(getResolveConstructLong("0b100", env) == 0b100);
+		assertTrue(getResolveConstructLong("0b1111011111111011111111111011111111111111111111110111111111111110", env)
+				== 0b1111011111111011111111111011111111111111111111110111111111111110L);
+		assertTrue(getResolveConstructLong("0b1111111111111111111111111111111111111111111111111111111111111111", env)
+				== 0b1111111111111111111111111111111111111111111111111111111111111111L); // Max value.
+		assertTrue(getResolveConstructLong("0o76543210", env) == 076543210L); // All chars.
+		assertTrue(getResolveConstructLong("0o1737745677477125767277", env) == 01737745677477125767277L);
+		assertTrue(getResolveConstructLong("0o1777777777777777777777", env) == 01777777777777777777777L); // Max value.
+	}
+
+	private static long getResolveConstructLong(String val, Environment env) {
+		return ((CInt) Static.resolveConstruct(val, Target.UNKNOWN, env)).getInt();
 	}
 
 }

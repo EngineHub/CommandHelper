@@ -1,11 +1,15 @@
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.MCItemStack;
+import com.laytonsmith.abstraction.MCRecipeChoice;
+import com.laytonsmith.abstraction.MCRecipeChoice.ExactChoice;
+import com.laytonsmith.abstraction.MCRecipeChoice.MaterialChoice;
 import com.laytonsmith.abstraction.MCShapedRecipe;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,18 +54,23 @@ public class BukkitMCShapedRecipe extends BukkitMCRecipe implements MCShapedReci
 	}
 
 	@Override
-	public Map<Character, MCMaterial[]> getIngredientMap() {
-		Map<Character, MCMaterial[]> ret = new HashMap<>();
-		for(Map.Entry<Character, RecipeChoice> e : recipe.getChoiceMap().entrySet()) {
-			if(e.getValue() == null) {
-				ret.put(e.getKey(), null);
-			} else {
-				List<Material> choices = ((RecipeChoice.MaterialChoice) e.getValue()).getChoices();
-				MCMaterial[] list = new MCMaterial[choices.size()];
-				for(int i = 0; i < choices.size(); i++) {
-					list[i] = BukkitMCMaterial.valueOfConcrete(choices.get(i));
+	public Map<Character, MCRecipeChoice> getIngredientMap() {
+		Map<Character, MCRecipeChoice> ret = new HashMap<>();
+		for(Map.Entry<Character, RecipeChoice> entry : recipe.getChoiceMap().entrySet()) {
+			if(entry.getValue() == null) {
+				ret.put(entry.getKey(), null);
+			} else if(entry.getValue() instanceof RecipeChoice.MaterialChoice materialChoice) {
+				MCRecipeChoice.MaterialChoice choice = new MCRecipeChoice.MaterialChoice();
+				for(Material material : materialChoice.getChoices()) {
+					choice.addMaterial(BukkitMCMaterial.valueOfConcrete(material));
 				}
-				ret.put(e.getKey(), list);
+				ret.put(entry.getKey(), choice);
+			} else if(entry.getValue() instanceof RecipeChoice.ExactChoice exactChoice) {
+				MCRecipeChoice.ExactChoice choice = new MCRecipeChoice.ExactChoice();
+				for(ItemStack itemStack : exactChoice.getChoices()) {
+					choice.addItem(new BukkitMCItemStack(itemStack));
+				}
+				ret.put(entry.getKey(), choice);
 			}
 		}
 		return ret;
@@ -83,26 +92,25 @@ public class BukkitMCShapedRecipe extends BukkitMCRecipe implements MCShapedReci
 	}
 
 	@Override
-	public void setIngredient(char key, MCItemStack... ingredients) {
-		ItemStack[] concrete = new ItemStack[ingredients.length];
-		for(int i = 0; i < ingredients.length; i++) {
-			concrete[i] = (ItemStack) ingredients[i].getHandle();
+	public void setIngredient(char key, MCRecipeChoice ingredients) {
+		if(ingredients instanceof MCRecipeChoice.ExactChoice) {
+			List<ItemStack> choice = new ArrayList<>();
+			for(MCItemStack itemStack : ((ExactChoice) ingredients).getItems()) {
+				choice.add((ItemStack) itemStack.getHandle());
+			}
+			recipe.setIngredient(key, new RecipeChoice.ExactChoice(choice));
+		} else if(ingredients instanceof MCRecipeChoice.MaterialChoice) {
+			List<Material> choice = new ArrayList<>();
+			for(MCMaterial material : ((MaterialChoice) ingredients).getMaterials()) {
+				choice.add((Material) material.getHandle());
+			}
+			recipe.setIngredient(key, new RecipeChoice.MaterialChoice(choice));
 		}
-		recipe.setIngredient(key, new RecipeChoice.ExactChoice(concrete));
 	}
 
 	@Override
 	public void setIngredient(char key, MCMaterial mat) {
 		recipe.setIngredient(key, (Material) mat.getHandle());
-	}
-
-	@Override
-	public void setIngredient(char key, MCMaterial... ingredients) {
-		Material[] concrete = new Material[ingredients.length];
-		for(int i = 0; i < ingredients.length; i++) {
-			concrete[i] = (Material) ingredients[i].getHandle();
-		}
-		recipe.setIngredient(key, new RecipeChoice.MaterialChoice(concrete));
 	}
 
 	@Override

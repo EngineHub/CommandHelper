@@ -1,6 +1,7 @@
 package com.laytonsmith.abstraction.bukkit;
 
-import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
+import com.destroystokyo.paper.profile.PlayerProfile;
+import com.destroystokyo.paper.profile.ProfileProperty;
 import com.laytonsmith.abstraction.MCPlayerProfile;
 import com.laytonsmith.abstraction.MCProfileProperty;
 
@@ -9,31 +10,28 @@ import java.util.UUID;
 
 public class BukkitMCPlayerProfile implements MCPlayerProfile {
 
-	Object pp;
+	PlayerProfile pp;
 
 	public BukkitMCPlayerProfile(Object pp) {
-		this.pp = pp;
+		this.pp = (PlayerProfile) pp;
 	}
 
 	@Override
 	public String getName() {
-		return (String) ReflectionUtils.invokeMethod(this.pp, "getName");
+		return this.pp.getName();
 	}
 
 	@Override
 	public UUID getId() {
-		return (UUID) ReflectionUtils.invokeMethod(this.pp, "getId");
+		return this.pp.getId();
 	}
 
 	@Override
 	public MCProfileProperty getProperty(String key) {
-		Set<?> properties = (Set<?>) ReflectionUtils.invokeMethod(this.pp, "getProperties");
-		for(Object property : properties) {
-			if(ReflectionUtils.invokeMethod(property, "getName").equals(key)) {
-				String name = (String) ReflectionUtils.invokeMethod(property, "getName");
-				String value = (String) ReflectionUtils.invokeMethod(property, "getValue");
-				String signature = (String) ReflectionUtils.invokeMethod(property, "getSignature");
-				return new MCProfileProperty(name, value, signature);
+		Set<ProfileProperty> properties = this.pp.getProperties();
+		for(ProfileProperty p : properties) {
+			if(p.getName().equals(key)) {
+				return new MCProfileProperty(p.getName(), p.getValue(), p.getSignature());
 			}
 		}
 		return null;
@@ -41,15 +39,12 @@ public class BukkitMCPlayerProfile implements MCPlayerProfile {
 
 	@Override
 	public void setProperty(MCProfileProperty property) {
-		Class clz;
-		try {
-			clz = Class.forName("com.destroystokyo.paper.profile.ProfileProperty");
-		} catch (ClassNotFoundException e) {
-			return;
-		}
-		Object profileProperty = ReflectionUtils.newInstance(clz, new Class[]{String.class, String.class, String.class},
-				new Object[]{property.getName(), property.getValue(), property.getSignature()});
-		ReflectionUtils.invokeMethod(this.pp, "setProperty", profileProperty);
+		this.pp.setProperty(new ProfileProperty(property.getName(), property.getValue(), property.getValue()));
+	}
+
+	@Override
+	public boolean removeProperty(String key) {
+		return this.pp.removeProperty(key);
 	}
 
 	@Override

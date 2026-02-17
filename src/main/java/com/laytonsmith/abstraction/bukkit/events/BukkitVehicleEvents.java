@@ -30,16 +30,20 @@ public class BukkitVehicleEvents {
 	public static class BukkitMCVehicleEntityCollideEvent extends BukkitMCVehicleEvent
 			implements MCVehicleEntityCollideEvent {
 
-		VehicleEntityCollisionEvent vec;
+		private final VehicleEntityCollisionEvent vec;
+		private MCEntity entity;
 
-		public BukkitMCVehicleEntityCollideEvent(VehicleCollisionEvent event) {
+		public BukkitMCVehicleEntityCollideEvent(VehicleEntityCollisionEvent event) {
 			super(event);
-			vec = (VehicleEntityCollisionEvent) event;
+			vec = event;
 		}
 
 		@Override
 		public MCEntity getEntity() {
-			return BukkitConvertor.BukkitGetCorrectEntity(vec.getEntity());
+			if(entity == null) {
+				entity = BukkitConvertor.BukkitGetCorrectEntity(vec.getEntity());
+			}
+			return entity;
 		}
 
 		@Override
@@ -185,7 +189,8 @@ public class BukkitVehicleEvents {
 
 	public static class BukkitMCVehicleEvent implements MCVehicleEvent {
 
-		VehicleEvent ve;
+		private final VehicleEvent ve;
+		private MCEntity vehicle;
 
 		public BukkitMCVehicleEvent(VehicleEvent event) {
 			ve = event;
@@ -193,7 +198,10 @@ public class BukkitVehicleEvents {
 
 		@Override
 		public MCEntity getVehicle() {
-			return BukkitConvertor.BukkitGetCorrectEntity(ve.getVehicle());
+			if(vehicle == null) {
+				vehicle = BukkitConvertor.BukkitGetCorrectEntity(ve.getVehicle());
+			}
+			return vehicle;
 		}
 
 		@Override

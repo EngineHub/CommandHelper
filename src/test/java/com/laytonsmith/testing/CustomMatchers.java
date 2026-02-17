@@ -1,7 +1,6 @@
 package com.laytonsmith.testing;
 
 import org.hamcrest.Description;
-import org.hamcrest.Factory;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 
@@ -10,7 +9,6 @@ import org.hamcrest.TypeSafeMatcher;
  */
 public class CustomMatchers {
 
-	@Factory
 	public static <T> Matcher<String> regexMatch(String regex) {
 		return new RegexMatch(regex);
 	}

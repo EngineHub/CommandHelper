@@ -48,7 +48,13 @@ public class Crypto {
 
 	private static CString getHMAC(String algorithm, Target t, Mixed[] args, Environment env) {
 		try {
-			SecretKeySpec signingKey = new SecretKeySpec(args[0].val().getBytes(), algorithm);
+			byte[] key;
+			if(args[0] instanceof CByteArray) {
+				key = ((CByteArray) args[0]).asByteArrayCopy();
+			} else {
+				key = args[0].val().getBytes();
+			}
+			SecretKeySpec signingKey = new SecretKeySpec(key, algorithm);
 			Mac mac = Mac.getInstance(algorithm);
 			mac.init(signingKey);
 			byte[] hmac = mac.doFinal(getByteArrayFromArg(args[1], env));
@@ -63,6 +69,8 @@ public class Crypto {
 		byte[] val;
 		if(c.isInstanceOf(CSecureString.TYPE, null, env)) {
 			val = ArrayUtils.charToBytes(((CSecureString) c).getDecryptedCharArray());
+		} else if(c instanceof CByteArray) {
+			val = ((CByteArray) c).asByteArrayCopy();
 		} else {
 			val = c.val().getBytes();
 		}
@@ -159,9 +167,11 @@ public class Crypto {
 
 		@Override
 		public String docs() {
-			return "string {val} Returns the md5 hash of the specified string. The md5 hash is no longer considered secure, so you should"
-					+ " not use it for storage of sensitive data, however for general hashing, it is a quick and easy solution. md5 is"
-					+ " a one way hashing algorithm. This function is aware of and compatible with secure_string.";
+			return "string {val} Returns the md5 hash of the specified string or byte array."
+					+ " The md5 hash is no longer considered secure, so you should not use it for storage of"
+					+ " sensitive data, however for general hashing, it is a quick and easy solution."
+					+ " md5 is a one way hashing algorithm."
+					+ " This function is aware of and compatible with secure_string.";
 		}
 
 		@Override
@@ -228,10 +238,11 @@ public class Crypto {
 
 		@Override
 		public String docs() {
-			return "string {val} Returns the sha1 hash of the specified string. Note that sha1 is considered no more secure than md5,"
-					+ " and should not be used in a security context. sha-256 should be used instead for storing sensitive"
-					+ " data. It is a one way hashing algorithm. This function is aware of and compatible with"
-					+ " secure_string.";
+			return "string {val} Returns the sha1 hash of the specified string or byte array."
+					+ " Note that sha1 is considered no more secure than md5,"
+					+ " and should not be used in a security context."
+					+ " sha-256 should be used instead for storing sensitive data. It is a one way hashing algorithm."
+					+ " This function is aware of and compatible with secure_string.";
 		}
 
 		@Override
@@ -298,9 +309,10 @@ public class Crypto {
 
 		@Override
 		public String docs() {
-			return "string {val} Returns the sha256 hash of the specified string. Note that sha256 is considered more secure than sha1 and md5, and is"
-					+ " typically used when storing sensitive data. It is a one way hashing algorithm. This function"
-					+ " is aware of and compatible with secure_string.";
+			return "string {val} Returns the sha256 hash of the specified string or byte array."
+					+ " Note that sha256 is considered more secure than sha1 and md5,"
+					+ " and is typically used when storing sensitive data. It is a one way hashing algorithm."
+					+ " This function is aware of and compatible with secure_string.";
 		}
 
 		@Override
@@ -368,7 +380,7 @@ public class Crypto {
 
 		@Override
 		public String docs() {
-			return "string {val} Returns the sha512 hash of the specified string. Note that sha512"
+			return "string {val} Returns the sha512 hash of the specified string or byte array. Note that sha512"
 					+ " is considered more secure than sha1 and md5 (and sha256, because it takes longer to calculate),"
 					+ " and is typically used when storing sensitive data. It is a one way hashing algorithm. This"
 					+ " function is aware of and compatible with secure_string.";
@@ -688,8 +700,9 @@ public class Crypto {
 
 		@Override
 		public String docs() {
-			return "string {key, val} Returns the md5 HMAC of the specified string using the provided key. This function"
-					+ " is aware of and compatible with secure_string.";
+			return "string {key, val} Returns the md5 HMAC of the specified value using the provided key."
+					+ " If the key or value is not a byte array, it will be converted to a byte array through its"
+					+ " UTF-8 string representation. This function is aware of and compatible with secure_string.";
 		}
 
 		@Override
@@ -747,8 +760,9 @@ public class Crypto {
 
 		@Override
 		public String docs() {
-			return "string {key, val} Returns the sha1 HMAC of the specified string using the provided key. This function"
-					+ " is aware of and compatible with secure_string.";
+			return "string {key, val} Returns the sha1 HMAC of the specified value using the provided key."
+					+ " If the key or value is not a byte array, it will be converted to a byte array through its"
+					+ " UTF-8 string representation. This function is aware of and compatible with secure_string.";
 		}
 
 		@Override
@@ -806,8 +820,9 @@ public class Crypto {
 
 		@Override
 		public String docs() {
-			return "string {key, val} Returns the sha256 HMAC of the specified string using the provided key. This"
-					+ " function is aware of and compatible with secure_string.";
+			return "string {key, val} Returns the sha256 HMAC of the specified value using the provided key."
+					+ " If the key or value is not a byte array, it will be converted to a byte array through its"
+					+ " UTF-8 string representation. This function is aware of and compatible with secure_string.";
 		}
 
 		@Override

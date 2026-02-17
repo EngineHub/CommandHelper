@@ -9,7 +9,6 @@ import com.laytonsmith.abstraction.MCAttributeModifier;
 import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.MCCommand;
 import com.laytonsmith.abstraction.MCCommandSender;
-import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCFireworkBuilder;
 import com.laytonsmith.abstraction.MCInventory;
@@ -18,6 +17,7 @@ import com.laytonsmith.abstraction.MCItemMeta;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCMetadataValue;
+import com.laytonsmith.abstraction.MCNamespacedKey;
 import com.laytonsmith.abstraction.MCNote;
 import com.laytonsmith.abstraction.MCPattern;
 import com.laytonsmith.abstraction.MCPlugin;
@@ -37,8 +37,10 @@ import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBrewingStand;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCChest;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCCommandBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCContainer;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCDecoratedPot;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCDispenser;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCDropper;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCEndGateway;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCFurnace;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCLectern;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
@@ -46,7 +48,9 @@ import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCSign;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCSkull;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCAgeable;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCAnimal;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCBoat;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCBreedable;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCChestBoat;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCCommandMinecart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCComplexEntityPart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCComplexLivingEntity;
@@ -61,6 +65,7 @@ import com.laytonsmith.abstraction.bukkit.entities.BukkitMCProjectile;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCSizedFireball;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCTameable;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCItemProjectile;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCTransformation;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCVehicle;
 import com.laytonsmith.abstraction.bukkit.events.BukkitAbstractEventMixin;
 import com.laytonsmith.abstraction.bukkit.events.drivers.BukkitBlockListener;
@@ -71,21 +76,20 @@ import com.laytonsmith.abstraction.bukkit.events.drivers.BukkitServerListener;
 import com.laytonsmith.abstraction.bukkit.events.drivers.BukkitVehicleListener;
 import com.laytonsmith.abstraction.bukkit.events.drivers.BukkitWeatherListener;
 import com.laytonsmith.abstraction.bukkit.events.drivers.BukkitWorldListener;
+import com.laytonsmith.abstraction.entities.MCTransformation;
 import com.laytonsmith.abstraction.enums.MCAttribute;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
+import com.laytonsmith.abstraction.enums.MCEquipmentSlotGroup;
 import com.laytonsmith.abstraction.enums.MCPatternShape;
 import com.laytonsmith.abstraction.enums.MCPotionType;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
 import com.laytonsmith.abstraction.enums.MCTone;
 import com.laytonsmith.abstraction.enums.MCVersion;
-import com.laytonsmith.abstraction.enums.bukkit.BukkitMCAttribute;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDyeColor;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCLegacyMaterial;
-import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPatternShape;
-import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPotionType;
 import com.laytonsmith.annotations.convert;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.LogLevel;
@@ -102,6 +106,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.World;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.block.Banner;
 import org.bukkit.block.Beacon;
@@ -112,20 +117,24 @@ import org.bukkit.block.Chest;
 import org.bukkit.block.CommandBlock;
 import org.bukkit.block.Container;
 import org.bukkit.block.CreatureSpawner;
+import org.bukkit.block.DecoratedPot;
 import org.bukkit.block.Dispenser;
 import org.bukkit.block.Dropper;
+import org.bukkit.block.EndGateway;
 import org.bukkit.block.Furnace;
 import org.bukkit.block.Lectern;
 import org.bukkit.block.Sign;
 import org.bukkit.block.Skull;
 import org.bukkit.block.banner.Pattern;
+import org.bukkit.block.banner.PatternType;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Ageable;
 import org.bukkit.entity.Animals;
+import org.bukkit.entity.Boat;
 import org.bukkit.entity.Breedable;
+import org.bukkit.entity.ChestBoat;
 import org.bukkit.entity.ComplexEntityPart;
 import org.bukkit.entity.ComplexLivingEntity;
 import org.bukkit.entity.Entity;
@@ -144,6 +153,8 @@ import org.bukkit.entity.minecart.CommandMinecart;
 import org.bukkit.inventory.BlastingRecipe;
 import org.bukkit.inventory.CampfireRecipe;
 import org.bukkit.inventory.ComplexRecipe;
+import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.EquipmentSlotGroup;
 import org.bukkit.inventory.FurnaceRecipe;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -167,15 +178,17 @@ import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.FireworkEffectMeta;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.KnowledgeBookMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.MapMeta;
 import org.bukkit.inventory.meta.MusicInstrumentMeta;
+import org.bukkit.inventory.meta.OminousBottleMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.inventory.meta.SuspiciousStewMeta;
 import org.bukkit.inventory.meta.TropicalFishBucketMeta;
 import org.bukkit.metadata.FixedMetadataValue;
-import org.bukkit.potion.PotionData;
+import org.bukkit.potion.PotionType;
 import org.yaml.snakeyaml.Yaml;
 
 import java.util.ArrayList;
@@ -189,6 +202,9 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import org.bukkit.command.RemoteConsoleCommandSender;
+import org.bukkit.util.Transformation;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 @convert(type = Implementation.Type.BUKKIT)
 public class BukkitConvertor extends AbstractConvertor {
@@ -207,29 +223,6 @@ public class BukkitConvertor extends AbstractConvertor {
 	@Override
 	public Class GetServerEventMixin() {
 		return BukkitAbstractEventMixin.class;
-	}
-
-	@Override
-	public MCEnchantment[] GetEnchantmentValues() {
-		MCEnchantment[] ea = new MCEnchantment[Enchantment.values().length];
-		Enchantment[] oea = Enchantment.values();
-		for(int i = 0; i < ea.length; i++) {
-			ea[i] = new BukkitMCEnchantment(oea[i]);
-		}
-		return ea;
-
-	}
-
-	@Override
-	public MCEnchantment GetEnchantmentByName(String name) {
-		Enchantment enchant = Enchantment.getByKey(NamespacedKey.minecraft(name.toLowerCase()));
-		if(enchant == null) {
-			enchant = Enchantment.getByName(name.toUpperCase());
-			if(enchant == null) {
-				return null;
-			}
-		}
-		return new BukkitMCEnchantment(enchant);
 	}
 
 	@Override
@@ -290,6 +283,9 @@ public class BukkitConvertor extends AbstractConvertor {
 			mat = BukkitMCLegacyMaterial.getMaterial(type);
 		}
 		if(mat == null) {
+			mat = Material.matchMaterial(type);
+		}
+		if(mat == null || !mat.isItem()) {
 			return null;
 		}
 		return new BukkitMCItemStack(new ItemStack(mat, qty));
@@ -297,22 +293,67 @@ public class BukkitConvertor extends AbstractConvertor {
 
 	@Override
 	public MCPotionData GetPotionData(MCPotionType type, boolean extended, boolean upgraded) {
-		return new BukkitMCPotionData(new PotionData(
-				BukkitMCPotionType.getConvertor().getConcreteEnum(type), extended, upgraded));
+		try {
+			Class clz = Class.forName("org.bukkit.potion.PotionData");
+			return new BukkitMCPotionData(ReflectionUtils.newInstance(clz,
+					new Class[]{PotionType.class, boolean.class, boolean.class},
+					new Object[]{type.getConcrete(), extended, upgraded}));
+		} catch (ClassNotFoundException ex) {
+			// probably after 1.20.5
+			// use PotionType instead
+			return null;
+		}
 	}
 
 	@Override
 	public MCAttributeModifier GetAttributeModifier(MCAttribute attr, UUID id, String name, double amt, MCAttributeModifier.Operation op, MCEquipmentSlot slot) {
-		if(name == null) {
-			name = " "; // Spigot does not allow an empty name even though Minecraft and Paper allow it
-		}
 		if(id == null) {
 			id = UUID.randomUUID();
 		}
 		AttributeModifier mod = new AttributeModifier(id, name, amt,
 				BukkitMCAttributeModifier.Operation.getConvertor().getConcreteEnum(op),
 				BukkitMCEquipmentSlot.getConvertor().getConcreteEnum(slot));
-		return new BukkitMCAttributeModifier(BukkitMCAttribute.getConvertor().getConcreteEnum(attr), mod);
+		return new BukkitMCAttributeModifier((Attribute) attr.getConcrete(), mod);
+	}
+
+	@Override
+	public MCAttributeModifier GetAttributeModifier(MCAttribute attr, UUID id, String name, double amt, MCAttributeModifier.Operation op, MCEquipmentSlotGroup slot) {
+		if(!((BukkitMCServer) Static.getServer()).isPaper()) {
+			// BODY is missing from Spigot, so this falls back to ARMOR just like EquipmentSlot.BODY
+			if(slot == MCEquipmentSlotGroup.BODY) {
+				slot = MCEquipmentSlotGroup.ARMOR;
+			}
+		}
+		if(id == null) {
+			id = UUID.randomUUID();
+		}
+		AttributeModifier mod = new AttributeModifier(id, name, amt,
+				BukkitMCAttributeModifier.Operation.getConvertor().getConcreteEnum(op),
+				EquipmentSlotGroup.getByName(slot.name()));
+		return new BukkitMCAttributeModifier((Attribute) attr.getConcrete(), mod);
+	}
+
+	@Override
+	public MCAttributeModifier GetAttributeModifier(MCAttribute attr, MCNamespacedKey key, double amt, MCAttributeModifier.Operation op, MCEquipmentSlot slot) {
+		EquipmentSlot es = BukkitMCEquipmentSlot.getConvertor().getConcreteEnum(slot);
+		AttributeModifier mod = new AttributeModifier((NamespacedKey) key.getHandle(), amt,
+				BukkitMCAttributeModifier.Operation.getConvertor().getConcreteEnum(op),
+				es == null ? EquipmentSlotGroup.ANY : es.getGroup());
+		return new BukkitMCAttributeModifier((Attribute) attr.getConcrete(), mod);
+	}
+
+	@Override
+	public MCAttributeModifier GetAttributeModifier(MCAttribute attr, MCNamespacedKey key, double amt, MCAttributeModifier.Operation op, MCEquipmentSlotGroup slot) {
+		if(!((BukkitMCServer) Static.getServer()).isPaper()) {
+			// BODY is missing from Spigot, so this falls back to ARMOR just like EquipmentSlot.BODY
+			if(slot == MCEquipmentSlotGroup.BODY) {
+				slot = MCEquipmentSlotGroup.ARMOR;
+			}
+		}
+		AttributeModifier mod = new AttributeModifier((NamespacedKey) key.getHandle(), amt,
+				BukkitMCAttributeModifier.Operation.getConvertor().getConcreteEnum(op),
+				EquipmentSlotGroup.getByName(slot.name()));
+		return new BukkitMCAttributeModifier((Attribute) attr.getConcrete(), mod);
 	}
 
 	@Override
@@ -333,8 +374,8 @@ public class BukkitConvertor extends AbstractConvertor {
 	public void Startup(CommandHelperPlugin chp) {
 		chp.registerEvents(BLOCK_LISTENER);
 		chp.registerEvents(ENTITY_LISTENER);
-		chp.registerEvents(INVENTORY_LISTENER);
-		chp.registerEvents(PLAYER_LISTENER);
+		chp.registerEventsDynamic(INVENTORY_LISTENER);
+		chp.registerEventsDynamic(PLAYER_LISTENER);
 		chp.registerEvents(SERVER_LISTENER);
 		chp.registerEvents(VEHICLE_LISTENER);
 		chp.registerEvents(WEATHER_LISTENER);
@@ -425,6 +466,21 @@ public class BukkitConvertor extends AbstractConvertor {
 			// Must come before Vehicle
 			type.setWrapperClass(BukkitMCMinecart.class);
 			return new BukkitMCMinecart(be);
+		}
+
+		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_21_3)) {
+			// boats were split into different classes by wood type
+			if(be instanceof ChestBoat) {
+				// Must come before Boat
+				type.setWrapperClass(BukkitMCChestBoat.class);
+				return new BukkitMCChestBoat(be);
+			}
+
+			if(be instanceof Boat) {
+				// Must come before Vehicle
+				type.setWrapperClass(BukkitMCBoat.class);
+				return new BukkitMCBoat(be);
+			}
 		}
 
 		if(be instanceof SizedFireball) {
@@ -585,6 +641,12 @@ public class BukkitConvertor extends AbstractConvertor {
 		if(bs instanceof CommandBlock) {
 			return new BukkitMCCommandBlock((CommandBlock) bs);
 		}
+		if(bs instanceof EndGateway) {
+			return new BukkitMCEndGateway((EndGateway) bs);
+		}
+		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_1) && bs instanceof DecoratedPot) {
+			return new BukkitMCDecoratedPot((DecoratedPot) bs);
+		}
 		return new BukkitMCBlockState(bs);
 	}
 
@@ -628,23 +690,34 @@ public class BukkitConvertor extends AbstractConvertor {
 		if(im instanceof SuspiciousStewMeta) {
 			return new BukkitMCSuspiciousStewMeta((SuspiciousStewMeta) im);
 		}
-		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_17)) {
+		if(im instanceof KnowledgeBookMeta) {
+			return new BukkitMCKnowledgeBookMeta((KnowledgeBookMeta) im);
+		}
+		MCVersion version = Static.getServer().getMinecraftVersion();
+		if(version.gte(MCVersion.MC1_17)) {
 			if(im instanceof BundleMeta) {
 				return new BukkitMCBundleMeta((BundleMeta) im);
 			}
-			if(im instanceof AxolotlBucketMeta) {
-				return new BukkitMCAxolotlBucketMeta((AxolotlBucketMeta) im);
-			}
-			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_3)) {
-				if(im instanceof MusicInstrumentMeta) {
-					return new BukkitMCMusicInstrumentMeta((MusicInstrumentMeta) im);
+			if(version.gte(MCVersion.MC1_17_X)) {
+				if(im instanceof AxolotlBucketMeta) {
+					return new BukkitMCAxolotlBucketMeta((AxolotlBucketMeta) im);
 				}
-				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20)) {
-					if(im instanceof ColorableArmorMeta) { // Must be before ArmorMeta and LeatherArmorMeta
-						return new BukkitMCColorableArmorMeta((ColorableArmorMeta) im);
+				if(version.gte(MCVersion.MC1_19_3)) {
+					if(im instanceof MusicInstrumentMeta) {
+						return new BukkitMCMusicInstrumentMeta((MusicInstrumentMeta) im);
 					}
-					if(im instanceof ArmorMeta) {
-						return new BukkitMCArmorMeta((ArmorMeta) im);
+					if(version.gte(MCVersion.MC1_20)) {
+						if(im instanceof ColorableArmorMeta) { // Must be before ArmorMeta and LeatherArmorMeta
+							return new BukkitMCColorableArmorMeta((ColorableArmorMeta) im);
+						}
+						if(im instanceof ArmorMeta) {
+							return new BukkitMCArmorMeta((ArmorMeta) im);
+						}
+						if(version.gte(MCVersion.MC1_20_6)) {
+							if(im instanceof OminousBottleMeta) {
+								return new BukkitMCOminousBottleMeta((OminousBottleMeta) im);
+							}
+						}
 					}
 				}
 			}
@@ -659,8 +732,8 @@ public class BukkitConvertor extends AbstractConvertor {
 	public MCInventory GetEntityInventory(MCEntity e) {
 		Entity entity = ((BukkitMCEntity) e).getHandle();
 		if(entity instanceof InventoryHolder) {
-			if(entity instanceof Player) {
-				return new BukkitMCPlayerInventory(((Player) entity).getInventory());
+			if(entity instanceof Player p) {
+				return new BukkitMCPlayerInventory(p.getInventory());
 			}
 			return new BukkitMCInventory(((InventoryHolder) entity).getInventory());
 		}
@@ -703,7 +776,16 @@ public class BukkitConvertor extends AbstractConvertor {
 			throw new CancelCommandException(Implementation.GetServerType().getBranding()
 					+ " tried to schedule a task while the plugin was disabled (is the server shutting down?).", Target.UNKNOWN);
 		}
-		return Bukkit.getServer().getScheduler().callSyncMethod(CommandHelperPlugin.self, callable).get();
+
+		if(Bukkit.isPrimaryThread()) {
+			try {
+				return callable.call();
+			} catch(Exception e) {
+				throw new ExecutionException(e);
+			}
+		} else {
+			return Bukkit.getServer().getScheduler().callSyncMethod(CommandHelperPlugin.self, callable).get();
+		}
 	}
 
 	@Override
@@ -722,6 +804,11 @@ public class BukkitConvertor extends AbstractConvertor {
 	}
 
 	@Override
+	public MCColor GetColor(int red, int green, int blue, int alpha) {
+		return BukkitMCColor.GetMCColor(Color.fromARGB(alpha, red, green, blue));
+	}
+
+	@Override
 	public MCColor GetColor(String colorName, Target t) throws CREFormatException {
 		return ConvertorHelper.GetColor(colorName, t);
 	}
@@ -729,7 +816,7 @@ public class BukkitConvertor extends AbstractConvertor {
 	@Override
 	public MCPattern GetPattern(MCDyeColor color, MCPatternShape shape) {
 		return new BukkitMCPattern(new Pattern(BukkitMCDyeColor.getConvertor().getConcreteEnum(color),
-				BukkitMCPatternShape.getConvertor().getConcreteEnum(shape)));
+				(PatternType) shape.getConcrete()));
 	}
 
 	@Override
@@ -763,19 +850,19 @@ public class BukkitConvertor extends AbstractConvertor {
 		try {
 			switch(type) {
 				case BLASTING:
-					return new BukkitMCCookingRecipe(new BlastingRecipe(nskey, is, Material.AIR, 0.0F, 100), type);
+					return new BukkitMCCookingRecipe(new BlastingRecipe(nskey, is, Material.STRUCTURE_VOID, 0.0F, 100), type);
 				case CAMPFIRE:
-					return new BukkitMCCookingRecipe(new CampfireRecipe(nskey, is, Material.AIR, 0.0F, 100), type);
+					return new BukkitMCCookingRecipe(new CampfireRecipe(nskey, is, Material.STRUCTURE_VOID, 0.0F, 100), type);
 				case FURNACE:
-					return new BukkitMCFurnaceRecipe(new FurnaceRecipe(nskey, is, Material.AIR, 0.0F, 200));
+					return new BukkitMCCookingRecipe(new FurnaceRecipe(nskey, is, Material.STRUCTURE_VOID, 0.0F, 200), type);
 				case SHAPED:
 					return new BukkitMCShapedRecipe(new ShapedRecipe(nskey, is));
 				case SHAPELESS:
 					return new BukkitMCShapelessRecipe(new ShapelessRecipe(nskey, is));
 				case SMOKING:
-					return new BukkitMCCookingRecipe(new SmokingRecipe(nskey, is, Material.AIR, 0.0F, 200), type);
+					return new BukkitMCCookingRecipe(new SmokingRecipe(nskey, is, Material.STRUCTURE_VOID, 0.0F, 200), type);
 				case STONECUTTING:
-					return new BukkitMCStonecuttingRecipe(new StonecuttingRecipe(nskey, is, Material.AIR));
+					return new BukkitMCStonecuttingRecipe(new StonecuttingRecipe(nskey, is, Material.STRUCTURE_VOID));
 				case SMITHING:
 				case COMPLEX:
 					throw new IllegalArgumentException("Unable to generate recipe type: " + type.name());
@@ -800,6 +887,8 @@ public class BukkitConvertor extends AbstractConvertor {
 			return new BukkitMCCookingRecipe(r, MCRecipeType.CAMPFIRE);
 		} else if(r instanceof SmokingRecipe) {
 			return new BukkitMCCookingRecipe(r, MCRecipeType.SMOKING);
+		} else if(r instanceof FurnaceRecipe) {
+			return new BukkitMCCookingRecipe(r, MCRecipeType.FURNACE);
 		} else if(r instanceof StonecuttingRecipe) {
 			return new BukkitMCStonecuttingRecipe((StonecuttingRecipe) r);
 		} else if(r instanceof ComplexRecipe) {
@@ -810,8 +899,6 @@ public class BukkitConvertor extends AbstractConvertor {
 			return new BukkitMCShapelessRecipe((ShapelessRecipe) r);
 		} else if(r instanceof ShapedRecipe) {
 			return new BukkitMCShapedRecipe((ShapedRecipe) r);
-		} else if(r instanceof FurnaceRecipe) {
-			return new BukkitMCFurnaceRecipe((FurnaceRecipe) r);
 		} else if(r instanceof MerchantRecipe) {
 			return new BukkitMCMerchantRecipe((MerchantRecipe) r);
 		} else {
@@ -871,4 +958,20 @@ public class BukkitConvertor extends AbstractConvertor {
 			return name;
 		}
 	}
+
+	@Override
+	public MCNamespacedKey GetNamespacedKey(String key) {
+		return new BukkitMCNamespacedKey(NamespacedKey.fromString(key, CommandHelperPlugin.self));
+	}
+
+	@Override
+	public MCTransformation GetTransformation(Quaternionf leftRotation, Quaternionf rightRotation, Vector3f scale, Vector3f translation) {
+		return new BukkitMCTransformation(new Transformation(translation, leftRotation, scale, rightRotation));
+	}
+
+	@Override
+	public boolean IsMainThread() {
+		return Bukkit.isPrimaryThread();
+	}
+
 }

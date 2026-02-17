@@ -97,6 +97,8 @@ public interface MCColor {
 	 */
 	Map<String, MCColor> STANDARD_COLORS = Internal.buildColors();
 
+	int getAlpha();
+
 	int getRed();
 
 	int getGreen();
@@ -112,6 +114,17 @@ public interface MCColor {
 	 * @return
 	 */
 	MCColor build(int red, int green, int blue);
+
+	/**
+	 * Returns a NEW instance of a color, given the specified ARGB values.
+	 *
+	 * @param alpha
+	 * @param red
+	 * @param green
+	 * @param blue
+	 * @return
+	 */
+	MCColor build(int alpha, int red, int green, int blue);
 
 	class Internal {
 

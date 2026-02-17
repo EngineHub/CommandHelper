@@ -598,7 +598,7 @@ public final class ArgumentParser {
 						b.append(", ");
 					}
 					first = false;
-					b.append("\"").append(s.replaceAll("\"", "\\\"")).append("\"");
+					b.append("\"").append(s.replace("\"", "\\\"")).append("\"");
 				}
 				b.append("]");
 			}
@@ -642,7 +642,7 @@ public final class ArgumentParser {
 					if(argType == Type.ARRAY_OF_STRINGS) {
 						b.append("A list. ");
 					}
-					b.append(description.replaceAll("\n", "\n\t\t"));
+					b.append(description.replace("\n", "\n\t\t"));
 				}
 				b.append("\n");
 			}

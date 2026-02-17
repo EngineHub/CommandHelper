@@ -16,8 +16,7 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.objects.ObjectDefinition;
 import com.laytonsmith.core.objects.ObjectType;
-import com.laytonsmith.testing.StaticTest;
-import org.junit.Test;
+import com.laytonsmith.testing.AbstractIntegrationTest;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -27,11 +26,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import org.junit.Test;
 
 /**
  *
  */
-public class ObjectManagementTest {
+public class ObjectManagementTest extends AbstractIntegrationTest {
 
 	static Set<Class<? extends Environment.EnvironmentImpl>> envs = Environment.getDefaultEnvClasses();
 
@@ -47,7 +47,6 @@ public class ObjectManagementTest {
 	}
 
 	public ObjectManagementTest() {
-		StaticTest.InstallFakeServerFrontend();
 	}
 
 	@Test

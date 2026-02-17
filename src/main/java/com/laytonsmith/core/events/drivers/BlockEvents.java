@@ -7,6 +7,7 @@ import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
+import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCIgniteCause;
 import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.events.MCBlockBreakEvent;
@@ -327,7 +328,9 @@ public class BlockEvents {
 					+ "{player: The player's name | block: the block type that was placed"
 					+ " | against: a block array of the block being placed against"
 					+ " | oldblock: the old block type that was replaced"
-					+ " | location: A locationArray for this block} "
+					+ " | location: A locationArray for this block "
+					+ " | item: the item used to the place the block "
+					+ " | hand: hand used to place the block} "
 					+ "{block} "
 					+ "{}";
 		}
@@ -412,6 +415,12 @@ public class BlockEvents {
 			map.put("player", new CString(event.getPlayer().getName(), t));
 			map.put("block", new CString(mat.getName(), t));
 			map.put("location", ObjectGenerator.GetGenerator().location(block.getLocation(), false, env));
+			map.put("item", ObjectGenerator.GetGenerator().item(event.getItemInHand(), Target.UNKNOWN, env));
+			if(event.getHand() == MCEquipmentSlot.WEAPON) {
+				map.put("hand", new CString("main_hand", Target.UNKNOWN));
+			} else {
+				map.put("hand", new CString("off_hand", Target.UNKNOWN));
+			}
 
 			MCBlock agstblock = event.getBlockAgainst();
 			MCMaterial agstmat = agstblock.getType();
@@ -474,10 +483,11 @@ public class BlockEvents {
 		@Override
 		public String docs() {
 			return "{block: <string match>}"
-					+ "This event is called when a block is burned. Cancelling the event cancels the burn. "
+					+ "This event is called when a block is burned away."
 					+ "{block: the block type that was burned"
-					+ " | location: the locationArray of this block}"
-					+ "{block}"
+					+ " | location: the location array of the burned block"
+					+ " | firelocation: the location array of the fire (or null)}"
+					+ "{}"
 					+ "{}";
 		}
 
@@ -553,6 +563,13 @@ public class BlockEvents {
 
 			map.put("block", new CString(block.getType().getName(), t));
 			map.put("location", ObjectGenerator.GetGenerator().location(block.getLocation(), false, env));
+
+			MCBlock source = event.getFireBlock();
+			if(source == null) {
+				map.put("firelocation", CNull.NULL);
+			} else {
+				map.put("firelocation", ObjectGenerator.GetGenerator().location(source.getLocation(), false));
+			}
 
 			return map;
 		}

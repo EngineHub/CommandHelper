@@ -6,7 +6,7 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.MSVersion;
-import com.laytonsmith.core.events.AbstractEvent;
+import com.laytonsmith.core.events.AbstractGenericEvent;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.Event;
 import com.laytonsmith.core.events.EventMixinInterface;
@@ -141,18 +141,18 @@ public class ExtensionTracker {
 
 	@SuppressWarnings("UseSpecificCatch")
 	public synchronized void registerEvent(Event e) {
-		if(e instanceof AbstractEvent) {
-			AbstractEvent ae = (AbstractEvent) e;
+		if(e instanceof AbstractGenericEvent) {
+			AbstractGenericEvent ae = (AbstractGenericEvent) e;
 			//Get the mixin for this server, and add it to e
 			Class mixinClass = StaticLayer.GetServerEventMixin();
 			try {
-				Constructor mixinConstructor = mixinClass.getConstructor(AbstractEvent.class);
+				Constructor mixinConstructor = mixinClass.getConstructor(AbstractGenericEvent.class);
 				EventMixinInterface mixin = (EventMixinInterface) mixinConstructor.newInstance(e);
 				ae.setAbstractEventMixin(mixin);
 			} catch (Exception ex) {
 				//This is a serious problem, and it should kill the plugin, for fast failure detection.
 				throw new Error("Could not properly instantiate the mixin class. "
-						+ "The constructor with the signature \"public " + mixinClass.getSimpleName() + "(AbstractEvent e)\" is missing"
+						+ "The constructor with the signature \"public " + mixinClass.getSimpleName() + "(AbstractGenericEvent e)\" is missing"
 						+ " from " + mixinClass.getName());
 			}
 		}

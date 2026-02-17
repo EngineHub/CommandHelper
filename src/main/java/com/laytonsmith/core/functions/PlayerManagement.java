@@ -1,5 +1,8 @@
 package com.laytonsmith.core.functions;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonIOException;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.PureUtilities.Version;
@@ -9,9 +12,12 @@ import com.laytonsmith.abstraction.MCConsoleCommandSender;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCHumanEntity;
 import com.laytonsmith.abstraction.MCItemStack;
+import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.abstraction.MCNamespacedKey;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.MCPlayerInput;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.MCWorldBorder;
@@ -24,6 +30,7 @@ import com.laytonsmith.abstraction.blocks.MCSignText;
 import com.laytonsmith.abstraction.entities.MCCommandMinecart;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.MCEntityType;
+import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCGameMode;
 import com.laytonsmith.abstraction.enums.MCPlayerStatistic;
 import com.laytonsmith.abstraction.enums.MCPotionEffectType;
@@ -60,6 +67,7 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREIOException;
 import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
 import com.laytonsmith.core.exceptions.CRE.CREInvalidWorldException;
@@ -228,6 +236,7 @@ public class PlayerManagement {
 		@Override
 		public String docs() {
 			return "string {[player], [dashless]} Returns the UUID of the current player or the specified player."
+					+ " If dashless is set to true, the returned UUID format will not have any dashes."
 					+ " This will attempt to find an offline player, but if that also fails,"
 					+ " a PlayerOfflineException will be thrown. ---- It is not recommended to give this user input."
 					+ " If the player is offline and hasn't visited the server recently (so that they're not in the"
@@ -486,8 +495,9 @@ public class PlayerManagement {
 		public String docs() {
 			return "boolean {[player], locationArray | [player], x, y, z} Sets the location of the player to the"
 					+ " specified coordinates. If the coordinates are not valid, or the player was otherwise prevented"
-					+ " from teleporting, false is returned, otherwise true. If player is omitted, the current player"
-					+ " is used. Note that 1 is automatically added to the y coordinate.";
+					+ " from teleporting, false is returned, otherwise true. On Paper 1.19.3+, passengers do not"
+					+ " automatically prevent teleports. If player is omitted, the current player is used. Important:"
+					+ " unlike {{function|set_entity_loc}}, 1.0 is automatically added to the y coordinate.";
 		}
 
 		@Override
@@ -591,7 +601,8 @@ public class PlayerManagement {
 					+ " If the block is too far, a RangeException is thrown. An array of block types to be considered"
 					+ " transparent can be supplied, otherwise only air will be considered transparent."
 					+ " Providing an empty array will cause air to be considered a potential target, allowing a way to"
-					+ " get the block containing the player's head.";
+					+ " get the block containing the player's head. On paper servers, this teleports passengers of"
+					+ " the player as well.";
 		}
 
 		@Override
@@ -1723,8 +1734,7 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "int {[player]} Gets the experience of a player within this level, as a percentage, from 0 to 99."
-					+ " (100 would be next level, therefore, 0.)";
+			return "int {[player]} Gets the experience of a player within this level, as a percentage, from 0 to 100.";
 		}
 
 		@Override
@@ -1778,7 +1788,7 @@ public class PlayerManagement {
 		@Override
 		public String docs() {
 			return "void {[player], xp} Sets the experience of a player within the current level, as a percentage,"
-					+ " from 0 to 99. 100 resets the experience to zero and adds a level to the player.";
+					+ " from 0 to 100. 100 will sometimes reset the experience to zero and add a level to the player.";
 		}
 
 		@Override
@@ -2239,7 +2249,7 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "boolean {player, potionEffect, [strength], [seconds], [ambient], [particles]}"
+			return "boolean {player, potionEffect, [strength], [seconds], [ambient], [particles], [icon]}"
 					+ " Adds one, or modifies an existing, potion effect on a mob."
 					+ " The potionEffect can be " + StringUtils.Join(MCPotionEffectType.types(), ", ", ", or ", " or ")
 					+ ". It also accepts an integer corresponding to the effect id listed on the Minecraft wiki."
@@ -2249,6 +2259,7 @@ public class PlayerManagement {
 					+ " Negative seconds makes the effect infinite. (or max in versions prior to 1.19.4)"
 					+ " Ambient takes a boolean of whether the particles should be more transparent."
 					+ " Particles takes a boolean of whether the particles should be visible at all."
+					+ " Icon argument takes a boolean of whether the effect icon should be displayed."
 					+ " The function returns whether or not the effect was modified.";
 		}
 
@@ -4382,13 +4393,20 @@ public class PlayerManagement {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{2, 3};
+			return new Integer[]{2, 3, 4};
 		}
 
 		@Override
 		public String docs() {
-			return "void {[player], locationArray, progress} Sends the player fake block break progress for a location."
-					+ " Progress is a percentage from 0.0 to 1.0.";
+			return "void {[player], locationArray, progress, [entity]} Sends the player fake block damage progress."
+					+ " Progress is a percentage from 0.0 to 1.0, with 0.0 clearing any block damage."
+					+ " Alternatively you can specify the discrete damage state as an integer from 0 to 10."
+					+ " If a source entity UUID is specified, it will be as if that entity is damaging the block,"
+					+ " otherwise the player will be used. If given null, damage will disregard source entity."
+					+ " If that entity damages a different block, the previous block's damage will be cleared."
+					+ " If unchanged, the damage will clear on its own after 20 seconds."
+					+ " On versions prior to Spigot 1.19.4 or Paper 1.19.2, the source entity will always be the"
+					+ " player this block damage is being sent to.";
 		}
 
 		@Override
@@ -4400,20 +4418,35 @@ public class PlayerManagement {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
-			int offset = 0;
-			if(args.length == 3) {
-				p = Static.GetPlayer(args[0], t, env);
-				offset = 1;
-			} else {
+			MCLocation location;
+			float progress;
+			MCEntity entity;
+			int argOffset = 0;
+			if(args.length == 2 || args.length == 3 && args[0] instanceof CArray) {
 				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
+			} else {
+				p = Static.GetPlayer(args[0], t, env);
+				argOffset = 1;
 			}
-			MCLocation loc = ObjectGenerator.GetGenerator().location(args[offset], p.getWorld(), t, env);
-			double progress = ArgumentValidation.getDouble(args[offset + 1], t, env);
+			location = ObjectGenerator.GetGenerator().location(args[argOffset], p.getWorld(), t, env);
+			Mixed progressArg = args[1 + argOffset];
+			if(progressArg instanceof CInt) {
+				progress = ArgumentValidation.getInt(progressArg, t) / 10.0F;
+			} else {
+				progress = (float) ArgumentValidation.getDouble(progressArg, t);
+			}
 			if(progress < 0.0 || progress > 1.0) {
-				throw new CRERangeException("Block damage progress must be 0.0 to 1.0.", t);
+				throw new CRERangeException("Block damage progress must be 0.0 to 1.0 (or 0 - 10).", t);
 			}
-			p.sendBlockDamage(loc, progress);
+			if(args.length < 3 + argOffset) {
+				entity = p;
+			} else if(args[2 + argOffset] instanceof CNull) {
+				entity = null;
+			} else {
+				entity = Static.getEntity(args[2 + argOffset], t);
+			}
+			p.sendBlockDamage(location, progress, entity);
 			return CVoid.VOID;
 		}
 
@@ -5076,12 +5109,15 @@ public class PlayerManagement {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCCommandSender cs = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
-			MCOfflinePlayer op = null;
+			MCOfflinePlayer op;
 			if(args.length == 1) {
 				op = Static.GetUser(args[0].val(), t, env);
-			} else if(cs != null) {
-				op = Static.GetUser(cs.getName(), t, env);
+			} else {
+				op = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				if(op == null) {
+					throw new CREInsufficientArgumentsException(this.getName()
+							+ " requires a player argument when ran from a non-player", t);
+				}
 			}
 			return new CInt((op == null ? 0 : op.getFirstPlayed()), t); // Return 0 for fake/null command senders.
 		}
@@ -5140,12 +5176,15 @@ public class PlayerManagement {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCCommandSender cs = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
-			MCOfflinePlayer op = null;
+			MCOfflinePlayer op;
 			if(args.length == 1) {
 				op = Static.GetUser(args[0].val(), t, env);
-			} else if(cs != null) {
-				op = Static.GetUser(cs.getName(), t, env);
+			} else {
+				op = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				if(op == null) {
+					throw new CREInsufficientArgumentsException(this.getName()
+							+ " requires a player argument when ran from a non-player", t);
+				}
 			}
 			return new CInt((op == null ? 0 : op.getLastPlayed()), t); // Return 0 for fake/null command senders.
 		}
@@ -5516,7 +5555,7 @@ public class PlayerManagement {
 			if(args[offset] instanceof CNull) {
 				p.setSpectatorTarget(null);
 			} else {
-				p.setSpectatorTarget(Static.getLivingEntity(args[offset], t));
+				p.setSpectatorTarget(Static.getEntity(args[offset], t));
 			}
 			return CVoid.VOID;
 		}
@@ -5578,17 +5617,15 @@ public class PlayerManagement {
 				throw new CREFormatException("Sound name '" + soundName + "' is invalid.", t);
 			}
 
+			MCSoundCategory category = null;
 			if(categoryName != null) {
-				MCSoundCategory category;
 				try {
 					category = MCSoundCategory.valueOf(categoryName.toUpperCase());
 				} catch (IllegalArgumentException iae) {
 					throw new CREFormatException("Sound category '" + categoryName + "' is invalid.", t);
 				}
-				p.stopSound(sound, category);
-			} else {
-				p.stopSound(sound);
 			}
+			p.stopSound(sound, category);
 
 			return CVoid.VOID;
 		}
@@ -5605,7 +5642,7 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {player, sound, [category]} Stops the specified sound for the given player.";
+			return "void {player, sound, [category]} Stops the specified sound for a player.";
 		}
 
 		@Override
@@ -5613,6 +5650,61 @@ public class PlayerManagement {
 			return MSVersion.V3_3_2;
 		}
 
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({com.laytonsmith.core.functions.Environment.play_sound.class})
+	public static class stop_sound_category extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRELengthException.class, CREFormatException.class, CREPlayerOfflineException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, GenericParameters generics, Mixed... args)
+				throws ConfigRuntimeException {
+
+			MCPlayer p = Static.GetPlayer(args[0], t);
+			MCSoundCategory category;
+			try {
+				category = MCSoundCategory.valueOf(args[1].val().toUpperCase());
+			} catch (IllegalArgumentException ex) {
+				throw new CREFormatException("Sound category '" + args[1].val() + "' is invalid.", t);
+			}
+			p.stopSound(category);
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "stop_sound_category";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "void {player, category} Stops all sounds in a category for a player. (MC 1.19+)";
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_5;
+		}
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
@@ -5666,11 +5758,7 @@ public class PlayerManagement {
 				}
 			}
 			try {
-				if(category != null) {
-					p.stopSound(soundName, category);
-				} else {
-					p.stopSound(soundName);
-				}
+				p.stopSound(soundName, category);
 			} catch(Exception ex) {
 				throw new CREFormatException(ex.getMessage(), t);
 			}
@@ -6107,11 +6195,13 @@ public class PlayerManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(Echoes.tellraw.class)
 	public static class ptellraw extends AbstractFunction {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class};
+			return new Class[]{CRECastException.class, CREFormatException.class, CREIOException.class,
+					CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -6126,15 +6216,31 @@ public class PlayerManagement {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			if(p == null) {
+				throw new CREPlayerOfflineException("ptellraw() requires player context. Consider tellraw().", t);
+			}
 			String selector = "@s";
 			String json;
-			if(args.length == 1) {
-				json = new DataTransformations.json_encode().exec(t, env, null, args[0]).val();
-			} else {
-				selector = ArgumentValidation.getString(args[0], t);
-				json = new DataTransformations.json_encode().exec(t, env, null, args[1]).val();
+			try {
+				Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+				if(args.length == 1) {
+					json = gson.toJson(Construct.GetPOJO(args[0], env));
+				} else {
+					selector = ArgumentValidation.getString(args[0], t);
+					json = gson.toJson(Construct.GetPOJO(args[1], env));
+				}
+			} catch(ClassCastException ex) {
+				throw new CRECastException(ex.getMessage(), t);
+			} catch(JsonIOException ex) {
+				throw new CREIOException(ex.getMessage(), t);
 			}
-			new Meta.sudo().exec(t, env, null, new CString("/minecraft:tellraw " + selector + " " + json, t));
+			try {
+				Static.getServer().runasConsole("minecraft:execute as " + p.getName() + " at @s"
+						+ " run minecraft:tellraw " + selector + " " + json);
+			} catch(Exception ex) {
+				throw new CREFormatException(ex.getMessage(), t, ex.getCause());
+			}
 			return CVoid.VOID;
 		}
 
@@ -6154,11 +6260,12 @@ public class PlayerManagement {
 					+ " this simply passes the input to the command. The raw is passed in as a normal"
 					+ " (possibly associative) array, and json encoded. No validation is done on the input,"
 					+ " so the command may fail. If not provided, the selector defaults to @s. Do not use double quotes"
-					+ " (smart string) when providing the selector. See {{function|tellraw}} if you don't need player"
-					+ " context. ---- The specification of the array may change from version to version of Minecraft,"
-					+ " but is documented here https://minecraft.gamepedia.com/Commands#Raw_JSON_text."
-					+ " This function is simply written in terms of json_encode and sudo, and is otherwise equivalent"
-					+ " to sudo('/minecraft:tellraw ' . @selector . ' ' . json_encode(@raw))";
+					+ " (smart string) when providing the selector. See {{function|tellraw}} if you don't need the @s"
+					+ " selector with player context. ---- The specification of the array may change from version to"
+					+ " version of Minecraft, but is documented here: https://minecraft.wiki/w/Text_component_format."
+					+ " This function is roughly equivalent to"
+					+ " runas('~console', '/execute as '.player().' at @s tellraw '.@selector.' '.json_encode(@raw))"
+					+ " but uses the Gson serializer instead.";
 		}
 
 		@Override
@@ -6175,8 +6282,7 @@ public class PlayerManagement {
 				new ExampleScript("Advanced usage with embedded selectors.",
 						"ptellraw('@a', array(\n"
 								+ "\tarray('selector': '@s'), // prints current player\n"
-								+ "\tarray('text': ': Hello '),\n"
-								+ "\tarray('selector': '@p') // prints receiving player\n"
+								+ "\tarray('text': ': Hello World!')\n"
 								+ "));",
 						"<<Would output a message from the current player to all players.>>"),
 				new ExampleScript("Complex object",
@@ -6662,7 +6768,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class plocale extends AbstractFunction {
 
 		@Override
@@ -6683,7 +6789,7 @@ public class PlayerManagement {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
-			if(args.length == 1) {
+			if(args.length == 0) {
 				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
 			} else {
@@ -6710,6 +6816,754 @@ public class PlayerManagement {
 		@Override
 		public Boolean runAsync() {
 			return false;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class phas_recipe extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "phas_recipe";
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {[player], recipeKey} Gets whether a player has a recipe in their recipe book.";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p;
+			String stringKey;
+			if(args.length == 1) {
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(p, t);
+				stringKey = args[0].val();
+			} else {
+				p = Static.GetPlayer(args[0], t);
+				stringKey = args[1].val();
+			}
+			MCNamespacedKey key = StaticLayer.GetConvertor().GetNamespacedKey(stringKey);
+			if(key == null) {
+				throw new CREFormatException("Invalid namespaced key format: " + stringKey, t);
+			}
+			return CBoolean.get(p.hasDiscoveredRecipe(key));
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CRELengthException.class, CREFormatException.class};
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class pgive_recipe extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "pgive_recipe";
+		}
+
+		@Override
+		public String docs() {
+			return "int {[player], recipeKey(s)} Adds one or more recipes to a player's recipe book."
+					+ " Can take a single recipe key or an array of keys."
+					+ " Returns how many recipes were newly discovered.";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p;
+			Mixed value;
+			if(args.length == 1) {
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(p, t);
+				value = args[0];
+			} else {
+				p = Static.GetPlayer(args[0], t);
+				value = args[1];
+			}
+			if(value.isInstanceOf(CArray.TYPE, null, env)) {
+				int result = 0;
+				for(Mixed element : ((CArray) value).asList()) {
+					MCNamespacedKey key = StaticLayer.GetConvertor().GetNamespacedKey(element.val());
+					if(key == null) {
+						throw new CREFormatException("Invalid namespaced key format: " + element.val(), t);
+					}
+					boolean success = p.discoverRecipe(key);
+					result += success ? 1 : 0;
+				}
+				return new CInt(result, t);
+			}
+			MCNamespacedKey key = StaticLayer.GetConvertor().GetNamespacedKey(value.val());
+			if(key == null) {
+				throw new CREFormatException("Invalid namespaced key format: " + value.val(), t);
+			}
+			boolean success = p.discoverRecipe(key);
+			return new CInt(success ? 1 : 0, t);
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CRELengthException.class, CREFormatException.class};
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class pforce_respawn extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "pforce_respawn";
+		}
+
+		@Override
+		public String docs() {
+			return "void {[player]} Forces a player to respawn immediately if they're currently dead.";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1};
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p;
+			if(args.length == 0) {
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(p, t);
+			} else {
+				p = Static.GetPlayer(args[0], t);
+			}
+			p.respawn();
+			return CVoid.VOID;
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CRELengthException.class};
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class phide_entity extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "phide_entity";
+		}
+
+		@Override
+		public String docs() {
+			return "void {[player], entityUUID} Sets an entity to no longer be seen or tracked by the player's client."
+					+ " Resets to default on player rejoin."
+					+ " (MC 1.18+)";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p;
+			MCEntity e;
+			if(args.length == 1) {
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(p, t);
+				e = Static.getEntity(args[0], t);
+			} else {
+				p = Static.GetPlayer(args[0], t);
+				e = Static.getEntity(args[1], t);
+			}
+			p.hideEntity(e);
+			return CVoid.VOID;
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CRELengthException.class, CREBadEntityException.class};
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class pshow_entity extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "pshow_entity";
+		}
+
+		@Override
+		public String docs() {
+			return "void {[player], entityUUID} Sets an entity to be sent to the player's client again. (MC 1.18+)";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p;
+			MCEntity e;
+			if(args.length == 1) {
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(p, t);
+				e = Static.getEntity(args[0], t);
+			} else {
+				p = Static.GetPlayer(args[0], t);
+				e = Static.getEntity(args[1], t);
+			}
+			p.showEntity(e);
+			return CVoid.VOID;
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CRELengthException.class, CREBadEntityException.class};
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class pcan_see_entity extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "pcan_see_entity";
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {[player], entityUUID} Gets whether the entity is known by the player's client or"
+					+ " hidden by a plugin. (MC 1.18+)";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p;
+			MCEntity e;
+			if(args.length == 1) {
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(p, t);
+				e = Static.getEntity(args[0], t);
+			} else {
+				p = Static.GetPlayer(args[0], t);
+				e = Static.getEntity(args[1], t);
+			}
+			return CBoolean.get(p.canSeeEntity(e));
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CRELengthException.class, CREBadEntityException.class};
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class psend_equipment extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "psend_equipment";
+		}
+
+		@Override
+		public String docs() {
+			return "void {[player], entityUUID, equipmentArray} Changes a living entity's equipment only for the"
+					+ " specified player. (MC 1.18+) Equipment array can be null to make all equipment not visible."
+					+ " Otherwise equipment array must be an associative array where the keys are equipment slots and"
+					+ " the values are item arrays or null. The equipment slots are: weapon, off_hand, helmet,"
+					+ " chestplate, leggings, boots, body (MC 1.20.6+), and saddle (MC 1.21.5+).";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3};
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p;
+			MCLivingEntity le;
+			Mixed equipment;
+			if(args.length == 2) {
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(p, t);
+				le = Static.getLivingEntity(args[0], t);
+				equipment = args[1];
+			} else {
+				p = Static.GetPlayer(args[0], t);
+				le = Static.getLivingEntity(args[1], t);
+				equipment = args[2];
+			}
+			if(equipment instanceof CNull) {
+				for(MCEquipmentSlot slot : MCEquipmentSlot.values()) {
+					p.sendEquipmentChange(le, slot, null);
+				}
+			} else if(equipment.isInstanceOf(CArray.TYPE, null, env)) {
+				CArray ea = (CArray) equipment;
+				for(String key : ea.stringKeySet()) {
+					try {
+						p.sendEquipmentChange(le, MCEquipmentSlot.valueOf(key.toUpperCase()),
+								ObjectGenerator.GetGenerator().item(ea.get(key, t), t));
+					} catch (IllegalArgumentException iae) {
+						throw new CREFormatException("Not an equipment slot: " + key, t);
+					}
+				}
+			} else {
+				throw new CREFormatException("Expected last argument to be an array or null", t);
+			}
+			return CVoid.VOID;
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CRELengthException.class, CREBadEntityException.class,
+					CREFormatException.class};
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+	}
+
+	@api
+	public static class get_player_ping extends AbstractFunction {
+
+		public String getName() {
+			return "get_player_ping";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1};
+		}
+
+		public String docs() {
+			return "int {[player]} Returns a player's average response time to ping packets in milliseconds."
+					+ " This is an indicator of the quality of the player's connection, as represented in the tab list.";
+		}
+
+		public Construct exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p;
+			if(args.length == 1) {
+				p = Static.GetPlayer(args[0].val(), t);
+			} else {
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(p, t);
+			}
+			return new CInt(p.getPing(), t);
+		}
+
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CRELengthException.class};
+		}
+
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		public boolean isRestricted() {
+			return false;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+	}
+
+	@api
+	public static class get_player_input extends AbstractFunction {
+
+		public String getName() {
+			return "get_player_input";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1};
+		}
+
+		public String docs() {
+			return "array {[player]} Returns a player's current input. (MC 1.21.3+)"
+					+ " This can be used to detect which movement keys the player is pressing."
+					+ " Array contains the following keys: forward, backward, left, right, jump, sneak, and sprint.";
+		}
+
+		public Construct exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p;
+			if(args.length == 1) {
+				p = Static.GetPlayer(args[0].val(), t);
+			} else {
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(p, t);
+			}
+			CArray ret = CArray.GetAssociativeArray(t);
+			MCPlayerInput input = p.getCurrentInput();
+			ret.set("forward", CBoolean.get(input.forward()), t);
+			ret.set("backward", CBoolean.get(input.backward()), t);
+			ret.set("left", CBoolean.get(input.left()), t);
+			ret.set("right", CBoolean.get(input.right()), t);
+			ret.set("jump", CBoolean.get(input.jump()), t);
+			ret.set("sneak", CBoolean.get(input.sneak()), t);
+			ret.set("sprint", CBoolean.get(input.sprint()), t);
+			return ret;
+		}
+
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CRELengthException.class};
+		}
+
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+	}
+
+	@api
+	public static class set_player_sleeping_ignored extends AbstractFunction {
+
+		@Override public String getName() {
+			return "set_player_sleeping_ignored";
+		}
+
+		@Override public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args)
+				throws ConfigRuntimeException {
+			final MCPlayer player;
+			final boolean value;
+			if(args.length == 1) {
+				player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(player, t);
+				value = ArgumentValidation.getBoolean(args[0], t);
+			} else {
+				player = Static.GetPlayer(args[0], t);
+				value = ArgumentValidation.getBoolean(args[1], t);
+			}
+			player.setSleepingIgnored(value);
+			return CVoid.VOID;
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{
+					CREPlayerOfflineException.class,
+					CREInsufficientArgumentsException.class,
+					CRECastException.class
+			};
+		}
+
+		@Override public boolean isRestricted() {
+			return false;
+		}
+
+		@Override public Boolean runAsync() {
+			return false;
+		}
+
+		@Override public MSVersion since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public String docs() {
+			return "void {[player], boolean} Sets whether <player> is ignored when "
+					+ "counting sleepers to skip night.";
+		}
+	}
+
+	@api
+	public static class is_player_sleeping_ignored extends AbstractFunction {
+
+		@Override public String getName() {
+			return "is_player_sleeping_ignored";
+		}
+
+		@Override public Integer[] numArgs() {
+			return new Integer[]{0, 1};
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args)
+				throws ConfigRuntimeException {
+			final MCPlayer player;
+			if(args.length == 0) {
+				player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(player, t);
+			} else {
+				player = Static.GetPlayer(args[0], t);
+			}
+			return CBoolean.get(player.isSleepingIgnored());
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[] {
+					CREPlayerOfflineException.class,
+					CREInsufficientArgumentsException.class
+			};
+		}
+
+		@Override public boolean isRestricted() {
+			return false;
+		}
+
+		@Override public Boolean runAsync() {
+			return false;
+		}
+
+		@Override public MSVersion since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {[player]} Returns whether <player> is currently ignored "
+					+ "by the night-skip sleep check.";
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({raw_pcan_see.class})
+	public static class raw_set_pvanish extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "raw_set_pvanish";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3};
+		}
+
+		@Override
+		public String docs() {
+			return "void {[player], isVanished, otherPlayer} Sets the visibility of this player to another player."
+					+ " If isVanished is true, the player's model and tablist name will not be visible to the other player.";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CRELengthException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer thisPlayer;
+			boolean isVanished;
+			MCPlayer otherPlayer;
+			if(args.length == 2) {
+				thisPlayer = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				isVanished = ArgumentValidation.getBooleanObject(args[0], t);
+				otherPlayer = Static.GetPlayer(args[1], t);
+			} else {
+				thisPlayer = Static.GetPlayer(args[0], t);
+				isVanished = ArgumentValidation.getBooleanObject(args[1], t);
+				otherPlayer = Static.GetPlayer(args[2], t);
+			}
+			otherPlayer.setVanished(isVanished, thisPlayer);
+			return CVoid.VOID;
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({raw_set_pvanish.class})
+	public static class raw_pcan_see extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "raw_pcan_see";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {[player], otherPlayer} Returns whether this player can see another player or not."
+					+ " Hidden players are sometimes called vanished players.";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CRELengthException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer thisPlayer;
+			MCPlayer otherPlayer;
+			if(args.length == 1) {
+				thisPlayer = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				otherPlayer = Static.GetPlayer(args[0], t);
+			} else {
+				thisPlayer = Static.GetPlayer(args[0], t);
+				otherPlayer = Static.GetPlayer(args[1], t);
+			}
+			return CBoolean.get(thisPlayer.canSee(otherPlayer));
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 	}
 }

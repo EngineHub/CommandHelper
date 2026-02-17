@@ -73,4 +73,10 @@ public abstract class BooleanPrefilterMatcher<T extends BindableEvent> extends A
 	}
 
 	protected abstract boolean getProperty(T event);
+
+	@Override
+	public int getPriority() {
+		return -1;
+	}
+
 }

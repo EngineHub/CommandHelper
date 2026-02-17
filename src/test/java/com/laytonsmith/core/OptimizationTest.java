@@ -8,7 +8,7 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
-import com.laytonsmith.testing.StaticTest;
+import com.laytonsmith.testing.AbstractIntegrationTest;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,7 +17,6 @@ import java.util.Set;
 import org.junit.Assert;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -25,15 +24,10 @@ import org.junit.Test;
  *
  * This is also used to test the lexer/compiler at a low level
  */
-public class OptimizationTest {
+public class OptimizationTest extends AbstractIntegrationTest {
 
 	static Set<Class<? extends Environment.EnvironmentImpl>> envs = Environment.getDefaultEnvClasses();
 	static Environment env;
-
-	@BeforeClass
-	public static void setUpClass() {
-		StaticTest.InstallFakeServerFrontend();
-	}
 
 	public static String optimize(String script, boolean pureMethodScript, Environment env) throws Exception {
 		try {
@@ -216,7 +210,7 @@ public class OptimizationTest {
 
 	@Test
 	public void testRegReplaceOptimization1() throws Exception {
-		assertEquals("replace('this is a thing','thing',dyn('hi'))", optimize("reg_replace('thing', dyn('hi'), 'this is a thing')"));
+		assertEquals("replace('this is a thing','thing','hi')", optimize("reg_replace('thing', 'hi', 'this is a thing')"));
 	}
 
 	@Test
@@ -270,7 +264,7 @@ public class OptimizationTest {
 
 	@Test
 	public void testMultipleAdjacentAssignment() throws Exception {
-		assertEquals("__statements__(assign(@one,inc(@two)),assign(ms.lang.int,@three,0),assign(@four,'test'))",
+		assertEquals("__statements__(assign(@one,inc(@two)),__unsafe_assign__(ms.lang.int,@three,0),assign(@four,'test'))",
 				optimize("@one = ++@two; int @three = 0; @four = 'test';"));
 	}
 
@@ -590,9 +584,9 @@ public class OptimizationTest {
 
 	@Test
 	public void testSconcatWithNonStatement() throws Exception {
-		assertEquals("__statements__(assign(ms.lang.int,@i,0),assign(ms.lang.int,@j,0))",
+		assertEquals("__statements__(__unsafe_assign__(ms.lang.int,@i,0),__unsafe_assign__(ms.lang.int,@j,0))",
 				optimize("int @i = 0; int @j = 0;"));
-		assertEquals("sconcat(__statements__(assign(ms.lang.int,@i,0)),assign(ms.lang.int,@j,0))",
+		assertEquals("sconcat(__statements__(__unsafe_assign__(ms.lang.int,@i,0)),__unsafe_assign__(ms.lang.int,@j,0))",
 				optimize("int @i = 0; int @j = 0"));
 	}
 
@@ -679,13 +673,13 @@ public class OptimizationTest {
 
 	@Test
 	public void testParenthesisRewritesCorrectly2() throws Exception {
-		assertEquals("__statements__(assign(ms.lang.closure,@c,closure(assign(ms.lang.int,@a,null),__statements__(msg(@a)))),execute(10,@c))",
+		assertEquals("__statements__(assign(ms.lang.closure,@c,closure(__unsafe_assign__(ms.lang.int,@a,null),__statements__(msg(@a)))),execute(10,@c))",
 				optimize("closure @c = closure(int @a) {msg(@a);};\n@c(10);"));
 	}
 
 	@Test
 	public void testParenthesisRewritesCorrectly3() throws Exception {
-		assertEquals("__statements__(assign(ms.lang.closure,@c,closure(assign(ms.lang.int,@a,null),assign(ms.lang.int,@b,null),__statements__(msg(@a)))),execute(10,11,@c))",
+		assertEquals("__statements__(assign(ms.lang.closure,@c,closure(__unsafe_assign__(ms.lang.int,@a,null),__unsafe_assign__(ms.lang.int,@b,null),__statements__(msg(@a)))),execute(10,11,@c))",
 				optimize("closure @c = closure(int @a, int @b) {msg(@a);};\n@c(10,11);"));
 	}
 
@@ -734,7 +728,7 @@ public class OptimizationTest {
 
 	@Test
 	public void testProcReference() throws Exception {
-		assertEquals("__statements__(proc(ms.lang.int,'_asdf',assign(ms.lang.int,@i,null),__statements__(return(@i))),"
+		assertEquals("__statements__(proc(ms.lang.int,'_asdf',__unsafe_assign__(ms.lang.int,@i,null),__statements__(return(@i))),"
 				+ "assign(ms.lang.Callable,@c,get_proc('_asdf')))",
 				optimize("int proc _asdf(int @i) { return @i; } Callable @c = proc _asdf;"));
 	}
@@ -767,9 +761,9 @@ public class OptimizationTest {
 
 	@Test
 	public void testForIsSelfStatement() throws Exception {
-		assertEquals("__statements__(for(assign(ms.lang.int,@i,0),lt(@i,10),inc(@i),__statements__(msg(@i))))",
+		assertEquals("__statements__(for(__unsafe_assign__(ms.lang.int,@i,0),lt(@i,10),inc(@i),__statements__(msg(@i))))",
 				optimize("for(int @i = 0, @i < 10, @i++) { msg(@i); }"));
-		assertEquals("__statements__(while(true,__statements__(msg(''),for(assign(ms.lang.int,@i,0),lt(@i,10),inc(@i),__statements__(msg(@i))))))",
+		assertEquals("__statements__(while(true,__statements__(msg(''),for(__unsafe_assign__(ms.lang.int,@i,0),lt(@i,10),inc(@i),__statements__(msg(@i))))))",
 				optimize("while(true) { msg('') for(int @i = 0, @i < 10, @i++) { msg(@i); }}"));
 	}
 

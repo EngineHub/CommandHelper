@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.PureUtilities.Version;
@@ -30,11 +31,13 @@ import com.laytonsmith.abstraction.entities.MCArmorStand;
 import com.laytonsmith.abstraction.entities.MCArrow;
 import com.laytonsmith.abstraction.entities.MCAxolotl;
 import com.laytonsmith.abstraction.entities.MCBee;
+import com.laytonsmith.abstraction.entities.MCBlockDisplay;
 import com.laytonsmith.abstraction.entities.MCBoat;
 import com.laytonsmith.abstraction.entities.MCCat;
 import com.laytonsmith.abstraction.entities.MCChestedHorse;
 import com.laytonsmith.abstraction.entities.MCCommandMinecart;
 import com.laytonsmith.abstraction.entities.MCCreeper;
+import com.laytonsmith.abstraction.entities.MCDisplay;
 import com.laytonsmith.abstraction.entities.MCEnderCrystal;
 import com.laytonsmith.abstraction.entities.MCEnderDragon;
 import com.laytonsmith.abstraction.entities.MCEnderSignal;
@@ -56,13 +59,17 @@ import com.laytonsmith.abstraction.entities.MCInteraction;
 import com.laytonsmith.abstraction.entities.MCInteraction.MCPreviousInteraction;
 import com.laytonsmith.abstraction.entities.MCIronGolem;
 import com.laytonsmith.abstraction.entities.MCItem;
+import com.laytonsmith.abstraction.entities.MCItemDisplay;
+import com.laytonsmith.abstraction.entities.MCItemDisplay.ModelTransform;
 import com.laytonsmith.abstraction.entities.MCItemFrame;
 import com.laytonsmith.abstraction.entities.MCItemProjectile;
 import com.laytonsmith.abstraction.entities.MCLightningStrike;
 import com.laytonsmith.abstraction.entities.MCLlama;
 import com.laytonsmith.abstraction.entities.MCLlama.MCLlamaColor;
+import com.laytonsmith.abstraction.entities.MCMannequin;
 import com.laytonsmith.abstraction.entities.MCMinecart;
 import com.laytonsmith.abstraction.entities.MCMushroomCow;
+import com.laytonsmith.abstraction.entities.MCOminousItemSpawner;
 import com.laytonsmith.abstraction.entities.MCPainting;
 import com.laytonsmith.abstraction.entities.MCPanda;
 import com.laytonsmith.abstraction.entities.MCParrot;
@@ -73,6 +80,7 @@ import com.laytonsmith.abstraction.entities.MCPigZombie;
 import com.laytonsmith.abstraction.entities.MCProjectile;
 import com.laytonsmith.abstraction.entities.MCPufferfish;
 import com.laytonsmith.abstraction.entities.MCRabbit;
+import com.laytonsmith.abstraction.entities.MCSalmon;
 import com.laytonsmith.abstraction.entities.MCSheep;
 import com.laytonsmith.abstraction.entities.MCShulker;
 import com.laytonsmith.abstraction.entities.MCShulkerBullet;
@@ -81,7 +89,9 @@ import com.laytonsmith.abstraction.entities.MCSnowman;
 import com.laytonsmith.abstraction.entities.MCSpectralArrow;
 import com.laytonsmith.abstraction.entities.MCStrider;
 import com.laytonsmith.abstraction.entities.MCTNT;
+import com.laytonsmith.abstraction.entities.MCTextDisplay;
 import com.laytonsmith.abstraction.entities.MCThrownPotion;
+import com.laytonsmith.abstraction.entities.MCTransformation;
 import com.laytonsmith.abstraction.entities.MCTrident;
 import com.laytonsmith.abstraction.entities.MCTropicalFish;
 import com.laytonsmith.abstraction.entities.MCVex;
@@ -104,6 +114,8 @@ import com.laytonsmith.abstraction.enums.MCFoxType;
 import com.laytonsmith.abstraction.enums.MCMushroomCowType;
 import com.laytonsmith.abstraction.enums.MCParrotType;
 import com.laytonsmith.abstraction.enums.MCParticle;
+import com.laytonsmith.abstraction.enums.MCPose;
+import com.laytonsmith.abstraction.enums.MCPotionType;
 import com.laytonsmith.abstraction.enums.MCProfession;
 import com.laytonsmith.abstraction.enums.MCRabbitType;
 import com.laytonsmith.abstraction.enums.MCRotation;
@@ -112,10 +124,13 @@ import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.MSLog;
+import com.laytonsmith.core.MSLog.Tags;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
@@ -147,6 +162,7 @@ import com.laytonsmith.core.exceptions.CRE.CRELengthException;
 import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
+import com.laytonsmith.core.exceptions.CRE.CREUnsupportedOperationException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
@@ -160,7 +176,11 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
+import org.apache.commons.lang3.tuple.Triple;
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 public class EntityManagement {
 
@@ -169,6 +189,10 @@ public class EntityManagement {
 	}
 
 	public abstract static class EntityFunction extends AbstractFunction {
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRELengthException.class, CREBadEntityException.class, CREFormatException.class};
+		}
 
 		@Override
 		public boolean isRestricted() {
@@ -182,12 +206,6 @@ public class EntityManagement {
 	}
 
 	public abstract static class EntityGetterFunction extends EntityFunction {
-
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRELengthException.class, CREBadEntityException.class};
-		}
-
 		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
@@ -195,12 +213,6 @@ public class EntityManagement {
 	}
 
 	public abstract static class EntitySetterFunction extends EntityFunction {
-
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREFormatException.class, CRELengthException.class, CREBadEntityException.class};
-		}
-
 		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
@@ -237,7 +249,7 @@ public class EntityManagement {
 						int x = ArgumentValidation.getInt32(args[1], t, env);
 						int z = ArgumentValidation.getInt32(args[2], t, env);
 						c = w.getChunkAt(x, z);
-					} catch (ConfigRuntimeException cre) {
+					} catch(ConfigRuntimeException cre) {
 						CArray l = CArray.GetAssociativeArray(t, null, env);
 						l.set("x", args[1], t, env);
 						l.set("z", args[2], t, env);
@@ -312,7 +324,7 @@ public class EntityManagement {
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			try {
 				Static.getEntity(args[0], t);
-			} catch (ConfigRuntimeException cre) {
+			} catch(ConfigRuntimeException cre) {
 				return CBoolean.FALSE;
 			}
 			return CBoolean.TRUE;
@@ -343,7 +355,7 @@ public class EntityManagement {
 
 			try {
 				e = Static.getEntity(args[0], t);
-			} catch (ConfigRuntimeException cre) {
+			} catch(ConfigRuntimeException cre) {
 				return CBoolean.FALSE;
 			}
 
@@ -367,16 +379,12 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class is_tameable extends AbstractFunction {
+	@seealso({MobManagement.set_mob_owner.class, MobManagement.get_mob_owner.class})
+	public static class is_tameable extends EntityGetterFunction {
 
 		@Override
 		public String getName() {
 			return "is_tameable";
-		}
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{1};
 		}
 
 		@Override
@@ -385,23 +393,8 @@ public class EntityManagement {
 		}
 
 		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRELengthException.class, CREBadEntityException.class};
-		}
-
-		@Override
-		public boolean isRestricted() {
-			return true;
-		}
-
-		@Override
 		public MSVersion since() {
 			return MSVersion.V3_3_0;
-		}
-
-		@Override
-		public Boolean runAsync() {
-			return false;
 		}
 
 		@Override
@@ -412,6 +405,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(set_entity_loc.class)
 	public static class entity_loc extends EntityGetterFunction {
 
 		@Override
@@ -448,6 +442,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(entity_loc.class)
 	public static class set_entity_loc extends EntitySetterFunction {
 
 		@Override
@@ -466,8 +461,11 @@ public class EntityManagement {
 				throw new CREFormatException("An array was expected but received " + args[1], t);
 			}
 			try {
+				if(!Float.isFinite(l.getPitch())) {
+					throw new CREIllegalArgumentException("pitch not finite", t);
+				}
 				return CBoolean.get(e.teleport(l));
-			} catch (IllegalArgumentException ex) {
+			} catch(IllegalArgumentException ex) {
 				throw new CREIllegalArgumentException(ex.getMessage(), t);
 			}
 		}
@@ -480,7 +478,8 @@ public class EntityManagement {
 		@Override
 		public String docs() {
 			return "boolean {entityUUID, locationArray} Teleports the entity to the given location and returns whether"
-					+ " the action was successful. Note this can set both location and direction.";
+					+ " the action was successful. Note this can set both location and direction. On Paper 1.19.3+"
+					+ " servers, this teleports passengers along with the entity instead of canceling the teleport.";
 		}
 
 		@Override
@@ -509,6 +508,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(set_entity_velocity.class)
 	public static class entity_velocity extends EntityGetterFunction {
 
 		@Override
@@ -547,6 +547,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(entity_velocity.class)
 	public static class set_entity_velocity extends EntitySetterFunction {
 
 		@Override
@@ -554,7 +555,7 @@ public class EntityManagement {
 			MCEntity e = Static.getEntity(args[0], t);
 			try {
 				e.setVelocity(ObjectGenerator.GetGenerator().vector(args[1], t, env));
-			} catch (IllegalArgumentException ex) {
+			} catch(IllegalArgumentException ex) {
 				throw new CREIllegalArgumentException(ex.getMessage(), t);
 			}
 			return CVoid.VOID;
@@ -563,7 +564,7 @@ public class EntityManagement {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CREFormatException.class, CRELengthException.class, CREBadEntityException.class,
-					CREIllegalArgumentException.class};
+				CREIllegalArgumentException.class};
 		}
 
 		@Override
@@ -630,6 +631,63 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(set_entity_saves_on_unload.class)
+	public static class get_entity_saves_on_unload extends EntityGetterFunction {
+
+		@Override
+		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCEntity ent = Static.getEntity(args[0], t);
+			return CBoolean.get(ent.savesOnUnload());
+		}
+
+		@Override
+		public String getName() {
+			return "get_entity_saves_on_unload";
+		}
+
+		@Override
+		public String docs() {
+			return "void {entityUUID} Gets whether the entity will be saved to disk when it is unloaded.";
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_5;
+		}
+
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(get_entity_saves_on_unload.class)
+	public static class set_entity_saves_on_unload extends EntitySetterFunction {
+
+		@Override
+		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCEntity ent = Static.getEntity(args[0], t);
+			ent.setSavesOnUnload(ArgumentValidation.getBooleanObject(args[1], t));
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "set_entity_saves_on_unload";
+		}
+
+		@Override
+		public String docs() {
+			return "void {entityUUID, boolean} Sets whether the entity is saved to disk when it is unloaded."
+					+ " By default an entity is saved. Setting this to false disables that."
+					+ " Can be used on players to disable player data saving on quit.";
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_5;
+		}
+
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class entity_type extends EntityGetterFunction {
 
 		@Override
@@ -642,7 +700,7 @@ public class EntityManagement {
 			MCEntity ent;
 			try {
 				ent = Static.getEntity(args[0], t);
-			} catch (ConfigRuntimeException cre) {
+			} catch(ConfigRuntimeException cre) {
 				return CNull.NULL;
 			}
 			return new CString(ent.getType().name(), t);
@@ -666,6 +724,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(set_entity_age.class)
 	public static class get_entity_age extends EntityGetterFunction {
 
 		@Override
@@ -690,6 +749,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(get_entity_age.class)
 	public static class set_entity_age extends EntitySetterFunction {
 
 		@Override
@@ -704,7 +764,7 @@ public class EntityManagement {
 			MCEntity ent = Static.getEntity(args[0], t);
 			try {
 				ent.setTicksLived(age);
-			} catch (IllegalArgumentException ex) {
+			} catch(IllegalArgumentException ex) {
 				throw new CRERangeException(ex.getMessage(), t);
 			}
 			return CVoid.VOID;
@@ -763,7 +823,7 @@ public class EntityManagement {
 				if(args.length >= 2) {
 					try {
 						projectile = MCEntityType.valueOf(args[1].val().toUpperCase());
-					} catch (IllegalArgumentException ex) {
+					} catch(IllegalArgumentException ex) {
 						throw new CREBadEntityTypeException(args[1] + " is not a valid entity type", t);
 					}
 
@@ -843,14 +903,12 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "string {[entity[, projectile]] | player, projectile, target[, speed]} shoots an entity from the"
+			return "string {[entity[, projectile]] | player, projectile, target[, speed]} Shoots an entity from the"
 					+ " specified location (can be an entity UUID, player name or location array), or the current"
 					+ " player if no arguments are passed. If no entity type is specified, it defaults to a fireball."
 					+ " If provide three arguments, with target (entity UUID, player name or location array), entity"
 					+ " will shoot to target location. Last, fourth argument, is double and specifies the speed"
-					+ " of projectile. Returns the UUID of the entity. Valid projectile types: "
-					+ StringUtils.Join(MCEntityType.values().stream().filter(MCEntityType::isProjectile)
-							.collect(Collectors.toList()), ", ", ", or ", " or ");
+					+ " of projectile. Returns the UUID of the entity.";
 		}
 
 		@Override
@@ -871,7 +929,7 @@ public class EntityManagement {
 			if(c.isInstanceOf(CString.TYPE, null, env)) {
 				try {
 					MCEntityType.MCVanillaEntityType.valueOf(c.val().toUpperCase());
-				} catch (IllegalArgumentException ex) {
+				} catch(IllegalArgumentException ex) {
 					env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions, new CompilerWarning(
 							c.val() + " is not a valid enum in com.commandhelper.EntityType",
 							c.getTarget(), null));
@@ -960,7 +1018,7 @@ public class EntityManagement {
 			for(String type : types) {
 				try {
 					entityType = MCEntityType.valueOf(type.toUpperCase());
-				} catch (IllegalArgumentException e) {
+				} catch(IllegalArgumentException e) {
 					throw new CREBadEntityException(String.format("Wrong entity type: %s", type), t);
 				}
 				newTypes.add(entityType.name());
@@ -972,14 +1030,14 @@ public class EntityManagement {
 		public String docs() {
 			return "array {locationArray, distance, [type] | locationArray, distance, [arrayTypes]} Returns an array of"
 					+ " all entities within the given distance from the location. Set type argument to filter entities"
-					+ " to a specific entity type. You can pass an array of types. Valid types (case doesn't matter): "
+					+ " to a specific entity type. You can pass an array of types. ---- Valid types: "
 					+ StringUtils.Join(MCEntityType.types(), ", ", ", or ", " or ");
 		}
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRECastException.class, CREBadEntityException.class, CREFormatException.class,
-					CRERangeException.class};
+				CRERangeException.class};
 		}
 
 		@Override
@@ -1000,7 +1058,7 @@ public class EntityManagement {
 			if(c.isInstanceOf(CString.TYPE, null, env)) {
 				try {
 					MCEntityType.MCVanillaEntityType.valueOf(c.val().toUpperCase());
-				} catch (IllegalArgumentException ex) {
+				} catch(IllegalArgumentException ex) {
 					env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions, new CompilerWarning(
 							c.val() + " is not a valid enum in com.commandhelper.EntityType",
 							c.getTarget(), null));
@@ -1010,7 +1068,7 @@ public class EntityManagement {
 					if(node.getData().isInstanceOf(CString.TYPE, null, env)) {
 						try {
 							MCEntityType.MCVanillaEntityType.valueOf(node.getData().val().toUpperCase());
-						} catch (IllegalArgumentException ex) {
+						} catch(IllegalArgumentException ex) {
 							env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions, new CompilerWarning(
 									node.getData().val() + " is not a valid enum in com.commandhelper.EntityType",
 									node.getTarget(), null));
@@ -1028,6 +1086,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(set_entity_onfire.class)
 	public static class entity_onfire extends EntityGetterFunction {
 
 		@Override
@@ -1055,6 +1114,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(entity_onfire.class)
 	public static class set_entity_onfire extends EntitySetterFunction {
 
 		@Override
@@ -1090,18 +1150,17 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class play_entity_effect extends EntitySetterFunction {
+	public static class play_entity_effect extends EntitySetterFunction implements Optimizable {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCEntity ent = Static.getEntity(args[0], t);
-			MCEntityEffect mee;
 			try {
-				mee = MCEntityEffect.valueOf(args[1].val().toUpperCase());
-			} catch (IllegalArgumentException iae) {
-				throw new CREFormatException("Unknown entity effect: " + args[1].val(), t);
+				MCEntityEffect mee = MCEntityEffect.valueOf(args[1].val().toUpperCase());
+				ent.playEffect(mee);
+			} catch(IllegalArgumentException iae) {
+				MSLog.GetLogger().e(Tags.GENERAL, "Invalid EntityEffect: " + args[1].val(), t);
 			}
-			ent.playEffect(mee);
 			return CVoid.VOID;
 		}
 
@@ -1117,7 +1176,7 @@ public class EntityManagement {
 					+ " the death effect makes the mob invisible to players and"
 					+ " immune to melee attacks. When used on players, they are"
 					+ " shown the respawn menu, but because they are not actually"
-					+ " dead, they can only log out. Possible effects are: "
+					+ " dead, they can only log out. ---- Possible effects are: "
 					+ StringUtils.Join(MCEntityEffect.values(), ", ", ", or ", " or ");
 		}
 
@@ -1126,9 +1185,36 @@ public class EntityManagement {
 			return MSVersion.V3_3_1;
 		}
 
+		@Override
+		public ParseTree optimizeDynamic(Target t, com.laytonsmith.core.environments.Environment env,
+				Set<Class<? extends com.laytonsmith.core.environments.Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+
+			if(children.size() < 2) {
+				return null;
+			}
+			Mixed c = children.get(1).getData();
+			if(c.isInstanceOf(CString.TYPE, null, env)) {
+				try {
+					MCEntityEffect.valueOf(c.val().toUpperCase());
+				} catch(IllegalArgumentException ex) {
+					env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions, new CompilerWarning(
+							c.val() + " is not a valid enum in com.commandhelper.EntityEffect",
+							c.getTarget(), null));
+				}
+			}
+			return null;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(set_mob_name.class)
 	public static class get_mob_name extends EntityGetterFunction {
 
 		@Override
@@ -1136,7 +1222,7 @@ public class EntityManagement {
 			MCEntity le = Static.getEntity(args[0], t);
 			try {
 				return new CString(le.getCustomName(), t);
-			} catch (IllegalArgumentException e) {
+			} catch(IllegalArgumentException e) {
 				throw new CRECastException(e.getMessage(), t);
 			}
 		}
@@ -1158,6 +1244,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(get_mob_name.class)
 	public static class set_mob_name extends EntitySetterFunction {
 
 		@Override
@@ -1165,7 +1252,7 @@ public class EntityManagement {
 			MCEntity le = Static.getEntity(args[0], t);
 			try {
 				le.setCustomName(args[1].val());
-			} catch (IllegalArgumentException e) {
+			} catch(IllegalArgumentException e) {
 				throw new CRECastException(e.getMessage(), t);
 			}
 			return CVoid.VOID;
@@ -1189,6 +1276,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({World.spawn_falling_block.class, launch_firework.class, drop_item.class, shoot_projectile.class})
 	public static class spawn_entity extends EntityFunction implements Optimizable {
 
 		@Override
@@ -1234,7 +1322,7 @@ public class EntityManagement {
 				if(!entType.isSpawnable()) {
 					throw new CREFormatException("spawn_entity() cannot spawn this entity type: " + args[0].val(), t);
 				}
-			} catch (IllegalArgumentException iae) {
+			} catch(IllegalArgumentException iae) {
 				throw new CREFormatException("Unknown entity type: " + args[0].val(), t);
 			}
 			for(int i = 0; i < qty; i++) {
@@ -1256,7 +1344,7 @@ public class EntityManagement {
 							} else {
 								ent = l.getWorld().spawn(l.getBlock().getLocation(), entType);
 							}
-						} catch (NullPointerException | IllegalArgumentException | IllegalStateException ex) {
+						} catch(NullPointerException | IllegalArgumentException | IllegalStateException ex) {
 							throw new CREFormatException("Unspawnable location for " + entType.getAbstracted().name(), t);
 						}
 						break;
@@ -1267,7 +1355,7 @@ public class EntityManagement {
 							} else {
 								ent = l.getWorld().spawn(l, entType);
 							}
-						} catch (IllegalArgumentException ex) {
+						} catch(IllegalArgumentException ex) {
 							throw new CREFormatException(ex.getMessage(), t);
 						}
 				}
@@ -1313,10 +1401,10 @@ public class EntityManagement {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-					new ExampleScript("Applying entity attributes before adding it to the world.",
-							"spawn_entity('ZOMBIE', 1, ptarget_space(),"
-							+ " closure(@id){ set_entity_spec(@id, array('baby': true)); set_entity_ai(@id, false); })",
-							"Creates a zombie, changes it to a baby zombie without AI, then adds it to the world."),
+				new ExampleScript("Applying entity attributes before adding it to the world.",
+				"spawn_entity('ZOMBIE', 1, ptarget_space(),"
+				+ " closure(@id){ set_entity_spec(@id, array('baby': true)); set_entity_ai(@id, false); })",
+				"Creates a zombie, changes it to a baby zombie without AI, then adds it to the world."),
 			};
 		}
 
@@ -1338,7 +1426,7 @@ public class EntityManagement {
 								"The entity type " + c.val() + " cannot be spawned by " + getName(),
 								c.getTarget(), null));
 					}
-				} catch (IllegalArgumentException ex) {
+				} catch(IllegalArgumentException ex) {
 					env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions, new CompilerWarning(
 							c.val() + " is not a valid enum in com.commandhelper.EntityType",
 							c.getTarget(), null));
@@ -1354,6 +1442,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({get_entity_rider.class, get_entity_riders.class, get_entity_vehicle.class})
 	public static class set_entity_rider extends EntitySetterFunction {
 
 		@Override
@@ -1380,7 +1469,7 @@ public class EntityManagement {
 			} else {
 				try {
 					success = horse.setPassenger(rider);
-				} catch (IllegalStateException ex) {
+				} catch(IllegalStateException ex) {
 					throw new CREFormatException("Circular entity riding!"
 							+ " One entity is already a passenger of the other.", t);
 				}
@@ -1410,6 +1499,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({get_entity_riders.class, set_entity_rider.class, get_entity_vehicle.class})
 	public static class get_entity_rider extends EntityGetterFunction {
 
 		@Override
@@ -1440,6 +1530,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({set_entity_rider.class, get_entity_rider.class, get_entity_vehicle.class})
 	public static class get_entity_riders extends EntityGetterFunction {
 
 		@Override
@@ -1471,6 +1562,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({set_entity_rider.class, get_entity_riders.class, get_entity_rider.class})
 	public static class get_entity_vehicle extends EntityGetterFunction {
 
 		@Override
@@ -1499,6 +1591,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(set_entity_max_speed.class)
 	public static class get_entity_max_speed extends EntityGetterFunction {
 
 		@Override
@@ -1522,7 +1615,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "double {entityUUID} Returns a max speed for given entity. Make sure that the entity is a minecart.";
+			return "double {entityUUID} Returns a max speed for a minecart.";
 		}
 
 		@Override
@@ -1532,6 +1625,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(get_entity_max_speed.class)
 	public static class set_entity_max_speed extends EntitySetterFunction {
 
 		@Override
@@ -1559,7 +1653,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityUUID} Sets a max speed for given entity. Make sure that the entity is a minecart.";
+			return "void {entityUUID} Sets a max speed for a minecart.";
 		}
 
 		@Override
@@ -1569,13 +1663,14 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(set_name_visible.class)
 	public static class get_name_visible extends EntityGetterFunction {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			try {
 				return CBoolean.get(Static.getEntity(args[0], t).isCustomNameVisible());
-			} catch (IllegalArgumentException e) {
+			} catch(IllegalArgumentException e) {
 				throw new CRECastException(e.getMessage(), t);
 			}
 		}
@@ -1599,13 +1694,14 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(get_name_visible.class)
 	public static class set_name_visible extends EntitySetterFunction {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			try {
 				Static.getEntity(args[0], t).setCustomNameVisible(ArgumentValidation.getBoolean(args[1], t, env));
-			} catch (IllegalArgumentException e) {
+			} catch(IllegalArgumentException e) {
 				throw new CRECastException(e.getMessage(), t);
 			}
 			return CVoid.VOID;
@@ -1630,22 +1726,8 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class get_art_at extends AbstractFunction {
-
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREBadEntityException.class, CREFormatException.class};
-		}
-
-		@Override
-		public boolean isRestricted() {
-			return true;
-		}
-
-		@Override
-		public Boolean runAsync() {
-			return false;
-		}
+	@seealso(set_art_at.class)
+	public static class get_art_at extends EntityGetterFunction {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
@@ -1668,11 +1750,6 @@ public class EntityManagement {
 		}
 
 		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{1};
-		}
-
-		@Override
 		public String docs() {
 			return "string {locationArray} Gets the specified art at the given location. If the item"
 					+ " at the specified location isn't a painting, an ----"
@@ -1687,22 +1764,8 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class set_art_at extends AbstractFunction {
-
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREFormatException.class};
-		}
-
-		@Override
-		public boolean isRestricted() {
-			return true;
-		}
-
-		@Override
-		public Boolean runAsync() {
-			return false;
-		}
+	@seealso(get_art_at.class)
+	public static class set_art_at extends EntitySetterFunction {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
@@ -1714,7 +1777,7 @@ public class EntityManagement {
 			MCArt art;
 			try {
 				art = MCArt.valueOf(args[1].val());
-			} catch (IllegalArgumentException e) {
+			} catch(IllegalArgumentException e) {
 				throw new CREFormatException("Invalid type: " + args[1].val(), t);
 			}
 			//If there's already a painting there, just use that one. Otherwise, spawn a new one.
@@ -1738,11 +1801,6 @@ public class EntityManagement {
 		@Override
 		public String getName() {
 			return "set_art_at";
-		}
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{2, 3};
 		}
 
 		@Override
@@ -1806,7 +1864,6 @@ public class EntityManagement {
 			docs = docs.replace("%RABBIT_TYPE%", StringUtils.Join(MCRabbitType.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%PARTICLE%", StringUtils.Join(MCParticle.types(), ", ", ", or ", " or "));
 			docs = docs.replace("%ENDERDRAGON_PHASE%", StringUtils.Join(MCEnderDragonPhase.values(), ", ", ", or ", " or "));
-			docs = docs.replace("%TREE_SPECIES%", StringUtils.Join(MCTreeSpecies.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%FISH_PATTERN%", StringUtils.Join(MCTropicalFish.MCPattern.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%CAT_TYPE%", StringUtils.Join(MCCatType.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%FOX_TYPE%", StringUtils.Join(MCFoxType.values(), ", ", ", or ", " or "));
@@ -1814,13 +1871,15 @@ public class EntityManagement {
 			docs = docs.replace("%PANDA_GENE%", StringUtils.Join(MCPanda.Gene.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%AXOLOTL_TYPE%", StringUtils.Join(MCAxolotlType.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%FROG_TYPE%", StringUtils.Join(MCFrogType.values(), ", ", ", or ", " or "));
+			docs = docs.replace("%ITEM_DISPLAY%", StringUtils.Join(ModelTransform.values(), ", ", ", or "));
+			docs = docs.replace("%WOLF_TYPE%", StringUtils.Join(MCWolf.Variant.values(), ", ", ", or "));
 			for(Field field : entity_spec.class.getDeclaredFields()) {
 				try {
 					String name = field.getName();
 					if(name.startsWith("KEY_")) {
 						docs = docs.replace("%" + name + "%", (String) field.get(null));
 					}
-				} catch (IllegalArgumentException | IllegalAccessException ex) {
+				} catch(IllegalArgumentException | IllegalAccessException ex) {
 					ex.printStackTrace();
 				}
 			}
@@ -1841,7 +1900,16 @@ public class EntityManagement {
 					CArray meta = CArray.GetAssociativeArray(t, null, env);
 					CArray effects = ObjectGenerator.GetGenerator().potions(cloud.getCustomEffects(), t, env);
 					meta.set("potions", effects, t, env);
-					meta.set("base", ObjectGenerator.GetGenerator().potionData(cloud.getBasePotionData(), t, env), t, env);
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
+						MCPotionType potionType = cloud.getBasePotionType();
+						if(potionType == null) {
+							meta.set("potiontype", CNull.NULL, t, env);
+						} else {
+							meta.set("potiontype", potionType.name(), t, env);
+						}
+					} else {
+						meta.set("base", ObjectGenerator.GetGenerator().potionData(cloud.getBasePotionData(), t, env), t, env);
+					}
 					specArray.set(entity_spec.KEY_AREAEFFECTCLOUD_POTIONMETA, meta, t, env);
 					specArray.set(entity_spec.KEY_AREAEFFECTCLOUD_RADIUS, new CDouble(cloud.getRadius(), t), t, env);
 					specArray.set(entity_spec.KEY_AREAEFFECTCLOUD_RADIUSONUSE, new CDouble(cloud.getRadiusOnUse(), t), t, env);
@@ -1866,11 +1934,27 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_ARROW_KNOCKBACK, new CInt(arrow.getKnockbackStrength(), t), t, env);
 					specArray.set(entity_spec.KEY_ARROW_DAMAGE, new CDouble(arrow.getDamage(), t), t, env);
 					specArray.set(entity_spec.KEY_ARROW_PIERCE_LEVEL, new CInt(arrow.getPierceLevel(), t), t, env);
+					specArray.set(entity_spec.KEY_ARROW_PICKUP, new CString(arrow.getPickupStatus().name(), t), t, env);
 					CArray tippedmeta = CArray.GetAssociativeArray(t, null, env);
 					CArray tippedeffects = ObjectGenerator.GetGenerator().potions(arrow.getCustomEffects(), t, env);
 					tippedmeta.set("potions", tippedeffects, t, env);
-					tippedmeta.set("base", ObjectGenerator.GetGenerator().potionData(arrow.getBasePotionData(), t, env), t, env);
-					specArray.set(entity_spec.KEY_TIPPEDARROW_POTIONMETA, tippedmeta, t, env);
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
+						MCPotionType potionType = arrow.getBasePotionType();
+						if(potionType == null) {
+							tippedmeta.set("potiontype", CNull.NULL, t, env);
+						} else {
+							tippedmeta.set("potiontype", potionType.name(), t, env);
+						}
+					} else {
+						tippedmeta.set("base", ObjectGenerator.GetGenerator().potionData(arrow.getBasePotionData(), t, env), t, env);
+					}
+					specArray.set(entity_spec.KEY_ARROW_POTIONMETA, tippedmeta, t, env);
+					MCColor arrowColor = arrow.getColor();
+					if(arrowColor == null) {
+						specArray.set(entity_spec.KEY_ARROW_COLOR, CNull.NULL, t, env);
+					} else {
+						specArray.set(entity_spec.KEY_ARROW_COLOR, ObjectGenerator.GetGenerator().color(arrowColor, t, env), t, env);
+					}
 					break;
 				case ARMOR_STAND:
 					MCArmorStand stand = (MCArmorStand) entity;
@@ -1908,6 +1992,10 @@ public class EntityManagement {
 					} else {
 						specArray.set(entity_spec.KEY_BEE_HIVE_LOCATION, ObjectGenerator.GetGenerator().location(hive, env), t, env);
 					}
+					break;
+				case BLOCK_DISPLAY:
+					MCBlockDisplay blockDisplay = (MCBlockDisplay) entity;
+					specArray.set(KEY_DISPLAY_BLOCK, ObjectGenerator.GetGenerator().blockData(blockDisplay.getBlockData(), t), t);
 					break;
 				case BOAT:
 					MCBoat boat = (MCBoat) entity;
@@ -2072,6 +2160,11 @@ public class EntityManagement {
 					MCIronGolem golem = (MCIronGolem) entity;
 					specArray.set(entity_spec.KEY_IRON_GOLEM_PLAYERCREATED, CBoolean.get(golem.isPlayerCreated()), t, env);
 					break;
+				case ITEM_DISPLAY:
+					MCItemDisplay itemDisplay = (MCItemDisplay) entity;
+					specArray.set(KEY_DISPLAY_ITEM, ObjectGenerator.GetGenerator().item(itemDisplay.getItem(), t), t);
+					specArray.set(KEY_DISPLAY_ITEM_DISPLAY, itemDisplay.getItemModelTransform().name(), t);
+					break;
 				case ITEM_FRAME:
 				case GLOW_ITEM_FRAME:
 					MCItemFrame frame = (MCItemFrame) entity;
@@ -2098,6 +2191,10 @@ public class EntityManagement {
 					MCSlime cube = (MCSlime) entity;
 					specArray.set(entity_spec.KEY_SLIME_SIZE, new CInt(cube.getSize(), t), t, env);
 					break;
+				case MANNEQUIN:
+					MCMannequin mannequin = (MCMannequin) entity;
+					specArray.set(entity_spec.KEY_MANNEQUIN_IMMOVABLE, CBoolean.get(mannequin.isImmovable()), t);
+					break;
 				case MINECART:
 				case MINECART_FURNACE:
 				case MINECART_HOPPER:
@@ -2117,6 +2214,11 @@ public class EntityManagement {
 				case MUSHROOM_COW:
 					MCMushroomCow cow = (MCMushroomCow) entity;
 					specArray.set(entity_spec.KEY_MUSHROOM_COW_TYPE, cow.getVariant().name(), t, env);
+					break;
+				case OMINOUS_ITEM_SPAWNER:
+					MCOminousItemSpawner spawner = (MCOminousItemSpawner) entity;
+					specArray.set(entity_spec.KEY_OMINOUS_SPAWNER_ITEM, ObjectGenerator.GetGenerator().item(spawner.getItem(), t), t);
+					specArray.set(entity_spec.KEY_OMINOUS_SPAWNER_DELAY, new CInt(spawner.getDelay(), t), t);
 					break;
 				case PAINTING:
 					MCPainting painting = (MCPainting) entity;
@@ -2169,6 +2271,12 @@ public class EntityManagement {
 					MCRabbit rabbit = (MCRabbit) entity;
 					specArray.set(entity_spec.KEY_RABBIT_TYPE, new CString(rabbit.getRabbitType().name(), t), t, env);
 					break;
+				case SALMON:
+					MCSalmon salmon = (MCSalmon) entity;
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_21_3)) {
+						specArray.set(entity_spec.KEY_SALMON_TYPE, new CString(salmon.getVariant().name(), t), t);
+					}
+					break;
 				case SHEEP:
 					MCSheep sheep = (MCSheep) entity;
 					specArray.set(entity_spec.KEY_SHEEP_COLOR, new CString(sheep.getColor().name(), t), t, env);
@@ -2176,7 +2284,12 @@ public class EntityManagement {
 					break;
 				case SHULKER:
 					MCShulker shulker = (MCShulker) entity;
-					specArray.set(entity_spec.KEY_SHULKER_COLOR, new CString(shulker.getColor().name(), t), t, env);
+					MCDyeColor shulkerColor = shulker.getColor();
+					if(shulkerColor == null) {
+						specArray.set(entity_spec.KEY_SHULKER_COLOR, CNull.NULL, t, env);
+					} else {
+						specArray.set(entity_spec.KEY_SHULKER_COLOR, new CString(shulker.getColor().name(), t), t, env);
+					}
 					break;
 				case SHULKER_BULLET:
 					MCShulkerBullet bullet = (MCShulkerBullet) entity;
@@ -2206,6 +2319,7 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_ARROW_DAMAGE, new CDouble(spectral.getDamage(), t), t, env);
 					specArray.set(entity_spec.KEY_SPECTRAL_ARROW_GLOWING_TICKS, new CInt(spectral.getGlowingTicks(), t), t, env);
 					break;
+				case LINGERING_POTION:
 				case SPLASH_POTION:
 					MCThrownPotion potion = (MCThrownPotion) entity;
 					specArray.set(entity_spec.KEY_SPLASH_POTION_ITEM, ObjectGenerator.GetGenerator().item(potion.getItem(), t, env), t, env);
@@ -2213,6 +2327,26 @@ public class EntityManagement {
 				case STRIDER:
 					MCStrider strider = (MCStrider) entity;
 					specArray.set(entity_spec.KEY_STEERABLE_SADDLED, CBoolean.get(strider.isSaddled()), t, env);
+					break;
+				case TEXT_DISPLAY:
+					MCTextDisplay tDisplay = (MCTextDisplay) entity;
+					specArray.set(entity_spec.KEY_DISPLAY_TEXT, tDisplay.getText());
+					specArray.set(entity_spec.KEY_DISPLAY_TEXT_ALIGNMENT, tDisplay.getAlignment().name());
+					specArray.set(entity_spec.KEY_DISPLAY_TEXT_LINE_WIDTH, new CInt(tDisplay.getLineWidth(), t), t);
+					specArray.set(entity_spec.KEY_DISPLAY_TEXT_SEE_THROUGH, CBoolean.get(tDisplay.isVisibleThroughBlocks()), t);
+					specArray.set(entity_spec.KEY_DISPLAY_TEXT_SHADOW, CBoolean.get(tDisplay.hasShadow()), t);
+					MCColor color = tDisplay.getBackgroundColor();
+					if(color == null) {
+						specArray.set(entity_spec.KEY_DISPLAY_TEXT_BACKGROUND_COLOR, CNull.NULL, t);
+					} else {
+						specArray.set(entity_spec.KEY_DISPLAY_TEXT_BACKGROUND_COLOR,
+								ObjectGenerator.GetGenerator().transparentColor(color, t), t);
+					}
+					long opacity = tDisplay.getOpacity();
+					if(opacity < 0) {
+						opacity += 256;
+					}
+					specArray.set(entity_spec.KEY_DISPLAY_TEXT_OPACITY, new CInt(opacity, t), t);
 					break;
 				case TRIDENT:
 					MCTrident trident = (MCTrident) entity;
@@ -2248,6 +2382,9 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_GENERIC_SITTING, CBoolean.get(wolf.isSitting()), t, env);
 					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19)) {
 						specArray.set(entity_spec.KEY_WOLF_INTERESTED, CBoolean.get(wolf.isInterested()), t, env);
+						if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
+							specArray.set(entity_spec.KEY_WOLF_TYPE, new CString(wolf.getWolfVariant().name(), t), t, env);
+						}
 					}
 					break;
 				case ZOGLIN:
@@ -2307,6 +2444,9 @@ public class EntityManagement {
 		private static final String KEY_ARROW_KNOCKBACK = "knockback";
 		private static final String KEY_ARROW_DAMAGE = "damage";
 		private static final String KEY_ARROW_PIERCE_LEVEL = "piercelevel";
+		private static final String KEY_ARROW_PICKUP = "pickup";
+		private static final String KEY_ARROW_POTIONMETA = "potionmeta";
+		private static final String KEY_ARROW_COLOR = "color";
 		private static final String KEY_ARMORSTAND_ARMS = "arms";
 		private static final String KEY_ARMORSTAND_BASEPLATE = "baseplate";
 		private static final String KEY_ARMORSTAND_GRAVITY = "gravity";
@@ -2327,6 +2467,16 @@ public class EntityManagement {
 		private static final String KEY_CREEPER_FUSETICKS = "fuseticks";
 		private static final String KEY_CREEPER_MAXFUSETICKS = "maxfuseticks";
 		private static final String KEY_CREEPER_EXPLOSIONRADIUS = "explosionradius";
+		private static final String KEY_DISPLAY_BLOCK = "blockdata";
+		private static final String KEY_DISPLAY_ITEM = "item";
+		private static final String KEY_DISPLAY_ITEM_DISPLAY = "itemdisplay";
+		private static final String KEY_DISPLAY_TEXT = "text";
+		private static final String KEY_DISPLAY_TEXT_ALIGNMENT = "alignment";
+		private static final String KEY_DISPLAY_TEXT_LINE_WIDTH = "linewidth";
+		private static final String KEY_DISPLAY_TEXT_SEE_THROUGH = "seethrough";
+		private static final String KEY_DISPLAY_TEXT_SHADOW = "shadow";
+		private static final String KEY_DISPLAY_TEXT_BACKGROUND_COLOR = "bgcolor";
+		private static final String KEY_DISPLAY_TEXT_OPACITY = "opacity";
 		private static final String KEY_DROPPED_ITEM_ITEMSTACK = "itemstack";
 		private static final String KEY_DROPPED_ITEM_PICKUPDELAY = "pickupdelay";
 		private static final String KEY_DROPPED_ITEM_OWNER = "owner";
@@ -2372,11 +2522,14 @@ public class EntityManagement {
 		private static final String KEY_ITEM_FRAME_ROTATION = "rotation";
 		private static final String KEY_ITEM_FRAME_VISIBLE = "visible";
 		private static final String KEY_LIGHTNING_EFFECT = "effect";
+		private static final String KEY_MANNEQUIN_IMMOVABLE = "immovable";
 		private static final String KEY_MINECART_BLOCK = "block";
 		private static final String KEY_MINECART_OFFSET = "offset";
 		private static final String KEY_MINECART_COMMAND_COMMAND = "command";
 		private static final String KEY_MINECART_COMMAND_CUSTOMNAME = "customname";
 		private static final String KEY_MUSHROOM_COW_TYPE = "type";
+		private static final String KEY_OMINOUS_SPAWNER_ITEM = "item";
+		private static final String KEY_OMINOUS_SPAWNER_DELAY = "delay";
 		private static final String KEY_PAINTING_ART = "type";
 		private static final String KEY_PANDA_MAINGENE = "maingene";
 		private static final String KEY_PANDA_HIDDENGENE = "hiddengene";
@@ -2393,6 +2546,7 @@ public class EntityManagement {
 		private static final String KEY_RABBIT_TYPE = "type";
 		private static final String KEY_PRIMED_TNT_FUSETICKS = "fuseticks";
 		private static final String KEY_PRIMED_TNT_SOURCE = "source";
+		private static final String KEY_SALMON_TYPE = "type";
 		private static final String KEY_SHEEP_COLOR = "color";
 		private static final String KEY_SHEEP_SHEARED = "sheared";
 		private static final String KEY_SHULKER_COLOR = "color";
@@ -2402,7 +2556,6 @@ public class EntityManagement {
 		private static final String KEY_SPECTRAL_ARROW_GLOWING_TICKS = "glowingticks";
 		private static final String KEY_SPLASH_POTION_ITEM = "item";
 		private static final String KEY_STEERABLE_SADDLED = "saddled";
-		private static final String KEY_TIPPEDARROW_POTIONMETA = "potionmeta";
 		private static final String KEY_TROPICALFISH_COLOR = "color";
 		private static final String KEY_TROPICALFISH_PATTERN = "pattern";
 		private static final String KEY_TROPICALFISH_PATTERNCOLOR = "patterncolor";
@@ -2414,6 +2567,7 @@ public class EntityManagement {
 		private static final String KEY_WOLF_ANGRY = "angry";
 		private static final String KEY_WOLF_COLOR = "color";
 		private static final String KEY_WOLF_INTERESTED = "interested";
+		private static final String KEY_WOLF_TYPE = "type";
 		private static final String KEY_ZOMBIE_BREAK_DOORS = "breakdoors";
 	}
 
@@ -2469,64 +2623,25 @@ public class EntityManagement {
 							case entity_spec.KEY_AREAEFFECTCLOUD_PARTICLE -> {
 								Mixed particleMixed = specArray.get(index, t, env);
 								if(particleMixed.isInstanceOf(CArray.TYPE, null, env)) {
-									Object data = null;
 									CArray pa = (CArray) particleMixed;
 									MCParticle p;
 									try {
 										p = MCParticle.valueOf(pa.get("particle", t, env).val().toUpperCase());
-									} catch (IllegalArgumentException ex) {
+									} catch(IllegalArgumentException ex) {
 										throw new CREIllegalArgumentException("Particle name '"
 												+ pa.get("particle", t, env).val() + "' is invalid.", t);
 									}
-									if(pa.containsKey("block")) {
-										// BLOCK_DUST, BLOCK_CRACK, FALLING_DUST
-										String value = pa.get("block", t, env).val();
-										MCMaterial mat = StaticLayer.GetMaterial(value);
-										if(mat != null) {
-											try {
-												data = mat.createBlockData();
-											} catch (IllegalArgumentException ex) {
-												throw new CREIllegalArgumentException(value + " is not a block.", t);
-											}
-										} else {
-											throw new CREIllegalArgumentException("Could not find material from " + value, t);
-										}
-									} else if(pa.containsKey("item")) {
-										// ITEM_CRACK
-										Mixed value = pa.get("item", t, env);
-										if(value.isInstanceOf(CArray.TYPE, null, env)) {
-											data = ObjectGenerator.GetGenerator().item(pa.get("item", t, env), t, env);
-										} else {
-											MCMaterial mat = StaticLayer.GetMaterial(value.val());
-											if(mat != null) {
-												if(mat.isItem()) {
-													data = StaticLayer.GetItemStack(mat, 1);
-												} else {
-													throw new CREIllegalArgumentException(value + " is not an item type.", t);
-												}
-											} else {
-												throw new CREIllegalArgumentException("Could not find material from " + value, t);
-											}
-										}
-									} else if(pa.containsKey("color")) {
-										// REDSTONE
-										Mixed c = pa.get("color", t, env);
-										if(c.isInstanceOf(CArray.TYPE, null, env)) {
-											data = ObjectGenerator.GetGenerator().color((CArray) c, t, env);
-										} else {
-											data = StaticLayer.GetConvertor().GetColor(c.val(), t);
-										}
-									}
 									try {
-										cloud.setParticle(p, data);
-									} catch (IllegalArgumentException ex) {
+										cloud.setParticle(p, ObjectGenerator.GetGenerator().particleData(p,
+												cloud.getLocation(), pa, t));
+									} catch(IllegalArgumentException ex) {
 										throw new CREFormatException("Invalid particle data for " + p.name(), t);
 									}
 								} else {
 									String particleName = particleMixed.val();
 									try {
 										cloud.setParticle(MCParticle.valueOf(particleName), null);
-									} catch (IllegalArgumentException ex) {
+									} catch(IllegalArgumentException ex) {
 										throw new CREFormatException("Invalid particle data: " + particleName, t);
 									}
 								}
@@ -2535,11 +2650,24 @@ public class EntityManagement {
 								Mixed c = specArray.get(index, t, env);
 								if(c.isInstanceOf(CArray.TYPE, null, env)) {
 									CArray meta = (CArray) c;
-									if(meta.containsKey("base")) {
+									if(meta.containsKey("potiontype")
+											&& Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
+										Mixed potiontype = meta.get("potiontype", t, env);
+										if(potiontype instanceof CNull) {
+											cloud.setBasePotionType(null);
+										} else {
+											cloud.setBasePotionType(MCPotionType.valueOf(potiontype.val()));
+										}
+									} else if(meta.containsKey("base")) {
 										Mixed base = meta.get("base", t, env);
 										if(base.isInstanceOf(CArray.TYPE, null, env)) {
-											MCPotionData pd = ObjectGenerator.GetGenerator().potionData((CArray) base, t, env);
-											cloud.setBasePotionData(pd);
+											if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
+												MCPotionType type = ObjectGenerator.GetGenerator().legacyPotionData((CArray) base, t, env);
+												cloud.setBasePotionType(type);
+											} else {
+												MCPotionData pd = ObjectGenerator.GetGenerator().potionData((CArray) base, t, env);
+												cloud.setBasePotionData(pd);
+											}
 										}
 									}
 									if(meta.containsKey("potions")) {
@@ -2607,15 +2735,36 @@ public class EntityManagement {
 								}
 								arrow.setPierceLevel(level);
 							}
-							case entity_spec.KEY_TIPPEDARROW_POTIONMETA -> {
+							case entity_spec.KEY_ARROW_PICKUP -> {
+								try {
+									arrow.setPickupStatus(MCArrow.PickupStatus.valueOf(specArray.get(index, t, env).val()));
+								} catch(IllegalArgumentException ex) {
+									throw new CREFormatException("Invalid arrow pickup status: "
+											+ specArray.get(index, t, env).val(), t);
+								}
+							}
+							case entity_spec.KEY_ARROW_POTIONMETA -> {
 								Mixed c = specArray.get(index, t, env);
 								if(c.isInstanceOf(CArray.TYPE, null, env)) {
 									CArray meta = (CArray) c;
-									if(meta.containsKey("base")) {
+									if(meta.containsKey("potiontype")
+											&& Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
+										Mixed potiontype = meta.get("potiontype", t, env);
+										if(potiontype instanceof CNull) {
+											arrow.setBasePotionType(null);
+										} else {
+											arrow.setBasePotionType(MCPotionType.valueOf(potiontype.val()));
+										}
+									} else if(meta.containsKey("base")) {
 										Mixed base = meta.get("base", t, env);
 										if(base.isInstanceOf(CArray.TYPE, null, env)) {
-											MCPotionData pd = ObjectGenerator.GetGenerator().potionData((CArray) base, t, env);
-											arrow.setBasePotionData(pd);
+											if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
+												MCPotionType type = ObjectGenerator.GetGenerator().legacyPotionData((CArray) base, t, env);
+												arrow.setBasePotionType(type);
+											} else {
+												MCPotionData pd = ObjectGenerator.GetGenerator().potionData((CArray) base, t, env);
+												arrow.setBasePotionData(pd);
+											}
 										}
 									}
 									if(meta.containsKey("potions")) {
@@ -2629,7 +2778,18 @@ public class EntityManagement {
 										}
 									}
 								} else {
-									throw new CRECastException("TippedArrow potion meta must be an array", t);
+									throw new CRECastException("Arrow potion meta must be an array", t);
+								}
+							}
+							case entity_spec.KEY_ARROW_COLOR -> {
+								Mixed colorMixed = specArray.get(index, t, env);
+								if(colorMixed instanceof CNull) {
+									arrow.setColor(null);
+								} else if(colorMixed.isInstanceOf(CArray.TYPE, null, env)) {
+									CArray color = (CArray) colorMixed;
+									arrow.setColor(ObjectGenerator.GetGenerator().color(color, t, env));
+								} else {
+									throw new CRECastException("Arrow color must be an array", t);
 								}
 							}
 							default -> throwException(index, t);
@@ -2655,7 +2815,7 @@ public class EntityManagement {
 										try {
 											poseMap.put(key, ObjectGenerator.GetGenerator().vector(poseMap.get(key),
 													poseArray.get("pose" + key.name(), t, env), t, env));
-										} catch (ConfigRuntimeException cre) {
+										} catch(ConfigRuntimeException cre) {
 											// Ignore, this just means the user didn't modify a body part
 										}
 									}
@@ -2676,7 +2836,7 @@ public class EntityManagement {
 							case entity_spec.KEY_AXOLOTL_TYPE:
 								try {
 									axolotl.setAxolotlType(MCAxolotlType.valueOf(specArray.get(index, t, env).val().toUpperCase()));
-								} catch (IllegalArgumentException exception) {
+								} catch(IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid axolotl type: " + specArray.get(index, t, env).val(), t);
 								}
 								break;
@@ -2712,6 +2872,29 @@ public class EntityManagement {
 						}
 					}
 					break;
+				case BLOCK_DISPLAY:
+					MCBlockDisplay bDisplay = (MCBlockDisplay) entity;
+					for(String index : specArray.stringKeySet()) {
+						switch(index.toLowerCase()) {
+							case entity_spec.KEY_DISPLAY_BLOCK:
+								MCBlockData bd;
+								Mixed m = specArray.get(index, t);
+								try {
+									if(m.isInstanceOf(CArray.TYPE, null, env)) {
+										bd = ObjectGenerator.GetGenerator().blockData((CArray) m, t);
+									} else {
+										bd = Static.getServer().createBlockData(m.val().toLowerCase());
+									}
+								} catch(IllegalArgumentException ex) {
+									throw new CREFormatException("Cannot create block data from: " + m.val(), t);
+								}
+								bDisplay.setBlockData(bd);
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
 				case BOAT:
 					MCBoat boat = (MCBoat) entity;
 					for(String index : specArray.stringKeySet()) {
@@ -2719,7 +2902,7 @@ public class EntityManagement {
 							case entity_spec.KEY_BOAT_TYPE:
 								try {
 									boat.setWoodType(MCTreeSpecies.valueOf(specArray.get(index, t, env).val().toUpperCase()));
-								} catch (IllegalArgumentException ex) {
+								} catch(IllegalArgumentException ex) {
 									throw new CREFormatException("Invalid boat type: " + specArray.get(index, t, env).val(), t);
 								}
 								break;
@@ -2735,7 +2918,7 @@ public class EntityManagement {
 							case entity_spec.KEY_CAT_TYPE:
 								try {
 									cat.setCatType(MCCatType.valueOf(specArray.get(index, t, env).val().toUpperCase()));
-								} catch (IllegalArgumentException exception) {
+								} catch(IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid cat type: " + specArray.get(index, t, env).val(), t);
 								}
 								break;
@@ -2745,7 +2928,7 @@ public class EntityManagement {
 							case entity_spec.KEY_CAT_COLOR:
 								try {
 									cat.setCollarColor(MCDyeColor.valueOf(specArray.get(index, t, env).val().toUpperCase()));
-								} catch (IllegalArgumentException exception) {
+								} catch(IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid collar color: " + specArray.get(index, t, env).val(), t);
 								}
 								break;
@@ -2764,21 +2947,21 @@ public class EntityManagement {
 							case entity_spec.KEY_CREEPER_MAXFUSETICKS:
 								try {
 									creeper.setMaxFuseTicks(ArgumentValidation.getInt32(specArray.get(index, t, env), t, env));
-								} catch (IllegalArgumentException ex) {
+								} catch(IllegalArgumentException ex) {
 									throw new CRERangeException("Ticks must not be negative.", t);
 								}
 								break;
 							case entity_spec.KEY_CREEPER_FUSETICKS:
 								try {
-									creeper.setFuseTicks(ArgumentValidation.getInt32(specArray.get(index, t), t));
-								} catch (IllegalArgumentException ex) {
+									creeper.setFuseTicks(ArgumentValidation.getInt32(specArray.get(index, t, env), t, env));
+								} catch(IllegalArgumentException ex) {
 									throw new CRERangeException(ex.getMessage(), t);
 								}
 								break;
 							case entity_spec.KEY_CREEPER_EXPLOSIONRADIUS:
 								try {
 									creeper.setExplosionRadius(ArgumentValidation.getInt32(specArray.get(index, t, env), t, env));
-								} catch (IllegalArgumentException ex) {
+								} catch(IllegalArgumentException ex) {
 									throw new CRERangeException("Radius must not be negative.", t);
 								}
 								break;
@@ -2798,14 +2981,14 @@ public class EntityManagement {
 							case entity_spec.KEY_HORSE_JUMP:
 								try {
 									chestedhorse.setJumpStrength(ArgumentValidation.getDouble(specArray.get(index, t, env), t, env));
-								} catch (IllegalArgumentException exception) {
+								} catch(IllegalArgumentException exception) {
 									throw new CRERangeException("The jump strength must be between 0.0 and 2.0", t);
 								}
 								break;
 							case entity_spec.KEY_HORSE_DOMESTICATION:
 								try {
 									chestedhorse.setDomestication(ArgumentValidation.getInt32(specArray.get(index, t, env), t, env));
-								} catch (IllegalArgumentException exception) {
+								} catch(IllegalArgumentException exception) {
 									throw new CRERangeException("The domestication level can not be higher than the max domestication level.", t);
 								}
 								break;
@@ -2882,7 +3065,7 @@ public class EntityManagement {
 							case entity_spec.KEY_ENDERDRAGON_PHASE:
 								try {
 									enderdragon.setPhase(MCEnderDragonPhase.valueOf(specArray.get(index, t, env).val().toUpperCase()));
-								} catch (IllegalArgumentException ex) {
+								} catch(IllegalArgumentException ex) {
 									throw new CREFormatException("Invalid EnderDragon phase: " + specArray.get(index, t, env).val(), t);
 								}
 								break;
@@ -2898,7 +3081,7 @@ public class EntityManagement {
 						Mixed targetLoc = specArray.get(entity_spec.KEY_ENDEREYE_TARGET, t, env);
 						try {
 							endereye.setTargetLocation(ObjectGenerator.GetGenerator().location(targetLoc, null, t, env));
-						} catch (IllegalArgumentException ex) {
+						} catch(IllegalArgumentException ex) {
 							throw new CREInvalidWorldException("An EnderEye cannot target a location in another world.", t);
 						}
 					}
@@ -3037,7 +3220,7 @@ public class EntityManagement {
 							case entity_spec.KEY_FOX_TYPE:
 								try {
 									fox.setVariant(MCFoxType.valueOf(specArray.get(index, t, env).val().toUpperCase()));
-								} catch (IllegalArgumentException exception) {
+								} catch(IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid fox type: " + specArray.get(index, t, env).val(), t);
 								}
 								break;
@@ -3053,7 +3236,7 @@ public class EntityManagement {
 							case entity_spec.KEY_FROG_TYPE:
 								try {
 									frog.setFrogType(MCFrogType.valueOf(specArray.get(index, t).val().toUpperCase()));
-								} catch (IllegalArgumentException exception) {
+								} catch(IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid frog type: " + specArray.get(index, t).val(), t);
 								}
 								break;
@@ -3081,28 +3264,28 @@ public class EntityManagement {
 							case entity_spec.KEY_HORSE_COLOR:
 								try {
 									horse.setColor(MCHorseColor.valueOf(specArray.get(index, t, env).val().toUpperCase()));
-								} catch (IllegalArgumentException exception) {
+								} catch(IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid horse color: " + specArray.get(index, t, env).val(), t);
 								}
 								break;
 							case entity_spec.KEY_HORSE_STYLE:
 								try {
 									horse.setPattern(MCHorsePattern.valueOf(specArray.get(index, t, env).val().toUpperCase()));
-								} catch (IllegalArgumentException exception) {
+								} catch(IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid horse style: " + specArray.get(index, t, env).val(), t);
 								}
 								break;
 							case entity_spec.KEY_HORSE_JUMP:
 								try {
 									horse.setJumpStrength(ArgumentValidation.getDouble(specArray.get(index, t, env), t, env));
-								} catch (IllegalArgumentException exception) {
+								} catch(IllegalArgumentException exception) {
 									throw new CRERangeException("The jump strength must be between 0.0 and 2.0", t);
 								}
 								break;
 							case entity_spec.KEY_HORSE_DOMESTICATION:
 								try {
 									horse.setDomestication(ArgumentValidation.getInt32(specArray.get(index, t, env), t, env));
-								} catch (IllegalArgumentException exception) {
+								} catch(IllegalArgumentException exception) {
 									throw new CRERangeException("The domestication level can not be higher than the max domestication level.", t);
 								}
 								break;
@@ -3153,6 +3336,26 @@ public class EntityManagement {
 						}
 					}
 					break;
+				case ITEM_DISPLAY:
+					MCItemDisplay itemDisplay = (MCItemDisplay) entity;
+					for(String index : specArray.stringKeySet()) {
+						switch(index.toLowerCase()) {
+							case entity_spec.KEY_DISPLAY_ITEM:
+								itemDisplay.setItem(ObjectGenerator.GetGenerator().item(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_DISPLAY_ITEM_DISPLAY:
+								try {
+									itemDisplay.setItemModelTransform(ModelTransform.valueOf(specArray.get(index, t).val()));
+								} catch(IllegalArgumentException ex) {
+									throw new CREFormatException("Invalid display item model transform: "
+											+ specArray.get(index, t).val(), t);
+								}
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
 				case ITEM_FRAME:
 				case GLOW_ITEM_FRAME:
 					MCItemFrame frame = (MCItemFrame) entity;
@@ -3167,7 +3370,7 @@ public class EntityManagement {
 							case entity_spec.KEY_ITEM_FRAME_ROTATION:
 								try {
 									frame.setRotation(MCRotation.valueOf(specArray.get(index, t, env).val().toUpperCase()));
-								} catch (IllegalArgumentException exception) {
+								} catch(IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid rotation type: " + specArray.get(index, t, env).val(), t);
 								}
 								break;
@@ -3186,7 +3389,7 @@ public class EntityManagement {
 							case entity_spec.KEY_HORSE_COLOR:
 								try {
 									llama.setLlamaColor(MCLlamaColor.valueOf(specArray.get(index, t, env).val().toUpperCase()));
-								} catch (IllegalArgumentException exception) {
+								} catch(IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid llama color: " + specArray.get(index, t, env).val(), t);
 								}
 								break;
@@ -3196,7 +3399,7 @@ public class EntityManagement {
 							case entity_spec.KEY_HORSE_DOMESTICATION:
 								try {
 									llama.setDomestication(ArgumentValidation.getInt32(specArray.get(index, t, env), t, env));
-								} catch (IllegalArgumentException exception) {
+								} catch(IllegalArgumentException exception) {
 									throw new CRERangeException("The domestication level can not be higher than the max domestication level.", t);
 								}
 								break;
@@ -3218,6 +3421,18 @@ public class EntityManagement {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_SLIME_SIZE -> cube.setSize(ArgumentValidation.getInt32(specArray.get(index, t, env), t, env));
 							default -> throwException(index, t);
+						}
+					}
+					break;
+				case MANNEQUIN:
+					MCMannequin mannequin = (MCMannequin) entity;
+					for(String index : specArray.stringKeySet()) {
+						switch(index.toLowerCase()) {
+							case entity_spec.KEY_MANNEQUIN_IMMOVABLE:
+								mannequin.setImmovable(ArgumentValidation.getBooleanObject(specArray.get(index, t), t));
+								break;
+							default:
+								throwException(index, t);
 						}
 					}
 					break;
@@ -3274,9 +3489,24 @@ public class EntityManagement {
 							case entity_spec.KEY_MUSHROOM_COW_TYPE:
 								try {
 									cow.setVariant(MCMushroomCowType.valueOf(specArray.get(index, t, env).val().toUpperCase()));
-								} catch (IllegalArgumentException exception) {
+								} catch(IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid mushroom cow type: " + specArray.get(index, t).val(), t);
 								}
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
+				case OMINOUS_ITEM_SPAWNER:
+					MCOminousItemSpawner spawner = (MCOminousItemSpawner) entity;
+					for(String index : specArray.stringKeySet()) {
+						switch(index.toLowerCase()) {
+							case entity_spec.KEY_OMINOUS_SPAWNER_ITEM:
+								spawner.setItem(ObjectGenerator.GetGenerator().item(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_OMINOUS_SPAWNER_DELAY:
+								spawner.setDelay(ArgumentValidation.getInt(specArray.get(index, t), t));
 								break;
 							default:
 								throwException(index, t);
@@ -3290,7 +3520,7 @@ public class EntityManagement {
 							case entity_spec.KEY_PAINTING_ART:
 								try {
 									painting.setArt(MCArt.valueOf(specArray.get(index, t, env).val().toUpperCase()));
-								} catch (IllegalArgumentException exception) {
+								} catch(IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid art type: " + specArray.get(index, t, env).val(), t);
 								}
 								break;
@@ -3306,14 +3536,14 @@ public class EntityManagement {
 							case entity_spec.KEY_PANDA_MAINGENE:
 								try {
 									panda.setMainGene(MCPanda.Gene.valueOf(specArray.get(index, t, env).val().toUpperCase()));
-								} catch (IllegalArgumentException exception) {
+								} catch(IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid panda gene: " + specArray.get(index, t, env).val(), t);
 								}
 								break;
 							case entity_spec.KEY_PANDA_HIDDENGENE:
 								try {
 									panda.setHiddenGene(MCPanda.Gene.valueOf(specArray.get(index, t, env).val().toUpperCase()));
-								} catch (IllegalArgumentException exception) {
+								} catch(IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid panda gene: " + specArray.get(index, t, env).val(), t);
 								}
 								break;
@@ -3344,7 +3574,7 @@ public class EntityManagement {
 							case entity_spec.KEY_PARROT_TYPE:
 								try {
 									parrot.setVariant(MCParrotType.valueOf(specArray.get(index, t, env).val().toUpperCase()));
-								} catch (IllegalArgumentException exception) {
+								} catch(IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid parrot type: " + specArray.get(index, t, env).val(), t);
 								}
 								break;
@@ -3423,7 +3653,7 @@ public class EntityManagement {
 							case entity_spec.KEY_RABBIT_TYPE:
 								try {
 									rabbit.setRabbitType(MCRabbitType.valueOf(specArray.get(index, t, env).val().toUpperCase()));
-								} catch (IllegalArgumentException exception) {
+								} catch(IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid rabbit type: " + specArray.get(index, t, env).val(), t);
 								}
 								break;
@@ -3444,6 +3674,24 @@ public class EntityManagement {
 						}
 					}
 					break;
+				case SALMON:
+					MCSalmon salmon = (MCSalmon) entity;
+					for(String index : specArray.stringKeySet()) {
+						switch(index.toLowerCase()) {
+							case entity_spec.KEY_SALMON_TYPE:
+								if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_21_3)) {
+									try {
+										salmon.setVariant(MCSalmon.Variant.valueOf(specArray.get(index, t).val()));
+									} catch (IllegalArgumentException exception) {
+										throw new CREFormatException("Invalid salmon type: " + specArray.get(index, t).val(), t);
+									}
+								}
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
 				case SHEEP:
 					MCSheep sheep = (MCSheep) entity;
 					for(String index : specArray.stringKeySet()) {
@@ -3451,7 +3699,7 @@ public class EntityManagement {
 							case entity_spec.KEY_SHEEP_COLOR:
 								try {
 									sheep.setColor(MCDyeColor.valueOf(specArray.get(index, t, env).val().toUpperCase()));
-								} catch (IllegalArgumentException exception) {
+								} catch(IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid sheep color: " + specArray.get(index, t, env).val(), t);
 								}
 								break;
@@ -3468,9 +3716,14 @@ public class EntityManagement {
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_SHULKER_COLOR:
+								Mixed value = specArray.get(index, t);
+								if(value instanceof CNull) {
+									shulker.setColor(null);
+									break;
+								}
 								try {
-									shulker.setColor(MCDyeColor.valueOf(specArray.get(index, t, env).val().toUpperCase()));
-								} catch (IllegalArgumentException exception) {
+									shulker.setColor(MCDyeColor.valueOf(value.val().toUpperCase()));
+								} catch(IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid shulker color: " + specArray.get(index, t, env).val(), t);
 								}
 								break;
@@ -3504,14 +3757,14 @@ public class EntityManagement {
 							case entity_spec.KEY_HORSE_JUMP:
 								try {
 									undeadhorse.setJumpStrength(ArgumentValidation.getDouble(specArray.get(index, t, env), t, env));
-								} catch (IllegalArgumentException exception) {
+								} catch(IllegalArgumentException exception) {
 									throw new CRERangeException("The jump strength must be between 0.0 and 2.0", t);
 								}
 								break;
 							case entity_spec.KEY_HORSE_DOMESTICATION:
 								try {
 									undeadhorse.setDomestication(ArgumentValidation.getInt32(specArray.get(index, t, env), t, env));
-								} catch (IllegalArgumentException exception) {
+								} catch(IllegalArgumentException exception) {
 									throw new CRERangeException("The domestication level can not be higher than the max domestication level.", t);
 								}
 								break;
@@ -3568,6 +3821,7 @@ public class EntityManagement {
 						}
 					}
 					break;
+				case LINGERING_POTION:
 				case SPLASH_POTION:
 					MCThrownPotion potion = (MCThrownPotion) entity;
 					for(String index : specArray.stringKeySet()) {
@@ -3576,7 +3830,7 @@ public class EntityManagement {
 								MCItemStack potionItem = ObjectGenerator.GetGenerator().item(specArray.get(index, t, env), t, env);
 								try {
 									potion.setItem(potionItem);
-								} catch (IllegalArgumentException ex) {
+								} catch(IllegalArgumentException ex) {
 									throw new CREFormatException("Invalid potion type: " + potionItem.getType().getName(), t);
 								}
 								break;
@@ -3597,27 +3851,75 @@ public class EntityManagement {
 						}
 					}
 					break;
+				case TEXT_DISPLAY:
+					MCTextDisplay tDisplay = (MCTextDisplay) entity;
+					for(String index : specArray.stringKeySet()) {
+						switch(index.toLowerCase()) {
+							case entity_spec.KEY_DISPLAY_TEXT:
+								tDisplay.setText(specArray.get(index, t, env).val());
+								break;
+							case entity_spec.KEY_DISPLAY_TEXT_ALIGNMENT:
+								try {
+									tDisplay.setAlignment(MCTextDisplay.Alignment.valueOf(specArray.get(index, t, env).val()));
+								} catch(IllegalArgumentException ex) {
+									throw new CREFormatException("Invalid text alignment: " + specArray.get(index, t, env).val(), t);
+								}
+								break;
+							case entity_spec.KEY_DISPLAY_TEXT_LINE_WIDTH:
+								tDisplay.setLineWidth(ArgumentValidation.getInt32(specArray.get(index, t, env), t, env));
+								break;
+							case entity_spec.KEY_DISPLAY_TEXT_SEE_THROUGH:
+								tDisplay.setVisibleThroughBlocks(ArgumentValidation.getBooleanObject(specArray.get(index, t, env), t, env));
+								break;
+							case entity_spec.KEY_DISPLAY_TEXT_SHADOW:
+								tDisplay.setHasShadow(ArgumentValidation.getBooleanObject(specArray.get(index, t, env), t, env));
+								break;
+							case entity_spec.KEY_DISPLAY_TEXT_BACKGROUND_COLOR:
+								Mixed color = specArray.get(index, t, env);
+								if(color.isInstanceOf(CArray.TYPE, null, env)) {
+									tDisplay.setBackgroundColor(ObjectGenerator.GetGenerator().color((CArray) color, t));
+								} else if(color instanceof CNull) {
+									tDisplay.setBackgroundColor(null);
+								} else {
+									throw new CRECastException("Expected a color array for text display background color.", t);
+								}
+								break;
+							case entity_spec.KEY_DISPLAY_TEXT_OPACITY:
+								long opacity = ArgumentValidation.getInt(specArray.get(index, t, env), t, env);
+								if(opacity < 0 || opacity > 255) {
+									throw new CRERangeException("Text opacity outside valid range.", t);
+								}
+								tDisplay.setOpacity((byte) opacity);
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
 				case TRIDENT:
 					MCTrident trident = (MCTrident) entity;
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
-							case entity_spec.KEY_ARROW_CRITICAL -> trident.setCritical(ArgumentValidation.getBoolean(specArray.get(index, t, env), t, env));
-							case entity_spec.KEY_ARROW_KNOCKBACK -> {
+							case entity_spec.KEY_ARROW_CRITICAL:
+								trident.setCritical(ArgumentValidation.getBoolean(specArray.get(index, t, env), t, env));
+								break;
+							case entity_spec.KEY_ARROW_KNOCKBACK:
 								int k = ArgumentValidation.getInt32(specArray.get(index, t, env), t, env);
 								if(k < 0) {
 									throw new CRERangeException("Knockback can not be negative.", t);
 								} else {
 									trident.setKnockbackStrength(k);
 								}
-							}
-							case entity_spec.KEY_ARROW_DAMAGE -> {
+								break;
+							case entity_spec.KEY_ARROW_DAMAGE:
 								double d = ArgumentValidation.getDouble(specArray.get(index, t, env), t, env);
 								if(d < 0) {
 									throw new CRERangeException("Damage cannot be negative.", t);
 								}
 								trident.setDamage(d);
-							}
-							default -> throwException(index, t);
+								break;
+							default:
+								throwException(index, t);
 						}
 					}
 					break;
@@ -3628,21 +3930,21 @@ public class EntityManagement {
 							case entity_spec.KEY_TROPICALFISH_COLOR:
 								try {
 									fish.setBodyColor(MCDyeColor.valueOf(specArray.get(index, t, env).val().toUpperCase()));
-								} catch (IllegalArgumentException exception) {
+								} catch(IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid fish color: " + specArray.get(index, t, env).val(), t);
 								}
 								break;
 							case entity_spec.KEY_TROPICALFISH_PATTERNCOLOR:
 								try {
 									fish.setPatternColor(MCDyeColor.valueOf(specArray.get(index, t, env).val().toUpperCase()));
-								} catch (IllegalArgumentException exception) {
+								} catch(IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid fish pattern color: " + specArray.get(index, t, env).val(), t);
 								}
 								break;
 							case entity_spec.KEY_TROPICALFISH_PATTERN:
 								try {
 									fish.setPattern(MCTropicalFish.MCPattern.valueOf(specArray.get(index, t, env).val().toUpperCase()));
-								} catch (IllegalArgumentException exception) {
+								} catch(IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid fish pattern: " + specArray.get(index, t, env).val(), t);
 								}
 								break;
@@ -3667,14 +3969,14 @@ public class EntityManagement {
 							case entity_spec.KEY_VILLAGER_PROFESSION:
 								try {
 									villager.setProfession(MCProfession.valueOf(specArray.get(index, t, env).val().toUpperCase()));
-								} catch (IllegalArgumentException exception) {
+								} catch(IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid profession: " + specArray.get(index, t, env).val(), t);
 								}
 								break;
 							case entity_spec.KEY_VILLAGER_LEVEL:
 								try {
 									villager.setLevel(ArgumentValidation.getInt32(specArray.get(index, t, env), t, env));
-								} catch (IllegalArgumentException exception) {
+								} catch(IllegalArgumentException exception) {
 									throw new CRERangeException("Expected profession level to be 1-5, but got "
 											+ specArray.get(index, t, env).val(), t);
 								}
@@ -3682,7 +3984,7 @@ public class EntityManagement {
 							case entity_spec.KEY_VILLAGER_EXPERIENCE:
 								try {
 									villager.setExperience(ArgumentValidation.getInt32(specArray.get(index, t, env), t, env));
-								} catch (IllegalArgumentException exception) {
+								} catch(IllegalArgumentException exception) {
 									throw new CRERangeException("Expected experience to be a positive number, but got "
 											+ specArray.get(index, t, env).val(), t);
 								}
@@ -3712,7 +4014,7 @@ public class EntityManagement {
 							case entity_spec.KEY_WOLF_COLOR:
 								try {
 									wolf.setCollarColor(MCDyeColor.valueOf(specArray.get(index, t, env).val().toUpperCase()));
-								} catch (IllegalArgumentException exception) {
+								} catch(IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid collar color: " + specArray.get(index, t, env).val(), t);
 								}
 								break;
@@ -3720,7 +4022,19 @@ public class EntityManagement {
 								wolf.setSitting(ArgumentValidation.getBoolean(specArray.get(index, t, env), t, env));
 								break;
 							case entity_spec.KEY_WOLF_INTERESTED:
-								wolf.setInterested(ArgumentValidation.getBooleanObject(specArray.get(index, t), t));
+								if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
+									wolf.setInterested(ArgumentValidation.getBooleanObject(specArray.get(index, t), t));
+								}
+								break;
+							case entity_spec.KEY_WOLF_TYPE:
+								if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
+									try {
+										MCWolf.Variant type = MCWolf.Variant.valueOf(specArray.get(index, t).val());
+										wolf.setWolfVariant(type);
+									} catch (IllegalArgumentException ex) {
+										throw new CREFormatException("Invalid wolf type: " + specArray.get(index, t).val(), t);
+									}
+								}
 								break;
 							default:
 								throwException(index, t);
@@ -3778,7 +4092,7 @@ public class EntityManagement {
 							case entity_spec.KEY_VILLAGER_PROFESSION:
 								try {
 									zombievillager.setProfession(MCProfession.valueOf(specArray.get(index, t, env).val().toUpperCase()));
-								} catch (IllegalArgumentException exception) {
+								} catch(IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid profession: " + specArray.get(index, t, env).val(), t);
 								}
 								break;
@@ -3831,6 +4145,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(set_projectile_shooter.class)
 	public static class get_projectile_shooter extends EntityGetterFunction {
 
 		@Override
@@ -3870,6 +4185,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(get_projectile_shooter.class)
 	public static class set_projectile_shooter extends EntitySetterFunction {
 
 		@Override
@@ -3912,6 +4228,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(set_projectile_bounce.class)
 	public static class get_projectile_bounce extends EntityGetterFunction {
 
 		@Override
@@ -3921,7 +4238,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "boolean {entityUUID} Returns if the given projectile should bounce when it hits something.";
+			return "boolean {entityUUID} Returns if the given projectile should bounce when it hits something. (deprecated)";
 		}
 
 		@Override
@@ -3941,6 +4258,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(get_projectile_bounce.class)
 	public static class set_projectile_bounce extends EntitySetterFunction {
 
 		@Override
@@ -3950,7 +4268,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityUUID, boolean} Sets if the given projectile should bounce when it hits something.";
+			return "void {entityUUID, boolean} Sets if the given projectile should bounce when it hits something. (deprecated)";
 		}
 
 		@Override
@@ -3971,6 +4289,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(set_projectile_item.class)
 	public static class get_projectile_item extends EntityGetterFunction {
 
 		@Override
@@ -4002,6 +4321,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(get_projectile_item.class)
 	public static class set_projectile_item extends EntitySetterFunction {
 
 		@Override
@@ -4034,6 +4354,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(set_entity_fall_distance.class)
 	public static class entity_fall_distance extends EntityGetterFunction {
 
 		@Override
@@ -4058,6 +4379,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(entity_fall_distance.class)
 	public static class set_entity_fall_distance extends EntitySetterFunction {
 
 		@Override
@@ -4083,6 +4405,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(get_entity_glowing.class)
 	public static class set_entity_glowing extends EntitySetterFunction {
 
 		@Override
@@ -4108,6 +4431,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(set_entity_glowing.class)
 	public static class get_entity_glowing extends EntityGetterFunction {
 
 		@Override
@@ -4133,6 +4457,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(set_entity_silent.class)
 	public static class get_entity_silent extends EntityGetterFunction {
 
 		@Override
@@ -4157,6 +4482,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(get_entity_silent.class)
 	public static class set_entity_silent extends EntitySetterFunction {
 
 		@Override
@@ -4183,6 +4509,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(set_entity_gravity.class)
 	public static class get_entity_gravity extends EntityGetterFunction {
 
 		@Override
@@ -4207,6 +4534,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(get_entity_gravity.class)
 	public static class set_entity_gravity extends EntitySetterFunction {
 
 		@Override
@@ -4233,6 +4561,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(set_entity_invulnerable.class)
 	public static class get_entity_invulnerable extends EntityGetterFunction {
 
 		@Override
@@ -4257,6 +4586,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(get_entity_invulnerable.class)
 	public static class set_entity_invulnerable extends EntitySetterFunction {
 
 		@Override
@@ -4284,6 +4614,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(set_entity_freezing.class)
 	public static class get_entity_freezing extends EntityGetterFunction {
 
 		@Override
@@ -4310,6 +4641,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(get_entity_freezing.class)
 	public static class set_entity_freezing extends EntitySetterFunction {
 
 		@Override
@@ -4326,7 +4658,7 @@ public class EntityManagement {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CREFormatException.class, CRELengthException.class, CREBadEntityException.class,
-					CRERangeException.class};
+				CRERangeException.class};
 		}
 
 		@Override
@@ -4347,6 +4679,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({add_scoreboard_tag.class, has_scoreboard_tag.class, remove_scoreboard_tag.class})
 	public static class get_scoreboard_tags extends EntityGetterFunction {
 
 		@Override
@@ -4377,6 +4710,38 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({get_scoreboard_tags.class, add_scoreboard_tag.class, remove_scoreboard_tag.class})
+	public static class has_scoreboard_tag extends EntityFunction {
+
+		@Override
+		public String getName() {
+			return "has_scoreboard_tag";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {entityUUID, tag} Returns whether this entity has a specific tag.";
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCEntity e = Static.getEntity(args[0], t);
+			return CBoolean.get(e.hasScoreboardTag(args[1].val()));
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({remove_scoreboard_tag.class, has_scoreboard_tag.class, get_scoreboard_tags.class})
 	public static class add_scoreboard_tag extends EntitySetterFunction {
 
 		@Override
@@ -4402,6 +4767,7 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({add_scoreboard_tag.class, has_scoreboard_tag.class, get_scoreboard_tags.class})
 	public static class remove_scoreboard_tag extends EntitySetterFunction {
 
 		@Override
@@ -4587,7 +4953,7 @@ public class EntityManagement {
 				//the sake of documentation, so we'll build the color list much more carefully.
 				//Note the false, so we don't actually initialize the class.
 				c = Class.forName(MCColor.class.getName(), false, this.getClass().getClassLoader());
-			} catch (ClassNotFoundException ex) {
+			} catch(ClassNotFoundException ex) {
 				//Hrm...
 				Logger.getLogger(Minecraft.class.getName()).log(Level.SEVERE, null, ex);
 				return "";
@@ -4606,7 +4972,7 @@ public class EntityManagement {
 					+ " Returns the firework rocket entity's UUID. ----"
 					+ " The options array may have the following keys:\n"
 					+ "{| cellspacing=\"1\" cellpadding=\"1\" border=\"1\" class=\"wikitable\"\n"
-					+ "! Array key !! Description !! Default\n"
+					+ "! Key !! Description !! Default\n"
 					+ "|-\n"
 					+ "| strength || A number indicating the flight duration of the rocket equal to the amount of"
 					+ " gunpowder used to craft a rocket. (negative numbers detonate immediately) || 2\n"
@@ -4639,22 +5005,8 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class get_hanging_direction extends AbstractFunction {
-
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[] {CREBadEntityException.class, CRELengthException.class, CREFormatException.class};
-		}
-
-		@Override
-		public boolean isRestricted() {
-			return true;
-		}
-
-		@Override
-		public Boolean runAsync() {
-			return false;
-		}
+	@seealso(set_hanging_direction.class)
+	public static class get_hanging_direction extends EntityGetterFunction {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
@@ -4683,6 +5035,13 @@ public class EntityManagement {
 		}
 
 		@Override
+		public LeftHandSideType getReturnType(ParseTree node, Target t, List<LeftHandSideType> argTypes, List<Target> argTargets,
+				LeftHandSideType inferredReturnType,
+				com.laytonsmith.core.environments.Environment env, Set<ConfigCompileException> exceptions) {
+			return CString.TYPE.asLeftHandSideType();
+		}
+
+		@Override
 		public String docs() {
 			return "string {entityUUID} Returns the direction a hanging entity is facing.";
 		}
@@ -4695,12 +5054,13 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(get_hanging_direction.class)
 	public static class set_hanging_direction extends AbstractFunction implements Optimizable {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[] {CREBadEntityException.class, CRELengthException.class, CREFormatException.class,
-					CREIllegalArgumentException.class};
+			return new Class[]{CREBadEntityException.class, CRELengthException.class, CREFormatException.class,
+				CREIllegalArgumentException.class};
 		}
 
 		@Override
@@ -4736,7 +5096,7 @@ public class EntityManagement {
 					}
 					hanging.setFacingDirection(face, force);
 					return CVoid.VOID;
-				} catch (IllegalArgumentException ex) {
+				} catch(IllegalArgumentException ex) {
 					throw new CREIllegalArgumentException("Invalid direction for " + entity.getType().name() + ": "
 							+ args[1].val(), t);
 				}
@@ -4772,7 +5132,7 @@ public class EntityManagement {
 		public ParseTree optimizeDynamic(Target t, com.laytonsmith.core.environments.Environment env,
 				Set<Class<? extends com.laytonsmith.core.environments.Environment.EnvironmentImpl>> envs,
 				List<ParseTree> children, FileOptions fileOptions)
-						throws ConfigCompileException, ConfigRuntimeException {
+				throws ConfigCompileException, ConfigRuntimeException {
 
 			if(children.size() < 2) {
 				return null;
@@ -4785,7 +5145,7 @@ public class EntityManagement {
 					if(!data.val().contains("_") && !data.val().equals("SELF")) {
 						return null;
 					}
-				} catch (IllegalArgumentException ex) {
+				} catch(IllegalArgumentException ex) {
 					// invalid BlockFace
 				}
 				throw new CREIllegalArgumentException("Invalid direction. Must be one of"
@@ -4801,4 +5161,781 @@ public class EntityManagement {
 
 	}
 
+	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({set_display_entity.class})
+	public static class get_display_entity extends EntityGetterFunction {
+
+		@Override
+		public String getName() {
+			return "get_display_entity";
+		}
+
+		@Override
+		public String docs() {
+			return "array {entityUUID} Returns an associative array of display entity data."
+					+ " Array keys are: 'billboard', 'brightness', 'glowcolor', 'height', 'width',"
+					+ " 'viewrange', 'shadowradius', 'shadowstrength', 'teleportduration', and 'transformation'. ---- "
+					+ " The following values are common to all display entity types. Data about specific display entity"
+					+ " types (block, text, and item display entities) can be found in {{function|entity_spec}}.\n\n"
+					+ "* '''billboard''' (string) : Controls which axes the rendered entity rotates around the entity"
+					+ " location when the viewing player's position or facing changes. FIXED (default) will not rotate."
+					+ " HORIZONTAL or VERTICAL rotate on their respective axes. CENTER rotates on both axes.\n"
+					+ "* '''brightness''' (array) : Controls the brightness when rendering the display entity."
+					+ " A null value (default) will render the entity based on the environment."
+					+ " An array with int values for the keys '''\"block\"''' and '''\"sky\"''' simulate the rendering"
+					+ " brightness from those respective light sources. Each must be from 0 - 15."
+					+ " Optionally a single int can be provided and will be used for both sky and block sources.\n"
+					+ "* '''glowcolor''' (array) : An RGB array for the entity glow color. If null (default), the"
+					+ " entity will use its scoreboard team color, if it has one.\n"
+					+ "* '''height''' (double) : The maximum height of the entity's bounding box. (default: 0.0)"
+					+ " Spans vertically from the entity's y location to (y+height), and is used for culling."
+					+ " If the client's field of view does not include this box, the entity will not be rendered."
+					+ " If either width or height is 0.0, culling is disabled.\n"
+					+ "* '''width''' (double) : The maximum width of the entity's bounding box. (default: 0.0)"
+					+ " Spans horizontally (width/2) from entity location.\n"
+					+ "* '''viewrange''' (double) : The relative distance the entity will be viewable."
+					+ " The default is 1.0, which is 64 meters multiplied by the player's entity distance scaling."
+					+ " This can also be limited by the world's entity-tracking-range for display entities.\n"
+					+ "* '''shadowradius''' (double) : The visible radius in meters of the entity's shadow."
+					+ " Effective range is from 0.0 (default) to 64.0.\n"
+					+ "* '''shadowstrength''' (double) : The opacity of the entity's shadow as a function of distance"
+					+ " to a block below the entity within shadowradius. (default: 1.0)\n"
+					+ "* '''teleportduration''' (int) : The duration in ticks a teleport is interpolated on the client."
+					+ " Range is strictly from 0 - 59. (default: 0) (MC 1.20.2+)\n"
+					+ "* '''interpolationduration''' (int) : The duration in ticks of interpolations. (non-teleport)\n"
+					+ "* '''transformation''' (array) : An associative array that includes 4 values, leftRotation,"
+					+ " rightRotation, scale, and translation. Both leftRotation and rightRotation have x, y, z, and w"
+					+ " values, and scale and translation have x, y, and z values. All are 32 bit floats.\n"
+					+ "\n";
+		}
+
+		@Override
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCEntity entity = Static.getEntity(args[0], t);
+			if(!(entity instanceof MCDisplay display)) {
+				throw new CREBadEntityException("Not a display entity.", t);
+			}
+			CArray info = CArray.GetAssociativeArray(t);
+			info.set("billboard", display.getBillboard().name());
+			MCDisplay.Brightness brightness = display.getBrightness();
+			if(brightness != null) {
+				CArray brightnessArray = CArray.GetAssociativeArray(t);
+				brightnessArray.set("block", new CInt(brightness.block(), t), t);
+				brightnessArray.set("sky", new CInt(brightness.block(), t), t);
+				info.set("brightness", brightnessArray, t);
+			} else {
+				info.set("brightness", CNull.NULL, t);
+			}
+			MCColor color = display.getGlowColorOverride();
+			if(color != null) {
+				info.set("glowcolor", ObjectGenerator.GetGenerator().color(color, t), t);
+			} else {
+				info.set("glowcolor", CNull.NULL, t);
+			}
+			info.set("height", new CDouble(display.getDisplayHeight(), t), t);
+			info.set("width", new CDouble(display.getDisplayWidth(), t), t);
+			info.set("viewrange", new CDouble(display.getViewRange(), t), t);
+			info.set("shadowradius", new CDouble(display.getShadowRadius(), t), t);
+			info.set("shadowstrength", new CDouble(display.getShadowStrength(), t), t);
+			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_2)) {
+				info.set("teleportduration", new CInt(display.getTeleportDuration(), t), t);
+			}
+			info.set("interpolationduration", new CInt(display.getInterpolationDurationTicks(), t), t);
+			MCTransformation tr = display.getTransformation();
+			CArray transformation = GetArrayFromTransformation(tr);
+			info.set("transformation", transformation, t);
+			return info;
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+	}
+
+	public static CArray GetArrayFromTransformation(MCTransformation tr) {
+		Target t = Target.UNKNOWN;
+		Quaternionf leftRotationT = tr.getLeftRotation();
+		Quaternionf rightRotationT = tr.getRightRotation();
+		Vector3f scaleT = tr.getScale();
+		Vector3f translationT = tr.getTranslation();
+		CArray leftRotation = CArray.GetAssociativeArray(t);
+		leftRotation.set("w", leftRotationT.w);
+		leftRotation.set("x", leftRotationT.x);
+		leftRotation.set("y", leftRotationT.y);
+		leftRotation.set("z", leftRotationT.z);
+		CArray rightRotation = CArray.GetAssociativeArray(t);
+		rightRotation.set("w", rightRotationT.w);
+		rightRotation.set("x", rightRotationT.x);
+		rightRotation.set("y", rightRotationT.y);
+		rightRotation.set("z", rightRotationT.z);
+		CArray scale = CArray.GetAssociativeArray(t);
+		scale.set("x", scaleT.x);
+		scale.set("y", scaleT.y);
+		scale.set("z", scaleT.z);
+		CArray translation = CArray.GetAssociativeArray(t);
+		translation.set("x", translationT.x);
+		translation.set("y", translationT.y);
+		translation.set("z", translationT.z);
+		CArray transformation = CArray.GetAssociativeArray(t);
+		transformation.set("leftRotation", leftRotation, t);
+		transformation.set("rightRotation", rightRotation, t);
+		transformation.set("scale", scale, t);
+		transformation.set("translation", translation, t);
+		return transformation;
+	}
+
+	public static MCTransformation GetTransformationFromMatrix(float[] f) {
+		Matrix4f matrix4f = new Matrix4f(
+				f[0], f[1], f[2], f[3],
+				f[4], f[5], f[6], f[7],
+				f[8], f[9], f[10], f[11],
+				f[12], f[13], f[14], f[15]);
+		matrix4f.transpose();
+		Matrix3f matrix3f = new Matrix3f(matrix4f);
+		Vector3f translation = matrix4f.getTranslation(new Vector3f());
+
+		float multiplier = 1.0F / matrix4f.m33();
+		if(multiplier != 1.0F) {
+			matrix3f.scale(multiplier);
+			translation.mul(multiplier);
+		}
+
+		Triple<Quaternionf, Vector3f, Quaternionf> triple = null;
+		Class MatrixUtil = ReflectionUtils.forName("com.mojang.math.MatrixUtil");
+		for(String method : new String[]{"svdDecompose", "a"}) {
+			if(ReflectionUtils.hasMethod(MatrixUtil, method, Triple.class, Matrix3f.class)) {
+				triple = (Triple) ReflectionUtils.invokeMethod(MatrixUtil, null, method,
+						new Class[]{Matrix3f.class},
+						new Object[]{matrix3f});
+				break;
+			}
+		}
+		if(triple == null) {
+			throw new Error("Cannot find svdDecompose method.");
+		}
+
+		Vector3f scale = triple.getMiddle();
+		Quaternionf leftRotation = triple.getLeft().rotateY((float) java.lang.Math.PI); // 180 deg
+		Quaternionf rightRotation = triple.getRight();
+		MCTransformation tr = StaticLayer.GetTransformation(leftRotation, rightRotation, scale, translation);
+		return tr;
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class get_transformation_from_matrix extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRELengthException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			float f[] = new float[16];
+			if(args.length == 1) {
+				CArray array = ArgumentValidation.getArray(args[0], t);
+				if(array.size() != 16) {
+					throw new CRELengthException("Input array expected to have length 16", t);
+				}
+				for(int i = 0; i < 16; i++) {
+					f[i] = ArgumentValidation.getDouble32(array.get(i, t), t);
+				}
+			} else {
+				for(int i = 0; i < 16; i++) {
+					f[i] = ArgumentValidation.getDouble32(args[i], t);
+				}
+			}
+			MCTransformation tr = GetTransformationFromMatrix(f);
+			return GetArrayFromTransformation(tr);
+		}
+
+		@Override
+		public String getName() {
+			return "get_transformation_from_matrix";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 16};
+		}
+
+		@Override
+		public String docs() {
+			return "array {array matrix | float f0, float f1, float f2, float f3, float f4, float f5, float f6, float"
+					+ " f7, float f8, float f9, float f10, float f11, float f12, float f13, float f14, float f15}"
+					+ " Converts a Minecraft transformation matrix into a transformation object. This is the same"
+					+ " underlying algorithm that set_display_entity uses when accepting a transformation matrix.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({get_display_entity.class})
+	public static class set_display_entity extends EntitySetterFunction {
+
+		@Override
+		public String getName() {
+			return "set_display_entity";
+		}
+
+		@Override
+		public String docs() {
+			return "void {entityUUID, array} Sets the data for a display entity."
+					+ " See {{function|get_display_entity}} for details about the array format. ---- "
+					+ " Note that there a couple additional points for setting the data that is unique to"
+					+ " the set function:\n\n"
+					+ "The '''transformation''' property can be provided in the same"
+					+ " format as received (i.e. with the leftRotation, rightRotation, scale, and translation"
+					+ " properties) but you can also provide it as a length 16 array of floats. These are"
+					+ " accepted in the same order that the /data command would accept them. Regardless of"
+					+ " how they are input, the function will always return the complex object. Sub-properties"
+					+ " of the transformation property are optional - missing values will not be changed.\n\n"
+					+ "The '''startinterpolation''' (int) property, if given, interpolates from the current values on"
+					+ " the client to any changed values the server sent this tick. It halts existing interpolations,"
+					+ " then starts interpolating on the current tick plus the given number of ticks (can be negative),"
+					+ " and finishes after 'interpolationduration' ticks."
+					+ " The following values are interpolated if changed:"
+					+ " transformation, shadow radius, shadow strength, text background, and text opacity."
+					+ " If none of those values are changed, it will use the last set again for interpolation."
+					+ " If the values are changed but 'startinterpolation' isn't sent, it will continue interpolation"
+					+ " for the remaining duration but with the new values.";
+		}
+
+		@Override
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCEntity entity = Static.getEntity(args[0], t);
+			if(!(entity instanceof MCDisplay display)) {
+				throw new CREBadEntityException("Not a display entity.", t);
+			}
+			CArray info = ArgumentValidation.getArray(args[1], t);
+			if(!info.isAssociative()) {
+				throw new CREIllegalArgumentException("Expected an associative array but found a normal array.", t);
+			}
+			if(info.containsKey("billboard")) {
+				try {
+					MCDisplay.Billboard billboard = MCDisplay.Billboard.valueOf(info.get("billboard", t).val());
+					display.setBillboard(billboard);
+				} catch(IllegalArgumentException ex) {
+					throw new CREFormatException("Invalid billboard type for display entity.", t);
+				}
+			}
+			if(info.containsKey("brightness")) {
+				Mixed m = info.get("brightness", t);
+				if(m instanceof CNull) {
+					display.setBrightness(null);
+				} else {
+					MCDisplay.Brightness brightness;
+					if(m.isInstanceOf(CArray.TYPE, null, environment)) {
+						CArray brightnessArray = (CArray) m;
+						if(!brightnessArray.isAssociative()) {
+							throw new CREIllegalArgumentException(
+									"Expected an associative array for brightness but found a normal array.", t);
+						}
+						int blockBrightness = ArgumentValidation.getInt32(brightnessArray.get("block", t), t);
+						int skyBrightness = ArgumentValidation.getInt32(brightnessArray.get("sky", t), t);
+						brightness = new MCDisplay.Brightness(blockBrightness, skyBrightness);
+					} else {
+						int level = ArgumentValidation.getInt32(m, t);
+						brightness = new MCDisplay.Brightness(level, level);
+					}
+					try {
+						display.setBrightness(brightness);
+					} catch(IllegalArgumentException ex) {
+						throw new CREIllegalArgumentException(ex.getMessage(), t);
+					}
+				}
+			}
+			if(info.containsKey("glowcolor")) {
+				Mixed m = info.get("glowcolor", t);
+				if(!(m instanceof CNull)) {
+					MCColor color = ObjectGenerator.GetGenerator().color(ArgumentValidation.getArray(m, t), t);
+					display.setGlowColorOverride(color);
+				}
+			}
+			if(info.containsKey("height")) {
+				display.setDisplayHeight((float) ArgumentValidation.getDouble(info.get("height", t), t));
+			}
+			if(info.containsKey("width")) {
+				display.setDisplayWidth((float) ArgumentValidation.getDouble(info.get("width", t), t));
+			}
+			if(info.containsKey("viewrange")) {
+				display.setViewRange((float) ArgumentValidation.getDouble(info.get("viewrange", t), t));
+			}
+			if(info.containsKey("shadowradius")) {
+				display.setShadowRadius((float) ArgumentValidation.getDouble(info.get("shadowradius", t), t));
+			}
+			if(info.containsKey("shadowstrength")) {
+				display.setShadowStrength((float) ArgumentValidation.getDouble(info.get("shadowstrength", t), t));
+			}
+			if(info.containsKey("teleportduration") && Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_2)) {
+				int ticks = ArgumentValidation.getInt32(info.get("teleportduration", t), t);
+				if(ticks < 0 || ticks > 59) {
+					throw new CRERangeException("Teleport duration must be from 0 - 59, but got " + ticks, t);
+				}
+				display.setTeleportDuration(ticks);
+			}
+			if(info.containsKey("interpolationduration")) {
+				display.setInterpolationDurationTicks(ArgumentValidation.getInt32(info.get("interpolationduration", t), t));
+			}
+			if(info.containsKey("startinterpolation")) {
+				display.setInterpolationDelayTicks(ArgumentValidation.getInt32(info.get("startinterpolation", t), t));
+			}
+			if(info.containsKey("transformation")) {
+				CArray transformation = ArgumentValidation.getArray(info.get("transformation", t), t);
+				if(transformation.size() == 16) {
+					float[] f = new float[16];
+					for(int i = 0; i < 16; i++) {
+						f[i] = ArgumentValidation.getDouble32(transformation.get(i, t), t);
+					}
+					MCTransformation tr = GetTransformationFromMatrix(f);
+					display.setTransformation(tr);
+				} else {
+					MCTransformation existingTransformation = display.getTransformation();
+					Quaternionf leftRotation;
+					if(transformation.containsKey("leftRotation")) {
+						CArray leftRotationC = ArgumentValidation.getArray(transformation.get("leftRotation", t), t);
+						leftRotation = new Quaternionf(
+								ArgumentValidation.getDouble(leftRotationC.get("x", t), t),
+								ArgumentValidation.getDouble(leftRotationC.get("y", t), t),
+								ArgumentValidation.getDouble(leftRotationC.get("z", t), t),
+								ArgumentValidation.getDouble(leftRotationC.get("w", t), t));
+					} else {
+						leftRotation = existingTransformation.getLeftRotation();
+					}
+					Quaternionf rightRotation;
+					if(transformation.containsKey("rightRotation")) {
+						CArray rightRotationC = ArgumentValidation.getArray(transformation.get("rightRotation", t), t);
+						rightRotation = new Quaternionf(
+								ArgumentValidation.getDouble(rightRotationC.get("x", t), t),
+								ArgumentValidation.getDouble(rightRotationC.get("y", t), t),
+								ArgumentValidation.getDouble(rightRotationC.get("z", t), t),
+								ArgumentValidation.getDouble(rightRotationC.get("w", t), t));
+					} else {
+						rightRotation = existingTransformation.getRightRotation();
+					}
+					Vector3f scale;
+					if(transformation.containsKey("scale")) {
+						CArray scaleC = ArgumentValidation.getArray(transformation.get("scale", t), t);
+						scale = new Vector3f(
+								ArgumentValidation.getDouble32(scaleC.get("x", t), t),
+								ArgumentValidation.getDouble32(scaleC.get("y", t), t),
+								ArgumentValidation.getDouble32(scaleC.get("z", t), t));
+					} else {
+						scale = existingTransformation.getScale();
+					}
+					Vector3f translation;
+					if(transformation.containsKey("translation")) {
+						CArray translationC = ArgumentValidation.getArray(transformation.get("translation", t), t);
+						translation = new Vector3f(
+								ArgumentValidation.getDouble32(translationC.get("x", t), t),
+								ArgumentValidation.getDouble32(translationC.get("y", t), t),
+								ArgumentValidation.getDouble32(translationC.get("z", t), t));
+					} else {
+						translation = existingTransformation.getTranslation();
+					}
+					MCTransformation tr = StaticLayer.GetTransformation(leftRotation, rightRotation, scale, translation);
+					display.setTransformation(tr);
+				}
+			}
+			return CVoid.VOID;
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREBadEntityException.class, CRELengthException.class, CREFormatException.class,
+				CREIllegalArgumentException.class, CRECastException.class, CRERangeException.class};
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+	}
+
+	@api
+	public static class get_entity_transient_id extends EntityGetterFunction {
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCEntity entity = Static.getEntity(args[0], t);
+			return new CInt(entity.getEntityId(), t);
+		}
+
+		@Override
+		public String getName() {
+			return "get_entity_transient_id";
+		}
+
+		@Override
+		public String docs() {
+			return "int {uuid} Given a permanent entity uuid, returns the transient entity id. This should not"
+					+ " be stored, as it is reset every restart, and is only useful for dealing with low level packets.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+	}
+
+	@api
+	public static class entity_in_water extends EntityGetterFunction {
+
+		@Override
+		public String getName() {
+			return "entity_in_water";
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {entityUUID} Returns whether an entity is colliding with water."
+					+ " This accounts for waterlogged blocks, bubble columns, and fluid height."
+					+ " It does not account for water cauldrons.";
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCEntity entity = Static.getEntity(args[0], t);
+			return CBoolean.get(entity.isInWater());
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+	}
+
+	@api
+	public static class set_entity_rotation extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREUnsupportedOperationException.class, CRELengthException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCEntity entity = Static.getEntity(args[0], t);
+
+			float yaw = (float) ArgumentValidation.getDouble(args[1], t);
+			float pitch;
+			if(args.length == 3) {
+				pitch = (float) ArgumentValidation.getDouble(args[2], t);
+			} else {
+				pitch = entity.getLocation().getPitch();
+			}
+
+			try {
+				entity.setRotation(yaw, pitch);
+			} catch(UnsupportedOperationException ex) {
+				throw new CREUnsupportedOperationException(getName() + " cannot be used on players.", t);
+			}
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "set_entity_rotation";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3};
+		}
+
+		@Override
+		public String docs() {
+			return "void {entityUUID, yaw, [pitch]} Sets an entity's yaw and pitch without teleporting or ejecting."
+					+ " Can only be used on players when on Paper 1.19 or above, otherwise will throw an"
+					+ " UnsupportedOperationException.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+	}
+
+	@api
+	@seealso(set_entity_killer.class)
+	public static class get_entity_killer extends EntityGetterFunction {
+
+		@Override
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCLivingEntity entity = Static.getLivingEntity(args[0], t);
+			MCPlayer killer = entity.getKiller();
+			if(killer == null) {
+				return CNull.NULL;
+			} else {
+				return new CString(killer.getName(), t);
+			}
+		}
+
+		@Override
+		public String getName() {
+			return "get_entity_killer";
+		}
+
+		@Override
+		public String docs() {
+			return "string {entityUUID} Gets the player killer of a living entity. Can be null."
+					+ " Usually indicates the last player that damaged the entity within the last five seconds.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+	}
+
+	@api
+	@seealso(get_entity_killer.class)
+	public static class set_entity_killer extends EntitySetterFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CRELengthException.class, CREBadEntityException.class};
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCLivingEntity entity = Static.getLivingEntity(args[0], t);
+			if(args[1] instanceof CNull) {
+				entity.setKiller(null);
+			} else {
+				MCPlayer killer = Static.GetPlayer(args[1], t);
+				entity.setKiller(killer);
+			}
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "set_entity_killer";
+		}
+
+		@Override
+		public String docs() {
+			return "void {entityUUID, player} Sets the player killer of a living entity. (Paper only)"
+					+ " Can be set at any time before the entity dies to change kill attribution for the next five"
+					+ " seconds or until it's changed again. Can be set to null.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+	}
+
+	@api
+	@seealso({PlayerManagement.pshow_entity.class, PlayerManagement.phide_entity.class,
+			PlayerManagement.pcan_see_entity.class, set_entity_hidden_by_default.class})
+	public static class is_entity_hidden_by_default extends EntityGetterFunction {
+
+		@Override
+		public String getName() {
+			return "is_entity_hidden_by_default";
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {entityUUID} Returns whether an entity is hidden by default to clients. (MC 1.19.3+)"
+					+ " If true, pshow_entity() must be used before a player's client can see this entity."
+					+ " Unrelated to the invisibility potion effect.";
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCEntity entity = Static.getEntity(args[0], t);
+			return CBoolean.get(!entity.isVisibleByDefault());
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+	}
+
+	@api
+	@seealso({PlayerManagement.pshow_entity.class, PlayerManagement.phide_entity.class,
+			PlayerManagement.pcan_see_entity.class, is_entity_hidden_by_default.class})
+	public static class set_entity_hidden_by_default extends EntitySetterFunction {
+
+		@Override
+		public String getName() {
+			return "set_entity_hidden_by_default";
+		}
+
+		@Override
+		public String docs() {
+			return "void {entityUUID, hidden} Sets whether an entity's is hidden by default to clients. (MC 1.19.3+)"
+					+ " If set to true, pshow_entity() must be used before a player's client can see this entity."
+					+ " Unrelated to the invisibility potion effect.";
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCEntity entity = Static.getEntity(args[0], t);
+			entity.setVisibleByDefault(!ArgumentValidation.getBooleanObject(args[1], t));
+			return CVoid.VOID;
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+	}
+
+	@api
+	@seealso(set_entity_pose.class)
+	public static class get_entity_pose extends EntityGetterFunction {
+
+		@Override
+		public String getName() {
+			return "get_entity_pose";
+		}
+
+		@Override
+		public String docs() {
+			return """
+					string {entityUUID} Returns the pose of an entity. Poses are desynchronized from entity state,
+					as the pose is set at the end of a tick and can be set to anything by a plugin.
+					----
+					Known poses:
+					{| class="wikitable"
+					|-
+					! scope="col" width="20%" | Entity Types
+					! scope="col" width="80%" | Poses
+					|-
+					! All Entities
+					| STANDING (default pose)
+					|-
+					! Living Entities
+					| DYING, SLEEPING
+					|-
+					! Most Humanoid Entities
+					| SNEAKING, SWIMMING, FALL_FLYING
+					|-
+					! Breeze
+					| INHALING, LONG_JUMPING, SHOOTING, SLIDING
+					|-
+					! Camel
+					| SITTING
+					|-
+					! Cat/Ocelot
+					| SNEAKING
+					|-
+					! Frog
+					| CROAKING, LONG_JUMPING, USING_TONGUE
+					|-
+					! Goat
+					| LONG_JUMPING
+					|-
+					! Mannequin
+					| Only FALL_FLYING, SLEEPING, SNEAKING, STANDING, SWIMMING
+					|-
+					! Player
+					| SPIN_ATTACK
+					|-
+					! Warden
+					| DIGGING, EMERGING, ROARING, SNIFFING
+					|}
+					""";
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCEntity entity = Static.getEntity(args[0], t);
+			return new CString(entity.getPose().name(), t);
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+	}
+
+	@api
+	@seealso(get_entity_pose.class)
+	public static class set_entity_pose extends EntitySetterFunction {
+
+		@Override
+		public String getName() {
+			return "set_entity_pose";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3};
+		}
+
+		@Override
+		public String docs() {
+			return """
+					void {entityUUID, pose, [fixed]} Sets an entity's pose. (only Mannequins on Spigot, 1.20.1+ on Paper)
+					The fixed argument is a boolean for whether the pose should stay unless manually changed.
+					(defaults to false) While in most cases you can set any pose to any entity,
+					only certain poses will result in a noticable change for a particular entity type.
+					Poses can affect entity hitboxes but do not otherwise change entity state.
+					See {{function|get_entity_pose}} for a list of poses.
+					""";
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCEntity entity = Static.getEntity(args[0], t);
+			MCPose pose;
+			try {
+				pose = MCPose.valueOf(args[1].val().toUpperCase());
+				boolean fixed = false;
+				if(args.length == 3) {
+					fixed = ArgumentValidation.getBooleanObject(args[2], t);
+				}
+				entity.setPose(pose, fixed);
+			} catch(IllegalArgumentException ex) {
+				throw new CREFormatException("Invalid pose for this entity: " + args[1].val(), t);
+			}
+			return CVoid.VOID;
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+	}
 }

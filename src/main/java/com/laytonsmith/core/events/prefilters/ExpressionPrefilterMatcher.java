@@ -106,4 +106,9 @@ public abstract class ExpressionPrefilterMatcher<T extends BindableEvent> extend
 
 	protected abstract double getProperty(T event);
 
+	@Override
+	public int getPriority() {
+		return 1;
+	}
+
 }

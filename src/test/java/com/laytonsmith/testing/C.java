@@ -31,6 +31,7 @@ public class C {
 			throw new Error(ex);
 		}
 	}
+
 	//Shortcut to Construct.class
 	public static final Class<CArray> ARRAY = CArray.class;
 	public static final Class<CBoolean> BOOLEAN = CBoolean.class;
@@ -70,8 +71,12 @@ public class C {
 		return CVoid.VOID;
 	}
 
-	public static IVariable IVariable(String name, Construct val) throws ConfigCompileException {
-		return new IVariable(Auto.TYPE, name, val, Target.UNKNOWN, ENV);
+	public static IVariable IVariable(String name, Construct val, Environment env) {
+		try {
+			return new IVariable(Auto.TYPE, name, val, Target.UNKNOWN, env);
+		} catch(ConfigCompileException ex) {
+			throw ex.asRuntimeException();
+		}
 	}
 
 	public static Variable Variable(String name, String val) {

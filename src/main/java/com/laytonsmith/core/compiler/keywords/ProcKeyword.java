@@ -28,64 +28,93 @@ public class ProcKeyword extends Keyword {
 		if(list.get(keywordPosition).getData() instanceof CKeyword) {
 			// It's a lone keyword, so we expect some function to follow, which is the proc name + variables
 			FileOptions options = list.get(keywordPosition).getFileOptions();
+
+			// Validate minimal required number of nodes.
 			if(list.size() <= keywordPosition + 1) {
 				throw new ConfigCompileException("Unexpected keyword", list.get(keywordPosition).getTarget());
 			}
+
+			/*
+			 * Parse:
+			 *     "proc _procName(params) { code }" to "proc(_procName, params, code)". Params and code are optional.
+			 *     "proc _procName(params)" to "proc(_procName, params, noop())". Params are optional.
+			 *     "proc _procName" to "get_proc(_procName)".
+			 */
 			if(list.get(keywordPosition + 1).getData() instanceof CFunction) {
+
+				// Create proc function node.
 				ParseTree procNode = new ParseTree(new CFunction(
 						DataHandling.proc.NAME, list.get(keywordPosition).getTarget()), options);
 				procNode.getNodeModifiers().merge(list.get(keywordPosition).getNodeModifiers());
+
+				// Add proc name to proc function node. Proc name node is currently a function node.
 				procNode.addChild(new ParseTree(new CString(list.get(keywordPosition + 1).getData().val(),
 						list.get(keywordPosition + 1).getTarget()), options));
-				// Grab the functions children, and put them on the stack
+
+				// Move proc name function node children to proc function node.
 				for(ParseTree child : list.get(keywordPosition + 1).getChildren()) {
 					procNode.addChild(child);
 				}
-				boolean forwardDeclaration = false;
-				if(list.size() > keywordPosition + 2) {
-					if(list.get(keywordPosition + 2).getData() instanceof CFunction cf
-							&& com.laytonsmith.core.functions.Compiler.__cbrace__.NAME.equals(cf.val())) {
-						validateCodeBlock(list.get(keywordPosition + 2), "Expected braces to follow proc definition");
-						procNode.addChild(getArgumentOrNoop(list.get(keywordPosition + 2)));
-					} else {
-						// Forward declaration, add a noop "implementation"
-						forwardDeclaration = true;
-						ParseTree statement = new ParseTree(new CFunction(Compiler.__statements__.NAME, Target.UNKNOWN),
-								list.get(keywordPosition + 1).getFileOptions(), true);
-						statement.addChild(new ParseTree(new CFunction(Meta.noop.NAME, Target.UNKNOWN),
-								list.get(keywordPosition + 1).getFileOptions(), true));
-						procNode.addChild(statement);
-					}
+
+				// Get code block from __cbrace__ function node. Define as forward declaration if code block is missing.
+				if(list.size() > keywordPosition + 2
+						&& list.get(keywordPosition + 2).getData() instanceof CFunction cf
+						&& com.laytonsmith.core.functions.Compiler.__cbrace__.NAME.equals(cf.val())) {
+
+					// Validate code block and add to proc function node.
+					validateCodeBlock(list.get(keywordPosition + 2), "Expected braces to follow proc definition");
+					procNode.addChild(getArgumentOrNoop(list.get(keywordPosition + 2)));
+
+					// Remove processed nodes from AST.
+					list.remove(keywordPosition); // Remove keyword node.
+					list.remove(keywordPosition); // Remove proc name function node (with proc parameters).
+					list.remove(keywordPosition); // Remove __cbrace__ function node.
 				} else {
-					throw new ConfigCompileException("Expected braces to follow proc definition", list.get(keywordPosition + 1).getTarget());
+
+					// Define as forward declaration by add a "noop()" as code block.
+					ParseTree statement = new ParseTree(new CFunction(Compiler.__statements__.NAME, Target.UNKNOWN),
+							list.get(keywordPosition + 1).getFileOptions(), true);
+					statement.addChild(new ParseTree(new CFunction(Meta.noop.NAME, Target.UNKNOWN),
+							list.get(keywordPosition + 1).getFileOptions(), true));
+					procNode.addChild(statement);
+
+					// Remove processed nodes from AST.
+					list.remove(keywordPosition); // Remove keyword node.
+					list.remove(keywordPosition); // Remove proc name function node (with proc parameters).
 				}
-				list.remove(keywordPosition); // Remove the keyword
-				list.remove(keywordPosition); // Remove the function definition
-				if(!forwardDeclaration) {
-					list.remove(keywordPosition); // Remove the cbrace
-				}
-				list.add(keywordPosition, procNode); // Add in the new proc definition
+
+				// Add proc function node to AST.
+				list.add(keywordPosition, procNode);
+
 			} else if(list.get(keywordPosition + 1).getData() instanceof CBareString name) {
-				// get_proc rewrite
-				list.remove(keywordPosition);
-				list.remove(keywordPosition);
+
+				// Parse "proc _procName" to "get_proc(_procName)".
+				list.remove(keywordPosition); // Remove keyword node.
+				list.remove(keywordPosition); // Remove proc name node.
+
+				// Add get_proc function node with proc name child node to AST.
 				ParseTree getProc = new ParseTree(new CFunction(DataHandling.get_proc.NAME, Target.UNKNOWN), options, true);
 				getProc.addChild(new ParseTree(new CString(name.val(), name.getTarget()), options));
 				list.add(keywordPosition, getProc);
+
 			} else {
+
+				// Proc keyword used incorrectly.
 				throw new ConfigCompileException("Unexpected use of \"proc\" keyword", list.get(keywordPosition).getTarget());
 			}
 
 		} else if(nodeIsProcFunction(list.get(keywordPosition))) {
-			// It's the functional usage, possibly followed by a cbrace. If so, pull the cbrace in, and that's it
-			if(list.size() > keywordPosition + 1) {
-				if(isValidCodeBlock(list.get(keywordPosition + 1))) {
-					list.get(keywordPosition).addChild(getArgumentOrNoop(list.get(keywordPosition + 1)));
-					list.remove(keywordPosition + 1);
-				}
+
+			// Parse "proc(_procName, params) { code }" to "proc(_procName, params, code)". Params are optional.
+			if(list.size() > keywordPosition + 1 && isValidCodeBlock(list.get(keywordPosition + 1))) {
+
+				// Pull in __cbrace__ function node as proc function node code block.
+				list.get(keywordPosition).addChild(getArgumentOrNoop(list.get(keywordPosition + 1)));
+				list.remove(keywordPosition + 1); // Remove __cbrace__ function node.
 			}
 		} else {
-			// Random keyword in the middle of nowhere
+
+			// Random proc keyword in the middle of nowhere.
 			throw new ConfigCompileException("Unexpected use of \"proc\" keyword", list.get(keywordPosition).getTarget());
 		}
 		return keywordPosition;

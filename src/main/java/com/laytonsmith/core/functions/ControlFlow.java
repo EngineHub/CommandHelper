@@ -23,6 +23,15 @@ import com.laytonsmith.core.compiler.ConditionalSelfStatement;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.SelfStatement;
 import com.laytonsmith.core.compiler.VariableScope;
+import com.laytonsmith.core.compiler.analysis.BreakableReference;
+import com.laytonsmith.core.compiler.analysis.ContinuableBoundDeclaration;
+import com.laytonsmith.core.compiler.analysis.ContinuableDeclaration;
+import com.laytonsmith.core.compiler.analysis.ContinuableReference;
+import com.laytonsmith.core.compiler.analysis.Declaration;
+import com.laytonsmith.core.compiler.analysis.BreakableBoundDeclaration;
+import com.laytonsmith.core.compiler.analysis.BreakableDeclaration;
+import com.laytonsmith.core.compiler.analysis.Namespace;
+import com.laytonsmith.core.compiler.analysis.ReturnableReference;
 import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.compiler.signature.FunctionSignatures;
@@ -169,7 +178,10 @@ public class ControlFlow {
 		@Override
 		public Scope linkScope(StaticAnalysis analysis, Scope parentScope,
 				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+
+			// Handle not enough arguments. Link child scopes, but return parent scope.
 			if(ast.numberOfChildren() < 2) {
+				super.linkScope(analysis, parentScope, ast, env, exceptions);
 				return parentScope;
 			}
 
@@ -454,9 +466,52 @@ public class ControlFlow {
 		@Override
 		public ParseTree optimizeDynamic(Target t, Environment env,
 				Set<Class<? extends Environment.EnvironmentImpl>> envs,
-				List<ParseTree> children, FileOptions fileOptions)
-				throws ConfigCompileException, ConfigRuntimeException {
-			// TODO: Redo this optimization.
+				List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException {
+
+			// Check for too few arguments.
+			if(children.size() < 2) {
+				throw new ConfigCompileException("Too few arguments passed to " + this.getName() + "()", t);
+			}
+
+			// Optimize per condition code pair for constant conditions.
+			boolean foundDynamicCond = false;
+			for(int i = 0; i < children.size() - 1; i += 2) {
+				ParseTree condNode = children.get(i);
+				if(condNode.isConst()) {
+					if(ArgumentValidation.getBooleanish(condNode.getData(), t)) {
+
+						// Optimize to true condition code block if no dynamic condition was present before this.
+						if(!foundDynamicCond) {
+							ParseTree codeNode = children.get(i + 1);
+							return codeNode;
+						}
+
+						// Remove condition code block pairs and else code block after this static true condition.
+						for(int j = children.size() - 1; j >= i + 2; j--) {
+							children.remove(j);
+						}
+						return null;
+					} else {
+
+						// Remove this constant false condition and its code block.
+						children.remove(i + 1);
+						children.remove(i);
+						i -= 2; // Compensate for next loop increment.
+					}
+				} else {
+					foundDynamicCond = true;
+				}
+			}
+
+			// Remove this ifelse() if no children are left.
+			if(children.size() == 0) {
+				return Optimizable.REMOVE_ME;
+			}
+
+			// Optimize this ifelse() to its else code block if only that code block is remaining.
+			if(children.size() == 1) {
+				return children.get(0);
+			}
 			return null;
 		}
 
@@ -473,6 +528,9 @@ public class ControlFlow {
 		@Override
 		public List<Boolean> isBranch(List<ParseTree> children) {
 			List<Boolean> branches = new ArrayList<>(children.size());
+			if(children.size() == 0) {
+				return branches;
+			}
 			// Only the first child is not a branch. Everything else is a branch.
 			branches.add(false);
 			for(int i = 1; i < children.size(); i++) {
@@ -530,7 +588,7 @@ public class ControlFlow {
 					+ " See the documentation on [[Logic|Logic]] for more information. ----"
 					+ " In addition, slices may be used to indicate ranges of integers that should trigger the"
 					+ " specified case. Slices embedded in an array are fine as well. Switch statements also support"
-					+ " brace/case/default syntax, as in most languages, althrough unlike most languages, fallthrough"
+					+ " brace/case/default syntax, as in most languages, although unlike most languages, fallthrough"
 					+ " isn't supported. Breaking with break() isn't required, but recommended. A number greater than 1"
 					+ " may be sent to break, and breaking out of the switch will consume a \"break counter\" and the"
 					+ " break will continue up the chain. If you do use break(), the return value of switch is ignored."
@@ -656,26 +714,41 @@ public class ControlFlow {
 		@Override
 		public Scope linkScope(StaticAnalysis analysis, Scope parentScope,
 				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+			if(ast.numberOfChildren() == 0) {
+				return super.linkScope(analysis, parentScope, ast, env, exceptions);
+			}
+
+			// Handle value in parent scope.
+			ParseTree val = ast.getChildAt(0);
+			Scope valScope = analysis.linkScope(parentScope, val, env, exceptions);
+
+			// Add breakable declaration in case parent scope.
+			Scope caseParentScope = analysis.createNewScope(valScope);
+			caseParentScope.addDeclaration(
+					new BreakableDeclaration(parentScope, ast.getNodeModifiers(), ast.getTarget()));
+			analysis.setTermScope(ast, caseParentScope);
+
+			// Handle switch cases scoping.
 			List<ParseTree> children = ast.getChildren();
-			for(int i = 0; i <= children.size() - 2; i += 2) {
+			for(int i = 1; i <= children.size() - 2; i += 2) {
 				ParseTree cond = children.get(i);
 				ParseTree code = children.get(i + 1);
 
 				// Handle condition in parent scope.
-				Scope condScope = analysis.linkScope(parentScope, cond, env, exceptions);
+				Scope condScope = analysis.linkScope(caseParentScope, cond, env, exceptions);
 
 				// Handle code branches in separate scope.
 				analysis.linkScope(analysis.createNewScope(condScope), code, env, exceptions);
 			}
 
 			// Handle optional default branch in separate scope.
-			if((children.size() & 0x01) == 0x01) { // (size % 2) == 1.
+			if((children.size() & 0x01) == 0x00) { // (size % 2) == 0.
 				analysis.linkScope(
-						analysis.createNewScope(parentScope), children.get(children.size() - 1), env, exceptions);
+						analysis.createNewScope(caseParentScope), children.get(children.size() - 1), env, exceptions);
 			}
 
-			// Return the parent scope.
-			return parentScope;
+			// Return the switch scope.
+			return caseParentScope;
 		}
 
 		@Override
@@ -1040,7 +1113,34 @@ public class ControlFlow {
 		@Override
 		public Scope linkScope(StaticAnalysis analysis, Scope parentScope,
 				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
-			super.linkScope(analysis, parentScope, ast, env, exceptions);
+
+			// Handle invalid number of arguments. Link child scopes, but return parent scope.
+			if(ast.numberOfChildren() != 4) {
+				super.linkScope(analysis, parentScope, ast, env, exceptions);
+				return parentScope;
+			}
+
+			// Link child scopes.
+			ParseTree assign = ast.getChildAt(0);
+			ParseTree cond = ast.getChildAt(1);
+			ParseTree exp = ast.getChildAt(2);
+			ParseTree code = ast.getChildAt(3);
+
+			// Link scopes in order: assign -> cond -> (code -> exp -> cond)*.
+			Scope assignScope = analysis.linkScope(parentScope, assign, env, exceptions);
+			Scope condScope = analysis.linkScope(assignScope, cond, env, exceptions);
+			Scope codeParentScope = analysis.createNewScope(condScope);
+			Scope codeScope = analysis.linkScope(codeParentScope, code, env, exceptions);
+			analysis.linkScope(codeScope, exp, env, exceptions);
+
+			// Add breakable and continuable declaration in loop code parent scope.
+			codeParentScope.addDeclaration(
+					new BreakableDeclaration(parentScope, ast.getNodeModifiers(), ast.getTarget()));
+			codeParentScope.addDeclaration(
+					new ContinuableDeclaration(ast.getNodeModifiers(), ast.getTarget()));
+			analysis.setTermScope(ast, codeParentScope);
+
+			// Return parent scope.
 			return parentScope;
 		}
 
@@ -1272,22 +1372,38 @@ public class ControlFlow {
 		@Override
 		public Scope linkScope(StaticAnalysis analysis, Scope parentScope,
 				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
-			if(ast.numberOfChildren() >= (this.runAsFor ? 3 : 4)) {
-				ParseTree assign = ast.getChildAt(0);
-				ParseTree cond = ast.getChildAt(1);
-				ParseTree exp = ast.getChildAt(2);
-				ParseTree code = ast.getChildAt(3);
-				ParseTree elseCode = (this.runAsFor ? null : ast.getChildAt(4));
 
-				// Order: assign -> cond -> (code -> exp -> cond)* -> elseCode?.
-				Scope assignScope = analysis.linkScope(parentScope, assign, env, exceptions);
-				Scope condScope = analysis.linkScope(assignScope, cond, env, exceptions);
-				Scope codeScope = analysis.linkScope(condScope, code, env, exceptions);
-				analysis.linkScope(codeScope, exp, env, exceptions);
-				if(elseCode != null) {
-					analysis.linkScope(condScope, code, env, exceptions);
-				}
+			// Handle not enough arguments. Link child scopes, but return parent scope.
+			if(ast.numberOfChildren() < (this.runAsFor ? 3 : 4)) {
+				super.linkScope(analysis, parentScope, ast, env, exceptions);
+				return parentScope;
 			}
+
+			// Get AST nodes.
+			ParseTree assign = ast.getChildAt(0);
+			ParseTree cond = ast.getChildAt(1);
+			ParseTree exp = ast.getChildAt(2);
+			ParseTree code = ast.getChildAt(3);
+			ParseTree elseCode = (this.runAsFor ? null : ast.getChildAt(4));
+
+			// Order: assign -> cond -> (code -> exp -> cond)* -> elseCode?.
+			Scope assignScope = analysis.linkScope(parentScope, assign, env, exceptions);
+			Scope condScope = analysis.linkScope(assignScope, cond, env, exceptions);
+			Scope codeParentScope = analysis.createNewScope(condScope);
+			Scope codeScope = analysis.linkScope(codeParentScope, code, env, exceptions);
+			analysis.linkScope(codeScope, exp, env, exceptions);
+			if(elseCode != null) {
+				analysis.linkScope(condScope, code, env, exceptions);
+			}
+
+			// Add breakable and continuable declaration in loop code parent scope.
+			codeParentScope.addDeclaration(
+					new BreakableDeclaration(parentScope, ast.getNodeModifiers(), ast.getTarget()));
+			codeParentScope.addDeclaration(
+					new ContinuableDeclaration(ast.getNodeModifiers(), ast.getTarget()));
+			analysis.setTermScope(ast, codeParentScope);
+
+			// Return parent scope.
 			return parentScope;
 		}
 
@@ -1530,26 +1646,41 @@ public class ControlFlow {
 		@Override
 		public Scope linkScope(StaticAnalysis analysis, Scope parentScope,
 				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
-			if(ast.numberOfChildren() >= 3) {
-				int ind = 0;
-				ParseTree array = ast.getChildAt(ind++);
-				ParseTree key = (ast.numberOfChildren() == 4 ? ast.getChildAt(ind++) : null);
-				ParseTree val = ast.getChildAt(ind++);
-				ParseTree code = ast.getChildAt(ind++);
 
-				// Order: array -> [key] -> val -> code?.
-				Scope arrayScope = analysis.linkScope(parentScope, array, env, exceptions);
-				Scope keyParamScope = arrayScope;
-				Scope keyValScope = arrayScope;
-				if(key != null) {
-					Scope[] scopes = analysis.linkParamScope(keyParamScope, keyValScope, key, env, exceptions);
-					keyParamScope = scopes[0];
-					keyValScope = scopes[1];
-				}
-				Scope[] scopes = analysis.linkParamScope(keyParamScope, keyValScope, val, env, exceptions);
-				Scope valScope = scopes[0]; // paramScope.
-				analysis.linkScope(valScope, code, env, exceptions);
+			// Handle not enough arguments. Link child scopes, but return parent scope.
+			if(ast.numberOfChildren() < 3) {
+				super.linkScope(analysis, parentScope, ast, env, exceptions);
+				return parentScope;
 			}
+
+			int ind = 0;
+			ParseTree array = ast.getChildAt(ind++);
+			ParseTree key = (ast.numberOfChildren() == 4 ? ast.getChildAt(ind++) : null);
+			ParseTree val = ast.getChildAt(ind++);
+			ParseTree code = ast.getChildAt(ind++);
+
+			// Order: array -> [key] -> val -> code?.
+			Scope arrayScope = analysis.linkScope(parentScope, array, env, exceptions);
+			Scope keyParamScope = arrayScope;
+			Scope keyValScope = arrayScope;
+			if(key != null) {
+				Scope[] scopes = analysis.linkParamScope(keyParamScope, keyValScope, key, env, exceptions);
+				keyParamScope = scopes[0];
+				keyValScope = scopes[1];
+			}
+			Scope[] scopes = analysis.linkParamScope(keyParamScope, keyValScope, val, env, exceptions);
+			Scope valScope = scopes[0]; // paramScope.
+			Scope codeParentScope = analysis.createNewScope(valScope);
+			analysis.linkScope(codeParentScope, code, env, exceptions);
+
+			// Add breakable and continuable declaration in loop code parent scope.
+			codeParentScope.addDeclaration(
+					new BreakableDeclaration(parentScope, ast.getNodeModifiers(), ast.getTarget()));
+			codeParentScope.addDeclaration(
+					new ContinuableDeclaration(ast.getNodeModifiers(), ast.getTarget()));
+			analysis.setTermScope(ast, codeParentScope);
+
+			// Return parent scope.
 			return parentScope;
 		}
 
@@ -1823,28 +1954,43 @@ public class ControlFlow {
 		@Override
 		public Scope linkScope(StaticAnalysis analysis, Scope parentScope,
 				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
-			if(ast.numberOfChildren() >= 4) {
-				int ind = 0;
-				ParseTree array = ast.getChildAt(ind++);
-				ParseTree key = (ast.numberOfChildren() == 5 ? ast.getChildAt(ind++) : null);
-				ParseTree val = ast.getChildAt(ind++);
-				ParseTree code = ast.getChildAt(ind++);
-				ParseTree elseCode = ast.getChildAt(ind++);
 
-				// Order: array -> [key] -> val -> code? | array -> elseCode.
-				Scope arrayScope = analysis.linkScope(parentScope, array, env, exceptions);
-				Scope keyParamScope = arrayScope;
-				Scope keyValScope = arrayScope;
-				if(key != null) {
-					Scope[] scopes = analysis.linkParamScope(keyParamScope, keyValScope, key, env, exceptions);
-					keyParamScope = scopes[0];
-					keyValScope = scopes[1];
-				}
-				Scope[] scopes = analysis.linkParamScope(keyParamScope, keyValScope, val, env, exceptions);
-				Scope valScope = scopes[0]; // paramScope.
-				analysis.linkScope(valScope, code, env, exceptions);
-				analysis.linkScope(arrayScope, elseCode, env, exceptions);
+			// Handle not enough arguments. Link child scopes, but return parent scope.
+			if(ast.numberOfChildren() < 4) {
+				super.linkScope(analysis, parentScope, ast, env, exceptions);
+				return parentScope;
 			}
+
+			int ind = 0;
+			ParseTree array = ast.getChildAt(ind++);
+			ParseTree key = (ast.numberOfChildren() == 5 ? ast.getChildAt(ind++) : null);
+			ParseTree val = ast.getChildAt(ind++);
+			ParseTree code = ast.getChildAt(ind++);
+			ParseTree elseCode = ast.getChildAt(ind++);
+
+			// Order: array -> [key] -> val -> code? | array -> elseCode.
+			Scope arrayScope = analysis.linkScope(parentScope, array, env, exceptions);
+			Scope keyParamScope = arrayScope;
+			Scope keyValScope = arrayScope;
+			if(key != null) {
+				Scope[] scopes = analysis.linkParamScope(keyParamScope, keyValScope, key, env, exceptions);
+				keyParamScope = scopes[0];
+				keyValScope = scopes[1];
+			}
+			Scope[] scopes = analysis.linkParamScope(keyParamScope, keyValScope, val, env, exceptions);
+			Scope valScope = scopes[0]; // paramScope.
+			Scope codeParentScope = analysis.createNewScope(valScope);
+			analysis.linkScope(codeParentScope, code, env, exceptions);
+			analysis.linkScope(arrayScope, elseCode, env, exceptions);
+
+			// Add breakable and continuable declaration in loop code parent scope.
+			codeParentScope.addDeclaration(
+					new BreakableDeclaration(parentScope, ast.getNodeModifiers(), ast.getTarget()));
+			codeParentScope.addDeclaration(
+					new ContinuableDeclaration(ast.getNodeModifiers(), ast.getTarget()));
+			analysis.setTermScope(ast, codeParentScope);
+
+			// Return parent scope.
 			return parentScope;
 		}
 
@@ -1990,7 +2136,30 @@ public class ControlFlow {
 		@Override
 		public Scope linkScope(StaticAnalysis analysis, Scope parentScope,
 				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
-			super.linkScope(analysis, parentScope, ast, env, exceptions);
+
+			// Handle insufficient number of arguments. Link child scopes, but return parent scope.
+			if(ast.numberOfChildren() != 2) {
+				super.linkScope(analysis, parentScope, ast, env, exceptions);
+				return parentScope;
+			}
+
+			// Link child scopes.
+			ParseTree cond = ast.getChildAt(0);
+			ParseTree code = ast.getChildAt(1);
+
+			// Link scopes in order: cond -> (code -> cond)*.
+			Scope condScope = analysis.linkScope(parentScope, cond, env, exceptions);
+			Scope codeParentScope = analysis.createNewScope(condScope);
+			analysis.linkScope(codeParentScope, code, env, exceptions);
+
+			// Add breakable and continuable declaration in loop code parent scope.
+			codeParentScope.addDeclaration(
+					new BreakableDeclaration(parentScope, ast.getNodeModifiers(), ast.getTarget()));
+			codeParentScope.addDeclaration(
+					new ContinuableDeclaration(ast.getNodeModifiers(), ast.getTarget()));
+			analysis.setTermScope(ast, codeParentScope);
+
+			// Return parent scope.
 			return parentScope;
 		}
 
@@ -2124,7 +2293,30 @@ public class ControlFlow {
 		@Override
 		public Scope linkScope(StaticAnalysis analysis, Scope parentScope,
 				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
-			super.linkScope(analysis, parentScope, ast, env, exceptions);
+
+			// Handle invalid number of arguments. Link child scopes, but return parent scope.
+			if(ast.numberOfChildren() != 2) {
+				super.linkScope(analysis, parentScope, ast, env, exceptions);
+				return parentScope;
+			}
+
+			// Link child scopes.
+			ParseTree code = ast.getChildAt(0);
+			ParseTree cond = ast.getChildAt(1);
+
+			// Link scopes in order: code -> (cond -> code)*.
+			Scope codeParentScope = analysis.createNewScope(parentScope);
+			analysis.linkScope(codeParentScope, code, env, exceptions);
+			analysis.linkScope(parentScope, cond, env, exceptions);
+
+			// Add breakable and continuable declaration in loop code parent scope.
+			codeParentScope.addDeclaration(
+					new BreakableDeclaration(parentScope, ast.getNodeModifiers(), ast.getTarget()));
+			codeParentScope.addDeclaration(
+					new ContinuableDeclaration(ast.getNodeModifiers(), ast.getTarget()));
+			analysis.setTermScope(ast, codeParentScope);
+
+			// Return parent scope.
 			return parentScope;
 		}
 
@@ -2193,8 +2385,80 @@ public class ControlFlow {
 		}
 
 		@Override
+		public LeftHandSideType typecheck(StaticAnalysis analysis,
+				ParseTree ast, LeftHandSideType inferredReturnType, Environment env, Set<ConfigCompileException> exceptions) {
+
+			// Typecheck function.
+			super.typecheck(analysis, ast, inferredReturnType, env, exceptions);
+
+			// Get break count.
+			long breakCount;
+			if(ast.numberOfChildren() >= 1 && ast.getChildAt(0).getData() instanceof CInt breakCountInt) {
+				breakCount = breakCountInt.getInt();
+				if(breakCount <= 0) {
+					breakCount = 1;
+				}
+			} else {
+				breakCount = 1;
+			}
+
+			// Resolve this breakable reference to a breakable declaration to validate usage of break in this context.
+			Scope scope = analysis.getTermScope(ast);
+			if(scope != null) {
+				long remainingBreakCount = breakCount;
+				Set<Declaration> decls = scope.getDeclarations(Namespace.BREAKABLE, null);
+				while(decls.size() != 0) {
+					assert decls.size() == 1 : "Break reference resolves to multiple breakables at once.";
+					assert decls.iterator().next() instanceof BreakableDeclaration : "Unsupported breakable declaration.";
+					Declaration decl = decls.iterator().next();
+					if(decl instanceof BreakableDeclaration loopDecl) {
+						if(--remainingBreakCount == 0) {
+							break;
+						}
+						decls = loopDecl.getParentScope().getDeclarations(Namespace.BREAKABLE, null);
+					} else if(decl instanceof BreakableBoundDeclaration) {
+						break;
+					} else {
+						throw new Error("Unsupported " + Namespace.BREAKABLE + " declaration.");
+					}
+				}
+				if(remainingBreakCount != 0) {
+					if(breakCount == remainingBreakCount) {
+						exceptions.add(new ConfigCompileException(
+								"Break is not valid in this context.", ast.getTarget()));
+					} else {
+						long breaksAvailable = breakCount - remainingBreakCount;
+						exceptions.add(new ConfigCompileException(
+								"Cannot break from " + breakCount + " breakables. Only " + breaksAvailable
+										+ " nested breakable" + (breaksAvailable == 1 ? " is" : "s are")
+										+ " available here.", ast.getTarget()));
+					}
+				}
+			}
+
+			// Return void.
+			return CVoid.TYPE.asLeftHandSideType();
+		}
+
+		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRECastException.class};
+		}
+
+		@Override
+		public Scope linkScope(StaticAnalysis analysis, Scope parentScope, ParseTree ast,
+				Environment env, Set<ConfigCompileException> exceptions) {
+
+			// Handle children. These will execute before this break().
+			Scope scope = super.linkScope(analysis, parentScope, ast, env, exceptions);
+
+			// Add break loop reference in new scope.
+			scope = analysis.createNewScope(scope);
+			scope.addReference(new BreakableReference(ast.getTarget()));
+			analysis.setTermScope(ast, scope);
+
+			// Return scope.
+			return scope;
 		}
 
 		@Override
@@ -2297,8 +2561,52 @@ public class ControlFlow {
 		}
 
 		@Override
+		public LeftHandSideType typecheck(StaticAnalysis analysis,
+				ParseTree ast, LeftHandSideType inferredReturnType, Environment env, Set<ConfigCompileException> exceptions) {
+
+			// Typecheck function.
+			super.typecheck(analysis, ast, inferredReturnType, env, exceptions);
+
+			// Resolve this continuable reference to a continuable declaration to validate usage of continue in this context.
+			Scope scope = analysis.getTermScope(ast);
+			if(scope != null) {
+				Set<Declaration> decls = scope.getDeclarations(Namespace.CONTINUABLE, null);
+				if(decls.size() == 0) {
+					exceptions.add(new ConfigCompileException(
+							"Continue is not valid in this context.", ast.getTarget()));
+				} else {
+					for(Declaration decl : decls) {
+						if(decl instanceof ContinuableBoundDeclaration) {
+							exceptions.add(new ConfigCompileException(
+									"Continue is not valid in this context.", ast.getTarget()));
+						}
+					}
+				}
+			}
+
+			// Return void.
+			return CVoid.TYPE.asLeftHandSideType();
+		}
+
+		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRECastException.class};
+		}
+
+		@Override
+		public Scope linkScope(StaticAnalysis analysis, Scope parentScope, ParseTree ast,
+				Environment env, Set<ConfigCompileException> exceptions) {
+
+			// Handle children. These will execute before this break().
+			Scope scope = super.linkScope(analysis, parentScope, ast, env, exceptions);
+
+			// Add break loop reference in new scope.
+			scope = analysis.createNewScope(scope);
+			scope.addReference(new ContinuableReference(ast.getTarget()));
+			analysis.setTermScope(ast, scope);
+
+			// Return scope.
+			return scope;
 		}
 
 		@Override
@@ -2372,8 +2680,63 @@ public class ControlFlow {
 		}
 
 		@Override
+		public LeftHandSideType typecheck(StaticAnalysis analysis,
+				ParseTree ast, LeftHandSideType inferredReturnType, Environment env, Set<ConfigCompileException> exceptions) {
+
+			// Get value type.
+			LeftHandSideType valType;
+			Target valTarget;
+			if(ast.numberOfChildren() == 0) {
+				valType = CVoid.TYPE.asLeftHandSideType();
+				valTarget = ast.getTarget();
+			} else if(ast.numberOfChildren() == 1) {
+				ParseTree valNode = ast.getChildAt(0);
+				valType = analysis.typecheck(valNode, inferredReturnType, env, exceptions);
+				valTarget = valNode.getTarget();
+			} else {
+
+				// Fall back to default behavior for invalid usage.
+				return super.typecheck(analysis, ast, inferredReturnType, env, exceptions);
+			}
+
+			// Resolve this returnable reference to its returnable declaration to get its required return type.
+			Scope scope = analysis.getTermScope(ast);
+			if(scope != null) {
+				Set<Declaration> decls = scope.getDeclarations(Namespace.RETURNABLE, null);
+				if(decls.size() == 0) {
+					exceptions.add(new ConfigCompileException("Return is not valid in this context.", ast.getTarget()));
+				} else {
+
+					// Type check return value for all found declared return types.
+					for(Declaration decl : decls) {
+						StaticAnalysis.requireType(valType, decl.getType(), valTarget, env, exceptions);
+					}
+				}
+			}
+
+			// Return void.
+			return CVoid.TYPE.asLeftHandSideType();
+		}
+
+		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return null;
+		}
+
+		@Override
+		public Scope linkScope(StaticAnalysis analysis, Scope parentScope, ParseTree ast,
+				Environment env, Set<ConfigCompileException> exceptions) {
+
+			// Handle children. These will execute before this return().
+			Scope scope = super.linkScope(analysis, parentScope, ast, env, exceptions);
+
+			// Add returnable reference in new scope.
+			scope = analysis.createNewScope(scope);
+			scope.addReference(new ReturnableReference(ast.getTarget()));
+			analysis.setTermScope(ast, scope);
+
+			// Return scope.
+			return scope;
 		}
 
 		@Override

@@ -53,24 +53,46 @@ public enum MCVersion implements Version {
 	MC1_15_X,
 	MC1_16,
 	MC1_16_1,
+	MC1_16_2,
+	MC1_16_3,
+	MC1_16_4,
 	MC1_16_X,
 	MC1_17,
 	MC1_17_X,
 	MC1_18,
+	MC1_18_1,
 	MC1_18_X,
 	MC1_19,
 	MC1_19_1,
 	MC1_19_2,
 	MC1_19_3,
+	MC1_19_4,
 	MC1_19_X,
 	MC1_20,
+	MC1_20_1,
+	MC1_20_2,
+	MC1_20_4,
+	MC1_20_6,
 	MC1_20_X,
-	MC1_X,
-	MC2_X,
+	MC1_21,
+	MC1_21_1,
+	MC1_21_3,
+	MC1_21_4,
+	MC1_21_5,
+	MC1_21_6,
+	MC1_21_7,
+	MC1_21_8,
+	MC1_21_9,
+	MC1_21_10,
+	MC1_21_11,
+	MC1_21_X,
 	MCX_X,
 	CURRENT,
 	FUTURE,
 	NEVER;
+
+	public static final MCVersion EARLIEST_SUPPORTED = MC1_16_X;
+	public static final MCVersion LATEST_SUPPORTED = MC1_21_11;
 
 	public static MCVersion match(String[] source) {
 		String[] parts = new String[Math.min(3, source.length)];
@@ -120,23 +142,17 @@ public enum MCVersion implements Version {
 
 	@Override
 	public int getMinor() {
-		String form = name().split("_")[1];
-		if("X".equals(form)) {
+		String[] parts = name().split("_");
+		if(parts.length < 2 || "X".equals(parts[1])) {
 			return -1;
 		}
-		return Integer.parseInt(form);
+		return Integer.parseInt(parts[1]);
 	}
 
 	@Override
 	public int getSupplemental() {
 		String[] parts = name().split("_");
-		if(parts.length > 2) {
-			if("X".equals(parts[2])) {
-				return -1;
-			}
-			return Integer.parseInt(parts[2]);
-		}
-		if(getMinor() == -1) {
+		if(parts.length < 3 || "X".equals(parts[2])) {
 			return -1;
 		}
 		return Integer.parseInt(parts[2]);

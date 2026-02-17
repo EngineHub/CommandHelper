@@ -23,6 +23,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.ArrayHandling;
 import com.laytonsmith.core.functions.BasicLogic;
 import com.laytonsmith.core.functions.DataHandling;
+import com.laytonsmith.core.natives.interfaces.ArrayAccessSet;
 import com.laytonsmith.core.natives.interfaces.Booleanish;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.objects.ObjectModifier;
@@ -51,7 +52,7 @@ import java.util.TreeMap;
  */
 @typeof("ms.lang.array")
 public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
-		com.laytonsmith.core.natives.interfaces.Iterable {
+		com.laytonsmith.core.natives.interfaces.Iterable, ArrayAccessSet {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
 	public static final CClassType TYPE = CClassType.getWithGenericDeclaration(CArray.class, new GenericDeclaration(Target.UNKNOWN,
@@ -336,6 +337,10 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		push(c, null, t, env);
 	}
 
+	public final void push(String s) {
+		push(new CString(s, Target.UNKNOWN), Target.UNKNOWN);
+	}
+
 	/**
 	 * Pushes a new Construct onto the end of the array. If the index is specified, this works like a "insert"
 	 * operation, in that all values are shifted to the right, starting with the value at that index. If the array is
@@ -447,6 +452,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	 * @param t The code target.
 	 * @param env The environment.
 	 */
+	@Override
 	public void set(Mixed index, Mixed c, Target t, Environment env) {
 		if(!associativeMode) {
 			if(index instanceof CNull) {
@@ -517,6 +523,18 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 
 	public final void set(String index, String value, Environment env) {
 		set(index, value, Target.UNKNOWN, env);
+	}
+
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	public final void set(String index, double value) {
+		set(index, new CDouble(value, Target.UNKNOWN), Target.UNKNOWN);
+	}
+
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	public final void set(String index, long value) {
+		set(index, new CInt(value, Target.UNKNOWN), Target.UNKNOWN);
 	}
 
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
@@ -1186,7 +1204,8 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 
 	@Override
 	public CClassType[] getInterfaces() {
-		return new CClassType[]{Booleanish.TYPE, com.laytonsmith.core.natives.interfaces.Iterable.TYPE};
+		return new CClassType[]{Booleanish.TYPE, com.laytonsmith.core.natives.interfaces.Iterable.TYPE,
+			ArrayAccessSet.TYPE};
 	}
 
 	@Override

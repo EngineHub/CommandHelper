@@ -6,6 +6,8 @@ import com.laytonsmith.annotations.MEnum;
 public enum MCSpawnReason {
 	BEEHIVE,
 	BREEDING,
+	BUCKET,
+	BUILD_COPPERGOLEM,
 	BUILD_IRONGOLEM,
 	BUILD_SNOWMAN,
 	BUILD_WITHER,
@@ -54,4 +56,24 @@ public enum MCSpawnReason {
 	SPELL,
 	METAMORPHOSIS,
 	DUPLICATION,
+	ENCHANTMENT,
+	TRIAL_SPAWNER,
+	POTION_EFFECT,
+	REHYDRATION("Paper"), // Happy Ghast
+	REANIMATE; // Copper Golem
+
+	final String mcImplementation;
+
+	MCSpawnReason() {
+		this.mcImplementation = null;
+	}
+
+	MCSpawnReason(String mcImplementation) {
+		this.mcImplementation = mcImplementation;
+	}
+
+	@Deprecated
+	public String getImplementation() {
+		return this.mcImplementation;
+	}
 }

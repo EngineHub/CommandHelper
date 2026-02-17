@@ -51,6 +51,8 @@ will be thrown if they are used improperly):
 | z || Time zone || General time zone || Pacific Standard Time; PST; GMT-08:00
 |-
 | Z || Time zone || RFC 822 time zone || -0800
+|-
+| X || Time zone || ISO 8601 time zone || -08; -0800; -08:00
 |}
 
 Pattern letters are usually repeated, as their number determines the exact presentation:
@@ -83,6 +85,28 @@ For parsing, RFC 822 time zones are also accepted.
 *** Digit Digit
 TwoDigitHours must be between 00 and 23. Other definitions are as for general time zones.
 For parsing, general time zones are also accepted.
+* ISO 8601 Time zone: The number of pattern letters designates the format for both formatting and parsing as follows:
+** ISO8601TimeZone:
+*** OneLetterISO8601TimeZone
+*** TwoLetterISO8601TimeZone
+*** ThreeLetterISO8601TimeZone
+** OneLetterISO8601TimeZone:
+*** Sign TwoDigitHours
+*** Z
+** TwoLetterISO8601TimeZone:
+*** Sign TwoDigitHours Minutes
+*** Z
+** ThreeLetterISO8601TimeZone:
+*** Sign TwoDigitHours  : Minutes
+*** Z
+Other definitions are as for general time zones or RFC 822 time zones.
+
+For formatting, if the offset value from GMT is 0, "Z" is produced. If the number of pattern letters is 1, any fraction
+of an hour is ignored. For example, if the pattern is "X" and the time zone is "GMT+05:30", "+05" is produced.
+
+For parsing, "Z" is parsed as the UTC time zone designator. General time zones are not accepted.
+
+If the number of pattern letters is 4 or more, FormatException is thrown.
 
 The timezone parameter can be specified as well, to change the timezone of the generated date. The
 default is to use the system's time. To bypass the time parameter, you can either send time() 

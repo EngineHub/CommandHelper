@@ -20,6 +20,7 @@ import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CClassType;
+import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
@@ -112,8 +113,8 @@ public class BasicLogic {
 			if(ArgumentValidation.anyBooleans(env, args)) {
 				boolean equals = true;
 				for(int i = 1; i < args.length; i++) {
-					boolean arg1 = ArgumentValidation.getBoolean(args[i - 1], t, env);
-					boolean arg2 = ArgumentValidation.getBoolean(args[i], t, env);
+					boolean arg1 = ArgumentValidation.getBooleanObject(args[i - 1], t, env);
+					boolean arg2 = ArgumentValidation.getBooleanObject(args[i], t, env);
 					if(arg1 != arg2) {
 						equals = false;
 						break;
@@ -150,7 +151,7 @@ public class BasicLogic {
 					}
 				}
 				return CBoolean.TRUE;
-			} catch (ConfigRuntimeException e) {
+			} catch(ConfigRuntimeException e) {
 				return CBoolean.FALSE;
 			}
 		}
@@ -228,7 +229,7 @@ public class BasicLogic {
 					+ " equals('1', 1) returns true, sequals('1', 1) returns false, because"
 					+ " the first one is a string, and the second one is an int. More often"
 					+ " than not, you want to use plain equals(). In addition, type juggling is"
-					+ " explicitely not performed on strings. Thus '2' !== '2.0', despite those"
+					+ " explicitly not performed on strings. Thus '2' !== '2.0', despite those"
 					+ " being ==. Operator syntax is also"
 					+ " supported: @a === @b";
 		}
@@ -488,8 +489,8 @@ public class BasicLogic {
 			if(ArgumentValidation.anyBooleans(env, args)) {
 				boolean equals = true;
 				for(int i = 1; i < args.length; i++) {
-					boolean arg1 = ArgumentValidation.getBoolean(args[i - 1], t, env);
-					boolean arg2 = ArgumentValidation.getBoolean(args[i], t, env);
+					boolean arg1 = ArgumentValidation.getBooleanObject(args[i - 1], t, env);
+					boolean arg2 = ArgumentValidation.getBooleanObject(args[i], t, env);
 					if(arg1 != arg2) {
 						equals = false;
 						break;
@@ -527,7 +528,7 @@ public class BasicLogic {
 					}
 				}
 				return CBoolean.TRUE;
-			} catch (ConfigRuntimeException e) {
+			} catch(ConfigRuntimeException e) {
 				return CBoolean.FALSE;
 			}
 		}
@@ -1097,7 +1098,7 @@ public class BasicLogic {
 			//This will only happen if they hardcode true/false in, but we still
 			//need to handle it appropriately.
 			for(Mixed c : args) {
-				if(!ArgumentValidation.getBoolean(c, t, env)) {
+				if(!ArgumentValidation.getBooleanish(c, t, env)) {
 					return CBoolean.FALSE;
 				}
 			}
@@ -1108,7 +1109,7 @@ public class BasicLogic {
 		public CBoolean execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
 			for(ParseTree tree : nodes) {
 				Mixed c = env.getEnv(GlobalEnv.class).GetScript().seval(tree, env);
-				boolean b = ArgumentValidation.getBoolean(c, t, env);
+				boolean b = ArgumentValidation.getBooleanish(c, t, env);
 				if(b == false) {
 					return CBoolean.FALSE;
 				}
@@ -1181,7 +1182,7 @@ public class BasicLogic {
 					continue;
 				}
 				if(child.isConst()) {
-					if(ArgumentValidation.getBoolean(child.getData(), t, env) == true) {
+					if(ArgumentValidation.getBooleanish(child.getData(), t, env) == true) {
 						it.remove();
 					} else {
 						foundFalse = true;
@@ -1206,7 +1207,7 @@ public class BasicLogic {
 			// At this point, it could be that there are some conditions with side effects, followed by a final false. However,
 			// if false is the only remaining condition (which could be) then we can simply return false here.
 			if(children.size() == 1 && children.get(0).isConst()
-					&& ArgumentValidation.getBoolean(children.get(0).getData(), t, env) == false) {
+					&& ArgumentValidation.getBooleanish(children.get(0).getData(), t, env) == false) {
 				return new ParseTree(CBoolean.FALSE, fileOptions);
 			}
 			if(children.isEmpty()) {
@@ -1264,7 +1265,7 @@ public class BasicLogic {
 			Mixed lastValue = CBoolean.TRUE;
 			for(ParseTree tree : nodes) {
 				lastValue = env.getEnv(GlobalEnv.class).GetScript().seval(tree, env);
-				if(!ArgumentValidation.getBooleanish(lastValue, t)) {
+				if(!ArgumentValidation.getBooleanish(lastValue, t, env)) {
 					return lastValue;
 				}
 			}
@@ -1307,7 +1308,7 @@ public class BasicLogic {
 					continue;
 				}
 				if(child.isConst()) {
-					if(ArgumentValidation.getBoolean(child.getData(), t, env) == true) {
+					if(ArgumentValidation.getBooleanish(child.getData(), t, env) == true) {
 						it.remove();
 					} else {
 						foundFalse = true;
@@ -1332,7 +1333,7 @@ public class BasicLogic {
 			// At this point, it could be that there are some conditions with side effects, followed by a final false. However,
 			// if false is the only remaining condition (which could be) then we can simply return false here.
 			if(children.size() == 1 && children.get(0).isConst()
-					&& ArgumentValidation.getBoolean(children.get(0).getData(), t, env) == false) {
+					&& ArgumentValidation.getBooleanish(children.get(0).getData(), t, env) == false) {
 				return new ParseTree(children.get(0).getData(), fileOptions);
 			}
 			if(children.isEmpty()) {
@@ -1392,7 +1393,7 @@ public class BasicLogic {
 			//This will only happen if they hardcode true/false in, but we still
 			//need to handle it appropriately.
 			for(Mixed c : args) {
-				if(ArgumentValidation.getBoolean(c, t, env)) {
+				if(ArgumentValidation.getBooleanish(c, t, env)) {
 					return CBoolean.TRUE;
 				}
 			}
@@ -1403,7 +1404,7 @@ public class BasicLogic {
 		public CBoolean execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
 			for(ParseTree tree : nodes) {
 				Mixed c = env.getEnv(GlobalEnv.class).GetScript().seval(tree, env);
-				if(ArgumentValidation.getBoolean(c, t, env)) {
+				if(ArgumentValidation.getBooleanish(c, t, env)) {
 					return CBoolean.TRUE;
 				}
 			}
@@ -1479,7 +1480,7 @@ public class BasicLogic {
 					if(child.getData() instanceof CSymbol) {
 						throw new ConfigCompileException("Unexpected symbol: \"" + child.getData().val() + "\"", t);
 					}
-					if(ArgumentValidation.getBoolean(child.getData(), t, env) == false) {
+					if(ArgumentValidation.getBooleanish(child.getData(), t, env) == false) {
 						it.remove();
 					} else {
 						foundTrue = true;
@@ -1504,7 +1505,7 @@ public class BasicLogic {
 			// At this point, it could be that there are some conditions with side effects, followed by a final true. However,
 			// if true is the only remaining condition (which could be) then we can simply return true here.
 			if(children.size() == 1 && children.get(0).isConst()
-					&& ArgumentValidation.getBoolean(children.get(0).getData(), t, env) == true) {
+					&& ArgumentValidation.getBooleanish(children.get(0).getData(), t, env) == true) {
 				return new ParseTree(CBoolean.TRUE, fileOptions);
 			}
 			if(children.isEmpty()) {
@@ -1653,7 +1654,7 @@ public class BasicLogic {
 			if(args.length != 1) {
 				throw new CREFormatException(this.getName() + " expects 1 argument.", t);
 			}
-			return CBoolean.get(!ArgumentValidation.getBoolean(args[0], t, env));
+			return CBoolean.get(!ArgumentValidation.getBooleanish(args[0], t, env));
 		}
 
 		@Override
@@ -1757,8 +1758,8 @@ public class BasicLogic {
 			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
-			boolean val1 = ArgumentValidation.getBoolean(args[0], t, env);
-			boolean val2 = ArgumentValidation.getBoolean(args[1], t, env);
+			boolean val1 = ArgumentValidation.getBooleanish(args[0], t, env);
+			boolean val2 = ArgumentValidation.getBooleanish(args[1], t, env);
 			return CBoolean.get(val1 ^ val2);
 		}
 
@@ -2680,7 +2681,7 @@ public class BasicLogic {
 
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
-			return new ExampleScript[] {
+			return new ExampleScript[]{
 				new ExampleScript("", "hash(1);"),
 				new ExampleScript("", "hash(2);"),
 				new ExampleScript("", "hash(3);"),
@@ -2691,4 +2692,102 @@ public class BasicLogic {
 
 	}
 
+	@api
+	public static class equals_epsilon extends AbstractFunction implements Optimizable {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			double d1 = ArgumentValidation.getNumber(args[0], t, env);
+			double d2 = ArgumentValidation.getNumber(args[1], t, env);
+			double epsilon = ArgumentValidation.getDouble(args[2], t, env);
+			return CBoolean.get(java.lang.Math.abs(d1 - d2) < epsilon);
+		}
+
+		@Override
+		public String getName() {
+			return "equals_epsilon";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{3};
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {double d1, number d2, double epsilon | number d1, double d2, double epsilon}"
+					+ " When comparing the equality of floating point numbers, it is often impossible to directly"
+					+ " compare via == (equals) since two floating point numbers that might be actually semantically"
+					+ " equivalent, are represented slightly differently in the computer, thus making them not actually"
+					+ " equal, even though they are effectively equal. This function provides an epsilon argument to"
+					+ " verify if two numbers are within that degree of difference. A good rule of thumb is"
+					+ " to use 5-6 places of precision, but depending on your program's needs, more or less might be"
+					+ " required.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CBoolean.TYPE)
+					.param(CNumber.TYPE, "d1", "The first number to compare.")
+					.param(CDouble.TYPE, "d2", "The second double to compare.")
+					.param(CDouble.TYPE, "epsilon",
+							"The degree of difference to use to determine equality, for instance 0.00001")
+					.newSignature(CBoolean.TYPE)
+					.param(CDouble.TYPE, "d1", "The first double to compare.")
+					.param(CNumber.TYPE, "d2", "The second number to compare.")
+					.param(CDouble.TYPE, "epsilon",
+							"The degree of difference to use to determine equality, for instance 0.00001")
+
+					.build();
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Demonstrates why equals doesn't always work", """
+																				@d1 = 0.8;
+																				@d2 = 0;
+																				for(@i = 0, @i < 8, @i++) {
+																					@d2 += 0.1;
+																				}
+																				msg(@d1);
+																				msg(@d2);
+																				msg(@d1 == @d2);"""),
+				new ExampleScript("Same example, this time with a precision.", """
+																				@d1 = 0.8;
+																				@d2 = 0;
+																				for(@i = 0, @i < 8, @i++) {
+																					@d2 += 0.1;
+																				}
+																				msg(@d1);
+																				msg(@d2);
+																				msg(equals_epsilon(@d1, @d2, 0.0001));"""),
+			};
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.NO_SIDE_EFFECTS, OptimizationOption.CONSTANT_OFFLINE);
+		}
+	}
 }

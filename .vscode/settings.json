@@ -1,0 +1,13 @@
+{
+    "java.compile.nullAnalysis.mode": "automatic",
+    "java.checkstyle.configuration": "${workspaceFolder}/checkstyle.xml",
+    "java.checkstyle.properties": {
+        "config_loc": "${workspaceFolder}",
+    },
+    "java.checkstyle.autocheck": true,
+    "java.format.settings.url": ".vscode/java-formatter.xml",
+    "[java]": {
+        "editor.insertSpaces": false
+    },
+    "files.trimTrailingWhitespace": true,
+}

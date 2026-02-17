@@ -39,7 +39,6 @@ import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CResource;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Variable;
@@ -154,7 +153,7 @@ public class Meta {
 
 		@Override
 		public Mixed exec(Target t, final Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
-			if(Construct.nval(args[1]) == null || args[1].val().isEmpty() || args[1].val().charAt(0) != '/') {
+			if(args[1] instanceof CNull || args[1].val().isEmpty() || args[1].val().charAt(0) != '/') {
 				throw new CREFormatException("The first character of the command must be a forward slash (i.e. '/give')", t);
 			}
 			String cmd = args[1].val().substring(1);
@@ -276,7 +275,7 @@ public class Meta {
 				return new run().exec(t, env, null, args);
 			}
 
-			if(Construct.nval(command) == null || command.val().isEmpty() || command.val().charAt(0) != '/') {
+			if(command instanceof CNull || command.val().isEmpty() || command.val().charAt(0) != '/') {
 				throw new CREFormatException("The first character of a command must be a forward slash (eg. /give)", t);
 			}
 
@@ -413,7 +412,7 @@ public class Meta {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
-			if(Construct.nval(args[0]) == null || args[0].val().isEmpty() || args[0].val().charAt(0) != '/') {
+			if(args[0] instanceof CNull || args[0].val().isEmpty() || args[0].val().charAt(0) != '/') {
 				throw new CREFormatException("The first character of the command must be a forward slash (i.e. '/give')", t);
 			}
 			MCCommandSender sender = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
@@ -607,8 +606,9 @@ public class Meta {
 				throws ConfigRuntimeException {
 			AliasCore ac = Static.getAliasCore();
 
+			String[] cmdArgs = args[0].val().split(" ");
 			for(Script s : ac.getScripts()) {
-				if(s.match(args[0].val())) {
+				if(s.match(cmdArgs)) {
 					return CBoolean.TRUE;
 				}
 			}
@@ -1404,7 +1404,7 @@ public class Meta {
 
 		@Override
 		public String docs() {
-			return "resource {} Returns a copy of the underlying engine's environment object. This is only useful to embedded scripting"
+			return "Resource {} Returns a copy of the underlying engine's environment object. This is only useful to embedded scripting"
 					+ " engines that are attempting to call back into " + Implementation.GetServerType().getBranding() + ". The object returned"
 					+ " is a CResource.";
 		}
@@ -1853,7 +1853,7 @@ public class Meta {
 			return "array {} Returns the smart comment on the currently running alias. The array returned will contain"
 					+ " the comment body in the 'body' element, and the annotations in the 'annotations' element as"
 					+ " an associative array. Each key in the annotation will contain an at symbol, so for instance"
-					+ " '@annotation' and the value is an array of all occurances. ";
+					+ " '@annotation' and the value is an array of all occurrences. ";
 		}
 
 		@Override

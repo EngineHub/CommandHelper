@@ -24,7 +24,7 @@ class RemoteDeploymentMethod implements DeploymentMethod {
 		// There's no real way for us to guess the OS though, so we can't do that automatically. But
 		// linux is a super good guess if we're using ssh. However, swapping to an rsync method may
 		// make this moot anyways.
-		toLocation = toLocation.replace("\\", "/");
+		toLocation = toLocation.replace('\\', '/');
 		return SSHWrapper.SCPWrite(data, remote + toLocation, overrideIdRsa);
 	}
 

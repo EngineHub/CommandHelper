@@ -76,7 +76,7 @@ public class ReadWriteFileConnection implements ConnectionMixin {
 			reader.getTopLevelFile().createNewFile();
 		}
 		this.blankDataModel = blankDataModel;
-		this.service = new ThreadPoolExecutor(1, 1,
+		this.service = new ThreadPoolExecutor(0, 1,
 				60L, TimeUnit.MILLISECONDS,
 				new LinkedBlockingQueue<Runnable>(),
 				new ThreadFactory() {

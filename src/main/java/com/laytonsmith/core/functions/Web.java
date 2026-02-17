@@ -471,10 +471,9 @@ public class Web {
 							}
 						}
 						CArray headers = CArray.GetAssociativeArray(t, null, env);
-						for(String key : resp.getHeaderNames()) {
-							CArray h = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
-									.addNativeParameter(CString.TYPE, null).buildNative(), env);
-							for(String val : resp.getHeaders(key)) {
+						for(String key : resp.getHeaderObject().getHeaderNames()) {
+							CArray h = new CArray(t, null, env);
+							for(String val : resp.getHeaderObject().getHeaders(key)) {
 								h.push(new CString(val, t), t, env);
 							}
 							headers.set(key, h, t, env);
@@ -487,26 +486,26 @@ public class Web {
 						if(arrayJar != null) {
 							getCookieJar(arrayJar, settings.getCookieJar(), t, env);
 						}
-						StaticLayer.GetConvertor().runOnMainThreadLater(
-								env.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), new Runnable() {
-
-							@Override
-							public void run() {
-								executeFinish(success, array, t, env);
-							}
-						});
+						if(settings.getBlocking()) {
+							executeFinish(success, array, t, env);
+						} else {
+							StaticLayer.GetConvertor().runOnMainThreadLater(
+									env.getEnv(StaticRuntimeEnv.class).GetDaemonManager(),
+									() -> executeFinish(success, array, t, env));
+						}
 					} catch (IOException e) {
 						final CREIOException ex = new CREIOException((e instanceof UnknownHostException ? "Unknown host: " : "")
 							+ e.getMessage(), t);
 						ex.setStackTraceElements(st);
 						if(error != null) {
-							StaticLayer.GetConvertor().runOnMainThreadLater(
-									env.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), new Runnable() {
-								@Override
-								public void run() {
-									executeFinish(error, ObjectGenerator.GetGenerator().exception(ex, env, t), t, env);
-								}
-							});
+							final CArray cException = ObjectGenerator.GetGenerator().exception(ex, env, t);
+							if(settings.getBlocking()) {
+								executeFinish(error, cException, t, env);
+							} else {
+								StaticLayer.GetConvertor().runOnMainThreadLater(
+										env.getEnv(StaticRuntimeEnv.class).GetDaemonManager(),
+										() -> executeFinish(error, cException, t, env));
+							}
 						} else {
 							ConfigRuntimeException.HandleUncaughtException(ex, env);
 						}

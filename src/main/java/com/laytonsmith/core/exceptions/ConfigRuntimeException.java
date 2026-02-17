@@ -116,6 +116,8 @@ public class ConfigRuntimeException extends RuntimeException {
 			if(e.getEnv() != null) {
 				MCCommandSender sender = e.getEnv().getEnv(CommandHelperEnvironment.class).GetCommandSender();
 				c.getEnv().getEnv(CommandHelperEnvironment.class).SetCommandSender(sender);
+			} else {
+				c.getEnv().getEnv(CommandHelperEnvironment.class).SetCommandSender(null);
 			}
 			try {
 				Mixed ret = c.executeCallable(env, Target.UNKNOWN, new Mixed[]{ex});
@@ -190,10 +192,13 @@ public class ConfigRuntimeException extends RuntimeException {
 		}
 	}
 
-	private static void PrintMessage(StringBuilder log, StringBuilder console, StringBuilder player, String type, String message, Throwable ex, List<StackTraceElement> st) {
+	private static void PrintMessage(StringBuilder log, StringBuilder console, StringBuilder player, String type, String message, Throwable ex, List<StackTraceElement> st, Target top) {
 		log.append(type).append(message).append("\n");
 		console.append(TermColors.RED).append(type).append(TermColors.WHITE).append(message).append("\n");
 		player.append(MCChatColor.RED).append(type).append(MCChatColor.WHITE).append(message).append("\n");
+		if(st.isEmpty()) {
+			st.add(new StackTraceElement("<<main code>>", top));
+		}
 		for(StackTraceElement e : st) {
 			Target t = e.getDefinedAt();
 			String proc = e.getProcedureName();
@@ -247,16 +252,20 @@ public class ConfigRuntimeException extends RuntimeException {
 		}
 
 		Target top = Target.UNKNOWN;
+		if(ex != null) {
+			top = ex.getTarget();
+		}
 		for(StackTraceElement e : st) {
 			Target t = e.getDefinedAt();
 			if(top == Target.UNKNOWN) {
 				top = t;
 			}
 		}
+
 		StringBuilder log = new StringBuilder();
 		StringBuilder console = new StringBuilder();
 		StringBuilder player = new StringBuilder();
-		PrintMessage(log, console, player, type, message, ex, st);
+		PrintMessage(log, console, player, type, message, ex, st, top);
 		if(ex != null) {
 			// Otherwise, a CCE
 			if(ex.getCause() != null && ex.getCause() instanceof ConfigRuntimeException) {
@@ -284,7 +293,7 @@ public class ConfigRuntimeException extends RuntimeException {
 				if(!"".equals(nMessage.trim())) {
 					nMessage = ": " + nMessage;
 				}
-				PrintMessage(log, console, player, nType, nMessage, ex, newSt);
+				PrintMessage(log, console, player, nType, nMessage, ex, newSt, top);
 				ex = (ConfigRuntimeException) ex.getCause();
 			}
 		}

@@ -2,6 +2,7 @@ package com.laytonsmith.abstraction.events;
 
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.entities.MCFishHook;
+import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCFishingState;
 
 public interface MCPlayerFishEvent extends MCPlayerEvent {
@@ -15,4 +16,7 @@ public interface MCPlayerFishEvent extends MCPlayerEvent {
 	MCFishingState getState();
 
 	void setExpToDrop(int exp);
+
+	MCEquipmentSlot getHand();
+
 }

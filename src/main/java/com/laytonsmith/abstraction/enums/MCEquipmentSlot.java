@@ -9,5 +9,7 @@ public enum MCEquipmentSlot {
 	BOOTS,
 	LEGGINGS,
 	CHESTPLATE,
-	HELMET
+	HELMET,
+	BODY,
+	SADDLE,
 }

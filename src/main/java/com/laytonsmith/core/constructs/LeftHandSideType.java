@@ -5,6 +5,7 @@ import com.laytonsmith.PureUtilities.Either;
 import com.laytonsmith.PureUtilities.ObjectHelpers;
 import com.laytonsmith.PureUtilities.Pair;
 import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.constructs.generics.ConcreteGenericParameter;
 import com.laytonsmith.core.constructs.generics.ConstraintLocation;
@@ -586,10 +587,10 @@ public final class LeftHandSideType extends Construct implements SourceType {
 	 * @return
 	 */
 	public CClassType asConcreteType(Target t) throws CREIllegalArgumentException {
-		String exMsg = "Cannot use the type \"" + getSimpleName() + "\" in this context.";
+		MSLog.StringProvider exMsg = () -> "Cannot use the type \"" + getSimpleName() + "\" in this context.";
 		ConcreteGenericParameter type = types.get(0);
 		if(type.getLeftHandGenericUse() != null && !type.getLeftHandGenericUse().getConstraints().isEmpty()) {
-			throw new CREIllegalArgumentException(exMsg, t);
+			throw new CREIllegalArgumentException(exMsg.getString(), t);
 		}
 		return type.getType();
 	}

@@ -100,12 +100,13 @@ public class Cmdline {
 		@Override
 		public CVoid exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String msg = Static.MCToANSIColors(args[0].val());
-			StreamUtils.GetSystemOut().print(msg);
+			PrintStream out = StreamUtils.GetSystemOut();
+			out.print(msg);
 			if(msg.contains("\033")) {
 				//We have color codes in it, we need to reset them
-				StreamUtils.GetSystemOut().print(TermColors.reset());
+				out.print(TermColors.reset());
 			}
-			StreamUtils.GetSystemOut().println();
+			out.println();
 			return CVoid.VOID;
 		}
 
@@ -248,7 +249,7 @@ public class Cmdline {
 		public String docs() {
 			return "void {text} Writes the text to the system's std out, but does not automatically add a newline at the end."
 					+ " Unlike console(), this does not use anything else to format the output, though in many"
-					+ " cases they will behave the same. Unlike other print methdods, colors and other formatting characters WILL"
+					+ " cases they will behave the same. Unlike other print methods, colors and other formatting characters WILL"
 					+ " \"bleed\" through, so"
 					+ " print_out(color(RED) . 'This is red') will also cause the next line to also be red,"
 					+ " so if you need to print multiple lines out, you should manually reset the color with print_out(color(RESET)),"
@@ -304,7 +305,7 @@ public class Cmdline {
 		public String docs() {
 			return "void {text} Writes the text to the system's std err, but does not automatically add a newline at the end."
 					+ " Unlike console(), this does not use anything else to format the output, though in many"
-					+ " cases they will behave the same. Unlike other print methdods, colors and other formatting characters WILL"
+					+ " cases they will behave the same. Unlike other print methods, colors and other formatting characters WILL"
 					+ " \"bleed\" through, so"
 					+ " print_err(color(RED) . 'This is red') will also cause the next line to also be red,"
 					+ " so if you need to print multiple lines out, you should manually reset the color with print_out(color(RESET)),"
@@ -954,7 +955,8 @@ public class Cmdline {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREInsufficientPermissionException.class, CREIOException.class};
+			return new Class[]{CREInsufficientPermissionException.class,
+					CREIOException.class, CREIllegalArgumentException.class};
 		}
 
 		@Override
@@ -991,6 +993,9 @@ public class Cmdline {
 				}
 			} else {
 				command = StringUtils.ArgParser(args[0].val()).toArray(new String[0]);
+			}
+			if(command.length == 0) {
+				throw new CREIllegalArgumentException("Empty command passed to " + this.getName() + "().", t);
 			}
 			if(args.length > 1) {
 				CArray options = ArgumentValidation.getArray(args[1], t, env);
@@ -1126,7 +1131,9 @@ public class Cmdline {
 		public String docs() {
 			return "void {command, [options]} Runs a shell command. <code>command</code> can either be a string or an array of string arguments,"
 					+ " which are run as an external process. Requires the allow-shell-commands option to be enabled in preferences, or run from command line, otherwise"
-					+ " an InsufficientPermissionException is thrown. ---- <code>options</code> is an associative array with zero or more"
+					+ " an InsufficientPermissionException is thrown."
+					+ "When the passed command results in an empty shell command, an IllegalArgumentException is thrown."
+					+ " ---- <code>options</code> is an associative array with zero or more"
 					+ " of the following options:\n\n"
 					+ "{| border=\"1\" class=\"wikitable\" cellspacing=\"1\" cellpadding=\"1\"\n"
 					+ "|-\n| workingDir || Sets the working directory for"
@@ -1156,7 +1163,8 @@ public class Cmdline {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREInsufficientPermissionException.class, CREShellException.class, CREIOException.class};
+			return new Class[]{CREInsufficientPermissionException.class,
+					CREShellException.class, CREIOException.class, CREIllegalArgumentException.class};
 		}
 
 		@Override
@@ -1190,6 +1198,9 @@ public class Cmdline {
 				}
 			} else {
 				command = StringUtils.ArgParser(args[0].val()).toArray(new String[0]);
+			}
+			if(command.length == 0) {
+				throw new CREIllegalArgumentException("Empty command passed to " + this.getName() + "().", t);
 			}
 			if(args.length > 1) {
 				CArray options = ArgumentValidation.getArray(args[1], t, env);
@@ -1262,7 +1273,9 @@ public class Cmdline {
 					+ " that return output and don't need very complicated usage, and failures don't need to check the exact error code."
 					+ " If the underlying command throws an IOException, it is"
 					+ " passed through. Requires the allow-shell-commands option to be enabled in preferences, or run from command line, otherwise"
-					+ " an InsufficientPermissionException is thrown. Options is an associative array which expects zero or more"
+					+ " an InsufficientPermissionException is thrown."
+					+ " When the passed command results in an empty shell command, an IllegalArgumentException is thrown."
+					+ " Options is an associative array which expects zero or more"
 					+ " of the following options: expectedErrorCode - The expected error code indicating successful command completion. Defaults to 0."
 					+ " workingDir - Sets the working directory for the sub process. By default null, which represents the directory of this script."
 					+ " If the path is relative, it is relative to the directory of this script.";

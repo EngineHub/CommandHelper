@@ -96,6 +96,9 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 
 	/**
 	 * Gets the return type of this function, based on the types of the passed arguments.
+	 * 
+	 * Implementation note: If you extend AbstractFunction and implement getSignatures, you don't need to implement this
+	 * method, the return type is pulled from the FunctionSignatures object.
 	 *
 	 * @param node The function node. Used to pull out explicit generic parameters, or set them, if they are inferred.
 	 * @param t The code target, used for setting the code target in thrown exceptions.

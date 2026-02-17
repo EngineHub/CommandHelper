@@ -19,7 +19,7 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.core.taskmanager.TaskManager;
 import com.laytonsmith.persistence.PersistenceNetwork;
-import com.laytonsmith.testing.StaticTest;
+import com.laytonsmith.testing.AbstractIntegrationTest;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -40,7 +40,7 @@ import static org.junit.Assert.fail;
 /**
  *
  */
-public class ObjectDefinitionTableTest {
+public class ObjectDefinitionTableTest extends AbstractIntegrationTest {
 
 	Environment env;
 	static Set<Class<? extends Environment.EnvironmentImpl>> envs = Environment.getDefaultEnvClasses();
@@ -62,8 +62,6 @@ public class ObjectDefinitionTableTest {
 
 	@Before
 	public void Before() {
-		StaticTest.InstallFakeServerFrontend();
-
 		ExecutionQueue executionQueue = Mockito.mock(ExecutionQueue.class, (invocation) -> {
 			throw new AssertionError("Interaction with the execution queue is not supported in this test.");
 		});

@@ -536,6 +536,8 @@ public class ExtensionManager {
 		} catch (Throwable e) {
 			// Prefs weren't loaded, probably caused by running tests.
 		}
+
+		OnLoad();
 	}
 
 	/**
@@ -578,6 +580,24 @@ public class ExtensionManager {
 //				StreamUtils.GetSystemOut().println("[CommandHelper] Could not delete loose file "
 //						+ f.getAbsolutePath() + ": " + ex.getMessage());
 //			}
+		}
+	}
+
+	/**
+	 * This should be run once, on server first startup.
+	 */
+	public static void OnLoad() {
+		for(ExtensionTracker trk : EXTENSIONS.values()) {
+			for(Extension ext : trk.getExtensions()) {
+				try {
+					ext.onLoad();
+				} catch (Throwable e) {
+					Logger log = Static.getLogger();
+					log.log(Level.SEVERE, ext.getClass().getName()
+							+ "'s onStartup caused an exception:");
+					log.log(Level.SEVERE, StackTraceUtils.GetStacktrace(e));
+				}
+			}
 		}
 	}
 

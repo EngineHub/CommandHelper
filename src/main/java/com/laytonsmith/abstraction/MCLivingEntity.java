@@ -9,7 +9,7 @@ import com.laytonsmith.core.constructs.Target;
 import java.util.HashSet;
 import java.util.List;
 
-public interface MCLivingEntity extends MCEntity, MCProjectileSource {
+public interface MCLivingEntity extends MCEntity, MCLeashable, MCProjectileSource {
 
 	boolean addEffect(MCPotionEffectType type, int strength, int ticks, boolean ambient, boolean particles, boolean icon);
 
@@ -43,9 +43,9 @@ public interface MCLivingEntity extends MCEntity, MCProjectileSource {
 
 	MCPlayer getKiller();
 
-	double getLastDamage();
+	void setKiller(MCPlayer killer);
 
-	MCEntity getLeashHolder();
+	double getLastDamage();
 
 	MCLivingEntity getTarget(Target t);
 
@@ -67,8 +67,6 @@ public interface MCLivingEntity extends MCEntity, MCProjectileSource {
 
 	boolean isGliding();
 
-	boolean isLeashed();
-
 	boolean hasAI();
 
 	void resetMaxHealth();
@@ -80,8 +78,6 @@ public interface MCLivingEntity extends MCEntity, MCProjectileSource {
 	void setHealth(double health);
 
 	void setLastDamage(double damage);
-
-	void setLeashHolder(MCEntity holder);
 
 	void setMaxHealth(double health);
 

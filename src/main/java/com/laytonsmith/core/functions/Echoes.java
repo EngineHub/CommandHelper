@@ -1,5 +1,8 @@
 package com.laytonsmith.core.functions;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonIOException;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.TermColors;
@@ -19,6 +22,7 @@ import com.laytonsmith.core.compiler.signature.SignatureBuilder;
 import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
@@ -29,6 +33,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREIOException;
 import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
 import com.laytonsmith.core.exceptions.CRE.CRELengthException;
 import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
@@ -183,11 +188,12 @@ public class Echoes {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso(PlayerManagement.ptellraw.class)
 	public static class tellraw extends AbstractFunction {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class};
+			return new Class[]{CRECastException.class, CREFormatException.class, CREIOException.class};
 		}
 
 		@Override
@@ -204,13 +210,24 @@ public class Echoes {
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String selector = "@a";
 			String json;
-			if(args.length == 1) {
-				json = new DataTransformations.json_encode().exec(t, env, null, args[0]).val();
-			} else {
-				selector = ArgumentValidation.getString(args[0], t);
-				json = new DataTransformations.json_encode().exec(t, env, null, args[1]).val();
+			try {
+				Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+				if(args.length == 1) {
+					json = gson.toJson(Construct.GetPOJO(args[0], env));
+				} else {
+					selector = ArgumentValidation.getString(args[0], t);
+					json = gson.toJson(Construct.GetPOJO(args[1], env));
+				}
+			} catch(ClassCastException ex) {
+				throw new CRECastException(ex.getMessage(), t);
+			} catch(JsonIOException ex) {
+				throw new CREIOException(ex.getMessage(), t);
 			}
-			Static.getServer().runasConsole("minecraft:tellraw " + selector + " " + json);
+			try {
+				Static.getServer().runasConsole("minecraft:tellraw " + selector + " " + json);
+			} catch(Exception ex) {
+				throw new CREFormatException(ex.getMessage(), t, ex.getCause());
+			}
 			return CVoid.VOID;
 		}
 
@@ -227,14 +244,15 @@ public class Echoes {
 		@Override
 		public String docs() {
 			return "void {[string selector], array raw} A thin wrapper around the tellraw command from console context,"
-					+ " this simply passes the input to the command. The raw is passed in as a normal"
-					+ " (possibly associative) array, and json encoded. No validation is done on the input, so the"
-					+ " command may fail. If not provided, the selector defaults to @a. Do not use double quotes"
-					+ " (smart string) when providing the selector. See {{function|ptellraw}} if you need player"
-					+ " context. ---- The specification of the array may change from version to version of Minecraft,"
-					+ " but is documented here https://minecraft.gamepedia.com/Commands#Raw_JSON_text."
-					+ " This function is simply written in terms of json_encode and runas, and is otherwise equivalent"
-					+ " to runas('~console', '/minecraft:tellraw ' . @selector . ' ' . json_encode(@raw))";
+					+ " this simply passes the input to the command. The raw is passed in as an array and json encoded."
+					+ " No validation is done on the input, so the command may fail."
+					+ " Do not use double quotes (smart string) when providing the selector."
+					+ " If not provided, the selector defaults to @a. See {{function|ptellraw}} if you need the @s"
+					+ " selector with player context. ---- The specification of the array may change from version to"
+					+ " version of Minecraft, but is documented here: https://minecraft.wiki/w/Text_component_format."
+					+ " This function is roughly equivalent to"
+					+ " runas('~console', '/tellraw '.@selector.' '.json_encode(@raw))"
+					+ " but uses the Gson serializer instead.";
 		}
 
 		@Override
@@ -247,7 +265,10 @@ public class Echoes {
 			return new ExampleScript[] {
 				new ExampleScript("Simple usage with a plain message",
 						"tellraw(array('text': 'Hello World!'));",
-						"<<Would output the plain message to all players.>>")
+						"<<Would output the plain message to all players.>>"),
+				new ExampleScript("Using a selector",
+						"tellraw('@a[gamemode=spectator]', array('text': 'Hello World!'));",
+						"<<Would output the message to all spectators.>>")
 			};
 		}
 
@@ -318,6 +339,53 @@ public class Echoes {
 
 			player.sendTitle(Construct.nval(args[offset]), Construct.nval(args[1 + offset]), fadein, stay, fadeout);
 			return CVoid.VOID;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class action_msg extends AbstractFunction {
+
+		public String getName() {
+			return "action_msg";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		public String docs() {
+			return "void {[player], message} Sends a message to the action bar above the hot bar.";
+		}
+
+		public Construct exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer player;
+			String message;
+			if(args.length == 2) {
+				player = Static.GetPlayer(args[0], t);
+				message = args[1].val();
+			} else {
+				player = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(player, t);
+				message = args[0].val();
+			}
+			player.sendActionMessage(message);
+			return CVoid.VOID;
+		}
+
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CRELengthException.class};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public MSVersion since() {
+			return MSVersion.V3_3_5;
 		}
 	}
 
@@ -642,7 +710,7 @@ public class Echoes {
 			final MCServer server = Static.getServer();
 
 			// Handle "broadcast(message, [null])".
-			if(args.length == 1 || Construct.nval(args[1]) == null) { // args.length can only be 1 or 2 due to the numArgs().
+			if(args.length == 1 || args[1] instanceof CNull) {
 				server.broadcastMessage(args[0].val());
 				return CVoid.VOID;
 			}

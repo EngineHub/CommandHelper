@@ -11,6 +11,7 @@ import com.laytonsmith.core.constructs.generics.GenericTypeParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREReadOnlyException;
+import com.laytonsmith.core.exceptions.CRE.CREUnsupportedOperationException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.natives.interfaces.Mixed;
@@ -22,6 +23,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
@@ -113,7 +115,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 		maxValue = Math.max(maxValue, spos + need);
 		//Reallocate if needed
 		if(spos + need >= data.limit()) {
-			int newSize = data.limit() * SCALE_MULTIPLIER;
+			int newSize = Math.max(data.limit() * SCALE_MULTIPLIER, spos + need);
 			if(newSize <= 0) {
 				//Protect from this happening
 				newSize = 1;
@@ -122,8 +124,9 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 			int position = data.position();
 			data.rewind();
 			temp.put(data);
+			temp.order(data.order());
+			temp.position(position);
 			data = temp;
-			data.position(position);
 		}
 		value = null;
 	}
@@ -515,8 +518,48 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	}
 
 	@Override
+	protected List<Mixed> getArray() {
+		throw new CREUnsupportedOperationException("Getting backing array from a byte array is not supported.", getTarget());
+	}
+
+	@Override
+	public List<Mixed> asList() {
+		throw new CREUnsupportedOperationException("Getting a list from a byte array is not supported.", getTarget());
+	}
+
+	@Override
+	protected SortedMap<String, Mixed> getAssociativeArray() {
+		throw new CREUnsupportedOperationException("Getting an associative array from a byte array is not supported.", getTarget());
+	}
+
+	@Override
+	public boolean inAssociativeMode() {
+		return false;
+	}
+
+	@Override
+	public void reverse(Target t) {
+		throw new CREUnsupportedOperationException("Reversing a byte array is not supported.", t);
+	}
+
+	@Override
+	public void push(Mixed c, Integer index, Target t, Environment env) throws IllegalArgumentException, IndexOutOfBoundsException {
+		throw new CREUnsupportedOperationException("Modifying a byte array using array_push() is not supported.", t);
+	}
+
+	@Override
 	public Set<Mixed> keySet(Environment env) {
-		throw new UnsupportedOperationException("Not supported.");
+		throw new CREUnsupportedOperationException("Getting a key set from a byte array is not supported.", getTarget());
+	}
+
+	@Override
+	public Set<String> stringKeySet() {
+		throw new CREUnsupportedOperationException("Getting a string key set from a byte array is not supported.", getTarget());
+	}
+
+	@Override
+	public void set(Mixed index, Mixed c, Target t) throws ConfigRuntimeException {
+		throw new CREUnsupportedOperationException("Modifying a byte array using array_set() is not supported.", t);
 	}
 
 	@Override
@@ -533,6 +576,51 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 		int i = ArgumentValidation.getInt32(index, t, env);
 		byte b = getByte(i);
 		return new CInt(b, t);
+	}
+
+	@Override
+	public boolean containsKey(String c) {
+		throw new CREUnsupportedOperationException("Checking for a key in a byte array is not supported.", getTarget());
+	}
+
+	@Override
+	public boolean contains(Mixed c) {
+		throw new CREUnsupportedOperationException("Checking for a value in a byte array is not supported.", c.getTarget());
+	}
+
+	@Override
+	public CArray indexesOf(Mixed value, Environment env) {
+		throw new CREUnsupportedOperationException("Getting indexes of a byte array is not supported.", value.getTarget());
+	}
+
+	@Override
+	public Mixed remove(Mixed construct) {
+		throw new CREUnsupportedOperationException("Removing a value from a byte array is not supported.", construct.getTarget());
+	}
+
+	@Override
+	public void removeValues(Mixed construct) {
+		throw new CREUnsupportedOperationException("Removing values from a byte array is not supported.", construct.getTarget());
+	}
+
+	@Override
+	public Iterator<Mixed> iterator() {
+		throw new CREUnsupportedOperationException("Iterating a byte array is not supported.", getTarget());
+	}
+
+	@Override
+	public void sort(final ArraySortType sort) {
+		throw new CREUnsupportedOperationException("Sorting a byte array is not supported.", getTarget());
+	}
+
+	@Override
+	public void clear() {
+		throw new CREUnsupportedOperationException("Clearing a byte array is not supported.", getTarget());
+	}
+
+	@Override
+	public void ensureCapacity(int capacity) {
+		throw new CREUnsupportedOperationException("Ensuring capacity in a byte array is not supported.", getTarget());
 	}
 
 	@Override

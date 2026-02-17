@@ -1,7 +1,6 @@
 package com.laytonsmith.abstraction.entities;
 
 import com.laytonsmith.PureUtilities.Vector3D;
-import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.enums.MCBodyPart;
 
 import java.util.Map;
@@ -20,76 +19,6 @@ public interface MCArmorStand {
 	 * @param posemap A map of body part keys and angle vector values
 	 */
 	void setAllPoses(Map<MCBodyPart, Vector3D> posemap);
-
-	/**
-	 * Returns the item the armor stand is currently holding
-	 *
-	 * @return the held item
-	 */
-	MCItemStack getItemInHand();
-
-	/**
-	 * Sets the item the armor stand is currently holding
-	 *
-	 * @param item the item to hold
-	 */
-	void setItemInHand(MCItemStack item);
-
-	/**
-	 * Returns the item currently being worn by the armor stand on its feet
-	 *
-	 * @return the worn item
-	 */
-	MCItemStack getBoots();
-
-	/**
-	 * Sets the item currently being worn by the armor stand on its feet
-	 *
-	 * @param item the item to wear
-	 */
-	void setBoots(MCItemStack item);
-
-	/**
-	 * Returns the item currently being worn by the armor stand on its legs
-	 *
-	 * @return the worn item
-	 */
-	MCItemStack getLeggings();
-
-	/**
-	 * Sets the item currently being worn by the armor stand on its legs
-	 *
-	 * @param item the item to wear
-	 */
-	void setLeggings(MCItemStack item);
-
-	/**
-	 * Returns the item currently being worn by the armor stand on its chest
-	 *
-	 * @return the worn item
-	 */
-	MCItemStack getChestplate();
-
-	/**
-	 * Sets the item currently being worn by the armor stand on its chest
-	 *
-	 * @param item the item to wear
-	 */
-	void setChestplate(MCItemStack item);
-
-	/**
-	 * Returns the item currently being worn by the armor stand on its head
-	 *
-	 * @return the worn item
-	 */
-	MCItemStack getHelmet();
-
-	/**
-	 * Sets the item currently being worn by the armor stand on its head
-	 *
-	 * @param item the item to wear
-	 */
-	void setHelmet(MCItemStack item);
 
 	/**
 	 * Returns the armor stand's body's current pose as a 3D vector of doubles. Each component is the angle for that

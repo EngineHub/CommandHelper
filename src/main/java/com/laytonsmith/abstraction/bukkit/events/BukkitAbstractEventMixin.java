@@ -4,7 +4,7 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCServer;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.events.AbstractEvent;
+import com.laytonsmith.core.events.AbstractGenericEvent;
 import com.laytonsmith.core.events.BindableEvent;
 import com.laytonsmith.core.events.EventMixinInterface;
 import com.laytonsmith.core.exceptions.EventException;
@@ -26,9 +26,9 @@ import org.bukkit.event.world.WorldEvent;
 
 public class BukkitAbstractEventMixin implements EventMixinInterface {
 
-	AbstractEvent mySuper;
+	AbstractGenericEvent mySuper;
 
-	public BukkitAbstractEventMixin(AbstractEvent mySuper) {
+	public BukkitAbstractEventMixin(AbstractGenericEvent mySuper) {
 		this.mySuper = mySuper;
 	}
 

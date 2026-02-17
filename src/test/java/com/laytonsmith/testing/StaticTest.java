@@ -12,7 +12,6 @@ import com.laytonsmith.abstraction.MCAttributeModifier;
 import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCConsoleCommandSender;
-import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCFireworkBuilder;
 import com.laytonsmith.abstraction.MCInventory;
@@ -21,9 +20,11 @@ import com.laytonsmith.abstraction.MCItemMeta;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCMetadataValue;
+import com.laytonsmith.abstraction.MCNamespacedKey;
 import com.laytonsmith.abstraction.MCNote;
 import com.laytonsmith.abstraction.MCPattern;
 import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.MCPlayerInput;
 import com.laytonsmith.abstraction.MCPlugin;
 import com.laytonsmith.abstraction.MCPluginMeta;
 import com.laytonsmith.abstraction.MCPotionData;
@@ -34,9 +35,11 @@ import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
+import com.laytonsmith.abstraction.entities.MCTransformation;
 import com.laytonsmith.abstraction.enums.MCAttribute;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
+import com.laytonsmith.abstraction.enums.MCEquipmentSlotGroup;
 import com.laytonsmith.abstraction.enums.MCPatternShape;
 import com.laytonsmith.abstraction.enums.MCPotionType;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
@@ -66,7 +69,7 @@ import com.laytonsmith.core.constructs.generics.Constraints;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
-import com.laytonsmith.core.events.AbstractEvent;
+import com.laytonsmith.core.events.AbstractGenericEvent;
 import com.laytonsmith.core.events.BindableEvent;
 import com.laytonsmith.core.events.EventMixinInterface;
 import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
@@ -102,6 +105,8 @@ import java.util.TreeSet;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
@@ -111,7 +116,7 @@ import static org.mockito.Mockito.when;
  *
  *
  */
-public class StaticTest {
+public class StaticTest extends AbstractIntegrationTest {
 
 	static com.laytonsmith.core.environments.Environment env;
 	static Set<Class<? extends Environment.EnvironmentImpl>> envs = Environment.getDefaultEnvClasses();
@@ -509,6 +514,7 @@ public class StaticTest {
 		when(p.isOnline()).thenReturn(true);
 		when(p.getName()).thenReturn(name);
 		when(p.getServer()).thenReturn(s);
+		when(p.getCurrentInput()).thenReturn(mock(MCPlayerInput.class));
 		when(p.isOp()).thenReturn(true);
 		if(s != null && s.getOnlinePlayers() != null) {
 			Collection<MCPlayer> online = s.getOnlinePlayers();
@@ -582,7 +588,6 @@ public class StaticTest {
 	}
 
 	public static void Run(String script, MCCommandSender player, MethodScriptComplete done, Environment env) throws Exception {
-		InstallFakeServerFrontend();
 		if(env == null) {
 			env = StaticTest.env;
 		}
@@ -601,7 +606,6 @@ public class StaticTest {
 	}
 
 	public static void RunCommand(String combinedScript, MCCommandSender player, String command, Environment env) throws Exception {
-		InstallFakeServerFrontend();
 		if(env == null) {
 			env = StaticTest.env;
 		}
@@ -616,7 +620,6 @@ public class StaticTest {
 	}
 
 	public static String SRun(String script, MCCommandSender player, Environment env) throws Exception {
-		InstallFakeServerFrontend();
 		final StringBuffer b = new StringBuffer();
 		Run(script, player, new MethodScriptComplete() {
 
@@ -715,7 +718,6 @@ public class StaticTest {
 	 * @throws java.lang.Exception
 	 */
 	public static void InstallFakeConvertor(MCPlayer fakePlayer) throws Exception {
-		InstallFakeServerFrontend();
 		try {
 			//We need to add the test directory to the ClassDiscovery path
 			//This should probably not be hard coded at some point.
@@ -745,18 +747,6 @@ public class StaticTest {
 		@Override
 		public Class GetServerEventMixin() {
 			return FakeServerMixin.class;
-		}
-
-		@Override
-		public MCEnchantment[] GetEnchantmentValues() {
-			Convertor c = new BukkitConvertor();
-			return c.GetEnchantmentValues();
-		}
-
-		@Override
-		public MCEnchantment GetEnchantmentByName(String name) {
-			Convertor c = new BukkitConvertor();
-			return c.GetEnchantmentByName(name);
 		}
 
 		@Override
@@ -790,6 +780,21 @@ public class StaticTest {
 		@Override
 		public MCAttributeModifier GetAttributeModifier(MCAttribute attr, UUID id, String name, double amt, MCAttributeModifier.Operation op, MCEquipmentSlot slot) {
 			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public MCAttributeModifier GetAttributeModifier(MCAttribute attr, UUID id, String name, double amt, MCAttributeModifier.Operation op, MCEquipmentSlotGroup slot) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public MCAttributeModifier GetAttributeModifier(MCAttribute attr, MCNamespacedKey key, double amt, MCAttributeModifier.Operation op, MCEquipmentSlot slot) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public MCAttributeModifier GetAttributeModifier(MCAttribute attr, MCNamespacedKey key, double amt, MCAttributeModifier.Operation op, MCEquipmentSlotGroup slot) {
+			throw new UnsupportedOperationException();
 		}
 
 		@Override
@@ -844,6 +849,11 @@ public class StaticTest {
 			return new MCColor() {
 
 				@Override
+				public int getAlpha() {
+					return 255;
+				}
+
+				@Override
 				public int getRed() {
 					return red;
 				}
@@ -861,6 +871,47 @@ public class StaticTest {
 				@Override
 				public MCColor build(int red, int green, int blue) {
 					return GetColor(red, green, blue);
+				}
+
+				@Override
+				public MCColor build(int alpha, int red, int green, int blue) {
+					return GetColor(red, green, blue, alpha);
+				}
+			};
+		}
+
+		@Override
+		public MCColor GetColor(final int red, final int green, final int blue, final int alpha) {
+			return new MCColor() {
+
+				@Override
+				public int getAlpha() {
+					return alpha;
+				}
+
+				@Override
+				public int getRed() {
+					return red;
+				}
+
+				@Override
+				public int getGreen() {
+					return green;
+				}
+
+				@Override
+				public int getBlue() {
+					return blue;
+				}
+
+				@Override
+				public MCColor build(int red, int green, int blue) {
+					return GetColor(red, green, blue);
+				}
+
+				@Override
+				public MCColor build(int alpha, int red, int green, int blue) {
+					return GetColor(red, green, blue, alpha);
 				}
 			};
 		}
@@ -944,6 +995,22 @@ public class StaticTest {
 		public String GetUser(Environment env) {
 			return "testUser";
 		}
+
+		@Override
+		public MCNamespacedKey GetNamespacedKey(String key) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public MCTransformation GetTransformation(Quaternionf leftRotation, Quaternionf rightRotation, Vector3f scale, Vector3f translation) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public boolean IsMainThread() {
+			return false;
+		}
+
 	}
 
 	public static class FakeServerMixin implements EventMixinInterface {
@@ -951,7 +1018,7 @@ public class StaticTest {
 		public static MCPlayer fakePlayer;
 		public boolean cancelled = false;
 
-		public FakeServerMixin(AbstractEvent e) {
+		public FakeServerMixin(AbstractGenericEvent e) {
 
 		}
 

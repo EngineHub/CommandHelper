@@ -1,8 +1,6 @@
 package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.PureUtilities.Version;
-import com.laytonsmith.abstraction.Implementation;
-import com.laytonsmith.abstraction.Implementation.Type;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.Static;
@@ -25,11 +23,12 @@ import com.laytonsmith.core.objects.AccessModifier;
 import com.laytonsmith.core.objects.ObjectModifier;
 import com.laytonsmith.core.objects.ObjectType;
 import com.laytonsmith.testing.StaticTest;
+import com.laytonsmith.testing.AbstractIntegrationTest;
 import org.junit.Before;
 
-import static com.laytonsmith.testing.StaticTest.InstallFakeServerFrontend;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.net.URL;
@@ -37,14 +36,12 @@ import java.util.EnumSet;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 /**
  *
  */
-public class InstanceofUtilTest {
+public class InstanceofUtilTest extends AbstractIntegrationTest {
 
 	Environment env;
 
@@ -53,11 +50,6 @@ public class InstanceofUtilTest {
 		env = Static.GenerateStandaloneEnvironment();
 	}
 
-	@BeforeClass
-	public static void setUpClass() {
-		Implementation.setServerType(Type.TEST);
-		InstallFakeServerFrontend();
-	}
 
 	@Test
 	public void testInstanceofUtil() throws Exception {

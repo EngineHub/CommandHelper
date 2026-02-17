@@ -1,5 +1,6 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
+import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.abstraction.MCAttributeModifier;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCEntityEquipment;
@@ -8,7 +9,6 @@ import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
-import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCAttributeModifier;
 import com.laytonsmith.abstraction.bukkit.BukkitMCEntityEquipment;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
@@ -16,7 +16,6 @@ import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import com.laytonsmith.abstraction.enums.MCAttribute;
 import com.laytonsmith.abstraction.enums.MCPotionEffectType;
 import com.laytonsmith.abstraction.enums.MCVersion;
-import com.laytonsmith.abstraction.enums.bukkit.BukkitMCAttribute;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPotionEffectType;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
@@ -26,11 +25,15 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.block.Block;
+import org.bukkit.damage.DamageSource;
+import org.bukkit.damage.DamageType;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.BlockIterator;
@@ -62,7 +65,8 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 
 	@Override
 	public double getMaxHealth() {
-		AttributeInstance maxHealth = le.getAttribute(Attribute.GENERIC_MAX_HEALTH);
+		Attribute attribute = (Attribute) MCAttribute.valueOf("GENERIC_MAX_HEALTH").getConcrete();
+		AttributeInstance maxHealth = le.getAttribute(attribute);
 		if(maxHealth == null) {
 			return le.getHealth();
 		}
@@ -71,7 +75,8 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 
 	@Override
 	public void setMaxHealth(double health) {
-		AttributeInstance maxHealth = le.getAttribute(Attribute.GENERIC_MAX_HEALTH);
+		Attribute attribute = (Attribute) MCAttribute.valueOf("GENERIC_MAX_HEALTH").getConcrete();
+		AttributeInstance maxHealth = le.getAttribute(attribute);
 		if(maxHealth == null) {
 			le.setHealth(health);
 			return;
@@ -84,7 +89,8 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 
 	@Override
 	public void resetMaxHealth() {
-		AttributeInstance maxHealth = le.getAttribute(Attribute.GENERIC_MAX_HEALTH);
+		Attribute attribute = (Attribute) MCAttribute.valueOf("GENERIC_MAX_HEALTH").getConcrete();
+		AttributeInstance maxHealth = le.getAttribute(attribute);
 		if(maxHealth == null) {
 			return;
 		}
@@ -127,6 +133,19 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 			return null;
 		}
 		return new BukkitMCPlayer(killer);
+	}
+
+	@Override
+	public void setKiller(MCPlayer killer) {
+		try {
+			if(killer == null) {
+				le.setKiller(null);
+			} else {
+				le.setKiller((Player) killer.getHandle());
+			}
+		} catch(NoSuchMethodError ignore) {
+			// probably not Paper
+		}
 	}
 
 	@Override
@@ -225,7 +244,7 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 	@Override
 	public boolean addEffect(MCPotionEffectType type, int strength, int ticks, boolean ambient, boolean particles, boolean icon) {
 		if(ticks < 0) {
-			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_X)) {
+			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_4)) {
 				ticks = -1;
 			} else {
 				ticks = Integer.MAX_VALUE;
@@ -294,10 +313,11 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 
 	@Override
 	public MCEntityEquipment getEquipment() {
-		if(le.getEquipment() == null) {
+		EntityEquipment eq = le.getEquipment();
+		if(eq == null) {
 			return null;
 		}
-		return new BukkitMCEntityEquipment(le.getEquipment());
+		return new BukkitMCEntityEquipment(eq);
 	}
 
 	@Override
@@ -346,16 +366,21 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 
 	@Override
 	public void kill() {
-		le.setLastDamageCause(new EntityDamageEvent(le, EntityDamageEvent.DamageCause.CUSTOM, le.getHealth()));
-		le.setHealth(0D);
+		try {
+			le.damage(le.getHealth(), DamageSource.builder(DamageType.GENERIC_KILL).build());
+		} catch (NoClassDefFoundError | NoSuchMethodError ex) {
+			// probably before 1.20.4
+			EntityDamageEvent event = ReflectionUtils.newInstance(EntityDamageEvent.class,
+					new Class[]{Entity.class, DamageCause.class, double.class},
+					new Object[]{le, EntityDamageEvent.DamageCause.CUSTOM, le.getHealth()});
+			ReflectionUtils.invokeMethod(le, "setLastDamageCause", event);
+			le.setHealth(0);
+		}
 	}
 
 	@Override
 	public MCEntity getLeashHolder() {
-		if(le.isLeashed()) {
-			return BukkitConvertor.BukkitGetCorrectEntity(le.getLeashHolder());
-		}
-		return null;
+		return new BukkitMCEntity(le.getLeashHolder());
 	}
 
 	@Override
@@ -403,7 +428,7 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 	}
 
 	private AttributeInstance getAttributeInstance(MCAttribute attr) {
-		AttributeInstance instance = le.getAttribute(BukkitMCAttribute.getConvertor().getConcreteEnum(attr));
+		AttributeInstance instance = le.getAttribute((Attribute) attr.getConcrete());
 		if(instance == null) {
 			throw new IllegalArgumentException("This attribute is not applicable to this entity type.");
 		}
@@ -438,7 +463,7 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 
 	@Override
 	public List<MCAttributeModifier> getAttributeModifiers(MCAttribute attr) {
-		Attribute bukkitAttribute = BukkitMCAttribute.getConvertor().getConcreteEnum(attr);
+		Attribute bukkitAttribute = (Attribute) attr.getConcrete();
 		AttributeInstance instance = le.getAttribute(bukkitAttribute);
 		if(instance == null) {
 			throw new IllegalArgumentException("This attribute is not applicable to this entity type.");

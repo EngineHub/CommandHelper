@@ -50,9 +50,12 @@
 						}
 					}
 				}
-				if(showRecommended && first) {
+				if(showRecommended && first && !version.poisoned) {
 					html += " (Recommended)";
 					first = false;
+				}
+				if(version.poisoned) {
+					html += " (Bad build)";
 				}
 				html += "</li>";
 			}

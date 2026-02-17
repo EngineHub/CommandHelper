@@ -1,5 +1,6 @@
 package com.laytonsmith.core.constructs;
 
+import com.laytonsmith.PureUtilities.Common.Annotations.AggressiveDeprecation;
 import com.laytonsmith.PureUtilities.Common.ArrayUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
@@ -16,6 +17,7 @@ import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREIndexOverflowException;
 import com.laytonsmith.core.exceptions.CRE.CREUnsupportedOperationException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.natives.interfaces.ArrayAccessSet;
 import com.laytonsmith.core.natives.interfaces.Booleanish;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 
@@ -25,13 +27,14 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
- * This data type is meant to be used for low level systems programming. The API doesn't use it directly, though in
- * the interpreter implementation, it does use an actual fixed size array. For native code, however, this uses native
- * fixed size arrays, which assists with code mapping and is a required primitive for bootstrapping purposes.
+ * This data type is meant to be used for low level systems programming. The API doesn't use it directly, though in the
+ * interpreter implementation, it does use an actual fixed size array. For native code, however, this uses native fixed
+ * size arrays, which assists with code mapping and is a required primitive for bootstrapping purposes.
  */
 @typeof("ms.lang.fixed_array")
 public class CFixedArray extends Construct implements
-		java.lang.Iterable<Mixed>, Booleanish, com.laytonsmith.core.natives.interfaces.Iterable {
+		java.lang.Iterable<Mixed>, Booleanish, com.laytonsmith.core.natives.interfaces.Iterable,
+		ArrayAccessSet {
 
 	private static final GenericDeclaration GEN = new GenericDeclaration(Target.UNKNOWN,
 			new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
@@ -94,6 +97,19 @@ public class CFixedArray extends Construct implements
 		}
 	}
 
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
+	public void set(Mixed index, Mixed value, Target t) {
+		set(index, value, t, null);
+	}
+
+	@Override
+	public void set(Mixed index, Mixed value, Target t, Environment env) {
+		int in = ArgumentValidation.getInt32(index, t, env);
+		set(in, value, t, env);
+	}
+
 	public void set(int index, Mixed value, Target t, Environment env) {
 		validateSet(value, t, env);
 		if(index >= data.length || index < 0) {
@@ -139,7 +155,8 @@ public class CFixedArray extends Construct implements
 
 	@Override
 	public CClassType[] getInterfaces() {
-		return new CClassType[]{Booleanish.TYPE, com.laytonsmith.core.natives.interfaces.Iterable.TYPE};
+		return new CClassType[]{Booleanish.TYPE, com.laytonsmith.core.natives.interfaces.Iterable.TYPE,
+			ArrayAccessSet.TYPE};
 	}
 
 	@Override

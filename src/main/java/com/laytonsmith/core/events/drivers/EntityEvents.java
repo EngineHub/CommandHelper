@@ -25,7 +25,7 @@ import com.laytonsmith.abstraction.enums.MCRegainReason;
 import com.laytonsmith.abstraction.enums.MCRemoveCause;
 import com.laytonsmith.abstraction.enums.MCSpawnReason;
 import com.laytonsmith.abstraction.enums.MCTargetReason;
-import com.laytonsmith.abstraction.enums.MCUnleashReason;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.events.MCCreatureSpawnEvent;
 import com.laytonsmith.abstraction.events.MCEntityChangeBlockEvent;
 import com.laytonsmith.abstraction.events.MCEntityDamageByEntityEvent;
@@ -38,6 +38,7 @@ import com.laytonsmith.abstraction.events.MCEntityPortalEvent;
 import com.laytonsmith.abstraction.events.MCEntityRegainHealthEvent;
 import com.laytonsmith.abstraction.events.MCEntityTargetEvent;
 import com.laytonsmith.abstraction.events.MCEntityToggleGlideEvent;
+import com.laytonsmith.abstraction.events.MCEntityToggleSwimEvent;
 import com.laytonsmith.abstraction.events.MCEntityUnleashEvent;
 import com.laytonsmith.abstraction.events.MCEntityPotionEffectEvent;
 import com.laytonsmith.abstraction.events.MCFireworkExplodeEvent;
@@ -67,6 +68,7 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.AbstractEvent;
+import com.laytonsmith.core.events.AbstractGenericEvent;
 import com.laytonsmith.core.events.BindableEvent;
 import com.laytonsmith.core.events.BoundEvent;
 import com.laytonsmith.core.events.BoundEvent.ActiveEvent;
@@ -74,6 +76,9 @@ import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventBuilder;
 import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
+import com.laytonsmith.core.events.prefilters.OptionalPlayerPrefilterMatcher;
+import com.laytonsmith.core.events.prefilters.PrefilterBuilder;
+import com.laytonsmith.core.events.prefilters.StringICPrefilterMatcher;
 import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
 import com.laytonsmith.core.exceptions.CRE.CREBindException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
@@ -383,14 +388,14 @@ public class EntityEvents {
 
 		@Override
 		public String docs() {
-			return "{id: <macro> The entityID | type: <macro> the entity type of the projectile"
+			return "{id: <macro> The UUID of the projectile | type: <macro> the entity type of the projectile"
 					+ " | hittype: <string match> the type of object hit, either ENTITY or BLOCK}"
 					+ " Fires when a projectile collides with something."
-					+ " {type | id: the entityID of the projectile |"
-					+ " location: where it makes contact | shooter | hittype | hit: the entity id or block"
-					+ " location array of the hit object.}"
+					+ " {type | id | location: the projectile's location upon impact"
+					+ " | shooter | hittype | hit: the entity id or block location array of the hit object."
+					+ " | hitface: the face that was hit on the block, if a block was hit}"
 					+ " {shooter: the entityID of the mob/player that fired"
-					+ " the projectile, or null if it is from a dispenser}"
+					+ " the projectile, or location array if it is from a dispenser}"
 					+ " {id}";
 		}
 
@@ -451,6 +456,7 @@ public class EntityEvents {
 			if(hitblock != null) {
 				ret.put("hit", ObjectGenerator.GetGenerator().location(hitblock.getLocation(), false, env));
 				ret.put("hittype", new CString("BLOCK", t));
+				ret.put("hitface", new CString(e.getHitFace().name(), t));
 			} else {
 				MCEntity hitentity = e.getHitEntity();
 				if(hitentity != null) {
@@ -734,7 +740,19 @@ public class EntityEvents {
 
 		@Override
 		public String docs() {
-			return "{type: <macro> | reason: <macro> One of " + StringUtils.Join(MCSpawnReason.values(), ", ", ", or ", " or ") + "}"
+			StringBuilder reasons = new StringBuilder();
+			for(MCSpawnReason value : MCSpawnReason.values()) {
+				if(!reasons.isEmpty()) {
+					reasons.append(", ");
+				}
+				reasons.append(value.name());
+				if(value.getImplementation() != null) {
+					reasons.append(" (");
+					reasons.append(value.getImplementation());
+					reasons.append(")");
+				}
+			}
+			return "{type: <macro> | reason: <macro> One of " + reasons + "}"
 					+ " Fired when a living entity spawns on the server."
 					+ " {type: the type of creature spawning | id: the entityID of the creature"
 					+ " | reason: the reason this creature is spawning | location: locationArray of the event}"
@@ -837,6 +855,7 @@ public class EntityEvents {
 					+ " | cause: The type of damage | amount | finalamount: health entity will lose after modifiers"
 					+ " | damager: If the source of damage is a player this will contain their name, otherwise it will be"
 					+ " the entityID of the damager (only available when an entity causes damage)"
+					+ " | damagertype: The type of entity that caused the damage, if there's a damager."
 					+ " | shooter: The name of the player who shot, otherwise the entityID"
 					+ " (only available when damager is a projectile)}"
 					+ " {amount: raw amount of damage (in half hearts)}"
@@ -1767,6 +1786,7 @@ public class EntityEvents {
 				} else {
 					map.put("damager", new CString(damager.getUniqueId().toString(), Target.UNKNOWN));
 				}
+				map.put("damagertype", new CString(damager.getType().name(), Target.UNKNOWN));
 				if(damager instanceof MCProjectile) {
 					MCProjectileSource shooter = ((MCProjectile) damager).getShooter();
 					if(shooter instanceof MCPlayer) {
@@ -1876,12 +1896,16 @@ public class EntityEvents {
 
 		@Override
 		public String docs() {
-			return "{type: <macro> The entity type of the entity | player: <macro> The player triggering the event"
+			return "{type: <macro> The type of hanging entity | player: <macro> The player placing the entity"
 					+ " | world: <macro> The world the entity is in}"
 					+ " This event is called when a player attempts to place an item frame, painting, or leash."
-					+ " {id: The entity ID of the entity. | type: The type of the hanging entity; can be ITEM_FRAME,"
-					+ " PAINTING, or LEASE_HITCH | location: Where the entity was placed. |"
-					+ " player: The name of the player which placed this entity. }"
+					+ " {id: The UUID of the hanging entity. | type: The type of the hanging entity (ITEM_FRAME,"
+					+ " GLOW_ITEM_FRAME, PAINTING, or LEASE_HITCH) | location: Where the entity was placed."
+					+ " | against: The location array of the block the hanging is being placed on."
+					+ " | face: The face of the block the hanging is being placed."
+					+ " | player: The name of the player placing the entity, or null."
+					+ " | item: The item array of the hanging being placed, or null. (MC 1.17.1+)"
+					+ " | hand: The hand used to place the item, or null. Can be main_hand or off_hand. (MC 1.19.2+)}"
 					+ " {}"
 					+ " {}";
 		}
@@ -1917,19 +1941,39 @@ public class EntityEvents {
 
 		@Override
 		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
-			if(event instanceof MCHangingPlaceEvent hangingPlaceEvent) {
+			if(event instanceof MCHangingPlaceEvent e) {
 				Map<String, Mixed> ret = evaluate_helper(event);
-				MCHanging hanging = hangingPlaceEvent.getEntity();
+				MCHanging hanging = e.getEntity();
 
 				ret.put("type", new CString(hanging.getType().name(), Target.UNKNOWN));
 				ret.put("id", new CString(hanging.getUniqueId().toString(), Target.UNKNOWN));
-				MCPlayer player = hangingPlaceEvent.getPlayer();
+				MCPlayer player = e.getPlayer();
 				if(player == null) {
 					ret.put("player", CNull.NULL);
 				} else {
 					ret.put("player", new CString(player.getName(), Target.UNKNOWN));
 				}
 				ret.put("location", ObjectGenerator.GetGenerator().location(hanging.getLocation(), env));
+				ret.put("against", ObjectGenerator.GetGenerator().location(e.getBlock().getLocation(), false, env));
+				ret.put("face", new CString(e.getBlockFace().name(), Target.UNKNOWN));
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_17_X)) {
+					MCItemStack item = e.getItem();
+					if(item != null) {
+						ret.put("item", ObjectGenerator.GetGenerator().item(item, Target.UNKNOWN, env));
+					} else {
+						ret.put("item", CNull.NULL);
+					}
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_2)) {
+						MCEquipmentSlot hand = e.getHand();
+						if(hand == null) {
+							ret.put("hand", CNull.NULL);
+						} else if(hand == MCEquipmentSlot.WEAPON) {
+							ret.put("hand", new CString("main_hand", Target.UNKNOWN));
+						} else {
+							ret.put("hand", new CString("off_hand", Target.UNKNOWN));
+						}
+					}
+				}
 				return ret;
 			} else {
 				throw new EventException("Cannot convert event to HangingPlaceEvent");
@@ -2025,6 +2069,99 @@ public class EntityEvents {
 		@Override
 		public Driver driver() {
 			return Driver.ENTITY_TOGGLE_GLIDE;
+		}
+	}
+
+	@api
+	public static class entity_toggle_swim extends AbstractGenericEvent<MCEntityToggleSwimEvent> {
+
+		@Override
+		public String getName() {
+			return "entity_toggle_swim";
+		}
+
+		@Override
+		public String docs() {
+			return "{type: <macro> The entity type of the entity | id: <macro> The entity id of the entity"
+					+ " | player: <macro> The player triggering the event}"
+					+ " This event is called when an entity's swimming status is toggled"
+					+ " {id: The entityID of the entity | type: The entity type of the entity |"
+					+ " swimming: true if the entity is entering swimming mode, false if the entity is leaving it |"
+					+ " player: If the entity is a player, this will contain their name, otherwise null}" + " {}"
+					+ " {}";
+		}
+
+
+		@Override
+		protected PrefilterBuilder getPrefilterBuilder() {
+			return new PrefilterBuilder<MCEntityToggleSwimEvent>()
+					.set("player", "The player that toggled swimming", new OptionalPlayerPrefilterMatcher<>())
+					.set("type", "The entity type of the entity that toggled swimming", new StringICPrefilterMatcher<>() {
+						@Override
+						protected String getProperty(MCEntityToggleSwimEvent event) {
+							return event.getEntityType().name();
+						}
+					})
+					.set("id", "The ID of the entity that toggled swimming", new StringICPrefilterMatcher<>() {
+						@Override
+						protected String getProperty(MCEntityToggleSwimEvent event) {
+							return event.getEntity().getUniqueId().toString();
+						}
+					});
+		}
+
+		@Override
+		public MCEntityToggleSwimEvent convert(CArray manualObject, Target t, Environment env) {
+			return null;
+		}
+
+		@Override
+		public Map<String, Mixed> evaluate(MCEntityToggleSwimEvent e, Environment env) throws EventException {
+			Map<String, Mixed> ret = evaluate_helper(e);
+			Target t = Target.UNKNOWN;
+
+			ret.put("swimming", CBoolean.GenerateCBoolean(e.isSwimming(), t));
+			ret.put("id", new CString(e.getEntity().getUniqueId().toString(), t));
+			ret.put("type", new CString(e.getEntityType().name(), t));
+
+			if(e.getEntity() instanceof MCPlayer) {
+				ret.put("player", new CString(((MCPlayer) e.getEntity()).getName(), t));
+			} else {
+				ret.put("player", CNull.NULL);
+			}
+
+			return ret;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Mixed value, MCEntityToggleSwimEvent event, Environment env) throws ConfigRuntimeException {
+			return false;
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.ENTITY_TOGGLE_SWIM;
+		}
+
+		@Override
+		public void cancel(MCEntityToggleSwimEvent o, boolean state) {
+		}
+
+		@Override
+		public boolean isCancellable(MCEntityToggleSwimEvent o) {
+			// Deprecated
+			// https://jd.papermc.io/paper/1.21.5/org/bukkit/event/entity/EntityToggleSwimEvent.html#setCancelled(boolean)
+			return false;
+		}
+
+		@Override
+		public boolean isCancelled(MCEntityToggleSwimEvent o) {
+			return false;
 		}
 	}
 
@@ -2261,8 +2398,8 @@ public class EntityEvents {
 			return "{type: <macro> | reason: <macro>}"
 					+ " This event is called when a leash is broken."
 					+ " {id: The entityID of the entity | type: The entity type of the entity"
-					+ " | reason: The reason the leash broke. Can be one of "
-					+ StringUtils.Join(MCUnleashReason.values(), ", ", ", or ", " or ") + "}"
+					+ " | reason: The reason the leash broke. Can be one of HOLDER_GONE, PLAYER_UNLEASH, DISTANCE,"
+					+ " SHEAR (Spigot-only 1.21.6+), FIREWORK (Spigot-only 1.21.6+), UNKNOWN}"
 					+ " {}";
 		}
 

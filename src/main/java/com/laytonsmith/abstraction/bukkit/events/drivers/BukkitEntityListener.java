@@ -1,6 +1,5 @@
 package com.laytonsmith.abstraction.bukkit.events.drivers;
 
-import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCCreatureSpawnEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityChangeBlockEvent;
@@ -13,6 +12,7 @@ import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEnti
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityPortalEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityRegainHealthEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityToggleGlideEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityToggleSwimEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityUnleashEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCFireworkExplodeEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCHangingBreakEvent;
@@ -49,6 +49,7 @@ import org.bukkit.event.entity.EntityPortalEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.EntityToggleGlideEvent;
+import org.bukkit.event.entity.EntityToggleSwimEvent;
 import org.bukkit.event.entity.EntityUnleashEvent;
 import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.event.entity.FireworkExplodeEvent;
@@ -114,12 +115,10 @@ public class BukkitEntityListener implements Listener {
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onTargetLiving(EntityTargetEvent event) {
-		BukkitMCTargetEvent ete = new BukkitMCTargetEvent(event);
-		MCEntity target = ete.getTarget();
-		if(target == null || !(target instanceof MCPlayer)) {
-			return;
+		if(event.getTarget() instanceof Player) {
+			BukkitMCTargetEvent ete = new BukkitMCTargetEvent(event);
+			EventUtils.TriggerListener(Driver.TARGET_ENTITY, "target_player", ete);
 		}
-		EventUtils.TriggerListener(Driver.TARGET_ENTITY, "target_player", ete);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
@@ -201,6 +200,12 @@ public class BukkitEntityListener implements Listener {
 	public void onEntityToggleGlide(EntityToggleGlideEvent event) {
 		BukkitMCEntityToggleGlideEvent etge = new BukkitMCEntityToggleGlideEvent(event);
 		EventUtils.TriggerListener(Driver.ENTITY_TOGGLE_GLIDE, "entity_toggle_glide", etge);
+	}
+
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onEntityToggleSwim(EntityToggleSwimEvent event) {
+		BukkitMCEntityToggleSwimEvent etse = new BukkitMCEntityToggleSwimEvent(event);
+		EventUtils.TriggerListener(Driver.ENTITY_TOGGLE_SWIM, "entity_toggle_swim", etse);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)

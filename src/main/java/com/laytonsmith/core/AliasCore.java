@@ -167,8 +167,9 @@ public class AliasCore {
 		}
 
 		Script script = null;
+		String[] args = command.split(" ");
 		for(Script s : scripts) {
-			if(s.match(command)) {
+			if(s.match(args)) {
 				script = s;
 				break;
 			}
@@ -780,7 +781,7 @@ public class AliasCore {
 
 			boolean finalHasFinal = hasFinal;
 			CNativeClosure.ClosureRunnable runnable = (Target t, Environment e, Mixed... args) -> {
-				List<String> inputArgs = ((CArray) args[2]).asList().stream().map(val -> val.val()).toList();
+				List<String> inputArgs = ((CArray) args[2]).asList(e).stream().map(val -> val.val()).toList();
 				CompletionValues completion = null;
 				if(inputArgs.size() <= completions.size()) {
 					completion = completions.get(inputArgs.size() - 1);
@@ -789,7 +790,7 @@ public class AliasCore {
 					if(finalHasFinal) {
 						completion = completions.get(completions.size() - 1);
 					} else {
-						return new CArray(Target.UNKNOWN);
+						return new CArray(Target.UNKNOWN, null, e);
 					}
 				}
 				CString alias = (CString) args[0];
@@ -801,7 +802,7 @@ public class AliasCore {
 						.filter(item -> item.startsWith(comparison))
 						.map(item -> new CString(item, Target.UNKNOWN))
 						.toList().toArray(CString[]::new);
-				return new CArray(t, toReturn);
+				return new CArray(t, null, e, toReturn);
 			};
 
 			CNativeClosure nativeClosure = new CNativeClosure(runnable, env);

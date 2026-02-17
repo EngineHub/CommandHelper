@@ -2,6 +2,7 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCObjective;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCScoreboard;
@@ -17,6 +18,8 @@ import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.NotInitializedYetException;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.signature.FunctionSignatures;
+import com.laytonsmith.core.compiler.signature.SignatureBuilder;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CInt;
@@ -46,10 +49,13 @@ import java.util.Set;
  *
  * @author jb_aero
  */
-public class Scoreboards {
+public final class Scoreboards {
 
 	public static String docs() {
 		return "A class of functions for manipulating the server scoreboard.";
+	}
+
+	private Scoreboards() {
 	}
 
 	/**
@@ -57,7 +63,7 @@ public class Scoreboards {
 	 */
 	public static final String MAIN = "main";
 	private static final String DEF_MSG = "Scoreboard defaults to '" + MAIN + "' if not given.";
-	private static Map<String, MCScoreboard> boards = new HashMap<String, MCScoreboard>();
+	private static final Map<String, MCScoreboard> BOARDS = new HashMap<>();
 
 	static {
 		if(!isBoard(MAIN)) {
@@ -84,7 +90,7 @@ public class Scoreboards {
 	 * @return if there is a scoreboard with the given id
 	 */
 	public static boolean isBoard(String id) {
-		return boards.containsKey(id);
+		return BOARDS.containsKey(id);
 	}
 
 	/**
@@ -94,7 +100,7 @@ public class Scoreboards {
 	 * @return if the given scoreboard is already being tracked
 	 */
 	public static boolean isBoard(MCScoreboard board) {
-		for(MCScoreboard s : boards.values()) {
+		for(MCScoreboard s : BOARDS.values()) {
 			if(s.equals(board)) {
 				return true;
 			}
@@ -118,7 +124,7 @@ public class Scoreboards {
 		if(isBoard(board)) {
 			throw new CREScoreboardException("That Scoreboard is already added.", t);
 		}
-		boards.put(id, board);
+		BOARDS.put(id, board);
 	}
 
 	/**
@@ -133,7 +139,7 @@ public class Scoreboards {
 		if(!isBoard(id)) {
 			throw new CREScoreboardException("The specified scoreboard does not exist.", t);
 		}
-		MCScoreboard ret = boards.get(id);
+		MCScoreboard ret = BOARDS.get(id);
 		if(ret == null) {
 			throw new CREScoreboardException("The specified scoreboard is null. Are you running from cmdline mode?", t);
 		}
@@ -149,7 +155,7 @@ public class Scoreboards {
 	 * @throws CREScoreboardException if the cache does not contain the given scoreboard
 	 */
 	public static String getBoardID(MCScoreboard board, Target t) throws CREScoreboardException {
-		for(Map.Entry<String, MCScoreboard> e : boards.entrySet()) {
+		for(Map.Entry<String, MCScoreboard> e : BOARDS.entrySet()) {
 			if(board.equals(e.getValue())) {
 				return e.getKey();
 			}
@@ -171,7 +177,7 @@ public class Scoreboards {
 		if(!isBoard(id)) {
 			throw new CREScoreboardException("The specified scoreboard does not exist.", t);
 		}
-		boards.remove(id);
+		BOARDS.remove(id);
 	}
 
 	/**
@@ -335,9 +341,8 @@ public class Scoreboards {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CArray ret = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
-					.addNativeParameter(CString.TYPE, null).buildNative(), env);
-			for(String id : boards.keySet()) {
+			CArray ret = new CArray(t, null, env);
+			for(String id : BOARDS.keySet()) {
 				ret.push(new CString(id, t), t, env);
 			}
 			return ret;
@@ -681,6 +686,7 @@ public class Scoreboards {
 					+ " all displays. Slot can be one of: " + StringUtils.Join(MCDisplaySlot.values(), ", ", ", or ")
 					+ " ---- If the displayname is too long, a LengthException will be thrown."
 					+ " The max length will differ based on server version, but this limit was removed in 1.20.1."
+					+ " Sidebar display slots for teams was added to Spigot in 1.19.2 and Paper in 1.17.1."
 					+ DEF_MSG;
 		}
 
@@ -832,8 +838,8 @@ public class Scoreboards {
 
 		@Override
 		public String docs() {
-			return "void {teamName, player, [scoreboard]} Adds a player to a team, given the team exists. The player"
-					+ " will be removed from any other team on the same scoreboard. " + DEF_MSG;
+			return "void {teamName, entry, [scoreboard]} Adds a player (or entity UUID) to a team, given the team exists."
+					+ " It will be removed from any other team on the same scoreboard. " + DEF_MSG;
 		}
 
 		@Override
@@ -867,8 +873,8 @@ public class Scoreboards {
 
 		@Override
 		public String docs() {
-			return "boolean {teamname, player, [scoreboard]} Attempts to remove a player from a team,"
-					+ " and returns true if successful, for false if the player was not part of the team." + DEF_MSG;
+			return "boolean {teamname, entry, [scoreboard]} Attempts to remove a player (or entity UUID) from a team,"
+					+ " and returns true if successful, for false if it was not part of the team." + DEF_MSG;
 		}
 
 		@Override
@@ -1261,5 +1267,48 @@ public class Scoreboards {
 		public MSVersion since() {
 			return MSVersion.V3_3_1;
 		}
+	}
+
+	@api
+	public static class get_scoreboard_entries extends SBFunction {
+
+		@Override
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCScoreboard s = assignBoard(0, t, args);
+			Set<String> entries = s.getEntries();
+			CArray ret = new CArray(t, entries.size());
+			for(String r : entries) {
+				ret.push(new CString(r, t), t);
+			}
+			return ret;
+		}
+
+		@Override
+		public String getName() {
+			return "get_scoreboard_entries";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1};
+		}
+
+		@Override
+		public String docs() {
+			return "array {[scoreboardName]} Gets a list of all the entries in the given scoreboard.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CArray.TYPE)
+					.param(CString.TYPE, "scoreboardName", "The name of the scoreboard", true)
+					.build();
+		}
+
 	}
 }

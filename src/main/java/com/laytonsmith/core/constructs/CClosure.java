@@ -126,7 +126,7 @@ public class CClosure extends Construct implements Callable, Booleanish {
 		} else if(node.getData() instanceof CString) {
 			String data = ArgumentValidation.getString(node.getData(), node.getTarget());
 			// Convert: \ -> \\ and ' -> \'
-			b.append("'").append(data.replace("\\", "\\\\").replaceAll("\t", "\\\\t").replaceAll("\n", "\\\\n")
+			b.append("'").append(data.replace("\\", "\\\\").replace("\t", "\\t").replace("\n", "\\n")
 					.replace("'", "\\'")).append("'");
 		} else if(node.getData() instanceof IVariable) {
 			b.append(((IVariable) node.getData()).getVariableName());
@@ -226,14 +226,19 @@ public class CClosure extends Construct implements Callable, Booleanish {
 		if(node == null) {
 			return;
 		}
-		StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
-		stManager.addStackTraceElement(new ConfigRuntimeException.StackTraceElement("<<closure>>", getTarget()));
+		Environment environment;
 		try {
-			Environment environment;
 			synchronized(this) {
 				environment = env.clone();
 			}
-			CArray arguments = new CArray(node.getData().getTarget());
+		} catch (CloneNotSupportedException ex) {
+			Logger.getLogger(CClosure.class.getName()).log(Level.SEVERE, null, ex);
+			return;
+		}
+		StackTraceManager stManager = environment.getEnv(GlobalEnv.class).GetStackTraceManager();
+		stManager.addStackTraceElement(new ConfigRuntimeException.StackTraceElement("<<closure>>", getTarget()));
+		try {
+			CArray arguments = new CArray(node.getData().getTarget(), null, environment);
 			CArray vararg = null;
 			LeftHandSideType varargType = null;
 			if(values != null) {
@@ -244,7 +249,7 @@ public class CClosure extends Construct implements Callable, Booleanish {
 					} else {
 						value = defaults[i].clone();
 					}
-					arguments.push(value, node.getData().getTarget());
+					arguments.push(value, node.getData().getTarget(), env);
 					boolean isVarArg = false;
 					if(this.names.length > i
 						|| (this.names.length != 0
@@ -270,11 +275,11 @@ public class CClosure extends Construct implements Callable, Booleanish {
 							isVarArg = true;
 						}
 						if(isVarArg) {
-							if(!InstanceofUtil.isInstanceof(value, varargType, environment)) {
-								throw new CRECastException("Expected type " + varargType + " but found " + value.typeof(environment),
+							if(!InstanceofUtil.isInstanceof(value.typeof(env), varargType, env)) {
+								throw new CRECastException("Expected type " + varargType + " but found " + value.typeof(env),
 										getTarget());
 							}
-							vararg.push(value, value.getTarget());
+							vararg.push(value, value.getTarget(), env);
 						} else {
 							IVariable var;
 							try {
@@ -322,7 +327,7 @@ public class CClosure extends Construct implements Callable, Booleanish {
 				// Check the return type of the closure to see if it matches the defined type
 				// Normal execution.
 				Mixed ret = ex.getReturn();
-				if(!InstanceofUtil.isInstanceof(ret.typeof(env).asLeftHandSideType(), returnType, environment)) {
+				if(!InstanceofUtil.isInstanceof(ret.typeof(env), returnType, environment)) {
 					throw new CRECastException("Expected closure to return a value of type " + returnType.val()
 							+ " but a value of type " + ret.typeof(env) + " was returned instead", ret.getTarget());
 				}
@@ -331,6 +336,7 @@ public class CClosure extends Construct implements Callable, Booleanish {
 			} catch (CancelCommandException e) {
 				// die()
 			} catch (ConfigRuntimeException ex) {
+				ex.setEnv(environment);
 				if(ex instanceof AbstractCREException) {
 					((AbstractCREException) ex).freezeStackTraceElements(stManager);
 				}

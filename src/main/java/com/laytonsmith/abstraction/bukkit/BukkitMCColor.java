@@ -1,6 +1,8 @@
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.MCColor;
+import com.laytonsmith.abstraction.enums.MCVersion;
+import com.laytonsmith.core.Static;
 import org.bukkit.Color;
 
 public final class BukkitMCColor implements MCColor {
@@ -8,11 +10,19 @@ public final class BukkitMCColor implements MCColor {
 	private static final BukkitMCColor BUILDER = new BukkitMCColor();
 
 	public static MCColor GetMCColor(Color c) {
-		return BUILDER.build(c.getRed(), c.getGreen(), c.getBlue());
+		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_4)) {
+			return BUILDER.build(c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
+		} else {
+			return BUILDER.build(c.getRed(), c.getGreen(), c.getBlue());
+		}
 	}
 
 	public static Color GetColor(MCColor c) {
-		return Color.fromRGB(c.getRed(), c.getGreen(), c.getBlue());
+		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_4)) {
+			return Color.fromARGB(c.getAlpha(), c.getRed(), c.getGreen(), c.getBlue());
+		} else {
+			return Color.fromRGB(c.getRed(), c.getGreen(), c.getBlue());
+		}
 	}
 
 	private BukkitMCColor() {
@@ -21,6 +31,12 @@ public final class BukkitMCColor implements MCColor {
 	private int red;
 	private int green;
 	private int blue;
+	private int alpha;
+
+	@Override
+	public int getAlpha() {
+		return alpha;
+	}
 
 	@Override
 	public int getRed() {
@@ -40,6 +56,17 @@ public final class BukkitMCColor implements MCColor {
 	@Override
 	public MCColor build(int red, int green, int blue) {
 		BukkitMCColor color = new BukkitMCColor();
+		color.alpha = 255;
+		color.red = red;
+		color.green = green;
+		color.blue = blue;
+		return color;
+	}
+
+	@Override
+	public MCColor build(int red, int green, int blue, int alpha) {
+		BukkitMCColor color = new BukkitMCColor();
+		color.alpha = alpha;
 		color.red = red;
 		color.green = green;
 		color.blue = blue;
@@ -49,6 +76,7 @@ public final class BukkitMCColor implements MCColor {
 	@Override
 	public int hashCode() {
 		int hash = 5;
+		hash = 11 * hash + this.alpha;
 		hash = 11 * hash + this.red;
 		hash = 11 * hash + this.green;
 		hash = 11 * hash + this.blue;
@@ -71,6 +99,9 @@ public final class BukkitMCColor implements MCColor {
 			return false;
 		}
 		if(this.blue != other.blue) {
+			return false;
+		}
+		if(this.alpha != other.alpha) {
 			return false;
 		}
 		return true;

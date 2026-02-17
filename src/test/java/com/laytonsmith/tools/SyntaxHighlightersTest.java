@@ -5,7 +5,7 @@
  */
 package com.laytonsmith.tools;
 
-import com.laytonsmith.testing.StaticTest;
+import com.laytonsmith.testing.AbstractIntegrationTest;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.Ignore;
@@ -14,10 +14,9 @@ import org.junit.Ignore;
  *
  * @author Cailin
  */
-public class SyntaxHighlightersTest {
+public class SyntaxHighlightersTest extends AbstractIntegrationTest {
 
 	public SyntaxHighlightersTest() {
-		StaticTest.InstallFakeServerFrontend();
 	}
 
 	@Test

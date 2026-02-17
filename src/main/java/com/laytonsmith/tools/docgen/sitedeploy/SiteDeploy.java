@@ -964,7 +964,7 @@ public final class SiteDeploy {
 				if(!bW.contains(EDIT_THIS_PAGE_PREAMBLE)) {
 					bW += "<p id=\"edit_this_page\">"
 							+ EDIT_THIS_PAGE_PREAMBLE
-							+ String.format(githubBaseUrl, "java/" + SiteDeploy.class.getName().replace(".", "/"))
+							+ String.format(githubBaseUrl, "java/" + SiteDeploy.class.getName().replace('.', '/'))
 							+ ".java"
 							+ EDIT_THIS_PAGE_POSTAMBLE
 							+ "</p>";
@@ -1220,8 +1220,8 @@ public final class SiteDeploy {
 				for(File r : zReader.listFiles()) {
 					String filename = r.getAbsolutePath().replaceFirst(path, "");
 					writePageFromResource(r.getName(), "/docs" + filename, r.getName() + ".html",
-							Arrays.asList(new String[]{r.getName().replace("_", " ")}), "Learning trail page for "
-									+ r.getName().replace("_", " "));
+							Arrays.asList(new String[]{r.getName().replace('_', ' ')}), "Learning trail page for "
+									+ r.getName().replace('_', ' '));
 				}
 			} catch (IOException ex) {
 				writeLog(null, ex);
@@ -1239,7 +1239,12 @@ public final class SiteDeploy {
 						(Class<? extends Function> o1, Class<? extends Function> o2) -> {
 					Function f1 = ReflectionUtils.instantiateUnsafe(o1);
 					Function f2 = ReflectionUtils.instantiateUnsafe(o2);
-					return f1.getName().compareTo(f2.getName());
+					int result = f1.compareTo(f2);
+					if(result == 0) {
+						// Functions with the same name
+						return o1.getPackageName().compareTo(o2.getPackageName());
+					}
+					return result;
 				});
 				functionClasses.addAll(ClassDiscovery.getDefaultInstance()
 						.loadClassesWithAnnotationThatExtend(api.class, Function.class));
@@ -1527,7 +1532,7 @@ public final class SiteDeploy {
 		}
 		String bW = "<p id=\"edit_this_page\">"
 				+ EDIT_THIS_PAGE_PREAMBLE
-				+ String.format(githubBaseUrl, "java/" + container.getName().replace(".", "/")) + ".java#L"
+				+ String.format(githubBaseUrl, "java/" + container.getName().replace('.', '/')) + ".java#L"
 				+ (lineNum < 10 ? lineNum : lineNum + 10) // Add 10, so we scroll a bit more in view
 				+ EDIT_THIS_PAGE_POSTAMBLE
 				+ " (Note this page is automatically generated from the documentation in the source code.)</p>";

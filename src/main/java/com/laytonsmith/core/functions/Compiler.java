@@ -6,19 +6,26 @@ import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.annotations.noprofile;
+import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
+import com.laytonsmith.core.Optimizable.OptimizationOption;
+import com.laytonsmith.core.compiler.CompilerEnvironment;
+import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.compiler.signature.FunctionSignatures;
 import com.laytonsmith.core.compiler.signature.SignatureBuilder;
 import com.laytonsmith.core.constructs.Auto;
+import com.laytonsmith.core.constructs.CBareString;
 import com.laytonsmith.core.constructs.CBracket;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CEntry;
 import com.laytonsmith.core.constructs.CFunction;
+import com.laytonsmith.core.constructs.CKeyword;
 import com.laytonsmith.core.constructs.CLabel;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
@@ -27,6 +34,8 @@ import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.LeftHandSideType;
+import com.laytonsmith.core.constructs.IVariableList;
+import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.generics.ConstraintLocation;
 import com.laytonsmith.core.constructs.generics.Constraints;
@@ -35,6 +44,10 @@ import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.constructs.generics.constraints.UnboundedConstraint;
 import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.environments.Environment.EnvironmentImpl;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.functions.DataHandling._string;
 import com.laytonsmith.core.functions.DataHandling.assign;
@@ -223,27 +236,34 @@ public class Compiler {
 			//If any of our nodes are CSymbols, we have different behavior
 			boolean inSymbolMode = false; //caching this can save Xn
 
+			// Rewrite execute operator.
 			rewriteParenthesis(list);
 
-			//Assignment
-			//Note that we are walking the array in reverse, because multiple assignments,
-			//say @a = @b = 1 will break if they look like assign(assign(@a, @b), 1),
-			//they need to be assign(@a, assign(@b, 1)). As a variation, we also have
-			//to support something like 1 + @a = 2, which will turn into add(1, assign(@a, 2),
-			//and 1 + @a = @b + 3 would turn into add(1, assign(@a, add(@b, 3))).
+			// Rewrite assignment operator.
+			/*
+			 * Note that we are walking the array in reverse, because multiple assignments,
+			 * say @a = @b = 1 will break if they look like assign(assign(@a, @b), 1),
+			 * they need to be assign(@a, assign(@b, 1)). As a variation, we also have
+			 * to support something like 1 + @a = 2, which will turn into add(1, assign(@a, 2),
+			 * and 1 + @a = @b + 3 would turn into add(1, assign(@a, add(@b, 3))).
+			 */
 			for(int i = list.size() - 2; i >= 0; i--) {
 				ParseTree node = list.get(i + 1);
 				if(node.getData() instanceof CSymbol && ((CSymbol) node.getData()).isAssignment()) {
+
+					// Get assign left hand side and autoconcat assign right hand side if necessary.
 					ParseTree lhs = list.get(i);
-					ParseTree assignNode = new ParseTree(
-							new CFunction(assign.NAME, node.getTarget()), node.getFileOptions());
-					ParseTree rhs;
 					if(i < list.size() - 3) {
-						//Need to autoconcat
 						List<ParseTree> valChildren = new ArrayList<>();
 						int index = i + 2;
 						// add all preceding symbols
-						while(list.size() > index + 1 && list.get(index).getData() instanceof CSymbol) {
+						while(list.size() > index + 1 && (list.get(index).getData() instanceof CSymbol
+								|| (list.get(index).getData() instanceof CFunction cf
+										&& cf.val().equals(Compiler.p.NAME)
+										&& list.get(index).numberOfChildren() == 1
+										&& (list.get(index).getChildAt(0).getData() instanceof CClassType
+												|| __type_ref__.createFromBareStringOrConcats(
+														list.get(index).getChildAt(0)) != null)))) {
 							valChildren.add(list.get(index));
 							list.remove(index);
 						}
@@ -273,26 +293,31 @@ public class Compiler {
 					if(list.size() <= i + 2) {
 						throw new ConfigCompileException("Unexpected end of statement", list.get(i).getTarget());
 					}
+					ParseTree rhs = list.get(i + 2);
 
-					// Additive assignment
+					// Wrap additive assignment in right hand side (e.g. convert @a += 1 to @a = @a + 1).
 					CSymbol sy = (CSymbol) node.getData();
 					String conversionFunction = sy.convertAssignment();
 					if(conversionFunction != null) {
-						ParseTree conversion = new ParseTree(new CFunction(conversionFunction, node.getTarget()), node.getFileOptions());
-						conversion.addChild(lhs);
-						conversion.addChild(list.get(i + 2));
-						list.set(i + 2, conversion);
+						ParseTree rhsReplacement = new ParseTree(
+								new CFunction(conversionFunction, node.getTarget()), node.getFileOptions());
+						rhsReplacement.addChild(lhs);
+						rhsReplacement.addChild(rhs);
+						rhs = rhsReplacement;
 					}
 
-					rhs = list.get(i + 2);
+					// Rewrite to assign node.
+					ParseTree assignNode = new ParseTree(
+							new CFunction(assign.NAME, node.getTarget()), node.getFileOptions());
 					assignNode.addChild(lhs);
 					assignNode.addChild(rhs);
-					list.set(i, assignNode);
-					list.remove(i + 1);
-					list.remove(i + 1);
+					list.set(i, assignNode); // Overwrite lhs with assign node.
+					list.remove(i + 1); // Remove "=" node.
+					list.remove(i + 1); // Remove rhs node.
 				}
 			}
-			//postfix
+
+			// Rewrite postfix operators.
 			for(int i = 0; i < list.size(); i++) {
 				ParseTree node = list.get(i);
 				if(node.getData() instanceof CSymbol) {
@@ -316,9 +341,10 @@ public class Compiler {
 					}
 				}
 			}
+
+			// Rewrite unary operators.
 			if(inSymbolMode) {
 				try {
-					//look for unary operators
 					for(int i = 0; i < list.size() - 1; i++) {
 						ParseTree node = list.get(i);
 						if(node.getData() instanceof CSymbol && ((CSymbol) node.getData()).isUnary()) {
@@ -362,152 +388,133 @@ public class Compiler {
 							conversion.addChild(rewrite(ac, returnSConcat, envs));
 						}
 					}
+				} catch (IndexOutOfBoundsException e) {
+					throw new ConfigCompileException("Unexpected symbol (" + list.get(list.size() - 1).getData().val() + ")",
+							list.get(list.size() - 1).getTarget());
+				}
+			}
+
+			// Rewrite cast operator.
+			for(int i = list.size() - 2; i >= 0; i--) {
+				ParseTree node = list.get(i);
+				if(node.getData() instanceof CFunction cf && cf.val().equals(Compiler.p.NAME)
+						&& node.numberOfChildren() == 1) {
+
+					// Convert bare string or concat() to type reference if needed.
+					ParseTree typeNode = node.getChildAt(0);
+					if(!(typeNode.getData() instanceof CClassType)) {
+						ParseTree convertedTypeNode = __type_ref__.createFromBareStringOrConcats(typeNode);
+						if(convertedTypeNode != null) {
+							typeNode = convertedTypeNode;
+						} else {
+
+							// This is not a "(classtype)" format. Skip node.
+							continue;
+						}
+					}
+
+					// Rewrite p(A) and the next list entry B to __cast__(B, A).
+					ParseTree castNode = new ParseTree(
+							new CFunction(__cast__.NAME, node.getTarget()), node.getFileOptions());
+					castNode.addChild(list.get(i + 1));
+					castNode.addChild(typeNode);
+					list.set(i, castNode);
+					list.remove(i + 1);
+				}
+			}
+
+			// Rewrite binary operators.
+			if(inSymbolMode) {
+				try {
 
 					//Exponential
 					for(int i = 0; i < list.size() - 1; i++) {
 						ParseTree next = list.get(i + 1);
-						if(next.getData() instanceof CSymbol) {
-							if(((CSymbol) next.getData()).isExponential()) {
-								ParseTree conversion = new ParseTree(new CFunction(((CSymbol) next.getData()).convert(), next.getTarget()), next.getFileOptions());
-								conversion.addChild(list.get(i));
-								conversion.addChild(list.get(i + 2));
-								list.set(i, conversion);
-								list.remove(i + 1);
-								list.remove(i + 1);
-								i--;
-							}
+						if(next.getData() instanceof CSymbol sy && sy.isExponential()) {
+							rewriteBinaryOperator(list, sy, i--);
 						}
 					}
-
 					//Multiplicative
 					for(int i = 0; i < list.size() - 1; i++) {
 						ParseTree next = list.get(i + 1);
-						if(next.getData() instanceof CSymbol) {
-							CSymbol nextData = (CSymbol) next.getData();
-							if(nextData.isMultaplicative() && !nextData.isAssignment()) {
-								ParseTree conversion = new ParseTree(new CFunction(((CSymbol) next.getData()).convert(), next.getTarget()), next.getFileOptions());
-								conversion.addChild(list.get(i));
-								conversion.addChild(list.get(i + 2));
-								list.set(i, conversion);
-								list.remove(i + 1);
-								list.remove(i + 1);
-								i--;
-							}
+						if(next.getData() instanceof CSymbol sy && sy.isMultaplicative() && !sy.isAssignment()) {
+							rewriteBinaryOperator(list, sy, i--);
 						}
 					}
 					//Additive
 					for(int i = 0; i < list.size() - 1; i++) {
 						ParseTree next = list.get(i + 1);
-						if(next.getData() instanceof CSymbol && ((CSymbol) next.getData()).isAdditive() && !((CSymbol) next.getData()).isAssignment()) {
-							ParseTree conversion = new ParseTree(new CFunction(((CSymbol) next.getData()).convert(), next.getTarget()), next.getFileOptions());
-							conversion.addChild(list.get(i));
-							conversion.addChild(list.get(i + 2));
-							list.set(i, conversion);
-							list.remove(i + 1);
-							list.remove(i + 1);
-							i--;
+						if(next.getData() instanceof CSymbol sy && sy.isAdditive() && !sy.isAssignment()) {
+							rewriteBinaryOperator(list, sy, i--);
 						}
 					}
 					//relational
 					for(int i = 0; i < list.size() - 1; i++) {
-						ParseTree node = list.get(i + 1);
-						if(node.getData() instanceof CSymbol && ((CSymbol) node.getData()).isRelational()) {
-							CSymbol sy = (CSymbol) node.getData();
-							ParseTree conversion = new ParseTree(new CFunction(sy.convert(), node.getTarget()), node.getFileOptions());
-							conversion.addChild(list.get(i));
-							conversion.addChild(list.get(i + 2));
-							list.set(i, conversion);
-							list.remove(i + 1);
-							list.remove(i + 1);
-							i--;
+						ParseTree next = list.get(i + 1);
+						if(next.getData() instanceof CSymbol sy && sy.isRelational()) {
+							rewriteBinaryOperator(list, sy, i--);
 						}
 					}
 					//equality
 					for(int i = 0; i < list.size() - 1; i++) {
-						ParseTree node = list.get(i + 1);
-						if(node.getData() instanceof CSymbol && ((CSymbol) node.getData()).isEquality()) {
-							CSymbol sy = (CSymbol) node.getData();
-							ParseTree conversion = new ParseTree(new CFunction(sy.convert(), node.getTarget()), node.getFileOptions());
-							conversion.addChild(list.get(i));
-							conversion.addChild(list.get(i + 2));
-							list.set(i, conversion);
-							list.remove(i + 1);
-							list.remove(i + 1);
-							i--;
+						ParseTree next = list.get(i + 1);
+						if(next.getData() instanceof CSymbol sy && sy.isEquality()) {
+							rewriteBinaryOperator(list, sy, i--);
 						}
 					}
 					// default and
 					for(int i = 0; i < list.size() - 1; i++) {
-						ParseTree node = list.get(i + 1);
-						if(node.getData() instanceof CSymbol && ((CSymbol) node.getData()).isDefaultAnd()) {
-							CSymbol sy = (CSymbol) node.getData();
-							ParseTree conversion = new ParseTree(new CFunction(sy.convert(), node.getTarget()), node.getFileOptions());
-							conversion.addChild(list.get(i));
-							conversion.addChild(list.get(i + 2));
-							list.set(i, conversion);
-							list.remove(i + 1);
-							list.remove(i + 1);
-							i--;
+						ParseTree next = list.get(i + 1);
+						if(next.getData() instanceof CSymbol sy && sy.isDefaultAnd()) {
+							rewriteBinaryOperator(list, sy, i--);
 						}
 					}
-
 					// default or
 					for(int i = 0; i < list.size() - 1; i++) {
-						ParseTree node = list.get(i + 1);
-						if(node.getData() instanceof CSymbol && ((CSymbol) node.getData()).isDefaultOr()) {
-							CSymbol sy = (CSymbol) node.getData();
-							ParseTree conversion = new ParseTree(new CFunction(sy.convert(), node.getTarget()), node.getFileOptions());
-							conversion.addChild(list.get(i));
-							conversion.addChild(list.get(i + 2));
-							list.set(i, conversion);
-							list.remove(i + 1);
-							list.remove(i + 1);
-							i--;
+						ParseTree next = list.get(i + 1);
+						if(next.getData() instanceof CSymbol sy && sy.isDefaultOr()) {
+							rewriteBinaryOperator(list, sy, i--);
 						}
 					}
-
 					//logical and
 					for(int i = 0; i < list.size() - 1; i++) {
-						ParseTree node = list.get(i + 1);
-						if(node.getData() instanceof CSymbol && ((CSymbol) node.getData()).isLogicalAnd()) {
-							CSymbol sy = (CSymbol) node.getData();
-							ParseTree conversion = new ParseTree(new CFunction(sy.convert(), node.getTarget()), node.getFileOptions());
-							conversion.addChild(list.get(i));
-							conversion.addChild(list.get(i + 2));
-							list.set(i, conversion);
-							list.remove(i + 1);
-							list.remove(i + 1);
-							i--;
+						ParseTree next = list.get(i + 1);
+						if(next.getData() instanceof CSymbol sy && sy.isLogicalAnd()) {
+							rewriteBinaryOperator(list, sy, i--);
 						}
 					}
 					//logical or
 					for(int i = 0; i < list.size() - 1; i++) {
-						ParseTree node = list.get(i + 1);
-						if(node.getData() instanceof CSymbol && ((CSymbol) node.getData()).isLogicalOr()) {
-							CSymbol sy = (CSymbol) node.getData();
-							ParseTree conversion = new ParseTree(new CFunction(sy.convert(), node.getTarget()), node.getFileOptions());
-							conversion.addChild(list.get(i));
-							conversion.addChild(list.get(i + 2));
-							list.set(i, conversion);
-							list.remove(i + 1);
-							list.remove(i + 1);
-							i--;
+						ParseTree next = list.get(i + 1);
+						if(next.getData() instanceof CSymbol sy && sy.isLogicalOr()) {
+							rewriteBinaryOperator(list, sy, i--);
 						}
 					}
 				} catch (IndexOutOfBoundsException e) {
-					throw new ConfigCompileException("Unexpected symbol (" + list.get(list.size() - 1).getData().val() + "). Did you forget to quote your symbols?", list.get(list.size() - 1).getTarget());
+					throw new ConfigCompileException("Unexpected symbol (" + list.get(list.size() - 1).getData().val() + ")",
+							list.get(list.size() - 1).getTarget());
 				}
 			}
 
 			// Look for typed assignments
 			for(int k = 0; k < list.size(); k++) {
-				if(list.get(k).getData().equals(CVoid.VOID)
-						|| list.get(k).getData() instanceof CClassType) {
+				ParseTree typeNode = list.get(k);
+
+				// Convert bare string or concat() to type reference if used like that in syntax.
+				ParseTree convertedTypeNode = __type_ref__.createFromBareStringOrConcats(typeNode);
+				ParseTree originalTypeNode = typeNode;
+				if(convertedTypeNode != null) {
+					typeNode = convertedTypeNode;
+				}
+
+				if(convertedTypeNode != null
+						|| typeNode.getData().equals(CVoid.VOID) || typeNode.getData() instanceof CClassType) {
 					if(k == list.size() - 1) {
 						// This is not a typed assignment
 						break;
 						//throw new ConfigCompileException("Unexpected ClassType", list.get(k).getTarget());
 					}
+
 					if(list.get(k + 1).getData() instanceof CFunction) {
 						switch(list.get(k + 1).getData().val()) {
 							// closure is missing from this, because "closure" is both a ClassType and a keyword,
@@ -517,34 +524,42 @@ public class Compiler {
 							case "proc":
 								// Typed assign/closure
 								if(list.get(k + 1).getData().val().equals(assign.NAME)
-										&& list.get(k).getData().equals(CVoid.VOID)) {
+										&& typeNode.getData().equals(CVoid.VOID)) {
 									throw new ConfigCompileException("Variables may not be of type void",
-											list.get(k).getTarget());
+											list.get(k + 1).getTarget());
 								}
-								ParseTree type = list.remove(k);
+
+								// Remove type node.
+								list.remove(k);
+
 								List<ParseTree> children = list.get(k).getChildren();
-								children.add(0, type);
+								children.add(0, typeNode);
 								list.get(k).setChildren(children);
 								break;
 							default:
-								throw new ConfigCompileException("Unexpected ClassType \"" + list.get(k).getData().val() + "\"", list.get(k).getTarget());
+								if(typeNode.getData().equals(CVoid.VOID) || typeNode.getData() instanceof CClassType) {
+									throw new ConfigCompileException("Unexpected ClassType \""
+											+ typeNode.getData().val() + "\"", typeNode.getTarget());
+								}
 						}
 					} else if(list.get(k + 1).getData() instanceof IVariable) {
 						// Not an assignment, a random variable declaration though.
-						ParseTree node = new ParseTree(new CFunction(assign.NAME, list.get(k).getTarget()), list.get(k).getFileOptions());
-						node.addChild(list.get(k));
+						ParseTree node = new ParseTree(new CFunction(assign.NAME, list.get(k + 1).getTarget()), typeNode.getFileOptions());
+						node.addChild(typeNode);
 						node.addChild(list.get(k + 1));
-						node.addChild(new ParseTree(CNull.UNDEFINED, list.get(k).getFileOptions()));
+						node.addChild(new ParseTree(CNull.UNDEFINED, typeNode.getFileOptions()));
 						list.set(k, node);
 						list.remove(k + 1);
 					} else if(list.get(k + 1).getData() instanceof CLabel) {
-						ParseTree node = new ParseTree(new CFunction(assign.NAME, list.get(k).getTarget()), list.get(k).getFileOptions());
-						ParseTree labelNode = new ParseTree(new CLabel(node.getData()), list.get(k).getFileOptions());
-						labelNode.addChild(list.get(k));
-						labelNode.addChild(new ParseTree(((CLabel) list.get(k + 1).getData()).cVal(), list.get(k).getFileOptions()));
-						labelNode.addChild(new ParseTree(CNull.UNDEFINED, list.get(k).getFileOptions()));
+						ParseTree node = new ParseTree(new CFunction(assign.NAME, list.get(k + 1).getTarget()), typeNode.getFileOptions());
+						ParseTree labelNode = new ParseTree(new CLabel(node.getData()), typeNode.getFileOptions());
+						labelNode.addChild(typeNode);
+						labelNode.addChild(new ParseTree(((CLabel) list.get(k + 1).getData()).cVal(), typeNode.getFileOptions()));
+						labelNode.addChild(new ParseTree(CNull.UNDEFINED, typeNode.getFileOptions()));
 						list.set(k, labelNode);
 						list.remove(k + 1);
+					} else if(originalTypeNode.getData().getClass().equals(CBareString.class)) {
+						continue; // Bare string was not used as a type.
 					} else {
 //						throw new ConfigCompileException("Unexpected data after ClassType", list.get(k + 1).getTarget());
 					}
@@ -649,29 +664,52 @@ public class Compiler {
 			}
 		}
 
+		private static void rewriteBinaryOperator(List<ParseTree> list, CSymbol symbol, int leftIndex) throws ConfigCompileException {
+			ParseTree left = list.get(leftIndex);
+			if(left.getData() instanceof CSymbol) {
+				throw new ConfigCompileException("Unexpected symbol (" + left.getData().val() + ") before binary operator ("
+						+ list.get(leftIndex + 1).getData().val() + ")", left.getTarget());
+			}
+			ParseTree right = list.get(leftIndex + 2);
+			if(right.getData() instanceof CSymbol) {
+				throw new ConfigCompileException("Unexpected symbol (" + right.getData().val() + ") after binary operator ("
+						+ list.get(leftIndex + 1).getData().val() + ")", right.getTarget());
+			}
+			ParseTree conversion = new ParseTree(new CFunction(symbol.convert(), symbol.getTarget()), left.getFileOptions());
+			conversion.addChild(left);
+			conversion.addChild(right);
+			list.set(leftIndex, conversion);
+			list.remove(leftIndex + 1);
+			list.remove(leftIndex + 1);
+		}
+
 		private static void rewriteParenthesis(List<ParseTree> list) throws ConfigCompileException {
 			for(int listInd = list.size() - 1; listInd >= 1; listInd--) {
 				Stack<ParseTree> executes = new Stack<>();
 				while(listInd > 0) {
-					ParseTree lastNode = list.get(listInd);
-					try {
-						if(lastNode.getData() instanceof CFunction cf
-								&& cf.hasFunction()
-								&& cf.getFunction() != null
-								&& cf.getFunction().getName().equals(Compiler.p.NAME)) {
-							Mixed prevNode = list.get(listInd - 1).getData();
-							if(prevNode instanceof CSymbol || prevNode instanceof CLabel || prevNode instanceof CString) {
-								// It's just a parenthesis like @a = (1); or key: (value), so we should leave it alone.
-								break;
-							}
-							executes.push(lastNode);
-							list.remove(listInd--);
-						} else {
-							break;
-						}
-					} catch (ConfigCompileException e) {
-						break; // The function does not exist. Ignore and handle as "not a p()".
+					ParseTree node = list.get(listInd);
+					if(!(node.getData() instanceof CFunction cf && cf.val().equals(Compiler.p.NAME))) {
+						break;
 					}
+					ParseTree prevNode = list.get(listInd - 1);
+					Mixed prevNodeVal = prevNode.getData();
+
+					// Do not rewrite parenthesis like "@a = (1);" or "key: (value)" to execute().
+					if(prevNodeVal instanceof CSymbol
+							|| prevNodeVal instanceof CLabel || prevNodeVal instanceof CString) {
+						break;
+					}
+
+					// Do not rewrite casts to execute() if the callable is the cast (i.e. "(type) (val)").
+					if(prevNodeVal instanceof CFunction cfunc && cfunc.val().equals(Compiler.p.NAME)
+							&& prevNode.numberOfChildren() == 1
+							&& (prevNode.getChildAt(0).getData() instanceof CClassType
+									|| __type_ref__.createFromBareStringOrConcats(prevNode.getChildAt(0)) != null)) {
+						break;
+					}
+
+					executes.push(node);
+					list.remove(listInd--);
 				}
 				if(!executes.isEmpty()) {
 					if(listInd >= 0) {
@@ -742,9 +780,158 @@ public class Compiler {
 		public ParseTree postParseRewrite(ParseTree ast, Environment env,
 				Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> exceptions) {
 			for(ParseTree child : ast.getChildren()) {
-				if(!(child.getData() instanceof CFunction)) {
+				// We only expect functions here.
+				// Bare strings already have a better exception from MethodScriptCompiler.checkLinearComponents()
+				if(!(child.getData() instanceof CFunction)
+						&& (!(child.getData() instanceof CBareString) || child.getData() instanceof CKeyword)) {
 					exceptions.add(new ConfigCompileException("Not a statement.", child.getTarget()));
 				}
+			}
+			return null;
+		}
+	}
+
+	@api
+	@noprofile
+	@hide("This is only used internally by the compiler.")
+	public static class __type_ref__ extends DummyFunction implements Optimizable {
+
+		public static final String NAME = "__type_ref__";
+
+		public static final String TYPE_REGEX = "[a-zA-Z0-9\\-_\\.]+";
+
+		@Override
+		public String getName() {
+			return NAME;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRENotFoundException.class};
+		}
+
+		@Override
+		public String docs() {
+			return "mixed {string} Used internally by the compiler. You shouldn't use it.";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			throw new CRENotFoundException("\"" + args[0].val() + "\" cannot be resolved to a type.", t);
+		}
+
+		@Override
+		public LeftHandSideType getReturnType(ParseTree node, Target t, List<LeftHandSideType> argTypes,
+				List<Target> argTargets, LeftHandSideType inferredReturnType, Environment env,
+				Set<ConfigCompileException> exceptions) {
+			return CClassType.TYPE.asLeftHandSideType();
+		}
+
+
+
+		public static ParseTree createASTNode(String typeName, Target t, FileOptions fileOptions) {
+			ParseTree node = new ParseTree(new CFunction(NAME, t), fileOptions);
+			node.addChild(new ParseTree(new CString(typeName, t), fileOptions, true));
+			return node;
+		}
+
+		/**
+		 * Converts already parsed AST node to a {@link __type_ref__} {@link ParseTree} node when the used syntax
+		 * actually implies usage of a class type reference (also when the type reference cannot be resolved).
+		 * @param typeNode - The node to convert.
+		 * @return A {@link ParseTree} containing the resulting {@link __type_ref__},
+		 * or {@code null} when conversion was not possible.
+		 */
+		public static ParseTree createFromBareStringOrConcats(ParseTree typeNode) {
+
+			// Convert bare string types to __type_ref__.
+			if(typeNode.getData().getClass().equals(CBareString.class)
+					&& typeNode.getData().val().matches(TYPE_REGEX)) {
+				return __type_ref__.createASTNode(
+						typeNode.getData().val(), typeNode.getTarget(), typeNode.getFileOptions());
+			}
+
+			// Convert concatenated bare string types such as "concat(concat(ms, lang), int)" to "ms.lang.int".
+			if(typeNode.getData() instanceof CFunction
+					&& typeNode.getData().val().equals(concat.NAME)
+					&& typeNode.getChildren().size() == 2) {
+				String typeName = null;
+				ParseTree node = typeNode;
+				while(true) {
+					ParseTree child1 = node.getChildAt(0);
+					ParseTree child2 = node.getChildAt(1);
+
+					if(child2.getData() instanceof CBareString) {
+						typeName = child2.getData().val() + (typeName == null ? "" : "." + typeName);
+					} else if(child2.getData() instanceof CClassType) {
+						// "ms.lang.int" will have "int" parsed as CClassType. Convert to original string.
+						String[] cClassTypeStrSplit = child2.getData().val().split("\\.");
+						typeName = cClassTypeStrSplit[cClassTypeStrSplit.length - 1]
+								+ (typeName == null ? "" : "." + typeName);
+					} else {
+						return null;
+					}
+					if(child1.getData() instanceof CBareString) {
+						typeName = child1.getData().val() + "." + typeName;
+						break;
+					} else if(child1.getData() instanceof CClassType) {
+						// "int.my.type" will have "int" parsed as CClassType. Convert to original string.
+						String[] cClassTypeStrSplit = child1.getData().val().split("\\.");
+						typeName = cClassTypeStrSplit[cClassTypeStrSplit.length - 1] + "." + typeName;
+						break;
+					} else if(!(child1.getData() instanceof CFunction) || !concat.NAME.equals(child1.getData().val())
+							|| child1.getChildren().size() != 2) {
+						return null;
+					}
+					node = child1;
+				}
+				if(typeName.matches(TYPE_REGEX)) {
+					return __type_ref__.createASTNode(typeName, typeNode.getTarget(), typeNode.getFileOptions());
+				}
+			}
+
+			return null;
+		}
+
+		@Override
+		public ParseTree postParseRewrite(ParseTree ast, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> exceptions) {
+
+			// Attempt to resolve type reference to CClassType.
+			String typeName = ast.getChildAt(0).getData().val();
+			try {
+				CClassType classType = CClassType.get(FullyQualifiedClassName.forName(typeName, ast.getTarget(), env), env);
+				return new ParseTree(classType, ast.getFileOptions());
+			} catch (CRECastException e) {
+				return null;
+			}
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+
+			/*
+			 * With static analysis enabled, the typechecker has already taken care of this AST node.
+			 * Until MethodScript supports user types, we know that custom types cannot be resolved regardless of the
+			 * outcome of static analysis. So we can generate an exception here until user type support is added.
+			 */
+			if(!StaticAnalysis.enabled()) {
+				throw new ConfigCompileException(
+						"\"" + children.get(0).getData().val() + "\" cannot be resolved to a type.", t);
 			}
 			return null;
 		}
@@ -1069,6 +1256,183 @@ public class Compiler {
 				exceptions.add(e);
 				return null;
 			}
+		}
+	}
+
+	@api
+	@noprofile
+	@hide("This is only used internally by the compiler.")
+	public static class __cast__ extends DummyFunction implements Optimizable {
+
+		public static final String NAME = "__cast__";
+
+		@Override
+		public String getName() {
+			return NAME;
+		}
+
+		@Override
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CClassType.AUTO)
+					.param(Mixed.TYPE, "value", "The value.")
+					.param(CClassType.TYPE, "type", "The type.")
+					.throwsEx(CRECastException.class, "When value cannot be cast to type.")
+					.build();
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[] {CRECastException.class};
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[] {2};
+		}
+
+		@Override
+		public String docs() {
+			return "mixed {mixed value, ClassType type} Used internally by the compiler. You shouldn't use it.";
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			Mixed value = args[0];
+			CClassType type = ArgumentValidation.getClassType(args[1], t, env).asConcreteType(t);
+			if(!InstanceofUtil.isInstanceof(value, type, env)) {
+				throw new CRECastException(
+						"Cannot cast from " + value.typeof(env).getSimpleName() + " to " + type.getSimpleName() + ".", t);
+			}
+			return value;
+		}
+
+		@Override
+		public LeftHandSideType typecheck(StaticAnalysis analysis, ParseTree ast, LeftHandSideType inferredReturnType,
+				Environment env, Set<ConfigCompileException> exceptions) {
+			// Fall back to default behavior for invalid usage.
+			if(ast.numberOfChildren() != 2) {
+				return super.typecheck(analysis, ast, inferredReturnType, env, exceptions);
+			}
+
+			// Typecheck value and type nodes.
+			ParseTree valNode = ast.getChildAt(0);
+			LeftHandSideType valType = analysis.typecheck(valNode, inferredReturnType, env, exceptions);
+			StaticAnalysis.requireType(valType, Mixed.TYPE, valType.getTarget(), env, exceptions);
+			ParseTree typeNode = ast.getChildAt(1);
+			LeftHandSideType typeType = analysis.typecheck(typeNode, inferredReturnType, env, exceptions);
+			StaticAnalysis.requireType(typeType, CClassType.TYPE, typeNode.getTarget(), env, exceptions);
+
+			// Get cast-to type.
+			// Much of this function deals with LHS types, but only concrete types can be cast to, so we require
+			// CClassType as the input type.
+			if(!(typeNode.getData() instanceof CClassType)) {
+				assert !exceptions.isEmpty() : "Missing compile-time type error for cast type argument.";
+				return Auto.LHSTYPE;
+			}
+			CClassType castToType = (CClassType) typeNode.getData();
+
+			// Generate redundancy warning for casts to the value type.
+			if(castToType.equals(valType)) {
+				env.getEnv(CompilerEnvironment.class).addCompilerWarning(ast.getFileOptions(),
+						new CompilerWarning("Redundant cast to " + castToType.getSimpleName(), ast.getTarget(),
+								FileOptions.SuppressWarning.UselessCode));
+			}
+
+			// Generate compile error for impossible casts.
+			if(!InstanceofUtil.isInstanceof(valType, castToType, env)
+					&& !InstanceofUtil.isInstanceof(castToType, valType, env)) {
+				exceptions.add(new ConfigCompileException("Cannot cast from "
+						+ valType.getSimpleName() + " to " + castToType.getSimpleName() + ".", ast.getTarget()));
+			}
+
+			// Return type that is being cast to.
+			return castToType.asLeftHandSideType();
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+					OptimizationOption.OPTIMIZE_DYNAMIC,
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.CACHE_RETURN
+			);
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, Environment env, Set<Class<? extends EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException, ConfigCompileGroupException {
+
+			// Optimize __cast__(__cast__(val, type1), type2) to __cast__(val, type1) if the cast to type2 will always
+			// pass given that the cast to type1 has passed.
+			ParseTree valNode = children.get(0);
+			if(valNode.getData() instanceof CFunction cf && cf.getCachedFunction() != null
+					&& cf.getCachedFunction().getName().equals(__cast__.NAME) && valNode.numberOfChildren() == 2) {
+				ParseTree typeNode = children.get(1);
+				ParseTree childTypeNode = valNode.getChildAt(1);
+				if(typeNode.getData() instanceof CClassType type
+						&& childTypeNode.getData() instanceof CClassType childType
+						&& InstanceofUtil.isInstanceof(childType, type, env)) {
+					return valNode;
+				}
+			}
+			return null;
+		}
+	}
+
+	@api
+	@noprofile
+	@noboilerplate
+	@hide("This is only used internally by the compiler.")
+	public static class __unsafe_assign__ extends assign {
+
+		public static final String NAME = "__unsafe_assign__";
+
+		@Override
+		public String getName() {
+			return NAME;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+
+			// Get arguments.
+			CClassType type;
+			String varName;
+			Mixed val;
+			if(args.length == 3) {
+				type = (CClassType) args[0];
+				varName = ((IVariable) args[1]).getVariableName();
+				val = args[2];
+			} else {
+				type = null;
+				varName = ((IVariable) args[0]).getVariableName();
+				val = args[1];
+			}
+
+			// Get variable list.
+			IVariableList list = env.getEnv(GlobalEnv.class).GetVarList();
+
+			// Unwrap assigned value from IVariable if an IVariable is passed.
+			if(val instanceof IVariable ivar) {
+				val = list.get(ivar.getVariableName(), ivar.getTarget(), env).ival();
+			}
+
+			// Assign value to variable.
+			// Overwrite variable if the type differs (can occur during proc parameter assignment in cloned outer scope).
+			IVariable var = list.get(varName);
+			if(var == null || (type != null && !type.equals(var.getDefinedType()))) {
+				try {
+					var = new IVariable(type, varName, val, t);
+				} catch(ConfigCompileException ex) {
+					throw new Error(ex);
+				}
+				list.set(var);
+			} else {
+				var.setIval(val);
+			}
+			return var;
 		}
 	}
 }

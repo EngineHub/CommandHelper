@@ -20,26 +20,30 @@ import com.laytonsmith.abstraction.enums.MCFishingState;
 import com.laytonsmith.abstraction.enums.MCGameMode;
 import com.laytonsmith.abstraction.enums.MCResourcePackStatus;
 import com.laytonsmith.abstraction.enums.MCTeleportCause;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.events.MCExpChangeEvent;
 import com.laytonsmith.abstraction.events.MCFoodLevelChangeEvent;
 import com.laytonsmith.abstraction.events.MCGamemodeChangeEvent;
+import com.laytonsmith.abstraction.events.MCPlayerAdvancementDoneEvent;
+import com.laytonsmith.abstraction.events.MCPlayerBucketEvent;
+import com.laytonsmith.abstraction.events.MCPlayerEnterBedEvent;
+import com.laytonsmith.abstraction.events.MCPlayerLeaveBedEvent;
 import com.laytonsmith.abstraction.events.MCPlayerChatEvent;
 import com.laytonsmith.abstraction.events.MCPlayerCommandEvent;
 import com.laytonsmith.abstraction.events.MCPlayerDeathEvent;
 import com.laytonsmith.abstraction.events.MCPlayerEditBookEvent;
-import com.laytonsmith.abstraction.events.MCPlayerEnterBedEvent;
 import com.laytonsmith.abstraction.events.MCPlayerFishEvent;
 import com.laytonsmith.abstraction.events.MCPlayerInteractEvent;
 import com.laytonsmith.abstraction.events.MCPlayerItemConsumeEvent;
 import com.laytonsmith.abstraction.events.MCPlayerJoinEvent;
 import com.laytonsmith.abstraction.events.MCPlayerKickEvent;
-import com.laytonsmith.abstraction.events.MCPlayerLeaveBedEvent;
 import com.laytonsmith.abstraction.events.MCPlayerLoginEvent;
 import com.laytonsmith.abstraction.events.MCPlayerMoveEvent;
 import com.laytonsmith.abstraction.events.MCPlayerPortalEvent;
 import com.laytonsmith.abstraction.events.MCPlayerQuitEvent;
 import com.laytonsmith.abstraction.events.MCPlayerResourcePackEvent;
 import com.laytonsmith.abstraction.events.MCPlayerRespawnEvent;
+import com.laytonsmith.abstraction.events.MCPlayerStopUsingItemEvent;
 import com.laytonsmith.abstraction.events.MCPlayerTeleportEvent;
 import com.laytonsmith.abstraction.events.MCPlayerToggleFlightEvent;
 import com.laytonsmith.abstraction.events.MCPlayerToggleSneakEvent;
@@ -93,6 +97,7 @@ import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CRENullPointerException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
+import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.core.functions.EventBinding.modify_event;
 import com.laytonsmith.core.functions.StringHandling;
 import com.laytonsmith.core.natives.interfaces.Mixed;
@@ -124,11 +129,11 @@ public class PlayerEvents {
 		@Override
 		public String docs() {
 			return "{}"
-					+ " Fires as a player's food level changes."
-					+ " Cancelling the event will cause the change to not be"
-					+ " applied."
+					+ " Fires when a player's food level changes."
+					+ " Cancelling the event will cause the change to not be applied."
 					+ " {player: the player | level: the new food level to be applied"
-					+ " | difference: the difference between the old level and the new }"
+					+ " | difference: the difference between the old level and the new"
+					+ " | item: The item array for the item that caused this change, or null if none}"
 					+ " {level: A different level to be applied }"
 					+ " {}";
 		}
@@ -157,6 +162,13 @@ public class PlayerEvents {
 				ret.put("player", new CString(event.getEntity().getName(), Target.UNKNOWN));
 				ret.put("level", new CInt(event.getFoodLevel(), Target.UNKNOWN));
 				ret.put("difference", new CInt(event.getDifference(), Target.UNKNOWN));
+
+				MCItemStack item = event.getItem();
+				if(item != null) {
+					ret.put("item", ObjectGenerator.GetGenerator().item(item, Target.UNKNOWN));
+				} else {
+					ret.put("item", CNull.NULL);
+				}
 
 				return ret;
 			} else {
@@ -199,20 +211,21 @@ public class PlayerEvents {
 		@Override
 		public String docs() {
 			return "{}"
-					+ " Fires as a player is finishing eating/drinking an item."
+					+ " Fires when a player is finishes eating/drinking an item."
 					+ " Cancelling the event will cause any effects to not be"
 					+ " applied and the item to not be taken from the player."
-					+ " {player: the player consuming | item: the item being consumed}"
+					+ " {player: The player consuming the item | item: The item being consumed"
+					+ " | hand: Either the main_hand or off_hand from which the item is consumed (MC 1.19.2+)}"
 					+ " {item: A different item to be consumed, changing this will"
 					+ " cause the original item to remain in the inventory}"
-					+ " {player|item}";
+					+ " {}";
 		}
 
 		@Override
 		protected PrefilterBuilder getPrefilterBuilder() {
 			return new PrefilterBuilder<MCPlayerItemConsumeEvent>()
 					.set("player", "The player consuming the item", new PlayerPrefilterMatcher<>())
-					.set("itemname", "The item the player is consuming", new ItemStackPrefilterMatcher<>() {
+					.set("itemname", "The item being consumed", new ItemStackPrefilterMatcher<>() {
 						@Override
 						protected MCItemStack getItemStack(MCPlayerItemConsumeEvent event) {
 							return event.getItem();
@@ -247,6 +260,13 @@ public class PlayerEvents {
 				Map<String, Mixed> ret = evaluate_helper(e);
 				Mixed item = ObjectGenerator.GetGenerator().item(e.getItem(), Target.UNKNOWN, env);
 				ret.put("item", item);
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_2)) {
+					if(e.getHand() == MCEquipmentSlot.WEAPON) {
+						ret.put("hand", new CString("main_hand", Target.UNKNOWN));
+					} else {
+						ret.put("hand", new CString("off_hand", Target.UNKNOWN));
+					}
+				}
 				return ret;
 			} else {
 				throw new EventException("Cannot convert to MCPlayerItemConsumeEvent");
@@ -287,18 +307,18 @@ public class PlayerEvents {
 		@Override
 		public String docs() {
 			return "{}"
-					+ "Fired when a player is kicked from the game. "
+					+ "Fires when a player is kicked from the game. "
 					+ "{player: the kicked player | message: the message shown to all online"
 					+ " players | reason: the message shown to the player getting kicked}"
 					+ "{message|reason}"
-					+ "{player|message|reason}";
+					+ "{}";
 		}
 
 		@Override
 		protected PrefilterBuilder getPrefilterBuilder() {
 			return new PrefilterBuilder<MCPlayerKickEvent>()
-					.set("player", "The player being kicked", new PlayerPrefilterMatcher<>())
-					.set("reason", "The reason string", new MacroPrefilterMatcher<>() {
+					.set("player", "The kicked player", new PlayerPrefilterMatcher<>())
+					.set("reason", "The message shown to the player getting kicked", new MacroPrefilterMatcher<>() {
 						@Override
 						protected Object getProperty(MCPlayerKickEvent event) {
 							return event.getReason();
@@ -363,8 +383,10 @@ public class PlayerEvents {
 		@Override
 		public String docs() {
 			return "{} "
-					+ "{player | from: The location the player is coming from | to: The location the player is now in |"
-					+ " type: the type of teleport occuring, one of "
+					+ " Fires when a player is teleported for any reason, except when respawning."
+					+ "{player | from: The location the player is teleporting from"
+					+ " | to: The location the player is teleporting to"
+					+ " | type: the type of teleport cause, one of "
 					+ StringUtils.Join(MCTeleportCause.values(), ", ") + "}"
 					+ "{to}"
 					+ "{}";
@@ -458,9 +480,9 @@ public class PlayerEvents {
 		@Override
 		public String docs() {
 			return "{}"
-					+ "Fired when a player collides with portal."
-					+ "{player: The player that teleport | from: The location the player is coming from"
-					+ " | to: The location the player is coming to. Returns null when using nether portal and"
+					+ "Fires when a player travels after entering a portal."
+					+ "{player: The player that entered the portal | from: The location the player is coming from"
+					+ " | to: The location the player is teleporting to. Returns null when using nether portal and"
 					+ " \"allow-nether\" in server.properties is set to false or when using end portal and"
 					+ " \"allow-end\" in bukkit.yml is set to false."
 					+ " | type: the type of portal occurring | creationallowed: If a new portal can be created."
@@ -473,7 +495,7 @@ public class PlayerEvents {
 		@Override
 		protected PrefilterBuilder getPrefilterBuilder() {
 			return new PrefilterBuilder<MCPlayerPortalEvent>()
-					.set("player", "The player portaling", new PlayerPrefilterMatcher<>())
+					.set("player", "The player that entered the portal", new PlayerPrefilterMatcher<>())
 					.set("from", "The location where the player is coming from", new LocationPrefilterMatcher<>() {
 						@Override
 						protected MCLocation getLocation(MCPlayerPortalEvent event) {
@@ -486,7 +508,7 @@ public class PlayerEvents {
 							return event.getCause();
 						}
 					})
-					.set("to", "The location the player is coming to. Returns null when using nether portal and"
+					.set("to", "The location the player is teleporting to. Returns null when using nether portal and"
 							+ " \"allow-nether\" in server.properties is set to false or when using end portal and"
 							+ " \"allow-end\" in bukkit.yml is set to false.", new LocationPrefilterMatcher<>() {
 						@Override
@@ -578,23 +600,25 @@ public class PlayerEvents {
 		@Override
 		public String docs() {
 			return "{} "
-					+ "This event is called when a player is about to log in. "
+					+ "Fires when a player connects to the server and is about to join. "
 					+ "This event cannot be cancelled. Instead, you can deny them by setting "
 					+ "'result' to KICK_BANNED, KICK_WHITELIST, KICK_OTHER, or KICK_FULL. "
 					+ "The default for 'result' is ALLOWED. When setting 'result', you "
 					+ "can specify the kick message by modifying 'kickmsg'. "
-					+ "{player: The player's name | uuid: The player's unique id | "
-					+ "kickmsg: The default kick message | ip: the player's IP address | "
-					+ "hostname: The hostname used to reach the server | "
-					+ "result: the default response to their logging in}"
+					+ "{player: The player that is connecting"
+					+ " | uuid: The player's unique id"
+					+ " | kickmsg: The kick message the player will see if kicked"
+					+ " | ip: the player's IP address"
+					+ " | hostname: The hostname used to reach the server"
+					+ " | result: the default response to their logging in}"
 					+ "{kickmsg|result}"
-					+ "{player|kickmsg|ip|result}";
+					+ "{}";
 		}
 
 		@Override
 		protected PrefilterBuilder getPrefilterBuilder() {
 			return new PrefilterBuilder<MCPlayerLoginEvent>()
-					.set("player", "The player that is about to login", new PlayerPrefilterMatcher<>());
+					.set("player", "The player that is connecting", new PlayerPrefilterMatcher<>());
 		}
 
 		@Override
@@ -651,8 +675,6 @@ public class PlayerEvents {
 		@Override
 		public void preExecution(Environment env, ActiveEvent activeEvent) {
 			if(activeEvent.getUnderlyingEvent() instanceof MCPlayerLoginEvent) {
-				//Static lookups of the player don't seem to work here, but
-				//the player is passed in with the event.
 				MCPlayer player = ((MCPlayerLoginEvent) activeEvent.getUnderlyingEvent()).getPlayer();
 				Static.InjectPlayer(player);
 			}
@@ -679,14 +701,12 @@ public class PlayerEvents {
 		@Override
 		public String docs() {
 			return "{} "
-					+ "This event is called when a player logs in. "
-					+ "Setting join_message to null causes it to not be displayed at all. Cancelling "
-					+ "the event does not prevent them from logging in. Instead, you should just pkick() them."
-					+ "{player: The player's name | world | join_message: The default join message |"
-					+ " first_login: True if this is the first time"
-					+ " the player has logged in.}"
-					+ "{join_message}"
-					+ "{player|world|join_message}";
+					+ "Fires when a player has finished login and is now joining the server and world."
+					+ " Cancelling the event does not prevent them from joining. See the player_login event or pkick()."
+					+ "{player: The player joining | world | join_message: The message that displays in chat"
+					+ " | first_login: True if this is the first time the player has logged in.}"
+					+ "{join_message: Setting to null will prevent any message from displaying in chat}"
+					+ "{}";
 		}
 
 		@Override
@@ -703,13 +723,13 @@ public class PlayerEvents {
 		protected PrefilterBuilder getPrefilterBuilder() {
 			return new PrefilterBuilder<MCPlayerJoinEvent>()
 					.set("player", "The player joining", new PlayerPrefilterMatcher<>())
-					.set("world", "The world the player is logging in to", new WorldPrefilterMatcher<>() {
+					.set("world", "The world the player is joining into", new WorldPrefilterMatcher<>() {
 						@Override
 						protected MCWorld getWorld(MCPlayerJoinEvent event) {
 							return event.getPlayer().getWorld();
 						}
 					})
-					.set("join_message", "The join message", new RegexPrefilterMatcher<>() {
+					.set("join_message", "The join message that displays in chat", new RegexPrefilterMatcher<>() {
 						@Override
 						protected String getProperty(MCPlayerJoinEvent event) {
 							return event.getJoinMessage();
@@ -753,24 +773,6 @@ public class PlayerEvents {
 					manual.get("join_message", Target.UNKNOWN, env).val());
 		}
 
-		@Override
-		public void preExecution(Environment env, ActiveEvent activeEvent) {
-			if(activeEvent.getUnderlyingEvent() instanceof MCPlayerJoinEvent) {
-				//Static lookups of the player as entity don't seem to work here, but
-				//the player is passed in with the event.
-				MCPlayer player = ((MCPlayerJoinEvent) activeEvent.getUnderlyingEvent()).getPlayer();
-				Static.InjectEntity(player);
-			}
-		}
-
-		@Override
-		public void postExecution(Environment env, ActiveEvent activeEvent) {
-			if(activeEvent.getUnderlyingEvent() instanceof MCPlayerJoinEvent) {
-				MCPlayer player = ((MCPlayerJoinEvent) activeEvent.getUnderlyingEvent()).getPlayer();
-				Static.UninjectEntity(player);
-			}
-		}
-
 	}
 
 	@api
@@ -784,21 +786,23 @@ public class PlayerEvents {
 		@Override
 		public String docs() {
 			return "{} "
-					+ "Fires when a player left or right clicks a block or the air. Note that this event may fire for"
-					+ " the main hand, off hand, or twice, one for each hand, depending on the item priority and what"
-					+ " is clicked. If you don't want multiple events, you can prefilter on hand. If you want to remove"
-					+ " the item that is being used, you must also cancel the event."
-					+ "{action: One of either left_click_block, right_click_block, left_click_air, or right_click_air."
-					+ " If left or right_click_air, neither facing nor location will be present."
-					+ " | block: The type of block they clicked, or null if clicked air or if the block is now empty."
-					+ " | item: The item array the player used to click, or null if not holding anything in that hand"
-					+ " | player: The player associated with this event"
-					+ " | facing: The (lowercase) face of the block they clicked. (One of "
-					+ StringUtils.Join(MCBlockFace.values(), ", ", ", or ") + ") |"
-					+ "location: The (x, y, z, world) location of the block they clicked |"
-					+ "hand: The hand used to click with, can be either main_hand or off_hand}"
+					+ "Fires when a player left or right clicks. Dropping items can also fire this event for the"
+					+ " main_hand if the player is not facing a block or is in adventure mode. This event may fire"
+					+ " multiple times for each click, main_hand and/or off_hand, depending on item priorities and what"
+					+ " block is clicked. You may want to prefilter by hand. An instant break block can fire two events"
+					+ " in one tick, one for the block broken and one for the block or air behind it. If you want to"
+					+ " remove the item that is being used, you should also cancel the event."
+					+ "{action: Can be left_click_block, right_click_block, left_click_air, or right_click_air."
+					+ " | player | hand: The hand used, can be either main_hand or off_hand."
+					+ " | item: The item array in the hand used, or null if there is nothing in that hand."
+					+ " | block: The type of block clicked, or null if no block was clicked."
+					+ " | location: The location array of the block clicked (exists only if block clicked)"
+					+ " | facing: The face of the block clicked: up, down, north, east, west, or south."
+					+ " (exists only if block clicked)"
+					+ " | position: Vector array of the position on the block that was right clicked."
+					+ " (exists only if block right-clicked) (MC 1.20.1+)}"
 					+ "{}"
-					+ "{player|action|item|location|facing}";
+					+ "{}";
 		}
 
 		@Override
@@ -905,6 +909,9 @@ public class PlayerEvents {
 					map.put("facing", new CString(pie.getBlockFace().name().toLowerCase(), Target.UNKNOWN));
 					map.put("location", ObjectGenerator.GetGenerator().location(pie.getClickedBlock().getLocation(),
 							false, env));
+					if(a == MCAction.RIGHT_CLICK_BLOCK && Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_1)) {
+						map.put("position", ObjectGenerator.GetGenerator().vector(pie.getClickedPosition(), Target.UNKNOWN));
+					}
 				}
 				map.put("world", new CString(pie.getPlayer().getWorld().getName(), Target.UNKNOWN));
 				map.put("item", ObjectGenerator.GetGenerator().item(pie.getItem(), Target.UNKNOWN, env));
@@ -945,13 +952,13 @@ public class PlayerEvents {
 		@Override
 		public String docs() {
 			return "{} "
-					+ "Fires when a player tries to enter a bed."
+					+ "Fires when a player interacts with a bed."
 					+ "{location: The location of the bed |"
-					+ " player: The player associated with this event |"
+					+ " player: The player interacting with the bed |"
 					+ " result: The outcome of this attempt to enter bed. Can be one of "
 					+ StringUtils.Join(MCEnterBedResult.values(), ", ", ", or ") + "}"
 					+ "{}"
-					+ "{location|player}";
+					+ "{}";
 		}
 
 		@Override
@@ -981,7 +988,7 @@ public class PlayerEvents {
 							return event.getResult();
 						}
 					})
-					.set("player", "The player entering the bed", new PlayerPrefilterMatcher<>());
+					.set("player", "The player interacting with the bed", new PlayerPrefilterMatcher<>());
 		}
 
 		@Override
@@ -1024,9 +1031,9 @@ public class PlayerEvents {
 			return "{} "
 					+ "Fires when a player leaves a bed."
 					+ "{location: The location of the bed |"
-					+ " player: The player associated with this event}"
+					+ " player: The player leaving the bed}"
 					+ "{}"
-					+ "{location|player}";
+					+ "{}";
 		}
 
 		@Override
@@ -1092,7 +1099,9 @@ public class PlayerEvents {
 		@Override
 		public String docs() {
 			return "{} "
-					+ "Fires when a player steps on a pressure plate or other interactable block."
+					+ "Fires when a player steps on any block that is modifiable when stepped or stomped on."
+					+ " These blocks include pressure plates, redstone ore, farmland, tripwire, turtle eggs, shriekers,"
+					+ " big dripleaves, etc."
 					+ "{location: The location of the block | activated: (deprecated)"
 					+ " | player: The player associated with this event}"
 					+ "{}"
@@ -1102,13 +1111,13 @@ public class PlayerEvents {
 		@Override
 		protected PrefilterBuilder getPrefilterBuilder() {
 			return new PrefilterBuilder<MCPlayerInteractEvent>()
-					.set("location", "The location of the pressure plate", new LocationPrefilterMatcher<>() {
+					.set("location", "The location of the block", new LocationPrefilterMatcher<>() {
 						@Override
 						protected MCLocation getLocation(MCPlayerInteractEvent event) {
 							return event.getClickedBlock().getLocation();
 						}
 					})
-					.set("player", "The player interacting with the pressure plate", new PlayerPrefilterMatcher<>());
+					.set("player", "The player interacting with the block", new PlayerPrefilterMatcher<>());
 		}
 
 		@Override
@@ -1161,15 +1170,12 @@ public class PlayerEvents {
 		@Override
 		public String docs() {
 			return "{}"
-					+ "Fires when a player respawns. Technically during this time, the player may not be considered"
-					+ " 'online'. This can cause problems if you try to run an external command with run() or"
-					+ " something. CommandHelper takes into account the fact that the player is offline, and works"
-					+ " around this, so all functions should respond correctly as if the player was online,"
-					+ " however other plugins or plain text commands that are run may not."
+					+ "Fires when a player respawns. The player may not exist in the player list during this event."
 					+ "{player: The player that is respawning | "
 					+ "location: The location they are going to respawn at | "
-					+ "bed_spawn: True if the respawn location is the player's bed"
-					+ "anchor_spawn: True if the respawn location is the player's respawn anchor}"
+					+ "bed_spawn: If the respawn location is the player's bed | "
+					+ "anchor_spawn: If the respawn location is the player's respawn anchor | "
+					+ "reason: One of DEATH, END_PORTAL, or PLUGIN (MC 1.19.4+)}"
 					+ "{location}"
 					+ "{}";
 		}
@@ -1229,6 +1235,9 @@ public class PlayerEvents {
 				map.put("location", location);
 				map.put("bed_spawn", CBoolean.get(event.isBedSpawn()));
 				map.put("anchor_spawn", CBoolean.get(event.isAnchorSpawn()));
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_4)) {
+					map.put("reason", new CString(event.getReason().name(), Target.UNKNOWN));
+				}
 				return map;
 			} else {
 				throw new EventException("Cannot convert e to PlayerRespawnEvent");
@@ -1257,24 +1266,6 @@ public class PlayerEvents {
 			}
 			return false;
 		}
-
-		@Override
-		public void preExecution(Environment env, ActiveEvent activeEvent) {
-			if(activeEvent.getUnderlyingEvent() instanceof MCPlayerRespawnEvent) {
-				//Static lookups of the player don't seem to work here, but
-				//the player is passed in with the event.
-				MCPlayer player = ((MCPlayerRespawnEvent) activeEvent.getUnderlyingEvent()).getPlayer();
-				Static.InjectPlayer(player);
-			}
-		}
-
-		@Override
-		public void postExecution(Environment env, ActiveEvent activeEvent) {
-			if(activeEvent.getUnderlyingEvent() instanceof MCPlayerRespawnEvent) {
-				MCPlayer player = ((MCPlayerRespawnEvent) activeEvent.getUnderlyingEvent()).getPlayer();
-				Static.UninjectPlayer(player);
-			}
-		}
 	}
 
 	@api
@@ -1288,7 +1279,7 @@ public class PlayerEvents {
 		@Override
 		public String docs() {
 			return "{}"
-					+ "Fired when a player dies."
+					+ "Fires when a player dies."
 					+ "{player: The player that died |"
 					+ " drops: An array of the items that will be dropped, or null |"
 					+ " xp: The amount of experience that will be dropped |"
@@ -1409,10 +1400,10 @@ public class PlayerEvents {
 		@Override
 		public String docs() {
 			return "{}"
-					+ "Fired when any player quits."
+					+ "Fires when a player disconnects."
 					+ "{message: The message to be sent}"
 					+ "{message}"
-					+ "{player|message}";
+					+ "{}";
 		}
 
 		@Override
@@ -1463,24 +1454,6 @@ public class PlayerEvents {
 			}
 			return false;
 		}
-
-		@Override
-		public void preExecution(Environment env, ActiveEvent activeEvent) {
-			if(activeEvent.getUnderlyingEvent() instanceof MCPlayerQuitEvent) {
-				//Static lookups of the player don't seem to work here, but
-				//the player is passed in with the event.
-				MCPlayer player = ((MCPlayerQuitEvent) activeEvent.getUnderlyingEvent()).getPlayer();
-				Static.InjectPlayer(player);
-			}
-		}
-
-		@Override
-		public void postExecution(Environment env, ActiveEvent activeEvent) {
-			if(activeEvent.getUnderlyingEvent() instanceof MCPlayerQuitEvent) {
-				MCPlayer player = ((MCPlayerQuitEvent) activeEvent.getUnderlyingEvent()).getPlayer();
-				Static.UninjectPlayer(player);
-			}
-		}
 	}
 
 	@api
@@ -1494,15 +1467,16 @@ public class PlayerEvents {
 		@Override
 		public String docs() {
 			return "{}"
-					+ "Fired when any player attempts to send a chat message."
-					+ "{message: The message to be sent | recipients | format}"
-					+ "{message|recipients: An array of"
-					+ " players that will receive the chat message. If a player doesn't exist"
-					+ " or is offline, and is in the array, it is simply ignored, no"
-					+ " exceptions will be thrown. | format: The \"printf\" format string, by "
-					+ " default \"&lt;%1$s> %2$s\". The first parameter is the player's display"
-					+ " name, and the second one is the message.}"
-					+ "{player|message|format}";
+					+ "Fires when any player sends a chat message."
+					+ "{message: The message to be sent | format"
+					+ " | recipients: An array of players that will receive the chat message}"
+					+ "{message: The chat message to be sent"
+					+ " | recipients: An array of players that will receive the chat message"
+					+ " | format: The \"printf\" format string, by default \"&lt;%1$s> %2$s\"."
+					+ " The first parameter is the player's display name, and the second one is the message.}"
+					+ "{message | recipients: Players in this array that are not online are ignored"
+					+ " | format: Clients that are configured to only see secure chat will not see modified messages.}"
+					+ "{}";
 		}
 
 		@Override
@@ -1631,18 +1605,16 @@ public class PlayerEvents {
 		@Override
 		public String docs() {
 			return "{}"
-					+ "Fired when any player attempts to send a chat message. The event handler is run on the async"
-					+ " thread, and not"
-					+ " the main server thread, which can lead to undefined results if your code accesses"
-					+ " non-threadsafe methods, hence"
-					+ " why this feature is undocumented. If this event is cancelled, player_chat binds will not fire."
-					+ "{message: The message to be sent | recipients | format}"
-					+ "{message|recipients: An array of"
-					+ " players that will receive the chat message. If a player doesn't exist"
-					+ " or is offline, and is in the array, it is simply ignored, no"
-					+ " exceptions will be thrown.|format: The \"printf\" format string, by "
-					+ " default \"&lt;%1$s> %2$s\". The first parameter is the player's display"
-					+ " name, and the second one is the message.}"
+					+ "Fires when any player sends a chat message. The event handler is run on the async thread,"
+					+ " and not the main server thread, which can lead to undefined results if your code accesses"
+					+ " non-threadsafe methods, hence why this feature is undocumented. If this event is cancelled,"
+					+ " player_chat binds will not fire."
+					+ "{message: The chat message to be sent"
+					+ " | recipients: An array of players that will receive the chat message"
+					+ " | format: The \"printf\" format string, by default \"&lt;%1$s> %2$s\"."
+					+ " The first parameter is the player's display name, and the second one is the message.}"
+					+ "{message | recipients: Players in this array that are not online are ignored"
+					+ " | format: Clients that are configured to only see secure chat will not see modified messages.}"
 					+ "{}";
 		}
 
@@ -1748,14 +1720,12 @@ public class PlayerEvents {
 
 		@Override
 		public String docs() {
-			return "{command: <string match> The entire command the player ran "
-					+ "| prefix: <string match> Just the first part of the command, i.e. '/cmd' in '/cmd blah blah'"
-					+ "| player: <macro> The player using the command}"
-					+ "This event is fired off when a player runs any command at all. This actually fires before normal"
-					+ " CommandHelper aliases, allowing you to insert control before defined aliases, even."
-					+ "{command: The entire command | prefix: Just the prefix of the command}"
+			return "{}"
+					+ "Fires when a player runs a command. This fires before CommandHelper aliases."
+					+ "{command: The entire command the player ran"
+					+ "| prefix: Just the first part of the command, i.e. '/cmd' in '/cmd blah blah'}"
 					+ "{command}"
-					+ "{command}";
+					+ "{}";
 		}
 
 		@Override
@@ -1772,13 +1742,13 @@ public class PlayerEvents {
 		protected PrefilterBuilder getPrefilterBuilder() {
 			return new PrefilterBuilder<MCPlayerCommandEvent>()
 					.set("player", "The player running the command", new PlayerPrefilterMatcher<>())
-					.set("command", "The entire command the player ran", new StringPrefilterMatcher<>() {
+					.set("command", "The entire command string", new StringPrefilterMatcher<>() {
 						@Override
 						protected String getProperty(MCPlayerCommandEvent event) {
 							return event.getCommand();
 						}
 					})
-					.set("prefix", "Just the first part of the command, i.e. '/cmd' in '/cmd blah blah'", new CustomPrefilterMatcher<>() {
+					.set("prefix", "Just the first part of the command", new CustomPrefilterMatcher<>() {
 						@Override
 						public boolean matches(String key, Mixed value, MCPlayerCommandEvent event, Target t, Environment env) {
 							String command = event.getCommand();
@@ -1858,14 +1828,13 @@ public class PlayerEvents {
 
 		@Override
 		public String docs() {
-			return "{player: <macro> The player that switched worlds "
-					+ "| from: <string match> The world the player is coming from "
-					+ "| to: <string match> The world the player is now in}"
-					+ " This event is fired off when a player changes worlds. This event is not cancellable,"
-					+ " so to prevent it, the player_teleport event must be checked."
+			return "{}"
+					+ " Fires when a player changes worlds, so it is not cancellable."
+					+ " To prevent a player from changing worlds, consider cancelling or modifying player_teleport"
+					+ " and player_spawn events."
 					+ "{player | from: The world the player is coming from | to: The world the player is now in}"
 					+ "{}"
-					+ "{player, from}";
+					+ "{}";
 		}
 
 		@Override
@@ -1953,11 +1922,9 @@ public class PlayerEvents {
 		@Override
 		public String docs() {
 			return "{}"
-					+ " This event is fired off after a player has moved a certain distance. Due to the high frequency"
-					+ " of this event, prefilters are extremely important to use -- especially a threshold -- so that"
-					+ " the script doesn't run every time."
-					+ "{player | world | from: The location the player is coming from | to: The location the player is"
-					+ " now in}"
+					+ " Fires when a player moves a certain distance, defined by the threshold prefilter,"
+					+ " which defaults to 1 meter. Prefilters are encouraged if you have a lot of players."
+					+ "{player | world | from: The location the player moved from | to: The location the player moved to}"
 					+ "{}"
 					+ "{}";
 		}
@@ -2002,20 +1969,20 @@ public class PlayerEvents {
 			return new PrefilterBuilder<MCPlayerMoveEvent>()
 					.set("player", "The player that moved. Switching worlds does not trigger this event.", new PlayerPrefilterMatcher<>())
 					.set("threshold", "The minimum distance the player must have travelled before the event"
-					+ " will be triggered. This is based on the 3D distance, and is measured in block units.", new CustomPrefilterMatcher<MCPlayerMoveEvent>() {
+					+ " will be triggered. This is based on the 3D distance in whole meters.", new CustomPrefilterMatcher<MCPlayerMoveEvent>() {
 						@Override
 						public boolean matches(String key, Mixed value, MCPlayerMoveEvent event, Target t, Environment env) {
 							long i = ArgumentValidation.getInt(value, t, env);
 							return i == event.getThreshold();
 						}
 					})
-					.set("from", "The location the player is coming from.", new LocationPrefilterMatcher<MCPlayerMoveEvent>() {
+					.set("from", "The location the player moved from.", new LocationPrefilterMatcher<MCPlayerMoveEvent>() {
 						@Override
 						protected MCLocation getLocation(MCPlayerMoveEvent event) {
 							return event.getFrom();
 						}
 					})
-					.set("to", "The location the player is going to.", new LocationPrefilterMatcher<MCPlayerMoveEvent>() {
+					.set("to", "The location the player moved to.", new LocationPrefilterMatcher<MCPlayerMoveEvent>() {
 						@Override
 						protected MCLocation getLocation(MCPlayerMoveEvent event) {
 							return event.getTo();
@@ -2085,7 +2052,8 @@ public class PlayerEvents {
 			return "{}"
 					+ " Fires when a player casts or reels a fishing rod."
 					+ " {player | world | state | xp | hook: the fishhook entity id"
-					+ " | caught: the id of the snared entity, can be a fish item}"
+					+ " | caught: the id of the snared entity, can be a fish item"
+					+ " | hand: the hand the fishing rod is in, only when state is FISHING (MC 1.19.2+)}"
 					+ " {xp: the exp the player will get from catching a fish}"
 					+ " {}";
 		}
@@ -2121,7 +2089,8 @@ public class PlayerEvents {
 				Target t = Target.UNKNOWN;
 				Map<String, Mixed> ret = evaluate_helper(event);
 				ret.put("world", new CString(event.getPlayer().getWorld().getName(), t));
-				ret.put("state", new CString(event.getState().name(), t));
+				MCFishingState state = event.getState();
+				ret.put("state", new CString(state.name(), t));
 				ret.put("hook", new CString(event.getHook().getUniqueId().toString(), t));
 				ret.put("xp", new CInt(event.getExpToDrop(), t));
 				Mixed caught = CNull.NULL;
@@ -2129,6 +2098,13 @@ public class PlayerEvents {
 					caught = new CString(event.getCaught().getUniqueId().toString(), t);
 				}
 				ret.put("caught", caught);
+				if(state == MCFishingState.FISHING && Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_2)) {
+					if(event.getHand() == MCEquipmentSlot.WEAPON) {
+						ret.put("hand", new CString("main_hand", Target.UNKNOWN));
+					} else {
+						ret.put("hand", new CString("off_hand", Target.UNKNOWN));
+					}
+				}
 				return ret;
 			} else {
 				throw new EventException("Could not convert to MCPlayerFishEvent");
@@ -2272,8 +2248,8 @@ public class PlayerEvents {
 
 		@Override
 		public String docs() {
-			return "{player: <macro>}"
-					+ " Fired when a player's experience changes naturally."
+			return "{}"
+					+ " Fires when a player's experience changes naturally."
 					+ " {player | amount}"
 					+ " {amount: an integer of the amount of exp that will be added to the player's total exp}"
 					+ " {}";
@@ -2341,8 +2317,8 @@ public class PlayerEvents {
 		@Override
 		public String docs() {
 			return "{}"
-					+ " This event is called when a player edit a book."
-					+ " {player: The player which edited the book | slot: The inventory slot number where the book is |"
+					+ " Fires when a player clicks done after modifying a book and quill or signs a book."
+					+ " {player: The player that edited the book | slot: The inventory slot number where the book is |"
 					+ " oldbook: The book before the editing (an array with keys title, author and pages) |"
 					+ " newbook: The book after the editing (an array with keys title, author and pages) |"
 					+ " signing: Whether or not the book is being signed}"
@@ -2358,7 +2334,7 @@ public class PlayerEvents {
 		@Override
 		protected PrefilterBuilder getPrefilterBuilder() {
 			return new PrefilterBuilder<MCPlayerEditBookEvent>()
-					.set("player", "The player which edited the book", new PlayerPrefilterMatcher<>())
+					.set("player", "The player that edited the book", new PlayerPrefilterMatcher<>())
 					.set("signing", "Whether or not the book is being signed", new BooleanPrefilterMatcher<>() {
 						@Override
 						protected boolean getProperty(MCPlayerEditBookEvent event) {
@@ -2488,7 +2464,7 @@ public class PlayerEvents {
 		@Override
 		public String docs() {
 			return "{}"
-					+ " Called when a player toggles their flying state."
+					+ " Fires when a player toggles their flying state, typically by double tapping their jump key."
 					+ " {player: The player who toggled their flying state | flying: Whether or not the player is"
 					+ " trying to start or stop flying |"
 					+ " location: Where the player is}"
@@ -2557,10 +2533,9 @@ public class PlayerEvents {
 
 		@Override
 		public String docs() {
-			return "{player: <macro> The player who toggled their sneaking state | sneaking: <boolean match> Whether"
-					+ " or not the player is now sneaking | world: <macro>}"
-					+ " Called when a player toggles their sneaking state."
-					+ " {player: The player who toggled their sneaking state | sneaking: Whether or not the player is"
+			return "{}"
+					+ " Fires when a player changes their sneaking state."
+					+ " {player: The player who changed their sneaking state | sneaking: Whether or not the player is"
 					+ " now sneaking |"
 					+ " location: Where the player is}"
 					+ " {}"
@@ -2575,7 +2550,7 @@ public class PlayerEvents {
 		@Override
 		protected PrefilterBuilder getPrefilterBuilder() {
 			return new PrefilterBuilder<MCPlayerToggleSneakEvent>()
-					.set("player", "The player who toggled their sneaking state", new PlayerPrefilterMatcher<>())
+					.set("player", "The player who changed their sneaking state", new PlayerPrefilterMatcher<>())
 					.set("sneaking", "Whether or not the player is now sneaking", new BooleanPrefilterMatcher<>() {
 						@Override
 						protected boolean getProperty(MCPlayerToggleSneakEvent event) {
@@ -2629,8 +2604,8 @@ public class PlayerEvents {
 		@Override
 		public String docs() {
 			return "{}"
-					+ " Called when a player toggles their sprinting state."
-					+ " {player: The player who toggled their sprinting state | sprinting: Whether or not the player"
+					+ " Fires when a player changes their sprinting state."
+					+ " {player: The player who changed their sprinting state | sprinting: Whether or not the player"
 					+ " is now sprinting |"
 					+ " location: Where the player is}"
 					+ " {}"
@@ -2645,7 +2620,7 @@ public class PlayerEvents {
 		@Override
 		protected PrefilterBuilder getPrefilterBuilder() {
 			return new PrefilterBuilder<MCPlayerToggleSprintEvent>()
-					.set("player", "The player who toggled their sprinting state.", new PlayerPrefilterMatcher<>())
+					.set("player", "The player who changed their sprinting state.", new PlayerPrefilterMatcher<>())
 					.set("sprinting", "Whether or not the player is now sprinting.", new BooleanPrefilterMatcher<>() {
 						@Override
 						protected boolean getProperty(MCPlayerToggleSprintEvent event) {
@@ -2699,11 +2674,12 @@ public class PlayerEvents {
 
 		@Override
 		public String docs() {
-			return "{player: <string match> | status: <string match> }"
-					+ " Called when a player's client responds to a request to download and load a resource pack."
+			return "{}"
+					+ " Fires when a player's client responds to a request to download and load a resource pack."
 					+ " Two of these events may be fired for each request: first when the client accepts the pack,"
 					+ " and later when the client successfully loads (or fails to download) the pack."
-					+ " {player | status: The resource pack status received from the client, one of: "
+					+ " {player | id: The UUID of the resource pack (MC 1.20.4+)"
+					+ " | status: The resource pack status received from the client, one of: "
 					+ StringUtils.Join(MCResourcePackStatus.values(), ", ", ", or ") + "}"
 					+ " {}"
 					+ " {}";
@@ -2727,6 +2703,9 @@ public class PlayerEvents {
 		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			Map<String, Mixed> map = evaluate_helper(event);
 			map.put("status", new CString(((MCPlayerResourcePackEvent) event).getStatus().name(), Target.UNKNOWN));
+			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_4)) {
+				map.put("id", new CString(((MCPlayerResourcePackEvent) event).getId().toString(), Target.UNKNOWN));
+			}
 			return map;
 		}
 
@@ -2738,6 +2717,244 @@ public class PlayerEvents {
 		@Override
 		public MSVersion since() {
 			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
+			return null;
+		}
+	}
+
+	public abstract static class player_bucket_event extends AbstractEvent {
+
+		@Override
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Environment env) throws PrefilterNonMatchException {
+			if(e instanceof MCPlayerBucketEvent) {
+				return true;
+			}
+			return false;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
+			throw ConfigRuntimeException.CreateUncatchableException("Unsupported operation.", Target.UNKNOWN);
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Mixed value, BindableEvent e, Environment env) {
+			return false;
+		}
+
+		@Override
+		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
+			if(event instanceof MCPlayerBucketEvent e) {
+				Map<String, Mixed> ret = evaluate_helper(e);
+				Target t = Target.UNKNOWN;
+
+				ret.put("player", new CString(e.getPlayer().getName(), t));
+				ret.put("location", ObjectGenerator.GetGenerator().location(e.getBlock().getLocation(), false));
+
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_2)) {
+					if(e.getHand() == MCEquipmentSlot.WEAPON) {
+						ret.put("hand", new CString("main_hand", t));
+					} else {
+						ret.put("hand", new CString("off_hand", t));
+					}
+				}
+				ret.put("item", ObjectGenerator.GetGenerator().item(e.getItemStack(), t));
+
+				return ret;
+			} else {
+				throw new EventException("Event received was not an MCPlayerBucketEvent.");
+			}
+		}
+	}
+
+	@api
+	public static class player_bucket_fill extends player_bucket_event {
+
+		@Override
+		public String getName() {
+			return "player_bucket_fill";
+		}
+
+		@Override
+		public String docs() {
+			return "{} "
+					+ "Fired when a player fills a bucket in their hand from the world."
+					+ " { player: the player who used the bucket."
+					+ " | location: where the bucket was filled from."
+					+ " | hand: hand the player was holding the bucket in, either main_hand or off_hand (MC 1.19.2+)."
+					+ " | item: the bucket item the player ended up with. }"
+					+ "{} "
+					+ "{} "
+					+ "{}";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.PLAYER_BUCKET_FILL;
+		}
+	}
+
+	@api
+	public static class player_bucket_empty extends player_bucket_event {
+
+		@Override
+		public String getName() {
+			return "player_bucket_empty";
+		}
+
+		@Override
+		public String docs() {
+			return "{} "
+					+ "Fired when a player empties a bucket in their hand into the world."
+					+ " { player: the player who used the bucket."
+					+ " | location: where the bucket was emptied to."
+					+ " | hand: hand the player was holding the bucket in, either main_hand or off_hand (MC 1.19.2+)."
+					+ " | item: the bucket item the player ended up with. }"
+					+ "{} "
+					+ "{} "
+					+ "{}";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.PLAYER_BUCKET_EMPTY;
+		}
+	}
+
+	@api
+	public static class player_advancement_done extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "player_advancement_done";
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.PLAYER_ADVANCEMENT_DONE;
+		}
+
+		@Override
+		public String docs() {
+			return "{}"
+					+ " Fires when a player completes all criteria to unlock an advancement or recipe."
+					+ " {player | advancement | title: The advancement display title, if one exists (MC 1.17.1+ on"
+					+ " Paper, 1.18.2+ on Spigot)}"
+					+ " {}"
+					+ " {}";
+		}
+
+		@Override
+		protected PrefilterBuilder getPrefilterBuilder() {
+			return new PrefilterBuilder<MCPlayerAdvancementDoneEvent>()
+					.set("advancement", "The namespaced key of the advancement completed", new MacroPrefilterMatcher<>() {
+						@Override
+						protected String getProperty(MCPlayerAdvancementDoneEvent event) {
+							return event.getAdvancementKey().toString();
+						}
+					});
+		}
+
+		@Override
+		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
+			if(event instanceof MCPlayerAdvancementDoneEvent e) {
+				Map<String, Mixed> map = new HashMap<>();
+				map.put("player", new CString(e.getPlayer().getName(), Target.UNKNOWN));
+				map.put("advancement", new CString(e.getAdvancementKey().toString(), Target.UNKNOWN));
+				map.put("title", new CString(e.getTitle(), Target.UNKNOWN));
+				return map;
+			} else {
+				throw new EventException("Event received was not an MCPlayerAdvancementDoneEvent.");
+			}
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
+			return false;
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
+			return null;
+		}
+	}
+
+	@api
+	public static class player_stop_using_item extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "player_stop_using_item";
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.PLAYER_STOP_USING_ITEM;
+		}
+
+		@Override
+		public String docs() {
+			return "{}"
+					+ " Fires when a player stops using an item such as shields, bows, crossbows, tridents, brushes,"
+					+ " goat horns, or spyglasses (not including when changing the held item)."
+					+ " Edible items will also fire this if the player stops consuming before completion."
+					+ " This event is only available on Paper 1.18.2+."
+					+ " {player | item: The item that was used. | ticks: The number of ticks the item was used.}"
+					+ " {}"
+					+ " {}";
+		}
+
+		@Override
+		protected PrefilterBuilder getPrefilterBuilder() {
+			return new PrefilterBuilder<MCPlayerStopUsingItemEvent>()
+					.set("player", "The player that was using the item.", new PlayerPrefilterMatcher<>())
+					.set("itemname", "The item type being used", new ItemStackPrefilterMatcher<>() {
+						@Override
+						protected MCItemStack getItemStack(MCPlayerStopUsingItemEvent event) {
+							return event.getItem();
+						}
+					});
+		}
+
+		@Override
+		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
+			if(event instanceof MCPlayerStopUsingItemEvent e) {
+				Map<String, Mixed> map = new HashMap<>();
+				map.put("player", new CString(e.getPlayer().getName(), Target.UNKNOWN));
+				map.put("item", ObjectGenerator.GetGenerator().item(e.getItem(), Target.UNKNOWN));
+				map.put("ticks", new CInt(e.getTicksHeldFor(), Target.UNKNOWN));
+				return map;
+			} else {
+				throw new EventException("Event received was not an MCPlayerStopUsingItemEvent.");
+			}
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
+			return false;
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_5;
 		}
 
 		@Override

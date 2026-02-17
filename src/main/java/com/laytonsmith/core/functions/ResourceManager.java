@@ -64,7 +64,7 @@ public class ResourceManager {
 	private static final Map<Long, CResource<?>> RESOURCES = new HashMap<>();
 
 	static {
-		StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
+		StaticLayer.GetConvertor().addPersistentShutdownHook(new Runnable() {
 
 			@Override
 			public void run() {
@@ -172,7 +172,7 @@ public class ResourceManager {
 
 		@Override
 		public String docs() {
-			return "resource {type, [data]} Creates a new resource, which is stored in memory. Various"
+			return "Resource {type, [data]} Creates a new resource, which is stored in memory. Various"
 					+ " functions require resources of certain types, which are created with this function."
 					+ " Barring resources that you intend on keeping around indefinitely, each call"
 					+ " to res_create_resource should be paired with a res_free_resource, being careful"
@@ -181,7 +181,7 @@ public class ResourceManager {
 					+ StringUtils.Join(ResourceTypes.values(), ", ", ", or ")
 					+ " It's worth noting that this function (and any function that relies on it) is a stopgap"
 					+ " measure, and will eventually be deprecated and removed. For certain types of operations,"
-					+ " it's completely unweildy to implement them in a procedural manner, so this is a temporary"
+					+ " it's completely unwieldy to implement them in a procedural manner, so this is a temporary"
 					+ " alternative to proper object support.";
 		}
 
@@ -237,7 +237,7 @@ public class ResourceManager {
 
 		@Override
 		public String docs() {
-			return "void {resource} Frees the given resource. This should ALWAYS be called at some point after creating a resource"
+			return "void {Resource} Frees the given resource. This should ALWAYS be called at some point after creating a resource"
 					+ " with res_create_resource, once you are done with the resource.";
 		}
 

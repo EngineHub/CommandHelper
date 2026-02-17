@@ -2,12 +2,9 @@ package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCAnimalTamer;
-import com.laytonsmith.abstraction.MCHumanEntity;
-import com.laytonsmith.abstraction.MCOfflinePlayer;
-import com.laytonsmith.abstraction.bukkit.entities.BukkitMCHumanEntity;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.AnimalTamer;
-import org.bukkit.entity.HumanEntity;
+
+import java.util.UUID;
 
 public class BukkitMCAnimalTamer implements MCAnimalTamer {
 
@@ -35,28 +32,6 @@ public class BukkitMCAnimalTamer implements MCAnimalTamer {
 		return at;
 	}
 
-	public MCOfflinePlayer getOfflinePlayer() {
-		if(at instanceof OfflinePlayer) {
-			return new BukkitMCOfflinePlayer((OfflinePlayer) at);
-		}
-		return null;
-	}
-
-	public boolean isOfflinePlayer() {
-		return at instanceof OfflinePlayer;
-	}
-
-	public boolean isHumanEntity() {
-		return at instanceof HumanEntity;
-	}
-
-	public MCHumanEntity getHumanEntity() {
-		if(at instanceof HumanEntity) {
-			return new BukkitMCHumanEntity((HumanEntity) at);
-		}
-		return null;
-	}
-
 	@Override
 	public String toString() {
 		return at.toString();
@@ -75,5 +50,10 @@ public class BukkitMCAnimalTamer implements MCAnimalTamer {
 	@Override
 	public String getName() {
 		return at.getName();
+	}
+
+	@Override
+	public UUID getUniqueID() {
+		return at.getUniqueId();
 	}
 }

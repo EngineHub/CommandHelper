@@ -12,5 +12,6 @@ public enum MCTreeSpecies {
 	JUNGLE,
 	MANGROVE,
 	OAK,
-	SPRUCE
+	PALE_OAK,
+	SPRUCE,
 }

@@ -2,9 +2,13 @@ package com.laytonsmith.abstraction.bukkit.events.drivers;
 
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
+import com.laytonsmith.abstraction.bukkit.BukkitMCServer;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCExpChangeEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCFoodLevelChangeEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCGamemodeChangeEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerAdvancementDoneEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerBucketEmptyEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerBucketFillEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerEnterBedEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerLeaveBedEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerChatEvent;
@@ -20,25 +24,32 @@ import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlay
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerQuitEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerRespawnEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerResourcePackEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerStopUsingItemEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerTeleportEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerToggleFlightEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerToggleSneakEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerToggleSprintEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCWorldChangedEvent;
+import com.laytonsmith.annotations.EventIdentifier;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.events.drivers.PlayerEvents;
+import io.papermc.paper.event.player.PlayerStopUsingItemEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerAdvancementDoneEvent;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerBedLeaveEvent;
+import org.bukkit.event.player.PlayerBucketEmptyEvent;
+import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerEditBookEvent;
 import org.bukkit.event.player.PlayerExpChangeEvent;
@@ -96,6 +107,11 @@ public class BukkitPlayerListener implements Listener {
 	public void onPlayerLogin(PlayerLoginEvent e) {
 		BukkitMCPlayerLoginEvent ple = new BukkitMCPlayerLoginEvent(e);
 		EventUtils.TriggerListener(Driver.PLAYER_LOGIN, "player_login", ple);
+		if(e.getResult() == PlayerLoginEvent.Result.ALLOWED) {
+			// store UUID for fallback player lookups by name
+			BukkitMCServer server = (BukkitMCServer) CommandHelperPlugin.myServer;
+			server.playerUUIDsByName.put(e.getPlayer().getName(), e.getPlayer().getUniqueId());
+		}
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
@@ -228,6 +244,8 @@ public class BukkitPlayerListener implements Listener {
 	public void onPlayerQuit(PlayerQuitEvent event) {
 		BukkitMCPlayerQuitEvent pqe = new BukkitMCPlayerQuitEvent(event);
 		EventUtils.TriggerListener(Driver.PLAYER_QUIT, "player_quit", pqe);
+		// clear UUID for fallback player lookups by name
+		((BukkitMCServer) CommandHelperPlugin.myServer).playerUUIDsByName.remove(event.getPlayer().getName());
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
@@ -242,7 +260,7 @@ public class BukkitPlayerListener implements Listener {
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerTeleport(PlayerTeleportEvent event) {
-		if(event.getFrom().equals(event.getTo())) {
+		if(event.getFrom().equals(event.getTo()) || event.getTo() == null) {
 			return;
 		}
 
@@ -360,5 +378,29 @@ public class BukkitPlayerListener implements Listener {
 				PlayerEvents.GetLastLocations(i).put(event.getPlayer().getName(), new BukkitMCLocation(event.getTo()));
 			}
 		}
+	}
+
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onBucketFill(PlayerBucketFillEvent event) {
+		BukkitMCPlayerBucketFillEvent pbfe = new BukkitMCPlayerBucketFillEvent(event);
+		EventUtils.TriggerListener(Driver.PLAYER_BUCKET_FILL, "player_bucket_fill", pbfe);
+	}
+
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onBucketEmpty(PlayerBucketEmptyEvent event) {
+		BukkitMCPlayerBucketEmptyEvent pbee = new BukkitMCPlayerBucketEmptyEvent(event);
+		EventUtils.TriggerListener(Driver.PLAYER_BUCKET_EMPTY, "player_bucket_empty", pbee);
+	}
+
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onPlayerAdvancementDoneEvent(PlayerAdvancementDoneEvent event) {
+		BukkitMCPlayerAdvancementDoneEvent pade = new BukkitMCPlayerAdvancementDoneEvent(event);
+		EventUtils.TriggerListener(Driver.PLAYER_ADVANCEMENT_DONE, "player_advancement_done", pade);
+	}
+
+	@EventIdentifier(event = Driver.PLAYER_STOP_USING_ITEM, className = "io.papermc.paper.event.player.PlayerStopUsingItemEvent")
+	public void onPlayerStopUsingItemEvent(Event event) {
+		BukkitMCPlayerStopUsingItemEvent psuie = new BukkitMCPlayerStopUsingItemEvent((PlayerStopUsingItemEvent) event);
+		EventUtils.TriggerListener(Driver.PLAYER_STOP_USING_ITEM, "player_stop_using_item", psuie);
 	}
 }

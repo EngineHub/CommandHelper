@@ -395,7 +395,7 @@ Commands may have additional annotations, which correspond to the values in regi
 @usage - Overrides the default usage example
 @permission - The permission the user must have to run this command. Note that this permission is in *addition* to the
 normal alias permission system, and so it's recommended to continue using the * label on the alias itself.
-@noPermMsg - Overrides the no permission error message
+@noPermMsg - Overrides the no permission error message (unused as of Spigot 1.19)
 @alias - Alias for this command. A command can have multiple aliases, and you can repeat this annotation to provide
 more.
 

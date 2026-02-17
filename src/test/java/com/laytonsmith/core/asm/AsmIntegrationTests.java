@@ -1,6 +1,8 @@
 package com.laytonsmith.core.asm;
 
 import com.laytonsmith.PureUtilities.Common.OSUtils;
+import com.laytonsmith.testing.AbstractIntegrationTest;
+
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
@@ -12,7 +14,7 @@ import static com.laytonsmith.core.asm.AsmIntegrationTestUtils.integrationTestAn
 import static com.laytonsmith.core.asm.AsmIntegrationTestUtils.installToolchain;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class AsmIntegrationTests {
+public class AsmIntegrationTests extends AbstractIntegrationTest {
 
 	@Test
 	public void aaaTestToolchainInstallation() throws Exception {

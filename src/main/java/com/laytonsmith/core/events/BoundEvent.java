@@ -293,7 +293,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
 		try {
 			Environment env = originalEnv.clone();
 			try {
-				env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, eventObjName, event, Target.UNKNOWN,
+				env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE.asLeftHandSideType(), eventObjName, event, Target.UNKNOWN,
 						env));
 			} catch (ConfigCompileException cce) {
 				throw new CREFormatException(cce.getMessage(), Target.UNKNOWN);

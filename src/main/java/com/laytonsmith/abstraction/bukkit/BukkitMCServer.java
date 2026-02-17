@@ -41,6 +41,7 @@ import org.bukkit.boss.BarStyle;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.command.SimpleCommandMap;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.server.BroadcastMessageEvent;
@@ -52,24 +53,34 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
 public class BukkitMCServer implements MCServer {
 
-	Server s;
-	MCVersion version;
-	boolean isPaper = false;
+	private final Server s;
+	private MCVersion version;
+	private String craftBukkitPackage;
+	private boolean isPaper = false;
 
 	public BukkitMCServer() {
 		this.s = Bukkit.getServer();
+		craftBukkitPackage = this.s.getClass().getPackage().getName();
 		try {
-			Class.forName("com.destroystokyo.paper.PaperConfig");
+			Class.forName("io.papermc.paper.configuration.Configuration");
 			this.isPaper = true;
-		} catch (ClassNotFoundException e) {}
+		} catch (ClassNotFoundException e) {
+			// check for below 1.19
+			try {
+				Class.forName("com.destroystokyo.paper.PaperConfig");
+				this.isPaper = true;
+			} catch (ClassNotFoundException ignore) {}
+		}
 	}
 
 	public BukkitMCServer(Server server) {
@@ -87,6 +98,10 @@ public class BukkitMCServer implements MCServer {
 
 	public boolean isPaper() {
 		return this.isPaper;
+	}
+
+	public String getCraftBukkitPackage() {
+		return this.craftBukkitPackage;
 	}
 
 	@Override
@@ -177,17 +192,28 @@ public class BukkitMCServer implements MCServer {
 
 	@Override
 	public MCPluginManager getPluginManager() {
-		if(s.getPluginManager() == null) {
-			return null;
-		}
 		return new BukkitMCPluginManager(s.getPluginManager());
 	}
+
+	/**
+	 * This player Name-to-UUID fallback is used to work around an issue in Minecraft/Spigot where players are
+	 * incorrectly removed from the by-name map in PlayerList (and the list of online players) but not the UUID keyed
+	 * map (which is used to determine if they're considered online by the Bukkit API).
+	 * This occurs during the respawn event or when a player is teleported between worlds during the quit event.
+	 * Versions of Spigot up to at least 1.20.4 are known to be affected by this issue.
+	 * This map should only be updated after the login and quit events in BukkitPlayerListener.
+	 */
+	public final Map<String, UUID> playerUUIDsByName = new HashMap<>();
 
 	@Override
 	public MCPlayer getPlayerExact(String name) {
 		Player p = s.getPlayerExact(name);
 		if(p == null) {
-			return null;
+			UUID id = playerUUIDsByName.get(name);
+			if(id == null) {
+				return null;
+			}
+			return getPlayer(id);
 		}
 		return new BukkitMCPlayer(p);
 	}
@@ -196,7 +222,11 @@ public class BukkitMCServer implements MCServer {
 	public MCPlayer getPlayer(String name) {
 		Player p = s.getPlayer(name);
 		if(p == null) {
-			return null;
+			UUID id = playerUUIDsByName.get(name);
+			if(id == null) {
+				return null;
+			}
+			return getPlayer(id);
 		}
 		return new BukkitMCPlayer(p);
 	}
@@ -326,7 +356,7 @@ public class BukkitMCServer implements MCServer {
 	@Override
 	public MCPlayerProfile getPlayerProfile(UUID id, String name) {
 		if(isPaper()) {
-			return new BukkitMCPlayerProfile(ReflectionUtils.invokeMethod(s, "createProfile", id, name));
+			return new BukkitMCPlayerProfile(this.s.createProfile(id, name));
 		}
 		return null;
 	}
@@ -416,11 +446,6 @@ public class BukkitMCServer implements MCServer {
 	@Override
 	public String getWorldContainer() {
 		return s.getWorldContainer().getPath();
-	}
-
-	@Override
-	public String getServerName() {
-		return "";
 	}
 
 	@Override
@@ -570,7 +595,15 @@ public class BukkitMCServer implements MCServer {
 
 	@Override
 	public boolean removeRecipe(String key) {
-		return s.removeRecipe(NamespacedKey.minecraft(key));
+		if(key.indexOf(':') > -1) {
+			NamespacedKey nsKey = NamespacedKey.fromString(key);
+			if(nsKey == null) {
+				return false;
+			}
+			return s.removeRecipe(nsKey);
+		} else {
+			return s.removeRecipe(NamespacedKey.minecraft(key));
+		}
 	}
 
 	@Override
@@ -621,5 +654,15 @@ public class BukkitMCServer implements MCServer {
 	@Override
 	public MCWorldBorder createWorldBorder() {
 		return new BukkitMCWorldBorder(s.createWorldBorder());
+	}
+
+	@Override
+	public List<UUID> selectEntites(MCCommandSender sender, String selector) {
+		List<Entity> selectedEntities = s.selectEntities((CommandSender) sender.getHandle(), selector);
+		List<UUID> result = new ArrayList<>(selectedEntities.size());
+		for(Entity e : selectedEntities) {
+			result.add(e.getUniqueId());
+		}
+		return result;
 	}
 }

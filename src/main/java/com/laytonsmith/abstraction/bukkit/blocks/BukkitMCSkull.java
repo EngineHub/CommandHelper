@@ -2,9 +2,13 @@ package com.laytonsmith.abstraction.bukkit.blocks;
 
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
+import com.laytonsmith.abstraction.MCPlayerProfile;
 import com.laytonsmith.abstraction.blocks.MCSkull;
 import com.laytonsmith.abstraction.bukkit.BukkitMCOfflinePlayer;
 
+import com.laytonsmith.abstraction.bukkit.BukkitMCPlayerProfile;
+import com.laytonsmith.abstraction.bukkit.BukkitMCServer;
+import com.laytonsmith.core.Static;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Skull;
 
@@ -45,5 +49,21 @@ public class BukkitMCSkull extends BukkitMCBlockState implements MCSkull {
 
 		// Set the skull owner.
 		this.skull.setOwningPlayer((OfflinePlayer) player.getHandle());
+	}
+
+	@Override
+	public MCPlayerProfile getPlayerProfile() {
+		if(((BukkitMCServer) Static.getServer()).isPaper()) {
+			Object profile = ReflectionUtils.invokeMethod(Skull.class, this.skull, "getPlayerProfile");
+			if(profile != null) {
+				return new BukkitMCPlayerProfile(profile);
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public void setPlayerProfile(MCPlayerProfile profile) {
+		ReflectionUtils.invokeMethod(this.skull, "setPlayerProfile", profile.getHandle());
 	}
 }

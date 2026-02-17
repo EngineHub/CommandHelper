@@ -15,20 +15,10 @@ public abstract class DynamicEnum<Abstracted extends Enum, Concrete> {
 
 	public abstract String name();
 
-	/**
-	 * Override me in API
-	 *
-	 * @return
-	 */
 	public Abstracted getAbstracted() {
 		return abstracted;
 	}
 
-	/**
-	 * Override me in Implementation if needed
-	 *
-	 * @return
-	 */
 	public Concrete getConcrete() {
 		return concrete;
 	}

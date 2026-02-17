@@ -635,8 +635,8 @@ public class DocGenTemplates {
 			String code = StringUtils.Join(ArrayUtils.slice(args, 1, args.length - 1), "|");
 			String out = code;
 			out = escapeWiki(out);
-			out = out.replaceAll("<", "&lt;");
-			out = out.replaceAll(">", "&gt;");
+			out = out.replace("<", "&lt;");
+			out = out.replace(">", "&gt;");
 			if(out.startsWith("\n")) {
 				out = out.substring(1);
 			}
@@ -652,7 +652,7 @@ public class DocGenTemplates {
 		@Override
 		public String generate(String... args) {
 			String note = StringUtils.Join(args, "|");
-			note = note.replaceAll("\n", " ");
+			note = note.replace('\n', ' ');
 			return "<div class=\"TakeNote\"><strong>Note:</strong> " + note + "</div>";
 		}
 
@@ -796,10 +796,10 @@ public class DocGenTemplates {
 				+ "! scope=\"col\" |\n"
 				+ "|-\n"
 				+ "| '''Q:'''\n"
-				+ "| '''" + args[0].replaceAll("\n", " ") + "'''\n"
+				+ "| '''" + args[0].replace('\n', ' ') + "'''\n"
 				+ "|- \n"
 				+ "| '''A:''' \n"
-				+ "| " + args[1].replaceAll("\n", " ") + "\n"
+				+ "| " + args[1].replace('\n', ' ') + "\n"
 				+ "|}";
 	};
 

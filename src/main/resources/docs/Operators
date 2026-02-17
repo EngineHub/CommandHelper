@@ -62,6 +62,7 @@ still uses array_get). Sub-strings within strings may be pulled out using the br
 <code>array(1, 2, 3)[1..2]</code> returns an array with 2 elements in it, namely 2 and 3. <code>'string'[0]</code> returns
 's', and <code>'string'[0..1]</code> returns 'st'.
 |-
+| ''Execute''
 | %%NOWIKI|( )%%
 | {{function|execute}}
 | Left
@@ -69,6 +70,12 @@ still uses array_get). Sub-strings within strings may be pulled out using the br
 are for instance closures and proc references, among a few others. These are first class values, and can be executed
 in a number of ways, for instance if we define @c as <code>closure @c = closure() { msg('hi'); };</code> then we can
 execute it as <code>@c();</code>.
+|-
+| ''Soft cast''
+| %%NOWIKI|( )%%
+| {{function|__cast__}}
+| Right
+| Soft (checking / non-converting) cast. Syntax <code>(type) value</code>.
 |-
 | ''Unary''
 | ! ++ --

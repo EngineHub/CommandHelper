@@ -27,7 +27,7 @@ public class BukkitMCPattern implements MCPattern {
 
 	@Override
 	public MCPatternShape getShape() {
-		return BukkitMCPatternShape.getConvertor().getAbstractedEnum(pattern.getPattern());
+		return BukkitMCPatternShape.valueOfConcrete(pattern.getPattern());
 	}
 
 	@Override

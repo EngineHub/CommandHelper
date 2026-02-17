@@ -3,6 +3,7 @@ package com.laytonsmith.abstraction.events;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.entities.MCProjectile;
 import com.laytonsmith.abstraction.blocks.MCBlock;
+import com.laytonsmith.abstraction.blocks.MCBlockFace;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.core.events.BindableEvent;
 
@@ -15,4 +16,6 @@ public interface MCProjectileHitEvent extends BindableEvent {
 	MCEntity getHitEntity();
 
 	MCBlock getHitBlock();
+
+	MCBlockFace getHitFace();
 }

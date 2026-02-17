@@ -6,6 +6,10 @@ import com.laytonsmith.annotations.MEnum;
 public enum MCResourcePackStatus {
 	ACCEPTED,
 	DECLINED,
+	DISCARDED,
+	DOWNLOADED,
 	FAILED_DOWNLOAD,
+	FAILED_RELOAD,
+	INVALID_URL,
 	SUCCESSFULLY_LOADED
 }

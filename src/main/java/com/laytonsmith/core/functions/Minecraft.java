@@ -2,6 +2,7 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCCreatureSpawner;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
@@ -12,11 +13,14 @@ import com.laytonsmith.abstraction.MCPluginManager;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
+import com.laytonsmith.abstraction.blocks.MCBlockData;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
+import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.enums.MCEffect;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.hide;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSVersion;
@@ -41,8 +45,10 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.drivers.ServerEvents;
 import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
+import com.laytonsmith.core.exceptions.CRE.CRELengthException;
 import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
 import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
@@ -57,12 +63,13 @@ import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -72,24 +79,11 @@ public class Minecraft {
 		return "These functions provide a hook into game functionality.";
 	}
 
-	private static final SortedMap<String, Mixed> DATA_VALUE_LOOKUP = new TreeMap<>();
-
-	static {
-		Properties p1 = new Properties();
-		try {
-			p1.load(Minecraft.class.getResourceAsStream("/data_values.txt"));
-			Enumeration e = p1.propertyNames();
-			while(e.hasMoreElements()) {
-				String name = e.nextElement().toString();
-				DATA_VALUE_LOOKUP.put(name, new CString(p1.getProperty(name), Target.UNKNOWN));
-			}
-		} catch (IOException ex) {
-			Logger.getLogger(Minecraft.class.getName()).log(Level.SEVERE, null, ex);
-		}
-	}
-
 	@api(environments = {CommandHelperEnvironment.class})
+	@hide("deprecated")
 	public static class data_values extends AbstractFunction implements Optimizable {
+
+		private static final Map<String, Mixed> DATA_VALUE_LOOKUP = new HashMap<>();
 
 		@Override
 		public String getName() {
@@ -114,7 +108,7 @@ public class Minecraft {
 			String changed = c;
 			if(changed.contains(":")) {
 				//Split on that, and reverse. Change wool:red to redwool
-				String split[] = changed.split(":");
+				String[] split = changed.split(":");
 				if(split.length == 2) {
 					changed = split[1] + split[0];
 				}
@@ -122,20 +116,23 @@ public class Minecraft {
 			//Remove anything that isn't a letter or a number
 			changed = changed.replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
 			//Do a lookup in the DataLookup table
-			if(DATA_VALUE_LOOKUP.containsKey(changed)) {
-				String split[] = DATA_VALUE_LOOKUP.get(changed).toString().split(":");
-				if(split[1].equals("0")) {
-					return new CInt(split[0], t);
-				}
-				return new CString(split[0] + ":" + split[1], t);
+			Mixed result = DATA_VALUE_LOOKUP.get(changed);
+			if(result == null) {
+				return CNull.NULL;
 			}
-			return CNull.NULL;
+			String[] split = result.val().split(":");
+			if(split[1].equals("0")) {
+				return new CInt(split[0], t);
+			}
+			return new CString(split[0] + ":" + split[1], t);
 		}
 
 		@Override
 		public String docs() {
-			return "int {var1} Does a lookup to return the data value of a name. For instance, returns 1 for 'stone'."
-					+ " If the data value cannot be found, null is returned.";
+			return "int {var1} Does a lookup to return the legacy data value of a name. For instance, returns 1 for 'stone'."
+					+ " If the data value cannot be found, null is returned. This function is deprecated and should"
+					+ " only be used to convert legacy data that used CommandHelper's old material aliases."
+					+ " To be removed in version 3.3.6.";
 		}
 
 		@Override
@@ -165,6 +162,19 @@ public class Minecraft {
 				throws ConfigCompileException, ConfigRuntimeException {
 			env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
 					new CompilerWarning(getName() + " is deprecated.", t, null));
+			if(DATA_VALUE_LOOKUP.isEmpty()) {
+				Properties p1 = new Properties();
+				try {
+					p1.load(Minecraft.class.getResourceAsStream("/data_values.txt"));
+					Enumeration e = p1.propertyNames();
+					while(e.hasMoreElements()) {
+						String name = e.nextElement().toString();
+						DATA_VALUE_LOOKUP.put(name, new CString(p1.getProperty(name), Target.UNKNOWN));
+					}
+				} catch (IOException ex) {
+					Logger.getLogger(Minecraft.class.getName()).log(Level.SEVERE, null, ex);
+				}
+			}
 			return null;
 		}
 
@@ -352,7 +362,7 @@ public class Minecraft {
 			Mixed id = args[0];
 			if(id.isInstanceOf(CArray.TYPE, null, env)) {
 				MCItemStack is = ObjectGenerator.GetGenerator().item(id, t, env);
-				return new CInt(is.getType().getMaxStackSize(), t);
+				return new CInt(is.maxStackSize(), t);
 			}
 			// legacy
 			int type;
@@ -419,15 +429,17 @@ public class Minecraft {
 		@Override
 		public String docs() {
 			return "void {locationArray, effect, [radius]} Plays the specified effect at the given location"
-					+ " for all players within the radius (or 64 by default). The effect can be one of the following: "
-					+ StringUtils.Join(MCEffect.values(), ", ", ", or ", " or ")
-					+ ". ---- Some effects may require an applicable block at the specified location."
-					+ " Additional data can be supplied with the syntax EFFECT:DATA."
-					+ "<br>The STEP_SOUND takes a block material name."
+					+ " for all players within the radius (or 64 by default)."
+					+ " ---- The effect can be one of the following: "
+					+ StringUtils.Join(MCEffect.values(), ", ", ", or ", " or ") + "."
+					+ " Some effects may require an applicable block at the specified location."
+					+ " Additional data can be supplied with the syntax EFFECT:DATA.<br>"
+					+ "<br>STEP_SOUND and PARTICLES_AND_SOUND_BRUSH_BLOCK_COMPLETE (Paper) take a block material name."
 					+ "<br>RECORD_PLAY takes a record material name."
-					+ "<br>SMOKE takes a facing, one of " + StringUtils.Join(MCBlockFace.values(), ", ", ", or ", " or ")
+					+ "<br>SHOOT_WHITE_SMOKE (Paper) and SMOKE take a facing, one of " + StringUtils.Join(MCBlockFace.values(), ", ", ", or ", " or ")
 					+ "<br>POTION_BREAK takes an int (represents color)."
-					+ "<br>VILLAGER_PLANT_GROW and BONE_MEAL_USE take an int for the number of particles.";
+					+ "<br>BONE_MEAL_USE, BEE_GROWTH (Paper), SMASH_ATTACK (Paper) and"
+					+ " TURTLE_EGG_PLACEMENT (Paper) take an int for the number of particles.";
 		}
 
 		@Override
@@ -473,7 +485,7 @@ public class Minecraft {
 			if(args.length > 2) {
 				radius = ArgumentValidation.getInt32(args[args.length - 1], t, env);
 			}
-			if(!dataString.equals("")) {
+			if(!dataString.isEmpty()) {
 				switch(effect) {
 					case RECORD_PLAY:
 					case STEP_SOUND:
@@ -489,6 +501,7 @@ public class Minecraft {
 						// Fall back to integer
 						break;
 					case SMOKE:
+					case SHOOT_WHITE_SMOKE:
 						try {
 							MCBlockFace facing = MCBlockFace.valueOf(dataString.toUpperCase());
 							try {
@@ -497,6 +510,19 @@ public class Minecraft {
 							} catch (IllegalArgumentException ex) {
 								throw new CREIllegalArgumentException(ex.getMessage(), t);
 							}
+						} catch (IllegalArgumentException ex) {
+							// Fall back to integer
+						}
+						break;
+					case PARTICLES_AND_SOUND_BRUSH_BLOCK_COMPLETE:
+						try {
+							MCBlockData blockData = Static.getServer().createBlockData(dataString.toLowerCase(Locale.ROOT));
+							try {
+								l.getWorld().playEffect(l, effect, blockData, radius);
+							} catch (IllegalArgumentException ex) {
+								throw new CREIllegalArgumentException(ex.getMessage(), t);
+							}
+							return CVoid.VOID;
 						} catch (IllegalArgumentException ex) {
 							// Fall back to integer
 						}
@@ -564,7 +590,7 @@ public class Minecraft {
 					+ " and only that information for that index will be returned."
 					+ " ---- Otherwise if value is not specified (or is -1), it returns an array of"
 					+ " information with the following pieces of information in the specified index: "
-					+ "<ul><li>0 - Server name; the name of the server in server.properties.</li>"
+					+ "<ul><li>0 - Empty.</li>"
 					+ "<li>1 - API version; The version of the plugin API this server is implementing.</li>"
 					+ "<li>2 - Server version; The bare version string of the server implementation.</li>"
 					+ "<li>3 - Allow flight; If true, Minecraft's inbuilt anti fly check is disabled.</li>"
@@ -621,8 +647,7 @@ public class Minecraft {
 			ArrayList<Mixed> retVals = new ArrayList<>();
 
 			if(index == 0 || index == -1) {
-				//Server name
-				retVals.add(new CString(server.getServerName(), t));
+				retVals.add(new CString("", t));
 			}
 
 			if(index == 1 || index == -1) {
@@ -867,15 +892,15 @@ public class Minecraft {
 				w = p.getWorld();
 			}
 			MCLocation location = ObjectGenerator.GetGenerator().location(args[0], w, t, env);
-			if(location.getBlock().getState() instanceof MCCreatureSpawner) {
-				MCEntityType entityType = ((MCCreatureSpawner) location.getBlock().getState()).getSpawnedType();
-				if(entityType == null) {
-					return CNull.NULL;
-				}
-				return new CString(entityType.name(), t);
-			} else {
-				throw new CREFormatException("The block at " + location.toString() + " is not a spawner block", t);
+			MCBlockState state = location.getBlock().getState();
+			if(!(state instanceof MCCreatureSpawner)) {
+				throw new CREFormatException("The block at " + location + " is not a spawner block", t);
 			}
+			MCEntityType entityType = ((MCCreatureSpawner) state).getSpawnedType();
+			if(entityType == null) {
+				return CNull.NULL;
+			}
+			return new CString(entityType.name(), t);
 		}
 
 		@Override
@@ -890,7 +915,8 @@ public class Minecraft {
 
 		@Override
 		public String docs() {
-			return "string {locationArray} Gets the entity type that will spawn from the specified mob spawner.";
+			return "string {locationArray} Gets the entity type that will spawn from the specified mob spawner."
+					+ " May be null.";
 		}
 
 		@Override
@@ -926,18 +952,21 @@ public class Minecraft {
 				w = p.getWorld();
 			}
 			MCLocation location = ObjectGenerator.GetGenerator().location(args[0], w, t, env);
-			MCEntityType type;
-			try {
-				type = MCEntityType.valueOf(args[1].val().toUpperCase());
-			} catch (IllegalArgumentException iae) {
-				throw new CREBadEntityException("Not a registered entity type: " + args[1].val(), t);
+			MCBlockState state = location.getBlock().getState();
+			if(!(state instanceof MCCreatureSpawner)) {
+				throw new CREFormatException("The block at " + location + " is not a spawner block", t);
 			}
-			if(location.getBlock().getState() instanceof MCCreatureSpawner) {
-				((MCCreatureSpawner) location.getBlock().getState()).setSpawnedType(type);
+			if(args[1] instanceof CNull) {
+				((MCCreatureSpawner) state).setSpawnedType(null);
 				return CVoid.VOID;
-			} else {
-				throw new CREFormatException("The block at " + location.toString() + " is not a spawner block", t);
 			}
+			try {
+				MCEntityType type = MCEntityType.valueOf(args[1].val().toUpperCase());
+				((MCCreatureSpawner) state).setSpawnedType(type);
+			} catch (IllegalArgumentException iae) {
+				throw new CREBadEntityException("Not a valid entity type: " + args[1].val(), t);
+			}
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -953,7 +982,8 @@ public class Minecraft {
 		@Override
 		public String docs() {
 			return "void {locationArray, type} Sets the mob spawner's entity type at the location specified."
-					+ " If the location is not a mob spawner, or if the type is invalid, a FormatException is thrown."
+					+ " If the location is not a mob spawner, a FormatException is thrown."
+					+ " Entity type may be set to null. If the entity type is invalid, a BadEntityException is thrown."
 					+ " ---- The type may be one of either "
 					+ StringUtils.Join(MCEntityType.MCVanillaEntityType.values(), ", ", ", or ");
 		}
@@ -1145,6 +1175,8 @@ public class Minecraft {
 						return CBoolean.get(mat.hasGravity());
 					case "isBlock":
 						return CBoolean.get(mat.isBlock());
+					case "isItem":
+						return CBoolean.get(mat.isItem());
 					case "isBurnable":
 						return CBoolean.get(mat.isBurnable());
 					case "isEdible":
@@ -1182,6 +1214,7 @@ public class Minecraft {
 			ret.set("maxDurability", new CInt(mat.getMaxDurability(), t), t, env);
 			ret.set("hasGravity", CBoolean.get(mat.hasGravity()), t, env);
 			ret.set("isBlock", CBoolean.get(mat.isBlock()), t, env);
+			ret.set("isItem", CBoolean.get(mat.isItem()), t, env);
 			ret.set("isBurnable", CBoolean.get(mat.isBurnable()), t, env);
 			ret.set("isEdible", CBoolean.get(mat.isEdible()), t, env);
 			ret.set("isFlammable", CBoolean.get(mat.isFlammable()), t, env);
@@ -1210,7 +1243,7 @@ public class Minecraft {
 		@Override
 		public String docs() {
 			return "mixed {material, [trait]} Returns an array of info about the material. If a trait is specified,"
-					+ " it returns only that trait. Available traits: hasGravity, isBlock, isBurnable, isEdible,"
+					+ " it returns only that trait. Available traits: hasGravity, isBlock, isItem, isBurnable, isEdible,"
 					+ " isFlammable, isOccluding, isRecord, isSolid, isTransparent, isInteractable, maxDurability,"
 					+ " hardness (for block materials only), blastResistance (for block materials only),"
 					+ " and maxStacksize. The accuracy of these values depend on the server implementation.";
@@ -1412,6 +1445,73 @@ public class Minecraft {
 		@Override
 		public String docs() {
 			return "array {} Returns an array of all material names.";
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class select_entities extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "select_entities";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		@Override
+		public String docs() {
+			return "array {[player], selector} Returns an array of all matching entities for a Minecraft target selector."
+					+ " The selector will use the current command sender context unless a player is specified."
+					+ " Selector must be a valid vanilla target selector for the current version of Minecraft or a"
+					+ " FormatException will be thrown.";
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCCommandSender sender;
+			String selector;
+			if(args.length == 2) {
+				sender = Static.GetPlayer(args[0], t);
+				selector = args[1].val();
+			} else {
+				sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+				if(sender == null) {
+					throw new CREException("No command sender in this context.", t);
+				}
+				selector = args[0].val();
+			}
+			try {
+				CArray result = new CArray(t);
+				for(UUID id : Static.getServer().selectEntites(sender, selector)) {
+					result.push(new CString(id.toString(), t), t);
+				}
+				return result;
+			} catch(IllegalArgumentException ex) {
+				throw new CREFormatException(ex.getMessage(), t);
+			}
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CRELengthException.class, CREPlayerOfflineException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return Boolean.FALSE;
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
 		}
 	}
 }

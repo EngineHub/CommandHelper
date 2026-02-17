@@ -1,5 +1,6 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
+import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCLivingEntity;
@@ -14,9 +15,12 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents;
 import com.laytonsmith.abstraction.enums.MCEntityEffect;
 import com.laytonsmith.abstraction.enums.MCEntityType;
+import com.laytonsmith.abstraction.enums.MCPose;
 import com.laytonsmith.abstraction.enums.MCTeleportCause;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPose;
 import com.laytonsmith.abstraction.events.MCEntityDamageEvent;
+import io.papermc.paper.entity.TeleportFlag;
 import org.bukkit.EntityEffect;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -30,10 +34,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import org.bukkit.Location;
 
 public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 
-	Entity e;
+	private static final boolean USE_RETAIN_PASSENGERS;
+
+	static {
+		boolean useRetainPassengers = false;
+		try {
+			Class<?> clz = Class.forName("io.papermc.paper.entity.TeleportFlag$EntityState");
+			if(clz.getAnnotation(Deprecated.class) == null) {
+				useRetainPassengers = true;
+			}
+		} catch(ClassNotFoundException ignored) {}
+		USE_RETAIN_PASSENGERS = useRetainPassengers;
+	}
+
+	private final Entity e;
 
 	public BukkitMCEntity(Entity e) {
 		super(e);
@@ -181,12 +199,27 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 
 	@Override
 	public void playEffect(MCEntityEffect type) {
-		e.playEffect(EntityEffect.valueOf(type.name()));
+		try {
+			e.playEffect(EntityEffect.valueOf(type.name()));
+		} catch(IllegalArgumentException ignore) {
+			// Likely a non-applicable effect (enforced in Paper 1.21.4+)
+			// Do nothing, as per documentation.
+		}
 	}
 
 	@Override
 	public void remove() {
 		e.remove();
+	}
+
+	@Override
+	public boolean savesOnUnload() {
+		return e.isPersistent();
+	}
+
+	@Override
+	public void setSavesOnUnload(boolean saves) {
+		e.setPersistent(saves);
 	}
 
 	@Override
@@ -197,11 +230,6 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 	@Override
 	public void setFireTicks(int ticks) {
 		e.setFireTicks(ticks);
-	}
-
-	@Override
-	public void setLastDamageCause(MCEntityDamageEvent event) {
-		e.setLastDamageCause((EntityDamageEvent) event._GetObject());
 	}
 
 	@Override
@@ -222,23 +250,37 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 
 	@Override
 	public boolean teleport(MCEntity destination) {
-		Entity ent = ((BukkitMCEntity) destination).getHandle();
-		return e.teleport(ent.getLocation());
+		return this.teleport(destination.getLocation(), MCTeleportCause.PLUGIN);
 	}
 
 	@Override
 	public boolean teleport(MCEntity destination, MCTeleportCause cause) {
-		return e.teleport(((BukkitMCEntity) destination).getHandle(), TeleportCause.valueOf(cause.name()));
+		return this.teleport(destination.getLocation(), cause);
 	}
 
 	@Override
 	public boolean teleport(MCLocation location) {
-		return e.teleport(((BukkitMCLocation) location).asLocation());
+		return this.teleport(location, MCTeleportCause.PLUGIN);
 	}
 
 	@Override
 	public boolean teleport(MCLocation location, MCTeleportCause cause) {
-		return e.teleport(((BukkitMCLocation) location).asLocation(), TeleportCause.valueOf(cause.name()));
+		Location l = (Location) location.getHandle();
+		TeleportCause c = TeleportCause.valueOf(cause.name());
+		if(USE_RETAIN_PASSENGERS) {
+			// Paper requires a third parameter to maintain consistent behavior when teleporting entities with passengers.
+			// TeleportFlag.EntityState added in 1.19.3 but RETAIN_PASSENGERS was made default in 1.21.10.
+			TeleportFlag teleportFlag = TeleportFlag.EntityState.RETAIN_PASSENGERS;
+			// Paper only method: e.teleport(l, c, teleportFlag);
+			return ReflectionUtils.invokeMethod(Entity.class, e, "teleport",
+					new Class[] {
+						org.bukkit.Location.class,
+						org.bukkit.event.player.PlayerTeleportEvent.TeleportCause.class,
+						TeleportFlag[].class
+					},
+					new Object[] { l, c, new TeleportFlag[] { teleportFlag } });
+		}
+		return e.teleport(l, c);
 	}
 
 	@Override
@@ -307,6 +349,11 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 	}
 
 	@Override
+	public boolean hasScoreboardTag(String tag) {
+		return e.getScoreboardTags().contains(tag);
+	}
+
+	@Override
 	public boolean addScoreboardTag(String tag) {
 		return e.addScoreboardTag(tag);
 	}
@@ -351,5 +398,53 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 	@Override
 	public int hashCode() {
 		return e.hashCode();
+	}
+
+	@Override
+	public int getEntityId() {
+		return e.getEntityId();
+	}
+
+	@Override
+	public boolean isInWater() {
+		return e.isInWater();
+	}
+
+	@Override
+	public void setRotation(float yaw, float pitch) {
+		e.setRotation(yaw, pitch);
+	}
+
+	@Override
+	public boolean isVisibleByDefault() {
+		try {
+			return e.isVisibleByDefault();
+		} catch (NoSuchMethodError ex) {
+			// probably before 1.19.3
+			return true;
+		}
+	}
+
+	@Override
+	public void setVisibleByDefault(boolean visible) {
+		try {
+			e.setVisibleByDefault(visible);
+		} catch (NoSuchMethodError ex) {
+			// probably before 1.19.3
+		}
+	}
+
+	@Override
+	public MCPose getPose() {
+		return BukkitMCPose.getConvertor().getAbstractedEnum(e.getPose());
+	}
+
+	@Override
+	public void setPose(MCPose pose, boolean fixed) {
+		try {
+			e.setPose(BukkitMCPose.getConvertor().getConcreteEnum(pose), fixed);
+		} catch (NoSuchMethodError ex) {
+			// either Spigot or prior to 1.20.1
+		}
 	}
 }

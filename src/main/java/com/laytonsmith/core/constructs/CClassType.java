@@ -42,6 +42,7 @@ import com.laytonsmith.core.objects.UserObject;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -70,6 +71,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	 * startup
 	 */
 	private static final ClassTypeCache NATIVE_CACHE = new ClassTypeCache();
+	private static final Map<FullyQualifiedClassName, CClassType> FQCN_CCLASSTYPE_CACHE = new HashMap<>();
 
 	// The only types that can be created here are the ones that don't have a real class associated with them, or the
 	// TYPE value itself, or values that are used in initialization of CClassType itself.
@@ -223,6 +225,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 
 	static {
 		NATIVE_CACHE.add(FullyQualifiedClassName.forNativeClass(CClassType.class), null, TYPE);
+		FQCN_CCLASSTYPE_CACHE.put(FullyQualifiedClassName.forNativeClass(CClassType.class), TYPE);
 	}
 
 	@StandardField
@@ -527,6 +530,16 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	}
 
 	/**
+	 * Returns the CClassType for a native enum. This will fail with a runtime error if this
+	 * class is not tagged with MEnum.
+	 * @param menum
+	 * @return
+	 */
+	public static CClassType getForEnum(Class<? extends Enum<?>> menum) {
+		return get(FullyQualifiedClassName.forNativeEnum(menum), null);
+	}
+
+	/**
 	 * This function defines a brand new class type.This should exclusively be used in a class definition scenario, and
 	 * never when simply looking up an existing class. The created CClassType is returned.
 	 *
@@ -815,6 +828,11 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	}
 
 	@Override
+	public Set<ObjectModifier> getObjectModifiers() {
+		return EnumSet.of(ObjectModifier.FINAL);
+	}
+
+	@Override
 	public Version since() {
 		return MSVersion.V3_3_1;
 	}
@@ -974,6 +992,10 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		return null;
 	}
 
+	/**
+	 * Converts this concrete type into a LHS type. This will always work, since all concrete types can be
+	 * represented as LHS types.
+	 */
 	public LeftHandSideType asLeftHandSideType() {
 		return LeftHandSideType.fromHardCodedType(this);
 	}

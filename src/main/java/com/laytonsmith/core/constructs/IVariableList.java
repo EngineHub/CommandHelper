@@ -81,6 +81,10 @@ public class IVariableList {
 		varList.put(v.getVariableName(), v);
 	}
 
+	public IVariable get(String name) {
+		return varList.get(name);
+	}
+
 	public IVariable get(String name, Target t, boolean bypassAssignedCheck, Environment env) {
 		IVariable v = varList.get(name);
 		if(v == null) {
@@ -97,7 +101,7 @@ public class IVariableList {
 		// non-strict mode it will be a compiler warning.
 		// ==, not .equals
 		if(v.ival() == CNull.UNDEFINED && !bypassAssignedCheck
-				&& env.getEnv(GlobalEnv.class).GetFlag("no-check-undefined") == null) {
+				&& env.getEnv(GlobalEnv.class).GetFlag(GlobalEnv.FLAG_NO_CHECK_UNDEFINED) == null) {
 			MSLog.GetLogger().Log(MSLog.Tags.RUNTIME, LogLevel.ERROR, "Using undefined variable: " + name, t);
 		}
 		v.setTarget(t);
@@ -139,7 +143,9 @@ public class IVariableList {
 	@Override
 	public IVariableList clone() {
 		IVariableList clone = new IVariableList(this);
-		clone.varList = new HashMap<>(varList);
+		for(IVariable var : varList.values()) {
+			clone.set(var.shallowClone());
+		}
 		return clone;
 	}
 

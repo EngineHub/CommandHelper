@@ -2,7 +2,6 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
-import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCItemStack;
@@ -11,6 +10,8 @@ import com.laytonsmith.abstraction.MCNote;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPattern;
 import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.MCPlayerProfile;
+import com.laytonsmith.abstraction.MCProfileProperty;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBanner;
@@ -18,6 +19,8 @@ import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockData;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.abstraction.blocks.MCCommandBlock;
+import com.laytonsmith.abstraction.blocks.MCDecoratedPot;
+import com.laytonsmith.abstraction.blocks.MCEndGateway;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.blocks.MCSign;
 import com.laytonsmith.abstraction.blocks.MCSign.Side;
@@ -49,7 +52,6 @@ import com.laytonsmith.core.compiler.signature.FunctionSignatures;
 import com.laytonsmith.core.compiler.signature.SignatureBuilder;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
-import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
@@ -77,6 +79,7 @@ import java.util.Arrays;
 
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class Environment {
@@ -262,7 +265,8 @@ public class Environment {
 		@Override
 		public String docs() {
 			return "void {locationArray, data, [physics]} Sets the block at the location from a blockdata string."
-					+ " Forward compatibility is not ensured.";
+					+ " Forward compatibility is not ensured."
+					+ " The physics boolean determines whether or not this causes a block update. Defaults to true.";
 		}
 
 		@Override
@@ -378,7 +382,8 @@ public class Environment {
 			return "void {locationArray, data, [physics]} Sets the block at the location from a blockdata object."
 					+ " Blockdata can be an associative array or string format."
 					+ " If an array, a 'block' key must exist with the block material."
-					+ " All the other keys must be a blockstate and its value.";
+					+ " All the other keys must be a blockstate and its value."
+					+ " The physics boolean determines whether or not this causes a block update. Defaults to true.";
 		}
 
 		@Override
@@ -484,71 +489,72 @@ public class Environment {
 
 		@Override
 		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCWorld w = null;
-			MCCommandSender sender = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
-			if(sender instanceof MCPlayer) {
-				w = ((MCPlayer) sender).getWorld();
+			MCPlayer player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCWorld world = null;
+			if(player != null) {
+				world = player.getWorld();
 			}
-			MCBlock b = ObjectGenerator.GetGenerator().location(args[0], w, t, env).getBlock();
-			if(b.isSign()) {
-				MCSign.Side side = Side.FRONT;
-				String line1 = "";
-				String line2 = "";
-				String line3 = "";
-				String line4 = "";
-				if((args.length == 2 || args.length == 3) && args[args.length - 1].isInstanceOf(CArray.TYPE, null, env)) {
-					if(args.length == 3) {
-						try {
-							side = MCSign.Side.valueOf(args[1].val());
-						} catch (IllegalArgumentException ex) {
-							throw new CREFormatException("Invalid sign side: " + args[1].val(), t);
-						}
+			MCBlock block = ObjectGenerator.GetGenerator().location(args[0], world, t, env).getBlock();
+			MCSign.Side side = Side.FRONT;
+			String line1 = "";
+			String line2 = "";
+			String line3 = "";
+			String line4 = "";
+			if((args.length == 2 || args.length == 3) && args[args.length - 1].isInstanceOf(CArray.TYPE, null, env)) {
+				if(args.length == 3) {
+					try {
+						side = MCSign.Side.valueOf(args[1].val());
+					} catch (IllegalArgumentException ex) {
+						throw new CREFormatException("Invalid sign side: " + args[1].val(), t);
 					}
-					CArray ca = (CArray) args[args.length - 1];
-					if(ca.size() >= 1) {
-						line1 = ca.get(0, t, env).val();
-					}
-					if(ca.size(env) >= 2) {
-						line2 = ca.get(1, t, env).val();
-					}
-					if(ca.size(env) >= 3) {
-						line3 = ca.get(2, t, env).val();
-					}
-					if(ca.size(env) >= 4) {
-						line4 = ca.get(3, t, env).val();
-					}
+				}
+				CArray ca = (CArray) args[args.length - 1];
+				if(ca.size() >= 1) {
+					line1 = ca.get(0, t).val();
+				}
+				if(ca.size() >= 2) {
+					line2 = ca.get(1, t).val();
+				}
+				if(ca.size() >= 3) {
+					line3 = ca.get(2, t).val();
+				}
+				if(ca.size() >= 4) {
+					line4 = ca.get(3, t).val();
+				}
 
-				} else {
-					if(args.length >= 2) {
-						line1 = args[1].val();
-					}
-					if(args.length >= 3) {
-						line2 = args[2].val();
-					}
-					if(args.length >= 4) {
-						line3 = args[3].val();
-					}
-					if(args.length >= 5) {
-						line4 = args[4].val();
-					}
-				}
-				MCSign sign = b.getSign();
-				MCSignText text = sign;
-				if(side == Side.BACK) {
-					text = sign.getBackText();
-					if(text == null) {
-						throw new CRERangeException("Sign does not have back text.", t);
-					}
-				}
-				text.setLine(0, line1);
-				text.setLine(1, line2);
-				text.setLine(2, line3);
-				text.setLine(3, line4);
-				sign.update();
-				return CVoid.VOID;
 			} else {
+				if(args.length >= 2) {
+					line1 = args[1].val();
+				}
+				if(args.length >= 3) {
+					line2 = args[2].val();
+				}
+				if(args.length >= 4) {
+					line3 = args[3].val();
+				}
+				if(args.length >= 5) {
+					line4 = args[4].val();
+				}
+			}
+			MCSign sign;
+			try {
+				sign = block.getSign();
+			} catch (ClassCastException ex) {
 				throw new CRERangeException("The block at the specified location is not a sign", t);
 			}
+			MCSignText text = sign;
+			if(side == Side.BACK) {
+				text = sign.getBackText();
+				if(text == null) {
+					throw new CRERangeException("Sign does not have back text.", t);
+				}
+			}
+			text.setLine(0, line1);
+			text.setLine(1, line2);
+			text.setLine(2, line3);
+			text.setLine(3, line4);
+			sign.update();
+			return CVoid.VOID;
 		}
 	}
 
@@ -594,35 +600,35 @@ public class Environment {
 
 		@Override
 		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCCommandSender sender = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
-			MCWorld w = null;
-			if(sender instanceof MCPlayer) {
-				w = ((MCPlayer) sender).getWorld();
+			MCPlayer player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCWorld world = null;
+			if(player != null) {
+				world = player.getWorld();
 			}
-			MCBlock b = ObjectGenerator.GetGenerator().location(args[0], w, t).getBlock();
-			if(b.isSign()) {
-				MCSignText text = b.getSign();
-				if(args.length == 2) {
-					try {
-						if(MCSign.Side.valueOf(args[1].val()) == Side.BACK) {
-							text = ((MCSign) text).getBackText();
-							if(text == null) {
-								throw new CRERangeException("Sign does not have back text.", t);
-							}
-						}
-					} catch (IllegalArgumentException ex) {
-						throw new CREFormatException("Invalid sign side: " + args[1].val(), t);
-					}
-				}
-				CString line1 = new CString(text.getLine(0), t);
-				CString line2 = new CString(text.getLine(1), t);
-				CString line3 = new CString(text.getLine(2), t);
-				CString line4 = new CString(text.getLine(3), t);
-				return new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
-						.addNativeParameter(CString.TYPE, null).buildNative(), env, line1, line2, line3, line4);
-			} else {
+			MCBlock block = ObjectGenerator.GetGenerator().location(args[0], world, t).getBlock();
+			MCSignText text;
+			try {
+				text = block.getSign();
+			} catch (ClassCastException ex) {
 				throw new CRERangeException("The block at the specified location is not a sign", t);
 			}
+			if(args.length == 2) {
+				try {
+					if(MCSign.Side.valueOf(args[1].val()) == Side.BACK) {
+						text = ((MCSign) text).getBackText();
+						if(text == null) {
+							throw new CRERangeException("Sign does not have back text.", t);
+						}
+					}
+				} catch (IllegalArgumentException ex) {
+					throw new CREFormatException("Invalid sign side: " + args[1].val(), t);
+				}
+			}
+			CString line1 = new CString(text.getLine(0), t);
+			CString line2 = new CString(text.getLine(1), t);
+			CString line3 = new CString(text.getLine(2), t);
+			CString line4 = new CString(text.getLine(3), t);
+			return new CArray(t, line1, line2, line3, line4);
 		}
 	}
 
@@ -938,15 +944,16 @@ public class Environment {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{2};
+			return new Integer[]{2, 3};
 		}
 
 		@Override
 		public String docs() {
-			return "void {locationArray, owner}"
+			return "void {locationArray, owner, [texture]}"
 					+ " Sets the owner of the skull at the given location by name or uuid."
 					+ " Supplying null will clear the skull owner, but due to limitations in Bukkit, clients will only"
 					+ " see this change after reloading the block."
+					+ " If owner is not null, the texture value as a Base64 encoded string may be provided. (Paper only)"
 					+ " If no world is provided and the function is executed by a player, the player's world is used."
 					+ " If the block at the given location isn't a skull, a RangeException is thrown.";
 		}
@@ -974,23 +981,38 @@ public class Environment {
 		@Override
 		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, GenericParameters generics, Mixed... args)
 				throws ConfigRuntimeException {
-			MCWorld defaultWorld = null;
-			MCCommandSender sender = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
-			if(sender instanceof MCPlayer) {
-				defaultWorld = ((MCPlayer) sender).getWorld();
-			}
-			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], defaultWorld, t, env);
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], p != null ? p.getWorld() : null, t, env);
 			MCBlock block = loc.getBlock();
 			MCBlockState blockState = block.getState();
-			if(blockState instanceof MCSkull) {
-				MCSkull skull = (MCSkull) blockState;
-				MCOfflinePlayer owner = (args[1] instanceof CNull ? null : Static.GetUser(args[1], t, env));
-				skull.setOwningPlayer(owner);
-				skull.update();
-				return CVoid.VOID;
-			} else {
+			if(!(blockState instanceof MCSkull skull)) {
 				throw new CRERangeException("The block at the specified location is not a skull", t);
 			}
+			MCOfflinePlayer owner;
+			if(args[1] instanceof CNull) {
+				owner = null;
+			} else {
+				owner = Static.GetUser(args[1], t);
+				if(owner == null) {
+					throw new CRENotFoundException(this.getName() + " could not get offline player: " + args[1].val(), t);
+				}
+			}
+			if(owner != null && args.length == 3) {
+				MCPlayerProfile profile = Static.getServer().getPlayerProfile(owner.getUniqueID(), owner.getName());
+				if(profile != null) {
+					if(args[2] instanceof CNull) {
+						profile.removeProperty("textures");
+					} else {
+						profile.setProperty(new MCProfileProperty("textures", args[2].val(), null));
+					}
+					skull.setPlayerProfile(profile);
+					skull.update();
+					return CVoid.VOID;
+				}
+			}
+			skull.setOwningPlayer(owner);
+			skull.update();
+			return CVoid.VOID;
 		}
 	}
 
@@ -1011,8 +1033,9 @@ public class Environment {
 		public String docs() {
 			return "array {locationArray}"
 					+ " Returns the owner name and uuid of the skull at the given location as an array in format:"
-					+ " {name: NAME, uuid: UUID}, or null if the skull does not have an owner. The value at the 'name'"
-					+ " key will be an empty string if the server does not know the player's name."
+					+ " {name: string, uuid: string, texture: string}, or null if the skull does not have an owner."
+					+ " The value at the 'name' key will be an empty string if the server does not know the player's name."
+					+ " The 'texture' value is the Base64 encoded string of the textures property, or null. (Paper only)"
 					+ " If no world is provided and the function is executed by a player, the player's world is used."
 					+ " If the block at the given location isn't a skull, a RangeException is thrown.";
 		}
@@ -1040,28 +1063,29 @@ public class Environment {
 		@Override
 		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, GenericParameters generics, Mixed... args)
 				throws ConfigRuntimeException {
-			MCWorld defaultWorld = null;
-			MCCommandSender sender = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
-			if(sender instanceof MCPlayer) {
-				defaultWorld = ((MCPlayer) sender).getWorld();
-			}
-			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], defaultWorld, t, env);
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], p != null ? p.getWorld() : null, t, env);
 			MCBlockState blockState = loc.getBlock().getState();
-			if(blockState instanceof MCSkull) {
-				MCSkull skull = (MCSkull) blockState;
-				MCOfflinePlayer owner = skull.getOwningPlayer();
-				if(owner == null) {
-					return CNull.NULL;
-				} else {
-					CArray ret = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
-							.addNativeParameter(CString.TYPE, null).buildNative(), env);
-					ret.set("name", owner.getName(), env);
-					ret.set("uuid", owner.getUniqueID().toString(), env);
-					return ret;
-				}
-			} else {
+			if(!(blockState instanceof MCSkull skull)) {
 				throw new CRERangeException("The block at the specified location is not a skull", t);
 			}
+			MCOfflinePlayer owner = skull.getOwningPlayer();
+			if(owner == null) {
+				return CNull.NULL;
+			}
+			CArray ret = CArray.GetAssociativeArray(t, null, env);
+			ret.set("name", owner.getName(), env);
+			ret.set("uuid", owner.getUniqueID().toString(), env);
+			MCPlayerProfile playerProfile = skull.getPlayerProfile();
+			if(playerProfile != null) {
+				MCProfileProperty textureProperty = playerProfile.getProperty("textures");
+				if(textureProperty != null) {
+					ret.set("texture", skull.getPlayerProfile().getProperty("textures").getValue(), env);
+				} else {
+					ret.set("texture", CNull.NULL, t, env);
+				}
+			}
+			return ret;
 		}
 	}
 
@@ -1325,26 +1349,26 @@ public class Environment {
 
 		@Override
 		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
-			double x = 0;
-			double z = 0;
+			int x = 0;
+			int z = 0;
 			MCWorld w = null;
 			String world = null;
-			MCCommandSender sender = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
-			if(sender instanceof MCPlayer) {
-				w = ((MCPlayer) sender).getWorld();
+			MCPlayer player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			if(player != null) {
+				w = player.getWorld();
 			}
 
-			if(args[0].isInstanceOf(CArray.TYPE, null, env) && !(args.length == 3)) {
+			if(args.length < 3 && args[0].isInstanceOf(CArray.TYPE, null, env)) {
 				MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t, env);
-				x = loc.getX();
-				z = loc.getZ();
-				world = loc.getWorld().getName();
+				x = loc.getBlockX();
+				z = loc.getBlockZ();
+				w = loc.getWorld();
 				if(args.length == 2) {
 					world = args[1].val();
 				}
-			} else if(args.length == 2 || args.length == 3) {
-				x = ArgumentValidation.getDouble(args[0], t, env);
-				z = ArgumentValidation.getDouble(args[1], t, env);
+			} else if(args.length > 1) {
+				x = (int) java.lang.Math.floor(ArgumentValidation.getDouble(args[0], t, env));
+				z = (int) java.lang.Math.floor(ArgumentValidation.getDouble(args[1], t, env));
 				if(args.length == 3) {
 					world = args[2].val();
 				}
@@ -1355,7 +1379,7 @@ public class Environment {
 			if(w == null) {
 				throw new CREInvalidWorldException("The specified world " + world + " doesn't exist", t);
 			}
-			MCBlock highestBlock = w.getHighestBlockAt((int) java.lang.Math.floor(x), (int) java.lang.Math.floor(z));
+			MCBlock highestBlock = w.getHighestBlockAt(x, z);
 			if(highestBlock == null) {
 				throw new CRENotFoundException(
 						"Could not find the highest block in " + this.getName() + " (are you running in cmdline mode?)", t);
@@ -1524,7 +1548,7 @@ public class Environment {
 				}
 				String ttone = ((CArray) args[noteOffset]).get("tone", t, env).val().toUpperCase().trim();
 				try {
-					tone = MCTone.valueOf(ttone.trim().replaceAll("#", ""));
+					tone = MCTone.valueOf(ttone.trim().replace("#", ""));
 				} catch (IllegalArgumentException e) {
 					throw new CREFormatException("Expected the tone parameter to be one of: "
 							+ StringUtils.Join(MCTone.values(), ", ", ", or ") + " but it was " + ttone, t);
@@ -1577,8 +1601,7 @@ public class Environment {
 
 
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class spawn_particle extends AbstractFunction {
-
+	public static class spawn_particle extends AbstractFunction implements Optimizable {
 		@Override
 		public MSVersion since() {
 			return MSVersion.V3_3_3;
@@ -1602,19 +1625,37 @@ public class Environment {
 					+ " array defining the characteristics of the particle to be spawned. The array requires the"
 					+ " particle name under the key \"particle\". ----"
 					+ " Possible particle types: " + StringUtils.Join(MCParticle.types(), ", ", ", or ", " or ") + "."
-					+ " <br><br>Some particles have more specific keys and/or special behavior, but the common keys for"
-					+ " the particle array are \"count\" (usually the number of particles to be spawned), \"speed\""
-					+ " (usually the velocity of the particle), \"xoffset\", \"yoffset\", and \"zoffset\""
-					+ " (usually the ranges from center within which the particle may be offset on that axis)."
-					+ " <br>BLOCK_DUST, BLOCK_CRACK and FALLING_DUST particles can take a block type name parameter"
-					+ " under the key \"block\" (default: STONE)."
-					+ " <br>ITEM_CRACK particles can take an item array or name under the key \"item\" (default: STONE)."
-					+ " <br>REDSTONE particles take an RGB color array (each 0 - 255) or name under the key \"color\""
-					+ " (default: RED)."
-					+ " <br>DUST_COLOR_TRANSITION particles take a \"tocolor\" in addition \"color\"."
-					+ " <br>VIBRATION particles take a \"destination\" location array or entity UUID."
-					+ " <br>SCULK_CHARGE particles take an \"angle\" in radians. (defaults to 0.0)"
-					+ " <br>SHRIEK particles take an integer \"delay\" in ticks before playing. (defaults to 0)";
+					+ "<br>"
+					+ "<br>Some particles have more specific keys and/or special behavior, but the common keys for"
+					+ " the particle array are:"
+					+ "<br>"
+					+ "<br>'''count''' : (int) Usually the number of particles to be spawned. A value of 0 (default)"
+					+ " can create different particle data behavior than larger numbers."
+					+ "<br>'''speed''' : (double) Usually the velocity of the particle. Can be other things (size for"
+					+ " EXPLOSION_LARGE with count 0) depending on other values, like the particle type and count."
+					+ "<br>'''xoffset''' : (double) Usually the random offset on the x-axis. An offset can also"
+					+ " be other things (velocity vector's x component for SMOKE_NORMAL) depending on other values,"
+					+ " like the particle type and count."
+					+ "<br>'''yoffset''' : (double) Usually the random offset on the y-axis."
+					+ "<br>'''zoffset''' : (double) Usually the random offset on the z-axis."
+					+ "<br>'''force''' : (boolean) Extends visibility range from 32 to 512 meters and encourages"
+					+ " clients to render it despite client settings."
+					+ "<br>"
+					+ "<br>BLOCK_DUST, BLOCK_CRACK, BLOCK_CRUMBLE, BLOCK_MARKER, DUST_PILLAR, and FALLING_DUST"
+					+ " particles can take a block type name parameter under the key \"block\" (default: STONE)."
+					+ "<br>ITEM_CRACK particles can take an item array or name under the key \"item\" (default: STONE)."
+					+ "<br>REDSTONE, SPELL (1.21.9+), and SPELL_INSTANT (1.21.9+) particles take an RGB color array"
+					+ " (each 0 - 255) or name under the key \"color\" (defaults to RED for REDSTONE, WHITE for others)."
+					+ "<br>SPELL_MOB (1.20.6+), TINTED_LEAVES (1.20.6+) and FLASH (1.21.9+) particles take an ARGB color"
+					+ " array (each 0 - 255) or name under the key \"color\" (defaults to opaque WHITE)."
+					+ "<br>SPELL, SPELL_INSTANT and DRAGON_BREATH (1.21.9+) particles take a \"power\" value that scales"
+					+ " velocity. (defaults to 1.0)"
+					+ "<br>DUST_COLOR_TRANSITION particles take a \"tocolor\" in addition \"color\"."
+					+ "<br>VIBRATION particles take a \"destination\" location array or entity UUID."
+					+ "<br>SCULK_CHARGE particles take an \"angle\" in radians. (defaults to 0.0)"
+					+ "<br>SHRIEK particles take an integer \"delay\" in ticks before playing. (defaults to 0)"
+					+ "<br>TRAIL particles take a \"target\" location array, a \"color\" as an RGB array or name, and a"
+					+ " \"duration\" integer in ticks.";
 		}
 
 		@Override
@@ -1642,6 +1683,7 @@ public class Environment {
 			double offsetY = 0.0;
 			double offsetZ = 0.0;
 			double speed = 0.0;
+			boolean force = false;
 			Object data = null;
 
 			if(args[1].isInstanceOf(CArray.TYPE, null, env)) {
@@ -1668,83 +1710,11 @@ public class Environment {
 				if(pa.containsKey("speed")) {
 					speed = ArgumentValidation.getDouble(pa.get("speed", t, env), t, env);
 				}
-
-				if(pa.containsKey("block")) {
-					String value = pa.get("block", t, env).val();
-					MCMaterial mat = StaticLayer.GetMaterial(value);
-					if(mat != null) {
-						try {
-							data = mat.createBlockData();
-						} catch (IllegalArgumentException ex) {
-							throw new CREIllegalArgumentException(value + " is not a block.", t);
-						}
-					} else {
-						throw new CREIllegalArgumentException("Could not find material from " + value, t);
-					}
-
-				} else if(pa.containsKey("item")) {
-					Mixed value = pa.get("item", t, env);
-					if(value.isInstanceOf(CArray.TYPE, null, env)) {
-						data = ObjectGenerator.GetGenerator().item(pa.get("item", t, env), t, env);
-					} else {
-						MCMaterial mat = StaticLayer.GetMaterial(value.val());
-						if(mat != null) {
-							if(mat.isItem()) {
-								data = StaticLayer.GetItemStack(mat, 1);
-							} else {
-								throw new CREIllegalArgumentException(value + " is not an item type.", t);
-							}
-						} else {
-							throw new CREIllegalArgumentException("Could not find material from " + value, t);
-						}
-					}
-
-				} else if(pa.containsKey("color")) {
-					Mixed c = pa.get("color", t, env);
-					MCColor color;
-					if(c.isInstanceOf(CArray.TYPE, null, env)) {
-						color = ObjectGenerator.GetGenerator().color((CArray) c, t, env);
-					} else {
-						color = StaticLayer.GetConvertor().GetColor(c.val(), t);
-					}
-					if(pa.containsKey("tocolor")) {
-						Mixed sc = pa.get("tocolor", t, env);
-						MCColor[] colors = new MCColor[2];
-						colors[0] = color;
-						if(sc.isInstanceOf(CArray.TYPE, null, env)) {
-							colors[1] = ObjectGenerator.GetGenerator().color((CArray) sc, t, env);
-						} else {
-							colors[1] = StaticLayer.GetConvertor().GetColor(sc.val(), t);
-						}
-						data = colors;
-					} else {
-						data = color;
-					}
-
-				} else if(pa.containsKey("destination")) {
-					Mixed d = pa.get("destination", t, env);
-					if(d.isInstanceOf(CArray.TYPE, null, env)) {
-						data = ObjectGenerator.GetGenerator().location(d, l.getWorld(), t, env);
-					} else {
-						data = Static.getEntity(d, t);
-					}
-
-				} else if(pa.containsKey("delay")) {
-					Mixed d = pa.get("delay", t);
-					if(d.isInstanceOf(CInt.TYPE, null, env)) {
-						data = d;
-					} else if(!(d instanceof CNull)) {
-						throw new CREIllegalArgumentException("Expected integer for delay but found " + d, t);
-					}
-
-				} else if(pa.containsKey("angle")) {
-					Mixed d = pa.get("angle", t);
-					if(d.isInstanceOf(CDouble.TYPE, null, env)) {
-						data = d;
-					} else if(!(d instanceof CNull)) {
-						throw new CREIllegalArgumentException("Expected double for angle but found " + d, t);
-					}
+				if(pa.containsKey("force")) {
+					force = ArgumentValidation.getBooleanObject(pa.get("force", t, env), t, env);
 				}
+
+				data = ObjectGenerator.GetGenerator().particleData(p, l, pa, t);
 
 			} else {
 				try {
@@ -1757,26 +1727,62 @@ public class Environment {
 			try {
 				if(args.length == 3) {
 					MCPlayer player;
-					if(args[2] instanceof CArray) {
-						CArray players = (CArray) args[2];
+					if(args[2] instanceof CArray players) {
 						if(players.isAssociative()) {
 							throw new CREIllegalArgumentException("Players argument must be a normal array.", t);
 						}
 						for(Mixed playerName : players.asList(env)) {
 							player = Static.GetPlayer(playerName, t, env);
-							player.spawnParticle(l, p, count, offsetX, offsetY, offsetZ, speed, data);
+							player.spawnParticle(l, p, count, offsetX, offsetY, offsetZ, speed, force, data);
 						}
 					} else {
 						player = Static.GetPlayer(args[2], t, env);
-						player.spawnParticle(l, p, count, offsetX, offsetY, offsetZ, speed, data);
+						player.spawnParticle(l, p, count, offsetX, offsetY, offsetZ, speed, force, data);
 					}
 				} else {
-					l.getWorld().spawnParticle(l, p, count, offsetX, offsetY, offsetZ, speed, data);
+					l.getWorld().spawnParticle(l, p, count, offsetX, offsetY, offsetZ, speed, force, data);
 				}
 			} catch (IllegalArgumentException ex) {
 				throw new CREIllegalArgumentException("Given unsupported data for particle type " + p.name(), t);
 			}
 			return CVoid.VOID;
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, com.laytonsmith.core.environments.Environment env,
+				Set<Class<? extends com.laytonsmith.core.environments.Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+
+			if(children.size() < 2) {
+				return null;
+			}
+			ParseTree child = children.get(1);
+			if(child.getData() instanceof CFunction && (child.getData().val().equals(DataHandling.array.NAME)
+					|| child.getData().val().equals(DataHandling.associative_array.NAME))) {
+				for(ParseTree node : child.getChildren()) {
+					if(node.getData() instanceof CFunction && node.getData().val().equals(Compiler.centry.NAME)) {
+						children = node.getChildren();
+						if(children.get(0).getData().val().equals("particle")
+								&& children.get(1).getData().isInstanceOf(CString.TYPE, null, env)) {
+							try {
+								MCParticle.MCVanillaParticle.valueOf(children.get(1).getData().val().toUpperCase());
+							} catch (IllegalArgumentException ex) {
+								env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
+										new CompilerWarning(children.get(1).getData().val()
+												+ " is not a valid enum in com.commandhelper.Particle",
+												children.get(1).getTarget(), null));
+							}
+						}
+					}
+				}
+			}
+			return null;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
 	}
 
@@ -1807,15 +1813,16 @@ public class Environment {
 			MCEntity ent = null;
 			if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
 				loc = ObjectGenerator.GetGenerator().location(args[0], null, t, env);
-			} else if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_18_X)) {
+			} else if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_18_1)) {
 				ent = Static.getEntity(args[0], t);
 			} else {
-				throw new CREFormatException("Expecting a location array on versions prior to MC 1.18.2", t);
+				throw new CREFormatException("Expecting a location array on versions prior to MC 1.18.1", t);
 			}
 			MCSound sound;
 			MCSoundCategory category = null;
 			float volume = 1;
 			float pitch = 1;
+			Long seed = null;
 
 			if(!(args[1].isInstanceOf(CArray.TYPE, null, env))) {
 				throw new CREFormatException("An array was expected but received " + args[1], t);
@@ -1847,30 +1854,33 @@ public class Environment {
 				pitch = ArgumentValidation.getDouble32(sa.get("pitch", t, env), t, env);
 			}
 
+			if(sa.containsKey("seed") && Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_2)) {
+				seed = ArgumentValidation.getInt(sa.get("seed", t), t);
+			}
+
 			if(args.length == 3) {
-				java.util.List<MCPlayer> players = new java.util.ArrayList<>();
 				if(args[2].isInstanceOf(CArray.TYPE, null, env)) {
-					for(String key : ((CArray) args[2]).stringKeySet()) {
-						players.add(Static.GetPlayer(((CArray) args[2]).get(key, t, env), t, env));
+					CArray players = (CArray) args[2];
+					for(String key : players.stringKeySet()) {
+						MCPlayer p = Static.GetPlayer(players.get(key, t, env), t, env);
+						if(ent != null) {
+							p.playSound(ent, sound, category, volume, pitch, seed);
+						} else {
+							p.playSound(loc, sound, category, volume, pitch, seed);
+						}
 					}
 				} else {
-					players.add(Static.GetPlayer(args[2], t, env));
-				}
-
-				if(loc == null) {
-					for(MCPlayer p : players) {
-						p.playSound(ent, sound, category, volume, pitch);
-					}
-				} else {
-					for(MCPlayer p : players) {
-						p.playSound(loc, sound, category, volume, pitch);
+					MCPlayer p = Static.GetPlayer(args[2], t);
+					if(ent != null) {
+						p.playSound(ent, sound, category, volume, pitch, seed);
+					} else {
+						p.playSound(loc, sound, category, volume, pitch, seed);
 					}
 				}
-
 			} else if(loc == null) {
-				ent.getWorld().playSound(ent, sound, category, volume, pitch);
+				ent.getWorld().playSound(ent, sound, category, volume, pitch, seed);
 			} else {
-				loc.getWorld().playSound(loc, sound, category, volume, pitch);
+				loc.getWorld().playSound(loc, sound, category, volume, pitch, seed);
 			}
 			return CVoid.VOID;
 		}
@@ -1888,14 +1898,17 @@ public class Environment {
 		@Override
 		public String docs() {
 			return "void {source, soundArray[, players]} Plays a sound at the given source."
-					+ " Source can be a location array or entity UUID. SoundArray is in an associative array with"
-					+ " keys 'sound', 'category', 'volume', 'pitch', where all are optional except sound."
-					+ " Volume, if greater than 1.0 (default), is the distance in chunks players can hear the sound."
-					+ " Pitch has a range of 0.5 - 2.0, where where 1.0 is the middle pitch and default. Players can"
-					+ " be a single player or an array of players to play the sound to, if"
-					+ " not given, all players can potentially hear it. ---- Possible categories: "
+					+ " Source can be a location array (or entity UUID on MC 1.18.1+)."
+					+ " The soundArray is in an associative array with the keys:"
+					+ " 'sound' 'category', 'volume' (float), 'pitch' (float), 'seed' (int; MC 1.20.2+)"
+					+ " -- all are optional except sound."
+					+ " Volume, if greater than 1.0 (default), controls the distance players can hear the sound."
+					+ " Pitch has a clamped range of 0.5 - 2.0, where where 1.0 is the middle pitch and default."
+					+ " Seed is an integer that determines which sound variant is played."
+					+ " Players can be a single player or an array of players to play the sound to, if not given,"
+					+ " all players can potentially hear it. ---- Possible categories: "
 					+ StringUtils.Join(MCSoundCategory.values(), ", ", ", or ", " or ") + "."
-					+ " \n\nPossible sounds: " + StringUtils.Join(MCSound.types(), "<br>");
+					+ " \n\nPossible sounds:\n" + StringUtils.Join(MCSound.values(), "<br>");
 		}
 
 		@Override
@@ -1964,11 +1977,21 @@ public class Environment {
 		@Override
 		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 
-			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t, env);
+			MCLocation loc = null;
+			MCEntity ent = null;
+			if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
+				loc = ObjectGenerator.GetGenerator().location(args[0], null, t, env);
+			} else if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_3)) {
+				ent = Static.getEntity(args[0], t);
+			} else {
+				throw new CREFormatException("Expecting a location array on versions prior to MC 1.19.3", t);
+			}
+
 			String path;
 			MCSoundCategory category = null;
 			float volume = 1;
 			float pitch = 1;
+			Long seed = null;
 
 			if(!(args[1].isInstanceOf(CArray.TYPE, null, env))) {
 				throw new CREFormatException("An array was expected but received " + args[1], t);
@@ -1994,6 +2017,10 @@ public class Environment {
 				pitch = ArgumentValidation.getDouble32(sa.get("pitch", t, env), t, env);
 			}
 
+			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_2) && sa.containsKey("seed")) {
+				seed = ArgumentValidation.getInt(sa.get("seed", t), t);
+			}
+
 			if(args.length == 3) {
 				java.util.List<MCPlayer> players = new java.util.ArrayList<>();
 				if(args[2].isInstanceOf(CArray.TYPE, null, env)) {
@@ -2005,13 +2032,11 @@ public class Environment {
 				}
 
 				try {
-					if(category == null) {
-						for(MCPlayer p : players) {
-							p.playSound(loc, path, volume, pitch);
-						}
-					} else {
-						for(MCPlayer p : players) {
-							p.playSound(loc, path, category, volume, pitch);
+					for(MCPlayer p : players) {
+						if(loc == null) {
+							p.playSound(ent, path, category, volume, pitch, seed);
+						} else {
+							p.playSound(loc, path, category, volume, pitch, seed);
 						}
 					}
 				} catch(Exception ex) {
@@ -2019,10 +2044,10 @@ public class Environment {
 				}
 			} else {
 				try {
-					if(category == null) {
-						loc.getWorld().playSound(loc, path, volume, pitch);
+					if(loc == null) {
+						ent.getWorld().playSound(ent, path, category, volume, pitch, seed);
 					} else {
-						loc.getWorld().playSound(loc, path, category, volume, pitch);
+						loc.getWorld().playSound(loc, path, category, volume, pitch, seed);
 					}
 				} catch(Exception ex) {
 					throw new CREFormatException(ex.getMessage(), t);
@@ -2043,14 +2068,17 @@ public class Environment {
 
 		@Override
 		public String docs() {
-			return "void {locationArray, soundArray[, players]} Plays a sound at the"
-					+ " given location. SoundArray is in an associative array with"
-					+ " keys 'sound', 'category', 'volume', 'pitch', where all are optional except sound."
-					+ " Volume, if greater than 1.0 (default), is the distance in chunks players can hear the sound."
-					+ " Pitch has a range of 0.5 - 2.0, where where 1.0 is the middle pitch and default. Players can"
-					+ " be a single player or an array of players to play the sound to, if"
-					+ " not given, all players can potentially hear it. Sound is"
-					+ " a sound path, separated by periods. ---- Possible categories: "
+			return "void {source, soundArray[, players]} Plays a sound at the given source."
+					+ " Source can be a location array (or entity UUID on MC 1.19.3+)."
+					+ " The soundArray is in an associative array with the keys:"
+					+ " 'sound', 'category', 'volume' (float), 'pitch' (float), 'seed' (int; MC 1.20.2+)"
+					+ " -- all are optional except sound."
+					+ " Volume, if greater than 1.0 (default), controls the distance players can hear the sound."
+					+ " Pitch has a clamped range of 0.5 - 2.0, where where 1.0 is the middle pitch and default."
+					+ " Seed is an integer that determines which sound variant is played."
+					+ " Players can be a single player or an array of players to play the sound to, if not given,"
+					+ " all players can potentially hear it. Sound is a sound path, separated by periods."
+					+ " ---- Possible categories: "
 					+ StringUtils.Join(MCSoundCategory.values(), ", ", ", or ", " or ") + ".";
 		}
 
@@ -3193,6 +3221,261 @@ public class Environment {
 		@Override
 		public Boolean runAsync() {
 			return false;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class get_decorated_pot_sherds extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "get_decorated_pot_sherds";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class, CREInvalidWorldException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public String docs() {
+			return "array {locationArray} Returns an associative array of sherds for each side of a decorated pot."
+					+ " The keys for each side are 'front', 'back', 'left', and 'right'."
+					+ " The values are one of any sherd materials or a brick if there's no decoration on that side.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, GenericParameters generics, Mixed... args)
+				throws ConfigRuntimeException {
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			MCBlockState bs = loc.getBlock().getState();
+			if(bs instanceof MCDecoratedPot decoratedPot) {
+				CArray sherds = CArray.GetAssociativeArray(t);
+				Map<MCDecoratedPot.Side, MCMaterial> potSherds = decoratedPot.getSherds();
+				for(Map.Entry<MCDecoratedPot.Side, MCMaterial> side : potSherds.entrySet()) {
+					sherds.set(side.getKey().name().toLowerCase(), side.getValue().name());
+				}
+				return sherds;
+			} else {
+				throw new CREFormatException("The block at the specified location is not a decorated pot", t);
+			}
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class set_decorated_pot_sherds extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "set_decorated_pot_sherds";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class, CREInvalidWorldException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public String docs() {
+			return "void {locationArray, array} Set the sherds on the sides of a decorated pot."
+					+ " Takes an associative array with a key for each side: 'front', 'back', 'left', and 'right'."
+					+ " Each side accepts a sherd material name, or if no decoration is desired on that side, a brick."
+					+ " Throws a FormatException if a side or material is not valid.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, GenericParameters generics, Mixed... args)
+				throws ConfigRuntimeException {
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			MCBlockState bs = loc.getBlock().getState();
+			if(!(bs instanceof MCDecoratedPot decoratedPot)) {
+				throw new CREFormatException("The block at the specified location is not a decorated pot", t);
+			}
+			Mixed sherds = args[1];
+			if(sherds.isInstanceOf(CArray.TYPE, null, env)) {
+				CArray sherdArray = (CArray) sherds;
+				if(sherdArray.isAssociative()) {
+					for(String key : sherdArray.stringKeySet()) {
+						MCDecoratedPot.Side side;
+						try {
+							side = MCDecoratedPot.Side.valueOf(key.toUpperCase());
+						} catch (IllegalArgumentException ex) {
+							throw new CREFormatException("Invalid decorated pot side: " + key, t);
+						}
+						try {
+							decoratedPot.setSherd(side, MCMaterial.valueOf(sherdArray.get(key, t).val()));
+						} catch (IllegalArgumentException ex) {
+							throw new CREFormatException(ex.getMessage(), t);
+						}
+					}
+					bs.update();
+					return CVoid.VOID;
+				}
+			}
+			throw new CREFormatException("Expected associative array for decorated pots.", t);
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class set_end_gateway_exit extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "set_end_gateway_exit";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3};
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class, CREInvalidWorldException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public String docs() {
+			return "void {gatewayLocation, exitLocation, [exactTeleport]} Sets an end gateways teleport exit location."
+					+ " The exit location must be null or a location array with the same world as the end gateway."
+					+ " If exactTeleport is set to true, entities will teleport to the exit's exact block location."
+					+ " Otherwise a teleport location will be found near the exit location.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, GenericParameters generics, Mixed... args)
+				throws ConfigRuntimeException {
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t, env);
+			MCBlockState bs = loc.getBlock().getState();
+			if(!(bs instanceof MCEndGateway endGateway)) {
+				throw new CREFormatException("The block at the specified location is not an end gateway", t);
+			}
+			if(args[1] instanceof CNull) {
+				endGateway.setExitLocation(null);
+			} else {
+				MCLocation exit = ObjectGenerator.GetGenerator().location(args[1], loc.getWorld(), t, env);
+				try {
+					endGateway.setExitLocation(exit);
+				} catch (IllegalArgumentException ex) {
+					throw new CREInvalidWorldException(ex.getMessage(), t);
+				}
+			}
+			if(args.length == 3) {
+				boolean exact = ArgumentValidation.getBooleanObject(args[2], t, env);
+				endGateway.setExactTeleport(exact);
+			}
+			endGateway.update();
+			return CVoid.VOID;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class set_end_gateway_age extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "set_end_gateway_age";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class, CREInvalidWorldException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public String docs() {
+			return "void {gatewayLocation, ticks} Sets an end gateway's age in ticks."
+					+ " A magenta beam is emitted from 0 to 200 ticks (10 seconds)."
+					+ " Also a purple beam is emitted very 2400 positive ticks (2 minutes)."
+					+ " Setting this to a negative number, like math_const('LONG_MIN'), can be used to prevent beams.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, GenericParameters generics, Mixed... args)
+				throws ConfigRuntimeException {
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t, env);
+			MCBlockState bs = loc.getBlock().getState();
+			if(!(bs instanceof MCEndGateway endGateway)) {
+				throw new CREFormatException("The block at the specified location is not an end gateway", t);
+			}
+			endGateway.setAge(ArgumentValidation.getInt(args[1], t, env));
+			endGateway.update();
+			return CVoid.VOID;
 		}
 	}
 }

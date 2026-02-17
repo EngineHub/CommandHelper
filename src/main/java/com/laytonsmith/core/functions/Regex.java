@@ -1,18 +1,18 @@
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
-import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
@@ -25,6 +25,7 @@ import com.laytonsmith.core.functions.StringHandling.replace;
 import com.laytonsmith.core.functions.StringHandling.split;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.natives.interfaces.Callable;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.EnumSet;
 import java.util.HashSet;
@@ -45,8 +46,7 @@ public class Regex {
 				+ "[[Regex|regular expressions]]. Note that all the functions are just passthroughs"
 				+ " to the Java regex mechanism. If you need to set a flag on the regex, where the api calls"
 				+ " for a pattern, instead send array('pattern', 'flags') where flags is any of i, m, or s."
-				+ " Alternatively, using the embedded flag system that Java provides is also valid. Named captures are"
-				+ " also supported if you are using Java 7, otherwise they are not supported.";
+				+ " Alternatively, using the embedded flag system that Java provides is also valid.";
 	}
 
 	@api
@@ -94,29 +94,15 @@ public class Regex {
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			Pattern pattern = getPattern(args[0], t, env);
 			String subject = args[1].val();
-			CArray ret = CArray.GetAssociativeArray(t, null, env);
 			Matcher m = pattern.matcher(subject);
 			if(m.find()) {
-				ret.set(0, new CString(m.group(0), t), t, env);
-				for(int i = 1; i <= m.groupCount(); i++) {
-					if(m.group(i) == null) {
-						ret.set(i, CNull.NULL, t, env);
-					} else {
-						ret.set(i, new CString(m.group(i), t), t, env);
-					}
+				CArray ret = ObjectGenerator.GetGenerator().regMatchValue(m, t);
+				for(String key : getNamedGroups(pattern.pattern())) {
+					ret.set(key, m.group(key), t, env);
 				}
-				//Named groups are only supported in Java 7, but we can
-				//dynamically enable this feature if they have it.
-				Set<String> namedGroups = getNamedGroups(pattern.pattern());
-				try {
-					for(String key : namedGroups) {
-						ret.set(key, (String) ReflectionUtils.invokeMethod(Matcher.class, m, "group", new Class[]{String.class}, new Object[]{key}), t, env);
-					}
-				} catch (ReflectionUtils.ReflectionException ex) {
-					throw new CREFormatException("Named captures are only supported with Java 7.", t);
-				}
+				return ret;
 			}
-			return ret;
+			return CArray.GetAssociativeArray(t, null, env);
 		}
 
 		@Override
@@ -144,10 +130,9 @@ public class Regex {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "reg_match('(\\\\d)(\\\\d)(\\\\d)', 'abc123')"),
-				//Java 7 can't be assumed to be working on the system running the doc gen, so we'll hardcode these.
-				new ExampleScript("Named captures (Only works if your system is running Java 7)",
+				new ExampleScript("Named captures ",
 				"reg_match('abc(?<foo>\\\\d+)(xyz)', 'abc123xyz')", "{0: abc123xyz, 1: 123, 2: xyz, foo: 123}"),
-				new ExampleScript("Named captures with backreferences (Only works if your system is running Java 7)",
+				new ExampleScript("Named captures with backreferences",
 				"reg_match('abc(?<foo>\\\\d+)def\\\\k<foo>', 'abc123def123')['foo']", "123")
 			};
 		}
@@ -201,20 +186,10 @@ public class Regex {
 			Matcher m = pattern.matcher(subject);
 			Set<String> namedGroups = getNamedGroups(pattern.pattern());
 			while(m.find()) {
-				CArray ret = CArray.GetAssociativeArray(t, null, env);
-				ret.set(0, new CString(m.group(0), t), t, env);
+				CArray ret = ObjectGenerator.GetGenerator().regMatchValue(m, t);
 
-				for(int i = 1; i <= m.groupCount(); i++) {
-					ret.set(i, new CString(m.group(i), t), t, env);
-				}
-				//Named groups are only supported in Java 7, but we can
-				//dynamically enable this feature if they have it.
-				try {
-					for(String key : namedGroups) {
-						ret.set(key, (String) ReflectionUtils.invokeMethod(Matcher.class, m, "group", new Class[]{String.class}, new Object[]{key}), t, env);
-					}
-				} catch (ReflectionUtils.ReflectionException e) {
-					throw new CREFormatException("Named captures are only supported with Java 7.", t);
+				for(String key : namedGroups) {
+					ret.set(key, m.group(key), t, env);
 				}
 				fret.push(ret, t, env);
 			}
@@ -246,10 +221,9 @@ public class Regex {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "reg_match_all('(\\\\d{3})', 'abc123456')"),
-				//Same thing here, can't guarantee we're running Java 7 when these are generated.
-				new ExampleScript("Named captures (Only works if your system is running Java 7)",
+				new ExampleScript("Named captures",
 				"reg_match_all('abc(?<foo>\\\\d+)(xyz)', 'abc123xyz')[0]['foo']", "123"),
-				new ExampleScript("Named captures with backreferences (Only works if your system is running Java 7)",
+				new ExampleScript("Named captures with backreferences",
 				"reg_match_all('abc(?<foo>\\\\d+)def\\\\k<foo>', 'abc123def123')[0]['foo']", "123")
 			};
 		}
@@ -272,12 +246,14 @@ public class Regex {
 		@Override
 		public String docs() {
 			return "string {pattern, replacement, subject} Replaces any occurrences of pattern with the replacement in subject."
-					+ " Back references are allowed.";
+					+ " Back references are allowed."
+					+ " 'replacement' can be a string, or a closure that accepts a found occurrence of 'pattern'"
+					+ " and returns the replacement string value.";
 		}
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREFormatException.class};
+			return new Class[]{CREFormatException.class, CRECastException.class};
 		}
 
 		@Override
@@ -298,12 +274,17 @@ public class Regex {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			Pattern pattern = getPattern(args[0], t, env);
-			String replacement = args[1].val();
+			Mixed replacement = args[1];
 			String subject = args[2].val();
 			String ret = "";
 
 			try {
-				ret = pattern.matcher(subject).replaceAll(replacement);
+				if(replacement instanceof Callable replacer) {
+					ret = pattern.matcher(subject).replaceAll(mr -> ArgumentValidation.getStringObject(
+							replacer.executeCallable(env, t, ObjectGenerator.GetGenerator().regMatchValue(mr, t)), t));
+				} else {
+					ret = pattern.matcher(subject).replaceAll(replacement.val());
+				}
 			} catch (IndexOutOfBoundsException e) {
 				throw new CREFormatException("Expecting a regex group at parameter 1 of reg_replace", t);
 			} catch (IllegalArgumentException e) {
@@ -318,19 +299,23 @@ public class Regex {
 				Set<Class<? extends Environment.EnvironmentImpl>> envs,
 				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
-			ParseTree data = children.get(0);
-			if(!Construct.IsDynamicHelper(data.getData())) {
-				String pattern = data.getData().val();
-				if(isLiteralRegex(pattern)) {
+			ParseTree patternArg = children.get(0);
+			Mixed patternData = patternArg.getData();
+			ParseTree replacementArg = children.get(1);
+			Mixed replacementData = replacementArg.getData();
+			if(!Construct.IsDynamicHelper(patternData) && !(replacementData instanceof CClosure) && !Construct.IsDynamicHelper(replacementData)) {
+				String pattern = patternData.val();
+				String replacement = replacementData.val();
+				if(isLiteralRegex(pattern) && !isBackreference(replacement)) {
 					//We want to replace this with replace()
 					//Note the alternative order of arguments
-					ParseTree replaceNode = new ParseTree(new CFunction(replace.NAME, t), data.getFileOptions());
+					ParseTree replaceNode = new ParseTree(new CFunction(replace.NAME, t), patternArg.getFileOptions());
 					replaceNode.addChildAt(0, children.get(2)); //subject -> main
 					replaceNode.addChildAt(1, new ParseTree(new CString(getLiteralRegex(pattern), t), replaceNode.getFileOptions())); //pattern -> what
 					replaceNode.addChildAt(2, children.get(1)); //replacement -> that
 					return replaceNode;
 				} else {
-					getPattern(data.getData(), t, env);
+					getPattern(patternArg.getData(), t, env);
 				}
 			}
 			return null;
@@ -355,8 +340,11 @@ public class Regex {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "reg_replace('\\\\d', 'Z', '123abc')"),
 				new ExampleScript("Using backreferences", "reg_replace('abc(\\\\d+)', '$1', 'abc123')"),
-				new ExampleScript("Using backreferences with named captures (Only works if your system is running Java 7)",
-				"reg_replace('abc(?<foo>\\\\d+)', '${foo}', 'abc123')", "123")
+				new ExampleScript("Using backreferences with named captures",
+				"reg_replace('abc(?<foo>\\\\d+)', '${foo}', 'abc123')", "123"),
+				new ExampleScript("Using closure as replacement function",
+				"reg_replace('cat|dog', closure(@match) {return array('dog': 'cat', 'cat': 'dog')[@match[0]]},"
+				+ " 'Oscar is a cat. Lucy is a dog.')")
 			};
 		}
 
@@ -636,6 +624,10 @@ public class Regex {
 		} catch (PatternSyntaxException e) {
 			throw new CREFormatException(e.getMessage(), c.getTarget());
 		}
+	}
+
+	private static boolean isBackreference(String replacement) {
+		return replacement.length() > 0 && replacement.charAt(0) == '$';
 	}
 
 	private static boolean isLiteralRegex(String regex) {

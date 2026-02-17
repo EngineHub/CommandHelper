@@ -3,6 +3,7 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
+import com.laytonsmith.testing.AbstractIntegrationTest;
 import com.laytonsmith.testing.StaticTest;
 import static com.laytonsmith.testing.StaticTest.SRun;
 import org.junit.After;
@@ -16,7 +17,7 @@ import static org.mockito.Mockito.verify;
 /**
  *
  */
-public class SchedulingTest {
+public class SchedulingTest extends AbstractIntegrationTest {
 
 	MCPlayer fakePlayer;
 	com.laytonsmith.core.environments.Environment env;
@@ -31,7 +32,6 @@ public class SchedulingTest {
 
 	@Before
 	public void setUp() throws Exception {
-		StaticTest.InstallFakeServerFrontend();
 		env = Static.GenerateStandaloneEnvironment();
 		env = env.cloneAndAdd(new CommandHelperEnvironment());
 		fakePlayer = StaticTest.GetOnlinePlayer();

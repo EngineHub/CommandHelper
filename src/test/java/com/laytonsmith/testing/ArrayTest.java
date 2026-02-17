@@ -6,7 +6,6 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import static com.laytonsmith.testing.StaticTest.SRun;
 import static org.junit.Assert.assertEquals;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.InOrder;
 import static org.mockito.Mockito.inOrder;
@@ -18,16 +17,11 @@ import static org.mockito.Mockito.when;
  *
  *
  */
-public class ArrayTest {
+public class ArrayTest extends AbstractIntegrationTest {
 
 	MCPlayer fakePlayer;
 
 	public ArrayTest() {
-	}
-
-	@BeforeClass
-	public static void setUpClass() {
-
 	}
 
 	@Before

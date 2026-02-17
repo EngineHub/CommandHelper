@@ -6,6 +6,7 @@ import com.laytonsmith.core.events.Prefilters.PrefilterType;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import com.laytonsmith.testing.AbstractIntegrationTest;
 import com.laytonsmith.testing.C;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -22,7 +23,7 @@ import static org.junit.Assert.fail;
  *
  *
  */
-public class PrefiltersTest {
+public class PrefiltersTest extends AbstractIntegrationTest {
 
 	Environment env;
 

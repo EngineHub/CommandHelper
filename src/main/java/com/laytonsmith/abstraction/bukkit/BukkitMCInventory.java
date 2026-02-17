@@ -66,7 +66,7 @@ public class BukkitMCInventory implements MCInventory {
 	@Override
 	public void setItem(int slot, MCItemStack stack) {
 		try {
-			this.i.setItem(slot, stack == null ? null : ((BukkitMCItemStack) stack).is);
+			this.i.setItem(slot, stack == null ? null : (ItemStack) stack.getHandle());
 		} catch (ArrayIndexOutOfBoundsException aioobe) {
 			if(slot > 0 && slot < getSize()) {
 				MSLog.GetLogger().Log(Tags.RUNTIME, LogLevel.WARNING, "The API claims that a particular slot is"
@@ -111,7 +111,7 @@ public class BukkitMCInventory implements MCInventory {
 
 	@Override
 	public Map<Integer, MCItemStack> addItem(MCItemStack stack) {
-		Map<Integer, ItemStack> h = i.addItem(stack == null ? null : ((BukkitMCItemStack) stack).is);
+		Map<Integer, ItemStack> h = i.addItem((ItemStack) stack.getHandle());
 		Map<Integer, MCItemStack> m = new HashMap<>();
 		for(Map.Entry<Integer, ItemStack> entry : h.entrySet()) {
 			Integer key = entry.getKey();
@@ -162,10 +162,13 @@ public class BukkitMCInventory implements MCInventory {
 
 	@Override
 	public String getTitle() {
-		Nameable n = ((Nameable) i.getHolder());
-		if(n == null) {
-			return null;
+		InventoryHolder h = i.getHolder();
+		if(h instanceof Nameable) {
+			return ((Nameable) h).getCustomName();
 		}
-		return n.getCustomName();
+		if(h instanceof BukkitMCVirtualInventoryHolder.VirtualHolder) {
+			return ((BukkitMCVirtualInventoryHolder.VirtualHolder) h).getTitle();
+		}
+		return null;
 	}
 }

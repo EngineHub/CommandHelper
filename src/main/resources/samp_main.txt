@@ -12,7 +12,9 @@
 @server_name = '<Server Name>';
 
 # Echo out a server greeting to the console
-console('Welcome to this server, which is running CommandHelper! (Change this message in plugins/CommandHelper/main.ms)');
+console('CommandHelper successfully installed! To get started, visit https://methodscript.com, and visit the learning'
+			. ' trail at the bottom, and particularly the Beginner\'s and Advanced Guides.'
+			. ' (Change this message in plugins/CommandHelper/main.ms)');
 
 # Bind an event to the player join, and tell ops hello.
 # We send in @server_name, so we can use it inside the event handler

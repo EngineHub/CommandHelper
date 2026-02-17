@@ -48,6 +48,7 @@ import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CRECausedByWrapper;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
+import com.laytonsmith.core.functions.Compiler.__type_ref__;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -217,7 +218,12 @@ public class Exceptions {
 			int numArgs = ast.numberOfChildren();
 			Scope catchParentScope = parentScope;
 			switch(numArgs) {
-				default: // Too many arguments, just analyze the first 4, this will cause a compile error later.
+				default: { // Too many arguments. Analyze the first 4 as usual and handle the rest generically.
+					Scope scope = parentScope;
+					for(int i = 4; i < ast.numberOfChildren(); i++) {
+						scope = analysis.linkScope(scope, ast.getChildAt(i), env, exceptions);
+					}
+				}
 				case 4: { // try(tryCode, exParam, catchCode, exTypes).
 					ParseTree exTypes = ast.getChildAt(3);
 					analysis.linkScope(parentScope, exTypes, env, exceptions);
@@ -301,9 +307,10 @@ public class Exceptions {
 			exceptions += StringUtils.Join(ee, ", ", ", and ");
 
 			return "nothing {exceptionType, msg, [causedBy] | exception} This function causes an exception to be thrown."
-					+ " The exceptionType may be any valid exception type."
-					+ "\n\nThe core exception types are: " + exceptions
-					+ "\n\nThere may be other exception types as well, refer to the documentation of any extensions you have installed.";
+					+ " The exceptionType may be any valid exception type. ---- "
+					+ "The core exception types are: " + exceptions
+					+ "\n\nThere may be other exception types as well,"
+					+ " refer to the documentation of any extensions you have installed.";
 		}
 
 		@Override
@@ -351,6 +358,9 @@ public class Exceptions {
 				try {
 					c = NativeTypeList.getNativeClass(FullyQualifiedClassName.forName(args[0].val(), t, env));
 				} catch (ClassNotFoundException ex) {
+					throw new CREFormatException("Expected a valid exception type, but found \"" + args[0].val() + "\"", t);
+				}
+				if(!CREThrowable.class.isAssignableFrom(c)) {
 					throw new CREFormatException("Expected a valid exception type, but found \"" + args[0].val() + "\"", t);
 				}
 				List<Class> classes = new ArrayList<>();
@@ -424,8 +434,8 @@ public class Exceptions {
 					+ " in the future). If true is returned, then default action will not occur, as it is assumed you have handled"
 					+ " it. Only one exception handler can be registered at this time. If code inside the closure generates it's own"
 					+ " exception, this will be handled by displaying both exceptions. To prevent this, you could put a try() block"
-					+ " around the whole code block, but it is highly recommended you do not supress this. It is possible to completely"
-					+ " supress all runtime exceptions using this method, but it is highly recommended that you still have a generic"
+					+ " around the whole code block, but it is highly recommended you do not suppress this. It is possible to completely"
+					+ " suppress all runtime exceptions using this method, but it is highly recommended that you still have a generic"
 					+ " logging mechanism, perhaps to console, so you don't \"lose\" your exceptions, and fail to realize anything is wrong.";
 		}
 
@@ -513,13 +523,10 @@ public class Exceptions {
 							// We need to define the exception in the variable table
 							IVariableList varList = env.getEnv(GlobalEnv.class).GetVarList();
 							IVariable var = (IVariable) assign.getChildAt(1).getData();
-							// This should eventually be changed to be of the appropriate type. Unfortunately, that will
-							// require reworking basically everything. We need all functions to accept Mixed, instead of Construct.
-							// This will have to do in the meantime.
 							try {
-								varList.set(new IVariable(CArray.TYPE, var.getVariableName(), e.getExceptionObject(env), t));
-							} catch (ConfigCompileException cce) {
-								throw new CREFormatException(cce.getMessage(), t);
+								varList.set(new IVariable(CArray.TYPE, var.getVariableName(), e.getExceptionObject(env), t, env));
+							} catch(ConfigCompileException ex1) {
+								throw ex1.asRuntimeException();
 							}
 							parent.eval(nodes[i + 1], env);
 							varList.remove(var.getVariableName());
@@ -609,12 +616,26 @@ public class Exceptions {
 				ParseTree assign = children.get(i);
 
 				// Check for a container function with a string as first argument, being an unknown type.
-				if(assign.numberOfChildren() > 0 && assign.getChildAt(0).getData().isInstanceOf(CString.TYPE, null, env)) {
-					throw new ConfigCompileException("Unknown class type: " + assign.getChildAt(0).getData().val(), t);
+				if(assign.numberOfChildren() > 0) {
+					if(assign.getChildAt(0).getData().isInstanceOf(CString.TYPE, null, env)) {
+						throw new ConfigCompileException("Unknown class type: "
+								+ assign.getChildAt(0).getData().val(), t);
+					}
+					if(assign.getChildAt(0).getData() instanceof CFunction
+									&& assign.getChildAt(0).getData().val().equals(__type_ref__.NAME)) {
+						if(!StaticAnalysis.enabled()) {
+							throw new ConfigCompileException("Unknown class type: "
+										+ assign.getChildAt(0).getChildAt(0).getData().val(), t);
+						}
+						return null; // Type error has already been generated by the type checker.
+					}
 				}
 
 				// Validate that the node is an assign with 3 arguments.
-				if(!CFunction.IsFunction(assign, DataHandling.assign.class) || assign.numberOfChildren() != 3) {
+				if(!(assign.getData() instanceof CFunction cf && cf.getFunction() != null
+						&& (cf.getFunction().getName().equals(DataHandling.assign.NAME)
+								|| cf.getFunction().getName().equals(Compiler.__unsafe_assign__.NAME)))
+						|| assign.numberOfChildren() != 3) {
 					throw new ConfigCompileException("Expecting a variable declaration, but instead "
 						+ assign.getData().val() + " was found", t);
 				}

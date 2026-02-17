@@ -18,7 +18,10 @@ import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.SelfStatement;
 import com.laytonsmith.core.compiler.VariableScope;
+import com.laytonsmith.core.compiler.analysis.BreakableBoundDeclaration;
+import com.laytonsmith.core.compiler.analysis.ContinuableBoundDeclaration;
 import com.laytonsmith.core.compiler.analysis.Namespace;
+import com.laytonsmith.core.compiler.analysis.ReturnableDeclaration;
 import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.CArray;
@@ -57,6 +60,7 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -222,8 +226,14 @@ public class EventBinding {
 
 				// Perform prefilter validation for known events.
 				if(i == 2 && eventName != null) {
-					argTypes.add(this.typecheckPrefilterParseTree(
-							analysis, eventName, child, env, ast.getFileOptions(), exceptions));
+					try {
+						argTypes.add(this.typecheckPrefilterParseTree(
+								analysis, eventName, child, env, ast.getFileOptions(), exceptions));
+					} catch(ConfigCompileException ex) {
+						exceptions.add(ex);
+					} catch(ConfigCompileGroupException ex) {
+						exceptions.addAll(ex.getList());
+					}
 					argTargets.add(child.getTarget());
 				} else {
 
@@ -240,7 +250,8 @@ public class EventBinding {
 
 		private LeftHandSideType typecheckPrefilterParseTree(
 				StaticAnalysis analysis, String eventName, ParseTree prefilterParseTree,
-				Environment env, FileOptions fileOptions, Set<ConfigCompileException> exceptions) {
+				Environment env, FileOptions fileOptions, Set<ConfigCompileException> exceptions)
+				throws ConfigCompileException, ConfigCompileGroupException {
 
 			// Return if the prefilter parse tree is not a hard-coded "array(...)" node.
 			if(!(prefilterParseTree.getData() instanceof CFunction)
@@ -262,6 +273,7 @@ public class EventBinding {
 			}
 
 			// Validate prefilters.
+			Map<Prefilter<? extends BindableEvent>, ParseTree> fullPrefilters = new HashMap<>();
 			for(ParseTree node : prefilterParseTree.getChildren()) {
 				if(node.getData() instanceof CFunction && node.getData().val().equals(Compiler.centry.NAME)) {
 					List<ParseTree> children = node.getChildren();
@@ -270,6 +282,7 @@ public class EventBinding {
 					if(prefilters.containsKey(prefilterKey)) {
 						Prefilter<? extends BindableEvent> prefilter = prefilters.get(prefilterKey);
 						prefilter.getMatcher().typecheck(analysis, prefilterEntryValParseTree, env, exceptions);
+						fullPrefilters.put(prefilter, prefilterEntryValParseTree);
 						if(prefilter.getStatus().contains(PrefilterStatus.REMOVED)) {
 							exceptions.add(new ConfigCompileException("This prefilter has been removed,"
 									+ " and is no longer available.", prefilterEntryValParseTree.getTarget()));
@@ -293,6 +306,8 @@ public class EventBinding {
 				}
 			}
 
+			ev.validatePrefilters(fullPrefilters, env);
+
 			// All array entries have been typechecked, so we can just return the array type here.
 			return CArray.TYPE.asLeftHandSideType();
 		}
@@ -301,8 +316,9 @@ public class EventBinding {
 		public Scope linkScope(StaticAnalysis analysis, Scope parentScope,
 				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
 
-			// Fully ignore the bind() if it will generate an exception later anyways.
+			// Handle not enough arguments. Link child scopes, but return parent scope.
 			if(ast.numberOfChildren() < 5) {
+				super.linkScope(analysis, parentScope, ast, env, exceptions);
 				return parentScope;
 			}
 
@@ -327,7 +343,15 @@ public class EventBinding {
 				paramScope = scopes[0];
 				valScope = scopes[1];
 			}
-			analysis.linkScope(paramScope, code, env, exceptions);
+			Scope codeParentScope = analysis.createNewScope(paramScope);
+			analysis.linkScope(codeParentScope, code, env, exceptions);
+
+			// Create returnable declaration in the inner root scope.
+			codeParentScope.addDeclaration(new ReturnableDeclaration(CVoid.TYPE.asLeftHandSideType(), ast.getNodeModifiers(), ast.getTarget()));
+
+			// Create breakable and continuable bound declarations to prevent resolving to parent scope.
+			codeParentScope.addDeclaration(new BreakableBoundDeclaration(ast.getNodeModifiers(), ast.getTarget()));
+			codeParentScope.addDeclaration(new ContinuableBoundDeclaration(ast.getNodeModifiers(), ast.getTarget()));
 
 			// Allow code after bind() to access declarations in assigned values, but not parameters themselves.
 			return valScope;
@@ -964,7 +988,7 @@ public class EventBinding {
 		@Override
 		public String docs() {
 			return "void {} Consumes an event, so that lower priority handlers don't even"
-					+ " recieve the event. Monitor level handlers will still recieve it, however,"
+					+ " receive the event. Monitor level handlers will still receive it, however,"
 					+ " and they can check to see if the event was consumed.";
 		}
 
@@ -1016,7 +1040,7 @@ public class EventBinding {
 			return "boolean {} Returns whether or not this event has been consumed. Usually only useful"
 					+ " for Monitor level handlers, it could also be used for highly robust code,"
 					+ " as an equal priority handler could have consumed the event, but this handler"
-					+ " would still recieve it.";
+					+ " would still receive it.";
 		}
 
 		@Override

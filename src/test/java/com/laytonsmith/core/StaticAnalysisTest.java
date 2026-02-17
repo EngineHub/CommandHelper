@@ -13,7 +13,9 @@ import com.laytonsmith.core.environments.RuntimeMode;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
+import com.laytonsmith.testing.AbstractIntegrationTest;
 import com.laytonsmith.testing.StaticTest;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -21,18 +23,13 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import org.junit.Assert;
 import static org.junit.Assert.*;
-import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
 /**
  *
  */
-public class StaticAnalysisTest {
-	@BeforeClass
-	public static void beforeClass() {
-		StaticTest.InstallFakeServerFrontend();
-	}
+public class StaticAnalysisTest extends AbstractIntegrationTest {
 
 	Environment env;
 	StaticAnalysis staticAnalysis;

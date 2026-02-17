@@ -1,22 +1,23 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
+import com.laytonsmith.abstraction.enums.MCChatColor;
+import com.laytonsmith.core.FileWriteMode;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.PureUtilities.ZipReader;
-import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.commandhelper.BukkitDirtyRegisteredListener;
 import com.laytonsmith.core.ArgumentValidation;
-import com.laytonsmith.core.FileWriteMode;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Security;
 import com.laytonsmith.core.Static;
-import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.CByteArray;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CInt;
@@ -34,7 +35,6 @@ import com.laytonsmith.core.exceptions.CRE.CREBindException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREIOException;
 import com.laytonsmith.core.exceptions.CRE.CREIncludeException;
-import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
 import com.laytonsmith.core.exceptions.CRE.CRESecurityException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -46,8 +46,10 @@ import org.bukkit.event.Cancellable;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 /**
@@ -117,124 +119,6 @@ public class Sandbox {
 			}
 			env.getEnv(GlobalEnv.class).GetEvent().setCancelled(true);
 			return CVoid.VOID;
-		}
-	}
-
-	@api(environments = {CommandHelperEnvironment.class})
-	public static class raw_set_pvanish extends AbstractFunction {
-
-		@Override
-		public String getName() {
-			return "raw_set_pvanish";
-		}
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{2, 3};
-		}
-
-		@Override
-		public String docs() {
-			return "void {[player], isVanished, otherPlayer} Sets the visibility"
-					+ " of the current player (or the one specified) to visible or invisible"
-					+ " (based on the value of isVanished) from the view of the otherPlayer."
-					+ " This is the raw access function, you probably shouldn't use this, as"
-					+ " the CommandHelper vanish api functions will probably be easier to use.";
-		}
-
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREPlayerOfflineException.class};
-		}
-
-		@Override
-		public boolean isRestricted() {
-			return true; //lol, very
-		}
-
-		@Override
-		public Boolean runAsync() {
-			return false;
-		}
-
-		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer me;
-			boolean isVanished;
-			MCPlayer other;
-			if(args.length == 2) {
-				me = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
-				isVanished = ArgumentValidation.getBoolean(args[0], t, env);
-				other = Static.GetPlayer(args[1], t, env);
-			} else {
-				me = Static.GetPlayer(args[0], t, env);
-				isVanished = ArgumentValidation.getBoolean(args[1], t, env);
-				other = Static.GetPlayer(args[2], t, env);
-			}
-
-			other.setVanished(isVanished, me);
-
-			return CVoid.VOID;
-		}
-
-		@Override
-		public MSVersion since() {
-			return MSVersion.V3_3_0;
-		}
-	}
-
-	@api(environments = {CommandHelperEnvironment.class})
-	public static class raw_pcan_see extends AbstractFunction {
-
-		@Override
-		public String getName() {
-			return "raw_pcan_see";
-		}
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{1, 2};
-		}
-
-		@Override
-		public String docs() {
-			return "boolean {[player], other} Returns a boolean stating if the other player can"
-					+ " see this player or not. This is the raw access function, you probably shouldn't use this, as"
-					+ " the CommandHelper vanish api functions will probably be easier to use.";
-		}
-
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREPlayerOfflineException.class};
-		}
-
-		@Override
-		public boolean isRestricted() {
-			return true;
-		}
-
-		@Override
-		public Boolean runAsync() {
-			return false;
-		}
-
-		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer me;
-			MCPlayer other;
-			if(args.length == 1) {
-				me = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
-				other = Static.GetPlayer(args[0], t, env);
-			} else {
-				me = Static.GetPlayer(args[0], t, env);
-				other = Static.GetPlayer(args[1], t, env);
-			}
-			return CBoolean.get(me.canSee(other));
-		}
-
-		@Override
-		public MSVersion since() {
-			return MSVersion.V3_3_0;
 		}
 	}
 
@@ -334,10 +218,9 @@ public class Sandbox {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			Function color = new Echoes.color();
-			String red = color.exec(t, env, null, args.length == 3 ? args[0] : new CString("RED", t)).val();
-			String white = color.exec(t, env, null, args.length == 3 ? args[1] : new CString("WHITE", t)).val();
-			String blue = color.exec(t, env, null, args.length == 3 ? args[2] : new CString("BLUE", t)).val();
+			MCChatColor red = MCChatColor.RED;
+			MCChatColor white = MCChatColor.WHITE;
+			MCChatColor blue = MCChatColor.BLUE;
 			int multiplier = 2;
 			char c = '=';
 			String one = multiply(c, 1 * multiplier);
@@ -347,16 +230,18 @@ public class Sandbox {
 			String twelve = multiply(c, 12 * multiplier);
 			String thirteen = multiply(c, 13 * multiplier);
 			String twentytwo = multiply(c, 22 * multiplier);
+			PrintStream out = StreamUtils.GetSystemOut();
+			String vertical = Static.MCToANSIColors(red + six + white + one + blue + two + white + one + red + twelve);
 			for(int i = 0; i < 6; ++i) {
-				System.out.println(Static.MCToANSIColors(red + six + white + one + blue + two + white + one + red + twelve) + TermColors.RESET);
+				out.println(vertical + TermColors.RESET);
 			}
-			System.out.println(Static.MCToANSIColors(white + seven + blue + two + white + thirteen) + TermColors.RESET);
+			out.println(Static.MCToANSIColors(white + seven + blue + two + white + thirteen) + TermColors.RESET);
 			for(int i = 0; i < 2; ++i) {
-				System.out.println(Static.MCToANSIColors(blue + twentytwo) + TermColors.RESET);
+				out.println(Static.MCToANSIColors(blue + twentytwo) + TermColors.RESET);
 			}
-			System.out.println(Static.MCToANSIColors(white + seven + blue + two + white + thirteen) + TermColors.RESET);
+			out.println(Static.MCToANSIColors(white + seven + blue + two + white + thirteen) + TermColors.RESET);
 			for(int i = 0; i < 6; ++i) {
-				System.out.println(Static.MCToANSIColors(red + six + white + one + blue + two + white + one + red + twelve) + TermColors.RESET);
+				out.println(vertical + TermColors.RESET);
 			}
 
 			return CVoid.VOID;
@@ -419,7 +304,8 @@ public class Sandbox {
 
 		@Override
 		public String docs() {
-			return "double {randomResource} Returns a new rand value. If the seed used to create the resource is the same, each resulting"
+			return "double {Resource} Returns a new rand value using the provided a RANDOM Resource."
+					+ " If the seed used to create the resource is the same, each resulting"
 					+ " series of numbers will be the same.";
 		}
 
@@ -493,8 +379,9 @@ public class Sandbox {
 
 		@Override
 		public String docs() {
-			return "int {path} Reads and compiles specified *.ms files. This can be used for files already compiled"
-					+ " with include(). Scripts that then include() these files will use the updated code."
+			return "int {path} Recompiles specified files already compiled with include()."
+					+ " If there's no compile errors, scripts that then include() these files will use the updated code."
+					+ " Note that this bypasses Static Analysis, even if you have it enabled."
 					+ " The path can be a directory or file. It is executed recursively through all subdirectories."
 					+ " If there's a compile error in any of the files, the function will throw an exception and other"
 					+ " scripts will continue to use the previous version of the code when included. Returns number"
@@ -523,49 +410,48 @@ public class Sandbox {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			File file = Static.GetFileFromArgument(args[0].val(), env, t, null);
-			int num = 0;
 			try {
-				if(Static.InCmdLine(env, true) || Security.CheckSecurity(file)) {
-					IncludeCache includeCache = env.getEnv(StaticRuntimeEnv.class).getIncludeCache();
-					if(file.isDirectory()) {
-						HashMap<File, ParseTree> files = compileDirectory(file, env, t);
-						includeCache.addAll(files);
-						num = files.size();
-					} else if(includeCache.has(file)) {
-						includeCache.add(file, compileFile(file, env, t));
-						num = 1;
-					}
-				} else {
+				File file = Static.GetFileFromArgument(args[0].val(), env, t, null).getCanonicalFile();
+				if(!Static.InCmdLine(env, true) && !Security.CheckSecurity(file)) {
 					throw new CRESecurityException("The script cannot access " + file
 							+ " due to restrictions imposed by the base-dir setting.", t);
 				}
+				IncludeCache cache = env.getEnv(StaticRuntimeEnv.class).getIncludeCache();
+				if(file.isDirectory()) {
+					Map<File, ParseTree> includes = new HashMap<>();
+					compileDirectory(includes, file, env, cache, t);
+					cache.addAll(includes);
+					return new CInt(includes.size(), t);
+				} else if(cache.has(file)) {
+					cache.add(file, compileFile(file, env, t));
+					return new CInt(1, t);
+				}
+				return new CInt(0, t);
 			} catch (IOException ex) {
 				throw new CREIOException(ex.getMessage(), t, ex);
 			}
-			return new CInt(num, t);
 		}
 
-		private HashMap<File, ParseTree> compileDirectory(File file, Environment env, Target t) {
-			HashMap<File, ParseTree> newFiles = new HashMap<>();
-			File[] files = file.listFiles();
+		private void compileDirectory(Map<File, ParseTree> includes, File dir, Environment env, IncludeCache cache, Target t) {
+			File[] files = dir.listFiles();
 			if(files != null) {
-				IncludeCache includeCache = env.getEnv(StaticRuntimeEnv.class).getIncludeCache();
 				for(File f : files) {
 					if(f.isDirectory()) {
-						newFiles.putAll(compileDirectory(f, env, t));
-					} else if(includeCache.has(f)) {
-						newFiles.put(f, compileFile(f, env, t));
+						compileDirectory(includes, f, env, cache, t);
+					} else if(cache.has(f)) {
+						includes.put(f, compileFile(f, env, t));
 					}
 				}
 			}
-			return newFiles;
 		}
 
 		private ParseTree compileFile(File file, Environment env, Target t) {
 			try {
 				String s = new ZipReader(file).getFileContents();
-				return MethodScriptCompiler.compile(MethodScriptCompiler.lex(s, env, file, true), env, env.getEnvClasses());
+				StaticAnalysis staticAnalysis = new StaticAnalysis(true);
+				staticAnalysis.setLocalDisabled(true);
+				return MethodScriptCompiler.compile(MethodScriptCompiler.lex(s, env, file, true), env, env.getEnvClasses(),
+						staticAnalysis);
 			} catch (ConfigCompileException ex) {
 				throw new CREIncludeException("There was a compile error when trying to recompile the script at "
 						+ file + "\n" + ex.getMessage() + " :: " + file.getName() + ":" + ex.getLineNum(), t);

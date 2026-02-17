@@ -87,7 +87,7 @@ import static org.mockito.Mockito.when;
  */
 //@RunWith(PowerMockRunner.class)
 //@PrepareForTest(Static.class)
-public class RandomTests {
+public class RandomTests extends AbstractIntegrationTest {
 
 	MCPlayer fakePlayer;
 	Environment env;
@@ -113,7 +113,6 @@ public class RandomTests {
 		Map<String, Throwable> uhohs = new HashMap<>();
 		String[] requiredMethods = new String[]{"toString", "equals", "hashCode"};
 		//Ensure that all the abstraction objects overloaded
-		StaticTest.InstallFakeServerFrontend();
 		outer:
 		for(Class c : ClassDiscovery.getDefaultInstance().loadClassesThatExtend(AbstractionObject.class)) {
 			inner:

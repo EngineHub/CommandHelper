@@ -92,4 +92,9 @@ public abstract class MacroICPrefilterMatcher<T extends BindableEvent> extends A
 	 */
 	protected abstract Object getProperty(T event);
 
+	@Override
+	public int getPriority() {
+		return 1;
+	}
+
 }

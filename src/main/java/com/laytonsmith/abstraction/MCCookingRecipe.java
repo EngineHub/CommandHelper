@@ -3,10 +3,10 @@ package com.laytonsmith.abstraction;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 
 public interface MCCookingRecipe extends MCRecipe {
-	MCMaterial[] getInput();
+	MCRecipeChoice getInput();
 	void setInput(MCItemStack input);
 	void setInput(MCMaterial mat);
-	void setInput(MCMaterial... mats);
+	void setInput(MCRecipeChoice choice);
 	int getCookingTime();
 	void setCookingTime(int ticks);
 	float getExperience();

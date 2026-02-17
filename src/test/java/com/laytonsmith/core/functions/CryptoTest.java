@@ -8,11 +8,13 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.laytonsmith.testing.AbstractIntegrationTest;
+
 /**
  *
  *
  */
-public class CryptoTest {
+public class CryptoTest extends AbstractIntegrationTest {
 
 	public CryptoTest() {
 	}

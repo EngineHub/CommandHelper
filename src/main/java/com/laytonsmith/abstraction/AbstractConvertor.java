@@ -13,14 +13,21 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Logger;
 
 public abstract class AbstractConvertor implements Convertor {
 
 	private final List<Runnable> shutdownHooks = new ArrayList<>();
+	private final List<Runnable> persistentShutdownHooks = new ArrayList<>();
 
 	@Override
 	public void addShutdownHook(Runnable r) {
 		shutdownHooks.add(r);
+	}
+
+	@Override
+	public void addPersistentShutdownHook(Runnable r) {
+		persistentShutdownHooks.add(r);
 	}
 
 	@Override
@@ -35,8 +42,20 @@ public abstract class AbstractConvertor implements Convertor {
 		});
 		Iterator<Runnable> iter = shutdownHooks.iterator();
 		while(iter.hasNext()) {
-			iter.next().run();
+			try {
+				iter.next().run();
+			} catch(Error e) {
+				Logger.getLogger(AbstractConvertor.class.getName()).severe(e.getMessage());
+			}
 			iter.remove();
+		}
+
+		for(Runnable r : persistentShutdownHooks) {
+			try {
+				r.run();
+			} catch(Error e) {
+				Logger.getLogger(AbstractConvertor.class.getName()).severe(e.getMessage());
+			}
 		}
 	}
 

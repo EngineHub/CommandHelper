@@ -5,11 +5,13 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
+import com.laytonsmith.testing.AbstractIntegrationTest;
+
 /**
  *
  *
  */
-public class ScriptTest {
+public class ScriptTest extends AbstractIntegrationTest {
 
 	public ScriptTest() {
 	}

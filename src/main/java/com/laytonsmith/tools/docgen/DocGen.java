@@ -544,31 +544,31 @@ public class DocGen {
 		private static String ExpandMacro(String macro, MarkupType type) {
 					if(type == MarkupType.HTML) {
 				return "<em>" + macro
-						.replaceAll("<string match>", "&lt;String Match&gt;")
-						.replaceAll("<boolean match>", "&lt;Boolean Match&gt;")
-						.replaceAll("<regex>", "&lt;Regex&gt;")
-						.replaceAll("<location match>", "&lt;Location Match&gt;")
-						.replaceAll("<math match>", "&lt;Math Match&gt;")
-						.replaceAll("<macro>", "&lt;Macro&gt;")
-						.replaceAll("<expression>", "&lt;Expression&gt;") + "</em>";
+						.replace("<string match>", "&lt;String Match&gt;")
+						.replace("<boolean match>", "&lt;Boolean Match&gt;")
+						.replace("<regex>", "&lt;Regex&gt;")
+						.replace("<location match>", "&lt;Location Match&gt;")
+						.replace("<math match>", "&lt;Math Match&gt;")
+						.replace("<macro>", "&lt;Macro&gt;")
+						.replace("<expression>", "&lt;Expression&gt;") + "</em>";
 			} else if(type == MarkupType.WIKI) {
 				return macro
-						.replaceAll("<string match>", "[[CommandHelper/Events/Prefilters#String Match|String Match]]")
-						.replaceAll("<boolean match>", "[[CommandHelper/Events/Prefilters#Boolean Match|Boolean Match]]")
-						.replaceAll("<regex>", "[[CommandHelper/Events/Prefilters#Regex|Regex]]")
-						.replaceAll("<location match>", "[[CommandHelper/Events/Prefilters#Location Match|Location Match]]")
-						.replaceAll("<math match>", "[[CommandHelper/Events/Prefilters#Math Match|Math Match]]")
-						.replaceAll("<macro>", "[[CommandHelper/Events/Prefilters#Macro|Macro]]")
-						.replaceAll("<expression>", "[[CommandHelper/Events/Prefilters#Expression|Expression]]");
+						.replace("<string match>", "[[CommandHelper/Events/Prefilters#String Match|String Match]]")
+						.replace("<boolean match>", "[[CommandHelper/Events/Prefilters#Boolean Match|Boolean Match]]")
+						.replace("<regex>", "[[CommandHelper/Events/Prefilters#Regex|Regex]]")
+						.replace("<location match>", "[[CommandHelper/Events/Prefilters#Location Match|Location Match]]")
+						.replace("<math match>", "[[CommandHelper/Events/Prefilters#Math Match|Math Match]]")
+						.replace("<macro>", "[[CommandHelper/Events/Prefilters#Macro|Macro]]")
+						.replace("<expression>", "[[CommandHelper/Events/Prefilters#Expression|Expression]]");
 			} else if(type == MarkupType.TEXT || type == MarkupType.MARKDOWN) {
 				return macro
-						.replaceAll("<string match>", "<String Match>")
-						.replaceAll("<boolean match>", "<Boolean Match>")
-						.replaceAll("<regex>", "<Regex>")
-						.replaceAll("<location match>", "<Location Match>")
-						.replaceAll("<math match>", "<Math Match>")
-						.replaceAll("<macro>", "<Macro>")
-						.replaceAll("<expression>", "<Expression>");
+						.replace("<string match>", "<String Match>")
+						.replace("<boolean match>", "<Boolean Match>")
+						.replace("<regex>", "<Regex>")
+						.replace("<location match>", "<Location Match>")
+						.replace("<math match>", "<Math Match>")
+						.replace("<macro>", "<Macro>")
+						.replace("<expression>", "<Expression>");
 					}
 			return macro;
 		}

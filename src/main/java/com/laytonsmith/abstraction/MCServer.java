@@ -96,9 +96,6 @@ public interface MCServer extends AbstractionObject {
 
 	MCOfflinePlayer[] getOfflinePlayers();
 
-	/* Boring information get methods -.- */
-	String getServerName();
-
 	String getMotd();
 
 	String getAPIVersion();
@@ -184,4 +181,6 @@ public interface MCServer extends AbstractionObject {
 	MCMerchant createMerchant(String title);
 
 	MCWorldBorder createWorldBorder();
+
+	List<UUID> selectEntites(MCCommandSender sender, String selector);
 }

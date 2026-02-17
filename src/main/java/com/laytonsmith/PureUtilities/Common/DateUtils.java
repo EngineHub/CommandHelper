@@ -45,8 +45,8 @@ public final class DateUtils {
 		String hour = String.format("%02d", c.get(Calendar.HOUR));
 		String minute = String.format("%02d", c.get(Calendar.MINUTE));
 		String second = String.format("%02d", c.get(Calendar.SECOND));
-		return name.replaceAll("%Y", year).replaceAll("%M", month)
-				.replaceAll("%D", day).replaceAll("%h", hour)
-				.replaceAll("%m", minute).replaceAll("%s", second);
+		return name.replace("%Y", year).replace("%M", month)
+				.replace("%D", day).replace("%h", hour)
+				.replace("%m", minute).replace("%s", second);
 	}
 }

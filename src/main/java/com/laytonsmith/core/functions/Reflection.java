@@ -28,10 +28,8 @@ import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.IVariable;
-import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.constructs.generics.ConcreteGenericParameter;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -58,6 +56,7 @@ import com.laytonsmith.persistence.PersistenceNetwork;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -355,25 +354,22 @@ public class Reflection {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			LeftHandSideType types = ArgumentValidation.getClassType(args[0], t, env);
-			CArray ret = new CArray(t, null, env);
-			ret.set("fqcn", types.val(), env);
-			ret.set("name", types.getSimpleName(), env);
-			ret.set("interfaces", new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
-					.addNativeParameter(CClassType.TYPE, null).buildNative(), env, types.getTypeInterfaces(env)), t, env);
-			ret.set("superclasses", new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
-					.addNativeParameter(CClassType.TYPE, null).buildNative(), env, types.getTypeSuperclasses(env)), t, env);
+			CClassType type = ArgumentValidation.getClassType(args[0], t, env).asConcreteType(t);
+			CArray ret = CArray.GetAssociativeArray(t, null, env);
+			ret.set("fqcn", type.getFQCN().getFQCN(), env);
+			ret.set("name", type.getFQCN().getSimpleName(), env);
+			ret.set("interfaces", new CArray(t, null, env, type.getTypeInterfaces(env)), t, env);
+			ret.set("superclasses", new CArray(t, null, env, type.getTypeSuperclasses(env)), t, env);
 
 			CArray typeDocs = new CArray(t, null, env);
-
-			for(ConcreteGenericParameter pair : types.getTypes()) {
-				CClassType type = pair.getType();
+			// When type unions are a thing, this will need to be implemented slightly differently.
+			for(CClassType m : Arrays.asList(type)) {
 				CArray docs = CArray.GetAssociativeArray(t, null, env);
 				docs.set("package", type.getPackage() == null ? CNull.NULL : type.getPackage(), t, env);
 				docs.set("isNative", CBoolean.get(type.getNativeType() != null), t, env);
-				docs.set("docs", type.getTypeDocs(env), env);
-				docs.set("since", type.getTypeSince(env).toString(), env);
-				typeDocs.push(docs, t, env);
+				docs.set("docs", m.getTypeDocs(env), env);
+				docs.set("since", m.getTypeSince(env).toString(), env);
+				typeDocs.push(docs, t);
 			}
 			ret.set("typeDocs", typeDocs, t, env);
 			return ret;

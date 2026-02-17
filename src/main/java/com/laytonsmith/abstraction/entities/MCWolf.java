@@ -19,4 +19,20 @@ public interface MCWolf extends MCTameable {
 	boolean isInterested();
 
 	void setInterested(boolean interested);
+
+	Variant getWolfVariant();
+
+	void setWolfVariant(Variant variant);
+
+	enum Variant {
+		ASHEN,
+		BLACK,
+		CHESTNUT,
+		PALE,
+		RUSTY,
+		SNOWY,
+		SPOTTED,
+		STRIPED,
+		WOODS
+	}
 }

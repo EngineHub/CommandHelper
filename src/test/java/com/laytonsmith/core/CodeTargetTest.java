@@ -5,7 +5,7 @@ import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.functions.StringHandling;
-import com.laytonsmith.testing.StaticTest;
+import com.laytonsmith.testing.AbstractIntegrationTest;
 import java.io.File;
 import java.util.List;
 import static org.junit.Assert.fail;
@@ -14,12 +14,11 @@ import org.junit.Test;
 /**
  * This class tests various scripts that have historically been shown to have incorrect code targets.
  */
-public class CodeTargetTest {
+public class CodeTargetTest extends AbstractIntegrationTest {
 
 	private static final File TEST_FILE = new File("test.ms");
 
 	private List<ParseTree> compile(String script) throws Exception {
-		StaticTest.InstallFakeServerFrontend();
 		Environment env = Static.GenerateStandaloneEnvironment();
 		File file = TEST_FILE;
 		TokenStream stream = MethodScriptCompiler.lex(script, env, file, true);

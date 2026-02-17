@@ -2,7 +2,10 @@ package com.laytonsmith.abstraction;
 
 import com.laytonsmith.abstraction.blocks.MCBlockData;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
+import com.laytonsmith.abstraction.enums.MCEnchantment;
 import com.laytonsmith.abstraction.enums.MCItemFlag;
+import com.laytonsmith.abstraction.enums.MCItemRarity;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -109,11 +112,21 @@ public interface MCItemMeta extends AbstractionObject {
 
 	void setUnbreakable(boolean unbreakable);
 
+	boolean hasDamage();
+
 	int getDamage();
 
 	void setDamage(int damage);
 
+	boolean hasMaxDamage();
+
+	int getMaxDamage();
+
+	void setMaxDamage(Integer damage);
+
 	MCBlockData getBlockData(MCMaterial material);
+
+	Map<String, String> getExistingBlockData();
 
 	boolean hasBlockData();
 
@@ -128,4 +141,89 @@ public interface MCItemMeta extends AbstractionObject {
 	List<MCAttributeModifier> getAttributeModifiers();
 
 	void setAttributeModifiers(List<MCAttributeModifier> modifiers);
+
+	boolean hasCustomTags();
+
+	MCTagContainer getCustomTags();
+
+	boolean hasItemName();
+
+	String getItemName();
+
+	void setItemName(String name);
+
+	boolean isHideTooltip();
+
+	void setHideTooltip(boolean hide);
+
+	boolean hasEnchantmentGlintOverride();
+
+	boolean getEnchantmentGlintOverride();
+
+	void setEnchantmentGlintOverride(boolean glint);
+
+	boolean hasMaxStackSize();
+
+	int getMaxStackSize();
+
+	void setMaxStackSize(Integer size);
+
+	boolean hasRarity();
+
+	MCItemRarity getRarity();
+
+	void setRarity(MCItemRarity rarity);
+
+	boolean hasEnchantable();
+
+	int getEnchantable();
+
+	void setEnchantable(Integer enchantability);
+
+	boolean hasJukeboxPlayable();
+
+	String getJukeboxPlayable();
+
+	void setJukeboxPlayable(String playable);
+
+	boolean isGlider();
+
+	void setGlider(boolean glider);
+
+	boolean hasUseRemainder();
+
+	MCItemStack getUseRemainder();
+
+	void setUseRemainder(MCItemStack remainder);
+
+	boolean hasFood();
+
+	MCFoodComponent getFood();
+
+	void setFood(MCFoodComponent component);
+
+	boolean hasItemModel();
+
+	String getItemModel();
+
+	void setItemModel(String key);
+
+	boolean hasTooltipStyle();
+
+	String getTooltipStyle();
+
+	void setTooltipStyle(String key);
+
+	boolean hasUseCooldown();
+
+	MCCooldownComponent getUseCooldown();
+
+	void setUseCooldown(MCCooldownComponent component);
+
+	boolean hasEquippable();
+
+	MCEquippableComponent getEquippable();
+
+	void setEquippable(MCEquippableComponent component);
+
 }

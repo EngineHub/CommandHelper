@@ -1,31 +1,37 @@
 package com.laytonsmith.abstraction.bukkit.events;
 
+import com.laytonsmith.abstraction.MCAnvilInventory;
 import com.laytonsmith.abstraction.MCCraftingInventory;
-import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCEnchantmentOffer;
+import com.laytonsmith.abstraction.MCGrindstoneInventory;
 import com.laytonsmith.abstraction.MCHumanEntity;
 import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCInventoryView;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCRecipe;
+import com.laytonsmith.abstraction.MCSmithingInventory;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
+import com.laytonsmith.abstraction.bukkit.BukkitMCAnvilInventory;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCraftingInventory;
-import com.laytonsmith.abstraction.bukkit.BukkitMCEnchantment;
 import com.laytonsmith.abstraction.bukkit.BukkitMCEnchantmentOffer;
+import com.laytonsmith.abstraction.bukkit.BukkitMCGrindstoneInventory;
 import com.laytonsmith.abstraction.bukkit.BukkitMCInventory;
 import com.laytonsmith.abstraction.bukkit.BukkitMCInventoryView;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
+import com.laytonsmith.abstraction.bukkit.BukkitMCSmithingInventory;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCHumanEntity;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.abstraction.enums.MCClickType;
 import com.laytonsmith.abstraction.enums.MCDragType;
+import com.laytonsmith.abstraction.enums.MCEnchantment;
 import com.laytonsmith.abstraction.enums.MCInventoryAction;
 import com.laytonsmith.abstraction.enums.MCResult;
 import com.laytonsmith.abstraction.enums.MCSlotType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCClickType;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEnchantment;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCInventoryAction;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCResult;
 import com.laytonsmith.abstraction.events.MCEnchantItemEvent;
@@ -37,8 +43,11 @@ import com.laytonsmith.abstraction.events.MCInventoryInteractEvent;
 import com.laytonsmith.abstraction.events.MCInventoryOpenEvent;
 import com.laytonsmith.abstraction.events.MCItemHeldEvent;
 import com.laytonsmith.abstraction.events.MCItemSwapEvent;
+import com.laytonsmith.abstraction.events.MCPrepareAnvilEvent;
+import com.laytonsmith.abstraction.events.MCPrepareGrindstoneEvent;
 import com.laytonsmith.abstraction.events.MCPrepareItemCraftEvent;
 import com.laytonsmith.abstraction.events.MCPrepareItemEnchantEvent;
+import com.laytonsmith.abstraction.events.MCPrepareSmithingEvent;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentOffer;
 import org.bukkit.entity.HumanEntity;
@@ -52,7 +61,10 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryEvent;
 import org.bukkit.event.inventory.InventoryInteractEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
+import org.bukkit.event.inventory.PrepareAnvilEvent;
+import org.bukkit.event.inventory.PrepareGrindstoneEvent;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
+import org.bukkit.event.inventory.PrepareSmithingEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.inventory.ItemStack;
@@ -123,7 +135,7 @@ public class BukkitInventoryEvents {
 		}
 
 		@Override
-		public boolean isCanceled() {
+		public boolean isCancelled() {
 			return iie.isCancelled();
 		}
 
@@ -330,7 +342,7 @@ public class BukkitInventoryEvents {
 			for(Map.Entry<Enchantment, Integer> ea : ei.getEnchantsToAdd().entrySet()) {
 				Enchantment key = ea.getKey();
 				Integer value = ea.getValue();
-				ret.put(new BukkitMCEnchantment(key), value);
+				ret.put(BukkitMCEnchantment.valueOfConcrete(key), value);
 			}
 			return ret;
 		}
@@ -350,7 +362,7 @@ public class BukkitInventoryEvents {
 			for(Map.Entry<MCEnchantment, Integer> ea : enchants.entrySet()) {
 				MCEnchantment key = ea.getKey();
 				Integer value = ea.getValue();
-				enchantments.put(((BukkitMCEnchantment) key).asEnchantment(), value);
+				enchantments.put((Enchantment) key.getConcrete(), value);
 			}
 
 			ItemStack item = ei.getItem();
@@ -385,6 +397,16 @@ public class BukkitInventoryEvents {
 		@Override
 		public int whichButton() {
 			return ei.whichButton();
+		}
+
+		@Override
+		public int getLevelHint() {
+			return ei.getLevelHint();
+		}
+
+		@Override
+		public MCEnchantment getEnchantmentHint() {
+			return BukkitMCEnchantment.valueOfConcrete(ei.getEnchantmentHint());
 		}
 	}
 
@@ -520,6 +542,11 @@ public class BukkitInventoryEvents {
 		}
 
 		@Override
+		public MCPlayer getPlayer() {
+			return new BukkitMCPlayer(e.getViewers().get(0));
+		}
+
+		@Override
 		public MCRecipe getRecipe() {
 			return BukkitConvertor.BukkitGetRecipe(e.getRecipe());
 		}
@@ -532,6 +559,78 @@ public class BukkitInventoryEvents {
 		@Override
 		public MCCraftingInventory getInventory() {
 			return new BukkitMCCraftingInventory(e.getInventory());
+		}
+	}
+
+	public static class BukkitMCPrepareAnvilEvent extends BukkitMCInventoryEvent implements MCPrepareAnvilEvent {
+		PrepareAnvilEvent e;
+
+		public BukkitMCPrepareAnvilEvent(PrepareAnvilEvent event) {
+			super(event);
+			e = event;
+		}
+
+		@Override
+		public void setResult(MCItemStack i) {
+			e.setResult(((BukkitMCItemStack) i).asItemStack());
+		}
+
+		@Override
+		public MCPlayer getPlayer() {
+			return new BukkitMCPlayer(e.getViewers().get(0));
+		}
+
+		@Override
+		public MCAnvilInventory getInventory() {
+			return new BukkitMCAnvilInventory(e.getInventory());
+		}
+	}
+
+	public static class BukkitMCPrepareSmithingEvent extends BukkitMCInventoryEvent implements MCPrepareSmithingEvent {
+		PrepareSmithingEvent e;
+
+		public BukkitMCPrepareSmithingEvent(PrepareSmithingEvent event) {
+			super(event);
+			e = event;
+		}
+
+		@Override
+		public MCPlayer getPlayer() {
+			return new BukkitMCPlayer(e.getViewers().get(0));
+		}
+
+		@Override
+		public void setResult(MCItemStack stack) {
+			e.setResult(((BukkitMCItemStack) stack).asItemStack());
+		}
+
+		@Override
+		public MCSmithingInventory getInventory() {
+			return new BukkitMCSmithingInventory(e.getInventory());
+		}
+	}
+
+	public static class BukkitMCPrepareGrindstoneEvent extends BukkitMCInventoryEvent implements MCPrepareGrindstoneEvent {
+		PrepareGrindstoneEvent e;
+
+		public BukkitMCPrepareGrindstoneEvent(PrepareGrindstoneEvent event) {
+			super(event);
+			e = event;
+		}
+
+		@Override
+		public MCPlayer getPlayer() {
+			return new BukkitMCPlayer(e.getViewers().get(0));
+		}
+
+		@Override
+		public void setResult(MCItemStack stack) {
+			e.setResult(((BukkitMCItemStack) stack).asItemStack());
+		}
+
+		@Override
+		public MCGrindstoneInventory getInventory() {
+			return new BukkitMCGrindstoneInventory(e.getInventory());
 		}
 	}
 }

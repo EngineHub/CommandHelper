@@ -215,7 +215,7 @@ public class LangServModel {
 					File includes = new File(ai, "includes");
 					if(includes.exists() && includes.isDirectory()) {
 						FileUtil.recursiveFind(includes, (r) -> {
-							String path = r.getAbsolutePath().replace("\\", "/");
+							String path = r.getAbsolutePath().replace('\\', '/');
 							if(path.endsWith(".ms")) {
 								libraryFiles.add(r);
 							}
@@ -225,7 +225,7 @@ public class LangServModel {
 					ai = lp;
 				}
 				FileUtil.recursiveFind(ai, (r) -> {
-					String path = r.getAbsolutePath().replace("\\", "/");
+					String path = r.getAbsolutePath().replace('\\', '/');
 					if(!path.contains(".disabled/") && r.isFile()) {
 						if(path.contains(".library/")) {
 							if(path.endsWith(".ms")) {
