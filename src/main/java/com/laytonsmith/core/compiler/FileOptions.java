@@ -369,7 +369,7 @@ public final class FileOptions {
 		UnexpectedStatement("In strict mode, unexpected statements are an error, but in non-strict mode, they are"
 				+ " a warning.", MSVersion.V3_3_5, SeverityLevel.HIGH),
 		GenericTypeOverrides("When using generics, defining a typename which matches an in-scope actual object type"
-				+ " can lead to confusion, since referneces to the original type will no longer reference the"
+				+ " can lead to confusion, since references to the original type will no longer reference the"
 				+ " actual type, but rather the typename. Thus, this should be avoided.", MSVersion.V3_3_6,
 				SeverityLevel.HIGH),
 		PossibleUnexpectedExecution("If the parenthesis following a token is on a different line as the previous"

@@ -54,7 +54,7 @@ import java.util.TreeSet;
 public final class LeftHandSideType extends Construct implements SourceType {
 
 	/**
-	 * Merges the inputs to create a single type union class.For instance, if {@code int | string} and
+	 * Merges the inputs to create a single type union class. For instance, if {@code int | string} and
 	 * {@code array | string} are passed in, the resulting type would be {@code int | string | array}. Note that for
 	 * subtypes with generic parameters, these are not merged unless they are completely equal.
 	 *
@@ -762,6 +762,26 @@ public final class LeftHandSideType extends Construct implements SourceType {
 	@Override
 	public boolean isVariadicType() {
 		return isVariadicType;
+	}
+
+	/**
+	 * Returns the base type of this variadic type, with generics preserved but the variadic flag removed.
+	 * For instance, {@code myclass<a>...} returns {@code myclass<a>}.
+	 * @return The base {@link LeftHandSideType} of this type.
+	 * @throws IllegalStateException If this is not a variadic type.
+	 */
+	public LeftHandSideType getVarargsBaseType() throws IllegalStateException {
+		if(!this.isVariadicType) {
+			throw new IllegalStateException("LeftHandSideType is not a vararg type.");
+		}
+		String newVal = val();
+		if(newVal.endsWith("...")) {
+			newVal = newVal.substring(0, newVal.length() - 3);
+		}
+		LeftHandSideType newType = new LeftHandSideType(newVal, getTarget(), null, types, isTypenameList,
+				genericTypeName, null);
+		newType.isVariadicType = false;
+		return newType;
 	}
 
 }

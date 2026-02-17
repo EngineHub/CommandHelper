@@ -77,7 +77,7 @@ public class CClosure extends Construct implements Callable, Booleanish {
 		this.isVarArgs = isVarArgs;
 		if(types.length > 0) {
 			for(int i = 0; i < types.length - 1; i++) {
-				if(isVarArgs[i]) {
+				if(types[i].isVariadicType()) {
 					throw new CREFormatException("Varargs can only be added to the last argument.", t);
 				}
 			}
@@ -253,10 +253,10 @@ public class CClosure extends Construct implements Callable, Booleanish {
 					boolean isVarArg = false;
 					if(this.names.length > i
 						|| (this.names.length != 0
-							&& this.isVarArgs[this.names.length - 1])) {
+							&& this.types[this.names.length - 1].isVariadicType())) {
 						String name;
 						if(i < this.names.length - 1
-								|| !this.isVarArgs[this.types.length - 1]) {
+								|| !this.types[this.types.length - 1].isVariadicType()) {
 							name = names[i];
 						} else {
 							name = this.names[this.names.length - 1];

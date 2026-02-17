@@ -73,7 +73,7 @@ public class Procedure implements Cloneable {
 		this.procComment = procComment;
 		for(int i = 0; i < varList.size(); i++) {
 			IVariable var = varList.get(i);
-			if(isVarArg.get(i) && i != varList.size() - 1) {
+			if(var.getDefinedType().isVariadicType() && i != varList.size() - 1) {
 				throw new CREFormatException("Varargs can only be added to the last argument.", t);
 			}
 			try {
@@ -82,7 +82,7 @@ public class Procedure implements Cloneable {
 				this.varList.put(var.getVariableName(), var);
 			}
 			this.varIndex.add(var);
-			if(isVarArg.get(i) && var.ival() != CNull.UNDEFINED) {
+			if(var.getDefinedType().isVariadicType() && var.ival() != CNull.UNDEFINED) {
 				throw new CREFormatException("Varargs may not have default values", t);
 			}
 			this.originals.put(var.getVariableName(), var.ival());
@@ -225,10 +225,10 @@ public class Procedure implements Cloneable {
 			arguments.push(c, t);
 			if(this.varIndex.size() > varInd
 					|| (!this.varIndex.isEmpty()
-						&& this.isVarArg.get(this.varIndex.size() - 1))) {
+						&& this.varIndex.get(this.varIndex.size() - 1).getDefinedType().isVariadicType())) {
 				IVariable var;
 				if(varInd < this.varIndex.size() - 1
-						|| !this.isVarArg.get(this.varIndex.size() - 1)) {
+						|| !this.varIndex.get(this.varIndex.size() - 1).getDefinedType().isVariadicType()) {
 					var = this.varIndex.get(varInd);
 				} else {
 					var = this.varIndex.get(this.varIndex.size() - 1);
@@ -254,7 +254,7 @@ public class Procedure implements Cloneable {
 
 				// Type check vararg parameter.
 				if(var.getDefinedType().isVariadicType()) {
-					if(InstanceofUtil.isInstanceof(c.typeof(env), var.getDefinedType().getNakedType(t, env), env)) {
+					if(InstanceofUtil.isInstanceof(c.typeof(env), var.getDefinedType().getVarargsBaseType(), env)) {
 						vararg.push(c, t, env);
 						continue;
 					} else {

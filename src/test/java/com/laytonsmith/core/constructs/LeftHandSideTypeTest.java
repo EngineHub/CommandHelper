@@ -3,6 +3,7 @@ package com.laytonsmith.core.constructs;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.natives.interfaces.Booleanish;
+import com.laytonsmith.testing.AbstractIntegrationTest;
 import com.laytonsmith.testing.StaticTest;
 import java.util.Arrays;
 import java.util.List;
@@ -13,7 +14,7 @@ import org.junit.Test;
 /**
  *
  */
-public class LeftHandSideTypeTest {
+public class LeftHandSideTypeTest extends AbstractIntegrationTest {
 
 	Environment env;
 
