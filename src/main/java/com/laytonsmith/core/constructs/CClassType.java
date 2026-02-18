@@ -594,40 +594,28 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	// so we just specifically support enums for now.
 	@Override
 	public Mixed get(String index, Target t) throws ConfigRuntimeException {
-		if(isEnum()) {
-			try {
-				return NativeTypeList.getNativeEnumType(fqcn).get(index, t);
-			} catch (ClassNotFoundException ex) {
-				throw new RuntimeException(ex);
-			}
-		}
-		throw new CREUnsupportedOperationException("Unsupported operation", t);
+		return get(index, t, null);
 	}
 
 	@Override
 	public Mixed get(String index, Target t, Environment env) throws ConfigRuntimeException {
-		return get(index, t);
+		if(isEnum()) {
+			try {
+				return NativeTypeList.getNativeEnumType(fqcn).get(index, t);
+			} catch (ClassNotFoundException ex) {
+				throw new RuntimeException(ex);
+			}
+		}
+		throw new CREUnsupportedOperationException("Unsupported operation", t);
 	}
 
 	@Override
 	public Mixed get(int index, Target t) throws ConfigRuntimeException {
-		if(isEnum()) {
-			try {
-				return NativeTypeList.getNativeEnumType(fqcn).get(index, t);
-			} catch (ClassNotFoundException ex) {
-				throw new RuntimeException(ex);
-			}
-		}
-		throw new CREUnsupportedOperationException("Unsupported operation", t);
+		return get(index, t, null);
 	}
 
 	@Override
 	public Mixed get(int index, Target t, Environment env) throws ConfigRuntimeException {
-		return get(index, t);
-	}
-
-	@Override
-	public Mixed get(Mixed index, Target t) throws ConfigRuntimeException {
 		if(isEnum()) {
 			try {
 				return NativeTypeList.getNativeEnumType(fqcn).get(index, t);
@@ -639,12 +627,29 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	}
 
 	@Override
+	public Mixed get(Mixed index, Target t) throws ConfigRuntimeException {
+		return get(index, t, null);
+	}
+
+	@Override
 	public Mixed get(Mixed index, Target t, Environment env) throws ConfigRuntimeException {
-		return get(index, t);
+		if(isEnum()) {
+			try {
+				return NativeTypeList.getNativeEnumType(fqcn).get(index, t);
+			} catch (ClassNotFoundException ex) {
+				throw new RuntimeException(ex);
+			}
+		}
+		throw new CREUnsupportedOperationException("Unsupported operation", t);
 	}
 
 	@Override
 	public Set<Mixed> keySet() {
+		return keySet(null);
+	}
+
+	@Override
+	public Set<Mixed> keySet(Environment env) {
 		if(isEnum()) {
 			try {
 				return NativeTypeList.getNativeEnumType(fqcn).keySet();
@@ -656,12 +661,12 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	}
 
 	@Override
-	public Set<Mixed> keySet(Environment env) {
-		return keySet();
+	public long size() {
+		return size(null);
 	}
 
 	@Override
-	public long size() {
+	public long size(Environment env) {
 		if(isEnum()) {
 			try {
 				return NativeTypeList.getNativeEnumType(fqcn).size();
@@ -670,11 +675,6 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 			}
 		}
 		return 0;
-	}
-
-	@Override
-	public long size(Environment env) {
-		return size();
 	}
 
 	@Override
@@ -689,12 +689,12 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 
 	@Override
 	public Mixed slice(int begin, int end, Target t) {
-		throw new CREUnsupportedOperationException("Unsupported operation", t);
+		return slice(begin, end, t, null);
 	}
 
 	@Override
 	public Mixed slice(int begin, int end, Target t, Environment env) {
-		return slice(begin, end, t);
+		throw new CREUnsupportedOperationException("Unsupported operation", t);
 	}
 
 	/**
@@ -709,12 +709,12 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 
 	@Override
 	public boolean getBooleanValue(Target t) {
-		return true;
+		return getBooleanValue(null, t);
 	}
 
 	@Override
 	public boolean getBooleanValue(Environment env, Target t) {
-		return getBooleanValue(t);
+		return true;
 	}
 
 	/**

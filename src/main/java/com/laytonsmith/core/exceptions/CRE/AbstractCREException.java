@@ -323,7 +323,7 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 
 	@Override
 	public boolean isInstanceOf(CClassType type) {
-		return Construct.isInstanceof(this, type);
+		return isInstanceOf(type, null, null);
 	}
 
 	@Override
@@ -333,17 +333,17 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 
 	@Override
 	public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env) {
-		return isInstanceOf(type);
+		return Construct.isInstanceof(this, type);
 	}
 
 	@Override
 	public CClassType typeof() {
-		return Construct.typeof(this);
+		return typeof((Environment) null);
 	}
 
 	@Override
 	public CClassType typeof(Environment env) {
-		return typeof();
+		return Construct.typeof(this);
 	}
 
 	@Override

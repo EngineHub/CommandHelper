@@ -251,6 +251,11 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 
 							@Override
 							public CClassType typeof() {
+								return typeof((Environment) null);
+							}
+
+							@Override
+							public CClassType typeof(Environment env) {
 								try {
 									return CClassType.get(fqcn);
 								} catch (ClassNotFoundException ex) {
@@ -259,13 +264,8 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 							}
 
 							@Override
-							public CClassType typeof(Environment env) {
-								return typeof();
-							}
-
-							@Override
 							public boolean isInstanceOf(CClassType type) {
-								return Construct.isInstanceof(this, type);
+								return isInstanceOf(type, null, null);
 							}
 
 							@Override
@@ -275,7 +275,7 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 
 							@Override
 							public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env) {
-								return isInstanceOf(type);
+								return Construct.isInstanceof(this, type);
 							}
 
 							@Override
@@ -448,7 +448,7 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 
 	@Override
 	public boolean isInstanceOf(CClassType type) {
-		return TYPE.equals(type);
+		return isInstanceOf(type, null, null);
 	}
 
 	@Override
@@ -458,17 +458,17 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 
 	@Override
 	public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env) {
-		return isInstanceOf(type);
+		return TYPE.equals(type);
 	}
 
 	@Override
 	public CClassType typeof() {
-		return TYPE;
+		return typeof((Environment) null);
 	}
 
 	@Override
 	public CClassType typeof(Environment env) {
-		return typeof();
+		return TYPE;
 	}
 
 	@Override

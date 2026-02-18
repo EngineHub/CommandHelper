@@ -501,7 +501,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	 */
 	@Override
 	public CClassType typeof() {
-		return typeof(this);
+		return typeof((Environment) null);
 	}
 
 	/**
@@ -516,7 +516,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 
 	@Override
 	public CClassType typeof(Environment env) {
-		return typeof();
+		return typeof(this);
 	}
 
 	/**
@@ -615,10 +615,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 
 	@Override
 	public boolean isInstanceOf(CClassType type) {
-		if(type.getNativeType() != null) {
-			return type.getNativeType().isAssignableFrom(this.getClass());
-		}
-		return isInstanceof(this, type);
+		return isInstanceOf(type, null, null);
 	}
 
 	@Override
@@ -628,7 +625,10 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 
 	@Override
 	public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env) {
-		return isInstanceOf(type);
+		if(type.getNativeType() != null) {
+			return type.getNativeType().isAssignableFrom(this.getClass());
+		}
+		return isInstanceof(this, type);
 	}
 
 	@Override

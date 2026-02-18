@@ -153,7 +153,7 @@ public class UserObject implements Mixed {
 
 	@Override
 	public boolean isInstanceOf(CClassType type) {
-		return Construct.isInstanceof(this, type);
+		return isInstanceOf(type, null, null);
 	}
 
 	@Override
@@ -163,17 +163,17 @@ public class UserObject implements Mixed {
 
 	@Override
 	public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env) {
-		return isInstanceOf(type);
+		return Construct.isInstanceof(this, type);
 	}
 
 	@Override
 	public CClassType typeof() {
-		return objectDefinition.getType();
+		return typeof((Environment) null);
 	}
 
 	@Override
 	public CClassType typeof(Environment env) {
-		return typeof();
+		return objectDefinition.getType();
 	}
 
 	@Override

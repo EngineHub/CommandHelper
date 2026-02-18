@@ -157,26 +157,31 @@ public class CReal2dMatrix extends AbstractMixedClass implements Matrix<Double>,
 
 	@Override
 	public CReal2dMatrixRow get(Mixed index, Target t) throws ConfigRuntimeException {
-		return get(ArgumentValidation.getInt32(index, t), t);
+		return (CReal2dMatrixRow) get(index, t, null);
 	}
 
 	@Override
 	public Mixed get(Mixed index, Target t, Environment env) throws ConfigRuntimeException {
-		return get(index, t);
+		return get(ArgumentValidation.getInt32(index, t), t, env);
 	}
 
 	@Override
 	public Mixed get(String index, Target t) throws ConfigRuntimeException {
-		throw new CREIllegalArgumentException("Matrices cannot be indexed into with non-numeric values.", t);
+		return get(index, t, null);
 	}
 
 	@Override
 	public Mixed get(String index, Target t, Environment env) throws ConfigRuntimeException {
-		return get(index, t);
+		throw new CREIllegalArgumentException("Matrices cannot be indexed into with non-numeric values.", t);
 	}
 
 	@Override
 	public CReal2dMatrixRow get(int index, Target t) throws ConfigRuntimeException {
+		return (CReal2dMatrixRow) get(index, t, null);
+	}
+
+	@Override
+	public Mixed get(int index, Target t, Environment env) throws ConfigRuntimeException {
 		if(index >= getRowCount() || index < 0) {
 			throw new CRERangeException("Matrix range out of bounds.", t);
 		}
@@ -184,12 +189,12 @@ public class CReal2dMatrix extends AbstractMixedClass implements Matrix<Double>,
 	}
 
 	@Override
-	public Mixed get(int index, Target t, Environment env) throws ConfigRuntimeException {
-		return get(index, t);
+	public Set<Mixed> keySet() {
+		return keySet(null);
 	}
 
 	@Override
-	public Set<Mixed> keySet() {
+	public Set<Mixed> keySet(Environment env) {
 		Set<Mixed> set = new HashSet<>();
 		for(int i = 0; i < getRowCount(); i++) {
 			set.add(new CInt(i, Target.UNKNOWN));
@@ -198,22 +203,22 @@ public class CReal2dMatrix extends AbstractMixedClass implements Matrix<Double>,
 	}
 
 	@Override
-	public Set<Mixed> keySet(Environment env) {
-		return keySet();
-	}
-
-	@Override
 	public boolean getBooleanValue(Target t) {
-		return data.length != 0;
+		return getBooleanValue(null, t);
 	}
 
 	@Override
 	public boolean getBooleanValue(Environment env, Target t) {
-		return getBooleanValue(t);
+		return data.length != 0;
 	}
 
 	@Override
 	public CArray slice(int begin, int end, Target t) {
+		return (CArray) slice(begin, end, t, null);
+	}
+
+	@Override
+	public Mixed slice(int begin, int end, Target t, Environment env) {
 		CArray ret = new CArray(t);
 		int step = (begin <= end) ? 1 : -1;
 
@@ -231,18 +236,13 @@ public class CReal2dMatrix extends AbstractMixedClass implements Matrix<Double>,
 	}
 
 	@Override
-	public Mixed slice(int begin, int end, Target t, Environment env) {
-		return slice(begin, end, t);
-	}
-
-	@Override
 	public long size() {
-		return getRowCount();
+		return size(null);
 	}
 
 	@Override
 	public long size(Environment env) {
-		return size();
+		return getRowCount();
 	}
 
 	public CReal2dMatrix deepClone() {
