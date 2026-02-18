@@ -13,6 +13,7 @@ import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
@@ -52,7 +53,7 @@ public class Easings {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			com.laytonsmith.core.Easings.EasingType type
 					= ArgumentValidation.getEnum(args[0], com.laytonsmith.core.Easings.EasingType.class, t);
 			double x = ArgumentValidation.getDouble(args[1], t);
@@ -136,7 +137,7 @@ public class Easings {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CArray start = ArgumentValidation.getArray(args[0], t);
 			double startX = ArgumentValidation.getDouble(start.get("x", t), t);
 			double startY = ArgumentValidation.getDouble(start.get("y", t), t);

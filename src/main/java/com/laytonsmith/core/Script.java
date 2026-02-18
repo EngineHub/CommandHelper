@@ -427,7 +427,7 @@ public class Script {
 					}
 					Mixed ret;
 					try {
-						ret = f.exec(m.getTarget(), env, args);
+						ret = Function.ExecuteFunction(f, m.getTarget(), env, args);
 					} finally {
 						if(p != null) {
 							p.stop();

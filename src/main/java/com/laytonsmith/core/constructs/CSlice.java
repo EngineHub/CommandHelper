@@ -69,7 +69,7 @@ public class CSlice extends CArray {
 
 	@Override
 	public List<Mixed> asList() {
-		CArray ca = new ArrayHandling.range().exec(Target.UNKNOWN, null, new CInt(start, Target.UNKNOWN), new CInt(finish, Target.UNKNOWN));
+		CArray ca = new ArrayHandling.range().exec(Target.UNKNOWN, null, null, new CInt(start, Target.UNKNOWN), new CInt(finish, Target.UNKNOWN));
 		return ca.asList();
 	}
 
