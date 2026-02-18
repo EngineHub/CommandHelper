@@ -16,6 +16,7 @@ import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
@@ -78,7 +79,7 @@ public class BossBar {
 		}
 
 		@Override
-		public CArray exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public CArray exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CArray ca = new CArray(t);
 			for(String id : BARS.keySet()) {
 				ca.push(new CString(id, t), t);
@@ -120,7 +121,7 @@ public class BossBar {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String id = args[0].val();
 			if(BARS.containsKey(id)) {
 				throw new CREIllegalArgumentException("That boss bar id is already in use.", t);
@@ -202,7 +203,7 @@ public class BossBar {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String id = args[0].val();
 			MCBossBar bar = BARS.get(id);
 			if(bar == null) {
@@ -278,7 +279,7 @@ public class BossBar {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String id = args[0].val();
 			MCBossBar bar = BARS.get(id);
 			if(bar == null) {
@@ -319,7 +320,7 @@ public class BossBar {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String id = args[0].val();
 			MCBossBar bar = BARS.get(id);
 			if(bar == null) {
@@ -356,7 +357,7 @@ public class BossBar {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCBossBar bar = BARS.get(args[0].val());
 			if(bar == null) {
 				throw new CRENotFoundException("That boss bar id does not exist.", t);
@@ -390,7 +391,7 @@ public class BossBar {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCBossBar bar = BARS.get(args[0].val());
 			if(bar == null) {
 				throw new CRENotFoundException("That boss bar id does not exist.", t);
@@ -424,7 +425,7 @@ public class BossBar {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCBossBar bar = BARS.get(args[0].val());
 			if(bar == null) {
 				throw new CRENotFoundException("That boss bar id does not exist.", t);

@@ -7,6 +7,7 @@ import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREIOException;
@@ -64,7 +65,7 @@ public class Clipboard {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			Cmdline.requireCmdlineMode(environment, this, t);
 			if(clipboard == null) {
 				throw new CREUnsupportedOperationException(
@@ -132,7 +133,7 @@ public class Clipboard {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			Cmdline.requireCmdlineMode(environment, this, t);
 			if(clipboard == null) {
 				throw new CREUnsupportedOperationException(

@@ -335,9 +335,9 @@ public class Main {
 
 		@Override
 		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
-			String buildYear = new Scheduling.simple_date().exec(Target.UNKNOWN, null,
+			String buildYear = new Scheduling.simple_date().exec(Target.UNKNOWN, null, null,
 					new CString("yyyy", Target.UNKNOWN),
-					new Meta.engine_build_date().exec(Target.UNKNOWN, null)).val();
+					new Meta.engine_build_date().exec(Target.UNKNOWN, null, null)).val();
 			StreamUtils.GetSystemOut().println("The MIT License (MIT)\n"
 					+ "\n"
 					+ "Copyright (c) 2012-" + buildYear + " Methodscript Contributors\n"
@@ -594,7 +594,7 @@ public class Main {
 						+ "\tstrict;" + li
 						+ "\tname: " + f.getName() + ";" + li
 						+ "\tauthor: " + System.getProperty("user.name") + ";" + li
-						+ "\tcreated: " + new Scheduling.simple_date().exec(Target.UNKNOWN, null, new CString("yyyy-MM-dd", Target.UNKNOWN)).val() + ";" + li
+						+ "\tcreated: " + new Scheduling.simple_date().exec(Target.UNKNOWN, null, null, new CString("yyyy-MM-dd", Target.UNKNOWN)).val() + ";" + li
 						+ "\tdescription: " + ";" + li
 						+ ">" + li + li, f, true);
 			}
@@ -641,7 +641,7 @@ public class Main {
 			classSimpleName = split[split.length - 1];
 
 			String author = System.getProperty("user.name");
-			String created = new Scheduling.simple_date().exec(Target.UNKNOWN, null,
+			String created = new Scheduling.simple_date().exec(Target.UNKNOWN, null, null,
 					new CString("yyyy-MM-dd", Target.UNKNOWN)).val();
 			File file = new File(clazz.replace(".", "/") + ".ms");
 			if(file.exists()) {

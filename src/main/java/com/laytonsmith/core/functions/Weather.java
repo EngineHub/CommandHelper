@@ -18,6 +18,7 @@ import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
@@ -59,7 +60,7 @@ public class Weather {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			int x;
 			int y;
 			int z;
@@ -136,7 +137,7 @@ public class Weather {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			boolean b = ArgumentValidation.getBoolean(args[0], t);
 			MCWorld w = null;
 			int duration = -1;
@@ -227,7 +228,7 @@ public class Weather {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCWorld w = null;
 			if(args.length == 1) {
 				if(environment.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
@@ -289,7 +290,7 @@ public class Weather {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCWorld w = null;
 			if(args.length == 1) {
 				w = Static.getServer().getWorld(args[0].val());
@@ -346,7 +347,7 @@ public class Weather {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCWorld w = null;
 			if(args.length == 1) {
 				w = Static.getServer().getWorld(args[0].val());

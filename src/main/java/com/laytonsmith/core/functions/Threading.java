@@ -23,6 +23,7 @@ import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
@@ -84,7 +85,7 @@ public final class Threading {
 		}
 
 		@Override
-		public Mixed exec(final Target t, final Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(final Target t, final Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			final String threadId = args[0].val();
 			final com.laytonsmith.core.natives.interfaces.Callable closure
 					= ArgumentValidation.getObject(args[1], t, com.laytonsmith.core.natives.interfaces.Callable.class);
@@ -102,7 +103,7 @@ public final class Threading {
 						ConfigRuntimeException.HandleUncaughtException(ex, env);
 					} catch (CancelCommandException ex) {
 						if(ex.getMessage() != null) {
-							new Echoes.console().exec(t, env, new CString(ex.getMessage(), t), CBoolean.FALSE);
+							new Echoes.console().exec(t, env, null, new CString(ex.getMessage(), t), CBoolean.FALSE);
 						}
 					} finally {
 						dm.deactivateThread(Thread.currentThread());
@@ -183,7 +184,7 @@ public final class Threading {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return new CString(Thread.currentThread().getName(), t);
 		}
 
@@ -237,7 +238,7 @@ public final class Threading {
 		}
 
 		@Override
-		public Mixed exec(final Target t, final Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(final Target t, final Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			final com.laytonsmith.core.natives.interfaces.Callable closure
 					= ArgumentValidation.getObject(args[0], t, com.laytonsmith.core.natives.interfaces.Callable.class);
 			StaticLayer.GetConvertor().runOnMainThreadLater(
@@ -302,7 +303,7 @@ public final class Threading {
 		}
 
 		@Override
-		public Mixed exec(final Target t, final Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(final Target t, final Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			final com.laytonsmith.core.natives.interfaces.Callable closure = ArgumentValidation.getObject(args[0], t,
 					com.laytonsmith.core.natives.interfaces.Callable.class);
 			Object ret;
@@ -511,7 +512,7 @@ public final class Threading {
 		}
 
 		@Override
-		public Mixed exec(final Target t, final Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(final Target t, final Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return CVoid.VOID;
 		}
 
@@ -631,7 +632,7 @@ public final class Threading {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			// Get the sync object tree and the code to synchronize.
 			Mixed cSyncObject = args[0];
 			com.laytonsmith.core.natives.interfaces.Callable callable
@@ -726,7 +727,7 @@ public final class Threading {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String threadId = args[0].val();
 			Thread th;
 			synchronized(THREAD_ID_MAP) {
@@ -791,7 +792,7 @@ public final class Threading {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String threadId = args[0].val();
 			Thread th;
 			synchronized(THREAD_ID_MAP) {
@@ -844,7 +845,7 @@ public final class Threading {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			Thread th;
 			if(args.length == 1) {
 				String threadId = args[0].val();
@@ -904,7 +905,7 @@ public final class Threading {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(args.length == 1) {
 				String threadId = args[0].val();
 				Thread th;
@@ -963,7 +964,7 @@ public final class Threading {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return CBoolean.get(Thread.interrupted());
 		}
 

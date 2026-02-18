@@ -28,6 +28,7 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -150,7 +151,7 @@ public class SQL {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			try {
 				Profiles.Profile profile;
 				if(args[0].isInstanceOf(CArray.TYPE)) {
@@ -495,7 +496,7 @@ public class SQL {
 		}
 
 		@Override
-		public Mixed exec(final Target t, final Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(final Target t, final Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			startup();
 			Mixed arg = args[args.length - 1];
 			if(!(arg.isInstanceOf(CClosure.TYPE))) {
@@ -512,7 +513,7 @@ public class SQL {
 					Mixed returnValue = CNull.NULL;
 					Mixed exception = CNull.NULL;
 					try {
-						returnValue = new query().exec(t, environment, newArgs);
+						returnValue = new query().exec(t, environment, null, newArgs);
 					} catch (ConfigRuntimeException ex) {
 						exception = ObjectGenerator.GetGenerator().exception(ex, environment, t);
 					}

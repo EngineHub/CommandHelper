@@ -30,6 +30,7 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
@@ -203,7 +204,7 @@ public class Reflection {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(args.length < 1) {
 				throw new CREInsufficientArgumentsException("Not enough parameters was sent to " + getName(), t);
 			}
@@ -296,7 +297,7 @@ public class Reflection {
 					l.forEach((String t1) -> {
 						a.push(new CString(t1, Target.UNKNOWN), Target.UNKNOWN);
 					});
-					return new ArrayHandling.array_sort().exec(t, env, a);
+					return new ArrayHandling.array_sort().exec(t, env, null, a);
 				} else if(args.length == 2) {
 					Keyword k = KeywordList.getKeywordByName(args[1].val());
 					if(k == null) {
@@ -355,7 +356,7 @@ public class Reflection {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CClassType type = ArgumentValidation.getClassType(args[0], t);
 			CArray ret = CArray.GetAssociativeArray(t);
 			ret.set("fqcn", type.getFQCN().getFQCN());
@@ -442,7 +443,7 @@ public class Reflection {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String element = args[0].val();
 			DocField docField;
 			try {
@@ -596,7 +597,7 @@ public class Reflection {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CArray ret = CArray.GetAssociativeArray(t);
 			if(FUNCS.keySet().size() < 10) {
 				initf(environment);
@@ -653,7 +654,7 @@ public class Reflection {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment,
+		public Mixed exec(Target t, Environment environment, GenericParameters generics,
 				Mixed... args) throws ConfigRuntimeException {
 			CArray ret = new CArray(t);
 			for(Event event : EventList.GetEvents()) {
@@ -703,7 +704,7 @@ public class Reflection {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CArray ret = new CArray(t);
 			for(Script s : Static.getAliasCore().getScripts()) {
 				ret.push(new CString(s.getSignature(), t), t);
@@ -752,7 +753,7 @@ public class Reflection {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			PersistenceNetwork pn = environment.getEnv(StaticRuntimeEnv.class).GetPersistenceNetwork();
 			return new CString(pn.getKeySource(args[0].val().split("\\.")).toString(), t);
 		}
@@ -803,7 +804,7 @@ public class Reflection {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CArray ret = new CArray(t);
 			for(Map.Entry<String, Procedure> p : environment.getEnv(GlobalEnv.class).GetProcs().entrySet()) {
 				ret.push(new CString(p.getKey(), t), t);
@@ -868,7 +869,7 @@ public class Reflection {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CArray ret = new CArray(t);
 			ObjectDefinitionTable odt = environment.getEnv(CompilerEnvironment.class).getObjectDefinitionTable();
 			for(ObjectDefinition od : odt.getObjectDefinitionSet()) {
@@ -936,7 +937,7 @@ public class Reflection {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String type = ArgumentValidation.getStringObject(args[0], t);
 			try {
 				return CClassType.get(FullyQualifiedClassName.forName(args[0].val(), t, environment));
