@@ -44,11 +44,11 @@ public abstract class CNumber extends CPrimitive {
 
 	@Override
 	public boolean getBooleanValue(Target t) {
-		return getNumber() != 0.0;
+		return getBooleanValue(null, t);
 	}
 
 	@Override
 	public boolean getBooleanValue(Environment env, Target t) {
-		return getBooleanValue(t);
+		return getNumber() != 0.0;
 	}
 }

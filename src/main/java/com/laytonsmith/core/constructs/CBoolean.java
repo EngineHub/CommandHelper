@@ -92,12 +92,12 @@ public final class CBoolean extends CPrimitive implements Cloneable {
 
 	@Override
 	public boolean getBooleanValue(Target t) {
-		return val;
+		return getBooleanValue(null, t);
 	}
 
 	@Override
 	public boolean getBooleanValue(Environment env, Target t) {
-		return getBooleanValue(t);
+		return val;
 	}
 
 

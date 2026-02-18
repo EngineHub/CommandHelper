@@ -352,11 +352,11 @@ public class CClosure extends Construct implements Callable, Booleanish {
 
 	@Override
 	public boolean getBooleanValue(Target t) {
-		return true;
+		return getBooleanValue(null, t);
 	}
 
 	@Override
 	public boolean getBooleanValue(Environment env, Target t) {
-		return getBooleanValue(t);
+		return true;
 	}
 }

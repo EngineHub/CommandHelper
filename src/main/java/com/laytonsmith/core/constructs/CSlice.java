@@ -116,16 +116,21 @@ public class CSlice extends CArray {
 
 	@Override
 	public void set(Mixed index, Mixed c, Target t) {
-		throw new CRECastException("CSlices cannot set values", t);
+		set(index, c, t, null);
 	}
 
 	@Override
 	public void set(Mixed index, Mixed c, Target t, com.laytonsmith.core.environments.Environment env) {
-		set(index, c, t);
+		throw new CRECastException("CSlices cannot set values", t);
 	}
 
 	@Override
 	public Mixed get(Mixed index, Target t) {
+		return get(index, t, null);
+	}
+
+	@Override
+	public Mixed get(Mixed index, Target t, com.laytonsmith.core.environments.Environment env) {
 		long i = ArgumentValidation.getInt(index, t);
 		if(i > max) {
 			throw new CRERangeException("Index out of bounds. Index: " + i + " Size: " + max, t);
@@ -134,12 +139,12 @@ public class CSlice extends CArray {
 	}
 
 	@Override
-	public Mixed get(Mixed index, Target t, com.laytonsmith.core.environments.Environment env) {
-		return get(index, t);
+	public Set<Mixed> keySet() {
+		return keySet(null);
 	}
 
 	@Override
-	public Set<Mixed> keySet() {
+	public Set<Mixed> keySet(com.laytonsmith.core.environments.Environment env) {
 		// To keep our memory footprint down, we create a "fake" keyset here, which doesn't
 		// require actually creating an entire Set. Removing items from the set isn't supported,
 		// but all iteration options are.
@@ -176,13 +181,8 @@ public class CSlice extends CArray {
 	}
 
 	@Override
-	public Set<Mixed> keySet(com.laytonsmith.core.environments.Environment env) {
-		return keySet();
-	}
-
-	@Override
 	public long size() {
-		return size;
+		return size(null);
 	}
 
 	@Override

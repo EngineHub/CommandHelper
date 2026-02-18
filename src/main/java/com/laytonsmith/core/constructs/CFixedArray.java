@@ -46,16 +46,21 @@ public class CFixedArray extends Construct implements
 
 	@Override
 	public Mixed get(String index, Target t) throws ConfigRuntimeException {
-		return null;
+		return get(index, t, null);
 	}
 
 	@Override
 	public Mixed get(String index, Target t, Environment env) throws ConfigRuntimeException {
-		return get(index, t);
+		return null;
 	}
 
 	@Override
 	public Mixed get(int index, Target t) throws ConfigRuntimeException {
+		return get(index, t, null);
+	}
+
+	@Override
+	public Mixed get(int index, Target t, Environment env) throws ConfigRuntimeException {
 		if(index < 0 || index >= data.length) {
 			throw new CREIndexOverflowException("Index overflows array size", t);
 		}
@@ -67,32 +72,27 @@ public class CFixedArray extends Construct implements
 	}
 
 	@Override
-	public Mixed get(int index, Target t, Environment env) throws ConfigRuntimeException {
-		return get(index, t);
-	}
-
-	@Override
 	public Mixed get(Mixed index, Target t) throws ConfigRuntimeException {
-		return get(ArgumentValidation.getInt32(index, t), t);
+		return get(index, t, null);
 	}
 
 	@Override
 	public Mixed get(Mixed index, Target t, Environment env) throws ConfigRuntimeException {
-		return get(index, t);
+		return get(ArgumentValidation.getInt32(index, t), t, env);
 	}
 
 	@Override
 	public Set<Mixed> keySet() {
+		return keySet(null);
+	}
+
+	@Override
+	public Set<Mixed> keySet(Environment env) {
 		Set<Mixed> set = new LinkedHashSet<>(data.length);
 		for(int i = 0; i < data.length; i++) {
 			set.add(new CInt(i, Target.UNKNOWN));
 		}
 		return set;
-	}
-
-	@Override
-	public Set<Mixed> keySet(Environment env) {
-		return keySet();
 	}
 
 	private void validateSet(Mixed value, Target t) {
@@ -103,13 +103,13 @@ public class CFixedArray extends Construct implements
 
 	@Override
 	public void set(Mixed index, Mixed value, Target t) {
-		int in = ArgumentValidation.getInt32(index, t);
-		set(in, value, t);
+		set(index, value, t, null);
 	}
 
 	@Override
 	public void set(Mixed index, Mixed value, Target t, Environment env) {
-		set(index, value, t);
+		int in = ArgumentValidation.getInt32(index, t);
+		set(in, value, t);
 	}
 
 	public void set(int index, Mixed value, Target t) {
@@ -132,32 +132,32 @@ public class CFixedArray extends Construct implements
 
 	@Override
 	public Mixed slice(int begin, int end, Target t) {
-		throw new CREUnsupportedOperationException("slices are not yet implemented on fixed_array", t);
+		return slice(begin, end, t, null);
 	}
 
 	@Override
 	public Mixed slice(int begin, int end, Target t, Environment env) {
-		return slice(begin, end, t);
+		throw new CREUnsupportedOperationException("slices are not yet implemented on fixed_array", t);
 	}
 
 	@Override
 	public boolean getBooleanValue(Target t) {
-		return size() > 0;
+		return getBooleanValue(null, t);
 	}
 
 	@Override
 	public boolean getBooleanValue(Environment env, Target t) {
-		return getBooleanValue(t);
+		return size(env) > 0;
 	}
 
 	@Override
 	public long size() {
-		return data.length;
+		return size(null);
 	}
 
 	@Override
 	public long size(Environment env) {
-		return size();
+		return data.length;
 	}
 
 	public void fill(Mixed value, Target t) {

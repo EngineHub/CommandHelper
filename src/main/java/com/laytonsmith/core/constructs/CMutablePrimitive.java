@@ -56,12 +56,12 @@ public final class CMutablePrimitive extends CArray implements Sizeable {
 
 	@Override
 	public void set(Mixed index, Mixed c, Target t) {
-		throw new CRECastException("mutable_primitives cannot have values set in them", t);
+		set(index, c, t, null);
 	}
 
 	@Override
 	public void set(Mixed index, Mixed c, Target t, com.laytonsmith.core.environments.Environment env) {
-		set(index, c, t);
+		throw new CRECastException("mutable_primitives cannot have values set in them", t);
 	}
 
 	/**
@@ -84,12 +84,12 @@ public final class CMutablePrimitive extends CArray implements Sizeable {
 
 	@Override
 	public Mixed get(Mixed index, Target t) {
-		return value;
+		return get(index, t, null);
 	}
 
 	@Override
 	public Mixed get(Mixed index, Target t, com.laytonsmith.core.environments.Environment env) {
-		return get(index, t);
+		return value;
 	}
 
 	@Override
@@ -114,16 +114,16 @@ public final class CMutablePrimitive extends CArray implements Sizeable {
 
 	@Override
 	public long size() {
+		return size(null);
+	}
+
+	@Override
+	public long size(com.laytonsmith.core.environments.Environment env) {
 		if(value.isInstanceOf(Sizeable.TYPE)) {
 			return ArgumentValidation.getObject(value, Target.UNKNOWN, Sizeable.class).size();
 		} else {
 			return 0;
 		}
-	}
-
-	@Override
-	public long size(com.laytonsmith.core.environments.Environment env) {
-		return size();
 	}
 
 	@Override

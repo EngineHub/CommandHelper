@@ -55,46 +55,46 @@ public class CReal2dMatrixRow extends AbstractMixedClass implements com.laytonsm
 
 	@Override
 	public Mixed get(String index, Target t) throws ConfigRuntimeException {
-		throw new CRECastException("Real2dMatrix only supports int keys.", t);
+		return get(index, t, null);
 	}
 
 	@Override
 	public Mixed get(String index, Target t, Environment env) throws ConfigRuntimeException {
-		return get(index, t);
+		throw new CRECastException("Real2dMatrix only supports int keys.", t);
 	}
 
 	@Override
 	public CDouble get(int index, Target t) throws ConfigRuntimeException {
-		return new CDouble(getNative(index, t), t);
+		return (CDouble) get(index, t, null);
 	}
 
 	@Override
 	public Mixed get(int index, Target t, Environment env) throws ConfigRuntimeException {
-		return get(index, t);
+		return new CDouble(getNative(index, t), t);
 	}
 
 	@Override
 	public Mixed get(Mixed index, Target t) throws ConfigRuntimeException {
-		return get(ArgumentValidation.getInt32(index, t), t);
+		return get(index, t, null);
 	}
 
 	@Override
 	public Mixed get(Mixed index, Target t, Environment env) throws ConfigRuntimeException {
-		return get(index, t);
+		return get(ArgumentValidation.getInt32(index, t), t, env);
 	}
 
 	@Override
 	public Set<Mixed> keySet() {
+		return keySet(null);
+	}
+
+	@Override
+	public Set<Mixed> keySet(Environment env) {
 		Set<Mixed> set = new HashSet<>();
 		for(int i = 0; i < parent.columns; i++) {
 			set.add(new CInt(i, Target.UNKNOWN));
 		}
 		return set;
-	}
-
-	@Override
-	public Set<Mixed> keySet(Environment env) {
-		return keySet();
 	}
 
 	@Override
@@ -109,12 +109,17 @@ public class CReal2dMatrixRow extends AbstractMixedClass implements com.laytonsm
 
 	@Override
 	public Mixed slice(int begin, int end, Target t) {
+		return slice(begin, end, t, null);
+	}
+
+	@Override
+	public Mixed slice(int begin, int end, Target t, Environment env) {
 		CArray ret = new CArray(t);
 		int step = (begin <= end) ? 1 : -1;
 
 		// Note: loop includes 'begin', excludes 'end', just like typical slice semantics
 		for(int i = begin; i != end; i += step) {
-			CDouble d = get(i, t);
+			CDouble d = (CDouble) get(i, t, env);
 			ret.push(d, t);
 		}
 
@@ -122,12 +127,12 @@ public class CReal2dMatrixRow extends AbstractMixedClass implements com.laytonsm
 	}
 
 	@Override
-	public Mixed slice(int begin, int end, Target t, Environment env) {
-		return slice(begin, end, t);
+	public boolean getBooleanValue(Target t) {
+		return getBooleanValue(null, t);
 	}
 
 	@Override
-	public boolean getBooleanValue(Target t) {
+	public boolean getBooleanValue(Environment env, Target t) {
 		// 0 dimension matrices are not possible, so this will
 		// always have at least one value in it, thus always
 		// true.
@@ -135,30 +140,25 @@ public class CReal2dMatrixRow extends AbstractMixedClass implements com.laytonsm
 	}
 
 	@Override
-	public boolean getBooleanValue(Environment env, Target t) {
-		return getBooleanValue(t);
-	}
-
-	@Override
 	public long size() {
-		return parent.columns;
+		return size(null);
 	}
 
 	@Override
 	public long size(Environment env) {
-		return size();
+		return parent.columns;
 	}
 
 	@Override
 	public void set(Mixed index, Mixed value, Target t) {
-		int in = ArgumentValidation.getInt32(index, t);
-		double d = ArgumentValidation.getDouble(value, t);
-		setNative(in, d, t);
+		set(index, value, t, null);
 	}
 
 	@Override
 	public void set(Mixed index, Mixed value, Target t, Environment env) {
-		set(index, value, t);
+		int in = ArgumentValidation.getInt32(index, t);
+		double d = ArgumentValidation.getDouble(value, t);
+		setNative(in, d, t);
 	}
 
 	@Override

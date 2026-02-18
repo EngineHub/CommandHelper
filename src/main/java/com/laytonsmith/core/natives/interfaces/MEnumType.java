@@ -507,6 +507,11 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 	}
 	@Override
 	public Mixed get(String index, Target t) throws ConfigRuntimeException {
+		return get(index, t, null);
+	}
+
+	@Override
+	public Mixed get(String index, Target t, Environment env) throws ConfigRuntimeException {
 		for(MEnumTypeValue v : values()) {
 			if(v.name().equals(index)) {
 				return v;
@@ -516,12 +521,12 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 	}
 
 	@Override
-	public Mixed get(String index, Target t, Environment env) throws ConfigRuntimeException {
-		return get(index, t);
+	public Mixed get(int index, Target t) throws ConfigRuntimeException {
+		return get(index, t, null);
 	}
 
 	@Override
-	public Mixed get(int index, Target t) throws ConfigRuntimeException {
+	public Mixed get(int index, Target t, Environment env) throws ConfigRuntimeException {
 		if(index >= values().size()) {
 			throw new CREIndexOverflowException("The index " + index + " is out of bounds", t);
 		}
@@ -529,38 +534,33 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 	}
 
 	@Override
-	public Mixed get(int index, Target t, Environment env) throws ConfigRuntimeException {
-		return get(index, t);
-	}
-
-	@Override
 	public Mixed get(Mixed index, Target t) throws ConfigRuntimeException {
-		return get(index.val(), t);
+		return get(index, t, null);
 	}
 
 	@Override
 	public Mixed get(Mixed index, Target t, Environment env) throws ConfigRuntimeException {
-		return get(index, t);
+		return get(index.val(), t, env);
 	}
 
 	@Override
 	public Set<Mixed> keySet() {
-		return values().stream().collect(Collectors.toSet());
+		return keySet(null);
 	}
 
 	@Override
 	public Set<Mixed> keySet(Environment env) {
-		return keySet();
+		return values().stream().collect(Collectors.toSet());
 	}
 
 	@Override
 	public long size() {
-		return values().size();
+		return size(null);
 	}
 
 	@Override
 	public long size(Environment env) {
-		return size();
+		return values().size();
 	}
 
 	@Override
@@ -575,12 +575,12 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 
 	@Override
 	public Mixed slice(int begin, int end, Target t) {
-		throw new CREUnsupportedOperationException("Cannot slice an enum", t);
+		return slice(begin, end, t, null);
 	}
 
 	@Override
 	public Mixed slice(int begin, int end, Target t, Environment env) {
-		return slice(begin, end, t);
+		throw new CREUnsupportedOperationException("Cannot slice an enum", t);
 	}
 
 	/**
@@ -591,12 +591,12 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 
 	@Override
 	public boolean getBooleanValue(Target t) {
-		return true;
+		return getBooleanValue(null, t);
 	}
 
 	@Override
 	public boolean getBooleanValue(Environment env, Target t) {
-		return getBooleanValue(t);
+		return true;
 	}
 
 }

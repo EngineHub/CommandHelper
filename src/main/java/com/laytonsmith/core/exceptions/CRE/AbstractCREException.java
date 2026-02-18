@@ -194,42 +194,42 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 	 */
 	@Override
 	public Mixed get(String index, Target t) throws ConfigRuntimeException {
-		return exceptionObject.get(index, t);
+		return get(index, t, null);
 	}
 
 	@Override
 	public Mixed get(String index, Target t, Environment env) throws ConfigRuntimeException {
-		return get(index, t);
+		return exceptionObject.get(index, t);
 	}
 
 	@Override
 	public Mixed get(int index, Target t) throws ConfigRuntimeException {
-		return exceptionObject.get(index, t);
+		return get(index, t, null);
 	}
 
 	@Override
 	public Mixed get(int index, Target t, Environment env) throws ConfigRuntimeException {
-		return get(index, t);
-	}
-
-	@Override
-	public Mixed get(Mixed index, Target t) throws ConfigRuntimeException {
 		return exceptionObject.get(index, t);
 	}
 
 	@Override
+	public Mixed get(Mixed index, Target t) throws ConfigRuntimeException {
+		return get(index, t, null);
+	}
+
+	@Override
 	public Mixed get(Mixed index, Target t, Environment env) throws ConfigRuntimeException {
-		return get(index, t);
+		return exceptionObject.get(index, t);
 	}
 
 	@Override
 	public Set<Mixed> keySet() {
-		return exceptionObject.keySet();
+		return keySet(null);
 	}
 
 	@Override
 	public Set<Mixed> keySet(Environment env) {
-		return keySet();
+		return exceptionObject.keySet();
 	}
 
 	@Override
@@ -244,12 +244,12 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 
 	@Override
 	public Mixed slice(int begin, int end, Target t) {
-		return exceptionObject.slice(begin, end, t);
+		return slice(begin, end, t, null);
 	}
 
 	@Override
 	public Mixed slice(int begin, int end, Target t, Environment env) {
-		return slice(begin, end, t);
+		return exceptionObject.slice(begin, end, t);
 	}
 
 	@Override
@@ -353,12 +353,12 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 
 	@Override
 	public boolean getBooleanValue(Target t) {
-		return true;
+		return getBooleanValue(null, t);
 	}
 
 	@Override
 	public boolean getBooleanValue(Environment env, Target t) {
-		return getBooleanValue(t);
+		return true;
 	}
 
 }

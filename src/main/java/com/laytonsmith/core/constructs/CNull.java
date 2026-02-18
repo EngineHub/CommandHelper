@@ -109,12 +109,12 @@ public final class CNull extends Construct implements Cloneable, Booleanish {
 
 	@Override
 	public boolean getBooleanValue(Target t) {
-		return false;
+		return getBooleanValue(null, t);
 	}
 
 	@Override
 	public boolean getBooleanValue(Environment env, Target t) {
-		return getBooleanValue(t);
+		return false;
 	}
 
 
