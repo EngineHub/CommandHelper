@@ -15,6 +15,7 @@ import com.laytonsmith.core.asm.LLVMFunction;
 import com.laytonsmith.core.asm.LLVMVersion;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -43,7 +44,7 @@ public class Math {
 		}
 
 		@Override
-		public IRData buildIR(IRBuilder builder, Target t, Environment env, ParseTree... nodes) throws ConfigCompileException {
+		public IRData buildIR(IRBuilder builder, Target t, Environment env, GenericParameters generics, ParseTree... nodes) throws ConfigCompileException {
 			LLVMEnvironment llvmenv = env.getEnv(LLVMEnvironment.class);
 			CompilerEnvironment cEnv = env.getEnv(CompilerEnvironment.class);
 			llvmenv.addGlobalDeclaration(AsmCommonLibTemplates.RAND, env);

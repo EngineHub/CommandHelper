@@ -18,6 +18,7 @@ import com.laytonsmith.core.constructs.CReal2dMatrix;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
