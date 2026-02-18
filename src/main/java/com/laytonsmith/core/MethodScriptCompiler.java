@@ -2699,7 +2699,7 @@ public final class MethodScriptCompiler {
 									+ tree.getData().val(), tree.getData().getTarget()));
 							result = null;
 						} else {
-							result = func.exec(tree.getData().getTarget(), env, constructs);
+							result = Function.ExecuteFunction(func, tree.getData().getTarget(), env, constructs);
 						}
 					} else if(isValidNumArgs(func, constructs.length)) {
 						result = ((Optimizable) func).optimize(tree.getData().getTarget(), env, constructs);

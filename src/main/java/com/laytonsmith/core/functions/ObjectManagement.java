@@ -24,6 +24,7 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.CREClassDefinitionError;
@@ -80,7 +81,7 @@ public class ObjectManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 		}
 
@@ -131,7 +132,7 @@ public class ObjectManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			throw new Error();
 		}
 
@@ -197,7 +198,7 @@ public class ObjectManagement {
 					throw new CREClassDefinitionError("Expected __to_class_reference__, but found " + data.getData()
 							+ " instead", t);
 				}
-				return new __to_class_reference__().exec(t, null,
+				return new __to_class_reference__().exec(t, null, null,
 						data.getChildren().stream()
 								.map((parseTree -> parseTree.getData()))
 								.collect(Collectors.toList())
@@ -448,7 +449,7 @@ public class ObjectManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			throw new Error();
 		}
 
@@ -597,7 +598,7 @@ public class ObjectManagement {
 
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			try {
 				return CClassType.get(FullyQualifiedClassName.forFullyQualifiedClass(args[0].val()));
 			} catch (ClassNotFoundException ex) {

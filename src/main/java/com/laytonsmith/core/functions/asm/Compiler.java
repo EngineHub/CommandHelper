@@ -11,6 +11,7 @@ import com.laytonsmith.core.asm.LLVMEnvironment;
 import com.laytonsmith.core.asm.LLVMFunction;
 import com.laytonsmith.core.asm.LLVMVersion;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -23,7 +24,7 @@ public class Compiler {
 	public static class __statements__ extends LLVMFunction {
 
 		@Override
-		public IRData buildIR(IRBuilder builder, Target t, Environment env, ParseTree... nodes) throws ConfigCompileException {
+		public IRData buildIR(IRBuilder builder, Target t, Environment env, GenericParameters generics, ParseTree... nodes) throws ConfigCompileException {
 			for(ParseTree node : nodes) {
 				AsmCompiler.getIR(builder, node, env);
 			}
@@ -56,7 +57,7 @@ public class Compiler {
 	public static class dyn extends LLVMFunction {
 
 		@Override
-		public IRData buildIR(IRBuilder builder, Target t, Environment env, ParseTree... nodes) throws ConfigCompileException {
+		public IRData buildIR(IRBuilder builder, Target t, Environment env, GenericParameters generics, ParseTree... nodes) throws ConfigCompileException {
 			IRData data = AsmCompiler.getIR(builder, nodes[0], env);
 			LLVMEnvironment llvmenv = env.getEnv(LLVMEnvironment.class);
 			int alloca = llvmenv.getNewLocalVariableReference(data.getResultType());

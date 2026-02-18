@@ -1793,7 +1793,7 @@ public class PlayerEvents {
 							String command = event.getCommand();
 							String prefilter = value.val();
 							StringHandling.parse_args pa = new StringHandling.parse_args();
-							CArray ca = (CArray) pa.exec(Target.UNKNOWN, null, new CString(command, Target.UNKNOWN));
+							CArray ca = (CArray) pa.exec(Target.UNKNOWN, null, null, new CString(command, Target.UNKNOWN));
 							if(ca.size() > 0) {
 								if(!ca.get(0, Target.UNKNOWN).val().equals(prefilter)) {
 									return false;
@@ -1831,7 +1831,7 @@ public class PlayerEvents {
 				map.put("command", new CString(event.getCommand(), Target.UNKNOWN));
 
 				StringHandling.parse_args pa = new StringHandling.parse_args();
-				CArray ca = (CArray) pa.exec(Target.UNKNOWN, null, new CString(event.getCommand(), Target.UNKNOWN));
+				CArray ca = (CArray) pa.exec(Target.UNKNOWN, null, null, new CString(event.getCommand(), Target.UNKNOWN));
 				map.put("prefix", new CString(ca.get(0, Target.UNKNOWN).val(), Target.UNKNOWN));
 
 				return map;

@@ -735,7 +735,7 @@ public class DocGenTemplates {
 		@Override
 		public String generate(String... args) {
 			String template = args[0];
-			return new Scheduling.simple_date().exec(Target.UNKNOWN, null, new CString(template, Target.UNKNOWN)).val();
+			return new Scheduling.simple_date().exec(Target.UNKNOWN, null, null, new CString(template, Target.UNKNOWN)).val();
 		}
 	};
 
@@ -772,7 +772,7 @@ public class DocGenTemplates {
 	public static final Generator CURRENTYEAR = new Generator() {
 		@Override
 		public String generate(String... args) throws GenerateException {
-			return new Scheduling.simple_date().exec(Target.UNKNOWN, null, new CString("yyyy", Target.UNKNOWN)).val();
+			return new Scheduling.simple_date().exec(Target.UNKNOWN, null, null, new CString("yyyy", Target.UNKNOWN)).val();
 		}
 	};
 
