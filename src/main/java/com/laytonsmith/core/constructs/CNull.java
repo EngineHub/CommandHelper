@@ -3,6 +3,7 @@ package com.laytonsmith.core.constructs;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.natives.interfaces.Booleanish;
 
 /**
@@ -109,6 +110,11 @@ public final class CNull extends Construct implements Cloneable, Booleanish {
 	@Override
 	public boolean getBooleanValue(Target t) {
 		return false;
+	}
+
+	@Override
+	public boolean getBooleanValue(Environment env, Target t) {
+		return getBooleanValue(t);
 	}
 
 

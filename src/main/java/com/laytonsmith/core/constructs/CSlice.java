@@ -120,12 +120,22 @@ public class CSlice extends CArray {
 	}
 
 	@Override
+	public void set(Mixed index, Mixed c, Target t, com.laytonsmith.core.environments.Environment env) {
+		set(index, c, t);
+	}
+
+	@Override
 	public Mixed get(Mixed index, Target t) {
 		long i = ArgumentValidation.getInt(index, t);
 		if(i > max) {
 			throw new CRERangeException("Index out of bounds. Index: " + i + " Size: " + max, t);
 		}
 		return new CInt(start + (direction * i), t);
+	}
+
+	@Override
+	public Mixed get(Mixed index, Target t, com.laytonsmith.core.environments.Environment env) {
+		return get(index, t);
 	}
 
 	@Override
@@ -166,7 +176,17 @@ public class CSlice extends CArray {
 	}
 
 	@Override
+	public Set<Mixed> keySet(com.laytonsmith.core.environments.Environment env) {
+		return keySet();
+	}
+
+	@Override
 	public long size() {
+		return size;
+	}
+
+	@Override
+	public long size(com.laytonsmith.core.environments.Environment env) {
 		return size;
 	}
 

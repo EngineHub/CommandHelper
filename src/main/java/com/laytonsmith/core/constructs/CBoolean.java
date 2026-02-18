@@ -3,6 +3,7 @@ package com.laytonsmith.core.constructs;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.objects.ObjectModifier;
 import java.util.EnumSet;
 import java.util.Set;
@@ -92,6 +93,11 @@ public final class CBoolean extends CPrimitive implements Cloneable {
 	@Override
 	public boolean getBooleanValue(Target t) {
 		return val;
+	}
+
+	@Override
+	public boolean getBooleanValue(Environment env, Target t) {
+		return getBooleanValue(t);
 	}
 
 

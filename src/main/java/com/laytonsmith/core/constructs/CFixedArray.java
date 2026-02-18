@@ -9,6 +9,7 @@ import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREIndexOverflowException;
 import com.laytonsmith.core.exceptions.CRE.CREUnsupportedOperationException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.natives.interfaces.ArrayAccessSet;
 import com.laytonsmith.core.natives.interfaces.Booleanish;
 import com.laytonsmith.core.natives.interfaces.Mixed;
@@ -49,6 +50,11 @@ public class CFixedArray extends Construct implements
 	}
 
 	@Override
+	public Mixed get(String index, Target t, Environment env) throws ConfigRuntimeException {
+		return get(index, t);
+	}
+
+	@Override
 	public Mixed get(int index, Target t) throws ConfigRuntimeException {
 		if(index < 0 || index >= data.length) {
 			throw new CREIndexOverflowException("Index overflows array size", t);
@@ -61,8 +67,18 @@ public class CFixedArray extends Construct implements
 	}
 
 	@Override
+	public Mixed get(int index, Target t, Environment env) throws ConfigRuntimeException {
+		return get(index, t);
+	}
+
+	@Override
 	public Mixed get(Mixed index, Target t) throws ConfigRuntimeException {
 		return get(ArgumentValidation.getInt32(index, t), t);
+	}
+
+	@Override
+	public Mixed get(Mixed index, Target t, Environment env) throws ConfigRuntimeException {
+		return get(index, t);
 	}
 
 	@Override
@@ -72,6 +88,11 @@ public class CFixedArray extends Construct implements
 			set.add(new CInt(i, Target.UNKNOWN));
 		}
 		return set;
+	}
+
+	@Override
+	public Set<Mixed> keySet(Environment env) {
+		return keySet();
 	}
 
 	private void validateSet(Mixed value, Target t) {
@@ -84,6 +105,11 @@ public class CFixedArray extends Construct implements
 	public void set(Mixed index, Mixed value, Target t) {
 		int in = ArgumentValidation.getInt32(index, t);
 		set(in, value, t);
+	}
+
+	@Override
+	public void set(Mixed index, Mixed value, Target t, Environment env) {
+		set(index, value, t);
 	}
 
 	public void set(int index, Mixed value, Target t) {
@@ -110,13 +136,28 @@ public class CFixedArray extends Construct implements
 	}
 
 	@Override
+	public Mixed slice(int begin, int end, Target t, Environment env) {
+		return slice(begin, end, t);
+	}
+
+	@Override
 	public boolean getBooleanValue(Target t) {
 		return size() > 0;
 	}
 
 	@Override
+	public boolean getBooleanValue(Environment env, Target t) {
+		return getBooleanValue(t);
+	}
+
+	@Override
 	public long size() {
 		return data.length;
+	}
+
+	@Override
+	public long size(Environment env) {
+		return size();
 	}
 
 	public void fill(Mixed value, Target t) {

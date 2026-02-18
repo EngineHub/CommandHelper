@@ -10,6 +10,7 @@ import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.objects.AccessModifier;
 import java.util.Set;
 
@@ -116,8 +117,21 @@ public interface Mixed extends Cloneable, Documentation {
 	 *
 	 * @param type
 	 * @return
+	 * @deprecated Use {@link #isInstanceOf(CClassType, Object, Environment)} instead.
 	 */
+	@Deprecated
 	public boolean isInstanceOf(CClassType type);
+
+	/**
+	 * Checks if this value is an instance of the given type, with environment context.
+	 * The lhsGenericParameters parameter is for future generic type checking and may be null.
+	 *
+	 * @param type
+	 * @param lhsGenericParameters
+	 * @param env
+	 * @return
+	 */
+	public boolean isInstanceOf(CClassType type, Object lhsGenericParameters, Environment env);
 
 	/**
 	 * Generally speaking, we cannot use Java's instanceof keyword to determine if something is an instanceof, because
@@ -143,8 +157,26 @@ public interface Mixed extends Cloneable, Documentation {
 	 *
 	 * @return
 	 * @throws IllegalArgumentException If the class isn't public facing.
+	 * @deprecated Use {@link #typeof(Environment)} instead.
 	 */
+	@Deprecated
 	public CClassType typeof();
+
+	/**
+	 * Returns the typeof this value, as a CClassType object, with environment context.
+	 *
+	 * @param env
+	 * @return
+	 * @throws IllegalArgumentException If the class isn't public facing.
+	 */
+	public CClassType typeof(Environment env);
+
+	/**
+	 * Returns the generic parameters for this value, or null if none.
+	 *
+	 * @return
+	 */
+	public Object getGenericParameters();
 
 	/**
 	 * Casts the class to the specified type. This only works with Java types, and so for dynamic elements, this

@@ -15,6 +15,7 @@ import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CRE.CREIndexOverflowException;
 import com.laytonsmith.core.exceptions.CRE.CREUnsupportedOperationException;
@@ -256,6 +257,11 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 							}
 
 							@Override
+							public CClassType typeof(Environment env) {
+								return typeof();
+							}
+
+							@Override
 							public boolean isInstanceOf(CClassType type) {
 								return Construct.isInstanceof(this, type);
 							}
@@ -263,6 +269,16 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 							@Override
 							public boolean isInstanceOf(Class<? extends Mixed> type) {
 								return Construct.isInstanceof(this, type);
+							}
+
+							@Override
+							public boolean isInstanceOf(CClassType type, Object lhsGenericParameters, Environment env) {
+								return isInstanceOf(type);
+							}
+
+							@Override
+							public Object getGenericParameters() {
+								return null;
 							}
 
 							@Override
@@ -439,8 +455,23 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 	}
 
 	@Override
+	public boolean isInstanceOf(CClassType type, Object lhsGenericParameters, Environment env) {
+		return isInstanceOf(type);
+	}
+
+	@Override
 	public CClassType typeof() {
 		return TYPE;
+	}
+
+	@Override
+	public CClassType typeof(Environment env) {
+		return typeof();
+	}
+
+	@Override
+	public Object getGenericParameters() {
+		return null;
 	}
 
 	@Override
@@ -483,6 +514,11 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 	}
 
 	@Override
+	public Mixed get(String index, Target t, Environment env) throws ConfigRuntimeException {
+		return get(index, t);
+	}
+
+	@Override
 	public Mixed get(int index, Target t) throws ConfigRuntimeException {
 		if(index >= values().size()) {
 			throw new CREIndexOverflowException("The index " + index + " is out of bounds", t);
@@ -491,8 +527,18 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 	}
 
 	@Override
+	public Mixed get(int index, Target t, Environment env) throws ConfigRuntimeException {
+		return get(index, t);
+	}
+
+	@Override
 	public Mixed get(Mixed index, Target t) throws ConfigRuntimeException {
 		return get(index.val(), t);
+	}
+
+	@Override
+	public Mixed get(Mixed index, Target t, Environment env) throws ConfigRuntimeException {
+		return get(index, t);
 	}
 
 	@Override
@@ -501,8 +547,18 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 	}
 
 	@Override
+	public Set<Mixed> keySet(Environment env) {
+		return keySet();
+	}
+
+	@Override
 	public long size() {
 		return values().size();
+	}
+
+	@Override
+	public long size(Environment env) {
+		return size();
 	}
 
 	@Override
@@ -520,6 +576,11 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 		throw new CREUnsupportedOperationException("Cannot slice an enum", t);
 	}
 
+	@Override
+	public Mixed slice(int begin, int end, Target t, Environment env) {
+		return slice(begin, end, t);
+	}
+
 	/**
 	 * Returns a list of the underlying enum values. This is roughly equivalent to a list of the Enum java class.
 	 * @return
@@ -529,6 +590,11 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 	@Override
 	public boolean getBooleanValue(Target t) {
 		return true;
+	}
+
+	@Override
+	public boolean getBooleanValue(Environment env, Target t) {
+		return getBooleanValue(t);
 	}
 
 }

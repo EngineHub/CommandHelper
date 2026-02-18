@@ -6,6 +6,7 @@ import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.objects.AccessModifier;
 import com.laytonsmith.core.objects.ObjectModifier;
 import java.net.URL;
@@ -69,6 +70,11 @@ public abstract class AbstractMixed implements Mixed {
 	}
 
 	@Override
+	public boolean isInstanceOf(CClassType type, Object lhsGenericParameters, Environment env) {
+		return isInstanceOf(type);
+	}
+
+	@Override
 	public boolean isInstanceOf(Class<? extends Mixed> type) {
 		return type.isAssignableFrom(this.getClass());
 	}
@@ -85,6 +91,16 @@ public abstract class AbstractMixed implements Mixed {
 	@Override
 	public CClassType typeof() {
 		return Construct.typeof(this);
+	}
+
+	@Override
+	public CClassType typeof(Environment env) {
+		return typeof();
+	}
+
+	@Override
+	public Object getGenericParameters() {
+		return null;
 	}
 
 	@Override

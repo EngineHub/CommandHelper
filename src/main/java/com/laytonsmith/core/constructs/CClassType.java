@@ -605,6 +605,11 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	}
 
 	@Override
+	public Mixed get(String index, Target t, Environment env) throws ConfigRuntimeException {
+		return get(index, t);
+	}
+
+	@Override
 	public Mixed get(int index, Target t) throws ConfigRuntimeException {
 		if(isEnum()) {
 			try {
@@ -614,6 +619,11 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 			}
 		}
 		throw new CREUnsupportedOperationException("Unsupported operation", t);
+	}
+
+	@Override
+	public Mixed get(int index, Target t, Environment env) throws ConfigRuntimeException {
+		return get(index, t);
 	}
 
 	@Override
@@ -629,6 +639,11 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	}
 
 	@Override
+	public Mixed get(Mixed index, Target t, Environment env) throws ConfigRuntimeException {
+		return get(index, t);
+	}
+
+	@Override
 	public Set<Mixed> keySet() {
 		if(isEnum()) {
 			try {
@@ -641,6 +656,11 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	}
 
 	@Override
+	public Set<Mixed> keySet(Environment env) {
+		return keySet();
+	}
+
+	@Override
 	public long size() {
 		if(isEnum()) {
 			try {
@@ -650,6 +670,11 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 			}
 		}
 		return 0;
+	}
+
+	@Override
+	public long size(Environment env) {
+		return size();
 	}
 
 	@Override
@@ -667,6 +692,11 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		throw new CREUnsupportedOperationException("Unsupported operation", t);
 	}
 
+	@Override
+	public Mixed slice(int begin, int end, Target t, Environment env) {
+		return slice(begin, end, t);
+	}
+
 	/**
 	 * If this was constructed against a native class, we can do some optimizations in the course
 	 * of operation. This may be null, and all code that uses this method must support the mechanisms if this
@@ -680,6 +710,11 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	@Override
 	public boolean getBooleanValue(Target t) {
 		return true;
+	}
+
+	@Override
+	public boolean getBooleanValue(Environment env, Target t) {
+		return getBooleanValue(t);
 	}
 
 	/**
@@ -741,6 +776,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	/**
 	 * Stub for generics support — not yet implemented.
 	 */
+	@Override
 	public GenericParameters getGenericParameters() {
 		throw new UnsupportedOperationException("Not yet implemented");
 	}

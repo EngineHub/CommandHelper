@@ -66,6 +66,11 @@ public class CString extends CPrimitive implements Cloneable,
 	}
 
 	@Override
+	public long size(Environment env) {
+		return size();
+	}
+
+	@Override
 	public boolean canBeAssociative() {
 		return false;
 	}
@@ -83,6 +88,11 @@ public class CString extends CPrimitive implements Cloneable,
 	}
 
 	@Override
+	public Mixed slice(int begin, int end, Target t, Environment env) {
+		return slice(begin, end, t);
+	}
+
+	@Override
 	public String getQuote() {
 		return super.getQuote();
 	}
@@ -97,9 +107,19 @@ public class CString extends CPrimitive implements Cloneable,
 	}
 
 	@Override
+	public Mixed get(int index, Target t, Environment env) throws ConfigRuntimeException {
+		return get(index, t);
+	}
+
+	@Override
 	public final Mixed get(Mixed index, Target t) throws ConfigRuntimeException {
 		int i = ArgumentValidation.getInt32(index, t);
 		return get(i, t);
+	}
+
+	@Override
+	public final Mixed get(Mixed index, Target t, Environment env) throws ConfigRuntimeException {
+		return get(index, t);
 	}
 
 	@Override
@@ -110,6 +130,11 @@ public class CString extends CPrimitive implements Cloneable,
 		} catch (NumberFormatException e) {
 			throw new CREFormatException("Expecting numerical index, but received " + index, t);
 		}
+	}
+
+	@Override
+	public final Mixed get(String index, Target t, Environment env) {
+		return get(index, t);
 	}
 
 	@Override
@@ -143,6 +168,11 @@ public class CString extends CPrimitive implements Cloneable,
 
 
 		};
+	}
+
+	@Override
+	public Set<Mixed> keySet(Environment env) {
+		return keySet();
 	}
 
 	@Override
@@ -183,6 +213,11 @@ public class CString extends CPrimitive implements Cloneable,
 					+ " with the logger-preferences.ini file.", t);
 		}
 		return val().length() > 0;
+	}
+
+	@Override
+	public boolean getBooleanValue(Environment env, Target t) {
+		return getBooleanValue(t);
 	}
 
 	@ExposedElement

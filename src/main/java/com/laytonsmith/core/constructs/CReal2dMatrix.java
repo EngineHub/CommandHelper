@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CRE.CREIndexOverflowException;
 import com.laytonsmith.core.exceptions.CRE.CRELengthException;
@@ -160,8 +161,18 @@ public class CReal2dMatrix extends AbstractMixedClass implements Matrix<Double>,
 	}
 
 	@Override
+	public Mixed get(Mixed index, Target t, Environment env) throws ConfigRuntimeException {
+		return get(index, t);
+	}
+
+	@Override
 	public Mixed get(String index, Target t) throws ConfigRuntimeException {
 		throw new CREIllegalArgumentException("Matrices cannot be indexed into with non-numeric values.", t);
+	}
+
+	@Override
+	public Mixed get(String index, Target t, Environment env) throws ConfigRuntimeException {
+		return get(index, t);
 	}
 
 	@Override
@@ -170,6 +181,11 @@ public class CReal2dMatrix extends AbstractMixedClass implements Matrix<Double>,
 			throw new CRERangeException("Matrix range out of bounds.", t);
 		}
 		return new CReal2dMatrixRow(this, index);
+	}
+
+	@Override
+	public Mixed get(int index, Target t, Environment env) throws ConfigRuntimeException {
+		return get(index, t);
 	}
 
 	@Override
@@ -182,8 +198,18 @@ public class CReal2dMatrix extends AbstractMixedClass implements Matrix<Double>,
 	}
 
 	@Override
+	public Set<Mixed> keySet(Environment env) {
+		return keySet();
+	}
+
+	@Override
 	public boolean getBooleanValue(Target t) {
 		return data.length != 0;
+	}
+
+	@Override
+	public boolean getBooleanValue(Environment env, Target t) {
+		return getBooleanValue(t);
 	}
 
 	@Override
@@ -205,8 +231,18 @@ public class CReal2dMatrix extends AbstractMixedClass implements Matrix<Double>,
 	}
 
 	@Override
+	public Mixed slice(int begin, int end, Target t, Environment env) {
+		return slice(begin, end, t);
+	}
+
+	@Override
 	public long size() {
 		return getRowCount();
+	}
+
+	@Override
+	public long size(Environment env) {
+		return size();
 	}
 
 	public CReal2dMatrix deepClone() {

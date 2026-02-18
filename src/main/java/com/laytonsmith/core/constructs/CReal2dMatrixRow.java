@@ -6,6 +6,7 @@ import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.natives.interfaces.AbstractMixedClass;
 import com.laytonsmith.core.natives.interfaces.ArrayAccessSet;
 import com.laytonsmith.core.natives.interfaces.Mixed;
@@ -58,13 +59,28 @@ public class CReal2dMatrixRow extends AbstractMixedClass implements com.laytonsm
 	}
 
 	@Override
+	public Mixed get(String index, Target t, Environment env) throws ConfigRuntimeException {
+		return get(index, t);
+	}
+
+	@Override
 	public CDouble get(int index, Target t) throws ConfigRuntimeException {
 		return new CDouble(getNative(index, t), t);
 	}
 
 	@Override
+	public Mixed get(int index, Target t, Environment env) throws ConfigRuntimeException {
+		return get(index, t);
+	}
+
+	@Override
 	public Mixed get(Mixed index, Target t) throws ConfigRuntimeException {
 		return get(ArgumentValidation.getInt32(index, t), t);
+	}
+
+	@Override
+	public Mixed get(Mixed index, Target t, Environment env) throws ConfigRuntimeException {
+		return get(index, t);
 	}
 
 	@Override
@@ -74,6 +90,11 @@ public class CReal2dMatrixRow extends AbstractMixedClass implements com.laytonsm
 			set.add(new CInt(i, Target.UNKNOWN));
 		}
 		return set;
+	}
+
+	@Override
+	public Set<Mixed> keySet(Environment env) {
+		return keySet();
 	}
 
 	@Override
@@ -101,6 +122,11 @@ public class CReal2dMatrixRow extends AbstractMixedClass implements com.laytonsm
 	}
 
 	@Override
+	public Mixed slice(int begin, int end, Target t, Environment env) {
+		return slice(begin, end, t);
+	}
+
+	@Override
 	public boolean getBooleanValue(Target t) {
 		// 0 dimension matrices are not possible, so this will
 		// always have at least one value in it, thus always
@@ -109,8 +135,18 @@ public class CReal2dMatrixRow extends AbstractMixedClass implements com.laytonsm
 	}
 
 	@Override
+	public boolean getBooleanValue(Environment env, Target t) {
+		return getBooleanValue(t);
+	}
+
+	@Override
 	public long size() {
 		return parent.columns;
+	}
+
+	@Override
+	public long size(Environment env) {
+		return size();
 	}
 
 	@Override
@@ -118,6 +154,11 @@ public class CReal2dMatrixRow extends AbstractMixedClass implements com.laytonsm
 		int in = ArgumentValidation.getInt32(index, t);
 		double d = ArgumentValidation.getDouble(value, t);
 		setNative(in, d, t);
+	}
+
+	@Override
+	public void set(Mixed index, Mixed value, Target t, Environment env) {
+		set(index, value, t);
 	}
 
 	@Override

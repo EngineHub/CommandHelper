@@ -160,8 +160,23 @@ public class UserObject implements Mixed {
 	}
 
 	@Override
+	public boolean isInstanceOf(CClassType type, Object lhsGenericParameters, Environment env) {
+		return isInstanceOf(type);
+	}
+
+	@Override
 	public CClassType typeof() {
 		return objectDefinition.getType();
+	}
+
+	@Override
+	public CClassType typeof(Environment env) {
+		return typeof();
+	}
+
+	@Override
+	public Object getGenericParameters() {
+		return null;
 	}
 
 	@Override

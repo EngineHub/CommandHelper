@@ -5,6 +5,7 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREReadOnlyException;
 import com.laytonsmith.core.exceptions.CRE.CREUnsupportedOperationException;
@@ -395,6 +396,11 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 		return maxValue;
 	}
 
+	@Override
+	public long size(Environment env) {
+		return size();
+	}
+
 	/**
 	 * Returns the maximum size of the underlying data before it would have to be resized to add more data. This is not
 	 * to be confused with the size.
@@ -491,6 +497,11 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	}
 
 	@Override
+	public Mixed slice(int begin, int end, Target t, Environment env) {
+		return slice(begin, end, t);
+	}
+
+	@Override
 	public boolean isAssociative() {
 		return false;
 	}
@@ -531,6 +542,11 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	}
 
 	@Override
+	public Set<Mixed> keySet(Environment env) {
+		return keySet();
+	}
+
+	@Override
 	public Set<String> stringKeySet() {
 		throw new CREUnsupportedOperationException("Getting a string key set from a byte array is not supported.", getTarget());
 	}
@@ -538,6 +554,11 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	@Override
 	public void set(Mixed index, Mixed c, Target t) throws ConfigRuntimeException {
 		throw new CREUnsupportedOperationException("Modifying a byte array using array_set() is not supported.", t);
+	}
+
+	@Override
+	public void set(Mixed index, Mixed c, Target t, Environment env) throws ConfigRuntimeException {
+		set(index, c, t);
 	}
 
 	@Override
@@ -554,6 +575,11 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 		int i = ArgumentValidation.getInt32(index, t);
 		byte b = getByte(i);
 		return new CInt(b, t);
+	}
+
+	@Override
+	public Mixed get(Mixed index, Target t, Environment env) throws ConfigRuntimeException {
+		return get(index, t);
 	}
 
 	@Override
@@ -653,6 +679,11 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 		}
 
 		@Override
+		public void set(Mixed index, Mixed c, Target t, Environment env) {
+			set(index, c, t);
+		}
+
+		@Override
 		public Mixed get(Mixed index, Target t) {
 			int i = ArgumentValidation.getInt32(index, t);
 			try {
@@ -663,8 +694,18 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 		}
 
 		@Override
+		public Mixed get(Mixed index, Target t, Environment env) {
+			return get(index, t);
+		}
+
+		@Override
 		public long size() {
 			return backing.length;
+		}
+
+		@Override
+		public long size(Environment env) {
+			return size();
 		}
 
 		@Override

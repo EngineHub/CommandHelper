@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.annotations.MEnum;
 import com.laytonsmith.annotations.typeof;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
@@ -39,6 +40,11 @@ public final class ArgumentValidation {
 		//
 	}
 
+	@Deprecated
+	public static Mixed getItemFromArray(CArray object, String key, Target t, Mixed defaultItem) throws ConfigRuntimeException {
+		return getItemFromArray(object, key, t, defaultItem, null);
+	}
+
 	/**
 	 * Returns an item from an array, as a generic construct. This provides a standard way of returning an item from an
 	 * array. If defaultItem is null, then it is required that the item be present in the object. If it is not, a
@@ -49,11 +55,12 @@ public final class ArgumentValidation {
 	 * @param t The code target
 	 * @param defaultItem The default item to return if the specified key isn't present in the array. If this is a java
 	 * null, and the key isn't present, a standard error message is thrown.
+	 * @param env The environment
 	 * @return The item in the array, or the defaultItem.
 	 * @throws ConfigRuntimeException A FormatException is thrown if it doesn't contain the appropriate value and the
 	 * defaultItem is null.
 	 */
-	public static Mixed getItemFromArray(CArray object, String key, Target t, Mixed defaultItem) throws ConfigRuntimeException {
+	public static Mixed getItemFromArray(CArray object, String key, Target t, Mixed defaultItem, Environment env) throws ConfigRuntimeException {
 		if(object.containsKey(key)) {
 			return object.get(key, t);
 		} else if(defaultItem == null) {
@@ -63,14 +70,20 @@ public final class ArgumentValidation {
 		}
 	}
 
+	@Deprecated
+	public static CArray getArray(Mixed construct, Target t) {
+		return getArray(construct, t, null);
+	}
+
 	/**
 	 * Returns a CArray object from a given construct, throwing a common error message if not.
 	 *
 	 * @param construct
 	 * @param t
+	 * @param env
 	 * @return
 	 */
-	public static CArray getArray(Mixed construct, Target t) {
+	public static CArray getArray(Mixed construct, Target t, Environment env) {
 		if(construct.isInstanceOf(CArray.TYPE)) {
 			return ((CArray) construct);
 		} else {
@@ -106,6 +119,11 @@ public final class ArgumentValidation {
 		}
 	}
 
+	@Deprecated
+	public static double getNumber(Mixed c, Target t) {
+		return getNumber(c, t, null);
+	}
+
 	/**
 	 * This function pulls a numerical equivalent from any given construct. It throws a ConfigRuntimeException if it
 	 * cannot be converted, for instance the string "s" cannot be cast to a number. The number returned will always be a
@@ -113,9 +131,10 @@ public final class ArgumentValidation {
 	 *
 	 * @param c
 	 * @param t
+	 * @param env
 	 * @return
 	 */
-	public static double getNumber(Mixed c, Target t) {
+	public static double getNumber(Mixed c, Target t, Environment env) {
 		// TODO: Formalize this in the same way that Booleanish is formalized.
 		if(c instanceof CMutablePrimitive) {
 			c = ((CMutablePrimitive) c).get();
@@ -168,14 +187,25 @@ public final class ArgumentValidation {
 			+ ")[\\x00-\\x20]*" // trailing whitespace
 	);
 
+	@Deprecated
+	public static boolean isNumber(Mixed c) {
+		return isNumber(c, null);
+	}
+
 	/**
 	 * Validates that a construct's value is a number or string that can be returned by GetNumber()
 	 *
 	 * @param c Mixed
+	 * @param env
 	 * @return boolean
 	 */
-	public static boolean isNumber(Mixed c) {
+	public static boolean isNumber(Mixed c, Environment env) {
 		return c instanceof CNumber || VALID_DOUBLE.matcher(c.val()).matches();
+	}
+
+	@Deprecated
+	public static double getDouble(Mixed c, Target t) {
+		return getDouble(c, t, null);
 	}
 
 	/**
@@ -183,9 +213,10 @@ public final class ArgumentValidation {
 	 *
 	 * @param c
 	 * @param t
+	 * @param env
 	 * @return
 	 */
-	public static double getDouble(Mixed c, Target t) {
+	public static double getDouble(Mixed c, Target t, Environment env) {
 		if(c instanceof CMutablePrimitive) {
 			c = ((CMutablePrimitive) c).get();
 		}
@@ -196,6 +227,11 @@ public final class ArgumentValidation {
 		}
 	}
 
+	@Deprecated
+	public static float getDouble32(Mixed c, Target t) {
+		return getDouble32(c, t, null);
+	}
+
 	/**
 	 * Returns a 32-bit float from the construct. Since the backing value is actually a double, if the number contained
 	 * in the construct is not within range after truncating, an exception is thrown (fail fast). When needing a float
@@ -203,9 +239,10 @@ public final class ArgumentValidation {
 	 *
 	 * @param c
 	 * @param t
+	 * @param env
 	 * @return
 	 */
-	public static float getDouble32(Mixed c, Target t) {
+	public static float getDouble32(Mixed c, Target t, Environment env) {
 		double l = getDouble(c, t);
 		if(Math.abs(l) > Float.MAX_VALUE) {
 			throw new CRERangeException("Expecting a 32 bit float, but a larger value was found: " + l, t);
@@ -213,15 +250,21 @@ public final class ArgumentValidation {
 		return (float) l;
 	}
 
+	@Deprecated
+	public static long getInt(Mixed c, Target t) {
+		return getInt(c, t, null);
+	}
+
 	/**
 	 * Returns a long from any given construct.
 	 *
 	 * @param c
 	 * @param t
+	 * @param env
 	 * @throws CRECastException If the value cannot be converted to a long
 	 * @return
 	 */
-	public static long getInt(Mixed c, Target t) {
+	public static long getInt(Mixed c, Target t, Environment env) {
 		if(c instanceof CMutablePrimitive) {
 			c = ((CMutablePrimitive) c).get();
 		}
@@ -247,6 +290,11 @@ public final class ArgumentValidation {
 		return i;
 	}
 
+	@Deprecated
+	public static int getInt32(Mixed c, Target t) {
+		return getInt32(c, t, null);
+	}
+
 	/**
 	 * Returns a 32 bit int from the construct. Since the backing value is actually a long, if the number contained in
 	 * the construct is not the same after truncating, an exception is thrown (fail fast). When needing an int from a
@@ -254,11 +302,12 @@ public final class ArgumentValidation {
 	 *
 	 * @param c
 	 * @param t
+	 * @param env
 	 * @throws CRERangeException If the value would be truncated
 	 * @throws CRECastException If the value cannot be cast to an int
 	 * @return
 	 */
-	public static int getInt32(Mixed c, Target t) {
+	public static int getInt32(Mixed c, Target t, Environment env) {
 		if(c instanceof CMutablePrimitive) {
 			c = ((CMutablePrimitive) c).get();
 		}
@@ -270,6 +319,11 @@ public final class ArgumentValidation {
 		return i;
 	}
 
+	@Deprecated
+	public static short getInt16(Mixed c, Target t) {
+		return getInt16(c, t, null);
+	}
+
 	/**
 	 * Returns a 16 bit int from the construct (a short). Since the backing value is actually a long, if the number
 	 * contained in the construct is not the same after truncating, an exception is thrown (fail fast). When needing an
@@ -277,11 +331,12 @@ public final class ArgumentValidation {
 	 *
 	 * @param c
 	 * @param t
+	 * @param env
 	 * @throws CRERangeException If the value would be truncated
 	 * @throws CRECastException If the value cannot be cast to an int
 	 * @return
 	 */
-	public static short getInt16(Mixed c, Target t) {
+	public static short getInt16(Mixed c, Target t, Environment env) {
 		if(c instanceof CMutablePrimitive) {
 			c = ((CMutablePrimitive) c).get();
 		}
@@ -293,6 +348,11 @@ public final class ArgumentValidation {
 		return s;
 	}
 
+	@Deprecated
+	public static byte getInt8(Mixed c, Target t) {
+		return getInt8(c, t, null);
+	}
+
 	/**
 	 * Returns an 8 bit int from the construct (a byte). Since the backing value is actually a long, if the number
 	 * contained in the construct is not the same after truncating, an exception is thrown (fail fast). When needing a
@@ -300,11 +360,12 @@ public final class ArgumentValidation {
 	 *
 	 * @param c
 	 * @param t
+	 * @param env
 	 * @throws CRERangeException If the value would be truncated
 	 * @throws CRECastException If the value cannot be cast to an int
 	 * @return
 	 */
-	public static byte getInt8(Mixed c, Target t) {
+	public static byte getInt8(Mixed c, Target t, Environment env) {
 		if(c instanceof CMutablePrimitive) {
 			c = ((CMutablePrimitive) c).get();
 		}
@@ -316,6 +377,11 @@ public final class ArgumentValidation {
 		return b;
 	}
 
+	@Deprecated
+	public static boolean getBooleanObject(Mixed c, Target t) {
+		return getBooleanObject(c, t, null);
+	}
+
 	/**
 	 * <s>Returns a the boolean value from the underlying CBoolean, or throws a CastException if the underlying type is
 	 * not a CBoolean.</s>
@@ -325,10 +391,16 @@ public final class ArgumentValidation {
 	 * to validate the type, use {@link #getObject(Mixed, Target, Class)}
 	 * @param c
 	 * @param t
+	 * @param env
 	 * @return
 	 */
-	public static boolean getBooleanObject(Mixed c, Target t) {
-		return getBooleanish(c, t);
+	public static boolean getBooleanObject(Mixed c, Target t, Environment env) {
+		return getBooleanish(c, t, env);
+	}
+
+	@Deprecated
+	public static boolean getBoolean(Mixed c, Target t) {
+		return getBoolean(c, t, null);
 	}
 
 	/**
@@ -338,14 +410,20 @@ public final class ArgumentValidation {
 	 * {@link #getBooleanish} or {@link #getBooleanObject}.
 	 * @param c
 	 * @param t
+	 * @param env
 	 * @return
 	 * @deprecated Use {@link #getBooleanish} for current behavior, or {@link #getBooleanObject} for strict behavior.
 	 * Generally speaking, if it seems reasonable for the user to send a non-boolean data type in this parameter, then
 	 * getBooleanish should be used. If it indicates a probable error, getBooleanObject should be used.
 	 */
 	@Deprecated
-	public static boolean getBoolean(Mixed c, Target t) {
-		return getBooleanish(c, t);
+	public static boolean getBoolean(Mixed c, Target t, Environment env) {
+		return getBooleanish(c, t, env);
+	}
+
+	@Deprecated
+	public static boolean getBooleanish(Mixed c, Target t) {
+		return getBooleanish(c, t, null);
 	}
 
 	/**
@@ -355,9 +433,10 @@ public final class ArgumentValidation {
 	 *
 	 * @param c The value to convert
 	 * @param t The code target
+	 * @param env
 	 * @return
 	 */
-	public static boolean getBooleanish(Mixed c, Target t) {
+	public static boolean getBooleanish(Mixed c, Target t, Environment env) {
 		if(c instanceof CVoid) {
 			// Eventually, we may want to turn this into a warning, maybe even a compiler error, but for now,
 			// to keep backwards compatibility, we want to keep this as is.
@@ -375,14 +454,20 @@ public final class ArgumentValidation {
 		throw new CRECastException("Could not convert value of type " + c.typeof() + " to a " + Booleanish.TYPE, t);
 	}
 
+	@Deprecated
+	public static CByteArray getByteArray(Mixed c, Target t) {
+		return getByteArray(c, t, null);
+	}
+
 	/**
 	 * Returns a CByteArray object from the given construct.
 	 *
 	 * @param c
 	 * @param t
+	 * @param env
 	 * @return
 	 */
-	public static CByteArray getByteArray(Mixed c, Target t) {
+	public static CByteArray getByteArray(Mixed c, Target t, Environment env) {
 		if(c instanceof CByteArray) {
 			return (CByteArray) c;
 		} else if(c instanceof CNull) {
@@ -412,28 +497,40 @@ public final class ArgumentValidation {
 		return c.val();
 	}
 
+	@Deprecated
+	public static String getStringObject(Mixed c, Target t) {
+		return getStringObject(c, t, null);
+	}
+
 	/**
 	 * Returns a String object from the given construct. Note that unlike {@link #getString}, this strictly expects a
 	 * string object, and will throw a CRECastException if it is not a string.
 	 *
 	 * @param c
 	 * @param t
+	 * @param env
 	 * @return
 	 */
-	public static String getStringObject(Mixed c, Target t) {
+	public static String getStringObject(Mixed c, Target t, Environment env) {
 		if(!c.isInstanceOf(CString.class)) {
 			throw new CRECastException("Expected a string, but found " + c.typeof() + " instead.", t);
 		}
 		return c.val();
 	}
 
+	@Deprecated
+	public static boolean anyDoubles(Mixed... c) {
+		return anyDoubles(null, c);
+	}
+
 	/**
 	 * Returns true if any of the constructs are a CDouble, false otherwise.
 	 *
+	 * @param env
 	 * @param c
 	 * @return
 	 */
-	public static boolean anyDoubles(Mixed... c) {
+	public static boolean anyDoubles(Environment env, Mixed... c) {
 		for(Mixed c1 : c) {
 			if(c1 instanceof CDouble || c1 instanceof CString && c1.val().indexOf(".", 1) > -1) {
 				return true;
@@ -442,13 +539,19 @@ public final class ArgumentValidation {
 		return false;
 	}
 
+	@Deprecated
+	public static boolean anyStrings(Mixed... c) {
+		return anyStrings(null, c);
+	}
+
 	/**
 	 * Return true if any of the constructs are CStrings, false otherwise.
 	 *
+	 * @param env
 	 * @param c
 	 * @return
 	 */
-	public static boolean anyStrings(Mixed... c) {
+	public static boolean anyStrings(Environment env, Mixed... c) {
 		for(Mixed c1 : c) {
 			if(c1 instanceof CString) {
 				return true;
@@ -457,13 +560,19 @@ public final class ArgumentValidation {
 		return false;
 	}
 
+	@Deprecated
+	public static boolean anyNulls(Mixed... c) {
+		return anyNulls(null, c);
+	}
+
 	/**
 	 * Returns true if any of the constructs are null
 	 *
+	 * @param env
 	 * @param c
 	 * @return
 	 */
-	public static boolean anyNulls(Mixed... c) {
+	public static boolean anyNulls(Environment env, Mixed... c) {
 		for(Mixed c1 : c) {
 			if(c1 instanceof CNull) {
 				return true;
@@ -472,13 +581,19 @@ public final class ArgumentValidation {
 		return false;
 	}
 
+	@Deprecated
+	public static boolean anyBooleans(Mixed... c) {
+		return anyBooleans(null, c);
+	}
+
 	/**
 	 * Returns true if any of the constructs are CBooleans, false otherwise.
 	 *
+	 * @param env
 	 * @param c
 	 * @return
 	 */
-	public static boolean anyBooleans(Mixed... c) {
+	public static boolean anyBooleans(Environment env, Mixed... c) {
 		for(Mixed c1 : c) {
 			if(c1 instanceof CBoolean) {
 				return true;
@@ -515,6 +630,11 @@ public final class ArgumentValidation {
 		}
 	}
 
+	@Deprecated
+	public static <T extends Enum<T>> Set<T> getEnumSet(Mixed c, Class<T> enumClass, Target t) {
+		return getEnumSet(c, enumClass, t, null);
+	}
+
 	/**
 	 * Returns a set of the given enum value. The input value may be either a single value or an array. If
 	 * it is a single value, the set will be of size 1. Null is also supported, and will return a set of size
@@ -523,9 +643,10 @@ public final class ArgumentValidation {
 	 * @param c
 	 * @param enumClass
 	 * @param t
+	 * @param env
 	 * @return
 	 */
-	public static <T extends Enum<T>> Set<T> getEnumSet(Mixed c, Class<T> enumClass, Target t) {
+	public static <T extends Enum<T>> Set<T> getEnumSet(Mixed c, Class<T> enumClass, Target t, Environment env) {
 		if(c instanceof CNull) {
 			return EnumSet.noneOf(enumClass);
 		}

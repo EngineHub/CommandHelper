@@ -10,6 +10,7 @@ import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.objects.AccessModifier;
 import java.net.URL;
 import java.util.EnumSet;
@@ -120,6 +121,11 @@ public abstract class AbstractMixedInterfaceRunner implements MixedInterfaceRunn
 	}
 
 	@Override
+	public CClassType typeof(Environment env) {
+		return typeof();
+	}
+
+	@Override
 	public boolean isInstanceOf(CClassType type) {
 		return Construct.isInstanceof(this, type);
 	}
@@ -127,6 +133,16 @@ public abstract class AbstractMixedInterfaceRunner implements MixedInterfaceRunn
 	@Override
 	public boolean isInstanceOf(Class<? extends Mixed> type) {
 		return Construct.isInstanceof(this, type);
+	}
+
+	@Override
+	public boolean isInstanceOf(CClassType type, Object lhsGenericParameters, Environment env) {
+		return isInstanceOf(type);
+	}
+
+	@Override
+	public Object getGenericParameters() {
+		return null;
 	}
 
 }
