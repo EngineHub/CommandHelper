@@ -522,7 +522,7 @@ public class Math {
 	 *
 	 * @return
 	 */
-	protected static Mixed doIncrementDecrement(ParseTree[] nodes,
+	private static Mixed doIncrementDecrement(ParseTree[] nodes,
 			Script parent, Environment env, Target t,
 			Function func, boolean pre, boolean inc) {
 		if(nodes[0].getData() instanceof CFunction && ((CFunction) nodes[0].getData()).hasFunction()) {
@@ -597,7 +597,7 @@ public class Math {
 		for(int i = 0; i < args.length; i++) {
 			args[i] = parent.eval(nodes[i], env);
 		}
-		return Function.ExecuteFunction(func, t, env, args);
+		return func.exec(t, env, null, args);
 	}
 
 	@api

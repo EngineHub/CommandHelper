@@ -1383,7 +1383,7 @@ public class World {
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], p != null ? p.getWorld() : null, t);
 
-			MCMaterial mat= StaticLayer.GetMaterial(args[1].val());
+			MCMaterial mat = StaticLayer.GetMaterial(args[1].val());
 			if(mat == null) {
 				mat = Static.ParseItemNotation(getName(), args[1].val(), 1, t).getType();
 			}

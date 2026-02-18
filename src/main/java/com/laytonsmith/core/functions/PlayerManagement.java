@@ -2046,7 +2046,7 @@ public class PlayerManagement {
 				m = Static.GetPlayer(args[0].val(), t);
 			}
 			Static.AssertPlayerNonNull(m, t);
-			int texp = m.getExpAtLevel()+ java.lang.Math.round(m.getExpToLevel() * m.getExp());
+			int texp = m.getExpAtLevel() + java.lang.Math.round(m.getExpToLevel() * m.getExp());
 			return new CInt(texp, t);
 		}
 	}
@@ -5111,7 +5111,7 @@ public class PlayerManagement {
 							+ " requires a player argument when ran from a non-player", t);
 				}
 			}
-			return new CInt((op == null ? 0 : op.getFirstPlayed()), t);// Return 0 for fake/null command senders.
+			return new CInt((op == null ? 0 : op.getFirstPlayed()), t); // Return 0 for fake/null command senders.
 		}
 
 		@Override
@@ -5178,7 +5178,7 @@ public class PlayerManagement {
 							+ " requires a player argument when ran from a non-player", t);
 				}
 			}
-			return new CInt((op == null ? 0 : op.getLastPlayed()), t);// Return 0 for fake/null command senders.
+			return new CInt((op == null ? 0 : op.getLastPlayed()), t); // Return 0 for fake/null command senders.
 		}
 
 		@Override

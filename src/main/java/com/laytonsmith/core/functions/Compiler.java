@@ -1068,7 +1068,7 @@ public class Compiler {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			throw new UnsupportedOperationException(getName()+ " should have been compiled out. If you are reaching"
+			throw new UnsupportedOperationException(getName() + " should have been compiled out. If you are reaching"
 					+ " this, an error has occurred in the parser. Please report this error to the developers.");
 		}
 
