@@ -39,7 +39,7 @@ public class InstanceofUtil {
 	 */
 	private static Set<CClassType> getAllCastableClassesWithBlacklist(CClassType c, Set<CClassType> blacklist,
 			Environment env) {
-		if(blacklist.contains(c)) {
+		if(blacklist.contains(c) || CNull.TYPE.equals(c)) {
 			return blacklist;
 		}
 		blacklist.add(c);
@@ -71,6 +71,9 @@ public class InstanceofUtil {
 		if(instanceofThis.getFQCN().equals("auto")) {
 			return true;
 		}
+		if(value instanceof CNull) {
+			return true;
+		}
 		if(value instanceof CFunction) {
 			// TODO: Need to put the return type here, so we can work with this, but for now, just always return false
 			return false;
@@ -88,7 +91,7 @@ public class InstanceofUtil {
 	 */
 	public static boolean isInstanceof(CClassType type, FullyQualifiedClassName instanceofThis, Environment env) {
 		Static.AssertNonNull(instanceofThis, "instanceofThis may not be null");
-		if(instanceofThis.getFQCN().equals("auto")) {
+		if(instanceofThis.getFQCN().equals("auto") || type == CNull.TYPE) {
 			return true;
 		}
 		for(CClassType c : getAllCastableClasses(type, env)) {
@@ -108,6 +111,9 @@ public class InstanceofUtil {
 	 * @return
 	 */
 	public static boolean isInstanceof(Mixed value, Class<? extends Mixed> instanceofThis, Environment env) {
+		if(instanceofThis.isAssignableFrom(value.getClass())) {
+			return true;
+		}
 		FullyQualifiedClassName typeof = typeof(instanceofThis);
 		return typeof == null ? false : isInstanceof(value, typeof, env);
 	}

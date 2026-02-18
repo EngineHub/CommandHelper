@@ -9,15 +9,18 @@ import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.natives.interfaces.Sizeable;
 import com.laytonsmith.core.natives.interfaces.ValueType;
+import com.laytonsmith.core.objects.ObjectModifier;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 import java.util.Stack;
 
 /**
  *
  */
 @typeof("ms.lang.mutable_primitive")
-public class CMutablePrimitive extends CArray implements Sizeable {
+public final class CMutablePrimitive extends CArray implements Sizeable {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
 	public static final CClassType TYPE = CClassType.get(CMutablePrimitive.class);
@@ -178,6 +181,11 @@ public class CMutablePrimitive extends CArray implements Sizeable {
 	@Override
 	public CClassType[] getInterfaces() {
 		return new CClassType[]{Sizeable.TYPE};
+	}
+
+	@Override
+	public Set<ObjectModifier> getObjectModifiers() {
+		return EnumSet.of(ObjectModifier.FINAL);
 	}
 
 }

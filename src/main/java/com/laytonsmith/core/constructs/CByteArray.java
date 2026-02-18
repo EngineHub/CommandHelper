@@ -29,7 +29,7 @@ import java.util.EnumSet;
  *
  */
 @typeof("ms.lang.byte_array")
-public class CByteArray extends CArray implements Sizeable, ArrayAccess {
+public final class CByteArray extends CArray implements Sizeable, ArrayAccess {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
 	public static final CClassType TYPE = CClassType.get(CByteArray.class);
@@ -759,7 +759,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 
 		@Override
 		public Set<ObjectModifier> getObjectModifiers() {
-			return EnumSet.of(ObjectModifier.STATIC);
+			return EnumSet.of(ObjectModifier.STATIC, ObjectModifier.FINAL);
 		}
 
 		@Override

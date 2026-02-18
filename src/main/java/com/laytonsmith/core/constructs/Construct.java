@@ -195,9 +195,9 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 			return c.val();
 		} else if(c instanceof CVoid) {
 			return "";
-		} else if(c instanceof CInt) {
+		} else if(InstanceofUtil.isInstanceof(c, CInt.class, null)) {
 			return ((CInt) c).getInt();
-		} else if(c instanceof CDouble) {
+		} else if(InstanceofUtil.isInstanceof(c, CDouble.class, null)) {
 			return ((CDouble) c).getDouble();
 		} else if(c instanceof CBoolean) {
 			return ((CBoolean) c).getBoolean();
@@ -414,13 +414,13 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	public static Object GetPOJO(Mixed c) throws ClassCastException {
 		if(c instanceof CNull) {
 			return null;
-		} else if(c instanceof CString) {
+		} else if(InstanceofUtil.isInstanceof(c, CString.class, null)) {
 			return c.val();
 		} else if(c instanceof CBoolean) {
 			return Boolean.valueOf(((CBoolean) c).getBoolean());
-		} else if(c instanceof CInt) {
+		} else if(InstanceofUtil.isInstanceof(c, CInt.class, null)) {
 			return Long.valueOf(((CInt) c).getInt());
-		} else if(c instanceof CDouble) {
+		} else if(InstanceofUtil.isInstanceof(c, CDouble.class, null)) {
 			return Double.valueOf(((CDouble) c).getDouble());
 		} else if(c.isInstanceOf(CByteArray.TYPE)) {
 			return ((CByteArray) c).asByteArrayCopy();

@@ -20,6 +20,7 @@ import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CNumber;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
+import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Booleanish;
@@ -143,9 +144,9 @@ public final class ArgumentValidation {
 		if(c == null || c instanceof CNull) {
 			return 0.0;
 		}
-		if(c instanceof CNumber) {
+		if(InstanceofUtil.isInstanceof(c, CNumber.class, env)) {
 			d = ((CNumber) c).getNumber();
-		} else if(c instanceof CString) {
+		} else if(InstanceofUtil.isInstanceof(c, CString.class, env)) {
 			try {
 				d = Double.parseDouble(c.val());
 			} catch (NumberFormatException e) {
@@ -157,7 +158,7 @@ public final class ArgumentValidation {
 			} else {
 				d = 0;
 			}
-		} else if(c instanceof CDecimal) {
+		} else if(InstanceofUtil.isInstanceof(c, CDecimal.class, env)) {
 			throw new CRECastException("Expecting a number, but received a decimal value instead. This cannot be"
 					+ " automatically cast, please use double(@decimal) to manually cast down to a double.", t);
 		} else {
@@ -200,7 +201,7 @@ public final class ArgumentValidation {
 	 * @return boolean
 	 */
 	public static boolean isNumber(Mixed c, Environment env) {
-		return c instanceof CNumber || VALID_DOUBLE.matcher(c.val()).matches();
+		return InstanceofUtil.isInstanceof(c, CNumber.class, env) || VALID_DOUBLE.matcher(c.val()).matches();
 	}
 
 	@Deprecated
@@ -448,7 +449,7 @@ public final class ArgumentValidation {
 		if(c == null) {
 			return false;
 		}
-		if(c instanceof Booleanish) {
+		if(InstanceofUtil.isInstanceof(c, Booleanish.class, env)) {
 			return ((Booleanish) c).getBooleanValue(t);
 		}
 		throw new CRECastException("Could not convert value of type " + c.typeof() + " to a " + Booleanish.TYPE, t);
@@ -532,7 +533,7 @@ public final class ArgumentValidation {
 	 */
 	public static boolean anyDoubles(Environment env, Mixed... c) {
 		for(Mixed c1 : c) {
-			if(c1 instanceof CDouble || c1 instanceof CString && c1.val().indexOf(".", 1) > -1) {
+			if(InstanceofUtil.isInstanceof(c1, CDouble.class, env) || InstanceofUtil.isInstanceof(c1, CString.class, env) && c1.val().indexOf(".", 1) > -1) {
 				return true;
 			}
 		}
@@ -553,7 +554,7 @@ public final class ArgumentValidation {
 	 */
 	public static boolean anyStrings(Environment env, Mixed... c) {
 		for(Mixed c1 : c) {
-			if(c1 instanceof CString) {
+			if(InstanceofUtil.isInstanceof(c1, CString.class, env)) {
 				return true;
 			}
 		}
