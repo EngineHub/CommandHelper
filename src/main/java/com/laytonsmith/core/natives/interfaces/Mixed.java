@@ -10,6 +10,8 @@ import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.objects.AccessModifier;
 import java.util.Set;
@@ -117,7 +119,7 @@ public interface Mixed extends Cloneable, Documentation {
 	 *
 	 * @param type
 	 * @return
-	 * @deprecated Use {@link #isInstanceOf(CClassType, Object, Environment)} instead.
+	 * @deprecated Use {@link #isInstanceOf(CClassType, LeftHandGenericUse, Environment)} instead.
 	 */
 	@Deprecated
 	public boolean isInstanceOf(CClassType type);
@@ -131,7 +133,7 @@ public interface Mixed extends Cloneable, Documentation {
 	 * @param env
 	 * @return
 	 */
-	public boolean isInstanceOf(CClassType type, Object lhsGenericParameters, Environment env);
+	public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env);
 
 	/**
 	 * Generally speaking, we cannot use Java's instanceof keyword to determine if something is an instanceof, because
@@ -176,7 +178,7 @@ public interface Mixed extends Cloneable, Documentation {
 	 *
 	 * @return
 	 */
-	public Object getGenericParameters();
+	public GenericParameters getGenericParameters();
 
 	/**
 	 * Casts the class to the specified type. This only works with Java types, and so for dynamic elements, this

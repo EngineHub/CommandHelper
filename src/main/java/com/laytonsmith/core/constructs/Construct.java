@@ -7,6 +7,8 @@ import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.MarshalException;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.objects.AccessModifier;
@@ -625,12 +627,12 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	}
 
 	@Override
-	public boolean isInstanceOf(CClassType type, Object lhsGenericParameters, Environment env) {
+	public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env) {
 		return isInstanceOf(type);
 	}
 
 	@Override
-	public Object getGenericParameters() {
+	public GenericParameters getGenericParameters() {
 		return null;
 	}
 

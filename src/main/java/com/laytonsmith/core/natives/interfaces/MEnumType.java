@@ -15,6 +15,8 @@ import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CRE.CREIndexOverflowException;
@@ -272,12 +274,12 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 							}
 
 							@Override
-							public boolean isInstanceOf(CClassType type, Object lhsGenericParameters, Environment env) {
+							public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env) {
 								return isInstanceOf(type);
 							}
 
 							@Override
-							public Object getGenericParameters() {
+							public GenericParameters getGenericParameters() {
 								return null;
 							}
 
@@ -455,7 +457,7 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 	}
 
 	@Override
-	public boolean isInstanceOf(CClassType type, Object lhsGenericParameters, Environment env) {
+	public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env) {
 		return isInstanceOf(type);
 	}
 
@@ -470,7 +472,7 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 	}
 
 	@Override
-	public Object getGenericParameters() {
+	public GenericParameters getGenericParameters() {
 		return null;
 	}
 

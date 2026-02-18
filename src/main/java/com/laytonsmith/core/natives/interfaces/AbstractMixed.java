@@ -6,6 +6,8 @@ import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.objects.AccessModifier;
 import com.laytonsmith.core.objects.ObjectModifier;
@@ -70,7 +72,7 @@ public abstract class AbstractMixed implements Mixed {
 	}
 
 	@Override
-	public boolean isInstanceOf(CClassType type, Object lhsGenericParameters, Environment env) {
+	public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env) {
 		return isInstanceOf(type);
 	}
 
@@ -99,7 +101,7 @@ public abstract class AbstractMixed implements Mixed {
 	}
 
 	@Override
-	public Object getGenericParameters() {
+	public GenericParameters getGenericParameters() {
 		return null;
 	}
 
