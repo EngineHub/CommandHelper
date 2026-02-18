@@ -107,6 +107,8 @@ public final class CNull extends Construct implements Cloneable, Booleanish {
 		throw new RuntimeException("Cannot call getInterfaces on null");
 	}
 
+	/** @deprecated Use {@link #getBooleanValue(Environment, Target)} instead. */
+	@Deprecated
 	@Override
 	public boolean getBooleanValue(Target t) {
 		return getBooleanValue(null, t);

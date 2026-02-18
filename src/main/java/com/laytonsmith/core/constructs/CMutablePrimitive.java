@@ -54,6 +54,8 @@ public final class CMutablePrimitive extends CArray implements Sizeable {
 		this.value = value;
 	}
 
+	/** @deprecated Use {@link #set(Mixed, Mixed, Target, Environment)} instead. */
+	@Deprecated
 	@Override
 	public void set(Mixed index, Mixed c, Target t) {
 		set(index, c, t, null);
@@ -82,6 +84,8 @@ public final class CMutablePrimitive extends CArray implements Sizeable {
 		return value;
 	}
 
+	/** @deprecated Use {@link #get(Mixed, Target, Environment)} instead. */
+	@Deprecated
 	@Override
 	public Mixed get(Mixed index, Target t) {
 		return get(index, t, null);
@@ -112,6 +116,8 @@ public final class CMutablePrimitive extends CArray implements Sizeable {
 		return new CString(value.val(), Target.UNKNOWN).getQuote();
 	}
 
+	/** @deprecated Use {@link #size(Environment)} instead. */
+	@Deprecated
 	@Override
 	public long size() {
 		return size(null);

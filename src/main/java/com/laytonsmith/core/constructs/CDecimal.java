@@ -84,6 +84,8 @@ public class CDecimal extends CPrimitive implements Cloneable {
 		return new CDecimal(val, getTarget());
 	}
 
+	/** @deprecated Use {@link #getBooleanValue(Environment, Target)} instead. */
+	@Deprecated
 	@Override
 	public boolean getBooleanValue(Target t) {
 		return getBooleanValue(null, t);

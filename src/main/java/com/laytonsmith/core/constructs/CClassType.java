@@ -592,6 +592,8 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 
 	// TODO: These getters will eventually be re-done to support static methods, but for now that is out of scope,
 	// so we just specifically support enums for now.
+	/** @deprecated Use {@link #get(String, Target, Environment)} instead. */
+	@Deprecated
 	@Override
 	public Mixed get(String index, Target t) throws ConfigRuntimeException {
 		return get(index, t, null);
@@ -609,6 +611,8 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		throw new CREUnsupportedOperationException("Unsupported operation", t);
 	}
 
+	/** @deprecated Use {@link #get(int, Target, Environment)} instead. */
+	@Deprecated
 	@Override
 	public Mixed get(int index, Target t) throws ConfigRuntimeException {
 		return get(index, t, null);
@@ -626,6 +630,8 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		throw new CREUnsupportedOperationException("Unsupported operation", t);
 	}
 
+	/** @deprecated Use {@link #get(Mixed, Target, Environment)} instead. */
+	@Deprecated
 	@Override
 	public Mixed get(Mixed index, Target t) throws ConfigRuntimeException {
 		return get(index, t, null);
@@ -643,6 +649,8 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		throw new CREUnsupportedOperationException("Unsupported operation", t);
 	}
 
+	/** @deprecated Use {@link #keySet(Environment)} instead. */
+	@Deprecated
 	@Override
 	public Set<Mixed> keySet() {
 		return keySet(null);
@@ -660,6 +668,8 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		return new HashSet<>();
 	}
 
+	/** @deprecated Use {@link #size(Environment)} instead. */
+	@Deprecated
 	@Override
 	public long size() {
 		return size(null);
@@ -687,6 +697,8 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		return true;
 	}
 
+	/** @deprecated Use {@link #slice(int, int, Target, Environment)} instead. */
+	@Deprecated
 	@Override
 	public Mixed slice(int begin, int end, Target t) {
 		return slice(begin, end, t, null);
@@ -707,6 +719,8 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		return nativeClass;
 	}
 
+	/** @deprecated Use {@link #getBooleanValue(Environment, Target)} instead. */
+	@Deprecated
 	@Override
 	public boolean getBooleanValue(Target t) {
 		return getBooleanValue(null, t);

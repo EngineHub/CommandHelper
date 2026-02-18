@@ -53,6 +53,8 @@ public class CReal2dMatrixRow extends AbstractMixedClass implements com.laytonsm
 		return new CClassType[]{com.laytonsmith.core.natives.interfaces.Iterable.TYPE, ArrayAccessSet.TYPE};
 	}
 
+	/** @deprecated Use {@link #get(String, Target, Environment)} instead. */
+	@Deprecated
 	@Override
 	public Mixed get(String index, Target t) throws ConfigRuntimeException {
 		return get(index, t, null);
@@ -63,6 +65,8 @@ public class CReal2dMatrixRow extends AbstractMixedClass implements com.laytonsm
 		throw new CRECastException("Real2dMatrix only supports int keys.", t);
 	}
 
+	/** @deprecated Use {@link #get(int, Target, Environment)} instead. */
+	@Deprecated
 	@Override
 	public CDouble get(int index, Target t) throws ConfigRuntimeException {
 		return (CDouble) get(index, t, null);
@@ -73,6 +77,8 @@ public class CReal2dMatrixRow extends AbstractMixedClass implements com.laytonsm
 		return new CDouble(getNative(index, t), t);
 	}
 
+	/** @deprecated Use {@link #get(Mixed, Target, Environment)} instead. */
+	@Deprecated
 	@Override
 	public Mixed get(Mixed index, Target t) throws ConfigRuntimeException {
 		return get(index, t, null);
@@ -83,6 +89,8 @@ public class CReal2dMatrixRow extends AbstractMixedClass implements com.laytonsm
 		return get(ArgumentValidation.getInt32(index, t), t, env);
 	}
 
+	/** @deprecated Use {@link #keySet(Environment)} instead. */
+	@Deprecated
 	@Override
 	public Set<Mixed> keySet() {
 		return keySet(null);
@@ -107,6 +115,8 @@ public class CReal2dMatrixRow extends AbstractMixedClass implements com.laytonsm
 		return false;
 	}
 
+	/** @deprecated Use {@link #slice(int, int, Target, Environment)} instead. */
+	@Deprecated
 	@Override
 	public Mixed slice(int begin, int end, Target t) {
 		return slice(begin, end, t, null);
@@ -126,6 +136,8 @@ public class CReal2dMatrixRow extends AbstractMixedClass implements com.laytonsm
 		return ret;
 	}
 
+	/** @deprecated Use {@link #getBooleanValue(Environment, Target)} instead. */
+	@Deprecated
 	@Override
 	public boolean getBooleanValue(Target t) {
 		return getBooleanValue(null, t);
@@ -139,6 +151,8 @@ public class CReal2dMatrixRow extends AbstractMixedClass implements com.laytonsm
 		return true;
 	}
 
+	/** @deprecated Use {@link #size(Environment)} instead. */
+	@Deprecated
 	@Override
 	public long size() {
 		return size(null);
@@ -149,6 +163,8 @@ public class CReal2dMatrixRow extends AbstractMixedClass implements com.laytonsm
 		return parent.columns;
 	}
 
+	/** @deprecated Use {@link #set(Mixed, Mixed, Target, Environment)} instead. */
+	@Deprecated
 	@Override
 	public void set(Mixed index, Mixed value, Target t) {
 		set(index, value, t, null);

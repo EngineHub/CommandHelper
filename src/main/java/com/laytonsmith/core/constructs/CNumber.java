@@ -42,6 +42,8 @@ public abstract class CNumber extends CPrimitive {
 
 	public abstract double getNumber();
 
+	/** @deprecated Use {@link #getBooleanValue(Environment, Target)} instead. */
+	@Deprecated
 	@Override
 	public boolean getBooleanValue(Target t) {
 		return getBooleanValue(null, t);

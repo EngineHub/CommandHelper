@@ -182,6 +182,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		return c;
 	}
 
+	/** @deprecated Use {@link #asList(Environment)} instead. */
 	@Deprecated
 	public List<Mixed> asList() {
 		return asList(null);
@@ -229,6 +230,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		return GetAssociativeArray(t, null, null);
 	}
 
+	/** @deprecated Use {@link #GetAssociativeArray(Target, GenericParameters, Environment, Mixed[])} instead. */
 	@Deprecated
 	public static CArray GetAssociativeArray(Target t, Mixed[] args) {
 		return GetAssociativeArray(t, null, null, args);
@@ -286,6 +288,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		}
 	}
 
+	/** @deprecated Use {@link #push(Mixed, Target, Environment)} instead. */
 	@Deprecated
 	public final void push(Mixed c, Target t) {
 		push(c, t, null);
@@ -306,6 +309,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		push(new CString(s, Target.UNKNOWN), Target.UNKNOWN);
 	}
 
+	/** @deprecated Use {@link #push(Mixed, Integer, Target, Environment)} instead. */
 	@Deprecated
 	public void push(Mixed c, Integer index, Target t) throws IllegalArgumentException, IndexOutOfBoundsException {
 		push(c, index, t, null);
@@ -356,6 +360,8 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		setDirty();
 	}
 
+	/** @deprecated Use {@link #keySet(Environment)} instead. */
+	@Deprecated
 	@Override
 	public Set<Mixed> keySet() {
 		return keySet(null);
@@ -412,6 +418,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		array = null; // null out the original array container so it can be GC'd
 	}
 
+	/** @deprecated Use {@link #set(Mixed, Mixed, Target, Environment)} instead. */
 	@Deprecated
 	public void set(Mixed index, Mixed c, Target t) {
 		set(index, c, t, null);
@@ -457,6 +464,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		setDirty();
 	}
 
+	/** @deprecated Use {@link #set(int, Mixed, Target, Environment)} instead. */
 	@Deprecated
 	public final void set(int index, Mixed c, Target t) {
 		this.set(index, c, t, null);
@@ -467,6 +475,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	}
 
 	/* Shortcuts */
+	/** @deprecated Use {@link #set(String, Mixed, Target, Environment)} instead. */
 	@Deprecated
 	public final void set(String index, Mixed c, Target t) {
 		set(index, c, t, null);
@@ -476,6 +485,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		set(new CString(index, t), c, t, env);
 	}
 
+	/** @deprecated Use {@link #set(String, String, Target, Environment)} instead. */
 	@Deprecated
 	public final void set(String index, String value, Target t) {
 		set(index, value, t, null);
@@ -485,6 +495,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		set(index, new CString(value, t), t, env);
 	}
 
+	/** @deprecated Use {@link #set(String, String, Environment)} instead. */
 	@Deprecated
 	public final void set(String index, String value) {
 		set(index, value, (Environment) null);
@@ -502,6 +513,8 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		set(index, new CInt(value, Target.UNKNOWN), Target.UNKNOWN);
 	}
 
+	/** @deprecated Use {@link #get(Mixed, Target, Environment)} instead. */
+	@Deprecated
 	@Override
 	public Mixed get(Mixed index, Target t) {
 		return get(index, t, null);
@@ -535,6 +548,8 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		return this.get(new CInt(index, t), t);
 	}
 
+	/** @deprecated Use {@link #get(int, Target, Environment)} instead. */
+	@Deprecated
 	@Override
 	public final Mixed get(int index, Target t) {
 		return this.get(new CInt(index, t), t);
@@ -545,6 +560,8 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		return this.get(new CInt(index, t), t, env);
 	}
 
+	/** @deprecated Use {@link #get(String, Target, Environment)} instead. */
+	@Deprecated
 	@Override
 	public final Mixed get(String index, Target t) {
 		return this.get(new CString(index, t), t);
@@ -587,6 +604,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		return contains(new CString(Integer.toString(i), Target.UNKNOWN));
 	}
 
+	/** @deprecated Use {@link #indexesOf(Mixed, Environment)} instead. */
 	@Deprecated
 	public CArray indexesOf(Mixed value) {
 		return indexesOf(value, null);
@@ -697,6 +715,8 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		return mutVal;
 	}
 
+	/** @deprecated Use {@link #size(Environment)} instead. */
+	@Deprecated
 	@Override
 	public long size() {
 		return size(null);
@@ -731,6 +751,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		return clone;
 	}
 
+	/** @deprecated Use {@link #deepClone(Target, Environment)} instead. */
 	@Deprecated
 	public CArray deepClone(Target t) {
 		return deepClone(t, null);
@@ -740,6 +761,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		return deepClone(this, t, new ArrayList<>(), env);
 	}
 
+	/** @deprecated Use {@link #deepClone(CArray, Target, ArrayList, Environment)} instead. */
 	@Deprecated
 	protected CArray deepClone(CArray array, Target t, ArrayList<CArray[]> cloneRefs) {
 		return deepClone(array, t, cloneRefs, null);
@@ -790,6 +812,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		}
 	}
 
+	/** @deprecated Use {@link #remove(int, Environment)} instead. */
 	@Deprecated
 	public Mixed remove(int i) {
 		return remove(i, null);
@@ -806,6 +829,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		return remove(new CInt(i, Target.UNKNOWN), env);
 	}
 
+	/** @deprecated Use {@link #remove(String, Environment)} instead. */
 	@Deprecated
 	public Mixed remove(String s) {
 		return remove(s, null);
@@ -822,6 +846,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		return remove(new CString(s, Target.UNKNOWN), env);
 	}
 
+	/** @deprecated Use {@link #remove(Mixed, Environment)} instead. */
 	@Deprecated
 	public Mixed remove(Mixed construct) {
 		return remove(construct, null);
@@ -884,6 +909,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		setDirty();
 	}
 
+	/** @deprecated Use {@link #createNew(Target, Environment)} instead. */
 	@Deprecated
 	public CArray createNew(Target t) {
 		return createNew(t, null);
@@ -954,6 +980,8 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		return true;
 	}
 
+	/** @deprecated Use {@link #slice(int, int, Target, Environment)} instead. */
+	@Deprecated
 	@Override
 	public Mixed slice(int begin, int end, Target t) {
 		return slice(begin, end, t, null);
@@ -1004,6 +1032,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		STRING_IC
 	}
 
+	/** @deprecated Use {@link #sort(ArraySortType, Environment)} instead. */
 	@Deprecated
 	public void sort(final ArraySortType sort) {
 		sort(sort, null);
@@ -1094,6 +1123,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		this.setDirty();
 	}
 
+	/** @deprecated Use {@link #isEmpty(Environment)} instead. */
 	@Deprecated
 	public boolean isEmpty() {
 		return isEmpty(null);
@@ -1134,9 +1164,11 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 			ArrayAccessSet.TYPE};
 	}
 
+	/** @deprecated Use {@link #getBooleanValue(Environment, Target)} instead. */
+	@Deprecated
 	@Override
 	public boolean getBooleanValue(Target t) {
-		return size() > 0;
+		return getBooleanValue(null, t);
 	}
 
 	@Override

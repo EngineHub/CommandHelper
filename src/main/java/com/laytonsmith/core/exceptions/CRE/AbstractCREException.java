@@ -191,7 +191,9 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 	 * @param t
 	 * @return
 	 * @throws ConfigRuntimeException
+	 * @deprecated Use {@link #get(String, Target, Environment)} instead.
 	 */
+	@Deprecated
 	@Override
 	public Mixed get(String index, Target t) throws ConfigRuntimeException {
 		return get(index, t, null);
@@ -202,6 +204,8 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 		return exceptionObject.get(index, t);
 	}
 
+	/** @deprecated Use {@link #get(int, Target, Environment)} instead. */
+	@Deprecated
 	@Override
 	public Mixed get(int index, Target t) throws ConfigRuntimeException {
 		return get(index, t, null);
@@ -212,6 +216,8 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 		return exceptionObject.get(index, t);
 	}
 
+	/** @deprecated Use {@link #get(Mixed, Target, Environment)} instead. */
+	@Deprecated
 	@Override
 	public Mixed get(Mixed index, Target t) throws ConfigRuntimeException {
 		return get(index, t, null);
@@ -222,6 +228,8 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 		return exceptionObject.get(index, t);
 	}
 
+	/** @deprecated Use {@link #keySet(Environment)} instead. */
+	@Deprecated
 	@Override
 	public Set<Mixed> keySet() {
 		return keySet(null);
@@ -242,6 +250,8 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 		return exceptionObject.canBeAssociative();
 	}
 
+	/** @deprecated Use {@link #slice(int, int, Target, Environment)} instead. */
+	@Deprecated
 	@Override
 	public Mixed slice(int begin, int end, Target t) {
 		return slice(begin, end, t, null);
@@ -321,6 +331,8 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 		throw new UnsupportedOperationException();
 	}
 
+	/** @deprecated Use {@link #isInstanceOf(CClassType, LeftHandGenericUse, Environment)} instead. */
+	@Deprecated
 	@Override
 	public boolean isInstanceOf(CClassType type) {
 		return isInstanceOf(type, null, null);
@@ -336,6 +348,8 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 		return Construct.isInstanceof(this, type);
 	}
 
+	/** @deprecated Use {@link #typeof(Environment)} instead. */
+	@Deprecated
 	@Override
 	public CClassType typeof() {
 		return typeof((Environment) null);
@@ -351,6 +365,8 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 		return null;
 	}
 
+	/** @deprecated Use {@link #getBooleanValue(Environment, Target)} instead. */
+	@Deprecated
 	@Override
 	public boolean getBooleanValue(Target t) {
 		return getBooleanValue(null, t);

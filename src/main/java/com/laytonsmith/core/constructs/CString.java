@@ -60,6 +60,8 @@ public class CString extends CPrimitive implements Cloneable,
 		return false;
 	}
 
+	/** @deprecated Use {@link #size(Environment)} instead. */
+	@Deprecated
 	@Override
 	public long size() {
 		return size(null);
@@ -75,6 +77,8 @@ public class CString extends CPrimitive implements Cloneable,
 		return false;
 	}
 
+	/** @deprecated Use {@link #slice(int, int, Target, Environment)} instead. */
+	@Deprecated
 	@Override
 	public Mixed slice(int begin, int end, Target t) {
 		return slice(begin, end, t, null);
@@ -97,6 +101,8 @@ public class CString extends CPrimitive implements Cloneable,
 		return super.getQuote();
 	}
 
+	/** @deprecated Use {@link #get(int, Target, Environment)} instead. */
+	@Deprecated
 	@Override
 	public Mixed get(int index, Target t) throws ConfigRuntimeException {
 		return get(index, t, null);
@@ -111,6 +117,8 @@ public class CString extends CPrimitive implements Cloneable,
 		}
 	}
 
+	/** @deprecated Use {@link #get(Mixed, Target, Environment)} instead. */
+	@Deprecated
 	@Override
 	public final Mixed get(Mixed index, Target t) throws ConfigRuntimeException {
 		return get(index, t, null);
@@ -122,6 +130,8 @@ public class CString extends CPrimitive implements Cloneable,
 		return get(i, t, env);
 	}
 
+	/** @deprecated Use {@link #get(String, Target, Environment)} instead. */
+	@Deprecated
 	@Override
 	public final Mixed get(String index, Target t) {
 		return get(index, t, null);
@@ -142,6 +152,8 @@ public class CString extends CPrimitive implements Cloneable,
 		return false;
 	}
 
+	/** @deprecated Use {@link #keySet(Environment)} instead. */
+	@Deprecated
 	@Override
 	public Set<Mixed> keySet() {
 		return keySet(null);
@@ -205,6 +217,8 @@ public class CString extends CPrimitive implements Cloneable,
 		return new CString(val(), getTarget());
 	}
 
+	/** @deprecated Use {@link #getBooleanValue(Environment, Target)} instead. */
+	@Deprecated
 	@Override
 	public boolean getBooleanValue(Target t) {
 		return getBooleanValue(null, t);

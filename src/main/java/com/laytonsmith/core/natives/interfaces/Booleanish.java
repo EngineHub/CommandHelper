@@ -28,7 +28,9 @@ public interface Booleanish extends Mixed {
 	 * @param t The code target, in case there are errors that are thrown, the correct target can be provided in the
 	 * error.
 	 * @return True if the value is trueish, false if it is falseish.
+	 * @deprecated Use {@link #getBooleanValue(Environment, Target)} instead.
 	 */
+	@Deprecated
 	boolean getBooleanValue(Target t);
 
 	/**

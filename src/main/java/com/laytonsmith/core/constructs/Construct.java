@@ -498,7 +498,9 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	 * This method may be overridden in special cases, such as dynamic types, but for most types, this
 	 * @return
 	 * @throws IllegalArgumentException If the class isn't public facing.
+	 * @deprecated Use {@link #typeof(Environment)} instead.
 	 */
+	@Deprecated
 	@Override
 	public CClassType typeof() {
 		return typeof((Environment) null);
@@ -613,6 +615,10 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 		return that.typeof().doesExtend(CClassType.get(type));
 	}
 
+	/**
+	 * @deprecated Use {@link #isInstanceOf(CClassType, LeftHandGenericUse, Environment)} instead.
+	 */
+	@Deprecated
 	@Override
 	public boolean isInstanceOf(CClassType type) {
 		return isInstanceOf(type, null, null);

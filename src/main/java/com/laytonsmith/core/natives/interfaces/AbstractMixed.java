@@ -63,6 +63,8 @@ public abstract class AbstractMixed implements Mixed {
 		return null;
 	}
 
+	/** @deprecated Use {@link #isInstanceOf(CClassType, LeftHandGenericUse, Environment)} instead. */
+	@Deprecated
 	@Override
 	public boolean isInstanceOf(CClassType type) {
 		return isInstanceOf(type, null, null);
@@ -89,7 +91,9 @@ public abstract class AbstractMixed implements Mixed {
 	 * This method may be overridden in special cases, such as dynamic types, but for most types, this
 	 * @return
 	 * @throws IllegalArgumentException If the class isn't public facing.
+	 * @deprecated Use {@link #typeof(Environment)} instead.
 	 */
+	@Deprecated
 	@Override
 	public CClassType typeof() {
 		return typeof((Environment) null);

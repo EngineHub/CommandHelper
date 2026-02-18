@@ -114,6 +114,8 @@ public class CSlice extends CArray {
 		return false;
 	}
 
+	/** @deprecated Use {@link #set(Mixed, Mixed, Target, Environment)} instead. */
+	@Deprecated
 	@Override
 	public void set(Mixed index, Mixed c, Target t) {
 		set(index, c, t, null);
@@ -124,6 +126,8 @@ public class CSlice extends CArray {
 		throw new CRECastException("CSlices cannot set values", t);
 	}
 
+	/** @deprecated Use {@link #get(Mixed, Target, Environment)} instead. */
+	@Deprecated
 	@Override
 	public Mixed get(Mixed index, Target t) {
 		return get(index, t, null);
@@ -138,6 +142,8 @@ public class CSlice extends CArray {
 		return new CInt(start + (direction * i), t);
 	}
 
+	/** @deprecated Use {@link #keySet(Environment)} instead. */
+	@Deprecated
 	@Override
 	public Set<Mixed> keySet() {
 		return keySet(null);
@@ -180,6 +186,8 @@ public class CSlice extends CArray {
 		};
 	}
 
+	/** @deprecated Use {@link #size(Environment)} instead. */
+	@Deprecated
 	@Override
 	public long size() {
 		return size(null);

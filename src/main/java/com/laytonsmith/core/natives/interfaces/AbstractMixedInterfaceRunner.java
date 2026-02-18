@@ -116,7 +116,9 @@ public abstract class AbstractMixedInterfaceRunner implements MixedInterfaceRunn
 	 *
 	 * @return
 	 * @throws IllegalArgumentException If the class isn't public facing.
+	 * @deprecated Use {@link #typeof(Environment)} instead.
 	 */
+	@Deprecated
 	@Override
 	public final CClassType typeof() {
 		return typeof((Environment) null);
@@ -127,6 +129,8 @@ public abstract class AbstractMixedInterfaceRunner implements MixedInterfaceRunn
 		return Construct.typeof(this);
 	}
 
+	/** @deprecated Use {@link #isInstanceOf(CClassType, LeftHandGenericUse, Environment)} instead. */
+	@Deprecated
 	@Override
 	public boolean isInstanceOf(CClassType type) {
 		return isInstanceOf(type, null, null);

@@ -151,6 +151,8 @@ public class UserObject implements Mixed {
 		return objectDefinition.getContainingClass();
 	}
 
+	/** @deprecated Use {@link #isInstanceOf(CClassType, LeftHandGenericUse, Environment)} instead. */
+	@Deprecated
 	@Override
 	public boolean isInstanceOf(CClassType type) {
 		return isInstanceOf(type, null, null);
@@ -166,6 +168,8 @@ public class UserObject implements Mixed {
 		return Construct.isInstanceof(this, type);
 	}
 
+	/** @deprecated Use {@link #typeof(Environment)} instead. */
+	@Deprecated
 	@Override
 	public CClassType typeof() {
 		return typeof((Environment) null);
