@@ -4,7 +4,7 @@ import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
-
+import com.laytonsmith.core.environments.Environment;
 
 /**
  * A value that is Booleanish is a non-boolean value, that can be converted to Boolean.
@@ -28,6 +28,18 @@ public interface Booleanish extends Mixed {
 	 * @param t The code target, in case there are errors that are thrown, the correct target can be provided in the
 	 * error.
 	 * @return True if the value is trueish, false if it is falseish.
+	 * @deprecated Use {@link #getBooleanValue(Environment, Target)} instead.
 	 */
+	@Deprecated
 	boolean getBooleanValue(Target t);
+
+	/**
+	 * Returns true if this value is a trueish value, with environment context.
+	 *
+	 * @param env The environment.
+	 * @param t The code target.
+	 * @return True if the value is trueish, false if it is falseish.
+	 */
+	boolean getBooleanValue(Environment env, Target t);
+
 }

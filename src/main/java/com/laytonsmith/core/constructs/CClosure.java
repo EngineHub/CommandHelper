@@ -350,8 +350,15 @@ public class CClosure extends Construct implements Callable, Booleanish {
 		return new CClassType[]{Callable.TYPE, Booleanish.TYPE};
 	}
 
+	/** @deprecated Use {@link #getBooleanValue(Environment, Target)} instead. */
+	@Deprecated
 	@Override
 	public boolean getBooleanValue(Target t) {
+		return getBooleanValue(null, t);
+	}
+
+	@Override
+	public boolean getBooleanValue(Environment env, Target t) {
 		return true;
 	}
 }

@@ -15,6 +15,9 @@ import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CRE.CREIndexOverflowException;
 import com.laytonsmith.core.exceptions.CRE.CREUnsupportedOperationException;
@@ -137,9 +140,11 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 				return ClassDiscovery.GetClassContainer(enumClass);
 			}
 
+			/** @deprecated Use {@link #isInstanceOf(CClassType, LeftHandGenericUse, Environment)} instead. */
+			@Deprecated
 			@Override
 			public boolean isInstanceOf(CClassType type) {
-				return Mixed.TYPE.equals(type) || MEnumType.TYPE.equals(type) || this.typeof().equals(type);
+				return isInstanceOf(type, null, null);
 			}
 
 			@Override
@@ -148,7 +153,19 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 			}
 
 			@Override
+			public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env) {
+				return Mixed.TYPE.equals(type) || MEnumType.TYPE.equals(type) || this.typeof(env).equals(type);
+			}
+
+			/** @deprecated Use {@link #typeof(Environment)} instead. */
+			@Deprecated
+			@Override
 			public CClassType typeof() {
+				return typeof(null);
+			}
+
+			@Override
+			public CClassType typeof(Environment env) {
 				try {
 					return CClassType.get(fqcn);
 				} catch (ClassNotFoundException ex) {
@@ -246,8 +263,15 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 								return v.toString();
 							}
 
+							/** @deprecated Use {@link #typeof(Environment)} instead. */
+							@Deprecated
 							@Override
 							public CClassType typeof() {
+								return typeof(null);
+							}
+
+							@Override
+							public CClassType typeof(Environment env) {
 								try {
 									return CClassType.get(fqcn);
 								} catch (ClassNotFoundException ex) {
@@ -255,14 +279,26 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 								}
 							}
 
+							/** @deprecated Use {@link #isInstanceOf(CClassType, LeftHandGenericUse, Environment)} instead. */
+							@Deprecated
 							@Override
 							public boolean isInstanceOf(CClassType type) {
-								return Construct.isInstanceof(this, type);
+								return isInstanceOf(type, null, null);
 							}
 
 							@Override
 							public boolean isInstanceOf(Class<? extends Mixed> type) {
 								return Construct.isInstanceof(this, type);
+							}
+
+							@Override
+							public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env) {
+								return Construct.isInstanceof(this, type);
+							}
+
+							@Override
+							public GenericParameters getGenericParameters() {
+								return null;
 							}
 
 							@Override
@@ -327,8 +363,15 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 				};
 			}
 
+			/** @deprecated Use {@link #getBooleanValue(Environment, Target)} instead. */
+			@Deprecated
 			@Override
 			public boolean getBooleanValue(Target t) {
+				return getBooleanValue(null, t);
+			}
+
+			@Override
+			public boolean getBooleanValue(Environment env, Target t) {
 				return true;
 			}
 
@@ -428,9 +471,11 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 		return null;
 	}
 
+	/** @deprecated Use {@link #isInstanceOf(CClassType, LeftHandGenericUse, Environment)} instead. */
+	@Deprecated
 	@Override
 	public boolean isInstanceOf(CClassType type) {
-		return TYPE.equals(type);
+		return isInstanceOf(type, null, null);
 	}
 
 	@Override
@@ -439,8 +484,25 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 	}
 
 	@Override
+	public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env) {
+		return TYPE.equals(type);
+	}
+
+	/** @deprecated Use {@link #typeof(Environment)} instead. */
+	@Deprecated
+	@Override
 	public CClassType typeof() {
+		return typeof(null);
+	}
+
+	@Override
+	public CClassType typeof(Environment env) {
 		return TYPE;
+	}
+
+	@Override
+	public GenericParameters getGenericParameters() {
+		return null;
 	}
 
 	@Override
@@ -472,8 +534,15 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 		}
 		return values;
 	}
+	/** @deprecated Use {@link #get(String, Target, Environment)} instead. */
+	@Deprecated
 	@Override
 	public Mixed get(String index, Target t) throws ConfigRuntimeException {
+		return get(index, t, null);
+	}
+
+	@Override
+	public Mixed get(String index, Target t, Environment env) throws ConfigRuntimeException {
 		for(MEnumTypeValue v : values()) {
 			if(v.name().equals(index)) {
 				return v;
@@ -482,26 +551,54 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 		throw new CREIllegalArgumentException(index + " cannot be found in " + typeof(), t);
 	}
 
+	/** @deprecated Use {@link #get(int, Target, Environment)} instead. */
+	@Deprecated
 	@Override
 	public Mixed get(int index, Target t) throws ConfigRuntimeException {
+		return get(index, t, null);
+	}
+
+	@Override
+	public Mixed get(int index, Target t, Environment env) throws ConfigRuntimeException {
 		if(index >= values().size()) {
 			throw new CREIndexOverflowException("The index " + index + " is out of bounds", t);
 		}
 		return values().get(index);
 	}
 
+	/** @deprecated Use {@link #get(Mixed, Target, Environment)} instead. */
+	@Deprecated
 	@Override
 	public Mixed get(Mixed index, Target t) throws ConfigRuntimeException {
-		return get(index.val(), t);
+		return get(index, t, null);
 	}
 
 	@Override
+	public Mixed get(Mixed index, Target t, Environment env) throws ConfigRuntimeException {
+		return get(index.val(), t, env);
+	}
+
+	/** @deprecated Use {@link #keySet(Environment)} instead. */
+	@Deprecated
+	@Override
 	public Set<Mixed> keySet() {
+		return keySet(null);
+	}
+
+	@Override
+	public Set<Mixed> keySet(Environment env) {
 		return values().stream().collect(Collectors.toSet());
 	}
 
+	/** @deprecated Use {@link #size(Environment)} instead. */
+	@Deprecated
 	@Override
 	public long size() {
+		return size(null);
+	}
+
+	@Override
+	public long size(Environment env) {
 		return values().size();
 	}
 
@@ -515,8 +612,15 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 		return true;
 	}
 
+	/** @deprecated Use {@link #slice(int, int, Target, Environment)} instead. */
+	@Deprecated
 	@Override
 	public Mixed slice(int begin, int end, Target t) {
+		return slice(begin, end, t, null);
+	}
+
+	@Override
+	public Mixed slice(int begin, int end, Target t, Environment env) {
 		throw new CREUnsupportedOperationException("Cannot slice an enum", t);
 	}
 
@@ -526,8 +630,15 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 	 */
 	protected abstract List<MEnumTypeValue> getValues();
 
+	/** @deprecated Use {@link #getBooleanValue(Environment, Target)} instead. */
+	@Deprecated
 	@Override
 	public boolean getBooleanValue(Target t) {
+		return getBooleanValue(null, t);
+	}
+
+	@Override
+	public boolean getBooleanValue(Environment env, Target t) {
 		return true;
 	}
 

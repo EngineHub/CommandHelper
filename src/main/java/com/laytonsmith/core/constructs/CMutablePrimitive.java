@@ -4,20 +4,24 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.natives.interfaces.Sizeable;
 import com.laytonsmith.core.natives.interfaces.ValueType;
+import com.laytonsmith.core.objects.ObjectModifier;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 import java.util.Stack;
 
 /**
  *
  */
 @typeof("ms.lang.mutable_primitive")
-public class CMutablePrimitive extends CArray implements Sizeable {
+public final class CMutablePrimitive extends CArray implements Sizeable {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
 	public static final CClassType TYPE = CClassType.get(CMutablePrimitive.class);
@@ -51,8 +55,15 @@ public class CMutablePrimitive extends CArray implements Sizeable {
 		this.value = value;
 	}
 
+	/** @deprecated Use {@link #set(Mixed, Mixed, Target, Environment)} instead. */
+	@Deprecated
 	@Override
 	public void set(Mixed index, Mixed c, Target t) {
+		set(index, c, t, null);
+	}
+
+	@Override
+	public void set(Mixed index, Mixed c, Target t, Environment env) {
 		throw new CRECastException("mutable_primitives cannot have values set in them", t);
 	}
 
@@ -74,8 +85,15 @@ public class CMutablePrimitive extends CArray implements Sizeable {
 		return value;
 	}
 
+	/** @deprecated Use {@link #get(Mixed, Target, Environment)} instead. */
+	@Deprecated
 	@Override
 	public Mixed get(Mixed index, Target t) {
+		return get(index, t, null);
+	}
+
+	@Override
+	public Mixed get(Mixed index, Target t, Environment env) {
 		return value;
 	}
 
@@ -99,10 +117,17 @@ public class CMutablePrimitive extends CArray implements Sizeable {
 		return new CString(value.val(), Target.UNKNOWN).getQuote();
 	}
 
+	/** @deprecated Use {@link #size(Environment)} instead. */
+	@Deprecated
 	@Override
 	public long size() {
+		return size(null);
+	}
+
+	@Override
+	public long size(Environment env) {
 		if(value.isInstanceOf(Sizeable.TYPE)) {
-			return ArgumentValidation.getObject(value, Target.UNKNOWN, Sizeable.class).size();
+			return ArgumentValidation.getObject(value, Target.UNKNOWN, Sizeable.class).size(env);
 		} else {
 			return 0;
 		}
@@ -136,7 +161,7 @@ public class CMutablePrimitive extends CArray implements Sizeable {
 	}
 
 	@Override
-	protected String getString(Stack<CArray> arrays, Target t) {
+	protected String getString(Stack<CArray> arrays, Target t, Environment env) {
 		return value.val();
 	}
 
@@ -163,6 +188,11 @@ public class CMutablePrimitive extends CArray implements Sizeable {
 	@Override
 	public CClassType[] getInterfaces() {
 		return new CClassType[]{Sizeable.TYPE};
+	}
+
+	@Override
+	public Set<ObjectModifier> getObjectModifiers() {
+		return EnumSet.of(ObjectModifier.FINAL);
 	}
 
 }

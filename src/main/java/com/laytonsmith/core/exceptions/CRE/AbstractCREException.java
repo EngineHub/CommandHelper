@@ -14,6 +14,8 @@ import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.StackTraceManager;
@@ -189,25 +191,53 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 	 * @param t
 	 * @return
 	 * @throws ConfigRuntimeException
+	 * @deprecated Use {@link #get(String, Target, Environment)} instead.
 	 */
+	@Deprecated
 	@Override
 	public Mixed get(String index, Target t) throws ConfigRuntimeException {
-		return exceptionObject.get(index, t);
+		return get(index, t, null);
 	}
 
+	@Override
+	public Mixed get(String index, Target t, Environment env) throws ConfigRuntimeException {
+		return exceptionObject.get(index, t, env);
+	}
+
+	/** @deprecated Use {@link #get(int, Target, Environment)} instead. */
+	@Deprecated
 	@Override
 	public Mixed get(int index, Target t) throws ConfigRuntimeException {
-		return exceptionObject.get(index, t);
+		return get(index, t, null);
 	}
 
+	@Override
+	public Mixed get(int index, Target t, Environment env) throws ConfigRuntimeException {
+		return exceptionObject.get(index, t, env);
+	}
+
+	/** @deprecated Use {@link #get(Mixed, Target, Environment)} instead. */
+	@Deprecated
 	@Override
 	public Mixed get(Mixed index, Target t) throws ConfigRuntimeException {
-		return exceptionObject.get(index, t);
+		return get(index, t, null);
 	}
 
 	@Override
+	public Mixed get(Mixed index, Target t, Environment env) throws ConfigRuntimeException {
+		return exceptionObject.get(index, t, env);
+	}
+
+	/** @deprecated Use {@link #keySet(Environment)} instead. */
+	@Deprecated
+	@Override
 	public Set<Mixed> keySet() {
-		return exceptionObject.keySet();
+		return keySet(null);
+	}
+
+	@Override
+	public Set<Mixed> keySet(Environment env) {
+		return exceptionObject.keySet(env);
 	}
 
 	@Override
@@ -220,9 +250,16 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 		return exceptionObject.canBeAssociative();
 	}
 
+	/** @deprecated Use {@link #slice(int, int, Target, Environment)} instead. */
+	@Deprecated
 	@Override
 	public Mixed slice(int begin, int end, Target t) {
-		return exceptionObject.slice(begin, end, t);
+		return slice(begin, end, t, null);
+	}
+
+	@Override
+	public Mixed slice(int begin, int end, Target t, Environment env) {
+		return exceptionObject.slice(begin, end, t, env);
 	}
 
 	@Override
@@ -294,9 +331,11 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 		throw new UnsupportedOperationException();
 	}
 
+	/** @deprecated Use {@link #isInstanceOf(CClassType, LeftHandGenericUse, Environment)} instead. */
+	@Deprecated
 	@Override
 	public boolean isInstanceOf(CClassType type) {
-		return Construct.isInstanceof(this, type);
+		return isInstanceOf(type, null, null);
 	}
 
 	@Override
@@ -305,12 +344,36 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 	}
 
 	@Override
+	public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env) {
+		return Construct.isInstanceof(this, type);
+	}
+
+	/** @deprecated Use {@link #typeof(Environment)} instead. */
+	@Deprecated
+	@Override
 	public CClassType typeof() {
+		return typeof(null);
+	}
+
+	@Override
+	public CClassType typeof(Environment env) {
 		return Construct.typeof(this);
 	}
 
 	@Override
+	public GenericParameters getGenericParameters() {
+		return null;
+	}
+
+	/** @deprecated Use {@link #getBooleanValue(Environment, Target)} instead. */
+	@Deprecated
+	@Override
 	public boolean getBooleanValue(Target t) {
+		return getBooleanValue(null, t);
+	}
+
+	@Override
+	public boolean getBooleanValue(Environment env, Target t) {
 		return true;
 	}
 

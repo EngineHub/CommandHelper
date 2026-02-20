@@ -2,6 +2,7 @@ package com.laytonsmith.core.natives.interfaces;
 
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.constructs.CClassType;
+import com.laytonsmith.core.environments.Environment;
 
 /**
  * Any object that can report a size should implement this.
@@ -16,6 +17,16 @@ public interface Sizeable extends Mixed {
 	 * Returns the size of this object.
 	 *
 	 * @return
+	 * @deprecated Use {@link #size(Environment)} instead.
 	 */
+	@Deprecated
 	long size();
+
+	/**
+	 * Returns the size of this object, with environment context.
+	 *
+	 * @param env
+	 * @return
+	 */
+	long size(Environment env);
 }

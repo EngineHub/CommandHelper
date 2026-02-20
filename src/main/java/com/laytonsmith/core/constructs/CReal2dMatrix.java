@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CRE.CREIndexOverflowException;
 import com.laytonsmith.core.exceptions.CRE.CRELengthException;
@@ -154,26 +155,54 @@ public class CReal2dMatrix extends AbstractMixedClass implements Matrix<Double>,
 		return false;
 	}
 
+	/** @deprecated Use {@link #get(Mixed, Target, Environment)} instead. */
+	@Deprecated
 	@Override
 	public CReal2dMatrixRow get(Mixed index, Target t) throws ConfigRuntimeException {
-		return get(ArgumentValidation.getInt32(index, t), t);
+		return (CReal2dMatrixRow) get(index, t, null);
 	}
 
 	@Override
+	public Mixed get(Mixed index, Target t, Environment env) throws ConfigRuntimeException {
+		return get(ArgumentValidation.getInt32(index, t, env), t, env);
+	}
+
+	/** @deprecated Use {@link #get(String, Target, Environment)} instead. */
+	@Deprecated
+	@Override
 	public Mixed get(String index, Target t) throws ConfigRuntimeException {
+		return get(index, t, null);
+	}
+
+	@Override
+	public Mixed get(String index, Target t, Environment env) throws ConfigRuntimeException {
 		throw new CREIllegalArgumentException("Matrices cannot be indexed into with non-numeric values.", t);
 	}
 
+	/** @deprecated Use {@link #get(int, Target, Environment)} instead. */
+	@Deprecated
 	@Override
 	public CReal2dMatrixRow get(int index, Target t) throws ConfigRuntimeException {
+		return (CReal2dMatrixRow) get(index, t, null);
+	}
+
+	@Override
+	public Mixed get(int index, Target t, Environment env) throws ConfigRuntimeException {
 		if(index >= getRowCount() || index < 0) {
 			throw new CRERangeException("Matrix range out of bounds.", t);
 		}
 		return new CReal2dMatrixRow(this, index);
 	}
 
+	/** @deprecated Use {@link #keySet(Environment)} instead. */
+	@Deprecated
 	@Override
 	public Set<Mixed> keySet() {
+		return keySet(null);
+	}
+
+	@Override
+	public Set<Mixed> keySet(Environment env) {
 		Set<Mixed> set = new HashSet<>();
 		for(int i = 0; i < getRowCount(); i++) {
 			set.add(new CInt(i, Target.UNKNOWN));
@@ -181,13 +210,27 @@ public class CReal2dMatrix extends AbstractMixedClass implements Matrix<Double>,
 		return set;
 	}
 
+	/** @deprecated Use {@link #getBooleanValue(Environment, Target)} instead. */
+	@Deprecated
 	@Override
 	public boolean getBooleanValue(Target t) {
-		return data.length != 0;
+		return getBooleanValue(null, t);
 	}
 
 	@Override
+	public boolean getBooleanValue(Environment env, Target t) {
+		return data.length != 0;
+	}
+
+	/** @deprecated Use {@link #slice(int, int, Target, Environment)} instead. */
+	@Deprecated
+	@Override
 	public CArray slice(int begin, int end, Target t) {
+		return (CArray) slice(begin, end, t, null);
+	}
+
+	@Override
+	public Mixed slice(int begin, int end, Target t, Environment env) {
 		CArray ret = new CArray(t);
 		int step = (begin <= end) ? 1 : -1;
 
@@ -204,8 +247,15 @@ public class CReal2dMatrix extends AbstractMixedClass implements Matrix<Double>,
 		return ret;
 	}
 
+	/** @deprecated Use {@link #size(Environment)} instead. */
+	@Deprecated
 	@Override
 	public long size() {
+		return size(null);
+	}
+
+	@Override
+	public long size(Environment env) {
 		return getRowCount();
 	}
 
