@@ -86,7 +86,7 @@ public class CReal2dMatrixRow extends AbstractMixedClass implements com.laytonsm
 
 	@Override
 	public Mixed get(Mixed index, Target t, Environment env) throws ConfigRuntimeException {
-		return get(ArgumentValidation.getInt32(index, t), t, env);
+		return get(ArgumentValidation.getInt32(index, t, env), t, env);
 	}
 
 	/** @deprecated Use {@link #keySet(Environment)} instead. */
@@ -172,8 +172,8 @@ public class CReal2dMatrixRow extends AbstractMixedClass implements com.laytonsm
 
 	@Override
 	public void set(Mixed index, Mixed value, Target t, Environment env) {
-		int in = ArgumentValidation.getInt32(index, t);
-		double d = ArgumentValidation.getDouble(value, t);
+		int in = ArgumentValidation.getInt32(index, t, env);
+		double d = ArgumentValidation.getDouble(value, t, env);
 		setNative(in, d, t);
 	}
 

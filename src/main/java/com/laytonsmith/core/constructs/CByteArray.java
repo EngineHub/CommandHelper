@@ -390,7 +390,9 @@ public final class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	 * Returns the current size of the byte array. This is not to be confused with the capacity.
 	 *
 	 * @return
+	 * @deprecated Use {@link #size(Environment)} instead.
 	 */
+	@Deprecated
 	@Override
 	public long size() {
 		return size(null);
@@ -491,6 +493,8 @@ public final class CByteArray extends CArray implements Sizeable, ArrayAccess {
 		return false;
 	}
 
+	/** @deprecated Use {@link #slice(int, int, Target, Environment)} instead. */
+	@Deprecated
 	@Override
 	public Mixed slice(int begin, int end, Target t) {
 		return slice(begin, end, t, null);
@@ -536,6 +540,8 @@ public final class CByteArray extends CArray implements Sizeable, ArrayAccess {
 		throw new CREUnsupportedOperationException("Modifying a byte array using array_push() is not supported.", t);
 	}
 
+	/** @deprecated Use {@link #keySet(Environment)} instead. */
+	@Deprecated
 	@Override
 	public Set<Mixed> keySet() {
 		return keySet(null);
@@ -551,6 +557,8 @@ public final class CByteArray extends CArray implements Sizeable, ArrayAccess {
 		throw new CREUnsupportedOperationException("Getting a string key set from a byte array is not supported.", getTarget());
 	}
 
+	/** @deprecated Use {@link #set(Mixed, Mixed, Target, Environment)} instead. */
+	@Deprecated
 	@Override
 	public void set(Mixed index, Mixed c, Target t) throws ConfigRuntimeException {
 		set(index, c, t, null);
@@ -570,6 +578,8 @@ public final class CByteArray extends CArray implements Sizeable, ArrayAccess {
 		return CByteArray.wrap(newArray, t);
 	}
 
+	/** @deprecated Use {@link #get(Mixed, Target, Environment)} instead. */
+	@Deprecated
 	@Override
 	public Mixed get(Mixed index, Target t) throws ConfigRuntimeException {
 		return get(index, t, null);
@@ -577,7 +587,7 @@ public final class CByteArray extends CArray implements Sizeable, ArrayAccess {
 
 	@Override
 	public Mixed get(Mixed index, Target t, Environment env) throws ConfigRuntimeException {
-		int i = ArgumentValidation.getInt32(index, t);
+		int i = ArgumentValidation.getInt32(index, t, env);
 		byte b = getByte(i);
 		return new CInt(b, t);
 	}
@@ -673,6 +683,8 @@ public final class CByteArray extends CArray implements Sizeable, ArrayAccess {
 			throw new CREByteArrayReadOnlyException("Arrays copied from ByteArrays are read only", t);
 		}
 
+		/** @deprecated Use {@link #set(Mixed, Mixed, Target, Environment)} instead. */
+		@Deprecated
 		@Override
 		public void set(Mixed index, Mixed c, Target t) {
 			set(index, c, t, null);
@@ -683,6 +695,8 @@ public final class CByteArray extends CArray implements Sizeable, ArrayAccess {
 			throw new CREByteArrayReadOnlyException("Arrays copied from ByteArrays are read only", t);
 		}
 
+		/** @deprecated Use {@link #get(Mixed, Target, Environment)} instead. */
+		@Deprecated
 		@Override
 		public Mixed get(Mixed index, Target t) {
 			return get(index, t, null);
@@ -690,7 +704,7 @@ public final class CByteArray extends CArray implements Sizeable, ArrayAccess {
 
 		@Override
 		public Mixed get(Mixed index, Target t, Environment env) {
-			int i = ArgumentValidation.getInt32(index, t);
+			int i = ArgumentValidation.getInt32(index, t, env);
 			try {
 				return new CInt(backing[i], t);
 			} catch (ArrayIndexOutOfBoundsException e) {
@@ -698,6 +712,8 @@ public final class CByteArray extends CArray implements Sizeable, ArrayAccess {
 			}
 		}
 
+		/** @deprecated Use {@link #size(Environment)} instead. */
+		@Deprecated
 		@Override
 		public long size() {
 			return size(null);

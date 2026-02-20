@@ -125,7 +125,7 @@ public abstract class AbstractMixedInterfaceRunner implements MixedInterfaceRunn
 	}
 
 	@Override
-	public CClassType typeof(Environment env) {
+	public final CClassType typeof(Environment env) {
 		return Construct.typeof(this);
 	}
 

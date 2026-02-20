@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
@@ -126,7 +127,7 @@ public final class CMutablePrimitive extends CArray implements Sizeable {
 	@Override
 	public long size(com.laytonsmith.core.environments.Environment env) {
 		if(value.isInstanceOf(Sizeable.TYPE)) {
-			return ArgumentValidation.getObject(value, Target.UNKNOWN, Sizeable.class).size();
+			return ArgumentValidation.getObject(value, Target.UNKNOWN, Sizeable.class).size(env);
 		} else {
 			return 0;
 		}
@@ -160,7 +161,7 @@ public final class CMutablePrimitive extends CArray implements Sizeable {
 	}
 
 	@Override
-	protected String getString(Stack<CArray> arrays, Target t) {
+	protected String getString(Stack<CArray> arrays, Target t, Environment env) {
 		return value.val();
 	}
 

@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -103,7 +104,7 @@ public class CSlice extends CArray {
 	}
 
 	@Override
-	protected String getString(Stack<CArray> arrays, Target t) {
+	protected String getString(Stack<CArray> arrays, Target t, Environment env) {
 		//We don't need to consider arrays, because we can't
 		//get stuck in an infinite loop.
 		return val();
@@ -135,7 +136,7 @@ public class CSlice extends CArray {
 
 	@Override
 	public Mixed get(Mixed index, Target t, com.laytonsmith.core.environments.Environment env) {
-		long i = ArgumentValidation.getInt(index, t);
+		long i = ArgumentValidation.getInt(index, t, env);
 		if(i > max) {
 			throw new CRERangeException("Index out of bounds. Index: " + i + " Size: " + max, t);
 		}

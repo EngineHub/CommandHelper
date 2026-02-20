@@ -201,7 +201,7 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 
 	@Override
 	public Mixed get(String index, Target t, Environment env) throws ConfigRuntimeException {
-		return exceptionObject.get(index, t);
+		return exceptionObject.get(index, t, env);
 	}
 
 	/** @deprecated Use {@link #get(int, Target, Environment)} instead. */
@@ -213,7 +213,7 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 
 	@Override
 	public Mixed get(int index, Target t, Environment env) throws ConfigRuntimeException {
-		return exceptionObject.get(index, t);
+		return exceptionObject.get(index, t, env);
 	}
 
 	/** @deprecated Use {@link #get(Mixed, Target, Environment)} instead. */
@@ -225,7 +225,7 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 
 	@Override
 	public Mixed get(Mixed index, Target t, Environment env) throws ConfigRuntimeException {
-		return exceptionObject.get(index, t);
+		return exceptionObject.get(index, t, env);
 	}
 
 	/** @deprecated Use {@link #keySet(Environment)} instead. */
@@ -237,7 +237,7 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 
 	@Override
 	public Set<Mixed> keySet(Environment env) {
-		return exceptionObject.keySet();
+		return exceptionObject.keySet(env);
 	}
 
 	@Override
@@ -259,7 +259,7 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 
 	@Override
 	public Mixed slice(int begin, int end, Target t, Environment env) {
-		return exceptionObject.slice(begin, end, t);
+		return exceptionObject.slice(begin, end, t, env);
 	}
 
 	@Override

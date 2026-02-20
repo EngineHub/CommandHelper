@@ -603,7 +603,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	public Mixed get(String index, Target t, Environment env) throws ConfigRuntimeException {
 		if(isEnum()) {
 			try {
-				return NativeTypeList.getNativeEnumType(fqcn).get(index, t);
+				return NativeTypeList.getNativeEnumType(fqcn).get(index, t, env);
 			} catch (ClassNotFoundException ex) {
 				throw new RuntimeException(ex);
 			}
@@ -622,7 +622,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	public Mixed get(int index, Target t, Environment env) throws ConfigRuntimeException {
 		if(isEnum()) {
 			try {
-				return NativeTypeList.getNativeEnumType(fqcn).get(index, t);
+				return NativeTypeList.getNativeEnumType(fqcn).get(index, t, env);
 			} catch (ClassNotFoundException ex) {
 				throw new RuntimeException(ex);
 			}
@@ -641,7 +641,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	public Mixed get(Mixed index, Target t, Environment env) throws ConfigRuntimeException {
 		if(isEnum()) {
 			try {
-				return NativeTypeList.getNativeEnumType(fqcn).get(index, t);
+				return NativeTypeList.getNativeEnumType(fqcn).get(index, t, env);
 			} catch (ClassNotFoundException ex) {
 				throw new RuntimeException(ex);
 			}
@@ -660,7 +660,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	public Set<Mixed> keySet(Environment env) {
 		if(isEnum()) {
 			try {
-				return NativeTypeList.getNativeEnumType(fqcn).keySet();
+				return NativeTypeList.getNativeEnumType(fqcn).keySet(env);
 			} catch (ClassNotFoundException ex) {
 				throw new RuntimeException(ex);
 			}
@@ -679,7 +679,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	public long size(Environment env) {
 		if(isEnum()) {
 			try {
-				return NativeTypeList.getNativeEnumType(fqcn).size();
+				return NativeTypeList.getNativeEnumType(fqcn).size(env);
 			} catch (ClassNotFoundException ex) {
 				throw new RuntimeException(ex);
 			}

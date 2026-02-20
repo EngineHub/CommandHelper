@@ -41,6 +41,9 @@ public final class ArgumentValidation {
 		//
 	}
 
+	/**
+	 * @deprecated Use {@link #getItemFromArray(CArray, String, Target, Mixed, Environment)} instead.
+	 */
 	@Deprecated
 	public static Mixed getItemFromArray(CArray object, String key, Target t, Mixed defaultItem) throws ConfigRuntimeException {
 		return getItemFromArray(object, key, t, defaultItem, null);
@@ -71,6 +74,9 @@ public final class ArgumentValidation {
 		}
 	}
 
+	/**
+	 * @deprecated Use {@link #getArray(Mixed, Target, Environment)} instead.
+	 */
 	@Deprecated
 	public static CArray getArray(Mixed construct, Target t) {
 		return getArray(construct, t, null);
@@ -120,6 +126,9 @@ public final class ArgumentValidation {
 		}
 	}
 
+	/**
+	 * @deprecated Use {@link #getNumber(Mixed, Target, Environment)} instead.
+	 */
 	@Deprecated
 	public static double getNumber(Mixed c, Target t) {
 		return getNumber(c, t, null);
@@ -188,6 +197,9 @@ public final class ArgumentValidation {
 			+ ")[\\x00-\\x20]*" // trailing whitespace
 	);
 
+	/**
+	 * @deprecated Use {@link #isNumber(Mixed, Environment)} instead.
+	 */
 	@Deprecated
 	public static boolean isNumber(Mixed c) {
 		return isNumber(c, null);
@@ -204,6 +216,9 @@ public final class ArgumentValidation {
 		return InstanceofUtil.isInstanceof(c, CNumber.class, env) || VALID_DOUBLE.matcher(c.val()).matches();
 	}
 
+	/**
+	 * @deprecated Use {@link #getDouble(Mixed, Target, Environment)} instead.
+	 */
 	@Deprecated
 	public static double getDouble(Mixed c, Target t) {
 		return getDouble(c, t, null);
@@ -222,12 +237,15 @@ public final class ArgumentValidation {
 			c = ((CMutablePrimitive) c).get();
 		}
 		try {
-			return getNumber(c, t);
+			return getNumber(c, t, env);
 		} catch (ConfigRuntimeException e) {
 			throw new CRECastException("Expecting a double, but received " + c.val() + " instead", t);
 		}
 	}
 
+	/**
+	 * @deprecated Use {@link #getDouble32(Mixed, Target, Environment)} instead.
+	 */
 	@Deprecated
 	public static float getDouble32(Mixed c, Target t) {
 		return getDouble32(c, t, null);
@@ -244,13 +262,16 @@ public final class ArgumentValidation {
 	 * @return
 	 */
 	public static float getDouble32(Mixed c, Target t, Environment env) {
-		double l = getDouble(c, t);
+		double l = getDouble(c, t, env);
 		if(Math.abs(l) > Float.MAX_VALUE) {
 			throw new CRERangeException("Expecting a 32 bit float, but a larger value was found: " + l, t);
 		}
 		return (float) l;
 	}
 
+	/**
+	 * @deprecated Use {@link #getInt(Mixed, Target, Environment)} instead.
+	 */
 	@Deprecated
 	public static long getInt(Mixed c, Target t) {
 		return getInt(c, t, null);
@@ -291,6 +312,9 @@ public final class ArgumentValidation {
 		return i;
 	}
 
+	/**
+	 * @deprecated Use {@link #getInt32(Mixed, Target, Environment)} instead.
+	 */
 	@Deprecated
 	public static int getInt32(Mixed c, Target t) {
 		return getInt32(c, t, null);
@@ -312,7 +336,7 @@ public final class ArgumentValidation {
 		if(c instanceof CMutablePrimitive) {
 			c = ((CMutablePrimitive) c).get();
 		}
-		long l = getInt(c, t);
+		long l = getInt(c, t, env);
 		int i = (int) l;
 		if(i != l) {
 			throw new CRERangeException("Expecting a 32 bit integer, but a larger value was found: " + l, t);
@@ -320,6 +344,9 @@ public final class ArgumentValidation {
 		return i;
 	}
 
+	/**
+	 * @deprecated Use {@link #getInt16(Mixed, Target, Environment)} instead.
+	 */
 	@Deprecated
 	public static short getInt16(Mixed c, Target t) {
 		return getInt16(c, t, null);
@@ -341,7 +368,7 @@ public final class ArgumentValidation {
 		if(c instanceof CMutablePrimitive) {
 			c = ((CMutablePrimitive) c).get();
 		}
-		long l = getInt(c, t);
+		long l = getInt(c, t, env);
 		short s = (short) l;
 		if(s != l) {
 			throw new CRERangeException("Expecting a 16 bit integer, but a larger value was found: " + l, t);
@@ -349,6 +376,9 @@ public final class ArgumentValidation {
 		return s;
 	}
 
+	/**
+	 * @deprecated Use {@link #getInt8(Mixed, Target, Environment)} instead.
+	 */
 	@Deprecated
 	public static byte getInt8(Mixed c, Target t) {
 		return getInt8(c, t, null);
@@ -370,7 +400,7 @@ public final class ArgumentValidation {
 		if(c instanceof CMutablePrimitive) {
 			c = ((CMutablePrimitive) c).get();
 		}
-		long l = getInt(c, t);
+		long l = getInt(c, t, env);
 		byte b = (byte) l;
 		if(b != l) {
 			throw new CRERangeException("Expecting an 8 bit integer, but a larger value was found: " + l, t);
@@ -378,6 +408,9 @@ public final class ArgumentValidation {
 		return b;
 	}
 
+	/**
+	 * @deprecated Use {@link #getBooleanObject(Mixed, Target, Environment)} instead.
+	 */
 	@Deprecated
 	public static boolean getBooleanObject(Mixed c, Target t) {
 		return getBooleanObject(c, t, null);
@@ -399,6 +432,9 @@ public final class ArgumentValidation {
 		return getBooleanish(c, t, env);
 	}
 
+	/**
+	 * @deprecated Use {@link #getBoolean(Mixed, Target, Environment)} instead.
+	 */
 	@Deprecated
 	public static boolean getBoolean(Mixed c, Target t) {
 		return getBoolean(c, t, null);
@@ -422,6 +458,9 @@ public final class ArgumentValidation {
 		return getBooleanish(c, t, env);
 	}
 
+	/**
+	 * @deprecated Use {@link #getBooleanish(Mixed, Target, Environment)} instead.
+	 */
 	@Deprecated
 	public static boolean getBooleanish(Mixed c, Target t) {
 		return getBooleanish(c, t, null);
@@ -455,6 +494,9 @@ public final class ArgumentValidation {
 		throw new CRECastException("Could not convert value of type " + c.typeof() + " to a " + Booleanish.TYPE, t);
 	}
 
+	/**
+	 * @deprecated Use {@link #getByteArray(Mixed, Target, Environment)} instead.
+	 */
 	@Deprecated
 	public static CByteArray getByteArray(Mixed c, Target t) {
 		return getByteArray(c, t, null);
@@ -498,6 +540,9 @@ public final class ArgumentValidation {
 		return c.val();
 	}
 
+	/**
+	 * @deprecated Use {@link #getStringObject(Mixed, Target, Environment)} instead.
+	 */
 	@Deprecated
 	public static String getStringObject(Mixed c, Target t) {
 		return getStringObject(c, t, null);
@@ -519,6 +564,9 @@ public final class ArgumentValidation {
 		return c.val();
 	}
 
+	/**
+	 * @deprecated Use {@link #anyDoubles(Environment, Mixed...)} instead.
+	 */
 	@Deprecated
 	public static boolean anyDoubles(Mixed... c) {
 		return anyDoubles(null, c);
@@ -540,6 +588,9 @@ public final class ArgumentValidation {
 		return false;
 	}
 
+	/**
+	 * @deprecated Use {@link #anyStrings(Environment, Mixed...)} instead.
+	 */
 	@Deprecated
 	public static boolean anyStrings(Mixed... c) {
 		return anyStrings(null, c);
@@ -561,6 +612,9 @@ public final class ArgumentValidation {
 		return false;
 	}
 
+	/**
+	 * @deprecated Use {@link #anyNulls(Environment, Mixed...)} instead.
+	 */
 	@Deprecated
 	public static boolean anyNulls(Mixed... c) {
 		return anyNulls(null, c);
@@ -582,6 +636,9 @@ public final class ArgumentValidation {
 		return false;
 	}
 
+	/**
+	 * @deprecated Use {@link #anyBooleans(Environment, Mixed...)} instead.
+	 */
 	@Deprecated
 	public static boolean anyBooleans(Mixed... c) {
 		return anyBooleans(null, c);
@@ -631,6 +688,9 @@ public final class ArgumentValidation {
 		}
 	}
 
+	/**
+	 * @deprecated Use {@link #getEnumSet(Mixed, Class, Target, Environment)} instead.
+	 */
 	@Deprecated
 	public static <T extends Enum<T>> Set<T> getEnumSet(Mixed c, Class<T> enumClass, Target t) {
 		return getEnumSet(c, enumClass, t, null);
