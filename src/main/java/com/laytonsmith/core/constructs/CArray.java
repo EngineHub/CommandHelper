@@ -102,7 +102,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	public CArray(Target t, int initialCapacity, Mixed... items) {
 		this(t, initialCapacity, null, items);
 	}
-	
+
 	public CArray(Target t, int initialCapacity, Environment env, Mixed... items) {
 		super("{}", ConstructType.ARRAY, t);
 		if(initialCapacity == -1) {
@@ -555,7 +555,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	public final Mixed get(long index, Target t) {
 		return this.get(new CInt(index, t), t, null);
 	}
-	
+
 	public final Mixed get(long index, Target t, Environment env) {
 		return this.get(new CInt(index, t), t, env);
 	}
