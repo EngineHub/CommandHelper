@@ -748,6 +748,7 @@ public final class LeftHandSideType extends Construct implements SourceType {
 		return val();
 	}
 
+	@Override
 	public GenericParameters getGenericParameters() {
 		return null;
 	}

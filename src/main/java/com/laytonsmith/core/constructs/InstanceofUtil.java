@@ -39,7 +39,7 @@ public class InstanceofUtil {
 	 */
 	private static Set<CClassType> getAllCastableClassesWithBlacklist(CClassType c, Set<CClassType> blacklist,
 			Environment env) {
-		if(blacklist.contains(c)) {
+		if(blacklist.contains(c) || CNull.TYPE.equals(c)) {
 			return blacklist;
 		}
 		blacklist.add(c);
@@ -108,6 +108,9 @@ public class InstanceofUtil {
 	 * @return
 	 */
 	public static boolean isInstanceof(Mixed value, Class<? extends Mixed> instanceofThis, Environment env) {
+		if(instanceofThis.isAssignableFrom(value.getClass())) {
+			return true;
+		}
 		FullyQualifiedClassName typeof = typeof(instanceofThis);
 		return typeof == null ? false : isInstanceof(value, typeof, env);
 	}

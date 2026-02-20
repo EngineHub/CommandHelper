@@ -7,6 +7,9 @@ import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.MarshalException;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.objects.AccessModifier;
 import com.laytonsmith.core.objects.ObjectModifier;
@@ -192,9 +195,9 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 			return c.val();
 		} else if(c instanceof CVoid) {
 			return "";
-		} else if(c instanceof CInt) {
+		} else if(InstanceofUtil.isInstanceof(c, CInt.class, null)) {
 			return ((CInt) c).getInt();
-		} else if(c instanceof CDouble) {
+		} else if(InstanceofUtil.isInstanceof(c, CDouble.class, null)) {
 			return ((CDouble) c).getDouble();
 		} else if(c instanceof CBoolean) {
 			return ((CBoolean) c).getBoolean();
@@ -411,13 +414,13 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	public static Object GetPOJO(Mixed c) throws ClassCastException {
 		if(c instanceof CNull) {
 			return null;
-		} else if(c instanceof CString) {
+		} else if(InstanceofUtil.isInstanceof(c, CString.class, null)) {
 			return c.val();
 		} else if(c instanceof CBoolean) {
 			return Boolean.valueOf(((CBoolean) c).getBoolean());
-		} else if(c instanceof CInt) {
+		} else if(InstanceofUtil.isInstanceof(c, CInt.class, null)) {
 			return Long.valueOf(((CInt) c).getInt());
-		} else if(c instanceof CDouble) {
+		} else if(InstanceofUtil.isInstanceof(c, CDouble.class, null)) {
 			return Double.valueOf(((CDouble) c).getDouble());
 		} else if(c.isInstanceOf(CByteArray.TYPE)) {
 			return ((CByteArray) c).asByteArrayCopy();
@@ -495,10 +498,12 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	 * This method may be overridden in special cases, such as dynamic types, but for most types, this
 	 * @return
 	 * @throws IllegalArgumentException If the class isn't public facing.
+	 * @deprecated Use {@link #typeof(Environment)} instead.
 	 */
+	@Deprecated
 	@Override
 	public CClassType typeof() {
-		return typeof(this);
+		return typeof((Environment) null);
 	}
 
 	/**
@@ -509,6 +514,11 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	 */
 	public static CClassType typeof(Mixed that) {
 		return CClassType.get(that.getClass());
+	}
+
+	@Override
+	public CClassType typeof(Environment env) {
+		return typeof(this);
 	}
 
 	/**
@@ -605,8 +615,22 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 		return that.typeof().doesExtend(CClassType.get(type));
 	}
 
+	/**
+	 * @deprecated Use {@link #isInstanceOf(CClassType, LeftHandGenericUse, Environment)} instead.
+	 */
+	@Deprecated
 	@Override
 	public boolean isInstanceOf(CClassType type) {
+		return isInstanceOf(type, null, null);
+	}
+
+	@Override
+	public boolean isInstanceOf(Class<? extends Mixed> type) {
+		return type.isAssignableFrom(this.getClass());
+	}
+
+	@Override
+	public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env) {
 		if(type.getNativeType() != null) {
 			return type.getNativeType().isAssignableFrom(this.getClass());
 		}
@@ -614,8 +638,8 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	}
 
 	@Override
-	public boolean isInstanceOf(Class<? extends Mixed> type) {
-		return type.isAssignableFrom(this.getClass());
+	public GenericParameters getGenericParameters() {
+		return null;
 	}
 
 	/**
