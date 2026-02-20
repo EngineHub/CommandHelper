@@ -227,7 +227,7 @@
 			<!-- GPL -->
 			<groupId>com.mysql</groupId>
 			<artifactId>mysql-connector-j</artifactId>
-			<version>8.3.0</version>
+			<version>9.4.0</version>
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
@@ -248,7 +248,7 @@
 			<!-- NOTE: If you change this version, you also have to change the install-mssql-auth command to
 			download the corresponding version of the mssql-auth dll. This will also require users to re-install
 			it, so an upgrade routine will need to be released as well. -->
-			<version>12.6.1.jre11</version>
+			<version>13.2.0.jre11</version>
 		</dependency>
 
 		<!-- Yaml parsing -->
@@ -394,7 +394,7 @@
 		<dependency>
 			<groupId>com.squareup.okio</groupId>
 			<artifactId>okio-jvm</artifactId>
-			<version>3.10.0</version>
+			<version>3.16.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.code.gson</groupId>

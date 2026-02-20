@@ -503,7 +503,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	@Deprecated
 	@Override
 	public CClassType typeof() {
-		return typeof(null);
+		return typeof((Environment) null);
 	}
 
 	/**
