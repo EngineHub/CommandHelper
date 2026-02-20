@@ -172,7 +172,7 @@ public class UserObject implements Mixed {
 	@Deprecated
 	@Override
 	public CClassType typeof() {
-		return typeof((Environment) null);
+		return typeof(null);
 	}
 
 	@Override

@@ -121,7 +121,7 @@ public abstract class AbstractMixedInterfaceRunner implements MixedInterfaceRunn
 	@Deprecated
 	@Override
 	public final CClassType typeof() {
-		return typeof((Environment) null);
+		return typeof(null);
 	}
 
 	@Override

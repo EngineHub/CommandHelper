@@ -161,7 +161,7 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 			@Deprecated
 			@Override
 			public CClassType typeof() {
-				return typeof((Environment) null);
+				return typeof(null);
 			}
 
 			@Override
@@ -267,7 +267,7 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 							@Deprecated
 							@Override
 							public CClassType typeof() {
-								return typeof((Environment) null);
+								return typeof(null);
 							}
 
 							@Override
@@ -492,7 +492,7 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 	@Deprecated
 	@Override
 	public CClassType typeof() {
-		return typeof((Environment) null);
+		return typeof(null);
 	}
 
 	@Override
