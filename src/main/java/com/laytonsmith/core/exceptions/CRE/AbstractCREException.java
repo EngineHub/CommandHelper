@@ -365,15 +365,15 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 		return null;
 	}
 
-	/** @deprecated Use {@link #getBooleanValue(Environment, Target)} instead. */
+	/** @deprecated Use {@link #getBooleanValue(Target, Environment)} instead. */
 	@Deprecated
 	@Override
 	public boolean getBooleanValue(Target t) {
-		return getBooleanValue(null, t);
+		return getBooleanValue(t, null);
 	}
 
 	@Override
-	public boolean getBooleanValue(Environment env, Target t) {
+	public boolean getBooleanValue(Target t, Environment env) {
 		return true;
 	}
 

@@ -28,18 +28,26 @@ public interface Booleanish extends Mixed {
 	 * @param t The code target, in case there are errors that are thrown, the correct target can be provided in the
 	 * error.
 	 * @return True if the value is trueish, false if it is falseish.
-	 * @deprecated Use {@link #getBooleanValue(Environment, Target)} instead.
+	 * @deprecated Use {@link #getBooleanValue(Target, Environment)} instead.
 	 */
 	@Deprecated
 	boolean getBooleanValue(Target t);
 
 	/**
-	 * Returns true if this value is a trueish value, with environment context.
+	 * Returns true if this value is a trueish value. Each implementation is free to define this as they wish. In
+	 * general, code that supports Booleanish values should not use this method directly, use
+	 * {@link ArgumentValidation#getBooleanish(com.laytonsmith.core.natives.interfaces.Mixed,
+	 * com.laytonsmith.core.constructs.Target)}, which ensures that the error message, if this is not an actual
+	 * Booleanish value, is standardized. In general, methods should not accept a Booleanish value (with some critical
+	 * exceptions, such as if(), for(), etc) as in the future, this will prevent functions from being fully strongly
+	 * typed in strict mode. In non-strict mode (or strict mode with the auto keyword) Booleanish types will be cross
+	 * cast to a boolean first anyways, so there is no point in accepting Booleanish values.
 	 *
+	 * @param t The code target, in case there are errors that are thrown, the correct target can be provided in the
+	 * error.
 	 * @param env The environment.
-	 * @param t The code target.
 	 * @return True if the value is trueish, false if it is falseish.
 	 */
-	boolean getBooleanValue(Environment env, Target t);
+	boolean getBooleanValue(Target t, Environment env);
 
 }

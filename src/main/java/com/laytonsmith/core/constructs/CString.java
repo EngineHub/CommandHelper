@@ -217,15 +217,15 @@ public class CString extends CPrimitive implements Cloneable,
 		return new CString(val(), getTarget());
 	}
 
-	/** @deprecated Use {@link #getBooleanValue(Environment, Target)} instead. */
+	/** @deprecated Use {@link #getBooleanValue(Target, Environment)} instead. */
 	@Deprecated
 	@Override
 	public boolean getBooleanValue(Target t) {
-		return getBooleanValue(null, t);
+		return getBooleanValue(t, null);
 	}
 
 	@Override
-	public boolean getBooleanValue(Environment env, Target t) {
+	public boolean getBooleanValue(Target t, Environment env) {
 		if(val().equals("false")) {
 			MSLog.GetLogger().e(MSLog.Tags.FALSESTRING, "String \"false\" evaluates as true (non-empty strings are"
 					+ " true). This is most likely not what you meant to do. This warning can globally be disabled"
