@@ -557,6 +557,9 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	}
 
 	public final Mixed get(long index, Target t, Environment env) {
+		if((int) index != index) {
+			throw new CREIndexOverflowException("The element at index \"" + index + "\" does not exist", t);
+		}
 		return this.get(new CInt(index, t), t, env);
 	}
 
@@ -1177,15 +1180,15 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 			ArrayAccessSet.TYPE};
 	}
 
-	/** @deprecated Use {@link #getBooleanValue(Environment, Target)} instead. */
+	/** @deprecated Use {@link #getBooleanValue(Target, Environment)} instead. */
 	@Deprecated
 	@Override
 	public boolean getBooleanValue(Target t) {
-		return getBooleanValue(null, t);
+		return getBooleanValue(t, null);
 	}
 
 	@Override
-	public boolean getBooleanValue(Environment env, Target t) {
+	public boolean getBooleanValue(Target t, Environment env) {
 		return size(env) > 0;
 	}
 

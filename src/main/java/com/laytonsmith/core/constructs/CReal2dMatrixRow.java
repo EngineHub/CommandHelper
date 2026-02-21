@@ -136,15 +136,15 @@ public class CReal2dMatrixRow extends AbstractMixedClass implements com.laytonsm
 		return ret;
 	}
 
-	/** @deprecated Use {@link #getBooleanValue(Environment, Target)} instead. */
+	/** @deprecated Use {@link #getBooleanValue(Target, Environment)} instead. */
 	@Deprecated
 	@Override
 	public boolean getBooleanValue(Target t) {
-		return getBooleanValue(null, t);
+		return getBooleanValue(t, null);
 	}
 
 	@Override
-	public boolean getBooleanValue(Environment env, Target t) {
+	public boolean getBooleanValue(Target t, Environment env) {
 		// 0 dimension matrices are not possible, so this will
 		// always have at least one value in it, thus always
 		// true.
