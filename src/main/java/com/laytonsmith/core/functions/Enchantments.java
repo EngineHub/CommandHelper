@@ -186,7 +186,7 @@ public class Enchantments {
 		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			int offset = 0;
-			if(args.length == 4 || args.length == 3 && args[2].isInstanceOf(CArray.TYPE)) {
+			if(args.length == 4 || args.length == 3 && args[2].isInstanceOf(CArray.TYPE, null, environment)) {
 				p = Static.GetPlayer(args[0].val(), t);
 				offset = 1;
 			} else {
@@ -198,7 +198,7 @@ public class Enchantments {
 				throw new CRECastException("There is no item at slot " + args[offset], t);
 			}
 
-			if(args[args.length - 1].isInstanceOf(CArray.TYPE)) {
+			if(args[args.length - 1].isInstanceOf(CArray.TYPE, null, environment)) {
 				CArray ca = (CArray) args[args.length - 1];
 				Map<MCEnchantment, Integer> enchants = ObjectGenerator.GetGenerator().enchants(ca, t);
 				for(Map.Entry<MCEnchantment, Integer> en : enchants.entrySet()) {
@@ -274,7 +274,7 @@ public class Enchantments {
 				throw new CRECastException("There is no item at slot " + args[offset], t);
 			}
 
-			if(args[offset + 1].isInstanceOf(CArray.TYPE)) {
+			if(args[offset + 1].isInstanceOf(CArray.TYPE, null, environment)) {
 				for(String name : ((CArray) args[offset + 1]).stringKeySet()) {
 					MCEnchantment e = GetEnchantment(name, t);
 					is.removeEnchantment(e);
@@ -490,7 +490,7 @@ public class Enchantments {
 		@Override
 		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCItemStack is;
-			if(args[0].isInstanceOf(CArray.TYPE)) {
+			if(args[0].isInstanceOf(CArray.TYPE, null, environment)) {
 				is = ObjectGenerator.GetGenerator().item(args[0], t);
 			} else {
 				is = Static.ParseItemNotation(null, args[0].val(), 1, t);
@@ -519,7 +519,7 @@ public class Enchantments {
 				FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() == 1
-					&& (children.get(0).getData().isInstanceOf(CString.TYPE) || children.get(0).getData().isInstanceOf(CInt.TYPE))) {
+					&& (children.get(0).getData().isInstanceOf(CString.TYPE, null, env) || children.get(0).getData().isInstanceOf(CInt.TYPE, null, env))) {
 				env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
 						new CompilerWarning("The string item format in " + getName() + " is deprecated.", t, null));
 			}

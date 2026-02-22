@@ -156,9 +156,9 @@ public class Exceptions {
 			List<FullyQualifiedClassName> interest = new ArrayList<>();
 			if(types != null) {
 				Mixed ptypes = that.seval(types, env);
-				if(ptypes.isInstanceOf(CString.TYPE)) {
+				if(ptypes.isInstanceOf(CString.TYPE, null, env)) {
 					interest.add(FullyQualifiedClassName.forName(ptypes.val(), t, env));
-				} else if(ptypes.isInstanceOf(CArray.TYPE)) {
+				} else if(ptypes.isInstanceOf(CArray.TYPE, null, env)) {
 					CArray ca = (CArray) ptypes;
 					for(int i = 0; i < ca.size(); i++) {
 						interest.add(FullyQualifiedClassName.forName(ca.get(i, t).val(), t, env));
@@ -399,7 +399,7 @@ public class Exceptions {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			if(args[0].isInstanceOf(CClosure.TYPE)) {
+			if(args[0].isInstanceOf(CClosure.TYPE, null, environment)) {
 				CClosure old = environment.getEnv(StaticRuntimeEnv.class).getExceptionHandler();
 				environment.getEnv(StaticRuntimeEnv.class).setExceptionHandler((CClosure) args[0]);
 				if(old == null) {
@@ -612,7 +612,7 @@ public class Exceptions {
 
 				// Check for a container function with a string as first argument, being an unknown type.
 				if(assign.numberOfChildren() > 0) {
-					if(assign.getChildAt(0).getData().isInstanceOf(CString.TYPE)) {
+					if(assign.getChildAt(0).getData().isInstanceOf(CString.TYPE, null, env)) {
 						throw new ConfigCompileException("Unknown class type: "
 								+ assign.getChildAt(0).getData().val(), t);
 					}

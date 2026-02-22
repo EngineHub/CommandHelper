@@ -142,11 +142,6 @@ public class EntityEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
-		}
-
-		@Override
 		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			if(e instanceof MCItemDespawnEvent) {
 				Target t = Target.UNKNOWN;
@@ -219,11 +214,6 @@ public class EntityEvents {
 				return true;
 			}
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 
 		@Override
@@ -313,11 +303,6 @@ public class EntityEvents {
 				return true;
 			}
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 
 		@Override
@@ -425,8 +410,8 @@ public class EntityEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			MCEntity p = Static.getEntity(manualObject.get("id", Target.UNKNOWN), Target.UNKNOWN);
+		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
+			MCEntity p = Static.getEntity(manualObject.get("id", Target.UNKNOWN, env), Target.UNKNOWN);
 			if(!(p instanceof MCProjectile)) {
 				throw new CREBadEntityException("The id was not a projectile", Target.UNKNOWN);
 			}
@@ -554,11 +539,6 @@ public class EntityEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
-		}
-
-		@Override
 		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
 			if(event instanceof MCProjectileLaunchEvent) {
 				MCProjectileLaunchEvent projectileLaunchEvent = (MCProjectileLaunchEvent) event;
@@ -656,11 +636,6 @@ public class EntityEvents {
 				return true;
 			}
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
 		}
 
 		@Override
@@ -773,11 +748,6 @@ public class EntityEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
-		}
-
-		@Override
 		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
 			if(!(event instanceof MCCreatureSpawnEvent)) {
 				throw new EventException("Could not convert to MCCreatureSpawnEvent");
@@ -878,11 +848,6 @@ public class EntityEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
-		}
-
-		@Override
 		public Map<String, Mixed> evaluate(BindableEvent e)
 				throws EventException {
 			if(e instanceof MCEntityDamageEvent) {
@@ -957,11 +922,6 @@ public class EntityEvents {
 				return true;
 			}
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
 		}
 
 		@Override
@@ -1056,11 +1016,6 @@ public class EntityEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
-		}
-
-		@Override
 		public Map<String, Mixed> evaluate(BindableEvent e)
 				throws EventException {
 			if(e instanceof MCPlayerInteractAtEntityEvent) {
@@ -1123,11 +1078,6 @@ public class EntityEvents {
 					+ "| item: An item array representing the item being dropped.} "
 					+ "{item: setting this to null removes the dropped item} "
 					+ "{player|item}";
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
 		}
 
 		@Override
@@ -1247,11 +1197,6 @@ public class EntityEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
-		}
-
-		@Override
 		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			if(e instanceof MCPlayerPickupItemEvent) {
 				MCPlayerPickupItemEvent event = (MCPlayerPickupItemEvent) e;
@@ -1326,11 +1271,6 @@ public class EntityEvents {
 				return event.getEntity() instanceof MCPlayer;
 			}
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 
 		@Override
@@ -1484,9 +1424,9 @@ public class EntityEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manual, Target t) {
+		public BindableEvent convert(CArray manual, Target t, Environment env) {
 			return EventBuilder.instantiate(MCEntityTargetEvent.class,
-					Static.GetPlayer(manual.get("player", Target.UNKNOWN).val(), Target.UNKNOWN));
+					Static.GetPlayer(manual.get("player", Target.UNKNOWN, env).val(), Target.UNKNOWN));
 		}
 
 	}
@@ -1526,11 +1466,6 @@ public class EntityEvents {
 				return true;
 			}
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 
 		@Override
@@ -1622,11 +1557,6 @@ public class EntityEvents {
 				return true;
 			}
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
 		}
 
 		@Override
@@ -1726,11 +1656,6 @@ public class EntityEvents {
 				return true;
 			}
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
 		}
 
 		@Override
@@ -1843,12 +1768,6 @@ public class EntityEvents {
 				return false;
 			}
 		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
-		}
-
 		@Override
 		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
 			if(event instanceof MCHangingBreakEvent) {
@@ -1929,11 +1848,6 @@ public class EntityEvents {
 				return true;
 			}
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
 		}
 
 		@Override
@@ -2026,11 +1940,6 @@ public class EntityEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
-		}
-
-		@Override
 		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			if(e instanceof MCEntityToggleGlideEvent) {
 				MCEntityToggleGlideEvent evt = (MCEntityToggleGlideEvent) e;
@@ -2105,11 +2014,6 @@ public class EntityEvents {
 							return event.getEntity().getUniqueId().toString();
 						}
 					});
-		}
-
-		@Override
-		public MCEntityToggleSwimEvent convert(CArray manualObject, Target t) {
-			return null;
 		}
 
 		@Override
@@ -2191,11 +2095,6 @@ public class EntityEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
-		}
-
-		@Override
 		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
 			if(event instanceof MCFireworkExplodeEvent) {
 				MCFireworkExplodeEvent e = (MCFireworkExplodeEvent) event;
@@ -2253,11 +2152,6 @@ public class EntityEvents {
 				return true;
 			}
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
 		}
 
 		@Override
@@ -2328,11 +2222,6 @@ public class EntityEvents {
 				return true;
 			}
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
 		}
 
 		@Override
@@ -2412,11 +2301,6 @@ public class EntityEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
-		}
-
-		@Override
 		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			if(e instanceof MCEntityUnleashEvent) {
 				MCEntityUnleashEvent event = (MCEntityUnleashEvent) e;
@@ -2472,11 +2356,6 @@ public class EntityEvents {
 				return true;
 			}
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
 		}
 
 		@Override
@@ -2557,11 +2436,6 @@ public class EntityEvents {
 		@Override
 		public Driver driver() {
 			return Driver.ENTITY_POTION_EFFECT;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
 		}
 
 		@Override

@@ -29,6 +29,7 @@ import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.AbstractEvent;
 import com.laytonsmith.core.events.BindableEvent;
 import com.laytonsmith.core.events.BoundEvent;
@@ -83,11 +84,6 @@ public class VehicleEvents {
 				return true;
 			}
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 
 		@Override
@@ -154,11 +150,6 @@ public class VehicleEvents {
 				return true;
 			}
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 
 		@Override
@@ -272,12 +263,6 @@ public class VehicleEvents {
 			}
 			return false;
 		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
-		}
-
 		@Override
 		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
 			if(event instanceof MCVehicleCollideEvent) {
@@ -482,15 +467,17 @@ public class VehicleEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
+		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
 
-			MCEntity e = Static.getEntity(manualObject.get("id", Target.UNKNOWN), Target.UNKNOWN);
+			MCEntity e = Static.getEntity(manualObject.get("id", t, env), t);
 			if(!(e instanceof MCVehicle)) {
-				throw new CREBadEntityException("The id was not a vehicle", Target.UNKNOWN);
+				throw new CREBadEntityException("The id was not a vehicle", t);
 			}
 
-			MCLocation from = ObjectGenerator.GetGenerator().location(manualObject.get("from", Target.UNKNOWN), e.getWorld(), manualObject.getTarget());
-			MCLocation to = ObjectGenerator.GetGenerator().location(manualObject.get("to", Target.UNKNOWN), e.getWorld(), manualObject.getTarget());
+			MCLocation from = ObjectGenerator.GetGenerator().location(manualObject.get("from", t, env),
+					e.getWorld(), manualObject.getTarget());
+			MCLocation to = ObjectGenerator.GetGenerator().location(manualObject.get("to", t, env),
+					e.getWorld(), manualObject.getTarget());
 			return EventBuilder.instantiate(MCVehicleMoveEvent.class, e, from, to);
 		}
 
@@ -578,11 +565,6 @@ public class VehicleEvents {
 				return true;
 			}
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 
 		@Override

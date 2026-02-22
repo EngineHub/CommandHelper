@@ -75,7 +75,7 @@ public class InstanceofUtil {
 			// TODO: Need to put the return type here, so we can work with this, but for now, just always return false
 			return false;
 		}
-		return isInstanceof(value.typeof(), instanceofThis, env);
+		return isInstanceof(value.typeof(env), instanceofThis, env);
 	}
 
 	/**

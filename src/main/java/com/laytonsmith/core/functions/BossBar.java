@@ -132,7 +132,7 @@ public class BossBar {
 			boolean visible = true;
 			double percent = 1.0;
 			if(args.length == 2) {
-				if(!(args[1].isInstanceOf(CArray.TYPE))) {
+				if(!(args[1].isInstanceOf(CArray.TYPE, null, env))) {
 					throw new CRECastException("Expected array for parameter 2 of create_bar()", t);
 				}
 				CArray ca = (CArray) args[1];
@@ -209,15 +209,15 @@ public class BossBar {
 			if(bar == null) {
 				throw new CRENotFoundException("That boss bar id does not exist.", t);
 			}
-			if(args[1].isInstanceOf(CString.TYPE)) {
+			if(args[1].isInstanceOf(CString.TYPE, null, env)) {
 				bar.setTitle(args[1].val());
-			} else if(args[1].isInstanceOf(CDouble.TYPE)) {
+			} else if(args[1].isInstanceOf(CDouble.TYPE, null, env)) {
 				try {
 					bar.setProgress(ArgumentValidation.getDouble(args[1], t));
 				} catch (IllegalArgumentException ex) {
 					throw new CRERangeException("Progress percentage must be from 0.0 to 1.0.", t);
 				}
-			} else if(args[1].isInstanceOf(CArray.TYPE)) {
+			} else if(args[1].isInstanceOf(CArray.TYPE, null, env)) {
 				CArray ca = (CArray) args[1];
 				if(ca.containsKey("title")) {
 					bar.setTitle(ca.get("title", t).val());

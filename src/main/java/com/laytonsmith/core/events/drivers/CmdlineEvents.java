@@ -12,6 +12,7 @@ import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.AbstractEvent;
 import com.laytonsmith.core.events.BindableEvent;
 import com.laytonsmith.core.events.BoundEvent;
@@ -100,7 +101,7 @@ public class CmdlineEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
+		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
 			return new BindableEvent() {
 
 				@Override
@@ -164,9 +165,9 @@ public class CmdlineEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			CmdlinePromptInput cpi = new CmdlinePromptInput(manualObject.get("command", t).val(),
-					ArgumentValidation.getBoolean(manualObject.get("shellMode", t), t));
+		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
+			CmdlinePromptInput cpi = new CmdlinePromptInput(manualObject.get("command", t, env).val(),
+					ArgumentValidation.getBoolean(manualObject.get("shellMode", t, env), t));
 			return cpi;
 		}
 
@@ -259,11 +260,6 @@ public class CmdlineEvents {
 		@Override
 		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			return true;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
 		@Override

@@ -36,6 +36,7 @@ import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.AbstractEvent;
 import com.laytonsmith.core.events.BindableEvent;
 import com.laytonsmith.core.events.BoundEvent;
@@ -66,11 +67,6 @@ public class BlockEvents {
 		@Override
 		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			return true;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
 		}
 
 		@Override
@@ -253,11 +249,6 @@ public class BlockEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
-		}
-
-		@Override
 		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			MCBlockBreakEvent event = (MCBlockBreakEvent) e;
 			Target t = Target.UNKNOWN;
@@ -395,11 +386,6 @@ public class BlockEvents {
 			}
 
 			return true;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
 		}
 
 		@Override
@@ -548,11 +534,6 @@ public class BlockEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
-		}
-
-		@Override
 		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			MCBlockBurnEvent event = (MCBlockBurnEvent) e;
 			Target t = Target.UNKNOWN;
@@ -624,11 +605,6 @@ public class BlockEvents {
 			Prefilters.match(prefilter, "cause", event.getCause().name(), Prefilters.PrefilterType.MACRO);
 			Prefilters.match(prefilter, "world", event.getBlock().getWorld().getName(), Prefilters.PrefilterType.STRING_MATCH);
 			return true;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
 		}
 
 		@Override
@@ -769,11 +745,6 @@ public class BlockEvents {
 			Prefilters.match(prefilter, "toworld", event.getToBlock().getWorld().getName(), PrefilterType.STRING_MATCH);
 			Prefilters.match(prefilter, "face", event.getBlockFace().toString(), PrefilterType.STRING_MATCH);
 			return true;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
 		}
 
 		@Override
@@ -1045,7 +1016,7 @@ public class BlockEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manual, Target t) {
+		public BindableEvent convert(CArray manual, Target t, Environment env) {
 			MCSignChangeEvent e = EventBuilder.instantiate(
 					MCSignChangeEvent.class,
 					Static.GetPlayer(manual.get("player", Target.UNKNOWN).val(), Target.UNKNOWN),
@@ -1107,11 +1078,6 @@ public class BlockEvents {
 				return true;
 			}
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
 		}
 
 		@Override
@@ -1257,11 +1223,6 @@ public class BlockEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
-		}
-
-		@Override
 		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
 			if(!(event instanceof MCBlockGrowEvent)) {
 				throw new EventException("Cannot convert event to BlockGrowEvent");
@@ -1314,11 +1275,6 @@ public class BlockEvents {
 		@Override
 		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event) throws PrefilterNonMatchException {
 			return event instanceof MCNotePlayEvent;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
 		}
 
 		@Override
@@ -1420,11 +1376,6 @@ public class BlockEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
-		}
-
-		@Override
 		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			if(!(e instanceof MCBlockFadeEvent)) {
 				throw new EventException("Cannot convert event to BlockFadeEvent");
@@ -1478,11 +1429,6 @@ public class BlockEvents {
 		@Override
 		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			return e instanceof MCBlockExplodeEvent;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
 		}
 
 		@Override
@@ -1553,11 +1499,6 @@ public class BlockEvents {
 		@Override
 		public Driver driver() {
 			return Driver.BLOCK_FORM;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
 		}
 
 		@Override

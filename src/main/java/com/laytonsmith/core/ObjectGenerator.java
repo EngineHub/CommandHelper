@@ -181,6 +181,12 @@ public class ObjectGenerator {
 		return ca;
 	}
 
+	/** @deprecated Use {@link #location(Mixed, MCWorld, Target, Environment)} instead. */
+	@Deprecated
+	public MCLocation location(Mixed c, MCWorld w, Target t) {
+		return location(c, w, t, null);
+	}
+
 	/**
 	 * Given a Location Object, returns a MCLocation. If the optional world is not specified in the object, the world
 	 * provided is used instead. Location "objects" are MethodScript arrays that represent a location in game. There are
@@ -188,9 +194,9 @@ public class ObjectGenerator {
 	 * yaw, pitch)</li> </ul> In all cases, the pitch and yaw default to 0, and the world defaults to the specified
 	 * world. <em>More conveniently: ([world], x, y, z, [yaw, pitch])</em>
 	 */
-	public MCLocation location(Mixed c, MCWorld w, Target t) {
+	public MCLocation location(Mixed c, MCWorld w, Target t, Environment env) {
 		if(!(c.isInstanceOf(CArray.TYPE))) {
-			throw new CREFormatException("Expecting an array, received " + c.typeof().getSimpleName(), t);
+			throw new CREFormatException("Expecting an array, received " + c.typeof(env).getSimpleName(), t);
 		}
 		CArray array = (CArray) c;
 		MCWorld world = w;
@@ -2063,6 +2069,12 @@ public class ObjectGenerator {
 		return vector(Vector3D.ZERO, c, t);
 	}
 
+	/** @deprecated Use {@link #vector(Vector3D, Mixed, Target, Environment)} instead. */
+	@Deprecated
+	public Vector3D vector(Vector3D v, Mixed c, Target t) {
+		return vector(v, c, t, null);
+	}
+
 	/**
 	 * Modifies an existing vector using a given vector object. Because Vector3D is immutable, this method does not
 	 * actually modify the existing vector, but creates a new one.
@@ -2072,7 +2084,7 @@ public class ObjectGenerator {
 	 * @param t the target
 	 * @return the Vector
 	 */
-	public Vector3D vector(Vector3D v, Mixed c, Target t) {
+	public Vector3D vector(Vector3D v, Mixed c, Target t, Environment env) {
 		if(c.isInstanceOf(CArray.TYPE)) {
 			CArray va = (CArray) c;
 			double x = v.X();
@@ -2107,7 +2119,7 @@ public class ObjectGenerator {
 			// fulfilling the todo?
 			return v;
 		} else {
-			throw new CREFormatException("Expecting an array, received " + c.typeof().getSimpleName(), t);
+			throw new CREFormatException("Expecting an array, received " + c.typeof(env).getSimpleName(), t);
 		}
 	}
 
@@ -2446,7 +2458,13 @@ public class ObjectGenerator {
 		return fe;
 	}
 
+	/** @deprecated Use {@link #fireworkEffect(CArray, Target, Environment)} instead. */
+	@Deprecated
 	public MCFireworkEffect fireworkEffect(CArray fe, Target t) {
+		return fireworkEffect(fe, t, null);
+	}
+
+	public MCFireworkEffect fireworkEffect(CArray fe, Target t, Environment env) {
 		MCFireworkBuilder builder = StaticLayer.GetConvertor().GetFireworkBuilder();
 		if(fe.containsKey("flicker")) {
 			builder.setFlicker(ArgumentValidation.getBoolean(fe.get("flicker", t), t));
@@ -2473,7 +2491,7 @@ public class ObjectGenerator {
 							break;
 						} else {
 							throw new CREFormatException("Expecting individual color to be an array or string, but found "
-									+ color.typeof(), t);
+									+ color.typeof(env), t);
 						}
 						builder.addColor(mccolor);
 					}
@@ -2489,7 +2507,7 @@ public class ObjectGenerator {
 				}
 			} else {
 				throw new CREFormatException("Expecting an array or string for colors parameter, but found "
-						+ colors.typeof(), t);
+						+ colors.typeof(env), t);
 			}
 		} else {
 			builder.addColor(MCColor.WHITE);
@@ -2510,7 +2528,7 @@ public class ObjectGenerator {
 						break;
 					} else {
 						throw new CREFormatException("Expecting individual color to be an array or string, but found "
-								+ color.typeof(), t);
+								+ color.typeof(env), t);
 					}
 					builder.addFadeColor(mccolor);
 				}
@@ -2521,7 +2539,7 @@ public class ObjectGenerator {
 				}
 			} else {
 				throw new CREFormatException("Expecting an array or string for fade parameter, but found "
-						+ colors.typeof(), t);
+						+ colors.typeof(env), t);
 			}
 		}
 		if(fe.containsKey("type")) {
@@ -2595,9 +2613,15 @@ public class ObjectGenerator {
 		return ret;
 	}
 
+	/** @deprecated Use {@link #recipe(Mixed, Target, Environment)} instead. */
+	@Deprecated
 	public MCRecipe recipe(Mixed c, Target t) {
+		return recipe(c, t, null);
+	}
+
+	public MCRecipe recipe(Mixed c, Target t, Environment env) {
 		if(!(c.isInstanceOf(CArray.TYPE))) {
-			throw new CRECastException("Expected array but received " + c.typeof().getSimpleName(), t);
+			throw new CRECastException("Expected array but received " + c.typeof(env).getSimpleName(), t);
 		}
 		CArray recipe = (CArray) c;
 

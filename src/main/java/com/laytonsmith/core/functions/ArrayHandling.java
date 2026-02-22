@@ -3818,18 +3818,18 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			Mixed fill = args[1];
 			if(args[0] instanceof CFixedArray fa) {
-				fa.fill(fill, t);
+				fa.fill(fill, t, env);
 				return fa;
 			} else {
-				CArray array = ArgumentValidation.getArray(args[0], t);
+				CArray array = ArgumentValidation.getArray(args[0], t, env);
 				if(array.isAssociative()) {
 					throw new CRECastException(getName() + " can only accept normal arrays.", t);
 				}
-				for(Mixed key : array.keySet()) {
-					array.set(key, fill, t);
+				for(Mixed key : array.keySet(env)) {
+					array.set(key, fill, t, env);
 				}
 				return array;
 			}

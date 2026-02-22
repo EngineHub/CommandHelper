@@ -154,7 +154,7 @@ public class SQL {
 		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			try {
 				Profiles.Profile profile;
-				if(args[0].isInstanceOf(CArray.TYPE)) {
+				if(args[0].isInstanceOf(CArray.TYPE, null, environment)) {
 					Map<String, String> data = new HashMap<>();
 					for(String key : ((CArray) args[0]).stringKeySet()) {
 						data.put(key, ((CArray) args[0]).get(key, t).val());
@@ -201,19 +201,19 @@ public class SQL {
 							continue;
 						}
 						try {
-							if(params[i].isInstanceOf(CInt.TYPE)) {
+							if(params[i].isInstanceOf(CInt.TYPE, null, environment)) {
 								ps.setLong(i + 1, ArgumentValidation.getInt(params[i], t));
-							} else if(params[i].isInstanceOf(CDouble.TYPE)) {
+							} else if(params[i].isInstanceOf(CDouble.TYPE, null, environment)) {
 								ps.setDouble(i + 1, (Double) ArgumentValidation.getDouble(params[i], t));
-							} else if(params[i].isInstanceOf(CString.TYPE)) {
+							} else if(params[i].isInstanceOf(CString.TYPE, null, environment)) {
 								if(type == Types.NCHAR || type == Types.NVARCHAR || type == Types.LONGNVARCHAR) {
 									ps.setNString(i + 1, (String) params[i].val());
 								} else {
 									ps.setString(i + 1, (String) params[i].val());
 								}
-							} else if(params[i].isInstanceOf(CByteArray.TYPE)) {
+							} else if(params[i].isInstanceOf(CByteArray.TYPE, null, environment)) {
 								ps.setBytes(i + 1, ((CByteArray) params[i]).asByteArrayCopy());
-							} else if(params[i].isInstanceOf(CBoolean.TYPE)) {
+							} else if(params[i].isInstanceOf(CBoolean.TYPE, null, environment)) {
 								ps.setBoolean(i + 1, ArgumentValidation.getBoolean(params[i], t));
 							} else {
 								throw new CRECastException("The type " + params[i].getClass().getSimpleName()
@@ -347,7 +347,7 @@ public class SQL {
 					env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
 							new CompilerWarning(msg, t, null));
 				}
-			} else if(queryData.isInstanceOf(CString.TYPE)) {
+			} else if(queryData.isInstanceOf(CString.TYPE, null, env)) {
 				//It's a hard coded query, so we can double check parameter lengths and other things
 				String query = queryData.val();
 				int count = 0;
@@ -499,7 +499,7 @@ public class SQL {
 		public Mixed exec(final Target t, final Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			startup();
 			Mixed arg = args[args.length - 1];
-			if(!(arg.isInstanceOf(CClosure.TYPE))) {
+			if(!(arg.isInstanceOf(CClosure.TYPE, null, environment))) {
 				throw new CRECastException("The last argument to " + getName() + " must be a closure.", t);
 			}
 			final CClosure closure = ((CClosure) arg);

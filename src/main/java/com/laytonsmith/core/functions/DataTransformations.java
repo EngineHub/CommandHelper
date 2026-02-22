@@ -338,7 +338,7 @@ public class DataTransformations {
 				String val;
 				if(c instanceof CNull) {
 					val = "";
-				} else if(c.isInstanceOf(CArray.TYPE)) {
+				} else if(c.isInstanceOf(CArray.TYPE, null, environment)) {
 					throw new CRECastException("Arrays cannot be encoded with ini_encode.", t);
 				} else {
 					val = c.val();

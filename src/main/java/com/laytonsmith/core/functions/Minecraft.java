@@ -97,7 +97,7 @@ public class Minecraft {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
-			if(args[0].isInstanceOf(CInt.TYPE)) {
+			if(args[0].isInstanceOf(CInt.TYPE, null, env)) {
 				return new CInt(ArgumentValidation.getInt(args[0], t), t);
 			}
 			String c = args[0].val();
@@ -229,7 +229,7 @@ public class Minecraft {
 		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			int i = -1;
 			int i2 = -1;
-			if(args[0].isInstanceOf(CString.TYPE)) {
+			if(args[0].isInstanceOf(CString.TYPE, null, environment)) {
 				//We also accept item notation
 				if(args[0].val().contains(":")) {
 					String[] split = args[0].val().split(":");
@@ -241,7 +241,7 @@ public class Minecraft {
 						throw new CREFormatException("Incorrect format for the item notation: " + args[0].val(), t);
 					}
 				}
-			} else if(args[0].isInstanceOf(CArray.TYPE)) {
+			} else if(args[0].isInstanceOf(CArray.TYPE, null, environment)) {
 				MCItemStack is = ObjectGenerator.GetGenerator().item(args[0], t, true);
 				return new CString(is.getType().getName(), t);
 			}
@@ -360,7 +360,7 @@ public class Minecraft {
 		@Override
 		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			Mixed id = args[0];
-			if(id.isInstanceOf(CArray.TYPE)) {
+			if(id.isInstanceOf(CArray.TYPE, null, environment)) {
 				MCItemStack is = ObjectGenerator.GetGenerator().item(id, t);
 				return new CInt(is.maxStackSize(), t);
 			}
@@ -398,7 +398,7 @@ public class Minecraft {
 			if(children.size() < 1) {
 				return null;
 			}
-			if(children.get(0).getData().isInstanceOf(CString.TYPE) && children.get(0).getData().val().contains(":")
+			if(children.get(0).getData().isInstanceOf(CString.TYPE, null, env) && children.get(0).getData().val().contains(":")
 					|| ArgumentValidation.isNumber(children.get(0).getData())) {
 				env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
 						new CompilerWarning("Numeric ids are deprecated in " + getName(), t, null));
@@ -551,7 +551,7 @@ public class Minecraft {
 				return null;
 			}
 			Mixed effect = children.get(1).getData();
-			if(effect.isInstanceOf(CString.TYPE)) {
+			if(effect.isInstanceOf(CString.TYPE, null, env)) {
 				String effectName = effect.val().split(":")[0].toUpperCase();
 				try {
 					MCEffect.valueOf(effectName);

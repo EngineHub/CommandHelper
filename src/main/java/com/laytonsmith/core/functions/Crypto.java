@@ -461,7 +461,7 @@ public class Crypto {
 			}
 			try {
 				String val;
-				if(args[0].isInstanceOf(CSecureString.TYPE)) {
+				if(args[0].isInstanceOf(CSecureString.TYPE, null, environment)) {
 					val = new String(((CSecureString) args[0]).getDecryptedCharArray());
 				} else {
 					val = args[0].val();
@@ -532,7 +532,7 @@ public class Crypto {
 		@Override
 		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String val;
-			if(args[0].isInstanceOf(CSecureString.TYPE)) {
+			if(args[0].isInstanceOf(CSecureString.TYPE, null, environment)) {
 				val = new String(((CSecureString) args[0]).getDecryptedCharArray());
 			} else {
 				val = args[0].val();
