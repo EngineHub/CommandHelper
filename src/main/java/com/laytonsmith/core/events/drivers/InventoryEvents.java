@@ -44,9 +44,7 @@ import com.laytonsmith.core.events.BoundEvent;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
-import com.laytonsmith.core.exceptions.CRE.CREBindException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
-import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.core.functions.InventoryManagement;
@@ -131,11 +129,6 @@ public class InventoryEvents {
 				return true;
 			}
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			throw new CREBindException("Unsupported Operation", Target.UNKNOWN);
 		}
 
 		@Override
@@ -274,11 +267,6 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
-		}
-
-		@Override
 		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
 			if(event instanceof MCInventoryDragEvent) {
 				MCInventoryDragEvent e = (MCInventoryDragEvent) event;
@@ -384,11 +372,6 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
-		}
-
-		@Override
 		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
 			if(event instanceof MCInventoryOpenEvent) {
 				MCInventoryOpenEvent e = (MCInventoryOpenEvent) event;
@@ -466,11 +449,6 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
-		}
-
-		@Override
 		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
 			if(event instanceof MCInventoryCloseEvent) {
 				MCInventoryCloseEvent e = (MCInventoryCloseEvent) event;
@@ -544,11 +522,6 @@ public class InventoryEvents {
 		@Override
 		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			return true;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
 		}
 
 		@Override
@@ -635,11 +608,6 @@ public class InventoryEvents {
 		@Override
 		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			return true;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
 		}
 
 		@Override
@@ -741,11 +709,6 @@ public class InventoryEvents {
 				return true;
 			}
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			throw ConfigRuntimeException.CreateUncatchableException("Unsupported operation.", Target.UNKNOWN);
 		}
 
 		@Override
@@ -854,11 +817,6 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			throw ConfigRuntimeException.CreateUncatchableException("Unsupported operation.", Target.UNKNOWN);
-		}
-
-		@Override
 		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
 			if(event instanceof MCItemSwapEvent) {
 				MCItemSwapEvent e = (MCItemSwapEvent) event;
@@ -926,11 +884,6 @@ public class InventoryEvents {
 				return true;
 			}
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			throw ConfigRuntimeException.CreateUncatchableException("Unsupported operation.", Target.UNKNOWN);
 		}
 
 		@Override
@@ -1016,11 +969,6 @@ public class InventoryEvents {
 				return true;
 			}
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			throw ConfigRuntimeException.CreateUncatchableException("Unsupported operation.", Target.UNKNOWN);
 		}
 
 		@Override
@@ -1121,11 +1069,6 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			throw ConfigRuntimeException.CreateUncatchableException("Unsupported operation.", Target.UNKNOWN);
-		}
-
-		@Override
 		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
 			if(event instanceof MCPrepareSmithingEvent e) {
 				MCSmithingInventory smithing = (MCSmithingInventory) e.getInventory();
@@ -1196,11 +1139,6 @@ public class InventoryEvents {
 				return true;
 			}
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			throw ConfigRuntimeException.CreateUncatchableException("Unsupported operation.", Target.UNKNOWN);
 		}
 
 		@Override

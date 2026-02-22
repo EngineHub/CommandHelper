@@ -243,25 +243,25 @@ public class Procedure implements Cloneable {
 
 				// Type check vararg parameter.
 				if(var.getDefinedType().isVariadicType()) {
-					if(InstanceofUtil.isInstanceof(c.typeof(), var.getDefinedType().getVarargsBaseType(), env)) {
+					if(InstanceofUtil.isInstanceof(c.typeof(env), var.getDefinedType().getVarargsBaseType(), env)) {
 						vararg.push(c, t);
 						continue;
 					} else {
 						throw new CRECastException("Procedure \"" + name + "\" expects a value of type "
 								+ var.getDefinedType().val() + " in argument " + (varInd + 1) + ", but"
-								+ " a value of type " + c.typeof() + " was found instead.", c.getTarget());
+								+ " a value of type " + c.typeof(env) + " was found instead.", c.getTarget());
 					}
 				}
 
 				// Type check non-vararg parameter.
-				if(InstanceofUtil.isInstanceof(c.typeof(), var.getDefinedType(), env)) {
+				if(InstanceofUtil.isInstanceof(c.typeof(env), var.getDefinedType(), env)) {
 					env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(var.getDefinedType(),
 							var.getVariableName(), c, c.getTarget()));
 					continue;
 				} else {
 					throw new CRECastException("Procedure \"" + name + "\" expects a value of type "
 							+ var.getDefinedType().val() + " in argument " + (varInd + 1) + ", but"
-							+ " a value of type " + c.typeof() + " was found instead.", c.getTarget());
+							+ " a value of type " + c.typeof(env) + " was found instead.", c.getTarget());
 				}
 			}
 		}
@@ -302,9 +302,9 @@ public class Procedure implements Cloneable {
 			}
 			if(returnType.equals(CVoid.TYPE) != ret.equals(CVoid.VOID)
 					|| !ret.equals(CNull.NULL) && !ret.equals(CVoid.VOID)
-					&& !InstanceofUtil.isInstanceof(ret.typeof(), returnType, env)) {
+					&& !InstanceofUtil.isInstanceof(ret.typeof(env), returnType, env)) {
 				throw new CRECastException("Expected procedure \"" + name + "\" to return a value of type "
-						+ returnType.val() + " but a value of type " + ret.typeof() + " was returned instead",
+						+ returnType.val() + " but a value of type " + ret.typeof(env) + " was returned instead",
 						ret.getTarget());
 			}
 			return ret;

@@ -72,7 +72,7 @@ public interface Event<TBindableEvent extends BindableEvent> extends Comparable<
 	 * @param t
 	 * @return
 	 */
-	public TBindableEvent convert(CArray manualObject, Target t);
+	public TBindableEvent convert(CArray manualObject, Target t, Environment env);
 
 	/**
 	 * This function is called when an event is triggered. It passes the event, and expects back a Map, which will be

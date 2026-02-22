@@ -165,10 +165,10 @@ public class EventBinding {
 			ParseTree tree = nodes[nodes.length - 1];
 
 			//Check to see if our arguments are correct
-			if(!(options instanceof CNull || options.isInstanceOf(CArray.TYPE))) {
+			if(!(options instanceof CNull || options.isInstanceOf(CArray.TYPE, null, env))) {
 				throw new CRECastException("The options must be an array or null", t);
 			}
-			if(!(prefilter instanceof CNull || prefilter.isInstanceOf(CArray.TYPE))) {
+			if(!(prefilter instanceof CNull || prefilter.isInstanceOf(CArray.TYPE, null, env))) {
 				throw new CRECastException("The prefilters must be an array or null", t);
 			}
 			if(!(event_obj instanceof IVariable)) {
@@ -387,14 +387,14 @@ public class EventBinding {
 					if(node.getData() instanceof CFunction && node.getData().val().equals(Compiler.centry.NAME)) {
 						List<ParseTree> children = node.getChildren();
 						if(children.get(0).getData().val().equals("id")
-								&& children.get(1).getData().isInstanceOf(CString.TYPE)) {
+								&& children.get(1).getData().isInstanceOf(CString.TYPE, null, env)) {
 							if(children.get(1).getData().val().matches(".*?:\\d*?")) {
 								exceptions.add(new ConfigCompileException(children.get(1).getData().val()
 											+ " is not a valid event identifier."
 											+ " It cannot match the regex \".*?:\\d*?\".", children.get(1).getTarget()));
 							}
 						} else if(children.get(0).getData().val().equals("priority")
-								&& children.get(1).getData().isInstanceOf(CString.TYPE)) {
+								&& children.get(1).getData().isInstanceOf(CString.TYPE, null, env)) {
 							try {
 								BoundEvent.Priority.valueOf(children.get(1).getData().val().toUpperCase());
 								try {
@@ -748,20 +748,20 @@ public class EventBinding {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CArray obj = null;
 			if(args[1] instanceof CNull) {
 				obj = new CArray(t);
-			} else if(args[1].isInstanceOf(CArray.TYPE)) {
+			} else if(args[1].isInstanceOf(CArray.TYPE, null, env)) {
 				obj = (CArray) args[1];
 			} else {
 				throw new CRECastException("The eventObject must be null, or an array", t);
 			}
 			boolean serverWide = false;
 			if(args.length == 3) {
-				serverWide = ArgumentValidation.getBoolean(args[2], t);
+				serverWide = ArgumentValidation.getBoolean(args[2], t, env);
 			}
-			EventUtils.ManualTrigger(args[0].val(), obj, t, serverWide);
+			EventUtils.ManualTrigger(args[0].val(), obj, t, serverWide, env);
 			return CVoid.VOID;
 		}
 	}
@@ -896,7 +896,7 @@ public class EventBinding {
 			if(args.length == 0) {
 				e.lock(null);
 			} else {
-				if(args[0].isInstanceOf(CArray.TYPE)) {
+				if(args[0].isInstanceOf(CArray.TYPE, null, environment)) {
 					CArray ca = (CArray) args[1];
 					for(int i = 0; i < ca.size(); i++) {
 						params.add(ca.get(i, t).val());

@@ -33,7 +33,6 @@ import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventBuilder;
 import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
-import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
@@ -96,11 +95,6 @@ public class ServerEvents {
 			Prefilters.match(prefilter, "sendertype",
 					getCommandsenderString(event.getCommandSender()), PrefilterType.STRING_MATCH);
 			return true;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
 		@Override
@@ -183,11 +177,6 @@ public class ServerEvents {
 				return true;
 			}
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 
 		@Override
@@ -291,11 +280,6 @@ public class ServerEvents {
 		@Override
 		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event) throws PrefilterNonMatchException {
 			return event instanceof MCCommandTabCompleteEvent;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 
 		@Override
@@ -406,11 +390,6 @@ public class ServerEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			throw new UnsupportedOperationException("Not supported yet.");
-		}
-
-		@Override
 		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			MCRedstoneChangedEvent event = (MCRedstoneChangedEvent) e;
 			Map<String, Mixed> map = evaluate_helper(e);
@@ -465,26 +444,24 @@ public class ServerEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
+		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
 
 			// Get the player recipients.
 			Mixed cRecipients = manualObject.get("player_recipients", t);
 			if(!(cRecipients instanceof CArray) && !(cRecipients instanceof CNull)) {
-				throw new CRECastException("Expected player_recipients to be an array, but received: "
-						+ cRecipients.typeof().toString(), t);
+				throw new CRECastException("Expected player_recipients to be an array", t);
 			}
 			Set<MCCommandSender> recipients = new HashSet<>();
 			CArray recipientsArray = (CArray) cRecipients;
-			for(int i = 0; i < recipientsArray.size(); i++) {
-				MCPlayer player = Static.GetPlayer(recipientsArray.get(i, t), t);
+			for(int i = 0; i < recipientsArray.size(env); i++) {
+				MCPlayer player = Static.GetPlayer(recipientsArray.get(i, t, env), t);
 				recipients.add(player);
 			}
 
 			// Get the message.
-			Mixed cMessage = manualObject.get("message", t);
+			Mixed cMessage = manualObject.get("message", t, env);
 			if(!(cMessage instanceof CString)) {
-				throw new CRECastException("Expected message to be a string, but received: "
-						+ cMessage.typeof().toString(), t);
+				throw new CRECastException("Expected message to be a string.", t);
 			}
 
 			// Instantiate and return the event.

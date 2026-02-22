@@ -88,11 +88,6 @@ public final class WorldEvents {
 		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			return false;
 		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
-		}
 	}
 
 	@api
@@ -136,11 +131,6 @@ public final class WorldEvents {
 		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			return false;
 		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
-		}
 	}
 
 	@api
@@ -183,11 +173,6 @@ public final class WorldEvents {
 		@Override
 		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
 		}
 	}
 
@@ -268,11 +253,6 @@ public final class WorldEvents {
 		@Override
 		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
 		}
 	}
 }

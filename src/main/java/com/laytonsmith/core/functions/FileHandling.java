@@ -275,7 +275,7 @@ public class FileHandling {
 			}
 			final String encoding = _encoding;
 
-			if(!(args[1 + callbackIndex].isInstanceOf(CClosure.TYPE))) {
+			if(!(args[1 + callbackIndex].isInstanceOf(CClosure.TYPE, null, environment))) {
 				throw new CRECastException("Expected parameter " + (2 + callbackIndex) + " of " + getName() + " to be a closure!", t);
 			} else {
 				callback = ((CClosure) args[1]);

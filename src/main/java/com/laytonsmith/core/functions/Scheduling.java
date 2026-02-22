@@ -292,7 +292,7 @@ public class Scheduling {
 			if(time < 0) {
 				throw new CRERangeException("Negative repeating delay", t);
 			}
-			if(!(args[1 + offset].isInstanceOf(Callable.TYPE))) {
+			if(!(args[1 + offset].isInstanceOf(Callable.TYPE, null, environment))) {
 				throw new CRECastException(getName() + " expects a Callable to be sent as the second argument", t);
 			}
 			final Callable c = (Callable) args[1 + offset];
@@ -390,7 +390,7 @@ public class Scheduling {
 			if(time < 0) {
 				throw new CRERangeException("Negative delay", t);
 			}
-			if(!(args[1].isInstanceOf(Callable.TYPE))) {
+			if(!(args[1].isInstanceOf(Callable.TYPE, null, environment))) {
 				throw new CRECastException(getName() + " expects a Callable to be sent as the second argument", t);
 			}
 			final Callable c = (Callable) args[1];
@@ -855,10 +855,10 @@ public class Scheduling {
 		@Override
 		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			//First things first, check the format of the arguments.
-			if(!(args[0].isInstanceOf(CString.TYPE))) {
+			if(!(args[0].isInstanceOf(CString.TYPE, null, environment))) {
 				throw new CRECastException("Expected string for argument 1 in " + getName(), t);
 			}
-			if(!(args[1].isInstanceOf(CClosure.TYPE))) {
+			if(!(args[1].isInstanceOf(CClosure.TYPE, null, environment))) {
 				throw new CRECastException("Expected closure for argument 2 in " + getName(), t);
 			}
 			CronFormat format = validateFormat(args[0].val(), t);
@@ -1177,7 +1177,7 @@ public class Scheduling {
 				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.get(0).isConst()) {
-				if(children.get(0).getData().isInstanceOf(CString.TYPE)) {
+				if(children.get(0).getData().isInstanceOf(CString.TYPE, null, env)) {
 					validateFormat(children.get(0).getData().val(), t);
 				}
 			}

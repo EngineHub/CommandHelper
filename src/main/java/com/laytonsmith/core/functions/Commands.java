@@ -92,7 +92,7 @@ public class Commands {
 		 * @param arg
 		 */
 		public static void customExec(Target t, Environment environment, MCCommand cmd, Mixed arg) {
-			if(arg.isInstanceOf(Callable.TYPE)) {
+			if(arg.isInstanceOf(Callable.TYPE, null, environment)) {
 				onTabComplete.put(cmd.getName(), (Callable) arg);
 			} else {
 				throw new CREFormatException("Only Callables are accepted as tabcompleters", t);
@@ -244,7 +244,7 @@ public class Commands {
 				register = true;
 				cmd = StaticLayer.GetConvertor().getNewCommand(cmdStr);
 			}
-			if(args[1].isInstanceOf(CArray.TYPE)) {
+			if(args[1].isInstanceOf(CArray.TYPE, null, environment)) {
 				CArray ops = (CArray) args[1];
 				if(ops.containsKey("permission")) {
 					cmd.setPermission(ops.get("permission", t).val());
@@ -260,7 +260,7 @@ public class Commands {
 				}
 				List<String> oldAliases = new ArrayList<>(cmd.getAliases());
 				if(ops.containsKey("aliases")) {
-					if(ops.get("aliases", t).isInstanceOf(CArray.TYPE)) {
+					if(ops.get("aliases", t).isInstanceOf(CArray.TYPE, null, environment)) {
 						List<Mixed> ca = ((CArray) ops.get("aliases", t)).asList();
 						List<String> aliases = new ArrayList<>();
 						for(Mixed c : ca) {
@@ -519,7 +519,7 @@ public class Commands {
 		 * @param arg
 		 */
 		static void customExec(Target t, Environment environment, MCCommand cmd, Mixed arg) {
-			if(arg.isInstanceOf(CClosure.TYPE)) {
+			if(arg.isInstanceOf(CClosure.TYPE, null, environment)) {
 				onCommand.put(cmd.getName(), (CClosure) arg);
 			} else {
 				throw new CREFormatException("At this time, only closures are accepted as command executors.", t);
