@@ -38,6 +38,7 @@ import com.laytonsmith.core.objects.ObjectDefinitionTable;
 import com.laytonsmith.core.objects.ObjectModifier;
 import com.laytonsmith.core.objects.ObjectType;
 import com.laytonsmith.core.objects.UserObject;
+import com.laytonsmith.PureUtilities.Common.Annotations.AggressiveDeprecation;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -165,7 +166,22 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		}
 
 		@Override
+		public boolean isInstanceOf(CClassType type) {
+			throw new Error();
+		}
+
+		@Override
+		public boolean isInstanceOf(Class<? extends Mixed> type) {
+			throw new Error();
+		}
+
+		@Override
 		public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env) {
+			throw new Error();
+		}
+
+		@Override
+		public CClassType typeof() {
 			throw new Error();
 		}
 
@@ -881,6 +897,14 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 
 	// TODO: These getters will eventually be re-done to support static methods, but for now that is out of scope,
 	// so we just specifically support enums for now.
+	/** @deprecated Use {@link #get(String, Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
+	public Mixed get(String index, Target t) throws ConfigRuntimeException {
+		return get(index, t, null);
+	}
+
 	@Override
 	public Mixed get(String index, Target t, Environment env) throws ConfigRuntimeException {
 		if(isEnum(env)) {
@@ -891,6 +915,14 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 			}
 		}
 		throw new CREUnsupportedOperationException("Unsupported operation", t);
+	}
+
+	/** @deprecated Use {@link #get(int, Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
+	public Mixed get(int index, Target t) throws ConfigRuntimeException {
+		return get(index, t, null);
 	}
 
 	@Override
@@ -905,6 +937,14 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		throw new CREUnsupportedOperationException("Unsupported operation", t);
 	}
 
+	/** @deprecated Use {@link #get(Mixed, Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
+	public Mixed get(Mixed index, Target t) throws ConfigRuntimeException {
+		return get(index, t, null);
+	}
+
 	@Override
 	public Mixed get(Mixed index, Target t, Environment env) throws ConfigRuntimeException {
 		if(isEnum(env)) {
@@ -917,6 +957,14 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		throw new CREUnsupportedOperationException("Unsupported operation", t);
 	}
 
+	/** @deprecated Use {@link #keySet(Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
+	public Set<Mixed> keySet() {
+		return keySet(null);
+	}
+
 	@Override
 	public Set<Mixed> keySet(Environment env) {
 		if(isEnum(env)) {
@@ -927,6 +975,14 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 			}
 		}
 		return new HashSet<>();
+	}
+
+	/** @deprecated Use {@link #size(Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
+	public long size() {
+		return size(null);
 	}
 
 	@Override
@@ -951,6 +1007,14 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		return true;
 	}
 
+	/** @deprecated Use {@link #slice(int, int, Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
+	public Mixed slice(int begin, int end, Target t) {
+		return slice(begin, end, t, null);
+	}
+
 	@Override
 	public Mixed slice(int begin, int end, Target t, Environment env) {
 		throw new CREUnsupportedOperationException("Unsupported operation", t);
@@ -967,8 +1031,16 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		return nativeClass;
 	}
 
+	/** @deprecated Use {@link #getBooleanValue(Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
 	@Override
-	public boolean getBooleanValue(Environment env, Target t) {
+	public boolean getBooleanValue(Target t) {
+		return getBooleanValue(t, null);
+	}
+
+	@Override
+	public boolean getBooleanValue(Target t, Environment env) {
 		return true;
 	}
 

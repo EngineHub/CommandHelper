@@ -15,6 +15,7 @@ import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.objects.ObjectType;
+import com.laytonsmith.PureUtilities.Common.Annotations.AggressiveDeprecation;
 
 import java.util.AbstractSet;
 import java.util.Iterator;
@@ -67,6 +68,14 @@ public class CString extends CPrimitive implements Cloneable,
 		return false;
 	}
 
+	/** @deprecated Use {@link #size(Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
+	public long size() {
+		return size(null);
+	}
+
 	@Override
 	public long size(Environment env) {
 		return val().length();
@@ -75,6 +84,14 @@ public class CString extends CPrimitive implements Cloneable,
 	@Override
 	public boolean canBeAssociative() {
 		return false;
+	}
+
+	/** @deprecated Use {@link #slice(int, int, Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
+	public Mixed slice(int begin, int end, Target t) {
+		return slice(begin, end, t, null);
 	}
 
 	@Override
@@ -94,6 +111,14 @@ public class CString extends CPrimitive implements Cloneable,
 		return super.getQuote();
 	}
 
+	/** @deprecated Use {@link #get(int, Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
+	public Mixed get(int index, Target t) throws ConfigRuntimeException {
+		return get(index, t, null);
+	}
+
 	@Override
 	public Mixed get(int index, Target t, Environment env) throws ConfigRuntimeException {
 		try {
@@ -103,10 +128,26 @@ public class CString extends CPrimitive implements Cloneable,
 		}
 	}
 
+	/** @deprecated Use {@link #get(Mixed, Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
+	public final Mixed get(Mixed index, Target t) throws ConfigRuntimeException {
+		return get(index, t, null);
+	}
+
 	@Override
 	public final Mixed get(Mixed index, Target t, Environment env) throws ConfigRuntimeException {
 		int i = ArgumentValidation.getInt32(index, t, env);
 		return get(i, t, env);
+	}
+
+	/** @deprecated Use {@link #get(String, Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
+	public final Mixed get(String index, Target t) {
+		return get(index, t, null);
 	}
 
 	@Override
@@ -122,6 +163,14 @@ public class CString extends CPrimitive implements Cloneable,
 	@Override
 	public boolean isAssociative() {
 		return false;
+	}
+
+	/** @deprecated Use {@link #keySet(Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
+	public Set<Mixed> keySet() {
+		return keySet(null);
 	}
 
 	@Override
@@ -182,8 +231,16 @@ public class CString extends CPrimitive implements Cloneable,
 		return new CString(val(), getTarget());
 	}
 
+	/** @deprecated Use {@link #getBooleanValue(Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
 	@Override
-	public boolean getBooleanValue(Environment env, Target t) {
+	public boolean getBooleanValue(Target t) {
+		return getBooleanValue(t, null);
+	}
+
+	@Override
+	public boolean getBooleanValue(Target t, Environment env) {
 		if(val().equals("false")) {
 			MSLog.GetLogger().e(MSLog.Tags.FALSESTRING, "String \"false\" evaluates as true (non-empty strings are"
 					+ " true). This is most likely not what you meant to do. This warning can globally be disabled"

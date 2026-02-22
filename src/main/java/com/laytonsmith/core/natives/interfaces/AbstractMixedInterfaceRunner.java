@@ -17,6 +17,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.objects.AccessModifier;
 import com.laytonsmith.core.objects.ObjectModifier;
 import com.laytonsmith.core.objects.ObjectType;
+import com.laytonsmith.PureUtilities.Common.Annotations.AggressiveDeprecation;
 
 import java.net.URL;
 import java.util.EnumSet;
@@ -120,10 +121,26 @@ public abstract class AbstractMixedInterfaceRunner implements MixedInterfaceRunn
 	 *
 	 * @return
 	 * @throws IllegalArgumentException If the class isn't public facing.
+	 * @deprecated Use {@link #typeof(Environment)} instead.
 	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
+	public final CClassType typeof() {
+		return typeof(null);
+	}
+
 	@Override
 	public final CClassType typeof(Environment env) {
 		return Construct.typeof(this, env);
+	}
+
+	/** @deprecated Use {@link #isInstanceOf(CClassType, LeftHandGenericUse, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
+	public boolean isInstanceOf(CClassType type) {
+		return isInstanceOf(type, null, null);
 	}
 
 	@Override
@@ -135,5 +152,10 @@ public abstract class AbstractMixedInterfaceRunner implements MixedInterfaceRunn
 	public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env) {
 		return InstanceofUtil.isInstanceof(this, LeftHandSideType.fromCClassType(
 				new ConcreteGenericParameter(type, lhsGenericParameters, Target.UNKNOWN, env), Target.UNKNOWN, env), env);
+	}
+
+	@Override
+	public boolean isInstanceOf(Class<? extends Mixed> type) {
+		return type.isAssignableFrom(this.getClass());
 	}
 }

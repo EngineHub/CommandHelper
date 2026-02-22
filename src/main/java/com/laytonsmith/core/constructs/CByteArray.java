@@ -33,7 +33,7 @@ import java.util.SortedMap;
  *
  */
 @typeof("ms.lang.byte_array")
-public class CByteArray extends CArray implements Sizeable, ArrayAccess {
+public final class CByteArray extends CArray implements Sizeable, ArrayAccess {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
 	public static final CClassType TYPE = CClassType.get(CByteArray.class)
@@ -404,7 +404,15 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	 *
 	 * @param env
 	 * @return
+	 * @deprecated Use {@link #size(Environment)} instead.
 	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
+	public long size() {
+		return size(null);
+	}
+
 	@Override
 	public long size(Environment env) {
 		return maxValue;
@@ -469,8 +477,8 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 		return new String(array, encoding);
 	}
 
-	@Deprecated
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
 	public CArray asArray(Target t) {
 		return asArray(t, null);
 	}
@@ -505,6 +513,14 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	@Override
 	public boolean canBeAssociative() {
 		return false;
+	}
+
+	/** @deprecated Use {@link #slice(int, int, Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
+	public Mixed slice(int begin, int end, Target t) {
+		return slice(begin, end, t, null);
 	}
 
 	@Override
@@ -547,6 +563,14 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 		throw new CREUnsupportedOperationException("Modifying a byte array using array_push() is not supported.", t);
 	}
 
+	/** @deprecated Use {@link #keySet(Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
+	public Set<Mixed> keySet() {
+		return keySet(null);
+	}
+
 	@Override
 	public Set<Mixed> keySet(Environment env) {
 		throw new CREUnsupportedOperationException("Getting a key set from a byte array is not supported.", getTarget());
@@ -557,8 +581,16 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 		throw new CREUnsupportedOperationException("Getting a string key set from a byte array is not supported.", getTarget());
 	}
 
+	/** @deprecated Use {@link #set(Mixed, Mixed, Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
 	@Override
 	public void set(Mixed index, Mixed c, Target t) throws ConfigRuntimeException {
+		set(index, c, t, null);
+	}
+
+	@Override
+	public void set(Mixed index, Mixed c, Target t, Environment env) throws ConfigRuntimeException {
 		throw new CREUnsupportedOperationException("Modifying a byte array using array_set() is not supported.", t);
 	}
 
@@ -569,6 +601,14 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 		byte[] newArray = new byte[that.maxValue];
 		System.arraycopy(original, 0, newArray, 0, that.maxValue);
 		return CByteArray.wrap(newArray, t, env);
+	}
+
+	/** @deprecated Use {@link #get(Mixed, Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
+	public Mixed get(Mixed index, Target t) throws ConfigRuntimeException {
+		return get(index, t, null);
 	}
 
 	@Override
@@ -679,9 +719,25 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 			throw new CREByteArrayReadOnlyException("Arrays copied from ByteArrays are read only", t);
 		}
 
+		/** @deprecated Use {@link #set(Mixed, Mixed, Target, Environment)} instead. */
+		@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+		@Deprecated
+		@Override
+		public void set(Mixed index, Mixed c, Target t) {
+			set(index, c, t, null);
+		}
+
 		@Override
 		public void set(Mixed index, Mixed c, Target t, Environment env) {
 			throw new CREByteArrayReadOnlyException("Arrays copied from ByteArrays are read only", t);
+		}
+
+		/** @deprecated Use {@link #get(Mixed, Target, Environment)} instead. */
+		@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+		@Deprecated
+		@Override
+		public Mixed get(Mixed index, Target t) {
+			return get(index, t, null);
 		}
 
 		@Override
@@ -692,6 +748,14 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 			} catch(ArrayIndexOutOfBoundsException e) {
 				throw new CRERangeException("Index out of range. Found " + i + ", but array length is only " + backing.length, t);
 			}
+		}
+
+		/** @deprecated Use {@link #size(Environment)} instead. */
+		@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+		@Deprecated
+		@Override
+		public long size() {
+			return size(null);
 		}
 
 		@Override
@@ -750,7 +814,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 
 		@Override
 		public Set<ObjectModifier> getObjectModifiers() {
-			return EnumSet.of(ObjectModifier.STATIC);
+			return EnumSet.of(ObjectModifier.STATIC, ObjectModifier.FINAL);
 		}
 
 		@Override

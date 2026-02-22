@@ -7,6 +7,7 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import java.util.Set;
+import com.laytonsmith.PureUtilities.Common.Annotations.AggressiveDeprecation;
 
 /**
  * Things that implement this can be accessed like an array, with array_get, or [].
@@ -25,11 +26,40 @@ public interface ArrayAccess extends Booleanish {
 	 * @param t
 	 * @param env
 	 * @return
+	 * @deprecated Use {@link #get(String, Target, Environment)} instead.
+	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	public Mixed get(String index, Target t) throws ConfigRuntimeException;
+
+	/**
+	 * Return the mixed at this location.This should throw an exception if the index does not exist. This method will
+	 * not be called if {@link #isAssociative()} returns false.
+	 *
+	 * @param index
+	 * @param t
+	 * @param env
+	 * @return
 	 */
 	public Mixed get(String index, Target t, Environment env) throws ConfigRuntimeException;
 
 	/**
-	 * Returns the mixed at this location.This should throw an exception if the index does not exist. This method will
+	 * Returns the mixed at this location. This should throw an exception if the index does not exist. This method will
+	 * not be called if {@link #isAssociative()} returns true.
+	 *
+	 * @param index
+	 * @param t
+	 * @param env
+	 * @return
+	 * @throws ConfigRuntimeException
+	 * @deprecated Use {@link #get(int, Target, Environment)} instead.
+	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	public Mixed get(int index, Target t) throws ConfigRuntimeException;
+
+	/**
+	 * Returns the mixed at this location. This should throw an exception if the index does not exist. This method will
 	 * not be called if {@link #isAssociative()} returns true.
 	 *
 	 * @param index
@@ -41,8 +71,23 @@ public interface ArrayAccess extends Booleanish {
 	public Mixed get(int index, Target t, Environment env) throws ConfigRuntimeException;
 
 	/**
-	 * Returns the mixed at this location.This should throw an exception if the index does not exist. This method may be
-	 * called whether or not it isAssociative returns true.
+	 * Returns the mixed at this location. This should throw an exception if the index does not exist. This method may
+	 * be called whether or not it isAssociative returns true.
+	 *
+	 * @param index
+	 * @param t
+	 * @param env
+	 * @return
+	 * @throws ConfigRuntimeException
+	 * @deprecated Use {@link #get(Mixed, Target, Environment)} instead.
+	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	public Mixed get(Mixed index, Target t) throws ConfigRuntimeException;
+
+	/**
+	 * Returns the mixed at this location. This should throw an exception if the index does not exist. This method may
+	 * be called whether or not it isAssociative returns true.
 	 *
 	 * @param index
 	 * @param t
@@ -53,7 +98,19 @@ public interface ArrayAccess extends Booleanish {
 	public Mixed get(Mixed index, Target t, Environment env) throws ConfigRuntimeException;
 
 	/**
-	 * If {@link #isAssociative()} returns true, this should return a set of all keys.If {@link #isAssociative()}
+	 * If {@link #isAssociative()} returns true, this should return a set of all keys. If {@link #isAssociative()}
+	 * returns false, this method will not be called.
+	 *
+	 * @param env
+	 * @return
+	 * @deprecated Use {@link #keySet(Environment)} instead.
+	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	public Set<Mixed> keySet();
+
+	/**
+	 * If {@link #isAssociative()} returns true, this should return a set of all keys. If {@link #isAssociative()}
 	 * returns false, this method will not be called.
 	 *
 	 * @param env
@@ -85,11 +142,26 @@ public interface ArrayAccess extends Booleanish {
 	 * Returns a slice at the specified location. Should throw an exception if an element in the range doesn't exist.
 	 * The range is inclusive.
 	 *
-	 * @implNote In general, MethodScript supports undefined begin and end slices, as well as reverse slices. For
-	 * CArray type only, this is fully covered, but for other slice types, only negative slice numbers are converted,
-	 * and subclasses must handle both forward and reverse slices if applicable. A good way to handle that is as such:
+	 * @param begin
+	 * @param end
+	 * @param t
+	 * @param env
+	 * @return
+	 * @deprecated Use {@link #slice(int, int, Target, Environment)} instead.
+	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	public Mixed slice(int begin, int end, Target t);
+
+	/**
+	 * Returns a slice at the specified location. Should throw an exception if an element in the range doesn't exist.
+	 * The range is inclusive.
+	 *
+	 * @implNote In general, MethodScript supports undefined begin and end slices, as well as reverse slices. For CArray
+	 * type only, this is fully covered, but for other slice types, only negative slice numbers are converted, and
+	 * subclasses must handle both forward and reverse slices if applicable. A good way to handle that is as such:
 	 * <pre><code>
-	 * int start = Math.min(begin, end);
+     * int start = Math.min(begin, end);
 	 * int stop = Math.max(begin, end);
 	 * int step = (begin &lt;= end) ? 1 : -1;
 	 * for(int i = start; i != stop; i += step) { ... }

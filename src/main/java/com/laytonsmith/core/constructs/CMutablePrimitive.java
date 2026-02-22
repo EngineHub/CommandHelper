@@ -13,6 +13,7 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.natives.interfaces.Sizeable;
 import com.laytonsmith.core.natives.interfaces.ValueType;
 import com.laytonsmith.core.objects.ObjectModifier;
+import com.laytonsmith.PureUtilities.Common.Annotations.AggressiveDeprecation;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -62,6 +63,14 @@ public final class CMutablePrimitive extends CArray implements Sizeable {
 		this.value = value;
 	}
 
+	/** @deprecated Use {@link #set(Mixed, Mixed, Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
+	public void set(Mixed index, Mixed c, Target t) {
+		set(index, c, t, null);
+	}
+
 	@Override
 	public void set(Mixed index, Mixed c, Target t, Environment env) {
 		throw new CRECastException("mutable_primitives cannot have values set in them", t);
@@ -83,6 +92,14 @@ public final class CMutablePrimitive extends CArray implements Sizeable {
 
 	public Mixed get() {
 		return value;
+	}
+
+	/** @deprecated Use {@link #get(Mixed, Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
+	public Mixed get(Mixed index, Target t) {
+		return get(index, t, null);
 	}
 
 	@Override
@@ -108,6 +125,14 @@ public final class CMutablePrimitive extends CArray implements Sizeable {
 	@Override
 	protected String getQuote() {
 		return new CString(value.val(), Target.UNKNOWN).getQuote();
+	}
+
+	/** @deprecated Use {@link #size(Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
+	public long size() {
+		return size(null);
 	}
 
 	@Override
@@ -185,4 +210,5 @@ public final class CMutablePrimitive extends CArray implements Sizeable {
 	public GenericParameters getGenericParameters() {
 		return null;
 	}
+
 }

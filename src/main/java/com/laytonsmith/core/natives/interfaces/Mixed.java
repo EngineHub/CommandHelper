@@ -13,6 +13,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.objects.AccessModifier;
 import com.laytonsmith.core.objects.ObjectModifier;
 import com.laytonsmith.core.objects.ObjectType;
+import com.laytonsmith.PureUtilities.Common.Annotations.AggressiveDeprecation;
 
 import java.util.Set;
 
@@ -108,16 +109,70 @@ public interface Mixed extends Cloneable, Documentation {
 
 	/**
 	 * Generally speaking, we cannot use Java's instanceof keyword to determine if something is an instanceof, because
-	 * user classes do not extend the hierarchy of objects in MethodScript.Essentially, we need to extend Java's
+	 * user classes do not extend the hierarchy of objects in MethodScript. Essentially, we need to extend Java's
 	 * instanceof keyword, so in order to do that, we must compare objects with a custom method, rather than rely on
 	 * Java's keyword.
 	 *
-	 * @param type The CClassType to check against
-	 * @param lhsGenericParameters The LHS generic definition (may be null)
-	 * @param env The environment
+	 * This method works with CClassTypes.
+	 *
+	 * Implementation note: The implementation of this should just be
+	 * {@link Construct#isInstanceof(com.laytonsmith.core.natives.interfaces.Mixed,
+	 * com.laytonsmith.core.constructs.CClassType)} which supports Mixed values.
+	 *
+	 * @param type
+	 * @return
+	 * @deprecated Use {@link #isInstanceOf(CClassType, LeftHandGenericUse, Environment)} instead.
+	 */
+	// @AggressiveDeprecation removed due to javac bug (JDK-8323756) — ACC_BRIDGE on
+	// abstract interface methods causes NPE in Types.interfaceCandidates() during
+	// test compilation. See https://github.com/LadyCailin/javacbug
+	@Deprecated
+	public boolean isInstanceOf(CClassType type);
+
+	/**
+	 * Generally speaking, we cannot use Java's instanceof keyword to determine if something is an instanceof, because
+	 * user classes do not extend the hierarchy of objects in MethodScript. Essentially, we need to extend Java's
+	 * instanceof keyword, so in order to do that, we must compare objects with a custom method, rather than rely on
+	 * Java's keyword.
+	 *
+	 * This method works with CClassTypes.
+	 *
+	 * Implementation note: The implementation of this should just be
+	 * {@link Construct#isInstanceof(com.laytonsmith.core.natives.interfaces.Mixed,
+	 * com.laytonsmith.core.constructs.CClassType)} which supports Mixed values.
+	 *
+	 * @param type
+	 * @param lhsGenericParameters
+	 * @param env
 	 * @return
 	 */
 	public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env);
+
+	/**
+	 * This method works with class type directly.
+	 *
+	 * Implementation note: The implementation of this should just be
+	 * {@link Construct#isInstanceof(com.laytonsmith.core.natives.interfaces.Mixed, java.lang.Class)} which supports
+	 * Mixed values.
+	 *
+	 * @param type
+	 * @return
+	 */
+	public boolean isInstanceOf(Class<? extends Mixed> type);
+
+	/**
+	 * Returns the typeof this value, as a CClassType object.Not all constructs are annotated with the @typeof
+	 * annotation, in which case this is considered a "private" object, which can't be directly accessed via
+	 * MethodScript. In this case, an IllegalArgumentException is thrown.
+	 *
+	 * @param env The environment.
+	 * @return
+	 * @throws IllegalArgumentException If the class isn't public facing.
+	 * @deprecated Use {@link #typeof(Environment)} instead.
+	 */
+	// @AggressiveDeprecation removed due to javac bug — see isInstanceOf(CClassType) above.
+	@Deprecated
+	public CClassType typeof();
 
 	/**
 	 * Returns the typeof this value, as a CClassType object.Not all constructs are annotated with the @typeof

@@ -21,6 +21,7 @@ import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CNumber;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
+import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -46,6 +47,9 @@ public final class ArgumentValidation {
 		//
 	}
 
+	/**
+	 * @deprecated Use {@link #getItemFromArray(CArray, String, Target, Mixed, Environment)} instead.
+	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public static Mixed getItemFromArray(CArray object, String key, Target t, Mixed defaultItem) throws ConfigRuntimeException {
@@ -77,6 +81,9 @@ public final class ArgumentValidation {
 		}
 	}
 
+	/**
+	 * @deprecated Use {@link #getArray(Mixed, Target, Environment)} instead.
+	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public static CArray getArray(Mixed construct, Target t) {
@@ -129,6 +136,9 @@ public final class ArgumentValidation {
 		}
 	}
 
+	/**
+	 * @deprecated Use {@link #getNumber(Mixed, Target, Environment)} instead.
+	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public static double getNumber(Mixed c, Target t) {
@@ -198,6 +208,9 @@ public final class ArgumentValidation {
 			+ ")[\\x00-\\x20]*" // trailing whitespace
 	);
 
+	/**
+	 * @deprecated Use {@link #isNumber(Mixed, Environment)} instead.
+	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public static boolean isNumber(Mixed c) {
@@ -217,6 +230,9 @@ public final class ArgumentValidation {
 		return c instanceof CNumber || VALID_DOUBLE.matcher(c.val()).matches();
 	}
 
+	/**
+	 * @deprecated Use {@link #getDouble(Mixed, Target, Environment)} instead.
+	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public static double getDouble(Mixed c, Target t) {
@@ -244,6 +260,9 @@ public final class ArgumentValidation {
 		}
 	}
 
+	/**
+	 * @deprecated Use {@link #getDouble32(Mixed, Target, Environment)} instead.
+	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public static float getDouble32(Mixed c, Target t) {
@@ -268,6 +287,9 @@ public final class ArgumentValidation {
 		return (float) l;
 	}
 
+	/**
+	 * @deprecated Use {@link #getInt(Mixed, Target, Environment)} instead.
+	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public static long getInt(Mixed c, Target t) {
@@ -309,6 +331,9 @@ public final class ArgumentValidation {
 		return i;
 	}
 
+	/**
+	 * @deprecated Use {@link #getInt32(Mixed, Target, Environment)} instead.
+	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public static int getInt32(Mixed c, Target t) {
@@ -339,6 +364,9 @@ public final class ArgumentValidation {
 		return i;
 	}
 
+	/**
+	 * @deprecated Use {@link #getInt16(Mixed, Target, Environment)} instead.
+	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public static short getInt16(Mixed c, Target t) {
@@ -369,6 +397,9 @@ public final class ArgumentValidation {
 		return s;
 	}
 
+	/**
+	 * @deprecated Use {@link #getInt8(Mixed, Target, Environment)} instead.
+	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public static byte getInt8(Mixed c, Target t) {
@@ -399,6 +430,9 @@ public final class ArgumentValidation {
 		return b;
 	}
 
+	/**
+	 * @deprecated Use {@link #getBooleanObject(Mixed, Target, Environment)} instead.
+	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public static boolean getBooleanObject(Mixed c, Target t) {
@@ -422,6 +456,9 @@ public final class ArgumentValidation {
 		return getBooleanish(c, t, env);
 	}
 
+	/**
+	 * @deprecated Use {@link #getBoolean(Mixed, Target, Environment)} instead.
+	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public static boolean getBoolean(Mixed c, Target t) {
@@ -440,12 +477,15 @@ public final class ArgumentValidation {
 	 * Generally speaking, if it seems reasonable for the user to send a non-boolean data type in this parameter, then
 	 * getBooleanish should be used. If it indicates a probable error, getBooleanObject should be used.
 	 */
-	@Deprecated
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
 	public static boolean getBoolean(Mixed c, Target t, Environment env) {
 		return getBooleanish(c, t, env);
 	}
 
+	/**
+	 * @deprecated Use {@link #getBooleanish(Mixed, Target, Environment)} instead.
+	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public static boolean getBooleanish(Mixed c, Target t) {
@@ -478,11 +518,14 @@ public final class ArgumentValidation {
 			return false;
 		}
 		if(c.isInstanceOf(Booleanish.TYPE, null, env)) {
-			return ((Booleanish) c).getBooleanValue(env, t);
+			return ((Booleanish) c).getBooleanValue(t, env);
 		}
 		throw new CRECastException("Could not convert value of type " + c.typeof(env) + " to a " + Booleanish.TYPE, t);
 	}
 
+	/**
+	 * @deprecated Use {@link #getByteArray(Mixed, Target, Environment)} instead.
+	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public static CByteArray getByteArray(Mixed c, Target t) {
@@ -541,6 +584,9 @@ public final class ArgumentValidation {
 		return c.val();
 	}
 
+	/**
+	 * @deprecated Use {@link #getStringObject(Mixed, Target, Environment)} instead.
+	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public static String getStringObject(Mixed c, Target t) {
@@ -563,6 +609,9 @@ public final class ArgumentValidation {
 		return c.val();
 	}
 
+	/**
+	 * @deprecated Use {@link #anyDoubles(Environment, Mixed...)} instead.
+	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public static boolean anyDoubles(Mixed... c) {
@@ -570,22 +619,24 @@ public final class ArgumentValidation {
 	}
 
 	/**
-	 * Returns true if any of the constructs are a CDouble, false otherwise
+	 * Returns true if any of the constructs are a CDouble, false otherwise.
 	 *
 	 * @param env
-	 *
 	 * @param c
 	 * @return
 	 */
 	public static boolean anyDoubles(Environment env, Mixed... c) {
 		for(Mixed c1 : c) {
-			if(c1 instanceof CDouble || c1 instanceof CString && c1.val().indexOf(".", 1) > -1) {
+			if(InstanceofUtil.isInstanceof(c1, CDouble.class, env) || InstanceofUtil.isInstanceof(c1, CString.class, env) && c1.val().indexOf(".", 1) > -1) {
 				return true;
 			}
 		}
 		return false;
 	}
 
+	/**
+	 * @deprecated Use {@link #anyStrings(Environment, Mixed...)} instead.
+	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public static boolean anyStrings(Mixed... c) {
@@ -601,7 +652,7 @@ public final class ArgumentValidation {
 	 */
 	public static boolean anyStrings(Environment env, Mixed... c) {
 		for(Mixed c1 : c) {
-			if(c1 instanceof CString) {
+			if(InstanceofUtil.isInstanceof(c1, CString.class, env)) {
 				return true;
 			}
 		}
@@ -609,11 +660,10 @@ public final class ArgumentValidation {
 	}
 
 	/**
-	 * Returns true if any of the constructs are null
-	 *
-	 * @param c
-	 * @return
+	 * @deprecated Use {@link #anyNulls(Environment, Mixed...)} instead.
 	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
 	public static boolean anyNulls(Mixed... c) {
 		return anyNulls(null, c);
 	}
@@ -635,11 +685,10 @@ public final class ArgumentValidation {
 	}
 
 	/**
-	 * Returns true if any of the constructs are CBooleans, false otherwise.
-	 *
-	 * @param c
-	 * @return
+	 * @deprecated Use {@link #anyBooleans(Environment, Mixed...)} instead.
 	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
 	public static boolean anyBooleans(Mixed... c) {
 		return anyBooleans(null, c);
 	}
@@ -690,10 +739,18 @@ public final class ArgumentValidation {
 	}
 
 	/**
-	 * Returns a set of the given enum value.The input value may be either a single value or an array. If it is a single
+	 * @deprecated Use {@link #getEnumSet(Mixed, Class, Target, Environment)} instead.
+	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	public static <T extends Enum<T>> Set<T> getEnumSet(Mixed c, Class<T> enumClass, Target t) {
+		return getEnumSet(c, enumClass, t, null);
+	}
+
+	/**
+	 * Returns a set of the given enum value. The input value may be either a single value or an array. If it is a single
 	 * value, the set will be of size 1. Null is also supported, and will return a set of size 0. Internally, uses
 	 * {@link #getEnum}, so the behavior will generally be consistent with that.
-	 *
 	 * @param <T>
 	 * @param c
 	 * @param enumClass

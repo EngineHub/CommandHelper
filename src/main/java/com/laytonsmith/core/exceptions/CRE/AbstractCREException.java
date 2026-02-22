@@ -26,6 +26,7 @@ import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.objects.AccessModifier;
 import com.laytonsmith.core.objects.ObjectModifier;
+import com.laytonsmith.PureUtilities.Common.Annotations.AggressiveDeprecation;
 
 import java.io.File;
 import java.net.URL;
@@ -196,20 +197,52 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 	 * @param t
 	 * @return
 	 * @throws ConfigRuntimeException
+	 * @deprecated Use {@link #get(String, Target, Environment)} instead.
 	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
+	public Mixed get(String index, Target t) throws ConfigRuntimeException {
+		return get(index, t, null);
+	}
+
 	@Override
 	public Mixed get(String index, Target t, Environment env) throws ConfigRuntimeException {
-		return exceptionObject.get(index, t);
+		return exceptionObject.get(index, t, env);
+	}
+
+	/** @deprecated Use {@link #get(int, Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
+	public Mixed get(int index, Target t) throws ConfigRuntimeException {
+		return get(index, t, null);
 	}
 
 	@Override
 	public Mixed get(int index, Target t, Environment env) throws ConfigRuntimeException {
-		return exceptionObject.get(index, t);
+		return exceptionObject.get(index, t, env);
+	}
+
+	/** @deprecated Use {@link #get(Mixed, Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
+	public Mixed get(Mixed index, Target t) throws ConfigRuntimeException {
+		return get(index, t, null);
 	}
 
 	@Override
 	public Mixed get(Mixed index, Target t, Environment env) throws ConfigRuntimeException {
 		return exceptionObject.get(index, t, env);
+	}
+
+	/** @deprecated Use {@link #keySet(Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
+	public Set<Mixed> keySet() {
+		return keySet(null);
 	}
 
 	@Override
@@ -225,6 +258,14 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 	@Override
 	public boolean canBeAssociative() {
 		return exceptionObject.canBeAssociative();
+	}
+
+	/** @deprecated Use {@link #slice(int, int, Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
+	public Mixed slice(int begin, int end, Target t) {
+		return slice(begin, end, t, null);
 	}
 
 	@Override
@@ -301,6 +342,14 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 		throw new UnsupportedOperationException();
 	}
 
+	/** @deprecated Use {@link #isInstanceOf(CClassType, LeftHandGenericUse, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
+	public boolean isInstanceOf(CClassType type) {
+		return isInstanceOf(type, null, null);
+	}
+
 	@Override
 	public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhs, Environment env) {
 		return InstanceofUtil.isInstanceof(this, LeftHandSideType.fromCClassType(
@@ -308,8 +357,21 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 	}
 
 	@Override
+	public boolean isInstanceOf(Class<? extends Mixed> type) {
+		return type.isAssignableFrom(this.getClass());
+	}
+
+	@Override
 	public CClassType typeof(Environment env) {
 		return Construct.typeof(this, env);
+	}
+
+	/** @deprecated Use {@link #typeof(Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
+	public CClassType typeof() {
+		return typeof(null);
 	}
 
 	@Override
@@ -317,8 +379,16 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 		return null;
 	}
 
+	/** @deprecated Use {@link #getBooleanValue(Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
 	@Override
-	public boolean getBooleanValue(Environment env, Target t) {
+	public boolean getBooleanValue(Target t) {
+		return getBooleanValue(t, null);
+	}
+
+	@Override
+	public boolean getBooleanValue(Target t, Environment env) {
 		return true;
 	}
 

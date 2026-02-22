@@ -251,8 +251,23 @@ public class InstanceofUtilTest extends AbstractIntegrationTest {
 		}
 
 		@Override
+		public boolean isInstanceOf(CClassType type) {
+			return isInstanceOf(type, null, null);
+		}
+
+		@Override
+		public boolean isInstanceOf(Class<? extends Mixed> type) {
+			return type.isAssignableFrom(this.getClass());
+		}
+
+		@Override
 		public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env) {
 			return InstanceofUtil.isInstanceof(this.typeof(env), type, lhsGenericParameters, env);
+		}
+
+		@Override
+		public CClassType typeof() {
+			return typeof(null);
 		}
 
 		@Override

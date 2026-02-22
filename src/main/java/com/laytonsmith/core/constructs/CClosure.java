@@ -35,6 +35,7 @@ import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.exceptions.StackTraceManager;
 import com.laytonsmith.core.functions.DataHandling;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import com.laytonsmith.PureUtilities.Common.Annotations.AggressiveDeprecation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -383,6 +384,14 @@ public class CClosure extends Construct implements Callable, Booleanish {
 		return new CClassType[]{Callable.TYPE, Booleanish.TYPE};
 	}
 
+	/** @deprecated Use {@link #getBooleanValue(Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
+	public boolean getBooleanValue(Target t) {
+		return getBooleanValue(t, null);
+	}
+
 	@Override
 	public GenericParameters getGenericParameters() {
 		GenericParameters.GenericParametersBuilder builder = GenericParameters.emptyBuilder(TYPE);
@@ -394,7 +403,7 @@ public class CClosure extends Construct implements Callable, Booleanish {
 	}
 
 	@Override
-	public boolean getBooleanValue(Environment env, Target t) {
+	public boolean getBooleanValue(Target t, Environment env) {
 		return true;
 	}
 }

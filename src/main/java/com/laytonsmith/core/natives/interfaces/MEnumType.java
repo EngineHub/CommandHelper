@@ -25,6 +25,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.objects.AccessModifier;
 import com.laytonsmith.core.objects.ObjectModifier;
 import com.laytonsmith.core.objects.ObjectType;
+import com.laytonsmith.PureUtilities.Common.Annotations.AggressiveDeprecation;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -151,10 +152,31 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 				return ClassDiscovery.GetClassContainer(enumClass);
 			}
 
+			/** @deprecated Use {@link #isInstanceOf(CClassType, LeftHandGenericUse, Environment)} instead. */
+			@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+			@Deprecated
+			@Override
+			public boolean isInstanceOf(CClassType type) {
+				return isInstanceOf(type, null, null);
+			}
+
+			@Override
+			public boolean isInstanceOf(Class<? extends Mixed> type) {
+				return type.isAssignableFrom(this.getClass());
+			}
+
 			@Override
 			public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env) {
 				return InstanceofUtil.isInstanceof(this, LeftHandSideType.fromCClassType(
 						new ConcreteGenericParameter(type, lhsGenericParameters, Target.UNKNOWN, env), Target.UNKNOWN, env), env);
+			}
+
+			/** @deprecated Use {@link #typeof(Environment)} instead. */
+			@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+			@Deprecated
+			@Override
+			public CClassType typeof() {
+				return typeof(null);
 			}
 
 			@Override
@@ -252,14 +274,30 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 								return v.toString();
 							}
 
+							/** @deprecated Use {@link #typeof(Environment)} instead. */
+							@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+							@Deprecated
+							@Override
+							public CClassType typeof() {
+								return typeof(null);
+							}
+
 							@Override
 							public CClassType typeof(Environment env) {
 								return CClassType.get(fqcn, env);
 							}
 
+							/** @deprecated Use {@link #isInstanceOf(CClassType, LeftHandGenericUse, Environment)} instead. */
+							@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+							@Deprecated
 							@Override
-							public GenericParameters getGenericParameters() {
-								return null;
+							public boolean isInstanceOf(CClassType type) {
+								return isInstanceOf(type, null, null);
+							}
+
+							@Override
+							public boolean isInstanceOf(Class<? extends Mixed> type) {
+								return type.isAssignableFrom(this.getClass());
 							}
 
 							@Override
@@ -272,6 +310,11 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 								return InstanceofUtil.isInstanceof(this, LeftHandSideType
 										.fromCClassType(new ConcreteGenericParameter(
 												type, lhsGenericParameters, Target.UNKNOWN, env), Target.UNKNOWN, env), env);
+							}
+
+							@Override
+							public GenericParameters getGenericParameters() {
+								return null;
 							}
 
 							@Override
@@ -331,8 +374,16 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 				};
 			}
 
+			/** @deprecated Use {@link #getBooleanValue(Target, Environment)} instead. */
+			@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+			@Deprecated
 			@Override
-			public boolean getBooleanValue(Environment env, Target t) {
+			public boolean getBooleanValue(Target t) {
+				return getBooleanValue(t, null);
+			}
+
+			@Override
+			public boolean getBooleanValue(Target t, Environment env) {
 				return true;
 			}
 
@@ -457,10 +508,31 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 		return null;
 	}
 
+	/** @deprecated Use {@link #isInstanceOf(CClassType, LeftHandGenericUse, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
+	public boolean isInstanceOf(CClassType type) {
+		return isInstanceOf(type, null, null);
+	}
+
+	@Override
+	public boolean isInstanceOf(Class<? extends Mixed> type) {
+		return type.isAssignableFrom(this.getClass());
+	}
+
 	@Override
 	public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env) {
 		return InstanceofUtil.isInstanceof(this, LeftHandSideType.fromCClassType(
 				new ConcreteGenericParameter(type, lhsGenericParameters, Target.UNKNOWN, env), Target.UNKNOWN, env), env);
+	}
+
+	/** @deprecated Use {@link #typeof(Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
+	public CClassType typeof() {
+		return typeof(null);
 	}
 
 	@Override
@@ -502,6 +574,14 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 		}
 		return values;
 	}
+	/** @deprecated Use {@link #get(String, Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
+	public Mixed get(String index, Target t) throws ConfigRuntimeException {
+		return get(index, t, null);
+	}
+
 	@Override
 	public Mixed get(String index, Target t, Environment env) throws ConfigRuntimeException {
 		for(MEnumTypeValue v : values()) {
@@ -512,6 +592,14 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 		throw new CREIllegalArgumentException(index + " cannot be found in " + typeof(env), t);
 	}
 
+	/** @deprecated Use {@link #get(int, Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
+	public Mixed get(int index, Target t) throws ConfigRuntimeException {
+		return get(index, t, null);
+	}
+
 	@Override
 	public Mixed get(int index, Target t, Environment env) throws ConfigRuntimeException {
 		if(index >= values().size()) {
@@ -520,14 +608,38 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 		return values().get(index);
 	}
 
+	/** @deprecated Use {@link #get(Mixed, Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
+	public Mixed get(Mixed index, Target t) throws ConfigRuntimeException {
+		return get(index, t, null);
+	}
+
 	@Override
 	public Mixed get(Mixed index, Target t, Environment env) throws ConfigRuntimeException {
 		return get(index.val(), t, env);
 	}
 
+	/** @deprecated Use {@link #keySet(Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
+	public Set<Mixed> keySet() {
+		return keySet(null);
+	}
+
 	@Override
 	public Set<Mixed> keySet(Environment env) {
 		return values().stream().collect(Collectors.toSet());
+	}
+
+	/** @deprecated Use {@link #size(Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
+	public long size() {
+		return size(null);
 	}
 
 	@Override
@@ -545,6 +657,14 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 		return true;
 	}
 
+	/** @deprecated Use {@link #slice(int, int, Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
+	public Mixed slice(int begin, int end, Target t) {
+		return slice(begin, end, t, null);
+	}
+
 	@Override
 	public Mixed slice(int begin, int end, Target t, Environment env) {
 		throw new CREUnsupportedOperationException("Cannot slice an enum", t);
@@ -556,8 +676,16 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 	 */
 	protected abstract List<MEnumTypeValue> getValues();
 
+	/** @deprecated Use {@link #getBooleanValue(Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
 	@Override
-	public boolean getBooleanValue(Environment env, Target t) {
+	public boolean getBooleanValue(Target t) {
+		return getBooleanValue(t, null);
+	}
+
+	@Override
+	public boolean getBooleanValue(Target t, Environment env) {
 		return true;
 	}
 

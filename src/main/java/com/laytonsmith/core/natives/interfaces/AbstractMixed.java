@@ -7,6 +7,7 @@ import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.objects.AccessModifier;
@@ -14,6 +15,7 @@ import com.laytonsmith.core.objects.ObjectModifier;
 import java.net.URL;
 import java.util.EnumSet;
 import java.util.Set;
+import com.laytonsmith.PureUtilities.Common.Annotations.AggressiveDeprecation;
 
 /**
  * Provides a basic Mixed implementation. This assumes that the object is a public, top level object. If it's also
@@ -64,12 +66,25 @@ public abstract class AbstractMixed implements Mixed {
 		return null;
 	}
 
+	/** @deprecated Use {@link #isInstanceOf(CClassType, LeftHandGenericUse, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
+	public boolean isInstanceOf(CClassType type) {
+		return isInstanceOf(type, null, null);
+	}
+
 	@Override
 	public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env) {
 		if(type.getNativeType() != null) {
 			return type.getNativeType().isAssignableFrom(this.getClass());
 		}
 		return this.typeof(env).doesExtend(env, type);
+	}
+
+	@Override
+	public boolean isInstanceOf(Class<? extends Mixed> type) {
+		return type.isAssignableFrom(this.getClass());
 	}
 
 	/**
@@ -80,10 +95,23 @@ public abstract class AbstractMixed implements Mixed {
 	 * This method may be overridden in special cases, such as dynamic types, but for most types, this
 	 * @return
 	 * @throws IllegalArgumentException If the class isn't public facing.
+	 * @deprecated Use {@link #typeof(Environment)} instead.
 	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
+	public CClassType typeof() {
+		return typeof(null);
+	}
+
 	@Override
 	public CClassType typeof(Environment env) {
 		return Construct.typeof(this, env);
+	}
+
+	@Override
+	public GenericParameters getGenericParameters() {
+		return null;
 	}
 
 	@Override

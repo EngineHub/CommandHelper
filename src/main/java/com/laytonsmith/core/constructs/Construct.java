@@ -8,10 +8,10 @@ import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.generics.ConcreteGenericParameter;
 import com.laytonsmith.core.constructs.generics.Constraints;
+import com.laytonsmith.core.exceptions.MarshalException;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
 import com.laytonsmith.core.environments.Environment;
-import com.laytonsmith.core.exceptions.MarshalException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.objects.AccessModifier;
 import com.laytonsmith.core.objects.ObjectModifier;
@@ -20,6 +20,7 @@ import com.laytonsmith.core.objects.UserObject;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
+import com.laytonsmith.PureUtilities.Common.Annotations.AggressiveDeprecation;
 
 import java.io.File;
 import java.math.BigInteger;
@@ -208,9 +209,9 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 			return c.val();
 		} else if(c instanceof CVoid) {
 			return "";
-		} else if(c instanceof CInt) {
+		} else if(InstanceofUtil.isInstanceof(c, CInt.class, null)) {
 			return ((CInt) c).getInt();
-		} else if(c instanceof CDouble) {
+		} else if(InstanceofUtil.isInstanceof(c, CDouble.class, null)) {
 			return ((CDouble) c).getDouble();
 		} else if(c instanceof CBoolean) {
 			return ((CBoolean) c).getBoolean();
@@ -427,13 +428,13 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	public static Object GetPOJO(Mixed c, Environment env) throws ClassCastException {
 		if(c instanceof CNull) {
 			return null;
-		} else if(c instanceof CString) {
+		} else if(InstanceofUtil.isInstanceof(c, CString.class, null)) {
 			return c.val();
 		} else if(c instanceof CBoolean) {
 			return Boolean.valueOf(((CBoolean) c).getBoolean());
-		} else if(c instanceof CInt) {
+		} else if(InstanceofUtil.isInstanceof(c, CInt.class, null)) {
 			return Long.valueOf(((CInt) c).getInt());
-		} else if(c instanceof CDouble) {
+		} else if(InstanceofUtil.isInstanceof(c, CDouble.class, null)) {
 			return Double.valueOf(((CDouble) c).getDouble());
 		} else if(c.isInstanceOf(CByteArray.TYPE, null, env)) {
 			return ((CByteArray) c).asByteArrayCopy();
@@ -513,10 +514,13 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	 *
 	 * @return
 	 * @throws IllegalArgumentException If the class isn't public facing.
+	 * @deprecated Use {@link #typeof(Environment)} instead.
 	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
 	@Override
-	public CClassType typeof(Environment env) {
-		return typeof(this, env);
+	public CClassType typeof() {
+		return typeof((Environment) null);
 	}
 
 	/**
@@ -558,6 +562,11 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	@Override
 	public GenericParameters getGenericParameters() {
 		return null;
+	}
+
+	@Override
+	public CClassType typeof(Environment env) {
+		return typeof(this, env);
 	}
 
 	/**
@@ -648,6 +657,21 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 			return false;
 		}
 		return that.typeof(env).doesExtend(env, CClassType.get(type));
+	}
+
+	/**
+	 * @deprecated Use {@link #isInstanceOf(CClassType, LeftHandGenericUse, Environment)} instead.
+	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
+	public boolean isInstanceOf(CClassType type) {
+		return isInstanceOf(type, null, null);
+	}
+
+	@Override
+	public boolean isInstanceOf(Class<? extends Mixed> type) {
+		return type.isAssignableFrom(this.getClass());
 	}
 
 	@Override

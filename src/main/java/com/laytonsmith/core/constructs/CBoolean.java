@@ -92,14 +92,16 @@ public final class CBoolean extends CPrimitive implements Cloneable {
 		return val;
 	}
 
-	@Deprecated
+	/** @deprecated Use {@link #getBooleanValue(Target, Environment)} instead. */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
 	public boolean getBooleanValue(Target t) {
-		return val;
+		return getBooleanValue(t, null);
 	}
 
 	@Override
-	public boolean getBooleanValue(Environment env, Target t) {
+	public boolean getBooleanValue(Target t, Environment env) {
 		return val;
 	}
 

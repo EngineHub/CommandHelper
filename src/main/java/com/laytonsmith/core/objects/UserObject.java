@@ -15,6 +15,7 @@ import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import com.laytonsmith.PureUtilities.Common.Annotations.AggressiveDeprecation;
 
 import java.net.URL;
 import java.util.HashMap;
@@ -159,6 +160,14 @@ public final class UserObject implements Mixed {
 		return objectDefinition.getContainingClass();
 	}
 
+	/** @deprecated Use {@link #isInstanceOf(CClassType, LeftHandGenericUse, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
+	public boolean isInstanceOf(CClassType type) {
+		return isInstanceOf(type, null, null);
+	}
+
 	@Override
 	public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env) {
 		return InstanceofUtil.isInstanceof(this, LeftHandSideType
@@ -167,8 +176,21 @@ public final class UserObject implements Mixed {
 	}
 
 	@Override
+	public boolean isInstanceOf(Class<? extends Mixed> type) {
+		return type.isAssignableFrom(this.getClass());
+	}
+
+	@Override
 	public final CClassType typeof(Environment env) {
 		return objectDefinition.getType();
+	}
+
+	/** @deprecated Use {@link #typeof(Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
+	public CClassType typeof() {
+		return typeof(null);
 	}
 
 	@Override

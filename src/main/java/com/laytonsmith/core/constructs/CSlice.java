@@ -18,6 +18,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.Stack;
+import com.laytonsmith.PureUtilities.Common.Annotations.AggressiveDeprecation;
 
 /**
  *
@@ -122,25 +123,26 @@ public class CSlice extends CArray {
 		return false;
 	}
 
+	/** @deprecated Use {@link #set(Mixed, Mixed, Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
+	public void set(Mixed index, Mixed c, Target t) {
+		set(index, c, t, null);
+	}
+
 	@Override
 	public void set(Mixed index, Mixed c, Target t, Environment env) {
 		throw new CRECastException("CSlices cannot set values", t);
 	}
 
+	/** @deprecated Use {@link #get(Mixed, Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
 	@Override
-	public Mixed get(String index, Target t, Environment env) {
-		return get(new CString(index, t), t, env);
+	public Mixed get(Mixed index, Target t) {
+		return get(index, t, null);
 	}
-
-	@Override
-	public Mixed get(int index, Target t) {
-		long i = index;
-		if(i > max) {
-			throw new CRERangeException("Index out of bounds. Index: " + i + " Size: " + max, t);
-		}
-		return new CInt(start + (direction * i), t);
-	}
-
 
 	@Override
 	public Mixed get(Mixed index, Target t, Environment env) {
@@ -149,6 +151,14 @@ public class CSlice extends CArray {
 			throw new CRERangeException("Index out of bounds. Index: " + i + " Size: " + max, t);
 		}
 		return new CInt(start + (direction * i), t);
+	}
+
+	/** @deprecated Use {@link #keySet(Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
+	public Set<Mixed> keySet() {
+		return keySet(null);
 	}
 
 	@Override
@@ -186,6 +196,14 @@ public class CSlice extends CArray {
 				return (int) CSlice.this.size(env);
 			}
 		};
+	}
+
+	/** @deprecated Use {@link #size(Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
+	public long size() {
+		return size(null);
 	}
 
 	@Override

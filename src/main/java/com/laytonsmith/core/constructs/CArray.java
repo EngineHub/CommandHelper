@@ -59,7 +59,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 			new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
 					new UnboundedConstraint(Target.UNKNOWN, "T"))))
 			.withSuperParameters(GenericTypeParameters.nativeBuilder(com.laytonsmith.core.natives.interfaces.Iterable.TYPE)
-				.addParameter("T", null))
+					.addParameter("T", null))
 			.done();
 	private boolean associativeMode = false;
 	private long nextIndex = 0;
@@ -322,7 +322,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
-	public void push(Mixed c, Target t) {
+	public final void push(Mixed c, Target t) {
 		push(c, t, null);
 	}
 
@@ -338,7 +338,16 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	}
 
 	public final void push(String s) {
-		push(new CString(s, Target.UNKNOWN), Target.UNKNOWN);
+		push(new CString(s, Target.UNKNOWN), Target.UNKNOWN, null);
+	}
+
+	/**
+	 * @deprecated Use {@link #push(Mixed, Integer, Target, Environment)} instead.
+	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	public void push(Mixed c, Integer index, Target t) throws IllegalArgumentException, IndexOutOfBoundsException {
+		push(c, index, t, null);
 	}
 
 	/**
@@ -389,9 +398,20 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	}
 
 	/**
+	 * @deprecated Use {@link #keySet(Environment)} instead.
+	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
+	public Set<Mixed> keySet() {
+		return keySet(null);
+	}
+
+	/**
 	 * Returns the key set for this array. If it's an associative array, it simply returns the key set of the map,
 	 * otherwise it generates a set of CInts from 0 to size-1, and returns that.
 	 *
+	 * @param env
 	 * @return
 	 */
 	@Override
@@ -484,8 +504,8 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		setDirty();
 	}
 
-	@Deprecated
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
 	public final void set(int index, Mixed c, Target t) {
 		this.set(index, c, t, null);
 	}
@@ -494,8 +514,8 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		this.set(new CInt(index, t), c, t, env);
 	}
 
-	@Deprecated
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
 	public void set(String index, Mixed c, Target t) {
 		this.set(index, c, t, null);
 	}
@@ -528,13 +548,13 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public final void set(String index, double value) {
-		set(index, new CDouble(value, Target.UNKNOWN), Target.UNKNOWN);
+		set(index, new CDouble(value, Target.UNKNOWN), Target.UNKNOWN, null);
 	}
 
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public final void set(String index, long value) {
-		set(index, new CInt(value, Target.UNKNOWN), Target.UNKNOWN);
+		set(index, new CInt(value, Target.UNKNOWN), Target.UNKNOWN, null);
 	}
 
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
@@ -567,19 +587,34 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		}
 	}
 
+	/**
+	 * @deprecated Use {@link #get(Mixed, Target, Environment)} instead.
+	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
 	public final Mixed get(long index, Target t) {
+		return this.get(index, t, null);
+	}
+
+	public final Mixed get(long index, Target t, Environment env) {
 		if((int) index != index) {
 			throw new CREIndexOverflowException("The element at index \"" + index + "\" does not exist", t);
 		}
-		return get((int) index, t);
+		return this.get((int) index, t, env);
+	}
+
+	/**
+	 * @deprecated Use {@link #get(int, Target, Environment)} instead.
+	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
+	public final Mixed get(int index, Target t) {
+		return this.get(new CInt(index, t), t, null);
 	}
 
 	@Override
 	public final Mixed get(int index, Target t, Environment env) {
-		return get(index, t);
-	}
-
-	public Mixed get(int index, Target t) {
 		if(!associativeMode) {
 			try {
 				return array.get(index);
@@ -602,12 +637,18 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		}
 	}
 
+	/**
+	 * @deprecated Use {@link #get(String, Target, Environment)} instead.
+	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
 	@Override
-	public Mixed get(String index, Target t, Environment env) {
-		return get(index, t);
+	public final Mixed get(String index, Target t) {
+		return this.get(index, t, null);
 	}
 
-	public final Mixed get(String index, Target t) {
+	@Override
+	public final Mixed get(String index, Target t, Environment env) {
 		if(!associativeMode) {
 			try {
 				return array.get(Integer.parseInt(index));
@@ -660,6 +701,15 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 
 	public final boolean contains(int i) {
 		return contains(new CString(Integer.toString(i), Target.UNKNOWN));
+	}
+
+	/**
+	 * @deprecated Use {@link #indexesOf(Mixed, Environment)} instead.
+	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	public CArray indexesOf(Mixed value) {
+		return indexesOf(value, null);
 	}
 
 	/**
@@ -722,7 +772,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		b.append("{");
 		if(!inAssociativeMode()) {
 			for(int i = 0; i < this.size(env); i++) {
-				Mixed value = this.get(i, t);
+				Mixed value = this.get(i, t, env);
 				String v;
 				if(value instanceof CArray carray) {
 					if(arrays.contains(carray)) {
@@ -749,10 +799,10 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 				}
 				first = false;
 				String v;
-				if(this.get(key, t) == null) {
+				if(this.get(key, t, env) == null) {
 					v = "null";
 				} else {
-					Mixed value = this.get(key, t);
+					Mixed value = this.get(key, t, env);
 					if(value instanceof CArray carray) {
 						if(arrays.contains(carray)) {
 							v = "*recursion*";
@@ -773,8 +823,8 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		return mutVal;
 	}
 
-	@Deprecated
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
 	public long size() {
 		return size(null);
 	}
@@ -809,8 +859,26 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		return clone;
 	}
 
+	/**
+	 * @deprecated Use {@link #deepClone(Target, Environment)} instead.
+	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	public CArray deepClone(Target t) {
+		return deepClone(t, null);
+	}
+
 	public CArray deepClone(Target t, Environment env) {
 		return deepClone(this, t, new ArrayList<>(), env);
+	}
+
+	/**
+	 * @deprecated Use {@link #deepClone(CArray, Target, ArrayList, Environment)} instead.
+	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	protected CArray deepClone(CArray array, Target t, ArrayList<CArray[]> cloneRefs) {
+		return deepClone(array, t, cloneRefs, null);
 	}
 
 	protected CArray deepClone(CArray array, Target t, ArrayList<CArray[]> cloneRefs, Environment env) {
@@ -860,6 +928,15 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	}
 
 	/**
+	 * @deprecated Use {@link #remove(int, Environment)} instead.
+	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	public Mixed remove(int i) {
+		return remove(i, null);
+	}
+
+	/**
 	 * Removes the value at the specified integer key.
 	 *
 	 * @param i The index to remove at
@@ -868,6 +945,15 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	 */
 	public Mixed remove(int i, Environment env) {
 		return remove(new CInt(i, Target.UNKNOWN), env);
+	}
+
+	/**
+	 * @deprecated Use {@link #remove(String, Environment)} instead.
+	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	public Mixed remove(String s) {
+		return remove(s, null);
 	}
 
 	/**
@@ -950,6 +1036,15 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	}
 
 	/**
+	 * @deprecated Use {@link #createNew(Target, Environment)} instead.
+	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	public CArray createNew(Target t) {
+		return createNew(t, null);
+	}
+
+	/**
 	 * Creates a new, empty array, with the same type. Note to subclasses: By default, this method expects a constructor
 	 * that accepts a {@link Target}, {@link GenericParameters}, {@link Environment}. If this assumption is not valid,
 	 * you may override this method as needed.
@@ -1023,7 +1118,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 
 	@Override
 	public Mixed slice(int begin, int end, Target t, Environment env) {
-		return new ArrayHandling.array_get().exec(t, null, null, new CSlice(begin, end, t, env));
+		return new ArrayHandling.array_get().exec(t, env, null, new CSlice(begin, end, t, env));
 	}
 
 	@Override
@@ -1208,8 +1303,18 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 			ArrayAccessSet.TYPE};
 	}
 
+	/**
+	 * @deprecated Use {@link #getBooleanValue(Target, Environment)} instead.
+	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
 	@Override
-	public boolean getBooleanValue(Environment env, Target t) {
+	public boolean getBooleanValue(Target t) {
+		return getBooleanValue(t, null);
+	}
+
+	@Override
+	public boolean getBooleanValue(Target t, Environment env) {
 		return size(env) > 0;
 	}
 

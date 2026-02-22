@@ -60,9 +60,25 @@ public class CReal2dMatrixRow extends AbstractMixedClass implements com.laytonsm
 		return null;
 	}
 
+	/** @deprecated Use {@link #get(String, Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
 	@Override
-	public Mixed get(String index, Target t, Environment env) throws ConfigRuntimeException {
+	public CDouble get(String index, Target t) throws ConfigRuntimeException {
+		return get(index, t, null);
+	}
+
+	@Override
+	public CDouble get(String index, Target t, Environment env) throws ConfigRuntimeException {
 		throw new CRECastException("Real2dMatrix only supports int keys.", t);
+	}
+
+	/** @deprecated Use {@link #get(int, Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
+	public CDouble get(int index, Target t) throws ConfigRuntimeException {
+		return (CDouble) get(index, t, null);
 	}
 
 	@Override
@@ -70,9 +86,25 @@ public class CReal2dMatrixRow extends AbstractMixedClass implements com.laytonsm
 		return new CDouble(getNative(index, t), t);
 	}
 
+	/** @deprecated Use {@link #get(Mixed, Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
 	@Override
-	public Mixed get(Mixed index, Target t, Environment env) throws ConfigRuntimeException {
-		return get(ArgumentValidation.getInt32(index, t), t, env);
+	public CDouble get(Mixed index, Target t) throws ConfigRuntimeException {
+		return get(index, t, null);
+	}
+
+	@Override
+	public CDouble get(Mixed index, Target t, Environment env) throws ConfigRuntimeException {
+		return get(ArgumentValidation.getInt32(index, t, env), t, env);
+	}
+
+	/** @deprecated Use {@link #keySet(Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
+	public Set<Mixed> keySet() {
+		return keySet(null);
 	}
 
 	@Override
@@ -94,6 +126,14 @@ public class CReal2dMatrixRow extends AbstractMixedClass implements com.laytonsm
 		return false;
 	}
 
+	/** @deprecated Use {@link #slice(int, int, Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
+	public Mixed slice(int begin, int end, Target t) {
+		return slice(begin, end, t, null);
+	}
+
 	@Override
 	public Mixed slice(int begin, int end, Target t, Environment env) {
 		CArray ret = new CArray(t, null, env);
@@ -101,19 +141,35 @@ public class CReal2dMatrixRow extends AbstractMixedClass implements com.laytonsm
 
 		// Note: loop includes 'begin', excludes 'end', just like typical slice semantics
 		for(int i = begin; i != end; i += step) {
-			CDouble d = get(i, t, env);
+			CDouble d = (CDouble) get(i, t, env);
 			ret.push(d, t, env);
 		}
 
 		return ret;
 	}
 
+	/** @deprecated Use {@link #getBooleanValue(Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
 	@Override
-	public boolean getBooleanValue(Environment env, Target t) {
+	public boolean getBooleanValue(Target t) {
+		return getBooleanValue(t, null);
+	}
+
+	@Override
+	public boolean getBooleanValue(Target t, Environment env) {
 		// 0 dimension matrices are not possible, so this will
 		// always have at least one value in it, thus always
 		// true.
 		return true;
+	}
+
+	/** @deprecated Use {@link #size(Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
+	public long size() {
+		return size(null);
 	}
 
 	@Override
@@ -122,6 +178,7 @@ public class CReal2dMatrixRow extends AbstractMixedClass implements com.laytonsm
 	}
 
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	/** @deprecated Use {@link #set(Mixed, Mixed, Target, Environment)} instead. */
 	@Deprecated
 	@Override
 	public void set(Mixed index, Mixed value, Target t) {
@@ -130,8 +187,8 @@ public class CReal2dMatrixRow extends AbstractMixedClass implements com.laytonsm
 
 	@Override
 	public void set(Mixed index, Mixed value, Target t, Environment env) {
-		int in = ArgumentValidation.getInt32(index, t);
-		double d = ArgumentValidation.getDouble(value, t);
+		int in = ArgumentValidation.getInt32(index, t, env);
+		double d = ArgumentValidation.getDouble(value, t, env);
 		setNative(in, d, t);
 	}
 
