@@ -100,11 +100,6 @@ public class ServerEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			throw new UnsupportedOperationException("Not supported yet.");
-		}
-
-		@Override
 		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			if(!(e instanceof MCServerCommandEvent)) {
 				throw new EventException("Cannot convert e to MCServerCommandEvent");
@@ -184,11 +179,6 @@ public class ServerEvents {
 				return true;
 			}
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 
 		@Override
@@ -407,11 +397,6 @@ public class ServerEvents {
 				return true;
 			}
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
 		@Override

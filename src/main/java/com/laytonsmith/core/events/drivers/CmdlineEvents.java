@@ -166,8 +166,8 @@ public class CmdlineEvents {
 
 		@Override
 		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			CmdlinePromptInput cpi = new CmdlinePromptInput(manualObject.get("command", t).val(),
-					ArgumentValidation.getBoolean(manualObject.get("shellMode", t), t, env));
+			CmdlinePromptInput cpi = new CmdlinePromptInput(manualObject.get("command", t, env).val(),
+					ArgumentValidation.getBooleanObject(manualObject.get("shellMode", t, env), t, env));
 			return cpi;
 		}
 
@@ -260,11 +260,6 @@ public class CmdlineEvents {
 		@Override
 		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Environment env) throws PrefilterNonMatchException {
 			return true;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
 		@Override

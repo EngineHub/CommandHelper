@@ -552,6 +552,13 @@ public final class ArgumentValidation {
 		}
 	}
 
+	/** @deprecated Use {@link #getClassType(Mixed, Target, Environment)} instead. */
+	@Deprecated
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	public static LeftHandSideType getClassType(Mixed c, Target t) {
+		return getClassType(c, t, null);
+	}
+	
 	/**
 	 * Returns the LeftHandSideType from the given Construct. This accepts either a LeftHandSideType directly, or a
 	 * CClassType, which is converted to a LeftHandSideType.

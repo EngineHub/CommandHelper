@@ -72,6 +72,7 @@ import com.laytonsmith.core.events.BoundEvent;
 import com.laytonsmith.core.events.BoundEvent.ActiveEvent;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventBuilder;
+import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.events.drivers.EntityEvents.entity_death;
 import com.laytonsmith.core.events.prefilters.BlockPrefilterMatcher;
 import com.laytonsmith.core.events.prefilters.BooleanPrefilterMatcher;
@@ -147,11 +148,6 @@ public class PlayerEvents {
 							return event.getEntity().getName();
 						}
 					});
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			return null;
 		}
 
 		@Override
@@ -248,9 +244,8 @@ public class PlayerEvents {
 
 		@Override
 		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			MCPlayer p = Static.GetPlayer(manualObject.get("player", Target.UNKNOWN), Target.UNKNOWN, env);
-			MCItemStack i = ObjectGenerator.GetGenerator().item(manualObject.get("item", Target.UNKNOWN),
-					Target.UNKNOWN, env);
+			MCPlayer p = Static.GetPlayer(manualObject.get("player", t, env), t, env);
+			MCItemStack i = ObjectGenerator.GetGenerator().item(manualObject.get("item", t, env), t, env);
 			return EventBuilder.instantiate(MCPlayerItemConsumeEvent.class, p, i);
 		}
 
@@ -324,11 +319,6 @@ public class PlayerEvents {
 							return event.getReason();
 						}
 					});
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			return null;
 		}
 
 		@Override
@@ -418,11 +408,11 @@ public class PlayerEvents {
 
 		@Override
 		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			MCPlayer p = Static.GetPlayer(manualObject.get("player", Target.UNKNOWN, env), Target.UNKNOWN, env);
-			MCLocation from = ObjectGenerator.GetGenerator().location(manualObject.get("from", Target.UNKNOWN, env),
-					p.getWorld(), manualObject.getTarget(), env);
-			MCLocation to = ObjectGenerator.GetGenerator().location(manualObject.get("to", Target.UNKNOWN, env),
-					p.getWorld(), manualObject.getTarget(), env);
+			MCPlayer p = Static.GetPlayer(manualObject.get("player", t, env), t, env);
+			MCLocation from = ObjectGenerator.GetGenerator().location(manualObject.get("from", t, env),
+					p.getWorld(), manualObject.getTarget());
+			MCLocation to = ObjectGenerator.GetGenerator().location(manualObject.get("to", t, env),
+					p.getWorld(), manualObject.getTarget());
 			return EventBuilder.instantiate(MCPlayerTeleportEvent.class, p, from, to);
 		}
 
@@ -520,11 +510,11 @@ public class PlayerEvents {
 
 		@Override
 		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			MCPlayer p = Static.GetPlayer(manualObject.get("player", Target.UNKNOWN, env), Target.UNKNOWN, env);
-			MCLocation from = ObjectGenerator.GetGenerator().location(manualObject.get("from", Target.UNKNOWN, env),
-					p.getWorld(), manualObject.getTarget(), env);
-			MCLocation to = ObjectGenerator.GetGenerator().location(manualObject.get("to", Target.UNKNOWN, env),
-					p.getWorld(), manualObject.getTarget(), env);
+			MCPlayer p = Static.GetPlayer(manualObject.get("player", t, env), t, env);
+			MCLocation from = ObjectGenerator.GetGenerator().location(manualObject.get("from", t, env),
+					p.getWorld(), manualObject.getTarget());
+			MCLocation to = ObjectGenerator.GetGenerator().location(manualObject.get("to", t, env),
+					p.getWorld(), manualObject.getTarget());
 			return EventBuilder.instantiate(MCPlayerPortalEvent.class, p, from, to);
 		}
 
@@ -619,11 +609,6 @@ public class PlayerEvents {
 		protected PrefilterBuilder getPrefilterBuilder() {
 			return new PrefilterBuilder<MCPlayerLoginEvent>()
 					.set("player", "The player that is connecting", new PlayerPrefilterMatcher<>());
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			return null;
 		}
 
 		@Override
@@ -769,8 +754,8 @@ public class PlayerEvents {
 		@Override
 		public BindableEvent convert(CArray manual, Target t, Environment env) {
 			return EventBuilder.<MCPlayerJoinEvent>instantiate(MCPlayerJoinEvent.class,
-					Static.GetPlayer(manual.get("player", Target.UNKNOWN, env).val(), Target.UNKNOWN, env),
-					manual.get("join_message", Target.UNKNOWN, env).val());
+					Static.GetPlayer(manual.get("player", t, env).val(), t, env),
+					manual.get("join_message", t, env).val());
 		}
 
 	}
@@ -929,14 +914,14 @@ public class PlayerEvents {
 
 		@Override
 		public BindableEvent convert(CArray manual, Target t, Environment env) {
-			MCPlayer p = Static.GetPlayer(manual.get("player", Target.UNKNOWN, env), Target.UNKNOWN, env);
-			MCAction a = MCAction.valueOf(manual.get("action", Target.UNKNOWN, env).val().toUpperCase());
-			MCItemStack is = Static.ParseItemNotation("player_interact event", manual.get("item", Target.UNKNOWN, env).val(),
-					1, Target.UNKNOWN);
-			MCBlock b = ObjectGenerator.GetGenerator().location(manual.get("location", Target.UNKNOWN, env), null,
-					Target.UNKNOWN, env).getBlock();
-			MCBlockFace bf = MCBlockFace.valueOf(manual.get("facing", Target.UNKNOWN, env).val().toUpperCase());
-			return EventBuilder.<MCPlayerInteractEvent>instantiate(MCPlayerInteractEvent.class, p, a, is, b, bf);
+			MCPlayer p = Static.GetPlayer(manual.get("player", t, env), t, env);
+			MCAction a = MCAction.valueOf(manual.get("action", t, env).val().toUpperCase());
+			MCItemStack is = Static.ParseItemNotation("player_interact event", manual.get("item", t, env).val(),
+					1, t);
+			MCBlock b = ObjectGenerator.GetGenerator().location(manual.get("location", t, env), null, t).getBlock();
+			MCBlockFace bf = MCBlockFace.valueOf(manual.get("facing", t, env).val().toUpperCase());
+			MCPlayerInteractEvent e = EventBuilder.instantiate(MCPlayerInteractEvent.class, p, a, is, b, bf);
+			return e;
 		}
 
 		@Override
@@ -1015,11 +1000,12 @@ public class PlayerEvents {
 
 		@Override
 		public BindableEvent convert(CArray manual, Target t, Environment env) {
-			MCPlayer p = Static.GetPlayer(manual.get("player", Target.UNKNOWN, env), Target.UNKNOWN, env);
-			MCBlock b = ObjectGenerator.GetGenerator().location(manual.get("location", Target.UNKNOWN, env),
-					null, Target.UNKNOWN, env).getBlock();
-			MCEnterBedResult r = MCEnterBedResult.valueOf(manual.get("result", Target.UNKNOWN, env).val());
-			return EventBuilder.<MCPlayerEnterBedEvent>instantiate(MCPlayerEnterBedEvent.class, p, b, r);
+			MCPlayer p = Static.GetPlayer(manual.get("player", t, env), t, env);
+			MCBlock b = ObjectGenerator.GetGenerator().location(manual.get("location", t, env),
+					null, t).getBlock();
+			MCEnterBedResult r = MCEnterBedResult.valueOf(manual.get("result", t, env).val());
+			MCPlayerEnterBedEvent e = EventBuilder.instantiate(MCPlayerEnterBedEvent.class, p, b, r);
+			return e;
 		}
 	}
 
@@ -1081,10 +1067,11 @@ public class PlayerEvents {
 
 		@Override
 		public BindableEvent convert(CArray manual, Target t, Environment env) {
-			MCPlayer p = Static.GetPlayer(manual.get("player", Target.UNKNOWN, env), Target.UNKNOWN, env);
-			MCBlock b = ObjectGenerator.GetGenerator().location(manual.get("location", Target.UNKNOWN, env),
-					null, Target.UNKNOWN, env).getBlock();
-			return EventBuilder.<MCPlayerEnterBedEvent>instantiate(MCPlayerEnterBedEvent.class, p, b);
+			MCPlayer p = Static.GetPlayer(manual.get("player", t, env), t, env);
+			MCBlock b = ObjectGenerator.GetGenerator().location(manual.get("location", t, env),
+					null, t).getBlock();
+			MCPlayerEnterBedEvent e = EventBuilder.instantiate(MCPlayerEnterBedEvent.class, p, b);
+			return e;
 		}
 	}
 
@@ -1122,11 +1109,11 @@ public class PlayerEvents {
 
 		@Override
 		public BindableEvent convert(CArray manual, Target t, Environment env) {
-			MCPlayer p = Static.GetPlayer(manual.get("player", Target.UNKNOWN, env), Target.UNKNOWN, env);
-			MCBlock b = ObjectGenerator.GetGenerator().location(manual.get("location", Target.UNKNOWN, env), null,
-					Target.UNKNOWN, env).getBlock();
-			return EventBuilder.<MCPlayerInteractEvent>instantiate(MCPlayerInteractEvent.class, p, MCAction.PHYSICAL, null,
+			MCPlayer p = Static.GetPlayer(manual.get("player", t, env), t, env);
+			MCBlock b = ObjectGenerator.GetGenerator().location(manual.get("location", t, env), null, t).getBlock();
+			MCPlayerInteractEvent e = EventBuilder.instantiate(MCPlayerInteractEvent.class, p, MCAction.PHYSICAL, null,
 					b, MCBlockFace.UP);
+			return e;
 		}
 
 		@Override
@@ -1248,10 +1235,10 @@ public class PlayerEvents {
 		public BindableEvent convert(CArray manual, Target t, Environment env) {
 			//For firing off the event manually, we have to convert the CArray into an
 			//actual object that will trigger it
-			MCPlayer p = Static.GetPlayer(manual.get("player", Target.UNKNOWN, env), Target.UNKNOWN, env);
-			MCLocation l = ObjectGenerator.GetGenerator().location(manual.get("location", Target.UNKNOWN, env), p.getWorld(),
-					Target.UNKNOWN, env);
-			return EventBuilder.<MCPlayerRespawnEvent>instantiate(MCPlayerRespawnEvent.class, p, l, false);
+			MCPlayer p = Static.GetPlayer(manual.get("player", t, env), t, env);
+			MCLocation l = ObjectGenerator.GetGenerator().location(manual.get("location", t, env), p.getWorld(), t);
+			MCPlayerRespawnEvent e = EventBuilder.instantiate(MCPlayerRespawnEvent.class, p, l, false);
+			return e;
 		}
 
 		@Override
@@ -1345,16 +1332,17 @@ public class PlayerEvents {
 		public BindableEvent convert(CArray manual, Target t, Environment env) {
 			//For firing off the event manually, we have to convert the CArray into an
 			//actual object that will trigger it
-			String splayer = manual.get("player", Target.UNKNOWN, env).val();
+			String splayer = manual.get("player", t, env).val();
 			List<MCItemStack> list = new ArrayList<>();
-			String deathMessage = manual.get("death_message", Target.UNKNOWN, env).val();
-			CArray clist = (CArray) manual.get("drops", Target.UNKNOWN, env);
+			String deathMessage = manual.get("death_message", t, env).val();
+			CArray clist = (CArray) manual.get("drops", t, env);
 			for(String key : clist.stringKeySet()) {
-				list.add(ObjectGenerator.GetGenerator().item(clist.get(key, Target.UNKNOWN, env), clist.getTarget(), env));
+				list.add(ObjectGenerator.GetGenerator().item(clist.get(key, t, env), clist.getTarget(), env));
 			}
-			return EventBuilder.<MCPlayerDeathEvent>instantiate(MCPlayerDeathEvent.class, Static.GetPlayer(splayer,
-					Target.UNKNOWN, env), list,
+			MCPlayerDeathEvent e = EventBuilder.instantiate(MCPlayerDeathEvent.class, Static.GetPlayer(splayer,
+					t, env), list,
 					0, deathMessage);
+			return e;
 		}
 
 		//Given the paramters, change the underlying event
@@ -2078,8 +2066,16 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Environment env) throws PrefilterNonMatchException {
+			if(e instanceof MCPlayerFishEvent) {
+				MCPlayerFishEvent event = (MCPlayerFishEvent) e;
+				Prefilters.match(prefilter, "state", event.getState().name(), Prefilters.PrefilterType.MACRO);
+				Prefilters.match(prefilter, "player", event.getPlayer().getName(), Prefilters.PrefilterType.MACRO);
+				Prefilters.match(prefilter, "world", event.getPlayer().getWorld().getName(),
+						Prefilters.PrefilterType.STRING_MATCH);
+				return true;
+			}
+			return false;
 		}
 
 		@Override
@@ -2206,11 +2202,6 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			throw new CREBindException("Unsupported Operation", Target.UNKNOWN);
-		}
-
-		@Override
 		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			if(event instanceof MCGamemodeChangeEvent) {
 				MCGamemodeChangeEvent e = (MCGamemodeChangeEvent) event;
@@ -2259,11 +2250,6 @@ public class PlayerEvents {
 		protected PrefilterBuilder getPrefilterBuilder() {
 			return new PrefilterBuilder<MCExpChangeEvent>()
 					.set("player", "The player whose exp is changing", new PlayerPrefilterMatcher<>());
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 
 		@Override
@@ -2341,11 +2327,6 @@ public class PlayerEvents {
 							return event.isSigning();
 						}
 					});
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			return null;
 		}
 
 		@Override
@@ -2496,11 +2477,6 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			return null;
-		}
-
-		@Override
 		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			if(event instanceof MCPlayerToggleFlightEvent ptfe) {
 				Map<String, Mixed> mapEvent = evaluate_helper(event);
@@ -2566,11 +2542,6 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			return null;
-		}
-
-		@Override
 		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			if(event instanceof MCPlayerToggleSneakEvent ptse) {
 				Map<String, Mixed> mapEvent = evaluate_helper(event);
@@ -2633,11 +2604,6 @@ public class PlayerEvents {
 							return event.getPlayer().getWorld().getName();
 						}
 					});
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			return null;
 		}
 
 		@Override
@@ -2718,11 +2684,6 @@ public class PlayerEvents {
 		public MSVersion since() {
 			return MSVersion.V3_3_4;
 		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			return null;
-		}
 	}
 
 	public abstract static class player_bucket_event extends AbstractEvent {
@@ -2733,11 +2694,6 @@ public class PlayerEvents {
 				return true;
 			}
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			throw ConfigRuntimeException.CreateUncatchableException("Unsupported operation.", Target.UNKNOWN);
 		}
 
 		@Override
@@ -2890,11 +2846,6 @@ public class PlayerEvents {
 		public MSVersion since() {
 			return MSVersion.V3_3_5;
 		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			return null;
-		}
 	}
 
 	@api
@@ -2955,11 +2906,6 @@ public class PlayerEvents {
 		@Override
 		public MSVersion since() {
 			return MSVersion.V3_3_5;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			return null;
 		}
 	}
 }

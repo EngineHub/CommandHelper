@@ -496,6 +496,8 @@
 						<arg>-XDignore.symbol.file</arg>
 						<arg>-parameters</arg>
 						<arg>-proc:none</arg>
+						<arg>-Xmaxwarns</arg>
+						<arg>9999</arg>
 					</compilerArgs>
 				</configuration>
 			</plugin>

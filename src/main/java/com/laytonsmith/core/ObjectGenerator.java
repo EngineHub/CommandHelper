@@ -199,6 +199,7 @@ public class ObjectGenerator {
 	}
 
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	/** @deprecated Use {@link #location(Mixed, MCWorld, Target, Environment)} instead. */
 	@Deprecated
 	public MCLocation location(Mixed c, MCWorld w, Target t) {
 		return location(c, w, t, null);
@@ -2150,6 +2151,7 @@ public class ObjectGenerator {
 		return vector(Vector3D.ZERO, c, t, env);
 	}
 
+	/** @deprecated Use {@link #vector(Vector3D, Mixed, Target, Environment)} instead. */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public Vector3D vector(Vector3D v, Mixed c, Target t) {
@@ -2614,6 +2616,7 @@ public class ObjectGenerator {
 	}
 
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	/** @deprecated Use {@link #fireworkEffect(CArray, Target, Environment)} instead. */
 	@Deprecated
 	public MCFireworkEffect fireworkEffect(CArray fe, Target t) {
 		return fireworkEffect(fe, t, null);
@@ -2777,6 +2780,7 @@ public class ObjectGenerator {
 		return ret;
 	}
 
+	/** @deprecated Use {@link #recipe(Mixed, Target, Environment)} instead. */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public MCRecipe recipe(Mixed c, Target t) {

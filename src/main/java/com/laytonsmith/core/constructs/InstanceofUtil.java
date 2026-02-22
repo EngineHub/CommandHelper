@@ -124,6 +124,10 @@ public class InstanceofUtil {
 			// "None" type, which is not instanceof anything, nor is anything instanceof it
 			return false;
 		}
+		if(value instanceof CFunction) {
+			// TODO: Need to put the return type here, so we can work with this, but for now, just always return false
+			return false;
+		}
 		return isInstanceof(value, instanceofThis.asLeftHandSideType(), env);
 	}
 

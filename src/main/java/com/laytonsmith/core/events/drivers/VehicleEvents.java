@@ -87,11 +87,6 @@ public class VehicleEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
-		}
-
-		@Override
 		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			if(event instanceof MCVehicleEnterExitEvent) {
 				MCVehicleEnterExitEvent e = (MCVehicleEnterExitEvent) event;
@@ -155,11 +150,6 @@ public class VehicleEvents {
 				return true;
 			}
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 
 		@Override
@@ -273,11 +263,6 @@ public class VehicleEvents {
 				return true;
 			}
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 
 		@Override
@@ -485,14 +470,15 @@ public class VehicleEvents {
 
 		@Override
 		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-
-			MCEntity e = Static.getEntity(manualObject.get("id", Target.UNKNOWN, env), Target.UNKNOWN);
+			MCEntity e = Static.getEntity(manualObject.get("id", t, env), t);
 			if(!(e instanceof MCVehicle)) {
-				throw new CREBadEntityException("The id was not a vehicle", Target.UNKNOWN);
+				throw new CREBadEntityException("The id was not a vehicle", t);
 			}
-
-			MCLocation from = ObjectGenerator.GetGenerator().location(manualObject.get("from", Target.UNKNOWN, env), e.getWorld(), manualObject.getTarget(), env);
-			MCLocation to = ObjectGenerator.GetGenerator().location(manualObject.get("to", Target.UNKNOWN, env), e.getWorld(), manualObject.getTarget(), env);
+			
+			MCLocation from = ObjectGenerator.GetGenerator().location(manualObject.get("from", t, env),
+					e.getWorld(), manualObject.getTarget());
+			MCLocation to = ObjectGenerator.GetGenerator().location(manualObject.get("to", t, env),
+					e.getWorld(), manualObject.getTarget());
 			return EventBuilder.instantiate(MCVehicleMoveEvent.class, e, from, to);
 		}
 
@@ -580,11 +566,6 @@ public class VehicleEvents {
 				return true;
 			}
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 
 		@Override

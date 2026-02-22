@@ -154,7 +154,7 @@ public final class EventUtils {
 					if(b.getEventName().equalsIgnoreCase(eventName)) {
 						BindableEvent convertedEvent = null;
 						try {
-							convertedEvent = driver.convert(object, t, b.getEnvironment());
+							convertedEvent = driver.convert(object, t, env);
 						} catch (UnsupportedOperationException ex) {
 							// The event will stay null, and be caught below
 						}

@@ -1565,6 +1565,12 @@ public final class Static {
 		return environment.getEnv(GlobalEnv.class).inCmdlineMode();
 	}
 
+	/** @deprecated Use {@link #AssertType(Class, Mixed[], int, Function, Target, Environment)} instead. */
+	@Deprecated
+	public static <T extends Mixed> T AssertType(Class<T> type, Mixed[] args, int argNumber, Function func, Target t) {
+		return AssertType(type, args, argNumber, func, t, null);
+	}
+
 	/**
 	 * This verifies that the type required is actually present, and returns the value, cast to the appropriate type,
 	 * or, if not the correct type, a CRE.
@@ -1577,7 +1583,8 @@ public final class Static {
 	 * @param args The array of arguments.
 	 * @param argNumber The argument number, used both for grabbing the correct argument from args, and building the
 	 * error message if the cast cannot occur.
-	 * @param func The function, in case this errors out, to build the error message.
+	 * @param func The function, in case this errors out,
+	 * @param envto build the error message.
 	 * @param t The code target
 	 * @param env The environment.
 	 * @return The value, cast to the desired type.

@@ -70,11 +70,6 @@ public class BlockEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			return null;
-		}
-
-		@Override
 		public boolean modifyEvent(String key, Mixed value, BindableEvent e, Environment env) {
 			return false;
 		}
@@ -254,11 +249,6 @@ public class BlockEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			return null;
-		}
-
-		@Override
 		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			MCBlockBreakEvent event = (MCBlockBreakEvent) e;
 			Target t = Target.UNKNOWN;
@@ -271,7 +261,7 @@ public class BlockEvents {
 
 			CArray drops = new CArray(t, null, env);
 			for(MCItemStack stack : event.getDrops()) {
-				drops.push(ObjectGenerator.GetGenerator().item(stack, t), t);
+				drops.push(ObjectGenerator.GetGenerator().item(stack, t, env), t);
 			}
 			map.put("drops", drops);
 
@@ -396,11 +386,6 @@ public class BlockEvents {
 			}
 
 			return true;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			return null;
 		}
 
 		@Override
@@ -549,11 +534,6 @@ public class BlockEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			return null;
-		}
-
-		@Override
 		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			MCBlockBurnEvent event = (MCBlockBurnEvent) e;
 			Target t = Target.UNKNOWN;
@@ -627,10 +607,6 @@ public class BlockEvents {
 			return true;
 		}
 
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			return null;
-		}
 
 		@Override
 		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
@@ -770,11 +746,6 @@ public class BlockEvents {
 			Prefilters.match(prefilter, "toworld", event.getToBlock().getWorld().getName(), PrefilterType.STRING_MATCH, env);
 			Prefilters.match(prefilter, "face", event.getBlockFace().toString(), PrefilterType.STRING_MATCH, env);
 			return true;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			return null;
 		}
 
 		@Override
@@ -1111,11 +1082,6 @@ public class BlockEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			return null;
-		}
-
-		@Override
 		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			MCBlockDispenseEvent event = (MCBlockDispenseEvent) e;
 			Target t = Target.UNKNOWN;
@@ -1258,11 +1224,6 @@ public class BlockEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			return null;
-		}
-
-		@Override
 		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			if(!(event instanceof MCBlockGrowEvent)) {
 				throw new EventException("Cannot convert event to BlockGrowEvent");
@@ -1315,11 +1276,6 @@ public class BlockEvents {
 		@Override
 		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event, Environment env) throws PrefilterNonMatchException {
 			return event instanceof MCNotePlayEvent;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			return null;
 		}
 
 		@Override
@@ -1421,11 +1377,6 @@ public class BlockEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			return null;
-		}
-
-		@Override
 		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			if(!(e instanceof MCBlockFadeEvent)) {
 				throw new EventException("Cannot convert event to BlockFadeEvent");
@@ -1479,11 +1430,6 @@ public class BlockEvents {
 		@Override
 		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Environment env) throws PrefilterNonMatchException {
 			return e instanceof MCBlockExplodeEvent;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			return null;
 		}
 
 		@Override
@@ -1554,11 +1500,6 @@ public class BlockEvents {
 		@Override
 		public Driver driver() {
 			return Driver.BLOCK_FORM;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			return null;
 		}
 
 		@Override

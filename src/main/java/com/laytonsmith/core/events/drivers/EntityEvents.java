@@ -142,11 +142,6 @@ public class EntityEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
-		}
-
-		@Override
 		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			if(e instanceof MCItemDespawnEvent) {
 				Target t = Target.UNKNOWN;
@@ -219,11 +214,6 @@ public class EntityEvents {
 				return true;
 			}
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 
 		@Override
@@ -313,11 +303,6 @@ public class EntityEvents {
 				return true;
 			}
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 
 		@Override
@@ -554,11 +539,6 @@ public class EntityEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			return null;
-		}
-
-		@Override
 		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			if(event instanceof MCProjectileLaunchEvent) {
 				MCProjectileLaunchEvent projectileLaunchEvent = (MCProjectileLaunchEvent) event;
@@ -656,11 +636,6 @@ public class EntityEvents {
 				return true;
 			}
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			return null;
 		}
 
 		@Override
@@ -773,11 +748,6 @@ public class EntityEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			return null;
-		}
-
-		@Override
 		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			if(!(event instanceof MCCreatureSpawnEvent)) {
 				throw new EventException("Could not convert to MCCreatureSpawnEvent");
@@ -878,11 +848,6 @@ public class EntityEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			return null;
-		}
-
-		@Override
 		public Map<String, Mixed> evaluate(BindableEvent e, Environment env)
 				throws EventException {
 			if(e instanceof MCEntityDamageEvent) {
@@ -957,11 +922,6 @@ public class EntityEvents {
 				return true;
 			}
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			return null;
 		}
 
 		@Override
@@ -1056,11 +1016,6 @@ public class EntityEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			return null;
-		}
-
-		@Override
 		public Map<String, Mixed> evaluate(BindableEvent e, Environment env)
 				throws EventException {
 			if(e instanceof MCPlayerInteractAtEntityEvent) {
@@ -1123,11 +1078,6 @@ public class EntityEvents {
 					+ "| item: An item array representing the item being dropped.} "
 					+ "{item: setting this to null removes the dropped item} "
 					+ "{player|item}";
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			return null;
 		}
 
 		@Override
@@ -1247,11 +1197,6 @@ public class EntityEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			return null;
-		}
-
-		@Override
 		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			if(e instanceof MCPlayerPickupItemEvent) {
 				MCPlayerPickupItemEvent event = (MCPlayerPickupItemEvent) e;
@@ -1326,11 +1271,6 @@ public class EntityEvents {
 				return event.getEntity() instanceof MCPlayer;
 			}
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 
 		@Override
@@ -1529,11 +1469,6 @@ public class EntityEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
-		}
-
-		@Override
 		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			if(e instanceof MCEntityEnterPortalEvent) {
 				MCEntityEnterPortalEvent event = (MCEntityEnterPortalEvent) e;
@@ -1624,11 +1559,6 @@ public class EntityEvents {
 				return true;
 			}
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			return null;
 		}
 
 		@Override
@@ -1729,11 +1659,6 @@ public class EntityEvents {
 				return true;
 			}
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			return null;
 		}
 
 		@Override
@@ -1848,11 +1773,6 @@ public class EntityEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			return null;
-		}
-
-		@Override
 		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			if(event instanceof MCHangingBreakEvent) {
 				MCHangingBreakEvent hangingBreakEvent = (MCHangingBreakEvent) event;
@@ -1932,11 +1852,6 @@ public class EntityEvents {
 				return true;
 			}
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			return null;
 		}
 
 		@Override
@@ -2029,11 +1944,6 @@ public class EntityEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			return null;
-		}
-
-		@Override
 		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			if(e instanceof MCEntityToggleGlideEvent) {
 				MCEntityToggleGlideEvent evt = (MCEntityToggleGlideEvent) e;
@@ -2108,11 +2018,6 @@ public class EntityEvents {
 							return event.getEntity().getUniqueId().toString();
 						}
 					});
-		}
-
-		@Override
-		public MCEntityToggleSwimEvent convert(CArray manualObject, Target t, Environment env) {
-			return null;
 		}
 
 		@Override
@@ -2194,11 +2099,6 @@ public class EntityEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			return null;
-		}
-
-		@Override
 		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			if(event instanceof MCFireworkExplodeEvent) {
 				MCFireworkExplodeEvent e = (MCFireworkExplodeEvent) event;
@@ -2256,11 +2156,6 @@ public class EntityEvents {
 				return true;
 			}
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			return null;
 		}
 
 		@Override
@@ -2331,11 +2226,6 @@ public class EntityEvents {
 				return true;
 			}
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			return null;
 		}
 
 		@Override
@@ -2415,11 +2305,6 @@ public class EntityEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			return null;
-		}
-
-		@Override
 		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			if(e instanceof MCEntityUnleashEvent) {
 				MCEntityUnleashEvent event = (MCEntityUnleashEvent) e;
@@ -2475,11 +2360,6 @@ public class EntityEvents {
 				return true;
 			}
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			return null;
 		}
 
 		@Override
@@ -2562,12 +2442,6 @@ public class EntityEvents {
 			return Driver.ENTITY_POTION_EFFECT;
 		}
 
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			return null;
-		}
-
-		@Override
 		public Version since() {
 			return MSVersion.V3_3_4;
 		}

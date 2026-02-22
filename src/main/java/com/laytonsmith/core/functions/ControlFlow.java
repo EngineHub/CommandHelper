@@ -911,7 +911,7 @@ public class ControlFlow {
 				for(int i = 1; i < children.size(); i += 2) {
 					Mixed data = children.get(i).getData();
 
-					if(!(data.isInstanceOf(CArray.TYPE, null, env))) {
+					if(!(data.isInstanceOf(CArray.TYPE, null, env)) || data instanceof CSlice) {
 						//Put it in an array to make the rest of this parsing easier.
 						data = new CArray(t, null, env);
 						((CArray) data).push(children.get(i).getData(), t, env);

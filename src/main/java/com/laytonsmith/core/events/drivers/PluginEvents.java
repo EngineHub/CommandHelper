@@ -3,7 +3,6 @@ package com.laytonsmith.core.events.drivers;
 import com.laytonsmith.abstraction.events.MCPluginIncomingMessageEvent;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.MSVersion;
-import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CByteArray;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
@@ -61,11 +60,6 @@ public class PluginEvents {
 				return true;
 			}
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			return null;
 		}
 
 		@Override
