@@ -96,7 +96,7 @@ public class Persistence {
 			String key = GetNamespace(args, args.length - 1, getName(), t);
 			String value = null;
 			try {
-				value = Construct.json_encode(args[args.length - 1], t);
+				value = Construct.json_encode(args[args.length - 1], t, env);
 			} catch (MarshalException e) {
 				throw new CREFormatException(e.getMessage(), t);
 			}

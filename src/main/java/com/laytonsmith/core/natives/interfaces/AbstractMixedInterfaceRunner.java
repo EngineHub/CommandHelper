@@ -143,7 +143,7 @@ public abstract class AbstractMixedInterfaceRunner implements MixedInterfaceRunn
 
 	@Override
 	public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env) {
-		return Construct.isInstanceof(this, type);
+		return Construct.isInstanceof(this, type, env);
 	}
 
 	@Override

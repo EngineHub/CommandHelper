@@ -293,7 +293,7 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 
 							@Override
 							public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env) {
-								return Construct.isInstanceof(this, type);
+								return Construct.isInstanceof(this, type, env);
 							}
 
 							@Override

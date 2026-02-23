@@ -9,6 +9,7 @@ import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
@@ -123,16 +124,23 @@ public enum MCTagType {
 		this.construction = construction;
 	}
 
+	/** @deprecated Use {@link #convert(MCTagContainer, Mixed, Environment)} instead. */
+	@Deprecated
+	public Object convert(MCTagContainer container, Mixed value) {
+		return convert(container, value, null);
+	}
+
 	/**
 	 * Returns a Java object from a MethodScript construct.
 	 * Throws a ConfigRuntimeException if the value is not valid for this tag type.
 	 * @param container the tag container context
 	 * @param value MethodScript construct
+	 * @param env
 	 * @return a Java object
 	 */
-	public Object convert(MCTagContainer container, Mixed value) {
+	public Object convert(MCTagContainer container, Mixed value, Environment env) {
 		if(this == TAG_CONTAINER) {
-			if(!value.isInstanceOf(CArray.TYPE)) {
+			if(!value.isInstanceOf(CArray.TYPE, null, env)) {
 				throw new CREFormatException("Expected tag container to be an array.", value.getTarget());
 			}
 			CArray containerArray = (CArray) value;
@@ -141,7 +149,7 @@ public enum MCTagType {
 			}
 			for(String key : containerArray.stringKeySet()) {
 				Mixed possibleArray = containerArray.get(key, value.getTarget());
-				if(!possibleArray.isInstanceOf(CArray.TYPE)) {
+				if(!possibleArray.isInstanceOf(CArray.TYPE, null, env)) {
 					throw new CREFormatException("Expected tag entry to be an array.", possibleArray.getTarget());
 				}
 				CArray entryArray = (CArray) possibleArray;
@@ -158,11 +166,11 @@ public enum MCTagType {
 				}
 				Object tagValue;
 				if(tagType == MCTagType.TAG_CONTAINER) {
-					tagValue = tagType.convert(container.newContainer(), entryValue);
+					tagValue = tagType.convert(container.newContainer(), entryValue, env);
 				} else if(tagType == TAG_CONTAINER_ARRAY) {
-					tagValue = tagType.convert(container, entryValue);
+					tagValue = tagType.convert(container, entryValue, env);
 				} else {
-					tagValue = tagType.convert(container, entryValue);
+					tagValue = tagType.convert(container, entryValue, env);
 				}
 				try {
 					container.set(StaticLayer.GetConvertor().GetNamespacedKey(key), tagType, tagValue);
@@ -174,7 +182,7 @@ public enum MCTagType {
 			}
 			return container;
 		} else if(this == TAG_CONTAINER_ARRAY) {
-			if(!value.isInstanceOf(CArray.TYPE)) {
+			if(!value.isInstanceOf(CArray.TYPE, null, env)) {
 				throw new CREFormatException("Expected tag container to be an array.", value.getTarget());
 			}
 			CArray array = (CArray) value;
@@ -184,7 +192,7 @@ public enum MCTagType {
 			MCTagContainer[] containers = new MCTagContainer[(int) array.size()];
 			int i = 0;
 			for(Mixed possibleContainer : array) {
-				containers[i++] = (MCTagContainer) TAG_CONTAINER.convert(container.newContainer(), possibleContainer);
+				containers[i++] = (MCTagContainer) TAG_CONTAINER.convert(container.newContainer(), possibleContainer, env);
 			}
 			return containers;
 		}

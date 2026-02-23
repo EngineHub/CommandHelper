@@ -306,7 +306,7 @@ public class Web {
 						}
 						settings.setComplexParameters(mparams);
 					} else {
-						if(csettings.get("params", t).isInstanceOf(CByteArray.TYPE, null, environment)) {
+						if(csettings.get("params", t) instanceof CByteArray) {
 							CByteArray b = (CByteArray) csettings.get("params", t);
 							settings.setRawParameter(b.asByteArrayCopy());
 						} else {
@@ -375,7 +375,7 @@ public class Web {
 				}
 				if(csettings.containsKey("trustStore")) {
 					Mixed trustStore = csettings.get("trustStore", t);
-					if(trustStore.isInstanceOf(CBoolean.TYPE, null, environment) && ArgumentValidation.getBoolean(trustStore, t) == false) {
+					if(trustStore instanceof CBoolean && ArgumentValidation.getBoolean(trustStore, t) == false) {
 						settings.setDisableCertChecking(true);
 					} else if(trustStore.isInstanceOf(CArray.TYPE, null, environment)) {
 						CArray trustStoreA = ((CArray) trustStore);
@@ -942,7 +942,7 @@ public class Web {
 					if(!"".equals(disposition)) {
 						message.setDisposition(disposition);
 					}
-					message.setContent(getContent(content, t), type);
+					message.setContent(getContent(content, t, environment), type);
 				} else {
 					Multipart mp = new MimeMultipart("alternative");
 					for(Mixed attachment : attachments.asList()) {
@@ -951,7 +951,7 @@ public class Web {
 						final String fileName = ArgumentValidation.getItemFromArray(pattachment, "filename", t, new CString("", t)).val().trim();
 						String description = ArgumentValidation.getItemFromArray(pattachment, "description", t, new CString("", t)).val().trim();
 						String disposition = ArgumentValidation.getItemFromArray(pattachment, "disposition", t, new CString("", t)).val().trim();
-						final Object content = getContent(ArgumentValidation.getItemFromArray(pattachment, "content", t, null), t);
+						final Object content = getContent(ArgumentValidation.getItemFromArray(pattachment, "content", t, null), t, environment);
 						BodyPart bp = new MimeBodyPart();
 						if(!"".equals(fileName)) {
 							bp.setFileName(fileName);
@@ -1032,10 +1032,10 @@ public class Web {
 		 * @param t
 		 * @return
 		 */
-		private Object getContent(Mixed c, Target t) {
-			if(c.isInstanceOf(CString.TYPE)) {
+		private Object getContent(Mixed c, Target t, Environment environment) {
+			if(c.isInstanceOf(CString.TYPE, null, environment)) {
 				return c.val();
-			} else if(c.isInstanceOf(CByteArray.TYPE)) {
+			} else if(c instanceof CByteArray) {
 				CByteArray cb = (CByteArray) c;
 				return cb.asByteArrayCopy();
 			} else {

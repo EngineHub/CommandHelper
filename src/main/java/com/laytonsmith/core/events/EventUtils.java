@@ -337,7 +337,7 @@ public final class EventUtils {
 				try {
 					//We must re-set the active event's bound event and parsed event
 					activeEvent.setBoundEvent(b);
-					activeEvent.setParsedEvent(driver.evaluate(e));
+					activeEvent.setParsedEvent(Event.ExecuteEvaluate(driver, e, b.getEnvironment()));
 					b.trigger(activeEvent);
 				} catch (FunctionReturnException ex) {
 					//We also know how to deal with this

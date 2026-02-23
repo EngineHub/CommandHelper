@@ -151,7 +151,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			if(e instanceof MCFoodLevelChangeEvent) {
 				Map<String, Mixed> ret = evaluate_helper(e);
 				MCFoodLevelChangeEvent event = (MCFoodLevelChangeEvent) e;
@@ -179,7 +179,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			if(event instanceof MCFoodLevelChangeEvent) {
 				MCFoodLevelChangeEvent e = (MCFoodLevelChangeEvent) event;
 
@@ -252,7 +252,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			if(event instanceof MCPlayerItemConsumeEvent) {
 				MCPlayerItemConsumeEvent e = (MCPlayerItemConsumeEvent) event;
 				Map<String, Mixed> ret = evaluate_helper(e);
@@ -277,7 +277,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			if(event instanceof MCPlayerItemConsumeEvent) {
 				MCPlayerItemConsumeEvent e = (MCPlayerItemConsumeEvent) event;
 				if(key.equalsIgnoreCase("item")) {
@@ -326,7 +326,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			if(e instanceof MCPlayerKickEvent) {
 				MCPlayerKickEvent event = (MCPlayerKickEvent) e;
 				Map<String, Mixed> map = evaluate_helper(e);
@@ -346,7 +346,7 @@ public class PlayerEvents {
 
 		@Override
 		public boolean modifyEvent(String key, Mixed value,
-				BindableEvent event) {
+				BindableEvent event, Environment env) {
 			if(event instanceof MCPlayerKickEvent) {
 				MCPlayerKickEvent e = (MCPlayerKickEvent) event;
 				if(key.equalsIgnoreCase("message")) {
@@ -423,7 +423,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			if(e instanceof MCPlayerTeleportEvent) {
 				MCPlayerTeleportEvent event = (MCPlayerTeleportEvent) e;
 				Map<String, Mixed> map = evaluate_helper(e);
@@ -446,7 +446,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			if(event instanceof MCPlayerTeleportEvent) {
 				MCPlayerTeleportEvent e = (MCPlayerTeleportEvent) event;
 
@@ -527,7 +527,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			if(e instanceof MCPlayerPortalEvent) {
 				MCPlayerPortalEvent event = (MCPlayerPortalEvent) e;
 				Map<String, Mixed> map = evaluate_helper(e);
@@ -554,7 +554,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			if(event instanceof MCPlayerPortalEvent) {
 				MCPlayerPortalEvent e = (MCPlayerPortalEvent) event;
 
@@ -622,7 +622,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			if(e instanceof MCPlayerLoginEvent) {
 				MCPlayerLoginEvent event = (MCPlayerLoginEvent) e;
 				Map<String, Mixed> map = evaluate_helper(e);
@@ -647,7 +647,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent e) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent e, Environment env) {
 			if(e instanceof MCPlayerLoginEvent) {
 				MCPlayerLoginEvent event = (MCPlayerLoginEvent) e;
 				if(key.equals("result")) {
@@ -735,7 +735,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			if(e instanceof MCPlayerJoinEvent) {
 				MCPlayerJoinEvent ple = (MCPlayerJoinEvent) e;
 				Map<String, Mixed> map = evaluate_helper(e);
@@ -749,7 +749,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			if(event instanceof MCPlayerJoinEvent) {
 				MCPlayerJoinEvent pje = (MCPlayerJoinEvent) event;
 				if(key.equals("join_message") || key.equals("message")) {
@@ -828,7 +828,7 @@ public class PlayerEvents {
 			}
 			if(prefilter.containsKey("block")) {
 				Mixed ctype = prefilter.get("block");
-				if(ctype.isInstanceOf(CString.TYPE) && ctype.val().contains(":")
+				if(ctype.isInstanceOf(CString.TYPE, null, event.getEnvironment()) && ctype.val().contains(":")
 						|| ArgumentValidation.isNumber(ctype)) {
 					int type;
 					String notation = ctype.val();
@@ -892,7 +892,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			if(e instanceof MCPlayerInteractEvent) {
 				MCPlayerInteractEvent pie = (MCPlayerInteractEvent) e;
 				Map<String, Mixed> map = evaluate_helper(e);
@@ -940,7 +940,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			if(event instanceof MCPlayerInteractEvent) {
 				MCPlayerInteractEvent pie = (MCPlayerInteractEvent) event;
 			}
@@ -995,7 +995,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			if(e instanceof MCPlayerEnterBedEvent) {
 				MCPlayerEnterBedEvent bee = (MCPlayerEnterBedEvent) e;
 				Map<String, Mixed> map = evaluate_helper(e);
@@ -1013,7 +1013,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			return false;
 		}
 
@@ -1064,7 +1064,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			if(e instanceof MCPlayerLeaveBedEvent) {
 				MCPlayerLeaveBedEvent bee = (MCPlayerLeaveBedEvent) e;
 				Map<String, Mixed> map = evaluate_helper(e);
@@ -1081,7 +1081,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			return false;
 		}
 
@@ -1137,7 +1137,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			if(e instanceof MCPlayerInteractEvent) {
 				MCPlayerInteractEvent pie = (MCPlayerInteractEvent) e;
 				Map<String, Mixed> map = evaluate_helper(e);
@@ -1156,7 +1156,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			return false;
 		}
 
@@ -1235,7 +1235,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			if(e instanceof MCPlayerRespawnEvent) {
 				MCPlayerRespawnEvent event = (MCPlayerRespawnEvent) e;
 				Map<String, Mixed> map = evaluate_helper(e);
@@ -1264,7 +1264,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			if(event instanceof MCPlayerRespawnEvent) {
 				MCPlayerRespawnEvent e = (MCPlayerRespawnEvent) event;
 				if(key.equals("location")) {
@@ -1330,10 +1330,10 @@ public class PlayerEvents {
 		//We have an actual event now, change it into a Map
 		//that will end up being the @event object
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			if(e instanceof MCPlayerDeathEvent) {
 				MCPlayerDeathEvent event = (MCPlayerDeathEvent) e;
-				Map<String, Mixed> map = super.evaluate(e);
+				Map<String, Mixed> map = super.evaluate(e, env);
 				map.putAll(evaluate_helper(e));
 				map.put("death_message", new CString(event.getDeathMessage(), Target.UNKNOWN));
 				map.put("keep_inventory", CBoolean.get(event.getKeepInventory()));
@@ -1371,7 +1371,7 @@ public class PlayerEvents {
 
 		//Given the paramters, change the underlying event
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			if(event instanceof MCPlayerDeathEvent) {
 				MCPlayerDeathEvent e = (MCPlayerDeathEvent) event;
 				switch(key) {
@@ -1394,7 +1394,7 @@ public class PlayerEvents {
 						e.setNewTotalExp(ArgumentValidation.getInt32(value, Target.UNKNOWN));
 						return true;
 					default:
-						return super.modifyEvent(key, value, event);
+						return super.modifyEvent(key, value, event, env);
 				}
 			} else {
 				return false;
@@ -1447,7 +1447,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			if(e instanceof MCPlayerQuitEvent) {
 				MCPlayerQuitEvent event = (MCPlayerQuitEvent) e;
 				Map<String, Mixed> map = evaluate_helper(e);
@@ -1460,7 +1460,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			if(event instanceof MCPlayerQuitEvent) {
 				MCPlayerQuitEvent e = (MCPlayerQuitEvent) event;
 				if("message".equals(key)) {
@@ -1536,7 +1536,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			if(e instanceof MCPlayerChatEvent) {
 				MCPlayerChatEvent event = (MCPlayerChatEvent) e;
 				Map<String, Mixed> map = evaluate_helper(e);
@@ -1555,14 +1555,14 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			if(event instanceof MCPlayerChatEvent) {
 				MCPlayerChatEvent e = (MCPlayerChatEvent) event;
 				if("message".equals(key)) {
 					e.setMessage(Construct.nval(value));
 				}
 				if("recipients".equals(key)) {
-					if(value.isInstanceOf(CArray.TYPE)) {
+					if(value.isInstanceOf(CArray.TYPE, null, env)) {
 						List<MCPlayer> list = new ArrayList<MCPlayer>();
 						for(String index : ((CArray) value).stringKeySet()) {
 							Mixed v = ((CArray) value).get(index, value.getTarget());
@@ -1676,7 +1676,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			if(e instanceof MCPlayerChatEvent) {
 				MCPlayerChatEvent event = (MCPlayerChatEvent) e;
 				Map<String, Mixed> map = evaluate_helper(e);
@@ -1695,14 +1695,14 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			if(event instanceof MCPlayerChatEvent) {
 				MCPlayerChatEvent e = (MCPlayerChatEvent) event;
 				if("message".equals(key)) {
 					e.setMessage(Construct.nval(value));
 				}
 				if("recipients".equals(key)) {
-					if(value.isInstanceOf(CArray.TYPE)) {
+					if(value.isInstanceOf(CArray.TYPE, null, env)) {
 						List<MCPlayer> list = new ArrayList<>();
 						for(String index : ((CArray) value).stringKeySet()) {
 							Mixed v = ((CArray) value).get(index, value.getTarget());
@@ -1804,7 +1804,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			if(e instanceof MCPlayerCommandEvent) {
 				MCPlayerCommandEvent event = (MCPlayerCommandEvent) e;
 				Map<String, Mixed> map = evaluate_helper(e);
@@ -1822,7 +1822,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			if(event instanceof MCPlayerCommandEvent) {
 				MCPlayerCommandEvent e = (MCPlayerCommandEvent) event;
 
@@ -1899,7 +1899,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			if(e instanceof MCWorldChangedEvent) {
 				MCWorldChangedEvent event = (MCWorldChangedEvent) e;
 				Map<String, Mixed> map = evaluate_helper(e);
@@ -1913,7 +1913,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			if(event instanceof MCWorldChangedEvent) {
 				MCWorldChangedEvent e = (MCWorldChangedEvent) event;
 			}
@@ -2036,7 +2036,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			if(e instanceof MCPlayerMoveEvent) {
 				MCPlayerMoveEvent event = (MCPlayerMoveEvent) e;
 				Map<String, Mixed> map = new HashMap<>();
@@ -2056,7 +2056,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			//Nothing can be modified, so always return false
 			return false;
 		}
@@ -2120,7 +2120,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			if(e instanceof MCPlayerFishEvent) {
 				MCPlayerFishEvent event = (MCPlayerFishEvent) e;
 				Target t = Target.UNKNOWN;
@@ -2149,7 +2149,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			if(event instanceof MCPlayerFishEvent) {
 				MCPlayerFishEvent e = (MCPlayerFishEvent) event;
 				if(key.equals("xp")) {
@@ -2245,7 +2245,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			if(event instanceof MCGamemodeChangeEvent) {
 				MCGamemodeChangeEvent e = (MCGamemodeChangeEvent) event;
 				Map<String, Mixed> ret = evaluate_helper(e);
@@ -2262,7 +2262,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			return false;
 		}
 
@@ -2296,7 +2296,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			if(event instanceof MCExpChangeEvent) {
 				MCExpChangeEvent e = (MCExpChangeEvent) event;
 				Map<String, Mixed> ret = evaluate_helper(e);
@@ -2313,7 +2313,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			if(event instanceof MCExpChangeEvent) {
 				MCExpChangeEvent e = (MCExpChangeEvent) event;
 				if("amount".equals(key)) {
@@ -2373,7 +2373,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			if(event instanceof MCPlayerEditBookEvent) {
 				MCPlayerEditBookEvent playerEditBookEvent = (MCPlayerEditBookEvent) event;
 				Map<String, Mixed> mapEvent = evaluate_helper(event);
@@ -2430,7 +2430,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			if(event instanceof MCPlayerEditBookEvent) {
 				if(key.equalsIgnoreCase("title")) {
 					MCPlayerEditBookEvent e = ((MCPlayerEditBookEvent) event);
@@ -2519,7 +2519,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			if(event instanceof MCPlayerToggleFlightEvent) {
 				MCPlayerToggleFlightEvent ptfe = (MCPlayerToggleFlightEvent) event;
 				Map<String, Mixed> mapEvent = evaluate_helper(event);
@@ -2532,7 +2532,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			return false;
 		}
 	}
@@ -2584,7 +2584,7 @@ public class PlayerEvents {
 					});
 		}
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			if(event instanceof MCPlayerToggleSneakEvent) {
 				MCPlayerToggleSneakEvent ptse = (MCPlayerToggleSneakEvent) event;
 				Map<String, Mixed> mapEvent = evaluate_helper(event);
@@ -2597,7 +2597,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			return false;
 		}
 	}
@@ -2650,7 +2650,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			if(event instanceof MCPlayerToggleSprintEvent) {
 				MCPlayerToggleSprintEvent ptse = (MCPlayerToggleSprintEvent) event;
 				Map<String, Mixed> mapEvent = evaluate_helper(event);
@@ -2663,7 +2663,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			return false;
 		}
 	}
@@ -2709,7 +2709,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			Map<String, Mixed> map = evaluate_helper(event);
 			map.put("status", new CString(((MCPlayerResourcePackEvent) event).getStatus().name(), Target.UNKNOWN));
 			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_4)) {
@@ -2719,7 +2719,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			return false;
 		}
 
@@ -2740,12 +2740,12 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent e) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent e, Environment env) {
 			return false;
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			if(event instanceof MCPlayerBucketEvent e) {
 				Map<String, Mixed> ret = evaluate_helper(e);
 				Target t = Target.UNKNOWN;
@@ -2868,7 +2868,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			if(event instanceof MCPlayerAdvancementDoneEvent e) {
 				Map<String, Mixed> map = new HashMap<>();
 				map.put("player", new CString(e.getPlayer().getName(), Target.UNKNOWN));
@@ -2881,7 +2881,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			return false;
 		}
 
@@ -2929,7 +2929,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			if(event instanceof MCPlayerStopUsingItemEvent e) {
 				Map<String, Mixed> map = new HashMap<>();
 				map.put("player", new CString(e.getPlayer().getName(), Target.UNKNOWN));
@@ -2942,7 +2942,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			return false;
 		}
 

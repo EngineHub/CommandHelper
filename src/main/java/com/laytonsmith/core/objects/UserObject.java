@@ -165,7 +165,7 @@ public class UserObject implements Mixed {
 
 	@Override
 	public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env) {
-		return Construct.isInstanceof(this, type);
+		return Construct.isInstanceof(this, type, env);
 	}
 
 	/** @deprecated Use {@link #typeof(Environment)} instead. */

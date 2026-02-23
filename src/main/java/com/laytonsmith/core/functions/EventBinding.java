@@ -835,7 +835,7 @@ public class EventBinding {
 			boolean success = false;
 			if(!active.isLocked(parameter)) {
 				try {
-					success = e.modifyEvent(parameter, value, environment.getEnv(GlobalEnv.class).GetEvent().getUnderlyingEvent());
+					success = Event.ExecuteModifyEvent(e, parameter, value, environment.getEnv(GlobalEnv.class).GetEvent().getUnderlyingEvent(), environment);
 				} catch (ConfigRuntimeException ex) {
 					ex.setTarget(t);
 					throw ex;

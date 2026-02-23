@@ -91,7 +91,7 @@ public final class ArgumentValidation {
 	 * @return
 	 */
 	public static CArray getArray(Mixed construct, Target t, Environment env) {
-		if(construct.isInstanceOf(CArray.TYPE)) {
+		if(construct.isInstanceOf(CArray.TYPE, null, env)) {
 			return ((CArray) construct);
 		} else {
 			throw new CRECastException("Expecting array, but received " + construct.val(), t);
@@ -294,9 +294,9 @@ public final class ArgumentValidation {
 		if(c == null || c instanceof CNull) {
 			return 0;
 		}
-		if(c.isInstanceOf(CInt.TYPE)) {
+		if(c.isInstanceOf(CInt.TYPE, null, env)) {
 			i = getObject(c, t, CInt.class).getInt();
-		} else if(c.isInstanceOf(CBoolean.TYPE)) {
+		} else if(c instanceof CBoolean) {
 			if(getObject(c, t, CBoolean.class).getBoolean()) {
 				i = 1;
 			} else {
@@ -717,7 +717,7 @@ public final class ArgumentValidation {
 		if(c instanceof CNull) {
 			return EnumSet.noneOf(enumClass);
 		}
-		if(!c.isInstanceOf(CArray.TYPE)) {
+		if(!c.isInstanceOf(CArray.TYPE, null, env)) {
 			Mixed val = c;
 			c = new CArray(t);
 			((CArray) c).push(val, t);

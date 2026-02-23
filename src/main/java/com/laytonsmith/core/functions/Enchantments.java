@@ -70,8 +70,8 @@ public class Enchantments {
 	 * @param value
 	 * @return
 	 */
-	public static int ConvertLevel(Mixed value) {
-		if(value.isInstanceOf(CInt.TYPE)) {
+	public static int ConvertLevel(Mixed value, Environment environment) {
+		if(value.isInstanceOf(CInt.TYPE, null, environment)) {
 			return (int) ((CInt) value).getInt();
 		}
 		String lc = value.val().toLowerCase().trim();
@@ -205,7 +205,7 @@ public class Enchantments {
 					is.addUnsafeEnchantment(en.getKey(), en.getValue());
 				}
 			} else {
-				int level = ConvertLevel(args[offset + 2]);
+				int level = ConvertLevel(args[offset + 2], environment);
 				if(level > 0) {
 					is.addUnsafeEnchantment(GetEnchantment(args[offset + 1].val(), t), level);
 				} else {

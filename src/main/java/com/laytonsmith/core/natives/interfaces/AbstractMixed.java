@@ -75,7 +75,7 @@ public abstract class AbstractMixed implements Mixed {
 		if(type.getNativeType() != null) {
 			return type.getNativeType().isAssignableFrom(this.getClass());
 		}
-		return Construct.isInstanceof(this, type);
+		return Construct.isInstanceof(this, type, env);
 	}
 
 	@Override

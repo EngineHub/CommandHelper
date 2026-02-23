@@ -364,7 +364,7 @@ public class Compiler {
 
 					// Convert bare string or concat() to type reference if needed.
 					ParseTree typeNode = node.getChildAt(0);
-					if(!typeNode.getData().isInstanceOf(CClassType.TYPE)) {
+					if(!(typeNode.getData() instanceof CClassType)) {
 						ParseTree convertedTypeNode = __type_ref__.createFromBareStringOrConcats(typeNode);
 						if(convertedTypeNode != null) {
 							typeNode = convertedTypeNode;
@@ -470,7 +470,7 @@ public class Compiler {
 				}
 
 				if(convertedTypeNode != null
-						|| typeNode.getData().equals(CVoid.VOID) || typeNode.getData().isInstanceOf(CClassType.TYPE)) {
+						|| typeNode.getData().equals(CVoid.VOID) || typeNode.getData() instanceof CClassType) {
 					if(k == list.size() - 1) {
 						// This is not a typed assignment
 						break;
@@ -499,7 +499,7 @@ public class Compiler {
 								list.get(k).setChildren(children);
 								break;
 							default:
-								if(typeNode.getData().equals(CVoid.VOID) || typeNode.getData().isInstanceOf(CClassType.TYPE)) {
+								if(typeNode.getData().equals(CVoid.VOID) || typeNode.getData() instanceof CClassType) {
 									throw new ConfigCompileException("Unexpected ClassType \""
 											+ typeNode.getData().val() + "\"", typeNode.getTarget());
 								}
@@ -664,7 +664,7 @@ public class Compiler {
 					// Do not rewrite casts to execute() if the callable is the cast (i.e. "(type) (val)").
 					if(prevNodeVal instanceof CFunction cfunc && cfunc.val().equals(Compiler.p.NAME)
 							&& prevNode.numberOfChildren() == 1
-							&& (prevNode.getChildAt(0).getData().isInstanceOf(CClassType.TYPE)
+							&& (prevNode.getChildAt(0).getData() instanceof CClassType
 									|| __type_ref__.createFromBareStringOrConcats(prevNode.getChildAt(0)) != null)) {
 						break;
 					}
@@ -1097,7 +1097,7 @@ public class Compiler {
 				if(children.size() != 1) {
 					throw new ConfigCompileException(getName() + " can only take one parameter", t);
 				}
-				if(!(children.get(0).getData().isInstanceOf(CString.TYPE))) {
+				if(!(children.get(0).getData().isInstanceOf(CString.TYPE, null, env))) {
 					throw new ConfigCompileException("Only hardcoded strings may be passed into " + getName(), t);
 				}
 				String value = children.get(0).getData().val();
@@ -1246,7 +1246,7 @@ public class Compiler {
 			CClassType type = ArgumentValidation.getClassType(args[1], t);
 			if(!InstanceofUtil.isInstanceof(value, type, env)) {
 				throw new CRECastException(
-						"Cannot cast from " + value.typeof().getSimpleName() + " to " + type.getSimpleName() + ".", t);
+						"Cannot cast from " + value.typeof(env).getSimpleName() + " to " + type.getSimpleName() + ".", t);
 			}
 			return value;
 		}

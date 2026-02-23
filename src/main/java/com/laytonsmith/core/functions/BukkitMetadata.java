@@ -113,7 +113,7 @@ public class BukkitMetadata {
 			if(args.length == 1) {
 				metadata = Static.getPlayer(environment, t).getMetadata(args[0].val());
 			} else {
-				metadata = GetMetadatable(args[0], t).getMetadata(args[1].val());
+				metadata = GetMetadatable(args[0], t, environment).getMetadata(args[1].val());
 			}
 			if(args.length == 3) {
 				MCPlugin plugin = Static.getPlugin(args[2], t);
@@ -164,7 +164,7 @@ public class BukkitMetadata {
 				metadatable = Static.getPlayer(environment, t);
 				key = args[0].val();
 			} else {
-				metadatable = GetMetadatable(args[0], t);
+				metadatable = GetMetadatable(args[0], t, environment);
 				key = args[1].val();
 			}
 			if(metadatable.hasMetadata(key)) {
@@ -225,7 +225,7 @@ public class BukkitMetadata {
 				value = args[1];
 				plugin = StaticLayer.GetPlugin();
 			} else {
-				metadatable = GetMetadatable(args[0], t);
+				metadatable = GetMetadatable(args[0], t, environment);
 				key = args[1].val();
 				value = args[2];
 				plugin = (args.length == 4) ? Static.getPlugin(args[3], t) : StaticLayer.GetPlugin();
@@ -266,7 +266,7 @@ public class BukkitMetadata {
 				metadatable = Static.getPlayer(environment, t);
 				key = args[0].val();
 			} else {
-				metadatable = GetMetadatable(args[0], t);
+				metadatable = GetMetadatable(args[0], t, environment);
 				key = args[1].val();
 			}
 			if(args.length == 3) {
@@ -293,8 +293,8 @@ public class BukkitMetadata {
 	 * @param t
 	 * @return
 	 */
-	private static MCMetadatable GetMetadatable(Mixed construct, Target t) {
-		if(construct.isInstanceOf(CArray.TYPE)) {
+	private static MCMetadatable GetMetadatable(Mixed construct, Target t, Environment env) {
+		if(construct.isInstanceOf(CArray.TYPE, null, env)) {
 			return ObjectGenerator.GetGenerator().location(construct, null, t).getBlock();
 		} else if(construct instanceof CString) {
 			switch(construct.val().length()) {

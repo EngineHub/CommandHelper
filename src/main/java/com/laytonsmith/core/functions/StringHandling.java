@@ -648,7 +648,7 @@ public class StringHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
-			if(args[0].isInstanceOf(Sizeable.TYPE)) {
+			if(args[0].isInstanceOf(Sizeable.TYPE, null, env)) {
 				return new CInt(((Sizeable) args[0]).size(), t);
 			} else {
 				return new CInt(args[0].val().length(), t);
@@ -710,9 +710,9 @@ public class StringHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
-			if(!(args[0].isInstanceOf(CString.TYPE))) {
+			if(!(args[0].isInstanceOf(CString.TYPE, null, env))) {
 				throw new CREFormatException(this.getName() + " expects a string as first argument, but type "
-						+ args[0].typeof() + " was found.", t);
+						+ args[0].typeof(env) + " was found.", t);
 			}
 			return new CString(args[0].val().toUpperCase(), t);
 		}
@@ -773,9 +773,9 @@ public class StringHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
-			if(!(args[0].isInstanceOf(CString.TYPE))) {
+			if(!(args[0].isInstanceOf(CString.TYPE, null, env))) {
 				throw new CREFormatException(this.getName() + " expects a string as first argument, but type "
-						+ args[0].typeof() + " was found.", t);
+						+ args[0].typeof(env) + " was found.", t);
 			}
 			return new CString(args[0].val().toLowerCase(), t);
 		}
@@ -1420,7 +1420,7 @@ public class StringHandling {
 			}
 
 			List<Mixed> flattenedArgs = new ArrayList<>();
-			if(numArgs == 3 && args[2].isInstanceOf(CArray.TYPE)) {
+			if(numArgs == 3 && args[2].isInstanceOf(CArray.TYPE, null, environment)) {
 				if(((CArray) args[2]).inAssociativeMode()) {
 					throw new CRECastException("If the second argument to " + getName() + " is an array, it may not be associative.", t);
 				} else {
@@ -2528,7 +2528,7 @@ public class StringHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			if(args[0].isInstanceOf(CArray.TYPE)) {
+			if(args[0].isInstanceOf(CArray.TYPE, null, environment)) {
 				CArray array = ArgumentValidation.getArray(args[0], t);
 				return new CSecureString(array, t);
 			} else {
@@ -2606,10 +2606,10 @@ public class StringHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			if(args[0].isInstanceOf(CSecureString.TYPE)) {
+			if(args[0].isInstanceOf(CSecureString.TYPE, null, environment)) {
 				CSecureString secure = ArgumentValidation.getObject(args[0], t, CSecureString.class);
 				return secure.getDecryptedCharCArray();
-			} else if(args[0].isInstanceOf(CString.TYPE)) {
+			} else if(args[0].isInstanceOf(CString.TYPE, null, environment)) {
 				CArray array = new CArray(Target.UNKNOWN, args[0].val().length());
 				for(char c : args[0].val().toCharArray()) {
 					array.push(new CString(c, t), t);

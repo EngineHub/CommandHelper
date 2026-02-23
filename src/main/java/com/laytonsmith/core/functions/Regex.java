@@ -92,7 +92,7 @@ public class Regex {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			Pattern pattern = getPattern(args[0], t);
+			Pattern pattern = getPattern(args[0], t, env);
 			String subject = args[1].val();
 			Matcher m = pattern.matcher(subject);
 			if(m.find()) {
@@ -111,7 +111,7 @@ public class Regex {
 				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(!Construct.IsDynamicHelper(children.get(0).getData())) {
-				getPattern(children.get(0).getData(), t);
+				getPattern(children.get(0).getData(), t, env);
 			}
 			return null;
 		}
@@ -180,7 +180,7 @@ public class Regex {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			Pattern pattern = getPattern(args[0], t);
+			Pattern pattern = getPattern(args[0], t, env);
 			String subject = args[1].val();
 			CArray fret = new CArray(t);
 			Matcher m = pattern.matcher(subject);
@@ -202,7 +202,7 @@ public class Regex {
 				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(!Construct.IsDynamicHelper(children.get(0).getData())) {
-				getPattern(children.get(0).getData(), t);
+				getPattern(children.get(0).getData(), t, env);
 			}
 			return null;
 		}
@@ -273,7 +273,7 @@ public class Regex {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			Pattern pattern = getPattern(args[0], t);
+			Pattern pattern = getPattern(args[0], t, env);
 			Mixed replacement = args[1];
 			String subject = args[2].val();
 			String ret = "";
@@ -315,7 +315,7 @@ public class Regex {
 					replaceNode.addChildAt(2, children.get(1)); //replacement -> that
 					return replaceNode;
 				} else {
-					getPattern(patternArg.getData(), t);
+					getPattern(patternArg.getData(), t, env);
 				}
 			}
 			return null;
@@ -394,7 +394,7 @@ public class Regex {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			Pattern pattern = getPattern(args[0], t);
+			Pattern pattern = getPattern(args[0], t, env);
 			String subject = args[1].val();
 			/**
 			 * We use a different indexing notation than Java's regex split. In the case of 0 for the limit, we will
@@ -430,7 +430,7 @@ public class Regex {
 					splitNode.addChildAt(1, children.get(1));
 					return splitNode;
 				} else {
-					getPattern(data.getData(), t);
+					getPattern(data.getData(), t, env);
 				}
 			}
 			return null;
@@ -494,7 +494,7 @@ public class Regex {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			Pattern pattern = getPattern(args[0], t);
+			Pattern pattern = getPattern(args[0], t, env);
 			String subject = args[1].val();
 			long ret = 0;
 			Matcher m = pattern.matcher(subject);
@@ -510,7 +510,7 @@ public class Regex {
 				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(!Construct.IsDynamicHelper(children.get(0).getData())) {
-				getPattern(children.get(0).getData(), t);
+				getPattern(children.get(0).getData(), t, env);
 			}
 			return null;
 		}
@@ -596,11 +596,11 @@ public class Regex {
 
 	}
 
-	private static Pattern getPattern(Mixed c, Target t) throws ConfigRuntimeException {
+	private static Pattern getPattern(Mixed c, Target t, Environment env) throws ConfigRuntimeException {
 		String regex = "";
 		int flags = 0;
 		String sflags = "";
-		if(c.isInstanceOf(CArray.TYPE)) {
+		if(c.isInstanceOf(CArray.TYPE, null, env)) {
 			CArray ca = (CArray) c;
 			regex = ca.get(0, t).val();
 			sflags = ca.get(1, t).val();

@@ -135,7 +135,7 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 				.forName(exception.get("classType", t).val(), t, env);
 		Class<? extends Mixed> clzz = NativeTypeList.getNativeClass(classType);
 		Throwable cause = null;
-		if(exception.get("causedBy", t).isInstanceOf(CArray.TYPE)) {
+		if(exception.get("causedBy", t).isInstanceOf(CArray.TYPE, null, env)) {
 			// It has a cause
 			cause = new CRECausedByWrapper((CArray) exception.get("causedBy", t));
 		}
@@ -345,7 +345,7 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 
 	@Override
 	public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env) {
-		return Construct.isInstanceof(this, type);
+		return Construct.isInstanceof(this, type, env);
 	}
 
 	/** @deprecated Use {@link #typeof(Environment)} instead. */

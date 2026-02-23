@@ -195,7 +195,7 @@ public class ObjectGenerator {
 	 * world. <em>More conveniently: ([world], x, y, z, [yaw, pitch])</em>
 	 */
 	public MCLocation location(Mixed c, MCWorld w, Target t, Environment env) {
-		if(!(c.isInstanceOf(CArray.TYPE))) {
+		if(!(c.isInstanceOf(CArray.TYPE, null, env))) {
 			throw new CREFormatException("Expecting an array, received " + c.typeof(env).getSimpleName(), t);
 		}
 		CArray array = (CArray) c;
@@ -290,15 +290,31 @@ public class ObjectGenerator {
 	 * @param t
 	 * @return An abstract item stack
 	 */
+	/**
+	 * @deprecated Use {@link #item(Mixed, Target, Environment)} instead.
+	 */
+	@Deprecated
 	public MCItemStack item(Mixed i, Target t) {
-		return item(i, t, false);
+		return item(i, t, false, null);
 	}
 
+	public MCItemStack item(Mixed i, Target t, Environment env) {
+		return item(i, t, false, env);
+	}
+
+	/**
+	 * @deprecated Use {@link #item(Mixed, Target, boolean, Environment)} instead.
+	 */
+	@Deprecated
 	public MCItemStack item(Mixed i, Target t, boolean legacy) {
+		return item(i, t, legacy, null);
+	}
+
+	public MCItemStack item(Mixed i, Target t, boolean legacy, Environment env) {
 		if(i instanceof CNull) {
 			return EmptyItem();
 		}
-		if(!(i.isInstanceOf(CArray.TYPE))) {
+		if(!(i.isInstanceOf(CArray.TYPE, null, env))) {
 			throw new CREFormatException("Expected an array!", t);
 		}
 		CArray item = (CArray) i;
@@ -335,7 +351,7 @@ public class ObjectGenerator {
 				}
 			} else {
 				Mixed type = item.get("type", t);
-				if(type.isInstanceOf(CString.TYPE)) {
+				if(type.isInstanceOf(CString.TYPE, null, env)) {
 					int seperatorIndex = type.val().indexOf(':');
 					if(seperatorIndex != -1) {
 						try {
@@ -367,7 +383,7 @@ public class ObjectGenerator {
 			// convert legacy meta to material
 			if(material.getName().equals("PIG_SPAWN_EGG") && item.containsKey("meta")) {
 				Mixed meta = item.get("meta", t);
-				if(meta.isInstanceOf(CArray.TYPE) && ((CArray) meta).containsKey("spawntype")) {
+				if(meta.isInstanceOf(CArray.TYPE, null, env) && ((CArray) meta).containsKey("spawntype")) {
 					Mixed spawntype = ((CArray) meta).get("spawntype", t);
 					if(!(spawntype instanceof CNull)) {
 						MCMaterial newmaterial;
@@ -988,11 +1004,19 @@ public class ObjectGenerator {
 	 * @return abstract item meta
 	 * @throws ConfigRuntimeException
 	 */
+	/**
+	 * @deprecated Use {@link #itemMeta(Mixed, MCMaterial, Target, Environment)} instead.
+	 */
+	@Deprecated
 	public MCItemMeta itemMeta(Mixed c, MCMaterial mat, Target t) throws ConfigRuntimeException {
+		return itemMeta(c, mat, t, null);
+	}
+
+	public MCItemMeta itemMeta(Mixed c, MCMaterial mat, Target t, Environment env) throws ConfigRuntimeException {
 		if(c instanceof CNull) {
 			return null;
 		}
-		if(!c.isInstanceOf(CArray.TYPE)) {
+		if(!c.isInstanceOf(CArray.TYPE, null, env)) {
 			throw new CREFormatException("An array was expected but received " + c + " instead.", t);
 		} else {
 			MCItemFactory itemFactory = Static.getServer().getItemFactory();
@@ -1015,11 +1039,11 @@ public class ObjectGenerator {
 					Mixed li = ma.get("lore", t);
 					if(li instanceof CNull) {
 						//do nothing
-					} else if(li.isInstanceOf(CString.TYPE)) {
+					} else if(li.isInstanceOf(CString.TYPE, null, env)) {
 						List<String> ll = new ArrayList<>();
 						ll.add(li.val());
 						meta.setLore(ll);
-					} else if(li.isInstanceOf(CArray.TYPE)) {
+					} else if(li.isInstanceOf(CArray.TYPE, null, env)) {
 						CArray la = (CArray) li;
 						List<String> ll = new ArrayList<>();
 						for(int j = 0; j < la.size(); j++) {
@@ -1032,7 +1056,7 @@ public class ObjectGenerator {
 				}
 				if(ma.containsKey("enchants")) {
 					Mixed enchants = ma.get("enchants", t);
-					if(enchants.isInstanceOf(CArray.TYPE)) {
+					if(enchants.isInstanceOf(CArray.TYPE, null, env)) {
 						for(Map.Entry<MCEnchantment, Integer> ench : enchants((CArray) enchants, t).entrySet()) {
 							meta.addEnchant(ench.getKey(), ench.getValue(), true);
 						}
@@ -1054,7 +1078,7 @@ public class ObjectGenerator {
 				}
 				if(ma.containsKey("flags")) {
 					Mixed flags = ma.get("flags", t);
-					if(flags.isInstanceOf(CArray.TYPE)) {
+					if(flags.isInstanceOf(CArray.TYPE, null, env)) {
 						CArray flagArray = (CArray) flags;
 						for(int i = 0; i < flagArray.size(); i++) {
 							Mixed flag = flagArray.get(i, t);
@@ -1069,7 +1093,7 @@ public class ObjectGenerator {
 					Mixed modifiers = ma.get("modifiers", t);
 					if(modifiers instanceof CNull) {
 						// no modifiers
-					} else if(modifiers.isInstanceOf(CArray.TYPE)) {
+					} else if(modifiers.isInstanceOf(CArray.TYPE, null, env)) {
 						CArray modifierArray = (CArray) modifiers;
 						if(modifierArray.isAssociative()) {
 							throw new CREFormatException("Array of attribute modifiers cannot be associative.", t);
@@ -1135,7 +1159,7 @@ public class ObjectGenerator {
 						Mixed mixedFood = ma.get("food", t);
 						if(mixedFood instanceof CNull) {
 							// not supported yet
-						} else if(mixedFood.isInstanceOf(CArray.TYPE)) {
+						} else if(mixedFood.isInstanceOf(CArray.TYPE, null, env)) {
 							CArray foodArray = (CArray) mixedFood;
 							if(!foodArray.isAssociative()) {
 								throw new CREFormatException("Food array must be associative.", t);
@@ -1195,7 +1219,7 @@ public class ObjectGenerator {
 						Mixed mixedCooldown =  ma.get("cooldown", t);
 						if(mixedCooldown instanceof CNull) {
 							// not yet supported
-						} else if(mixedCooldown.isInstanceOf(CArray.TYPE)) {
+						} else if(mixedCooldown.isInstanceOf(CArray.TYPE, null, env)) {
 							CArray cooldownArray = (CArray) mixedCooldown;
 							if(!cooldownArray.isAssociative()) {
 								throw new CREFormatException("Cooldown array must be associative.", t);
@@ -1235,7 +1259,7 @@ public class ObjectGenerator {
 						Mixed equippableMixed = ma.get("equippable", t);
 						if(equippableMixed instanceof CNull) {
 							// not yet supported
-						} else if(equippableMixed.isInstanceOf(CArray.TYPE)) {
+						} else if(equippableMixed.isInstanceOf(CArray.TYPE, null, env)) {
 							CArray equippableArray = (CArray) equippableMixed;
 							if(!equippableArray.isAssociative()) {
 								throw new CREFormatException("Equippable array must be associative.", t);
@@ -1252,7 +1276,7 @@ public class ObjectGenerator {
 								Mixed entitiesMixed = equippableArray.get("entities", t);
 								if(entitiesMixed instanceof CNull) {
 									// ignored
-								} else if(entitiesMixed.isInstanceOf(CArray.TYPE)) {
+								} else if(entitiesMixed.isInstanceOf(CArray.TYPE, null, env)) {
 									CArray entitiesArray = (CArray) entitiesMixed;
 									if(entitiesArray.isAssociative()) {
 										throw new CREFormatException("Allowed entities array must not be associative.", t);
@@ -1452,7 +1476,7 @@ public class ObjectGenerator {
 					} else if(bs instanceof MCDecoratedPot decoratedPot) {
 						if(ma.containsKey("sherds")) {
 							Mixed sherds = ma.get("sherds", t);
-							if(sherds.isInstanceOf(CArray.TYPE)) {
+							if(sherds.isInstanceOf(CArray.TYPE, null, env)) {
 								CArray sherdArray = (CArray) sherds;
 								if(!sherdArray.isAssociative()) {
 									throw new CREFormatException("Expected associative array for decorated pot meta.", t);
@@ -1476,7 +1500,7 @@ public class ObjectGenerator {
 						if(ma.containsKey("inventory")) {
 							MCInventory inv = ((MCInventoryHolder) bs).getInventory();
 							Mixed cInvRaw = ma.get("inventory", t);
-							if(cInvRaw.isInstanceOf(CArray.TYPE)) {
+							if(cInvRaw.isInstanceOf(CArray.TYPE, null, env)) {
 								CArray cinv = (CArray) cInvRaw;
 								for(String key : cinv.stringKeySet()) {
 									try {
@@ -1505,7 +1529,7 @@ public class ObjectGenerator {
 						}
 						if(ma.containsKey("signtext")) {
 							Mixed possibleLines = ma.get("signtext", t);
-							if(possibleLines.isInstanceOf(CArray.TYPE)) {
+							if(possibleLines.isInstanceOf(CArray.TYPE, null, env)) {
 								CArray lines = (CArray) possibleLines;
 								for(int i = 0; i < lines.size(); i++) {
 									sign.setLine(i, lines.get(i, t).val());
@@ -1527,7 +1551,7 @@ public class ObjectGenerator {
 						if(backText != null) {
 							if(ma.containsKey("backtext")) {
 								Mixed possibleLines = ma.get("backtext", t);
-								if(possibleLines.isInstanceOf(CArray.TYPE)) {
+								if(possibleLines.isInstanceOf(CArray.TYPE, null, env)) {
 									CArray lines = (CArray) possibleLines;
 									for(int i = 0; i < lines.size(); i++) {
 										backText.setLine(i, lines.get(i, t).val());
@@ -1568,7 +1592,7 @@ public class ObjectGenerator {
 						Mixed mtrim = ma.get("trim", t);
 						if(mtrim instanceof CNull) {
 							// nothing
-						} else if(mtrim.isInstanceOf(CArray.TYPE)) {
+						} else if(mtrim.isInstanceOf(CArray.TYPE, null, env)) {
 							CArray trim = (CArray) mtrim;
 							if(!trim.isAssociative()) {
 								throw new CREFormatException("Expected associative array for armor trim meta.", t);
@@ -1585,7 +1609,7 @@ public class ObjectGenerator {
 							Mixed ci = ma.get("color", t);
 							if(ci instanceof CNull) {
 								//nothing
-							} else if(ci.isInstanceOf(CArray.TYPE)) {
+							} else if(ci.isInstanceOf(CArray.TYPE, null, env)) {
 								((MCColorableArmorMeta) armorMeta).setColor(color((CArray) ci, t));
 							} else {
 								throw new CREFormatException("Color was expected to be an array.", t);
@@ -1596,7 +1620,7 @@ public class ObjectGenerator {
 					MCFireworkEffectMeta femeta = (MCFireworkEffectMeta) meta;
 					if(ma.containsKey("effect")) {
 						Mixed cfem = ma.get("effect", t);
-						if(cfem.isInstanceOf(CArray.TYPE)) {
+						if(cfem.isInstanceOf(CArray.TYPE, null, env)) {
 							femeta.setEffect(fireworkEffect((CArray) cfem, t));
 						} else if(!(cfem instanceof CNull)) {
 							throw new CREFormatException("FireworkCharge effect was expected to be an array or null.", t);
@@ -1606,7 +1630,7 @@ public class ObjectGenerator {
 					MCFireworkMeta fmeta = (MCFireworkMeta) meta;
 					if(ma.containsKey("firework")) {
 						Mixed construct = ma.get("firework", t);
-						if(construct.isInstanceOf(CArray.TYPE)) {
+						if(construct.isInstanceOf(CArray.TYPE, null, env)) {
 							CArray firework = (CArray) construct;
 							if(firework.containsKey("strength")) {
 								fmeta.setStrength(ArgumentValidation.getInt32(firework.get("strength", t), t));
@@ -1614,9 +1638,9 @@ public class ObjectGenerator {
 							if(firework.containsKey("effects")) {
 								// New style (supports multiple effects)
 								Mixed effects = firework.get("effects", t);
-								if(effects.isInstanceOf(CArray.TYPE)) {
+								if(effects.isInstanceOf(CArray.TYPE, null, env)) {
 									for(Mixed effect : ((CArray) effects).asList()) {
-										if(effect.isInstanceOf(CArray.TYPE)) {
+										if(effect.isInstanceOf(CArray.TYPE, null, env)) {
 											fmeta.addEffect(fireworkEffect((CArray) effect, t));
 										} else {
 											throw new CREFormatException("Firework effect was expected to be an array.", t);
@@ -1638,7 +1662,7 @@ public class ObjectGenerator {
 						Mixed ci = ma.get("color", t);
 						if(ci instanceof CNull) {
 							//nothing
-						} else if(ci.isInstanceOf(CArray.TYPE)) {
+						} else if(ci.isInstanceOf(CArray.TYPE, null, env)) {
 							((MCLeatherArmorMeta) meta).setColor(color((CArray) ci, t));
 						} else {
 							throw new CREFormatException("Color was expected to be an array.", t);
@@ -1670,7 +1694,7 @@ public class ObjectGenerator {
 						Mixed pages = ma.get("pages", t);
 						if(pages instanceof CNull) {
 							//nothing
-						} else if(pages.isInstanceOf(CArray.TYPE)) {
+						} else if(pages.isInstanceOf(CArray.TYPE, null, env)) {
 							CArray pa = (CArray) pages;
 							List<String> pl = new ArrayList<>();
 							for(int j = 0; j < pa.size(); j++) {
@@ -1730,7 +1754,7 @@ public class ObjectGenerator {
 						Mixed stored = ma.get("stored", t);
 						if(stored instanceof CNull) {
 							//Still doing nothing
-						} else if(stored.isInstanceOf(CArray.TYPE)) {
+						} else if(stored.isInstanceOf(CArray.TYPE, null, env)) {
 							for(Map.Entry<MCEnchantment, Integer> ench : enchants((CArray) stored, t).entrySet()) {
 								((MCEnchantmentStorageMeta) meta).addStoredEnchant(ench.getKey(), ench.getValue(), true);
 							}
@@ -1741,7 +1765,7 @@ public class ObjectGenerator {
 				} else if(meta instanceof MCPotionMeta) {
 					if(ma.containsKey("potions")) {
 						Mixed effects = ma.get("potions", t);
-						if(effects.isInstanceOf(CArray.TYPE)) {
+						if(effects.isInstanceOf(CArray.TYPE, null, env)) {
 							for(MCLivingEntity.MCEffect e : potions((CArray) effects, t)) {
 								((MCPotionMeta) meta).addCustomEffect(e.getPotionEffectType(), e.getStrength(),
 										e.getTicksRemaining(), e.isAmbient(), e.hasParticles(), e.showIcon(), true, t);
@@ -1757,7 +1781,7 @@ public class ObjectGenerator {
 						}
 					} else if(ma.containsKey("base")) {
 						Mixed potiondata = ma.get("base", t);
-						if(potiondata.isInstanceOf(CArray.TYPE)) {
+						if(potiondata.isInstanceOf(CArray.TYPE, null, env)) {
 							if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
 								((MCPotionMeta) meta).setBasePotionType(legacyPotionData((CArray) potiondata, t));
 							} else {
@@ -1767,16 +1791,16 @@ public class ObjectGenerator {
 					}
 					if(ma.containsKey("color")) {
 						Mixed color = ma.get("color", t);
-						if(color.isInstanceOf(CArray.TYPE)) {
+						if(color.isInstanceOf(CArray.TYPE, null, env)) {
 							((MCPotionMeta) meta).setColor(color((CArray) color, t));
-						} else if(color.isInstanceOf(CString.TYPE)) {
+						} else if(color.isInstanceOf(CString.TYPE, null, env)) {
 							((MCPotionMeta) meta).setColor(StaticLayer.GetConvertor().GetColor(color.val(), t));
 						}
 					}
 				} else if(meta instanceof MCSuspiciousStewMeta) {
 					if(ma.containsKey("potions")) {
 						Mixed effects = ma.get("potions", t);
-						if(effects.isInstanceOf(CArray.TYPE)) {
+						if(effects.isInstanceOf(CArray.TYPE, null, env)) {
 							for(MCLivingEntity.MCEffect e : potions((CArray) effects, t)) {
 								((MCSuspiciousStewMeta) meta).addCustomEffect(e.getPotionEffectType(), e.getStrength(),
 										e.getTicksRemaining(), e.isAmbient(), e.hasParticles(), e.showIcon(), true, t);
@@ -1808,7 +1832,7 @@ public class ObjectGenerator {
 				} else if(meta instanceof MCMapMeta) {
 					if(ma.containsKey("color")) {
 						Mixed ci = ma.get("color", t);
-						if(ci.isInstanceOf(CArray.TYPE)) {
+						if(ci.isInstanceOf(CArray.TYPE, null, env)) {
 							((MCMapMeta) meta).setColor(color((CArray) ci, t));
 						} else if(!(ci instanceof CNull)) {
 							throw new CREFormatException("Color was expected to be an array.", t);
@@ -1897,7 +1921,7 @@ public class ObjectGenerator {
 				} else if(meta instanceof MCKnowledgeBookMeta knowledgeBookMeta) {
 					if(ma.containsKey("recipes")) {
 						Mixed value = ma.get("recipes", t);
-						if(value.isInstanceOf(CArray.TYPE)) {
+						if(value.isInstanceOf(CArray.TYPE, null, env)) {
 							CArray array = ((CArray) value);
 							List<MCNamespacedKey> keys = new ArrayList<>((int) array.size());
 							for(Mixed entry : ((CArray) value).asList()) {
@@ -2085,7 +2109,7 @@ public class ObjectGenerator {
 	 * @return the Vector
 	 */
 	public Vector3D vector(Vector3D v, Mixed c, Target t, Environment env) {
-		if(c.isInstanceOf(CArray.TYPE)) {
+		if(c.isInstanceOf(CArray.TYPE, null, env)) {
 			CArray va = (CArray) c;
 			double x = v.X();
 			double y = v.Y();
@@ -2133,7 +2157,15 @@ public class ObjectGenerator {
 		return ret;
 	}
 
+	/**
+	 * @deprecated Use {@link #enchants(CArray, Target, Environment)} instead.
+	 */
+	@Deprecated
 	public Map<MCEnchantment, Integer> enchants(CArray enchantArray, Target t) {
+		return enchants(enchantArray, t, null);
+	}
+
+	public Map<MCEnchantment, Integer> enchants(CArray enchantArray, Target t, Environment env) {
 		Map<MCEnchantment, Integer> ret = new HashMap<>();
 		for(String key : enchantArray.stringKeySet()) {
 			MCEnchantment etype = null;
@@ -2143,7 +2175,7 @@ public class ObjectGenerator {
 			if(enchantArray.isAssociative()) {
 				try {
 					etype = MCEnchantment.valueOf(key.toUpperCase());
-					if(value.isInstanceOf(CInt.TYPE)) {
+					if(value.isInstanceOf(CInt.TYPE, null, env)) {
 						ret.put(etype, ArgumentValidation.getInt32(value, t));
 						continue;
 					}
@@ -2153,7 +2185,7 @@ public class ObjectGenerator {
 			}
 
 			// legacy format
-			if(value.isInstanceOf(CArray.TYPE)) {
+			if(value.isInstanceOf(CArray.TYPE, null, env)) {
 				CArray ea = (CArray) value;
 				if(etype == null) {
 					String setype = ea.get("etype", t).val();
@@ -2300,10 +2332,18 @@ public class ObjectGenerator {
 		return ea;
 	}
 
+	/**
+	 * @deprecated Use {@link #potions(CArray, Target, Environment)} instead.
+	 */
+	@Deprecated
 	public List<MCLivingEntity.MCEffect> potions(CArray ea, Target t) {
+		return potions(ea, t, null);
+	}
+
+	public List<MCLivingEntity.MCEffect> potions(CArray ea, Target t, Environment env) {
 		List<MCLivingEntity.MCEffect> ret = new ArrayList<>();
 		for(String key : ea.stringKeySet()) {
-			if(ea.get(key, t).isInstanceOf(CArray.TYPE)) {
+			if(ea.get(key, t).isInstanceOf(CArray.TYPE, null, env)) {
 				CArray effect = (CArray) ea.get(key, t);
 				MCPotionEffectType type;
 				int strength = 0;
@@ -2358,7 +2398,15 @@ public class ObjectGenerator {
 		return base;
 	}
 
+	/**
+	 * @deprecated Use {@link #potionData(CArray, Target, Environment)} instead.
+	 */
+	@Deprecated
 	public MCPotionData potionData(CArray pd, Target t) {
+		return potionData(pd, t, null);
+	}
+
+	public MCPotionData potionData(CArray pd, Target t, Environment env) {
 		MCPotionType type;
 		try {
 			type = MCPotionType.valueOf(pd.get("type", t).val().toUpperCase());
@@ -2369,7 +2417,7 @@ public class ObjectGenerator {
 		boolean upgraded = false;
 		if(pd.containsKey("extended")) {
 			Mixed cext = pd.get("extended", t);
-			if(cext.isInstanceOf(CBoolean.TYPE)) {
+			if(cext instanceof CBoolean) {
 				extended = ((CBoolean) cext).getBoolean();
 			} else {
 				throw new CREFormatException(
@@ -2378,7 +2426,7 @@ public class ObjectGenerator {
 		}
 		if(pd.containsKey("upgraded")) {
 			Mixed cupg = pd.get("upgraded", t);
-			if(cupg.isInstanceOf(CBoolean.TYPE)) {
+			if(cupg instanceof CBoolean) {
 				upgraded = ((CBoolean) cupg).getBoolean();
 			} else {
 				throw new CREFormatException(
@@ -2392,7 +2440,15 @@ public class ObjectGenerator {
 		}
 	}
 
+	/**
+	 * @deprecated Use {@link #legacyPotionData(CArray, Target, Environment)} instead.
+	 */
+	@Deprecated
 	public MCPotionType legacyPotionData(CArray potionArray, Target t) {
+		return legacyPotionData(potionArray, t, null);
+	}
+
+	public MCPotionType legacyPotionData(CArray potionArray, Target t, Environment env) {
 		MCPotionType type;
 		try {
 			// need to get converted type first before extending/upgrading
@@ -2407,13 +2463,13 @@ public class ObjectGenerator {
 		boolean upgraded = false;
 		if(potionArray.containsKey("extended")) {
 			Mixed cext = potionArray.get("extended", t);
-			if(cext.isInstanceOf(CBoolean.TYPE)) {
+			if(cext instanceof CBoolean) {
 				extended = ((CBoolean) cext).getBoolean();
 			}
 		}
 		if(potionArray.containsKey("upgraded")) {
 			Mixed cupg = potionArray.get("upgraded", t);
-			if(cupg.isInstanceOf(CBoolean.TYPE)) {
+			if(cupg instanceof CBoolean) {
 				upgraded = ((CBoolean) cupg).getBoolean();
 			}
 		}
@@ -2474,18 +2530,18 @@ public class ObjectGenerator {
 		}
 		if(fe.containsKey("colors")) {
 			Mixed colors = fe.get("colors", t);
-			if(colors.isInstanceOf(CArray.TYPE)) {
+			if(colors.isInstanceOf(CArray.TYPE, null, env)) {
 				CArray ccolors = (CArray) colors;
 				if(ccolors.size() == 0) {
 					builder.addColor(MCColor.WHITE);
 				} else {
 					for(Mixed color : ccolors.asList()) {
 						MCColor mccolor;
-						if(color.isInstanceOf(CString.TYPE)) {
+						if(color.isInstanceOf(CString.TYPE, null, env)) {
 							mccolor = StaticLayer.GetConvertor().GetColor(color.val(), t);
-						} else if(color.isInstanceOf(CArray.TYPE)) {
+						} else if(color.isInstanceOf(CArray.TYPE, null, env)) {
 							mccolor = color((CArray) color, t);
-						} else if(color.isInstanceOf(CInt.TYPE) && ccolors.size() == 3) {
+						} else if(color.isInstanceOf(CInt.TYPE, null, env) && ccolors.size() == 3) {
 							// Appears to be a single color
 							builder.addColor(color(ccolors, t));
 							break;
@@ -2496,7 +2552,7 @@ public class ObjectGenerator {
 						builder.addColor(mccolor);
 					}
 				}
-			} else if(colors.isInstanceOf(CString.TYPE)) {
+			} else if(colors.isInstanceOf(CString.TYPE, null, env)) {
 				String[] split = colors.val().split("\\|");
 				if(split.length == 0) {
 					builder.addColor(MCColor.WHITE);
@@ -2514,15 +2570,15 @@ public class ObjectGenerator {
 		}
 		if(fe.containsKey("fade")) {
 			Mixed colors = fe.get("fade", t);
-			if(colors.isInstanceOf(CArray.TYPE)) {
+			if(colors.isInstanceOf(CArray.TYPE, null, env)) {
 				CArray ccolors = (CArray) colors;
 				for(Mixed color : ccolors.asList()) {
 					MCColor mccolor;
-					if(color.isInstanceOf(CArray.TYPE)) {
+					if(color.isInstanceOf(CArray.TYPE, null, env)) {
 						mccolor = color((CArray) color, t);
-					} else if(color.isInstanceOf(CString.TYPE)) {
+					} else if(color.isInstanceOf(CString.TYPE, null, env)) {
 						mccolor = StaticLayer.GetConvertor().GetColor(color.val(), t);
-					} else if(color.isInstanceOf(CInt.TYPE) && ccolors.size() == 3) {
+					} else if(color.isInstanceOf(CInt.TYPE, null, env) && ccolors.size() == 3) {
 						// Appears to be a single color
 						builder.addFadeColor(color(ccolors, t));
 						break;
@@ -2532,7 +2588,7 @@ public class ObjectGenerator {
 					}
 					builder.addFadeColor(mccolor);
 				}
-			} else if(colors.isInstanceOf(CString.TYPE)) {
+			} else if(colors.isInstanceOf(CString.TYPE, null, env)) {
 				String[] split = colors.val().split("\\|");
 				for(String s : split) {
 					builder.addFadeColor(StaticLayer.GetConvertor().GetColor(s, t));
@@ -2620,7 +2676,7 @@ public class ObjectGenerator {
 	}
 
 	public MCRecipe recipe(Mixed c, Target t, Environment env) {
-		if(!(c.isInstanceOf(CArray.TYPE))) {
+		if(!(c.isInstanceOf(CArray.TYPE, null, env))) {
 			throw new CRECastException("Expected array but received " + c.typeof(env).getSimpleName(), t);
 		}
 		CArray recipe = (CArray) c;
@@ -2656,7 +2712,7 @@ public class ObjectGenerator {
 				}
 				int i = 0;
 				for(Mixed row : shaped.asList()) {
-					if(row.isInstanceOf(CString.TYPE) && row.val().length() >= 1 && row.val().length() <= 3) {
+					if(row.isInstanceOf(CString.TYPE, null, env) && row.val().length() >= 1 && row.val().length() <= 3) {
 						shape[i] = row.val();
 						i++;
 					} else {
@@ -2671,13 +2727,13 @@ public class ObjectGenerator {
 				}
 				for(String key : shapedIngredients.stringKeySet()) {
 					Mixed ingredient = shapedIngredients.get(key, t);
-					if(ingredient.isInstanceOf(CArray.TYPE)) {
+					if(ingredient.isInstanceOf(CArray.TYPE, null, env)) {
 						if(((CArray) ingredient).isAssociative()) {
 							// Single exact item ingredient
 							((MCShapedRecipe) ret).setIngredient(key.charAt(0), recipeItem(ingredient, t));
 						} else {
 							// Multiple ingredient choices
-							((MCShapedRecipe) ret).setIngredient(key.charAt(0), recipeChoice((CArray) ingredient, t));
+							((MCShapedRecipe) ret).setIngredient(key.charAt(0), recipeChoice((CArray) ingredient, t, env));
 						}
 					} else if(ingredient instanceof CNull) {
 						// empty
@@ -2693,7 +2749,7 @@ public class ObjectGenerator {
 					throw new CREIllegalArgumentException("Ingredients array is invalid.", t);
 				}
 				for(Mixed ingredient : ingredients.asList()) {
-					if(ingredient.isInstanceOf(CArray.TYPE)) {
+					if(ingredient.isInstanceOf(CArray.TYPE, null, env)) {
 						if(((CArray) ingredient).isAssociative()) {
 							// Single ingredient item array
 							if(((CArray) ingredient).containsKey("meta")) {
@@ -2708,7 +2764,7 @@ public class ObjectGenerator {
 							}
 						} else {
 							// Multiple ingredient choices
-							((MCShapelessRecipe) ret).addIngredient(recipeChoice((CArray) ingredient, t));
+							((MCShapelessRecipe) ret).addIngredient(recipeChoice((CArray) ingredient, t, env));
 						}
 					} else {
 						// single ingredient material
@@ -2722,11 +2778,11 @@ public class ObjectGenerator {
 			case FURNACE:
 			case SMOKING:
 				Mixed input = recipe.get("input", t);
-				if(input.isInstanceOf(CArray.TYPE)) {
+				if(input.isInstanceOf(CArray.TYPE, null, env)) {
 					if(((CArray) input).isAssociative()) {
 						((MCCookingRecipe) ret).setInput(recipeItem(input, t));
 					} else {
-						((MCCookingRecipe) ret).setInput(recipeChoice((CArray) input, t));
+						((MCCookingRecipe) ret).setInput(recipeChoice((CArray) input, t, env));
 					}
 				} else {
 					((MCCookingRecipe) ret).setInput(recipeMaterial(input, t));
@@ -2741,11 +2797,11 @@ public class ObjectGenerator {
 
 			case STONECUTTING:
 				Mixed stoneCutterInput = recipe.get("input", t);
-				if(stoneCutterInput.isInstanceOf(CArray.TYPE)) {
+				if(stoneCutterInput.isInstanceOf(CArray.TYPE, null, env)) {
 					if(((CArray) stoneCutterInput).isAssociative()) {
 						((MCStonecuttingRecipe) ret).setInput(recipeItem(stoneCutterInput, t));
 					} else {
-						((MCStonecuttingRecipe) ret).setInput(recipeChoice((CArray) stoneCutterInput, t));
+						((MCStonecuttingRecipe) ret).setInput(recipeChoice((CArray) stoneCutterInput, t, env));
 					}
 				} else {
 					((MCStonecuttingRecipe) ret).setInput(recipeMaterial(stoneCutterInput, t));
@@ -2784,12 +2840,12 @@ public class ObjectGenerator {
 	 * @return
 	 * @throws CREIllegalArgumentException
 	 */
-	private MCRecipeChoice recipeChoice(CArray ingredient, Target t) {
+	private MCRecipeChoice recipeChoice(CArray ingredient, Target t, Environment env) {
 		// Multiple ingredient choices
 		MCRecipeChoice.MaterialChoice materialChoice = new MCRecipeChoice.MaterialChoice();
 		MCRecipeChoice.ExactChoice exactChoice = new MCRecipeChoice.ExactChoice();
 		for(Mixed choice : ingredient.asList()) {
-			if(choice.isInstanceOf(CArray.TYPE)) {
+			if(choice.isInstanceOf(CArray.TYPE, null, env)) {
 				exactChoice.addItem(recipeItem(choice, t));
 			} else {
 				materialChoice.addMaterial(recipeMaterial(choice, t));
@@ -2943,7 +2999,15 @@ public class ObjectGenerator {
 		return new CString(value, Target.UNKNOWN);
 	}
 
+	/**
+	 * @deprecated Use {@link #particleData(MCParticle, MCLocation, CArray, Target, Environment)} instead.
+	 */
+	@Deprecated
 	public Object particleData(MCParticle particleType, MCLocation l, CArray pa, Target t) {
+		return particleData(particleType, l, pa, t, null);
+	}
+
+	public Object particleData(MCParticle particleType, MCLocation l, CArray pa, Target t, Environment env) {
 		switch(particleType.getAbstracted()) {
 			case BLOCK_DUST:
 			case BLOCK_CRACK:
@@ -2968,8 +3032,8 @@ public class ObjectGenerator {
 			case ITEM_CRACK:
 				if(pa.containsKey("item")) {
 					Mixed value = pa.get("item", t);
-					if(value.isInstanceOf(CArray.TYPE)) {
-						return item(pa.get("item", t), t);
+					if(value.isInstanceOf(CArray.TYPE, null, env)) {
+						return item(pa.get("item", t), t, env);
 					} else {
 						MCMaterial mat = StaticLayer.GetMaterial(value.val());
 						if(mat != null) {
@@ -2989,7 +3053,7 @@ public class ObjectGenerator {
 			case FLASH:
 				if(pa.containsKey("color")) {
 					Mixed c = pa.get("color", t);
-					if(c.isInstanceOf(CArray.TYPE)) {
+					if(c.isInstanceOf(CArray.TYPE, null, env)) {
 						return color((CArray) c, t);
 					} else {
 						return StaticLayer.GetConvertor().GetColor(c.val(), t);
@@ -2999,7 +3063,7 @@ public class ObjectGenerator {
 			case DRAGON_BREATH:
 				if(pa.containsKey("power")) {
 					Mixed d = pa.get("power", t);
-					if(d.isInstanceOf(CDouble.TYPE)) {
+					if(d.isInstanceOf(CDouble.TYPE, null, env)) {
 						return (float) ((CDouble) d).getDouble();
 					} else if(!(d instanceof CNull)) {
 						throw new CREIllegalArgumentException("Expected double for power but found " + d, t);
@@ -3011,7 +3075,7 @@ public class ObjectGenerator {
 				MCColor spellColor = MCColor.WHITE;
 				if(pa.containsKey("color")) {
 					Mixed c = pa.get("color", t);
-					if(c.isInstanceOf(CArray.TYPE)) {
+					if(c.isInstanceOf(CArray.TYPE, null, env)) {
 						spellColor = color((CArray) c, t);
 					} else {
 						spellColor = StaticLayer.GetConvertor().GetColor(c.val(), t);
@@ -3020,7 +3084,7 @@ public class ObjectGenerator {
 				float power = 1.0F;
 				if(pa.containsKey("power")) {
 					Mixed d = pa.get("power", t);
-					if(d.isInstanceOf(CDouble.TYPE)) {
+					if(d.isInstanceOf(CDouble.TYPE, null, env)) {
 						power = (float) ((CDouble) d).getDouble();
 					} else if(!(d instanceof CNull)) {
 						throw new CREIllegalArgumentException("Expected double for power but found " + d, t);
@@ -3031,14 +3095,14 @@ public class ObjectGenerator {
 				if(pa.containsKey("color")) {
 					Mixed c = pa.get("color", t);
 					MCColor fromColor;
-					if(c.isInstanceOf(CArray.TYPE)) {
+					if(c.isInstanceOf(CArray.TYPE, null, env)) {
 						fromColor = color((CArray) c, t);
 					} else {
 						fromColor = StaticLayer.GetConvertor().GetColor(c.val(), t);
 					}
 					if(pa.containsKey("tocolor")) {
 						Mixed sc = pa.get("tocolor", t);
-						if(sc.isInstanceOf(CArray.TYPE)) {
+						if(sc.isInstanceOf(CArray.TYPE, null, env)) {
 							return new MCParticleData.DustTransition(fromColor, color((CArray) sc, t));
 						} else {
 							return new MCParticleData.DustTransition(fromColor,
@@ -3048,7 +3112,7 @@ public class ObjectGenerator {
 					return new MCParticleData.DustTransition(fromColor, MCColor.WHITE);
 				} else if(pa.containsKey("tocolor")) {
 					Mixed sc = pa.get("tocolor", t);
-					if(sc.isInstanceOf(CArray.TYPE)) {
+					if(sc.isInstanceOf(CArray.TYPE, null, env)) {
 						return new MCParticleData.DustTransition(MCColor.WHITE, color((CArray) sc, t));
 					} else {
 						return new MCParticleData.DustTransition(MCColor.WHITE,
@@ -3059,7 +3123,7 @@ public class ObjectGenerator {
 			case VIBRATION:
 				if(pa.containsKey("destination")) {
 					Mixed d = pa.get("destination", t);
-					if(d.isInstanceOf(CArray.TYPE)) {
+					if(d.isInstanceOf(CArray.TYPE, null, env)) {
 						return new MCParticleData.VibrationBlockDestination(location(d, l.getWorld(), t), 5);
 					} else {
 						return new MCParticleData.VibrationEntityDestination(Static.getEntity(d, t), 5);
@@ -3069,7 +3133,7 @@ public class ObjectGenerator {
 			case SHRIEK:
 				if(pa.containsKey("delay")) {
 					Mixed d = pa.get("delay", t);
-					if(d.isInstanceOf(CInt.TYPE)) {
+					if(d.isInstanceOf(CInt.TYPE, null, env)) {
 						return (int) ((CInt) d).getInt();
 					} else if(!(d instanceof CNull)) {
 						throw new CREIllegalArgumentException("Expected integer for delay but found " + d, t);
@@ -3079,7 +3143,7 @@ public class ObjectGenerator {
 			case SCULK_CHARGE:
 				if(pa.containsKey("angle")) {
 					Mixed d = pa.get("angle", t);
-					if(d.isInstanceOf(CDouble.TYPE)) {
+					if(d.isInstanceOf(CDouble.TYPE, null, env)) {
 						return (float) ((CDouble) d).getDouble();
 					} else if(!(d instanceof CNull)) {
 						throw new CREIllegalArgumentException("Expected double for angle but found " + d, t);
@@ -3090,14 +3154,14 @@ public class ObjectGenerator {
 				MCLocation target = l;
 				if(pa.containsKey("target")) {
 					Mixed d = pa.get("target", t);
-					if(d.isInstanceOf(CArray.TYPE)) {
+					if(d.isInstanceOf(CArray.TYPE, null, env)) {
 						target = location(d, l.getWorld(), t);
 					}
 				}
 				MCColor color;
 				if(pa.containsKey("color")) {
 					Mixed c = pa.get("color", t);
-					if(c.isInstanceOf(CArray.TYPE)) {
+					if(c.isInstanceOf(CArray.TYPE, null, env)) {
 						color = color((CArray) c, t);
 					} else {
 						color = StaticLayer.GetConvertor().GetColor(c.val(), t);

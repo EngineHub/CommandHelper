@@ -169,17 +169,17 @@ public class ObjectManagement {
 			return (CArray) d;
 		}
 
-		private Mixed evaluateString(ParseTree data, Target t) {
+		private Mixed evaluateString(ParseTree data, Target t, Environment env) {
 			if(data.getData() instanceof CNull) {
 				return CNull.NULL;
 			}
-			if(!(data.getData().isInstanceOf(CString.TYPE))) {
+			if(!(data.getData().isInstanceOf(CString.TYPE, null, env))) {
 				throw new CREClassDefinitionError("Expected a string, but found " + data.getData() + " instead", t);
 			}
 			return data.getData();
 		}
-		private CString evaluateStringNoNull(ParseTree data, Target t) {
-			Mixed d = evaluateString(data, t);
+		private CString evaluateStringNoNull(ParseTree data, Target t, Environment env) {
+			Mixed d = evaluateString(data, t, env);
 			if(d instanceof CNull) {
 				throw new CREClassDefinitionError("Expected a string, but found null instead", t);
 			}
@@ -210,7 +210,7 @@ public class ObjectManagement {
 		@Override
 		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			// 0 - Access Modifier
-			AccessModifier accessModifier = ArgumentValidation.getEnum(evaluateStringNoNull(nodes[0], t),
+			AccessModifier accessModifier = ArgumentValidation.getEnum(evaluateStringNoNull(nodes[0], t, env),
 					AccessModifier.class, t);
 
 			// 1 - Object Modifiers
@@ -219,11 +219,11 @@ public class ObjectManagement {
 					.collect(Collectors.toSet());
 
 			// 2 - Object Type
-			ObjectType type = ArgumentValidation.getEnum(evaluateStringNoNull(nodes[2], t), ObjectType.class, t);
+			ObjectType type = ArgumentValidation.getEnum(evaluateStringNoNull(nodes[2], t, env), ObjectType.class, t);
 
 			// 3 - Object Name
 			FullyQualifiedClassName name
-					= FullyQualifiedClassName.forFullyQualifiedClass(evaluateStringNoNull(nodes[3], t).val());
+					= FullyQualifiedClassName.forFullyQualifiedClass(evaluateStringNoNull(nodes[3], t, env).val());
 
 			// 4 - Superclasses
 			Set<UnqualifiedClassName> superclasses = new HashSet<>();

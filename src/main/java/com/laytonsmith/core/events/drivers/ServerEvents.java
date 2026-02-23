@@ -98,7 +98,7 @@ public class ServerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			if(!(e instanceof MCServerCommandEvent)) {
 				throw new EventException("Cannot convert e to MCServerCommandEvent");
 			}
@@ -128,7 +128,7 @@ public class ServerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			if(event instanceof MCServerCommandEvent) {
 				MCServerCommandEvent e = (MCServerCommandEvent) event;
 				if(key.equals("command")) {
@@ -180,7 +180,7 @@ public class ServerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			if(e instanceof MCServerPingEvent) {
 				MCServerPingEvent event = (MCServerPingEvent) e;
 				Target t = Target.UNKNOWN;
@@ -207,7 +207,7 @@ public class ServerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			if(event instanceof MCServerPingEvent) {
 				MCServerPingEvent e = (MCServerPingEvent) event;
 				switch(key.toLowerCase()) {
@@ -283,7 +283,7 @@ public class ServerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			if(event instanceof MCCommandTabCompleteEvent) {
 				MCCommandTabCompleteEvent e = (MCCommandTabCompleteEvent) event;
 				Target t = Target.UNKNOWN;
@@ -315,11 +315,11 @@ public class ServerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			if(event instanceof MCCommandTabCompleteEvent) {
 				MCCommandTabCompleteEvent e = (MCCommandTabCompleteEvent) event;
 				if("completions".equals(key)) {
-					if(value.isInstanceOf(CArray.TYPE)) {
+					if(value.isInstanceOf(CArray.TYPE, null, env)) {
 						List<String> comp = new ArrayList<>();
 						if(((CArray) value).inAssociativeMode()) {
 							for(Mixed k : ((CArray) value).keySet()) {
@@ -390,7 +390,7 @@ public class ServerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			MCRedstoneChangedEvent event = (MCRedstoneChangedEvent) e;
 			Map<String, Mixed> map = evaluate_helper(e);
 			map.put("location", ObjectGenerator.GetGenerator().location(event.getLocation(), false));
@@ -404,7 +404,7 @@ public class ServerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			return false;
 		}
 
@@ -470,7 +470,7 @@ public class ServerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			MCBroadcastMessageEvent event = (MCBroadcastMessageEvent) e;
 			Map<String, Mixed> map = evaluate_helper(e);
 			map.put("message", new CString(event.getMessage(), Target.UNKNOWN));
@@ -488,7 +488,7 @@ public class ServerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent e) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent e, Environment env) {
 			if(key.equals("message")) {
 				MCBroadcastMessageEvent event = (MCBroadcastMessageEvent) e;
 				event.setMessage(Construct.nval(value));
