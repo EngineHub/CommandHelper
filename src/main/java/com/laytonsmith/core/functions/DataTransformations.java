@@ -76,7 +76,7 @@ public class DataTransformations {
 		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CArray ca = ArgumentValidation.getArray(args[0], t);
 			try {
-				return new CString(Construct.json_encode(ca, t), t);
+				return new CString(Construct.json_encode(ca, t, environment), t);
 			} catch (MarshalException ex) {
 				throw new CRECastException(ex.getMessage(), t);
 			}

@@ -211,9 +211,9 @@ public class SQL {
 								} else {
 									ps.setString(i + 1, (String) params[i].val());
 								}
-							} else if(params[i].isInstanceOf(CByteArray.TYPE, null, environment)) {
+							} else if(params[i] instanceof CByteArray) {
 								ps.setBytes(i + 1, ((CByteArray) params[i]).asByteArrayCopy());
-							} else if(params[i].isInstanceOf(CBoolean.TYPE, null, environment)) {
+							} else if(params[i] instanceof CBoolean) {
 								ps.setBoolean(i + 1, ArgumentValidation.getBoolean(params[i], t));
 							} else {
 								throw new CRECastException("The type " + params[i].getClass().getSimpleName()

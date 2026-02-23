@@ -255,7 +255,7 @@ public class EntityManagement {
 						ret.push(new CString(e.getUniqueId().toString(), t), t);
 					}
 				} else {
-					if(args[0].isInstanceOf(CArray.TYPE)) {
+					if(args[0].isInstanceOf(CArray.TYPE, null, environment)) {
 						c = ObjectGenerator.GetGenerator().location(args[0], null, t).getChunk();
 						for(MCEntity e : c.getEntities()) {
 							ret.push(new CString(e.getUniqueId().toString(), t), t);
@@ -451,7 +451,7 @@ public class EntityManagement {
 		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCEntity e = Static.getEntity(args[0], t);
 			MCLocation l;
-			if(args[1].isInstanceOf(CArray.TYPE)) {
+			if(args[1].isInstanceOf(CArray.TYPE, null, environment)) {
 				l = ObjectGenerator.GetGenerator().location(args[1], e.getWorld(), t);
 			} else {
 				throw new CREFormatException("An array was expected but received " + args[1], t);
@@ -922,7 +922,7 @@ public class EntityManagement {
 				return null;
 			}
 			Mixed c = children.get(1).getData();
-			if(c.isInstanceOf(CString.TYPE)) {
+			if(c.isInstanceOf(CString.TYPE, null, env)) {
 				try {
 					MCEntityType.MCVanillaEntityType.valueOf(c.val().toUpperCase());
 				} catch(IllegalArgumentException ex) {
@@ -961,7 +961,7 @@ public class EntityManagement {
 			int dist;
 			List<String> types = new ArrayList<>();
 
-			if(!(args[0].isInstanceOf(CArray.TYPE))) {
+			if(!(args[0].isInstanceOf(CArray.TYPE, null, env))) {
 				throw new CREBadEntityException("Expecting an array at parameter 1 of entities_in_radius", t);
 			}
 
@@ -973,7 +973,7 @@ public class EntityManagement {
 			}
 
 			if(args.length == 3) {
-				if(args[2].isInstanceOf(CArray.TYPE)) {
+				if(args[2].isInstanceOf(CArray.TYPE, null, env)) {
 					CArray ta = (CArray) args[2];
 					for(int i = 0; i < ta.size(); i++) {
 						types.add(ta.get(i, t).val());
@@ -1051,7 +1051,7 @@ public class EntityManagement {
 				return null;
 			}
 			Mixed c = children.get(children.size() - 1).getData();
-			if(c.isInstanceOf(CString.TYPE)) {
+			if(c.isInstanceOf(CString.TYPE, null, env)) {
 				try {
 					MCEntityType.MCVanillaEntityType.valueOf(c.val().toUpperCase());
 				} catch(IllegalArgumentException ex) {
@@ -1061,7 +1061,7 @@ public class EntityManagement {
 				}
 			} else if(c instanceof CFunction && c.val().equals(DataHandling.array.NAME)) {
 				for(ParseTree node : children.get(children.size() - 1).getChildren()) {
-					if(node.getData().isInstanceOf(CString.TYPE)) {
+					if(node.getData().isInstanceOf(CString.TYPE, null, env)) {
 						try {
 							MCEntityType.MCVanillaEntityType.valueOf(node.getData().val().toUpperCase());
 						} catch(IllegalArgumentException ex) {
@@ -1191,7 +1191,7 @@ public class EntityManagement {
 				return null;
 			}
 			Mixed c = children.get(1).getData();
-			if(c.isInstanceOf(CString.TYPE)) {
+			if(c.isInstanceOf(CString.TYPE, null, env)) {
 				try {
 					MCEntityEffect.valueOf(c.val().toUpperCase());
 				} catch(IllegalArgumentException ex) {
@@ -1293,7 +1293,7 @@ public class EntityManagement {
 			if(args.length >= 3) {
 				l = ObjectGenerator.GetGenerator().location(args[2], null, t);
 				if(args.length == 4) {
-					if(args[3].isInstanceOf(CClosure.TYPE)) {
+					if(args[3].isInstanceOf(CClosure.TYPE, null, environment)) {
 						consumer = (CClosure) args[3];
 					} else {
 						throw new CREIllegalArgumentException("Expected a closure as last argument for spawn_entity().", t);
@@ -1414,7 +1414,7 @@ public class EntityManagement {
 				return null;
 			}
 			Mixed c = children.get(0).getData();
-			if(c.isInstanceOf(CString.TYPE)) {
+			if(c.isInstanceOf(CString.TYPE, null, env)) {
 				try {
 					MCEntityType.MCVanillaEntityType type = MCEntityType.MCVanillaEntityType.valueOf(c.val().toUpperCase());
 					if(!type.isSpawnable()) {
@@ -2606,7 +2606,7 @@ public class EntityManagement {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_AREAEFFECTCLOUD_COLOR:
 								Mixed colorMixed = specArray.get(index, t);
-								if(colorMixed.isInstanceOf(CArray.TYPE)) {
+								if(colorMixed.isInstanceOf(CArray.TYPE, null, environment)) {
 									CArray color = (CArray) colorMixed;
 									cloud.setColor(ObjectGenerator.GetGenerator().color(color, t));
 								} else {
@@ -2621,7 +2621,7 @@ public class EntityManagement {
 								break;
 							case entity_spec.KEY_AREAEFFECTCLOUD_PARTICLE:
 								Mixed particleMixed = specArray.get(index, t);
-								if(particleMixed.isInstanceOf(CArray.TYPE)) {
+								if(particleMixed.isInstanceOf(CArray.TYPE, null, environment)) {
 									CArray pa = (CArray) particleMixed;
 									MCParticle p;
 									try {
@@ -2632,7 +2632,7 @@ public class EntityManagement {
 									}
 									try {
 										cloud.setParticle(p, ObjectGenerator.GetGenerator().particleData(p,
-												cloud.getLocation(), pa, t));
+												cloud.getLocation(), pa, t, environment));
 									} catch(IllegalArgumentException ex) {
 										throw new CREFormatException("Invalid particle data for " + p.name(), t);
 									}
@@ -2647,7 +2647,7 @@ public class EntityManagement {
 								break;
 							case entity_spec.KEY_AREAEFFECTCLOUD_POTIONMETA:
 								Mixed c = specArray.get(index, t);
-								if(c.isInstanceOf(CArray.TYPE)) {
+								if(c.isInstanceOf(CArray.TYPE, null, environment)) {
 									CArray meta = (CArray) c;
 									if(meta.containsKey("potiontype")
 											&& Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
@@ -2659,12 +2659,12 @@ public class EntityManagement {
 										}
 									} else if(meta.containsKey("base")) {
 										Mixed base = meta.get("base", t);
-										if(base.isInstanceOf(CArray.TYPE)) {
+										if(base.isInstanceOf(CArray.TYPE, null, environment)) {
 											if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
 												MCPotionType type = ObjectGenerator.GetGenerator().legacyPotionData((CArray) base, t);
 												cloud.setBasePotionType(type);
 											} else {
-												MCPotionData pd = ObjectGenerator.GetGenerator().potionData((CArray) base, t);
+												MCPotionData pd = ObjectGenerator.GetGenerator().potionData((CArray) base, t, environment);
 												cloud.setBasePotionData(pd);
 											}
 										}
@@ -2672,8 +2672,8 @@ public class EntityManagement {
 									if(meta.containsKey("potions")) {
 										cloud.clearCustomEffects();
 										Mixed potions = meta.get("potions", t);
-										if(potions.isInstanceOf(CArray.TYPE)) {
-											List<MCLivingEntity.MCEffect> list = ObjectGenerator.GetGenerator().potions((CArray) potions, t);
+										if(potions.isInstanceOf(CArray.TYPE, null, environment)) {
+											List<MCLivingEntity.MCEffect> list = ObjectGenerator.GetGenerator().potions((CArray) potions, t, environment);
 											for(MCLivingEntity.MCEffect effect : list) {
 												cloud.addCustomEffect(effect);
 											}
@@ -2699,7 +2699,7 @@ public class EntityManagement {
 								Mixed cloudSource = specArray.get(index, t);
 								if(cloudSource instanceof CNull) {
 									cloud.setSource(null);
-								} else if(cloudSource.isInstanceOf(CArray.TYPE)) {
+								} else if(cloudSource.isInstanceOf(CArray.TYPE, null, environment)) {
 									MCBlock b = ObjectGenerator.GetGenerator().location(cloudSource, cloud.getWorld(), t).getBlock();
 									if(b.isDispenser()) {
 										cloud.setSource(b.getDispenser().getBlockProjectileSource());
@@ -2757,7 +2757,7 @@ public class EntityManagement {
 								break;
 							case entity_spec.KEY_ARROW_POTIONMETA:
 								Mixed c = specArray.get(index, t);
-								if(c.isInstanceOf(CArray.TYPE)) {
+								if(c.isInstanceOf(CArray.TYPE, null, environment)) {
 									CArray meta = (CArray) c;
 									if(meta.containsKey("potiontype")
 											&& Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
@@ -2769,12 +2769,12 @@ public class EntityManagement {
 										}
 									} else if(meta.containsKey("base")) {
 										Mixed base = meta.get("base", t);
-										if(base.isInstanceOf(CArray.TYPE)) {
+										if(base.isInstanceOf(CArray.TYPE, null, environment)) {
 											if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
 												MCPotionType type = ObjectGenerator.GetGenerator().legacyPotionData((CArray) base, t);
 												arrow.setBasePotionType(type);
 											} else {
-												MCPotionData pd = ObjectGenerator.GetGenerator().potionData((CArray) base, t);
+												MCPotionData pd = ObjectGenerator.GetGenerator().potionData((CArray) base, t, environment);
 												arrow.setBasePotionData(pd);
 											}
 										}
@@ -2782,8 +2782,8 @@ public class EntityManagement {
 									if(meta.containsKey("potions")) {
 										arrow.clearCustomEffects();
 										Mixed potions = meta.get("potions", t);
-										if(potions.isInstanceOf(CArray.TYPE)) {
-											List<MCLivingEntity.MCEffect> list = ObjectGenerator.GetGenerator().potions((CArray) potions, t);
+										if(potions.isInstanceOf(CArray.TYPE, null, environment)) {
+											List<MCLivingEntity.MCEffect> list = ObjectGenerator.GetGenerator().potions((CArray) potions, t, environment);
 											for(MCLivingEntity.MCEffect effect : list) {
 												arrow.addCustomEffect(effect);
 											}
@@ -2797,7 +2797,7 @@ public class EntityManagement {
 								Mixed colorMixed = specArray.get(index, t);
 								if(colorMixed instanceof CNull) {
 									arrow.setColor(null);
-								} else if(colorMixed.isInstanceOf(CArray.TYPE)) {
+								} else if(colorMixed.isInstanceOf(CArray.TYPE, null, environment)) {
 									CArray color = (CArray) colorMixed;
 									arrow.setColor(ObjectGenerator.GetGenerator().color(color, t));
 								} else {
@@ -2834,7 +2834,7 @@ public class EntityManagement {
 							case entity_spec.KEY_ARMORSTAND_POSES:
 								Map<MCBodyPart, Vector3D> poseMap = stand.getAllPoses();
 								Mixed posesMixed = specArray.get(index, t);
-								if(posesMixed.isInstanceOf(CArray.TYPE)) {
+								if(posesMixed.isInstanceOf(CArray.TYPE, null, environment)) {
 									CArray poseArray = (CArray) posesMixed;
 									for(MCBodyPart key : poseMap.keySet()) {
 										try {
@@ -2915,7 +2915,7 @@ public class EntityManagement {
 								MCBlockData bd;
 								Mixed m = specArray.get(index, t);
 								try {
-									if(m.isInstanceOf(CArray.TYPE)) {
+									if(m.isInstanceOf(CArray.TYPE, null, environment)) {
 										bd = ObjectGenerator.GetGenerator().blockData((CArray) m, t);
 									} else {
 										bd = Static.getServer().createBlockData(m.val().toLowerCase());
@@ -3085,7 +3085,7 @@ public class EntityManagement {
 								Mixed c = specArray.get(index, t);
 								if(c instanceof CNull) {
 									endercrystal.setBeamTarget(null);
-								} else if(c.isInstanceOf(CArray.TYPE)) {
+								} else if(c.isInstanceOf(CArray.TYPE, null, environment)) {
 									MCLocation l = ObjectGenerator.GetGenerator().location((CArray) c, endercrystal.getWorld(), t);
 									endercrystal.setBeamTarget(l);
 								} else {
@@ -3230,7 +3230,7 @@ public class EntityManagement {
 								fm.clearEffects();
 								CArray effects = ArgumentValidation.getArray(specArray.get(index, t), t);
 								for(Mixed eff : effects.asList()) {
-									if(eff.isInstanceOf(CArray.TYPE)) {
+									if(eff.isInstanceOf(CArray.TYPE, null, environment)) {
 										fm.addEffect(ObjectGenerator.GetGenerator().fireworkEffect((CArray) eff, t));
 									} else {
 										throw new CRECastException("Firework effect expected to be an array.", t);
@@ -3924,7 +3924,7 @@ public class EntityManagement {
 								break;
 							case entity_spec.KEY_DISPLAY_TEXT_BACKGROUND_COLOR:
 								Mixed color = specArray.get(index, t);
-								if(color.isInstanceOf(CArray.TYPE)) {
+								if(color.isInstanceOf(CArray.TYPE, null, environment)) {
 									tDisplay.setBackgroundColor(ObjectGenerator.GetGenerator().color((CArray) color, t));
 								} else if(color instanceof CNull) {
 									tDisplay.setBackgroundColor(null);
@@ -4261,7 +4261,7 @@ public class EntityManagement {
 			if(entity instanceof MCProjectile) {
 				if(args[1] instanceof CNull) {
 					((MCProjectile) entity).setShooter(null);
-				} else if(args[1].isInstanceOf(CArray.TYPE)) {
+				} else if(args[1].isInstanceOf(CArray.TYPE, null, environment)) {
 					MCBlock b = ObjectGenerator.GetGenerator().location(args[1], entity.getWorld(), t).getBlock();
 					if(b.isDispenser()) {
 						((MCProjectile) entity).setShooter(b.getDispenser().getBlockProjectileSource());
@@ -4903,7 +4903,7 @@ public class EntityManagement {
 				is = ObjectGenerator.GetGenerator().item(args[0], t);
 			} else {
 				MCPlayer p;
-				if(args[0].isInstanceOf(CArray.TYPE)) {
+				if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
 					p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 					l = ObjectGenerator.GetGenerator().location(args[0], (p != null ? p.getWorld() : null), t);
 					natural = true;
@@ -4975,7 +4975,7 @@ public class EntityManagement {
 			List<MCFireworkEffect> effects = new ArrayList<>();
 			if(options.containsKey("effects")) {
 				Mixed cEffects = options.get("effects", t);
-				if(cEffects.isInstanceOf(CArray.TYPE)) {
+				if(cEffects.isInstanceOf(CArray.TYPE, null, environment)) {
 					for(Mixed c : ((CArray) cEffects).asList()) {
 						effects.add(ObjectGenerator.GetGenerator().fireworkEffect((CArray) c, t));
 					}
@@ -5479,7 +5479,7 @@ public class EntityManagement {
 					display.setBrightness(null);
 				} else {
 					MCDisplay.Brightness brightness;
-					if(m.isInstanceOf(CArray.TYPE)) {
+					if(m.isInstanceOf(CArray.TYPE, null, environment)) {
 						CArray brightnessArray = (CArray) m;
 						if(!brightnessArray.isAssociative()) {
 							throw new CREIllegalArgumentException(

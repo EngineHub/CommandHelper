@@ -371,13 +371,13 @@ public final class Threading {
 	 */
 	private static final Map<Object, Lock> SYNC_OBJECT_LOCKS = new HashMap<>();
 
-	private static Lock getSyncObject(Mixed cSyncObject, Function f, Target t) {
+	private static Lock getSyncObject(Mixed cSyncObject, Function f, Target t, Environment env) {
 
 		if(cSyncObject instanceof CNull || cSyncObject == null) {
 			throw new CRENullPointerException("Synchronization object may not be null in " + f.getName() + "().", t);
 		}
 		Object syncObject = cSyncObject;
-		if(cSyncObject.isInstanceOf(ValueType.TYPE)) {
+		if(cSyncObject.isInstanceOf(ValueType.TYPE, null, env)) {
 			if(!(cSyncObject instanceof CString)) {
 				throw new CREIllegalArgumentException("Only strings and non-value types can be used for synchronization.", t);
 			}
@@ -498,7 +498,7 @@ public final class Threading {
 
 			// Get the sync object (CArray or String value of the Mixed).
 			Mixed cSyncObject = parent.seval(syncObjectTree, env);
-			Lock syncObject = getSyncObject(cSyncObject, this, t);
+			Lock syncObject = getSyncObject(cSyncObject, this, t, env);
 
 			// Evaluate the code, synchronized by the passed sync object.
 			try {
@@ -639,7 +639,7 @@ public final class Threading {
 					= ArgumentValidation.getObject(args[1], t, com.laytonsmith.core.natives.interfaces.Callable.class);
 
 			// Get the sync object (CArray or String value of the Mixed).
-			Lock syncObject = getSyncObject(cSyncObject, this, t);
+			Lock syncObject = getSyncObject(cSyncObject, this, t, env);
 
 			// Evaluate the code, synchronized by the passed sync object.
 			DaemonManager dm = env.getEnv(StaticRuntimeEnv.class).GetDaemonManager();

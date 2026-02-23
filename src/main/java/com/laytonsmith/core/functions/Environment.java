@@ -499,7 +499,7 @@ public class Environment {
 			String line2 = "";
 			String line3 = "";
 			String line4 = "";
-			if((args.length == 2 || args.length == 3) && args[args.length - 1].isInstanceOf(CArray.TYPE)) {
+			if((args.length == 2 || args.length == 3) && args[args.length - 1].isInstanceOf(CArray.TYPE, null, environment)) {
 				if(args.length == 3) {
 					try {
 						side = MCSign.Side.valueOf(args[1].val());
@@ -1235,7 +1235,7 @@ public class Environment {
 				return null;
 			}
 			Mixed c = children.get(children.size() - 1).getData();
-			if(c.isInstanceOf(CString.TYPE)) {
+			if(c.isInstanceOf(CString.TYPE, null, env)) {
 				try {
 					MCBiomeType.MCVanillaBiomeType.valueOf(c.val());
 				} catch (IllegalArgumentException ex) {
@@ -1356,7 +1356,7 @@ public class Environment {
 				w = player.getWorld();
 			}
 
-			if(args.length < 3 && args[0].isInstanceOf(CArray.TYPE)) {
+			if(args.length < 3 && args[0].isInstanceOf(CArray.TYPE, null, env)) {
 				MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
 				x = loc.getBlockX();
 				z = loc.getBlockZ();
@@ -1439,7 +1439,7 @@ public class Environment {
 			boolean fire = true;
 			MCEntity source = null;
 
-			if(!(args[0].isInstanceOf(CArray.TYPE))) {
+			if(!(args[0].isInstanceOf(CArray.TYPE, null, env))) {
 				throw new CRECastException("Expecting an array at parameter 1 of explosion", t);
 			}
 			if(args.length >= 2) {
@@ -1517,7 +1517,7 @@ public class Environment {
 				noteOffset = 2;
 				l = ObjectGenerator.GetGenerator().location(args[3], p.getWorld(), t);
 			} else {
-				if(!(args[1].isInstanceOf(CArray.TYPE)) && args[2].isInstanceOf(CArray.TYPE)) {
+				if(!(args[1].isInstanceOf(CArray.TYPE, null, environment)) && args[2].isInstanceOf(CArray.TYPE, null, environment)) {
 					//Player provided, location not
 					instrumentOffset = 1;
 					noteOffset = 2;
@@ -1538,7 +1538,7 @@ public class Environment {
 						+ StringUtils.Join(MCInstrument.values(), ", ", ", or "), t);
 			}
 			MCTone tone = null;
-			if(args[noteOffset].isInstanceOf(CArray.TYPE)) {
+			if(args[noteOffset].isInstanceOf(CArray.TYPE, null, environment)) {
 				int octave = ArgumentValidation.getInt32(((CArray) args[noteOffset]).get("octave", t), t);
 				if(octave < 0 || octave > 2) {
 					throw new CRERangeException("The octave must be 0, 1, or 2, but was " + octave, t);
@@ -1683,7 +1683,7 @@ public class Environment {
 			boolean force = false;
 			Object data = null;
 
-			if(args[1].isInstanceOf(CArray.TYPE)) {
+			if(args[1].isInstanceOf(CArray.TYPE, null, environment)) {
 				CArray pa = (CArray) args[1];
 				try {
 					p = MCParticle.valueOf(pa.get("particle", t).val().toUpperCase());
@@ -1711,7 +1711,7 @@ public class Environment {
 					force = ArgumentValidation.getBooleanObject(pa.get("force", t), t);
 				}
 
-				data = ObjectGenerator.GetGenerator().particleData(p, l, pa, t);
+				data = ObjectGenerator.GetGenerator().particleData(p, l, pa, t, environment);
 
 			} else {
 				try {
@@ -1761,7 +1761,7 @@ public class Environment {
 					if(node.getData() instanceof CFunction && node.getData().val().equals(Compiler.centry.NAME)) {
 						children = node.getChildren();
 						if(children.get(0).getData().val().equals("particle")
-								&& children.get(1).getData().isInstanceOf(CString.TYPE)) {
+								&& children.get(1).getData().isInstanceOf(CString.TYPE, null, env)) {
 							try {
 								MCParticle.MCVanillaParticle.valueOf(children.get(1).getData().val().toUpperCase());
 							} catch (IllegalArgumentException ex) {
@@ -1810,7 +1810,7 @@ public class Environment {
 
 			MCLocation loc = null;
 			MCEntity ent = null;
-			if(args[0].isInstanceOf(CArray.TYPE)) {
+			if(args[0].isInstanceOf(CArray.TYPE, null, environment)) {
 				loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
 			} else if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_18_1)) {
 				ent = Static.getEntity(args[0], t);
@@ -1824,7 +1824,7 @@ public class Environment {
 			float pitch = 1;
 			Long seed = null;
 
-			if(!(args[1].isInstanceOf(CArray.TYPE))) {
+			if(!(args[1].isInstanceOf(CArray.TYPE, null, environment))) {
 				throw new CREFormatException("An array was expected but received " + args[1], t);
 			}
 
@@ -1859,7 +1859,7 @@ public class Environment {
 			}
 
 			if(args.length == 3) {
-				if(args[2].isInstanceOf(CArray.TYPE)) {
+				if(args[2].isInstanceOf(CArray.TYPE, null, environment)) {
 					CArray players = (CArray) args[2];
 					for(String key : players.stringKeySet()) {
 						MCPlayer p = Static.GetPlayer(players.get(key, t), t);
@@ -1932,7 +1932,7 @@ public class Environment {
 					if(node.getData() instanceof CFunction && node.getData().val().equals(Compiler.centry.NAME)) {
 						children = node.getChildren();
 						if(children.get(0).getData().val().equals("sound")
-								&& children.get(1).getData().isInstanceOf(CString.TYPE)) {
+								&& children.get(1).getData().isInstanceOf(CString.TYPE, null, env)) {
 							try {
 								MCSound.MCVanillaSound.valueOf(children.get(1).getData().val().toUpperCase());
 							} catch (IllegalArgumentException ex) {
@@ -1981,7 +1981,7 @@ public class Environment {
 
 			MCLocation loc = null;
 			MCEntity ent = null;
-			if(args[0].isInstanceOf(CArray.TYPE)) {
+			if(args[0].isInstanceOf(CArray.TYPE, null, environment)) {
 				loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
 			} else if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_3)) {
 				ent = Static.getEntity(args[0], t);
@@ -1995,7 +1995,7 @@ public class Environment {
 			float pitch = 1;
 			Long seed = null;
 
-			if(!(args[1].isInstanceOf(CArray.TYPE))) {
+			if(!(args[1].isInstanceOf(CArray.TYPE, null, environment))) {
 				throw new CREFormatException("An array was expected but received " + args[1], t);
 			}
 
@@ -2025,7 +2025,7 @@ public class Environment {
 
 			if(args.length == 3) {
 				java.util.List<MCPlayer> players = new java.util.ArrayList<>();
-				if(args[2].isInstanceOf(CArray.TYPE)) {
+				if(args[2].isInstanceOf(CArray.TYPE, null, environment)) {
 					for(String key : ((CArray) args[2]).stringKeySet()) {
 						players.add(Static.GetPlayer(((CArray) args[2]).get(key, t), t));
 					}
@@ -2836,7 +2836,7 @@ public class Environment {
 				throws ConfigRuntimeException {
 			String cmd = null;
 			if(args.length == 2 && !(args[1] instanceof CNull)) {
-				if(!(args[1].isInstanceOf(CString.TYPE))) {
+				if(!(args[1].isInstanceOf(CString.TYPE, null, environment))) {
 					throw new CRECastException("Parameter 2 of " + getName() + " must be a string or null", t);
 				}
 				cmd = args[1].val();
@@ -2948,7 +2948,7 @@ public class Environment {
 		) throws ConfigRuntimeException {
 			String name = null;
 			if(args.length == 2 && !(args[1] instanceof CNull)) {
-				if(!(args[1].isInstanceOf(CString.TYPE))) {
+				if(!(args[1].isInstanceOf(CString.TYPE, null, environment))) {
 					throw new CRECastException("Parameter 2 of " + getName() + " must be a string or null", t);
 				}
 				name = args[1].val();
@@ -3132,7 +3132,7 @@ public class Environment {
 							if(node.getData() instanceof CFunction && node.getData().val().equals(Compiler.centry.NAME)) {
 								children = node.getChildren();
 								if(children.get(0).getData().val().equals("color")
-										&& children.get(1).getData().isInstanceOf(CString.TYPE)) {
+										&& children.get(1).getData().isInstanceOf(CString.TYPE, null, env)) {
 									try {
 										MCDyeColor.valueOf(children.get(1).getData().val());
 									} catch (IllegalArgumentException ex) {
@@ -3142,7 +3142,7 @@ public class Environment {
 														children.get(1).getTarget(), null));
 									}
 								} else if(children.get(0).getData().val().equals("shape")
-										&& children.get(1).getData().isInstanceOf(CString.TYPE)) {
+										&& children.get(1).getData().isInstanceOf(CString.TYPE, null, env)) {
 									try {
 										MCPatternShape.valueOf(children.get(1).getData().val());
 									} catch (IllegalArgumentException ex) {
@@ -3331,7 +3331,7 @@ public class Environment {
 				throw new CREFormatException("The block at the specified location is not a decorated pot", t);
 			}
 			Mixed sherds = args[1];
-			if(sherds.isInstanceOf(CArray.TYPE)) {
+			if(sherds.isInstanceOf(CArray.TYPE, null, environment)) {
 				CArray sherdArray = (CArray) sherds;
 				if(sherdArray.isAssociative()) {
 					for(String key : sherdArray.stringKeySet()) {

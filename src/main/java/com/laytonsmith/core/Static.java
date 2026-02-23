@@ -43,6 +43,7 @@ import com.laytonsmith.core.constructs.CResource;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Variable;
@@ -829,8 +830,24 @@ public final class Static {
 		return GetUUID(subject.val(), t);
 	}
 
+	/**
+	 * @deprecated Use {@link #GetUser(Mixed, Target, Environment)} instead.
+	 */
+	@Deprecated
 	public static MCOfflinePlayer GetUser(Mixed search, Target t) {
-		return GetUser(search.val(), t);
+		return GetUser(search.val(), t, null);
+	}
+
+	public static MCOfflinePlayer GetUser(Mixed search, Target t, Environment env) {
+		return GetUser(search.val(), t, env);
+	}
+
+	/**
+	 * @deprecated Use {@link #GetUser(String, Target, Environment)} instead.
+	 */
+	@Deprecated
+	public static MCOfflinePlayer GetUser(String search, Target t) {
+		return GetUser(search, t, null);
 	}
 
 	/**
@@ -840,9 +857,10 @@ public final class Static {
 	 *
 	 * @param search The text to be searched, can be between 1 and 16 characters, or 32 or 36 characters
 	 * @param t
+	 * @param env
 	 * @return
 	 */
-	public static MCOfflinePlayer GetUser(String search, Target t) {
+	public static MCOfflinePlayer GetUser(String search, Target t, Environment env) {
 		MCOfflinePlayer ofp;
 		if(search.length() > 0 && search.length() <= 16) {
 			if(CONSOLE_NAME.equals(search)) {
@@ -854,7 +872,7 @@ public final class Static {
 			try {
 				ofp = getServer().getOfflinePlayer(GetUUID(search, t));
 			} catch(ConfigRuntimeException cre) {
-				if(cre instanceof CREThrowable && ((CREThrowable) cre).isInstanceOf(CRELengthException.TYPE)) {
+				if(cre instanceof CREThrowable && ((CREThrowable) cre).isInstanceOf(CRELengthException.TYPE, null, env)) {
 					throw new CRELengthException("The given string was the wrong size to identify a player."
 							+ " A player name is expected to be between 1 and 16 characters. " + cre.getMessage(), t);
 				} else {
@@ -875,7 +893,26 @@ public final class Static {
 	 * @return
 	 * @throws ConfigRuntimeException
 	 */
+	/**
+	 * @deprecated Use {@link #GetPlayer(String, Target, Environment)} instead.
+	 */
+	@Deprecated
 	public static MCPlayer GetPlayer(String player, Target t) throws ConfigRuntimeException {
+		return GetPlayer(player, t, null);
+	}
+
+	/**
+	 * Returns the player specified by name or UUID. Injected players are also returned in this list. If provided a string
+	 * between 1 and 16 characters, the lookup will be name-based. If provided a string that is 32 or 36 characters, the
+	 * lookup will be UUID-based. Throws CREPlayerOfflineException if the player is not online.
+	 *
+	 * @param player
+	 * @param t
+	 * @param env
+	 * @return
+	 * @throws ConfigRuntimeException
+	 */
+	public static MCPlayer GetPlayer(String player, Target t, Environment env) throws ConfigRuntimeException {
 		if(player == null) {
 			throw new CREPlayerOfflineException("No player was specified!", t);
 		}
@@ -897,7 +934,7 @@ public final class Static {
 					throw new CREPlayerOfflineException("The specified player (" + player + ") is not online", t);
 				}
 			} catch(CREThrowable ex) {
-				if(ex.isInstanceOf(CRELengthException.TYPE)) {
+				if(ex.isInstanceOf(CRELengthException.TYPE, null, env)) {
 					throw new CRELengthException("The given string was the wrong size to identify a player."
 							+ " A player name is expected to be between 1 and 16 characters. " + ex.getMessage(), t);
 				} else {
@@ -908,8 +945,16 @@ public final class Static {
 		return p;
 	}
 
+	/**
+	 * @deprecated Use {@link #GetPlayer(Mixed, Target, Environment)} instead.
+	 */
+	@Deprecated
 	public static MCPlayer GetPlayer(Mixed player, Target t) throws ConfigRuntimeException {
-		return GetPlayer(player.val(), t);
+		return GetPlayer(player.val(), t, null);
+	}
+
+	public static MCPlayer GetPlayer(Mixed player, Target t, Environment env) throws ConfigRuntimeException {
+		return GetPlayer(player.val(), t, env);
 	}
 
 	/**
@@ -1569,7 +1614,7 @@ public final class Static {
 			boolean[] array = (boolean[]) object;
 			CArray r = new CArray(t);
 			for(boolean b : array) {
-				r.push(CBoolean.get(b), t);
+				r.push(CBoolean.get(b), t, null);
 			}
 			return r;
 		} else if(object instanceof byte[]) {
@@ -1585,51 +1630,51 @@ public final class Static {
 			short[] array = (short[]) object;
 			CArray r = new CArray(t);
 			for(short s : array) {
-				r.push(new CInt(s, t), t);
+				r.push(new CInt(s, t), t, null);
 			}
 			return r;
 		} else if(object instanceof int[]) {
 			int[] array = (int[]) object;
 			CArray r = new CArray(t);
 			for(int i : array) {
-				r.push(new CInt(i, t), t);
+				r.push(new CInt(i, t), t, null);
 			}
 			return r;
 		} else if(object instanceof long[]) {
 			long[] array = (long[]) object;
 			CArray r = new CArray(t);
 			for(long l : array) {
-				r.push(new CInt(l, t), t);
+				r.push(new CInt(l, t), t, null);
 			}
 			return r;
 		} else if(object instanceof float[]) {
 			float[] array = (float[]) object;
 			CArray r = new CArray(t);
 			for(float f : array) {
-				r.push(new CDouble(f, t), t);
+				r.push(new CDouble(f, t), t, null);
 			}
 			return r;
 		} else if(object instanceof double[]) {
 			double[] array = (double[]) object;
 			CArray r = new CArray(t);
 			for(double d : array) {
-				r.push(new CDouble(d, t), t);
+				r.push(new CDouble(d, t), t, null);
 			}
 			return r;
 		} else if(object instanceof Object[]) {
 			CArray r = new CArray(t);
 			for(Object o : (Object[]) object) {
-				r.push((o == object) ? r : getMSObject(o, t), t);
+				r.push((o == object) ? r : getMSObject(o, t), t, null);
 			}
 			return r;
 		} else if(object instanceof Collection) {
 			return getMSObject(((Collection) object).toArray(), t);
 		} else if(object instanceof Map) {
 			Map map = ((Map) object);
-			CArray r = CArray.GetAssociativeArray(t);
+			CArray r = CArray.GetAssociativeArray(t, null, null);
 			for(Object key : map.keySet()) {
 				Object o = map.get(key);
-				r.set(key.toString(), (o == object) ? r : getMSObject(o, t), t);
+				r.set(key.toString(), (o == object) ? r : getMSObject(o, t), t, null);
 			}
 			return r;
 		} else {
@@ -1638,12 +1683,20 @@ public final class Static {
 	}
 
 	/**
+	 * @deprecated Use {@link #getJavaObject(Mixed, Environment)} instead.
+	 */
+	@Deprecated
+	public static Object getJavaObject(Mixed construct) {
+		return getJavaObject(construct, null);
+	}
+
+	/**
 	 * Given a MethodScript object, returns a java object.
 	 *
 	 * @param construct
 	 * @return
 	 */
-	public static Object getJavaObject(Mixed construct) {
+	public static Object getJavaObject(Mixed construct, Environment env) {
 		if((construct == null) || (construct instanceof CNull)) {
 			return null;
 		} else if(construct instanceof CVoid) {
@@ -1654,19 +1707,19 @@ public final class Static {
 			return ((CInt) construct).getInt();
 		} else if(construct instanceof CDouble) {
 			return ((CDouble) construct).getDouble();
-		} else if(construct instanceof CString) {
+		} else if(InstanceofUtil.isInstanceof(construct, CString.class, env)) {
 			return construct.val();
 		} else if(construct instanceof CByteArray) {
 			return ((CByteArray) construct).asByteArrayCopy();
 		} else if(construct instanceof CResource) {
 			return ((CResource) construct).getResource();
-		} else if(construct.isInstanceOf(CArray.TYPE)) {
+		} else if(construct.isInstanceOf(CArray.TYPE, null, env)) {
 			CArray array = (CArray) construct;
 			if(array.isAssociative()) {
 				HashMap<String, Object> map = new HashMap<>();
 				for(Mixed key : array.keySet()) {
 					Mixed c = array.get(key.val(), Target.UNKNOWN);
-					map.put(key.val(), (c == array) ? map : getJavaObject(c));
+					map.put(key.val(), (c == array) ? map : getJavaObject(c, env));
 				}
 				return map;
 			} else {
@@ -1678,7 +1731,7 @@ public final class Static {
 					if(c == array) {
 						a[i] = a;
 					} else {
-						a[i] = getJavaObject(array.get(i, Target.UNKNOWN));
+						a[i] = getJavaObject(array.get(i, Target.UNKNOWN), env);
 					}
 					if(a[i] != null) {
 						if(clazz == null) {
@@ -1724,7 +1777,7 @@ public final class Static {
 				}
 			}
 		} else {
-			return construct;
+			throw new ClassCastException(construct.getClass().getName() + " cannot be cast to a POJO");
 		}
 	}
 

@@ -112,7 +112,7 @@ public class CmdlineEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			Map<String, Mixed> map = new HashMap<>();
 			map.put("time", new CInt(System.currentTimeMillis(), Target.UNKNOWN));
 			return map;
@@ -124,7 +124,7 @@ public class CmdlineEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			return false;
 		}
 
@@ -172,7 +172,7 @@ public class CmdlineEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			CmdlinePromptInput cpi = (CmdlinePromptInput) e;
 			Map<String, Mixed> map = new HashMap<>();
 			map.put("command", new CString(cpi.getCommand(), Target.UNKNOWN));
@@ -186,7 +186,7 @@ public class CmdlineEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			return false;
 		}
 
@@ -263,7 +263,7 @@ public class CmdlineEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			return Collections.EMPTY_MAP;
 		}
 
@@ -273,7 +273,7 @@ public class CmdlineEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			return false;
 		}
 

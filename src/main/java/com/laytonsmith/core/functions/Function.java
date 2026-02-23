@@ -195,10 +195,11 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 	/**
 	 * Returns the message to use when this function gets profiled, if useSpecialExec returns false.
 	 *
+	 * @param env
 	 * @param args
 	 * @return
 	 */
-	public String profileMessage(Mixed... args);
+	public String profileMessage(Environment env, Mixed... args);
 
 	/**
 	 * Returns the message to use when this function gets profiled, if useSpecialExec returns true.
@@ -243,11 +244,11 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 		public List<ParseTree> getBranches(ParseTree self);
 	}
 
-	// TODO: The reflection bridge below is a backward-compatibility shim for
-	// 3rd-party functions that still implement the old 3-arg
-	// exec(Target, Environment, Mixed...) signature. Once all known extensions
-	// have been updated, the cache and reflection fallback can be removed, and
-	// callers can invoke exec directly.
+	// Reflection bridge for backward compatibility with 3rd-party functions
+	// that still implement the old 3-arg exec(Target, Environment, Mixed...) signature.
+	// Once all known extensions have been updated, the cache and reflection fallback
+	// can be removed, and callers can invoke exec directly.
+	// Added 2026-02-23.
 
 	/**
 	 * Cache of Function classes that only implement the old 3-arg exec signature.
@@ -279,6 +280,27 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 			return ReflectionUtils.invokeMethod(f.getClass(), f, "exec",
 					new Class[]{Target.class, Environment.class, Mixed[].class},
 					new Object[]{t, env, args});
+		}
+	}
+
+	// Reflection bridge for backward compatibility with 3rd-party functions
+	// that still implement the old profileMessage(Mixed...) signature only.
+	// Added 2026-02-23.
+	Set<Class<?>> OLD_PROFILE_MESSAGE_CACHE = Collections.newSetFromMap(new ConcurrentHashMap<>());
+
+	static String ExecuteProfileMessage(Function f, Environment env, Mixed[] args) {
+		if(OLD_PROFILE_MESSAGE_CACHE.contains(f.getClass())) {
+			return (String) ReflectionUtils.invokeMethod(f.getClass(), f, "profileMessage",
+					new Class[]{Mixed[].class},
+					new Object[]{args});
+		}
+		try {
+			return f.profileMessage(env, args);
+		} catch(AbstractMethodError e) {
+			OLD_PROFILE_MESSAGE_CACHE.add(f.getClass());
+			return (String) ReflectionUtils.invokeMethod(f.getClass(), f, "profileMessage",
+					new Class[]{Mixed[].class},
+					new Object[]{args});
 		}
 	}
 }

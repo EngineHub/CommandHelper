@@ -536,7 +536,8 @@ public class CommandHelperPlugin extends JavaPlugin {
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
 		MCCommandSender mcsender = BukkitConvertor.BukkitGetCorrectSender(sender);
 		MCCommand cmd = new BukkitMCCommand(command);
-		return cmd.handleTabComplete(mcsender, alias, args);
+		// TODO: Figure out how to get an env here
+		return cmd.handleTabComplete(mcsender, alias, args, null);
 	}
 
 	/**

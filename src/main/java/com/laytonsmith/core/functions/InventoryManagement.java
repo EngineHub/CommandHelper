@@ -512,7 +512,7 @@ public class InventoryManagement {
 				m = Static.GetPlayer(args[0], t);
 				arg = args[1];
 			}
-			if(!(arg.isInstanceOf(CArray.TYPE))) {
+			if(!(arg.isInstanceOf(CArray.TYPE, null, env))) {
 				throw new CRECastException("Expecting an array as the last argument.", t);
 			}
 			CArray array = (CArray) arg;
@@ -670,7 +670,7 @@ public class InventoryManagement {
 				return new CInt(0, t);
 			}
 
-			if(c.isInstanceOf(CArray.TYPE)) {
+			if(c.isInstanceOf(CArray.TYPE, null, environment)) {
 				ca = (CArray) c;
 				is = ObjectGenerator.GetGenerator().item(ca, t);
 			} else {
@@ -713,7 +713,7 @@ public class InventoryManagement {
 				Set<Class<? extends Environment.EnvironmentImpl>> envs,
 				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
-			if(children.size() > 0 && children.get(children.size() - 1).getData().isInstanceOf(CString.TYPE)) {
+			if(children.size() > 0 && children.get(children.size() - 1).getData().isInstanceOf(CString.TYPE, null, env)) {
 				env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
 						new CompilerWarning("The string item format in " + getName() + " is deprecated.", t, null));
 			}
@@ -790,7 +790,7 @@ public class InventoryManagement {
 			if(item instanceof CNull) {
 				ca = null;
 				is = StaticLayer.GetItemStack("AIR", 1);
-			} else if(item.isInstanceOf(CArray.TYPE)) {
+			} else if(item.isInstanceOf(CArray.TYPE, null, environment)) {
 				ca = (CArray) item;
 				is = ObjectGenerator.GetGenerator().item(ca, t);
 			} else {
@@ -836,7 +836,7 @@ public class InventoryManagement {
 				Set<Class<? extends Environment.EnvironmentImpl>> envs,
 				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
-			if(children.size() > 0 && children.get(children.size() - 1).getData().isInstanceOf(CString.TYPE)) {
+			if(children.size() > 0 && children.get(children.size() - 1).getData().isInstanceOf(CString.TYPE, null, env)) {
 				env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
 						new CompilerWarning("The string item format in " + getName() + " is deprecated.", t, null));
 			}
@@ -917,11 +917,11 @@ public class InventoryManagement {
 				if(args[1] instanceof CNull) {
 					return new CInt(0, t);
 				}
-				if(args[1].isInstanceOf(CArray.TYPE)) {
+				if(args[1].isInstanceOf(CArray.TYPE, null, environment)) {
 					itemOffset = 1;
 				}
 			} else if(args.length == 3) {
-				if(args[0].isInstanceOf(CString.TYPE)) { // we assume player here, apparently
+				if(args[0].isInstanceOf(CString.TYPE, null, environment)) { // we assume player here, apparently
 					itemOffset = 1;
 				}
 			} else if(args.length == 4) {
@@ -935,7 +935,7 @@ public class InventoryManagement {
 				p = Static.GetPlayer(args[0], t);
 			}
 
-			if(args[itemOffset].isInstanceOf(CArray.TYPE)) {
+			if(args[itemOffset].isInstanceOf(CArray.TYPE, null, environment)) {
 				is = ObjectGenerator.GetGenerator().item(args[itemOffset], t);
 			} else if(args.length > 1) {
 				is = Static.ParseItemNotation(null, args[itemOffset].val(), ArgumentValidation.getInt32(args[itemOffset + 1], t), t);
@@ -972,7 +972,7 @@ public class InventoryManagement {
 				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() > 2 || children.size() == 2
-					&& (children.get(1).getData().isInstanceOf(CString.TYPE) || children.get(1).getData().isInstanceOf(CInt.TYPE))) {
+					&& (children.get(1).getData().isInstanceOf(CString.TYPE, null, env) || children.get(1).getData().isInstanceOf(CInt.TYPE, null, env))) {
 				env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
 						new CompilerWarning("The string item format in " + getName() + " is deprecated.", t, null));
 			}
@@ -1033,7 +1033,7 @@ public class InventoryManagement {
 				if(args[1] instanceof CNull) {
 					return new CInt(0, t);
 				}
-				if(args[1].isInstanceOf(CArray.TYPE)) {
+				if(args[1].isInstanceOf(CArray.TYPE, null, environment)) {
 					itemOffset = 1;
 				}
 			} else if(args.length == 3) {
@@ -1047,7 +1047,7 @@ public class InventoryManagement {
 				p = Static.GetPlayer(args[0], t);
 			}
 
-			if(args[itemOffset].isInstanceOf(CArray.TYPE)) {
+			if(args[itemOffset].isInstanceOf(CArray.TYPE, null, environment)) {
 				ca = (CArray) args[itemOffset];
 				is = ObjectGenerator.GetGenerator().item(ca, t);
 			} else {
@@ -1095,7 +1095,7 @@ public class InventoryManagement {
 				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() > 2 || children.size() == 2
-					&& (children.get(1).getData().isInstanceOf(CString.TYPE) || children.get(1).getData().isInstanceOf(CInt.TYPE))) {
+					&& (children.get(1).getData().isInstanceOf(CString.TYPE, null, env) || children.get(1).getData().isInstanceOf(CInt.TYPE, null, env))) {
 				env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
 						new CompilerWarning("The string item format in " + getName() + " is deprecated.", t, null));
 			}
@@ -1177,11 +1177,11 @@ public class InventoryManagement {
 				if(args[1] instanceof CNull) {
 					return new CInt(0, t);
 				}
-				if(args[1].isInstanceOf(CArray.TYPE)) {
+				if(args[1].isInstanceOf(CArray.TYPE, null, environment)) {
 					itemOffset = 1;
 				}
 			} else if(args.length == 3) {
-				if(args[0].isInstanceOf(CString.TYPE)) { // we assume player here, apparently
+				if(args[0].isInstanceOf(CString.TYPE, null, environment)) { // we assume player here, apparently
 					itemOffset = 1;
 				}
 			} else if(args.length == 4) {
@@ -1195,7 +1195,7 @@ public class InventoryManagement {
 				p = Static.GetPlayer(args[0], t);
 			}
 
-			if(args[itemOffset].isInstanceOf(CArray.TYPE)) {
+			if(args[itemOffset].isInstanceOf(CArray.TYPE, null, environment)) {
 				is = ObjectGenerator.GetGenerator().item(args[itemOffset], t);
 			} else {
 				is = Static.ParseItemNotation(null, args[itemOffset].val(), ArgumentValidation.getInt32(args[itemOffset + 1], t), t);
@@ -1230,7 +1230,7 @@ public class InventoryManagement {
 				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() > 2 || children.size() == 2
-					&& (children.get(1).getData().isInstanceOf(CString.TYPE) || children.get(1).getData().isInstanceOf(CInt.TYPE))) {
+					&& (children.get(1).getData().isInstanceOf(CString.TYPE, null, env) || children.get(1).getData().isInstanceOf(CInt.TYPE, null, env))) {
 				env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
 						new CompilerWarning("The string item format in " + getName() + " is deprecated.", t, null));
 			}
@@ -1290,7 +1290,7 @@ public class InventoryManagement {
 				if(args[1] instanceof CNull) {
 					return new CInt(0, t);
 				}
-				if(args[1].isInstanceOf(CArray.TYPE)) {
+				if(args[1].isInstanceOf(CArray.TYPE, null, environment)) {
 					itemOffset = 1;
 				}
 			} else if(args.length == 3) {
@@ -1304,7 +1304,7 @@ public class InventoryManagement {
 				p = Static.GetPlayer(args[0], t);
 			}
 
-			if(args[itemOffset].isInstanceOf(CArray.TYPE)) {
+			if(args[itemOffset].isInstanceOf(CArray.TYPE, null, environment)) {
 				ca = (CArray) args[itemOffset];
 				is = ObjectGenerator.GetGenerator().item(ca, t);
 			} else {
@@ -1351,7 +1351,7 @@ public class InventoryManagement {
 				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() > 2 || children.size() == 2
-					&& (children.get(1).getData().isInstanceOf(CString.TYPE) || children.get(1).getData().isInstanceOf(CInt.TYPE))) {
+					&& (children.get(1).getData().isInstanceOf(CString.TYPE, null, env) || children.get(1).getData().isInstanceOf(CInt.TYPE, null, env))) {
 				env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
 						new CompilerWarning("The string item format in " + getName() + " is deprecated.", t, null));
 			}
@@ -1450,7 +1450,7 @@ public class InventoryManagement {
 				arg = args[0];
 			}
 
-			if(!(arg.isInstanceOf(CArray.TYPE))) {
+			if(!(arg.isInstanceOf(CArray.TYPE, null, env))) {
 				throw new CRECastException("Expecting an array as argument " + (args.length == 1 ? "1" : "2"), t);
 			}
 
@@ -1616,7 +1616,7 @@ public class InventoryManagement {
 			if(p != null) {
 				w = p.getWorld();
 			}
-			MCInventory inv = GetInventoryOrNull(args[0], w, t);
+			MCInventory inv = GetInventoryOrNull(args[0], w, t, environment);
 			return CBoolean.get(inv != null);
 		}
 
@@ -1672,7 +1672,7 @@ public class InventoryManagement {
 				w = p.getWorld();
 			}
 
-			MCInventory inv = GetInventory(args[0], w, t);
+			MCInventory inv = GetInventory(args[0], w, t, environment);
 			int slot = ArgumentValidation.getInt32(args[1], t);
 			try {
 				MCItemStack is = inv.getItem(slot);
@@ -1736,7 +1736,7 @@ public class InventoryManagement {
 				w = p.getWorld();
 			}
 
-			MCInventory inv = GetInventory(args[0], w, t);
+			MCInventory inv = GetInventory(args[0], w, t, environment);
 			int slot = ArgumentValidation.getInt32(args[1], t);
 			MCItemStack is = ObjectGenerator.GetGenerator().item(args[2], t);
 			try {
@@ -1798,7 +1798,7 @@ public class InventoryManagement {
 				w = p.getWorld();
 			}
 
-			MCInventory inv = GetInventory(args[0], w, t);
+			MCInventory inv = GetInventory(args[0], w, t, environment);
 			return new CString(inv.getType().name(), t);
 		}
 
@@ -1854,7 +1854,7 @@ public class InventoryManagement {
 			if(environment.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
 				w = environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
 			}
-			MCInventory inventory = InventoryManagement.GetInventory(args[0], w, t);
+			MCInventory inventory = InventoryManagement.GetInventory(args[0], w, t, environment);
 			return new CInt(inventory.getSize(), t);
 		}
 
@@ -1907,7 +1907,7 @@ public class InventoryManagement {
 			if(p != null) {
 				w = p.getWorld();
 			}
-			MCInventory inventory = InventoryManagement.GetInventory(args[0], w, t);
+			MCInventory inventory = InventoryManagement.GetInventory(args[0], w, t, environment);
 			try {
 				return new CString(inventory.getTitle(), t);
 			} catch (ClassCastException ex) {
@@ -2043,7 +2043,7 @@ public class InventoryManagement {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 
-			MCInventory inventory = InventoryManagement.GetInventory(args[0], null, t);
+			MCInventory inventory = InventoryManagement.GetInventory(args[0], null, t, env);
 
 			Integer size = inventory.getSize();
 			Integer index = -1;
@@ -2123,10 +2123,10 @@ public class InventoryManagement {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 
-			MCInventory inventory = InventoryManagement.GetInventory(args[0], null, t);
+			MCInventory inventory = InventoryManagement.GetInventory(args[0], null, t, env);
 			Integer size = inventory.getSize();
 
-			if(!(args[1].isInstanceOf(CArray.TYPE))) {
+			if(!(args[1].isInstanceOf(CArray.TYPE, null, env))) {
 				throw new CRECastException("Expecting an array as argument 2", t);
 			}
 
@@ -2213,7 +2213,7 @@ public class InventoryManagement {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCInventory inventory = InventoryManagement.GetInventory(args[0], null, t);
+			MCInventory inventory = InventoryManagement.GetInventory(args[0], null, t, environment);
 			MCItemStack is;
 			if(args.length == 2) {
 				is = ObjectGenerator.GetGenerator().item(args[1], t);
@@ -2301,7 +2301,7 @@ public class InventoryManagement {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCInventory inventory = InventoryManagement.GetInventory(args[0], null, t);
+			MCInventory inventory = InventoryManagement.GetInventory(args[0], null, t, environment);
 			Integer size = inventory.getSize();
 			CArray ca = null;
 
@@ -2555,11 +2555,11 @@ public class InventoryManagement {
 			MCInventory inv;
 			if(args.length == 2) {
 				p = Static.GetPlayer(args[0], t);
-				inv = GetInventory(args[1], p.getWorld(), t);
+				inv = GetInventory(args[1], p.getWorld(), t, env);
 			} else {
 				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
-				inv = GetInventory(args[0], p.getWorld(), t);
+				inv = GetInventory(args[0], p.getWorld(), t, env);
 			}
 			p.openInventory(inv);
 			return CVoid.VOID;
@@ -2623,7 +2623,7 @@ public class InventoryManagement {
 				// probably tests
 				return CNull.NULL;
 			}
-			return GetInventoryHolder(view.getTopInventory(), t);
+			return GetInventoryHolder(view.getTopInventory(), t, env);
 		}
 
 		@Override
@@ -2669,7 +2669,7 @@ public class InventoryManagement {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCInventory inv = GetInventory(args[0], null, t);
+			MCInventory inv = GetInventory(args[0], null, t, env);
 			CArray list = new CArray(t);
 			for(MCHumanEntity viewer : inv.getViewers()) {
 				list.push(new CString(viewer.getName(), t), t);
@@ -2791,7 +2791,7 @@ public class InventoryManagement {
 			int size = 54;
 			String title = null;
 			if(args.length > 1) {
-				if(args[1].isInstanceOf(CNumber.TYPE)) {
+				if(args[1].isInstanceOf(CNumber.TYPE, null, env)) {
 					size = ArgumentValidation.getInt32(args[1], t);
 					if(size < 9) {
 						size = 9; // minimum
@@ -2825,7 +2825,7 @@ public class InventoryManagement {
 			}
 
 			if(args.length == 4) {
-				if(!(args[3].isInstanceOf(CArray.TYPE))) {
+				if(!(args[3].isInstanceOf(CArray.TYPE, null, env))) {
 					throw new CRECastException("Inventory argument not an array in " + getName(), t);
 				}
 				CArray array = (CArray) args[3];
@@ -2934,10 +2934,10 @@ public class InventoryManagement {
 	 * @param t
 	 * @return
 	 */
-	static MCInventory GetInventory(Mixed specifier, MCWorld w, Target t) {
-		MCInventory inv = GetInventoryOrNull(specifier, w, t);
+	static MCInventory GetInventory(Mixed specifier, MCWorld w, Target t, Environment env) {
+		MCInventory inv = GetInventoryOrNull(specifier, w, t, env);
 		if(inv == null) {
-			if(specifier.isInstanceOf(CArray.TYPE)) {
+			if(specifier.isInstanceOf(CArray.TYPE, null, env)) {
 				throw new CREIllegalArgumentException("The location specified is not capable of having an inventory.", t);
 			}
 			throw new CREIllegalArgumentException("An inventory for \"" + specifier.val() + "\" does not exist.", t);
@@ -2945,8 +2945,8 @@ public class InventoryManagement {
 		return inv;
 	}
 
-	private static MCInventory GetInventoryOrNull(Mixed specifier, MCWorld w, Target t) {
-		if(specifier.isInstanceOf(CArray.TYPE)) {
+	private static MCInventory GetInventoryOrNull(Mixed specifier, MCWorld w, Target t, Environment env) {
+		if(specifier.isInstanceOf(CArray.TYPE, null, env)) {
 			MCLocation l = ObjectGenerator.GetGenerator().location(specifier, w, t);
 			return StaticLayer.GetConvertor().GetLocationInventory(l);
 		}
@@ -2968,7 +2968,7 @@ public class InventoryManagement {
 	 * @param t
 	 * @return The construct representation of the inventory holder
 	 */
-	public static Mixed GetInventoryHolder(MCInventory inv, Target t) {
+	public static Mixed GetInventoryHolder(MCInventory inv, Target t, Environment env) {
 		MCInventoryHolder h = inv.getHolder();
 		if(h instanceof MCEntity) {
 			return new CString(((MCEntity) h).getUniqueId().toString(), t);

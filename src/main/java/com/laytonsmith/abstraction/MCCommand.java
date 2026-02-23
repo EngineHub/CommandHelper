@@ -1,5 +1,6 @@
 package com.laytonsmith.abstraction;
 
+import com.laytonsmith.core.environments.Environment;
 import java.util.List;
 
 public interface MCCommand extends AbstractionObject {
@@ -52,7 +53,7 @@ public interface MCCommand extends AbstractionObject {
 
 	List<String> tabComplete(MCCommandSender sender, String alias, String[] args);
 
-	List<String> handleTabComplete(MCCommandSender sender, String alias, String[] args);
+	List<String> handleTabComplete(MCCommandSender sender, String alias, String[] args, Environment env);
 
 	boolean handleCustomCommand(MCCommandSender sender, String label, String[] args);
 }

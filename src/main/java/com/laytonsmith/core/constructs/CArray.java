@@ -815,7 +815,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 			return c.val();
 		} else if(c instanceof CNull) {
 			return "";
-		} else if(c.isInstanceOf(CBoolean.TYPE, null, env)) {
+		} else if(c instanceof CBoolean) {
 			if(((CBoolean) c).getBoolean()) {
 				return "1";
 			} else {
@@ -948,7 +948,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 				throw new RuntimeException(ex);
 			}
 		} catch (NoSuchMethodException ex) {
-			throw new RuntimeException(this.typeof() + " does not support creating a new value.");
+			throw new RuntimeException(this.typeof(env) + " does not support creating a new value.");
 		} catch (SecurityException ex) {
 			throw new RuntimeException(ex);
 		}
@@ -1078,8 +1078,8 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 					if(c.isInstanceOf(CArray.TYPE, null, env)) {
 						throw new CRECastException("Cannot sort an array of arrays.", CArray.this.getTarget());
 					}
-					if(!(c.isInstanceOf(CBoolean.TYPE, null, env) || c.isInstanceOf(CString.TYPE, null, env) || c.isInstanceOf(CInt.TYPE, null, env)
-							|| c.isInstanceOf(CDouble.TYPE, null, env) || c instanceof CNull || c.isInstanceOf(CClassType.TYPE, null, env))) {
+					if(!(c instanceof CBoolean || c.isInstanceOf(CString.TYPE, null, env) || c.isInstanceOf(CInt.TYPE, null, env)
+							|| c.isInstanceOf(CDouble.TYPE, null, env) || c instanceof CNull || c instanceof CClassType)) {
 						throw new CREFormatException("Unsupported type being sorted: " + c.typeof(env), CArray.this.getTarget());
 					}
 				}
@@ -1092,7 +1092,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 						return o1.val().compareTo("");
 					}
 				}
-				if(o1.isInstanceOf(CBoolean.TYPE, null, env) || o2.isInstanceOf(CBoolean.TYPE, null, env)) {
+				if(o1 instanceof CBoolean || o2 instanceof CBoolean) {
 					if(ArgumentValidation.getBooleanish(o1, Target.UNKNOWN, env) == ArgumentValidation.getBooleanish(o2, Target.UNKNOWN, env)) {
 						return 0;
 					} else {

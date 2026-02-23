@@ -297,7 +297,7 @@ public abstract class AbstractFunction implements Function {
 	}
 
 	@Override
-	public String profileMessage(Mixed... args) {
+	public String profileMessage(Environment env, Mixed... args) {
 		StringBuilder b = new StringBuilder();
 		boolean first = true;
 		for(Mixed ccc : args) {
@@ -305,14 +305,14 @@ public abstract class AbstractFunction implements Function {
 				b.append(", ");
 			}
 			first = false;
-			if(ccc.isInstanceOf(CArray.TYPE)) {
+			if(ccc.isInstanceOf(CArray.TYPE, null, env)) {
 				//Arrays take too long to toString, so we don't want to actually toString them here if
 				//we don't need to.
 				b.append("<arrayNotShown size:").append(((CArray) ccc).size()).append(">");
-			} else if(ccc.isInstanceOf(CClosure.TYPE)) {
+			} else if(ccc.isInstanceOf(CClosure.TYPE, null, env)) {
 				//The toString of a closure is too long, so let's not output them either.
 				b.append("<closureNotShown>");
-			} else if(ccc.isInstanceOf(CString.TYPE)) {
+			} else if(ccc.isInstanceOf(CString.TYPE, null, env)) {
 				String val = ccc.val().replace("\\", "\\\\").replace("'", "\\'");
 				int max = 1000;
 				if(val.length() > max) {

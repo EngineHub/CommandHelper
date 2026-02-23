@@ -42,14 +42,21 @@ public final class CMutablePrimitive extends CArray implements Sizeable {
 		return true;
 	}
 
+	/** @deprecated Use {@link #set(Mixed, Target, Environment)} instead. */
+	@Deprecated
+	public void set(Mixed value, Target t) {
+		set(value, t, null);
+	}
+
 	/**
 	 * Sets the value of the underlying primitive. Only primitives (and null) may be stored.
 	 *
 	 * @param value
 	 * @param t
+	 * @param env
 	 */
-	public void set(Mixed value, Target t) {
-		if(!value.isInstanceOf(ValueType.TYPE)) {
+	public void set(Mixed value, Target t, Environment env) {
+		if(!value.isInstanceOf(ValueType.TYPE, null, env)) {
 			throw new CREFormatException("mutable_primitives can only store primitive values.", t);
 		}
 		this.value = value;

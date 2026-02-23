@@ -497,7 +497,7 @@ public class Sandbox {
 			}
 
 			byte[] content;
-			if(!(args[1].isInstanceOf(CByteArray.TYPE, null, environment))) {
+			if(!(args[1] instanceof CByteArray)) {
 				content = args[1].val().getBytes(Charset.forName("UTF-8"));
 			} else {
 				content = ArgumentValidation.getByteArray(args[1], t).asByteArrayCopy();

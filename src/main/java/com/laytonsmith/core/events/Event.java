@@ -13,11 +13,16 @@ import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
+import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * This interface should be implemented to allow the bind() function to bind to a particular event type. To be
  * recognized as an event type, it should also tag itself with @api, and it will be included in the EventList.
+ *
  * @param <TBindableEvent> The underlying event type.
  */
 public interface Event<TBindableEvent extends BindableEvent> extends Comparable<Event<TBindableEvent>>, Documentation {
@@ -48,8 +53,8 @@ public interface Event<TBindableEvent extends BindableEvent> extends Comparable<
 	 * parameters.
 	 *
 	 * For subclasses who properly implement {@link #getPrefilters}, this should be changed to throw an
-	 * UnsupportedOperationException until the method is fully removed. For classes that extend AbstractEvent, it
-	 * should simply be removed.
+	 * UnsupportedOperationException until the method is fully removed. For classes that extend AbstractEvent, it should
+	 * simply be removed.
 	 *
 	 * @param prefilter The prefilter map, provided by the script
 	 * @param e The bindable event itself
@@ -80,10 +85,11 @@ public interface Event<TBindableEvent extends BindableEvent> extends Comparable<
 	 * is considered a fatal error, and will throw an uncatchable CH exception.
 	 *
 	 * @param e The bindable event
+	 * @param env The environment.
 	 * @return The map build from the event
 	 * @throws com.laytonsmith.core.exceptions.EventException If some exception occurs during map building
 	 */
-	public Map<String, Mixed> evaluate(TBindableEvent e) throws EventException;
+	public Map<String, Mixed> evaluate(TBindableEvent e, Environment env) throws EventException;
 
 	/**
 	 * This is called to determine if an event is cancellable in the first place
@@ -177,9 +183,10 @@ public interface Event<TBindableEvent extends BindableEvent> extends Comparable<
 	 * @param key
 	 * @param value
 	 * @param event
+	 * @param env The environment.
 	 * @return
 	 */
-	public boolean modifyEvent(String key, Mixed value, TBindableEvent event);
+	public boolean modifyEvent(String key, Mixed value, TBindableEvent event, Environment env);
 
 	/**
 	 * Returns if this event is cancelled. If the event is not cancellable, false should be returned, though this case
@@ -235,9 +242,10 @@ public interface Event<TBindableEvent extends BindableEvent> extends Comparable<
 	public Map<String, Prefilter<? extends TBindableEvent>> getPrefilters();
 
 	/**
-	 * Called after prefilters are individually validated, and can be used when there is additional validation
-	 * that can be done across multiple prefilters, i.e. when the value of one prefilter is as such, then
-	 * another prefilter may have different behavior.
+	 * Called after prefilters are individually validated, and can be used when there is additional validation that can
+	 * be done across multiple prefilters, i.e. when the value of one prefilter is as such, then another prefilter may
+	 * have different behavior.
+	 *
 	 * @param prefilters The full set of prefilters.
 	 * @param env The environment.
 	 * @throws com.laytonsmith.core.exceptions.ConfigCompileException
@@ -245,5 +253,52 @@ public interface Event<TBindableEvent extends BindableEvent> extends Comparable<
 	 */
 	public void validatePrefilters(Map<Prefilter<TBindableEvent>, ParseTree> prefilters, Environment env)
 			throws ConfigCompileException, ConfigCompileGroupException;
+
+	// Reflection bridge for backward compatibility with 3rd-party events
+	// that still implement the old modifyEvent(String, Mixed, BindableEvent) signature.
+	// Added 2026-02-23.
+	Set<Class<?>> OLD_MODIFY_EVENT_CACHE = Collections.newSetFromMap(new ConcurrentHashMap<>());
+
+	@SuppressWarnings({"unchecked", "checkstyle:methodtypeparametername"})
+	static <TBindableEvent extends BindableEvent> boolean ExecuteModifyEvent(Event<TBindableEvent> event,
+			String key, Mixed value,
+			TBindableEvent underlying, Environment env) {
+		if(OLD_MODIFY_EVENT_CACHE.contains(event.getClass())) {
+			return (boolean) ReflectionUtils.invokeMethod(event.getClass(), event, "modifyEvent",
+					new Class[]{String.class, Mixed.class, BindableEvent.class},
+					new Object[]{key, value, underlying});
+		}
+		try {
+			return event.modifyEvent(key, value, underlying, env);
+		} catch(AbstractMethodError e) {
+			OLD_MODIFY_EVENT_CACHE.add(event.getClass());
+			return (boolean) ReflectionUtils.invokeMethod(event.getClass(), event, "modifyEvent",
+					new Class[]{String.class, Mixed.class, BindableEvent.class},
+					new Object[]{key, value, underlying});
+		}
+	}
+
+	// Reflection bridge for backward compatibility with 3rd-party events
+	// that still implement the old evaluate(BindableEvent) signature.
+	// Added 2026-02-23.
+	Set<Class<?>> OLD_EVALUATE_CACHE = Collections.newSetFromMap(new ConcurrentHashMap<>());
+
+	@SuppressWarnings({"unchecked", "checkstyle:methodtypeparametername"})
+	static <TBindableEvent extends BindableEvent> Map<String, Mixed> ExecuteEvaluate(
+			Event<TBindableEvent> event, TBindableEvent e, Environment env) throws EventException {
+		if(OLD_EVALUATE_CACHE.contains(event.getClass())) {
+			return (Map<String, Mixed>) ReflectionUtils.invokeMethod(event.getClass(), event, "evaluate",
+					new Class[]{BindableEvent.class},
+					new Object[]{e});
+		}
+		try {
+			return event.evaluate(e, env);
+		} catch(AbstractMethodError ex) {
+			OLD_EVALUATE_CACHE.add(event.getClass());
+			return (Map<String, Mixed>) ReflectionUtils.invokeMethod(event.getClass(), event, "evaluate",
+					new Class[]{BindableEvent.class},
+					new Object[]{e});
+		}
+	}
 
 }

@@ -26,8 +26,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -168,6 +166,14 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	}
 
 	/**
+	 * @deprecated Use {@link #json_encode(Mixed, Target, Environment)} instead.
+	 */
+	@Deprecated
+	public static String json_encode(Mixed c, Target t) throws MarshalException {
+		return json_encode(c, t, null);
+	}
+
+	/**
 	 * This function takes a Construct, and turns it into a JSON value. If the construct is not one of the following, a
 	 * MarshalException is thrown: CArray, CBoolean, CDouble, CInt, CNull, CString, CVoid, Command. Currently
 	 * unsupported, but will be in the future are: CClosure/CFunction The following map is applied when encoding and
@@ -183,15 +189,16 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	 *
 	 * @param c
 	 * @param t
+	 * @param env
 	 * @return
 	 * @throws com.laytonsmith.core.exceptions.MarshalException
 	 */
-	public static String json_encode(Mixed c, Target t) throws MarshalException {
-		return JSONValue.toJSONString(json_encode0(c, t));
+	public static String json_encode(Mixed c, Target t, Environment env) throws MarshalException {
+		return JSONValue.toJSONString(json_encode0(c, t, env));
 	}
 
-	private static Object json_encode0(Mixed c, Target t) throws MarshalException {
-		if(c.isInstanceOf(CString.TYPE) || c instanceof Command) {
+	private static Object json_encode0(Mixed c, Target t, Environment env) throws MarshalException {
+		if(c.isInstanceOf(CString.TYPE, null, env) || c instanceof Command) {
 			return c.val();
 		} else if(c instanceof CVoid) {
 			return "";
@@ -203,22 +210,22 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 			return ((CBoolean) c).getBoolean();
 		} else if(c instanceof CNull) {
 			return null;
-		} else if(c.isInstanceOf(CArray.TYPE)) {
+		} else if(c.isInstanceOf(CArray.TYPE, null, env)) {
 			CArray ca = (CArray) c;
 			if(!ca.inAssociativeMode()) {
 				List<Object> list = new ArrayList<Object>();
 				for(int i = 0; i < ca.size(); i++) {
-					list.add(json_encode0(ca.get(i, t), t));
+					list.add(json_encode0(ca.get(i, t), t, env));
 				}
 				return list;
 			} else {
 				Map<String, Object> map = new HashMap<String, Object>();
 				for(String key : ca.stringKeySet()) {
-					map.put(key, json_encode0(ca.get(key, t), t));
+					map.put(key, json_encode0(ca.get(key, t), t, env));
 				}
 				return map;
 			}
-		} else if(c.isInstanceOf(CClassType.TYPE)) {
+		} else if(c instanceof CClassType) {
 			return c.val();
 		} else {
 			throw new MarshalException("The type of " + c.getClass().getSimpleName() + " is not currently supported", c);
@@ -410,42 +417,11 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	 * @param c
 	 * @return
 	 * @throws ClassCastException
+	 * @deprecated Use {@link Static#getJavaObject(Mixed, Environment)} instead.
 	 */
+	@Deprecated
 	public static Object GetPOJO(Mixed c) throws ClassCastException {
-		if(c instanceof CNull) {
-			return null;
-		} else if(InstanceofUtil.isInstanceof(c, CString.class, null)) {
-			return c.val();
-		} else if(c instanceof CBoolean) {
-			return Boolean.valueOf(((CBoolean) c).getBoolean());
-		} else if(InstanceofUtil.isInstanceof(c, CInt.class, null)) {
-			return Long.valueOf(((CInt) c).getInt());
-		} else if(InstanceofUtil.isInstanceof(c, CDouble.class, null)) {
-			return Double.valueOf(((CDouble) c).getDouble());
-		} else if(c.isInstanceOf(CByteArray.TYPE)) {
-			return ((CByteArray) c).asByteArrayCopy();
-		} else if(c.isInstanceOf(CArray.TYPE)) {
-			CArray ca = (CArray) c;
-			if(ca.inAssociativeMode()) {
-				//SortedMap
-				SortedMap<String, Object> map = new TreeMap<>();
-				for(Entry<String, Mixed> entry : ca.getAssociativeArray().entrySet()) {
-					map.put(entry.getKey(), GetPOJO(entry.getValue()));
-				}
-				return map;
-			} else {
-				//ArrayList
-				ArrayList<Object> list = new ArrayList<Object>((int) ca.size());
-				for(Mixed construct : ca.getArray()) {
-					list.add(GetPOJO(construct));
-				}
-				return list;
-			}
-		} else if(c instanceof CResource) {
-			return ((CResource) c).getResource();
-		} else {
-			throw new ClassCastException(c.getClass().getName() + " cannot be cast to a POJO");
-		}
+		return Static.getJavaObject(c);
 	}
 
 	public CString asString() {
@@ -599,11 +575,27 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 		return null;
 	}
 
+	/**
+	 * @deprecated Use {@link #isInstanceof(Mixed, CClassType, Environment)} instead.
+	 */
+	@Deprecated
 	public static boolean isInstanceof(Mixed that, CClassType type) {
-		return that.getClass().isAnnotationPresent(typeof.class) && that.typeof().doesExtend(type);
+		return isInstanceof(that, type, null);
 	}
 
+	public static boolean isInstanceof(Mixed that, CClassType type, Environment env) {
+		return that.getClass().isAnnotationPresent(typeof.class) && that.typeof(env).doesExtend(type);
+	}
+
+	/**
+	 * @deprecated Use {@link #isInstanceof(Mixed, Class, Environment)} instead.
+	 */
+	@Deprecated
 	public static boolean isInstanceof(Mixed that, Class<? extends Mixed> type) {
+		return isInstanceof(that, type, null);
+	}
+
+	public static boolean isInstanceof(Mixed that, Class<? extends Mixed> type, Environment env) {
 		if(ClassDiscovery.GetClassAnnotation(that.getClass(), typeof.class) == null) {
 			// This can happen in cases where we are in the middle of optimization.
 			// This can perhaps be improved in the future, when we store the return
@@ -611,8 +603,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 			// but anyways, for now, just return false.
 			return false;
 		}
-		// TODO: We need the compiler environment here so we can look up custom types.
-		return that.typeof().doesExtend(CClassType.get(type));
+		return that.typeof(env).doesExtend(CClassType.get(type));
 	}
 
 	/**
@@ -634,7 +625,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 		if(type.getNativeType() != null) {
 			return type.getNativeType().isAssignableFrom(this.getClass());
 		}
-		return isInstanceof(this, type);
+		return isInstanceof(this, type, env);
 	}
 
 	@Override
