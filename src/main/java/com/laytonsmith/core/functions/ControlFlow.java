@@ -478,7 +478,7 @@ public class ControlFlow {
 			for(int i = 0; i < children.size() - 1; i += 2) {
 				ParseTree condNode = children.get(i);
 				if(condNode.isConst()) {
-					if(ArgumentValidation.getBooleanish(condNode.getData(), t)) {
+					if(ArgumentValidation.getBooleanish(condNode.getData(), t, env)) {
 
 						// Optimize to true condition code block if no dynamic condition was present before this.
 						if(!foundDynamicCond) {

@@ -648,11 +648,11 @@ public class World {
 			MCChunk[] chunks = world.getForceLoadedChunks();
 			CArray ret = new CArray(t);
 			for(MCChunk c : chunks) {
-				CArray chunk = CArray.GetAssociativeArray(t);
-				chunk.set("x", new CInt(c.getX(), t), t);
-				chunk.set("z", new CInt(c.getZ(), t), t);
-				chunk.set("world", c.getWorld().getName(), t);
-				ret.push(chunk, t);
+				CArray chunk = CArray.GetAssociativeArray(t, null, env);
+				chunk.set("x", new CInt(c.getX(), t), t, env);
+				chunk.set("z", new CInt(c.getZ(), t), t, env);
+				chunk.set("world", c.getWorld().getName(), t, env);
+				ret.push(chunk, t, env);
 			}
 			return ret;
 		}
@@ -1932,9 +1932,9 @@ public class World {
 				boolean success = false;
 				Object value = world.getGameRuleValue(ruleName);
 				if(value instanceof Boolean) {
-					value = inverted != ArgumentValidation.getBooleanish(args[offset + 1], t);
+					value = inverted != ArgumentValidation.getBooleanish(args[offset + 1], t, env);
 				} else {
-					value = ArgumentValidation.getInt32(args[offset + 1], t);
+					value = ArgumentValidation.getInt32(args[offset + 1], t, env);
 				}
 				if(args.length == 2) {
 					for(MCWorld w : Static.getServer().getWorlds()) {
@@ -2077,7 +2077,7 @@ public class World {
 				distance = ArgumentValidation.getNumber(args[2], t, env);
 			}
 			if(args.length >= 4) {
-				clamp = ArgumentValidation.getBooleanish(args[3], t);
+				clamp = ArgumentValidation.getBooleanish(args[3], t, env);
 			}
 			Vector3D vector;
 			if(args[1].isInstanceOf(CArray.TYPE, null, env)) {
@@ -2285,15 +2285,15 @@ public class World {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CArray loc = ArgumentValidation.getArray(args[0], t);
+			CArray loc = ArgumentValidation.getArray(args[0], t, env);
 			double yaw;
 			double pitch;
 			if(loc.isAssociative()) {
-				yaw = ArgumentValidation.getDouble(loc.get("yaw", t), t);
-				pitch = ArgumentValidation.getDouble(loc.get("pitch", t), t);
+				yaw = ArgumentValidation.getDouble(loc.get("yaw", t, env), t, env);
+				pitch = ArgumentValidation.getDouble(loc.get("pitch", t, env), t, env);
 			} else {
-				yaw = ArgumentValidation.getDouble(loc.get(4, t), t);
-				pitch = ArgumentValidation.getDouble(loc.get(5, t), t);
+				yaw = ArgumentValidation.getDouble(loc.get(4, t, env), t, env);
+				pitch = ArgumentValidation.getDouble(loc.get(5, t, env), t, env);
 			}
 			yaw = java.lang.Math.toRadians(yaw);
 			pitch = java.lang.Math.toRadians(pitch);

@@ -1142,7 +1142,7 @@ public class ObjectGenerator {
 				}
 
 				if(ma.containsKey("tags")) {
-					Mixed tagArray = ma.get("tags", t);
+					Mixed tagArray = ma.get("tags", t, env);
 					if(tagArray instanceof CNull) {
 						// no custom tags
 					} else {
@@ -1153,11 +1153,11 @@ public class ObjectGenerator {
 				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
 					// Item data components
 					if(ma.containsKey("maxstacksize")) {
-						Mixed maxstacksize = ma.get("maxstacksize", t);
+						Mixed maxstacksize = ma.get("maxstacksize", t, env);
 						if(maxstacksize instanceof CNull) {
 							// not yet supported
 						} else {
-							meta.setMaxStackSize(ArgumentValidation.getInt32(maxstacksize, t));
+							meta.setMaxStackSize(ArgumentValidation.getInt32(maxstacksize, t, env));
 						}
 					}
 					if(ma.containsKey("glint")) {

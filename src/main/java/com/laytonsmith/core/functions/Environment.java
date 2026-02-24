@@ -509,17 +509,17 @@ public class Environment {
 					}
 				}
 				CArray ca = (CArray) args[args.length - 1];
-				if(ca.size() >= 1) {
-					line1 = ca.get(0, t).val();
+				if(ca.size(env) >= 1) {
+					line1 = ca.get(0, t, env).val();
 				}
-				if(ca.size() >= 2) {
-					line2 = ca.get(1, t).val();
+				if(ca.size(env) >= 2) {
+					line2 = ca.get(1, t, env).val();
 				}
-				if(ca.size() >= 3) {
-					line3 = ca.get(2, t).val();
+				if(ca.size(env) >= 3) {
+					line3 = ca.get(2, t, env).val();
 				}
-				if(ca.size() >= 4) {
-					line4 = ca.get(3, t).val();
+				if(ca.size(env) >= 4) {
+					line4 = ca.get(3, t, env).val();
 				}
 
 			} else {
@@ -813,7 +813,7 @@ public class Environment {
 						throw new CREFormatException("Invalid sign side: " + args[1].val(), t);
 					}
 				}
-				text.setGlowingText(ArgumentValidation.getBooleanObject(args[args.length - 1], t));
+				text.setGlowingText(ArgumentValidation.getBooleanObject(args[args.length - 1], t, env));
 				sign.update();
 				return CVoid.VOID;
 			} else {
@@ -928,7 +928,7 @@ public class Environment {
 				throw new CRERangeException("The block at the specified location is not a sign", t);
 			}
 			MCSign sign = b.getSign();
-			sign.setWaxed(ArgumentValidation.getBooleanObject(args[1], t));
+			sign.setWaxed(ArgumentValidation.getBooleanObject(args[1], t, env));
 			sign.update();
 			return CVoid.VOID;
 		}
@@ -1210,8 +1210,8 @@ public class Environment {
 				MCLocation location = ObjectGenerator.GetGenerator().location(args[0], w, t);
 				location.getWorld().setBiome(location, biomeType);
 			} else {
-				x = ArgumentValidation.getInt32(args[0], t);
-				z = ArgumentValidation.getInt32(args[1], t);
+				x = ArgumentValidation.getInt32(args[0], t, env);
+				z = ArgumentValidation.getInt32(args[1], t, env);
 				if(args.length == 4) {
 					w = Static.getServer().getWorld(args[2].val());
 				} else if(w == null) {
@@ -1855,7 +1855,7 @@ public class Environment {
 			}
 
 			if(sa.containsKey("seed") && Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_2)) {
-				seed = ArgumentValidation.getInt(sa.get("seed", t), t);
+				seed = ArgumentValidation.getInt(sa.get("seed", t, env), t, env);
 			}
 
 			if(args.length == 3) {
@@ -2001,7 +2001,7 @@ public class Environment {
 
 			CArray sa = (CArray) args[1];
 
-			path = ArgumentValidation.getStringObject(sa.get("sound", t, env), t);
+			path = ArgumentValidation.getStringObject(sa.get("sound", t, env), t, env);
 
 			if(sa.containsKey("category")) {
 				try {
@@ -2020,7 +2020,7 @@ public class Environment {
 			}
 
 			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_2) && sa.containsKey("seed")) {
-				seed = ArgumentValidation.getInt(sa.get("seed", t), t);
+				seed = ArgumentValidation.getInt(sa.get("seed", t, env), t, env);
 			}
 
 			if(args.length == 3) {
@@ -3070,13 +3070,13 @@ public class Environment {
 					CArray p = ArgumentValidation.getArray(mp, t, env);
 					MCDyeColor color;
 					try {
-						color = MCDyeColor.valueOf(p.get("color", t).val());
+						color = MCDyeColor.valueOf(p.get("color", t, env).val());
 					} catch (IllegalArgumentException ex) {
 						throw new CREFormatException("Invalid color name", t);
 					}
 					MCPatternShape shape;
 					try {
-						shape = MCPatternShape.valueOf(p.get("shape", t).val());
+						shape = MCPatternShape.valueOf(p.get("shape", t, env).val());
 					} catch (IllegalArgumentException ex) {
 						throw new CREFormatException("Invalid shape name", t);
 					}
@@ -3272,10 +3272,10 @@ public class Environment {
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
 			MCBlockState bs = loc.getBlock().getState();
 			if(bs instanceof MCDecoratedPot decoratedPot) {
-				CArray sherds = CArray.GetAssociativeArray(t);
+				CArray sherds = CArray.GetAssociativeArray(t, null, env);
 				Map<MCDecoratedPot.Side, MCMaterial> potSherds = decoratedPot.getSherds();
 				for(Map.Entry<MCDecoratedPot.Side, MCMaterial> side : potSherds.entrySet()) {
-					sherds.set(side.getKey().name().toLowerCase(), side.getValue().name());
+					sherds.set(side.getKey().name().toLowerCase(), side.getValue().name(), env);
 				}
 				return sherds;
 			} else {
@@ -3345,7 +3345,7 @@ public class Environment {
 							throw new CREFormatException("Invalid decorated pot side: " + key, t);
 						}
 						try {
-							decoratedPot.setSherd(side, MCMaterial.valueOf(sherdArray.get(key, t).val()));
+							decoratedPot.setSherd(side, MCMaterial.valueOf(sherdArray.get(key, t, env).val()));
 						} catch (IllegalArgumentException ex) {
 							throw new CREFormatException(ex.getMessage(), t);
 						}

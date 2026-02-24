@@ -536,7 +536,7 @@ public class MobManagement {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCLivingEntity ent = Static.getLivingEntity(args[0], t);
-			int ticks = ArgumentValidation.getInt32(args[1], t);
+			int ticks = ArgumentValidation.getInt32(args[1], t, env);
 			if(ent instanceof MCAnimal animal) {
 				animal.setLoveTicks(ticks);
 				return CVoid.VOID;

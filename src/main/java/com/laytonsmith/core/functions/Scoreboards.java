@@ -1278,7 +1278,7 @@ public final class Scoreboards {
 			Set<String> entries = s.getEntries();
 			CArray ret = new CArray(t, entries.size());
 			for(String r : entries) {
-				ret.push(new CString(r, t), t);
+				ret.push(new CString(r, t), t, env);
 			}
 			return ret;
 		}

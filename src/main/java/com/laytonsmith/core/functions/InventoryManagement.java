@@ -2954,7 +2954,7 @@ public class InventoryManagement {
 
 	private static MCInventory GetInventoryOrNull(Mixed specifier, MCWorld w, Target t, Environment env) {
 		if(specifier.isInstanceOf(CArray.TYPE, null, env)) {
-			MCLocation l = ObjectGenerator.GetGenerator().location(specifier, w, t);
+			MCLocation l = ObjectGenerator.GetGenerator().location(specifier, w, t, env);
 			return StaticLayer.GetConvertor().GetLocationInventory(l);
 		}
 		if(specifier.val().length() == 36 || specifier.val().length() == 32) {

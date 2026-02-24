@@ -1474,7 +1474,7 @@ public class Minecraft {
 			MCCommandSender sender;
 			String selector;
 			if(args.length == 2) {
-				sender = Static.GetPlayer(args[0], t);
+				sender = Static.GetPlayer(args[0], t, env);
 				selector = args[1].val();
 			} else {
 				sender = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
@@ -1486,7 +1486,7 @@ public class Minecraft {
 			try {
 				CArray result = new CArray(t);
 				for(UUID id : Static.getServer().selectEntites(sender, selector)) {
-					result.push(new CString(id.toString(), t), t);
+					result.push(new CString(id.toString(), t), t, env);
 				}
 				return result;
 			} catch(IllegalArgumentException ex) {

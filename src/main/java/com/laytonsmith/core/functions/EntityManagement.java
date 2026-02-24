@@ -664,7 +664,7 @@ public class EntityManagement {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCEntity ent = Static.getEntity(args[0], t);
-			ent.setSavesOnUnload(ArgumentValidation.getBooleanObject(args[1], t));
+			ent.setSavesOnUnload(ArgumentValidation.getBooleanObject(args[1], t, env));
 			return CVoid.VOID;
 		}
 
@@ -1995,7 +1995,7 @@ public class EntityManagement {
 					break;
 				case BLOCK_DISPLAY:
 					MCBlockDisplay blockDisplay = (MCBlockDisplay) entity;
-					specArray.set(KEY_DISPLAY_BLOCK, ObjectGenerator.GetGenerator().blockData(blockDisplay.getBlockData(), t), t);
+					specArray.set(KEY_DISPLAY_BLOCK, ObjectGenerator.GetGenerator().blockData(blockDisplay.getBlockData(), t), t, env);
 					break;
 				case BOAT:
 					MCBoat boat = (MCBoat) entity;
@@ -2040,9 +2040,9 @@ public class EntityManagement {
 						specArray.set(entity_spec.KEY_DROPPED_ITEM_THROWER, new CString(thrower.toString(), t), t, env);
 					}
 					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_18_X)) {
-						specArray.set(entity_spec.KEY_DROPPED_ITEM_DESPAWN, CBoolean.get(item.willDespawn()), t);
+						specArray.set(entity_spec.KEY_DROPPED_ITEM_DESPAWN, CBoolean.get(item.willDespawn()), t, env);
 					} else {
-						specArray.set(entity_spec.KEY_DROPPED_ITEM_DESPAWN, CBoolean.TRUE, t);
+						specArray.set(entity_spec.KEY_DROPPED_ITEM_DESPAWN, CBoolean.TRUE, t, env);
 					}
 					break;
 				case ENDER_CRYSTAL:
@@ -2134,26 +2134,26 @@ public class EntityManagement {
 					break;
 				case INTERACTION:
 					MCInteraction interaction = (MCInteraction) entity;
-					specArray.set(entity_spec.KEY_INTERACTION_WIDTH, new CDouble(interaction.getWidth(), t), t);
-					specArray.set(entity_spec.KEY_INTERACTION_HEIGHT, new CDouble(interaction.getHeight(), t), t);
-					specArray.set(entity_spec.KEY_INTERACTION_RESPONSE, CBoolean.get(interaction.isResponsive()), t);
+					specArray.set(entity_spec.KEY_INTERACTION_WIDTH, new CDouble(interaction.getWidth(), t), t, env);
+					specArray.set(entity_spec.KEY_INTERACTION_HEIGHT, new CDouble(interaction.getHeight(), t), t, env);
+					specArray.set(entity_spec.KEY_INTERACTION_RESPONSE, CBoolean.get(interaction.isResponsive()), t, env);
 					MCPreviousInteraction attack = interaction.getLastAttack();
 					if(attack != null) {
-						CArray attackArray = CArray.GetAssociativeArray(t);
-						attackArray.set("puuid", attack.getUuid().toString());
-						attackArray.set("timestamp", new CInt(attack.getTimestamp(), t), t);
-						specArray.set(entity_spec.KEY_INTERACTION_ATTACK, attackArray, t);
+						CArray attackArray = CArray.GetAssociativeArray(t, null, env);
+						attackArray.set("puuid", attack.getUuid().toString(), env);
+						attackArray.set("timestamp", new CInt(attack.getTimestamp(), t), t, env);
+						specArray.set(entity_spec.KEY_INTERACTION_ATTACK, attackArray, t, env);
 					} else {
-						specArray.set(entity_spec.KEY_INTERACTION_ATTACK, CNull.NULL, t);
+						specArray.set(entity_spec.KEY_INTERACTION_ATTACK, CNull.NULL, t, env);
 					}
 					MCPreviousInteraction interact = interaction.getLastInteraction();
 					if(interact != null) {
-						CArray interactionArray = CArray.GetAssociativeArray(t);
-						interactionArray.set("puuid", interact.getUuid().toString());
-						interactionArray.set("timestamp", new CInt(interact.getTimestamp(), t), t);
-						specArray.set(entity_spec.KEY_INTERACTION_INTERACTION, interactionArray, t);
+						CArray interactionArray = CArray.GetAssociativeArray(t, null, env);
+						interactionArray.set("puuid", interact.getUuid().toString(), env);
+						interactionArray.set("timestamp", new CInt(interact.getTimestamp(), t), t, env);
+						specArray.set(entity_spec.KEY_INTERACTION_INTERACTION, interactionArray, t, env);
 					} else {
-						specArray.set(entity_spec.KEY_INTERACTION_INTERACTION, CNull.NULL, t);
+						specArray.set(entity_spec.KEY_INTERACTION_INTERACTION, CNull.NULL, t, env);
 					}
 					break;
 				case IRON_GOLEM:
@@ -2162,8 +2162,8 @@ public class EntityManagement {
 					break;
 				case ITEM_DISPLAY:
 					MCItemDisplay itemDisplay = (MCItemDisplay) entity;
-					specArray.set(KEY_DISPLAY_ITEM, ObjectGenerator.GetGenerator().item(itemDisplay.getItem(), t), t);
-					specArray.set(KEY_DISPLAY_ITEM_DISPLAY, itemDisplay.getItemModelTransform().name(), t);
+					specArray.set(KEY_DISPLAY_ITEM, ObjectGenerator.GetGenerator().item(itemDisplay.getItem(), t), t, env);
+					specArray.set(KEY_DISPLAY_ITEM_DISPLAY, itemDisplay.getItemModelTransform().name(), t, env);
 					break;
 				case ITEM_FRAME:
 				case GLOW_ITEM_FRAME:
@@ -2193,7 +2193,7 @@ public class EntityManagement {
 					break;
 				case MANNEQUIN:
 					MCMannequin mannequin = (MCMannequin) entity;
-					specArray.set(entity_spec.KEY_MANNEQUIN_IMMOVABLE, CBoolean.get(mannequin.isImmovable()), t);
+					specArray.set(entity_spec.KEY_MANNEQUIN_IMMOVABLE, CBoolean.get(mannequin.isImmovable()), t, env);
 					break;
 				case MINECART:
 				case MINECART_FURNACE:
@@ -2217,8 +2217,8 @@ public class EntityManagement {
 					break;
 				case OMINOUS_ITEM_SPAWNER:
 					MCOminousItemSpawner spawner = (MCOminousItemSpawner) entity;
-					specArray.set(entity_spec.KEY_OMINOUS_SPAWNER_ITEM, ObjectGenerator.GetGenerator().item(spawner.getItem(), t), t);
-					specArray.set(entity_spec.KEY_OMINOUS_SPAWNER_DELAY, new CInt(spawner.getDelay(), t), t);
+					specArray.set(entity_spec.KEY_OMINOUS_SPAWNER_ITEM, ObjectGenerator.GetGenerator().item(spawner.getItem(), t), t, env);
+					specArray.set(entity_spec.KEY_OMINOUS_SPAWNER_DELAY, new CInt(spawner.getDelay(), t), t, env);
 					break;
 				case PAINTING:
 					MCPainting painting = (MCPainting) entity;
@@ -2274,7 +2274,7 @@ public class EntityManagement {
 				case SALMON:
 					MCSalmon salmon = (MCSalmon) entity;
 					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_21_3)) {
-						specArray.set(entity_spec.KEY_SALMON_TYPE, new CString(salmon.getVariant().name(), t), t);
+						specArray.set(entity_spec.KEY_SALMON_TYPE, new CString(salmon.getVariant().name(), t), t, env);
 					}
 					break;
 				case SHEEP:
@@ -2330,23 +2330,23 @@ public class EntityManagement {
 					break;
 				case TEXT_DISPLAY:
 					MCTextDisplay tDisplay = (MCTextDisplay) entity;
-					specArray.set(entity_spec.KEY_DISPLAY_TEXT, tDisplay.getText());
-					specArray.set(entity_spec.KEY_DISPLAY_TEXT_ALIGNMENT, tDisplay.getAlignment().name());
-					specArray.set(entity_spec.KEY_DISPLAY_TEXT_LINE_WIDTH, new CInt(tDisplay.getLineWidth(), t), t);
-					specArray.set(entity_spec.KEY_DISPLAY_TEXT_SEE_THROUGH, CBoolean.get(tDisplay.isVisibleThroughBlocks()), t);
-					specArray.set(entity_spec.KEY_DISPLAY_TEXT_SHADOW, CBoolean.get(tDisplay.hasShadow()), t);
+					specArray.set(entity_spec.KEY_DISPLAY_TEXT, tDisplay.getText(), env);
+					specArray.set(entity_spec.KEY_DISPLAY_TEXT_ALIGNMENT, tDisplay.getAlignment().name(), env);
+					specArray.set(entity_spec.KEY_DISPLAY_TEXT_LINE_WIDTH, new CInt(tDisplay.getLineWidth(), t), t, env);
+					specArray.set(entity_spec.KEY_DISPLAY_TEXT_SEE_THROUGH, CBoolean.get(tDisplay.isVisibleThroughBlocks()), t, env);
+					specArray.set(entity_spec.KEY_DISPLAY_TEXT_SHADOW, CBoolean.get(tDisplay.hasShadow()), t, env);
 					MCColor color = tDisplay.getBackgroundColor();
 					if(color == null) {
-						specArray.set(entity_spec.KEY_DISPLAY_TEXT_BACKGROUND_COLOR, CNull.NULL, t);
+						specArray.set(entity_spec.KEY_DISPLAY_TEXT_BACKGROUND_COLOR, CNull.NULL, t, env);
 					} else {
 						specArray.set(entity_spec.KEY_DISPLAY_TEXT_BACKGROUND_COLOR,
-								ObjectGenerator.GetGenerator().transparentColor(color, t), t);
+								ObjectGenerator.GetGenerator().transparentColor(color, t), t, env);
 					}
 					long opacity = tDisplay.getOpacity();
 					if(opacity < 0) {
 						opacity += 256;
 					}
-					specArray.set(entity_spec.KEY_DISPLAY_TEXT_OPACITY, new CInt(opacity, t), t);
+					specArray.set(entity_spec.KEY_DISPLAY_TEXT_OPACITY, new CInt(opacity, t), t, env);
 					break;
 				case TRIDENT:
 					MCTrident trident = (MCTrident) entity;
@@ -2395,9 +2395,9 @@ public class EntityManagement {
 				case DROWNED:
 				case HUSK:
 					MCZombie zombie = (MCZombie) entity;
-					specArray.set(entity_spec.KEY_GENERIC_BABY, CBoolean.get(zombie.isBaby()), t);
+					specArray.set(entity_spec.KEY_GENERIC_BABY, CBoolean.get(zombie.isBaby()), t, env);
 					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19)) {
-						specArray.set(entity_spec.KEY_ZOMBIE_BREAK_DOORS, CBoolean.get(zombie.canBreakDoors()), t);
+						specArray.set(entity_spec.KEY_ZOMBIE_BREAK_DOORS, CBoolean.get(zombie.canBreakDoors()), t, env);
 					}
 					break;
 				case ZOMBIE_VILLAGER:
@@ -2878,7 +2878,7 @@ public class EntityManagement {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_DISPLAY_BLOCK:
 								MCBlockData bd;
-								Mixed m = specArray.get(index, t);
+								Mixed m = specArray.get(index, t, env);
 								try {
 									if(m.isInstanceOf(CArray.TYPE, null, env)) {
 										bd = ObjectGenerator.GetGenerator().blockData((CArray) m, t);
@@ -3028,7 +3028,7 @@ public class EntityManagement {
 							}
 							case entity_spec.KEY_DROPPED_ITEM_DESPAWN -> {
 								if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_18_X)) {
-									item.setWillDespawn(ArgumentValidation.getBooleanObject(specArray.get(index, t), t));
+									item.setWillDespawn(ArgumentValidation.getBooleanObject(specArray.get(index, t, env), t, env));
 								}
 							}
 							default -> throwException(index, t);
@@ -3199,7 +3199,7 @@ public class EntityManagement {
 								}
 								break;
 							case entity_spec.KEY_FIREWORK_ANGLED:
-								firework.setShotAtAngle(ArgumentValidation.getBooleanObject(specArray.get(index, t), t));
+								firework.setShotAtAngle(ArgumentValidation.getBooleanObject(specArray.get(index, t, env), t, env));
 								break;
 							default:
 								throwException(index, t);
@@ -3235,9 +3235,9 @@ public class EntityManagement {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_FROG_TYPE:
 								try {
-									frog.setFrogType(MCFrogType.valueOf(specArray.get(index, t).val().toUpperCase()));
+									frog.setFrogType(MCFrogType.valueOf(specArray.get(index, t, env).val().toUpperCase()));
 								} catch(IllegalArgumentException exception) {
-									throw new CREFormatException("Invalid frog type: " + specArray.get(index, t).val(), t);
+									throw new CREFormatException("Invalid frog type: " + specArray.get(index, t, env).val(), t);
 								}
 								break;
 							default:
@@ -3308,13 +3308,13 @@ public class EntityManagement {
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_INTERACTION_HEIGHT:
-								interaction.setHeight(ArgumentValidation.getDouble(specArray.get(index, t), t));
+								interaction.setHeight(ArgumentValidation.getDouble(specArray.get(index, t, env), t, env));
 								break;
 							case entity_spec.KEY_INTERACTION_WIDTH:
-								interaction.setWidth(ArgumentValidation.getDouble(specArray.get(index, t), t));
+								interaction.setWidth(ArgumentValidation.getDouble(specArray.get(index, t, env), t, env));
 								break;
 							case entity_spec.KEY_INTERACTION_RESPONSE:
-								interaction.setResponsive(ArgumentValidation.getBooleanish(specArray.get(index, t), t));
+								interaction.setResponsive(ArgumentValidation.getBooleanish(specArray.get(index, t, env), t, env));
 								break;
 							case entity_spec.KEY_INTERACTION_ATTACK:
 							case entity_spec.KEY_INTERACTION_INTERACTION:
@@ -3341,14 +3341,14 @@ public class EntityManagement {
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_DISPLAY_ITEM:
-								itemDisplay.setItem(ObjectGenerator.GetGenerator().item(specArray.get(index, t), t));
+								itemDisplay.setItem(ObjectGenerator.GetGenerator().item(specArray.get(index, t, env), t));
 								break;
 							case entity_spec.KEY_DISPLAY_ITEM_DISPLAY:
 								try {
-									itemDisplay.setItemModelTransform(ModelTransform.valueOf(specArray.get(index, t).val()));
+									itemDisplay.setItemModelTransform(ModelTransform.valueOf(specArray.get(index, t, env).val()));
 								} catch(IllegalArgumentException ex) {
 									throw new CREFormatException("Invalid display item model transform: "
-											+ specArray.get(index, t).val(), t);
+											+ specArray.get(index, t, env).val(), t);
 								}
 								break;
 							default:
@@ -3429,7 +3429,7 @@ public class EntityManagement {
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_MANNEQUIN_IMMOVABLE:
-								mannequin.setImmovable(ArgumentValidation.getBooleanObject(specArray.get(index, t), t));
+								mannequin.setImmovable(ArgumentValidation.getBooleanObject(specArray.get(index, t, env), t, env));
 								break;
 							default:
 								throwException(index, t);
@@ -3490,7 +3490,7 @@ public class EntityManagement {
 								try {
 									cow.setVariant(MCMushroomCowType.valueOf(specArray.get(index, t, env).val().toUpperCase()));
 								} catch(IllegalArgumentException exception) {
-									throw new CREFormatException("Invalid mushroom cow type: " + specArray.get(index, t).val(), t);
+									throw new CREFormatException("Invalid mushroom cow type: " + specArray.get(index, t, env).val(), t);
 								}
 								break;
 							default:
@@ -3503,10 +3503,10 @@ public class EntityManagement {
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_OMINOUS_SPAWNER_ITEM:
-								spawner.setItem(ObjectGenerator.GetGenerator().item(specArray.get(index, t), t));
+								spawner.setItem(ObjectGenerator.GetGenerator().item(specArray.get(index, t, env), t));
 								break;
 							case entity_spec.KEY_OMINOUS_SPAWNER_DELAY:
-								spawner.setDelay(ArgumentValidation.getInt(specArray.get(index, t), t));
+								spawner.setDelay(ArgumentValidation.getInt(specArray.get(index, t, env), t, env));
 								break;
 							default:
 								throwException(index, t);
@@ -3548,16 +3548,16 @@ public class EntityManagement {
 								}
 								break;
 							case entity_spec.KEY_PANDA_EATING:
-								panda.setEating(ArgumentValidation.getBooleanObject(specArray.get(index, t), t));
+								panda.setEating(ArgumentValidation.getBooleanObject(specArray.get(index, t, env), t, env));
 								break;
 							case entity_spec.KEY_PANDA_ONBACK:
-								panda.setOnBack(ArgumentValidation.getBooleanObject(specArray.get(index, t), t));
+								panda.setOnBack(ArgumentValidation.getBooleanObject(specArray.get(index, t, env), t, env));
 								break;
 							case entity_spec.KEY_PANDA_ROLLING:
-								panda.setRolling(ArgumentValidation.getBooleanObject(specArray.get(index, t), t));
+								panda.setRolling(ArgumentValidation.getBooleanObject(specArray.get(index, t, env), t, env));
 								break;
 							case entity_spec.KEY_PANDA_SNEEZING:
-								panda.setSneezing(ArgumentValidation.getBooleanObject(specArray.get(index, t), t));
+								panda.setSneezing(ArgumentValidation.getBooleanObject(specArray.get(index, t, env), t, env));
 								break;
 							default:
 								throwException(index, t);
@@ -3681,9 +3681,9 @@ public class EntityManagement {
 							case entity_spec.KEY_SALMON_TYPE:
 								if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_21_3)) {
 									try {
-										salmon.setVariant(MCSalmon.Variant.valueOf(specArray.get(index, t).val()));
+										salmon.setVariant(MCSalmon.Variant.valueOf(specArray.get(index, t, env).val()));
 									} catch (IllegalArgumentException exception) {
-										throw new CREFormatException("Invalid salmon type: " + specArray.get(index, t).val(), t);
+										throw new CREFormatException("Invalid salmon type: " + specArray.get(index, t, env).val(), t);
 									}
 								}
 								break;
@@ -3716,7 +3716,7 @@ public class EntityManagement {
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_SHULKER_COLOR:
-								Mixed value = specArray.get(index, t);
+								Mixed value = specArray.get(index, t, env);
 								if(value instanceof CNull) {
 									shulker.setColor(null);
 									break;
@@ -4023,16 +4023,16 @@ public class EntityManagement {
 								break;
 							case entity_spec.KEY_WOLF_INTERESTED:
 								if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
-									wolf.setInterested(ArgumentValidation.getBooleanObject(specArray.get(index, t), t));
+									wolf.setInterested(ArgumentValidation.getBooleanObject(specArray.get(index, t, env), t, env));
 								}
 								break;
 							case entity_spec.KEY_WOLF_TYPE:
 								if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
 									try {
-										MCWolf.Variant type = MCWolf.Variant.valueOf(specArray.get(index, t).val());
+										MCWolf.Variant type = MCWolf.Variant.valueOf(specArray.get(index, t, env).val());
 										wolf.setWolfVariant(type);
 									} catch (IllegalArgumentException ex) {
-										throw new CREFormatException("Invalid wolf type: " + specArray.get(index, t).val(), t);
+										throw new CREFormatException("Invalid wolf type: " + specArray.get(index, t, env).val(), t);
 									}
 								}
 								break;
@@ -4097,7 +4097,7 @@ public class EntityManagement {
 								}
 								break;
 							case entity_spec.KEY_ZOMBIE_BREAK_DOORS:
-								zombievillager.setCanBreakDoors(ArgumentValidation.getBooleanObject(specArray.get(index, t), t));
+								zombievillager.setCanBreakDoors(ArgumentValidation.getBooleanObject(specArray.get(index, t, env), t, env));
 								break;
 							default:
 								throwException(index, t);
@@ -4911,7 +4911,7 @@ public class EntityManagement {
 
 			int strength = 2;
 			if(options.containsKey("strength")) {
-				strength = ArgumentValidation.getInt32(options.get("strength", t), t, env);
+				strength = ArgumentValidation.getInt32(options.get("strength", t, env), t, env);
 				if(strength > 127) {
 					throw new CRERangeException("Strength cannot be higher than 127", t);
 				}
@@ -5092,7 +5092,7 @@ public class EntityManagement {
 					face = MCBlockFace.valueOf(args[1].val());
 					boolean force = false;
 					if(args.length == 3) {
-						force = ArgumentValidation.getBooleanObject(args[2], t);
+						force = ArgumentValidation.getBooleanObject(args[2], t, env);
 					}
 					hanging.setFacingDirection(face, force);
 					return CVoid.VOID;
@@ -5215,35 +5215,35 @@ public class EntityManagement {
 			if(!(entity instanceof MCDisplay display)) {
 				throw new CREBadEntityException("Not a display entity.", t);
 			}
-			CArray info = CArray.GetAssociativeArray(t);
-			info.set("billboard", display.getBillboard().name());
+			CArray info = CArray.GetAssociativeArray(t, null, env);
+			info.set("billboard", display.getBillboard().name(), env);
 			MCDisplay.Brightness brightness = display.getBrightness();
 			if(brightness != null) {
-				CArray brightnessArray = CArray.GetAssociativeArray(t);
-				brightnessArray.set("block", new CInt(brightness.block(), t), t);
-				brightnessArray.set("sky", new CInt(brightness.block(), t), t);
-				info.set("brightness", brightnessArray, t);
+				CArray brightnessArray = CArray.GetAssociativeArray(t, null, env);
+				brightnessArray.set("block", new CInt(brightness.block(), t), t, env);
+				brightnessArray.set("sky", new CInt(brightness.block(), t), t, env);
+				info.set("brightness", brightnessArray, t, env);
 			} else {
-				info.set("brightness", CNull.NULL, t);
+				info.set("brightness", CNull.NULL, t, env);
 			}
 			MCColor color = display.getGlowColorOverride();
 			if(color != null) {
-				info.set("glowcolor", ObjectGenerator.GetGenerator().color(color, t), t);
+				info.set("glowcolor", ObjectGenerator.GetGenerator().color(color, t), t, env);
 			} else {
-				info.set("glowcolor", CNull.NULL, t);
+				info.set("glowcolor", CNull.NULL, t, env);
 			}
-			info.set("height", new CDouble(display.getDisplayHeight(), t), t);
-			info.set("width", new CDouble(display.getDisplayWidth(), t), t);
-			info.set("viewrange", new CDouble(display.getViewRange(), t), t);
-			info.set("shadowradius", new CDouble(display.getShadowRadius(), t), t);
-			info.set("shadowstrength", new CDouble(display.getShadowStrength(), t), t);
+			info.set("height", new CDouble(display.getDisplayHeight(), t), t, env);
+			info.set("width", new CDouble(display.getDisplayWidth(), t), t, env);
+			info.set("viewrange", new CDouble(display.getViewRange(), t), t, env);
+			info.set("shadowradius", new CDouble(display.getShadowRadius(), t), t, env);
+			info.set("shadowstrength", new CDouble(display.getShadowStrength(), t), t, env);
 			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_2)) {
-				info.set("teleportduration", new CInt(display.getTeleportDuration(), t), t);
+				info.set("teleportduration", new CInt(display.getTeleportDuration(), t), t, env);
 			}
-			info.set("interpolationduration", new CInt(display.getInterpolationDurationTicks(), t), t);
+			info.set("interpolationduration", new CInt(display.getInterpolationDurationTicks(), t), t, env);
 			MCTransformation tr = display.getTransformation();
 			CArray transformation = GetArrayFromTransformation(tr);
-			info.set("transformation", transformation, t);
+			info.set("transformation", transformation, t, env);
 			return info;
 		}
 
@@ -5345,16 +5345,16 @@ public class EntityManagement {
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			float f[] = new float[16];
 			if(args.length == 1) {
-				CArray array = ArgumentValidation.getArray(args[0], t);
-				if(array.size() != 16) {
+				CArray array = ArgumentValidation.getArray(args[0], t, env);
+				if(array.size(env) != 16) {
 					throw new CRELengthException("Input array expected to have length 16", t);
 				}
 				for(int i = 0; i < 16; i++) {
-					f[i] = ArgumentValidation.getDouble32(array.get(i, t), t);
+					f[i] = ArgumentValidation.getDouble32(array.get(i, t, env), t, env);
 				}
 			} else {
 				for(int i = 0; i < 16; i++) {
-					f[i] = ArgumentValidation.getDouble32(args[i], t);
+					f[i] = ArgumentValidation.getDouble32(args[i], t, env);
 				}
 			}
 			MCTransformation tr = GetTransformationFromMatrix(f);
@@ -5424,20 +5424,20 @@ public class EntityManagement {
 			if(!(entity instanceof MCDisplay display)) {
 				throw new CREBadEntityException("Not a display entity.", t);
 			}
-			CArray info = ArgumentValidation.getArray(args[1], t);
+			CArray info = ArgumentValidation.getArray(args[1], t, env);
 			if(!info.isAssociative()) {
 				throw new CREIllegalArgumentException("Expected an associative array but found a normal array.", t);
 			}
 			if(info.containsKey("billboard")) {
 				try {
-					MCDisplay.Billboard billboard = MCDisplay.Billboard.valueOf(info.get("billboard", t).val());
+					MCDisplay.Billboard billboard = MCDisplay.Billboard.valueOf(info.get("billboard", t, env).val());
 					display.setBillboard(billboard);
 				} catch(IllegalArgumentException ex) {
 					throw new CREFormatException("Invalid billboard type for display entity.", t);
 				}
 			}
 			if(info.containsKey("brightness")) {
-				Mixed m = info.get("brightness", t);
+				Mixed m = info.get("brightness", t, env);
 				if(m instanceof CNull) {
 					display.setBrightness(null);
 				} else {
@@ -5448,11 +5448,11 @@ public class EntityManagement {
 							throw new CREIllegalArgumentException(
 									"Expected an associative array for brightness but found a normal array.", t);
 						}
-						int blockBrightness = ArgumentValidation.getInt32(brightnessArray.get("block", t), t);
-						int skyBrightness = ArgumentValidation.getInt32(brightnessArray.get("sky", t), t);
+						int blockBrightness = ArgumentValidation.getInt32(brightnessArray.get("block", t, env), t, env);
+						int skyBrightness = ArgumentValidation.getInt32(brightnessArray.get("sky", t, env), t, env);
 						brightness = new MCDisplay.Brightness(blockBrightness, skyBrightness);
 					} else {
-						int level = ArgumentValidation.getInt32(m, t);
+						int level = ArgumentValidation.getInt32(m, t, env);
 						brightness = new MCDisplay.Brightness(level, level);
 					}
 					try {
@@ -5463,46 +5463,46 @@ public class EntityManagement {
 				}
 			}
 			if(info.containsKey("glowcolor")) {
-				Mixed m = info.get("glowcolor", t);
+				Mixed m = info.get("glowcolor", t, env);
 				if(!(m instanceof CNull)) {
-					MCColor color = ObjectGenerator.GetGenerator().color(ArgumentValidation.getArray(m, t), t);
+					MCColor color = ObjectGenerator.GetGenerator().color(ArgumentValidation.getArray(m, t, env), t);
 					display.setGlowColorOverride(color);
 				}
 			}
 			if(info.containsKey("height")) {
-				display.setDisplayHeight((float) ArgumentValidation.getDouble(info.get("height", t), t));
+				display.setDisplayHeight((float) ArgumentValidation.getDouble(info.get("height", t, env), t, env));
 			}
 			if(info.containsKey("width")) {
-				display.setDisplayWidth((float) ArgumentValidation.getDouble(info.get("width", t), t));
+				display.setDisplayWidth((float) ArgumentValidation.getDouble(info.get("width", t, env), t, env));
 			}
 			if(info.containsKey("viewrange")) {
-				display.setViewRange((float) ArgumentValidation.getDouble(info.get("viewrange", t), t));
+				display.setViewRange((float) ArgumentValidation.getDouble(info.get("viewrange", t, env), t, env));
 			}
 			if(info.containsKey("shadowradius")) {
-				display.setShadowRadius((float) ArgumentValidation.getDouble(info.get("shadowradius", t), t));
+				display.setShadowRadius((float) ArgumentValidation.getDouble(info.get("shadowradius", t, env), t, env));
 			}
 			if(info.containsKey("shadowstrength")) {
-				display.setShadowStrength((float) ArgumentValidation.getDouble(info.get("shadowstrength", t), t));
+				display.setShadowStrength((float) ArgumentValidation.getDouble(info.get("shadowstrength", t, env), t, env));
 			}
 			if(info.containsKey("teleportduration") && Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_2)) {
-				int ticks = ArgumentValidation.getInt32(info.get("teleportduration", t), t);
+				int ticks = ArgumentValidation.getInt32(info.get("teleportduration", t, env), t, env);
 				if(ticks < 0 || ticks > 59) {
 					throw new CRERangeException("Teleport duration must be from 0 - 59, but got " + ticks, t);
 				}
 				display.setTeleportDuration(ticks);
 			}
 			if(info.containsKey("interpolationduration")) {
-				display.setInterpolationDurationTicks(ArgumentValidation.getInt32(info.get("interpolationduration", t), t));
+				display.setInterpolationDurationTicks(ArgumentValidation.getInt32(info.get("interpolationduration", t, env), t, env));
 			}
 			if(info.containsKey("startinterpolation")) {
-				display.setInterpolationDelayTicks(ArgumentValidation.getInt32(info.get("startinterpolation", t), t));
+				display.setInterpolationDelayTicks(ArgumentValidation.getInt32(info.get("startinterpolation", t, env), t, env));
 			}
 			if(info.containsKey("transformation")) {
-				CArray transformation = ArgumentValidation.getArray(info.get("transformation", t), t);
-				if(transformation.size() == 16) {
+				CArray transformation = ArgumentValidation.getArray(info.get("transformation", t, env), t, env);
+				if(transformation.size(env) == 16) {
 					float[] f = new float[16];
 					for(int i = 0; i < 16; i++) {
-						f[i] = ArgumentValidation.getDouble32(transformation.get(i, t), t);
+						f[i] = ArgumentValidation.getDouble32(transformation.get(i, t, env), t, env);
 					}
 					MCTransformation tr = GetTransformationFromMatrix(f);
 					display.setTransformation(tr);
@@ -5510,43 +5510,43 @@ public class EntityManagement {
 					MCTransformation existingTransformation = display.getTransformation();
 					Quaternionf leftRotation;
 					if(transformation.containsKey("leftRotation")) {
-						CArray leftRotationC = ArgumentValidation.getArray(transformation.get("leftRotation", t), t);
+						CArray leftRotationC = ArgumentValidation.getArray(transformation.get("leftRotation", t, env), t, env);
 						leftRotation = new Quaternionf(
-								ArgumentValidation.getDouble(leftRotationC.get("x", t), t),
-								ArgumentValidation.getDouble(leftRotationC.get("y", t), t),
-								ArgumentValidation.getDouble(leftRotationC.get("z", t), t),
-								ArgumentValidation.getDouble(leftRotationC.get("w", t), t));
+								ArgumentValidation.getDouble(leftRotationC.get("x", t, env), t, env),
+								ArgumentValidation.getDouble(leftRotationC.get("y", t, env), t, env),
+								ArgumentValidation.getDouble(leftRotationC.get("z", t, env), t, env),
+								ArgumentValidation.getDouble(leftRotationC.get("w", t, env), t, env));
 					} else {
 						leftRotation = existingTransformation.getLeftRotation();
 					}
 					Quaternionf rightRotation;
 					if(transformation.containsKey("rightRotation")) {
-						CArray rightRotationC = ArgumentValidation.getArray(transformation.get("rightRotation", t), t);
+						CArray rightRotationC = ArgumentValidation.getArray(transformation.get("rightRotation", t, env), t, env);
 						rightRotation = new Quaternionf(
-								ArgumentValidation.getDouble(rightRotationC.get("x", t), t),
-								ArgumentValidation.getDouble(rightRotationC.get("y", t), t),
-								ArgumentValidation.getDouble(rightRotationC.get("z", t), t),
-								ArgumentValidation.getDouble(rightRotationC.get("w", t), t));
+								ArgumentValidation.getDouble(rightRotationC.get("x", t, env), t, env),
+								ArgumentValidation.getDouble(rightRotationC.get("y", t, env), t, env),
+								ArgumentValidation.getDouble(rightRotationC.get("z", t, env), t, env),
+								ArgumentValidation.getDouble(rightRotationC.get("w", t, env), t, env));
 					} else {
 						rightRotation = existingTransformation.getRightRotation();
 					}
 					Vector3f scale;
 					if(transformation.containsKey("scale")) {
-						CArray scaleC = ArgumentValidation.getArray(transformation.get("scale", t), t);
+						CArray scaleC = ArgumentValidation.getArray(transformation.get("scale", t, env), t, env);
 						scale = new Vector3f(
-								ArgumentValidation.getDouble32(scaleC.get("x", t), t),
-								ArgumentValidation.getDouble32(scaleC.get("y", t), t),
-								ArgumentValidation.getDouble32(scaleC.get("z", t), t));
+								ArgumentValidation.getDouble32(scaleC.get("x", t, env), t, env),
+								ArgumentValidation.getDouble32(scaleC.get("y", t, env), t, env),
+								ArgumentValidation.getDouble32(scaleC.get("z", t, env), t, env));
 					} else {
 						scale = existingTransformation.getScale();
 					}
 					Vector3f translation;
 					if(transformation.containsKey("translation")) {
-						CArray translationC = ArgumentValidation.getArray(transformation.get("translation", t), t);
+						CArray translationC = ArgumentValidation.getArray(transformation.get("translation", t, env), t, env);
 						translation = new Vector3f(
-								ArgumentValidation.getDouble32(translationC.get("x", t), t),
-								ArgumentValidation.getDouble32(translationC.get("y", t), t),
-								ArgumentValidation.getDouble32(translationC.get("z", t), t));
+								ArgumentValidation.getDouble32(translationC.get("x", t, env), t, env),
+								ArgumentValidation.getDouble32(translationC.get("y", t, env), t, env),
+								ArgumentValidation.getDouble32(translationC.get("z", t, env), t, env));
 					} else {
 						translation = existingTransformation.getTranslation();
 					}
@@ -5651,10 +5651,10 @@ public class EntityManagement {
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCEntity entity = Static.getEntity(args[0], t);
 
-			float yaw = (float) ArgumentValidation.getDouble(args[1], t);
+			float yaw = (float) ArgumentValidation.getDouble(args[1], t, env);
 			float pitch;
 			if(args.length == 3) {
-				pitch = (float) ArgumentValidation.getDouble(args[2], t);
+				pitch = (float) ArgumentValidation.getDouble(args[2], t, env);
 			} else {
 				pitch = entity.getLocation().getPitch();
 			}
@@ -5811,7 +5811,7 @@ public class EntityManagement {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCEntity entity = Static.getEntity(args[0], t);
-			entity.setVisibleByDefault(!ArgumentValidation.getBooleanObject(args[1], t));
+			entity.setVisibleByDefault(!ArgumentValidation.getBooleanObject(args[1], t, env));
 			return CVoid.VOID;
 		}
 
@@ -5924,7 +5924,7 @@ public class EntityManagement {
 				pose = MCPose.valueOf(args[1].val().toUpperCase());
 				boolean fixed = false;
 				if(args.length == 3) {
-					fixed = ArgumentValidation.getBooleanObject(args[2], t);
+					fixed = ArgumentValidation.getBooleanObject(args[2], t, env);
 				}
 				entity.setPose(pose, fixed);
 			} catch(IllegalArgumentException ex) {

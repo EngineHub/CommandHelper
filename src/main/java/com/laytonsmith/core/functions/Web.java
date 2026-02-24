@@ -307,7 +307,7 @@ public class Web {
 						}
 						settings.setComplexParameters(mparams);
 					} else {
-						if(csettings.get("params", t, env).isInstanceOf(CByteArray.TYPE, null, env)) {
+						if(csettings.get("params", t, env) instanceof CByteArray) {
 							CByteArray b = (CByteArray) csettings.get("params", t, env);
 							settings.setRawParameter(b.asByteArrayCopy());
 						} else {
@@ -376,8 +376,7 @@ public class Web {
 				}
 				if(csettings.containsKey("trustStore")) {
 					Mixed trustStore = csettings.get("trustStore", t, env);
-					if(trustStore.isInstanceOf(CBoolean.TYPE, null, env)
-							&& ArgumentValidation.getBoolean(trustStore, t, env) == false) {
+					if(trustStore instanceof CBoolean && ArgumentValidation.getBooleanObject(trustStore, t, env) == false) {
 						settings.setDisableCertChecking(true);
 					} else if(trustStore.isInstanceOf(CArray.TYPE, null, env)) {
 						CArray trustStoreA = ((CArray) trustStore);
@@ -428,7 +427,7 @@ public class Web {
 					settings.setDownloadStrategy(puMode);
 				}
 				if(csettings.containsKey("binary")) {
-					binary = ArgumentValidation.getBoolean(csettings.get("binary", t, env), t, env);
+					binary = ArgumentValidation.getBooleanObject(csettings.get("binary", t, env), t, env);
 				} else {
 					binary = false;
 				}
@@ -440,10 +439,10 @@ public class Web {
 				}
 
 				if(csettings.containsKey("blocking")) {
-					boolean blocking = ArgumentValidation.getBoolean(csettings.get("blocking", t, env), t, env);
+					boolean blocking = ArgumentValidation.getBooleanObject(csettings.get("blocking", t, env), t, env);
 					settings.setBlocking(blocking);
 				}
-				if(csettings.containsKey("log") && ArgumentValidation.getBoolean(csettings.get("log", t, env), t, env)) {
+				if(csettings.containsKey("log") && ArgumentValidation.getBooleanObject(csettings.get("log", t, env), t, env)) {
 					settings.setLogger(Logger.getLogger(Web.class.getName()));
 				}
 				settings.setAuthenticationDetails(username, password);

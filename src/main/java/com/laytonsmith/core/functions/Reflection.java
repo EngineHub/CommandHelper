@@ -292,7 +292,7 @@ public class Reflection {
 					CArray a = new CArray(t);
 					List<String> l = new ArrayList<>(KeywordList.getKeywordNames());
 					l.forEach((String t1) -> {
-						a.push(new CString(t1, Target.UNKNOWN), Target.UNKNOWN);
+						a.push(new CString(t1, Target.UNKNOWN), Target.UNKNOWN, env);
 					});
 					return new ArrayHandling.array_sort().exec(t, env, null, a);
 				} else if(args.length == 2) {
@@ -367,9 +367,9 @@ public class Reflection {
 				CArray docs = CArray.GetAssociativeArray(t, null, env);
 				docs.set("package", type.getPackage() == null ? CNull.NULL : type.getPackage(), t, env);
 				docs.set("isNative", CBoolean.get(type.getNativeType() != null), t, env);
-				docs.set("docs", m.getTypeDocs(env), env);
-				docs.set("since", m.getTypeSince(env).toString(), env);
-				typeDocs.push(docs, t);
+				docs.set("docs", m.getTypeDocs(t, env), env);
+				docs.set("since", m.getTypeSince(t, env).toString(), env);
+				typeDocs.push(docs, t, env);
 			}
 			ret.set("typeDocs", typeDocs, t, env);
 			return ret;

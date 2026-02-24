@@ -4167,18 +4167,18 @@ public class PlayerManagement {
 			String[] lines = sign.getLines();
 
 			if(args.length == 2 || args.length == 3) {
-				CArray signArray = ArgumentValidation.getArray(args[1 + offset], t);
+				CArray signArray = ArgumentValidation.getArray(args[1 + offset], t, env);
 				if(signArray.isAssociative()) {
 					if(signArray.containsKey("signtext")) {
-						Mixed possibleLines = signArray.get("signtext", t);
+						Mixed possibleLines = signArray.get("signtext", t, env);
 						if(possibleLines.isInstanceOf(CArray.TYPE, null, env)) {
 							CArray frontLines = (CArray) possibleLines;
-							if(frontLines.size() > 4) {
+							if(frontLines.size(env) > 4) {
 								throw new CREFormatException("Sign text array cannot have more than 4 elements.", t);
 							}
-							for(int i = 0; i < frontLines.size(); i++) {
-								if(!(frontLines.get(i, t) instanceof CNull)) {
-									sign.setLine(i, frontLines.get(i, t).val());
+							for(int i = 0; i < frontLines.size(env); i++) {
+								if(!(frontLines.get(i, t, env) instanceof CNull)) {
+									sign.setLine(i, frontLines.get(i, t, env).val());
 								}
 							}
 						} else {
@@ -4186,10 +4186,10 @@ public class PlayerManagement {
 						}
 					}
 					if(signArray.containsKey("glowing")) {
-						sign.setGlowingText(ArgumentValidation.getBooleanObject(signArray.get("glowing", t), t));
+						sign.setGlowingText(ArgumentValidation.getBooleanObject(signArray.get("glowing", t, env), t, env));
 					}
 					if(signArray.containsKey("color")) {
-						Mixed dye = signArray.get("color", t);
+						Mixed dye = signArray.get("color", t, env);
 						if(!(dye instanceof CNull)) {
 							try {
 								sign.setDyeColor(MCDyeColor.valueOf(dye.val()));
@@ -4201,15 +4201,15 @@ public class PlayerManagement {
 					MCSignText backText = sign.getBackText();
 					if(backText != null) {
 						if(signArray.containsKey("backtext")) {
-							Mixed possibleLines = signArray.get("backtext", t);
+							Mixed possibleLines = signArray.get("backtext", t, env);
 							if(possibleLines.isInstanceOf(CArray.TYPE, null, env)) {
 								CArray backLines = (CArray) possibleLines;
-								if(backLines.size() > 4) {
+								if(backLines.size(env) > 4) {
 									throw new CREFormatException("Sign back text array cannot have more than 4 elements.", t);
 								}
-								for(int i = 0; i < backLines.size(); i++) {
-									if(!(backLines.get(i, t) instanceof CNull)) {
-										backText.setLine(i, backLines.get(i, t).val());
+								for(int i = 0; i < backLines.size(env); i++) {
+									if(!(backLines.get(i, t, env) instanceof CNull)) {
+										backText.setLine(i, backLines.get(i, t, env).val());
 									}
 								}
 							} else {
@@ -4217,10 +4217,10 @@ public class PlayerManagement {
 							}
 						}
 						if(signArray.containsKey("backglowing")) {
-							backText.setGlowingText(ArgumentValidation.getBooleanObject(signArray.get("backglowing", t), t));
+							backText.setGlowingText(ArgumentValidation.getBooleanObject(signArray.get("backglowing", t, env), t, env));
 						}
 						if(signArray.containsKey("backcolor")) {
-							Mixed dye = signArray.get("backcolor", t);
+							Mixed dye = signArray.get("backcolor", t, env);
 							if(!(dye instanceof CNull)) {
 								try {
 									backText.setDyeColor(MCDyeColor.valueOf(dye.val()));
@@ -4234,11 +4234,11 @@ public class PlayerManagement {
 					return CVoid.VOID;
 				} else {
 					// Lines are in an array
-					if(signArray.size() > 4) {
+					if(signArray.size(env) > 4) {
 						throw new CREFormatException("Sign array cannot have more than 4 elements.", t);
 					}
-					for(int i = 0; i < signArray.size(); i++) {
-						Mixed line = signArray.get(i, t);
+					for(int i = 0; i < signArray.size(env); i++) {
+						Mixed line = signArray.get(i, t, env);
 						if(!(line instanceof CNull)) {
 							lines[i] = line.val();
 						}
@@ -4432,9 +4432,9 @@ public class PlayerManagement {
 			location = ObjectGenerator.GetGenerator().location(args[argOffset], p.getWorld(), t, env);
 			Mixed progressArg = args[1 + argOffset];
 			if(progressArg instanceof CInt) {
-				progress = ArgumentValidation.getInt(progressArg, t) / 10.0F;
+				progress = ArgumentValidation.getInt(progressArg, t, env) / 10.0F;
 			} else {
-				progress = (float) ArgumentValidation.getDouble(progressArg, t);
+				progress = (float) ArgumentValidation.getDouble(progressArg, t, env);
 			}
 			if(progress < 0.0 || progress > 1.0) {
 				throw new CRERangeException("Block damage progress must be 0.0 to 1.0 (or 0 - 10).", t);
@@ -5599,9 +5599,9 @@ public class PlayerManagement {
 				if(!soundArray.isAssociative()) {
 					throw new CRECastException("Expected an associative array", t);
 				}
-				soundName = soundArray.get("sound", t).val();
+				soundName = soundArray.get("sound", t, env).val();
 				if(soundArray.containsKey("category")) {
-					categoryName = soundArray.get("category", t).val();
+					categoryName = soundArray.get("category", t, env).val();
 				}
 			} else {
 				soundName = args[1].val();
@@ -5675,7 +5675,7 @@ public class PlayerManagement {
 		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, GenericParameters generics, Mixed... args)
 				throws ConfigRuntimeException {
 
-			MCPlayer p = Static.GetPlayer(args[0], t);
+			MCPlayer p = Static.GetPlayer(args[0], t, env);
 			MCSoundCategory category;
 			try {
 				category = MCSoundCategory.valueOf(args[1].val().toUpperCase());
@@ -5731,7 +5731,7 @@ public class PlayerManagement {
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args)
 				throws ConfigRuntimeException {
 
-			MCPlayer p = Static.GetPlayer(args[0], t);
+			MCPlayer p = Static.GetPlayer(args[0], t, env);
 			String soundName;
 			String categoryName = null;
 			if(args[1].isInstanceOf(CArray.TYPE, null, env)) {
@@ -5739,9 +5739,9 @@ public class PlayerManagement {
 				if(!soundArray.isAssociative()) {
 					throw new CRECastException("Expected an associative array or sound string", t);
 				}
-				soundName = soundArray.get("sound", t).val();
+				soundName = soundArray.get("sound", t, env).val();
 				if(soundArray.containsKey("category")) {
-					categoryName = soundArray.get("category", t).val();
+					categoryName = soundArray.get("category", t, env).val();
 				}
 			} else {
 				soundName = args[1].val();
@@ -6637,7 +6637,7 @@ public class PlayerManagement {
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			if(args.length == 1) {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 			} else {
 				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
@@ -6646,11 +6646,11 @@ public class PlayerManagement {
 			if(wb == null) {
 				return CNull.NULL;
 			}
-			CArray ret = CArray.GetAssociativeArray(t);
-			ret.set("width", new CDouble(wb.getSize(), t), t);
-			ret.set("center", ObjectGenerator.GetGenerator().location(wb.getCenter(), false), t);
-			ret.set("warningtime", new CInt(wb.getWarningTime(), t), t);
-			ret.set("warningdistance", new CInt(wb.getWarningDistance(), t), t);
+			CArray ret = CArray.GetAssociativeArray(t, null, env);
+			ret.set("width", new CDouble(wb.getSize(), t), t, env);
+			ret.set("center", ObjectGenerator.GetGenerator().location(wb.getCenter(), false), t, env);
+			ret.set("warningtime", new CInt(wb.getWarningTime(), t), t, env);
+			ret.set("warningdistance", new CInt(wb.getWarningDistance(), t), t, env);
 			return ret;
 		}
 
@@ -6703,7 +6703,7 @@ public class PlayerManagement {
 			MCPlayer p;
 			Mixed c;
 			if(args.length == 2) {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 				c = args[1];
 			} else {
 				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -6724,20 +6724,20 @@ public class PlayerManagement {
 			CArray params = (CArray) c;
 			if(params.containsKey("width")) {
 				if(params.containsKey("seconds")) {
-					wb.setSize(ArgumentValidation.getDouble(params.get("width", t), t),
-							ArgumentValidation.getInt32(params.get("seconds", t), t));
+					wb.setSize(ArgumentValidation.getDouble(params.get("width", t, env), t, env),
+							ArgumentValidation.getInt32(params.get("seconds", t, env), t, env));
 				} else {
-					wb.setSize(ArgumentValidation.getDouble(params.get("width", t), t));
+					wb.setSize(ArgumentValidation.getDouble(params.get("width", t, env), t, env));
 				}
 			}
 			if(params.containsKey("center")) {
-				wb.setCenter(ObjectGenerator.GetGenerator().location(params.get("center", t), p.getWorld(), t));
+				wb.setCenter(ObjectGenerator.GetGenerator().location(params.get("center", t, env), p.getWorld(), t));
 			}
 			if(params.containsKey("warningtime")) {
-				wb.setWarningTime(ArgumentValidation.getInt32(params.get("warningtime", t), t));
+				wb.setWarningTime(ArgumentValidation.getInt32(params.get("warningtime", t, env), t, env));
 			}
 			if(params.containsKey("warningdistance")) {
-				wb.setWarningDistance(ArgumentValidation.getInt32(params.get("warningdistance", t), t));
+				wb.setWarningDistance(ArgumentValidation.getInt32(params.get("warningdistance", t, env), t, env));
 			}
 			p.setWorldBorder(wb);
 			return CVoid.VOID;
@@ -6793,7 +6793,7 @@ public class PlayerManagement {
 				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
 			} else {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 			}
 			return new CString(p.getLocale(), t);
 		}
@@ -6846,7 +6846,7 @@ public class PlayerManagement {
 				Static.AssertPlayerNonNull(p, t);
 				stringKey = args[0].val();
 			} else {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 				stringKey = args[1].val();
 			}
 			MCNamespacedKey key = StaticLayer.GetConvertor().GetNamespacedKey(stringKey);
@@ -6906,12 +6906,12 @@ public class PlayerManagement {
 				Static.AssertPlayerNonNull(p, t);
 				value = args[0];
 			} else {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 				value = args[1];
 			}
 			if(value.isInstanceOf(CArray.TYPE, null, env)) {
 				int result = 0;
-				for(Mixed element : ((CArray) value).asList()) {
+				for(Mixed element : ((CArray) value).asList(env)) {
 					MCNamespacedKey key = StaticLayer.GetConvertor().GetNamespacedKey(element.val());
 					if(key == null) {
 						throw new CREFormatException("Invalid namespaced key format: " + element.val(), t);
@@ -6975,7 +6975,7 @@ public class PlayerManagement {
 				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
 			} else {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 			}
 			p.respawn();
 			return CVoid.VOID;
@@ -7031,7 +7031,7 @@ public class PlayerManagement {
 				Static.AssertPlayerNonNull(p, t);
 				e = Static.getEntity(args[0], t);
 			} else {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 				e = Static.getEntity(args[1], t);
 			}
 			p.hideEntity(e);
@@ -7086,7 +7086,7 @@ public class PlayerManagement {
 				Static.AssertPlayerNonNull(p, t);
 				e = Static.getEntity(args[0], t);
 			} else {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 				e = Static.getEntity(args[1], t);
 			}
 			p.showEntity(e);
@@ -7142,7 +7142,7 @@ public class PlayerManagement {
 				Static.AssertPlayerNonNull(p, t);
 				e = Static.getEntity(args[0], t);
 			} else {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 				e = Static.getEntity(args[1], t);
 			}
 			return CBoolean.get(p.canSeeEntity(e));
@@ -7202,7 +7202,7 @@ public class PlayerManagement {
 				le = Static.getLivingEntity(args[0], t);
 				equipment = args[1];
 			} else {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 				le = Static.getLivingEntity(args[1], t);
 				equipment = args[2];
 			}
@@ -7215,7 +7215,7 @@ public class PlayerManagement {
 				for(String key : ea.stringKeySet()) {
 					try {
 						p.sendEquipmentChange(le, MCEquipmentSlot.valueOf(key.toUpperCase()),
-								ObjectGenerator.GetGenerator().item(ea.get(key, t), t));
+								ObjectGenerator.GetGenerator().item(ea.get(key, t, env), t));
 					} catch (IllegalArgumentException iae) {
 						throw new CREFormatException("Not an equipment slot: " + key, t);
 					}
@@ -7267,7 +7267,7 @@ public class PlayerManagement {
 		public Construct exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			if(args.length == 1) {
-				p = Static.GetPlayer(args[0].val(), t);
+				p = Static.GetPlayer(args[0].val(), t, env);
 			} else {
 				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
@@ -7312,20 +7312,20 @@ public class PlayerManagement {
 		public Construct exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			if(args.length == 1) {
-				p = Static.GetPlayer(args[0].val(), t);
+				p = Static.GetPlayer(args[0].val(), t, env);
 			} else {
 				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
 			}
-			CArray ret = CArray.GetAssociativeArray(t);
+			CArray ret = CArray.GetAssociativeArray(t, null, env);
 			MCPlayerInput input = p.getCurrentInput();
-			ret.set("forward", CBoolean.get(input.forward()), t);
-			ret.set("backward", CBoolean.get(input.backward()), t);
-			ret.set("left", CBoolean.get(input.left()), t);
-			ret.set("right", CBoolean.get(input.right()), t);
-			ret.set("jump", CBoolean.get(input.jump()), t);
-			ret.set("sneak", CBoolean.get(input.sneak()), t);
-			ret.set("sprint", CBoolean.get(input.sprint()), t);
+			ret.set("forward", CBoolean.get(input.forward()), t, env);
+			ret.set("backward", CBoolean.get(input.backward()), t, env);
+			ret.set("left", CBoolean.get(input.left()), t, env);
+			ret.set("right", CBoolean.get(input.right()), t, env);
+			ret.set("jump", CBoolean.get(input.jump()), t, env);
+			ret.set("sneak", CBoolean.get(input.sneak()), t, env);
+			ret.set("sprint", CBoolean.get(input.sprint()), t, env);
 			return ret;
 		}
 
@@ -7365,10 +7365,10 @@ public class PlayerManagement {
 			if(args.length == 1) {
 				player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(player, t);
-				value = ArgumentValidation.getBoolean(args[0], t);
+				value = ArgumentValidation.getBoolean(args[0], t, env);
 			} else {
-				player = Static.GetPlayer(args[0], t);
-				value = ArgumentValidation.getBoolean(args[1], t);
+				player = Static.GetPlayer(args[0], t, env);
+				value = ArgumentValidation.getBoolean(args[1], t, env);
 			}
 			player.setSleepingIgnored(value);
 			return CVoid.VOID;
@@ -7421,7 +7421,7 @@ public class PlayerManagement {
 				player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(player, t);
 			} else {
-				player = Static.GetPlayer(args[0], t);
+				player = Static.GetPlayer(args[0], t, env);
 			}
 			return CBoolean.get(player.isSleepingIgnored());
 		}
@@ -7495,12 +7495,12 @@ public class PlayerManagement {
 			MCPlayer otherPlayer;
 			if(args.length == 2) {
 				thisPlayer = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
-				isVanished = ArgumentValidation.getBooleanObject(args[0], t);
-				otherPlayer = Static.GetPlayer(args[1], t);
+				isVanished = ArgumentValidation.getBooleanObject(args[0], t, env);
+				otherPlayer = Static.GetPlayer(args[1], t, env);
 			} else {
-				thisPlayer = Static.GetPlayer(args[0], t);
-				isVanished = ArgumentValidation.getBooleanObject(args[1], t);
-				otherPlayer = Static.GetPlayer(args[2], t);
+				thisPlayer = Static.GetPlayer(args[0], t, env);
+				isVanished = ArgumentValidation.getBooleanObject(args[1], t, env);
+				otherPlayer = Static.GetPlayer(args[2], t, env);
 			}
 			otherPlayer.setVanished(isVanished, thisPlayer);
 			return CVoid.VOID;
@@ -7553,10 +7553,10 @@ public class PlayerManagement {
 			MCPlayer otherPlayer;
 			if(args.length == 1) {
 				thisPlayer = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
-				otherPlayer = Static.GetPlayer(args[0], t);
+				otherPlayer = Static.GetPlayer(args[0], t, env);
 			} else {
-				thisPlayer = Static.GetPlayer(args[0], t);
-				otherPlayer = Static.GetPlayer(args[1], t);
+				thisPlayer = Static.GetPlayer(args[0], t, env);
+				otherPlayer = Static.GetPlayer(args[1], t, env);
 			}
 			return CBoolean.get(thisPlayer.canSee(otherPlayer));
 		}
