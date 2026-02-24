@@ -245,26 +245,26 @@ public class Web {
 				}
 				settings.setHeaders(headers);
 			} else {
-				CArray csettings = ArgumentValidation.getArray(args[1], t);
+				CArray csettings = ArgumentValidation.getArray(args[1], t, env);
 				if(csettings.containsKey("method")) {
 					try {
-						settings.setMethod(HTTPMethod.valueOf(csettings.get("method", t).val()));
+						settings.setMethod(HTTPMethod.valueOf(csettings.get("method", t, env).val()));
 					} catch (IllegalArgumentException e) {
 						throw new CREFormatException(e.getMessage(), t);
 					}
 				}
 				if(csettings.containsKey("useDefaultHeaders")) {
-					useDefaultHeaders = ArgumentValidation.getBoolean(csettings.get("useDefaultHeaders", t), t);
+					useDefaultHeaders = ArgumentValidation.getBoolean(csettings.get("useDefaultHeaders", t, env), t, env);
 				}
-				if(csettings.containsKey("headers") && !(csettings.get("headers", t) instanceof CNull)) {
-					CArray headers = ArgumentValidation.getArray(csettings.get("headers", t), t);
+				if(csettings.containsKey("headers") && !(csettings.get("headers", t, env) instanceof CNull)) {
+					CArray headers = ArgumentValidation.getArray(csettings.get("headers", t, env), t, env);
 					Map<String, List<String>> mheaders = new HashMap<String, List<String>>();
 					for(String key : headers.stringKeySet()) {
 						List<String> h = new ArrayList<String>();
-						Mixed c = headers.get(key, t);
+						Mixed c = headers.get(key, t, env);
 						if(c.isInstanceOf(CArray.TYPE, null, env)) {
 							for(String kkey : ((CArray) c).stringKeySet()) {
-								h.add(((CArray) c).get(kkey, t).val());
+								h.add(((CArray) c).get(kkey, t, env).val());
 							}
 						} else {
 							h.add(c.val());
@@ -288,16 +288,16 @@ public class Web {
 						settings.getHeaders().put(key, Arrays.asList(DEFAULT_HEADERS.get(key)));
 					}
 				}
-				if(csettings.containsKey("params") && !(csettings.get("params", t) instanceof CNull)) {
-					if(csettings.get("params", t).isInstanceOf(CArray.TYPE, null, env)) {
-						CArray params = ArgumentValidation.getArray(csettings.get("params", t), t);
+				if(csettings.containsKey("params") && !(csettings.get("params", t, env) instanceof CNull)) {
+					if(csettings.get("params", t, env).isInstanceOf(CArray.TYPE, null, env)) {
+						CArray params = ArgumentValidation.getArray(csettings.get("params", t, env), t, env);
 						Map<String, List<String>> mparams = new HashMap<>();
 						for(String key : params.stringKeySet()) {
-							Mixed c = params.get(key, t);
+							Mixed c = params.get(key, t, env);
 							List<String> l = new ArrayList<>();
 							if(c.isInstanceOf(CArray.TYPE, null, env)) {
 								for(String kkey : ((CArray) c).stringKeySet()) {
-									l.add(((ArrayAccess) c).get(kkey, t).val());
+									l.add(((ArrayAccess) c).get(kkey, t, env).val());
 								}
 							} else {
 								l.add(c.val());
@@ -306,31 +306,31 @@ public class Web {
 						}
 						settings.setComplexParameters(mparams);
 					} else {
-						if(csettings.get("params", t) instanceof CByteArray) {
-							CByteArray b = (CByteArray) csettings.get("params", t);
+						if(csettings.get("params", t, env) instanceof CByteArray) {
+							CByteArray b = (CByteArray) csettings.get("params", t, env);
 							settings.setRawParameter(b.asByteArrayCopy());
 						} else {
 							try {
-								settings.setRawParameter(csettings.get("params", t).val().getBytes("UTF-8"));
+								settings.setRawParameter(csettings.get("params", t, env).val().getBytes("UTF-8"));
 							} catch (UnsupportedEncodingException ex) {
 								throw new Error(ex);
 							}
 						}
 					}
 				}
-				if(csettings.containsKey("cookiejar") && !(csettings.get("cookiejar", t) instanceof CNull)) {
-					arrayJar = ArgumentValidation.getArray(csettings.get("cookiejar", t), t);
+				if(csettings.containsKey("cookiejar") && !(csettings.get("cookiejar", t, env) instanceof CNull)) {
+					arrayJar = ArgumentValidation.getArray(csettings.get("cookiejar", t, env), t, env);
 					settings.setCookieJar(getCookieJar(arrayJar, t));
 				} else {
 					arrayJar = null;
 				}
 				if(csettings.containsKey("followRedirects")) {
-					settings.setFollowRedirects(ArgumentValidation.getBoolean(csettings.get("followRedirects", t), t));
+					settings.setFollowRedirects(ArgumentValidation.getBoolean(csettings.get("followRedirects", t, env), t, env));
 				}
 				//Only required parameter
 				if(csettings.containsKey("success")) {
-					if(csettings.get("success", t).isInstanceOf(CClosure.TYPE, null, env)) {
-						success = (CClosure) csettings.get("success", t);
+					if(csettings.get("success", t, env).isInstanceOf(CClosure.TYPE, null, env)) {
+						success = (CClosure) csettings.get("success", t, env);
 					} else {
 						throw new CRECastException("Expecting the success parameter to be a closure.", t);
 					}
@@ -338,8 +338,8 @@ public class Web {
 					throw new CRECastException("Missing the success parameter, which is required.", t);
 				}
 				if(csettings.containsKey("error")) {
-					if(csettings.get("error", t).isInstanceOf(CClosure.TYPE, null, env)) {
-						error = (CClosure) csettings.get("error", t);
+					if(csettings.get("error", t, env).isInstanceOf(CClosure.TYPE, null, env)) {
+						error = (CClosure) csettings.get("error", t, env);
 					} else {
 						throw new CRECastException("Expecting the error parameter to be a closure.", t);
 					}
@@ -347,42 +347,42 @@ public class Web {
 					error = null;
 				}
 				if(csettings.containsKey("timeout")) {
-					settings.setTimeout(ArgumentValidation.getInt32(csettings.get("timeout", t), t));
+					settings.setTimeout(ArgumentValidation.getInt32(csettings.get("timeout", t, env), t, env));
 				}
 				String username = null;
 				String password = null;
 				if(csettings.containsKey("username")) {
-					username = csettings.get("username", t).val();
+					username = csettings.get("username", t, env).val();
 				}
 				if(csettings.containsKey("password")) {
-					password = csettings.get("password", t).val();
+					password = csettings.get("password", t, env).val();
 				}
 				if(csettings.containsKey("proxy")) {
-					CArray proxySettings = ArgumentValidation.getArray(csettings.get("proxy", t), t);
+					CArray proxySettings = ArgumentValidation.getArray(csettings.get("proxy", t, env), t, env);
 					Proxy.Type type;
 					String proxyURL;
 					int port;
 					try {
-						type = Proxy.Type.valueOf(proxySettings.get("type", t).val());
+						type = Proxy.Type.valueOf(proxySettings.get("type", t, env).val());
 					} catch (IllegalArgumentException e) {
 						throw new CREFormatException(e.getMessage(), t, e);
 					}
-					proxyURL = proxySettings.get("url", t).val();
-					port = ArgumentValidation.getInt32(proxySettings.get("port", t), t);
+					proxyURL = proxySettings.get("url", t, env).val();
+					port = ArgumentValidation.getInt32(proxySettings.get("port", t, env), t, env);
 					SocketAddress addr = new InetSocketAddress(proxyURL, port);
 					Proxy proxy = new Proxy(type, addr);
 					settings.setProxy(proxy);
 				}
 				if(csettings.containsKey("trustStore")) {
-					Mixed trustStore = csettings.get("trustStore", t);
-					if(trustStore instanceof CBoolean && ArgumentValidation.getBoolean(trustStore, t) == false) {
+					Mixed trustStore = csettings.get("trustStore", t, env);
+					if(trustStore instanceof CBoolean && ArgumentValidation.getBoolean(trustStore, t, env) == false) {
 						settings.setDisableCertChecking(true);
 					} else if(trustStore.isInstanceOf(CArray.TYPE, null, env)) {
 						CArray trustStoreA = ((CArray) trustStore);
-						LinkedHashMap<String, String> trustStoreJ = new LinkedHashMap<>((int) trustStoreA.size());
+						LinkedHashMap<String, String> trustStoreJ = new LinkedHashMap<>((int) trustStoreA.size(env));
 						final String noDefault = "no default";
 						for(String key : trustStoreA.stringKeySet()) {
-							String value = trustStoreA.get(key, t).val();
+							String value = trustStoreA.get(key, t, env).val();
 							if(noDefault.equals(key) && noDefault.equals(value)) {
 								settings.setUseDefaultTrustStore(false);
 								continue;
@@ -397,7 +397,7 @@ public class Web {
 					}
 				}
 				if(csettings.containsKey("download")) {
-					Mixed download = csettings.get("download", t);
+					Mixed download = csettings.get("download", t, env);
 					if(download instanceof CNull) {
 						settings.setDownloadTo(null);
 					} else { // TODO: Remove this check and tie into the VFS once that is complete.
@@ -412,7 +412,7 @@ public class Web {
 				}
 				if(csettings.containsKey("downloadStrategy")) {
 					com.laytonsmith.core.FileWriteMode mode
-							= ArgumentValidation.getEnum(csettings.get("downloadStrategy", t), FileWriteMode.class, t);
+							= ArgumentValidation.getEnum(csettings.get("downloadStrategy", t, env), FileWriteMode.class, t);
 					com.laytonsmith.PureUtilities.Common.FileWriteMode puMode;
 					if(mode == com.laytonsmith.core.FileWriteMode.APPEND) {
 						puMode = com.laytonsmith.PureUtilities.Common.FileWriteMode.APPEND;
@@ -426,22 +426,22 @@ public class Web {
 					settings.setDownloadStrategy(puMode);
 				}
 				if(csettings.containsKey("binary")) {
-					binary = ArgumentValidation.getBoolean(csettings.get("binary", t), t);
+					binary = ArgumentValidation.getBoolean(csettings.get("binary", t, env), t, env);
 				} else {
 					binary = false;
 				}
 
 				if(csettings.containsKey("textEncoding")) {
-					textEncoding = csettings.get("textEncoding", t).val();
+					textEncoding = csettings.get("textEncoding", t, env).val();
 				} else {
 					textEncoding = "UTF-8";
 				}
 
 				if(csettings.containsKey("blocking")) {
-					boolean blocking = ArgumentValidation.getBoolean(csettings.get("blocking", t), t);
+					boolean blocking = ArgumentValidation.getBoolean(csettings.get("blocking", t, env), t, env);
 					settings.setBlocking(blocking);
 				}
-				if(csettings.containsKey("log") && ArgumentValidation.getBoolean(csettings.get("log", t), t)) {
+				if(csettings.containsKey("log") && ArgumentValidation.getBoolean(csettings.get("log", t, env), t, env)) {
 					settings.setLogger(Logger.getLogger(Web.class.getName()));
 				}
 				settings.setAuthenticationDetails(username, password);
@@ -456,31 +456,31 @@ public class Web {
 				public void run() {
 					try {
 						HTTPResponse resp = WebUtility.GetPage(url, settings);
-						final CArray array = CArray.GetAssociativeArray(t);
+						final CArray array = CArray.GetAssociativeArray(t, null, env);
 						if(settings.getDownloadTo() == null) {
 							if(binary) {
-								array.set("data", CByteArray.wrap(resp.getContent(), t), t);
+								array.set("data", CByteArray.wrap(resp.getContent(), t), t, env);
 							} else {
 								try {
-									array.set("body", new CString(new String(resp.getContent(), textEncoding), t), t);
+									array.set("body", new CString(new String(resp.getContent(), textEncoding), t), t, env);
 								} catch (UnsupportedEncodingException ex) {
 									throw new CREFormatException("Unsupported encoding [" + textEncoding + "]", t, ex);
 								}
 							}
 						}
-						CArray headers = CArray.GetAssociativeArray(t);
+						CArray headers = CArray.GetAssociativeArray(t, null, env);
 						for(String key : resp.getHeaderObject().getHeaderNames()) {
 							CArray h = new CArray(t);
 							for(String val : resp.getHeaderObject().getHeaders(key)) {
-								h.push(new CString(val, t), t);
+								h.push(new CString(val, t), t, env);
 							}
-							headers.set(key, h, t);
+							headers.set(key, h, t, env);
 						}
-						array.set("headers", headers, t);
-						array.set("responseCode", new CInt(resp.getResponseCode(), t), t);
-						array.set("responseText", resp.getResponseText());
-						array.set("httpVersion", resp.getHttpVersion());
-						array.set("error", CBoolean.get(resp.getResponseCode() >= 400 && resp.getResponseCode() < 600), t);
+						array.set("headers", headers, t, env);
+						array.set("responseCode", new CInt(resp.getResponseCode(), t), t, env);
+						array.set("responseText", resp.getResponseText(), env);
+						array.set("httpVersion", resp.getHttpVersion(), env);
+						array.set("error", CBoolean.get(resp.getResponseCode() >= 400 && resp.getResponseCode() < 600), t, env);
 						if(arrayJar != null) {
 							getCookieJar(arrayJar, settings.getCookieJar(), t);
 						}
@@ -639,7 +639,7 @@ public class Web {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CArray array = ArgumentValidation.getArray(args[0], t);
+			CArray array = ArgumentValidation.getArray(args[0], t, env);
 			CookieJar jar = getCookieJar(array, t);
 			jar.clearSessionCookies();
 			return CVoid.VOID;
@@ -806,11 +806,11 @@ public class Web {
 			// Argument processing
 			CArray options;
 			if(args.length == 1) {
-				options = ArgumentValidation.getArray(args[0], t);
+				options = ArgumentValidation.getArray(args[0], t, env);
 			} else {
 				// Load the profile for transport data, if specified.
 				String profileName = ArgumentValidation.getString(args[0], t);
-				options = CArray.GetAssociativeArray(t);
+				options = CArray.GetAssociativeArray(t, null, env);
 				Profiles.Profile p;
 				try {
 					p = env.getEnv(StaticRuntimeEnv.class).getProfiles().getProfileById(profileName);
@@ -822,13 +822,13 @@ public class Web {
 				}
 				Map<String, Object> data = ((EmailProfile) p).getMap();
 				for(String key : data.keySet()) {
-					options.set(key, Construct.GetConstruct(data.get(key)), t);
+					options.set(key, Construct.GetConstruct(data.get(key)), t, env);
 				}
 				// Override any transport data that was also specified in the options, as
 				// well as adding the email settings here too.
-				CArray options2 = ArgumentValidation.getArray(args[1], t);
+				CArray options2 = ArgumentValidation.getArray(args[1], t, env);
 				for(String key : options2.stringKeySet()) {
-					options.set(key, options2.get(key, t), t);
+					options.set(key, options2.get(key, t, env), t, env);
 				}
 			}
 
@@ -836,10 +836,10 @@ public class Web {
 			String host = ArgumentValidation.getItemFromArray(options, "host", t, new CString("localhost", t)).val();
 			final String mailUser = ArgumentValidation.getItemFromArray(options, "user", t, new CString("", t)).val();
 			final String mailPassword = ArgumentValidation.getItemFromArray(options, "password", t, new CString("", t)).val();
-			int mailPort = ArgumentValidation.getInt32(ArgumentValidation.getItemFromArray(options, "port", t, new CInt(587, t)), t);
-			boolean useSSL = ArgumentValidation.getBooleanObject(ArgumentValidation.getItemFromArray(options, "use_ssl", t, CBoolean.FALSE), t);
-			boolean useStartTLS = ArgumentValidation.getBooleanObject(ArgumentValidation.getItemFromArray(options, "use_start_tls", t, CBoolean.FALSE), t);
-			int timeout = ArgumentValidation.getInt32(ArgumentValidation.getItemFromArray(options, "timeout", t, new CInt(10000, t)), t);
+			int mailPort = ArgumentValidation.getInt32(ArgumentValidation.getItemFromArray(options, "port", t, new CInt(587, t)), t, env);
+			boolean useSSL = ArgumentValidation.getBooleanObject(ArgumentValidation.getItemFromArray(options, "use_ssl", t, CBoolean.FALSE), t, env);
+			boolean useStartTLS = ArgumentValidation.getBooleanObject(ArgumentValidation.getItemFromArray(options, "use_start_tls", t, CBoolean.FALSE), t, env);
+			int timeout = ArgumentValidation.getInt32(ArgumentValidation.getItemFromArray(options, "timeout", t, new CInt(10000, t)), t, env);
 
 			//Standard email options
 			String from = ArgumentValidation.getItemFromArray(options, "from", t, null).val();
@@ -849,11 +849,11 @@ public class Web {
 			CArray to;
 			if(cto.isInstanceOf(CString.TYPE, null, env)) {
 				to = new CArray(t);
-				to.push(cto, t);
+				to.push(cto, t, env);
 			} else {
 				to = (CArray) cto;
 			}
-			CArray attachments = ArgumentValidation.getArray(ArgumentValidation.getItemFromArray(options, "attachments", t, new CArray(t)), t);
+			CArray attachments = ArgumentValidation.getArray(ArgumentValidation.getItemFromArray(options, "attachments", t, new CArray(t)), t, env);
 
 			// Setup and execution
 			Properties properties = System.getProperties();
@@ -894,13 +894,13 @@ public class Web {
 				message.setSubject(subject);
 
 				if(!"".equals(body)) {
-					CArray bodyAttachment = CArray.GetAssociativeArray(t);
-					bodyAttachment.set("type", "text/plain");
-					bodyAttachment.set("content", body);
-					attachments.push(bodyAttachment, 0, t);
+					CArray bodyAttachment = CArray.GetAssociativeArray(t, null, env);
+					bodyAttachment.set("type", "text/plain", env);
+					bodyAttachment.set("content", body, env);
+					attachments.push(bodyAttachment, 0, t, env);
 				}
 
-				for(Mixed c : to.asList()) {
+				for(Mixed c : to.asList(env)) {
 					Message.RecipientType type = Message.RecipientType.TO;
 					String address;
 					if(c.isInstanceOf(CArray.TYPE, null, env)) {
@@ -926,8 +926,8 @@ public class Web {
 					message.addRecipient(type, new InternetAddress(address));
 				}
 
-				if(attachments.size() == 1) {
-					CArray pattachment = ArgumentValidation.getArray(attachments.get(0, t), t);
+				if(attachments.size(env) == 1) {
+					CArray pattachment = ArgumentValidation.getArray(attachments.get(0, t, env), t, env);
 					String type = ArgumentValidation.getItemFromArray(pattachment, "type", t, null).val();
 					String fileName = ArgumentValidation.getItemFromArray(pattachment, "filename", t, new CString("", t)).val().trim();
 					String description = ArgumentValidation.getItemFromArray(pattachment, "description", t, new CString("", t)).val().trim();
@@ -945,8 +945,8 @@ public class Web {
 					message.setContent(getContent(content, t, env), type);
 				} else {
 					Multipart mp = new MimeMultipart("alternative");
-					for(Mixed attachment : attachments.asList()) {
-						CArray pattachment = ArgumentValidation.getArray(attachment, t);
+					for(Mixed attachment : attachments.asList(env)) {
+						CArray pattachment = ArgumentValidation.getArray(attachment, t, env);
 						final String type = ArgumentValidation.getItemFromArray(pattachment, "type", t, null).val();
 						final String fileName = ArgumentValidation.getItemFromArray(pattachment, "filename", t, new CString("", t)).val().trim();
 						String description = ArgumentValidation.getItemFromArray(pattachment, "description", t, new CString("", t)).val().trim();
