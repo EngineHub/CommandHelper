@@ -50,5 +50,6 @@ public class CREGenericConstraintException extends CREException {
 	public GenericParameters getGenericParameters() {
 		return null;
 	}
+
 }
 

@@ -37,4 +37,9 @@ public class ArrayAccessSetRunner extends AbstractMixedInterfaceRunner {
 	public CClassType[] getInterfaces() {
 		return CClassType.EMPTY_CLASS_ARRAY;
 	}
+
+	@Override
+	public GenericParameters getGenericParameters() {
+		return null;
+	}
 }
