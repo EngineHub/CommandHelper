@@ -226,10 +226,10 @@ public class Minecraft {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			int i = -1;
 			int i2 = -1;
-			if(args[0].isInstanceOf(CString.TYPE, null, environment)) {
+			if(args[0].isInstanceOf(CString.TYPE, null, env)) {
 				//We also accept item notation
 				if(args[0].val().contains(":")) {
 					String[] split = args[0].val().split(":");
@@ -241,7 +241,7 @@ public class Minecraft {
 						throw new CREFormatException("Incorrect format for the item notation: " + args[0].val(), t);
 					}
 				}
-			} else if(args[0].isInstanceOf(CArray.TYPE, null, environment)) {
+			} else if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
 				MCItemStack is = ObjectGenerator.GetGenerator().item(args[0], t, true);
 				return new CString(is.getType().getName(), t);
 			}
@@ -310,7 +310,7 @@ public class Minecraft {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CArray item = ArgumentValidation.getArray(args[0], t);
 			MCItemStack is = ObjectGenerator.GetGenerator().item(item, t, true);
 			return ObjectGenerator.GetGenerator().item(is, t);
@@ -358,9 +358,9 @@ public class Minecraft {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			Mixed id = args[0];
-			if(id.isInstanceOf(CArray.TYPE, null, environment)) {
+			if(id.isInstanceOf(CArray.TYPE, null, env)) {
 				MCItemStack is = ObjectGenerator.GetGenerator().item(id, t);
 				return new CInt(is.maxStackSize(), t);
 			}
@@ -882,9 +882,9 @@ public class Minecraft {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCWorld w = null;
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(p != null) {
 				w = p.getWorld();
 			}
@@ -942,9 +942,9 @@ public class Minecraft {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCWorld w = null;
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(p != null) {
 				w = p.getWorld();
 			}
@@ -1011,7 +1011,7 @@ public class Minecraft {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = Static.GetPlayer(args[0], t);
 			p.sendResourcePack(args[1].val());
 			return CVoid.VOID;
@@ -1061,7 +1061,7 @@ public class Minecraft {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCServer s = Static.getServer();
 			CArray ret = new CArray(t);
 			for(String ip : s.getIPBans()) {
@@ -1110,7 +1110,7 @@ public class Minecraft {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCServer s = Static.getServer();
 			String ip = args[0].val();
 			if(ArgumentValidation.getBoolean(args[1], t)) {
@@ -1152,7 +1152,7 @@ public class Minecraft {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCMaterial mat = StaticLayer.GetMaterial(args[0].val());
 			if(mat == null) {
 				try {
@@ -1320,7 +1320,7 @@ public class Minecraft {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws CancelCommandException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException {
 			Static.getServer().shutdown();
 			throw new CancelCommandException("", t);
 		}
@@ -1352,9 +1352,9 @@ public class Minecraft {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCWorld world = null;
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(p != null) {
 				world = p.getWorld();
 			}
@@ -1415,7 +1415,7 @@ public class Minecraft {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CArray mats = new CArray(t);
 			for(String mat : MCMaterial.types()) {
 				mats.push(new CString(mat, t), t);
@@ -1466,14 +1466,14 @@ public class Minecraft {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender sender;
 			String selector;
 			if(args.length == 2) {
 				sender = Static.GetPlayer(args[0], t);
 				selector = args[1].val();
 			} else {
-				sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+				sender = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 				if(sender == null) {
 					throw new CREException("No command sender in this context.", t);
 				}

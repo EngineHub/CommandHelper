@@ -53,7 +53,7 @@ public class Marquee {
 		}
 
 		@Override
-		public Mixed exec(final Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(final Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			final String marqueeName;
 			final String text;
 			final int stringWidth;
@@ -69,7 +69,7 @@ public class Marquee {
 			text = args[1 + offset].val();
 			stringWidth = ArgumentValidation.getInt32(args[2 + offset], t);
 			delayTime = ArgumentValidation.getInt32(args[3 + offset], t);
-			if(args[4 + offset].isInstanceOf(CClosure.TYPE, null, environment)) {
+			if(args[4 + offset].isInstanceOf(CClosure.TYPE, null, env)) {
 				callback = ((CClosure) args[4 + offset]);
 			} else {
 				throw new CRECastException("Expected argument " + (4 + offset + 1) + " to be a closure, but was not.", t);
@@ -159,7 +159,7 @@ public class Marquee {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String marqueeName = args[0].val();
 			if(MARQUEE_MAP.containsKey(marqueeName)) {
 				MARQUEE_MAP.get(marqueeName).stop();

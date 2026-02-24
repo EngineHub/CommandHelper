@@ -155,7 +155,7 @@ public class Compiler {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return new CEntry(args[0], args[1], t);
 		}
 	}
@@ -937,7 +937,7 @@ public class Compiler {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(args.length == 0) {
 				return CVoid.VOID;
 			}
@@ -950,7 +950,7 @@ public class Compiler {
 	public static class __cbracket__ extends DummyFunction implements Optimizable {
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
@@ -986,7 +986,7 @@ public class Compiler {
 		public static final String NAME = "__cbrace__";
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
@@ -1067,7 +1067,7 @@ public class Compiler {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			throw new UnsupportedOperationException(getName() + " should have been compiled out. If you are reaching"
 					+ " this, an error has occurred in the parser. Please report this error to the developers.");
 		}

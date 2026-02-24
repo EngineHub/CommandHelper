@@ -58,9 +58,9 @@ public class ExtensionMeta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			try {
-				FunctionList.getFunction(args[0].val().toLowerCase(), environment.getEnvClasses(), t);
+				FunctionList.getFunction(args[0].val().toLowerCase(), env.getEnvClasses(), t);
 			} catch (ConfigCompileException ex) {
 				return CBoolean.FALSE;
 			}
@@ -160,7 +160,7 @@ public class ExtensionMeta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return CBoolean.get(EventList.getEvent(args[0].val().toLowerCase()) != null);
 		}
 
@@ -229,7 +229,7 @@ public class ExtensionMeta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			Map<URL, ExtensionTracker> trackers = ExtensionManager.getTrackers();
 			for(ExtensionTracker tracker : trackers.values()) {
 				String identifier = tracker.getIdentifier();
@@ -301,7 +301,7 @@ public class ExtensionMeta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			Map<URL, ExtensionTracker> trackers = ExtensionManager.getTrackers();
 
 			CArray retn = CArray.GetAssociativeArray(t);

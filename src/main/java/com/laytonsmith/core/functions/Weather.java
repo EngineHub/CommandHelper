@@ -228,11 +228,11 @@ public class Weather {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCWorld w = null;
 			if(args.length == 1) {
-				if(environment.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
-					w = environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
+				if(env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
+					w = env.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
 				}
 			} else {
 				w = Static.getServer().getWorld(args[1].val());
@@ -290,13 +290,13 @@ public class Weather {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCWorld w = null;
 			if(args.length == 1) {
 				w = Static.getServer().getWorld(args[0].val());
 			} else {
-				if(environment.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
-					w = environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
+				if(env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
+					w = env.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
 				}
 			}
 			if(w != null) {
@@ -347,13 +347,13 @@ public class Weather {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCWorld w = null;
 			if(args.length == 1) {
 				w = Static.getServer().getWorld(args[0].val());
 			} else {
-				if(environment.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
-					w = environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
+				if(env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
+					w = env.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
 				}
 			}
 			if(w != null) {

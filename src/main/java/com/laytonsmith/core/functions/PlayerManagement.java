@@ -198,8 +198,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCOfflinePlayer pl = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCOfflinePlayer pl = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			boolean dashless = false;
 			if(args.length >= 1) {
 				try {
@@ -721,8 +721,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(args.length > 0) {
 				p = Static.GetPlayer(args[0], t);
 			}
@@ -1866,8 +1866,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCCommandSender p = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
 			int xp;
 			if(p instanceof MCPlayer) {
@@ -2367,8 +2367,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(args.length > 0) {
 				p = Static.GetPlayer(args[0], t);
 			}
@@ -3196,8 +3196,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(args.length == 1) {
 				m = Static.GetPlayer(args[0].val(), t);
 			}
@@ -3245,8 +3245,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCLocation l;
 			if(args.length == 1) {
 				l = ObjectGenerator.GetGenerator().location(args[0], null, t);
@@ -3303,8 +3303,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(args.length == 1) {
 				m = Static.GetPlayer(args[0].val(), t);
 			}
@@ -3353,8 +3353,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(args.length == 1) {
 				p = Static.GetPlayer(args[0], t);
 			}
@@ -3404,8 +3404,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			Mixed ticks;
 			if(args.length == 2) {
 				p = Static.GetPlayer(args[0], t);
@@ -3462,8 +3462,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(args.length == 1) {
 				p = Static.GetPlayer(args[0], t);
 			}
@@ -3512,8 +3512,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			boolean flight;
 			if(args.length == 1) {
 				flight = ArgumentValidation.getBoolean(args[0], t);
@@ -3597,11 +3597,11 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = null;
 			boolean relative = false;
-			if(environment.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
-				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			if(env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			}
 			if(args.length >= 2) {
 				p = Static.GetPlayer(args[0], t);
@@ -3693,10 +3693,10 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = null;
-			if(environment.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
-				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			if(env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			}
 			if(args.length == 1) {
 				p = Static.GetPlayer(args[0], t);
@@ -3745,10 +3745,10 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = null;
-			if(environment.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
-				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			if(env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			}
 			if(args.length == 1) {
 				p = Static.GetPlayer(args[0], t);
@@ -3778,8 +3778,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(args.length == 1) {
 				m = Static.GetPlayer(args[0], t);
 			}
@@ -3828,8 +3828,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int offset = 0;
 			if(args.length == 2) {
 				m = Static.GetPlayer(args[0], t);
@@ -3888,14 +3888,14 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer m;
 			String listName;
 			if(args.length == 2) {
 				m = Static.GetPlayer(args[0], t);
 				listName = Construct.nval(args[1]);
 			} else {
-				m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(m, t);
 				listName = Construct.nval(args[0]);
 			}
@@ -3944,8 +3944,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(args.length == 1) {
 				p = Static.GetPlayer(args[0], t);
 			}
@@ -4011,12 +4011,12 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			if(args.length == 1) {
 				p = Static.GetPlayer(args[0], t);
 			} else {
-				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
 			}
 			Vector3D velocity = p.getVelocity();
@@ -4055,8 +4055,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			Vector3D v;
 			int offset = 0;
 			switch(args.length) {
@@ -4143,8 +4143,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int offset = 0;
 			if(args.length == 3 || args.length == 6) {
 				p = Static.GetPlayer(args[0], t);
@@ -4164,7 +4164,7 @@ public class PlayerManagement {
 				if(signArray.isAssociative()) {
 					if(signArray.containsKey("signtext")) {
 						Mixed possibleLines = signArray.get("signtext", t);
-						if(possibleLines.isInstanceOf(CArray.TYPE, null, environment)) {
+						if(possibleLines.isInstanceOf(CArray.TYPE, null, env)) {
 							CArray frontLines = (CArray) possibleLines;
 							if(frontLines.size() > 4) {
 								throw new CREFormatException("Sign text array cannot have more than 4 elements.", t);
@@ -4195,7 +4195,7 @@ public class PlayerManagement {
 					if(backText != null) {
 						if(signArray.containsKey("backtext")) {
 							Mixed possibleLines = signArray.get("backtext", t);
-							if(possibleLines.isInstanceOf(CArray.TYPE, null, environment)) {
+							if(possibleLines.isInstanceOf(CArray.TYPE, null, env)) {
 								CArray backLines = (CArray) possibleLines;
 								if(backLines.size() > 4) {
 									throw new CREFormatException("Sign back text array cannot have more than 4 elements.", t);
@@ -4297,8 +4297,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int offset = 0;
 			if(args.length == 3) {
 				p = Static.GetPlayer(args[0], t);
@@ -4409,14 +4409,14 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			MCLocation location;
 			float progress;
 			MCEntity entity;
 			int argOffset = 0;
 			if(args.length == 2 || args.length == 3 && args[0] instanceof CArray) {
-				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
 			} else {
 				p = Static.GetPlayer(args[0], t);
@@ -4478,8 +4478,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(args.length == 1) {
 				p = Static.GetPlayer(args[0], t);
 			}
@@ -4527,8 +4527,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int hungerIndex = 0;
 			if(args.length == 2) {
 				p = Static.GetPlayer(args[0], t);
@@ -4580,8 +4580,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(args.length == 1) {
 				p = Static.GetPlayer(args[0], t);
 			}
@@ -4629,8 +4629,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			float saturation;
 			int saturationIndex = 0;
 			if(args.length == 2) {
@@ -4895,8 +4895,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(args.length == 1) {
 				p = Static.GetPlayer(args[0].val(), t);
 			}
@@ -4950,8 +4950,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(args.length == 1) {
 				p = Static.GetPlayer(args[0].val(), t);
 			}
@@ -4980,7 +4980,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCServer s = Static.getServer();
 			CArray ret = new CArray(t);
 			// This causes the function to return an empty array for a fake/null server.
@@ -5043,7 +5043,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCOfflinePlayer offp = Static.GetUser(args[0].val(), t);
 			return CBoolean.get(offp != null && offp.hasPlayedBefore());
 		}
@@ -5100,12 +5100,12 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCOfflinePlayer op;
 			if(args.length == 1) {
 				op = Static.GetUser(args[0].val(), t);
 			} else {
-				op = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				op = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				if(op == null) {
 					throw new CREInsufficientArgumentsException(this.getName()
 							+ " requires a player argument when ran from a non-player", t);
@@ -5167,12 +5167,12 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCOfflinePlayer op;
 			if(args.length == 1) {
 				op = Static.GetUser(args[0].val(), t);
 			} else {
-				op = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				op = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				if(op == null) {
 					throw new CREInsufficientArgumentsException(this.getName()
 							+ " requires a player argument when ran from a non-player", t);
@@ -5233,7 +5233,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCOfflinePlayer p = Static.GetUser(args[0].val(), t);
 			if(p == null) {
 				return CNull.NULL;
@@ -5287,7 +5287,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			Static.getServer().savePlayers();
 			return CVoid.VOID;
 		}
@@ -5349,8 +5349,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			boolean flight;
 			if(args.length == 1) {
 				flight = ArgumentValidation.getBoolean(args[0], t);
@@ -5417,12 +5417,12 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			if(args.length == 1) {
 				p = Static.GetPlayer(args[0], t);
 			} else {
-				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
 			}
 			return CBoolean.get(p.isFlying());
@@ -5470,10 +5470,10 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			if(args.length == 0) {
-				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			} else {
 				p = Static.GetPlayer(args[0], t);
 			}
@@ -5531,11 +5531,11 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			int offset = 0;
 			if(args.length == 1) {
-				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			} else {
 				p = Static.GetPlayer(args[0], t);
 				offset = 1;
@@ -5579,14 +5579,14 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, GenericParameters generics, Mixed... args)
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, GenericParameters generics, Mixed... args)
 				throws ConfigRuntimeException {
 
 			MCPlayer p = Static.GetPlayer(args[0], t);
 
 			String soundName;
 			String categoryName = null;
-			if(args[1].isInstanceOf(CArray.TYPE, null, environment)) {
+			if(args[1].isInstanceOf(CArray.TYPE, null, env)) {
 				CArray soundArray = (CArray) args[1];
 				if(!soundArray.isAssociative()) {
 					throw new CRECastException("Expected an associative array", t);
@@ -5664,7 +5664,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, GenericParameters generics, Mixed... args)
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, GenericParameters generics, Mixed... args)
 				throws ConfigRuntimeException {
 
 			MCPlayer p = Static.GetPlayer(args[0], t);
@@ -5720,13 +5720,13 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, GenericParameters generics, Mixed... args)
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, GenericParameters generics, Mixed... args)
 				throws ConfigRuntimeException {
 
 			MCPlayer p = Static.GetPlayer(args[0], t);
 			String soundName;
 			String categoryName = null;
-			if(args[1].isInstanceOf(CArray.TYPE, null, environment)) {
+			if(args[1].isInstanceOf(CArray.TYPE, null, env)) {
 				CArray soundArray = (CArray) args[1];
 				if(!soundArray.isAssociative()) {
 					throw new CRECastException("Expected an associative array or sound string", t);
@@ -6207,8 +6207,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(p == null) {
 				throw new CREPlayerOfflineException("ptellraw() requires player context. Consider tellraw().", t);
 			}
@@ -6312,8 +6312,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			String filter = null;
 			MCPlayerStatistic stat;
 			int offset = 0;
@@ -6415,8 +6415,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			String filter = null;
 			MCPlayerStatistic stat;
 			int offset = 0;
@@ -6537,12 +6537,12 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			if(args.length == 1) {
 				p = Static.GetPlayer(args[0], t);
 			} else {
-				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
 			}
 			return CBoolean.get(p.isBlocking());
@@ -6588,12 +6588,12 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			if(args.length == 1) {
 				p = Static.GetPlayer(args[0], t);
 			} else {
-				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
 			}
 			return CBoolean.get(p.isSprinting());
@@ -6626,12 +6626,12 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			if(args.length == 1) {
 				p = Static.GetPlayer(args[0], t);
 			} else {
-				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
 			}
 			MCWorldBorder wb = p.getWorldBorder();
@@ -6691,14 +6691,14 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			Mixed c;
 			if(args.length == 2) {
 				p = Static.GetPlayer(args[0], t);
 				c = args[1];
 			} else {
-				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
 				c = args[0];
 			}
@@ -6710,7 +6710,7 @@ public class PlayerManagement {
 			if(wb == null) {
 				wb = Static.getServer().createWorldBorder();
 			}
-			if(!(c.isInstanceOf(CArray.TYPE, null, environment))) {
+			if(!(c.isInstanceOf(CArray.TYPE, null, env))) {
 				throw new CREFormatException("Expected array or null but given \"" + c.val() + "\"", t);
 			}
 			CArray params = (CArray) c;
@@ -7481,12 +7481,12 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer thisPlayer;
 			boolean isVanished;
 			MCPlayer otherPlayer;
 			if(args.length == 2) {
-				thisPlayer = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				thisPlayer = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				isVanished = ArgumentValidation.getBooleanObject(args[0], t);
 				otherPlayer = Static.GetPlayer(args[1], t);
 			} else {
@@ -7540,11 +7540,11 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer thisPlayer;
 			MCPlayer otherPlayer;
 			if(args.length == 1) {
-				thisPlayer = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				thisPlayer = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				otherPlayer = Static.GetPlayer(args[0], t);
 			} else {
 				thisPlayer = Static.GetPlayer(args[0], t);

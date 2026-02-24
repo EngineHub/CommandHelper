@@ -84,7 +84,7 @@ public class Performance {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(!Prefs.AllowProfiling()) {
 				throw new CRESecurityException("allow-profiling is currently off, you must set it to true in your preferences.", t);
 			}

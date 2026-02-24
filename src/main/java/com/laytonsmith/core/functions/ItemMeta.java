@@ -79,7 +79,7 @@ public class ItemMeta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			MCItemStack is;
 			Mixed slot;
@@ -87,7 +87,7 @@ public class ItemMeta {
 				p = Static.GetPlayer(args[0], t);
 				slot = args[1];
 			} else {
-				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
 				slot = args[0];
 			}
@@ -183,7 +183,7 @@ public class ItemMeta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			Mixed slot;
 			Mixed meta;
@@ -193,7 +193,7 @@ public class ItemMeta {
 				slot = args[1];
 				meta = args[2];
 			} else {
-				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
 				slot = args[0];
 				meta = args[1];
@@ -291,8 +291,8 @@ public class ItemMeta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int slot;
 			if(args.length == 2) {
 				p = Static.GetPlayer(args[0], t);
@@ -356,21 +356,21 @@ public class ItemMeta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int slot;
 			CArray color;
 			if(args.length == 3) {
 				p = Static.GetPlayer(args[0], t);
 				slot = ArgumentValidation.getInt32(args[1], t);
-				if(args[2].isInstanceOf(CArray.TYPE, null, environment)) {
+				if(args[2].isInstanceOf(CArray.TYPE, null, env)) {
 					color = (CArray) args[2];
 				} else {
 					throw new CREFormatException("Expected an array but received " + args[2] + " instead.", t);
 				}
 			} else {
 				slot = ArgumentValidation.getInt32(args[0], t);
-				if(args[1].isInstanceOf(CArray.TYPE, null, environment)) {
+				if(args[1].isInstanceOf(CArray.TYPE, null, env)) {
 					color = (CArray) args[1];
 				} else {
 					throw new CREFormatException("Expected an array but received " + args[1] + " instead.", t);
@@ -435,14 +435,14 @@ public class ItemMeta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			Mixed slot;
 			if(args.length == 2) {
 				p = Static.GetPlayer(args[0], t);
 				slot = args[1];
 			} else {
-				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
 				slot = args[0];
 			}

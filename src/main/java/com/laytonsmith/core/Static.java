@@ -984,12 +984,12 @@ public final class Static {
 	/**
 	 * If the sender is a player, it is returned, otherwise a ConfigRuntimeException is thrown.
 	 *
-	 * @param environment
+	 * @param env
 	 * @param t
 	 * @return
 	 */
-	public static MCPlayer getPlayer(Environment environment, Target t) {
-		MCPlayer player = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+	public static MCPlayer getPlayer(Environment env, Target t) {
+		MCPlayer player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 		if(player != null) {
 			return player;
 		} else {
@@ -1518,16 +1518,16 @@ public final class Static {
 	 * Returns true if currently running in cmdline mode. If the environment is null, or the GlobalEnv is not available,
 	 * then defaultValue is returned.
 	 *
-	 * @param environment
+	 * @param env
 	 * @param defaultValue What should be returned if the environment is null or GlobalEnv is not present. (Happens
 	 * during compile time.)
 	 * @return
 	 */
-	public static boolean InCmdLine(Environment environment, boolean defaultValue) {
-		if(environment == null || !environment.hasEnv(GlobalEnv.class)) {
+	public static boolean InCmdLine(Environment env, boolean defaultValue) {
+		if(env == null || !env.hasEnv(GlobalEnv.class)) {
 			return defaultValue;
 		}
-		return environment.getEnv(GlobalEnv.class).inCmdlineMode();
+		return env.getEnv(GlobalEnv.class).inCmdlineMode();
 	}
 
 	/** @deprecated Use {@link #AssertType(Class, Mixed[], int, Function, Target, Environment)} instead. */

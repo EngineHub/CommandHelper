@@ -56,9 +56,9 @@ public class PluginMeta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPluginMeta meta = StaticLayer.GetConvertor().GetPluginMeta();
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int offset = 0;
 			if(args.length == 3) {
 				offset = 1;
@@ -119,9 +119,9 @@ public class PluginMeta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int offset = 0;
 			if(args.length == 3) {
 				offset = 1;
@@ -184,7 +184,7 @@ public class PluginMeta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCMessenger messenger = Static.getServer().getMessenger();
 			if(messenger == null) {
 				throw new CRENotFoundException(
@@ -249,7 +249,7 @@ public class PluginMeta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCMessenger messenger = Static.getServer().getMessenger();
 			if(messenger == null) {
 				throw new CRENotFoundException(
@@ -310,7 +310,7 @@ public class PluginMeta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCMessenger messenger = Static.getServer().getMessenger();
 			if(messenger == null) {
 				throw new CRENotFoundException(
@@ -364,7 +364,7 @@ public class PluginMeta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCMessenger messenger = Static.getServer().getMessenger();
 			if(messenger == null) {
 				throw new CRENotFoundException(

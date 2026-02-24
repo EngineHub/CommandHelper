@@ -25,7 +25,7 @@ public interface Callable extends Mixed {
 	 * handled automatically, but other ProgramFlowManipulationExceptions will, . ConfigRuntimeExceptions will also
 	 * bubble up past this, since an execution mechanism may need to do custom handling.
 	 *
-	 * @param environment
+	 * @param env
 	 * @param values The values to be passed to the callable
 	 * @param t
 	 * @return The return value of the callable, or VOID if nothing was returned
@@ -33,7 +33,7 @@ public interface Callable extends Mixed {
 	 * @throws ProgramFlowManipulationException If any ProgramFlowManipulationException is thrown (other than a
 	 * LoopManipulationException) within the callable
 	 */
-	Mixed executeCallable(Environment environment, Target t, Mixed... values)
+	Mixed executeCallable(Environment env, Target t, Mixed... values)
 			throws ConfigRuntimeException, ProgramFlowManipulationException, CancelCommandException;
 
 	/**

@@ -111,7 +111,7 @@ public class ResourceManager {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			ResourceTypes type;
 			Mixed data = null;
 			try {
@@ -210,8 +210,8 @@ public class ResourceManager {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			if(args[0].isInstanceOf(CResource.TYPE, null, environment)) {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			if(args[0].isInstanceOf(CResource.TYPE, null, env)) {
 				CResource<?> resource = (CResource<?>) args[0];
 				if(RESOURCES.containsKey(resource.getId())) {
 					RESOURCES.remove(resource.getId());

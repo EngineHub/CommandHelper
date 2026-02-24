@@ -42,7 +42,7 @@ public class OS {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			try {
 				return new CInt(OSUtils.GetMyPid(), t);
 			} catch (UnsupportedOperationException ex) {

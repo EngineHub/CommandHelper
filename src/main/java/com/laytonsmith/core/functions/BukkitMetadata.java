@@ -108,12 +108,12 @@ public class BukkitMetadata {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			List<MCMetadataValue> metadata;
 			if(args.length == 1) {
-				metadata = Static.getPlayer(environment, t).getMetadata(args[0].val());
+				metadata = Static.getPlayer(env, t).getMetadata(args[0].val());
 			} else {
-				metadata = GetMetadatable(args[0], t, environment).getMetadata(args[1].val());
+				metadata = GetMetadatable(args[0], t, env).getMetadata(args[1].val());
 			}
 			if(args.length == 3) {
 				MCPlugin plugin = Static.getPlugin(args[2], t);
@@ -157,14 +157,14 @@ public class BukkitMetadata {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String key;
 			MCMetadatable metadatable;
 			if(args.length == 1) {
-				metadatable = Static.getPlayer(environment, t);
+				metadatable = Static.getPlayer(env, t);
 				key = args[0].val();
 			} else {
-				metadatable = GetMetadatable(args[0], t, environment);
+				metadatable = GetMetadatable(args[0], t, env);
 				key = args[1].val();
 			}
 			if(metadatable.hasMetadata(key)) {
@@ -214,18 +214,18 @@ public class BukkitMetadata {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String key;
 			MCMetadatable metadatable;
 			Mixed value;
 			MCPlugin plugin;
 			if(args.length == 2) {
-				metadatable = Static.getPlayer(environment, t);
+				metadatable = Static.getPlayer(env, t);
 				key = args[0].val();
 				value = args[1];
 				plugin = StaticLayer.GetPlugin();
 			} else {
-				metadatable = GetMetadatable(args[0], t, environment);
+				metadatable = GetMetadatable(args[0], t, env);
 				key = args[1].val();
 				value = args[2];
 				plugin = (args.length == 4) ? Static.getPlugin(args[3], t) : StaticLayer.GetPlugin();
@@ -259,14 +259,14 @@ public class BukkitMetadata {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String key;
 			MCMetadatable metadatable;
 			if(args.length == 1) {
-				metadatable = Static.getPlayer(environment, t);
+				metadatable = Static.getPlayer(env, t);
 				key = args[0].val();
 			} else {
-				metadatable = GetMetadatable(args[0], t, environment);
+				metadatable = GetMetadatable(args[0], t, env);
 				key = args[1].val();
 			}
 			if(args.length == 3) {

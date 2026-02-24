@@ -184,7 +184,7 @@ public final class Threading {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return new CString(Thread.currentThread().getName(), t);
 		}
 
@@ -727,7 +727,7 @@ public final class Threading {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String threadId = args[0].val();
 			Thread th;
 			synchronized(THREAD_ID_MAP) {
@@ -792,7 +792,7 @@ public final class Threading {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String threadId = args[0].val();
 			Thread th;
 			synchronized(THREAD_ID_MAP) {
@@ -845,7 +845,7 @@ public final class Threading {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			Thread th;
 			if(args.length == 1) {
 				String threadId = args[0].val();
@@ -905,7 +905,7 @@ public final class Threading {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(args.length == 1) {
 				String threadId = args[0].val();
 				Thread th;
@@ -964,7 +964,7 @@ public final class Threading {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return CBoolean.get(Thread.interrupted());
 		}
 

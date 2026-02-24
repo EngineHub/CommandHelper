@@ -107,7 +107,7 @@ public abstract class LLVMFunction implements FunctionBase, Function {
 	}
 
 	@Override
-	public final Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+	public final Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 		throw new UnsupportedOperationException("Not supported.");
 	}
 

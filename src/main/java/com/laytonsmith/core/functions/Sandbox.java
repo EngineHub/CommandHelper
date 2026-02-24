@@ -107,8 +107,8 @@ public class Sandbox {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			BoundEvent.ActiveEvent original = environment.getEnv(GlobalEnv.class).GetEvent();
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			BoundEvent.ActiveEvent original = env.getEnv(GlobalEnv.class).GetEvent();
 			if(original == null) {
 				throw new CREBindException("is_cancelled cannot be called outside an event handler", t);
 			}
@@ -117,7 +117,7 @@ public class Sandbox {
 				((Cancellable) original.getUnderlyingEvent()).setCancelled(true);
 				BukkitDirtyRegisteredListener.setCancelled((org.bukkit.event.Event) original.getUnderlyingEvent());
 			}
-			environment.getEnv(GlobalEnv.class).GetEvent().setCancelled(true);
+			env.getEnv(GlobalEnv.class).GetEvent().setCancelled(true);
 			return CVoid.VOID;
 		}
 	}
@@ -156,7 +156,7 @@ public class Sandbox {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return new CString(GenerateMooSaying(args[0].val())
 					+ " \\   ^__^\n"
 					+ "  \\  (oo)\\_______\n"
@@ -177,7 +177,7 @@ public class Sandbox {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return new CString(
 					GenerateMooSaying(args[0].val())
 					+ "              ^__^   /\n"
@@ -199,7 +199,7 @@ public class Sandbox {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return new CString("  .-*)) `*-.\n"
 					+ " /*  ((*   *'.\n"
 					+ "|   *))  *   *\\\n"

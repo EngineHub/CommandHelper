@@ -408,7 +408,7 @@ public class ControlFlow {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return CNull.NULL;
 		}
 
@@ -637,7 +637,7 @@ public class ControlFlow {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return CNull.NULL;
 		}
 
@@ -1007,7 +1007,7 @@ public class ControlFlow {
 	public static class switch_ic extends _switch implements Optimizable, BranchStatement, VariableScope {
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			throw new Error();
 		}
 
@@ -1315,7 +1315,7 @@ public class ControlFlow {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return null;
 		}
 
@@ -2124,7 +2124,7 @@ public class ControlFlow {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return CNull.NULL;
 		}
 
@@ -2230,7 +2230,7 @@ public class ControlFlow {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return CNull.NULL;
 		}
 
@@ -2864,7 +2864,7 @@ public class ControlFlow {
 	public static class call_proc_array extends call_proc {
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CArray ca = ArgumentValidation.getArray(args[1], t);
 			if(ca.inAssociativeMode()) {
 				throw new CRECastException("Expected the array passed to " + getName() + " to be non-associative.", t);
@@ -2875,7 +2875,7 @@ public class ControlFlow {
 				args2[i] = ca.get(i - 1, t);
 			}
 			// TODO: This probably needs to change once generics are added
-			return super.exec(t, environment, null, args2);
+			return super.exec(t, env, null, args2);
 		}
 
 		@Override

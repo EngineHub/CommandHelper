@@ -219,7 +219,7 @@ public class Web {
 		}
 
 		@Override
-		public Mixed exec(final Target t, final Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(final Target t, final Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			final URL url;
 			try {
 				url = new URL(args[0].val());
@@ -233,7 +233,7 @@ public class Web {
 			final boolean binary;
 			final String textEncoding;
 			boolean useDefaultHeaders = true;
-			if(args[1].isInstanceOf(CClosure.TYPE, null, environment)) {
+			if(args[1].isInstanceOf(CClosure.TYPE, null, env)) {
 				success = (CClosure) args[1];
 				error = null;
 				arrayJar = null;
@@ -262,7 +262,7 @@ public class Web {
 					for(String key : headers.stringKeySet()) {
 						List<String> h = new ArrayList<String>();
 						Mixed c = headers.get(key, t);
-						if(c.isInstanceOf(CArray.TYPE, null, environment)) {
+						if(c.isInstanceOf(CArray.TYPE, null, env)) {
 							for(String kkey : ((CArray) c).stringKeySet()) {
 								h.add(((CArray) c).get(kkey, t).val());
 							}
@@ -289,13 +289,13 @@ public class Web {
 					}
 				}
 				if(csettings.containsKey("params") && !(csettings.get("params", t) instanceof CNull)) {
-					if(csettings.get("params", t).isInstanceOf(CArray.TYPE, null, environment)) {
+					if(csettings.get("params", t).isInstanceOf(CArray.TYPE, null, env)) {
 						CArray params = ArgumentValidation.getArray(csettings.get("params", t), t);
 						Map<String, List<String>> mparams = new HashMap<>();
 						for(String key : params.stringKeySet()) {
 							Mixed c = params.get(key, t);
 							List<String> l = new ArrayList<>();
-							if(c.isInstanceOf(CArray.TYPE, null, environment)) {
+							if(c.isInstanceOf(CArray.TYPE, null, env)) {
 								for(String kkey : ((CArray) c).stringKeySet()) {
 									l.add(((ArrayAccess) c).get(kkey, t).val());
 								}
@@ -329,7 +329,7 @@ public class Web {
 				}
 				//Only required parameter
 				if(csettings.containsKey("success")) {
-					if(csettings.get("success", t).isInstanceOf(CClosure.TYPE, null, environment)) {
+					if(csettings.get("success", t).isInstanceOf(CClosure.TYPE, null, env)) {
 						success = (CClosure) csettings.get("success", t);
 					} else {
 						throw new CRECastException("Expecting the success parameter to be a closure.", t);
@@ -338,7 +338,7 @@ public class Web {
 					throw new CRECastException("Missing the success parameter, which is required.", t);
 				}
 				if(csettings.containsKey("error")) {
-					if(csettings.get("error", t).isInstanceOf(CClosure.TYPE, null, environment)) {
+					if(csettings.get("error", t).isInstanceOf(CClosure.TYPE, null, env)) {
 						error = (CClosure) csettings.get("error", t);
 					} else {
 						throw new CRECastException("Expecting the error parameter to be a closure.", t);
@@ -377,7 +377,7 @@ public class Web {
 					Mixed trustStore = csettings.get("trustStore", t);
 					if(trustStore instanceof CBoolean && ArgumentValidation.getBoolean(trustStore, t) == false) {
 						settings.setDisableCertChecking(true);
-					} else if(trustStore.isInstanceOf(CArray.TYPE, null, environment)) {
+					} else if(trustStore.isInstanceOf(CArray.TYPE, null, env)) {
 						CArray trustStoreA = ((CArray) trustStore);
 						LinkedHashMap<String, String> trustStoreJ = new LinkedHashMap<>((int) trustStoreA.size());
 						final String noDefault = "no default";
@@ -401,8 +401,8 @@ public class Web {
 					if(download instanceof CNull) {
 						settings.setDownloadTo(null);
 					} else { // TODO: Remove this check and tie into the VFS once that is complete.
-						if(Static.InCmdLine(environment, true)) {
-							File file = Static.GetFileFromArgument(Construct.nval(download), environment, t, null);
+						if(Static.InCmdLine(env, true)) {
+							File file = Static.GetFileFromArgument(Construct.nval(download), env, t, null);
 							if(!file.isAbsolute()) {
 								file = new File(t.file(), file.getPath());
 							}
@@ -448,8 +448,8 @@ public class Web {
 			}
 
 			List<ConfigRuntimeException.StackTraceElement> st
-					= environment.getEnv(GlobalEnv.class).GetStackTraceManager().getCurrentStackTrace();
-			environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager().activateThread(null);
+					= env.getEnv(GlobalEnv.class).GetStackTraceManager().getCurrentStackTrace();
+			env.getEnv(StaticRuntimeEnv.class).GetDaemonManager().activateThread(null);
 			Runnable task = new Runnable() {
 
 				@Override
@@ -485,32 +485,32 @@ public class Web {
 							getCookieJar(arrayJar, settings.getCookieJar(), t);
 						}
 						if(settings.getBlocking()) {
-							executeFinish(success, array, t, environment);
+							executeFinish(success, array, t, env);
 						} else {
 							StaticLayer.GetConvertor().runOnMainThreadLater(
-									environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager(),
-									() -> executeFinish(success, array, t, environment));
+									env.getEnv(StaticRuntimeEnv.class).GetDaemonManager(),
+									() -> executeFinish(success, array, t, env));
 						}
 					} catch (IOException e) {
 						final CREIOException ex = new CREIOException((e instanceof UnknownHostException ? "Unknown host: " : "")
 							+ e.getMessage(), t);
 						ex.setStackTraceElements(st);
 						if(error != null) {
-							final CArray cException = ObjectGenerator.GetGenerator().exception(ex, environment, t);
+							final CArray cException = ObjectGenerator.GetGenerator().exception(ex, env, t);
 							if(settings.getBlocking()) {
-								executeFinish(error, cException, t, environment);
+								executeFinish(error, cException, t, env);
 							} else {
 								StaticLayer.GetConvertor().runOnMainThreadLater(
-										environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager(),
-										() -> executeFinish(error, cException, t, environment));
+										env.getEnv(StaticRuntimeEnv.class).GetDaemonManager(),
+										() -> executeFinish(error, cException, t, env));
 							}
 						} else {
-							ConfigRuntimeException.HandleUncaughtException(ex, environment);
+							ConfigRuntimeException.HandleUncaughtException(ex, env);
 						}
 					} catch (Exception e) {
 						e.printStackTrace();
 					} finally {
-						environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager().deactivateThread(null);
+						env.getEnv(StaticRuntimeEnv.class).GetDaemonManager().deactivateThread(null);
 					}
 				}
 			};
@@ -522,7 +522,7 @@ public class Web {
 			return CVoid.VOID;
 		}
 
-		private void executeFinish(CClosure closure, Mixed arg, Target t, Environment environment) {
+		private void executeFinish(CClosure closure, Mixed arg, Target t, Environment env) {
 			try {
 				Mixed ret = closure.executeCallable(new Mixed[]{arg});
 				//Just ignore this if it's returning void. Otherwise, warn.
@@ -535,7 +535,7 @@ public class Web {
 				//This is an error
 				MSLog.GetLogger().Log(MSLog.Tags.RUNTIME, LogLevel.WARNING, "Only return may be used inside the closure.", t);
 			} catch (ConfigRuntimeException e) {
-				ConfigRuntimeException.HandleUncaughtException(e, environment);
+				ConfigRuntimeException.HandleUncaughtException(e, env);
 			} catch (Throwable e) {
 				//Other throwables we just need to report
 				MSLog.GetLogger().Log(MSLog.Tags.RUNTIME, LogLevel.ERROR, "An unexpected exception has occurred. No extra"
@@ -638,7 +638,7 @@ public class Web {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CArray array = ArgumentValidation.getArray(args[0], t);
 			CookieJar jar = getCookieJar(array, t);
 			jar.clearSessionCookies();
@@ -687,7 +687,7 @@ public class Web {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			try {
 				return new CString(URLEncoder.encode(args[0].val(), "UTF-8"), t);
 			} catch (UnsupportedEncodingException ex) {
@@ -744,7 +744,7 @@ public class Web {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			try {
 				return new CString(URLDecoder.decode(args[0].val(), "UTF-8"), t);
 			} catch (UnsupportedEncodingException ex) {
@@ -802,7 +802,7 @@ public class Web {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			// Argument processing
 			CArray options;
 			if(args.length == 1) {
@@ -813,7 +813,7 @@ public class Web {
 				options = CArray.GetAssociativeArray(t);
 				Profiles.Profile p;
 				try {
-					p = environment.getEnv(StaticRuntimeEnv.class).getProfiles().getProfileById(profileName);
+					p = env.getEnv(StaticRuntimeEnv.class).getProfiles().getProfileById(profileName);
 				} catch (Profiles.InvalidProfileException ex) {
 					throw new CREFormatException(ex.getMessage(), t, ex);
 				}
@@ -847,7 +847,7 @@ public class Web {
 			String body = ArgumentValidation.getItemFromArray(options, "body", t, new CString("", t)).val();
 			Mixed cto = ArgumentValidation.getItemFromArray(options, "to", t, null);
 			CArray to;
-			if(cto.isInstanceOf(CString.TYPE, null, environment)) {
+			if(cto.isInstanceOf(CString.TYPE, null, env)) {
 				to = new CArray(t);
 				to.push(cto, t);
 			} else {
@@ -903,7 +903,7 @@ public class Web {
 				for(Mixed c : to.asList()) {
 					Message.RecipientType type = Message.RecipientType.TO;
 					String address;
-					if(c.isInstanceOf(CArray.TYPE, null, environment)) {
+					if(c.isInstanceOf(CArray.TYPE, null, env)) {
 						CArray ca = (CArray) c;
 						String stype = ArgumentValidation.getItemFromArray(ca, "type", t, new CString("TO", t)).val();
 						switch(stype) {
@@ -942,7 +942,7 @@ public class Web {
 					if(!"".equals(disposition)) {
 						message.setDisposition(disposition);
 					}
-					message.setContent(getContent(content, t, environment), type);
+					message.setContent(getContent(content, t, env), type);
 				} else {
 					Multipart mp = new MimeMultipart("alternative");
 					for(Mixed attachment : attachments.asList()) {
@@ -951,7 +951,7 @@ public class Web {
 						final String fileName = ArgumentValidation.getItemFromArray(pattachment, "filename", t, new CString("", t)).val().trim();
 						String description = ArgumentValidation.getItemFromArray(pattachment, "description", t, new CString("", t)).val().trim();
 						String disposition = ArgumentValidation.getItemFromArray(pattachment, "disposition", t, new CString("", t)).val().trim();
-						final Object content = getContent(ArgumentValidation.getItemFromArray(pattachment, "content", t, null), t, environment);
+						final Object content = getContent(ArgumentValidation.getItemFromArray(pattachment, "content", t, null), t, env);
 						BodyPart bp = new MimeBodyPart();
 						if(!"".equals(fileName)) {
 							bp.setFileName(fileName);
@@ -1032,8 +1032,8 @@ public class Web {
 		 * @param t
 		 * @return
 		 */
-		private Object getContent(Mixed c, Target t, Environment environment) {
-			if(c.isInstanceOf(CString.TYPE, null, environment)) {
+		private Object getContent(Mixed c, Target t, Environment env) {
+			if(c.isInstanceOf(CString.TYPE, null, env)) {
 				return c.val();
 			} else if(c instanceof CByteArray) {
 				CByteArray cb = (CByteArray) c;

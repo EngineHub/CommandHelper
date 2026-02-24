@@ -265,8 +265,8 @@ public class Persistence {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			PersistenceNetwork p = environment.getEnv(StaticRuntimeEnv.class).GetPersistenceNetwork();
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			PersistenceNetwork p = env.getEnv(StaticRuntimeEnv.class).GetPersistenceNetwork();
 			List<String> keyChain = new ArrayList<String>();
 			keyChain.add("storage");
 			String namespace = GetNamespace(args, null, getName(), t);
@@ -404,12 +404,12 @@ public class Persistence {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String namespace = GetNamespace(args, null, getName(), t);
 			MSLog.GetLogger().Log(MSLog.Tags.PERSISTENCE, LogLevel.DEBUG, "Clearing value: " + namespace, t);
 			try {
-				environment.getEnv(StaticRuntimeEnv.class).GetPersistenceNetwork().clearKey(
-						environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager(),
+				env.getEnv(StaticRuntimeEnv.class).GetPersistenceNetwork().clearKey(
+						env.getEnv(StaticRuntimeEnv.class).GetDaemonManager(),
 						("storage." + namespace).split("\\."));
 			} catch (DataSourceException | ReadOnlyException | IOException ex) {
 				throw new CREIOException(ex.getMessage(), t, ex);
