@@ -98,7 +98,7 @@ public class Minecraft {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			if(args[0].isInstanceOf(CInt.TYPE, null, env)) {
-				return new CInt(ArgumentValidation.getInt(args[0], t), t);
+				return new CInt(ArgumentValidation.getInt(args[0], t, env), t);
 			}
 			String c = args[0].val();
 			MCMaterial mat = StaticLayer.GetMaterial("LEGACY_" + c.toUpperCase());
@@ -247,7 +247,7 @@ public class Minecraft {
 			}
 			if(i == -1) {
 				try {
-					i = ArgumentValidation.getInt32(args[0], t);
+					i = ArgumentValidation.getInt32(args[0], t, env);
 				} catch (CRECastException ex) {
 					// possibly a material name
 					MCMaterial mat = StaticLayer.GetMaterialFromLegacy(args[0].val(), 0);
@@ -311,7 +311,7 @@ public class Minecraft {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CArray item = ArgumentValidation.getArray(args[0], t);
+			CArray item = ArgumentValidation.getArray(args[0], t, env);
 			MCItemStack is = ObjectGenerator.GetGenerator().item(item, t, true);
 			return ObjectGenerator.GetGenerator().item(is, t);
 		}
@@ -464,7 +464,7 @@ public class Minecraft {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			MCLocation l = ObjectGenerator.GetGenerator().location(args[0], p == null ? null : p.getWorld(), t);
+			MCLocation l = ObjectGenerator.GetGenerator().location(args[0], p == null ? null : p.getWorld(), t, env);
 			MCEffect effect;
 			int data = 0;
 			String effectName = args[1].val();
@@ -482,7 +482,7 @@ public class Minecraft {
 				return CVoid.VOID;
 			}
 			if(args.length > 2) {
-				radius = ArgumentValidation.getInt32(args[args.length - 1], t);
+				radius = ArgumentValidation.getInt32(args[args.length - 1], t, env);
 			}
 			if(!dataString.isEmpty()) {
 				switch(effect) {
@@ -636,7 +636,7 @@ public class Minecraft {
 			if(args.length == 0) {
 				index = -1;
 			} else if(args.length == 1) {
-				index = ArgumentValidation.getInt32(args[0], t);
+				index = ArgumentValidation.getInt32(args[0], t, env);
 			}
 
 			if(index < -1 || index > 16) {
@@ -686,7 +686,7 @@ public class Minecraft {
 						continue;
 					}
 					CString os = new CString(o.getName(), t);
-					co.push(os, t);
+					co.push(os, t, env);
 				}
 				retVals.add(co);
 			}
@@ -704,7 +704,7 @@ public class Minecraft {
 						continue;
 					}
 					CString name = new CString(p.getName(), t);
-					co.push(name, t);
+					co.push(name, t, env);
 				}
 
 				retVals.add(co);
@@ -749,7 +749,7 @@ public class Minecraft {
 
 			CArray ca = new CArray(t);
 			for(Mixed c : retVals) {
-				ca.push(c, t);
+				ca.push(c, t, env);
 			}
 			return ca;
 		}
@@ -803,7 +803,7 @@ public class Minecraft {
 					continue;
 				}
 				CString os = new CString(o.getName(), t);
-				co.push(os, t);
+				co.push(os, t, env);
 			}
 			return co;
 		}
@@ -857,7 +857,7 @@ public class Minecraft {
 					continue;
 				}
 				CString os = new CString(o.getName(), t);
-				co.push(os, t);
+				co.push(os, t, env);
 			}
 			return co;
 		}
@@ -888,7 +888,7 @@ public class Minecraft {
 			if(p != null) {
 				w = p.getWorld();
 			}
-			MCLocation location = ObjectGenerator.GetGenerator().location(args[0], w, t);
+			MCLocation location = ObjectGenerator.GetGenerator().location(args[0], w, t, env);
 			MCBlockState state = location.getBlock().getState();
 			if(!(state instanceof MCCreatureSpawner)) {
 				throw new CREFormatException("The block at " + location + " is not a spawner block", t);
@@ -948,7 +948,7 @@ public class Minecraft {
 			if(p != null) {
 				w = p.getWorld();
 			}
-			MCLocation location = ObjectGenerator.GetGenerator().location(args[0], w, t);
+			MCLocation location = ObjectGenerator.GetGenerator().location(args[0], w, t, env);
 			MCBlockState state = location.getBlock().getState();
 			if(!(state instanceof MCCreatureSpawner)) {
 				throw new CREFormatException("The block at " + location + " is not a spawner block", t);
@@ -1012,7 +1012,7 @@ public class Minecraft {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = Static.GetPlayer(args[0], t);
+			MCPlayer p = Static.GetPlayer(args[0], t, env);
 			p.sendResourcePack(args[1].val());
 			return CVoid.VOID;
 		}
@@ -1065,7 +1065,7 @@ public class Minecraft {
 			MCServer s = Static.getServer();
 			CArray ret = new CArray(t);
 			for(String ip : s.getIPBans()) {
-				ret.push(new CString(ip, t), t);
+				ret.push(new CString(ip, t), t, env);
 			}
 			return ret;
 		}
@@ -1113,7 +1113,7 @@ public class Minecraft {
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCServer s = Static.getServer();
 			String ip = args[0].val();
-			if(ArgumentValidation.getBoolean(args[1], t)) {
+			if(ArgumentValidation.getBoolean(args[1], t, env)) {
 				s.banIP(ip);
 			} else {
 				s.unbanIP(ip);
@@ -1156,7 +1156,7 @@ public class Minecraft {
 			MCMaterial mat = StaticLayer.GetMaterial(args[0].val());
 			if(mat == null) {
 				try {
-					mat = StaticLayer.GetMaterialFromLegacy(ArgumentValidation.getInt32(args[0], t), 0);
+					mat = StaticLayer.GetMaterialFromLegacy(ArgumentValidation.getInt32(args[0], t, env), 0);
 				} catch (CRECastException ex) {
 					throw new CREIllegalArgumentException("Unable to get the material from: " + args[0].val(), t);
 				}
@@ -1205,23 +1205,23 @@ public class Minecraft {
 						throw new CREFormatException("Invalid argument for material_info: " + args[1].val(), t);
 				}
 			}
-			CArray ret = CArray.GetAssociativeArray(t);
-			ret.set("maxStacksize", new CInt(mat.getMaxStackSize(), t), t);
-			ret.set("maxDurability", new CInt(mat.getMaxDurability(), t), t);
-			ret.set("hasGravity", CBoolean.get(mat.hasGravity()), t);
-			ret.set("isBlock", CBoolean.get(mat.isBlock()), t);
-			ret.set("isItem", CBoolean.get(mat.isItem()), t);
-			ret.set("isBurnable", CBoolean.get(mat.isBurnable()), t);
-			ret.set("isEdible", CBoolean.get(mat.isEdible()), t);
-			ret.set("isFlammable", CBoolean.get(mat.isFlammable()), t);
-			ret.set("isOccluding", CBoolean.get(mat.isOccluding()), t);
-			ret.set("isRecord", CBoolean.get(mat.isRecord()), t);
-			ret.set("isSolid", CBoolean.get(mat.isSolid()), t);
-			ret.set("isTransparent", CBoolean.get(mat.isTransparent()), t);
-			ret.set("isInteractable", CBoolean.get(mat.isInteractable()), t);
+			CArray ret = CArray.GetAssociativeArray(t, null, env);
+			ret.set("maxStacksize", new CInt(mat.getMaxStackSize(), t), t, env);
+			ret.set("maxDurability", new CInt(mat.getMaxDurability(), t), t, env);
+			ret.set("hasGravity", CBoolean.get(mat.hasGravity()), t, env);
+			ret.set("isBlock", CBoolean.get(mat.isBlock()), t, env);
+			ret.set("isItem", CBoolean.get(mat.isItem()), t, env);
+			ret.set("isBurnable", CBoolean.get(mat.isBurnable()), t, env);
+			ret.set("isEdible", CBoolean.get(mat.isEdible()), t, env);
+			ret.set("isFlammable", CBoolean.get(mat.isFlammable()), t, env);
+			ret.set("isOccluding", CBoolean.get(mat.isOccluding()), t, env);
+			ret.set("isRecord", CBoolean.get(mat.isRecord()), t, env);
+			ret.set("isSolid", CBoolean.get(mat.isSolid()), t, env);
+			ret.set("isTransparent", CBoolean.get(mat.isTransparent()), t, env);
+			ret.set("isInteractable", CBoolean.get(mat.isInteractable()), t, env);
 			if(mat.isBlock()) {
-				ret.set("hardness", new CDouble(mat.getHardness(), t), t);
-				ret.set("blastResistance", new CDouble(mat.getBlastResistance(), t), t);
+				ret.set("hardness", new CDouble(mat.getHardness(), t), t, env);
+				ret.set("blastResistance", new CDouble(mat.getBlastResistance(), t), t, env);
 			}
 			return ret;
 		}
@@ -1358,10 +1358,10 @@ public class Minecraft {
 			if(p != null) {
 				world = p.getWorld();
 			}
-			MCLocation location = ObjectGenerator.GetGenerator().location(args[0], world, t);
+			MCLocation location = ObjectGenerator.GetGenerator().location(args[0], world, t, env);
 			boolean add = true;
 			if(args.length > 1) {
-				add = ArgumentValidation.getBoolean(args[1], t);
+				add = ArgumentValidation.getBoolean(args[1], t, env);
 			}
 			Map<MCLocation, Boolean> redstoneMonitors = ServerEvents.getRedstoneMonitors();
 			if(add) {
@@ -1418,7 +1418,7 @@ public class Minecraft {
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CArray mats = new CArray(t);
 			for(String mat : MCMaterial.types()) {
-				mats.push(new CString(mat, t), t);
+				mats.push(new CString(mat, t), t, env);
 			}
 			return mats;
 		}
@@ -1470,7 +1470,7 @@ public class Minecraft {
 			MCCommandSender sender;
 			String selector;
 			if(args.length == 2) {
-				sender = Static.GetPlayer(args[0], t);
+				sender = Static.GetPlayer(args[0], t, env);
 				selector = args[1].val();
 			} else {
 				sender = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
@@ -1482,7 +1482,7 @@ public class Minecraft {
 			try {
 				CArray result = new CArray(t);
 				for(UUID id : Static.getServer().selectEntites(sender, selector)) {
-					result.push(new CString(id.toString(), t), t);
+					result.push(new CString(id.toString(), t), t, env);
 				}
 				return result;
 			} catch(IllegalArgumentException ex) {

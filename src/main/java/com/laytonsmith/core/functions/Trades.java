@@ -61,7 +61,7 @@ public class Trades {
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CArray ret = new CArray(t);
 			for(MCMerchantRecipe mr : GetMerchant(args[0], t).getRecipes()) {
-				ret.push(trade(mr, t), t);
+				ret.push(trade(mr, t), t, env);
 			}
 			return ret;
 		}
@@ -100,12 +100,12 @@ public class Trades {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCMerchant merchant = GetMerchant(args[0], t);
-			CArray trades = ArgumentValidation.getArray(args[1], t);
+			CArray trades = ArgumentValidation.getArray(args[1], t, env);
 			List<MCMerchantRecipe> recipes = new ArrayList<>();
 			if(trades.isAssociative()) {
 				throw new CRECastException("Expected non-associative array for list of trade arrays.", t);
 			}
-			for(Mixed trade : trades.asList()) {
+			for(Mixed trade : trades.asList(env)) {
 				recipes.add(trade(trade, t));
 			}
 			merchant.setRecipes(recipes);
@@ -171,13 +171,13 @@ public class Trades {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CArray ret = CArray.GetAssociativeArray(t);
+			CArray ret = CArray.GetAssociativeArray(t, null, env);
 			for(Map.Entry<String, MCMerchant> entry : VIRTUAL_MERCHANTS.entrySet()) {
 				if(entry.getValue() == null) {
 					VIRTUAL_MERCHANTS.remove(entry.getKey());
 					continue;
 				}
-				ret.set(entry.getKey(), entry.getValue().getTitle(), t);
+				ret.set(entry.getKey(), entry.getValue().getTitle(), t, env);
 			}
 			return ret;
 		}
@@ -301,7 +301,7 @@ public class Trades {
 				player = Static.getPlayer(env, t);
 			}
 			if(args.length == 3) {
-				force = ArgumentValidation.getBooleanish(args[2], t);
+				force = ArgumentValidation.getBooleanish(args[2], t, env);
 			}
 			MCMerchant merchant = GetMerchant(args[0], t);
 			if(!force && merchant.isTrading()) {
