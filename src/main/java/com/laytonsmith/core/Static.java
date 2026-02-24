@@ -44,6 +44,7 @@ import com.laytonsmith.core.constructs.CResource;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Variable;
@@ -844,6 +845,9 @@ public final class Static {
 		return GetUUID(subject.val(), t);
 	}
 
+	/**
+	 * @deprecated Use {@link #GetUser(Mixed, Target, Environment)} instead.
+	 */
 	@Deprecated
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	public static MCOfflinePlayer GetUser(Mixed search, Target t) {
@@ -854,6 +858,9 @@ public final class Static {
 		return GetUser(search.val(), t, env);
 	}
 
+	/**
+	 * @deprecated Use {@link #GetUser(String, Target, Environment)} instead.
+	 */
 	@Deprecated
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	public static MCOfflinePlayer GetUser(String search, Target t) {
@@ -867,6 +874,7 @@ public final class Static {
 	 *
 	 * @param search The text to be searched, can be between 1 and 16 characters, or 32 or 36 characters
 	 * @param t
+	 * @param env
 	 * @return
 	 */
 	public static MCOfflinePlayer GetUser(String search, Target t, Environment env) {
@@ -903,6 +911,9 @@ public final class Static {
 	 * @throws ConfigRuntimeException
 	 * @deprecated This method doesn't work with user classes, and will cause errors once those are introduced. This
 	 * will be removed once those are added, instead, use the version with the environment.
+	 */
+	/**
+	 * @deprecated Use {@link #GetPlayer(String, Target, Environment)} instead.
 	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
@@ -945,9 +956,9 @@ public final class Static {
 	}
 
 	/**
-	 * Returns the player specified by name.Injected players also are returned in this list. If provided a string
+	 * Returns the player specified by name or UUID. Injected players are also returned in this list. If provided a string
 	 * between 1 and 16 characters, the lookup will be name-based. If provided a string that is 32 or 36 characters, the
-	 * lookup will be uuid-based.
+	 * lookup will be UUID-based. Throws CREPlayerOfflineException if the player is not online.
 	 *
 	 * @param player
 	 * @param t
@@ -956,8 +967,6 @@ public final class Static {
 	 * @throws ConfigRuntimeException
 	 */
 	public static MCPlayer GetPlayer(String player, Target t, Environment env) throws ConfigRuntimeException {
-		MCCommandSender m;
-
 		if(player == null) {
 			throw new CREPlayerOfflineException("No player was specified!", t);
 		}
@@ -989,6 +998,8 @@ public final class Static {
 		}
 		return p;
 	}
+
+
 
 	/**
 	 * Returns the specified command sender by name. Players are supported, as is the special ~console user. The special
@@ -1728,6 +1739,14 @@ public final class Static {
 	}
 
 	/**
+	 * @deprecated Use {@link #getJavaObject(Mixed, Environment)} instead.
+	 */
+	@Deprecated
+	public static Object getJavaObject(Mixed construct) {
+		return getJavaObject(construct, null);
+	}
+
+	/**
 	 * Given a MethodScript object, returns a java object.
 	 *
 	 * @param construct
@@ -1745,7 +1764,7 @@ public final class Static {
 			return ((CInt) construct).getInt();
 		} else if(construct instanceof CDouble) {
 			return ((CDouble) construct).getDouble();
-		} else if(construct instanceof CString) {
+		} else if(InstanceofUtil.isInstanceof(construct, CString.class, env)) {
 			return construct.val();
 		} else if(construct instanceof CByteArray) {
 			return ((CByteArray) construct).asByteArrayCopy();
@@ -1815,7 +1834,7 @@ public final class Static {
 				}
 			}
 		} else {
-			return construct;
+			throw new ClassCastException(construct.getClass().getName() + " cannot be cast to a POJO");
 		}
 	}
 

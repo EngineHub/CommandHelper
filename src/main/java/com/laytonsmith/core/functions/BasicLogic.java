@@ -259,7 +259,7 @@ public class BasicLogic {
 			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
-			if(args[1].typeof(env).equals(args[0].typeof(env))) {
+		if(args[1].typeof(env).equals(args[0].typeof(env))) {
 				if(args[0].isInstanceOf(CString.TYPE, null, env)
 						&& args[1].isInstanceOf(CString.TYPE, null, env)) {
 					// Check for actual string equality, so we don't do type massaging

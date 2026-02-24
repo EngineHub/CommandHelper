@@ -46,7 +46,7 @@ public class Crypto {
 				+ " rather than the default string value \"**secure string**\".";
 	}
 
-	private static CString getHMAC(String algorithm, Target t, Mixed[] args, Environment env) {
+	private static CString getHMAC(String algorithm, Target t, Environment env, Mixed[] args) {
 		try {
 			byte[] key;
 			if(args[0] instanceof CByteArray) {
@@ -727,7 +727,7 @@ public class Crypto {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			return getHMAC("HmacMD5", t, args, env);
+			return getHMAC("HmacMD5", t, env, args);
 		}
 
 		@Override
@@ -787,7 +787,7 @@ public class Crypto {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			return getHMAC("HmacSHA1", t, args, env);
+			return getHMAC("HmacSHA1", t, env, args);
 		}
 
 		@Override
@@ -847,7 +847,7 @@ public class Crypto {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			return getHMAC("HmacSHA256", t, args, env);
+			return getHMAC("HmacSHA256", t, env, args);
 		}
 
 		@Override

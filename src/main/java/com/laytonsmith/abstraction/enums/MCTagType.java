@@ -9,6 +9,7 @@ import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.environments.Environment;
@@ -124,11 +125,18 @@ public enum MCTagType {
 		this.construction = construction;
 	}
 
+	/** @deprecated Use {@link #convert(MCTagContainer, Mixed, Environment)} instead. */
+	@Deprecated
+	public Object convert(MCTagContainer container, Mixed value) {
+		return convert(container, value, null);
+	}
+
 	/**
 	 * Returns a Java object from a MethodScript construct.
 	 * Throws a ConfigRuntimeException if the value is not valid for this tag type.
 	 * @param container the tag container context
 	 * @param value MethodScript construct
+	 * @param env
 	 * @return a Java object
 	 */
 	public Object convert(MCTagContainer container, Mixed value, Environment env) {

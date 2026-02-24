@@ -1714,7 +1714,7 @@ public class Environment {
 					force = ArgumentValidation.getBooleanObject(pa.get("force", t, env), t, env);
 				}
 
-				data = ObjectGenerator.GetGenerator().particleData(p, l, pa, t);
+				data = ObjectGenerator.GetGenerator().particleData(p, l, pa, t, env);
 
 			} else {
 				try {

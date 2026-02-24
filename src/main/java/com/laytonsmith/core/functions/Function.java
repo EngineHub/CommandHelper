@@ -18,8 +18,11 @@ import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Note that to "activate" this class as a function, you must prefix the '@api' annotation to it.
@@ -237,6 +240,7 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 	/**
 	 * Returns the message to use when this function gets profiled, if useSpecialExec returns false.
 	 *
+	 * @param env
 	 * @param args
 	 * @return
 	 */
@@ -283,5 +287,65 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 		 * @return
 		 */
 		public List<ParseTree> getBranches(ParseTree self);
+	}
+
+	// Reflection bridge for backward compatibility with 3rd-party functions
+	// that still implement the old 3-arg exec(Target, Environment, Mixed...) signature.
+	// Once all known extensions have been updated, the cache and reflection fallback
+	// can be removed, and callers can invoke exec directly.
+	// Added 2026-02-23.
+
+	/**
+	 * Cache of Function classes that only implement the old 3-arg exec signature.
+	 */
+	Set<Class<?>> OLD_EXEC_CACHE = Collections.newSetFromMap(new ConcurrentHashMap<>());
+
+	/**
+	 * Invokes {@link #exec} on the given function with backward compatibility for 3rd-party functions
+	 * that still implement the old 3-arg exec(Target, Environment, Mixed...) signature.
+	 * For functions with the new signature, this has zero overhead beyond a Set lookup on cached misses.
+	 *
+	 * @param f The function to execute.
+	 * @param t The code target.
+	 * @param env The environment.
+	 * @param args The arguments.
+	 * @return The result of the function execution.
+	 * @throws ConfigRuntimeException
+	 */
+	static Mixed ExecuteFunction(Function f, Target t, Environment env, Mixed[] args) throws ConfigRuntimeException {
+		if(OLD_EXEC_CACHE.contains(f.getClass())) {
+			return ReflectionUtils.invokeMethod(f.getClass(), f, "exec",
+					new Class[]{Target.class, Environment.class, Mixed[].class},
+					new Object[]{t, env, args});
+		}
+		try {
+			return f.exec(t, env, null, args);
+		} catch(AbstractMethodError e) {
+			OLD_EXEC_CACHE.add(f.getClass());
+			return ReflectionUtils.invokeMethod(f.getClass(), f, "exec",
+					new Class[]{Target.class, Environment.class, Mixed[].class},
+					new Object[]{t, env, args});
+		}
+	}
+
+	// Reflection bridge for backward compatibility with 3rd-party functions
+	// that still implement the old profileMessage(Mixed...) signature only.
+	// Added 2026-02-23.
+	Set<Class<?>> OLD_PROFILE_MESSAGE_CACHE = Collections.newSetFromMap(new ConcurrentHashMap<>());
+
+	static String ExecuteProfileMessage(Function f, Environment env, Mixed[] args) {
+		if(OLD_PROFILE_MESSAGE_CACHE.contains(f.getClass())) {
+			return (String) ReflectionUtils.invokeMethod(f.getClass(), f, "profileMessage",
+					new Class[]{Mixed[].class},
+					new Object[]{args});
+		}
+		try {
+			return f.profileMessage(env, args);
+		} catch(AbstractMethodError e) {
+			OLD_PROFILE_MESSAGE_CACHE.add(f.getClass());
+			return (String) ReflectionUtils.invokeMethod(f.getClass(), f, "profileMessage",
+					new Class[]{Mixed[].class},
+					new Object[]{args});
+		}
 	}
 }

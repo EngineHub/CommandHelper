@@ -124,7 +124,7 @@ public class CClosure extends Construct implements Callable, Booleanish {
 				}
 				b.append(")");
 			}
-		} else if(node.getData() instanceof CString) {
+		} else if(node.getData().isInstanceOf(CString.TYPE, null, env)) {
 			String data = ArgumentValidation.getString(node.getData(), node.getTarget());
 			// Convert: \ -> \\ and ' -> \'
 			b.append("'").append(data.replace("\\", "\\\\").replace("\t", "\\t").replace("\n", "\\n")
@@ -276,7 +276,7 @@ public class CClosure extends Construct implements Callable, Booleanish {
 							isVarArg = true;
 						}
 						if(isVarArg) {
-							if(!InstanceofUtil.isInstanceof(value.typeof(env), varargType, env)) {
+							if(!InstanceofUtil.isInstanceof(value.typeof(env), varargType.getVarargsBaseType(), env)) {
 								throw new CRECastException("Expected type " + varargType + " but found " + value.typeof(env),
 										getTarget());
 							}

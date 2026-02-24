@@ -333,6 +333,9 @@ public class ObjectGenerator {
 		return item(i, t, false, env);
 	}
 
+	/**
+	 * @deprecated Use {@link #item(Mixed, Target, boolean, Environment)} instead.
+	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public MCItemStack item(Mixed i, Target t, boolean legacy) {
@@ -2170,7 +2173,7 @@ public class ObjectGenerator {
 	 */
 	public Vector3D vector(Vector3D v, Mixed c, Target t, Environment env) {
 		if(c.isInstanceOf(CArray.TYPE, null, env)) {
-			CArray va  = (CArray) c;
+			CArray va = (CArray) c;
 			double x = v.X();
 			double y = v.Y();
 			double z = v.Z();
@@ -2427,6 +2430,9 @@ public class ObjectGenerator {
 		return ea;
 	}
 
+	/**
+	 * @deprecated Use {@link #potions(CArray, Target, Environment)} instead.
+	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public List<MCLivingEntity.MCEffect> potions(CArray ea, Target t) {
@@ -2497,6 +2503,9 @@ public class ObjectGenerator {
 		return base;
 	}
 
+	/**
+	 * @deprecated Use {@link #potionData(CArray, Target, Environment)} instead.
+	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public MCPotionData potionData(CArray pd, Target t) {
@@ -2523,7 +2532,7 @@ public class ObjectGenerator {
 		}
 		if(pd.containsKey("upgraded")) {
 			Mixed cupg = pd.get("upgraded", t, env);
-			if(cupg.isInstanceOf(CBoolean.TYPE, null, env)) {
+			if(cupg instanceof CBoolean) {
 				upgraded = ((CBoolean) cupg).getBoolean();
 			} else {
 				throw new CREFormatException(
@@ -2537,6 +2546,9 @@ public class ObjectGenerator {
 		}
 	}
 
+	/**
+	 * @deprecated Use {@link #legacyPotionData(CArray, Target, Environment)} instead.
+	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public MCPotionType legacyPotionData(CArray potionArray, Target t) {
@@ -2558,13 +2570,13 @@ public class ObjectGenerator {
 		boolean upgraded = false;
 		if(potionArray.containsKey("extended")) {
 			Mixed cext = potionArray.get("extended", t, env);
-			if(cext.isInstanceOf(CBoolean.TYPE, null, env)) {
+			if(cext instanceof CBoolean) {
 				extended = ((CBoolean) cext).getBoolean();
 			}
 		}
 		if(potionArray.containsKey("upgraded")) {
 			Mixed cupg = potionArray.get("upgraded", t, env);
-			if(cupg.isInstanceOf(CBoolean.TYPE, null, env)) {
+			if(cupg instanceof CBoolean) {
 				upgraded = ((CBoolean) cupg).getBoolean();
 			}
 		}
@@ -3117,6 +3129,9 @@ public class ObjectGenerator {
 		return new CString(value, Target.UNKNOWN);
 	}
 
+	/**
+	 * @deprecated Use {@link #particleData(MCParticle, MCLocation, CArray, Target, Environment)} instead.
+	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public Object particleData(MCParticle particleType, MCLocation l, CArray pa, Target t) {

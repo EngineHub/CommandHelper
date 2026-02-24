@@ -250,7 +250,7 @@ public final class ArrayHandling {
 							} else if(defaultConstruct != null && iindex >= ca.size(env)) {
 								return defaultConstruct;
 							}
-							return ca.get(iindex, t);
+							return ca.get(iindex, t, env);
 						} else {
 							if(defaultConstruct != null && !ca.containsKey(index.val())) {
 								return defaultConstruct;
@@ -440,7 +440,7 @@ public final class ArrayHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			if(args[0] instanceof CArray) {
+			if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
 				try {
 					((CArray) args[0]).set(args[1], args[2], t, env);
 				} catch(IndexOutOfBoundsException e) {
@@ -533,7 +533,7 @@ public final class ArrayHandling {
 				throw new CREInsufficientArgumentsException(
 						"At least 2 arguments must be provided to " + this.getName(), t);
 			}
-			if(args[0] instanceof CArray) {
+			if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
 				CArray array = (CArray) args[0];
 				int initialSize = (int) array.size(env);
 				for(int i = 1; i < args.length; i++) {
@@ -1024,7 +1024,7 @@ public final class ArrayHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			if(args[0] instanceof CArray) {
+			if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
 				Mixed m = args[0];
 				for(int i = 1; i < args.length; i++) {
 					if(!(m.isInstanceOf(CArray.TYPE, null, env))) {
@@ -1871,7 +1871,7 @@ public final class ArrayHandling {
 					int value;
 					if(c instanceof CNull) {
 						value = 0;
-					} else if(c.isInstanceOf(CBoolean.TYPE, null, env)) {
+					} else if(c instanceof CBoolean) {
 						if(((CBoolean) c).getBoolean()) {
 							value = 1;
 						} else {

@@ -425,7 +425,7 @@ public class Script {
 					if(f.shouldProfile()) {
 						Profiler profiler = env.getEnv(StaticRuntimeEnv.class).GetProfiler();
 						if(profiler.isLoggable(f.profileAt())) {
-							p = profiler.start(f.profileMessage(env, args), f.profileAt());
+							p = profiler.start(Function.ExecuteProfileMessage(f, env, args), f.profileAt());
 						}
 					}
 					Mixed ret;

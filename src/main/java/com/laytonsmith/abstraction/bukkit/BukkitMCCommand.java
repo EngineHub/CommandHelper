@@ -211,11 +211,11 @@ public class BukkitMCCommand implements MCCommand {
 	}
 
 	@Override
-	public List<String> handleTabComplete(MCCommandSender sender, String alias, String[] args) {
+	public List<String> handleTabComplete(MCCommandSender sender, String alias, String[] args, Environment env) {
 		if(Commands.onTabComplete.containsKey(cmd.getName().toLowerCase())) {
 			Target t = Target.UNKNOWN;
 			Callable closure = Commands.onTabComplete.get(cmd.getName().toLowerCase());
-			Environment env = closure.getEnv();
+			env = closure.getEnv();
 			CArray cargs = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
 					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			for(String arg : args) {
@@ -270,7 +270,7 @@ public class BukkitMCCommand implements MCCommand {
 				Mixed fret = closure.executeCallable(null, t, new CString(label, t), new CString(sender.getName(), t), cargs,
 						new CArray(t, null, env) // reserved for an obgen style command array
 				);
-				if(fret.isInstanceOf(CBoolean.TYPE, null, env)) {
+				if(fret instanceof CBoolean) {
 					return ((CBoolean) fret).getBoolean();
 				}
 			} catch (ConfigRuntimeException cre) {

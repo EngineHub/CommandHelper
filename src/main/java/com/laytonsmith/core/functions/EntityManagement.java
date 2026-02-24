@@ -2633,7 +2633,7 @@ public class EntityManagement {
 									}
 									try {
 										cloud.setParticle(p, ObjectGenerator.GetGenerator().particleData(p,
-												cloud.getLocation(), pa, t));
+												cloud.getLocation(), pa, t, env));
 									} catch(IllegalArgumentException ex) {
 										throw new CREFormatException("Invalid particle data for " + p.name(), t);
 									}

@@ -315,7 +315,7 @@ public final class ArgumentValidation {
 		}
 		if(c instanceof CInt || c.isInstanceOf(CInt.TYPE, null, env)) {
 			i = getObject(c, t, CInt.class).getInt();
-		} else if(c.isInstanceOf(CBoolean.TYPE, null, env)) {
+		} else if(c instanceof CBoolean) {
 			if(getObject(c, t, CBoolean.class).getBoolean()) {
 				i = 1;
 			} else {

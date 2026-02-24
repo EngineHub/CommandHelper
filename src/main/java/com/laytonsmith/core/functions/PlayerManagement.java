@@ -3421,7 +3421,7 @@ public class PlayerManagement {
 				ticks = args[0];
 			}
 			int tick = 0;
-			if(ticks.isInstanceOf(CBoolean.TYPE, null, env)) {
+			if(ticks instanceof CBoolean) {
 				boolean value = ((CBoolean) ticks).getBoolean();
 				if(value) {
 					tick = 20;

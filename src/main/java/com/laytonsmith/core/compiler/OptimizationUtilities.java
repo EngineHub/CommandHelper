@@ -82,12 +82,12 @@ public class OptimizationUtilities {
 		StringBuilder b = new StringBuilder();
 		//The root always contains null.
 		for(ParseTree child : tree.getChildren()) {
-			b.append(optimize0(child));
+			b.append(optimize0(child, env));
 		}
 		return b.toString();
 	}
 
-	private static String optimize0(ParseTree node) {
+	private static String optimize0(ParseTree node, Environment env) {
 		if(node.getData() instanceof CFunction cFunction) {
 			StringBuilder b = new StringBuilder();
 			boolean first = true;
@@ -101,7 +101,7 @@ public class OptimizationUtilities {
 					b.append(",");
 				}
 				first = false;
-				b.append(optimize0(child));
+				b.append(optimize0(child, env));
 			}
 			b.append(")");
 			return b.toString();
@@ -129,7 +129,7 @@ public class OptimizationUtilities {
 					b.append(",");
 				}
 				first = false;
-				b.append(optimize0(new ParseTree(n.get(key, Target.UNKNOWN), node.getFileOptions(), true)));
+				b.append(optimize0(new ParseTree(n.get(key, Target.UNKNOWN), node.getFileOptions(), true), env));
 			}
 			b.append(")");
 			return b.toString();

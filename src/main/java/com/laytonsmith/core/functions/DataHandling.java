@@ -752,7 +752,7 @@ public class DataHandling {
 			int offset = 0;
 			if(args.length == 3) {
 				offset = 1;
-				if(!args[0].isInstanceOf(CClassType.TYPE, null, env)
+				if(!(args[0] instanceof CClassType)
 						&& (!(args[0] instanceof CFunction) || !args[0].val().equals(__type_ref__.NAME))) {
 					throw new ConfigCompileException("Expecting a ClassType for parameter 1 to assign", t);
 				}
@@ -1064,7 +1064,7 @@ public class DataHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			return CBoolean.get(args[0].isInstanceOf(CByteArray.TYPE, null, env));
+			return CBoolean.get(args[0] instanceof CByteArray);
 		}
 
 		@Override
@@ -1371,7 +1371,7 @@ public class DataHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			return CBoolean.get(args[0].isInstanceOf(CBoolean.TYPE, null, env));
+			return CBoolean.get(args[0] instanceof CBoolean);
 		}
 
 		@Override
@@ -1660,7 +1660,7 @@ public class DataHandling {
 			boolean procDefinitelyNotConstant = false;
 			CClassType returnType = Auto.TYPE;
 			NodeModifiers modifiers = null;
-			if(nodes[0].getData().equals(CVoid.VOID) || nodes[0].getData().isInstanceOf(CClassType.TYPE, null, env)) {
+			if(nodes[0].getData().equals(CVoid.VOID) || nodes[0].getData() instanceof CClassType) {
 				if(nodes[0].getData().equals(CVoid.VOID)) {
 					returnType = CVoid.TYPE;
 				} else {
@@ -2882,7 +2882,7 @@ public class DataHandling {
 			// Use first child as closure return type if it is a type.
 			LeftHandSideType returnType = Auto.TYPE.asLeftHandSideType();
 			int nodeOffset = 0;
-			if(nodes.length > 0 && nodes[0].getData().isInstanceOf(CClassType.TYPE, null, env)) {
+			if(nodes.length > 0 && nodes[0].getData() instanceof CClassType) {
 				if(nodes[0].getData() instanceof LeftHandSideType lhst) {
 					returnType = lhst;
 				} else {
@@ -4261,7 +4261,7 @@ public class DataHandling {
 				return CBoolean.FALSE;
 			}
 			CClassType type;
-			if(args[1].isInstanceOf(CClassType.TYPE, null, env)) {
+			if(args[1] instanceof CClassType) {
 				type = (CClassType) args[1];
 			} else {
 				throw new RuntimeException("This should have been optimized out, this is a bug in instanceof,"
@@ -4300,7 +4300,7 @@ public class DataHandling {
 				Set<Class<? extends Environment.EnvironmentImpl>> envs, List<ParseTree> children,
 				FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			// There are two specific cases here where we will give more precise error messages.
-			// If it's a string, yell at them
+			// If it's a string, yell at them (Note CKeyword extends CString, for better or worse)
 			if(children.get(1).getData().isInstanceOf(CString.TYPE, null, env)) {
 				throw new ConfigCompileException("Unexpected string type passed to \"instanceof\"", t);
 			}
@@ -4309,7 +4309,7 @@ public class DataHandling {
 				throw new ConfigCompileException("Variable types are not allowed in \"instanceof\"", t);
 			}
 			// Unknown error, but this is still never valid.
-			if(!(children.get(1).getData().isInstanceOf(CClassType.TYPE, null, env))) {
+			if(!(children.get(1).getData() instanceof CClassType)) {
 				throw new ConfigCompileException("Unexpected type for \"instanceof\": " + children.get(1).getData(), t);
 			}
 			// null is technically a type, but instanceof shouldn't work with that
