@@ -73,10 +73,10 @@ public class DataTransformations {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CArray ca = ArgumentValidation.getArray(args[0], t);
 			try {
-				return new CString(Construct.json_encode(ca, t, environment), t);
+				return new CString(Construct.json_encode(ca, t, env), t);
 			} catch (MarshalException ex) {
 				throw new CRECastException(ex.getMessage(), t);
 			}
@@ -130,7 +130,7 @@ public class DataTransformations {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String s = args[0].val();
 			try {
 				return Construct.json_decode(s, t);
@@ -188,7 +188,7 @@ public class DataTransformations {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CArray ca = ArgumentValidation.getArray(args[0], t);
 			boolean prettyPrint = false;
 			if(args.length == 2) {
@@ -323,7 +323,7 @@ public class DataTransformations {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			Properties props = new Properties();
 			CArray arr = ArgumentValidation.getArray(args[0], t);
 			String comment = null;
@@ -338,7 +338,7 @@ public class DataTransformations {
 				String val;
 				if(c instanceof CNull) {
 					val = "";
-				} else if(c.isInstanceOf(CArray.TYPE, null, environment)) {
+				} else if(c.isInstanceOf(CArray.TYPE, null, env)) {
 					throw new CRECastException("Arrays cannot be encoded with ini_encode.", t);
 				} else {
 					val = c.val();
@@ -402,7 +402,7 @@ public class DataTransformations {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			Properties props = new Properties();
 			Reader reader = new StringReader(args[0].val());
 			try {
@@ -469,7 +469,7 @@ public class DataTransformations {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			XMLDocument doc;
 			try {
 				doc = new XMLDocument(args[0].val());
@@ -525,7 +525,7 @@ public class DataTransformations {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 

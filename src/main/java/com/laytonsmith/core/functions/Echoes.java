@@ -202,7 +202,7 @@ public class Echoes {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String selector = "@a";
 			String json;
 			try {
@@ -311,7 +311,7 @@ public class Echoes {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer player;
 			int fadein = 10;
 			int stay = 70;
@@ -322,7 +322,7 @@ public class Echoes {
 				player = Static.GetPlayer(args[0].val(), t);
 				offset = 1;
 			} else {
-				player = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(player, t);
 			}
 
@@ -352,14 +352,14 @@ public class Echoes {
 			return "void {[player], message} Sends a message to the action bar above the hot bar.";
 		}
 
-		public Construct exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer player;
 			String message;
 			if(args.length == 2) {
 				player = Static.GetPlayer(args[0], t);
 				message = args[1].val();
 			} else {
-				player = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(player, t);
 				message = args[0].val();
 			}
@@ -553,7 +553,7 @@ public class Echoes {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return new CString(MCChatColor.stripColor(args[0].val()), t);
 		}
 
@@ -836,13 +836,13 @@ public class Echoes {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			Mixed text = args[0];
 			String symbol = "&";
 			if(args.length == 2) {
 				symbol = args[1].val();
 			}
-			if(!(text.isInstanceOf(CString.TYPE, null, environment))) {
+			if(!(text.isInstanceOf(CString.TYPE, null, env))) {
 				return text;
 			}
 			String stext = text.val();

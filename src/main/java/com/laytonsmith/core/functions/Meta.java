@@ -601,7 +601,7 @@ public class Meta {
 		}
 
 		@Override
-		public CBoolean exec(Target t, Environment environment, GenericParameters generics, Mixed... args)
+		public CBoolean exec(Target t, Environment env, GenericParameters generics, Mixed... args)
 				throws ConfigRuntimeException {
 			AliasCore ac = Static.getAliasCore();
 
@@ -760,30 +760,30 @@ public class Meta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) {
 			return null;
 		}
 
 		@Override
-		public Mixed execs(Target t, Environment environment, Script parent, ParseTree... nodes) throws ConfigRuntimeException {
-			String senderName = parent.seval(nodes[0], environment).val();
+		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) throws ConfigRuntimeException {
+			String senderName = parent.seval(nodes[0], env).val();
 			MCCommandSender sender = Static.GetCommandSender(senderName, t);
-			MCCommandSender originalSender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+			MCCommandSender originalSender = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			int offset = 0;
-			String originalLabel = environment.getEnv(GlobalEnv.class).GetLabel();
+			String originalLabel = env.getEnv(GlobalEnv.class).GetLabel();
 			if(nodes.length == 3) {
 				offset++;
-				String label = parent.seval(nodes[1], environment).val();
-				environment.getEnv(GlobalEnv.class).SetLabel(label);
+				String label = parent.seval(nodes[1], env).val();
+				env.getEnv(GlobalEnv.class).SetLabel(label);
 			} else {
-				environment.getEnv(GlobalEnv.class).SetLabel(parent.getLabel());
+				env.getEnv(GlobalEnv.class).SetLabel(parent.getLabel());
 			}
-			environment.getEnv(CommandHelperEnvironment.class).SetCommandSender(sender);
-			parent.enforceLabelPermissions(environment);
+			env.getEnv(CommandHelperEnvironment.class).SetCommandSender(sender);
+			parent.enforceLabelPermissions(env);
 			ParseTree tree = nodes[1 + offset];
-			parent.eval(tree, environment);
-			environment.getEnv(CommandHelperEnvironment.class).SetCommandSender(originalSender);
-			environment.getEnv(GlobalEnv.class).SetLabel(originalLabel);
+			parent.eval(tree, env);
+			env.getEnv(CommandHelperEnvironment.class).SetCommandSender(originalSender);
+			env.getEnv(GlobalEnv.class).SetLabel(originalLabel);
 			return CVoid.VOID;
 		}
 
@@ -850,11 +850,11 @@ public class Meta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			if(environment.getEnv(CommandHelperEnvironment.class).GetCommand() == null) {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			if(env.getEnv(CommandHelperEnvironment.class).GetCommand() == null) {
 				return CNull.NULL;
 			} else {
-				return new CString(environment.getEnv(CommandHelperEnvironment.class).GetCommand(), t);
+				return new CString(env.getEnv(CommandHelperEnvironment.class).GetCommand(), t);
 			}
 		}
 
@@ -884,7 +884,7 @@ public class Meta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String player = args[0].val();
 			String cmd = args[1].val();
 			if(cmd.isEmpty() || cmd.charAt(0) != '/') {
@@ -964,8 +964,8 @@ public class Meta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCCommandSender sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCCommandSender sender = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCLocation loc;
 			CArray ret;
 			if(sender instanceof MCBlockCommandSender) {
@@ -1023,11 +1023,11 @@ public class Meta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer player;
 			boolean state;
 			if(args.length == 1) {
-				player = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(player, t);
 				state = ArgumentValidation.getBoolean(args[0], t);
 			} else {
@@ -1090,17 +1090,17 @@ public class Meta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CString s;
-			if(args[0].isInstanceOf(CString.TYPE, null, environment)) {
+			if(args[0].isInstanceOf(CString.TYPE, null, env)) {
 				s = (CString) args[0];
 			} else {
 				s = new CString(args[0].val(), t);
 			}
-			if(is_alias.exec(t, environment, null, s).getBoolean()) {
-				call_alias.exec(t, environment, null, s);
+			if(is_alias.exec(t, env, null, s).getBoolean()) {
+				call_alias.exec(t, env, null, s);
 			} else {
-				run.exec(t, environment, null, s);
+				run.exec(t, env, null, s);
 			}
 			return CVoid.VOID;
 		}
@@ -1165,7 +1165,7 @@ public class Meta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return CVoid.VOID;
 		}
 
@@ -1219,15 +1219,15 @@ public class Meta {
 		}
 
 		@Override
-		public CArray exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public CArray exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CArray c = new CArray(t);
 			for(Locale l : Locale.getAvailableLocales()) {
 				if(!l.getCountry().isEmpty()) {
 					c.push(new CString(l.toString(), t), t);
 				}
 			}
-			new ArrayHandling.array_sort().exec(t, environment, null, c);
-			c = new ArrayHandling.array_unique().exec(t, environment, null, c);
+			new ArrayHandling.array_sort().exec(t, env, null, c);
+			c = new ArrayHandling.array_unique().exec(t, env, null, c);
 			return c;
 
 		}
@@ -1286,7 +1286,7 @@ public class Meta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			JarFile jf;
 			try {
 				String jar = ClassDiscovery.GetClassContainer(Meta.class).toString();
@@ -1342,8 +1342,8 @@ public class Meta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			return new CInt(environment.getEnv(GlobalEnv.class).GetScript().getCompileTime(), t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			return new CInt(env.getEnv(GlobalEnv.class).GetScript().getCompileTime(), t);
 		}
 
 		@Override
@@ -1387,8 +1387,8 @@ public class Meta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			return new CResource<>(environment, t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			return new CResource<>(env, t);
 		}
 
 		@Override
@@ -1434,7 +1434,7 @@ public class Meta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CArray ret = new CArray(t);
 			for(FileOptions.CompilerOption s : FileOptions.CompilerOption.values()) {
 				ret.push(new CString(s.getName(), t), t);
@@ -1483,7 +1483,7 @@ public class Meta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CArray ret = new CArray(t);
 			for(FileOptions.SuppressWarning s : FileOptions.SuppressWarning.values()) {
 				ret.push(new CString(s.getName(), t), t);
@@ -1534,10 +1534,10 @@ public class Meta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String name = ArgumentValidation.getString(args[0], t);
 			Mixed setting = args[1];
-			environment.getEnv(GlobalEnv.class).SetRuntimeSetting(name, setting);
+			env.getEnv(GlobalEnv.class).SetRuntimeSetting(name, setting);
 			return CVoid.VOID;
 		}
 
@@ -1587,14 +1587,14 @@ public class Meta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String name = ArgumentValidation.getString(args[0], t);
-			GlobalEnv env = environment.getEnv(GlobalEnv.class);
-			if(env.GetRuntimeSetting(name) != null) {
-				env.SetRuntimeSetting(name, null);
+			GlobalEnv gEnv = env.getEnv(GlobalEnv.class);
+			if(gEnv.GetRuntimeSetting(name) != null) {
+				gEnv.SetRuntimeSetting(name, null);
 			} else {
 				if(!ArgumentValidation.getBooleanish(
-						env.GetRuntimeSetting("function.remove_runtime_setting.no_warn_on_removing_blank",
+						gEnv.GetRuntimeSetting("function.remove_runtime_setting.no_warn_on_removing_blank",
 								CBoolean.FALSE), t)) {
 					MSLog.GetLogger().e(MSLog.Tags.META, "Attempting to remove a runtime setting that doesn't exist,"
 							+ " '" + name + "'", t);
@@ -1646,9 +1646,9 @@ public class Meta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String name = ArgumentValidation.getString(args[0], t);
-			return CBoolean.get(environment.getEnv(GlobalEnv.class).GetRuntimeSetting(name) != null);
+			return CBoolean.get(env.getEnv(GlobalEnv.class).GetRuntimeSetting(name) != null);
 		}
 
 		@Override
@@ -1692,7 +1692,7 @@ public class Meta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			throw new Error();
 		}
 
@@ -1769,7 +1769,7 @@ public class Meta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return new CString(ClassDiscovery.GetClassContainer(Meta.class).toString(), t);
 		}
 
@@ -1815,8 +1815,8 @@ public class Meta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			SmartComment comment = environment.getEnv(GlobalEnv.class).GetAliasComment();
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			SmartComment comment = env.getEnv(GlobalEnv.class).GetAliasComment();
 			if(comment == null) {
 				return CNull.NULL;
 			}

@@ -398,10 +398,10 @@ public class Exceptions {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			if(args[0].isInstanceOf(CClosure.TYPE, null, environment)) {
-				CClosure old = environment.getEnv(StaticRuntimeEnv.class).getExceptionHandler();
-				environment.getEnv(StaticRuntimeEnv.class).setExceptionHandler((CClosure) args[0]);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			if(args[0].isInstanceOf(CClosure.TYPE, null, env)) {
+				CClosure old = env.getEnv(StaticRuntimeEnv.class).getExceptionHandler();
+				env.getEnv(StaticRuntimeEnv.class).setExceptionHandler((CClosure) args[0]);
 				if(old == null) {
 					return CNull.NULL;
 				} else {
@@ -496,7 +496,7 @@ public class Exceptions {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return CVoid.VOID;
 		}
 
@@ -729,8 +729,8 @@ public class Exceptions {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			StackTraceManager stManager = environment.getEnv(GlobalEnv.class).GetStackTraceManager();
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
 			List<ConfigRuntimeException.StackTraceElement> elements = stManager.getCurrentStackTrace();
 			CArray ret = new CArray(t);
 			for(ConfigRuntimeException.StackTraceElement e : elements) {

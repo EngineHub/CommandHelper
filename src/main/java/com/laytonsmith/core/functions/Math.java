@@ -2299,7 +2299,7 @@ public class Math {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			double x = ArgumentValidation.getDouble(args[0], t) + 1;
 			DecimalFormat twoDForm = new DecimalFormat("0.##############E0");
 			String str = twoDForm.format(x);
@@ -2397,15 +2397,15 @@ public class Math {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String expr = args[0].val().trim();
 			if("".equals(expr)) {
 				throw new CREFormatException("Expression may not be empty", t);
 			}
 			CArray vars = null;
-			if(args.length == 2 && args[1].isInstanceOf(CArray.TYPE, null, environment)) {
+			if(args.length == 2 && args[1].isInstanceOf(CArray.TYPE, null, env)) {
 				vars = (CArray) args[1];
-			} else if(args.length == 2 && !(args[1].isInstanceOf(CArray.TYPE, null, environment))) {
+			} else if(args.length == 2 && !(args[1].isInstanceOf(CArray.TYPE, null, env))) {
 				throw new CRECastException("The second argument of expr() should be an array", t);
 			}
 			if(vars != null && !vars.inAssociativeMode()) {
@@ -2503,8 +2503,8 @@ public class Math {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			if(args[0].isInstanceOf(CInt.TYPE, null, environment)) {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			if(args[0].isInstanceOf(CInt.TYPE, null, env)) {
 				return new CInt(-(ArgumentValidation.getInt(args[0], t)), t);
 			} else {
 				return new CDouble(-(ArgumentValidation.getDouble(args[0], t)), t);
@@ -2544,7 +2544,7 @@ public class Math {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			double val = ArgumentValidation.getDouble(args[0], t);
 			if(val <= 0) {
 				throw new CRERangeException("val was <= 0", t);
@@ -2689,7 +2689,7 @@ public class Math {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			try {
 				MathConstants c = MathConstants.valueOf(args[0].val());
 				Number v = c.getValue();

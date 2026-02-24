@@ -520,13 +520,13 @@ public class OAuth {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			PersistenceNetwork pn = environment.getEnv(StaticRuntimeEnv.class).GetPersistenceNetwork();
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			PersistenceNetwork pn = env.getEnv(StaticRuntimeEnv.class).GetPersistenceNetwork();
 			String namespace = "oauth";
 			if(args.length >= 1) {
 				namespace += "." + x_get_oauth_token.getFormattedClientId(args[0].val());
 			}
-			DaemonManager dm = environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager();
+			DaemonManager dm = env.getEnv(StaticRuntimeEnv.class).GetDaemonManager();
 			try {
 				Map<String[], String> list = pn.getNamespace(namespace.split("\\."));
 				for(String[] key : list.keySet()) {

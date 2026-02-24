@@ -345,7 +345,7 @@ public class Trades {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCMerchant merchant = GetMerchant(args[0], t);
 			return merchant.isTrading() ? new CString(merchant.getTrader().getUniqueId().toString(), t) : CNull.NULL;
 		}

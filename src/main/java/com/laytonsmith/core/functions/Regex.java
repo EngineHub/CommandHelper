@@ -552,7 +552,7 @@ public class Regex {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return new CString(java.util.regex.Pattern.quote(args[0].val()), t);
 		}
 

@@ -278,7 +278,7 @@ public class Scheduling {
 		}
 
 		@Override
-		public Mixed exec(final Target t, final Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(final Target t, final Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			long time = ArgumentValidation.getInt(args[0], t);
 			int offset = 0;
 			long delay = time;
@@ -292,24 +292,24 @@ public class Scheduling {
 			if(time < 0) {
 				throw new CRERangeException("Negative repeating delay", t);
 			}
-			if(!(args[1 + offset].isInstanceOf(Callable.TYPE, null, environment))) {
+			if(!(args[1 + offset].isInstanceOf(Callable.TYPE, null, env))) {
 				throw new CRECastException(getName() + " expects a Callable to be sent as the second argument", t);
 			}
 			final Callable c = (Callable) args[1 + offset];
 			final AtomicInteger ret = new AtomicInteger(-1);
 
-			ret.set(StaticLayer.SetFutureRepeater(environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), time, delay, () -> {
+			ret.set(StaticLayer.SetFutureRepeater(env.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), time, delay, () -> {
 				c.getEnv().getEnv(GlobalEnv.class).SetCustom("timeout-id", ret.get());
 				try {
-					ProfilePoint p = environment.getEnv(StaticRuntimeEnv.class).GetProfiler().start("Executing timeout"
+					ProfilePoint p = env.getEnv(StaticRuntimeEnv.class).GetProfiler().start("Executing timeout"
 							+ " with id " + ret.get() + " (defined at " + t.toString() + ")", LogLevel.ERROR);
 					try {
-						c.executeCallable(environment, t);
+						c.executeCallable(env, t);
 					} finally {
 						p.stop();
 					}
 				} catch (ConfigRuntimeException e) {
-					ConfigRuntimeException.HandleUncaughtException(e, environment);
+					ConfigRuntimeException.HandleUncaughtException(e, env);
 				} catch (CancelCommandException e) {
 					//Ok
 				} catch (ProgramFlowManipulationException e) {
@@ -384,19 +384,19 @@ public class Scheduling {
 		}
 
 		@Override
-		public Mixed exec(final Target t, final Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			final TaskManager taskManager = environment.getEnv(StaticRuntimeEnv.class).GetTaskManager();
+		public Mixed exec(final Target t, final Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			final TaskManager taskManager = env.getEnv(StaticRuntimeEnv.class).GetTaskManager();
 			long time = ArgumentValidation.getInt(args[0], t);
 			if(time < 0) {
 				throw new CRERangeException("Negative delay", t);
 			}
-			if(!(args[1].isInstanceOf(Callable.TYPE, null, environment))) {
+			if(!(args[1].isInstanceOf(Callable.TYPE, null, env))) {
 				throw new CRECastException(getName() + " expects a Callable to be sent as the second argument", t);
 			}
 			final Callable c = (Callable) args[1];
 			final AtomicInteger ret = new AtomicInteger(-1);
 			ret.set(StaticLayer.SetFutureRunnable(
-					environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), time, () -> {
+					env.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), time, () -> {
 				c.getEnv().getEnv(GlobalEnv.class).SetCustom("timeout-id", ret.get());
 				TaskHandler task = taskManager.getTask(CoreTaskType.TIMEOUT, ret.get());
 				if(task == null) {
@@ -410,7 +410,7 @@ public class Scheduling {
 					ProfilePoint p = c.getEnv().getEnv(StaticRuntimeEnv.class).GetProfiler().start("Executing timeout"
 							+ " with id " + ret.get() + " (defined at " + t.toString() + ")", LogLevel.ERROR);
 					try {
-						c.executeCallable(environment, t);
+						c.executeCallable(env, t);
 					} finally {
 						p.stop();
 					}
@@ -498,16 +498,16 @@ public class Scheduling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			if(args.length == 0 && environment.getEnv(GlobalEnv.class).GetCustom("timeout-id") != null) {
-				StaticLayer.ClearFutureRunnable((Integer) environment.getEnv(GlobalEnv.class).GetCustom("timeout-id"));
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			if(args.length == 0 && env.getEnv(GlobalEnv.class).GetCustom("timeout-id") != null) {
+				StaticLayer.ClearFutureRunnable((Integer) env.getEnv(GlobalEnv.class).GetCustom("timeout-id"));
 			} else if(args.length == 1) {
 				if(args[0] instanceof CNull) {
 					throw new CRENullPointerException("Null value sent to " + getName()
 							+ "(). Did you mean " + getName() + "(0)?", t);
 				}
 				int id = ArgumentValidation.getInt32(args[0], t);
-				TaskManager taskManager = environment.getEnv(StaticRuntimeEnv.class).GetTaskManager();
+				TaskManager taskManager = env.getEnv(StaticRuntimeEnv.class).GetTaskManager();
 				TaskHandler task = taskManager.getTask(CoreTaskType.TIMEOUT, id);
 				if(task == null) { // may not be a timeout
 					StaticLayer.ClearFutureRunnable(id);
@@ -685,7 +685,7 @@ public class Scheduling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			SimpleDateFormat dateFormat;
 			Locale locale = Locale.getDefault();
 			if(args.length >= 3) {
@@ -766,7 +766,7 @@ public class Scheduling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String[] timezones = ArrayUtils.EMPTY_STRING_ARRAY;
 			try {
 				timezones = TimeZone.getAvailableIDs();
@@ -853,12 +853,12 @@ public class Scheduling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			//First things first, check the format of the arguments.
-			if(!(args[0].isInstanceOf(CString.TYPE, null, environment))) {
+			if(!(args[0].isInstanceOf(CString.TYPE, null, env))) {
 				throw new CRECastException("Expected string for argument 1 in " + getName(), t);
 			}
-			if(!(args[1].isInstanceOf(CClosure.TYPE, null, environment))) {
+			if(!(args[1].isInstanceOf(CClosure.TYPE, null, env))) {
 				throw new CRECastException("Expected closure for argument 2 in " + getName(), t);
 			}
 			CronFormat format = validateFormat(args[0].val(), t);
@@ -867,7 +867,7 @@ public class Scheduling {
 			//then register this job, as well as inform clear_task of this id.
 			synchronized(CRON_THREAD_LOCK) {
 				if(cronThread == null) {
-					final DaemonManager dm = environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager();
+					final DaemonManager dm = env.getEnv(StaticRuntimeEnv.class).GetDaemonManager();
 					final MutableObject<Boolean> stopCron = new MutableObject<>(false);
 					StaticLayer.GetConvertor().addShutdownHook(() -> {
 						cronThread = null;
@@ -1205,8 +1205,8 @@ public class Scheduling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			Integer id = (Integer) environment.getEnv(GlobalEnv.class).GetCustom("cron-task-id");
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			Integer id = (Integer) env.getEnv(GlobalEnv.class).GetCustom("cron-task-id");
 			if(args.length == 1) {
 				id = (int) ArgumentValidation.getInt(args[0], t);
 			}

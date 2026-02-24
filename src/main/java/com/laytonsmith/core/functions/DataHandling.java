@@ -280,7 +280,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return CArray.GetAssociativeArray(t, args);
 		}
 
@@ -1386,7 +1386,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			boolean b = true;
 			try {
 				ArgumentValidation.getNumber(args[0], t);
@@ -1460,7 +1460,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			double d;
 			try {
 				d = ArgumentValidation.getDouble(args[0], t);
@@ -2291,7 +2291,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			// This function is rewritten to include() calls in compile time, so this doesn't exist in runtime.
 			throw new UnsupportedOperationException();
 		}
@@ -2542,8 +2542,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			return CBoolean.get(args[0].isInstanceOf(CClosure.TYPE, null, environment));
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			return CBoolean.get(args[0].isInstanceOf(CClosure.TYPE, null, env));
 		}
 
 		@Override
@@ -2603,11 +2603,11 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String key;
-			if(args[0].isInstanceOf(CString.TYPE, null, environment)) {
+			if(args[0].isInstanceOf(CString.TYPE, null, env)) {
 				key = args[0].val();
-			} else if(args[0].isInstanceOf(CArray.TYPE, null, environment)) {
+			} else if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
 				if(((CArray) args[0]).isAssociative()) {
 					throw new CREIllegalArgumentException("Associative arrays may not be used as keys in " + getName(), t);
 				}
@@ -2674,11 +2674,11 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String key;
-			if(args[0].isInstanceOf(CString.TYPE, null, environment)) {
+			if(args[0].isInstanceOf(CString.TYPE, null, env)) {
 				key = args[0].val();
-			} else if(args[0].isInstanceOf(CArray.TYPE, null, environment)) {
+			} else if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
 				if(((CArray) args[0]).isAssociative()) {
 					throw new CREIllegalArgumentException("Associative arrays may not be used as keys in " + getName(), t);
 				}
@@ -2766,7 +2766,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return CVoid.VOID;
 		}
 
@@ -3133,11 +3133,11 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(args[args.length - 1] instanceof Callable callable) {
 				Mixed[] vals = new Mixed[args.length - 1];
 				System.arraycopy(args, 0, vals, 0, args.length - 1);
-				return callable.executeCallable(environment, t, vals);
+				return callable.executeCallable(env, t, vals);
 			} else {
 				throw new CRECastException("Only a Callable (created for instance from the closure function) can be"
 						+ " sent to execute(), or executed directly, such as @c().", t);
@@ -3198,7 +3198,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			Mixed[] vals = ArgumentValidation.getArray(args[0], t).asList().toArray(new Mixed[0]);
 			CClosure closure = ArgumentValidation.getObject(args[1], t, CClosure.class);
 			return closure.executeCallable(vals);
@@ -3250,8 +3250,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			if(!(args[args.length - 1].isInstanceOf(CClosure.TYPE, null, environment))) {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			if(!(args[args.length - 1].isInstanceOf(CClosure.TYPE, null, env))) {
 				throw new CRECastException("Only a closure (created from the closure function) can be sent to executeas()", t);
 			}
 			Mixed[] vals = new Mixed[args.length - 3];
@@ -3263,7 +3263,7 @@ public class DataHandling {
 			MCCommandSender originalSender = cEnv.GetCommandSender();
 			MCCommandSender sender;
 			if(args[0] instanceof CNull) {
-				sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+				sender = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			} else {
 				sender = Static.GetCommandSender(args[0].val(), t);
 			}
@@ -3339,7 +3339,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return CBoolean.get(ArgumentValidation.getBoolean(args[0], t));
 		}
 
@@ -3408,7 +3408,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			Mixed arg = args[0];
 			if(arg instanceof CMutablePrimitive) {
 				arg = ((CMutablePrimitive) arg).get();
@@ -3501,7 +3501,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return new CDouble(ArgumentValidation.getDouble(args[0], t), t);
 		}
 
@@ -3566,8 +3566,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			if(args[0].isInstanceOf(CString.TYPE, null, environment)) {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			if(args[0].isInstanceOf(CString.TYPE, null, env)) {
 				return args[0];
 			}
 			return new CString(args[0].val(), t);
@@ -3618,7 +3618,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			int radix = ArgumentValidation.getInt32(args[1], t);
 			if(radix < Character.MIN_RADIX || radix > Character.MAX_RADIX) {
 				throw new CRERangeException("The radix must be between " + Character.MIN_RADIX + " and " + Character.MAX_RADIX + ", inclusive.", t);
@@ -3690,7 +3690,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String value = args[0].val();
 			int radix = ArgumentValidation.getInt32(args[1], t);
 			if(radix < Character.MIN_RADIX || radix > Character.MAX_RADIX) {
@@ -3775,9 +3775,9 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			try {
-				return args[0].typeof(environment);
+				return args[0].typeof(env);
 			} catch (IllegalArgumentException ex) {
 				throw new Error("Class " + args[0].getClass().getName() + " is not annotated with @typeof. Please report this"
 						+ " error to the developers.");
@@ -4029,7 +4029,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			Mixed val = CNull.NULL;
 			if(args.length > 0) {
 				val = args[0];
@@ -4131,7 +4131,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(args[0] instanceof CNull) {
 				return CBoolean.FALSE;
 			}
@@ -4142,7 +4142,7 @@ public class DataHandling {
 				throw new RuntimeException("This should have been optimized out, this is a bug in instanceof,"
 						+ " please report it");
 			}
-			boolean b = InstanceofUtil.isInstanceof(args[0], type, environment);
+			boolean b = InstanceofUtil.isInstanceof(args[0], type, env);
 			return CBoolean.get(b);
 		}
 
@@ -4304,7 +4304,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CClassType type = ArgumentValidation.getClassType(args[0], t);
 			int size = ArgumentValidation.getInt32(args[1], t);
 			if(size < 0) {

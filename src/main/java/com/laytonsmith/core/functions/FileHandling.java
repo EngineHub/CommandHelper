@@ -161,7 +161,7 @@ public class FileHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return CNull.NULL;
 		}
 
@@ -263,7 +263,7 @@ public class FileHandling {
 		}
 
 		@Override
-		public Mixed exec(final Target t, final Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(final Target t, final Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			startup();
 			final String file = args[0].val();
 			final CClosure callback;
@@ -275,12 +275,12 @@ public class FileHandling {
 			}
 			final String encoding = _encoding;
 
-			if(!(args[1 + callbackIndex].isInstanceOf(CClosure.TYPE, null, environment))) {
+			if(!(args[1 + callbackIndex].isInstanceOf(CClosure.TYPE, null, env))) {
 				throw new CRECastException("Expected parameter " + (2 + callbackIndex) + " of " + getName() + " to be a closure!", t);
 			} else {
 				callback = ((CClosure) args[1]);
 			}
-			if(!Static.InCmdLine(environment, true)) {
+			if(!Static.InCmdLine(env, true)) {
 				try {
 					if(!Security.CheckSecurity(file)) {
 						throw new CRESecurityException("You do not have permission to access the file '" + file + "'", t);
@@ -289,7 +289,7 @@ public class FileHandling {
 					throw new CREIOException(ex.getMessage(), t, ex);
 				}
 			}
-			queue.invokeLater(environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), new Runnable() {
+			queue.invokeLater(env.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), new Runnable() {
 
 				@Override
 				public void run() {
@@ -306,7 +306,7 @@ public class FileHandling {
 					} else {
 						try {
 							//It's a local file read
-							File _file = Static.GetFileFromArgument(file, environment, t, null);
+							File _file = Static.GetFileFromArgument(file, env, t, null);
 							returnString = FileUtil.read(_file, encoding);
 						} catch (IOException ex) {
 							exception = new CREIOException(ex.getMessage(), t, ex);
@@ -322,10 +322,10 @@ public class FileHandling {
 					if(exception == null) {
 						cex = CNull.NULL;
 					} else {
-						cex = ObjectGenerator.GetGenerator().exception(exception, environment, t);
+						cex = ObjectGenerator.GetGenerator().exception(exception, env, t);
 					}
 					StaticLayer.GetConvertor().runOnMainThreadLater(
-							environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), new Runnable() {
+							env.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), new Runnable() {
 
 						@Override
 						public void run() {
@@ -390,10 +390,10 @@ public class FileHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			File location = Static.GetFileFromArgument(args[0].val(), environment, t, null);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			File location = Static.GetFileFromArgument(args[0].val(), env, t, null);
 			try {
-				if(!Static.InCmdLine(environment, true) && !Security.CheckSecurity(location)) {
+				if(!Static.InCmdLine(env, true) && !Security.CheckSecurity(location)) {
 					throw new CRESecurityException("You do not have permission to access the file '" + location + "'", t);
 				}
 			} catch (IOException ex) {
@@ -571,7 +571,7 @@ public class FileHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			//TODO: Doesn't work yet.
 			//TODO: Be sure to change over to Static.GetFileFromArgument
 			String path = args[0].val().trim().replace('\\', '/');
@@ -635,8 +635,8 @@ public class FileHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			File f = Static.GetFileFromArgument(args[0].val(), environment, t, null);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			File f = Static.GetFileFromArgument(args[0].val(), env, t, null);
 			try {
 				return new CString(f.getCanonicalPath(), t);
 			} catch (IOException ex) {

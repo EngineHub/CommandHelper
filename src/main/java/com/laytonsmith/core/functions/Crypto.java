@@ -115,7 +115,7 @@ public class Crypto {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String s = args[0].val();
 			StringBuilder b = new StringBuilder();
 			for(int i = 0; i < s.length(); i++) {
@@ -194,9 +194,9 @@ public class Crypto {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			try {
-				byte[] val = getByteArrayFromArg(args[0], environment);
+				byte[] val = getByteArrayFromArg(args[0], env);
 				MessageDigest digest = java.security.MessageDigest.getInstance("MD5");
 				digest.update(val);
 				String hash = StringUtils.toHex(digest.digest()).toLowerCase();
@@ -265,9 +265,9 @@ public class Crypto {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			try {
-				byte[] val = getByteArrayFromArg(args[0], environment);
+				byte[] val = getByteArrayFromArg(args[0], env);
 				MessageDigest digest = java.security.MessageDigest.getInstance("SHA1");
 				digest.update(val);
 				String hash = StringUtils.toHex(digest.digest()).toLowerCase();
@@ -335,9 +335,9 @@ public class Crypto {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			try {
-				byte[] val = getByteArrayFromArg(args[0], environment);
+				byte[] val = getByteArrayFromArg(args[0], env);
 				MessageDigest digest = java.security.MessageDigest.getInstance("SHA-256");
 				digest.update(val);
 				String hash = StringUtils.toHex(digest.digest()).toLowerCase();
@@ -406,9 +406,9 @@ public class Crypto {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			try {
-				byte[] val = getByteArrayFromArg(args[0], environment);
+				byte[] val = getByteArrayFromArg(args[0], env);
 				MessageDigest digest = java.security.MessageDigest.getInstance("SHA-512");
 				digest.update(val);
 				String hash = StringUtils.toHex(digest.digest()).toLowerCase();
@@ -454,14 +454,14 @@ public class Crypto {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			int log_rounds = 5;
 			if(args.length == 2) {
 				log_rounds = ArgumentValidation.getInt32(args[1], t);
 			}
 			try {
 				String val;
-				if(args[0].isInstanceOf(CSecureString.TYPE, null, environment)) {
+				if(args[0].isInstanceOf(CSecureString.TYPE, null, env)) {
 					val = new String(((CSecureString) args[0]).getDecryptedCharArray());
 				} else {
 					val = args[0].val();
@@ -530,9 +530,9 @@ public class Crypto {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String val;
-			if(args[0].isInstanceOf(CSecureString.TYPE, null, environment)) {
+			if(args[0].isInstanceOf(CSecureString.TYPE, null, env)) {
 				val = new String(((CSecureString) args[0]).getDecryptedCharArray());
 			} else {
 				val = args[0].val();
@@ -591,7 +591,7 @@ public class Crypto {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CByteArray ba = ArgumentValidation.getByteArray(args[0], t);
 			byte[] data = ba.asByteArrayCopy();
 			data = Base64.encodeBase64(data);
@@ -646,7 +646,7 @@ public class Crypto {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CByteArray ba = ArgumentValidation.getByteArray(args[0], t);
 			byte[] data = ba.asByteArrayCopy();
 			data = Base64.decodeBase64(data);
@@ -723,8 +723,8 @@ public class Crypto {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			return getHMAC("HmacMD5", t, environment, args);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			return getHMAC("HmacMD5", t, env, args);
 		}
 
 		@Override
@@ -783,8 +783,8 @@ public class Crypto {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			return getHMAC("HmacSHA1", t, environment, args);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			return getHMAC("HmacSHA1", t, env, args);
 		}
 
 		@Override
@@ -843,8 +843,8 @@ public class Crypto {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			return getHMAC("HmacSHA256", t, environment, args);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			return getHMAC("HmacSHA256", t, env, args);
 		}
 
 		@Override

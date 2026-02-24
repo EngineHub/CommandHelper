@@ -151,17 +151,17 @@ public class SQL {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			try {
 				Profiles.Profile profile;
-				if(args[0].isInstanceOf(CArray.TYPE, null, environment)) {
+				if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
 					Map<String, String> data = new HashMap<>();
 					for(String key : ((CArray) args[0]).stringKeySet()) {
 						data.put(key, ((CArray) args[0]).get(key, t).val());
 					}
 					profile = ProfilesImpl.getProfile(data);
 				} else {
-					Profiles profiles = environment.getEnv(StaticRuntimeEnv.class).getProfiles();
+					Profiles profiles = env.getEnv(StaticRuntimeEnv.class).getProfiles();
 					profile = profiles.getProfileById(args[0].val());
 				}
 				if(!(profile instanceof SQLProfile)) {
@@ -201,11 +201,11 @@ public class SQL {
 							continue;
 						}
 						try {
-							if(params[i].isInstanceOf(CInt.TYPE, null, environment)) {
+							if(params[i].isInstanceOf(CInt.TYPE, null, env)) {
 								ps.setLong(i + 1, ArgumentValidation.getInt(params[i], t));
-							} else if(params[i].isInstanceOf(CDouble.TYPE, null, environment)) {
+							} else if(params[i].isInstanceOf(CDouble.TYPE, null, env)) {
 								ps.setDouble(i + 1, (Double) ArgumentValidation.getDouble(params[i], t));
-							} else if(params[i].isInstanceOf(CString.TYPE, null, environment)) {
+							} else if(params[i].isInstanceOf(CString.TYPE, null, env)) {
 								if(type == Types.NCHAR || type == Types.NVARCHAR || type == Types.LONGNVARCHAR) {
 									ps.setNString(i + 1, (String) params[i].val());
 								} else {
@@ -496,31 +496,31 @@ public class SQL {
 		}
 
 		@Override
-		public Mixed exec(final Target t, final Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(final Target t, final Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			startup();
 			Mixed arg = args[args.length - 1];
-			if(!(arg.isInstanceOf(CClosure.TYPE, null, environment))) {
+			if(!(arg.isInstanceOf(CClosure.TYPE, null, env))) {
 				throw new CRECastException("The last argument to " + getName() + " must be a closure.", t);
 			}
 			final CClosure closure = ((CClosure) arg);
 			final Mixed[] newArgs = new Mixed[args.length - 1];
 			//Make a new array minus the closure
 			System.arraycopy(args, 0, newArgs, 0, newArgs.length);
-			queue.invokeLater(environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), new Runnable() {
+			queue.invokeLater(env.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), new Runnable() {
 
 				@Override
 				public void run() {
 					Mixed returnValue = CNull.NULL;
 					Mixed exception = CNull.NULL;
 					try {
-						returnValue = new query().exec(t, environment, null, newArgs);
+						returnValue = new query().exec(t, env, null, newArgs);
 					} catch (ConfigRuntimeException ex) {
-						exception = ObjectGenerator.GetGenerator().exception(ex, environment, t);
+						exception = ObjectGenerator.GetGenerator().exception(ex, env, t);
 					}
 					final Mixed cret = returnValue;
 					final Mixed cex = exception;
 					StaticLayer.GetConvertor().runOnMainThreadLater(
-							environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), new Runnable() {
+							env.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), new Runnable() {
 
 						@Override
 						public void run() {

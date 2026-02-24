@@ -1022,7 +1022,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			if(args[0] instanceof CNull) {
 				throw new CRECastException(this.getName() + " expects a string as first argument, but found null.", t);
 			}
@@ -1387,7 +1387,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(args.length < 2) {
 				throw new CREInsufficientArgumentsException(getName() + " expects 2 or more arguments", t);
 			}
@@ -1420,7 +1420,7 @@ public class StringHandling {
 			}
 
 			List<Mixed> flattenedArgs = new ArrayList<>();
-			if(numArgs == 3 && args[2].isInstanceOf(CArray.TYPE, null, environment)) {
+			if(numArgs == 3 && args[2].isInstanceOf(CArray.TYPE, null, env)) {
 				if(((CArray) args[2]).inAssociativeMode()) {
 					throw new CRECastException("If the second argument to " + getName() + " is an array, it may not be associative.", t);
 				} else {
@@ -1937,7 +1937,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String val = args[0].val();
 			String encoding = "UTF-8";
 			if(args.length == 2) {
@@ -1993,7 +1993,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CByteArray ba = ArgumentValidation.getByteArray(args[0], t);
 			String encoding = "UTF-8";
 			if(args.length == 2) {
@@ -2048,7 +2048,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(args.length < 2) {
 				throw new CREInsufficientArgumentsException(getName() + " must have 2 arguments at minimum", t);
 			}
@@ -2137,7 +2137,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			try {
 				return new CString(new String(Character.toChars(ArgumentValidation.getInt32(args[0], t))), t);
 			} catch (IllegalArgumentException ex) {
@@ -2205,7 +2205,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(args[0].val().toCharArray().length == 0) {
 				throw new CRERangeException("Empty string cannot be converted to unicode.", t);
 			}
@@ -2263,7 +2263,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return new CInt(StringUtils.LevenshteinDistance(args[0].val(), args[1].val()), t);
 		}
 
@@ -2320,7 +2320,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return new CInt(args[0].val().compareTo(args[1].val()), t);
 		}
 
@@ -2365,7 +2365,7 @@ public class StringHandling {
 	public static class string_compare_ic extends string_compare {
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return new CInt(args[0].val().compareToIgnoreCase(args[1].val()), t);
 		}
 
@@ -2418,7 +2418,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(args[0] instanceof CNull) {
 				return CNull.NULL;
 			}
@@ -2527,8 +2527,8 @@ public class StringHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			if(args[0].isInstanceOf(CArray.TYPE, null, environment)) {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
 				CArray array = ArgumentValidation.getArray(args[0], t);
 				return new CSecureString(array, t);
 			} else {
@@ -2605,11 +2605,11 @@ public class StringHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			if(args[0].isInstanceOf(CSecureString.TYPE, null, environment)) {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			if(args[0].isInstanceOf(CSecureString.TYPE, null, env)) {
 				CSecureString secure = ArgumentValidation.getObject(args[0], t, CSecureString.class);
 				return secure.getDecryptedCharCArray();
-			} else if(args[0].isInstanceOf(CString.TYPE, null, environment)) {
+			} else if(args[0].isInstanceOf(CString.TYPE, null, env)) {
 				CArray array = new CArray(Target.UNKNOWN, args[0].val().length());
 				for(char c : args[0].val().toCharArray()) {
 					array.push(new CString(c, t), t);
@@ -2714,7 +2714,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			UUIDType type = UUIDType.RANDOM;
 			String input = null;
 			if(args.length > 0) {

@@ -51,8 +51,8 @@ public class TaskHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			TaskManager tm = environment.getEnv(StaticRuntimeEnv.class).GetTaskManager();
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			TaskManager tm = env.getEnv(StaticRuntimeEnv.class).GetTaskManager();
 			CArray ret = new CArray(t);
 			for(TaskHandler task : tm.getTasks()) {
 				CArray tt = CArray.GetAssociativeArray(t);
@@ -135,10 +135,10 @@ public class TaskHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String type = args[0].val();
 			int id = ArgumentValidation.getInt32(args[1], t);
-			TaskManager tm = environment.getEnv(StaticRuntimeEnv.class).GetTaskManager();
+			TaskManager tm = env.getEnv(StaticRuntimeEnv.class).GetTaskManager();
 			tm.killTask(type, id);
 			return CVoid.VOID;
 		}

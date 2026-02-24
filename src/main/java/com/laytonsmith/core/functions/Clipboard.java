@@ -65,8 +65,8 @@ public class Clipboard {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			Cmdline.requireCmdlineMode(environment, this, t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			Cmdline.requireCmdlineMode(env, this, t);
 			if(clipboard == null) {
 				throw new CREUnsupportedOperationException(
 						"Clipboard functions are not supported on this platform.", t);
@@ -133,8 +133,8 @@ public class Clipboard {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			Cmdline.requireCmdlineMode(environment, this, t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			Cmdline.requireCmdlineMode(env, this, t);
 			if(clipboard == null) {
 				throw new CREUnsupportedOperationException(
 						"Clipboard functions are not supported on this platform.", t);

@@ -255,17 +255,17 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CBoolean exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
-			if(args[1].typeof(environment).equals(args[0].typeof(environment))) {
-				if(args[0].isInstanceOf(CString.TYPE, null, environment) && args[1].isInstanceOf(CString.TYPE, null, environment)) {
+			if(args[1].typeof(env).equals(args[0].typeof(env))) {
+				if(args[0].isInstanceOf(CString.TYPE, null, env) && args[1].isInstanceOf(CString.TYPE, null, env)) {
 					// Check for actual string equality, so we don't do type massaging
 					// for numeric strings. Thus '2' !== '2.0'
 					return CBoolean.get(args[0].val().equals(args[1].val()));
 				}
-				return new equals().exec(t, environment, null, args);
+				return new equals().exec(t, env, null, args);
 			} else {
 				return CBoolean.FALSE;
 			}
@@ -333,8 +333,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			return new sequals().exec(t, environment, null, args).not();
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			return new sequals().exec(t, env, null, args).not();
 		}
 
 		@Override
@@ -575,13 +575,13 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CBoolean exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			Mixed v1 = args[0];
 			Mixed v2 = args[1];
 			if(!v2.getClass().equals(v1.getClass())) {
 				return CBoolean.FALSE;
 			}
-			return new equals_ic().exec(t, environment, null, v1, v2);
+			return new equals_ic().exec(t, env, null, v1, v2);
 		}
 
 		@Override
@@ -674,8 +674,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CBoolean exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			return new equals_ic().exec(t, environment, null, args).not();
+		public CBoolean exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			return new equals_ic().exec(t, env, null, args).not();
 		}
 
 		@Override
@@ -721,11 +721,11 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CBoolean exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			if(args[0].isInstanceOf(CArray.TYPE, null, environment) && args[1].isInstanceOf(CArray.TYPE, null, environment)) {
+		public CBoolean exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			if(args[0].isInstanceOf(CArray.TYPE, null, env) && args[1].isInstanceOf(CArray.TYPE, null, env)) {
 				return CBoolean.get(args[0] == args[1]);
 			} else {
-				return new equals().exec(t, environment, null, args);
+				return new equals().exec(t, env, null, args);
 			}
 		}
 
@@ -1253,7 +1253,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return CVoid.VOID;
 		}
 
@@ -1549,7 +1549,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return CVoid.VOID;
 		}
 
@@ -1749,7 +1749,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CBoolean exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
@@ -1823,7 +1823,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) {
 			return CNull.NULL;
 		}
 
@@ -1898,13 +1898,13 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) {
 			return CNull.NULL;
 		}
 
 		@Override
-		public CBoolean execs(Target t, Environment environment, Script parent, ParseTree... args) throws ConfigRuntimeException {
-			return new or().execs(t, environment, parent, args).not();
+		public CBoolean execs(Target t, Environment env, Script parent, ParseTree... args) throws ConfigRuntimeException {
+			return new or().execs(t, env, parent, args).not();
 		}
 
 		@Override
@@ -1973,11 +1973,11 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CBoolean exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
-			return new xor().exec(t, environment, null, args).not();
+			return new xor().exec(t, env, null, args).not();
 		}
 
 		@Override
@@ -2045,7 +2045,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CInt exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public CInt exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(args.length < 2) {
 				throw new CREFormatException(this.getName() + " expects at least 2 arguments.", t);
 			}
@@ -2132,7 +2132,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CInt exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public CInt exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(args.length < 2) {
 				throw new CREFormatException(this.getName() + " expects at least 2 arguments.", t);
 			}
@@ -2221,7 +2221,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CInt exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public CInt exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(args.length < 2) {
 				throw new CREFormatException(this.getName() + " expects at least 2 arguments.", t);
 			}
@@ -2306,7 +2306,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CInt exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public CInt exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(args.length != 1) {
 				throw new CREFormatException(this.getName() + " expects 1 argument.", t);
 			}
@@ -2372,7 +2372,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CInt exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public CInt exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
@@ -2442,7 +2442,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CInt exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public CInt exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
@@ -2514,7 +2514,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CInt exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public CInt exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
@@ -2565,7 +2565,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return CVoid.VOID;
 		}
 
@@ -2645,7 +2645,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CInt exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public CInt exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return new CInt(args[0].hashCode(), t);
 		}
 

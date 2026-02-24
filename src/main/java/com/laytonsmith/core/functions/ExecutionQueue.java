@@ -57,10 +57,10 @@ public class ExecutionQueue {
 		}
 
 		@Override
-		public Mixed exec(Target t, final Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, final Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			final CClosure c;
 			String queue = null;
-			if(!(args[0].isInstanceOf(CClosure.TYPE, null, environment))) {
+			if(!(args[0].isInstanceOf(CClosure.TYPE, null, env))) {
 				throw new CRECastException("Parameter 1 to " + getName() + " must be a closure.", t);
 			}
 			c = ((CClosure) args[0]);
@@ -68,8 +68,8 @@ public class ExecutionQueue {
 				queue = Construct.nval(args[1]);
 			}
 
-			environment.getEnv(StaticRuntimeEnv.class).getExecutionQueue().push(
-					environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), queue, new Runnable() {
+			env.getEnv(StaticRuntimeEnv.class).getExecutionQueue().push(
+					env.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), queue, new Runnable() {
 
 				@Override
 				public void run() {
@@ -81,7 +81,7 @@ public class ExecutionQueue {
 								try {
 									c.executeCallable();
 								} catch (ConfigRuntimeException ex) {
-									ConfigRuntimeException.HandleUncaughtException(ex, environment);
+									ConfigRuntimeException.HandleUncaughtException(ex, env);
 								} catch (ProgramFlowManipulationException ex) {
 									// Ignored
 								}
@@ -140,10 +140,10 @@ public class ExecutionQueue {
 		}
 
 		@Override
-		public Mixed exec(Target t, final Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, final Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			final CClosure c;
 			String queue = null;
-			if(!(args[0].isInstanceOf(CClosure.TYPE, null, environment))) {
+			if(!(args[0].isInstanceOf(CClosure.TYPE, null, env))) {
 				throw new CRECastException("Parameter 1 to " + getName() + " must be a closure.", t);
 			}
 			c = ((CClosure) args[0]);
@@ -151,8 +151,8 @@ public class ExecutionQueue {
 				queue = Construct.nval(args[1]);
 			}
 
-			environment.getEnv(StaticRuntimeEnv.class).getExecutionQueue().pushFront(
-					environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), queue, new Runnable() {
+			env.getEnv(StaticRuntimeEnv.class).getExecutionQueue().pushFront(
+					env.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), queue, new Runnable() {
 
 				@Override
 				public void run() {
@@ -164,7 +164,7 @@ public class ExecutionQueue {
 								try {
 									c.executeCallable();
 								} catch (ConfigRuntimeException ex) {
-									ConfigRuntimeException.HandleUncaughtException(ex, environment);
+									ConfigRuntimeException.HandleUncaughtException(ex, env);
 								} catch (ProgramFlowManipulationException ex) {
 									// Ignored
 								}
@@ -223,12 +223,12 @@ public class ExecutionQueue {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String queue = null;
 			if(args.length == 1) {
 				queue = Construct.nval(args[0]);
 			}
-			environment.getEnv(StaticRuntimeEnv.class).getExecutionQueue().remove(queue);
+			env.getEnv(StaticRuntimeEnv.class).getExecutionQueue().remove(queue);
 			return CVoid.VOID;
 		}
 
@@ -273,12 +273,12 @@ public class ExecutionQueue {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String queue = null;
 			if(args.length == 1) {
 				queue = Construct.nval(args[0]);
 			}
-			environment.getEnv(StaticRuntimeEnv.class).getExecutionQueue().removeFront(queue);
+			env.getEnv(StaticRuntimeEnv.class).getExecutionQueue().removeFront(queue);
 			return CVoid.VOID;
 		}
 
@@ -324,12 +324,12 @@ public class ExecutionQueue {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String queue = null;
 			if(args.length == 1) {
 				queue = Construct.nval(args[0]);
 			}
-			environment.getEnv(StaticRuntimeEnv.class).getExecutionQueue().clear(queue);
+			env.getEnv(StaticRuntimeEnv.class).getExecutionQueue().clear(queue);
 			return CVoid.VOID;
 		}
 
@@ -375,12 +375,12 @@ public class ExecutionQueue {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String queue = null;
 			if(args.length == 1) {
 				queue = Construct.nval(args[0]);
 			}
-			return CBoolean.get(environment.getEnv(StaticRuntimeEnv.class).getExecutionQueue().isRunning(queue));
+			return CBoolean.get(env.getEnv(StaticRuntimeEnv.class).getExecutionQueue().isRunning(queue));
 		}
 
 		@Override
@@ -424,7 +424,7 @@ public class ExecutionQueue {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String queue = null;
 			if(args.length == 2) {
 				queue = Construct.nval(args[1]);
@@ -433,8 +433,8 @@ public class ExecutionQueue {
 			if(delay < 0) {
 				throw new CRERangeException("Negative delay", t);
 			}
-			environment.getEnv(StaticRuntimeEnv.class).getExecutionQueue().push(
-					environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), queue, new Runnable() {
+			env.getEnv(StaticRuntimeEnv.class).getExecutionQueue().push(
+					env.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), queue, new Runnable() {
 
 				@Override
 				public void run() {
@@ -490,7 +490,7 @@ public class ExecutionQueue {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String queue = null;
 			if(args.length == 2) {
 				queue = Construct.nval(args[1]);
@@ -499,8 +499,8 @@ public class ExecutionQueue {
 			if(delay < 0) {
 				throw new CRERangeException("Negative delay", t);
 			}
-			environment.getEnv(StaticRuntimeEnv.class).getExecutionQueue().pushFront(
-					environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), queue, new Runnable() {
+			env.getEnv(StaticRuntimeEnv.class).getExecutionQueue().pushFront(
+					env.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), queue, new Runnable() {
 
 				@Override
 				public void run() {

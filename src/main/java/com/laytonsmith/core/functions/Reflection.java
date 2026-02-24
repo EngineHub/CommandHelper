@@ -356,13 +356,13 @@ public class Reflection {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CClassType type = ArgumentValidation.getClassType(args[0], t);
 			CArray ret = CArray.GetAssociativeArray(t);
 			ret.set("fqcn", type.getFQCN().getFQCN());
 			ret.set("name", type.getFQCN().getSimpleName());
-			ret.set("interfaces", new CArray(t, type.getTypeInterfaces(environment)), t);
-			ret.set("superclasses", new CArray(t, type.getTypeSuperclasses(environment)), t);
+			ret.set("interfaces", new CArray(t, type.getTypeInterfaces(env)), t);
+			ret.set("superclasses", new CArray(t, type.getTypeSuperclasses(env)), t);
 
 			CArray typeDocs = new CArray(t);
 			// When type unions are a thing, this will need to be implemented slightly differently.
@@ -370,8 +370,8 @@ public class Reflection {
 				CArray docs = CArray.GetAssociativeArray(t);
 				docs.set("package", type.getPackage() == null ? CNull.NULL : type.getPackage(), t);
 				docs.set("isNative", CBoolean.get(type.getNativeType() != null), t);
-				docs.set("docs", m.getTypeDocs(t, environment));
-				docs.set("since", m.getTypeSince(t, environment).toString());
+				docs.set("docs", m.getTypeDocs(t, env));
+				docs.set("since", m.getTypeSince(t, env).toString());
 				typeDocs.push(docs, t);
 			}
 			ret.set("typeDocs", typeDocs, t);
@@ -597,10 +597,10 @@ public class Reflection {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CArray ret = CArray.GetAssociativeArray(t);
 			if(FUNCS.keySet().size() < 10) {
-				initf(environment);
+				initf(env);
 			}
 			for(String cname : FUNCS.keySet()) {
 				CArray fnames = new CArray(t);
@@ -654,7 +654,7 @@ public class Reflection {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics,
+		public Mixed exec(Target t, Environment env, GenericParameters generics,
 				Mixed... args) throws ConfigRuntimeException {
 			CArray ret = new CArray(t);
 			for(Event event : EventList.GetEvents()) {
@@ -704,7 +704,7 @@ public class Reflection {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CArray ret = new CArray(t);
 			for(Script s : Static.getAliasCore().getScripts()) {
 				ret.push(new CString(s.getSignature(), t), t);
@@ -753,8 +753,8 @@ public class Reflection {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			PersistenceNetwork pn = environment.getEnv(StaticRuntimeEnv.class).GetPersistenceNetwork();
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			PersistenceNetwork pn = env.getEnv(StaticRuntimeEnv.class).GetPersistenceNetwork();
 			return new CString(pn.getKeySource(args[0].val().split("\\.")).toString(), t);
 		}
 
@@ -804,9 +804,9 @@ public class Reflection {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CArray ret = new CArray(t);
-			for(Map.Entry<String, Procedure> p : environment.getEnv(GlobalEnv.class).GetProcs().entrySet()) {
+			for(Map.Entry<String, Procedure> p : env.getEnv(GlobalEnv.class).GetProcs().entrySet()) {
 				ret.push(new CString(p.getKey(), t), t);
 			}
 			ret.sort(CArray.ArraySortType.STRING_IC);
@@ -869,9 +869,9 @@ public class Reflection {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CArray ret = new CArray(t);
-			ObjectDefinitionTable odt = environment.getEnv(CompilerEnvironment.class).getObjectDefinitionTable();
+			ObjectDefinitionTable odt = env.getEnv(CompilerEnvironment.class).getObjectDefinitionTable();
 			for(ObjectDefinition od : odt.getObjectDefinitionSet()) {
 				try {
 					ret.push(CClassType.get(FullyQualifiedClassName.forFullyQualifiedClass(od.getClassName())), t);
@@ -937,10 +937,10 @@ public class Reflection {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String type = ArgumentValidation.getStringObject(args[0], t);
 			try {
-				return CClassType.get(FullyQualifiedClassName.forName(args[0].val(), t, environment));
+				return CClassType.get(FullyQualifiedClassName.forName(args[0].val(), t, env));
 			} catch (CRECastException | ClassNotFoundException ex) {
 				throw new CRENotFoundException("Could not find type " + type, t);
 			}
