@@ -2323,7 +2323,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return new CInt(args[0].val().compareTo(args[1].val()), t);
 		}
 
@@ -2368,7 +2368,7 @@ public class StringHandling {
 	public static class string_compare_ic extends string_compare {
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return new CInt(args[0].val().compareToIgnoreCase(args[1].val()), t);
 		}
 

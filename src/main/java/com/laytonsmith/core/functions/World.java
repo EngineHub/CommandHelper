@@ -631,12 +631,12 @@ public class World {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCWorld world;
 			if(args.length == 1) {
 				world = Static.getServer().getWorld(args[0].val());
 			} else {
-				MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				MCPlayer m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				if(m == null) {
 					throw new CREInvalidWorldException("No world specified", t);
 				}
@@ -1178,14 +1178,14 @@ public class World {
 				} catch (IllegalArgumentException e) {
 					throw new CREFormatException(args[1].val() + " is not a valid world type.", t);
 				}
-				MCWorldEnvironment environment;
+				MCWorldEnvironment worldEnv;
 				try {
-					environment = MCWorldEnvironment.valueOf(args[2].val().toUpperCase());
+					worldEnv = MCWorldEnvironment.valueOf(args[2].val().toUpperCase());
 				} catch (IllegalArgumentException e) {
 					throw new CREFormatException(args[2].val() + " is not a valid environment type. Must be one of: "
 							+ StringUtils.Join(MCWorldEnvironment.values(), ", "), t);
 				}
-				creator.type(type).environment(environment);
+				creator.type(type).environment(worldEnv);
 			}
 			if((args.length >= 4) && !(args[3] instanceof CNull)) {
 				if(args[3].isInstanceOf(CInt.TYPE, null, env)) {

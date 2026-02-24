@@ -635,7 +635,7 @@ public class EntityManagement {
 	public static class get_entity_saves_on_unload extends EntityGetterFunction {
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCEntity ent = Static.getEntity(args[0], t);
 			return CBoolean.get(ent.savesOnUnload());
 		}
@@ -662,7 +662,7 @@ public class EntityManagement {
 	public static class set_entity_saves_on_unload extends EntitySetterFunction {
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCEntity ent = Static.getEntity(args[0], t);
 			ent.setSavesOnUnload(ArgumentValidation.getBooleanObject(args[1], t));
 			return CVoid.VOID;
@@ -728,7 +728,7 @@ public class EntityManagement {
 	public static class get_entity_age extends EntityGetterFunction {
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return new CInt(Static.getEntity(args[0], t).getTicksLived(), t);
 		}
 
@@ -4729,7 +4729,7 @@ public class EntityManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCEntity e = Static.getEntity(args[0], t);
 			return CBoolean.get(e.hasScoreboardTag(args[1].val()));
 		}
@@ -5210,7 +5210,7 @@ public class EntityManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCEntity entity = Static.getEntity(args[0], t);
 			if(!(entity instanceof MCDisplay display)) {
 				throw new CREBadEntityException("Not a display entity.", t);
@@ -5419,7 +5419,7 @@ public class EntityManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCEntity entity = Static.getEntity(args[0], t);
 			if(!(entity instanceof MCDisplay display)) {
 				throw new CREBadEntityException("Not a display entity.", t);
@@ -5442,7 +5442,7 @@ public class EntityManagement {
 					display.setBrightness(null);
 				} else {
 					MCDisplay.Brightness brightness;
-					if(m.isInstanceOf(CArray.TYPE, null, environment)) {
+					if(m.isInstanceOf(CArray.TYPE, null, env)) {
 						CArray brightnessArray = (CArray) m;
 						if(!brightnessArray.isAssociative()) {
 							throw new CREIllegalArgumentException(

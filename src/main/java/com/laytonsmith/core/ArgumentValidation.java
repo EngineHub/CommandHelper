@@ -558,7 +558,7 @@ public final class ArgumentValidation {
 	public static LeftHandSideType getClassType(Mixed c, Target t) {
 		return getClassType(c, t, null);
 	}
-	
+
 	/**
 	 * Returns the LeftHandSideType from the given Construct. This accepts either a LeftHandSideType directly, or a
 	 * CClassType, which is converted to a LeftHandSideType.

@@ -53,8 +53,8 @@ public class CNativeClosure extends Construct implements Callable {
 	}
 
 	@Override
-	public Mixed executeCallable(Environment environment, Target t, Mixed... values) throws ConfigRuntimeException, ProgramFlowManipulationException, CancelCommandException {
-		return runnable.execute(t, environment, values);
+	public Mixed executeCallable(Environment env, Target t, Mixed... values) throws ConfigRuntimeException, ProgramFlowManipulationException, CancelCommandException {
+		return runnable.execute(t, env, values);
 	}
 
 	@Override

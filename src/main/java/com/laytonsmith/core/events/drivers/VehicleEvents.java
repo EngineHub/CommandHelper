@@ -474,7 +474,7 @@ public class VehicleEvents {
 			if(!(e instanceof MCVehicle)) {
 				throw new CREBadEntityException("The id was not a vehicle", t);
 			}
-			
+
 			MCLocation from = ObjectGenerator.GetGenerator().location(manualObject.get("from", t, env),
 					e.getWorld(), manualObject.getTarget());
 			MCLocation to = ObjectGenerator.GetGenerator().location(manualObject.get("to", t, env),

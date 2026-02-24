@@ -13,7 +13,6 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.objects.AccessModifier;
 import com.laytonsmith.core.objects.ObjectModifier;
 import com.laytonsmith.core.objects.ObjectType;
-import com.laytonsmith.PureUtilities.Common.Annotations.AggressiveDeprecation;
 
 import java.util.Set;
 

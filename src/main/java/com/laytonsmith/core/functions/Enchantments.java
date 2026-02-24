@@ -16,7 +16,6 @@ import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
-import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
@@ -520,7 +519,7 @@ public class Enchantments {
 				FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() == 1
-					&& (children.get(0).getData().isInstanceOf(CString.TYPE, null, env) 
+					&& (children.get(0).getData().isInstanceOf(CString.TYPE, null, env)
 					|| children.get(0).getData().isInstanceOf(CInt.TYPE, null, env))) {
 				env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
 						new CompilerWarning("The string item format in " + getName() + " is deprecated.", t, null));

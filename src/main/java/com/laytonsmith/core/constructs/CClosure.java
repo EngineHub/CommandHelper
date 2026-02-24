@@ -227,19 +227,19 @@ public class CClosure extends Construct implements Callable, Booleanish {
 		if(node == null) {
 			return;
 		}
-		Environment environment;
+		Environment env;
 		try {
 			synchronized(this) {
-				environment = env.clone();
+				env = this.env.clone();
 			}
 		} catch (CloneNotSupportedException ex) {
 			Logger.getLogger(CClosure.class.getName()).log(Level.SEVERE, null, ex);
 			return;
 		}
-		StackTraceManager stManager = environment.getEnv(GlobalEnv.class).GetStackTraceManager();
+		StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
 		stManager.addStackTraceElement(new ConfigRuntimeException.StackTraceElement("<<closure>>", getTarget()));
 		try {
-			CArray arguments = new CArray(node.getData().getTarget(), null, environment);
+			CArray arguments = new CArray(node.getData().getTarget(), null, env);
 			CArray vararg = null;
 			LeftHandSideType varargType = null;
 			if(values != null) {
@@ -264,9 +264,9 @@ public class CClosure extends Construct implements Callable, Booleanish {
 							if(vararg == null) {
 								// TODO: Once generics are added, add the type
 								vararg = new CArray(value.getTarget(), GenericParameters.emptyBuilder(CArray.TYPE)
-									.addParameter(varargType).build(getTarget(), environment), environment);
+									.addParameter(varargType).build(getTarget(), env), env);
 								try {
-									environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE,
+									env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE,
 											name, vararg, value.getTarget()));
 								} catch(ConfigCompileException ex) {
 									throw new CREError(ex.getMessage(), getTarget(), ex);
@@ -284,11 +284,11 @@ public class CClosure extends Construct implements Callable, Booleanish {
 						} else {
 							IVariable var;
 							try {
-								var = new IVariable(types[i], name, value, getTarget(), environment);
+								var = new IVariable(types[i], name, value, getTarget(), env);
 							} catch(ConfigCompileException ex) {
 								throw new CREError(ex.getMessage(), getTarget(), ex);
 							}
-							environment.getEnv(GlobalEnv.class).GetVarList().set(var);
+							env.getEnv(GlobalEnv.class).GetVarList().set(var);
 						}
 					}
 				}
@@ -303,7 +303,7 @@ public class CClosure extends Construct implements Callable, Booleanish {
 
 			if(!hasArgumentsParam) {
 				try {
-					environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, "@arguments", arguments,
+					env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, "@arguments", arguments,
 							node.getData().getTarget()));
 				} catch(ConfigCompileException ex) {
 					throw new CREError(ex.getMessage(), getTarget(), ex);
@@ -315,7 +315,7 @@ public class CClosure extends Construct implements Callable, Booleanish {
 			children.add(node);
 			newNode.setChildren(children);
 			try {
-				MethodScriptCompiler.execute(newNode, environment, null, environment.getEnv(GlobalEnv.class)
+				MethodScriptCompiler.execute(newNode, env, null, env.getEnv(GlobalEnv.class)
 						.GetScript());
 			} catch (LoopManipulationException e) {
 				//This shouldn't ever happen.
@@ -323,12 +323,12 @@ public class CClosure extends Construct implements Callable, Booleanish {
 				Target t = lme.getTarget();
 				ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.CreateUncatchableException("A "
 						+ lme.getName() + "() bubbled up to the top of"
-						+ " a closure, which is unexpected behavior.", t), environment);
+						+ " a closure, which is unexpected behavior.", t), env);
 			} catch (FunctionReturnException ex) {
 				// Check the return type of the closure to see if it matches the defined type
 				// Normal execution.
 				Mixed ret = ex.getReturn();
-				if(!InstanceofUtil.isInstanceof(ret.typeof(env), returnType, environment)) {
+				if(!InstanceofUtil.isInstanceof(ret.typeof(env), returnType, env)) {
 					throw new CRECastException("Expected closure to return a value of type " + returnType.val()
 							+ " but a value of type " + ret.typeof(env) + " was returned instead", ret.getTarget());
 				}
@@ -337,7 +337,7 @@ public class CClosure extends Construct implements Callable, Booleanish {
 			} catch (CancelCommandException e) {
 				// die()
 			} catch (ConfigRuntimeException ex) {
-				ex.setEnv(environment);
+				ex.setEnv(env);
 				if(ex instanceof AbstractCREException) {
 					((AbstractCREException) ex).freezeStackTraceElements(stManager);
 				}
@@ -393,6 +393,11 @@ public class CClosure extends Construct implements Callable, Booleanish {
 	}
 
 	@Override
+	public boolean getBooleanValue(Target t, Environment env) {
+		return true;
+	}
+
+	@Override
 	public GenericParameters getGenericParameters() {
 		GenericParameters.GenericParametersBuilder builder = GenericParameters.emptyBuilder(TYPE);
 		builder.addParameter(returnType);
@@ -400,10 +405,5 @@ public class CClosure extends Construct implements Callable, Booleanish {
 			builder.addParameter(type);
 		}
 		return builder.buildWithoutValidation();
-	}
-
-	@Override
-	public boolean getBooleanValue(Target t, Environment env) {
-		return true;
 	}
 }

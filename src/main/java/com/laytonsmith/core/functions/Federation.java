@@ -31,7 +31,7 @@ public class Federation {
 //		}
 //
 //		@Override
-//		public Construct exec(final Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
+//		public Construct exec(final Target t, final Environment env, Construct... args) throws ConfigRuntimeException {
 //			final CArray connection_data = Static.AssertType(CArray.class, args, 0, this, t);
 //			final CClosure remote_callback = Static.AssertType(CClosure.class, args, 1, this, t);
 //			final CClosure local_callback;
@@ -67,7 +67,7 @@ public class Federation {
 //				password = null;
 //			}
 //			if(connection_data.containsKey("remote_public_key")) {
-//				remote_public_key = Static.GetFileFromArgument(connection_data.get("remote_public_key").val(), environment, t, null);
+//				remote_public_key = Static.GetFileFromArgument(connection_data.get("remote_public_key").val(), env, t, null);
 //			} else {
 //				remote_public_key = null;
 //			}
@@ -76,7 +76,7 @@ public class Federation {
 //			} else {
 //				master_port = com.laytonsmith.core.federation.Federation.MASTER_PORT;
 //			}
-//			final DaemonManager dm = environment.getEnv(GlobalEnv.class).GetDaemonManager();
+//			final DaemonManager dm = env.getEnv(GlobalEnv.class).GetDaemonManager();
 //			// All the arguments are now parsed. Kick off a new thread.
 //
 //			new Thread(new Runnable() {
@@ -256,7 +256,7 @@ public class Federation {
 //		}
 //
 //		@Override
-//		public Construct exec(Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
+//		public Construct exec(Target t, final Environment env, Construct... args) throws ConfigRuntimeException {
 //			final String server_name;
 //			final String password;
 //			final File authorized_keys;
@@ -279,7 +279,7 @@ public class Federation {
 //				password = null;
 //			}
 //			if(connection_details.containsKey("authorized_keys")) {
-//				authorized_keys = Static.GetFileFromArgument(connection_details.get("authorized_keys").val(), environment, t, null);
+//				authorized_keys = Static.GetFileFromArgument(connection_details.get("authorized_keys").val(), env, t, null);
 //			} else {
 //				authorized_keys = null;
 //			}
@@ -303,8 +303,8 @@ public class Federation {
 //				throw new Exceptions.FormatException("A server with the name \"" + server_name + "\" is already registered.", t);
 //			}
 //
-//			final PersistenceNetwork pn = environment.getEnv(GlobalEnv.class).GetPersistenceNetwork();
-//			final DaemonManager dm = environment.getEnv(GlobalEnv.class).GetDaemonManager();
+//			final PersistenceNetwork pn = env.getEnv(GlobalEnv.class).GetPersistenceNetwork();
+//			final DaemonManager dm = env.getEnv(GlobalEnv.class).GetDaemonManager();
 //			// Argument parsing and validation is now done.
 //			final boolean is_master;
 //			try {
@@ -391,7 +391,7 @@ public class Federation {
 //								try {
 //									HandleReadOnlyException(ex);
 //								} catch (ConfigRuntimeException ee) {
-//									ConfigRuntimeException.HandleUncaughtException(ee, environment);
+//									ConfigRuntimeException.HandleUncaughtException(ee, env);
 //								}
 //							}
 //							break;
@@ -483,7 +483,7 @@ public class Federation {
 //		}
 //
 //		@Override
-//		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+//		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 //			String server_name = args[0].val();
 //
 //			for(FederationServer server : federationServers.values()) {
@@ -501,7 +501,7 @@ public class Federation {
 //			synchronized (serverCountLock) {
 //				serverCount--;
 //				if(serverCount == 0) {
-//					environment.getEnv(GlobalEnv.class).GetDaemonManager().deactivateThread(null);
+//					env.getEnv(GlobalEnv.class).GetDaemonManager().deactivateThread(null);
 //				}
 //			}
 //

@@ -110,7 +110,7 @@ public class Debug {
 //			return false;
 //		}
 //
-//		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+//		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 //			if(!(Boolean) Static.getPreferences().getPreference("allow-debug-logging")) {
 //				throw new ConfigRuntimeException("allow-debug-logging is currently set to false. To use " + this.getVariableName() + ", enable it in your preferences.", CRESecurityException.class, t);
 //			}
@@ -442,7 +442,7 @@ public class Debug {
 //			return false;
 //		}
 //
-//		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+//		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 //			if(!(Boolean) Static.getPreferences().getPreference("allow-debug-logging")) {
 //				throw new ConfigRuntimeException("allow-debug-logging is currently set to false. To use " + this.getVariableName() + ", enable it in your preferences.", CRESecurityException.class, t);
 //			}
@@ -495,7 +495,7 @@ public class Debug {
 //			return true;
 //		}
 //
-//		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+//		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 //			if(!(Boolean) Static.getPreferences().getPreference("allow-debug-logging")) {
 //				throw new ConfigRuntimeException("allow-debug-logging is currently set to false. To use " + this.getVariableName() + ", enable it in your preferences.", CRESecurityException.class, t);
 //			}
@@ -571,7 +571,7 @@ public class Debug {
 //			return false;
 //		}
 //
-//		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+//		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 //			if(!(Boolean) Static.getPreferences().getPreference("allow-debug-logging")) {
 //				throw new ConfigRuntimeException("allow-debug-logging is currently set to false. To use " + this.getVariableName() + ", enable it in your preferences.", CRESecurityException.class, t);
 //			}

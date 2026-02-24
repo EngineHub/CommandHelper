@@ -220,7 +220,7 @@ public class Web {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(final Target t, final Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			final URL url;
 			try {
 				url = new URL(args[0].val());
@@ -524,7 +524,7 @@ public class Web {
 			return CVoid.VOID;
 		}
 
-		private void executeFinish(CClosure closure, Mixed arg, Target t, Environment environment) {
+		private void executeFinish(CClosure closure, Mixed arg, Target t, Environment env) {
 			try {
 				Mixed ret = closure.executeCallable(new Mixed[]{arg});
 				//Just ignore this if it's returning void. Otherwise, warn.
@@ -537,7 +537,7 @@ public class Web {
 				//This is an error
 				MSLog.GetLogger().Log(MSLog.Tags.RUNTIME, LogLevel.WARNING, "Only return may be used inside the closure.", t);
 			} catch (ConfigRuntimeException e) {
-				ConfigRuntimeException.HandleUncaughtException(e, environment);
+				ConfigRuntimeException.HandleUncaughtException(e, env);
 			} catch (Throwable e) {
 				//Other throwables we just need to report
 				MSLog.GetLogger().Log(MSLog.Tags.RUNTIME, LogLevel.ERROR, "An unexpected exception has occurred. No extra"

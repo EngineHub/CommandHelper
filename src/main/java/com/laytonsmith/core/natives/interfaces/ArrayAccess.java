@@ -161,7 +161,7 @@ public interface ArrayAccess extends Booleanish {
 	 * type only, this is fully covered, but for other slice types, only negative slice numbers are converted, and
 	 * subclasses must handle both forward and reverse slices if applicable. A good way to handle that is as such:
 	 * <pre><code>
-     * int start = Math.min(begin, end);
+	 * int start = Math.min(begin, end);
 	 * int stop = Math.max(begin, end);
 	 * int step = (begin &lt;= end) ? 1 : -1;
 	 * for(int i = start; i != stop; i += step) { ... }

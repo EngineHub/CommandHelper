@@ -357,14 +357,14 @@ public class Echoes {
 			return "void {[player], message} Sends a message to the action bar above the hot bar.";
 		}
 
-		public Construct exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer player;
 			String message;
 			if(args.length == 2) {
 				player = Static.GetPlayer(args[0], t);
 				message = args[1].val();
 			} else {
-				player = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(player, t);
 				message = args[0].val();
 			}

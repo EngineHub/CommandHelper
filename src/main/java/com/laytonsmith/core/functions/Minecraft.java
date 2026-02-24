@@ -1470,14 +1470,14 @@ public class Minecraft {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender sender;
 			String selector;
 			if(args.length == 2) {
 				sender = Static.GetPlayer(args[0], t);
 				selector = args[1].val();
 			} else {
-				sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+				sender = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 				if(sender == null) {
 					throw new CREException("No command sender in this context.", t);
 				}

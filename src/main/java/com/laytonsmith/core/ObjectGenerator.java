@@ -2073,22 +2073,6 @@ public class ObjectGenerator {
 	}
 
 	/**
-	 * Returns a CArray with an alpha channel from a given MCColor. It will be in the format array(a: 0, r: 0, g: 0, b: 0)
-	 *
-	 * @param color
-	 * @param t
-	 * @return
-	 */
-	public CArray transparentColor(MCColor color, Target t) {
-		CArray ca = CArray.GetAssociativeArray(t);
-		ca.set("r", new CInt(color.getRed(), t), t);
-		ca.set("g", new CInt(color.getGreen(), t), t);
-		ca.set("b", new CInt(color.getBlue(), t), t);
-		ca.set("a", new CInt(color.getAlpha(), t), t);
-		return ca;
-	}
-
-	/**
 	 * Gets a vector object, given a Vector.
 	 *
 	 * @param vector the Vector
@@ -2214,6 +2198,22 @@ public class ObjectGenerator {
 		} else {
 			throw new CREFormatException("Expecting an array, received " + c.typeof(env).getSimpleName(), t);
 		}
+	}
+
+	/**
+	 * Returns a CArray with an alpha channel from a given MCColor. It will be in the format array(a: 0, r: 0, g: 0, b: 0)
+	 *
+	 * @param color
+	 * @param t
+	 * @return
+	 */
+	public CArray transparentColor(MCColor color, Target t) {
+		CArray ca = CArray.GetAssociativeArray(t);
+		ca.set("r", new CInt(color.getRed(), t), t);
+		ca.set("g", new CInt(color.getGreen(), t), t);
+		ca.set("b", new CInt(color.getBlue(), t), t);
+		ca.set("a", new CInt(color.getAlpha(), t), t);
+		return ca;
 	}
 
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
@@ -3332,6 +3332,7 @@ public class ObjectGenerator {
 	 * @param value
 	 * @param plugin
 	 * @return
+	 * @deprecated Use {@link #metadataValue(Mixed, MCPlugin, Environment)} instead.
 	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated

@@ -53,7 +53,7 @@ public class Marquee {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(final Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			final String marqueeName;
 			final String text;
 			final int stringWidth;

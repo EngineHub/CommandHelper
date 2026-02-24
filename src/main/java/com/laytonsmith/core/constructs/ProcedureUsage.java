@@ -90,9 +90,9 @@ public class ProcedureUsage extends Construct implements Callable {
 	}
 
 	@Override
-	public Mixed executeCallable(Environment environment, Target t, Mixed... values) throws ConfigRuntimeException,
+	public Mixed executeCallable(Environment env, Target t, Mixed... values) throws ConfigRuntimeException,
 			ProgramFlowManipulationException, CancelCommandException {
-		return proc.execute(Arrays.asList(values), environment, t);
+		return proc.execute(Arrays.asList(values), env, t);
 	}
 
 	@Override

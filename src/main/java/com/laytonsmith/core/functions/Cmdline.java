@@ -567,7 +567,7 @@ public class Cmdline {
 
 		@SuppressWarnings({"BroadCatchBlock", "TooBroadCatch", "UseSpecificCatch"})
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			//TODO: Make this more robust by having a local cache of the environment which we modify, and get_env returns from.
 			Map<String, String> newenv = new HashMap<>(System.getenv());
 			newenv.put(args[0].val(), args[1].val());
@@ -576,8 +576,8 @@ public class Cmdline {
 				Class<?> processEnvironmentClass = Class.forName("java.lang.ProcessEnvironment");
 				Field theEnvironmentField = processEnvironmentClass.getDeclaredField("theEnvironment");
 				theEnvironmentField.setAccessible(true);
-				Map<String, String> env = (Map<String, String>) theEnvironmentField.get(null);
-				env.putAll(newenv);
+				Map<String, String> sysEnv = (Map<String, String>) theEnvironmentField.get(null);
+				sysEnv.putAll(newenv);
 				Field theCaseInsensitiveEnvironmentField = processEnvironmentClass.getDeclaredField("theCaseInsensitiveEnvironment");
 				theCaseInsensitiveEnvironmentField.setAccessible(true);
 				Map<String, String> cienv = (Map<String, String>) theCaseInsensitiveEnvironmentField.get(null);
@@ -586,12 +586,12 @@ public class Cmdline {
 			} catch (NoSuchFieldException e) {
 				try {
 					Class[] classes = Collections.class.getDeclaredClasses();
-					Map<String, String> env = System.getenv();
+					Map<String, String> sysEnv = System.getenv();
 					for(Class cl : classes) {
 						if("java.util.Collections$UnmodifiableMap".equals(cl.getName())) {
 							Field field = cl.getDeclaredField("m");
 							field.setAccessible(true);
-							Object obj = field.get(env);
+							Object obj = field.get(sysEnv);
 							Map<String, String> map = (Map<String, String>) obj;
 							map.clear();
 							map.putAll(newenv);
@@ -970,7 +970,7 @@ public class Cmdline {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(final Target t, final Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(!Static.InCmdLine(env, true)) {
 				if(!Prefs.AllowShellCommands()) {
 					throw new CREInsufficientPermissionException("Shell commands are not allowed. Enable them in preferences.ini.", t);
@@ -2080,13 +2080,13 @@ public class Cmdline {
 	/**
 	 * Requires cmdline mode. If not currently in cmdline mode, a proper CRE is thrown.
 	 *
-	 * @param environment
+	 * @param env
 	 * @param f The function this is being called from.
 	 * @param t
 	 * @throws ConfigRuntimeException If not in cmdline mode.
 	 */
-	public static void requireCmdlineMode(Environment environment, Function f, Target t) throws ConfigRuntimeException {
-		if(!Static.InCmdLine(environment, true)) {
+	public static void requireCmdlineMode(Environment env, Function f, Target t) throws ConfigRuntimeException {
+		if(!Static.InCmdLine(env, true)) {
 			throw new CREInsufficientPermissionException(f.getName() + " cannot be used outside of cmdline mode.", t);
 		}
 	}

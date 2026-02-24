@@ -165,7 +165,7 @@ public class MobManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCLivingEntity mob = Static.getLivingEntity(args[0], t);
 			if(!mob.isTameable()) {
 				throw new CREUntameableMobException("The specified entity is not tameable", t);
@@ -499,7 +499,7 @@ public class MobManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCLivingEntity ent = Static.getLivingEntity(args[0], t);
 			if(ent instanceof MCAnimal animal) {
 				return new CInt(animal.getLoveTicks(), t);
@@ -534,7 +534,7 @@ public class MobManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCLivingEntity ent = Static.getLivingEntity(args[0], t);
 			int ticks = ArgumentValidation.getInt32(args[1], t);
 			if(ent instanceof MCAnimal animal) {

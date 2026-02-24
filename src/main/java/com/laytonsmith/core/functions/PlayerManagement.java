@@ -5672,7 +5672,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, GenericParameters generics, Mixed... args)
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, GenericParameters generics, Mixed... args)
 				throws ConfigRuntimeException {
 
 			MCPlayer p = Static.GetPlayer(args[0], t);
@@ -6634,12 +6634,12 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			if(args.length == 1) {
 				p = Static.GetPlayer(args[0], t);
 			} else {
-				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
 			}
 			MCWorldBorder wb = p.getWorldBorder();
@@ -7489,12 +7489,12 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer thisPlayer;
 			boolean isVanished;
 			MCPlayer otherPlayer;
 			if(args.length == 2) {
-				thisPlayer = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				thisPlayer = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				isVanished = ArgumentValidation.getBooleanObject(args[0], t);
 				otherPlayer = Static.GetPlayer(args[1], t);
 			} else {
@@ -7548,11 +7548,11 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer thisPlayer;
 			MCPlayer otherPlayer;
 			if(args.length == 1) {
-				thisPlayer = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				thisPlayer = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				otherPlayer = Static.GetPlayer(args[0], t);
 			} else {
 				thisPlayer = Static.GetPlayer(args[0], t);

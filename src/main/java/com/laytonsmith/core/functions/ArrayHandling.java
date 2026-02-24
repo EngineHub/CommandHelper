@@ -2293,7 +2293,7 @@ public final class ArrayHandling {
 			if(ca.isEmpty(env)) {
 				return CNull.NULL;
 			} else {
-				return ca.get(ca.size(env) - 1, t);
+				return ca.get(ca.size(env) - 1, t, env);
 			}
 		}
 
@@ -2425,7 +2425,7 @@ public final class ArrayHandling {
 				throw new CRERangeException("Number cannot be larger than array size", t);
 			}
 			if(args.length > 2) {
-				getKeys = ArgumentValidation.getBoolean(args[2], t, env);
+				getKeys = ArgumentValidation.getBooleanObject(args[2], t, env);
 			}
 
 			LinkedHashSet<Integer> randoms = new LinkedHashSet<>();
@@ -2512,11 +2512,11 @@ public final class ArrayHandling {
 		}
 
 		@Override
-		public CArray exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public CArray exec(final Target t, final Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CArray array = ArgumentValidation.getArray(args[0], t, env);
 			boolean compareTypes = true;
 			if(args.length == 2) {
-				compareTypes = ArgumentValidation.getBoolean(args[1], t, env);
+				compareTypes = ArgumentValidation.getBooleanObject(args[1], t, env);
 			}
 			final boolean fCompareTypes = compareTypes;
 			if(array.inAssociativeMode()) {
@@ -2528,8 +2528,8 @@ public final class ArrayHandling {
 
 					@Override
 					public boolean checkIfEquals(Mixed item1, Mixed item2) {
-						return (fCompareTypes && ArgumentValidation.getBoolean(sequals.exec(t, env, null, item1, item2), t, env))
-								|| (!fCompareTypes && ArgumentValidation.getBoolean(equals.exec(t, env, null, item1, item2), t, env));
+						return (fCompareTypes && ArgumentValidation.getBooleanObject(sequals.exec(t, env, null, item1, item2), t, env))
+								|| (!fCompareTypes && ArgumentValidation.getBooleanObject(equals.exec(t, env, null, item1, item2), t, env));
 					}
 				});
 				for(Mixed c : set) {
@@ -2931,7 +2931,7 @@ public final class ArrayHandling {
 			if(array.size(env) == 1) {
 				// This line looks bad, but all it does is return the first (and since we know only) value in the array,
 				// whether or not it is associative or normal.
-				return array.get(array.keySet(env).toArray(new Mixed[0])[0], t, env);
+				return array.get(array.keySet(env).toArray(Mixed[]::new)[0], t, env);
 			}
 			List<Mixed> keys = new ArrayList<>(array.keySet(env));
 			Mixed lastValue = array.get(keys.get(0), t, env);
@@ -3016,7 +3016,7 @@ public final class ArrayHandling {
 			if(array.size(env) == 1) {
 				// This line looks bad, but all it does is return the first (and since we know only) value in the array,
 				// whether or not it is associative or normal.
-				return array.get(array.keySet(env).toArray(new Mixed[0])[0], t, env);
+				return array.get(array.keySet(env).toArray(Mixed[]::new)[0], t, env);
 			}
 			List<Mixed> keys = new ArrayList<>(array.keySet(env));
 			Mixed lastValue = array.get(keys.get(keys.size() - 1), t, env);
@@ -3385,7 +3385,7 @@ public final class ArrayHandling {
 						} else {
 							if(closure == null) {
 								if(comparisonFunction != null) {
-									if(ArgumentValidation.getBoolean(comparisonFunction.exec(t, env, null,
+									if(ArgumentValidation.getBooleanish(comparisonFunction.exec(t, env, null,
 											one.get(k1[i], t, env), two.get(k2[j], t, env)
 									), t, env)) {
 										ret.push(one.get(k1[i], t, env), t, env);
@@ -3395,9 +3395,8 @@ public final class ArrayHandling {
 									throw new Error();
 								}
 							} else {
-								Mixed fre = closure.executeCallable(env, t, one.get(k1[i], t, env),
-										two.get(k2[j], t, env));
-								boolean res = ArgumentValidation.getBoolean(fre, fre.getTarget(), env);
+								Mixed fre = closure.executeCallable(env, t, one.get(k1[i], t, env), two.get(k2[j], t, env));
+								boolean res = ArgumentValidation.getBooleanish(fre, fre.getTarget(), env);
 								if(res) {
 									ret.push(one.get(k1[i], t, env), t, env);
 									continue i;
@@ -3778,7 +3777,7 @@ public final class ArrayHandling {
 						} else {
 							if(closure == null) {
 								if(comparisonFunction != null) {
-									if(ArgumentValidation.getBoolean(comparisonFunction.exec(t, env, null,
+									if(ArgumentValidation.getBooleanish(comparisonFunction.exec(t, env, null,
 											one.get(k1[i], t, env), two.get(k2[j], t, env)
 									), t, env)) {
 										addValue = false;
@@ -3788,9 +3787,8 @@ public final class ArrayHandling {
 									throw new Error();
 								}
 							} else {
-								Mixed fre = closure.executeCallable(env, t, one.get(k1[i], t, env),
-										two.get(k2[j], t, env));
-								boolean res = ArgumentValidation.getBoolean(fre, fre.getTarget(), env);
+								Mixed fre = closure.executeCallable(env, t, one.get(k1[i], t, env), two.get(k2[j], t, env));
+								boolean res = ArgumentValidation.getBooleanish(fre, fre.getTarget(), env);
 								if(res) {
 									addValue = false;
 									break;

@@ -144,11 +144,6 @@ public abstract class AbstractMixedInterfaceRunner implements MixedInterfaceRunn
 	}
 
 	@Override
-	public GenericParameters getGenericParameters() {
-		return null;
-	}
-
-	@Override
 	public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env) {
 		return InstanceofUtil.isInstanceof(this, LeftHandSideType.fromCClassType(
 				new ConcreteGenericParameter(type, lhsGenericParameters, Target.UNKNOWN, env), Target.UNKNOWN, env), env);
@@ -157,5 +152,10 @@ public abstract class AbstractMixedInterfaceRunner implements MixedInterfaceRunn
 	@Override
 	public boolean isInstanceOf(Class<? extends Mixed> type) {
 		return type.isAssignableFrom(this.getClass());
+	}
+
+	@Override
+	public GenericParameters getGenericParameters() {
+		return null;
 	}
 }

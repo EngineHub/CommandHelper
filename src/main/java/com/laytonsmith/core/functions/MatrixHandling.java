@@ -9,7 +9,6 @@ import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.compiler.signature.FunctionSignatures;
 import com.laytonsmith.core.compiler.signature.SignatureBuilder;
 import com.laytonsmith.core.constructs.CArray;
-import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CInt;

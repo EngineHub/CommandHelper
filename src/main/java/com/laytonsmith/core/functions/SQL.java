@@ -496,7 +496,7 @@ public class SQL {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(final Target t, final Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			startup();
 			Mixed arg = args[args.length - 1];
 			if(!(arg.isInstanceOf(CClosure.TYPE, null, env))) {

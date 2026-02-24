@@ -57,7 +57,7 @@ public class ExecutionQueue {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, final Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			final CClosure c;
 			String queue = null;
 			if(!(args[0].isInstanceOf(CClosure.TYPE, null, env))) {
@@ -140,7 +140,7 @@ public class ExecutionQueue {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, final Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			final CClosure c;
 			String queue = null;
 			if(!(args[0].isInstanceOf(CClosure.TYPE, null, env))) {

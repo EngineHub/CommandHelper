@@ -437,7 +437,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	public static Object GetPOJO(Mixed c) throws ClassCastException {
 		return Static.getJavaObject(c);
 	}
-	
+
 	/**
 	 * Converts a Construct to a POJO, if the type is convertable. The types returned from this method are set, unlike
 	 * GetConstruct which is more flexible. The mapping is precisely as follows:
@@ -554,6 +554,11 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 				that.getGenericParameters().toGenericTypeParameters(naked, Target.UNKNOWN, env), env);
 	}
 
+	@Override
+	public CClassType typeof(Environment env) {
+		return typeof(this, env);
+	}
+
 	/**
 	 * Returns the generic parameters for this Construct. By default, null, but this MUST be overridden by objects which
 	 * have generics.
@@ -563,11 +568,6 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	@Override
 	public GenericParameters getGenericParameters() {
 		return null;
-	}
-
-	@Override
-	public CClassType typeof(Environment env) {
-		return typeof(this, env);
 	}
 
 	/**

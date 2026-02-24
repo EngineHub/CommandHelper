@@ -1590,15 +1590,15 @@ public class Meta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String name = ArgumentValidation.getString(args[0], t);
-			GlobalEnv env = environment.getEnv(GlobalEnv.class);
-			if(env.GetRuntimeSetting(name) != null) {
-				env.SetRuntimeSetting(name, null);
+			GlobalEnv gEnv = env.getEnv(GlobalEnv.class);
+			if(gEnv.GetRuntimeSetting(name) != null) {
+				gEnv.SetRuntimeSetting(name, null);
 			} else {
 				if(!ArgumentValidation.getBooleanish(
-						env.GetRuntimeSetting("function.remove_runtime_setting.no_warn_on_removing_blank",
-								CBoolean.FALSE), t, environment)) {
+						gEnv.GetRuntimeSetting("function.remove_runtime_setting.no_warn_on_removing_blank",
+								CBoolean.FALSE), t, env)) {
 					MSLog.GetLogger().e(MSLog.Tags.META, "Attempting to remove a runtime setting that doesn't exist,"
 							+ " '" + name + "'", t);
 				}
