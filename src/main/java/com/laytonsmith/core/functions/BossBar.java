@@ -82,7 +82,7 @@ public class BossBar {
 		public CArray exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CArray ca = new CArray(t);
 			for(String id : BARS.keySet()) {
-				ca.push(new CString(id, t), t);
+				ca.push(new CString(id, t), t, env);
 			}
 			return ca;
 		}
@@ -137,28 +137,28 @@ public class BossBar {
 				}
 				CArray ca = (CArray) args[1];
 				if(ca.containsKey("title")) {
-					title = ca.get("title", t).val();
+					title = ca.get("title", t, env).val();
 				}
 				if(ca.containsKey("color")) {
 					try {
-						color = MCBarColor.valueOf(ca.get("color", t).val());
+						color = MCBarColor.valueOf(ca.get("color", t, env).val());
 					} catch (IllegalArgumentException ex) {
 						throw new CREFormatException("Invalid boss bar color.", t);
 					}
 				}
 				if(ca.containsKey("style")) {
 					try {
-						style = MCBarStyle.valueOf(ca.get("style", t).val());
+						style = MCBarStyle.valueOf(ca.get("style", t, env).val());
 					} catch (IllegalArgumentException ex) {
 						throw new CREFormatException("Invalid boss bar style.", t);
 					}
 				}
 				if(ca.containsKey("visible")) {
-					visible = ArgumentValidation.getBoolean(ca.get("visible", t), t);
+					visible = ArgumentValidation.getBoolean(ca.get("visible", t, env), t, env);
 				}
 				if(ca.containsKey("percent")) {
 					try {
-						percent = ArgumentValidation.getDouble(ca.get("percent", t), t);
+						percent = ArgumentValidation.getDouble(ca.get("percent", t, env), t, env);
 					} catch (IllegalArgumentException ex) {
 						throw new CRERangeException("Progress percentage must be from 0.0 to 1.0.", t);
 					}
@@ -213,35 +213,35 @@ public class BossBar {
 				bar.setTitle(args[1].val());
 			} else if(args[1].isInstanceOf(CDouble.TYPE, null, env)) {
 				try {
-					bar.setProgress(ArgumentValidation.getDouble(args[1], t));
+					bar.setProgress(ArgumentValidation.getDouble(args[1], t, env));
 				} catch (IllegalArgumentException ex) {
 					throw new CRERangeException("Progress percentage must be from 0.0 to 1.0.", t);
 				}
 			} else if(args[1].isInstanceOf(CArray.TYPE, null, env)) {
 				CArray ca = (CArray) args[1];
 				if(ca.containsKey("title")) {
-					bar.setTitle(ca.get("title", t).val());
+					bar.setTitle(ca.get("title", t, env).val());
 				}
 				if(ca.containsKey("color")) {
 					try {
-						bar.setColor(MCBarColor.valueOf(ca.get("color", t).val()));
+						bar.setColor(MCBarColor.valueOf(ca.get("color", t, env).val()));
 					} catch (IllegalArgumentException ex) {
 						throw new CREFormatException("Invalid boss bar color.", t);
 					}
 				}
 				if(ca.containsKey("style")) {
 					try {
-						bar.setStyle(MCBarStyle.valueOf(ca.get("style", t).val()));
+						bar.setStyle(MCBarStyle.valueOf(ca.get("style", t, env).val()));
 					} catch (IllegalArgumentException ex) {
 						throw new CREFormatException("Invalid boss bar style.", t);
 					}
 				}
 				if(ca.containsKey("visible")) {
-					bar.setVisible(ArgumentValidation.getBoolean(ca.get("visible", t), t));
+					bar.setVisible(ArgumentValidation.getBoolean(ca.get("visible", t, env), t, env));
 				}
 				if(ca.containsKey("percent")) {
 					try {
-						bar.setProgress(ArgumentValidation.getDouble(ca.get("percent", t), t));
+						bar.setProgress(ArgumentValidation.getDouble(ca.get("percent", t, env), t, env));
 					} catch (IllegalArgumentException ex) {
 						throw new CRERangeException("Progress percentage must be from 0.0 to 1.0.", t);
 					}
@@ -285,12 +285,12 @@ public class BossBar {
 			if(bar == null) {
 				throw new CRENotFoundException("That boss bar id does not exist.", t);
 			}
-			CArray ret = CArray.GetAssociativeArray(t);
-			ret.set("title", bar.getTitle(), t);
-			ret.set("color", bar.getColor().name(), t);
-			ret.set("style", bar.getStyle().name(), t);
-			ret.set("visible", CBoolean.get(bar.isVisible()), t);
-			ret.set("percent", new CDouble(bar.getProgress(), t), t);
+			CArray ret = CArray.GetAssociativeArray(t, null, env);
+			ret.set("title", bar.getTitle(), t, env);
+			ret.set("color", bar.getColor().name(), t, env);
+			ret.set("style", bar.getStyle().name(), t, env);
+			ret.set("visible", CBoolean.get(bar.isVisible()), t, env);
+			ret.set("percent", new CDouble(bar.getProgress(), t), t, env);
 			return ret;
 		}
 
@@ -362,7 +362,7 @@ public class BossBar {
 			if(bar == null) {
 				throw new CRENotFoundException("That boss bar id does not exist.", t);
 			}
-			bar.addPlayer(Static.GetPlayer(args[1].val(), t));
+			bar.addPlayer(Static.GetPlayer(args[1].val(), t, env));
 			return CVoid.VOID;
 		}
 
@@ -396,7 +396,7 @@ public class BossBar {
 			if(bar == null) {
 				throw new CRENotFoundException("That boss bar id does not exist.", t);
 			}
-			bar.removePlayer(Static.GetPlayer(args[1].val(), t));
+			bar.removePlayer(Static.GetPlayer(args[1].val(), t, env));
 			return CVoid.VOID;
 		}
 
@@ -432,7 +432,7 @@ public class BossBar {
 			}
 			CArray players = new CArray(t);
 			for(MCPlayer player : bar.getPlayers()) {
-				players.push(new CString(player.getName(), t), t);
+				players.push(new CString(player.getName(), t), t, env);
 			}
 			return players;
 		}

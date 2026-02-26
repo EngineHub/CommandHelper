@@ -410,7 +410,7 @@ public class Environment {
 						b.setType(mat);
 						return CVoid.VOID;
 					}
-					bd = ObjectGenerator.GetGenerator().blockData((CArray) args[1], t);
+					bd = ObjectGenerator.GetGenerator().blockData((CArray) args[1], t, env);
 				} else {
 					bd = Static.getServer().createBlockData(args[1].val());
 				}

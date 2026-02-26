@@ -312,11 +312,11 @@ public class VehicleEvents {
 			if(event instanceof MCVehicleEntityCollideEvent) {
 				MCVehicleEntityCollideEvent e = (MCVehicleEntityCollideEvent) event;
 				if(key.equals("collide")) {
-					e.setCollisionCancelled(!ArgumentValidation.getBoolean(value, Target.UNKNOWN));
+					e.setCollisionCancelled(!ArgumentValidation.getBoolean(value, Target.UNKNOWN, env));
 					return true;
 				}
 				if(key.equals("pickup")) {
-					e.setPickupCancelled(!ArgumentValidation.getBoolean(value, Target.UNKNOWN));
+					e.setPickupCancelled(!ArgumentValidation.getBoolean(value, Target.UNKNOWN, env));
 					return true;
 				}
 			}

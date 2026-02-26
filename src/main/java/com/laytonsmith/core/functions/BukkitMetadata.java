@@ -230,7 +230,7 @@ public class BukkitMetadata {
 				value = args[2];
 				plugin = (args.length == 4) ? Static.getPlugin(args[3], t) : StaticLayer.GetPlugin();
 			}
-			metadatable.setMetadata(key, ObjectGenerator.GetGenerator().metadataValue(value, plugin));
+			metadatable.setMetadata(key, ObjectGenerator.GetGenerator().metadataValue(value, plugin, env));
 			return CVoid.VOID;
 		}
 

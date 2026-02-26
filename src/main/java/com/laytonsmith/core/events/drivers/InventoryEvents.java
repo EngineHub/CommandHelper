@@ -142,7 +142,7 @@ public class InventoryEvents {
 				map.put("player", new CString(e.getWhoClicked().getName(), t));
 				CArray viewers = new CArray(t);
 				for(MCHumanEntity viewer : e.getViewers()) {
-					viewers.push(new CString(viewer.getName(), t), t);
+					viewers.push(new CString(viewer.getName(), t), t, env);
 				}
 				map.put("viewers", viewers);
 
@@ -154,18 +154,18 @@ public class InventoryEvents {
 				map.put("shiftclick", CBoolean.get(e.isShiftClick()));
 				map.put("creativeclick", CBoolean.get(e.isCreativeClick()));
 				map.put("keyboardclick", CBoolean.get(e.isKeyboardClick()));
-				map.put("cursoritem", ObjectGenerator.GetGenerator().item(e.getCursor(), t));
+				map.put("cursoritem", ObjectGenerator.GetGenerator().item(e.getCursor(), t, env));
 
 				map.put("slot", new CInt(e.getSlot(), t));
 				map.put("rawslot", new CInt(e.getRawSlot(), t));
 				map.put("hotbarbutton", new CInt(e.getHotbarButton(), t));
 				map.put("slottype", new CString(e.getSlotType().name(), t));
-				map.put("slotitem", ObjectGenerator.GetGenerator().item(e.getCurrentItem(), t));
+				map.put("slotitem", ObjectGenerator.GetGenerator().item(e.getCurrentItem(), t, env));
 
-				CArray items = CArray.GetAssociativeArray(t);
+				CArray items = CArray.GetAssociativeArray(t, null, env);
 				MCInventory inv = e.getInventory();
 				for(int i = 0; i < inv.getSize(); i++) {
-					items.set(i, ObjectGenerator.GetGenerator().item(inv.getItem(i), t), t);
+					items.set(i, ObjectGenerator.GetGenerator().item(inv.getItem(i), t, env), t, env);
 				}
 				map.put("inventory", items);
 				map.put("inventorytype", new CString(inv.getType().name(), t));
@@ -188,11 +188,11 @@ public class InventoryEvents {
 				MCInventoryClickEvent e = (MCInventoryClickEvent) event;
 
 				if(key.equalsIgnoreCase("slotitem")) {
-					e.setCurrentItem(ObjectGenerator.GetGenerator().item(value, value.getTarget()));
+					e.setCurrentItem(ObjectGenerator.GetGenerator().item(value, value.getTarget(), env));
 					return true;
 				}
 				if(key.equalsIgnoreCase("cursoritem")) {
-					e.setCursor(ObjectGenerator.GetGenerator().item(value, value.getTarget()));
+					e.setCursor(ObjectGenerator.GetGenerator().item(value, value.getTarget(), env));
 					return true;
 				}
 			}
@@ -274,33 +274,33 @@ public class InventoryEvents {
 				Map<String, Mixed> map = evaluate_helper(event);
 
 				map.put("player", new CString(e.getWhoClicked().getName(), Target.UNKNOWN));
-				map.put("newcursoritem", ObjectGenerator.GetGenerator().item(e.getCursor(), Target.UNKNOWN));
-				map.put("oldcursoritem", ObjectGenerator.GetGenerator().item(e.getOldCursor(), Target.UNKNOWN));
+				map.put("newcursoritem", ObjectGenerator.GetGenerator().item(e.getCursor(), Target.UNKNOWN, env));
+				map.put("oldcursoritem", ObjectGenerator.GetGenerator().item(e.getOldCursor(), Target.UNKNOWN, env));
 
 				CArray slots = new CArray(Target.UNKNOWN);
 				for(Integer slot : e.getInventorySlots()) {
-					slots.push(new CInt(slot.intValue(), Target.UNKNOWN), Target.UNKNOWN);
+					slots.push(new CInt(slot.intValue(), Target.UNKNOWN), Target.UNKNOWN, env);
 				}
 				map.put("slots", slots);
 
 				CArray rawSlots = new CArray(Target.UNKNOWN);
 				for(Integer slot : e.getRawSlots()) {
-					rawSlots.push(new CInt(slot.intValue(), Target.UNKNOWN), Target.UNKNOWN);
+					rawSlots.push(new CInt(slot.intValue(), Target.UNKNOWN), Target.UNKNOWN, env);
 				}
 				map.put("rawslots", rawSlots);
 
-				CArray newItems = CArray.GetAssociativeArray(Target.UNKNOWN);
+				CArray newItems = CArray.GetAssociativeArray(Target.UNKNOWN, null, env);
 				for(Map.Entry<Integer, MCItemStack> ni : e.getNewItems().entrySet()) {
 					Integer key = ni.getKey();
 					MCItemStack value = ni.getValue();
-					newItems.set(key.intValue(), ObjectGenerator.GetGenerator().item(value, Target.UNKNOWN), Target.UNKNOWN);
+					newItems.set(key.intValue(), ObjectGenerator.GetGenerator().item(value, Target.UNKNOWN, env), Target.UNKNOWN, env);
 				}
 				map.put("newitems", newItems);
 
-				CArray items = CArray.GetAssociativeArray(Target.UNKNOWN);
+				CArray items = CArray.GetAssociativeArray(Target.UNKNOWN, null, env);
 				MCInventory inv = e.getInventory();
 				for(int i = 0; i < inv.getSize(); i++) {
-					items.set(i, ObjectGenerator.GetGenerator().item(inv.getItem(i), Target.UNKNOWN), Target.UNKNOWN);
+					items.set(i, ObjectGenerator.GetGenerator().item(inv.getItem(i), Target.UNKNOWN, env), Target.UNKNOWN, env);
 				}
 				map.put("inventory", items);
 				map.put("inventorytype", new CString(inv.getType().name(), Target.UNKNOWN));
@@ -325,7 +325,7 @@ public class InventoryEvents {
 				MCInventoryDragEvent e = (MCInventoryDragEvent) event;
 
 				if(key.equalsIgnoreCase("cursoritem")) {
-					e.setCursor(ObjectGenerator.GetGenerator().item(value, value.getTarget()));
+					e.setCursor(ObjectGenerator.GetGenerator().item(value, value.getTarget(), env));
 					return true;
 				}
 			}
@@ -381,11 +381,11 @@ public class InventoryEvents {
 
 				map.put("player", new CString(e.getPlayer().getName(), t));
 
-				CArray items = CArray.GetAssociativeArray(t);
+				CArray items = CArray.GetAssociativeArray(t, null, env);
 				MCInventory inv = e.getInventory();
 				for(int i = 0; i < inv.getSize(); i++) {
-					Mixed c = ObjectGenerator.GetGenerator().item(inv.getItem(i), t);
-					items.set(i, c, t);
+					Mixed c = ObjectGenerator.GetGenerator().item(inv.getItem(i), t, env);
+					items.set(i, c, t, env);
 				}
 				map.put("inventory", items);
 
@@ -458,11 +458,11 @@ public class InventoryEvents {
 
 				map.put("player", new CString(e.getPlayer().getName(), t));
 
-				CArray items = CArray.GetAssociativeArray(t);
+				CArray items = CArray.GetAssociativeArray(t, null, env);
 				MCInventory inv = e.getInventory();
 				for(int i = 0; i < inv.getSize(); i++) {
-					Mixed c = ObjectGenerator.GetGenerator().item(inv.getItem(i), t);
-					items.set(i, c, t);
+					Mixed c = ObjectGenerator.GetGenerator().item(inv.getItem(i), t, env);
+					items.set(i, c, t, env);
 				}
 				map.put("inventory", items);
 
@@ -532,7 +532,7 @@ public class InventoryEvents {
 				Map<String, Mixed> map = evaluate_helper(event);
 
 				map.put("player", new CString(e.GetEnchanter().getName(), Target.UNKNOWN));
-				map.put("item", ObjectGenerator.GetGenerator().item(e.getItem(), Target.UNKNOWN));
+				map.put("item", ObjectGenerator.GetGenerator().item(e.getItem(), Target.UNKNOWN, env));
 				map.put("inventorytype", new CString(e.getInventory().getType().name(), Target.UNKNOWN));
 				map.put("levels", new CInt(e.getExpLevelCost(), Target.UNKNOWN));
 				map.put("enchants", ObjectGenerator.GetGenerator().enchants(e.getEnchantsToAdd(), Target.UNKNOWN));
@@ -560,12 +560,12 @@ public class InventoryEvents {
 				MCEnchantItemEvent e = (MCEnchantItemEvent) event;
 
 				if(key.equalsIgnoreCase("levels")) {
-					e.setExpLevelCost(ArgumentValidation.getInt32(value, value.getTarget()));
+					e.setExpLevelCost(ArgumentValidation.getInt32(value, value.getTarget(), env));
 					return true;
 				}
 
 				if(key.equalsIgnoreCase("item")) {
-					e.setItem(ObjectGenerator.GetGenerator().item(value, value.getTarget()));
+					e.setItem(ObjectGenerator.GetGenerator().item(value, value.getTarget(), env));
 					return true;
 				}
 
@@ -619,14 +619,14 @@ public class InventoryEvents {
 				Map<String, Mixed> map = evaluate_helper(event);
 
 				map.put("player", new CString(e.getEnchanter().getName(), t));
-				map.put("item", ObjectGenerator.GetGenerator().item(e.getItem(), t));
+				map.put("item", ObjectGenerator.GetGenerator().item(e.getItem(), t, env));
 				map.put("inventorytype", new CString(e.getInventory().getType().name(), t));
 				map.put("enchantmentbonus", new CInt(e.getEnchantmentBonus(), t));
 
 				CArray expCostsCArray = new CArray(t);
 				MCEnchantmentOffer[] offers = e.getOffers();
 				for(MCEnchantmentOffer offer : offers) {
-					expCostsCArray.push(new CInt(offer.getCost(), t), t);
+					expCostsCArray.push(new CInt(offer.getCost(), t), t, env);
 				}
 				map.put("expcosts", expCostsCArray);
 
@@ -650,7 +650,7 @@ public class InventoryEvents {
 				MCPrepareItemEnchantEvent e = (MCPrepareItemEnchantEvent) event;
 
 				if(key.equalsIgnoreCase("item")) {
-					e.setItem(ObjectGenerator.GetGenerator().item(value, t));
+					e.setItem(ObjectGenerator.GetGenerator().item(value, t, env));
 					return true;
 				}
 
@@ -662,8 +662,8 @@ public class InventoryEvents {
 
 							for(int i = 0; i <= 2; i++) {
 								MCEnchantmentOffer offer = offers[i];
-								Mixed cost = cExpCosts.get(i, t);
-								offer.setCost(ArgumentValidation.getInt32(cost, t));
+								Mixed cost = cExpCosts.get(i, t, env);
+								offer.setCost(ArgumentValidation.getInt32(cost, t, env));
 							}
 						} else {
 							throw new CREFormatException("Expected a normal array!", t);
@@ -735,7 +735,7 @@ public class InventoryEvents {
 			if(event instanceof MCItemHeldEvent) {
 				MCItemHeldEvent e = (MCItemHeldEvent) event;
 				if("to".equals(key)) {
-					e.getPlayer().getInventory().setHeldItemSlot(ArgumentValidation.getInt32(value, value.getTarget()));
+					e.getPlayer().getInventory().setHeldItemSlot(ArgumentValidation.getInt32(value, value.getTarget(), env));
 					return true;
 				}
 			}
@@ -822,8 +822,8 @@ public class InventoryEvents {
 			if(event instanceof MCItemSwapEvent) {
 				MCItemSwapEvent e = (MCItemSwapEvent) event;
 				Map<String, Mixed> ret = evaluate_helper(e);
-				ret.put("main_hand", ObjectGenerator.GetGenerator().item(e.getMainHandItem(), Target.UNKNOWN));
-				ret.put("off_hand", ObjectGenerator.GetGenerator().item(e.getOffHandItem(), Target.UNKNOWN));
+				ret.put("main_hand", ObjectGenerator.GetGenerator().item(e.getMainHandItem(), Target.UNKNOWN, env));
+				ret.put("off_hand", ObjectGenerator.GetGenerator().item(e.getOffHandItem(), Target.UNKNOWN, env));
 				return ret;
 			} else {
 				throw new EventException("Event received was not an MCItemSwapEvent");
@@ -840,11 +840,11 @@ public class InventoryEvents {
 			if(event instanceof MCItemSwapEvent) {
 				MCItemSwapEvent e = (MCItemSwapEvent) event;
 				if("main_hand".equals(key)) {
-					e.setMainHandItem(ObjectGenerator.GetGenerator().item(value, value.getTarget()));
+					e.setMainHandItem(ObjectGenerator.GetGenerator().item(value, value.getTarget(), env));
 					return true;
 				}
 				if("off_hand".equals(key)) {
-					e.setOffHandItem(ObjectGenerator.GetGenerator().item(value, value.getTarget()));
+					e.setOffHandItem(ObjectGenerator.GetGenerator().item(value, value.getTarget(), env));
 					return true;
 				}
 			}
@@ -894,19 +894,19 @@ public class InventoryEvents {
 				Target t = Target.UNKNOWN;
 				CArray viewers = new CArray(t);
 				for(MCHumanEntity v : e.getViewers()) {
-					viewers.push(new CString(v.getName(), t), t);
+					viewers.push(new CString(v.getName(), t), t, env);
 				}
 				ret.put("viewers", viewers);
 				ret.put("player", new CString(e.getPlayer().getName(), t));
 				ret.put("recipe", ObjectGenerator.GetGenerator().recipe(e.getRecipe(), t));
 				ret.put("isRepair", CBoolean.get(e.isRepair()));
-				CArray matrix = CArray.GetAssociativeArray(t);
+				CArray matrix = CArray.GetAssociativeArray(t, null, env);
 				MCItemStack[] mi = e.getInventory().getMatrix();
 				for(int i = 0; i < mi.length; i++) {
-					matrix.set(i, ObjectGenerator.GetGenerator().item(mi[i], t), t);
+					matrix.set(i, ObjectGenerator.GetGenerator().item(mi[i], t, env), t, env);
 				}
 				ret.put("matrix", matrix);
-				ret.put("result", ObjectGenerator.GetGenerator().item(e.getInventory().getResult(), t));
+				ret.put("result", ObjectGenerator.GetGenerator().item(e.getInventory().getResult(), t, env));
 				return ret;
 			} else {
 				throw new EventException("Event received was not an MCPrepareItemCraftEvent.");
@@ -923,7 +923,7 @@ public class InventoryEvents {
 			if(event instanceof MCPrepareItemCraftEvent e) {
 				Target t = Target.UNKNOWN;
 				if("result".equals(key)) {
-					e.getInventory().setResult(ObjectGenerator.GetGenerator().item(value, t));
+					e.getInventory().setResult(ObjectGenerator.GetGenerator().item(value, t, env));
 					return true;
 				}
 			}
@@ -979,9 +979,9 @@ public class InventoryEvents {
 				Map<String, Mixed> ret = evaluate_helper(e);
 
 				ret.put("player", new CString(e.getPlayer().getName(), Target.UNKNOWN));
-				ret.put("first_item", ObjectGenerator.GetGenerator().item(anvil.getFirstItem(), Target.UNKNOWN));
-				ret.put("second_item", ObjectGenerator.GetGenerator().item(anvil.getSecondItem(), Target.UNKNOWN));
-				ret.put("result", ObjectGenerator.GetGenerator().item(anvil.getResult(), Target.UNKNOWN));
+				ret.put("first_item", ObjectGenerator.GetGenerator().item(anvil.getFirstItem(), Target.UNKNOWN, env));
+				ret.put("second_item", ObjectGenerator.GetGenerator().item(anvil.getSecondItem(), Target.UNKNOWN, env));
+				ret.put("result", ObjectGenerator.GetGenerator().item(anvil.getResult(), Target.UNKNOWN, env));
 				ret.put("level_repair_cost", new CInt(anvil.getRepairCost(), Target.UNKNOWN));
 				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_18_1)) {
 					ret.put("item_repair_cost", new CInt(anvil.getRepairCostAmount(), Target.UNKNOWN));
@@ -1004,19 +1004,19 @@ public class InventoryEvents {
 			if(event instanceof MCPrepareAnvilEvent e) {
 				Target t = value.getTarget();
 				if(key.equalsIgnoreCase("result")) {
-					e.setResult(ObjectGenerator.GetGenerator().item(value, t));
+					e.setResult(ObjectGenerator.GetGenerator().item(value, t, env));
 					return true;
 				}
 
 				MCAnvilInventory anvil = (MCAnvilInventory) e.getInventory();
 				if(key.equalsIgnoreCase("level_repair_cost")) {
-					anvil.setRepairCost(ArgumentValidation.getInt32(value, t));
+					anvil.setRepairCost(ArgumentValidation.getInt32(value, t, env));
 					return true;
 				}
 
 				if(key.equalsIgnoreCase("item_repair_cost")) {
 					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_18_1)) {
-						anvil.setRepairCostAmount(ArgumentValidation.getInt32(value, t));
+						anvil.setRepairCostAmount(ArgumentValidation.getInt32(value, t, env));
 						return true;
 					} else {
 						return false;
@@ -1024,7 +1024,7 @@ public class InventoryEvents {
 				}
 
 				if(key.equalsIgnoreCase("max_repair_cost")) {
-					anvil.setMaximumRepairCost(ArgumentValidation.getInt32(value, t));
+					anvil.setMaximumRepairCost(ArgumentValidation.getInt32(value, t, env));
 					return true;
 				}
 			}
@@ -1076,13 +1076,13 @@ public class InventoryEvents {
 				Map<String, Mixed> ret = evaluate_helper(e);
 
 				ret.put("player", new CString(e.getPlayer().getName(), Target.UNKNOWN));
-				ret.put("first_item", ObjectGenerator.GetGenerator().item(smithing.getInputTemplate(), Target.UNKNOWN));
-				ret.put("second_item", ObjectGenerator.GetGenerator().item(smithing.getInputEquipment(), Target.UNKNOWN));
+				ret.put("first_item", ObjectGenerator.GetGenerator().item(smithing.getInputTemplate(), Target.UNKNOWN, env));
+				ret.put("second_item", ObjectGenerator.GetGenerator().item(smithing.getInputEquipment(), Target.UNKNOWN, env));
 				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20)) {
-					ret.put("third_item", ObjectGenerator.GetGenerator().item(smithing.getInputMaterial(), Target.UNKNOWN));
+					ret.put("third_item", ObjectGenerator.GetGenerator().item(smithing.getInputMaterial(), Target.UNKNOWN, env));
 				}
 				ret.put("recipe", ObjectGenerator.GetGenerator().recipe(smithing.getRecipe(), Target.UNKNOWN));
-				ret.put("result", ObjectGenerator.GetGenerator().item(smithing.getResult(), Target.UNKNOWN));
+				ret.put("result", ObjectGenerator.GetGenerator().item(smithing.getResult(), Target.UNKNOWN, env));
 
 				return ret;
 			} else {
@@ -1100,7 +1100,7 @@ public class InventoryEvents {
 			if(event instanceof MCPrepareSmithingEvent e) {
 				Target t = value.getTarget();
 				if(key.equalsIgnoreCase("result")) {
-					e.setResult(ObjectGenerator.GetGenerator().item(value, t));
+					e.setResult(ObjectGenerator.GetGenerator().item(value, t, env));
 					return true;
 				}
 			}
@@ -1149,9 +1149,9 @@ public class InventoryEvents {
 				Map<String, Mixed> ret = evaluate_helper(e);
 
 				ret.put("player", new CString(e.getPlayer().getName(), Target.UNKNOWN));
-				ret.put("upper_item", ObjectGenerator.GetGenerator().item(grindstone.getUpperItem(), Target.UNKNOWN));
-				ret.put("lower_item", ObjectGenerator.GetGenerator().item(grindstone.getLowerItem(), Target.UNKNOWN));
-				ret.put("result", ObjectGenerator.GetGenerator().item(grindstone.getResult(), Target.UNKNOWN));
+				ret.put("upper_item", ObjectGenerator.GetGenerator().item(grindstone.getUpperItem(), Target.UNKNOWN, env));
+				ret.put("lower_item", ObjectGenerator.GetGenerator().item(grindstone.getLowerItem(), Target.UNKNOWN, env));
+				ret.put("result", ObjectGenerator.GetGenerator().item(grindstone.getResult(), Target.UNKNOWN, env));
 
 				return ret;
 			} else {
@@ -1169,7 +1169,7 @@ public class InventoryEvents {
 			if(event instanceof MCPrepareGrindstoneEvent e) {
 				Target t = value.getTarget();
 				if(key.equalsIgnoreCase("result")) {
-					e.setResult(ObjectGenerator.GetGenerator().item(value, t));
+					e.setResult(ObjectGenerator.GetGenerator().item(value, t, env));
 					return true;
 				}
 			}

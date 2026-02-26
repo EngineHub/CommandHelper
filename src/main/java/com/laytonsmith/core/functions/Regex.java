@@ -98,11 +98,11 @@ public class Regex {
 			if(m.find()) {
 				CArray ret = ObjectGenerator.GetGenerator().regMatchValue(m, t);
 				for(String key : getNamedGroups(pattern.pattern())) {
-					ret.set(key, m.group(key), t);
+					ret.set(key, m.group(key), t, env);
 				}
 				return ret;
 			}
-			return CArray.GetAssociativeArray(t);
+			return CArray.GetAssociativeArray(t, null, env);
 		}
 
 		@Override
@@ -189,9 +189,9 @@ public class Regex {
 				CArray ret = ObjectGenerator.GetGenerator().regMatchValue(m, t);
 
 				for(String key : namedGroups) {
-					ret.set(key, m.group(key), t);
+					ret.set(key, m.group(key), t, env);
 				}
-				fret.push(ret, t);
+				fret.push(ret, t, env);
 			}
 			return fret;
 		}
@@ -281,7 +281,7 @@ public class Regex {
 			try {
 				if(replacement instanceof Callable replacer) {
 					ret = pattern.matcher(subject).replaceAll(mr -> ArgumentValidation.getStringObject(
-							replacer.executeCallable(env, t, ObjectGenerator.GetGenerator().regMatchValue(mr, t)), t));
+							replacer.executeCallable(env, t, ObjectGenerator.GetGenerator().regMatchValue(mr, t)), t, env));
 				} else {
 					ret = pattern.matcher(subject).replaceAll(replacement.val());
 				}
@@ -405,12 +405,12 @@ public class Regex {
 			 */
 			int limit = Integer.MAX_VALUE - 1;
 			if(args.length >= 3) {
-				limit = ArgumentValidation.getInt32(args[2], t);
+				limit = ArgumentValidation.getInt32(args[2], t, env);
 			}
 			String[] rsplit = pattern.split(subject, limit + 1);
 			CArray ret = new CArray(t);
 			for(String split : rsplit) {
-				ret.push(new CString(split, t), t);
+				ret.push(new CString(split, t), t, env);
 			}
 			return ret;
 		}
@@ -602,8 +602,8 @@ public class Regex {
 		String sflags = "";
 		if(c.isInstanceOf(CArray.TYPE, null, env)) {
 			CArray ca = (CArray) c;
-			regex = ca.get(0, t).val();
-			sflags = ca.get(1, t).val();
+			regex = ca.get(0, t, env).val();
+			sflags = ca.get(1, t, env).val();
 			for(int i = 0; i < sflags.length(); i++) {
 				if(sflags.toLowerCase().charAt(i) == 'i') {
 					flags |= java.util.regex.Pattern.CASE_INSENSITIVE;

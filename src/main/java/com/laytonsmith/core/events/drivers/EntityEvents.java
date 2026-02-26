@@ -149,7 +149,7 @@ public class EntityEvents {
 				Map<String, Mixed> ret = evaluate_helper(event);
 				ret.put("location", ObjectGenerator.GetGenerator().location(event.getLocation(), false));
 				ret.put("id", new CString(event.getEntity().getUniqueId().toString(), t));
-				ret.put("item", ObjectGenerator.GetGenerator().item(event.getEntity().getItemStack(), t));
+				ret.put("item", ObjectGenerator.GetGenerator().item(event.getEntity().getItemStack(), t, env));
 				return ret;
 			} else {
 				throw new EventException("Could not convert to MCItemDespawnEvent");
@@ -224,7 +224,7 @@ public class EntityEvents {
 				Map<String, Mixed> ret = evaluate_helper(event);
 				ret.put("location", ObjectGenerator.GetGenerator().location(event.getLocation(), false));
 				ret.put("id", new CString(event.getEntity().getUniqueId().toString(), t));
-				ret.put("item", ObjectGenerator.GetGenerator().item(event.getEntity().getItemStack(), t));
+				ret.put("item", ObjectGenerator.GetGenerator().item(event.getEntity().getItemStack(), t, env));
 				return ret;
 			} else {
 				throw new EventException("Could not convert to MCItemSpawnEvent");
@@ -240,7 +240,7 @@ public class EntityEvents {
 		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			if(event instanceof MCItemSpawnEvent) {
 				if("item".equals(key)) {
-					((MCItemSpawnEvent) event).getEntity().setItemStack(ObjectGenerator.GetGenerator().item(value, value.getTarget()));
+					((MCItemSpawnEvent) event).getEntity().setItemStack(ObjectGenerator.GetGenerator().item(value, value.getTarget(), env));
 					return true;
 				}
 			}
@@ -313,7 +313,7 @@ public class EntityEvents {
 				Map<String, Mixed> ret = evaluate_helper(e);
 				CArray blocks = new CArray(t);
 				for(MCBlock b : e.getBlocks()) {
-					blocks.push(ObjectGenerator.GetGenerator().location(b.getLocation(), false), t);
+					blocks.push(ObjectGenerator.GetGenerator().location(b.getLocation(), false), t, env);
 				}
 				ret.put("blocks", blocks);
 				MCEntity ent = e.getEntity();
@@ -337,7 +337,7 @@ public class EntityEvents {
 			if(event instanceof MCEntityExplodeEvent) {
 				MCEntityExplodeEvent e = (MCEntityExplodeEvent) event;
 				if(key.equals("yield")) {
-					e.setYield(ArgumentValidation.getDouble32(value, value.getTarget()));
+					e.setYield(ArgumentValidation.getDouble32(value, value.getTarget(), env));
 					return true;
 				}
 				if(key.equals("blocks")) {
@@ -346,7 +346,7 @@ public class EntityEvents {
 						List<MCBlock> blocks = new ArrayList<>();
 						for(String b : ba.stringKeySet()) {
 							MCWorld w = e.getLocation().getWorld();
-							MCLocation loc = ObjectGenerator.GetGenerator().location(ba.get(b, value.getTarget()), w, value.getTarget());
+							MCLocation loc = ObjectGenerator.GetGenerator().location(ba.get(b, value.getTarget(), env), w, value.getTarget(), env);
 							blocks.add(loc.getWorld().getBlockAt(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()));
 						}
 						e.setBlocks(blocks);
@@ -568,7 +568,7 @@ public class EntityEvents {
 				}
 				mapEvent.put("location", ObjectGenerator.GetGenerator().location(projectile.getLocation()));
 				CArray velocity = ObjectGenerator.GetGenerator().vector(projectile.getVelocity(), Target.UNKNOWN);
-				velocity.set("magnitude", new CDouble(projectile.getVelocity().length(), Target.UNKNOWN), Target.UNKNOWN);
+				velocity.set("magnitude", new CDouble(projectile.getVelocity().length(), Target.UNKNOWN), Target.UNKNOWN, env);
 				mapEvent.put("velocity", velocity);
 				return mapEvent;
 			} else {
@@ -648,16 +648,16 @@ public class EntityEvents {
 				Map<String, Mixed> map = evaluate_helper(event);
 				CArray drops = new CArray(t);
 				for(MCItemStack is : e.getDrops()) {
-					drops.push(ObjectGenerator.GetGenerator().item(is, t), t);
+					drops.push(ObjectGenerator.GetGenerator().item(is, t, env), t, env);
 				}
 				map.put("type", new CString(dead.getType().name(), t));
 				map.put("id", new CString(dead.getUniqueId().toString(), t));
 				map.put("drops", drops);
 				map.put("xp", new CInt(e.getDroppedExp(), t));
-				CArray cod = CArray.GetAssociativeArray(t);
+				CArray cod = CArray.GetAssociativeArray(t, null, env);
 				Map<String, Mixed> ldc = parseEntityDamageEvent(dead.getLastDamageCause(), new HashMap<>());
 				for(Map.Entry<String, Mixed> entry : ldc.entrySet()) {
-					cod.set(entry.getKey(), entry.getValue(), t);
+					cod.set(entry.getKey(), entry.getValue(), t, env);
 				}
 				map.put("cause", cod);
 				map.put("location", ObjectGenerator.GetGenerator().location(dead.getLocation()));
@@ -677,7 +677,7 @@ public class EntityEvents {
 			if(event instanceof MCEntityDeathEvent) {
 				MCEntityDeathEvent e = (MCEntityDeathEvent) event;
 				if(key.equals("xp")) {
-					e.setDroppedExp(ArgumentValidation.getInt32(value, value.getTarget()));
+					e.setDroppedExp(ArgumentValidation.getInt32(value, value.getTarget(), env));
 					return true;
 				}
 				if(key.equals("drops")) {
@@ -690,7 +690,7 @@ public class EntityEvents {
 					e.clearDrops();
 					CArray drops = (CArray) value;
 					for(String dropID : drops.stringKeySet()) {
-						e.addDrop(ObjectGenerator.GetGenerator().item(drops.get(dropID, value.getTarget()), value.getTarget()));
+						e.addDrop(ObjectGenerator.GetGenerator().item(drops.get(dropID, value.getTarget(), env), value.getTarget(), env));
 					}
 					return true;
 				}
@@ -872,7 +872,7 @@ public class EntityEvents {
 				BindableEvent event, Environment env) {
 			MCEntityDamageEvent e = (MCEntityDamageEvent) event;
 			if(key.equals("amount")) {
-				e.setDamage(ArgumentValidation.getDouble(value, value.getTarget()));
+				e.setDamage(ArgumentValidation.getDouble(value, value.getTarget(), env));
 				return true;
 			}
 			return false;
@@ -1123,7 +1123,7 @@ public class EntityEvents {
 				MCPlayerDropItemEvent event = (MCPlayerDropItemEvent) e;
 				Map<String, Mixed> map = evaluate_helper(e);
 
-				map.put("item", ObjectGenerator.GetGenerator().item(event.getItemDrop().getItemStack(), Target.UNKNOWN));
+				map.put("item", ObjectGenerator.GetGenerator().item(event.getItemDrop().getItemStack(), Target.UNKNOWN, env));
 				map.put("id", new CString(event.getItemDrop().getUniqueId().toString(), Target.UNKNOWN));
 
 				return map;
@@ -1138,7 +1138,7 @@ public class EntityEvents {
 				MCPlayerDropItemEvent e = (MCPlayerDropItemEvent) event;
 
 				if(key.equalsIgnoreCase("item")) {
-					MCItemStack stack = ObjectGenerator.GetGenerator().item(value, value.getTarget());
+					MCItemStack stack = ObjectGenerator.GetGenerator().item(value, value.getTarget(), env);
 
 					e.setItemStack(stack);
 
@@ -1202,7 +1202,7 @@ public class EntityEvents {
 				MCPlayerPickupItemEvent event = (MCPlayerPickupItemEvent) e;
 				Map<String, Mixed> map = evaluate_helper(e);
 				map.put("id", new CString(event.getItem().getUniqueId().toString(), Target.UNKNOWN));
-				map.put("item", ObjectGenerator.GetGenerator().item(event.getItem().getItemStack(), Target.UNKNOWN));
+				map.put("item", ObjectGenerator.GetGenerator().item(event.getItem().getItemStack(), Target.UNKNOWN, env));
 				map.put("remaining", new CInt(event.getRemaining(), Target.UNKNOWN));
 				return map;
 			} else {
@@ -1221,7 +1221,7 @@ public class EntityEvents {
 				MCPlayerPickupItemEvent e = (MCPlayerPickupItemEvent) event;
 
 				if(key.equalsIgnoreCase("item")) {
-					MCItemStack stack = ObjectGenerator.GetGenerator().item(value, value.getTarget());
+					MCItemStack stack = ObjectGenerator.GetGenerator().item(value, value.getTarget(), env);
 
 					e.setItemStack(stack);
 
@@ -1410,7 +1410,7 @@ public class EntityEvents {
 						ete.setTarget(null);
 						return true;
 					} else if(value.isInstanceOf(CString.TYPE, null, env)) {
-						MCPlayer p = Static.GetPlayer(value.val(), value.getTarget());
+						MCPlayer p = Static.GetPlayer(value.val(), value.getTarget(), env);
 
 						if(p.isOnline()) {
 							ete.setTarget(p);
@@ -1426,7 +1426,7 @@ public class EntityEvents {
 		@Override
 		public BindableEvent convert(CArray manual, Target t, Environment env) {
 			return EventBuilder.instantiate(MCEntityTargetEvent.class,
-					Static.GetPlayer(manual.get("player", Target.UNKNOWN, env).val(), Target.UNKNOWN));
+					Static.GetPlayer(manual.get("player", Target.UNKNOWN, env).val(), Target.UNKNOWN, env));
 		}
 
 	}
@@ -1870,7 +1870,7 @@ public class EntityEvents {
 				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_17_X)) {
 					MCItemStack item = e.getItem();
 					if(item != null) {
-						ret.put("item", ObjectGenerator.GetGenerator().item(item, Target.UNKNOWN));
+						ret.put("item", ObjectGenerator.GetGenerator().item(item, Target.UNKNOWN, env));
 					} else {
 						ret.put("item", CNull.NULL);
 					}
@@ -2179,7 +2179,7 @@ public class EntityEvents {
 			if(event instanceof MCEntityRegainHealthEvent) {
 				MCEntityRegainHealthEvent e = (MCEntityRegainHealthEvent) event;
 				if(key.equalsIgnoreCase("amount")) {
-					e.setAmount(ArgumentValidation.getDouble(value, value.getTarget()));
+					e.setAmount(ArgumentValidation.getDouble(value, value.getTarget(), env));
 					return true;
 				}
 			}
@@ -2257,13 +2257,13 @@ public class EntityEvents {
 				MCEntityPortalEvent e = (MCEntityPortalEvent) event;
 
 				if(key.equalsIgnoreCase("to")) {
-					MCLocation loc = ObjectGenerator.GetGenerator().location(value, null, value.getTarget());
+					MCLocation loc = ObjectGenerator.GetGenerator().location(value, null, value.getTarget(), env);
 					e.setTo(loc);
 					return true;
 				}
 
 				if(key.equalsIgnoreCase("searchradius")) {
-					e.setSearchRadius(ArgumentValidation.getInt32(value, value.getTarget()));
+					e.setSearchRadius(ArgumentValidation.getInt32(value, value.getTarget(), env));
 					return true;
 				}
 			}

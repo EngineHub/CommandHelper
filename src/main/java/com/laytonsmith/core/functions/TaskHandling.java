@@ -55,17 +55,17 @@ public class TaskHandling {
 			TaskManager tm = env.getEnv(StaticRuntimeEnv.class).GetTaskManager();
 			CArray ret = new CArray(t);
 			for(TaskHandler task : tm.getTasks()) {
-				CArray tt = CArray.GetAssociativeArray(t);
-				tt.set("id", new CInt(task.getID(), t), t);
-				tt.set("type", task.getType().name());
-				tt.set("state", task.getState().name());
-				tt.set("target", task.getDefinedAt().toString());
-				CArray properties = CArray.GetAssociativeArray(t);
+				CArray tt = CArray.GetAssociativeArray(t, null, env);
+				tt.set("id", new CInt(task.getID(), t), t, env);
+				tt.set("type", task.getType().name(), env);
+				tt.set("state", task.getState().name(), env);
+				tt.set("target", task.getDefinedAt().toString(), env);
+				CArray properties = CArray.GetAssociativeArray(t, null, env);
 				for(String prop : task.getProperties()) {
-					properties.set(prop, task.getPropertyData().get(prop).toString());
+					properties.set(prop, task.getPropertyData().get(prop).toString(), env);
 				}
-				tt.set("properties", properties, t);
-				ret.push(tt, t);
+				tt.set("properties", properties, t, env);
+				ret.push(tt, t, env);
 			}
 			return ret;
 		}
@@ -137,7 +137,7 @@ public class TaskHandling {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String type = args[0].val();
-			int id = ArgumentValidation.getInt32(args[1], t);
+			int id = ArgumentValidation.getInt32(args[1], t, env);
 			TaskManager tm = env.getEnv(StaticRuntimeEnv.class).GetTaskManager();
 			tm.killTask(type, id);
 			return CVoid.VOID;

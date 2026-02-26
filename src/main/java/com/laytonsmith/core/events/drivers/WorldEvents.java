@@ -240,7 +240,7 @@ public final class WorldEvents {
 			List<MCBlockState> blocks = event.getBlocks();
 			CArray a = new CArray(Target.UNKNOWN, blocks.size());
 			for(MCBlockState block : blocks) {
-				a.push(ObjectGenerator.GetGenerator().location(block.getLocation(), false), Target.UNKNOWN);
+				a.push(ObjectGenerator.GetGenerator().location(block.getLocation(), false), Target.UNKNOWN, env);
 			}
 			r.put("blocks", a);
 			r.put("location", ObjectGenerator.GetGenerator().location(event.getLocation(), false));

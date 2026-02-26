@@ -197,7 +197,7 @@ public class ServerEvents {
 				ret.put("maxplayers", new CInt(event.getMaxPlayers(), t));
 				CArray players = new CArray(t);
 				for(MCPlayer player : event.getPlayers()) {
-					players.push(new CString(player.getName(), t), t);
+					players.push(new CString(player.getName(), t), t, env);
 				}
 				ret.put("list", players);
 				return ret;
@@ -215,13 +215,13 @@ public class ServerEvents {
 						e.setMOTD(value.val());
 						return true;
 					case "maxplayers":
-						e.setMaxPlayers(ArgumentValidation.getInt32(value, value.getTarget()));
+						e.setMaxPlayers(ArgumentValidation.getInt32(value, value.getTarget(), env));
 						return true;
 					case "list":
 						// Modifies the player list. The new list will be the intersection of the original
 						// and the given list. Names and UUID's outside this intersection will simply be ignored.
 						Set<MCPlayer> modifiedPlayers = new HashSet<>();
-						List<Mixed> passedList = ArgumentValidation.getArray(value, value.getTarget()).asList();
+						List<Mixed> passedList = ArgumentValidation.getArray(value, value.getTarget(), env).asList(env);
 						for(MCPlayer player : e.getPlayers()) {
 							for(Mixed construct : passedList) {
 								String playerStr = construct.val();
@@ -292,14 +292,14 @@ public class ServerEvents {
 				CArray comp = new CArray(t);
 				if(e.getCompletions() != null) {
 					for(String c : e.getCompletions()) {
-						comp.push(new CString(c, t), t);
+						comp.push(new CString(c, t), t, env);
 					}
 				}
 				ret.put("completions", comp);
 				ret.put("command", new CString(e.getCommand().getName(), t));
 				CArray args = new CArray(t);
 				for(String a : e.getArguments()) {
-					args.push(new CString(a, t), t);
+					args.push(new CString(a, t), t, env);
 				}
 				ret.put("args", args);
 				ret.put("alias", new CString(e.getAlias(), t));
@@ -322,11 +322,11 @@ public class ServerEvents {
 					if(value.isInstanceOf(CArray.TYPE, null, env)) {
 						List<String> comp = new ArrayList<>();
 						if(((CArray) value).inAssociativeMode()) {
-							for(Mixed k : ((CArray) value).keySet()) {
-								comp.add(((CArray) value).get(k, value.getTarget()).val());
+							for(Mixed k : ((CArray) value).keySet(env)) {
+								comp.add(((CArray) value).get(k, value.getTarget(), env).val());
 							}
 						} else {
-							for(Mixed v : ((CArray) value).asList()) {
+							for(Mixed v : ((CArray) value).asList(env)) {
 								comp.add(v.val());
 							}
 						}
@@ -447,14 +447,14 @@ public class ServerEvents {
 		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
 
 			// Get the player recipients.
-			Mixed cRecipients = manualObject.get("player_recipients", t);
+			Mixed cRecipients = manualObject.get("player_recipients", t, env);
 			if(!(cRecipients instanceof CArray) && !(cRecipients instanceof CNull)) {
 				throw new CRECastException("Expected player_recipients to be an array", t);
 			}
 			Set<MCCommandSender> recipients = new HashSet<>();
 			CArray recipientsArray = (CArray) cRecipients;
 			for(int i = 0; i < recipientsArray.size(env); i++) {
-				MCPlayer player = Static.GetPlayer(recipientsArray.get(i, t, env), t);
+				MCPlayer player = Static.GetPlayer(recipientsArray.get(i, t, env), t, env);
 				recipients.add(player);
 			}
 
@@ -476,7 +476,7 @@ public class ServerEvents {
 			map.put("message", new CString(event.getMessage(), Target.UNKNOWN));
 			CArray cRecipients = new CArray(Target.UNKNOWN);
 			for(MCPlayer player : event.getPlayerRecipients()) {
-				cRecipients.push(new CString(player.getName(), Target.UNKNOWN), Target.UNKNOWN);
+				cRecipients.push(new CString(player.getName(), Target.UNKNOWN), Target.UNKNOWN, env);
 			}
 			map.put("player_recipients", cRecipients);
 			return map;
