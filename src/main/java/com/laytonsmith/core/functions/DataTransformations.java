@@ -74,7 +74,7 @@ public class DataTransformations {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CArray ca = ArgumentValidation.getArray(args[0], t);
+			CArray ca = ArgumentValidation.getArray(args[0], t, env);
 			try {
 				return new CString(Construct.json_encode(ca, t, env), t);
 			} catch (MarshalException ex) {
@@ -189,10 +189,10 @@ public class DataTransformations {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CArray ca = ArgumentValidation.getArray(args[0], t);
+			CArray ca = ArgumentValidation.getArray(args[0], t, env);
 			boolean prettyPrint = false;
 			if(args.length == 2) {
-				prettyPrint = ArgumentValidation.getBoolean(args[1], t);
+				prettyPrint = ArgumentValidation.getBooleanObject(args[1], t, env);
 			}
 			DumperOptions options = new DumperOptions();
 			if(prettyPrint) {
@@ -201,7 +201,7 @@ public class DataTransformations {
 			}
 			Yaml yaml = new Yaml(options);
 			try {
-				return new CString(yaml.dump(Construct.GetPOJO(ca)), t);
+				return new CString(yaml.dump(Static.getJavaObject(ca, env)), t);
 			} catch (ClassCastException ex) {
 				throw new CRECastException(ex.getMessage(), t);
 			}
@@ -256,7 +256,7 @@ public class DataTransformations {
 					.GetRuntimeSettingOrCNull("function.yml_decode.code_point_limit", CNull.NULL);
 			if(!CNull.NULL.equals(codePointLimit)) {
 				try {
-					options.setCodePointLimit(ArgumentValidation.getInt32(codePointLimit, t));
+					options.setCodePointLimit(ArgumentValidation.getInt32(codePointLimit, t, env));
 				} catch (CRERangeException | CRECastException e) {
 					// Ignore invalid value.
 				}
@@ -325,7 +325,7 @@ public class DataTransformations {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			Properties props = new Properties();
-			CArray arr = ArgumentValidation.getArray(args[0], t);
+			CArray arr = ArgumentValidation.getArray(args[0], t, env);
 			String comment = null;
 			if(args.length == 2) {
 				comment = args[1].val();
@@ -334,7 +334,7 @@ public class DataTransformations {
 				throw new CRECastException("Expecting an associative array", t);
 			}
 			for(String key : arr.stringKeySet()) {
-				Mixed c = arr.get(key, t);
+				Mixed c = arr.get(key, t, env);
 				String val;
 				if(c instanceof CNull) {
 					val = "";
@@ -388,7 +388,7 @@ public class DataTransformations {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREFormatException.class};
+			return new Class[]{CREFormatException.class, CRECastException.class};
 		}
 
 		@Override
@@ -410,9 +410,9 @@ public class DataTransformations {
 			} catch (IOException ex) {
 				throw new CREFormatException(ex.getMessage(), t);
 			}
-			CArray arr = CArray.GetAssociativeArray(t);
+			CArray arr = CArray.GetAssociativeArray(t, null, env);
 			for(String key : props.stringPropertyNames()) {
-				arr.set(key, props.getProperty(key));
+				arr.set(key, props.getProperty(key), env);
 			}
 			return arr;
 		}

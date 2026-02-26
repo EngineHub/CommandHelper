@@ -56,7 +56,7 @@ public class Easings {
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			com.laytonsmith.core.Easings.EasingType type
 					= ArgumentValidation.getEnum(args[0], com.laytonsmith.core.Easings.EasingType.class, t);
-			double x = ArgumentValidation.getDouble(args[1], t);
+			double x = ArgumentValidation.getDouble(args[1], t, env);
 			double ret = com.laytonsmith.core.Easings.GetEasing(type, x);
 			return new CDouble(ret, Target.UNKNOWN);
 		}
@@ -138,19 +138,19 @@ public class Easings {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CArray start = ArgumentValidation.getArray(args[0], t);
-			double startX = ArgumentValidation.getDouble(start.get("x", t), t);
-			double startY = ArgumentValidation.getDouble(start.get("y", t), t);
-			double startZ = ArgumentValidation.getDouble(start.get("z", t), t);
-			CArray finish = ArgumentValidation.getArray(args[1], t);
-			double finishX = ArgumentValidation.getDouble(finish.get("x", t), t);
-			double finishY = ArgumentValidation.getDouble(finish.get("y", t), t);
-			double finishZ = ArgumentValidation.getDouble(finish.get("z", t), t);
+			CArray start = ArgumentValidation.getArray(args[0], t, env);
+			double startX = ArgumentValidation.getDouble(start.get("x", t, env), t, env);
+			double startY = ArgumentValidation.getDouble(start.get("y", t, env), t, env);
+			double startZ = ArgumentValidation.getDouble(start.get("z", t, env), t, env);
+			CArray finish = ArgumentValidation.getArray(args[1], t, env);
+			double finishX = ArgumentValidation.getDouble(finish.get("x", t, env), t, env);
+			double finishY = ArgumentValidation.getDouble(finish.get("y", t, env), t, env);
+			double finishZ = ArgumentValidation.getDouble(finish.get("z", t, env), t, env);
 			com.laytonsmith.core.Easings.EasingType type
 					= ArgumentValidation.getEnum(args[2], com.laytonsmith.core.Easings.EasingType.class, t);
-			double x = ArgumentValidation.getDouble(args[3], t);
+			double x = ArgumentValidation.getDouble(args[3], t, env);
 			double percentage = com.laytonsmith.core.Easings.GetEasing(type, x);
-			CArray result = CArray.GetAssociativeArray(Target.UNKNOWN);
+			CArray result = CArray.GetAssociativeArray(Target.UNKNOWN, null, env);
 			result.set("x", startX + (finishX - startX) * percentage);
 			result.set("y", startY + (finishY - startY) * percentage);
 			result.set("z", startZ + (finishZ - startZ) * percentage);

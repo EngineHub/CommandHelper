@@ -84,14 +84,14 @@ public class ItemMeta {
 			MCItemStack is;
 			Mixed slot;
 			if(args.length == 2) {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 				slot = args[1];
 			} else {
 				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
 				slot = args[0];
 			}
-			is = p.getItemAt(slot instanceof CNull ? null : ArgumentValidation.getInt32(slot, t));
+			is = p.getItemAt(slot instanceof CNull ? null : ArgumentValidation.getInt32(slot, t, env));
 			return ObjectGenerator.GetGenerator().itemMeta(is, t);
 		}
 
@@ -189,7 +189,7 @@ public class ItemMeta {
 			Mixed meta;
 			MCItemStack is;
 			if(args.length == 3) {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 				slot = args[1];
 				meta = args[2];
 			} else {
@@ -198,11 +198,11 @@ public class ItemMeta {
 				slot = args[0];
 				meta = args[1];
 			}
-			is = p.getItemAt(slot instanceof CNull ? null : ArgumentValidation.getInt32(slot, t));
+			is = p.getItemAt(slot instanceof CNull ? null : ArgumentValidation.getInt32(slot, t, env));
 			if(is == null) {
 				throw new CRECastException("There is no item at slot " + slot, t);
 			}
-			is.setItemMeta(ObjectGenerator.GetGenerator().itemMeta(meta, is.getType(), t));
+			is.setItemMeta(ObjectGenerator.GetGenerator().itemMeta(meta, is.getType(), t, env));
 			return CVoid.VOID;
 		}
 
@@ -295,10 +295,10 @@ public class ItemMeta {
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int slot;
 			if(args.length == 2) {
-				p = Static.GetPlayer(args[0], t);
-				slot = ArgumentValidation.getInt32(args[1], t);
+				p = Static.GetPlayer(args[0], t, env);
+				slot = ArgumentValidation.getInt32(args[1], t, env);
 			} else {
-				slot = ArgumentValidation.getInt32(args[0], t);
+				slot = ArgumentValidation.getInt32(args[0], t, env);
 			}
 			Static.AssertPlayerNonNull(p, t);
 			MCItemStack is = p.getItemAt(slot);
@@ -361,15 +361,15 @@ public class ItemMeta {
 			int slot;
 			CArray color;
 			if(args.length == 3) {
-				p = Static.GetPlayer(args[0], t);
-				slot = ArgumentValidation.getInt32(args[1], t);
+				p = Static.GetPlayer(args[0], t, env);
+				slot = ArgumentValidation.getInt32(args[1], t, env);
 				if(args[2].isInstanceOf(CArray.TYPE, null, env)) {
 					color = (CArray) args[2];
 				} else {
 					throw new CREFormatException("Expected an array but received " + args[2] + " instead.", t);
 				}
 			} else {
-				slot = ArgumentValidation.getInt32(args[0], t);
+				slot = ArgumentValidation.getInt32(args[0], t, env);
 				if(args[1].isInstanceOf(CArray.TYPE, null, env)) {
 					color = (CArray) args[1];
 				} else {
@@ -439,14 +439,14 @@ public class ItemMeta {
 			MCPlayer p;
 			Mixed slot;
 			if(args.length == 2) {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 				slot = args[1];
 			} else {
 				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
 				slot = args[0];
 			}
-			MCItemStack is = p.getItemAt(slot instanceof CNull ? null : ArgumentValidation.getInt32(slot, t));
+			MCItemStack is = p.getItemAt(slot instanceof CNull ? null : ArgumentValidation.getInt32(slot, t, env));
 			if(is == null) {
 				return CBoolean.FALSE;
 			}

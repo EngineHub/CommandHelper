@@ -376,7 +376,7 @@ public class PlayerManagement {
 					throw new CRECastException("Expecting an array at parameter 1 of players_in_radius", t);
 				}
 
-				loc = ObjectGenerator.GetGenerator().location(args[0], p != null ? p.getWorld() : null, t);
+				loc = ObjectGenerator.GetGenerator().location(args[0], p != null ? p.getWorld() : null, t, env);
 				dist = ArgumentValidation.getDouble(args[1], t, env);
 			}
 
@@ -537,7 +537,7 @@ public class PlayerManagement {
 					Static.AssertPlayerNonNull(p, t);
 				}
 
-				l = ObjectGenerator.GetGenerator().location(ca, p.getWorld(), t);
+				l = ObjectGenerator.GetGenerator().location(ca, p.getWorld(), t, env);
 
 				// set yaw/pitch to current player values if not given
 				MCLocation ploc = p.getLocation();
@@ -2043,7 +2043,7 @@ public class PlayerManagement {
 				m = (MCPlayer) p;
 			}
 			if(args.length == 1) {
-				m = Static.GetPlayer(args[0].val(), t);
+				m = Static.GetPlayer(args[0].val(), t, env);
 			}
 			Static.AssertPlayerNonNull(m, t);
 			int texp = m.getExpAtLevel() + java.lang.Math.round(m.getExpToLevel() * m.getExp());
@@ -3249,10 +3249,10 @@ public class PlayerManagement {
 			MCPlayer m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCLocation l;
 			if(args.length == 1) {
-				l = ObjectGenerator.GetGenerator().location(args[0], null, t);
+				l = ObjectGenerator.GetGenerator().location(args[0], null, t, env);
 			} else {
 				m = Static.GetPlayer(args[0].val(), t, env);
-				l = ObjectGenerator.GetGenerator().location(args[1], null, t);
+				l = ObjectGenerator.GetGenerator().location(args[1], null, t, env);
 			}
 			if(m == null) {
 				throw new CREPlayerOfflineException("That player is not online", t);
@@ -4066,7 +4066,7 @@ public class PlayerManagement {
 						offset = 1;
 						p = Static.GetPlayer(args[0], t, env);
 					}
-					v = ObjectGenerator.GetGenerator().vector(args[offset], t);
+					v = ObjectGenerator.GetGenerator().vector(args[offset], t, env);
 					break;
 				}
 				case 3:
@@ -4151,7 +4151,7 @@ public class PlayerManagement {
 				offset = 1;
 			}
 			Static.AssertPlayerNonNull(p, t);
-			MCLocation loc = ObjectGenerator.GetGenerator().location(args[offset], p.getWorld(), t);
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[offset], p.getWorld(), t, env);
 			MCBlock block = loc.getBlock();
 			if(!block.isSign()) {
 				return CVoid.VOID;
@@ -4305,7 +4305,7 @@ public class PlayerManagement {
 				offset = 1;
 			}
 			Static.AssertPlayerNonNull(p, t);
-			MCLocation loc = ObjectGenerator.GetGenerator().location(args[offset], p.getWorld(), t);
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[offset], p.getWorld(), t, env);
 			Mixed cdata = args[1 + offset];
 			MCBlockData data;
 			if(cdata instanceof CNull) {
@@ -4422,7 +4422,7 @@ public class PlayerManagement {
 				p = Static.GetPlayer(args[0], t, env);
 				argOffset = 1;
 			}
-			location = ObjectGenerator.GetGenerator().location(args[argOffset], p.getWorld(), t);
+			location = ObjectGenerator.GetGenerator().location(args[argOffset], p.getWorld(), t, env);
 			Mixed progressArg = args[1 + argOffset];
 			if(progressArg instanceof CInt) {
 				progress = ArgumentValidation.getInt(progressArg, t, env) / 10.0F;
@@ -4837,7 +4837,7 @@ public class PlayerManagement {
 
 			if(args[locationIndex].isInstanceOf(CArray.TYPE, null, env)) {
 				CArray ca = (CArray) args[locationIndex];
-				l = ObjectGenerator.GetGenerator().location(ca, m.getWorld(), t);
+				l = ObjectGenerator.GetGenerator().location(ca, m.getWorld(), t, env);
 				l.add(0, 1, 0); // someone decided to match ploc() here
 			} else {
 				l = m.getLocation();
@@ -6723,7 +6723,7 @@ public class PlayerManagement {
 				}
 			}
 			if(params.containsKey("center")) {
-				wb.setCenter(ObjectGenerator.GetGenerator().location(params.get("center", t, env), p.getWorld(), t));
+				wb.setCenter(ObjectGenerator.GetGenerator().location(params.get("center", t, env), p.getWorld(), t, env));
 			}
 			if(params.containsKey("warningtime")) {
 				wb.setWarningTime(ArgumentValidation.getInt32(params.get("warningtime", t, env), t, env));
@@ -7207,7 +7207,7 @@ public class PlayerManagement {
 				for(String key : ea.stringKeySet()) {
 					try {
 						p.sendEquipmentChange(le, MCEquipmentSlot.valueOf(key.toUpperCase()),
-								ObjectGenerator.GetGenerator().item(ea.get(key, t, env), t));
+								ObjectGenerator.GetGenerator().item(ea.get(key, t, env), t, env));
 					} catch (IllegalArgumentException iae) {
 						throw new CREFormatException("Not an equipment slot: " + key, t);
 					}

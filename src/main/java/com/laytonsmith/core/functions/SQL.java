@@ -157,7 +157,7 @@ public class SQL {
 				if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
 					Map<String, String> data = new HashMap<>();
 					for(String key : ((CArray) args[0]).stringKeySet()) {
-						data.put(key, ((CArray) args[0]).get(key, t).val());
+						data.put(key, ((CArray) args[0]).get(key, t, env).val());
 					}
 					profile = ProfilesImpl.getProfile(data);
 				} else {
@@ -202,9 +202,9 @@ public class SQL {
 						}
 						try {
 							if(params[i].isInstanceOf(CInt.TYPE, null, env)) {
-								ps.setLong(i + 1, ArgumentValidation.getInt(params[i], t));
+								ps.setLong(i + 1, ArgumentValidation.getInt(params[i], t, env));
 							} else if(params[i].isInstanceOf(CDouble.TYPE, null, env)) {
-								ps.setDouble(i + 1, (Double) ArgumentValidation.getDouble(params[i], t));
+								ps.setDouble(i + 1, (Double) ArgumentValidation.getDouble(params[i], t, env));
 							} else if(params[i].isInstanceOf(CString.TYPE, null, env)) {
 								if(type == Types.NCHAR || type == Types.NVARCHAR || type == Types.LONGNVARCHAR) {
 									ps.setNString(i + 1, (String) params[i].val());
@@ -214,7 +214,7 @@ public class SQL {
 							} else if(params[i] instanceof CByteArray) {
 								ps.setBytes(i + 1, ((CByteArray) params[i]).asByteArrayCopy());
 							} else if(params[i] instanceof CBoolean) {
-								ps.setBoolean(i + 1, ArgumentValidation.getBoolean(params[i], t));
+								ps.setBoolean(i + 1, ArgumentValidation.getBoolean(params[i], t, env));
 							} else {
 								throw new CRECastException("The type " + params[i].getClass().getSimpleName()
 										+ " of parameter " + (i + 1) + " is not supported.", t);
@@ -232,7 +232,7 @@ public class SQL {
 						ResultSetMetaData md = ps.getMetaData();
 						ResultSet rs = ps.getResultSet();
 						while(rs != null && rs.next()) {
-							CArray row = CArray.GetAssociativeArray(t);
+							CArray row = CArray.GetAssociativeArray(t, null, env);
 							for(int i = 1; i <= md.getColumnCount(); i++) {
 								Construct value;
 								int columnType = md.getColumnType(i);
@@ -298,9 +298,9 @@ public class SQL {
 								// for instance SELECT foo AS bar... then we would get "foo" from that. Instead,
 								// we use the column label, which in the example, would return "bar", which is what
 								// the user will expect in the results.
-								row.set(md.getColumnLabel(i), value, t);
+								row.set(md.getColumnLabel(i), value, t, env);
 							}
-							ret.push(row, t);
+							ret.push(row, t, env);
 						}
 						return ret;
 					} else {

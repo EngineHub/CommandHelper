@@ -367,7 +367,7 @@ public class StringHandling {
 			String string = args[0].val();
 			boolean useAdvanced = false;
 			if(args.length >= 2) {
-				useAdvanced = ArgumentValidation.getBoolean(args[1], t);
+				useAdvanced = ArgumentValidation.getBoolean(args[1], t, env);
 			}
 			List<Mixed> a = new ArrayList<>();
 			if(!useAdvanced) {
@@ -841,10 +841,10 @@ public class StringHandling {
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			try {
 				String s = args[0].val();
-				int begin = ArgumentValidation.getInt32(args[1], t);
+				int begin = ArgumentValidation.getInt32(args[1], t, env);
 				int end;
 				if(args.length == 3) {
-					end = ArgumentValidation.getInt32(args[2], t);
+					end = ArgumentValidation.getInt32(args[2], t, env);
 				} else {
 					end = s.length();
 				}
@@ -1319,13 +1319,13 @@ public class StringHandling {
 			String string = args[1].val();
 			int limit = Integer.MAX_VALUE;
 			if(args.length >= 3) {
-				limit = ArgumentValidation.getInt32(args[2], t);
+				limit = ArgumentValidation.getInt32(args[2], t, env);
 			}
 			int sp = 0;
 			if(split.length() == 0) {
 				//Empty string, so special case.
 				for(int i = 0; i < string.length(); i++) {
-					array.push(new CString(string.charAt(i), t), t);
+					array.push(new CString(string.charAt(i), t), t, env);
 				}
 				return array;
 			}
@@ -1334,16 +1334,16 @@ public class StringHandling {
 				if(string.substring(i, i + split.length()).equals(split)) {
 					//Split point found
 					splitsFound++;
-					array.push(new CString(string.substring(sp, i), t), t);
+					array.push(new CString(string.substring(sp, i), t), t, env);
 					sp = i + split.length();
 					i += split.length() - 1;
 				}
 			}
 			if(sp != 0) {
-				array.push(new CString(string.substring(sp, string.length()), t), t);
+				array.push(new CString(string.substring(sp, string.length()), t), t, env);
 			} else {
 				//It was not found anywhere, so put the whole string in
-				array.push(args[1], t);
+				array.push(args[1], t, env);
 			}
 			return array;
 		}
@@ -1994,7 +1994,7 @@ public class StringHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CByteArray ba = ArgumentValidation.getByteArray(args[0], t);
+			CByteArray ba = ArgumentValidation.getByteArray(args[0], t, env);
 			String encoding = "UTF-8";
 			if(args.length == 2) {
 				encoding = args[1].val();
@@ -2139,7 +2139,7 @@ public class StringHandling {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			try {
-				return new CString(new String(Character.toChars(ArgumentValidation.getInt32(args[0], t))), t);
+				return new CString(new String(Character.toChars(ArgumentValidation.getInt32(args[0], t, env))), t);
 			} catch (IllegalArgumentException ex) {
 				throw new CRERangeException("Code point out of range: " + args[0].val(), t);
 			}
@@ -2423,7 +2423,7 @@ public class StringHandling {
 				return CNull.NULL;
 			}
 			String string = args[0].val();
-			int times = ArgumentValidation.getInt32(args[1], t);
+			int times = ArgumentValidation.getInt32(args[1], t, env);
 			if(times < 0) {
 				throw new CRERangeException("Expecting a value >= 0, but " + times + " was found.", t);
 			}
@@ -2529,7 +2529,7 @@ public class StringHandling {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
-				CArray array = ArgumentValidation.getArray(args[0], t);
+				CArray array = ArgumentValidation.getArray(args[0], t, env);
 				return new CSecureString(array, t);
 			} else {
 				String s = args[0].val();
@@ -2612,7 +2612,7 @@ public class StringHandling {
 			} else if(args[0].isInstanceOf(CString.TYPE, null, env)) {
 				CArray array = new CArray(Target.UNKNOWN, args[0].val().length());
 				for(char c : args[0].val().toCharArray()) {
-					array.push(new CString(c, t), t);
+					array.push(new CString(c, t), t, env);
 				}
 				return array;
 			} else {

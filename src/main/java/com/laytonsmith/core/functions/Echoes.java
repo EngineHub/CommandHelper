@@ -144,7 +144,7 @@ public class Echoes {
 			if(Static.getConsoleName().equals(args[0].val())) {
 				p = Static.getServer().getConsole();
 			} else {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 			}
 			StringBuilder b = new StringBuilder();
 			for(int i = 1; i < args.length; i++) {
@@ -319,7 +319,7 @@ public class Echoes {
 			int offset = 0;
 
 			if(args.length == 3 || args.length == 6) {
-				player = Static.GetPlayer(args[0].val(), t);
+				player = Static.GetPlayer(args[0].val(), t, env);
 				offset = 1;
 			} else {
 				player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -327,9 +327,9 @@ public class Echoes {
 			}
 
 			if(args.length > 3) {
-				fadein = ArgumentValidation.getInt32(args[2 + offset], t);
-				stay = ArgumentValidation.getInt32(args[3 + offset], t);
-				fadeout = ArgumentValidation.getInt32(args[4 + offset], t);
+				fadein = ArgumentValidation.getInt32(args[2 + offset], t, env);
+				stay = ArgumentValidation.getInt32(args[3 + offset], t, env);
+				fadeout = ArgumentValidation.getInt32(args[4 + offset], t, env);
 			}
 
 			player.sendTitle(Construct.nval(args[offset]), Construct.nval(args[1 + offset]), fadein, stay, fadeout);
@@ -356,7 +356,7 @@ public class Echoes {
 			MCPlayer player;
 			String message;
 			if(args.length == 2) {
-				player = Static.GetPlayer(args[0], t);
+				player = Static.GetPlayer(args[0], t, env);
 				message = args[1].val();
 			} else {
 				player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -648,7 +648,7 @@ public class Echoes {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			final MCPlayer player = Static.GetPlayer(args[0], t);
+			final MCPlayer player = Static.GetPlayer(args[0], t, env);
 			player.chat(args[1].val());
 			return CVoid.VOID;
 		}
@@ -722,12 +722,12 @@ public class Echoes {
 
 				// Get the recipients from the array.
 				Set<MCCommandSender> recipients = new HashSet<>();
-				for(Mixed p : array.asList()) {
+				for(Mixed p : array.asList(env)) {
 					if(p.val().equalsIgnoreCase("~console")) {
 						recipients.add(server.getConsole());
 					} else {
 						try {
-							recipients.add(Static.GetPlayer(p, t));
+							recipients.add(Static.GetPlayer(p, t, env));
 						} catch (CREPlayerOfflineException cre) {
 							// Ignore offline players.
 						}
@@ -793,9 +793,9 @@ public class Echoes {
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String mes = Static.MCToANSIColors(args[0].val());
 			boolean prefix = ArgumentValidation.getBooleanish(env.getEnv(GlobalEnv.class)
-					.GetRuntimeSetting("function.console.prefix_default", CBoolean.TRUE), t);
+					.GetRuntimeSetting("function.console.prefix_default", CBoolean.TRUE), t, env);
 			if(args.length > 1) {
-				prefix = ArgumentValidation.getBoolean(args[1], t);
+				prefix = ArgumentValidation.getBoolean(args[1], t, env);
 			}
 
 			if(prefix) {

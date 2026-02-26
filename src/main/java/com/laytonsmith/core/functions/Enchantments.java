@@ -187,13 +187,13 @@ public class Enchantments {
 			MCPlayer p;
 			int offset = 0;
 			if(args.length == 4 || args.length == 3 && args[2].isInstanceOf(CArray.TYPE, null, env)) {
-				p = Static.GetPlayer(args[0].val(), t);
+				p = Static.GetPlayer(args[0].val(), t, env);
 				offset = 1;
 			} else {
 				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
 			}
-			MCItemStack is = p.getItemAt(args[offset] instanceof CNull ? null : ArgumentValidation.getInt32(args[offset], t));
+			MCItemStack is = p.getItemAt(args[offset] instanceof CNull ? null : ArgumentValidation.getInt32(args[offset], t, env));
 			if(is == null) {
 				throw new CRECastException("There is no item at slot " + args[offset], t);
 			}
@@ -262,14 +262,14 @@ public class Enchantments {
 			MCPlayer p;
 			int offset = 0;
 			if(args.length == 3) {
-				p = Static.GetPlayer(args[0].val(), t);
+				p = Static.GetPlayer(args[0].val(), t, env);
 				offset = 1;
 			} else {
 				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
 			}
 
-			MCItemStack is = p.getItemAt(args[offset] instanceof CNull ? null : ArgumentValidation.getInt32(args[offset], t));
+			MCItemStack is = p.getItemAt(args[offset] instanceof CNull ? null : ArgumentValidation.getInt32(args[offset], t, env));
 			if(is == null) {
 				throw new CRECastException("There is no item at slot " + args[offset], t);
 			}
@@ -335,14 +335,14 @@ public class Enchantments {
 			MCPlayer p;
 			Mixed slot;
 			if(args.length == 2) {
-				p = Static.GetPlayer(args[0].val(), t);
+				p = Static.GetPlayer(args[0].val(), t, env);
 				slot = args[1];
 			} else {
 				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
 				slot = args[0];
 			}
-			MCItemStack is = p.getItemAt(slot instanceof CNull ? null : ArgumentValidation.getInt32(slot, t));
+			MCItemStack is = p.getItemAt(slot instanceof CNull ? null : ArgumentValidation.getInt32(slot, t, env));
 			if(is == null) {
 				return new CArray(t);
 			}
@@ -394,7 +394,7 @@ public class Enchantments {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCEnchantment e = GetEnchantment(args[0].val(), t);
-			MCItemStack is = ObjectGenerator.GetGenerator().item(args[1], t);
+			MCItemStack is = ObjectGenerator.GetGenerator().item(args[1], t, env);
 			return CBoolean.get(e.canEnchantItem(is));
 		}
 	}
@@ -491,7 +491,7 @@ public class Enchantments {
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCItemStack is;
 			if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
-				is = ObjectGenerator.GetGenerator().item(args[0], t);
+				is = ObjectGenerator.GetGenerator().item(args[0], t, env);
 			} else {
 				is = Static.ParseItemNotation(null, args[0].val(), 1, t);
 			}
@@ -506,7 +506,7 @@ public class Enchantments {
 			CArray ca = new CArray(t);
 			for(MCEnchantment e : MCEnchantment.values()) {
 				if(e.canEnchantItem(is)) {
-					ca.push(new CString(e.name().toLowerCase(), t), t);
+					ca.push(new CString(e.name().toLowerCase(), t), t, env);
 				}
 			}
 			CACHE.put(name, ca);
@@ -603,7 +603,7 @@ public class Enchantments {
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CArray ret = new CArray(t);
 			for(MCEnchantment e : MCEnchantment.values()) {
-				ret.push(new CString(e.name().toLowerCase(), t), t);
+				ret.push(new CString(e.name().toLowerCase(), t), t, env);
 			}
 			return ret;
 		}

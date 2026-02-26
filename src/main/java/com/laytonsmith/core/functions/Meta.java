@@ -159,8 +159,8 @@ public class Meta {
 			String cmd = args[1].val().substring(1);
 			if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
 				CArray u = (CArray) args[0];
-				for(int i = 0; i < u.size(); i++) {
-					exec(t, env, null, new Mixed[]{new CString(u.get(i, t).val(), t), args[1]});
+				for(int i = 0; i < u.size(env); i++) {
+					exec(t, env, null, new Mixed[]{new CString(u.get(i, t, env).val(), t), args[1]});
 				}
 				return CVoid.VOID;
 			}
@@ -175,7 +175,7 @@ public class Meta {
 				}
 				Static.getServer().runasConsole(cmd);
 			} else {
-				MCPlayer m = Static.GetPlayer(args[0], t);
+				MCPlayer m = Static.GetPlayer(args[0], t, env);
 
 				MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				String name;
@@ -263,7 +263,7 @@ public class Meta {
 			Mixed command;
 			MCPlayer sender;
 			if(args.length == 2) {
-				sender = Static.GetPlayer(args[0], t);
+				sender = Static.GetPlayer(args[0], t, env);
 				command = args[1];
 			} else {
 				sender = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -508,11 +508,11 @@ public class Meta {
 					throw new CREException("No command sender in this context.", t);
 				}
 				commandString = args[0].val();
-				argList = ArgumentValidation.getArray(args[1], t).asList();
+				argList = ArgumentValidation.getArray(args[1], t, env).asList(env);
 			} else {
 				sender = Static.GetCommandSender(args[0].val(), t);
 				commandString = args[1].val();
-				argList = ArgumentValidation.getArray(args[2], t).asList();
+				argList = ArgumentValidation.getArray(args[2], t, env).asList(env);
 			}
 
 			if(commandString.length() < 1 || commandString.charAt(0) != '/') {
@@ -532,7 +532,7 @@ public class Meta {
 			List<String> completions = command.tabComplete(sender, commandString, arguments);
 			CArray ret = new CArray(t);
 			for(String s : completions) {
-				ret.push(new CString(s, t), t);
+				ret.push(new CString(s, t), t, env);
 			}
 			return ret;
 		}
@@ -1029,10 +1029,10 @@ public class Meta {
 			if(args.length == 1) {
 				player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(player, t);
-				state = ArgumentValidation.getBoolean(args[0], t);
+				state = ArgumentValidation.getBoolean(args[0], t, env);
 			} else {
-				player = Static.GetPlayer(args[0].val(), t);
-				state = ArgumentValidation.getBoolean(args[1], t);
+				player = Static.GetPlayer(args[0].val(), t, env);
+				state = ArgumentValidation.getBoolean(args[1], t, env);
 			}
 			player.setOp(state);
 			return CVoid.VOID;
@@ -1223,7 +1223,7 @@ public class Meta {
 			CArray c = new CArray(t);
 			for(Locale l : Locale.getAvailableLocales()) {
 				if(!l.getCountry().isEmpty()) {
-					c.push(new CString(l.toString(), t), t);
+					c.push(new CString(l.toString(), t), t, env);
 				}
 			}
 			new ArrayHandling.array_sort().exec(t, env, null, c);
@@ -1437,7 +1437,7 @@ public class Meta {
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CArray ret = new CArray(t);
 			for(FileOptions.CompilerOption s : FileOptions.CompilerOption.values()) {
-				ret.push(new CString(s.getName(), t), t);
+				ret.push(new CString(s.getName(), t), t, env);
 			}
 			return ret;
 		}
@@ -1486,7 +1486,7 @@ public class Meta {
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CArray ret = new CArray(t);
 			for(FileOptions.SuppressWarning s : FileOptions.SuppressWarning.values()) {
-				ret.push(new CString(s.getName(), t), t);
+				ret.push(new CString(s.getName(), t), t, env);
 			}
 			return ret;
 		}
@@ -1595,7 +1595,7 @@ public class Meta {
 			} else {
 				if(!ArgumentValidation.getBooleanish(
 						gEnv.GetRuntimeSetting("function.remove_runtime_setting.no_warn_on_removing_blank",
-								CBoolean.FALSE), t)) {
+								CBoolean.FALSE), t, env)) {
 					MSLog.GetLogger().e(MSLog.Tags.META, "Attempting to remove a runtime setting that doesn't exist,"
 							+ " '" + name + "'", t);
 				}
@@ -1820,16 +1820,16 @@ public class Meta {
 			if(comment == null) {
 				return CNull.NULL;
 			}
-			CArray ret = CArray.GetAssociativeArray(t);
-			ret.set("body", comment.getBody());
-			CArray annotations = CArray.GetAssociativeArray(t);
-			ret.set("annotations", annotations, t);
+			CArray ret = CArray.GetAssociativeArray(t, null, env);
+			ret.set("body", comment.getBody(), env);
+			CArray annotations = CArray.GetAssociativeArray(t, null, env);
+			ret.set("annotations", annotations, t, env);
 			for(Map.Entry<String, List<String>> entry : comment.getAnnotations().entrySet()) {
 				CArray list = new CArray(t, entry.getValue().size());
 				for(String s : entry.getValue()) {
-					list.push(new CString(s, t), t);
+					list.push(new CString(s, t), t, env);
 				}
-				annotations.set(entry.getKey(), list, t);
+				annotations.set(entry.getKey(), list, t, env);
 			}
 			return ret;
 		}

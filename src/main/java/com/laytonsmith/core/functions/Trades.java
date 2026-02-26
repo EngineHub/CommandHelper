@@ -61,7 +61,7 @@ public class Trades {
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CArray ret = new CArray(t);
 			for(MCMerchantRecipe mr : GetMerchant(args[0], t).getRecipes()) {
-				ret.push(trade(mr, t), t, env);
+				ret.push(trade(mr, t, env), t, env);
 			}
 			return ret;
 		}
@@ -106,7 +106,7 @@ public class Trades {
 				throw new CRECastException("Expected non-associative array for list of trade arrays.", t);
 			}
 			for(Mixed trade : trades.asList(env)) {
-				recipes.add(trade(trade, t));
+				recipes.add(trade(trade, t, env));
 			}
 			merchant.setRecipes(recipes);
 			return CVoid.VOID;
@@ -296,7 +296,7 @@ public class Trades {
 			MCPlayer player;
 			boolean force = false;
 			if(args.length > 1) {
-				player = Static.GetPlayer(args[1], t);
+				player = Static.GetPlayer(args[1], t, env);
 			} else {
 				player = Static.getPlayer(env, t);
 			}
@@ -399,55 +399,55 @@ public class Trades {
 		return merchant;
 	}
 
-	private static MCMerchantRecipe trade(Mixed c, Target t) {
+	private static MCMerchantRecipe trade(Mixed c, Target t, Environment env) {
 
-		CArray recipe = ArgumentValidation.getArray(c, t);
+		CArray recipe = ArgumentValidation.getArray(c, t, env);
 
-		MCItemStack result = ObjectGenerator.GetGenerator().item(recipe.get("result", t), t);
+		MCItemStack result = ObjectGenerator.GetGenerator().item(recipe.get("result", t, env), t, env);
 
 		MCMerchantRecipe mer = (MCMerchantRecipe) StaticLayer.GetNewRecipe(null, MCRecipeType.MERCHANT, result);
 
 		if(recipe.containsKey("maxuses")) {
-			mer.setMaxUses(ArgumentValidation.getInt32(recipe.get("maxuses", t), t));
+			mer.setMaxUses(ArgumentValidation.getInt32(recipe.get("maxuses", t, env), t, env));
 		}
 		if(recipe.containsKey("uses")) {
-			mer.setUses(ArgumentValidation.getInt32(recipe.get("uses", t), t));
+			mer.setUses(ArgumentValidation.getInt32(recipe.get("uses", t, env), t, env));
 		}
 		if(recipe.containsKey("hasxpreward")) {
-			mer.setHasExperienceReward(ArgumentValidation.getBoolean(recipe.get("hasxpreward", t), t));
+			mer.setHasExperienceReward(ArgumentValidation.getBoolean(recipe.get("hasxpreward", t, env), t, env));
 		}
 
-		CArray ingredients = ArgumentValidation.getArray(recipe.get("ingredients", t), t);
+		CArray ingredients = ArgumentValidation.getArray(recipe.get("ingredients", t, env), t, env);
 		if(ingredients.inAssociativeMode()) {
 			throw new CREFormatException("Ingredients array is invalid.", t);
 		}
-		if(ingredients.size() < 1 || ingredients.size() > 2) {
+		if(ingredients.size(env) < 1 || ingredients.size(env) > 2) {
 			throw new CRERangeException("Ingredients for merchants must contain 1 or 2 items, found "
-					+ ingredients.size(), t);
+					+ ingredients.size(env), t);
 		}
 		List<MCItemStack> mcIngredients = new ArrayList<>();
-		for(Mixed ingredient : ingredients.asList()) {
-			mcIngredients.add(ObjectGenerator.GetGenerator().item(ingredient, t));
+		for(Mixed ingredient : ingredients.asList(env)) {
+			mcIngredients.add(ObjectGenerator.GetGenerator().item(ingredient, t, env));
 		}
 		mer.setIngredients(mcIngredients);
 
 		return mer;
 	}
 
-	private static Mixed trade(MCMerchantRecipe r, Target t) {
+	private static Mixed trade(MCMerchantRecipe r, Target t, Environment env) {
 		if(r == null) {
 			return CNull.NULL;
 		}
-		CArray ret = CArray.GetAssociativeArray(t);
-		ret.set("result", ObjectGenerator.GetGenerator().item(r.getResult(), t), t);
+		CArray ret = CArray.GetAssociativeArray(t, null, env);
+		ret.set("result", ObjectGenerator.GetGenerator().item(r.getResult(), t), t, env);
 		CArray il = new CArray(t);
 		for(MCItemStack i : r.getIngredients()) {
-			il.push(ObjectGenerator.GetGenerator().item(i, t), t);
+			il.push(ObjectGenerator.GetGenerator().item(i, t), t, env);
 		}
-		ret.set("ingredients", il, t);
-		ret.set("maxuses", new CInt(r.getMaxUses(), t), t);
-		ret.set("uses", new CInt(r.getUses(), t), t);
-		ret.set("hasxpreward", CBoolean.get(r.hasExperienceReward()), t);
+		ret.set("ingredients", il, t, env);
+		ret.set("maxuses", new CInt(r.getMaxUses(), t), t, env);
+		ret.set("uses", new CInt(r.getUses(), t), t, env);
+		ret.set("hasxpreward", CBoolean.get(r.hasExperienceReward()), t, env);
 
 		return ret;
 	}

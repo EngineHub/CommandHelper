@@ -105,16 +105,16 @@ public class Web {
 		return "Contains various methods to make HTTP requests.";
 	}
 
-	private static void getCookieJar(CArray arrayJar, CookieJar cookieJar, Target t) {
+	private static void getCookieJar(CArray arrayJar, CookieJar cookieJar, Target t, Environment env) {
 		CArray ret = arrayJar;
 		for(Cookie cookie : cookieJar.getAllCookies()) {
 			boolean update = false;
 			CArray aCookie = null;
-			for(Mixed ac : arrayJar.asList()) {
-				aCookie = ArgumentValidation.getArray(ac, t);
-				if(cookie.getName().equals(aCookie.get("name", t).val())
-						&& cookie.getDomain().equals(aCookie.get("domain", t).val())
-						&& cookie.getPath().equals(aCookie.get("path", t).val())) {
+			for(Mixed ac : arrayJar.asList(env)) {
+				aCookie = ArgumentValidation.getArray(ac, t, env);
+				if(cookie.getName().equals(aCookie.get("name", t, env).val())
+						&& cookie.getDomain().equals(aCookie.get("domain", t, env).val())
+						&& cookie.getPath().equals(aCookie.get("path", t, env).val())) {
 					//This is just an update, not a new cookie
 					update = true;
 					break;
@@ -122,27 +122,27 @@ public class Web {
 			}
 			CArray c;
 			if(!update) {
-				c = CArray.GetAssociativeArray(t);
+				c = CArray.GetAssociativeArray(t, null, env);
 			} else {
 				c = aCookie;
 			}
-			c.set("name", cookie.getName());
-			c.set("value", cookie.getValue());
-			c.set("domain", cookie.getDomain());
-			c.set("path", cookie.getPath());
-			c.set("expiration", new CInt(cookie.getExpiration(), t), t);
-			c.set("httpOnly", CBoolean.get(cookie.isHttpOnly()), t);
-			c.set("secureOnly", CBoolean.get(cookie.isSecureOnly()), t);
+			c.set("name", cookie.getName(), env);
+			c.set("value", cookie.getValue(), env);
+			c.set("domain", cookie.getDomain(), env);
+			c.set("path", cookie.getPath(), env);
+			c.set("expiration", new CInt(cookie.getExpiration(), t), t, env);
+			c.set("httpOnly", CBoolean.get(cookie.isHttpOnly()), t, env);
+			c.set("secureOnly", CBoolean.get(cookie.isSecureOnly()), t, env);
 			if(!update) {
-				ret.push(c, t);
+				ret.push(c, t, env);
 			}
 		}
 	}
 
-	private static CookieJar getCookieJar(CArray cookieJar, Target t) {
+	private static CookieJar getCookieJar(CArray cookieJar, Target t, Environment env) {
 		CookieJar ret = new CookieJar();
 		for(String key : cookieJar.stringKeySet()) {
-			CArray cookie = ArgumentValidation.getArray(cookieJar.get(key, t), t);
+			CArray cookie = ArgumentValidation.getArray(cookieJar.get(key, t, env), t, env);
 			String name;
 			String value;
 			String domain;
@@ -152,22 +152,22 @@ public class Web {
 			boolean secureOnly = false;
 			if(cookie.containsKey("name") && cookie.containsKey("value")
 					&& cookie.containsKey("domain") && cookie.containsKey("path")) {
-				name = cookie.get("name", t).val();
-				value = cookie.get("value", t).val();
-				domain = cookie.get("domain", t).val();
-				path = cookie.get("path", t).val();
+				name = cookie.get("name", t, env).val();
+				value = cookie.get("value", t, env).val();
+				domain = cookie.get("domain", t, env).val();
+				path = cookie.get("path", t, env).val();
 			} else {
 				throw new CREFormatException("The name, value, domain, and path keys are required"
 						+ " in all cookies.", t);
 			}
 			if(cookie.containsKey("expiration")) {
-				expiration = ArgumentValidation.getInt(cookie.get("expiration", t), t);
+				expiration = ArgumentValidation.getInt(cookie.get("expiration", t, env), t, env);
 			}
 			if(cookie.containsKey("httpOnly")) {
-				httpOnly = ArgumentValidation.getBoolean(cookie.get("httpOnly", t), t);
+				httpOnly = ArgumentValidation.getBoolean(cookie.get("httpOnly", t, env), t, env);
 			}
 			if(cookie.containsKey("secureOnly")) {
-				secureOnly = ArgumentValidation.getBoolean(cookie.get("secureOnly", t), t);
+				secureOnly = ArgumentValidation.getBoolean(cookie.get("secureOnly", t, env), t, env);
 			}
 			Cookie c = new Cookie(name, value, domain, path, expiration, httpOnly, secureOnly);
 			ret.addCookie(c);
@@ -320,7 +320,7 @@ public class Web {
 				}
 				if(csettings.containsKey("cookiejar") && !(csettings.get("cookiejar", t, env) instanceof CNull)) {
 					arrayJar = ArgumentValidation.getArray(csettings.get("cookiejar", t, env), t, env);
-					settings.setCookieJar(getCookieJar(arrayJar, t));
+					settings.setCookieJar(getCookieJar(arrayJar, t, env));
 				} else {
 					arrayJar = null;
 				}
@@ -482,7 +482,7 @@ public class Web {
 						array.set("httpVersion", resp.getHttpVersion(), env);
 						array.set("error", CBoolean.get(resp.getResponseCode() >= 400 && resp.getResponseCode() < 600), t, env);
 						if(arrayJar != null) {
-							getCookieJar(arrayJar, settings.getCookieJar(), t);
+							getCookieJar(arrayJar, settings.getCookieJar(), t, env);
 						}
 						if(settings.getBlocking()) {
 							executeFinish(success, array, t, env);
@@ -640,7 +640,7 @@ public class Web {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CArray array = ArgumentValidation.getArray(args[0], t, env);
-			CookieJar jar = getCookieJar(array, t);
+			CookieJar jar = getCookieJar(array, t, env);
 			jar.clearSessionCookies();
 			return CVoid.VOID;
 		}
