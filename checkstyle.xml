@@ -31,6 +31,12 @@
 			<property name="message" value="Javadoc comment at column [\d]+ has parse error\. Details: no viable alternative at input '[\\t]+ \*' while parsing JAVADOC_TAG"/>
 		</module>
 
+		<!-- Allow braceless else when it directly contains a switch expression -->
+		<module name="SuppressionXpathSingleFilter">
+			<property name="checks" value="NeedBraces"/>
+			<property name="query" value="//LITERAL_ELSE[./EXPR/ASSIGN/LITERAL_SWITCH]"/>
+		</module>
+
 		<!-- Indent must use tab characters -->
 		<module name="RegexpSinglelineJava">
 			<property name="format" value="^\t* ([^\*]|$)"/> <!-- Javadoc and multiline comments have a single leading whitespace, so allow " *" -->
