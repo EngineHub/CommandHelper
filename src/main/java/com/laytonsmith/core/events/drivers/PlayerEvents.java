@@ -162,7 +162,7 @@ public class PlayerEvents {
 
 				MCItemStack item = event.getItem();
 				if(item != null) {
-					ret.put("item", ObjectGenerator.GetGenerator().item(item, Target.UNKNOWN, env));
+					ret.put("item", ObjectGenerator.GetGenerator().item(item, Target.UNKNOWN));
 				} else {
 					ret.put("item", CNull.NULL);
 				}
@@ -256,7 +256,7 @@ public class PlayerEvents {
 			if(event instanceof MCPlayerItemConsumeEvent) {
 				MCPlayerItemConsumeEvent e = (MCPlayerItemConsumeEvent) event;
 				Map<String, Mixed> ret = evaluate_helper(e);
-				Mixed item = ObjectGenerator.GetGenerator().item(e.getItem(), Target.UNKNOWN, env);
+				Mixed item = ObjectGenerator.GetGenerator().item(e.getItem(), Target.UNKNOWN);
 				ret.put("item", item);
 				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_2)) {
 					if(e.getHand() == MCEquipmentSlot.WEAPON) {
@@ -914,7 +914,7 @@ public class PlayerEvents {
 					}
 				}
 				map.put("world", new CString(pie.getPlayer().getWorld().getName(), Target.UNKNOWN));
-				map.put("item", ObjectGenerator.GetGenerator().item(pie.getItem(), Target.UNKNOWN, env));
+				map.put("item", ObjectGenerator.GetGenerator().item(pie.getItem(), Target.UNKNOWN));
 				if(pie.getHand() == MCEquipmentSlot.WEAPON) {
 					map.put("hand", new CString("main_hand", Target.UNKNOWN));
 				} else {

@@ -154,18 +154,18 @@ public class InventoryEvents {
 				map.put("shiftclick", CBoolean.get(e.isShiftClick()));
 				map.put("creativeclick", CBoolean.get(e.isCreativeClick()));
 				map.put("keyboardclick", CBoolean.get(e.isKeyboardClick()));
-				map.put("cursoritem", ObjectGenerator.GetGenerator().item(e.getCursor(), t, env));
+				map.put("cursoritem", ObjectGenerator.GetGenerator().item(e.getCursor(), t));
 
 				map.put("slot", new CInt(e.getSlot(), t));
 				map.put("rawslot", new CInt(e.getRawSlot(), t));
 				map.put("hotbarbutton", new CInt(e.getHotbarButton(), t));
 				map.put("slottype", new CString(e.getSlotType().name(), t));
-				map.put("slotitem", ObjectGenerator.GetGenerator().item(e.getCurrentItem(), t, env));
+				map.put("slotitem", ObjectGenerator.GetGenerator().item(e.getCurrentItem(), t));
 
 				CArray items = CArray.GetAssociativeArray(t, null, env);
 				MCInventory inv = e.getInventory();
 				for(int i = 0; i < inv.getSize(); i++) {
-					items.set(i, ObjectGenerator.GetGenerator().item(inv.getItem(i), t, env), t, env);
+					items.set(i, ObjectGenerator.GetGenerator().item(inv.getItem(i), t), t, env);
 				}
 				map.put("inventory", items);
 				map.put("inventorytype", new CString(inv.getType().name(), t));
@@ -274,8 +274,8 @@ public class InventoryEvents {
 				Map<String, Mixed> map = evaluate_helper(event);
 
 				map.put("player", new CString(e.getWhoClicked().getName(), Target.UNKNOWN));
-				map.put("newcursoritem", ObjectGenerator.GetGenerator().item(e.getCursor(), Target.UNKNOWN, env));
-				map.put("oldcursoritem", ObjectGenerator.GetGenerator().item(e.getOldCursor(), Target.UNKNOWN, env));
+				map.put("newcursoritem", ObjectGenerator.GetGenerator().item(e.getCursor(), Target.UNKNOWN));
+				map.put("oldcursoritem", ObjectGenerator.GetGenerator().item(e.getOldCursor(), Target.UNKNOWN));
 
 				CArray slots = new CArray(Target.UNKNOWN);
 				for(Integer slot : e.getInventorySlots()) {
@@ -293,14 +293,14 @@ public class InventoryEvents {
 				for(Map.Entry<Integer, MCItemStack> ni : e.getNewItems().entrySet()) {
 					Integer key = ni.getKey();
 					MCItemStack value = ni.getValue();
-					newItems.set(key.intValue(), ObjectGenerator.GetGenerator().item(value, Target.UNKNOWN, env), Target.UNKNOWN, env);
+					newItems.set(key.intValue(), ObjectGenerator.GetGenerator().item(value, Target.UNKNOWN), Target.UNKNOWN, env);
 				}
 				map.put("newitems", newItems);
 
 				CArray items = CArray.GetAssociativeArray(Target.UNKNOWN, null, env);
 				MCInventory inv = e.getInventory();
 				for(int i = 0; i < inv.getSize(); i++) {
-					items.set(i, ObjectGenerator.GetGenerator().item(inv.getItem(i), Target.UNKNOWN, env), Target.UNKNOWN, env);
+					items.set(i, ObjectGenerator.GetGenerator().item(inv.getItem(i), Target.UNKNOWN), Target.UNKNOWN, env);
 				}
 				map.put("inventory", items);
 				map.put("inventorytype", new CString(inv.getType().name(), Target.UNKNOWN));
@@ -384,7 +384,7 @@ public class InventoryEvents {
 				CArray items = CArray.GetAssociativeArray(t, null, env);
 				MCInventory inv = e.getInventory();
 				for(int i = 0; i < inv.getSize(); i++) {
-					Mixed c = ObjectGenerator.GetGenerator().item(inv.getItem(i), t, env);
+					Mixed c = ObjectGenerator.GetGenerator().item(inv.getItem(i), t);
 					items.set(i, c, t, env);
 				}
 				map.put("inventory", items);
@@ -461,7 +461,7 @@ public class InventoryEvents {
 				CArray items = CArray.GetAssociativeArray(t, null, env);
 				MCInventory inv = e.getInventory();
 				for(int i = 0; i < inv.getSize(); i++) {
-					Mixed c = ObjectGenerator.GetGenerator().item(inv.getItem(i), t, env);
+					Mixed c = ObjectGenerator.GetGenerator().item(inv.getItem(i), t);
 					items.set(i, c, t, env);
 				}
 				map.put("inventory", items);
@@ -532,7 +532,7 @@ public class InventoryEvents {
 				Map<String, Mixed> map = evaluate_helper(event);
 
 				map.put("player", new CString(e.GetEnchanter().getName(), Target.UNKNOWN));
-				map.put("item", ObjectGenerator.GetGenerator().item(e.getItem(), Target.UNKNOWN, env));
+				map.put("item", ObjectGenerator.GetGenerator().item(e.getItem(), Target.UNKNOWN));
 				map.put("inventorytype", new CString(e.getInventory().getType().name(), Target.UNKNOWN));
 				map.put("levels", new CInt(e.getExpLevelCost(), Target.UNKNOWN));
 				map.put("enchants", ObjectGenerator.GetGenerator().enchants(e.getEnchantsToAdd(), Target.UNKNOWN));
@@ -619,7 +619,7 @@ public class InventoryEvents {
 				Map<String, Mixed> map = evaluate_helper(event);
 
 				map.put("player", new CString(e.getEnchanter().getName(), t));
-				map.put("item", ObjectGenerator.GetGenerator().item(e.getItem(), t, env));
+				map.put("item", ObjectGenerator.GetGenerator().item(e.getItem(), t));
 				map.put("inventorytype", new CString(e.getInventory().getType().name(), t));
 				map.put("enchantmentbonus", new CInt(e.getEnchantmentBonus(), t));
 
@@ -822,8 +822,8 @@ public class InventoryEvents {
 			if(event instanceof MCItemSwapEvent) {
 				MCItemSwapEvent e = (MCItemSwapEvent) event;
 				Map<String, Mixed> ret = evaluate_helper(e);
-				ret.put("main_hand", ObjectGenerator.GetGenerator().item(e.getMainHandItem(), Target.UNKNOWN, env));
-				ret.put("off_hand", ObjectGenerator.GetGenerator().item(e.getOffHandItem(), Target.UNKNOWN, env));
+				ret.put("main_hand", ObjectGenerator.GetGenerator().item(e.getMainHandItem(), Target.UNKNOWN));
+				ret.put("off_hand", ObjectGenerator.GetGenerator().item(e.getOffHandItem(), Target.UNKNOWN));
 				return ret;
 			} else {
 				throw new EventException("Event received was not an MCItemSwapEvent");
@@ -903,10 +903,10 @@ public class InventoryEvents {
 				CArray matrix = CArray.GetAssociativeArray(t, null, env);
 				MCItemStack[] mi = e.getInventory().getMatrix();
 				for(int i = 0; i < mi.length; i++) {
-					matrix.set(i, ObjectGenerator.GetGenerator().item(mi[i], t, env), t, env);
+					matrix.set(i, ObjectGenerator.GetGenerator().item(mi[i], t), t, env);
 				}
 				ret.put("matrix", matrix);
-				ret.put("result", ObjectGenerator.GetGenerator().item(e.getInventory().getResult(), t, env));
+				ret.put("result", ObjectGenerator.GetGenerator().item(e.getInventory().getResult(), t));
 				return ret;
 			} else {
 				throw new EventException("Event received was not an MCPrepareItemCraftEvent.");
@@ -979,9 +979,9 @@ public class InventoryEvents {
 				Map<String, Mixed> ret = evaluate_helper(e);
 
 				ret.put("player", new CString(e.getPlayer().getName(), Target.UNKNOWN));
-				ret.put("first_item", ObjectGenerator.GetGenerator().item(anvil.getFirstItem(), Target.UNKNOWN, env));
-				ret.put("second_item", ObjectGenerator.GetGenerator().item(anvil.getSecondItem(), Target.UNKNOWN, env));
-				ret.put("result", ObjectGenerator.GetGenerator().item(anvil.getResult(), Target.UNKNOWN, env));
+				ret.put("first_item", ObjectGenerator.GetGenerator().item(anvil.getFirstItem(), Target.UNKNOWN));
+				ret.put("second_item", ObjectGenerator.GetGenerator().item(anvil.getSecondItem(), Target.UNKNOWN));
+				ret.put("result", ObjectGenerator.GetGenerator().item(anvil.getResult(), Target.UNKNOWN));
 				ret.put("level_repair_cost", new CInt(anvil.getRepairCost(), Target.UNKNOWN));
 				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_18_1)) {
 					ret.put("item_repair_cost", new CInt(anvil.getRepairCostAmount(), Target.UNKNOWN));
@@ -1076,13 +1076,13 @@ public class InventoryEvents {
 				Map<String, Mixed> ret = evaluate_helper(e);
 
 				ret.put("player", new CString(e.getPlayer().getName(), Target.UNKNOWN));
-				ret.put("first_item", ObjectGenerator.GetGenerator().item(smithing.getInputTemplate(), Target.UNKNOWN, env));
-				ret.put("second_item", ObjectGenerator.GetGenerator().item(smithing.getInputEquipment(), Target.UNKNOWN, env));
+				ret.put("first_item", ObjectGenerator.GetGenerator().item(smithing.getInputTemplate(), Target.UNKNOWN));
+				ret.put("second_item", ObjectGenerator.GetGenerator().item(smithing.getInputEquipment(), Target.UNKNOWN));
 				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20)) {
-					ret.put("third_item", ObjectGenerator.GetGenerator().item(smithing.getInputMaterial(), Target.UNKNOWN, env));
+					ret.put("third_item", ObjectGenerator.GetGenerator().item(smithing.getInputMaterial(), Target.UNKNOWN));
 				}
 				ret.put("recipe", ObjectGenerator.GetGenerator().recipe(smithing.getRecipe(), Target.UNKNOWN));
-				ret.put("result", ObjectGenerator.GetGenerator().item(smithing.getResult(), Target.UNKNOWN, env));
+				ret.put("result", ObjectGenerator.GetGenerator().item(smithing.getResult(), Target.UNKNOWN));
 
 				return ret;
 			} else {
@@ -1149,9 +1149,9 @@ public class InventoryEvents {
 				Map<String, Mixed> ret = evaluate_helper(e);
 
 				ret.put("player", new CString(e.getPlayer().getName(), Target.UNKNOWN));
-				ret.put("upper_item", ObjectGenerator.GetGenerator().item(grindstone.getUpperItem(), Target.UNKNOWN, env));
-				ret.put("lower_item", ObjectGenerator.GetGenerator().item(grindstone.getLowerItem(), Target.UNKNOWN, env));
-				ret.put("result", ObjectGenerator.GetGenerator().item(grindstone.getResult(), Target.UNKNOWN, env));
+				ret.put("upper_item", ObjectGenerator.GetGenerator().item(grindstone.getUpperItem(), Target.UNKNOWN));
+				ret.put("lower_item", ObjectGenerator.GetGenerator().item(grindstone.getLowerItem(), Target.UNKNOWN));
+				ret.put("result", ObjectGenerator.GetGenerator().item(grindstone.getResult(), Target.UNKNOWN));
 
 				return ret;
 			} else {
