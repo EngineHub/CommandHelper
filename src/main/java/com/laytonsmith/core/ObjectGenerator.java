@@ -305,7 +305,6 @@ public class ObjectGenerator {
 	 *
 	 * @param i
 	 * @param t
-	 * @param env
 	 * @return An abstract item stack
 	 * @deprecated Use {@link #item(Mixed, Target, Environment)} instead.
 	 */
