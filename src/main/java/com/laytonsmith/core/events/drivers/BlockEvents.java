@@ -957,7 +957,7 @@ public class BlockEvents {
 			Map<String, Mixed> map = evaluate_helper(e);
 
 			map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
-			map.put("text", event.getLines(env));
+			map.put("text", event.getLines());
 			map.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation(), false));
 			map.put("side", new CString(event.getSide().name(), Target.UNKNOWN));
 

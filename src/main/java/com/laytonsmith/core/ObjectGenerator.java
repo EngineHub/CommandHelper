@@ -538,7 +538,7 @@ public class ObjectGenerator {
 			}
 
 			if(meta.hasCustomTags()) {
-				ma.set("tags", MCTagType.TAG_CONTAINER.construct(meta.getCustomTags(), null), t, null);
+				ma.set("tags", MCTagType.TAG_CONTAINER.construct(meta.getCustomTags()), t, null);
 			} else {
 				ma.set("tags", CNull.NULL, t, null);
 			}
@@ -673,7 +673,7 @@ public class ObjectGenerator {
 					// we can ensure we don't populate this meta array with the default banner data.
 					if(mCBlockStateMeta.hasBlockState()) {
 						ma.set("basecolor", banner.getBaseColor().name(), t, null);
-						CArray patterns = new CArray(t, banner.numberOfPatterns(), null, null);
+						CArray patterns = new CArray(t, banner.numberOfPatterns(), (GenericParameters) null, (Environment) null);
 						for(MCPattern p : banner.getPatterns()) {
 							CArray pattern = CArray.GetAssociativeArray(t, null, null);
 							pattern.set("shape", new CString(p.getShape().toString(), t), t, null);
@@ -923,7 +923,7 @@ public class ObjectGenerator {
 				CArray effects = potions(susstew.getCustomEffects(), t);
 				ma.set("potions", effects, t, null);
 			} else if(meta instanceof MCBannerMeta bannermeta) {
-				CArray patterns = new CArray(t, bannermeta.numberOfPatterns(), null, null);
+				CArray patterns = new CArray(t, bannermeta.numberOfPatterns(), (GenericParameters) null, (Environment) null);
 				for(MCPattern p : bannermeta.getPatterns()) {
 					CArray pattern = CArray.GetAssociativeArray(t, null, null);
 					pattern.set("shape", new CString(p.getShape().toString(), t), t, null);
@@ -1017,6 +1017,7 @@ public class ObjectGenerator {
 	 * @param t
 	 * @return abstract item meta
 	 * @throws ConfigRuntimeException
+	 * @deprecated Use {@link #itemMeta(Mixed, MCMaterial, Target, Environment)} instead.
 	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated

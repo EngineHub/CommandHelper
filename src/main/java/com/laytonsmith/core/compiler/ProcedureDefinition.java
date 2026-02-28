@@ -3,7 +3,6 @@ package com.laytonsmith.core.compiler;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.constructs.CClassType;
-import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.DocComment;
 import com.laytonsmith.core.constructs.Target;

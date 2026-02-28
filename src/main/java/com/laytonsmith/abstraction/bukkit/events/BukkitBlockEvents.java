@@ -45,7 +45,6 @@ import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
-import com.laytonsmith.core.environments.Environment;
 import org.bukkit.block.Block;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
@@ -392,12 +391,12 @@ public class BukkitBlockEvents {
 		}
 
 		@Override
-		public CArray getLines(Environment env) {
+		public CArray getLines() {
 			CArray retn = new CArray(Target.UNKNOWN, GenericParameters.emptyBuilder(CArray.TYPE)
-					.addNativeParameter(CString.TYPE, null).buildNative(), env);
+					.addNativeParameter(CString.TYPE, null).buildNative(), null);
 
 			for(int i = 0; i < 4; i++) {
-				retn.push(new CString(pie.getLine(i), Target.UNKNOWN), Target.UNKNOWN, env);
+				retn.push(new CString(pie.getLine(i), Target.UNKNOWN), Target.UNKNOWN, null);
 			}
 
 			return retn;
