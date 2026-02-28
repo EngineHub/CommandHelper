@@ -3,10 +3,10 @@ package com.laytonsmith.core.compiler;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.constructs.CClassType;
-import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.DocComment;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.objects.ObjectType;
@@ -73,4 +73,5 @@ public class ProcedureDefinition extends Construct {
 	public GenericParameters getGenericParameters() {
 		return null;
 	}
+
 }

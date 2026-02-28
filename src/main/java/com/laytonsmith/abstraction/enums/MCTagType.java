@@ -68,7 +68,7 @@ public enum MCTagType {
 				return ints;
 			},
 			(int[] array) -> {
-				CArray r = new CArray(Target.UNKNOWN);
+				CArray r = new CArray(Target.UNKNOWN, null, null);
 				for(int i : array) {
 					r.push(new CInt(i, Target.UNKNOWN), Target.UNKNOWN, null);
 				}
@@ -91,7 +91,7 @@ public enum MCTagType {
 				return longs;
 			},
 			(long[] array) -> {
-				CArray ret = new CArray(Target.UNKNOWN);
+				CArray ret = new CArray(Target.UNKNOWN, null, null);
 				for(long i : array) {
 					ret.push(new CInt(i, Target.UNKNOWN), Target.UNKNOWN, null);
 				}
