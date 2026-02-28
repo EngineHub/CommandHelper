@@ -26,7 +26,6 @@ import com.laytonsmith.abstraction.MCFoodComponent;
 import com.laytonsmith.abstraction.MCFurnaceInventory;
 import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCInventoryHolder;
-import com.laytonsmith.abstraction.MCItemFactory;
 import com.laytonsmith.abstraction.MCItemMeta;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCKnowledgeBookMeta;
@@ -69,9 +68,7 @@ import com.laytonsmith.abstraction.blocks.MCFurnace;
 import com.laytonsmith.abstraction.blocks.MCMaterial.MCVanillaMaterial;
 import com.laytonsmith.abstraction.blocks.MCSign;
 import com.laytonsmith.abstraction.blocks.MCSignText;
-import com.laytonsmith.abstraction.entities.MCTropicalFish;
 import com.laytonsmith.abstraction.enums.MCAttribute;
-import com.laytonsmith.abstraction.enums.MCAxolotlType;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.MCEnchantment;
 import com.laytonsmith.abstraction.enums.MCEntityType;
@@ -79,15 +76,11 @@ import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlotGroup;
 import com.laytonsmith.abstraction.enums.MCFireworkType;
 import com.laytonsmith.abstraction.enums.MCItemFlag;
-import com.laytonsmith.abstraction.enums.MCItemRarity;
 import com.laytonsmith.abstraction.enums.MCParticle;
-import com.laytonsmith.abstraction.enums.MCPatternShape;
 import com.laytonsmith.abstraction.enums.MCPotionEffectType;
 import com.laytonsmith.abstraction.enums.MCPotionType;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
 import com.laytonsmith.abstraction.enums.MCTagType;
-import com.laytonsmith.abstraction.enums.MCTrimMaterial;
-import com.laytonsmith.abstraction.enums.MCTrimPattern;
 import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
@@ -99,7 +92,6 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
-import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREEnchantmentException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
@@ -187,6 +179,10 @@ public class ObjectGenerator {
 	}
 
 	/**
+	 * @param c
+	 * @param w
+	 * @param t
+	 * @return 
 	 * @deprecated Use {@link #location(Mixed, MCWorld, Target, Environment)} instead.
 	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
@@ -201,12 +197,11 @@ public class ObjectGenerator {
 	 * 4 usages: <ul> <li>(x, y, z)</li> <li>(x, y, z, world)</li> <li>(x, y, z, yaw, pitch)</li> <li>(x, y, z, world,
 	 * yaw, pitch)</li> </ul> In all cases, the pitch and yaw default to 0, and the world defaults to the specified
 	 * world. <em>More conveniently: ([world], x, y, z, [yaw, pitch])</em>
-	 *
 	 * @param c
 	 * @param w
-	 * @param env
 	 * @param t
-	 * @return
+	 * @param env
+	 * @return 
 	 */
 	public MCLocation location(Mixed c, MCWorld w, Target t, Environment env) {
 		if(!(c.isInstanceOf(CArray.TYPE, null, env))) {
@@ -276,12 +271,6 @@ public class ObjectGenerator {
 		return StaticLayer.GetLocation(world, x, y, z, yaw, pitch);
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
-	@Deprecated
-	public Construct item(MCItemStack is, Target t) {
-		return item(is, t, null);
-	}
-
 	/**
 	 * An Item Object consists of data about a particular item stack. Information included is: recipeType, data, qty,
 	 * and an array of enchantment objects (labeled enchants): erecipeType (enchantment recipeType) and elevel
@@ -293,15 +282,15 @@ public class ObjectGenerator {
 	 * @param env
 	 * @return An item array or CNull
 	 */
-	public Construct item(MCItemStack is, Target t, Environment env) {
+	public Construct item(MCItemStack is, Target t) {
 		if(is == null || is.isEmpty()) {
 			return CNull.NULL;
 		}
 
-		CArray ret = CArray.GetAssociativeArray(t, null, env);
-		ret.set("name", new CString(is.getType().getName(), t), t, env);
-		ret.set("qty", new CInt(is.getAmount(), t), t, env);
-		ret.set("meta", itemMeta(is, t, env), t, env);
+		CArray ret = CArray.GetAssociativeArray(t, null, null);
+		ret.set("name", new CString(is.getType().getName(), t), t, null);
+		ret.set("qty", new CInt(is.getAmount(), t), t, null);
+		ret.set("meta", itemMeta(is, t, env), t, null);
 		return ret;
 	}
 
@@ -318,12 +307,23 @@ public class ObjectGenerator {
 	 * @param t
 	 * @param env
 	 * @return An abstract item stack
+	 * @deprecated Use {@link #item(Mixed, Target, Environment)} instead.
 	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	public MCItemStack item(Mixed i, Target t) {
+		return item(i, t, false, null);
+	}
+
 	public MCItemStack item(Mixed i, Target t, Environment env) {
 		return item(i, t, false, env);
 	}
 
 	/**
+	 * @param i
+	 * @param t
+	 * @param legacy
+	 * @return 
 	 * @deprecated Use {@link #item(Mixed, Target, boolean, Environment)} instead.
 	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
@@ -414,12 +414,9 @@ public class ObjectGenerator {
 						MCMaterial newmaterial;
 						String entityName = spawntype.val().toUpperCase();
 						newmaterial = switch(entityName) {
-							case "MUSHROOM_COW" ->
-								StaticLayer.GetMaterial("MOOSHROOM_SPAWN_EGG");
-							case "PIG_ZOMBIE" ->
-								StaticLayer.GetMaterial("ZOMBIE_PIGMAN_SPAWN_EGG");
-							default ->
-								StaticLayer.GetMaterial(entityName + "_SPAWN_EGG");
+							case "MUSHROOM_COW" -> StaticLayer.GetMaterial("MOOSHROOM_SPAWN_EGG");
+							case "PIG_ZOMBIE" -> StaticLayer.GetMaterial("ZOMBIE_PIGMAN_SPAWN_EGG");
+							default -> StaticLayer.GetMaterial(entityName + "_SPAWN_EGG");
 						};
 						if(newmaterial != null) {
 							material = newmaterial;
@@ -485,13 +482,7 @@ public class ObjectGenerator {
 		return StaticLayer.GetItemStack("AIR", 0);
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
-	@Deprecated
 	public Construct itemMeta(MCItemStack is, Target t) {
-		return itemMeta(is, t, null);
-	}
-
-	public Construct itemMeta(MCItemStack is, Target t, Environment env) {
 		if(is == null || !is.hasItemMeta()) {
 			return CNull.NULL;
 		} else {
@@ -664,7 +655,7 @@ public class ObjectGenerator {
 					ma.set("unbreakable", CBoolean.get(meta.isUnbreakable()), t, null);
 				} else if(material.isBlock()) {
 					if(meta.hasBlockData()) {
-						ma.set("blockdata", blockData(meta.getBlockData(material), t), t, null);
+						ma.set("blockdata", blockData(meta.getBlockData(material), t, null), t, null);
 					} else {
 						ma.set("blockdata", CNull.NULL, t, null);
 					}
@@ -673,12 +664,12 @@ public class ObjectGenerator {
 
 			// Specific ItemMeta
 			if(meta instanceof MCBlockStateMeta mCBlockStateMeta) {
-				MCBlockState bs = ((MCBlockStateMeta) meta).getBlockState(true);
+				MCBlockState bs = mCBlockStateMeta.getBlockState(true);
 				if(bs instanceof MCBanner banner) {
 					// This is a shield that may or may not have a banner attached, but if we get the BlockState when
 					// no banner exists, it gives us a default one. By first checking hasBlockState(),
 					// we can ensure we don't populate this meta array with the default banner data.
-					if(((MCBlockStateMeta) meta).hasBlockState()) {
+					if(mCBlockStateMeta.hasBlockState()) {
 						ma.set("basecolor", banner.getBaseColor().name(), t, null);
 						CArray patterns = new CArray(t, banner.numberOfPatterns(), null, env);
 						for(MCPattern p : banner.getPatterns()) {
@@ -689,8 +680,7 @@ public class ObjectGenerator {
 						}
 						ma.set("patterns", patterns, t, null);
 					}
-				} else if(bs instanceof MCCreatureSpawner) {
-					MCCreatureSpawner mccs = (MCCreatureSpawner) bs;
+				} else if(bs instanceof MCCreatureSpawner mccs) {
 					MCEntityType type = mccs.getSpawnedType();
 					if(type == null) {
 						ma.set("spawntype", CNull.NULL, t, null);
@@ -704,8 +694,7 @@ public class ObjectGenerator {
 					ma.set("maxnearbyentities", new CInt(mccs.getMaxNearbyEntities(), t), t, null);
 					ma.set("playerrange", new CInt(mccs.getPlayerRange(), t), t, null);
 					ma.set("spawnrange", new CInt(mccs.getSpawnRange(), t), t, null);
-				} else if(bs instanceof MCBrewingStand) {
-					MCBrewingStand brewStand = (MCBrewingStand) bs;
+				} else if(bs instanceof MCBrewingStand brewStand) {
 					ma.set("brewtime", new CInt(brewStand.getBrewingTime(), t), t, null);
 					ma.set("fuel", new CInt(brewStand.getFuelLevel(), t), t, null);
 					MCBrewerInventory inv = brewStand.getInventory();
@@ -726,8 +715,7 @@ public class ObjectGenerator {
 						invData.set("rightbottle", ObjectGenerator.GetGenerator().item(inv.getRightBottle(), t), t, null);
 					}
 					ma.set("inventory", invData, t, null);
-				} else if(bs instanceof MCFurnace) {
-					MCFurnace furnace = (MCFurnace) bs;
+				} else if(bs instanceof MCFurnace furnace) {
 					ma.set("burntime", new CInt(furnace.getBurnTime(), t), t, null);
 					ma.set("cooktime", new CInt(furnace.getCookTime(), t), t, null);
 					MCFurnaceInventory inv = furnace.getInventory();
@@ -752,9 +740,9 @@ public class ObjectGenerator {
 					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_4)) {
 						ma.set("item", item(decoratedPot.getItemStack(), t), t, null);
 					}
-				} else if(bs instanceof MCInventoryHolder) {
+				} else if(bs instanceof MCInventoryHolder mCInventoryHolder) {
 					// Finally, handle InventoryHolders with inventory slots that do not have a special meaning.
-					MCInventory inv = ((MCInventoryHolder) bs).getInventory();
+					MCInventory inv = mCInventoryHolder.getInventory();
 					CArray box = CArray.GetAssociativeArray(t, null, null);
 					for(int i = 0; i < inv.getSize(); i++) {
 						Construct item = ObjectGenerator.GetGenerator().item(inv.getItem(i), t, env);
@@ -807,8 +795,8 @@ public class ObjectGenerator {
 				} else {
 					ma.set("trim", CNull.NULL, t, null);
 				}
-				if(armorMeta instanceof MCColorableArmorMeta) {
-					ma.set("color", color(((MCColorableArmorMeta) armorMeta).getColor(), t), t, null);
+				if(armorMeta instanceof MCColorableArmorMeta mCColorableArmorMeta) {
+					ma.set("color", color(mCColorableArmorMeta.getColor(), t), t, null);
 				}
 			} else if(meta instanceof MCFireworkEffectMeta mcfem) {
 				MCFireworkEffect effect = mcfem.getEffect();
@@ -817,8 +805,7 @@ public class ObjectGenerator {
 				} else {
 					ma.set("effect", fireworkEffect(effect, t), t, null);
 				}
-			} else if(meta instanceof MCFireworkMeta) {
-				MCFireworkMeta mcfm = (MCFireworkMeta) meta;
+			} else if(meta instanceof MCFireworkMeta mcfm) {
 				CArray firework = CArray.GetAssociativeArray(t, null, null);
 				firework.set("strength", new CInt(mcfm.getStrength(), t), t, null);
 				CArray fe = new CArray(t, null, env);
@@ -827,8 +814,8 @@ public class ObjectGenerator {
 				}
 				firework.set("effects", fe, t, null);
 				ma.set("firework", firework, t, null);
-			} else if(meta instanceof MCLeatherArmorMeta) {
-				CArray color = color(((MCLeatherArmorMeta) meta).getColor(), t);
+			} else if(meta instanceof MCLeatherArmorMeta mCLeatherArmorMeta) {
+				CArray color = color(mCLeatherArmorMeta.getColor(), t);
 				ma.set("color", color, t, null);
 			} else if(meta instanceof MCBookMeta bookMeta) {
 				if(material.getAbstracted() == MCVanillaMaterial.WRITTEN_BOOK) {
@@ -858,8 +845,8 @@ public class ObjectGenerator {
 					pages = CNull.NULL;
 				}
 				ma.set("pages", pages, t, null);
-			} else if(meta instanceof MCSkullMeta) {
-				MCPlayerProfile profile = ((MCSkullMeta) meta).getProfile();
+			} else if(meta instanceof MCSkullMeta mCSkullMeta) {
+				MCPlayerProfile profile = mCSkullMeta.getProfile();
 				// If a profile doesn't exist, it either doesn't have one (plain head) or it's not supported by server.
 				// Either way we fall back to old behavior.
 				if(profile != null) {
@@ -880,9 +867,9 @@ public class ObjectGenerator {
 						ma.set("texture", CNull.NULL, t, null);
 					}
 				} else {
-					if(((MCSkullMeta) meta).hasOwner()) {
-						ma.set("owner", new CString(((MCSkullMeta) meta).getOwner(), t), t, null);
-						MCOfflinePlayer ofp = ((MCSkullMeta) meta).getOwningPlayer();
+					if(mCSkullMeta.hasOwner()) {
+						ma.set("owner", new CString(mCSkullMeta.getOwner(), t), t, null);
+						MCOfflinePlayer ofp = mCSkullMeta.getOwningPlayer();
 						if(ofp != null) {
 							ma.set("owneruuid", new CString(ofp.getUniqueID().toString(), t), t, null);
 						} else {
@@ -894,7 +881,7 @@ public class ObjectGenerator {
 					}
 				}
 				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_3)) {
-					String sound = ((MCSkullMeta) meta).getNoteBlockSound();
+					String sound = mCSkullMeta.getNoteBlockSound();
 					if(sound == null) {
 						ma.set("noteblocksound", CNull.NULL, t, null);
 					} else {
@@ -904,14 +891,13 @@ public class ObjectGenerator {
 			} else if(meta instanceof MCEnchantmentStorageMeta mCEnchantmentStorageMeta) {
 				Construct stored;
 				if(mCEnchantmentStorageMeta.hasStoredEnchants()) {
-					stored = enchants(mCEnchantmentStorageMeta.getStoredEnchants(), t);
+					stored = enchants(mCEnchantmentStorageMeta.getStoredEnchants(), t, null);
 				} else {
 					stored = CNull.NULL;
 				}
 				ma.set("stored", stored, t, null);
-			} else if(meta instanceof MCPotionMeta) {
-				MCPotionMeta potionmeta = (MCPotionMeta) meta;
-				CArray effects = potions(potionmeta.getCustomEffects(), t);
+			} else if(meta instanceof MCPotionMeta potionmeta) {
+				CArray effects = potions(potionmeta.getCustomEffects(), t, env);
 				ma.set("potions", effects, t, null);
 				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
 					MCPotionType potionType = potionmeta.getBasePotionType();
@@ -932,10 +918,9 @@ public class ObjectGenerator {
 					ma.set("color", CNull.NULL, t, null);
 				}
 			} else if(meta instanceof MCSuspiciousStewMeta susstew) {
-				CArray effects = potions(susstew.getCustomEffects(), t);
+				CArray effects = potions(susstew.getCustomEffects(), t, env);
 				ma.set("potions", effects, t, null);
-			} else if(meta instanceof MCBannerMeta) {
-				MCBannerMeta bannermeta = (MCBannerMeta) meta;
+			} else if(meta instanceof MCBannerMeta bannermeta) {
 				CArray patterns = new CArray(t, bannermeta.numberOfPatterns(), null, env);
 				for(MCPattern p : bannermeta.getPatterns()) {
 					CArray pattern = CArray.GetAssociativeArray(t, null, null);
@@ -944,8 +929,8 @@ public class ObjectGenerator {
 					patterns.push(pattern, t, null);
 				}
 				ma.set("patterns", patterns, t, null);
-			} else if(meta instanceof MCMapMeta) {
-				MCMapMeta mm = ((MCMapMeta) meta);
+			} else if(meta instanceof MCMapMeta mCMapMeta) {
+				MCMapMeta mm = mCMapMeta;
 				MCColor mapcolor = mm.getColor();
 				if(mapcolor == null) {
 					ma.set("color", CNull.NULL, t, null);
@@ -984,18 +969,17 @@ public class ObjectGenerator {
 					ma.set("target", location(cm.getTargetLocation(), false), t, null);
 				}
 				ma.set("lodestone", CBoolean.get(cm.isLodestoneTracked()), t, null);
-			} else if(meta instanceof MCBundleMeta) {
-				MCBundleMeta bm = (MCBundleMeta) meta;
+			} else if(meta instanceof MCBundleMeta bm) {
 				List<MCItemStack> items = bm.getItems();
 				CArray arrayItems = new CArray(t, null, env);
 				for(MCItemStack item : items) {
-					arrayItems.push(ObjectGenerator.GetGenerator().item(item, t), t, null);
+					arrayItems.push(ObjectGenerator.GetGenerator().item(item, t, env), t, null);
 				}
 				ma.set("items", arrayItems, t, null);
-			} else if(meta instanceof MCAxolotlBucketMeta) {
-				ma.set("variant", ((MCAxolotlBucketMeta) meta).getAxolotlType().name(), t, null);
-			} else if(meta instanceof MCMusicInstrumentMeta) {
-				String instrumentKey = ((MCMusicInstrumentMeta) meta).getInstrument();
+			} else if(meta instanceof MCAxolotlBucketMeta mCAxolotlBucketMeta) {
+				ma.set("variant", mCAxolotlBucketMeta.getAxolotlType().name(), t, null);
+			} else if(meta instanceof MCMusicInstrumentMeta mCMusicInstrumentMeta) {
+				String instrumentKey = mCMusicInstrumentMeta.getInstrument();
 				if(instrumentKey == null) {
 					ma.set("instrument", CNull.NULL, t, null);
 				} else {
@@ -1368,8 +1352,8 @@ public class ObjectGenerator {
 				}
 				if(ma.containsKey("blockdata")) {
 					Mixed mBlockData = ma.get("blockdata", t, env);
-					if(mBlockData instanceof CArray) {
-						meta.setBlockData(blockData((CArray) mBlockData, mat, t, env));
+					if(mBlockData instanceof CArray cArray) {
+						meta.setBlockData(blockData(cArray, mat, t, env));
 					}
 				}
 
@@ -1517,10 +1501,10 @@ public class ObjectGenerator {
 							}
 						}
 						bsm.setBlockState(bs);
-					} else if(bs instanceof MCInventoryHolder) {
+					} else if(bs instanceof MCInventoryHolder mCInventoryHolder) {
 						// Finally, handle InventoryHolders with inventory slots that do not have a special meaning.
 						if(ma.containsKey("inventory")) {
-							MCInventory inv = ((MCInventoryHolder) bs).getInventory();
+							MCInventory inv = mCInventoryHolder.getInventory();
 							Mixed cInvRaw = ma.get("inventory", t, env);
 							if(cInvRaw.isInstanceOf(CArray.TYPE, null, env)) {
 								CArray cinv = (CArray) cInvRaw;
@@ -1626,13 +1610,13 @@ public class ObjectGenerator {
 							throw new CREFormatException("Expected an array or null for armor trim meta.", t);
 						}
 					}
-					if(armorMeta instanceof MCColorableArmorMeta) {
+					if(armorMeta instanceof MCColorableArmorMeta mCColorableArmorMeta) {
 						if(ma.containsKey("color")) {
 							Mixed ci = ma.get("color", t, env);
 							if(ci instanceof CNull) {
 								//nothing
 							} else if(ci.isInstanceOf(CArray.TYPE, null, env)) {
-								((MCColorableArmorMeta) armorMeta).setColor(color((CArray) ci, t, env));
+								mCColorableArmorMeta.setColor(color((CArray) ci, t, env));
 							} else {
 								throw new CREFormatException("Color was expected to be an array.", t);
 							}
@@ -1683,7 +1667,7 @@ public class ObjectGenerator {
 						if(ci instanceof CNull) {
 							//nothing
 						} else if(ci.isInstanceOf(CArray.TYPE, null, env)) {
-							((MCLeatherArmorMeta) meta).setColor(color((CArray) ci, t, env));
+							mCLeatherArmorMeta.setColor(color((CArray) ci, t, env));
 						} else {
 							throw new CREFormatException("Color was expected to be an array.", t);
 						}
@@ -1765,7 +1749,7 @@ public class ObjectGenerator {
 						if(ma.containsKey("noteblocksound")) {
 							Mixed sound = ma.get("noteblocksound", t, env);
 							if(!(sound instanceof CNull)) {
-								((MCSkullMeta) meta).setNoteBlockSound(sound.val());
+								mCSkullMeta.setNoteBlockSound(sound.val());
 							}
 						}
 					}
@@ -1776,7 +1760,7 @@ public class ObjectGenerator {
 							//Still doing nothing
 						} else if(stored.isInstanceOf(CArray.TYPE, null, env)) {
 							for(Map.Entry<MCEnchantment, Integer> ench : enchants((CArray) stored, t, env).entrySet()) {
-								((MCEnchantmentStorageMeta) meta).addStoredEnchant(ench.getKey(), ench.getValue(), true);
+								mCEnchantmentStorageMeta.addStoredEnchant(ench.getKey(), ench.getValue(), true);
 							}
 						} else {
 							throw new CREFormatException("Stored field was expected to be an array of Enchantment arrays", t);
@@ -1787,7 +1771,7 @@ public class ObjectGenerator {
 						Mixed effects = ma.get("potions", t, env);
 						if(effects.isInstanceOf(CArray.TYPE, null, env)) {
 							for(MCLivingEntity.MCEffect e : potions((CArray) effects, t, env)) {
-								((MCPotionMeta) meta).addCustomEffect(e.getPotionEffectType(), e.getStrength(),
+								mCPotionMeta.addCustomEffect(e.getPotionEffectType(), e.getStrength(),
 										e.getTicksRemaining(), e.isAmbient(), e.hasParticles(), e.showIcon(), true, t);
 							}
 						} else {
@@ -1797,32 +1781,32 @@ public class ObjectGenerator {
 					if(ma.containsKey("potiontype") && Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_2)) {
 						Mixed potiontype = ma.get("potiontype", t, env);
 						if(!(potiontype instanceof CNull)) {
-							((MCPotionMeta) meta).setBasePotionType(MCPotionType.valueOf(potiontype.val()));
+							mCPotionMeta.setBasePotionType(MCPotionType.valueOf(potiontype.val()));
 						}
 					} else if(ma.containsKey("base")) {
 						Mixed potiondata = ma.get("base", t, env);
 						if(potiondata.isInstanceOf(CArray.TYPE, null, env)) {
 							if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
-								((MCPotionMeta) meta).setBasePotionType(legacyPotionData((CArray) potiondata, t, env));
+								mCPotionMeta.setBasePotionType(legacyPotionData((CArray) potiondata, t, env));
 							} else {
-								((MCPotionMeta) meta).setBasePotionData(potionData((CArray) potiondata, t, env));
+								mCPotionMeta.setBasePotionData(potionData((CArray) potiondata, t, env));
 							}
 						}
 					}
 					if(ma.containsKey("color")) {
 						Mixed color = ma.get("color", t, env);
 						if(color.isInstanceOf(CArray.TYPE, null, env)) {
-							((MCPotionMeta) meta).setColor(color((CArray) color, t, env));
+							mCPotionMeta.setColor(color((CArray) color, t, env));
 						} else if(color.isInstanceOf(CString.TYPE, null, env)) {
 							mCPotionMeta.setColor(StaticLayer.GetConvertor().GetColor(color.val(), t));
 						}
 					}
-				} else if(meta instanceof MCSuspiciousStewMeta) {
+				} else if(meta instanceof MCSuspiciousStewMeta mCSuspiciousStewMeta) {
 					if(ma.containsKey("potions")) {
 						Mixed effects = ma.get("potions", t, env);
 						if(effects.isInstanceOf(CArray.TYPE, null, env)) {
 							for(MCLivingEntity.MCEffect e : potions((CArray) effects, t, env)) {
-								((MCSuspiciousStewMeta) meta).addCustomEffect(e.getPotionEffectType(), e.getStrength(),
+								mCSuspiciousStewMeta.addCustomEffect(e.getPotionEffectType(), e.getStrength(),
 										e.getTicksRemaining(), e.isAmbient(), e.hasParticles(), e.showIcon(), true, t);
 							}
 						} else {
@@ -1838,7 +1822,7 @@ public class ObjectGenerator {
 							String color = pattern.get("color", t, env).val().toUpperCase();
 							try {
 								MCDyeColor dyecolor = MCDyeColor.valueOf(color);
-								((MCBannerMeta) meta).addPattern(StaticLayer.GetConvertor().GetPattern(dyecolor, shape));
+								mCBannerMeta.addPattern(StaticLayer.GetConvertor().GetPattern(dyecolor, shape));
 							} catch(IllegalArgumentException ex) {
 								if(color.equals("SILVER")) {
 									// convert old DyeColor
@@ -1853,7 +1837,7 @@ public class ObjectGenerator {
 					if(ma.containsKey("color")) {
 						Mixed ci = ma.get("color", t, env);
 						if(ci.isInstanceOf(CArray.TYPE, null, env)) {
-							((MCMapMeta) meta).setColor(color((CArray) ci, t, env));
+							mCMapMeta.setColor(color((CArray) ci, t, env));
 						} else if(!(ci instanceof CNull)) {
 							throw new CREFormatException("Color was expected to be an array.", t);
 						}
@@ -1901,7 +1885,7 @@ public class ObjectGenerator {
 					if(ma.containsKey("target")) {
 						Mixed loc = ma.get("target", t, env);
 						if(!(loc instanceof CNull)) {
-							((MCCompassMeta) meta).setTargetLocation(location(loc, null, t, env));
+							mCCompassMeta.setTargetLocation(location(loc, null, t, env));
 						}
 					}
 					if(ma.containsKey("lodestone")) {
@@ -1912,6 +1896,7 @@ public class ObjectGenerator {
 					if(ma.containsKey("items")) {
 						Mixed value = ma.get("items", t, env);
 						if(value instanceof CArray cArray) {
+							MCBundleMeta bm = mCBundleMeta;
 							CArray items = cArray;
 							for(String key : items.stringKeySet()) {
 								Mixed entry = items.get(key, t, env);
@@ -1930,11 +1915,11 @@ public class ObjectGenerator {
 							mCAxolotlBucketMeta.setAxolotlType(MCAxolotlType.valueOf(value.val().toUpperCase()));
 						}
 					}
-				} else if(meta instanceof MCMusicInstrumentMeta) {
+				} else if(meta instanceof MCMusicInstrumentMeta mCMusicInstrumentMeta) {
 					if(ma.containsKey("instrument")) {
 						Mixed value = ma.get("instrument", t, env);
 						if(!(value instanceof CNull)) {
-							((MCMusicInstrumentMeta) meta).setInstrument(value.val());
+							mCMusicInstrumentMeta.setInstrument(value.val());
 						}
 					}
 				} else if(meta instanceof MCKnowledgeBookMeta knowledgeBookMeta) {
@@ -1951,11 +1936,11 @@ public class ObjectGenerator {
 							throw new CREFormatException("Expected array or null for recipes but got " + value.val(), t);
 						}
 					}
-				} else if(meta instanceof MCOminousBottleMeta) {
+				} else if(meta instanceof MCOminousBottleMeta mCOminousBottleMeta) {
 					if(ma.containsKey("ominousamplifier")) {
 						Mixed value = ma.get("ominousamplifier", t, env);
 						if(!(value instanceof CNull)) {
-							((MCOminousBottleMeta) meta).setAmplifier(ArgumentValidation.getInt32(value, t, env));
+							mCOminousBottleMeta.setAmplifier(ArgumentValidation.getInt32(value, t, env));
 						}
 					}
 				}
@@ -2135,6 +2120,7 @@ public class ObjectGenerator {
 	 *
 	 * @param c the vector array
 	 * @param t the target
+	 * @param env
 	 * @return the Vector
 	 */
 	public Vector3D vector(Mixed c, Target t, Environment env) {
@@ -2142,6 +2128,9 @@ public class ObjectGenerator {
 	}
 
 	/**
+	 * @param v the original vector
+	 * @param c the vector array
+	 * @param t the target
 	 * @deprecated Use {@link #vector(Vector3D, Mixed, Target, Environment)} instead.
 	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
@@ -2221,8 +2210,6 @@ public class ObjectGenerator {
 		return ca;
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
-	@Deprecated
 	public CArray enchants(Map<MCEnchantment, Integer> map, Target t) {
 		CArray ret = CArray.GetAssociativeArray(t, null, null);
 		for(Map.Entry<MCEnchantment, Integer> entry : map.entrySet()) {
@@ -2231,6 +2218,15 @@ public class ObjectGenerator {
 			ret.set(entry.getKey().name().toLowerCase(), enchant, t, null);
 		}
 		return ret;
+	}
+
+	/**
+	 * @deprecated Use {@link #itemMeta(Mixed, MCMaterial, Target, Environment)} instead.
+	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	public MCItemMeta itemMeta(Mixed c, MCMaterial mat, Target t) throws ConfigRuntimeException {
+		return itemMeta(c, mat, t, null);
 	}
 
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
@@ -2275,8 +2271,6 @@ public class ObjectGenerator {
 		return ret;
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
-	@Deprecated
 	public CArray attributeModifier(MCAttributeModifier m, Target t) {
 		CArray modifier = CArray.GetAssociativeArray(t, null, null);
 
@@ -2309,6 +2303,9 @@ public class ObjectGenerator {
 	}
 
 	/**
+	 * @param m
+	 * @param t
+	 * @return 
 	 * @deprecated Use {@link #attributeModifier(CArray, Target, Environment)} instead.
 	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
@@ -2428,6 +2425,9 @@ public class ObjectGenerator {
 	}
 
 	/**
+	 * @param ea
+	 * @param t
+	 * @return 
 	 * @deprecated Use {@link #potions(CArray, Target, Environment)} instead.
 	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
@@ -2486,8 +2486,6 @@ public class ObjectGenerator {
 		return ret;
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
-	@Deprecated
 	public CArray potionData(MCPotionData mcpd, Target t) {
 		CArray base = CArray.GetAssociativeArray(t, null, null);
 		base.set("type", mcpd.getType().name(), t, null);
@@ -2497,6 +2495,9 @@ public class ObjectGenerator {
 	}
 
 	/**
+	 * @param pd
+	 * @param t
+	 * @return 
 	 * @deprecated Use {@link #potionData(CArray, Target, Environment)} instead.
 	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
@@ -2516,8 +2517,8 @@ public class ObjectGenerator {
 		boolean upgraded = false;
 		if(pd.containsKey("extended")) {
 			Mixed cext = pd.get("extended", t, env);
-			if(cext.isInstanceOf(CBoolean.TYPE, null, env)) {
-				extended = ((CBoolean) cext).getBoolean();
+			if(cext instanceof CBoolean cBoolean) {
+				extended = cBoolean.getBoolean();
 			} else {
 				throw new CREFormatException(
 						"Expected potion value for key \"extended\" to be a boolean", t);
@@ -2525,8 +2526,8 @@ public class ObjectGenerator {
 		}
 		if(pd.containsKey("upgraded")) {
 			Mixed cupg = pd.get("upgraded", t, env);
-			if(cupg instanceof CBoolean) {
-				upgraded = ((CBoolean) cupg).getBoolean();
+			if(cupg instanceof CBoolean cBoolean) {
+				upgraded = cBoolean.getBoolean();
 			} else {
 				throw new CREFormatException(
 						"Expected potion value for key \"upgraded\" to be a boolean", t);
@@ -2540,6 +2541,9 @@ public class ObjectGenerator {
 	}
 
 	/**
+	 * @param potionArray
+	 * @param t
+	 * @return 
 	 * @deprecated Use {@link #legacyPotionData(CArray, Target, Environment)} instead.
 	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
@@ -2563,14 +2567,14 @@ public class ObjectGenerator {
 		boolean upgraded = false;
 		if(potionArray.containsKey("extended")) {
 			Mixed cext = potionArray.get("extended", t, env);
-			if(cext instanceof CBoolean) {
-				extended = ((CBoolean) cext).getBoolean();
+			if(cext instanceof CBoolean cBoolean) {
+				extended = cBoolean.getBoolean();
 			}
 		}
 		if(potionArray.containsKey("upgraded")) {
 			Mixed cupg = potionArray.get("upgraded", t, env);
-			if(cupg instanceof CBoolean) {
-				upgraded = ((CBoolean) cupg).getBoolean();
+			if(cupg instanceof CBoolean cBoolean) {
+				upgraded = cBoolean.getBoolean();
 			}
 		}
 		if(extended) {
@@ -2615,6 +2619,9 @@ public class ObjectGenerator {
 	}
 
 	/**
+	 * @param fe
+	 * @param t
+	 * @return 
 	 * @deprecated Use {@link #fireworkEffect(CArray, Target, Environment)} instead.
 	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
@@ -2781,6 +2788,9 @@ public class ObjectGenerator {
 	}
 
 	/**
+	 * @param c
+	 * @param t
+	 * @return 
 	 * @deprecated Use {@link #recipe(Mixed, Target, Environment)} instead.
 	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
@@ -2921,8 +2931,7 @@ public class ObjectGenerator {
 				}
 				return ret;
 			}
-			default ->
-				throw new CREIllegalArgumentException("Could not find valid recipe type.", t);
+			default -> throw new CREIllegalArgumentException("Could not find valid recipe type.", t);
 		}
 	}
 
@@ -3036,6 +3045,9 @@ public class ObjectGenerator {
 	}
 
 	/**
+	 * @param ca
+	 * @param t
+	 * @return 
 	 * @deprecated Use {@link #blockData(CArray, Target, Environment)} instead.
 	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
@@ -3049,6 +3061,10 @@ public class ObjectGenerator {
 	}
 
 	/**
+	 * @param ca
+	 * @param blockType
+	 * @param t
+	 * @return 
 	 * @deprecated Use {@link #blockData(CArray, MCMaterial, Target, Environment)} instead.
 	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
@@ -3132,6 +3148,11 @@ public class ObjectGenerator {
 	}
 
 	/**
+	 * @param particleType
+	 * @param l
+	 * @param pa
+	 * @param t
+	 * @return 
 	 * @deprecated Use {@link #particleData(MCParticle, MCLocation, CArray, Target, Environment)} instead.
 	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
@@ -3142,12 +3163,7 @@ public class ObjectGenerator {
 
 	public Object particleData(MCParticle particleType, MCLocation l, CArray pa, Target t, Environment env) {
 		switch(particleType.getAbstracted()) {
-			case BLOCK_DUST:
-			case BLOCK_CRACK:
-			case BLOCK_CRUMBLE:
-			case BLOCK_MARKER:
-			case DUST_PILLAR:
-			case FALLING_DUST:
+			case BLOCK_DUST, BLOCK_CRACK, BLOCK_CRUMBLE, BLOCK_MARKER, DUST_PILLAR, FALLING_DUST -> {
 				if(pa.containsKey("block")) {
 					String value = pa.get("block", t, env).val();
 					MCMaterial mat = StaticLayer.GetMaterial(value);
@@ -3161,8 +3177,8 @@ public class ObjectGenerator {
 						throw new CREIllegalArgumentException("Could not find material from " + value, t);
 					}
 				}
-				break;
-			case ITEM_CRACK:
+			}
+			case ITEM_CRACK -> {
 				if(pa.containsKey("item")) {
 					Mixed value = pa.get("item", t, env);
 					if(value.isInstanceOf(CArray.TYPE, null, env)) {
@@ -3180,10 +3196,8 @@ public class ObjectGenerator {
 						}
 					}
 				}
-				break;
-			case SPELL_MOB:
-			case REDSTONE:
-			case FLASH:
+			}
+			case SPELL_MOB, REDSTONE, FLASH -> {
 				if(pa.containsKey("color")) {
 					Mixed c = pa.get("color", t, env);
 					if(c.isInstanceOf(CArray.TYPE, null, env)) {
@@ -3192,8 +3206,8 @@ public class ObjectGenerator {
 						return StaticLayer.GetConvertor().GetColor(c.val(), t);
 					}
 				}
-				break;
-			case DRAGON_BREATH:
+			}
+			case DRAGON_BREATH -> {
 				if(pa.containsKey("power")) {
 					Mixed d = pa.get("power", t, env);
 					if(d.isInstanceOf(CDouble.TYPE, null, env)) {
@@ -3202,9 +3216,8 @@ public class ObjectGenerator {
 						throw new CREIllegalArgumentException("Expected double for power but found " + d, t);
 					}
 				}
-				break;
-			case SPELL:
-			case SPELL_INSTANT:
+			}
+			case SPELL, SPELL_INSTANT -> {
 				MCColor spellColor = MCColor.WHITE;
 				if(pa.containsKey("color")) {
 					Mixed c = pa.get("color", t, env);
@@ -3224,7 +3237,8 @@ public class ObjectGenerator {
 					}
 				}
 				return new MCParticleData.Spell(spellColor, power);
-			case DUST_COLOR_TRANSITION:
+			}
+			case DUST_COLOR_TRANSITION -> {
 				if(pa.containsKey("color")) {
 					Mixed c = pa.get("color", t, env);
 					MCColor fromColor;
@@ -3252,8 +3266,8 @@ public class ObjectGenerator {
 								StaticLayer.GetConvertor().GetColor(sc.val(), t));
 					}
 				}
-				break;
-			case VIBRATION:
+			}
+			case VIBRATION -> {
 				if(pa.containsKey("destination")) {
 					Mixed d = pa.get("destination", t, env);
 					if(d.isInstanceOf(CArray.TYPE, null, env)) {
@@ -3262,8 +3276,8 @@ public class ObjectGenerator {
 						return new MCParticleData.VibrationEntityDestination(Static.getEntity(d, t), 5);
 					}
 				}
-				break;
-			case SHRIEK:
+			}
+			case SHRIEK -> {
 				if(pa.containsKey("delay")) {
 					Mixed d = pa.get("delay", t, env);
 					if(d.isInstanceOf(CInt.TYPE, null, env)) {
@@ -3272,8 +3286,8 @@ public class ObjectGenerator {
 						throw new CREIllegalArgumentException("Expected integer for delay but found " + d, t);
 					}
 				}
-				break;
-			case SCULK_CHARGE:
+			}
+			case SCULK_CHARGE -> {
 				if(pa.containsKey("angle")) {
 					Mixed d = pa.get("angle", t, env);
 					if(d.isInstanceOf(CDouble.TYPE, null, env)) {
@@ -3282,8 +3296,8 @@ public class ObjectGenerator {
 						throw new CREIllegalArgumentException("Expected double for angle but found " + d, t);
 					}
 				}
-				break;
-			case TRAIL:
+			}
+			case TRAIL -> {
 				MCLocation target = l;
 				if(pa.containsKey("target")) {
 					Mixed d = pa.get("target", t, env);
@@ -3312,6 +3326,7 @@ public class ObjectGenerator {
 					duration = new Random().nextInt(40) + 10;
 				}
 				return new MCParticleData.Trail(target, color, duration);
+			}
 		}
 		return null;
 	}
