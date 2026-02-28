@@ -1681,7 +1681,7 @@ public class InventoryManagement {
 			int slot = ArgumentValidation.getInt32(args[1], t, env);
 			try {
 				MCItemStack is = inv.getItem(slot);
-				return ObjectGenerator.GetGenerator().item(is, t, env);
+				return ObjectGenerator.GetGenerator().item(is, t);
 			} catch (ArrayIndexOutOfBoundsException e) {
 				throw new CRERangeException("Index out of bounds for the inventory type.", t);
 			}
@@ -2064,12 +2064,12 @@ public class InventoryManagement {
 			if(index == -1) {
 				CArray ret = CArray.GetAssociativeArray(t, null, env);
 				for(int i = 0; i < size; i++) {
-					ret.set(i, ObjectGenerator.GetGenerator().item(inventory.getItem(i), t, env), t, env);
+					ret.set(i, ObjectGenerator.GetGenerator().item(inventory.getItem(i), t), t, env);
 				}
 
 				return ret;
 			} else {
-				return ObjectGenerator.GetGenerator().item(inventory.getItem(index), t, env);
+				return ObjectGenerator.GetGenerator().item(inventory.getItem(index), t);
 			}
 		}
 	}

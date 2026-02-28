@@ -182,7 +182,7 @@ public class ObjectGenerator {
 	 * @param c
 	 * @param w
 	 * @param t
-	 * @return 
+	 * @return
 	 * @deprecated Use {@link #location(Mixed, MCWorld, Target, Environment)} instead.
 	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
@@ -197,11 +197,12 @@ public class ObjectGenerator {
 	 * 4 usages: <ul> <li>(x, y, z)</li> <li>(x, y, z, world)</li> <li>(x, y, z, yaw, pitch)</li> <li>(x, y, z, world,
 	 * yaw, pitch)</li> </ul> In all cases, the pitch and yaw default to 0, and the world defaults to the specified
 	 * world. <em>More conveniently: ([world], x, y, z, [yaw, pitch])</em>
+	 *
 	 * @param c
 	 * @param w
 	 * @param t
 	 * @param env
-	 * @return 
+	 * @return
 	 */
 	public MCLocation location(Mixed c, MCWorld w, Target t, Environment env) {
 		if(!(c.isInstanceOf(CArray.TYPE, null, env))) {
@@ -279,7 +280,6 @@ public class ObjectGenerator {
 	 *
 	 * @param is
 	 * @param t
-	 * @param env
 	 * @return An item array or CNull
 	 */
 	public Construct item(MCItemStack is, Target t) {
@@ -290,7 +290,7 @@ public class ObjectGenerator {
 		CArray ret = CArray.GetAssociativeArray(t, null, null);
 		ret.set("name", new CString(is.getType().getName(), t), t, null);
 		ret.set("qty", new CInt(is.getAmount(), t), t, null);
-		ret.set("meta", itemMeta(is, t, env), t, null);
+		ret.set("meta", itemMeta(is, t), t, null);
 		return ret;
 	}
 
@@ -323,7 +323,7 @@ public class ObjectGenerator {
 	 * @param i
 	 * @param t
 	 * @param legacy
-	 * @return 
+	 * @return
 	 * @deprecated Use {@link #item(Mixed, Target, boolean, Environment)} instead.
 	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
@@ -414,9 +414,12 @@ public class ObjectGenerator {
 						MCMaterial newmaterial;
 						String entityName = spawntype.val().toUpperCase();
 						newmaterial = switch(entityName) {
-							case "MUSHROOM_COW" -> StaticLayer.GetMaterial("MOOSHROOM_SPAWN_EGG");
-							case "PIG_ZOMBIE" -> StaticLayer.GetMaterial("ZOMBIE_PIGMAN_SPAWN_EGG");
-							default -> StaticLayer.GetMaterial(entityName + "_SPAWN_EGG");
+							case "MUSHROOM_COW" ->
+								StaticLayer.GetMaterial("MOOSHROOM_SPAWN_EGG");
+							case "PIG_ZOMBIE" ->
+								StaticLayer.GetMaterial("ZOMBIE_PIGMAN_SPAWN_EGG");
+							default ->
+								StaticLayer.GetMaterial(entityName + "_SPAWN_EGG");
 						};
 						if(newmaterial != null) {
 							material = newmaterial;
@@ -2221,6 +2224,9 @@ public class ObjectGenerator {
 	}
 
 	/**
+	 * @param enchantArray
+	 * @param t
+	 * @return
 	 * @deprecated Use {@link #itemMeta(Mixed, MCMaterial, Target, Environment)} instead.
 	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
@@ -2305,7 +2311,7 @@ public class ObjectGenerator {
 	/**
 	 * @param m
 	 * @param t
-	 * @return 
+	 * @return
 	 * @deprecated Use {@link #attributeModifier(CArray, Target, Environment)} instead.
 	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
@@ -2427,7 +2433,7 @@ public class ObjectGenerator {
 	/**
 	 * @param ea
 	 * @param t
-	 * @return 
+	 * @return
 	 * @deprecated Use {@link #potions(CArray, Target, Environment)} instead.
 	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
@@ -2497,7 +2503,7 @@ public class ObjectGenerator {
 	/**
 	 * @param pd
 	 * @param t
-	 * @return 
+	 * @return
 	 * @deprecated Use {@link #potionData(CArray, Target, Environment)} instead.
 	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
@@ -2543,7 +2549,7 @@ public class ObjectGenerator {
 	/**
 	 * @param potionArray
 	 * @param t
-	 * @return 
+	 * @return
 	 * @deprecated Use {@link #legacyPotionData(CArray, Target, Environment)} instead.
 	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
@@ -2621,7 +2627,7 @@ public class ObjectGenerator {
 	/**
 	 * @param fe
 	 * @param t
-	 * @return 
+	 * @return
 	 * @deprecated Use {@link #fireworkEffect(CArray, Target, Environment)} instead.
 	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
@@ -2790,7 +2796,7 @@ public class ObjectGenerator {
 	/**
 	 * @param c
 	 * @param t
-	 * @return 
+	 * @return
 	 * @deprecated Use {@link #recipe(Mixed, Target, Environment)} instead.
 	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
@@ -2931,7 +2937,8 @@ public class ObjectGenerator {
 				}
 				return ret;
 			}
-			default -> throw new CREIllegalArgumentException("Could not find valid recipe type.", t);
+			default ->
+				throw new CREIllegalArgumentException("Could not find valid recipe type.", t);
 		}
 	}
 
@@ -3047,7 +3054,7 @@ public class ObjectGenerator {
 	/**
 	 * @param ca
 	 * @param t
-	 * @return 
+	 * @return
 	 * @deprecated Use {@link #blockData(CArray, Target, Environment)} instead.
 	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
@@ -3064,7 +3071,7 @@ public class ObjectGenerator {
 	 * @param ca
 	 * @param blockType
 	 * @param t
-	 * @return 
+	 * @return
 	 * @deprecated Use {@link #blockData(CArray, MCMaterial, Target, Environment)} instead.
 	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
@@ -3152,7 +3159,7 @@ public class ObjectGenerator {
 	 * @param l
 	 * @param pa
 	 * @param t
-	 * @return 
+	 * @return
 	 * @deprecated Use {@link #particleData(MCParticle, MCLocation, CArray, Target, Environment)} instead.
 	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")

@@ -261,7 +261,7 @@ public class BlockEvents {
 
 			CArray drops = new CArray(t, null, env);
 			for(MCItemStack stack : event.getDrops()) {
-				drops.push(ObjectGenerator.GetGenerator().item(stack, t, env), t, env);
+				drops.push(ObjectGenerator.GetGenerator().item(stack, t), t, env);
 			}
 			map.put("drops", drops);
 
@@ -400,7 +400,7 @@ public class BlockEvents {
 			map.put("player", new CString(event.getPlayer().getName(), t));
 			map.put("block", new CString(mat.getName(), t));
 			map.put("location", ObjectGenerator.GetGenerator().location(block.getLocation(), false));
-			map.put("item", ObjectGenerator.GetGenerator().item(event.getItemInHand(), Target.UNKNOWN, env));
+			map.put("item", ObjectGenerator.GetGenerator().item(event.getItemInHand(), Target.UNKNOWN));
 			if(event.getHand() == MCEquipmentSlot.WEAPON) {
 				map.put("hand", new CString("main_hand", Target.UNKNOWN));
 			} else {
@@ -1090,7 +1090,7 @@ public class BlockEvents {
 			MCBlock block = event.getBlock();
 
 			map.put("type", new CString(block.getType().getName(), t));
-			map.put("item", ObjectGenerator.GetGenerator().item(event.getItem(), t, env));
+			map.put("item", ObjectGenerator.GetGenerator().item(event.getItem(), t));
 			map.put("location", ObjectGenerator.GetGenerator().location(block.getLocation(), false));
 
 			CArray velocity = ObjectGenerator.GetGenerator().vector(event.getVelocity(), t);
