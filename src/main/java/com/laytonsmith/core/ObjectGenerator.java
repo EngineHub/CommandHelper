@@ -133,7 +133,6 @@ public class ObjectGenerator {
 	 * Gets a Location Object, given a MCLocation
 	 *
 	 * @param l
-	 * @param env
 	 * @return
 	 */
 	public CArray location(MCLocation l) {
@@ -145,7 +144,6 @@ public class ObjectGenerator {
 	 *
 	 * @param l
 	 * @param includeYawAndPitch
-	 * @param env
 	 * @return
 	 */
 	public CArray location(MCLocation l, boolean includeYawAndPitch) {
@@ -1899,7 +1897,6 @@ public class ObjectGenerator {
 					if(ma.containsKey("items")) {
 						Mixed value = ma.get("items", t, env);
 						if(value instanceof CArray cArray) {
-							MCBundleMeta bm = mCBundleMeta;
 							CArray items = cArray;
 							for(String key : items.stringKeySet()) {
 								Mixed entry = items.get(key, t, env);
@@ -1968,7 +1965,6 @@ public class ObjectGenerator {
 	 *
 	 * @param color
 	 * @param t
-	 * @param env
 	 * @return
 	 */
 	public CArray color(MCColor color, Target t) {
@@ -2056,7 +2052,6 @@ public class ObjectGenerator {
 	 * Gets a vector object, given a Vector.
 	 *
 	 * @param vector the Vector
-	 * @param env
 	 * @return the vector array
 	 */
 	public CArray vector(Vector3D vector) {
@@ -2068,7 +2063,6 @@ public class ObjectGenerator {
 	 *
 	 * @param vector the Vector
 	 * @param t the Target
-	 * @param env
 	 * @return the vector array
 	 */
 	public CArray vector(Vector3D vector, Target t) {
@@ -2099,7 +2093,6 @@ public class ObjectGenerator {
 	 *
 	 * @param c the vector array
 	 * @param t the target
-	 * @param env
 	 * @return the Vector
 	 * @deprecated Use {@link #vector(Mixed, Target, Environment)} instead.
 	 */
@@ -2221,18 +2214,6 @@ public class ObjectGenerator {
 			ret.set(entry.getKey().name().toLowerCase(), enchant, t, null);
 		}
 		return ret;
-	}
-
-	/**
-	 * @param enchantArray
-	 * @param t
-	 * @return
-	 * @deprecated Use {@link #itemMeta(Mixed, MCMaterial, Target, Environment)} instead.
-	 */
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
-	@Deprecated
-	public MCItemMeta itemMeta(Mixed c, MCMaterial mat, Target t) throws ConfigRuntimeException {
-		return itemMeta(c, mat, t, null);
 	}
 
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
@@ -3343,7 +3324,6 @@ public class ObjectGenerator {
 	 *
 	 * @param value
 	 * @param plugin
-	 * @param env
 	 * @return
 	 * @deprecated Use {@link #metadataValue(Mixed, MCPlugin, Environment)} instead.
 	 */
