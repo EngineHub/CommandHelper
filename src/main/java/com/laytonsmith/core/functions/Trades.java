@@ -439,10 +439,10 @@ public class Trades {
 			return CNull.NULL;
 		}
 		CArray ret = CArray.GetAssociativeArray(t, null, env);
-		ret.set("result", ObjectGenerator.GetGenerator().item(r.getResult(), t, env), t, env);
-		CArray il = new CArray(t, null, env);
+		ret.set("result", ObjectGenerator.GetGenerator().item(r.getResult(), t), t, env);
+		CArray il = new CArray(t);
 		for(MCItemStack i : r.getIngredients()) {
-			il.push(ObjectGenerator.GetGenerator().item(i, t, env), t, env);
+			il.push(ObjectGenerator.GetGenerator().item(i, t), t, env);
 		}
 		ret.set("ingredients", il, t, env);
 		ret.set("maxuses", new CInt(r.getMaxUses(), t), t, env);

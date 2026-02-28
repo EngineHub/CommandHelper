@@ -92,7 +92,7 @@ public class ItemMeta {
 				slot = args[0];
 			}
 			is = p.getItemAt(slot instanceof CNull ? null : ArgumentValidation.getInt32(slot, t, env));
-			return ObjectGenerator.GetGenerator().itemMeta(is, t, env);
+			return ObjectGenerator.GetGenerator().itemMeta(is, t);
 		}
 
 		@Override
@@ -307,7 +307,7 @@ public class ItemMeta {
 			}
 			MCItemMeta im = is.getItemMeta();
 			if(im instanceof MCLeatherArmorMeta) {
-				return ObjectGenerator.GetGenerator().color(((MCLeatherArmorMeta) im).getColor(), t, env);
+				return ObjectGenerator.GetGenerator().color(((MCLeatherArmorMeta) im).getColor(), t);
 			} else {
 				throw new CRECastException("The item at slot " + slot + " is not leather armor.", t);
 			}

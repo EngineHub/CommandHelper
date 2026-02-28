@@ -192,7 +192,7 @@ public class DataTransformations {
 			CArray ca = ArgumentValidation.getArray(args[0], t, env);
 			boolean prettyPrint = false;
 			if(args.length == 2) {
-				prettyPrint = ArgumentValidation.getBoolean(args[1], t, env);
+				prettyPrint = ArgumentValidation.getBooleanObject(args[1], t, env);
 			}
 			DumperOptions options = new DumperOptions();
 			if(prettyPrint) {
@@ -201,7 +201,7 @@ public class DataTransformations {
 			}
 			Yaml yaml = new Yaml(options);
 			try {
-				return new CString(yaml.dump(Construct.GetPOJO(ca, env)), t);
+				return new CString(yaml.dump(Static.getJavaObject(ca, env)), t);
 			} catch (ClassCastException ex) {
 				throw new CRECastException(ex.getMessage(), t);
 			}
@@ -256,7 +256,7 @@ public class DataTransformations {
 					.GetRuntimeSettingOrCNull("function.yml_decode.code_point_limit", CNull.NULL);
 			if(!CNull.NULL.equals(codePointLimit)) {
 				try {
-					options.setCodePointLimit(ArgumentValidation.getInt32(codePointLimit, t));
+					options.setCodePointLimit(ArgumentValidation.getInt32(codePointLimit, t, env));
 				} catch (CRERangeException | CRECastException e) {
 					// Ignore invalid value.
 				}
@@ -388,7 +388,7 @@ public class DataTransformations {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREFormatException.class};
+			return new Class[]{CREFormatException.class, CRECastException.class};
 		}
 
 		@Override

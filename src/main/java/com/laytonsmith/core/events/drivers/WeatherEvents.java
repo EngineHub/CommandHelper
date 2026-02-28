@@ -70,7 +70,7 @@ public class WeatherEvents {
 				Map<String, Mixed> ret = evaluate_helper(e);
 				ret.put("world", new CString(e.getWorld().getName(), t));
 				ret.put("id", new CString(e.getLightning().getUniqueId().toString(), t));
-				ret.put("location", ObjectGenerator.GetGenerator().location(e.getLightning().getLocation(), env));
+				ret.put("location", ObjectGenerator.GetGenerator().location(e.getLightning().getLocation()));
 				ret.put("is_effect", CBoolean.GenerateCBoolean(e.getLightning().isEffect(), t));
 				ret.put("cause", new CString(e.getCause().name(), t));
 				return ret;

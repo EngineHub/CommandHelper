@@ -147,7 +147,7 @@ public class EntityEvents {
 				Target t = Target.UNKNOWN;
 				MCItemDespawnEvent event = (MCItemDespawnEvent) e;
 				Map<String, Mixed> ret = evaluate_helper(event);
-				ret.put("location", ObjectGenerator.GetGenerator().location(event.getLocation(), false, env));
+				ret.put("location", ObjectGenerator.GetGenerator().location(event.getLocation(), false));
 				ret.put("id", new CString(event.getEntity().getUniqueId().toString(), t));
 				ret.put("item", ObjectGenerator.GetGenerator().item(event.getEntity().getItemStack(), t, env));
 				return ret;
@@ -222,7 +222,7 @@ public class EntityEvents {
 				Target t = Target.UNKNOWN;
 				MCItemSpawnEvent event = (MCItemSpawnEvent) e;
 				Map<String, Mixed> ret = evaluate_helper(event);
-				ret.put("location", ObjectGenerator.GetGenerator().location(event.getLocation(), false, env));
+				ret.put("location", ObjectGenerator.GetGenerator().location(event.getLocation(), false));
 				ret.put("id", new CString(event.getEntity().getUniqueId().toString(), t));
 				ret.put("item", ObjectGenerator.GetGenerator().item(event.getEntity().getItemStack(), t, env));
 				return ret;
@@ -313,13 +313,13 @@ public class EntityEvents {
 				Map<String, Mixed> ret = evaluate_helper(e);
 				CArray blocks = new CArray(t, null, env);
 				for(MCBlock b : e.getBlocks()) {
-					blocks.push(ObjectGenerator.GetGenerator().location(b.getLocation(), false, env), t, env);
+					blocks.push(ObjectGenerator.GetGenerator().location(b.getLocation(), false), t, env);
 				}
 				ret.put("blocks", blocks);
 				MCEntity ent = e.getEntity();
 				ret.put("id", new CString(ent.getUniqueId().toString(), t));
 				ret.put("type", new CString(ent.getType().name(), t));
-				ret.put("location", ObjectGenerator.GetGenerator().location(e.getLocation(), env));
+				ret.put("location", ObjectGenerator.GetGenerator().location(e.getLocation()));
 				ret.put("yield", new CDouble(e.getYield(), t));
 				return ret;
 			} else {
@@ -426,12 +426,12 @@ public class EntityEvents {
 			MCProjectile pro = e.getEntity();
 			ret.put("id", new CString(pro.getUniqueId().toString(), t));
 			ret.put("type", new CString(pro.getType().name(), t));
-			CArray loc = ObjectGenerator.GetGenerator().location(pro.getLocation(), env);
+			CArray loc = ObjectGenerator.GetGenerator().location(pro.getLocation());
 			ret.put("location", loc);
 			MCProjectileSource shooter = pro.getShooter();
 			if(shooter instanceof MCBlockProjectileSource) {
 				ret.put("shooter", ObjectGenerator.GetGenerator().location(
-						((MCBlockProjectileSource) shooter).getBlock().getLocation(), false, env));
+						((MCBlockProjectileSource) shooter).getBlock().getLocation(), false));
 			} else if(shooter instanceof MCEntity) {
 				ret.put("shooter", new CString(((MCEntity) shooter).getUniqueId().toString(), t));
 			} else {
@@ -439,7 +439,7 @@ public class EntityEvents {
 			}
 			MCBlock hitblock = e.getHitBlock();
 			if(hitblock != null) {
-				ret.put("hit", ObjectGenerator.GetGenerator().location(hitblock.getLocation(), false, env));
+				ret.put("hit", ObjectGenerator.GetGenerator().location(hitblock.getLocation(), false));
 				ret.put("hittype", new CString("BLOCK", t));
 				ret.put("hitface", new CString(e.getHitFace().name(), t));
 			} else {
@@ -558,7 +558,7 @@ public class EntityEvents {
 					}
 				} else if(shooter instanceof MCBlockProjectileSource) {
 					mapEvent.put("shooter", ObjectGenerator.GetGenerator().location(
-							((MCBlockProjectileSource) shooter).getBlock().getLocation(), false, env));
+							((MCBlockProjectileSource) shooter).getBlock().getLocation(), false));
 					mapEvent.put("shootertype", new CString("BLOCK", Target.UNKNOWN));
 					mapEvent.put("player", CNull.NULL);
 				} else {
@@ -566,8 +566,8 @@ public class EntityEvents {
 					mapEvent.put("shootertype", CNull.NULL);
 					mapEvent.put("player", CNull.NULL);
 				}
-				mapEvent.put("location", ObjectGenerator.GetGenerator().location(projectile.getLocation(), env));
-				CArray velocity = ObjectGenerator.GetGenerator().vector(projectile.getVelocity(), Target.UNKNOWN, env);
+				mapEvent.put("location", ObjectGenerator.GetGenerator().location(projectile.getLocation()));
+				CArray velocity = ObjectGenerator.GetGenerator().vector(projectile.getVelocity(), Target.UNKNOWN);
 				velocity.set("magnitude", new CDouble(projectile.getVelocity().length(), Target.UNKNOWN), Target.UNKNOWN, env);
 				mapEvent.put("velocity", velocity);
 				return mapEvent;
@@ -660,7 +660,7 @@ public class EntityEvents {
 					cod.set(entry.getKey(), entry.getValue(), t, env);
 				}
 				map.put("cause", cod);
-				map.put("location", ObjectGenerator.GetGenerator().location(dead.getLocation(), env));
+				map.put("location", ObjectGenerator.GetGenerator().location(dead.getLocation()));
 				return map;
 			} else {
 				throw new EventException("Cannot convert e to EntityDeathEvent");
@@ -758,7 +758,7 @@ public class EntityEvents {
 			map.put("type", new CString(e.getEntity().getType().name(), t));
 			map.put("id", new CString(e.getEntity().getUniqueId().toString(), t));
 			map.put("reason", new CString(e.getSpawnReason().name(), t));
-			map.put("location", ObjectGenerator.GetGenerator().location(e.getLocation(), env));
+			map.put("location", ObjectGenerator.GetGenerator().location(e.getLocation()));
 			return map;
 		}
 
@@ -1024,7 +1024,7 @@ public class EntityEvents {
 
 				map.put("clicked", new CString(event.getEntity().getType().name(), Target.UNKNOWN));
 				map.put("id", new CString(event.getEntity().getUniqueId().toString(), Target.UNKNOWN));
-				map.put("position", ObjectGenerator.GetGenerator().vector(event.getClickedPosition(), Target.UNKNOWN, env));
+				map.put("position", ObjectGenerator.GetGenerator().vector(event.getClickedPosition(), Target.UNKNOWN));
 
 				String data = "";
 				if(event.getEntity() instanceof MCPlayer) {
@@ -1290,7 +1290,7 @@ public class EntityEvents {
 				map.put("amount", new CDouble(event.getDamage(), t));
 				map.put("finalamount", new CDouble(event.getFinalDamage(), t));
 				map.put("id", new CString(event.getDamager().getUniqueId().toString(), t));
-				map.put("location", ObjectGenerator.GetGenerator().location(event.getEntity().getLocation(), env));
+				map.put("location", ObjectGenerator.GetGenerator().location(event.getEntity().getLocation()));
 
 				Mixed data = CNull.NULL;
 				if(event.getDamager() instanceof MCPlayer) {
@@ -1303,7 +1303,7 @@ public class EntityEvents {
 					} else if(shooter instanceof MCEntity) {
 						data = new CString(((MCEntity) shooter).getType().name().toUpperCase(), t);
 					} else if(shooter instanceof MCBlockProjectileSource) {
-						data = ObjectGenerator.GetGenerator().location(((MCBlockProjectileSource) shooter).getBlock().getLocation(), false, env);
+						data = ObjectGenerator.GetGenerator().location(((MCBlockProjectileSource) shooter).getBlock().getLocation(), false);
 					}
 				}
 				map.put("data", data);
@@ -1477,7 +1477,7 @@ public class EntityEvents {
 				Map<String, Mixed> ret = evaluate_helper(event);
 				ret.put("id", new CString(event.getEntity().getUniqueId().toString(), t));
 				ret.put("type", new CString(event.getEntity().getType().name(), t));
-				ret.put("location", ObjectGenerator.GetGenerator().location(event.getLocation(), false, env));
+				ret.put("location", ObjectGenerator.GetGenerator().location(event.getLocation(), false));
 				ret.put("portaltype", new CString(mat.getName(), t));
 				return ret;
 			} else {
@@ -1571,7 +1571,7 @@ public class EntityEvents {
 				ret.put("entity", new CString(event.getEntity().getUniqueId().toString(), t));
 				ret.put("from", new CString(event.getBlock().getType().getName(), t));
 				ret.put("to", new CString(event.getTo().getName(), t));
-				ret.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation(), false, env));
+				ret.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation(), false));
 				return ret;
 			} else {
 				throw new EventException("Could not convert to MCEntityChangeBlockEvent");
@@ -1669,7 +1669,7 @@ public class EntityEvents {
 				Map<String, Mixed> ret = evaluate_helper(event);
 				ret.put("entity", new CString(event.getEntity().getUniqueId().toString(), t));
 				ret.put("block", new CString(event.getBlock().getType().getName(), t));
-				ret.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation(), false, env));
+				ret.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation(), false));
 				return ret;
 			} else {
 				throw new EventException("Could not convert to MCEntityInteractEvent");
@@ -1702,7 +1702,7 @@ public class EntityEvents {
 			map.put("amount", new CDouble(event.getDamage(), Target.UNKNOWN));
 			map.put("finalamount", new CDouble(event.getFinalDamage(), Target.UNKNOWN));
 			map.put("world", new CString(event.getEntity().getWorld().getName(), Target.UNKNOWN));
-			map.put("location", ObjectGenerator.GetGenerator().location(event.getEntity().getLocation(), env));
+			map.put("location", ObjectGenerator.GetGenerator().location(event.getEntity().getLocation()));
 
 			if(event instanceof MCEntityDamageByEntityEvent) {
 				MCEntity damager = ((MCEntityDamageByEntityEvent) event).getDamager();
@@ -1719,7 +1719,7 @@ public class EntityEvents {
 					} else if(shooter instanceof MCEntity) {
 						map.put("shooter", new CString(((MCEntity) shooter).getUniqueId().toString(), Target.UNKNOWN));
 					} else if(shooter instanceof MCBlockProjectileSource) {
-						map.put("shooter", ObjectGenerator.GetGenerator().location(((MCBlockProjectileSource) shooter).getBlock().getLocation(), false, env));
+						map.put("shooter", ObjectGenerator.GetGenerator().location(((MCBlockProjectileSource) shooter).getBlock().getLocation(), false));
 					}
 				}
 			}
@@ -1780,7 +1780,7 @@ public class EntityEvents {
 				MCHanging hanging = hangingBreakEvent.getEntity();
 				mapEvent.put("id", new CString(hanging.getUniqueId().toString(), Target.UNKNOWN));
 				mapEvent.put("type", new CString(hanging.getType().name(), Target.UNKNOWN));
-				mapEvent.put("location", ObjectGenerator.GetGenerator().location(hanging.getLocation(), env));
+				mapEvent.put("location", ObjectGenerator.GetGenerator().location(hanging.getLocation()));
 				mapEvent.put("cause", new CString(hangingBreakEvent.getCause().name(), Target.UNKNOWN));
 				MCEntity remover = hangingBreakEvent.getRemover();
 				if(remover != null) {
@@ -1868,8 +1868,8 @@ public class EntityEvents {
 				} else {
 					ret.put("player", new CString(player.getName(), Target.UNKNOWN));
 				}
-				ret.put("location", ObjectGenerator.GetGenerator().location(hanging.getLocation(), env));
-				ret.put("against", ObjectGenerator.GetGenerator().location(e.getBlock().getLocation(), false, env));
+				ret.put("location", ObjectGenerator.GetGenerator().location(hanging.getLocation()));
+				ret.put("against", ObjectGenerator.GetGenerator().location(e.getBlock().getLocation(), false));
 				ret.put("face", new CString(e.getBlockFace().name(), Target.UNKNOWN));
 				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_17_X)) {
 					MCItemStack item = e.getItem();
@@ -2105,7 +2105,7 @@ public class EntityEvents {
 				Map<String, Mixed> ret = new HashMap<>();
 				MCFirework firework = e.getEntity();
 				ret.put("id", new CString(firework.getUniqueId().toString(), Target.UNKNOWN));
-				ret.put("location", ObjectGenerator.GetGenerator().location(firework.getLocation(), env));
+				ret.put("location", ObjectGenerator.GetGenerator().location(firework.getLocation()));
 				return ret;
 			} else {
 				throw new EventException("Could not convert to MCFireworkExplodeEvent");
@@ -2236,12 +2236,12 @@ public class EntityEvents {
 				Target t = Target.UNKNOWN;
 				ret.put("id", new CString(event.getEntity().getUniqueId().toString(), t));
 				ret.put("type", new CString(event.getEntity().getType().name(), t));
-				ret.put("from", ObjectGenerator.GetGenerator().location(event.getFrom(), env));
+				ret.put("from", ObjectGenerator.GetGenerator().location(event.getFrom()));
 				MCLocation to = event.getTo();
 				if(to == null) {
 					ret.put("to", CNull.NULL);
 				} else {
-					ret.put("to", ObjectGenerator.GetGenerator().location(to, env));
+					ret.put("to", ObjectGenerator.GetGenerator().location(to));
 				}
 				ret.put("searchradius", new CInt(event.getSearchRadius(), t));
 				return ret;
@@ -2476,8 +2476,8 @@ public class EntityEvents {
 				mapEvent.put("id", new CString(event.getEntity().getUniqueId().toString(), t));
 				mapEvent.put("action", new CString(event.getAction().toString().toLowerCase(), t));
 				mapEvent.put("cause", new CString(event.getCause().toString().toLowerCase(), t));
-				mapEvent.put("newPotion", event.getNewEffect().map(ef -> (Mixed) objGenerator.potion(ef, t, env)).orElse(CNull.NULL));
-				mapEvent.put("oldPotion", event.getOldEffect().map(ef -> (Mixed) objGenerator.potion(ef, t, env)).orElse(CNull.NULL));
+				mapEvent.put("newPotion", event.getNewEffect().map(ef -> (Mixed) objGenerator.potion(ef, t)).orElse(CNull.NULL));
+				mapEvent.put("oldPotion", event.getOldEffect().map(ef -> (Mixed) objGenerator.potion(ef, t)).orElse(CNull.NULL));
 
 				return mapEvent;
 			}

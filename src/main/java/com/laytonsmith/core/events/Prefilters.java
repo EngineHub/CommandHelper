@@ -158,7 +158,7 @@ public final class Prefilters {
 	@Deprecated
 	public static void match(Map<String, Mixed> map, String key,
 			MCLocation actualValue, PrefilterType type, Environment env) throws PrefilterNonMatchException {
-		match(map, key, ObjectGenerator.GetGenerator().location(actualValue, false, env), type, env);
+		match(map, key, ObjectGenerator.GetGenerator().location(actualValue, false), type, env);
 	}
 
 	@Deprecated

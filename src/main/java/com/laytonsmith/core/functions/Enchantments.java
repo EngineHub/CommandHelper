@@ -346,7 +346,7 @@ public class Enchantments {
 			if(is == null) {
 				return new CArray(t);
 			}
-			return ObjectGenerator.GetGenerator().enchants(is.getEnchantments(), t, env);
+			return ObjectGenerator.GetGenerator().enchants(is.getEnchantments(), t);
 		}
 	}
 

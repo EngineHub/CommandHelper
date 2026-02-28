@@ -253,7 +253,7 @@ public class Recipes {
 			MCItemStack item = ObjectGenerator.GetGenerator().item(args[0], t, env);
 			List<MCRecipe> recipes = Static.getServer().getRecipesFor(item);
 			for(MCRecipe recipe : recipes) {
-				ret.push(ObjectGenerator.GetGenerator().recipe(recipe, t, env), t, env);
+				ret.push(ObjectGenerator.GetGenerator().recipe(recipe, t), t, env);
 			}
 
 			return ret;
@@ -296,7 +296,7 @@ public class Recipes {
 			CArray ret = new CArray(t, null, env);
 			List<MCRecipe> recipes = Static.getServer().allRecipes();
 			for(MCRecipe recipe : recipes) {
-				ret.push(ObjectGenerator.GetGenerator().recipe(recipe, t, env), t, env);
+				ret.push(ObjectGenerator.GetGenerator().recipe(recipe, t), t, env);
 			}
 
 			return ret;

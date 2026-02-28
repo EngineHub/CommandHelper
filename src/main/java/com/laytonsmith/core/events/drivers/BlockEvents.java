@@ -80,7 +80,7 @@ public class BlockEvents {
 			Target t = Target.UNKNOWN;
 			Map<String, Mixed> map = evaluate_helper(event);
 
-			map.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation(), false, env));
+			map.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation(), false));
 			map.put("isSticky", CBoolean.get(event.isSticky()));
 			map.put("direction", new CString(event.getDirection().name(), t));
 
@@ -261,11 +261,11 @@ public class BlockEvents {
 
 			CArray drops = new CArray(t, null, env);
 			for(MCItemStack stack : event.getDrops()) {
-				drops.push(ObjectGenerator.GetGenerator().item(stack, t, env), t);
+				drops.push(ObjectGenerator.GetGenerator().item(stack, t, env), t, env);
 			}
 			map.put("drops", drops);
 
-			map.put("location", ObjectGenerator.GetGenerator().location(block.getLocation(), false, env));
+			map.put("location", ObjectGenerator.GetGenerator().location(block.getLocation(), false));
 			map.put("xp", new CInt(event.getExpToDrop(), t));
 
 			return map;
@@ -280,7 +280,7 @@ public class BlockEvents {
 				if(value.isInstanceOf(CArray.TYPE, null, env)) {
 					CArray arr = (CArray) value;
 					for(int i = 0; i < arr.size(env); i++) {
-						CArray item = ArgumentValidation.getArray(arr.get(i, value.getTarget()), value.getTarget(), env);
+						CArray item = ArgumentValidation.getArray(arr.get(i, value.getTarget(), env), value.getTarget(), env);
 						MCItemStack stack = ObjectGenerator.GetGenerator().item(item, value.getTarget(), env);
 						if(!stack.isEmpty()) {
 							drops.add(stack);
@@ -399,7 +399,7 @@ public class BlockEvents {
 
 			map.put("player", new CString(event.getPlayer().getName(), t));
 			map.put("block", new CString(mat.getName(), t));
-			map.put("location", ObjectGenerator.GetGenerator().location(block.getLocation(), false, env));
+			map.put("location", ObjectGenerator.GetGenerator().location(block.getLocation(), false));
 			map.put("item", ObjectGenerator.GetGenerator().item(event.getItemInHand(), Target.UNKNOWN, env));
 			if(event.getHand() == MCEquipmentSlot.WEAPON) {
 				map.put("hand", new CString("main_hand", Target.UNKNOWN));
@@ -542,7 +542,7 @@ public class BlockEvents {
 			MCBlock block = event.getBlock();
 
 			map.put("block", new CString(block.getType().getName(), t));
-			map.put("location", ObjectGenerator.GetGenerator().location(block.getLocation(), false, env));
+			map.put("location", ObjectGenerator.GetGenerator().location(block.getLocation(), false));
 
 			MCBlock source = event.getFireBlock();
 			if(source == null) {
@@ -628,10 +628,10 @@ public class BlockEvents {
 			MCBlock b = event.getIgnitingBlock();
 			if(b != null) {
 				map.put("ignitingblock", new CString(b.getType().getName(), t));
-				map.put("ignitingblocklocation",  ObjectGenerator.GetGenerator().location(b.getLocation(), false, env));
+				map.put("ignitingblocklocation",  ObjectGenerator.GetGenerator().location(b.getLocation(), false));
 			}
 
-			map.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation(), false, env));
+			map.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation(), false));
 			map.put("cause", new CString(event.getCause().name(), t));
 
 			return map;
@@ -760,12 +760,12 @@ public class BlockEvents {
 			MCBlock block = event.getBlock();
 
 			map.put("block", new CString(block.getType().getName(), t));
-			map.put("location", ObjectGenerator.GetGenerator().location(block.getLocation(), false, env));
+			map.put("location", ObjectGenerator.GetGenerator().location(block.getLocation(), false));
 
 			MCBlock toblock = event.getToBlock();
 
 			map.put("toblock", new CString(toblock.getType().getName(), t));
-			map.put("tolocation", ObjectGenerator.GetGenerator().location(toblock.getLocation(), false, env));
+			map.put("tolocation", ObjectGenerator.GetGenerator().location(toblock.getLocation(), false));
 
 			map.put("face", new CString(event.getBlockFace().toString(), t));
 			return map;
@@ -787,11 +787,11 @@ public class BlockEvents {
 				if(value.isInstanceOf(CArray.TYPE, null, env)) {
 					CArray blockArray = (CArray) value;
 					if(blockArray.containsKey("name")) {
-						Mixed name = blockArray.get("name", value.getTarget());
+						Mixed name = blockArray.get("name", value.getTarget(), env);
 						int data = 0;
 						if(blockArray.containsKey("data")) {
 							try {
-								data = Integer.parseInt(blockArray.get("data", value.getTarget()).val());
+								data = Integer.parseInt(blockArray.get("data", value.getTarget(), env).val());
 							} catch (Exception ex) {
 								throw new CREFormatException("blockArray is invalid", value.getTarget());
 							}
@@ -809,13 +809,13 @@ public class BlockEvents {
 						int type;
 						int data = 0;
 						try {
-							type = Integer.parseInt(blockArray.get("type", value.getTarget()).val());
+							type = Integer.parseInt(blockArray.get("type", value.getTarget(), env).val());
 						} catch (Exception ex) {
 							throw new CREFormatException("blockArray is invalid", value.getTarget());
 						}
 						if(blockArray.containsKey("data")) {
 							try {
-								data = Integer.parseInt(blockArray.get("data", value.getTarget()).val());
+								data = Integer.parseInt(blockArray.get("data", value.getTarget(), env).val());
 							} catch (Exception ex) {
 								throw new CREFormatException("blockArray is invalid", value.getTarget());
 							}
@@ -843,11 +843,11 @@ public class BlockEvents {
 				if(value.isInstanceOf(CArray.TYPE, null, env)) {
 					CArray blockArray = (CArray) value;
 					if(blockArray.containsKey("name")) {
-						Mixed name = blockArray.get("name", value.getTarget());
+						Mixed name = blockArray.get("name", value.getTarget(), env);
 						int data = 0;
 						if(blockArray.containsKey("data")) {
 							try {
-								data = Integer.parseInt(blockArray.get("data", value.getTarget()).val());
+								data = Integer.parseInt(blockArray.get("data", value.getTarget(), env).val());
 							} catch (Exception ex) {
 								throw new CREFormatException("blockArray is invalid", value.getTarget());
 							}
@@ -865,13 +865,13 @@ public class BlockEvents {
 						int type;
 						int data = 0;
 						try {
-							type = Integer.parseInt(blockArray.get("type", value.getTarget()).val());
+							type = Integer.parseInt(blockArray.get("type", value.getTarget(), env).val());
 						} catch (Exception ex) {
 							throw new CREFormatException("blockArray is invalid", value.getTarget());
 						}
 						if(blockArray.containsKey("data")) {
 							try {
-								data = Integer.parseInt(blockArray.get("data", value.getTarget()).val());
+								data = Integer.parseInt(blockArray.get("data", value.getTarget(), env).val());
 							} catch (Exception ex) {
 								throw new CREFormatException("blockArray is invalid", value.getTarget());
 							}
@@ -958,7 +958,7 @@ public class BlockEvents {
 
 			map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
 			map.put("text", event.getLines(env));
-			map.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation(), false, env));
+			map.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation(), false));
 			map.put("side", new CString(event.getSide().name(), Target.UNKNOWN));
 
 			return map;
@@ -985,7 +985,7 @@ public class BlockEvents {
 				String[] lines = {"", "", "", ""};
 
 				for(int i = 0; i < 4; i++) {
-					lines[i] = val.get(i, value.getTarget()).toString();
+					lines[i] = val.get(i, value.getTarget(), env).toString();
 				}
 
 				sce.setLines(lines);
@@ -1020,9 +1020,9 @@ public class BlockEvents {
 		public BindableEvent convert(CArray manual, Target t, Environment env) {
 			MCSignChangeEvent e = EventBuilder.instantiate(
 					MCSignChangeEvent.class,
-					Static.GetPlayer(manual.get("player", Target.UNKNOWN).val(), Target.UNKNOWN, env),
-					manual.get("1", Target.UNKNOWN).val(), manual.get("2", Target.UNKNOWN).val(),
-					manual.get("3", Target.UNKNOWN).val(), manual.get("4", Target.UNKNOWN).val());
+					Static.GetPlayer(manual.get("player", Target.UNKNOWN, env).val(), Target.UNKNOWN, env),
+					manual.get("1", Target.UNKNOWN, env).val(), manual.get("2", Target.UNKNOWN, env).val(),
+					manual.get("3", Target.UNKNOWN, env).val(), manual.get("4", Target.UNKNOWN, env).val());
 			return e;
 		}
 	}
@@ -1091,9 +1091,9 @@ public class BlockEvents {
 
 			map.put("type", new CString(block.getType().getName(), t));
 			map.put("item", ObjectGenerator.GetGenerator().item(event.getItem(), t, env));
-			map.put("location", ObjectGenerator.GetGenerator().location(block.getLocation(), false, env));
+			map.put("location", ObjectGenerator.GetGenerator().location(block.getLocation(), false));
 
-			CArray velocity = ObjectGenerator.GetGenerator().vector(event.getVelocity(), t, env);
+			CArray velocity = ObjectGenerator.GetGenerator().vector(event.getVelocity(), t);
 			velocity.set("magnitude", new CDouble(event.getVelocity().length(), t), t, env);
 			map.put("velocity", velocity);
 
@@ -1234,7 +1234,7 @@ public class BlockEvents {
 
 			mapEvent.put("block", new CString(e.getBlock().getType().getName(), t));
 			mapEvent.put("newblock", new CString(e.getNewState().getType().getName(), t));
-			mapEvent.put("location", ObjectGenerator.GetGenerator().location(e.getBlock().getLocation(), false, env));
+			mapEvent.put("location", ObjectGenerator.GetGenerator().location(e.getBlock().getLocation(), false));
 			return mapEvent;
 		}
 
@@ -1287,7 +1287,7 @@ public class BlockEvents {
 			Target t = Target.UNKNOWN;
 			Map<String, Mixed> map = new HashMap<>();
 
-			map.put("location", ObjectGenerator.GetGenerator().location(e.getBlock().getLocation(), false, env));
+			map.put("location", ObjectGenerator.GetGenerator().location(e.getBlock().getLocation(), false));
 			map.put("instrument", new CString(e.getInstrument().name(), t));
 			map.put("tone", new CString(e.getNote().getTone().name() + (e.getNote().isSharped() ? "#" : ""), t));
 			map.put("octave", new CInt(e.getNote().getOctave(), t));
@@ -1388,7 +1388,7 @@ public class BlockEvents {
 			mapEvent.put("block", new CString(event.getBlock().getType().getName(), t));
 			mapEvent.put("newblock", new CString(event.getNewState().getType().getName(), t));
 
-			mapEvent.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation(), false, env));
+			mapEvent.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation(), false));
 			return mapEvent;
 		}
 
@@ -1442,10 +1442,10 @@ public class BlockEvents {
 			Map<String, Mixed> ret = evaluate_helper(event);
 
 			MCBlock blk = event.getBlock();
-			ret.put("location", ObjectGenerator.GetGenerator().location(blk.getLocation(), false, env));
+			ret.put("location", ObjectGenerator.GetGenerator().location(blk.getLocation(), false));
 			CArray blocks = new CArray(t, null, env);
 			for(MCBlock b : event.getBlocks()) {
-				blocks.push(ObjectGenerator.GetGenerator().location(b.getLocation(), false, env), t, env);
+				blocks.push(ObjectGenerator.GetGenerator().location(b.getLocation(), false), t, env);
 			}
 			ret.put("blocks", blocks);
 			ret.put("yield", new CDouble(event.getYield(), t));
@@ -1532,7 +1532,7 @@ public class BlockEvents {
 				Map<String, Mixed> mapEvent = this.evaluate_helper(e);
 				mapEvent.put("block", new CString(event.getBlock().getType().getName(), t));
 				mapEvent.put("newblock", new CString(event.getNewState().getType().getName(), t));
-				mapEvent.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation(), false, env));
+				mapEvent.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation(), false));
 				return mapEvent;
 			}
 		}

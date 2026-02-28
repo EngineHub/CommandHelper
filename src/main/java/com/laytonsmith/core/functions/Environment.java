@@ -339,7 +339,7 @@ public class Environment {
 			if(b == null) {
 				throw new CRENotFoundException("Could not find the block in " + this.getName() + " (cmdline mode?)", t);
 			}
-			return ObjectGenerator.GetGenerator().blockData(b.getBlockData(), t, env);
+			return ObjectGenerator.GetGenerator().blockData(b.getBlockData(), t);
 		}
 
 		@Override
@@ -411,7 +411,7 @@ public class Environment {
 						b.setType(mat);
 						return CVoid.VOID;
 					}
-					bd = ObjectGenerator.GetGenerator().blockData((CArray) args[1], null, t, env);
+					bd = ObjectGenerator.GetGenerator().blockData((CArray) args[1], t, env);
 				} else {
 					bd = Static.getServer().createBlockData(args[1].val());
 				}
@@ -1384,7 +1384,7 @@ public class Environment {
 				throw new CRENotFoundException(
 						"Could not find the highest block in " + this.getName() + " (are you running in cmdline mode?)", t);
 			}
-			return ObjectGenerator.GetGenerator().location(highestBlock.getLocation(), false, env);
+			return ObjectGenerator.GetGenerator().location(highestBlock.getLocation(), false);
 		}
 
 		@Override

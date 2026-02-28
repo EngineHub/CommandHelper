@@ -281,7 +281,7 @@ public class Regex {
 			try {
 				if(replacement instanceof Callable replacer) {
 					ret = pattern.matcher(subject).replaceAll(mr -> ArgumentValidation.getStringObject(
-							replacer.executeCallable(env, t, ObjectGenerator.GetGenerator().regMatchValue(mr, t)), t));
+							replacer.executeCallable(env, t, ObjectGenerator.GetGenerator().regMatchValue(mr, t)), t, env));
 				} else {
 					ret = pattern.matcher(subject).replaceAll(replacement.val());
 				}

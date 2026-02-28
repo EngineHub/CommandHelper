@@ -161,7 +161,7 @@ public class PlayerEvents {
 
 				MCItemStack item = event.getItem();
 				if(item != null) {
-					ret.put("item", ObjectGenerator.GetGenerator().item(item, Target.UNKNOWN));
+					ret.put("item", ObjectGenerator.GetGenerator().item(item, Target.UNKNOWN, env));
 				} else {
 					ret.put("item", CNull.NULL);
 				}
@@ -410,9 +410,9 @@ public class PlayerEvents {
 		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
 			MCPlayer p = Static.GetPlayer(manualObject.get("player", t, env), t, env);
 			MCLocation from = ObjectGenerator.GetGenerator().location(manualObject.get("from", t, env),
-					p.getWorld(), manualObject.getTarget());
+					p.getWorld(), manualObject.getTarget(), env);
 			MCLocation to = ObjectGenerator.GetGenerator().location(manualObject.get("to", t, env),
-					p.getWorld(), manualObject.getTarget());
+					p.getWorld(), manualObject.getTarget(), env);
 			return EventBuilder.instantiate(MCPlayerTeleportEvent.class, p, from, to);
 		}
 
@@ -423,8 +423,8 @@ public class PlayerEvents {
 
 				//Fill in the event parameters
 				map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
-				map.put("from", ObjectGenerator.GetGenerator().location(event.getFrom(), env));
-				map.put("to", ObjectGenerator.GetGenerator().location(event.getTo(), env));
+				map.put("from", ObjectGenerator.GetGenerator().location(event.getFrom()));
+				map.put("to", ObjectGenerator.GetGenerator().location(event.getTo()));
 				map.put("type", new CString(event.getCause().toString(), Target.UNKNOWN));
 
 				return map;
@@ -512,9 +512,9 @@ public class PlayerEvents {
 		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
 			MCPlayer p = Static.GetPlayer(manualObject.get("player", t, env), t, env);
 			MCLocation from = ObjectGenerator.GetGenerator().location(manualObject.get("from", t, env),
-					p.getWorld(), manualObject.getTarget());
+					p.getWorld(), manualObject.getTarget(), env);
 			MCLocation to = ObjectGenerator.GetGenerator().location(manualObject.get("to", t, env),
-					p.getWorld(), manualObject.getTarget());
+					p.getWorld(), manualObject.getTarget(), env);
 			return EventBuilder.instantiate(MCPlayerPortalEvent.class, p, from, to);
 		}
 
@@ -523,11 +523,11 @@ public class PlayerEvents {
 			if(e instanceof MCPlayerPortalEvent event) {
 				Map<String, Mixed> map = evaluate_helper(e);
 				map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
-				map.put("from", ObjectGenerator.GetGenerator().location(event.getFrom(), env));
+				map.put("from", ObjectGenerator.GetGenerator().location(event.getFrom()));
 				if(event.getTo() == null) {
 					map.put("to", CNull.NULL);
 				} else {
-					map.put("to", ObjectGenerator.GetGenerator().location(event.getTo(), env));
+					map.put("to", ObjectGenerator.GetGenerator().location(event.getTo()));
 				}
 				map.put("type", new CString(event.getCause().toString(), Target.UNKNOWN));
 				map.put("creationallowed", CBoolean.get(event.canCreatePortal()));
@@ -893,7 +893,7 @@ public class PlayerEvents {
 				if(a == MCAction.LEFT_CLICK_BLOCK || a == MCAction.RIGHT_CLICK_BLOCK) {
 					map.put("facing", new CString(pie.getBlockFace().name().toLowerCase(), Target.UNKNOWN));
 					map.put("location", ObjectGenerator.GetGenerator().location(pie.getClickedBlock().getLocation(),
-							false, env));
+							false));
 					if(a == MCAction.RIGHT_CLICK_BLOCK && Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_1)) {
 						map.put("position", ObjectGenerator.GetGenerator().vector(pie.getClickedPosition(), Target.UNKNOWN));
 					}
@@ -918,7 +918,7 @@ public class PlayerEvents {
 			MCAction a = MCAction.valueOf(manual.get("action", t, env).val().toUpperCase());
 			MCItemStack is = Static.ParseItemNotation("player_interact event", manual.get("item", t, env).val(),
 					1, t);
-			MCBlock b = ObjectGenerator.GetGenerator().location(manual.get("location", t, env), null, t).getBlock();
+			MCBlock b = ObjectGenerator.GetGenerator().location(manual.get("location", t, env), null, t, env).getBlock();
 			MCBlockFace bf = MCBlockFace.valueOf(manual.get("facing", t, env).val().toUpperCase());
 			MCPlayerInteractEvent e = EventBuilder.instantiate(MCPlayerInteractEvent.class, p, a, is, b, bf);
 			return e;
@@ -980,7 +980,7 @@ public class PlayerEvents {
 		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			if(e instanceof MCPlayerEnterBedEvent bee) {
 				Map<String, Mixed> map = evaluate_helper(e);
-				map.put("location", ObjectGenerator.GetGenerator().location(bee.getBed().getLocation(), false, env));
+				map.put("location", ObjectGenerator.GetGenerator().location(bee.getBed().getLocation(), false));
 				map.put("result", new CString(bee.getResult().name(), Target.UNKNOWN));
 				return map;
 			} else {
@@ -1002,7 +1002,7 @@ public class PlayerEvents {
 		public BindableEvent convert(CArray manual, Target t, Environment env) {
 			MCPlayer p = Static.GetPlayer(manual.get("player", t, env), t, env);
 			MCBlock b = ObjectGenerator.GetGenerator().location(manual.get("location", t, env),
-					null, t).getBlock();
+					null, t, env).getBlock();
 			MCEnterBedResult r = MCEnterBedResult.valueOf(manual.get("result", t, env).val());
 			MCPlayerEnterBedEvent e = EventBuilder.instantiate(MCPlayerEnterBedEvent.class, p, b, r);
 			return e;
@@ -1048,7 +1048,7 @@ public class PlayerEvents {
 		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			if(e instanceof MCPlayerLeaveBedEvent bee) {
 				Map<String, Mixed> map = evaluate_helper(e);
-				map.put("location", ObjectGenerator.GetGenerator().location(bee.getBed().getLocation(), false, env));
+				map.put("location", ObjectGenerator.GetGenerator().location(bee.getBed().getLocation(), false));
 				return map;
 			} else {
 				throw new EventException("Cannot convert e to an appropriate PlayerBedEvent.");
@@ -1069,7 +1069,7 @@ public class PlayerEvents {
 		public BindableEvent convert(CArray manual, Target t, Environment env) {
 			MCPlayer p = Static.GetPlayer(manual.get("player", t, env), t, env);
 			MCBlock b = ObjectGenerator.GetGenerator().location(manual.get("location", t, env),
-					null, t).getBlock();
+					null, t, env).getBlock();
 			MCPlayerEnterBedEvent e = EventBuilder.instantiate(MCPlayerEnterBedEvent.class, p, b);
 			return e;
 		}
@@ -1110,7 +1110,7 @@ public class PlayerEvents {
 		@Override
 		public BindableEvent convert(CArray manual, Target t, Environment env) {
 			MCPlayer p = Static.GetPlayer(manual.get("player", t, env), t, env);
-			MCBlock b = ObjectGenerator.GetGenerator().location(manual.get("location", t, env), null, t).getBlock();
+			MCBlock b = ObjectGenerator.GetGenerator().location(manual.get("location", t, env), null, t, env).getBlock();
 			MCPlayerInteractEvent e = EventBuilder.instantiate(MCPlayerInteractEvent.class, p, MCAction.PHYSICAL, null,
 					b, MCBlockFace.UP);
 			return e;
@@ -1121,7 +1121,7 @@ public class PlayerEvents {
 			if(e instanceof MCPlayerInteractEvent pie) {
 				Map<String, Mixed> map = evaluate_helper(e);
 				map.put("location", ObjectGenerator.GetGenerator().location(pie.getClickedBlock().getLocation(),
-						false, env));
+						false));
 				map.put("activated", CBoolean.TRUE); // was never used, but was documented; remove in 3.3.5
 				return map;
 			} else {
@@ -1218,7 +1218,7 @@ public class PlayerEvents {
 			if(e instanceof MCPlayerRespawnEvent event) {
 				Map<String, Mixed> map = evaluate_helper(e);
 				//the helper puts the player in for us
-				CArray location = ObjectGenerator.GetGenerator().location(event.getRespawnLocation(), env);
+				CArray location = ObjectGenerator.GetGenerator().location(event.getRespawnLocation());
 				map.put("location", location);
 				map.put("bed_spawn", CBoolean.get(event.isBedSpawn()));
 				map.put("anchor_spawn", CBoolean.get(event.isAnchorSpawn()));
@@ -1236,7 +1236,7 @@ public class PlayerEvents {
 			//For firing off the event manually, we have to convert the CArray into an
 			//actual object that will trigger it
 			MCPlayer p = Static.GetPlayer(manual.get("player", t, env), t, env);
-			MCLocation l = ObjectGenerator.GetGenerator().location(manual.get("location", t, env), p.getWorld(), t);
+			MCLocation l = ObjectGenerator.GetGenerator().location(manual.get("location", t, env), p.getWorld(), t, env);
 			MCPlayerRespawnEvent e = EventBuilder.instantiate(MCPlayerRespawnEvent.class, p, l, false);
 			return e;
 		}
@@ -2001,8 +2001,8 @@ public class PlayerEvents {
 				Map<String, Mixed> map = new HashMap<>();
 				map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
 				map.put("world", new CString(event.getFrom().getWorld().getName(), Target.UNKNOWN));
-				map.put("from", ObjectGenerator.GetGenerator().location(event.getFrom(), env));
-				map.put("to", ObjectGenerator.GetGenerator().location(event.getTo(), env));
+				map.put("from", ObjectGenerator.GetGenerator().location(event.getFrom()));
+				map.put("to", ObjectGenerator.GetGenerator().location(event.getTo()));
 				return map;
 			} else {
 				throw new EventException("Cannot convert e to MCPlayerMovedEvent");
@@ -2480,7 +2480,7 @@ public class PlayerEvents {
 		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			if(event instanceof MCPlayerToggleFlightEvent ptfe) {
 				Map<String, Mixed> mapEvent = evaluate_helper(event);
-				mapEvent.put("location", ObjectGenerator.GetGenerator().location(ptfe.getPlayer().getLocation(), env));
+				mapEvent.put("location", ObjectGenerator.GetGenerator().location(ptfe.getPlayer().getLocation()));
 				mapEvent.put("flying", CBoolean.get(ptfe.isFlying()));
 				return mapEvent;
 			} else {
@@ -2545,7 +2545,7 @@ public class PlayerEvents {
 		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			if(event instanceof MCPlayerToggleSneakEvent ptse) {
 				Map<String, Mixed> mapEvent = evaluate_helper(event);
-				mapEvent.put("location", ObjectGenerator.GetGenerator().location(ptse.getPlayer().getLocation(), env));
+				mapEvent.put("location", ObjectGenerator.GetGenerator().location(ptse.getPlayer().getLocation()));
 				mapEvent.put("sneaking", CBoolean.get(ptse.isSneaking()));
 				return mapEvent;
 			} else {
@@ -2611,7 +2611,7 @@ public class PlayerEvents {
 			if(event instanceof MCPlayerToggleSprintEvent) {
 				MCPlayerToggleSprintEvent ptse = (MCPlayerToggleSprintEvent) event;
 				Map<String, Mixed> mapEvent = evaluate_helper(event);
-				mapEvent.put("location", ObjectGenerator.GetGenerator().location(ptse.getPlayer().getLocation(), env));
+				mapEvent.put("location", ObjectGenerator.GetGenerator().location(ptse.getPlayer().getLocation()));
 				mapEvent.put("sprinting", CBoolean.get(ptse.isSprinting()));
 				return mapEvent;
 			} else {

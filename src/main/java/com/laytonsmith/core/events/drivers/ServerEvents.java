@@ -397,7 +397,7 @@ public class ServerEvents {
 		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			MCRedstoneChangedEvent event = (MCRedstoneChangedEvent) e;
 			Map<String, Mixed> map = evaluate_helper(e);
-			map.put("location", ObjectGenerator.GetGenerator().location(event.getLocation(), false, env));
+			map.put("location", ObjectGenerator.GetGenerator().location(event.getLocation(), false));
 			map.put("active", CBoolean.get(event.isActive()));
 			return map;
 		}

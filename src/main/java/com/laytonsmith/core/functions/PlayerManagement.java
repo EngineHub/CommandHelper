@@ -446,7 +446,7 @@ public class PlayerManagement {
 						"Could not find the location of the player (are you running in cmdline mode?)", t);
 			}
 			location.setY(location.getY() - 1);
-			return ObjectGenerator.GetGenerator().location(location, env);
+			return ObjectGenerator.GetGenerator().location(location);
 		}
 
 		@Override
@@ -674,7 +674,7 @@ public class PlayerManagement {
 			if(b == null) {
 				throw new CRERangeException("No block in sight, or block too far", t);
 			} else {
-				return ObjectGenerator.GetGenerator().location(b.getLocation(), false, env);
+				return ObjectGenerator.GetGenerator().location(b.getLocation(), false);
 			}
 		}
 
@@ -731,7 +731,7 @@ public class PlayerManagement {
 			if(b == null) {
 				throw new CRERangeException("No block in sight, or block too far", t);
 			}
-			return ObjectGenerator.GetGenerator().location(b.getLocation(), false, env);
+			return ObjectGenerator.GetGenerator().location(b.getLocation(), false);
 		}
 
 		@Override
@@ -2380,7 +2380,7 @@ public class PlayerManagement {
 				p = Static.GetPlayer(args[0], t, env);
 			}
 			Static.AssertPlayerNonNull(p, t);
-			return ObjectGenerator.GetGenerator().potions(p.getEffects(), t, env);
+			return ObjectGenerator.GetGenerator().potions(p.getEffects(), t);
 		}
 
 		@Override
@@ -3267,7 +3267,7 @@ public class PlayerManagement {
 			Static.AssertPlayerNonNull(m, t);
 			MCLocation old = m.getCompassTarget();
 			m.setCompassTarget(l);
-			return ObjectGenerator.GetGenerator().location(old, env);
+			return ObjectGenerator.GetGenerator().location(old);
 		}
 	}
 
@@ -3316,7 +3316,7 @@ public class PlayerManagement {
 				m = Static.GetPlayer(args[0].val(), t, env);
 			}
 			Static.AssertPlayerNonNull(m, t);
-			return ObjectGenerator.GetGenerator().location(m.getCompassTarget(), false, env);
+			return ObjectGenerator.GetGenerator().location(m.getCompassTarget(), false);
 		}
 	}
 
@@ -4031,7 +4031,7 @@ public class PlayerManagement {
 				throw new CRENotFoundException(
 						"The players velocity could not be found (Are you running in cmdline mode?)", t);
 			}
-			CArray vector = ObjectGenerator.GetGenerator().vector(velocity, t, env);
+			CArray vector = ObjectGenerator.GetGenerator().vector(velocity, t);
 			vector.set("magnitude", new CDouble(velocity.length(), t), t, env);
 			return vector;
 		}
@@ -4703,7 +4703,7 @@ public class PlayerManagement {
 			if(loc == null) {
 				return CNull.NULL;
 			} else {
-				return ObjectGenerator.GetGenerator().location(loc, env);
+				return ObjectGenerator.GetGenerator().location(loc);
 			}
 		}
 
@@ -6731,7 +6731,7 @@ public class PlayerManagement {
 				}
 			}
 			if(params.containsKey("center")) {
-				wb.setCenter(ObjectGenerator.GetGenerator().location(params.get("center", t, env), p.getWorld(), t));
+				wb.setCenter(ObjectGenerator.GetGenerator().location(params.get("center", t, env), p.getWorld(), t, env));
 			}
 			if(params.containsKey("warningtime")) {
 				wb.setWarningTime(ArgumentValidation.getInt32(params.get("warningtime", t, env), t, env));
@@ -7215,7 +7215,7 @@ public class PlayerManagement {
 				for(String key : ea.stringKeySet()) {
 					try {
 						p.sendEquipmentChange(le, MCEquipmentSlot.valueOf(key.toUpperCase()),
-								ObjectGenerator.GetGenerator().item(ea.get(key, t, env), t));
+								ObjectGenerator.GetGenerator().item(ea.get(key, t, env), t, env));
 					} catch (IllegalArgumentException iae) {
 						throw new CREFormatException("Not an equipment slot: " + key, t);
 					}

@@ -2980,9 +2980,9 @@ public class InventoryManagement {
 		if(h instanceof MCEntity) {
 			return new CString(((MCEntity) h).getUniqueId().toString(), t);
 		} else if(h instanceof MCBlockState) {
-			return ObjectGenerator.GetGenerator().location(((MCBlockState) h).getLocation(), false, env);
+			return ObjectGenerator.GetGenerator().location(((MCBlockState) h).getLocation(), false);
 		} else if(h instanceof MCDoubleChest) {
-			return ObjectGenerator.GetGenerator().location(((MCDoubleChest) h).getLocation(), false, env);
+			return ObjectGenerator.GetGenerator().location(((MCDoubleChest) h).getLocation(), false);
 		} else if(h instanceof MCVirtualInventoryHolder) {
 			return new CString(((MCVirtualInventoryHolder) h).getID(), t);
 		}

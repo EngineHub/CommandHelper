@@ -971,10 +971,10 @@ public class Meta {
 			CArray ret;
 			if(sender instanceof MCBlockCommandSender) {
 				loc = ((MCBlockCommandSender) sender).getBlock().getLocation();
-				ret = ObjectGenerator.GetGenerator().location(loc, false, env); // Do not include pitch/yaw.
+				ret = ObjectGenerator.GetGenerator().location(loc, false); // Do not include pitch/yaw.
 			} else if(sender instanceof MCCommandMinecart) {
 				loc = ((MCCommandMinecart) sender).getLocation();
-				ret = ObjectGenerator.GetGenerator().location(loc, true, env); // Include pitch/yaw.
+				ret = ObjectGenerator.GetGenerator().location(loc, true); // Include pitch/yaw.
 			} else {
 				return CNull.NULL;
 			}

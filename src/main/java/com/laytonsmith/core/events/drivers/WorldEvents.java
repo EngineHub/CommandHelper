@@ -241,10 +241,10 @@ public final class WorldEvents {
 			List<MCBlockState> blocks = event.getBlocks();
 			CArray a = new CArray(Target.UNKNOWN, blocks.size(), null, env);
 			for(MCBlockState block : blocks) {
-				a.push(ObjectGenerator.GetGenerator().location(block.getLocation(), false, env), Target.UNKNOWN, env);
+				a.push(ObjectGenerator.GetGenerator().location(block.getLocation(), false), Target.UNKNOWN, env);
 			}
 			r.put("blocks", a);
-			r.put("location", ObjectGenerator.GetGenerator().location(event.getLocation(), false, env));
+			r.put("location", ObjectGenerator.GetGenerator().location(event.getLocation(), false));
 			MCPlayer player = event.getPlayer();
 			r.put("player", player == null ? CNull.NULL : new CString(player.getName(), Target.UNKNOWN));
 			r.put("type", new CString(event.getSpecies().name(), Target.UNKNOWN));

@@ -281,7 +281,7 @@ public class VehicleEvents {
 				switch(e.getCollisionType()) {
 					case BLOCK:
 						block = ObjectGenerator.GetGenerator().location(
-								((MCVehicleBlockCollideEvent) e).getBlock().getLocation(), false, env);
+								((MCVehicleBlockCollideEvent) e).getBlock().getLocation(), false);
 						break;
 					case ENTITY:
 						MCVehicleEntityCollideEvent vec = (MCVehicleEntityCollideEvent) e;
@@ -489,8 +489,8 @@ public class VehicleEvents {
 				Target t = Target.UNKNOWN;
 				Map<String, Mixed> ret = new HashMap<>();
 				ret.put("world", new CString(e.getFrom().getWorld().getName(), t));
-				ret.put("from", ObjectGenerator.GetGenerator().location(e.getFrom(), env));
-				ret.put("to", ObjectGenerator.GetGenerator().location(e.getTo(), env));
+				ret.put("from", ObjectGenerator.GetGenerator().location(e.getFrom()));
+				ret.put("to", ObjectGenerator.GetGenerator().location(e.getTo()));
 				ret.put("vehicletype", new CString(e.getVehicle().getType().name(), t));
 				ret.put("id", new CString(e.getVehicle().getUniqueId().toString(), t));
 
@@ -589,10 +589,10 @@ public class VehicleEvents {
 					} else if(shooter instanceof MCEntity) {
 						ret.put("shooter", new CString(((MCEntity) shooter).getUniqueId().toString(), Target.UNKNOWN));
 					} else if(shooter instanceof MCBlockProjectileSource) {
-						ret.put("shooter", ObjectGenerator.GetGenerator().location(((MCBlockProjectileSource) shooter).getBlock().getLocation(), false, env));
+						ret.put("shooter", ObjectGenerator.GetGenerator().location(((MCBlockProjectileSource) shooter).getBlock().getLocation(), false));
 					}
 				}
-				ret.put("location", ObjectGenerator.GetGenerator().location(e.getVehicle().getLocation(), env));
+				ret.put("location", ObjectGenerator.GetGenerator().location(e.getVehicle().getLocation()));
 				return ret;
 			} else {
 				throw new EventException("Could not convert to MCVehicleDestroyEvent");

@@ -361,7 +361,7 @@ public class Echoes {
 			MCPlayer player;
 			String message;
 			if(args.length == 2) {
-				player = Static.GetPlayer(args[0], t);
+				player = Static.GetPlayer(args[0], t, env);
 				message = args[1].val();
 			} else {
 				player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();

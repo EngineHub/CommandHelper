@@ -134,7 +134,7 @@ public class World {
 			if(w == null) {
 				throw new CREInvalidWorldException("The specified world \"" + args[0].val() + "\" is not a valid world.", t);
 			}
-			return ObjectGenerator.GetGenerator().location(w.getSpawnLocation(), env);
+			return ObjectGenerator.GetGenerator().location(w.getSpawnLocation());
 		}
 	}
 
@@ -2086,7 +2086,7 @@ public class World {
 					// Need to check if the shift would go beyond the target, if so, just return the final
 					// destination.
 					if(loc.distance(to) < distance) {
-						return ObjectGenerator.GetGenerator().location(to, env);
+						return ObjectGenerator.GetGenerator().location(to);
 					}
 				}
 				vector = to.toVector().subtract(loc.toVector()).normalize();
@@ -2099,7 +2099,7 @@ public class World {
 				}
 			}
 			loc.add(vector.multiply(distance));
-			return ObjectGenerator.GetGenerator().location(loc, env);
+			return ObjectGenerator.GetGenerator().location(loc);
 		}
 
 		@Override
@@ -2305,7 +2305,7 @@ public class World {
 			if(args.length == 2) {
 				v = v.multiply(ArgumentValidation.getDouble(args[1], t, env));
 			}
-			return ObjectGenerator.GetGenerator().vector(v, env);
+			return ObjectGenerator.GetGenerator().vector(v, Target.UNKNOWN);
 		}
 	}
 
@@ -2484,7 +2484,7 @@ public class World {
 			MCWorldBorder wb = w.getWorldBorder();
 			CArray ret = CArray.GetAssociativeArray(t, null, env);
 			ret.set("width", new CDouble(wb.getSize(), t), t, env);
-			ret.set("center", ObjectGenerator.GetGenerator().location(wb.getCenter(), false, env), t, env);
+			ret.set("center", ObjectGenerator.GetGenerator().location(wb.getCenter(), false), t, env);
 			ret.set("damagebuffer", new CDouble(wb.getDamageBuffer(), t), t, env);
 			ret.set("damageamount", new CDouble(wb.getDamageAmount(), t), t, env);
 			ret.set("warningtime", new CInt(wb.getWarningTime(), t), t, env);

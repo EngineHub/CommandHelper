@@ -567,7 +567,7 @@ public class MobManagement {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCLivingEntity mob = Static.getLivingEntity(args[0], t);
-			return ObjectGenerator.GetGenerator().potions(mob.getEffects(), t, env);
+			return ObjectGenerator.GetGenerator().potions(mob.getEffects(), t);
 		}
 
 		@Override
@@ -1350,7 +1350,7 @@ public class MobManagement {
 			}
 			CArray lineOfSight = new CArray(t, null, env);
 			for(MCBlock block : entity.getLineOfSight(transparents, maxDistance)) {
-				lineOfSight.push(ObjectGenerator.GetGenerator().location(block.getLocation(), false, env), t, env);
+				lineOfSight.push(ObjectGenerator.GetGenerator().location(block.getLocation(), false), t, env);
 			}
 			return lineOfSight;
 		}
@@ -1828,7 +1828,7 @@ public class MobManagement {
 			try {
 				CArray ret = new CArray(t, null, env);
 				for(MCAttributeModifier m : e.getAttributeModifiers(attribute)) {
-					ret.push(ObjectGenerator.GetGenerator().attributeModifier(m, t, env), t, env);
+					ret.push(ObjectGenerator.GetGenerator().attributeModifier(m, t), t, env);
 				}
 				return ret;
 			} catch (IllegalArgumentException ex) {

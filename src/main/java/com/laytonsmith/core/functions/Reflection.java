@@ -367,8 +367,8 @@ public class Reflection {
 				CArray docs = CArray.GetAssociativeArray(t, null, env);
 				docs.set("package", type.getPackage() == null ? CNull.NULL : type.getPackage(), t, env);
 				docs.set("isNative", CBoolean.get(type.getNativeType() != null), t, env);
-				docs.set("docs", m.getTypeDocs(t, env), env);
-				docs.set("since", m.getTypeSince(t, env).toString(), env);
+				docs.set("docs", m.getTypeDocs(env), env);
+				docs.set("since", m.getTypeSince(env).toString(), env);
 				typeDocs.push(docs, t, env);
 			}
 			ret.set("typeDocs", typeDocs, t, env);

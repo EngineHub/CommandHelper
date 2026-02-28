@@ -214,7 +214,7 @@ public class SQL {
 							} else if(params[i] instanceof CByteArray) {
 								ps.setBytes(i + 1, ((CByteArray) params[i]).asByteArrayCopy());
 							} else if(params[i] instanceof CBoolean) {
-								ps.setBoolean(i + 1, ArgumentValidation.getBoolean(params[i], t));
+								ps.setBoolean(i + 1, ArgumentValidation.getBoolean(params[i], t, env));
 							} else {
 								throw new CRECastException("The type " + params[i].getClass().getSimpleName()
 										+ " of parameter " + (i + 1) + " is not supported.", t);

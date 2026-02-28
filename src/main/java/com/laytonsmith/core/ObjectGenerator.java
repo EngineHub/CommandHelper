@@ -137,12 +137,6 @@ public class ObjectGenerator {
 		return pog;
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
-	@Deprecated
-	public CArray location(MCLocation l) {
-		return location(l, null);
-	}
-
 	/**
 	 * Gets a Location Object, given a MCLocation
 	 *
@@ -150,14 +144,8 @@ public class ObjectGenerator {
 	 * @param env
 	 * @return
 	 */
-	public CArray location(MCLocation l, Environment env) {
-		return location(l, true, env);
-	}
-
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
-	@Deprecated
-	public CArray location(MCLocation l, boolean includeYawAndPitch) {
-		return location(l, includeYawAndPitch, null);
+	public CArray location(MCLocation l) {
+		return location(l, true);
 	}
 
 	/**
@@ -168,20 +156,20 @@ public class ObjectGenerator {
 	 * @param env
 	 * @return
 	 */
-	public CArray location(MCLocation l, boolean includeYawAndPitch, Environment env) {
-		CArray ca = CArray.GetAssociativeArray(Target.UNKNOWN, null, env);
+	public CArray location(MCLocation l, boolean includeYawAndPitch) {
+		CArray ca = CArray.GetAssociativeArray(Target.UNKNOWN, null, null);
 		Construct x = new CDouble(l.getX(), Target.UNKNOWN);
 		Construct y = new CDouble(l.getY(), Target.UNKNOWN);
 		Construct z = new CDouble(l.getZ(), Target.UNKNOWN);
 		Construct world = (l.getWorld() != null ? new CString(l.getWorld().getName(), Target.UNKNOWN) : CNull.NULL);
-		ca.set("0", x, Target.UNKNOWN, env);
-		ca.set("1", y, Target.UNKNOWN, env);
-		ca.set("2", z, Target.UNKNOWN, env);
-		ca.set("3", world, Target.UNKNOWN, env);
-		ca.set("x", x, Target.UNKNOWN, env);
-		ca.set("y", y, Target.UNKNOWN, env);
-		ca.set("z", z, Target.UNKNOWN, env);
-		ca.set("world", world, Target.UNKNOWN, env);
+		ca.set("0", x, Target.UNKNOWN, null);
+		ca.set("1", y, Target.UNKNOWN, null);
+		ca.set("2", z, Target.UNKNOWN, null);
+		ca.set("3", world, Target.UNKNOWN, null);
+		ca.set("x", x, Target.UNKNOWN, null);
+		ca.set("y", y, Target.UNKNOWN, null);
+		ca.set("z", z, Target.UNKNOWN, null);
+		ca.set("world", world, Target.UNKNOWN, null);
 		if(includeYawAndPitch) {
 			// guarantee yaw in the 0 - 359.9~ range
 			float yawRaw = l.getYaw() % 360.0f;
@@ -190,16 +178,18 @@ public class ObjectGenerator {
 			}
 			Construct yaw = new CDouble(yawRaw, Target.UNKNOWN);
 			Construct pitch = new CDouble(l.getPitch(), Target.UNKNOWN);
-			ca.set("4", yaw, Target.UNKNOWN, env);
-			ca.set("5", pitch, Target.UNKNOWN, env);
-			ca.set("yaw", yaw, Target.UNKNOWN, env);
-			ca.set("pitch", pitch, Target.UNKNOWN, env);
+			ca.set("4", yaw, Target.UNKNOWN, null);
+			ca.set("5", pitch, Target.UNKNOWN, null);
+			ca.set("yaw", yaw, Target.UNKNOWN, null);
+			ca.set("pitch", pitch, Target.UNKNOWN, null);
 		}
 		return ca;
 	}
 
+	/**
+	 * @deprecated Use {@link #location(Mixed, MCWorld, Target, Environment)} instead.
+	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
-	/** @deprecated Use {@link #location(Mixed, MCWorld, Target, Environment)} instead. */
 	@Deprecated
 	public MCLocation location(Mixed c, MCWorld w, Target t) {
 		return location(c, w, t, null);
@@ -483,7 +473,7 @@ public class ObjectGenerator {
 					ret.addUnsafeEnchantment(entry.getKey(), entry.getValue());
 				}
 				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "Converted legacy enchants array not in meta.", t);
-			} catch (ClassCastException ex) {
+			} catch(ClassCastException ex) {
 				throw new CREFormatException("Enchants must be an array of enchantment arrays.", t);
 			}
 		}
@@ -507,7 +497,7 @@ public class ObjectGenerator {
 		} else {
 			Construct display;
 			Construct lore;
-			CArray ma = CArray.GetAssociativeArray(t, null, env);
+			CArray ma = CArray.GetAssociativeArray(t, null, null);
 			MCItemMeta meta = is.getItemMeta();
 			MCMaterial material = is.getType();
 			if(meta.hasDisplayName()) {
@@ -518,165 +508,165 @@ public class ObjectGenerator {
 			if(meta.hasLore()) {
 				lore = new CArray(t, null, env);
 				for(String l : meta.getLore()) {
-					((CArray) lore).push(new CString(l, t), t, env);
+					((CArray) lore).push(new CString(l, t), t, null);
 				}
 			} else {
 				lore = CNull.NULL;
 			}
-			ma.set("display", display, t, env);
-			ma.set("lore", lore, t, env);
-			ma.set("enchants", enchants(meta.getEnchants(), t, env), t, env);
-			ma.set("repair", new CInt(meta.getRepairCost(), t), t, env);
+			ma.set("display", display, t, null);
+			ma.set("lore", lore, t, null);
+			ma.set("enchants", enchants(meta.getEnchants(), t), t, null);
+			ma.set("repair", new CInt(meta.getRepairCost(), t), t, null);
 
 			if(meta.hasCustomModelData()) {
-				ma.set("model", new CInt(meta.getCustomModelData(), t), t, env);
+				ma.set("model", new CInt(meta.getCustomModelData(), t), t, null);
 			} else {
-				ma.set("model", CNull.NULL, t, env);
+				ma.set("model", CNull.NULL, t, null);
 			}
 
 			Set<MCItemFlag> itemFlags = meta.getItemFlags();
 			CArray flagArray = new CArray(t, null, env);
 			if(!itemFlags.isEmpty()) {
 				for(MCItemFlag flag : itemFlags) {
-					flagArray.push(new CString(flag.name(), t), t, env);
+					flagArray.push(new CString(flag.name(), t), t, null);
 				}
 			}
-			ma.set("flags", flagArray, t, env);
+			ma.set("flags", flagArray, t, null);
 
 			List<MCAttributeModifier> modifierList = meta.getAttributeModifiers();
 			if(modifierList == null) {
-				ma.set("modifiers", CNull.NULL, t, env);
+				ma.set("modifiers", CNull.NULL, t, null);
 			} else {
 				CArray modifiers = new CArray(t, null, env);
 				for(MCAttributeModifier m : modifierList) {
-					modifiers.push(attributeModifier(m, t, env), t, env);
+					modifiers.push(attributeModifier(m, t), t, null);
 				}
-				ma.set("modifiers", modifiers, t, env);
+				ma.set("modifiers", modifiers, t, null);
 			}
 
 			if(meta.hasCustomTags()) {
-				ma.set("tags", MCTagType.TAG_CONTAINER.construct(meta.getCustomTags(), env), t, env);
+				ma.set("tags", MCTagType.TAG_CONTAINER.construct(meta.getCustomTags(), null), t, null);
 			} else {
-				ma.set("tags", CNull.NULL, t, env);
+				ma.set("tags", CNull.NULL, t, null);
 			}
 
 			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
 				if(meta.hasMaxStackSize()) {
-					ma.set("maxstacksize", new CInt(meta.getMaxStackSize(), t), t, env);
+					ma.set("maxstacksize", new CInt(meta.getMaxStackSize(), t), t, null);
 				}
 				if(meta.hasEnchantmentGlintOverride()) {
-					ma.set("glint", CBoolean.get(meta.getEnchantmentGlintOverride()), t, env);
+					ma.set("glint", CBoolean.get(meta.getEnchantmentGlintOverride()), t, null);
 				}
 				if(meta.hasRarity()) {
-					ma.set("rarity", new CString(meta.getRarity().name(), t), t, env);
+					ma.set("rarity", new CString(meta.getRarity().name(), t), t, null);
 				}
 				if(meta.hasMaxDamage()) {
-					ma.set("maxdamage", new CInt(meta.getMaxDamage(), t), t, env);
+					ma.set("maxdamage", new CInt(meta.getMaxDamage(), t), t, null);
 				}
 				if(meta.hasDamage() || material.getMaxDurability() > 0) {
-					ma.set("damage", new CInt(meta.getDamage(), t), t, env);
-					ma.set("unbreakable", CBoolean.get(meta.isUnbreakable()), t, env);
+					ma.set("damage", new CInt(meta.getDamage(), t), t, null);
+					ma.set("unbreakable", CBoolean.get(meta.isUnbreakable()), t, null);
 				} else if(meta.isUnbreakable()) {
-					ma.set("unbreakable", CBoolean.TRUE, t, env);
+					ma.set("unbreakable", CBoolean.TRUE, t, null);
 				}
 				if(material.isBlock()) {
 					if(meta.hasBlockData()) {
 						Map<String, String> blockData = meta.getExistingBlockData();
 						if(blockData != null) {
-							ma.set("blockdata", blockData(material, blockData, t), t, env);
+							ma.set("blockdata", blockData(material, blockData, t), t, null);
 						} else {
-							ma.set("blockdata", CNull.NULL, t, env);
+							ma.set("blockdata", CNull.NULL, t, null);
 						}
 					} else {
-						ma.set("blockdata", CNull.NULL, t, env);
+						ma.set("blockdata", CNull.NULL, t, null);
 					}
 				}
 				if(meta.hasFood()) {
 					MCFoodComponent foodComponent = meta.getFood();
-					CArray food = CArray.GetAssociativeArray(t, null, env);
-					food.set("nutrition", new CInt(foodComponent.getNutrition(), t), t, env);
-					food.set("saturation", new CDouble(foodComponent.getSaturation(), t), t, env);
-					food.set("always", CBoolean.get(foodComponent.getCanAlwaysEat()), t, env);
-					ma.set("food", food, t, env);
+					CArray food = CArray.GetAssociativeArray(t, null, null);
+					food.set("nutrition", new CInt(foodComponent.getNutrition(), t), t, null);
+					food.set("saturation", new CDouble(foodComponent.getSaturation(), t), t, null);
+					food.set("always", CBoolean.get(foodComponent.getCanAlwaysEat()), t, null);
+					ma.set("food", food, t, null);
 				}
 
 				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_21)) {
 					if(meta.hasJukeboxPlayable()) {
-						ma.set("jukeboxsong", new CString(meta.getJukeboxPlayable(), t), t, env);
+						ma.set("jukeboxsong", new CString(meta.getJukeboxPlayable(), t), t, null);
 					}
 				}
 
 				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_21_3)) {
 					if(meta.hasEnchantable()) {
-						ma.set("enchantability", new CInt(meta.getEnchantable(), t), t, env);
+						ma.set("enchantability", new CInt(meta.getEnchantable(), t), t, null);
 					}
 					if(meta.isGlider()) {
-						ma.set("glider", CBoolean.TRUE, t, env);
+						ma.set("glider", CBoolean.TRUE, t, null);
 					}
 					if(meta.hasUseRemainder()) {
-						ma.set("remainder", item(meta.getUseRemainder(), t), t, env);
+						ma.set("remainder", item(meta.getUseRemainder(), t), t, null);
 					}
 					if(meta.hasUseCooldown()) {
 						MCCooldownComponent cooldownComponent = meta.getUseCooldown();
-						CArray cooldown = CArray.GetAssociativeArray(t, null, env);
-						cooldown.set("seconds", new CDouble(cooldownComponent.getSeconds(), t), t, env);
+						CArray cooldown = CArray.GetAssociativeArray(t, null, null);
+						cooldown.set("seconds", new CDouble(cooldownComponent.getSeconds(), t), t, null);
 						String group = cooldownComponent.getCooldownGroup();
 						if(group != null) {
-							cooldown.set("group", new CString(group, t), t, env);
+							cooldown.set("group", new CString(group, t), t, null);
 						}
-						ma.set("cooldown", cooldown, t, env);
+						ma.set("cooldown", cooldown, t, null);
 					}
 					if(meta.hasItemModel()) {
-						ma.set("itemmodel", new CString(meta.getItemModel(), t), t, env);
+						ma.set("itemmodel", new CString(meta.getItemModel(), t), t, null);
 					}
 					if(meta.hasTooltipStyle()) {
-						ma.set("tooltipstyle", new CString(meta.getTooltipStyle(), t), t, env);
+						ma.set("tooltipstyle", new CString(meta.getTooltipStyle(), t), t, null);
 					}
 					if(meta.hasEquippable()) {
 						MCEquippableComponent equippableComponent = meta.getEquippable();
-						CArray equippable = CArray.GetAssociativeArray(t, null, env);
+						CArray equippable = CArray.GetAssociativeArray(t, null, null);
 						MCEquipmentSlot slot = equippableComponent.getSlot();
-						equippable.set("slot", new CString(slot.name(), t), t, env);
+						equippable.set("slot", new CString(slot.name(), t), t, null);
 						String asset = equippableComponent.getAssetId();
 						if(asset != null) {
-							equippable.set("asset", new CString(asset, t), t, env);
+							equippable.set("asset", new CString(asset, t), t, null);
 						}
 						String cameraOverlay = equippableComponent.getCameraOverlay();
 						if(cameraOverlay != null) {
-							equippable.set("overlay", new CString(cameraOverlay, t), t, env);
+							equippable.set("overlay", new CString(cameraOverlay, t), t, null);
 						}
 						Collection<MCEntityType> allowedEntities = equippableComponent.getAllowedEntities();
 						if(allowedEntities != null) {
 							CArray entities = new CArray(t, null, env);
 							for(MCEntityType type : allowedEntities) {
-								entities.push(new CString(type.name(), t), t, env);
+								entities.push(new CString(type.name(), t), t, null);
 							}
-							equippable.set("entities", entities, t, env);
+							equippable.set("entities", entities, t, null);
 						}
 						String sound = equippableComponent.getEquipSound();
 						if(sound != null) {
-							equippable.set("sound", new CString(sound, t), t);
+							equippable.set("sound", new CString(sound, t), t, null);
 						}
-						equippable.set("dispensable", CBoolean.get(equippableComponent.isDispensable()), t, env);
-						equippable.set("swappable", CBoolean.get(equippableComponent.isSwappable()), t, env);
-						equippable.set("damageable", CBoolean.get(equippableComponent.isDamageOnHurt()), t, env);
+						equippable.set("dispensable", CBoolean.get(equippableComponent.isDispensable()), t, null);
+						equippable.set("swappable", CBoolean.get(equippableComponent.isSwappable()), t, null);
+						equippable.set("damageable", CBoolean.get(equippableComponent.isDamageOnHurt()), t, null);
 						if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_21_5)) {
-							equippable.set("interactable", CBoolean.get(equippableComponent.isEquipOnInteract()), t, env);
+							equippable.set("interactable", CBoolean.get(equippableComponent.isEquipOnInteract()), t, null);
 						}
-						ma.set("equippable", equippable, t, env);
+						ma.set("equippable", equippable, t, null);
 					}
 				}
 
 			} else { // versions before 1.20.6
 				if(material.getMaxDurability() > 0) {
 					// Damageable items only
-					ma.set("damage", new CInt(meta.getDamage(), t), t, env);
-					ma.set("unbreakable", CBoolean.get(meta.isUnbreakable()), t, env);
+					ma.set("damage", new CInt(meta.getDamage(), t), t, null);
+					ma.set("unbreakable", CBoolean.get(meta.isUnbreakable()), t, null);
 				} else if(material.isBlock()) {
 					if(meta.hasBlockData()) {
-						ma.set("blockdata", blockData(meta.getBlockData(material), t, env), t, env);
+						ma.set("blockdata", blockData(meta.getBlockData(material), t), t, null);
 					} else {
-						ma.set("blockdata", CNull.NULL, t, env);
+						ma.set("blockdata", CNull.NULL, t, null);
 					}
 				}
 			}
@@ -684,161 +674,162 @@ public class ObjectGenerator {
 			// Specific ItemMeta
 			if(meta instanceof MCBlockStateMeta mCBlockStateMeta) {
 				MCBlockState bs = ((MCBlockStateMeta) meta).getBlockState(true);
-				if(bs instanceof MCBanner mCBanner) {
+				if(bs instanceof MCBanner banner) {
 					// This is a shield that may or may not have a banner attached, but if we get the BlockState when
 					// no banner exists, it gives us a default one. By first checking hasBlockState(),
 					// we can ensure we don't populate this meta array with the default banner data.
-					if(mCBlockStateMeta.hasBlockState()) {
-						MCBanner banner = mCBanner;
-						ma.set("basecolor", banner.getBaseColor().name(), t, env);
+					if(((MCBlockStateMeta) meta).hasBlockState()) {
+						ma.set("basecolor", banner.getBaseColor().name(), t, null);
 						CArray patterns = new CArray(t, banner.numberOfPatterns(), null, env);
 						for(MCPattern p : banner.getPatterns()) {
-							CArray pattern = CArray.GetAssociativeArray(t, null, env);
-							pattern.set("shape", new CString(p.getShape().toString(), t), t, env);
-							pattern.set("color", new CString(p.getColor().toString(), t), t, env);
-							patterns.push(pattern, t, env);
+							CArray pattern = CArray.GetAssociativeArray(t, null, null);
+							pattern.set("shape", new CString(p.getShape().toString(), t), t, null);
+							pattern.set("color", new CString(p.getColor().toString(), t), t, null);
+							patterns.push(pattern, t, null);
 						}
-						ma.set("patterns", patterns, t, env);
+						ma.set("patterns", patterns, t, null);
 					}
 				} else if(bs instanceof MCCreatureSpawner) {
 					MCCreatureSpawner mccs = (MCCreatureSpawner) bs;
 					MCEntityType type = mccs.getSpawnedType();
 					if(type == null) {
-						ma.set("spawntype", CNull.NULL, t, env);
+						ma.set("spawntype", CNull.NULL, t, null);
 					} else {
-						ma.set("spawntype", type.name(), env);
+						ma.set("spawntype", type.name(), t, null);
 					}
-					ma.set("delay", new CInt(mccs.getDelay(), t), t, env);
-					ma.set("mindelay", new CInt(mccs.getMinDelay(), t), t, env);
-					ma.set("maxdelay", new CInt(mccs.getMaxDelay(), t), t, env);
-					ma.set("spawncount", new CInt(mccs.getSpawnCount(), t), t, env);
-					ma.set("maxnearbyentities", new CInt(mccs.getMaxNearbyEntities(), t), t, env);
-					ma.set("playerrange", new CInt(mccs.getPlayerRange(), t), t, env);
-					ma.set("spawnrange", new CInt(mccs.getSpawnRange(), t), t, env);
+					ma.set("delay", new CInt(mccs.getDelay(), t), t, null);
+					ma.set("mindelay", new CInt(mccs.getMinDelay(), t), t, null);
+					ma.set("maxdelay", new CInt(mccs.getMaxDelay(), t), t, null);
+					ma.set("spawncount", new CInt(mccs.getSpawnCount(), t), t, null);
+					ma.set("maxnearbyentities", new CInt(mccs.getMaxNearbyEntities(), t), t, null);
+					ma.set("playerrange", new CInt(mccs.getPlayerRange(), t), t, null);
+					ma.set("spawnrange", new CInt(mccs.getSpawnRange(), t), t, null);
 				} else if(bs instanceof MCBrewingStand) {
 					MCBrewingStand brewStand = (MCBrewingStand) bs;
-					ma.set("brewtime", new CInt(brewStand.getBrewingTime(), t), t, env);
-					ma.set("fuel", new CInt(brewStand.getFuelLevel(), t), t, env);
+					ma.set("brewtime", new CInt(brewStand.getBrewingTime(), t), t, null);
+					ma.set("fuel", new CInt(brewStand.getFuelLevel(), t), t, null);
 					MCBrewerInventory inv = brewStand.getInventory();
-					CArray invData = CArray.GetAssociativeArray(t, null, env);
+					CArray invData = CArray.GetAssociativeArray(t, null, null);
 					if(inv.getFuel().getAmount() != 0) {
-						invData.set("fuel", ObjectGenerator.GetGenerator().item(inv.getFuel(), t, env), t, env);
+						invData.set("fuel", ObjectGenerator.GetGenerator().item(inv.getFuel(), t), t, null);
 					}
 					if(inv.getIngredient().getAmount() != 0) {
-						invData.set("ingredient", ObjectGenerator.GetGenerator().item(inv.getIngredient(), t, env), t, env);
+						invData.set("ingredient", ObjectGenerator.GetGenerator().item(inv.getIngredient(), t), t, null);
 					}
 					if(inv.getLeftBottle().getAmount() != 0) {
-						invData.set("leftbottle", ObjectGenerator.GetGenerator().item(inv.getLeftBottle(), t, env), t, env);
+						invData.set("leftbottle", ObjectGenerator.GetGenerator().item(inv.getLeftBottle(), t), t, null);
 					}
 					if(inv.getMiddleBottle().getAmount() != 0) {
-						invData.set("middlebottle", ObjectGenerator.GetGenerator().item(inv.getMiddleBottle(), t, env), t, env);
+						invData.set("middlebottle", ObjectGenerator.GetGenerator().item(inv.getMiddleBottle(), t), t, null);
 					}
 					if(inv.getRightBottle().getAmount() != 0) {
-						invData.set("rightbottle", ObjectGenerator.GetGenerator().item(inv.getRightBottle(), t, env), t, env);
+						invData.set("rightbottle", ObjectGenerator.GetGenerator().item(inv.getRightBottle(), t), t, null);
 					}
-					ma.set("inventory", invData, t, env);
-				} else if(bs instanceof MCFurnace furnace) {
-					ma.set("burntime", new CInt(furnace.getBurnTime(), t), t, env);
-					ma.set("cooktime", new CInt(furnace.getCookTime(), t), t, env);
+					ma.set("inventory", invData, t, null);
+				} else if(bs instanceof MCFurnace) {
+					MCFurnace furnace = (MCFurnace) bs;
+					ma.set("burntime", new CInt(furnace.getBurnTime(), t), t, null);
+					ma.set("cooktime", new CInt(furnace.getCookTime(), t), t, null);
 					MCFurnaceInventory inv = furnace.getInventory();
-					CArray invData = CArray.GetAssociativeArray(t, null, env);
+					CArray invData = CArray.GetAssociativeArray(t, null, null);
 					if(inv.getResult().getAmount() != 0) {
-						invData.set("result", ObjectGenerator.GetGenerator().item(inv.getResult(), t, env), t, env);
+						invData.set("result", ObjectGenerator.GetGenerator().item(inv.getResult(), t), t, null);
 					}
 					if(inv.getFuel().getAmount() != 0) {
-						invData.set("fuel", ObjectGenerator.GetGenerator().item(inv.getFuel(), t, env), t, env);
+						invData.set("fuel", ObjectGenerator.GetGenerator().item(inv.getFuel(), t), t, null);
 					}
 					if(inv.getSmelting().getAmount() != 0) {
-						invData.set("smelting", ObjectGenerator.GetGenerator().item(inv.getSmelting(), t, env), t, env);
+						invData.set("smelting", ObjectGenerator.GetGenerator().item(inv.getSmelting(), t), t, null);
 					}
-					ma.set("inventory", invData, t, env);
+					ma.set("inventory", invData, t, null);
 				} else if(bs instanceof MCDecoratedPot decoratedPot) {
-					CArray sherds = CArray.GetAssociativeArray(t, null, env);
+					CArray sherds = CArray.GetAssociativeArray(t, null, null);
 					Map<MCDecoratedPot.Side, MCMaterial> potSherds = decoratedPot.getSherds();
 					for(Map.Entry<MCDecoratedPot.Side, MCMaterial> side : potSherds.entrySet()) {
-						sherds.set(side.getKey().name().toLowerCase(), side.getValue().name(), env);
+						sherds.set(side.getKey().name().toLowerCase(), side.getValue().name(), t, null);
 					}
-					ma.set("sherds", sherds, t, env);
+					ma.set("sherds", sherds, t, null);
 					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_4)) {
-						ma.set("item", item(decoratedPot.getItemStack(), t, env), t, env);
+						ma.set("item", item(decoratedPot.getItemStack(), t), t, null);
 					}
 				} else if(bs instanceof MCInventoryHolder) {
 					// Finally, handle InventoryHolders with inventory slots that do not have a special meaning.
 					MCInventory inv = ((MCInventoryHolder) bs).getInventory();
-					CArray box = CArray.GetAssociativeArray(t, null, env);
+					CArray box = CArray.GetAssociativeArray(t, null, null);
 					for(int i = 0; i < inv.getSize(); i++) {
 						Construct item = ObjectGenerator.GetGenerator().item(inv.getItem(i), t, env);
 						if(!(item instanceof CNull)) {
-							box.set(i, item, t, env);
+							box.set(i, item, t, null);
 						}
 					}
-					ma.set("inventory", box, t, env);
+					ma.set("inventory", box, t, null);
 				} else if(bs instanceof MCSign sign) {
-					ma.set("waxed", CBoolean.get(sign.isWaxed()), t, env);
+					ma.set("waxed", CBoolean.get(sign.isWaxed()), t, null);
 					CArray lines = new CArray(t, null, env);
 					for(String line : sign.getLines()) {
-						lines.push(new CString(line, t), t, env);
+						lines.push(new CString(line, t), t, null);
 					}
-					ma.set("signtext", lines, t, env);
-					ma.set("glowing", CBoolean.get(sign.isGlowingText()), t, env);
+					ma.set("signtext", lines, t, null);
+					ma.set("glowing", CBoolean.get(sign.isGlowingText()), t, null);
 					MCDyeColor color = sign.getDyeColor();
 					if(color == null) {
-						ma.set("color", CNull.NULL, t, env);
+						ma.set("color", CNull.NULL, t, null);
 					} else {
-						ma.set("color", color.name(), t, env);
+						ma.set("color", color.name(), t, null);
 					}
 					MCSignText backText = sign.getBackText();
 					if(backText != null) {
 						CArray back = new CArray(t, null, env);
 						for(String line : backText.getLines()) {
-							back.push(new CString(line, t), t, env);
+							back.push(new CString(line, t), t, null);
 						}
-						ma.set("backtext", back, t, env);
-						ma.set("backglowing", CBoolean.get(backText.isGlowingText()), t, env);
+						ma.set("backtext", back, t, null);
+						ma.set("backglowing", CBoolean.get(backText.isGlowingText()), t, null);
 						MCDyeColor backColor = backText.getDyeColor();
 						if(backColor == null) {
-							ma.set("backcolor", CNull.NULL, t, env);
+							ma.set("backcolor", CNull.NULL, t, null);
 						} else {
-							ma.set("backcolor", backColor.name(), t, env);
+							ma.set("backcolor", backColor.name(), t, null);
 						}
 					}
 				} else if(bs instanceof MCCommandBlock cmdBlock) {
-					ma.set("command", cmdBlock.getCommand(), env);
-					ma.set("customname", cmdBlock.getName(), env);
+					ma.set("command", cmdBlock.getCommand(), t, null);
+					ma.set("customname", cmdBlock.getName(), t, null);
 				} else if(bs instanceof MCBeehive beehive) {
-					ma.set("beecount", new CInt(beehive.getEntityCount(), t), t, env);
+					ma.set("beecount", new CInt(beehive.getEntityCount(), t), t, null);
 				}
 			} else if(meta instanceof MCArmorMeta armorMeta) { // Must be before MCLeatherArmorMeta
 				if(armorMeta.hasTrim()) {
-					CArray trim = CArray.GetAssociativeArray(t, null, env);
-					trim.set("material", armorMeta.getTrimMaterial().name(), env);
-					trim.set("pattern", armorMeta.getTrimPattern().name(), env);
-					ma.set("trim", trim, t, env);
+					CArray trim = CArray.GetAssociativeArray(t, null, null);
+					trim.set("material", armorMeta.getTrimMaterial().name(), t, null);
+					trim.set("pattern", armorMeta.getTrimPattern().name(), t, null);
+					ma.set("trim", trim, t, null);
 				} else {
-					ma.set("trim", CNull.NULL, t, env);
+					ma.set("trim", CNull.NULL, t, null);
 				}
 				if(armorMeta instanceof MCColorableArmorMeta) {
-					ma.set("color", color(((MCColorableArmorMeta) armorMeta).getColor(), t, env), t, env);
+					ma.set("color", color(((MCColorableArmorMeta) armorMeta).getColor(), t), t, null);
 				}
 			} else if(meta instanceof MCFireworkEffectMeta mcfem) {
 				MCFireworkEffect effect = mcfem.getEffect();
 				if(effect == null) {
-					ma.set("effect", CNull.NULL, t, env);
+					ma.set("effect", CNull.NULL, t, null);
 				} else {
-					ma.set("effect", fireworkEffect(effect, t, env), t, env);
+					ma.set("effect", fireworkEffect(effect, t), t, null);
 				}
-			} else if(meta instanceof MCFireworkMeta mcfm) {
-				CArray firework = CArray.GetAssociativeArray(t, null, env);
-				firework.set("strength", new CInt(mcfm.getStrength(), t), t, env);
+			} else if(meta instanceof MCFireworkMeta) {
+				MCFireworkMeta mcfm = (MCFireworkMeta) meta;
+				CArray firework = CArray.GetAssociativeArray(t, null, null);
+				firework.set("strength", new CInt(mcfm.getStrength(), t), t, null);
 				CArray fe = new CArray(t, null, env);
 				for(MCFireworkEffect effect : mcfm.getEffects()) {
-					fe.push(fireworkEffect(effect, t), t, env);
+					fe.push(fireworkEffect(effect, t), t, null);
 				}
-				firework.set("effects", fe, t, env);
-				ma.set("firework", firework, t, env);
+				firework.set("effects", fe, t, null);
+				ma.set("firework", firework, t, null);
 			} else if(meta instanceof MCLeatherArmorMeta) {
 				CArray color = color(((MCLeatherArmorMeta) meta).getColor(), t);
-				ma.set("color", color, t, env);
+				ma.set("color", color, t, null);
 			} else if(meta instanceof MCBookMeta bookMeta) {
 				if(material.getAbstracted() == MCVanillaMaterial.WRITTEN_BOOK) {
 					Construct title;
@@ -853,176 +844,178 @@ public class ObjectGenerator {
 					} else {
 						author = CNull.NULL;
 					}
-					ma.set("title", title, t, env);
-					ma.set("author", author, t, env);
-					ma.set("generation", bookMeta.getGeneration().name(), t, env);
+					ma.set("title", title, t, null);
+					ma.set("author", author, t, null);
+					ma.set("generation", bookMeta.getGeneration().name(), t, null);
 				}
 				Construct pages;
 				if(bookMeta.hasPages()) {
 					pages = new CArray(t, null, env);
 					for(String p : bookMeta.getPages()) {
-						((CArray) pages).push(new CString(p, t), t, env);
+						((CArray) pages).push(new CString(p, t), t, null);
 					}
 				} else {
 					pages = CNull.NULL;
 				}
-				ma.set("pages", pages, t, env);
-			} else if(meta instanceof MCSkullMeta mCSkullMeta) {
+				ma.set("pages", pages, t, null);
+			} else if(meta instanceof MCSkullMeta) {
 				MCPlayerProfile profile = ((MCSkullMeta) meta).getProfile();
 				// If a profile doesn't exist, it either doesn't have one (plain head) or it's not supported by server.
 				// Either way we fall back to old behavior.
 				if(profile != null) {
 					if(profile.getName() != null) {
-						ma.set("owner", new CString(profile.getName(), t), t, env);
+						ma.set("owner", new CString(profile.getName(), t), t, null);
 					} else {
-						ma.set("owner", CNull.NULL, t, env);
+						ma.set("owner", CNull.NULL, t, null);
 					}
 					if(profile.getId() != null) {
-						ma.set("owneruuid", new CString(profile.getId().toString(), t), t, env);
+						ma.set("owneruuid", new CString(profile.getId().toString(), t), t, null);
 					} else {
-						ma.set("owneruuid", CNull.NULL, t, env);
+						ma.set("owneruuid", CNull.NULL, t, null);
 					}
 					MCProfileProperty texture = profile.getProperty("textures");
 					if(texture != null) {
-						ma.set("texture", new CString(texture.getValue(), t), t, env);
+						ma.set("texture", new CString(texture.getValue(), t), t, null);
 					} else {
-						ma.set("texture", CNull.NULL, t, env);
+						ma.set("texture", CNull.NULL, t, null);
 					}
 				} else {
-					if(mCSkullMeta.hasOwner()) {
-						ma.set("owner", new CString(mCSkullMeta.getOwner(), t), t, env);
-						MCOfflinePlayer ofp = mCSkullMeta.getOwningPlayer();
+					if(((MCSkullMeta) meta).hasOwner()) {
+						ma.set("owner", new CString(((MCSkullMeta) meta).getOwner(), t), t, null);
+						MCOfflinePlayer ofp = ((MCSkullMeta) meta).getOwningPlayer();
 						if(ofp != null) {
-							ma.set("owneruuid", new CString(ofp.getUniqueID().toString(), t), t, env);
+							ma.set("owneruuid", new CString(ofp.getUniqueID().toString(), t), t, null);
 						} else {
-							ma.set("owneruuid", CNull.NULL, t, env);
+							ma.set("owneruuid", CNull.NULL, t, null);
 						}
 					} else {
-						ma.set("owner", CNull.NULL, t, env);
-						ma.set("owneruuid", CNull.NULL, t, env);
+						ma.set("owner", CNull.NULL, t, null);
+						ma.set("owneruuid", CNull.NULL, t, null);
 					}
 				}
 				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_3)) {
 					String sound = ((MCSkullMeta) meta).getNoteBlockSound();
 					if(sound == null) {
-						ma.set("noteblocksound", CNull.NULL, t, env);
+						ma.set("noteblocksound", CNull.NULL, t, null);
 					} else {
-						ma.set("noteblocksound", new CString(sound, t), t, env);
+						ma.set("noteblocksound", new CString(sound, t), t, null);
 					}
 				}
 			} else if(meta instanceof MCEnchantmentStorageMeta mCEnchantmentStorageMeta) {
 				Construct stored;
 				if(mCEnchantmentStorageMeta.hasStoredEnchants()) {
-					stored = enchants(mCEnchantmentStorageMeta.getStoredEnchants(), t, env);
+					stored = enchants(mCEnchantmentStorageMeta.getStoredEnchants(), t);
 				} else {
 					stored = CNull.NULL;
 				}
-				ma.set("stored", stored, t, env);
+				ma.set("stored", stored, t, null);
 			} else if(meta instanceof MCPotionMeta) {
 				MCPotionMeta potionmeta = (MCPotionMeta) meta;
-				CArray effects = potions(potionmeta.getCustomEffects(), t, env);
-				ma.set("potions", effects, t, env);
+				CArray effects = potions(potionmeta.getCustomEffects(), t);
+				ma.set("potions", effects, t, null);
 				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
 					MCPotionType potionType = potionmeta.getBasePotionType();
 					if(potionType == null) {
-						ma.set("potiontype", CNull.NULL, t, env);
+						ma.set("potiontype", CNull.NULL, t, null);
 					} else {
-						ma.set("potiontype", potionType.name(), env);
+						ma.set("potiontype", potionType.name(), t, null);
 					}
 				} else {
 					MCPotionData potiondata = potionmeta.getBasePotionData();
 					if(potiondata != null) {
-						ma.set("base", potionData(potiondata, t, env), t, env);
+						ma.set("base", potionData(potiondata, t), t, null);
 					}
 				}
 				if(potionmeta.hasColor()) {
-					ma.set("color", color(potionmeta.getColor(), t, env), t, env);
+					ma.set("color", color(potionmeta.getColor(), t), t, null);
 				} else {
-					ma.set("color", CNull.NULL, t, env);
+					ma.set("color", CNull.NULL, t, null);
 				}
 			} else if(meta instanceof MCSuspiciousStewMeta susstew) {
-				CArray effects = potions(susstew.getCustomEffects(), t, env);
-				ma.set("potions", effects, t);
-			} else if(meta instanceof MCBannerMeta bannermeta) {
+				CArray effects = potions(susstew.getCustomEffects(), t);
+				ma.set("potions", effects, t, null);
+			} else if(meta instanceof MCBannerMeta) {
+				MCBannerMeta bannermeta = (MCBannerMeta) meta;
 				CArray patterns = new CArray(t, bannermeta.numberOfPatterns(), null, env);
 				for(MCPattern p : bannermeta.getPatterns()) {
-					CArray pattern = CArray.GetAssociativeArray(t, null, env);
-					pattern.set("shape", new CString(p.getShape().toString(), t), t, env);
-					pattern.set("color", new CString(p.getColor().toString(), t), t, env);
-					patterns.push(pattern, t, env);
+					CArray pattern = CArray.GetAssociativeArray(t, null, null);
+					pattern.set("shape", new CString(p.getShape().toString(), t), t, null);
+					pattern.set("color", new CString(p.getColor().toString(), t), t, null);
+					patterns.push(pattern, t, null);
 				}
-				ma.set("patterns", patterns, t, env);
-			} else if(meta instanceof MCMapMeta mCMapMeta) {
-				MCMapMeta mm = mCMapMeta;
+				ma.set("patterns", patterns, t, null);
+			} else if(meta instanceof MCMapMeta) {
+				MCMapMeta mm = ((MCMapMeta) meta);
 				MCColor mapcolor = mm.getColor();
 				if(mapcolor == null) {
-					ma.set("color", CNull.NULL, t, env);
+					ma.set("color", CNull.NULL, t, null);
 				} else {
-					ma.set("color", color(mapcolor, t, env), t, env);
+					ma.set("color", color(mapcolor, t), t, null);
 				}
 				if(mm.hasMapId()) {
-					ma.set("mapid", new CInt(mm.getMapId(), t), t, env);
+					ma.set("mapid", new CInt(mm.getMapId(), t), t, null);
 				} else {
-					ma.set("mapid", CNull.NULL, t, env);
+					ma.set("mapid", CNull.NULL, t, null);
 				}
 			} else if(meta instanceof MCTropicalFishBucketMeta fm) {
 				if(fm.hasVariant()) {
-					ma.set("fishcolor", new CString(fm.getBodyColor().name(), t), t, env);
-					ma.set("fishpatterncolor", new CString(fm.getPatternColor().name(), t), t, env);
-					ma.set("fishpattern", new CString(fm.getPattern().name(), t), t, env);
+					ma.set("fishcolor", new CString(fm.getBodyColor().name(), t), t, null);
+					ma.set("fishpatterncolor", new CString(fm.getPatternColor().name(), t), t, null);
+					ma.set("fishpattern", new CString(fm.getPattern().name(), t), t, null);
 				} else {
-					ma.set("fishcolor", CNull.NULL, t, env);
-					ma.set("fishpatterncolor", CNull.NULL, t, env);
-					ma.set("fishpattern", CNull.NULL, t, env);
+					ma.set("fishcolor", CNull.NULL, t, null);
+					ma.set("fishpatterncolor", CNull.NULL, t, null);
+					ma.set("fishpattern", CNull.NULL, t, null);
 				}
 			} else if(meta instanceof MCCrossbowMeta cbm) {
 				if(cbm.hasChargedProjectiles()) {
 					CArray projectiles = new CArray(t, null, env);
 					for(MCItemStack projectile : cbm.getChargedProjectiles()) {
-						projectiles.push(item(projectile, t, env), t, env);
+						projectiles.push(item(projectile, t), t, null);
 					}
-					ma.set("projectiles", projectiles, t, env);
+					ma.set("projectiles", projectiles, t, null);
 				} else {
-					ma.set("projectiles", CNull.NULL, t, env);
+					ma.set("projectiles", CNull.NULL, t, null);
 				}
 			} else if(meta instanceof MCCompassMeta cm) {
 				if(cm.getTargetLocation() == null) {
-					ma.set("target", CNull.NULL, t, env);
+					ma.set("target", CNull.NULL, t, null);
 				} else {
-					ma.set("target", location(cm.getTargetLocation(), false, env), t, env);
+					ma.set("target", location(cm.getTargetLocation(), false), t, null);
 				}
-				ma.set("lodestone", CBoolean.get(cm.isLodestoneTracked()), t, env);
-			} else if(meta instanceof MCBundleMeta bm) {
+				ma.set("lodestone", CBoolean.get(cm.isLodestoneTracked()), t, null);
+			} else if(meta instanceof MCBundleMeta) {
+				MCBundleMeta bm = (MCBundleMeta) meta;
 				List<MCItemStack> items = bm.getItems();
 				CArray arrayItems = new CArray(t, null, env);
 				for(MCItemStack item : items) {
-					arrayItems.push(ObjectGenerator.GetGenerator().item(item, t, env), t, env);
+					arrayItems.push(ObjectGenerator.GetGenerator().item(item, t), t, null);
 				}
-				ma.set("items", arrayItems, t, env);
+				ma.set("items", arrayItems, t, null);
 			} else if(meta instanceof MCAxolotlBucketMeta) {
-				ma.set("variant", ((MCAxolotlBucketMeta) meta).getAxolotlType().name(), env);
+				ma.set("variant", ((MCAxolotlBucketMeta) meta).getAxolotlType().name(), t, null);
 			} else if(meta instanceof MCMusicInstrumentMeta) {
 				String instrumentKey = ((MCMusicInstrumentMeta) meta).getInstrument();
 				if(instrumentKey == null) {
-					ma.set("instrument", CNull.NULL, t, env);
+					ma.set("instrument", CNull.NULL, t, null);
 				} else {
-					ma.set("instrument", instrumentKey, env);
+					ma.set("instrument", instrumentKey, t, null);
 				}
 			} else if(meta instanceof MCKnowledgeBookMeta knowledgeBookMeta) {
 				if(knowledgeBookMeta.hasRecipes()) {
 					CArray recipes = new CArray(t, null, env);
 					for(MCNamespacedKey key : knowledgeBookMeta.getRecipes()) {
-						recipes.push(new CString(key.toString(), t), t);
+						recipes.push(new CString(key.toString(), t), t, null);
 					}
-					ma.set("recipes", recipes, t, env);
+					ma.set("recipes", recipes, t, null);
 				} else {
-					ma.set("recipes", CNull.NULL, t, env);
+					ma.set("recipes", CNull.NULL, t, null);
 				}
 			} else if(meta instanceof MCOminousBottleMeta ominousBottleMeta) {
 				if(ominousBottleMeta.hasAmplifier()) {
-					ma.set("ominousamplifier", new CInt(ominousBottleMeta.getAmplifier(), t), t, env);
+					ma.set("ominousamplifier", new CInt(ominousBottleMeta.getAmplifier(), t), t, null);
 				} else {
-					ma.set("ominousamplifier", CNull.NULL, t, env);
+					ma.set("ominousamplifier", CNull.NULL, t, null);
 				}
 			}
 			return ma;
@@ -1036,8 +1029,9 @@ public class ObjectGenerator {
 	}
 
 	/**
-	 * Generates item meta from the provided item material before applying the data from the specified fields
-	 * in the provided array. Returns null when given null data.
+	 * Generates item meta from the provided item material before applying the data from the specified fields in the
+	 * provided array. Returns null when given null data.
+	 *
 	 * @param c an associative CArray representation of item meta
 	 * @param mat the item material from which to generate the item meta
 	 * @param t
@@ -1161,35 +1155,35 @@ public class ObjectGenerator {
 						}
 					}
 					if(ma.containsKey("glint")) {
-						Mixed glint = ma.get("glint", t);
+						Mixed glint = ma.get("glint", t, env);
 						if(glint instanceof CNull) {
 							// not yet supported
 						} else {
-							meta.setEnchantmentGlintOverride(ArgumentValidation.getBooleanObject(glint, t));
+							meta.setEnchantmentGlintOverride(ArgumentValidation.getBooleanObject(glint, t, env));
 						}
 					}
 					if(ma.containsKey("maxdamage")) {
-						Mixed maxdamage = ma.get("maxdamage", t);
+						Mixed maxdamage = ma.get("maxdamage", t, env);
 						if(maxdamage instanceof CNull) {
 							// not yet supported
 						} else {
-							meta.setMaxDamage(ArgumentValidation.getInt32(maxdamage, t));
+							meta.setMaxDamage(ArgumentValidation.getInt32(maxdamage, t, env));
 						}
 					}
 					if(ma.containsKey("rarity")) {
-						Mixed rarity = ma.get("rarity", t);
+						Mixed rarity = ma.get("rarity", t, env);
 						if(rarity instanceof CNull) {
 							// not yet supported
 						} else {
 							try {
 								meta.setRarity(MCItemRarity.valueOf(rarity.val()));
-							} catch (IllegalArgumentException ex) {
+							} catch(IllegalArgumentException ex) {
 								throw new CREFormatException("Rarity does not exist: " + rarity.val(), t);
 							}
 						}
 					}
 					if(ma.containsKey("food")) {
-						Mixed mixedFood = ma.get("food", t);
+						Mixed mixedFood = ma.get("food", t, env);
 						if(mixedFood instanceof CNull) {
 							// not supported yet
 						} else if(mixedFood.isInstanceOf(CArray.TYPE, null, env)) {
@@ -1215,7 +1209,7 @@ public class ObjectGenerator {
 				}
 				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_21)) {
 					if(ma.containsKey("jukeboxsong")) {
-						Mixed playable = ma.get("jukeboxsong", t);
+						Mixed playable = ma.get("jukeboxsong", t, env);
 						if(playable instanceof CNull) {
 							// not yet supported
 						} else {
@@ -1225,7 +1219,7 @@ public class ObjectGenerator {
 				}
 				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_21_3)) {
 					if(ma.containsKey("enchantability")) {
-						Mixed enchantability = ma.get("enchantability", t);
+						Mixed enchantability = ma.get("enchantability", t, env);
 						if(enchantability instanceof CNull) {
 							// not yet supported
 						} else {
@@ -1233,7 +1227,7 @@ public class ObjectGenerator {
 						}
 					}
 					if(ma.containsKey("glider")) {
-						Mixed glider = ma.get("glider", t);
+						Mixed glider = ma.get("glider", t, env);
 						if(glider instanceof CNull) {
 							meta.setGlider(false);
 						} else {
@@ -1241,7 +1235,7 @@ public class ObjectGenerator {
 						}
 					}
 					if(ma.containsKey("remainder")) {
-						Mixed remainder = ma.get("remainder", t);
+						Mixed remainder = ma.get("remainder", t, env);
 						if(remainder instanceof CNull) {
 							// not yet supported
 						} else {
@@ -1249,7 +1243,7 @@ public class ObjectGenerator {
 						}
 					}
 					if(ma.containsKey("cooldown")) {
-						Mixed mixedCooldown =  ma.get("cooldown", t);
+						Mixed mixedCooldown = ma.get("cooldown", t, env);
 						if(mixedCooldown instanceof CNull) {
 							// not yet supported
 						} else if(mixedCooldown.isInstanceOf(CArray.TYPE, null, env)) {
@@ -1262,7 +1256,7 @@ public class ObjectGenerator {
 								cooldown.setSeconds(ArgumentValidation.getDouble32(cooldownArray.get("seconds", t, env), t, env));
 							}
 							if(cooldownArray.containsKey("group")) {
-								Mixed group = cooldownArray.get("group", t);
+								Mixed group = cooldownArray.get("group", t, env);
 								if(!(group instanceof CNull)) {
 									cooldown.setCooldownGroup(group.val());
 								}
@@ -1273,7 +1267,7 @@ public class ObjectGenerator {
 						}
 					}
 					if(ma.containsKey("itemmodel")) {
-						Mixed itemmodel = ma.get("itemmodel", t);
+						Mixed itemmodel = ma.get("itemmodel", t, env);
 						if(itemmodel instanceof CNull) {
 							// not yet supported
 						} else {
@@ -1281,7 +1275,7 @@ public class ObjectGenerator {
 						}
 					}
 					if(ma.containsKey("tooltipstyle")) {
-						Mixed tooltipstyle = ma.get("tooltipstyle", t);
+						Mixed tooltipstyle = ma.get("tooltipstyle", t, env);
 						if(tooltipstyle instanceof CNull) {
 							// not yet supported
 						} else {
@@ -1289,7 +1283,7 @@ public class ObjectGenerator {
 						}
 					}
 					if(ma.containsKey("equippable")) {
-						Mixed equippableMixed = ma.get("equippable", t);
+						Mixed equippableMixed = ma.get("equippable", t, env);
 						if(equippableMixed instanceof CNull) {
 							// not yet supported
 						} else if(equippableMixed.isInstanceOf(CArray.TYPE, null, env)) {
@@ -1299,14 +1293,14 @@ public class ObjectGenerator {
 							}
 							MCEquippableComponent equippable = meta.getEquippable();
 							try {
-								String slotName = equippableArray.get("slot", t).val().toUpperCase();
+								String slotName = equippableArray.get("slot", t, env).val().toUpperCase();
 								equippable.setSlot(MCEquipmentSlot.valueOf(slotName));
-							} catch (IllegalArgumentException ex) {
+							} catch(IllegalArgumentException ex) {
 								throw new CREFormatException("Not a valid equipment slot: "
-										+ equippableArray.get("slot", t).val(), t);
+										+ equippableArray.get("slot", t, env).val(), t);
 							}
 							if(equippableArray.containsKey("entities")) {
-								Mixed entitiesMixed = equippableArray.get("entities", t);
+								Mixed entitiesMixed = equippableArray.get("entities", t, env);
 								if(entitiesMixed instanceof CNull) {
 									// ignored
 								} else if(entitiesMixed.isInstanceOf(CArray.TYPE, null, env)) {
@@ -1322,7 +1316,7 @@ public class ObjectGenerator {
 								}
 							}
 							if(equippableArray.containsKey("overlay")) {
-								Mixed cameraOverlayMixed = equippableArray.get("overlay", t);
+								Mixed cameraOverlayMixed = equippableArray.get("overlay", t, env);
 								if(!(cameraOverlayMixed instanceof CNull)) {
 									equippable.setCameraOverlay(cameraOverlayMixed.val());
 								}
@@ -1336,13 +1330,13 @@ public class ObjectGenerator {
 										equippableArray.get("dispensable", t, env), t, env));
 							}
 							if(equippableArray.containsKey("asset")) {
-								Mixed assetMixed = equippableArray.get("asset", t);
+								Mixed assetMixed = equippableArray.get("asset", t, env);
 								if(!(assetMixed instanceof CNull)) {
 									equippable.setAssetId(assetMixed.val());
 								}
 							}
 							if(equippableArray.containsKey("sound")) {
-								Mixed soundMixed = equippableArray.get("sound", t);
+								Mixed soundMixed = equippableArray.get("sound", t, env);
 								if(!(soundMixed instanceof CNull)) {
 									equippable.setEquipSound(soundMixed.val());
 								}
@@ -1362,18 +1356,18 @@ public class ObjectGenerator {
 					}
 				}
 				if(ma.containsKey("damage")) {
-					Mixed damage = ma.get("damage", t);
+					Mixed damage = ma.get("damage", t, env);
 					if(damage instanceof CNull) {
 						// not yet supported
 					} else {
-						meta.setDamage(ArgumentValidation.getInt32(damage, t));
+						meta.setDamage(ArgumentValidation.getInt32(damage, t, env));
 					}
 				}
 				if(ma.containsKey("unbreakable")) {
-					meta.setUnbreakable(ArgumentValidation.getBooleanish(ma.get("unbreakable", t), t));
+					meta.setUnbreakable(ArgumentValidation.getBooleanish(ma.get("unbreakable", t, env), t, env));
 				}
 				if(ma.containsKey("blockdata")) {
-					Mixed mBlockData = ma.get("blockdata", t);
+					Mixed mBlockData = ma.get("blockdata", t, env);
 					if(mBlockData instanceof CArray) {
 						meta.setBlockData(blockData((CArray) mBlockData, mat, t, env));
 					}
@@ -1503,7 +1497,7 @@ public class ObjectGenerator {
 						bsm.setBlockState(bs);
 					} else if(bs instanceof MCDecoratedPot decoratedPot) {
 						if(ma.containsKey("sherds")) {
-							Mixed sherds = ma.get("sherds", t);
+							Mixed sherds = ma.get("sherds", t, env);
 							if(sherds.isInstanceOf(CArray.TYPE, null, env)) {
 								CArray sherdArray = (CArray) sherds;
 								if(!sherdArray.isAssociative()) {
@@ -1511,7 +1505,7 @@ public class ObjectGenerator {
 								}
 								for(String key : sherdArray.stringKeySet()) {
 									decoratedPot.setSherd(MCDecoratedPot.Side.valueOf(key.toUpperCase()),
-											MCMaterial.valueOf(sherdArray.get(key, t).val()));
+											MCMaterial.valueOf(sherdArray.get(key, t, env).val()));
 								}
 							} else {
 								throw new CREFormatException("Expected associative array for decorated pot meta.", t);
@@ -1519,7 +1513,7 @@ public class ObjectGenerator {
 						}
 						if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_4)) {
 							if(ma.containsKey("item")) {
-								decoratedPot.setItemStack(item(ma.get("item", t), t));
+								decoratedPot.setItemStack(item(ma.get("item", t, env), t, env));
 							}
 						}
 						bsm.setBlockState(bs);
@@ -1539,7 +1533,7 @@ public class ObjectGenerator {
 													+ " inventory array, so ignoring.");
 										}
 										inv.setItem(index, ObjectGenerator.GetGenerator().item(cinv.get(key, t, env), t, env));
-									} catch (NumberFormatException ex) {
+									} catch(NumberFormatException ex) {
 										ConfigRuntimeException.DoWarning("Expecting integer value for key in "
 												+ bs.getClass().getSimpleName().replaceFirst("MC", "")
 												+ " inventory array, but \"" + key + "\" was found. Ignoring.");
@@ -1556,11 +1550,11 @@ public class ObjectGenerator {
 							sign.setWaxed(ArgumentValidation.getBooleanObject(ma.get("waxed", t, env), t, env));
 						}
 						if(ma.containsKey("signtext")) {
-							Mixed possibleLines = ma.get("signtext", t);
+							Mixed possibleLines = ma.get("signtext", t, env);
 							if(possibleLines.isInstanceOf(CArray.TYPE, null, env)) {
 								CArray lines = (CArray) possibleLines;
-								for(int i = 0; i < lines.size(); i++) {
-									sign.setLine(i, lines.get(i, t).val());
+								for(int i = 0; i < lines.size(env); i++) {
+									sign.setLine(i, lines.get(i, t, env).val());
 								}
 							} else {
 								throw new CREFormatException("Expected array for sign text", t);
@@ -1570,7 +1564,7 @@ public class ObjectGenerator {
 							sign.setGlowingText(ArgumentValidation.getBooleanObject(ma.get("glowing", t, env), t, env));
 						}
 						if(ma.containsKey("color")) {
-							Mixed dye = ma.get("color", t);
+							Mixed dye = ma.get("color", t, env);
 							if(!(dye instanceof CNull)) {
 								sign.setDyeColor(MCDyeColor.valueOf(dye.val()));
 							}
@@ -1578,11 +1572,11 @@ public class ObjectGenerator {
 						MCSignText backText = sign.getBackText();
 						if(backText != null) {
 							if(ma.containsKey("backtext")) {
-								Mixed possibleLines = ma.get("backtext", t);
+								Mixed possibleLines = ma.get("backtext", t, env);
 								if(possibleLines.isInstanceOf(CArray.TYPE, null, env)) {
 									CArray lines = (CArray) possibleLines;
-									for(int i = 0; i < lines.size(); i++) {
-										backText.setLine(i, lines.get(i, t).val());
+									for(int i = 0; i < lines.size(env); i++) {
+										backText.setLine(i, lines.get(i, t, env).val());
 									}
 								} else {
 									throw new CREFormatException("Expected array for sign back text", t);
@@ -1592,7 +1586,7 @@ public class ObjectGenerator {
 								backText.setGlowingText(ArgumentValidation.getBooleanObject(ma.get("backglowing", t, env), t, env));
 							}
 							if(ma.containsKey("backcolor")) {
-								Mixed dye = ma.get("backcolor", t);
+								Mixed dye = ma.get("backcolor", t, env);
 								if(!(dye instanceof CNull)) {
 									backText.setDyeColor(MCDyeColor.valueOf(dye.val()));
 								}
@@ -1601,23 +1595,23 @@ public class ObjectGenerator {
 						bsm.setBlockState(bs);
 					} else if(bs instanceof MCCommandBlock cmdBlock) {
 						if(ma.containsKey("command")) {
-							cmdBlock.setCommand(ma.get("command", t).val());
+							cmdBlock.setCommand(ma.get("command", t, env).val());
 						}
 						if(ma.containsKey("customname")) {
-							cmdBlock.setName(ma.get("customname", t).val());
+							cmdBlock.setName(ma.get("customname", t, env).val());
 						}
 						bsm.setBlockState(bs);
 					} else if(bs instanceof MCBeehive beehive
 							&& Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
 						if(ma.containsKey("beecount")) {
-							int beeCount = ArgumentValidation.getInt32(ma.get("beecount", t), t);
+							int beeCount = ArgumentValidation.getInt32(ma.get("beecount", t, env), t, env);
 							beehive.addBees(beeCount);
 						}
 						bsm.setBlockState(bs);
 					}
 				} else if(meta instanceof MCArmorMeta armorMeta) { // Must be before MCLeatherArmorMeta
 					if(ma.containsKey("trim")) {
-						Mixed mtrim = ma.get("trim", t);
+						Mixed mtrim = ma.get("trim", t, env);
 						if(mtrim instanceof CNull) {
 							// nothing
 						} else if(mtrim.isInstanceOf(CArray.TYPE, null, env)) {
@@ -1625,8 +1619,8 @@ public class ObjectGenerator {
 							if(!trim.isAssociative()) {
 								throw new CREFormatException("Expected associative array for armor trim meta.", t);
 							}
-							MCTrimPattern pattern = MCTrimPattern.valueOf(trim.get("pattern", t).val());
-							MCTrimMaterial material = MCTrimMaterial.valueOf(trim.get("material", t).val());
+							MCTrimPattern pattern = MCTrimPattern.valueOf(trim.get("pattern", t, env).val());
+							MCTrimMaterial material = MCTrimMaterial.valueOf(trim.get("material", t, env).val());
 							armorMeta.setTrim(pattern, material);
 						} else {
 							throw new CREFormatException("Expected an array or null for armor trim meta.", t);
@@ -1634,11 +1628,11 @@ public class ObjectGenerator {
 					}
 					if(armorMeta instanceof MCColorableArmorMeta) {
 						if(ma.containsKey("color")) {
-							Mixed ci = ma.get("color", t);
+							Mixed ci = ma.get("color", t, env);
 							if(ci instanceof CNull) {
 								//nothing
 							} else if(ci.isInstanceOf(CArray.TYPE, null, env)) {
-								((MCColorableArmorMeta) armorMeta).setColor(color((CArray) ci, t));
+								((MCColorableArmorMeta) armorMeta).setColor(color((CArray) ci, t, env));
 							} else {
 								throw new CREFormatException("Color was expected to be an array.", t);
 							}
@@ -1689,7 +1683,7 @@ public class ObjectGenerator {
 						if(ci instanceof CNull) {
 							//nothing
 						} else if(ci.isInstanceOf(CArray.TYPE, null, env)) {
-							mCLeatherArmorMeta.setColor(color((CArray) ci, t, env));
+							((MCLeatherArmorMeta) meta).setColor(color((CArray) ci, t, env));
 						} else {
 							throw new CREFormatException("Color was expected to be an array.", t);
 						}
@@ -1782,7 +1776,7 @@ public class ObjectGenerator {
 							//Still doing nothing
 						} else if(stored.isInstanceOf(CArray.TYPE, null, env)) {
 							for(Map.Entry<MCEnchantment, Integer> ench : enchants((CArray) stored, t, env).entrySet()) {
-								mCEnchantmentStorageMeta.addStoredEnchant(ench.getKey(), ench.getValue(), true);
+								((MCEnchantmentStorageMeta) meta).addStoredEnchant(ench.getKey(), ench.getValue(), true);
 							}
 						} else {
 							throw new CREFormatException("Stored field was expected to be an array of Enchantment arrays", t);
@@ -1793,7 +1787,7 @@ public class ObjectGenerator {
 						Mixed effects = ma.get("potions", t, env);
 						if(effects.isInstanceOf(CArray.TYPE, null, env)) {
 							for(MCLivingEntity.MCEffect e : potions((CArray) effects, t, env)) {
-								mCPotionMeta.addCustomEffect(e.getPotionEffectType(), e.getStrength(),
+								((MCPotionMeta) meta).addCustomEffect(e.getPotionEffectType(), e.getStrength(),
 										e.getTicksRemaining(), e.isAmbient(), e.hasParticles(), e.showIcon(), true, t);
 							}
 						} else {
@@ -1809,7 +1803,7 @@ public class ObjectGenerator {
 						Mixed potiondata = ma.get("base", t, env);
 						if(potiondata.isInstanceOf(CArray.TYPE, null, env)) {
 							if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
-								((MCPotionMeta) meta).setBasePotionType(legacyPotionData((CArray) potiondata, t));
+								((MCPotionMeta) meta).setBasePotionType(legacyPotionData((CArray) potiondata, t, env));
 							} else {
 								((MCPotionMeta) meta).setBasePotionData(potionData((CArray) potiondata, t, env));
 							}
@@ -1818,14 +1812,14 @@ public class ObjectGenerator {
 					if(ma.containsKey("color")) {
 						Mixed color = ma.get("color", t, env);
 						if(color.isInstanceOf(CArray.TYPE, null, env)) {
-							mCPotionMeta.setColor(color((CArray) color, t, env));
+							((MCPotionMeta) meta).setColor(color((CArray) color, t, env));
 						} else if(color.isInstanceOf(CString.TYPE, null, env)) {
 							mCPotionMeta.setColor(StaticLayer.GetConvertor().GetColor(color.val(), t));
 						}
 					}
 				} else if(meta instanceof MCSuspiciousStewMeta) {
 					if(ma.containsKey("potions")) {
-						Mixed effects = ma.get("potions", t);
+						Mixed effects = ma.get("potions", t, env);
 						if(effects.isInstanceOf(CArray.TYPE, null, env)) {
 							for(MCLivingEntity.MCEffect e : potions((CArray) effects, t, env)) {
 								((MCSuspiciousStewMeta) meta).addCustomEffect(e.getPotionEffectType(), e.getStrength(),
@@ -1844,7 +1838,7 @@ public class ObjectGenerator {
 							String color = pattern.get("color", t, env).val().toUpperCase();
 							try {
 								MCDyeColor dyecolor = MCDyeColor.valueOf(color);
-								mCBannerMeta.addPattern(StaticLayer.GetConvertor().GetPattern(dyecolor, shape));
+								((MCBannerMeta) meta).addPattern(StaticLayer.GetConvertor().GetPattern(dyecolor, shape));
 							} catch(IllegalArgumentException ex) {
 								if(color.equals("SILVER")) {
 									// convert old DyeColor
@@ -1859,7 +1853,7 @@ public class ObjectGenerator {
 					if(ma.containsKey("color")) {
 						Mixed ci = ma.get("color", t, env);
 						if(ci.isInstanceOf(CArray.TYPE, null, env)) {
-							mCMapMeta.setColor(color((CArray) ci, t, env));
+							((MCMapMeta) meta).setColor(color((CArray) ci, t, env));
 						} else if(!(ci instanceof CNull)) {
 							throw new CREFormatException("Color was expected to be an array.", t);
 						}
@@ -1907,7 +1901,7 @@ public class ObjectGenerator {
 					if(ma.containsKey("target")) {
 						Mixed loc = ma.get("target", t, env);
 						if(!(loc instanceof CNull)) {
-							mCCompassMeta.setTargetLocation(location(loc, null, t, env));
+							((MCCompassMeta) meta).setTargetLocation(location(loc, null, t, env));
 						}
 					}
 					if(ma.containsKey("lodestone")) {
@@ -1938,14 +1932,14 @@ public class ObjectGenerator {
 					}
 				} else if(meta instanceof MCMusicInstrumentMeta) {
 					if(ma.containsKey("instrument")) {
-						Mixed value = ma.get("instrument", t);
+						Mixed value = ma.get("instrument", t, env);
 						if(!(value instanceof CNull)) {
 							((MCMusicInstrumentMeta) meta).setInstrument(value.val());
 						}
 					}
 				} else if(meta instanceof MCKnowledgeBookMeta knowledgeBookMeta) {
 					if(ma.containsKey("recipes")) {
-						Mixed value = ma.get("recipes", t);
+						Mixed value = ma.get("recipes", t, env);
 						if(value.isInstanceOf(CArray.TYPE, null, env)) {
 							CArray array = ((CArray) value);
 							List<MCNamespacedKey> keys = new ArrayList<>((int) array.size(env));
@@ -1959,7 +1953,7 @@ public class ObjectGenerator {
 					}
 				} else if(meta instanceof MCOminousBottleMeta) {
 					if(ma.containsKey("ominousamplifier")) {
-						Mixed value = ma.get("ominousamplifier", t);
+						Mixed value = ma.get("ominousamplifier", t, env);
 						if(!(value instanceof CNull)) {
 							((MCOminousBottleMeta) meta).setAmplifier(ArgumentValidation.getInt32(value, t, env));
 						}
@@ -1981,12 +1975,6 @@ public class ObjectGenerator {
 		return AbstractCREException.getFromCArray(exception, t, env);
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
-	@Deprecated
-	public CArray color(MCColor color, Target t) {
-		return color(color, t, null);
-	}
-
 	/**
 	 * Returns a CArray given an MCColor. It will be in the format array(r: 0, g: 0, b: 0)
 	 *
@@ -1995,14 +1983,24 @@ public class ObjectGenerator {
 	 * @param env
 	 * @return
 	 */
-	public CArray color(MCColor color, Target t, Environment env) {
-		CArray ca = CArray.GetAssociativeArray(t, null, env);
-		ca.set("r", new CInt(color.getRed(), t), t, env);
-		ca.set("g", new CInt(color.getGreen(), t), t, env);
-		ca.set("b", new CInt(color.getBlue(), t), t, env);
+	public CArray color(MCColor color, Target t) {
+		CArray ca = CArray.GetAssociativeArray(t, null, null);
+		ca.set("r", new CInt(color.getRed(), t), t, null);
+		ca.set("g", new CInt(color.getGreen(), t), t, null);
+		ca.set("b", new CInt(color.getBlue(), t), t, null);
 		return ca;
 	}
 
+	/**
+	 * Returns an MCColor given a colorArray, which supports the following three format recipeTypes (in this order of
+	 * priority) array(r: 0, g: 0, b: 0) array(red: 0, green: 0, blue: 0) array(0, 0, 0). Optionally accepts an alpha
+	 * channel for the keys: 'a', 'alpha', and 3 respectively.
+	 *
+	 * @param color
+	 * @param t
+	 * @return
+	 * @deprecated Use {@link #color(CArray, Target, Environment)} instead.
+	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public MCColor color(CArray color, Target t) {
@@ -2011,8 +2009,8 @@ public class ObjectGenerator {
 
 	/**
 	 * Returns an MCColor given a colorArray, which supports the following three format recipeTypes (in this order of
-	 * priority) array(r: 0, g: 0, b: 0) array(red: 0, green: 0, blue: 0) array(0, 0, 0).
-	 * Optionally accepts an alpha channel for the keys: 'a', 'alpha', and 3 respectively.
+	 * priority) array(r: 0, g: 0, b: 0) array(red: 0, green: 0, blue: 0) array(0, 0, 0). Optionally accepts an alpha
+	 * channel for the keys: 'a', 'alpha', and 3 respectively.
 	 *
 	 * @param color
 	 * @param t
@@ -2044,18 +2042,18 @@ public class ObjectGenerator {
 		} else {
 			blue = ArgumentValidation.getInt32(color.get(2, t, env), t, env);
 		}
-		if(color.size() > 3) {
+		if(color.size(env) > 3) {
 			int alpha;
 			if(color.containsKey("a")) {
-				alpha = ArgumentValidation.getInt32(color.get("a", t), t);
+				alpha = ArgumentValidation.getInt32(color.get("a", t, env), t, env);
 			} else if(color.containsKey("alpha")) {
-				alpha = ArgumentValidation.getInt32(color.get("alpha", t), t);
+				alpha = ArgumentValidation.getInt32(color.get("alpha", t, env), t, env);
 			} else {
-				alpha = ArgumentValidation.getInt32(color.get(3, t), t);
+				alpha = ArgumentValidation.getInt32(color.get(3, t, env), t, env);
 			}
 			try {
 				return StaticLayer.GetConvertor().GetColor(red, green, blue, alpha);
-			} catch (IllegalArgumentException ex) {
+			} catch(IllegalArgumentException ex) {
 				throw new CRERangeException(ex.getMessage(), t, ex);
 			}
 		}
@@ -2066,12 +2064,6 @@ public class ObjectGenerator {
 		}
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
-	@Deprecated
-	public CArray vector(Vector3D vector) {
-		return vector(vector, (Environment) null);
-	}
-
 	/**
 	 * Gets a vector object, given a Vector.
 	 *
@@ -2079,14 +2071,8 @@ public class ObjectGenerator {
 	 * @param env
 	 * @return the vector array
 	 */
-	public CArray vector(Vector3D vector, Environment env) {
-		return vector(vector, Target.UNKNOWN, env);
-	}
-
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
-	@Deprecated
-	public CArray vector(Vector3D vector, Target t) {
-		return vector(vector, t, null);
+	public CArray vector(Vector3D vector) {
+		return vector(vector, Target.UNKNOWN);
 	}
 
 	/**
@@ -2097,24 +2083,18 @@ public class ObjectGenerator {
 	 * @param env
 	 * @return the vector array
 	 */
-	public CArray vector(Vector3D vector, Target t, Environment env) {
+	public CArray vector(Vector3D vector, Target t) {
 		CArray ca = CArray.GetAssociativeArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
-				.addNativeParameter(CDouble.TYPE, null).buildNative(), env);
+				.addNativeParameter(CDouble.TYPE, null).buildNative(), null);
 		//Integral keys first
-		ca.set(0, new CDouble(vector.X(), t), t, env);
-		ca.set(1, new CDouble(vector.Y(), t), t, env);
-		ca.set(2, new CDouble(vector.Z(), t), t, env);
+		ca.set(0, new CDouble(vector.X(), t), t, null);
+		ca.set(1, new CDouble(vector.Y(), t), t, null);
+		ca.set(2, new CDouble(vector.Z(), t), t, null);
 		//Then string keys
-		ca.set("x", new CDouble(vector.X(), t), t, env);
-		ca.set("y", new CDouble(vector.Y(), t), t, env);
-		ca.set("z", new CDouble(vector.Z(), t), t, env);
+		ca.set("x", new CDouble(vector.X(), t), t, null);
+		ca.set("y", new CDouble(vector.Y(), t), t, null);
+		ca.set("z", new CDouble(vector.Z(), t), t, null);
 		return ca;
-	}
-
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
-	@Deprecated
-	public Vector3D vector(Mixed c, Target t) {
-		return vector(c, t, null);
 	}
 
 	/**
@@ -2133,12 +2113,37 @@ public class ObjectGenerator {
 	 * @param t the target
 	 * @param env
 	 * @return the Vector
+	 * @deprecated Use {@link #vector(Mixed, Target, Environment)} instead.
+	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	public Vector3D vector(Mixed c, Target t) {
+		return vector(Vector3D.ZERO, c, t, null);
+	}
+
+	/**
+	 * Gets a Vector, given a vector object.
+	 *
+	 * A vector has three parts: the X, Y, and Z. If the vector object is missing the Z part, then we will assume it is
+	 * zero. If the vector object is missing the X and/or Y part, then we will assume it is not a vector.
+	 *
+	 * Furthermore, the string keys ("x", "y" and "z") take precedence over the integral ones. For example, in a case of
+	 * <code>array(0, 1, 2, x: 3, y: 4, z: 5)</code>, the resultant Vector will be of the value
+	 * <code>Vector(3, 4, 5)</code>.
+	 *
+	 * For consistency, the method will accept any Construct, but it requires a CArray.
+	 *
+	 * @param c the vector array
+	 * @param t the target
+	 * @return the Vector
 	 */
 	public Vector3D vector(Mixed c, Target t, Environment env) {
 		return vector(Vector3D.ZERO, c, t, env);
 	}
 
-	/** @deprecated Use {@link #vector(Vector3D, Mixed, Target, Environment)} instead. */
+	/**
+	 * @deprecated Use {@link #vector(Vector3D, Mixed, Target, Environment)} instead.
+	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public Vector3D vector(Vector3D v, Mixed c, Target t) {
@@ -2157,7 +2162,7 @@ public class ObjectGenerator {
 	 */
 	public Vector3D vector(Vector3D v, Mixed c, Target t, Environment env) {
 		if(c.isInstanceOf(CArray.TYPE, null, env)) {
-			CArray va = (CArray) c;
+			CArray va  = (CArray) c;
 			double x = v.X();
 			double y = v.Y();
 			double z = v.Z();
@@ -2208,26 +2213,22 @@ public class ObjectGenerator {
 	 * @return
 	 */
 	public CArray transparentColor(MCColor color, Target t) {
-		CArray ca = CArray.GetAssociativeArray(t);
-		ca.set("r", new CInt(color.getRed(), t), t);
-		ca.set("g", new CInt(color.getGreen(), t), t);
-		ca.set("b", new CInt(color.getBlue(), t), t);
-		ca.set("a", new CInt(color.getAlpha(), t), t);
+		CArray ca = CArray.GetAssociativeArray(t, null, null);
+		ca.set("r", new CInt(color.getRed(), t), t, null);
+		ca.set("g", new CInt(color.getGreen(), t), t, null);
+		ca.set("b", new CInt(color.getBlue(), t), t, null);
+		ca.set("a", new CInt(color.getAlpha(), t), t, null);
 		return ca;
 	}
 
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public CArray enchants(Map<MCEnchantment, Integer> map, Target t) {
-		return enchants(map, t, null);
-	}
-
-	public CArray enchants(Map<MCEnchantment, Integer> map, Target t, Environment env) {
-		CArray ret = CArray.GetAssociativeArray(t, null, env);
+		CArray ret = CArray.GetAssociativeArray(t, null, null);
 		for(Map.Entry<MCEnchantment, Integer> entry : map.entrySet()) {
-			CArray enchant = CArray.GetAssociativeArray(t, null, env);
-			enchant.set("elevel", new CInt(entry.getValue(), t), t, env);
-			ret.set(entry.getKey().name().toLowerCase(), enchant, t, env);
+			CArray enchant = CArray.GetAssociativeArray(t, null, null);
+			enchant.set("elevel", new CInt(entry.getValue(), t), t, null);
+			ret.set(entry.getKey().name().toLowerCase(), enchant, t, null);
 		}
 		return ret;
 	}
@@ -2261,7 +2262,7 @@ public class ObjectGenerator {
 			if(value.isInstanceOf(CArray.TYPE, null, env)) {
 				CArray ea = (CArray) value;
 				if(etype == null) {
-					String setype = ea.get("etype", t).val();
+					String setype = ea.get("etype", t, env).val();
 					etype = MCEnchantment.valueOf(setype);
 					if(etype == null) {
 						throw new CREEnchantmentException("Unknown enchantment type: " + setype, t);
@@ -2277,22 +2278,18 @@ public class ObjectGenerator {
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public CArray attributeModifier(MCAttributeModifier m, Target t) {
-		return attributeModifier(m, t, null);
-	}
-
-	public CArray attributeModifier(MCAttributeModifier m, Target t, Environment env) {
-		CArray modifier = CArray.GetAssociativeArray(t, null, env);
+		CArray modifier = CArray.GetAssociativeArray(t, null, null);
 
 		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_21)) {
-			modifier.set("id", m.getKey().toString(), env);
+			modifier.set("id", m.getKey().toString(), t, null);
 		} else {
-			modifier.set("name", m.getAttributeName(), env);
-			modifier.set("uuid", m.getUniqueId().toString(), env);
+			modifier.set("name", m.getAttributeName(), t, null);
+			modifier.set("uuid", m.getUniqueId().toString(), t, null);
 		}
 
-		modifier.set("attribute", m.getAttribute().name(), env);
-		modifier.set("operation", m.getOperation().name(), env);
-		modifier.set("amount", new CDouble(m.getAmount(), t), t, env);
+		modifier.set("attribute", m.getAttribute().name(), t, null);
+		modifier.set("operation", m.getOperation().name(), t, null);
+		modifier.set("amount", new CDouble(m.getAmount(), t), t, null);
 
 		Mixed slot = CNull.NULL;
 		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
@@ -2307,17 +2304,19 @@ public class ObjectGenerator {
 				slot = new CString(equipmentSlot.name(), t);
 			}
 		}
-		modifier.set("slot", slot, t, env);
+		modifier.set("slot", slot, t, null);
 		return modifier;
 	}
 
+	/**
+	 * @deprecated Use {@link #attributeModifier(CArray, Target, Environment)} instead.
+	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public MCAttributeModifier attributeModifier(CArray m, Target t) {
 		return attributeModifier(m, t, null);
 	}
 
-	@SuppressWarnings("null")
 	public MCAttributeModifier attributeModifier(CArray m, Target t, Environment env) {
 		if(!m.isAssociative()) {
 			throw new CREFormatException("Attribute modifier array must be associative.", t);
@@ -2347,16 +2346,16 @@ public class ObjectGenerator {
 		amount = ArgumentValidation.getDouble(m.get("amount", t, env), t, env);
 
 		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_21) && m.containsKey("id")) {
-			id = StaticLayer.GetConvertor().GetNamespacedKey(m.get("id", t).val());
+			id = StaticLayer.GetConvertor().GetNamespacedKey(m.get("id", t, env).val());
 		} else {
 			if(m.containsKey("name")) {
-				name = m.get("name", t).val();
+				name = m.get("name", t, env).val();
 			}
 			if(m.containsKey("uuid")) {
 				try {
-					uuid = UUID.fromString(m.get("uuid", t).val());
-				} catch (IllegalArgumentException ex) {
-					throw new CREFormatException("Invalid UUID format: " + m.get("uuid", t), t);
+					uuid = UUID.fromString(m.get("uuid", t, env).val());
+				} catch(IllegalArgumentException ex) {
+					throw new CREFormatException("Invalid UUID format: " + m.get("uuid", t, env), t);
 				}
 			}
 		}
@@ -2367,19 +2366,25 @@ public class ObjectGenerator {
 				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
 					// check new slots groups first
 					slotGroup = switch(s.val()) {
-						case "ANY" -> MCEquipmentSlotGroup.ANY;
-						case "HAND" -> MCEquipmentSlotGroup.HAND;
-						case "ARMOR" -> MCEquipmentSlotGroup.ARMOR;
-						case "BODY" -> MCEquipmentSlotGroup.BODY;
-						case "SADDLE" -> MCEquipmentSlotGroup.SADDLE;
-						default -> null;
+						case "ANY" ->
+							MCEquipmentSlotGroup.ANY;
+						case "HAND" ->
+							MCEquipmentSlotGroup.HAND;
+						case "ARMOR" ->
+							MCEquipmentSlotGroup.ARMOR;
+						case "BODY" ->
+							MCEquipmentSlotGroup.BODY;
+						case "SADDLE" ->
+							MCEquipmentSlotGroup.SADDLE;
+						default ->
+							null;
 					};
 				}
 				if(slotGroup == null) {
 					try {
 						slot = MCEquipmentSlot.valueOf(s.val());
-					} catch (IllegalArgumentException ex) {
-						throw new CREFormatException("Invalid equipment slot name: " + m.get("slot", t), t);
+					} catch(IllegalArgumentException ex) {
+						throw new CREFormatException("Invalid equipment slot name: " + m.get("slot", t, env), t);
 					}
 				}
 			}
@@ -2400,17 +2405,13 @@ public class ObjectGenerator {
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public CArray potion(MCLivingEntity.MCEffect eff, Target t) {
-		return potion(eff, t, null);
-	}
-
-	public CArray potion(MCLivingEntity.MCEffect eff, Target t, Environment env) {
-		CArray effect = CArray.GetAssociativeArray(t, null, env);
-		effect.set("id", new CInt(eff.getPotionEffectType().getId(), t), t, env);
-		effect.set("strength", new CInt(eff.getStrength(), t), t, env);
-		effect.set("seconds", new CDouble(eff.getTicksRemaining() / 20.0, t), t, env);
-		effect.set("ambient", CBoolean.get(eff.isAmbient()), t, env);
-		effect.set("particles", CBoolean.get(eff.hasParticles()), t, env);
-		effect.set("icon", CBoolean.get(eff.showIcon()), t, env);
+		CArray effect = CArray.GetAssociativeArray(t, null, null);
+		effect.set("id", new CInt(eff.getPotionEffectType().getId(), t), t, null);
+		effect.set("strength", new CInt(eff.getStrength(), t), t, null);
+		effect.set("seconds", new CDouble(eff.getTicksRemaining() / 20.0, t), t, null);
+		effect.set("ambient", CBoolean.get(eff.isAmbient()), t, null);
+		effect.set("particles", CBoolean.get(eff.hasParticles()), t, null);
+		effect.set("icon", CBoolean.get(eff.showIcon()), t, null);
 
 		return effect;
 	}
@@ -2418,14 +2419,10 @@ public class ObjectGenerator {
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public CArray potions(List<MCLivingEntity.MCEffect> effectList, Target t) {
-		return potions(effectList, t, null);
-	}
-
-	public CArray potions(List<MCLivingEntity.MCEffect> effectList, Target t, Environment env) {
-		CArray ea = CArray.GetAssociativeArray(t, null, env);
+		CArray ea = CArray.GetAssociativeArray(t, null, null);
 		for(MCLivingEntity.MCEffect eff : effectList) {
-			CArray effect = potion(eff, t, env);
-			ea.set(eff.getPotionEffectType().name().toLowerCase(), effect, t, env);
+			CArray effect = potion(eff, t);
+			ea.set(eff.getPotionEffectType().name().toLowerCase(), effect, t, null);
 		}
 		return ea;
 	}
@@ -2492,14 +2489,10 @@ public class ObjectGenerator {
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public CArray potionData(MCPotionData mcpd, Target t) {
-		return potionData(mcpd, t, null);
-	}
-
-	public CArray potionData(MCPotionData mcpd, Target t, Environment env) {
-		CArray base = CArray.GetAssociativeArray(t, null, env);
-		base.set("type", mcpd.getType().name(), t, env);
-		base.set("extended", CBoolean.get(mcpd.isExtended()), t, env);
-		base.set("upgraded", CBoolean.get(mcpd.isUpgraded()), t, env);
+		CArray base = CArray.GetAssociativeArray(t, null, null);
+		base.set("type", mcpd.getType().name(), t, null);
+		base.set("extended", CBoolean.get(mcpd.isExtended()), t, null);
+		base.set("upgraded", CBoolean.get(mcpd.isUpgraded()), t, null);
 		return base;
 	}
 
@@ -2560,7 +2553,7 @@ public class ObjectGenerator {
 		try {
 			// need to get converted type first before extending/upgrading
 			type = MCPotionType.valueOf(potionArray.get("type", t, env).val().toUpperCase());
-		} catch (IllegalArgumentException ex) {
+		} catch(IllegalArgumentException ex) {
 			throw new CREFormatException("Invalid potion type: " + potionArray.get("type", t, env).val(), t);
 		}
 		if(type == null) {
@@ -2583,14 +2576,14 @@ public class ObjectGenerator {
 		if(extended) {
 			try {
 				type = MCPotionType.valueOf("LONG_" + type.name());
-			} catch (IllegalArgumentException ex) {
+			} catch(IllegalArgumentException ex) {
 				throw new CREFormatException("Could not find extended potion type for: "
 						+ potionArray.get("type", t, env).val(), t);
 			}
 		} else if(upgraded) {
 			try {
 				type = MCPotionType.valueOf("STRONG_" + type.name());
-			} catch (IllegalArgumentException ex) {
+			} catch(IllegalArgumentException ex) {
 				throw new CREFormatException("Could not find upgraded potion type for: "
 						+ potionArray.get("type", t, env).val(), t);
 			}
@@ -2598,37 +2591,33 @@ public class ObjectGenerator {
 		return type;
 	}
 
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
-	@Deprecated
 	public CArray fireworkEffect(MCFireworkEffect mcfe, Target t) {
-		return fireworkEffect(mcfe, t, null);
-	}
-
-	public CArray fireworkEffect(MCFireworkEffect mcfe, Target t, Environment env) {
-		CArray fe = CArray.GetAssociativeArray(t, null, env);
-		fe.set("flicker", CBoolean.get(mcfe.hasFlicker()), t, env);
-		fe.set("trail", CBoolean.get(mcfe.hasTrail()), t, env);
+		CArray fe = CArray.GetAssociativeArray(t, null, null);
+		fe.set("flicker", CBoolean.get(mcfe.hasFlicker()), t, null);
+		fe.set("trail", CBoolean.get(mcfe.hasTrail()), t, null);
 		MCFireworkType type = mcfe.getType();
 		if(type != null) {
-			fe.set("type", new CString(mcfe.getType().name(), t), t, env);
+			fe.set("type", new CString(mcfe.getType().name(), t), t, null);
 		} else {
-			fe.set("type", CNull.NULL, t, env);
+			fe.set("type", CNull.NULL, t, null);
 		}
-		CArray colors = new CArray(t, null, env);
+		CArray colors = new CArray(t, null, null);
 		for(MCColor c : mcfe.getColors()) {
-			colors.push(ObjectGenerator.GetGenerator().color(c, t, env), t, env);
+			colors.push(ObjectGenerator.GetGenerator().color(c, t), t, null);
 		}
-		fe.set("colors", colors, t, env);
-		CArray fadeColors = new CArray(t, null, env);
+		fe.set("colors", colors, t, null);
+		CArray fadeColors = new CArray(t, null, null);
 		for(MCColor c : mcfe.getFadeColors()) {
-			fadeColors.push(ObjectGenerator.GetGenerator().color(c, t, env), t, env);
+			fadeColors.push(ObjectGenerator.GetGenerator().color(c, t), t, null);
 		}
-		fe.set("fade", fadeColors, t, env);
+		fe.set("fade", fadeColors, t, null);
 		return fe;
 	}
 
+	/**
+	 * @deprecated Use {@link #fireworkEffect(CArray, Target, Environment)} instead.
+	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
-	/** @deprecated Use {@link #fireworkEffect(CArray, Target, Environment)} instead. */
 	@Deprecated
 	public MCFireworkEffect fireworkEffect(CArray fe, Target t) {
 		return fireworkEffect(fe, t, null);
@@ -2637,10 +2626,10 @@ public class ObjectGenerator {
 	public MCFireworkEffect fireworkEffect(CArray fe, Target t, Environment env) {
 		MCFireworkBuilder builder = StaticLayer.GetConvertor().GetFireworkBuilder();
 		if(fe.containsKey("flicker")) {
-			builder.setFlicker(ArgumentValidation.getBoolean(fe.get("flicker", t, env), t, env));
+			builder.setFlicker(ArgumentValidation.getBooleanObject(fe.get("flicker", t, env), t, env));
 		}
 		if(fe.containsKey("trail")) {
-			builder.setTrail(ArgumentValidation.getBoolean(fe.get("trail", t, env), t, env));
+			builder.setTrail(ArgumentValidation.getBooleanObject(fe.get("trail", t, env), t, env));
 		}
 		if(fe.containsKey("colors")) {
 			Mixed colors = fe.get("colors", t, env);
@@ -2732,67 +2721,68 @@ public class ObjectGenerator {
 		if(r == null) {
 			return CNull.NULL;
 		}
-		CArray ret = CArray.GetAssociativeArray(t, null, env);
-		ret.set("type", new CString(r.getRecipeType().name(), t), t, env);
-		ret.set("result", item(r.getResult(), t), t, env);
-		ret.set("key", r.getKey(), t, env);
-		ret.set("group", r.getGroup(), t, env);
+		CArray ret = CArray.GetAssociativeArray(t, null, null);
+		ret.set("type", new CString(r.getRecipeType().name(), t), t, null);
+		ret.set("result", item(r.getResult(), t), t, null);
+		ret.set("key", r.getKey(), t, null);
+		ret.set("group", r.getGroup(), t, null);
 		if(r instanceof MCCookingRecipe recipe) {
-			ret.set("input", recipeChoice(recipe.getInput(), env), t, env);
-			ret.set("experience", new CDouble(recipe.getExperience(), t), t, env);
-			ret.set("cookingtime", new CInt(recipe.getCookingTime(), t), t, env);
+			ret.set("input", recipeChoice(recipe.getInput()), t, null);
+			ret.set("experience", new CDouble(recipe.getExperience(), t), t, null);
+			ret.set("cookingtime", new CInt(recipe.getCookingTime(), t), t, null);
 		} else if(r instanceof MCShapelessRecipe shapeless) {
 			CArray il = new CArray(t, null, env);
 			for(MCRecipeChoice choice : shapeless.getIngredients()) {
-				il.push(recipeChoice(choice, env), t, env);
+				il.push(recipeChoice(choice), t, null);
 			}
-			ret.set("ingredients", il, t, env);
+			ret.set("ingredients", il, t, null);
 		} else if(r instanceof MCShapedRecipe shaped) {
 			CArray shape = new CArray(t, null, env);
 			for(String line : shaped.getShape()) {
-				shape.push(new CString(line, t), t, env);
+				shape.push(new CString(line, t), t, null);
 			}
-
-			ret.set("shape", shape, t, env);
-			CArray imap = CArray.GetAssociativeArray(t, null, env);
+			ret.set("shape", shape, t, null);
+			CArray imap = CArray.GetAssociativeArray(t, null, null);
 			for(Map.Entry<Character, MCRecipeChoice> entry : shaped.getIngredientMap().entrySet()) {
 				if(entry.getValue() == null) {
-					imap.set(entry.getKey().toString(), CNull.NULL, t, env);
+					imap.set(entry.getKey().toString(), CNull.NULL, t, null);
 				} else {
-					imap.set(entry.getKey().toString(), recipeChoice(entry.getValue(), env), t, env);
+					imap.set(entry.getKey().toString(), recipeChoice(entry.getValue()), t, null);
 				}
 			}
-			ret.set("ingredients", imap, t, env);
+			ret.set("ingredients", imap, t, null);
 		} else if(r instanceof MCStonecuttingRecipe recipe) {
-			ret.set("input", recipeChoice(recipe.getInput(), env), t, env);
+			ret.set("input", recipeChoice(recipe.getInput()), t, null);
 		} else if(r instanceof MCSmithingRecipe recipe) {
 			MCMaterial[] base = recipe.getBase();
 			if(base.length == 1) {
-				ret.set("base", new CString(base[0].getName(), t), t, env);
+				ret.set("base", new CString(base[0].getName(), t), t, null);
 			} else {
 				CArray mats = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
 						.addNativeParameter(CString.TYPE, null).buildNative(), env);
 				for(MCMaterial mat : base) {
-					mats.push(new CString(mat.getName(), t), t, env);
+					mats.push(new CString(mat.getName(), t), t, null);
 				}
-				ret.set("base", mats, t, env);
+				ret.set("base", mats, t, null);
 			}
 			MCMaterial[] additions = recipe.getAddition();
 			if(additions.length == 1) {
-				ret.set("addition", new CString(additions[0].getName(), t), t, env);
+				ret.set("addition", new CString(additions[0].getName(), t), t, null);
 			} else {
 				CArray mats = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
 						.addNativeParameter(CString.TYPE, null).buildNative(), env);
 				for(MCMaterial mat : additions) {
-					mats.push(new CString(mat.getName(), t), t, env);
+					mats.push(new CString(mat.getName(), t), t, null);
 				}
-				ret.set("addition", mats, t, env);
+				ret.set("addition", mats, t, null);
 			}
 		}
 		return ret;
 	}
 
-	/** @deprecated Use {@link #recipe(Mixed, Target, Environment)} instead. */
+	/**
+	 * @deprecated Use {@link #recipe(Mixed, Target, Environment)} instead.
+	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public MCRecipe recipe(Mixed c, Target t) {
@@ -2885,6 +2875,7 @@ public class ObjectGenerator {
 							} else {
 								// Single ingredient material with optional qty
 								MCItemStack stack = recipeItem(ingredient, t, env);
+								((MCShapelessRecipe) ret).addIngredient(stack.getType(), stack.getAmount());
 							}
 						} else {
 							// Multiple ingredient choices
@@ -2936,8 +2927,8 @@ public class ObjectGenerator {
 	}
 
 	/**
-	 * Returns a recipe ingredient material from a material name,
-	 * or throws an exception if invalid. Ingredient material must exist and cannot be air.
+	 * Returns a recipe ingredient material from a material name, or throws an exception if invalid. Ingredient material
+	 * must exist and cannot be air.
 	 *
 	 * @param arg material name
 	 * @param t
@@ -2953,9 +2944,8 @@ public class ObjectGenerator {
 	}
 
 	/**
-	 * Returns an MCRecipeChoice from an array of exact items or material names,
-	 * or throws an exception if invalid. Item array must not be empty.
-	 * Ingredient material must exist and cannot be air.
+	 * Returns an MCRecipeChoice from an array of exact items or material names, or throws an exception if invalid. Item
+	 * array must not be empty. Ingredient material must exist and cannot be air.
 	 *
 	 * @param ingredient a CArray of material names or item arrays
 	 * @param t
@@ -2990,24 +2980,24 @@ public class ObjectGenerator {
 	 * @param ingredient
 	 * @return
 	 */
-	private Mixed recipeChoice(MCRecipeChoice ingredient, Environment env) {
+	private Mixed recipeChoice(MCRecipeChoice ingredient) {
 		if(ingredient instanceof MCRecipeChoice.MaterialChoice materialChoice) {
 			if(materialChoice.getMaterials().size() == 1) {
 				return new CString(materialChoice.getMaterials().get(0).getName(), Target.UNKNOWN);
 			} else {
-				CArray materialArray = new CArray(Target.UNKNOWN, null, env);
+				CArray materialArray = new CArray(Target.UNKNOWN, null, null);
 				for(MCMaterial mat : materialChoice.getMaterials()) {
-					materialArray.push(new CString(mat.getName(), Target.UNKNOWN), Target.UNKNOWN, env);
+					materialArray.push(new CString(mat.getName(), Target.UNKNOWN), Target.UNKNOWN, null);
 				}
 				return materialArray;
 			}
 		} else if(ingredient instanceof MCRecipeChoice.ExactChoice exactChoice) {
 			if(exactChoice.getItems().size() == 1) {
-				return item(exactChoice.getItems().get(0), Target.UNKNOWN, env);
+				return item(exactChoice.getItems().get(0), Target.UNKNOWN, null);
 			} else {
-				CArray itemArray = new CArray(Target.UNKNOWN, null, env);
+				CArray itemArray = new CArray(Target.UNKNOWN, null, null);
 				for(MCItemStack itemStack : exactChoice.getItems()) {
-					itemArray.push(item(itemStack, Target.UNKNOWN, env), Target.UNKNOWN, env);
+					itemArray.push(item(itemStack, Target.UNKNOWN), Target.UNKNOWN, null);
 				}
 				return itemArray;
 			}
@@ -3017,8 +3007,8 @@ public class ObjectGenerator {
 	}
 
 	/**
-	 * Returns a recipe ingredient item stack, or throws an exception if invalid.
-	 * Argument cannot be null; the material must exist and cannot be air; and quantity cannot be zero.
+	 * Returns a recipe ingredient item stack, or throws an exception if invalid. Argument cannot be null; the material
+	 * must exist and cannot be air; and quantity cannot be zero.
 	 *
 	 * @param arg
 	 * @param t
@@ -3045,10 +3035,26 @@ public class ObjectGenerator {
 		return material(name.val(), t);
 	}
 
+	/**
+	 * @deprecated Use {@link #blockData(CArray, Target, Environment)} instead.
+	 */
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public MCBlockData blockData(CArray ca, Target t) {
 		return blockData(ca, null, t, null);
+	}
+
+	public MCBlockData blockData(CArray ca, Target t, Environment env) {
+		return blockData(ca, null, t, env);
+	}
+
+	/**
+	 * @deprecated Use {@link #blockData(CArray, MCMaterial, Target, Environment)} instead.
+	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	public MCBlockData blockData(CArray ca, MCMaterial blockType, Target t) {
+		return blockData(ca, blockType, t, null);
 	}
 
 	public MCBlockData blockData(CArray ca, MCMaterial blockType, Target t, Environment env) {
@@ -3085,22 +3091,18 @@ public class ObjectGenerator {
 	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public CArray blockData(MCBlockData blockdata, Target t) {
-		return blockData(blockdata, t, null);
-	}
-
-	public CArray blockData(MCBlockData blockdata, Target t, Environment env) {
-		CArray ca = CArray.GetAssociativeArray(t, null, env);
+		CArray ca = CArray.GetAssociativeArray(t, null, null);
 		String full = blockdata.getAsString().substring(10); // ignore "minecraft:"
 		int bracketPos = full.indexOf('[', 3);
 		if(bracketPos != -1) {
-			ca.set("block", new CString(full.substring(0, bracketPos), t), t, env);
+			ca.set("block", new CString(full.substring(0, bracketPos), t), t, null);
 			String[] states = full.substring(bracketPos + 1, full.length() - 1).split(",");
 			for(String s : states) {
 				int equalsPos = s.indexOf('=');
-				ca.set(s.substring(0, equalsPos), blockState(s.substring(equalsPos + 1)), t, env);
+				ca.set(s.substring(0, equalsPos), blockState(s.substring(equalsPos + 1)), t, null);
 			}
 		} else {
-			ca.set("block", new CString(full, t), t, env);
+			ca.set("block", new CString(full, t), t, null);
 		}
 		return ca;
 	}
@@ -3147,12 +3149,12 @@ public class ObjectGenerator {
 			case DUST_PILLAR:
 			case FALLING_DUST:
 				if(pa.containsKey("block")) {
-					String value = pa.get("block", t).val();
+					String value = pa.get("block", t, env).val();
 					MCMaterial mat = StaticLayer.GetMaterial(value);
 					if(mat != null) {
 						try {
 							return mat.createBlockData();
-						} catch (IllegalArgumentException ex) {
+						} catch(IllegalArgumentException ex) {
 							throw new CREIllegalArgumentException(value + " is not a block.", t);
 						}
 					} else {
@@ -3162,9 +3164,9 @@ public class ObjectGenerator {
 				break;
 			case ITEM_CRACK:
 				if(pa.containsKey("item")) {
-					Mixed value = pa.get("item", t);
+					Mixed value = pa.get("item", t, env);
 					if(value.isInstanceOf(CArray.TYPE, null, env)) {
-						return item(pa.get("item", t), t, env);
+						return item(pa.get("item", t, env), t, env);
 					} else {
 						MCMaterial mat = StaticLayer.GetMaterial(value.val());
 						if(mat != null) {
@@ -3183,7 +3185,7 @@ public class ObjectGenerator {
 			case REDSTONE:
 			case FLASH:
 				if(pa.containsKey("color")) {
-					Mixed c = pa.get("color", t);
+					Mixed c = pa.get("color", t, env);
 					if(c.isInstanceOf(CArray.TYPE, null, env)) {
 						return color((CArray) c, t, env);
 					} else {
@@ -3193,7 +3195,7 @@ public class ObjectGenerator {
 				break;
 			case DRAGON_BREATH:
 				if(pa.containsKey("power")) {
-					Mixed d = pa.get("power", t);
+					Mixed d = pa.get("power", t, env);
 					if(d.isInstanceOf(CDouble.TYPE, null, env)) {
 						return (float) ((CDouble) d).getDouble();
 					} else if(!(d instanceof CNull)) {
@@ -3205,7 +3207,7 @@ public class ObjectGenerator {
 			case SPELL_INSTANT:
 				MCColor spellColor = MCColor.WHITE;
 				if(pa.containsKey("color")) {
-					Mixed c = pa.get("color", t);
+					Mixed c = pa.get("color", t, env);
 					if(c.isInstanceOf(CArray.TYPE, null, env)) {
 						spellColor = color((CArray) c, t, env);
 					} else {
@@ -3214,7 +3216,7 @@ public class ObjectGenerator {
 				}
 				float power = 1.0F;
 				if(pa.containsKey("power")) {
-					Mixed d = pa.get("power", t);
+					Mixed d = pa.get("power", t, env);
 					if(d.isInstanceOf(CDouble.TYPE, null, env)) {
 						power = (float) ((CDouble) d).getDouble();
 					} else if(!(d instanceof CNull)) {
@@ -3224,7 +3226,7 @@ public class ObjectGenerator {
 				return new MCParticleData.Spell(spellColor, power);
 			case DUST_COLOR_TRANSITION:
 				if(pa.containsKey("color")) {
-					Mixed c = pa.get("color", t);
+					Mixed c = pa.get("color", t, env);
 					MCColor fromColor;
 					if(c.isInstanceOf(CArray.TYPE, null, env)) {
 						fromColor = color((CArray) c, t, env);
@@ -3232,7 +3234,7 @@ public class ObjectGenerator {
 						fromColor = StaticLayer.GetConvertor().GetColor(c.val(), t);
 					}
 					if(pa.containsKey("tocolor")) {
-						Mixed sc = pa.get("tocolor", t);
+						Mixed sc = pa.get("tocolor", t, env);
 						if(sc.isInstanceOf(CArray.TYPE, null, env)) {
 							return new MCParticleData.DustTransition(fromColor, color((CArray) sc, t, env));
 						} else {
@@ -3242,7 +3244,7 @@ public class ObjectGenerator {
 					}
 					return new MCParticleData.DustTransition(fromColor, MCColor.WHITE);
 				} else if(pa.containsKey("tocolor")) {
-					Mixed sc = pa.get("tocolor", t);
+					Mixed sc = pa.get("tocolor", t, env);
 					if(sc.isInstanceOf(CArray.TYPE, null, env)) {
 						return new MCParticleData.DustTransition(MCColor.WHITE, color((CArray) sc, t, env));
 					} else {
@@ -3253,7 +3255,7 @@ public class ObjectGenerator {
 				break;
 			case VIBRATION:
 				if(pa.containsKey("destination")) {
-					Mixed d = pa.get("destination", t);
+					Mixed d = pa.get("destination", t, env);
 					if(d.isInstanceOf(CArray.TYPE, null, env)) {
 						return new MCParticleData.VibrationBlockDestination(location(d, l.getWorld(), t, env), 5);
 					} else {
@@ -3263,7 +3265,7 @@ public class ObjectGenerator {
 				break;
 			case SHRIEK:
 				if(pa.containsKey("delay")) {
-					Mixed d = pa.get("delay", t);
+					Mixed d = pa.get("delay", t, env);
 					if(d.isInstanceOf(CInt.TYPE, null, env)) {
 						return (int) ((CInt) d).getInt();
 					} else if(!(d instanceof CNull)) {
@@ -3273,7 +3275,7 @@ public class ObjectGenerator {
 				break;
 			case SCULK_CHARGE:
 				if(pa.containsKey("angle")) {
-					Mixed d = pa.get("angle", t);
+					Mixed d = pa.get("angle", t, env);
 					if(d.isInstanceOf(CDouble.TYPE, null, env)) {
 						return (float) ((CDouble) d).getDouble();
 					} else if(!(d instanceof CNull)) {
@@ -3284,14 +3286,14 @@ public class ObjectGenerator {
 			case TRAIL:
 				MCLocation target = l;
 				if(pa.containsKey("target")) {
-					Mixed d = pa.get("target", t);
+					Mixed d = pa.get("target", t, env);
 					if(d.isInstanceOf(CArray.TYPE, null, env)) {
 						target = location(d, l.getWorld(), t, env);
 					}
 				}
 				MCColor color;
 				if(pa.containsKey("color")) {
-					Mixed c = pa.get("color", t);
+					Mixed c = pa.get("color", t, env);
 					if(c.isInstanceOf(CArray.TYPE, null, env)) {
 						color = color((CArray) c, t, env);
 					} else {
@@ -3304,7 +3306,7 @@ public class ObjectGenerator {
 				}
 				int duration;
 				if(pa.containsKey("duration")) {
-					duration = ArgumentValidation.getInt32(pa.get("duration", t), t, env);
+					duration = ArgumentValidation.getInt32(pa.get("duration", t, env), t, env);
 				} else {
 					// Default duration is a random value from 0.5 to 2.5 seconds
 					duration = new Random().nextInt(40) + 10;
@@ -3321,7 +3323,14 @@ public class ObjectGenerator {
 	 * @param plugin
 	 * @param env
 	 * @return
+	 * @deprecated Use {@link #metadataValue(Mixed, MCPlugin, Environment)} instead.
 	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	public MCMetadataValue metadataValue(Mixed value, MCPlugin plugin) {
+		return metadataValue(value, plugin, null);
+	}
+
 	public MCMetadataValue metadataValue(Mixed value, MCPlugin plugin, Environment env) {
 		return metadataValue(Static.getJavaObject(value, env), plugin);
 	}
@@ -3332,21 +3341,14 @@ public class ObjectGenerator {
 	 * @param value
 	 * @param plugin
 	 * @return
-	 * @deprecated Use {@link #metadataValue(Mixed, MCPlugin, Environment)} instead.
 	 */
-	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
-	@Deprecated
-	public MCMetadataValue metadataValue(Mixed value, MCPlugin plugin) {
-		return metadataValue(value, plugin, null);
-	}
-
 	public MCMetadataValue metadataValue(Object value, MCPlugin plugin) {
 		return StaticLayer.GetMetadataValue(value, plugin);
 	}
 
 	/**
 	 * Return match result in MethodScript variable value presentation
-	 * 
+	 *
 	 * @param matchResult match result
 	 * @param t the target
 	 * @return match array
