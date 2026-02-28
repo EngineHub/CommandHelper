@@ -379,15 +379,6 @@ public class BukkitBlockEvents {
 			pie = e;
 		}
 
-		public static BukkitMCSignChangeEvent _instantiate(MCBlock sign, MCPlayer player, CArray signtext) {
-			String[] text = new String[4];
-			for(int i = 0; i < signtext.size(); i++) {
-				text[i] = signtext.get(i, Target.UNKNOWN).toString();
-			}
-			return new BukkitMCSignChangeEvent(new SignChangeEvent(((BukkitMCBlock) sign).__Block(), ((BukkitMCPlayer) player)._Player(),
-					text));
-		}
-
 		@Override
 		public MCPlayer getPlayer() {
 			return new BukkitMCPlayer(pie.getPlayer());
@@ -403,7 +394,7 @@ public class BukkitBlockEvents {
 			CArray retn = new CArray(Target.UNKNOWN);
 
 			for(int i = 0; i < 4; i++) {
-				retn.push(new CString(pie.getLine(i), Target.UNKNOWN), Target.UNKNOWN);
+				retn.push(new CString(pie.getLine(i), Target.UNKNOWN), Target.UNKNOWN, null);
 			}
 
 			return retn;

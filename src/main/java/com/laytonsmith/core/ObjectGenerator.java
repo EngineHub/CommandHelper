@@ -107,6 +107,7 @@ import com.laytonsmith.core.exceptions.CRE.CREInvalidWorldException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -118,6 +119,7 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
+import java.util.Objects;
 import java.util.regex.MatchResult;
 
 /**
@@ -325,7 +327,9 @@ public class ObjectGenerator {
 		return item(i, t, legacy, null);
 	}
 
+	@SuppressWarnings("null")
 	public MCItemStack item(Mixed i, Target t, boolean legacy, Environment env) {
+		Objects.requireNonNull(i);
 		if(i instanceof CNull) {
 			return EmptyItem();
 		}
@@ -398,7 +402,8 @@ public class ObjectGenerator {
 			// convert legacy meta to material
 			if(material.getName().equals("PIG_SPAWN_EGG") && item.containsKey("meta")) {
 				Mixed meta = item.get("meta", t, env);
-				if(meta.isInstanceOf(CArray.TYPE, null, env) && ((CArray) meta).containsKey("spawntype")) {
+				if(meta.isInstanceOf(CArray.TYPE, null, env)
+						&& ((CArray) meta).containsKey("spawntype")) {
 					Mixed spawntype = ((CArray) meta).get("spawntype", t, env);
 					if(!(spawntype instanceof CNull)) {
 						MCMaterial newmaterial;
@@ -490,7 +495,7 @@ public class ObjectGenerator {
 				display = CNull.NULL;
 			}
 			if(meta.hasLore()) {
-				lore = new CArray(t);
+				lore = new CArray(t, null, null);
 				for(String l : meta.getLore()) {
 					((CArray) lore).push(new CString(l, t), t, null);
 				}
@@ -509,7 +514,7 @@ public class ObjectGenerator {
 			}
 
 			Set<MCItemFlag> itemFlags = meta.getItemFlags();
-			CArray flagArray = new CArray(t);
+			CArray flagArray = new CArray(t, null, null);
 			if(!itemFlags.isEmpty()) {
 				for(MCItemFlag flag : itemFlags) {
 					flagArray.push(new CString(flag.name(), t), t, null);
@@ -521,7 +526,7 @@ public class ObjectGenerator {
 			if(modifierList == null) {
 				ma.set("modifiers", CNull.NULL, t, null);
 			} else {
-				CArray modifiers = new CArray(t);
+				CArray modifiers = new CArray(t, null, null);
 				for(MCAttributeModifier m : modifierList) {
 					modifiers.push(attributeModifier(m, t), t, null);
 				}
@@ -621,7 +626,7 @@ public class ObjectGenerator {
 						}
 						Collection<MCEntityType> allowedEntities = equippableComponent.getAllowedEntities();
 						if(allowedEntities != null) {
-							CArray entities = new CArray(t);
+							CArray entities = new CArray(t, null, null);
 							for(MCEntityType type : allowedEntities) {
 								entities.push(new CString(type.name(), t), t, null);
 							}
@@ -664,7 +669,7 @@ public class ObjectGenerator {
 					// we can ensure we don't populate this meta array with the default banner data.
 					if(mCBlockStateMeta.hasBlockState()) {
 						ma.set("basecolor", banner.getBaseColor().name(), t, null);
-						CArray patterns = new CArray(t, banner.numberOfPatterns());
+						CArray patterns = new CArray(t, banner.numberOfPatterns(), (GenericParameters) null, (Environment) null);
 						for(MCPattern p : banner.getPatterns()) {
 							CArray pattern = CArray.GetAssociativeArray(t, null, null);
 							pattern.set("shape", new CString(p.getShape().toString(), t), t, null);
@@ -746,7 +751,7 @@ public class ObjectGenerator {
 					ma.set("inventory", box, t, null);
 				} else if(bs instanceof MCSign sign) {
 					ma.set("waxed", CBoolean.get(sign.isWaxed()), t, null);
-					CArray lines = new CArray(t);
+					CArray lines = new CArray(t, null, null);
 					for(String line : sign.getLines()) {
 						lines.push(new CString(line, t), t, null);
 					}
@@ -760,7 +765,7 @@ public class ObjectGenerator {
 					}
 					MCSignText backText = sign.getBackText();
 					if(backText != null) {
-						CArray back = new CArray(t);
+						CArray back = new CArray(t, null, null);
 						for(String line : backText.getLines()) {
 							back.push(new CString(line, t), t, null);
 						}
@@ -801,7 +806,7 @@ public class ObjectGenerator {
 			} else if(meta instanceof MCFireworkMeta mcfm) {
 				CArray firework = CArray.GetAssociativeArray(t, null, null);
 				firework.set("strength", new CInt(mcfm.getStrength(), t), t, null);
-				CArray fe = new CArray(t);
+				CArray fe = new CArray(t, null, null);
 				for(MCFireworkEffect effect : mcfm.getEffects()) {
 					fe.push(fireworkEffect(effect, t), t, null);
 				}
@@ -830,7 +835,7 @@ public class ObjectGenerator {
 				}
 				Construct pages;
 				if(bookMeta.hasPages()) {
-					pages = new CArray(t);
+					pages = new CArray(t, null, null);
 					for(String p : bookMeta.getPages()) {
 						((CArray) pages).push(new CString(p, t), t, null);
 					}
@@ -914,7 +919,7 @@ public class ObjectGenerator {
 				CArray effects = potions(susstew.getCustomEffects(), t);
 				ma.set("potions", effects, t, null);
 			} else if(meta instanceof MCBannerMeta bannermeta) {
-				CArray patterns = new CArray(t, bannermeta.numberOfPatterns());
+				CArray patterns = new CArray(t, bannermeta.numberOfPatterns(), (GenericParameters) null, (Environment) null);
 				for(MCPattern p : bannermeta.getPatterns()) {
 					CArray pattern = CArray.GetAssociativeArray(t, null, null);
 					pattern.set("shape", new CString(p.getShape().toString(), t), t, null);
@@ -947,7 +952,7 @@ public class ObjectGenerator {
 				}
 			} else if(meta instanceof MCCrossbowMeta cbm) {
 				if(cbm.hasChargedProjectiles()) {
-					CArray projectiles = new CArray(t);
+					CArray projectiles = new CArray(t, null, null);
 					for(MCItemStack projectile : cbm.getChargedProjectiles()) {
 						projectiles.push(item(projectile, t), t, null);
 					}
@@ -964,7 +969,7 @@ public class ObjectGenerator {
 				ma.set("lodestone", CBoolean.get(cm.isLodestoneTracked()), t, null);
 			} else if(meta instanceof MCBundleMeta bm) {
 				List<MCItemStack> items = bm.getItems();
-				CArray arrayItems = new CArray(t);
+				CArray arrayItems = new CArray(t, null, null);
 				for(MCItemStack item : items) {
 					arrayItems.push(ObjectGenerator.GetGenerator().item(item, t), t, null);
 				}
@@ -980,7 +985,7 @@ public class ObjectGenerator {
 				}
 			} else if(meta instanceof MCKnowledgeBookMeta knowledgeBookMeta) {
 				if(knowledgeBookMeta.hasRecipes()) {
-					CArray recipes = new CArray(t);
+					CArray recipes = new CArray(t, null, null);
 					for(MCNamespacedKey key : knowledgeBookMeta.getRecipes()) {
 						recipes.push(new CString(key.toString(), t), t, null);
 					}
@@ -1015,6 +1020,18 @@ public class ObjectGenerator {
 		return itemMeta(c, mat, t, null);
 	}
 
+	/**
+	 * Generates item meta from the provided item material before applying the data from the specified fields in the
+	 * provided array. Returns null when given null data.
+	 *
+	 * @param c an associative CArray representation of item meta
+	 * @param mat the item material from which to generate the item meta
+	 * @param t
+	 * @param env
+	 * @return abstract item meta
+	 * @throws ConfigRuntimeException
+	 */
+	@SuppressWarnings({"null", "UseSpecificCatch"})
 	public MCItemMeta itemMeta(Mixed c, MCMaterial mat, Target t, Environment env) throws ConfigRuntimeException {
 		if(c instanceof CNull) {
 			return null;
@@ -1888,12 +1905,11 @@ public class ObjectGenerator {
 					if(ma.containsKey("items")) {
 						Mixed value = ma.get("items", t, env);
 						if(value instanceof CArray cArray) {
-							MCBundleMeta bm = mCBundleMeta;
 							CArray items = cArray;
 							for(String key : items.stringKeySet()) {
 								Mixed entry = items.get(key, t, env);
 								if(!(entry instanceof CNull)) {
-									bm.addItem(ObjectGenerator.GetGenerator().item(entry, t, env));
+									mCBundleMeta.addItem(ObjectGenerator.GetGenerator().item(entry, t, env));
 								}
 							}
 						} else if(!(value instanceof CNull)) {
@@ -2087,10 +2103,10 @@ public class ObjectGenerator {
 	}
 
 	/**
-	 * Gets a Vector, given a vector object.
+	 * Gets a Vector, given a vector object. A vector has three parts: the X, Y, and Z.
 	 *
-	 * A vector has three parts: the X, Y, and Z. If the vector object is missing the Z part, then we will assume it is
-	 * zero. If the vector object is missing the X and/or Y part, then we will assume it is not a vector.
+	 * If the vector object is missing the Z part, then we will assume it is zero. If the vector object is missing the X
+	 * and/or Y part, then we will assume it is not a vector.
 	 *
 	 * Furthermore, the string keys ("x", "y" and "z") take precedence over the integral ones. For example, in a case of
 	 * <code>array(0, 1, 2, x: 3, y: 4, z: 5)</code>, the resultant Vector will be of the value
@@ -2158,15 +2174,22 @@ public class ObjectGenerator {
 			double z = v.Z();
 
 			if(!va.isAssociative()) {
-				if(va.size(env) == 3) { // 3rd dimension vector
-					x = ArgumentValidation.getNumber(va.get(0, t, env), t, env);
-					y = ArgumentValidation.getNumber(va.get(1, t, env), t, env);
-					z = ArgumentValidation.getNumber(va.get(2, t, env), t, env);
-				} else if(va.size(env) == 2) { // 2nd dimension vector
-					x = ArgumentValidation.getNumber(va.get(0, t, env), t, env);
-					y = ArgumentValidation.getNumber(va.get(1, t, env), t, env);
-				} else if(va.size(env) == 1) {
-					x = ArgumentValidation.getNumber(va.get(0, t, env), t, env);
+				switch((int) va.size(env)) {
+					case 3 -> {
+						// 3rd dimension vector
+						x = ArgumentValidation.getNumber(va.get(0, t, env), t, env);
+						y = ArgumentValidation.getNumber(va.get(1, t, env), t, env);
+						z = ArgumentValidation.getNumber(va.get(2, t, env), t, env);
+					}
+					case 2 -> {
+						// 2nd dimension vector
+						x = ArgumentValidation.getNumber(va.get(0, t, env), t, env);
+						y = ArgumentValidation.getNumber(va.get(1, t, env), t, env);
+					}
+					case 1 ->
+						x = ArgumentValidation.getNumber(va.get(0, t, env), t, env);
+					default -> {
+					}
 				}
 			} else {
 				if(va.containsKey("x")) {
@@ -2182,7 +2205,6 @@ public class ObjectGenerator {
 
 			return new Vector3D(x, y, z);
 		} else if(c instanceof CNull) {
-			// fulfilling the todo?
 			return v;
 		} else {
 			throw new CREFormatException("Expecting an array, received " + c.typeof(env).getSimpleName(), t);
@@ -2572,12 +2594,12 @@ public class ObjectGenerator {
 		} else {
 			fe.set("type", CNull.NULL, t, null);
 		}
-		CArray colors = new CArray(t);
+		CArray colors = new CArray(t, null, null);
 		for(MCColor c : mcfe.getColors()) {
 			colors.push(ObjectGenerator.GetGenerator().color(c, t), t, null);
 		}
 		fe.set("colors", colors, t, null);
-		CArray fadeColors = new CArray(t);
+		CArray fadeColors = new CArray(t, null, null);
 		for(MCColor c : mcfe.getFadeColors()) {
 			fadeColors.push(ObjectGenerator.GetGenerator().color(c, t), t, null);
 		}
@@ -2698,13 +2720,13 @@ public class ObjectGenerator {
 			ret.set("experience", new CDouble(recipe.getExperience(), t), t, null);
 			ret.set("cookingtime", new CInt(recipe.getCookingTime(), t), t, null);
 		} else if(r instanceof MCShapelessRecipe shapeless) {
-			CArray il = new CArray(t);
+			CArray il = new CArray(t, null, null);
 			for(MCRecipeChoice choice : shapeless.getIngredients()) {
 				il.push(recipeChoice(choice), t, null);
 			}
 			ret.set("ingredients", il, t, null);
 		} else if(r instanceof MCShapedRecipe shaped) {
-			CArray shape = new CArray(t);
+			CArray shape = new CArray(t, null, null);
 			for(String line : shaped.getShape()) {
 				shape.push(new CString(line, t), t, null);
 			}
@@ -2952,7 +2974,7 @@ public class ObjectGenerator {
 			if(materialChoice.getMaterials().size() == 1) {
 				return new CString(materialChoice.getMaterials().get(0).getName(), Target.UNKNOWN);
 			} else {
-				CArray materialArray = new CArray(Target.UNKNOWN);
+				CArray materialArray = new CArray(Target.UNKNOWN, null, null);
 				for(MCMaterial mat : materialChoice.getMaterials()) {
 					materialArray.push(new CString(mat.getName(), Target.UNKNOWN), Target.UNKNOWN, null);
 				}
@@ -2962,7 +2984,7 @@ public class ObjectGenerator {
 			if(exactChoice.getItems().size() == 1) {
 				return item(exactChoice.getItems().get(0), Target.UNKNOWN);
 			} else {
-				CArray itemArray = new CArray(Target.UNKNOWN);
+				CArray itemArray = new CArray(Target.UNKNOWN, null, null);
 				for(MCItemStack itemStack : exactChoice.getItems()) {
 					itemArray.push(item(itemStack, Target.UNKNOWN), Target.UNKNOWN, null);
 				}
