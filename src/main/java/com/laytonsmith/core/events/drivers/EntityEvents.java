@@ -149,7 +149,7 @@ public class EntityEvents {
 				Map<String, Mixed> ret = evaluate_helper(event);
 				ret.put("location", ObjectGenerator.GetGenerator().location(event.getLocation(), false));
 				ret.put("id", new CString(event.getEntity().getUniqueId().toString(), t));
-				ret.put("item", ObjectGenerator.GetGenerator().item(event.getEntity().getItemStack(), t, env));
+				ret.put("item", ObjectGenerator.GetGenerator().item(event.getEntity().getItemStack(), t));
 				return ret;
 			} else {
 				throw new EventException("Could not convert to MCItemDespawnEvent");
@@ -224,7 +224,7 @@ public class EntityEvents {
 				Map<String, Mixed> ret = evaluate_helper(event);
 				ret.put("location", ObjectGenerator.GetGenerator().location(event.getLocation(), false));
 				ret.put("id", new CString(event.getEntity().getUniqueId().toString(), t));
-				ret.put("item", ObjectGenerator.GetGenerator().item(event.getEntity().getItemStack(), t, env));
+				ret.put("item", ObjectGenerator.GetGenerator().item(event.getEntity().getItemStack(), t));
 				return ret;
 			} else {
 				throw new EventException("Could not convert to MCItemSpawnEvent");
@@ -648,7 +648,7 @@ public class EntityEvents {
 				Map<String, Mixed> map = evaluate_helper(event);
 				CArray drops = new CArray(t);
 				for(MCItemStack is : e.getDrops()) {
-					drops.push(ObjectGenerator.GetGenerator().item(is, t, env), t, env);
+					drops.push(ObjectGenerator.GetGenerator().item(is, t), t, env);
 				}
 				map.put("type", new CString(dead.getType().name(), t));
 				map.put("id", new CString(dead.getUniqueId().toString(), t));
@@ -1123,7 +1123,7 @@ public class EntityEvents {
 				MCPlayerDropItemEvent event = (MCPlayerDropItemEvent) e;
 				Map<String, Mixed> map = evaluate_helper(e);
 
-				map.put("item", ObjectGenerator.GetGenerator().item(event.getItemDrop().getItemStack(), Target.UNKNOWN, env));
+				map.put("item", ObjectGenerator.GetGenerator().item(event.getItemDrop().getItemStack(), Target.UNKNOWN));
 				map.put("id", new CString(event.getItemDrop().getUniqueId().toString(), Target.UNKNOWN));
 
 				return map;
@@ -1202,7 +1202,7 @@ public class EntityEvents {
 				MCPlayerPickupItemEvent event = (MCPlayerPickupItemEvent) e;
 				Map<String, Mixed> map = evaluate_helper(e);
 				map.put("id", new CString(event.getItem().getUniqueId().toString(), Target.UNKNOWN));
-				map.put("item", ObjectGenerator.GetGenerator().item(event.getItem().getItemStack(), Target.UNKNOWN, env));
+				map.put("item", ObjectGenerator.GetGenerator().item(event.getItem().getItemStack(), Target.UNKNOWN));
 				map.put("remaining", new CInt(event.getRemaining(), Target.UNKNOWN));
 				return map;
 			} else {
@@ -1870,7 +1870,7 @@ public class EntityEvents {
 				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_17_X)) {
 					MCItemStack item = e.getItem();
 					if(item != null) {
-						ret.put("item", ObjectGenerator.GetGenerator().item(item, Target.UNKNOWN, env));
+						ret.put("item", ObjectGenerator.GetGenerator().item(item, Target.UNKNOWN));
 					} else {
 						ret.put("item", CNull.NULL);
 					}
