@@ -313,7 +313,7 @@ public class Minecraft {
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CArray item = ArgumentValidation.getArray(args[0], t, env);
 			MCItemStack is = ObjectGenerator.GetGenerator().item(item, t, true, env);
-			return ObjectGenerator.GetGenerator().item(is, t, env);
+			return ObjectGenerator.GetGenerator().item(is, t);
 		}
 
 		@Override

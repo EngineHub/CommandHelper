@@ -770,7 +770,7 @@ public class MobManagement {
 			Map<MCEquipmentSlot, MCItemStack> eqmap = eq.getAllEquipment();
 			CArray ret = CArray.GetAssociativeArray(t, null, env);
 			for(MCEquipmentSlot key : eqmap.keySet()) {
-				ret.set(key.name().toLowerCase(), ObjectGenerator.GetGenerator().item(eqmap.get(key), t, env), t, env);
+				ret.set(key.name().toLowerCase(), ObjectGenerator.GetGenerator().item(eqmap.get(key), t), t, env);
 			}
 			return ret;
 		}

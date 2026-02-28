@@ -909,7 +909,7 @@ public class InventoryEvents {
 				}
 				ret.put("viewers", viewers);
 				ret.put("player", new CString(e.getPlayer().getName(), t));
-				ret.put("recipe", ObjectGenerator.GetGenerator().recipe(e.getRecipe(), t, env));
+				ret.put("recipe", ObjectGenerator.GetGenerator().recipe(e.getRecipe(), t));
 				ret.put("isRepair", CBoolean.get(e.isRepair()));
 				CArray matrix = CArray.GetAssociativeArray(t, null, env);
 				MCItemStack[] mi = e.getInventory().getMatrix();

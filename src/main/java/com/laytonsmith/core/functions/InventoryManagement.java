@@ -165,7 +165,7 @@ public class InventoryManagement {
 						"Could not find the inventory of the given player (are you running in cmdline mode?)", t);
 			}
 			if(slot == null) {
-				return ObjectGenerator.GetGenerator().item(inv.getItemInMainHand(), t, env);
+				return ObjectGenerator.GetGenerator().item(inv.getItemInMainHand(), t);
 			}
 			if(slot.equals(36)) {
 				slot = 100;
@@ -195,7 +195,7 @@ public class InventoryManagement {
 			} else {
 				throw new CRERangeException("Slot index must be 0-35, or 100-103, or -106", t);
 			}
-			return ObjectGenerator.GetGenerator().item(is, t, env);
+			return ObjectGenerator.GetGenerator().item(is, t);
 		}
 	}
 
@@ -1591,7 +1591,7 @@ public class InventoryManagement {
 				throw new CRERangeException("Slot index must be 0-26", t);
 			}
 			MCItemStack is = inv.getItem(slot);
-			return ObjectGenerator.GetGenerator().item(is, t, env);
+			return ObjectGenerator.GetGenerator().item(is, t);
 		}
 	}
 

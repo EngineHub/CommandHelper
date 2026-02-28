@@ -2021,11 +2021,11 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_HORSE_JUMP, new CDouble(chestedhorse.getJumpStrength(), t), t, env);
 					specArray.set(entity_spec.KEY_HORSE_DOMESTICATION, new CInt(chestedhorse.getDomestication(), t), t, env);
 					specArray.set(entity_spec.KEY_HORSE_MAXDOMESTICATION, new CInt(chestedhorse.getMaxDomestication(), t), t, env);
-					specArray.set(entity_spec.KEY_HORSE_SADDLE, ObjectGenerator.GetGenerator().item(chestedhorse.getSaddle(), t, env), t, env);
+					specArray.set(entity_spec.KEY_HORSE_SADDLE, ObjectGenerator.GetGenerator().item(chestedhorse.getSaddle(), t), t, env);
 					break;
 				case DROPPED_ITEM:
 					MCItem item = (MCItem) entity;
-					specArray.set(entity_spec.KEY_DROPPED_ITEM_ITEMSTACK, ObjectGenerator.GetGenerator().item(item.getItemStack(), t, env), t, env);
+					specArray.set(entity_spec.KEY_DROPPED_ITEM_ITEMSTACK, ObjectGenerator.GetGenerator().item(item.getItemStack(), t), t, env);
 					specArray.set(entity_spec.KEY_DROPPED_ITEM_PICKUPDELAY, new CInt(item.getPickupDelay(), t), t, env);
 					UUID owner = item.getOwner();
 					if(owner == null) {
@@ -2060,7 +2060,7 @@ public class EntityManagement {
 					MCEnderSignal endereye = (MCEnderSignal) entity;
 					specArray.set(entity_spec.KEY_ENDEREYE_DESPAWNTICKS, new CInt(endereye.getDespawnTicks(), t), t, env);
 					specArray.set(entity_spec.KEY_ENDEREYE_DROP, CBoolean.get(endereye.getDropItem()), t, env);
-					specArray.set(entity_spec.KEY_ENDEREYE_ITEM, ObjectGenerator.GetGenerator().item(endereye.getItem(), t, env), t, env);
+					specArray.set(entity_spec.KEY_ENDEREYE_ITEM, ObjectGenerator.GetGenerator().item(endereye.getItem(), t), t, env);
 					specArray.set(entity_spec.KEY_ENDEREYE_TARGET, ObjectGenerator.GetGenerator().location(endereye.getTargetLocation(), false), t, env);
 					break;
 				case ENDER_DRAGON:
@@ -2129,8 +2129,8 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_HORSE_JUMP, new CDouble(horse.getJumpStrength(), t), t, env);
 					specArray.set(entity_spec.KEY_HORSE_DOMESTICATION, new CInt(horse.getDomestication(), t), t, env);
 					specArray.set(entity_spec.KEY_HORSE_MAXDOMESTICATION, new CInt(horse.getMaxDomestication(), t), t, env);
-					specArray.set(entity_spec.KEY_HORSE_ARMOR, ObjectGenerator.GetGenerator().item(horse.getArmor(), t, env), t, env);
-					specArray.set(entity_spec.KEY_HORSE_SADDLE, ObjectGenerator.GetGenerator().item(horse.getSaddle(), t, env), t, env);
+					specArray.set(entity_spec.KEY_HORSE_ARMOR, ObjectGenerator.GetGenerator().item(horse.getArmor(), t), t, env);
+					specArray.set(entity_spec.KEY_HORSE_SADDLE, ObjectGenerator.GetGenerator().item(horse.getSaddle(), t), t, env);
 					break;
 				case INTERACTION:
 					MCInteraction interaction = (MCInteraction) entity;
@@ -2169,7 +2169,7 @@ public class EntityManagement {
 				case GLOW_ITEM_FRAME:
 					MCItemFrame frame = (MCItemFrame) entity;
 					specArray.set(entity_spec.KEY_ITEM_FRAME_FIXED, CBoolean.get(frame.isFixed()), t, env);
-					specArray.set(entity_spec.KEY_ITEM_FRAME_ITEM, ObjectGenerator.GetGenerator().item(frame.getItem(), t, env), t, env);
+					specArray.set(entity_spec.KEY_ITEM_FRAME_ITEM, ObjectGenerator.GetGenerator().item(frame.getItem(), t), t, env);
 					specArray.set(entity_spec.KEY_ITEM_FRAME_ROTATION, new CString(frame.getRotation().name(), t), t, env);
 					specArray.set(entity_spec.KEY_ITEM_FRAME_VISIBLE, CBoolean.get(frame.isVisible()), t, env);
 					break;
@@ -2184,7 +2184,7 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_HORSE_CHEST, CBoolean.get(llama.hasChest()), t, env);
 					specArray.set(entity_spec.KEY_HORSE_DOMESTICATION, new CInt(llama.getDomestication(), t), t, env);
 					specArray.set(entity_spec.KEY_HORSE_MAXDOMESTICATION, new CInt(llama.getMaxDomestication(), t), t, env);
-					specArray.set(entity_spec.KEY_HORSE_SADDLE, ObjectGenerator.GetGenerator().item(llama.getSaddle(), t, env), t, env);
+					specArray.set(entity_spec.KEY_HORSE_SADDLE, ObjectGenerator.GetGenerator().item(llama.getSaddle(), t), t, env);
 					break;
 				case MAGMA_CUBE:
 				case SLIME:
@@ -2306,7 +2306,7 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_HORSE_JUMP, new CDouble(undeadhorse.getJumpStrength(), t), t, env);
 					specArray.set(entity_spec.KEY_HORSE_DOMESTICATION, new CInt(undeadhorse.getDomestication(), t), t, env);
 					specArray.set(entity_spec.KEY_HORSE_MAXDOMESTICATION, new CInt(undeadhorse.getMaxDomestication(), t), t, env);
-					specArray.set(entity_spec.KEY_HORSE_SADDLE, ObjectGenerator.GetGenerator().item(undeadhorse.getSaddle(), t, env), t, env);
+					specArray.set(entity_spec.KEY_HORSE_SADDLE, ObjectGenerator.GetGenerator().item(undeadhorse.getSaddle(), t), t, env);
 					break;
 				case SNOWMAN:
 					MCSnowman snowman = (MCSnowman) entity;
@@ -2322,7 +2322,7 @@ public class EntityManagement {
 				case LINGERING_POTION:
 				case SPLASH_POTION:
 					MCThrownPotion potion = (MCThrownPotion) entity;
-					specArray.set(entity_spec.KEY_SPLASH_POTION_ITEM, ObjectGenerator.GetGenerator().item(potion.getItem(), t, env), t, env);
+					specArray.set(entity_spec.KEY_SPLASH_POTION_ITEM, ObjectGenerator.GetGenerator().item(potion.getItem(), t), t, env);
 					break;
 				case STRIDER:
 					MCStrider strider = (MCStrider) entity;
@@ -4308,7 +4308,7 @@ public class EntityManagement {
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCEntity entity = Static.getEntity(args[0], t);
 			if(entity instanceof MCItemProjectile) {
-				return ObjectGenerator.GetGenerator().item(((MCItemProjectile) entity).getItem(), t, env);
+				return ObjectGenerator.GetGenerator().item(((MCItemProjectile) entity).getItem(), t);
 			} else {
 				throw new CREBadEntityException("The given entity does not have a display item.", t);
 			}
