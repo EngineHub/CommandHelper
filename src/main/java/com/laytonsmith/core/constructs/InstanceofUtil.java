@@ -324,7 +324,15 @@ public class InstanceofUtil {
 				}
 				checkLHGU = new LeftHandGenericUse(checkClassType, Target.UNKNOWN, env, params);
 			}
-			for(ConcreteGenericParameter superClass : superClasses.getTypes()) {
+			LeftHandSideType varargResolvedSuperClasses = superClasses;
+			if(varargResolvedSuperClasses.isVariadicType()) {
+				// `ms.lang.string...` should be treated like `ms.lang.array<ms.lang.string>`, so convert
+				// to that for the rest of the processing since it's variadic.
+				varargResolvedSuperClasses = LeftHandSideType
+						.fromNativeCClassType(CArray.TYPE,
+								varargResolvedSuperClasses.getVarargsBaseType(env).toNativeLeftHandGenericUse());
+			}
+			for(ConcreteGenericParameter superClass : varargResolvedSuperClasses.getTypes()) {
 				CClassType superClassType = superClass.getType();
 				LeftHandGenericUse superLHGU = superClass.getLeftHandGenericUse();
 				if(superLHGU == null && superClass.getType().getTypeGenericParameters() != null) {

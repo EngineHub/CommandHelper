@@ -3,35 +3,18 @@ package com.laytonsmith.core.constructs;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
-import org.junit.After;
-import org.junit.AfterClass;
+import com.laytonsmith.testing.AbstractIntegrationTest;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
-public class CFixedArrayTest {
+public class CFixedArrayTest extends AbstractIntegrationTest {
 
 	Environment env;
-
-	public CFixedArrayTest() {
-	}
-
-	@BeforeClass
-	public static void setUpClass() {
-	}
-
-	@AfterClass
-	public static void tearDownClass() {
-	}
 
 	@Before
 	public void setUp() throws Exception {
 		env = Static.GenerateStandaloneEnvironment();
-	}
-
-	@After
-	public void tearDown() {
 	}
 
 	@Test

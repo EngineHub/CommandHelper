@@ -13,6 +13,7 @@ import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Optimizable.OptimizationOption;
+import com.laytonsmith.core.SourceType;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.compiler.FileOptions;
@@ -261,7 +262,7 @@ public class Compiler {
 								|| (list.get(index).getData() instanceof CFunction cf
 										&& cf.val().equals(Compiler.p.NAME)
 										&& list.get(index).numberOfChildren() == 1
-										&& (list.get(index).getChildAt(0).getData() instanceof CClassType
+										&& (list.get(index).getChildAt(0).getData() instanceof SourceType
 												|| __type_ref__.createFromBareStringOrConcats(
 														list.get(index).getChildAt(0)) != null)))) {
 							valChildren.add(list.get(index));
@@ -402,7 +403,7 @@ public class Compiler {
 
 					// Convert bare string or concat() to type reference if needed.
 					ParseTree typeNode = node.getChildAt(0);
-					if(!(typeNode.getData() instanceof CClassType)) {
+					if(!(typeNode.getData() instanceof SourceType)) {
 						ParseTree convertedTypeNode = __type_ref__.createFromBareStringOrConcats(typeNode);
 						if(convertedTypeNode != null) {
 							typeNode = convertedTypeNode;
@@ -508,7 +509,7 @@ public class Compiler {
 				}
 
 				if(convertedTypeNode != null
-						|| typeNode.getData().equals(CVoid.VOID) || typeNode.getData() instanceof CClassType) {
+						|| typeNode.getData().equals(CVoid.VOID) || typeNode.getData() instanceof SourceType) {
 					if(k == list.size() - 1) {
 						// This is not a typed assignment
 						break;
@@ -537,7 +538,7 @@ public class Compiler {
 								list.get(k).setChildren(children);
 								break;
 							default:
-								if(typeNode.getData().equals(CVoid.VOID) || typeNode.getData() instanceof CClassType) {
+								if(typeNode.getData().equals(CVoid.VOID) || typeNode.getData() instanceof SourceType) {
 									throw new ConfigCompileException("Unexpected ClassType \""
 											+ typeNode.getData().val() + "\"", typeNode.getTarget());
 								}

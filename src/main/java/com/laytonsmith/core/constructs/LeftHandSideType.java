@@ -7,6 +7,7 @@ import com.laytonsmith.PureUtilities.Pair;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.SourceType;
 import com.laytonsmith.core.constructs.generics.ConcreteGenericParameter;
 import com.laytonsmith.core.constructs.generics.ConstraintLocation;
 import com.laytonsmith.core.constructs.generics.ConstraintValidator;
@@ -18,6 +19,7 @@ import com.laytonsmith.core.constructs.generics.LeftHandGenericUseParameter;
 import com.laytonsmith.core.constructs.generics.constraints.ExactTypeConstraint;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.objects.ObjectModifier;
 import java.util.ArrayList;
@@ -50,6 +52,11 @@ import java.util.TreeSet;
  * While less common use cases exist such that a CClassType can't represent the LHS, the common use case can, for
  * instance {@code int @i = 1;}. Therefore, there are convenience methods for easily converting a CClassType into a
  * LeftHandSideType. Additionally, all the actual types represented are naked CClassType values.
+ * <p>
+ * LHS types have a unique feature, which is that they can represent variadic types, specifically and only in Callable
+ * parameter declarations. This is a feature of the specific instance of the type, and not of the type as a whole,
+ * so CClassType cannot represent such a concept. A parameter of type `string...` for instance is actually treated
+ * as an array of strings for most purposes.
  */
 public final class LeftHandSideType extends Construct implements SourceType {
 
@@ -168,9 +175,6 @@ public final class LeftHandSideType extends Construct implements SourceType {
 		isTypenameList.add(false);
 		LeftHandSideType lhst = createCClassTypeUnion(t, env, Arrays.asList(
 				new ConcreteGenericParameter(classType, null, Target.UNKNOWN, null)), isTypenameList);
-		if(classType != null) {
-			lhst.isVariadicType = classType.isVariadicType();
-		}
 		return lhst;
 	}
 
@@ -256,7 +260,7 @@ public final class LeftHandSideType extends Construct implements SourceType {
 
 	/**
 	 * Creates a new LeftHandSideType from the given list of CClassTypes and LeftHandGenericUse pairs. Each pair
-	 * represents a single type in the type union. The LeftHangGenericUse in each pair may be null, but the CClassTypes
+	 * represents a single type in the type union. The LeftHandGenericUse in each pair may be null, but the CClassTypes
 	 * may not, except when representing the none type.
 	 * <p>
 	 * If any of the types in the union are {@code auto}, then simply {@code auto} is returned.
@@ -586,6 +590,7 @@ public final class LeftHandSideType extends Construct implements SourceType {
 	 * @param t
 	 * @return
 	 */
+	@Override
 	public CClassType asConcreteType(Target t) throws CREIllegalArgumentException {
 		MSLog.StringProvider exMsg = () -> "Cannot use the type \"" + getSimpleName() + "\" in this context.";
 		ConcreteGenericParameter type = types.get(0);
@@ -634,6 +639,11 @@ public final class LeftHandSideType extends Construct implements SourceType {
 	 */
 	public LeftHandGenericUseParameter toNativeLeftHandGenericUse(CClassType forType, int parameterPosition) {
 		return toLeftHandGenericUse(forType, Target.UNKNOWN, null, ConstraintLocation.LHS, parameterPosition);
+	}
+
+	@Override
+	public LeftHandSideType asLeftHandSideType() {
+		return this;
 	}
 
 	public static interface Renderer {
@@ -701,10 +711,10 @@ public final class LeftHandSideType extends Construct implements SourceType {
 	 *
 	 * @return
 	 */
-	public List<Set<ObjectModifier>> getTypeObjectModifiers() {
+	public List<Set<ObjectModifier>> getTypeObjectModifiers(Environment env) {
 		List<Set<ObjectModifier>> ret = new ArrayList<>();
 		for(ConcreteGenericParameter type : types) {
-			ret.add(type.getType().getObjectModifiers());
+			ret.add(type.getType().getTypeObjectModifiers(env));
 		}
 		return ret;
 	}
@@ -751,15 +761,23 @@ public final class LeftHandSideType extends Construct implements SourceType {
 		return null;
 	}
 
-	@Override
-	public SourceType asVariadicType(Environment env) {
+	/**
+	 * Returns a new LeftHandSideType with the variadic flag set. If this type is already variadic, this throws an
+	 * exception.
+	 * @param t
+	 * @param env
+	 * @return
+	 */
+	public LeftHandSideType asVariadicType(Target t, Environment env) throws ConfigCompileException {
+		if(this.isVariadicType) {
+			throw new ConfigCompileException("Variadic modifier (\"...\") cannot be applied more than once to a type.", t);
+		}
 		LeftHandSideType newType = new LeftHandSideType(val() + "...", getTarget(), env, types, isTypenameList,
 				genericTypeName, null);
 		newType.isVariadicType = true;
 		return newType;
 	}
 
-	@Override
 	public boolean isVariadicType() {
 		return isVariadicType;
 	}
@@ -770,7 +788,7 @@ public final class LeftHandSideType extends Construct implements SourceType {
 	 * @return The base {@link LeftHandSideType} of this type.
 	 * @throws IllegalStateException If this is not a variadic type.
 	 */
-	public LeftHandSideType getVarargsBaseType() throws IllegalStateException {
+	public LeftHandSideType getVarargsBaseType(Environment env) throws IllegalStateException {
 		if(!this.isVariadicType) {
 			throw new IllegalStateException("LeftHandSideType is not a vararg type.");
 		}

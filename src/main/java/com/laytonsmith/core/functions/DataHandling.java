@@ -25,6 +25,7 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Procedure;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Security;
+import com.laytonsmith.core.SourceType;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.BranchStatement;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
@@ -117,6 +118,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -396,10 +398,7 @@ public class DataHandling {
 
 				// Get and validate variable type.
 				LeftHandSideType type = ArgumentValidation.getClassType(args[0], t, env);
-				Boolean varArgsAllowed = env.getEnv(GlobalEnv.class).GetFlag(GlobalEnv.FLAG_VAR_ARGS_ALLOWED);
-				if(varArgsAllowed == null) {
-					varArgsAllowed = false;
-				}
+				Boolean varArgsAllowed = Objects.requireNonNullElse(env.getEnv(GlobalEnv.class).GetFlag(GlobalEnv.FLAG_VAR_ARGS_ALLOWED), false);
 				if(type.isVariadicType() && !varArgsAllowed) {
 					throw new CRECastException("Cannot use varargs type in this context", t);
 				}
@@ -409,6 +408,16 @@ public class DataHandling {
 
 				// Get assigned value.
 				Mixed val = args[2];
+				if(type.isVariadicType() && val == CNull.UNDEFINED) {
+					// If it's variadic, and we've gotten this far, varArgsAllowed is true, which means
+					// we're in a Callable parameter . CNull.UNDEFINED is the default
+					// for Callable assignments without an actual assignment, but in reality it should be
+					// an empty list of the given type, so construct an array of the underlying type here.
+					GenericParameters typeGenerics = GenericParameters
+							.addParameter(CArray.TYPE, type.getVarargsBaseType(env).asConcreteType(t), null, env, t)
+							.build(t, env);
+					val = new CArray(t, typeGenerics, env);
+				}
 
 				// Unwrap assigned value from IVariable if an IVariable is passed.
 				if(val instanceof IVariable ivar) {
@@ -419,7 +428,7 @@ public class DataHandling {
 				if(val instanceof CVoid) {
 					throw new CRECastException("Void may not be assigned to a variable", t);
 				}
-				if(!InstanceofUtil.isInstanceof(val.typeof(env), type, env)) {
+				if(!InstanceofUtil.isInstanceof(val, type, env)) {
 					throw new CRECastException(varName + " is of type " + type.val() + ", but a value of type "
 							+ val.typeof(env) + " was assigned to it.", t);
 				}
@@ -1655,16 +1664,15 @@ public class DataHandling {
 		public static Procedure getProcedure(Target t, Environment env, Script parent, ParseTree... nodes) {
 			String name = "";
 			List<IVariable> vars = new ArrayList<>();
-			List<Boolean> isVarArgs = new ArrayList<>();
 			List<String> varNames = new ArrayList<>();
 			boolean procDefinitelyNotConstant = false;
-			CClassType returnType = Auto.TYPE;
+			LeftHandSideType returnType = Auto.LHSTYPE;
 			NodeModifiers modifiers = null;
-			if(nodes[0].getData().equals(CVoid.VOID) || nodes[0].getData() instanceof CClassType) {
+			if(nodes[0].getData().equals(CVoid.VOID) || nodes[0].getData() instanceof SourceType st) {
 				if(nodes[0].getData().equals(CVoid.VOID)) {
-					returnType = CVoid.TYPE;
+					returnType = CVoid.TYPE.asLeftHandSideType();
 				} else {
-					returnType = (CClassType) nodes[0].getData();
+					returnType = ((SourceType) nodes[0].getData()).asLeftHandSideType();
 				}
 				ParseTree[] newNodes = new ParseTree[nodes.length - 1];
 				for(int i = 1; i < nodes.length; i++) {
@@ -1783,7 +1791,6 @@ public class DataHandling {
 				try {
 					// Store IVariable object clone.
 					vars.add(new IVariable(ivar.getDefinedType(), ivar.getVariableName(), ivarVal, ivar.getTarget(), env));
-					isVarArgs.add(ivar.getDefinedType().isVariadicType());
 				} catch(ConfigCompileException ex) {
 					throw ex.asRuntimeException();
 				}
@@ -1793,7 +1800,7 @@ public class DataHandling {
 			env.getEnv(GlobalEnv.class).SetVarList(originalList);
 
 			// Create and return procedure.
-			Procedure myProc = new Procedure(name, returnType, vars, isVarArgs, nodes[0].getNodeModifiers().getComment(), code, t);
+			Procedure myProc = new Procedure(name, returnType, vars, nodes[0].getNodeModifiers().getComment(), code, t);
 			if(procDefinitelyNotConstant) {
 				myProc.definitelyNotConstant();
 			}
@@ -2893,7 +2900,7 @@ public class DataHandling {
 
 			// Return an empty (possibly statically typed) closure when it is empty and does not have any parameters.
 			if(nodes.length - nodeOffset == 0) {
-				return new CClosure(null, env, returnType, new String[0], new Mixed[0], new Boolean[0],
+				return new CClosure(null, env, returnType, new String[0], new Mixed[0],
 						new LeftHandSideType[0], t);
 			}
 
@@ -2909,7 +2916,6 @@ public class DataHandling {
 			int numParams = nodes.length - nodeOffset - 1;
 			String[] names = new String[numParams];
 			Mixed[] defaults = new Mixed[numParams];
-			Boolean[] isVarArgs = new Boolean[numParams];
 			LeftHandSideType[] types = new LeftHandSideType[numParams];
 			for(int i = 0; i < numParams; i++) {
 				ParseTree node = nodes[i + nodeOffset];
@@ -2934,14 +2940,13 @@ public class DataHandling {
 				try {
 					defaults[i] = ((IVariable) ret).ival().clone();
 					types[i] = ((IVariable) ret).getDefinedType();
-					isVarArgs[i] = types[i].isVariadicType();
 				} catch (CloneNotSupportedException ex) {
 					Logger.getLogger(DataHandling.class.getName()).log(Level.SEVERE, null, ex);
 				}
 			}
 
 			// Create and return the closure, using the last argument as the closure body.
-			return new CClosure(nodes[nodes.length - 1], myEnv, returnType, names, defaults, isVarArgs, types, t);
+			return new CClosure(nodes[nodes.length - 1], myEnv, returnType, names, defaults, types, t);
 		}
 
 		@Override
@@ -3088,7 +3093,7 @@ public class DataHandling {
 			if(nodes.length == 0) {
 				//Empty closure, do nothing.
 				return new CIClosure(null, env, Auto.TYPE.asLeftHandSideType(),
-						new String[0], new Mixed[0], new Boolean[0], new LeftHandSideType[0], t);
+						new String[0], new Mixed[0], new LeftHandSideType[0], t);
 			}
 			// Handle the closure type first thing
 			LeftHandSideType returnType = Auto.TYPE.asLeftHandSideType();
@@ -3106,7 +3111,6 @@ public class DataHandling {
 			}
 			String[] names = new String[nodes.length - 1];
 			Mixed[] defaults = new Mixed[nodes.length - 1];
-			Boolean[] isVarArgs = new Boolean[nodes.length - 1];
 			LeftHandSideType[] types = new LeftHandSideType[nodes.length - 1];
 			// We clone the enviornment at this point, because we don't want the values
 			// that are assigned here to overwrite values in the main scope.
@@ -3139,7 +3143,6 @@ public class DataHandling {
 				try {
 					defaults[i] = ((IVariable) ret).ival().clone();
 					types[i] = ((IVariable) ret).getDefinedType();
-					isVarArgs[i] = types[i].isVariadicType();
 				} catch (CloneNotSupportedException ex) {
 					Logger.getLogger(DataHandling.class.getName()).log(Level.SEVERE, null, ex);
 				}
@@ -3147,7 +3150,7 @@ public class DataHandling {
 			// Now that iclosure is done with the current variable list, it can be removed from the cloned environment.
 			// This ensures it's not unintentionally retaining values in memory cloned from the original scope.
 			myEnv.getEnv(GlobalEnv.class).SetVarList(null);
-			return new CIClosure(nodes[nodes.length - 1], myEnv, returnType, names, defaults, isVarArgs, types, t);
+			return new CIClosure(nodes[nodes.length - 1], myEnv, returnType, names, defaults, types, t);
 		}
 
 		@Override

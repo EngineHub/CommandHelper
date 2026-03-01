@@ -200,8 +200,8 @@ public final class GenericParameters {
 	}
 
 	/**
-	 * Begins construction of a new GenericParameters object.This should only be used with native, hardcoded classes, as
-	 * incorrect usage will cause an Error.
+	 * Begins construction of a new GenericParameters object.This should only be used with native, hardcoded classes
+	 * (in both {@code forType} and {@code type}), as incorrect usage will cause an Error.
 	 *
 	 * @param forType The type that these parameters are being added to.
 	 * @param type

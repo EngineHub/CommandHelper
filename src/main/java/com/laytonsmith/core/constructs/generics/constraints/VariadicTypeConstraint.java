@@ -8,6 +8,7 @@ import com.laytonsmith.core.constructs.generics.ConstraintToConstraintValidator;
 import com.laytonsmith.core.constructs.generics.ConstraintValidator;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREGenericConstraintException;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import java.util.EnumSet;
 import java.util.Set;
 
@@ -88,7 +89,7 @@ public class VariadicTypeConstraint extends Constraint {
 
 	@Override
 	public ExactTypeConstraint convertFromNull(Target t) throws CREGenericConstraintException {
-		return new ExactTypeConstraint(t, (LeftHandSideType) Auto.LHSTYPE.asVariadicType(null));
+		return new ExactTypeConstraint(t, (LeftHandSideType) Auto.LHSTYPE_VARIADIC);
 	}
 
 }

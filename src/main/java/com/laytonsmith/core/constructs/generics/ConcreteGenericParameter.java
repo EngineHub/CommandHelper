@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.Either;
 import com.laytonsmith.PureUtilities.Pair;
 import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.CClassType;
+import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.generics.constraints.ExactTypeConstraint;
@@ -22,18 +23,21 @@ public class ConcreteGenericParameter {
 	private final Environment env;
 
 	/**
-	 * Creates a new ConcreteGenericParameter. The type may be null, representing the "none" type. If the type cannot
-	 * contain parameters, but some where provided, or it can contain parameters, but not enough/too many were provided,
-	 * an exception is thrown.
+	 * Creates a new ConcreteGenericParameter. The type may be java null, representing the "none" type.
+	 * If the type cannot contain parameters, but some where provided, or it can contain parameters, but not
+	 * enough/too many were provided, an exception is thrown. The type cannot be CNull.
 	 *
-	 * @param type
-	 * @param lhgu
-	 * @param t
+	 * @param type The underlying type, java null if representing the "none" type.
+	 * @param lhgu The LHGU, if any
+	 * @param t The code target where this was constructed.
 	 * @param env The environment.
 	 * @throws CREGenericConstraintException If generic parameters were provided, but were erroneous according to the
 	 * type.
 	 */
 	public ConcreteGenericParameter(CClassType type, LeftHandGenericUse lhgu, Target t, Environment env) {
+		if(CNull.NULL.equals(type)) {
+			throw new CREGenericConstraintException("Null cannot be used here.", t);
+		}
 		if(type == null && lhgu != null) {
 			throw new CREGenericConstraintException("\"none\" type cannot have generic parameters.", t);
 		}
@@ -73,10 +77,19 @@ public class ConcreteGenericParameter {
 	 */
 	public static final ConcreteGenericParameter AUTO = fromNativeType(Auto.TYPE, null);
 
+	/**
+	 * Returns the underlying base type. This may be java null, if so, this represents the "none" type. It will
+	 * never be CNull.
+	 * @return
+	 */
 	public CClassType getType() {
 		return this.type;
 	}
 
+	/**
+	 * Returns the underlying left hand generic use.
+	 * @return
+	 */
 	public LeftHandGenericUse getLeftHandGenericUse() {
 		if(this.type.getTypeGenericParameters() != null) {
 			return this.type.getTypeGenericParameters().toLeftHandGenericUse();
@@ -84,10 +97,18 @@ public class ConcreteGenericParameter {
 		return this.lhgu;
 	}
 
+	/**
+	 * Returns a Pair of the underlying CClassType ({@link #getType()}) and the LHGU ({@link #getLeftHandGenericUse()}).
+	 * @return
+	 */
 	public Pair<CClassType, LeftHandGenericUse> getAsPair() {
 		return new Pair<>(this.type, this.lhgu);
 	}
 
+	/**
+	 * Returns this as a LeftHandSideType.
+	 * @return
+	 */
 	public LeftHandSideType asLeftHandSideType() {
 		return LeftHandSideType.fromCClassType(this, Target.UNKNOWN, env);
 	}

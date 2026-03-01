@@ -21,6 +21,7 @@ import com.laytonsmith.core.compiler.LateBindingKeyword;
 import com.laytonsmith.core.compiler.TokenStream;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.CBareString;
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CDecimal;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CFunction;
@@ -36,7 +37,7 @@ import com.laytonsmith.core.constructs.CSymbol;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
-import com.laytonsmith.core.constructs.SourceType;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.constructs.Token.TType;
@@ -1754,7 +1755,7 @@ public final class MethodScriptCompiler {
 				if(!(previous.getData() instanceof SourceType st)) {
 					throw new ConfigCompileException("Unexpected varargs token (\"...\"). This can only be used with types.", t.target);
 				}
-				previous.setData(st.asVariadicType(env));
+				previous.setData(st.asLeftHandSideType().asVariadicType(t.getTarget(), env));
 				continue;
 			} else if(t.type == TType.LIT) {
 				Construct c;

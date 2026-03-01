@@ -31,9 +31,9 @@ import com.laytonsmith.core.constructs.generics.constraints.VariadicTypeConstrai
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREGenericConstraintException;
 import com.laytonsmith.core.functions.DataHandling.assign;
+import com.laytonsmith.testing.AbstractIntegrationTest;
 import com.laytonsmith.testing.StaticTest;
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -46,24 +46,14 @@ import java.util.Objects;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import org.junit.BeforeClass;
 
-public class GenericsTest {
+public class GenericsTest extends AbstractIntegrationTest {
 	public GenericsTest() {
 
 	}
 
 	private Environment env;
 	private FileOptions fileOptions = new FileOptions(new HashMap<>());
-
-	@BeforeClass
-	public static void setUpClass() throws Exception {
-		StaticTest.InstallFakeServerFrontend();
-	}
-
-	@AfterClass
-	public static void tearDownClass() throws Exception {
-	}
 
 	@Before
 	public void setUp() throws Exception {
@@ -84,7 +74,7 @@ public class GenericsTest {
 
 	@Test
 	public void testConstraintHasCorrectData() throws Exception {
-		UpperBoundConstraint ubc = new UpperBoundConstraint(Target.UNKNOWN, "T", CNumber.TYPE.asLeftHandSideType());
+		UpperBoundConstraint ubc = new UpperBoundConstraint(env, Target.UNKNOWN, "T", CNumber.TYPE.asLeftHandSideType());
 		assertEquals("upper bound", ubc.getConstraintName());
 		assertEquals("T", ubc.getTypeName());
 		assertEquals("T extends ms.lang.number", ubc.toString());
@@ -94,7 +84,7 @@ public class GenericsTest {
 	public void testLHSToStringIsCorrect() throws Exception {
 		// ? extends array<array<int>>
 		LeftHandGenericUse lhgu = new LeftHandGenericUse(CArray.TYPE, Target.UNKNOWN, env, new Constraints(Target.UNKNOWN, ConstraintLocation.LHS,
-				new UpperBoundConstraint(Target.UNKNOWN, "?", CClassType.get(CArray.TYPE.getFQCN(), Target.UNKNOWN,
+				new UpperBoundConstraint(env, Target.UNKNOWN, "?", CClassType.get(CArray.TYPE.getFQCN(), Target.UNKNOWN,
 						GenericTypeParameters.nativeBuilder(CArray.TYPE)
 								.addParameter(CArray.TYPE, new LeftHandGenericUse(CArray.TYPE, Target.UNKNOWN, env,
 										new Constraints(Target.UNKNOWN, ConstraintLocation.LHS, new ExactTypeConstraint(Target.UNKNOWN, CInt.TYPE.asLeftHandSideType()))))
@@ -104,10 +94,10 @@ public class GenericsTest {
 		// ? extends array<? extends int>
 
 		lhgu = new LeftHandGenericUse(CArray.TYPE, Target.UNKNOWN, env, new Constraints(Target.UNKNOWN, ConstraintLocation.LHS,
-				new UpperBoundConstraint(Target.UNKNOWN, "?", CClassType.get(CArray.TYPE.getFQCN(), Target.UNKNOWN,
+				new UpperBoundConstraint(env, Target.UNKNOWN, "?", CClassType.get(CArray.TYPE.getFQCN(), Target.UNKNOWN,
 						GenericTypeParameters.nativeBuilder(CArray.TYPE)
 								.addParameter(CArray.TYPE, new LeftHandGenericUse(CArray.TYPE, Target.UNKNOWN, env,
-										new Constraints(Target.UNKNOWN, ConstraintLocation.LHS, new UpperBoundConstraint(Target.UNKNOWN, "?", CInt.TYPE.asLeftHandSideType()))))
+										new Constraints(Target.UNKNOWN, ConstraintLocation.LHS, new UpperBoundConstraint(env, Target.UNKNOWN, "?", CInt.TYPE.asLeftHandSideType()))))
 								.build(), env).asLeftHandSideType())));
 		assertEquals("? extends ms.lang.array<ms.lang.array<? extends ms.lang.int>>", lhgu.toString());
 
@@ -349,7 +339,7 @@ public class GenericsTest {
 		);
 
 		List<Constraints> badlhs = Arrays.asList(new Constraints(Target.UNKNOWN, ConstraintLocation.LHS, new ExactTypeConstraint(Target.UNKNOWN, CInt.TYPE.asLeftHandSideType())),
-				new Constraints(Target.UNKNOWN, ConstraintLocation.LHS, new UpperBoundConstraint(Target.UNKNOWN, "?", CString.TYPE.asLeftHandSideType())),
+				new Constraints(Target.UNKNOWN, ConstraintLocation.LHS, new UpperBoundConstraint(env, Target.UNKNOWN, "?", CString.TYPE.asLeftHandSideType())),
 				new Constraints(Target.UNKNOWN, ConstraintLocation.LHS, new ExactTypeConstraint(Target.UNKNOWN, CArray.TYPE.asLeftHandSideType()))
 		);
 		List<Constraints> badlhs2 = Arrays.asList(new Constraints(Target.UNKNOWN, ConstraintLocation.LHS));

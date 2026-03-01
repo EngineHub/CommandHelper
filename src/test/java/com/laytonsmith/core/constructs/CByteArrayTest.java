@@ -6,6 +6,7 @@ package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.testing.AbstractIntegrationTest;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -19,7 +20,7 @@ import static org.junit.Assert.assertEquals;
  *
  *
  */
-public class CByteArrayTest {
+public class CByteArrayTest extends AbstractIntegrationTest {
 
 	Environment env;
 	public CByteArrayTest() {

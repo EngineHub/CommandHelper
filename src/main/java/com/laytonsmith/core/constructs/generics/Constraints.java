@@ -402,7 +402,7 @@ public class Constraints implements Iterable<Constraint> {
 			// Now buf contains the class, which may need additional parsing
 			clazz = ParseClassType(fileOptions, buf.toString(), t, env);
 			if("extends".equals(keyword)) {
-				return new UpperBoundConstraint(t, name, clazz);
+				return new UpperBoundConstraint(env, t, name, clazz);
 			} else if("super".equals(keyword)) {
 				return new LowerBoundConstraint(t, name, clazz);
 			}

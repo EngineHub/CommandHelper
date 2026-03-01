@@ -39,6 +39,7 @@ import com.laytonsmith.core.objects.ObjectModifier;
 import com.laytonsmith.core.objects.ObjectType;
 import com.laytonsmith.core.objects.UserObject;
 import com.laytonsmith.PureUtilities.Common.Annotations.AggressiveDeprecation;
+import com.laytonsmith.core.SourceType;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -58,6 +59,13 @@ import java.util.stream.Stream;
 /**
  * A CClassType represents a reference to a MethodScript class, which is generally used on the right hand side. See
  * {@link LeftHandSideType} for the left hand side equivalent.
+ * <p>
+ * There are major differences in how CClassTypes are handled, compared to for instance LeftHandSideTypes.
+ * For any given class, there can only be one CClassType instance, for any given set of generic parameters.
+ * CClassType can always be represented as a LeftHandSideType, but there can be multiple LeftHandSideTypes that
+ * represent the same type - these represent specific usages of the type in certain places in the code, not the
+ * type itself. For this reason, CClassType cannot represent variadic types, because that is a call site specific
+ * concept.
  */
 @typeof("ms.lang.ClassType")
 @SuppressWarnings("checkstyle:overloadmethodsdeclarationorder")
@@ -248,8 +256,6 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	private final FullyQualifiedClassName fqcn;
 	@StandardField
 	private final GenericTypeParameters genericParameters;
-	@StandardField
-	private boolean isVariadicType = false;
 
 	/**
 	 * This is an invalid instance of the underlying type that can only be used for Documentation purposes or finding
@@ -848,6 +854,11 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		return EnumSet.of(ObjectModifier.FINAL);
 	}
 
+	public Set<ObjectModifier> getTypeObjectModifiers(Environment env) {
+		instantiateInvalidType(env);
+		return invalidType.getObjectModifiers();
+	}
+
 	@Override
 	public Version since() {
 		return MSVersion.V3_3_1;
@@ -1068,8 +1079,14 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	 * Converts this concrete type into a LHS type. This will always work, since all concrete types can be
 	 * represented as LHS types.
 	 */
+	@Override
 	public LeftHandSideType asLeftHandSideType() {
 		return LeftHandSideType.fromHardCodedType(this);
+	}
+
+	@Override
+	public CClassType asConcreteType(Target t) {
+		return this;
 	}
 
 	/**
@@ -1293,23 +1310,5 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		private boolean containsNakedClassType(FullyQualifiedClassName fqcn) {
 			return contains(fqcn, null);
 		}
-	}
-
-	@Override
-	public boolean isVariadicType() {
-		return isVariadicType;
-	}
-
-	@Override
-	public SourceType asVariadicType(Environment env) {
-		CClassType newType;
-		try {
-			newType = new CClassType(this.fqcn.asVariadicType(), getTarget(), false,
-					this.genericDeclaration, env, this.nativeClass);
-		} catch(ClassNotFoundException ex) {
-			throw new Error(ex);
-		}
-		newType.isVariadicType = true;
-		return newType;
 	}
 }

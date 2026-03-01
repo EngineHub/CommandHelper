@@ -55,7 +55,6 @@ public class CClosure extends Construct implements Callable, Booleanish {
 	protected final Mixed[] defaults;
 	protected final LeftHandSideType[] types;
 	protected final LeftHandSideType returnType;
-	protected final Boolean[] isVarArgs;
 
 	private static final Constraints RETURN_TYPE = new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION, new UnboundedConstraint(Target.UNKNOWN, "ReturnType"));
 	private static final Constraints PARAMETERS = new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION, new VariadicTypeConstraint(Target.UNKNOWN, "Parameters"));
@@ -68,14 +67,13 @@ public class CClosure extends Construct implements Callable, Booleanish {
 				.addParameter("Parameters", PARAMETERS));
 
 	public CClosure(ParseTree node, Environment env, LeftHandSideType returnType, String[] names, Mixed[] defaults,
-			Boolean[] isVarArgs, LeftHandSideType[] types, Target t) {
+			LeftHandSideType[] types, Target t) {
 		super(node != null ? node.toString() : "", ConstructType.CLOSURE, t);
 		this.node = node;
 		this.env = env;
 		this.names = names;
 		this.defaults = defaults;
 		this.types = types;
-		this.isVarArgs = isVarArgs;
 		if(types.length > 0) {
 			for(int i = 0; i < types.length - 1; i++) {
 				if(types[i].isVariadicType()) {
@@ -262,21 +260,21 @@ public class CClosure extends Construct implements Callable, Booleanish {
 						} else {
 							name = this.names[this.names.length - 1];
 							if(vararg == null) {
-								// TODO: Once generics are added, add the type
+								varargType = this.types[this.types.length - 1].getVarargsBaseType(env);
 								vararg = new CArray(value.getTarget(), GenericParameters.emptyBuilder(CArray.TYPE)
-									.addParameter(varargType).build(getTarget(), env), env);
+									.addParameter(varargType)
+									.build(getTarget(), env), env);
 								try {
 									env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE,
 											name, vararg, value.getTarget()));
 								} catch(ConfigCompileException ex) {
 									throw new CREError(ex.getMessage(), getTarget(), ex);
 								}
-								varargType = this.types[this.types.length - 1];
 							}
 							isVarArg = true;
 						}
 						if(isVarArg) {
-							if(!InstanceofUtil.isInstanceof(value.typeof(env), varargType.getVarargsBaseType(), env)) {
+							if(!InstanceofUtil.isInstanceof(value, varargType, env)) {
 								throw new CRECastException("Expected type " + varargType + " but found " + value.typeof(env),
 										getTarget());
 							}

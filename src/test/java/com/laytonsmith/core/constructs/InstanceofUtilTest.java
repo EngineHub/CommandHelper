@@ -63,7 +63,7 @@ public class InstanceofUtilTest extends AbstractIntegrationTest {
 		// Generics testing
 		LeftHandGenericUse extendsNumberLHGU = new LeftHandGenericUse(CArray.TYPE, Target.UNKNOWN, env,
 				new Constraints(Target.UNKNOWN, ConstraintLocation.LHS,
-						new UpperBoundConstraint(Target.UNKNOWN, "?", CNumber.TYPE.asLeftHandSideType())));
+						new UpperBoundConstraint(env, Target.UNKNOWN, "?", CNumber.TYPE.asLeftHandSideType())));
 
 		LeftHandGenericUse superIntLHGU = new LeftHandGenericUse(CArray.TYPE, Target.UNKNOWN, env,
 				new Constraints(Target.UNKNOWN, ConstraintLocation.LHS,
@@ -77,7 +77,7 @@ public class InstanceofUtilTest extends AbstractIntegrationTest {
 
 		LeftHandGenericUse extendsPrimitiveLHGU = new LeftHandGenericUse(CArray.TYPE, Target.UNKNOWN, env,
 				new Constraints(Target.UNKNOWN, ConstraintLocation.LHS,
-						new UpperBoundConstraint(Target.UNKNOWN, "?", CPrimitive.TYPE.asLeftHandSideType())));
+						new UpperBoundConstraint(env, Target.UNKNOWN, "?", CPrimitive.TYPE.asLeftHandSideType())));
 
 		LeftHandGenericUse intExactTypeLHGU = new LeftHandGenericUse(CArray.TYPE, Target.UNKNOWN, env,
 				new Constraints(Target.UNKNOWN, ConstraintLocation.LHS,
@@ -167,7 +167,7 @@ public class InstanceofUtilTest extends AbstractIntegrationTest {
 		@SuppressWarnings("FieldNameHidesFieldInSuperclass")
 		public static final CClassType TYPE = CClassType.getWithGenericDeclaration(InstanceofUtilTestA.class, new GenericDeclaration(Target.UNKNOWN,
 				new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
-						new UpperBoundConstraint(Target.UNKNOWN, "T", CPrimitive.TYPE.asLeftHandSideType()))));
+						new UpperBoundConstraint(null, Target.UNKNOWN, "T", CPrimitive.TYPE.asLeftHandSideType()))));
 
 		private final GenericParameters genericParameters;
 
@@ -291,9 +291,9 @@ public class InstanceofUtilTest extends AbstractIntegrationTest {
 		@SuppressWarnings("FieldNameHidesFieldInSuperclass")
 		public static final CClassType TYPE = CClassType.getWithGenericDeclaration(InstanceofUtilTestB.class, new GenericDeclaration(Target.UNKNOWN,
 				new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
-						new UpperBoundConstraint(Target.UNKNOWN, "T", CPrimitive.TYPE.asLeftHandSideType())),
+						new UpperBoundConstraint(null, Target.UNKNOWN, "T", CPrimitive.TYPE.asLeftHandSideType())),
 				new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
-						new UpperBoundConstraint(Target.UNKNOWN, "U", CNumber.TYPE.asLeftHandSideType()))))
+						new UpperBoundConstraint(null, Target.UNKNOWN, "U", CNumber.TYPE.asLeftHandSideType()))))
 				.withSuperParameters(GenericTypeParameters.nativeBuilder(InstanceofUtilTestA.TYPE).addParameter("T", null))
 				.done();
 

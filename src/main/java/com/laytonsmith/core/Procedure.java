@@ -52,9 +52,8 @@ public class Procedure implements Cloneable {
 	private Map<String, IVariable> varList;
 	private final Map<String, Mixed> originals = new HashMap<>();
 	private final List<IVariable> varIndex = new ArrayList<>();
-	private final List<Boolean> isVarArg;
 	private ParseTree tree;
-	private CClassType returnType;
+	private LeftHandSideType returnType;
 	private boolean possiblyConstant = false;
 	private SmartComment procComment;
 
@@ -64,7 +63,7 @@ public class Procedure implements Cloneable {
 	 */
 	private final Target definedAt;
 
-	public Procedure(String name, CClassType returnType, List<IVariable> varList, List<Boolean> isVarArg,
+	public Procedure(String name, LeftHandSideType returnType, List<IVariable> varList,
 			SmartComment procComment,
 			ParseTree tree, Target t) {
 		this.name = name;
@@ -96,7 +95,6 @@ public class Procedure implements Cloneable {
 		//we can be sure that we cannot inline this in any way.
 		this.possiblyConstant = checkPossiblyConstant(tree);
 		this.returnType = returnType;
-		this.isVarArg = isVarArg;
 	}
 
 	private boolean checkPossiblyConstant(ParseTree tree) {
@@ -222,7 +220,7 @@ public class Procedure implements Cloneable {
 		CArray vararg = null;
 		for(varInd = 0; varInd < args.size(); varInd++) {
 			Mixed c = args.get(varInd);
-			arguments.push(c, t);
+			arguments.push(c, t, env);
 			if(this.varIndex.size() > varInd
 					|| (!this.varIndex.isEmpty()
 						&& this.varIndex.get(this.varIndex.size() - 1).getDefinedType().isVariadicType())) {
@@ -234,7 +232,8 @@ public class Procedure implements Cloneable {
 					var = this.varIndex.get(this.varIndex.size() - 1);
 					if(vararg == null) {
 						vararg = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
-								.addParameter(var.getDefinedType()).build(t, env), env);
+								.addParameter(var.getDefinedType().getVarargsBaseType(env))
+								.build(t, env), env);
 						try {
 							env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE,
 									var.getVariableName(), vararg, c.getTarget()));
@@ -254,7 +253,7 @@ public class Procedure implements Cloneable {
 
 				// Type check vararg parameter.
 				if(var.getDefinedType().isVariadicType()) {
-					if(InstanceofUtil.isInstanceof(c.typeof(env), var.getDefinedType().getVarargsBaseType(), env)) {
+					if(InstanceofUtil.isInstanceof(c, var.getDefinedType().getVarargsBaseType(env), env)) {
 						vararg.push(c, t, env);
 						continue;
 					} else {
@@ -265,7 +264,7 @@ public class Procedure implements Cloneable {
 				}
 
 				// Type check non-vararg parameter.
-				if(InstanceofUtil.isInstanceof(c.typeof(env), var.getDefinedType(), env)) {
+				if(InstanceofUtil.isInstanceof(c, var.getDefinedType(), env)) {
 					try {
 						env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(var.getDefinedType(),
 								var.getVariableName(), c, c.getTarget(), env));
@@ -321,12 +320,12 @@ public class Procedure implements Cloneable {
 		} catch (FunctionReturnException e) {
 			// Normal exit
 			Mixed ret = e.getReturn();
-			if(returnType.equals(Auto.TYPE)) {
+			if(returnType.equals(Auto.LHSTYPE)) {
 				return ret;
 			}
-			if(returnType.equals(CVoid.TYPE) != ret.equals(CVoid.VOID)
+			if(returnType.equals(CVoid.TYPE.asLeftHandSideType()) != ret.equals(CVoid.VOID)
 					|| !ret.equals(CNull.NULL) && !ret.equals(CVoid.VOID)
-					&& !InstanceofUtil.isInstanceof(ret.typeof(env), returnType, env)) {
+					&& !InstanceofUtil.isInstanceof(ret, returnType, env)) {
 				throw new CRECastException("Expected procedure \"" + name + "\" to return a value of type "
 						+ returnType.val() + " but a value of type " + ret.typeof(env) + " was returned instead",
 						ret.getTarget());
@@ -351,7 +350,7 @@ public class Procedure implements Cloneable {
 		// If we got here, then there was no return value. This is fine, but only for returnType void or auto.
 		// TODO: Once strong typing is implemented at a compiler level, this should be removed to increase runtime
 		// performance.
-		if(!(returnType.equals(Auto.TYPE) || returnType.equals(CVoid.TYPE))) {
+		if(!(returnType.equals(Auto.LHSTYPE) || returnType.equals(CVoid.TYPE.asLeftHandSideType()))) {
 			throw new CRECastException("Expecting procedure \"" + name + "\" to return a value of type " + returnType.val() + ","
 					+ " but no value was returned.", tree.getTarget());
 		}
@@ -379,7 +378,7 @@ public class Procedure implements Cloneable {
 	}
 
 	public LeftHandSideType getReturnType() {
-		return returnType.asLeftHandSideType();
+		return returnType;
 	}
 
 	public List<LeftHandSideType> getParameterTypes() {

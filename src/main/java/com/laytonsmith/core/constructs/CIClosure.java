@@ -31,8 +31,8 @@ public class CIClosure extends CClosure {
 				.addParameter("Parameters", PARAMETERS));
 
 	public CIClosure(ParseTree node, Environment env, LeftHandSideType returnType, String[] names, Mixed[] defaults,
-			Boolean[] isVarArgs, LeftHandSideType[] types, Target t) {
-		super(node, env, returnType, names, defaults, isVarArgs, types, t);
+			LeftHandSideType[] types, Target t) {
+		super(node, env, returnType, names, defaults, types, t);
 	}
 
 	@Override

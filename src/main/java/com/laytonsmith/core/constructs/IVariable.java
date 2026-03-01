@@ -21,6 +21,7 @@ public class IVariable extends Construct implements Cloneable {
 	private final String name;
 	private final LeftHandSideType type;
 	private final Target definedTarget;
+	private final String typeString;
 	public static final String VARIABLE_NAME_REGEX = "@[\\p{L}0-9_]+";
 
 	public IVariable(String name, Target t) throws ConfigCompileException {
@@ -76,25 +77,30 @@ public class IVariable extends Construct implements Cloneable {
 		for(ConcreteGenericParameter types : type.getTypes()) {
 			LeftHandGenericUse genericDefinition = types.getLeftHandGenericUse();
 			CClassType subType = types.getType();
+			ConstraintValidator.ValidateLHS(t, subType, genericDefinition, env);
 			if(subType.equals(CVoid.TYPE)) {
 				throw new CRECastException("Variables may not be of type void", t);
 			}
-			ConstraintValidator.ValidateLHS(t, subType, genericDefinition, env);
-			if(env != null && (!subType.equals(Auto.TYPE) && !(value instanceof CNull))) {
-				if(!InstanceofUtil.isInstanceof(value, subType, env)) {
-					hasValidType = false;
-				}
-			}
+//			if(env != null && (!subType.equals(Auto.TYPE) && !(value instanceof CNull))) {
+//				if(!InstanceofUtil.isInstanceof(value, subType, env)) {
+//					hasValidType = false;
+//				}
+//			}
 		}
-		if(!hasValidType) {
+		if(!InstanceofUtil.isAssignableTo(value.typeof(env).asLeftHandSideType(), type, env)) {
 			throw new CRECastException(name + " is of type " + type.val() + ", but a value of type "
 					+ value.typeof(env) + " was assigned to it.", t);
 		}
+//		if(!hasValidType) {
+//			throw new CRECastException(name + " is of type " + type.val() + ", but a value of type "
+//					+ value.typeof(env) + " was assigned to it.", t);
+//		}
 
 		this.type = type;
 		this.varValue = value;
 		this.name = name;
 		this.definedTarget = t;
+		this.typeString = type.toString();
 	}
 
 	/**
@@ -107,6 +113,7 @@ public class IVariable extends Construct implements Cloneable {
 		this.varValue = value;
 		this.name = name;
 		this.definedTarget = t;
+		this.typeString = type.toString();
 	}
 
 	@Override
@@ -134,7 +141,7 @@ public class IVariable extends Construct implements Cloneable {
 
 	@Override
 	public String toString() {
-		return this.name + ":(" + this.ival().getClass().getSimpleName() + ") '" + this.ival().val() + "'";
+		return this.name + ":(" + typeString + ") '" + this.ival().val() + "'";
 	}
 
 	@Override
