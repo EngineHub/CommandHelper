@@ -631,16 +631,6 @@ public final class LeftHandSideType extends Construct implements SourceType {
 		return CNull.TYPE.equals(types.get(0).getType());
 	}
 
-	/**
-	 * This should ONLY be used when building native signatures, but otherwise behaves the same as
-	 * {@link #toLeftHandGenericUse()}
-	 *
-	 * @return An equivalent LeftHandGenericUse statement.
-	 */
-	public LeftHandGenericUseParameter toNativeLeftHandGenericUse(CClassType forType, int parameterPosition) {
-		return toLeftHandGenericUse(forType, Target.UNKNOWN, null, ConstraintLocation.LHS, parameterPosition);
-	}
-
 	@Override
 	public LeftHandSideType asLeftHandSideType() {
 		return this;
@@ -649,6 +639,16 @@ public final class LeftHandSideType extends Construct implements SourceType {
 	public static interface Renderer {
 
 		LeftHandGenericUseParameter render(CClassType forType, int parameterPosition);
+	}
+
+	/**
+	 * This should ONLY be used when building native signatures, but otherwise behaves the same as
+	 * {@link #toLeftHandGenericUse()}
+	 *
+	 * @return An equivalent LeftHandGenericUse statement.
+	 */
+	public LeftHandGenericUseParameter toNativeLeftHandGenericUse(CClassType forType, int parameterPosition) {
+		return toLeftHandGenericUse(forType, Target.UNKNOWN, null, ConstraintLocation.LHS, parameterPosition);
 	}
 
 	public Renderer toNativeLeftHandGenericUse() {

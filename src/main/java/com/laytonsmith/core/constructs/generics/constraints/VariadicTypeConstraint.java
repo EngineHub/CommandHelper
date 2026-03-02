@@ -8,7 +8,6 @@ import com.laytonsmith.core.constructs.generics.ConstraintToConstraintValidator;
 import com.laytonsmith.core.constructs.generics.ConstraintValidator;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREGenericConstraintException;
-import com.laytonsmith.core.exceptions.ConfigCompileException;
 import java.util.EnumSet;
 import java.util.Set;
 
