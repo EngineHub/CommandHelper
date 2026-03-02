@@ -383,7 +383,7 @@ public class ItemMeta {
 			}
 			MCItemMeta im = is.getItemMeta();
 			if(im instanceof MCLeatherArmorMeta) {
-				((MCLeatherArmorMeta) im).setColor(ObjectGenerator.GetGenerator().color(color, t));
+				((MCLeatherArmorMeta) im).setColor(ObjectGenerator.GetGenerator().color(color, t, env));
 				is.setItemMeta(im);
 			} else {
 				throw new CRECastException("The item at slot " + slot + " is not leather armor", t);

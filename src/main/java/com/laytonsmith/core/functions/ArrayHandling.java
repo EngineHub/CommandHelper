@@ -16,12 +16,10 @@ import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.compiler.FileOptions;
-import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.compiler.signature.FunctionSignatures;
 import com.laytonsmith.core.compiler.signature.SignatureBuilder;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
-import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CFixedArray;
 import com.laytonsmith.core.constructs.CInt;
@@ -32,8 +30,13 @@ import com.laytonsmith.core.constructs.CSlice;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.ConstraintLocation;
+import com.laytonsmith.core.constructs.generics.Constraints;
+import com.laytonsmith.core.constructs.generics.GenericDeclaration;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.constraints.UnboundedConstraint;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
@@ -68,8 +71,11 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
 
+@SuppressWarnings("ALL")
 @core
-public class ArrayHandling {
+public final class ArrayHandling {
+
+	private ArrayHandling() {}
 
 	public static String docs() {
 		return "This class contains functions that provide a way to manipulate arrays. To create an array, use the"
@@ -97,19 +103,18 @@ public class ArrayHandling {
 			if(args[0] instanceof Sizeable s) {
 				return new CInt(s.size(env), t);
 			}
-			if(args[0].isInstanceOf(CArray.TYPE, null, env) && !(args[0] instanceof CMutablePrimitive)) {
-				return new CInt(((CArray) args[0]).size(env), t);
+			if(args[0].isInstanceOf(CArray.TYPE, null, env)
+					&& !(args[0] instanceof CMutablePrimitive)) {
+				return new CInt(((Sizeable) args[0]).size(env), t);
 			}
 			throw new CRECastException("Argument 1 of " + this.getName() + " must be an array", t);
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
-				Environment env, Set<ConfigCompileException> exceptions) {
-			if(argTypes.size() == 1) {
-				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);
-			}
-			return CInt.TYPE;
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CInt.TYPE)
+					.param(Sizeable.TYPE, "array", "The array to check the size of.")
+					.build();
 		}
 
 		@Override
@@ -173,7 +178,7 @@ public class ArrayHandling {
 			if(args.length >= 2) {
 				index = args[1];
 			} else {
-				index = new CSlice(0, -1, t);
+				index = new CSlice(0, -1, t, env);
 			}
 			if(args.length >= 3) {
 				defaultConstruct = args[2];
@@ -259,7 +264,7 @@ public class ArrayHandling {
 							if(ca.inAssociativeMode()) {
 								c = CArray.GetAssociativeArray(t, null, env);
 							} else {
-								c = new CArray(t);
+								c = new CArray(t, null, env);
 							}
 							ca.set(index, c, t, env);
 							return c;
@@ -297,18 +302,22 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
-				Environment env, Set<ConfigCompileException> exceptions) {
-			if(argTypes.size() == 2 || argTypes.size() == 3) {
-				StaticAnalysis.requireAnyType(argTypes.get(0), new CClassType[] {ArrayAccess.TYPE,
-						com.laytonsmith.core.natives.interfaces.Iterable.TYPE}, argTargets.get(0), env, exceptions);
-				StaticAnalysis.requireAnyType(argTypes.get(1),
-						new CClassType[]{CInt.TYPE, CSlice.TYPE, CString.TYPE}, argTargets.get(1), env, exceptions);
-				if(argTypes.size() == 3) {
-					StaticAnalysis.requireType(argTypes.get(2), Mixed.TYPE, argTargets.get(2), env, exceptions);
-				}
-			}
-			return CClassType.AUTO;
+		public FunctionSignatures getSignatures() {
+			Constraints tConstraints = new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+					new UnboundedConstraint(Target.UNKNOWN, "T"));
+			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN, tConstraints);
+			LeftHandSideType t = LeftHandSideType.fromNativeGenericDefinitionType(genericDeclaration, "T", null);
+			return new SignatureBuilder(t)
+					.param(LeftHandSideType.fromNativeCClassType(
+							ArrayAccess.TYPE, t.toNativeLeftHandGenericUse()),
+							"array", "The ArrayAccess object to read from.")
+					.param(LeftHandSideType.fromNativeTypeUnion(
+							CInt.TYPE.asLeftHandSideType(), CSlice.TYPE.asLeftHandSideType(),
+							CString.TYPE.asLeftHandSideType()),
+							"index", "The index to read from.")
+					.param(t, "default", "The default value to return, if the value at the specified index does not exist.", true)
+					.setGenericDeclaration(genericDeclaration, "The generic type of the array.")
+					.build();
 		}
 
 		@Override
@@ -407,7 +416,7 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
 			env.getEnv(GlobalEnv.class).SetFlag(GlobalEnv.FLAG_ARRAY_SPECIAL_GET, true);
 			Mixed array;
 			try {
@@ -443,16 +452,20 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
-				Environment env, Set<ConfigCompileException> exceptions) {
-			if(argTypes.size() == 3) {
-				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);
-				StaticAnalysis.requireAnyType(argTypes.get(1),
-						new CClassType[]{CInt.TYPE, CSlice.TYPE, CString.TYPE}, argTargets.get(1), env, exceptions);
-				StaticAnalysis.requireType(argTypes.get(2), Mixed.TYPE, argTargets.get(2), env, exceptions);
-				return argTypes.get(2);
-			}
-			return CClassType.AUTO;
+		public FunctionSignatures getSignatures() {
+			Constraints tConstraints = new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+					new UnboundedConstraint(Target.UNKNOWN, "T"));
+			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN, tConstraints);
+			LeftHandSideType t = LeftHandSideType.fromNativeGenericDefinitionType(genericDeclaration, "T", null);
+			return new SignatureBuilder(t)
+					.param(LeftHandSideType.fromNativeCClassType(CArray.TYPE, t.toNativeLeftHandGenericUse()),
+							"array", "The array to set the value in.")
+					.param(LeftHandSideType.fromNativeTypeUnion(
+							CInt.TYPE.asLeftHandSideType(), CString.TYPE.asLeftHandSideType()),
+							"index", "The index to write to.")
+					.param(t, "value", "The value to set in the array.")
+					.setGenericDeclaration(genericDeclaration, "The generic type of the array.")
+					.build();
 		}
 
 		@Override
@@ -538,15 +551,18 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
-				Environment env, Set<ConfigCompileException> exceptions) {
-			if(argTypes.size() >= 2) {
-				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);
-				for(int i = 1; i < argTypes.size(); i++) {
-					StaticAnalysis.requireType(argTypes.get(i), Mixed.TYPE, argTargets.get(i), env, exceptions);
-				}
-			}
-			return CVoid.TYPE;
+		public FunctionSignatures getSignatures() {
+			Constraints tConstraints = new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+					new UnboundedConstraint(Target.UNKNOWN, "T"));
+			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN, tConstraints);
+			LeftHandSideType t = LeftHandSideType.fromNativeGenericDefinitionType(genericDeclaration, "T", null);
+			return new SignatureBuilder(CVoid.TYPE)
+					.param(LeftHandSideType.fromNativeCClassType(CArray.TYPE, t.toNativeLeftHandGenericUse()),
+							"array", "The array to push the values in.")
+					.param(t, "pushValue", "The values to push in the array.")
+					.varParam(t, "additionalValues", "Additional values to push on to the array.")
+					.setGenericDeclaration(genericDeclaration, "The generic type of the array.")
+					.build();
 		}
 
 		@Override
@@ -646,14 +662,18 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
-				Environment env, Set<ConfigCompileException> exceptions) {
-			if(argTypes.size() == 3) {
-				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);
-				StaticAnalysis.requireType(argTypes.get(1), Mixed.TYPE, argTargets.get(1), env, exceptions);
-				StaticAnalysis.requireType(argTypes.get(2), CInt.TYPE, argTargets.get(2), env, exceptions);
-			}
-			return CVoid.TYPE;
+		public FunctionSignatures getSignatures() {
+			Constraints tConstraints = new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+					new UnboundedConstraint(Target.UNKNOWN, "T"));
+			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN, tConstraints);
+			LeftHandSideType t = LeftHandSideType.fromNativeGenericDefinitionType(genericDeclaration, "T", null);
+			return new SignatureBuilder(CVoid.TYPE)
+					.param(LeftHandSideType.fromNativeCClassType(CArray.TYPE, t.toNativeLeftHandGenericUse()),
+							"array", "The array to insert the value in.")
+					.param(CInt.TYPE, "index", "The index to insert at.")
+					.param(t, "value", "The value to insert in the array.")
+					.setGenericDeclaration(genericDeclaration, "The generic type of the array.")
+					.build();
 		}
 
 		@Override
@@ -727,13 +747,17 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
-				Environment env, Set<ConfigCompileException> exceptions) {
-			if(argTypes.size() == 2) {
-				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);
-				StaticAnalysis.requireType(argTypes.get(1), Mixed.TYPE, argTargets.get(1), env, exceptions);
-			}
-			return CBoolean.TYPE;
+		public FunctionSignatures getSignatures() {
+			Constraints tConstraints = new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+					new UnboundedConstraint(Target.UNKNOWN, "T"));
+			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN, tConstraints);
+			LeftHandSideType t = LeftHandSideType.fromNativeGenericDefinitionType(genericDeclaration, "T", null);
+			return new SignatureBuilder(CBoolean.TYPE)
+					.param(LeftHandSideType.fromNativeCClassType(CArray.TYPE, t.toNativeLeftHandGenericUse()),
+							"array", "The array to search in.")
+					.param(t, "testValue", "The value to search for.")
+					.setGenericDeclaration(genericDeclaration, "The generic type of the array.")
+					.build();
 		}
 
 		@Override
@@ -837,13 +861,17 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
-				Environment env, Set<ConfigCompileException> exceptions) {
-			if(argTypes.size() == 2) {
-				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);
-				StaticAnalysis.requireType(argTypes.get(1), Mixed.TYPE, argTargets.get(1), env, exceptions);
-			}
-			return CBoolean.TYPE;
+		public FunctionSignatures getSignatures() {
+			Constraints tConstraints = new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+					new UnboundedConstraint(Target.UNKNOWN, "T"));
+			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN, tConstraints);
+			LeftHandSideType t = LeftHandSideType.fromNativeGenericDefinitionType(genericDeclaration, "T", null);
+			return new SignatureBuilder(CBoolean.TYPE)
+					.param(LeftHandSideType.fromNativeCClassType(CArray.TYPE, t.toNativeLeftHandGenericUse()),
+							"array", "The array to search in.")
+					.param(t, "testValue", "The value to search for.")
+					.setGenericDeclaration(genericDeclaration, "The generic type of the array.")
+					.build();
 		}
 
 		@Override
@@ -891,13 +919,17 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
-				Environment env, Set<ConfigCompileException> exceptions) {
-			if(argTypes.size() == 2) {
-				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);
-				StaticAnalysis.requireType(argTypes.get(1), Mixed.TYPE, argTargets.get(1), env, exceptions);
-			}
-			return CBoolean.TYPE;
+		public FunctionSignatures getSignatures() {
+			Constraints tConstraints = new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+					new UnboundedConstraint(Target.UNKNOWN, "T"));
+			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN, tConstraints);
+			LeftHandSideType t = LeftHandSideType.fromNativeGenericDefinitionType(genericDeclaration, "T", null);
+			return new SignatureBuilder(CBoolean.TYPE)
+					.param(LeftHandSideType.fromNativeCClassType(CArray.TYPE, t.toNativeLeftHandGenericUse()),
+							"array", "The array to search in.")
+					.param(t, "testValue", "The value to search for.")
+					.setGenericDeclaration(genericDeclaration, "The generic type of the array.")
+					.build();
 		}
 
 		@Override
@@ -1023,15 +1055,22 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
-				Environment env, Set<ConfigCompileException> exceptions) {
-			if(argTypes.size() >= 1) {
-				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);
-				for(int i = 1; i < argTypes.size(); i++) {
-					StaticAnalysis.requireType(argTypes.get(i), Mixed.TYPE, argTargets.get(i), env, exceptions);
-				}
-			}
-			return CBoolean.TYPE;
+		public FunctionSignatures getSignatures() {
+			Constraints tConstraints = new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+					new UnboundedConstraint(Target.UNKNOWN, "T"));
+			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN, tConstraints);
+			LeftHandSideType t = LeftHandSideType.fromNativeGenericDefinitionType(genericDeclaration, "T", null);
+			return new SignatureBuilder(CBoolean.TYPE)
+					.param(LeftHandSideType.fromNativeCClassType(CArray.TYPE, t.toNativeLeftHandGenericUse()),
+							"array", "The array to search in.")
+					.param(LeftHandSideType.fromNativeTypeUnion(
+							CInt.TYPE.asLeftHandSideType(), CString.TYPE.asLeftHandSideType()),
+							"index", "The index to check.")
+					.varParam(LeftHandSideType.fromNativeTypeUnion(
+							CInt.TYPE.asLeftHandSideType(), CString.TYPE.asLeftHandSideType()),
+							"additionalIndices", "Additionaly indices to recurse down and check.")
+					.setGenericDeclaration(genericDeclaration, "The generic type of the array.")
+					.build();
 		}
 
 		@Override
@@ -1111,9 +1150,10 @@ public class ArrayHandling {
 
 		@Override
 		public CArray exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			if(args[0].isInstanceOf(CArray.TYPE, null, env) && args[1].isInstanceOf(CInt.TYPE, null, env)) {
-				CArray original = (CArray) args[0];
-				int size = (int) ((CInt) args[1]).getInt();
+			if(args[0].isInstanceOf(CArray.TYPE, null, env)
+					&& args[1].isInstanceOf(CInt.TYPE, null, env)) {
+				CArray original = ArgumentValidation.getArray(args[0], t, env);
+				int size = ArgumentValidation.getInt32(args[1], t, env);
 				Mixed fill = CNull.NULL;
 				if(args.length == 3) {
 					fill = args[2];
@@ -1129,16 +1169,18 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
-				Environment env, Set<ConfigCompileException> exceptions) {
-			if(argTypes.size() == 2 || argTypes.size() == 3) {
-				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);
-				StaticAnalysis.requireType(argTypes.get(1), CInt.TYPE, argTargets.get(1), env, exceptions);
-				if(argTypes.size() == 3) {
-					StaticAnalysis.requireType(argTypes.get(2), Mixed.TYPE, argTargets.get(2), env, exceptions);
-				}
-			}
-			return CArray.TYPE;
+		public FunctionSignatures getSignatures() {
+			Constraints tConstraints = new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+					new UnboundedConstraint(Target.UNKNOWN, "T"));
+			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN, tConstraints);
+			LeftHandSideType t = LeftHandSideType.fromNativeGenericDefinitionType(genericDeclaration, "T", null);
+			return new SignatureBuilder(CArray.TYPE, "A reference to the passed in array.")
+					.param(LeftHandSideType.fromNativeCClassType(CArray.TYPE, t.toNativeLeftHandGenericUse()),
+							"array", "The array to search in.")
+					.param(CInt.TYPE, "size", "The new array size.")
+					.param(t, "fill", "The value to fill in the array, null, by default", true)
+					.setGenericDeclaration(genericDeclaration, "The generic type of the array.")
+					.build();
 		}
 
 		@Override
@@ -1214,9 +1256,11 @@ public class ArrayHandling {
 				increment = ArgumentValidation.getInt(args[2], t, env);
 			}
 			if(start < finish && increment < 0 || start > finish && increment > 0 || increment == 0) {
-				return new CArray(t, null, env);
+				return new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+						.addNativeParameter(CInt.TYPE, null).buildNative(), env);
 			}
-			CArray ret = new CArray(t);
+			CArray ret = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CInt.TYPE, null).buildNative(), env);
 			for(long i = start; (increment > 0 ? i < finish : i > finish); i = i + increment) {
 				ret.push(new CInt(i, t), t, env);
 			}
@@ -1282,9 +1326,10 @@ public class ArrayHandling {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			// As an exception, strings aren't supported here. There's no reason to do this for a string that isn't accidental.
-			if(args[0].isInstanceOf(ArrayAccess.TYPE, null, env) && !(args[0].isInstanceOf(CString.TYPE, null, env))) {
+			if(args[0].isInstanceOf(ArrayAccess.TYPE, null, env)
+					&& !(args[0].isInstanceOf(CString.TYPE, null, env))) {
 				ArrayAccess ca = (ArrayAccess) args[0];
-				CArray ca2 = new CArray(t);
+				CArray ca2 = new CArray(t, null, env);
 				for(Mixed c : ca.keySet(env)) {
 					ca2.push(c, t, env);
 				}
@@ -1350,7 +1395,7 @@ public class ArrayHandling {
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
 				CArray ca = ArgumentValidation.getArray(args[0], t, env);
-				CArray ca2 = new CArray(t);
+				CArray ca2 = new CArray(t, null, env);
 				for(Mixed c : ca.keySet(env)) {
 					ca2.push(ca.get(c, t, env), t, env);
 				}
@@ -1416,7 +1461,7 @@ public class ArrayHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CArray newArray = new CArray(t);
+			CArray newArray = new CArray(t, null, env);
 			if(args.length < 2) {
 				throw new CREInsufficientArgumentsException("array_merge must be called with at least two parameters", t);
 			}
@@ -1715,7 +1760,7 @@ public class ArrayHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			return new CSlice(ArgumentValidation.getInt(args[0], t, env), ArgumentValidation.getInt(args[1], t, env), t);
+			return new CSlice(ArgumentValidation.getInt(args[0], t, env), ArgumentValidation.getInt(args[1], t, env), t, env);
 		}
 
 		@Override
@@ -1799,8 +1844,8 @@ public class ArrayHandling {
 				return ca;
 			}
 
-			CArray left = new CArray(t);
-			CArray right = new CArray(t);
+			CArray left = new CArray(t, null, env);
+			CArray right = new CArray(t, null, env);
 			int middle = (int) (ca.size(env) / 2);
 			for(int i = 0; i < middle; i++) {
 				left.push(ca.get(i, t, env), t, env);
@@ -1816,7 +1861,7 @@ public class ArrayHandling {
 		}
 
 		private CArray merge(CArray left, CArray right, CClosure closure, Target t, Environment env) {
-			CArray result = new CArray(t);
+			CArray result = new CArray(t, null, env);
 			while(left.size(env) > 0 || right.size(env) > 0) {
 				if(left.size(env) > 0 && right.size(env) > 0) {
 					// Compare the first two elements of each side
@@ -2001,7 +2046,7 @@ public class ArrayHandling {
 
 				@Override
 				public void run() {
-					Mixed c = new array_sort().exec(Target.UNKNOWN, null, null, array, sortType);
+					Mixed c = new array_sort().exec(Target.UNKNOWN, null, generics, array, sortType);
 					callback.executeCallable(env, t, new Mixed[]{c});
 				}
 			});
@@ -2061,8 +2106,8 @@ public class ArrayHandling {
 				array.removeValues(args[1]);
 			} else {
 				for(long i = array.size(env) - 1; i >= 0; i--) {
-					if(BasicLogic.equals.doEquals(array.get(i, t, env), args[1])) {
-						new array_remove().exec(t, env, null, array, new CInt(i, t));
+					if(BasicLogic.equals.doEquals(array.get(i, t), args[1])) {
+						new array_remove().exec(t, env, generics, array, new CInt(i, t));
 					}
 				}
 			}
@@ -2366,7 +2411,7 @@ public class ArrayHandling {
 			long number = 1;
 			boolean getKeys = true;
 			CArray array = ArgumentValidation.getArray(args[0], t, env);
-			CArray newArray = new CArray(t);
+			CArray newArray = new CArray(t, null, env);
 			if(array.isEmpty(env)) {
 				return newArray;
 			}
@@ -2478,7 +2523,7 @@ public class ArrayHandling {
 				return array.clone();
 			} else {
 				List<Mixed> asList = array.asList(env);
-				CArray newArray = new CArray(t);
+				CArray newArray = new CArray(t, null, env);
 				Set<Mixed> set = new LinkedComparatorSet<>(asList, new LinkedComparatorSet.EqualsComparator<Mixed>() {
 
 					@Override
@@ -2577,7 +2622,7 @@ public class ArrayHandling {
 					}
 				}
 			} else {
-				newArray = new CArray(t);
+				newArray = new CArray(t, null, env);
 				for(int i = 0; i < array.size(env); i++) {
 					Mixed key = new CInt(i, t);
 					Mixed value = array.get(i, t, env);
@@ -2733,7 +2778,8 @@ public class ArrayHandling {
 				throw new CRECastException("Expecting argument 1 to be an array", t);
 			}
 			CArray array = (CArray) args[0];
-			CArray shallowClone = (array.isAssociative() ? CArray.GetAssociativeArray(t, null, env) : new CArray(t));
+			CArray shallowClone = (array.isAssociative() ? CArray.GetAssociativeArray(t, null, env)
+					: new CArray(t, null, env));
 			for(Mixed key : array.keySet(env)) {
 				shallowClone.set(key, array.get(key, t, env), t, env);
 			}
@@ -3195,7 +3241,8 @@ public class ArrayHandling {
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CArray array = ArgumentValidation.getArray(args[0], t, env);
 			CClosure closure = ArgumentValidation.getObject(args[1], t, CClosure.class);
-			CArray newArray = (array.isAssociative() ? CArray.GetAssociativeArray(t, null, env) : new CArray(t, (int) array.size(env)));
+			CArray newArray = (array.isAssociative() ? CArray.GetAssociativeArray(t, null, env)
+					: new CArray(t, (int) array.size(env), null, env));
 
 			for(Mixed c : array.keySet(env)) {
 				Mixed fr = closure.executeCallable(env, t, array.get(c, t, env));
@@ -3305,7 +3352,7 @@ public class ArrayHandling {
 					mode = ArgumentValidation.getEnum(args[2], ArrayValueComparisonMode.class, t);
 				}
 			}
-			CArray ret = new CArray(t);
+			CArray ret = new CArray(t, null, env);
 
 			if(!associativeMode && closure == null && mode == ArrayValueComparisonMode.HASH) {
 				// Optimize for O(n log n) method
@@ -3509,7 +3556,7 @@ public class ArrayHandling {
 			};
 		}
 
-		private boolean subsetOf(Mixed constA, Mixed constB, Target t, Environment env) {
+		public boolean subsetOf(Mixed constA, Mixed constB, Target t, Environment env) {
 			if(!constA.typeof(env).equals(constB.typeof(env))) {
 				return false;
 			}
@@ -3697,7 +3744,7 @@ public class ArrayHandling {
 					mode = ArgumentValidation.getEnum(args[2], ArrayValueComparisonMode.class, t);
 				}
 			}
-			CArray ret = new CArray(t);
+			CArray ret = new CArray(t, null, env);
 
 			if(!associativeMode && closure == null && mode == ArrayValueComparisonMode.HASH) {
 				// Optimize for O(n log n) method

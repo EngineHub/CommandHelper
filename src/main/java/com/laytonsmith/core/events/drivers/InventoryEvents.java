@@ -38,6 +38,7 @@ import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.AbstractEvent;
 import com.laytonsmith.core.events.BindableEvent;
@@ -101,7 +102,8 @@ public class InventoryEvents {
 			Map<String, Mixed> prefilter = event.getPrefilter();
 			if(prefilter.containsKey("slotitem")) {
 				Mixed type = prefilter.get("slotitem");
-				if(type.isInstanceOf(CString.TYPE, null, event.getEnvironment()) && type.val().contains(":") || ArgumentValidation.isNumber(type)) {
+				if(type.isInstanceOf(CString.TYPE, null, event.getEnvironment())
+						&& type.val().contains(":") || ArgumentValidation.isNumber(type, event.getEnvironment())) {
 					MCItemStack is = Static.ParseItemNotation(null, prefilter.get("slotitem").val(), 1, event.getTarget());
 					prefilter.put("slotitem", new CString(is.getType().getName(), event.getTarget()));
 					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The item notation format for the \"slotitem\" prefilter"
@@ -111,21 +113,21 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event, Environment env) throws PrefilterNonMatchException {
 			if(event instanceof MCInventoryClickEvent) {
 				MCInventoryClickEvent e = (MCInventoryClickEvent) event;
 
 				if(prefilter.containsKey("virtual")) {
 					boolean isVirtual = e.getInventory().getHolder() instanceof MCVirtualInventoryHolder;
-					if(isVirtual != ArgumentValidation.getBoolean(prefilter.get("virtual"), Target.UNKNOWN)) {
+					if(isVirtual != ArgumentValidation.getBoolean(prefilter.get("virtual"), Target.UNKNOWN, env)) {
 						return false;
 					}
 				}
-				Prefilters.match(prefilter, "action", e.getAction().name(), PrefilterType.MACRO);
-				Prefilters.match(prefilter, "player", e.getWhoClicked().getName(), PrefilterType.MACRO);
-				Prefilters.match(prefilter, "clicktype", e.getClickType().name(), PrefilterType.MACRO);
-				Prefilters.match(prefilter, "slottype", e.getSlotType().name(), PrefilterType.MACRO);
-				Prefilters.match(prefilter, "slotitem", e.getCurrentItem().getType().getName(), PrefilterType.STRING_MATCH);
+				Prefilters.match(prefilter, "action", e.getAction().name(), PrefilterType.MACRO, env);
+				Prefilters.match(prefilter, "player", e.getWhoClicked().getName(), PrefilterType.MACRO, env);
+				Prefilters.match(prefilter, "clicktype", e.getClickType().name(), PrefilterType.MACRO, env);
+				Prefilters.match(prefilter, "slottype", e.getSlotType().name(), PrefilterType.MACRO, env);
+				Prefilters.match(prefilter, "slotitem", e.getCurrentItem().getType().getName(), PrefilterType.STRING_MATCH, env);
 
 				return true;
 			}
@@ -140,7 +142,8 @@ public class InventoryEvents {
 				Target t = Target.UNKNOWN;
 
 				map.put("player", new CString(e.getWhoClicked().getName(), t));
-				CArray viewers = new CArray(t);
+				CArray viewers = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+						.addNativeParameter(CString.TYPE, null).buildNative(), env);
 				for(MCHumanEntity viewer : e.getViewers()) {
 					viewers.push(new CString(viewer.getName(), t), t, env);
 				}
@@ -238,7 +241,8 @@ public class InventoryEvents {
 			Map<String, Mixed> prefilter = event.getPrefilter();
 			if(prefilter.containsKey("cursoritem")) {
 				Mixed type = prefilter.get("cursoritem");
-				if(type.isInstanceOf(CString.TYPE, null, event.getEnvironment()) && type.val().contains(":") || ArgumentValidation.isNumber(type)) {
+				if(type.isInstanceOf(CString.TYPE, null, event.getEnvironment())
+						&& type.val().contains(":") || ArgumentValidation.isNumber(type, event.getEnvironment())) {
 					MCItemStack is = Static.ParseItemNotation(null, prefilter.get("cursoritem").val(), 1, event.getTarget());
 					prefilter.put("cursoritem", new CString(is.getType().getName(), event.getTarget()));
 					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The item notation format for the \"cursoritem\" prefilter"
@@ -248,19 +252,19 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event, Environment env) throws PrefilterNonMatchException {
 			if(event instanceof MCInventoryDragEvent) {
 				MCInventoryDragEvent e = (MCInventoryDragEvent) event;
 
 				if(prefilter.containsKey("virtual")) {
 					boolean isVirtual = e.getInventory().getHolder() instanceof MCVirtualInventoryHolder;
-					if(isVirtual != ArgumentValidation.getBoolean(prefilter.get("virtual"), Target.UNKNOWN)) {
+					if(isVirtual != ArgumentValidation.getBoolean(prefilter.get("virtual"), Target.UNKNOWN, env)) {
 						return false;
 					}
 				}
-				Prefilters.match(prefilter, "world", e.getWhoClicked().getWorld().getName(), PrefilterType.MACRO);
-				Prefilters.match(prefilter, "type", e.getType().name(), PrefilterType.STRING_MATCH);
-				Prefilters.match(prefilter, "cursoritem", e.getOldCursor().getType().getName(), PrefilterType.STRING_MATCH);
+				Prefilters.match(prefilter, "world", e.getWhoClicked().getWorld().getName(), PrefilterType.MACRO, env);
+				Prefilters.match(prefilter, "type", e.getType().name(), PrefilterType.STRING_MATCH, env);
+				Prefilters.match(prefilter, "cursoritem", e.getOldCursor().getType().getName(), PrefilterType.STRING_MATCH, env);
 
 				return true;
 			}
@@ -277,13 +281,15 @@ public class InventoryEvents {
 				map.put("newcursoritem", ObjectGenerator.GetGenerator().item(e.getCursor(), Target.UNKNOWN));
 				map.put("oldcursoritem", ObjectGenerator.GetGenerator().item(e.getOldCursor(), Target.UNKNOWN));
 
-				CArray slots = new CArray(Target.UNKNOWN);
+				CArray slots = new CArray(Target.UNKNOWN, GenericParameters.emptyBuilder(CArray.TYPE)
+						.addNativeParameter(CInt.TYPE, null).buildNative(), env);
 				for(Integer slot : e.getInventorySlots()) {
 					slots.push(new CInt(slot.intValue(), Target.UNKNOWN), Target.UNKNOWN, env);
 				}
 				map.put("slots", slots);
 
-				CArray rawSlots = new CArray(Target.UNKNOWN);
+				CArray rawSlots = new CArray(Target.UNKNOWN, GenericParameters.emptyBuilder(CArray.TYPE)
+						.addNativeParameter(CInt.TYPE, null).buildNative(), env);
 				for(Integer slot : e.getRawSlots()) {
 					rawSlots.push(new CInt(slot.intValue(), Target.UNKNOWN), Target.UNKNOWN, env);
 				}
@@ -359,12 +365,12 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event, Environment env) throws PrefilterNonMatchException {
 			if(event instanceof MCInventoryOpenEvent) {
 				MCInventoryOpenEvent e = (MCInventoryOpenEvent) event;
 				if(prefilter.containsKey("virtual")) {
 					boolean isVirtual = e.getInventory().getHolder() instanceof MCVirtualInventoryHolder;
-					if(isVirtual != ArgumentValidation.getBoolean(prefilter.get("virtual"), Target.UNKNOWN)) {
+					if(isVirtual != ArgumentValidation.getBoolean(prefilter.get("virtual"), Target.UNKNOWN, env)) {
 						return false;
 					}
 				}
@@ -436,12 +442,12 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event, Environment env) throws PrefilterNonMatchException {
 			if(event instanceof MCInventoryCloseEvent) {
 				MCInventoryCloseEvent e = (MCInventoryCloseEvent) event;
 				if(prefilter.containsKey("virtual")) {
 					boolean isVirtual = e.getInventory().getHolder() instanceof MCVirtualInventoryHolder;
-					if(isVirtual != ArgumentValidation.getBoolean(prefilter.get("virtual"), Target.UNKNOWN)) {
+					if(isVirtual != ArgumentValidation.getBoolean(prefilter.get("virtual"), Target.UNKNOWN, env)) {
 						return false;
 					}
 				}
@@ -521,7 +527,7 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Environment env) throws PrefilterNonMatchException {
 			return true;
 		}
 
@@ -570,7 +576,7 @@ public class InventoryEvents {
 				}
 
 				if(key.equalsIgnoreCase("enchants")) {
-					e.setEnchantsToAdd((ObjectGenerator.GetGenerator().enchants((CArray) value, value.getTarget())));
+					e.setEnchantsToAdd((ObjectGenerator.GetGenerator().enchants((CArray) value, value.getTarget(), env)));
 					return true;
 				}
 			}
@@ -607,7 +613,7 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Environment env) throws PrefilterNonMatchException {
 			return true;
 		}
 
@@ -623,7 +629,9 @@ public class InventoryEvents {
 				map.put("inventorytype", new CString(e.getInventory().getType().name(), t));
 				map.put("enchantmentbonus", new CInt(e.getEnchantmentBonus(), t));
 
-				CArray expCostsCArray = new CArray(t);
+				CArray expCostsCArray = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+						.addNativeParameter(CInt.TYPE, null).buildNative(), env);
+
 				MCEnchantmentOffer[] offers = e.getOffers();
 				for(MCEnchantmentOffer offer : offers) {
 					expCostsCArray.push(new CInt(offer.getCost(), t), t, env);
@@ -701,7 +709,7 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event, Environment env) throws PrefilterNonMatchException {
 			if(event instanceof MCItemHeldEvent) {
 				MCItemHeldEvent e = (MCItemHeldEvent) event;
 				if(prefilter.containsKey("player") && !e.getPlayer().getName().equals(prefilter.get("player").val())) {
@@ -775,7 +783,8 @@ public class InventoryEvents {
 			Map<String, Mixed> prefilter = event.getPrefilter();
 			if(prefilter.containsKey("main_hand")) {
 				Mixed type = prefilter.get("main_hand");
-				if(type.isInstanceOf(CString.TYPE, null, event.getEnvironment()) && type.val().contains(":") || ArgumentValidation.isNumber(type)) {
+				if(type.isInstanceOf(CString.TYPE, null, event.getEnvironment())
+						&& type.val().contains(":") || ArgumentValidation.isNumber(type, event.getEnvironment())) {
 					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The item notation format in the \"main_hand\""
 							+ " prefilter in " + getName() + " is deprecated.", event.getTarget());
 					MCItemStack is = Static.ParseItemNotation(null, prefilter.get("main_hand").val(), 1, event.getTarget());
@@ -784,7 +793,8 @@ public class InventoryEvents {
 			}
 			if(prefilter.containsKey("off_hand")) {
 				Mixed type = prefilter.get("off_hand");
-				if(type.isInstanceOf(CString.TYPE, null, event.getEnvironment()) && type.val().contains(":") || ArgumentValidation.isNumber(type)) {
+				if(type.isInstanceOf(CString.TYPE, null, event.getEnvironment())
+						&& type.val().contains(":") || ArgumentValidation.isNumber(type, event.getEnvironment())) {
 					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The item notation format in the \"off_hand\""
 							+ " prefilter in " + getName() + " is deprecated.", event.getTarget());
 					MCItemStack is = Static.ParseItemNotation(null, prefilter.get("off_hand").val(), 1, event.getTarget());
@@ -794,11 +804,11 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event, Environment env) throws PrefilterNonMatchException {
 			if(event instanceof MCItemSwapEvent) {
 				MCItemSwapEvent e = (MCItemSwapEvent) event;
 
-				Prefilters.match(prefilter, "player", e.getPlayer().getName(), PrefilterType.MACRO);
+				Prefilters.match(prefilter, "player", e.getPlayer().getName(), PrefilterType.MACRO, env);
 				if(prefilter.containsKey("main_hand")) {
 					String value = prefilter.get("main_hand").val();
 					if(!e.getMainHandItem().getType().getName().equals(value)) {
@@ -880,7 +890,7 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event, Environment env) throws PrefilterNonMatchException {
 			if(event instanceof MCPrepareItemCraftEvent) {
 				return true;
 			}
@@ -892,7 +902,8 @@ public class InventoryEvents {
 			if(event instanceof MCPrepareItemCraftEvent e) {
 				Map<String, Mixed> ret = evaluate_helper(e);
 				Target t = Target.UNKNOWN;
-				CArray viewers = new CArray(t);
+				CArray viewers = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+						.addNativeParameter(CString.TYPE, null).buildNative(), env);
 				for(MCHumanEntity v : e.getViewers()) {
 					viewers.push(new CString(v.getName(), t), t, env);
 				}
@@ -965,7 +976,7 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event, Environment env) throws PrefilterNonMatchException {
 			if(event instanceof MCPrepareAnvilEvent) {
 				return true;
 			}
@@ -1062,7 +1073,7 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event, Environment env) throws PrefilterNonMatchException {
 			if(event instanceof MCPrepareSmithingEvent) {
 				return true;
 			}
@@ -1135,7 +1146,7 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event, Environment env) throws PrefilterNonMatchException {
 			if(event instanceof MCPrepareGrindstoneEvent) {
 				return true;
 			}

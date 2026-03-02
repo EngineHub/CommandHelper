@@ -825,7 +825,7 @@ public class MobManagement {
 				CArray ea = (CArray) args[1];
 				for(String key : ea.stringKeySet()) {
 					try {
-						eq.put(MCEquipmentSlot.valueOf(key.toUpperCase()), ObjectGenerator.GetGenerator().item(ea.get(key, t), t));
+						eq.put(MCEquipmentSlot.valueOf(key.toUpperCase()), ObjectGenerator.GetGenerator().item(ea.get(key, t, env), t, env));
 					} catch (IllegalArgumentException iae) {
 						throw new CREFormatException("Not an equipment slot: " + key, t);
 					}
@@ -939,7 +939,8 @@ public class MobManagement {
 			if(eq == null) {
 				throw new CREBadEntityTypeException("Entities of type \"" + le.getType() + "\" do not have equipment.", t);
 			}
-			CArray ret = CArray.GetAssociativeArray(t, null, env);
+			CArray ret = CArray.GetAssociativeArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+				.addNativeParameter(CDouble.TYPE, null).buildNative(), env);
 			for(Map.Entry<MCEquipmentSlot, Float> ent : eq.getAllDropChances().entrySet()) {
 				ret.set(ent.getKey().name().toLowerCase(), new CDouble(ent.getValue(), t), t, env);
 			}
@@ -987,7 +988,7 @@ public class MobManagement {
 				CArray ea = (CArray) args[1];
 				for(String key : ea.stringKeySet()) {
 					try {
-						eq.put(MCEquipmentSlot.valueOf(key.toUpperCase()), ArgumentValidation.getDouble32(ea.get(key, t), t));
+						eq.put(MCEquipmentSlot.valueOf(key.toUpperCase()), ArgumentValidation.getDouble32(ea.get(key, t, env), t, env));
 					} catch (IllegalArgumentException iae) {
 						throw new CREFormatException("Not an equipment slot: " + key, t);
 					}
@@ -1331,7 +1332,7 @@ public class MobManagement {
 						continue;
 					}
 					try {
-						material = StaticLayer.GetMaterialFromLegacy(ArgumentValidation.getInt16(mat, t), 0);
+						material = StaticLayer.GetMaterialFromLegacy(ArgumentValidation.getInt16(mat, t, env), 0);
 						if(material != null) {
 							MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The id \"" + mat.val() + "\" is deprecated."
 									+ " Converted to \"" + material.getName() + "\"", t);
@@ -1347,7 +1348,7 @@ public class MobManagement {
 			if(args.length == 3) {
 				maxDistance = ArgumentValidation.getInt32(args[2], t, env);
 			}
-			CArray lineOfSight = new CArray(t);
+			CArray lineOfSight = new CArray(t, null, env);
 			for(MCBlock block : entity.getLineOfSight(transparents, maxDistance)) {
 				lineOfSight.push(ObjectGenerator.GetGenerator().location(block.getLocation(), false), t, env);
 			}
@@ -1825,7 +1826,7 @@ public class MobManagement {
 				throw new CREFormatException("Invalid attribute name: " + args[1].val(), t);
 			}
 			try {
-				CArray ret = new CArray(t);
+				CArray ret = new CArray(t, null, env);
 				for(MCAttributeModifier m : e.getAttributeModifiers(attribute)) {
 					ret.push(ObjectGenerator.GetGenerator().attributeModifier(m, t), t, env);
 				}
@@ -1998,7 +1999,7 @@ public class MobManagement {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCLivingEntity e = Static.getLivingEntity(args[0], t);
-			MCAttributeModifier modifier = ObjectGenerator.GetGenerator().attributeModifier(ArgumentValidation.getArray(args[1], t, env), t);
+			MCAttributeModifier modifier = ObjectGenerator.GetGenerator().attributeModifier(ArgumentValidation.getArray(args[1], t, env), t, env);
 			try {
 				e.addAttributeModifier(modifier);
 			} catch (IllegalArgumentException ex) {
@@ -2053,7 +2054,7 @@ public class MobManagement {
 			MCLivingEntity e = Static.getLivingEntity(args[0], t);
 			MCAttributeModifier modifier = null;
 			if(args.length == 2) {
-				modifier = ObjectGenerator.GetGenerator().attributeModifier(ArgumentValidation.getArray(args[1], t, env), t);
+				modifier = ObjectGenerator.GetGenerator().attributeModifier(ArgumentValidation.getArray(args[1], t, env), t, env);
 			} else {
 				MCAttribute attribute;
 				try {

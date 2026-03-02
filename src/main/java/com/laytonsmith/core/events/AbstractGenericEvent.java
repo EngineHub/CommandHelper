@@ -97,7 +97,7 @@ public abstract class AbstractGenericEvent<TBindableEvent extends BindableEvent>
 	}
 
 	@Override
-	public boolean matches(Map<String, Mixed> prefilter, TBindableEvent e) throws PrefilterNonMatchException {
+	public boolean matches(Map<String, Mixed> prefilter, TBindableEvent e, Environment env) throws PrefilterNonMatchException {
 		throw new UnsupportedOperationException();
 	}
 

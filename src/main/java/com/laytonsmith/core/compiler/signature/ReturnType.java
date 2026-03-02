@@ -1,6 +1,7 @@
 package com.laytonsmith.core.compiler.signature;
 
 import com.laytonsmith.core.constructs.CClassType;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 
 /**
  * Represents the return type of a function, closure or procedure.
@@ -8,7 +9,7 @@ import com.laytonsmith.core.constructs.CClassType;
  */
 public class ReturnType {
 
-	private final CClassType type;
+	private final LeftHandSideType type;
 	private final String valDesc;
 
 	/**
@@ -16,7 +17,7 @@ public class ReturnType {
 	 * @param type - The type that will be returned.
 	 * @param valDesc - The return value description.
 	 */
-	public ReturnType(CClassType type, String valDesc) {
+	public ReturnType(LeftHandSideType type, String valDesc) {
 		this.type = type;
 		this.valDesc = valDesc;
 	}
@@ -25,7 +26,7 @@ public class ReturnType {
 	 * Gets the return type.
 	 * @return The {@link CClassType}.
 	 */
-	public CClassType getType() {
+	public LeftHandSideType getType() {
 		return this.type;
 	}
 

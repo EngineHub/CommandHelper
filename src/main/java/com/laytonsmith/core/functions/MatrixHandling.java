@@ -21,6 +21,7 @@ import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
+import com.laytonsmith.core.exceptions.CRE.CREIndexOverflowException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -83,7 +84,7 @@ public class MatrixHandling {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class, CRERangeException.class};
+			return new Class[]{CRECastException.class, CRERangeException.class, CREIndexOverflowException.class};
 		}
 
 		@Override
@@ -160,7 +161,7 @@ public class MatrixHandling {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class, CRERangeException.class};
+			return new Class[]{CRECastException.class, CRERangeException.class, CREIndexOverflowException.class};
 		}
 
 		@Override
@@ -277,7 +278,7 @@ public class MatrixHandling {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class};
+			return new Class[]{CRECastException.class, CREIndexOverflowException.class};
 		}
 
 		@Override
@@ -485,7 +486,7 @@ public class MatrixHandling {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class};
+			return new Class[]{CRECastException.class, CREIndexOverflowException.class};
 		}
 
 		@Override
@@ -540,7 +541,7 @@ public class MatrixHandling {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREIllegalArgumentException.class, CRECastException.class};
+			return new Class[]{CREIllegalArgumentException.class, CRECastException.class, CREIndexOverflowException.class};
 		}
 
 		@Override
@@ -605,7 +606,7 @@ public class MatrixHandling {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREIllegalArgumentException.class, CRECastException.class};
+			return new Class[]{CREIllegalArgumentException.class, CRECastException.class, CREIndexOverflowException.class};
 		}
 
 		@Override
@@ -670,7 +671,7 @@ public class MatrixHandling {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class};
+			return new Class[]{CRECastException.class, CREIndexOverflowException.class};
 		}
 
 		@Override
@@ -729,7 +730,7 @@ public class MatrixHandling {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRERangeException.class, CRECastException.class};
+			return new Class[]{CRERangeException.class, CRECastException.class, CREIndexOverflowException.class};
 		}
 
 		@Override
@@ -793,7 +794,7 @@ public class MatrixHandling {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREIllegalArgumentException.class, CRECastException.class};
+			return new Class[]{CREIllegalArgumentException.class, CRECastException.class, CREIndexOverflowException.class};
 		}
 
 		@Override
@@ -859,7 +860,7 @@ public class MatrixHandling {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class};
+			return new Class[]{CRECastException.class, CREIndexOverflowException.class};
 		}
 
 		@Override
@@ -924,7 +925,7 @@ public class MatrixHandling {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class};
+			return new Class[]{CRECastException.class, CREIndexOverflowException.class};
 		}
 
 		@Override
@@ -989,7 +990,7 @@ public class MatrixHandling {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class};
+			return new Class[]{CRECastException.class, CREIndexOverflowException.class};
 		}
 
 		@Override
@@ -1044,7 +1045,7 @@ public class MatrixHandling {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class};
+			return new Class[]{CRECastException.class, CREIndexOverflowException.class};
 		}
 
 		@Override
@@ -1113,7 +1114,7 @@ public class MatrixHandling {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class, CRERangeException.class};
+			return new Class[]{CRECastException.class, CRERangeException.class, CREIndexOverflowException.class};
 		}
 
 		@Override
@@ -1169,7 +1170,7 @@ public class MatrixHandling {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class, CRERangeException.class};
+			return new Class[]{CRECastException.class, CRERangeException.class, CREIndexOverflowException.class};
 		}
 
 		@Override
@@ -1226,7 +1227,7 @@ public class MatrixHandling {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class};
+			return new Class[]{CRECastException.class, CREIndexOverflowException.class};
 		}
 
 		@Override

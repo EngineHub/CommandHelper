@@ -703,6 +703,7 @@ public class ArrayUtils {
 		for(int i = 0; i < list.size(); i++) {
 			obj[i] = list.get(i);
 		}
+		assert obj != null;
 		return obj;
 	}
 

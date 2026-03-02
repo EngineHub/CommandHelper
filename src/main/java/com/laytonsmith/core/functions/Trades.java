@@ -59,7 +59,7 @@ public class Trades {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CArray ret = new CArray(t);
+			CArray ret = new CArray(t, null, env);
 			for(MCMerchantRecipe mr : GetMerchant(args[0], t).getRecipes()) {
 				ret.push(trade(mr, t, env), t, env);
 			}

@@ -5,6 +5,7 @@ import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.core.AbstractCommandLineTool;
 import com.laytonsmith.core.InternalException;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -79,7 +80,8 @@ public class AsmMain {
 					throw new ConfigCompileGroupException(exs);
 				}
 			} catch (ConfigCompileGroupException ex) {
-				ConfigRuntimeException.HandleUncaughtException(ex, "One or more compile errors occurred during compilation.", null);
+				ConfigRuntimeException.HandleUncaughtException(ex, "One or more compile errors occurred during compilation.", null,
+						Static.GenerateStandaloneEnvironment());
 			}
 		}
 	}

@@ -249,7 +249,7 @@ public class Recipes {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CArray ret = new CArray(t);
+			CArray ret = new CArray(t, null, env);
 			MCItemStack item = ObjectGenerator.GetGenerator().item(args[0], t, env);
 			List<MCRecipe> recipes = Static.getServer().getRecipesFor(item);
 			for(MCRecipe recipe : recipes) {
@@ -293,7 +293,7 @@ public class Recipes {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CArray ret = new CArray(t);
+			CArray ret = new CArray(t, null, env);
 			List<MCRecipe> recipes = Static.getServer().allRecipes();
 			for(MCRecipe recipe : recipes) {
 				ret.push(ObjectGenerator.GetGenerator().recipe(recipe, t), t, env);

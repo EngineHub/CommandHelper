@@ -2,6 +2,7 @@ package com.laytonsmith.core.natives.interfaces;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.annotations.seealso;
+import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Construct;
@@ -14,6 +15,7 @@ import com.laytonsmith.core.objects.ObjectModifier;
 import java.net.URL;
 import java.util.EnumSet;
 import java.util.Set;
+import com.laytonsmith.PureUtilities.Common.Annotations.AggressiveDeprecation;
 
 /**
  * Provides a basic Mixed implementation. This assumes that the object is a public, top level object. If it's also
@@ -45,7 +47,8 @@ public abstract class AbstractMixed implements Mixed {
 
 	@Override
 	public String getName() {
-		return typeof().getName();
+		typeof t = ClassDiscovery.GetClassAnnotation(this.getClass(), typeof.class);
+		return t.value();
 	}
 
 	@Override
@@ -64,6 +67,7 @@ public abstract class AbstractMixed implements Mixed {
 	}
 
 	/** @deprecated Use {@link #isInstanceOf(CClassType, LeftHandGenericUse, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	@Override
 	public boolean isInstanceOf(CClassType type) {
@@ -75,7 +79,7 @@ public abstract class AbstractMixed implements Mixed {
 		if(type.getNativeType() != null) {
 			return type.getNativeType().isAssignableFrom(this.getClass());
 		}
-		return Construct.isInstanceof(this, type, env);
+		return this.typeof(env).doesExtend(env, type);
 	}
 
 	@Override
@@ -93,6 +97,7 @@ public abstract class AbstractMixed implements Mixed {
 	 * @throws IllegalArgumentException If the class isn't public facing.
 	 * @deprecated Use {@link #typeof(Environment)} instead.
 	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	@Override
 	public CClassType typeof() {
@@ -101,7 +106,7 @@ public abstract class AbstractMixed implements Mixed {
 
 	@Override
 	public CClassType typeof(Environment env) {
-		return Construct.typeof(this);
+		return Construct.typeof(this, env);
 	}
 
 	@Override

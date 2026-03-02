@@ -48,4 +48,5 @@ public class IterableRunner extends AbstractMixedInterfaceRunner {
 	public GenericParameters getGenericParameters() {
 		return null;
 	}
+
 }

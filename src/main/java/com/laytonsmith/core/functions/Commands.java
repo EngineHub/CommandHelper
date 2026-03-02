@@ -247,21 +247,21 @@ public class Commands {
 			if(args[1].isInstanceOf(CArray.TYPE, null, env)) {
 				CArray ops = (CArray) args[1];
 				if(ops.containsKey("permission")) {
-					cmd.setPermission(ops.get("permission", t).val());
+					cmd.setPermission(ops.get("permission", t, env).val());
 				}
 				if(ops.containsKey("description")) {
-					cmd.setDescription(ops.get("description", t).val());
+					cmd.setDescription(ops.get("description", t, env).val());
 				}
 				if(ops.containsKey("usage")) {
-					cmd.setUsage(ops.get("usage", t).val());
+					cmd.setUsage(ops.get("usage", t, env).val());
 				}
 				if(ops.containsKey("noPermMsg")) {
-					cmd.setPermissionMessage(ops.get("noPermMsg", t).val());
+					cmd.setPermissionMessage(ops.get("noPermMsg", t, env).val());
 				}
 				List<String> oldAliases = new ArrayList<>(cmd.getAliases());
 				if(ops.containsKey("aliases")) {
-					if(ops.get("aliases", t).isInstanceOf(CArray.TYPE, null, env)) {
-						List<Mixed> ca = ((CArray) ops.get("aliases", t)).asList();
+					if(ops.get("aliases", t, env).isInstanceOf(CArray.TYPE, null, env)) {
+						List<Mixed> ca = ((CArray) ops.get("aliases", t, env)).asList(env);
 						List<String> aliases = new ArrayList<>();
 						for(Mixed c : ca) {
 							String alias = c.val().toLowerCase().trim();
@@ -281,10 +281,10 @@ public class Commands {
 					}
 				}
 				if(ops.containsKey("executor")) {
-					set_executor.customExec(t, env, cmd, ops.get("executor", t));
+					set_executor.customExec(t, env, cmd, ops.get("executor", t, env));
 				}
 				if(ops.containsKey("tabcompleter")) {
-					set_tabcompleter.customExec(t, env, cmd, ops.get("tabcompleter", t));
+					set_tabcompleter.customExec(t, env, cmd, ops.get("tabcompleter", t, env));
 				}
 				boolean success = true;
 				if(register) {
@@ -575,26 +575,27 @@ public class Commands {
 				return CNull.NULL;
 			}
 			Collection<MCCommand> commands = map.getCommands();
-			CArray ret = CArray.GetAssociativeArray(t);
+			CArray ret = CArray.GetAssociativeArray(t, null, env);
 			for(MCCommand command : commands) {
-				CArray ca = CArray.GetAssociativeArray(t);
-				ca.set("name", new CString(command.getName(), t), t);
-				ca.set("description", new CString(command.getDescription(), t), t);
+				CArray ca = CArray.GetAssociativeArray(t, null, env);
+				ca.set("name", new CString(command.getName(), t), t, env);
+				ca.set("description", new CString(command.getDescription(), t), t, env);
 				Mixed permission;
 				if(command.getPermission() == null) {
 					permission = CNull.NULL;
 				} else {
 					permission = new CString(command.getPermission(), t);
 				}
-				ca.set("permission", permission, t);
-				ca.set("nopermmsg", new CString(command.getPermissionMessage(), t), t);
-				ca.set("usage", new CString(command.getUsage(), t), t);
-				CArray aliases = new CArray(t);
+				ca.set("permission", permission, t, env);
+				ca.set("nopermmsg", new CString(command.getPermissionMessage(), t), t, env);
+				ca.set("usage", new CString(command.getUsage(), t), t, env);
+				CArray aliases = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+						.addNativeParameter(CString.TYPE, null).buildNative(), env);
 				for(String a : command.getAliases()) {
-					aliases.push(new CString(a, t), t);
+					aliases.push(new CString(a, t), t, env);
 				}
-				ca.set("aliases", aliases, t);
-				ret.set(command.getName(), ca, t);
+				ca.set("aliases", aliases, t, env);
+				ret.set(command.getName(), ca, t, env);
 			}
 			return ret;
 		}

@@ -1,5 +1,6 @@
 package com.laytonsmith.core.compiler.signatures;
 
+import com.laytonsmith.core.ParseTree;
 import static org.junit.Assert.*;
 
 import java.util.ArrayList;
@@ -19,8 +20,10 @@ import com.laytonsmith.core.compiler.signature.Throws;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CClassType;
+import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CVoid;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -31,10 +34,12 @@ import com.laytonsmith.testing.AbstractIntegrationTest;
 public class FunctionSignaturesTest extends AbstractIntegrationTest {
 
 	private Environment env;
+	private ParseTree fakeParseTree;
 
 	@Before
 	public void setUp() throws Exception {
 		this.env = Static.GenerateStandaloneEnvironment(false);
+		this.fakeParseTree = new ParseTree(new CFunction("test", Target.UNKNOWN), null);
 	}
 
 	@Test
@@ -44,7 +49,7 @@ public class FunctionSignaturesTest extends AbstractIntegrationTest {
 		FunctionSignatures signatures = new SignatureBuilder(CArray.TYPE).build();
 
 		// Assert that the return type was correctly set.
-		assertEquals(CArray.TYPE, signatures.getSignatures().get(0).getReturnType().getType());
+		assertEquals(CArray.TYPE.asLeftHandSideType(), signatures.getSignatures().get(0).getReturnType().getType());
 	}
 
 	@Test
@@ -58,7 +63,7 @@ public class FunctionSignaturesTest extends AbstractIntegrationTest {
 		List<Param> paramsList = signatures.getSignatures().get(0).getParams();
 		assertEquals(1, paramsList.size());
 		assertEquals("param1", paramsList.get(0).getName());
-		assertEquals(CInt.TYPE, paramsList.get(0).getType());
+		assertEquals(CInt.TYPE.asLeftHandSideType(), paramsList.get(0).getType());
 	}
 
 	@Test
@@ -105,12 +110,13 @@ public class FunctionSignaturesTest extends AbstractIntegrationTest {
 
 		// Assert return type and compile exceptions for zero arguments.
 		Set<ConfigCompileException> exceptions = new HashSet<>();
-		CClassType returnType = signatures.getReturnType(
+		LeftHandSideType returnType = signatures.getReturnType(
+				fakeParseTree,
 				Target.UNKNOWN,
 				Arrays.asList(),
 				Arrays.asList(),
-				this.env, exceptions);
-		assertEquals(CVoid.TYPE, returnType);
+				null, this.env, exceptions);
+		assertEquals(CVoid.TYPE.asLeftHandSideType(), returnType);
 		assertArrayEquals(new Object[0], exceptions.toArray());
 	}
 
@@ -122,12 +128,13 @@ public class FunctionSignaturesTest extends AbstractIntegrationTest {
 
 		// Assert return type and compile exceptions for one argument.
 		Set<ConfigCompileException> exceptions = new HashSet<>();
-		CClassType returnType = signatures.getReturnType(
+		LeftHandSideType returnType = signatures.getReturnType(
+				fakeParseTree,
 				Target.UNKNOWN,
-				Arrays.asList(CInt.TYPE),
+				Arrays.asList(CInt.TYPE.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN),
-				this.env, exceptions);
-		assertEquals(CClassType.AUTO, returnType);
+				null, this.env, exceptions);
+		assertEquals(CClassType.AUTO.asLeftHandSideType(), returnType);
 		assertFalse(exceptions.isEmpty());
 	}
 
@@ -139,12 +146,13 @@ public class FunctionSignaturesTest extends AbstractIntegrationTest {
 
 		// Assert return type and compile exceptions for one argument.
 		Set<ConfigCompileException> exceptions = new HashSet<>();
-		CClassType returnType = signatures.getReturnType(
+		LeftHandSideType returnType = signatures.getReturnType(
+				fakeParseTree,
 				Target.UNKNOWN,
-				Arrays.asList(CInt.TYPE),
+				Arrays.asList(CInt.TYPE.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN),
-				this.env, exceptions);
-		assertEquals(CArray.TYPE, returnType);
+				null, this.env, exceptions);
+		assertEquals(CArray.TYPE.asLeftHandSideType(), returnType);
 		assertArrayEquals(new Object[0], exceptions.toArray());
 	}
 
@@ -156,12 +164,13 @@ public class FunctionSignaturesTest extends AbstractIntegrationTest {
 
 		// Assert return type and compile exceptions for one argument.
 		Set<ConfigCompileException> exceptions = new HashSet<>();
-		CClassType returnType = signatures.getReturnType(
+		LeftHandSideType returnType = signatures.getReturnType(
+				fakeParseTree,
 				Target.UNKNOWN,
-				Arrays.asList(CClassType.AUTO),
+				Arrays.asList(CClassType.AUTO.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN),
-				this.env, exceptions);
-		assertEquals(CArray.TYPE, returnType);
+				null, this.env, exceptions);
+		assertEquals(CArray.TYPE.asLeftHandSideType(), returnType);
 		assertArrayEquals(new Object[0], exceptions.toArray());
 	}
 
@@ -173,12 +182,13 @@ public class FunctionSignaturesTest extends AbstractIntegrationTest {
 
 		// Assert return type and compile exceptions for two arguments.
 		Set<ConfigCompileException> exceptions = new HashSet<>();
-		CClassType returnType = signatures.getReturnType(
+		LeftHandSideType returnType = signatures.getReturnType(
+				fakeParseTree,
 				Target.UNKNOWN,
 				Arrays.asList(),
 				Arrays.asList(),
-				this.env, exceptions);
-		assertEquals(CClassType.AUTO, returnType);
+				null, this.env, exceptions);
+		assertEquals(CClassType.AUTO.asLeftHandSideType(), returnType);
 		assertFalse(exceptions.isEmpty());
 	}
 
@@ -190,12 +200,13 @@ public class FunctionSignaturesTest extends AbstractIntegrationTest {
 
 		// Assert return type and compile exceptions for two arguments.
 		Set<ConfigCompileException> exceptions = new HashSet<>();
-		CClassType returnType = signatures.getReturnType(
+		LeftHandSideType returnType = signatures.getReturnType(
+				fakeParseTree,
 				Target.UNKNOWN,
-				Arrays.asList(CInt.TYPE, CBoolean.TYPE),
+				Arrays.asList(CInt.TYPE.asLeftHandSideType(), CBoolean.TYPE.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN, Target.UNKNOWN),
-				this.env, exceptions);
-		assertEquals(CClassType.AUTO, returnType);
+				null, this.env, exceptions);
+		assertEquals(CClassType.AUTO.asLeftHandSideType(), returnType);
 		assertFalse(exceptions.isEmpty());
 	}
 
@@ -207,12 +218,13 @@ public class FunctionSignaturesTest extends AbstractIntegrationTest {
 
 		// Assert return type and compile exceptions for one wrongly typed argument.
 		Set<ConfigCompileException> exceptions = new HashSet<>();
-		CClassType returnType = signatures.getReturnType(
+		LeftHandSideType returnType = signatures.getReturnType(
+				fakeParseTree,
 				Target.UNKNOWN,
-				Arrays.asList(CBoolean.TYPE),
+				Arrays.asList(CBoolean.TYPE.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN),
-				this.env, exceptions);
-		assertEquals(CClassType.AUTO, returnType);
+				null, this.env, exceptions);
+		assertEquals(CClassType.AUTO.asLeftHandSideType(), returnType);
 		assertFalse(exceptions.isEmpty());
 	}
 
@@ -224,12 +236,13 @@ public class FunctionSignaturesTest extends AbstractIntegrationTest {
 
 		// Assert return type and compile exceptions for one wrongly typed argument.
 		Set<ConfigCompileException> exceptions = new HashSet<>();
-		CClassType returnType = signatures.getReturnType(
+		LeftHandSideType returnType = signatures.getReturnType(
+				fakeParseTree,
 				Target.UNKNOWN,
-				Arrays.asList(CVoid.TYPE),
+				Arrays.asList(CVoid.TYPE.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN),
-				this.env, exceptions);
-		assertEquals(CClassType.AUTO, returnType);
+				null, this.env, exceptions);
+		assertEquals(CClassType.AUTO.asLeftHandSideType(), returnType);
 		assertFalse(exceptions.isEmpty());
 	}
 
@@ -242,12 +255,13 @@ public class FunctionSignaturesTest extends AbstractIntegrationTest {
 
 		// Assert return type and compile exceptions for matching the first signature.
 		Set<ConfigCompileException> exceptions = new HashSet<>();
-		CClassType returnType = signatures.getReturnType(
+		LeftHandSideType returnType = signatures.getReturnType(
+				fakeParseTree,
 				Target.UNKNOWN,
-				Arrays.asList(CInt.TYPE),
+				Arrays.asList(CInt.TYPE.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN),
-				this.env, exceptions);
-		assertEquals(CArray.TYPE, returnType);
+				null, this.env, exceptions);
+		assertEquals(CArray.TYPE.asLeftHandSideType(), returnType);
 		assertArrayEquals(new Object[0], exceptions.toArray());
 	}
 
@@ -260,12 +274,13 @@ public class FunctionSignaturesTest extends AbstractIntegrationTest {
 
 		// Assert return type and compile exceptions for matching the second signature.
 		Set<ConfigCompileException> exceptions = new HashSet<>();
-		CClassType returnType = signatures.getReturnType(
+		LeftHandSideType returnType = signatures.getReturnType(
+				fakeParseTree,
 				Target.UNKNOWN,
-				Arrays.asList(CBoolean.TYPE),
+				Arrays.asList(CBoolean.TYPE.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN),
-				this.env, exceptions);
-		assertEquals(CInt.TYPE, returnType);
+				null, this.env, exceptions);
+		assertEquals(CInt.TYPE.asLeftHandSideType(), returnType);
 		assertArrayEquals(new Object[0], exceptions.toArray());
 	}
 
@@ -278,12 +293,13 @@ public class FunctionSignaturesTest extends AbstractIntegrationTest {
 
 		// Assert return type and compile exceptions for matching the both signatures.
 		Set<ConfigCompileException> exceptions = new HashSet<>();
-		CClassType returnType = signatures.getReturnType(
+		LeftHandSideType returnType = signatures.getReturnType(
+				fakeParseTree,
 				Target.UNKNOWN,
-				Arrays.asList(CClassType.AUTO),
+				Arrays.asList(CClassType.AUTO.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN),
-				this.env, exceptions);
-		assertEquals(CInt.TYPE, returnType);
+				null, this.env, exceptions);
+		assertEquals(CInt.TYPE.asLeftHandSideType(), returnType);
 		assertArrayEquals(new Object[0], exceptions.toArray());
 	}
 
@@ -297,12 +313,13 @@ public class FunctionSignaturesTest extends AbstractIntegrationTest {
 
 		// Assert return type and compile exceptions for matching the both signatures.
 		Set<ConfigCompileException> exceptions = new HashSet<>();
-		CClassType returnType = signatures.getReturnType(
+		LeftHandSideType returnType = signatures.getReturnType(
+				fakeParseTree,
 				Target.UNKNOWN,
-				Arrays.asList(CClassType.AUTO),
+				Arrays.asList(CClassType.AUTO.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN),
-				this.env, exceptions);
-		assertEquals(CClassType.AUTO, returnType);
+				null, this.env, exceptions);
+		assertEquals(CClassType.AUTO.asLeftHandSideType(), returnType);
 		assertArrayEquals(new Object[0], exceptions.toArray());
 	}
 
@@ -314,19 +331,21 @@ public class FunctionSignaturesTest extends AbstractIntegrationTest {
 
 		// Assert return type and compile exceptions for zero and one arguments.
 		Set<ConfigCompileException> exceptions = new HashSet<>();
-		CClassType returnType1 = signatures.getReturnType(
+		LeftHandSideType returnType1 = signatures.getReturnType(
+				fakeParseTree,
 				Target.UNKNOWN,
 				Arrays.asList(),
 				Arrays.asList(),
-				this.env, exceptions);
-		assertEquals(CArray.TYPE, returnType1);
+				null, this.env, exceptions);
+		assertEquals(CArray.TYPE.asLeftHandSideType(), returnType1);
 		assertArrayEquals(new Object[0], exceptions.toArray());
-		CClassType returnType2 = signatures.getReturnType(
+		LeftHandSideType returnType2 = signatures.getReturnType(
+				fakeParseTree,
 				Target.UNKNOWN,
-				Arrays.asList(CInt.TYPE),
+				Arrays.asList(CInt.TYPE.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN),
-				this.env, exceptions);
-		assertEquals(CArray.TYPE, returnType2);
+				null, this.env, exceptions);
+		assertEquals(CArray.TYPE.asLeftHandSideType(), returnType2);
 		assertArrayEquals(new Object[0], exceptions.toArray());
 	}
 
@@ -338,26 +357,29 @@ public class FunctionSignaturesTest extends AbstractIntegrationTest {
 
 		// Assert return type and compile exceptions for zero, one and two arguments.
 		Set<ConfigCompileException> exceptions = new HashSet<>();
-		CClassType returnType1 = signatures.getReturnType(
+		LeftHandSideType returnType1 = signatures.getReturnType(
+				fakeParseTree,
 				Target.UNKNOWN,
 				Arrays.asList(),
 				Arrays.asList(),
-				this.env, exceptions);
-		assertEquals(CArray.TYPE, returnType1);
+				null, this.env, exceptions);
+		assertEquals(CArray.TYPE.asLeftHandSideType(), returnType1);
 		assertArrayEquals(new Object[0], exceptions.toArray());
-		CClassType returnType2 = signatures.getReturnType(
+		LeftHandSideType returnType2 = signatures.getReturnType(
+				fakeParseTree,
 				Target.UNKNOWN,
-				Arrays.asList(CInt.TYPE),
+				Arrays.asList(CInt.TYPE.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN),
-				this.env, exceptions);
-		assertEquals(CArray.TYPE, returnType2);
+				null, this.env, exceptions);
+		assertEquals(CArray.TYPE.asLeftHandSideType(), returnType2);
 		assertArrayEquals(new Object[0], exceptions.toArray());
-		CClassType returnType3 = signatures.getReturnType(
+		LeftHandSideType returnType3 = signatures.getReturnType(
+				fakeParseTree,
 				Target.UNKNOWN,
-				Arrays.asList(CInt.TYPE, CInt.TYPE),
+				Arrays.asList(CInt.TYPE.asLeftHandSideType(), CInt.TYPE.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN, Target.UNKNOWN),
-				this.env, exceptions);
-		assertEquals(CArray.TYPE, returnType3);
+				null, this.env, exceptions);
+		assertEquals(CArray.TYPE.asLeftHandSideType(), returnType3);
 		assertArrayEquals(new Object[0], exceptions.toArray());
 	}
 
@@ -371,31 +393,34 @@ public class FunctionSignaturesTest extends AbstractIntegrationTest {
 				.param(CArray.TYPE, "param5", "desc5").build();
 
 		// Validate signature parameter types through its string version.
-		assertEquals("(int, int..., int, [array], array)", signatures.getSignaturesParamTypesString());
+		assertEquals("(int, int..., int, [array<auto>], array<auto>)", signatures.getSignaturesParamTypesString());
 
 		// Assert return type and compile exceptions for matching the signature in multiple ways.
 		Set<ConfigCompileException> exceptions = new HashSet<>();
-		CClassType returnType = signatures.getReturnType(
+		LeftHandSideType returnType = signatures.getReturnType(
+				fakeParseTree,
 				Target.UNKNOWN,
-				Arrays.asList(CInt.TYPE, CInt.TYPE, CArray.TYPE),
+				Arrays.asList(CInt.TYPE.asLeftHandSideType(), CInt.TYPE.asLeftHandSideType(), CArray.TYPE.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN, Target.UNKNOWN, Target.UNKNOWN),
-				this.env, exceptions);
-		assertEquals(CArray.TYPE, returnType);
+				null, this.env, exceptions);
+		assertEquals(CArray.TYPE.asLeftHandSideType(), returnType);
 		assertArrayEquals(new Object[0], exceptions.toArray());
-		CClassType returnType2 = signatures.getReturnType(
+		LeftHandSideType returnType2 = signatures.getReturnType(
+				fakeParseTree,
 				Target.UNKNOWN,
-				Arrays.asList(CInt.TYPE, CInt.TYPE, CInt.TYPE, CInt.TYPE, CArray.TYPE),
+				Arrays.asList(CInt.TYPE.asLeftHandSideType(), CInt.TYPE.asLeftHandSideType(), CInt.TYPE.asLeftHandSideType(), CInt.TYPE.asLeftHandSideType(), CArray.TYPE.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN, Target.UNKNOWN, Target.UNKNOWN, Target.UNKNOWN, Target.UNKNOWN),
-				this.env, exceptions);
-		assertEquals(CArray.TYPE, returnType2);
+				null, this.env, exceptions);
+		assertEquals(CArray.TYPE.asLeftHandSideType(), returnType2);
 		assertArrayEquals(new Object[0], exceptions.toArray());
-		CClassType returnType3 = signatures.getReturnType(
+		LeftHandSideType returnType3 = signatures.getReturnType(
+				fakeParseTree,
 				Target.UNKNOWN,
-				Arrays.asList(CInt.TYPE, CInt.TYPE, CInt.TYPE, CInt.TYPE, CArray.TYPE, CArray.TYPE),
+				Arrays.asList(CInt.TYPE.asLeftHandSideType(), CInt.TYPE.asLeftHandSideType(), CInt.TYPE.asLeftHandSideType(), CInt.TYPE.asLeftHandSideType(), CArray.TYPE.asLeftHandSideType(), CArray.TYPE.asLeftHandSideType()),
 				Arrays.asList(Target.UNKNOWN, Target.UNKNOWN,
 						Target.UNKNOWN, Target.UNKNOWN, Target.UNKNOWN, Target.UNKNOWN),
-				this.env, exceptions);
-		assertEquals(CArray.TYPE, returnType3);
+				null, this.env, exceptions);
+		assertEquals(CArray.TYPE.asLeftHandSideType(), returnType3);
 		assertArrayEquals(new Object[0], exceptions.toArray());
 	}
 
@@ -418,15 +443,16 @@ public class FunctionSignaturesTest extends AbstractIntegrationTest {
 		// other varargs and an optional arg to match the last 3 arguments properly.
 		Set<ConfigCompileException> exceptions = new HashSet<>();
 		for(int numArgs = 3; numArgs < 10; numArgs++) {
-			List<CClassType> argTypes = new ArrayList<>();
+			List<LeftHandSideType> argTypes = new ArrayList<>();
 			List<Target> argTargets = new ArrayList<>();
 			for(int i = 0; i < numArgs; i++) {
-				argTypes.add(CInt.TYPE);
+				argTypes.add(CInt.TYPE.asLeftHandSideType());
 				argTargets.add(Target.UNKNOWN);
 			}
-			CClassType returnType = signatures.getReturnType(
-					Target.UNKNOWN, argTypes, argTargets, this.env, exceptions);
-			assertEquals(CArray.TYPE, returnType);
+			LeftHandSideType returnType = signatures.getReturnType(
+					fakeParseTree,
+					Target.UNKNOWN, argTypes, argTargets, null, this.env, exceptions);
+			assertEquals(CArray.TYPE.asLeftHandSideType(), returnType);
 			assertArrayEquals(new Object[0], exceptions.toArray());
 		}
 	}

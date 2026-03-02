@@ -101,7 +101,7 @@ public class BasicLogic {
 			if(referenceMatch) {
 				return CBoolean.TRUE;
 			}
-			if(ArgumentValidation.anyNulls(args)) {
+			if(ArgumentValidation.anyNulls(env, args)) {
 				boolean equals = true;
 				for(Mixed c : args) {
 					if(!(c instanceof CNull)) {
@@ -110,11 +110,11 @@ public class BasicLogic {
 				}
 				return CBoolean.get(equals);
 			}
-			if(ArgumentValidation.anyBooleans(args)) {
+			if(ArgumentValidation.anyBooleans(env, args)) {
 				boolean equals = true;
 				for(int i = 1; i < args.length; i++) {
-					boolean arg1 = ArgumentValidation.getBoolean(args[i - 1], t, env);
-					boolean arg2 = ArgumentValidation.getBoolean(args[i], t, env);
+					boolean arg1 = ArgumentValidation.getBooleanObject(args[i - 1], t, env);
+					boolean arg2 = ArgumentValidation.getBooleanObject(args[i], t, env);
 					if(arg1 != arg2) {
 						equals = false;
 						break;
@@ -137,11 +137,11 @@ public class BasicLogic {
 			}
 			try {
 				// Validate that these are numbers, so that getNumber doesn't throw an exception.
-				if(!ArgumentValidation.isNumber(args[0])) {
+				if(!ArgumentValidation.isNumber(args[0], env)) {
 					return CBoolean.FALSE;
 				}
 				for(int i = 1; i < args.length; i++) {
-					if(!ArgumentValidation.isNumber(args[i])) {
+					if(!ArgumentValidation.isNumber(args[i], env)) {
 						return CBoolean.FALSE;
 					}
 					double arg1 = ArgumentValidation.getNumber(args[i - 1], t, env);
@@ -259,13 +259,14 @@ public class BasicLogic {
 			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
-			if(args[1].typeof(env).equals(args[0].typeof(env))) {
-				if(args[0].isInstanceOf(CString.TYPE, null, env) && args[1].isInstanceOf(CString.TYPE, null, env)) {
+		if(args[1].typeof(env).equals(args[0].typeof(env))) {
+				if(args[0].isInstanceOf(CString.TYPE, null, env)
+						&& args[1].isInstanceOf(CString.TYPE, null, env)) {
 					// Check for actual string equality, so we don't do type massaging
 					// for numeric strings. Thus '2' !== '2.0'
 					return CBoolean.get(args[0].val().equals(args[1].val()));
 				}
-				return new equals().exec(t, env, null, args);
+				return new equals().exec(t, env, generics, args);
 			} else {
 				return CBoolean.FALSE;
 			}
@@ -334,7 +335,7 @@ public class BasicLogic {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			return new sequals().exec(t, env, null, args).not();
+			return new sequals().exec(t, env, generics, args).not();
 		}
 
 		@Override
@@ -412,7 +413,7 @@ public class BasicLogic {
 
 		@Override
 		public CBoolean exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			return new equals().exec(t, env, null, args).not();
+			return new equals().exec(t, env, generics, args).not();
 		}
 
 		@Override
@@ -485,11 +486,11 @@ public class BasicLogic {
 			if(args.length <= 1) {
 				throw new CREInsufficientArgumentsException("At least two arguments must be passed to equals_ic", t);
 			}
-			if(ArgumentValidation.anyBooleans(args)) {
+			if(ArgumentValidation.anyBooleans(env, args)) {
 				boolean equals = true;
 				for(int i = 1; i < args.length; i++) {
-					boolean arg1 = ArgumentValidation.getBoolean(args[i - 1], t, env);
-					boolean arg2 = ArgumentValidation.getBoolean(args[i], t, env);
+					boolean arg1 = ArgumentValidation.getBooleanObject(args[i - 1], t, env);
+					boolean arg2 = ArgumentValidation.getBooleanObject(args[i], t, env);
 					if(arg1 != arg2) {
 						equals = false;
 						break;
@@ -512,12 +513,12 @@ public class BasicLogic {
 			}
 			try {
 				// Validate that these are numbers, so that getNumber doesn't throw an exception.
-				if(!ArgumentValidation.isNumber(args[0])) {
+				if(!ArgumentValidation.isNumber(args[0], env)) {
 					return CBoolean.FALSE;
 				}
 				boolean equals = true;
 				for(int i = 1; i < args.length; i++) {
-					if(!ArgumentValidation.isNumber(args[i])) {
+					if(!ArgumentValidation.isNumber(args[i], env)) {
 						return CBoolean.FALSE;
 					}
 					double arg1 = ArgumentValidation.getNumber(args[i - 1], t, env);
@@ -581,7 +582,7 @@ public class BasicLogic {
 			if(!v2.getClass().equals(v1.getClass())) {
 				return CBoolean.FALSE;
 			}
-			return new equals_ic().exec(t, env, null, v1, v2);
+			return new equals_ic().exec(t, env, generics, v1, v2);
 		}
 
 		@Override
@@ -675,7 +676,7 @@ public class BasicLogic {
 
 		@Override
 		public CBoolean exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			return new equals_ic().exec(t, env, null, args).not();
+			return new equals_ic().exec(t, env, generics, args).not();
 		}
 
 		@Override
@@ -722,10 +723,11 @@ public class BasicLogic {
 
 		@Override
 		public CBoolean exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			if(args[0].isInstanceOf(CArray.TYPE, null, env) && args[1].isInstanceOf(CArray.TYPE, null, env)) {
+			if(args[0].isInstanceOf(CArray.TYPE, null, env)
+					&& args[1].isInstanceOf(CArray.TYPE, null, env)) {
 				return CBoolean.get(args[0] == args[1]);
 			} else {
-				return new equals().exec(t, env, null, args);
+				return new equals().exec(t, env, generics, args);
 			}
 		}
 
@@ -1096,7 +1098,7 @@ public class BasicLogic {
 			//This will only happen if they hardcode true/false in, but we still
 			//need to handle it appropriately.
 			for(Mixed c : args) {
-				if(!ArgumentValidation.getBoolean(c, t, env)) {
+				if(!ArgumentValidation.getBooleanish(c, t, env)) {
 					return CBoolean.FALSE;
 				}
 			}
@@ -1104,10 +1106,10 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CBoolean execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public CBoolean execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
 			for(ParseTree tree : nodes) {
 				Mixed c = env.getEnv(GlobalEnv.class).GetScript().seval(tree, env);
-				boolean b = ArgumentValidation.getBoolean(c, t, env);
+				boolean b = ArgumentValidation.getBooleanish(c, t, env);
 				if(b == false) {
 					return CBoolean.FALSE;
 				}
@@ -1180,7 +1182,7 @@ public class BasicLogic {
 					continue;
 				}
 				if(child.isConst()) {
-					if(ArgumentValidation.getBoolean(child.getData(), t, env) == true) {
+					if(ArgumentValidation.getBooleanish(child.getData(), t, env) == true) {
 						it.remove();
 					} else {
 						foundFalse = true;
@@ -1204,7 +1206,8 @@ public class BasicLogic {
 //			}
 			// At this point, it could be that there are some conditions with side effects, followed by a final false. However,
 			// if false is the only remaining condition (which could be) then we can simply return false here.
-			if(children.size() == 1 && children.get(0).isConst() && ArgumentValidation.getBoolean(children.get(0).getData(), t, env) == false) {
+			if(children.size() == 1 && children.get(0).isConst()
+					&& ArgumentValidation.getBooleanish(children.get(0).getData(), t, env) == false) {
 				return new ParseTree(CBoolean.FALSE, fileOptions);
 			}
 			if(children.isEmpty()) {
@@ -1258,7 +1261,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
 			Mixed lastValue = CBoolean.TRUE;
 			for(ParseTree tree : nodes) {
 				lastValue = env.getEnv(GlobalEnv.class).GetScript().seval(tree, env);
@@ -1305,7 +1308,7 @@ public class BasicLogic {
 					continue;
 				}
 				if(child.isConst()) {
-					if(ArgumentValidation.getBoolean(child.getData(), t, env) == true) {
+					if(ArgumentValidation.getBooleanish(child.getData(), t, env) == true) {
 						it.remove();
 					} else {
 						foundFalse = true;
@@ -1329,7 +1332,8 @@ public class BasicLogic {
 //			}
 			// At this point, it could be that there are some conditions with side effects, followed by a final false. However,
 			// if false is the only remaining condition (which could be) then we can simply return false here.
-			if(children.size() == 1 && children.get(0).isConst() && ArgumentValidation.getBoolean(children.get(0).getData(), t, env) == false) {
+			if(children.size() == 1 && children.get(0).isConst()
+					&& ArgumentValidation.getBooleanish(children.get(0).getData(), t, env) == false) {
 				return new ParseTree(children.get(0).getData(), fileOptions);
 			}
 			if(children.isEmpty()) {
@@ -1389,7 +1393,7 @@ public class BasicLogic {
 			//This will only happen if they hardcode true/false in, but we still
 			//need to handle it appropriately.
 			for(Mixed c : args) {
-				if(ArgumentValidation.getBoolean(c, t, env)) {
+				if(ArgumentValidation.getBooleanish(c, t, env)) {
 					return CBoolean.TRUE;
 				}
 			}
@@ -1397,10 +1401,10 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CBoolean execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public CBoolean execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
 			for(ParseTree tree : nodes) {
 				Mixed c = env.getEnv(GlobalEnv.class).GetScript().seval(tree, env);
-				if(ArgumentValidation.getBoolean(c, t, env)) {
+				if(ArgumentValidation.getBooleanish(c, t, env)) {
 					return CBoolean.TRUE;
 				}
 			}
@@ -1476,7 +1480,7 @@ public class BasicLogic {
 					if(child.getData() instanceof CSymbol) {
 						throw new ConfigCompileException("Unexpected symbol: \"" + child.getData().val() + "\"", t);
 					}
-					if(ArgumentValidation.getBoolean(child.getData(), t, env) == false) {
+					if(ArgumentValidation.getBooleanish(child.getData(), t, env) == false) {
 						it.remove();
 					} else {
 						foundTrue = true;
@@ -1500,7 +1504,8 @@ public class BasicLogic {
 //			}
 			// At this point, it could be that there are some conditions with side effects, followed by a final true. However,
 			// if true is the only remaining condition (which could be) then we can simply return true here.
-			if(children.size() == 1 && children.get(0).isConst() && ArgumentValidation.getBoolean(children.get(0).getData(), t, env) == true) {
+			if(children.size() == 1 && children.get(0).isConst()
+					&& ArgumentValidation.getBooleanish(children.get(0).getData(), t, env) == true) {
 				return new ParseTree(CBoolean.TRUE, fileOptions);
 			}
 			if(children.isEmpty()) {
@@ -1554,7 +1559,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
 			for(ParseTree tree : nodes) {
 				Mixed c = env.getEnv(GlobalEnv.class).GetScript().seval(tree, env);
 				if(ArgumentValidation.getBooleanish(c, t, env)) {
@@ -1649,7 +1654,7 @@ public class BasicLogic {
 			if(args.length != 1) {
 				throw new CREFormatException(this.getName() + " expects 1 argument.", t);
 			}
-			return CBoolean.get(!ArgumentValidation.getBoolean(args[0], t, env));
+			return CBoolean.get(!ArgumentValidation.getBooleanish(args[0], t, env));
 		}
 
 		@Override
@@ -1753,8 +1758,8 @@ public class BasicLogic {
 			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
-			boolean val1 = ArgumentValidation.getBoolean(args[0], t, env);
-			boolean val2 = ArgumentValidation.getBoolean(args[1], t, env);
+			boolean val1 = ArgumentValidation.getBooleanish(args[0], t, env);
+			boolean val2 = ArgumentValidation.getBooleanish(args[1], t, env);
 			return CBoolean.get(val1 ^ val2);
 		}
 
@@ -1828,8 +1833,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CBoolean execs(Target t, Environment env, Script parent, ParseTree... nodes) {
-			return new and().execs(t, env, parent, nodes).not();
+		public CBoolean execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
+			return new and().execs(t, env, parent, generics, nodes).not();
 		}
 
 		@Override
@@ -1903,8 +1908,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CBoolean execs(Target t, Environment env, Script parent, ParseTree... args) throws ConfigRuntimeException {
-			return new or().execs(t, env, parent, args).not();
+		public CBoolean execs(Target t, Environment environment, Script parent, GenericParameters generics, ParseTree... args) throws ConfigRuntimeException {
+			return new or().execs(t, environment, parent, generics, args).not();
 		}
 
 		@Override

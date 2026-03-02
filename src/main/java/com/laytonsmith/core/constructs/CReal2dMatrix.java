@@ -9,6 +9,7 @@ import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CRE.CREIndexOverflowException;
 import com.laytonsmith.core.exceptions.CRE.CRELengthException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.AbstractMixedClass;
 import com.laytonsmith.core.natives.interfaces.Matrix;
@@ -16,6 +17,8 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import com.laytonsmith.PureUtilities.Common.Annotations.AggressiveDeprecation;
+import com.laytonsmith.core.constructs.generics.GenericTypeParameters;
 
 /**
  *
@@ -25,7 +28,10 @@ public class CReal2dMatrix extends AbstractMixedClass implements Matrix<Double>,
 		com.laytonsmith.core.natives.interfaces.Iterable {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get(CReal2dMatrix.class);
+	public static final CClassType TYPE = CClassType.get(CReal2dMatrix.class)
+			.withSuperParameters(GenericTypeParameters.nativeBuilder(com.laytonsmith.core.natives.interfaces.Iterable.TYPE)
+					.addParameter(CReal2dMatrixRow.TYPE, null))
+			.done();
 
 	int rows;
 	int columns;
@@ -155,39 +161,47 @@ public class CReal2dMatrix extends AbstractMixedClass implements Matrix<Double>,
 		return false;
 	}
 
+	@Override
+	public GenericParameters getGenericParameters() {
+		return null;
+	}
+
 	/** @deprecated Use {@link #get(Mixed, Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	@Override
 	public CReal2dMatrixRow get(Mixed index, Target t) throws ConfigRuntimeException {
-		return (CReal2dMatrixRow) get(index, t, null);
-	}
-
-	@Override
-	public Mixed get(Mixed index, Target t, Environment env) throws ConfigRuntimeException {
-		return get(ArgumentValidation.getInt32(index, t, env), t, env);
-	}
-
-	/** @deprecated Use {@link #get(String, Target, Environment)} instead. */
-	@Deprecated
-	@Override
-	public Mixed get(String index, Target t) throws ConfigRuntimeException {
 		return get(index, t, null);
 	}
 
 	@Override
-	public Mixed get(String index, Target t, Environment env) throws ConfigRuntimeException {
+	public CReal2dMatrixRow get(Mixed index, Target t, Environment env) throws ConfigRuntimeException {
+		return get(ArgumentValidation.getInt32(index, t, env), t, env);
+	}
+
+	/** @deprecated Use {@link #get(String, Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	@Override
+	public CReal2dMatrixRow get(String index, Target t) throws ConfigRuntimeException {
+		return get(index, t, null);
+	}
+
+	@Override
+	public CReal2dMatrixRow get(String index, Target t, Environment env) throws ConfigRuntimeException {
 		throw new CREIllegalArgumentException("Matrices cannot be indexed into with non-numeric values.", t);
 	}
 
 	/** @deprecated Use {@link #get(int, Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	@Override
 	public CReal2dMatrixRow get(int index, Target t) throws ConfigRuntimeException {
-		return (CReal2dMatrixRow) get(index, t, null);
+		return get(index, t, null);
 	}
 
 	@Override
-	public Mixed get(int index, Target t, Environment env) throws ConfigRuntimeException {
+	public CReal2dMatrixRow get(int index, Target t, Environment env) throws ConfigRuntimeException {
 		if(index >= getRowCount() || index < 0) {
 			throw new CRERangeException("Matrix range out of bounds.", t);
 		}
@@ -195,6 +209,7 @@ public class CReal2dMatrix extends AbstractMixedClass implements Matrix<Double>,
 	}
 
 	/** @deprecated Use {@link #keySet(Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	@Override
 	public Set<Mixed> keySet() {
@@ -211,6 +226,7 @@ public class CReal2dMatrix extends AbstractMixedClass implements Matrix<Double>,
 	}
 
 	/** @deprecated Use {@link #getBooleanValue(Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	@Override
 	public boolean getBooleanValue(Target t) {
@@ -223,6 +239,7 @@ public class CReal2dMatrix extends AbstractMixedClass implements Matrix<Double>,
 	}
 
 	/** @deprecated Use {@link #slice(int, int, Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	@Override
 	public CArray slice(int begin, int end, Target t) {
@@ -230,24 +247,25 @@ public class CReal2dMatrix extends AbstractMixedClass implements Matrix<Double>,
 	}
 
 	@Override
-	public Mixed slice(int begin, int end, Target t, Environment env) {
-		CArray ret = new CArray(t);
+	public CArray slice(int begin, int end, Target t, Environment env) {
+		CArray ret = new CArray(t, null, env);
 		int step = (begin <= end) ? 1 : -1;
 
 		// Note: loop includes 'begin', excludes 'end', just like typical slice semantics
 		for(int i = begin; i != end; i += step) {
-			CArray row = new CArray(t);
+			CArray row = new CArray(t, null, env);
 			double[] d = getRow(i, t);
 			for(int k = 0; k < d.length; k++) {
-				row.push(new CDouble(d[k], t), t);
+				row.push(new CDouble(d[k], t), t, env);
 			}
-			ret.push(row, t);
+			ret.push(row, t, env);
 		}
 
 		return ret;
 	}
 
 	/** @deprecated Use {@link #size(Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	@Override
 	public long size() {

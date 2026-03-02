@@ -3,6 +3,11 @@ package com.laytonsmith.core.natives.interfaces;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.ConstraintLocation;
+import com.laytonsmith.core.constructs.generics.Constraints;
+import com.laytonsmith.core.constructs.generics.GenericDeclaration;
+import com.laytonsmith.core.constructs.generics.constraints.UnboundedConstraint;
+import com.laytonsmith.core.constructs.generics.constraints.VariadicTypeConstraint;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -15,7 +20,10 @@ import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 public interface Callable extends Mixed {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get(Callable.class);
+	public static final CClassType TYPE = CClassType.getWithGenericDeclaration(Callable.class,
+			new GenericDeclaration(Target.UNKNOWN,
+				new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION, new UnboundedConstraint(Target.UNKNOWN, "ReturnType")),
+				new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION, new VariadicTypeConstraint(Target.UNKNOWN, "Parameters"))));
 
 	/**
 	 * Executes the callable, giving it the supplied arguments. {@code values} may be null, which means that no

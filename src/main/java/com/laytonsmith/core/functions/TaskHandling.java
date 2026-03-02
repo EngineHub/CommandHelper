@@ -53,7 +53,7 @@ public class TaskHandling {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			TaskManager tm = env.getEnv(StaticRuntimeEnv.class).GetTaskManager();
-			CArray ret = new CArray(t);
+			CArray ret = new CArray(t, null, env);
 			for(TaskHandler task : tm.getTasks()) {
 				CArray tt = CArray.GetAssociativeArray(t, null, env);
 				tt.set("id", new CInt(task.getID(), t), t, env);

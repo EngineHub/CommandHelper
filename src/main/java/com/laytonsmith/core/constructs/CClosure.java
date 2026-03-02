@@ -12,13 +12,22 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.compiler.FileOptions;
+import com.laytonsmith.core.constructs.generics.ConstraintLocation;
+import com.laytonsmith.core.constructs.generics.Constraints;
+import com.laytonsmith.core.constructs.generics.GenericDeclaration;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.GenericTypeParameters;
+import com.laytonsmith.core.constructs.generics.constraints.UnboundedConstraint;
+import com.laytonsmith.core.constructs.generics.constraints.VariadicTypeConstraint;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREError;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREStackOverflowError;
 import com.laytonsmith.core.exceptions.CancelCommandException;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.LoopManipulationException;
@@ -26,6 +35,8 @@ import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.exceptions.StackTraceManager;
 import com.laytonsmith.core.functions.DataHandling;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import com.laytonsmith.PureUtilities.Common.Annotations.AggressiveDeprecation;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -42,14 +53,21 @@ public class CClosure extends Construct implements Callable, Booleanish {
 	protected final Environment env;
 	protected final String[] names;
 	protected final Mixed[] defaults;
-	protected final CClassType[] types;
-	protected final CClassType returnType;
+	protected final LeftHandSideType[] types;
+	protected final LeftHandSideType returnType;
+
+	private static final Constraints RETURN_TYPE = new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION, new UnboundedConstraint(Target.UNKNOWN, "ReturnType"));
+	private static final Constraints PARAMETERS = new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION, new VariadicTypeConstraint(Target.UNKNOWN, "Parameters"));
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get(CClosure.class);
+	public static final CClassType TYPE = CClassType.getWithGenericDeclaration(CClosure.class,
+			new GenericDeclaration(Target.UNKNOWN, RETURN_TYPE, PARAMETERS))
+			.withSuperParameters(GenericTypeParameters.nativeBuilder(Callable.TYPE)
+				.addParameter("ReturnType", RETURN_TYPE)
+				.addParameter("Parameters", PARAMETERS));
 
-	public CClosure(ParseTree node, Environment env, CClassType returnType, String[] names, Mixed[] defaults,
-			CClassType[] types, Target t) {
+	public CClosure(ParseTree node, Environment env, LeftHandSideType returnType, String[] names, Mixed[] defaults,
+			LeftHandSideType[] types, Target t) {
 		super(node != null ? node.toString() : "", ConstructType.CLOSURE, t);
 		this.node = node;
 		this.env = env;
@@ -78,11 +96,11 @@ public class CClosure extends Construct implements Callable, Booleanish {
 	@Override
 	public String val() {
 		StringBuilder b = new StringBuilder();
-		condense(getNode(), b);
+		condense(getNode(), b, env);
 		return b.toString();
 	}
 
-	private void condense(ParseTree node, StringBuilder b) {
+	private void condense(ParseTree node, StringBuilder b, Environment env) {
 		if(node == null) {
 			return;
 		}
@@ -93,11 +111,11 @@ public class CClosure extends Construct implements Callable, Booleanish {
 				// when deserializing it later.
 				// Labels add : themselves, so no need to add that.
 				b.append(node.getChildAt(0));
-				condense(node.getChildAt(1), b);
+				condense(node.getChildAt(1), b, env);
 			} else {
 				b.append(func.val()).append("(");
 				for(int i = 0; i < node.numberOfChildren(); i++) {
-					condense(node.getChildAt(i), b);
+					condense(node.getChildAt(i), b, env);
 					if(i != node.numberOfChildren() - 1 && !((CFunction) node.getData()).val().equals(Compiler.__autoconcat__.NAME)) {
 						b.append(",");
 					}
@@ -219,9 +237,9 @@ public class CClosure extends Construct implements Callable, Booleanish {
 		StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
 		stManager.addStackTraceElement(new ConfigRuntimeException.StackTraceElement("<<closure>>", getTarget()));
 		try {
-			CArray arguments = new CArray(node.getData().getTarget());
+			CArray arguments = new CArray(node.getData().getTarget(), null, env);
 			CArray vararg = null;
-			CClassType varargType = null;
+			LeftHandSideType varargType = null;
 			if(values != null) {
 				for(int i = 0; i < Math.max(values.length, names.length); i++) {
 					Mixed value;
@@ -230,7 +248,7 @@ public class CClosure extends Construct implements Callable, Booleanish {
 					} else {
 						value = defaults[i].clone();
 					}
-					arguments.push(value, node.getData().getTarget());
+					arguments.push(value, node.getData().getTarget(), env);
 					boolean isVarArg = false;
 					if(this.names.length > i
 						|| (this.names.length != 0
@@ -242,22 +260,32 @@ public class CClosure extends Construct implements Callable, Booleanish {
 						} else {
 							name = this.names[this.names.length - 1];
 							if(vararg == null) {
-								// TODO: Once generics are added, add the type
-								vararg = new CArray(value.getTarget());
-								env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE,
-										name, vararg, value.getTarget()));
-								varargType = this.types[this.types.length - 1];
+								varargType = this.types[this.types.length - 1].getVarargsBaseType(env);
+								vararg = new CArray(value.getTarget(), GenericParameters.emptyBuilder(CArray.TYPE)
+									.addParameter(varargType)
+									.build(getTarget(), env), env);
+								try {
+									env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE,
+											name, vararg, value.getTarget()));
+								} catch(ConfigCompileException ex) {
+									throw new CREError(ex.getMessage(), getTarget(), ex);
+								}
 							}
 							isVarArg = true;
 						}
 						if(isVarArg) {
-							if(!InstanceofUtil.isInstanceof(value.typeof(env), varargType.getVarargsBaseType(), env)) {
+							if(!InstanceofUtil.isInstanceof(value, varargType, env)) {
 								throw new CRECastException("Expected type " + varargType + " but found " + value.typeof(env),
 										getTarget());
 							}
-							vararg.push(value, value.getTarget());
+							vararg.push(value, value.getTarget(), env);
 						} else {
-							IVariable var = new IVariable(types[i], name, value, getTarget(), env);
+							IVariable var;
+							try {
+								var = new IVariable(types[i], name, value, getTarget(), env);
+							} catch(ConfigCompileException ex) {
+								throw new CREError(ex.getMessage(), getTarget(), ex);
+							}
 							env.getEnv(GlobalEnv.class).GetVarList().set(var);
 						}
 					}
@@ -272,8 +300,12 @@ public class CClosure extends Construct implements Callable, Booleanish {
 			}
 
 			if(!hasArgumentsParam) {
-				env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, "@arguments", arguments,
-						node.getData().getTarget()));
+				try {
+					env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, "@arguments", arguments,
+							node.getData().getTarget()));
+				} catch(ConfigCompileException ex) {
+					throw new CREError(ex.getMessage(), getTarget(), ex);
+				}
 			}
 
 			ParseTree newNode = new ParseTree(new CFunction(DataHandling.g.NAME, getTarget()), node.getFileOptions());
@@ -314,7 +346,7 @@ public class CClosure extends Construct implements Callable, Booleanish {
 				stManager.popStackTraceElement();
 			}
 			// If we got here, then there was no return type. This is fine, but only for returnType void or auto.
-			if(!(returnType.equals(Auto.TYPE) || returnType.equals(CVoid.TYPE))) {
+			if(!(returnType.isAuto() || returnType.isVoid())) {
 				throw new CRECastException("Expecting closure to return a value of type " + returnType.val() + ","
 						+ " but no value was returned.", node.getTarget());
 			}
@@ -351,6 +383,7 @@ public class CClosure extends Construct implements Callable, Booleanish {
 	}
 
 	/** @deprecated Use {@link #getBooleanValue(Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	@Override
 	public boolean getBooleanValue(Target t) {
@@ -360,5 +393,15 @@ public class CClosure extends Construct implements Callable, Booleanish {
 	@Override
 	public boolean getBooleanValue(Target t, Environment env) {
 		return true;
+	}
+
+	@Override
+	public GenericParameters getGenericParameters() {
+		GenericParameters.GenericParametersBuilder builder = GenericParameters.emptyBuilder(TYPE);
+		builder.addParameter(returnType);
+		for(LeftHandSideType type : types) {
+			builder.addParameter(type);
+		}
+		return builder.buildWithoutValidation();
 	}
 }

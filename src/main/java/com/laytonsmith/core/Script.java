@@ -23,6 +23,7 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.constructs.Token.TType;
 import com.laytonsmith.core.constructs.Variable;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
@@ -386,6 +387,7 @@ public class Script {
 				if(debugOutput) {
 					doDebugOutput(f.getName(), c.getChildren());
 				}
+
 				if(f.useSpecialExec()) {
 					ProfilePoint p = null;
 					if(f.shouldProfile()) {
@@ -396,7 +398,8 @@ public class Script {
 					}
 					Mixed ret;
 					try {
-						ret = f.execs(m.getTarget(), env, this, c.getChildren().toArray(new ParseTree[args.length]));
+						// TODO: Provide generic parameters
+						ret = f.execs(m.getTarget(), env, this, null, c.getChildren().toArray(new ParseTree[args.length]));
 					} finally {
 						if(p != null) {
 							p.stop();
@@ -427,7 +430,8 @@ public class Script {
 					}
 					Mixed ret;
 					try {
-						ret = Function.ExecuteFunction(f, m.getTarget(), env, args);
+						GenericParameters parameters = c.getNodeModifiers().getGenerics();
+						ret = f.exec(m.getTarget(), env, parameters, args);
 					} finally {
 						if(p != null) {
 							p.stop();

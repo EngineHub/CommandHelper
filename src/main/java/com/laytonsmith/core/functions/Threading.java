@@ -85,7 +85,7 @@ public final class Threading {
 		}
 
 		@Override
-		public Mixed exec(final Target t, final Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			final String threadId = args[0].val();
 			final com.laytonsmith.core.natives.interfaces.Callable closure
 					= ArgumentValidation.getObject(args[1], t, com.laytonsmith.core.natives.interfaces.Callable.class);
@@ -238,7 +238,7 @@ public final class Threading {
 		}
 
 		@Override
-		public Mixed exec(final Target t, final Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			final com.laytonsmith.core.natives.interfaces.Callable closure
 					= ArgumentValidation.getObject(args[0], t, com.laytonsmith.core.natives.interfaces.Callable.class);
 			StaticLayer.GetConvertor().runOnMainThreadLater(
@@ -303,7 +303,7 @@ public final class Threading {
 		}
 
 		@Override
-		public Mixed exec(final Target t, final Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			final com.laytonsmith.core.natives.interfaces.Callable closure = ArgumentValidation.getObject(args[0], t,
 					com.laytonsmith.core.natives.interfaces.Callable.class);
 			Object ret;
@@ -490,7 +490,7 @@ public final class Threading {
 		}
 
 		@Override
-		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
 
 			// Get the sync object tree and the code to synchronize.
 			ParseTree syncObjectTree = nodes[0];
@@ -512,7 +512,7 @@ public final class Threading {
 		}
 
 		@Override
-		public Mixed exec(final Target t, final Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return CVoid.VOID;
 		}
 
@@ -738,7 +738,7 @@ public final class Threading {
 			}
 			int wait = 0;
 			if(args.length > 1) {
-				wait = ArgumentValidation.getInt32(args[1], t);
+				wait = ArgumentValidation.getInt32(args[1], t, env);
 			}
 			try {
 				th.join(wait);

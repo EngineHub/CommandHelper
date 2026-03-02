@@ -6,9 +6,9 @@ import com.laytonsmith.abstraction.events.MCEntityEvent;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
-import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.prefilters.PlayerPrefilterMatcher.PlayerPrefilterDocs;
@@ -31,9 +31,9 @@ public class OptionalPlayerPrefilterMatcher<T extends MCEntityEvent> extends Mac
 	}
 
 	@Override
-	public void validate(ParseTree node, CClassType nodeType, Environment env)
+	public void validate(ParseTree node, LeftHandSideType nodeType, Environment env)
 			throws ConfigCompileException, ConfigCompileGroupException, ConfigRuntimeException {
-		if(!nodeType.doesExtend(CString.TYPE)) {
+		if(!nodeType.doesExtend(CString.TYPE, env)) {
 			env.getEnv(CompilerEnvironment.class).addCompilerWarning(node.getFileOptions(),
 					new CompilerWarning("Expected a string (player) here, this may not perform as expected.",
 							node.getTarget(), null));
@@ -41,13 +41,13 @@ public class OptionalPlayerPrefilterMatcher<T extends MCEntityEvent> extends Mac
 	}
 
 	@Override
-	public boolean matches(String key, Mixed value, T event, Target t) {
+	public boolean matches(String key, Mixed value, T event, Target t, Environment env) {
 		Object prop = getProperty(event);
 		if(prop == null) {
 			return CNull.NULL.equals(value);
 		}
 
-		return super.matches(key, value, event, t);
+		return super.matches(key, value, event, t, env);
 	}
 
 	@Override

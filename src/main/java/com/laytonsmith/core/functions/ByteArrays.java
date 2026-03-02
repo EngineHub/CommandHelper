@@ -54,7 +54,7 @@ public class ByteArrays {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			return new CByteArray(t);
+			return new CByteArray(t, env);
 		}
 
 		@Override
@@ -84,8 +84,8 @@ public class ByteArrays {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CByteArray ba = ArgumentValidation.getByteArray(args[0], t);
-			return ba.asArray(t);
+			CByteArray ba = ArgumentValidation.getByteArray(args[0], t, env);
+			return ba.asArray(t, env);
 		}
 
 		@Override
@@ -119,7 +119,7 @@ public class ByteArrays {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CByteArray ba = getBA(args, t);
+			CByteArray ba = getBA(args, t, env);
 			ba.rewind();
 			return CVoid.VOID;
 		}
@@ -151,8 +151,8 @@ public class ByteArrays {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CByteArray ba = getBA(args, t);
-			Integer pos = get_getPos(args, t);
+			CByteArray ba = getBA(args, t, env);
+			Integer pos = get_getPos(args, t, env);
 			try {
 				return new CInt(ba.getByte(pos), t);
 			} catch (IndexOutOfBoundsException | BufferUnderflowException e) {
@@ -183,8 +183,8 @@ public class ByteArrays {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CByteArray ba = getBA(args, t);
-			Integer pos = get_getPos(args, t);
+			CByteArray ba = getBA(args, t, env);
+			Integer pos = get_getPos(args, t, env);
 			try {
 				return new CString(ba.getChar(pos), t);
 			} catch (IndexOutOfBoundsException | BufferUnderflowException e) {
@@ -215,8 +215,8 @@ public class ByteArrays {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CByteArray ba = getBA(args, t);
-			Integer pos = get_getPos(args, t);
+			CByteArray ba = getBA(args, t, env);
+			Integer pos = get_getPos(args, t, env);
 			try {
 				return new CInt(ba.getShort(pos), t);
 			} catch (IndexOutOfBoundsException | BufferUnderflowException e) {
@@ -246,8 +246,8 @@ public class ByteArrays {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CByteArray ba = getBA(args, t);
-			Integer pos = get_getPos(args, t);
+			CByteArray ba = getBA(args, t, env);
+			Integer pos = get_getPos(args, t, env);
 			try {
 				return new CInt(ba.getInt(pos), t);
 			} catch (IndexOutOfBoundsException | BufferUnderflowException e) {
@@ -278,8 +278,8 @@ public class ByteArrays {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CByteArray ba = getBA(args, t);
-			Integer pos = get_getPos(args, t);
+			CByteArray ba = getBA(args, t, env);
+			Integer pos = get_getPos(args, t, env);
 			try {
 				return new CInt(ba.getLong(pos), t);
 			} catch (IndexOutOfBoundsException | BufferUnderflowException e) {
@@ -310,8 +310,8 @@ public class ByteArrays {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CByteArray ba = getBA(args, t);
-			Integer pos = get_getPos(args, t);
+			CByteArray ba = getBA(args, t, env);
+			Integer pos = get_getPos(args, t, env);
 			try {
 				return new CDouble(ba.getFloat(pos), t);
 			} catch (IndexOutOfBoundsException | BufferUnderflowException e) {
@@ -342,8 +342,8 @@ public class ByteArrays {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CByteArray ba = getBA(args, t);
-			Integer pos = get_getPos(args, t);
+			CByteArray ba = getBA(args, t, env);
+			Integer pos = get_getPos(args, t, env);
 			try {
 				return new CDouble(ba.getDouble(pos), t);
 			} catch (IndexOutOfBoundsException | BufferUnderflowException e) {
@@ -378,14 +378,14 @@ public class ByteArrays {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CByteArray ba = getBA(args, t);
-			int size = ArgumentValidation.getInt32(args[1], t);
+			CByteArray ba = getBA(args, t, env);
+			int size = ArgumentValidation.getInt32(args[1], t, env);
 			Integer pos = null;
 			if(args.length == 3) {
-				pos = ArgumentValidation.getInt32(args[2], t);
+				pos = ArgumentValidation.getInt32(args[2], t, env);
 			}
 			try {
-				return ba.getBytes(size, pos);
+				return ba.getBytes(size, pos, env);
 			} catch (IndexOutOfBoundsException | BufferUnderflowException e) {
 				throw new CRERangeException(e.getMessage(), t);
 			}
@@ -414,8 +414,8 @@ public class ByteArrays {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CByteArray ba = getBA(args, t);
-			Integer pos = get_getPos(args, t);
+			CByteArray ba = getBA(args, t, env);
+			Integer pos = get_getPos(args, t, env);
 			String encoding = null;
 			if(args.length == 3) {
 				encoding = Construct.nval(args[2]);
@@ -456,9 +456,9 @@ public class ByteArrays {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CByteArray ba = getBA(args, t);
-			byte b = ArgumentValidation.getInt8(args[1], t);
-			Integer pos = set_getPos(args, t);
+			CByteArray ba = getBA(args, t, env);
+			byte b = ArgumentValidation.getInt8(args[1], t, env);
+			Integer pos = set_getPos(args, t, env);
 			ba.putByte(b, pos);
 			return CVoid.VOID;
 		}
@@ -491,13 +491,13 @@ public class ByteArrays {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CByteArray ba = getBA(args, t);
+			CByteArray ba = getBA(args, t, env);
 			String b = args[1].val();
 			char c = '\0';
 			if(b.length() > 0) {
 				c = b.charAt(0);
 			}
-			Integer pos = set_getPos(args, t);
+			Integer pos = set_getPos(args, t, env);
 			ba.putChar(c, pos);
 			return CVoid.VOID;
 		}
@@ -525,9 +525,9 @@ public class ByteArrays {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CByteArray ba = getBA(args, t);
-			short b = ArgumentValidation.getInt16(args[1], t);
-			Integer pos = set_getPos(args, t);
+			CByteArray ba = getBA(args, t, env);
+			short b = ArgumentValidation.getInt16(args[1], t, env);
+			Integer pos = set_getPos(args, t, env);
 			ba.putShort(b, pos);
 			return CVoid.VOID;
 		}
@@ -560,9 +560,9 @@ public class ByteArrays {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CByteArray ba = getBA(args, t);
-			int b = ArgumentValidation.getInt32(args[1], t);
-			Integer pos = set_getPos(args, t);
+			CByteArray ba = getBA(args, t, env);
+			int b = ArgumentValidation.getInt32(args[1], t, env);
+			Integer pos = set_getPos(args, t, env);
 			ba.putInt(b, pos);
 			return CVoid.VOID;
 		}
@@ -594,9 +594,9 @@ public class ByteArrays {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CByteArray ba = getBA(args, t);
-			long b = ArgumentValidation.getInt(args[1], t);
-			Integer pos = set_getPos(args, t);
+			CByteArray ba = getBA(args, t, env);
+			long b = ArgumentValidation.getInt(args[1], t, env);
+			Integer pos = set_getPos(args, t, env);
 			ba.putLong(b, pos);
 			return CVoid.VOID;
 		}
@@ -624,9 +624,9 @@ public class ByteArrays {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CByteArray ba = getBA(args, t);
-			float b = ArgumentValidation.getDouble32(args[1], t);
-			Integer pos = set_getPos(args, t);
+			CByteArray ba = getBA(args, t, env);
+			float b = ArgumentValidation.getDouble32(args[1], t, env);
+			Integer pos = set_getPos(args, t, env);
 			ba.putFloat(b, pos);
 			return CVoid.VOID;
 		}
@@ -659,9 +659,9 @@ public class ByteArrays {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CByteArray ba = getBA(args, t);
-			double b = ArgumentValidation.getDouble(args[1], t);
-			Integer pos = set_getPos(args, t);
+			CByteArray ba = getBA(args, t, env);
+			double b = ArgumentValidation.getDouble(args[1], t, env);
+			Integer pos = set_getPos(args, t, env);
 			ba.putDouble(b, pos);
 			return CVoid.VOID;
 		}
@@ -689,9 +689,9 @@ public class ByteArrays {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CByteArray dest = getBA(args, t);
-			CByteArray src = ArgumentValidation.getByteArray(args[1], t);
-			Integer pos = set_getPos(args, t);
+			CByteArray dest = getBA(args, t, env);
+			CByteArray src = ArgumentValidation.getByteArray(args[1], t, env);
+			Integer pos = set_getPos(args, t, env);
 			dest.putBytes(src, pos);
 			return CVoid.VOID;
 		}
@@ -719,9 +719,9 @@ public class ByteArrays {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CByteArray ba = getBA(args, t);
+			CByteArray ba = getBA(args, t, env);
 			String s = args[1].val();
-			Integer pos = set_getPos(args, t);
+			Integer pos = set_getPos(args, t, env);
 			String encoding = null;
 			if(args.length == 3) {
 				encoding = Construct.nval(args[2]);
@@ -777,8 +777,8 @@ public class ByteArrays {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CByteArray ba = ArgumentValidation.getByteArray(args[0], t);
-			boolean setLittle = ArgumentValidation.getBoolean(args[1], t);
+			CByteArray ba = ArgumentValidation.getByteArray(args[0], t, env);
+			boolean setLittle = ArgumentValidation.getBoolean(args[1], t, env);
 			ba.setOrder(setLittle ? ByteOrder.LITTLE_ENDIAN : ByteOrder.BIG_ENDIAN);
 			return CVoid.VOID;
 		}
@@ -828,7 +828,7 @@ public class ByteArrays {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CByteArray ba = ArgumentValidation.getByteArray(args[0], t);
+			CByteArray ba = ArgumentValidation.getByteArray(args[0], t, env);
 			return CBoolean.get(ba.getOrder() == ByteOrder.LITTLE_ENDIAN);
 		}
 
@@ -855,21 +855,21 @@ public class ByteArrays {
 
 	}
 
-	private static CByteArray getBA(Mixed[] args, Target t) {
-		return ArgumentValidation.getByteArray(args[0], t);
+	private static CByteArray getBA(Mixed[] args, Target t, Environment env) {
+		return ArgumentValidation.getByteArray(args[0], t, env);
 	}
 
-	private static Integer get_getPos(Mixed[] args, Target t) {
+	private static Integer get_getPos(Mixed[] args, Target t, Environment env) {
 		if(args.length == 2) {
-			return ArgumentValidation.getInt32(args[1], t);
+			return ArgumentValidation.getInt32(args[1], t, env);
 		} else {
 			return null;
 		}
 	}
 
-	private static Integer set_getPos(Mixed[] args, Target t) {
+	private static Integer set_getPos(Mixed[] args, Target t, Environment env) {
 		if(args.length == 3) {
-			return ArgumentValidation.getInt32(args[2], t);
+			return ArgumentValidation.getInt32(args[2], t, env);
 		} else {
 			return null;
 		}

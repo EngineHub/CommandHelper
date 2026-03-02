@@ -9,8 +9,8 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.constructs.CArray;
-import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CNull;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.BindableEvent;
@@ -63,9 +63,9 @@ public abstract class LocationPrefilterMatcher<T extends BindableEvent> extends 
 	}
 
 	@Override
-	public void validate(ParseTree node, CClassType nodeType, Environment env)
+	public void validate(ParseTree node, LeftHandSideType nodeType, Environment env)
 			throws ConfigCompileException, ConfigCompileGroupException, ConfigRuntimeException {
-		if(!nodeType.doesExtend(CArray.TYPE)) {
+		if(!nodeType.doesExtend(CArray.TYPE, env)) {
 			env.getEnv(CompilerEnvironment.class).addCompilerWarning(node.getFileOptions(),
 					new CompilerWarning("Expected a location array here, this may not perform as expected.",
 							node.getTarget(), null));
@@ -73,7 +73,7 @@ public abstract class LocationPrefilterMatcher<T extends BindableEvent> extends 
 	}
 
 	@Override
-	public boolean matches(String key, Mixed value, T event, Target t) {
+	public boolean matches(String key, Mixed value, T event, Target t, Environment env) {
 		MCLocation eventLocation = getLocation(event);
 		if(eventLocation == null) {
 			return CNull.NULL.equals(value);
@@ -83,28 +83,28 @@ public abstract class LocationPrefilterMatcher<T extends BindableEvent> extends 
 			return false;
 		}
 
-		CArray location = ArgumentValidation.getArray(value, t);
+		CArray location = ArgumentValidation.getArray(value, t, env);
 		Double x = null;
 		Double y = null;
 		Double z = null;
 		String world = null;
 
 		if(location.containsKey("x")) {
-			x = ArgumentValidation.getDouble(location.get("x", t), t);
+			x = ArgumentValidation.getDouble(location.get("x", t), t, env);
 		} else if(location.containsKey(0)) {
-			x = ArgumentValidation.getDouble(location.get(0, t), t);
+			x = ArgumentValidation.getDouble(location.get(0, t), t, env);
 		}
 
 		if(location.containsKey("y")) {
-			y = ArgumentValidation.getDouble(location.get("y", t), t);
+			y = ArgumentValidation.getDouble(location.get("y", t), t, env);
 		} else if(location.containsKey(1)) {
-			y = ArgumentValidation.getDouble(location.get(1, t), t);
+			y = ArgumentValidation.getDouble(location.get(1, t), t, env);
 		}
 
 		if(location.containsKey("z")) {
-			z = ArgumentValidation.getDouble(location.get("z", t), t);
+			z = ArgumentValidation.getDouble(location.get("z", t), t, env);
 		} else if(location.containsKey(2)) {
-			z = ArgumentValidation.getDouble(location.get(2, t), t);
+			z = ArgumentValidation.getDouble(location.get(2, t), t, env);
 		}
 
 		if(location.containsKey("world")) {
@@ -115,7 +115,7 @@ public abstract class LocationPrefilterMatcher<T extends BindableEvent> extends 
 
 		double tolerance = getDefaultTolerance();
 		if(location.containsKey("tolerance")) {
-			tolerance = ArgumentValidation.getDouble(location.get("tolerance", t), t);
+			tolerance = ArgumentValidation.getDouble(location.get("tolerance", t), t, env);
 		}
 
 		if(world != null && !eventLocation.getWorld().getName().equals(world)) {

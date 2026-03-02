@@ -369,7 +369,7 @@ public class Debug {
 						+ TermColors.BRIGHT_WHITE + ivar.getDefinedType()
 						+ TermColors.RESET + " (actual type "
 						+ TermColors.BRIGHT_WHITE + val.typeof(env)
-						+ (val.isInstanceOf(Sizeable.TYPE, null, env) ? ", length: " + ((Sizeable) val).size() : "")
+						+ (val.isInstanceOf(Sizeable.TYPE, null, env) ? ", length: " + ((Sizeable) val).size(env) : "")
 						+ TermColors.RESET + ") "
 						+ TermColors.CYAN + ivar.getVariableName()
 						+ TermColors.RESET + ": " + val.val());
@@ -609,9 +609,10 @@ public class Debug {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
-			CArray carray = new CArray(t);
+			CArray carray = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			for(Thread thread : threadSet) {
-				carray.push(new CString(thread.getName(), t), t);
+				carray.push(new CString(thread.getName(), t), t, env);
 			}
 			return carray;
 		}
@@ -715,7 +716,7 @@ public class Debug {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			Script.debugOutput = ArgumentValidation.getBoolean(args[0], t);
+			Script.debugOutput = ArgumentValidation.getBoolean(args[0], t, env);
 			if(Script.debugOutput) {
 				StreamUtils.GetSystemOut().println(TermColors.BG_RED + "[[DEBUG]] set_debug_output(true)"
 						+ TermColors.RESET);

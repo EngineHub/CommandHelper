@@ -55,6 +55,7 @@ public class Scope {
 	}
 
 	public void addParent(Scope parent) {
+		Objects.requireNonNull(parent);
 		this.parents.add(parent);
 	}
 

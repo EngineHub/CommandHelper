@@ -19,13 +19,14 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
-import java.io.File;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -55,7 +56,7 @@ public abstract class CompositeFunction extends AbstractFunction {
 
 				String script = script();
 				Scope rootScope = new Scope();
-				rootScope.addDeclaration(new ParamDeclaration("@arguments", CArray.TYPE, null,
+				rootScope.addDeclaration(new ParamDeclaration("@arguments", CArray.TYPE.asLeftHandSideType(), null,
 						new NodeModifiers(),
 						Target.UNKNOWN));
 				rootScope.addDeclaration(new ReturnableDeclaration(null, new NodeModifiers(), Target.UNKNOWN));
@@ -77,7 +78,12 @@ public abstract class CompositeFunction extends AbstractFunction {
 		GlobalEnv gEnv = env.getEnv(GlobalEnv.class);
 		IVariableList oldVariables = gEnv.GetVarList();
 		IVariableList newVariables = new IVariableList(oldVariables);
-		newVariables.set(new IVariable(CArray.TYPE, "@arguments", new CArray(t, args.length, args), t));
+		try {
+			newVariables.set(new IVariable(CArray.TYPE, "@arguments", new CArray(t, args.length,
+					null, env, args), t));
+		} catch (ConfigCompileException cce) {
+			throw new CREFormatException(cce.getMessage(), t);
+		}
 		gEnv.SetVarList(newVariables);
 		Mixed ret = CVoid.VOID;
 		try {
@@ -140,7 +146,7 @@ public abstract class CompositeFunction extends AbstractFunction {
 	}
 
 	@Override
-	public final Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+	public final Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
 		throw new Error(this.getClass().toString());
 	}
 

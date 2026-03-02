@@ -146,19 +146,19 @@ public class InventoryManagement {
 			if(all) {
 				CArray ret = CArray.GetAssociativeArray(t, null, env);
 				for(int i = 0; i < 36; i++) {
-					ret.set(i, getInvSlot(m, i, t), t, env);
+					ret.set(i, getInvSlot(m, i, t, env), t, env);
 				}
 				for(int i = 100; i < 104; i++) {
-					ret.set(i, getInvSlot(m, i, t), t, env);
+					ret.set(i, getInvSlot(m, i, t, env), t, env);
 				}
-				ret.set(-106, getInvSlot(m, -106, t), t, env);
+				ret.set(-106, getInvSlot(m, -106, t, env), t, env);
 				return ret;
 			} else {
-				return getInvSlot(m, index, t);
+				return getInvSlot(m, index, t, env);
 			}
 		}
 
-		private Mixed getInvSlot(MCPlayer m, Integer slot, Target t) {
+		private Mixed getInvSlot(MCPlayer m, Integer slot, Target t, Environment env) {
 			MCPlayerInventory inv = m.getInventory();
 			if(inv == null) {
 				throw new CRENotFoundException(
@@ -686,18 +686,18 @@ public class InventoryManagement {
 			int total = 0;
 			for(int i = 0; i < 36; i++) {
 				MCItemStack iis = inv.getItem(i);
-				total += total(ca, is, iis, t);
+				total += total(ca, is, iis, t, env);
 			}
-			total += total(ca, is, inv.getBoots(), t);
-			total += total(ca, is, inv.getLeggings(), t);
-			total += total(ca, is, inv.getChestplate(), t);
-			total += total(ca, is, inv.getHelmet(), t);
-			total += total(ca, is, inv.getItemInOffHand(), t);
+			total += total(ca, is, inv.getBoots(), t, env);
+			total += total(ca, is, inv.getLeggings(), t, env);
+			total += total(ca, is, inv.getChestplate(), t, env);
+			total += total(ca, is, inv.getHelmet(), t, env);
+			total += total(ca, is, inv.getItemInOffHand(), t, env);
 			return new CInt(total, t);
 		}
 
-		private int total(CArray map, MCItemStack is, MCItemStack iis, Target t) {
-			if(IsMatch(map, is, iis, t)) {
+		private int total(CArray map, MCItemStack is, MCItemStack iis, Target t, Environment env) {
+			if(IsMatch(map, is, iis, t, env)) {
 				return iis.getAmount();
 			}
 			return 0;
@@ -802,25 +802,26 @@ public class InventoryManagement {
 				throw new CRENotFoundException(
 						"Could not find the inventory of the given player (are you running in cmdline mode?)", t);
 			}
-			CArray ret = new CArray(t);
+			CArray ret = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CInt.TYPE, null).buildNative(), env);
 			for(int i = 0; i < 36; i++) {
-				if(IsMatch(ca, is, inv.getItem(i), t)) {
+				if(IsMatch(ca, is, inv.getItem(i), t, env)) {
 					ret.push(new CInt(i, t), t, env);
 				}
 			}
-			if(IsMatch(ca, is, inv.getBoots(), t)) {
+			if(IsMatch(ca, is, inv.getBoots(), t, env)) {
 				ret.push(new CInt(100, t), t, env);
 			}
-			if(IsMatch(ca, is, inv.getLeggings(), t)) {
+			if(IsMatch(ca, is, inv.getLeggings(), t, env)) {
 				ret.push(new CInt(101, t), t, env);
 			}
-			if(IsMatch(ca, is, inv.getChestplate(), t)) {
+			if(IsMatch(ca, is, inv.getChestplate(), t, env)) {
 				ret.push(new CInt(102, t), t, env);
 			}
-			if(IsMatch(ca, is, inv.getHelmet(), t)) {
+			if(IsMatch(ca, is, inv.getHelmet(), t, env)) {
 				ret.push(new CInt(103, t), t, env);
 			}
-			if(IsMatch(ca, is, inv.getItemInOffHand(), t)) {
+			if(IsMatch(ca, is, inv.getItemInOffHand(), t, env)) {
 				ret.push(new CInt(-106, t), t, env);
 			}
 			return ret;
@@ -940,7 +941,7 @@ public class InventoryManagement {
 			} else if(args.length > 1) {
 				is = Static.ParseItemNotation(null, args[itemOffset].val(), ArgumentValidation.getInt32(args[itemOffset + 1], t, env), t);
 				if(args.length > itemOffset + 2) {
-					is.setItemMeta(ObjectGenerator.GetGenerator().itemMeta(args[itemOffset + 2], is.getType(), t));
+					is.setItemMeta(ObjectGenerator.GetGenerator().itemMeta(args[itemOffset + 2], is.getType(), t, env));
 				}
 			} else {
 				throw new CREInsufficientArgumentsException("Expecting a qty for string item format.", t);
@@ -972,7 +973,8 @@ public class InventoryManagement {
 				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() > 2 || children.size() == 2
-					&& (children.get(1).getData().isInstanceOf(CString.TYPE, null, env) || children.get(1).getData().isInstanceOf(CInt.TYPE, null, env))) {
+					&& (children.get(1).getData().isInstanceOf(CString.TYPE, null, env)
+					|| children.get(1).getData().isInstanceOf(CInt.TYPE, null, env))) {
 				env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
 						new CompilerWarning("The string item format in " + getName() + " is deprecated.", t, null));
 			}
@@ -1067,7 +1069,7 @@ public class InventoryManagement {
 				if(remaining <= 0) {
 					break;
 				}
-				if(IsMatch(ca, is, iis, t)) {
+				if(IsMatch(ca, is, iis, t, env)) {
 					//Take the minimum of either: remaining, or iis.getAmount()
 					int toTake = java.lang.Math.min(remaining, iis.getAmount());
 					remaining -= toTake;
@@ -1095,7 +1097,8 @@ public class InventoryManagement {
 				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() > 2 || children.size() == 2
-					&& (children.get(1).getData().isInstanceOf(CString.TYPE, null, env) || children.get(1).getData().isInstanceOf(CInt.TYPE, null, env))) {
+					&& (children.get(1).getData().isInstanceOf(CString.TYPE, null, env)
+					|| children.get(1).getData().isInstanceOf(CInt.TYPE, null, env))) {
 				env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
 						new CompilerWarning("The string item format in " + getName() + " is deprecated.", t, null));
 			}
@@ -1200,7 +1203,7 @@ public class InventoryManagement {
 			} else {
 				is = Static.ParseItemNotation(null, args[itemOffset].val(), ArgumentValidation.getInt32(args[itemOffset + 1], t, env), t);
 				if(args.length > itemOffset + 2) {
-					is.setItemMeta(ObjectGenerator.GetGenerator().itemMeta(args[itemOffset + 2], is.getType(), t));
+					is.setItemMeta(ObjectGenerator.GetGenerator().itemMeta(args[itemOffset + 2], is.getType(), t, env));
 				}
 			}
 
@@ -1230,7 +1233,8 @@ public class InventoryManagement {
 				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() > 2 || children.size() == 2
-					&& (children.get(1).getData().isInstanceOf(CString.TYPE, null, env) || children.get(1).getData().isInstanceOf(CInt.TYPE, null, env))) {
+					&& (children.get(1).getData().isInstanceOf(CString.TYPE, null, env)
+					|| children.get(1).getData().isInstanceOf(CInt.TYPE, null, env))) {
 				env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
 						new CompilerWarning("The string item format in " + getName() + " is deprecated.", t, null));
 			}
@@ -1324,7 +1328,7 @@ public class InventoryManagement {
 				if(remaining <= 0) {
 					break;
 				}
-				if(IsMatch(ca, is, iis, t)) {
+				if(IsMatch(ca, is, iis, t, env)) {
 					//Take the minimum of either: remaining, or iis.getAmount()
 					int toTake = java.lang.Math.min(remaining, iis.getAmount());
 					remaining -= toTake;
@@ -1351,7 +1355,8 @@ public class InventoryManagement {
 				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() > 2 || children.size() == 2
-					&& (children.get(1).getData().isInstanceOf(CString.TYPE, null, env) || children.get(1).getData().isInstanceOf(CInt.TYPE, null, env))) {
+					&& (children.get(1).getData().isInstanceOf(CString.TYPE, null, env)
+					|| children.get(1).getData().isInstanceOf(CInt.TYPE, null, env))) {
 				env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
 						new CompilerWarning("The string item format in " + getName() + " is deprecated.", t, null));
 			}
@@ -1567,16 +1572,16 @@ public class InventoryManagement {
 				CArray ret = CArray.GetAssociativeArray(t, null, env);
 
 				for(int i = 0; i < 27; i++) {
-					ret.set(i, getInvSlot(m, i, t), t, env);
+					ret.set(i, getInvSlot(m, i, t, env), t, env);
 				}
 
 				return ret;
 			} else {
-				return getInvSlot(m, index, t);
+				return getInvSlot(m, index, t, env);
 			}
 		}
 
-		private Mixed getInvSlot(MCPlayer m, Integer slot, Target t) {
+		private Mixed getInvSlot(MCPlayer m, Integer slot, Target t, Environment env) {
 			MCInventory inv = m.getEnderChest();
 			if(inv == null) {
 				throw new CRENotFoundException(
@@ -2220,7 +2225,7 @@ public class InventoryManagement {
 			} else {
 				is = Static.ParseItemNotation(this.getName(), args[1].val(), ArgumentValidation.getInt32(args[2], t, env), t);
 				if(args.length == 4) {
-					is.setItemMeta(ObjectGenerator.GetGenerator().itemMeta(args[3], is.getType(), t));
+					is.setItemMeta(ObjectGenerator.GetGenerator().itemMeta(args[3], is.getType(), t, env));
 				}
 			}
 
@@ -2320,7 +2325,7 @@ public class InventoryManagement {
 				if(remaining <= 0) {
 					break;
 				}
-				if(IsMatch(ca, is, iis, t)) {
+				if(IsMatch(ca, is, iis, t, env)) {
 					//Take the minimum of either: remaining, or iis.getAmount()
 					int toTake = java.lang.Math.min(remaining, iis.getAmount());
 					remaining -= toTake;
@@ -2670,7 +2675,8 @@ public class InventoryManagement {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCInventory inv = GetInventory(args[0], null, t, env);
-			CArray list = new CArray(t);
+			CArray list = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			for(MCHumanEntity viewer : inv.getViewers()) {
 				list.push(new CString(viewer.getName(), t), t, env);
 			}
@@ -2719,7 +2725,8 @@ public class InventoryManagement {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CArray list = new CArray(t);
+			CArray list = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			for(String id : VIRTUAL_INVENTORIES.keySet()) {
 				list.push(new CString(id, t), t, env);
 			}
@@ -2996,12 +3003,12 @@ public class InventoryManagement {
 	 * @param t
 	 * @return Whether or not the items are a match
 	 */
-	private static boolean IsMatch(CArray map, MCItemStack is, MCItemStack iis, Target t) {
+	private static boolean IsMatch(CArray map, MCItemStack is, MCItemStack iis, Target t, Environment env) {
 		if(!is.getType().equals(iis.getType())) {
 			return false;
 		}
 		if(map != null && map.containsKey("meta")) {
-			Mixed c = map.get("meta", t);
+			Mixed c = map.get("meta", t, env);
 			if(c instanceof CNull) {
 				if(iis.hasItemMeta()) {
 					return false;

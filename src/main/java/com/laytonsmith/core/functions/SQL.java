@@ -28,7 +28,6 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -37,6 +36,7 @@ import com.laytonsmith.core.Profiles;
 import com.laytonsmith.core.ProfilesImpl;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CRESQLException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
@@ -228,7 +228,7 @@ public class SQL {
 					boolean isResultSet = ps.execute();
 					if(isResultSet) {
 						//Result set
-						CArray ret = new CArray(t);
+						CArray ret = new CArray(t, null, env);
 						ResultSetMetaData md = ps.getMetaData();
 						ResultSet rs = ps.getResultSet();
 						while(rs != null && rs.next()) {
@@ -264,7 +264,7 @@ public class SQL {
 									case Types.BINARY:
 									case Types.VARBINARY:
 									case Types.LONGVARBINARY:
-										value = CByteArray.wrap(rs.getBytes(i), t);
+										value = CByteArray.wrap(rs.getBytes(i), t, env);
 										break;
 
 									case Types.DATE:

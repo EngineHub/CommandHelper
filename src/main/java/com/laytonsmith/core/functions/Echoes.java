@@ -17,9 +17,11 @@ import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.signature.FunctionSignatures;
+import com.laytonsmith.core.compiler.signature.SignatureBuilder;
+import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
-import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
@@ -43,7 +45,6 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -70,7 +71,7 @@ public class Echoes {
 		}
 
 		@Override
-		public Mixed exec(final Target t, Environment env, GenericParameters generics, final Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			StringBuilder b = new StringBuilder();
 			for(Mixed arg : args) {
 				b.append(arg.val());
@@ -116,8 +117,12 @@ public class Echoes {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
-			return CVoid.TYPE;
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CVoid.TYPE)
+					.param(Auto.TYPE, "message", "The message to send.")
+					.varParam(Auto.TYPE, "additionalMessages", "Additional parts of the message to send. These parts"
+							+ " will simply be concatenated with the others")
+					.build();
 		}
 
 	}
@@ -208,10 +213,10 @@ public class Echoes {
 			try {
 				Gson gson = new GsonBuilder().disableHtmlEscaping().create();
 				if(args.length == 1) {
-					json = gson.toJson(Construct.GetPOJO(args[0]));
+					json = gson.toJson(Construct.GetPOJO(args[0], env));
 				} else {
 					selector = ArgumentValidation.getString(args[0], t);
-					json = gson.toJson(Construct.GetPOJO(args[1]));
+					json = gson.toJson(Construct.GetPOJO(args[1], env));
 				}
 			} catch(ClassCastException ex) {
 				throw new CRECastException(ex.getMessage(), t);
@@ -352,7 +357,7 @@ public class Echoes {
 			return "void {[player], message} Sends a message to the action bar above the hot bar.";
 		}
 
-		public Construct exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer player;
 			String message;
 			if(args.length == 2) {
@@ -573,7 +578,7 @@ public class Echoes {
 		}
 
 		@Override
-		public Mixed exec(final Target t, final Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(p != null) {
 				p.chat(args[0].val());

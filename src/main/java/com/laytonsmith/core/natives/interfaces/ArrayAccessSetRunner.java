@@ -14,6 +14,11 @@ import com.laytonsmith.core.constructs.generics.GenericParameters;
 public class ArrayAccessSetRunner extends AbstractMixedInterfaceRunner {
 
 	@Override
+	public GenericParameters getGenericParameters() {
+		return null;
+	}
+
+	@Override
 	public String docs() {
 		return "Provides write access to an object using the square bracket notation.";
 	}
@@ -31,10 +36,5 @@ public class ArrayAccessSetRunner extends AbstractMixedInterfaceRunner {
 	@Override
 	public CClassType[] getInterfaces() {
 		return CClassType.EMPTY_CLASS_ARRAY;
-	}
-
-	@Override
-	public GenericParameters getGenericParameters() {
-		return null;
 	}
 }

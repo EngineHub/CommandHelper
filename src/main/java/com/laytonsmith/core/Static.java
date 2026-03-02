@@ -1,6 +1,7 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.PureUtilities.Common.Annotations.AggressiveDeprecation;
 import com.laytonsmith.PureUtilities.Common.DateUtils;
 import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
@@ -47,6 +48,7 @@ import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Variable;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
@@ -61,7 +63,6 @@ import com.laytonsmith.core.exceptions.CRE.CREInvalidWorldException;
 import com.laytonsmith.core.exceptions.CRE.CRELengthException;
 import com.laytonsmith.core.exceptions.CRE.CRENullPointerException;
 import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
-import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Function;
@@ -73,6 +74,7 @@ import com.laytonsmith.persistence.DataSourceException;
 import com.laytonsmith.persistence.PersistenceNetwork;
 import com.laytonsmith.persistence.PersistenceNetworkImpl;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
+import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -96,7 +98,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.yaml.snakeyaml.Yaml;
 
 /**
  * This class contains several static methods to get various objects that really should be static in the first place,
@@ -143,6 +144,7 @@ public final class Static {
 	 * @deprecated Use {@link ArgumentValidation#getArray(Mixed, Target)} instead.
 	 */
 	@Deprecated
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	public static CArray getArray(Mixed construct, Target t) {
 		return ArgumentValidation.getArray(construct, t);
 	}
@@ -160,6 +162,7 @@ public final class Static {
 	 * @deprecated Use {@link ArgumentValidation#getArray(Mixed, Target)} instead.
 	 */
 	@Deprecated
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	public static <T extends Mixed> T getObject(Mixed construct, Target t, Class<T> clazz) {
 		return ArgumentValidation.getObject(construct, t, clazz);
 	}
@@ -170,7 +173,10 @@ public final class Static {
 	 * @param number The java number to convert.
 	 * @param t The code target.
 	 * @return A construct equivalent to the given java number, whose the type is the better to represent it.
+	 * @deprecated Use {@link ArgumentValidation#getNumber(com.laytonsmith.core.natives.interfaces.Mixed, com.laytonsmith.core.constructs.Target, com.laytonsmith.core.environments.Environment)}
 	 */
+	@Deprecated
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	public static CNumber getNumber(Number number, Target t) {
 		long longValue = number.longValue();
 		double doubleValue = number.doubleValue();
@@ -199,6 +205,7 @@ public final class Static {
 	 * @deprecated Use {@link ArgumentValidation#getDouble(Mixed, Target)} instead.
 	 */
 	@Deprecated
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	public static double getDouble(Mixed c, Target t) {
 		return ArgumentValidation.getDouble(c, t);
 	}
@@ -211,6 +218,7 @@ public final class Static {
 	 * @deprecated Use {@link ArgumentValidation#getDouble32(Mixed, Target)} instead.
 	 */
 	@Deprecated
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	public static float getDouble32(Mixed c, Target t) {
 		return ArgumentValidation.getDouble32(c, t);
 	}
@@ -225,6 +233,7 @@ public final class Static {
 	 * @deprecated Use {@link ArgumentValidation#getInt(Mixed, Target)} instead.
 	 */
 	@Deprecated
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	public static long getInt(Mixed c, Target t) {
 		return ArgumentValidation.getInt(c, t);
 	}
@@ -242,6 +251,7 @@ public final class Static {
 	 * @deprecated Use {@link ArgumentValidation#getInt32(Mixed, Target)} instead.
 	 */
 	@Deprecated
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	public static int getInt32(Mixed c, Target t) {
 		return ArgumentValidation.getInt32(c, t);
 	}
@@ -259,6 +269,7 @@ public final class Static {
 	 * @deprecated Use {@link ArgumentValidation#getInt16(Mixed, Target)} instead.
 	 */
 	@Deprecated
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	public static short getInt16(Mixed c, Target t) {
 		return ArgumentValidation.getInt16(c, t);
 	}
@@ -276,6 +287,7 @@ public final class Static {
 	 * @deprecated Use {@link ArgumentValidation#getInt8(Mixed, Target)} instead.
 	 */
 	@Deprecated
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	public static byte getInt8(Mixed c, Target t) {
 		return ArgumentValidation.getInt8(c, t);
 	}
@@ -296,6 +308,7 @@ public final class Static {
 	 * method. (Or any of the other methods that are duplicated.)
 	 */
 	@Deprecated
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	public static boolean getBoolean(Mixed c, Target t) {
 		return ArgumentValidation.getBooleanish(c, t);
 	}
@@ -309,6 +322,7 @@ public final class Static {
 	 * @deprecated Use {@link ArgumentValidation#getObject(Mixed, Target, Class)} with {@link CPrimitive}.class instead.
 	 */
 	@Deprecated
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	public static CPrimitive getPrimitive(Mixed c, Target t) {
 		return ArgumentValidation.getObject(c, t, CPrimitive.class);
 	}
@@ -322,6 +336,7 @@ public final class Static {
 	 * @deprecated Use {@link ArgumentValidation#getByteArray(Mixed, Target)} instead.
 	 */
 	@Deprecated
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	public static CByteArray getByteArray(Mixed c, Target t) {
 		return ArgumentValidation.getByteArray(c, t);
 	}
@@ -334,6 +349,7 @@ public final class Static {
 	 * @deprecated Use {@link ArgumentValidation#anyDoubles(Mixed...)} instead.
 	 */
 	@Deprecated
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	public static boolean anyDoubles(Mixed... c) {
 		return ArgumentValidation.anyDoubles(c);
 	}
@@ -346,6 +362,7 @@ public final class Static {
 	 * @deprecated Use {@link ArgumentValidation#anyStrings(Mixed...)} instead.
 	 */
 	@Deprecated
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	public static boolean anyStrings(Mixed... c) {
 		return ArgumentValidation.anyStrings(c);
 	}
@@ -358,6 +375,7 @@ public final class Static {
 	 * @deprecated Use {@link ArgumentValidation#anyBooleans(Mixed...)} instead.
 	 */
 	@Deprecated
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	public static boolean anyBooleans(Mixed... c) {
 		return ArgumentValidation.anyBooleans(c);
 	}
@@ -370,6 +388,7 @@ public final class Static {
 	 * @deprecated Use {@link ArgumentValidation#anyNulls(Mixed...)} instead.
 	 */
 	@Deprecated
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	public static boolean anyNulls(Mixed... c) {
 		return ArgumentValidation.anyNulls(c);
 	}
@@ -548,16 +567,17 @@ public final class Static {
 	private static final Pattern INVALID_DECIMAL = Pattern.compile("0m[0-9]*[^0-9]+[0-9]*");
 
 	/**
-	 * Given a string input, creates and returns a Construct of the appropriate type. This takes into account that null,
+	 * Given a string input, creates and returns a Construct of the appropriate type.This takes into account that null,
 	 * true, and false are keywords.
 	 *
 	 * @param val
 	 * @param t
+	 * @param env
 	 * @return
 	 * @throws ConfigRuntimeException If the value is a hex or binary value, but has invalid characters in it.
 	 */
-	public static Construct resolveConstruct(String val, Target t) throws ConfigRuntimeException {
-		return resolveConstruct(val, t, false);
+	public static Construct resolveConstruct(String val, Target t, Environment env) throws ConfigRuntimeException {
+		return resolveConstruct(val, t, false, env);
 	}
 
 	/**
@@ -572,7 +592,7 @@ public final class Static {
 	 * @return
 	 * @throws ConfigRuntimeException
 	 */
-	public static Construct resolveConstruct(String val, Target t, boolean returnBareStrings)
+	public static Construct resolveConstruct(String val, Target t, boolean returnBareStrings, Environment env)
 			throws ConfigRuntimeException {
 		if(val == null) {
 			return new CString("", t);
@@ -662,12 +682,7 @@ public final class Static {
 		}
 		String fqType = NativeTypeList.resolveNativeType(val);
 		if(fqType != null) {
-			try {
-				return CClassType.get(FullyQualifiedClassName.forFullyQualifiedClass(fqType));
-			} catch(ClassNotFoundException ex) {
-				// Can't happen, because we just resolved the type, and it wasn't null.
-				throw new Error(ex);
-			}
+			return CClassType.get(FullyQualifiedClassName.forFullyQualifiedClass(fqType), env);
 		}
 		if(returnBareStrings) {
 			return new CBareString(val, t);
@@ -834,8 +849,9 @@ public final class Static {
 	 * @deprecated Use {@link #GetUser(Mixed, Target, Environment)} instead.
 	 */
 	@Deprecated
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	public static MCOfflinePlayer GetUser(Mixed search, Target t) {
-		return GetUser(search.val(), t, null);
+		return GetUser(search, t, null);
 	}
 
 	public static MCOfflinePlayer GetUser(Mixed search, Target t, Environment env) {
@@ -846,6 +862,7 @@ public final class Static {
 	 * @deprecated Use {@link #GetUser(String, Target, Environment)} instead.
 	 */
 	@Deprecated
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	public static MCOfflinePlayer GetUser(String search, Target t) {
 		return GetUser(search, t, null);
 	}
@@ -892,13 +909,50 @@ public final class Static {
 	 * @param t
 	 * @return
 	 * @throws ConfigRuntimeException
+	 * @deprecated This method doesn't work with user classes, and will cause errors once those are introduced. This
+	 * will be removed once those are added, instead, use the version with the environment.
 	 */
 	/**
 	 * @deprecated Use {@link #GetPlayer(String, Target, Environment)} instead.
 	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public static MCPlayer GetPlayer(String player, Target t) throws ConfigRuntimeException {
 		return GetPlayer(player, t, null);
+	}
+
+	/**
+	 * Returns the player specified by name.Injected players also are returned in this list. If provided a string
+	 * between 1 and 16 characters, the lookup will be name-based. If provided a string that is 32 or 36 characters, the
+	 * lookup will be uuid-based.
+	 *
+	 * @param player
+	 * @param t
+	 * @param env
+	 * @return
+	 * @throws ConfigRuntimeException
+	 * @deprecated This method doesn't work with user classes, and will cause errors once those are introduced. This
+	 * will be removed once those are added, instead, use the version with the environment.
+	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	public static MCPlayer GetPlayer(Mixed player, Target t) throws ConfigRuntimeException {
+		return GetPlayer(player, t, null);
+	}
+
+	/**
+	 * Returns the player specified by name.Injected players also are returned in this list. If provided a string
+	 * between 1 and 16 characters, the lookup will be name-based. If provided a string that is 32 or 36 characters, the
+	 * lookup will be uuid-based.
+	 *
+	 * @param player
+	 * @param t
+	 * @param env
+	 * @return
+	 * @throws ConfigRuntimeException
+	 */
+	public static MCPlayer GetPlayer(Mixed player, Target t, Environment env) throws ConfigRuntimeException {
+		return GetPlayer(player.val(), t, env);
 	}
 
 	/**
@@ -945,17 +999,7 @@ public final class Static {
 		return p;
 	}
 
-	/**
-	 * @deprecated Use {@link #GetPlayer(Mixed, Target, Environment)} instead.
-	 */
-	@Deprecated
-	public static MCPlayer GetPlayer(Mixed player, Target t) throws ConfigRuntimeException {
-		return GetPlayer(player.val(), t, null);
-	}
 
-	public static MCPlayer GetPlayer(Mixed player, Target t, Environment env) throws ConfigRuntimeException {
-		return GetPlayer(player.val(), t, env);
-	}
 
 	/**
 	 * Returns the specified command sender by name. Players are supported, as is the special ~console user. The special
@@ -1421,6 +1465,8 @@ public final class Static {
 				persistenceNetwork, profiles, new TaskManagerImpl(),
 				new ExecutionQueueImpl("MethodScriptExecutionQueue", "default"),
 				includeCache == null ? new IncludeCache() : includeCache, staticAnalysis);
+		// TODO: This will need to be added once native classes are compiled in
+//		compilerEnvironment.getObjectDefinitionTable().addNativeTypes(retEnv, retEnv.getEnvClasses());
 		return Environment.createEnvironment(gEnv, staticRuntimeEnv, new CompilerEnvironment());
 	}
 
@@ -1551,9 +1597,11 @@ public final class Static {
 	 * @param func The function, in case this errors out,
 	 * @param envto build the error message.
 	 * @param t The code target
+	 * @param env The environment.
 	 * @return The value, cast to the desired type.
 	 */
-	public static <T extends Mixed> T AssertType(Class<T> type, Mixed[] args, int argNumber, Function func, Target t, Environment env) {
+	public static <T extends Mixed> T AssertType(Class<T> type, Mixed[] args, int argNumber, Function func, Target t,
+			Environment env) {
 		Mixed value = args[argNumber];
 		if(!type.isAssignableFrom(value.getClass())) {
 			typeof todesired = ClassDiscovery.GetClassAnnotation(type, typeof.class);
@@ -1575,9 +1623,10 @@ public final class Static {
 	 *
 	 * @param object
 	 * @param t
+	 * @param env
 	 * @return
 	 */
-	public static Construct getMSObject(Object object, Target t) {
+	public static Construct getMSObject(Object object, Target t, Environment env) {
 		if(object == null) {
 			return CNull.NULL;
 		} else if(object instanceof Boolean) {
@@ -1612,69 +1661,76 @@ public final class Static {
 			return (Construct) object;
 		} else if(object instanceof boolean[]) {
 			boolean[] array = (boolean[]) object;
-			CArray r = new CArray(t);
+			CArray r = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CBoolean.TYPE, null).buildNative(), env);
 			for(boolean b : array) {
-				r.push(CBoolean.get(b), t, null);
+				r.push(CBoolean.get(b), t, env);
 			}
 			return r;
 		} else if(object instanceof byte[]) {
-			return CByteArray.wrap((byte[]) object, t);
+			return CByteArray.wrap((byte[]) object, t, env);
 		} else if(object instanceof char[]) {
 			char[] array = (char[]) object;
-			CArray r = new CArray(t);
+			CArray r = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			for(char c : array) {
-				r.push(new CString(c, t), t);
+				r.push(new CString(c, t), t, env);
 			}
 			return r;
 		} else if(object instanceof short[]) {
 			short[] array = (short[]) object;
-			CArray r = new CArray(t);
+			CArray r = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CInt.TYPE, null).buildNative(), env);
 			for(short s : array) {
-				r.push(new CInt(s, t), t, null);
+				r.push(new CInt(s, t), t, env);
 			}
 			return r;
 		} else if(object instanceof int[]) {
 			int[] array = (int[]) object;
-			CArray r = new CArray(t);
+			CArray r = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CInt.TYPE, null).buildNative(), null);
 			for(int i : array) {
-				r.push(new CInt(i, t), t, null);
+				r.push(new CInt(i, t), t, env);
 			}
 			return r;
 		} else if(object instanceof long[]) {
 			long[] array = (long[]) object;
-			CArray r = new CArray(t);
+			CArray r = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CInt.TYPE, null).buildNative(), env);
 			for(long l : array) {
-				r.push(new CInt(l, t), t, null);
+				r.push(new CInt(l, t), t, env);
 			}
 			return r;
 		} else if(object instanceof float[]) {
 			float[] array = (float[]) object;
-			CArray r = new CArray(t);
+			CArray r = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CDouble.TYPE, null).buildNative(), env);
 			for(float f : array) {
-				r.push(new CDouble(f, t), t, null);
+				r.push(new CDouble(f, t), t, env);
 			}
 			return r;
 		} else if(object instanceof double[]) {
 			double[] array = (double[]) object;
-			CArray r = new CArray(t);
+			CArray r = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CDouble.TYPE, null).buildNative(), env);
 			for(double d : array) {
-				r.push(new CDouble(d, t), t, null);
+				r.push(new CDouble(d, t), t, env);
 			}
 			return r;
 		} else if(object instanceof Object[]) {
-			CArray r = new CArray(t);
+			CArray r = new CArray(t, null, env);
 			for(Object o : (Object[]) object) {
-				r.push((o == object) ? r : getMSObject(o, t), t, null);
+				r.push((o == object) ? r : getMSObject(o, t, env), t, env);
 			}
 			return r;
 		} else if(object instanceof Collection) {
-			return getMSObject(((Collection) object).toArray(), t);
+			return getMSObject(((Collection) object).toArray(), t, env);
 		} else if(object instanceof Map) {
 			Map map = ((Map) object);
-			CArray r = CArray.GetAssociativeArray(t, null, null);
+			CArray r = CArray.GetAssociativeArray(t, null, env);
 			for(Object key : map.keySet()) {
 				Object o = map.get(key);
-				r.set(key.toString(), (o == object) ? r : getMSObject(o, t), t, null);
+				r.set(key.toString(), (o == object) ? r : getMSObject(o, t, env), t, env);
 			}
 			return r;
 		} else {
@@ -1694,6 +1750,7 @@ public final class Static {
 	 * Given a MethodScript object, returns a java object.
 	 *
 	 * @param construct
+	 * @param env
 	 * @return
 	 */
 	public static Object getJavaObject(Mixed construct, Environment env) {
@@ -1717,21 +1774,21 @@ public final class Static {
 			CArray array = (CArray) construct;
 			if(array.isAssociative()) {
 				HashMap<String, Object> map = new HashMap<>();
-				for(Mixed key : array.keySet()) {
-					Mixed c = array.get(key.val(), Target.UNKNOWN);
+				for(Mixed key : array.keySet(env)) {
+					Mixed c = array.get(key.val(), Target.UNKNOWN, env);
 					map.put(key.val(), (c == array) ? map : getJavaObject(c, env));
 				}
 				return map;
 			} else {
-				Object[] a = new Object[(int) array.size()];
+				Object[] a = new Object[(int) array.size(env)];
 				boolean nullable = false;
 				Class<?> clazz = null;
-				for(int i = 0; i < array.size(); i++) {
-					Mixed c = array.get(i, Target.UNKNOWN);
+				for(int i = 0; i < array.size(env); i++) {
+					Mixed c = array.get(i, Target.UNKNOWN, env);
 					if(c == array) {
 						a[i] = a;
 					} else {
-						a[i] = getJavaObject(array.get(i, Target.UNKNOWN), env);
+						a[i] = getJavaObject(array.get(i, Target.UNKNOWN, env), env);
 					}
 					if(a[i] != null) {
 						if(clazz == null) {

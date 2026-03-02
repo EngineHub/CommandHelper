@@ -14,6 +14,7 @@ import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
+
 import java.io.File;
 import java.util.List;
 import java.util.Set;
@@ -90,7 +91,11 @@ public class OptimizationUtilities {
 		if(node.getData() instanceof CFunction cFunction) {
 			StringBuilder b = new StringBuilder();
 			boolean first = true;
-			b.append(cFunction.val()).append("(");
+			b.append(cFunction.val());
+			if(node.getNodeModifiers().getGenerics() != null) {
+				b.append(node.getNodeModifiers().getGenerics().toString());
+			}
+			b.append("(");
 			for(ParseTree child : node.getChildren()) {
 				if(!first) {
 					b.append(",");

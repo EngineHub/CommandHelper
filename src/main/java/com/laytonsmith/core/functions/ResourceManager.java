@@ -20,10 +20,11 @@ import com.laytonsmith.core.exceptions.CRE.CRENullPointerException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import org.xml.sax.SAXException;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-import org.xml.sax.SAXException;
 
 /**
  *
@@ -145,7 +146,7 @@ public class ResourceManager {
 					break;
 				case RANDOM:
 					resource = new CResource<>(new Random(
-							ArgumentValidation.getInt(data, t)), new CResource.ResourceToString() {
+							ArgumentValidation.getInt(data, t, env)), new CResource.ResourceToString() {
 						@Override
 						public String getString(CResource res) {
 							return res.getResource().toString();
@@ -211,7 +212,7 @@ public class ResourceManager {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			if(args[0].isInstanceOf(CResource.TYPE, null, env)) {
+			if(args[0] instanceof CResource) {
 				CResource<?> resource = (CResource<?>) args[0];
 				if(RESOURCES.containsKey(resource.getId())) {
 					RESOURCES.remove(resource.getId());

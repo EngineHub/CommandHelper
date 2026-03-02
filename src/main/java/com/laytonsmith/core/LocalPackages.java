@@ -118,12 +118,12 @@ public class LocalPackages {
 						} catch (ConfigCompileException e) {
 							compileErrors = true;
 							ConfigRuntimeException.HandleUncaughtException(e, "Compile error in script."
-									+ " Compilation will attempt to continue, however.", player);
+									+ " Compilation will attempt to continue, however.", player, env);
 						} catch (ConfigCompileGroupException ex) {
 							compileErrors = true;
 							for(ConfigCompileException e : ex.getList()) {
 								ConfigRuntimeException.HandleUncaughtException(e, "Compile error in script."
-										+ " Compilation will attempt to continue, however.", player);
+										+ " Compilation will attempt to continue, however.", player, env);
 							}
 						} catch (CloneNotSupportedException e) {
 							throw new Error("Environment wasn't clonable, while it should be.", e);
@@ -137,7 +137,7 @@ public class LocalPackages {
 			} catch (ConfigCompileException e) {
 				compileErrors = true;
 				ConfigRuntimeException.HandleUncaughtException(e, "Could not compile alias definition in "
-						+ fi.file, player);
+						+ fi.file, player, env);
 			}
 		}
 		return scripts;
@@ -166,7 +166,7 @@ public class LocalPackages {
 		if(!compileExceptions.isEmpty()) {
 			compileErrors = true;
 			for(ConfigCompileException ex : compileExceptions) {
-				ConfigRuntimeException.HandleUncaughtException(ex, "Compile error in script.", player);
+				ConfigRuntimeException.HandleUncaughtException(ex, "Compile error in script.", player, env);
 			}
 		}
 
@@ -180,11 +180,11 @@ public class LocalPackages {
 			} catch (ConfigCompileGroupException e) {
 				compileErrors = true;
 				ConfigRuntimeException.HandleUncaughtException(e, fi.file.getAbsolutePath()
-						+ " could not be compiled, due to compile errors.", player);
+						+ " could not be compiled, due to compile errors.", player, env);
 			} catch (ConfigCompileException e) {
 				compileErrors = true;
 				ConfigRuntimeException.HandleUncaughtException(e, fi.file.getAbsolutePath()
-						+ " could not be compiled, due to a compile error.", player);
+						+ " could not be compiled, due to a compile error.", player, env);
 			} catch (ConfigRuntimeException e) {
 				compileErrors = true;
 				ConfigRuntimeException.HandleUncaughtException(e, env);

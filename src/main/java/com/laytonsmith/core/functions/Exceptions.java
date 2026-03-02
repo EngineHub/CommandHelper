@@ -12,11 +12,11 @@ import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.annotations.typeof;
-import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.FullyQualifiedClassName;
-import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.LogLevel;
+import com.laytonsmith.core.MSLog;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
@@ -55,6 +55,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.StackTraceManager;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -128,7 +129,7 @@ public class Exceptions {
 		}
 
 		@Override
-		public Mixed execs(Target t, Environment env, Script that, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script that, GenericParameters generics, ParseTree... nodes) {
 			ParseTree tryCode = nodes[0];
 			ParseTree varName = null;
 			ParseTree catchCode = null;
@@ -160,8 +161,8 @@ public class Exceptions {
 					interest.add(FullyQualifiedClassName.forName(ptypes.val(), t, env));
 				} else if(ptypes.isInstanceOf(CArray.TYPE, null, env)) {
 					CArray ca = (CArray) ptypes;
-					for(int i = 0; i < ca.size(); i++) {
-						interest.add(FullyQualifiedClassName.forName(ca.get(i, t).val(), t, env));
+					for(int i = 0; i < ca.size(env); i++) {
+						interest.add(FullyQualifiedClassName.forName(ca.get(i, t, env).val(), t, env));
 					}
 				} else {
 					throw new CRECastException("Expected argument 4 to be a string, or an array of strings.", t);
@@ -182,7 +183,7 @@ public class Exceptions {
 				if(!(e instanceof AbstractCREException)) {
 					throw e;
 				}
-				FullyQualifiedClassName name = ((AbstractCREException) e).getExceptionType().getFQCN();
+				FullyQualifiedClassName name = ((AbstractCREException) e).getExceptionType(env).getFQCN();
 				if(Prefs.DebugMode()) {
 					StreamUtils.GetSystemOut().println("[" + Implementation.GetServerType().getBranding() + "]:"
 							+ " Exception thrown (debug mode on) -> " + e.getMessage() + " :: " + name + ":"
@@ -345,7 +346,7 @@ public class Exceptions {
 				try {
 					// Exception type
 					// We need to reverse the excpetion into an object
-					throw ObjectGenerator.GetGenerator().exception(ArgumentValidation.getArray(args[0], t), t, env);
+					throw ObjectGenerator.GetGenerator().exception(ArgumentValidation.getArray(args[0], t, env), t, env);
 				} catch (ClassNotFoundException ex) {
 					throw new CRECastException(ex.getMessage(), t);
 				}
@@ -370,7 +371,7 @@ public class Exceptions {
 				arguments.add(t);
 				if(args.length == 3) {
 					classes.add(Throwable.class);
-					arguments.add(new CRECausedByWrapper(ArgumentValidation.getArray(args[2], t)));
+					arguments.add(new CRECausedByWrapper(ArgumentValidation.getArray(args[2], t, env)));
 				}
 				CREThrowable throwable = (CREThrowable) ReflectionUtils.newInstance(c, classes.toArray(new Class[classes.size()]), arguments.toArray());
 				throw throwable;
@@ -501,7 +502,7 @@ public class Exceptions {
 		}
 
 		@Override
-		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
 			boolean exceptionCaught = false;
 			ConfigRuntimeException caughtException = null;
 			try {
@@ -513,16 +514,20 @@ public class Exceptions {
 					throw ex;
 				}
 				AbstractCREException e = AbstractCREException.getAbstractCREException(ex);
-				CClassType exceptionType = e.getExceptionType();
+				CClassType exceptionType = e.getExceptionType(env);
 				for(int i = 1; i < nodes.length - 1; i += 2) {
 					ParseTree assign = nodes[i];
 					CClassType clauseType = ((CClassType) assign.getChildAt(0).getData());
-					if(exceptionType.doesExtend(clauseType)) {
+					if(exceptionType.doesExtend(env, clauseType)) {
 						try {
 							// We need to define the exception in the variable table
 							IVariableList varList = env.getEnv(GlobalEnv.class).GetVarList();
 							IVariable var = (IVariable) assign.getChildAt(1).getData();
-							varList.set(new IVariable(CArray.TYPE, var.getVariableName(), e.getExceptionObject(), t));
+							try {
+								varList.set(new IVariable(CArray.TYPE, var.getVariableName(), e.getExceptionObject(env), t, env));
+							} catch(ConfigCompileException ex1) {
+								throw ex1.asRuntimeException();
+							}
 							parent.eval(nodes[i + 1], env);
 							varList.remove(var.getVariableName());
 						} catch (ConfigRuntimeException | FunctionReturnException newEx) {
@@ -643,7 +648,7 @@ public class Exceptions {
 				types.add(type);
 
 				// Validate that the exception type extends throwable.
-				if(!type.doesExtend(CREThrowable.TYPE)) {
+				if(!type.doesExtend(env, CREThrowable.TYPE)) {
 					throw new ConfigCompileException("The type defined in a catch clause must extend the"
 							+ " Throwable class.", t);
 				}
@@ -732,9 +737,9 @@ public class Exceptions {
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
 			List<ConfigRuntimeException.StackTraceElement> elements = stManager.getCurrentStackTrace();
-			CArray ret = new CArray(t);
+			CArray ret = new CArray(t, null, env);
 			for(ConfigRuntimeException.StackTraceElement e : elements) {
-				ret.push(e.getObjectFor(), Target.UNKNOWN);
+				ret.push(e.getObjectFor(env), Target.UNKNOWN, env);
 			}
 			return ret;
 		}

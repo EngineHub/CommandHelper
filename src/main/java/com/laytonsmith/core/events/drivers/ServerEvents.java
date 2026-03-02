@@ -1,16 +1,16 @@
 package com.laytonsmith.core.events.drivers;
 
 import com.laytonsmith.PureUtilities.Version;
-import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCBlockCommandSender;
+import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCConsoleCommandSender;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.entities.MCCommandMinecart;
 import com.laytonsmith.abstraction.events.MCBroadcastMessageEvent;
 import com.laytonsmith.abstraction.events.MCCommandTabCompleteEvent;
-import com.laytonsmith.abstraction.events.MCServerCommandEvent;
 import com.laytonsmith.abstraction.events.MCRedstoneChangedEvent;
+import com.laytonsmith.abstraction.events.MCServerCommandEvent;
 import com.laytonsmith.abstraction.events.MCServerPingEvent;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.ArgumentValidation;
@@ -24,6 +24,7 @@ import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.AbstractEvent;
@@ -33,9 +34,9 @@ import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventBuilder;
 import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
-import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 
 import java.util.ArrayList;
@@ -85,15 +86,15 @@ public class ServerEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Environment env) throws PrefilterNonMatchException {
 			if(!(e instanceof MCServerCommandEvent)) {
 				return false;
 			}
 			MCServerCommandEvent event = (MCServerCommandEvent) e;
 			String prefix = event.getCommand().split(" ", 2)[0];
-			Prefilters.match(prefilter, "prefix", prefix, PrefilterType.STRING_MATCH);
+			Prefilters.match(prefilter, "prefix", prefix, PrefilterType.STRING_MATCH, env);
 			Prefilters.match(prefilter, "sendertype",
-					getCommandsenderString(event.getCommandSender()), PrefilterType.STRING_MATCH);
+					getCommandsenderString(event.getCommandSender()), PrefilterType.STRING_MATCH, env);
 			return true;
 		}
 
@@ -169,11 +170,11 @@ public class ServerEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Environment env) throws PrefilterNonMatchException {
 			if(e instanceof MCServerPingEvent) {
 				MCServerPingEvent event = (MCServerPingEvent) e;
-				Prefilters.match(prefilter, "players", event.getNumPlayers(), PrefilterType.MATH_MATCH);
-				Prefilters.match(prefilter, "maxplayers", event.getMaxPlayers(), PrefilterType.MATH_MATCH);
+				Prefilters.match(prefilter, "players", event.getNumPlayers(), PrefilterType.MATH_MATCH, env);
+				Prefilters.match(prefilter, "maxplayers", event.getMaxPlayers(), PrefilterType.MATH_MATCH, env);
 				return true;
 			}
 			return false;
@@ -195,7 +196,8 @@ public class ServerEvents {
 				ret.put("motd", new CString(event.getMOTD(), t));
 				ret.put("players", new CInt(event.getNumPlayers(), t));
 				ret.put("maxplayers", new CInt(event.getMaxPlayers(), t));
-				CArray players = new CArray(t);
+				CArray players = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+						.addNativeParameter(CString.TYPE, null).buildNative(), env);
 				for(MCPlayer player : event.getPlayers()) {
 					players.push(new CString(player.getName(), t), t, env);
 				}
@@ -278,7 +280,7 @@ public class ServerEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event, Environment env) throws PrefilterNonMatchException {
 			return event instanceof MCCommandTabCompleteEvent;
 		}
 
@@ -289,7 +291,8 @@ public class ServerEvents {
 				Target t = Target.UNKNOWN;
 				Map<String, Mixed> ret = evaluate_helper(event);
 				ret.put("sender", new CString(e.getCommandSender().getName(), t));
-				CArray comp = new CArray(t);
+				CArray comp = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+						.addNativeParameter(CString.TYPE, null).buildNative(), env);
 				if(e.getCompletions() != null) {
 					for(String c : e.getCompletions()) {
 						comp.push(new CString(c, t), t, env);
@@ -297,7 +300,8 @@ public class ServerEvents {
 				}
 				ret.put("completions", comp);
 				ret.put("command", new CString(e.getCommand().getName(), t));
-				CArray args = new CArray(t);
+				CArray args = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+						.addNativeParameter(CString.TYPE, null).buildNative(), env);
 				for(String a : e.getArguments()) {
 					args.push(new CString(a, t), t, env);
 				}
@@ -380,10 +384,10 @@ public class ServerEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, com.laytonsmith.core.natives.interfaces.Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Environment env) throws PrefilterNonMatchException {
 			if(e instanceof MCRedstoneChangedEvent) {
 				MCRedstoneChangedEvent event = (MCRedstoneChangedEvent) e;
-				Prefilters.match(prefilter, "location", event.getLocation(), PrefilterType.LOCATION_MATCH);
+				Prefilters.match(prefilter, "location", event.getLocation(), PrefilterType.LOCATION_MATCH, env);
 				return true;
 			}
 			return false;
@@ -434,10 +438,10 @@ public class ServerEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Environment env) throws PrefilterNonMatchException {
 			if(e instanceof MCBroadcastMessageEvent) {
 				MCBroadcastMessageEvent event = (MCBroadcastMessageEvent) e;
-				Prefilters.match(prefilter, "message", event.getMessage(), PrefilterType.STRING_MATCH);
+				Prefilters.match(prefilter, "message", event.getMessage(), PrefilterType.STRING_MATCH, env);
 				return true;
 			}
 			return false;
@@ -449,7 +453,8 @@ public class ServerEvents {
 			// Get the player recipients.
 			Mixed cRecipients = manualObject.get("player_recipients", t, env);
 			if(!(cRecipients instanceof CArray) && !(cRecipients instanceof CNull)) {
-				throw new CRECastException("Expected player_recipients to be an array", t);
+				throw new CRECastException("Expected player_recipients to be an array, but received: "
+						+ cRecipients.typeof(env).toString(), t);
 			}
 			Set<MCCommandSender> recipients = new HashSet<>();
 			CArray recipientsArray = (CArray) cRecipients;
@@ -461,7 +466,8 @@ public class ServerEvents {
 			// Get the message.
 			Mixed cMessage = manualObject.get("message", t, env);
 			if(!(cMessage instanceof CString)) {
-				throw new CRECastException("Expected message to be a string.", t);
+				throw new CRECastException("Expected message to be a string, but received: "
+						+ cMessage.typeof(env).toString(), t);
 			}
 
 			// Instantiate and return the event.
@@ -474,7 +480,8 @@ public class ServerEvents {
 			MCBroadcastMessageEvent event = (MCBroadcastMessageEvent) e;
 			Map<String, Mixed> map = evaluate_helper(e);
 			map.put("message", new CString(event.getMessage(), Target.UNKNOWN));
-			CArray cRecipients = new CArray(Target.UNKNOWN);
+			CArray cRecipients = new CArray(Target.UNKNOWN, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			for(MCPlayer player : event.getPlayerRecipients()) {
 				cRecipients.push(new CString(player.getName(), Target.UNKNOWN), Target.UNKNOWN, env);
 			}

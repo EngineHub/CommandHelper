@@ -6,6 +6,13 @@ import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.ConstraintLocation;
+import com.laytonsmith.core.constructs.generics.Constraints;
+import com.laytonsmith.core.constructs.generics.GenericDeclaration;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.GenericTypeParameters;
+import com.laytonsmith.core.constructs.generics.constraints.UnboundedConstraint;
+import com.laytonsmith.core.constructs.generics.constraints.VariadicTypeConstraint;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -15,13 +22,20 @@ import java.util.Arrays;
 
 /**
  * A method is the foundational class for containing information about a method defined in a class. These may include
- * interfaces, where the method isn't actually defined, abstract methods, and
+ * interfaces, where the method isn't actually defined, abstract methods, and concrete classes.
  */
 @typeof("ms.lang.Method")
 public class Method extends Construct implements Callable {
 
+	private static final Constraints RETURN_TYPE = new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION, new UnboundedConstraint(Target.UNKNOWN, "ReturnType"));
+	private static final Constraints PARAMETERS = new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION, new VariadicTypeConstraint(Target.UNKNOWN, "Parameters"));
+
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get(Method.class);
+	public static final CClassType TYPE = CClassType.getWithGenericDeclaration(Method.class,
+			new GenericDeclaration(Target.UNKNOWN, RETURN_TYPE, PARAMETERS))
+			.withSuperParameters(GenericTypeParameters.nativeBuilder(Callable.TYPE)
+				.addParameter("ReturnType", RETURN_TYPE)
+				.addParameter("Parameters", PARAMETERS));
 
 	private final CClassType returnType;
 	private final String name;
@@ -84,6 +98,11 @@ public class Method extends Construct implements Callable {
 
 	public ParseTree getTree() {
 		return tree;
+	}
+
+	@Override
+	public GenericParameters getGenericParameters() {
+		return null;
 	}
 
 	@Override

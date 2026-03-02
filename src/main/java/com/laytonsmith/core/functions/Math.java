@@ -15,18 +15,18 @@ import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.SimpleDocumentation;
-import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
+import com.laytonsmith.core.compiler.signature.FunctionSignatures;
+import com.laytonsmith.core.compiler.signature.SignatureBuilder;
 import com.laytonsmith.core.constructs.CArray;
-import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CDouble;
-import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CMutablePrimitive;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
@@ -40,8 +40,8 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.natives.interfaces.Mixed;
-import java.text.DecimalFormat;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -522,7 +522,7 @@ public class Math {
 	 *
 	 * @return
 	 */
-	private static Mixed doIncrementDecrement(ParseTree[] nodes,
+	protected static Mixed doIncrementDecrement(ParseTree[] nodes,
 			Script parent, Environment env, Target t,
 			Function func, boolean pre, boolean inc) {
 		if(nodes[0].getData() instanceof CFunction && ((CFunction) nodes[0].getData()).hasFunction()) {
@@ -546,7 +546,8 @@ public class Math {
 				}
 				long delta = ArgumentValidation.getInt(cdelta, t, env);
 				//First, error check, then get the old value, and store it in temp.
-				if(!(array.isInstanceOf(CArray.TYPE, null, env)) && !(array.isInstanceOf(ArrayAccess.TYPE, null, env))) {
+				if(!(array.isInstanceOf(CArray.TYPE, null, env))
+						&& !(array.isInstanceOf(ArrayAccess.TYPE, null, env))) {
 					//Let's just evaluate this like normal with array_get, so it will
 					//throw the appropriate exception.
 					new ArrayHandling.array_get().exec(t, env, null, array, index);
@@ -623,7 +624,7 @@ public class Math {
 		}
 
 		@Override
-		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
 			return doIncrementDecrement(nodes, parent, env, t, this, true, true);
 		}
 
@@ -648,9 +649,13 @@ public class Math {
 					newVal = new CInt(ArgumentValidation.getInt(v.ival(), t, env) + value, t);
 				}
 				if(v.ival() instanceof CMutablePrimitive) {
-					newVal = ((CMutablePrimitive) v.ival()).setAndReturn(newVal, t);
+					newVal = ((CMutablePrimitive) v.ival()).setAndReturn(newVal, t, env);
 				}
-				v = new IVariable(v.getDefinedType(), v.getVariableName(), newVal, v.getDefinedTarget(), env);
+				try {
+					v = new IVariable(v.getDefinedType(), v.getVariableName(), newVal, v.getDefinedTarget(), env);
+				} catch (ConfigCompileException cce) {
+					throw new CREFormatException(cce.getMessage(), t);
+				}
 				env.getEnv(GlobalEnv.class).GetVarList().set(v);
 				return v;
 			} else if(ArgumentValidation.anyDoubles(env, args[0])) {
@@ -743,7 +748,7 @@ public class Math {
 		}
 
 		@Override
-		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
 			return Math.doIncrementDecrement(nodes, parent, env, t, this, false, true);
 		}
 
@@ -768,7 +773,7 @@ public class Math {
 					newVal = new CInt(ArgumentValidation.getInt(v.ival(), t, env) + value, t);
 				}
 				if(v.ival() instanceof CMutablePrimitive) {
-					newVal = ((CMutablePrimitive) v.ival()).setAndReturn(newVal, t);
+					newVal = ((CMutablePrimitive) v.ival()).setAndReturn(newVal, t, env);
 				}
 				Mixed oldVal = null;
 				try {
@@ -776,7 +781,11 @@ public class Math {
 				} catch (CloneNotSupportedException ex) {
 					Logger.getLogger(Math.class.getName()).log(Level.SEVERE, null, ex);
 				}
-				v = new IVariable(v.getDefinedType(), v.getVariableName(), newVal, v.getDefinedTarget(), env);
+				try {
+					v = new IVariable(v.getDefinedType(), v.getVariableName(), newVal, v.getDefinedTarget(), env);
+				} catch (ConfigCompileException cce) {
+					throw new CREFormatException(cce.getMessage(), t);
+				}
 				env.getEnv(GlobalEnv.class).GetVarList().set(v);
 				return oldVal;
 			} else if(ArgumentValidation.anyDoubles(env, args[0])) {
@@ -873,7 +882,7 @@ public class Math {
 		}
 
 		@Override
-		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
 			return doIncrementDecrement(nodes, parent, env, t, this, true, false);
 		}
 
@@ -898,9 +907,13 @@ public class Math {
 					newVal = new CInt(ArgumentValidation.getInt(v.ival(), t, env) - value, t);
 				}
 				if(v.ival() instanceof CMutablePrimitive) {
-					newVal = ((CMutablePrimitive) v.ival()).setAndReturn(newVal, t);
+					newVal = ((CMutablePrimitive) v.ival()).setAndReturn(newVal, t, env);
 				}
-				v = new IVariable(v.getDefinedType(), v.getVariableName(), newVal, v.getDefinedTarget(), env);
+				try {
+					v = new IVariable(v.getDefinedType(), v.getVariableName(), newVal, v.getDefinedTarget(), env);
+				} catch (ConfigCompileException cce) {
+					throw new CREFormatException(cce.getMessage(), t);
+				}
 				env.getEnv(GlobalEnv.class).GetVarList().set(v);
 				return v;
 			} else if(ArgumentValidation.anyDoubles(env, args[0])) {
@@ -993,7 +1006,7 @@ public class Math {
 		}
 
 		@Override
-		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
 			return doIncrementDecrement(nodes, parent, env, t, this, false, false);
 		}
 
@@ -1018,7 +1031,7 @@ public class Math {
 					newVal = new CInt(ArgumentValidation.getInt(v.ival(), t, env) - value, t);
 				}
 				if(v.ival() instanceof CMutablePrimitive) {
-					newVal = ((CMutablePrimitive) v.ival()).setAndReturn(newVal, t);
+					newVal = ((CMutablePrimitive) v.ival()).setAndReturn(newVal, t, env);
 				}
 				Mixed oldVal = null;
 				try {
@@ -1026,7 +1039,11 @@ public class Math {
 				} catch (CloneNotSupportedException ex) {
 					Logger.getLogger(Math.class.getName()).log(Level.SEVERE, null, ex);
 				}
-				v = new IVariable(v.getDefinedType(), v.getVariableName(), newVal, v.getDefinedTarget(), env);
+				try {
+					v = new IVariable(v.getDefinedType(), v.getVariableName(), newVal, v.getDefinedTarget(), env);
+				} catch (ConfigCompileException cce) {
+					throw new CREFormatException(cce.getMessage(), t);
+				}
 				env.getEnv(GlobalEnv.class).GetVarList().set(v);
 				return oldVal;
 			} else if(ArgumentValidation.anyDoubles(env, args[0])) {
@@ -1176,13 +1193,16 @@ public class Math {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
-			if(argTypes.size() == 0) {
-				return CDouble.TYPE;
-			} else {
-				return CInt.TYPE;
-			}
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CDouble.TYPE)
+					.newSignature(CInt.TYPE)
+					.param(CInt.TYPE, "max", "The maximum integer to return, exclusive")
+					.newSignature(CInt.TYPE)
+					.param(CInt.TYPE, "min", "The minimum integer to return, inclusive")
+					.param(CInt.TYPE, "max", "The maximum integer to return, exclusive")
+					.build();
 		}
+
 	}
 
 	@api
@@ -1475,7 +1495,7 @@ public class Math {
 			}
 		}
 
-		private List<Mixed> recList(List<Mixed> list, Environment env, Mixed... args) {
+		public List<Mixed> recList(List<Mixed> list, Environment env, Mixed... args) {
 			for(Mixed c : args) {
 				if(c.isInstanceOf(CArray.TYPE, null, env)) {
 					for(int i = 0; i < ((CArray) c).size(env); i++) {
@@ -1557,9 +1577,9 @@ public class Math {
 			}
 		}
 
-		private List<Mixed> recList(List<Mixed> list, Environment env, Mixed... args) {
+		public List<Mixed> recList(List<Mixed> list, Environment env, Mixed... args) {
 			for(Mixed c : args) {
-				if(c.isInstanceOf(CArray.TYPE, null, null)) {
+				if(c.isInstanceOf(CArray.TYPE, null, env)) {
 					for(int i = 0; i < ((CArray) c).size(env); i++) {
 						recList(list, env, ((CArray) c).get(i, Target.UNKNOWN, env));
 					}
@@ -1931,7 +1951,7 @@ public class Math {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			return Static.getNumber(java.lang.Math.sinh(ArgumentValidation.getNumber(args[0], t, env)), t);
+			return new CDouble(java.lang.Math.sinh(ArgumentValidation.getNumber(args[0], t, env)), t);
 		}
 
 		@Override
@@ -1983,7 +2003,7 @@ public class Math {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			return Static.getNumber(java.lang.Math.cosh(ArgumentValidation.getNumber(args[0], t, env)), t);
+			return new CDouble(java.lang.Math.cosh(ArgumentValidation.getNumber(args[0], t, env)), t);
 		}
 
 		@Override
@@ -2035,7 +2055,7 @@ public class Math {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			return Static.getNumber(java.lang.Math.tanh(ArgumentValidation.getNumber(args[0], t, env)), t);
+			return new CDouble(java.lang.Math.tanh(ArgumentValidation.getNumber(args[0], t, env)), t);
 		}
 
 		@Override
@@ -2195,7 +2215,8 @@ public class Math {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			return new CDouble(java.lang.Math.atan2(ArgumentValidation.getNumber(args[0], t, env), ArgumentValidation.getNumber(args[1], t, env)), t);
+			return new CDouble(java.lang.Math.atan2(ArgumentValidation.getNumber(args[0], t, env),
+					ArgumentValidation.getNumber(args[1], t, env)), t);
 		}
 
 		@Override

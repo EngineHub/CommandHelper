@@ -251,7 +251,8 @@ public class Statistics {
 				}
 			}
 			List<Double> returns = mode(values);
-			CArray ret = new CArray(t, returns.size());
+			CArray ret = new CArray(t, returns.size(), GenericParameters.emptyBuilder(CArray.TYPE)
+				.addNativeParameter(CNumber.TYPE, null).buildNative(), env);
 			for(Double d : returns) {
 				ret.push(new CDouble(d, t), t, env);
 			}
@@ -343,13 +344,13 @@ public class Statistics {
 			if(args.length == 2 && args[1].isInstanceOf(CArray.TYPE, null, env)) {
 				CArray c = ArgumentValidation.getArray(args[1], t, env);
 				for(Mixed m : c.asList(env)) {
-					values.add(ArgumentValidation.getNumber(m, t));
+					values.add(ArgumentValidation.getNumber(m, t, env));
 				}
 			} else {
 				boolean first = true;
 				for(Mixed m : args) {
 					if(!first) {
-						values.add(ArgumentValidation.getNumber(m, t));
+						values.add(ArgumentValidation.getNumber(m, t, env));
 					}
 					first = false;
 				}

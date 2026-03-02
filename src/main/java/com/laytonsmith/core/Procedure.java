@@ -4,18 +4,20 @@ import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.SmartComment;
 import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.CArray;
-import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.InstanceofUtil;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREError;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREStackOverflowError;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -50,7 +52,7 @@ public class Procedure implements Cloneable {
 	private final Map<String, Mixed> originals = new HashMap<>();
 	private final List<IVariable> varIndex = new ArrayList<>();
 	private ParseTree tree;
-	private CClassType returnType;
+	private LeftHandSideType returnType;
 	private boolean possiblyConstant = false;
 	private SmartComment procComment;
 
@@ -60,7 +62,8 @@ public class Procedure implements Cloneable {
 	 */
 	private final Target definedAt;
 
-	public Procedure(String name, CClassType returnType, List<IVariable> varList, SmartComment procComment,
+	public Procedure(String name, LeftHandSideType returnType, List<IVariable> varList,
+			SmartComment procComment,
 			ParseTree tree, Target t) {
 		this.name = name;
 		this.definedAt = t;
@@ -208,14 +211,15 @@ public class Procedure implements Cloneable {
 		Script fakeScript = Script.GenerateScript(tree, env.getEnv(GlobalEnv.class).GetLabel(), null);
 
 		// Create container for the @arguments variable.
-		CArray arguments = new CArray(Target.UNKNOWN, this.varIndex.size());
+		CArray arguments = new CArray(Target.UNKNOWN, this.varIndex.size(),
+				null, env);
 
 		// Handle passed procedure arguments.
 		int varInd;
 		CArray vararg = null;
 		for(varInd = 0; varInd < args.size(); varInd++) {
 			Mixed c = args.get(varInd);
-			arguments.push(c, t);
+			arguments.push(c, t, env);
 			if(this.varIndex.size() > varInd
 					|| (!this.varIndex.isEmpty()
 						&& this.varIndex.get(this.varIndex.size() - 1).getDefinedType().isVariadicType())) {
@@ -226,16 +230,21 @@ public class Procedure implements Cloneable {
 				} else {
 					var = this.varIndex.get(this.varIndex.size() - 1);
 					if(vararg == null) {
-						// TODO: Once generics are added, add the type
-						vararg = new CArray(t);
-						env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE,
-								var.getVariableName(), vararg, c.getTarget()));
+						vararg = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+								.addParameter(var.getDefinedType().getVarargsBaseType(env))
+								.build(t, env), env);
+						try {
+							env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE,
+									var.getVariableName(), vararg, c.getTarget()));
+						} catch(ConfigCompileException ex) {
+							throw new CREError(ex.getMessage(), t, ex);
+						}
 					}
 				}
 
 				// Type check "void" value.
 				if(c instanceof CVoid
-						&& !(var.getDefinedType().equals(Auto.TYPE) || var.getDefinedType().equals(CVoid.TYPE))) {
+						&& !(var.getDefinedType().isAuto() || var.getDefinedType().isVoid())) {
 					throw new CRECastException("Procedure \"" + name + "\" expects a value of type "
 							+ var.getDefinedType().val() + " in argument " + (varInd + 1) + ", but"
 							+ " a void value was found instead.", c.getTarget());
@@ -243,8 +252,8 @@ public class Procedure implements Cloneable {
 
 				// Type check vararg parameter.
 				if(var.getDefinedType().isVariadicType()) {
-					if(InstanceofUtil.isInstanceof(c.typeof(env), var.getDefinedType().getVarargsBaseType(), env)) {
-						vararg.push(c, t);
+					if(InstanceofUtil.isInstanceof(c, var.getDefinedType().getVarargsBaseType(env), env)) {
+						vararg.push(c, t, env);
 						continue;
 					} else {
 						throw new CRECastException("Procedure \"" + name + "\" expects a value of type "
@@ -254,9 +263,13 @@ public class Procedure implements Cloneable {
 				}
 
 				// Type check non-vararg parameter.
-				if(InstanceofUtil.isInstanceof(c.typeof(env), var.getDefinedType(), env)) {
-					env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(var.getDefinedType(),
-							var.getVariableName(), c, c.getTarget()));
+				if(InstanceofUtil.isInstanceof(c, var.getDefinedType(), env)) {
+					try {
+						env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(var.getDefinedType(),
+								var.getVariableName(), c, c.getTarget(), env));
+					} catch(ConfigCompileException ex) {
+						throw ex.asRuntimeException();
+					}
 					continue;
 				} else {
 					throw new CRECastException("Procedure \"" + name + "\" expects a value of type "
@@ -270,11 +283,20 @@ public class Procedure implements Cloneable {
 		while(varInd < this.varIndex.size()) {
 			String varName = this.varIndex.get(varInd++).getVariableName();
 			Mixed defVal = this.originals.get(varName);
-			env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(Auto.TYPE, varName, defVal, defVal.getTarget()));
-			arguments.push(defVal, t);
+			try {
+				env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(Auto.TYPE, varName, defVal, defVal.getTarget()));
+			} catch (ConfigCompileException cce) {
+				// Shouldn't happen here, but just in case
+				throw new CREFormatException(cce.getMessage(), defVal.getTarget());
+			}
+			arguments.push(defVal, t, env);
 		}
 
-		env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, "@arguments", arguments, t));
+		try {
+			env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, "@arguments", arguments, t));
+		} catch (ConfigCompileException cce) {
+			throw new CREFormatException(cce.getMessage(), t);
+		}
 		StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
 		stManager.addStackTraceElement(new ConfigRuntimeException.StackTraceElement("proc " + name, getTarget()));
 		try {
@@ -297,12 +319,12 @@ public class Procedure implements Cloneable {
 		} catch (FunctionReturnException e) {
 			// Normal exit
 			Mixed ret = e.getReturn();
-			if(returnType.equals(Auto.TYPE)) {
+			if(returnType.equals(Auto.LHSTYPE)) {
 				return ret;
 			}
-			if(returnType.equals(CVoid.TYPE) != ret.equals(CVoid.VOID)
+			if(returnType.equals(CVoid.TYPE.asLeftHandSideType()) != ret.equals(CVoid.VOID)
 					|| !ret.equals(CNull.NULL) && !ret.equals(CVoid.VOID)
-					&& !InstanceofUtil.isInstanceof(ret.typeof(env), returnType, env)) {
+					&& !InstanceofUtil.isInstanceof(ret, returnType, env)) {
 				throw new CRECastException("Expected procedure \"" + name + "\" to return a value of type "
 						+ returnType.val() + " but a value of type " + ret.typeof(env) + " was returned instead",
 						ret.getTarget());
@@ -327,7 +349,7 @@ public class Procedure implements Cloneable {
 		// If we got here, then there was no return value. This is fine, but only for returnType void or auto.
 		// TODO: Once strong typing is implemented at a compiler level, this should be removed to increase runtime
 		// performance.
-		if(!(returnType.equals(Auto.TYPE) || returnType.equals(CVoid.TYPE))) {
+		if(!(returnType.equals(Auto.LHSTYPE) || returnType.equals(CVoid.TYPE.asLeftHandSideType()))) {
 			throw new CRECastException("Expecting procedure \"" + name + "\" to return a value of type " + returnType.val() + ","
 					+ " but no value was returned.", tree.getTarget());
 		}
@@ -352,5 +374,17 @@ public class Procedure implements Cloneable {
 
 	public void definitelyNotConstant() {
 		possiblyConstant = false;
+	}
+
+	public LeftHandSideType getReturnType() {
+		return returnType;
+	}
+
+	public List<LeftHandSideType> getParameterTypes() {
+		List<LeftHandSideType> ret = new ArrayList<>();
+		for(IVariable var : this.varIndex) {
+			ret.add(var.getDefinedType());
+		}
+		return ret;
 	}
 }

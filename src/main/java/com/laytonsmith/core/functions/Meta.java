@@ -116,7 +116,7 @@ public class Meta {
 			return false;
 		}
 
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return CBoolean.get(CommandHelperPlugin.isFirstLoad());
 		}
 
@@ -530,7 +530,8 @@ public class Meta {
 			}
 
 			List<String> completions = command.tabComplete(sender, commandString, arguments);
-			CArray ret = new CArray(t);
+			CArray ret = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			for(String s : completions) {
 				ret.push(new CString(s, t), t, env);
 			}
@@ -539,7 +540,7 @@ public class Meta {
 
 		@Override
 		public String docs() {
-			return "array {[player], command, args} Runs a plugin command's tab completer and returns an array of"
+			return "array<string> {[player], command, args} Runs a plugin command's tab completer and returns an array of"
 					+ " possible completions for the final argument. ----"
 					+ " The args parameter must be an array of strings."
 					+ " A command prefix can be used to specify a specific plugin. (eg. \"/worldedit:remove\")"
@@ -765,7 +766,7 @@ public class Meta {
 		}
 
 		@Override
-		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) throws ConfigRuntimeException {
+		public Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) throws ConfigRuntimeException {
 			String senderName = parent.seval(nodes[0], env).val();
 			MCCommandSender sender = Static.GetCommandSender(senderName, t);
 			MCCommandSender originalSender = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
@@ -1220,7 +1221,7 @@ public class Meta {
 
 		@Override
 		public CArray exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CArray c = new CArray(t);
+			CArray c = new CArray(t, null, env);
 			for(Locale l : Locale.getAvailableLocales()) {
 				if(!l.getCountry().isEmpty()) {
 					c.push(new CString(l.toString(), t), t, env);
@@ -1435,7 +1436,8 @@ public class Meta {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CArray ret = new CArray(t);
+			CArray ret = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			for(FileOptions.CompilerOption s : FileOptions.CompilerOption.values()) {
 				ret.push(new CString(s.getName(), t), t, env);
 			}
@@ -1454,7 +1456,7 @@ public class Meta {
 
 		@Override
 		public String docs() {
-			return "array {} Returns a list of all defined compiler options, which can be set using the"
+			return "array<string> {} Returns a list of all defined compiler options, which can be set using the"
 					+ " compilerOptions file option";
 		}
 
@@ -1484,7 +1486,8 @@ public class Meta {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CArray ret = new CArray(t);
+			CArray ret = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			for(FileOptions.SuppressWarning s : FileOptions.SuppressWarning.values()) {
 				ret.push(new CString(s.getName(), t), t, env);
 			}
@@ -1503,7 +1506,7 @@ public class Meta {
 
 		@Override
 		public String docs() {
-			return "array {} Returns a list of all defined compiler warnings, which can be suppressed using the"
+			return "array<string> {} Returns a list of all defined compiler warnings, which can be suppressed using the"
 					+ " suppressWarnings file option";
 		}
 
@@ -1825,7 +1828,8 @@ public class Meta {
 			CArray annotations = CArray.GetAssociativeArray(t, null, env);
 			ret.set("annotations", annotations, t, env);
 			for(Map.Entry<String, List<String>> entry : comment.getAnnotations().entrySet()) {
-				CArray list = new CArray(t, entry.getValue().size());
+				CArray list = new CArray(t, entry.getValue().size(), GenericParameters.emptyBuilder(CArray.TYPE)
+						.addNativeParameter(CString.TYPE, null).buildNative(), env);
 				for(String s : entry.getValue()) {
 					list.push(new CString(s, t), t, env);
 				}

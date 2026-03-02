@@ -1,6 +1,12 @@
 package com.laytonsmith.core.exceptions;
 
+import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.annotations.typeof;
+import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.exceptions.CRE.CREException;
 import java.io.File;
 import java.util.Objects;
 
@@ -127,6 +133,59 @@ public class ConfigCompileException extends AbstractCompileException implements 
 			return ret;
 		}
 		return this.message.compareTo(cre.message);
+	}
+
+	/**
+	 * Some code is typechecked, and actually checked for errors at compile time, where a ConfigCompileException
+	 * makes sense. However, much of the runtime code uses the same code paths, and they can still "throw" a compile
+	 * exception in those code paths, but at runtime, these are "guaranteed" not to error. In these cases, you can
+	 * just rethrow this as a runtime exception. Make sure you aren't using this in code paths that are compiler
+	 * path only.
+	 * @return
+	 */
+	public ConfigCompileRuntimeException asRuntimeException() {
+		return new ConfigCompileRuntimeException(this.getMessage(), this.getTarget(), this);
+	}
+
+	@typeof("ms.lang.ConfigCompileRuntimeException")
+	private static class ConfigCompileRuntimeException extends CREException {
+
+		@SuppressWarnings("FieldNameHidesFieldInSuperclass")
+		public static final CClassType TYPE = CClassType.get(ConfigCompileRuntimeException.class);
+
+		public ConfigCompileRuntimeException(String msg, Target t) {
+			super(msg, t);
+		}
+
+		public ConfigCompileRuntimeException(String msg, Target t, Throwable cause) {
+			super(msg, t, cause);
+		}
+
+		@Override
+		public String docs() {
+			return "Thrown if an SQL related exception occurs.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_1;
+		}
+
+		@Override
+		public CClassType[] getSuperclasses() {
+			return super.getSuperclasses();
+		}
+
+		@Override
+		public CClassType[] getInterfaces() {
+			return super.getInterfaces();
+		}
+
+		@Override
+		public GenericParameters getGenericParameters() {
+			return null;
+		}
+
 	}
 
 }

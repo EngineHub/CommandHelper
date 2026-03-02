@@ -14,12 +14,23 @@ import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 
 /**
  * This class provides methods for more easily creating different Constructs for testing purposes.
  *
  */
 public class C {
+
+	private static final Environment ENV;
+
+	static {
+		try {
+			ENV = Static.GenerateStandaloneEnvironment(false);
+		} catch (Exception ex) {
+			throw new Error(ex);
+		}
+	}
 
 	//Shortcut to Construct.class
 	public static final Class<CArray> ARRAY = CArray.class;
@@ -33,7 +44,7 @@ public class C {
 	public static final Class<Variable> VARIABLE = Variable.class;
 
 	public static CArray Array(Construct... elems) {
-		return new CArray(Target.UNKNOWN, elems);
+		return new CArray(Target.UNKNOWN, null, ENV, elems);
 	}
 
 	public static CBoolean Boolean(boolean b) {
@@ -61,7 +72,11 @@ public class C {
 	}
 
 	public static IVariable IVariable(String name, Construct val, Environment env) {
-		return new IVariable(Auto.TYPE, name, val, Target.UNKNOWN, env);
+		try {
+			return new IVariable(Auto.TYPE, name, val, Target.UNKNOWN, env);
+		} catch(ConfigCompileException ex) {
+			throw ex.asRuntimeException();
+		}
 	}
 
 	public static Variable Variable(String name, String val) {
@@ -74,19 +89,19 @@ public class C {
 	 * @param val
 	 * @return
 	 */
-	public static Construct onstruct(String val) {
-		return Static.resolveConstruct(val, Target.UNKNOWN);
+	public static CString onstruct(String val) {
+		return new CString(val, Target.UNKNOWN);
 	}
 
-	public static Construct onstruct(long val) {
-		return Static.resolveConstruct(Long.toString(val), Target.UNKNOWN);
+	public static CInt onstruct(long val) {
+		return new CInt(val, Target.UNKNOWN);
 	}
 
-	public static Construct onstruct(boolean val) {
-		return Static.resolveConstruct((val ? "true" : "false"), Target.UNKNOWN);
+	public static CBoolean onstruct(boolean val) {
+		return CBoolean.get(val);
 	}
 
-	public static Construct onstruct(double val) {
-		return Static.resolveConstruct(java.lang.Double.toString(val), Target.UNKNOWN);
+	public static CDouble onstruct(double val) {
+		return new CDouble(val, Target.UNKNOWN);
 	}
 }

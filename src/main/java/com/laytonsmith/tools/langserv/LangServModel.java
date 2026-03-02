@@ -500,6 +500,8 @@ public class LangServModel {
 							for(FullyQualifiedClassName fqcn : NativeTypeList.getNativeTypeList()) {
 								try {
 									Mixed m = NativeTypeList.getInvalidInstanceForUse(fqcn);
+									// TODO: This works because we're only iterating native classes, but a null
+									// environment is not in general supported here.
 									CompletionItem ci = new CompletionItem(m.typeof(null).getSimpleName());
 									ci.setKind(CompletionItemKind.TypeParameter);
 									ci.setDetail(m.getName());

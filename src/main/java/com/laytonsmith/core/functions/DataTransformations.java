@@ -133,7 +133,7 @@ public class DataTransformations {
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String s = args[0].val();
 			try {
-				return Construct.json_decode(s, t);
+				return Construct.json_decode(s, t, env);
 			} catch (MarshalException ex) {
 				throw new CREFormatException("JSON is improperly formatted. " + ex.getMessage(), t);
 			}
@@ -275,7 +275,7 @@ public class DataTransformations {
 				throw new CREFormatException("Improperly formatted YML"
 						+ (cause != null ? ": " + cause.getMessage() : ""), t, cause);
 			}
-			return Construct.GetConstruct(ret);
+			return Construct.GetConstruct(ret, env);
 		}
 
 		@Override
@@ -410,7 +410,8 @@ public class DataTransformations {
 			} catch (IOException ex) {
 				throw new CREFormatException(ex.getMessage(), t);
 			}
-			CArray arr = CArray.GetAssociativeArray(t, null, env);
+			CArray arr = CArray.GetAssociativeArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			for(String key : props.stringPropertyNames()) {
 				arr.set(key, props.getProperty(key), env);
 			}
@@ -477,7 +478,7 @@ public class DataTransformations {
 				throw new CREFormatException("Malformed XML.", t, ex);
 			}
 			try {
-				return Static.resolveConstruct(doc.getNode(args[1].val()), t);
+				return Static.resolveConstruct(doc.getNode(args[1].val()), t, env);
 			} catch (XPathExpressionException ex) {
 				throw new CREFormatException(ex.getMessage(), t, ex);
 			}

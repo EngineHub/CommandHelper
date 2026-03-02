@@ -8,6 +8,7 @@ import com.laytonsmith.core.compiler.Keyword;
 import com.laytonsmith.core.compiler.RightAssociativeLateBindingKeyword;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.ControlFlow;
 
@@ -18,7 +19,8 @@ import com.laytonsmith.core.functions.ControlFlow;
 public class BreakKeyword extends RightAssociativeLateBindingKeyword {
 
 	@Override
-	protected ParseTree process(Target t, FileOptions fileOptions, ParseTree rightHandNode) throws ConfigCompileException {
+	protected ParseTree process(Environment env, Target t, FileOptions fileOptions,
+			ParseTree rightHandNode) throws ConfigCompileException {
 		ParseTree ret = new ParseTree(new CFunction(ControlFlow._break.NAME, t), fileOptions);
 		if(rightHandNode != null) {
 			ret.addChild(rightHandNode);

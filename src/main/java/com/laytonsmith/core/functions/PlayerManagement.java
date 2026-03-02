@@ -205,7 +205,7 @@ public class PlayerManagement {
 				try {
 					pl = Static.GetPlayer(args[0], t, env);
 				} catch (ConfigRuntimeException cre) {
-					pl = Static.GetUser(args[0], t);
+					pl = Static.GetUser(args[0], t, env);
 				}
 			}
 			if(args.length == 2) {
@@ -264,7 +264,7 @@ public class PlayerManagement {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CArray players = new CArray(t);
+			CArray players = new CArray(t, null, env);
 			if(args.length == 0) {
 				for(MCPlayer player : Static.getServer().getOnlinePlayers()) {
 					players.push(new CString(player.getName(), t), t, env);
@@ -380,7 +380,7 @@ public class PlayerManagement {
 				dist = ArgumentValidation.getDouble(args[1], t, env);
 			}
 
-			CArray sa = new CArray(t);
+			CArray sa = new CArray(t, null, env);
 
 			for(MCPlayer pa1 : pa) {
 				if(inRadius(pa1, dist, loc)) {
@@ -650,7 +650,7 @@ public class PlayerManagement {
 						continue;
 					}
 					try {
-						material = StaticLayer.GetMaterialFromLegacy(ArgumentValidation.getInt16(mat, t), 0);
+						material = StaticLayer.GetMaterialFromLegacy(ArgumentValidation.getInt16(mat, t, env), 0);
 						if(material != null) {
 							MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The id \"" + mat.val() + "\" is deprecated."
 									+ " Converted to \"" + material.getName() + "\"", t);
@@ -834,7 +834,7 @@ public class PlayerManagement {
 				sender = Static.GetCommandSender(args[0].val(), t);
 			}
 
-			CArray ret = new CArray(t);
+			CArray ret = new CArray(t, null, env);
 			if(sender != null) {
 				for(String group : sender.getGroups()) {
 					ret.push(new CString(group, t), t, env);
@@ -973,6 +973,8 @@ public class PlayerManagement {
 							"Could not find the location of the player (are you running in cmdline mode?)", t);
 				}
 				retVals.add(new CArray(t,
+						GenericParameters.emptyBuilder(CArray.TYPE)
+								.addNativeParameter(CDouble.TYPE, null).buildNative(), env,
 						new CDouble(loc.getX(), t),
 						new CDouble(loc.getY() - 1, t),
 						new CDouble(loc.getZ(), t)));
@@ -988,7 +990,9 @@ public class PlayerManagement {
 				if(b == null) {
 					retVals.add(CNull.NULL);
 				} else {
-					retVals.add(new CArray(t, new CInt(b.getX(), t), new CInt(b.getY(), t), new CInt(b.getZ(), t)));
+					retVals.add(new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+							.addNativeParameter(CInt.TYPE, null).buildNative(), env,
+							new CInt(b.getX(), t), new CInt(b.getY(), t), new CInt(b.getZ(), t)));
 				}
 			}
 			if(index == 3 || index == -1) {
@@ -1025,7 +1029,8 @@ public class PlayerManagement {
 			}
 			if(index == 9 || index == -1) {
 				//MCPlayer groups
-				CArray a = new CArray(t);
+				CArray a = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+						.addNativeParameter(CString.TYPE, null).buildNative(), env);
 				for(String group : p.getGroups()) {
 					a.push(new CString(group, t), t, env);
 				}
@@ -1078,7 +1083,7 @@ public class PlayerManagement {
 			if(retVals.size() == 1) {
 				return retVals.get(0);
 			} else {
-				CArray ca = new CArray(t);
+				CArray ca = new CArray(t, null, env);
 				for(Mixed c : retVals) {
 					ca.push(c, t, env);
 				}
@@ -1509,7 +1514,9 @@ public class PlayerManagement {
 						yaw += 360.0f;
 					}
 					float pitch = l.getPitch();
-					return new CArray(t, new CDouble(yaw, t), new CDouble(pitch, t));
+					return new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+							.addNativeParameter(CDouble.TYPE, null).buildNative(), env,
+							new CDouble(yaw, t), new CDouble(pitch, t));
 				}
 			}
 			//Setter
@@ -2717,7 +2724,7 @@ public class PlayerManagement {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCOfflinePlayer pl = Static.GetUser(args[0].val(), t);
+			MCOfflinePlayer pl = Static.GetUser(args[0].val(), t, env);
 			return CBoolean.get(pl != null && pl.isWhitelisted());
 		}
 	}
@@ -2763,7 +2770,7 @@ public class PlayerManagement {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCOfflinePlayer pl = Static.GetUser(args[0].val(), t);
+			MCOfflinePlayer pl = Static.GetUser(args[0].val(), t, env);
 			boolean whitelist = ArgumentValidation.getBoolean(args[1], t, env);
 			if(pl == null) {
 				throw new CRENotFoundException(
@@ -2826,7 +2833,7 @@ public class PlayerManagement {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCOfflinePlayer pl = Static.GetUser(args[0].val(), t);
+			MCOfflinePlayer pl = Static.GetUser(args[0].val(), t, env);
 			if(pl == null) {
 				throw new CRENotFoundException(
 						this.getName() + " could not get the offline player (are you running in cmdline mode?)", t);
@@ -2887,7 +2894,7 @@ public class PlayerManagement {
 			String source = "";
 
 			if(target.length() > 16) {
-				MCOfflinePlayer pl = Static.GetUser(target, t);
+				MCOfflinePlayer pl = Static.GetUser(target, t, env);
 				if(pl == null) {
 					throw new CRENotFoundException(
 							this.getName() + " could not get the offline player (are you running in cmdline mode?)", t);
@@ -4684,7 +4691,7 @@ public class PlayerManagement {
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCOfflinePlayer player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(args.length == 1) {
-				player = Static.GetUser(args[0].val(), t);
+				player = Static.GetUser(args[0].val(), t, env);
 			} else if(player == null) {
 				throw new CREInsufficientArgumentsException(this.getName() + " requires a player as first argument when ran from console", t);
 			}
@@ -4982,7 +4989,8 @@ public class PlayerManagement {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCServer s = Static.getServer();
-			CArray ret = new CArray(t);
+			CArray ret = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+				.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			// This causes the function to return an empty array for a fake/null server.
 			if(s != null) {
 				MCOfflinePlayer[] players = s.getOfflinePlayers();
@@ -5007,7 +5015,7 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "array {} Returns an array of every player who has played on this server.";
+			return "array<string> {} Returns an array of every player who has played on this server.";
 		}
 
 		@Override
@@ -5044,7 +5052,7 @@ public class PlayerManagement {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCOfflinePlayer offp = Static.GetUser(args[0].val(), t);
+			MCOfflinePlayer offp = Static.GetUser(args[0].val(), t, env);
 			return CBoolean.get(offp != null && offp.hasPlayedBefore());
 		}
 
@@ -5103,7 +5111,7 @@ public class PlayerManagement {
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCOfflinePlayer op;
 			if(args.length == 1) {
-				op = Static.GetUser(args[0].val(), t);
+				op = Static.GetUser(args[0].val(), t, env);
 			} else {
 				op = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				if(op == null) {
@@ -5170,7 +5178,7 @@ public class PlayerManagement {
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCOfflinePlayer op;
 			if(args.length == 1) {
-				op = Static.GetUser(args[0].val(), t);
+				op = Static.GetUser(args[0].val(), t, env);
 			} else {
 				op = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				if(op == null) {
@@ -5234,7 +5242,7 @@ public class PlayerManagement {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCOfflinePlayer p = Static.GetUser(args[0].val(), t);
+			MCOfflinePlayer p = Static.GetUser(args[0].val(), t, env);
 			if(p == null) {
 				return CNull.NULL;
 			}
@@ -5579,7 +5587,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, GenericParameters generics, Mixed... args)
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args)
 				throws ConfigRuntimeException {
 
 			MCPlayer p = Static.GetPlayer(args[0], t, env);
@@ -5720,7 +5728,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, GenericParameters generics, Mixed... args)
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args)
 				throws ConfigRuntimeException {
 
 			MCPlayer p = Static.GetPlayer(args[0], t, env);
@@ -6217,10 +6225,10 @@ public class PlayerManagement {
 			try {
 				Gson gson = new GsonBuilder().disableHtmlEscaping().create();
 				if(args.length == 1) {
-					json = gson.toJson(Construct.GetPOJO(args[0]));
+					json = gson.toJson(Construct.GetPOJO(args[0], env));
 				} else {
 					selector = ArgumentValidation.getString(args[0], t);
-					json = gson.toJson(Construct.GetPOJO(args[1]));
+					json = gson.toJson(Construct.GetPOJO(args[1], env));
 				}
 			} catch(ClassCastException ex) {
 				throw new CRECastException(ex.getMessage(), t);
@@ -7256,7 +7264,7 @@ public class PlayerManagement {
 					+ " This is an indicator of the quality of the player's connection, as represented in the tab list.";
 		}
 
-		public Construct exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			if(args.length == 1) {
 				p = Static.GetPlayer(args[0].val(), t, env);
@@ -7301,7 +7309,7 @@ public class PlayerManagement {
 					+ " Array contains the following keys: forward, backward, left, right, jump, sneak, and sprint.";
 		}
 
-		public Construct exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			if(args.length == 1) {
 				p = Static.GetPlayer(args[0].val(), t, env);

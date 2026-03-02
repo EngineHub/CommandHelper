@@ -9,6 +9,7 @@ import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.BoundEvent.Priority;
 import com.laytonsmith.core.events.prefilters.Prefilter;
@@ -195,7 +196,7 @@ public final class EventUtils {
 		if(prefilters == null) {
 			// Old, deprecated method
 			try {
-				return driver.matches(userPrefilters, e);
+				return driver.matches(userPrefilters, e, b.getEnvironment());
 			} catch (PrefilterNonMatchException ex) {
 				return false;
 			}
@@ -208,7 +209,7 @@ public final class EventUtils {
 				}
 				Prefilter<? extends BindableEvent> pf = prefilter.getValue();
 				PrefilterMatcher matcher = pf.getMatcher();
-				if(!matcher.matches(key, value, e, b.getTarget())) {
+				if(!matcher.matches(key, value, e, b.getTarget(), b.getEnvironment())) {
 					return false;
 				}
 			}
@@ -359,13 +360,14 @@ public final class EventUtils {
 		}
 	}
 
-	public static Construct DumpEvents() {
-		CArray ca = new CArray(Target.UNKNOWN);
+	public static Construct DumpEvents(Environment env) {
+		CArray ca = new CArray(Target.UNKNOWN, GenericParameters.emptyBuilder(CArray.TYPE)
+			.addParameter(CString.TYPE, null, env, Target.UNKNOWN).buildNative(), env);
 		for(SortedSet<BoundEvent> set : EVENT_HANDLES.values()) {
 			Iterator<BoundEvent> i = set.iterator();
 			while(i.hasNext()) {
 				BoundEvent b = i.next();
-				ca.push(new CString(b.toString() + ":" + b.getFile() + ":" + b.getLineNum(), Target.UNKNOWN), Target.UNKNOWN);
+				ca.push(new CString(b.toString() + ":" + b.getFile() + ":" + b.getLineNum(), Target.UNKNOWN), Target.UNKNOWN, env);
 			}
 		}
 		return ca;

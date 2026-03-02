@@ -20,14 +20,15 @@ public class UpperBoundConstraint extends BoundaryConstraint {
 
 	/**
 	 * Constructs a new upper bound constraint.
+	 * @param env The environment. If only containing native types, this is fine to be null.
 	 * @param t Code target
 	 * @param typename The name of this parameter, may be ? for LHS constraints
 	 * @param upperBound The concrete upper bound
 	 */
-	public UpperBoundConstraint(Target t, String typename, LeftHandSideType upperBound) {
+	public UpperBoundConstraint(Environment env, Target t, String typename, LeftHandSideType upperBound) {
 		super(t, typename, upperBound);
 		ConstraintValidator.ValidateTypename(typename, t);
-		for(Set<ObjectModifier> upperBoundComponent : upperBound.getTypeObjectModifiers()) {
+		for(Set<ObjectModifier> upperBoundComponent : upperBound.getTypeObjectModifiers(env)) {
 			if(upperBoundComponent.contains(ObjectModifier.FINAL)) {
 				throw new CREGenericConstraintException(upperBound.val() + " is marked as final, and so"
 						+ " cannot be used in an upper bound constraint.", t);

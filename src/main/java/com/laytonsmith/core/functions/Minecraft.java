@@ -38,8 +38,8 @@ import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
-import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.drivers.ServerEvents;
@@ -242,7 +242,7 @@ public class Minecraft {
 					}
 				}
 			} else if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
-				MCItemStack is = ObjectGenerator.GetGenerator().item(args[0], t, true);
+				MCItemStack is = ObjectGenerator.GetGenerator().item(args[0], t, true, env);
 				return new CString(is.getType().getName(), t);
 			}
 			if(i == -1) {
@@ -312,7 +312,7 @@ public class Minecraft {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CArray item = ArgumentValidation.getArray(args[0], t, env);
-			MCItemStack is = ObjectGenerator.GetGenerator().item(item, t, true);
+			MCItemStack is = ObjectGenerator.GetGenerator().item(item, t, true, env);
 			return ObjectGenerator.GetGenerator().item(is, t);
 		}
 
@@ -361,7 +361,7 @@ public class Minecraft {
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			Mixed id = args[0];
 			if(id.isInstanceOf(CArray.TYPE, null, env)) {
-				MCItemStack is = ObjectGenerator.GetGenerator().item(id, t);
+				MCItemStack is = ObjectGenerator.GetGenerator().item(id, t, env);
 				return new CInt(is.maxStackSize(), t);
 			}
 			// legacy
@@ -398,8 +398,9 @@ public class Minecraft {
 			if(children.size() < 1) {
 				return null;
 			}
-			if(children.get(0).getData().isInstanceOf(CString.TYPE, null, env) && children.get(0).getData().val().contains(":")
-					|| ArgumentValidation.isNumber(children.get(0).getData())) {
+			if(children.get(0).getData().isInstanceOf(CString.TYPE, null, env)
+					&& children.get(0).getData().val().contains(":")
+					|| ArgumentValidation.isNumber(children.get(0).getData(), env)) {
 				env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
 						new CompilerWarning("Numeric ids are deprecated in " + getName(), t, null));
 			}
@@ -597,8 +598,8 @@ public class Minecraft {
 					+ "<li>5 - Allow end; if true, the End is enabled</li>"
 					+ "<li>6 - World container; The path to the world container.</li>"
 					+ "<li>7 - Max player limit; returns the player limit.</li>"
-					+ "<li>8 - Operators; An array of operators on the server.</li>"
-					+ "<li>9 - Plugins; An array of plugins loaded by the server.</li>"
+					+ "<li>8 - Operators; An array&lt;string&gt; of operators on the server.</li>"
+					+ "<li>9 - Plugins; An array&lt;string&gt; of plugins loaded by the server.</li>"
 					+ "<li>10 - Online Mode; If true, users are authenticated with Mojang before login</li>"
 					+ "<li>11 - Server port; Get the game port that the server runs on</li>"
 					+ "<li>12 - Server IP; Get the IP that the server runs on</li>"
@@ -679,7 +680,8 @@ public class Minecraft {
 			}
 			if(index == 8 || index == -1) {
 				//Array of op's
-				CArray co = new CArray(t);
+				CArray co = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+						.addNativeParameter(CString.TYPE, null).buildNative(), null);
 				List<MCOfflinePlayer> so = server.getOperators();
 				for(MCOfflinePlayer o : so) {
 					if(o == null) {
@@ -692,7 +694,8 @@ public class Minecraft {
 			}
 			if(index == 9 || index == -1) {
 				//Array of plugins
-				CArray co = new CArray(t);
+				CArray co = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+						.addNativeParameter(CString.TYPE, null).buildNative(), env);
 				MCPluginManager plugManager = server.getPluginManager();
 				if(plugManager == null) {
 					throw new CRENotFoundException(this.getName()
@@ -747,7 +750,7 @@ public class Minecraft {
 				return retVals.get(0);
 			}
 
-			CArray ca = new CArray(t);
+			CArray ca = new CArray(t, null, env);
 			for(Mixed c : retVals) {
 				ca.push(c, t, env);
 			}
@@ -796,7 +799,7 @@ public class Minecraft {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			MCServer server = Static.getServer();
-			CArray co = new CArray(t);
+			CArray co = new CArray(t, null, env);
 			List<MCOfflinePlayer> so = server.getBannedPlayers();
 			for(MCOfflinePlayer o : so) {
 				if(o == null) {
@@ -850,7 +853,7 @@ public class Minecraft {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			MCServer server = Static.getServer();
-			CArray co = new CArray(t);
+			CArray co = new CArray(t, null, env);
 			List<MCOfflinePlayer> so = server.getWhitelistedPlayers();
 			for(MCOfflinePlayer o : so) {
 				if(o == null) {
@@ -1063,7 +1066,8 @@ public class Minecraft {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCServer s = Static.getServer();
-			CArray ret = new CArray(t);
+			CArray ret = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			for(String ip : s.getIPBans()) {
 				ret.push(new CString(ip, t), t, env);
 			}
@@ -1082,7 +1086,7 @@ public class Minecraft {
 
 		@Override
 		public String docs() {
-			return "array {} Returns an array of entries from banned-ips.txt.";
+			return "array<string> {} Returns an array of entries from banned-ips.txt.";
 		}
 
 		@Override
@@ -1268,7 +1272,7 @@ public class Minecraft {
 			if(children.size() < 1) {
 				return null;
 			}
-			if(ArgumentValidation.isNumber(children.get(0).getData())) {
+			if(ArgumentValidation.isNumber(children.get(0).getData(), env)) {
 				env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
 						new CompilerWarning("Numeric ids are deprecated in " + getName() + ".", t, null));
 			}
@@ -1416,7 +1420,7 @@ public class Minecraft {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CArray mats = new CArray(t);
+			CArray mats = new CArray(t, null, env);
 			for(String mat : MCMaterial.types()) {
 				mats.push(new CString(mat, t), t, env);
 			}

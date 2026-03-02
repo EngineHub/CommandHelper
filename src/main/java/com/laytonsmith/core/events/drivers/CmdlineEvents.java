@@ -87,11 +87,11 @@ public class CmdlineEvents {
 
 		@Override
 		public String docs() {
-			return "{} Fires off every 5 seconds, with no other side effects. {} {} {}";
+			return "{} Fires off every 5 seconds, with no other side effects. {} {} {}";
 		}
 
 		@Override
-		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Environment env) throws PrefilterNonMatchException {
 			return true;
 		}
 
@@ -155,7 +155,7 @@ public class CmdlineEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Environment env) throws PrefilterNonMatchException {
 			return true;
 		}
 
@@ -167,7 +167,7 @@ public class CmdlineEvents {
 		@Override
 		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
 			CmdlinePromptInput cpi = new CmdlinePromptInput(manualObject.get("command", t, env).val(),
-					ArgumentValidation.getBoolean(manualObject.get("shellMode", t, env), t));
+					ArgumentValidation.getBooleanObject(manualObject.get("shellMode", t, env), t, env));
 			return cpi;
 		}
 
@@ -258,7 +258,7 @@ public class CmdlineEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Environment env) throws PrefilterNonMatchException {
 			return true;
 		}
 
