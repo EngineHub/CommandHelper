@@ -1766,7 +1766,7 @@ public final class MethodScriptCompiler {
 				}
 				// make CDouble/CDecimal here because otherwise Long.parseLong() will remove
 				// minus zero before decimals and leading zeroes after decimals
-				if((c instanceof CInt || c instanceof CDecimal) && next1.type == TType.DOT && next2.type == TType.LIT) {
+				if(c instanceof CInt && next1.type == TType.DOT && next2.type == TType.LIT) {
 					try {
 						c = new CDouble(Double.parseDouble(t.val() + '.' + next2.val()), t.target);
 						i += 2;

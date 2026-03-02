@@ -600,7 +600,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		if((int) index != index) {
 			throw new CREIndexOverflowException("The element at index \"" + index + "\" does not exist", t);
 		}
-		return this.get((int) index, t, env);
+		return this.get(new CInt(index, t), t, env);
 	}
 
 	/**
@@ -1288,7 +1288,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 
 	@Override
 	public Set<ObjectModifier> getObjectModifiers() {
-		return EnumSet.of(ObjectModifier.FINAL);
+		return EnumSet.noneOf(ObjectModifier.class);
 	}
 
 	@Override

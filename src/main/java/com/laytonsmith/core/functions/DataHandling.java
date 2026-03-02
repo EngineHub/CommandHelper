@@ -428,7 +428,7 @@ public class DataHandling {
 				if(val instanceof CVoid) {
 					throw new CRECastException("Void may not be assigned to a variable", t);
 				}
-				if(!InstanceofUtil.isInstanceof(val, type, env)) {
+				if(!InstanceofUtil.isAssignableTo(val.typeof(env).asLeftHandSideType(), type, env)) {
 					throw new CRECastException(varName + " is of type " + type.val() + ", but a value of type "
 							+ val.typeof(env) + " was assigned to it.", t);
 				}
@@ -469,7 +469,7 @@ public class DataHandling {
 					}
 					list.set(var);
 				} else {
-					if(!InstanceofUtil.isInstanceof(val.typeof(env), var.getDefinedType(), env)) {
+					if(!InstanceofUtil.isInstanceof(val, var.getDefinedType(), env)) {
 						throw new CRECastException(varName + " is of type " + var.getDefinedType()
 								+ ", but a value of type " + val.typeof(env) + " was assigned to it.", t);
 					}
@@ -812,12 +812,13 @@ public class DataHandling {
 				ParseTree typeNode = children.get(0);
 				ParseTree varNode = children.get(1);
 				ParseTree valNode = children.get(2);
-				if(typeNode.getData() instanceof CClassType declaredType
+				if(typeNode.getData() instanceof SourceType declaredSourceType
 						&& varNode.getData() instanceof IVariable) {
+					LeftHandSideType declaredType = declaredSourceType.asLeftHandSideType();
 					if(valNode.isConst()) {
-						CClassType valType = valNode.getData().typeof(env);
-						if((valType != CClassType.AUTO || declaredType == CClassType.AUTO)
-								&& InstanceofUtil.isInstanceof(valType, declaredType, env)) {
+						LeftHandSideType valType = valNode.getData().typeof(env).asLeftHandSideType();
+						if((valType != Auto.LHSTYPE || declaredType == Auto.LHSTYPE)
+								&& InstanceofUtil.isAssignableTo(valType, declaredType, env)) {
 							ParseTree newAssignNode = new ParseTree(new CFunction(__unsafe_assign__.NAME, t), fileOptions);
 							newAssignNode.addChild(typeNode);
 							newAssignNode.addChild(varNode);
@@ -827,9 +828,9 @@ public class DataHandling {
 					}
 					if(valNode.getData() instanceof CFunction cf && cf.getCachedFunction() != null
 							&& cf.getCachedFunction().getName().equals(__cast__.NAME) && valNode.numberOfChildren() == 2
-							&& valNode.getChildAt(1).getData() instanceof CClassType castType
-							&& (castType != CClassType.AUTO || declaredType == CClassType.AUTO)
-							&& InstanceofUtil.isInstanceof(castType, declaredType, env)) {
+							&& valNode.getChildAt(1).getData() instanceof SourceType castType
+							&& (castType.asLeftHandSideType() != Auto.LHSTYPE || declaredType == Auto.LHSTYPE)
+							&& InstanceofUtil.isAssignableTo(castType.asLeftHandSideType(), declaredType, env)) {
 						ParseTree newAssignNode = new ParseTree(new CFunction(__unsafe_assign__.NAME, t), fileOptions);
 						newAssignNode.addChild(typeNode);
 						newAssignNode.addChild(varNode);

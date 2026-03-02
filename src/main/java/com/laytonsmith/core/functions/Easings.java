@@ -16,6 +16,7 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREIndexOverflowException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -123,6 +124,7 @@ public class Easings {
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{
 				CRECastException.class,
+				CREIndexOverflowException.class,
 			};
 		}
 

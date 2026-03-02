@@ -425,7 +425,7 @@ public class InstanceofUtil {
 
 	/**
 	 * This function returns true if a value of a certain type is assignable to the given type. In general, this is
-	 * precisely equivalent to {@link #isInstanceof(CClassType, CClassType, LeftHandGenericUse, Environment)} except
+	 * precisely equivalent to {@link #isInstanceof(LeftHandSideType, LeftHandSideType, Environment)} except
 	 * this allows for null to be assigned to any value in general. The only exception to this rule is if the type is
 	 * defined with the NotNull annotation, or the type itself is NotNull.
 	 * <p>

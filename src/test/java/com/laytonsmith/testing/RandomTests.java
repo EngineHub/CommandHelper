@@ -210,7 +210,9 @@ public class RandomTests extends AbstractIntegrationTest {
 			Map<CClassType, GenericTypeParameters> chainParameters = ReflectionUtils.get(CClassType.class, type, "chainParameters");
 			for(CClassType val : supers) {
 				if(val.getGenericDeclaration() != null && !chainParameters.containsKey(val)) {
-					uhohs.put(type.getNativeType() + " does not provide generic chain parameters for " + val.getNativeType(), null);
+					uhohs.put(type.getNativeType() + " does not provide generic chain parameters for "
+							+ val.getNativeType() + ". Add .withSuperParameters(GenericTypeParameters.nativeBuilder("
+							+ val.getNativeType() + ".TYPE).addParameter(...)).done() to the TYPE definition.", null);
 				}
 			}
 		}

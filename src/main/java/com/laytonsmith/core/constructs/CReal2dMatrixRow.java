@@ -8,6 +8,7 @@ import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.GenericTypeParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.natives.interfaces.AbstractMixedClass;
 import com.laytonsmith.core.natives.interfaces.ArrayAccessSet;
@@ -24,7 +25,10 @@ public class CReal2dMatrixRow extends AbstractMixedClass implements com.laytonsm
 		ArrayAccessSet {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get(CReal2dMatrixRow.class);
+	public static final CClassType TYPE = CClassType.get(CReal2dMatrixRow.class)
+			.withSuperParameters(GenericTypeParameters.nativeBuilder(com.laytonsmith.core.natives.interfaces.Iterable.TYPE)
+					.addParameter(CDouble.TYPE, null))
+			.done();;
 
 	CReal2dMatrix parent;
 	int rowIndex;

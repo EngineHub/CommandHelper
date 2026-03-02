@@ -1399,11 +1399,11 @@ public class Compiler {
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 
 			// Get arguments.
-			CClassType type;
+			LeftHandSideType type;
 			String varName;
 			Mixed val;
 			if(args.length == 3) {
-				type = (CClassType) args[0];
+				type = ((SourceType) args[0]).asLeftHandSideType();
 				varName = ((IVariable) args[1]).getVariableName();
 				val = args[2];
 			} else {
@@ -1425,7 +1425,7 @@ public class Compiler {
 			IVariable var = list.get(varName);
 			if(var == null || (type != null && !type.equals(var.getDefinedType()))) {
 				try {
-					var = new IVariable(type, varName, val, t);
+					var = new IVariable(type, varName, val, t, env);
 				} catch(ConfigCompileException ex) {
 					throw new Error(ex);
 				}

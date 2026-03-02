@@ -1,5 +1,6 @@
 package com.laytonsmith.core.constructs;
 
+import com.laytonsmith.PureUtilities.Common.Annotations.AggressiveDeprecation;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.core.constructs.generics.ConcreteGenericParameter;
 import com.laytonsmith.core.constructs.generics.ConstraintValidator;
@@ -28,13 +29,26 @@ public class IVariable extends Construct implements Cloneable {
 		this(Auto.TYPE, name, new CString("", t), t, null);
 	}
 
+	/**
+	 *
+	 * @param checkedType
+	 * @param name
+	 * @param checkedValue
+	 * @param t
+	 * @throws ConfigCompileException
+	 * @deprecated Use {@link #IVariable(com.laytonsmith.core.constructs.LeftHandSideType, java.lang.String,
+	 * com.laytonsmith.core.natives.interfaces.Mixed, com.laytonsmith.core.constructs.Target,
+	 * com.laytonsmith.core.environments.Environment)} instead.
+	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
 	public IVariable(CClassType checkedType, String name, Mixed checkedValue, Target t) throws ConfigCompileException {
 		this(checkedType, name, checkedValue, t, null);
 	}
 
 	/**
 	 * Temporary function that sets generic parameters to null. This will be removed in the future once the compiler
-	 * supports generics, at which point you should explicitely pass in null to the other constructor if there were
+	 * supports generics, at which point you should explicitly pass in null to the other constructor if there were
 	 * no generics defined.
 	 * @param type
 	 * @param name
@@ -44,6 +58,7 @@ public class IVariable extends Construct implements Cloneable {
 	 * @throws ConfigCompileException
 	 * @deprecated Use {@link #IVariable(CClassType, String, Mixed, Target, LeftHandGenericUse, Environment)}
 	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public IVariable(CClassType type, String name, Mixed value, Target t, Environment env) throws ConfigCompileException {
 		this(type.asLeftHandSideType(), name, value, t, env);
@@ -51,7 +66,7 @@ public class IVariable extends Construct implements Cloneable {
 
 	/**
 	 * Constructs a new IVariable instance.
-	 * @param type The type of value, may be auto
+	 * @param type The defined type of the variable, may be auto.
 	 * @param name The name of the variable
 	 * @param value The value, if it was provided. May be CNull, but cannot be java null
 	 * @param t The code target where this value was defined
@@ -73,7 +88,6 @@ public class IVariable extends Construct implements Cloneable {
 		if(value instanceof CVoid) {
 			throw new CRECastException("Void may not be assigned to a variable", t);
 		}
-		boolean hasValidType = true;
 		for(ConcreteGenericParameter types : type.getTypes()) {
 			LeftHandGenericUse genericDefinition = types.getLeftHandGenericUse();
 			CClassType subType = types.getType();
@@ -81,20 +95,11 @@ public class IVariable extends Construct implements Cloneable {
 			if(subType.equals(CVoid.TYPE)) {
 				throw new CRECastException("Variables may not be of type void", t);
 			}
-//			if(env != null && (!subType.equals(Auto.TYPE) && !(value instanceof CNull))) {
-//				if(!InstanceofUtil.isInstanceof(value, subType, env)) {
-//					hasValidType = false;
-//				}
-//			}
 		}
 		if(!InstanceofUtil.isAssignableTo(value.typeof(env).asLeftHandSideType(), type, env)) {
 			throw new CRECastException(name + " is of type " + type.val() + ", but a value of type "
 					+ value.typeof(env) + " was assigned to it.", t);
 		}
-//		if(!hasValidType) {
-//			throw new CRECastException(name + " is of type " + type.val() + ", but a value of type "
-//					+ value.typeof(env) + " was assigned to it.", t);
-//		}
 
 		this.type = type;
 		this.varValue = value;

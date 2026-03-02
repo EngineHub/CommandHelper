@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import com.laytonsmith.PureUtilities.Common.Annotations.AggressiveDeprecation;
+import com.laytonsmith.core.constructs.generics.GenericTypeParameters;
 
 /**
  *
@@ -27,7 +28,10 @@ public class CReal2dMatrix extends AbstractMixedClass implements Matrix<Double>,
 		com.laytonsmith.core.natives.interfaces.Iterable {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get(CReal2dMatrix.class);
+	public static final CClassType TYPE = CClassType.get(CReal2dMatrix.class)
+			.withSuperParameters(GenericTypeParameters.nativeBuilder(com.laytonsmith.core.natives.interfaces.Iterable.TYPE)
+					.addParameter(CReal2dMatrixRow.TYPE, null))
+			.done();
 
 	int rows;
 	int columns;

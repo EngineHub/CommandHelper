@@ -2709,6 +2709,10 @@ public class ControlFlow {
 
 					// Type check return value for all found declared return types.
 					for(Declaration decl : decls) {
+						if(valType.isVoid() && decl.getType().isVoid()) {
+							// void return in a void proc/closure is always valid.
+							continue;
+						}
 						StaticAnalysis.requireType(valType, decl.getType(), valTarget, env, exceptions);
 					}
 				}

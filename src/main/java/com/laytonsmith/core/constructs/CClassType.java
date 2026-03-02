@@ -1136,7 +1136,8 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 
 	/**
 	 * Adds the given superclass's generic parameters. For instance, if this is {@code class A} which extends
-	 * {@code class B<int>}, then when defining A.TYPE, after calling CClass.get(...) it should chain
+	 * {@code class B<int>}, (i.e. {@code class A extends B<int>}), then when defining A.TYPE,
+	 * after calling CClass.get(...) it should chain
 	 * {@code .withSuperParameters(GenericTypeParameters.nativeBuilder(B.TYPE).addParameter(CInt.TYPE, null)).done()}.
 	 * If multiple classes with parameters are extended, those can be chained, as the method returns {@code this}.
 	 * <p>
