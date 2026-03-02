@@ -129,7 +129,7 @@ public class OptimizationUtilities {
 					b.append(",");
 				}
 				first = false;
-				b.append(optimize0(new ParseTree(n.get(key, Target.UNKNOWN), node.getFileOptions(), true), env));
+				b.append(optimize0(new ParseTree(n.get(key, Target.UNKNOWN, null), node.getFileOptions(), true), env));
 			}
 			b.append(")");
 			return b.toString();
