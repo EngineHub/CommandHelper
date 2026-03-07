@@ -399,6 +399,11 @@ public class BasicLogicTest extends AbstractIntegrationTest {
 		verify(fakePlayer).sendMessage("null");
 	}
 
+	@Test(expected = ConfigCompileException.class)
+	public void testDor3() throws Exception {
+		SRun("dor()", fakePlayer);
+	}
+
 	@Test
 	public void testDand() throws Exception {
 		SRun("msg(typeof(dand('a', 'b', false)))", fakePlayer);

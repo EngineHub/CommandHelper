@@ -6,7 +6,6 @@ import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.natives.interfaces.Callable;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 
@@ -39,7 +38,7 @@ public class CNativeClosure extends Construct implements Callable {
 	}
 
 	@Override
-	public Mixed executeCallable(Environment env, Target t, Mixed... values) throws ConfigRuntimeException, ProgramFlowManipulationException, CancelCommandException {
+	public Mixed executeCallable(Environment env, Target t, Mixed... values) throws ConfigRuntimeException, CancelCommandException {
 		return runnable.execute(t, env, values);
 	}
 

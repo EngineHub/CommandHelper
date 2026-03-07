@@ -86,7 +86,7 @@ public class DataHandlingTest extends AbstractIntegrationTest {
 		File test = new File("unit_test_inc.ms");
 		FileUtil.write("msg('hello')", test);
 		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler
-				.lex(script, null, new File("./script.txt"), true), null, envs), env, null, null, null);
+				.lex(script, null, new File("./script.txt"), true), null, envs), env, null, null);
 		verify(fakePlayer).sendMessage("hello");
 		//delete the test file
 		test.delete();

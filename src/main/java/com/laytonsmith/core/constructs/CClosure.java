@@ -7,8 +7,9 @@ import com.laytonsmith.core.functions.Compiler;
 import com.laytonsmith.core.natives.interfaces.Booleanish;
 import com.laytonsmith.core.natives.interfaces.Callable;
 import com.laytonsmith.core.MSVersion;
-import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.Script;
+import com.laytonsmith.core.StepAction;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.compiler.FileOptions;
@@ -20,14 +21,10 @@ import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREStackOverflowError;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.exceptions.FunctionReturnException;
-import com.laytonsmith.core.exceptions.LoopManipulationException;
-import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.exceptions.StackTraceManager;
-import com.laytonsmith.core.functions.DataHandling;
+import com.laytonsmith.core.exceptions.UnhandledFlowControlException;
+import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.natives.interfaces.Mixed;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -149,7 +146,6 @@ public class CClosure extends Construct implements Callable, Booleanish {
 	 * @param values
 	 * @return
 	 * @throws ConfigRuntimeException
-	 * @throws ProgramFlowManipulationException
 	 * @throws CancelCommandException
 	 */
 	public Mixed executeCallable(Mixed... values) {
@@ -160,9 +156,7 @@ public class CClosure extends Construct implements Callable, Booleanish {
 	 * Executes the closure, giving it the supplied arguments. {@code values} may be null, which means that no arguments
 	 * are being sent.
 	 *
-	 * LoopManipulationExceptions will never bubble up past this point, because they are never allowed, so they are
-	 * handled automatically, but other ProgramFlowManipulationExceptions will, . ConfigRuntimeExceptions will also
-	 * bubble up past this, since an execution mechanism may need to do custom handling.
+	 * ConfigRuntimeExceptions will bubble up past this, since an execution mechanism may need to do custom handling.
 	 *
 	 * A typical execution will include the following code:
 	 * <pre>
@@ -170,7 +164,7 @@ public class CClosure extends Construct implements Callable, Booleanish {
 	 *	closure.execute();
 	 * } catch (ConfigRuntimeException e){
 	 *	ConfigRuntimeException.HandleUncaughtException(e);
-	 * } catch (ProgramFlowManipulationException e){
+	 * } catch (CancelCommandException e){
 	 *	// Ignored
 	 * }
 	 * </pre>
@@ -181,31 +175,23 @@ public class CClosure extends Construct implements Callable, Booleanish {
 	 * @param values The values to be passed to the closure
 	 * @return The return value of the closure, or VOID if nothing was returned
 	 * @throws ConfigRuntimeException If any call inside the closure causes a CRE
-	 * @throws ProgramFlowManipulationException If any ProgramFlowManipulationException is thrown (other than a
-	 * LoopManipulationException) within the closure
+	 * @throws CancelCommandException If die() is called within the closure
 	 */
 	@Override
 	public Mixed executeCallable(Environment env, Target t, Mixed... values)
-			throws ConfigRuntimeException, ProgramFlowManipulationException, CancelCommandException {
-		try {
-			execute(values);
-		} catch (FunctionReturnException e) {
-			return e.getReturn();
-		}
-		return CVoid.VOID;
+			throws ConfigRuntimeException, CancelCommandException {
+		return execute(values);
 	}
 
 	/**
 	 * @param values
 	 * @throws ConfigRuntimeException
-	 * @throws ProgramFlowManipulationException
-	 * @throws FunctionReturnException
 	 * @throws CancelCommandException
 	 */
-	protected void execute(Mixed... values) throws ConfigRuntimeException, ProgramFlowManipulationException,
-			FunctionReturnException, CancelCommandException {
+	protected Mixed execute(Mixed... values) throws ConfigRuntimeException,
+			CancelCommandException {
 		if(node == null) {
-			return;
+			return CVoid.VOID;
 		}
 		Environment env;
 		try {
@@ -214,7 +200,7 @@ public class CClosure extends Construct implements Callable, Booleanish {
 			}
 		} catch (CloneNotSupportedException ex) {
 			Logger.getLogger(CClosure.class.getName()).log(Level.SEVERE, null, ex);
-			return;
+			return CVoid.VOID;
 		}
 		StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
 		stManager.addStackTraceElement(new ConfigRuntimeException.StackTraceElement("<<closure>>", getTarget()));
@@ -276,50 +262,44 @@ public class CClosure extends Construct implements Callable, Booleanish {
 						node.getData().getTarget()));
 			}
 
-			ParseTree newNode = new ParseTree(new CFunction(DataHandling.g.NAME, getTarget()), node.getFileOptions());
-			List<ParseTree> children = new ArrayList<>();
-			children.add(node);
-			newNode.setChildren(children);
+			Script script = env.getEnv(GlobalEnv.class).GetScript();
+			if(script == null) {
+				script = Script.GenerateScript(node, env.getEnv(GlobalEnv.class).GetLabel(), null);
+			}
+			Mixed result;
 			try {
-				MethodScriptCompiler.execute(newNode, env, null, env.getEnv(GlobalEnv.class)
-						.GetScript());
-			} catch (LoopManipulationException e) {
-				//This shouldn't ever happen.
-				LoopManipulationException lme = ((LoopManipulationException) e);
-				Target t = lme.getTarget();
+				result = script.eval(node, env);
+			} catch(UnhandledFlowControlException e) {
+				StepAction.FlowControlAction action = e.getAction();
+				if(action instanceof Exceptions.ThrowAction throwAction) {
+					ConfigRuntimeException ex = throwAction.getException();
+					ex.setEnv(env);
+					if(ex instanceof AbstractCREException) {
+						((AbstractCREException) ex).freezeStackTraceElements(stManager);
+					}
+					throw ex;
+				}
+				Target t = action.getTarget();
 				ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.CreateUncatchableException("A "
-						+ lme.getName() + "() bubbled up to the top of"
+						+ "flow control action bubbled up to the top of"
 						+ " a closure, which is unexpected behavior.", t), env);
-			} catch (FunctionReturnException ex) {
-				// Check the return type of the closure to see if it matches the defined type
-				// Normal execution.
-				Mixed ret = ex.getReturn();
-				if(!InstanceofUtil.isInstanceof(ret.typeof(env), returnType, env)) {
-					throw new CRECastException("Expected closure to return a value of type " + returnType.val()
-							+ " but a value of type " + ret.typeof(env) + " was returned instead", ret.getTarget());
-				}
-				// Now rethrow it
-				throw ex;
-			} catch (CancelCommandException e) {
-				// die()
-			} catch (ConfigRuntimeException ex) {
-				ex.setEnv(env);
-				if(ex instanceof AbstractCREException) {
-					((AbstractCREException) ex).freezeStackTraceElements(stManager);
-				}
-				throw ex;
-			} catch (StackOverflowError e) {
+				return CVoid.VOID;
+			} catch(StackOverflowError e) {
 				throw new CREStackOverflowError(null, node.getTarget(), e);
-			} finally {
-				stManager.popStackTraceElement();
 			}
-			// If we got here, then there was no return type. This is fine, but only for returnType void or auto.
-			if(!(returnType.equals(Auto.TYPE) || returnType.equals(CVoid.TYPE))) {
-				throw new CRECastException("Expecting closure to return a value of type " + returnType.val() + ","
-						+ " but no value was returned.", node.getTarget());
+
+			if(!returnType.equals(Auto.TYPE)
+					&& !InstanceofUtil.isInstanceof(result.typeof(env), returnType, env)) {
+				throw new CRECastException("Expected closure to return a value of type " + returnType.val()
+						+ " but a value of type " + result.typeof(env) + " was returned instead",
+						result.getTarget());
 			}
+			return result;
 		} catch (CloneNotSupportedException ex) {
 			Logger.getLogger(CClosure.class.getName()).log(Level.SEVERE, null, ex);
+			return CVoid.VOID;
+		} finally {
+			stManager.popStackTraceElement();
 		}
 	}
 

@@ -11,10 +11,14 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.FlowFunction;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
-import com.laytonsmith.core.Script;
+import com.laytonsmith.core.StepAction;
+import com.laytonsmith.core.StepAction.Complete;
+import com.laytonsmith.core.StepAction.Evaluate;
+import com.laytonsmith.core.StepAction.StepResult;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.compiler.signature.FunctionSignatures;
@@ -49,7 +53,6 @@ import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.functions.BasicLogic.equals;
 import com.laytonsmith.core.functions.BasicLogic.equals_ic;
 import com.laytonsmith.core.functions.BasicLogic.sequals;
@@ -387,7 +390,7 @@ public class ArrayHandling {
 	@api
 	@seealso({array_get.class, array.class, array_push.class, com.laytonsmith.tools.docgen.templates.Arrays.class})
 	@OperatorPreferred("@array[@key] = @value")
-	public static class array_set extends AbstractFunction {
+	public static class array_set extends AbstractFunction implements FlowFunction<array_set.ArraySetState> {
 
 		public static final String NAME = "array_set";
 
@@ -401,32 +404,68 @@ public class ArrayHandling {
 			return new Integer[]{3};
 		}
 
-		@Override
-		public boolean useSpecialExec() {
-			return true;
+		static class ArraySetState {
+			enum Phase { EVAL_ARRAY, EVAL_INDEX, EVAL_VALUE }
+			Phase phase = Phase.EVAL_ARRAY;
+			ParseTree[] children;
+			Mixed array;
+			Mixed index;
+
+			ArraySetState(ParseTree[] children) {
+				this.children = children;
+			}
+
+			@Override
+			public String toString() {
+				return phase.name();
+			}
 		}
 
 		@Override
-		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public StepResult<ArraySetState> begin(Target t, ParseTree[] children, Environment env) {
 			env.getEnv(GlobalEnv.class).SetFlag(GlobalEnv.FLAG_ARRAY_SPECIAL_GET, true);
-			Mixed array;
-			try {
-				array = parent.seval(nodes[0], env);
-			} finally {
+			ArraySetState state = new ArraySetState(children);
+			return new StepResult<>(new Evaluate(children[0]), state);
+		}
+
+		@Override
+		public StepResult<ArraySetState> childCompleted(Target t, ArraySetState state,
+				Mixed result, Environment env) {
+			switch(state.phase) {
+				case EVAL_ARRAY:
+					env.getEnv(GlobalEnv.class).ClearFlag(GlobalEnv.FLAG_ARRAY_SPECIAL_GET);
+					state.array = result;
+					state.phase = ArraySetState.Phase.EVAL_INDEX;
+					return new StepResult<>(new Evaluate(state.children[1]), state);
+				case EVAL_INDEX:
+					state.index = result;
+					state.phase = ArraySetState.Phase.EVAL_VALUE;
+					return new StepResult<>(new Evaluate(state.children[2]), state);
+				case EVAL_VALUE:
+					if(!(state.array.isInstanceOf(ArrayAccessSet.TYPE, null, env))) {
+						throw new CRECastException("Argument 1 of " + getName()
+								+ " must be an array, or implement ArrayAccessSet.", t);
+					}
+					try {
+						((ArrayAccessSet) state.array).set(state.index, result, t, env);
+					} catch(IndexOutOfBoundsException e) {
+						throw new CREIndexOverflowException("The index "
+								+ new CString(state.index).getQuote() + " is out of bounds", t);
+					}
+					return new StepResult<>(new Complete(result), state);
+				default:
+					throw ConfigRuntimeException.CreateUncatchableException(
+							"Invalid array_set state: " + state.phase, t);
+			}
+		}
+
+		@Override
+		public StepResult<ArraySetState> childInterrupted(Target t, ArraySetState state,
+				StepAction.FlowControl action, Environment env) {
+			if(state.phase == ArraySetState.Phase.EVAL_ARRAY) {
 				env.getEnv(GlobalEnv.class).ClearFlag(GlobalEnv.FLAG_ARRAY_SPECIAL_GET);
 			}
-			Mixed index = parent.seval(nodes[1], env);
-			Mixed value = parent.seval(nodes[2], env);
-			if(!(array.isInstanceOf(ArrayAccessSet.TYPE, null, env))) {
-				throw new CRECastException("Argument 1 of " + this.getName() + " must be an array, or implement ArrayAccessSet.", t);
-			}
-
-			try {
-				((ArrayAccessSet) array).set(index, value, t, env);
-			} catch(IndexOutOfBoundsException e) {
-				throw new CREIndexOverflowException("The index " + new CString(index).getQuote() + " is out of bounds", t);
-			}
-			return value;
+			return null;
 		}
 
 		@Override
@@ -2809,7 +2848,7 @@ public class ArrayHandling {
 			for(Mixed key : aa.keySet(env)) {
 				try {
 					closure.executeCallable(env, t, key, aa.get(key, t, env));
-				} catch(ProgramFlowManipulationException ex) {
+				} catch(CancelCommandException ex) {
 					// Ignored
 				}
 			}
