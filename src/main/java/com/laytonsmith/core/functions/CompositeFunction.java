@@ -22,7 +22,6 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.io.File;
 
@@ -82,13 +81,11 @@ public abstract class CompositeFunction extends AbstractFunction {
 		Mixed ret = CVoid.VOID;
 		try {
 			if(gEnv.GetScript() != null) {
-				gEnv.GetScript().eval(tree, env);
+				ret = gEnv.GetScript().eval(tree, env);
 			} else {
 				// This can happen when the environment is not fully setup during tests, in addition to optimization
-				Script.GenerateScript(null, null, null).eval(tree, env);
+				ret = Script.GenerateScript(null, null, null).eval(tree, env);
 			}
-		} catch (FunctionReturnException ex) {
-			ret = ex.getReturn();
 		} catch (ConfigRuntimeException ex) {
 			if(Prefs.DebugMode()) {
 				MSLog.GetLogger().e(MSLog.Tags.GENERAL, "Possibly false stacktrace, could be internal error",
@@ -137,17 +134,6 @@ public abstract class CompositeFunction extends AbstractFunction {
 	 */
 	protected boolean cacheCompile() {
 		return true;
-	}
-
-	@Override
-	public final Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
-		throw new Error(this.getClass().toString());
-	}
-
-	@Override
-	public final boolean useSpecialExec() {
-		// This defeats the purpose, so don't allow this.
-		return false;
 	}
 
 }

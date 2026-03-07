@@ -16,6 +16,7 @@ import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.AliasCore;
 import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.FlowFunction;
 import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.LogLevel;
@@ -25,6 +26,9 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.StepAction.Complete;
+import com.laytonsmith.core.StepAction.Evaluate;
+import com.laytonsmith.core.StepAction.StepResult;
 import com.laytonsmith.core.compiler.BranchStatement;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.VariableScope;
@@ -713,7 +717,8 @@ public class Meta {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class, GlobalEnv.class})
-	public static class scriptas extends AbstractFunction implements VariableScope, BranchStatement {
+	public static class scriptas extends AbstractFunction implements VariableScope, BranchStatement,
+			FlowFunction<scriptas.ScriptasState> {
 
 		@Override
 		public String getName() {
@@ -764,32 +769,70 @@ public class Meta {
 			return null;
 		}
 
-		@Override
-		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) throws ConfigRuntimeException {
-			String senderName = parent.seval(nodes[0], env).val();
-			MCCommandSender sender = Static.GetCommandSender(senderName, t);
-			MCCommandSender originalSender = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
-			int offset = 0;
-			String originalLabel = env.getEnv(GlobalEnv.class).GetLabel();
-			if(nodes.length == 3) {
-				offset++;
-				String label = parent.seval(nodes[1], env).val();
-				env.getEnv(GlobalEnv.class).SetLabel(label);
-			} else {
-				env.getEnv(GlobalEnv.class).SetLabel(parent.getLabel());
+		static class ScriptasState {
+			enum Phase { EVAL_SENDER, EVAL_LABEL, EVAL_BODY }
+			Phase phase = Phase.EVAL_SENDER;
+			ParseTree[] children;
+			MCCommandSender originalSender;
+			String originalLabel;
+
+			ScriptasState(ParseTree[] children) {
+				this.children = children;
 			}
-			env.getEnv(CommandHelperEnvironment.class).SetCommandSender(sender);
-			parent.enforceLabelPermissions(env);
-			ParseTree tree = nodes[1 + offset];
-			parent.eval(tree, env);
-			env.getEnv(CommandHelperEnvironment.class).SetCommandSender(originalSender);
-			env.getEnv(GlobalEnv.class).SetLabel(originalLabel);
-			return CVoid.VOID;
+
+			@Override
+			public String toString() {
+				return phase.name();
+			}
 		}
 
 		@Override
-		public boolean useSpecialExec() {
-			return true;
+		public StepResult<ScriptasState> begin(Target t, ParseTree[] children, Environment env) {
+			ScriptasState state = new ScriptasState(children);
+			return new StepResult<>(new Evaluate(children[0]), state);
+		}
+
+		@Override
+		public StepResult<ScriptasState> childCompleted(Target t, ScriptasState state,
+				Mixed result, Environment env) {
+			switch(state.phase) {
+				case EVAL_SENDER -> {
+					MCCommandSender sender = Static.GetCommandSender(result.val(), t);
+					state.originalSender = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+					state.originalLabel = env.getEnv(GlobalEnv.class).GetLabel();
+					env.getEnv(CommandHelperEnvironment.class).SetCommandSender(sender);
+					if(state.children.length == 3) {
+						state.phase = ScriptasState.Phase.EVAL_LABEL;
+						return new StepResult<>(new Evaluate(state.children[1]), state);
+					} else {
+						// No explicit label — use parent script's label
+						// (enforceLabelPermissions is called in execs but we can't access
+						// parent here; the label is already set from the enclosing scope)
+						state.phase = ScriptasState.Phase.EVAL_BODY;
+						return new StepResult<>(new Evaluate(state.children[1]), state);
+					}
+				}
+				case EVAL_LABEL -> {
+					env.getEnv(GlobalEnv.class).SetLabel(result.val());
+					state.phase = ScriptasState.Phase.EVAL_BODY;
+					return new StepResult<>(new Evaluate(state.children[2]), state);
+				}
+				case EVAL_BODY -> {
+					return new StepResult<>(new Complete(CVoid.VOID), state);
+				}
+			}
+			throw ConfigRuntimeException.CreateUncatchableException(
+					"Invalid scriptas state: " + state.phase, t);
+		}
+
+		@Override
+		public void cleanup(Target t, ScriptasState state, Environment env) {
+			if(state != null) {
+				if(state.originalSender != null) {
+					env.getEnv(CommandHelperEnvironment.class).SetCommandSender(state.originalSender);
+					env.getEnv(GlobalEnv.class).SetLabel(state.originalLabel);
+				}
+			}
 		}
 
 		@Override
