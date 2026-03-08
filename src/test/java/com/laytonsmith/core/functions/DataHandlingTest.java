@@ -341,6 +341,27 @@ public class DataHandlingTest extends AbstractIntegrationTest {
 	}
 
 	@Test
+	public void testExecuteArray() throws Exception {
+		assertEquals("3", SRun("execute_array(array(1, 2), closure(@a, @b){ return(@a + @b); })", fakePlayer));
+	}
+
+	@Test
+	public void testExecuteArrayEmpty() throws Exception {
+		assertEquals("hello", SRun("execute_array(array(), closure(){ return('hello'); })", fakePlayer));
+	}
+
+	@Test
+	public void testExecuteasRestoresContext() throws Exception {
+		MCPlayer fakePlayer2 = StaticTest.GetOnlinePlayer("Player02", fakeServer);
+		when(fakeServer.getPlayer("Player02")).thenReturn(fakePlayer2);
+		SRun("@c = closure(){msg(player())};\n"
+				+ "executeas('Player02', null, @c);\n"
+				+ "msg(player());", fakePlayer);
+		verify(fakePlayer2).sendMessage("Player02");
+		verify(fakePlayer).sendMessage(fakePlayer.getName());
+	}
+
+	@Test
 	public void testEmptyClosureFunction() throws Exception {
 		// This should not throw an exception
 		SRun("closure()", null);

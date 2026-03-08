@@ -196,10 +196,15 @@ public abstract class CallbackYield extends AbstractFunction implements FlowFunc
 
 	private void cleanupCurrentStep(CallbackState state, Environment env) {
 		YieldStep step = state.currentStep;
-		if(step != null && step.preparedEnv != null) {
-			// Pop the stack trace element that prepareExecution pushed
-			step.preparedEnv.getEnv(GlobalEnv.class).GetStackTraceManager().popStackTraceElement();
-			step.preparedEnv = null;
+		if(step != null) {
+			if(step.preparedEnv != null) {
+				// Pop the stack trace element that prepareExecution pushed
+				step.preparedEnv.getEnv(GlobalEnv.class).GetStackTraceManager().popStackTraceElement();
+				step.preparedEnv = null;
+			}
+			if(step.cleanupAction != null) {
+				step.cleanupAction.run();
+			}
 		}
 		state.currentStep = null;
 	}
@@ -284,6 +289,14 @@ public abstract class CallbackYield extends AbstractFunction implements FlowFunc
 		}
 
 		/**
+		 * Clears all remaining queued steps. Used for short-circuiting (e.g. array_every,
+		 * array_some) where the final result is known before all steps have been processed.
+		 */
+		public void clear() {
+			steps.clear();
+		}
+
+		/**
 		 * Fallback for when CallbackYield functions are called outside the iterative
 		 * interpreter (e.g. during compile-time optimization). Drains all steps synchronously
 		 * by calling executeCallable directly.
@@ -311,6 +324,7 @@ public abstract class CallbackYield extends AbstractFunction implements FlowFunc
 		final Callable callable;
 		final Mixed[] args;
 		BiConsumer<Mixed, Yield> callback;
+		Runnable cleanupAction;
 		Environment preparedEnv;
 
 		YieldStep(Callable callable, Mixed[] args) {
@@ -327,6 +341,18 @@ public abstract class CallbackYield extends AbstractFunction implements FlowFunc
 		 */
 		public YieldStep then(BiConsumer<Mixed, Yield> callback) {
 			this.callback = callback;
+			return this;
+		}
+
+		/**
+		 * Register a cleanup action that runs after this step completes, whether
+		 * normally or due to an exception. This is analogous to a {@code finally} block.
+		 *
+		 * @param cleanup The cleanup action to run
+		 * @return This step, for fluent chaining
+		 */
+		public YieldStep cleanup(Runnable cleanup) {
+			this.cleanupAction = cleanup;
 			return this;
 		}
 

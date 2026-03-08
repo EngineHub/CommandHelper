@@ -13,6 +13,7 @@ import com.laytonsmith.annotations.noprofile;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.annotations.unbreakable;
 import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.CallbackYield;
 import com.laytonsmith.core.natives.interfaces.Callable;
 import com.laytonsmith.core.FlowFunction;
 import com.laytonsmith.core.Globals;
@@ -3293,7 +3294,7 @@ public class DataHandling {
 
 	@api
 	@seealso({com.laytonsmith.tools.docgen.templates.Closures.class, execute_array.class, executeas.class})
-	public static class execute extends AbstractFunction {
+	public static class execute extends CallbackYield {
 
 		public static final String NAME = "execute";
 
@@ -3335,11 +3336,12 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		protected void execWithYield(Target t, Environment env, Mixed[] args, CallbackYield.Yield yield) {
 			if(args[args.length - 1] instanceof Callable callable) {
 				Mixed[] vals = new Mixed[args.length - 1];
 				System.arraycopy(args, 0, vals, 0, args.length - 1);
-				return callable.executeCallable(env, t, vals);
+				yield.call(callable, env, t, vals)
+						.then((result, y) -> y.done(() -> result));
 			} else {
 				throw new CRECastException("Only a Callable (created for instance from the closure function) can be"
 						+ " sent to execute(), or executed directly, such as @c().", t);
@@ -3364,7 +3366,7 @@ public class DataHandling {
 
 	@api
 	@seealso({com.laytonsmith.tools.docgen.templates.Closures.class, execute.class})
-	public static class execute_array extends AbstractFunction {
+	public static class execute_array extends CallbackYield {
 		@Override
 		public String getName() {
 			return "execute_array";
@@ -3400,10 +3402,11 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		protected void execWithYield(Target t, Environment env, Mixed[] args, CallbackYield.Yield yield) {
 			Mixed[] vals = ArgumentValidation.getArray(args[0], t).asList().toArray(new Mixed[0]);
 			CClosure closure = ArgumentValidation.getObject(args[1], t, CClosure.class);
-			return closure.executeCallable(vals);
+			yield.call(closure, env, t, vals)
+					.then((result, y) -> y.done(() -> result));
 		}
 
 		@Override
@@ -3414,7 +3417,7 @@ public class DataHandling {
 
 	@api
 	@seealso({com.laytonsmith.tools.docgen.templates.Closures.class})
-	public static class executeas extends AbstractFunction implements Optimizable {
+	public static class executeas extends CallbackYield implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -3452,7 +3455,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		protected void execWithYield(Target t, Environment env, Mixed[] args, CallbackYield.Yield yield) {
 			if(!(args[args.length - 1].isInstanceOf(CClosure.TYPE, null, env))) {
 				throw new CRECastException("Only a closure (created from the closure function) can be sent to executeas()", t);
 			}
@@ -3476,12 +3479,12 @@ public class DataHandling {
 				gEnv.SetLabel(args[1].val());
 			}
 
-			try {
-				return closure.executeCallable(vals);
-			} finally {
-				cEnv.SetCommandSender(originalSender);
-				gEnv.SetLabel(originalLabel);
-			}
+			yield.call(closure, env, t, vals)
+					.then((result, y) -> y.done(() -> result))
+					.cleanup(() -> {
+						cEnv.SetCommandSender(originalSender);
+						gEnv.SetLabel(originalLabel);
+					});
 		}
 
 		@Override
