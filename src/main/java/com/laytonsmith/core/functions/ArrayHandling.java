@@ -11,6 +11,7 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.CallbackYield;
 import com.laytonsmith.core.FlowFunction;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
@@ -3213,7 +3214,7 @@ public class ArrayHandling {
 	}
 
 	@api
-	public static class array_map extends AbstractFunction {
+	public static class array_map extends CallbackYield {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -3231,21 +3232,22 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		protected void execWithYield(Target t, Environment env, Mixed[] args, CallbackYield.Yield yield) {
 			CArray array = ArgumentValidation.getArray(args[0], t, env);
 			CClosure closure = ArgumentValidation.getObject(args[1], t, CClosure.class);
 			CArray newArray = (array.isAssociative() ? CArray.GetAssociativeArray(t, null, env) : new CArray(t, (int) array.size(env)));
 
 			for(Mixed c : array.keySet(env)) {
-				Mixed fr = closure.executeCallable(env, t, array.get(c, t, env));
-				if(fr.isInstanceOf(CVoid.TYPE, null, env)) {
-					throw new CREIllegalArgumentException("The closure passed to " + getName()
-							+ " must return a value.", t);
-				}
-				newArray.set(c, fr, t, env);
+				yield.call(closure, env, t, array.get(c, t, env))
+						.then((result, y) -> {
+							if(result.isInstanceOf(CVoid.TYPE, null, env)) {
+								throw new CREIllegalArgumentException("The closure passed to " + getName()
+										+ " must return a value.", t);
+							}
+							newArray.set(c, result, t, env);
+						});
 			}
-
-			return newArray;
+			yield.done(() -> newArray);
 		}
 
 		@Override

@@ -1,6 +1,7 @@
 package com.laytonsmith.core.natives.interfaces;
 
 import com.laytonsmith.annotations.typeof;
+import com.laytonsmith.core.CallbackYield;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
@@ -28,7 +29,10 @@ public interface Callable extends Mixed {
 	 * @return The return value of the callable, or VOID if nothing was returned
 	 * @throws ConfigRuntimeException If any call inside the callable causes a CRE
 	 * @throws CancelCommandException If die() is called within the callable
+	 * @deprecated Functions that call closures should extend {@link CallbackYield}
+	 * instead of calling this directly, which re-enters eval() and defeats the iterative interpreter.
 	 */
+	@Deprecated
 	Mixed executeCallable(Environment env, Target t, Mixed... values)
 			throws ConfigRuntimeException, CancelCommandException;
 

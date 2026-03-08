@@ -18,6 +18,11 @@ import com.laytonsmith.core.environments.Environment;
  * <p>Functions that DO need it (if, for, and, try, etc.) implement this interface
  * and are driven by the interpreter loop via begin/childCompleted/childInterrupted.</p>
  *
+ * <p>Functions that execute Callables MUST use this mechanism, however,
+ * in most cases, it is sufficient to implement {@link CallbackYield} instead, which
+ * is a specialized overload of this class, which hides most of the complexity
+ * in the case where the only complexity is calling Callables.</p>
+ *
  * <p>The type parameter {@code S} is the per-call state type. Since function instances
  * are singletons, per-call mutable state cannot be stored on the function itself.
  * Instead, methods receive and return state via {@link StepAction.StepResult}.

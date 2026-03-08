@@ -2,6 +2,7 @@ package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
+import com.laytonsmith.core.CallbackYield;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
@@ -37,6 +38,11 @@ public class CNativeClosure extends Construct implements Callable {
 		return true;
 	}
 
+	/**
+	 * @deprecated Functions that call closures should extend {@link CallbackYield}
+	 * instead of calling this directly, which re-enters eval() and defeats the iterative interpreter.
+	 */
+	@Deprecated
 	@Override
 	public Mixed executeCallable(Environment env, Target t, Mixed... values) throws ConfigRuntimeException, CancelCommandException {
 		return runnable.execute(t, env, values);
