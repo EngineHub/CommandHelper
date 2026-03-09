@@ -20,6 +20,7 @@ import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREStackOverflowError;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.exceptions.StackTraceFrame;
 import com.laytonsmith.core.exceptions.StackTraceManager;
 import com.laytonsmith.core.exceptions.UnhandledFlowControlException;
 import com.laytonsmith.core.functions.ControlFlow;
@@ -198,7 +199,7 @@ public class Procedure implements Cloneable {
 
 		Script fakeScript = Script.GenerateScript(tree, env.getEnv(GlobalEnv.class).GetLabel(), null);
 		StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
-		stManager.addStackTraceElement(new ConfigRuntimeException.StackTraceElement("proc " + name, getTarget()));
+		stManager.addStackTraceFrame(new StackTraceFrame("proc " + name, getTarget()));
 		try {
 			Mixed result = fakeScript.eval(tree, env);
 			if(result == null) {
@@ -223,7 +224,7 @@ public class Procedure implements Cloneable {
 		} catch(StackOverflowError e) {
 			throw new CREStackOverflowError(null, t, e);
 		} finally {
-			stManager.popStackTraceElement();
+			stManager.popStackTraceFrame();
 		}
 	}
 
@@ -261,8 +262,8 @@ public class Procedure implements Cloneable {
 	public Callable.PreparedCallable prepareCall(List<Mixed> args, Environment callerEnv, Target callTarget) {
 		Environment env = prepareEnvironment(args, callerEnv, callTarget);
 		StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
-		stManager.addStackTraceElement(
-				new ConfigRuntimeException.StackTraceElement("proc " + name, getTarget()));
+		stManager.addStackTraceFrame(
+				new StackTraceFrame("proc " + name, getTarget()));
 		return new Callable.PreparedCallable(tree, env);
 	}
 
@@ -469,14 +470,14 @@ public class Procedure implements Cloneable {
 			bodyStarted = true;
 			procEnv = prepareEnvironment(evaluatedArgs, callerEnv, callTarget);
 			StackTraceManager stManager = procEnv.getEnv(GlobalEnv.class).GetStackTraceManager();
-			stManager.addStackTraceElement(
-					new ConfigRuntimeException.StackTraceElement("proc " + name, getTarget()));
+			stManager.addStackTraceFrame(
+					new StackTraceFrame("proc " + name, getTarget()));
 			return new StepAction.Evaluate(tree, procEnv);
 		}
 
 		private void popStackTrace() {
 			if(procEnv != null) {
-				procEnv.getEnv(GlobalEnv.class).GetStackTraceManager().popStackTraceElement();
+				procEnv.getEnv(GlobalEnv.class).GetStackTraceManager().popStackTraceFrame();
 			}
 		}
 	}

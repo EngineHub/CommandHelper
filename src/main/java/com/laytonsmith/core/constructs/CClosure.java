@@ -22,6 +22,7 @@ import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREStackOverflowError;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.exceptions.StackTraceFrame;
 import com.laytonsmith.core.exceptions.StackTraceManager;
 import com.laytonsmith.core.exceptions.UnhandledFlowControlException;
 import com.laytonsmith.core.functions.Exceptions;
@@ -125,7 +126,7 @@ public class CClosure extends Construct implements Callable, Booleanish {
 	 * instead of recursing into a new eval() call.
 	 *
 	 * <p>The caller is responsible for evaluating the body (via {@link #getNode()}) in the
-	 * returned environment, and for calling {@link StackTraceManager#popStackTraceElement()}
+	 * returned environment, and for calling {@link StackTraceManager#popStackTraceFrame()}
 	 * when done (or ensuring it's done via a cleanup mechanism).</p>
 	 *
 	 * @param values The argument values to bind, or null for no arguments
@@ -146,7 +147,7 @@ public class CClosure extends Construct implements Callable, Booleanish {
 			return null;
 		}
 		StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
-		stManager.addStackTraceElement(new ConfigRuntimeException.StackTraceElement("<<closure>>", getTarget()));
+		stManager.addStackTraceFrame(new StackTraceFrame("<<closure>>", getTarget()));
 
 		CArray arguments = new CArray(node.getData().getTarget());
 		CArray vararg = null;
@@ -335,7 +336,7 @@ public class CClosure extends Construct implements Callable, Booleanish {
 			return CVoid.VOID;
 		}
 		StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
-		stManager.addStackTraceElement(new ConfigRuntimeException.StackTraceElement("<<closure>>", getTarget()));
+		stManager.addStackTraceFrame(new StackTraceFrame("<<closure>>", getTarget()));
 		try {
 			CArray arguments = new CArray(node.getData().getTarget());
 			CArray vararg = null;
@@ -431,7 +432,7 @@ public class CClosure extends Construct implements Callable, Booleanish {
 			Logger.getLogger(CClosure.class.getName()).log(Level.SEVERE, null, ex);
 			return CVoid.VOID;
 		} finally {
-			stManager.popStackTraceElement();
+			stManager.popStackTraceFrame();
 		}
 	}
 

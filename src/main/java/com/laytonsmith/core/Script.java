@@ -5,11 +5,13 @@ import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.SimpleVersion;
 import com.laytonsmith.PureUtilities.SmartComment;
 import com.laytonsmith.PureUtilities.TermColors;
+import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.TokenStream;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
@@ -17,11 +19,15 @@ import com.laytonsmith.core.constructs.Command;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Construct.ConstructType;
 import com.laytonsmith.core.constructs.IVariable;
+import com.laytonsmith.core.constructs.IVariableList;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.constructs.Token.TType;
 import com.laytonsmith.core.constructs.Variable;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
+import com.laytonsmith.core.environments.DebugContext;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
@@ -31,16 +37,23 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.exceptions.StackTraceFrame;
+import com.laytonsmith.core.exceptions.StackTraceManager;
 import com.laytonsmith.core.exceptions.UnhandledFlowControlException;
 import com.laytonsmith.core.functions.ControlFlow;
 import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import com.laytonsmith.core.objects.AccessModifier;
+import com.laytonsmith.core.objects.ObjectModifier;
+import com.laytonsmith.core.objects.ObjectType;
+import java.net.URL;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -58,6 +71,131 @@ import java.util.Set;
  * Secondly, the default values of any variables, and thirdly, the unparsed tree for the right side of the script.
  */
 public class Script {
+
+	/**
+	 * Sentinel value returned by eval/evalLoop when the debugger pauses execution.
+	 * Callers should check with {@link #isDebuggerPaused(Mixed)} before using the result.
+	 */
+	private static final Mixed DEBUGGER_PAUSED
+// <editor-fold defaultstate="collapsed" desc="DEBUGGER_PAUSED implementation">
+			= new Mixed() {
+		@Override
+		public String val() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public void setTarget(Target target) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public Target getTarget() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public Mixed clone() throws CloneNotSupportedException {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public String getName() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public String docs() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public Version since() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public CClassType[] getSuperclasses() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public CClassType[] getInterfaces() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public ObjectType getObjectType() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public Set<ObjectModifier> getObjectModifiers() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public AccessModifier getAccessModifier() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public CClassType getContainingClass() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public boolean isInstanceOf(CClassType type) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public boolean isInstanceOf(Class<? extends Mixed> type) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public CClassType typeof() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public CClassType typeof(Environment env) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public GenericParameters getGenericParameters() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public URL getSourceJar() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public Class<? extends Documentation>[] seeAlso() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+	};
+// </editor-fold>
+
+	/**
+	 * Returns true if the given result indicates the debugger paused execution
+	 * rather than completing normally.
+	 *
+	 * @param result The return value from eval or execute
+	 * @return true if execution was paused by the debugger
+	 */
+	public static boolean isDebuggerPaused(Mixed result) {
+		return result == DEBUGGER_PAUSED;
+	}
 
 	// See set_debug_output()
 	public static boolean debugOutput = false;
@@ -289,13 +427,37 @@ public class Script {
 	 * @param env The environment
 	 * @return The result of evaluation
 	 */
-	@SuppressWarnings("unchecked")
 	private Mixed iterativeEval(ParseTree root, Environment env) {
 		EvalStack stack = new EvalStack();
 		stack.push(new StackFrame(root, env, null, null));
-		Mixed lastResult = null;
-		boolean hasResult = false;
-		StepAction.FlowControl pendingFlowControl = null;
+		return evalLoop(stack, null, false, null, env);
+	}
+
+	/**
+	 * Resumes execution from a previously frozen {@link DebugSnapshot}. The snapshot is
+	 * created by the interpreter when a debug pause is triggered, and is passed to the
+	 * {@link DebugListener#onPaused} callback. The caller must set the desired
+	 * {@link DebugContext.StepMode} on the DebugContext before calling this method.
+	 *
+	 * @param snapshot The frozen state to resume from
+	 * @return The result of evaluation, or null if execution pauses again
+	 */
+	public static Mixed resumeEval(DebugSnapshot snapshot) {
+		DebugContext debugCtx = snapshot.env.hasEnv(DebugContext.class)
+				? snapshot.env.getEnv(DebugContext.class) : null;
+		if(debugCtx != null) {
+			debugCtx.setPaused(false, null);
+			debugCtx.getListener().onResumed();
+		}
+		return evalLoop(snapshot.stack, snapshot.lastResult, snapshot.hasResult,
+				snapshot.pendingFlowControl, snapshot.env);
+	}
+
+	@SuppressWarnings("unchecked")
+	private static Mixed evalLoop(EvalStack stack, Mixed lastResult, boolean hasResult,
+			StepAction.FlowControl pendingFlowControl, Environment env) {
+		DebugContext debugCtx = env.hasEnv(DebugContext.class)
+				? env.getEnv(DebugContext.class) : null;
 
 		while(!stack.isEmpty()) {
 			GlobalEnv gEnv = env.getEnv(GlobalEnv.class);
@@ -348,6 +510,21 @@ public class Script {
 
 			ParseTree node = frame.getNode();
 			Mixed data = node.getData();
+
+			// Debug pause check (after flow control is resolved, only on first visit to function nodes)
+			if(debugCtx != null && !debugCtx.isDisconnected()
+					&& data instanceof CFunction
+					&& !frame.hasBegun()) {
+				Target currentTarget = node.getTarget();
+				int userDepth = gEnv.GetStackTraceManager().getDepth();
+				if(debugCtx.shouldPause(currentTarget, userDepth)) {
+					DebugSnapshot snapshot = new DebugSnapshot(
+							stack, lastResult, hasResult, pendingFlowControl, env, currentTarget);
+					debugCtx.setPaused(true, currentTarget);
+					debugCtx.getListener().onPaused(snapshot);
+					return DEBUGGER_PAUSED;
+				}
+			}
 
 			// Literal / variable nodes (no children)
 			if(data instanceof Construct co && co.getCType() != Construct.ConstructType.FUNCTION
@@ -499,6 +676,10 @@ public class Script {
 					}
 				}
 			}
+		}
+
+		if(debugCtx != null) {
+			debugCtx.getListener().onCompleted();
 		}
 
 		return lastResult;
@@ -977,6 +1158,88 @@ public class Script {
 
 	public boolean doLog() {
 		return !nolog;
+	}
+
+	/**
+	 * A frozen snapshot of the interpreter's execution state, created when the debugger pauses.
+	 * Contains everything needed to inspect the current state (variables, call stack, source
+	 * location) and to resume execution later.
+	 *
+	 * <p>The raw interpreter state (eval stack, pending flow control, etc.) is private and
+	 * accessible only to {@link Script}. External callers (e.g. a DAP server) can use the
+	 * public inspection methods to read variables, call stack, and source location.</p>
+	 */
+	public static final class DebugSnapshot {
+
+		private final EvalStack stack;
+		private final Mixed lastResult;
+		private final boolean hasResult;
+		private final StepAction.FlowControl pendingFlowControl;
+		private final Environment env;
+		private final Target pauseTarget;
+
+		private DebugSnapshot(EvalStack stack, Mixed lastResult, boolean hasResult,
+				StepAction.FlowControl pendingFlowControl, Environment env, Target pauseTarget) {
+			this.stack = stack;
+			this.lastResult = lastResult;
+			this.hasResult = hasResult;
+			this.pendingFlowControl = pendingFlowControl;
+			this.env = env;
+			this.pauseTarget = pauseTarget;
+		}
+
+		/**
+		 * Returns the source location where execution paused.
+		 */
+		public Target getPauseTarget() {
+			return pauseTarget;
+		}
+
+		/**
+		 * Returns the user-visible call stack (proc/closure/include frames) at the point
+		 * of the pause. The list is ordered from innermost (most recent) to outermost.
+		 *
+		 * @return A list of stack trace frames
+		 */
+		public List<StackTraceFrame> getCallStack() {
+			StackTraceManager stm = env.getEnv(GlobalEnv.class).GetStackTraceManager();
+			return stm.getCurrentStackTrace();
+		}
+
+		/**
+		 * Returns the user-visible call depth at the point of the pause. This is the
+		 * count of proc/closure/include frames, not the raw eval stack size.
+		 *
+		 * @return The user-visible call depth
+		 */
+		public int getUserCallDepth() {
+			StackTraceManager stm = env.getEnv(GlobalEnv.class).GetStackTraceManager();
+			return stm.getDepth();
+		}
+
+		/**
+		 * Returns the variables visible at the point of the pause as a name-to-value map.
+		 * The map preserves insertion order.
+		 *
+		 * @return A map from variable name (including the @ prefix) to its current value
+		 */
+		public Map<String, Mixed> getVariables() {
+			IVariableList varList = env.getEnv(GlobalEnv.class).GetVarList();
+			Map<String, Mixed> result = new LinkedHashMap<>();
+			for(String name : varList.keySet()) {
+				IVariable iv = varList.get(name);
+				if(iv != null) {
+					result.put(name, iv.ival());
+				}
+			}
+			return result;
+		}
+
+		@Override
+		public String toString() {
+			return "DebugSnapshot{target=" + pauseTarget + ", depth=" + getUserCallDepth()
+					+ ", vars=" + getVariables().size() + ", hasResult=" + hasResult + "}";
+		}
 	}
 
 }

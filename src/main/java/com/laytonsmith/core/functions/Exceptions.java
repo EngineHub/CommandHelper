@@ -863,9 +863,9 @@ public class Exceptions {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
-			List<ConfigRuntimeException.StackTraceElement> elements = stManager.getCurrentStackTrace();
+			List<com.laytonsmith.core.exceptions.StackTraceFrame> elements = stManager.getCurrentStackTrace();
 			CArray ret = new CArray(t);
-			for(ConfigRuntimeException.StackTraceElement e : elements) {
+			for(com.laytonsmith.core.exceptions.StackTraceFrame e : elements) {
 				ret.push(e.getObjectFor(), Target.UNKNOWN);
 			}
 			return ret;

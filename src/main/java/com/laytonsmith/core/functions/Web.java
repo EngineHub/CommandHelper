@@ -48,6 +48,7 @@ import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.exceptions.StackTraceFrame;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.tools.docgen.DocGenTemplates;
@@ -447,7 +448,7 @@ public class Web {
 				settings.setAuthenticationDetails(username, password);
 			}
 
-			List<ConfigRuntimeException.StackTraceElement> st
+			List<StackTraceFrame> st
 					= env.getEnv(GlobalEnv.class).GetStackTraceManager().getCurrentStackTrace();
 			env.getEnv(StaticRuntimeEnv.class).GetDaemonManager().activateThread(null);
 			Runnable task = new Runnable() {
