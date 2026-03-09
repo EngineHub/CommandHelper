@@ -9,6 +9,7 @@ import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.CallbackYield;
 import com.laytonsmith.core.FlowFunction;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.LogLevel;
@@ -56,6 +57,7 @@ import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.InstanceofUtil;
+import com.laytonsmith.core.constructs.ProcedureUsage;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
@@ -3180,7 +3182,7 @@ public class ControlFlow {
 	}
 
 	@api
-	public static class call_proc extends AbstractFunction implements Optimizable {
+	public static class call_proc extends CallbackYield implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -3223,17 +3225,18 @@ public class ControlFlow {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		protected void execWithYield(Target t, Environment env, Mixed[] args, Yield yield) {
 			if(args.length < 1) {
 				throw new CREInsufficientArgumentsException("Expecting at least one argument to " + getName(), t);
 			}
 			Procedure proc = env.getEnv(GlobalEnv.class).GetProcs().get(args[0].val());
-			if(proc != null) {
-				List<Mixed> vars = new ArrayList<>(Arrays.asList(args));
-				vars.remove(0);
-				return proc.execute(vars, env, t);
+			if(proc == null) {
+				throw new CREInvalidProcedureException("Unknown procedure \"" + args[0].val() + "\"", t);
 			}
-			throw new CREInvalidProcedureException("Unknown procedure \"" + args[0].val() + "\"", t);
+			ProcedureUsage procUsage = new ProcedureUsage(proc, env, t);
+			Mixed[] procArgs = Arrays.copyOfRange(args, 1, args.length);
+			yield.call(procUsage, env, t, procArgs)
+					.then((result, y) -> y.done(() -> result));
 		}
 
 		@Override
@@ -3273,7 +3276,7 @@ public class ControlFlow {
 	public static class call_proc_array extends call_proc {
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		protected void execWithYield(Target t, Environment env, Mixed[] args, Yield yield) {
 			CArray ca = ArgumentValidation.getArray(args[1], t, env);
 			if(ca.inAssociativeMode()) {
 				throw new CRECastException("Expected the array passed to " + getName() + " to be non-associative.", t);
@@ -3284,7 +3287,7 @@ public class ControlFlow {
 				args2[i] = ca.get(i - 1, t, env);
 			}
 			// TODO: This probably needs to change once generics are added
-			return super.exec(t, env, null, args2);
+			super.execWithYield(t, env, args2, yield);
 		}
 
 		@Override

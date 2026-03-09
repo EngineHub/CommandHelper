@@ -235,6 +235,15 @@ public class CClosure extends Construct implements Callable, Booleanish {
 	}
 
 	@Override
+	public Callable.PreparedCallable prepareForStack(Environment callerEnv, Target t, Mixed... values) {
+		PreparedExecution prep = prepareExecution(values);
+		if(prep == null) {
+			return null;
+		}
+		return new Callable.PreparedCallable(getNode(), prep.getEnv());
+	}
+
+	@Override
 	public CClosure clone() throws CloneNotSupportedException {
 		CClosure clone = (CClosure) super.clone();
 		if(this.node != null) {

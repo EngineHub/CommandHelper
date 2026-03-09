@@ -2,6 +2,7 @@ package com.laytonsmith.core.natives.interfaces;
 
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.CallbackYield;
+import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
@@ -41,4 +42,29 @@ public interface Callable extends Mixed {
 	 * @return
 	 */
 	Environment getEnv();
+
+	/**
+	 * Prepares this callable for evaluation on the shared EvalStack, without re-entering eval().
+	 * Returns a {@link PreparedCallable} containing the AST node and prepared environment,
+	 * or {@code null} if this callable cannot be prepared (the caller should fall back to
+	 * {@link #executeCallable}).
+	 *
+	 * <p>The caller is responsible for popping the stack trace element (via
+	 * {@link com.laytonsmith.core.exceptions.StackTraceManager#popStackTraceElement()})
+	 * from the returned environment when done.</p>
+	 *
+	 * @param callerEnv The caller's environment
+	 * @param t The call site target
+	 * @param values The argument values to bind
+	 * @return A {@link PreparedCallable}, or null for sync-only callables
+	 */
+	default PreparedCallable prepareForStack(Environment callerEnv, Target t, Mixed... values) {
+		return null;
+	}
+
+	/**
+	 * The result of {@link #prepareForStack}. Contains the AST node to evaluate
+	 * and the prepared environment with arguments bound.
+	 */
+	record PreparedCallable(ParseTree node, Environment env) {}
 }

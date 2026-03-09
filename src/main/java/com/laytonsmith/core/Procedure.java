@@ -27,6 +27,7 @@ import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
+import com.laytonsmith.core.natives.interfaces.Callable;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 
 import java.util.ArrayList;
@@ -244,6 +245,25 @@ public class Procedure implements Cloneable {
 
 	public void definitelyNotConstant() {
 		possiblyConstant = false;
+	}
+
+	/**
+	 * Prepares this procedure for stack-based execution without re-entering eval().
+	 * Clones the environment, binds arguments, and pushes a stack trace element.
+	 * The caller is responsible for evaluating the returned tree in the returned
+	 * environment, and for popping the stack trace element when done.
+	 *
+	 * @param args The evaluated argument values
+	 * @param callerEnv The caller's environment (will be cloned)
+	 * @param callTarget The target of the procedure call site
+	 * @return The prepared call containing the procedure body tree and environment
+	 */
+	public Callable.PreparedCallable prepareCall(List<Mixed> args, Environment callerEnv, Target callTarget) {
+		Environment env = prepareEnvironment(args, callerEnv, callTarget);
+		StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
+		stManager.addStackTraceElement(
+				new ConfigRuntimeException.StackTraceElement("proc " + name, getTarget()));
+		return new Callable.PreparedCallable(tree, env);
 	}
 
 	/**

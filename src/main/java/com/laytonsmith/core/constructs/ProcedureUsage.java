@@ -81,6 +81,11 @@ public class ProcedureUsage extends Construct implements Callable {
 	}
 
 	@Override
+	public Callable.PreparedCallable prepareForStack(Environment callerEnv, Target t, Mixed... values) {
+		return proc.prepareCall(Arrays.asList(values), callerEnv, t);
+	}
+
+	@Override
 	public Environment getEnv() {
 		return this.env;
 	}

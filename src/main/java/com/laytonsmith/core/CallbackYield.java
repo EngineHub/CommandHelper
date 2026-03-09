@@ -1,6 +1,5 @@
 package com.laytonsmith.core;
 
-import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
@@ -166,21 +165,14 @@ public abstract class CallbackYield extends AbstractFunction implements FlowFunc
 			YieldStep step = yield.steps.poll();
 			state.currentStep = step;
 
-			// Prepare the closure execution
-			if(step.callable instanceof CClosure closure) {
-				CClosure.PreparedExecution prep = closure.prepareExecution(step.args);
-				if(prep == null) {
-					// Null node closure — result is void
-					if(step.callback != null) {
-						step.callback.accept(CVoid.VOID, yield);
-					}
-					return drainNext(t, state, env);
-				}
-				step.preparedEnv = prep.getEnv();
+			// Try stack-based execution first (closures, procedures)
+			Callable.PreparedCallable prep = step.callable.prepareForStack(env, t, step.args);
+			if(prep != null) {
+				step.preparedEnv = prep.env();
 				return new StepAction.StepResult<>(
-						new StepAction.Evaluate(closure.getNode(), prep.getEnv()), state);
+						new StepAction.Evaluate(prep.node(), prep.env()), state);
 			} else {
-				// Non-closure Callable (e.g. Method, CNativeClosure) — fall back to synchronous
+				// Sync-only Callable (e.g. CNativeClosure) — execute inline
 				Mixed result = step.callable.executeCallable(env, t, step.args);
 				if(step.callback != null) {
 					step.callback.accept(result, yield);
