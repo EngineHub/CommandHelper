@@ -60,6 +60,7 @@ import org.eclipse.lsp4j.CompletionList;
 import org.eclipse.lsp4j.CompletionOptions;
 import org.eclipse.lsp4j.CompletionParams;
 import org.eclipse.lsp4j.DeclarationParams;
+import org.eclipse.lsp4j.DefinitionParams;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.DidChangeConfigurationParams;
 import org.eclipse.lsp4j.DidChangeTextDocumentParams;
@@ -397,6 +398,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 
 		sc.setDocumentSymbolProvider(true);
 		sc.setDeclarationProvider(true);
+		sc.setDefinitionProvider(true);
 		sc.setHoverProvider(true);
 //		sc.setTypeDefinitionProvider(true);
 
@@ -675,6 +677,14 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 			result.cancel(true);
 		});
 		return result;
+	}
+
+	@Override
+	public CompletableFuture<Either<List<? extends Location>, List<? extends LocationLink>>> definition(DefinitionParams params) {
+		logv(this.getClass().getName() + "." + StackTraceUtils.currentMethod() + " called");
+		logv(() -> params.toString());
+		DeclarationParams dp = new DeclarationParams(params.getTextDocument(), params.getPosition());
+		return declaration(dp);
 	}
 
 	@Override

@@ -399,10 +399,45 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	 */
 	public StackTraceManager GetStackTraceManager() {
 		Thread currentThread = Thread.currentThread();
-		if(this.stackTraceManager == null || currentThread != this.stackTraceManagerThread) {
+		if(this.stackTraceManager == null
+				|| currentThread != this.stackTraceManagerThread) {
 			this.stackTraceManager = new StackTraceManager(this);
 			this.stackTraceManagerThread = currentThread;
 		}
+		return this.stackTraceManager;
+	}
+
+	/**
+	 * Re-associates the existing StackTraceManager with the current thread, without
+	 * creating a new one. This is used by the debugger when resuming execution on a
+	 * new thread after a breakpoint pause — the StackTraceManager state must carry
+	 * over from the previous execution thread.
+	 *
+	 * <p>After calling this method, {@link #GetStackTraceManager()} will return the
+	 * existing StackTraceManager when called from the current thread. Other threads
+	 * (e.g. background threads from x_new_thread) will still get their own fresh
+	 * StackTraceManager, which is the correct behavior — they should not share
+	 * the main thread's call depth tracking.</p>
+	 *
+	 * <p>If no StackTraceManager exists yet, this is a no-op (the next call to
+	 * {@link #GetStackTraceManager()} will create one normally).</p>
+	 */
+	public void adoptStackTraceManager() {
+		if(this.stackTraceManager != null) {
+			this.stackTraceManagerThread = Thread.currentThread();
+		}
+	}
+
+	/**
+	 * Returns the existing StackTraceManager without performing the thread-affinity
+	 * check. Unlike {@link #GetStackTraceManager()}, this will never create a new
+	 * StackTraceManager or change the thread association. Returns null if no
+	 * StackTraceManager has been created yet.
+	 *
+	 * <p>This is intended for read-only access from threads other than the execution
+	 * thread, such as the debugger's DAP handler thread reading a frozen snapshot.</p>
+	 */
+	public StackTraceManager peekStackTraceManager() {
 		return this.stackTraceManager;
 	}
 

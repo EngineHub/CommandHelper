@@ -90,11 +90,10 @@ public final class Threading {
 			final String threadId = args[0].val();
 			final com.laytonsmith.core.natives.interfaces.Callable closure
 					= ArgumentValidation.getObject(args[1], t, com.laytonsmith.core.natives.interfaces.Callable.class);
+			DaemonManager dm = env.getEnv(StaticRuntimeEnv.class).GetDaemonManager();
 			Thread th = new Thread("(" + Implementation.GetServerType().getBranding() + ") " + threadId) {
 				@Override
 				public void run() {
-					DaemonManager dm = env.getEnv(StaticRuntimeEnv.class).GetDaemonManager();
-					dm.activateThread(Thread.currentThread());
 					try {
 						closure.executeCallable(env, t);
 					} catch (ConfigRuntimeException ex) {
@@ -113,6 +112,7 @@ public final class Threading {
 					}
 				}
 			};
+			dm.activateThread(th, threadId);
 			th.start();
 			synchronized(THREAD_ID_MAP) {
 				THREAD_ID_MAP.put(threadId, th);

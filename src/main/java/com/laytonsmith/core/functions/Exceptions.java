@@ -198,14 +198,13 @@ public class Exceptions {
 				if(!(e instanceof AbstractCREException)) {
 					return null;
 				}
-				FullyQualifiedClassName name
-						= ((AbstractCREException) e).getExceptionType().getFQCN();
+				CClassType exType = ((AbstractCREException) e).getExceptionType();
 				if(Prefs.DebugMode()) {
 					StreamUtils.GetSystemOut().println("[" + Implementation.GetServerType().getBranding() + "]:"
-							+ " Exception thrown (debug mode on) -> " + e.getMessage() + " :: " + name + ":"
+							+ " Exception thrown (debug mode on) -> " + e.getMessage() + " :: " + exType.getFQCN() + ":"
 							+ e.getTarget().file() + ":" + e.getTarget().line());
 				}
-				if(state.interest.isEmpty() || state.interest.contains(name)) {
+				if(matchesInterest(exType, state.interest)) {
 					if(state.catchIndex >= 0) {
 						CArray ex = ObjectGenerator.GetGenerator().exception(e, env, t);
 						if(state.ivar != null) {
@@ -221,6 +220,38 @@ public class Exceptions {
 				return null;
 			}
 			return null;
+		}
+
+		@Override
+		public boolean wouldCatch(TryState state, ConfigRuntimeException exception) {
+			if(state.phase != Phase.TRY_BODY) {
+				return false;
+			}
+			if(!(exception instanceof AbstractCREException ace)) {
+				return false;
+			}
+			return matchesInterest(ace.getExceptionType(), state.interest);
+		}
+
+		/**
+		 * Returns true if the given exception type matches the interest list,
+		 * using {@code doesExtend} for proper subtype checking. An empty interest
+		 * list matches all exception types.
+		 */
+		private static boolean matchesInterest(CClassType exType, List<FullyQualifiedClassName> interest) {
+			if(interest.isEmpty()) {
+				return true;
+			}
+			for(FullyQualifiedClassName interestFqcn : interest) {
+				try {
+					if(exType.doesExtend(CClassType.get(interestFqcn))) {
+						return true;
+					}
+				} catch(ClassNotFoundException e) {
+					// Unknown type can't match
+				}
+			}
+			return false;
 		}
 
 		@Override
@@ -672,6 +703,25 @@ public class Exceptions {
 		}
 
 		@Override
+		public boolean wouldCatch(ComplexTryState state, ConfigRuntimeException exception) {
+			if(state.phase != Phase.TRY_BODY) {
+				return false;
+			}
+			if(!(exception instanceof AbstractCREException ace)) {
+				return false;
+			}
+			CClassType exceptionType = ace.getExceptionType();
+			for(int i = 1; i < state.children.length - 1; i += 2) {
+				ParseTree assign = state.children[i];
+				CClassType clauseType = ((CClassType) assign.getChildAt(0).getData());
+				if(exceptionType.doesExtend(clauseType)) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		@Override
 		public String getName() {
 			return NAME;
 		}
@@ -768,8 +818,8 @@ public class Exceptions {
 						&& (cf.getFunction().getName().equals(DataHandling.assign.NAME)
 								|| cf.getFunction().getName().equals(Compiler.__unsafe_assign__.NAME)))
 						|| assign.numberOfChildren() != 3) {
-					throw new ConfigCompileException("Expecting a variable declaration, but instead "
-						+ assign.getData().val() + " was found", t);
+					throw new ConfigCompileException("catch clause requires a type and a variable,"
+						+ " e.g. catch(Exception @e)", assign.getData().getTarget());
 				}
 
 				// Validate that the first argument of the assign is a valid type.

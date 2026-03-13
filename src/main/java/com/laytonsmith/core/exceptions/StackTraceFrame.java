@@ -15,6 +15,7 @@ public class StackTraceFrame {
 
 	private final String procedureName;
 	private Target definedAt;
+	private final Target callSite;
 
 	/**
 	 * Creates a new StackTraceFrame.
@@ -23,8 +24,20 @@ public class StackTraceFrame {
 	 * @param definedAt The code target where the procedure is defined at.
 	 */
 	public StackTraceFrame(String procedureName, Target definedAt) {
+		this(procedureName, definedAt, Target.UNKNOWN);
+	}
+
+	/**
+	 * Creates a new StackTraceFrame with a call site.
+	 *
+	 * @param procedureName The name of the procedure
+	 * @param definedAt The code target where the procedure is defined at.
+	 * @param callSite The code target of the call expression in the caller's code.
+	 */
+	public StackTraceFrame(String procedureName, Target definedAt, Target callSite) {
 		this.procedureName = procedureName;
 		this.definedAt = definedAt;
+		this.callSite = callSite;
 	}
 
 	/**
@@ -43,6 +56,17 @@ public class StackTraceFrame {
 	 */
 	public Target getDefinedAt() {
 		return definedAt;
+	}
+
+	/**
+	 * Gets the code target of the call expression in the caller's code. For example,
+	 * if {@code <main>} calls {@code _foo()}, the call site is where {@code _foo()}
+	 * appears in {@code <main>}. Returns {@link Target#UNKNOWN} if not available.
+	 *
+	 * @return The call site target
+	 */
+	public Target getCallSite() {
+		return callSite;
 	}
 
 	@Override

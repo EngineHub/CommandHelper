@@ -95,6 +95,8 @@ import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.profiler.ProfilePoint;
 import com.laytonsmith.persistence.DataSourceException;
+import com.laytonsmith.core.environments.DebugContext;
+import com.laytonsmith.tools.debugger.MSDebugServer;
 import com.laytonsmith.tools.docgen.DocGen;
 import com.laytonsmith.tools.docgen.DocGenTemplates;
 import jline.console.ConsoleReader;
@@ -174,17 +176,77 @@ public final class Interpreter {
 	}
 
 	public static void startWithTTY(String file, List<String> args, boolean systemExitOnFailure) throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
+		startWithTTY(file, args, systemExitOnFailure, false, 0, false, null);
+	}
+
+	/**
+	 * Starts execution of a script file in TTY mode, optionally with a debugger.
+	 *
+	 * @param file The script file path.
+	 * @param args Arguments passed to the script.
+	 * @param systemExitOnFailure If true, calls System.exit on compile errors.
+	 * @param debug If true, starts a DAP debug server on the given port.
+	 * @param debugPort The port for the DAP TCP listener. If 0, uses
+	 *     {@link MSDebugServer#DEFAULT_PORT}.
+	 * @param debugSuspend If true, waits for the debugger to connect before executing.
+	 * @param debugThreadingMode The threading mode override: "sync", "async", or null for default.
+	 */
+	public static void startWithTTY(String file, List<String> args, boolean systemExitOnFailure,
+			boolean debug, int debugPort, boolean debugSuspend, String debugThreadingMode) throws IOException,
+			DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
 		File fromFile = new File(file).getCanonicalFile();
 		Interpreter interpreter = new Interpreter(args, fromFile.getParentFile().getPath(), true);
+
+		if(debug) {
+			int port = debugPort == 0 ? MSDebugServer.DEFAULT_PORT : debugPort;
+			DebugContext.ThreadingMode threadingMode = DebugContext.ThreadingMode.SYNCHRONOUS;
+			if("async".equals(debugThreadingMode)) {
+				threadingMode = DebugContext.ThreadingMode.ASYNCHRONOUS;
+			}
+			MSDebugServer debugServer = new MSDebugServer();
+			interpreter.env = debugServer.startListening(port, interpreter.env, debugSuspend, threadingMode);
+			try {
+				debugServer.awaitConfiguration();
+			} catch(InterruptedException e) {
+				Thread.currentThread().interrupt();
+				debugServer.shutdown();
+				return;
+			}
+
+			try {
+				ParseTree tree = interpreter.compile(FileUtil.read(fromFile), args, fromFile);
+				debugServer.runScript(tree, interpreter.env,
+						interpreter.buildVars(args, fromFile));
+				debugServer.awaitCompletion();
+			} catch(ConfigCompileException ex) {
+				ConfigRuntimeException.HandleUncaughtException(ex, null, null);
+				StreamUtils.GetSystemOut().println(TermColors.reset());
+				if(systemExitOnFailure) {
+					System.exit(1);
+				}
+			} catch(ConfigCompileGroupException ex) {
+				ConfigRuntimeException.HandleUncaughtException(ex, null);
+				StreamUtils.GetSystemOut().println(TermColors.reset());
+				if(systemExitOnFailure) {
+					System.exit(1);
+				}
+			} catch(InterruptedException e) {
+				Thread.currentThread().interrupt();
+			} finally {
+				debugServer.shutdown();
+			}
+			return;
+		}
+
 		try {
 			interpreter.execute(FileUtil.read(fromFile), args, fromFile);
-		} catch (ConfigCompileException ex) {
+		} catch(ConfigCompileException ex) {
 			ConfigRuntimeException.HandleUncaughtException(ex, null, null);
 			StreamUtils.GetSystemOut().println(TermColors.reset());
 			if(systemExitOnFailure) {
 				System.exit(1);
 			}
-		} catch (ConfigCompileGroupException ex) {
+		} catch(ConfigCompileGroupException ex) {
 			ConfigRuntimeException.HandleUncaughtException(ex, null);
 			StreamUtils.GetSystemOut().println(TermColors.reset());
 			if(systemExitOnFailure) {
@@ -779,54 +841,8 @@ public final class Interpreter {
 					+ ");";
 		}
 		isExecuting = true;
-		if(args != null) {
-			staticAnalysis.getStartScope().addDeclaration(
-					new Declaration(Namespace.IVARIABLE, "@arguments", CArray.TYPE, null, Target.UNKNOWN));
-		}
-		ProfilePoint compile = env.getEnv(StaticRuntimeEnv.class).GetProfiler().start("Compilation", LogLevel.VERBOSE);
-		final ParseTree tree;
-		try {
-			TokenStream stream = MethodScriptCompiler.lex(script, env, fromFile, true);
-			tree = MethodScriptCompiler.compile(stream, env, env.getEnvClasses(), staticAnalysis);
-			staticAnalysis = new StaticAnalysis(staticAnalysis.getEndScope(), true); // Continue analysis in end scope.
-		} finally {
-			compile.stop();
-		}
-		//Environment env = Environment.createEnvironment(this.env.getEnv(GlobalEnv.class));
-		final List<Variable> vars = new ArrayList<>();
-		if(args != null) {
-			//Build the @arguments variable, the $ vars, and $ itself. Note that
-			//we have special handling for $0, that is the script name, like bash.
-			//However, it doesn't get added to either $ or @arguments, due to the
-			//uncommon use of it.
-			StringBuilder finalArgument = new StringBuilder();
-			CArray arguments = new CArray(Target.UNKNOWN);
-			{
-				//Set the $0 argument
-				Variable v = new Variable("$0", "", Target.UNKNOWN);
-				v.setVal(fromFile.toString());
-				v.setDefault(fromFile.toString());
-				vars.add(v);
-			}
-			for(int i = 0; i < args.size(); i++) {
-				String arg = args.get(i);
-				if(i > 0) {
-					finalArgument.append(" ");
-				}
-				Variable v = new Variable("$" + Integer.toString(i + 1), "", Target.UNKNOWN);
-				v.setVal(new CString(arg, Target.UNKNOWN));
-				v.setDefault(arg);
-				vars.add(v);
-				finalArgument.append(arg);
-				arguments.push(new CString(arg, Target.UNKNOWN), Target.UNKNOWN);
-			}
-			Variable v = new Variable("$", "", false, true, Target.UNKNOWN);
-			v.setVal(new CString(finalArgument.toString(), Target.UNKNOWN));
-			v.setDefault(finalArgument.toString());
-			vars.add(v);
-			env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, "@arguments", arguments,
-					Target.UNKNOWN));
-		}
+		final ParseTree tree = compile(script, args, fromFile);
+		final List<Variable> vars = buildVars(args, fromFile);
 		try {
 			ProfilePoint p = this.env.getEnv(StaticRuntimeEnv.class)
 					.GetProfiler().start("Interpreter Script", LogLevel.ERROR);
@@ -915,6 +931,68 @@ public final class Interpreter {
 	public void execute(File script, List<String> args) throws ConfigCompileException, IOException, ConfigCompileGroupException {
 		String scriptString = FileUtil.read(script);
 		execute(scriptString, args, script);
+	}
+
+	/**
+	 * Compiles a script, returning the parse tree.
+	 */
+	private ParseTree compile(String script, List<String> args, File fromFile)
+			throws ConfigCompileException, ConfigCompileGroupException {
+		if(args != null) {
+			staticAnalysis.getStartScope().addDeclaration(
+					new Declaration(Namespace.IVARIABLE, "@arguments", CArray.TYPE, null, Target.UNKNOWN));
+		}
+		ProfilePoint compile = env.getEnv(StaticRuntimeEnv.class).GetProfiler()
+				.start("Compilation", LogLevel.VERBOSE);
+		try {
+			TokenStream stream = MethodScriptCompiler.lex(script, env, fromFile, true);
+			ParseTree tree = MethodScriptCompiler.compile(stream, env, env.getEnvClasses(), staticAnalysis);
+			staticAnalysis = new StaticAnalysis(staticAnalysis.getEndScope(), true);
+			return tree;
+		} finally {
+			compile.stop();
+		}
+	}
+
+	/**
+	 * Builds the argument variables ($0, $1, ..., $, @arguments) for a script execution.
+	 */
+	private List<Variable> buildVars(List<String> args, File fromFile) {
+		List<Variable> vars = new ArrayList<>();
+		if(args != null) {
+			//Build the @arguments variable, the $ vars, and $ itself. Note that
+			//we have special handling for $0, that is the script name, like bash.
+			//However, it doesn't get added to either $ or @arguments, due to the
+			//uncommon use of it.
+			StringBuilder finalArgument = new StringBuilder();
+			CArray arguments = new CArray(Target.UNKNOWN);
+			{
+				//Set the $0 argument
+				Variable v = new Variable("$0", "", Target.UNKNOWN);
+				v.setVal(fromFile.toString());
+				v.setDefault(fromFile.toString());
+				vars.add(v);
+			}
+			for(int i = 0; i < args.size(); i++) {
+				String arg = args.get(i);
+				if(i > 0) {
+					finalArgument.append(" ");
+				}
+				Variable v = new Variable("$" + Integer.toString(i + 1), "", Target.UNKNOWN);
+				v.setVal(new CString(arg, Target.UNKNOWN));
+				v.setDefault(arg);
+				vars.add(v);
+				finalArgument.append(arg);
+				arguments.push(new CString(arg, Target.UNKNOWN), Target.UNKNOWN);
+			}
+			Variable v = new Variable("$", "", false, true, Target.UNKNOWN);
+			v.setVal(new CString(finalArgument.toString(), Target.UNKNOWN));
+			v.setDefault(finalArgument.toString());
+			vars.add(v);
+			env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, "@arguments", arguments,
+					Target.UNKNOWN));
+		}
+		return vars;
 	}
 
 	public boolean doBuiltin(String script) {

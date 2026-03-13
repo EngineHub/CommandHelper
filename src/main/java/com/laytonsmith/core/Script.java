@@ -30,6 +30,8 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.DebugContext;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.environments.LivePausedState;
+import com.laytonsmith.core.environments.PausedState;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.CRE.CREInsufficientPermissionException;
 import com.laytonsmith.core.exceptions.CRE.CREInvalidProcedureException;
@@ -51,6 +53,7 @@ import java.net.URL;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
@@ -430,7 +433,13 @@ public class Script {
 	private Mixed iterativeEval(ParseTree root, Environment env) {
 		EvalStack stack = new EvalStack();
 		stack.push(new StackFrame(root, env, null, null));
-		return evalLoop(stack, null, false, null, env);
+		Mixed result = evalLoop(stack, null, false, null, env);
+		DebugContext debugCtx = env.hasEnv(DebugContext.class)
+				? env.getEnv(DebugContext.class) : null;
+		if(debugCtx != null && !isDebuggerPaused(result)) {
+			debugCtx.getListener().onCompleted();
+		}
+		return result;
 	}
 
 	/**
@@ -449,8 +458,18 @@ public class Script {
 			debugCtx.setPaused(false, null);
 			debugCtx.getListener().onResumed();
 		}
-		return evalLoop(snapshot.stack, snapshot.lastResult, snapshot.hasResult,
+		// Re-associate the StackTraceManager with the current thread. Since
+		// resumeOnThread spawns a new thread each time, the thread identity
+		// changes, but the StackTraceManager state must carry over. All cloned
+		// GlobalEnvs (from proc calls) share the same StackTraceManager
+		// reference, so adopting once on the top-level env suffices.
+		snapshot.env.getEnv(GlobalEnv.class).adoptStackTraceManager();
+		Mixed result = evalLoop(snapshot.stack, snapshot.lastResult, snapshot.hasResult,
 				snapshot.pendingFlowControl, snapshot.env);
+		if(debugCtx != null && !isDebuggerPaused(result)) {
+			debugCtx.getListener().onCompleted();
+		}
+		return result;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -517,12 +536,12 @@ public class Script {
 					&& !frame.hasBegun()) {
 				Target currentTarget = node.getTarget();
 				int userDepth = gEnv.GetStackTraceManager().getDepth();
-				if(debugCtx.shouldPause(currentTarget, userDepth)) {
-					DebugSnapshot snapshot = new DebugSnapshot(
-							stack, lastResult, hasResult, pendingFlowControl, env, currentTarget);
-					debugCtx.setPaused(true, currentTarget);
-					debugCtx.getListener().onPaused(snapshot);
-					return DEBUGGER_PAUSED;
+				if(debugCtx.shouldPause(currentTarget, userDepth, frame.getEnv())) {
+					Mixed pauseResult = debugPause(debugCtx, stack, lastResult, hasResult,
+							pendingFlowControl, frame.getEnv(), currentTarget);
+					if(pauseResult != null) {
+						return pauseResult;
+					}
 				}
 			}
 
@@ -631,6 +650,17 @@ public class Script {
 				} else if(action instanceof StepAction.FlowControl fc) {
 					pendingFlowControl = fc;
 					cleanupAndPop(stack, frame);
+					// Exception breakpoint check for FlowFunction-originated throws
+					if(debugCtx != null && !debugCtx.isDisconnected()
+							&& fc.getAction()
+									instanceof Exceptions.ThrowAction ta
+							&& debugCtx.shouldBreakOnException(ta.getException(), stack)) {
+						Mixed pauseResult = debugPause(debugCtx, stack, lastResult, hasResult,
+								pendingFlowControl, frame.getEnv(), ta.getException().getTarget());
+						if(pauseResult != null) {
+							return pauseResult;
+						}
+					}
 				}
 				continue;
 			}
@@ -672,14 +702,19 @@ public class Script {
 						// Convert MethodScript exceptions to FlowControl(ThrowAction)
 						stack.pop();
 						pendingFlowControl = new StepAction.FlowControl(
-								new com.laytonsmith.core.functions.Exceptions.ThrowAction(e));
+								new Exceptions.ThrowAction(e));
+						// Exception breakpoint check
+						if(debugCtx != null && !debugCtx.isDisconnected()
+								&& debugCtx.shouldBreakOnException(e, stack)) {
+							Mixed pauseResult = debugPause(debugCtx, stack, lastResult, hasResult,
+									pendingFlowControl, frame.getEnv(), e.getTarget());
+							if(pauseResult != null) {
+								return pauseResult;
+							}
+						}
 					}
 				}
 			}
-		}
-
-		if(debugCtx != null) {
-			debugCtx.getListener().onCompleted();
 		}
 
 		return lastResult;
@@ -696,6 +731,46 @@ public class Script {
 					frame.getNode().getTarget(), frame.getFunctionState(), frame.getEnv());
 		}
 		stack.pop();
+	}
+
+	/**
+	 * Handles the debug pause at a breakpoint or step condition. In synchronous mode,
+	 * blocks the interpreter thread until the DAP server calls resume, then returns
+	 * {@code null} to indicate execution should continue. In asynchronous mode,
+	 * creates a snapshot and returns {@link #DEBUGGER_PAUSED} to indicate the caller
+	 * should return that sentinel value.
+	 *
+	 * @param debugCtx The debug context
+	 * @param stack The eval stack (used for async snapshot)
+	 * @param lastResult The last result (used for async snapshot)
+	 * @param hasResult Whether there is a pending result (used for async snapshot)
+	 * @param pendingFlowControl The pending flow control (used for exception state)
+	 * @param env The current frame's environment
+	 * @param pauseTarget The source location where execution is pausing
+	 * @return {@link #DEBUGGER_PAUSED} if the caller should return (async mode),
+	 *     or null if execution should continue (sync mode resumed or interrupted)
+	 */
+	private static Mixed debugPause(DebugContext debugCtx, EvalStack stack,
+			Mixed lastResult, boolean hasResult,
+			StepAction.FlowControl pendingFlowControl, Environment env, Target pauseTarget) {
+		debugCtx.setPaused(true, pauseTarget);
+		if(debugCtx.shouldUseSyncMode()) {
+			LivePausedState state = new LivePausedState(env, pauseTarget, pendingFlowControl);
+			debugCtx.getListener().onPaused(state);
+			try {
+				debugCtx.awaitResume();
+			} catch(InterruptedException e) {
+				java.lang.Thread.currentThread().interrupt();
+			}
+			debugCtx.setPaused(false, null);
+			debugCtx.getListener().onResumed();
+			return null;
+		} else {
+			DebugSnapshot snapshot = new DebugSnapshot(
+					stack, lastResult, hasResult, pendingFlowControl, env, pauseTarget);
+			debugCtx.getListener().onPaused(snapshot);
+			return DEBUGGER_PAUSED;
+		}
 	}
 
 	/**
@@ -1169,7 +1244,7 @@ public class Script {
 	 * accessible only to {@link Script}. External callers (e.g. a DAP server) can use the
 	 * public inspection methods to read variables, call stack, and source location.</p>
 	 */
-	public static final class DebugSnapshot {
+	public static final class DebugSnapshot implements PausedState {
 
 		private final EvalStack stack;
 		private final Mixed lastResult;
@@ -1191,8 +1266,17 @@ public class Script {
 		/**
 		 * Returns the source location where execution paused.
 		 */
+		@Override
 		public Target getPauseTarget() {
 			return pauseTarget;
+		}
+
+		/**
+		 * Returns the environment at the point of the pause.
+		 */
+		@Override
+		public Environment getEnvironment() {
+			return env;
 		}
 
 		/**
@@ -1201,8 +1285,12 @@ public class Script {
 		 *
 		 * @return A list of stack trace frames
 		 */
+		@Override
 		public List<StackTraceFrame> getCallStack() {
-			StackTraceManager stm = env.getEnv(GlobalEnv.class).GetStackTraceManager();
+			StackTraceManager stm = env.getEnv(GlobalEnv.class).peekStackTraceManager();
+			if(stm == null) {
+				return Collections.emptyList();
+			}
 			return stm.getCurrentStackTrace();
 		}
 
@@ -1212,8 +1300,12 @@ public class Script {
 		 *
 		 * @return The user-visible call depth
 		 */
+		@Override
 		public int getUserCallDepth() {
-			StackTraceManager stm = env.getEnv(GlobalEnv.class).GetStackTraceManager();
+			StackTraceManager stm = env.getEnv(GlobalEnv.class).peekStackTraceManager();
+			if(stm == null) {
+				return 0;
+			}
 			return stm.getDepth();
 		}
 
@@ -1223,6 +1315,7 @@ public class Script {
 		 *
 		 * @return A map from variable name (including the @ prefix) to its current value
 		 */
+		@Override
 		public Map<String, Mixed> getVariables() {
 			IVariableList varList = env.getEnv(GlobalEnv.class).GetVarList();
 			Map<String, Mixed> result = new LinkedHashMap<>();
@@ -1233,6 +1326,28 @@ public class Script {
 				}
 			}
 			return result;
+		}
+
+		/**
+		 * Returns true if this pause was caused by an exception breakpoint.
+		 */
+		@Override
+		public boolean isExceptionPause() {
+			return pendingFlowControl != null
+					&& pendingFlowControl.getAction() instanceof Exceptions.ThrowAction;
+		}
+
+		/**
+		 * If this is an exception pause, returns the exception that caused the pause.
+		 * Otherwise returns null.
+		 */
+		@Override
+		public ConfigRuntimeException getPauseException() {
+			if(pendingFlowControl != null
+					&& pendingFlowControl.getAction() instanceof Exceptions.ThrowAction ta) {
+				return ta.getException();
+			}
+			return null;
 		}
 
 		@Override
