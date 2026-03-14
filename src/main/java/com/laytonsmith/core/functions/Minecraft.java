@@ -1268,7 +1268,7 @@ public class Minecraft {
 			if(children.size() < 1) {
 				return null;
 			}
-			if(ArgumentValidation.isNumber(children.get(0).getData())) {
+			if(children.get(0).isConst() && ArgumentValidation.isNumber(children.get(0).getData())) {
 				env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
 						new CompilerWarning("Numeric ids are deprecated in " + getName() + ".", t, null));
 			}
