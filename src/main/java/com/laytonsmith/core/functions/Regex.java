@@ -4,6 +4,7 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.CallbackYield;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Optimizable;
@@ -231,7 +232,7 @@ public class Regex {
 	}
 
 	@api
-	public static class reg_replace extends AbstractFunction implements Optimizable {
+	public static class reg_replace extends CallbackYield implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -272,26 +273,55 @@ public class Regex {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		protected void execWithYield(Target t, Environment env, Mixed[] args, CallbackYield.Yield yield) {
 			Pattern pattern = getPattern(args[0], t, env);
 			Mixed replacement = args[1];
 			String subject = args[2].val();
-			String ret = "";
 
-			try {
-				if(replacement instanceof Callable replacer) {
-					ret = pattern.matcher(subject).replaceAll(mr -> ArgumentValidation.getStringObject(
-							replacer.executeCallable(env, t, ObjectGenerator.GetGenerator().regMatchValue(mr, t)), t, env));
-				} else {
-					ret = pattern.matcher(subject).replaceAll(replacement.val());
+			if(replacement instanceof Callable replacer) {
+				// Collect all match positions upfront, then yield each closure call.
+				Matcher m = pattern.matcher(subject);
+				StringBuilder sb = new StringBuilder();
+				int lastEnd = 0;
+				boolean found = false;
+				try {
+					while(m.find()) {
+						found = true;
+						final int segStart = lastEnd;
+						final int matchStart = m.start();
+						CArray matchData = ObjectGenerator.GetGenerator().regMatchValue(m, t);
+						yield.call(replacer, env, t, matchData)
+								.then((result, y) -> {
+									sb.append(subject, segStart, matchStart);
+									sb.append(ArgumentValidation.getStringObject(result, t, env));
+								});
+						lastEnd = m.end();
+					}
+				} catch(IndexOutOfBoundsException e) {
+					throw new CREFormatException("Expecting a regex group at parameter 1 of reg_replace", t);
+				} catch(IllegalArgumentException e) {
+					throw new CREFormatException(e.getMessage(), t);
 				}
-			} catch (IndexOutOfBoundsException e) {
-				throw new CREFormatException("Expecting a regex group at parameter 1 of reg_replace", t);
-			} catch (IllegalArgumentException e) {
-				throw new CREFormatException(e.getMessage(), t);
+				if(!found) {
+					yield.done(() -> new CString(subject, t));
+				} else {
+					final int tail = lastEnd;
+					yield.done(() -> {
+						sb.append(subject, tail, subject.length());
+						return new CString(sb.toString(), t);
+					});
+				}
+			} else {
+				// Plain string replacement — no closures, synchronous.
+				try {
+					String ret = pattern.matcher(subject).replaceAll(replacement.val());
+					yield.done(() -> new CString(ret, t));
+				} catch(IndexOutOfBoundsException e) {
+					throw new CREFormatException("Expecting a regex group at parameter 1 of reg_replace", t);
+				} catch(IllegalArgumentException e) {
+					throw new CREFormatException(e.getMessage(), t);
+				}
 			}
-
-			return new CString(ret, t);
 		}
 
 		@Override

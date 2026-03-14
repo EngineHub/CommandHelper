@@ -3,7 +3,10 @@ package com.laytonsmith.testing;
 import com.laytonsmith.abstraction.MCPlayer;
 import static com.laytonsmith.testing.StaticTest.SRun;
 
+import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREStackOverflowError;
+import com.laytonsmith.core.exceptions.StackTraceManager;
 import org.bukkit.plugin.Plugin;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -131,6 +134,31 @@ public class ProcedureTest extends AbstractIntegrationTest {
 				+ "msg(_parse_args(array(0,1,2,3,4,5,6,7)))", fakePlayer);
 
 		verify(fakePlayer, times(3)).sendMessage("{1, 3, 5, 7}");
+	}
+
+	@Test
+	public void testInfiniteRecursionThrowsStackOverflow() throws Exception {
+		try {
+			SRun("proc _recurse() { _recurse() } _recurse()", fakePlayer);
+			fail("Expected CREStackOverflowError from infinite recursion");
+		} catch(CREStackOverflowError ex) {
+			// Test passed — infinite recursion was caught
+		}
+	}
+
+	@Test
+	public void testCustomCallDepthLimit() throws Exception {
+		try {
+			SRun("set_runtime_setting('system.max_call_depth', 10)"
+					+ " proc _recurse() { _recurse() } _recurse()", fakePlayer);
+			fail("Expected CREStackOverflowError from infinite recursion");
+		} catch(CREStackOverflowError ex) {
+			// Test passed — custom limit was enforced
+		} finally {
+			// Reset the runtime setting so it doesn't affect other tests
+			GlobalEnv gEnv = StaticTest.env.getEnv(GlobalEnv.class);
+			gEnv.SetRuntimeSetting(StackTraceManager.MAX_CALL_DEPTH_SETTING, null);
+		}
 	}
 
 }

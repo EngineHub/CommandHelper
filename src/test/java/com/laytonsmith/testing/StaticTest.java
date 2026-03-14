@@ -74,9 +74,6 @@ import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
-import com.laytonsmith.core.exceptions.FunctionReturnException;
-import com.laytonsmith.core.exceptions.LoopBreakException;
-import com.laytonsmith.core.exceptions.LoopContinueException;
 import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.functions.BasicLogic.equals;
 import com.laytonsmith.core.functions.Function;
@@ -180,8 +177,7 @@ public class StaticTest extends AbstractIntegrationTest {
 			TestExec(f, StaticTest.GetFakeConsoleCommandSender(), "fake console command sender");
 		}
 
-		//Let's make sure that if execs is defined in the class, useSpecialExec returns true.
-		//Same thing for optimize/canOptimize and optimizeDynamic/canOptimizeDynamic
+		//Let's make sure optimization declarations are consistent.
 		if(f instanceof Optimizable) {
 			Set<Optimizable.OptimizationOption> options = ((Optimizable) f).optimizationOptions();
 			if(options.contains(Optimizable.OptimizationOption.CONSTANT_OFFLINE) && options.contains(Optimizable.OptimizationOption.OPTIMIZE_CONSTANT)) {
@@ -189,12 +185,6 @@ public class StaticTest extends AbstractIntegrationTest {
 			}
 		}
 		for(Method method : f.getClass().getDeclaredMethods()) {
-			if(method.getName().equals("execs")) {
-				if(!f.useSpecialExec()) {
-					fail(f.getName() + " declares execs, but returns false for useSpecialExec.");
-				}
-			}
-
 			if(f instanceof Optimizable) {
 				Set<Optimizable.OptimizationOption> options = ((Optimizable) f).optimizationOptions();
 				if(method.getName().equals("optimize")) {
@@ -313,15 +303,6 @@ public class StaticTest extends AbstractIntegrationTest {
 								+ name + ", but it did.");
 					}
 				} catch (Throwable e) {
-					if(e instanceof LoopBreakException && !f.getName().equals("break")) {
-						fail("Only break() can throw LoopBreakExceptions");
-					}
-					if(e instanceof LoopContinueException && !f.getName().equals("continue")) {
-						fail("Only continue() can throw LoopContinueExceptions");
-					}
-					if(e instanceof FunctionReturnException && !f.getName().equals("return")) {
-						fail("Only return() can throw FunctionReturnExceptions");
-					}
 					if(e instanceof NullPointerException) {
 						String error = (f.getName() + " breaks if you send it the following while using a " + commandType + ": " + Arrays.deepToString(con) + "\n");
 						error += ("Here is the first few stack trace lines:\n");

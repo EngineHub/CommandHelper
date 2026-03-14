@@ -19,7 +19,6 @@ import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.extensions.ExtensionTracker;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
-import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 
@@ -339,8 +338,6 @@ public final class EventUtils {
 					activeEvent.setBoundEvent(b);
 					activeEvent.setParsedEvent(Event.ExecuteEvaluate(driver, e, b.getEnvironment()));
 					b.trigger(activeEvent);
-				} catch (FunctionReturnException ex) {
-					//We also know how to deal with this
 				} catch (EventException ex) {
 					throw new CREEventException(ex.getMessage(), b.getTarget(), ex);
 				} catch (ConfigRuntimeException ex) {

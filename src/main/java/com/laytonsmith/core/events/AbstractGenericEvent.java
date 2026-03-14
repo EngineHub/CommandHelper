@@ -22,16 +22,13 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.events.prefilters.Prefilter;
 import com.laytonsmith.core.events.prefilters.PrefilterBuilder;
-import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREUnsupportedOperationException;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
-import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
-import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.profiler.ProfilePoint;
 
@@ -157,10 +154,6 @@ public abstract class AbstractGenericEvent<TBindableEvent extends BindableEvent>
 				if(ex.getMessage() != null && !ex.getMessage().isEmpty()) {
 					StreamUtils.GetSystemOut().println(ex.getMessage());
 				}
-			} catch(FunctionReturnException ex) {
-				//We simply allow this to end the event execution
-			} catch(ProgramFlowManipulationException ex) {
-				ConfigRuntimeException.HandleUncaughtException(new CREFormatException("Unexpected control flow operation used.", ex.getTarget()), env);
 			}
 		} finally {
 			if(event != null) {

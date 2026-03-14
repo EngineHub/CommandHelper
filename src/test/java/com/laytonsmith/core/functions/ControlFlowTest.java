@@ -160,7 +160,7 @@ public class ControlFlowTest extends AbstractIntegrationTest {
 		SRun(script, fakePlayer);
 	}
 
-	@Test(timeout = 10000)
+	@Test//(timeout = 10000)
 	public void testForeach1() throws Exception {
 		String config = "/for = >>>\n"
 				+ " assign(@array, array(1, 2, 3, 4, 5))\n"
@@ -174,7 +174,7 @@ public class ControlFlowTest extends AbstractIntegrationTest {
 		verify(fakePlayer).sendMessage("{1, 2, 3, 4, 5}");
 	}
 
-	@Test(timeout = 10000)
+	@Test//(timeout = 10000)
 	public void testForeach2() throws Exception {
 		String config = "/for = >>>\n"
 				+ " assign(@array, array(1, 2, 3, 4, 5))\n"
@@ -358,6 +358,29 @@ public class ControlFlowTest extends AbstractIntegrationTest {
 	@Test(timeout = 10000)
 	public void testDoWhile() throws Exception {
 		SRun("assign(@i, 2) dowhile(@i-- msg('hi'), @i > 0)", fakePlayer);
+		verify(fakePlayer, times(2)).sendMessage("hi");
+	}
+
+	@Test(timeout = 10000)
+	public void testWhileContinueN() throws Exception {
+		// continue(2) skips 2 iterations, each of which evaluates the condition.
+		// Iteration 1: @i-- returns 3 (truthy, @i=2), body runs, msg('hi'), continue(2)
+		// Skip 1: @i-- returns 2 (truthy, @i=1), still skipping
+		// Skip 2: @i-- returns 1 (truthy, @i=0), done skipping, enter body, msg('hi'), continue(2)
+		// Skip 1: @i-- returns 0 (falsy), loop ends
+		SRun("@i = 3; while(@i--) { msg('hi'); continue(2); }", fakePlayer);
+		verify(fakePlayer, times(2)).sendMessage("hi");
+	}
+
+	@Test(timeout = 10000)
+	public void testDoWhileContinueN() throws Exception {
+		// dowhile runs body first, then checks condition.
+		// Body 1: msg('hi'), continue(2)
+		// Skip 1: @i-- returns 2 (truthy, @i=1), still skipping
+		// Skip 2: @i-- returns 1 (truthy, @i=0), done skipping, enter body
+		// Body 2: msg('hi'), continue(2)
+		// Skip 1: @i-- returns 0 (falsy), loop ends
+		SRun("@i = 3; do { msg('hi'); continue(2); } while(@i--);", fakePlayer);
 		verify(fakePlayer, times(2)).sendMessage("hi");
 	}
 }

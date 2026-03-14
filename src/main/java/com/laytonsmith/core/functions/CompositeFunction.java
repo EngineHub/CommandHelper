@@ -1,12 +1,14 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
-import com.laytonsmith.core.MSLog;
+import com.laytonsmith.core.FlowFunction;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.NodeModifiers;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Script;
+import com.laytonsmith.core.StepAction;
+import com.laytonsmith.core.StepAction.StepResult;
 import com.laytonsmith.core.compiler.analysis.ParamDeclaration;
 import com.laytonsmith.core.compiler.analysis.ReturnableDeclaration;
 import com.laytonsmith.core.compiler.analysis.Scope;
@@ -22,7 +24,6 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.io.File;
 
@@ -37,42 +38,25 @@ import java.util.Map;
  * exist on a given platform, the function can be automatically provided on that platform.
  * This prevents rewrites for straightforward functions.
  */
-public abstract class CompositeFunction extends AbstractFunction {
+public abstract class CompositeFunction extends AbstractFunction
+		implements FlowFunction<CompositeFunction.CompositeState> {
 
 	private static final Map<Class<? extends CompositeFunction>, ParseTree> CACHED_SCRIPTS = new HashMap<>();
 
+	static class CompositeState {
+		enum Phase { EVAL_ARGS, EVAL_BODY }
+		Phase phase = Phase.EVAL_ARGS;
+		ParseTree[] children;
+		Mixed[] evaluatedArgs;
+		int argIndex = 0;
+		IVariableList oldVariables;
+	}
+
 	@Override
 	public final Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-		ParseTree tree;
-		// TODO: Ultimately, this is not scalable. We need to compile and cache these scripts at Java compile time,
-		// not at runtime the first time a function is used. This is an easier first step though.
-		File debugFile = null;
-		if(Prefs.DebugMode()) {
-			debugFile = new File("/NATIVE-MSCRIPT/" + getName());
-		}
-		if(!CACHED_SCRIPTS.containsKey(this.getClass())) {
-			try {
-
-				String script = script();
-				Scope rootScope = new Scope();
-				rootScope.addDeclaration(new ParamDeclaration("@arguments", CArray.TYPE, null,
-						new NodeModifiers(),
-						Target.UNKNOWN));
-				rootScope.addDeclaration(new ReturnableDeclaration(null, new NodeModifiers(), Target.UNKNOWN));
-				tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, env, debugFile, true),
-						env, env.getEnvClasses(), new StaticAnalysis(rootScope, true))
-						// the root of the tree is null, so go ahead and pull it up
-						.getChildAt(0);
-			} catch (ConfigCompileException | ConfigCompileGroupException ex) {
-				// This is really bad.
-				throw new Error(ex);
-			}
-			if(cacheCompile()) {
-				CACHED_SCRIPTS.put(this.getClass(), tree);
-			}
-		} else {
-			tree = CACHED_SCRIPTS.get(this.getClass());
-		}
+		// Sync fallback for compile-time optimization (CONSTANT_OFFLINE).
+		// The FlowFunction path is used during normal interpretation.
+		ParseTree tree = getOrCompileTree(env);
 
 		GlobalEnv gEnv = env.getEnv(GlobalEnv.class);
 		IVariableList oldVariables = gEnv.GetVarList();
@@ -82,30 +66,105 @@ public abstract class CompositeFunction extends AbstractFunction {
 		Mixed ret = CVoid.VOID;
 		try {
 			if(gEnv.GetScript() != null) {
-				gEnv.GetScript().eval(tree, env);
+				ret = gEnv.GetScript().eval(tree, env);
 			} else {
-				// This can happen when the environment is not fully setup during tests, in addition to optimization
-				Script.GenerateScript(null, null, null).eval(tree, env);
+				ret = Script.GenerateScript(null, null, null).eval(tree, env);
 			}
-		} catch (FunctionReturnException ex) {
-			ret = ex.getReturn();
-		} catch (ConfigRuntimeException ex) {
-			if(Prefs.DebugMode()) {
-				MSLog.GetLogger().e(MSLog.Tags.GENERAL, "Possibly false stacktrace, could be internal error",
-						ex.getTarget());
-			}
-			if(gEnv.GetStackTraceManager().getCurrentStackTrace().isEmpty()) {
-				ex.setTarget(t);
-				ConfigRuntimeException.StackTraceElement ste = new ConfigRuntimeException
-						.StackTraceElement(this.getName(), t);
-				gEnv.GetStackTraceManager().addStackTraceElement(ste);
-			}
-			gEnv.GetStackTraceManager().setCurrentTarget(t);
-			throw ex;
+		} finally {
+			gEnv.SetVarList(oldVariables);
 		}
-		gEnv.SetVarList(oldVariables);
 
 		return ret;
+	}
+
+	@Override
+	public StepResult<CompositeState> begin(Target t, ParseTree[] children, Environment env) {
+		CompositeState state = new CompositeState();
+		state.children = children;
+		state.evaluatedArgs = new Mixed[children.length];
+		if(children.length > 0) {
+			return new StepResult<>(new StepAction.Evaluate(children[0]), state);
+		} else {
+			return evalBody(t, state, env);
+		}
+	}
+
+	@Override
+	public StepResult<CompositeState> childCompleted(Target t, CompositeState state, Mixed result, Environment env) {
+		if(state.phase == CompositeState.Phase.EVAL_ARGS) {
+			state.evaluatedArgs[state.argIndex] = result;
+			state.argIndex++;
+			if(state.argIndex < state.children.length) {
+				return new StepResult<>(new StepAction.Evaluate(state.children[state.argIndex]), state);
+			}
+			return evalBody(t, state, env);
+		} else {
+			// Body evaluation complete
+			return new StepResult<>(new StepAction.Complete(result), state);
+		}
+	}
+
+	@Override
+	public StepResult<CompositeState> childInterrupted(Target t, CompositeState state,
+			StepAction.FlowControl action, Environment env) {
+		if(state.phase == CompositeState.Phase.EVAL_BODY
+				&& action.getAction() instanceof ControlFlow.ReturnAction ret) {
+			return new StepResult<>(new StepAction.Complete(ret.getValue()), state);
+		}
+		return null;
+	}
+
+	@Override
+	public void cleanup(Target t, CompositeState state, Environment env) {
+		if(state != null && state.oldVariables != null) {
+			env.getEnv(GlobalEnv.class).SetVarList(state.oldVariables);
+		}
+	}
+
+	private StepResult<CompositeState> evalBody(Target t, CompositeState state, Environment env) {
+		state.phase = CompositeState.Phase.EVAL_BODY;
+		ParseTree tree = getOrCompileTree(env);
+
+		GlobalEnv gEnv = env.getEnv(GlobalEnv.class);
+		state.oldVariables = gEnv.GetVarList();
+		IVariableList newVariables = new IVariableList(state.oldVariables);
+		newVariables.set(new IVariable(CArray.TYPE, "@arguments",
+				new CArray(t, state.evaluatedArgs.length, state.evaluatedArgs), t));
+		gEnv.SetVarList(newVariables);
+
+		return new StepResult<>(new StepAction.Evaluate(tree), state);
+	}
+
+	private ParseTree getOrCompileTree(Environment env) {
+		if(CACHED_SCRIPTS.containsKey(this.getClass())) {
+			return CACHED_SCRIPTS.get(this.getClass());
+		}
+		// TODO: Ultimately, this is not scalable. We need to compile and cache these scripts at Java compile time,
+		// not at runtime the first time a function is used. This is an easier first step though.
+		File debugFile = null;
+		if(Prefs.DebugMode()) {
+			debugFile = new File("/NATIVE-MSCRIPT/" + getName());
+		}
+		ParseTree tree;
+		try {
+			String script = script();
+			Scope rootScope = new Scope();
+			rootScope.addDeclaration(new ParamDeclaration("@arguments", CArray.TYPE, null,
+					new NodeModifiers(),
+					Target.UNKNOWN));
+			rootScope.addDeclaration(new ReturnableDeclaration(null, new NodeModifiers(), Target.UNKNOWN));
+			tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, env, debugFile, true),
+					env, env.getEnvClasses(), new StaticAnalysis(rootScope, true))
+					// the root of the tree is null, so go ahead and pull it up
+					.getChildAt(0);
+		} catch(ConfigCompileException | ConfigCompileGroupException ex) {
+			// This is really bad.
+			throw new Error(ex);
+		}
+		if(cacheCompile()) {
+			CACHED_SCRIPTS.put(this.getClass(), tree);
+		}
+		return tree;
 	}
 
 	/**
@@ -137,17 +196,6 @@ public abstract class CompositeFunction extends AbstractFunction {
 	 */
 	protected boolean cacheCompile() {
 		return true;
-	}
-
-	@Override
-	public final Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
-		throw new Error(this.getClass().toString());
-	}
-
-	@Override
-	public final boolean useSpecialExec() {
-		// This defeats the purpose, so don't allow this.
-		return false;
 	}
 
 }

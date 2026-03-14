@@ -4,7 +4,6 @@ import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ParseTree;
-import com.laytonsmith.core.Script;
 import com.laytonsmith.core.compiler.SelfStatement;
 import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
@@ -74,8 +73,7 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 	 * parameters sent to the function have already been resolved into an atomic value, so functions do not have to
 	 * worry about resolving parameters. There is an explicit check made before calling exec to ensure that Mixed
 	 * ... args will only be one of the atomic objects. If a code tree is needed instead of a resolved construct, the
-	 * function should indicate so, and {@code execs} will be called instead. If exec is needed, execs should return
-	 * CVoid.
+	 * function should implement {@link FlowFunction} instead.
 	 *
 	 * @param t The location of this function call in the code, used for correct error messages
 	 * @param environment The current code environment
@@ -149,25 +147,6 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 			Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> exceptions);
 
 	/**
-	 * If a function needs a code tree instead of a resolved construct, it should return true here. Most functions will
-	 * return false for this value.
-	 *
-	 * @return
-	 */
-	public boolean useSpecialExec();
-
-	/**
-	 * If useSpecialExec indicates it needs the code tree instead of the resolved constructs, this gets called instead
-	 * of exec. If execs is needed, exec should return CVoid.
-	 *
-	 * @param t
-	 * @param env
-	 * @param nodes
-	 * @return
-	 */
-	public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes);
-
-	/**
 	 * Returns an array of example scripts, which are used for documentation purposes.
 	 * <p>
 	 * If there are no examples, null or empty array should be returned.
@@ -193,7 +172,7 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 	public LogLevel profileAt();
 
 	/**
-	 * Returns the message to use when this function gets profiled, if useSpecialExec returns false.
+	 * Returns the message to use when this function gets profiled with resolved args.
 	 *
 	 * @param env
 	 * @param args
@@ -202,7 +181,7 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 	public String profileMessage(Environment env, Mixed... args);
 
 	/**
-	 * Returns the message to use when this function gets profiled, if useSpecialExec returns true.
+	 * Returns the message to use when this function gets profiled with unresolved parse tree args.
 	 *
 	 * @param args
 	 * @return
