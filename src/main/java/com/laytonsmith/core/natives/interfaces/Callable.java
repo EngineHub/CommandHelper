@@ -22,18 +22,21 @@ public interface Callable extends Mixed {
 	 * Executes the callable, giving it the supplied arguments. {@code values} may be null, which means that no
 	 * arguments are being sent.
 	 *
-	 * ConfigRuntimeExceptions will bubble up past this, since an execution mechanism may need to do custom handling.
+	 * <p>ConfigRuntimeExceptions will bubble up past this, since an execution mechanism may need to do custom
+	 * handling.</p>
 	 *
-	 * @param env
+	 * <p>Note: This method starts a fresh top-level evaluation, which is correct for callers that run the
+	 * callable on a new thread (e.g., x_new_thread). However, callers that execute the callable on the
+	 * <em>same</em> thread within an already-running eval loop should extend {@link CallbackYield} and use
+	 * {@link #prepareForStack} instead, to avoid re-entering eval() and defeating the iterative interpreter.</p>
+	 *
+	 * @param env The caller's environment (may be ignored by implementations that capture their own)
 	 * @param values The values to be passed to the callable
-	 * @param t
+	 * @param t The call site target
 	 * @return The return value of the callable, or VOID if nothing was returned
 	 * @throws ConfigRuntimeException If any call inside the callable causes a CRE
 	 * @throws CancelCommandException If die() is called within the callable
-	 * @deprecated Functions that call closures should extend {@link CallbackYield}
-	 * instead of calling this directly, which re-enters eval() and defeats the iterative interpreter.
 	 */
-	@Deprecated
 	Mixed executeCallable(Environment env, Target t, Mixed... values)
 			throws ConfigRuntimeException, CancelCommandException;
 

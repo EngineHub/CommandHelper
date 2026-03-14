@@ -48,6 +48,7 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
+import com.laytonsmith.core.environments.DebugContext;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
@@ -1898,6 +1899,56 @@ public class Meta {
 		@Override
 		public Version since() {
 			return MSVersion.V0_0_0;
+		}
+
+	}
+
+	@api
+	public static class debugger_attached extends AbstractFunction {
+
+		public static final String NAME = "debugger_attached";
+
+		@Override
+		public String getName() {
+			return NAME;
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return null;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args)
+				throws ConfigRuntimeException {
+			return CBoolean.get(env.hasEnv(DebugContext.class)
+					&& !env.getEnv(DebugContext.class).isDisconnected());
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {} Returns true if a debugger is currently attached to this execution environment."
+					+ " This can be used to conditionally enable debug logging or other diagnostic behavior.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
 		}
 
 	}

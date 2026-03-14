@@ -191,7 +191,7 @@ public abstract class CallbackYield extends AbstractFunction implements FlowFunc
 		if(step != null) {
 			if(step.preparedEnv != null) {
 				// Pop the stack trace element that prepareExecution pushed
-				step.preparedEnv.getEnv(GlobalEnv.class).GetStackTraceManager().popStackTraceElement();
+				step.preparedEnv.getEnv(GlobalEnv.class).GetStackTraceManager().popStackTraceFrame();
 				step.preparedEnv = null;
 			}
 			if(step.cleanupAction != null) {

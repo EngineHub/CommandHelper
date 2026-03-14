@@ -97,6 +97,7 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.exceptions.StackTraceFrame;
 import com.laytonsmith.core.exceptions.StackTraceManager;
 import com.laytonsmith.core.functions.ArrayHandling.array_get;
 import com.laytonsmith.core.functions.ArrayHandling.array_push;
@@ -2347,9 +2348,8 @@ public class DataHandling {
 					if(include != null) {
 						StackTraceManager stManager
 								= env.getEnv(GlobalEnv.class).GetStackTraceManager();
-						stManager.addStackTraceElement(
-								new ConfigRuntimeException.StackTraceElement(
-								"<<include " + result.val() + ">>", t));
+						stManager.addStackTraceFrame(
+								new StackTraceFrame("<<include " + result.val() + ">>", t));
 						state.phase = IncludeState.Phase.EVAL_INCLUDE;
 						return new StepResult<>(new Evaluate(include.getChildAt(0)), state);
 					}
@@ -2382,7 +2382,7 @@ public class DataHandling {
 		public void cleanup(Target t, IncludeState state, Environment env) {
 			if(state != null
 					&& state.phase == IncludeState.Phase.EVAL_INCLUDE) {
-				env.getEnv(GlobalEnv.class).GetStackTraceManager().popStackTraceElement();
+				env.getEnv(GlobalEnv.class).GetStackTraceManager().popStackTraceFrame();
 			}
 		}
 

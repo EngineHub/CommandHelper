@@ -53,6 +53,7 @@ import com.laytonsmith.tools.Manager;
 import com.laytonsmith.tools.ProfilerSummary;
 import com.laytonsmith.tools.SyntaxHighlighters;
 import com.laytonsmith.tools.UILauncher;
+import com.laytonsmith.tools.debugger.MSDebugServer;
 import com.laytonsmith.tools.docgen.DocGen;
 import com.laytonsmith.tools.docgen.DocGenExportTool;
 import com.laytonsmith.tools.docgen.DocGenTemplates;
@@ -764,6 +765,9 @@ public class Main {
 				modules = modules.replaceAll("(.*)\n", "--add-opens $1=ALL-UNNAMED ");
 				args += " " + modules;
 			}
+			if(JavaVersion.GetMajorVersion() >= 16) {
+				args += "--enable-native-access=ALL-UNNAMED ";
+			}
 			args += "-Xrs ";
 			StreamUtils.GetSystemOut().println(args.trim());
 		}
@@ -1072,21 +1076,58 @@ public class Main {
 					.addArgument(new ArgumentBuilder()
 						.setDescription("The code to run")
 						.setUsageName("methodscript code")
-						.setRequiredAndDefault());
+						.setRequiredAndDefault())
+					.addArgument(new ArgumentBuilder()
+						.setDescription("Enable the DAP debug server.")
+						.asFlag()
+						.setName("debug"))
+					.addArgument(new ArgumentBuilder()
+						.setDescription("The port for the debug server. Defaults to "
+								+ MSDebugServer.DEFAULT_PORT + ".")
+						.setUsageName("port")
+						.setOptional()
+						.setName("debug-port")
+						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.NUMBER))
+					.addArgument(new ArgumentBuilder()
+						.setDescription("Wait for the debugger to connect before executing.")
+						.asFlag()
+						.setName("debug-suspend"));
 		}
 
 		@Override
 		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
 			ClassDiscovery.getDefaultInstance().addThisJar();
 
+			boolean debug = parsedArgs.isFlagSet("debug");
+			int debugPort = 0;
+			if(parsedArgs.getNumberArgument("debug-port") != null) {
+				debugPort = parsedArgs.getNumberArgument("debug-port").intValue();
+			}
+			boolean debugSuspend = parsedArgs.isFlagSet("debug-suspend");
+
 			String script = parsedArgs.getStringArgument();
 			File file = new File("Interpreter");
 			Environment env = Static.GenerateStandaloneEnvironment(true,
 					EnumSet.of(RuntimeMode.CMDLINE, RuntimeMode.INTERPRETER));
 			Set<Class<? extends Environment.EnvironmentImpl>> envs = Environment.getDefaultEnvClasses();
-			MethodScriptCompiler.execute(script, file, true, env, envs, (s) -> {
-				System.out.println(s);
-			}, null, null);
+
+			MSDebugServer debugServer = null;
+			if(debug) {
+				int port = debugPort == 0 ? MSDebugServer.DEFAULT_PORT : debugPort;
+				debugServer = new MSDebugServer();
+				env = debugServer.startListening(port, env, debugSuspend);
+				debugServer.awaitConfiguration();
+			}
+
+			try {
+				MethodScriptCompiler.execute(script, file, true, env, envs, (s) -> {
+					System.out.println(s);
+				}, null, null);
+			} finally {
+				if(debugServer != null) {
+					debugServer.shutdown();
+				}
+			}
 		}
 	}
 
@@ -1218,15 +1259,44 @@ public class Main {
 			//We actually can't use the parsedArgs, because there may be cmdline switches in
 			//the arguments that we want to ignore here, but otherwise pass through. parsedArgs
 			//will prevent us from seeing those, however.
-			List<String> allArgs = parsedArgs.getRawArguments();
+			List<String> allArgs = new ArrayList<>(parsedArgs.getRawArguments());
 			if(allArgs.isEmpty()) {
 				StreamUtils.GetSystemErr().println("Usage: path/to/file.ms [arg1 arg2]");
 				System.exit(1);
 			}
+
+			boolean debug = false;
+			int debugPort = 0;
+			boolean debugSuspend = false;
+			String debugThreadingMode = null;
+			for(java.util.Iterator<String> it = allArgs.iterator(); it.hasNext();) {
+				String arg = it.next();
+				if("--debug".equals(arg)) {
+					debug = true;
+					it.remove();
+				} else if("--debug-port".equals(arg)) {
+					it.remove();
+					if(it.hasNext()) {
+						debugPort = Integer.parseInt(it.next());
+						it.remove();
+					}
+				} else if("--debug-suspend".equals(arg)) {
+					debugSuspend = true;
+					it.remove();
+				} else if("--debug-threading-mode".equals(arg)) {
+					it.remove();
+					if(it.hasNext()) {
+						debugThreadingMode = it.next();
+						it.remove();
+					}
+				}
+			}
+
 			String fileName = allArgs.get(0);
 			allArgs.remove(0);
 			try {
-				Interpreter.startWithTTY(fileName, allArgs);
+				Interpreter.startWithTTY(fileName, allArgs, true,
+						debug, debugPort, debugSuspend, debugThreadingMode);
 			} catch (Profiles.InvalidProfileException ex) {
 				StreamUtils.GetSystemErr().println("Invalid profile file at " + MethodScriptFileLocations.getDefault()
 						.getProfilesFile()

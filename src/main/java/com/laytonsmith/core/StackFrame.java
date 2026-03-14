@@ -29,7 +29,7 @@ public class StackFrame {
 	private final Environment env;
 	private final Function function;
 	private final FlowFunction<?> flowFunction;
-	private final List<Mixed> args;
+	private List<Mixed> args;
 	private int childIndex;
 	private boolean begun;
 	private Object functionState;
@@ -48,7 +48,6 @@ public class StackFrame {
 		this.env = env;
 		this.function = function;
 		this.flowFunction = flowFunction;
-		this.args = new ArrayList<>();
 		this.childIndex = 0;
 		this.begun = false;
 		this.functionState = null;
@@ -158,6 +157,9 @@ public class StackFrame {
 	 * Adds an evaluated child result to the args list (for simple mode).
 	 */
 	public void addArg(Mixed result) {
+		if(args == null) {
+			args = new ArrayList<>();
+		}
 		args.add(result);
 	}
 
@@ -165,6 +167,9 @@ public class StackFrame {
 	 * Returns the accumulated evaluated arguments (for simple mode).
 	 */
 	public Mixed[] getArgs() {
+		if(args == null) {
+			return new Mixed[0];
+		}
 		return args.toArray(new Mixed[0]);
 	}
 

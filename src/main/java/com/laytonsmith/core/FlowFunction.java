@@ -2,6 +2,7 @@ package com.laytonsmith.core;
 
 import com.laytonsmith.core.StepAction.StepResult;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.environments.Environment;
 
@@ -93,5 +94,22 @@ public interface FlowFunction<S> {
 	 * @param env The current environment
 	 */
 	default void cleanup(Target t, S state, Environment env) {
+	}
+
+	/**
+	 * Returns whether the given exception would be caught by this function,
+	 * given the current per-call state. The default returns false. Override in
+	 * exception-catching functions (e.g. try/catch) to inspect the state and
+	 * determine if the exception matches a catch clause.
+	 *
+	 * <p>This is used by the debugger to determine if an exception is "uncaught"
+	 * by inspecting the eval stack without actually propagating the exception.</p>
+	 *
+	 * @param state The per-call state from the stack frame
+	 * @param exception The exception to check
+	 * @return true if this function would catch the exception in its current state
+	 */
+	default boolean wouldCatch(S state, ConfigRuntimeException exception) {
+		return false;
 	}
 }
