@@ -94,6 +94,7 @@ public class DebugInfrastructureTest {
 	 */
 	private static class TestDebugListener implements DebugListener {
 		final List<PausedState> pauses = new ArrayList<>();
+		final List<String> logMessages = new ArrayList<>();
 		boolean completed = false;
 		int resumeCount = 0;
 
@@ -110,6 +111,11 @@ public class DebugInfrastructureTest {
 		@Override
 		public void onCompleted() {
 			completed = true;
+		}
+
+		@Override
+		public void onLogPoint(String message) {
+			logMessages.add(message);
 		}
 
 		Script.DebugSnapshot snapshot(int index) {
@@ -647,5 +653,23 @@ public class DebugInfrastructureTest {
 			assertTrue("Step-over x_new_thread should pause at next line",
 					h.awaitStop(2, 5));
 		}
+	}
+
+	@Test
+	public void testLogPoint() throws Exception {
+		String script = "@x = 42\n@y = @x + 1\n@z = @y + 1";
+		TestDebugListener listener = new TestDebugListener();
+		DebugContext debugCtx = new DebugContext(listener, DebugContext.ThreadingMode.ASYNCHRONOUS,
+				Thread.currentThread());
+		debugCtx.addBreakpoint(new Breakpoint(TEST_FILE, 2, null, 0, "x is {@x}"));
+
+		executeWithDebugger(script, debugCtx);
+
+		// Log point should not cause a pause
+		assertEquals(0, listener.pauses.size());
+		// But should have logged the message
+		assertEquals(1, listener.logMessages.size());
+		assertEquals("x is 42", listener.logMessages.get(0));
+		assertTrue(listener.completed);
 	}
 }

@@ -81,6 +81,11 @@ public class DebugContext implements Environment.EnvironmentImpl {
 	private ThreadingMode threadingMode;
 	private volatile Thread mainThread;
 
+	// Log point deduplication: tracks last fired log point to avoid firing
+	// multiple times for different AST nodes on the same source line.
+	private File lastLogPointFile;
+	private int lastLogPointLine = -1;
+
 	// Per-thread debug state (step mode, pause latch, etc.)
 	private final ConcurrentHashMap<Thread, ThreadDebugState> threadStates = new ConcurrentHashMap<>();
 
@@ -335,6 +340,24 @@ public class DebugContext implements Environment.EnvironmentImpl {
 			} else {
 				shouldStop = true;
 			}
+			if(shouldStop && bp.isLogPoint()) {
+				// Deduplicate: only fire once per visit to a source line.
+				// Resets when execution moves to a different line.
+				if(!source.file().equals(lastLogPointFile) || source.line() != lastLogPointLine) {
+					lastLogPointFile = source.file();
+					lastLogPointLine = source.line();
+					String msg = interpolateLogMessage(bp.logMessage(), env);
+					listener.onLogPoint(msg);
+				}
+				return false;
+			}
+		}
+
+		// Clear log point dedup when we move to a different line
+		if(lastLogPointLine != -1
+				&& (!source.file().equals(lastLogPointFile) || source.line() != lastLogPointLine)) {
+			lastLogPointFile = null;
+			lastLogPointLine = -1;
 		}
 
 		if(!shouldStop) {
@@ -398,6 +421,46 @@ public class DebugContext implements Environment.EnvironmentImpl {
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * Interpolates a DAP log message template. Expressions in {@code {braces}} are
+	 * evaluated as MethodScript and their string value substituted in.
+	 */
+	private String interpolateLogMessage(String template, Environment env) {
+		StringBuilder sb = new StringBuilder();
+		int i = 0;
+		while(i < template.length()) {
+			char c = template.charAt(i);
+			if(c == '{') {
+				int end = template.indexOf('}', i + 1);
+				if(end == -1) {
+					sb.append(c);
+					i++;
+				} else {
+					String expr = template.substring(i + 1, end);
+					try {
+						Mixed result = MethodScriptCompiler.execute(
+								MethodScriptCompiler.compile(
+										MethodScriptCompiler.lex(expr, null, null, true),
+										null, Environment.getDefaultEnvClasses()),
+								env, null, null);
+						while(result instanceof IVariable iv) {
+							result = env.getEnv(GlobalEnv.class).GetVarList()
+									.get(iv.getVariableName(), iv.getTarget(), env).ival();
+						}
+						sb.append(result.val());
+					} catch(Exception e) {
+						sb.append("{").append(expr).append("}");
+					}
+					i = end + 1;
+				}
+			} else {
+				sb.append(c);
+				i++;
+			}
+		}
+		return sb.toString();
 	}
 
 	/**

@@ -316,6 +316,7 @@ public class MSDebugServer implements IDebugProtocolServer {
 		caps.setSupportsEvaluateForHovers(true);
 		caps.setSupportsConditionalBreakpoints(true);
 		caps.setSupportsHitConditionalBreakpoints(true);
+		caps.setSupportsLogPoints(true);
 
 		ExceptionBreakpointsFilter allFilter = new ExceptionBreakpointsFilter();
 		allFilter.setFilter("all");
@@ -408,6 +409,7 @@ public class MSDebugServer implements IDebugProtocolServer {
 			for(SourceBreakpoint sbp : sourceBreakpoints) {
 				String condition = sbp.getCondition();
 				String hitCondition = sbp.getHitCondition();
+				String logMessage = sbp.getLogMessage();
 				int hitThreshold = 0;
 				if(hitCondition != null && !hitCondition.isEmpty()) {
 					try {
@@ -421,7 +423,7 @@ public class MSDebugServer implements IDebugProtocolServer {
 				bp.setLine(sbp.getLine());
 				bp.setSource(source);
 				try {
-					debugBps.add(new Breakpoint(file, sbp.getLine(), condition, hitThreshold));
+					debugBps.add(new Breakpoint(file, sbp.getLine(), condition, hitThreshold, logMessage));
 					bp.setVerified(true);
 				} catch(IllegalArgumentException e) {
 					bp.setVerified(false);
@@ -902,6 +904,11 @@ public class MSDebugServer implements IDebugProtocolServer {
 				args.setReason(ThreadEventArgumentsReason.EXITED);
 				client.thread(args);
 			}
+		}
+
+		@Override
+		public void onLogPoint(String message) {
+			sendOutput("console", message + "\n");
 		}
 	}
 }

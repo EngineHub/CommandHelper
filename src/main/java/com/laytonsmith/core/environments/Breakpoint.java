@@ -28,6 +28,7 @@ public class Breakpoint {
 	private final ParseTree compiledCondition;
 	private final int hitCountThreshold;
 	private int hitCount;
+	private final String logMessage;
 
 	/**
 	 * Creates an unconditional breakpoint at the given file and line.
@@ -36,7 +37,7 @@ public class Breakpoint {
 	 * @param line The 1-indexed line number. Must be positive.
 	 */
 	public Breakpoint(File file, int line) {
-		this(file, line, null, 0);
+		this(file, line, null, 0, null);
 	}
 
 	/**
@@ -49,9 +50,27 @@ public class Breakpoint {
 	 * @param condition A MethodScript expression to evaluate, or null for unconditional.
 	 * @param hitCountThreshold Number of times the breakpoint must be hit before pausing
 	 *                          (0 means pause on first hit).
-	 * @throws IllegalArgumentException if the condition cannot be compiled
 	 */
 	public Breakpoint(File file, int line, String condition, int hitCountThreshold) {
+		this(file, line, condition, hitCountThreshold, null);
+	}
+
+	/**
+	 * Creates a breakpoint with optional condition, hit count threshold, and log message.
+	 * If a condition is provided, it is compiled immediately so that syntax
+	 * errors are caught early. If a logMessage is provided, this breakpoint
+	 * acts as a log point: instead of pausing, it logs the message and continues.
+	 * Expressions in {@code {braces}} within the log message are evaluated at hit time.
+	 *
+	 * @param file The source file. Must not be null.
+	 * @param line The 1-indexed line number. Must be positive.
+	 * @param condition A MethodScript expression to evaluate, or null for unconditional.
+	 * @param hitCountThreshold Number of times the breakpoint must be hit before pausing
+	 *                          (0 means pause on first hit).
+	 * @param logMessage A message to log instead of pausing, or null for a normal breakpoint.
+	 * @throws IllegalArgumentException if the condition cannot be compiled
+	 */
+	public Breakpoint(File file, int line, String condition, int hitCountThreshold, String logMessage) {
 		if(file == null) {
 			throw new IllegalArgumentException("Breakpoint file must not be null");
 		}
@@ -74,6 +93,21 @@ public class Breakpoint {
 		} else {
 			this.compiledCondition = null;
 		}
+		this.logMessage = logMessage;
+	}
+
+	/**
+	 * Returns the log message template, or null if this is a normal breakpoint.
+	 */
+	public String logMessage() {
+		return logMessage;
+	}
+
+	/**
+	 * Returns true if this is a log point (logs instead of pausing).
+	 */
+	public boolean isLogPoint() {
+		return logMessage != null && !logMessage.isEmpty();
 	}
 
 	/**

@@ -50,4 +50,15 @@ public interface DebugListener {
 	default void onThreadExited(int dapThreadId) {
 		// no-op by default
 	}
+
+	/**
+	 * Called when a log point breakpoint is hit. The message has already been
+	 * interpolated (expressions in {@code {braces}} evaluated).
+	 * Default implementation does nothing.
+	 *
+	 * @param message The interpolated log message
+	 */
+	default void onLogPoint(String message) {
+		// no-op by default
+	}
 }
