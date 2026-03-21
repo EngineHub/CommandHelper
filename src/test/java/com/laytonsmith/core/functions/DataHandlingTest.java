@@ -86,7 +86,7 @@ public class DataHandlingTest extends AbstractIntegrationTest {
 		File test = new File("unit_test_inc.ms");
 		FileUtil.write("msg('hello')", test);
 		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler
-				.lex(script, null, new File("./script.txt"), true), null, envs), env, null, null, null);
+				.lex(script, null, new File("./script.txt"), true), null, envs), env, null, null);
 		verify(fakePlayer).sendMessage("hello");
 		//delete the test file
 		test.delete();
@@ -338,6 +338,27 @@ public class DataHandlingTest extends AbstractIntegrationTest {
 	@Test
 	public void testClosureReturnsFromExecute() throws Exception {
 		assertEquals("3", SRun("execute(closure(return(3)))", fakePlayer));
+	}
+
+	@Test
+	public void testExecuteArray() throws Exception {
+		assertEquals("3", SRun("execute_array(array(1, 2), closure(@a, @b){ return(@a + @b); })", fakePlayer));
+	}
+
+	@Test
+	public void testExecuteArrayEmpty() throws Exception {
+		assertEquals("hello", SRun("execute_array(array(), closure(){ return('hello'); })", fakePlayer));
+	}
+
+	@Test
+	public void testExecuteasRestoresContext() throws Exception {
+		MCPlayer fakePlayer2 = StaticTest.GetOnlinePlayer("Player02", fakeServer);
+		when(fakeServer.getPlayer("Player02")).thenReturn(fakePlayer2);
+		SRun("@c = closure(){msg(player())};\n"
+				+ "executeas('Player02', null, @c);\n"
+				+ "msg(player());", fakePlayer);
+		verify(fakePlayer2).sendMessage("Player02");
+		verify(fakePlayer).sendMessage(fakePlayer.getName());
 	}
 
 	@Test

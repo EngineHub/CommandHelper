@@ -20,14 +20,14 @@ import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREStackOverflowError;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.exceptions.FunctionReturnException;
-import com.laytonsmith.core.exceptions.LoopManipulationException;
 import com.laytonsmith.core.exceptions.StackTraceManager;
+import com.laytonsmith.core.exceptions.UnhandledFlowControlException;
 import com.laytonsmith.core.functions.ControlFlow;
+import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
-import com.laytonsmith.core.functions.StringHandling;
+import com.laytonsmith.core.natives.interfaces.Callable;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 
 import java.util.ArrayList;
@@ -194,144 +194,37 @@ public class Procedure implements Cloneable {
 	 * @return
 	 */
 	public Mixed execute(List<Mixed> args, Environment oldEnv, Target t) {
-		boolean prev = oldEnv.getEnv(GlobalEnv.class).getCloneVars();
-		oldEnv.getEnv(GlobalEnv.class).setCloneVars(false);
-		Environment env;
-		try {
-			env = oldEnv.clone();
-			env.getEnv(GlobalEnv.class).setCloneVars(true);
-		} catch (CloneNotSupportedException ex) {
-			throw new RuntimeException(ex);
-		}
-		oldEnv.getEnv(GlobalEnv.class).setCloneVars(prev);
+		Environment env = prepareEnvironment(args, oldEnv, t);
 
 		Script fakeScript = Script.GenerateScript(tree, env.getEnv(GlobalEnv.class).GetLabel(), null);
-
-		// Create container for the @arguments variable.
-		CArray arguments = new CArray(Target.UNKNOWN, this.varIndex.size());
-
-		// Handle passed procedure arguments.
-		int varInd;
-		CArray vararg = null;
-		for(varInd = 0; varInd < args.size(); varInd++) {
-			Mixed c = args.get(varInd);
-			arguments.push(c, t);
-			if(this.varIndex.size() > varInd
-					|| (!this.varIndex.isEmpty()
-						&& this.varIndex.get(this.varIndex.size() - 1).getDefinedType().isVariadicType())) {
-				IVariable var;
-				if(varInd < this.varIndex.size() - 1
-						|| !this.varIndex.get(this.varIndex.size() - 1).getDefinedType().isVariadicType()) {
-					var = this.varIndex.get(varInd);
-				} else {
-					var = this.varIndex.get(this.varIndex.size() - 1);
-					if(vararg == null) {
-						// TODO: Once generics are added, add the type
-						vararg = new CArray(t);
-						env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE,
-								var.getVariableName(), vararg, c.getTarget()));
-					}
-				}
-
-				// Type check "void" value.
-				if(c instanceof CVoid
-						&& !(var.getDefinedType().equals(Auto.TYPE) || var.getDefinedType().equals(CVoid.TYPE))) {
-					throw new CRECastException("Procedure \"" + name + "\" expects a value of type "
-							+ var.getDefinedType().val() + " in argument " + (varInd + 1) + ", but"
-							+ " a void value was found instead.", c.getTarget());
-				}
-
-				// Type check vararg parameter.
-				if(var.getDefinedType().isVariadicType()) {
-					if(InstanceofUtil.isInstanceof(c.typeof(env), var.getDefinedType().getVarargsBaseType(), env)) {
-						vararg.push(c, t);
-						continue;
-					} else {
-						throw new CRECastException("Procedure \"" + name + "\" expects a value of type "
-								+ var.getDefinedType().val() + " in argument " + (varInd + 1) + ", but"
-								+ " a value of type " + c.typeof(env) + " was found instead.", c.getTarget());
-					}
-				}
-
-				// Type check non-vararg parameter.
-				if(InstanceofUtil.isInstanceof(c.typeof(env), var.getDefinedType(), env)) {
-					env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(var.getDefinedType(),
-							var.getVariableName(), c, c.getTarget()));
-					continue;
-				} else {
-					throw new CRECastException("Procedure \"" + name + "\" expects a value of type "
-							+ var.getDefinedType().val() + " in argument " + (varInd + 1) + ", but"
-							+ " a value of type " + c.typeof(env) + " was found instead.", c.getTarget());
-				}
-			}
-		}
-
-		// Assign default values to remaining proc arguments.
-		while(varInd < this.varIndex.size()) {
-			String varName = this.varIndex.get(varInd++).getVariableName();
-			Mixed defVal = this.originals.get(varName);
-			env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(Auto.TYPE, varName, defVal, defVal.getTarget()));
-			arguments.push(defVal, t);
-		}
-
-		env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, "@arguments", arguments, t));
 		StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
 		stManager.addStackTraceElement(new ConfigRuntimeException.StackTraceElement("proc " + name, getTarget()));
 		try {
-			if(tree.getData() instanceof CFunction
-					&& tree.getData().val().equals(StringHandling.sconcat.NAME)) {
-				//If the inner tree is just an sconcat, we can optimize by
-				//simply running the arguments to the sconcat. We're not going
-				//to use the results, after all, and this is a common occurrence,
-				//because the compiler will often put it there automatically.
-				//We *could* optimize this by removing it from the compiled code,
-				//and we still should do that, but this check is quick enough,
-				//and so can remain even once we do add the optimization to the
-				//compiler proper.
-				for(ParseTree child : tree.getChildren()) {
-					fakeScript.eval(child, env);
+			Mixed result = fakeScript.eval(tree, env);
+			if(result == null) {
+				result = CVoid.VOID;
+			}
+			return typeCheckReturn(result, env);
+		} catch(UnhandledFlowControlException e) {
+			if(e.getAction() instanceof ControlFlow.BreakAction
+					|| e.getAction() instanceof ControlFlow.ContinueAction) {
+				throw ConfigRuntimeException.CreateUncatchableException(
+						"Loop manipulation operations (e.g. break() or continue()) cannot"
+						+ " bubble up past procedures.", t);
+			}
+			if(e.getAction() instanceof Exceptions.ThrowAction ta) {
+				ConfigRuntimeException ex = ta.getException();
+				if(ex instanceof AbstractCREException ace) {
+					ace.freezeStackTraceElements(stManager);
 				}
-			} else {
-				fakeScript.eval(tree, env);
-			}
-		} catch (FunctionReturnException e) {
-			// Normal exit
-			Mixed ret = e.getReturn();
-			if(returnType.equals(Auto.TYPE)) {
-				return ret;
-			}
-			if(returnType.equals(CVoid.TYPE) != ret.equals(CVoid.VOID)
-					|| !ret.equals(CNull.NULL) && !ret.equals(CVoid.VOID)
-					&& !InstanceofUtil.isInstanceof(ret.typeof(env), returnType, env)) {
-				throw new CRECastException("Expected procedure \"" + name + "\" to return a value of type "
-						+ returnType.val() + " but a value of type " + ret.typeof(env) + " was returned instead",
-						ret.getTarget());
-			}
-			return ret;
-		} catch (LoopManipulationException ex) {
-			// These cannot bubble up past procedure calls. This will eventually be
-			// a compile error.
-			throw ConfigRuntimeException.CreateUncatchableException("Loop manipulation operations (e.g. break() or continue()) cannot"
-					+ " bubble up past procedures.", t);
-		} catch (ConfigRuntimeException e) {
-			if(e instanceof AbstractCREException) {
-				((AbstractCREException) e).freezeStackTraceElements(stManager);
+				throw ex;
 			}
 			throw e;
-		} catch (StackOverflowError e) {
+		} catch(StackOverflowError e) {
 			throw new CREStackOverflowError(null, t, e);
 		} finally {
 			stManager.popStackTraceElement();
 		}
-		// Normal exit, but no return.
-		// If we got here, then there was no return value. This is fine, but only for returnType void or auto.
-		// TODO: Once strong typing is implemented at a compiler level, this should be removed to increase runtime
-		// performance.
-		if(!(returnType.equals(Auto.TYPE) || returnType.equals(CVoid.TYPE))) {
-			throw new CRECastException("Expecting procedure \"" + name + "\" to return a value of type " + returnType.val() + ","
-					+ " but no value was returned.", tree.getTarget());
-		}
-		return CVoid.VOID;
 	}
 
 	public Target getTarget() {
@@ -352,5 +245,239 @@ public class Procedure implements Cloneable {
 
 	public void definitelyNotConstant() {
 		possiblyConstant = false;
+	}
+
+	/**
+	 * Prepares this procedure for stack-based execution without re-entering eval().
+	 * Clones the environment, binds arguments, and pushes a stack trace element.
+	 * The caller is responsible for evaluating the returned tree in the returned
+	 * environment, and for popping the stack trace element when done.
+	 *
+	 * @param args The evaluated argument values
+	 * @param callerEnv The caller's environment (will be cloned)
+	 * @param callTarget The target of the procedure call site
+	 * @return The prepared call containing the procedure body tree and environment
+	 */
+	public Callable.PreparedCallable prepareCall(List<Mixed> args, Environment callerEnv, Target callTarget) {
+		Environment env = prepareEnvironment(args, callerEnv, callTarget);
+		StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
+		stManager.addStackTraceElement(
+				new ConfigRuntimeException.StackTraceElement("proc " + name, getTarget()));
+		return new Callable.PreparedCallable(tree, env);
+	}
+
+	/**
+	 * Clones the environment and assigns procedure arguments (with type checking).
+	 * Used by both {@link #execute} and {@link ProcedureFlow}.
+	 *
+	 * @param args The evaluated argument values
+	 * @param oldEnv The caller's environment (will be cloned)
+	 * @param callTarget The target of the procedure call site
+	 * @return The prepared environment for the procedure body
+	 */
+	private Environment prepareEnvironment(List<Mixed> args, Environment oldEnv, Target callTarget) {
+		boolean prev = oldEnv.getEnv(GlobalEnv.class).getCloneVars();
+		oldEnv.getEnv(GlobalEnv.class).setCloneVars(false);
+		Environment env;
+		try {
+			env = oldEnv.clone();
+			env.getEnv(GlobalEnv.class).setCloneVars(true);
+		} catch(CloneNotSupportedException ex) {
+			throw new RuntimeException(ex);
+		}
+		oldEnv.getEnv(GlobalEnv.class).setCloneVars(prev);
+
+		CArray arguments = new CArray(Target.UNKNOWN, this.varIndex.size());
+
+		int varInd;
+		CArray vararg = null;
+		for(varInd = 0; varInd < args.size(); varInd++) {
+			Mixed c = args.get(varInd);
+			arguments.push(c, callTarget);
+			if(this.varIndex.size() > varInd
+					|| (!this.varIndex.isEmpty()
+						&& this.varIndex.get(this.varIndex.size() - 1).getDefinedType().isVariadicType())) {
+				IVariable var;
+				if(varInd < this.varIndex.size() - 1
+						|| !this.varIndex.get(this.varIndex.size() - 1).getDefinedType().isVariadicType()) {
+					var = this.varIndex.get(varInd);
+				} else {
+					var = this.varIndex.get(this.varIndex.size() - 1);
+					if(vararg == null) {
+						vararg = new CArray(callTarget);
+						env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE,
+								var.getVariableName(), vararg, c.getTarget()));
+					}
+				}
+
+				if(c instanceof CVoid
+						&& !(var.getDefinedType().equals(Auto.TYPE) || var.getDefinedType().equals(CVoid.TYPE))) {
+					throw new CRECastException("Procedure \"" + name + "\" expects a value of type "
+							+ var.getDefinedType().val() + " in argument " + (varInd + 1) + ", but"
+							+ " a void value was found instead.", c.getTarget());
+				}
+
+				if(var.getDefinedType().isVariadicType()) {
+					if(InstanceofUtil.isInstanceof(c.typeof(env), var.getDefinedType().getVarargsBaseType(), env)) {
+						vararg.push(c, callTarget);
+						continue;
+					} else {
+						throw new CRECastException("Procedure \"" + name + "\" expects a value of type "
+								+ var.getDefinedType().val() + " in argument " + (varInd + 1) + ", but"
+								+ " a value of type " + c.typeof(env) + " was found instead.", c.getTarget());
+					}
+				}
+
+				if(InstanceofUtil.isInstanceof(c.typeof(env), var.getDefinedType(), env)) {
+					env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(var.getDefinedType(),
+							var.getVariableName(), c, c.getTarget()));
+					continue;
+				} else {
+					throw new CRECastException("Procedure \"" + name + "\" expects a value of type "
+							+ var.getDefinedType().val() + " in argument " + (varInd + 1) + ", but"
+							+ " a value of type " + c.typeof(env) + " was found instead.", c.getTarget());
+				}
+			}
+		}
+
+		while(varInd < this.varIndex.size()) {
+			String varName = this.varIndex.get(varInd++).getVariableName();
+			Mixed defVal = this.originals.get(varName);
+			env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(Auto.TYPE, varName, defVal, defVal.getTarget()));
+			arguments.push(defVal, callTarget);
+		}
+
+		env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, "@arguments", arguments, callTarget));
+		return env;
+	}
+
+	/**
+	 * Type-checks a return value against this procedure's declared return type.
+	 */
+	private Mixed typeCheckReturn(Mixed ret, Environment env) {
+		if(returnType.equals(Auto.TYPE)) {
+			return ret;
+		}
+		if(returnType.equals(CVoid.TYPE) != ret.equals(CVoid.VOID)
+				|| !ret.equals(CNull.NULL) && !ret.equals(CVoid.VOID)
+				&& !InstanceofUtil.isInstanceof(ret.typeof(env), returnType, env)) {
+			throw new CRECastException("Expected procedure \"" + name + "\" to return a value of type "
+					+ returnType.val() + " but a value of type " + ret.typeof(env) + " was returned instead",
+					ret.getTarget());
+		}
+		return ret;
+	}
+
+	/**
+	 * Checks that this procedure's return type allows a void return (no explicit return statement).
+	 */
+	private Mixed typeCheckVoidReturn() {
+		if(!(returnType.equals(Auto.TYPE) || returnType.equals(CVoid.TYPE))) {
+			throw new CRECastException("Expecting procedure \"" + name + "\" to return a value of type "
+					+ returnType.val() + ", but no value was returned.", tree.getTarget());
+		}
+		return CVoid.VOID;
+	}
+
+	/**
+	 * Creates a {@link FlowFunction} for this procedure call, for use with the iterative
+	 * interpreter. The flow function manages the procedure call lifecycle:
+	 * <ol>
+	 *   <li>Evaluates argument expressions (with IVariable resolution)</li>
+	 *   <li>Prepares the procedure environment (clones env, assigns parameters)</li>
+	 *   <li>Evaluates the procedure body in the new environment</li>
+	 *   <li>Handles Return (type-checks and completes), blocks Break/Continue</li>
+	 * </ol>
+	 *
+	 * @param callTarget The target of the procedure call site
+	 * @return A per-call FlowFunction for this procedure
+	 */
+	public FlowFunction<?> createProcedureFlow(Target callTarget) {
+		return new ProcedureFlow(callTarget);
+	}
+
+	/**
+	 * Per-call flow function for procedure execution in the iterative interpreter.
+	 * Manages the two-phase lifecycle: arg evaluation then body evaluation.
+	 * Since this is created per-call, it stores state in its own fields
+	 * rather than using the generic S type parameter.
+	 */
+	private class ProcedureFlow implements FlowFunction<Void> {
+		private final Target callTarget;
+		private final List<Mixed> evaluatedArgs = new ArrayList<>();
+		private ParseTree[] children;
+		private int argIndex = 0;
+		private boolean bodyStarted = false;
+		private Environment procEnv;
+
+		ProcedureFlow(Target callTarget) {
+			this.callTarget = callTarget;
+		}
+
+		@Override
+		public StepAction.StepResult<Void> begin(Target t, ParseTree[] children, Environment env) {
+			this.children = children;
+			if(children.length == 0) {
+				return new StepAction.StepResult<>(startBody(env), null);
+			}
+			return new StepAction.StepResult<>(new StepAction.Evaluate(children[0]), null);
+		}
+
+		@Override
+		public StepAction.StepResult<Void> childCompleted(Target t, Void state, Mixed result, Environment env) {
+			if(!bodyStarted) {
+				// Resolve IVariables (seval semantics for proc arguments)
+				Mixed resolved = result;
+				while(resolved instanceof IVariable cur) {
+					resolved = env.getEnv(GlobalEnv.class).GetVarList()
+							.get(cur.getVariableName(), cur.getTarget(), env).ival();
+				}
+				evaluatedArgs.add(resolved);
+				argIndex++;
+				if(argIndex < children.length) {
+					return new StepAction.StepResult<>(new StepAction.Evaluate(children[argIndex]), null);
+				}
+				return new StepAction.StepResult<>(startBody(env), null);
+			}
+			// Body completed normally (no explicit return)
+			return new StepAction.StepResult<>(new StepAction.Complete(typeCheckVoidReturn()), null);
+		}
+
+		@Override
+		public StepAction.StepResult<Void> childInterrupted(Target t, Void state,
+				StepAction.FlowControl action, Environment env) {
+			StepAction.FlowControlAction fca = action.getAction();
+			if(fca instanceof ControlFlow.ReturnAction ret) {
+				return new StepAction.StepResult<>(
+						new StepAction.Complete(typeCheckReturn(ret.getValue(), procEnv)), null);
+			}
+			if(fca instanceof ControlFlow.BreakAction || fca instanceof ControlFlow.ContinueAction) {
+				throw ConfigRuntimeException.CreateUncatchableException(
+						"Loop manipulation operations (e.g. break() or continue()) cannot"
+						+ " bubble up past procedures.", callTarget);
+			}
+			// Unknown flow control — propagate
+			return null;
+		}
+
+		@Override
+		public void cleanup(Target t, Void state, Environment env) {
+			popStackTrace();
+		}
+
+		private StepAction startBody(Environment callerEnv) {
+			bodyStarted = true;
+			procEnv = prepareEnvironment(evaluatedArgs, callerEnv, callTarget);
+			StackTraceManager stManager = procEnv.getEnv(GlobalEnv.class).GetStackTraceManager();
+			stManager.addStackTraceElement(
+					new ConfigRuntimeException.StackTraceElement("proc " + name, getTarget()));
+			return new StepAction.Evaluate(tree, procEnv);
+		}
+
+		private void popStackTrace() {
+			if(procEnv != null) {
+				procEnv.getEnv(GlobalEnv.class).GetStackTraceManager().popStackTraceElement();
+			}
+		}
 	}
 }
