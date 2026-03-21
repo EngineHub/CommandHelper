@@ -12,7 +12,6 @@ import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
-import com.laytonsmith.core.Script;
 import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.SelfStatement;
@@ -24,7 +23,6 @@ import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CString;
-import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.IVariableList;
 import com.laytonsmith.core.constructs.Target;
@@ -56,22 +54,6 @@ public abstract class AbstractFunction implements Function {
 	protected AbstractFunction() {
 		//If we have the noprofile annotation, cache that we don't want to profile.
 		shouldProfile = !this.getClass().isAnnotationPresent(noprofile.class);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * By default, we return CVoid.
-	 *
-	 * @param t
-	 * @param env
-	 * @param parent
-	 * @param nodes
-	 * @return
-	 */
-	@Override
-	public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
-		return CVoid.VOID;
 	}
 
 	/**
@@ -201,16 +183,6 @@ public abstract class AbstractFunction implements Function {
 			return firstArgScope;
 		}
 		return parentScope;
-	}
-
-	/**
-	 * By default, we return false, because most functions do not need this
-	 *
-	 * @return
-	 */
-	@Override
-	public boolean useSpecialExec() {
-		return false;
 	}
 
 	/**

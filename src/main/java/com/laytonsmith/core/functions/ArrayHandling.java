@@ -11,10 +11,15 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.CallbackYield;
+import com.laytonsmith.core.FlowFunction;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
-import com.laytonsmith.core.Script;
+import com.laytonsmith.core.StepAction;
+import com.laytonsmith.core.StepAction.Complete;
+import com.laytonsmith.core.StepAction.Evaluate;
+import com.laytonsmith.core.StepAction.StepResult;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.compiler.signature.FunctionSignatures;
@@ -49,7 +54,6 @@ import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.functions.BasicLogic.equals;
 import com.laytonsmith.core.functions.BasicLogic.equals_ic;
 import com.laytonsmith.core.functions.BasicLogic.sequals;
@@ -67,6 +71,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.BiConsumer;
 
 @core
 public class ArrayHandling {
@@ -387,7 +392,7 @@ public class ArrayHandling {
 	@api
 	@seealso({array_get.class, array.class, array_push.class, com.laytonsmith.tools.docgen.templates.Arrays.class})
 	@OperatorPreferred("@array[@key] = @value")
-	public static class array_set extends AbstractFunction {
+	public static class array_set extends AbstractFunction implements FlowFunction<array_set.ArraySetState> {
 
 		public static final String NAME = "array_set";
 
@@ -401,32 +406,68 @@ public class ArrayHandling {
 			return new Integer[]{3};
 		}
 
-		@Override
-		public boolean useSpecialExec() {
-			return true;
+		static class ArraySetState {
+			enum Phase { EVAL_ARRAY, EVAL_INDEX, EVAL_VALUE }
+			Phase phase = Phase.EVAL_ARRAY;
+			ParseTree[] children;
+			Mixed array;
+			Mixed index;
+
+			ArraySetState(ParseTree[] children) {
+				this.children = children;
+			}
+
+			@Override
+			public String toString() {
+				return phase.name();
+			}
 		}
 
 		@Override
-		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public StepResult<ArraySetState> begin(Target t, ParseTree[] children, Environment env) {
 			env.getEnv(GlobalEnv.class).SetFlag(GlobalEnv.FLAG_ARRAY_SPECIAL_GET, true);
-			Mixed array;
-			try {
-				array = parent.seval(nodes[0], env);
-			} finally {
+			ArraySetState state = new ArraySetState(children);
+			return new StepResult<>(new Evaluate(children[0]), state);
+		}
+
+		@Override
+		public StepResult<ArraySetState> childCompleted(Target t, ArraySetState state,
+				Mixed result, Environment env) {
+			switch(state.phase) {
+				case EVAL_ARRAY:
+					env.getEnv(GlobalEnv.class).ClearFlag(GlobalEnv.FLAG_ARRAY_SPECIAL_GET);
+					state.array = result;
+					state.phase = ArraySetState.Phase.EVAL_INDEX;
+					return new StepResult<>(new Evaluate(state.children[1]), state);
+				case EVAL_INDEX:
+					state.index = result;
+					state.phase = ArraySetState.Phase.EVAL_VALUE;
+					return new StepResult<>(new Evaluate(state.children[2]), state);
+				case EVAL_VALUE:
+					if(!(state.array.isInstanceOf(ArrayAccessSet.TYPE, null, env))) {
+						throw new CRECastException("Argument 1 of " + getName()
+								+ " must be an array, or implement ArrayAccessSet.", t);
+					}
+					try {
+						((ArrayAccessSet) state.array).set(state.index, result, t, env);
+					} catch(IndexOutOfBoundsException e) {
+						throw new CREIndexOverflowException("The index "
+								+ new CString(state.index).getQuote() + " is out of bounds", t);
+					}
+					return new StepResult<>(new Complete(result), state);
+				default:
+					throw ConfigRuntimeException.CreateUncatchableException(
+							"Invalid array_set state: " + state.phase, t);
+			}
+		}
+
+		@Override
+		public StepResult<ArraySetState> childInterrupted(Target t, ArraySetState state,
+				StepAction.FlowControl action, Environment env) {
+			if(state.phase == ArraySetState.Phase.EVAL_ARRAY) {
 				env.getEnv(GlobalEnv.class).ClearFlag(GlobalEnv.FLAG_ARRAY_SPECIAL_GET);
 			}
-			Mixed index = parent.seval(nodes[1], env);
-			Mixed value = parent.seval(nodes[2], env);
-			if(!(array.isInstanceOf(ArrayAccessSet.TYPE, null, env))) {
-				throw new CRECastException("Argument 1 of " + this.getName() + " must be an array, or implement ArrayAccessSet.", t);
-			}
-
-			try {
-				((ArrayAccessSet) array).set(index, value, t, env);
-			} catch(IndexOutOfBoundsException e) {
-				throw new CREIndexOverflowException("The index " + new CString(index).getQuote() + " is out of bounds", t);
-			}
-			return value;
+			return null;
 		}
 
 		@Override
@@ -1737,7 +1778,7 @@ public class ArrayHandling {
 	}
 
 	@api
-	public static class array_sort extends AbstractFunction implements Optimizable {
+	public static class array_sort extends CallbackYield implements Optimizable {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -1755,7 +1796,7 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		protected void execWithYield(Target t, Environment env, Mixed[] args, CallbackYield.Yield yield) {
 			if(!(args[0].isInstanceOf(CArray.TYPE, null, env))) {
 				throw new CRECastException("The first parameter to array_sort must be an array", t);
 			}
@@ -1763,7 +1804,8 @@ public class ArrayHandling {
 			CArray.ArraySortType sortType = CArray.ArraySortType.REGULAR;
 			CClosure customSort = null;
 			if(ca.size(env) <= 1) {
-				return ca;
+				yield.done(() -> ca);
+				return;
 			}
 			try {
 				if(args.length == 2) {
@@ -1778,83 +1820,124 @@ public class ArrayHandling {
 				throw new CREFormatException("The sort type must be one of either: " + StringUtils.Join(CArray.ArraySortType.values(), ", ", " or "), t);
 			}
 			if(sortType == null) {
-				// It's a custom sort, which we have implemented below.
 				if(ca.isAssociative()) {
 					throw new CRECastException("Associative arrays may not be sorted using a custom comparator.", t);
 				}
-				CArray sorted = customSort(ca, customSort, t, env);
-				//Clear it out and re-apply the values, so this is in place.
-				ca.clear();
-				for(Mixed c : sorted.keySet(env)) {
-					ca.set(c, sorted.get(c, t, env), t, env);
+				// Copy elements into a working list for bottom-up merge sort
+				int n = (int) ca.size(env);
+				Mixed[] work = new Mixed[n];
+				for(int i = 0; i < n; i++) {
+					work[i] = ca.get(i, t, env);
 				}
+				// Queue the first merge comparison
+				queueMergeSort(customSort, env, t, work, ca, yield);
 			} else {
 				ca.sort(sortType, env);
 			}
-			return ca;
+			yield.done(() -> ca);
 		}
 
-		private CArray customSort(CArray ca, CClosure closure, Target t, Environment env) {
-			if(ca.size(env) <= 1) {
-				return ca;
-			}
+		/**
+		 * Implements a bottom-up merge sort using yield steps. Each element comparison
+		 * is a closure call that yields to the eval loop.
+		 */
+		private void queueMergeSort(CClosure closure, Environment env, Target t,
+				Mixed[] work, CArray ca, CallbackYield.Yield yield) {
+			int n = work.length;
+			// State: width doubles each pass (1, 2, 4, ...), i is the start of each merge block
+			int[] width = {1};
+			int[] i = {0};
+			// left/right pointers within the current merge
+			int[] l = {0};
+			int[] r = {0};
+			int[] lEnd = {0};
+			int[] rEnd = {0};
+			Mixed[] aux = new Mixed[n];
 
-			CArray left = new CArray(t);
-			CArray right = new CArray(t);
-			int middle = (int) (ca.size(env) / 2);
-			for(int i = 0; i < middle; i++) {
-				left.push(ca.get(i, t, env), t, env);
-			}
-			for(int i = middle; i < ca.size(env); i++) {
-				right.push(ca.get(i, t, env), t, env);
-			}
-
-			left = customSort(left, closure, t, env);
-			right = customSort(right, closure, t, env);
-
-			return merge(left, right, closure, t, env);
-		}
-
-		private CArray merge(CArray left, CArray right, CClosure closure, Target t, Environment env) {
-			CArray result = new CArray(t);
-			while(left.size(env) > 0 || right.size(env) > 0) {
-				if(left.size(env) > 0 && right.size(env) > 0) {
-					// Compare the first two elements of each side
-					Mixed l = left.get(0, t, env);
-					Mixed r = right.get(0, t, env);
-					Mixed c = closure.executeCallable(null, t, l, r);
-					int value;
-					if(c instanceof CNull) {
-						value = 0;
-					} else if(c instanceof CBoolean) {
-						if(((CBoolean) c).getBoolean()) {
-							value = 1;
+			// Set up initial merge block
+			Runnable[] setupNextMerge = new Runnable[1];
+			setupNextMerge[0] = () -> {
+				while(width[0] < n) {
+					if(i[0] < n) {
+						l[0] = i[0];
+						lEnd[0] = java.lang.Math.min(i[0] + width[0], n);
+						r[0] = lEnd[0];
+						rEnd[0] = java.lang.Math.min(i[0] + 2 * width[0], n);
+						i[0] += 2 * width[0];
+						if(r[0] < rEnd[0]) {
+							// This merge block has elements on both sides; need comparisons
+							return;
 						} else {
-							value = -1;
+							// Only left side has elements, just copy them
+							for(int k = l[0]; k < lEnd[0]; k++) {
+								aux[k] = work[k];
+							}
+							continue;
 						}
-					} else if(c.isInstanceOf(CInt.TYPE, null, env)) {
-						long longVal = ((CInt) c).getInt();
-						value = (longVal > 0 ? 1 : (longVal < 0 ? -1 : 0));
-					} else {
-						throw new CRECastException("The custom closure did not return a value (or returned an invalid"
-								+ " type). It must always return true, false, null, or an integer.", t);
 					}
-					if(value <= 0) {
-						result.push(left.get(0, t, env), t, env);
-						left.remove(0, env);
-					} else {
-						result.push(right.get(0, t, env), t, env);
-						right.remove(0, env);
-					}
-				} else if(left.size(env) > 0) {
-					result.push(left.get(0, t, env), t, env);
-					left.remove(0, env);
-				} else if(right.size(env) > 0) {
-					result.push(right.get(0, t, env), t, env);
-					right.remove(0, env);
+					// Finished a pass — copy aux back to work and start next width
+					System.arraycopy(aux, 0, work, 0, n);
+					width[0] *= 2;
+					i[0] = 0;
 				}
+				// Sort complete — write results back to the CArray
+				ca.clear();
+				for(int k = 0; k < n; k++) {
+					ca.push(work[k], t, env);
+				}
+			};
+
+			// Recursive step that drives the merge comparison
+			BiConsumer<Mixed, CallbackYield.Yield>[] mergeStep = new BiConsumer[1];
+			mergeStep[0] = (result, y) -> {
+				int value = parseCompareResult(result, t, env);
+				if(value <= 0) {
+					aux[l[0] + r[0] - lEnd[0]] = work[l[0]];
+					l[0]++;
+				} else {
+					aux[l[0] + r[0] - lEnd[0]] = work[r[0]];
+					r[0]++;
+				}
+				// Continue merging this block
+				if(l[0] < lEnd[0] && r[0] < rEnd[0]) {
+					y.call(closure, env, t, work[l[0]], work[r[0]]).then(mergeStep[0]);
+				} else {
+					// One side exhausted — copy remainder
+					while(l[0] < lEnd[0]) {
+						aux[l[0] + r[0] - lEnd[0]] = work[l[0]];
+						l[0]++;
+					}
+					while(r[0] < rEnd[0]) {
+						aux[l[0] + r[0] - lEnd[0]] = work[r[0]];
+						r[0]++;
+					}
+					// Move to next merge block
+					setupNextMerge[0].run();
+					if(width[0] < n) {
+						y.call(closure, env, t, work[l[0]], work[r[0]]).then(mergeStep[0]);
+					}
+				}
+			};
+
+			// Kick off the first comparison
+			setupNextMerge[0].run();
+			if(width[0] < n) {
+				yield.call(closure, env, t, work[l[0]], work[r[0]]).then(mergeStep[0]);
 			}
-			return result;
+		}
+
+		private int parseCompareResult(Mixed c, Target t, Environment env) {
+			if(c instanceof CNull) {
+				return 0;
+			} else if(c instanceof CBoolean) {
+				return ((CBoolean) c).getBoolean() ? 1 : -1;
+			} else if(c.isInstanceOf(CInt.TYPE, null, env)) {
+				long longVal = ((CInt) c).getInt();
+				return (longVal > 0 ? 1 : (longVal < 0 ? -1 : 0));
+			} else {
+				throw new CRECastException("The custom closure did not return a value (or returned an invalid"
+						+ " type). It must always return true, false, null, or an integer.", t);
+			}
 		}
 
 		@Override
@@ -2536,7 +2619,7 @@ public class ArrayHandling {
 	}
 
 	@api
-	public static class array_filter extends AbstractFunction {
+	public static class array_filter extends CallbackYield {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -2554,7 +2637,7 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		protected void execWithYield(Target t, Environment env, Mixed[] args, CallbackYield.Yield yield) {
 			com.laytonsmith.core.natives.interfaces.Iterable array;
 			CClosure closure;
 			if(!(args[0] instanceof com.laytonsmith.core.natives.interfaces.Iterable)) {
@@ -2570,28 +2653,32 @@ public class ArrayHandling {
 				newArray = CArray.GetAssociativeArray(t, null, env);
 				for(Mixed key : array.keySet(env)) {
 					Mixed value = array.get(key, t, env);
-					Mixed ret = closure.executeCallable(env, t, key, value);
-					boolean bret = ArgumentValidation.getBooleanish(ret, t, env);
-					if(bret) {
-						newArray.set(key, value, t, env);
-					}
+					yield.call(closure, env, t, key, value)
+							.then((result, y) -> {
+								boolean bret = ArgumentValidation.getBooleanish(result, t, env);
+								if(bret) {
+									newArray.set(key, value, t, env);
+								}
+							});
 				}
 			} else {
 				newArray = new CArray(t);
 				for(int i = 0; i < array.size(env); i++) {
-					Mixed key = new CInt(i, t);
 					Mixed value = array.get(i, t, env);
-					Mixed ret = closure.executeCallable(env, t, key, value);
-					if(ret == CNull.NULL) {
-						ret = CBoolean.FALSE;
-					}
-					boolean bret = ArgumentValidation.getBooleanish(ret, t, env);
-					if(bret) {
-						newArray.push(value, t, env);
-					}
+					yield.call(closure, env, t, new CInt(i, t), value)
+							.then((result, y) -> {
+								Mixed r = result;
+								if(r == CNull.NULL) {
+									r = CBoolean.FALSE;
+								}
+								boolean bret = ArgumentValidation.getBooleanish(r, t, env);
+								if(bret) {
+									newArray.push(value, t, env);
+								}
+							});
 				}
 			}
-			return newArray;
+			yield.done(() -> newArray);
 		}
 
 		@Override
@@ -2780,7 +2867,7 @@ public class ArrayHandling {
 	}
 
 	@api
-	public static class array_iterate extends AbstractFunction {
+	public static class array_iterate extends CallbackYield {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -2798,7 +2885,7 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		protected void execWithYield(Target t, Environment env, Mixed[] args, CallbackYield.Yield yield) {
 			ArrayAccess aa;
 			if(args[0] instanceof CFixedArray fa) {
 				aa = fa;
@@ -2807,13 +2894,9 @@ public class ArrayHandling {
 			}
 			CClosure closure = ArgumentValidation.getObject(args[1], t, CClosure.class);
 			for(Mixed key : aa.keySet(env)) {
-				try {
-					closure.executeCallable(env, t, key, aa.get(key, t, env));
-				} catch(ProgramFlowManipulationException ex) {
-					// Ignored
-				}
+				yield.call(closure, env, t, key, aa.get(key, t, env));
 			}
-			return aa;
+			yield.done(() -> aa);
 		}
 
 		@Override
@@ -2858,7 +2941,7 @@ public class ArrayHandling {
 	}
 
 	@api
-	public static class array_reduce extends AbstractFunction {
+	public static class array_reduce extends CallbackYield {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -2876,26 +2959,36 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		protected void execWithYield(Target t, Environment env, Mixed[] args, CallbackYield.Yield yield) {
 			CArray array = ArgumentValidation.getArray(args[0], t, env);
 			CClosure closure = ArgumentValidation.getObject(args[1], t, CClosure.class);
 			if(array.isEmpty(env)) {
-				return CNull.NULL;
-			}
-			if(array.size(env) == 1) {
-				// This line looks bad, but all it does is return the first (and since we know only) value in the array,
-				// whether or not it is associative or normal.
-				return array.get(array.keySet(env).toArray(Mixed[]::new)[0], t, env);
+				yield.done(() -> CNull.NULL);
+				return;
 			}
 			List<Mixed> keys = new ArrayList<>(array.keySet(env));
-			Mixed lastValue = array.get(keys.get(0), t, env);
-			for(int i = 1; i < keys.size(); ++i) {
-				lastValue = closure.executeCallable(env, t, lastValue, array.get(keys.get(i), t, env));
-				if(lastValue instanceof CVoid) {
-					throw new CREIllegalArgumentException("The closure passed to " + getName() + " cannot return void.", t);
-				}
+			if(array.size(env) == 1) {
+				yield.done(() -> array.get(keys.get(0), t, env));
+				return;
 			}
-			return lastValue;
+			Mixed[] acc = {array.get(keys.get(0), t, env)};
+			queueReduceStep(closure, env, t, array, keys, acc, 1, yield);
+			yield.done(() -> acc[0]);
+		}
+
+		private void queueReduceStep(CClosure closure, Environment env, Target t,
+				CArray array, List<Mixed> keys, Mixed[] acc, int index, CallbackYield.Yield yield) {
+			yield.call(closure, env, t, acc[0], array.get(keys.get(index), t, env))
+					.then((result, y) -> {
+						if(result instanceof CVoid) {
+							throw new CREIllegalArgumentException("The closure passed to " + getName()
+									+ " cannot return void.", t);
+						}
+						acc[0] = result;
+						if(index + 1 < keys.size()) {
+							queueReduceStep(closure, env, t, array, keys, acc, index + 1, y);
+						}
+					});
 		}
 
 		@Override
@@ -2943,7 +3036,7 @@ public class ArrayHandling {
 	}
 
 	@api
-	public static class array_reduce_right extends AbstractFunction {
+	public static class array_reduce_right extends CallbackYield {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -2961,26 +3054,36 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		protected void execWithYield(Target t, Environment env, Mixed[] args, CallbackYield.Yield yield) {
 			CArray array = ArgumentValidation.getArray(args[0], t, env);
 			CClosure closure = ArgumentValidation.getObject(args[1], t, CClosure.class);
 			if(array.isEmpty(env)) {
-				return CNull.NULL;
-			}
-			if(array.size(env) == 1) {
-				// This line looks bad, but all it does is return the first (and since we know only) value in the array,
-				// whether or not it is associative or normal.
-				return array.get(array.keySet(env).toArray(Mixed[]::new)[0], t, env);
+				yield.done(() -> CNull.NULL);
+				return;
 			}
 			List<Mixed> keys = new ArrayList<>(array.keySet(env));
-			Mixed lastValue = array.get(keys.get(keys.size() - 1), t, env);
-			for(int i = keys.size() - 2; i >= 0; --i) {
-				lastValue = closure.executeCallable(env, t, lastValue, array.get(keys.get(i), t, env));
-				if(lastValue instanceof CVoid) {
-					throw new CREIllegalArgumentException("The closure passed to " + getName() + " cannot return void.", t);
-				}
+			if(array.size(env) == 1) {
+				yield.done(() -> array.get(keys.get(0), t, env));
+				return;
 			}
-			return lastValue;
+			Mixed[] acc = {array.get(keys.get(keys.size() - 1), t, env)};
+			queueReduceStep(closure, env, t, array, keys, acc, keys.size() - 2, yield);
+			yield.done(() -> acc[0]);
+		}
+
+		private void queueReduceStep(CClosure closure, Environment env, Target t,
+				CArray array, List<Mixed> keys, Mixed[] acc, int index, CallbackYield.Yield yield) {
+			yield.call(closure, env, t, acc[0], array.get(keys.get(index), t, env))
+					.then((result, y) -> {
+						if(result instanceof CVoid) {
+							throw new CREIllegalArgumentException("The closure passed to " + getName()
+									+ " cannot return void.", t);
+						}
+						acc[0] = result;
+						if(index - 1 >= 0) {
+							queueReduceStep(closure, env, t, array, keys, acc, index - 1, y);
+						}
+					});
 		}
 
 		@Override
@@ -3028,7 +3131,7 @@ public class ArrayHandling {
 	}
 
 	@api
-	public static class array_every extends AbstractFunction {
+	public static class array_every extends CallbackYield {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -3046,17 +3149,21 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		protected void execWithYield(Target t, Environment env, Mixed[] args, CallbackYield.Yield yield) {
 			CArray array = ArgumentValidation.getArray(args[0], t, env);
 			CClosure closure = ArgumentValidation.getObject(args[1], t, CClosure.class);
+			boolean[] result = {true};
 			for(Mixed c : array.keySet(env)) {
-				Mixed fr = closure.executeCallable(env, t, array.get(c, t, env));
-				boolean ret = ArgumentValidation.getBooleanish(fr, t, env);
-				if(ret == false) {
-					return CBoolean.FALSE;
-				}
+				yield.call(closure, env, t, array.get(c, t, env))
+						.then((fr, y) -> {
+							boolean ret = ArgumentValidation.getBooleanish(fr, t, env);
+							if(!ret) {
+								result[0] = false;
+								y.clear();
+							}
+						});
 			}
-			return CBoolean.TRUE;
+			yield.done(() -> CBoolean.get(result[0]));
 		}
 
 		@Override
@@ -3101,7 +3208,7 @@ public class ArrayHandling {
 	}
 
 	@api
-	public static class array_some extends AbstractFunction {
+	public static class array_some extends CallbackYield {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -3119,17 +3226,21 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		protected void execWithYield(Target t, Environment env, Mixed[] args, CallbackYield.Yield yield) {
 			CArray array = ArgumentValidation.getArray(args[0], t, env);
 			CClosure closure = ArgumentValidation.getObject(args[1], t, CClosure.class);
+			boolean[] result = {false};
 			for(Mixed c : array.keySet(env)) {
-				Mixed fr = closure.executeCallable(env, t, array.get(c, t, env));
-				boolean ret = ArgumentValidation.getBooleanish(fr, t, env);
-				if(ret == true) {
-					return CBoolean.TRUE;
-				}
+				yield.call(closure, env, t, array.get(c, t, env))
+						.then((fr, y) -> {
+							boolean ret = ArgumentValidation.getBooleanish(fr, t, env);
+							if(ret) {
+								result[0] = true;
+								y.clear();
+							}
+						});
 			}
-			return CBoolean.FALSE;
+			yield.done(() -> CBoolean.get(result[0]));
 		}
 
 		@Override
@@ -3174,7 +3285,7 @@ public class ArrayHandling {
 	}
 
 	@api
-	public static class array_map extends AbstractFunction {
+	public static class array_map extends CallbackYield {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -3192,21 +3303,22 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		protected void execWithYield(Target t, Environment env, Mixed[] args, CallbackYield.Yield yield) {
 			CArray array = ArgumentValidation.getArray(args[0], t, env);
 			CClosure closure = ArgumentValidation.getObject(args[1], t, CClosure.class);
 			CArray newArray = (array.isAssociative() ? CArray.GetAssociativeArray(t, null, env) : new CArray(t, (int) array.size(env)));
 
 			for(Mixed c : array.keySet(env)) {
-				Mixed fr = closure.executeCallable(env, t, array.get(c, t, env));
-				if(fr.isInstanceOf(CVoid.TYPE, null, env)) {
-					throw new CREIllegalArgumentException("The closure passed to " + getName()
-							+ " must return a value.", t);
-				}
-				newArray.set(c, fr, t, env);
+				yield.call(closure, env, t, array.get(c, t, env))
+						.then((result, y) -> {
+							if(result.isInstanceOf(CVoid.TYPE, null, env)) {
+								throw new CREIllegalArgumentException("The closure passed to " + getName()
+										+ " must return a value.", t);
+							}
+							newArray.set(c, result, t, env);
+						});
 			}
-
-			return newArray;
+			yield.done(() -> newArray);
 		}
 
 		@Override
@@ -3270,7 +3382,7 @@ public class ArrayHandling {
 
 	@api
 	@seealso({array_merge.class, array_subtract.class})
-	public static class array_intersect extends AbstractFunction {
+	public static class array_intersect extends CallbackYield {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -3288,7 +3400,7 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		protected void execWithYield(Target t, Environment env, Mixed[] args, CallbackYield.Yield yield) {
 			CArray one = ArgumentValidation.getArray(args[0], t, env);
 			CArray two = ArgumentValidation.getArray(args[1], t, env);
 			CClosure closure = null;
@@ -3320,6 +3432,12 @@ public class ArrayHandling {
 						ret.push(c, t, env);
 					}
 				}
+			} else if(closure != null) {
+				Mixed[] k1 = new Mixed[(int) one.size(env)];
+				Mixed[] k2 = new Mixed[(int) two.size(env)];
+				one.keySet(env).toArray(k1);
+				two.keySet(env).toArray(k2);
+				queueIntersectStep(closure, env, t, one, two, k1, k2, ret, 0, 0, yield);
 			} else {
 				Mixed[] k1 = new Mixed[(int) one.size(env)];
 				Mixed[] k2 = new Mixed[(int) two.size(env)];
@@ -3336,30 +3454,44 @@ public class ArrayHandling {
 								continue i;
 							}
 						} else {
-							if(closure == null) {
-								if(comparisonFunction != null) {
-									if(ArgumentValidation.getBooleanish(comparisonFunction.exec(t, env, null,
-											one.get(k1[i], t, env), two.get(k2[j], t, env)
-									), t, env)) {
-										ret.push(one.get(k1[i], t, env), t, env);
-										continue i;
-									}
-								} else {
-									throw new Error();
-								}
-							} else {
-								Mixed fre = closure.executeCallable(env, t, one.get(k1[i], t, env), two.get(k2[j], t, env));
-								boolean res = ArgumentValidation.getBooleanish(fre, fre.getTarget(), env);
-								if(res) {
+							if(comparisonFunction != null) {
+								if(ArgumentValidation.getBooleanish(comparisonFunction.exec(t, env, null,
+										one.get(k1[i], t, env), two.get(k2[j], t, env)
+								), t, env)) {
 									ret.push(one.get(k1[i], t, env), t, env);
 									continue i;
 								}
+							} else {
+								throw new Error();
 							}
 						}
 					}
 				}
 			}
-			return ret;
+			yield.done(() -> ret);
+		}
+
+		private void queueIntersectStep(CClosure closure, Environment env, Target t,
+				CArray one, CArray two, Mixed[] k1, Mixed[] k2, CArray ret,
+				int i, int j, CallbackYield.Yield yield) {
+			if(i >= k1.length) {
+				return;
+			}
+			yield.call(closure, env, t, one.get(k1[i], t, env), two.get(k2[j], t, env))
+					.then((result, y) -> {
+						boolean res = ArgumentValidation.getBooleanish(result, result.getTarget(), env);
+						if(res) {
+							ret.push(one.get(k1[i], t, env), t, env);
+							// Match found, skip to next outer element
+							queueIntersectStep(closure, env, t, one, two, k1, k2, ret, i + 1, 0, y);
+						} else if(j + 1 < k2.length) {
+							// Try next inner element
+							queueIntersectStep(closure, env, t, one, two, k1, k2, ret, i, j + 1, y);
+						} else {
+							// Exhausted inner loop, move to next outer element
+							queueIntersectStep(closure, env, t, one, two, k1, k2, ret, i + 1, 0, y);
+						}
+					});
 		}
 
 		@Override
@@ -3662,7 +3794,7 @@ public class ArrayHandling {
 
 	@api
 	@seealso(array_intersect.class)
-	public static class array_subtract extends AbstractFunction {
+	public static class array_subtract extends CallbackYield {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -3680,7 +3812,7 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		protected void execWithYield(Target t, Environment env, Mixed[] args, CallbackYield.Yield yield) {
 			CArray one = ArgumentValidation.getArray(args[0], t, env);
 			CArray two = ArgumentValidation.getArray(args[1], t, env);
 			CClosure closure = null;
@@ -3712,6 +3844,12 @@ public class ArrayHandling {
 						ret.push(c, t, env);
 					}
 				}
+			} else if(closure != null) {
+				Mixed[] k1 = new Mixed[(int) one.size(env)];
+				Mixed[] k2 = new Mixed[(int) two.size(env)];
+				one.keySet(env).toArray(k1);
+				two.keySet(env).toArray(k2);
+				queueSubtractStep(closure, env, t, one, two, k1, k2, ret, 0, 0, yield);
 			} else {
 				Mixed[] k1 = new Mixed[(int) one.size(env)];
 				Mixed[] k2 = new Mixed[(int) two.size(env)];
@@ -3728,24 +3866,15 @@ public class ArrayHandling {
 								break;
 							}
 						} else {
-							if(closure == null) {
-								if(comparisonFunction != null) {
-									if(ArgumentValidation.getBooleanish(comparisonFunction.exec(t, env, null,
-											one.get(k1[i], t, env), two.get(k2[j], t, env)
-									), t, env)) {
-										addValue = false;
-										break;
-									}
-								} else {
-									throw new Error();
-								}
-							} else {
-								Mixed fre = closure.executeCallable(env, t, one.get(k1[i], t, env), two.get(k2[j], t, env));
-								boolean res = ArgumentValidation.getBooleanish(fre, fre.getTarget(), env);
-								if(res) {
+							if(comparisonFunction != null) {
+								if(ArgumentValidation.getBooleanish(comparisonFunction.exec(t, env, null,
+										one.get(k1[i], t, env), two.get(k2[j], t, env)
+								), t, env)) {
 									addValue = false;
 									break;
 								}
+							} else {
+								throw new Error();
 							}
 						}
 					}
@@ -3758,7 +3887,30 @@ public class ArrayHandling {
 					}
 				}
 			}
-			return ret;
+			yield.done(() -> ret);
+		}
+
+		private void queueSubtractStep(CClosure closure, Environment env, Target t,
+				CArray one, CArray two, Mixed[] k1, Mixed[] k2, CArray ret,
+				int i, int j, CallbackYield.Yield yield) {
+			if(i >= k1.length) {
+				return;
+			}
+			yield.call(closure, env, t, one.get(k1[i], t, env), two.get(k2[j], t, env))
+					.then((result, y) -> {
+						boolean res = ArgumentValidation.getBooleanish(result, result.getTarget(), env);
+						if(res) {
+							// Match found — this element should NOT be in the result
+							queueSubtractStep(closure, env, t, one, two, k1, k2, ret, i + 1, 0, y);
+						} else if(j + 1 < k2.length) {
+							// No match yet, try next inner element
+							queueSubtractStep(closure, env, t, one, two, k1, k2, ret, i, j + 1, y);
+						} else {
+							// Exhausted inner loop with no match — include this element
+							ret.push(one.get(k1[i], t, env), t, env);
+							queueSubtractStep(closure, env, t, one, two, k1, k2, ret, i + 1, 0, y);
+						}
+					});
 		}
 
 		@Override

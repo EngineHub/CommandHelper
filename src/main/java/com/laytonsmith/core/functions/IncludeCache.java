@@ -16,10 +16,10 @@ import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.CRE.CREIOException;
 import com.laytonsmith.core.exceptions.CRE.CREIncludeException;
 import com.laytonsmith.core.exceptions.CRE.CRESecurityException;
+import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.profiler.ProfilePoint;
 import com.laytonsmith.core.profiler.Profiler;
 import java.io.File;
@@ -238,7 +238,7 @@ public class IncludeCache {
 			try {
 				MethodScriptCompiler.execute(
 						IncludeCache.get(f, env, env.getEnvClasses(), new Target(0, f, 0)), env, null, s);
-			} catch (ProgramFlowManipulationException e) {
+			} catch (CancelCommandException e) {
 				ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.CreateUncatchableException(
 						"Cannot break program flow in auto include files.", e.getTarget()), env);
 			} catch (ConfigRuntimeException e) {
