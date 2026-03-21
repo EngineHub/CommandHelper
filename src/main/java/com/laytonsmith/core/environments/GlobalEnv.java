@@ -399,8 +399,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	 */
 	public StackTraceManager GetStackTraceManager() {
 		Thread currentThread = Thread.currentThread();
-		if(this.stackTraceManager == null
-				|| currentThread != this.stackTraceManagerThread) {
+		if(this.stackTraceManager == null || currentThread != this.stackTraceManagerThread) {
 			this.stackTraceManager = new StackTraceManager(this);
 			this.stackTraceManagerThread = currentThread;
 		}

@@ -661,6 +661,28 @@ public class Script {
 							return pauseResult;
 						}
 					}
+					frame.setKeepIVariable(false);
+					result = ((FlowFunction<Object>) frame.getFlowFunction()).childCompleted(
+							t, frame.getFunctionState(), lastResult, frame.getEnv());
+					hasResult = false;
+				} else {
+					throw ConfigRuntimeException.CreateUncatchableException(
+							"Flow function in invalid state for " + data.val(), data.getTarget());
+				}
+
+				frame.setFunctionState(result.getState());
+				StepAction action = result.getAction();
+				if(action instanceof StepAction.Evaluate e) {
+					frame.setKeepIVariable(e.keepIVariable());
+					Environment evalEnv = e.getEnv() != null ? e.getEnv() : frame.getEnv();
+					stack.push(new StackFrame(e.getNode(), evalEnv, null, null));
+				} else if(action instanceof StepAction.Complete c) {
+					lastResult = c.getResult();
+					hasResult = true;
+					cleanupAndPop(stack, frame);
+				} else if(action instanceof StepAction.FlowControl fc) {
+					pendingFlowControl = fc;
+					cleanupAndPop(stack, frame);
 				}
 				continue;
 			}
@@ -771,6 +793,33 @@ public class Script {
 			debugCtx.getListener().onPaused(snapshot);
 			return DEBUGGER_PAUSED;
 		}
+
+		return lastResult;
+	}
+
+	/**
+	 * Calls {@link FlowFunction#cleanup} if the frame has a FlowFunction that has begun,
+	 * then pops the frame from the stack.
+	 */
+	@SuppressWarnings("unchecked")
+	private static void cleanupAndPop(EvalStack stack, StackFrame frame) {
+		if(frame.hasFlowFunction() && frame.hasBegun()) {
+			((FlowFunction<Object>) frame.getFlowFunction()).cleanup(
+					frame.getNode().getTarget(), frame.getFunctionState(), frame.getEnv());
+		}
+		stack.pop();
+	}
+
+	/**
+	 * Given the parse tree and environment, executes the tree.
+	 *
+	 * @param c
+	 * @param env
+	 * @return
+	 * @throws CancelCommandException
+	 */
+	public Mixed eval(ParseTree c, final Environment env) throws CancelCommandException {
+		return iterativeEval(c, env);
 	}
 
 	/**

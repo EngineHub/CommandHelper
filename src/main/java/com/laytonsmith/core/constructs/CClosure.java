@@ -275,6 +275,8 @@ public class CClosure extends Construct implements Callable, Booleanish {
 	 * @throws CancelCommandException
 	 * @deprecated Use {@link #executeCallable(Environment, Target, Mixed...)} instead, which
 	 * provides the caller's environment and target for proper error reporting.
+	 * Functions that call closures should also consider extending {@link CallbackYield}
+	 * instead of calling this directly, which re-enters eval() and defeats the iterative interpreter.
 	 */
 	@Deprecated
 	public Mixed executeCallable(Mixed... values) {
@@ -311,7 +313,10 @@ public class CClosure extends Construct implements Callable, Booleanish {
 	 * @return The return value of the closure, or VOID if nothing was returned
 	 * @throws ConfigRuntimeException If any call inside the closure causes a CRE
 	 * @throws CancelCommandException If die() is called within the closure
+	 * @deprecated Functions that call closures should extend {@link CallbackYield}
+	 * instead of calling this directly, which re-enters eval() and defeats the iterative interpreter.
 	 */
+	@Deprecated
 	@Override
 	public Mixed executeCallable(Environment env, Target t, Mixed... values)
 			throws ConfigRuntimeException, CancelCommandException {
