@@ -99,7 +99,7 @@ public final class AggressiveDeprecationTransformer implements ClassFileTransfor
 				LocalDate deprecationDate =
 							LocalDate.parse((String) aggressiveDeprecation.getValue("deprecationDate"), FORMATTER);
 
-				if(MSVersion.LATEST.gte(removalVersion) || LocalDate.now()
+				if(MSVersion.LATEST.gte(removalVersion) && LocalDate.now()
 						.isAfter(deprecationDate.plusYears(1))) {
 					System.err.println(TermColors.YELLOW + mirror.getDeclaringClass() + "." + mirror.getName() + "(" + mirror.getParams()
 						+ ") is slated for removal now, consider removing it from the codebase or updating"
