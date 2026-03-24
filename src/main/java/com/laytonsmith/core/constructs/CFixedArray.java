@@ -1,15 +1,22 @@
 package com.laytonsmith.core.constructs;
 
+import com.laytonsmith.PureUtilities.Common.Annotations.AggressiveDeprecation;
 import com.laytonsmith.PureUtilities.Common.ArrayUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.constructs.generics.ConstraintLocation;
+import com.laytonsmith.core.constructs.generics.Constraints;
+import com.laytonsmith.core.constructs.generics.constraints.UnboundedConstraint;
+import com.laytonsmith.core.constructs.generics.GenericDeclaration;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.GenericTypeParameters;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREIndexOverflowException;
 import com.laytonsmith.core.exceptions.CRE.CREUnsupportedOperationException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.natives.interfaces.ArrayAccessSet;
 import com.laytonsmith.core.natives.interfaces.Booleanish;
 import com.laytonsmith.core.natives.interfaces.Mixed;
@@ -29,14 +36,22 @@ public class CFixedArray extends Construct implements
 		java.lang.Iterable<Mixed>, Booleanish, com.laytonsmith.core.natives.interfaces.Iterable,
 		ArrayAccessSet {
 
-	public static final CClassType TYPE = CClassType.get(CFixedArray.class);
-	private Mixed[] data;
-	private CClassType allowedType;
-
-	public CFixedArray(Target t, CClassType type, int size) {
-		super(type.getSimpleName() + "[" + size + "]", ConstructType.ARRAY, t);
+	private static final GenericDeclaration GEN = new GenericDeclaration(Target.UNKNOWN,
+			new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+				new UnboundedConstraint(Target.UNKNOWN, "T")));
+	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
+	public static final CClassType TYPE = CClassType.getWithGenericDeclaration(CFixedArray.class, GEN)
+			.withSuperParameters(GenericTypeParameters.nativeBuilder(com.laytonsmith.core.natives.interfaces.Iterable.TYPE)
+				.addParameter("T", null))
+			.done();
+	private final Mixed[] data;
+	private final GenericParameters genericParameters;
+	private final LeftHandSideType allowedType;
+	public CFixedArray(Target t, GenericParameters parameters, int size) {
+		super(parameters.getParameters().get(0).toString() + "[" + size + "]", ConstructType.ARRAY, t);
 		data = new Mixed[size];
-		allowedType = type;
+		genericParameters = parameters;
+		this.allowedType = parameters.getParameters().get(0);
 	}
 
 	@Override
@@ -45,6 +60,7 @@ public class CFixedArray extends Construct implements
 	}
 
 	/** @deprecated Use {@link #get(String, Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	@Override
 	public Mixed get(String index, Target t) throws ConfigRuntimeException {
@@ -57,6 +73,7 @@ public class CFixedArray extends Construct implements
 	}
 
 	/** @deprecated Use {@link #get(int, Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	@Override
 	public Mixed get(int index, Target t) throws ConfigRuntimeException {
@@ -76,6 +93,7 @@ public class CFixedArray extends Construct implements
 	}
 
 	/** @deprecated Use {@link #get(Mixed, Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	@Override
 	public Mixed get(Mixed index, Target t) throws ConfigRuntimeException {
@@ -88,6 +106,7 @@ public class CFixedArray extends Construct implements
 	}
 
 	/** @deprecated Use {@link #keySet(Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	@Override
 	public Set<Mixed> keySet() {
@@ -104,11 +123,13 @@ public class CFixedArray extends Construct implements
 	}
 
 	private void validateSet(Mixed value, Target t, Environment env) {
-		if(!value.typeof(env).doesExtend(allowedType)) {
-			throw new CRECastException("Cannot set value of type " + value.typeof(env).toString() + " into fixed_array of type " + allowedType.toString(), t);
+		if(!value.typeof(env).doesExtend(env, allowedType)) {
+			throw new CRECastException("Cannot set value of type "
+					+ value.typeof(env).toString() + " into fixed_array of type " + allowedType.toString(), t);
 		}
 	}
 
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	/** @deprecated Use {@link #set(Mixed, Mixed, Target, Environment)} instead. */
 	@Deprecated
 	@Override
@@ -141,6 +162,7 @@ public class CFixedArray extends Construct implements
 	}
 
 	/** @deprecated Use {@link #slice(int, int, Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	@Override
 	public Mixed slice(int begin, int end, Target t) {
@@ -153,6 +175,7 @@ public class CFixedArray extends Construct implements
 	}
 
 	/** @deprecated Use {@link #getBooleanValue(Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	@Override
 	public boolean getBooleanValue(Target t) {
@@ -165,6 +188,7 @@ public class CFixedArray extends Construct implements
 	}
 
 	/** @deprecated Use {@link #size(Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	@Override
 	public long size() {
@@ -209,5 +233,10 @@ public class CFixedArray extends Construct implements
 	@Override
 	public Version since() {
 		return MSVersion.V3_3_5;
+	}
+
+	@Override
+	public GenericParameters getGenericParameters() {
+		return genericParameters;
 	}
 }

@@ -7,12 +7,16 @@ import com.laytonsmith.core.Method;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CNull;
-import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.InstanceofUtil;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.ConcreteGenericParameter;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import com.laytonsmith.PureUtilities.Common.Annotations.AggressiveDeprecation;
+
 import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
@@ -23,17 +27,19 @@ import java.util.Set;
  * A UserObject represents an instance of an object that was defined in MethodScript, i.e. we have no native
  * class reference here.
  */
-public class UserObject implements Mixed {
+public final class UserObject implements Mixed {
 
 	private static int objectIdCounter = 0;
 
 	private final Environment env;
 	private final Target t;
 	private final ObjectDefinition objectDefinition;
+	private final GenericParameters genericParameters;
 
 	private final Map<String, Mixed> fieldTable;
 
 	private final Mixed nativeObject;
+
 
 	private final int objectId;
 
@@ -44,13 +50,16 @@ public class UserObject implements Mixed {
 	 * an invalid object. The default values will not be properly populated if this is null.
 	 * @param env The environment
 	 * @param objectDefinition The object definition this object is based on.
+	 * @param genericParameters The generic parameters for this instance.
 	 * @param nativeObject If there is an underlying native object, this should be sent along with this object. However,
 	 * if this is not a native object, this should be null.
 	 */
-	public UserObject(Target t, Script parent, Environment env, ObjectDefinition objectDefinition, Mixed nativeObject) {
+	public UserObject(Target t, Script parent, Environment env, ObjectDefinition objectDefinition,
+			GenericParameters genericParameters, Mixed nativeObject) {
 		this.t = t;
 		this.env = env;
 		this.objectDefinition = objectDefinition;
+		this.genericParameters = genericParameters;
 		this.nativeObject = nativeObject;
 		this.objectId = objectIdCounter++;
 		this.fieldTable = new HashMap<>();
@@ -152,6 +161,7 @@ public class UserObject implements Mixed {
 	}
 
 	/** @deprecated Use {@link #isInstanceOf(CClassType, LeftHandGenericUse, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	@Override
 	public boolean isInstanceOf(CClassType type) {
@@ -159,16 +169,24 @@ public class UserObject implements Mixed {
 	}
 
 	@Override
-	public boolean isInstanceOf(Class<? extends Mixed> type) {
-		return Construct.isInstanceof(this, type);
+	public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env) {
+		return InstanceofUtil.isInstanceof(this, LeftHandSideType
+				.fromCClassType(
+						new ConcreteGenericParameter(type, lhsGenericParameters, Target.UNKNOWN, env), Target.UNKNOWN, env), env);
 	}
 
 	@Override
-	public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env) {
-		return Construct.isInstanceof(this, type, env);
+	public boolean isInstanceOf(Class<? extends Mixed> type) {
+		return type.isAssignableFrom(this.getClass());
+	}
+
+	@Override
+	public final CClassType typeof(Environment env) {
+		return objectDefinition.getType();
 	}
 
 	/** @deprecated Use {@link #typeof(Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	@Override
 	public CClassType typeof() {
@@ -176,13 +194,8 @@ public class UserObject implements Mixed {
 	}
 
 	@Override
-	public CClassType typeof(Environment env) {
-		return objectDefinition.getType();
-	}
-
-	@Override
 	public GenericParameters getGenericParameters() {
-		return null;
+		return genericParameters;
 	}
 
 	@Override

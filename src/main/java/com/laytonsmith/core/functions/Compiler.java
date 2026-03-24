@@ -13,6 +13,7 @@ import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Optimizable.OptimizationOption;
+import com.laytonsmith.core.SourceType;
 import com.laytonsmith.core.StepAction.Complete;
 import com.laytonsmith.core.StepAction.Evaluate;
 import com.laytonsmith.core.StepAction.StepResult;
@@ -22,6 +23,7 @@ import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.compiler.signature.FunctionSignatures;
 import com.laytonsmith.core.compiler.signature.SignatureBuilder;
+import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.CBareString;
 import com.laytonsmith.core.constructs.CBracket;
 import com.laytonsmith.core.constructs.CClassType;
@@ -35,11 +37,16 @@ import com.laytonsmith.core.constructs.CSymbol;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.IVariableList;
 import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.constructs.Token;
+import com.laytonsmith.core.constructs.generics.ConstraintLocation;
+import com.laytonsmith.core.constructs.generics.Constraints;
+import com.laytonsmith.core.constructs.generics.GenericDeclaration;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.constraints.UnboundedConstraint;
+import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.Environment.EnvironmentImpl;
@@ -62,6 +69,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
@@ -137,11 +145,13 @@ public class Compiler {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+		public LeftHandSideType getReturnType(ParseTree node, Target t, List<LeftHandSideType> argTypes,
+				List<Target> argTargets, LeftHandSideType inferredReturnType, Environment env,
+				Set<ConfigCompileException> exceptions) {
 			if(argTypes.size() == 1) {
 				return argTypes.get(0);
 			} else {
-				return CVoid.TYPE;
+				return CVoid.LHSTYPE;
 			}
 		}
 
@@ -164,6 +174,35 @@ public class Compiler {
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return new CEntry(args[0], args[1], t);
 		}
+
+		@Override
+		public LeftHandSideType typecheck(StaticAnalysis analysis,
+				ParseTree ast, LeftHandSideType inferredReturnType,
+				Environment env, Set<ConfigCompileException> exceptions) {
+			if(!(ast.getChildAt(0).getData() instanceof CLabel)) {
+				exceptions.add(new ConfigCompileException("Expected label.", ast.getChildAt(0).getTarget()));
+			}
+			LeftHandSideType inferredParameterType = ast.getChildAt(1)
+					.getDeclaredType(analysis, env, Auto.LHSTYPE);
+			inferredParameterType = LeftHandSideType.resolveTypeFromGenerics(Target.UNKNOWN, env, inferredParameterType, null, null, (Map) null);
+			return analysis.typecheck(ast.getChildAt(1), inferredParameterType, env, exceptions);
+		}
+
+		@Override
+		public List<LeftHandSideType> getResolvedParameterTypes(StaticAnalysis analysis, Target t, Environment env, GenericParameters generics, LeftHandSideType inferredReturnType, List<ParseTree> children) {
+			List<LeftHandSideType> ret = new ArrayList<>();
+			ret.add(Auto.LHSTYPE);
+			ret.add(children.get(1).getDeclaredType(analysis, env, inferredReturnType));
+			return ret;
+		}
+
+		@Override
+		public LeftHandSideType getReturnType(ParseTree node, Target t, List<LeftHandSideType> argTypes, List<Target> argTargets, LeftHandSideType inferredReturnType, Environment env, Set<ConfigCompileException> exceptions) {
+			return argTypes.get(1);
+		}
+
+
+
 	}
 
 	@api
@@ -229,7 +268,7 @@ public class Compiler {
 								|| (list.get(index).getData() instanceof CFunction cf
 										&& cf.val().equals(Compiler.p.NAME)
 										&& list.get(index).numberOfChildren() == 1
-										&& (list.get(index).getChildAt(0).getData() instanceof CClassType
+										&& (list.get(index).getChildAt(0).getData() instanceof SourceType
 												|| __type_ref__.createFromBareStringOrConcats(
 														list.get(index).getChildAt(0)) != null)))) {
 							valChildren.add(list.get(index));
@@ -370,7 +409,7 @@ public class Compiler {
 
 					// Convert bare string or concat() to type reference if needed.
 					ParseTree typeNode = node.getChildAt(0);
-					if(!(typeNode.getData() instanceof CClassType)) {
+					if(!(typeNode.getData() instanceof SourceType)) {
 						ParseTree convertedTypeNode = __type_ref__.createFromBareStringOrConcats(typeNode);
 						if(convertedTypeNode != null) {
 							typeNode = convertedTypeNode;
@@ -476,7 +515,7 @@ public class Compiler {
 				}
 
 				if(convertedTypeNode != null
-						|| typeNode.getData().equals(CVoid.VOID) || typeNode.getData() instanceof CClassType) {
+						|| typeNode.getData().equals(CVoid.VOID) || typeNode.getData() instanceof SourceType) {
 					if(k == list.size() - 1) {
 						// This is not a typed assignment
 						break;
@@ -505,7 +544,7 @@ public class Compiler {
 								list.get(k).setChildren(children);
 								break;
 							default:
-								if(typeNode.getData().equals(CVoid.VOID) || typeNode.getData() instanceof CClassType) {
+								if(typeNode.getData().equals(CVoid.VOID) || typeNode.getData() instanceof SourceType) {
 									throw new ConfigCompileException("Unexpected ClassType \""
 											+ typeNode.getData().val() + "\"", typeNode.getTarget());
 								}
@@ -529,7 +568,7 @@ public class Compiler {
 					} else if(originalTypeNode.getData().getClass().equals(CBareString.class)) {
 						continue; // Bare string was not used as a type.
 					} else {
-						throw new ConfigCompileException("Unexpected data after ClassType", list.get(k + 1).getTarget());
+//						throw new ConfigCompileException("Unexpected data after ClassType", list.get(k + 1).getTarget());
 					}
 				}
 			}
@@ -728,14 +767,14 @@ public class Compiler {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes,
-				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
-			for(CClassType argType : argTypes) {
+		public LeftHandSideType getReturnType(ParseTree node, Target t, List<LeftHandSideType> argTypes,
+				List<Target> argTargets, LeftHandSideType inferredType, Environment env, Set<ConfigCompileException> exceptions) {
+			for(LeftHandSideType argType : argTypes) {
 				if(argType == null) {
 					return null; // An argument alters control flow, so this function will never return.
 				}
 			}
-			return CVoid.TYPE;
+			return CVoid.TYPE.asLeftHandSideType();
 		}
 
 		@Override
@@ -794,10 +833,13 @@ public class Compiler {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes,
-				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
-			return CClassType.TYPE;
+		public LeftHandSideType getReturnType(ParseTree node, Target t, List<LeftHandSideType> argTypes,
+				List<Target> argTargets, LeftHandSideType inferredReturnType, Environment env,
+				Set<ConfigCompileException> exceptions) {
+			return CClassType.TYPE.asLeftHandSideType();
 		}
+
+
 
 		public static ParseTree createASTNode(String typeName, Target t, FileOptions fileOptions) {
 			ParseTree node = new ParseTree(new CFunction(NAME, t), fileOptions);
@@ -870,9 +912,9 @@ public class Compiler {
 			// Attempt to resolve type reference to CClassType.
 			String typeName = ast.getChildAt(0).getData().val();
 			try {
-				CClassType classType = CClassType.get(FullyQualifiedClassName.forName(typeName, ast.getTarget(), env));
+				CClassType classType = CClassType.get(FullyQualifiedClassName.forName(typeName, ast.getTarget(), env), env);
 				return new ParseTree(classType, ast.getFileOptions());
-			} catch (CRECastException | ClassNotFoundException e) {
+			} catch (CRECastException e) {
 				return null;
 			}
 		}
@@ -949,6 +991,20 @@ public class Compiler {
 			}
 			return args[0];
 		}
+
+		@Override
+		public FunctionSignatures getSignatures() {
+			GenericDeclaration declaration = new GenericDeclaration(Target.UNKNOWN,
+				new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+					new UnboundedConstraint(Target.UNKNOWN, "T")));
+			LeftHandSideType t = LeftHandSideType.fromNativeGenericDefinitionType(declaration, "T", null);
+			return new SignatureBuilder(t)
+					.param(t, "argument", "The value to return.")
+					.setGenericDeclaration(declaration, "The type of the value.")
+					.newSignature(CVoid.TYPE)
+					.build();
+		}
+
 	}
 
 	@api
@@ -1249,7 +1305,7 @@ public class Compiler {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			Mixed value = args[0];
-			CClassType type = ArgumentValidation.getClassType(args[1], t);
+			CClassType type = ArgumentValidation.getClassType(args[1], t, env).asConcreteType(t);
 			if(!InstanceofUtil.isInstanceof(value, type, env)) {
 				throw new CRECastException(
 						"Cannot cast from " + value.typeof(env).getSimpleName() + " to " + type.getSimpleName() + ".", t);
@@ -1258,26 +1314,27 @@ public class Compiler {
 		}
 
 		@Override
-		public CClassType typecheck(StaticAnalysis analysis,
-				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
-
+		public LeftHandSideType typecheck(StaticAnalysis analysis, ParseTree ast, LeftHandSideType inferredReturnType,
+				Environment env, Set<ConfigCompileException> exceptions) {
 			// Fall back to default behavior for invalid usage.
 			if(ast.numberOfChildren() != 2) {
-				return super.typecheck(analysis, ast, env, exceptions);
+				return super.typecheck(analysis, ast, inferredReturnType, env, exceptions);
 			}
 
 			// Typecheck value and type nodes.
 			ParseTree valNode = ast.getChildAt(0);
-			CClassType valType = analysis.typecheck(valNode, env, exceptions);
+			LeftHandSideType valType = analysis.typecheck(valNode, inferredReturnType, env, exceptions);
 			StaticAnalysis.requireType(valType, Mixed.TYPE, valType.getTarget(), env, exceptions);
 			ParseTree typeNode = ast.getChildAt(1);
-			CClassType typeType = analysis.typecheck(typeNode, env, exceptions);
+			LeftHandSideType typeType = analysis.typecheck(typeNode, inferredReturnType, env, exceptions);
 			StaticAnalysis.requireType(typeType, CClassType.TYPE, typeNode.getTarget(), env, exceptions);
 
 			// Get cast-to type.
+			// Much of this function deals with LHS types, but only concrete types can be cast to, so we require
+			// CClassType as the input type.
 			if(!(typeNode.getData() instanceof CClassType)) {
 				assert !exceptions.isEmpty() : "Missing compile-time type error for cast type argument.";
-				return CClassType.AUTO;
+				return Auto.LHSTYPE;
 			}
 			CClassType castToType = (CClassType) typeNode.getData();
 
@@ -1296,7 +1353,7 @@ public class Compiler {
 			}
 
 			// Return type that is being cast to.
-			return castToType;
+			return castToType.asLeftHandSideType();
 		}
 
 		@Override
@@ -1347,11 +1404,11 @@ public class Compiler {
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 
 			// Get arguments.
-			CClassType type;
+			LeftHandSideType type;
 			String varName;
 			Mixed val;
 			if(args.length == 3) {
-				type = (CClassType) args[0];
+				type = ((SourceType) args[0]).asLeftHandSideType();
 				varName = ((IVariable) args[1]).getVariableName();
 				val = args[2];
 			} else {
@@ -1372,7 +1429,11 @@ public class Compiler {
 			// Overwrite variable if the type differs (can occur during proc parameter assignment in cloned outer scope).
 			IVariable var = list.get(varName);
 			if(var == null || (type != null && !type.equals(var.getDefinedType()))) {
-				var = new IVariable(type, varName, val, t);
+				try {
+					var = new IVariable(type, varName, val, t, env);
+				} catch(ConfigCompileException ex) {
+					throw new Error(ex);
+				}
 				list.set(var);
 			} else {
 				var.setIval(val);

@@ -130,10 +130,13 @@ import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.compiler.FileOptions;
+import com.laytonsmith.core.compiler.signature.FunctionSignatures;
+import com.laytonsmith.core.compiler.signature.SignatureBuilder;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CClassType;
@@ -226,7 +229,8 @@ public class EntityManagement {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CArray ret = new CArray(t);
+			CArray ret = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			if(args.length == 0) {
 				for(MCWorld w : Static.getServer().getWorlds()) {
 					for(MCEntity e : w.getEntities()) {
@@ -291,7 +295,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "array {[world, [x, z]] | [locationArray]} Returns an array of IDs for all entities in the given"
+			return "array<string> {[world, [x, z]] | [locationArray]} Returns an array of IDs for all entities in the given"
 					+ " scope. With no args, this will return all entities loaded on the entire server. If the first"
 					+ " argument is given and is a location, only entities in the chunk containing that location will"
 					+ " be returned, or if it is a world only entities in that world will be returned. If all three"
@@ -510,7 +514,7 @@ public class EntityManagement {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCEntity e = Static.getEntity(args[0], t);
-			CArray va  = ObjectGenerator.GetGenerator().vector(e.getVelocity(), t);
+			CArray va = ObjectGenerator.GetGenerator().vector(e.getVelocity(), t);
 			va.set("magnitude", new CDouble(e.getVelocity().length(), t), t, env);
 			return va;
 		}
@@ -550,7 +554,7 @@ public class EntityManagement {
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCEntity e = Static.getEntity(args[0], t);
 			try {
-				e.setVelocity(ObjectGenerator.GetGenerator().vector(args[1], t));
+				e.setVelocity(ObjectGenerator.GetGenerator().vector(args[1], t, env));
 			} catch(IllegalArgumentException ex) {
 				throw new CREIllegalArgumentException(ex.getMessage(), t);
 			}
@@ -990,7 +994,7 @@ public class EntityManagement {
 			int centerX = loc.getBlockX() >> 4;
 			int centerZ = loc.getBlockZ() >> 4;
 
-			CArray entities = new CArray(t);
+			CArray entities = new CArray(t, null, env);
 			for(int offsetX = 0 - chunkRadius; offsetX <= chunkRadius; offsetX++) {
 				for(int offsetZ = 0 - chunkRadius; offsetZ <= chunkRadius; offsetZ++) {
 					if(!world.isChunkLoaded(centerX + offsetX, centerZ + offsetZ)) {
@@ -1285,7 +1289,7 @@ public class EntityManagement {
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender cs = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			int qty = 1;
-			CArray ret = new CArray(t);
+			CArray ret = new CArray(t, null, env);
 			MCEntityType entType;
 			MCLocation l;
 			MCEntity ent;
@@ -1533,7 +1537,8 @@ public class EntityManagement {
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCEntity ent = Static.getEntity(args[0], t);
 			List<MCEntity> riders = ent.getPassengers();
-			CArray ret = new CArray(t);
+			CArray ret = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+				.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			for(MCEntity rider : riders) {
 				ret.push(new CString(rider.getUniqueId().toString(), t), t, env);
 			}
@@ -1547,7 +1552,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "array {entityUUID} Returns an array of UUIDs for the given entity's riders.";
+			return "array<string> {entityUUID} Returns an array of UUIDs for the given entity's riders.";
 		}
 
 		@Override
@@ -1900,7 +1905,7 @@ public class EntityManagement {
 						if(potionType == null) {
 							meta.set("potiontype", CNull.NULL, t, env);
 						} else {
-							meta.set("potiontype", potionType.name(), env);
+							meta.set("potiontype", potionType.name(), t, env);
 						}
 					} else {
 						meta.set("base", ObjectGenerator.GetGenerator().potionData(cloud.getBasePotionData(), t), t, env);
@@ -1938,7 +1943,7 @@ public class EntityManagement {
 						if(potionType == null) {
 							tippedmeta.set("potiontype", CNull.NULL, t, env);
 						} else {
-							tippedmeta.set("potiontype", potionType.name(), env);
+							tippedmeta.set("potiontype", potionType.name(), t, env);
 						}
 					} else {
 						tippedmeta.set("base", ObjectGenerator.GetGenerator().potionData(arrow.getBasePotionData(), t), t, env);
@@ -2096,7 +2101,7 @@ public class EntityManagement {
 					MCFirework firework = (MCFirework) entity;
 					MCFireworkMeta fmeta = firework.getFireWorkMeta();
 					specArray.set(entity_spec.KEY_FIREWORK_STRENGTH, new CInt(fmeta.getStrength(), t), t, env);
-					CArray fe = new CArray(t);
+					CArray fe = new CArray(t, null, env);
 					for(MCFireworkEffect effect : fmeta.getEffects()) {
 						fe.push(ObjectGenerator.GetGenerator().fireworkEffect(effect, t), t, env);
 					}
@@ -2604,22 +2609,18 @@ public class EntityManagement {
 					MCAreaEffectCloud cloud = (MCAreaEffectCloud) entity;
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
-							case entity_spec.KEY_AREAEFFECTCLOUD_COLOR:
+							case entity_spec.KEY_AREAEFFECTCLOUD_COLOR -> {
 								Mixed colorMixed = specArray.get(index, t, env);
 								if(colorMixed.isInstanceOf(CArray.TYPE, null, env)) {
 									CArray color = (CArray) colorMixed;
-									cloud.setColor(ObjectGenerator.GetGenerator().color(color, t));
+									cloud.setColor(ObjectGenerator.GetGenerator().color(color, t, env));
 								} else {
 									throw new CRECastException("AreaEffectCloud color must be an array", t);
 								}
-								break;
-							case entity_spec.KEY_AREAEFFECTCLOUD_DURATION:
-								cloud.setDuration(ArgumentValidation.getInt32(specArray.get(index, t, env), t, env));
-								break;
-							case entity_spec.KEY_AREAEFFECTCLOUD_DURATIONONUSE:
-								cloud.setDurationOnUse(ArgumentValidation.getInt32(specArray.get(index, t, env), t, env));
-								break;
-							case entity_spec.KEY_AREAEFFECTCLOUD_PARTICLE:
+							}
+							case entity_spec.KEY_AREAEFFECTCLOUD_DURATION -> cloud.setDuration(ArgumentValidation.getInt32(specArray.get(index, t, env), t, env));
+							case entity_spec.KEY_AREAEFFECTCLOUD_DURATIONONUSE -> cloud.setDurationOnUse(ArgumentValidation.getInt32(specArray.get(index, t, env), t, env));
+							case entity_spec.KEY_AREAEFFECTCLOUD_PARTICLE -> {
 								Mixed particleMixed = specArray.get(index, t, env);
 								if(particleMixed.isInstanceOf(CArray.TYPE, null, env)) {
 									CArray pa = (CArray) particleMixed;
@@ -2644,8 +2645,8 @@ public class EntityManagement {
 										throw new CREFormatException("Invalid particle data: " + particleName, t);
 									}
 								}
-								break;
-							case entity_spec.KEY_AREAEFFECTCLOUD_POTIONMETA:
+							}
+							case entity_spec.KEY_AREAEFFECTCLOUD_POTIONMETA -> {
 								Mixed c = specArray.get(index, t, env);
 								if(c.isInstanceOf(CArray.TYPE, null, env)) {
 									CArray meta = (CArray) c;
@@ -2661,7 +2662,7 @@ public class EntityManagement {
 										Mixed base = meta.get("base", t, env);
 										if(base.isInstanceOf(CArray.TYPE, null, env)) {
 											if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
-												MCPotionType type = ObjectGenerator.GetGenerator().legacyPotionData((CArray) base, t);
+												MCPotionType type = ObjectGenerator.GetGenerator().legacyPotionData((CArray) base, t, env);
 												cloud.setBasePotionType(type);
 											} else {
 												MCPotionData pd = ObjectGenerator.GetGenerator().potionData((CArray) base, t, env);
@@ -2682,20 +2683,12 @@ public class EntityManagement {
 								} else {
 									throw new CRECastException("AreaEffectCloud potion meta must be an array", t);
 								}
-								break;
-							case entity_spec.KEY_AREAEFFECTCLOUD_RADIUS:
-								cloud.setRadius(ArgumentValidation.getDouble32(specArray.get(index, t, env), t, env));
-								break;
-							case entity_spec.KEY_AREAEFFECTCLOUD_RADIUSONUSE:
-								cloud.setRadiusOnUse(ArgumentValidation.getDouble32(specArray.get(index, t, env), t, env));
-								break;
-							case entity_spec.KEY_AREAEFFECTCLOUD_RADIUSPERTICK:
-								cloud.setRadiusPerTick(ArgumentValidation.getDouble32(specArray.get(index, t, env), t, env));
-								break;
-							case entity_spec.KEY_AREAEFFECTCLOUD_REAPPLICATIONDELAY:
-								cloud.setReapplicationDelay(ArgumentValidation.getInt32(specArray.get(index, t, env), t, env));
-								break;
-							case entity_spec.KEY_AREAEFFECTCLOUD_SOURCE:
+							}
+							case entity_spec.KEY_AREAEFFECTCLOUD_RADIUS -> cloud.setRadius(ArgumentValidation.getDouble32(specArray.get(index, t, env), t, env));
+							case entity_spec.KEY_AREAEFFECTCLOUD_RADIUSONUSE -> cloud.setRadiusOnUse(ArgumentValidation.getDouble32(specArray.get(index, t, env), t, env));
+							case entity_spec.KEY_AREAEFFECTCLOUD_RADIUSPERTICK -> cloud.setRadiusPerTick(ArgumentValidation.getDouble32(specArray.get(index, t, env), t, env));
+							case entity_spec.KEY_AREAEFFECTCLOUD_REAPPLICATIONDELAY -> cloud.setReapplicationDelay(ArgumentValidation.getInt32(specArray.get(index, t, env), t, env));
+							case entity_spec.KEY_AREAEFFECTCLOUD_SOURCE -> {
 								Mixed cloudSource = specArray.get(index, t, env);
 								if(cloudSource instanceof CNull) {
 									cloud.setSource(null);
@@ -2709,12 +2702,9 @@ public class EntityManagement {
 								} else {
 									cloud.setSource(Static.getLivingEntity(cloudSource, t));
 								}
-								break;
-							case entity_spec.KEY_AREAEFFECTCLOUD_WAITTIME:
-								cloud.setWaitTime(ArgumentValidation.getInt32(specArray.get(index, t, env), t, env));
-								break;
-							default:
-								throwException(index, t);
+							}
+							case entity_spec.KEY_AREAEFFECTCLOUD_WAITTIME -> cloud.setWaitTime(ArgumentValidation.getInt32(specArray.get(index, t, env), t, env));
+							default -> throwException(index, t);
 						}
 					}
 					break;
@@ -2722,40 +2712,38 @@ public class EntityManagement {
 					MCArrow arrow = (MCArrow) entity;
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
-							case entity_spec.KEY_ARROW_CRITICAL:
-								arrow.setCritical(ArgumentValidation.getBoolean(specArray.get(index, t, env), t, env));
-								break;
-							case entity_spec.KEY_ARROW_KNOCKBACK:
+							case entity_spec.KEY_ARROW_CRITICAL -> arrow.setCritical(ArgumentValidation.getBoolean(specArray.get(index, t, env), t, env));
+							case entity_spec.KEY_ARROW_KNOCKBACK -> {
 								int k = ArgumentValidation.getInt32(specArray.get(index, t, env), t, env);
 								if(k < 0) {
 									throw new CRERangeException("Knockback can not be negative.", t);
 								} else {
 									arrow.setKnockbackStrength(k);
 								}
-								break;
-							case entity_spec.KEY_ARROW_DAMAGE:
+							}
+							case entity_spec.KEY_ARROW_DAMAGE -> {
 								double d = ArgumentValidation.getDouble(specArray.get(index, t, env), t, env);
 								if(d < 0) {
 									throw new CRERangeException("Damage cannot be negative.", t);
 								}
 								arrow.setDamage(d);
-								break;
-							case entity_spec.KEY_ARROW_PIERCE_LEVEL:
+							}
+							case entity_spec.KEY_ARROW_PIERCE_LEVEL -> {
 								int level = ArgumentValidation.getInt32(specArray.get(index, t, env), t, env);
 								if(level < 0 || level > 127) {
 									throw new CRERangeException("Pierce level must be 0 to 127.", t);
 								}
 								arrow.setPierceLevel(level);
-								break;
-							case entity_spec.KEY_ARROW_PICKUP:
+							}
+							case entity_spec.KEY_ARROW_PICKUP -> {
 								try {
 									arrow.setPickupStatus(MCArrow.PickupStatus.valueOf(specArray.get(index, t, env).val()));
 								} catch(IllegalArgumentException ex) {
 									throw new CREFormatException("Invalid arrow pickup status: "
 											+ specArray.get(index, t, env).val(), t);
 								}
-								break;
-							case entity_spec.KEY_ARROW_POTIONMETA:
+							}
+							case entity_spec.KEY_ARROW_POTIONMETA -> {
 								Mixed c = specArray.get(index, t, env);
 								if(c.isInstanceOf(CArray.TYPE, null, env)) {
 									CArray meta = (CArray) c;
@@ -2771,7 +2759,7 @@ public class EntityManagement {
 										Mixed base = meta.get("base", t, env);
 										if(base.isInstanceOf(CArray.TYPE, null, env)) {
 											if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_6)) {
-												MCPotionType type = ObjectGenerator.GetGenerator().legacyPotionData((CArray) base, t);
+												MCPotionType type = ObjectGenerator.GetGenerator().legacyPotionData((CArray) base, t, env);
 												arrow.setBasePotionType(type);
 											} else {
 												MCPotionData pd = ObjectGenerator.GetGenerator().potionData((CArray) base, t, env);
@@ -2792,20 +2780,19 @@ public class EntityManagement {
 								} else {
 									throw new CRECastException("Arrow potion meta must be an array", t);
 								}
-								break;
-							case entity_spec.KEY_ARROW_COLOR:
+							}
+							case entity_spec.KEY_ARROW_COLOR -> {
 								Mixed colorMixed = specArray.get(index, t, env);
 								if(colorMixed instanceof CNull) {
 									arrow.setColor(null);
 								} else if(colorMixed.isInstanceOf(CArray.TYPE, null, env)) {
 									CArray color = (CArray) colorMixed;
-									arrow.setColor(ObjectGenerator.GetGenerator().color(color, t));
+									arrow.setColor(ObjectGenerator.GetGenerator().color(color, t, env));
 								} else {
 									throw new CRECastException("Arrow color must be an array", t);
 								}
-								break;
-							default:
-								throwException(index, t);
+							}
+							default -> throwException(index, t);
 						}
 					}
 					break;
@@ -2813,25 +2800,13 @@ public class EntityManagement {
 					MCArmorStand stand = (MCArmorStand) entity;
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
-							case entity_spec.KEY_ARMORSTAND_ARMS:
-								stand.setHasArms(ArgumentValidation.getBoolean(specArray.get(index, t, env), t, env));
-								break;
-							case entity_spec.KEY_ARMORSTAND_BASEPLATE:
-								stand.setHasBasePlate(ArgumentValidation.getBoolean(specArray.get(index, t, env), t, env));
-								break;
-							case entity_spec.KEY_ARMORSTAND_GRAVITY:
-								stand.setHasGravity(ArgumentValidation.getBoolean(specArray.get(index, t, env), t, env));
-								break;
-							case entity_spec.KEY_ARMORSTAND_MARKER:
-								stand.setMarker(ArgumentValidation.getBoolean(specArray.get(index, t, env), t, env));
-								break;
-							case entity_spec.KEY_ARMORSTAND_SMALLSIZE:
-								stand.setSmall(ArgumentValidation.getBoolean(specArray.get(index, t, env), t, env));
-								break;
-							case entity_spec.KEY_ARMORSTAND_VISIBLE:
-								stand.setVisible(ArgumentValidation.getBoolean(specArray.get(index, t, env), t, env));
-								break;
-							case entity_spec.KEY_ARMORSTAND_POSES:
+							case entity_spec.KEY_ARMORSTAND_ARMS -> stand.setHasArms(ArgumentValidation.getBoolean(specArray.get(index, t, env), t, env));
+							case entity_spec.KEY_ARMORSTAND_BASEPLATE -> stand.setHasBasePlate(ArgumentValidation.getBoolean(specArray.get(index, t, env), t, env));
+							case entity_spec.KEY_ARMORSTAND_GRAVITY -> stand.setHasGravity(ArgumentValidation.getBoolean(specArray.get(index, t, env), t, env));
+							case entity_spec.KEY_ARMORSTAND_MARKER -> stand.setMarker(ArgumentValidation.getBoolean(specArray.get(index, t, env), t, env));
+							case entity_spec.KEY_ARMORSTAND_SMALLSIZE -> stand.setSmall(ArgumentValidation.getBoolean(specArray.get(index, t, env), t, env));
+							case entity_spec.KEY_ARMORSTAND_VISIBLE -> stand.setVisible(ArgumentValidation.getBoolean(specArray.get(index, t, env), t, env));
+							case entity_spec.KEY_ARMORSTAND_POSES -> {
 								Map<MCBodyPart, Vector3D> poseMap = stand.getAllPoses();
 								Mixed posesMixed = specArray.get(index, t, env);
 								if(posesMixed.isInstanceOf(CArray.TYPE, null, env)) {
@@ -2839,21 +2814,18 @@ public class EntityManagement {
 									for(MCBodyPart key : poseMap.keySet()) {
 										try {
 											poseMap.put(key, ObjectGenerator.GetGenerator().vector(poseMap.get(key),
-													poseArray.get("pose" + key.name(), t, env), t));
+													poseArray.get("pose" + key.name(), t, env), t, env));
 										} catch(ConfigRuntimeException cre) {
 											// Ignore, this just means the user didn't modify a body part
 										}
 									}
 								}
 								if(posesMixed instanceof CNull) {
-									for(MCBodyPart key : poseMap.keySet()) {
-										poseMap.put(key, Vector3D.ZERO);
-									}
+									poseMap.replaceAll((k, v) -> Vector3D.ZERO);
 								}
 								stand.setAllPoses(poseMap);
-								break;
-							default:
-								throwException(index, t);
+							}
+							default -> throwException(index, t);
 						}
 					}
 					break;
@@ -2877,33 +2849,26 @@ public class EntityManagement {
 					MCBee bee = (MCBee) entity;
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
-							case entity_spec.KEY_BEE_ANGER:
-								bee.setAnger(ArgumentValidation.getInt32(specArray.get(index, t, env), t, env));
-								break;
-							case entity_spec.KEY_BEE_NECTAR:
-								bee.setHasNectar(ArgumentValidation.getBooleanObject(specArray.get(index, t, env), t, env));
-								break;
-							case entity_spec.KEY_BEE_STUNG:
-								bee.setHasStung(ArgumentValidation.getBooleanObject(specArray.get(index, t, env), t, env));
-								break;
-							case entity_spec.KEY_BEE_FLOWER_LOCATION:
+							case entity_spec.KEY_BEE_ANGER -> bee.setAnger(ArgumentValidation.getInt32(specArray.get(index, t, env), t, env));
+							case entity_spec.KEY_BEE_NECTAR -> bee.setHasNectar(ArgumentValidation.getBooleanObject(specArray.get(index, t, env), t, env));
+							case entity_spec.KEY_BEE_STUNG -> bee.setHasStung(ArgumentValidation.getBooleanObject(specArray.get(index, t, env), t, env));
+							case entity_spec.KEY_BEE_FLOWER_LOCATION -> {
 								Mixed flower = specArray.get(index, t, env);
 								if(flower instanceof CNull) {
 									bee.setFlowerLocation(null);
 								} else {
 									bee.setFlowerLocation(ObjectGenerator.GetGenerator().location(flower, null, t, env));
 								}
-								break;
-							case entity_spec.KEY_BEE_HIVE_LOCATION:
+							}
+							case entity_spec.KEY_BEE_HIVE_LOCATION -> {
 								Mixed hive = specArray.get(index, t, env);
 								if(hive instanceof CNull) {
 									bee.setHiveLocation(null);
 								} else {
 									bee.setHiveLocation(ObjectGenerator.GetGenerator().location(hive, null, t, env));
 								}
-								break;
-							default:
-								throwException(index, t);
+							}
+							default -> throwException(index, t);
 						}
 					}
 					break;
@@ -3042,21 +3007,17 @@ public class EntityManagement {
 					MCItem item = (MCItem) entity;
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
-							case entity_spec.KEY_DROPPED_ITEM_ITEMSTACK:
-								item.setItemStack(ObjectGenerator.GetGenerator().item(specArray.get(index, t, env), t, env));
-								break;
-							case entity_spec.KEY_DROPPED_ITEM_PICKUPDELAY:
-								item.setPickupDelay(ArgumentValidation.getInt32(specArray.get(index, t, env), t, env));
-								break;
-							case entity_spec.KEY_DROPPED_ITEM_OWNER:
+							case entity_spec.KEY_DROPPED_ITEM_ITEMSTACK -> item.setItemStack(ObjectGenerator.GetGenerator().item(specArray.get(index, t, env), t, env));
+							case entity_spec.KEY_DROPPED_ITEM_PICKUPDELAY -> item.setPickupDelay(ArgumentValidation.getInt32(specArray.get(index, t, env), t, env));
+							case entity_spec.KEY_DROPPED_ITEM_OWNER -> {
 								Mixed owner = specArray.get(index, t, env);
 								if(owner instanceof CNull) {
 									item.setOwner(null);
 								} else {
 									item.setOwner(Static.GetUUID(owner, t));
 								}
-								break;
-							case entity_spec.KEY_DROPPED_ITEM_THROWER:
+							}
+							case entity_spec.KEY_DROPPED_ITEM_THROWER -> {
 								Mixed thrower = specArray.get(index, t, env);
 								if(thrower instanceof CNull) {
 									item.setThrower(null);
@@ -3064,13 +3025,13 @@ public class EntityManagement {
 									item.setThrower(Static.GetUUID(thrower, t));
 								}
 								break;
-							case entity_spec.KEY_DROPPED_ITEM_DESPAWN:
+							}
+							case entity_spec.KEY_DROPPED_ITEM_DESPAWN -> {
 								if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_18_X)) {
 									item.setWillDespawn(ArgumentValidation.getBooleanObject(specArray.get(index, t, env), t, env));
 								}
-								break;
-							default:
-								throwException(index, t);
+							}
+							default -> throwException(index, t);
 						}
 					}
 					break;
@@ -3211,7 +3172,7 @@ public class EntityManagement {
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_FIREBALL_DIRECTION:
-								ball.setDirection(ObjectGenerator.GetGenerator().vector(specArray.get(index, t, env), t));
+								ball.setDirection(ObjectGenerator.GetGenerator().vector(specArray.get(index, t, env), t, env));
 								break;
 							default:
 								throwException(index, t);
@@ -3231,7 +3192,7 @@ public class EntityManagement {
 								CArray effects = ArgumentValidation.getArray(specArray.get(index, t, env), t, env);
 								for(Mixed eff : effects.asList(env)) {
 									if(eff.isInstanceOf(CArray.TYPE, null, env)) {
-										fm.addEffect(ObjectGenerator.GetGenerator().fireworkEffect((CArray) eff, t));
+										fm.addEffect(ObjectGenerator.GetGenerator().fireworkEffect((CArray) eff, t, env));
 									} else {
 										throw new CRECastException("Firework effect expected to be an array.", t);
 									}
@@ -3458,11 +3419,8 @@ public class EntityManagement {
 					MCSlime cube = (MCSlime) entity;
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
-							case entity_spec.KEY_SLIME_SIZE:
-								cube.setSize(ArgumentValidation.getInt32(specArray.get(index, t, env), t, env));
-								break;
-							default:
-								throwException(index, t);
+							case entity_spec.KEY_SLIME_SIZE -> cube.setSize(ArgumentValidation.getInt32(specArray.get(index, t, env), t, env));
+							default -> throwException(index, t);
 						}
 					}
 					break;
@@ -3486,15 +3444,12 @@ public class EntityManagement {
 					MCMinecart minecart = (MCMinecart) entity;
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
-							case entity_spec.KEY_MINECART_BLOCK:
+							case entity_spec.KEY_MINECART_BLOCK -> {
 								MCMaterial mat = ObjectGenerator.GetGenerator().material(specArray.get(index, t, env), t);
 								minecart.setDisplayBlock(mat.createBlockData());
-								break;
-							case entity_spec.KEY_MINECART_OFFSET:
-								minecart.setDisplayBlockOffset(ArgumentValidation.getInt32(specArray.get(index, t, env), t, env));
-								break;
-							default:
-								throwException(index, t);
+							}
+							case entity_spec.KEY_MINECART_OFFSET -> minecart.setDisplayBlockOffset(ArgumentValidation.getInt32(specArray.get(index, t, env), t, env));
+							default -> throwException(index, t);
 						}
 					}
 					break;
@@ -3502,31 +3457,28 @@ public class EntityManagement {
 					MCCommandMinecart commandminecart = (MCCommandMinecart) entity;
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
-							case entity_spec.KEY_MINECART_COMMAND_CUSTOMNAME:
+							case entity_spec.KEY_MINECART_COMMAND_CUSTOMNAME -> {
 								Mixed customName = specArray.get(index, t, env);
 								if(customName instanceof CNull) {
 									commandminecart.setName(null);
 								} else {
 									commandminecart.setName(customName.val());
 								}
-								break;
-							case entity_spec.KEY_MINECART_COMMAND_COMMAND:
+							}
+							case entity_spec.KEY_MINECART_COMMAND_COMMAND -> {
 								Mixed command = specArray.get(index, t, env);
 								if(command instanceof CNull) {
 									commandminecart.setCommand(null);
 								} else {
 									commandminecart.setCommand(command.val());
 								}
-								break;
-							case entity_spec.KEY_MINECART_BLOCK:
+							}
+							case entity_spec.KEY_MINECART_BLOCK -> {
 								MCMaterial mat = ObjectGenerator.GetGenerator().material(specArray.get(index, t, env), t);
 								commandminecart.setDisplayBlock(mat.createBlockData());
-								break;
-							case entity_spec.KEY_MINECART_OFFSET:
-								commandminecart.setDisplayBlockOffset(ArgumentValidation.getInt32(specArray.get(index, t, env), t, env));
-								break;
-							default:
-								throwException(index, t);
+							}
+							case entity_spec.KEY_MINECART_OFFSET -> commandminecart.setDisplayBlockOffset(ArgumentValidation.getInt32(specArray.get(index, t, env), t, env));
+							default -> throwException(index, t);
 						}
 					}
 					break;
@@ -4005,11 +3957,8 @@ public class EntityManagement {
 					MCVex vex = (MCVex) entity;
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
-							case entity_spec.KEY_VEX_CHARGING:
-								vex.setCharging(ArgumentValidation.getBooleanObject(specArray.get(index, t, env), t, env));
-								break;
-							default:
-								throwException(index, t);
+							case entity_spec.KEY_VEX_CHARGING -> vex.setCharging(ArgumentValidation.getBooleanObject(specArray.get(index, t, env), t, env));
+							default -> throwException(index, t);
 						}
 					}
 					break;
@@ -4049,14 +3998,9 @@ public class EntityManagement {
 					MCWitherSkull skull = (MCWitherSkull) entity;
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
-							case entity_spec.KEY_WITHER_SKULL_CHARGED:
-								skull.setCharged(ArgumentValidation.getBoolean(specArray.get(index, t, env), t, env));
-								break;
-							case entity_spec.KEY_FIREBALL_DIRECTION:
-								skull.setDirection(ObjectGenerator.GetGenerator().vector(specArray.get(index, t, env), t));
-								break;
-							default:
-								throwException(index, t);
+							case entity_spec.KEY_WITHER_SKULL_CHARGED -> skull.setCharged(ArgumentValidation.getBoolean(specArray.get(index, t, env), t, env));
+							case entity_spec.KEY_FIREBALL_DIRECTION -> skull.setDirection(ObjectGenerator.GetGenerator().vector(specArray.get(index, t, env), t, env));
+							default -> throwException(index, t);
 						}
 					}
 					break;
@@ -4751,7 +4695,8 @@ public class EntityManagement {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCEntity e = Static.getEntity(args[0], t);
-			CArray tags = new CArray(t);
+			CArray tags = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+				.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			for(String tag : e.getScoreboardTags()) {
 				tags.push(new CString(tag, t), t, env);
 			}
@@ -4977,13 +4922,13 @@ public class EntityManagement {
 				Mixed cEffects = options.get("effects", t, env);
 				if(cEffects.isInstanceOf(CArray.TYPE, null, env)) {
 					for(Mixed c : ((CArray) cEffects).asList(env)) {
-						effects.add(ObjectGenerator.GetGenerator().fireworkEffect((CArray) c, t));
+						effects.add(ObjectGenerator.GetGenerator().fireworkEffect((CArray) c, t, env));
 					}
 				} else {
 					throw new CREFormatException("Firework effects must be an array.", t);
 				}
 			} else {
-				effects.add(ObjectGenerator.GetGenerator().fireworkEffect(options, t));
+				effects.add(ObjectGenerator.GetGenerator().fireworkEffect(options, t, env));
 			}
 
 			MCFirework firework = loc.getWorld().launchFirework(loc, strength, effects);
@@ -5064,7 +5009,7 @@ public class EntityManagement {
 	public static class get_hanging_direction extends EntityGetterFunction {
 
 		@Override
-		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCEntity entity = Static.getEntity(args[0], t);
 			if(entity instanceof MCHanging hanging) {
 				return new CString(hanging.getFacing().name(), t);
@@ -5078,9 +5023,22 @@ public class EntityManagement {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CString.TYPE)
+					.param(CString.TYPE, "entityUUID", "The entity uuid to check (with or without dashes).")
+					.build();
+		}
+
+		@Override
+		public LeftHandSideType getReturnType(ParseTree node, Target t, List<LeftHandSideType> argTypes, List<Target> argTargets,
+				LeftHandSideType inferredReturnType,
 				com.laytonsmith.core.environments.Environment env, Set<ConfigCompileException> exceptions) {
-			return CString.TYPE;
+			return CString.TYPE.asLeftHandSideType();
 		}
 
 		@Override
@@ -5116,12 +5074,17 @@ public class EntityManagement {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets, com.laytonsmith.core.environments.Environment env, Set<ConfigCompileException> exceptions) {
-			return CVoid.TYPE;
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CVoid.TYPE)
+					.param(CString.TYPE, "entityUUID", "The uuid of the entity, (with or without dashes).")
+					.param(CClassType.getEnum(MCBlockFace.class, Target.UNKNOWN), "direction", "The direction to set.")
+					.param(CBoolean.TYPE, "force", "A hanging will not change direction if there's no supporting"
+							+ " block in the new position, unless this is set to true.", true)
+					.build();
 		}
 
 		@Override
-		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCEntity entity = Static.getEntity(args[0], t);
 			if(entity instanceof MCHanging hanging) {
 				MCBlockFace face;

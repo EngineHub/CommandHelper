@@ -504,7 +504,7 @@ public class World {
 				throw new CRENotFoundException(
 						"Could not find the chunk objects of the world (are you running in cmdline mode?)", t);
 			}
-			CArray ret = new CArray(t);
+			CArray ret = new CArray(t, null, env);
 			for(MCChunk c : chunks) {
 				CArray chunk = CArray.GetAssociativeArray(t, null, env);
 				chunk.set("x", new CInt(c.getX(), t), t, env);
@@ -1086,7 +1086,7 @@ public class World {
 				throw new CREInvalidWorldException("No world specified", t);
 			}
 
-			int day = ArgumentValidation.getInt32((args.length == 1 ? args[0] : args[1]), t);
+			int day = ArgumentValidation.getInt32((args.length == 1 ? args[0] : args[1]), t, env);
 			if(day < 0) {
 				throw new CRERangeException("Day cannot be negative.", t);
 			}
@@ -1250,9 +1250,10 @@ public class World {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CArray worlds = new CArray(t);
+			CArray worlds = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			for(MCWorld w : Static.getServer().getWorlds()) {
-				worlds.push(new CString(w.getName(), t), t);
+				worlds.push(new CString(w.getName(), t), t, env);
 			}
 			return worlds;
 		}
@@ -1269,7 +1270,7 @@ public class World {
 
 		@Override
 		public String docs() {
-			return "array {} Returns a list of all currently loaded worlds.";
+			return "array<string> {} Returns a list of all currently loaded worlds.";
 		}
 
 		@Override
@@ -1394,7 +1395,7 @@ public class World {
 			MCFallingBlock block = loc.getWorld().spawnFallingBlock(loc, mat.createBlockData());
 
 			if(args.length == 3) {
-				block.setVelocity(ObjectGenerator.GetGenerator().vector(args[2], t));
+				block.setVelocity(ObjectGenerator.GetGenerator().vector(args[2], t, env));
 			}
 
 			return new CString(block.getUniqueId().toString(), t);
@@ -2304,7 +2305,7 @@ public class World {
 			if(args.length == 2) {
 				v = v.multiply(ArgumentValidation.getDouble(args[1], t, env));
 			}
-			return ObjectGenerator.GetGenerator().vector(v);
+			return ObjectGenerator.GetGenerator().vector(v, Target.UNKNOWN);
 		}
 	}
 
@@ -2425,14 +2426,14 @@ public class World {
 		}
 
 		@Override
-		public Mixed exec(Target target, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCWorld world = null;
 			if(player != null) {
 				world = player.getWorld();
 			}
-			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], world, target, env);
-			return new CDouble(loc.getBlock().getTemperature(), target);
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], world, t, env);
+			return new CDouble(loc.getBlock().getTemperature(), t);
 		}
 
 		@Override

@@ -13,6 +13,7 @@ import com.laytonsmith.core.asm.LLVMFunction;
 import com.laytonsmith.core.asm.LLVMVersion;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.IVariable;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
@@ -32,7 +33,7 @@ public class DataHandling {
 		public IRData buildIR(IRBuilder builder, Target t, Environment env, GenericParameters generics, ParseTree... nodes) throws ConfigCompileException {
 			LLVMEnvironment llvmenv = env.getEnv(LLVMEnvironment.class);
 			int offset;
-			CClassType type;
+			LeftHandSideType type;
 			String name;
 			if(nodes.length == 3) {
 				offset = 1;
@@ -40,7 +41,7 @@ public class DataHandling {
 					throw new CRECastException(getName() + " with 3 arguments only accepts an ivariable as the second argument.", t);
 				}
 				name = ((IVariable) nodes[offset].getData()).getVariableName();
-				type = ArgumentValidation.getClassType(nodes[0].getData(), t);
+				type = ArgumentValidation.getClassType(nodes[0].getData(), t, env);
 				// TODO: Add duplicate check here, or remove if not needed
 //				if(list.has(name) && env.getEnv(GlobalEnv.class).GetFlag(GlobalEnv.FLAG_NO_CHECK_DUPLICATE_ASSIGN) == null) {
 //					if(env.getEnv(GlobalEnv.class).GetFlag(GlobalEnv.FLAG_CLOSURE_WARN_OVERWRITE) != null) {
@@ -60,7 +61,7 @@ public class DataHandling {
 				name = ((IVariable) nodes[offset].getData()).getVariableName();
 				type = llvmenv.getVariableType(name);
 				if(type == null) {
-					type = CClassType.AUTO;
+					type = CClassType.AUTO.asLeftHandSideType();
 				}
 			}
 

@@ -50,4 +50,5 @@ public class MixedRunner extends AbstractMixedInterfaceRunner {
 	public GenericParameters getGenericParameters() {
 		return null;
 	}
+
 }

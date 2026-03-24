@@ -27,6 +27,7 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Procedure;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Security;
+import com.laytonsmith.core.SourceType;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.StepAction;
 import com.laytonsmith.core.StepAction.Complete;
@@ -74,9 +75,14 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.IVariableList;
 import com.laytonsmith.core.constructs.InstanceofUtil;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.ProcedureUsage;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.ConstraintLocation;
+import com.laytonsmith.core.constructs.generics.Constraints;
+import com.laytonsmith.core.constructs.generics.GenericDeclaration;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.constraints.UnboundedConstraint;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.Environment.EnvironmentImpl;
@@ -117,6 +123,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -150,35 +157,51 @@ public class DataHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
-			return new CArray(t, args);
+			return new CArray(t, null, env, args);
 		}
 
 		@Override
-		public CClassType typecheck(StaticAnalysis analysis,
-				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
-			return typecheckArray(analysis, ast, env, exceptions);
+		public FunctionSignatures getSignatures() {
+			Constraints tConstraints = new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+					new UnboundedConstraint(Target.UNKNOWN, "T"));
+			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN, tConstraints);
+			LeftHandSideType t = LeftHandSideType.fromNativeGenericDefinitionType(genericDeclaration, "T", null);
+			return new SignatureBuilder(LeftHandSideType.fromNativeCClassType(CArray.TYPE,
+					t.toNativeLeftHandGenericUse()))
+					.varParam(t, "item", "The items to put into the array initially.")
+					.setGenericDeclaration(genericDeclaration, "The generic type of the array. Note that"
+							+ " a type must be explicitely provided in strict mode.")
+					.build();
 		}
 
-		protected static CClassType typecheckArray(StaticAnalysis analysis,
-				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
-			for(ParseTree child : ast.getChildren()) {
-				Mixed elem = child.getData();
 
-				// If this is a centry(), ignore the first (CLabel) argument.
-				if(elem instanceof CFunction && centry.NAME.equals(elem.val())) {
-					if(child.numberOfChildren() == 2) {
-						CClassType type = analysis.typecheck(child.getChildAt(1), env, exceptions);
-						StaticAnalysis.requireType(type, Mixed.TYPE, child.getChildAt(1).getTarget(), env, exceptions);
-					}
-				} else {
 
-					// This is normal value, so typecheck it.
-					CClassType type = analysis.typecheck(child, env, exceptions);
-					StaticAnalysis.requireType(type, Mixed.TYPE, child.getTarget(), env, exceptions);
-				}
-			}
-			return CArray.TYPE;
-		}
+//		@Override
+//		public LeftHandSideType typecheck(StaticAnalysis analysis,
+//				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+//			return typecheckArray(analysis, ast, env, exceptions);
+//		}
+//
+//		protected static LeftHandSideType typecheckArray(StaticAnalysis analysis,
+//				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+//			for(ParseTree child : ast.getChildren()) {
+//				Mixed elem = child.getData();
+//
+//				// If this is a centry(), ignore the first (CLabel) argument.
+//				if(elem instanceof CFunction && centry.NAME.equals(elem.val())) {
+//					if(child.numberOfChildren() == 2) {
+//						LeftHandSideType type = analysis.typecheck(child.getChildAt(1), env, exceptions);
+//						StaticAnalysis.requireType(type, Mixed.TYPE, child.getChildAt(1).getTarget(), env, exceptions);
+//					}
+//				} else {
+//
+//					// This is normal value, so typecheck it.
+//					LeftHandSideType type = analysis.typecheck(child, env, exceptions);
+//					StaticAnalysis.requireType(type, Mixed.TYPE, child.getTarget(), env, exceptions);
+//				}
+//			}
+//			return CArray.TYPE.asLeftHandSideType();
+//		}
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -216,8 +239,6 @@ public class DataHandling {
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
-
-		FileOptions lastFileOptions = null;
 
 		@Override
 		@SuppressWarnings("null")
@@ -286,14 +307,27 @@ public class DataHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			return CArray.GetAssociativeArray(t, args);
+			return CArray.GetAssociativeArray(t, null, env, args);
 		}
 
 		@Override
-		public CClassType typecheck(StaticAnalysis analysis,
-				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
-			return array.typecheckArray(analysis, ast, env, exceptions);
+		public FunctionSignatures getSignatures() {
+			Constraints tConstraints = new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+					new UnboundedConstraint(Target.UNKNOWN, "T"));
+			GenericDeclaration genericDeclaration = new GenericDeclaration(Target.UNKNOWN, tConstraints);
+			LeftHandSideType t = LeftHandSideType.fromNativeGenericDefinitionType(genericDeclaration, "T", null);
+			return new SignatureBuilder(LeftHandSideType.fromNativeCClassType(CArray.TYPE, t.toNativeLeftHandGenericUse()))
+					.varParam(t, "item", "The items to put into the array initially.")
+					.setGenericDeclaration(genericDeclaration, "The generic type of the array. Note that"
+							+ " a type must be explicitely provided in strict mode.")
+					.build();
 		}
+
+//		@Override
+//		public LeftHandSideType typecheck(StaticAnalysis analysis,
+//				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+//			return array.typecheckArray(analysis, ast, env, exceptions);
+//		}
 
 		@Override
 		public String getName() {
@@ -368,11 +402,8 @@ public class DataHandling {
 				}
 
 				// Get and validate variable type.
-				CClassType type = ArgumentValidation.getClassType(args[0], t);
-				Boolean varArgsAllowed = env.getEnv(GlobalEnv.class).GetFlag(GlobalEnv.FLAG_VAR_ARGS_ALLOWED);
-				if(varArgsAllowed == null) {
-					varArgsAllowed = false;
-				}
+				LeftHandSideType type = ArgumentValidation.getClassType(args[0], t, env);
+				Boolean varArgsAllowed = Objects.requireNonNullElse(env.getEnv(GlobalEnv.class).GetFlag(GlobalEnv.FLAG_VAR_ARGS_ALLOWED), false);
 				if(type.isVariadicType() && !varArgsAllowed) {
 					throw new CRECastException("Cannot use varargs type in this context", t);
 				}
@@ -382,6 +413,16 @@ public class DataHandling {
 
 				// Get assigned value.
 				Mixed val = args[2];
+				if(type.isVariadicType() && val == CNull.UNDEFINED) {
+					// If it's variadic, and we've gotten this far, varArgsAllowed is true, which means
+					// we're in a Callable parameter . CNull.UNDEFINED is the default
+					// for Callable assignments without an actual assignment, but in reality it should be
+					// an empty list of the given type, so construct an array of the underlying type here.
+					GenericParameters typeGenerics = GenericParameters
+							.addParameter(CArray.TYPE, type.getVarargsBaseType(env).asConcreteType(t), null, env, t)
+							.build(t, env);
+					val = new CArray(t, typeGenerics, env);
+				}
 
 				// Unwrap assigned value from IVariable if an IVariable is passed.
 				if(val instanceof IVariable ivar) {
@@ -392,15 +433,18 @@ public class DataHandling {
 				if(val instanceof CVoid) {
 					throw new CRECastException("Void may not be assigned to a variable", t);
 				}
-				if(!InstanceofUtil.isInstanceof(val.typeof(env), type, env)) {
+				if(!InstanceofUtil.isAssignableTo(val.typeof(env).asLeftHandSideType(), type, env)) {
 					throw new CRECastException(varName + " is of type " + type.val() + ", but a value of type "
 							+ val.typeof(env) + " was assigned to it.", t);
 				}
 
-				// Set variable in variable list.
-				var = new IVariable(type, varName, val, t);
+				try {
+					// Set variable in variable list.
+					var = new IVariable(type, varName, val, t, env);
+				} catch(ConfigCompileException ex) {
+					throw ex.asRuntimeException();
+				}
 				list.set(var);
-
 			} else {
 
 				// Get and validate variable name.
@@ -423,10 +467,14 @@ public class DataHandling {
 				}
 				var = list.get(varName);
 				if(var == null) {
-					var = new IVariable(Auto.TYPE, varName, val, t);
+					try {
+						var = new IVariable(Auto.TYPE.asLeftHandSideType(), varName, val, t, env);
+					} catch(ConfigCompileException ex) {
+						throw ex.asRuntimeException();
+					}
 					list.set(var);
 				} else {
-					if(!InstanceofUtil.isInstanceof(val.typeof(env), var.getDefinedType(), env)) {
+					if(!InstanceofUtil.isInstanceof(val, var.getDefinedType(), env)) {
 						throw new CRECastException(varName + " is of type " + var.getDefinedType()
 								+ ", but a value of type " + val.typeof(env) + " was assigned to it.", t);
 					}
@@ -438,15 +486,16 @@ public class DataHandling {
 
 		@Override
 		@SuppressWarnings("checkstyle:FallThrough")
-		public CClassType typecheck(StaticAnalysis analysis,
-				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+		public LeftHandSideType typecheck(StaticAnalysis analysis,
+				ParseTree ast, LeftHandSideType inferredType,
+				Environment env, Set<ConfigCompileException> exceptions) {
 			int ind = 0;
-			CClassType declaredType = null;
+			LeftHandSideType declaredType = null;
 			switch(ast.numberOfChildren()) {
 				case 3:
 					// Typecheck declaration type.
 					ParseTree typeNode = ast.getChildAt(ind++);
-					declaredType = StaticAnalysis.requireClassType(typeNode, exceptions);
+					declaredType = StaticAnalysis.requireClassType(typeNode, ast.getTarget(), exceptions);
 					// Intentional fallthrough.
 				case 2:
 					// Typecheck variable.
@@ -456,7 +505,8 @@ public class DataHandling {
 
 					// Get assigned value.
 					ParseTree valNode = ast.getChildAt(ind);
-					CClassType valType = analysis.typecheck(valNode, env, exceptions);
+					LeftHandSideType valType = analysis.typecheck(valNode,
+							declaredType == null ? Auto.LHSTYPE : declaredType, env, exceptions);
 
 					// Attempt to get the declared type from this variable's declaration.
 					if(declaredType == null && ivar != null) {
@@ -476,8 +526,8 @@ public class DataHandling {
 					}
 
 					// If a variable is declared as AUTO or unknown, then its value should actually be any mixed.
-					if(declaredType == null || declaredType == CClassType.AUTO) {
-						declaredType = Mixed.TYPE;
+					if(declaredType == null || declaredType.isAuto()) {
+						declaredType = Mixed.TYPE.asLeftHandSideType();
 					}
 
 					// Type check assigned value.
@@ -487,7 +537,7 @@ public class DataHandling {
 					return valType;
 				default:
 					// Invalid number of arguments. Don't generate any further errors.
-					return CClassType.AUTO;
+					return CClassType.AUTO.asLeftHandSideType();
 			}
 		}
 
@@ -509,10 +559,14 @@ public class DataHandling {
 				Mixed rawType = ast.getChildAt(0).getData();
 				ParseTree ivarAst = ast.getChildAt(1);
 				Mixed rawIVar = ivarAst.getData();
-				if(rawType instanceof CClassType && rawIVar instanceof IVariable) {
-					CClassType type = (CClassType) rawType;
-					IVariable iVar = (IVariable) rawIVar;
-
+				if((rawType instanceof CClassType || rawType instanceof LeftHandSideType)
+						&& rawIVar instanceof IVariable iVar) {
+					LeftHandSideType type;
+					if(rawType instanceof CClassType cct) {
+						type = cct.asLeftHandSideType();
+					} else {
+						type = (LeftHandSideType) rawType;
+					}
 					// Add the new variable declaration.
 					declScope.addDeclaration(new Declaration(
 							Namespace.IVARIABLE, iVar.getVariableName(), type, ast.getNodeModifiers(),
@@ -533,8 +587,7 @@ public class DataHandling {
 				Scope newScope = analysis.createNewScope(valScope);
 				ParseTree ivarAst = ast.getChildAt(0);
 				Mixed rawIVar = ivarAst.getData();
-				if(rawIVar instanceof IVariable) {
-					IVariable iVar = (IVariable) rawIVar;
+				if(rawIVar instanceof IVariable iVar) {
 
 					// Add ivariable assign declaration in a new scope.
 					newScope.addDeclaration(new IVariableAssignDeclaration(iVar.getVariableName(),
@@ -574,10 +627,14 @@ public class DataHandling {
 				Mixed rawType = ast.getChildAt(0).getData();
 				ParseTree ivarAst = ast.getChildAt(1);
 				Mixed rawIVar = ivarAst.getData();
-				if(rawType instanceof CClassType && rawIVar instanceof IVariable) {
-					CClassType type = (CClassType) rawType;
-					IVariable iVar = (IVariable) rawIVar;
-
+				if((rawType instanceof CClassType || rawType instanceof LeftHandSideType)
+						&& rawIVar instanceof IVariable iVar) {
+					LeftHandSideType type;
+					if(rawType instanceof CClassType cct) {
+						type = cct.asLeftHandSideType();
+					} else {
+						type = (LeftHandSideType) rawType;
+					}
 					// Add the new variable declaration.
 					paramScope = analysis.createNewScope(paramScope);
 					ParamDeclaration pDecl = new ParamDeclaration(iVar.getVariableName(), type,
@@ -603,13 +660,12 @@ public class DataHandling {
 				// Put the variable declaration in the param scope.
 				ParseTree ivarAst = ast.getChildAt(0);
 				Mixed rawIVar = ivarAst.getData();
-				if(rawIVar instanceof IVariable) {
-					IVariable iVar = (IVariable) rawIVar;
+				if(rawIVar instanceof IVariable iVar) {
 
 					// Add the new variable declaration.
 					paramScope = analysis.createNewScope(paramScope);
 					ParamDeclaration pDecl = new ParamDeclaration(
-							iVar.getVariableName(), CClassType.AUTO,
+							iVar.getVariableName(), Auto.LHSTYPE,
 							(ast.getChildAt(1).getData() == CNull.UNDEFINED ? null : ast.getChildAt(1)),
 							ast.getNodeModifiers(), ast.getTarget());
 					params.add(pDecl);
@@ -623,6 +679,48 @@ public class DataHandling {
 
 			// Invalid parameter. Fall back to handling this function's arguments.
 			return new Scope[] {paramScope, super.linkScope(analysis, valScope, ast, env, exceptions)};
+		}
+
+		@Override
+		public List<LeftHandSideType> getResolvedParameterTypes(StaticAnalysis analysis,
+				Target t, Environment env, GenericParameters generics,
+				LeftHandSideType inferredReturnType, List<ParseTree> children) {
+			List<LeftHandSideType> ret = new ArrayList<>(children.size());
+			if(children.size() == 2) {
+				ret.add(Auto.LHSTYPE);
+				ret.add(Auto.LHSTYPE);
+			} else {
+				Mixed data = children.get(0).getData();
+				LeftHandSideType type;
+				if(data instanceof LeftHandSideType lhst) {
+					type = lhst;
+				} else if(data instanceof CClassType ctype) {
+					type = ctype.asLeftHandSideType();
+				} else {
+					type = Auto.LHSTYPE;
+				}
+				ret.add(type);
+				ret.add(Auto.LHSTYPE);
+				ret.add(type);
+			}
+			return ret;
+		}
+
+		@Override
+		public LeftHandSideType getReturnType(ParseTree node, Target t, List<LeftHandSideType> argTypes, List<Target> argTargets, LeftHandSideType inferredReturnType, Environment env, Set<ConfigCompileException> exceptions) {
+			if(node.getChildren().size() == 2) {
+				return Auto.LHSTYPE;
+			} else {
+				Mixed data = node.getChildAt(0).getData();
+				if(data instanceof LeftHandSideType lhst) {
+					return lhst;
+				} else if(data instanceof CClassType type) {
+					return type.asLeftHandSideType();
+				} else {
+					exceptions.add(new ConfigCompileException("Unexpected type passed to assign", t));
+					return Auto.LHSTYPE;
+				}
+			}
 		}
 
 		@Override
@@ -719,12 +817,13 @@ public class DataHandling {
 				ParseTree typeNode = children.get(0);
 				ParseTree varNode = children.get(1);
 				ParseTree valNode = children.get(2);
-				if(typeNode.getData() instanceof CClassType declaredType
+				if(typeNode.getData() instanceof SourceType declaredSourceType
 						&& varNode.getData() instanceof IVariable) {
+					LeftHandSideType declaredType = declaredSourceType.asLeftHandSideType();
 					if(valNode.isConst()) {
-						CClassType valType = valNode.getData().typeof(env);
-						if((valType != CClassType.AUTO || declaredType == CClassType.AUTO)
-								&& InstanceofUtil.isInstanceof(valType, declaredType, env)) {
+						LeftHandSideType valType = valNode.getData().typeof(env).asLeftHandSideType();
+						if((valType != Auto.LHSTYPE || declaredType == Auto.LHSTYPE)
+								&& InstanceofUtil.isAssignableTo(valType, declaredType, env)) {
 							ParseTree newAssignNode = new ParseTree(new CFunction(__unsafe_assign__.NAME, t), fileOptions);
 							newAssignNode.addChild(typeNode);
 							newAssignNode.addChild(varNode);
@@ -734,9 +833,9 @@ public class DataHandling {
 					}
 					if(valNode.getData() instanceof CFunction cf && cf.getCachedFunction() != null
 							&& cf.getCachedFunction().getName().equals(__cast__.NAME) && valNode.numberOfChildren() == 2
-							&& valNode.getChildAt(1).getData() instanceof CClassType castType
-							&& (castType != CClassType.AUTO || declaredType == CClassType.AUTO)
-							&& InstanceofUtil.isInstanceof(castType, declaredType, env)) {
+							&& valNode.getChildAt(1).getData() instanceof SourceType castType
+							&& (castType.asLeftHandSideType() != Auto.LHSTYPE || declaredType == Auto.LHSTYPE)
+							&& InstanceofUtil.isAssignableTo(castType.asLeftHandSideType(), declaredType, env)) {
 						ParseTree newAssignNode = new ParseTree(new CFunction(__unsafe_assign__.NAME, t), fileOptions);
 						newAssignNode.addChild(typeNode);
 						newAssignNode.addChild(varNode);
@@ -928,8 +1027,16 @@ public class DataHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("True condition", "is_string('yes')"),
-				new ExampleScript("False condition", "is_string(1) #is_stringable() would return true here")};
+				new ExampleScript("False condition", "is_string(1) // is_stringable() would return true here")};
 		}
+
+		@Override
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CBoolean.TYPE)
+					.param(Auto.TYPE, "value", "The value to check if it is a string.")
+					.build();
+		}
+
 	}
 
 	@api
@@ -1094,7 +1201,8 @@ public class DataHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			return CBoolean.get(args[0].isInstanceOf(CInt.TYPE, null, env) || args[0].isInstanceOf(CDouble.TYPE, null, env));
+			return CBoolean.get(args[0].isInstanceOf(CInt.TYPE, null, env)
+					|| args[0].isInstanceOf(CDouble.TYPE, null, env));
 		}
 
 		@Override
@@ -1394,7 +1502,7 @@ public class DataHandling {
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			boolean b = true;
 			try {
-				ArgumentValidation.getNumber(args[0], t);
+				ArgumentValidation.getNumber(args[0], t, env);
 			} catch (ConfigRuntimeException e) {
 				b = false;
 			}
@@ -1468,7 +1576,7 @@ public class DataHandling {
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			double d;
 			try {
-				d = ArgumentValidation.getDouble(args[0], t);
+				d = ArgumentValidation.getDouble(args[0], t, env);
 			} catch (ConfigRuntimeException e) {
 				return CBoolean.FALSE;
 			}
@@ -1510,7 +1618,7 @@ public class DataHandling {
 			Phase phase = Phase.EVAL_DEFAULTS;
 
 			ParseTree[] nodes; // after stripping return type prefix
-			CClassType returnType;
+			LeftHandSideType returnType;
 			ParseTree code;
 			IVariableList originalList;
 
@@ -1535,15 +1643,15 @@ public class DataHandling {
 		public StepResult<ProcState> begin(Target t, ParseTree[] children, Environment env) {
 			ProcState state = new ProcState();
 
-			// Parse return type from first child (CClassType or CVoid)
-			state.returnType = Auto.TYPE;
+			// Parse return type from first child (SourceType or CVoid)
+			state.returnType = Auto.LHSTYPE;
 			NodeModifiers modifiers = null;
 			ParseTree[] nodes = children;
-			if(nodes[0].getData().equals(CVoid.VOID) || nodes[0].getData() instanceof CClassType) {
+			if(nodes[0].getData().equals(CVoid.VOID) || nodes[0].getData() instanceof SourceType) {
 				if(nodes[0].getData().equals(CVoid.VOID)) {
-					state.returnType = CVoid.TYPE;
+					state.returnType = CVoid.TYPE.asLeftHandSideType();
 				} else {
-					state.returnType = (CClassType) nodes[0].getData();
+					state.returnType = ((SourceType) nodes[0].getData()).asLeftHandSideType();
 				}
 				ParseTree[] newNodes = new ParseTree[nodes.length - 1];
 				for(int i = 1; i < nodes.length; i++) {
@@ -1612,8 +1720,12 @@ public class DataHandling {
 
 				// Store IVariable with default value
 				Mixed ivarVal = (defaultValue != null ? defaultValue : new CString("", t));
-				state.vars.add(new IVariable(ivar.getDefinedType(),
-						ivar.getVariableName(), ivarVal, ivar.getTarget()));
+				try {
+					state.vars.add(new IVariable(ivar.getDefinedType(),
+							ivar.getVariableName(), ivarVal, ivar.getTarget(), env));
+				} catch(ConfigCompileException cce) {
+					throw new CREFormatException(cce.getMessage(), t);
+				}
 
 				state.paramIndex++;
 				return advanceToNextParam(t, state, env);
@@ -1742,18 +1854,20 @@ public class DataHandling {
 			return null;
 		}
 
+
+
 		public static Procedure getProcedure(Target t, Environment env, Script parent, ParseTree... nodes) {
 			String name = "";
 			List<IVariable> vars = new ArrayList<>();
 			List<String> varNames = new ArrayList<>();
 			boolean procDefinitelyNotConstant = false;
-			CClassType returnType = Auto.TYPE;
+			LeftHandSideType returnType = Auto.LHSTYPE;
 			NodeModifiers modifiers = null;
-			if(nodes[0].getData().equals(CVoid.VOID) || nodes[0].getData() instanceof CClassType) {
+			if(nodes[0].getData().equals(CVoid.VOID) || nodes[0].getData() instanceof SourceType st) {
 				if(nodes[0].getData().equals(CVoid.VOID)) {
-					returnType = CVoid.TYPE;
+					returnType = CVoid.TYPE.asLeftHandSideType();
 				} else {
-					returnType = (CClassType) nodes[0].getData();
+					returnType = ((SourceType) nodes[0].getData()).asLeftHandSideType();
 				}
 				ParseTree[] newNodes = new ParseTree[nodes.length - 1];
 				for(int i = 1; i < nodes.length; i++) {
@@ -1874,8 +1988,12 @@ public class DataHandling {
 				// Get IVariable value.
 				Mixed ivarVal = (paramDefaultValue != null ? paramDefaultValue : new CString("", t));
 
-				// Store IVariable object clone.
-				vars.add(new IVariable(ivar.getDefinedType(), ivar.getVariableName(), ivarVal, ivar.getTarget()));
+				try {
+					// Store IVariable object clone.
+					vars.add(new IVariable(ivar.getDefinedType(), ivar.getVariableName(), ivarVal, ivar.getTarget(), env));
+				} catch(ConfigCompileException ex) {
+					throw ex.asRuntimeException();
+				}
 			}
 
 			// Restore variable list.
@@ -1906,14 +2024,16 @@ public class DataHandling {
 
 			// Handle optional return type argument (CClassType or CVoid, default to AUTO).
 			int ind = 0;
-			CClassType retType;
+			LeftHandSideType retType;
 			if(ast.getChildAt(ind).getData() instanceof CClassType) {
-				retType = (CClassType) ast.getChildAt(ind++).getData();
+				retType = ((CClassType) ast.getChildAt(ind++).getData()).asLeftHandSideType();
+			} else if(ast.getChildAt(ind).getData() instanceof LeftHandSideType lhst) {
+				retType = lhst;
 			} else if(ast.getChildAt(ind).getData().equals(CVoid.VOID)) {
 				ind++;
-				retType = CVoid.TYPE;
+				retType = CVoid.TYPE.asLeftHandSideType();
 			} else {
-				retType = CClassType.AUTO;
+				retType = CClassType.AUTO.asLeftHandSideType();
 			}
 
 			// Get proc name.
@@ -1924,7 +2044,7 @@ public class DataHandling {
 			Scope paramScope = analysis.createNewScope();
 
 			// Insert @arguments parameter.
-			paramScope.addDeclaration(new ParamDeclaration("@arguments", CArray.TYPE, null, ast.getNodeModifiers(),
+			paramScope.addDeclaration(new ParamDeclaration("@arguments", CArray.TYPE.asLeftHandSideType(), null, ast.getNodeModifiers(),
 					ast.getTarget()));
 
 			// Handle procedure parameters from left to right.
@@ -1990,7 +2110,7 @@ public class DataHandling {
 					//Yup! It worked. It's a const proc.
 					return c;
 				} catch (ConfigRuntimeException e) {
-					if(e instanceof CREThrowable && ((CREThrowable) e) instanceof CREInvalidProcedureException) {
+					if(e instanceof CREInvalidProcedureException) {
 						//This is the only valid exception that doesn't strictly mean it's a bad
 						//call.
 						return null;
@@ -2158,7 +2278,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CClassType typecheck(StaticAnalysis sa, ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+		public LeftHandSideType typecheck(StaticAnalysis sa, ParseTree ast, LeftHandSideType inferredType,
+				Environment env, Set<ConfigCompileException> exceptions) {
 			ParseTree procName = ast.getChildren().get(0);
 			Target t = procName.getTarget();
 			boolean found;
@@ -2172,7 +2293,7 @@ public class DataHandling {
 				exceptions.add(new ConfigCompileException("Could not find proc \"" + procName + "\"",
 						t));
 			}
-			return ProcedureUsage.TYPE;
+			return ProcedureUsage.TYPE.asLeftHandSideType();
 		}
 
 		@Override
@@ -2823,7 +2944,7 @@ public class DataHandling {
 				if(((CArray) args[0]).isAssociative()) {
 					throw new CREIllegalArgumentException("Associative arrays may not be used as keys in " + getName(), t);
 				}
-				key = GetNamespace((CArray) args[0], t);
+				key = GetNamespace((CArray) args[0], t, env);
 			} else {
 				throw new CREIllegalArgumentException("Argument 1 in " + this.getName() + " must be a string or array.", t);
 			}
@@ -2894,7 +3015,7 @@ public class DataHandling {
 				if(((CArray) args[0]).isAssociative()) {
 					throw new CREIllegalArgumentException("Associative arrays may not be used as keys in " + getName(), t);
 				}
-				key = GetNamespace((CArray) args[0], t);
+				key = GetNamespace((CArray) args[0], t, env);
 			} else {
 				throw new CREIllegalArgumentException("Argument 1 in " + this.getName() + " must be a string or array.", t);
 			}
@@ -2934,15 +3055,15 @@ public class DataHandling {
 		static class ClosureState {
 			ParseTree[] children;
 			Environment closureEnv;
-			CClassType returnType;
+			LeftHandSideType returnType;
 			int nodeOffset;
 			int paramIndex;
 			int numParams;
 			String[] names;
 			Mixed[] defaults;
-			CClassType[] types;
+			LeftHandSideType[] types;
 
-			ClosureState(ParseTree[] children, Environment closureEnv, CClassType returnType,
+			ClosureState(ParseTree[] children, Environment closureEnv, LeftHandSideType returnType,
 					int nodeOffset, int numParams) {
 				this.children = children;
 				this.closureEnv = closureEnv;
@@ -2951,7 +3072,7 @@ public class DataHandling {
 				this.numParams = numParams;
 				this.names = new String[numParams];
 				this.defaults = new Mixed[numParams];
-				this.types = new CClassType[numParams];
+				this.types = new LeftHandSideType[numParams];
 			}
 
 			@Override
@@ -2962,17 +3083,17 @@ public class DataHandling {
 
 		@Override
 		public StepResult<ClosureState> begin(Target t, ParseTree[] children, Environment env) {
-			CClassType returnType = Auto.TYPE;
+			LeftHandSideType returnType = Auto.LHSTYPE;
 			int nodeOffset = 0;
-			if(children.length > 0 && children[0].getData() instanceof CClassType) {
-				returnType = (CClassType) children[0].getData();
+			if(children.length > 0 && children[0].getData() instanceof SourceType) {
+				returnType = ((SourceType) children[0].getData()).asLeftHandSideType();
 				nodeOffset = 1;
 			}
 
 			if(children.length - nodeOffset == 0) {
 				return new StepResult<>(new Complete(
 						createClosureObject(null, env, returnType,
-						new String[0], new Mixed[0], new CClassType[0], t)), null);
+						new String[0], new Mixed[0], new LeftHandSideType[0], t)), null);
 			}
 
 			Environment myEnv;
@@ -2988,7 +3109,7 @@ public class DataHandling {
 			if(numParams == 0) {
 				return new StepResult<>(new Complete(
 						createClosureObject(children[children.length - 1], myEnv, returnType,
-						new String[0], new Mixed[0], new CClassType[0], t)), state);
+						new String[0], new Mixed[0], new LeftHandSideType[0], t)), state);
 			}
 
 			myEnv.getEnv(GlobalEnv.class).SetFlag(GlobalEnv.FLAG_CLOSURE_WARN_OVERWRITE, true);
@@ -3036,8 +3157,8 @@ public class DataHandling {
 			return null;
 		}
 
-		protected Mixed createClosureObject(ParseTree body, Environment env, CClassType returnType,
-				String[] names, Mixed[] defaults, CClassType[] types, Target t) {
+		protected Mixed createClosureObject(ParseTree body, Environment env, LeftHandSideType returnType,
+				String[] names, Mixed[] defaults, LeftHandSideType[] types, Target t) {
 			return new CClosure(body, env, returnType, names, defaults, types, t);
 		}
 
@@ -3108,14 +3229,17 @@ public class DataHandling {
 
 			// Handle optional return type argument (CClassType or CVoid, default to AUTO).
 			int ind = 0;
-			CClassType retType;
+			LeftHandSideType retType;
 			if(ast.getChildAt(ind).getData() instanceof CClassType) {
-				retType = (CClassType) ast.getChildAt(ind++).getData();
+				retType = ((CClassType) ast.getChildAt(ind++).getData()).asLeftHandSideType();
+			} else if(ast.getChildAt(ind).getData() instanceof LeftHandSideType lhst) {
+				retType = lhst;
+				ind++;
 			} else if(ast.getChildAt(ind).getData().equals(CVoid.VOID)) {
 				ind++;
-				retType = CVoid.TYPE;
+				retType = CVoid.TYPE.asLeftHandSideType();
 			} else {
-				retType = CClassType.AUTO;
+				retType = Auto.LHSTYPE;
 			}
 
 			// Create parameter scope. Set parent scope if this closure type is allowed to resolve in the parent scope.
@@ -3128,7 +3252,7 @@ public class DataHandling {
 			}
 
 			// Insert @arguments parameter.
-			paramScope.addDeclaration(new ParamDeclaration("@arguments", CArray.TYPE, null, ast.getNodeModifiers(),
+			paramScope.addDeclaration(new ParamDeclaration("@arguments", CArray.TYPE.asLeftHandSideType(), null, ast.getNodeModifiers(),
 					ast.getTarget()));
 
 			// Handle closure parameters from left to right.
@@ -3201,8 +3325,8 @@ public class DataHandling {
 	public static class iclosure extends closure {
 
 		@Override
-		protected Mixed createClosureObject(ParseTree body, Environment env, CClassType returnType,
-				String[] names, Mixed[] defaults, CClassType[] types, Target t) {
+		protected Mixed createClosureObject(ParseTree body, Environment env, LeftHandSideType returnType,
+				String[] names, Mixed[] defaults, LeftHandSideType[] types, Target t) {
 			env.getEnv(GlobalEnv.class).SetVarList(null);
 			return new CIClosure(body, env, returnType, names, defaults, types, t);
 		}
@@ -3524,13 +3648,15 @@ public class DataHandling {
 		@Override
 		public String docs() {
 			return "boolean {item} Returns a new construct that has been cast to a boolean. The item is cast according to"
-					+ " the boolean conversion rules. Since all data types can be cast to a"
-					+ " a boolean, this function will never throw an exception.";
+					+ " the boolean conversion rules. Void types are false, the special \"none\" type is false, null"
+					+ " is false, mutable primitives are cast according to the underlying primitive value, and all"
+					+ " other values are cast based on their booleanish value. Any other type of value causes a"
+					+ " CastException.";
 		}
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return null;
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -3545,7 +3671,7 @@ public class DataHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			return CBoolean.get(ArgumentValidation.getBoolean(args[0], t));
+			return CBoolean.get(ArgumentValidation.getBoolean(args[0], t, env));
 		}
 
 		@Override
@@ -3707,7 +3833,7 @@ public class DataHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			return new CDouble(ArgumentValidation.getDouble(args[0], t), t);
+			return new CDouble(ArgumentValidation.getDouble(args[0], t, env), t);
 		}
 
 		@Override
@@ -3824,11 +3950,11 @@ public class DataHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			int radix = ArgumentValidation.getInt32(args[1], t);
+			int radix = ArgumentValidation.getInt32(args[1], t, env);
 			if(radix < Character.MIN_RADIX || radix > Character.MAX_RADIX) {
 				throw new CRERangeException("The radix must be between " + Character.MIN_RADIX + " and " + Character.MAX_RADIX + ", inclusive.", t);
 			}
-			return new CString(Long.toString(ArgumentValidation.getInt(args[0], t), radix), t);
+			return new CString(Long.toString(ArgumentValidation.getInt(args[0], t, env), radix), t);
 		}
 
 		@Override
@@ -3897,7 +4023,7 @@ public class DataHandling {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String value = args[0].val();
-			int radix = ArgumentValidation.getInt32(args[1], t);
+			int radix = ArgumentValidation.getInt32(args[1], t, env);
 			if(radix < Character.MIN_RADIX || radix > Character.MAX_RADIX) {
 				throw new CRERangeException("The radix must be between " + Character.MIN_RADIX + " and " + Character.MAX_RADIX + ", inclusive.", t);
 			}
@@ -3948,15 +4074,15 @@ public class DataHandling {
 	 * @param array
 	 * @return
 	 */
-	private static String GetNamespace(CArray array, Target t) {
+	private static String GetNamespace(CArray array, Target t, Environment env) {
 		boolean first = true;
 		StringBuilder b = new StringBuilder();
-		for(int i = 0; i < array.size(); i++) {
+		for(int i = 0; i < array.size(env); i++) {
 			if(!first) {
 				b.append(".");
 			}
 			first = false;
-			b.append(array.get(i, t).val());
+			b.append(array.get(i, t, env).val());
 		}
 		return b.toString();
 	}
@@ -4287,7 +4413,7 @@ public class DataHandling {
 			if(args.length > 0) {
 				val = args[0];
 			}
-			return new CMutablePrimitive(val, t);
+			return new CMutablePrimitive(val, t, env);
 		}
 
 		@Override
@@ -4384,7 +4510,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(args[0] instanceof CNull) {
 				return CBoolean.FALSE;
 			}
@@ -4558,13 +4684,13 @@ public class DataHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CClassType type = ArgumentValidation.getClassType(args[0], t);
-			int size = ArgumentValidation.getInt32(args[1], t);
+			LeftHandSideType type = ArgumentValidation.getClassType(args[0], t, env);
+			int size = ArgumentValidation.getInt32(args[1], t, env);
 			if(size < 0) {
 				throw new CRERangeException("Array size must be zero or greater. Received: " + size, t);
 			}
 			// nullOut is intentionally ignored here, as it's irrelevant in the case of the interpreter
-			return new CFixedArray(t, type, size);
+			return new CFixedArray(t, generics, size);
 		}
 
 		@Override
@@ -4578,8 +4704,20 @@ public class DataHandling {
 		}
 
 		@Override
+		public FunctionSignatures getSignatures() {
+			GenericDeclaration tDeclaration = new GenericDeclaration(Target.UNKNOWN,
+				new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+					new UnboundedConstraint(Target.UNKNOWN, "T")));
+			LeftHandSideType t = LeftHandSideType.fromNativeGenericDefinitionType(tDeclaration, "T", null);
+			return new SignatureBuilder(LeftHandSideType.fromNativeCClassType(CFixedArray.TYPE, t.toNativeLeftHandGenericUse()))
+					.param(CInt.TYPE, "size", "The size of the fixed array. This cannot be changed later.")
+					.param(CBoolean.TYPE, "nullOut", "Whether or not to null out the values in the array.", true)
+					.build();
+		}
+
+		@Override
 		public String docs() {
-			return "fixed_array {ClassType type, int size, [boolean nullOut]} Creates an array that can hold values of"
+			return "fixed_array {int size, [boolean nullOut]} Creates an array that can hold values of"
 					+ " the given type, and is of the given size."
 					+ " The array cannot be resized or retyped later."
 					+ " The array cannot be associative. In general, this isn't"
@@ -4595,9 +4733,103 @@ public class DataHandling {
 					+ " through the array and sets each value to null (or equivalent for primitive types). This"
 					+ " takes additional work, but sets the value to a known state. This can be bypassed if the array"
 					+ " is about to be filled from 0 to length, but should otherwise always be set to true."
-					+ " A RangeException is thrown if size is negative, or larger than a 32 bits signed integer."
-					+ " A CastException is thrown when size cannot be cast to an int.";
+					+ " A RangeException is thrown if size is negative, or larger than a 32 bits signed integer.";
 		}
+	}
+
+	@api
+	public static class cast extends AbstractFunction {
+
+		public static final String NAME = "cast";
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public String getName() {
+			return "cast";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "value {value} Returns the value, cast as the appropriate type. For true casts, this"
+					+ "is a compile time only operation, though for cross casts, an actual conversion is done"
+					+ " on the type, and the resulting value is not strictly equal to the original. ----"
+					+ " Casting is in general the process of informing the typechecker that we expect the"
+					+ " actual, concrete, underlying type to be of the correct value. Consider for instance"
+					+ " this code:\n\n"
+					+ " <%CODE|\n"
+					+ "primitive @p = 1.0; // Actual value is 1.0, which is a double\n"
+					+ "int @i = @p; // Compiler complains, because @p is a primitive, and not an int\n"
+					+ "%>"
+					+ "\n"
+					+ "We can retain type safety, but also move the typecheck into runtime by using a cast."
+					+ "<%CODE|\n"
+					+ "primitive @p = 1.0;\n"
+					+ "int @i = cast<int>(@p); // Passes typechecking, will cause a runtime error if it's wrong\n"
+					+ "int @j = cast(@p); // <int> is inferred because that's the value we're assigning to\n"
+					+ "int @k = @p as int; // Using as keyword, preferred syntax\n"
+					+ "%>"
+					+ "\n"
+					+ "In general, this will work to cast values that could possibly be converted. Some types are"
+					+ " not castable anyways, for instance <code>string @string = ...; cast&lt;closure&gt;(@string);</code>"
+					+ " will not work, since a string is not convertable no matter what.\n\n"
+					+ "This function will also work to cross cast a value, though this is not yet defined.\n\n"
+					+ "Keyword notation is preferred, <code>@value as int</code> is equivalent to"
+					+ " <code>cast&lt;int&gt;(@value)</code>.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_6;
+		}
+
+		@Override
+		public FunctionSignatures getSignatures() {
+			GenericDeclaration declaration = new GenericDeclaration(Target.UNKNOWN,
+					new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+						new UnboundedConstraint(Target.UNKNOWN, "T")));
+			LeftHandSideType t = LeftHandSideType.fromNativeGenericDefinitionType(declaration, "T", null);
+			return new SignatureBuilder(t)
+					.param(Auto.TYPE, "value", "The value to cast.")
+					.setGenericDeclaration(declaration, "The value to cast to.")
+					.throwsEx(CRECastException.class, "If the underlying type cannot actually be cast to the specified type.")
+					.build();
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			if(generics != null) {
+				LeftHandSideType expectedType = generics.getParameters().get(0);
+				// We would probably throw an exception later anyways, but putting the cast here ensures that we
+				// will for sure throw an exception, and at the expected location.
+				if(!InstanceofUtil.isInstanceof(args[0], expectedType, env)) {
+					// TODO: Implement cross casting
+					String value = expectedType.val();
+					throw new CRECastException("Expected a value of type " + value + " but " + args[0].typeof(env)
+							+ " was found.", t);
+				}
+			}
+			return args[0];
+		}
+
 	}
 
 }

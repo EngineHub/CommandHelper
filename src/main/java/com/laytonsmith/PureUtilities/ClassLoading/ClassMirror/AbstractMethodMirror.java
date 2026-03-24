@@ -6,6 +6,9 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import static org.objectweb.asm.Opcodes.ACC_SYNTHETIC;
+import static org.objectweb.asm.Opcodes.ACC_VARARGS;
+import org.objectweb.asm.Type;
 
 /**
  * An {@link AbstractMethodMirror} encompasses both methods and constructors.
@@ -13,6 +16,38 @@ import java.util.Objects;
 public abstract class AbstractMethodMirror extends AbstractElementMirror {
 
 	private static final long serialVersionUID = 1L;
+
+	public static AbstractMethodMirror fromVisitParameters(int access, String name, String desc, String signature, String[] exceptions, ClassReferenceMirror classReferenceMirror) {
+		List<ClassReferenceMirror> parameterMirrors = new ArrayList<>();
+		for(Type type : Type.getArgumentTypes(desc)) {
+			parameterMirrors.add(new ClassReferenceMirror(type.getDescriptor()));
+		}
+		final AbstractMethodMirror methodMirror;
+		if(ConstructorMirror.INIT.equals(name)) {
+			methodMirror = new ConstructorMirror(
+					classReferenceMirror,
+					new ModifierMirror(ModifierMirror.Type.METHOD, access),
+					new ClassReferenceMirror(Type.getReturnType(desc).getDescriptor()),
+					name,
+					parameterMirrors,
+					(access & ACC_VARARGS) == ACC_VARARGS,
+					(access & ACC_SYNTHETIC) == ACC_SYNTHETIC,
+					signature
+			);
+		} else {
+			methodMirror = new MethodMirror(
+					classReferenceMirror,
+					new ModifierMirror(ModifierMirror.Type.METHOD, access),
+					new ClassReferenceMirror(Type.getReturnType(desc).getDescriptor()),
+					name,
+					parameterMirrors,
+					(access & ACC_VARARGS) == ACC_VARARGS,
+					(access & ACC_SYNTHETIC) == ACC_SYNTHETIC,
+					signature
+			);
+		}
+		return methodMirror;
+	}
 
 	private final List<ClassReferenceMirror> params;
 	private boolean isVararg = false;

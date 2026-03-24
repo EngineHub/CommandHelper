@@ -1,28 +1,24 @@
 package com.laytonsmith.core.constructs;
 
+import com.laytonsmith.core.Static;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
+import com.laytonsmith.testing.AbstractIntegrationTest;
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
  *
  */
-public class CReal2dMatrixTest {
+public class CReal2dMatrixTest extends AbstractIntegrationTest {
 
-	@BeforeClass
-	public static void setUpClass() {
-	}
-
-	@AfterClass
-	public static void tearDownClass() {
-	}
+	Environment env;
 
 	@Before
-	public void setUp() {
+	public void setUp() throws Exception {
+		this.env = Static.GenerateStandaloneEnvironment();
 	}
 
 	@After
@@ -69,8 +65,8 @@ public class CReal2dMatrixTest {
 			8, 9, 10, 11
 		};
 		CReal2dMatrix m = new CReal2dMatrix(3, 4, data1);
-		CArray slice = m.slice(1, 2, Target.UNKNOWN);
-		Assert.assertEquals(5, ((CDouble) ((ArrayAccess) slice.get(0, Target.UNKNOWN)).get(1, Target.UNKNOWN)).val, 0.1);
+		CArray slice = m.slice(1, 2, Target.UNKNOWN, env);
+		Assert.assertEquals(5, ((CDouble) ((ArrayAccess) slice.get(0, Target.UNKNOWN, env)).get(1, Target.UNKNOWN, env)).val, 0.1);
 	}
 
 	@Test
@@ -81,8 +77,8 @@ public class CReal2dMatrixTest {
 			8, 9, 10, 11
 		};
 		CReal2dMatrix m = new CReal2dMatrix(3, 4, data1);
-		CArray slice = m.slice(2, 1, Target.UNKNOWN);
-		Assert.assertEquals(9, ((CDouble) ((ArrayAccess) slice.get(0, Target.UNKNOWN)).get(1, Target.UNKNOWN)).val, 0.1);
+		CArray slice = m.slice(2, 1, Target.UNKNOWN, env);
+		Assert.assertEquals(9, ((CDouble) ((ArrayAccess) slice.get(0, Target.UNKNOWN, env)).get(1, Target.UNKNOWN, env)).val, 0.1);
 	}
 
 	@Test

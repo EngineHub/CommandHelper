@@ -402,7 +402,7 @@ public class Constraints implements Iterable<Constraint> {
 			// Now buf contains the class, which may need additional parsing
 			clazz = ParseClassType(fileOptions, buf.toString(), t, env);
 			if("extends".equals(keyword)) {
-				return new UpperBoundConstraint(t, name, clazz);
+				return new UpperBoundConstraint(env, t, name, clazz);
 			} else if("super".equals(keyword)) {
 				return new LowerBoundConstraint(t, name, clazz);
 			}
@@ -412,7 +412,7 @@ public class Constraints implements Iterable<Constraint> {
 			if(location == ConstraintLocation.DEFINITION) {
 				if(fileOptions != null) {
 					try {
-						CClassType.get(FullyQualifiedClassName.forName(buf.toString(), t, env), t);
+						CClassType.get(FullyQualifiedClassName.forName(buf.toString(), t, env), env);
 						// This passed. It will still work just fine, this is an UnboundedConstraint
 						// though, not an ExactTypeConstraint, which cannot be used in the Definition site. However,
 						// this will hide the name of the real type, which should be warned against
@@ -422,8 +422,6 @@ public class Constraints implements Iterable<Constraint> {
 						env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions, warning);
 					} catch(CRECastException ex) {
 						// Ok
-					} catch(ClassNotFoundException ex) {
-						// Ok — type doesn't exist, not a real type override
 					}
 				}
 				if(buf.toString().endsWith("...")) {

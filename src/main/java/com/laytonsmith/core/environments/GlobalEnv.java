@@ -10,6 +10,7 @@ import com.laytonsmith.core.ScriptProvider;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.IVariableList;
 import com.laytonsmith.core.constructs.Target;
@@ -20,6 +21,7 @@ import com.laytonsmith.core.exceptions.StackTraceManager;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.natives.interfaces.Iterator;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,6 +30,7 @@ import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -54,11 +57,13 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	private BoundEvent.ActiveEvent event = null;
 	private boolean interrupt = false;
 	private final List<Iterator> arrayAccessList = Collections.synchronizedList(new ArrayList<>());
+	private final Map<CClassType, Set<CClassType>> isInstanceofCache = new HashMap<>();
 	private Thread stackTraceManagerThread = null;
 	private StackTraceManager stackTraceManager = null;
 	private final MutableObject<Map<String, Mixed>> runtimeSettings
 			= new MutableObject<>(new ConcurrentHashMap<>());
 	private FileOptions fileOptions;
+	private final CClassType.ClassTypeCache classTypeCache = new CClassType.ClassTypeCache();
 	private ScriptProvider scriptProvider = new ScriptProvider.FileSystemScriptProvider();
 
 	// $variable (dollar-variable) bindings for the current execution context.
@@ -468,10 +473,10 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	 * @param t
 	 * @return
 	 */
-	public boolean GetRuntimeSetting(String name, boolean defaultValue, Target t) {
+	public boolean GetRuntimeSetting(String name, boolean defaultValue, Target t, Environment env) {
 		Mixed b = GetRuntimeSetting(name, CBoolean.get(defaultValue));
 		try {
-			return ArgumentValidation.getBooleanish(b, t);
+			return ArgumentValidation.getBooleanish(b, t, env);
 		} catch(CRECastException ex) {
 			MSLog.GetLogger().w(MSLog.Tags.RUNTIME, "Runtime setting \"" + name + "\" is not a boolean value, but was"
 					+ " expected to be. The default value is being used instead.", t);
@@ -543,9 +548,27 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	}
 
 	/**
+	 * Returns the ClassTypeCache. NOTE: This shouldn't normally be used except by CClassType. Instead, use
+	 * the accessor methods defined there, and pass the environment to it.
+	 * @return
+	 */
+	public CClassType.ClassTypeCache GetClassCache() {
+		return this.classTypeCache;
+	}
+
+	/**
+	 * Returns the instanceof cache for this runtime. This should only be used by InstanceofUtil. Use that class
+	 * directly if you think you need this value.
+	 * @return
+	 */
+	public Map<CClassType, Set<CClassType>> getIsInstanceofCache() {
+		return isInstanceofCache;
+	}
+
+	/**
 	 * Sets the resolved $variable bindings for this execution. The map uses identity-based
 	 * lookup (IdentityHashMap) so that only the specific Variable nodes from the original
-	 * tree are resolved — this preserves tree-scoped visibility without mutating the tree.
+	 * tree are resolved - this preserves tree-scoped visibility without mutating the tree.
 	 */
 	public void SetDollarVarBindings(IdentityHashMap<Mixed, String> bindings) {
 		this.dollarVarBindings = bindings;

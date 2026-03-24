@@ -1,19 +1,19 @@
 package com.laytonsmith.core.natives.interfaces;
 
-import com.laytonsmith.core.objects.ObjectType;
-import com.laytonsmith.core.objects.ObjectModifier;
 import com.laytonsmith.PureUtilities.Common.Annotations.ForceImplementation;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.constructs.CClassType;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.objects.AccessModifier;
+import com.laytonsmith.core.objects.ObjectModifier;
+import com.laytonsmith.core.objects.ObjectType;
+
 import java.util.Set;
 
 /**
@@ -94,6 +94,7 @@ public interface Mixed extends Cloneable, Documentation {
 
 	/**
 	 * Gets the access level for this object, i.e. public, private...
+	 *
 	 * @return
 	 */
 	public AccessModifier getAccessModifier();
@@ -121,12 +122,23 @@ public interface Mixed extends Cloneable, Documentation {
 	 * @return
 	 * @deprecated Use {@link #isInstanceOf(CClassType, LeftHandGenericUse, Environment)} instead.
 	 */
+	// @AggressiveDeprecation removed due to javac bug (JDK-8323756) — ACC_BRIDGE on
+	// abstract interface methods causes NPE in Types.interfaceCandidates() during
+	// test compilation. See https://github.com/LadyCailin/javacbug
 	@Deprecated
 	public boolean isInstanceOf(CClassType type);
 
 	/**
-	 * Checks if this value is an instance of the given type, with environment context.
-	 * The lhsGenericParameters parameter is for future generic type checking and may be null.
+	 * Generally speaking, we cannot use Java's instanceof keyword to determine if something is an instanceof, because
+	 * user classes do not extend the hierarchy of objects in MethodScript. Essentially, we need to extend Java's
+	 * instanceof keyword, so in order to do that, we must compare objects with a custom method, rather than rely on
+	 * Java's keyword.
+	 *
+	 * This method works with CClassTypes.
+	 *
+	 * Implementation note: The implementation of this should just be
+	 * {@link Construct#isInstanceof(com.laytonsmith.core.natives.interfaces.Mixed,
+	 * com.laytonsmith.core.constructs.CClassType)} which supports Mixed values.
 	 *
 	 * @param type
 	 * @param lhsGenericParameters
@@ -136,11 +148,6 @@ public interface Mixed extends Cloneable, Documentation {
 	public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env);
 
 	/**
-	 * Generally speaking, we cannot use Java's instanceof keyword to determine if something is an instanceof, because
-	 * user classes do not extend the hierarchy of objects in MethodScript. Essentially, we need to extend Java's
-	 * instanceof keyword, so in order to do that, we must compare objects with a custom method, rather than rely on
-	 * Java's keyword.
-	 *
 	 * This method works with class type directly.
 	 *
 	 * Implementation note: The implementation of this should just be
@@ -153,45 +160,61 @@ public interface Mixed extends Cloneable, Documentation {
 	public boolean isInstanceOf(Class<? extends Mixed> type);
 
 	/**
-	 * Returns the typeof this value, as a CClassType object. Not all constructs are annotated with the @typeof
+	 * Returns the typeof this value, as a CClassType object.Not all constructs are annotated with the @typeof
 	 * annotation, in which case this is considered a "private" object, which can't be directly accessed via
 	 * MethodScript. In this case, an IllegalArgumentException is thrown.
 	 *
+	 * @param env The environment.
 	 * @return
 	 * @throws IllegalArgumentException If the class isn't public facing.
 	 * @deprecated Use {@link #typeof(Environment)} instead.
 	 */
+	// @AggressiveDeprecation removed due to javac bug — see isInstanceOf(CClassType) above.
 	@Deprecated
 	public CClassType typeof();
 
 	/**
-	 * Returns the typeof this value, as a CClassType object, with environment context.
+	 * Returns the typeof this value, as a CClassType object.Not all constructs are annotated with the @typeof
+	 * annotation, in which case this is considered a "private" object, which can't be directly accessed via
+	 * MethodScript. In this case, an IllegalArgumentException is thrown.
 	 *
-	 * @param env
+	 * @param env The environment.
 	 * @return
 	 * @throws IllegalArgumentException If the class isn't public facing.
 	 */
 	public CClassType typeof(Environment env);
 
 	/**
-	 * Returns the generic parameters for this value, or null if none.
+	 * Returns the generic paramters assigned to this instance. This MUST be null if
+	 * {@code typeof().getGenericDeclaration()} would return null, and MUST NOT be null if it doesn't.
+	 * <p>
+	 * The generic parameters represent the concrete types that this instance was constructed with at runtime, and
+	 * remain with the instance as part of the runtime data. In general, subclasses should not implement this directly,
+	 * instead a superclass should provide a registration method, and handle it in a generic way.
+	 * <p>
+	 * All subclasses must override this. If a subclass overrides a superclass which has generic parameters, but this
+	 * particular instance does not have any, it must return null, even though the superclass would return the
+	 * parameters defined for it.
 	 *
-	 * @return
+	 * @return The generic parameters for this instance, or null if it doesn't/can't have any.
 	 */
+	@ForceImplementation
 	public GenericParameters getGenericParameters();
 
 	/**
-	 * Casts the class to the specified type. This only works with Java types, and so for dynamic elements, this
-	 * may throw a RuntimeException. For dynamic types, use the other castTo.
+	 * Casts the class to the specified type. This only works with Java types, and so for dynamic elements, this may
+	 * throw a RuntimeException. For dynamic types, use the other castTo.
 	 *
-	 * <p>For classes that are instanceof this class, (or vice versa) no logic is done, it is just cast, though if
-	 * it can't be cast, it will throw a ClassCastException. For classes that are cross castable, they will be first
-	 * cross casted.
+	 * <p>
+	 * For classes that are instanceof this class, (or vice versa) no logic is done, it is just cast, though if it can't
+	 * be cast, it will throw a ClassCastException. For classes that are cross castable, they will be first cross
+	 * casted.
 	 *
-	 * An important note, while it seems like you can just cast from the value using standard java cast notation,
-	 * the object model is not 1:1, and so dynamic classes may logically extend the java class, but due to restrictions
-	 * in java, that can't actually happen in java's object model, so we cannot rely on java's casting functionality
+	 * An important note, while it seems like you can just cast from the value using standard java cast notation, the
+	 * object model is not 1:1, and so dynamic classes may logically extend the java class, but due to restrictions in
+	 * java, that can't actually happen in java's object model, so we cannot rely on java's casting functionality
 	 * either. Add to that that user types don't exist in the java anyways.
+	 *
 	 * @param <T>
 	 * @param clazz
 	 * @return
@@ -199,5 +222,4 @@ public interface Mixed extends Cloneable, Documentation {
 	 */
 	// The whole argument validation/Static.get* methods needs to be moved to this mechanism.
 	//public <T extends Mixed> T castTo(Class<T> clazz) throws ClassCastException;
-
 }

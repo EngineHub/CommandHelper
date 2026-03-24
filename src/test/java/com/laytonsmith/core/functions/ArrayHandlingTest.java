@@ -15,20 +15,20 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.testing.AbstractIntegrationTest;
 import com.laytonsmith.testing.C;
 import com.laytonsmith.testing.StaticTest;
+import org.junit.Before;
+import org.junit.Test;
+
 import static com.laytonsmith.testing.StaticTest.Run;
 import static com.laytonsmith.testing.StaticTest.SRun;
 import static com.laytonsmith.testing.StaticTest.TestClassDocs;
 import static com.laytonsmith.testing.StaticTest.assertCEquals;
 import static com.laytonsmith.testing.StaticTest.assertReturn;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
-import org.junit.Before;
-import org.junit.Test;
-
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.hamcrest.core.Is.*;
 
 /**
  *
@@ -48,7 +48,7 @@ public class ArrayHandlingTest extends AbstractIntegrationTest {
 	@Before
 	public void setUp() {
 		fakePlayer = StaticTest.GetOnlinePlayer();
-		commonArray = new CArray(Target.UNKNOWN, new CInt(1, Target.UNKNOWN), new CInt(2, Target.UNKNOWN), new CInt(3, Target.UNKNOWN));
+		commonArray = new CArray(Target.UNKNOWN, null, env, new CInt(1, Target.UNKNOWN), new CInt(2, Target.UNKNOWN), new CInt(3, Target.UNKNOWN));
 		env.getEnv(CommandHelperEnvironment.class).SetPlayer(fakePlayer);
 	}
 
@@ -161,10 +161,10 @@ public class ArrayHandlingTest extends AbstractIntegrationTest {
 	public void testArrayPush() throws CancelCommandException {
 		ArrayHandling.array_push a = new ArrayHandling.array_push();
 		assertReturn(a.exec(Target.UNKNOWN, env, null, commonArray, C.onstruct(4)), C.VOID);
-		assertCEquals(C.onstruct(1), commonArray.get(0, Target.UNKNOWN));
-		assertCEquals(C.onstruct(2), commonArray.get(1, Target.UNKNOWN));
-		assertCEquals(C.onstruct(3), commonArray.get(2, Target.UNKNOWN));
-		assertCEquals(C.onstruct(4), commonArray.get(3, Target.UNKNOWN));
+		assertCEquals(C.onstruct(1), commonArray.get(0, Target.UNKNOWN, env));
+		assertCEquals(C.onstruct(2), commonArray.get(1, Target.UNKNOWN, env));
+		assertCEquals(C.onstruct(3), commonArray.get(2, Target.UNKNOWN, env));
+		assertCEquals(C.onstruct(4), commonArray.get(3, Target.UNKNOWN, env));
 	}
 
 	@Test(timeout = 10000)
@@ -183,7 +183,12 @@ public class ArrayHandlingTest extends AbstractIntegrationTest {
 
 	@Test(timeout = 10000)
 	public void testArrayResize() throws Exception {
-		String script = "assign(@array, array(1)) msg(@array) array_resize(@array, 2) msg(@array) array_resize(@array, 3, 'hello') msg(@array)";
+		String script = "assign(@array, array(1))"
+				+ " msg(@array)"
+				+ " array_resize(@array, 2)"
+				+ " msg(@array)"
+				+ " array_resize(@array, 3, 'hello')"
+				+ " msg(@array)";
 		StaticTest.Run(script, fakePlayer);
 		verify(fakePlayer).sendMessage("{1}");
 		verify(fakePlayer).sendMessage("{1, null}");
@@ -415,7 +420,11 @@ public class ArrayHandlingTest extends AbstractIntegrationTest {
 
 	@Test
 	public void testArrayGetClone() throws Exception { // This is expected to be a deep clone.
-		Run("@a = array(array(array('value'))); @b = @a[]; @b[0][0][0] = 'changedValue'; msg(@a[0][0][0]); msg(@b[0][0][0]);", fakePlayer);
+		Run("@a = array(array(array('value')));"
+				+ " @b = @a[];"
+				+ " @b[0][0][0] = 'changedValue';"
+				+ " msg(@a[0][0][0]);"
+				+ " msg(@b[0][0][0]);", fakePlayer);
 		verify(fakePlayer).sendMessage("value");
 		verify(fakePlayer).sendMessage("changedValue");
 	}
@@ -597,6 +606,8 @@ public class ArrayHandlingTest extends AbstractIntegrationTest {
 
 	@Test
 	public void testArrayIntersect() throws Exception {
+		assertThat(SRun("array_intersect(array(1, 2, 3), array(4, 5, 6), closure(@a, @b) { return(true); })", fakePlayer),
+				is("{1, 2, 3}"));
 		assertThat(SRun("array_intersect(array(one: 1, two: 2), array(one: 1, three: 3))", fakePlayer), is("{one: 1}"));
 		try {
 			SRun("array_intersect(array(one: 1, two: 2), array(one: 1, three: 3), 'EQUALS')", fakePlayer);
@@ -615,8 +626,6 @@ public class ArrayHandlingTest extends AbstractIntegrationTest {
 		assertThat(SRun("array_intersect(array('1', '2', '3'), array(1, 2, 3), 'STRICT_EQUALS')", fakePlayer), is("{}"));
 		assertThat(SRun("array_intersect(array('1', '2', '3'), array('1', 2, 3), 'STRICT_EQUALS')", fakePlayer), is("{1}"));
 
-		assertThat(SRun("array_intersect(array(1, 2, 3), array(4, 5, 6), closure(@a, @b) { return(true); })", fakePlayer),
-				is("{1, 2, 3}"));
 		assertThat(SRun("array_intersect(array(1, 2, 3), array(1, 2, 3), closure(@a, @b) { return(false); })", fakePlayer),
 				is("{}"));
 

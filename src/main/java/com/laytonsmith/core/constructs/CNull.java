@@ -3,8 +3,10 @@ package com.laytonsmith.core.constructs;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.natives.interfaces.Booleanish;
+import com.laytonsmith.PureUtilities.Common.Annotations.AggressiveDeprecation;
 
 /**
  * Represents a MethodScript null value.
@@ -108,6 +110,7 @@ public final class CNull extends Construct implements Cloneable, Booleanish {
 	}
 
 	/** @deprecated Use {@link #getBooleanValue(Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	@Override
 	public boolean getBooleanValue(Target t) {
@@ -117,6 +120,11 @@ public final class CNull extends Construct implements Cloneable, Booleanish {
 	@Override
 	public boolean getBooleanValue(Target t, Environment env) {
 		return false;
+	}
+
+	@Override
+	public GenericParameters getGenericParameters() {
+		return null;
 	}
 
 

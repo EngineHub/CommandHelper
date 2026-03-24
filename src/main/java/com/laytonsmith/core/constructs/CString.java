@@ -1,22 +1,26 @@
 package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.annotations.ExposedElement;
 import com.laytonsmith.annotations.NonInheritImplements;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.GenericTypeParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.objects.ObjectType;
+import com.laytonsmith.PureUtilities.Common.Annotations.AggressiveDeprecation;
+
 import java.util.AbstractSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Set;
-import com.laytonsmith.annotations.ExposedElement;
 
 /**
  *
@@ -28,7 +32,11 @@ public class CString extends CPrimitive implements Cloneable,
 		com.laytonsmith.core.natives.interfaces.Iterable {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get(CString.class);
+	public static final CClassType TYPE = CClassType.get(CString.class)
+			.withSuperParameters(GenericTypeParameters
+					.nativeBuilder(com.laytonsmith.core.natives.interfaces.Iterable.TYPE)
+					.addParameter(CClassType.RECURSIVE_DEFINITION, null))
+			.done();
 
 	public CString(String value, Target t) {
 		super(value == null ? "" : value, ConstructType.STRING, t);
@@ -61,6 +69,7 @@ public class CString extends CPrimitive implements Cloneable,
 	}
 
 	/** @deprecated Use {@link #size(Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	@Override
 	public long size() {
@@ -78,6 +87,7 @@ public class CString extends CPrimitive implements Cloneable,
 	}
 
 	/** @deprecated Use {@link #slice(int, int, Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	@Override
 	public Mixed slice(int begin, int end, Target t) {
@@ -102,6 +112,7 @@ public class CString extends CPrimitive implements Cloneable,
 	}
 
 	/** @deprecated Use {@link #get(int, Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	@Override
 	public Mixed get(int index, Target t) throws ConfigRuntimeException {
@@ -118,6 +129,7 @@ public class CString extends CPrimitive implements Cloneable,
 	}
 
 	/** @deprecated Use {@link #get(Mixed, Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	@Override
 	public final Mixed get(Mixed index, Target t) throws ConfigRuntimeException {
@@ -131,6 +143,7 @@ public class CString extends CPrimitive implements Cloneable,
 	}
 
 	/** @deprecated Use {@link #get(String, Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	@Override
 	public final Mixed get(String index, Target t) {
@@ -153,6 +166,7 @@ public class CString extends CPrimitive implements Cloneable,
 	}
 
 	/** @deprecated Use {@link #keySet(Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	@Override
 	public Set<Mixed> keySet() {
@@ -218,6 +232,7 @@ public class CString extends CPrimitive implements Cloneable,
 	}
 
 	/** @deprecated Use {@link #getBooleanValue(Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	@Override
 	public boolean getBooleanValue(Target t) {
@@ -257,5 +272,10 @@ public class CString extends CPrimitive implements Cloneable,
 
 	public String convert() {
 		return val();
+	}
+
+	@Override
+	public GenericParameters getGenericParameters() {
+		return null;
 	}
 }

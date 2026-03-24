@@ -1,5 +1,7 @@
 package com.laytonsmith.core.events;
 
+import com.laytonsmith.core.Static;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
@@ -23,6 +25,8 @@ import static org.junit.Assert.fail;
  */
 public class PrefiltersTest extends AbstractIntegrationTest {
 
+	Environment env;
+
 	public PrefiltersTest() {
 	}
 
@@ -35,7 +39,8 @@ public class PrefiltersTest extends AbstractIntegrationTest {
 	}
 
 	@Before
-	public void setUp() {
+	public void setUp() throws Exception {
+		env = Static.GenerateStandaloneEnvironment();
 	}
 
 	@After
@@ -50,12 +55,12 @@ public class PrefiltersTest extends AbstractIntegrationTest {
 		Map<String, Mixed> map = new HashMap<>();
 		map.put("x", C.String("/1|2|3/"));
 		try {
-			Prefilters.match(map, "x", C.Int(2), PrefilterType.REGEX);
+			Prefilters.match(map, "x", C.Int(2), PrefilterType.REGEX, env);
 		} catch (PrefilterNonMatchException e) {
 			fail("Expected a match here");
 		}
 		try {
-			Prefilters.match(map, "x", C.Int(4), PrefilterType.REGEX);
+			Prefilters.match(map, "x", C.Int(4), PrefilterType.REGEX, env);
 			fail("Did not expect a match here");
 		} catch (PrefilterNonMatchException e) {
 		}
@@ -66,12 +71,12 @@ public class PrefiltersTest extends AbstractIntegrationTest {
 		Map<String, Mixed> map = new HashMap<>();
 		map.put("x", C.String("test"));
 		try {
-			Prefilters.match(map, "x", "test", PrefilterType.STRING_MATCH);
+			Prefilters.match(map, "x", "test", PrefilterType.STRING_MATCH, env);
 		} catch (PrefilterNonMatchException e) {
 			fail("Expected a match here");
 		}
 		try {
-			Prefilters.match(map, "x", "nope", PrefilterType.STRING_MATCH);
+			Prefilters.match(map, "x", "nope", PrefilterType.STRING_MATCH, env);
 			fail("Did not expect a match here");
 		} catch (PrefilterNonMatchException e) {
 		}
@@ -82,12 +87,12 @@ public class PrefiltersTest extends AbstractIntegrationTest {
 		Map<String, Mixed> map = new HashMap<>();
 		map.put("x", C.String("2"));
 		try {
-			Prefilters.match(map, "x", "2.0", PrefilterType.MATH_MATCH);
+			Prefilters.match(map, "x", "2.0", PrefilterType.MATH_MATCH, env);
 		} catch (PrefilterNonMatchException e) {
 			fail("Expected a match here");
 		}
 		try {
-			Prefilters.match(map, "x", "2.00001", PrefilterType.MATH_MATCH);
+			Prefilters.match(map, "x", "2.00001", PrefilterType.MATH_MATCH, env);
 			fail("Did not expect a match here");
 		} catch (PrefilterNonMatchException e) {
 		}
@@ -99,36 +104,36 @@ public class PrefiltersTest extends AbstractIntegrationTest {
 		map.put("x", C.String("(x > 4)"));
 		try {
 			try {
-				Prefilters.match(map, "x", "5", PrefilterType.EXPRESSION);
+				Prefilters.match(map, "x", "5", PrefilterType.EXPRESSION, env);
 			} catch (PrefilterNonMatchException e) {
 				fail("Expected a match here");
 			}
 			try {
-				Prefilters.match(map, "x", "4", PrefilterType.EXPRESSION);
+				Prefilters.match(map, "x", "4", PrefilterType.EXPRESSION, env);
 				fail("Did not expect a match here");
 			} catch (PrefilterNonMatchException e) {
 			}
 
 			map.put("x", C.String("(x == 5)"));
 			try {
-				Prefilters.match(map, "x", "5", PrefilterType.EXPRESSION);
+				Prefilters.match(map, "x", "5", PrefilterType.EXPRESSION, env);
 			} catch (PrefilterNonMatchException e) {
 				fail("Expected a match here");
 			}
 			try {
-				Prefilters.match(map, "x", "4", PrefilterType.EXPRESSION);
+				Prefilters.match(map, "x", "4", PrefilterType.EXPRESSION, env);
 				fail("Did not expect a match here");
 			} catch (PrefilterNonMatchException e) {
 			}
 
 			map.put("x", C.String("(2 + 3)"));
 			try {
-				Prefilters.match(map, "x", "5", PrefilterType.EXPRESSION);
+				Prefilters.match(map, "x", "5", PrefilterType.EXPRESSION, env);
 			} catch (PrefilterNonMatchException e) {
 				fail("Expected a match here");
 			}
 			try {
-				Prefilters.match(map, "x", "4", PrefilterType.EXPRESSION);
+				Prefilters.match(map, "x", "4", PrefilterType.EXPRESSION, env);
 				fail("Did not expect a match here");
 			} catch (PrefilterNonMatchException e) {
 			}

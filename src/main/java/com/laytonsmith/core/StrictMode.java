@@ -22,8 +22,8 @@ public class StrictMode {
 	public static boolean isStrictMode(FileOptions fileOptions, Environment env, Target t) {
 		boolean runtimeSetting = false;
 		if(env != null) {
-			GlobalEnv gEnv = env.getEnv(GlobalEnv.class);
-			runtimeSetting = gEnv.GetRuntimeSetting("system.strict_mode.enabled", false, t);
+			GlobalEnv genv = env.getEnv(GlobalEnv.class);
+			runtimeSetting = genv.GetRuntimeSetting("system.strict_mode.enabled", false, t, env);
 		}
 		return fileOptions.isStrict() || runtimeSetting;
 	}

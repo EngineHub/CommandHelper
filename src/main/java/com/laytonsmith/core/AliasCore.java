@@ -88,6 +88,7 @@ public class AliasCore {
 	private final Set<String> echoCommand = new HashSet<>();
 	private CompilerEnvironment compilerEnv;
 	private StaticRuntimeEnv staticRuntimeEnv;
+	private Environment env;
 	private List<Script> scripts;
 	private boolean lastCompileFailed = false;
 
@@ -427,7 +428,7 @@ public class AliasCore {
 								if(s1.getCommandName().equalsIgnoreCase(s2.getCommandName())) {
 									ConfigRuntimeException.HandleUncaughtException(
 											new ConfigCompileException("Duplicate command defined. (First occurrence found at "
-													+ s1.getTarget() + ")", s2.getTarget()), "Duplicate command.", player);
+													+ s1.getTarget() + ")", s2.getTarget()), "Duplicate command.", player, env);
 								}
 							}
 						}
@@ -483,6 +484,7 @@ public class AliasCore {
 			this.scripts = newScripts;
 			this.compilerEnv = compilerEnv;
 			this.staticRuntimeEnv = newStaticRuntimeEnv;
+			this.env = env;
 		} else {
 			// We're proceeding, so use the new StaticRuntimeEnv even if we don't reload scripts
 			this.staticRuntimeEnv = newStaticRuntimeEnv;
@@ -594,6 +596,10 @@ public class AliasCore {
 		if(player != null) {
 			player.sendMessage(MCChatColor.YELLOW + "[CommandHelper] " + output);
 		}
+	}
+
+	public Environment getLastLoadedEnv() {
+		return this.env;
 	}
 
 	private void registerCommand(Script script, Environment env) {
@@ -743,7 +749,7 @@ public class AliasCore {
 								Mixed ret = completionProc.execute(Arrays.asList(alias, player, args),
 										env, Target.UNKNOWN);
 								if(ret instanceof CArray ca) {
-									return ca.asList().stream().map(i -> i.toString()).toList();
+									return ca.asList(env).stream().map(i -> i.toString()).toList();
 								}
 								MSLog.GetLogger().w(MSLog.Tags.COMPILER,
 									"Completion proc " + completionProc + " returned a non-array value.",
@@ -756,8 +762,8 @@ public class AliasCore {
 						// Otherwise disable completions.
 						try {
 							FullyQualifiedClassName fqcn = FullyQualifiedClassName.forName(type, Target.UNKNOWN, env);
-							CClassType t = CClassType.get(fqcn);
-							if(t.isEnum()) {
+							CClassType t = CClassType.get(fqcn, env);
+							if(t.isEnum(env)) {
 								MEnumType enumType = NativeTypeList.getNativeEnumType(fqcn);
 								completions.add((alias, player, args) -> enumType.values()
 										.stream().map(value -> value.name()).toList());
@@ -775,7 +781,7 @@ public class AliasCore {
 
 			boolean finalHasFinal = hasFinal;
 			CNativeClosure.ClosureRunnable runnable = (Target t, Environment e, Mixed... args) -> {
-				List<String> inputArgs = ((CArray) args[2]).asList().stream().map(val -> val.val()).toList();
+				List<String> inputArgs = ((CArray) args[2]).asList(e).stream().map(val -> val.val()).toList();
 				CompletionValues completion = null;
 				if(inputArgs.size() <= completions.size()) {
 					completion = completions.get(inputArgs.size() - 1);
@@ -784,7 +790,7 @@ public class AliasCore {
 					if(finalHasFinal) {
 						completion = completions.get(completions.size() - 1);
 					} else {
-						return new CArray(Target.UNKNOWN);
+						return new CArray(Target.UNKNOWN, null, e);
 					}
 				}
 				CString alias = (CString) args[0];
@@ -796,7 +802,7 @@ public class AliasCore {
 						.filter(item -> item.startsWith(comparison))
 						.map(item -> new CString(item, Target.UNKNOWN))
 						.toList().toArray(CString[]::new);
-				return new CArray(t, toReturn);
+				return new CArray(t, null, e, toReturn);
 			};
 
 			CNativeClosure nativeClosure = new CNativeClosure(runnable, env);

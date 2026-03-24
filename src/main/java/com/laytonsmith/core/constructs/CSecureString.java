@@ -4,8 +4,18 @@ import com.laytonsmith.PureUtilities.Common.ArrayUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
-import com.laytonsmith.core.exceptions.CRE.CREIndexOverflowException;
+import com.laytonsmith.core.objects.ObjectModifier;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.ShortBufferException;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -14,22 +24,17 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.ShortBufferException;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
+import java.util.Set;
 
 /**
  *
  * @author cailin
  */
 @typeof("ms.lang.secure_string")
-public class CSecureString extends CString {
+public final class CSecureString extends Construct {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
 	public static final CClassType TYPE = CClassType.get(CSecureString.class);
@@ -40,20 +45,20 @@ public class CSecureString extends CString {
 	private int actualLength;
 
 	public CSecureString(char[] val, Target t) {
-		super("**secure string**", t);
+		super("**secure string**", ConstructType.STRING, t);
 		init();
 		construct(ArrayUtils.charToBytes(val));
 	}
 
-	public CSecureString(CArray val, Target t) {
-		super("**secure string**", t);
+	public CSecureString(CArray val, Target t, Environment env) {
+		super("**secure string**", ConstructType.STRING, t);
 		init();
-		construct(CArrayToByteArray(val, t));
+		construct(CArrayToByteArray(val, t, env));
 	}
 
 	// duplicate constructor
 	private CSecureString(byte[] encrypted, Cipher decrypter, int encLength, int actualLength, Target t) {
-		super("**secure string**", t);
+		super("**secure string**", ConstructType.STRING, t);
 		init();
 		this.encrypted = encrypted;
 		this.decrypter = decrypter;
@@ -85,13 +90,13 @@ public class CSecureString extends CString {
 		}
 	}
 
-	private static byte[] CArrayToByteArray(CArray val, Target t) {
-		List<Byte> cval = new ArrayList<>((int) val.size());
+	private static byte[] CArrayToByteArray(CArray val, Target t, Environment env) {
+		List<Byte> cval = new ArrayList<>((int) val.size(env));
 		if(val.isAssociative()) {
 			throw new CREFormatException("Expected a normal array in secure string, but an associative one was passed in", t);
 		}
-		for(int i = 0; i < val.size(); i++) {
-			String c = val.get(i, t).val();
+		for(int i = 0; i < val.size(env); i++) {
+			String c = val.get(i, t, env).val();
 			if(c.length() != 1) {
 				throw new CREFormatException("The array passed in must be an array of single character strings", t);
 			}
@@ -114,21 +119,28 @@ public class CSecureString extends CString {
 		}
 	}
 
-	public CArray getDecryptedCharCArray() {
+	public CArray getDecryptedCharCArray(Environment env) {
 		char[] array = getDecryptedCharArray();
-		CArray carray = new CArray(Target.UNKNOWN, array.length);
+		CArray carray = new CArray(Target.UNKNOWN, array.length, GenericParameters.emptyBuilder(CArray.TYPE)
+				.addNativeParameter(CString.TYPE, null)
+				.buildNative(), env);
 		for(char c : array) {
-			carray.push(new CString(c, Target.UNKNOWN), Target.UNKNOWN);
+			carray.push(new CString(c, Target.UNKNOWN), Target.UNKNOWN, env);
 		}
 		return carray;
+	}
+
+	@Override
+	public boolean isDynamic() {
+		return false;
 	}
 
 	@Override
 	public String docs() {
 		return "A secure_string is a string which cannot normally be toString'd, and whose underlying representation"
 				+ " is encrypted in memory. This should be used for storing passwords or other sensitive data which"
-				+ " should in no cases be stored in plain text. Since this extends string, it can generally be used in"
-				+ " place of a string, and when done so, cannot accidentally be exposed (via logs or exception messages,"
+				+ " should in no cases be stored in plain text. In this way, it cannot accidentally be exposed"
+				+ " (via logs or exception messages,"
 				+ " or other accidental exposure) unless it is specifically instructed to decrypt and switch to a char"
 				+ " array. While this cannot by itself ensure security of the value, it can help prevent most accidental"
 				+ " exposures of data by intermediate code. When exported as a string (or imported as a string) other"
@@ -150,26 +162,6 @@ public class CSecureString extends CString {
 	@Override
 	public CClassType[] getInterfaces() {
 		return CClassType.EMPTY_CLASS_ARRAY;
-	}
-
-	@Override
-	public long size() {
-		return 0;
-	}
-
-	@Override
-	public CString clone() throws CloneNotSupportedException {
-		return this;
-	}
-
-	@Override
-	public Construct get(int index, Target t) {
-		throw new CREIndexOverflowException("Secure strings cannot be iterated", t);
-	}
-
-	@Override
-	public Construct slice(int begin, int end, Target t) {
-		throw new CREIndexOverflowException("Secure strings cannot be sliced", t);
 	}
 
 	private static volatile boolean initialized = false;
@@ -229,8 +221,12 @@ public class CSecureString extends CString {
 	}
 
 	@Override
-	public CSecureString duplicate() {
-		return new CSecureString(encrypted, decrypter, encLength, actualLength, getTarget());
+	public Set<ObjectModifier> getObjectModifiers() {
+		return EnumSet.of(ObjectModifier.FINAL);
 	}
 
+	@Override
+	public GenericParameters getGenericParameters() {
+		return null;
+	}
 }

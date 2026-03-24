@@ -88,7 +88,7 @@ public class VariadicTypeConstraint extends Constraint {
 
 	@Override
 	public ExactTypeConstraint convertFromNull(Target t) throws CREGenericConstraintException {
-		return new ExactTypeConstraint(t, (LeftHandSideType) Auto.LHSTYPE.asVariadicType(null));
+		return new ExactTypeConstraint(t, (LeftHandSideType) Auto.LHSTYPE_VARIADIC);
 	}
 
 }

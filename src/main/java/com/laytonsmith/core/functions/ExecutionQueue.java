@@ -429,7 +429,7 @@ public class ExecutionQueue {
 			if(args.length == 2) {
 				queue = Construct.nval(args[1]);
 			}
-			final long delay = ArgumentValidation.getInt(args[0], t);
+			final long delay = ArgumentValidation.getInt(args[0], t, env);
 			if(delay < 0) {
 				throw new CRERangeException("Negative delay", t);
 			}
@@ -495,7 +495,7 @@ public class ExecutionQueue {
 			if(args.length == 2) {
 				queue = Construct.nval(args[1]);
 			}
-			final long delay = ArgumentValidation.getInt(args[0], t);
+			final long delay = ArgumentValidation.getInt(args[0], t, env);
 			if(delay < 0) {
 				throw new CRERangeException("Negative delay", t);
 			}

@@ -7,8 +7,8 @@ import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
-import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.BindableEvent;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -65,9 +65,9 @@ public abstract class EnumPrefilterMatcher<T extends BindableEvent, U extends En
 	}
 
 	@Override
-	public void validate(ParseTree node, CClassType nodeType, Environment env)
+	public void validate(ParseTree node, LeftHandSideType nodeType, Environment env)
 			throws ConfigCompileException, ConfigCompileGroupException, ConfigRuntimeException {
-		if(!nodeType.doesExtend(CString.TYPE)) {
+		if(!nodeType.doesExtend(CString.TYPE, env)) {
 			env.getEnv(CompilerEnvironment.class).addCompilerWarning(node.getFileOptions(),
 					new CompilerWarning("Unexpected type here.",
 							node.getTarget(), null));

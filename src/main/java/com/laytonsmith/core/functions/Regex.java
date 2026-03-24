@@ -183,7 +183,7 @@ public class Regex {
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			Pattern pattern = getPattern(args[0], t, env);
 			String subject = args[1].val();
-			CArray fret = new CArray(t);
+			CArray fret = new CArray(t, null, env);
 			Matcher m = pattern.matcher(subject);
 			Set<String> namedGroups = getNamedGroups(pattern.pattern());
 			while(m.find()) {
@@ -396,7 +396,7 @@ public class Regex {
 
 		@Override
 		public String docs() {
-			return "array {pattern, subject, [limit]} Splits a string on the given regex, and returns an array of the parts. If"
+			return "array<string> {pattern, subject, [limit]} Splits a string on the given regex, and returns an array of the parts. If"
 					+ " nothing matched, an array with one element, namely the original subject, is returned."
 					+ " Limit defaults to infinity, but if set, only"
 					+ " that number of splits will occur.";
@@ -438,7 +438,8 @@ public class Regex {
 				limit = ArgumentValidation.getInt32(args[2], t, env);
 			}
 			String[] rsplit = pattern.split(subject, limit + 1);
-			CArray ret = new CArray(t);
+			CArray ret = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			for(String split : rsplit) {
 				ret.push(new CString(split, t), t, env);
 			}

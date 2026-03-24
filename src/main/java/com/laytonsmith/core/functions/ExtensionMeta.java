@@ -205,7 +205,7 @@ public class ExtensionMeta {
 				throw new ConfigCompileException(getName() + " can only accept hardcoded string values", t);
 			}
 
-			return new ParseTree(this.exec(t, null, null, children.get(0).getData()), children.get(0).getFileOptions());
+			return new ParseTree(this.exec(t, env, null, children.get(0).getData()), children.get(0).getFileOptions());
 		}
 	}
 
@@ -277,7 +277,7 @@ public class ExtensionMeta {
 			} else if(!(children.get(0).getData().isInstanceOf(CString.TYPE, null, env))) {
 				throw new ConfigCompileException(getName() + " can only accept hardcoded string values", t);
 			} else {
-				return new ParseTree(this.exec(t, null, null, children.get(0).getData()), children.get(0).getFileOptions());
+				return new ParseTree(this.exec(t, env, null, children.get(0).getData()), children.get(0).getFileOptions());
 			}
 		}
 	}
@@ -304,7 +304,7 @@ public class ExtensionMeta {
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			Map<URL, ExtensionTracker> trackers = ExtensionManager.getTrackers();
 
-			CArray retn = CArray.GetAssociativeArray(t);
+			CArray retn = CArray.GetAssociativeArray(t, null, env);
 
 			if(args.length == 0) {
 				for(URL url : trackers.keySet()) {
@@ -312,9 +312,9 @@ public class ExtensionMeta {
 					CArray trkdata;
 
 					if(!retn.containsKey(trk.getIdentifier())) {
-						trkdata = CArray.GetAssociativeArray(t);
+						trkdata = CArray.GetAssociativeArray(t, null, env);
 					} else {
-						trkdata = (CArray) retn.get(trk.getIdentifier(), t);
+						trkdata = (CArray) retn.get(trk.getIdentifier(), t, env);
 					}
 
 					// For both events and functions, make sure we don't overwrite
@@ -323,36 +323,36 @@ public class ExtensionMeta {
 					// style extensions, as they don't have an identifier.
 					CArray funcs;
 					if(!trkdata.containsKey("functions")) {
-						funcs = new CArray(t);
+						funcs = new CArray(t, null, env);
 					} else {
-						funcs = (CArray) trkdata.get("functions", t);
+						funcs = (CArray) trkdata.get("functions", t, env);
 					}
 					for(FunctionBase func : trk.getFunctions()) {
 						if(!funcs.contains(func.getName())) {
-							funcs.push(new CString(func.getName(), t), t);
+							funcs.push(new CString(func.getName(), t), t, env);
 						}
 					}
-					funcs.sort(CArray.ArraySortType.STRING_IC);
-					trkdata.set("functions", funcs, t);
+					funcs.sort(CArray.ArraySortType.STRING_IC, env);
+					trkdata.set("functions", funcs, t, env);
 
 					CArray events;
 					if(!trkdata.containsKey("events")) {
-						events = new CArray(t);
+						events = new CArray(t, null, env);
 					} else {
-						events = (CArray) trkdata.get("events", t);
+						events = (CArray) trkdata.get("events", t, env);
 					}
 					for(Event event : trk.getEvents()) {
-						events.push(new CString(event.getName(), t), t);
+						events.push(new CString(event.getName(), t), t, env);
 					}
-					events.sort(CArray.ArraySortType.STRING_IC);
-					trkdata.set("events", events, t);
+					events.sort(CArray.ArraySortType.STRING_IC, env);
+					trkdata.set("events", events, t, env);
 
-					trkdata.set("version", trk.getVersion().toString());
+					trkdata.set("version", trk.getVersion().toString(), env);
 
 					if(trk.getIdentifier() != null) {
-						retn.set(trk.getIdentifier(), trkdata, t);
+						retn.set(trk.getIdentifier(), trkdata, t, env);
 					} else {
-						retn.set("__unidentified__", trkdata, t);
+						retn.set("__unidentified__", trkdata, t, env);
 					}
 				}
 			} else {
@@ -362,23 +362,25 @@ public class ExtensionMeta {
 						identifier = "__unidentified__";
 					}
 					if(identifier.equals(args[0].val())) {
-						CArray functions = (retn.containsKey("functions")) ? (CArray) retn.get("functions", t) : new CArray(t);
+						CArray functions = (retn.containsKey("functions"))
+								? (CArray) retn.get("functions", t, env) : new CArray(t, null, env);
 						for(FunctionBase function : tracker.getFunctions()) {
 							if(!functions.contains(function.getName())) {
-								functions.push(new CString(function.getName(), t), t);
+								functions.push(new CString(function.getName(), t), t, env);
 							}
 						}
-						functions.sort(CArray.ArraySortType.STRING_IC);
-						retn.set("functions", functions, t);
-						CArray events = (retn.containsKey("events")) ? (CArray) retn.get("events", t) : new CArray(t);
+						functions.sort(CArray.ArraySortType.STRING_IC, env);
+						retn.set("functions", functions, t, env);
+						CArray events = (retn.containsKey("events"))
+								? (CArray) retn.get("events", t, env) : new CArray(t, null, env);
 						for(Event event : tracker.getEvents()) {
 							if(!events.contains(event.getName())) {
-								events.push(new CString(event.getName(), t), t);
+								events.push(new CString(event.getName(), t), t, env);
 							}
 						}
-						events.sort(CArray.ArraySortType.STRING_IC);
-						retn.set("events", events, t);
-						retn.set("version", tracker.getVersion().toString(), t);
+						events.sort(CArray.ArraySortType.STRING_IC, env);
+						retn.set("events", events, t, env);
+						retn.set("version", tracker.getVersion().toString(), t, env);
 					}
 				}
 			}

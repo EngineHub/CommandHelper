@@ -419,7 +419,8 @@ public class Cmdline {
 				}
 				return new CString(prop, t);
 			} else {
-				CArray ca = CArray.GetAssociativeArray(t, null, env);
+				CArray ca = CArray.GetAssociativeArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+						.addNativeParameter(CString.TYPE, null).buildNative(), env);
 				for(String key : System.getProperties().stringPropertyNames()) {
 					ca.set(key, System.getProperty(key), env);
 				}
@@ -515,7 +516,8 @@ public class Cmdline {
 			if(args.length == 1) {
 				return new CString(System.getenv(args[0].val()), t);
 			} else {
-				CArray ca = CArray.GetAssociativeArray(t, null, env);
+				CArray ca = CArray.GetAssociativeArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+						.addNativeParameter(CString.TYPE, null).buildNative(), env);
 				for(String key : System.getenv().keySet()) {
 					ca.set(key, System.getenv(key), env);
 				}
@@ -1328,7 +1330,7 @@ public class Cmdline {
 				oses.add(os);
 			}
 			if(oses.contains(OSUtils.GetOS())) {
-				return new shell_adv().exec(t, env, null, ArrayUtils.cast(ArrayUtils.slice(args, 1, args.length - 1), Construct[].class));
+				return new shell_adv().exec(t, env, generics, ArrayUtils.cast(ArrayUtils.slice(args, 1, args.length - 1), Construct[].class));
 			}
 			return CVoid.VOID;
 		}
@@ -1394,7 +1396,7 @@ public class Cmdline {
 				oses.add(os);
 			}
 			if(oses.contains(OSUtils.GetOS())) {
-				return new shell().exec(t, env, null, ArrayUtils.cast(ArrayUtils.slice(args, 1, args.length - 1), Construct[].class));
+				return new shell().exec(t, env, generics, ArrayUtils.cast(ArrayUtils.slice(args, 1, args.length - 1), Construct[].class));
 			}
 			return CNull.NULL;
 		}
@@ -1515,7 +1517,7 @@ public class Cmdline {
 			}
 			try {
 				if(binary) {
-					CByteArray ba = new CByteArray(t);
+					CByteArray ba = new CByteArray(t, env);
 					while(true) {
 						int b = System.in.read();
 						if(b < 0) {
@@ -1707,7 +1709,8 @@ public class Cmdline {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			requireCmdlineMode(env, this, t);
-			CArray ca = new CArray(t);
+			CArray ca = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			File cwd = Static.GetFileFromArgument(args.length > 0 ? args[0].val() : null, env, t, env.getEnv(GlobalEnv.class).GetRootFolder());
 			if(cwd.isDirectory()) {
 				File[] fs = cwd.listFiles();
@@ -1736,7 +1739,7 @@ public class Cmdline {
 
 		@Override
 		public String docs() {
-			return "array {[directory]} Returns an array of files in the current working directory, including \"hidden\" files, or"
+			return "array<string> {[directory]} Returns an array of files in the current working directory, including \"hidden\" files, or"
 					+ "if directory is specified, the files in that directory. This is only available in cmdline mode.";
 		}
 
@@ -1970,19 +1973,19 @@ public class Cmdline {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			requireCmdlineMode(env, this, t);
-			final CArray a = new CArray(t);
+			final CArray a = new CArray(t, null, env);
 			String regex = ArgumentValidation.getString(args[0], t);
 			String startFrom = env.getEnv(GlobalEnv.class).GetRootFolder().getAbsolutePath();
 			Set<FindType> findTypes = EnumSet.allOf(FindType.class);
 			if(args.length == 2) {
 				if(args[1].isInstanceOf(CArray.TYPE, null, env)) {
-					findTypes = ArgumentValidation.getEnumSet(args[1], FindType.class, t);
+					findTypes = ArgumentValidation.getEnumSet(args[1], FindType.class, t, env);
 				} else {
 					startFrom = ArgumentValidation.getString(args[1], t);
 				}
 			} else if(args.length > 2) {
 				startFrom = ArgumentValidation.getString(args[1], t);
-				findTypes = ArgumentValidation.getEnumSet(args[2], FindType.class, t);
+				findTypes = ArgumentValidation.getEnumSet(args[2], FindType.class, t, env);
 			}
 			if(findTypes.isEmpty()) {
 				throw new CREIllegalArgumentException("types must be a non-empty array, and not null", t);

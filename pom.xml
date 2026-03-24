@@ -135,6 +135,8 @@
 		<maven.test.failure.ignore>true</maven.test.failure.ignore>
 		<maven.compiler.source>16</maven.compiler.source>
 		<maven.compiler.target>16</maven.compiler.target>
+		<!-- Empty argLine, to allow for non-code coverage execution -->
+		<argLine></argLine>
 	</properties>
 	<repositories>
 		<repository>
@@ -493,6 +495,7 @@
 					<compilerArgs>
 						<arg>-XDignore.symbol.file</arg>
 						<arg>-parameters</arg>
+						<arg>-proc:none</arg>
 						<arg>-Xmaxwarns</arg>
 						<arg>9999</arg>
 					</compilerArgs>
@@ -1008,7 +1011,7 @@
 						<!-- Include custom, none specific classes -->
 						<include>**/RandomTests.java</include>
 					</includes>
-					<argLine>-Dfile.encoding=UTF-8 --add-opens java.base/java.lang.reflect=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED</argLine>
+					<argLine>@{argLine} -Dfile.encoding=UTF-8 --add-opens java.base/java.lang.reflect=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED</argLine>
 				</configuration>
 			</plugin>
 
@@ -1063,6 +1066,36 @@
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>cobertura-maven-plugin</artifactId>
 				<version>2.7</version>
+			</plugin>
+
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.14</version>
+				<executions>
+					<execution>
+						<id>default-prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>default-report</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>default-check</id>
+						<goals>
+							<goal>check</goal>
+						</goals>
+						<configuration>
+							<rules></rules>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 
 			<!-- Checkstyle plugin -->
@@ -1144,7 +1177,7 @@
 					<plugin>
 						<groupId>org.jacoco</groupId>
 						<artifactId>jacoco-maven-plugin</artifactId>
-						<version>0.8.7</version>
+						<version>0.8.14</version>
 						<configuration>
 							<skip>true</skip>
 						</configuration>
@@ -1204,7 +1237,19 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>cobertura-maven-plugin</artifactId>
-				<version>2.1</version>
+				<version>2.7</version>
+			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.14</version>
+				<reportSets>
+					<reportSet>
+						<reports>
+							<report>report</report>
+						</reports>
+					</reportSet>
+				</reportSets>
 			</plugin>
 		</plugins>
 	</reporting>

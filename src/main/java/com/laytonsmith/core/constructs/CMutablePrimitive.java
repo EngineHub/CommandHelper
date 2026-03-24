@@ -4,6 +4,8 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.GenericTypeParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
@@ -11,6 +13,8 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.natives.interfaces.Sizeable;
 import com.laytonsmith.core.natives.interfaces.ValueType;
 import com.laytonsmith.core.objects.ObjectModifier;
+import com.laytonsmith.PureUtilities.Common.Annotations.AggressiveDeprecation;
+
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -24,17 +28,21 @@ import java.util.Stack;
 public final class CMutablePrimitive extends CArray implements Sizeable {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get(CMutablePrimitive.class);
+	public static final CClassType TYPE = CClassType.get(CMutablePrimitive.class)
+			.withSuperParameters(GenericTypeParameters.nativeBuilder(CArray.TYPE).addParameter(Auto.LHSTYPE))
+			.done();
 
 	private Mixed value = CNull.NULL;
 
-	public CMutablePrimitive(Target t) {
-		this(null, t);
+	public CMutablePrimitive(Target t, Environment env) {
+		this(null, t, env);
 	}
 
-	public CMutablePrimitive(Mixed value, Target t) {
-		super(t, 0);
-		set(value, t);
+	public CMutablePrimitive(Mixed value, Target t, Environment env) {
+		super(t, 0, GenericParameters.emptyBuilder(CArray.TYPE)
+				.addNativeParameter(Auto.TYPE, null)
+				.buildNative(), env);
+		set(value, t, env);
 	}
 
 	@Override
@@ -63,6 +71,7 @@ public final class CMutablePrimitive extends CArray implements Sizeable {
 	}
 
 	/** @deprecated Use {@link #set(Mixed, Mixed, Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	@Override
 	public void set(Mixed index, Mixed c, Target t) {
@@ -76,15 +85,15 @@ public final class CMutablePrimitive extends CArray implements Sizeable {
 
 	/**
 	 * Sets the value as if
-	 * {@link #set(Mixed, com.laytonsmith.core.constructs.Target)} were called, then
+	 * {@link #set(Mixed, com.laytonsmith.core.constructs.Target, Environment)} were called, then
 	 * returns a reference to this object.
 	 *
 	 * @param value
 	 * @param t
 	 * @return
 	 */
-	public CMutablePrimitive setAndReturn(Mixed value, Target t) {
-		set(value, t);
+	public CMutablePrimitive setAndReturn(Mixed value, Target t, Environment env) {
+		set(value, t, env);
 		return this;
 	}
 
@@ -93,6 +102,7 @@ public final class CMutablePrimitive extends CArray implements Sizeable {
 	}
 
 	/** @deprecated Use {@link #get(Mixed, Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	@Override
 	public Mixed get(Mixed index, Target t) {
@@ -125,6 +135,7 @@ public final class CMutablePrimitive extends CArray implements Sizeable {
 	}
 
 	/** @deprecated Use {@link #size(Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	@Override
 	public long size() {
@@ -146,7 +157,7 @@ public final class CMutablePrimitive extends CArray implements Sizeable {
 	}
 
 	@Override
-	public List<Mixed> asList() {
+	public List<Mixed> asList(Environment env) {
 		return getArray();
 	}
 
@@ -156,8 +167,8 @@ public final class CMutablePrimitive extends CArray implements Sizeable {
 	}
 
 	@Override
-	public CArray createNew(Target t) {
-		return new CMutablePrimitive(value, t);
+	public CArray createNew(Target t, Environment env) {
+		return new CMutablePrimitive(value, t, fallbackEnv);
 	}
 
 	@Override
@@ -173,8 +184,8 @@ public final class CMutablePrimitive extends CArray implements Sizeable {
 	}
 
 	@Override
-	public void push(Mixed c, Integer i, Target t) {
-		set(c, t);
+	public void push(Mixed c, Integer i, Target t, Environment env) {
+		set(c, t, env);
 	}
 
 	@Override
@@ -200,6 +211,11 @@ public final class CMutablePrimitive extends CArray implements Sizeable {
 	@Override
 	public Set<ObjectModifier> getObjectModifiers() {
 		return EnumSet.of(ObjectModifier.FINAL);
+	}
+
+	@Override
+	public GenericParameters getGenericParameters() {
+		return null;
 	}
 
 }

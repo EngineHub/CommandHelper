@@ -41,6 +41,7 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import org.apache.commons.io.FileUtils;
 import org.bukkit.event.Cancellable;
 
 import java.io.File;
@@ -50,7 +51,6 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-import org.apache.commons.io.FileUtils;
 
 /**
  *
@@ -200,7 +200,8 @@ public class Sandbox {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			return new CString("  .-*)) `*-.\n"
+			return new CString(""
+					+ "   .-*)) `*-.\n"
 					+ " /*  ((*   *'.\n"
 					+ "|   *))  *   *\\\n"
 					+ "| *  ((*   *  /\n"
@@ -216,7 +217,7 @@ public class Sandbox {
 	public static class norway extends DummyFunction {
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCChatColor red = MCChatColor.RED;
 			MCChatColor white = MCChatColor.WHITE;
 			MCChatColor blue = MCChatColor.BLUE;
@@ -280,7 +281,7 @@ public class Sandbox {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			Random r;
 			try {
 				r = (Random) ArgumentValidation.getObject(args[0], t, CResource.class).getResource();
@@ -487,11 +488,11 @@ public class Sandbox {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			if(!Static.InCmdLine(environment, true)) {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			if(!Static.InCmdLine(env, true)) {
 				throw new CRESecurityException(getName() + " is only available in cmdline mode.", t);
 			}
-			File location = Static.GetFileFromArgument(args[0].val(), environment, t, null);
+			File location = Static.GetFileFromArgument(args[0].val(), env, t, null);
 			if(location.isDirectory()) {
 				throw new CREIOException("Path already exists, and is a directory", t);
 			}
@@ -500,7 +501,7 @@ public class Sandbox {
 			if(!(args[1] instanceof CByteArray)) {
 				content = args[1].val().getBytes(Charset.forName("UTF-8"));
 			} else {
-				content = ArgumentValidation.getByteArray(args[1], t).asByteArrayCopy();
+				content = ArgumentValidation.getByteArray(args[1], t, env).asByteArrayCopy();
 			}
 			FileWriteMode mode = FileWriteMode.SAFE_WRITE;
 			if(args.length > 2) {

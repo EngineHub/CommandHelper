@@ -4,6 +4,8 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.GenericTypeParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
@@ -16,6 +18,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.Stack;
+import com.laytonsmith.PureUtilities.Common.Annotations.AggressiveDeprecation;
 
 /**
  *
@@ -25,7 +28,10 @@ import java.util.Stack;
 public class CSlice extends CArray {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get(CSlice.class);
+	public static final CClassType TYPE = CClassType.get(CSlice.class)
+			.withSuperParameters(GenericTypeParameters.nativeBuilder(CArray.TYPE)
+				.addParameter(CInt.TYPE, null))
+			.done();
 
 	private long start;
 	private long finish;
@@ -33,8 +39,10 @@ public class CSlice extends CArray {
 	private long max;
 	private long size;
 
-	public CSlice(String slice, Target t) throws ConfigCompileException {
-		super(t);
+	public CSlice(String slice, Target t, Environment env) throws ConfigCompileException {
+		super(t, GenericParameters.emptyBuilder(CArray.TYPE)
+				.addNativeParameter(CInt.TYPE, null)
+				.buildNative(), env);
 		String[] split = slice.split("\\.\\.");
 		if(split.length > 2) {
 			throw new ConfigCompileException("Invalid slice notation! (" + slice + ")", t);
@@ -61,17 +69,17 @@ public class CSlice extends CArray {
 		calculateCaches();
 	}
 
-	public CSlice(long from, long to, Target t) {
-		super(t);
+	public CSlice(long from, long to, Target t, Environment env) {
+		super(t, null, env);
 		this.start = from;
 		this.finish = to;
 		calculateCaches();
 	}
 
 	@Override
-	public List<Mixed> asList() {
-		CArray ca = new ArrayHandling.range().exec(Target.UNKNOWN, null, null, new CInt(start, Target.UNKNOWN), new CInt(finish, Target.UNKNOWN));
-		return ca.asList();
+	public List<Mixed> asList(Environment env) {
+		CArray ca = new ArrayHandling.range().exec(Target.UNKNOWN, env, null, new CInt(start, Target.UNKNOWN), new CInt(finish, Target.UNKNOWN));
+		return ca.asList(env);
 	}
 
 	private void calculateCaches() {
@@ -116,6 +124,7 @@ public class CSlice extends CArray {
 	}
 
 	/** @deprecated Use {@link #set(Mixed, Mixed, Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	@Override
 	public void set(Mixed index, Mixed c, Target t) {
@@ -128,6 +137,7 @@ public class CSlice extends CArray {
 	}
 
 	/** @deprecated Use {@link #get(Mixed, Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	@Override
 	public Mixed get(Mixed index, Target t) {
@@ -144,6 +154,7 @@ public class CSlice extends CArray {
 	}
 
 	/** @deprecated Use {@link #keySet(Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	@Override
 	public Set<Mixed> keySet() {
@@ -182,12 +193,13 @@ public class CSlice extends CArray {
 
 			@Override
 			public int size() {
-				return (int) CSlice.this.size();
+				return (int) CSlice.this.size(env);
 			}
 		};
 	}
 
 	/** @deprecated Use {@link #size(Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	@Override
 	public long size() {
@@ -202,7 +214,7 @@ public class CSlice extends CArray {
 	@Override
 	public boolean contains(Mixed c) {
 		try {
-			long i = ArgumentValidation.getInt(c, Target.UNKNOWN);
+			long i = ArgumentValidation.getInt(c, Target.UNKNOWN, fallbackEnv);
 			if(start < finish) {
 				return start <= i && i <= finish;
 			} else {
@@ -241,5 +253,19 @@ public class CSlice extends CArray {
 	@Override
 	public CClassType[] getInterfaces() {
 		return CClassType.EMPTY_CLASS_ARRAY;
+	}
+
+	@Override
+	public Mixed slice(int begin, int end, Target t, Environment env) {
+		if(begin < end) {
+			return new CSlice(start - begin, finish - end, t, env);
+		} else {
+			return new CSlice(finish - begin, start - end, t, env);
+		}
+	}
+
+	@Override
+	public GenericParameters getGenericParameters() {
+		return null;
 	}
 }

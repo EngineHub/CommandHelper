@@ -70,7 +70,7 @@ public class Enchantments {
 	 * @param value
 	 * @return
 	 */
-	public static int ConvertLevel(Mixed value, Environment env) {
+	public static int ConvertLevel(Environment env, Mixed value) {
 		if(value.isInstanceOf(CInt.TYPE, null, env)) {
 			return (int) ((CInt) value).getInt();
 		}
@@ -200,12 +200,12 @@ public class Enchantments {
 
 			if(args[args.length - 1].isInstanceOf(CArray.TYPE, null, env)) {
 				CArray ca = (CArray) args[args.length - 1];
-				Map<MCEnchantment, Integer> enchants = ObjectGenerator.GetGenerator().enchants(ca, t);
+				Map<MCEnchantment, Integer> enchants = ObjectGenerator.GetGenerator().enchants(ca, t, env);
 				for(Map.Entry<MCEnchantment, Integer> en : enchants.entrySet()) {
 					is.addUnsafeEnchantment(en.getKey(), en.getValue());
 				}
 			} else {
-				int level = ConvertLevel(args[offset + 2], env);
+				int level = ConvertLevel(env, args[offset + 2]);
 				if(level > 0) {
 					is.addUnsafeEnchantment(GetEnchantment(args[offset + 1].val(), t), level);
 				} else {
@@ -503,7 +503,7 @@ public class Enchantments {
 			if(CACHE.containsKey(name)) {
 				return CACHE.get(name).clone();
 			}
-			CArray ca = new CArray(t);
+			CArray ca = new CArray(t, null, env);
 			for(MCEnchantment e : MCEnchantment.values()) {
 				if(e.canEnchantItem(is)) {
 					ca.push(new CString(e.name().toLowerCase(), t), t, env);
@@ -519,7 +519,8 @@ public class Enchantments {
 				FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() == 1
-					&& (children.get(0).getData().isInstanceOf(CString.TYPE, null, env) || children.get(0).getData().isInstanceOf(CInt.TYPE, null, env))) {
+					&& (children.get(0).getData().isInstanceOf(CString.TYPE, null, env)
+					|| children.get(0).getData().isInstanceOf(CInt.TYPE, null, env))) {
 				env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
 						new CompilerWarning("The string item format in " + getName() + " is deprecated.", t, null));
 			}
@@ -601,7 +602,7 @@ public class Enchantments {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CArray ret = new CArray(t);
+			CArray ret = new CArray(t, null, env);
 			for(MCEnchantment e : MCEnchantment.values()) {
 				ret.push(new CString(e.name().toLowerCase(), t), t, env);
 			}

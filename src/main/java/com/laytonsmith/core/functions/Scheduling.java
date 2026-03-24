@@ -222,7 +222,7 @@ public class Scheduling {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			Mixed x = args[0];
-			double time = ArgumentValidation.getNumber(x, t);
+			double time = ArgumentValidation.getNumber(x, t, env);
 			try {
 				Thread.sleep((int) (time * 1000));
 			} catch (InterruptedException ex) {
@@ -277,13 +277,13 @@ public class Scheduling {
 		}
 
 		@Override
-		public Mixed exec(final Target t, final Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			long time = ArgumentValidation.getInt(args[0], t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			long time = ArgumentValidation.getInt(args[0], t, env);
 			int offset = 0;
 			long delay = time;
 			if(args.length == 3) {
 				offset = 1;
-				delay = ArgumentValidation.getInt(args[1], t);
+				delay = ArgumentValidation.getInt(args[1], t, env);
 				if(delay < 0) {
 					throw new CRERangeException("Negative initial delay", t);
 				}
@@ -381,9 +381,9 @@ public class Scheduling {
 		}
 
 		@Override
-		public Mixed exec(final Target t, final Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			final TaskManager taskManager = env.getEnv(StaticRuntimeEnv.class).GetTaskManager();
-			long time = ArgumentValidation.getInt(args[0], t);
+			long time = ArgumentValidation.getInt(args[0], t, env);
 			if(time < 0) {
 				throw new CRERangeException("Negative delay", t);
 			}
@@ -501,7 +501,7 @@ public class Scheduling {
 					throw new CRENullPointerException("Null value sent to " + getName()
 							+ "(). Did you mean " + getName() + "(0)?", t);
 				}
-				int id = ArgumentValidation.getInt32(args[0], t);
+				int id = ArgumentValidation.getInt32(args[0], t, env);
 				TaskManager taskManager = env.getEnv(StaticRuntimeEnv.class).GetTaskManager();
 				TaskHandler task = taskManager.getTask(CoreTaskType.TIMEOUT, id);
 				if(task == null) { // may not be a timeout
@@ -612,7 +612,7 @@ public class Scheduling {
 		public CString exec(Target t, Environment env, GenericParameters generics, Mixed... args) {
 			Date now = new Date();
 			if(args.length >= 2 && !(args[1] instanceof CNull)) {
-				now = new Date(ArgumentValidation.getInt(args[1], t));
+				now = new Date(ArgumentValidation.getInt(args[1], t, env));
 			}
 			TimeZone timezone = TimeZone.getDefault();
 			if(args.length >= 3 && Construct.nval(args[2]) != null) {
@@ -777,9 +777,10 @@ public class Scheduling {
 			//Let's sort the timezones
 			List<String> tz = new ArrayList<>(Arrays.asList(timezones));
 			Collections.sort(tz);
-			CArray ret = new CArray(t);
+			CArray ret = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CString.TYPE, null).buildNative(), env);
 			for(String s : tz) {
-				ret.push(new CString(s, t), t);
+				ret.push(new CString(s, t), t, env);
 			}
 			return ret;
 		}
@@ -1203,7 +1204,7 @@ public class Scheduling {
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			Integer id = (Integer) env.getEnv(GlobalEnv.class).GetCustom("cron-task-id");
 			if(args.length == 1) {
-				id = (int) ArgumentValidation.getInt(args[0], t);
+				id = (int) ArgumentValidation.getInt(args[0], t, env);
 			}
 			if(id == null) {
 				throw new CRERangeException("No task ID provided, and not running from within a cron task.", t);

@@ -1,6 +1,5 @@
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.core.FileWriteMode;
 import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
@@ -17,10 +16,11 @@ import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.EmailProfile;
+import com.laytonsmith.core.FileWriteMode;
+import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSVersion;
-import com.laytonsmith.core.EmailProfile;
-import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.MethodScriptFileLocations;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Prefs;
@@ -51,6 +51,23 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.tools.docgen.DocGenTemplates;
+
+import javax.activation.CommandMap;
+import javax.activation.DataHandler;
+import javax.activation.DataSource;
+import javax.activation.MailcapCommandMap;
+import javax.mail.Authenticator;
+import javax.mail.BodyPart;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -78,22 +95,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.activation.CommandMap;
-import javax.activation.DataHandler;
-import javax.activation.DataSource;
-import javax.activation.MailcapCommandMap;
-import javax.mail.Authenticator;
-import javax.mail.BodyPart;
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.Multipart;
-import javax.mail.PasswordAuthentication;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
 
 /**
  *
@@ -375,7 +376,7 @@ public class Web {
 				}
 				if(csettings.containsKey("trustStore")) {
 					Mixed trustStore = csettings.get("trustStore", t, env);
-					if(trustStore instanceof CBoolean && ArgumentValidation.getBoolean(trustStore, t, env) == false) {
+					if(trustStore instanceof CBoolean && ArgumentValidation.getBooleanObject(trustStore, t, env) == false) {
 						settings.setDisableCertChecking(true);
 					} else if(trustStore.isInstanceOf(CArray.TYPE, null, env)) {
 						CArray trustStoreA = ((CArray) trustStore);
@@ -426,7 +427,7 @@ public class Web {
 					settings.setDownloadStrategy(puMode);
 				}
 				if(csettings.containsKey("binary")) {
-					binary = ArgumentValidation.getBoolean(csettings.get("binary", t, env), t, env);
+					binary = ArgumentValidation.getBooleanObject(csettings.get("binary", t, env), t, env);
 				} else {
 					binary = false;
 				}
@@ -438,10 +439,10 @@ public class Web {
 				}
 
 				if(csettings.containsKey("blocking")) {
-					boolean blocking = ArgumentValidation.getBoolean(csettings.get("blocking", t, env), t, env);
+					boolean blocking = ArgumentValidation.getBooleanObject(csettings.get("blocking", t, env), t, env);
 					settings.setBlocking(blocking);
 				}
-				if(csettings.containsKey("log") && ArgumentValidation.getBoolean(csettings.get("log", t, env), t, env)) {
+				if(csettings.containsKey("log") && ArgumentValidation.getBooleanObject(csettings.get("log", t, env), t, env)) {
 					settings.setLogger(Logger.getLogger(Web.class.getName()));
 				}
 				settings.setAuthenticationDetails(username, password);
@@ -459,7 +460,7 @@ public class Web {
 						final CArray array = CArray.GetAssociativeArray(t, null, env);
 						if(settings.getDownloadTo() == null) {
 							if(binary) {
-								array.set("data", CByteArray.wrap(resp.getContent(), t), t, env);
+								array.set("data", CByteArray.wrap(resp.getContent(), t, env), t, env);
 							} else {
 								try {
 									array.set("body", new CString(new String(resp.getContent(), textEncoding), t), t, env);
@@ -470,7 +471,7 @@ public class Web {
 						}
 						CArray headers = CArray.GetAssociativeArray(t, null, env);
 						for(String key : resp.getHeaderObject().getHeaderNames()) {
-							CArray h = new CArray(t);
+							CArray h = new CArray(t, null, env);
 							for(String val : resp.getHeaderObject().getHeaders(key)) {
 								h.push(new CString(val, t), t, env);
 							}
@@ -821,7 +822,7 @@ public class Web {
 				}
 				Map<String, Object> data = ((EmailProfile) p).getMap();
 				for(String key : data.keySet()) {
-					options.set(key, Construct.GetConstruct(data.get(key)), t, env);
+					options.set(key, Construct.GetConstruct(data.get(key), env), t, env);
 				}
 				// Override any transport data that was also specified in the options, as
 				// well as adding the email settings here too.
@@ -832,27 +833,28 @@ public class Web {
 			}
 
 			// Transport options
-			String host = ArgumentValidation.getItemFromArray(options, "host", t, new CString("localhost", t)).val();
-			final String mailUser = ArgumentValidation.getItemFromArray(options, "user", t, new CString("", t)).val();
-			final String mailPassword = ArgumentValidation.getItemFromArray(options, "password", t, new CString("", t)).val();
-			int mailPort = ArgumentValidation.getInt32(ArgumentValidation.getItemFromArray(options, "port", t, new CInt(587, t)), t, env);
-			boolean useSSL = ArgumentValidation.getBooleanObject(ArgumentValidation.getItemFromArray(options, "use_ssl", t, CBoolean.FALSE), t, env);
-			boolean useStartTLS = ArgumentValidation.getBooleanObject(ArgumentValidation.getItemFromArray(options, "use_start_tls", t, CBoolean.FALSE), t, env);
-			int timeout = ArgumentValidation.getInt32(ArgumentValidation.getItemFromArray(options, "timeout", t, new CInt(10000, t)), t, env);
+			String host = ArgumentValidation.getItemFromArray(options, "host", t, new CString("localhost", t), env).val();
+			final String mailUser = ArgumentValidation.getItemFromArray(options, "user", t, new CString("", t), env).val();
+			final String mailPassword = ArgumentValidation.getItemFromArray(options, "password", t, new CString("", t), env).val();
+			int mailPort = ArgumentValidation.getInt32(ArgumentValidation.getItemFromArray(options, "port", t, new CInt(587, t), env), t, env);
+			boolean useSSL = ArgumentValidation.getBooleanObject(ArgumentValidation.getItemFromArray(options, "use_ssl", t, CBoolean.FALSE, env), t, env);
+			boolean useStartTLS = ArgumentValidation.getBooleanObject(ArgumentValidation.getItemFromArray(options, "use_start_tls", t, CBoolean.FALSE, env), t, env);
+			int timeout = ArgumentValidation.getInt32(ArgumentValidation.getItemFromArray(options, "timeout", t, new CInt(10000, t), env), t, env);
 
 			//Standard email options
-			String from = ArgumentValidation.getItemFromArray(options, "from", t, null).val();
-			String subject = ArgumentValidation.getItemFromArray(options, "subject", t, new CString("<No Subject>", t)).val();
-			String body = ArgumentValidation.getItemFromArray(options, "body", t, new CString("", t)).val();
-			Mixed cto = ArgumentValidation.getItemFromArray(options, "to", t, null);
+			String from = ArgumentValidation.getItemFromArray(options, "from", t, null, env).val();
+			String subject = ArgumentValidation.getItemFromArray(options, "subject", t, new CString("<No Subject>", t), env).val();
+			String body = ArgumentValidation.getItemFromArray(options, "body", t, new CString("", t), env).val();
+			Mixed cto = ArgumentValidation.getItemFromArray(options, "to", t, null, env);
 			CArray to;
 			if(cto.isInstanceOf(CString.TYPE, null, env)) {
-				to = new CArray(t);
+				to = new CArray(t, null, env);
 				to.push(cto, t, env);
 			} else {
 				to = (CArray) cto;
 			}
-			CArray attachments = ArgumentValidation.getArray(ArgumentValidation.getItemFromArray(options, "attachments", t, new CArray(t)), t, env);
+			CArray attachments = ArgumentValidation.getArray(ArgumentValidation
+					.getItemFromArray(options, "attachments", t, new CArray(t, null, env), env), t, env);
 
 			// Setup and execution
 			Properties properties = System.getProperties();
@@ -904,7 +906,7 @@ public class Web {
 					String address;
 					if(c.isInstanceOf(CArray.TYPE, null, env)) {
 						CArray ca = (CArray) c;
-						String stype = ArgumentValidation.getItemFromArray(ca, "type", t, new CString("TO", t)).val();
+						String stype = ArgumentValidation.getItemFromArray(ca, "type", t, new CString("TO", t), env).val();
 						switch(stype) {
 							case "TO":
 								type = Message.RecipientType.TO;
@@ -918,7 +920,7 @@ public class Web {
 							default:
 								throw new CREFormatException("Recipient type must be one of either: TO, CC, or BCC, but \"" + stype + "\" was found.", t);
 						}
-						address = ArgumentValidation.getItemFromArray(ca, "address", t, null).val();
+						address = ArgumentValidation.getItemFromArray(ca, "address", t, null, env).val();
 					} else {
 						address = c.val();
 					}
@@ -927,11 +929,11 @@ public class Web {
 
 				if(attachments.size(env) == 1) {
 					CArray pattachment = ArgumentValidation.getArray(attachments.get(0, t, env), t, env);
-					String type = ArgumentValidation.getItemFromArray(pattachment, "type", t, null).val();
-					String fileName = ArgumentValidation.getItemFromArray(pattachment, "filename", t, new CString("", t)).val().trim();
-					String description = ArgumentValidation.getItemFromArray(pattachment, "description", t, new CString("", t)).val().trim();
-					String disposition = ArgumentValidation.getItemFromArray(pattachment, "disposition", t, new CString("", t)).val().trim();
-					Mixed content = ArgumentValidation.getItemFromArray(pattachment, "content", t, null);
+					String type = ArgumentValidation.getItemFromArray(pattachment, "type", t, null, env).val();
+					String fileName = ArgumentValidation.getItemFromArray(pattachment, "filename", t, new CString("", t), env).val().trim();
+					String description = ArgumentValidation.getItemFromArray(pattachment, "description", t, new CString("", t), env).val().trim();
+					String disposition = ArgumentValidation.getItemFromArray(pattachment, "disposition", t, new CString("", t), env).val().trim();
+					Mixed content = ArgumentValidation.getItemFromArray(pattachment, "content", t, null, env);
 					if(!"".equals(fileName)) {
 						message.setFileName(fileName);
 					}
@@ -946,11 +948,11 @@ public class Web {
 					Multipart mp = new MimeMultipart("alternative");
 					for(Mixed attachment : attachments.asList(env)) {
 						CArray pattachment = ArgumentValidation.getArray(attachment, t, env);
-						final String type = ArgumentValidation.getItemFromArray(pattachment, "type", t, null).val();
-						final String fileName = ArgumentValidation.getItemFromArray(pattachment, "filename", t, new CString("", t)).val().trim();
-						String description = ArgumentValidation.getItemFromArray(pattachment, "description", t, new CString("", t)).val().trim();
-						String disposition = ArgumentValidation.getItemFromArray(pattachment, "disposition", t, new CString("", t)).val().trim();
-						final Object content = getContent(ArgumentValidation.getItemFromArray(pattachment, "content", t, null), t, env);
+						final String type = ArgumentValidation.getItemFromArray(pattachment, "type", t, null, env).val();
+						final String fileName = ArgumentValidation.getItemFromArray(pattachment, "filename", t, new CString("", t), env).val().trim();
+						String description = ArgumentValidation.getItemFromArray(pattachment, "description", t, new CString("", t), env).val().trim();
+						String disposition = ArgumentValidation.getItemFromArray(pattachment, "disposition", t, new CString("", t), env).val().trim();
+						final Object content = getContent(ArgumentValidation.getItemFromArray(pattachment, "content", t, null, env), t, env);
 						BodyPart bp = new MimeBodyPart();
 						if(!"".equals(fileName)) {
 							bp.setFileName(fileName);
@@ -1034,7 +1036,7 @@ public class Web {
 		private Object getContent(Mixed c, Target t, Environment env) {
 			if(c.isInstanceOf(CString.TYPE, null, env)) {
 				return c.val();
-			} else if(c instanceof CByteArray) {
+			} else if(c.isInstanceOf(CByteArray.TYPE, null, env)) {
 				CByteArray cb = (CByteArray) c;
 				return cb.asByteArrayCopy();
 			} else {

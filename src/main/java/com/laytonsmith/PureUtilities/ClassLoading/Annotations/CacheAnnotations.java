@@ -52,6 +52,7 @@ public class CacheAnnotations {
 		AnnotationChecks.checkForTypeInTypeofClasses();
 		AnnotationChecks.verifyExhaustiveVisitors();
 		AnnotationChecks.verifyNonInheritImplements();
+		AnnotationChecks.rewriteAggressiveDeprecations();
 
 		Implementation.setServerType(Implementation.Type.SHELL);
 		List<String> uhohs = new ArrayList<>();

@@ -7,18 +7,20 @@ import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.testing.AbstractIntegrationTest;
 import com.laytonsmith.testing.C;
 import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
 
 /**
  *
@@ -27,6 +29,7 @@ import org.junit.Test;
 public class TestStatic extends AbstractIntegrationTest {
 
 	Target t = Target.UNKNOWN;
+	Environment env;
 
 	public TestStatic() {
 	}
@@ -40,31 +43,32 @@ public class TestStatic extends AbstractIntegrationTest {
 	}
 
 	@Before
-	public void setUp() {
+	public void setUp() throws Exception {
+		env = Static.GenerateStandaloneEnvironment();
 	}
 
 	@Test
 	public void testGetNumber() {
-		assertEquals(1.0, ArgumentValidation.getNumber(C.String("1.0"), t), 0.0);
-		assertEquals(1.0, ArgumentValidation.getNumber(C.String("1"), t), 0.0);
-		assertEquals(1.0, ArgumentValidation.getNumber(C.Int(1), t), 0.0);
-		assertEquals(1.0, ArgumentValidation.getNumber(C.Double(1.0), t), 0.0);
+		assertEquals(1.0, ArgumentValidation.getNumber(C.String("1.0"), t, env), 0.0);
+		assertEquals(1.0, ArgumentValidation.getNumber(C.String("1"), t, env), 0.0);
+		assertEquals(1.0, ArgumentValidation.getNumber(C.Int(1), t, env), 0.0);
+		assertEquals(1.0, ArgumentValidation.getNumber(C.Double(1.0), t, env), 0.0);
 	}
 
 	@Test
 	public void testGetDouble() {
-		assertEquals(1.0, ArgumentValidation.getDouble(C.String("1.0"), t), 0.0);
-		assertEquals(1.0, ArgumentValidation.getDouble(C.String("1"), t), 0.0);
-		assertEquals(1.0, ArgumentValidation.getDouble(C.Int(1), t), 0.0);
-		assertEquals(1.0, ArgumentValidation.getDouble(C.Double(1.0), t), 0.0);
+		assertEquals(1.0, ArgumentValidation.getDouble(C.String("1.0"), t, env), 0.0);
+		assertEquals(1.0, ArgumentValidation.getDouble(C.String("1"), t, env), 0.0);
+		assertEquals(1.0, ArgumentValidation.getDouble(C.Int(1), t, env), 0.0);
+		assertEquals(1.0, ArgumentValidation.getDouble(C.Double(1.0), t, env), 0.0);
 	}
 
 	@Test
 	public void testGetInt() {
-		assertEquals(1, ArgumentValidation.getInt(C.Int(1), t));
-		assertEquals(1, ArgumentValidation.getInt(C.String("1"), t));
+		assertEquals(1, ArgumentValidation.getInt(C.Int(1), t, env));
+		assertEquals(1, ArgumentValidation.getInt(C.String("1"), t, env));
 		try {
-			ArgumentValidation.getInt(C.Double(1.0), t);
+			ArgumentValidation.getInt(C.Double(1.0), t, env);
 			fail("Should not have been able to parse 1.0 as an int");
 		} catch (ConfigRuntimeException e) {
 			// Test Passed.
@@ -73,29 +77,29 @@ public class TestStatic extends AbstractIntegrationTest {
 
 	@Test
 	public void testGetBoolean() {
-		assertTrue(ArgumentValidation.getBooleanish(C.Boolean(true), Target.UNKNOWN));
-		assertTrue(ArgumentValidation.getBooleanish(C.String("non-empty string"), Target.UNKNOWN));
-		assertFalse(ArgumentValidation.getBooleanish(C.String(""), Target.UNKNOWN));
-		assertTrue(ArgumentValidation.getBooleanish(C.Int(1), Target.UNKNOWN));
-		assertFalse(ArgumentValidation.getBooleanish(C.Int(0), Target.UNKNOWN));
+		assertTrue(ArgumentValidation.getBooleanish(C.Boolean(true), Target.UNKNOWN, env));
+		assertTrue(ArgumentValidation.getBooleanish(C.String("non-empty string"), Target.UNKNOWN, env));
+		assertFalse(ArgumentValidation.getBooleanish(C.String(""), Target.UNKNOWN, env));
+		assertTrue(ArgumentValidation.getBooleanish(C.Int(1), Target.UNKNOWN, env));
+		assertFalse(ArgumentValidation.getBooleanish(C.Int(0), Target.UNKNOWN, env));
 	}
 
 	@Test
 	public void testAnyDoubles() {
-		assertTrue(ArgumentValidation.anyDoubles(C.Int(0), C.Int(1), C.Double(1)));
-		assertFalse(ArgumentValidation.anyDoubles(C.Int(1)));
+		assertTrue(ArgumentValidation.anyDoubles(env, C.Int(0), C.Int(1), C.Double(1)));
+		assertFalse(ArgumentValidation.anyDoubles(env, C.Int(1)));
 	}
 
 	@Test
 	public void testAnyStrings() {
-		assertTrue(ArgumentValidation.anyStrings(C.Int(0), C.Int(1), C.String("")));
-		assertFalse(ArgumentValidation.anyStrings(C.Int(1)));
+		assertTrue(ArgumentValidation.anyStrings(env, C.Int(0), C.Int(1), C.String("")));
+		assertFalse(ArgumentValidation.anyStrings(env, C.Int(1)));
 	}
 
 	@Test
 	public void testAnyBooleans() {
-		assertTrue(ArgumentValidation.anyBooleans(C.Int(0), C.Int(1), C.Boolean(true)));
-		assertFalse(ArgumentValidation.anyBooleans(C.Int(1)));
+		assertTrue(ArgumentValidation.anyBooleans(env, C.Int(0), C.Int(1), C.Boolean(true)));
+		assertFalse(ArgumentValidation.anyBooleans(env, C.Int(1)));
 	}
 
 	@Test
@@ -105,29 +109,29 @@ public class TestStatic extends AbstractIntegrationTest {
 
 	@Test
 	public void testResolveConstruct() {
-		assertTrue(Static.resolveConstruct("1", Target.UNKNOWN) instanceof CInt);
-		assertTrue(Static.resolveConstruct("true", Target.UNKNOWN) instanceof CBoolean);
-		assertTrue(Static.resolveConstruct("false", Target.UNKNOWN) instanceof CBoolean);
-		assertTrue(Static.resolveConstruct("null", Target.UNKNOWN) instanceof CNull);
-		assertTrue(Static.resolveConstruct("1.1", Target.UNKNOWN) instanceof CDouble);
-		assertTrue(Static.resolveConstruct("astring", Target.UNKNOWN) instanceof CString);
-		assertTrue(Static.resolveConstruct("string", Target.UNKNOWN) instanceof CClassType);
-		assertTrue(getResolveConstructLong("0xFF") == 0xFF);
-		assertTrue(getResolveConstructLong("0xABCDEF0123456789") == 0xABCDEF0123456789L); // All chars.
-		assertTrue(getResolveConstructLong("0xFFAFFFFFFFF0FFFF") == 0xFFAFFFFFFFF0FFFFL);
-		assertTrue(getResolveConstructLong("0xFFFFFFFFFFFFFFFF") == 0xFFFFFFFFFFFFFFFFL); // Max value.
-		assertTrue(getResolveConstructLong("0b100") == 0b100);
-		assertTrue(getResolveConstructLong("0b1111011111111011111111111011111111111111111111110111111111111110")
+		assertTrue(Static.resolveConstruct("1", Target.UNKNOWN, env) instanceof CInt);
+		assertTrue(Static.resolveConstruct("true", Target.UNKNOWN, env) instanceof CBoolean);
+		assertTrue(Static.resolveConstruct("false", Target.UNKNOWN, env) instanceof CBoolean);
+		assertTrue(Static.resolveConstruct("null", Target.UNKNOWN, env) instanceof CNull);
+		assertTrue(Static.resolveConstruct("1.1", Target.UNKNOWN, env) instanceof CDouble);
+		assertTrue(Static.resolveConstruct("astring", Target.UNKNOWN, env) instanceof CString);
+		assertTrue(Static.resolveConstruct("string", Target.UNKNOWN, env) instanceof CClassType);
+		assertTrue(getResolveConstructLong("0xFF", env) == 0xFF);
+		assertTrue(getResolveConstructLong("0xABCDEF0123456789", env) == 0xABCDEF0123456789L); // All chars.
+		assertTrue(getResolveConstructLong("0xFFAFFFFFFFF0FFFF", env) == 0xFFAFFFFFFFF0FFFFL);
+		assertTrue(getResolveConstructLong("0xFFFFFFFFFFFFFFFF", env) == 0xFFFFFFFFFFFFFFFFL); // Max value.
+		assertTrue(getResolveConstructLong("0b100", env) == 0b100);
+		assertTrue(getResolveConstructLong("0b1111011111111011111111111011111111111111111111110111111111111110", env)
 				== 0b1111011111111011111111111011111111111111111111110111111111111110L);
-		assertTrue(getResolveConstructLong("0b1111111111111111111111111111111111111111111111111111111111111111")
+		assertTrue(getResolveConstructLong("0b1111111111111111111111111111111111111111111111111111111111111111", env)
 				== 0b1111111111111111111111111111111111111111111111111111111111111111L); // Max value.
-		assertTrue(getResolveConstructLong("0o76543210") == 076543210L); // All chars.
-		assertTrue(getResolveConstructLong("0o1737745677477125767277") == 01737745677477125767277L);
-		assertTrue(getResolveConstructLong("0o1777777777777777777777") == 01777777777777777777777L); // Max value.
+		assertTrue(getResolveConstructLong("0o76543210", env) == 076543210L); // All chars.
+		assertTrue(getResolveConstructLong("0o1737745677477125767277", env) == 01737745677477125767277L);
+		assertTrue(getResolveConstructLong("0o1777777777777777777777", env) == 01777777777777777777777L); // Max value.
 	}
 
-	private static long getResolveConstructLong(String val) {
-		return ((CInt) Static.resolveConstruct(val, Target.UNKNOWN)).getInt();
+	private static long getResolveConstructLong(String val, Environment env) {
+		return ((CInt) Static.resolveConstruct(val, Target.UNKNOWN, env)).getInt();
 	}
 
 }

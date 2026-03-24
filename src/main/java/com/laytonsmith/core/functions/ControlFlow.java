@@ -1,7 +1,7 @@
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
+import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.breakable;
@@ -11,8 +11,8 @@ import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.CallbackYield;
 import com.laytonsmith.core.FlowFunction;
-import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.LogLevel;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Procedure;
@@ -45,7 +45,6 @@ import com.laytonsmith.core.compiler.signature.FunctionSignatures.MatchType;
 import com.laytonsmith.core.compiler.signature.SignatureBuilder;
 import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.CArray;
-import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CKeyword;
@@ -56,14 +55,19 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
-import com.laytonsmith.core.constructs.InstanceofUtil;
+import com.laytonsmith.core.constructs.LeftHandSideType;
 import com.laytonsmith.core.constructs.ProcedureUsage;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.ConstraintLocation;
+import com.laytonsmith.core.constructs.generics.Constraints;
+import com.laytonsmith.core.constructs.generics.GenericDeclaration;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.constraints.UnboundedConstraint;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
 import com.laytonsmith.core.exceptions.CRE.CREInvalidProcedureException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
@@ -232,55 +236,35 @@ public class ControlFlow {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			/*
-			 *  TODO - Decide how to define the ternary return value.
-			 *  Note that getReturnType is overridden, so these signatures are not used for typechecking.
-			 */
-			return new SignatureBuilder(CClassType.AUTO, MatchType.MATCH_FIRST)
-					.param(Booleanish.TYPE, "cond", "The condition.")
-					.param(Mixed.TYPE, "ifValue", "The value that is returned when the condition is true.")
-					.param(Mixed.TYPE, "elseValue", "The value that is returned when the condition is false.")
-					.newSignature(CVoid.TYPE).param(Booleanish.TYPE, "cond", "The condition.")
-					.param(null, "ifCode", "The code that runs when the condition is true.")
-					.param(null, "elseCode", "The optional code that runs when the condition is false.", true).build();
-		}
-
-		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes,
-				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
-
-			// Get return type based on the function signatures. This generates all necessary compile errors.
-			CClassType retType = super.getReturnType(t, argTypes, argTargets, env, exceptions);
-
-			// When void is returned, ternary usage could still be possible when a branch is terminating.
-			// It is also possible that both branches are terminating, in which case this should return null as well.
-			if(retType == CVoid.TYPE && argTypes.size() == 3) {
-
-				// Return the type of the other branch if one branch is terminating (ternary, terminating or void).
-				if(argTypes.get(1) == null) {
-					return argTypes.get(2);
-				}
-				if(argTypes.get(2) == null) {
-					return argTypes.get(1);
-				}
-			}
-
-			// Perform partial type inference since there is no way to express an A OR B type yet.
-			/*
-			 * TODO - This currently returns the lowest type if one extends the other.
-			 * Make this return a multitype instead as soon as all typechecking code supports multitypes.
-			 */
-			if(retType == CClassType.AUTO && argTypes.size() == 3) {
-				if(InstanceofUtil.isInstanceof(argTypes.get(1), argTypes.get(2), env)) {
-					return argTypes.get(2);
-				}
-				if(InstanceofUtil.isInstanceof(argTypes.get(2), argTypes.get(1), env)) {
-					return argTypes.get(1);
-				}
-			}
-
-			// Return the super result.
-			return retType;
+			GenericDeclaration ternaryIfOnly = new GenericDeclaration(Target.UNKNOWN,
+				new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+					new UnboundedConstraint(Target.UNKNOWN, "T")));
+			GenericDeclaration ternaryIfElse = new GenericDeclaration(Target.UNKNOWN,
+				new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+					new UnboundedConstraint(Target.UNKNOWN, "T")),
+				new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+					new UnboundedConstraint(Target.UNKNOWN, "U")));
+			LeftHandSideType voidOrBooleanish = LeftHandSideType.fromNativeTypeUnion(CVoid.LHSTYPE,
+					Booleanish.TYPE.asLeftHandSideType());
+			LeftHandSideType tTernaryIfOnly = LeftHandSideType.fromNativeGenericDefinitionType(ternaryIfOnly, "T", null);
+			LeftHandSideType tTernaryIfElse = LeftHandSideType.fromNativeGenericDefinitionType(ternaryIfElse, "T", null);
+			LeftHandSideType uTernaryIfElse = LeftHandSideType.fromNativeGenericDefinitionType(ternaryIfElse, "U", null);
+			return new SignatureBuilder(
+						LeftHandSideType.fromNativeTypeUnion(tTernaryIfElse, uTernaryIfElse),
+						MatchType.MATCH_FIRST)
+					.param(voidOrBooleanish, "cond", "The condition.")
+					.param(tTernaryIfElse, "ifValue", "The value that is returned when the condition is true.")
+					.param(uTernaryIfElse, "elseValue", "The value that is returned when the condition is false.")
+					.setGenericDeclaration(ternaryIfElse, "T is the return type if the condition is true, U is the return type if false.")
+					.newSignature(LeftHandSideType.fromNativeTypeUnion(tTernaryIfOnly, CVoid.LHSTYPE))
+					.param(voidOrBooleanish, "cond", "The condition.")
+					.param(tTernaryIfOnly, "ifValue", "The value that is returned when the condition is true.")
+					.setGenericDeclaration(ternaryIfOnly, "T is the return type if the condition is true (void otherwise).")
+					.newSignature(CVoid.TYPE)
+					.param(voidOrBooleanish, "cond", "The condition.")
+					.param((LeftHandSideType) null, "ifCode", "The code that runs when the condition is true.")
+					.param((LeftHandSideType) null, "elseCode", "The optional code that runs when the condition is false.", true)
+					.build();
 		}
 
 		@Override
@@ -1031,7 +1015,7 @@ public class ControlFlow {
 					+ " remove the duplicate value";
 			final BasicLogic.equals equals = new BasicLogic.equals();
 			Set<Mixed> values = new TreeSet<>((Mixed t1, Mixed t2) -> {
-				if(equals.exec(Target.UNKNOWN, null, null, t1, t2).getBoolean()) {
+				if(equals.exec(Target.UNKNOWN, env, null, t1, t2).getBoolean()) {
 					return 0;
 				} else {
 					return t1.val().compareTo(t2.val());
@@ -1047,7 +1031,7 @@ public class ControlFlow {
 				//To standardize the rest of the code (and to optimize), go ahead and resolve array()
 				if(children.get(i).getData() instanceof CFunction
 						&& children.get(i).getData().val().equals(DataHandling.array.NAME)) {
-					CArray data = new CArray(t);
+					CArray data = new CArray(t, null, env);
 					for(ParseTree child : children.get(i).getChildren()) {
 						if(Construct.IsDynamicHelper(child.getData())) {
 							throw new ConfigCompileException(notConstant, child.getTarget());
@@ -1061,7 +1045,7 @@ public class ControlFlow {
 					List<Mixed> list = ((CArray) children.get(i).getData()).asList(env);
 					for(Mixed c : list) {
 						if(c instanceof CSlice) {
-							for(Mixed cc : ((CSlice) c).asList()) {
+							for(Mixed cc : ((CSlice) c).asList(env)) {
 								if(values.contains(cc)) {
 									throw new ConfigCompileException(alreadyContains, cc.getTarget());
 								}
@@ -1089,7 +1073,8 @@ public class ControlFlow {
 				}
 			}
 
-			if((children.size() > 3 || (children.size() > 1 && children.get(1).getData().isInstanceOf(CArray.TYPE, null, env)))
+			if((children.size() > 3 || (children.size() > 1
+					&& children.get(1).getData().isInstanceOf(CArray.TYPE, null, env)))
 					//No point in doing this optimization if there are only 3 args and the case is flat.
 					//Also, doing this check prevents an inifinite loop during optimization.
 					&& (children.size() > 0 && !Construct.IsDynamicHelper(children.get(0).getData()))) {
@@ -1102,7 +1087,7 @@ public class ControlFlow {
 
 					if(!(data.isInstanceOf(CArray.TYPE, null, env)) || data instanceof CSlice) {
 						//Put it in an array to make the rest of this parsing easier.
-						data = new CArray(t);
+						data = new CArray(t, null, env);
 						((CArray) data).push(children.get(i).getData(), t, env);
 					}
 					for(Mixed value : ((CArray) data).asList(env)) {
@@ -1110,7 +1095,7 @@ public class ControlFlow {
 							long rangeLeft = ((CSlice) value).getStart();
 							long rangeRight = ((CSlice) value).getFinish();
 							if(children.get(0).getData().isInstanceOf(CInt.TYPE, null, env)) {
-								long v = ArgumentValidation.getInt(children.get(0).getData(), t);
+								long v = ArgumentValidation.getInt(children.get(0).getData(), t, env);
 								if((rangeLeft < rangeRight && v >= rangeLeft && v <= rangeRight)
 										|| (rangeLeft > rangeRight && v >= rangeRight && v <= rangeLeft)
 										|| (rangeLeft == rangeRight && v == rangeLeft)) {
@@ -1225,7 +1210,7 @@ public class ControlFlow {
 				ParseTree child = children.get(i);
 				Mixed caseData = child.getData();
 				if(caseData instanceof CArray) {
-					CArray newData = new CArray(child.getTarget());
+					CArray newData = new CArray(child.getTarget(), null, env);
 					for(Mixed cse : ((CArray) caseData).asList(env)) {
 						if(cse instanceof CString) {
 							CString data = (CString) cse;
@@ -1300,7 +1285,7 @@ public class ControlFlow {
 							+ "When this is false, this function returns.")
 					.param(Mixed.TYPE, "loopExpr", "The expression that is executed each time the loop continues"
 							+ " after executing the loopCode.")
-					.param(null, "loopCode", "The code that is executed in the loop.").build();
+					.param((LeftHandSideType) null, "loopCode", "The code that is executed in the loop.").build();
 		}
 
 		@Override
@@ -1593,8 +1578,8 @@ public class ControlFlow {
 							+ " If loopCode has not been executed in the first iteration, then elseCode is executed.")
 					.param(Mixed.TYPE, "loopExpr", "The expression that is executed each time the loop continues"
 							+ " after executing the loopCode.")
-					.param(null, "loopCode", "The code that is executed in the loop.")
-					.param(null, "elseCode", "The code that is executed when the condition returns"
+					.param((LeftHandSideType) null, "loopCode", "The code that is executed in the loop.")
+					.param((LeftHandSideType) null, "elseCode", "The code that is executed when the condition returns"
 							+ " false in the first iteration of the loop.").build();
 		}
 
@@ -1773,7 +1758,7 @@ public class ControlFlow {
 						throw new CRECastException("Parameter " + (2 + state.offset)
 								+ " of " + getName() + " must be an ivariable", t);
 					}
-					state.valueVar = (IVariable) result;
+				state.valueVar = (IVariable) result;
 					return startIteration(t, state, env);
 				}
 				case LOOP_BODY: {
@@ -1847,13 +1832,21 @@ public class ControlFlow {
 			}
 			Mixed key = state.assocKeyIterator.next();
 			if(state.keyVar != null) {
-				env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(
-						state.keyVar.getDefinedType(), state.keyVar.getVariableName(),
-						key, state.keyVar.getDefinedTarget(), env));
+				try {
+					env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(
+							state.keyVar.getDefinedType(), state.keyVar.getVariableName(),
+							key, state.keyVar.getDefinedTarget(), env));
+				} catch(ConfigCompileException cce) {
+					throw new CREFormatException(cce.getMessage(), t);
+				}
 			}
-			env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(
-					state.valueVar.getDefinedType(), state.valueVar.getVariableName(),
-					state.arr.get(key, t, env), state.valueVar.getDefinedTarget(), env));
+			try {
+				env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(
+						state.valueVar.getDefinedType(), state.valueVar.getVariableName(),
+						state.arr.get(key, t, env), state.valueVar.getDefinedTarget(), env));
+			} catch(ConfigCompileException cce) {
+				throw new CREFormatException(cce.getMessage(), t);
+			}
 			state.phase = ForeachState.Phase.LOOP_BODY;
 			return new StepResult<>(new Evaluate(state.codeNode), state);
 		}
@@ -1892,13 +1885,21 @@ public class ControlFlow {
 			}
 			int current = iter.getCurrent();
 			if(state.keyVar != null) {
-				env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(
-						state.keyVar.getDefinedType(), state.keyVar.getVariableName(),
-						new CInt(current, t), state.keyVar.getDefinedTarget(), env));
+				try {
+					env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(
+							state.keyVar.getDefinedType(), state.keyVar.getVariableName(),
+							new CInt(current, t), state.keyVar.getDefinedTarget(), env));
+				} catch(ConfigCompileException cce) {
+					throw new CREFormatException(cce.getMessage(), t);
+				}
 			}
-			env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(
-					state.valueVar.getDefinedType(), state.valueVar.getVariableName(),
-					state.arr.get(current, t, env), state.valueVar.getDefinedTarget(), env));
+			try {
+				env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(
+						state.valueVar.getDefinedType(), state.valueVar.getVariableName(),
+						state.arr.get(current, t, env), state.valueVar.getDefinedTarget(), env));
+			} catch(ConfigCompileException cce) {
+				throw new CREFormatException(cce.getMessage(), t);
+			}
 			state.phase = ForeachState.Phase.LOOP_BODY;
 			return new StepResult<>(new Evaluate(state.codeNode), state);
 		}
@@ -1938,11 +1939,12 @@ public class ControlFlow {
 		@Override
 		public FunctionSignatures getSignatures() {
 			return new SignatureBuilder(CVoid.TYPE)
+					.setNoneIsAllowed(true)
 					.param(com.laytonsmith.core.natives.interfaces.Iterable.TYPE, "data", "The iterable data.")
-					.param(null, "key",
+					.param((LeftHandSideType) null, "key",
 							"The optional ivariable used to assign the key of each data entry key to.", true)
-					.param(null, "value", "The ivariable used to assign each data entry value to.")
-					.param(null, "code", "The code that will be executed for each entry in the data.").build();
+					.param((LeftHandSideType) null, "value", "The ivariable used to assign each data entry value to.")
+					.param((LeftHandSideType) null, "code", "The code that will be executed for each entry in the data.").build();
 		}
 
 		@Override
@@ -1999,17 +2001,19 @@ public class ControlFlow {
 					+ " The same syntax is valid as in an array slice."
 					+ " If key is set (it must be an ivariable) then the index of each iteration will be set to that."
 					+ " See the examples for a demonstration. ---- "
-					+ " Enhanced syntax may also be used in foreach, using the \"in\", \"as\" and \"else\" keywords."
+					+ " Enhanced syntax may also be used in foreach, using the \"in\" and \"else\" keywords."
 					+ " See the examples for examples of each structure. Using these keywords makes the structure of"
 					+ " the foreach read much better. For instance, with foreach(@value in @array){ } the code very"
 					+ " literally reads \"for each value in array\", making ascertaining the behavior of the loop"
-					+ " easier. The \"as\" keyword reads less plainly, and so is not recommended for use, but is"
-					+ " allowed. Note that the array and value are reversed with the \"as\" keyword. An \"else\" block"
+					+ " easier. An \"else\" block"
 					+ " may be used after the foreach, which will only run if the array provided is empty, that is, the"
 					+ " loop code would never run. This provides a good way to provide \"default\" handling."
 					+ " Array modifications while iterating are supported, and are well defined."
 					+ " See [[Array_iteration|the page documenting array iterations]]"
-					+ " for full details.";
+					+ " for full details. Note that previous versions supported using the \"as\" keyword in"
+					+ " foreach statements. This still works for backwards compatibility purposes, but is not"
+					+ " recommended for new code, as it conflicts with cast usage, and may be removed in"
+					+ " future versions.";
 		}
 
 		@Override
@@ -2039,10 +2043,10 @@ public class ControlFlow {
 				+ "foreach(@key: @value in @array){\n"
 				+ "\tmsg(@key . ': ' . @value);\n"
 				+ "}"),
-				new ExampleScript("Using \"as\" keyword", "@array = array(1, 2, 3);\n"
-				+ "foreach(@array as @value){\n"
-				+ "\tmsg(@value);\n"
-				+ "}"),
+//				new ExampleScript("Using \"as\" keyword", "@array = array(1, 2, 3);\n"
+//				+ "foreach(@array as @value){\n"
+//				+ "\tmsg(@value);\n"
+//				+ "}"),
 				/* This is actually borked in real code, so it needs to be fixed.
 				 * In the meantime, whatever, just remove the example.
 				new ExampleScript("Using \"as\" keyword, with a key", "@array = array(1, 2, 3);\n"
@@ -2228,12 +2232,13 @@ public class ControlFlow {
 		@Override
 		public FunctionSignatures getSignatures() {
 			return new SignatureBuilder(CVoid.TYPE)
+					.setNoneIsAllowed(true)
 					.param(com.laytonsmith.core.natives.interfaces.Iterable.TYPE, "data", "The iterable data.")
-					.param(null, "key",
+					.param((LeftHandSideType) null, "key",
 							"The optional ivariable used to assign the key of each data entry key to.", true)
-					.param(null, "value", "The ivariable used to assign each data entry value to.")
-					.param(null, "code", "The code that will be executed for each entry in the data.")
-					.param(null, "elseCode", "The code that will be executed when the data contains no entries.")
+					.param((LeftHandSideType) null, "value", "The ivariable used to assign each data entry value to.")
+					.param((LeftHandSideType) null, "code", "The code that will be executed for each entry in the data.")
+					.param((LeftHandSideType) null, "elseCode", "The code that will be executed when the data contains no entries.")
 					.build();
 		}
 
@@ -2455,7 +2460,7 @@ public class ControlFlow {
 			return new SignatureBuilder(CVoid.TYPE)
 					.param(Booleanish.TYPE, "cond",
 							"The loop condition that is checked each time before the code is executed.")
-					.param(null, "code", "The code that is executed in the loop.", true).build();
+					.param((LeftHandSideType) null, "code", "The code that is executed in the loop.", true).build();
 		}
 
 		@Override
@@ -2639,7 +2644,7 @@ public class ControlFlow {
 		@Override
 		public FunctionSignatures getSignatures() {
 			return new SignatureBuilder(CVoid.TYPE)
-					.param(null, "code", "The code that is executed in the loop.")
+					.param((LeftHandSideType) null, "code", "The code that is executed in the loop.")
 					.param(Booleanish.TYPE, "cond",
 							"The loop condition that is checked each time after the code is executed.").build();
 		}
@@ -2773,11 +2778,11 @@ public class ControlFlow {
 		}
 
 		@Override
-		public CClassType typecheck(StaticAnalysis analysis,
-				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+		public LeftHandSideType typecheck(StaticAnalysis analysis,
+				ParseTree ast, LeftHandSideType inferredReturnType, Environment env, Set<ConfigCompileException> exceptions) {
 
 			// Typecheck function.
-			super.typecheck(analysis, ast, env, exceptions);
+			super.typecheck(analysis, ast, inferredReturnType, env, exceptions);
 
 			// Get break count.
 			long breakCount;
@@ -2825,7 +2830,7 @@ public class ControlFlow {
 			}
 
 			// Return void.
-			return CVoid.TYPE;
+			return CVoid.TYPE.asLeftHandSideType();
 		}
 
 		@Override
@@ -2872,7 +2877,7 @@ public class ControlFlow {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			return new SignatureBuilder(null)
+			return SignatureBuilder.withNoneReturnType()
 					.param(CInt.TYPE, "loopAmount", "The amount of loops to break from.", true).build();
 		}
 
@@ -2959,11 +2964,11 @@ public class ControlFlow {
 		}
 
 		@Override
-		public CClassType typecheck(StaticAnalysis analysis,
-				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+		public LeftHandSideType typecheck(StaticAnalysis analysis,
+				ParseTree ast, LeftHandSideType inferredReturnType, Environment env, Set<ConfigCompileException> exceptions) {
 
 			// Typecheck function.
-			super.typecheck(analysis, ast, env, exceptions);
+			super.typecheck(analysis, ast, inferredReturnType, env, exceptions);
 
 			// Resolve this continuable reference to a continuable declaration to validate usage of continue in this context.
 			Scope scope = analysis.getTermScope(ast);
@@ -2983,7 +2988,7 @@ public class ControlFlow {
 			}
 
 			// Return void.
-			return CVoid.TYPE;
+			return CVoid.TYPE.asLeftHandSideType();
 		}
 
 		@Override
@@ -3030,7 +3035,7 @@ public class ControlFlow {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			return new SignatureBuilder(null)
+			return SignatureBuilder.withNoneReturnType()
 					.param(CInt.TYPE, "loopAmount", "The amount of loop iterations to continue.", true).build();
 		}
 
@@ -3087,23 +3092,23 @@ public class ControlFlow {
 		}
 
 		@Override
-		public CClassType typecheck(StaticAnalysis analysis,
-				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+		public LeftHandSideType typecheck(StaticAnalysis analysis,
+				ParseTree ast, LeftHandSideType inferredReturnType, Environment env, Set<ConfigCompileException> exceptions) {
 
 			// Get value type.
-			CClassType valType;
+			LeftHandSideType valType;
 			Target valTarget;
 			if(ast.numberOfChildren() == 0) {
-				valType = CVoid.TYPE;
+				valType = CVoid.TYPE.asLeftHandSideType();
 				valTarget = ast.getTarget();
 			} else if(ast.numberOfChildren() == 1) {
 				ParseTree valNode = ast.getChildAt(0);
-				valType = analysis.typecheck(valNode, env, exceptions);
+				valType = analysis.typecheck(valNode, inferredReturnType, env, exceptions);
 				valTarget = valNode.getTarget();
 			} else {
 
 				// Fall back to default behavior for invalid usage.
-				return super.typecheck(analysis, ast, env, exceptions);
+				return super.typecheck(analysis, ast, inferredReturnType, env, exceptions);
 			}
 
 			// Resolve this returnable reference to its returnable declaration to get its required return type.
@@ -3116,13 +3121,17 @@ public class ControlFlow {
 
 					// Type check return value for all found declared return types.
 					for(Declaration decl : decls) {
+						if(valType.isVoid() && decl.getType().isVoid()) {
+							// void return in a void proc/closure is always valid.
+							continue;
+						}
 						StaticAnalysis.requireType(valType, decl.getType(), valTarget, env, exceptions);
 					}
 				}
 			}
 
 			// Return void.
-			return CVoid.TYPE;
+			return CVoid.TYPE.asLeftHandSideType();
 		}
 
 		@Override
@@ -3175,7 +3184,7 @@ public class ControlFlow {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			return new SignatureBuilder(null)
+			return SignatureBuilder.withNoneReturnType()
 					.param(Mixed.TYPE, "value", "The value to return. If omitted, void will be returned.", true)
 					.build();
 		}
@@ -3365,7 +3374,8 @@ public class ControlFlow {
 
 		@Override
 		public FunctionSignatures getSignatures() {
-			return new SignatureBuilder(null).varParam(Mixed.TYPE, "messages",
+			return SignatureBuilder.withNoneReturnType()
+					.varParam(Mixed.TYPE, "messages",
 					"The messages that will be shown to the user (concatenated together).").build();
 		}
 

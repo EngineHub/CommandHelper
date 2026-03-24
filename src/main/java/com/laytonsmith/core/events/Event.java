@@ -67,7 +67,7 @@ public interface Event<TBindableEvent extends BindableEvent> extends Comparable<
 	 * Error.
 	 */
 	@Deprecated
-	public boolean matches(Map<String, Mixed> prefilter, TBindableEvent e) throws PrefilterNonMatchException;
+	public boolean matches(Map<String, Mixed> prefilter, TBindableEvent e, Environment env) throws PrefilterNonMatchException;
 
 	/**
 	 * If an event is manually triggered, then it may be required for an event object to be faked, so the rest of the

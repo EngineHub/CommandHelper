@@ -40,6 +40,7 @@ import com.laytonsmith.core.exceptions.CRE.CREScoreboardException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -195,26 +196,27 @@ public final class Scoreboards {
 		return getBoard(MAIN, t);
 	}
 
-	static CArray getTeam(MCTeam team, Target t) {
-		CArray to = CArray.GetAssociativeArray(t);
-		to.set("name", new CString(team.getName(), t), t);
-		to.set("displayname", new CString(team.getDisplayName(), t), t);
-		to.set("prefix", new CString(team.getPrefix(), t), t);
-		to.set("suffix", new CString(team.getSuffix(), t), t);
-		to.set("color", new CString(team.getColor().name(), t), t);
-		to.set("size", new CInt(team.getSize(), t), t);
-		CArray ops = CArray.GetAssociativeArray(t);
-		ops.set("friendlyfire", CBoolean.get(team.allowFriendlyFire()), t);
-		ops.set("friendlyinvisibles", CBoolean.get(team.canSeeFriendlyInvisibles()), t);
-		ops.set("nametagvisibility", new CString(team.getOption(MCOption.NAME_TAG_VISIBILITY).name(), t), t);
-		ops.set("collisionrule", new CString(team.getOption(MCOption.COLLISION_RULE).name(), t), t);
-		ops.set("deathmessagevisibility", new CString(team.getOption(MCOption.DEATH_MESSAGE_VISIBILITY).name(), t), t);
-		to.set("options", ops, t);
-		CArray pl = new CArray(t);
+	static CArray getTeam(MCTeam team, Target t, Environment env) {
+		CArray to = CArray.GetAssociativeArray(t, null, env);
+		to.set("name", new CString(team.getName(), t), t, env);
+		to.set("displayname", new CString(team.getDisplayName(), t), t, env);
+		to.set("prefix", new CString(team.getPrefix(), t), t, env);
+		to.set("suffix", new CString(team.getSuffix(), t), t, env);
+		to.set("color", new CString(team.getColor().name(), t), t, env);
+		to.set("size", new CInt(team.getSize(), t), t, env);
+		CArray ops = CArray.GetAssociativeArray(t, null, env);
+		ops.set("friendlyfire", CBoolean.get(team.allowFriendlyFire()), t, env);
+		ops.set("friendlyinvisibles", CBoolean.get(team.canSeeFriendlyInvisibles()), t, env);
+		ops.set("nametagvisibility", new CString(team.getOption(MCOption.NAME_TAG_VISIBILITY).name(), t), t, env);
+		ops.set("collisionrule", new CString(team.getOption(MCOption.COLLISION_RULE).name(), t), t, env);
+		ops.set("deathmessagevisibility", new CString(team.getOption(MCOption.DEATH_MESSAGE_VISIBILITY).name(), t), t, env);
+		to.set("options", ops, t, env);
+		CArray pl = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+				.addNativeParameter(CString.TYPE, null).buildNative(), env);
 		for(String entry : team.getEntries()) {
-			pl.push(new CString(entry, t), t);
+			pl.push(new CString(entry, t), t, env);
 		}
-		to.set("players", pl, t);
+		to.set("players", pl, t, env);
 		return to;
 	}
 
@@ -258,7 +260,7 @@ public final class Scoreboards {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = Static.GetPlayer(args[0], t);
+			MCPlayer p = Static.GetPlayer(args[0], t, env);
 			String ret;
 			try {
 				ret = getBoardID(p.getScoreboard(), t);
@@ -302,7 +304,7 @@ public final class Scoreboards {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = Static.GetPlayer(args[0], t);
+			MCPlayer p = Static.GetPlayer(args[0], t, env);
 			p.setScoreboard(assignBoard(1, t, args));
 			return CVoid.VOID;
 		}
@@ -339,7 +341,7 @@ public final class Scoreboards {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CArray ret = new CArray(t);
+			CArray ret = new CArray(t, null, env);
 			for(String id : BOARDS.keySet()) {
 				ret.push(new CString(id, t), t, env);
 			}
@@ -392,7 +394,8 @@ public final class Scoreboards {
 			} else {
 				os = s.getObjectives();
 			}
-			CArray ret = new CArray(t);
+			CArray ret = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+				.addNativeParameter(CArray.TYPE, null).buildNative(), env);
 			for(MCObjective o : os) {
 				CArray obj = CArray.GetAssociativeArray(t, null, env);
 				obj.set("name", new CString(o.getName(), t), t, env);
@@ -446,7 +449,7 @@ public final class Scoreboards {
 			}
 			CArray ret = CArray.GetAssociativeArray(t, null, env);
 			for(MCTeam team : s.getTeams()) {
-				ret.set(team.getName(), getTeam(team, t), t, env);
+				ret.set(team.getName(), getTeam(team, t, env), t, env);
 			}
 			return ret;
 		}
@@ -521,6 +524,11 @@ public final class Scoreboards {
 	public static class create_objective extends SBFunction {
 
 		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREScoreboardException.class};
+		}
+
+		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(2, t, args);
 			String name = args[0].val();
@@ -567,6 +575,11 @@ public final class Scoreboards {
 
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class create_team extends SBFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREScoreboardException.class};
+		}
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
@@ -798,6 +811,11 @@ public final class Scoreboards {
 	public static class team_add_player extends SBFunction {
 
 		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREScoreboardException.class};
+		}
+
+		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(2, t, args);
 			MCTeam team = s.getTeam(args[0].val());
@@ -875,7 +893,7 @@ public final class Scoreboards {
 			if(team == null) {
 				return CNull.NULL;
 			}
-			return getTeam(team, t);
+			return getTeam(team, t, env);
 		}
 
 		@Override

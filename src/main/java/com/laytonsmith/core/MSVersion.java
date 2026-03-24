@@ -21,7 +21,8 @@ public enum MSVersion implements Version {
 	V3_3_2("3.3.2"),
 	V3_3_3("3.3.3"),
 	V3_3_4("3.3.4"),
-	V3_3_5("3.3.5");
+	V3_3_5("3.3.5"),
+	V3_3_6("3.3.6");
 
 	final SemVer2 version;
 

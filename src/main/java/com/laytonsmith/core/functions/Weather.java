@@ -71,15 +71,15 @@ public class Weather {
 			if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
 				CArray a = (CArray) args[0];
 				MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
-				MCLocation l = ObjectGenerator.GetGenerator().location(a, p == null ? null : p.getWorld(), t);
+				MCLocation l = ObjectGenerator.GetGenerator().location(a, p == null ? null : p.getWorld(), t, env);
 				x = (int) java.lang.Math.floor(l.getX());
 				y = (int) java.lang.Math.floor(l.getY());
 				z = (int) java.lang.Math.floor(l.getZ());
 				w = l.getWorld();
 			} else {
-				x = (int) java.lang.Math.floor(ArgumentValidation.getNumber(args[0], t));
-				y = (int) java.lang.Math.floor(ArgumentValidation.getNumber(args[1], t));
-				z = (int) java.lang.Math.floor(ArgumentValidation.getNumber(args[2], t));
+				x = (int) java.lang.Math.floor(ArgumentValidation.getNumber(args[0], t, env));
+				y = (int) java.lang.Math.floor(ArgumentValidation.getNumber(args[1], t, env));
+				z = (int) java.lang.Math.floor(ArgumentValidation.getNumber(args[2], t, env));
 				safeIndex = 3;
 			}
 			if(args.length >= safeIndex + 1) {

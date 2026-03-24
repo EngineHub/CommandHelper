@@ -1,10 +1,13 @@
 package com.laytonsmith.core.constructs;
 
+import com.laytonsmith.PureUtilities.Common.Annotations.AggressiveDeprecation;
 import com.laytonsmith.PureUtilities.Sizes;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.GenericTypeParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREReadOnlyException;
@@ -12,27 +15,31 @@ import com.laytonsmith.core.exceptions.CRE.CREUnsupportedOperationException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import com.laytonsmith.core.natives.interfaces.Sizeable;
 import com.laytonsmith.core.objects.ObjectModifier;
+
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
-import com.laytonsmith.core.natives.interfaces.Sizeable;
-import java.util.ArrayList;
-import java.util.EnumSet;
 
 /**
- *
+ *The
  *
  */
 @typeof("ms.lang.byte_array")
 public final class CByteArray extends CArray implements Sizeable, ArrayAccess {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get(CByteArray.class);
+	public static final CClassType TYPE = CClassType.get(CByteArray.class)
+			.withSuperParameters(GenericTypeParameters.nativeBuilder(CArray.TYPE).addParameter(CInt.TYPE, null))
+			.withSuperParameters(GenericTypeParameters.nativeBuilder(ArrayAccess.TYPE).addParameter(CInt.TYPE, null))
+			.done();
 
 	/**
 	 * Initial size of the ByteBuffer
@@ -50,10 +57,11 @@ public final class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	 *
 	 * @param b
 	 * @param t
+	 * @param env
 	 * @return
 	 */
-	public static CByteArray wrap(byte[] b, Target t) {
-		CByteArray ba = new CByteArray(t, 0);
+	public static CByteArray wrap(byte[] b, Target t, Environment env) {
+		CByteArray ba = new CByteArray(t, 0, env);
 		ba.data = ByteBuffer.wrap(b);
 		ba.maxValue = b.length;
 		return ba;
@@ -67,9 +75,10 @@ public final class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	 * Creates a new, empty CByteArray, with initial capacity 1024.
 	 *
 	 * @param t
+	 * @param env
 	 */
-	public CByteArray(Target t) {
-		this(t, INITIAL_SIZE);
+	public CByteArray(Target t, Environment env) {
+		this(t, INITIAL_SIZE, env);
 	}
 
 	/**
@@ -77,9 +86,12 @@ public final class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	 *
 	 * @param t
 	 * @param capacity
+	 * @param env
 	 */
-	public CByteArray(Target t, int capacity) {
-		super(t, INITIAL_SIZE);
+	public CByteArray(Target t, int capacity, Environment env) {
+		super(t, INITIAL_SIZE, GenericParameters.emptyBuilder(CArray.TYPE)
+				.addNativeParameter(CInt.TYPE, null)
+				.buildNative(), env);
 		//super("", ConstructType.BYTE_ARRAY, t);
 		data = ByteBuffer.allocate(capacity);
 	}
@@ -126,7 +138,7 @@ public final class CByteArray extends CArray implements Sizeable, ArrayAccess {
 			data.rewind();
 			try {
 				value = new String(data.array(), "UTF-8");
-			} catch (UnsupportedEncodingException ex) {
+			} catch(UnsupportedEncodingException ex) {
 				throw new Error(ex);
 			}
 			data.position(position);
@@ -372,10 +384,11 @@ public final class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	 *
 	 * @param size
 	 * @param pos
+	 * @param env
 	 * @return
 	 */
-	public CByteArray getBytes(int size, Integer pos) {
-		CByteArray ba = new CByteArray(this.getTarget(), 0);
+	public CByteArray getBytes(int size, Integer pos, Environment env) {
+		CByteArray ba = new CByteArray(this.getTarget(), 0, env);
 		byte[] d = new byte[size];
 		if(pos != null) {
 			data.position(pos);
@@ -389,9 +402,11 @@ public final class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	/**
 	 * Returns the current size of the byte array. This is not to be confused with the capacity.
 	 *
+	 * @param env
 	 * @return
 	 * @deprecated Use {@link #size(Environment)} instead.
 	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	@Override
 	public long size() {
@@ -462,6 +477,12 @@ public final class CByteArray extends CArray implements Sizeable, ArrayAccess {
 		return new String(array, encoding);
 	}
 
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
+	@Deprecated
+	public CArray asArray(Target t) {
+		return asArray(t, null);
+	}
+
 	/**
 	 * Returns a new read only CArray object with integers at each index, representing the underlying byte array. They
 	 * are not linked. This array is faster than normal CArrays, at the cost of being read only. Cloning the array is
@@ -469,10 +490,11 @@ public final class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	 * CArray is independent of this CByteArray (it is a new copy).
 	 *
 	 * @param t
+	 * @param env
 	 * @return
 	 */
-	public CArray asArray(Target t) {
-		return new CArrayByteBacking(asByteArrayCopy(), t);
+	public CArray asArray(Target t, Environment env) {
+		return new CArrayByteBacking(asByteArrayCopy(), t, env);
 	}
 
 	/**
@@ -494,6 +516,7 @@ public final class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	}
 
 	/** @deprecated Use {@link #slice(int, int, Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	@Override
 	public Mixed slice(int begin, int end, Target t) {
@@ -502,7 +525,7 @@ public final class CByteArray extends CArray implements Sizeable, ArrayAccess {
 
 	@Override
 	public Mixed slice(int begin, int end, Target t, Environment env) {
-		return getBytes(end - begin, begin);
+		return getBytes(end - begin, begin, env);
 	}
 
 	@Override
@@ -536,11 +559,12 @@ public final class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	}
 
 	@Override
-	public void push(Mixed c, Integer index, Target t) throws IllegalArgumentException, IndexOutOfBoundsException {
+	public void push(Mixed c, Integer index, Target t, Environment env) throws IllegalArgumentException, IndexOutOfBoundsException {
 		throw new CREUnsupportedOperationException("Modifying a byte array using array_push() is not supported.", t);
 	}
 
 	/** @deprecated Use {@link #keySet(Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	@Override
 	public Set<Mixed> keySet() {
@@ -558,6 +582,7 @@ public final class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	}
 
 	/** @deprecated Use {@link #set(Mixed, Mixed, Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	@Override
 	public void set(Mixed index, Mixed c, Target t) throws ConfigRuntimeException {
@@ -570,15 +595,16 @@ public final class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	}
 
 	@Override
-	protected CArray deepClone(CArray array, Target t, ArrayList<CArray[]> cloneRefs) {
+	protected CArray deepClone(CArray array, Target t, ArrayList<CArray[]> cloneRefs, Environment env) {
 		CByteArray that = (CByteArray) array;
 		byte[] original = that.data.array();
 		byte[] newArray = new byte[that.maxValue];
 		System.arraycopy(original, 0, newArray, 0, that.maxValue);
-		return CByteArray.wrap(newArray, t);
+		return CByteArray.wrap(newArray, t, env);
 	}
 
 	/** @deprecated Use {@link #get(Mixed, Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	@Override
 	public Mixed get(Mixed index, Target t) throws ConfigRuntimeException {
@@ -603,7 +629,7 @@ public final class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	}
 
 	@Override
-	public CArray indexesOf(Mixed value) {
+	public CArray indexesOf(Mixed value, Environment env) {
 		throw new CREUnsupportedOperationException("Getting indexes of a byte array is not supported.", value.getTarget());
 	}
 
@@ -657,6 +683,11 @@ public final class CByteArray extends CArray implements Sizeable, ArrayAccess {
 		return new CClassType[]{Sizeable.TYPE, ArrayAccess.TYPE};
 	}
 
+	@Override
+	public GenericParameters getGenericParameters() {
+		return null;
+	}
+
 	/**
 	 * This is a more efficient implementation of CArray for the backing byte arrays.
 	 */
@@ -664,12 +695,17 @@ public final class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	private static class CArrayByteBacking extends CArray {
 
 		@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-		public static final CClassType TYPE = CClassType.get(CArrayByteBacking.class);
+		public static final CClassType TYPE = CClassType.get(CArrayByteBacking.class)
+				.withSuperParameters(GenericTypeParameters.nativeBuilder(CArray.TYPE)
+					.addParameter(CInt.TYPE, null))
+				.done();
 		private final byte[] backing;
 		private String value = null;
 
-		public CArrayByteBacking(byte[] backing, Target t) {
-			super(t);
+		public CArrayByteBacking(byte[] backing, Target t, Environment env) {
+			super(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CInt.TYPE, null)
+					.buildNative(), env);
 			this.backing = backing;
 		}
 
@@ -679,11 +715,12 @@ public final class CByteArray extends CArray implements Sizeable, ArrayAccess {
 		}
 
 		@Override
-		public void push(Mixed c, Integer i, Target t) {
+		public void push(Mixed c, Integer i, Target t, Environment env) {
 			throw new CREByteArrayReadOnlyException("Arrays copied from ByteArrays are read only", t);
 		}
 
 		/** @deprecated Use {@link #set(Mixed, Mixed, Target, Environment)} instead. */
+		@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 		@Deprecated
 		@Override
 		public void set(Mixed index, Mixed c, Target t) {
@@ -696,6 +733,7 @@ public final class CByteArray extends CArray implements Sizeable, ArrayAccess {
 		}
 
 		/** @deprecated Use {@link #get(Mixed, Target, Environment)} instead. */
+		@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 		@Deprecated
 		@Override
 		public Mixed get(Mixed index, Target t) {
@@ -707,12 +745,13 @@ public final class CByteArray extends CArray implements Sizeable, ArrayAccess {
 			int i = ArgumentValidation.getInt32(index, t, env);
 			try {
 				return new CInt(backing[i], t);
-			} catch (ArrayIndexOutOfBoundsException e) {
+			} catch(ArrayIndexOutOfBoundsException e) {
 				throw new CRERangeException("Index out of range. Found " + i + ", but array length is only " + backing.length, t);
 			}
 		}
 
 		/** @deprecated Use {@link #size(Environment)} instead. */
+		@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 		@Deprecated
 		@Override
 		public long size() {
@@ -729,7 +768,7 @@ public final class CByteArray extends CArray implements Sizeable, ArrayAccess {
 			if(value == null) {
 				try {
 					value = new String(backing, "UTF-8");
-				} catch (UnsupportedEncodingException ex) {
+				} catch(UnsupportedEncodingException ex) {
 					throw new Error(ex);
 				}
 			}
@@ -783,6 +822,11 @@ public final class CByteArray extends CArray implements Sizeable, ArrayAccess {
 			return CByteArray.TYPE;
 		}
 
+		@Override
+		public GenericParameters getGenericParameters() {
+			return null;
+		}
+
 		@typeof("ms.lang.ByteArrayReadOnlyException")
 		public static class CREByteArrayReadOnlyException extends CREReadOnlyException {
 
@@ -825,6 +869,11 @@ public final class CByteArray extends CArray implements Sizeable, ArrayAccess {
 			@Override
 			public CClassType getContainingClass() {
 				return CArrayByteBacking.TYPE;
+			}
+
+			@Override
+			public GenericParameters getGenericParameters() {
+				return null;
 			}
 
 		}

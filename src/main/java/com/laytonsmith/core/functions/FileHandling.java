@@ -456,7 +456,7 @@ public class FileHandling {
 				InputStream stream = new GZIPInputStream(new FileInputStream(location));
 				byte[] fileBytes = StreamUtils.GetBytes(stream);
 				stream.close();
-				return CByteArray.wrap(fileBytes, t);
+				return CByteArray.wrap(fileBytes, t, env);
 			} catch (IOException ex) {
 				Static.getLogger().log(Level.SEVERE, "Could not read in file while attempting to find " + location.getAbsolutePath()
 						+ "\nFile " + (location.exists() ? "exists" : "does not exist"));
@@ -519,7 +519,7 @@ public class FileHandling {
 				InputStream stream = new BufferedInputStream(new FileInputStream(location));
 				byte[] fileBytes = StreamUtils.GetBytes(stream);
 				stream.close();
-				return CByteArray.wrap(fileBytes, t);
+				return CByteArray.wrap(fileBytes, t, env);
 			} catch (IOException ex) {
 				Static.getLogger().log(Level.SEVERE, "Could not read in file while attempting to find " + location.getAbsolutePath()
 						+ "\nFile " + (location.exists() ? "exists" : "does not exist"));

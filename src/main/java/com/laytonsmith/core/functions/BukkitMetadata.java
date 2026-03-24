@@ -119,14 +119,14 @@ public class BukkitMetadata {
 				MCPlugin plugin = Static.getPlugin(args[2], t);
 				for(MCMetadataValue value : metadata) {
 					if(value.getOwningPlugin().equals(plugin)) {
-						return Static.getMSObject(value.value(), t);
+						return Static.getMSObject(value.value(), t, env);
 					}
 				}
 				return CNull.NULL;
 			} else {
-				CArray values = CArray.GetAssociativeArray(t);
+				CArray values = CArray.GetAssociativeArray(t, null, env);
 				for(MCMetadataValue value : metadata) {
-					values.set(value.getOwningPlugin().getName(), Static.getMSObject(value.value(), t), t);
+					values.set(value.getOwningPlugin().getName(), Static.getMSObject(value.value(), t, env), t, env);
 				}
 				return values;
 			}
@@ -295,7 +295,7 @@ public class BukkitMetadata {
 	 */
 	private static MCMetadatable GetMetadatable(Mixed construct, Target t, Environment env) {
 		if(construct.isInstanceOf(CArray.TYPE, null, env)) {
-			return ObjectGenerator.GetGenerator().location(construct, null, t).getBlock();
+			return ObjectGenerator.GetGenerator().location(construct, null, t, env).getBlock();
 		} else if(construct instanceof CString) {
 			switch(construct.val().length()) {
 				case 32:

@@ -1,5 +1,6 @@
 package com.laytonsmith.core.natives.interfaces;
 
+import com.laytonsmith.PureUtilities.Common.Annotations.AggressiveDeprecation;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
@@ -26,16 +27,17 @@ public interface ArrayAccessSet extends Mixed {
 	 * @param t The code target.
 	 * @deprecated Use {@link #set(Mixed, Mixed, Target, Environment)} instead.
 	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public void set(Mixed index, Mixed value, Target t);
 
 	/**
-	 * Sets the value at the specified index in the object, with environment context.
+	 * Sets the value at the specified index in the object.
 	 *
 	 * @param index The zero-based index.
 	 * @param value The value to set.
 	 * @param t The code target.
 	 * @param env The environment.
 	 */
-	void set(Mixed index, Mixed value, Target t, Environment env);
+	public void set(Mixed index, Mixed value, Target t, Environment env);
 }

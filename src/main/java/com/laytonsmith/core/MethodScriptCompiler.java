@@ -36,7 +36,6 @@ import com.laytonsmith.core.constructs.CSymbol;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
-import com.laytonsmith.core.constructs.SourceType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.constructs.Token.TType;
@@ -1494,7 +1493,7 @@ public final class MethodScriptCompiler {
 						myIndex.addChild(tree.getChildAt(j));
 					}
 				} else {
-					myIndex = new ParseTree(new CSlice("0..-1", t.target), fileOptions, true);
+					myIndex = new ParseTree(new CSlice("0..-1", t.target, env), fileOptions, true);
 				}
 				tree.setChildren(tree.getChildren().subList(0, array));
 				ParseTree arrayGet = new ParseTree(new CFunction(array_get.NAME, t.target), fileOptions, true);
@@ -1677,7 +1676,7 @@ public final class MethodScriptCompiler {
 							value = next1.val() + next2.val();
 							i++;
 						}
-						slice = new CSlice(".." + value, t.getTarget());
+						slice = new CSlice(".." + value, t.getTarget(), env);
 						i++;
 						tree.addChild(new ParseTree(slice, fileOptions));
 						constructCount.peek().incrementAndGet();
@@ -1700,7 +1699,7 @@ public final class MethodScriptCompiler {
 								value = next2.val() + next3.val();
 								i++;
 							}
-							slice = new CSlice(".." + value, next1.getTarget());
+							slice = new CSlice(".." + value, next1.getTarget(), env);
 							if(t.type.isKeyword()) {
 								tree.addChild(new ParseTree(new CKeyword(t.val(), t.getTarget()), fileOptions));
 								constructCount.peek().incrementAndGet();
@@ -1713,7 +1712,7 @@ public final class MethodScriptCompiler {
 								modifier = prev1.val();
 								tree.removeChildAt(tree.getChildren().size() - 1);
 							}
-							slice = new CSlice(modifier + t.value + "..", t.target);
+							slice = new CSlice(modifier + t.value + "..", t.target, env);
 						} else {
 							//both are provided
 							String modifier1 = "";
@@ -1735,7 +1734,7 @@ public final class MethodScriptCompiler {
 								second = next3;
 								i++;
 							}
-							slice = new CSlice(modifier1 + first.value + ".." + modifier2 + second.value, t.target);
+							slice = new CSlice(modifier1 + first.value + ".." + modifier2 + second.value, t.target, env);
 						}
 						i++;
 						tree.addChild(new ParseTree(slice, fileOptions));
@@ -1752,19 +1751,15 @@ public final class MethodScriptCompiler {
 					throw new ConfigCompileException("Unexpected varargs token (\"...\")", t.target);
 				}
 				ParseTree previous = tree.getChildAt(tree.getChildren().size() - 1);
-				// TODO: Add LHSType as well, though this will not work as is with user objects. It may need
-				// to be moved into a node modifier or something.
-				if(!(previous.getData() instanceof SourceType)) {
+				if(!(previous.getData() instanceof SourceType st)) {
 					throw new ConfigCompileException("Unexpected varargs token (\"...\"). This can only be used with types.", t.target);
 				}
-				if(previous.getData() instanceof SourceType st) {
-					previous.setData(st.asVariadicType(null));
-				}
+				previous.setData(st.asLeftHandSideType().asVariadicType(t.getTarget(), env));
 				continue;
 			} else if(t.type == TType.LIT) {
 				Construct c;
 				try {
-					c = Static.resolveConstruct(t.val(), t.target, true);
+					c = Static.resolveConstruct(t.val(), t.target, true, env);
 				} catch (ConfigRuntimeException ex) {
 					throw new ConfigCompileException(ex);
 				}
@@ -1810,7 +1805,7 @@ public final class MethodScriptCompiler {
 				tree.addChild(new ParseTree(new IVariable(t.val(), t.target), fileOptions));
 				constructCount.peek().incrementAndGet();
 			} else if(t.type.equals(TType.UNKNOWN)) {
-				tree.addChild(new ParseTree(Static.resolveConstruct(t.val(), t.target), fileOptions));
+				tree.addChild(new ParseTree(Static.resolveConstruct(t.val(), t.target, env), fileOptions));
 				constructCount.peek().incrementAndGet();
 			} else if(t.type.isSymbol()) { //Logic and math symbols
 
@@ -2038,7 +2033,7 @@ public final class MethodScriptCompiler {
 			long breakCounter = 1;
 			if(tree.getChildren().size() == 1) {
 				try {
-					breakCounter = ArgumentValidation.getInt32(tree.getChildAt(0).getData(), tree.getChildAt(0).getTarget());
+					breakCounter = ArgumentValidation.getInt32(tree.getChildAt(0).getData(), tree.getChildAt(0).getTarget(), Environment.createEnvironment());
 				} catch (CRECastException | CRERangeException e) {
 					compilerErrors.add(new ConfigCompileException(e));
 					return;
@@ -2700,7 +2695,19 @@ public final class MethodScriptCompiler {
 									+ tree.getData().val(), tree.getData().getTarget()));
 							result = null;
 						} else {
-							result = Function.ExecuteFunction(func, tree.getData().getTarget(), env, constructs);
+							boolean stop = false;
+							for(Mixed r : constructs) {
+								if(r instanceof CSymbol) {
+									compilerErrors.add(new ConfigCompileException("Unexpected symbol", r.getTarget()));
+									stop = true;
+								}
+							}
+							if(!stop) {
+								// TODO: Provide generic parameters
+								result = func.exec(tree.getData().getTarget(), env, null, constructs);
+							} else {
+								result = null;
+							}
 						}
 					} else if(isValidNumArgs(func, constructs.length)) {
 						result = ((Optimizable) func).optimize(tree.getData().getTarget(), env, constructs);
@@ -2909,7 +2916,7 @@ public final class MethodScriptCompiler {
 						if(lhs == null && !keyword.allowEmptyValue()) {
 							throw new ConfigCompileException("Unexpected keyword " + keyword.getName(), node.getTarget());
 						}
-						ParseTree replacement = keyword.processLeftAssociative(node.getTarget(), node.getFileOptions(), lhs);
+						ParseTree replacement = keyword.processLeftAssociative(env, node.getTarget(), node.getFileOptions(), lhs);
 						children.set(i, replacement);
 						if(lhs != null) {
 							children.remove(i - 1);
@@ -2920,7 +2927,7 @@ public final class MethodScriptCompiler {
 						if(rhs == null && !keyword.allowEmptyValue()) {
 							throw new ConfigCompileException("Unexpected keyword " + keyword.getName(), node.getTarget());
 						}
-						ParseTree replacement = keyword.processRightAssociative(node.getTarget(), node.getFileOptions(), rhs);
+						ParseTree replacement = keyword.processRightAssociative(env, node.getTarget(), node.getFileOptions(), rhs);
 						children.set(i, replacement);
 						if(rhs != null) {
 							children.remove(i + 1);
@@ -2930,15 +2937,15 @@ public final class MethodScriptCompiler {
 						if(!keyword.allowEmptyValue() && (i == 0 || i + 1 >= children.size())) {
 							throw new ConfigCompileException("Unexpected keyword " + keyword.getName(), node.getTarget());
 						}
-						ParseTree replacement = keyword.processBothAssociative(node.getTarget(), node.getFileOptions(),
+						ParseTree replacement = keyword.processBothAssociative(env, node.getTarget(), node.getFileOptions(),
 								lhs, rhs);
 						children.set(i, replacement);
-						if(rhs != null) {
-							children.remove(i + 1);
-							i--;
-						}
 						if(lhs != null) {
 							children.remove(i - 1);
+						}
+						if(rhs != null) {
+							children.remove(i);
+							i--;
 						}
 					}
 				}

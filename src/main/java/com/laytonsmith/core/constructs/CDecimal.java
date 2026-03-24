@@ -3,9 +3,11 @@ package com.laytonsmith.core.constructs;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import java.math.BigDecimal;
+import com.laytonsmith.PureUtilities.Common.Annotations.AggressiveDeprecation;
 
 /**
  *
@@ -85,6 +87,7 @@ public class CDecimal extends CPrimitive implements Cloneable {
 	}
 
 	/** @deprecated Use {@link #getBooleanValue(Target, Environment)} instead. */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	@Override
 	public boolean getBooleanValue(Target t) {
@@ -94,6 +97,11 @@ public class CDecimal extends CPrimitive implements Cloneable {
 	@Override
 	public boolean getBooleanValue(Target t, Environment env) {
 		return val.compareTo(new BigDecimal(0)) != 0;
+	}
+
+	@Override
+	public GenericParameters getGenericParameters() {
+		return null;
 	}
 
 }

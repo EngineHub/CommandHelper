@@ -48,9 +48,10 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.compiler.FileOptions;
+import com.laytonsmith.core.compiler.signature.FunctionSignatures;
+import com.laytonsmith.core.compiler.signature.SignatureBuilder;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
-import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
@@ -108,7 +109,7 @@ public class Environment {
 		@Override
 		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, GenericParameters generics, Mixed... args)
 				throws CancelCommandException, ConfigRuntimeException {
-			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t, env);
 			MCBlock b = loc.getWorld().getBlockAt(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
 			if(b == null) {
 				throw new CRENotFoundException(
@@ -161,7 +162,7 @@ public class Environment {
 		@Override
 		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, GenericParameters generics, Mixed... args)
 				throws CancelCommandException, ConfigRuntimeException {
-			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t, env);
 			boolean physics = true;
 			if(args.length == 3) {
 				physics = ArgumentValidation.getBoolean(args[2], t, env);
@@ -218,7 +219,7 @@ public class Environment {
 		@Override
 		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, GenericParameters generics, Mixed... args)
 				throws CancelCommandException, ConfigRuntimeException {
-			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t, env);
 			MCBlock b = loc.getWorld().getBlockAt(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
 			if(b == null) {
 				throw new CRENotFoundException("Could not find the block in " + this.getName() + " (cmdline mode?)", t);
@@ -271,7 +272,7 @@ public class Environment {
 		@Override
 		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, GenericParameters generics, Mixed... args)
 				throws CancelCommandException, ConfigRuntimeException {
-			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t, env);
 			MCBlock b = loc.getWorld().getBlockAt(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
 			if(b == null) {
 				throw new CRENotFoundException("Could not find the block in " + this.getName() + " (cmdline mode?)", t);
@@ -333,7 +334,7 @@ public class Environment {
 		@Override
 		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, GenericParameters generics, Mixed... args)
 				throws CancelCommandException, ConfigRuntimeException {
-			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t, env);
 			MCBlock b = loc.getWorld().getBlockAt(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
 			if(b == null) {
 				throw new CRENotFoundException("Could not find the block in " + this.getName() + " (cmdline mode?)", t);
@@ -388,7 +389,7 @@ public class Environment {
 		@Override
 		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, GenericParameters generics, Mixed... args)
 				throws CancelCommandException, ConfigRuntimeException {
-			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t, env);
 			MCBlock b = loc.getWorld().getBlockAt(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
 			if(b == null) {
 				throw new CRENotFoundException("Could not find the block in " + this.getName() + " (cmdline mode?)", t);
@@ -493,7 +494,7 @@ public class Environment {
 			if(player != null) {
 				world = player.getWorld();
 			}
-			MCBlock block = ObjectGenerator.GetGenerator().location(args[0], world, t).getBlock();
+			MCBlock block = ObjectGenerator.GetGenerator().location(args[0], world, t, env).getBlock();
 			MCSign.Side side = Side.FRONT;
 			String line1 = "";
 			String line2 = "";
@@ -676,7 +677,7 @@ public class Environment {
 			if(sender instanceof MCPlayer) {
 				w = ((MCPlayer) sender).getWorld();
 			}
-			MCLocation l = ObjectGenerator.GetGenerator().location(args[0], w, t);
+			MCLocation l = ObjectGenerator.GetGenerator().location(args[0], w, t, env);
 			return CBoolean.get(l.getBlock().isSign());
 		}
 	}
@@ -727,7 +728,7 @@ public class Environment {
 			if(sender instanceof MCPlayer) {
 				w = ((MCPlayer) sender).getWorld();
 			}
-			MCBlock b = ObjectGenerator.GetGenerator().location(args[0], w, t).getBlock();
+			MCBlock b = ObjectGenerator.GetGenerator().location(args[0], w, t, env).getBlock();
 			if(b.isSign()) {
 				MCSignText text = b.getSign();
 				if(args.length == 2) {
@@ -796,7 +797,7 @@ public class Environment {
 			if(sender instanceof MCPlayer) {
 				w = ((MCPlayer) sender).getWorld();
 			}
-			MCBlock b = ObjectGenerator.GetGenerator().location(args[0], w, t).getBlock();
+			MCBlock b = ObjectGenerator.GetGenerator().location(args[0], w, t, env).getBlock();
 			if(b.isSign()) {
 				MCSign sign = b.getSign();
 				MCSignText text = sign;
@@ -981,7 +982,7 @@ public class Environment {
 		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, GenericParameters generics, Mixed... args)
 				throws ConfigRuntimeException {
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], p != null ? p.getWorld() : null, t);
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], p != null ? p.getWorld() : null, t, env);
 			MCBlock block = loc.getBlock();
 			MCBlockState blockState = block.getState();
 			if(!(blockState instanceof MCSkull skull)) {
@@ -1063,7 +1064,7 @@ public class Environment {
 		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, GenericParameters generics, Mixed... args)
 				throws ConfigRuntimeException {
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], p != null ? p.getWorld() : null, t);
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], p != null ? p.getWorld() : null, t, env);
 			MCBlockState blockState = loc.getBlock().getState();
 			if(!(blockState instanceof MCSkull skull)) {
 				throw new CRERangeException("The block at the specified location is not a skull", t);
@@ -1194,6 +1195,7 @@ public class Environment {
 			if(sender instanceof MCPlayer) {
 				w = ((MCPlayer) sender).getWorld();
 			}
+
 			MCBiomeType biomeType;
 			try {
 				biomeType = MCBiomeType.valueOf(args[args.length - 1].val());
@@ -1295,7 +1297,7 @@ public class Environment {
 			if(sender instanceof MCPlayer) {
 				w = ((MCPlayer) sender).getWorld();
 			}
-			MCLocation location = ObjectGenerator.GetGenerator().location(args[0], w, t);
+			MCLocation location = ObjectGenerator.GetGenerator().location(args[0], w, t, env);
 			MCBiomeType bt = location.getWorld().getBiome(location);
 			if(bt == null) {
 				throw new CRENotFoundException("Could not find the biome type (are you running in cmdline mode?)", t);
@@ -1357,7 +1359,7 @@ public class Environment {
 			}
 
 			if(args.length < 3 && args[0].isInstanceOf(CArray.TYPE, null, env)) {
-				MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
+				MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t, env);
 				x = loc.getBlockX();
 				z = loc.getBlockZ();
 				w = loc.getWorld();
@@ -1467,7 +1469,7 @@ public class Environment {
 			if(p != null) {
 				w = p.getWorld();
 			}
-			loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
+			loc = ObjectGenerator.GetGenerator().location(args[0], w, t, env);
 			w = loc.getWorld();
 
 			return CBoolean.get(w.explosion(loc, size, safe, fire, source));
@@ -1512,23 +1514,24 @@ public class Environment {
 				noteOffset = 1;
 				l = p.getLocation();
 			} else if(args.length == 4) {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 				instrumentOffset = 1;
 				noteOffset = 2;
-				l = ObjectGenerator.GetGenerator().location(args[3], p.getWorld(), t);
+				l = ObjectGenerator.GetGenerator().location(args[3], p.getWorld(), t, env);
 			} else {
-				if(!(args[1].isInstanceOf(CArray.TYPE, null, env)) && args[2].isInstanceOf(CArray.TYPE, null, env)) {
+				if(!(args[1].isInstanceOf(CArray.TYPE, null, env))
+						&& args[2].isInstanceOf(CArray.TYPE, null, env)) {
 					//Player provided, location not
 					instrumentOffset = 1;
 					noteOffset = 2;
-					p = Static.GetPlayer(args[0], t);
+					p = Static.GetPlayer(args[0], t, env);
 					l = p.getLocation();
 				} else {
 					//location provided, player not
 					instrumentOffset = 0;
 					noteOffset = 1;
 					Static.AssertPlayerNonNull(p, t);
-					l = ObjectGenerator.GetGenerator().location(args[2], p.getWorld(), t);
+					l = ObjectGenerator.GetGenerator().location(args[2], p.getWorld(), t, env);
 				}
 			}
 			try {
@@ -1673,7 +1676,7 @@ public class Environment {
 
 		@Override
 		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCLocation l = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			MCLocation l = ObjectGenerator.GetGenerator().location(args[0], null, t, env);
 			MCParticle p;
 			int count = 0;
 			double offsetX = 0.0;
@@ -1729,11 +1732,11 @@ public class Environment {
 							throw new CREIllegalArgumentException("Players argument must be a normal array.", t);
 						}
 						for(Mixed playerName : players.asList(env)) {
-							player = Static.GetPlayer(playerName, t);
+							player = Static.GetPlayer(playerName, t, env);
 							player.spawnParticle(l, p, count, offsetX, offsetY, offsetZ, speed, force, data);
 						}
 					} else {
-						player = Static.GetPlayer(args[2], t);
+						player = Static.GetPlayer(args[2], t, env);
 						player.spawnParticle(l, p, count, offsetX, offsetY, offsetZ, speed, force, data);
 					}
 				} else {
@@ -1804,20 +1807,17 @@ public class Environment {
 		}
 
 		@Override
-		public Mixed exec(Target t,
-				com.laytonsmith.core.environments.Environment env,
-				GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 
 			MCLocation loc = null;
 			MCEntity ent = null;
 			if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
-				loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+				loc = ObjectGenerator.GetGenerator().location(args[0], null, t, env);
 			} else if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_18_1)) {
 				ent = Static.getEntity(args[0], t);
 			} else {
 				throw new CREFormatException("Expecting a location array on versions prior to MC 1.18.1", t);
 			}
-
 			MCSound sound;
 			MCSoundCategory category = null;
 			float volume = 1;
@@ -1862,7 +1862,7 @@ public class Environment {
 				if(args[2].isInstanceOf(CArray.TYPE, null, env)) {
 					CArray players = (CArray) args[2];
 					for(String key : players.stringKeySet()) {
-						MCPlayer p = Static.GetPlayer(players.get(key, t, env), t);
+						MCPlayer p = Static.GetPlayer(players.get(key, t, env), t, env);
 						if(ent != null) {
 							p.playSound(ent, sound, category, volume, pitch, seed);
 						} else {
@@ -1982,7 +1982,7 @@ public class Environment {
 			MCLocation loc = null;
 			MCEntity ent = null;
 			if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
-				loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+				loc = ObjectGenerator.GetGenerator().location(args[0], null, t, env);
 			} else if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_3)) {
 				ent = Static.getEntity(args[0], t);
 			} else {
@@ -2027,10 +2027,10 @@ public class Environment {
 				java.util.List<MCPlayer> players = new java.util.ArrayList<>();
 				if(args[2].isInstanceOf(CArray.TYPE, null, env)) {
 					for(String key : ((CArray) args[2]).stringKeySet()) {
-						players.add(Static.GetPlayer(((CArray) args[2]).get(key, t, env), t));
+						players.add(Static.GetPlayer(((CArray) args[2]).get(key, t, env), t, env));
 					}
 				} else {
-					players.add(Static.GetPlayer(args[2], t));
+					players.add(Static.GetPlayer(args[2], t, env));
 				}
 
 				try {
@@ -2112,7 +2112,7 @@ public class Environment {
 		@Override
 		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			MCLocation l = ObjectGenerator.GetGenerator().location(args[0], p == null ? null : p.getWorld(), t);
+			MCLocation l = ObjectGenerator.GetGenerator().location(args[0], p == null ? null : p.getWorld(), t, env);
 			MCBlock b = l.getBlock();
 			if(args.length == 2) {
 				switch(args[1].val()) {
@@ -2130,7 +2130,8 @@ public class Environment {
 						throw new CREFormatException("Invalid argument for block info", t);
 				}
 			}
-			CArray array = CArray.GetAssociativeArray(t, null, env);
+			CArray array = CArray.GetAssociativeArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+					.addNativeParameter(CBoolean.TYPE, null).buildNative(), env);
 			array.set("solid", CBoolean.get(b.isSolid()), t, env);
 			array.set("flammable", CBoolean.get(b.isFlammable()), t, env);
 			array.set("transparent", CBoolean.get(b.isTransparent()), t, env);
@@ -2151,7 +2152,7 @@ public class Environment {
 
 		@Override
 		public String docs() {
-			return "mixed {locationArray, [index]} Returns an associative array with various information about a block."
+			return "mixed {locationArray, [index]} Returns an associative array<boolean> with various information about a block."
 					+ " If an index is specified, it will return a boolean. ---- The accuracy of these values will"
 					+ " depend on the server implementation."
 					+ "<ul>"
@@ -2216,7 +2217,7 @@ public class Environment {
 			if(pl != null) {
 				w = pl.getWorld();
 			}
-			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t, env);
 			return new CInt(loc.getBlock().getLightLevel(), t);
 		}
 	}
@@ -2269,7 +2270,7 @@ public class Environment {
 			if(pl != null) {
 				w = pl.getWorld();
 			}
-			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t, env);
 			return new CInt(loc.getBlock().getLightFromSky(), t);
 		}
 	}
@@ -2322,7 +2323,7 @@ public class Environment {
 			if(pl != null) {
 				w = pl.getWorld();
 			}
-			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t, env);
 			return new CInt(loc.getBlock().getLightFromBlocks(), t);
 		}
 	}
@@ -2377,7 +2378,7 @@ public class Environment {
 			if(pl != null) {
 				w = pl.getWorld();
 			}
-			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t, env);
 			CheckMode mode;
 			if(args.length == 2) {
 				try {
@@ -2465,7 +2466,7 @@ public class Environment {
 			if(pl != null) {
 				w = pl.getWorld();
 			}
-			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t, env);
 			return new CInt(loc.getBlock().getBlockPower(), t);
 		}
 	}
@@ -2524,7 +2525,7 @@ public class Environment {
 				}
 			}
 			MCPlayer psender = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			MCLocation location = ObjectGenerator.GetGenerator().location(args[0], (psender != null ? psender.getWorld() : null), t);
+			MCLocation location = ObjectGenerator.GetGenerator().location(args[0], (psender != null ? psender.getWorld() : null), t, env);
 			return CBoolean.get(location.getWorld().generateTree(location, treeType));
 		}
 	}
@@ -2572,7 +2573,7 @@ public class Environment {
 		@Override
 		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, GenericParameters generics, Mixed... args)
 				throws ConfigRuntimeException {
-			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t, env);
 			return CBoolean.get(loc.getBlock().getState().isLockable());
 		}
 	}
@@ -2622,7 +2623,7 @@ public class Environment {
 		@Override
 		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, GenericParameters generics, Mixed... args)
 				throws ConfigRuntimeException {
-			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t, env);
 			MCBlockState block = loc.getBlock().getState();
 			if(!block.isLockable()) {
 				throw new CREIllegalArgumentException("Block is not lockable.", t);
@@ -2676,7 +2677,7 @@ public class Environment {
 		@Override
 		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, GenericParameters generics, Mixed... args)
 				throws ConfigRuntimeException {
-			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t, env);
 			MCBlockState block = loc.getBlock().getState();
 			if(!block.isLockable()) {
 				throw new CREIllegalArgumentException("Block is not lockable.", t);
@@ -2731,7 +2732,7 @@ public class Environment {
 		@Override
 		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, GenericParameters generics, Mixed... args)
 				throws ConfigRuntimeException {
-			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t, env);
 			MCBlockState block = loc.getBlock().getState();
 			if(!block.isLockable()) {
 				throw new CREIllegalArgumentException("Block is not lockable.", t);
@@ -2782,7 +2783,7 @@ public class Environment {
 		@Override
 		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, GenericParameters generics, Mixed... args)
 				throws ConfigRuntimeException {
-			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t, env);
 			if(loc.getBlock().isCommandBlock()) {
 				MCCommandBlock cb = loc.getBlock().getCommandBlock();
 				return new CString(cb.getCommand(), t);
@@ -2842,7 +2843,7 @@ public class Environment {
 				cmd = args[1].val();
 			}
 
-			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t, env);
 			if(loc.getBlock().isCommandBlock()) {
 				MCCommandBlock cb = loc.getBlock().getCommandBlock();
 				cb.setCommand(cmd);
@@ -2894,7 +2895,7 @@ public class Environment {
 		@Override
 		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, GenericParameters generics, Mixed... args)
 				throws ConfigRuntimeException {
-			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t, env);
 			if(loc.getBlock().isCommandBlock()) {
 				MCCommandBlock cb = loc.getBlock().getCommandBlock();
 				return new CString(cb.getName(), t);
@@ -2944,8 +2945,7 @@ public class Environment {
 		}
 
 		@Override
-		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, GenericParameters generics, Mixed... args
-		) throws ConfigRuntimeException {
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String name = null;
 			if(args.length == 2 && !(args[1] instanceof CNull)) {
 				if(!(args[1].isInstanceOf(CString.TYPE, null, env))) {
@@ -2954,7 +2954,7 @@ public class Environment {
 				name = args[1].val();
 			}
 
-			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t, env);
 			if(loc.getBlock().isCommandBlock()) {
 				MCCommandBlock cb = loc.getBlock().getCommandBlock();
 				cb.setName(name);
@@ -2985,10 +2985,10 @@ public class Environment {
 
 		@Override
 		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t, env);
 			MCBlock b = loc.getWorld().getBlockAt(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
 			if(b.getState() instanceof MCBanner banner) {
-				CArray patterns = new CArray(t, banner.numberOfPatterns());
+				CArray patterns = new CArray(t, banner.numberOfPatterns(), null, env);
 				for(MCPattern p : banner.getPatterns()) {
 					CArray pattern = CArray.GetAssociativeArray(t, null, env);
 					pattern.set("color", p.getColor().name(), env);
@@ -3012,11 +3012,11 @@ public class Environment {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
-				com.laytonsmith.core.environments.Environment env, Set<ConfigCompileException> exceptions) {
-			return CArray.TYPE;
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CArray.TYPE, "The banner patterns.")
+					.param(CArray.TYPE, "location", "The location of the banner.")
+					.build();
 		}
-
 
 		@Override
 		public String docs() {
@@ -3052,13 +3052,16 @@ public class Environment {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets, com.laytonsmith.core.environments.Environment env, Set<ConfigCompileException> exceptions) {
-			return CVoid.TYPE;
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CVoid.TYPE)
+					.param(CArray.TYPE, "location", "The location of the banner.")
+					.param(CArray.TYPE, "patterns", "The patterns to apply.")
+					.build();
 		}
 
 		@Override
 		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t, env);
 			MCBlock b = loc.getWorld().getBlockAt(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
 			CArray patterns = ArgumentValidation.getArray(args[1], t, env);
 			if(b.getState() instanceof MCBanner banner) {
@@ -3203,7 +3206,7 @@ public class Environment {
 		@Override
 		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, GenericParameters generics, Mixed... args)
 				throws ConfigRuntimeException {
-			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t, env);
 			return CBoolean.get(loc.getBlock().applyBoneMeal());
 		}
 
@@ -3399,7 +3402,7 @@ public class Environment {
 		@Override
 		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, GenericParameters generics, Mixed... args)
 				throws ConfigRuntimeException {
-			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t, env);
 			MCBlockState bs = loc.getBlock().getState();
 			if(!(bs instanceof MCEndGateway endGateway)) {
 				throw new CREFormatException("The block at the specified location is not an end gateway", t);
@@ -3407,7 +3410,7 @@ public class Environment {
 			if(args[1] instanceof CNull) {
 				endGateway.setExitLocation(null);
 			} else {
-				MCLocation exit = ObjectGenerator.GetGenerator().location(args[1], loc.getWorld(), t);
+				MCLocation exit = ObjectGenerator.GetGenerator().location(args[1], loc.getWorld(), t, env);
 				try {
 					endGateway.setExitLocation(exit);
 				} catch (IllegalArgumentException ex) {
@@ -3467,7 +3470,7 @@ public class Environment {
 		@Override
 		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, GenericParameters generics, Mixed... args)
 				throws ConfigRuntimeException {
-			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t, env);
 			MCBlockState bs = loc.getBlock().getState();
 			if(!(bs instanceof MCEndGateway endGateway)) {
 				throw new CREFormatException("The block at the specified location is not an end gateway", t);

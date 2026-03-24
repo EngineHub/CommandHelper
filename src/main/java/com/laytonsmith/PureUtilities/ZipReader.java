@@ -388,6 +388,7 @@ public class ZipReader {
 	 */
 	public File[] listFiles() throws IOException {
 		if(!isZipped) {
+			assert file.listFiles() != null;
 			return file.listFiles();
 		} else {
 			initList();
@@ -405,7 +406,9 @@ public class ZipReader {
 					}
 				}
 			}
-			return ArrayUtils.asArray(File.class, files);
+			File[] ret = ArrayUtils.asArray(File.class, files);
+			assert ret != null;
+			return ret;
 		}
 	}
 

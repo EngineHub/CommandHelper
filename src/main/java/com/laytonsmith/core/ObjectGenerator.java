@@ -107,6 +107,7 @@ import com.laytonsmith.core.exceptions.CRE.CREInvalidWorldException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import com.laytonsmith.PureUtilities.Common.Annotations.AggressiveDeprecation;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
 
 import java.util.ArrayList;
@@ -190,6 +191,7 @@ public class ObjectGenerator {
 	 * @return
 	 * @deprecated Use {@link #location(Mixed, MCWorld, Target, Environment)} instead.
 	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public MCLocation location(Mixed c, MCWorld w, Target t) {
 		return location(c, w, t, null);
@@ -306,6 +308,7 @@ public class ObjectGenerator {
 	 * @return An abstract item stack
 	 * @deprecated Use {@link #item(Mixed, Target, Environment)} instead.
 	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public MCItemStack item(Mixed i, Target t) {
 		return item(i, t, false, null);
@@ -322,6 +325,7 @@ public class ObjectGenerator {
 	 * @return
 	 * @deprecated Use {@link #item(Mixed, Target, boolean, Environment)} instead.
 	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public MCItemStack item(Mixed i, Target t, boolean legacy) {
 		return item(i, t, legacy, null);
@@ -1015,6 +1019,7 @@ public class ObjectGenerator {
 	 * @throws ConfigRuntimeException
 	 * @deprecated Use {@link #itemMeta(Mixed, MCMaterial, Target, Environment)} instead.
 	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public MCItemMeta itemMeta(Mixed c, MCMaterial mat, Target t) throws ConfigRuntimeException {
 		return itemMeta(c, mat, t, null);
@@ -1961,7 +1966,7 @@ public class ObjectGenerator {
 
 	public CArray exception(ConfigRuntimeException e, Environment env, Target t) {
 		AbstractCREException ex = AbstractCREException.getAbstractCREException(e);
-		return ex.getExceptionObject();
+		return ex.getExceptionObject(env);
 	}
 
 	public AbstractCREException exception(CArray exception, Target t, Environment env) throws ClassNotFoundException {
@@ -1993,6 +1998,7 @@ public class ObjectGenerator {
 	 * @return
 	 * @deprecated Use {@link #color(CArray, Target, Environment)} instead.
 	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public MCColor color(CArray color, Target t) {
 		return color(color, t, null);
@@ -2090,7 +2096,8 @@ public class ObjectGenerator {
 	 * @return the vector array
 	 */
 	public CArray vector(Vector3D vector, Target t) {
-		CArray ca = CArray.GetAssociativeArray(t, null, null);
+		CArray ca = CArray.GetAssociativeArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+				.addNativeParameter(CDouble.TYPE, null).buildNative(), null);
 		//Integral keys first
 		ca.set(0, new CDouble(vector.X(), t), t, null);
 		ca.set(1, new CDouble(vector.Y(), t), t, null);
@@ -2119,6 +2126,7 @@ public class ObjectGenerator {
 	 * @return the Vector
 	 * @deprecated Use {@link #vector(Mixed, Target, Environment)} instead.
 	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public Vector3D vector(Mixed c, Target t) {
 		return vector(Vector3D.ZERO, c, t, null);
@@ -2151,6 +2159,7 @@ public class ObjectGenerator {
 	 * @param t the target
 	 * @deprecated Use {@link #vector(Vector3D, Mixed, Target, Environment)} instead.
 	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public Vector3D vector(Vector3D v, Mixed c, Target t) {
 		return vector(v, c, t, null);
@@ -2227,6 +2236,7 @@ public class ObjectGenerator {
 	 * @return
 	 * @deprecated Use {@link #enchants(CArray, Target, Environment)} instead.
 	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public Map<MCEnchantment, Integer> enchants(CArray enchantArray, Target t) {
 		return enchants(enchantArray, t, null);
@@ -2305,6 +2315,7 @@ public class ObjectGenerator {
 	 * @return
 	 * @deprecated Use {@link #attributeModifier(CArray, Target, Environment)} instead.
 	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public MCAttributeModifier attributeModifier(CArray m, Target t) {
 		return attributeModifier(m, t, null);
@@ -2422,6 +2433,7 @@ public class ObjectGenerator {
 	 * @return
 	 * @deprecated Use {@link #potions(CArray, Target, Environment)} instead.
 	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public List<MCLivingEntity.MCEffect> potions(CArray ea, Target t) {
 		return potions(ea, t, null);
@@ -2491,6 +2503,7 @@ public class ObjectGenerator {
 	 * @return
 	 * @deprecated Use {@link #potionData(CArray, Target, Environment)} instead.
 	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public MCPotionData potionData(CArray pd, Target t) {
 		return potionData(pd, t, null);
@@ -2536,6 +2549,7 @@ public class ObjectGenerator {
 	 * @return
 	 * @deprecated Use {@link #legacyPotionData(CArray, Target, Environment)} instead.
 	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public MCPotionType legacyPotionData(CArray potionArray, Target t) {
 		return legacyPotionData(potionArray, t, null);
@@ -2613,6 +2627,7 @@ public class ObjectGenerator {
 	 * @return
 	 * @deprecated Use {@link #fireworkEffect(CArray, Target, Environment)} instead.
 	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public MCFireworkEffect fireworkEffect(CArray fe, Target t) {
 		return fireworkEffect(fe, t, null);
@@ -2747,7 +2762,8 @@ public class ObjectGenerator {
 			if(base.length == 1) {
 				ret.set("base", new CString(base[0].getName(), t), t, null);
 			} else {
-				CArray mats = new CArray(t);
+				CArray mats = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+						.addNativeParameter(CString.TYPE, null).buildNative(), null);
 				for(MCMaterial mat : base) {
 					mats.push(new CString(mat.getName(), t), t, null);
 				}
@@ -2757,7 +2773,8 @@ public class ObjectGenerator {
 			if(additions.length == 1) {
 				ret.set("addition", new CString(additions[0].getName(), t), t, null);
 			} else {
-				CArray mats = new CArray(t);
+				CArray mats = new CArray(t, GenericParameters.emptyBuilder(CArray.TYPE)
+						.addNativeParameter(CString.TYPE, null).buildNative(), null);
 				for(MCMaterial mat : additions) {
 					mats.push(new CString(mat.getName(), t), t, null);
 				}
@@ -2773,6 +2790,7 @@ public class ObjectGenerator {
 	 * @return
 	 * @deprecated Use {@link #recipe(Mixed, Target, Environment)} instead.
 	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public MCRecipe recipe(Mixed c, Target t) {
 		return recipe(c, t, null);
@@ -3030,6 +3048,7 @@ public class ObjectGenerator {
 	 * @return
 	 * @deprecated Use {@link #blockData(CArray, Target, Environment)} instead.
 	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public MCBlockData blockData(CArray ca, Target t) {
 		return blockData(ca, null, t, null);
@@ -3046,6 +3065,7 @@ public class ObjectGenerator {
 	 * @return
 	 * @deprecated Use {@link #blockData(CArray, MCMaterial, Target, Environment)} instead.
 	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public MCBlockData blockData(CArray ca, MCMaterial blockType, Target t) {
 		return blockData(ca, blockType, t, null);
@@ -3131,6 +3151,7 @@ public class ObjectGenerator {
 	 * @return
 	 * @deprecated Use {@link #particleData(MCParticle, MCLocation, CArray, Target, Environment)} instead.
 	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public Object particleData(MCParticle particleType, MCLocation l, CArray pa, Target t) {
 		return particleData(particleType, l, pa, t, null);
@@ -3314,6 +3335,7 @@ public class ObjectGenerator {
 	 * @return
 	 * @deprecated Use {@link #metadataValue(Mixed, MCPlugin, Environment)} instead.
 	 */
+	@AggressiveDeprecation(deprecationDate = "2022-04-06", removalVersion = "3.3.7", deprecationVersion = "3.3.6")
 	@Deprecated
 	public MCMetadataValue metadataValue(Mixed value, MCPlugin plugin) {
 		return metadataValue(value, plugin, null);

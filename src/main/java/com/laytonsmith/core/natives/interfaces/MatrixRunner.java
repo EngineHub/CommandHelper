@@ -12,6 +12,11 @@ import com.laytonsmith.core.constructs.generics.GenericParameters;
 @InterfaceRunnerFor(Matrix.class)
 public class MatrixRunner extends AbstractMixedInterfaceRunner {
 	@Override
+	public GenericParameters getGenericParameters() {
+		return null;
+	}
+
+	@Override
 	public String docs() {
 		return "A matrix is a multidimensional collection of values, similar to a multidimensional array."
 				+ " Unlike a multidimensional array, a matrix requires the values in each dimension to have"
@@ -34,10 +39,5 @@ public class MatrixRunner extends AbstractMixedInterfaceRunner {
 	@Override
 	public CClassType[] getInterfaces() {
 		return CClassType.EMPTY_CLASS_ARRAY;
-	}
-
-	@Override
-	public GenericParameters getGenericParameters() {
-		return null;
 	}
 }
