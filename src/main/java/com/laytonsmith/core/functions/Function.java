@@ -3,7 +3,6 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ParseTree;
-import com.laytonsmith.core.Script;
 import com.laytonsmith.core.compiler.SelfStatement;
 import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
@@ -72,10 +71,9 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 	 * function can provide a more specific error message for the user. If the function was canceled due to a fatal
 	 * error in the syntax of the user input or some similar situation, it should throw a ConfigRuntimeException. All
 	 * parameters sent to the function have already been resolved into an atomic value, so functions do not have to
-	 * worry about resolving parameters. There is an explicit check made before calling exec to ensure that Construct
-	 * ... args will only be one of the atomic Constructs. If a code tree is needed instead of a resolved construct, the
-	 * function should indicate so, and {@code execs} will be called instead. If exec is needed, execs should return
-	 * CVoid.
+	 * worry about resolving parameters. There is an explicit check made before calling exec to ensure that Mixed
+	 * ... args will only be one of the atomic objects. If a code tree is needed instead of a resolved construct, the
+	 * function should implement {@link FlowFunction} instead.
 	 *
 	 * @param t The location of this function call in the code, used for correct error messages
 	 * @param env The current code environment
@@ -188,31 +186,6 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 			Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> exceptions);
 
 	/**
-	 * If a function needs a code tree instead of a resolved construct, it should return true here. Most functions will
-	 * return false for this value.
-	 *
-	 * @return
-	 */
-	public boolean useSpecialExec();
-
-	/**
-	 * If useSpecialExec indicates it needs the code tree instead of the resolved constructs, this gets called instead
-	 * of exec.If execs is needed, exec should return CVoid.
-	 *
-	 * @param t The code target currently running. Exceptions generated should use this value where possible.
-	 * @param env The environment
-	 * @param parent The parent script, which can be used to evaluate nodes.
-	 * @param generics The generic type parameter(s) passed to the function. For instance, in the code
-	 * {@code array<string>("asdf", "fdsa")} this will contain the reference to the {@code string} type. This will have
-	 * been validated beforehand to be within the bounds of the function signature. If no type parameters were passed
-	 * in, or if the diamond operator was used, this will contain the default type values filled in. However, this
-	 * parameter MAY be null, which indicates the same thing, and so all functions must accept null values here.
-	 * @param nodes the raw parse tree nodes, which should be evaluated by this function.
-	 * @return The resulting value after function execution.
-	 */
-	public Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes);
-
-	/**
 	 * Returns an array of example scripts, which are used for documentation purposes.
 	 * <p>
 	 * If there are no examples, null or empty array should be returned.
@@ -238,7 +211,7 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 	public LogLevel profileAt();
 
 	/**
-	 * Returns the message to use when this function gets profiled, if useSpecialExec returns false.
+	 * Returns the message to use when this function gets profiled with resolved args.
 	 *
 	 * @param env
 	 * @param args
@@ -247,7 +220,7 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 	public String profileMessage(Environment env, Mixed... args);
 
 	/**
-	 * Returns the message to use when this function gets profiled, if useSpecialExec returns true.
+	 * Returns the message to use when this function gets profiled with unresolved parse tree args.
 	 *
 	 * @param args
 	 * @return

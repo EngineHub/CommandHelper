@@ -233,13 +233,13 @@ public class MathTest extends AbstractIntegrationTest {
 
 	@Test
 	public void testChained() throws Exception {
-		assertEquals("8", SRun("2 + 2 + 2 + 2", null));
-		assertEquals("20", SRun("2 * 2 + 2 * 2 * 2 + 2 * 2 * 2", null));
+		assertEquals("8", SRun("dyn(2) + dyn(2) + dyn(2) + dyn(2)", null));
+		assertEquals("20", SRun("dyn(2) * dyn(2) + dyn(2) * dyn(2) * dyn(2) + dyn(2) * dyn(2) * dyn(2)", null));
 	}
 
 	@Test
 	public void testRound() throws Exception {
-		assertEquals("4.0", SRun("round(4.4)", null));
+		assertEquals("4.0", SRun("round(dyn(4.4))", null));
 		assertEquals("5.0", SRun("round(4.5)", null));
 		assertEquals("4.6", SRun("round(4.55, 1)", null));
 	}

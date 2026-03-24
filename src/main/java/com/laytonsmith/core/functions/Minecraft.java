@@ -398,9 +398,8 @@ public class Minecraft {
 			if(children.size() < 1) {
 				return null;
 			}
-			if(children.get(0).getData().isInstanceOf(CString.TYPE, null, env)
-					&& children.get(0).getData().val().contains(":")
-					|| ArgumentValidation.isNumber(children.get(0).getData(), env)) {
+			if(children.get(0).isConst() && (children.get(0).getData().isInstanceOf(CString.TYPE, null, env) && children.get(0).getData().val().contains(":")
+					|| ArgumentValidation.isNumber(children.get(0).getData(), env))) {
 				env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
 						new CompilerWarning("Numeric ids are deprecated in " + getName(), t, null));
 			}
@@ -1272,7 +1271,7 @@ public class Minecraft {
 			if(children.size() < 1) {
 				return null;
 			}
-			if(ArgumentValidation.isNumber(children.get(0).getData(), env)) {
+			if(children.get(0).isConst() && ArgumentValidation.isNumber(children.get(0).getData(), env)) {
 				env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
 						new CompilerWarning("Numeric ids are deprecated in " + getName() + ".", t, null));
 			}

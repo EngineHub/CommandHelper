@@ -44,7 +44,6 @@ import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.natives.interfaces.Callable;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.profiler.ProfilePoint;
@@ -312,8 +311,6 @@ public class Scheduling {
 					ConfigRuntimeException.HandleUncaughtException(e, env);
 				} catch (CancelCommandException e) {
 					//Ok
-				} catch (ProgramFlowManipulationException e) {
-					ConfigRuntimeException.DoWarning("Using a program flow manipulation construct improperly! " + e.getClass().getSimpleName());
 				}
 			}));
 			return new CInt(ret.get(), t);
@@ -418,8 +415,6 @@ public class Scheduling {
 					ConfigRuntimeException.HandleUncaughtException(e, c.getEnv());
 				} catch (CancelCommandException e) {
 					//Ok
-				} catch (ProgramFlowManipulationException e) {
-					ConfigRuntimeException.DoWarning("Using a program flow manipulation construct improperly! " + e.getClass().getSimpleName());
 				} finally {
 					// If the task was somehow killed in the closure, it'll already be finished
 					if(!task.getState().isFinalized()) {

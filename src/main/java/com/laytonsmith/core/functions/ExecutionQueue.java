@@ -16,8 +16,8 @@ import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
+import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
@@ -82,7 +82,7 @@ public class ExecutionQueue {
 									c.executeCallable();
 								} catch (ConfigRuntimeException ex) {
 									ConfigRuntimeException.HandleUncaughtException(ex, env);
-								} catch (ProgramFlowManipulationException ex) {
+								} catch (CancelCommandException ex) {
 									// Ignored
 								}
 								return null;
@@ -165,7 +165,7 @@ public class ExecutionQueue {
 									c.executeCallable();
 								} catch (ConfigRuntimeException ex) {
 									ConfigRuntimeException.HandleUncaughtException(ex, env);
-								} catch (ProgramFlowManipulationException ex) {
+								} catch (CancelCommandException ex) {
 									// Ignored
 								}
 								return null;

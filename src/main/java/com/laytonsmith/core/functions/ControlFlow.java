@@ -9,12 +9,18 @@ import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.CallbackYield;
+import com.laytonsmith.core.FlowFunction;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Procedure;
-import com.laytonsmith.core.Script;
+import com.laytonsmith.core.StepAction;
+import com.laytonsmith.core.StepAction.Complete;
+import com.laytonsmith.core.StepAction.Evaluate;
+import com.laytonsmith.core.StepAction.FlowControl;
+import com.laytonsmith.core.StepAction.StepResult;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.BranchStatement;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
@@ -50,6 +56,7 @@ import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.LeftHandSideType;
+import com.laytonsmith.core.constructs.ProcedureUsage;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.generics.ConstraintLocation;
 import com.laytonsmith.core.constructs.generics.Constraints;
@@ -77,9 +84,7 @@ import com.laytonsmith.core.functions.StringHandling.sconcat;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.exceptions.FunctionReturnException;
-import com.laytonsmith.core.exceptions.LoopBreakException;
-import com.laytonsmith.core.exceptions.LoopContinueException;
+
 import com.laytonsmith.core.natives.interfaces.Booleanish;
 import com.laytonsmith.core.natives.interfaces.Iterator;
 import com.laytonsmith.core.natives.interfaces.Mixed;
@@ -101,9 +106,115 @@ public class ControlFlow {
 		return "This class provides various functions to manage control flow.";
 	}
 
+	// --- FlowControlAction types ---
+	// These are the first-class representations of control flow in the iterative interpreter.
+	// They replace the old ProgramFlowManipulationException hierarchy.
+
+	/**
+	 * Produced by {@code break()}. Propagates up to the nearest loop flow function.
+	 */
+	public static class BreakAction implements StepAction.FlowControlAction {
+		private final int levels;
+		private final Target target;
+
+		public BreakAction(int levels, Target target) {
+			this.levels = levels;
+			this.target = target;
+		}
+
+		public int getLevels() {
+			return levels;
+		}
+
+		@Override
+		public Target getTarget() {
+			return target;
+		}
+	}
+
+	/**
+	 * Produced by {@code continue()}. Propagates up to the nearest loop flow function.
+	 */
+	public static class ContinueAction implements StepAction.FlowControlAction {
+		private final int levels;
+		private final Target target;
+
+		public ContinueAction(int levels, Target target) {
+			this.levels = levels;
+			this.target = target;
+		}
+
+		public int getLevels() {
+			return levels;
+		}
+
+		@Override
+		public Target getTarget() {
+			return target;
+		}
+	}
+
+	/**
+	 * Produced by {@code return()}. Propagates up to the nearest procedure/closure boundary.
+	 */
+	public static class ReturnAction implements StepAction.FlowControlAction {
+		private final Mixed value;
+		private final Target target;
+
+		public ReturnAction(Mixed value, Target target) {
+			this.value = value;
+			this.target = target;
+		}
+
+		public Mixed getValue() {
+			return value;
+		}
+
+		@Override
+		public Target getTarget() {
+			return target;
+		}
+	}
+
 	@api
 	@ConditionalSelfStatement
-	public static class _if extends AbstractFunction implements Optimizable, BranchStatement, VariableScope {
+	public static class _if extends AbstractFunction implements FlowFunction<_if.IfState>, Optimizable, BranchStatement, VariableScope {
+
+		static class IfState {
+			ParseTree[] children;
+			boolean conditionEvaluated;
+
+			IfState(ParseTree[] children) {
+				this.children = children;
+			}
+
+			@Override
+			public String toString() {
+				return conditionEvaluated ? "branch" : "condition";
+			}
+		}
+
+		@Override
+		public StepResult<IfState> begin(Target t, ParseTree[] children, Environment env) {
+			IfState state = new IfState(children);
+			return new StepResult<>(new Evaluate(children[0]), state);
+		}
+
+		@Override
+		public StepResult<IfState> childCompleted(Target t, IfState state,
+				Mixed result, Environment env) {
+			if(!state.conditionEvaluated) {
+				state.conditionEvaluated = true;
+				if(ArgumentValidation.getBooleanish(result, t, env)) {
+					return new StepResult<>(new Evaluate(state.children[1]), state);
+				} else if(state.children.length == 3) {
+					return new StepResult<>(new Evaluate(state.children[2]), state);
+				} else {
+					return new StepResult<>(new Complete(CVoid.VOID), state);
+				}
+			}
+			return new StepResult<>(new Complete(result), state);
+		}
 
 		public static final String NAME = "if";
 
@@ -115,20 +226,6 @@ public class ControlFlow {
 		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{Integer.MAX_VALUE};
-		}
-
-		@Override
-		public Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
-			ParseTree condition = nodes[0];
-			if(ArgumentValidation.getBooleanish(parent.seval(condition, env), t, env)) {
-				ParseTree ifCode = nodes[1];
-				return parent.seval(ifCode, env);
-			} else if(nodes.length == 3) {
-				ParseTree elseCode = nodes[2];
-				return parent.seval(elseCode, env);
-			} else {
-				return CVoid.VOID;
-			}
 		}
 
 		@Override
@@ -224,11 +321,6 @@ public class ControlFlow {
 		@Override
 		public Boolean runAsync() {
 			return false;
-		}
-
-		@Override
-		public boolean useSpecialExec() {
-			return true;
 		}
 
 		@Override
@@ -345,7 +437,55 @@ public class ControlFlow {
 
 	@api(environments = {GlobalEnv.class})
 	@ConditionalSelfStatement
-	public static class ifelse extends AbstractFunction implements Optimizable, BranchStatement, VariableScope {
+	public static class ifelse extends AbstractFunction implements FlowFunction<ifelse.IfElseState>, Optimizable, BranchStatement, VariableScope {
+
+		static class IfElseState {
+			ParseTree[] children;
+			int condIndex; // index of current condition being tested (even indices)
+			boolean evaluatingBranch;
+
+			IfElseState(ParseTree[] children) {
+				this.children = children;
+			}
+
+			@Override
+			public String toString() {
+				return evaluatingBranch ? "branch" : "cond " + condIndex;
+			}
+		}
+
+		@Override
+		public StepResult<IfElseState> begin(Target t, ParseTree[] children, Environment env) {
+			if(children.length < 2) {
+				throw new CREInsufficientArgumentsException("ifelse expects at least 2 arguments", t);
+			}
+			IfElseState state = new IfElseState(children);
+			return new StepResult<>(new Evaluate(children[0]), state);
+		}
+
+		@Override
+		public StepResult<IfElseState> childCompleted(Target t, IfElseState state,
+				Mixed result, Environment env) {
+			if(state.evaluatingBranch) {
+				return new StepResult<>(new Complete(result), state);
+			}
+			// We just evaluated a condition
+			if(ArgumentValidation.getBooleanish(result, t, env)) {
+				state.evaluatingBranch = true;
+				return new StepResult<>(new Evaluate(state.children[state.condIndex + 1]), state);
+			}
+			// Condition was false, advance to next pair
+			state.condIndex += 2;
+			if(state.condIndex <= state.children.length - 2) {
+				return new StepResult<>(new Evaluate(state.children[state.condIndex]), state);
+			}
+			// No more condition pairs — check for else block (odd number of children)
+			if(state.children.length % 2 == 1) {
+				state.evaluatingBranch = true;
+				return new StepResult<>(new Evaluate(state.children[state.children.length - 1]), state);
+			}
+			return new StepResult<>(new Complete(CVoid.VOID), state);
+		}
 
 		public static final String NAME = "ifelse";
 
@@ -397,35 +537,12 @@ public class ControlFlow {
 		}
 
 		@Override
-		public Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
-			if(nodes.length < 2) {
-				throw new CREInsufficientArgumentsException("ifelse expects at least 2 arguments", t);
-			}
-			for(int i = 0; i <= nodes.length - 2; i += 2) {
-				ParseTree condition = nodes[i];
-				if(ArgumentValidation.getBooleanish(parent.seval(condition, env), t, env)) {
-					ParseTree ifCode = nodes[i + 1];
-					return env.getEnv(GlobalEnv.class).GetScript().seval(ifCode, env);
-				}
-			}
-			if(nodes.length % 2 == 1) {
-				return env.getEnv(GlobalEnv.class).GetScript().seval(nodes[nodes.length - 1], env);
-			}
-			return CVoid.VOID;
-		}
-
-		@Override
 		public FunctionSignatures getSignatures() {
 			/*
 			 * TODO - Implement a way to define [cond, code]* using signatures, and use it here.
 			 * Also check switch() and switch_ic(), as they need the same feature.
 			 */
 			return super.getSignatures();
-		}
-
-		@Override
-		public boolean useSpecialExec() {
-			return true;
 		}
 
 		@Override
@@ -569,7 +686,125 @@ public class ControlFlow {
 	@api
 	@breakable
 	@ConditionalSelfStatement
-	public static class _switch extends AbstractFunction implements Optimizable, BranchStatement, VariableScope {
+	public static class _switch extends AbstractFunction implements FlowFunction<_switch.SwitchState>, Optimizable, BranchStatement, VariableScope {
+
+		static class SwitchState {
+			enum Phase { EVAL_VALUE, EVAL_CASE, EVAL_CODE }
+			Phase phase = Phase.EVAL_VALUE;
+			ParseTree[] children;
+			Mixed switchValue;
+			int caseIndex = 1; // starts at 1, skips switch value
+
+			SwitchState(ParseTree[] children) {
+				this.children = children;
+			}
+
+			@Override
+			public String toString() {
+				return phase + " idx=" + caseIndex;
+			}
+		}
+
+		@Override
+		public StepResult<SwitchState> begin(Target t, ParseTree[] children, Environment env) {
+			SwitchState state = new SwitchState(children);
+			return new StepResult<>(new Evaluate(children[0]), state);
+		}
+
+		@Override
+		public StepResult<SwitchState> childCompleted(Target t, SwitchState state,
+				Mixed result, Environment env) {
+			switch(state.phase) {
+				case EVAL_VALUE:
+					state.switchValue = result;
+					state.phase = SwitchState.Phase.EVAL_CASE;
+					if(state.caseIndex <= state.children.length - 2) {
+						return new StepResult<>(new Evaluate(state.children[state.caseIndex]), state);
+					}
+					// No cases, check for default
+					if(state.children.length % 2 == 0) {
+						state.phase = SwitchState.Phase.EVAL_CODE;
+						return new StepResult<>(new Evaluate(
+								state.children[state.children.length - 1]), state);
+					}
+					return new StepResult<>(new Complete(CVoid.VOID), state);
+
+				case EVAL_CASE:
+					BasicLogic.equals equals = new BasicLogic.equals();
+					boolean matched = false;
+					if(result instanceof CSlice) {
+						long rangeLeft = ((CSlice) result).getStart();
+						long rangeRight = ((CSlice) result).getFinish();
+						if(state.switchValue.isInstanceOf(CInt.TYPE, null, env)) {
+							long v = ArgumentValidation.getInt(state.switchValue, t);
+							matched = (rangeLeft < rangeRight && v >= rangeLeft && v <= rangeRight)
+									|| (rangeLeft > rangeRight && v >= rangeRight && v <= rangeLeft)
+									|| (rangeLeft == rangeRight && v == rangeLeft);
+						}
+					} else if(result.isInstanceOf(CArray.TYPE, null, env)) {
+						for(String index : ((CArray) result).stringKeySet()) {
+							Mixed inner = ((CArray) result).get(index, t, env);
+							if(inner instanceof CSlice) {
+								long rangeLeft = ((CSlice) inner).getStart();
+								long rangeRight = ((CSlice) inner).getFinish();
+								if(state.switchValue.isInstanceOf(CInt.TYPE, null, env)) {
+									long v = ArgumentValidation.getInt(state.switchValue, t);
+									if((rangeLeft < rangeRight && v >= rangeLeft && v <= rangeRight)
+											|| (rangeLeft > rangeRight && v >= rangeRight && v <= rangeLeft)
+											|| (rangeLeft == rangeRight && v == rangeLeft)) {
+										matched = true;
+										break;
+									}
+								}
+							} else if(equals.exec(t, env, null, state.switchValue, inner).getBoolean()) {
+								matched = true;
+								break;
+							}
+						}
+					} else if(equals.exec(t, env, null, state.switchValue, result).getBoolean()) {
+						matched = true;
+					}
+					if(matched) {
+						state.phase = SwitchState.Phase.EVAL_CODE;
+						return new StepResult<>(new Evaluate(
+								state.children[state.caseIndex + 1]), state);
+					}
+					// No match, advance to next case pair
+					state.caseIndex += 2;
+					if(state.caseIndex <= state.children.length - 2) {
+						return new StepResult<>(new Evaluate(state.children[state.caseIndex]), state);
+					}
+					// No more cases, check for default
+					if(state.children.length % 2 == 0) {
+						state.phase = SwitchState.Phase.EVAL_CODE;
+						return new StepResult<>(new Evaluate(
+								state.children[state.children.length - 1]), state);
+					}
+					return new StepResult<>(new Complete(CVoid.VOID), state);
+
+				case EVAL_CODE:
+					return new StepResult<>(new Complete(result), state);
+
+				default:
+					throw ConfigRuntimeException.CreateUncatchableException(
+							"Invalid switch state: " + state.phase, t);
+			}
+		}
+
+		@Override
+		public StepResult<SwitchState> childInterrupted(Target t, SwitchState state,
+				StepAction.FlowControl action, Environment env) {
+			if(state.phase == SwitchState.Phase.EVAL_CODE
+					&& action.getAction() instanceof BreakAction breakAction) {
+				int levels = breakAction.getLevels();
+				if(levels <= 1) {
+					return new StepResult<>(new Complete(CVoid.VOID), state);
+				}
+				return new StepResult<>(new FlowControl(
+						new BreakAction(levels - 1, breakAction.getTarget())), state);
+			}
+			return null; // propagate
+		}
 
 		@Override
 		public String getName() {
@@ -647,62 +882,6 @@ public class ControlFlow {
 		}
 
 		@Override
-		public Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
-			Mixed value = parent.seval(nodes[0], env);
-			BasicLogic.equals equals = new BasicLogic.equals();
-			try {
-				for(int i = 1; i <= nodes.length - 2; i += 2) {
-					ParseTree statement = nodes[i];
-					ParseTree code = nodes[i + 1];
-					Mixed evalStatement = parent.seval(statement, env);
-					if(evalStatement instanceof CSlice) { //Can do more optimal handling for this Array subclass
-						long rangeLeft = ((CSlice) evalStatement).getStart();
-						long rangeRight = ((CSlice) evalStatement).getFinish();
-						if(value.isInstanceOf(CInt.TYPE, null, env)) {
-							long v = ArgumentValidation.getInt(value, t, env);
-							if((rangeLeft < rangeRight && v >= rangeLeft && v <= rangeRight)
-									|| (rangeLeft > rangeRight && v >= rangeRight && v <= rangeLeft)
-									|| (rangeLeft == rangeRight && v == rangeLeft)) {
-								return parent.seval(code, env);
-							}
-						}
-					} else if(evalStatement.isInstanceOf(CArray.TYPE, null, env)) {
-						for(String index : ((CArray) evalStatement).stringKeySet()) {
-							Mixed inner = ((CArray) evalStatement).get(index, t, env);
-							if(inner instanceof CSlice) {
-								long rangeLeft = ((CSlice) inner).getStart();
-								long rangeRight = ((CSlice) inner).getFinish();
-								if(value.isInstanceOf(CInt.TYPE, null, env)) {
-									long v = ArgumentValidation.getInt(value, t, env);
-									if((rangeLeft < rangeRight && v >= rangeLeft && v <= rangeRight)
-											|| (rangeLeft > rangeRight && v >= rangeRight && v <= rangeLeft)
-											|| (rangeLeft == rangeRight && v == rangeLeft)) {
-										return parent.seval(code, env);
-									}
-								}
-							} else if(equals.exec(t, env, null, value, inner).getBoolean()) {
-								return parent.seval(code, env);
-							}
-						}
-					} else if(equals.exec(t, env, null, value, evalStatement).getBoolean()) {
-						return parent.seval(code, env);
-					}
-				}
-				if(nodes.length % 2 == 0) {
-					return parent.seval(nodes[nodes.length - 1], env);
-				}
-			} catch (LoopBreakException ex) {
-				//Ignored, unless the value passed in is greater than 1, in which case
-				//we rethrow.
-				if(ex.getTimes() > 1) {
-					ex.setTimes(ex.getTimes() - 1);
-					throw ex;
-				}
-			}
-			return CVoid.VOID;
-		}
-
-		@Override
 		public FunctionSignatures getSignatures() {
 			/*
 			 * TODO - Implement a way to define [case, code]* using signatures, and use it here.
@@ -749,11 +928,6 @@ public class ControlFlow {
 
 			// Return the switch scope.
 			return caseParentScope;
-		}
-
-		@Override
-		public boolean useSpecialExec() {
-			return true;
 		}
 
 		@Override
@@ -1066,7 +1240,26 @@ public class ControlFlow {
 	@seealso({com.laytonsmith.tools.docgen.templates.Loops.class,
 		com.laytonsmith.tools.docgen.templates.ArrayIteration.class})
 	@SelfStatement
-	public static class _for extends AbstractFunction implements Optimizable, BranchStatement, VariableScope {
+	public static class _for extends AbstractFunction implements FlowFunction<forelse.ForState>, Optimizable, BranchStatement, VariableScope {
+
+		private static final forelse FOR_DELEGATE = new forelse();
+
+		@Override
+		public StepResult<forelse.ForState> begin(Target t, ParseTree[] children, Environment env) {
+			return FOR_DELEGATE.begin(t, children, env);
+		}
+
+		@Override
+		public StepResult<forelse.ForState> childCompleted(Target t, forelse.ForState state,
+				Mixed result, Environment env) {
+			return FOR_DELEGATE.childCompleted(t, state, result, env);
+		}
+
+		@Override
+		public StepResult<forelse.ForState> childInterrupted(Target t, forelse.ForState state,
+				StepAction.FlowControl action, Environment env) {
+			return FOR_DELEGATE.childInterrupted(t, state, action, env);
+		}
 
 		@Override
 		public String getName() {
@@ -1081,16 +1274,6 @@ public class ControlFlow {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) {
 			return CVoid.VOID;
-		}
-
-		@Override
-		public boolean useSpecialExec() {
-			return true;
-		}
-
-		@Override
-		public Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
-			return new forelse(true).execs(t, env, parent, generics, nodes);
 		}
 
 		@Override
@@ -1217,7 +1400,13 @@ public class ControlFlow {
 				//existing system sort that out.
 			}
 
-			return null;
+			// Rewrite for(a, b, c, d) as forelse(a, b, c, d, null)
+			ParseTree rewrite = new ParseTree(new CFunction(forelse.NAME, t), fileOptions);
+			for(ParseTree child : children) {
+				rewrite.addChild(child);
+			}
+			rewrite.addChild(new ParseTree(CNull.NULL, fileOptions));
+			return rewrite;
 		}
 
 		@Override
@@ -1261,17 +1450,97 @@ public class ControlFlow {
 	@noboilerplate
 	@breakable
 	@SelfStatement
-	public static class forelse extends AbstractFunction implements BranchStatement, VariableScope {
+	public static class forelse extends AbstractFunction implements FlowFunction<forelse.ForState>, BranchStatement, VariableScope {
 
 		public static final String NAME = "forelse";
 
-		public forelse() {
+		enum Phase { ASSIGN, CONDITION, BODY, INCREMENT, ELSE }
+
+		static class ForState {
+			Phase phase;
+			ParseTree[] children;
+			boolean hasRunOnce;
+			int skipCount;
+
+			ForState(ParseTree[] children) {
+				this.phase = Phase.ASSIGN;
+				this.children = children;
+				this.hasRunOnce = false;
+			}
+
+			@Override
+			public String toString() {
+				return phase.name() + (hasRunOnce ? " (looped)" : "")
+						+ (skipCount > 0 ? " skip=" + skipCount : "");
+			}
 		}
 
-		boolean runAsFor = false;
+		@Override
+		public StepResult<ForState> begin(Target t, ParseTree[] children, Environment env) {
+			ForState state = new ForState(children);
+			return new StepResult<>(new Evaluate(children[0], null, true), state);
+		}
 
-		forelse(boolean runAsFor) {
-			this.runAsFor = runAsFor;
+		@Override
+		public StepResult<ForState> childCompleted(Target t, ForState state, Mixed result, Environment env) {
+			switch(state.phase) {
+				case ASSIGN:
+					if(!(result instanceof IVariable)) {
+						throw new CRECastException("First parameter of for must be an ivariable", t);
+					}
+					state.phase = Phase.CONDITION;
+					return new StepResult<>(new Evaluate(state.children[1]), state);
+				case CONDITION:
+					boolean cond = ArgumentValidation.getBooleanish(result, t, env);
+					if(!cond) {
+						if(!state.hasRunOnce && !(state.children[4].getData() instanceof CNull)) {
+							state.phase = Phase.ELSE;
+							return new StepResult<>(new Evaluate(state.children[4]), state);
+						}
+						return new StepResult<>(new Complete(CVoid.VOID), state);
+					}
+					state.hasRunOnce = true;
+					if(state.skipCount > 1) {
+						state.skipCount--;
+						state.phase = Phase.INCREMENT;
+						return new StepResult<>(new Evaluate(state.children[2]), state);
+					}
+					state.skipCount = 0;
+					state.phase = Phase.BODY;
+					return new StepResult<>(new Evaluate(state.children[3]), state);
+				case BODY:
+					state.phase = Phase.INCREMENT;
+					return new StepResult<>(new Evaluate(state.children[2]), state);
+				case INCREMENT:
+					state.phase = Phase.CONDITION;
+					return new StepResult<>(new Evaluate(state.children[1]), state);
+				case ELSE:
+					return new StepResult<>(new Complete(CVoid.VOID), state);
+				default:
+					throw ConfigRuntimeException.CreateUncatchableException(
+							"Invalid for loop state: " + state.phase, t);
+			}
+		}
+
+		@Override
+		public StepResult<ForState> childInterrupted(Target t, ForState state,
+				StepAction.FlowControl action, Environment env) {
+			if(state.phase == Phase.BODY) {
+				if(action.getAction() instanceof BreakAction breakAction) {
+					int levels = breakAction.getLevels();
+					if(levels <= 1) {
+						return new StepResult<>(new Complete(CVoid.VOID), state);
+					}
+					return new StepResult<>(new FlowControl(
+							new BreakAction(levels - 1, breakAction.getTarget())), state);
+				}
+				if(action.getAction() instanceof ContinueAction continueAction) {
+					state.skipCount = continueAction.getLevels();
+					state.phase = Phase.INCREMENT;
+					return new StepResult<>(new Evaluate(state.children[2]), state);
+				}
+			}
+			return null;
 		}
 
 		@Override
@@ -1295,63 +1564,8 @@ public class ControlFlow {
 		}
 
 		@Override
-		public boolean useSpecialExec() {
-			return true;
-		}
-
-		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return null;
-		}
-
-		@Override
-		public Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) throws ConfigRuntimeException {
-			ParseTree assign = nodes[0];
-			ParseTree condition = nodes[1];
-			ParseTree expression = nodes[2];
-			ParseTree runnable = nodes[3];
-			ParseTree elseCode = null;
-			if(!runAsFor) {
-				elseCode = nodes[4];
-			}
-			boolean hasRunOnce = false;
-
-			Mixed counter = parent.eval(assign, env);
-			if(!(counter instanceof IVariable)) {
-				throw new CRECastException("First parameter of for must be an ivariable", t);
-			}
-			int _continue = 0;
-			while(true) {
-				boolean cond = ArgumentValidation.getBoolean(parent.seval(condition, env), t, env);
-				if(cond == false) {
-					break;
-				}
-				hasRunOnce = true;
-				if(_continue >= 1) {
-					--_continue;
-					parent.eval(expression, env);
-					continue;
-				}
-				try {
-					parent.eval(runnable, env);
-				} catch (LoopBreakException e) {
-					int num = e.getTimes();
-					if(num > 1) {
-						e.setTimes(--num);
-						throw e;
-					}
-					return CVoid.VOID;
-				} catch (LoopContinueException e) {
-					_continue = e.getTimes() - 1;
-					parent.eval(expression, env);
-					continue;
-				}
-				parent.eval(expression, env);
-			}
-			if(!hasRunOnce && !runAsFor && elseCode != null) {
-				parent.eval(elseCode, env);
-			}
-			return CVoid.VOID;
 		}
 
 		@Override
@@ -1374,7 +1588,7 @@ public class ControlFlow {
 				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
 
 			// Handle not enough arguments. Link child scopes, but return parent scope.
-			if(ast.numberOfChildren() < (this.runAsFor ? 3 : 4)) {
+			if(ast.numberOfChildren() < 4) {
 				super.linkScope(analysis, parentScope, ast, env, exceptions);
 				return parentScope;
 			}
@@ -1384,7 +1598,7 @@ public class ControlFlow {
 			ParseTree cond = ast.getChildAt(1);
 			ParseTree exp = ast.getChildAt(2);
 			ParseTree code = ast.getChildAt(3);
-			ParseTree elseCode = (this.runAsFor ? null : ast.getChildAt(4));
+			ParseTree elseCode = ast.numberOfChildren() > 4 ? ast.getChildAt(4) : null;
 
 			// Order: assign -> cond -> (code -> exp -> cond)* -> elseCode?.
 			Scope assignScope = analysis.linkScope(parentScope, assign, env, exceptions);
@@ -1442,7 +1656,268 @@ public class ControlFlow {
 	@breakable
 	@seealso({com.laytonsmith.tools.docgen.templates.Loops.class, ArrayIteration.class})
 	@SelfStatement
-	public static class foreach extends AbstractFunction implements BranchStatement, VariableScope {
+	public static class foreach extends AbstractFunction implements FlowFunction<foreach.ForeachState>, BranchStatement, VariableScope {
+
+		static class ForeachState {
+			enum Phase { EVAL_ARRAY, EVAL_KEY, EVAL_VALUE, LOOP_BODY, ELSE_BODY }
+			Phase phase = Phase.EVAL_ARRAY;
+			ParseTree[] children;
+			int offset; // 1 if key parameter present, 0 otherwise
+			boolean hasElse;
+
+			com.laytonsmith.core.natives.interfaces.Iterable arr;
+			IVariable keyVar;
+			IVariable valueVar;
+			ParseTree codeNode;
+			ParseTree elseNode;
+
+			// Associative iteration
+			boolean isAssociative;
+			java.util.Iterator<Mixed> assocKeyIterator;
+
+			// Non-associative iteration
+			Iterator nonAssocIterator;
+			List<Iterator> arrayAccessList;
+			int skipCount;
+
+			ForeachState(ParseTree[] children, int offset, boolean hasElse) {
+				this.children = children;
+				this.offset = offset;
+				this.hasElse = hasElse;
+			}
+
+			@Override
+			public String toString() {
+				return phase.name().toLowerCase();
+			}
+		}
+
+		@Override
+		public StepResult<ForeachState> begin(Target t, ParseTree[] children, Environment env) {
+			if(children.length < 3) {
+				throw new CREInsufficientArgumentsException(
+						"Insufficient arguments passed to " + getName(), t);
+			}
+			int offset = (children.length == 4) ? 1 : 0;
+			ForeachState state = new ForeachState(children, offset, false);
+			return new StepResult<>(new Evaluate(children[0]), state);
+		}
+
+		@Override
+		public StepResult<ForeachState> childCompleted(Target t, ForeachState state,
+				Mixed result, Environment env) {
+			switch(state.phase) {
+				case EVAL_ARRAY: {
+					Mixed arr = result;
+					if(arr instanceof CSlice) {
+						long start = ((CSlice) arr).getStart();
+						long finish = ((CSlice) arr).getFinish();
+						if(finish < start) {
+							arr = new ArrayHandling.range().exec(t, env, null,
+									new CInt(start, t), new CInt(finish - 1, t), new CInt(-1, t));
+						} else {
+							arr = new ArrayHandling.range().exec(t, env, null,
+									new CInt(start, t), new CInt(finish + 1, t));
+						}
+					}
+					if(!(arr instanceof com.laytonsmith.core.natives.interfaces.Iterable)) {
+						throw new CRECastException("Parameter 1 of " + getName()
+								+ " must be an Iterable data structure", t);
+					}
+					state.arr = (com.laytonsmith.core.natives.interfaces.Iterable) arr;
+					state.codeNode = state.children[2 + state.offset];
+					if(state.hasElse) {
+						state.elseNode = state.children[state.children.length - 1];
+					}
+
+					// Check empty for foreachelse
+					if(state.hasElse && state.arr.size(env) == 0) {
+						state.phase = ForeachState.Phase.ELSE_BODY;
+						return new StepResult<>(new Evaluate(state.elseNode), state);
+					}
+
+					if(state.offset == 1) {
+						state.phase = ForeachState.Phase.EVAL_KEY;
+						return new StepResult<>(new Evaluate(state.children[1], null, true), state);
+					}
+					state.phase = ForeachState.Phase.EVAL_VALUE;
+					return new StepResult<>(new Evaluate(state.children[1], null, true), state);
+				}
+				case EVAL_KEY: {
+					if(!(result instanceof IVariable)) {
+						throw new CRECastException("Parameter 2 of " + getName()
+								+ " must be an ivariable", t);
+					}
+					state.keyVar = (IVariable) result;
+					state.phase = ForeachState.Phase.EVAL_VALUE;
+					return new StepResult<>(new Evaluate(
+							state.children[1 + state.offset], null, true), state);
+				}
+				case EVAL_VALUE: {
+					if(!(result instanceof IVariable)) {
+						throw new CRECastException("Parameter " + (2 + state.offset)
+								+ " of " + getName() + " must be an ivariable", t);
+					}
+				state.valueVar = (IVariable) result;
+					return startIteration(t, state, env);
+				}
+				case LOOP_BODY: {
+					if(state.isAssociative) {
+						return nextAssociativeIteration(t, state, env);
+					} else {
+						return advanceNonAssociative(t, state, env);
+					}
+				}
+				case ELSE_BODY:
+					return new StepResult<>(new Complete(CVoid.VOID), state);
+				default:
+					throw ConfigRuntimeException.CreateUncatchableException(
+							"Invalid foreach state: " + state.phase, t);
+			}
+		}
+
+		@Override
+		public StepResult<ForeachState> childInterrupted(Target t, ForeachState state,
+				StepAction.FlowControl action, Environment env) {
+			if(state.phase == ForeachState.Phase.LOOP_BODY) {
+				if(action.getAction() instanceof BreakAction breakAction) {
+					cleanupIterator(state);
+					int levels = breakAction.getLevels();
+					if(levels <= 1) {
+						return new StepResult<>(new Complete(CVoid.VOID), state);
+					}
+					return new StepResult<>(new FlowControl(
+							new BreakAction(levels - 1, breakAction.getTarget())), state);
+				}
+				if(action.getAction() instanceof ContinueAction continueAction) {
+					int levels = continueAction.getLevels();
+					if(state.isAssociative) {
+						// For associative arrays, skip means skip entries in the iterator
+						for(int i = 0; i < levels - 1 && state.assocKeyIterator.hasNext(); i++) {
+							state.assocKeyIterator.next();
+						}
+						return nextAssociativeIteration(t, state, env);
+					} else {
+						// For non-associative, we need to skip entries
+						state.skipCount = levels;
+						return advanceNonAssociative(t, state, env);
+					}
+				}
+				// Other interruptions (throw, return) — cleanup before propagating
+				cleanupIterator(state);
+			}
+			return null; // propagate
+		}
+
+		private StepResult<ForeachState> startIteration(Target t, ForeachState state, Environment env) {
+			if(state.arr.isAssociative()) {
+				state.isAssociative = true;
+				// Clone the key set so modifications during iteration don't affect order
+				Set<Mixed> keySet = new LinkedHashSet<>(state.arr.keySet(env));
+				state.assocKeyIterator = keySet.iterator();
+				return nextAssociativeIteration(t, state, env);
+			} else {
+				state.isAssociative = false;
+				state.nonAssocIterator = new Iterator(state.arr);
+				state.arrayAccessList = env.getEnv(GlobalEnv.class).GetArrayAccessIterators();
+				state.arrayAccessList.add(state.nonAssocIterator);
+				return advanceNonAssociative(t, state, env);
+			}
+		}
+
+		private StepResult<ForeachState> nextAssociativeIteration(Target t,
+				ForeachState state, Environment env) {
+			if(!state.assocKeyIterator.hasNext()) {
+				return new StepResult<>(new Complete(CVoid.VOID), state);
+			}
+			Mixed key = state.assocKeyIterator.next();
+			if(state.keyVar != null) {
+				try {
+					env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(
+							state.keyVar.getDefinedType(), state.keyVar.getVariableName(),
+							key, state.keyVar.getDefinedTarget(), env));
+				} catch(ConfigCompileException cce) {
+					throw new CREFormatException(cce.getMessage(), t);
+				}
+			}
+			try {
+				env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(
+						state.valueVar.getDefinedType(), state.valueVar.getVariableName(),
+						state.arr.get(key, t, env), state.valueVar.getDefinedTarget(), env));
+			} catch(ConfigCompileException cce) {
+				throw new CREFormatException(cce.getMessage(), t);
+			}
+			state.phase = ForeachState.Phase.LOOP_BODY;
+			return new StepResult<>(new Evaluate(state.codeNode), state);
+		}
+
+		/**
+		 * Advances the non-associative iterator, skipping blacklisted entries and
+		 * handling skipCount from continue(n). If the iterator reaches the end,
+		 * cleans up and returns Complete.
+		 */
+		private StepResult<ForeachState> advanceNonAssociative(Target t,
+				ForeachState state, Environment env) {
+			Iterator iter = state.nonAssocIterator;
+			// If we are re-entering after a body execution or a continue,
+			// we need to advance past the current element first.
+			if(state.phase == ForeachState.Phase.LOOP_BODY) {
+				iter.incrementCurrent();
+			}
+			// Skip blacklisted entries (removed during iteration)
+			// and handle skipCount from continue(n)
+			while(iter.getCurrent() < state.arr.size(env)) {
+				if(iter.isBlacklisted(iter.getCurrent())) {
+					iter.incrementCurrent();
+					continue;
+				}
+				if(state.skipCount > 1) {
+					state.skipCount--;
+					iter.incrementCurrent();
+					continue;
+				}
+				state.skipCount = 0;
+				break;
+			}
+			if(iter.getCurrent() >= state.arr.size(env)) {
+				cleanupIterator(state);
+				return new StepResult<>(new Complete(CVoid.VOID), state);
+			}
+			int current = iter.getCurrent();
+			if(state.keyVar != null) {
+				try {
+					env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(
+							state.keyVar.getDefinedType(), state.keyVar.getVariableName(),
+							new CInt(current, t), state.keyVar.getDefinedTarget(), env));
+				} catch(ConfigCompileException cce) {
+					throw new CREFormatException(cce.getMessage(), t);
+				}
+			}
+			try {
+				env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(
+						state.valueVar.getDefinedType(), state.valueVar.getVariableName(),
+						state.arr.get(current, t, env), state.valueVar.getDefinedTarget(), env));
+			} catch(ConfigCompileException cce) {
+				throw new CREFormatException(cce.getMessage(), t);
+			}
+			state.phase = ForeachState.Phase.LOOP_BODY;
+			return new StepResult<>(new Evaluate(state.codeNode), state);
+		}
+
+		private void cleanupIterator(ForeachState state) {
+			if(!state.isAssociative && state.nonAssocIterator != null
+					&& state.arrayAccessList != null) {
+				state.arrayAccessList.remove(state.nonAssocIterator);
+				state.nonAssocIterator = null;
+			}
+		}
+
+		@Override
+		public void cleanup(Target t, ForeachState state, Environment env) {
+			if(state != null) {
+				cleanupIterator(state);
+			}
+		}
 
 		@Override
 		public String getName() {
@@ -1460,172 +1935,6 @@ public class ControlFlow {
 			return CVoid.VOID;
 		}
 
-		@Override
-		public Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
-			if(nodes.length < 3) {
-				throw new CREInsufficientArgumentsException("Insufficient arguments passed to " + getName(), t);
-			}
-			ParseTree array = nodes[0];
-			ParseTree key = null;
-			int offset = 0;
-			if(nodes.length == 4) {
-				//Key and value provided
-				key = nodes[1];
-				offset = 1;
-			}
-			ParseTree value = nodes[1 + offset];
-			ParseTree code = nodes[2 + offset];
-			Mixed arr = parent.seval(array, env);
-			Mixed ik = null;
-			if(key != null) {
-				ik = parent.eval(key, env);
-				if(!(ik instanceof IVariable)) {
-					throw new CRECastException("Parameter 2 of " + getName() + " must be an ivariable", t);
-				}
-			}
-			Mixed iv = parent.eval(value, env);
-			if(arr instanceof CSlice) {
-				long start = ((CSlice) arr).getStart();
-				long finish = ((CSlice) arr).getFinish();
-				if(finish < start) {
-					arr = new ArrayHandling.range()
-							.exec(t, env, null, new CInt(start, t), new CInt(finish - 1, t), new CInt(-1, t));
-				} else {
-					arr = new ArrayHandling.range().exec(t, env, null, new CInt(start, t), new CInt(finish + 1, t));
-				}
-			}
-			if(!(arr instanceof com.laytonsmith.core.natives.interfaces.Iterable)) {
-				throw new CRECastException("Parameter 1 of " + getName() + " must be an Iterable data structure", t);
-			}
-			if(!(iv instanceof IVariable)) {
-				throw new CRECastException(
-						"Parameter " + (2 + offset) + " of " + getName() + " must be an ivariable", t);
-			}
-			com.laytonsmith.core.natives.interfaces.Iterable one
-				= (com.laytonsmith.core.natives.interfaces.Iterable) arr;
-			IVariable kkey = (IVariable) ik;
-			IVariable two = (IVariable) iv;
-			if(one.isAssociative()) {
-				//Iteration of an associative array is much easier, and we have
-				//special logic here to decrease the complexity.
-
-				//Clone the set, so changes in the array won't cause changes in
-				//the iteration order.
-				Set<Mixed> keySet = new LinkedHashSet<>(one.keySet(env));
-				//Continues in an associative array are slightly different, so
-				//we have to track this differently. Basically, we skip the
-				//next element in the array key set.
-				int continues = 0;
-				for(Mixed c : keySet) {
-					if(continues > 0) {
-						//If continues is greater than 0, continue in the loop,
-						//however many times necessary to make it 0.
-						continues--;
-						continue;
-					}
-					//If the key isn't null, set that in the variable table.
-					if(kkey != null) {
-						try {
-							env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(kkey.getDefinedType(),
-									kkey.getVariableName(), c, kkey.getDefinedTarget(), env));
-						}  catch (ConfigCompileException cce) {
-							throw new CREFormatException(cce.getMessage(), t);
-						}
-					}
-					//Set the value in the variable table
-					try {
-						env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(two.getDefinedType(),
-								two.getVariableName(), one.get(c, t, env), two.getDefinedTarget(), env));
-					}  catch (ConfigCompileException cce) {
-						throw new CREFormatException(cce.getMessage(), t);
-					}
-					try {
-						//Execute the code
-						parent.eval(code, env);
-						//And handle any break/continues.
-					} catch (LoopBreakException e) {
-						int num = e.getTimes();
-						if(num > 1) {
-							e.setTimes(--num);
-							throw e;
-						}
-						return CVoid.VOID;
-					} catch (LoopContinueException e) {
-						// In associative arrays, (unlike with normal arrays) we need to decrement it by one, because
-						// the nature of the normal array is such that the counter is handled manually by our code.
-						// Because we are letting java handle our code though, this run actually counts as one run.
-						continues += e.getTimes() - 1;
-					}
-				}
-				return CVoid.VOID;
-			} else {
-				//It's not associative, so we have more complex handling. We will create an ArrayAccessIterator,
-				//and store that in the environment. As the array is iterated, underlying changes in the array
-				//will be reflected in the object, and we will adjust as necessary. The reason we use this mechanism
-				//is to avoid cloning the array, and iterating that. Arrays may be extremely large, and cloning the
-				//entire array is wasteful in that case. We are essentially tracking deltas this way, which prevents
-				//memory usage from getting out of hand.
-				Iterator iterator = new Iterator(one);
-				List<Iterator> arrayAccessList = env.getEnv(GlobalEnv.class).GetArrayAccessIterators();
-				try {
-					arrayAccessList.add(iterator);
-					int continues = 0;
-					while(true) {
-						int current = iterator.getCurrent();
-						if(continues > 0) {
-							//We have some continues to handle. Blacklisted
-							//values don't count for the continuing count, so
-							//we have to consider that when counting.
-							iterator.incrementCurrent();
-							if(iterator.isBlacklisted(current)) {
-								continue;
-							} else {
-								--continues;
-								continue;
-							}
-						}
-						if(current >= one.size(env)) {
-							//Done with the iterations.
-							break;
-						}
-						//If the item is blacklisted, we skip it.
-						if(!iterator.isBlacklisted(current)) {
-							if(kkey != null) {
-								try {
-									env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(kkey.getDefinedType(),
-											kkey.getVariableName(), new CInt(current, t), kkey.getDefinedTarget(), env));
-								} catch (ConfigCompileException cce) {
-									throw new CREFormatException(cce.getMessage(), t);
-								}
-							}
-							try {
-								env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(two.getDefinedType(),
-										two.getVariableName(), one.get(current, t, env), two.getDefinedTarget(), env));
-							} catch (ConfigCompileException cce) {
-								throw new CREFormatException(cce.getMessage(), t);
-							}
-							try {
-								parent.eval(code, env);
-							} catch (LoopBreakException e) {
-								int num = e.getTimes();
-								if(num > 1) {
-									e.setTimes(--num);
-									throw e;
-								}
-								return CVoid.VOID;
-							} catch (LoopContinueException e) {
-								continues += e.getTimes();
-								continue;
-							}
-						}
-						iterator.incrementCurrent();
-					}
-				} finally {
-					arrayAccessList.remove(iterator);
-				}
-			}
-			return CVoid.VOID;
-		}
 
 		@Override
 		public FunctionSignatures getSignatures() {
@@ -1721,11 +2030,6 @@ public class ControlFlow {
 		@Override
 		public Boolean runAsync() {
 			return null;
-		}
-
-		@Override
-		public boolean useSpecialExec() {
-			return true;
 		}
 
 		@Override
@@ -1915,27 +2219,14 @@ public class ControlFlow {
 		}
 
 		@Override
-		public Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
-			ParseTree array = nodes[0];
-			//The last one
-			ParseTree elseCode = nodes[nodes.length - 1];
-
-			Mixed data = parent.seval(array, env);
-
-			if(!(data.isInstanceOf(CArray.TYPE, null, env)) && !(data instanceof CSlice)) {
-				throw new CRECastException(getName() + " expects an array for parameter 1", t);
+		public StepResult<ForeachState> begin(Target t, ParseTree[] children, Environment env) {
+			if(children.length < 4) {
+				throw new CREInsufficientArgumentsException(
+						"Insufficient arguments passed to " + getName(), t);
 			}
-
-			if(((CArray) data).isEmpty(env)) {
-				parent.eval(elseCode, env);
-			} else {
-				ParseTree pass[] = new ParseTree[nodes.length - 1];
-				System.arraycopy(nodes, 0, pass, 0, nodes.length - 1);
-				nodes[0] = new ParseTree(data, null);
-				return super.execs(t, env, parent, generics, pass);
-			}
-
-			return CVoid.VOID;
+			int offset = (children.length == 5) ? 1 : 0;
+			ForeachState state = new ForeachState(children, offset, true);
+			return new StepResult<>(new Evaluate(children[0]), state);
 		}
 
 		@Override
@@ -2052,7 +2343,78 @@ public class ControlFlow {
 	@breakable
 	@seealso({com.laytonsmith.tools.docgen.templates.Loops.class})
 	@SelfStatement
-	public static class _while extends AbstractFunction implements BranchStatement, VariableScope {
+	public static class _while extends AbstractFunction implements FlowFunction<_while.WhileState>, BranchStatement, VariableScope {
+
+		static class WhileState {
+			enum Phase { CONDITION, BODY }
+			Phase phase = Phase.CONDITION;
+			ParseTree[] children;
+			int skipCount;
+
+			WhileState(ParseTree[] children) {
+				this.children = children;
+			}
+
+			@Override
+			public String toString() {
+				return phase.name().toLowerCase();
+			}
+		}
+
+		@Override
+		public StepResult<WhileState> begin(Target t, ParseTree[] children, Environment env) {
+			WhileState state = new WhileState(children);
+			return new StepResult<>(new Evaluate(children[0]), state);
+		}
+
+		@Override
+		public StepResult<WhileState> childCompleted(Target t, WhileState state,
+				Mixed result, Environment env) {
+			switch(state.phase) {
+				case CONDITION:
+					if(ArgumentValidation.getBooleanish(result, t, env)) {
+						if(state.skipCount > 1) {
+							state.skipCount--;
+							return new StepResult<>(new Evaluate(state.children[0]), state);
+						}
+						state.skipCount = 0;
+						if(state.children.length > 1) {
+							state.phase = WhileState.Phase.BODY;
+							return new StepResult<>(new Evaluate(state.children[1]), state);
+						}
+						// while(condition) with no body — re-evaluate condition
+						return new StepResult<>(new Evaluate(state.children[0]), state);
+					}
+					return new StepResult<>(new Complete(CVoid.VOID), state);
+				case BODY:
+					state.phase = WhileState.Phase.CONDITION;
+					return new StepResult<>(new Evaluate(state.children[0]), state);
+				default:
+					throw ConfigRuntimeException.CreateUncatchableException(
+							"Invalid while state: " + state.phase, t);
+			}
+		}
+
+		@Override
+		public StepResult<WhileState> childInterrupted(Target t, WhileState state,
+				StepAction.FlowControl action, Environment env) {
+			if(state.phase == WhileState.Phase.BODY) {
+				if(action.getAction() instanceof BreakAction breakAction) {
+					int levels = breakAction.getLevels();
+					if(levels <= 1) {
+						return new StepResult<>(new Complete(CVoid.VOID), state);
+					}
+					return new StepResult<>(new FlowControl(
+							new BreakAction(levels - 1, breakAction.getTarget())), state);
+				}
+				if(action.getAction() instanceof ContinueAction continueAction) {
+					state.skipCount = continueAction.getLevels();
+					state.phase = WhileState.Phase.CONDITION;
+					return new StepResult<>(new Evaluate(state.children[0]), state);
+				}
+			}
+			return null; // propagate
+		}
 
 		public static final String NAME = "while";
 
@@ -2094,38 +2456,11 @@ public class ControlFlow {
 		}
 
 		@Override
-		public Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
-			try {
-				while(ArgumentValidation.getBoolean(parent.seval(nodes[0], env), t, env)) {
-					//We allow while(thing()); to be done. This makes certain
-					//types of coding styles possible.
-					if(nodes.length > 1) {
-						try {
-							parent.eval(nodes[1], env);
-						} catch (LoopContinueException e) {
-							//ok.
-						}
-					}
-				}
-			} catch (LoopBreakException e) {
-				if(e.getTimes() > 1) {
-					throw new LoopBreakException(e.getTimes() - 1, t);
-				}
-			}
-			return CVoid.VOID;
-		}
-
-		@Override
 		public FunctionSignatures getSignatures() {
 			return new SignatureBuilder(CVoid.TYPE)
 					.param(Booleanish.TYPE, "cond",
 							"The loop condition that is checked each time before the code is executed.")
 					.param((LeftHandSideType) null, "code", "The code that is executed in the loop.", true).build();
-		}
-
-		@Override
-		public boolean useSpecialExec() {
-			return true;
 		}
 
 		@Override
@@ -2210,7 +2545,74 @@ public class ControlFlow {
 	@breakable
 	@seealso({com.laytonsmith.tools.docgen.templates.Loops.class})
 	@SelfStatement
-	public static class _dowhile extends AbstractFunction implements BranchStatement, VariableScope {
+	public static class _dowhile extends AbstractFunction implements FlowFunction<_dowhile.DoWhileState>, BranchStatement, VariableScope {
+
+		static class DoWhileState {
+			enum Phase { BODY, CONDITION }
+			Phase phase = Phase.BODY;
+			ParseTree[] children;
+			int skipCount;
+
+			DoWhileState(ParseTree[] children) {
+				this.children = children;
+			}
+
+			@Override
+			public String toString() {
+				return phase.name().toLowerCase();
+			}
+		}
+
+		@Override
+		public StepResult<DoWhileState> begin(Target t, ParseTree[] children, Environment env) {
+			DoWhileState state = new DoWhileState(children);
+			return new StepResult<>(new Evaluate(children[0]), state);
+		}
+
+		@Override
+		public StepResult<DoWhileState> childCompleted(Target t, DoWhileState state,
+				Mixed result, Environment env) {
+			switch(state.phase) {
+				case BODY:
+					state.phase = DoWhileState.Phase.CONDITION;
+					return new StepResult<>(new Evaluate(state.children[1]), state);
+				case CONDITION:
+					if(ArgumentValidation.getBooleanish(result, t, env)) {
+						if(state.skipCount > 1) {
+							state.skipCount--;
+							return new StepResult<>(new Evaluate(state.children[1]), state);
+						}
+						state.skipCount = 0;
+						state.phase = DoWhileState.Phase.BODY;
+						return new StepResult<>(new Evaluate(state.children[0]), state);
+					}
+					return new StepResult<>(new Complete(CVoid.VOID), state);
+				default:
+					throw ConfigRuntimeException.CreateUncatchableException(
+							"Invalid dowhile state: " + state.phase, t);
+			}
+		}
+
+		@Override
+		public StepResult<DoWhileState> childInterrupted(Target t, DoWhileState state,
+				StepAction.FlowControl action, Environment env) {
+			if(state.phase == DoWhileState.Phase.BODY) {
+				if(action.getAction() instanceof BreakAction breakAction) {
+					int levels = breakAction.getLevels();
+					if(levels <= 1) {
+						return new StepResult<>(new Complete(CVoid.VOID), state);
+					}
+					return new StepResult<>(new FlowControl(
+							new BreakAction(levels - 1, breakAction.getTarget())), state);
+				}
+				if(action.getAction() instanceof ContinueAction continueAction) {
+					state.skipCount = continueAction.getLevels();
+					state.phase = DoWhileState.Phase.CONDITION;
+					return new StepResult<>(new Evaluate(state.children[1]), state);
+				}
+			}
+			return null; // propagate
+		}
 
 		public static final String NAME = "dowhile";
 
@@ -2265,29 +2667,6 @@ public class ControlFlow {
 		@Override
 		public MSVersion since() {
 			return MSVersion.V3_3_1;
-		}
-
-		@Override
-		public boolean useSpecialExec() {
-			return true;
-		}
-
-		@Override
-		public Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
-			try {
-				do {
-					try {
-						parent.eval(nodes[0], env);
-					} catch (LoopContinueException e) {
-						//ok. No matter how many times it tells us to continue, we're only going to continue once.
-					}
-				} while(ArgumentValidation.getBoolean(parent.seval(nodes[1], env), t, env));
-			} catch (LoopBreakException e) {
-				if(e.getTimes() > 1) {
-					throw new LoopBreakException(e.getTimes() - 1, t);
-				}
-			}
-			return CVoid.VOID;
 		}
 
 		@Override
@@ -2359,13 +2738,27 @@ public class ControlFlow {
 	}
 
 	@api
-	public static class _break extends AbstractFunction implements Optimizable {
+	public static class _break extends AbstractFunction implements FlowFunction<Void>, Optimizable {
 
 		public static final String NAME = "break";
 
 		@Override
 		public String getName() {
 			return "break";
+		}
+
+		@Override
+		public StepResult<Void> begin(Target t, ParseTree[] children, Environment env) {
+			if(children.length == 0) {
+				return new StepResult<>(new FlowControl(new BreakAction(1, t)), null);
+			}
+			return new StepResult<>(new Evaluate(children[0]), null);
+		}
+
+		@Override
+		public StepResult<Void> childCompleted(Target t, Void state, Mixed result, Environment env) {
+			int n = ArgumentValidation.getInt32(result, t, env);
+			return new StepResult<>(new FlowControl(new BreakAction(n, t)), null);
 		}
 
 		@Override
@@ -2479,11 +2872,7 @@ public class ControlFlow {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args)
 				throws CancelCommandException, ConfigRuntimeException {
-			int num = 1;
-			if(args.length == 1) {
-				num = ArgumentValidation.getInt32(args[0], t, env);
-			}
-			throw new LoopBreakException(num, t);
+			throw new Error("break() should not be called via exec(); it is handled by the iterative interpreter");
 		}
 
 		@Override
@@ -2539,13 +2928,27 @@ public class ControlFlow {
 	}
 
 	@api
-	public static class _continue extends AbstractFunction {
+	public static class _continue extends AbstractFunction implements FlowFunction<Void> {
 
 		public static final String NAME = "continue";
 
 		@Override
 		public String getName() {
 			return NAME;
+		}
+
+		@Override
+		public StepResult<Void> begin(Target t, ParseTree[] children, Environment env) {
+			if(children.length == 0) {
+				return new StepResult<>(new FlowControl(new ContinueAction(1, t)), null);
+			}
+			return new StepResult<>(new Evaluate(children[0]), null);
+		}
+
+		@Override
+		public StepResult<Void> childCompleted(Target t, Void state, Mixed result, Environment env) {
+			int n = ArgumentValidation.getInt32(result, t, env);
+			return new StepResult<>(new FlowControl(new ContinueAction(n, t)), null);
 		}
 
 		@Override
@@ -2627,11 +3030,7 @@ public class ControlFlow {
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args)
 				throws CancelCommandException, ConfigRuntimeException {
-			int num = 1;
-			if(args.length == 1) {
-				num = ArgumentValidation.getInt32(args[0], t, env);
-			}
-			throw new LoopContinueException(num, t);
+			throw new Error("continue() should not be called via exec(); it is handled by the iterative interpreter");
 		}
 
 		@Override
@@ -2655,13 +3054,26 @@ public class ControlFlow {
 	}
 
 	@api
-	public static class _return extends AbstractFunction implements Optimizable {
+	public static class _return extends AbstractFunction implements FlowFunction<Void>, Optimizable {
 
 		public static final String NAME = "return";
 
 		@Override
 		public String getName() {
 			return NAME;
+		}
+
+		@Override
+		public StepResult<Void> begin(Target t, ParseTree[] children, Environment env) {
+			if(children.length == 0) {
+				return new StepResult<>(new FlowControl(new ReturnAction(CVoid.VOID, t)), null);
+			}
+			return new StepResult<>(new Evaluate(children[0]), null);
+		}
+
+		@Override
+		public StepResult<Void> childCompleted(Target t, Void state, Mixed result, Environment env) {
+			return new StepResult<>(new FlowControl(new ReturnAction(result, t)), null);
 		}
 
 		@Override
@@ -2767,8 +3179,7 @@ public class ControlFlow {
 
 		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			Mixed ret = (args.length == 1 ? args[0] : CVoid.VOID);
-			throw new FunctionReturnException(ret, t);
+			throw new Error("return() should not be called via exec(); it is handled by the iterative interpreter");
 		}
 
 		@Override
@@ -2780,7 +3191,7 @@ public class ControlFlow {
 	}
 
 	@api
-	public static class call_proc extends AbstractFunction implements Optimizable {
+	public static class call_proc extends CallbackYield implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -2823,17 +3234,18 @@ public class ControlFlow {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		protected void execWithYield(Target t, Environment env, Mixed[] args, Yield yield) {
 			if(args.length < 1) {
 				throw new CREInsufficientArgumentsException("Expecting at least one argument to " + getName(), t);
 			}
 			Procedure proc = env.getEnv(GlobalEnv.class).GetProcs().get(args[0].val());
-			if(proc != null) {
-				List<Mixed> vars = new ArrayList<>(Arrays.asList(args));
-				vars.remove(0);
-				return proc.execute(vars, env, t);
+			if(proc == null) {
+				throw new CREInvalidProcedureException("Unknown procedure \"" + args[0].val() + "\"", t);
 			}
-			throw new CREInvalidProcedureException("Unknown procedure \"" + args[0].val() + "\"", t);
+			ProcedureUsage procUsage = new ProcedureUsage(proc, env, t);
+			Mixed[] procArgs = Arrays.copyOfRange(args, 1, args.length);
+			yield.call(procUsage, env, t, procArgs)
+					.then((result, y) -> y.done(() -> result));
 		}
 
 		@Override
@@ -2873,7 +3285,7 @@ public class ControlFlow {
 	public static class call_proc_array extends call_proc {
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		protected void execWithYield(Target t, Environment env, Mixed[] args, Yield yield) {
 			CArray ca = ArgumentValidation.getArray(args[1], t, env);
 			if(ca.inAssociativeMode()) {
 				throw new CRECastException("Expected the array passed to " + getName() + " to be non-associative.", t);
@@ -2883,7 +3295,8 @@ public class ControlFlow {
 			for(int i = 1; i < args2.length; i++) {
 				args2[i] = ca.get(i - 1, t, env);
 			}
-			return super.exec(t, env, generics, args2);
+			// TODO: This probably needs to change once generics are added
+			super.execWithYield(t, env, args2, yield);
 		}
 
 		@Override

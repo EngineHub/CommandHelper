@@ -8,12 +8,15 @@ import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.annotations.noprofile;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.FullyQualifiedClassName;
+import com.laytonsmith.core.FlowFunction;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
-import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Optimizable.OptimizationOption;
 import com.laytonsmith.core.SourceType;
+import com.laytonsmith.core.StepAction.Complete;
+import com.laytonsmith.core.StepAction.Evaluate;
+import com.laytonsmith.core.StepAction.StepResult;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.compiler.FileOptions;
@@ -85,7 +88,7 @@ public class Compiler {
 	@api
 	@noprofile
 	@hide("This is only used internally by the compiler.")
-	public static class p extends DummyFunction implements Optimizable {
+	public static class p extends DummyFunction implements FlowFunction<Void>, Optimizable {
 
 		public static final String NAME = "p";
 
@@ -100,13 +103,16 @@ public class Compiler {
 		}
 
 		@Override
-		public boolean useSpecialExec() {
-			return true;
+		public StepResult<Void> begin(Target t, ParseTree[] children, Environment env) {
+			if(children.length == 1) {
+				return new StepResult<>(new Evaluate(children[0]), null);
+			}
+			return new StepResult<>(new Complete(CVoid.VOID), null);
 		}
 
 		@Override
-		public Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
-			return (nodes.length == 1 ? parent.eval(nodes[0], env) : CVoid.VOID);
+		public StepResult<Void> childCompleted(Target t, Void state, Mixed result, Environment env) {
+			return new StepResult<>(new Complete(result), null);
 		}
 
 		@Override
@@ -610,10 +616,9 @@ public class Compiler {
 								child.setChildren(list);
 							}
 							try {
-								Function f = (Function) FunctionList.getFunction(identifier, envs);
-								// TODO: Determine if generics need to be supported here. Probably not.
-								ParseTree node = new ParseTree(
-										f.execs(identifier.getTarget(), null, null, null, child), child.getFileOptions());
+								FunctionList.getFunction(identifier, envs);
+								ParseTree node = new ParseTree(identifier, child.getFileOptions());
+								node.addChild(child);
 								if(node.getData() instanceof CFunction
 										&& node.getData().val().equals(__autoconcat__.NAME)) {
 									node = rewrite(node.getChildren(), returnSConcat, envs);

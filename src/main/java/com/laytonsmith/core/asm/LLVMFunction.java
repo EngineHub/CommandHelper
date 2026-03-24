@@ -7,7 +7,6 @@ import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ParseTree;
-import com.laytonsmith.core.Script;
 import com.laytonsmith.core.compiler.SelfStatement;
 import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
@@ -255,15 +254,6 @@ public abstract class LLVMFunction implements FunctionBase, Function {
 	 */
 	public abstract IRData buildIR(IRBuilder builder, Target t, Environment env, GenericParameters parameters, ParseTree... nodes) throws ConfigCompileException;
 
-	@Override
-	public final boolean useSpecialExec() {
-		throw new UnsupportedOperationException("Not supported.");
-	}
-
-	@Override
-	public final Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
-		throw new UnsupportedOperationException("Not supported.");
-	}
 
 	/**
 	 * If this function is used, and it needs to do startup configuration, that configuration goes here.

@@ -10,11 +10,14 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.FlowFunction;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
-import com.laytonsmith.core.Script;
 import com.laytonsmith.core.SimpleDocumentation;
+import com.laytonsmith.core.StepAction.Complete;
+import com.laytonsmith.core.StepAction.Evaluate;
+import com.laytonsmith.core.StepAction.StepResult;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.compiler.signature.FunctionSignatures;
@@ -517,94 +520,145 @@ public class Math {
 	}
 
 	/**
-	 * If we have the case {@code @array[0]++}, we have to increment it as though it were a variable, so we have to do
-	 * that with execs. This method consolidates the code to do so.
-	 *
-	 * @return
+	 * Shared state for the inc/dec/postinc/postdec FlowFunction implementations.
 	 */
-	protected static Mixed doIncrementDecrement(ParseTree[] nodes,
-			Script parent, Environment env, Target t,
-			Function func, boolean pre, boolean inc) {
-		if(nodes[0].getData() instanceof CFunction && ((CFunction) nodes[0].getData()).hasFunction()) {
+	static class IncDecState {
+		enum Phase { EVAL_ARRAY, EVAL_INDEX, EVAL_DELTA, EVAL_ARG0, EVAL_ARG1 }
+		Phase phase;
+		ParseTree[] nodes;
+		boolean pre;
+		boolean inc;
+		Function func;
+		boolean arrayMode;
+		// Array path fields
+		Mixed array;
+		Mixed index;
+		// Variable path fields
+		Mixed[] args;
+		int argCount;
+
+		@Override
+		public String toString() {
+			return phase.name() + (arrayMode ? " (array)" : " (var)")
+					+ (pre ? " pre" : " post") + (inc ? "inc" : "dec");
+		}
+	}
+
+	private static StepResult<IncDecState> incDecBegin(Target t, ParseTree[] children,
+			Environment env, Function func, boolean pre, boolean inc) {
+		IncDecState state = new IncDecState();
+		state.nodes = children;
+		state.pre = pre;
+		state.inc = inc;
+		state.func = func;
+
+		if(children[0].getData() instanceof CFunction && ((CFunction) children[0].getData()).hasFunction()) {
 			Function f;
 			try {
-				f = ((CFunction) nodes[0].getData()).getFunction();
-			} catch (ConfigCompileException ex) {
-				// This can't really happen, as the compiler would have already caught this
+				f = ((CFunction) children[0].getData()).getFunction();
+			} catch(ConfigCompileException ex) {
 				throw new Error(ex);
 			}
-			if(f.getName().equals(new ArrayHandling.array_get().getName())) {
-				//Ok, so, this is it, we're in charge here.
-				//First, pull out the current value. We're gonna do this manually though, and we will actually
-				//skip the whole array_get execution.
-				ParseTree eval = nodes[0];
-				Mixed array = parent.seval(eval.getChildAt(0), env);
-				Mixed index = parent.seval(eval.getChildAt(1), env);
-				Mixed cdelta = new CInt(1, t);
-				if(nodes.length == 2) {
-					cdelta = parent.seval(nodes[1], env);
-				}
-				long delta = ArgumentValidation.getInt(cdelta, t, env);
-				//First, error check, then get the old value, and store it in temp.
-				if(!(array.isInstanceOf(CArray.TYPE, null, env))
-						&& !(array.isInstanceOf(ArrayAccess.TYPE, null, env))) {
-					//Let's just evaluate this like normal with array_get, so it will
-					//throw the appropriate exception.
-					new ArrayHandling.array_get().exec(t, env, null, array, index);
-					throw ConfigRuntimeException.CreateUncatchableException("Shouldn't have gotten here. Please report this error, and how you got here.", t);
-				} else if(!(array.isInstanceOf(CArray.TYPE, null, env))) {
-					//It's an ArrayAccess type, but we can't use that here, so, throw our
-					//own exception.
-					throw new CRECastException("Cannot increment/decrement a non-array array"
-							+ " accessed value. (The value passed in was \"" + array.val() + "\")", t);
-				}
-				//Ok, we're good. Data types should all be correct.
-				CArray myArray = ((CArray) array);
-				Mixed value = myArray.get(index, t, env);
-
-				//Alright, now let's actually perform the increment, and store that in the array.
-				if(value.isInstanceOf(CInt.TYPE, null, env)) {
-					CInt newVal;
-					if(inc) {
-						newVal = new CInt(ArgumentValidation.getInt(value, t, env) + delta, t);
-					} else {
-						newVal = new CInt(ArgumentValidation.getInt(value, t, env) - delta, t);
-					}
-					new ArrayHandling.array_set().exec(t, env, null, array, index, newVal);
-					if(pre) {
-						return newVal;
-					} else {
-						return value;
-					}
-				} else if(value.isInstanceOf(CDouble.TYPE, null, env)) {
-					CDouble newVal;
-					if(inc) {
-						newVal = new CDouble(ArgumentValidation.getDouble(value, t, env) + delta, t);
-					} else {
-						newVal = new CDouble(ArgumentValidation.getDouble(value, t, env) - delta, t);
-					}
-					new ArrayHandling.array_set().exec(t, env, null, array, index, newVal);
-					if(pre) {
-						return newVal;
-					} else {
-						return value;
-					}
-				} else {
-					throw new CRECastException("Cannot increment/decrement a non numeric value.", t);
-				}
+			if(f.getName().equals(ArrayHandling.array_get.NAME)) {
+				state.arrayMode = true;
+				state.phase = IncDecState.Phase.EVAL_ARRAY;
+				return new StepResult<>(new Evaluate(children[0].getChildAt(0)), state);
 			}
 		}
-		Mixed[] args = new Mixed[nodes.length];
-		for(int i = 0; i < args.length; i++) {
-			args[i] = parent.eval(nodes[i], env);
+
+		// Variable path - evaluate args with keepIVariable=true
+		state.arrayMode = false;
+		state.argCount = children.length;
+		state.args = new Mixed[state.argCount];
+		state.phase = IncDecState.Phase.EVAL_ARG0;
+		return new StepResult<>(new Evaluate(children[0], null, true), state);
+	}
+
+	private static StepResult<IncDecState> incDecChildCompleted(Target t, IncDecState state,
+			Mixed result, Environment env) {
+		if(state.arrayMode) {
+			switch(state.phase) {
+				case EVAL_ARRAY:
+					state.array = result;
+					state.phase = IncDecState.Phase.EVAL_INDEX;
+					return new StepResult<>(new Evaluate(state.nodes[0].getChildAt(1)), state);
+				case EVAL_INDEX:
+					state.index = result;
+					if(state.nodes.length == 2) {
+						state.phase = IncDecState.Phase.EVAL_DELTA;
+						return new StepResult<>(new Evaluate(state.nodes[1]), state);
+					}
+					return new StepResult<>(new Complete(
+							performArrayIncDec(t, state, new CInt(1, t), env)), state);
+				case EVAL_DELTA:
+					return new StepResult<>(new Complete(
+							performArrayIncDec(t, state, result, env)), state);
+				default:
+					throw ConfigRuntimeException.CreateUncatchableException(
+							"Invalid inc/dec state: " + state.phase, t);
+			}
+		} else {
+			// Variable path
+			switch(state.phase) {
+				case EVAL_ARG0:
+					state.args[0] = result;
+					if(state.argCount > 1) {
+						state.phase = IncDecState.Phase.EVAL_ARG1;
+						return new StepResult<>(new Evaluate(state.nodes[1], null, true), state);
+					}
+					return new StepResult<>(new Complete(
+							state.func.exec(t, env, null, state.args)), state);
+				case EVAL_ARG1:
+					state.args[1] = result;
+					return new StepResult<>(new Complete(
+							state.func.exec(t, env, null, state.args)), state);
+				default:
+					throw ConfigRuntimeException.CreateUncatchableException(
+							"Invalid inc/dec state: " + state.phase, t);
+			}
 		}
-		return func.exec(t, env, null, args);
+	}
+
+	private static Mixed performArrayIncDec(Target t, IncDecState state, Mixed cdelta, Environment env) {
+		long delta = ArgumentValidation.getInt(cdelta, t, env);
+		if(!(state.array.isInstanceOf(CArray.TYPE, null, env))
+				&& !(state.array.isInstanceOf(ArrayAccess.TYPE, null, env))) {
+			new ArrayHandling.array_get().exec(t, env, null, state.array, state.index);
+			throw ConfigRuntimeException.CreateUncatchableException(
+					"Shouldn't have gotten here. Please report this error, and how you got here.", t);
+		} else if(!(state.array.isInstanceOf(CArray.TYPE, null, env))) {
+			throw new CRECastException("Cannot increment/decrement a non-array array"
+					+ " accessed value. (The value passed in was \"" + state.array.val() + "\")", t);
+		}
+		CArray myArray = ((CArray) state.array);
+		Mixed value = myArray.get(state.index, t, env);
+		if(value.isInstanceOf(CInt.TYPE, null, env)) {
+			CInt newVal;
+			if(state.inc) {
+				newVal = new CInt(ArgumentValidation.getInt(value, t, env) + delta, t);
+			} else {
+				newVal = new CInt(ArgumentValidation.getInt(value, t, env) - delta, t);
+			}
+			new ArrayHandling.array_set().exec(t, env, null, state.array, state.index, newVal);
+			return state.pre ? newVal : value;
+		} else if(value.isInstanceOf(CDouble.TYPE, null, env)) {
+			CDouble newVal;
+			if(state.inc) {
+				newVal = new CDouble(ArgumentValidation.getDouble(value, t, env) + delta, t);
+			} else {
+				newVal = new CDouble(ArgumentValidation.getDouble(value, t, env) - delta, t);
+			}
+			new ArrayHandling.array_set().exec(t, env, null, state.array, state.index, newVal);
+			return state.pre ? newVal : value;
+		} else {
+			throw new CRECastException("Cannot increment/decrement a non numeric value.", t);
+		}
 	}
 
 	@api
 	@seealso({dec.class, postdec.class, postinc.class})
 	@OperatorPreferred("++")
-	public static class inc extends AbstractFunction implements Optimizable {
+	public static class inc extends AbstractFunction implements Optimizable, FlowFunction<IncDecState> {
 
 		public static final String NAME = "inc";
 
@@ -619,13 +673,14 @@ public class Math {
 		}
 
 		@Override
-		public boolean useSpecialExec() {
-			return true;
+		public StepResult<IncDecState> begin(Target t, ParseTree[] children, Environment env) {
+			return incDecBegin(t, children, env, this, true, true);
 		}
 
 		@Override
-		public Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
-			return doIncrementDecrement(nodes, parent, env, t, this, true, true);
+		public StepResult<IncDecState> childCompleted(Target t, IncDecState state,
+				Mixed result, Environment env) {
+			return incDecChildCompleted(t, state, result, env);
 		}
 
 		@Override
@@ -728,7 +783,7 @@ public class Math {
 	@api
 	@seealso({postdec.class, inc.class, dec.class})
 	@OperatorPreferred("++")
-	public static class postinc extends AbstractFunction implements Optimizable {
+	public static class postinc extends AbstractFunction implements Optimizable, FlowFunction<IncDecState> {
 
 		public static final String NAME = "postinc";
 
@@ -743,13 +798,14 @@ public class Math {
 		}
 
 		@Override
-		public boolean useSpecialExec() {
-			return true;
+		public StepResult<IncDecState> begin(Target t, ParseTree[] children, Environment env) {
+			return incDecBegin(t, children, env, this, false, true);
 		}
 
 		@Override
-		public Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
-			return Math.doIncrementDecrement(nodes, parent, env, t, this, false, true);
+		public StepResult<IncDecState> childCompleted(Target t, IncDecState state,
+				Mixed result, Environment env) {
+			return incDecChildCompleted(t, state, result, env);
 		}
 
 		@Override
@@ -862,7 +918,7 @@ public class Math {
 	@api
 	@seealso({inc.class, postdec.class, postinc.class})
 	@OperatorPreferred("--")
-	public static class dec extends AbstractFunction implements Optimizable {
+	public static class dec extends AbstractFunction implements Optimizable, FlowFunction<IncDecState> {
 
 		public static final String NAME = "dec";
 
@@ -877,13 +933,14 @@ public class Math {
 		}
 
 		@Override
-		public boolean useSpecialExec() {
-			return true;
+		public StepResult<IncDecState> begin(Target t, ParseTree[] children, Environment env) {
+			return incDecBegin(t, children, env, this, true, false);
 		}
 
 		@Override
-		public Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
-			return doIncrementDecrement(nodes, parent, env, t, this, true, false);
+		public StepResult<IncDecState> childCompleted(Target t, IncDecState state,
+				Mixed result, Environment env) {
+			return incDecChildCompleted(t, state, result, env);
 		}
 
 		@Override
@@ -986,7 +1043,7 @@ public class Math {
 	@api
 	@seealso({postinc.class, inc.class, dec.class})
 	@OperatorPreferred("--")
-	public static class postdec extends AbstractFunction implements Optimizable {
+	public static class postdec extends AbstractFunction implements Optimizable, FlowFunction<IncDecState> {
 
 		public static final String NAME = "postdec";
 
@@ -1001,13 +1058,14 @@ public class Math {
 		}
 
 		@Override
-		public boolean useSpecialExec() {
-			return true;
+		public StepResult<IncDecState> begin(Target t, ParseTree[] children, Environment env) {
+			return incDecBegin(t, children, env, this, false, false);
 		}
 
 		@Override
-		public Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
-			return doIncrementDecrement(nodes, parent, env, t, this, false, false);
+		public StepResult<IncDecState> childCompleted(Target t, IncDecState state,
+				Mixed result, Environment env) {
+			return incDecChildCompleted(t, state, result, env);
 		}
 
 		@Override

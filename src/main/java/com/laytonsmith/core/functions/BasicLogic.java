@@ -6,10 +6,13 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.FlowFunction;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
-import com.laytonsmith.core.Script;
+import com.laytonsmith.core.StepAction.Complete;
+import com.laytonsmith.core.StepAction.Evaluate;
+import com.laytonsmith.core.StepAction.StepResult;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.compiler.analysis.Scope;
@@ -54,6 +57,75 @@ public class BasicLogic {
 
 	public static String docs() {
 		return "These functions provide basic logical operations.";
+	}
+
+	/**
+	 * Shared state for short-circuit logic FlowFunctions (and, or, dand, dor, nand, nor).
+	 */
+	static class ShortCircuitState {
+		ParseTree[] children;
+		int index;
+
+		ShortCircuitState(ParseTree[] children) {
+			this.children = children;
+			this.index = 0;
+		}
+
+		@Override
+		public String toString() {
+			return "index=" + index + "/" + children.length;
+		}
+	}
+
+	enum ShortCircuitMode {
+		AND,  // short-circuit on false, return CBoolean
+		OR,   // short-circuit on true, return CBoolean
+		DAND, // short-circuit on falsy, return actual value
+		DOR   // short-circuit on truthy, return actual value
+	}
+
+	private static StepResult<ShortCircuitState> scBegin(ParseTree[] children) {
+		ShortCircuitState state = new ShortCircuitState(children);
+		return new StepResult<>(new Evaluate(children[0]), state);
+	}
+
+	private static StepResult<ShortCircuitState> scChildCompleted(Target t,
+			ShortCircuitState state, Mixed result, Environment env, ShortCircuitMode mode) {
+		boolean boolVal;
+		switch(mode) {
+			case AND -> {
+				boolVal = ArgumentValidation.getBoolean(result, t, env);
+				if(!boolVal) {
+					return new StepResult<>(new Complete(CBoolean.FALSE), state);
+				}
+			}
+			case OR -> {
+				boolVal = ArgumentValidation.getBoolean(result, t, env);
+				if(boolVal) {
+					return new StepResult<>(new Complete(CBoolean.TRUE), state);
+				}
+			}
+			case DAND -> {
+				if(!ArgumentValidation.getBooleanish(result, t, env)) {
+					return new StepResult<>(new Complete(result), state);
+				}
+			}
+			case DOR -> {
+				if(ArgumentValidation.getBooleanish(result, t, env)) {
+					return new StepResult<>(new Complete(result), state);
+				}
+			}
+		}
+		state.index++;
+		if(state.index < state.children.length) {
+			return new StepResult<>(new Evaluate(state.children[state.index]), state);
+		}
+		// All evaluated, none short-circuited
+		return switch(mode) {
+			case AND -> new StepResult<>(new Complete(CBoolean.TRUE), state);
+			case OR -> new StepResult<>(new Complete(CBoolean.FALSE), state);
+			case DAND, DOR -> new StepResult<>(new Complete(result), state);
+		};
 	}
 
 	@api
@@ -1079,7 +1151,7 @@ public class BasicLogic {
 	@api(environments = {GlobalEnv.class})
 	@seealso({or.class})
 	@OperatorPreferred("&&")
-	public static class and extends AbstractFunction implements Optimizable {
+	public static class and extends AbstractFunction implements Optimizable, FlowFunction<ShortCircuitState> {
 
 		public static final String NAME = "and";
 
@@ -1106,15 +1178,14 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CBoolean execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
-			for(ParseTree tree : nodes) {
-				Mixed c = env.getEnv(GlobalEnv.class).GetScript().seval(tree, env);
-				boolean b = ArgumentValidation.getBooleanish(c, t, env);
-				if(b == false) {
-					return CBoolean.FALSE;
-				}
-			}
-			return CBoolean.TRUE;
+		public StepResult<ShortCircuitState> begin(Target t, ParseTree[] children, Environment env) {
+			return scBegin(children);
+		}
+
+		@Override
+		public StepResult<ShortCircuitState> childCompleted(Target t, ShortCircuitState state,
+				Mixed result, Environment env) {
+			return scChildCompleted(t, state, result, env, ShortCircuitMode.AND);
 		}
 
 		@Override
@@ -1155,11 +1226,6 @@ public class BasicLogic {
 		@Override
 		public Boolean runAsync() {
 			return null;
-		}
-
-		@Override
-		public boolean useSpecialExec() {
-			return true;
 		}
 
 		@Override
@@ -1233,7 +1299,7 @@ public class BasicLogic {
 	}
 
 	@api
-	public static class dand extends AbstractFunction implements Optimizable {
+	public static class dand extends AbstractFunction implements Optimizable, FlowFunction<ShortCircuitState> {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -1251,25 +1317,19 @@ public class BasicLogic {
 		}
 
 		@Override
-		public boolean useSpecialExec() {
-			return true;
-		}
-
-		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return CVoid.VOID;
 		}
 
 		@Override
-		public Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
-			Mixed lastValue = CBoolean.TRUE;
-			for(ParseTree tree : nodes) {
-				lastValue = env.getEnv(GlobalEnv.class).GetScript().seval(tree, env);
-				if(!ArgumentValidation.getBooleanish(lastValue, t, env)) {
-					return lastValue;
-				}
-			}
-			return lastValue;
+		public StepResult<ShortCircuitState> begin(Target t, ParseTree[] children, Environment env) {
+			return scBegin(children);
+		}
+
+		@Override
+		public StepResult<ShortCircuitState> childCompleted(Target t, ShortCircuitState state,
+				Mixed result, Environment env) {
+			return scChildCompleted(t, state, result, env, ShortCircuitMode.DAND);
 		}
 
 		@Override
@@ -1376,7 +1436,7 @@ public class BasicLogic {
 	@api(environments = {GlobalEnv.class})
 	@seealso({and.class})
 	@OperatorPreferred("||")
-	public static class or extends AbstractFunction implements Optimizable {
+	public static class or extends AbstractFunction implements Optimizable, FlowFunction<ShortCircuitState> {
 
 		@Override
 		public String getName() {
@@ -1401,14 +1461,14 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CBoolean execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
-			for(ParseTree tree : nodes) {
-				Mixed c = env.getEnv(GlobalEnv.class).GetScript().seval(tree, env);
-				if(ArgumentValidation.getBooleanish(c, t, env)) {
-					return CBoolean.TRUE;
-				}
-			}
-			return CBoolean.FALSE;
+		public StepResult<ShortCircuitState> begin(Target t, ParseTree[] children, Environment env) {
+			return scBegin(children);
+		}
+
+		@Override
+		public StepResult<ShortCircuitState> childCompleted(Target t, ShortCircuitState state,
+				Mixed result, Environment env) {
+			return scChildCompleted(t, state, result, env, ShortCircuitMode.OR);
 		}
 
 		@Override
@@ -1450,11 +1510,6 @@ public class BasicLogic {
 		@Override
 		public Boolean runAsync() {
 			return null;
-		}
-
-		@Override
-		public boolean useSpecialExec() {
-			return true;
 		}
 
 		@Override
@@ -1531,7 +1586,7 @@ public class BasicLogic {
 	}
 
 	@api
-	public static class dor extends AbstractFunction implements Optimizable {
+	public static class dor extends AbstractFunction implements Optimizable, FlowFunction<ShortCircuitState> {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -1549,24 +1604,19 @@ public class BasicLogic {
 		}
 
 		@Override
-		public boolean useSpecialExec() {
-			return true;
-		}
-
-		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return CVoid.VOID;
 		}
 
 		@Override
-		public Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
-			for(ParseTree tree : nodes) {
-				Mixed c = env.getEnv(GlobalEnv.class).GetScript().seval(tree, env);
-				if(ArgumentValidation.getBooleanish(c, t, env)) {
-					return c;
-				}
-			}
-			return env.getEnv(GlobalEnv.class).GetScript().seval(nodes[nodes.length - 1], env);
+		public StepResult<ShortCircuitState> begin(Target t, ParseTree[] children, Environment env) {
+			return scBegin(children);
+		}
+
+		@Override
+		public StepResult<ShortCircuitState> childCompleted(Target t, ShortCircuitState state,
+				Mixed result, Environment env) {
+			return scChildCompleted(t, state, result, env, ShortCircuitMode.DOR);
 		}
 
 		@Override
@@ -1592,6 +1642,9 @@ public class BasicLogic {
 				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			OptimizationUtilities.pullUpLikeFunctions(children, getName());
+			if(children.isEmpty()) {
+				throw new ConfigCompileException(getName() + " requires at least one argument", t);
+			}
 			return null;
 		}
 
@@ -1790,7 +1843,7 @@ public class BasicLogic {
 
 	@api
 	@seealso({and.class})
-	public static class nand extends AbstractFunction {
+	public static class nand extends AbstractFunction implements FlowFunction<ShortCircuitState> {
 
 		@Override
 		public String getName() {
@@ -1833,8 +1886,18 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CBoolean execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
-			return new and().execs(t, env, parent, generics, nodes).not();
+		public StepResult<ShortCircuitState> begin(Target t, ParseTree[] children, Environment env) {
+			return scBegin(children);
+		}
+
+		@Override
+		public StepResult<ShortCircuitState> childCompleted(Target t, ShortCircuitState state,
+				Mixed result, Environment env) {
+			StepResult<ShortCircuitState> r = scChildCompleted(t, state, result, env, ShortCircuitMode.AND);
+			if(r.getAction() instanceof Complete c) {
+				return new StepResult<>(new Complete(((CBoolean) c.getResult()).not()), state);
+			}
+			return r;
 		}
 
 		@Override
@@ -1852,11 +1915,6 @@ public class BasicLogic {
 		}
 
 		@Override
-		public boolean useSpecialExec() {
-			return true;
-		}
-
-		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "nand(true, true)")};
@@ -1865,7 +1923,7 @@ public class BasicLogic {
 
 	@api
 	@seealso({or.class})
-	public static class nor extends AbstractFunction {
+	public static class nor extends AbstractFunction implements FlowFunction<ShortCircuitState> {
 
 		@Override
 		public String getName() {
@@ -1908,8 +1966,18 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CBoolean execs(Target t, Environment environment, Script parent, GenericParameters generics, ParseTree... args) throws ConfigRuntimeException {
-			return new or().execs(t, environment, parent, generics, args).not();
+		public StepResult<ShortCircuitState> begin(Target t, ParseTree[] children, Environment env) {
+			return scBegin(children);
+		}
+
+		@Override
+		public StepResult<ShortCircuitState> childCompleted(Target t, ShortCircuitState state,
+				Mixed result, Environment env) {
+			StepResult<ShortCircuitState> r = scChildCompleted(t, state, result, env, ShortCircuitMode.OR);
+			if(r.getAction() instanceof Complete c) {
+				return new StepResult<>(new Complete(((CBoolean) c.getResult()).not()), state);
+			}
+			return r;
 		}
 
 		@Override
@@ -1924,11 +1992,6 @@ public class BasicLogic {
 		public Scope linkScope(StaticAnalysis analysis, Scope parentScope,
 				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
 			return this.linkScopeLazy(analysis, parentScope, ast, env, exceptions);
-		}
-
-		@Override
-		public boolean useSpecialExec() {
-			return true;
 		}
 
 		@Override

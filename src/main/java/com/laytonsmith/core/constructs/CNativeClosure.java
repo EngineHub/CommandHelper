@@ -2,6 +2,7 @@ package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
+import com.laytonsmith.core.CallbackYield;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.constructs.generics.ConstraintLocation;
 import com.laytonsmith.core.constructs.generics.Constraints;
@@ -13,7 +14,6 @@ import com.laytonsmith.core.constructs.generics.constraints.VariadicTypeConstrai
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.natives.interfaces.Callable;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 
@@ -52,8 +52,13 @@ public class CNativeClosure extends Construct implements Callable {
 		return true;
 	}
 
+	/**
+	 * @deprecated Functions that call closures should extend {@link CallbackYield}
+	 * instead of calling this directly, which re-enters eval() and defeats the iterative interpreter.
+	 */
+	@Deprecated
 	@Override
-	public Mixed executeCallable(Environment env, Target t, Mixed... values) throws ConfigRuntimeException, ProgramFlowManipulationException, CancelCommandException {
+	public Mixed executeCallable(Environment env, Target t, Mixed... values) throws ConfigRuntimeException, CancelCommandException {
 		return runnable.execute(t, env, values);
 	}
 

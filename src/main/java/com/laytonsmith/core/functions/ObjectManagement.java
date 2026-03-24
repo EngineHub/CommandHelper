@@ -9,10 +9,13 @@ import com.laytonsmith.annotations.hide;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.natives.interfaces.Callable;
 import com.laytonsmith.core.FullyQualifiedClassName;
+import com.laytonsmith.core.FlowFunction;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
-import com.laytonsmith.core.Script;
+import com.laytonsmith.core.StepAction.Complete;
+import com.laytonsmith.core.StepAction.Evaluate;
+import com.laytonsmith.core.StepAction.StepResult;
 import com.laytonsmith.core.UnqualifiedClassName;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.FileOptions;
@@ -114,7 +117,7 @@ public class ObjectManagement {
 
 	@api
 	@hide("Not meant for normal use")
-	public static class define_object extends AbstractFunction implements Optimizable {
+	public static class define_object extends AbstractFunction implements FlowFunction<Void>, Optimizable {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -132,13 +135,19 @@ public class ObjectManagement {
 		}
 
 		@Override
-		public boolean useSpecialExec() {
-			return true;
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			throw new Error();
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			throw new Error();
+		public StepResult<Void> begin(Target t, ParseTree[] children, Environment env) {
+			doDefineObject(t, env, children);
+			return new StepResult<>(new Complete(CVoid.VOID), null);
+		}
+
+		@Override
+		public StepResult<Void> childCompleted(Target t, Void state, Mixed result, Environment env) {
+			throw new Error("define_object does not evaluate children");
 		}
 
 		/**
@@ -215,8 +224,8 @@ public class ObjectManagement {
 			return data.getData();
 		}
 
-		@Override
-		public Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
+
+		private void doDefineObject(Target t, Environment env, ParseTree... nodes) {
 			// 0 - Access Modifier
 			AccessModifier accessModifier = ArgumentValidation.getEnum(evaluateStringNoNull(nodes[0], t, env),
 					AccessModifier.class, t);
@@ -387,7 +396,6 @@ public class ObjectManagement {
 				}
 			}
 
-			return CVoid.VOID;
 		}
 
 		@Override
@@ -395,8 +403,7 @@ public class ObjectManagement {
 				Set<Class<? extends Environment.EnvironmentImpl>> envs,
 				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
-			// Do the same thing as execs, but remove this call
-			execs(t, env, null, null, children.toArray(new ParseTree[children.size()]));
+			doDefineObject(t, env, children.toArray(new ParseTree[children.size()]));
 			return REMOVE_ME;
 		}
 
@@ -441,7 +448,7 @@ public class ObjectManagement {
 
 	@api
 	@hide("Normally one should use the new keyword")
-	public static class new_object extends AbstractFunction implements Optimizable {
+	public static class new_object extends AbstractFunction implements FlowFunction<new_object.NewObjectState>, Optimizable {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -459,11 +466,6 @@ public class ObjectManagement {
 		}
 
 		@Override
-		public boolean useSpecialExec() {
-			return true;
-		}
-
-		@Override
 		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			throw new Error();
 		}
@@ -475,18 +477,25 @@ public class ObjectManagement {
 		private static final int DEFAULT = -1;
 		private static final int UNDECIDEABLE = -2;
 
+		static class NewObjectState {
+			ParseTree[] children;
+			Callable constructor;
+			Mixed obj;
+			Mixed[] constructorArgs;
+			int nextArgIndex;
+		}
+
 		@Override
-		public Mixed execs(final Target t, final Environment env, Script parent, GenericParameters generics, ParseTree... args)
-				throws ConfigRuntimeException {
+		public StepResult<NewObjectState> begin(Target t, ParseTree[] children, Environment env) {
 			ObjectDefinitionTable odt = env.getEnv(CompilerEnvironment.class).getObjectDefinitionTable();
-			CClassType clazz = ((CClassType) args[0].getData());
+			CClassType clazz = ((CClassType) children[0].getData());
 			ObjectDefinition od;
 			try {
 				od = odt.get(clazz.getFQCN());
-			} catch (ObjectDefinitionNotFoundException ex) {
+			} catch(ObjectDefinitionNotFoundException ex) {
 				throw new CREClassDefinitionError(ex.getMessage(), t, ex);
 			}
-			int constructorId = (int) ((CInt) args[1].getData()).getInt();
+			int constructorId = (int) ((CInt) children[1].getData()).getInt();
 			Callable constructor;
 			switch(constructorId) {
 				case DEFAULT:
@@ -512,17 +521,39 @@ public class ObjectManagement {
 				// and grab the object generated there.
 			}
 			GenericParameters genericParameters = null; // TODO
-			Mixed obj = new UserObject(t, parent, env, od, genericParameters, null);
+			Mixed obj = new UserObject(t, null, env, od, genericParameters, null);
+
+			NewObjectState state = new NewObjectState();
+			state.children = children;
+			state.constructor = constructor;
+			state.obj = obj;
+
 			// This is the MethodScript construction.
 			if(constructor != null) {
-				Mixed[] values = new Mixed[args.length - 1];
-				values[0] = obj;
-				for(int i = 2; i < args.length; i++) {
-					values[i + 1] = parent.eval(args[i], env);
+				state.constructorArgs = new Mixed[children.length - 1];
+				state.constructorArgs[0] = obj;
+				if(children.length > 2) {
+					state.nextArgIndex = 2;
+					return new StepResult<>(new Evaluate(children[2]), state);
 				}
-				constructor.executeCallable(env, t, values);
+				constructor.executeCallable(env, t, state.constructorArgs);
 			}
-			return obj;
+
+			return new StepResult<>(new Complete(obj), state);
+		}
+
+		@Override
+		public StepResult<NewObjectState> childCompleted(Target t, NewObjectState state,
+				Mixed result, Environment env) {
+			state.constructorArgs[state.nextArgIndex - 1] = result;
+			state.nextArgIndex++;
+
+			if(state.nextArgIndex < state.children.length) {
+				return new StepResult<>(new Evaluate(state.children[state.nextArgIndex]), state);
+			}
+
+			state.constructor.executeCallable(env, t, state.constructorArgs);
+			return new StepResult<>(new Complete(state.obj), state);
 		}
 
 		@Override

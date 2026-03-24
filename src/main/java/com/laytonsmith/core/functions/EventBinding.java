@@ -8,10 +8,13 @@ import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.FlowFunction;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
-import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.StepAction.Complete;
+import com.laytonsmith.core.StepAction.Evaluate;
+import com.laytonsmith.core.StepAction.StepResult;
 import com.laytonsmith.core.compiler.BranchStatement;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
@@ -82,7 +85,7 @@ public class EventBinding {
 
 	@api
 	@SelfStatement
-	public static class bind extends AbstractFunction implements Optimizable, BranchStatement, VariableScope, DocumentSymbolProvider {
+	public static class bind extends AbstractFunction implements FlowFunction<bind.BindState>, Optimizable, BranchStatement, VariableScope, DocumentSymbolProvider {
 
 		@Override
 		public String getName() {
@@ -133,67 +136,118 @@ public class EventBinding {
 			return CVoid.VOID;
 		}
 
+		// -- FlowFunction implementation --
+		// bind evaluates args 0-2 with IVariable resolution (equivalent to seval),
+		// args 3..n-2 with keepIVariable=true (need raw IVariables for event_obj and custom params),
+		// and does NOT evaluate the last arg (the code tree stored in the BoundEvent).
+
+		static class BindState {
+			int nextArg = 0;
+			ParseTree[] children;
+			Mixed name;
+			Mixed options;
+			Mixed prefilter;
+			Mixed eventObj;
+			IVariableList customParams;
+		}
+
 		@Override
-		public Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
-			if(nodes.length < 5) {
+		public StepResult<BindState> begin(Target t, ParseTree[] children, Environment env) {
+			if(children.length < 5) {
 				throw new CREInsufficientArgumentsException("bind accepts 5 or more parameters", t);
 			}
-			Mixed name = parent.seval(nodes[0], env);
-			Mixed options = parent.seval(nodes[1], env);
-			Mixed prefilter = parent.seval(nodes[2], env);
-			Mixed event_obj = parent.eval(nodes[3], env);
-			IVariableList custom_params = new IVariableList(env.getEnv(GlobalEnv.class).GetVarList());
-			for(int a = 0; a < nodes.length - 5; a++) {
-				Mixed var = parent.eval(nodes[4 + a], env);
-				if(!(var instanceof IVariable)) {
-					throw new CRECastException("The custom parameters must be ivariables", t);
-				}
-				IVariable cur = (IVariable) var;
-				custom_params.set(env.getEnv(GlobalEnv.class).GetVarList().get(cur.getVariableName(),
-						cur.getTarget(), env));
-			}
-			Environment newEnv = env;
-			try {
-				newEnv = env.clone();
-			} catch (Exception e) {
-			}
-			// Set the permission to global if it's null, since that means
-			// it wasn't set, and so we aren't in a secured environment anyway.
-			if(newEnv.getEnv(GlobalEnv.class).GetLabel() == null) {
-				newEnv.getEnv(GlobalEnv.class).SetLabel(Static.GLOBAL_PERMISSION);
-			}
-			newEnv.getEnv(GlobalEnv.class).SetVarList(custom_params);
-			ParseTree tree = nodes[nodes.length - 1];
+			BindState state = new BindState();
+			state.children = children;
+			state.customParams = new IVariableList(env.getEnv(GlobalEnv.class).GetVarList());
+			return new StepResult<>(new Evaluate(children[0]), state);
+		}
 
-			//Check to see if our arguments are correct
-			if(!(options instanceof CNull || options.isInstanceOf(CArray.TYPE, null, env))) {
-				throw new CRECastException("The options must be an array or null", t);
+		@Override
+		public StepResult<BindState> childCompleted(Target t, BindState state, Mixed result, Environment env) {
+			int argIndex = state.nextArg;
+			state.nextArg++;
+
+			switch(argIndex) {
+				case 0 -> state.name = result;
+				case 1 -> {
+					if(!(result instanceof CNull || result.isInstanceOf(CArray.TYPE, null, env))) {
+						throw new CRECastException("The options must be an array or null", t);
+					}
+					state.options = result;
+				}
+				case 2 -> {
+					if(!(result instanceof CNull || result.isInstanceOf(CArray.TYPE, null, env))) {
+						throw new CRECastException("The prefilters must be an array or null", t);
+					}
+					state.prefilter = result;
+				}
+				case 3 -> {
+					if(!(result instanceof IVariable)) {
+						throw new CRECastException("The event object must be an IVariable", t);
+					}
+					state.eventObj = result;
+				}
+				default -> {
+					if(!(result instanceof IVariable)) {
+						throw new CRECastException("The custom parameters must be ivariables", t);
+					}
+					IVariable cur = (IVariable) result;
+					state.customParams.set(env.getEnv(GlobalEnv.class).GetVarList()
+							.get(cur.getVariableName(), cur.getTarget(), env));
+				}
 			}
-			if(!(prefilter instanceof CNull || prefilter.isInstanceOf(CArray.TYPE, null, env))) {
-				throw new CRECastException("The prefilters must be an array or null", t);
+
+			int nextIndex = state.nextArg;
+			int lastIndex = state.children.length - 1;
+
+			if(nextIndex < lastIndex) {
+				boolean keepIVar = nextIndex >= 3;
+				return new StepResult<>(new Evaluate(state.children[nextIndex], null, keepIVar), state);
 			}
-			if(!(event_obj instanceof IVariable)) {
-				throw new CRECastException("The event object must be an IVariable", t);
-			}
-			CString id;
+
+			// All args evaluated — register the event
+			return new StepResult<>(new Complete(registerBind(t, state, env)), state);
+		}
+
+		/**
+		 * Performs the bind registration after all args have been evaluated and validated.
+		 */
+		private Mixed registerBind(Target t, BindState state, Environment env) {
+			Mixed options = state.options;
+			Mixed prefilter = state.prefilter;
+
 			if(options instanceof CNull) {
 				options = null;
 			}
 			if(prefilter instanceof CNull) {
 				prefilter = null;
 			}
+
+			Environment newEnv = env;
+			try {
+				newEnv = env.clone();
+			} catch(Exception e) {
+			}
+			if(newEnv.getEnv(GlobalEnv.class).GetLabel() == null) {
+				newEnv.getEnv(GlobalEnv.class).SetLabel(Static.GLOBAL_PERMISSION);
+			}
+			newEnv.getEnv(GlobalEnv.class).SetVarList(state.customParams);
+
+			ParseTree tree = state.children[state.children.length - 1];
+
+			CString id;
 			Event event;
 			try {
-				BoundEvent be = new BoundEvent(name.val(), (CArray) options, (CArray) prefilter,
-						((IVariable) event_obj).getVariableName(), newEnv, tree, t);
+				BoundEvent be = new BoundEvent(state.name.val(), (CArray) options, (CArray) prefilter,
+						((IVariable) state.eventObj).getVariableName(), newEnv, tree, t);
 				EventUtils.RegisterEvent(be);
 				id = new CString(be.getId(), t);
 				event = be.getEventDriver();
-			} catch (EventException ex) {
+			} catch(EventException ex) {
 				throw new CREBindException(ex.getMessage(), t);
 			}
 
-			//Set up our bind counter, but only if the event is supposed to be added to the counter
+			// Set up bind counter for daemon thread management
 			if(event.addCounter()) {
 				synchronized(BIND_COUNTER) {
 					if(BIND_COUNTER.get() == 0) {
@@ -355,11 +409,6 @@ public class EventBinding {
 
 			// Allow code after bind() to access declarations in assigned values, but not parameters themselves.
 			return valScope;
-		}
-
-		@Override
-		public boolean useSpecialExec() {
-			return true;
 		}
 
 		@Override

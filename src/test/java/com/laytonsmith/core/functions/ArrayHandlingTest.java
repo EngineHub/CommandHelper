@@ -307,6 +307,30 @@ public class ArrayHandlingTest extends AbstractIntegrationTest {
 	}
 
 	@Test
+	public void testArraySortCustomClosure() throws Exception {
+		Run("@a = array(3, 1, 4, 1, 5, 9);\n"
+				+ "array_sort(@a, closure(@l, @r){ return(@l - @r); });\n"
+				+ "msg(@a);", fakePlayer);
+		verify(fakePlayer).sendMessage("{1, 1, 3, 4, 5, 9}");
+	}
+
+	@Test
+	public void testArraySortCustomClosureReverse() throws Exception {
+		Run("@a = array(3, 1, 4, 1, 5, 9);\n"
+				+ "array_sort(@a, closure(@l, @r){ return(@r - @l); });\n"
+				+ "msg(@a);", fakePlayer);
+		verify(fakePlayer).sendMessage("{9, 5, 4, 3, 1, 1}");
+	}
+
+	@Test
+	public void testArraySortCustomClosureBoolean() throws Exception {
+		Run("@a = array(5, 2, 8, 1);\n"
+				+ "array_sort(@a, closure(@l, @r){ return(@l > @r); });\n"
+				+ "msg(@a);", fakePlayer);
+		verify(fakePlayer).sendMessage("{1, 2, 5, 8}");
+	}
+
+	@Test
 	public void testArrayImplode1() throws Exception {
 		Run("msg(array_implode(array(1,2,3,4,5,6,7,8,9,1,2,3,4,5)))", fakePlayer);
 		verify(fakePlayer).sendMessage("1 2 3 4 5 6 7 8 9 1 2 3 4 5");
@@ -528,6 +552,51 @@ public class ArrayHandlingTest extends AbstractIntegrationTest {
 	}
 
 	@Test
+	public void testArrayFilterNormal() throws Exception {
+		Run("@array = array(1, 2, 3, 4, 5);\n"
+				+ "@odds = array_filter(@array, closure(@key, @value){\n"
+				+ "\treturn(@value % 2 == 1);\n"
+				+ "});\n"
+				+ "msg(@odds);", fakePlayer);
+		verify(fakePlayer).sendMessage("{1, 3, 5}");
+	}
+
+	@Test
+	public void testArrayFilterAssociative() throws Exception {
+		Run("@array = array(a: 1, b: 2, c: 3);\n"
+				+ "@result = array_filter(@array, closure(@key, @value){\n"
+				+ "\treturn(@value > 1);\n"
+				+ "});\n"
+				+ "msg(@result);", fakePlayer);
+		verify(fakePlayer).sendMessage("{b: 2, c: 3}");
+	}
+
+	@Test
+	public void testArrayFilterEmpty() throws Exception {
+		Run("@array = array();\n"
+				+ "@result = array_filter(@array, closure(@key, @value){\n"
+				+ "\treturn(true);\n"
+				+ "});\n"
+				+ "msg(@result);", fakePlayer);
+		verify(fakePlayer).sendMessage("{}");
+	}
+
+	@Test
+	public void testArrayReduceEmpty() throws Exception {
+		assertEquals("null", SRun("array_reduce(array(), closure(@a, @b){ return(@a + @b); })", fakePlayer));
+	}
+
+	@Test
+	public void testArrayReduceSingle() throws Exception {
+		assertEquals("5", SRun("array_reduce(array(5), closure(@a, @b){ return(@a + @b); })", fakePlayer));
+	}
+
+	@Test
+	public void testArrayReduceRightSingle() throws Exception {
+		assertEquals("5", SRun("array_reduce_right(array(5), closure(@a, @b){ return(@a + @b); })", fakePlayer));
+	}
+
+	@Test
 	public void testArrayReverse() throws Exception {
 		Run("@array = array(1, 2, 3, 4);\n"
 				+ "array_reverse(@array);\n"
@@ -564,6 +633,38 @@ public class ArrayHandlingTest extends AbstractIntegrationTest {
 				+ " array(array(id: 1, qty: 19), array(id: 6, qty: 2)), closure(@a, @b){ return(@a['id'] == @b['id']); })", fakePlayer),
 				is("{{id: 1, qty: 2}}"));
 
+	}
+
+	@Test
+	public void testArraySubtractHash() throws Exception {
+		assertThat(SRun("array_subtract(array(1, 2, 3, 4), array(2, 4))", fakePlayer), is("{1, 3}"));
+	}
+
+	@Test
+	public void testArraySubtractEquals() throws Exception {
+		assertThat(SRun("array_subtract(array(1, 2, 3), array(2, 3, 4), 'EQUALS')", fakePlayer), is("{1}"));
+	}
+
+	@Test
+	public void testArraySubtractAssociative() throws Exception {
+		assertThat(SRun("array_subtract(array(a: 1, b: 2, c: 3), array(b: 99, d: 4))", fakePlayer), is("{a: 1, c: 3}"));
+	}
+
+	@Test
+	public void testArraySubtractClosure() throws Exception {
+		assertThat(SRun("array_subtract(array(1, 2, 3, 4), array(10, 20), closure(@a, @b){ return(@a * 10 == @b); })",
+				fakePlayer), is("{3, 4}"));
+	}
+
+	@Test
+	public void testArraySubtractNoOverlap() throws Exception {
+		assertThat(SRun("array_subtract(array(1, 2, 3), array(4, 5, 6))", fakePlayer), is("{1, 2, 3}"));
+	}
+
+	@Test
+	public void testArrayIntersectClosurePartial() throws Exception {
+		assertThat(SRun("array_intersect(array(1, 2, 3, 4), array(10, 30), closure(@a, @b){ return(@a * 10 == @b); })",
+				fakePlayer), is("{1, 3}"));
 	}
 
 	@Test

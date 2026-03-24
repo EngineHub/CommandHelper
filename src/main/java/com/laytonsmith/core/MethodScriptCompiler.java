@@ -76,6 +76,7 @@ import java.util.Collections;
 import java.util.EmptyStackException;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -3060,12 +3061,27 @@ public final class MethodScriptCompiler {
 	 * @return
 	 */
 	public static Mixed execute(ParseTree root, Environment env, MethodScriptComplete done, Script script) {
-		return execute(root, env, done, script, null);
+		Mixed result;
+		if(root == null) {
+			result = CVoid.VOID;
+		} else {
+			if(script == null) {
+				script = new Script(null, null, env.getEnv(GlobalEnv.class).GetLabel(), env.getEnvClasses(),
+						root.getFileOptions(), null);
+			}
+			result = script.eval(root, env);
+		}
+		if(done != null) {
+			done.done(result.val().trim());
+		}
+		return result;
 	}
 
 	/**
 	 * Executes a pre-compiled MethodScript, given the specified Script environment, but also provides a method to set
-	 * the constants in the script.
+	 * the constants in the script. The $variable bindings are resolved by walking the tree and mapping each Variable
+	 * node's identity to its resolved value, then storing the map in the environment. See
+	 * {@link GlobalEnv#SetDollarVarBindings} for details on why identity-based lookup is used.
 	 *
 	 * @param root
 	 * @param env
@@ -3075,53 +3091,23 @@ public final class MethodScriptCompiler {
 	 * @return
 	 */
 	public static Mixed execute(ParseTree root, Environment env, MethodScriptComplete done, Script script, List<Variable> vars) {
-		if(root == null) {
-			return CVoid.VOID;
-		}
-		if(script == null) {
-			script = new Script(null, null, env.getEnv(GlobalEnv.class).GetLabel(), env.getEnvClasses(),
-					root.getFileOptions(), null);
-		}
-		if(vars != null) {
-			Map<String, Variable> varMap = new HashMap<>();
+		if(root != null && vars != null && !vars.isEmpty()) {
+			Map<String, String> varValues = new HashMap<>();
 			for(Variable v : vars) {
-				varMap.put(v.getVariableName(), v);
+				varValues.put(v.getVariableName(), v.getDefault());
 			}
+			IdentityHashMap<Mixed, String> dollarBindings = new IdentityHashMap<>();
 			for(Mixed tempNode : root.getAllData()) {
 				if(tempNode instanceof Variable variable) {
-					Variable vv = varMap.get(variable.getVariableName());
-					if(vv != null) {
-						variable.setVal(vv.getDefault());
-					} else {
-						//The variable is unset. I'm not quite sure what cases would cause this
-						variable.setVal("");
+					String val = varValues.get(variable.getVariableName());
+					if(val != null) {
+						dollarBindings.put(tempNode, val);
 					}
 				}
 			}
+			env.getEnv(GlobalEnv.class).SetDollarVarBindings(dollarBindings);
 		}
-		StringBuilder b = new StringBuilder();
-		Mixed returnable = null;
-		for(ParseTree gg : root.getChildren()) {
-			Mixed retc = script.eval(gg, env);
-			if(root.numberOfChildren() == 1) {
-				returnable = retc;
-				if(done == null) {
-					// string builder is not needed, so return immediately
-					return returnable;
-				}
-			}
-			String ret = retc.val();
-			if(!ret.trim().isEmpty()) {
-				b.append(ret).append(" ");
-			}
-		}
-		if(done != null) {
-			done.done(b.toString().trim());
-		}
-		if(returnable != null) {
-			return returnable;
-		}
-		return Static.resolveConstruct(b.toString().trim(), Target.UNKNOWN, env);
+		return execute(root, env, done, script);
 	}
 
 	private static final List<Character> PDF_STACK = Arrays.asList(

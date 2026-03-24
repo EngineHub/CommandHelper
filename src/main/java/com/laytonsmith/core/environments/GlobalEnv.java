@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -64,6 +65,28 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	private FileOptions fileOptions;
 	private final CClassType.ClassTypeCache classTypeCache = new CClassType.ClassTypeCache();
 	private ScriptProvider scriptProvider = new ScriptProvider.FileSystemScriptProvider();
+
+	// $variable (dollar-variable) bindings for the current execution context.
+	//
+	// $variables are alias command parameters (e.g. /cmd $x = msg($x)), and also
+	// command-line script arguments ($0, $1, $). They are scoped to the compiled
+	// tree in which they appear — the old implementation walked the entire parse tree
+	// and mutated each Variable node in place via setVal(). This was thread-unsafe:
+	// if two threads executed the same alias concurrently, one thread's values would
+	// overwrite the other's, since they shared the same compiled tree.
+	//
+	// The new design avoids tree mutation entirely. Instead, we collect the identity
+	// (object reference) of every Variable node found in the tree via getAllData(),
+	// resolve its value, and store the mapping here using an IdentityHashMap. The
+	// interpreter checks this map when it encounters a Variable node. Because identity
+	// is used (not equals), a $x node that appears in the original alias tree is resolved,
+	// but a $x node in an unrelated tree (e.g. a different alias or a separately compiled
+	// include) is not — preserving the original tree-scoped visibility semantics.
+	//
+	// This map is set once at the start of execution (in Script.run() or
+	// MethodScriptCompiler.execute()) and is carried through the environment into
+	// nested calls (procs defined inline, etc.) without modification.
+	private IdentityHashMap<Mixed, String> dollarVarBindings = null;
 
 	/**
 	 * Creates a new GlobalEnvironment. All fields in the constructor are required, and cannot be null.
@@ -382,7 +405,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	public StackTraceManager GetStackTraceManager() {
 		Thread currentThread = Thread.currentThread();
 		if(this.stackTraceManager == null || currentThread != this.stackTraceManagerThread) {
-			this.stackTraceManager = new StackTraceManager();
+			this.stackTraceManager = new StackTraceManager(this);
 			this.stackTraceManagerThread = currentThread;
 		}
 		return this.stackTraceManager;
@@ -540,5 +563,25 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	 */
 	public Map<CClassType, Set<CClassType>> getIsInstanceofCache() {
 		return isInstanceofCache;
+	}
+
+	/**
+	 * Sets the resolved $variable bindings for this execution. The map uses identity-based
+	 * lookup (IdentityHashMap) so that only the specific Variable nodes from the original
+	 * tree are resolved - this preserves tree-scoped visibility without mutating the tree.
+	 */
+	public void SetDollarVarBindings(IdentityHashMap<Mixed, String> bindings) {
+		this.dollarVarBindings = bindings;
+	}
+
+	/**
+	 * Returns the resolved value for a specific $variable node, or null if the node
+	 * is not in scope.
+	 */
+	public String GetDollarVarBinding(Mixed variableNode) {
+		if(dollarVarBindings == null) {
+			return null;
+		}
+		return dollarVarBindings.get(variableNode);
 	}
 }

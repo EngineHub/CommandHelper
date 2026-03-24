@@ -13,7 +13,6 @@ import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
-import com.laytonsmith.core.Script;
 import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.SelfStatement;
@@ -26,7 +25,6 @@ import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CString;
-import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.IVariableList;
 import com.laytonsmith.core.constructs.LeftHandSideType;
@@ -66,19 +64,7 @@ public abstract class AbstractFunction implements Function {
 
 	/**
 	 * {@inheritDoc}
-	 *
-	 * By default, we return CVoid.
-	 *
-	 * @param t
-	 * @param env
-	 * @param parent
-	 * @param nodes
-	 * @return
 	 */
-	@Override
-	public Mixed execs(Target t, Environment env, Script parent, GenericParameters generics, ParseTree... nodes) {
-		return CVoid.VOID;
-	}
 
 	private Set<Function> nagAlert = new TreeSet<>();
 
@@ -294,16 +280,6 @@ public abstract class AbstractFunction implements Function {
 			return firstArgScope;
 		}
 		return parentScope;
-	}
-
-	/**
-	 * By default, we return false, because most functions do not need this
-	 *
-	 * @return
-	 */
-	@Override
-	public boolean useSpecialExec() {
-		return false;
 	}
 
 	/**
