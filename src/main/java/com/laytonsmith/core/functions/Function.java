@@ -18,6 +18,7 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -248,17 +249,31 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 	 */
 	static Mixed ExecuteFunction(Function f, Target t, Environment env, Mixed[] args) throws ConfigRuntimeException {
 		if(OLD_EXEC_CACHE.contains(f.getClass())) {
-			return ReflectionUtils.invokeMethod(f.getClass(), f, "exec",
-					new Class[]{Target.class, Environment.class, Mixed[].class},
-					new Object[]{t, env, args});
+			return invokeOldExec(f, t, env, args);
 		}
 		try {
 			return f.exec(t, env, null, args);
 		} catch(AbstractMethodError e) {
 			OLD_EXEC_CACHE.add(f.getClass());
+			return invokeOldExec(f, t, env, args);
+		}
+	}
+
+	private static Mixed invokeOldExec(Function f, Target t, Environment env, Mixed[] args)
+			throws ConfigRuntimeException {
+		try {
 			return ReflectionUtils.invokeMethod(f.getClass(), f, "exec",
 					new Class[]{Target.class, Environment.class, Mixed[].class},
 					new Object[]{t, env, args});
+		} catch(ReflectionUtils.ReflectionException e) {
+			Throwable cause = e.getCause();
+			if(cause instanceof InvocationTargetException) {
+				cause = cause.getCause();
+			}
+			if(cause instanceof ConfigRuntimeException) {
+				throw (ConfigRuntimeException) cause;
+			}
+			throw e;
 		}
 	}
 
@@ -269,17 +284,30 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 
 	static String ExecuteProfileMessage(Function f, Environment env, Mixed[] args) {
 		if(OLD_PROFILE_MESSAGE_CACHE.contains(f.getClass())) {
-			return (String) ReflectionUtils.invokeMethod(f.getClass(), f, "profileMessage",
-					new Class[]{Mixed[].class},
-					new Object[]{args});
+			return invokeOldProfileMessage(f, args);
 		}
 		try {
 			return f.profileMessage(env, args);
 		} catch(AbstractMethodError e) {
 			OLD_PROFILE_MESSAGE_CACHE.add(f.getClass());
+			return invokeOldProfileMessage(f, args);
+		}
+	}
+
+	private static String invokeOldProfileMessage(Function f, Mixed[] args) {
+		try {
 			return (String) ReflectionUtils.invokeMethod(f.getClass(), f, "profileMessage",
 					new Class[]{Mixed[].class},
 					new Object[]{args});
+		} catch(ReflectionUtils.ReflectionException e) {
+			Throwable cause = e.getCause();
+			if(cause instanceof InvocationTargetException) {
+				cause = cause.getCause();
+			}
+			if(cause instanceof ConfigRuntimeException) {
+				throw (ConfigRuntimeException) cause;
+			}
+			throw e;
 		}
 	}
 }
