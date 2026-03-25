@@ -27,6 +27,7 @@ import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.DebugContext;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.RuntimeMode;
@@ -53,6 +54,7 @@ import com.laytonsmith.tools.Manager;
 import com.laytonsmith.tools.ProfilerSummary;
 import com.laytonsmith.tools.SyntaxHighlighters;
 import com.laytonsmith.tools.UILauncher;
+import com.laytonsmith.tools.debugger.DebugSecurity;
 import com.laytonsmith.tools.debugger.MSDebugServer;
 import com.laytonsmith.tools.docgen.DocGen;
 import com.laytonsmith.tools.docgen.DocGenExportTool;
@@ -1091,7 +1093,28 @@ public class Main {
 					.addArgument(new ArgumentBuilder()
 						.setDescription("Wait for the debugger to connect before executing.")
 						.asFlag()
-						.setName("debug-suspend"));
+						.setName("debug-suspend"))
+					.addArgument(new ArgumentBuilder()
+						.setDescription("The security mode for the debug server."
+								+ " Required when --debug is set."
+								+ " NONE: no authentication (localhost only)."
+								+ " KEYPAIR: SSH-style key authentication with TLS.")
+						.setUsageName("mode")
+						.setOptional()
+						.setName("debug-security")
+						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING))
+					.addArgument(new ArgumentBuilder()
+						.setDescription("The address to bind the debug server to."
+								+ " Defaults to " + MSDebugServer.DEFAULT_BIND_ADDRESS + ".")
+						.setUsageName("address")
+						.setOptional()
+						.setName("debug-bind-address")
+						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING))
+					.addArgument(new ArgumentBuilder()
+						.setDescription("Convenience shorthand that sets --debug-security NONE"
+								+ " and --debug-bind-address 0.0.0.0. For quick testing only.")
+						.asFlag()
+						.setName("debug-insecure"));
 		}
 
 		@Override
@@ -1104,6 +1127,42 @@ public class Main {
 				debugPort = parsedArgs.getNumberArgument("debug-port").intValue();
 			}
 			boolean debugSuspend = parsedArgs.isFlagSet("debug-suspend");
+			boolean debugInsecure = parsedArgs.isFlagSet("debug-insecure");
+			String debugSecurityStr = parsedArgs.getStringArgument("debug-security");
+			String debugBindAddress = parsedArgs.getStringArgument("debug-bind-address");
+
+			// --debug-insecure changes defaults but explicit values take priority
+			String defaultSecurity = debugInsecure
+					? DebugSecurity.NONE.name() : null;
+			String defaultBindAddress = debugInsecure ? "0.0.0.0"
+					: MSDebugServer.DEFAULT_BIND_ADDRESS;
+
+			DebugSecurity debugSecurity;
+			String securityValue = debugSecurityStr != null ? debugSecurityStr : defaultSecurity;
+			if(securityValue != null) {
+				try {
+					debugSecurity = DebugSecurity.valueOf(securityValue.toUpperCase());
+				} catch(IllegalArgumentException e) {
+					StreamUtils.GetSystemErr().println("Invalid --debug-security value: "
+							+ securityValue + ". Must be one of "
+							+ StringUtils.Join(DebugSecurity.values(),
+									", ", ", or "));
+					System.exit(1);
+					return;
+				}
+			} else if(debug) {
+				StreamUtils.GetSystemErr().println("--debug-security is required when"
+						+ " --debug is set. Must be one of "
+						+ StringUtils.Join(DebugSecurity.values(),
+								", ", ", or "));
+				System.exit(1);
+				return;
+			} else {
+				debugSecurity = DebugSecurity.KEYPAIR;
+			}
+			if(debugBindAddress == null) {
+				debugBindAddress = defaultBindAddress;
+			}
 
 			String script = parsedArgs.getStringArgument();
 			File file = new File("Interpreter");
@@ -1115,7 +1174,12 @@ public class Main {
 			if(debug) {
 				int port = debugPort == 0 ? MSDebugServer.DEFAULT_PORT : debugPort;
 				debugServer = new MSDebugServer();
-				env = debugServer.startListening(port, env, debugSuspend);
+				File authorizedKeysFile = debugSecurity == DebugSecurity.KEYPAIR
+						? MethodScriptFileLocations.getDefault().getAuthorizedDebugKeysFile()
+						: null;
+				env = debugServer.startListening(port, debugBindAddress, env,
+						debugSuspend, DebugContext.ThreadingMode.SYNCHRONOUS,
+						debugSecurity, authorizedKeysFile);
 				debugServer.awaitConfiguration();
 			}
 
@@ -1269,6 +1333,9 @@ public class Main {
 			int debugPort = 0;
 			boolean debugSuspend = false;
 			String debugThreadingMode = null;
+			String debugSecurityStr = null;
+			String debugBindAddress = null;
+			boolean debugInsecure = false;
 			for(java.util.Iterator<String> it = allArgs.iterator(); it.hasNext();) {
 				String arg = it.next();
 				if("--debug".equals(arg)) {
@@ -1289,14 +1356,68 @@ public class Main {
 						debugThreadingMode = it.next();
 						it.remove();
 					}
+				} else if("--debug-security".equals(arg)) {
+					it.remove();
+					if(it.hasNext()) {
+						debugSecurityStr = it.next();
+						it.remove();
+					}
+				} else if("--debug-bind-address".equals(arg)) {
+					it.remove();
+					if(it.hasNext()) {
+						debugBindAddress = it.next();
+						it.remove();
+					}
+				} else if("--debug-insecure".equals(arg)) {
+					debugInsecure = true;
+					it.remove();
 				}
+			}
+
+			// Resolve security and bind address.
+			// --debug-insecure changes defaults; explicit values take priority.
+			String defaultSecurity = debugInsecure
+					? DebugSecurity.NONE.name() : null;
+			String defaultBindAddress = debugInsecure ? "0.0.0.0"
+					: MSDebugServer.DEFAULT_BIND_ADDRESS;
+
+			DebugSecurity debugSecurity;
+			String securityValue = debugSecurityStr != null
+					? debugSecurityStr : defaultSecurity;
+			if(securityValue != null) {
+				try {
+					debugSecurity = DebugSecurity.valueOf(
+							securityValue.toUpperCase());
+				} catch(IllegalArgumentException e) {
+					StreamUtils.GetSystemErr().println(
+							"Invalid --debug-security value: "
+							+ securityValue + ". Must be one of "
+							+ StringUtils.Join(DebugSecurity.values(),
+									", ", ", or "));
+					System.exit(1);
+					return;
+				}
+			} else if(debug) {
+				StreamUtils.GetSystemErr().println(
+						"--debug-security is required when --debug is"
+						+ " set. Must be one of "
+						+ StringUtils.Join(DebugSecurity.values(),
+								", ", ", or "));
+				System.exit(1);
+				return;
+			} else {
+				debugSecurity = DebugSecurity.KEYPAIR;
+			}
+			if(debugBindAddress == null) {
+				debugBindAddress = defaultBindAddress;
 			}
 
 			String fileName = allArgs.get(0);
 			allArgs.remove(0);
 			try {
 				Interpreter.startWithTTY(fileName, allArgs, true,
-						debug, debugPort, debugSuspend, debugThreadingMode);
+						debug, debugPort, debugSuspend, debugThreadingMode,
+						debugSecurity, debugBindAddress);
 			} catch (Profiles.InvalidProfileException ex) {
 				StreamUtils.GetSystemErr().println("Invalid profile file at " + MethodScriptFileLocations.getDefault()
 						.getProfilesFile()
@@ -1394,8 +1515,9 @@ public class Main {
 		@Override
 		public ArgumentParser getArgumentParser() {
 			return ArgumentParser.GetParser()
-				.addDescription("Creates an ssh compatible rsa key pair. This is used with the Federation system, but"
-						+ " is useful with other tools as well.")
+				.addDescription("Creates an ssh compatible rsa key pair, suitable for use with the"
+						+ " MethodScript debugger's KEYPAIR security mode, or other tools that"
+						+ " require RSA key authentication.")
 				.addArgument(new ArgumentBuilder()
 						.setDescription("Output file for the keys. For instance, \"/home/user/.ssh/id_rsa\"."
 							+ " The public key will have the same name, with \".pub\" appended.")

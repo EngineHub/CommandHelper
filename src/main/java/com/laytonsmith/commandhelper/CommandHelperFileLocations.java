@@ -31,4 +31,13 @@ public class CommandHelperFileLocations extends MethodScriptFileLocations {
 		return new File(getCacheDirectory(), "upgradeLog.json");
 	}
 
+	/**
+	 * Returns the location of the authorized_debug_keys file.
+	 * @return
+	 */
+	@Override
+	public File getAuthorizedDebugKeysFile() {
+		return new File(getConfigDirectory(), "authorized_debug_keys");
+	}
+
 }

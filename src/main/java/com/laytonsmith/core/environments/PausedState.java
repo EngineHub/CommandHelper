@@ -5,6 +5,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.StackTraceFrame;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -56,4 +57,23 @@ public interface PausedState {
 	 * If this is an exception pause, returns the exception. Otherwise returns null.
 	 */
 	ConfigRuntimeException getPauseException();
+
+	/**
+	 * Returns the available step-in targets for the current paused location.
+	 * Each target represents a function call on the current line that could be
+	 * stepped into (procs, closures, includes). Default returns empty.
+	 */
+	default List<StepInTargetInfo> getStepInTargets() {
+		return Collections.emptyList();
+	}
+
+	/**
+	 * A step-in target: a function call on the paused line that the user can choose
+	 * to step into.
+	 *
+	 * @param name The function name as it appears in source
+	 * @param column The column position of the call, used as a unique identifier
+	 */
+	record StepInTargetInfo(String name, int column) {
+	}
 }

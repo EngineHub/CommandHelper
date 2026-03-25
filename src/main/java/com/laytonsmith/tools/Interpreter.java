@@ -96,6 +96,7 @@ import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.profiler.ProfilePoint;
 import com.laytonsmith.persistence.DataSourceException;
 import com.laytonsmith.core.environments.DebugContext;
+import com.laytonsmith.tools.debugger.DebugSecurity;
 import com.laytonsmith.tools.debugger.MSDebugServer;
 import com.laytonsmith.tools.docgen.DocGen;
 import com.laytonsmith.tools.docgen.DocGenTemplates;
@@ -176,7 +177,9 @@ public final class Interpreter {
 	}
 
 	public static void startWithTTY(String file, List<String> args, boolean systemExitOnFailure) throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
-		startWithTTY(file, args, systemExitOnFailure, false, 0, false, null);
+		startWithTTY(file, args, systemExitOnFailure,
+				false, 0, false, null, DebugSecurity.KEYPAIR,
+				MSDebugServer.DEFAULT_BIND_ADDRESS);
 	}
 
 	/**
@@ -190,21 +193,46 @@ public final class Interpreter {
 	 *     {@link MSDebugServer#DEFAULT_PORT}.
 	 * @param debugSuspend If true, waits for the debugger to connect before executing.
 	 * @param debugThreadingMode The threading mode override: "sync", "async", or null for default.
+	 * @param debugSecurity The security mode for incoming debug connections.
+	 * @param debugBindAddress The address to bind the debug server to.
 	 */
 	public static void startWithTTY(String file, List<String> args, boolean systemExitOnFailure,
-			boolean debug, int debugPort, boolean debugSuspend, String debugThreadingMode) throws IOException,
+			boolean debug, int debugPort, boolean debugSuspend, String debugThreadingMode,
+			DebugSecurity debugSecurity, String debugBindAddress) throws IOException,
 			DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
 		File fromFile = new File(file).getCanonicalFile();
 		Interpreter interpreter = new Interpreter(args, fromFile.getParentFile().getPath(), true);
 
 		if(debug) {
+			if(!fromFile.exists()) {
+				StreamUtils.GetSystemErr().println("Error: File '" + fromFile.getAbsolutePath()
+						+ "' does not exist");
+				if(systemExitOnFailure) {
+					System.exit(1);
+				}
+				return;
+			}
 			int port = debugPort == 0 ? MSDebugServer.DEFAULT_PORT : debugPort;
 			DebugContext.ThreadingMode threadingMode = DebugContext.ThreadingMode.SYNCHRONOUS;
 			if("async".equals(debugThreadingMode)) {
 				threadingMode = DebugContext.ThreadingMode.ASYNCHRONOUS;
 			}
 			MSDebugServer debugServer = new MSDebugServer();
-			interpreter.env = debugServer.startListening(port, interpreter.env, debugSuspend, threadingMode);
+			File authorizedKeysFile = debugSecurity == DebugSecurity.KEYPAIR
+					? MethodScriptFileLocations.getDefault().getAuthorizedDebugKeysFile()
+					: null;
+			interpreter.env = debugServer.startListening(port, debugBindAddress,
+					interpreter.env, debugSuspend, threadingMode, debugSecurity,
+					authorizedKeysFile);
+
+			// Install a signal handler so Ctrl+C cleanly shuts down the debug
+			// server and exits, even when running with -Xrs.
+			SignalHandler.addStopHandlers((type) -> {
+				debugServer.shutdown();
+				System.exit(130);
+				return true;
+			});
+
 			try {
 				debugServer.awaitConfiguration();
 			} catch(InterruptedException e) {
@@ -227,6 +255,11 @@ public final class Interpreter {
 			} catch(ConfigCompileGroupException ex) {
 				ConfigRuntimeException.HandleUncaughtException(ex, null);
 				StreamUtils.GetSystemOut().println(TermColors.reset());
+				if(systemExitOnFailure) {
+					System.exit(1);
+				}
+			} catch(IOException ex) {
+				StreamUtils.GetSystemErr().println("Error: " + ex.getMessage());
 				if(systemExitOnFailure) {
 					System.exit(1);
 				}

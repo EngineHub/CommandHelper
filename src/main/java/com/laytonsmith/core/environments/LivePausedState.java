@@ -28,12 +28,15 @@ public class LivePausedState implements PausedState {
 	private final Environment env;
 	private final Target pauseTarget;
 	private final StepAction.FlowControl pendingFlowControl;
+	private final List<PausedState.StepInTargetInfo> stepInTargets;
 
 	public LivePausedState(Environment env, Target pauseTarget,
-			StepAction.FlowControl pendingFlowControl) {
+			StepAction.FlowControl pendingFlowControl,
+			List<PausedState.StepInTargetInfo> stepInTargets) {
 		this.env = env;
 		this.pauseTarget = pauseTarget;
 		this.pendingFlowControl = pendingFlowControl;
+		this.stepInTargets = stepInTargets;
 	}
 
 	@Override
@@ -90,6 +93,11 @@ public class LivePausedState implements PausedState {
 			return ta.getException();
 		}
 		return null;
+	}
+
+	@Override
+	public List<StepInTargetInfo> getStepInTargets() {
+		return stepInTargets;
 	}
 
 	@Override

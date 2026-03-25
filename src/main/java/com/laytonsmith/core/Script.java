@@ -661,28 +661,6 @@ public class Script {
 							return pauseResult;
 						}
 					}
-					frame.setKeepIVariable(false);
-					result = ((FlowFunction<Object>) frame.getFlowFunction()).childCompleted(
-							t, frame.getFunctionState(), lastResult, frame.getEnv());
-					hasResult = false;
-				} else {
-					throw ConfigRuntimeException.CreateUncatchableException(
-							"Flow function in invalid state for " + data.val(), data.getTarget());
-				}
-
-				frame.setFunctionState(result.getState());
-				StepAction action = result.getAction();
-				if(action instanceof StepAction.Evaluate e) {
-					frame.setKeepIVariable(e.keepIVariable());
-					Environment evalEnv = e.getEnv() != null ? e.getEnv() : frame.getEnv();
-					stack.push(new StackFrame(e.getNode(), evalEnv, null, null));
-				} else if(action instanceof StepAction.Complete c) {
-					lastResult = c.getResult();
-					hasResult = true;
-					cleanupAndPop(stack, frame);
-				} else if(action instanceof StepAction.FlowControl fc) {
-					pendingFlowControl = fc;
-					cleanupAndPop(stack, frame);
 				}
 				continue;
 			}
@@ -775,9 +753,12 @@ public class Script {
 	private static Mixed debugPause(DebugContext debugCtx, EvalStack stack,
 			Mixed lastResult, boolean hasResult,
 			StepAction.FlowControl pendingFlowControl, Environment env, Target pauseTarget) {
+		List<PausedState.StepInTargetInfo> stepInTargets = findStepInTargets(stack, pauseTarget);
 		debugCtx.setPaused(true, pauseTarget);
 		if(debugCtx.shouldUseSyncMode()) {
-			LivePausedState state = new LivePausedState(env, pauseTarget, pendingFlowControl);
+			LivePausedState state = new LivePausedState(env, pauseTarget,
+					pendingFlowControl, stepInTargets);
+			debugCtx.prepareAwait();
 			debugCtx.getListener().onPaused(state);
 			try {
 				debugCtx.awaitResume();
@@ -789,37 +770,46 @@ public class Script {
 			return null;
 		} else {
 			DebugSnapshot snapshot = new DebugSnapshot(
-					stack, lastResult, hasResult, pendingFlowControl, env, pauseTarget);
+					stack, lastResult, hasResult, pendingFlowControl, env, pauseTarget,
+					stepInTargets);
 			debugCtx.getListener().onPaused(snapshot);
 			return DEBUGGER_PAUSED;
 		}
-
-		return lastResult;
 	}
 
 	/**
-	 * Calls {@link FlowFunction#cleanup} if the frame has a FlowFunction that has begun,
-	 * then pops the frame from the stack.
+	 * Walks the parse tree at the top of the eval stack to find steppable function
+	 * calls on the same line as the pause target. These are the "step into targets"
+	 * that the user can choose to step into specifically (e.g. procs, closures).
 	 */
-	@SuppressWarnings("unchecked")
-	private static void cleanupAndPop(EvalStack stack, StackFrame frame) {
-		if(frame.hasFlowFunction() && frame.hasBegun()) {
-			((FlowFunction<Object>) frame.getFlowFunction()).cleanup(
-					frame.getNode().getTarget(), frame.getFunctionState(), frame.getEnv());
+	private static List<PausedState.StepInTargetInfo> findStepInTargets(
+			EvalStack stack, Target pauseTarget) {
+		List<PausedState.StepInTargetInfo> targets = new ArrayList<>();
+		if(stack.isEmpty() || pauseTarget == null) {
+			return targets;
 		}
-		stack.pop();
+		StackFrame frame = stack.peek();
+		ParseTree node = frame.getNode();
+		if(node == null) {
+			return targets;
+		}
+		collectSteppableTargets(node, pauseTarget.line(), targets);
+		return targets;
 	}
 
 	/**
-	 * Given the parse tree and environment, executes the tree.
-	 *
-	 * @param c
-	 * @param env
-	 * @return
-	 * @throws CancelCommandException
+	 * Recursively collects steppable function calls (procs) on the given line.
 	 */
-	public Mixed eval(ParseTree c, final Environment env) throws CancelCommandException {
-		return iterativeEval(c, env);
+	private static void collectSteppableTargets(ParseTree node, int line,
+			List<PausedState.StepInTargetInfo> targets) {
+		if(node.getData() instanceof CFunction cf) {
+			if(cf.getTarget().line() == line && cf.val().startsWith("_")) {
+				targets.add(new PausedState.StepInTargetInfo(cf.val(), cf.getTarget().col()));
+			}
+		}
+		for(ParseTree child : node.getChildren()) {
+			collectSteppableTargets(child, line, targets);
+		}
 	}
 
 	/**
@@ -1301,15 +1291,18 @@ public class Script {
 		private final StepAction.FlowControl pendingFlowControl;
 		private final Environment env;
 		private final Target pauseTarget;
+		private final List<PausedState.StepInTargetInfo> stepInTargets;
 
 		private DebugSnapshot(EvalStack stack, Mixed lastResult, boolean hasResult,
-				StepAction.FlowControl pendingFlowControl, Environment env, Target pauseTarget) {
+				StepAction.FlowControl pendingFlowControl, Environment env, Target pauseTarget,
+				List<PausedState.StepInTargetInfo> stepInTargets) {
 			this.stack = stack;
 			this.lastResult = lastResult;
 			this.hasResult = hasResult;
 			this.pendingFlowControl = pendingFlowControl;
 			this.env = env;
 			this.pauseTarget = pauseTarget;
+			this.stepInTargets = stepInTargets;
 		}
 
 		/**
@@ -1397,6 +1390,11 @@ public class Script {
 				return ta.getException();
 			}
 			return null;
+		}
+
+		@Override
+		public List<StepInTargetInfo> getStepInTargets() {
+			return stepInTargets;
 		}
 
 		@Override

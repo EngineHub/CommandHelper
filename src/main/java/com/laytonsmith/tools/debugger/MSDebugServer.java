@@ -1,6 +1,8 @@
 package com.laytonsmith.tools.debugger;
 
+import com.laytonsmith.PureUtilities.CommandExecutor;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
@@ -26,6 +28,7 @@ import org.eclipse.lsp4j.debug.ContinuedEventArguments;
 import org.eclipse.lsp4j.debug.DisconnectArguments;
 import org.eclipse.lsp4j.debug.EvaluateArguments;
 import org.eclipse.lsp4j.debug.EvaluateResponse;
+import org.eclipse.lsp4j.debug.ExitedEventArguments;
 import org.eclipse.lsp4j.debug.ExceptionBreakpointsFilter;
 import org.eclipse.lsp4j.debug.InitializeRequestArguments;
 import org.eclipse.lsp4j.debug.OutputEventArguments;
@@ -42,6 +45,9 @@ import org.eclipse.lsp4j.debug.StackFrame;
 import org.eclipse.lsp4j.debug.StackTraceArguments;
 import org.eclipse.lsp4j.debug.StackTraceResponse;
 import org.eclipse.lsp4j.debug.StepInArguments;
+import org.eclipse.lsp4j.debug.StepInTarget;
+import org.eclipse.lsp4j.debug.StepInTargetsArguments;
+import org.eclipse.lsp4j.debug.StepInTargetsResponse;
 import org.eclipse.lsp4j.debug.StepOutArguments;
 import org.eclipse.lsp4j.debug.StoppedEventArguments;
 import org.eclipse.lsp4j.debug.StoppedEventArgumentsReason;
@@ -57,13 +63,22 @@ import org.eclipse.lsp4j.debug.services.IDebugProtocolServer;
 import org.eclipse.lsp4j.jsonrpc.Launcher;
 
 import java.io.File;
+import java.io.InputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyStore;
+import java.security.SecureRandom;
 import java.util.ArrayList;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
@@ -97,6 +112,9 @@ public class MSDebugServer implements IDebugProtocolServer {
 
 	private static final int LOCALS_REF = 1;
 
+	/** Default bind address for the DAP TCP listener. */
+	public static final String DEFAULT_BIND_ADDRESS = "127.0.0.1";
+
 	private IDebugProtocolClient client;
 	private DebugContext debugCtx;
 	private final ConcurrentHashMap<Integer, PausedState> pausedStates = new ConcurrentHashMap<>();
@@ -108,45 +126,52 @@ public class MSDebugServer implements IDebugProtocolServer {
 	private boolean configurationDone = false;
 	private String programPath;
 	private ServerSocket serverSocket;
+	private Socket clientSocket;
 	private final CountDownLatch suspendLatch = new CountDownLatch(1);
 	private final CountDownLatch completionLatch = new CountDownLatch(1);
 	private boolean suspendOnStart = false;
 	private boolean managedExecution = false;
+	private volatile boolean scriptCompleted = false;
 	private PrintStream originalOut;
 	private PrintStream originalErr;
-
-	/**
-	 * Starts a DAP TCP listener on the given port. This method starts accepting
-	 * connections on a background thread and returns immediately. When a client
-	 * connects, the DAP JSON-RPC protocol handler starts automatically.
-	 *
-	 * @param port The TCP port to listen on.
-	 * @param environment The Environment to debug. If it does not already contain a
-	 *     DebugContext, one will be created and added.
-	 * @param suspend If true, script execution will not begin until the debugger sends
-	 *     configurationDone (analogous to Java's suspend=y).
-	 * @return The Environment, which may have been cloned to include the DebugContext.
-	 * @throws IOException If the server socket cannot be opened.
-	 */
-	public Environment startListening(int port, Environment environment, boolean suspend) throws IOException {
-		return startListening(port, environment, suspend, DebugContext.ThreadingMode.SYNCHRONOUS);
-	}
+	private DebugSecurity securityMode = DebugSecurity.KEYPAIR;
+	private DebugAuthenticator authenticator;
+	private SSLContext sslContext;
 
 	/**
 	 * Starts a DAP TCP listener on the given port with an explicit threading mode.
 	 *
 	 * @param port The TCP port to listen on.
+	 * @param bindAddress The address to bind to (e.g. "127.0.0.1" or "0.0.0.0").
 	 * @param environment The Environment to debug.
 	 * @param suspend If true, waits for configurationDone before execution.
 	 * @param threadingMode The threading mode for the main execution thread.
+	 * @param security The security mode for incoming connections.
+	 * @param authorizedKeysFile The file containing authorized public keys (required
+	 *     when security is KEYPAIR, ignored when NONE).
 	 * @return The Environment, which may have been cloned to include the DebugContext.
-	 * @throws IOException If the server socket cannot be opened.
+	 * @throws IOException If the server socket cannot be opened or the authorized keys
+	 *     file cannot be read.
 	 */
-	public Environment startListening(int port, Environment environment, boolean suspend,
-			DebugContext.ThreadingMode threadingMode) throws IOException {
+	public Environment startListening(int port, String bindAddress, Environment environment,
+			boolean suspend, DebugContext.ThreadingMode threadingMode,
+			DebugSecurity security, File authorizedKeysFile) throws IOException {
 		this.env = environment;
 		this.suspendOnStart = suspend;
 		this.managedExecution = true;
+		this.securityMode = security;
+
+		if(security == DebugSecurity.KEYPAIR) {
+			if(authorizedKeysFile == null) {
+				throw new IOException("KEYPAIR security requires an authorized keys file");
+			}
+			this.authenticator = new DebugAuthenticator(authorizedKeysFile);
+			try {
+				this.sslContext = createEphemeralSSLContext();
+			} catch(Exception e) {
+				throw new IOException("Failed to create TLS context", e);
+			}
+		}
 
 		if(env.hasEnv(DebugContext.class)) {
 			debugCtx = env.getEnv(DebugContext.class);
@@ -160,28 +185,96 @@ public class MSDebugServer implements IDebugProtocolServer {
 			}
 		}
 
-		serverSocket = new ServerSocket(port);
-		System.err.println("MethodScript debugger listening on port " + port);
+		if(security == DebugSecurity.NONE && !"127.0.0.1".equals(bindAddress)
+				&& !"localhost".equals(bindAddress)) {
+			throw new IOException("NONE security mode can only bind to localhost (127.0.0.1). "
+					+ "Use KEYPAIR security for remote connections.");
+		}
+
+		serverSocket = new ServerSocket();
+		serverSocket.setReuseAddress(true);
+		serverSocket.bind(new java.net.InetSocketAddress(
+				InetAddress.getByName(bindAddress), port), 1);
+		StreamUtils.GetSystemErr().println("MethodScript debugger listening on " + bindAddress + ":"
+				+ serverSocket.getLocalPort() + " (security: " + security + ")");
 		if(suspend) {
-			System.err.println("Waiting for debugger to connect before execution...");
+			StreamUtils.GetSystemErr().println("Waiting for debugger to connect before execution...");
 		}
 
 		java.lang.Thread acceptThread = new java.lang.Thread(() -> {
-			try {
-				Socket socket = serverSocket.accept();
-				socket.setKeepAlive(true);
-				Launcher<IDebugProtocolClient> launcher
-						= DSPLauncher.createServerLauncher(this, socket.getInputStream(), socket.getOutputStream());
-				client = launcher.getRemoteProxy();
-				launcher.startListening();
-			} catch(IOException e) {
-				if(!serverSocket.isClosed()) {
-					System.err.println("Debug server accept failed: " + e.getMessage());
+			while(!serverSocket.isClosed()) {
+				try {
+					Socket socket = serverSocket.accept();
+					socket.setKeepAlive(true);
+					clientSocket = socket;
+					InputStream in = socket.getInputStream();
+					OutputStream out = socket.getOutputStream();
+
+					if(securityMode == DebugSecurity.KEYPAIR && authenticator != null) {
+						if(!authenticator.authenticate(in, out)) {
+							StreamUtils.GetSystemErr().println("Debug client authentication failed, "
+									+ "closing connection.");
+							socket.close();
+							StreamUtils.GetSystemErr().println("Waiting for another connection...");
+							continue;
+						}
+						StreamUtils.GetSystemErr().println("Debug client authenticated successfully.");
+
+						SSLSocketFactory sslFactory = sslContext.getSocketFactory();
+						SSLSocket sslSocket = (SSLSocket) sslFactory.createSocket(
+								socket,
+								socket.getInetAddress().getHostAddress(),
+								socket.getPort(),
+								true);
+						sslSocket.setUseClientMode(false);
+						sslSocket.startHandshake();
+						StreamUtils.GetSystemErr().println("TLS handshake completed.");
+						clientSocket = sslSocket;
+						in = sslSocket.getInputStream();
+						out = sslSocket.getOutputStream();
+					}
+
+					Launcher<IDebugProtocolClient> launcher
+							= DSPLauncher.createServerLauncher(this, in, out);
+					client = launcher.getRemoteProxy();
+					launcher.startListening().get();
+
+					// DAP session ended (client disconnected or crashed).
+					client = null;
+					if(serverSocket.isClosed()) {
+						break;
+					}
+					if(scriptCompleted) {
+						// Script is done - no point accepting more connections.
+						completionLatch.countDown();
+						break;
+					}
+					if(suspendOnStart && debugCtx != null) {
+						debugCtx.awaitReconnect();
+						StreamUtils.GetSystemErr().println("Debug client disconnected. Execution "
+								+ "suspended. Waiting for another connection...");
+					} else {
+						StreamUtils.GetSystemErr().println("Debug client disconnected. "
+								+ "Waiting for another connection...");
+					}
+				} catch(IOException e) {
+					if(!serverSocket.isClosed()) {
+						StreamUtils.GetSystemErr().println("Debug server accept failed: "
+								+ e.getMessage());
+					}
+				} catch(Exception e) {
+					if(!serverSocket.isClosed()) {
+						StreamUtils.GetSystemErr().println("Debug session error: " + e.getMessage());
+					}
 				}
 			}
 		}, "ms-debug-accept");
 		acceptThread.setDaemon(true);
 		acceptThread.start();
+
+		Runtime.getRuntime().addShutdownHook(new java.lang.Thread(() -> {
+			shutdown();
+		}, "ms-debug-shutdown"));
 
 		return env;
 	}
@@ -195,6 +288,13 @@ public class MSDebugServer implements IDebugProtocolServer {
 		if(suspendOnStart) {
 			suspendLatch.await();
 		}
+	}
+
+	/**
+	 * Returns true if a debugger has connected and sent the configurationDone request.
+	 */
+	public boolean isConfigurationDone() {
+		return configurationDone;
 	}
 
 	/**
@@ -254,7 +354,23 @@ public class MSDebugServer implements IDebugProtocolServer {
 				executionCompleted();
 			}
 		}, "ms-debug-execution");
-		debugCtx.setMainThread(executionThread);
+		if(managedExecution) {
+			// Embedded mode: keep the host's main thread as the debug main
+			// thread. Register the execution thread as a background thread
+			// with its own DAP ID so it can safely block on breakpoints.
+			// Transfer the main thread's debug state (step mode, etc.) to
+			// the execution thread.
+			int dapId = debugCtx.registerThread(executionThread, "execution",
+					debugCtx.getMainThread());
+			if(client != null) {
+				ThreadEventArguments tea = new ThreadEventArguments();
+				tea.setThreadId(dapId);
+				tea.setReason(ThreadEventArgumentsReason.STARTED);
+				client.thread(tea);
+			}
+		} else {
+			debugCtx.setMainThread(executionThread);
+		}
 		executionThread.start();
 	}
 
@@ -277,14 +393,25 @@ public class MSDebugServer implements IDebugProtocolServer {
 
 	/**
 	 * Called when script execution completes normally (not paused). Sends the
-	 * terminated event to the client and releases the completion latch.
+	 * exited and terminated events to the client. The client is expected to
+	 * respond with a disconnect request, which releases the completion latch.
 	 */
 	private void executionCompleted() {
-		restoreOutputRedirect();
-		if(client != null) {
-			client.terminated(new TerminatedEventArguments());
+		if(!managedExecution) {
+			// CLI mode: the script is the entire program, so signal termination.
+			scriptCompleted = true;
+			restoreOutputRedirect();
+			if(client != null) {
+				ExitedEventArguments exitArgs = new ExitedEventArguments();
+				exitArgs.setExitCode(0);
+				client.exited(exitArgs);
+				client.terminated(new TerminatedEventArguments());
+			} else {
+				completionLatch.countDown();
+			}
 		}
-		completionLatch.countDown();
+		// Embedded mode (managedExecution=true): script completion is normal.
+		// The debug session stays alive for the next script execution.
 	}
 
 	/**
@@ -297,9 +424,38 @@ public class MSDebugServer implements IDebugProtocolServer {
 	}
 
 	/**
-	 * Shuts down the debug server, closing the TCP listener.
+	 * Returns true if a DAP client is currently connected.
+	 */
+	public boolean isClientConnected() {
+		return client != null;
+	}
+
+	/**
+	 * Shuts down the debug server, closing the TCP listener and unblocking
+	 * any threads waiting for a debugger reconnection.
 	 */
 	public void shutdown() {
+		if(debugCtx != null) {
+			debugCtx.disconnect();
+		}
+		// Notify the client of termination before closing sockets, so
+		// the DAP framework doesn't throw SocketExceptions mid-response.
+		if(client != null) {
+			try {
+				client.terminated(new TerminatedEventArguments());
+			} catch(Exception e) {
+				// Client may already be gone
+			}
+			client = null;
+		}
+		completionLatch.countDown();
+		try {
+			if(clientSocket != null && !clientSocket.isClosed()) {
+				clientSocket.close();
+			}
+		} catch(IOException e) {
+			// Ignore close errors
+		}
 		try {
 			if(serverSocket != null && !serverSocket.isClosed()) {
 				serverSocket.close();
@@ -307,6 +463,53 @@ public class MSDebugServer implements IDebugProtocolServer {
 		} catch(IOException e) {
 			// Ignore close errors
 		}
+	}
+
+	/**
+	 * Creates an ephemeral SSLContext with a self-signed certificate for
+	 * encrypting DAP traffic after KEYPAIR authentication.
+	 */
+	private static SSLContext createEphemeralSSLContext() throws Exception {
+		File tempKeystore = File.createTempFile("ms-debug-", ".p12");
+		tempKeystore.delete(); // keytool requires the file not exist
+		tempKeystore.deleteOnExit();
+		String password = Long.toHexString(new SecureRandom().nextLong());
+		String keytool = System.getProperty("java.home") + File.separator
+				+ "bin" + File.separator + "keytool";
+
+		java.io.ByteArrayOutputStream errStream = new java.io.ByteArrayOutputStream();
+		int exitCode = new CommandExecutor(keytool,
+				"-genkeypair",
+				"-alias", "debug",
+				"-keyalg", "RSA",
+				"-keysize", "2048",
+				"-validity", "1",
+				"-dname", "CN=MethodScript Debug Server",
+				"-keystore", tempKeystore.getAbsolutePath(),
+				"-storepass", password,
+				"-keypass", password,
+				"-storetype", "PKCS12")
+				.setSystemErr(errStream)
+				.start().waitFor();
+		if(exitCode != 0) {
+			throw new IOException("keytool failed (exit " + exitCode + "): "
+					+ errStream.toString("UTF-8").trim());
+		}
+
+		KeyStore keyStore = KeyStore.getInstance("PKCS12");
+		try(InputStream fis = Files.newInputStream(tempKeystore.toPath())) {
+			keyStore.load(fis, password.toCharArray());
+		} finally {
+			tempKeystore.delete();
+		}
+
+		KeyManagerFactory kmf = KeyManagerFactory.getInstance(
+				KeyManagerFactory.getDefaultAlgorithm());
+		kmf.init(keyStore, password.toCharArray());
+
+		SSLContext ctx = SSLContext.getInstance("TLS");
+		ctx.init(kmf.getKeyManagers(), null, new SecureRandom());
+		return ctx;
 	}
 
 	@Override
@@ -317,6 +520,7 @@ public class MSDebugServer implements IDebugProtocolServer {
 		caps.setSupportsConditionalBreakpoints(true);
 		caps.setSupportsHitConditionalBreakpoints(true);
 		caps.setSupportsLogPoints(true);
+		caps.setSupportsStepInTargetsRequest(true);
 
 		ExceptionBreakpointsFilter allFilter = new ExceptionBreakpointsFilter();
 		allFilter.setFilter("all");
@@ -366,9 +570,20 @@ public class MSDebugServer implements IDebugProtocolServer {
 	}
 
 	@Override
+	public CompletableFuture<Void> attach(Map<String, Object> args) {
+		// In attach mode, the environment and debug context were already
+		// set up by startListening(). Just signal that we're ready.
+		client.initialized();
+		return CompletableFuture.completedFuture(null);
+	}
+
+	@Override
 	public CompletableFuture<Void> configurationDone(ConfigurationDoneArguments args) {
 		configurationDone = true;
 		suspendLatch.countDown();
+		if(debugCtx != null) {
+			debugCtx.reconnect();
+		}
 		if(programPath != null && !managedExecution) {
 			startExecution();
 		}
@@ -378,7 +593,14 @@ public class MSDebugServer implements IDebugProtocolServer {
 	@Override
 	public CompletableFuture<Void> disconnect(DisconnectArguments args) {
 		if(debugCtx != null) {
-			debugCtx.disconnect();
+			if(suspendOnStart && !scriptCompleted) {
+				// Suspend mode: pause execution until a new debugger connects.
+				// awaitReconnect() releases paused threads so they can block
+				// in shouldPause() on the reconnect monitor.
+				debugCtx.awaitReconnect();
+			} else {
+				debugCtx.disconnect();
+			}
 			if(!pausedStates.isEmpty()) {
 				for(int threadId : pausedStates.keySet()) {
 					resumeExecution(threadId);
@@ -386,8 +608,12 @@ public class MSDebugServer implements IDebugProtocolServer {
 			}
 		}
 		suspendLatch.countDown();
-		completionLatch.countDown();
-		shutdown();
+		if(!suspendOnStart || scriptCompleted) {
+			completionLatch.countDown();
+		}
+		// Don't call shutdown() - the accept loop will handle reconnection.
+		// The Interpreter's finally block calls shutdown() when the main
+		// thread is done.
 		return CompletableFuture.completedFuture(null);
 	}
 
@@ -464,7 +690,7 @@ public class MSDebugServer implements IDebugProtocolServer {
 		int threadId = args.getThreadId();
 		if(pausedStates.containsKey(threadId)) {
 			debugCtx.setStepMode(threadId,
-					DebugContext.StepMode.NONE, 0, Target.UNKNOWN);
+					DebugContext.StepMode.NONE, 0, Target.UNKNOWN, -1);
 			resumeExecution(threadId);
 		}
 		ContinueResponse response = new ContinueResponse();
@@ -478,7 +704,7 @@ public class MSDebugServer implements IDebugProtocolServer {
 		PausedState state = pausedStates.get(threadId);
 		if(state != null) {
 			debugCtx.setStepMode(threadId, DebugContext.StepMode.OVER,
-					state.getUserCallDepth(), state.getPauseTarget());
+					state.getUserCallDepth(), state.getPauseTarget(), -1);
 			resumeExecution(threadId);
 		}
 		return CompletableFuture.completedFuture(null);
@@ -489,8 +715,10 @@ public class MSDebugServer implements IDebugProtocolServer {
 		int threadId = args.getThreadId();
 		PausedState state = pausedStates.get(threadId);
 		if(state != null) {
+			Integer targetId = args.getTargetId();
+			int targetCol = (targetId != null && targetId >= 0) ? targetId : -1;
 			debugCtx.setStepMode(threadId, DebugContext.StepMode.INTO,
-					state.getUserCallDepth(), state.getPauseTarget());
+					state.getUserCallDepth(), state.getPauseTarget(), targetCol);
 			resumeExecution(threadId);
 		}
 		return CompletableFuture.completedFuture(null);
@@ -502,10 +730,34 @@ public class MSDebugServer implements IDebugProtocolServer {
 		PausedState state = pausedStates.get(threadId);
 		if(state != null) {
 			debugCtx.setStepMode(threadId, DebugContext.StepMode.OUT,
-					state.getUserCallDepth(), state.getPauseTarget());
+					state.getUserCallDepth(), state.getPauseTarget(), -1);
 			resumeExecution(threadId);
 		}
 		return CompletableFuture.completedFuture(null);
+	}
+
+	@Override
+	public CompletableFuture<StepInTargetsResponse> stepInTargets(StepInTargetsArguments args) {
+		StepInTargetsResponse response = new StepInTargetsResponse();
+		// Find the paused state — stepInTargets provides frameId, but all frames share
+		// the same paused state, so we use lastInspectedState (set by the most recent
+		// stackTrace request, which VS Code always sends before stepInTargets).
+		PausedState state = lastInspectedState;
+		if(state != null) {
+			List<PausedState.StepInTargetInfo> infos = state.getStepInTargets();
+			StepInTarget[] targets = new StepInTarget[infos.size()];
+			for(int i = 0; i < infos.size(); i++) {
+				PausedState.StepInTargetInfo info = infos.get(i);
+				StepInTarget sit = new StepInTarget();
+				sit.setId(info.column());
+				sit.setLabel(info.name());
+				targets[i] = sit;
+			}
+			response.setTargets(targets);
+		} else {
+			response.setTargets(new StepInTarget[0]);
+		}
+		return CompletableFuture.completedFuture(response);
 	}
 
 	@Override

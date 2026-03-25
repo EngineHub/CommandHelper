@@ -14,6 +14,7 @@ import com.laytonsmith.core.environments.PausedState;
 import com.laytonsmith.core.exceptions.StackTraceFrame;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.testing.StaticTest;
+import com.laytonsmith.tools.debugger.DebugSecurity;
 import com.laytonsmith.tools.debugger.MSDebugServer;
 import org.eclipse.lsp4j.debug.InitializeRequestArguments;
 import org.eclipse.lsp4j.debug.NextArguments;
@@ -139,7 +140,8 @@ public class DebugInfrastructureTest {
 		assertEquals(2, listener.pauses.get(0).getPauseTarget().line());
 
 		// Resume with continue (NONE = run freely)
-		debugCtx.setStepMode(DebugContext.StepMode.NONE, 0, Target.UNKNOWN);
+		debugCtx.setStepMode(DebugContext.MAIN_THREAD_DAP_ID,
+				DebugContext.StepMode.NONE, 0, Target.UNKNOWN, -1);
 		Script.resumeEval(listener.snapshot(0));
 
 		assertTrue(listener.completed);
@@ -163,7 +165,8 @@ public class DebugInfrastructureTest {
 		assertEquals("hello", vars.get("@y").val());
 
 		// Clean up: continue to completion
-		debugCtx.setStepMode(DebugContext.StepMode.NONE, 0, Target.UNKNOWN);
+		debugCtx.setStepMode(DebugContext.MAIN_THREAD_DAP_ID,
+				DebugContext.StepMode.NONE, 0, Target.UNKNOWN, -1);
 		Script.resumeEval(listener.snapshot(0));
 		assertTrue(listener.completed);
 	}
@@ -184,14 +187,16 @@ public class DebugInfrastructureTest {
 		assertEquals(1, listener.pauses.get(0).getPauseTarget().line());
 
 		// Continue to next breakpoint
-		debugCtx.setStepMode(DebugContext.StepMode.NONE, 0, Target.UNKNOWN);
+		debugCtx.setStepMode(DebugContext.MAIN_THREAD_DAP_ID,
+				DebugContext.StepMode.NONE, 0, Target.UNKNOWN, -1);
 		Script.resumeEval(listener.snapshot(0));
 
 		assertEquals(2, listener.pauses.size());
 		assertEquals(3, listener.pauses.get(1).getPauseTarget().line());
 
 		// Continue to completion
-		debugCtx.setStepMode(DebugContext.StepMode.NONE, 0, Target.UNKNOWN);
+		debugCtx.setStepMode(DebugContext.MAIN_THREAD_DAP_ID,
+				DebugContext.StepMode.NONE, 0, Target.UNKNOWN, -1);
 		Script.resumeEval(listener.snapshot(1));
 		assertTrue(listener.completed);
 	}
@@ -235,8 +240,8 @@ public class DebugInfrastructureTest {
 		assertEquals(5, pause1.getPauseTarget().line());
 
 		// Step into
-		debugCtx.setStepMode(DebugContext.StepMode.INTO,
-				pause1.getUserCallDepth(), pause1.getPauseTarget());
+		debugCtx.setStepMode(DebugContext.MAIN_THREAD_DAP_ID, DebugContext.StepMode.INTO,
+				pause1.getUserCallDepth(), pause1.getPauseTarget(), -1);
 		Script.resumeEval(listener.snapshot(0));
 
 		// Should pause inside the proc body (line 2)
@@ -245,7 +250,8 @@ public class DebugInfrastructureTest {
 		assertEquals(2, pause2.getPauseTarget().line());
 
 		// Continue to completion
-		debugCtx.setStepMode(DebugContext.StepMode.NONE, 0, Target.UNKNOWN);
+		debugCtx.setStepMode(DebugContext.MAIN_THREAD_DAP_ID,
+				DebugContext.StepMode.NONE, 0, Target.UNKNOWN, -1);
 		Script.resumeEval(listener.snapshot(1));
 		assertTrue(listener.completed);
 	}
@@ -264,8 +270,8 @@ public class DebugInfrastructureTest {
 		assertEquals(5, pause1.getPauseTarget().line());
 
 		// Step over
-		debugCtx.setStepMode(DebugContext.StepMode.OVER,
-				pause1.getUserCallDepth(), pause1.getPauseTarget());
+		debugCtx.setStepMode(DebugContext.MAIN_THREAD_DAP_ID, DebugContext.StepMode.OVER,
+				pause1.getUserCallDepth(), pause1.getPauseTarget(), -1);
 		Script.resumeEval(listener.snapshot(0));
 
 		// Should pause at line 6, having skipped into the proc
@@ -274,7 +280,8 @@ public class DebugInfrastructureTest {
 		assertEquals(6, pause2.getPauseTarget().line());
 
 		// Continue to completion
-		debugCtx.setStepMode(DebugContext.StepMode.NONE, 0, Target.UNKNOWN);
+		debugCtx.setStepMode(DebugContext.MAIN_THREAD_DAP_ID,
+				DebugContext.StepMode.NONE, 0, Target.UNKNOWN, -1);
 		Script.resumeEval(listener.snapshot(1));
 		assertTrue(listener.completed);
 	}
@@ -297,8 +304,8 @@ public class DebugInfrastructureTest {
 		assertTrue("Should be inside proc (depth > 0)", depthInside > 0);
 
 		// Step out
-		debugCtx.setStepMode(DebugContext.StepMode.OUT,
-				depthInside, pause1.getPauseTarget());
+		debugCtx.setStepMode(DebugContext.MAIN_THREAD_DAP_ID, DebugContext.StepMode.OUT,
+				depthInside, pause1.getPauseTarget(), -1);
 		Script.resumeEval(listener.snapshot(0));
 
 		// Should pause after returning from the proc
@@ -308,7 +315,8 @@ public class DebugInfrastructureTest {
 				pause2.getUserCallDepth() < depthInside);
 
 		// Continue to completion
-		debugCtx.setStepMode(DebugContext.StepMode.NONE, 0, Target.UNKNOWN);
+		debugCtx.setStepMode(DebugContext.MAIN_THREAD_DAP_ID,
+				DebugContext.StepMode.NONE, 0, Target.UNKNOWN, -1);
 		Script.resumeEval(listener.snapshot(1));
 		assertTrue(listener.completed);
 	}
@@ -332,7 +340,8 @@ public class DebugInfrastructureTest {
 				callStack.get(0).getProcedureName().contains("_foo"));
 
 		// Clean up
-		debugCtx.setStepMode(DebugContext.StepMode.NONE, 0, Target.UNKNOWN);
+		debugCtx.setStepMode(DebugContext.MAIN_THREAD_DAP_ID,
+				DebugContext.StepMode.NONE, 0, Target.UNKNOWN, -1);
 		Script.resumeEval(listener.snapshot(0));
 	}
 
@@ -348,11 +357,13 @@ public class DebugInfrastructureTest {
 		executeWithDebugger(script, debugCtx);
 		assertEquals(0, listener.resumeCount);
 
-		debugCtx.setStepMode(DebugContext.StepMode.NONE, 0, Target.UNKNOWN);
+		debugCtx.setStepMode(DebugContext.MAIN_THREAD_DAP_ID,
+				DebugContext.StepMode.NONE, 0, Target.UNKNOWN, -1);
 		Script.resumeEval(listener.snapshot(0));
 		assertEquals(1, listener.resumeCount);
 
-		debugCtx.setStepMode(DebugContext.StepMode.NONE, 0, Target.UNKNOWN);
+		debugCtx.setStepMode(DebugContext.MAIN_THREAD_DAP_ID,
+				DebugContext.StepMode.NONE, 0, Target.UNKNOWN, -1);
 		Script.resumeEval(listener.snapshot(1));
 		assertEquals(2, listener.resumeCount);
 		assertTrue(listener.completed);
@@ -415,7 +426,7 @@ public class DebugInfrastructureTest {
 
 		// Resume the paused thread (not the test thread)
 		debugCtx.getThreadState(pausedThread.get())
-				.setStepMode(DebugContext.StepMode.NONE, 0, Target.UNKNOWN);
+				.setStepMode(DebugContext.StepMode.NONE, 0, Target.UNKNOWN, -1);
 		debugCtx.getThreadState(pausedThread.get()).resume();
 		assertTrue("Resume was not processed within timeout",
 				resumeReached.await(10, TimeUnit.SECONDS));
@@ -482,7 +493,7 @@ public class DebugInfrastructureTest {
 
 		// Resume the background thread (must target the actual paused thread, not the test thread)
 		debugCtx.getThreadState(pausedThread.get())
-				.setStepMode(DebugContext.StepMode.NONE, 0, Target.UNKNOWN);
+				.setStepMode(DebugContext.StepMode.NONE, 0, Target.UNKNOWN, -1);
 		debugCtx.getThreadState(pausedThread.get()).resume();
 		assertTrue("Resume was not processed within timeout",
 				resumeReached.await(10, TimeUnit.SECONDS));
@@ -532,7 +543,8 @@ public class DebugInfrastructureTest {
 			server = new MSDebugServer();
 			Environment env = Static.GenerateStandaloneEnvironment();
 			env = env.cloneAndAdd(new CommandHelperEnvironment());
-			env = server.startListening(0, env, false, mode);
+			env = server.startListening(0, MSDebugServer.DEFAULT_BIND_ADDRESS,
+					env, false, mode, DebugSecurity.NONE, null);
 			int port = server.getPort();
 			assertTrue("Server should be listening", port > 0);
 
@@ -670,6 +682,128 @@ public class DebugInfrastructureTest {
 		// But should have logged the message
 		assertEquals(1, listener.logMessages.size());
 		assertEquals("x is 42", listener.logMessages.get(0));
+		assertTrue(listener.completed);
+	}
+
+	@Test
+	public void testStepIntoTargetSkipsEarlierCall() throws Exception {
+		String script = "proc _bar() {\n"
+				+ "\treturn(10)\n"
+				+ "}\n"
+				+ "proc _foo() {\n"
+				+ "\treturn(20)\n"
+				+ "}\n"
+				+ "@result = _bar() + _foo()";
+		TestDebugListener listener = new TestDebugListener();
+		DebugContext debugCtx = new DebugContext(listener, DebugContext.ThreadingMode.ASYNCHRONOUS,
+				Thread.currentThread());
+		debugCtx.addBreakpoint(new Breakpoint(TEST_FILE, 7));
+
+		executeWithDebugger(script, debugCtx);
+
+		// Should pause at line 7
+		assertEquals(1, listener.pauses.size());
+		PausedState pause1 = listener.pauses.get(0);
+		assertEquals(7, pause1.getPauseTarget().line());
+
+		// Check step-in targets include both procs
+		List<PausedState.StepInTargetInfo> targets = pause1.getStepInTargets();
+		PausedState.StepInTargetInfo fooTarget = null;
+		for(PausedState.StepInTargetInfo t : targets) {
+			if("_foo".equals(t.name())) {
+				fooTarget = t;
+			}
+		}
+		assertNotNull("Should find _foo as step-in target", fooTarget);
+
+		// Step into _foo specifically — should skip _bar entirely
+		debugCtx.getThreadState().setStepMode(DebugContext.StepMode.INTO,
+				pause1.getUserCallDepth(), pause1.getPauseTarget(), fooTarget.column());
+		Script.resumeEval(listener.snapshot(0));
+
+		// Should pause inside _foo (line 5), NOT _bar (line 2)
+		assertEquals(2, listener.pauses.size());
+		PausedState pause2 = listener.pauses.get(1);
+		assertEquals(5, pause2.getPauseTarget().line());
+
+		// Continue to completion
+		debugCtx.setStepMode(DebugContext.MAIN_THREAD_DAP_ID,
+				DebugContext.StepMode.NONE, 0, Target.UNKNOWN, -1);
+		Script.resumeEval(listener.snapshot(1));
+		assertTrue(listener.completed);
+	}
+
+	@Test
+	public void testStepIntoTargetThenBreakpointRefires() throws Exception {
+		String script = "proc _bar() {\n"
+				+ "\treturn(10)\n"
+				+ "}\n"
+				+ "proc _foo() {\n"
+				+ "\treturn(20)\n"
+				+ "}\n"
+				+ "@result = _bar() + _foo()";
+		TestDebugListener listener = new TestDebugListener();
+		DebugContext debugCtx = new DebugContext(listener, DebugContext.ThreadingMode.ASYNCHRONOUS,
+				Thread.currentThread());
+		debugCtx.addBreakpoint(new Breakpoint(TEST_FILE, 7));
+
+		executeWithDebugger(script, debugCtx);
+
+		// Pause 1: line 7 breakpoint
+		assertEquals(1, listener.pauses.size());
+		PausedState pause1 = listener.pauses.get(0);
+
+		// Find _bar target and step into it
+		List<PausedState.StepInTargetInfo> targets = pause1.getStepInTargets();
+		PausedState.StepInTargetInfo barTarget = null;
+		for(PausedState.StepInTargetInfo t : targets) {
+			if("_bar".equals(t.name())) {
+				barTarget = t;
+			}
+		}
+		assertNotNull("Should find _bar as step-in target", barTarget);
+
+		debugCtx.getThreadState().setStepMode(DebugContext.StepMode.INTO,
+				pause1.getUserCallDepth(), pause1.getPauseTarget(), barTarget.column());
+		Script.resumeEval(listener.snapshot(0));
+
+		// Pause 2: inside _bar (line 2)
+		assertEquals(2, listener.pauses.size());
+		assertEquals(2, listener.pauses.get(1).getPauseTarget().line());
+
+		// Continue from _bar — breakpoint on line 7 should re-fire
+		// (targeted step-into is complete, normal breakpoint behavior resumes)
+		debugCtx.setStepMode(DebugContext.MAIN_THREAD_DAP_ID,
+				DebugContext.StepMode.NONE, 0, Target.UNKNOWN, -1);
+		Script.resumeEval(listener.snapshot(1));
+
+		// Pause 3: breakpoint at line 7 fires again (back from _bar, _foo not yet called)
+		assertEquals(3, listener.pauses.size());
+		assertEquals(7, listener.pauses.get(2).getPauseTarget().line());
+
+		// Now step into _foo
+		PausedState pause3 = listener.pauses.get(2);
+		targets = pause3.getStepInTargets();
+		PausedState.StepInTargetInfo fooTarget = null;
+		for(PausedState.StepInTargetInfo t : targets) {
+			if("_foo".equals(t.name())) {
+				fooTarget = t;
+			}
+		}
+		assertNotNull("Should find _foo as step-in target", fooTarget);
+
+		debugCtx.getThreadState().setStepMode(DebugContext.StepMode.INTO,
+				pause3.getUserCallDepth(), pause3.getPauseTarget(), fooTarget.column());
+		Script.resumeEval(listener.snapshot(2));
+
+		// Pause 4: inside _foo (line 5)
+		assertEquals(4, listener.pauses.size());
+		assertEquals(5, listener.pauses.get(3).getPauseTarget().line());
+
+		// Continue to completion
+		debugCtx.setStepMode(DebugContext.MAIN_THREAD_DAP_ID,
+				DebugContext.StepMode.NONE, 0, Target.UNKNOWN, -1);
+		Script.resumeEval(listener.snapshot(3));
 		assertTrue(listener.completed);
 	}
 }

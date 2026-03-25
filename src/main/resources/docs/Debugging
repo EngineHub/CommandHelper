@@ -4,9 +4,8 @@ you write the code as cleverly as possible, you are, by definition, not smart
 enough to debug it." --Brian Kernighan
 
 Debugging your code is an important, but challenging part of writing working code.
-Currently, MethodScript does not have an interactive debugger (though this is planned
-in the future) however, this does not stop you from debugging scripts anyways.
-When debugging, there are several key concepts
+MethodScript has an interactive debugger, offered through the official VS Code
+extension, but there are some key concepts to keep in mind regardless of what tool you use to debug.
 
 * Understand code flow
 * Understand variable's values

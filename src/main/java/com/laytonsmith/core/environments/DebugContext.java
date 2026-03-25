@@ -9,12 +9,14 @@ import com.laytonsmith.core.StackFrame;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.exceptions.StackTraceFrame;
+import com.laytonsmith.core.exceptions.StackTraceManager;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -81,6 +83,15 @@ public class DebugContext implements Environment.EnvironmentImpl {
 	private ThreadingMode threadingMode;
 	private volatile Thread mainThread;
 
+	// Reconnect support: when the debugger disconnects with suspend mode,
+	// execution threads block in shouldPause() until a new client connects.
+	private volatile boolean awaitingReconnect = false;
+	private final Object reconnectMonitor = new Object();
+
+	// Suspend-on-start support: when true, execution threads block in
+	// shouldPause() until the debugger connects and sends configurationDone.
+	private volatile boolean awaitingInitialConnection = false;
+
 	// Log point deduplication: tracks last fired log point to avoid firing
 	// multiple times for different AST nodes on the same source line.
 	private File lastLogPointFile;
@@ -146,28 +157,8 @@ public class DebugContext implements Environment.EnvironmentImpl {
 	}
 
 	/**
-	 * Replaces all breakpoints for a given file. Used by DAP's setBreakpoints
-	 * which sends the full set of breakpoints for a file at once.
-	 *
-	 * @param file The file whose breakpoints to replace
-	 * @param lines The new set of line numbers
-	 */
-	public void setBreakpointsForFile(File file, Set<Integer> lines) {
-		TreeMap<Integer, Breakpoint> map = new TreeMap<>();
-		for(int line : lines) {
-			Breakpoint bp = new Breakpoint(file, line);
-			map.put(line, bp);
-		}
-		if(map.isEmpty()) {
-			breakpoints.remove(file);
-		} else {
-			breakpoints.put(file, map);
-		}
-	}
-
-	/**
 	 * Replaces all breakpoints for a given file with fully configured breakpoints
-	 * (including conditions and hit counts).
+	 * (including conditions, hit counts, and log messages).
 	 *
 	 * @param file The file whose breakpoints to replace
 	 * @param newBreakpoints The new breakpoints for this file
@@ -227,31 +218,14 @@ public class DebugContext implements Environment.EnvironmentImpl {
 	/**
 	 * Sets the step mode and reference depth for the calling thread. Called when the user
 	 * issues a step command (into/over/out) or continue.
-	 *
-	 * @param mode The new step mode
-	 * @param currentDepth The user-visible call depth at the time of the command
-	 *     (count of proc/closure/include frames, not raw eval stack size)
-	 * @param currentTarget The source target at the time of the command
+	 * When targetCol >= 0, step-into will only enter the function at that column.
 	 */
-	public void setStepMode(StepMode mode, int currentDepth, Target currentTarget) {
-		getThreadState().setStepMode(mode, currentDepth, currentTarget);
-	}
-
-	/**
-	 * Sets the step mode for a specific thread, identified by DAP thread ID.
-	 */
-	public void setStepMode(int dapThreadId, StepMode mode, int currentDepth, Target currentTarget) {
+	public void setStepMode(int dapThreadId, StepMode mode, int currentDepth,
+			Target currentTarget, int targetCol) {
 		Thread t = getThreadByDapId(dapThreadId);
 		if(t != null) {
-			getThreadState(t).setStepMode(mode, currentDepth, currentTarget);
+			getThreadState(t).setStepMode(mode, currentDepth, currentTarget, targetCol);
 		}
-	}
-
-	/**
-	 * Returns the stack depth when the current step command was issued, for the calling thread.
-	 */
-	public int getStepReferenceDepth() {
-		return getThreadState().getStepReferenceDepth();
 	}
 
 	/**
@@ -281,12 +255,67 @@ public class DebugContext implements Environment.EnvironmentImpl {
 	 */
 	public void disconnect() {
 		this.disconnected = true;
+		synchronized(reconnectMonitor) {
+			awaitingReconnect = false;
+			awaitingInitialConnection = false;
+			reconnectMonitor.notifyAll();
+		}
 		for(ThreadDebugState state : threadStates.values()) {
 			state.setPaused(false, null);
-			state.setStepMode(StepMode.NONE, 0, null);
+			state.setStepMode(StepMode.NONE, 0, null, -1);
 			state.resume();
 		}
 		threadStates.clear();
+	}
+
+	/**
+	 * Enters reconnect-wait mode. Execution threads that call
+	 * {@link #shouldPause} will block until {@link #reconnect()} is called.
+	 * This is used when the debugger disconnects while suspend mode is active,
+	 * so that execution pauses until a new client attaches.
+	 */
+	public void awaitReconnect() {
+		synchronized(reconnectMonitor) {
+			awaitingReconnect = true;
+		}
+		// Resume any threads that are paused on debug latches so they can
+		// reach shouldPause() and block on the reconnect monitor instead.
+		for(ThreadDebugState state : threadStates.values()) {
+			state.setPaused(false, null);
+			state.resume();
+		}
+	}
+
+	/**
+	 * Signals that a new debugger has connected. Unblocks any execution
+	 * threads that are waiting in {@link #shouldPause} for a reconnection.
+	 */
+	public void reconnect() {
+		synchronized(reconnectMonitor) {
+			awaitingReconnect = false;
+			awaitingInitialConnection = false;
+			reconnectMonitor.notifyAll();
+		}
+	}
+
+	/**
+	 * Returns true if execution threads are blocked waiting for a debugger
+	 * to reconnect.
+	 */
+	public boolean isAwaitingReconnect() {
+		return awaitingReconnect;
+	}
+
+	/**
+	 * Sets the awaiting-initial-connection flag. When true, execution threads
+	 * will block in {@link #shouldPause} until a debugger connects and calls
+	 * {@link #reconnect()}. This is used for suspend-on-start in contexts
+	 * where the calling thread cannot be blocked (e.g. Minecraft server startup).
+	 */
+	public void setAwaitingInitialConnection(boolean awaiting) {
+		synchronized(reconnectMonitor) {
+			awaitingInitialConnection = awaiting;
+		}
 	}
 
 	/**
@@ -321,6 +350,25 @@ public class DebugContext implements Environment.EnvironmentImpl {
 	public boolean shouldPause(Target source, int userCallDepth, Environment env) {
 		if(disconnected) {
 			return false;
+		}
+
+		// If the debugger disconnected with suspend mode, or we're awaiting
+		// the initial debugger connection (suspend-on-start), block until
+		// a debugger connects. The thread will appear stopped at whatever
+		// line it was executing when the disconnect happened.
+		if(awaitingReconnect || awaitingInitialConnection) {
+			synchronized(reconnectMonitor) {
+				while(awaitingReconnect || awaitingInitialConnection) {
+					try {
+						reconnectMonitor.wait();
+					} catch(InterruptedException e) {
+						Thread.currentThread().interrupt();
+						return false;
+					}
+				}
+			}
+			// A new debugger just connected - pause so it can inspect state.
+			return true;
 		}
 
 		if(source == null || source == Target.UNKNOWN
@@ -365,7 +413,34 @@ public class DebugContext implements Environment.EnvironmentImpl {
 				case NONE:
 					break;
 				case INTO:
-					shouldStop = !sameSourceLine(source, state.getStepReferenceTarget());
+					if(state.getStepIntoTargetCol() >= 0) {
+						// Targeted step-into: only step into the function at the target column
+						if(sameSourceLine(source, state.getStepReferenceTarget())) {
+							// Still on the paused line, haven't entered anything yet
+							break;
+						}
+						if(userCallDepth > state.getStepReferenceDepth()) {
+							// Entered a function — check if it's the target
+							StackTraceManager stm = env.getEnv(GlobalEnv.class)
+									.peekStackTraceManager();
+							if(stm != null) {
+								List<StackTraceFrame> frames = stm.getCurrentStackTrace();
+								if(!frames.isEmpty()) {
+									Target callSite = frames.get(0).getCallSite();
+									if(callSite.col() == state.getStepIntoTargetCol()) {
+										shouldStop = true;
+										break;
+									}
+								}
+							}
+							// Not the target — don't pause (step over this call)
+						} else {
+							// Moved to a different line at same/lower depth (safety fallback)
+							shouldStop = true;
+						}
+					} else {
+						shouldStop = !sameSourceLine(source, state.getStepReferenceTarget());
+					}
 					break;
 				case OVER:
 					shouldStop = userCallDepth <= state.getStepReferenceDepth()
@@ -389,6 +464,16 @@ public class DebugContext implements Environment.EnvironmentImpl {
 				return false;
 			}
 			state.clearSkippingResume();
+		}
+
+		// When doing targeted step-into, suppress breakpoint re-fires on the
+		// reference line. We may return to this line between stepping over
+		// non-target functions and entering the target.
+		if(shouldStop && state.getStepMode() == StepMode.INTO
+				&& state.getStepIntoTargetCol() >= 0
+				&& sameSourceLine(source, state.getStepReferenceTarget())
+				&& userCallDepth <= state.getStepReferenceDepth()) {
+			shouldStop = false;
 		}
 
 		return shouldStop;
@@ -579,8 +664,18 @@ public class DebugContext implements Environment.EnvironmentImpl {
 	}
 
 	/**
+	 * Creates the latch that {@link #awaitResume()} will block on. Must be
+	 * called before notifying the listener of a pause, so that a resume()
+	 * arriving before awaitResume() is not lost.
+	 */
+	public void prepareAwait() {
+		getThreadState().prepareAwait();
+	}
+
+	/**
 	 * Blocks the calling thread until {@link #resume(int)} is called from the DAP thread.
 	 * Used by the interpreter loop in synchronous mode to pause in place.
+	 * {@link #prepareAwait()} must have been called first.
 	 *
 	 * @throws InterruptedException if the waiting thread is interrupted
 	 */
@@ -617,16 +712,6 @@ public class DebugContext implements Environment.EnvironmentImpl {
 	 * construction time; this is for background threads.
 	 *
 	 * @param t The thread to register
-	 * @return The assigned DAP thread ID
-	 */
-	public int registerThread(Thread t) {
-		return registerThread(t, null);
-	}
-
-	/**
-	 * Registers a thread with an explicit display name.
-	 *
-	 * @param t The thread to register
 	 * @param displayName The user-visible name, or null to use the Java thread name
 	 * @return The assigned DAP thread ID
 	 */
@@ -635,6 +720,26 @@ public class DebugContext implements Environment.EnvironmentImpl {
 			threadNames.put(t, displayName != null ? displayName : t.getName());
 			return nextDapThreadId.getAndIncrement();
 		});
+	}
+
+	/**
+	 * Registers a thread and transfers the {@link ThreadDebugState} from a
+	 * source thread. This is used in embedded async mode where the main
+	 * thread's step mode and other debug state need to carry over to a
+	 * spawned execution thread without changing the main thread identity.
+	 *
+	 * @param t The thread to register
+	 * @param displayName The user-visible name
+	 * @param stateSource The thread whose debug state should be transferred
+	 * @return The assigned DAP thread ID
+	 */
+	public int registerThread(Thread t, String displayName, Thread stateSource) {
+		int dapId = registerThread(t, displayName);
+		ThreadDebugState state = threadStates.remove(stateSource);
+		if(state != null) {
+			threadStates.put(t, state);
+		}
+		return dapId;
 	}
 
 	/**
