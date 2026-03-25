@@ -18,6 +18,7 @@ import com.laytonsmith.core.environments.PausedState;
 import com.laytonsmith.core.environments.RuntimeMode;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.StackTraceFrame;
+import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.environments.Breakpoint;
 import org.eclipse.lsp4j.debug.Capabilities;
@@ -111,6 +112,7 @@ public class MSDebugServer implements IDebugProtocolServer {
 	public static final int DEFAULT_PORT = 6732;
 
 	private static final int LOCALS_REF = 1;
+	private static final int COMPOUND_REF_START = 100;
 
 	/** Default bind address for the DAP TCP listener. */
 	public static final String DEFAULT_BIND_ADDRESS = "127.0.0.1";
@@ -137,6 +139,8 @@ public class MSDebugServer implements IDebugProtocolServer {
 	private DebugSecurity securityMode = DebugSecurity.KEYPAIR;
 	private DebugAuthenticator authenticator;
 	private SSLContext sslContext;
+	private final ConcurrentHashMap<Integer, Mixed> compoundVariableRefs = new ConcurrentHashMap<>();
+	private int nextCompoundRef = COMPOUND_REF_START;
 
 	/**
 	 * Starts a DAP TCP listener on the given port with an explicit threading mode.
@@ -593,7 +597,10 @@ public class MSDebugServer implements IDebugProtocolServer {
 	@Override
 	public CompletableFuture<Void> disconnect(DisconnectArguments args) {
 		if(debugCtx != null) {
-			if(suspendOnStart && !scriptCompleted) {
+			if(managedExecution) {
+				// Embedded mode: the server stays alive for reconnection.
+				// Don't mark as disconnected, just release any paused threads.
+			} else if(suspendOnStart && !scriptCompleted) {
 				// Suspend mode: pause execution until a new debugger connects.
 				// awaitReconnect() releases paused threads so they can block
 				// in shouldPause() on the reconnect monitor.
@@ -866,25 +873,55 @@ public class MSDebugServer implements IDebugProtocolServer {
 	public CompletableFuture<VariablesResponse> variables(VariablesArguments args) {
 		VariablesResponse response = new VariablesResponse();
 		PausedState inspected = lastInspectedState;
-		if(inspected == null || args.getVariablesReference() != LOCALS_REF) {
+		int ref = args.getVariablesReference();
+
+		if(inspected == null) {
 			response.setVariables(new Variable[0]);
 			return CompletableFuture.completedFuture(response);
 		}
 
-		Map<String, Mixed> vars = inspected.getVariables();
-		List<Variable> result = new ArrayList<>();
 		Environment stateEnv = inspected.getEnvironment();
-		for(Map.Entry<String, Mixed> entry : vars.entrySet()) {
-			Variable v = new Variable();
-			v.setName(entry.getKey());
-			v.setValue(entry.getValue().val());
-			v.setType(entry.getValue().typeof(stateEnv).val());
-			v.setVariablesReference(0);
-			result.add(v);
+		List<Variable> result = new ArrayList<>();
+
+		if(ref == LOCALS_REF) {
+			compoundVariableRefs.clear();
+			nextCompoundRef = COMPOUND_REF_START;
+			Map<String, Mixed> vars = inspected.getVariables();
+			for(Map.Entry<String, Mixed> entry : vars.entrySet()) {
+				result.add(buildVariable(entry.getKey(), entry.getValue(), stateEnv));
+			}
+		} else if(compoundVariableRefs.containsKey(ref)) {
+			Mixed compound = compoundVariableRefs.get(ref);
+			if(compound instanceof CArray arr) {
+				for(Mixed key : arr.keySet()) {
+					Mixed value = arr.get(key, Target.UNKNOWN);
+					result.add(buildVariable(key.val(), value, stateEnv));
+				}
+			}
 		}
 
 		response.setVariables(result.toArray(new Variable[0]));
 		return CompletableFuture.completedFuture(response);
+	}
+
+	private Variable buildVariable(String name, Mixed value, Environment stateEnv) {
+		Variable v = new Variable();
+		v.setName(name);
+		v.setType(value.typeof(stateEnv).val());
+		if(value instanceof CArray arr) {
+			int refId = nextCompoundRef++;
+			compoundVariableRefs.put(refId, value);
+			v.setVariablesReference(refId);
+			if(arr.inAssociativeMode()) {
+				v.setValue("array (associative, length: " + arr.size(stateEnv) + ")");
+			} else {
+				v.setValue("array (length: " + arr.size(stateEnv) + ")");
+			}
+		} else {
+			v.setVariablesReference(0);
+			v.setValue(value.val());
+		}
+		return v;
 	}
 
 	@Override

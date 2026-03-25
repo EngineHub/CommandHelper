@@ -1114,7 +1114,16 @@ public class Main {
 						.setDescription("Convenience shorthand that sets --debug-security NONE"
 								+ " and --debug-bind-address 0.0.0.0. For quick testing only.")
 						.asFlag()
-						.setName("debug-insecure"));
+						.setName("debug-insecure"))
+					.addArgument(new ArgumentBuilder()
+						.setDescription("The threading mode for the debug server."
+								+ " sync: blocks the executing thread at breakpoints."
+								+ " async: snapshots state without blocking."
+								+ " Defaults to sync.")
+						.setUsageName("mode")
+						.setOptional()
+						.setName("debug-threading-mode")
+						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING));
 		}
 
 		@Override
@@ -1130,6 +1139,7 @@ public class Main {
 			boolean debugInsecure = parsedArgs.isFlagSet("debug-insecure");
 			String debugSecurityStr = parsedArgs.getStringArgument("debug-security");
 			String debugBindAddress = parsedArgs.getStringArgument("debug-bind-address");
+			String debugThreadingModeStr = parsedArgs.getStringArgument("debug-threading-mode");
 
 			// --debug-insecure changes defaults but explicit values take priority
 			String defaultSecurity = debugInsecure
@@ -1173,12 +1183,16 @@ public class Main {
 			MSDebugServer debugServer = null;
 			if(debug) {
 				int port = debugPort == 0 ? MSDebugServer.DEFAULT_PORT : debugPort;
+				DebugContext.ThreadingMode threadingMode = DebugContext.ThreadingMode.SYNCHRONOUS;
+				if("async".equals(debugThreadingModeStr)) {
+					threadingMode = DebugContext.ThreadingMode.ASYNCHRONOUS;
+				}
 				debugServer = new MSDebugServer();
 				File authorizedKeysFile = debugSecurity == DebugSecurity.KEYPAIR
 						? MethodScriptFileLocations.getDefault().getAuthorizedDebugKeysFile()
 						: null;
 				env = debugServer.startListening(port, debugBindAddress, env,
-						debugSuspend, DebugContext.ThreadingMode.SYNCHRONOUS,
+						debugSuspend, threadingMode,
 						debugSecurity, authorizedKeysFile);
 				debugServer.awaitConfiguration();
 			}

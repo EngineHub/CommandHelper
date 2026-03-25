@@ -292,6 +292,7 @@ public class DebugContext implements Environment.EnvironmentImpl {
 	 */
 	public void reconnect() {
 		synchronized(reconnectMonitor) {
+			disconnected = false;
 			awaitingReconnect = false;
 			awaitingInitialConnection = false;
 			reconnectMonitor.notifyAll();
