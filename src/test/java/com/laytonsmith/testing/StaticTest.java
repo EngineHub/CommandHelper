@@ -526,6 +526,7 @@ public class StaticTest extends AbstractIntegrationTest {
 			env = StaticTest.env;
 		}
 		env.getEnv(GlobalEnv.class).GetVarList().clear();
+		env.getEnv(GlobalEnv.class).GetStackTraceManager().clear();
 		env.getEnv(CommandHelperEnvironment.class).SetCommandSender(player);
 		StaticAnalysis analysis = new StaticAnalysis(true);
 		analysis.setLocalEnable(false);
