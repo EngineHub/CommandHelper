@@ -1,17 +1,20 @@
 package com.laytonsmith.PureUtilities.Common;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.nio.ByteBuffer;
 import java.security.InvalidKeyException;
 import java.security.Key;
+import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Objects;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -21,82 +24,113 @@ import org.apache.commons.codec.binary.Base64;
 
 /**
  * Given a public/private key pair, this class uses RSA to encrypt/decrypt data.
+ *
+ * <p>Keys are stored in standard formats:
+ * <ul>
+ *   <li>Private key: PKCS#8 PEM ({@code -----BEGIN PRIVATE KEY-----})</li>
+ *   <li>Public key: OpenSSH format ({@code ssh-rsa <base64> <label>})</li>
+ * </ul>
+ * These formats are interoperable with OpenSSH, Node.js crypto, and other standard tools.
  */
 public class RSAEncrypt {
 
-	/**
-	 * The RSA algorithm key.
-	 */
 	private static final String ALGORITHM = "RSA";
+	private static final int KEY_SIZE = 2048;
 
 	/**
-	 * Generates a new key, and stores the value in the RSA
+	 * Generates a new RSA key pair.
 	 *
 	 * @param label The label that will be associated with the public key
-	 * @return
+	 *     (e.g. "user@host")
+	 * @return A new RSAEncrypt instance with both keys
 	 */
 	public static RSAEncrypt generateKey(String label) {
 		KeyPairGenerator keyGen;
 		try {
 			keyGen = KeyPairGenerator.getInstance(ALGORITHM);
-		} catch (NoSuchAlgorithmException ex) {
+		} catch(NoSuchAlgorithmException ex) {
 			throw new RuntimeException(ex);
 		}
-		keyGen.initialize(1024);
+		keyGen.initialize(KEY_SIZE);
 		KeyPair key = keyGen.generateKeyPair();
-		RSAEncrypt enc = new RSAEncrypt(toString(key.getPrivate()), toString(key.getPublic(), label));
+		RSAEncrypt enc = new RSAEncrypt(
+				privateKeyToPem(key.getPrivate()),
+				publicKeyToSsh(key.getPublic(), label));
 		return enc;
 	}
 
 	/**
-	 * Given a public key and a label, produces an ssh compatible rsa public key string.
-	 *
-	 * @param key
-	 * @param label
-	 * @return
+	 * Encodes a private key as a PKCS#8 PEM string.
 	 */
-	public static String toString(PublicKey key, String label) {
-		Objects.requireNonNull(label);
-		ByteArrayOutputStream pubBOS = new ByteArrayOutputStream();
-		try {
-			ObjectOutputStream publicKeyOS = new ObjectOutputStream(pubBOS);
-			publicKeyOS.writeObject(key);
-		} catch (IOException ex) {
-			throw new RuntimeException(ex);
+	private static String privateKeyToPem(PrivateKey key) {
+		String base64 = Base64.encodeBase64String(key.getEncoded());
+		StringBuilder sb = new StringBuilder();
+		sb.append("-----BEGIN PRIVATE KEY-----");
+		for(int i = 0; i < base64.length(); i++) {
+			if(i % 64 == 0) {
+				sb.append(StringUtils.nl());
+			}
+			sb.append(base64.charAt(i));
 		}
-		String publicKey = Base64.encodeBase64String(pubBOS.toByteArray());
-		publicKey = "ssh-rsa " + publicKey + " " + label;
-		return publicKey;
+		sb.append(StringUtils.nl()).append("-----END PRIVATE KEY-----").append(StringUtils.nl());
+		return sb.toString();
 	}
 
 	/**
-	 * Given a private key, produces an ssh compatible rsa private key string.
-	 *
-	 * @param key
-	 * @return
+	 * Encodes a public key in OpenSSH format: {@code ssh-rsa <base64> <label>}.
+	 * The base64 payload uses the SSH wire format (RFC 4253):
+	 * string "ssh-rsa", mpint e, mpint n.
 	 */
-	private static String toString(PrivateKey key) {
-		ByteArrayOutputStream privBOS = new ByteArrayOutputStream();
-		ObjectOutputStream privateKeyOS;
+	private static String publicKeyToSsh(PublicKey key, String label) {
+		Objects.requireNonNull(label);
+		RSAPublicKey rsaKey = (RSAPublicKey) key;
 		try {
-			privateKeyOS = new ObjectOutputStream(privBOS);
-			privateKeyOS.writeObject(key);
-		} catch (IOException ex) {
+			ByteArrayOutputStream buf = new ByteArrayOutputStream();
+			DataOutputStream dos = new DataOutputStream(buf);
+			byte[] typeBytes = "ssh-rsa".getBytes("UTF-8");
+			dos.writeInt(typeBytes.length);
+			dos.write(typeBytes);
+			byte[] eBytes = rsaKey.getPublicExponent().toByteArray();
+			dos.writeInt(eBytes.length);
+			dos.write(eBytes);
+			byte[] nBytes = rsaKey.getModulus().toByteArray();
+			dos.writeInt(nBytes.length);
+			dos.write(nBytes);
+			dos.flush();
+			return "ssh-rsa " + Base64.encodeBase64String(buf.toByteArray()) + " " + label;
+		} catch(IOException ex) {
 			throw new RuntimeException(ex);
 		}
-		String privateKey = Base64.encodeBase64String(privBOS.toByteArray());
+	}
 
-		StringBuilder privBuilder = new StringBuilder();
-		privBuilder.append("-----BEGIN RSA PRIVATE KEY-----");
-		for(int i = 0; i < privateKey.length(); i++) {
-			if(i % 64 == 0) {
-				privBuilder.append(StringUtils.nl());
-			}
-			privBuilder.append(privateKey.charAt(i));
+	/**
+	 * Parses an OpenSSH public key string and returns the PublicKey.
+	 * Reads the SSH wire format: string "ssh-rsa", mpint e, mpint n.
+	 */
+	private static PublicKey sshToPublicKey(String base64Part) {
+		byte[] decoded = Base64.decodeBase64(base64Part);
+		ByteBuffer bb = ByteBuffer.wrap(decoded);
+		// Read key type string
+		int typeLen = bb.getInt();
+		byte[] typeBytes = new byte[typeLen];
+		bb.get(typeBytes);
+		// Read exponent
+		int eLen = bb.getInt();
+		byte[] eBytes = new byte[eLen];
+		bb.get(eBytes);
+		java.math.BigInteger e = new java.math.BigInteger(eBytes);
+		// Read modulus
+		int nLen = bb.getInt();
+		byte[] nBytes = new byte[nLen];
+		bb.get(nBytes);
+		java.math.BigInteger n = new java.math.BigInteger(nBytes);
+		try {
+			java.security.spec.RSAPublicKeySpec spec = new java.security.spec.RSAPublicKeySpec(n, e);
+			KeyFactory kf = KeyFactory.getInstance(ALGORITHM);
+			return kf.generatePublic(spec);
+		} catch(NoSuchAlgorithmException | InvalidKeySpecException ex) {
+			throw new RuntimeException(ex);
 		}
-		privBuilder.append(StringUtils.nl()).append("-----END RSA PRIVATE KEY-----").append(StringUtils.nl());
-		privateKey = privBuilder.toString();
-		return privateKey;
 	}
 
 	private PublicKey publicKey;
@@ -104,57 +138,52 @@ public class RSAEncrypt {
 	private String label;
 
 	/**
-	 * Creates a new RSAEncrypt object, based on the ssh compatible private/public key pair. Only one key needs to be
-	 * provided. If so, only those methods for the key provided will work.
+	 * Creates a new RSAEncrypt object from PEM/SSH key strings. Only one key needs to be
+	 * provided. If so, only the methods for that key will work.
 	 *
-	 * @param privateKey
-	 * @param publicKey
-	 * @throws IllegalArgumentException If the keys are not the correct type. They must be ssh compatible.
+	 * <p>The private key should be PKCS#8 PEM format ({@code -----BEGIN PRIVATE KEY-----}).
+	 * The public key should be OpenSSH format ({@code ssh-rsa <base64> <label>}).
+	 *
+	 * @param privateKey The private key PEM string, or null
+	 * @param publicKey The public key SSH string, or null
+	 * @throws IllegalArgumentException If a key string cannot be parsed
 	 */
 	public RSAEncrypt(String privateKey, String publicKey) throws IllegalArgumentException {
 		if(privateKey != null) {
-			//private key processing
-			//replace all newlines with nothing
 			privateKey = privateKey.replaceAll("\r", "");
 			privateKey = privateKey.replaceAll("\n", "");
-			//Remove the BEGIN/END tags
+			privateKey = privateKey.replace("-----BEGIN PRIVATE KEY-----", "");
+			privateKey = privateKey.replace("-----END PRIVATE KEY-----", "");
+			// Also strip PKCS#1 headers for compatibility with ssh-keygen keys
 			privateKey = privateKey.replace("-----BEGIN RSA PRIVATE KEY-----", "");
 			privateKey = privateKey.replace("-----END RSA PRIVATE KEY-----", "");
-			ObjectInputStream privOIS;
 			try {
-				privOIS = new ObjectInputStream(new ByteArrayInputStream(Base64.decodeBase64(privateKey)));
-				this.privateKey = (PrivateKey) privOIS.readObject();
-			} catch (IOException | ClassNotFoundException ex) {
-				throw new RuntimeException(ex);
+				byte[] keyBytes = Base64.decodeBase64(privateKey);
+				PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
+				KeyFactory kf = KeyFactory.getInstance(ALGORITHM);
+				this.privateKey = kf.generatePrivate(spec);
+			} catch(NoSuchAlgorithmException | InvalidKeySpecException ex) {
+				throw new IllegalArgumentException("Failed to parse private key", ex);
 			}
 		}
 
 		if(publicKey != null) {
-			//public key processing
-			String[] split = publicKey.split(" ");
-			if(split.length != 3) {
-				throw new IllegalArgumentException("Invalid public key passed in.");
+			String[] split = publicKey.trim().split("\\s+");
+			if(split.length < 2) {
+				throw new IllegalArgumentException("Invalid public key format.");
 			}
 			if(!"ssh-rsa".equals(split[0])) {
-				throw new IllegalArgumentException("Invalid public key type. Expecting ssh-rsa, but found \"" + split[0] + "\"");
+				throw new IllegalArgumentException(
+						"Invalid public key type. Expecting ssh-rsa, but found \""
+						+ split[0] + "\"");
 			}
-			this.label = split[2];
-			ObjectInputStream pubOIS;
-			try {
-				pubOIS = new ObjectInputStream(new ByteArrayInputStream(Base64.decodeBase64(split[1])));
-				this.publicKey = (PublicKey) pubOIS.readObject();
-			} catch (IOException | ClassNotFoundException ex) {
-				throw new RuntimeException(ex);
-			}
+			this.label = split.length >= 3 ? split[2] : "";
+			this.publicKey = sshToPublicKey(split[1]);
 		}
 	}
 
 	/**
-	 * Encrypts the data with the public key, which can be decrypted with the private key. This is only valid if the
-	 * public key was provided.
-	 *
-	 * @param data
-	 * @return
+	 * Encrypts the data with the public key, which can be decrypted with the private key.
 	 */
 	public byte[] encryptWithPublic(byte[] data) {
 		Objects.requireNonNull(publicKey);
@@ -162,12 +191,7 @@ public class RSAEncrypt {
 	}
 
 	/**
-	 * Encrypts the data with the private key, which can be decrypted with the public key. This is only valid if the
-	 * private key was provided.
-	 *
-	 * @param data
-	 * @return
-	 * @throws InvalidKeyException
+	 * Encrypts the data with the private key, which can be decrypted with the public key.
 	 */
 	public byte[] encryptWithPrivate(byte[] data) throws InvalidKeyException {
 		Objects.requireNonNull(privateKey);
@@ -175,11 +199,7 @@ public class RSAEncrypt {
 	}
 
 	/**
-	 * Decrypts the data with the public key, which will have been encrypted with the private key. This is only valid if
-	 * the public key was provided.
-	 *
-	 * @param data
-	 * @return
+	 * Decrypts the data with the public key, which will have been encrypted with the private key.
 	 */
 	public byte[] decryptWithPublic(byte[] data) {
 		Objects.requireNonNull(publicKey);
@@ -187,60 +207,40 @@ public class RSAEncrypt {
 	}
 
 	/**
-	 * Decrypts the data with the private key, which will have been encrypted with the public key. This is only valid if
-	 * the private key was provided.
-	 *
-	 * @param data
-	 * @return
+	 * Decrypts the data with the private key, which will have been encrypted with the public key.
 	 */
 	public byte[] decryptWithPrivate(byte[] data) {
 		Objects.requireNonNull(privateKey);
 		return crypt(data, privateKey, Cipher.DECRYPT_MODE);
 	}
 
-	/**
-	 * Utility method that actually does the de/encrypting.
-	 *
-	 * @param data
-	 * @param key
-	 * @param cryptMode
-	 * @return
-	 */
 	private byte[] crypt(byte[] data, Key key, int cryptMode) {
-		byte[] cipherValue = null;
-		Cipher cipher;
 		try {
-			cipher = Cipher.getInstance(ALGORITHM);
+			Cipher cipher = Cipher.getInstance(ALGORITHM);
 			cipher.init(cryptMode, key);
-			cipherValue = cipher.doFinal(data);
-		} catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException | NoSuchAlgorithmException | NoSuchPaddingException ex) {
+			return cipher.doFinal(data);
+		} catch(InvalidKeyException | IllegalBlockSizeException | BadPaddingException
+				| NoSuchAlgorithmException | NoSuchPaddingException ex) {
 			throw new RuntimeException(ex);
 		}
-		return cipherValue;
 	}
 
 	/**
-	 * Returns the private key string.
-	 *
-	 * @return
+	 * Returns the private key as a PKCS#8 PEM string.
 	 */
 	public String getPrivateKey() {
-		return toString(privateKey);
+		return privateKeyToPem(privateKey);
 	}
 
 	/**
-	 * Returns the public key string.
-	 *
-	 * @return
+	 * Returns the public key as an OpenSSH format string.
 	 */
 	public String getPublicKey() {
-		return toString(publicKey, label);
+		return publicKeyToSsh(publicKey, label);
 	}
 
 	/**
 	 * Returns the label on the public key.
-	 *
-	 * @return
 	 */
 	public String getLabel() {
 		return label;

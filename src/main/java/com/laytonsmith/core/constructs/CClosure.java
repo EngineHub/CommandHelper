@@ -22,6 +22,7 @@ import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREStackOverflowError;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.exceptions.StackTraceFrame;
 import com.laytonsmith.core.exceptions.StackTraceManager;
 import com.laytonsmith.core.exceptions.UnhandledFlowControlException;
 import com.laytonsmith.core.functions.Exceptions;
@@ -125,7 +126,7 @@ public class CClosure extends Construct implements Callable, Booleanish {
 	 * instead of recursing into a new eval() call.
 	 *
 	 * <p>The caller is responsible for evaluating the body (via {@link #getNode()}) in the
-	 * returned environment, and for calling {@link StackTraceManager#popStackTraceElement()}
+	 * returned environment, and for calling {@link StackTraceManager#popStackTraceFrame()}
 	 * when done (or ensuring it's done via a cleanup mechanism).</p>
 	 *
 	 * @param values The argument values to bind, or null for no arguments
@@ -146,7 +147,7 @@ public class CClosure extends Construct implements Callable, Booleanish {
 			return null;
 		}
 		StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
-		stManager.addStackTraceElement(new ConfigRuntimeException.StackTraceElement("<<closure>>", getTarget()));
+		stManager.addStackTraceFrame(new StackTraceFrame("<<closure>>", getTarget()));
 
 		CArray arguments = new CArray(node.getData().getTarget());
 		CArray vararg = null;
@@ -267,13 +268,14 @@ public class CClosure extends Construct implements Callable, Booleanish {
 	 * Shorthand for calling
 	 * {@link #executeCallable(com.laytonsmith.core.environments.Environment,
 	 * com.laytonsmith.core.constructs.Target, com.laytonsmith.core.natives.interfaces.Mixed...)}
-	 * with a null environment, and Target.UNKNOWN. Since closures don't need these parameters,
-	 * this is easier, however, Callables do not have this.
+	 * with a null environment, and Target.UNKNOWN.
 	 * @param values
 	 * @return
 	 * @throws ConfigRuntimeException
 	 * @throws CancelCommandException
-	 * @deprecated Functions that call closures should extend {@link CallbackYield}
+	 * @deprecated Use {@link #executeCallable(Environment, Target, Mixed...)} instead, which
+	 * provides the caller's environment and target for proper error reporting.
+	 * Functions that call closures should also consider extending {@link CallbackYield}
 	 * instead of calling this directly, which re-enters eval() and defeats the iterative interpreter.
 	 */
 	@Deprecated
@@ -285,14 +287,20 @@ public class CClosure extends Construct implements Callable, Booleanish {
 	 * Executes the closure, giving it the supplied arguments. {@code values} may be null, which means that no arguments
 	 * are being sent.
 	 *
-	 * ConfigRuntimeExceptions will bubble up past this, since an execution mechanism may need to do custom handling.
+	 * <p>ConfigRuntimeExceptions will bubble up past this, since an execution mechanism may need to do custom
+	 * handling.</p>
 	 *
-	 * A typical execution will include the following code:
+	 * <p>Note: This method starts a fresh top-level evaluation, which is correct for callers that run the
+	 * closure on a new thread (e.g., x_new_thread). However, callers that execute the closure on the
+	 * <em>same</em> thread within an already-running eval loop should extend {@link CallbackYield} and use
+	 * {@link #prepareForStack} instead, to avoid re-entering eval() and defeating the iterative interpreter.</p>
+	 *
+	 * <p>A typical execution will include the following code:</p>
 	 * <pre>
 	 * try {
-	 *	closure.execute();
+	 *	closure.executeCallable(env, t);
 	 * } catch (ConfigRuntimeException e){
-	 *	ConfigRuntimeException.HandleUncaughtException(e);
+	 *	ConfigRuntimeException.HandleUncaughtException(e, env);
 	 * } catch (CancelCommandException e){
 	 *	// Ignored
 	 * }
@@ -322,78 +330,13 @@ public class CClosure extends Construct implements Callable, Booleanish {
 	 */
 	protected Mixed execute(Mixed... values) throws ConfigRuntimeException,
 			CancelCommandException {
-		if(node == null) {
+		PreparedExecution prep = prepareExecution(values);
+		if(prep == null) {
 			return CVoid.VOID;
 		}
-		Environment env;
-		try {
-			synchronized(this) {
-				env = this.env.clone();
-			}
-		} catch (CloneNotSupportedException ex) {
-			Logger.getLogger(CClosure.class.getName()).log(Level.SEVERE, null, ex);
-			return CVoid.VOID;
-		}
+		Environment env = prep.getEnv();
 		StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
-		stManager.addStackTraceElement(new ConfigRuntimeException.StackTraceElement("<<closure>>", getTarget()));
 		try {
-			CArray arguments = new CArray(node.getData().getTarget());
-			CArray vararg = null;
-			CClassType varargType = null;
-			if(values != null) {
-				for(int i = 0; i < Math.max(values.length, names.length); i++) {
-					Mixed value;
-					if(i < values.length) {
-						value = values[i];
-					} else {
-						value = defaults[i].clone();
-					}
-					arguments.push(value, node.getData().getTarget());
-					boolean isVarArg = false;
-					if(this.names.length > i
-						|| (this.names.length != 0
-							&& this.types[this.names.length - 1].isVariadicType())) {
-						String name;
-						if(i < this.names.length - 1
-								|| !this.types[this.types.length - 1].isVariadicType()) {
-							name = names[i];
-						} else {
-							name = this.names[this.names.length - 1];
-							if(vararg == null) {
-								// TODO: Once generics are added, add the type
-								vararg = new CArray(value.getTarget());
-								env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE,
-										name, vararg, value.getTarget()));
-								varargType = this.types[this.types.length - 1];
-							}
-							isVarArg = true;
-						}
-						if(isVarArg) {
-							if(!InstanceofUtil.isInstanceof(value.typeof(env), varargType.getVarargsBaseType(), env)) {
-								throw new CRECastException("Expected type " + varargType + " but found " + value.typeof(env),
-										getTarget());
-							}
-							vararg.push(value, value.getTarget());
-						} else {
-							IVariable var = new IVariable(types[i], name, value, getTarget(), env);
-							env.getEnv(GlobalEnv.class).GetVarList().set(var);
-						}
-					}
-				}
-			}
-			boolean hasArgumentsParam = false;
-			for(String pName : this.names) {
-				if(pName.equals("@arguments")) {
-					hasArgumentsParam = true;
-					break;
-				}
-			}
-
-			if(!hasArgumentsParam) {
-				env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, "@arguments", arguments,
-						node.getData().getTarget()));
-			}
-
 			Script script = env.getEnv(GlobalEnv.class).GetScript();
 			if(script == null) {
 				script = Script.GenerateScript(node, env.getEnv(GlobalEnv.class).GetLabel(), null);
@@ -427,11 +370,8 @@ public class CClosure extends Construct implements Callable, Booleanish {
 						result.getTarget());
 			}
 			return result;
-		} catch (CloneNotSupportedException ex) {
-			Logger.getLogger(CClosure.class.getName()).log(Level.SEVERE, null, ex);
-			return CVoid.VOID;
 		} finally {
-			stManager.popStackTraceElement();
+			stManager.popStackTraceFrame();
 		}
 	}
 
