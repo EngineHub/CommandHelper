@@ -1250,12 +1250,17 @@ public class DebugInfrastructureTest {
 	@Test
 	public void testDAPExceptionBreakpointsAll() throws Exception {
 		String script = "@x = 1\ntry {\n\tthrow(Exception, 'test')\n} catch(Exception @e) {\n\t@y = 1\n}";
-		try(DAPTestHarness h = new DAPTestHarness(script, new int[]{},
+		try(DAPTestHarness h = new DAPTestHarness(script, new int[]{1},
 				DebugContext.ThreadingMode.SYNCHRONOUS)) {
+			// Pause at line 1 first, then set exception breakpoints before
+			// the throw executes, avoiding the race condition.
+			assertTrue(h.awaitStop(0, 5));
 			h.setExceptionBreakpoints("all");
+			h.setBreakpoints(new int[]{});
+			h.continue_();
 			// The throw should cause a stop
 			assertTrue("Should break on caught exception",
-					h.awaitStop(0, 5));
+					h.awaitStop(1, 5));
 			h.continue_();
 			h.terminated.await(5, TimeUnit.SECONDS);
 		}
@@ -1264,9 +1269,14 @@ public class DebugInfrastructureTest {
 	@Test
 	public void testDAPExceptionBreakpointsUncaught() throws Exception {
 		String script = "@x = 1\ntry {\n\tthrow(Exception, 'test')\n} catch(Exception @e) {\n\t@y = 1\n}";
-		try(DAPTestHarness h = new DAPTestHarness(script, new int[]{},
+		try(DAPTestHarness h = new DAPTestHarness(script, new int[]{1},
 				DebugContext.ThreadingMode.SYNCHRONOUS)) {
+			// Pause at line 1 first, then set exception breakpoints before
+			// the throw executes, avoiding the race condition.
+			assertTrue(h.awaitStop(0, 5));
 			h.setExceptionBreakpoints("uncaught");
+			h.setBreakpoints(new int[]{});
+			h.continue_();
 			// Caught exception should NOT trigger a break with "uncaught" filter
 			// Script should complete normally
 			assertTrue("Script should complete without breaking",
