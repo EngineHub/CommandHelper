@@ -30,7 +30,7 @@ public class StackTraceManager {
 	private static final CInt DEFAULT_MAX_DEPTH_MIXED
 			= new CInt(DEFAULT_MAX_CALL_DEPTH, Target.UNKNOWN);
 
-	private final Stack<ConfigRuntimeException.StackTraceElement> elements = new Stack<>();
+	private final Stack<StackTraceFrame> elements = new Stack<>();
 	private final GlobalEnv gEnv;
 
 	/**
@@ -48,7 +48,7 @@ public class StackTraceManager {
 	 *
 	 * @param element The element to be pushed on
 	 */
-	public void addStackTraceElement(ConfigRuntimeException.StackTraceElement element) {
+	public void addStackTraceFrame(StackTraceFrame element) {
 		elements.add(element);
 		Mixed setting = gEnv.GetRuntimeSetting(MAX_CALL_DEPTH_SETTING, DEFAULT_MAX_DEPTH_MIXED);
 		int maxDepth = ArgumentValidation.getInt32(setting, element.getDefinedAt(), null);
@@ -60,7 +60,7 @@ public class StackTraceManager {
 	/**
 	 * Pops the top stack trace trail element off.
 	 */
-	public void popStackTraceElement() {
+	public void popStackTraceFrame() {
 		elements.pop();
 	}
 
@@ -69,8 +69,8 @@ public class StackTraceManager {
 	 *
 	 * @return
 	 */
-	public List<ConfigRuntimeException.StackTraceElement> getCurrentStackTrace() {
-		List<ConfigRuntimeException.StackTraceElement> l = new ArrayList<>(elements);
+	public List<StackTraceFrame> getCurrentStackTrace() {
+		List<StackTraceFrame> l = new ArrayList<>(elements);
 		Collections.reverse(l);
 		return l;
 	}
@@ -112,5 +112,6 @@ public class StackTraceManager {
 			elements.peek().setDefinedAt(target);
 		}
 	}
+
 
 }

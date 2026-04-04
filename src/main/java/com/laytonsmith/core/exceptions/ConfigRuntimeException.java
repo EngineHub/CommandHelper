@@ -14,7 +14,6 @@ import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CClosure;
-import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
@@ -25,7 +24,6 @@ import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
 import com.laytonsmith.core.exceptions.CRE.CRECausedByWrapper;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -191,14 +189,14 @@ public class ConfigRuntimeException extends RuntimeException {
 		}
 	}
 
-	private static void PrintMessage(StringBuilder log, StringBuilder console, StringBuilder player, String type, String message, Throwable ex, List<StackTraceElement> st, Target top) {
+	private static void PrintMessage(StringBuilder log, StringBuilder console, StringBuilder player, String type, String message, Throwable ex, List<StackTraceFrame> st, Target top) {
 		log.append(type).append(message).append("\n");
 		console.append(TermColors.RED).append(type).append(TermColors.WHITE).append(message).append("\n");
 		player.append(MCChatColor.RED).append(type).append(MCChatColor.WHITE).append(message).append("\n");
 		if(st.isEmpty()) {
-			st.add(new StackTraceElement("<<main code>>", top));
+			st.add(new StackTraceFrame("<<main code>>", top));
 		}
-		for(StackTraceElement e : st) {
+		for(StackTraceFrame e : st) {
 			Target t = e.getDefinedAt();
 			String proc = e.getProcedureName();
 			File file = t.file();
@@ -239,12 +237,12 @@ public class ConfigRuntimeException extends RuntimeException {
 	 * @param optionalMessage
 	 */
 	@SuppressWarnings("ThrowableResultIgnored")
-	private static void DoReport(String message, String exceptionType, ConfigRuntimeException ex, List<StackTraceElement> stacktrace, MCPlayer currentPlayer) {
+	private static void DoReport(String message, String exceptionType, ConfigRuntimeException ex, List<StackTraceFrame> stacktrace, MCPlayer currentPlayer) {
 		String type = exceptionType;
 		if(exceptionType == null) {
 			type = "FATAL";
 		}
-		List<StackTraceElement> st = new ArrayList<>(stacktrace);
+		List<StackTraceFrame> st = new ArrayList<>(stacktrace);
 		if(message == null) {
 			message = "";
 		}
@@ -256,7 +254,7 @@ public class ConfigRuntimeException extends RuntimeException {
 		if(ex != null) {
 			top = ex.getTarget();
 		}
-		for(StackTraceElement e : st) {
+		for(StackTraceFrame e : st) {
 			Target t = e.getDefinedAt();
 			if(top == Target.UNKNOWN) {
 				top = t;
@@ -279,14 +277,14 @@ public class ConfigRuntimeException extends RuntimeException {
 				player.append(MCChatColor.AQUA).append("Caused by:\n");
 				CArray exception = ((CRECausedByWrapper) ex).getException();
 				CArray stackTrace = ArgumentValidation.getArray(exception.get("stackTrace", t), t);
-				List<StackTraceElement> newSt = new ArrayList<>();
+				List<StackTraceFrame> newSt = new ArrayList<>();
 				for(Mixed consElement : stackTrace.asList()) {
 					CArray element = ArgumentValidation.getArray(consElement, t);
 					int line = ArgumentValidation.getInt32(element.get("line", t), t);
 					File file = new File(element.get("file", t).val());
 					int col = ArgumentValidation.getInt32(element.get("col", t), t);
 					Target stElementTarget = new Target(line, file, col);
-					newSt.add(new StackTraceElement(element.get("id", t).val(), stElementTarget));
+					newSt.add(new StackTraceFrame(element.get("id", t).val(), stElementTarget));
 				}
 
 				String nType = exception.get("classType", t).val();
@@ -316,7 +314,7 @@ public class ConfigRuntimeException extends RuntimeException {
 				&& e.getEnv().getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
 			p = e.getEnv().getEnv(CommandHelperEnvironment.class).GetPlayer();
 		}
-		List<StackTraceElement> st = new ArrayList<>();
+		List<StackTraceFrame> st = new ArrayList<>();
 		if(e instanceof AbstractCREException) {
 			st = ((AbstractCREException) e).getCREStackTrace();
 		}
@@ -339,8 +337,8 @@ public class ConfigRuntimeException extends RuntimeException {
 	}
 
 	private static void DoReport(ConfigCompileException e, MCPlayer player) {
-		List<StackTraceElement> st = new ArrayList<StackTraceElement>();
-		st.add(0, new StackTraceElement("", e.getTarget()));
+		List<StackTraceFrame> st = new ArrayList<StackTraceFrame>();
+		st.add(0, new StackTraceFrame("", e.getTarget()));
 		DoReport(e.getMessage(), "COMPILE ERROR", null, st, player);
 	}
 
@@ -465,81 +463,4 @@ public class ConfigRuntimeException extends RuntimeException {
 			return null;
 		}
 	}
-
-	/**
-	 * A stacktrace contains 1 or more stack trace elements. A new stacktrace element is added each time an exception
-	 * bubbles up past a procedure.
-	 */
-	public static class StackTraceElement {
-
-		private final String procedureName;
-		private Target definedAt;
-
-		/**
-		 * Creates a new StackTraceElement.
-		 *
-		 * @param procedureName The name of the procedure
-		 * @param definedAt The code target where the procedure is defined at.
-		 */
-		public StackTraceElement(String procedureName, Target definedAt) {
-			this.procedureName = procedureName;
-			this.definedAt = definedAt;
-		}
-
-		/**
-		 * Gets the name of the procedure.
-		 *
-		 * @return
-		 */
-		public String getProcedureName() {
-			return procedureName;
-		}
-
-		/**
-		 * Gets the code target where the procedure is defined at.
-		 *
-		 * @return
-		 */
-		public Target getDefinedAt() {
-			return definedAt;
-		}
-
-		@Override
-		public String toString() {
-			return procedureName + " (Defined at " + definedAt + ")";
-		}
-
-		public CArray getObjectFor() {
-			CArray element = CArray.GetAssociativeArray(Target.UNKNOWN);
-			element.set("id", getProcedureName());
-			try {
-				String name = "Unknown file";
-				if(getDefinedAt().file() != null) {
-					name = getDefinedAt().file().getCanonicalPath();
-				}
-				element.set("file", name);
-			} catch (IOException ex) {
-				// This shouldn't happen, but if it does, we want to fall back to something marginally useful
-				String name = "Unknown file";
-				if(getDefinedAt().file() != null) {
-					name = getDefinedAt().file().getAbsolutePath();
-				}
-				element.set("file", name);
-			}
-			element.set("line", new CInt(getDefinedAt().line(), Target.UNKNOWN), Target.UNKNOWN);
-			element.set("col", new CInt(getDefinedAt().col(), Target.UNKNOWN), Target.UNKNOWN);
-			return element;
-		}
-
-		/**
-		 * In general, only the core elements should change this
-		 *
-		 * @param target
-		 */
-		void setDefinedAt(Target target) {
-			definedAt = target;
-		}
-
-	}
-
 }

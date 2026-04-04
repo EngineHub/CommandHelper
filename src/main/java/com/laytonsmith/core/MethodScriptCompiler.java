@@ -3064,7 +3064,7 @@ public final class MethodScriptCompiler {
 			}
 			result = script.eval(root, env);
 		}
-		if(done != null) {
+		if(done != null && !Script.isDebuggerPaused(result)) {
 			done.done(result.val().trim());
 		}
 		return result;

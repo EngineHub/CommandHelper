@@ -10,6 +10,7 @@ import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
+import com.laytonsmith.core.constructs.IVariableList;
 import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
@@ -20,6 +21,7 @@ import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREStackOverflowError;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.exceptions.StackTraceFrame;
 import com.laytonsmith.core.exceptions.StackTraceManager;
 import com.laytonsmith.core.exceptions.UnhandledFlowControlException;
 import com.laytonsmith.core.functions.ControlFlow;
@@ -198,7 +200,7 @@ public class Procedure implements Cloneable {
 
 		Script fakeScript = Script.GenerateScript(tree, env.getEnv(GlobalEnv.class).GetLabel(), null);
 		StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
-		stManager.addStackTraceElement(new ConfigRuntimeException.StackTraceElement("proc " + name, getTarget()));
+		stManager.addStackTraceFrame(new StackTraceFrame("proc " + name, getTarget()));
 		try {
 			Mixed result = fakeScript.eval(tree, env);
 			if(result == null) {
@@ -223,7 +225,7 @@ public class Procedure implements Cloneable {
 		} catch(StackOverflowError e) {
 			throw new CREStackOverflowError(null, t, e);
 		} finally {
-			stManager.popStackTraceElement();
+			stManager.popStackTraceFrame();
 		}
 	}
 
@@ -261,8 +263,8 @@ public class Procedure implements Cloneable {
 	public Callable.PreparedCallable prepareCall(List<Mixed> args, Environment callerEnv, Target callTarget) {
 		Environment env = prepareEnvironment(args, callerEnv, callTarget);
 		StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
-		stManager.addStackTraceElement(
-				new ConfigRuntimeException.StackTraceElement("proc " + name, getTarget()));
+		stManager.addStackTraceFrame(
+				new StackTraceFrame("proc " + name, getTarget()));
 		return new Callable.PreparedCallable(tree, env);
 	}
 
@@ -287,7 +289,9 @@ public class Procedure implements Cloneable {
 		}
 		oldEnv.getEnv(GlobalEnv.class).setCloneVars(prev);
 
+		IVariableList varList = env.getEnv(GlobalEnv.class).GetVarList();
 		CArray arguments = new CArray(Target.UNKNOWN, this.varIndex.size());
+		IVariable lastParam = this.varIndex.isEmpty() ? null : this.varIndex.get(this.varIndex.size() - 1);
 
 		int varInd;
 		CArray vararg = null;
@@ -295,17 +299,17 @@ public class Procedure implements Cloneable {
 			Mixed c = args.get(varInd);
 			arguments.push(c, callTarget);
 			if(this.varIndex.size() > varInd
-					|| (!this.varIndex.isEmpty()
-						&& this.varIndex.get(this.varIndex.size() - 1).getDefinedType().isVariadicType())) {
+					|| (lastParam != null
+						&& lastParam.getDefinedType().isVariadicType())) {
 				IVariable var;
 				if(varInd < this.varIndex.size() - 1
-						|| !this.varIndex.get(this.varIndex.size() - 1).getDefinedType().isVariadicType()) {
+						|| !lastParam.getDefinedType().isVariadicType()) {
 					var = this.varIndex.get(varInd);
 				} else {
-					var = this.varIndex.get(this.varIndex.size() - 1);
+					var = lastParam;
 					if(vararg == null) {
 						vararg = new CArray(callTarget);
-						env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE,
+						varList.set(new IVariable(CArray.TYPE,
 								var.getVariableName(), vararg, c.getTarget()));
 					}
 				}
@@ -329,7 +333,7 @@ public class Procedure implements Cloneable {
 				}
 
 				if(InstanceofUtil.isInstanceof(c.typeof(env), var.getDefinedType(), env)) {
-					env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(var.getDefinedType(),
+					varList.set(new IVariable(var.getDefinedType(),
 							var.getVariableName(), c, c.getTarget()));
 					continue;
 				} else {
@@ -343,11 +347,11 @@ public class Procedure implements Cloneable {
 		while(varInd < this.varIndex.size()) {
 			String varName = this.varIndex.get(varInd++).getVariableName();
 			Mixed defVal = this.originals.get(varName);
-			env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(Auto.TYPE, varName, defVal, defVal.getTarget()));
+			varList.set(new IVariable(Auto.TYPE, varName, defVal, defVal.getTarget()));
 			arguments.push(defVal, callTarget);
 		}
 
-		env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, "@arguments", arguments, callTarget));
+		varList.set(new IVariable(CArray.TYPE, "@arguments", arguments, callTarget));
 		return env;
 	}
 
@@ -469,14 +473,14 @@ public class Procedure implements Cloneable {
 			bodyStarted = true;
 			procEnv = prepareEnvironment(evaluatedArgs, callerEnv, callTarget);
 			StackTraceManager stManager = procEnv.getEnv(GlobalEnv.class).GetStackTraceManager();
-			stManager.addStackTraceElement(
-					new ConfigRuntimeException.StackTraceElement("proc " + name, getTarget()));
+			stManager.addStackTraceFrame(
+					new StackTraceFrame("proc " + name, getTarget(), callTarget));
 			return new StepAction.Evaluate(tree, procEnv);
 		}
 
 		private void popStackTrace() {
 			if(procEnv != null) {
-				procEnv.getEnv(GlobalEnv.class).GetStackTraceManager().popStackTraceElement();
+				procEnv.getEnv(GlobalEnv.class).GetStackTraceManager().popStackTraceFrame();
 			}
 		}
 	}

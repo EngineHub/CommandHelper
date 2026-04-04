@@ -4,15 +4,165 @@ you write the code as cleverly as possible, you are, by definition, not smart
 enough to debug it." --Brian Kernighan
 
 Debugging your code is an important, but challenging part of writing working code.
-Currently, MethodScript does not have an interactive debugger (though this is planned
-in the future) however, this does not stop you from debugging scripts anyways.
-When debugging, there are several key concepts
+MethodScript has an interactive debugger, offered through the official VS Code
+extension, which supports breakpoints, step execution, variable inspection,
+and more. This page covers how to set up and use the debugger, as well as
+general debugging techniques.
+
+== VS Code Debugger ==
+
+The recommended way to debug MethodScript is with the official VS Code extension.
+It provides a full-featured debugging experience using the
+[[https://microsoft.github.io/debug-adapter-protocol/|Debug Adapter Protocol (DAP)]],
+including:
+
+* Breakpoints (line and conditional)
+* Step over, step into, step out
+* Variable inspection (locals and closure variables)
+* Call stack inspection
+* Log points (output a message without stopping)
+
+=== Installation ===
+
+Install the
+[[https://marketplace.visualstudio.com/items?itemName=MethodScriptVSC.methodscriptvsc|MethodScript VS Code extension]]
+from the VS Code Marketplace by searching for
+"MethodScript" in the Extensions panel, or install it from the command line:
+
+<%PRE|
+code --install-extension MethodScriptVSC.methodscriptvsc
+%>
+
+=== Command Line Debugging ===
+
+To debug a standalone <code>.ms</code> script, open it in VS Code and press
+F5, then "Launch". The extension will launch the script with the debug server enabled and
+automatically connect.
+
+You can also launch the debugger manually from the command line:
+
+<%PRE|
+java -jar CommandHelper.jar cmdline --debug --debug-security NONE script.ms
+%>
+
+This starts the debug server on port 6732 (the default). You can then attach
+VS Code to it by pressing F5 and choosing "Attach". The following command line
+flags are available:
+
+{| class="wiki-table"
+|-
+! Flag !! Description
+|-
+| <code>--debug</code> || Enable the DAP debug server.
+|-
+| <code>--debug-port &lt;port&gt;</code> || The port for the debug server. Defaults to 6732.
+|-
+| <code>--debug-suspend</code> || Wait for a debugger to connect before executing the script.
+|-
+| <code>--debug-security &lt;mode&gt;</code> || Security mode: <code>NONE</code> (localhost only, no auth) or <code>KEYPAIR</code> (SSH-style auth + TLS).
+|-
+| <code>--debug-threading-mode &lt;mode&gt;</code> || Threading mode: <code>sync</code> (default) blocks the executing thread at breakpoints, <code>async</code> snapshots state without blocking.
+|-
+| <code>--debug-bind-address &lt;address&gt;</code> || Address to bind to. Defaults to 127.0.0.1.
+|-
+| <code>--debug-insecure</code> || Shorthand for <code>--debug-security NONE --debug-bind-address 0.0.0.0</code>. For quick local testing only.
+|}
+
+=== Minecraft Server Debugging ===
+
+To debug scripts running inside a Minecraft server, configure the debug
+server in <code>plugins/CommandHelper/preferences.ini</code>:
+
+{| class="wiki-table"
+|-
+! Preference !! Default !! Description
+|-
+| <code>debug-server-mode</code> || <code>off</code> || <code>off</code> disables the debug server. <code>on</code> starts it automatically when the plugin loads. <code>manual</code> allows starting it with <code>/debug-server start</code>.
+|-
+| <code>debug-server-port</code> || <code>6732</code> || The TCP port for the debug server.
+|-
+| <code>debug-server-security</code> || <code>KEYPAIR</code> || <code>KEYPAIR</code> requires SSH-style authentication and enables TLS (recommended). <code>NONE</code> allows unauthenticated connections, restricted to localhost.
+|-
+| <code>debug-server-bind-address</code> || <code>127.0.0.1</code> || The address the debug server binds to. Use <code>0.0.0.0</code> for remote connections (requires KEYPAIR security).
+|-
+| <code>debug-server-threading</code> || <code>async</code> || <code>async</code> snapshots state without blocking the server thread (default, recommended). <code>sync</code> blocks the executing thread at breakpoints.
+|-
+| <code>debug-server-timeout</code> || <code>15</code> || Minutes before the debug server shuts down with no connected client. Set to 0 to disable. Only applies to manual mode.
+|}
+
+Once the debug server is running, press F5 in VS Code, choose "Attach", and
+enter the host and port. If using keypair security, you will also need to
+provide your private key. By default, this looks for ´~/.ssh/id_rsa`.
+
+To debug startup scripts (e.g. <code>main.ms</code>), connect the debugger
+first, then use <code>/recompile</code> to re-run the startup scripts with
+the debugger attached.
+
+==== Manual Mode ====
+
+Manual mode (<code>debug-server-mode=manual</code>) lets you start and stop
+the debug server on demand from the server console:
+
+<%PRE|
+/debug-server start
+/debug-server stop
+/debug-server status
+%>
+
+The server will automatically shut down after the configured timeout
+(default 15 minutes) if no client connects.
+
+=== Keypair Security ===
+
+For remote debugging keypair security is required, but can also be used locally.
+It uses SSH-style key authentication and TLS encryption.
+
+To set it up:
+
+# Generate an SSH key pair if you don't have one: <code>ssh-keygen -t ed25519</code> (or <code>mscript -- key-gen</code>).
+# Copy your public key to the authorized debug keys file at <code>~/.mscript/authorized_debug_keys</code> (for command line) or <code>plugins/CommandHelper/authorized_debug_keys</code> (for CommandHelper). One public key per line, same format as <code>~/.ssh/authorized_keys</code>.
+# From command line, use <code>--debug-security KEYPAIR</code>. For CommandHelper, set <code>debug-server-security</code> to <code>KEYPAIR</code> in preferences.ini.
+# When attaching from VS Code, select "Keypair" security and provide your private key (or leave blank to auto-detect from <code>~/.ssh/</code>).
+
+=== Using the Debugger ===
+
+==== Breakpoints ====
+
+Click in the gutter next to a line number in VS Code to set a breakpoint.
+When execution reaches that line, the debugger will pause and let you
+inspect the current state.
+
+Right-click a breakpoint to add a condition (the breakpoint only fires when
+the condition is true) or convert it to a log point (outputs a message
+without pausing).
+
+==== Stepping ====
+
+Once paused at a breakpoint, use the debug toolbar to control execution:
+
+* '''Step Over''' (F10) - Execute the current line and pause at the next line.
+* '''Step Into''' (F11) - If the current line calls a procedure, step into it.
+* '''Step Out''' (Shift+F11) - Run until the current procedure returns.
+* '''Continue''' (F5) - Resume execution until the next breakpoint.
+
+When stepping into a line that calls multiple procedures, VS Code will show
+step-into targets so you can choose which procedure to enter.
+
+==== Variable Inspection ====
+
+While paused, the Variables panel shows all variables in the current scope.
+You can expand arrays to inspect their contents.
+
+== General Debugging Techniques ==
+
+Regardless of whether you use the VS Code debugger, there are some key
+concepts to keep in mind when debugging.
 
 * Understand code flow
 * Understand variable's values
 * Know the assumptions you are making, and test assumptions that matter
 
-== Understand code flow ==
+=== Understand code flow ===
 
 The most important thing for you to know is how the code is supposed to work. Granted, there
 may be a problem with how it is actually working, but if you don't know what the code
@@ -20,7 +170,7 @@ is supposed to do, you can't know what is wrong with it. This includes usages of
 builtin API, as well as your own code. Stack traces are important to understand as well.
 Lets examine the components of a stack trace, given the following source code:
 
-%%CODE|
+<%CODE|
 #!/usr/local/bin/mscript
 proc(_proc1, @a,
         return(_proc2(@a))
@@ -31,16 +181,16 @@ proc(_proc2, @b,
 )
 
 msg(_proc1(0))
-%%
+%>
 
 When we run this script, we get the following error:
 
-%%PRE|
+<%PRE|
 RangeException: Division by 0!
         proc _proc2:Interpreter:8
         proc _proc1:Interpreter:4
         <<main code>>:Interpreter:11
-%%
+%>
 
 This is our ''stack trace''. The problem is that we are dividing by zero. The first
 line of the stack trace tells us what the error type was, and gives us the exception
@@ -53,60 +203,62 @@ will contain a file path. The important information is the code description and 
 number. The code description tells us that this is code defined in the procedure "_proc2",
 and the error is on line 8.
 
-%%PRE|
+<%PRE|
 8          return(1 / @b)
-%%
+%>
 
 If @b is zero, then this would certainly cause the error. However, there is more to the
 stack trace, which is useful, because this line may not be where we actually want to fix
 the error. The next element in the stack trace tells us that _proc2 was called from _proc1,
 on line 4.
 
-%%PRE|
+<%PRE|
 4          return(_proc2(@a))
-%%
+%>
 
 Ok, so this still doesn't help us much, because we don't know where @a came from,
 so lets dig down again into the stack trace. The last element is &lt;&lt;main code&gt;&gt;, which
 means that this is the "top level" of the execution unit. In this case, it means that
 the code is "loose" code, that is, it is not contained inside a procedure. 
 
-%%PRE|
+<%PRE|
 11 msg(_proc1(0))
-%%
+%>
 
 Aha! Now we see where the 0 is coming from, it is hard coded in at this point. Sometimes
 your code is more complicated though, and it's not so obvious where a value is coming from,
 which leads us to our next section:
 
-== Understand variable's values ==
+=== Understand variable's values ===
 
-Sometimes it's not obvious where a variable's values come from. In this case, you can use
+Sometimes it's not obvious where a variable's values come from. If you are using the
+VS Code debugger, you can simply set a breakpoint and inspect variables in the
+Variables panel. Without a debugger, you can use
 runtime checks to gather the value of variables. The simplest way to do this is to use
 {{function|msg}} or {{function|console}} to output the value of the variable at that moment
 in time. Say you have a value that is brought in from storage:
 
-%%CODE|
+<%CODE|
 @value = get_value('my.value')
-%%
+%>
 
 We don't know offhand what @value is, so it may be useful to output the value before we use
 it, especially if it's involved in part of the stack trace chain.
 
-%%CODE|
+<%CODE|
 msg(@value)
-%%
+%>
 
 You can also use {{function|trace}} for a more detailed output, which includes the
 variable name. So, assuming @value contained 'string', then <code>trace(@value)</code>
 would output: <code>@value: string</code>.
 
-== Know the assumptions you are making, and test assumptions that matter ==
+=== Know the assumptions you are making, and test assumptions that matter ===
 
 As you look at the problem code, it is likely that you won't test all your assumptions. Sometimes,
 it's obvious what a particular value is, for instance, given this code:
 
-%%CODE|
+<%CODE|
 @value1 = $value
 @value2 = 1
 if(@value1 == 'test1'){
@@ -114,7 +266,7 @@ if(@value1 == 'test1'){
 }
 trace(@value1)
 _problem_code(@value2)
-%%
+%>
 
 If when we trace(@value1), we see that it is "test1", then we can safely assume that
 @value2 is 0. However, if we did not have that trace() present, (allowing us to know
@@ -122,24 +274,24 @@ the value of @value1 for sure) we must be aware that we have two assumptions her
 assumptions matter, that is, they are involved in the code that is having problems, we
 would be wise to test those assumptions, in order to rule out the problem.
 
-== Syntax errors ==
+=== Syntax errors ===
 
 These debugging techniques do not help with syntax errors. There is a difference between
 compiler errors and runtime errors. Syntax errors do not require testing values or anything,
 because they are a problem with your syntax, not your logic. For instance, in the following
 code, we are missing a parenthesis.
 
-%%CODE|
+<%CODE|
 if(@a == 2{
 	msg('a is 2')
 }
-%%
+%>
 
 These types of errors are usually more straightforward to fix, since the compiler can usually
 point us right at the code in question. Regardless, the code isn't actually running
 at this point, so our runtime debugging techniques aren't applicable here.
 
-== Bugs in MethodScript itself ==
+=== Bugs in MethodScript itself ===
 
 MethodScript is itself written in code, and is prone to bugs as well. These debugging
 techniques are not meant to be useful when you get a java stack trace, and in fact,
@@ -148,13 +300,13 @@ cases, you may be able to find a workaround which prevents the error, but in ALL
 cases if you get a Java stack trace, this is a bug which should be reported. An example
 Java stack trace looks like this:
 
-%%PRE|
+<%PRE|
 java.io.FileNotFoundException: test.txt
         at java.io.FileInputStream.<init>(FileInputStream.java)
         at java.io.FileInputStream.<init>(FileInputStream.java)
         at com.example.Example.readFile(Example.java:19)
         at com.example.Example.main(Example.java:7)
-%%
+%>
 
 If you can determine what was done to cause this error, please include that information
 in the bug report, but often times, this error can be fixed without any information
