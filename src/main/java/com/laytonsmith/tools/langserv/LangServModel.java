@@ -56,6 +56,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.CompletionItemKind;
+import org.eclipse.lsp4j.MarkupContent;
+import org.eclipse.lsp4j.MarkupKind;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.DidChangeTextDocumentParams;
@@ -446,8 +448,9 @@ public class LangServModel {
 								//					ci.setCommitCharacters(Arrays.asList("("));
 								ci.setKind(CompletionItemKind.Function);
 								ci.setDetail(di.ret);
-								ci.setDocumentation(di.originalArgs + "\n\n" + di.desc
-										+ (di.extendedDesc == null ? "" : "\n\n" + di.extendedDesc));
+								ci.setDocumentation(new MarkupContent(MarkupKind.MARKDOWN,
+										WikiToMarkdown.convert(di.originalArgs + "\n\n" + di.desc
+										+ (di.extendedDesc == null ? "" : "\n\n" + di.extendedDesc))));
 								list.add(ci);
 							}
 							functionCompletionItems = list;
@@ -493,7 +496,8 @@ public class LangServModel {
 									}
 									description.append("\n");
 								}
-								ci.setDocumentation(description.toString());
+								ci.setDocumentation(new MarkupContent(MarkupKind.MARKDOWN,
+										WikiToMarkdown.convert(description.toString())));
 								list.add(ci);
 							}
 							eventCompletionItems = list;
@@ -507,7 +511,8 @@ public class LangServModel {
 									CompletionItem ci = new CompletionItem(m.typeof(null).getSimpleName());
 									ci.setKind(CompletionItemKind.TypeParameter);
 									ci.setDetail(m.getName());
-									ci.setDocumentation(m.docs());
+									ci.setDocumentation(new MarkupContent(MarkupKind.MARKDOWN,
+										WikiToMarkdown.convert(m.docs())));
 									ci.setCommitCharacters(Arrays.asList(" "));
 									list.add(ci);
 								} catch(Throwable ex) {

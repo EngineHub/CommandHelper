@@ -49,12 +49,12 @@ public class StackTraceManager {
 	 * @param element The element to be pushed on
 	 */
 	public void addStackTraceFrame(StackTraceFrame element) {
-		elements.add(element);
 		Mixed setting = gEnv.GetRuntimeSetting(MAX_CALL_DEPTH_SETTING, DEFAULT_MAX_DEPTH_MIXED);
 		int maxDepth = ArgumentValidation.getInt32(setting, element.getDefinedAt(), null);
-		if(elements.size() > maxDepth) {
+		if(elements.size() >= maxDepth) {
 			throw new CREStackOverflowError("Stack overflow", element.getDefinedAt());
 		}
+		elements.add(element);
 	}
 
 	/**
@@ -62,6 +62,13 @@ public class StackTraceManager {
 	 */
 	public void popStackTraceFrame() {
 		elements.pop();
+	}
+
+	/**
+	 * Clears all stack trace frames. Used primarily for test cleanup.
+	 */
+	public void clear() {
+		elements.clear();
 	}
 
 	/**
