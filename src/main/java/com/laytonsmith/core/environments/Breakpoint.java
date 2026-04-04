@@ -159,6 +159,13 @@ public class Breakpoint {
 		return ++hitCount;
 	}
 
+	/**
+	 * Returns the current hit count without incrementing.
+	 */
+	public int getHitCount() {
+		return hitCount;
+	}
+
 	@Override
 	@SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
 	public boolean equals(Object obj) {

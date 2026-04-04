@@ -385,7 +385,7 @@ public class DebugContext implements Environment.EnvironmentImpl {
 		Breakpoint bp = getBreakpoint(source.file(), source.line());
 		if(bp != null) {
 			if(bp.isConditional()) {
-				shouldStop = evaluateBreakpointCondition(bp, env);
+				shouldStop = evaluateBreakpointCondition(bp, source, state, env);
 			} else {
 				shouldStop = true;
 			}
@@ -484,10 +484,22 @@ public class DebugContext implements Environment.EnvironmentImpl {
 	 * Evaluates a conditional breakpoint's condition and hit count.
 	 * Returns true if the breakpoint should cause a pause.
 	 */
-	private boolean evaluateBreakpointCondition(Breakpoint bp, Environment env) {
-		// Check hit count first (cheap)
+	private boolean evaluateBreakpointCondition(Breakpoint bp, Target source,
+			ThreadDebugState state, Environment env) {
+		// Check hit count first (cheap). Deduplicate per source line visit:
+		// multiple AST nodes on the same line should only increment the hit
+		// count once. We use the column to distinguish "same visit, different
+		// node" (col differs → cache hit) from "new visit, same first node"
+		// (col matches → cache miss, re-evaluate).
 		if(bp.hitCountThreshold() > 0) {
-			if(bp.incrementHitCount() < bp.hitCountThreshold()) {
+			if(!state.hasCachedBreakpointResult(source.file(), source.line(), source.col())) {
+				int count = bp.incrementHitCount();
+				boolean hitReached = count >= bp.hitCountThreshold();
+				state.cacheBreakpointResult(source.file(), source.line(), source.col(), hitReached);
+				if(!hitReached) {
+					return false;
+				}
+			} else if(!state.getCachedBreakpointResult()) {
 				return false;
 			}
 		}

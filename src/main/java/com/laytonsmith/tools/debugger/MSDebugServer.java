@@ -91,6 +91,8 @@ import org.eclipse.lsp4j.debug.NextArguments;
 import org.eclipse.lsp4j.debug.ThreadEventArguments;
 import org.eclipse.lsp4j.debug.ThreadEventArgumentsReason;
 
+import com.laytonsmith.abstraction.StaticLayer;
+
 /**
  * A Debug Adapter Protocol (DAP) server for MethodScript. This server can be started
  * alongside any MethodScript execution mode (cmdline, eval, embedded) to enable
@@ -134,6 +136,7 @@ public class MSDebugServer implements IDebugProtocolServer {
 	private boolean suspendOnStart = false;
 	private boolean managedExecution = false;
 	private volatile boolean scriptCompleted = false;
+	private boolean startedOnHostMainThread = false;
 	private PrintStream originalOut;
 	private PrintStream originalErr;
 	private DebugSecurity securityMode = DebugSecurity.KEYPAIR;
@@ -141,6 +144,16 @@ public class MSDebugServer implements IDebugProtocolServer {
 	private SSLContext sslContext;
 	private final ConcurrentHashMap<Integer, Mixed> compoundVariableRefs = new ConcurrentHashMap<>();
 	private int nextCompoundRef = COMPOUND_REF_START;
+
+	/**
+	 * Sets whether this server is in managed execution mode. In managed mode,
+	 * the server does not own the process lifecycle - the host (e.g. Minecraft)
+	 * manages it. This affects thread registration, completion events, and
+	 * how execution resumes after breakpoints.
+	 */
+	public void setManagedExecution(boolean managed) {
+		this.managedExecution = managed;
+	}
 
 	/**
 	 * Starts a DAP TCP listener on the given port with an explicit threading mode.
@@ -162,7 +175,6 @@ public class MSDebugServer implements IDebugProtocolServer {
 			DebugSecurity security, File authorizedKeysFile) throws IOException {
 		this.env = environment;
 		this.suspendOnStart = suspend;
-		this.managedExecution = true;
 		this.securityMode = security;
 
 		if(security == DebugSecurity.KEYPAIR) {
@@ -328,6 +340,7 @@ public class MSDebugServer implements IDebugProtocolServer {
 	 */
 	public void runScript(ParseTree tree, Environment env, List<com.laytonsmith.core.constructs.Variable> vars) {
 		this.env = env;
+		this.startedOnHostMainThread = managedExecution && StaticLayer.IsMainThread();
 		wireUpDaemonManager(env);
 		installOutputRedirect();
 		spawnExecutionThread(() -> MethodScriptCompiler.execute(tree, env, null, null, vars));
@@ -940,6 +953,8 @@ public class MSDebugServer implements IDebugProtocolServer {
 			Environment evalEnv = inspected.getEnvironment();
 			GlobalEnv gEnv = evalEnv.getEnv(GlobalEnv.class);
 			gEnv.SetFlag(GlobalEnv.FLAG_NO_CHECK_UNDEFINED, true);
+			boolean oldDynamic = gEnv.GetDynamicScriptingMode();
+			gEnv.SetDynamicScriptingMode(true);
 			try {
 				Set<Class<? extends Environment.EnvironmentImpl>> envClasses
 						= evalEnv.getEnvClasses();
@@ -952,6 +967,7 @@ public class MSDebugServer implements IDebugProtocolServer {
 				response.setResult(result.val());
 				response.setType(result.typeof(evalEnv).val());
 			} finally {
+				gEnv.SetDynamicScriptingMode(oldDynamic);
 				gEnv.ClearFlag(GlobalEnv.FLAG_NO_CHECK_UNDEFINED);
 			}
 		} catch(Exception e) {
@@ -994,14 +1010,40 @@ public class MSDebugServer implements IDebugProtocolServer {
 		pausedStates.remove(threadId);
 		if(debugCtx.getThreadingMode() == DebugContext.ThreadingMode.SYNCHRONOUS
 				|| threadId != DebugContext.MAIN_THREAD_DAP_ID) {
-			// Sync mode or background thread: thread is blocked on the latch — release it
+			// Sync mode or background thread: thread is blocked on the latch - release it
 			asyncSnapshots.remove(threadId);
 			debugCtx.resume(threadId);
+		} else if(startedOnHostMainThread) {
+			// Async mode, managed execution started on host main thread:
+			// resume on that thread so the host's main-thread contract is honored
+			Script.DebugSnapshot snapshot = asyncSnapshots.remove(threadId);
+			resumeOnHostMainThread(snapshot);
 		} else {
 			// Async mode, main thread: spawn a new thread to resume from snapshot
 			Script.DebugSnapshot snapshot = asyncSnapshots.remove(threadId);
 			spawnExecutionThread(() -> Script.resumeEval(snapshot));
 		}
+	}
+
+	/**
+	 * Resumes script execution on the host's main thread. Used in managed/embedded
+	 * mode when the script was originally running on the host's main thread (e.g.
+	 * Minecraft server thread). The host's convertor schedules the work via
+	 * {@link com.laytonsmith.abstraction.AbstractConvertor#runOnMainThreadLater}.
+	 */
+	private void resumeOnHostMainThread(Script.DebugSnapshot snapshot) {
+		StaticLayer.GetConvertor().runOnMainThreadLater(null, () -> {
+			try {
+				Mixed result = Script.resumeEval(snapshot);
+				if(!Script.isDebuggerPaused(result)) {
+					mainThreadFinished();
+					executionCompleted();
+				}
+			} catch(Exception e) {
+				sendOutput("error", "Script error: " + e.getMessage());
+				executionCompleted();
+			}
+		});
 	}
 
 	/**

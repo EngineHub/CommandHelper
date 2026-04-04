@@ -31,10 +31,27 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Before;
 import org.junit.Test;
+import org.eclipse.lsp4j.debug.EvaluateArguments;
+import org.eclipse.lsp4j.debug.EvaluateResponse;
+import org.eclipse.lsp4j.debug.ScopesArguments;
+import org.eclipse.lsp4j.debug.ScopesResponse;
+import org.eclipse.lsp4j.debug.StackTraceArguments;
+import org.eclipse.lsp4j.debug.StackTraceResponse;
+import org.eclipse.lsp4j.debug.StepInArguments;
+import org.eclipse.lsp4j.debug.StepOutArguments;
+import org.eclipse.lsp4j.debug.ThreadEventArguments;
+import org.eclipse.lsp4j.debug.ThreadsResponse;
+import org.eclipse.lsp4j.debug.VariablesArguments;
+import org.eclipse.lsp4j.debug.VariablesResponse;
+import org.eclipse.lsp4j.debug.DisconnectArguments;
+import org.eclipse.lsp4j.debug.StepInTargetsArguments;
+import org.eclipse.lsp4j.debug.StepInTargetsResponse;
+import org.eclipse.lsp4j.debug.SetExceptionBreakpointsArguments;
 
 import java.io.File;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -515,10 +532,25 @@ public class DebugInfrastructureTest {
 		final List<CountDownLatch> stopLatches = new ArrayList<>();
 		final CountDownLatch terminated = new CountDownLatch(1);
 		final AtomicReference<StoppedEventArguments> lastStopArgs = new AtomicReference<>();
+		final List<ThreadEventArguments> threadEvents
+				= Collections.synchronizedList(new ArrayList<>());
+		final CountDownLatch threadExited = new CountDownLatch(1);
 		private boolean closed = false;
+		private boolean managed = false;
 
 		DAPTestHarness(String script, int[] breakpointLines,
 				DebugContext.ThreadingMode mode) throws Exception {
+			this(script, toSourceBreakpoints(breakpointLines), mode, false);
+		}
+
+		DAPTestHarness(String script, int[] breakpointLines,
+				DebugContext.ThreadingMode mode, boolean managedExecution) throws Exception {
+			this(script, toSourceBreakpoints(breakpointLines), mode, managedExecution);
+		}
+
+		DAPTestHarness(String script, SourceBreakpoint[] breakpoints,
+				DebugContext.ThreadingMode mode, boolean managedExecution) throws Exception {
+			this.managed = managedExecution;
 			// Create enough latches for expected stops
 			for(int i = 0; i < 10; i++) {
 				stopLatches.add(new CountDownLatch(1));
@@ -538,9 +570,20 @@ public class DebugInfrastructureTest {
 				public void terminated(org.eclipse.lsp4j.debug.TerminatedEventArguments args) {
 					terminated.countDown();
 				}
+
+				@Override
+				public void thread(ThreadEventArguments args) {
+					threadEvents.add(args);
+					if("exited".equals(args.getReason())) {
+						threadExited.countDown();
+					}
+				}
 			};
 
 			server = new MSDebugServer();
+			if(managedExecution) {
+				server.setManagedExecution(true);
+			}
 			Environment env = Static.GenerateStandaloneEnvironment();
 			env = env.cloneAndAdd(new CommandHelperEnvironment());
 			env = server.startListening(0, MSDebugServer.DEFAULT_BIND_ADDRESS,
@@ -557,17 +600,7 @@ public class DebugInfrastructureTest {
 			proxy.initialize(new InitializeRequestArguments()).get(5, TimeUnit.SECONDS);
 
 			// Set breakpoints
-			SetBreakpointsArguments bpArgs = new SetBreakpointsArguments();
-			Source source = new Source();
-			source.setPath(TEST_FILE.getPath());
-			bpArgs.setSource(source);
-			SourceBreakpoint[] sbps = new SourceBreakpoint[breakpointLines.length];
-			for(int i = 0; i < breakpointLines.length; i++) {
-				sbps[i] = new SourceBreakpoint();
-				sbps[i].setLine(breakpointLines[i]);
-			}
-			bpArgs.setBreakpoints(sbps);
-			proxy.setBreakpoints(bpArgs).get(5, TimeUnit.SECONDS);
+			sendBreakpoints(breakpoints);
 
 			// Compile and run
 			StaticAnalysis analysis = new StaticAnalysis(true);
@@ -577,20 +610,129 @@ public class DebugInfrastructureTest {
 			server.runScript(tree, env, null);
 		}
 
+		static SourceBreakpoint[] toSourceBreakpoints(int[] lines) {
+			SourceBreakpoint[] sbps = new SourceBreakpoint[lines.length];
+			for(int i = 0; i < lines.length; i++) {
+				sbps[i] = new SourceBreakpoint();
+				sbps[i].setLine(lines[i]);
+			}
+			return sbps;
+		}
+
+		void sendBreakpoints(SourceBreakpoint[] sbps) throws Exception {
+			SetBreakpointsArguments bpArgs = new SetBreakpointsArguments();
+			Source source = new Source();
+			source.setPath(TEST_FILE.getPath());
+			bpArgs.setSource(source);
+			bpArgs.setBreakpoints(sbps);
+			proxy.setBreakpoints(bpArgs).get(5, TimeUnit.SECONDS);
+		}
+
+		void setBreakpoints(int[] lines) throws Exception {
+			sendBreakpoints(toSourceBreakpoints(lines));
+		}
+
+		void setBreakpointsWithConditions(int[] lines, String[] conditions) throws Exception {
+			SourceBreakpoint[] sbps = toSourceBreakpoints(lines);
+			for(int i = 0; i < sbps.length; i++) {
+				if(conditions != null && i < conditions.length && conditions[i] != null) {
+					sbps[i].setCondition(conditions[i]);
+				}
+			}
+			sendBreakpoints(sbps);
+		}
+
+		void setBreakpointsWithHitCounts(int[] lines, String[] hitCounts) throws Exception {
+			SourceBreakpoint[] sbps = toSourceBreakpoints(lines);
+			for(int i = 0; i < sbps.length; i++) {
+				if(hitCounts != null && i < hitCounts.length && hitCounts[i] != null) {
+					sbps[i].setHitCondition(hitCounts[i]);
+				}
+			}
+			sendBreakpoints(sbps);
+		}
+
 		boolean awaitStop(int index, long seconds) throws InterruptedException {
 			return stopLatches.get(index).await(seconds, TimeUnit.SECONDS);
 		}
 
+		int lastStoppedThreadId() {
+			StoppedEventArguments args = lastStopArgs.get();
+			return args != null ? args.getThreadId() : 1;
+		}
+
 		void stepOver() throws Exception {
 			NextArguments args = new NextArguments();
-			args.setThreadId(1);
+			args.setThreadId(lastStoppedThreadId());
 			proxy.next(args).get(5, TimeUnit.SECONDS);
 		}
 
 		void continue_() throws Exception {
 			ContinueArguments args = new ContinueArguments();
-			args.setThreadId(1);
+			args.setThreadId(lastStoppedThreadId());
 			proxy.continue_(args).get(5, TimeUnit.SECONDS);
+		}
+
+		void stepIn() throws Exception {
+			StepInArguments args = new StepInArguments();
+			args.setThreadId(lastStoppedThreadId());
+			proxy.stepIn(args).get(5, TimeUnit.SECONDS);
+		}
+
+		void stepOut() throws Exception {
+			StepOutArguments args = new StepOutArguments();
+			args.setThreadId(lastStoppedThreadId());
+			proxy.stepOut(args).get(5, TimeUnit.SECONDS);
+		}
+
+		ThreadsResponse threads() throws Exception {
+			return proxy.threads().get(5, TimeUnit.SECONDS);
+		}
+
+		StackTraceResponse stackTrace() throws Exception {
+			StackTraceArguments args = new StackTraceArguments();
+			args.setThreadId(lastStoppedThreadId());
+			return proxy.stackTrace(args).get(5, TimeUnit.SECONDS);
+		}
+
+		ScopesResponse scopes() throws Exception {
+			StackTraceResponse st = stackTrace();
+			ScopesArguments args = new ScopesArguments();
+			args.setFrameId(st.getStackFrames()[0].getId());
+			return proxy.scopes(args).get(5, TimeUnit.SECONDS);
+		}
+
+		VariablesResponse variables(int variablesReference) throws Exception {
+			VariablesArguments args = new VariablesArguments();
+			args.setVariablesReference(variablesReference);
+			return proxy.variables(args).get(5, TimeUnit.SECONDS);
+		}
+
+		EvaluateResponse evaluate(String expression) throws Exception {
+			EvaluateArguments args = new EvaluateArguments();
+			args.setExpression(expression);
+			args.setContext("repl");
+			StackTraceResponse st = stackTrace();
+			args.setFrameId(st.getStackFrames()[0].getId());
+			return proxy.evaluate(args).get(5, TimeUnit.SECONDS);
+		}
+
+		void disconnect() throws Exception {
+			DisconnectArguments args = new DisconnectArguments();
+			proxy.disconnect(args).get(5, TimeUnit.SECONDS);
+		}
+
+		StepInTargetsResponse stepInTargets() throws Exception {
+			StackTraceResponse st = stackTrace();
+			StepInTargetsArguments args = new StepInTargetsArguments();
+			args.setFrameId(st.getStackFrames()[0].getId());
+			return proxy.stepInTargets(args).get(5, TimeUnit.SECONDS);
+		}
+
+		void setExceptionBreakpoints(String... filters) throws Exception {
+			SetExceptionBreakpointsArguments args = new SetExceptionBreakpointsArguments();
+			args.setFilters(filters);
+			proxy.setExceptionBreakpoints(args).get(5, TimeUnit.SECONDS);
 		}
 
 		@Override
@@ -805,5 +947,457 @@ public class DebugInfrastructureTest {
 				DebugContext.StepMode.NONE, 0, Target.UNKNOWN, -1);
 		Script.resumeEval(listener.snapshot(3));
 		assertTrue(listener.completed);
+	}
+
+	// ---- Managed execution mode tests ----
+
+	@Test
+	public void testManagedModeStepOverSync() throws Exception {
+		managedModeStepOver(DebugContext.ThreadingMode.SYNCHRONOUS);
+	}
+
+	@Test
+	public void testManagedModeStepOverAsync() throws Exception {
+		managedModeStepOver(DebugContext.ThreadingMode.ASYNCHRONOUS);
+	}
+
+	private void managedModeStepOver(DebugContext.ThreadingMode mode) throws Exception {
+		String script = "@x = 1\n@y = 2\n@z = 3";
+		try(DAPTestHarness h = new DAPTestHarness(script, new int[]{1}, mode, true)) {
+			assertTrue("Breakpoint at line 1 was not hit",
+					h.awaitStop(0, 5));
+			// In managed mode, the stopped thread should NOT be 1 (main)
+			int stoppedId = h.lastStoppedThreadId();
+			assertTrue("Execution thread should have a non-main DAP ID in managed mode",
+					stoppedId > 1);
+			h.stepOver();
+			assertTrue("Step-over should pause at next line",
+					h.awaitStop(1, 5));
+			h.continue_();
+			assertTrue("Script should complete",
+					h.threadExited.await(5, TimeUnit.SECONDS));
+		}
+	}
+
+	@Test
+	public void testManagedModeThreadEvents() throws Exception {
+		String script = "@x = 1\n@y = 2";
+		try(DAPTestHarness h = new DAPTestHarness(script, new int[]{1},
+				DebugContext.ThreadingMode.SYNCHRONOUS, true)) {
+			assertTrue(h.awaitStop(0, 5));
+			// In managed mode, a thread-started event should have been sent
+			// for the execution thread
+			boolean foundStarted = false;
+			for(ThreadEventArguments tea : h.threadEvents) {
+				if("started".equals(tea.getReason())) {
+					foundStarted = true;
+					assertTrue("Execution thread DAP ID should be > 1",
+							tea.getThreadId() > 1);
+				}
+			}
+			assertTrue("Should have received thread-started event for execution thread",
+					foundStarted);
+			h.continue_();
+			h.threadExited.await(5, TimeUnit.SECONDS);
+		}
+	}
+
+	@Test
+	public void testManagedModeDisconnectKeepsServerAlive() throws Exception {
+		String script = "@x = 1\n@y = 2\n@z = 3";
+		try(DAPTestHarness h = new DAPTestHarness(script, new int[]{1},
+				DebugContext.ThreadingMode.SYNCHRONOUS, true)) {
+			assertTrue(h.awaitStop(0, 5));
+			// Disconnect while paused - in managed mode, this should resume
+			// execution and NOT terminate the server
+			h.disconnect();
+			// The script should complete (execution was resumed by disconnect)
+			assertTrue("Script should complete after managed disconnect",
+					h.threadExited.await(5, TimeUnit.SECONDS));
+		}
+	}
+
+	// ---- Threads, stack trace, scopes, and variables via DAP ----
+
+	@Test
+	public void testDAPThreadsList() throws Exception {
+		String script = "@x = 1\n@y = 2";
+		try(DAPTestHarness h = new DAPTestHarness(script, new int[]{1},
+				DebugContext.ThreadingMode.SYNCHRONOUS)) {
+			assertTrue(h.awaitStop(0, 5));
+			ThreadsResponse resp = h.threads();
+			assertNotNull(resp.getThreads());
+			assertTrue("Should have at least one thread",
+					resp.getThreads().length >= 1);
+			h.continue_();
+			h.terminated.await(5, TimeUnit.SECONDS);
+		}
+	}
+
+	@Test
+	public void testDAPStackTrace() throws Exception {
+		String script = "proc _inner() {\n"
+				+ "\t@a = 1\n"
+				+ "}\n"
+				+ "proc _outer() {\n"
+				+ "\t_inner()\n"
+				+ "}\n"
+				+ "_outer()";
+		try(DAPTestHarness h = new DAPTestHarness(script, new int[]{2},
+				DebugContext.ThreadingMode.SYNCHRONOUS)) {
+			assertTrue(h.awaitStop(0, 5));
+			StackTraceResponse resp = h.stackTrace();
+			org.eclipse.lsp4j.debug.StackFrame[] frames = resp.getStackFrames();
+			assertTrue("Should have at least 2 frames",
+					frames.length >= 2);
+			assertEquals("proc _inner", frames[0].getName());
+			assertEquals("proc _outer", frames[1].getName());
+			h.continue_();
+			h.terminated.await(5, TimeUnit.SECONDS);
+		}
+	}
+
+	@Test
+	public void testDAPScopesAndVariables() throws Exception {
+		String script = "@x = 42\n@y = 'hello'\n@z = 3";
+		try(DAPTestHarness h = new DAPTestHarness(script, new int[]{3},
+				DebugContext.ThreadingMode.SYNCHRONOUS)) {
+			assertTrue(h.awaitStop(0, 5));
+			ScopesResponse scopeResp = h.scopes();
+			assertNotNull(scopeResp.getScopes());
+			assertTrue("Should have at least one scope",
+					scopeResp.getScopes().length >= 1);
+			int localsRef = scopeResp.getScopes()[0].getVariablesReference();
+			assertTrue("Locals scope should have a variables reference",
+					localsRef > 0);
+			VariablesResponse varResp = h.variables(localsRef);
+			assertNotNull(varResp.getVariables());
+			// Find @x and @y
+			boolean foundX = false;
+			boolean foundY = false;
+			for(org.eclipse.lsp4j.debug.Variable v : varResp.getVariables()) {
+				if("@x".equals(v.getName())) {
+					assertEquals("42", v.getValue());
+					foundX = true;
+				}
+				if("@y".equals(v.getName())) {
+					assertEquals("hello", v.getValue());
+					foundY = true;
+				}
+			}
+			assertTrue("Should find @x in variables", foundX);
+			assertTrue("Should find @y in variables", foundY);
+			h.continue_();
+			h.terminated.await(5, TimeUnit.SECONDS);
+		}
+	}
+
+	// ---- CArray expansion via variables ----
+
+	@Test
+	public void testDAPVariablesIndexedArray() throws Exception {
+		String script = "@arr = array(10, 20, 30)\n@y = 1";
+		try(DAPTestHarness h = new DAPTestHarness(script, new int[]{2},
+				DebugContext.ThreadingMode.SYNCHRONOUS)) {
+			assertTrue(h.awaitStop(0, 5));
+			ScopesResponse scopeResp = h.scopes();
+			int localsRef = scopeResp.getScopes()[0].getVariablesReference();
+			VariablesResponse varResp = h.variables(localsRef);
+			// Find @arr - it should be expandable
+			org.eclipse.lsp4j.debug.Variable arrVar = null;
+			for(org.eclipse.lsp4j.debug.Variable v : varResp.getVariables()) {
+				if("@arr".equals(v.getName())) {
+					arrVar = v;
+					break;
+				}
+			}
+			assertNotNull("Should find @arr", arrVar);
+			assertTrue("Array should be expandable",
+					arrVar.getVariablesReference() > 0);
+			// Expand the array
+			VariablesResponse children = h.variables(arrVar.getVariablesReference());
+			assertEquals("Indexed array should have 3 elements",
+					3, children.getVariables().length);
+			assertEquals("10", children.getVariables()[0].getValue());
+			assertEquals("20", children.getVariables()[1].getValue());
+			assertEquals("30", children.getVariables()[2].getValue());
+			h.continue_();
+			h.terminated.await(5, TimeUnit.SECONDS);
+		}
+	}
+
+	@Test
+	public void testDAPVariablesAssociativeArray() throws Exception {
+		String script = "@map = array(a: 'x', b: 'y')\n@z = 1";
+		try(DAPTestHarness h = new DAPTestHarness(script, new int[]{2},
+				DebugContext.ThreadingMode.SYNCHRONOUS)) {
+			assertTrue(h.awaitStop(0, 5));
+			ScopesResponse scopeResp = h.scopes();
+			int localsRef = scopeResp.getScopes()[0].getVariablesReference();
+			VariablesResponse varResp = h.variables(localsRef);
+			org.eclipse.lsp4j.debug.Variable mapVar = null;
+			for(org.eclipse.lsp4j.debug.Variable v : varResp.getVariables()) {
+				if("@map".equals(v.getName())) {
+					mapVar = v;
+					break;
+				}
+			}
+			assertNotNull("Should find @map", mapVar);
+			assertTrue("Assoc array should be expandable",
+					mapVar.getVariablesReference() > 0);
+			VariablesResponse children = h.variables(mapVar.getVariablesReference());
+			assertEquals(2, children.getVariables().length);
+			// Check keys
+			boolean foundA = false;
+			boolean foundB = false;
+			for(org.eclipse.lsp4j.debug.Variable v : children.getVariables()) {
+				if("a".equals(v.getName())) {
+					assertEquals("x", v.getValue());
+					foundA = true;
+				}
+				if("b".equals(v.getName())) {
+					assertEquals("y", v.getValue());
+					foundB = true;
+				}
+			}
+			assertTrue("Should find key 'a'", foundA);
+			assertTrue("Should find key 'b'", foundB);
+			h.continue_();
+			h.terminated.await(5, TimeUnit.SECONDS);
+		}
+	}
+
+	@Test
+	public void testDAPVariablesNestedArray() throws Exception {
+		String script = "@nested = array(array(1, 2), array(3, 4))\n@z = 1";
+		try(DAPTestHarness h = new DAPTestHarness(script, new int[]{2},
+				DebugContext.ThreadingMode.SYNCHRONOUS)) {
+			assertTrue(h.awaitStop(0, 5));
+			ScopesResponse scopeResp = h.scopes();
+			int localsRef = scopeResp.getScopes()[0].getVariablesReference();
+			VariablesResponse varResp = h.variables(localsRef);
+			org.eclipse.lsp4j.debug.Variable nestedVar = null;
+			for(org.eclipse.lsp4j.debug.Variable v : varResp.getVariables()) {
+				if("@nested".equals(v.getName())) {
+					nestedVar = v;
+					break;
+				}
+			}
+			assertNotNull("Should find @nested", nestedVar);
+			assertTrue("Nested array should be expandable",
+					nestedVar.getVariablesReference() > 0);
+			// Expand outer array
+			VariablesResponse outerChildren = h.variables(nestedVar.getVariablesReference());
+			assertEquals(2, outerChildren.getVariables().length);
+			// First element should also be expandable
+			assertTrue("Inner array should be expandable",
+					outerChildren.getVariables()[0].getVariablesReference() > 0);
+			// Expand inner array
+			VariablesResponse innerChildren = h.variables(
+					outerChildren.getVariables()[0].getVariablesReference());
+			assertEquals(2, innerChildren.getVariables().length);
+			assertEquals("1", innerChildren.getVariables()[0].getValue());
+			assertEquals("2", innerChildren.getVariables()[1].getValue());
+			h.continue_();
+			h.terminated.await(5, TimeUnit.SECONDS);
+		}
+	}
+
+	// ---- Evaluate via DAP ----
+
+	@Test
+	public void testDAPEvaluateSimple() throws Exception {
+		String script = "@x = 42\n@y = 2";
+		try(DAPTestHarness h = new DAPTestHarness(script, new int[]{2},
+				DebugContext.ThreadingMode.SYNCHRONOUS)) {
+			assertTrue(h.awaitStop(0, 5));
+			EvaluateResponse resp = h.evaluate("1 + 2");
+			assertEquals("3", resp.getResult());
+			h.continue_();
+			h.terminated.await(5, TimeUnit.SECONDS);
+		}
+	}
+
+	@Test
+	public void testDAPEvaluateVariable() throws Exception {
+		String script = "@x = 42\n@y = 2";
+		try(DAPTestHarness h = new DAPTestHarness(script, new int[]{2},
+				DebugContext.ThreadingMode.SYNCHRONOUS)) {
+			assertTrue(h.awaitStop(0, 5));
+			EvaluateResponse resp = h.evaluate("@x");
+			assertEquals("42", resp.getResult());
+			h.continue_();
+			h.terminated.await(5, TimeUnit.SECONDS);
+		}
+	}
+
+	@Test
+	public void testDAPEvaluateError() throws Exception {
+		String script = "@x = 42\n@y = 2";
+		try(DAPTestHarness h = new DAPTestHarness(script, new int[]{2},
+				DebugContext.ThreadingMode.SYNCHRONOUS)) {
+			assertTrue(h.awaitStop(0, 5));
+			// Invalid expression should return error message, not throw
+			EvaluateResponse resp = h.evaluate("this is not valid");
+			assertNotNull(resp.getResult());
+			h.continue_();
+			h.terminated.await(5, TimeUnit.SECONDS);
+		}
+	}
+
+	// ---- Exception breakpoints via DAP ----
+
+	@Test
+	public void testDAPExceptionBreakpointsAll() throws Exception {
+		String script = "@x = 1\ntry {\n\tthrow(Exception, 'test')\n} catch(Exception @e) {\n\t@y = 1\n}";
+		try(DAPTestHarness h = new DAPTestHarness(script, new int[]{},
+				DebugContext.ThreadingMode.SYNCHRONOUS)) {
+			h.setExceptionBreakpoints("all");
+			// The throw should cause a stop
+			assertTrue("Should break on caught exception",
+					h.awaitStop(0, 5));
+			h.continue_();
+			h.terminated.await(5, TimeUnit.SECONDS);
+		}
+	}
+
+	@Test
+	public void testDAPExceptionBreakpointsUncaught() throws Exception {
+		String script = "@x = 1\ntry {\n\tthrow(Exception, 'test')\n} catch(Exception @e) {\n\t@y = 1\n}";
+		try(DAPTestHarness h = new DAPTestHarness(script, new int[]{},
+				DebugContext.ThreadingMode.SYNCHRONOUS)) {
+			h.setExceptionBreakpoints("uncaught");
+			// Caught exception should NOT trigger a break with "uncaught" filter
+			// Script should complete normally
+			assertTrue("Script should complete without breaking",
+					h.terminated.await(5, TimeUnit.SECONDS));
+		}
+	}
+
+	// ---- Conditional breakpoints via DAP ----
+
+	@Test
+	public void testDAPConditionalBreakpoint() throws Exception {
+		String script = "@x = 0\nforeach(range(5), @i,\n\t@x = @x + 1\n)";
+		SourceBreakpoint sbp = new SourceBreakpoint();
+		sbp.setLine(3);
+		sbp.setCondition("@x == 3");
+		try(DAPTestHarness h = new DAPTestHarness(script, new SourceBreakpoint[]{sbp},
+				DebugContext.ThreadingMode.SYNCHRONOUS, false)) {
+			assertTrue("Should hit conditional breakpoint",
+					h.awaitStop(0, 5));
+			h.stackTrace();
+			EvaluateResponse response = h.evaluate("@x");
+			assertEquals("3", response.getResult());
+			h.continue_();
+			h.terminated.await(5, TimeUnit.SECONDS);
+		}
+	}
+
+	// ---- Hit count breakpoints via DAP ----
+
+	@Test
+	public void testDAPHitCountBreakpoint() throws Exception {
+		String script = "@x = 0\nforeach(range(5), @i,\n\t@x = @x + 1\n)";
+		SourceBreakpoint sbp = new SourceBreakpoint();
+		sbp.setLine(3);
+		sbp.setHitCondition("4");
+		try(DAPTestHarness h = new DAPTestHarness(script, new SourceBreakpoint[]{sbp},
+				DebugContext.ThreadingMode.SYNCHRONOUS, false)) {
+			assertTrue("Should hit breakpoint on 4th iteration",
+					h.awaitStop(0, 5));
+			h.stackTrace();
+			EvaluateResponse response = h.evaluate("@x");
+			assertEquals("3", response.getResult());
+			h.continue_();
+			h.terminated.await(5, TimeUnit.SECONDS);
+		}
+	}
+
+	// ---- Step in / step out via DAP ----
+
+	@Test
+	public void testDAPStepIn() throws Exception {
+		String script = "proc _greet() {\n"
+				+ "\t@msg = 'hi'\n"
+				+ "}\n"
+				+ "_greet()";
+		try(DAPTestHarness h = new DAPTestHarness(script, new int[]{4},
+				DebugContext.ThreadingMode.SYNCHRONOUS)) {
+			assertTrue(h.awaitStop(0, 5));
+			h.stepIn();
+			assertTrue("Step-in should pause inside proc",
+					h.awaitStop(1, 5));
+			// Verify we're inside the proc by checking stack trace
+			StackTraceResponse stResp = h.stackTrace();
+			org.eclipse.lsp4j.debug.StackFrame[] frames = stResp.getStackFrames();
+			assertTrue("Should have multiple frames when inside proc",
+					frames.length >= 2);
+			assertEquals("proc _greet", frames[0].getName());
+			h.continue_();
+			h.terminated.await(5, TimeUnit.SECONDS);
+		}
+	}
+
+	@Test
+	public void testDAPStepOut() throws Exception {
+		String script = "proc _inner() {\n"
+				+ "\t@a = 1\n"
+				+ "\t@b = 2\n"
+				+ "}\n"
+				+ "@before = 0\n"
+				+ "_inner()\n"
+				+ "@after = 0";
+		try(DAPTestHarness h = new DAPTestHarness(script, new int[]{2},
+				DebugContext.ThreadingMode.SYNCHRONOUS)) {
+			assertTrue(h.awaitStop(0, 5));
+			// We're inside _inner at line 2. Step out should return to caller.
+			h.stepOut();
+			assertTrue("Step-out should pause after returning from proc",
+					h.awaitStop(1, 5));
+			// Verify we're back at the top level
+			StackTraceResponse stResp = h.stackTrace();
+			org.eclipse.lsp4j.debug.StackFrame[] frames = stResp.getStackFrames();
+			assertEquals("Should be back at top level (1 frame)",
+					1, frames.length);
+			h.continue_();
+			h.terminated.await(5, TimeUnit.SECONDS);
+		}
+	}
+
+	@Test
+	public void testDAPStepInTargets() throws Exception {
+		String script = "proc _bar() {\n"
+				+ "\treturn(10)\n"
+				+ "}\n"
+				+ "proc _foo() {\n"
+				+ "\treturn(20)\n"
+				+ "}\n"
+				+ "@result = _bar() + _foo()";
+		try(DAPTestHarness h = new DAPTestHarness(script, new int[]{7},
+				DebugContext.ThreadingMode.SYNCHRONOUS)) {
+			assertTrue(h.awaitStop(0, 5));
+			StepInTargetsResponse resp = h.stepInTargets();
+			assertNotNull(resp.getTargets());
+			assertTrue("Should have at least 2 step-in targets",
+					resp.getTargets().length >= 2);
+			h.continue_();
+			h.terminated.await(5, TimeUnit.SECONDS);
+		}
+	}
+
+	// ---- Disconnect resumes execution ----
+
+	@Test
+	public void testDAPDisconnectResumesExecution() throws Exception {
+		String script = "@x = 1\n@y = 2\n@z = 3";
+		try(DAPTestHarness h = new DAPTestHarness(script, new int[]{1},
+				DebugContext.ThreadingMode.SYNCHRONOUS)) {
+			assertTrue(h.awaitStop(0, 5));
+			h.disconnect();
+			// Script should resume and complete after disconnect
+			assertTrue("Script should complete after disconnect",
+					h.terminated.await(5, TimeUnit.SECONDS));
+		}
 	}
 }

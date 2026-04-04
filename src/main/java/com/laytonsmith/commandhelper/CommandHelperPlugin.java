@@ -729,6 +729,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 				: null;
 
 		debugServer = new MSDebugServer();
+		debugServer.setManagedExecution(true);
 		try {
 			GlobalEnv gEnv = new GlobalEnv(
 					MethodScriptFileLocations.getDefault().getConfigDirectory(),

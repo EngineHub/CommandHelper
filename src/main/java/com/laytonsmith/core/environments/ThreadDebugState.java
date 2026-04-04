@@ -2,6 +2,7 @@ package com.laytonsmith.core.environments;
 
 import com.laytonsmith.core.constructs.Target;
 
+import java.io.File;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -19,6 +20,16 @@ public class ThreadDebugState {
 	private volatile boolean paused = false;
 	private volatile boolean skippingResume = false;
 	private volatile CountDownLatch pauseLatch;
+
+	// Breakpoint hit-count deduplication: when shouldPause checks a
+	// hit-count breakpoint, we cache the file+line+col+result so that
+	// subsequent AST nodes on the same source line reuse the cached result
+	// (and don't re-increment the hit count). A "new visit" to the same
+	// line is detected when the same first-node column fires again.
+	private volatile File lastBpFile;
+	private volatile int lastBpLine = -1;
+	private volatile int lastBpCol = -1;
+	private volatile boolean lastBpResult;
 
 	public DebugContext.StepMode getStepMode() {
 		return stepMode;
@@ -94,5 +105,45 @@ public class ThreadDebugState {
 		if(latch != null) {
 			latch.countDown();
 		}
+	}
+
+	/**
+	 * Returns true if we already evaluated a hit-count breakpoint for this
+	 * file+line on this thread and can reuse the cached result. A cache hit
+	 * occurs when file+line match but col differs (a subsequent AST node on
+	 * the same source line). When file+line+col all match, it means the first
+	 * node is firing again (new loop iteration), so we return false to force
+	 * a fresh evaluation.
+	 */
+	public boolean hasCachedBreakpointResult(File file, int line, int col) {
+		return lastBpLine == line && file != null && file.equals(lastBpFile)
+				&& lastBpCol != col;
+	}
+
+	/**
+	 * Returns the cached breakpoint evaluation result.
+	 */
+	public boolean getCachedBreakpointResult() {
+		return lastBpResult;
+	}
+
+	/**
+	 * Caches the breakpoint evaluation result for the given file+line+col.
+	 */
+	public void cacheBreakpointResult(File file, int line, int col, boolean result) {
+		this.lastBpFile = file;
+		this.lastBpLine = line;
+		this.lastBpCol = col;
+		this.lastBpResult = result;
+	}
+
+	/**
+	 * Clears the breakpoint evaluation cache. Called when execution moves
+	 * to a different source line.
+	 */
+	public void clearBreakpointCache() {
+		this.lastBpFile = null;
+		this.lastBpLine = -1;
+		this.lastBpCol = -1;
 	}
 }
