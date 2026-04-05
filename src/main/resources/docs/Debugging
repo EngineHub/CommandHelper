@@ -13,7 +13,7 @@ general debugging techniques.
 
 The recommended way to debug MethodScript is with the official VS Code extension.
 It provides a full-featured debugging experience using the
-[[https://microsoft.github.io/debug-adapter-protocol/|Debug Adapter Protocol (DAP)]],
+[https://microsoft.github.io/debug-adapter-protocol/ Debug Adapter Protocol (DAP)],
 including:
 
 * Breakpoints (line and conditional)
@@ -25,7 +25,7 @@ including:
 === Installation ===
 
 Install the
-[[https://marketplace.visualstudio.com/items?itemName=MethodScriptVSC.methodscriptvsc|MethodScript VS Code extension]]
+[https://marketplace.visualstudio.com/items?itemName=MethodScriptVSC.methodscriptvsc MethodScript VS Code extension]
 from the VS Code Marketplace by searching for
 "MethodScript" in the Extensions panel, or install it from the command line:
 
