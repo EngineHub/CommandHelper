@@ -9,7 +9,7 @@ import com.laytonsmith.PureUtilities.CommandExecutor;
 import com.laytonsmith.PureUtilities.Common.ArrayUtils;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.OSUtils;
-import com.laytonsmith.PureUtilities.Common.RSAEncrypt;
+import com.laytonsmith.PureUtilities.Common.SSHKeyPair;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Common.UIUtils;
@@ -1524,27 +1524,41 @@ public class Main {
 	}
 
 	@tool("key-gen")
-	public static class RSAKeyGenMode extends AbstractCommandLineTool {
+	public static class KeyGenMode extends AbstractCommandLineTool {
 
 		@Override
 		public ArgumentParser getArgumentParser() {
 			return ArgumentParser.GetParser()
-				.addDescription("Creates an ssh compatible rsa key pair, suitable for use with the"
+				.addDescription("Creates an ssh compatible key pair, suitable for use with the"
 						+ " MethodScript debugger's KEYPAIR security mode, or other tools that"
-						+ " require RSA key authentication.")
+						+ " require key authentication. Supports "
+						+ StringUtils.Join(SSHKeyPair.KeyType.values(), ", ",
+								", or ", " or ", null, (kt) -> kt.name())
+						+ " key types.")
 				.addArgument(new ArgumentBuilder()
-						.setDescription("Output file for the keys. For instance, \"/home/user/.ssh/id_rsa\"."
+						.setDescription("Output file for the keys. For instance,"
+							+ " \"/home/user/.ssh/id_ed25519\"."
 							+ " The public key will have the same name, with \".pub\" appended.")
 						.setUsageName("file")
 						.setRequired()
 						.setName('o', "output-file")
 						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING))
 				.addArgument(new ArgumentBuilder()
-						.setDescription("Label for the public key. For instance, \"user@localhost\" or an email"
-								+ " address.")
+						.setDescription("Label for the public key. For instance,"
+								+ " \"user@localhost\" or an email address.")
 						.setUsageName("label")
 						.setRequired()
 						.setName('l', "label")
+						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING))
+				.addArgument(new ArgumentBuilder()
+						.setDescription("Key type to generate. Options: "
+								+ StringUtils.Join(SSHKeyPair.KeyType.values(), ", ",
+										", or ", " or ", null, (kt) -> kt.name())
+								+ ". Default: ED25519.")
+						.setUsageName("type")
+						.setOptional()
+						.setName('t', "type")
+						.setDefaultVal("ED25519")
 						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING));
 		}
 
@@ -1554,13 +1568,30 @@ public class Main {
 			File privOutputFile = new File(outputFileString);
 			File pubOutputFile = new File(outputFileString + ".pub");
 			String label = parsedArgs.getStringArgument('l');
+			String typeStr = parsedArgs.getStringArgument('t');
+			if(typeStr == null || typeStr.isEmpty()) {
+				typeStr = "ED25519";
+			}
+			SSHKeyPair.KeyType keyType;
+			try {
+				keyType = SSHKeyPair.KeyType.valueOf(typeStr.toUpperCase());
+			} catch(IllegalArgumentException e) {
+				StreamUtils.GetSystemErr().println("Unknown key type: " + typeStr
+						+ ". Supported types: "
+						+ StringUtils.Join(SSHKeyPair.KeyType.values(), ", ",
+								", or ", " or ", null, (kt) -> kt.name()));
+				System.exit(1);
+				return;
+			}
 			if(privOutputFile.exists() || pubOutputFile.exists()) {
-				StreamUtils.GetSystemErr().println("Either the public key or private key file already exists. This utility will not overwrite any existing files.");
+				StreamUtils.GetSystemErr().println("Either the public key or private key"
+						+ " file already exists. This utility will not overwrite any"
+						+ " existing files.");
 				System.exit(1);
 			}
-			RSAEncrypt enc = RSAEncrypt.generateKey(label);
-			FileUtil.write(enc.getPrivateKey(), privOutputFile);
-			FileUtil.write(enc.getPublicKey(), pubOutputFile);
+			SSHKeyPair keyPair = SSHKeyPair.generateKey(keyType, label);
+			FileUtil.write(keyPair.getPrivateKeyPem(), privOutputFile);
+			FileUtil.write(keyPair.getPublicKeySsh(), pubOutputFile);
 			System.exit(0);
 		}
 	}
