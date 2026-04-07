@@ -397,9 +397,11 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 		sc.setWorkspace(wsc);
 
 		sc.setDocumentSymbolProvider(true);
-		sc.setDeclarationProvider(true);
-		sc.setDefinitionProvider(true);
-		sc.setHoverProvider(true);
+		if(StaticAnalysis.enabled()) {
+			sc.setDeclarationProvider(true);
+			sc.setDefinitionProvider(true);
+			sc.setHoverProvider(true);
+		}
 //		sc.setTypeDefinitionProvider(true);
 
 		{
