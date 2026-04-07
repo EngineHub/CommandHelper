@@ -10,6 +10,7 @@ import com.laytonsmith.core.asm.AsmMain.AsmMainCmdlineTool;
 import com.laytonsmith.testing.StaticTest;
 
 import java.io.File;
+import java.nio.file.Files;
 
 import static org.junit.Assert.assertEquals;
 
@@ -73,12 +74,11 @@ public class AsmIntegrationTestUtils {
 		if(skipTest()) {
 			throw new UnsupportedOperationException();
 		}
-		File f = File.createTempFile("methodScriptAsmIntegrationTest", ".ms");
+		File tempDir = Files.createTempDirectory("methodScriptAsmIntegrationTest").toFile();
+		File f = new File(tempDir, "program.ms");
 		FileUtil.write(program, f);
-		f.deleteOnExit();
-		File target = new File(f.getParentFile(), "target");
+		File target = new File(tempDir, "target");
 		target.mkdir();
-		target.deleteOnExit();
 		return f;
 	}
 
@@ -95,6 +95,7 @@ public class AsmIntegrationTestUtils {
 			throw new UnsupportedOperationException();
 		}
 		AsmMainCmdlineTool tool = new AsmMain.AsmMainCmdlineTool();
+		tool.setThrowOnError(true);
 		tool.execute(tool.getArgumentParser().match("\"" + file.getAbsolutePath() + "\" -o \""
 				+ new File(file.getParentFile(), "target").getCanonicalPath() + "\" --verbose"));
 	}
@@ -151,6 +152,7 @@ public class AsmIntegrationTestUtils {
 	 * @param args     Any arguments to pass to the program on the command line.
 	 * @return
 	 */
+
 	public static void integrationTest(String expected, String program, String... args) throws Exception {
 		if(skipTest()) {
 			return;
@@ -179,12 +181,16 @@ public class AsmIntegrationTestUtils {
 		}
 		installToolchain();
 		File msFile = installProgram(program);
-		compileFile(msFile);
-		File exe = getExecutableFromMSFile(msFile);
-		String output = executeProgram(exe, args);
-		if(output.endsWith(OSUtils.GetLineEnding())) {
-			output = StringUtils.replaceLast(output, OSUtils.GetLineEnding(), "");
+		try {
+			compileFile(msFile);
+			File exe = getExecutableFromMSFile(msFile);
+			String output = executeProgram(exe, args);
+			if(output.endsWith(OSUtils.GetLineEnding())) {
+				output = StringUtils.replaceLast(output, OSUtils.GetLineEnding(), "");
+			}
+			return output;
+		} finally {
+			FileUtil.recursiveDelete(msFile.getParentFile());
 		}
-		return output;
 	}
 }

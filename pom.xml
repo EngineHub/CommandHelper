@@ -1166,6 +1166,23 @@
 				<maven.test.failure.ignore>false</maven.test.failure.ignore>
 			</properties>
 		</profile>
+		<profile>
+			<id>llvm-integration-tests</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<version>3.2.5</version>
+						<configuration>
+							<systemPropertyVariables>
+								<methodscript_run_llvm_integration_tests>true</methodscript_run_llvm_integration_tests>
+							</systemPropertyVariables>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
 	</profiles>
 	<pluginRepositories>
 		<pluginRepository>

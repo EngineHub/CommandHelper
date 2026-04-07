@@ -1166,7 +1166,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 
 	@Override
 	public Set<ObjectModifier> getObjectModifiers() {
-		return EnumSet.of(ObjectModifier.FINAL);
+		return EnumSet.of(ObjectModifier.FINAL, ObjectModifier.NATIVE);
 	}
 
 	@Override

@@ -78,7 +78,7 @@ public final class CVoid extends Construct implements Cloneable {
 
 	@Override
 	public Set<ObjectModifier> getObjectModifiers() {
-		return EnumSet.of(ObjectModifier.FINAL);
+		return EnumSet.of(ObjectModifier.FINAL, ObjectModifier.NATIVE);
 	}
 
 	@Override

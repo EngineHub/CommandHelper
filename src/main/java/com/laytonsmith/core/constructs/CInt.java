@@ -5,13 +5,17 @@ import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.objects.ObjectModifier;
+
+import java.util.EnumSet;
+import java.util.Set;
 
 /**
  *
  *
  */
 @typeof("ms.lang.int")
-public class CInt extends CNumber implements Cloneable {
+public final class CInt extends CNumber implements Cloneable {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
 	public static final CClassType TYPE = CClassType.get(CInt.class);
@@ -75,6 +79,11 @@ public class CInt extends CNumber implements Cloneable {
 	@Override
 	public double getNumber() {
 		return (double) val;
+	}
+
+	@Override
+	public Set<ObjectModifier> getObjectModifiers() {
+		return EnumSet.of(ObjectModifier.FINAL, ObjectModifier.NATIVE);
 	}
 
 	@Override

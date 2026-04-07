@@ -7,6 +7,7 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.asm.IRBuilder;
 import com.laytonsmith.core.asm.IRData;
 import com.laytonsmith.core.asm.IRDataBuilder;
+import com.laytonsmith.core.asm.IRType;
 import com.laytonsmith.core.asm.LLVMArgumentValidation;
 import com.laytonsmith.core.asm.LLVMEnvironment;
 import com.laytonsmith.core.asm.LLVMFunction;
@@ -40,7 +41,7 @@ public class DataHandling {
 					throw new CRECastException(getName() + " with 3 arguments only accepts an ivariable as the second argument.", t);
 				}
 				name = ((IVariable) nodes[offset].getData()).getVariableName();
-				type = ArgumentValidation.getClassType(nodes[0].getData(), t);
+				type = ArgumentValidation.getClassType(nodes[0].getData(), t, env);
 				// TODO: Add duplicate check here, or remove if not needed
 //				if(list.has(name) && env.getEnv(GlobalEnv.class).GetFlag(GlobalEnv.FLAG_NO_CHECK_DUPLICATE_ASSIGN) == null) {
 //					if(env.getEnv(GlobalEnv.class).GetFlag(GlobalEnv.FLAG_CLOSURE_WARN_OVERWRITE) != null) {
@@ -65,6 +66,10 @@ public class DataHandling {
 			}
 
 			IRData data = LLVMArgumentValidation.getAny(builder, env, nodes[offset + 1], t);
+			IRType declaredIRType = LLVMArgumentValidation.convertCClassTypeToIRType(type);
+			if(declaredIRType == IRType.MS_VALUE && data.getResultType() != IRType.MS_VALUE) {
+				data = LLVMArgumentValidation.boxToMsValue(builder, t, env, data);
+			}
 			llvmenv.addVariableMapping(name, data.getResultVariable(), type);
 			return IRDataBuilder.asVoid();
 		}

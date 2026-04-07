@@ -1,5 +1,6 @@
 package com.laytonsmith.core.asm;
 
+import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CString;
@@ -19,7 +20,9 @@ public final class LLVMPlatformResolver {
 		if(c == null) {
 			throw new NullPointerException("Unexpected null value");
 		}
-		if(c instanceof CInt ci) {
+		if(c instanceof CBoolean cb) {
+			return IRDataBuilder.asConstant(IRType.INTEGER1, cb.getBoolean() ? "1" : "0");
+		} else if(c instanceof CInt ci) {
 			return IRDataBuilder.asConstant(IRType.INTEGER64, Long.toString(ci.getInt()));
 		} else if(c instanceof CDouble cd) {
 			// Get the raw bytes, and write those out as a hex string, to keep full precision.

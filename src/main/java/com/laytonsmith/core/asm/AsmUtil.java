@@ -68,7 +68,11 @@ public final class AsmUtil {
 			if(s.length() < commentTab) {
 				s += StringUtils.stringMultiply(commentTab - s.length(), " ");
 			}
-			s += " ; " + t.toString();
+			if(t == Target.UNKNOWN) {
+				s += " ; <<synthetic>>";
+			} else {
+				s += " ; " + t.toString();
+			}
 		}
 		s += OSUtils.GetLineEnding();
 		return s;

@@ -63,6 +63,20 @@ public class AsmCommonLibTemplates {
 		register("declare dso_local i32 @time(...)", env);
 	};
 
+	/**
+	 * C Standard
+	 */
+	public static final Generator STRCMP = (env) -> {
+		register("declare dso_local i32 @strcmp(i8*, i8*)", env);
+	};
+
+	/**
+	 * C Standard
+	 */
+	public static final Generator STRLEN = (env) -> {
+		register("declare dso_local i64 @strlen(i8*)", env);
+	};
+
 	public static final Generator LLVM_MEMCPY_P0I8_P0I8_I64 = (env) -> {
 		register("declare void @llvm.memcpy.p0i8.p0i8.i64(i8* noalias nocapture writeonly, i8* noalias nocapture readonly, i64, i1 immarg) nounwind", env);
 	};

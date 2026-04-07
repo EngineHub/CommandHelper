@@ -5,6 +5,7 @@ import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.asm.IRType.Category;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
+import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CFunction;
@@ -54,7 +55,26 @@ public final class LLVMArgumentValidation {
 			}
 			return IRDataBuilder.setReturnVariable(ret, expectedType);
 		}
+		if(data.getResultType() == IRType.MS_VALUE) {
+			// Unbox ms_value to the expected concrete type
+			IRData unboxed = emitUnbox(builder, t, env, expectedType, data.getResultVariable());
+			return unboxed;
+		}
+		if(expectedType == IRType.MS_VALUE) {
+			// Box the concrete type into an ms_value
+			return emitBox(builder, t, env, data.getResultType(), data.getReference());
+		}
 		if(expectedType == IRType.STRING) {
+			if(data.getResultType() == IRType.INTEGER1) {
+				// Boolean to string: select between "true" and "false" constants
+				String trueStr = llvmenv.getOrPutStringConstant("true");
+				String falseStr = llvmenv.getOrPutStringConstant("false");
+				int result = llvmenv.getNewLocalVariableReference(IRType.STRING);
+				builder.appendLine(t, "%" + result + " = select " + data.getReference()
+						+ ", i8* getelementptr inbounds ([5 x i8], [5 x i8]* @" + trueStr + ", i64 0, i64 0)"
+						+ ", i8* getelementptr inbounds ([6 x i8], [6 x i8]* @" + falseStr + ", i64 0, i64 0)");
+				return IRDataBuilder.setReturnVariable(result, IRType.STRING);
+			}
 			// Everything can be converted to a string via sprintf, but it requires slightly different code for each.
 			if(os.isWindows()) {
 				llvmenv.addSystemHeader("stdio.h");
@@ -101,7 +121,7 @@ public final class LLVMArgumentValidation {
 	public static IRData getInt32(IRBuilder builder, Environment env, ParseTree c, Target t) throws ConfigCompileException {
 		if(c.isConst()) {
 			Mixed data = c.getData();
-			int i = ArgumentValidation.getInt32(data, t);
+			int i = ArgumentValidation.getInt32(data, t, null);
 			return IRDataBuilder.asConstant(IRType.INTEGER32, Integer.toString(i));
 		} else if(c.getData() instanceof CFunction) {
 			return handleFunction(t, IRType.INTEGER32, builder, env, c);
@@ -152,28 +172,31 @@ public final class LLVMArgumentValidation {
 	}
 
 	/**
-	 * Given a CClassType, returns the IRType that this maps to. Auto and other unmappable concepts return the generic
-	 * struct type.
+	 * Given a CClassType, returns the IRType that this maps to. Types that map 1:1 to a concrete LLVM primitive
+	 * (int, double, string, boolean) return the corresponding IRType. Everything else (auto, number, mixed,
+	 * arrays, objects, interface types) returns MS_VALUE.
 	 * @param type
 	 * @return
-	 * @throws ClassNotFoundException
 	 */
 	public static IRType convertCClassTypeToIRType(CClassType type) {
+		if(type == CInt.TYPE) {
+			return IRType.INTEGER64;
+		} else if(type == CDouble.TYPE) {
+			return IRType.DOUBLE;
+		} else if(type == CBoolean.TYPE) {
+			return IRType.INTEGER1;
+		} else if(CClassType.AUTO.equals(type)) {
+			return IRType.MS_VALUE;
+		}
 		try {
-			if(CInt.TYPE.isExtendedBy(type)) {
-				return IRType.INTEGER64;
-			} else if(CDouble.TYPE.isExtendedBy(type)) {
-				return IRType.DOUBLE;
-			} else if(CString.TYPE.isExtendedBy(type)) {
+			if(CString.TYPE.isExtendedBy(type)) {
 				return IRType.STRING;
 			}
 		} catch (ClassNotFoundException ex) {
 			throw new UnsupportedOperationException(ex);
 		}
 
-		// TODO: Eventually, this will just return the arbitrary data structure type. However, for native types,
-		// we should support all of them directly, so for the time being, this just throws.
-		throw new UnsupportedOperationException(type.getFQCN().getFQCN() + " is not yet supported");
+		return IRType.MS_VALUE;
 	}
 
 	public static String getValueFromConstant(IRBuilder builder, ParseTree data, Environment env) {
@@ -206,10 +229,8 @@ public final class LLVMArgumentValidation {
 			int load = e.getNewLocalVariableReference(datatype);
 			builder.generator(t, env).allocaStoreAndLoad(alloca, datatype, data, load);
 			return IRDataBuilder.setReturnVariable(load, datatype);
-		} else if(c.getData() instanceof CFunction cf) {
-			Set<ConfigCompileException> exceptions = new HashSet<>();
-			CClassType retType = cf.getCachedFunction().typecheck(e.getStaticAnalysis(), c, env, exceptions);
-			IRData data = handleFunction(t, convertCClassTypeToIRType(retType), builder, env, c);
+		} else if(c.getData() instanceof CFunction) {
+			IRData data = AsmCompiler.getIR(builder, c, env);
 			int alloca = e.getNewLocalVariableReference(data.getResultType());
 			int load = e.getNewLocalVariableReference(data.getResultType());
 			builder.generator(t, env).allocaStoreAndLoad(alloca, data.getResultType(), data.getResultVariable(), load);
@@ -217,10 +238,146 @@ public final class LLVMArgumentValidation {
 		} else if(c.getData() instanceof IVariable ivar) {
 			String name = ivar.getVariableName();
 			IRType datatype = convertCClassTypeToIRType(e.getVariableType(name));
-			int load = e.getNewLocalVariableReference(datatype);
-			builder.generator(t, env).load(load, datatype, e.getVariableMapping(name));
-			return IRDataBuilder.setReturnVariable(load, datatype);
+			int varRef = e.getVariableMapping(name);
+			return IRDataBuilder.setReturnVariable(varRef, datatype);
 		}
 		throw new UnsupportedOperationException();
+	}
+
+	/**
+	 * Boxes a concrete value into an ms_value. If the value is already an ms_value (or ms_null),
+	 * returns it unchanged.
+	 * @param builder The IR builder to append to.
+	 * @param t The code target for debug info.
+	 * @param env The environment.
+	 * @param data The value to box.
+	 * @return IRData pointing to the boxed ms_value variable.
+	 */
+	public static IRData boxToMsValue(IRBuilder builder, Target t, Environment env, IRData data) {
+		if(data.getResultType() == IRType.MS_VALUE || data.getResultType() == IRType.MS_NULL) {
+			return data;
+		}
+		return emitBox(builder, t, env, data.getResultType(), data.getReference());
+	}
+
+	/**
+	 * Emits IR to box a typed value into an ms_value. The result is an ms_value stored in a local variable.
+	 * @param builder The IR builder to append to.
+	 * @param t The code target for debug info.
+	 * @param env The environment.
+	 * @param sourceType The concrete IR type of the value being boxed.
+	 * @param sourceRef The reference to the value (e.g. "i64 %5" or "i64 42").
+	 * @return IRData pointing to the boxed ms_value variable.
+	 */
+	private static IRData emitBox(IRBuilder builder, Target t, Environment env,
+			IRType sourceType, String sourceRef) {
+		LLVMEnvironment llvmenv = env.getEnv(LLVMEnvironment.class);
+		if(!sourceType.isBoxable()) {
+			throw new UnsupportedOperationException("Cannot box type " + sourceType.getIRType());
+		}
+
+		// Convert the value to i64 payload
+		String payloadRef;
+		if(sourceType.getCategory() == IRType.Category.INTEGER) {
+			if(sourceType == IRType.INTEGER64) {
+				payloadRef = sourceRef;
+			} else {
+				int zext = llvmenv.getNewLocalVariableReference(IRType.INTEGER64);
+				builder.appendLine(t, "%" + zext + " = zext " + sourceRef + " to i64");
+				payloadRef = "i64 %" + zext;
+			}
+		} else if(sourceType.getCategory() == IRType.Category.FLOAT) {
+			if(sourceType == IRType.DOUBLE) {
+				int bitcast = llvmenv.getNewLocalVariableReference(IRType.INTEGER64);
+				builder.appendLine(t, "%" + bitcast + " = bitcast " + sourceRef + " to i64");
+				payloadRef = "i64 %" + bitcast;
+			} else {
+				// Upcast to double first, then bitcast to i64
+				int fpext = llvmenv.getNewLocalVariableReference(IRType.DOUBLE);
+				builder.appendLine(t, "%" + fpext + " = fpext " + sourceRef + " to double");
+				int bitcast = llvmenv.getNewLocalVariableReference(IRType.INTEGER64);
+				builder.appendLine(t, "%" + bitcast + " = bitcast double %" + fpext + " to i64");
+				payloadRef = "i64 %" + bitcast;
+			}
+		} else if(sourceType == IRType.STRING || sourceType == IRType.INTEGER8POINTER) {
+			int ptrtoint = llvmenv.getNewLocalVariableReference(IRType.INTEGER64);
+			builder.appendLine(t, "%" + ptrtoint + " = ptrtoint " + sourceRef + " to i64");
+			payloadRef = "i64 %" + ptrtoint;
+		} else {
+			throw new UnsupportedOperationException("Cannot box type " + sourceType.getIRType());
+		}
+
+		// Build the struct field by field from undef
+		int insertTag = llvmenv.getNewLocalVariableReference(IRType.MS_VALUE);
+		int insertPayload = llvmenv.getNewLocalVariableReference(IRType.MS_VALUE);
+		builder.appendLine(t, "%" + insertTag + " = insertvalue { i8, i64 } undef, i8 "
+				+ sourceType.getBoxTag() + ", 0");
+		builder.appendLine(t, "%" + insertPayload + " = insertvalue { i8, i64 } %" + insertTag
+				+ ", " + payloadRef + ", 1");
+
+		return IRDataBuilder.setReturnVariable(insertPayload, IRType.MS_VALUE);
+	}
+
+	/**
+	 * Emits IR to unbox an ms_value into a specific expected type.
+	 * @param builder The IR builder to append to.
+	 * @param t The code target for debug info.
+	 * @param env The environment.
+	 * @param expectedType The concrete IR type to extract.
+	 * @param boxedVariable The variable reference holding the ms_value.
+	 * @return IRData pointing to the unboxed value.
+	 */
+	private static IRData emitUnbox(IRBuilder builder, Target t, Environment env,
+			IRType expectedType, int boxedVariable) {
+		LLVMEnvironment llvmenv = env.getEnv(LLVMEnvironment.class);
+
+		// Extract the i64 payload from index 1
+		int payload = llvmenv.getNewLocalVariableReference(IRType.INTEGER64);
+		builder.appendLine(t, "%" + payload + " = extractvalue { i8, i64 } %" + boxedVariable + ", 1");
+
+		if(expectedType == IRType.INTEGER64) {
+			return IRDataBuilder.setReturnVariable(payload, IRType.INTEGER64);
+		} else if(expectedType.getCategory() == IRType.Category.INTEGER) {
+			// Truncate from i64 to smaller integer
+			int trunc = llvmenv.getNewLocalVariableReference(expectedType);
+			builder.appendLine(t, "%" + trunc + " = trunc i64 %" + payload + " to "
+					+ expectedType.getIRType());
+			return IRDataBuilder.setReturnVariable(trunc, expectedType);
+		} else if(expectedType == IRType.DOUBLE) {
+			// Reinterpret the i64 bits as double
+			int bitcast = llvmenv.getNewLocalVariableReference(IRType.DOUBLE);
+			builder.appendLine(t, "%" + bitcast + " = bitcast i64 %" + payload + " to double");
+			return IRDataBuilder.setReturnVariable(bitcast, IRType.DOUBLE);
+		} else if(expectedType.getCategory() == IRType.Category.FLOAT) {
+			// Reinterpret as double first, then narrow to smaller float
+			int bitcast = llvmenv.getNewLocalVariableReference(IRType.DOUBLE);
+			builder.appendLine(t, "%" + bitcast + " = bitcast i64 %" + payload + " to double");
+			int fptrunc = llvmenv.getNewLocalVariableReference(expectedType);
+			builder.appendLine(t, "%" + fptrunc + " = fptrunc double %" + bitcast + " to "
+					+ expectedType.getIRType());
+			return IRDataBuilder.setReturnVariable(fptrunc, expectedType);
+		} else if(expectedType == IRType.STRING || expectedType == IRType.INTEGER8POINTER) {
+			// Convert the integer back to a pointer
+			int inttoptr = llvmenv.getNewLocalVariableReference(expectedType);
+			builder.appendLine(t, "%" + inttoptr + " = inttoptr i64 %" + payload + " to "
+					+ expectedType.getIRType());
+			return IRDataBuilder.setReturnVariable(inttoptr, expectedType);
+		}
+		throw new UnsupportedOperationException("Cannot unbox to type " + expectedType.getIRType());
+	}
+
+	/**
+	 * Emits IR to extract the type tag from an ms_value.
+	 * @param builder The IR builder to append to.
+	 * @param t The code target for debug info.
+	 * @param env The environment.
+	 * @param boxedVariable The variable reference holding the ms_value.
+	 * @return IRData pointing to the i8 tag value.
+	 */
+	static IRData emitGetTag(IRBuilder builder, Target t, Environment env, int boxedVariable) {
+		LLVMEnvironment llvmenv = env.getEnv(LLVMEnvironment.class);
+		int tag = llvmenv.getNewLocalVariableReference(IRType.INTEGER8);
+		builder.appendLine(t, "%" + tag + " = extractvalue { i8, i64 } %" + boxedVariable + ", 0");
+		return IRDataBuilder.setReturnVariable(tag, IRType.INTEGER8);
 	}
 }

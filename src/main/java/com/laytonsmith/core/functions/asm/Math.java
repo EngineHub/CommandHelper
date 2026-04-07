@@ -14,6 +14,7 @@ import com.laytonsmith.core.asm.LLVMEnvironment;
 import com.laytonsmith.core.asm.LLVMFunction;
 import com.laytonsmith.core.asm.LLVMVersion;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
+import com.laytonsmith.core.compiler.signature.FunctionSignatures;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
@@ -85,7 +86,7 @@ public class Math {
 				String min;
 				String max;
 				if(nodes[0].isConst()) {
-					long vMax = ArgumentValidation.getInt(nodes[0].getData(), t);
+					long vMax = ArgumentValidation.getInt(nodes[0].getData(), t, null);
 					if(vMax > Integer.MAX_VALUE) {
 						throw new ConfigCompileException("max and min must be below int max, defined as "
 								+ Integer.MAX_VALUE, t);
@@ -110,7 +111,7 @@ public class Math {
 					max = dmax.getReference();
 
 					if(nodes[1].isConst()) {
-						long vMax = ArgumentValidation.getInt(nodes[1].getData(), t);
+						long vMax = ArgumentValidation.getInt(nodes[1].getData(), t, null);
 						if(vMax > Integer.MAX_VALUE) {
 							throw new ConfigCompileException("max and min must be below int max, defined as "
 									+ Integer.MAX_VALUE, t);
@@ -159,5 +160,11 @@ public class Math {
 		public Version since() {
 			return LLVMVersion.V0_0_1;
 		}
+
+		@Override
+		public FunctionSignatures getSignatures() {
+			return getDefaultFunction().getSignatures();
+		}
+
 	}
 }
