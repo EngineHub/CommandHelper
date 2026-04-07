@@ -1,6 +1,6 @@
 package com.laytonsmith.tools.debugger;
 
-import com.laytonsmith.PureUtilities.Common.RSAEncrypt;
+import com.laytonsmith.PureUtilities.Common.SSHKeyPair;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -12,7 +12,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.security.SecureRandom;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -21,9 +20,9 @@ import java.util.List;
  * <p>The handshake occurs on the raw TCP socket before any DAP traffic. The protocol is:
  * <ol>
  *   <li>Server sends: magic bytes ({@code MSDBG\1}), then a 32-byte random nonce</li>
- *   <li>Client sends: the nonce signed with its private key, plus its public key string</li>
+ *   <li>Client sends: a digital signature of the nonce, plus its public key string</li>
  *   <li>Server verifies: (a) the public key is in the authorized keys file,
- *       (b) the signature decrypts to the original nonce</li>
+ *       (b) the signature is valid for the nonce</li>
  *   <li>Server sends: a result byte (1 = success, 0 = failure) and an error message on failure</li>
  * </ol>
  *
@@ -134,9 +133,8 @@ public class DebugAuthenticator {
 
 		// Step 4: Verify the signature
 		try {
-			RSAEncrypt rsa = new RSAEncrypt(null, clientPublicKey);
-			byte[] decrypted = rsa.decryptWithPublic(signature);
-			if(!Arrays.equals(nonce, decrypted)) {
+			SSHKeyPair keyPair = new SSHKeyPair(null, clientPublicKey);
+			if(!keyPair.verify(nonce, signature)) {
 				sendFailure(dataOut, "Signature verification failed");
 				return false;
 			}
@@ -176,7 +174,7 @@ public class DebugAuthenticator {
 
 	/**
 	 * Extracts the key type and base64 key data from an SSH public key string,
-	 * ignoring the label. Returns {@code "ssh-rsa <base64>"} or {@code null} if invalid.
+	 * ignoring the label. Returns {@code "type <base64>"} or {@code null} if invalid.
 	 */
 	private static String extractKeyData(String sshPublicKey) {
 		if(sshPublicKey == null) {

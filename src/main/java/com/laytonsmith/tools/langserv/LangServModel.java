@@ -251,7 +251,6 @@ public class LangServModel {
 			// These may be present in the runtime environment,
 			// but it's not possible for us to tell that at this point.
 			StaticAnalysis envSa = new StaticAnalysis(true);
-			envSa.setLocalEnable(true);
 			env = Static.GenerateStandaloneEnvironment(false, EnumSet.of(RuntimeMode.CMDLINE), includeCache,
 					envSa);
 			// Make this configurable at some point. For now, however, we need this so we can get
@@ -293,7 +292,6 @@ public class LangServModel {
 		for(File f2 : mainFiles) {
 			String uri = f2.toURI().toString();
 			StaticAnalysis staticAnalysis = new StaticAnalysis(true);
-			staticAnalysis.setLocalEnable(true);
 			parseTrees.put(uri, doCompilation(uri, staticAnalysis, env, exceptions));
 			staticAnalysisMap.put(uri, staticAnalysis);
 		}
@@ -309,7 +307,6 @@ public class LangServModel {
 					// This was not included, was dynamically included, or there was a compile exception.
 					// Can only treat it as an isolated script at this point.
 					StaticAnalysis staticAnalysis = new StaticAnalysis(true);
-					staticAnalysis.setLocalEnable(true);
 					parseTrees.put(uri, doCompilation(uri, staticAnalysis, env, exceptions));
 					staticAnalysisMap.put(uri, staticAnalysis);
 				}
