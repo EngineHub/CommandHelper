@@ -568,7 +568,8 @@ public class Script {
 				// First visit: resolve function or procedure
 				if(frame.getFunction() == null && !frame.hasFlowFunction()) {
 					if(cfunc.hasProcedure()) {
-						Procedure p = gEnv.GetProcs().get(data.val());
+						Procedure p = frame.getEnv().getEnv(GlobalEnv.class)
+								.GetProcs().get(data.val());
 						if(p == null) {
 							throw new CREInvalidProcedureException(
 									"Unknown procedure \"" + data.val() + "\"", data.getTarget());

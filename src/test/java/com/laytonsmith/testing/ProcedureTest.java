@@ -4,6 +4,9 @@ import com.laytonsmith.abstraction.MCPlayer;
 import static com.laytonsmith.testing.StaticTest.SRun;
 
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.events.BindableEvent;
+import com.laytonsmith.core.events.Driver;
+import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREStackOverflowError;
 import com.laytonsmith.core.exceptions.StackTraceManager;
@@ -13,6 +16,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -158,6 +162,39 @@ public class ProcedureTest extends AbstractIntegrationTest {
 			// Reset the runtime setting so it doesn't affect other tests
 			GlobalEnv gEnv = StaticTest.env.getEnv(GlobalEnv.class);
 			gEnv.SetRuntimeSetting(StackTraceManager.MAX_CALL_DEPTH_SETTING, null);
+		}
+	}
+
+	@Test
+	public void testProcVisibleInsideClosure() throws Exception {
+		SRun("proc _test() { msg('hello') } closure() { _test() }()", fakePlayer);
+		verify(fakePlayer).sendMessage("hello");
+	}
+
+	@Test
+	public void testProcVisibleInClosureExecutedFromBind() throws Exception {
+		try {
+			SRun("@callbacks = array()"
+					+ "\nbind('cmdline_test_event', null, null, @event, @callbacks) {"
+					+ "\n  foreach(@cb in @callbacks) {"
+					+ "\n    execute(@cb)"
+					+ "\n  }"
+					+ "\n}"
+					+ "\nproc _test() { msg('hello') }"
+					+ "\n@callbacks[] = closure() {"
+					+ "\n  _test()"
+					+ "\n}", fakePlayer);
+
+			EventUtils.TriggerListener(Driver.EXTENSION, "cmdline_test_event", new BindableEvent() {
+				@Override
+				public Object _GetObject() {
+					return new Object();
+				}
+			});
+
+			verify(fakePlayer, atLeastOnce()).sendMessage("hello");
+		} finally {
+			EventUtils.UnregisterAll();
 		}
 	}
 
