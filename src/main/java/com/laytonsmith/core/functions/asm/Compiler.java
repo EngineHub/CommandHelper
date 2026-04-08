@@ -21,6 +21,16 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
  */
 public class Compiler {
 	@api(environments = LLVMEnvironment.class, platform = api.Platforms.COMPILER_LLVM)
+	public static class __unsafe_assign__ extends DataHandling.assign {
+
+		@Override
+		public String getName() {
+			return "__unsafe_assign__";
+		}
+
+	}
+
+	@api(environments = LLVMEnvironment.class, platform = api.Platforms.COMPILER_LLVM)
 	public static class __statements__ extends LLVMFunction {
 
 		@Override

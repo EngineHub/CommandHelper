@@ -695,7 +695,7 @@ public final class LeftHandSideType extends Construct implements SourceType {
 
 	@Override
 	public Set<ObjectModifier> getObjectModifiers() {
-		return EnumSet.of(ObjectModifier.FINAL);
+		return EnumSet.of(ObjectModifier.FINAL, ObjectModifier.NATIVE);
 	}
 
 	/**

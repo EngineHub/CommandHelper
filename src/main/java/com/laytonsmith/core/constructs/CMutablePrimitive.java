@@ -199,7 +199,7 @@ public final class CMutablePrimitive extends CArray implements Sizeable {
 
 	@Override
 	public Set<ObjectModifier> getObjectModifiers() {
-		return EnumSet.of(ObjectModifier.FINAL);
+		return EnumSet.of(ObjectModifier.FINAL, ObjectModifier.NATIVE);
 	}
 
 }

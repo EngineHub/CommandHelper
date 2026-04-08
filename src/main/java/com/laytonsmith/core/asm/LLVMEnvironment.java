@@ -2,9 +2,12 @@ package com.laytonsmith.core.asm;
 
 
 import com.laytonsmith.PureUtilities.Common.OSUtils;
+import com.laytonsmith.core.LogLevel;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.asm.metadata.LLVMMetadataRegistry;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.CClassType;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 
 import java.util.HashMap;
@@ -24,7 +27,7 @@ public class LLVMEnvironment implements Environment.EnvironmentImpl {
 	private final Map<String, String> strings = new HashMap<>();
 	private final Stack<Map<String, Integer>> variableTable = new Stack<>();
 	private final Stack<Map<String, CClassType>> variableTableType = new Stack<>();
-	private final Stack<Map<Integer, IRType>> irVariableTableType = new Stack<>();
+	private final Map<Integer, IRType> irVariableTableType = new HashMap<>();
 	private final Set<String> globalDeclarations = new HashSet<>();
 	private final StaticAnalysis staticAnalysis = new StaticAnalysis(false);
 	private int localVariableCounter = 0;
@@ -146,6 +149,8 @@ public class LLVMEnvironment implements Environment.EnvironmentImpl {
 	 */
 	public void newMethodFrame(String methodName) {
 		localVariableCounter = 0;
+		irVariableTableType.clear();
+		pushVariableScope();
 	}
 
 	/**
@@ -155,7 +160,7 @@ public class LLVMEnvironment implements Environment.EnvironmentImpl {
 	 */
 	public int getNewLocalVariableReference(IRType type) {
 		int value = localVariableCounter++;
-		irVariableTableType.peek().put(value, type);
+		irVariableTableType.put(value, type);
 		return value;
 	}
 
@@ -200,36 +205,66 @@ public class LLVMEnvironment implements Environment.EnvironmentImpl {
 	public void pushVariableScope() {
 		variableTable.push(new HashMap<>());
 		variableTableType.push(new HashMap<>());
-		irVariableTableType.push(new HashMap<>());
 	}
 
 	public void popVariableScope() {
 		variableTable.pop();
 		variableTableType.pop();
-		irVariableTableType.pop();
 	}
 
 	public void addVariableMapping(String methodscriptVariableName, int llvmVariableName, CClassType type) {
+		// Check for shadowing in enclosing scopes (not the current scope - redefinition in same scope is fine)
+		for(int i = variableTable.size() - 2; i >= 0; i--) {
+			if(variableTable.get(i).containsKey(methodscriptVariableName)) {
+				MSLog.GetLogger().Log(MSLog.Tags.COMPILER, LogLevel.WARNING,
+						"Variable " + methodscriptVariableName + " shadows a variable of the same name"
+						+ " in an enclosing scope.", Target.UNKNOWN);
+				break;
+			}
+		}
 		variableTable.peek().put(methodscriptVariableName, llvmVariableName);
 		variableTableType.peek().put(methodscriptVariableName, type);
 	}
 
 	/**
 	 * Returns the IR reference to this variable. All variables are allocaStoreAndLoaded, so this is the value of
-	 * the load instruction.
+	 * the load instruction. Walks the scope stack from innermost to outermost, returning the first match.
 	 * @param methodscriptVariableName
-	 * @return
+	 * @return The variable reference.
+	 * @throws RuntimeException if the variable is not defined in any scope.
 	 */
 	public int getVariableMapping(String methodscriptVariableName) {
-		return variableTable.peek().get(methodscriptVariableName);
+		for(int i = variableTable.size() - 1; i >= 0; i--) {
+			Integer result = variableTable.get(i).get(methodscriptVariableName);
+			if(result != null) {
+				return result;
+			}
+		}
+		throw new RuntimeException("Variable " + methodscriptVariableName + " is not defined.");
 	}
 
+	/**
+	 * Returns the CClassType for the given variable. Walks the scope stack from innermost to outermost.
+	 * @param methodscriptVariableName
+	 * @return The variable type, or null if not found in any scope.
+	 */
 	public CClassType getVariableType(String methodscriptVariableName) {
-		return variableTableType.peek().get(methodscriptVariableName);
+		for(int i = variableTableType.size() - 1; i >= 0; i--) {
+			CClassType result = variableTableType.get(i).get(methodscriptVariableName);
+			if(result != null) {
+				return result;
+			}
+		}
+		return null;
 	}
 
+	/**
+	 * Returns the IRType for the given local variable reference. Walks the scope stack from innermost to outermost.
+	 * @param variable
+	 * @return The IR type, or null if not found in any scope.
+	 */
 	public IRType getIRType(int variable) {
-		return irVariableTableType.peek().get(variable);
+		return irVariableTableType.get(variable);
 	}
 
 	public int getNewMetadataId() {

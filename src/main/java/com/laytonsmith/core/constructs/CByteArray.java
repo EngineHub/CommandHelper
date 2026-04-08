@@ -775,7 +775,7 @@ public final class CByteArray extends CArray implements Sizeable, ArrayAccess {
 
 		@Override
 		public Set<ObjectModifier> getObjectModifiers() {
-			return EnumSet.of(ObjectModifier.STATIC, ObjectModifier.FINAL);
+			return EnumSet.of(ObjectModifier.STATIC, ObjectModifier.FINAL, ObjectModifier.NATIVE);
 		}
 
 		@Override
@@ -819,7 +819,7 @@ public final class CByteArray extends CArray implements Sizeable, ArrayAccess {
 
 			@Override
 			public Set<ObjectModifier> getObjectModifiers() {
-				return EnumSet.of(ObjectModifier.STATIC);
+				return EnumSet.of(ObjectModifier.STATIC, ObjectModifier.NATIVE);
 			}
 
 			@Override

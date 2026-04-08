@@ -25,16 +25,63 @@ public class IRBuilder {
 
 	}
 
+	private int fillTarget = -1;
+
 	public void appendLine(Target t, String line) {
 		// This is a great place to put a breakpoint if you aren't sure where a line of IR is coming from.
-		lines.add(line);
+		if(fillTarget >= 0) {
+			lines.set(fillTarget, line);
+			fillTarget = -1;
+		} else {
+			lines.add(line);
+			targets.add(t);
+		}
+	}
+
+	/**
+	 * Reserves a line slot at the current position in the IR output. The slot contains a null
+	 * placeholder and must be filled later via {@link #fillReservedLine(int, Runnable)}. This is
+	 * used when a line (such as a conditional branch) cannot be fully constructed until blocks
+	 * that follow it have been generated (and their label numbers are known).
+	 * @param t The target for source location tracking.
+	 * @return The index of the reserved slot, for use with {@link #fillReservedLine(int, Runnable)}.
+	 */
+	public int reserveLine(Target t) {
+		int index = lines.size();
+		lines.add(null);
 		targets.add(t);
+		return index;
+	}
+
+	/**
+	 * Fills a previously reserved line slot by executing the given action. The action should
+	 * call exactly one Gen method (e.g. {@code gen.br} or {@code gen.brCond}), which will
+	 * write its output into the reserved slot instead of appending to the end.
+	 * @param index The index returned by {@link #reserveLine(Target)}.
+	 * @param action A runnable that calls a Gen method to produce the line.
+	 */
+	public void fillReservedLine(int index, Runnable action) {
+		fillTarget = index;
+		action.run();
+		if(fillTarget >= 0) {
+			throw new IllegalStateException(
+					"fillReservedLine action did not produce any output");
+		}
 	}
 
 	public void appendLines(Target t, String... lines) {
 		for(String line : lines) {
 			appendLine(t, line);
 		}
+	}
+
+	/**
+	 * Appends a label line (e.g. "42:") for the given label number.
+	 * @param t The target for source location tracking.
+	 * @param label The label number (as returned by {@link LLVMEnvironment#getGotoLabel()}).
+	 */
+	public void appendLabel(Target t, int label) {
+		appendLine(t, label + ":");
 	}
 
 	public void appendLines(Target t, List<String> lines) {
@@ -85,6 +132,86 @@ public class IRBuilder {
 
 	public Gen generator(Target t, Environment env) {
 		return this.new Gen(t, env);
+	}
+
+	/**
+	 * Integer comparison predicates for the icmp instruction.
+	 */
+	public enum ICmpPredicate {
+		EQ("eq"),
+		NE("ne"),
+		/** Unsigned greater than */
+		UGT("ugt"),
+		/** Unsigned greater or equal */
+		UGE("uge"),
+		/** Unsigned less than */
+		ULT("ult"),
+		/** Unsigned less or equal */
+		ULE("ule"),
+		/** Signed greater than */
+		SGT("sgt"),
+		/** Signed greater or equal */
+		SGE("sge"),
+		/** Signed less than */
+		SLT("slt"),
+		/** Signed less or equal */
+		SLE("sle");
+
+		private final String ir;
+
+		ICmpPredicate(String ir) {
+			this.ir = ir;
+		}
+
+		@Override
+		public String toString() {
+			return ir;
+		}
+	}
+
+	/**
+	 * Floating point comparison predicates for the fcmp instruction.
+	 */
+	public enum FCmpPredicate {
+		/** Ordered and equal */
+		OEQ("oeq"),
+		/** Ordered and greater than */
+		OGT("ogt"),
+		/** Ordered and greater or equal */
+		OGE("oge"),
+		/** Ordered and less than */
+		OLT("olt"),
+		/** Ordered and less or equal */
+		OLE("ole"),
+		/** Ordered and not equal */
+		ONE("one"),
+		/** Ordered (no NaNs) */
+		ORD("ord"),
+		/** Unordered (either NaN) */
+		UNO("uno"),
+		/** Unordered or equal */
+		UEQ("ueq"),
+		/** Unordered or greater than */
+		UGT("ugt"),
+		/** Unordered or greater or equal */
+		UGE("uge"),
+		/** Unordered or less than */
+		ULT("ult"),
+		/** Unordered or less or equal */
+		ULE("ule"),
+		/** Unordered or not equal */
+		UNE("une");
+
+		private final String ir;
+
+		FCmpPredicate(String ir) {
+			this.ir = ir;
+		}
+
+		@Override
+		public String toString() {
+			return ir;
+		}
 	}
 
 	public class Gen {
@@ -191,6 +318,252 @@ public class IRBuilder {
 			allocaAndStore(allocaId, type, storeValue);
 			load(loadId, type, allocaId);
 			return loadId;
+		}
+
+		// --- Comparison instructions ---
+
+		/**
+		 * Integer comparison of two registers.
+		 * @return The result variable (always i1).
+		 */
+		public int icmp(ICmpPredicate predicate, IRType operandType, int lhs, int rhs) {
+			int result = llvmenv.getNewLocalVariableReference(IRType.INTEGER1);
+			IRBuilder.this.appendLine(t, "%" + result + " = icmp " + predicate + " "
+					+ operandType.getIRType() + " %" + lhs + ", %" + rhs);
+			return result;
+		}
+
+		/**
+		 * Integer comparison of a register against a constant.
+		 * @return The result variable (always i1).
+		 */
+		public int icmp(ICmpPredicate predicate, IRType operandType, int lhs, String rhsConst) {
+			int result = llvmenv.getNewLocalVariableReference(IRType.INTEGER1);
+			IRBuilder.this.appendLine(t, "%" + result + " = icmp " + predicate + " "
+					+ operandType.getIRType() + " %" + lhs + ", " + rhsConst);
+			return result;
+		}
+
+		/**
+		 * Floating point comparison of two registers.
+		 * @return The result variable (always i1).
+		 */
+		public int fcmp(FCmpPredicate predicate, IRType operandType, int lhs, int rhs) {
+			int result = llvmenv.getNewLocalVariableReference(IRType.INTEGER1);
+			IRBuilder.this.appendLine(t, "%" + result + " = fcmp " + predicate + " "
+					+ operandType.getIRType() + " %" + lhs + ", %" + rhs);
+			return result;
+		}
+
+		/**
+		 * Floating point comparison of a register against a constant.
+		 * @return The result variable (always i1).
+		 */
+		public int fcmp(FCmpPredicate predicate, IRType operandType, int lhs, String rhsConst) {
+			int result = llvmenv.getNewLocalVariableReference(IRType.INTEGER1);
+			IRBuilder.this.appendLine(t, "%" + result + " = fcmp " + predicate + " "
+					+ operandType.getIRType() + " %" + lhs + ", " + rhsConst);
+			return result;
+		}
+
+		// --- Logical instructions ---
+
+		/**
+		 * Bitwise AND of two registers.
+		 * @return The result variable.
+		 */
+		public int and(IRType type, int lhs, int rhs) {
+			int result = llvmenv.getNewLocalVariableReference(type);
+			IRBuilder.this.appendLine(t, "%" + result + " = and " + type.getIRType()
+					+ " %" + lhs + ", %" + rhs);
+			return result;
+		}
+
+		/**
+		 * Bitwise OR of two registers.
+		 * @return The result variable.
+		 */
+		public int or(IRType type, int lhs, int rhs) {
+			int result = llvmenv.getNewLocalVariableReference(type);
+			IRBuilder.this.appendLine(t, "%" + result + " = or " + type.getIRType()
+					+ " %" + lhs + ", %" + rhs);
+			return result;
+		}
+
+		// --- Select instruction ---
+
+		/**
+		 * Select between two register values based on an i1 condition.
+		 * @return The result variable.
+		 */
+		public int select(int condition, IRType valueType, int trueVal, int falseVal) {
+			int result = llvmenv.getNewLocalVariableReference(valueType);
+			IRBuilder.this.appendLine(t, "%" + result + " = select i1 %" + condition
+					+ ", " + valueType.getIRType() + " %" + trueVal
+					+ ", " + valueType.getIRType() + " %" + falseVal);
+			return result;
+		}
+
+		/**
+		 * Select between two arbitrary value references based on an i1 condition.
+		 * The references are inserted as-is after the type prefix.
+		 * @return The result variable.
+		 */
+		public int select(int condition, IRType valueType, String trueRef, String falseRef) {
+			int result = llvmenv.getNewLocalVariableReference(valueType);
+			IRBuilder.this.appendLine(t, "%" + result + " = select i1 %" + condition
+					+ ", " + valueType.getIRType() + " " + trueRef
+					+ ", " + valueType.getIRType() + " " + falseRef);
+			return result;
+		}
+
+		// --- Cast instructions ---
+
+		// --- Branch instructions ---
+
+		/**
+		 * Unconditional branch to a label.
+		 * @param label The label to branch to.
+		 */
+		public void br(int label) {
+			IRBuilder.this.appendLine(t, "br label %" + label);
+		}
+
+		/**
+		 * Conditional branch based on an i1 condition.
+		 * @param condition The i1 condition variable.
+		 * @param trueLabel The label to branch to if true.
+		 * @param falseLabel The label to branch to if false.
+		 */
+		public void brCond(int condition, int trueLabel, int falseLabel) {
+			IRBuilder.this.appendLine(t, "br i1 %" + condition
+					+ ", label %" + trueLabel + ", label %" + falseLabel);
+		}
+
+		// --- Cast instructions ---
+
+		/**
+		 * Bitcast between types of the same bit width.
+		 * @return The result variable.
+		 */
+		public int bitcast(IRType fromType, int value, IRType toType) {
+			int result = llvmenv.getNewLocalVariableReference(toType);
+			IRBuilder.this.appendLine(t, "%" + result + " = bitcast "
+					+ fromType.getIRType() + " %" + value + " to " + toType.getIRType());
+			return result;
+		}
+
+		/**
+		 * Signed integer to floating point conversion.
+		 * @return The result variable.
+		 */
+		public int sitofp(IRType fromType, int value, IRType toType) {
+			int result = llvmenv.getNewLocalVariableReference(toType);
+			IRBuilder.this.appendLine(t, "%" + result + " = sitofp "
+					+ fromType.getIRType() + " %" + value + " to " + toType.getIRType());
+			return result;
+		}
+
+		/**
+		 * Floating point extension to a wider float type.
+		 * @return The result variable.
+		 */
+		public int fpext(IRType fromType, int value, IRType toType) {
+			int result = llvmenv.getNewLocalVariableReference(toType);
+			IRBuilder.this.appendLine(t, "%" + result + " = fpext "
+					+ fromType.getIRType() + " %" + value + " to " + toType.getIRType());
+			return result;
+		}
+
+		/**
+		 * Integer to pointer conversion.
+		 * @return The result variable.
+		 */
+		public int inttoptr(IRType fromType, int value, IRType toType) {
+			int result = llvmenv.getNewLocalVariableReference(toType);
+			IRBuilder.this.appendLine(t, "%" + result + " = inttoptr "
+					+ fromType.getIRType() + " %" + value + " to " + toType.getIRType());
+			return result;
+		}
+
+		// --- Aggregate instructions ---
+
+		/**
+		 * Extract a field from an aggregate (struct) value.
+		 * @return The result variable.
+		 */
+		public int extractvalue(IRType structType, int structVar, int index, IRType resultType) {
+			int result = llvmenv.getNewLocalVariableReference(resultType);
+			IRBuilder.this.appendLine(t, "%" + result + " = extractvalue "
+					+ structType.getIRType() + " %" + structVar + ", " + index);
+			return result;
+		}
+
+		// --- ms_value tag category checks ---
+
+		/**
+		 * Checks whether an ms_value tag variable belongs to the given category.
+		 * Emits one icmp per boxable IRType in that category, ORed together.
+		 * @param category The category to check for.
+		 * @param tagVar The i8 tag variable to test.
+		 * @return An i1 result variable that is true if the tag matches.
+		 */
+		private int isTagCategory(IRType.Category category, int tagVar) {
+			int result = -1;
+			for(IRType type : IRType.values()) {
+				if(type.isBoxable() && type.getCategory() == category) {
+					int cmp = icmp(ICmpPredicate.EQ, IRType.INTEGER8,
+							tagVar, type.getBoxTagString());
+					if(result == -1) {
+						result = cmp;
+					} else {
+						result = or(IRType.INTEGER1, result, cmp);
+					}
+				}
+			}
+			if(result == -1) {
+				throw new IllegalArgumentException(
+						"No boxable types found for category: " + category);
+			}
+			return result;
+		}
+
+		/**
+		 * Checks whether an ms_value tag represents a float type.
+		 * @param tagVar The i8 tag variable to test.
+		 * @return An i1 result variable.
+		 */
+		public int isFloatTag(int tagVar) {
+			return isTagCategory(IRType.Category.FLOAT, tagVar);
+		}
+
+		/**
+		 * Checks whether an ms_value tag represents a string type.
+		 * @param tagVar The i8 tag variable to test.
+		 * @return An i1 result variable.
+		 */
+		public int isStringTag(int tagVar) {
+			return isTagCategory(IRType.Category.POINTER, tagVar);
+		}
+
+		/**
+		 * Checks whether an ms_value tag represents a boolean (i1) type.
+		 * @param tagVar The i8 tag variable to test.
+		 * @return An i1 result variable.
+		 */
+		public int isBoolTag(int tagVar) {
+			return icmp(ICmpPredicate.EQ, IRType.INTEGER8,
+					tagVar, IRType.INTEGER1.getBoxTagString());
+		}
+
+		/**
+		 * Checks whether an ms_value tag represents null.
+		 * @param tagVar The i8 tag variable to test.
+		 * @return An i1 result variable.
+		 */
+		public int isNullTag(int tagVar) {
+			return icmp(ICmpPredicate.EQ, IRType.INTEGER8,
+					tagVar, IRType.MS_NULL.getBoxTagString());
 		}
 
 	}

@@ -19,13 +19,27 @@ import java.util.Set;
  */
 public class AsmMain {
 
-	private static void LogErrorAndQuit(String error, int code) {
-		StreamUtils.GetSystemErr().println(TermColors.RED + error + TermColors.RESET);
-		System.exit(code);
-	}
-
 	@tool(value = "asm", undocumented = true)
 	public static class AsmMainCmdlineTool extends AbstractCommandLineTool {
+
+		private boolean throwOnError = false;
+
+		/**
+		 * When set to true, errors that would normally call System.exit will instead throw a
+		 * RuntimeException. This is intended for use in test environments where System.exit
+		 * would kill the test runner.
+		 */
+		public void setThrowOnError(boolean value) {
+			this.throwOnError = value;
+		}
+
+		private void logErrorAndQuit(String error, int code) {
+			StreamUtils.GetSystemErr().println(TermColors.RED + error + TermColors.RESET);
+			if(throwOnError) {
+				throw new RuntimeException("ASM compilation failed (exit code " + code + "): " + error);
+			}
+			System.exit(code);
+		}
 
 		@Override
 		public ArgumentParser getArgumentParser() {
@@ -41,6 +55,9 @@ public class AsmMain {
 					new AsmInstaller().install(parsedArgs.isFlagSet("install-toolchain-non-interactive"));
 				} catch (IOException | InterruptedException e) {
 					StreamUtils.GetSystemErr().println(e.getMessage());
+					if(throwOnError) {
+						throw new RuntimeException("Toolchain installation failed", e);
+					}
 					System.exit(1);
 				}
 				return;
@@ -59,15 +76,15 @@ public class AsmMain {
 			try {
 				try {
 					if(input.isDirectory()) {
-						LogErrorAndQuit("Currently only single files are supported.", 1);
+						logErrorAndQuit("Currently only single files are supported.", 1);
 					} else {
 						AsmCompiler compiler = new AsmCompiler(parsedArgs);
 						try {
 							compiler.compileEntryPoint(input, output, exeName);
 						} catch (IOException ex) {
-							LogErrorAndQuit(ex.getMessage(), 1);
+							logErrorAndQuit(ex.getMessage(), 1);
 						} catch (InternalException ex) {
-							LogErrorAndQuit(ex.getMessage() + "\nAn internal exception occurred, which is not caused by your code. "
+							logErrorAndQuit(ex.getMessage() + "\nAn internal exception occurred, which is not caused by your code. "
 									+ (parsedArgs.isFlagSet("verbose")
 									? "Please report this with all the above information."
 									: "Please re-run with the --verbose switch."), 2);

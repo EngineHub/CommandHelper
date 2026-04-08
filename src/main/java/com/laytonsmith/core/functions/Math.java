@@ -21,6 +21,8 @@ import com.laytonsmith.core.StepAction.Evaluate;
 import com.laytonsmith.core.StepAction.StepResult;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
+import com.laytonsmith.core.compiler.signature.FunctionSignatures;
+import com.laytonsmith.core.compiler.signature.SignatureBuilder;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CDouble;
@@ -1235,12 +1237,12 @@ public class Math {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
-			if(argTypes.size() == 0) {
-				return CDouble.TYPE;
-			} else {
-				return CInt.TYPE;
-			}
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CDouble.TYPE, "No-arg variant, which returns a double")
+					.newSignature(CInt.TYPE, "One or two arg variant, which returns an integer within a range.")
+					.param(CInt.TYPE, "minOrMax", "With only one argument, this is the max. With two, this is the min.")
+					.param(CInt.TYPE, "max", "The max. Max is exclusive.", true)
+					.build();
 		}
 	}
 

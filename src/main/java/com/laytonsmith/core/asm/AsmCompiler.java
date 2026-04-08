@@ -228,7 +228,6 @@ public class AsmCompiler {
 			}
 			StringBuilder program = new StringBuilder();
 			llvmenv.newMethodFrame("@main");
-			llvmenv.pushVariableScope();
 			// TODO: Eventually add the argument processing for this
 			// Pop 0..2 for the main args and entry label
 			llvmenv.getNewLocalVariableReference(IRType.INTEGER32);

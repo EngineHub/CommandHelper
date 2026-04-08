@@ -45,17 +45,28 @@ public abstract class LLVMFunction implements FunctionBase, Function {
 		return getDefaultDocs();
 	}
 
-	private FunctionBase getDefaultFunction() throws ConfigCompileException {
+	/**
+	 * Returns the Function object as defined in the Java Intepreter. This can be used to grab common values like
+	 * the signature.
+	 * @return
+	 * @throws ConfigCompileException
+	 */
+	protected Function getDefaultFunction() {
 		CFunction f = new CFunction(getName(), Target.UNKNOWN);
-		FunctionBase fb = FunctionList.getFunction(f, api.Platforms.INTERPRETER_JAVA, null);
-		return fb;
+		FunctionBase fb;
+		try {
+			fb = FunctionList.getFunction(f, api.Platforms.INTERPRETER_JAVA, null);
+		} catch(ConfigCompileException ex) {
+			throw new Error(ex);
+		}
+		return (Function) fb;
 	}
 
 	private String getDefaultDocs() {
 		try {
 			FunctionBase fb = getDefaultFunction();
 			return fb.docs();
-		} catch (ConfigCompileException ex) {
+		} catch (Error ex) {
 			return "mixed {...} This function is missing documentation. Please report it.";
 		}
 	}
