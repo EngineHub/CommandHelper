@@ -21,7 +21,6 @@ import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
@@ -58,10 +57,10 @@ public class Trades {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			CArray ret = new CArray(t);
 			for(MCMerchantRecipe mr : GetMerchant(args[0], t).getRecipes()) {
-				ret.push(trade(mr, t, env), t, env);
+				ret.push(trade(mr, t), t);
 			}
 			return ret;
 		}
@@ -98,15 +97,15 @@ public class Trades {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCMerchant merchant = GetMerchant(args[0], t);
-			CArray trades = ArgumentValidation.getArray(args[1], t, env);
+			CArray trades = ArgumentValidation.getArray(args[1], t);
 			List<MCMerchantRecipe> recipes = new ArrayList<>();
 			if(trades.isAssociative()) {
 				throw new CRECastException("Expected non-associative array for list of trade arrays.", t);
 			}
-			for(Mixed trade : trades.asList(env)) {
-				recipes.add(trade(trade, t, env));
+			for(Mixed trade : trades.asList()) {
+				recipes.add(trade(trade, t));
 			}
 			merchant.setRecipes(recipes);
 			return CVoid.VOID;
@@ -170,14 +169,14 @@ public class Trades {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CArray ret = CArray.GetAssociativeArray(t, null, env);
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			CArray ret = CArray.GetAssociativeArray(t);
 			for(Map.Entry<String, MCMerchant> entry : VIRTUAL_MERCHANTS.entrySet()) {
 				if(entry.getValue() == null) {
 					VIRTUAL_MERCHANTS.remove(entry.getKey());
 					continue;
 				}
-				ret.set(entry.getKey(), entry.getValue().getTitle(), t, env);
+				ret.set(entry.getKey(), entry.getValue().getTitle(), t);
 			}
 			return ret;
 		}
@@ -213,7 +212,7 @@ public class Trades {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			if(VIRTUAL_MERCHANTS.containsKey(args[0].val())) {
 				throw new CREIllegalArgumentException("There is already a merchant with id " + args[0].val(), t);
 			} else {
@@ -256,7 +255,7 @@ public class Trades {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return CBoolean.get(VIRTUAL_MERCHANTS.remove(args[0].val()) != null);
 		}
 
@@ -292,16 +291,16 @@ public class Trades {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer player;
 			boolean force = false;
 			if(args.length > 1) {
-				player = Static.GetPlayer(args[1], t, env);
+				player = Static.GetPlayer(args[1], t);
 			} else {
 				player = Static.getPlayer(env, t);
 			}
 			if(args.length == 3) {
-				force = ArgumentValidation.getBooleanish(args[2], t, env);
+				force = ArgumentValidation.getBooleanish(args[2], t);
 			}
 			MCMerchant merchant = GetMerchant(args[0], t);
 			if(!force && merchant.isTrading()) {
@@ -345,7 +344,7 @@ public class Trades {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCMerchant merchant = GetMerchant(args[0], t);
 			return merchant.isTrading() ? new CString(merchant.getTrader().getUniqueId().toString(), t) : CNull.NULL;
 		}
@@ -399,55 +398,55 @@ public class Trades {
 		return merchant;
 	}
 
-	private static MCMerchantRecipe trade(Mixed c, Target t, Environment env) {
+	private static MCMerchantRecipe trade(Mixed c, Target t) {
 
-		CArray recipe = ArgumentValidation.getArray(c, t, env);
+		CArray recipe = ArgumentValidation.getArray(c, t);
 
-		MCItemStack result = ObjectGenerator.GetGenerator().item(recipe.get("result", t, env), t, env);
+		MCItemStack result = ObjectGenerator.GetGenerator().item(recipe.get("result", t), t);
 
 		MCMerchantRecipe mer = (MCMerchantRecipe) StaticLayer.GetNewRecipe(null, MCRecipeType.MERCHANT, result);
 
 		if(recipe.containsKey("maxuses")) {
-			mer.setMaxUses(ArgumentValidation.getInt32(recipe.get("maxuses", t, env), t, env));
+			mer.setMaxUses(ArgumentValidation.getInt32(recipe.get("maxuses", t), t));
 		}
 		if(recipe.containsKey("uses")) {
-			mer.setUses(ArgumentValidation.getInt32(recipe.get("uses", t, env), t, env));
+			mer.setUses(ArgumentValidation.getInt32(recipe.get("uses", t), t));
 		}
 		if(recipe.containsKey("hasxpreward")) {
-			mer.setHasExperienceReward(ArgumentValidation.getBoolean(recipe.get("hasxpreward", t, env), t, env));
+			mer.setHasExperienceReward(ArgumentValidation.getBoolean(recipe.get("hasxpreward", t), t));
 		}
 
-		CArray ingredients = ArgumentValidation.getArray(recipe.get("ingredients", t, env), t, env);
+		CArray ingredients = ArgumentValidation.getArray(recipe.get("ingredients", t), t);
 		if(ingredients.inAssociativeMode()) {
 			throw new CREFormatException("Ingredients array is invalid.", t);
 		}
-		if(ingredients.size(env) < 1 || ingredients.size(env) > 2) {
+		if(ingredients.size() < 1 || ingredients.size() > 2) {
 			throw new CRERangeException("Ingredients for merchants must contain 1 or 2 items, found "
-					+ ingredients.size(env), t);
+					+ ingredients.size(), t);
 		}
 		List<MCItemStack> mcIngredients = new ArrayList<>();
-		for(Mixed ingredient : ingredients.asList(env)) {
-			mcIngredients.add(ObjectGenerator.GetGenerator().item(ingredient, t, env));
+		for(Mixed ingredient : ingredients.asList()) {
+			mcIngredients.add(ObjectGenerator.GetGenerator().item(ingredient, t));
 		}
 		mer.setIngredients(mcIngredients);
 
 		return mer;
 	}
 
-	private static Mixed trade(MCMerchantRecipe r, Target t, Environment env) {
+	private static Mixed trade(MCMerchantRecipe r, Target t) {
 		if(r == null) {
 			return CNull.NULL;
 		}
-		CArray ret = CArray.GetAssociativeArray(t, null, env);
-		ret.set("result", ObjectGenerator.GetGenerator().item(r.getResult(), t), t, env);
+		CArray ret = CArray.GetAssociativeArray(t);
+		ret.set("result", ObjectGenerator.GetGenerator().item(r.getResult(), t), t);
 		CArray il = new CArray(t);
 		for(MCItemStack i : r.getIngredients()) {
-			il.push(ObjectGenerator.GetGenerator().item(i, t), t, env);
+			il.push(ObjectGenerator.GetGenerator().item(i, t), t);
 		}
-		ret.set("ingredients", il, t, env);
-		ret.set("maxuses", new CInt(r.getMaxUses(), t), t, env);
-		ret.set("uses", new CInt(r.getUses(), t), t, env);
-		ret.set("hasxpreward", CBoolean.get(r.hasExperienceReward()), t, env);
+		ret.set("ingredients", il, t);
+		ret.set("maxuses", new CInt(r.getMaxUses(), t), t);
+		ret.set("uses", new CInt(r.getUses(), t), t);
+		ret.set("hasxpreward", CBoolean.get(r.hasExperienceReward()), t);
 
 		return ret;
 	}

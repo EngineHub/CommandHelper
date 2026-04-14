@@ -8,13 +8,10 @@ import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
-import com.laytonsmith.core.FlowFunction;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
-import com.laytonsmith.core.StepAction.Complete;
-import com.laytonsmith.core.StepAction.Evaluate;
-import com.laytonsmith.core.StepAction.StepResult;
 import com.laytonsmith.core.compiler.BranchStatement;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
@@ -37,7 +34,6 @@ import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.IVariableList;
 import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
@@ -84,7 +80,7 @@ public class EventBinding {
 
 	@api
 	@SelfStatement
-	public static class bind extends AbstractFunction implements FlowFunction<bind.BindState>, Optimizable, BranchStatement, VariableScope, DocumentSymbolProvider {
+	public static class bind extends AbstractFunction implements Optimizable, BranchStatement, VariableScope, DocumentSymbolProvider {
 
 		@Override
 		public String getName() {
@@ -131,122 +127,71 @@ public class EventBinding {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return CVoid.VOID;
 		}
 
-		// -- FlowFunction implementation --
-		// bind evaluates args 0-2 with IVariable resolution (equivalent to seval),
-		// args 3..n-2 with keepIVariable=true (need raw IVariables for event_obj and custom params),
-		// and does NOT evaluate the last arg (the code tree stored in the BoundEvent).
-
-		static class BindState {
-			int nextArg = 0;
-			ParseTree[] children;
-			Mixed name;
-			Mixed options;
-			Mixed prefilter;
-			Mixed eventObj;
-			IVariableList customParams;
-		}
-
 		@Override
-		public StepResult<BindState> begin(Target t, ParseTree[] children, Environment env) {
-			if(children.length < 5) {
+		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+			if(nodes.length < 5) {
 				throw new CREInsufficientArgumentsException("bind accepts 5 or more parameters", t);
 			}
-			BindState state = new BindState();
-			state.children = children;
-			state.customParams = new IVariableList(env.getEnv(GlobalEnv.class).GetVarList());
-			return new StepResult<>(new Evaluate(children[0]), state);
-		}
-
-		@Override
-		public StepResult<BindState> childCompleted(Target t, BindState state, Mixed result, Environment env) {
-			int argIndex = state.nextArg;
-			state.nextArg++;
-
-			switch(argIndex) {
-				case 0 -> state.name = result;
-				case 1 -> {
-					if(!(result instanceof CNull || result.isInstanceOf(CArray.TYPE, null, env))) {
-						throw new CRECastException("The options must be an array or null", t);
-					}
-					state.options = result;
+			Mixed name = parent.seval(nodes[0], env);
+			Mixed options = parent.seval(nodes[1], env);
+			Mixed prefilter = parent.seval(nodes[2], env);
+			Mixed event_obj = parent.eval(nodes[3], env);
+			IVariableList custom_params = new IVariableList(env.getEnv(GlobalEnv.class).GetVarList());
+			for(int a = 0; a < nodes.length - 5; a++) {
+				Mixed var = parent.eval(nodes[4 + a], env);
+				if(!(var instanceof IVariable)) {
+					throw new CRECastException("The custom parameters must be ivariables", t);
 				}
-				case 2 -> {
-					if(!(result instanceof CNull || result.isInstanceOf(CArray.TYPE, null, env))) {
-						throw new CRECastException("The prefilters must be an array or null", t);
-					}
-					state.prefilter = result;
-				}
-				case 3 -> {
-					if(!(result instanceof IVariable)) {
-						throw new CRECastException("The event object must be an IVariable", t);
-					}
-					state.eventObj = result;
-				}
-				default -> {
-					if(!(result instanceof IVariable)) {
-						throw new CRECastException("The custom parameters must be ivariables", t);
-					}
-					IVariable cur = (IVariable) result;
-					state.customParams.set(env.getEnv(GlobalEnv.class).GetVarList()
-							.get(cur.getVariableName(), cur.getTarget(), env));
-				}
+				IVariable cur = (IVariable) var;
+				custom_params.set(env.getEnv(GlobalEnv.class).GetVarList().get(cur.getVariableName(),
+						cur.getTarget(), env));
 			}
-
-			int nextIndex = state.nextArg;
-			int lastIndex = state.children.length - 1;
-
-			if(nextIndex < lastIndex) {
-				boolean keepIVar = nextIndex >= 3;
-				return new StepResult<>(new Evaluate(state.children[nextIndex], null, keepIVar), state);
+			Environment newEnv = env;
+			try {
+				newEnv = env.clone();
+			} catch (Exception e) {
 			}
+			// Set the permission to global if it's null, since that means
+			// it wasn't set, and so we aren't in a secured environment anyway.
+			if(newEnv.getEnv(GlobalEnv.class).GetLabel() == null) {
+				newEnv.getEnv(GlobalEnv.class).SetLabel(Static.GLOBAL_PERMISSION);
+			}
+			newEnv.getEnv(GlobalEnv.class).SetVarList(custom_params);
+			ParseTree tree = nodes[nodes.length - 1];
 
-			// All args evaluated — register the event
-			return new StepResult<>(new Complete(registerBind(t, state, env)), state);
-		}
-
-		/**
-		 * Performs the bind registration after all args have been evaluated and validated.
-		 */
-		private Mixed registerBind(Target t, BindState state, Environment env) {
-			Mixed options = state.options;
-			Mixed prefilter = state.prefilter;
-
+			//Check to see if our arguments are correct
+			if(!(options instanceof CNull || options.isInstanceOf(CArray.TYPE))) {
+				throw new CRECastException("The options must be an array or null", t);
+			}
+			if(!(prefilter instanceof CNull || prefilter.isInstanceOf(CArray.TYPE))) {
+				throw new CRECastException("The prefilters must be an array or null", t);
+			}
+			if(!(event_obj instanceof IVariable)) {
+				throw new CRECastException("The event object must be an IVariable", t);
+			}
+			CString id;
 			if(options instanceof CNull) {
 				options = null;
 			}
 			if(prefilter instanceof CNull) {
 				prefilter = null;
 			}
-
-			Environment newEnv = env;
-			try {
-				newEnv = env.clone();
-			} catch(Exception e) {
-			}
-			if(newEnv.getEnv(GlobalEnv.class).GetLabel() == null) {
-				newEnv.getEnv(GlobalEnv.class).SetLabel(Static.GLOBAL_PERMISSION);
-			}
-			newEnv.getEnv(GlobalEnv.class).SetVarList(state.customParams);
-
-			ParseTree tree = state.children[state.children.length - 1];
-
-			CString id;
 			Event event;
 			try {
-				BoundEvent be = new BoundEvent(state.name.val(), (CArray) options, (CArray) prefilter,
-						((IVariable) state.eventObj).getVariableName(), newEnv, tree, t);
+				BoundEvent be = new BoundEvent(name.val(), (CArray) options, (CArray) prefilter,
+						((IVariable) event_obj).getVariableName(), newEnv, tree, t);
 				EventUtils.RegisterEvent(be);
 				id = new CString(be.getId(), t);
 				event = be.getEventDriver();
-			} catch(EventException ex) {
+			} catch (EventException ex) {
 				throw new CREBindException(ex.getMessage(), t);
 			}
 
-			// Set up bind counter for daemon thread management
+			//Set up our bind counter, but only if the event is supposed to be added to the counter
 			if(event.addCounter()) {
 				synchronized(BIND_COUNTER) {
 					if(BIND_COUNTER.get() == 0) {
@@ -409,6 +354,11 @@ public class EventBinding {
 		}
 
 		@Override
+		public boolean useSpecialExec() {
+			return true;
+		}
+
+		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC, OptimizationOption.CUSTOM_LINK);
 		}
@@ -436,14 +386,14 @@ public class EventBinding {
 					if(node.getData() instanceof CFunction && node.getData().val().equals(Compiler.centry.NAME)) {
 						List<ParseTree> children = node.getChildren();
 						if(children.get(0).getData().val().equals("id")
-								&& children.get(1).getData().isInstanceOf(CString.TYPE, null, env)) {
+								&& children.get(1).getData().isInstanceOf(CString.TYPE)) {
 							if(children.get(1).getData().val().matches(".*?:\\d*?")) {
 								exceptions.add(new ConfigCompileException(children.get(1).getData().val()
 											+ " is not a valid event identifier."
 											+ " It cannot match the regex \".*?:\\d*?\".", children.get(1).getTarget()));
 							}
 						} else if(children.get(0).getData().val().equals("priority")
-								&& children.get(1).getData().isInstanceOf(CString.TYPE, null, env)) {
+								&& children.get(1).getData().isInstanceOf(CString.TYPE)) {
 							try {
 								BoundEvent.Priority.valueOf(children.get(1).getData().val().toUpperCase());
 								try {
@@ -557,7 +507,7 @@ public class EventBinding {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return EventUtils.DumpEvents();
 		}
 	}
@@ -602,7 +552,7 @@ public class EventBinding {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String id;
 			BoundEvent be;
 			if(args.length == 1) {
@@ -611,10 +561,10 @@ public class EventBinding {
 				be = EventUtils.GetEventById(id);
 			} else {
 				//We are cancelling this event. If we are not in an event, throw an exception
-				if(env.getEnv(GlobalEnv.class).GetEvent() == null) {
+				if(environment.getEnv(GlobalEnv.class).GetEvent() == null) {
 					throw new CREBindException("No event ID specified, and not running inside an event", t);
 				}
-				be = env.getEnv(GlobalEnv.class).GetEvent().getBoundEvent();
+				be = environment.getEnv(GlobalEnv.class).GetEvent().getBoundEvent();
 				id = be.getId();
 			}
 			Event event = null;
@@ -627,7 +577,7 @@ public class EventBinding {
 				synchronized(BIND_COUNTER) {
 					BIND_COUNTER.decrementAndGet();
 					if(BIND_COUNTER.get() == 0) {
-						env.getEnv(StaticRuntimeEnv.class).GetDaemonManager().deactivateThread(null);
+						environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager().deactivateThread(null);
 					}
 				}
 			}
@@ -677,13 +627,13 @@ public class EventBinding {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			boolean cancelled = true;
 			if(args.length == 1) {
 				cancelled = ArgumentValidation.getBoolean(args[0], t);
 			}
 
-			BoundEvent.ActiveEvent original = env.getEnv(GlobalEnv.class).GetEvent();
+			BoundEvent.ActiveEvent original = environment.getEnv(GlobalEnv.class).GetEvent();
 			if(original == null) {
 				throw new CREBindException("cancel cannot be called outside an event handler", t);
 			}
@@ -734,8 +684,8 @@ public class EventBinding {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			BoundEvent.ActiveEvent original = env.getEnv(GlobalEnv.class).GetEvent();
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			BoundEvent.ActiveEvent original = environment.getEnv(GlobalEnv.class).GetEvent();
 			if(original == null) {
 				throw new CREBindException("is_cancelled cannot be called outside an event handler", t);
 			}
@@ -797,20 +747,20 @@ public class EventBinding {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			CArray obj = null;
 			if(args[1] instanceof CNull) {
 				obj = new CArray(t);
-			} else if(args[1].isInstanceOf(CArray.TYPE, null, env)) {
+			} else if(args[1].isInstanceOf(CArray.TYPE)) {
 				obj = (CArray) args[1];
 			} else {
 				throw new CRECastException("The eventObject must be null, or an array", t);
 			}
 			boolean serverWide = false;
 			if(args.length == 3) {
-				serverWide = ArgumentValidation.getBoolean(args[2], t, env);
+				serverWide = ArgumentValidation.getBoolean(args[2], t);
 			}
-			EventUtils.ManualTrigger(args[0].val(), obj, t, serverWide, env);
+			EventUtils.ManualTrigger(args[0].val(), obj, t, serverWide);
 			return CVoid.VOID;
 		}
 	}
@@ -866,25 +816,25 @@ public class EventBinding {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String parameter = args[0].val();
 			Mixed value = args[1];
 			boolean throwOnFailure = false;
 			if(args.length == 3) {
 				throwOnFailure = ArgumentValidation.getBoolean(args[3], t);
 			}
-			if(env.getEnv(GlobalEnv.class).GetEvent() == null) {
+			if(environment.getEnv(GlobalEnv.class).GetEvent() == null) {
 				throw new CREBindException(this.getName() + " must be called from within an event handler", t);
 			}
-			Event e = env.getEnv(GlobalEnv.class).GetEvent().getEventDriver();
-			if(env.getEnv(GlobalEnv.class).GetEvent().getBoundEvent().getPriority().equals(Priority.MONITOR)) {
+			Event e = environment.getEnv(GlobalEnv.class).GetEvent().getEventDriver();
+			if(environment.getEnv(GlobalEnv.class).GetEvent().getBoundEvent().getPriority().equals(Priority.MONITOR)) {
 				throw new CREBindException("Monitor level handlers may not modify an event!", t);
 			}
-			ActiveEvent active = env.getEnv(GlobalEnv.class).GetEvent();
+			ActiveEvent active = environment.getEnv(GlobalEnv.class).GetEvent();
 			boolean success = false;
 			if(!active.isLocked(parameter)) {
 				try {
-					success = Event.ExecuteModifyEvent(e, parameter, value, env.getEnv(GlobalEnv.class).GetEvent().getUnderlyingEvent(), env);
+					success = e.modifyEvent(parameter, value, environment.getEnv(GlobalEnv.class).GetEvent().getUnderlyingEvent());
 				} catch (ConfigRuntimeException ex) {
 					ex.setTarget(t);
 					throw ex;
@@ -934,18 +884,18 @@ public class EventBinding {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			if(env.getEnv(GlobalEnv.class).GetEvent() == null) {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			if(environment.getEnv(GlobalEnv.class).GetEvent() == null) {
 				throw new CREBindException("lock must be called from within an event handler", t);
 			}
 
-			BoundEvent.ActiveEvent e = env.getEnv(GlobalEnv.class).GetEvent();
+			BoundEvent.ActiveEvent e = environment.getEnv(GlobalEnv.class).GetEvent();
 			Priority p = e.getBoundEvent().getPriority();
 			List<String> params = new ArrayList<String>();
 			if(args.length == 0) {
 				e.lock(null);
 			} else {
-				if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
+				if(args[0].isInstanceOf(CArray.TYPE)) {
 					CArray ca = (CArray) args[1];
 					for(int i = 0; i < ca.size(); i++) {
 						params.add(ca.get(i, t).val());
@@ -1005,11 +955,11 @@ public class EventBinding {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			if(env.getEnv(GlobalEnv.class).GetEvent() == null) {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			if(environment.getEnv(GlobalEnv.class).GetEvent() == null) {
 				throw new CREBindException("is_locked may only be called from inside an event handler", t);
 			}
-			return CBoolean.get(env.getEnv(GlobalEnv.class).GetEvent().isLocked(args[0].val()));
+			return CBoolean.get(environment.getEnv(GlobalEnv.class).GetEvent().isLocked(args[0].val()));
 		}
 
 		@Override
@@ -1054,11 +1004,11 @@ public class EventBinding {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			if(env.getEnv(GlobalEnv.class).GetEvent() == null) {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			if(environment.getEnv(GlobalEnv.class).GetEvent() == null) {
 				throw new CREBindException("consume may only be called from an event handler!", t);
 			}
-			env.getEnv(GlobalEnv.class).GetEvent().consume();
+			environment.getEnv(GlobalEnv.class).GetEvent().consume();
 			return CVoid.VOID;
 		}
 
@@ -1105,11 +1055,11 @@ public class EventBinding {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			if(env.getEnv(GlobalEnv.class).GetEvent() == null) {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			if(environment.getEnv(GlobalEnv.class).GetEvent() == null) {
 				throw new CREBindException("is_consumed must be called from within an event handler", t);
 			}
-			return CBoolean.get(env.getEnv(GlobalEnv.class).GetEvent().isConsumed());
+			return CBoolean.get(environment.getEnv(GlobalEnv.class).GetEvent().isConsumed());
 		}
 
 		@Override
@@ -1159,12 +1109,12 @@ public class EventBinding {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			if(env.getEnv(GlobalEnv.class).GetEvent() == null) {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			if(environment.getEnv(GlobalEnv.class).GetEvent() == null) {
 				throw new CREBindException("event_meta must be called from within an event handler!", t);
 			}
 			CArray history = new CArray(t);
-			for(String entry : env.getEnv(GlobalEnv.class).GetEvent().getHistory()) {
+			for(String entry : environment.getEnv(GlobalEnv.class).GetEvent().getHistory()) {
 				history.push(new CString(entry, t), t);
 			}
 			return history;
@@ -1195,7 +1145,7 @@ public class EventBinding {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return CBoolean.get(EventUtils.GetEventById(args[0].val()) != null);
 		}
 

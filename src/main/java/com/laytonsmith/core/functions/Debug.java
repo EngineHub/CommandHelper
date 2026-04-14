@@ -22,7 +22,6 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
@@ -110,7 +109,7 @@ public class Debug {
 //			return false;
 //		}
 //
-//		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+//		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 //			if(!(Boolean) Static.getPreferences().getPreference("allow-debug-logging")) {
 //				throw new ConfigRuntimeException("allow-debug-logging is currently set to false. To use " + this.getVariableName() + ", enable it in your preferences.", CRESecurityException.class, t);
 //			}
@@ -243,7 +242,7 @@ public class Debug {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(Prefs.DebugMode()) {
 				try {
 					Static.LogDebug(MethodScriptFileLocations.getDefault().getConfigDirectory(), args[0].val(), LogLevel.DEBUG);
@@ -260,11 +259,11 @@ public class Debug {
 	public static class trace extends always_trace {
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			//TODO: Once Prefs are no longer static, check to see if debug mode is on during compilation, and
 			//if so, remove this function entirely
 			if(Prefs.DebugMode()) {
-				return always_trace.doTrace(t, env, args);
+				return always_trace.doTrace(t, environment, args);
 			}
 			return CVoid.VOID;
 		}
@@ -307,8 +306,8 @@ public class Debug {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			return doTrace(t, env, args);
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			return doTrace(t, environment, args);
 		}
 
 		@Override
@@ -353,13 +352,13 @@ public class Debug {
 			};
 		}
 
-		public static CVoid doTrace(Target t, Environment env, Mixed... args) {
+		public static CVoid doTrace(Target t, Environment environment, Mixed... args) {
 			if(args[0] instanceof IVariable) {
-				IVariable ivar = env.getEnv(GlobalEnv.class).GetVarList()
-						.get(((IVariable) args[0]).getVariableName(), t, env);
+				IVariable ivar = environment.getEnv(GlobalEnv.class).GetVarList()
+						.get(((IVariable) args[0]).getVariableName(), t, environment);
 				Mixed val = ivar.ival();
 				StreamUtils.GetSystemOut().println(
-						TermColors.GREEN + env.getEnv(GlobalEnv.class).GetStackTraceManager()
+						TermColors.GREEN + environment.getEnv(GlobalEnv.class).GetStackTraceManager()
 								.getCurrentStackTrace().get(0).getProcedureName()
 						+ TermColors.RESET + ":"
 						+ TermColors.YELLOW + t.file().getName()
@@ -368,14 +367,14 @@ public class Debug {
 						+ TermColors.RESET + ": "
 						+ TermColors.BRIGHT_WHITE + ivar.getDefinedType()
 						+ TermColors.RESET + " (actual type "
-						+ TermColors.BRIGHT_WHITE + val.typeof(env)
-						+ (val.isInstanceOf(Sizeable.TYPE, null, env) ? ", length: " + ((Sizeable) val).size() : "")
+						+ TermColors.BRIGHT_WHITE + val.typeof()
+						+ (val.isInstanceOf(Sizeable.TYPE) ? ", length: " + ((Sizeable) val).size() : "")
 						+ TermColors.RESET + ") "
 						+ TermColors.CYAN + ivar.getVariableName()
 						+ TermColors.RESET + ": " + val.val());
 				return CVoid.VOID;
 			} else {
-				throw new CRECastException("Expecting an ivar, but received " + args[0].typeof(env).getSimpleName()
+				throw new CRECastException("Expecting an ivar, but received " + args[0].typeof().getSimpleName()
 						+ " instead", t);
 			}
 		}
@@ -442,7 +441,7 @@ public class Debug {
 //			return false;
 //		}
 //
-//		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+//		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 //			if(!(Boolean) Static.getPreferences().getPreference("allow-debug-logging")) {
 //				throw new ConfigRuntimeException("allow-debug-logging is currently set to false. To use " + this.getVariableName() + ", enable it in your preferences.", CRESecurityException.class, t);
 //			}
@@ -495,7 +494,7 @@ public class Debug {
 //			return true;
 //		}
 //
-//		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+//		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 //			if(!(Boolean) Static.getPreferences().getPreference("allow-debug-logging")) {
 //				throw new ConfigRuntimeException("allow-debug-logging is currently set to false. To use " + this.getVariableName() + ", enable it in your preferences.", CRESecurityException.class, t);
 //			}
@@ -571,7 +570,7 @@ public class Debug {
 //			return false;
 //		}
 //
-//		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+//		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 //			if(!(Boolean) Static.getPreferences().getPreference("allow-debug-logging")) {
 //				throw new ConfigRuntimeException("allow-debug-logging is currently set to false. To use " + this.getVariableName() + ", enable it in your preferences.", CRESecurityException.class, t);
 //			}
@@ -607,7 +606,7 @@ public class Debug {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
 			CArray carray = new CArray(t);
 			for(Thread thread : threadSet) {
@@ -659,7 +658,7 @@ public class Debug {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			File file = new File("dump.hprof");
 			try {
 				HeapDumper.dumpHeap(file.getAbsolutePath(), true);
@@ -714,7 +713,7 @@ public class Debug {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			Script.debugOutput = ArgumentValidation.getBoolean(args[0], t);
 			if(Script.debugOutput) {
 				StreamUtils.GetSystemOut().println(TermColors.BG_RED + "[[DEBUG]] set_debug_output(true)"

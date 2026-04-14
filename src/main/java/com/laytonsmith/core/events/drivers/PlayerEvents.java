@@ -151,7 +151,12 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
+
+		@Override
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			if(e instanceof MCFoodLevelChangeEvent) {
 				Map<String, Mixed> ret = evaluate_helper(e);
 				MCFoodLevelChangeEvent event = (MCFoodLevelChangeEvent) e;
@@ -179,12 +184,12 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			if(event instanceof MCFoodLevelChangeEvent) {
 				MCFoodLevelChangeEvent e = (MCFoodLevelChangeEvent) event;
 
 				if(key.equalsIgnoreCase("level")) {
-					e.setFoodLevel(ArgumentValidation.getInt32(value, Target.UNKNOWN, env));
+					e.setFoodLevel(ArgumentValidation.getInt32(value, Target.UNKNOWN));
 					return true;
 				}
 			}
@@ -245,14 +250,15 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			MCPlayer p = Static.GetPlayer(manualObject.get("player", t, env), t, env);
-			MCItemStack i = ObjectGenerator.GetGenerator().item(manualObject.get("item", t, env), t, env);
+		public BindableEvent convert(CArray manualObject, Target t) {
+			MCPlayer p = Static.GetPlayer(manualObject.get("player", Target.UNKNOWN), Target.UNKNOWN);
+			MCItemStack i = ObjectGenerator.GetGenerator().item(manualObject.get("item", Target.UNKNOWN),
+					Target.UNKNOWN);
 			return EventBuilder.instantiate(MCPlayerItemConsumeEvent.class, p, i);
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
 			if(event instanceof MCPlayerItemConsumeEvent) {
 				MCPlayerItemConsumeEvent e = (MCPlayerItemConsumeEvent) event;
 				Map<String, Mixed> ret = evaluate_helper(e);
@@ -277,11 +283,11 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			if(event instanceof MCPlayerItemConsumeEvent) {
 				MCPlayerItemConsumeEvent e = (MCPlayerItemConsumeEvent) event;
 				if(key.equalsIgnoreCase("item")) {
-					e.setItem(ObjectGenerator.GetGenerator().item(value, Target.UNKNOWN, env));
+					e.setItem(ObjectGenerator.GetGenerator().item(value, Target.UNKNOWN));
 					return true;
 				}
 			}
@@ -326,7 +332,12 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
+
+		@Override
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			if(e instanceof MCPlayerKickEvent) {
 				MCPlayerKickEvent event = (MCPlayerKickEvent) e;
 				Map<String, Mixed> map = evaluate_helper(e);
@@ -346,7 +357,7 @@ public class PlayerEvents {
 
 		@Override
 		public boolean modifyEvent(String key, Mixed value,
-				BindableEvent event, Environment env) {
+				BindableEvent event) {
 			if(event instanceof MCPlayerKickEvent) {
 				MCPlayerKickEvent e = (MCPlayerKickEvent) event;
 				if(key.equalsIgnoreCase("message")) {
@@ -413,17 +424,17 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			MCPlayer p = Static.GetPlayer(manualObject.get("player", t, env), t, env);
-			MCLocation from = ObjectGenerator.GetGenerator().location(manualObject.get("from", t, env),
-					p.getWorld(), manualObject.getTarget(), env);
-			MCLocation to = ObjectGenerator.GetGenerator().location(manualObject.get("to", t, env),
-					p.getWorld(), manualObject.getTarget(), env);
+		public BindableEvent convert(CArray manualObject, Target t) {
+			MCPlayer p = Static.GetPlayer(manualObject.get("player", Target.UNKNOWN), Target.UNKNOWN);
+			MCLocation from = ObjectGenerator.GetGenerator().location(manualObject.get("from", Target.UNKNOWN),
+					p.getWorld(), manualObject.getTarget());
+			MCLocation to = ObjectGenerator.GetGenerator().location(manualObject.get("to", Target.UNKNOWN),
+					p.getWorld(), manualObject.getTarget());
 			return EventBuilder.instantiate(MCPlayerTeleportEvent.class, p, from, to);
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			if(e instanceof MCPlayerTeleportEvent) {
 				MCPlayerTeleportEvent event = (MCPlayerTeleportEvent) e;
 				Map<String, Mixed> map = evaluate_helper(e);
@@ -446,12 +457,12 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			if(event instanceof MCPlayerTeleportEvent) {
 				MCPlayerTeleportEvent e = (MCPlayerTeleportEvent) event;
 
 				if(key.equalsIgnoreCase("to")) {
-					MCLocation loc = ObjectGenerator.GetGenerator().location(value, null, Target.UNKNOWN, env);
+					MCLocation loc = ObjectGenerator.GetGenerator().location(value, null, Target.UNKNOWN);
 					e.setTo(loc);
 
 					return true;
@@ -517,17 +528,17 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			MCPlayer p = Static.GetPlayer(manualObject.get("player", t, env), t, env);
-			MCLocation from = ObjectGenerator.GetGenerator().location(manualObject.get("from", t, env),
-					p.getWorld(), manualObject.getTarget(), env);
-			MCLocation to = ObjectGenerator.GetGenerator().location(manualObject.get("to", t, env),
-					p.getWorld(), manualObject.getTarget(), env);
+		public BindableEvent convert(CArray manualObject, Target t) {
+			MCPlayer p = Static.GetPlayer(manualObject.get("player", Target.UNKNOWN), Target.UNKNOWN);
+			MCLocation from = ObjectGenerator.GetGenerator().location(manualObject.get("from", Target.UNKNOWN),
+					p.getWorld(), manualObject.getTarget());
+			MCLocation to = ObjectGenerator.GetGenerator().location(manualObject.get("to", Target.UNKNOWN),
+					p.getWorld(), manualObject.getTarget());
 			return EventBuilder.instantiate(MCPlayerPortalEvent.class, p, from, to);
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			if(e instanceof MCPlayerPortalEvent) {
 				MCPlayerPortalEvent event = (MCPlayerPortalEvent) e;
 				Map<String, Mixed> map = evaluate_helper(e);
@@ -554,28 +565,28 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			if(event instanceof MCPlayerPortalEvent) {
 				MCPlayerPortalEvent e = (MCPlayerPortalEvent) event;
 
 				if(key.equalsIgnoreCase("to")) {
-					MCLocation loc = ObjectGenerator.GetGenerator().location(value, null, value.getTarget(), env);
+					MCLocation loc = ObjectGenerator.GetGenerator().location(value, null, value.getTarget());
 					e.setTo(loc);
 					return true;
 				}
 
 				if(key.equalsIgnoreCase("creationallowed")) {
-					e.setCanCreatePortal(ArgumentValidation.getBooleanObject(value, value.getTarget(), env));
+					e.setCanCreatePortal(ArgumentValidation.getBooleanObject(value, value.getTarget()));
 					return true;
 				}
 
 				if(key.equalsIgnoreCase("creationradius")) {
-					e.setCreationRadius(ArgumentValidation.getInt32(value, value.getTarget(), env));
+					e.setCreationRadius(ArgumentValidation.getInt32(value, value.getTarget()));
 					return true;
 				}
 
 				if(key.equalsIgnoreCase("searchradius")) {
-					e.setSearchRadius(ArgumentValidation.getInt32(value, value.getTarget(), env));
+					e.setSearchRadius(ArgumentValidation.getInt32(value, value.getTarget()));
 					return true;
 				}
 			}
@@ -622,7 +633,12 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
+
+		@Override
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			if(e instanceof MCPlayerLoginEvent) {
 				MCPlayerLoginEvent event = (MCPlayerLoginEvent) e;
 				Map<String, Mixed> map = evaluate_helper(e);
@@ -647,7 +663,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent e, Environment env) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent e) {
 			if(e instanceof MCPlayerLoginEvent) {
 				MCPlayerLoginEvent event = (MCPlayerLoginEvent) e;
 				if(key.equals("result")) {
@@ -735,7 +751,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			if(e instanceof MCPlayerJoinEvent) {
 				MCPlayerJoinEvent ple = (MCPlayerJoinEvent) e;
 				Map<String, Mixed> map = evaluate_helper(e);
@@ -749,7 +765,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			if(event instanceof MCPlayerJoinEvent) {
 				MCPlayerJoinEvent pje = (MCPlayerJoinEvent) event;
 				if(key.equals("join_message") || key.equals("message")) {
@@ -766,10 +782,10 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manual, Target t, Environment env) {
+		public BindableEvent convert(CArray manual, Target t) {
 			MCPlayerJoinEvent e = EventBuilder.instantiate(MCPlayerJoinEvent.class,
-					Static.GetPlayer(manual.get("player", t, env).val(), t, env),
-					manual.get("join_message", t, env).val());
+					Static.GetPlayer(manual.get("player", Target.UNKNOWN).val(), Target.UNKNOWN),
+					manual.get("join_message", Target.UNKNOWN).val());
 			return e;
 		}
 
@@ -828,7 +844,7 @@ public class PlayerEvents {
 			}
 			if(prefilter.containsKey("block")) {
 				Mixed ctype = prefilter.get("block");
-				if(ctype.isInstanceOf(CString.TYPE, null, event.getEnvironment()) && ctype.val().contains(":")
+				if(ctype.isInstanceOf(CString.TYPE) && ctype.val().contains(":")
 						|| ArgumentValidation.isNumber(ctype)) {
 					int type;
 					String notation = ctype.val();
@@ -892,7 +908,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			if(e instanceof MCPlayerInteractEvent) {
 				MCPlayerInteractEvent pie = (MCPlayerInteractEvent) e;
 				Map<String, Mixed> map = evaluate_helper(e);
@@ -928,19 +944,20 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manual, Target t, Environment env) {
-			MCPlayer p = Static.GetPlayer(manual.get("player", t, env), t, env);
-			MCAction a = MCAction.valueOf(manual.get("action", t, env).val().toUpperCase());
-			MCItemStack is = Static.ParseItemNotation("player_interact event", manual.get("item", t, env).val(),
-					1, t);
-			MCBlock b = ObjectGenerator.GetGenerator().location(manual.get("location", t, env), null, t, env).getBlock();
-			MCBlockFace bf = MCBlockFace.valueOf(manual.get("facing", t, env).val().toUpperCase());
+		public BindableEvent convert(CArray manual, Target t) {
+			MCPlayer p = Static.GetPlayer(manual.get("player", Target.UNKNOWN), Target.UNKNOWN);
+			MCAction a = MCAction.valueOf(manual.get("action", Target.UNKNOWN).val().toUpperCase());
+			MCItemStack is = Static.ParseItemNotation("player_interact event", manual.get("item", Target.UNKNOWN).val(),
+					1, Target.UNKNOWN);
+			MCBlock b = ObjectGenerator.GetGenerator().location(manual.get("location", Target.UNKNOWN), null,
+					Target.UNKNOWN).getBlock();
+			MCBlockFace bf = MCBlockFace.valueOf(manual.get("facing", Target.UNKNOWN).val().toUpperCase());
 			MCPlayerInteractEvent e = EventBuilder.instantiate(MCPlayerInteractEvent.class, p, a, is, b, bf);
 			return e;
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			if(event instanceof MCPlayerInteractEvent) {
 				MCPlayerInteractEvent pie = (MCPlayerInteractEvent) event;
 			}
@@ -995,7 +1012,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			if(e instanceof MCPlayerEnterBedEvent) {
 				MCPlayerEnterBedEvent bee = (MCPlayerEnterBedEvent) e;
 				Map<String, Mixed> map = evaluate_helper(e);
@@ -1013,16 +1030,16 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			return false;
 		}
 
 		@Override
-		public BindableEvent convert(CArray manual, Target t, Environment env) {
-			MCPlayer p = Static.GetPlayer(manual.get("player", t, env), t, env);
-			MCBlock b = ObjectGenerator.GetGenerator().location(manual.get("location", t, env),
-					null, t, env).getBlock();
-			MCEnterBedResult r = MCEnterBedResult.valueOf(manual.get("result", t, env).val());
+		public BindableEvent convert(CArray manual, Target t) {
+			MCPlayer p = Static.GetPlayer(manual.get("player", Target.UNKNOWN), Target.UNKNOWN);
+			MCBlock b = ObjectGenerator.GetGenerator().location(manual.get("location", Target.UNKNOWN),
+					null, Target.UNKNOWN).getBlock();
+			MCEnterBedResult r = MCEnterBedResult.valueOf(manual.get("result", Target.UNKNOWN).val());
 			MCPlayerEnterBedEvent e = EventBuilder.instantiate(MCPlayerEnterBedEvent.class, p, b, r);
 			return e;
 		}
@@ -1064,7 +1081,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			if(e instanceof MCPlayerLeaveBedEvent) {
 				MCPlayerLeaveBedEvent bee = (MCPlayerLeaveBedEvent) e;
 				Map<String, Mixed> map = evaluate_helper(e);
@@ -1081,15 +1098,15 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			return false;
 		}
 
 		@Override
-		public BindableEvent convert(CArray manual, Target t, Environment env) {
-			MCPlayer p = Static.GetPlayer(manual.get("player", t, env), t, env);
-			MCBlock b = ObjectGenerator.GetGenerator().location(manual.get("location", t, env),
-					null, t, env).getBlock();
+		public BindableEvent convert(CArray manual, Target t) {
+			MCPlayer p = Static.GetPlayer(manual.get("player", Target.UNKNOWN), Target.UNKNOWN);
+			MCBlock b = ObjectGenerator.GetGenerator().location(manual.get("location", Target.UNKNOWN),
+					null, Target.UNKNOWN).getBlock();
 			MCPlayerEnterBedEvent e = EventBuilder.instantiate(MCPlayerEnterBedEvent.class, p, b);
 			return e;
 		}
@@ -1128,16 +1145,17 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manual, Target t, Environment env) {
-			MCPlayer p = Static.GetPlayer(manual.get("player", t, env), t, env);
-			MCBlock b = ObjectGenerator.GetGenerator().location(manual.get("location", t, env), null, t, env).getBlock();
+		public BindableEvent convert(CArray manual, Target t) {
+			MCPlayer p = Static.GetPlayer(manual.get("player", Target.UNKNOWN), Target.UNKNOWN);
+			MCBlock b = ObjectGenerator.GetGenerator().location(manual.get("location", Target.UNKNOWN), null,
+					Target.UNKNOWN).getBlock();
 			MCPlayerInteractEvent e = EventBuilder.instantiate(MCPlayerInteractEvent.class, p, MCAction.PHYSICAL, null,
 					b, MCBlockFace.UP);
 			return e;
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			if(e instanceof MCPlayerInteractEvent) {
 				MCPlayerInteractEvent pie = (MCPlayerInteractEvent) e;
 				Map<String, Mixed> map = evaluate_helper(e);
@@ -1156,7 +1174,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			return false;
 		}
 
@@ -1235,7 +1253,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			if(e instanceof MCPlayerRespawnEvent) {
 				MCPlayerRespawnEvent event = (MCPlayerRespawnEvent) e;
 				Map<String, Mixed> map = evaluate_helper(e);
@@ -1254,23 +1272,24 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manual, Target t, Environment env) {
+		public BindableEvent convert(CArray manual, Target t) {
 			//For firing off the event manually, we have to convert the CArray into an
 			//actual object that will trigger it
-			MCPlayer p = Static.GetPlayer(manual.get("player", t, env), t, env);
-			MCLocation l = ObjectGenerator.GetGenerator().location(manual.get("location", t, env), p.getWorld(), t, env);
+			MCPlayer p = Static.GetPlayer(manual.get("player", Target.UNKNOWN), Target.UNKNOWN);
+			MCLocation l = ObjectGenerator.GetGenerator().location(manual.get("location", Target.UNKNOWN), p.getWorld(),
+					Target.UNKNOWN);
 			MCPlayerRespawnEvent e = EventBuilder.instantiate(MCPlayerRespawnEvent.class, p, l, false);
 			return e;
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			if(event instanceof MCPlayerRespawnEvent) {
 				MCPlayerRespawnEvent e = (MCPlayerRespawnEvent) event;
 				if(key.equals("location")) {
 					//Change this parameter in e to value
 					e.setRespawnLocation(ObjectGenerator.GetGenerator().location(value, e.getPlayer().getWorld(),
-							Target.UNKNOWN, env));
+							Target.UNKNOWN));
 					return true;
 				}
 			}
@@ -1330,10 +1349,10 @@ public class PlayerEvents {
 		//We have an actual event now, change it into a Map
 		//that will end up being the @event object
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			if(e instanceof MCPlayerDeathEvent) {
 				MCPlayerDeathEvent event = (MCPlayerDeathEvent) e;
-				Map<String, Mixed> map = super.evaluate(e, env);
+				Map<String, Mixed> map = super.evaluate(e);
 				map.putAll(evaluate_helper(e));
 				map.put("death_message", new CString(event.getDeathMessage(), Target.UNKNOWN));
 				map.put("keep_inventory", CBoolean.get(event.getKeepInventory()));
@@ -1353,25 +1372,25 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manual, Target t, Environment env) {
+		public BindableEvent convert(CArray manual, Target t) {
 			//For firing off the event manually, we have to convert the CArray into an
 			//actual object that will trigger it
-			String splayer = manual.get("player", t, env).val();
+			String splayer = manual.get("player", Target.UNKNOWN).val();
 			List<MCItemStack> list = new ArrayList<>();
-			String deathMessage = manual.get("death_message", t, env).val();
-			CArray clist = (CArray) manual.get("drops", t, env);
+			String deathMessage = manual.get("death_message", Target.UNKNOWN).val();
+			CArray clist = (CArray) manual.get("drops", Target.UNKNOWN);
 			for(String key : clist.stringKeySet()) {
-				list.add(ObjectGenerator.GetGenerator().item(clist.get(key, t, env), clist.getTarget(), env));
+				list.add(ObjectGenerator.GetGenerator().item(clist.get(key, Target.UNKNOWN), clist.getTarget()));
 			}
 			MCPlayerDeathEvent e = EventBuilder.instantiate(MCPlayerDeathEvent.class, Static.GetPlayer(splayer,
-					t, env), list,
+					Target.UNKNOWN), list,
 					0, deathMessage);
 			return e;
 		}
 
 		//Given the paramters, change the underlying event
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			if(event instanceof MCPlayerDeathEvent) {
 				MCPlayerDeathEvent e = (MCPlayerDeathEvent) event;
 				switch(key) {
@@ -1379,22 +1398,22 @@ public class PlayerEvents {
 						e.setDeathMessage(Construct.nval(value));
 						return true;
 					case "keep_inventory":
-						e.setKeepInventory(ArgumentValidation.getBoolean(value, Target.UNKNOWN, env));
+						e.setKeepInventory(ArgumentValidation.getBoolean(value, Target.UNKNOWN));
 						return true;
 					case "keep_level":
-						e.setKeepLevel(ArgumentValidation.getBoolean(value, Target.UNKNOWN, env));
+						e.setKeepLevel(ArgumentValidation.getBoolean(value, Target.UNKNOWN));
 						return true;
 					case "new_exp":
-						e.setNewExp(ArgumentValidation.getInt32(value, Target.UNKNOWN, env));
+						e.setNewExp(ArgumentValidation.getInt32(value, Target.UNKNOWN));
 						return true;
 					case "new_level":
-						e.setNewLevel(ArgumentValidation.getInt32(value, Target.UNKNOWN, env));
+						e.setNewLevel(ArgumentValidation.getInt32(value, Target.UNKNOWN));
 						return true;
 					case "new_total_exp":
-						e.setNewTotalExp(ArgumentValidation.getInt32(value, Target.UNKNOWN, env));
+						e.setNewTotalExp(ArgumentValidation.getInt32(value, Target.UNKNOWN));
 						return true;
 					default:
-						return super.modifyEvent(key, value, event, env);
+						return super.modifyEvent(key, value, event);
 				}
 			} else {
 				return false;
@@ -1436,10 +1455,10 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 			//Get the parameters from the manualObject
-			MCPlayer player = Static.GetPlayer(manualObject.get("player", Target.UNKNOWN, env), Target.UNKNOWN, env);
-			String message = Construct.nval(manualObject.get("message", Target.UNKNOWN, env));
+			MCPlayer player = Static.GetPlayer(manualObject.get("player", Target.UNKNOWN), Target.UNKNOWN);
+			String message = Construct.nval(manualObject.get("message", Target.UNKNOWN));
 
 			BindableEvent e = EventBuilder.instantiate(MCPlayerCommandEvent.class,
 					player, message);
@@ -1447,7 +1466,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			if(e instanceof MCPlayerQuitEvent) {
 				MCPlayerQuitEvent event = (MCPlayerQuitEvent) e;
 				Map<String, Mixed> map = evaluate_helper(e);
@@ -1460,7 +1479,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			if(event instanceof MCPlayerQuitEvent) {
 				MCPlayerQuitEvent e = (MCPlayerQuitEvent) event;
 				if("message".equals(key)) {
@@ -1524,11 +1543,11 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 			//Get the parameters from the manualObject
-			MCPlayer player = Static.GetPlayer(manualObject.get("player", Target.UNKNOWN, env), Target.UNKNOWN, env);
-			String message = Construct.nval(manualObject.get("message", Target.UNKNOWN, env));
-			String format = Construct.nval(manualObject.get("format", Target.UNKNOWN, env));
+			MCPlayer player = Static.GetPlayer(manualObject.get("player", Target.UNKNOWN), Target.UNKNOWN);
+			String message = Construct.nval(manualObject.get("message", Target.UNKNOWN));
+			String format = Construct.nval(manualObject.get("format", Target.UNKNOWN));
 
 			BindableEvent e = EventBuilder.instantiate(MCPlayerChatEvent.class,
 					player, message, format);
@@ -1536,7 +1555,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			if(e instanceof MCPlayerChatEvent) {
 				MCPlayerChatEvent event = (MCPlayerChatEvent) e;
 				Map<String, Mixed> map = evaluate_helper(e);
@@ -1544,7 +1563,7 @@ public class PlayerEvents {
 				map.put("message", new CString(event.getMessage(), Target.UNKNOWN));
 				CArray ca = new CArray(Target.UNKNOWN);
 				for(MCPlayer recipient : event.getRecipients()) {
-					ca.push(new CString(recipient.getName(), Target.UNKNOWN), Target.UNKNOWN, env);
+					ca.push(new CString(recipient.getName(), Target.UNKNOWN), Target.UNKNOWN);
 				}
 				map.put("format", new CString(event.getFormat(), Target.UNKNOWN));
 				map.put("recipients", ca);
@@ -1555,19 +1574,19 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			if(event instanceof MCPlayerChatEvent) {
 				MCPlayerChatEvent e = (MCPlayerChatEvent) event;
 				if("message".equals(key)) {
 					e.setMessage(Construct.nval(value));
 				}
 				if("recipients".equals(key)) {
-					if(value.isInstanceOf(CArray.TYPE, null, env)) {
+					if(value.isInstanceOf(CArray.TYPE)) {
 						List<MCPlayer> list = new ArrayList<MCPlayer>();
 						for(String index : ((CArray) value).stringKeySet()) {
-							Mixed v = ((CArray) value).get(index, value.getTarget(), env);
+							Mixed v = ((CArray) value).get(index, value.getTarget());
 							try {
-								list.add(Static.GetPlayer(v, value.getTarget(), env));
+								list.add(Static.GetPlayer(v, value.getTarget()));
 							} catch (ConfigRuntimeException ex) {
 								//Ignored
 							}
@@ -1665,10 +1684,10 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 			//Get the parameters from the manualObject
-			MCPlayer player = Static.GetPlayer(manualObject.get("player", Target.UNKNOWN, env), Target.UNKNOWN);
-			String message = Construct.nval(manualObject.get("message", Target.UNKNOWN, env));
+			MCPlayer player = Static.GetPlayer(manualObject.get("player", Target.UNKNOWN), Target.UNKNOWN);
+			String message = Construct.nval(manualObject.get("message", Target.UNKNOWN));
 
 			BindableEvent e = EventBuilder.instantiate(MCPlayerChatEvent.class,
 					player, message);
@@ -1676,7 +1695,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			if(e instanceof MCPlayerChatEvent) {
 				MCPlayerChatEvent event = (MCPlayerChatEvent) e;
 				Map<String, Mixed> map = evaluate_helper(e);
@@ -1695,14 +1714,14 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			if(event instanceof MCPlayerChatEvent) {
 				MCPlayerChatEvent e = (MCPlayerChatEvent) event;
 				if("message".equals(key)) {
 					e.setMessage(Construct.nval(value));
 				}
 				if("recipients".equals(key)) {
-					if(value.isInstanceOf(CArray.TYPE, null, env)) {
+					if(value.isInstanceOf(CArray.TYPE)) {
 						List<MCPlayer> list = new ArrayList<>();
 						for(String index : ((CArray) value).stringKeySet()) {
 							Mixed v = ((CArray) value).get(index, value.getTarget());
@@ -1774,7 +1793,7 @@ public class PlayerEvents {
 							String command = event.getCommand();
 							String prefilter = value.val();
 							StringHandling.parse_args pa = new StringHandling.parse_args();
-							CArray ca = (CArray) pa.exec(Target.UNKNOWN, null, null, new CString(command, Target.UNKNOWN));
+							CArray ca = (CArray) pa.exec(Target.UNKNOWN, null, new CString(command, Target.UNKNOWN));
 							if(ca.size() > 0) {
 								if(!ca.get(0, Target.UNKNOWN).val().equals(prefilter)) {
 									return false;
@@ -1795,16 +1814,16 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			MCPlayer player = Static.GetPlayer(manualObject.get("player", Target.UNKNOWN, env), Target.UNKNOWN);
-			String command = Construct.nval(manualObject.get("command", Target.UNKNOWN, env));
+		public BindableEvent convert(CArray manualObject, Target t) {
+			MCPlayer player = Static.GetPlayer(manualObject.get("player", Target.UNKNOWN), Target.UNKNOWN);
+			String command = Construct.nval(manualObject.get("command", Target.UNKNOWN));
 
 			BindableEvent e = EventBuilder.instantiate(MCPlayerCommandEvent.class, player, command);
 			return e;
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			if(e instanceof MCPlayerCommandEvent) {
 				MCPlayerCommandEvent event = (MCPlayerCommandEvent) e;
 				Map<String, Mixed> map = evaluate_helper(e);
@@ -1812,7 +1831,7 @@ public class PlayerEvents {
 				map.put("command", new CString(event.getCommand(), Target.UNKNOWN));
 
 				StringHandling.parse_args pa = new StringHandling.parse_args();
-				CArray ca = (CArray) pa.exec(Target.UNKNOWN, null, null, new CString(event.getCommand(), Target.UNKNOWN));
+				CArray ca = (CArray) pa.exec(Target.UNKNOWN, null, new CString(event.getCommand(), Target.UNKNOWN));
 				map.put("prefix", new CString(ca.get(0, Target.UNKNOWN).val(), Target.UNKNOWN));
 
 				return map;
@@ -1822,7 +1841,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			if(event instanceof MCPlayerCommandEvent) {
 				MCPlayerCommandEvent e = (MCPlayerCommandEvent) event;
 
@@ -1889,9 +1908,9 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			MCPlayer player = Static.GetPlayer(manualObject.get("player", Target.UNKNOWN, env), Target.UNKNOWN);
-			MCWorld from = Static.getServer().getWorld(manualObject.get("from", Target.UNKNOWN, env).val());
+		public BindableEvent convert(CArray manualObject, Target t) {
+			MCPlayer player = Static.GetPlayer(manualObject.get("player", Target.UNKNOWN), Target.UNKNOWN);
+			MCWorld from = Static.getServer().getWorld(manualObject.get("from", Target.UNKNOWN).val());
 
 			BindableEvent e = EventBuilder.instantiate(MCPlayerCommandEvent.class,
 					player, from);
@@ -1899,7 +1918,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			if(e instanceof MCWorldChangedEvent) {
 				MCWorldChangedEvent event = (MCWorldChangedEvent) e;
 				Map<String, Mixed> map = evaluate_helper(e);
@@ -1913,7 +1932,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			if(event instanceof MCWorldChangedEvent) {
 				MCWorldChangedEvent e = (MCWorldChangedEvent) event;
 			}
@@ -2026,17 +2045,17 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
-			MCPlayer p = Static.GetPlayer(manualObject.get("player", Target.UNKNOWN, env), Target.UNKNOWN);
-			MCLocation from = ObjectGenerator.GetGenerator().location(manualObject.get("from", Target.UNKNOWN, env),
+		public BindableEvent convert(CArray manualObject, Target t) {
+			MCPlayer p = Static.GetPlayer(manualObject.get("player", Target.UNKNOWN), Target.UNKNOWN);
+			MCLocation from = ObjectGenerator.GetGenerator().location(manualObject.get("from", Target.UNKNOWN),
 					p.getWorld(), manualObject.getTarget());
-			MCLocation to = ObjectGenerator.GetGenerator().location(manualObject.get("to", Target.UNKNOWN, env),
+			MCLocation to = ObjectGenerator.GetGenerator().location(manualObject.get("to", Target.UNKNOWN),
 					p.getWorld(), manualObject.getTarget());
 			return EventBuilder.instantiate(MCPlayerMoveEvent.class, p, from, to);
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			if(e instanceof MCPlayerMoveEvent) {
 				MCPlayerMoveEvent event = (MCPlayerMoveEvent) e;
 				Map<String, Mixed> map = new HashMap<>();
@@ -2056,7 +2075,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			//Nothing can be modified, so always return false
 			return false;
 		}
@@ -2120,7 +2139,12 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
+		public BindableEvent convert(CArray manualObject, Target t) {
+			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
+		}
+
+		@Override
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			if(e instanceof MCPlayerFishEvent) {
 				MCPlayerFishEvent event = (MCPlayerFishEvent) e;
 				Target t = Target.UNKNOWN;
@@ -2149,7 +2173,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			if(event instanceof MCPlayerFishEvent) {
 				MCPlayerFishEvent e = (MCPlayerFishEvent) event;
 				if(key.equals("xp")) {
@@ -2245,7 +2269,12 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
+		public BindableEvent convert(CArray manualObject, Target t) {
+			throw new CREBindException("Unsupported Operation", Target.UNKNOWN);
+		}
+
+		@Override
+		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
 			if(event instanceof MCGamemodeChangeEvent) {
 				MCGamemodeChangeEvent e = (MCGamemodeChangeEvent) event;
 				Map<String, Mixed> ret = evaluate_helper(e);
@@ -2262,7 +2291,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			return false;
 		}
 
@@ -2296,7 +2325,12 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
+		public BindableEvent convert(CArray manualObject, Target t) {
+			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
+		}
+
+		@Override
+		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
 			if(event instanceof MCExpChangeEvent) {
 				MCExpChangeEvent e = (MCExpChangeEvent) event;
 				Map<String, Mixed> ret = evaluate_helper(e);
@@ -2313,7 +2347,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			if(event instanceof MCExpChangeEvent) {
 				MCExpChangeEvent e = (MCExpChangeEvent) event;
 				if("amount".equals(key)) {
@@ -2373,7 +2407,12 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
+
+		@Override
+		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
 			if(event instanceof MCPlayerEditBookEvent) {
 				MCPlayerEditBookEvent playerEditBookEvent = (MCPlayerEditBookEvent) event;
 				Map<String, Mixed> mapEvent = evaluate_helper(event);
@@ -2430,7 +2469,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			if(event instanceof MCPlayerEditBookEvent) {
 				if(key.equalsIgnoreCase("title")) {
 					MCPlayerEditBookEvent e = ((MCPlayerEditBookEvent) event);
@@ -2519,7 +2558,12 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
+
+		@Override
+		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
 			if(event instanceof MCPlayerToggleFlightEvent) {
 				MCPlayerToggleFlightEvent ptfe = (MCPlayerToggleFlightEvent) event;
 				Map<String, Mixed> mapEvent = evaluate_helper(event);
@@ -2532,7 +2576,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			return false;
 		}
 	}
@@ -2583,8 +2627,14 @@ public class PlayerEvents {
 						}
 					});
 		}
+
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
+
+		@Override
+		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
 			if(event instanceof MCPlayerToggleSneakEvent) {
 				MCPlayerToggleSneakEvent ptse = (MCPlayerToggleSneakEvent) event;
 				Map<String, Mixed> mapEvent = evaluate_helper(event);
@@ -2597,7 +2647,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			return false;
 		}
 	}
@@ -2650,7 +2700,12 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
+
+		@Override
+		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
 			if(event instanceof MCPlayerToggleSprintEvent) {
 				MCPlayerToggleSprintEvent ptse = (MCPlayerToggleSprintEvent) event;
 				Map<String, Mixed> mapEvent = evaluate_helper(event);
@@ -2663,7 +2718,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			return false;
 		}
 	}
@@ -2709,7 +2764,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
 			Map<String, Mixed> map = evaluate_helper(event);
 			map.put("status", new CString(((MCPlayerResourcePackEvent) event).getStatus().name(), Target.UNKNOWN));
 			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_4)) {
@@ -2719,13 +2774,18 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			return false;
 		}
 
 		@Override
 		public MSVersion since() {
 			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
 		}
 	}
 
@@ -2740,12 +2800,17 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent e, Environment env) {
+		public BindableEvent convert(CArray manualObject, Target t) {
+			throw ConfigRuntimeException.CreateUncatchableException("Unsupported operation.", Target.UNKNOWN);
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Mixed value, BindableEvent e) {
 			return false;
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
 			if(event instanceof MCPlayerBucketEvent e) {
 				Map<String, Mixed> ret = evaluate_helper(e);
 				Target t = Target.UNKNOWN;
@@ -2868,7 +2933,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
 			if(event instanceof MCPlayerAdvancementDoneEvent e) {
 				Map<String, Mixed> map = new HashMap<>();
 				map.put("player", new CString(e.getPlayer().getName(), Target.UNKNOWN));
@@ -2881,13 +2946,18 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			return false;
 		}
 
 		@Override
 		public MSVersion since() {
 			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
 		}
 	}
 
@@ -2929,7 +2999,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
 			if(event instanceof MCPlayerStopUsingItemEvent e) {
 				Map<String, Mixed> map = new HashMap<>();
 				map.put("player", new CString(e.getPlayer().getName(), Target.UNKNOWN));
@@ -2942,13 +3012,18 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			return false;
 		}
 
 		@Override
 		public MSVersion since() {
 			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
 		}
 	}
 }

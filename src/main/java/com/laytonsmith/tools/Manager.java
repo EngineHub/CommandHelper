@@ -461,7 +461,7 @@ public class Manager {
 			Environment env = Environment.createEnvironment(gEnv, staticRuntimeEnv, new CommandHelperEnvironment());
 			Mixed c = MethodScriptCompiler.execute(MethodScriptCompiler.compile(
 					MethodScriptCompiler.lex(valueScript, env, null, true), env, null), env, null, null);
-			String value = Construct.json_encode(c, Target.UNKNOWN, env);
+			String value = Construct.json_encode(c, Target.UNKNOWN);
 			pl(CYAN + "Adding: " + WHITE + value);
 			String[] k = key.split("\\.");
 			DaemonManager dm = new DaemonManager();

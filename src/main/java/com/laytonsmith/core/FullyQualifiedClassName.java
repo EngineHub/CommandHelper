@@ -88,7 +88,7 @@ public final class FullyQualifiedClassName implements Comparable<FullyQualifiedC
 		String fqcn = m.value();
 		FullyQualifiedClassName f = new FullyQualifiedClassName(fqcn);
 		try {
-			f.nativeClass = NativeTypeList.getNativeEnumType(f).typeof(null).getNativeType();
+			f.nativeClass = NativeTypeList.getNativeEnumType(f).typeof().getNativeType();
 		} catch (ClassNotFoundException ex) {
 			// This can't happen, it would have already been the above error.
 			throw new Error(ex);

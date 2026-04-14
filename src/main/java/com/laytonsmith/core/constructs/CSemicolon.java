@@ -2,7 +2,6 @@ package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.core.MSVersion;
-import com.laytonsmith.core.constructs.generics.GenericParameters;
 
 /**
  * Represents a semicolon at the end of a statement. Forces the statement to close out.
@@ -40,9 +39,6 @@ public class CSemicolon extends Construct {
 		return CClassType.EMPTY_CLASS_ARRAY;
 	}
 
-	@Override
-	public GenericParameters getGenericParameters() {
-		return null;
-	}
+
 
 }

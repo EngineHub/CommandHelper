@@ -5,7 +5,6 @@ import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.constructs.generics.GenericParameters;
 
 /**
  *
@@ -43,10 +42,5 @@ public class CRENullPointerException extends CREException {
 	@Override
 	public CClassType[] getInterfaces() {
 		return super.getInterfaces();
-	}
-
-	@Override
-	public GenericParameters getGenericParameters() {
-		return null;
 	}
 }

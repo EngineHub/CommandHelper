@@ -22,13 +22,15 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.events.prefilters.Prefilter;
 import com.laytonsmith.core.events.prefilters.PrefilterBuilder;
-import com.laytonsmith.core.exceptions.CRE.CREUnsupportedOperationException;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
+import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
+import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.profiler.ProfilePoint;
 
@@ -57,8 +59,8 @@ public abstract class AbstractGenericEvent<TBindableEvent extends BindableEvent>
 	}
 
 	/**
-	 * This function should return true if the event code should be run, based on implementation specific conditions for
-	 * the BindableEvent.
+	 * This function should return true if the event code should be run, based on implementation specific conditions
+	 * for the BindableEvent.
 	 *
 	 * @param e The bindable event itself
 	 * @return {@code true} if the event code should be run
@@ -150,10 +152,14 @@ public abstract class AbstractGenericEvent<TBindableEvent extends BindableEvent>
 		try {
 			try {
 				MethodScriptCompiler.execute(tree, env, null, null);
-			} catch(CancelCommandException ex) {
+			} catch (CancelCommandException ex) {
 				if(ex.getMessage() != null && !ex.getMessage().isEmpty()) {
 					StreamUtils.GetSystemOut().println(ex.getMessage());
 				}
+			} catch (FunctionReturnException ex) {
+				//We simply allow this to end the event execution
+			} catch (ProgramFlowManipulationException ex) {
+				ConfigRuntimeException.HandleUncaughtException(new CREFormatException("Unexpected control flow operation used.", ex.getTarget()), env);
 			}
 		} finally {
 			if(event != null) {
@@ -319,10 +325,9 @@ public abstract class AbstractGenericEvent<TBindableEvent extends BindableEvent>
 	}
 
 	/**
-	 * Returns the prefilter builder for this subclass. This is built by AbstractEvent and cached, so that calls to
-	 * getPrefilters will be faster for future calls. Subclasses should implement this in order to provide declarative
-	 * prefilter support, which is more efficient and provides more features to end users.
-	 *
+	 * Returns the prefilter builder for this subclass. This is built by AbstractEvent and cached, so that calls
+	 * to getPrefilters will be faster for future calls. Subclasses should implement this in order to provide
+	 * declarative prefilter support, which is more efficient and provides more features to end users.
 	 * @return
 	 */
 	// TODO: Once everything has this, this should be re-added, since everything should have its own version.
@@ -333,19 +338,15 @@ public abstract class AbstractGenericEvent<TBindableEvent extends BindableEvent>
 
 	/**
 	 * By default, we do nothing.
-	 *
 	 * @param prefilters
 	 * @param env
 	 */
 	@Override
 	public void validatePrefilters(Map<Prefilter<TBindableEvent>, ParseTree> prefilters, Environment env)
-			throws ConfigCompileException, ConfigCompileGroupException {
+		throws ConfigCompileException, ConfigCompileGroupException {
 		//
 	}
 
-	@Override
-	public TBindableEvent convert(CArray manualObject, Target t, Environment env) {
-		throw new CREUnsupportedOperationException("Manual triggering of the "
-				+ getName() + " event is not supported.", t);
-	}
+
+
 }

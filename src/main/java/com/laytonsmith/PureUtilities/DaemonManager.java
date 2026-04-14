@@ -1,8 +1,6 @@
 package com.laytonsmith.PureUtilities;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -12,50 +10,9 @@ import java.util.Set;
  */
 public class DaemonManager {
 
-	/**
-	 * Listener interface for thread lifecycle events.
-	 */
-	public interface ThreadLifecycleListener {
-		/**
-		 * Called when a thread is activated (registered as active).
-		 * @param t The thread that was activated
-		 * @param displayName A user-facing display name for the thread, or null
-		 *     if no explicit name was provided (in which case the thread's Java
-		 *     name should be used as a fallback).
-		 */
-		void onActivated(Thread t, String displayName);
-
-		/**
-		 * Called when a thread is deactivated (no longer active).
-		 * @param t The thread that was deactivated
-		 */
-		void onDeactivated(Thread t);
-	}
-
 	private final Object lock = new Object();
 	private final Set<Thread> threads = new HashSet<>();
-	private final List<ThreadLifecycleListener> listeners = new ArrayList<>();
 	private int count = 0;
-
-	/**
-	 * Adds a listener that will be notified when threads are activated or deactivated.
-	 * @param listener The listener to add
-	 */
-	public void addThreadLifecycleListener(ThreadLifecycleListener listener) {
-		synchronized(lock) {
-			listeners.add(listener);
-		}
-	}
-
-	/**
-	 * Removes a previously added lifecycle listener.
-	 * @param listener The listener to remove
-	 */
-	public void removeThreadLifecycleListener(ThreadLifecycleListener listener) {
-		synchronized(lock) {
-			listeners.remove(listener);
-		}
-	}
 
 	/**
 	 * Sets a thread to "daemon" mode, meaning it is currently active. Null may be sent, in which case the current
@@ -64,27 +21,13 @@ public class DaemonManager {
 	 * @param t The thread to activate
 	 */
 	public void activateThread(Thread t) {
-		activateThread(t, null);
-	}
-
-	/**
-	 * Sets a thread to "daemon" mode with an explicit display name. Null may be sent for the thread,
-	 * in which case the current thread is used.
-	 *
-	 * @param t The thread to activate
-	 * @param displayName A user-facing name for the thread, or null to use the Java thread name
-	 */
-	public void activateThread(Thread t, String displayName) {
-		Thread resolved;
-		List<ThreadLifecycleListener> snapshot;
 		synchronized(lock) {
-			resolved = t != null ? t : Thread.currentThread();
-			threads.add(resolved);
+			if(t != null) {
+				threads.add(t);
+			} else {
+				threads.add(Thread.currentThread());
+			}
 			++count;
-			snapshot = new ArrayList<>(listeners);
-		}
-		for(ThreadLifecycleListener listener : snapshot) {
-			listener.onActivated(resolved, displayName);
 		}
 	}
 
@@ -94,17 +37,14 @@ public class DaemonManager {
 	 * @param t The thread to deactivate
 	 */
 	public void deactivateThread(Thread t) {
-		Thread resolved;
-		List<ThreadLifecycleListener> snapshot;
 		synchronized(lock) {
-			resolved = t != null ? t : Thread.currentThread();
-			threads.remove(resolved);
+			if(t != null) {
+				threads.remove(t);
+			} else {
+				threads.remove(Thread.currentThread());
+			}
 			--count;
 			lock.notify();
-			snapshot = new ArrayList<>(listeners);
-		}
-		for(ThreadLifecycleListener listener : snapshot) {
-			listener.onDeactivated(resolved);
 		}
 	}
 

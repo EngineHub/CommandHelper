@@ -5,7 +5,6 @@ import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.constructs.generics.GenericParameters;
 
 /**
  * This is thrown if a class definition is incorrect. Normally this should be a compiler error, but in dynamic code
@@ -44,10 +43,5 @@ public class CREClassDefinitionError extends CREError {
 	@Override
 	public CClassType[] getInterfaces() {
 		return super.getInterfaces();
-	}
-
-	@Override
-	public GenericParameters getGenericParameters() {
-		return null;
 	}
 }

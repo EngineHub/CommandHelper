@@ -10,7 +10,6 @@ import com.laytonsmith.core.asm.LLVMEnvironment;
 import com.laytonsmith.core.asm.LLVMFunction;
 import com.laytonsmith.core.asm.LLVMVersion;
 import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -23,7 +22,7 @@ public class Meta {
 	public static class noop extends LLVMFunction {
 
 		@Override
-		public IRData buildIR(IRBuilder builder, Target t, Environment env, GenericParameters generics, ParseTree... nodes)
+		public IRData buildIR(IRBuilder builder, Target t, Environment env, ParseTree... nodes)
 				throws ConfigCompileException {
 			builder.appendLine(t, "add i1 0, 0 ; noop()");
 			return IRDataBuilder.asVoid();

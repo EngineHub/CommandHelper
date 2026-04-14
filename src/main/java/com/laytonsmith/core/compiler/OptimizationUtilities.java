@@ -81,22 +81,22 @@ public class OptimizationUtilities {
 		StringBuilder b = new StringBuilder();
 		//The root always contains null.
 		for(ParseTree child : tree.getChildren()) {
-			b.append(optimize0(child, env));
+			b.append(optimize0(child));
 		}
 		return b.toString();
 	}
 
-	private static String optimize0(ParseTree node, Environment env) {
-		if(node.getData() instanceof CFunction cFunction) {
+	private static String optimize0(ParseTree node) {
+		if(node.getData() instanceof CFunction) {
 			StringBuilder b = new StringBuilder();
 			boolean first = true;
-			b.append(cFunction.val()).append("(");
+			b.append(((CFunction) node.getData()).val()).append("(");
 			for(ParseTree child : node.getChildren()) {
 				if(!first) {
 					b.append(",");
 				}
 				first = false;
-				b.append(optimize0(child, env));
+				b.append(optimize0(child));
 			}
 			b.append(")");
 			return b.toString();
@@ -105,26 +105,26 @@ public class OptimizationUtilities {
 			return new StringBuilder().append("'").append(node.getData().val()
 					.replace("\\", "\\\\").replace("\t", "\\t").replace("\n", "\\n")
 					.replace("'", "\\'")).append("'").toString();
-		} else if(node.getData() instanceof IVariable iVariable) {
-			return iVariable.getVariableName();
-		} else if(node.getData() instanceof Variable variable) {
-			return variable.getVariableName();
+		} else if(node.getData() instanceof IVariable) {
+			return ((IVariable) node.getData()).getVariableName();
+		} else if(node.getData() instanceof Variable) {
+			return ((Variable) node.getData()).getVariableName();
 		} else if(node.getData() instanceof CSlice) {
 			return node.getData().val();
-		} else if(node.getData() instanceof CArray cArray) {
+		} else if(node.getData().isInstanceOf(CArray.TYPE)) {
 			//It's a hardcoded array. This only happens in the course of optimization, if
 			//the optimizer adds a new array. We still need to handle it appropriately though.
 			//The values in the array will be constant, guaranteed.
 			StringBuilder b = new StringBuilder();
 			b.append("array(");
 			boolean first = true;
-			CArray n = cArray;
+			CArray n = (CArray) node.getData();
 			for(String key : n.stringKeySet()) {
 				if(!first) {
 					b.append(",");
 				}
 				first = false;
-				b.append(optimize0(new ParseTree(n.get(key, Target.UNKNOWN, null), node.getFileOptions(), true), env));
+				b.append(optimize0(new ParseTree(n.get(key, Target.UNKNOWN), node.getFileOptions(), true)));
 			}
 			b.append(")");
 			return b.toString();

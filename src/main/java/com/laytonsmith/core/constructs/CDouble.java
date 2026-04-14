@@ -3,7 +3,6 @@ package com.laytonsmith.core.constructs;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.MSVersion;
-import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 
 /**
@@ -76,11 +75,6 @@ public class CDouble extends CNumber implements Cloneable {
 	@Override
 	public double getNumber() {
 		return val;
-	}
-
-	@Override
-	public GenericParameters getGenericParameters() {
-		return null;
 	}
 
 }

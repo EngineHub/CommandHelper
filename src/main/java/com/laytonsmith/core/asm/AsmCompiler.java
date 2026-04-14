@@ -554,7 +554,7 @@ public class AsmCompiler {
 			if(fb instanceof LLVMFunction f) {
 				builder.functionsUsed.add(f);
 				return f.buildIR(builder, node.getTarget(), env,
-						null, node.getChildren().toArray(new ParseTree[node.getChildren().size()]));
+						node.getChildren().toArray(new ParseTree[node.getChildren().size()]));
 			} else {
 				throw new Error("Unexpected function type");
 			}

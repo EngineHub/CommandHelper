@@ -11,15 +11,10 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.ArgumentValidation;
-import com.laytonsmith.core.CallbackYield;
-import com.laytonsmith.core.FlowFunction;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
-import com.laytonsmith.core.StepAction;
-import com.laytonsmith.core.StepAction.Complete;
-import com.laytonsmith.core.StepAction.Evaluate;
-import com.laytonsmith.core.StepAction.StepResult;
+import com.laytonsmith.core.Script;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.compiler.signature.FunctionSignatures;
@@ -38,7 +33,6 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
@@ -54,6 +48,7 @@ import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.functions.BasicLogic.equals;
 import com.laytonsmith.core.functions.BasicLogic.equals_ic;
 import com.laytonsmith.core.functions.BasicLogic.sequals;
@@ -71,7 +66,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.function.BiConsumer;
 
 @core
 public class ArrayHandling {
@@ -96,14 +90,14 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			// TODO: It's far too late to deprecate this, but this method and length() are aliases, so
 			// we should at least harmonize the implementations.
 			if(args[0] instanceof Sizeable s) {
-				return new CInt(s.size(env), t);
+				return new CInt(s.size(), t);
 			}
-			if(args[0].isInstanceOf(CArray.TYPE, null, env) && !(args[0] instanceof CMutablePrimitive)) {
-				return new CInt(((CArray) args[0]).size(env), t);
+			if(args[0].isInstanceOf(CArray.TYPE) && !(args[0] instanceof CMutablePrimitive)) {
+				return new CInt(((CArray) args[0]).size(), t);
 			}
 			throw new CRECastException("Argument 1 of " + this.getName() + " must be an array", t);
 		}
@@ -172,7 +166,7 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			Mixed index;
 			Mixed defaultConstruct = null;
 			if(args.length >= 2) {
@@ -184,13 +178,13 @@ public class ArrayHandling {
 				defaultConstruct = args[2];
 			}
 
-			if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
+			if(args[0].isInstanceOf(CArray.TYPE)) {
 				CArray ca = (CArray) args[0];
 				if(index instanceof CSlice) {
 
 					// Deep clone the array if the "index" is the initial one.
 					if(((CSlice) index).getStart() == 0 && ((CSlice) index).getFinish() == -1) {
-						return ca.deepClone(t, env);
+						return ca.deepClone(t);
 					} else if(ca.inAssociativeMode()) {
 						throw new CRECastException("Array slices are not allowed with an associative array", t);
 					}
@@ -201,29 +195,29 @@ public class ArrayHandling {
 					try {
 						//Convert negative indexes
 						if(start < 0) {
-							start = ca.size(env) + start;
+							start = ca.size() + start;
 							if(start < 0) {
 								throw new CREIndexOverflowException("The element at index \""
 										+ ((CSlice) index).getStart() + "\" does not exist", t);
 							}
 						}
 						if(finish < 0) {
-							finish = ca.size(env) + finish;
+							finish = ca.size() + finish;
 							if(finish < 0) {
 								throw new CREIndexOverflowException("The element at index \""
 										+ ((CSlice) index).getFinish() + "\" does not exist", t);
 							}
 						}
-						CArray na = ca.createNew(t, env);
+						CArray na = ca.createNew(t);
 						if(finish < start) {
 							//return an empty array in cases where the indexes don't make sense
 							return na;
 						}
 						for(long i = start; i <= finish; i++) {
 							try {
-								na.push(ca.get((int) i, t, env).clone(), t, env);
+								na.push(ca.get((int) i, t).clone(), t);
 							} catch(CloneNotSupportedException e) {
-								na.push(ca.get((int) i, t, env), t, env);
+								na.push(ca.get((int) i, t), t);
 							}
 						}
 						return na;
@@ -236,10 +230,10 @@ public class ArrayHandling {
 							if(index instanceof CNull) {
 								throw new CRECastException("Expected a number, but received null instead", t);
 							}
-							long iindex = ArgumentValidation.getInt(index, t, env);
+							long iindex = ArgumentValidation.getInt(index, t);
 							if(iindex < 0) {
 								//negative index, convert to positive index
-								iindex = ca.size(env) + iindex;
+								iindex = ca.size() + iindex;
 								if(iindex < 0) {
 									if(defaultConstruct != null) {
 										return defaultConstruct;
@@ -247,32 +241,32 @@ public class ArrayHandling {
 									throw new CREIndexOverflowException("The element at index \"" + index.val()
 											+ "\" does not exist", t);
 								}
-							} else if(defaultConstruct != null && iindex >= ca.size(env)) {
+							} else if(defaultConstruct != null && iindex >= ca.size()) {
 								return defaultConstruct;
 							}
-							return ca.get(iindex, t, env);
+							return ca.get(iindex, t);
 						} else {
 							if(defaultConstruct != null && !ca.containsKey(index.val())) {
 								return defaultConstruct;
 							}
-							return ca.get(index, t, env);
+							return ca.get(index, t);
 						}
 					} catch(ConfigRuntimeException e) {
 						if(env.getEnv(GlobalEnv.class).GetFlag(GlobalEnv.FLAG_ARRAY_SPECIAL_GET) != null) {
 							//They are asking for an array that doesn't exist yet, so let's create it now.
 							CArray c;
 							if(ca.inAssociativeMode()) {
-								c = CArray.GetAssociativeArray(t, null, env);
+								c = CArray.GetAssociativeArray(t);
 							} else {
 								c = new CArray(t);
 							}
-							ca.set(index, c, t, env);
+							ca.set(index, c, t);
 							return c;
 						}
 						throw e;
 					}
 				}
-			} else if(args[0].isInstanceOf(com.laytonsmith.core.natives.interfaces.Iterable.TYPE, null, env)) {
+			} else if(args[0].isInstanceOf(com.laytonsmith.core.natives.interfaces.Iterable.TYPE)) {
 				com.laytonsmith.core.natives.interfaces.Iterable aa
 						= (com.laytonsmith.core.natives.interfaces.Iterable) args[0];
 				if(index instanceof CSlice cSlice) {
@@ -282,19 +276,19 @@ public class ArrayHandling {
 					try {
 						//Convert negative indexes
 						if(start < 0) {
-							start = (int) aa.size(env) + start;
+							start = (int) aa.size() + start;
 						}
 						if(finish < 0) {
-							finish = (int) aa.size(env) + finish;
+							finish = (int) aa.size() + finish;
 						}
-						return aa.slice(start, finish + 1, t, env);
+						return aa.slice(start, finish + 1, t);
 					} catch(NumberFormatException e) {
 						throw new CRECastException("Ranges must be integer numbers, i.e., [0..5]", t);
 					}
-				} else if(index.isInstanceOf(CInt.TYPE, null, env)) {
-					return aa.get(ArgumentValidation.getInt32(index, t, env), t, env);
+				} else if(index.isInstanceOf(CInt.TYPE)) {
+					return aa.get(ArgumentValidation.getInt32(index, t), t);
 				} else {
-					return aa.get(index, t, env);
+					return aa.get(index, t);
 				}
 			} else {
 				throw new CRECastException("Argument 1 of " + this.getName() + " must be an Iterable object, such as an array.", t);
@@ -354,10 +348,10 @@ public class ArrayHandling {
 			if(args.length == 0) {
 				throw new CRECastException("Argument 1 of " + this.getName() + " must be an array", t);
 			}
-			if(args[0].isInstanceOf(ArrayAccess.TYPE, null, env)) {
+			if(args[0].isInstanceOf(ArrayAccess.TYPE)) {
 				ArrayAccess aa = (ArrayAccess) args[0];
 				if(args.length > 1 && !aa.canBeAssociative()) {
-					if(!(args[1].isInstanceOf(CInt.TYPE, null, env)) && !(args[1] instanceof CSlice)) {
+					if(!(args[1].isInstanceOf(CInt.TYPE)) && !(args[1] instanceof CSlice)) {
 						throw new ConfigCompileException("Accessing an element as an associative array,"
 								+ " when it can only accept integers.", t);
 					}
@@ -392,7 +386,7 @@ public class ArrayHandling {
 	@api
 	@seealso({array_get.class, array.class, array_push.class, com.laytonsmith.tools.docgen.templates.Arrays.class})
 	@OperatorPreferred("@array[@key] = @value")
-	public static class array_set extends AbstractFunction implements FlowFunction<array_set.ArraySetState> {
+	public static class array_set extends AbstractFunction {
 
 		public static final String NAME = "array_set";
 
@@ -406,75 +400,39 @@ public class ArrayHandling {
 			return new Integer[]{3};
 		}
 
-		static class ArraySetState {
-			enum Phase { EVAL_ARRAY, EVAL_INDEX, EVAL_VALUE }
-			Phase phase = Phase.EVAL_ARRAY;
-			ParseTree[] children;
-			Mixed array;
-			Mixed index;
-
-			ArraySetState(ParseTree[] children) {
-				this.children = children;
-			}
-
-			@Override
-			public String toString() {
-				return phase.name();
-			}
+		@Override
+		public boolean useSpecialExec() {
+			return true;
 		}
 
 		@Override
-		public StepResult<ArraySetState> begin(Target t, ParseTree[] children, Environment env) {
+		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			env.getEnv(GlobalEnv.class).SetFlag(GlobalEnv.FLAG_ARRAY_SPECIAL_GET, true);
-			ArraySetState state = new ArraySetState(children);
-			return new StepResult<>(new Evaluate(children[0]), state);
-		}
-
-		@Override
-		public StepResult<ArraySetState> childCompleted(Target t, ArraySetState state,
-				Mixed result, Environment env) {
-			switch(state.phase) {
-				case EVAL_ARRAY:
-					env.getEnv(GlobalEnv.class).ClearFlag(GlobalEnv.FLAG_ARRAY_SPECIAL_GET);
-					state.array = result;
-					state.phase = ArraySetState.Phase.EVAL_INDEX;
-					return new StepResult<>(new Evaluate(state.children[1]), state);
-				case EVAL_INDEX:
-					state.index = result;
-					state.phase = ArraySetState.Phase.EVAL_VALUE;
-					return new StepResult<>(new Evaluate(state.children[2]), state);
-				case EVAL_VALUE:
-					if(!(state.array.isInstanceOf(ArrayAccessSet.TYPE, null, env))) {
-						throw new CRECastException("Argument 1 of " + getName()
-								+ " must be an array, or implement ArrayAccessSet.", t);
-					}
-					try {
-						((ArrayAccessSet) state.array).set(state.index, result, t, env);
-					} catch(IndexOutOfBoundsException e) {
-						throw new CREIndexOverflowException("The index "
-								+ new CString(state.index).getQuote() + " is out of bounds", t);
-					}
-					return new StepResult<>(new Complete(result), state);
-				default:
-					throw ConfigRuntimeException.CreateUncatchableException(
-							"Invalid array_set state: " + state.phase, t);
-			}
-		}
-
-		@Override
-		public StepResult<ArraySetState> childInterrupted(Target t, ArraySetState state,
-				StepAction.FlowControl action, Environment env) {
-			if(state.phase == ArraySetState.Phase.EVAL_ARRAY) {
+			Mixed array;
+			try {
+				array = parent.seval(nodes[0], env);
+			} finally {
 				env.getEnv(GlobalEnv.class).ClearFlag(GlobalEnv.FLAG_ARRAY_SPECIAL_GET);
 			}
-			return null;
+			Mixed index = parent.seval(nodes[1], env);
+			Mixed value = parent.seval(nodes[2], env);
+			if(!(array.isInstanceOf(ArrayAccessSet.TYPE))) {
+				throw new CRECastException("Argument 1 of " + this.getName() + " must be an array, or implement ArrayAccessSet.", t);
+			}
+
+			try {
+				((ArrayAccessSet) array).set(index, value, t);
+			} catch(IndexOutOfBoundsException e) {
+				throw new CREIndexOverflowException("The index " + new CString(index).getQuote() + " is out of bounds", t);
+			}
+			return value;
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			if(args[0].isInstanceOf(CArray.TYPE)) {
 				try {
-					((CArray) args[0]).set(args[1], args[2], t, env);
+					((CArray) args[0]).set(args[1], args[2], t);
 				} catch(IndexOutOfBoundsException e) {
 					throw new CREIndexOverflowException("The index " + args[1].val() + " is out of bounds", t);
 				}
@@ -556,16 +514,16 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			if(args.length < 2) {
 				throw new CREInsufficientArgumentsException(
 						"At least 2 arguments must be provided to " + this.getName(), t);
 			}
-			if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
+			if(args[0].isInstanceOf(CArray.TYPE)) {
 				CArray array = (CArray) args[0];
-				int initialSize = (int) array.size(env);
+				int initialSize = (int) array.size();
 				for(int i = 1; i < args.length; i++) {
-					array.push(args[i], t, env);
+					array.push(args[i], t);
 					for(Iterator iterator : env.getEnv(GlobalEnv.class).GetArrayAccessIteratorsFor(((ArrayAccess) args[0]))) {
 						//This is always pushing after the current index.
 						//Given that this is the last one, we don't need to waste
@@ -658,15 +616,15 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CArray array = ArgumentValidation.getArray(args[0], t, env);
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			CArray array = ArgumentValidation.getArray(args[0], t);
 			Mixed value = args[1];
-			int index = ArgumentValidation.getInt32(args[2], t, env);
+			int index = ArgumentValidation.getInt32(args[2], t);
 			try {
-				array.push(value, index, t, env);
+				array.push(value, index, t);
 				//If the push succeeded (actually an insert) we need to check to see if we are currently iterating
 				//and act appropriately.
-				for(Iterator iterator : env.getEnv(GlobalEnv.class).GetArrayAccessIteratorsFor(array)) {
+				for(Iterator iterator : environment.getEnv(GlobalEnv.class).GetArrayAccessIteratorsFor(array)) {
 					if(index <= iterator.getCurrent()) {
 						//The insertion happened before (or at) this index, so we need to increment the
 						//iterator, as well as increment all the blacklist items above this one.
@@ -751,16 +709,16 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			ArrayAccess aa;
 			if(args[0] instanceof ArrayAccess) {
 				aa = (ArrayAccess) args[0];
 			} else {
-				CArray ca = ArgumentValidation.getArray(args[0], t, env);
+				CArray ca = ArgumentValidation.getArray(args[0], t);
 				aa = ca;
 			}
-			for(Mixed key : aa.keySet(env)) {
-				if(new equals().exec(t, env, null, aa.get(key, t, env), args[1]).getBoolean()) {
+			for(Mixed key : aa.keySet()) {
+				if(new equals().exec(t, env, aa.get(key, t), args[1]).getBoolean()) {
 					return CBoolean.TRUE;
 				}
 			}
@@ -862,15 +820,15 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			ArrayAccess aa;
 			if(args[0] instanceof ArrayAccess a) {
 				aa = a;
 			} else {
-				aa = ArgumentValidation.getArray(args[0], t, env);
+				aa = ArgumentValidation.getArray(args[0], t);
 			}
-			for(Mixed key : aa.keySet(env)) {
-				if(new equals_ic().exec(t, env, null, aa.get(key, t, env), args[1]).getBoolean()) {
+			for(Mixed key : aa.keySet()) {
+				if(new equals_ic().exec(t, environment, aa.get(key, t), args[1]).getBoolean()) {
 					return CBoolean.TRUE;
 				}
 			}
@@ -916,15 +874,15 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			ArrayAccess aa;
 			if(args[0] instanceof ArrayAccess a) {
 				aa = a;
 			} else {
-				aa = ArgumentValidation.getArray(args[0], t, env);
+				aa = ArgumentValidation.getArray(args[0], t);
 			}
-			for(Mixed key : aa.keySet(env)) {
-				if(new sequals().exec(t, env, null, aa.get(key, t, env), args[1]).getBoolean()) {
+			for(Mixed key : aa.keySet()) {
+				if(new sequals().exec(t, env, aa.get(key, t), args[1]).getBoolean()) {
 					return CBoolean.TRUE;
 				}
 			}
@@ -1032,18 +990,18 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			if(args[0].isInstanceOf(CArray.TYPE)) {
 				Mixed m = args[0];
 				for(int i = 1; i < args.length; i++) {
-					if(!(m.isInstanceOf(CArray.TYPE, null, env))) {
+					if(!(m.isInstanceOf(CArray.TYPE))) {
 						return CBoolean.FALSE;
 					}
 					CArray ca = (CArray) m;
 					if(!ca.inAssociativeMode()) {
 						try {
-							int index = ArgumentValidation.getInt32(args[i], t, env);
-							if(index >= ca.size(env) || index < 0) {
+							int index = ArgumentValidation.getInt32(args[i], t);
+							if(index >= ca.size() || index < 0) {
 								return CBoolean.FALSE;
 							}
 						} catch(ConfigRuntimeException e) {
@@ -1055,7 +1013,7 @@ public class ArrayHandling {
 							return CBoolean.FALSE;
 						}
 					}
-					m = ca.get(args[i], t, env);
+					m = ca.get(args[i], t);
 				}
 				return CBoolean.TRUE;
 			} else {
@@ -1151,16 +1109,16 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public CArray exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			if(args[0].isInstanceOf(CArray.TYPE, null, env) && args[1].isInstanceOf(CInt.TYPE, null, env)) {
+		public CArray exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			if(args[0].isInstanceOf(CArray.TYPE) && args[1].isInstanceOf(CInt.TYPE)) {
 				CArray original = (CArray) args[0];
 				int size = (int) ((CInt) args[1]).getInt();
 				Mixed fill = CNull.NULL;
 				if(args.length == 3) {
 					fill = args[2];
 				}
-				for(long i = original.size(env); i < size; i++) {
-					original.push(fill, t, env);
+				for(long i = original.size(); i < size; i++) {
+					original.push(fill, t);
 				}
 			} else {
 				throw new CRECastException(
@@ -1240,26 +1198,26 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public CArray exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public CArray exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			long start = 0;
 			long finish = 0;
 			long increment = 1;
 			if(args.length == 1) {
-				finish = ArgumentValidation.getInt(args[0], t, env);
+				finish = ArgumentValidation.getInt(args[0], t);
 			} else if(args.length == 2) {
-				start = ArgumentValidation.getInt(args[0], t, env);
-				finish = ArgumentValidation.getInt(args[1], t, env);
+				start = ArgumentValidation.getInt(args[0], t);
+				finish = ArgumentValidation.getInt(args[1], t);
 			} else if(args.length == 3) {
-				start = ArgumentValidation.getInt(args[0], t, env);
-				finish = ArgumentValidation.getInt(args[1], t, env);
-				increment = ArgumentValidation.getInt(args[2], t, env);
+				start = ArgumentValidation.getInt(args[0], t);
+				finish = ArgumentValidation.getInt(args[1], t);
+				increment = ArgumentValidation.getInt(args[2], t);
 			}
 			if(start < finish && increment < 0 || start > finish && increment > 0 || increment == 0) {
-				return new CArray(t, null, env);
+				return new CArray(t);
 			}
 			CArray ret = new CArray(t);
 			for(long i = start; (increment > 0 ? i < finish : i > finish); i = i + increment) {
-				ret.push(new CInt(i, t), t, env);
+				ret.push(new CInt(i, t), t);
 			}
 			return ret;
 		}
@@ -1321,13 +1279,13 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			// As an exception, strings aren't supported here. There's no reason to do this for a string that isn't accidental.
-			if(args[0].isInstanceOf(ArrayAccess.TYPE, null, env) && !(args[0].isInstanceOf(CString.TYPE, null, env))) {
+			if(args[0].isInstanceOf(ArrayAccess.TYPE) && !(args[0].isInstanceOf(CString.TYPE))) {
 				ArrayAccess ca = (ArrayAccess) args[0];
 				CArray ca2 = new CArray(t);
-				for(Mixed c : ca.keySet(env)) {
-					ca2.push(c, t, env);
+				for(Mixed c : ca.keySet()) {
+					ca2.push(c, t);
 				}
 				return ca2;
 			} else {
@@ -1388,12 +1346,12 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
-				CArray ca = ArgumentValidation.getArray(args[0], t, env);
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			if(args[0].isInstanceOf(CArray.TYPE)) {
+				CArray ca = ArgumentValidation.getArray(args[0], t);
 				CArray ca2 = new CArray(t);
-				for(Mixed c : ca.keySet(env)) {
-					ca2.push(ca.get(c, t, env), t, env);
+				for(Mixed c : ca.keySet()) {
+					ca2.push(ca.get(c, t), t);
 				}
 				return ca2;
 			} else {
@@ -1456,25 +1414,25 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			CArray newArray = new CArray(t);
 			if(args.length < 2) {
 				throw new CREInsufficientArgumentsException("array_merge must be called with at least two parameters", t);
 			}
 			for(Mixed arg : args) {
-				if(arg.isInstanceOf(ArrayAccess.TYPE, null, env)) {
+				if(arg.isInstanceOf(ArrayAccess.TYPE)) {
 					com.laytonsmith.core.natives.interfaces.Iterable cur
 							= (com.laytonsmith.core.natives.interfaces.Iterable) arg;
 					if(!cur.isAssociative()) {
-						for(int j = 0; j < cur.size(env); j++) {
-							newArray.push(cur.get(j, t, env), t, env);
+						for(int j = 0; j < cur.size(); j++) {
+							newArray.push(cur.get(j, t), t);
 						}
 					} else {
-						for(Mixed key : cur.keySet(env)) {
-							if(key.isInstanceOf(CInt.TYPE, null, env)) {
-								newArray.set(key, cur.get((int) ((CInt) key).getInt(), t, env), t, env);
+						for(Mixed key : cur.keySet()) {
+							if(key.isInstanceOf(CInt.TYPE)) {
+								newArray.set(key, cur.get((int) ((CInt) key).getInt(), t), t);
 							} else {
-								newArray.set(key, cur.get(key.val(), t, env), t, env);
+								newArray.set(key, cur.get(key.val(), t), t);
 							}
 						}
 					}
@@ -1542,15 +1500,15 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CArray array = ArgumentValidation.getArray(args[0], t, env);
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			CArray array = ArgumentValidation.getArray(args[0], t);
 			if(array.isAssociative()) {
-				return array.remove(args[1], env);
+				return array.remove(args[1]);
 			} else {
-				int index = ArgumentValidation.getInt32(args[1], t, env);
-				Mixed removed = array.remove(args[1], env);
+				int index = ArgumentValidation.getInt32(args[1], t);
+				Mixed removed = array.remove(args[1]);
 				//If the removed index is <= the current index, we need to decrement the counter.
-				for(Iterator iterator : env.getEnv(GlobalEnv.class).GetArrayAccessIteratorsFor(array)) {
+				for(Iterator iterator : environment.getEnv(GlobalEnv.class).GetArrayAccessIteratorsFor(array)) {
 					if(index <= iterator.getCurrent()) {
 						iterator.decrementCurrent();
 					}
@@ -1606,8 +1564,8 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			if(!(args[0].isInstanceOf(ArrayAccess.TYPE, null, env))) {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			if(!(args[0].isInstanceOf(ArrayAccess.TYPE))) {
 				throw new CRECastException("Expecting argument 1 to be an ArrayAccess type object", t);
 			}
 			StringBuilder b = new StringBuilder();
@@ -1617,8 +1575,8 @@ public class ArrayHandling {
 				glue = ArgumentValidation.getObject(args[1], t, CPrimitive.class).val();
 			}
 			boolean first = true;
-			for(Mixed key : ca.keySet(env)) {
-				Mixed value = ca.get(key, t, env);
+			for(Mixed key : ca.keySet()) {
+				Mixed value = ca.get(key, t);
 				if(!first) {
 					b.append(glue).append(value.val());
 				} else {
@@ -1662,8 +1620,8 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CArray array = ArgumentValidation.getArray(args[0], t, env);
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			CArray array = ArgumentValidation.getArray(args[0], t);
 			String innerGlue = ArgumentValidation.getString(args[1], t);
 			String outerGlue = ArgumentValidation.getString(args[2], t);
 			if(!array.isAssociative()) {
@@ -1673,8 +1631,8 @@ public class ArrayHandling {
 			StringBuilder b = new StringBuilder();
 
 			boolean first = true;
-			for(Mixed key : array.keySet(env)) {
-				Mixed value = array.get(key, t, env);
+			for(Mixed key : array.keySet()) {
+				Mixed value = array.get(key, t);
 				if(!first) {
 					b.append(outerGlue);
 				}
@@ -1755,8 +1713,8 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			return new CSlice(ArgumentValidation.getInt(args[0], t, env), ArgumentValidation.getInt(args[1], t, env), t);
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			return new CSlice(ArgumentValidation.getInt(args[0], t), ArgumentValidation.getInt(args[1], t), t);
 		}
 
 		@Override
@@ -1778,7 +1736,7 @@ public class ArrayHandling {
 	}
 
 	@api
-	public static class array_sort extends CallbackYield implements Optimizable {
+	public static class array_sort extends AbstractFunction implements Optimizable {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -1796,20 +1754,19 @@ public class ArrayHandling {
 		}
 
 		@Override
-		protected void execWithYield(Target t, Environment env, Mixed[] args, CallbackYield.Yield yield) {
-			if(!(args[0].isInstanceOf(CArray.TYPE, null, env))) {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			if(!(args[0].isInstanceOf(CArray.TYPE))) {
 				throw new CRECastException("The first parameter to array_sort must be an array", t);
 			}
 			CArray ca = (CArray) args[0];
 			CArray.ArraySortType sortType = CArray.ArraySortType.REGULAR;
 			CClosure customSort = null;
-			if(ca.size(env) <= 1) {
-				yield.done(() -> ca);
-				return;
+			if(ca.size() <= 1) {
+				return ca;
 			}
 			try {
 				if(args.length == 2) {
-					if(args[1].isInstanceOf(CClosure.TYPE, null, env)) {
+					if(args[1].isInstanceOf(CClosure.TYPE)) {
 						sortType = null;
 						customSort = (CClosure) args[1];
 					} else {
@@ -1820,124 +1777,83 @@ public class ArrayHandling {
 				throw new CREFormatException("The sort type must be one of either: " + StringUtils.Join(CArray.ArraySortType.values(), ", ", " or "), t);
 			}
 			if(sortType == null) {
+				// It's a custom sort, which we have implemented below.
 				if(ca.isAssociative()) {
 					throw new CRECastException("Associative arrays may not be sorted using a custom comparator.", t);
 				}
-				// Copy elements into a working list for bottom-up merge sort
-				int n = (int) ca.size(env);
-				Mixed[] work = new Mixed[n];
-				for(int i = 0; i < n; i++) {
-					work[i] = ca.get(i, t, env);
-				}
-				// Queue the first merge comparison
-				queueMergeSort(customSort, env, t, work, ca, yield);
-			} else {
-				ca.sort(sortType, env);
-			}
-			yield.done(() -> ca);
-		}
-
-		/**
-		 * Implements a bottom-up merge sort using yield steps. Each element comparison
-		 * is a closure call that yields to the eval loop.
-		 */
-		private void queueMergeSort(CClosure closure, Environment env, Target t,
-				Mixed[] work, CArray ca, CallbackYield.Yield yield) {
-			int n = work.length;
-			// State: width doubles each pass (1, 2, 4, ...), i is the start of each merge block
-			int[] width = {1};
-			int[] i = {0};
-			// left/right pointers within the current merge
-			int[] l = {0};
-			int[] r = {0};
-			int[] lEnd = {0};
-			int[] rEnd = {0};
-			Mixed[] aux = new Mixed[n];
-
-			// Set up initial merge block
-			Runnable[] setupNextMerge = new Runnable[1];
-			setupNextMerge[0] = () -> {
-				while(width[0] < n) {
-					if(i[0] < n) {
-						l[0] = i[0];
-						lEnd[0] = java.lang.Math.min(i[0] + width[0], n);
-						r[0] = lEnd[0];
-						rEnd[0] = java.lang.Math.min(i[0] + 2 * width[0], n);
-						i[0] += 2 * width[0];
-						if(r[0] < rEnd[0]) {
-							// This merge block has elements on both sides; need comparisons
-							return;
-						} else {
-							// Only left side has elements, just copy them
-							for(int k = l[0]; k < lEnd[0]; k++) {
-								aux[k] = work[k];
-							}
-							continue;
-						}
-					}
-					// Finished a pass — copy aux back to work and start next width
-					System.arraycopy(aux, 0, work, 0, n);
-					width[0] *= 2;
-					i[0] = 0;
-				}
-				// Sort complete — write results back to the CArray
+				CArray sorted = customSort(ca, customSort, t);
+				//Clear it out and re-apply the values, so this is in place.
 				ca.clear();
-				for(int k = 0; k < n; k++) {
-					ca.push(work[k], t, env);
+				for(Mixed c : sorted.keySet()) {
+					ca.set(c, sorted.get(c, t), t);
 				}
-			};
-
-			// Recursive step that drives the merge comparison
-			BiConsumer<Mixed, CallbackYield.Yield>[] mergeStep = new BiConsumer[1];
-			mergeStep[0] = (result, y) -> {
-				int value = parseCompareResult(result, t, env);
-				if(value <= 0) {
-					aux[l[0] + r[0] - lEnd[0]] = work[l[0]];
-					l[0]++;
-				} else {
-					aux[l[0] + r[0] - lEnd[0]] = work[r[0]];
-					r[0]++;
-				}
-				// Continue merging this block
-				if(l[0] < lEnd[0] && r[0] < rEnd[0]) {
-					y.call(closure, env, t, work[l[0]], work[r[0]]).then(mergeStep[0]);
-				} else {
-					// One side exhausted — copy remainder
-					while(l[0] < lEnd[0]) {
-						aux[l[0] + r[0] - lEnd[0]] = work[l[0]];
-						l[0]++;
-					}
-					while(r[0] < rEnd[0]) {
-						aux[l[0] + r[0] - lEnd[0]] = work[r[0]];
-						r[0]++;
-					}
-					// Move to next merge block
-					setupNextMerge[0].run();
-					if(width[0] < n) {
-						y.call(closure, env, t, work[l[0]], work[r[0]]).then(mergeStep[0]);
-					}
-				}
-			};
-
-			// Kick off the first comparison
-			setupNextMerge[0].run();
-			if(width[0] < n) {
-				yield.call(closure, env, t, work[l[0]], work[r[0]]).then(mergeStep[0]);
+			} else {
+				ca.sort(sortType);
 			}
+			return ca;
 		}
 
-		private int parseCompareResult(Mixed c, Target t, Environment env) {
-			if(c instanceof CNull) {
-				return 0;
-			} else if(c instanceof CBoolean) {
-				return ((CBoolean) c).getBoolean() ? 1 : -1;
-			} else if(c.isInstanceOf(CInt.TYPE, null, env)) {
-				long longVal = ((CInt) c).getInt();
-				return (longVal > 0 ? 1 : (longVal < 0 ? -1 : 0));
-			} else {
-				throw new CRECastException("The custom closure did not return a value (or returned an invalid"
-						+ " type). It must always return true, false, null, or an integer.", t);
+		private CArray customSort(CArray ca, CClosure closure, Target t) {
+			if(ca.size() <= 1) {
+				return ca;
 			}
+
+			CArray left = new CArray(t);
+			CArray right = new CArray(t);
+			int middle = (int) (ca.size() / 2);
+			for(int i = 0; i < middle; i++) {
+				left.push(ca.get(i, t), t);
+			}
+			for(int i = middle; i < ca.size(); i++) {
+				right.push(ca.get(i, t), t);
+			}
+
+			left = customSort(left, closure, t);
+			right = customSort(right, closure, t);
+
+			return merge(left, right, closure, t);
+		}
+
+		private CArray merge(CArray left, CArray right, CClosure closure, Target t) {
+			CArray result = new CArray(t);
+			while(left.size() > 0 || right.size() > 0) {
+				if(left.size() > 0 && right.size() > 0) {
+					// Compare the first two elements of each side
+					Mixed l = left.get(0, t);
+					Mixed r = right.get(0, t);
+					Mixed c = closure.executeCallable(null, t, l, r);
+					int value;
+					if(c instanceof CNull) {
+						value = 0;
+					} else if(c.isInstanceOf(CBoolean.TYPE)) {
+						if(((CBoolean) c).getBoolean()) {
+							value = 1;
+						} else {
+							value = -1;
+						}
+					} else if(c.isInstanceOf(CInt.TYPE)) {
+						long longVal = ((CInt) c).getInt();
+						value = (longVal > 0 ? 1 : (longVal < 0 ? -1 : 0));
+					} else {
+						throw new CRECastException("The custom closure did not return a value (or returned an invalid"
+								+ " type). It must always return true, false, null, or an integer.", t);
+					}
+					if(value <= 0) {
+						result.push(left.get(0, t), t);
+						left.remove(0);
+					} else {
+						result.push(right.get(0, t), t);
+						right.remove(0);
+					}
+				} else if(left.size() > 0) {
+					result.push(left.get(0, t), t);
+					left.remove(0);
+				} else if(right.size() > 0) {
+					result.push(right.get(0, t), t);
+					right.remove(0);
+				}
+			}
+			return result;
 		}
 
 		@Override
@@ -2075,17 +1991,17 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			startup();
-			final CArray array = ArgumentValidation.getArray(args[0], t, env);
+			final CArray array = ArgumentValidation.getArray(args[0], t);
 			final CString sortType = new CString(args.length > 2 ? args[1].val() : CArray.ArraySortType.REGULAR.name(), t);
 			final CClosure callback = ArgumentValidation.getObject((args.length == 2 ? args[1] : args[2]), t, CClosure.class);
-			queue.invokeLater(env.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), new Runnable() {
+			queue.invokeLater(environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), new Runnable() {
 
 				@Override
 				public void run() {
-					Mixed c = new array_sort().exec(Target.UNKNOWN, null, null, array, sortType);
-					callback.executeCallable(env, t, new Mixed[]{c});
+					Mixed c = new array_sort().exec(Target.UNKNOWN, null, array, sortType);
+					callback.executeCallable(environment, t, new Mixed[]{c});
 				}
 			});
 			return CVoid.VOID;
@@ -2135,17 +2051,17 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CArray array = ArgumentValidation.getArray(args[0], t, env);
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			CArray array = ArgumentValidation.getArray(args[0], t);
 			//This needs to be in terms of array_remove, to ensure that the iteration
 			//logic is followed. We will iterate backwards, however, to make the
 			//process more efficient, unless this is an associative array.
 			if(array.isAssociative()) {
 				array.removeValues(args[1]);
 			} else {
-				for(long i = array.size(env) - 1; i >= 0; i--) {
-					if(BasicLogic.equals.doEquals(array.get(i, t, env), args[1])) {
-						new array_remove().exec(t, env, null, array, new CInt(i, t));
+				for(long i = array.size() - 1; i >= 0; i--) {
+					if(BasicLogic.equals.doEquals(array.get(i, t), args[1])) {
+						new array_remove().exec(t, environment, array, new CInt(i, t));
 					}
 				}
 			}
@@ -2204,11 +2120,11 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			if(!(args[0].isInstanceOf(CArray.TYPE, null, env))) {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			if(!(args[0].isInstanceOf(CArray.TYPE))) {
 				throw new CRECastException("Expected parameter 1 to be an array, but was " + args[0].val(), t);
 			}
-			return ((CArray) args[0]).indexesOf(args[1], env);
+			return ((CArray) args[0]).indexesOf(args[1]);
 		}
 
 		@Override
@@ -2267,12 +2183,12 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CArray ca = (CArray) new array_indexes().exec(t, env, generics, args);
-			if(ca.isEmpty(env)) {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			CArray ca = (CArray) new array_indexes().exec(t, environment, args);
+			if(ca.isEmpty()) {
 				return CNull.NULL;
 			} else {
-				return ca.get(0, t, env);
+				return ca.get(0, t);
 			}
 		}
 
@@ -2326,12 +2242,12 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CArray ca = (CArray) new array_indexes().exec(t, env, generics, args);
-			if(ca.isEmpty(env)) {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			CArray ca = (CArray) new array_indexes().exec(t, environment, args);
+			if(ca.isEmpty()) {
 				return CNull.NULL;
 			} else {
-				return ca.get(ca.size(env) - 1, t, env);
+				return ca.get(ca.size() - 1, t);
 			}
 		}
 
@@ -2385,8 +2301,8 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			if(args[0].isInstanceOf(CArray.TYPE)) {
 				((CArray) args[0]).reverse(t);
 			}
 			return args[0];
@@ -2445,37 +2361,37 @@ public class ArrayHandling {
 		Random r = new Random(System.currentTimeMillis());
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			long number = 1;
 			boolean getKeys = true;
-			CArray array = ArgumentValidation.getArray(args[0], t, env);
+			CArray array = ArgumentValidation.getArray(args[0], t);
 			CArray newArray = new CArray(t);
-			if(array.isEmpty(env)) {
+			if(array.isEmpty()) {
 				return newArray;
 			}
 			if(args.length > 1) {
-				number = ArgumentValidation.getInt(args[1], t, env);
+				number = ArgumentValidation.getInt(args[1], t);
 			}
 			if(number < 1) {
 				throw new CRERangeException("number may not be less than 1.", t);
 			}
-			if(number > array.size(env)) {
+			if(number > array.size()) {
 				throw new CRERangeException("Number cannot be larger than array size", t);
 			}
 			if(args.length > 2) {
-				getKeys = ArgumentValidation.getBooleanObject(args[2], t, env);
+				getKeys = ArgumentValidation.getBoolean(args[2], t);
 			}
 
 			LinkedHashSet<Integer> randoms = new LinkedHashSet<>();
 			while(randoms.size() < number) {
-				randoms.add(java.lang.Math.abs(r.nextInt() % (int) array.size(env)));
+				randoms.add(java.lang.Math.abs(r.nextInt() % (int) array.size()));
 			}
-			List<Mixed> keySet = new ArrayList<>(array.keySet(env));
+			List<Mixed> keySet = new ArrayList<>(array.keySet());
 			for(Integer i : randoms) {
 				if(getKeys) {
-					newArray.push(keySet.get(i), t, env);
+					newArray.push(keySet.get(i), t);
 				} else {
-					newArray.push(array.get(keySet.get(i), t, env), t, env);
+					newArray.push(array.get(keySet.get(i), t), t);
 				}
 			}
 			return newArray;
@@ -2550,28 +2466,28 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public CArray exec(final Target t, final Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CArray array = ArgumentValidation.getArray(args[0], t, env);
+		public CArray exec(final Target t, final Environment environment, Mixed... args) throws ConfigRuntimeException {
+			CArray array = ArgumentValidation.getArray(args[0], t);
 			boolean compareTypes = true;
 			if(args.length == 2) {
-				compareTypes = ArgumentValidation.getBooleanObject(args[1], t, env);
+				compareTypes = ArgumentValidation.getBoolean(args[1], t);
 			}
 			final boolean fCompareTypes = compareTypes;
 			if(array.inAssociativeMode()) {
 				return array.clone();
 			} else {
-				List<Mixed> asList = array.asList(env);
+				List<Mixed> asList = array.asList();
 				CArray newArray = new CArray(t);
 				Set<Mixed> set = new LinkedComparatorSet<>(asList, new LinkedComparatorSet.EqualsComparator<Mixed>() {
 
 					@Override
 					public boolean checkIfEquals(Mixed item1, Mixed item2) {
-						return (fCompareTypes && ArgumentValidation.getBooleanObject(sequals.exec(t, env, null, item1, item2), t, env))
-								|| (!fCompareTypes && ArgumentValidation.getBooleanObject(equals.exec(t, env, null, item1, item2), t, env));
+						return (fCompareTypes && ArgumentValidation.getBoolean(sequals.exec(t, environment, item1, item2), t))
+								|| (!fCompareTypes && ArgumentValidation.getBoolean(equals.exec(t, environment, item1, item2), t));
 					}
 				});
 				for(Mixed c : set) {
-					newArray.push(c, t, env);
+					newArray.push(c, t);
 				}
 				return newArray;
 			}
@@ -2619,7 +2535,7 @@ public class ArrayHandling {
 	}
 
 	@api
-	public static class array_filter extends CallbackYield {
+	public static class array_filter extends AbstractFunction {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -2637,48 +2553,44 @@ public class ArrayHandling {
 		}
 
 		@Override
-		protected void execWithYield(Target t, Environment env, Mixed[] args, CallbackYield.Yield yield) {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			com.laytonsmith.core.natives.interfaces.Iterable array;
 			CClosure closure;
 			if(!(args[0] instanceof com.laytonsmith.core.natives.interfaces.Iterable)) {
 				throw new CRECastException("Expecting an array for argument 1", t);
 			}
-			if(!(args[1].isInstanceOf(CClosure.TYPE, null, env))) {
+			if(!(args[1].isInstanceOf(CClosure.TYPE))) {
 				throw new CRECastException("Expecting a closure for argument 2", t);
 			}
 			array = (com.laytonsmith.core.natives.interfaces.Iterable) args[0];
 			closure = (CClosure) args[1];
 			CArray newArray;
 			if(array.isAssociative()) {
-				newArray = CArray.GetAssociativeArray(t, null, env);
-				for(Mixed key : array.keySet(env)) {
-					Mixed value = array.get(key, t, env);
-					yield.call(closure, env, t, key, value)
-							.then((result, y) -> {
-								boolean bret = ArgumentValidation.getBooleanish(result, t, env);
-								if(bret) {
-									newArray.set(key, value, t, env);
-								}
-							});
+				newArray = CArray.GetAssociativeArray(t);
+				for(Mixed key : array.keySet()) {
+					Mixed value = array.get(key, t);
+					Mixed ret = closure.executeCallable(environment, t, key, value);
+					boolean bret = ArgumentValidation.getBooleanish(ret, t);
+					if(bret) {
+						newArray.set(key, value, t);
+					}
 				}
 			} else {
 				newArray = new CArray(t);
-				for(int i = 0; i < array.size(env); i++) {
-					Mixed value = array.get(i, t, env);
-					yield.call(closure, env, t, new CInt(i, t), value)
-							.then((result, y) -> {
-								Mixed r = result;
-								if(r == CNull.NULL) {
-									r = CBoolean.FALSE;
-								}
-								boolean bret = ArgumentValidation.getBooleanish(r, t, env);
-								if(bret) {
-									newArray.push(value, t, env);
-								}
-							});
+				for(int i = 0; i < array.size(); i++) {
+					Mixed key = new CInt(i, t);
+					Mixed value = array.get(i, t);
+					Mixed ret = closure.executeCallable(environment, t, key, value);
+					if(ret == CNull.NULL) {
+						ret = CBoolean.FALSE;
+					}
+					boolean bret = ArgumentValidation.getBooleanish(ret, t);
+					if(bret) {
+						newArray.push(value, t);
+					}
 				}
 			}
-			yield.done(() -> newArray);
+			return newArray;
 		}
 
 		@Override
@@ -2744,14 +2656,14 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args.length != 1) {
 				throw new CREInsufficientArgumentsException("Expecting exactly one argument", t);
 			}
-			if(!(args[0].isInstanceOf(CArray.TYPE, null, env))) {
+			if(!(args[0].isInstanceOf(CArray.TYPE))) {
 				throw new CRECastException("Expecting argument 1 to be an array", t);
 			}
-			return ((CArray) args[0]).deepClone(t, env);
+			return ((CArray) args[0]).deepClone(t);
 		}
 
 		@Override
@@ -2812,17 +2724,17 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args.length != 1) {
 				throw new CREInsufficientArgumentsException("Expecting exactly one argument", t);
 			}
-			if(!(args[0].isInstanceOf(CArray.TYPE, null, env))) {
+			if(!(args[0].isInstanceOf(CArray.TYPE))) {
 				throw new CRECastException("Expecting argument 1 to be an array", t);
 			}
 			CArray array = (CArray) args[0];
-			CArray shallowClone = (array.isAssociative() ? CArray.GetAssociativeArray(t, null, env) : new CArray(t));
-			for(Mixed key : array.keySet(env)) {
-				shallowClone.set(key, array.get(key, t, env), t, env);
+			CArray shallowClone = (array.isAssociative() ? CArray.GetAssociativeArray(t) : new CArray(t));
+			for(Mixed key : array.keySet()) {
+				shallowClone.set(key, array.get(key, t), t);
 			}
 			return shallowClone;
 		}
@@ -2867,7 +2779,7 @@ public class ArrayHandling {
 	}
 
 	@api
-	public static class array_iterate extends CallbackYield {
+	public static class array_iterate extends AbstractFunction {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -2885,18 +2797,22 @@ public class ArrayHandling {
 		}
 
 		@Override
-		protected void execWithYield(Target t, Environment env, Mixed[] args, CallbackYield.Yield yield) {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			ArrayAccess aa;
 			if(args[0] instanceof CFixedArray fa) {
 				aa = fa;
 			} else {
-				aa = ArgumentValidation.getArray(args[0], t, env);
+				aa = ArgumentValidation.getArray(args[0], t);
 			}
 			CClosure closure = ArgumentValidation.getObject(args[1], t, CClosure.class);
-			for(Mixed key : aa.keySet(env)) {
-				yield.call(closure, env, t, key, aa.get(key, t, env));
+			for(Mixed key : aa.keySet()) {
+				try {
+					closure.executeCallable(environment, t, key, aa.get(key, t));
+				} catch(ProgramFlowManipulationException ex) {
+					// Ignored
+				}
 			}
-			yield.done(() -> aa);
+			return aa;
 		}
 
 		@Override
@@ -2941,7 +2857,7 @@ public class ArrayHandling {
 	}
 
 	@api
-	public static class array_reduce extends CallbackYield {
+	public static class array_reduce extends AbstractFunction {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -2959,36 +2875,26 @@ public class ArrayHandling {
 		}
 
 		@Override
-		protected void execWithYield(Target t, Environment env, Mixed[] args, CallbackYield.Yield yield) {
-			CArray array = ArgumentValidation.getArray(args[0], t, env);
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			CArray array = ArgumentValidation.getArray(args[0], t);
 			CClosure closure = ArgumentValidation.getObject(args[1], t, CClosure.class);
-			if(array.isEmpty(env)) {
-				yield.done(() -> CNull.NULL);
-				return;
+			if(array.isEmpty()) {
+				return CNull.NULL;
 			}
-			List<Mixed> keys = new ArrayList<>(array.keySet(env));
-			if(array.size(env) == 1) {
-				yield.done(() -> array.get(keys.get(0), t, env));
-				return;
+			if(array.size() == 1) {
+				// This line looks bad, but all it does is return the first (and since we know only) value in the array,
+				// whether or not it is associative or normal.
+				return array.get(array.keySet().toArray(new Mixed[0])[0], t);
 			}
-			Mixed[] acc = {array.get(keys.get(0), t, env)};
-			queueReduceStep(closure, env, t, array, keys, acc, 1, yield);
-			yield.done(() -> acc[0]);
-		}
-
-		private void queueReduceStep(CClosure closure, Environment env, Target t,
-				CArray array, List<Mixed> keys, Mixed[] acc, int index, CallbackYield.Yield yield) {
-			yield.call(closure, env, t, acc[0], array.get(keys.get(index), t, env))
-					.then((result, y) -> {
-						if(result instanceof CVoid) {
-							throw new CREIllegalArgumentException("The closure passed to " + getName()
-									+ " cannot return void.", t);
-						}
-						acc[0] = result;
-						if(index + 1 < keys.size()) {
-							queueReduceStep(closure, env, t, array, keys, acc, index + 1, y);
-						}
-					});
+			List<Mixed> keys = new ArrayList<>(array.keySet());
+			Mixed lastValue = array.get(keys.get(0), t);
+			for(int i = 1; i < keys.size(); ++i) {
+				lastValue = closure.executeCallable(environment, t, lastValue, array.get(keys.get(i), t));
+				if(lastValue instanceof CVoid) {
+					throw new CREIllegalArgumentException("The closure passed to " + getName() + " cannot return void.", t);
+				}
+			}
+			return lastValue;
 		}
 
 		@Override
@@ -3036,7 +2942,7 @@ public class ArrayHandling {
 	}
 
 	@api
-	public static class array_reduce_right extends CallbackYield {
+	public static class array_reduce_right extends AbstractFunction {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -3054,36 +2960,26 @@ public class ArrayHandling {
 		}
 
 		@Override
-		protected void execWithYield(Target t, Environment env, Mixed[] args, CallbackYield.Yield yield) {
-			CArray array = ArgumentValidation.getArray(args[0], t, env);
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			CArray array = ArgumentValidation.getArray(args[0], t);
 			CClosure closure = ArgumentValidation.getObject(args[1], t, CClosure.class);
-			if(array.isEmpty(env)) {
-				yield.done(() -> CNull.NULL);
-				return;
+			if(array.isEmpty()) {
+				return CNull.NULL;
 			}
-			List<Mixed> keys = new ArrayList<>(array.keySet(env));
-			if(array.size(env) == 1) {
-				yield.done(() -> array.get(keys.get(0), t, env));
-				return;
+			if(array.size() == 1) {
+				// This line looks bad, but all it does is return the first (and since we know only) value in the array,
+				// whether or not it is associative or normal.
+				return array.get(array.keySet().toArray(new Mixed[0])[0], t);
 			}
-			Mixed[] acc = {array.get(keys.get(keys.size() - 1), t, env)};
-			queueReduceStep(closure, env, t, array, keys, acc, keys.size() - 2, yield);
-			yield.done(() -> acc[0]);
-		}
-
-		private void queueReduceStep(CClosure closure, Environment env, Target t,
-				CArray array, List<Mixed> keys, Mixed[] acc, int index, CallbackYield.Yield yield) {
-			yield.call(closure, env, t, acc[0], array.get(keys.get(index), t, env))
-					.then((result, y) -> {
-						if(result instanceof CVoid) {
-							throw new CREIllegalArgumentException("The closure passed to " + getName()
-									+ " cannot return void.", t);
-						}
-						acc[0] = result;
-						if(index - 1 >= 0) {
-							queueReduceStep(closure, env, t, array, keys, acc, index - 1, y);
-						}
-					});
+			List<Mixed> keys = new ArrayList<>(array.keySet());
+			Mixed lastValue = array.get(keys.get(keys.size() - 1), t);
+			for(int i = keys.size() - 2; i >= 0; --i) {
+				lastValue = closure.executeCallable(environment, t, lastValue, array.get(keys.get(i), t));
+				if(lastValue instanceof CVoid) {
+					throw new CREIllegalArgumentException("The closure passed to " + getName() + " cannot return void.", t);
+				}
+			}
+			return lastValue;
 		}
 
 		@Override
@@ -3131,7 +3027,7 @@ public class ArrayHandling {
 	}
 
 	@api
-	public static class array_every extends CallbackYield {
+	public static class array_every extends AbstractFunction {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -3149,21 +3045,17 @@ public class ArrayHandling {
 		}
 
 		@Override
-		protected void execWithYield(Target t, Environment env, Mixed[] args, CallbackYield.Yield yield) {
-			CArray array = ArgumentValidation.getArray(args[0], t, env);
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			CArray array = ArgumentValidation.getArray(args[0], t);
 			CClosure closure = ArgumentValidation.getObject(args[1], t, CClosure.class);
-			boolean[] result = {true};
-			for(Mixed c : array.keySet(env)) {
-				yield.call(closure, env, t, array.get(c, t, env))
-						.then((fr, y) -> {
-							boolean ret = ArgumentValidation.getBooleanish(fr, t, env);
-							if(!ret) {
-								result[0] = false;
-								y.clear();
-							}
-						});
+			for(Mixed c : array.keySet()) {
+				Mixed fr = closure.executeCallable(environment, t, array.get(c, t));
+				boolean ret = ArgumentValidation.getBooleanish(fr, t);
+				if(ret == false) {
+					return CBoolean.FALSE;
+				}
 			}
-			yield.done(() -> CBoolean.get(result[0]));
+			return CBoolean.TRUE;
 		}
 
 		@Override
@@ -3208,7 +3100,7 @@ public class ArrayHandling {
 	}
 
 	@api
-	public static class array_some extends CallbackYield {
+	public static class array_some extends AbstractFunction {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -3226,21 +3118,17 @@ public class ArrayHandling {
 		}
 
 		@Override
-		protected void execWithYield(Target t, Environment env, Mixed[] args, CallbackYield.Yield yield) {
-			CArray array = ArgumentValidation.getArray(args[0], t, env);
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			CArray array = ArgumentValidation.getArray(args[0], t);
 			CClosure closure = ArgumentValidation.getObject(args[1], t, CClosure.class);
-			boolean[] result = {false};
-			for(Mixed c : array.keySet(env)) {
-				yield.call(closure, env, t, array.get(c, t, env))
-						.then((fr, y) -> {
-							boolean ret = ArgumentValidation.getBooleanish(fr, t, env);
-							if(ret) {
-								result[0] = true;
-								y.clear();
-							}
-						});
+			for(Mixed c : array.keySet()) {
+				Mixed fr = closure.executeCallable(environment, t, array.get(c, t));
+				boolean ret = ArgumentValidation.getBooleanish(fr, t);
+				if(ret == true) {
+					return CBoolean.TRUE;
+				}
 			}
-			yield.done(() -> CBoolean.get(result[0]));
+			return CBoolean.FALSE;
 		}
 
 		@Override
@@ -3285,7 +3173,7 @@ public class ArrayHandling {
 	}
 
 	@api
-	public static class array_map extends CallbackYield {
+	public static class array_map extends AbstractFunction {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -3303,22 +3191,21 @@ public class ArrayHandling {
 		}
 
 		@Override
-		protected void execWithYield(Target t, Environment env, Mixed[] args, CallbackYield.Yield yield) {
-			CArray array = ArgumentValidation.getArray(args[0], t, env);
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			CArray array = ArgumentValidation.getArray(args[0], t);
 			CClosure closure = ArgumentValidation.getObject(args[1], t, CClosure.class);
-			CArray newArray = (array.isAssociative() ? CArray.GetAssociativeArray(t, null, env) : new CArray(t, (int) array.size(env)));
+			CArray newArray = (array.isAssociative() ? CArray.GetAssociativeArray(t) : new CArray(t, (int) array.size()));
 
-			for(Mixed c : array.keySet(env)) {
-				yield.call(closure, env, t, array.get(c, t, env))
-						.then((result, y) -> {
-							if(result.isInstanceOf(CVoid.TYPE, null, env)) {
-								throw new CREIllegalArgumentException("The closure passed to " + getName()
-										+ " must return a value.", t);
-							}
-							newArray.set(c, result, t, env);
-						});
+			for(Mixed c : array.keySet()) {
+				Mixed fr = closure.executeCallable(environment, t, array.get(c, t));
+				if(fr.isInstanceOf(CVoid.TYPE)) {
+					throw new CREIllegalArgumentException("The closure passed to " + getName()
+							+ " must return a value.", t);
+				}
+				newArray.set(c, fr, t);
 			}
-			yield.done(() -> newArray);
+
+			return newArray;
 		}
 
 		@Override
@@ -3382,7 +3269,7 @@ public class ArrayHandling {
 
 	@api
 	@seealso({array_merge.class, array_subtract.class})
-	public static class array_intersect extends CallbackYield {
+	public static class array_intersect extends AbstractFunction {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -3400,9 +3287,9 @@ public class ArrayHandling {
 		}
 
 		@Override
-		protected void execWithYield(Target t, Environment env, Mixed[] args, CallbackYield.Yield yield) {
-			CArray one = ArgumentValidation.getArray(args[0], t, env);
-			CArray two = ArgumentValidation.getArray(args[1], t, env);
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			CArray one = ArgumentValidation.getArray(args[0], t);
+			CArray two = ArgumentValidation.getArray(args[1], t);
 			CClosure closure = null;
 			ArrayValueComparisonMode mode = ArrayValueComparisonMode.HASH;
 			boolean associativeMode = one.isAssociative() || two.isAssociative();
@@ -3411,7 +3298,7 @@ public class ArrayHandling {
 					throw new CREIllegalArgumentException("For associative arrays, only 2 parameters may be provided,"
 							+ " the comparison mode value is not used.", t);
 				}
-				if(args[2].isInstanceOf(CClosure.TYPE, null, env)) {
+				if(args[2].isInstanceOf(CClosure.TYPE)) {
 					closure = ArgumentValidation.getObject(args[2], t, CClosure.class);
 				} else {
 					mode = ArgumentValidation.getEnum(args[2], ArrayValueComparisonMode.class, t);
@@ -3429,69 +3316,49 @@ public class ArrayHandling {
 				// Iterate one, and check if the hash of each value is in the set. If so, add it.
 				for(Mixed c : one) {
 					if(a2Set.contains(c.hashCode())) {
-						ret.push(c, t, env);
+						ret.push(c, t);
 					}
 				}
-			} else if(closure != null) {
-				Mixed[] k1 = new Mixed[(int) one.size(env)];
-				Mixed[] k2 = new Mixed[(int) two.size(env)];
-				one.keySet(env).toArray(k1);
-				two.keySet(env).toArray(k2);
-				queueIntersectStep(closure, env, t, one, two, k1, k2, ret, 0, 0, yield);
 			} else {
-				Mixed[] k1 = new Mixed[(int) one.size(env)];
-				Mixed[] k2 = new Mixed[(int) two.size(env)];
-				one.keySet(env).toArray(k1);
-				two.keySet(env).toArray(k2);
+				Mixed[] k1 = new Mixed[(int) one.size()];
+				Mixed[] k2 = new Mixed[(int) two.size()];
+				one.keySet().toArray(k1);
+				two.keySet().toArray(k2);
 				equals equals = new equals();
 				Function comparisonFunction = mode.getComparisonFunction();
 				i:
 				for(int i = 0; i < k1.length; i++) {
 					for(int j = 0; j < k2.length; j++) {
 						if(associativeMode) {
-							if(equals.exec(t, env, null, k1[i], k2[j]).getBoolean()) {
-								ret.set(k1[i], one.get(k1[i], t, env), t, env);
+							if(equals.exec(t, environment, k1[i], k2[j]).getBoolean()) {
+								ret.set(k1[i], one.get(k1[i], t), t);
 								continue i;
 							}
 						} else {
-							if(comparisonFunction != null) {
-								if(ArgumentValidation.getBooleanish(comparisonFunction.exec(t, env, null,
-										one.get(k1[i], t, env), two.get(k2[j], t, env)
-								), t, env)) {
-									ret.push(one.get(k1[i], t, env), t, env);
-									continue i;
+							if(closure == null) {
+								if(comparisonFunction != null) {
+									if(ArgumentValidation.getBoolean(comparisonFunction.exec(t, environment,
+											one.get(k1[i], t), two.get(k2[j], t)
+									), t)) {
+										ret.push(one.get(k1[i], t), t);
+										continue i;
+									}
+								} else {
+									throw new Error();
 								}
 							} else {
-								throw new Error();
+								Mixed fre = closure.executeCallable(environment, t, one.get(k1[i], t), two.get(k2[j], t));
+								boolean res = ArgumentValidation.getBoolean(fre, fre.getTarget());
+								if(res) {
+									ret.push(one.get(k1[i], t), t);
+									continue i;
+								}
 							}
 						}
 					}
 				}
 			}
-			yield.done(() -> ret);
-		}
-
-		private void queueIntersectStep(CClosure closure, Environment env, Target t,
-				CArray one, CArray two, Mixed[] k1, Mixed[] k2, CArray ret,
-				int i, int j, CallbackYield.Yield yield) {
-			if(i >= k1.length) {
-				return;
-			}
-			yield.call(closure, env, t, one.get(k1[i], t, env), two.get(k2[j], t, env))
-					.then((result, y) -> {
-						boolean res = ArgumentValidation.getBooleanish(result, result.getTarget(), env);
-						if(res) {
-							ret.push(one.get(k1[i], t, env), t, env);
-							// Match found, skip to next outer element
-							queueIntersectStep(closure, env, t, one, two, k1, k2, ret, i + 1, 0, y);
-						} else if(j + 1 < k2.length) {
-							// Try next inner element
-							queueIntersectStep(closure, env, t, one, two, k1, k2, ret, i, j + 1, y);
-						} else {
-							// Exhausted inner loop, move to next outer element
-							queueIntersectStep(closure, env, t, one, two, k1, k2, ret, i + 1, 0, y);
-						}
-					});
+			return ret;
 		}
 
 		@Override
@@ -3607,16 +3474,16 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			Mixed constA = args[0];
 			Mixed constB = args[1];
-			if(!(constA.isInstanceOf(CArray.TYPE, null, env))) {
+			if(!(constA.isInstanceOf(CArray.TYPE))) {
 				throw new CREIllegalArgumentException("Expecting an array, but received " + constA, t);
 			}
-			if(!(constB.isInstanceOf(CArray.TYPE, null, env))) {
+			if(!(constB.isInstanceOf(CArray.TYPE))) {
 				throw new CREIllegalArgumentException("Expecting an array, but received " + constB, t);
 			}
-			return CBoolean.get(subsetOf(constA, constB, t, env));
+			return CBoolean.get(subsetOf(constA, constB, t));
 		}
 
 		@Override
@@ -3641,11 +3508,11 @@ public class ArrayHandling {
 			};
 		}
 
-		private boolean subsetOf(Mixed constA, Mixed constB, Target t, Environment env) {
-			if(!constA.typeof(env).equals(constB.typeof(env))) {
+		public boolean subsetOf(Mixed constA, Mixed constB, Target t) {
+			if(!constA.typeof().equals(constB.typeof())) {
 				return false;
 			}
-			if(constA.isInstanceOf(CArray.TYPE, null, env)) {
+			if(constA.isInstanceOf(CArray.TYPE)) {
 				CArray arrA = (CArray) constA;
 				CArray arrB = (CArray) constB;
 				if(arrA.isAssociative() != arrB.isAssociative()) {
@@ -3656,20 +3523,20 @@ public class ArrayHandling {
 						if(!arrB.containsKey(key)) {
 							return false;
 						}
-						Mixed eltA = arrA.get(key, t, env);
-						Mixed eltB = arrB.get(key, t, env);
-						if(!subsetOf(eltA, eltB, t, env)) {
+						Mixed eltA = arrA.get(key, t);
+						Mixed eltB = arrB.get(key, t);
+						if(!subsetOf(eltA, eltB, t)) {
 							return false;
 						}
 					}
 				} else {
-					for(int i = 0; i < arrA.size(env); i++) {
+					for(int i = 0; i < arrA.size(); i++) {
 						if(!arrB.containsKey(i)) {
 							return false;
 						}
-						Mixed eltA = arrA.get(i, t, env);
-						Mixed eltB = arrB.get(i, t, env);
-						if(!subsetOf(eltA, eltB, t, env)) {
+						Mixed eltA = arrA.get(i, t);
+						Mixed eltB = arrB.get(i, t);
+						if(!subsetOf(eltA, eltB, t)) {
 							return false;
 						}
 					}
@@ -3757,13 +3624,13 @@ public class ArrayHandling {
 		Random rand = new Random();
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CArray array = ArgumentValidation.getArray(args[0], t, env);
-			if(array.isEmpty(env)) {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			CArray array = ArgumentValidation.getArray(args[0], t);
+			if(array.isEmpty()) {
 				throw new CRELengthException("Array is empty", t);
 			}
-			List<Mixed> keySet = new ArrayList<>(array.keySet(env));
-			return array.get(keySet.get(java.lang.Math.abs(rand.nextInt() % (int) array.size(env))), t, env);
+			List<Mixed> keySet = new ArrayList<>(array.keySet());
+			return array.get(keySet.get(java.lang.Math.abs(rand.nextInt() % (int) array.size())), t);
 		}
 
 		@Override
@@ -3794,7 +3661,7 @@ public class ArrayHandling {
 
 	@api
 	@seealso(array_intersect.class)
-	public static class array_subtract extends CallbackYield {
+	public static class array_subtract extends AbstractFunction {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -3812,9 +3679,9 @@ public class ArrayHandling {
 		}
 
 		@Override
-		protected void execWithYield(Target t, Environment env, Mixed[] args, CallbackYield.Yield yield) {
-			CArray one = ArgumentValidation.getArray(args[0], t, env);
-			CArray two = ArgumentValidation.getArray(args[1], t, env);
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			CArray one = ArgumentValidation.getArray(args[0], t);
+			CArray two = ArgumentValidation.getArray(args[1], t);
 			CClosure closure = null;
 			ArrayValueComparisonMode mode = ArrayValueComparisonMode.HASH;
 			boolean associativeMode = one.isAssociative() || two.isAssociative();
@@ -3823,7 +3690,7 @@ public class ArrayHandling {
 					throw new CREIllegalArgumentException("For associative arrays, only 2 parameters may be provided,"
 							+ " the comparison mode value is not used.", t);
 				}
-				if(args[2].isInstanceOf(CClosure.TYPE, null, env)) {
+				if(args[2].isInstanceOf(CClosure.TYPE)) {
 					closure = ArgumentValidation.getObject(args[2], t, CClosure.class);
 				} else {
 					mode = ArgumentValidation.getEnum(args[2], ArrayValueComparisonMode.class, t);
@@ -3841,76 +3708,56 @@ public class ArrayHandling {
 				// Iterate one, and check if the hash of each value is in the set. If not, add it.
 				for(Mixed c : one) {
 					if(!a2Set.contains(c.hashCode())) {
-						ret.push(c, t, env);
+						ret.push(c, t);
 					}
 				}
-			} else if(closure != null) {
-				Mixed[] k1 = new Mixed[(int) one.size(env)];
-				Mixed[] k2 = new Mixed[(int) two.size(env)];
-				one.keySet(env).toArray(k1);
-				two.keySet(env).toArray(k2);
-				queueSubtractStep(closure, env, t, one, two, k1, k2, ret, 0, 0, yield);
 			} else {
-				Mixed[] k1 = new Mixed[(int) one.size(env)];
-				Mixed[] k2 = new Mixed[(int) two.size(env)];
-				one.keySet(env).toArray(k1);
-				two.keySet(env).toArray(k2);
+				Mixed[] k1 = new Mixed[(int) one.size()];
+				Mixed[] k2 = new Mixed[(int) two.size()];
+				one.keySet().toArray(k1);
+				two.keySet().toArray(k2);
 				equals equals = new equals();
 				Function comparisonFunction = mode.getComparisonFunction();
 				for(int i = 0; i < k1.length; i++) {
 					boolean addValue = true;
 					for(int j = 0; j < k2.length; j++) {
 						if(associativeMode) {
-							if(equals.exec(t, env, null, k1[i], k2[j]).getBoolean()) {
+							if(equals.exec(t, environment, k1[i], k2[j]).getBoolean()) {
 								addValue = false;
 								break;
 							}
 						} else {
-							if(comparisonFunction != null) {
-								if(ArgumentValidation.getBooleanish(comparisonFunction.exec(t, env, null,
-										one.get(k1[i], t, env), two.get(k2[j], t, env)
-								), t, env)) {
+							if(closure == null) {
+								if(comparisonFunction != null) {
+									if(ArgumentValidation.getBoolean(comparisonFunction.exec(t, environment,
+											one.get(k1[i], t), two.get(k2[j], t)
+									), t)) {
+										addValue = false;
+										break;
+									}
+								} else {
+									throw new Error();
+								}
+							} else {
+								Mixed fre = closure.executeCallable(environment, t, one.get(k1[i], t), two.get(k2[j], t));
+								boolean res = ArgumentValidation.getBoolean(fre, fre.getTarget());
+								if(res) {
 									addValue = false;
 									break;
 								}
-							} else {
-								throw new Error();
 							}
 						}
 					}
 					if(addValue) {
 						if(associativeMode) {
-							ret.set(k1[i], one.get(k1[i], t, env), t, env);
+							ret.set(k1[i], one.get(k1[i], t), t);
 						} else {
-							ret.push(one.get(k1[i], t, env), t, env);
+							ret.push(one.get(k1[i], t), t);
 						}
 					}
 				}
 			}
-			yield.done(() -> ret);
-		}
-
-		private void queueSubtractStep(CClosure closure, Environment env, Target t,
-				CArray one, CArray two, Mixed[] k1, Mixed[] k2, CArray ret,
-				int i, int j, CallbackYield.Yield yield) {
-			if(i >= k1.length) {
-				return;
-			}
-			yield.call(closure, env, t, one.get(k1[i], t, env), two.get(k2[j], t, env))
-					.then((result, y) -> {
-						boolean res = ArgumentValidation.getBooleanish(result, result.getTarget(), env);
-						if(res) {
-							// Match found — this element should NOT be in the result
-							queueSubtractStep(closure, env, t, one, two, k1, k2, ret, i + 1, 0, y);
-						} else if(j + 1 < k2.length) {
-							// No match yet, try next inner element
-							queueSubtractStep(closure, env, t, one, two, k1, k2, ret, i, j + 1, y);
-						} else {
-							// Exhausted inner loop with no match — include this element
-							ret.push(one.get(k1[i], t, env), t, env);
-							queueSubtractStep(closure, env, t, one, two, k1, k2, ret, i + 1, 0, y);
-						}
-					});
+			return ret;
 		}
 
 		@Override
@@ -3970,18 +3817,18 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			Mixed fill = args[1];
 			if(args[0] instanceof CFixedArray fa) {
-				fa.fill(fill, t, env);
+				fa.fill(fill, t);
 				return fa;
 			} else {
-				CArray array = ArgumentValidation.getArray(args[0], t, env);
+				CArray array = ArgumentValidation.getArray(args[0], t);
 				if(array.isAssociative()) {
 					throw new CRECastException(getName() + " can only accept normal arrays.", t);
 				}
-				for(Mixed key : array.keySet(env)) {
-					array.set(key, fill, t, env);
+				for(Mixed key : array.keySet()) {
+					array.set(key, fill, t);
 				}
 				return array;
 			}
@@ -4026,8 +3873,8 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			ArgumentValidation.getArray(args[0], t, env).clear();
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			ArgumentValidation.getArray(args[0], t).clear();
 			return CVoid.VOID;
 		}
 

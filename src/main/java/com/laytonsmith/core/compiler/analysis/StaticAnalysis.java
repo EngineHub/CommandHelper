@@ -449,7 +449,7 @@ public class StaticAnalysis {
 			return Auto.TYPE;
 		}
 		try {
-			return node.typeof(env);
+			return node.typeof();
 		} catch(Throwable t) {
 			// Functions that might contain these unsupported objects should make sure that they don't type check them.
 			// In case an unsupported object causes an error here, it likely means that we have a syntax error.

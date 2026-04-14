@@ -3,7 +3,6 @@ package com.laytonsmith.core.constructs;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.MSVersion;
-import com.laytonsmith.core.environments.Environment;
 
 /**
  *
@@ -42,15 +41,8 @@ public abstract class CNumber extends CPrimitive {
 
 	public abstract double getNumber();
 
-	/** @deprecated Use {@link #getBooleanValue(Target, Environment)} instead. */
-	@Deprecated
 	@Override
 	public boolean getBooleanValue(Target t) {
-		return getBooleanValue(t, null);
-	}
-
-	@Override
-	public boolean getBooleanValue(Target t, Environment env) {
 		return getNumber() != 0.0;
 	}
 }

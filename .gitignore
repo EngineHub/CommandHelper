@@ -17,7 +17,6 @@ nbactions.xml
 /preferences.*
 .DS_Store
 /test-backend/
-.mvn/
 /nbproject/
 dependency-reduced-pom.xml
 

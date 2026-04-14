@@ -24,10 +24,6 @@ commands:
         description: Turns on the interpreter for however long is specified in the preferences option "interpreter-timeout". This only does something if run from console.
         usage: /<command>
         permission: this.command.can.only.be.run.from.console
-    debug-server:
-        description: Controls the DAP debug server. Console only.
-        usage: /<command> <start|stop|status>
-        permission: this.command.can.only.be.run.from.console
 permissions:
     ch.reloadaliases:
         description: Permission alias for commandhelper.reloadaliases

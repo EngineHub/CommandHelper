@@ -25,7 +25,6 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
@@ -70,7 +69,7 @@ public class Echoes {
 		}
 
 		@Override
-		public Mixed exec(final Target t, Environment env, GenericParameters generics, final Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(final Target t, Environment env, final Mixed... args) throws ConfigRuntimeException {
 			StringBuilder b = new StringBuilder();
 			for(Mixed arg : args) {
 				b.append(arg.val());
@@ -136,7 +135,7 @@ public class Echoes {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			if(args.length < 2) {
 				throw new CREInsufficientArgumentsException("You must send at least 2 arguments to tmsg", t);
 			}
@@ -144,7 +143,7 @@ public class Echoes {
 			if(Static.getConsoleName().equals(args[0].val())) {
 				p = Static.getServer().getConsole();
 			} else {
-				p = Static.GetPlayer(args[0], t, env);
+				p = Static.GetPlayer(args[0], t);
 			}
 			StringBuilder b = new StringBuilder();
 			for(int i = 1; i < args.length; i++) {
@@ -202,7 +201,7 @@ public class Echoes {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String selector = "@a";
 			String json;
 			try {
@@ -311,7 +310,7 @@ public class Echoes {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer player;
 			int fadein = 10;
 			int stay = 70;
@@ -319,17 +318,17 @@ public class Echoes {
 			int offset = 0;
 
 			if(args.length == 3 || args.length == 6) {
-				player = Static.GetPlayer(args[0].val(), t, env);
+				player = Static.GetPlayer(args[0].val(), t);
 				offset = 1;
 			} else {
-				player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				player = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(player, t);
 			}
 
 			if(args.length > 3) {
-				fadein = ArgumentValidation.getInt32(args[2 + offset], t, env);
-				stay = ArgumentValidation.getInt32(args[3 + offset], t, env);
-				fadeout = ArgumentValidation.getInt32(args[4 + offset], t, env);
+				fadein = ArgumentValidation.getInt32(args[2 + offset], t);
+				stay = ArgumentValidation.getInt32(args[3 + offset], t);
+				fadeout = ArgumentValidation.getInt32(args[4 + offset], t);
 			}
 
 			player.sendTitle(Construct.nval(args[offset]), Construct.nval(args[1 + offset]), fadein, stay, fadeout);
@@ -352,14 +351,14 @@ public class Echoes {
 			return "void {[player], message} Sends a message to the action bar above the hot bar.";
 		}
 
-		public Construct exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer player;
 			String message;
 			if(args.length == 2) {
-				player = Static.GetPlayer(args[0], t, env);
+				player = Static.GetPlayer(args[0], t);
 				message = args[1].val();
 			} else {
-				player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				player = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(player, t);
 				message = args[0].val();
 			}
@@ -401,7 +400,7 @@ public class Echoes {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			String val = Construct.nval(args[0]);
 			if(val == null) {
 				return new CString(MCChatColor.WHITE.toString(), t);
@@ -553,7 +552,7 @@ public class Echoes {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return new CString(MCChatColor.stripColor(args[0].val()), t);
 		}
 
@@ -573,7 +572,7 @@ public class Echoes {
 		}
 
 		@Override
-		public Mixed exec(final Target t, final Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(final Target t, final Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(p != null) {
 				p.chat(args[0].val());
@@ -647,8 +646,8 @@ public class Echoes {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			final MCPlayer player = Static.GetPlayer(args[0], t, env);
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			final MCPlayer player = Static.GetPlayer(args[0], t);
 			player.chat(args[1].val());
 			return CVoid.VOID;
 		}
@@ -701,7 +700,7 @@ public class Echoes {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			final MCServer server = Static.getServer();
 
 			// Handle "broadcast(message, [null])".
@@ -711,7 +710,7 @@ public class Echoes {
 			}
 
 			// Handle "broadcast(message, recipientsArray)".
-			if(args[1].isInstanceOf(CArray.TYPE, null, env)) {
+			if(args[1].isInstanceOf(CArray.TYPE)) {
 
 				// Get the CArray and validate that it is non-associative.
 				CArray array = (CArray) args[1];
@@ -722,12 +721,12 @@ public class Echoes {
 
 				// Get the recipients from the array.
 				Set<MCCommandSender> recipients = new HashSet<>();
-				for(Mixed p : array.asList(env)) {
+				for(Mixed p : array.asList()) {
 					if(p.val().equalsIgnoreCase("~console")) {
 						recipients.add(server.getConsole());
 					} else {
 						try {
-							recipients.add(Static.GetPlayer(p, t, env));
+							recipients.add(Static.GetPlayer(p, t));
 						} catch (CREPlayerOfflineException cre) {
 							// Ignore offline players.
 						}
@@ -790,12 +789,12 @@ public class Echoes {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			String mes = Static.MCToANSIColors(args[0].val());
 			boolean prefix = ArgumentValidation.getBooleanish(env.getEnv(GlobalEnv.class)
-					.GetRuntimeSetting("function.console.prefix_default", CBoolean.TRUE), t, env);
+					.GetRuntimeSetting("function.console.prefix_default", CBoolean.TRUE), t);
 			if(args.length > 1) {
-				prefix = ArgumentValidation.getBoolean(args[1], t, env);
+				prefix = ArgumentValidation.getBoolean(args[1], t);
 			}
 
 			if(prefix) {
@@ -836,13 +835,13 @@ public class Echoes {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			Mixed text = args[0];
 			String symbol = "&";
 			if(args.length == 2) {
 				symbol = args[1].val();
 			}
-			if(!(text.isInstanceOf(CString.TYPE, null, env))) {
+			if(!(text.isInstanceOf(CString.TYPE))) {
 				return text;
 			}
 			String stext = text.val();

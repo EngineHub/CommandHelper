@@ -28,7 +28,6 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -151,17 +150,17 @@ public class SQL {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			try {
 				Profiles.Profile profile;
-				if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
+				if(args[0].isInstanceOf(CArray.TYPE)) {
 					Map<String, String> data = new HashMap<>();
 					for(String key : ((CArray) args[0]).stringKeySet()) {
-						data.put(key, ((CArray) args[0]).get(key, t, env).val());
+						data.put(key, ((CArray) args[0]).get(key, t).val());
 					}
 					profile = ProfilesImpl.getProfile(data);
 				} else {
-					Profiles profiles = env.getEnv(StaticRuntimeEnv.class).getProfiles();
+					Profiles profiles = environment.getEnv(StaticRuntimeEnv.class).getProfiles();
 					profile = profiles.getProfileById(args[0].val());
 				}
 				if(!(profile instanceof SQLProfile)) {
@@ -201,20 +200,20 @@ public class SQL {
 							continue;
 						}
 						try {
-							if(params[i].isInstanceOf(CInt.TYPE, null, env)) {
-								ps.setLong(i + 1, ArgumentValidation.getInt(params[i], t, env));
-							} else if(params[i].isInstanceOf(CDouble.TYPE, null, env)) {
-								ps.setDouble(i + 1, (Double) ArgumentValidation.getDouble(params[i], t, env));
-							} else if(params[i].isInstanceOf(CString.TYPE, null, env)) {
+							if(params[i].isInstanceOf(CInt.TYPE)) {
+								ps.setLong(i + 1, ArgumentValidation.getInt(params[i], t));
+							} else if(params[i].isInstanceOf(CDouble.TYPE)) {
+								ps.setDouble(i + 1, (Double) ArgumentValidation.getDouble(params[i], t));
+							} else if(params[i].isInstanceOf(CString.TYPE)) {
 								if(type == Types.NCHAR || type == Types.NVARCHAR || type == Types.LONGNVARCHAR) {
 									ps.setNString(i + 1, (String) params[i].val());
 								} else {
 									ps.setString(i + 1, (String) params[i].val());
 								}
-							} else if(params[i] instanceof CByteArray) {
+							} else if(params[i].isInstanceOf(CByteArray.TYPE)) {
 								ps.setBytes(i + 1, ((CByteArray) params[i]).asByteArrayCopy());
-							} else if(params[i] instanceof CBoolean) {
-								ps.setBoolean(i + 1, ArgumentValidation.getBoolean(params[i], t, env));
+							} else if(params[i].isInstanceOf(CBoolean.TYPE)) {
+								ps.setBoolean(i + 1, ArgumentValidation.getBoolean(params[i], t));
 							} else {
 								throw new CRECastException("The type " + params[i].getClass().getSimpleName()
 										+ " of parameter " + (i + 1) + " is not supported.", t);
@@ -232,7 +231,7 @@ public class SQL {
 						ResultSetMetaData md = ps.getMetaData();
 						ResultSet rs = ps.getResultSet();
 						while(rs != null && rs.next()) {
-							CArray row = CArray.GetAssociativeArray(t, null, env);
+							CArray row = CArray.GetAssociativeArray(t);
 							for(int i = 1; i <= md.getColumnCount(); i++) {
 								Construct value;
 								int columnType = md.getColumnType(i);
@@ -298,9 +297,9 @@ public class SQL {
 								// for instance SELECT foo AS bar... then we would get "foo" from that. Instead,
 								// we use the column label, which in the example, would return "bar", which is what
 								// the user will expect in the results.
-								row.set(md.getColumnLabel(i), value, t, env);
+								row.set(md.getColumnLabel(i), value, t);
 							}
-							ret.push(row, t, env);
+							ret.push(row, t);
 						}
 						return ret;
 					} else {
@@ -347,7 +346,7 @@ public class SQL {
 					env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
 							new CompilerWarning(msg, t, null));
 				}
-			} else if(queryData.isInstanceOf(CString.TYPE, null, env)) {
+			} else if(queryData.isInstanceOf(CString.TYPE)) {
 				//It's a hard coded query, so we can double check parameter lengths and other things
 				String query = queryData.val();
 				int count = 0;
@@ -496,31 +495,31 @@ public class SQL {
 		}
 
 		@Override
-		public Mixed exec(final Target t, final Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(final Target t, final Environment environment, Mixed... args) throws ConfigRuntimeException {
 			startup();
 			Mixed arg = args[args.length - 1];
-			if(!(arg.isInstanceOf(CClosure.TYPE, null, env))) {
+			if(!(arg.isInstanceOf(CClosure.TYPE))) {
 				throw new CRECastException("The last argument to " + getName() + " must be a closure.", t);
 			}
 			final CClosure closure = ((CClosure) arg);
 			final Mixed[] newArgs = new Mixed[args.length - 1];
 			//Make a new array minus the closure
 			System.arraycopy(args, 0, newArgs, 0, newArgs.length);
-			queue.invokeLater(env.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), new Runnable() {
+			queue.invokeLater(environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), new Runnable() {
 
 				@Override
 				public void run() {
 					Mixed returnValue = CNull.NULL;
 					Mixed exception = CNull.NULL;
 					try {
-						returnValue = new query().exec(t, env, null, newArgs);
+						returnValue = new query().exec(t, environment, newArgs);
 					} catch (ConfigRuntimeException ex) {
-						exception = ObjectGenerator.GetGenerator().exception(ex, env, t);
+						exception = ObjectGenerator.GetGenerator().exception(ex, environment, t);
 					}
 					final Mixed cret = returnValue;
 					final Mixed cex = exception;
 					StaticLayer.GetConvertor().runOnMainThreadLater(
-							env.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), new Runnable() {
+							environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), new Runnable() {
 
 						@Override
 						public void run() {

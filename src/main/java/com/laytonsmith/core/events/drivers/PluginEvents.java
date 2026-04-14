@@ -3,13 +3,13 @@ package com.laytonsmith.core.events.drivers;
 import com.laytonsmith.abstraction.events.MCPluginIncomingMessageEvent;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CByteArray;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.events.AbstractEvent;
 import com.laytonsmith.core.events.BindableEvent;
 import com.laytonsmith.core.events.Driver;
-import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
@@ -62,7 +62,12 @@ public class PluginEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
+
+		@Override
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			if(e instanceof MCPluginIncomingMessageEvent) {
 				MCPluginIncomingMessageEvent event = (MCPluginIncomingMessageEvent) e;
 				Map<String, Mixed> ret = evaluate_helper(e);
@@ -89,7 +94,7 @@ public class PluginEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			return false;
 		}
 

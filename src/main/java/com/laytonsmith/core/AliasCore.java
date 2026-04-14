@@ -29,7 +29,6 @@ import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
-import com.laytonsmith.core.environments.DebugContext;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.RuntimeMode;
@@ -91,17 +90,6 @@ public class AliasCore {
 	private StaticRuntimeEnv staticRuntimeEnv;
 	private List<Script> scripts;
 	private boolean lastCompileFailed = false;
-	private volatile DebugContext debugContext;
-
-	/**
-	 * Sets the DebugContext to inject into all script execution environments.
-	 * Pass {@code null} to disable debugging.
-	 *
-	 * @param ctx The DebugContext from the debug server, or null.
-	 */
-	public void setDebugContext(DebugContext ctx) {
-		this.debugContext = ctx;
-	}
 
 	/**
 	 * This constructor accepts the constant file locations object for MethodScript.
@@ -199,13 +187,6 @@ public class AliasCore {
 		cEnv.SetCommandSender(sender);
 		cEnv.SetCommand(command);
 		Environment env = Environment.createEnvironment(gEnv, staticRuntimeEnv, cEnv, compilerEnv);
-		if(debugContext != null && !debugContext.isDisconnected()) {
-			try {
-				env = env.cloneAndAdd(debugContext);
-			} catch(Exception e) {
-				Static.getLogger().log(Level.WARNING, "Failed to add debug context", e);
-			}
-		}
 
 		this.addPlayerReference(sender);
 		ProfilePoint alias = env.getEnv(StaticRuntimeEnv.class).GetProfiler().start("Alias - \"" + command + "\"",
@@ -372,13 +353,6 @@ public class AliasCore {
 			CommandHelperEnvironment commandHelperEnv = new CommandHelperEnvironment();
 			CompilerEnvironment compilerEnv = new CompilerEnvironment();
 			env = Environment.createEnvironment(globalEnv, newStaticRuntimeEnv, commandHelperEnv, compilerEnv);
-			if(debugContext != null && !debugContext.isDisconnected()) {
-				try {
-					env = env.cloneAndAdd(debugContext);
-				} catch(Exception e) {
-					Static.getLogger().log(Level.WARNING, "Failed to add debug context", e);
-				}
-			}
 
 			File aliasConfig = new File(fileLocations.getConfigDirectory(), Prefs.ScriptName());
 			if(!aliasConfig.exists()) {

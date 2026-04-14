@@ -1,7 +1,6 @@
 package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.PureUtilities.Version;
-import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 
 /**
@@ -211,11 +210,6 @@ public class CSymbol extends Construct {
 	@Override
 	public CClassType[] getInterfaces() {
 		return new CClassType[]{};
-	}
-
-	@Override
-	public GenericParameters getGenericParameters() {
-		return null;
 	}
 
 }

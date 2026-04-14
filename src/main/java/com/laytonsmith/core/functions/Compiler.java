@@ -8,14 +8,11 @@ import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.annotations.noprofile;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.FullyQualifiedClassName;
-import com.laytonsmith.core.FlowFunction;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Optimizable.OptimizationOption;
-import com.laytonsmith.core.StepAction.Complete;
-import com.laytonsmith.core.StepAction.Evaluate;
-import com.laytonsmith.core.StepAction.StepResult;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.compiler.FileOptions;
@@ -39,7 +36,6 @@ import com.laytonsmith.core.constructs.IVariableList;
 import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Token;
-import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.Environment.EnvironmentImpl;
@@ -80,7 +76,7 @@ public class Compiler {
 	@api
 	@noprofile
 	@hide("This is only used internally by the compiler.")
-	public static class p extends DummyFunction implements FlowFunction<Void>, Optimizable {
+	public static class p extends DummyFunction implements Optimizable {
 
 		public static final String NAME = "p";
 
@@ -95,20 +91,17 @@ public class Compiler {
 		}
 
 		@Override
-		public StepResult<Void> begin(Target t, ParseTree[] children, Environment env) {
-			if(children.length == 1) {
-				return new StepResult<>(new Evaluate(children[0]), null);
-			}
-			return new StepResult<>(new Complete(CVoid.VOID), null);
+		public boolean useSpecialExec() {
+			return true;
 		}
 
 		@Override
-		public StepResult<Void> childCompleted(Target t, Void state, Mixed result, Environment env) {
-			return new StepResult<>(new Complete(result), null);
+		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+			return (nodes.length == 1 ? parent.eval(nodes[0], env) : CVoid.VOID);
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return CVoid.VOID;
 		}
 
@@ -161,7 +154,7 @@ public class Compiler {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return new CEntry(args[0], args[1], t);
 		}
 	}
@@ -174,7 +167,7 @@ public class Compiler {
 		public static final String NAME = "__autoconcat__";
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			throw new Error("Should not have gotten here, " + __autoconcat__.NAME + " was not removed before runtime.");
 		}
 
@@ -370,7 +363,7 @@ public class Compiler {
 
 					// Convert bare string or concat() to type reference if needed.
 					ParseTree typeNode = node.getChildAt(0);
-					if(!(typeNode.getData() instanceof CClassType)) {
+					if(!typeNode.getData().isInstanceOf(CClassType.TYPE)) {
 						ParseTree convertedTypeNode = __type_ref__.createFromBareStringOrConcats(typeNode);
 						if(convertedTypeNode != null) {
 							typeNode = convertedTypeNode;
@@ -476,7 +469,7 @@ public class Compiler {
 				}
 
 				if(convertedTypeNode != null
-						|| typeNode.getData().equals(CVoid.VOID) || typeNode.getData() instanceof CClassType) {
+						|| typeNode.getData().equals(CVoid.VOID) || typeNode.getData().isInstanceOf(CClassType.TYPE)) {
 					if(k == list.size() - 1) {
 						// This is not a typed assignment
 						break;
@@ -505,7 +498,7 @@ public class Compiler {
 								list.get(k).setChildren(children);
 								break;
 							default:
-								if(typeNode.getData().equals(CVoid.VOID) || typeNode.getData() instanceof CClassType) {
+								if(typeNode.getData().equals(CVoid.VOID) || typeNode.getData().isInstanceOf(CClassType.TYPE)) {
 									throw new ConfigCompileException("Unexpected ClassType \""
 											+ typeNode.getData().val() + "\"", typeNode.getTarget());
 								}
@@ -577,9 +570,9 @@ public class Compiler {
 								child.setChildren(list);
 							}
 							try {
-								FunctionList.getFunction(identifier, envs);
-								ParseTree node = new ParseTree(identifier, child.getFileOptions());
-								node.addChild(child);
+								Function f = (Function) FunctionList.getFunction(identifier, envs);
+								ParseTree node = new ParseTree(
+										f.execs(identifier.getTarget(), null, null, child), child.getFileOptions());
 								if(node.getData() instanceof CFunction
 										&& node.getData().val().equals(__autoconcat__.NAME)) {
 									node = rewrite(node.getChildren(), returnSConcat, envs);
@@ -670,7 +663,7 @@ public class Compiler {
 					// Do not rewrite casts to execute() if the callable is the cast (i.e. "(type) (val)").
 					if(prevNodeVal instanceof CFunction cfunc && cfunc.val().equals(Compiler.p.NAME)
 							&& prevNode.numberOfChildren() == 1
-							&& (prevNode.getChildAt(0).getData() instanceof CClassType
+							&& (prevNode.getChildAt(0).getData().isInstanceOf(CClassType.TYPE)
 									|| __type_ref__.createFromBareStringOrConcats(prevNode.getChildAt(0)) != null)) {
 						break;
 					}
@@ -723,7 +716,7 @@ public class Compiler {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return CVoid.VOID;
 		}
 
@@ -789,7 +782,7 @@ public class Compiler {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			throw new CRENotFoundException("\"" + args[0].val() + "\" cannot be resolved to a type.", t);
 		}
 
@@ -917,7 +910,7 @@ public class Compiler {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			String s = null;
 			if(args.length == 1) {
 				s = args[0].val();
@@ -943,7 +936,7 @@ public class Compiler {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args.length == 0) {
 				return CVoid.VOID;
 			}
@@ -956,7 +949,7 @@ public class Compiler {
 	public static class __cbracket__ extends DummyFunction implements Optimizable {
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
@@ -992,7 +985,7 @@ public class Compiler {
 		public static final String NAME = "__cbrace__";
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
@@ -1073,7 +1066,7 @@ public class Compiler {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			throw new UnsupportedOperationException(getName() + " should have been compiled out. If you are reaching"
 					+ " this, an error has occurred in the parser. Please report this error to the developers.");
 		}
@@ -1103,7 +1096,7 @@ public class Compiler {
 				if(children.size() != 1) {
 					throw new ConfigCompileException(getName() + " can only take one parameter", t);
 				}
-				if(!(children.get(0).getData().isInstanceOf(CString.TYPE, null, env))) {
+				if(!(children.get(0).getData().isInstanceOf(CString.TYPE))) {
 					throw new ConfigCompileException("Only hardcoded strings may be passed into " + getName(), t);
 				}
 				String value = children.get(0).getData().val();
@@ -1247,12 +1240,12 @@ public class Compiler {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			Mixed value = args[0];
 			CClassType type = ArgumentValidation.getClassType(args[1], t);
 			if(!InstanceofUtil.isInstanceof(value, type, env)) {
 				throw new CRECastException(
-						"Cannot cast from " + value.typeof(env).getSimpleName() + " to " + type.getSimpleName() + ".", t);
+						"Cannot cast from " + value.typeof().getSimpleName() + " to " + type.getSimpleName() + ".", t);
 			}
 			return value;
 		}
@@ -1344,7 +1337,7 @@ public class Compiler {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 
 			// Get arguments.
 			CClassType type;

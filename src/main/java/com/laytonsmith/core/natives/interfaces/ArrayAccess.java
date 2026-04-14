@@ -4,7 +4,6 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import java.util.Set;
 
@@ -24,20 +23,8 @@ public interface ArrayAccess extends Booleanish {
 	 * @param index
 	 * @param t
 	 * @return
-	 * @deprecated Use {@link #get(String, Target, Environment)} instead.
 	 */
-	@Deprecated
 	public Mixed get(String index, Target t) throws ConfigRuntimeException;
-
-	/**
-	 * Return the mixed at this location, with environment context.
-	 *
-	 * @param index
-	 * @param t
-	 * @param env
-	 * @return
-	 */
-	Mixed get(String index, Target t, Environment env) throws ConfigRuntimeException;
 
 	/**
 	 * Returns the mixed at this location. This should throw an exception if the index does not exist. This method will
@@ -47,21 +34,8 @@ public interface ArrayAccess extends Booleanish {
 	 * @param t
 	 * @return
 	 * @throws ConfigRuntimeException
-	 * @deprecated Use {@link #get(int, Target, Environment)} instead.
 	 */
-	@Deprecated
 	public Mixed get(int index, Target t) throws ConfigRuntimeException;
-
-	/**
-	 * Returns the mixed at this location, with environment context.
-	 *
-	 * @param index
-	 * @param t
-	 * @param env
-	 * @return
-	 * @throws ConfigRuntimeException
-	 */
-	Mixed get(int index, Target t, Environment env) throws ConfigRuntimeException;
 
 	/**
 	 * Returns the mixed at this location. This should throw an exception if the index does not exist. This method may
@@ -71,39 +45,16 @@ public interface ArrayAccess extends Booleanish {
 	 * @param t
 	 * @return
 	 * @throws ConfigRuntimeException
-	 * @deprecated Use {@link #get(Mixed, Target, Environment)} instead.
 	 */
-	@Deprecated
 	public Mixed get(Mixed index, Target t) throws ConfigRuntimeException;
-
-	/**
-	 * Returns the mixed at this location, with environment context.
-	 *
-	 * @param index
-	 * @param t
-	 * @param env
-	 * @return
-	 * @throws ConfigRuntimeException
-	 */
-	Mixed get(Mixed index, Target t, Environment env) throws ConfigRuntimeException;
 
 	/**
 	 * If {@link #isAssociative()} returns true, this should return a set of all keys. If {@link #isAssociative()}
 	 * returns false, this method will not be called.
 	 *
 	 * @return
-	 * @deprecated Use {@link #keySet(Environment)} instead.
 	 */
-	@Deprecated
 	public Set<Mixed> keySet();
-
-	/**
-	 * Returns the key set with environment context.
-	 *
-	 * @param env
-	 * @return
-	 */
-	Set<Mixed> keySet(Environment env);
 
 	/**
 	 * Unlike {@link #canBeAssociative()}, this is a runtime flag. If the underlying object is associative (that is, it
@@ -129,25 +80,22 @@ public interface ArrayAccess extends Booleanish {
 	 * Returns a slice at the specified location. Should throw an exception if an element in the range doesn't exist.
 	 * The range is inclusive.
 	 *
-	 * @param begin
-	 * @param end
-	 * @param t
-	 * @return
-	 * @deprecated Use {@link #slice(int, int, Target, Environment)} instead.
-	 */
-	@Deprecated
-	public Mixed slice(int begin, int end, Target t);
-
-	/**
-	 * Returns a slice at the specified location, with environment context.
+	 * @implNote In general, MethodScript supports undefined begin and end slices, as well as reverse slices. For
+	 * CArray type only, this is fully covered, but for other slice types, only negative slice numbers are converted,
+	 * and subclasses must handle both forward and reverse slices if applicable. A good way to handle that is as such:
+	 * <pre><code>
+	 * int start = Math.min(begin, end);
+	 * int stop = Math.max(begin, end);
+	 * int step = (begin &lt;= end) ? 1 : -1;
+	 * for(int i = start; i != stop; i += step) { ... }
+	 * </code></pre>
 	 *
 	 * @param begin
 	 * @param end
 	 * @param t
-	 * @param env
 	 * @return
 	 */
-	Mixed slice(int begin, int end, Target t, Environment env);
+	public Mixed slice(int begin, int end, Target t);
 
 
 	@Override

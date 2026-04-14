@@ -31,9 +31,9 @@ public class CIClosure extends CClosure {
 //		StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
 //		stManager.addStackTraceElement(new ConfigRuntimeException.StackTraceElement("<<iclosure>>", getTarget()));
 //		try {
-//			Environment env;
+//			Environment environment;
 //			synchronized(this) {
-//				env = env.clone();
+//				environment = env.clone();
 //			}
 //			if(values != null) {
 //				for(int i = 0; i < names.length; i++) {
@@ -44,8 +44,8 @@ public class CIClosure extends CClosure {
 //					} catch (Exception e) {
 //						value = defaults[i].clone();
 //					}
-//					env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(types[i], name, value,
-//							getTarget(), env));
+//					environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(types[i], name, value,
+//							getTarget(), environment));
 //				}
 //			}
 //			boolean hasArgumentsParam = false;
@@ -63,7 +63,7 @@ public class CIClosure extends CClosure {
 //						arguments.push(value, node.getData().getTarget());
 //					}
 //				}
-//				env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, "@arguments", arguments,
+//				environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, "@arguments", arguments,
 //						node.getData().getTarget()));
 //			}
 //
@@ -72,7 +72,7 @@ public class CIClosure extends CClosure {
 //			children.add(node);
 //			newNode.setChildren(children);
 //			try {
-//				MethodScriptCompiler.execute(newNode, env, null, env.getEnv(GlobalEnv.class)
+//				MethodScriptCompiler.execute(newNode, environment, null, environment.getEnv(GlobalEnv.class)
 //						.GetScript());
 //			} catch (LoopManipulationException e) {
 //				//This shouldn't ever happen.
@@ -84,7 +84,7 @@ public class CIClosure extends CClosure {
 //			} catch (FunctionReturnException ex) {
 //				// Check the return type of the closure to see if it matches the defined type
 //				Mixed ret = ex.getReturn();
-//				if(!InstanceofUtil.isInstanceof(ret, returnType, env)) {
+//				if(!InstanceofUtil.isInstanceof(ret, returnType, environment)) {
 //					throw new CRECastException("Expected closure to return a value of type " + returnType.val()
 //							+ " but a value of type " + ret.typeof() + " was returned instead", ret.getTarget());
 //				}

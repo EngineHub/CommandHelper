@@ -13,9 +13,7 @@ import com.laytonsmith.annotations.noprofile;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.annotations.unbreakable;
 import com.laytonsmith.core.ArgumentValidation;
-import com.laytonsmith.core.CallbackYield;
 import com.laytonsmith.core.natives.interfaces.Callable;
-import com.laytonsmith.core.FlowFunction;
 import com.laytonsmith.core.Globals;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.MSLog;
@@ -28,10 +26,6 @@ import com.laytonsmith.core.Procedure;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Security;
 import com.laytonsmith.core.Static;
-import com.laytonsmith.core.StepAction;
-import com.laytonsmith.core.StepAction.Complete;
-import com.laytonsmith.core.StepAction.Evaluate;
-import com.laytonsmith.core.StepAction.StepResult;
 import com.laytonsmith.core.compiler.BranchStatement;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
@@ -76,7 +70,6 @@ import com.laytonsmith.core.constructs.IVariableList;
 import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.ProcedureUsage;
 import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.Environment.EnvironmentImpl;
@@ -92,12 +85,12 @@ import com.laytonsmith.core.exceptions.CRE.CREIndexOverflowException;
 import com.laytonsmith.core.exceptions.CRE.CREInsufficientPermissionException;
 import com.laytonsmith.core.exceptions.CRE.CREInvalidProcedureException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
+import com.laytonsmith.core.exceptions.CRE.CREStackOverflowError;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.exceptions.StackTraceFrame;
 import com.laytonsmith.core.exceptions.StackTraceManager;
 import com.laytonsmith.core.functions.ArrayHandling.array_get;
 import com.laytonsmith.core.functions.ArrayHandling.array_push;
@@ -150,7 +143,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			return new CArray(t, args);
 		}
 
@@ -245,7 +238,7 @@ public class DataHandling {
 						String v;
 						if(value instanceof IVariable iVariable) {
 							v = iVariable.getVariableName();
-						} else if(value.isInstanceOf(CString.TYPE, null, env)) {
+						} else if(value.isInstanceOf(CString.TYPE)) {
 							v = ((CString) value).getQuote();
 						} else {
 							v = "@value";
@@ -286,7 +279,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return CArray.GetAssociativeArray(t, args);
 		}
 
@@ -347,7 +340,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			IVariableList list = env.getEnv(GlobalEnv.class).GetVarList();
 			IVariable var;
 			if(args.length == 3) {
@@ -393,9 +386,9 @@ public class DataHandling {
 				if(val instanceof CVoid) {
 					throw new CRECastException("Void may not be assigned to a variable", t);
 				}
-				if(!InstanceofUtil.isInstanceof(val.typeof(env), type, env)) {
+				if(!InstanceofUtil.isInstanceof(val.typeof(), type, env)) {
 					throw new CRECastException(varName + " is of type " + type.val() + ", but a value of type "
-							+ val.typeof(env) + " was assigned to it.", t);
+							+ val.typeof() + " was assigned to it.", t);
 				}
 
 				// Set variable in variable list.
@@ -427,9 +420,9 @@ public class DataHandling {
 					var = new IVariable(Auto.TYPE, varName, val, t);
 					list.set(var);
 				} else {
-					if(!InstanceofUtil.isInstanceof(val.typeof(env), var.getDefinedType(), env)) {
+					if(!InstanceofUtil.isInstanceof(val.typeof(), var.getDefinedType(), env)) {
 						throw new CRECastException(varName + " is of type " + var.getDefinedType()
-								+ ", but a value of type " + val.typeof(env) + " was assigned to it.", t);
+								+ ", but a value of type " + val.typeof() + " was assigned to it.", t);
 					}
 					var.setIval(val);
 				}
@@ -669,7 +662,7 @@ public class DataHandling {
 			int offset = 0;
 			if(args.length == 3) {
 				offset = 1;
-				if(!(args[0] instanceof CClassType)
+				if(!args[0].isInstanceOf(CClassType.TYPE)
 						&& (!(args[0] instanceof CFunction) || !args[0].val().equals(__type_ref__.NAME))) {
 					throw new ConfigCompileException("Expecting a ClassType for parameter 1 to assign", t);
 				}
@@ -723,7 +716,7 @@ public class DataHandling {
 				if(typeNode.getData() instanceof CClassType declaredType
 						&& varNode.getData() instanceof IVariable) {
 					if(valNode.isConst()) {
-						CClassType valType = valNode.getData().typeof(env);
+						CClassType valType = valNode.getData().typeof();
 						if((valType != CClassType.AUTO || declaredType == CClassType.AUTO)
 								&& InstanceofUtil.isInstanceof(valType, declaredType, env)) {
 							ParseTree newAssignNode = new ParseTree(new CFunction(__unsafe_assign__.NAME, t), fileOptions);
@@ -852,8 +845,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			return CBoolean.get(!(args[0].isInstanceOf(CArray.TYPE, null, env)));
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			return CBoolean.get(!(args[0].isInstanceOf(CArray.TYPE)));
 		}
 
 		@Override
@@ -913,8 +906,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			return CBoolean.get(args[0].isInstanceOf(CString.TYPE, null, env));
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			return CBoolean.get(args[0].isInstanceOf(CString.TYPE));
 		}
 
 		@Override
@@ -972,8 +965,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			return CBoolean.get(args[0] instanceof CByteArray);
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			return CBoolean.get(args[0].isInstanceOf(CByteArray.TYPE));
 		}
 
 		@Override
@@ -1032,8 +1025,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			return CBoolean.get(args[0].isInstanceOf(CArray.TYPE, null, env));
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			return CBoolean.get(args[0].isInstanceOf(CArray.TYPE));
 		}
 
 		@Override
@@ -1094,8 +1087,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			return CBoolean.get(args[0].isInstanceOf(CInt.TYPE, null, env) || args[0].isInstanceOf(CDouble.TYPE, null, env));
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			return CBoolean.get(args[0].isInstanceOf(CInt.TYPE) || args[0].isInstanceOf(CDouble.TYPE));
 		}
 
 		@Override
@@ -1157,8 +1150,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			return CBoolean.get(args[0].isInstanceOf(CDouble.TYPE, null, env));
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			return CBoolean.get(args[0].isInstanceOf(CDouble.TYPE));
 		}
 
 		@Override
@@ -1218,8 +1211,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			return CBoolean.get(args[0].isInstanceOf(CInt.TYPE, null, env));
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			return CBoolean.get(args[0].isInstanceOf(CInt.TYPE));
 		}
 
 		@Override
@@ -1278,8 +1271,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			return CBoolean.get(args[0] instanceof CBoolean);
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			return CBoolean.get(args[0].isInstanceOf(CBoolean.TYPE));
 		}
 
 		@Override
@@ -1337,7 +1330,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return CBoolean.get(args[0] instanceof CNull);
 		}
 
@@ -1392,7 +1385,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			boolean b = true;
 			try {
 				ArgumentValidation.getNumber(args[0], t);
@@ -1466,7 +1459,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			double d;
 			try {
 				d = ArgumentValidation.getDouble(args[0], t);
@@ -1504,197 +1497,7 @@ public class DataHandling {
 	@api
 	@unbreakable
 	@SelfStatement
-	public static class proc extends AbstractFunction implements FlowFunction<proc.ProcState>, BranchStatement, VariableScope, DocumentSymbolProvider {
-
-		static class ProcState {
-			enum Phase { EVAL_DEFAULTS, EVAL_PARAMS }
-			Phase phase = Phase.EVAL_DEFAULTS;
-
-			ParseTree[] nodes; // after stripping return type prefix
-			CClassType returnType;
-			ParseTree code;
-			IVariableList originalList;
-
-			// Phase 1 (EVAL_DEFAULTS)
-			int defaultIndex = 1; // starts at 1, skips proc name
-			Mixed[] paramDefaultValues;
-			boolean procDefinitelyNotConstant;
-
-			// Phase 2 (EVAL_PARAMS)
-			int paramIndex = 0;
-			String name = "";
-			List<IVariable> vars = new ArrayList<>();
-			List<String> varNames = new ArrayList<>();
-
-			@Override
-			public String toString() {
-				return phase + " idx=" + (phase == Phase.EVAL_DEFAULTS ? defaultIndex : paramIndex);
-			}
-		}
-
-		@Override
-		public StepResult<ProcState> begin(Target t, ParseTree[] children, Environment env) {
-			ProcState state = new ProcState();
-
-			// Parse return type from first child (CClassType or CVoid)
-			state.returnType = Auto.TYPE;
-			NodeModifiers modifiers = null;
-			ParseTree[] nodes = children;
-			if(nodes[0].getData().equals(CVoid.VOID) || nodes[0].getData() instanceof CClassType) {
-				if(nodes[0].getData().equals(CVoid.VOID)) {
-					state.returnType = CVoid.TYPE;
-				} else {
-					state.returnType = (CClassType) nodes[0].getData();
-				}
-				ParseTree[] newNodes = new ParseTree[nodes.length - 1];
-				for(int i = 1; i < nodes.length; i++) {
-					newNodes[i - 1] = nodes[i];
-				}
-				modifiers = nodes[0].getNodeModifiers();
-				nodes = newNodes;
-			}
-			nodes[0].getNodeModifiers().merge(modifiers);
-			state.nodes = nodes;
-
-			// Save variable list for restoration after param evaluation
-			state.originalList = env.getEnv(GlobalEnv.class).GetVarList().clone();
-
-			// Get code block (last node)
-			state.code = nodes[nodes.length - 1];
-
-			// Init default values array
-			state.paramDefaultValues = new Mixed[nodes.length - 1];
-
-			// Start Phase 1: evaluate default parameter values
-			return advanceToNextDefault(t, state, env);
-		}
-
-		@Override
-		public StepResult<ProcState> childCompleted(Target t, ProcState state,
-				Mixed result, Environment env) {
-			if(state.phase == ProcState.Phase.EVAL_DEFAULTS) {
-				env.getEnv(GlobalEnv.class).ClearFlag(GlobalEnv.FLAG_VAR_ARGS_ALLOWED);
-				state.paramDefaultValues[state.defaultIndex] = result;
-				state.defaultIndex++;
-				return advanceToNextDefault(t, state, env);
-			} else {
-				// EVAL_PARAMS phase
-				env.getEnv(GlobalEnv.class).ClearFlag(GlobalEnv.FLAG_VAR_ARGS_ALLOWED);
-				env.getEnv(GlobalEnv.class).ClearFlag(GlobalEnv.FLAG_NO_CHECK_DUPLICATE_ASSIGN);
-
-				Mixed defaultValue = state.paramDefaultValues[state.paramIndex];
-				IVariable ivar;
-				if(defaultValue != null) {
-					ivar = (IVariable) result;
-				} else {
-					if(state.paramIndex == 0) {
-						if(result instanceof IVariable) {
-							throw new CREInvalidProcedureException(
-									"Anonymous Procedures are not allowed", t);
-						}
-						state.name = result.val();
-						state.paramIndex++;
-						return advanceToNextParam(t, state, env);
-					}
-					if(!(result instanceof IVariable)) {
-						throw new CREInvalidProcedureException(
-								"You must use IVariables as the arguments", t);
-					}
-					ivar = (IVariable) result;
-				}
-
-				// Check for duplicate parameter names
-				String varName = ivar.getVariableName();
-				if(state.varNames.contains(varName)) {
-					throw new CREInvalidProcedureException(
-							"Same variable name defined twice in " + state.name, t);
-				}
-				state.varNames.add(varName);
-
-				// Store IVariable with default value
-				Mixed ivarVal = (defaultValue != null ? defaultValue : new CString("", t));
-				state.vars.add(new IVariable(ivar.getDefinedType(),
-						ivar.getVariableName(), ivarVal, ivar.getTarget()));
-
-				state.paramIndex++;
-				return advanceToNextParam(t, state, env);
-			}
-		}
-
-		@Override
-		public StepResult<ProcState> childInterrupted(Target t, ProcState state,
-				StepAction.FlowControl action, Environment env) {
-			env.getEnv(GlobalEnv.class).ClearFlag(GlobalEnv.FLAG_VAR_ARGS_ALLOWED);
-			env.getEnv(GlobalEnv.class).ClearFlag(GlobalEnv.FLAG_NO_CHECK_DUPLICATE_ASSIGN);
-			return null; // propagate
-		}
-
-		private StepResult<ProcState> advanceToNextDefault(Target t, ProcState state, Environment env) {
-			while(state.defaultIndex < state.nodes.length - 1) {
-				ParseTree node = state.nodes[state.defaultIndex];
-				if(node.getData() instanceof CFunction cf) {
-					if(cf.val().equals(assign.NAME) || cf.val().equals(__unsafe_assign__.NAME)) {
-						ParseTree paramDefaultValueNode = node.getChildAt(node.numberOfChildren() - 1);
-						if(Construct.IsDynamicHelper(paramDefaultValueNode.getData())) {
-							state.procDefinitelyNotConstant = true;
-						}
-						env.getEnv(GlobalEnv.class).SetFlag(GlobalEnv.FLAG_VAR_ARGS_ALLOWED, true);
-						return new StepResult<>(new Evaluate(paramDefaultValueNode), state);
-					} else if(cf.val().equals(__autoconcat__.NAME)) {
-						throw new CREInvalidProcedureException(
-								"Invalid arguments defined for procedure", t);
-					}
-				}
-				state.paramDefaultValues[state.defaultIndex] = null;
-				state.defaultIndex++;
-			}
-			return startParamPhase(t, state, env);
-		}
-
-		private StepResult<ProcState> startParamPhase(Target t, ProcState state, Environment env) {
-			state.phase = ProcState.Phase.EVAL_PARAMS;
-			state.paramIndex = 0;
-			return advanceToNextParam(t, state, env);
-		}
-
-		private StepResult<ProcState> advanceToNextParam(Target t, ProcState state, Environment env) {
-			if(state.paramIndex >= state.nodes.length - 1) {
-				return registerProc(t, state, env);
-			}
-			env.getEnv(GlobalEnv.class).SetFlag(GlobalEnv.FLAG_NO_CHECK_DUPLICATE_ASSIGN, true);
-			env.getEnv(GlobalEnv.class).SetFlag(GlobalEnv.FLAG_VAR_ARGS_ALLOWED, true);
-			Mixed defaultValue = state.paramDefaultValues[state.paramIndex];
-			if(defaultValue != null) {
-				// Build temp assign node with pre-evaluated default value
-				ParseTree assignNode = state.nodes[state.paramIndex];
-				CFunction assignFunc = (CFunction) assignNode.getData();
-				CFunction newCf = new CFunction(assignFunc.val(), assignNode.getTarget());
-				newCf.setFunction(assignFunc.getCachedFunction());
-				ParseTree tempAssignNode = new ParseTree(newCf, assignNode.getFileOptions());
-				if(assignNode.numberOfChildren() == 3) {
-					tempAssignNode.addChild(assignNode.getChildAt(0));
-					tempAssignNode.addChild(assignNode.getChildAt(1));
-					tempAssignNode.addChild(new ParseTree(defaultValue, assignNode.getFileOptions()));
-				} else {
-					tempAssignNode.addChild(assignNode.getChildAt(0));
-					tempAssignNode.addChild(new ParseTree(defaultValue, assignNode.getFileOptions()));
-				}
-				return new StepResult<>(new Evaluate(tempAssignNode, null, true), state);
-			} else {
-				return new StepResult<>(new Evaluate(state.nodes[state.paramIndex], null, true), state);
-			}
-		}
-
-		private StepResult<ProcState> registerProc(Target t, ProcState state, Environment env) {
-			env.getEnv(GlobalEnv.class).SetVarList(state.originalList);
-			Procedure myProc = new Procedure(state.name, state.returnType, state.vars,
-					state.nodes[0].getNodeModifiers().getComment(), state.code, t);
-			if(state.procDefinitelyNotConstant) {
-				myProc.definitelyNotConstant();
-			}
-			env.getEnv(GlobalEnv.class).GetProcs().put(myProc.getName(), myProc);
-			return new StepResult<>(new Complete(CVoid.VOID), state);
-		}
+	public static class proc extends AbstractFunction implements BranchStatement, VariableScope, DocumentSymbolProvider {
 
 		public static final String NAME = "proc";
 
@@ -1743,6 +1546,13 @@ public class DataHandling {
 			return null;
 		}
 
+		@Override
+		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+			Procedure myProc = getProcedure(t, env, parent, nodes);
+			env.getEnv(GlobalEnv.class).GetProcs().put(myProc.getName(), myProc);
+			return CVoid.VOID;
+		}
+
 		public static Procedure getProcedure(Target t, Environment env, Script parent, ParseTree... nodes) {
 			String name = "";
 			List<IVariable> vars = new ArrayList<>();
@@ -1750,7 +1560,7 @@ public class DataHandling {
 			boolean procDefinitelyNotConstant = false;
 			CClassType returnType = Auto.TYPE;
 			NodeModifiers modifiers = null;
-			if(nodes[0].getData().equals(CVoid.VOID) || nodes[0].getData() instanceof CClassType) {
+			if(nodes[0].getData().equals(CVoid.VOID) || nodes[0].getData().isInstanceOf(CClassType.TYPE)) {
 				if(nodes[0].getData().equals(CVoid.VOID)) {
 					returnType = CVoid.TYPE;
 				} else {
@@ -1811,13 +1621,8 @@ public class DataHandling {
 					// Construct temporary assign node to assign resulting default parameter value.
 					ParseTree assignNode = nodes[i];
 					CFunction assignFunc = (CFunction) assignNode.getData();
-					CFunction tempFunc = new CFunction(assignFunc.val(), assignNode.getTarget());
-					try {
-						tempFunc.getFunction();
-					} catch(ConfigCompileException ex) {
-						throw new Error(ex);
-					}
-					ParseTree tempAssignNode = new ParseTree(tempFunc, assignNode.getFileOptions());
+					ParseTree tempAssignNode = new ParseTree(new CFunction(assignFunc.val(),
+							assignNode.getTarget()), assignNode.getFileOptions());
 					if(assignNode.numberOfChildren() == 3) {
 						tempAssignNode.addChild(assignNode.getChildAt(0));
 						tempAssignNode.addChild(assignNode.getChildAt(1));
@@ -1891,7 +1696,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return CVoid.VOID;
 		}
 
@@ -1963,6 +1768,11 @@ public class DataHandling {
 			return declScope;
 		}
 
+		@Override
+		public boolean useSpecialExec() {
+			return true;
+		}
+
 		/**
 		 * Returns either null to indicate that the procedure is not const, or returns a single Mixed, which should
 		 * replace the call to the procedure.
@@ -1991,7 +1801,8 @@ public class DataHandling {
 					//Yup! It worked. It's a const proc.
 					return c;
 				} catch (ConfigRuntimeException e) {
-					if(e instanceof CREThrowable && ((CREThrowable) e) instanceof CREInvalidProcedureException) {
+					if(e instanceof CREThrowable
+							&& ((CREThrowable) e).isInstanceOf(CREInvalidProcedureException.TYPE)) {
 						//This is the only valid exception that doesn't strictly mean it's a bad
 						//call.
 						return null;
@@ -2129,7 +1940,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			String procName = args[0].val();
 			Procedure proc = env.getEnv(GlobalEnv.class).GetProcs().get(procName);
 			if(proc == null) {
@@ -2224,8 +2035,7 @@ public class DataHandling {
 
 	@api
 	@DocumentLink(0)
-	public static class include extends AbstractFunction implements Optimizable, DocumentLinkProvider,
-			FlowFunction<include.IncludeState> {
+	public static class include extends AbstractFunction implements Optimizable, DocumentLinkProvider {
 
 		public static final String NAME = "include";
 
@@ -2265,125 +2075,98 @@ public class DataHandling {
 		}
 
 		@Override
-		public CVoid exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public CVoid exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return CVoid.VOID;
 		}
 
-		static class IncludeState {
-			enum Phase { EVAL_PATH, EVAL_INCLUDE }
-			Phase phase = Phase.EVAL_PATH;
-			ParseTree[] children;
-
-			IncludeState(ParseTree[] children) {
-				this.children = children;
-			}
-
-			@Override
-			public String toString() {
-				return phase.name();
-			}
-		}
-
 		@Override
-		public StepResult<IncludeState> begin(Target t, ParseTree[] children, Environment env) {
-			IncludeState state = new IncludeState(children);
-			return new StepResult<>(new Evaluate(children[0]), state);
-		}
-
-		@Override
-		public StepResult<IncludeState> childCompleted(Target t, IncludeState state,
-				Mixed result, Environment env) {
-			switch(state.phase) {
-				case EVAL_PATH -> {
-					String location = result.val();
-					File file = Static.GetFileFromArgument(location, env, t, null);
-					try {
-						file = file.getCanonicalFile();
-					} catch(IOException ex) {
-						throw new CREIOException(ex.getMessage(), t);
-					}
-					StaticAnalysis analysis;
-					IncludeCache includeCache = env.getEnv(StaticRuntimeEnv.class).getIncludeCache();
-					boolean isFirstCompile = false;
-					Scope parentScope = includeCache.getDynamicAnalysisParentScopeCache().get(t);
-					if(parentScope != null) {
-						analysis = includeCache.getStaticAnalysis(file);
-						if(analysis == null) {
-							analysis = new StaticAnalysis(true);
-							analysis.getStartScope().addParent(parentScope);
-							isFirstCompile = true;
-						}
-					} else {
-						analysis = new StaticAnalysis(true);
-					}
-					ParseTree include = IncludeCache.get(file, env, env.getEnvClasses(), analysis, t);
-					if(isFirstCompile) {
-						analysis.getStartScope().removeParent(parentScope);
-					} else if(parentScope != null) {
-						analysis = analysis.clone();
-						analysis.getStartScope().addParent(parentScope);
-						Set<ConfigCompileException> exceptions = new HashSet<>();
-						analysis.analyzeFinalScopeGraph(env, exceptions);
-						if(exceptions.size() == 1) {
-							ConfigCompileException ex = exceptions.iterator().next();
-							String fileName = (ex.getFile() == null
-									? "Unknown Source" : ex.getFile().getName());
-							throw new CREIncludeException(
-									"There was a compile error when trying to include the script at "
-									+ file + "\n" + ex.getMessage()
-									+ " :: " + fileName + ":" + ex.getLineNum(), t);
-						} else if(exceptions.size() > 1) {
-							StringBuilder b = new StringBuilder();
-							b.append("There were compile errors when trying to include the script at ")
-									.append(file).append("\n");
-							for(ConfigCompileException ex : exceptions) {
-								String fileName = (ex.getFile() == null
-										? "Unknown Source" : ex.getFile().getName());
-								b.append(ex.getMessage()).append(" :: ").append(fileName)
-										.append(":").append(ex.getLineNum()).append("\n");
-							}
-							throw new CREIncludeException(b.toString(), t);
-						}
-					}
-					if(include != null) {
-						StackTraceManager stManager
-								= env.getEnv(GlobalEnv.class).GetStackTraceManager();
-						stManager.addStackTraceFrame(
-								new StackTraceFrame("<<include " + result.val() + ">>", t));
-						state.phase = IncludeState.Phase.EVAL_INCLUDE;
-						return new StepResult<>(new Evaluate(include.getChildAt(0)), state);
-					}
-					return new StepResult<>(new Complete(CVoid.VOID), state);
+		public CVoid execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+			ParseTree tree = nodes[0];
+			Mixed arg = parent.seval(tree, env);
+			String location = arg.val();
+			File file = Static.GetFileFromArgument(location, env, t, null);
+			try {
+				file = file.getCanonicalFile();
+			} catch (IOException ex) {
+				throw new CREIOException(ex.getMessage(), t);
+			}
+			// Create new static analysis for dynamic includes that have not yet been cached.
+			StaticAnalysis analysis;
+			IncludeCache includeCache = env.getEnv(StaticRuntimeEnv.class).getIncludeCache();
+			boolean isFirstCompile = false;
+			Scope parentScope = includeCache.getDynamicAnalysisParentScopeCache().get(t);
+			if(parentScope != null) {
+				analysis = includeCache.getStaticAnalysis(file);
+				if(analysis == null) {
+					analysis = new StaticAnalysis(true);
+					analysis.getStartScope().addParent(parentScope);
+					isFirstCompile = true;
 				}
-				case EVAL_INCLUDE -> {
-					return new StepResult<>(new Complete(CVoid.VOID), state);
+			} else {
+				analysis = new StaticAnalysis(true); // It's a static include.
+			}
+
+			// Get or load the include.
+			ParseTree include = IncludeCache.get(file, env, env.getEnvClasses(), analysis, t);
+
+			// Perform static analysis for dynamic includes.
+			// This should not run if this is the first compile for this include, as IncludeCache.get() checks it then.
+			/*
+			 *  TODO - This analysis runs on an optimized AST.
+			 *  Cloning, caching and using the non-optimized AST would be nice.
+			 *  This solution is acceptable in the meantime, as the first analysis of a dynamic include runs
+			 *  on the non-optimized AST through IncludeCache.get(), and otherwise-runtime errors should still be
+			 *  caught when analyzing the optimized AST.
+			 */
+			if(isFirstCompile) {
+
+				// Remove this parent scope since it should not end up in the cached analysis.
+				analysis.getStartScope().removeParent(parentScope);
+			} else {
+
+				// Set up analysis. Cloning is required to not mess up the cached analysis.
+				analysis = analysis.clone();
+				analysis.getStartScope().addParent(parentScope);
+				Set<ConfigCompileException> exceptions = new HashSet<>();
+				analysis.analyzeFinalScopeGraph(env, exceptions);
+
+				// Handle compile exceptions.
+				if(exceptions.size() == 1) {
+					ConfigCompileException ex = exceptions.iterator().next();
+					String fileName = (ex.getFile() == null ? "Unknown Source" : ex.getFile().getName());
+					throw new CREIncludeException(
+							"There was a compile error when trying to include the script at " + file
+							+ "\n" + ex.getMessage() + " :: " + fileName + ":" + ex.getLineNum(), t);
+				} else if(exceptions.size() > 1) {
+					StringBuilder b = new StringBuilder();
+					b.append("There were compile errors when trying to include the script at ")
+							.append(file).append("\n");
+					for(ConfigCompileException ex : exceptions) {
+						String fileName = (ex.getFile() == null ? "Unknown Source" : ex.getFile().getName());
+						b.append(ex.getMessage()).append(" :: ").append(fileName).append(":")
+								.append(ex.getLineNum()).append("\n");
+					}
+					throw new CREIncludeException(b.toString(), t);
 				}
 			}
-			throw ConfigRuntimeException.CreateUncatchableException(
-					"Invalid include state: " + state.phase, t);
-		}
 
-		@Override
-		public StepResult<IncludeState> childInterrupted(Target t, IncludeState state,
-				StepAction.FlowControl action, Environment env) {
-			if(state.phase == IncludeState.Phase.EVAL_INCLUDE) {
-				if(action.getAction() instanceof Exceptions.ThrowAction throwAction) {
-					ConfigRuntimeException ex = throwAction.getException();
-					if(ex instanceof AbstractCREException ace) {
-						ace.freezeStackTraceElements(
-								env.getEnv(GlobalEnv.class).GetStackTraceManager());
-					}
+			if(include != null) {
+				// It could be an empty file
+				StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
+				stManager.addStackTraceElement(
+						new ConfigRuntimeException.StackTraceElement("<<include " + arg.val() + ">>", t));
+				try {
+					parent.eval(include.getChildAt(0), env);
+				} catch (AbstractCREException e) {
+					e.freezeStackTraceElements(stManager);
+					throw e;
+				} catch (StackOverflowError e) {
+					throw new CREStackOverflowError(null, t, e);
+				} finally {
+					stManager.popStackTraceElement();
 				}
 			}
-			return null;
-		}
-
-		@Override
-		public void cleanup(Target t, IncludeState state, Environment env) {
-			if(state != null
-					&& state.phase == IncludeState.Phase.EVAL_INCLUDE) {
-				env.getEnv(GlobalEnv.class).GetStackTraceManager().popStackTraceFrame();
-			}
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -2413,6 +2196,11 @@ public class DataHandling {
 
 			// Fall back to default behavior for invalid syntax.
 			return super.linkScope(analysis, parentScope, ast, env, exceptions);
+		}
+
+		@Override
+		public boolean useSpecialExec() {
+			return true;
 		}
 
 		@Override
@@ -2503,7 +2291,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			// This function is rewritten to include() calls in compile time, so this doesn't exist in runtime.
 			throw new UnsupportedOperationException();
 		}
@@ -2651,7 +2439,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) {
+		public Mixed exec(Target t, Environment env, Mixed... args) {
 			return CBoolean.get(env.getEnv(GlobalEnv.class).GetProcs().get(args[0].val()) != null);
 		}
 	}
@@ -2695,8 +2483,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			if(args[0].isInstanceOf(CArray.TYPE)) {
 				return CBoolean.get(((CArray) args[0]).inAssociativeMode());
 			} else {
 				throw new CRECastException(this.getName() + " expects argument 1 to be an array", t);
@@ -2754,8 +2542,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			return CBoolean.get(args[0].isInstanceOf(CClosure.TYPE, null, env));
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			return CBoolean.get(args[0].isInstanceOf(CClosure.TYPE));
 		}
 
 		@Override
@@ -2815,11 +2603,11 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String key;
-			if(args[0].isInstanceOf(CString.TYPE, null, env)) {
+			if(args[0].isInstanceOf(CString.TYPE)) {
 				key = args[0].val();
-			} else if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
+			} else if(args[0].isInstanceOf(CArray.TYPE)) {
 				if(((CArray) args[0]).isAssociative()) {
 					throw new CREIllegalArgumentException("Associative arrays may not be used as keys in " + getName(), t);
 				}
@@ -2886,11 +2674,11 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String key;
-			if(args[0].isInstanceOf(CString.TYPE, null, env)) {
+			if(args[0].isInstanceOf(CString.TYPE)) {
 				key = args[0].val();
-			} else if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
+			} else if(args[0].isInstanceOf(CArray.TYPE)) {
 				if(((CArray) args[0]).isAssociative()) {
 					throw new CREIllegalArgumentException("Associative arrays may not be used as keys in " + getName(), t);
 				}
@@ -2929,117 +2717,7 @@ public class DataHandling {
 	@api
 	@unbreakable
 	@seealso({com.laytonsmith.tools.docgen.templates.Closures.class})
-	public static class closure extends AbstractFunction implements FlowFunction<closure.ClosureState>, BranchStatement, VariableScope {
-
-		static class ClosureState {
-			ParseTree[] children;
-			Environment closureEnv;
-			CClassType returnType;
-			int nodeOffset;
-			int paramIndex;
-			int numParams;
-			String[] names;
-			Mixed[] defaults;
-			CClassType[] types;
-
-			ClosureState(ParseTree[] children, Environment closureEnv, CClassType returnType,
-					int nodeOffset, int numParams) {
-				this.children = children;
-				this.closureEnv = closureEnv;
-				this.returnType = returnType;
-				this.nodeOffset = nodeOffset;
-				this.numParams = numParams;
-				this.names = new String[numParams];
-				this.defaults = new Mixed[numParams];
-				this.types = new CClassType[numParams];
-			}
-
-			@Override
-			public String toString() {
-				return "param " + paramIndex + "/" + numParams;
-			}
-		}
-
-		@Override
-		public StepResult<ClosureState> begin(Target t, ParseTree[] children, Environment env) {
-			CClassType returnType = Auto.TYPE;
-			int nodeOffset = 0;
-			if(children.length > 0 && children[0].getData() instanceof CClassType) {
-				returnType = (CClassType) children[0].getData();
-				nodeOffset = 1;
-			}
-
-			if(children.length - nodeOffset == 0) {
-				return new StepResult<>(new Complete(
-						createClosureObject(null, env, returnType,
-						new String[0], new Mixed[0], new CClassType[0], t)), null);
-			}
-
-			Environment myEnv;
-			try {
-				myEnv = env.clone();
-			} catch(CloneNotSupportedException ex) {
-				throw new RuntimeException(ex);
-			}
-
-			int numParams = children.length - nodeOffset - 1;
-			ClosureState state = new ClosureState(children, myEnv, returnType, nodeOffset, numParams);
-
-			if(numParams == 0) {
-				return new StepResult<>(new Complete(
-						createClosureObject(children[children.length - 1], myEnv, returnType,
-						new String[0], new Mixed[0], new CClassType[0], t)), state);
-			}
-
-			myEnv.getEnv(GlobalEnv.class).SetFlag(GlobalEnv.FLAG_CLOSURE_WARN_OVERWRITE, true);
-			myEnv.getEnv(GlobalEnv.class).SetFlag(GlobalEnv.FLAG_VAR_ARGS_ALLOWED, true);
-			return new StepResult<>(new Evaluate(children[nodeOffset], myEnv, true), state);
-		}
-
-		@Override
-		public StepResult<ClosureState> childCompleted(Target t, ClosureState state,
-				Mixed result, Environment env) {
-			if(!(result instanceof IVariable iv)) {
-				throw new CRECastException("Arguments sent to " + getName()
-						+ " barring the last) must be ivariables", t);
-			}
-			state.names[state.paramIndex] = iv.getVariableName();
-			try {
-				state.defaults[state.paramIndex] = iv.ival().clone();
-				state.types[state.paramIndex] = iv.getDefinedType();
-			} catch(CloneNotSupportedException ex) {
-				Logger.getLogger(DataHandling.class.getName()).log(Level.SEVERE, null, ex);
-			}
-			state.paramIndex++;
-
-			if(state.paramIndex < state.numParams) {
-				return new StepResult<>(new Evaluate(
-						state.children[state.nodeOffset + state.paramIndex],
-						state.closureEnv, true), state);
-			}
-
-			state.closureEnv.getEnv(GlobalEnv.class).ClearFlag(GlobalEnv.FLAG_VAR_ARGS_ALLOWED);
-			state.closureEnv.getEnv(GlobalEnv.class).ClearFlag(GlobalEnv.FLAG_CLOSURE_WARN_OVERWRITE);
-			ParseTree body = state.children[state.children.length - 1];
-			return new StepResult<>(new Complete(
-					createClosureObject(body, state.closureEnv, state.returnType,
-					state.names, state.defaults, state.types, t)), state);
-		}
-
-		@Override
-		public StepResult<ClosureState> childInterrupted(Target t, ClosureState state,
-				StepAction.FlowControl action, Environment env) {
-			if(state != null && state.closureEnv != null) {
-				state.closureEnv.getEnv(GlobalEnv.class).ClearFlag(GlobalEnv.FLAG_VAR_ARGS_ALLOWED);
-				state.closureEnv.getEnv(GlobalEnv.class).ClearFlag(GlobalEnv.FLAG_CLOSURE_WARN_OVERWRITE);
-			}
-			return null;
-		}
-
-		protected Mixed createClosureObject(ParseTree body, Environment env, CClassType returnType,
-				String[] names, Mixed[] defaults, CClassType[] types, Target t) {
-			return new CClosure(body, env, returnType, names, defaults, types, t);
-		}
+	public static class closure extends AbstractFunction implements BranchStatement, VariableScope {
 
 		@Override
 		public String getName() {
@@ -3088,8 +2766,69 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return CVoid.VOID;
+		}
+
+		@Override
+		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+
+			// Use first child as closure return type if it is a type.
+			CClassType returnType = Auto.TYPE;
+			int nodeOffset = 0;
+			if(nodes.length > 0 && nodes[0].getData().isInstanceOf(CClassType.TYPE)) {
+				returnType = (CClassType) nodes[0].getData();
+				nodeOffset = 1;
+			}
+
+			// Return an empty (possibly statically typed) closure when it is empty and does not have any parameters.
+			if(nodes.length - nodeOffset == 0) {
+				return new CClosure(null, env, returnType, new String[0], new Mixed[0], new CClassType[0], t);
+			}
+
+			// Clone the environment to prevent parameter and variable assigns overwriting variables in the outer scope.
+			Environment myEnv;
+			try {
+				myEnv = env.clone();
+			} catch (CloneNotSupportedException ex) {
+				throw new RuntimeException(ex);
+			}
+
+			// Get closure parameter names, default values and types.
+			int numParams = nodes.length - nodeOffset - 1;
+			String[] names = new String[numParams];
+			Mixed[] defaults = new Mixed[numParams];
+			CClassType[] types = new CClassType[numParams];
+			for(int i = 0; i < numParams; i++) {
+				ParseTree node = nodes[i + nodeOffset];
+				ParseTree newNode = new ParseTree(new CFunction(g.NAME, t), node.getFileOptions());
+				List<ParseTree> children = new ArrayList<>();
+				children.add(node);
+				newNode.setChildren(children);
+				Script fakeScript = Script.GenerateScript(newNode, myEnv.getEnv(GlobalEnv.class).GetLabel(), null);
+				myEnv.getEnv(GlobalEnv.class).SetFlag(GlobalEnv.FLAG_CLOSURE_WARN_OVERWRITE, true);
+				myEnv.getEnv(GlobalEnv.class).SetFlag(GlobalEnv.FLAG_VAR_ARGS_ALLOWED, true);
+				Mixed ret;
+				try {
+					ret = MethodScriptCompiler.execute(newNode, myEnv, null, fakeScript);
+				} finally {
+					myEnv.getEnv(GlobalEnv.class).ClearFlag(GlobalEnv.FLAG_VAR_ARGS_ALLOWED);
+					myEnv.getEnv(GlobalEnv.class).ClearFlag(GlobalEnv.FLAG_CLOSURE_WARN_OVERWRITE);
+				}
+				if(!(ret instanceof IVariable)) {
+					throw new CRECastException("Arguments sent to " + getName() + " barring the last) must be ivariables", t);
+				}
+				names[i] = ((IVariable) ret).getVariableName();
+				try {
+					defaults[i] = ((IVariable) ret).ival().clone();
+					types[i] = ((IVariable) ret).getDefinedType();
+				} catch (CloneNotSupportedException ex) {
+					Logger.getLogger(DataHandling.class.getName()).log(Level.SEVERE, null, ex);
+				}
+			}
+
+			// Create and return the closure, using the last argument as the closure body.
+			return new CClosure(nodes[nodes.length - 1], myEnv, returnType, names, defaults, types, t);
 		}
 
 		@Override
@@ -3163,6 +2902,11 @@ public class DataHandling {
 		}
 
 		@Override
+		public boolean useSpecialExec() {
+			return true;
+		}
+
+		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Creates a closure", "closure(){\n"
@@ -3201,13 +2945,6 @@ public class DataHandling {
 	public static class iclosure extends closure {
 
 		@Override
-		protected Mixed createClosureObject(ParseTree body, Environment env, CClassType returnType,
-				String[] names, Mixed[] defaults, CClassType[] types, Target t) {
-			env.getEnv(GlobalEnv.class).SetVarList(null);
-			return new CIClosure(body, env, returnType, names, defaults, types, t);
-		}
-
-		@Override
 		public String getName() {
 			return "iclosure";
 		}
@@ -3228,6 +2965,66 @@ public class DataHandling {
 					+ " an array of all the arguments passed to the closure, much like procedures."
 					+ " See the wiki article on [[Closures|closures]] for more details"
 					+ " and examples.";
+		}
+
+		@Override
+		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+			if(nodes.length == 0) {
+				//Empty closure, do nothing.
+				return new CIClosure(null, env, Auto.TYPE, new String[]{}, new Mixed[]{}, new CClassType[]{}, t);
+			}
+			// Handle the closure type first thing
+			CClassType returnType = Auto.TYPE;
+			if(nodes[0].getData().isInstanceOf(CClassType.TYPE)) {
+				returnType = (CClassType) nodes[0].getData();
+				ParseTree[] newNodes = new ParseTree[nodes.length - 1];
+				for(int i = 1; i < nodes.length; i++) {
+					newNodes[i - 1] = nodes[i];
+				}
+				nodes = newNodes;
+			}
+			String[] names = new String[nodes.length - 1];
+			Mixed[] defaults = new Mixed[nodes.length - 1];
+			CClassType[] types = new CClassType[nodes.length - 1];
+			// We clone the enviornment at this point, because we don't want the values
+			// that are assigned here to overwrite values in the main scope.
+			Environment myEnv;
+			try {
+				myEnv = env.clone();
+			} catch (CloneNotSupportedException ex) {
+				throw new RuntimeException(ex);
+			}
+			for(int i = 0; i < nodes.length - 1; i++) {
+				ParseTree node = nodes[i];
+				ParseTree newNode = new ParseTree(new CFunction(g.NAME, t), node.getFileOptions());
+				List<ParseTree> children = new ArrayList<>();
+				children.add(node);
+				newNode.setChildren(children);
+				Script fakeScript = Script.GenerateScript(newNode, myEnv.getEnv(GlobalEnv.class).GetLabel(), null);
+				myEnv.getEnv(GlobalEnv.class).SetFlag(GlobalEnv.FLAG_CLOSURE_WARN_OVERWRITE, true);
+				myEnv.getEnv(GlobalEnv.class).SetFlag(GlobalEnv.FLAG_VAR_ARGS_ALLOWED, true);
+				Mixed ret;
+				try {
+					ret = MethodScriptCompiler.execute(newNode, myEnv, null, fakeScript);
+				} finally {
+					myEnv.getEnv(GlobalEnv.class).ClearFlag(GlobalEnv.FLAG_VAR_ARGS_ALLOWED);
+					myEnv.getEnv(GlobalEnv.class).ClearFlag(GlobalEnv.FLAG_CLOSURE_WARN_OVERWRITE);
+				}
+				if(!(ret instanceof IVariable)) {
+					throw new CRECastException("Arguments sent to " + getName() + " barring the last) must be ivariables", t);
+				}
+				names[i] = ((IVariable) ret).getVariableName();
+				try {
+					defaults[i] = ((IVariable) ret).ival().clone();
+					types[i] = ((IVariable) ret).getDefinedType();
+				} catch (CloneNotSupportedException ex) {
+					Logger.getLogger(DataHandling.class.getName()).log(Level.SEVERE, null, ex);
+				}
+			}
+			// Now that iclosure is done with the current variable list, it can be removed from the cloned environment.
+			// This ensures it's not unintentionally retaining values in memory cloned from the original scope.
+			myEnv.getEnv(GlobalEnv.class).SetVarList(null);
+			return new CIClosure(nodes[nodes.length - 1], myEnv, returnType, names, defaults, types, t);
 		}
 
 		@Override
@@ -3294,7 +3091,7 @@ public class DataHandling {
 
 	@api
 	@seealso({com.laytonsmith.tools.docgen.templates.Closures.class, execute_array.class, executeas.class})
-	public static class execute extends CallbackYield {
+	public static class execute extends AbstractFunction {
 
 		public static final String NAME = "execute";
 
@@ -3336,12 +3133,11 @@ public class DataHandling {
 		}
 
 		@Override
-		protected void execWithYield(Target t, Environment env, Mixed[] args, CallbackYield.Yield yield) {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args[args.length - 1] instanceof Callable callable) {
 				Mixed[] vals = new Mixed[args.length - 1];
 				System.arraycopy(args, 0, vals, 0, args.length - 1);
-				yield.call(callable, env, t, vals)
-						.then((result, y) -> y.done(() -> result));
+				return callable.executeCallable(environment, t, vals);
 			} else {
 				throw new CRECastException("Only a Callable (created for instance from the closure function) can be"
 						+ " sent to execute(), or executed directly, such as @c().", t);
@@ -3366,7 +3162,7 @@ public class DataHandling {
 
 	@api
 	@seealso({com.laytonsmith.tools.docgen.templates.Closures.class, execute.class})
-	public static class execute_array extends CallbackYield {
+	public static class execute_array extends AbstractFunction {
 		@Override
 		public String getName() {
 			return "execute_array";
@@ -3402,11 +3198,10 @@ public class DataHandling {
 		}
 
 		@Override
-		protected void execWithYield(Target t, Environment env, Mixed[] args, CallbackYield.Yield yield) {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			Mixed[] vals = ArgumentValidation.getArray(args[0], t).asList().toArray(new Mixed[0]);
 			CClosure closure = ArgumentValidation.getObject(args[1], t, CClosure.class);
-			yield.call(closure, env, t, vals)
-					.then((result, y) -> y.done(() -> result));
+			return closure.executeCallable(vals);
 		}
 
 		@Override
@@ -3417,7 +3212,7 @@ public class DataHandling {
 
 	@api
 	@seealso({com.laytonsmith.tools.docgen.templates.Closures.class})
-	public static class executeas extends CallbackYield implements Optimizable {
+	public static class executeas extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -3455,8 +3250,8 @@ public class DataHandling {
 		}
 
 		@Override
-		protected void execWithYield(Target t, Environment env, Mixed[] args, CallbackYield.Yield yield) {
-			if(!(args[args.length - 1].isInstanceOf(CClosure.TYPE, null, env))) {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			if(!(args[args.length - 1].isInstanceOf(CClosure.TYPE))) {
 				throw new CRECastException("Only a closure (created from the closure function) can be sent to executeas()", t);
 			}
 			Mixed[] vals = new Mixed[args.length - 3];
@@ -3468,7 +3263,7 @@ public class DataHandling {
 			MCCommandSender originalSender = cEnv.GetCommandSender();
 			MCCommandSender sender;
 			if(args[0] instanceof CNull) {
-				sender = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+				sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			} else {
 				sender = Static.GetCommandSender(args[0].val(), t);
 			}
@@ -3479,12 +3274,12 @@ public class DataHandling {
 				gEnv.SetLabel(args[1].val());
 			}
 
-			yield.call(closure, env, t, vals)
-					.then((result, y) -> y.done(() -> result))
-					.cleanup(() -> {
-						cEnv.SetCommandSender(originalSender);
-						gEnv.SetLabel(originalLabel);
-					});
+			try {
+				return closure.executeCallable(vals);
+			} finally {
+				cEnv.SetCommandSender(originalSender);
+				gEnv.SetLabel(originalLabel);
+			}
 		}
 
 		@Override
@@ -3544,7 +3339,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return CBoolean.get(ArgumentValidation.getBoolean(args[0], t));
 		}
 
@@ -3613,7 +3408,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			Mixed arg = args[0];
 			if(arg instanceof CMutablePrimitive) {
 				arg = ((CMutablePrimitive) arg).get();
@@ -3706,7 +3501,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return new CDouble(ArgumentValidation.getDouble(args[0], t), t);
 		}
 
@@ -3771,8 +3566,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			if(args[0].isInstanceOf(CString.TYPE, null, env)) {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			if(args[0].isInstanceOf(CString.TYPE)) {
 				return args[0];
 			}
 			return new CString(args[0].val(), t);
@@ -3823,7 +3618,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			int radix = ArgumentValidation.getInt32(args[1], t);
 			if(radix < Character.MIN_RADIX || radix > Character.MAX_RADIX) {
 				throw new CRERangeException("The radix must be between " + Character.MIN_RADIX + " and " + Character.MAX_RADIX + ", inclusive.", t);
@@ -3895,7 +3690,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String value = args[0].val();
 			int radix = ArgumentValidation.getInt32(args[1], t);
 			if(radix < Character.MIN_RADIX || radix > Character.MAX_RADIX) {
@@ -3980,9 +3775,9 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			try {
-				return args[0].typeof(env);
+				return args[0].typeof();
 			} catch (IllegalArgumentException ex) {
 				throw new Error("Class " + args[0].getClass().getName() + " is not annotated with @typeof. Please report this"
 						+ " error to the developers.");
@@ -4027,8 +3822,7 @@ public class DataHandling {
 	}
 
 	@api
-	public static class eval extends AbstractFunction implements Optimizable,
-			FlowFunction<eval.EvalState> {
+	public static class eval extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -4063,7 +3857,62 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+			if(ArgumentValidation.getBooleanish(env.getEnv(GlobalEnv.class).GetRuntimeSetting("function.eval.disable",
+					CBoolean.FALSE), t)) {
+				throw new CREInsufficientPermissionException("eval is disabled", t);
+			}
+			boolean oldDynamicScriptMode = env.getEnv(GlobalEnv.class).GetDynamicScriptingMode();
+			ParseTree node = nodes[0];
+			try {
+				env.getEnv(GlobalEnv.class).SetDynamicScriptingMode(true);
+				Mixed script = parent.seval(node, env);
+				if(script.isInstanceOf(CClosure.TYPE)) {
+					throw new CRECastException("Closures cannot be eval'd directly. Use execute() instead.", t);
+				}
+				ParseTree root = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script.val(), env, t.file(), true),
+						env, env.getEnvClasses());
+				if(root == null) {
+					return new CString("", t);
+				}
+
+				// Unwrap single value in __statements__() and return its string value.
+				if(root.getChildren().size() == 1 && root.getChildAt(0).getData() instanceof CFunction
+						&& ((CFunction) root.getChildAt(0).getData()).getFunction().getName().equals(__statements__.NAME)
+						&& root.getChildAt(0).getChildren().size() == 1) {
+					return new CString(parent.seval(root.getChildAt(0).getChildAt(0), env).val(), t);
+				}
+
+				// Concat string values of all children and return the result.
+				StringBuilder b = new StringBuilder();
+				int count = 0;
+				for(ParseTree child : root.getChildren()) {
+					Mixed s = parent.seval(child, env);
+					if(!s.val().trim().isEmpty()) {
+						if(count > 0) {
+							b.append(" ");
+						}
+						b.append(s.val());
+					}
+					count++;
+				}
+				return new CString(b.toString(), t);
+			} catch (ConfigCompileException e) {
+				throw new CREFormatException("Could not compile eval'd code: " + e.getMessage(), t);
+			} catch (ConfigCompileGroupException ex) {
+				StringBuilder b = new StringBuilder();
+				b.append("Could not compile eval'd code: ");
+				for(ConfigCompileException e : ex.getList()) {
+					b.append(e.getMessage()).append("\n");
+				}
+				throw new CREFormatException(b.toString(), t);
+			} finally {
+				env.getEnv(GlobalEnv.class).SetDynamicScriptingMode(oldDynamicScriptMode);
+			}
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			return CVoid.VOID;
 		}
 		//Doesn't matter, run out of state anyways
@@ -4073,111 +3922,9 @@ public class DataHandling {
 			return null;
 		}
 
-		static class EvalState {
-			enum Phase { EVAL_ARG, EVAL_CHILDREN }
-			Phase phase = Phase.EVAL_ARG;
-			boolean oldDynamicScriptMode;
-			List<ParseTree> compiledChildren;
-			int childIndex;
-			StringBuilder result = new StringBuilder();
-			int count;
-
-			@Override
-			public String toString() {
-				return phase == Phase.EVAL_ARG ? "EVAL_ARG"
-						: "EVAL_CHILDREN[" + childIndex + "/" + compiledChildren.size() + "]";
-			}
-		}
-
 		@Override
-		public StepResult<EvalState> begin(Target t, ParseTree[] children, Environment env) {
-			if(ArgumentValidation.getBooleanish(env.getEnv(GlobalEnv.class).GetRuntimeSetting(
-					"function.eval.disable", CBoolean.FALSE), t)) {
-				throw new CREInsufficientPermissionException("eval is disabled", t);
-			}
-			EvalState state = new EvalState();
-			state.oldDynamicScriptMode = env.getEnv(GlobalEnv.class).GetDynamicScriptingMode();
-			env.getEnv(GlobalEnv.class).SetDynamicScriptingMode(true);
-			return new StepResult<>(new Evaluate(children[0]), state);
-		}
-
-		@Override
-		public StepResult<EvalState> childCompleted(Target t, EvalState state,
-				Mixed result, Environment env) {
-			switch(state.phase) {
-				case EVAL_ARG -> {
-					if(result.isInstanceOf(CClosure.TYPE, null, env)) {
-						throw new CRECastException(
-								"Closures cannot be eval'd directly. Use execute() instead.", t);
-					}
-					ParseTree root;
-					try {
-						root = MethodScriptCompiler.compile(
-								MethodScriptCompiler.lex(result.val(), env, t.file(), true),
-								env, env.getEnvClasses());
-					} catch(ConfigCompileException e) {
-						throw new CREFormatException(
-								"Could not compile eval'd code: " + e.getMessage(), t);
-					} catch(ConfigCompileGroupException ex) {
-						StringBuilder b = new StringBuilder();
-						b.append("Could not compile eval'd code: ");
-						for(ConfigCompileException e : ex.getList()) {
-							b.append(e.getMessage()).append("\n");
-						}
-						throw new CREFormatException(b.toString(), t);
-					}
-					if(root == null) {
-						return new StepResult<>(new Complete(new CString("", t)), state);
-					}
-					// Unwrap single value in __statements__() with single child
-					try {
-						if(root.getChildren().size() == 1 && root.getChildAt(0).getData() instanceof CFunction
-								&& ((CFunction) root.getChildAt(0).getData()).getFunction().getName()
-										.equals(__statements__.NAME)
-								&& root.getChildAt(0).getChildren().size() == 1) {
-							state.compiledChildren = List.of(root.getChildAt(0).getChildAt(0));
-						} else {
-							state.compiledChildren = root.getChildren();
-						}
-					} catch(ConfigCompileException e) {
-						throw new CREFormatException(
-								"Could not compile eval'd code: " + e.getMessage(), t);
-					}
-					state.phase = EvalState.Phase.EVAL_CHILDREN;
-					state.childIndex = 0;
-					if(state.compiledChildren.isEmpty()) {
-						return new StepResult<>(new Complete(new CString("", t)), state);
-					}
-					return new StepResult<>(
-							new Evaluate(state.compiledChildren.get(state.childIndex)), state);
-				}
-				case EVAL_CHILDREN -> {
-					if(!result.val().trim().isEmpty()) {
-						if(state.count > 0) {
-							state.result.append(" ");
-						}
-						state.result.append(result.val());
-					}
-					state.count++;
-					state.childIndex++;
-					if(state.childIndex < state.compiledChildren.size()) {
-						return new StepResult<>(
-								new Evaluate(state.compiledChildren.get(state.childIndex)), state);
-					}
-					return new StepResult<>(
-							new Complete(new CString(state.result.toString(), t)), state);
-				}
-			}
-			throw ConfigRuntimeException.CreateUncatchableException(
-					"Invalid eval state: " + state.phase, t);
-		}
-
-		@Override
-		public void cleanup(Target t, EvalState state, Environment env) {
-			if(state != null) {
-				env.getEnv(GlobalEnv.class).SetDynamicScriptingMode(
-						state.oldDynamicScriptMode);
-			}
+		public boolean useSpecialExec() {
+			return true;
 		}
 
 		@Override
@@ -4221,7 +3968,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			return CVoid.VOID;
 		}
 
@@ -4282,7 +4029,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			Mixed val = CNull.NULL;
 			if(args.length > 0) {
 				val = args[0];
@@ -4384,18 +4131,18 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args[0] instanceof CNull) {
 				return CBoolean.FALSE;
 			}
 			CClassType type;
-			if(args[1] instanceof CClassType) {
+			if(args[1].isInstanceOf(CClassType.TYPE)) {
 				type = (CClassType) args[1];
 			} else {
 				throw new RuntimeException("This should have been optimized out, this is a bug in instanceof,"
 						+ " please report it");
 			}
-			boolean b = InstanceofUtil.isInstanceof(args[0], type, env);
+			boolean b = InstanceofUtil.isInstanceof(args[0], type, environment);
 			return CBoolean.get(b);
 		}
 
@@ -4429,7 +4176,7 @@ public class DataHandling {
 				FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			// There are two specific cases here where we will give more precise error messages.
 			// If it's a string, yell at them (Note CKeyword extends CString, for better or worse)
-			if(children.get(1).getData().isInstanceOf(CString.TYPE, null, env)) {
+			if(children.get(1).getData().isInstanceOf(CString.TYPE)) {
 				throw new ConfigCompileException("Unexpected string type passed to \"instanceof\"", t);
 			}
 			// If it's a variable, also yell at them
@@ -4437,7 +4184,7 @@ public class DataHandling {
 				throw new ConfigCompileException("Variable types are not allowed in \"instanceof\"", t);
 			}
 			// Unknown error, but this is still never valid.
-			if(!(children.get(1).getData() instanceof CClassType)) {
+			if(!(children.get(1).getData().isInstanceOf(CClassType.TYPE))) {
 				throw new ConfigCompileException("Unexpected type for \"instanceof\": " + children.get(1).getData(), t);
 			}
 			// null is technically a type, but instanceof shouldn't work with that
@@ -4446,7 +4193,7 @@ public class DataHandling {
 			}
 			// It's hardcoded, allow it, but optimize it out.
 			if(children.get(0).isConst()) {
-				return new ParseTree(exec(t, null, null, children.get(0).getData(), children.get(1).getData()), fileOptions);
+				return new ParseTree(exec(t, null, children.get(0).getData(), children.get(1).getData()), fileOptions);
 			}
 			return null;
 		}
@@ -4491,7 +4238,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			IVariableList list = env.getEnv(GlobalEnv.class).GetVarList();
 			Mixed value = list.get(((IVariable) args[0]).getVariableName(), t, env).ival();
 			list.freeValue(value);
@@ -4557,7 +4304,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			CClassType type = ArgumentValidation.getClassType(args[0], t);
 			int size = ArgumentValidation.getInt32(args[1], t);
 			if(size < 0) {

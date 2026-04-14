@@ -5,7 +5,6 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
-import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREReadOnlyException;
 import com.laytonsmith.core.exceptions.CRE.CREUnsupportedOperationException;
@@ -29,7 +28,7 @@ import java.util.EnumSet;
  *
  */
 @typeof("ms.lang.byte_array")
-public final class CByteArray extends CArray implements Sizeable, ArrayAccess {
+public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
 	public static final CClassType TYPE = CClassType.get(CByteArray.class);
@@ -390,16 +389,9 @@ public final class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	 * Returns the current size of the byte array. This is not to be confused with the capacity.
 	 *
 	 * @return
-	 * @deprecated Use {@link #size(Environment)} instead.
 	 */
-	@Deprecated
 	@Override
 	public long size() {
-		return size(null);
-	}
-
-	@Override
-	public long size(Environment env) {
 		return maxValue;
 	}
 
@@ -493,15 +485,8 @@ public final class CByteArray extends CArray implements Sizeable, ArrayAccess {
 		return false;
 	}
 
-	/** @deprecated Use {@link #slice(int, int, Target, Environment)} instead. */
-	@Deprecated
 	@Override
 	public Mixed slice(int begin, int end, Target t) {
-		return slice(begin, end, t, null);
-	}
-
-	@Override
-	public Mixed slice(int begin, int end, Target t, Environment env) {
 		return getBytes(end - begin, begin);
 	}
 
@@ -540,15 +525,8 @@ public final class CByteArray extends CArray implements Sizeable, ArrayAccess {
 		throw new CREUnsupportedOperationException("Modifying a byte array using array_push() is not supported.", t);
 	}
 
-	/** @deprecated Use {@link #keySet(Environment)} instead. */
-	@Deprecated
 	@Override
 	public Set<Mixed> keySet() {
-		return keySet(null);
-	}
-
-	@Override
-	public Set<Mixed> keySet(Environment env) {
 		throw new CREUnsupportedOperationException("Getting a key set from a byte array is not supported.", getTarget());
 	}
 
@@ -557,15 +535,8 @@ public final class CByteArray extends CArray implements Sizeable, ArrayAccess {
 		throw new CREUnsupportedOperationException("Getting a string key set from a byte array is not supported.", getTarget());
 	}
 
-	/** @deprecated Use {@link #set(Mixed, Mixed, Target, Environment)} instead. */
-	@Deprecated
 	@Override
 	public void set(Mixed index, Mixed c, Target t) throws ConfigRuntimeException {
-		set(index, c, t, null);
-	}
-
-	@Override
-	public void set(Mixed index, Mixed c, Target t, Environment env) throws ConfigRuntimeException {
 		throw new CREUnsupportedOperationException("Modifying a byte array using array_set() is not supported.", t);
 	}
 
@@ -578,16 +549,9 @@ public final class CByteArray extends CArray implements Sizeable, ArrayAccess {
 		return CByteArray.wrap(newArray, t);
 	}
 
-	/** @deprecated Use {@link #get(Mixed, Target, Environment)} instead. */
-	@Deprecated
 	@Override
 	public Mixed get(Mixed index, Target t) throws ConfigRuntimeException {
-		return get(index, t, null);
-	}
-
-	@Override
-	public Mixed get(Mixed index, Target t, Environment env) throws ConfigRuntimeException {
-		int i = ArgumentValidation.getInt32(index, t, env);
+		int i = ArgumentValidation.getInt32(index, t);
 		byte b = getByte(i);
 		return new CInt(b, t);
 	}
@@ -683,28 +647,14 @@ public final class CByteArray extends CArray implements Sizeable, ArrayAccess {
 			throw new CREByteArrayReadOnlyException("Arrays copied from ByteArrays are read only", t);
 		}
 
-		/** @deprecated Use {@link #set(Mixed, Mixed, Target, Environment)} instead. */
-		@Deprecated
 		@Override
 		public void set(Mixed index, Mixed c, Target t) {
-			set(index, c, t, null);
-		}
-
-		@Override
-		public void set(Mixed index, Mixed c, Target t, Environment env) {
 			throw new CREByteArrayReadOnlyException("Arrays copied from ByteArrays are read only", t);
 		}
 
-		/** @deprecated Use {@link #get(Mixed, Target, Environment)} instead. */
-		@Deprecated
 		@Override
 		public Mixed get(Mixed index, Target t) {
-			return get(index, t, null);
-		}
-
-		@Override
-		public Mixed get(Mixed index, Target t, Environment env) {
-			int i = ArgumentValidation.getInt32(index, t, env);
+			int i = ArgumentValidation.getInt32(index, t);
 			try {
 				return new CInt(backing[i], t);
 			} catch (ArrayIndexOutOfBoundsException e) {
@@ -712,15 +662,8 @@ public final class CByteArray extends CArray implements Sizeable, ArrayAccess {
 			}
 		}
 
-		/** @deprecated Use {@link #size(Environment)} instead. */
-		@Deprecated
 		@Override
 		public long size() {
-			return size(null);
-		}
-
-		@Override
-		public long size(Environment env) {
 			return backing.length;
 		}
 
@@ -775,7 +718,7 @@ public final class CByteArray extends CArray implements Sizeable, ArrayAccess {
 
 		@Override
 		public Set<ObjectModifier> getObjectModifiers() {
-			return EnumSet.of(ObjectModifier.STATIC, ObjectModifier.FINAL);
+			return EnumSet.of(ObjectModifier.STATIC);
 		}
 
 		@Override

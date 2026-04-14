@@ -33,7 +33,6 @@ import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREError;
@@ -98,7 +97,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			StringBuilder b = new StringBuilder();
 			for(int i = 0; i < args.length; i++) {
 				b.append(args[i].val());
@@ -173,7 +172,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			StringBuilder b = new StringBuilder();
 			for(int i = 0; i < args.length; i++) {
 				if(i > 0) {
@@ -257,7 +256,7 @@ public class StringHandling {
 					// sconcat only returns a string (except in the special case above) so we need to
 					// return the string value if it's not already a string
 					try {
-						if(child.isConst() && InstanceofUtil.isInstanceof(child.getData(), CString.TYPE, env)) {
+						if(InstanceofUtil.isInstanceof(child.getData(), CString.TYPE, env)) {
 							return child;
 						}
 					} catch (IllegalArgumentException ex) {
@@ -302,7 +301,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			String thing = args[0].val();
 			String what = args[1].val();
 			String that = args[2].val();
@@ -363,11 +362,11 @@ public class StringHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			String string = args[0].val();
 			boolean useAdvanced = false;
 			if(args.length >= 2) {
-				useAdvanced = ArgumentValidation.getBoolean(args[1], t, env);
+				useAdvanced = ArgumentValidation.getBoolean(args[1], t);
 			}
 			List<Mixed> a = new ArrayList<>();
 			if(!useAdvanced) {
@@ -470,7 +469,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			return new CString(args[0].val().trim(), args[0].getTarget());
 		}
 
@@ -527,7 +526,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			return new CString(StringUtils.trimRight(args[0].val()), args[0].getTarget());
 		}
 
@@ -584,7 +583,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			return new CString(StringUtils.trimLeft(args[0].val()), t);
 		}
 
@@ -647,8 +646,8 @@ public class StringHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
-			if(args[0].isInstanceOf(Sizeable.TYPE, null, env)) {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+			if(args[0].isInstanceOf(Sizeable.TYPE)) {
 				return new CInt(((Sizeable) args[0]).size(), t);
 			} else {
 				return new CInt(args[0].val().length(), t);
@@ -709,10 +708,10 @@ public class StringHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
-			if(!(args[0].isInstanceOf(CString.TYPE, null, env))) {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+			if(!(args[0].isInstanceOf(CString.TYPE))) {
 				throw new CREFormatException(this.getName() + " expects a string as first argument, but type "
-						+ args[0].typeof(env) + " was found.", t);
+						+ args[0].typeof() + " was found.", t);
 			}
 			return new CString(args[0].val().toUpperCase(), t);
 		}
@@ -772,10 +771,10 @@ public class StringHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
-			if(!(args[0].isInstanceOf(CString.TYPE, null, env))) {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+			if(!(args[0].isInstanceOf(CString.TYPE))) {
 				throw new CREFormatException(this.getName() + " expects a string as first argument, but type "
-						+ args[0].typeof(env) + " was found.", t);
+						+ args[0].typeof() + " was found.", t);
 			}
 			return new CString(args[0].val().toLowerCase(), t);
 		}
@@ -838,13 +837,13 @@ public class StringHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			try {
 				String s = args[0].val();
-				int begin = ArgumentValidation.getInt32(args[1], t, env);
+				int begin = ArgumentValidation.getInt32(args[1], t);
 				int end;
 				if(args.length == 3) {
-					end = ArgumentValidation.getInt32(args[2], t, env);
+					end = ArgumentValidation.getInt32(args[2], t);
 				} else {
 					end = s.length();
 				}
@@ -894,7 +893,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			Static.AssertNonCNull(t, args);
 
 			String teststring = args[0].val();
@@ -962,7 +961,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			Static.AssertNonCNull(t, args);
 
 			String teststring = args[0].val();
@@ -1022,7 +1021,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			if(args[0] instanceof CNull) {
 				throw new CRECastException(this.getName() + " expects a string as first argument, but found null.", t);
 			}
@@ -1126,7 +1125,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			Static.AssertNonCNull(t, args);
 			String haystack = args[0].val();
 			String needle = args[1].val();
@@ -1310,7 +1309,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			//http://stackoverflow.com/questions/2667015/is-regex-too-slow-real-life-examples-where-simple-non-regex-alternative-is-bett
 			//According to this, regex isn't necessarily slower, but we do want to escape the pattern either way, since the main advantage
 			//of this function is convenience (not speed) however, if we can eek out a little extra speed too, excellent.
@@ -1319,13 +1318,13 @@ public class StringHandling {
 			String string = args[1].val();
 			int limit = Integer.MAX_VALUE;
 			if(args.length >= 3) {
-				limit = ArgumentValidation.getInt32(args[2], t, env);
+				limit = ArgumentValidation.getInt32(args[2], t);
 			}
 			int sp = 0;
 			if(split.length() == 0) {
 				//Empty string, so special case.
 				for(int i = 0; i < string.length(); i++) {
-					array.push(new CString(string.charAt(i), t), t, env);
+					array.push(new CString(string.charAt(i), t), t);
 				}
 				return array;
 			}
@@ -1334,16 +1333,16 @@ public class StringHandling {
 				if(string.substring(i, i + split.length()).equals(split)) {
 					//Split point found
 					splitsFound++;
-					array.push(new CString(string.substring(sp, i), t), t, env);
+					array.push(new CString(string.substring(sp, i), t), t);
 					sp = i + split.length();
 					i += split.length() - 1;
 				}
 			}
 			if(sp != 0) {
-				array.push(new CString(string.substring(sp, string.length()), t), t, env);
+				array.push(new CString(string.substring(sp, string.length()), t), t);
 			} else {
 				//It was not found anywhere, so put the whole string in
-				array.push(args[1], t, env);
+				array.push(args[1], t);
 			}
 			return array;
 		}
@@ -1387,7 +1386,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args.length < 2) {
 				throw new CREInsufficientArgumentsException(getName() + " expects 2 or more arguments", t);
 			}
@@ -1420,7 +1419,7 @@ public class StringHandling {
 			}
 
 			List<Mixed> flattenedArgs = new ArrayList<>();
-			if(numArgs == 3 && args[2].isInstanceOf(CArray.TYPE, null, env)) {
+			if(numArgs == 3 && args[2].isInstanceOf(CArray.TYPE)) {
 				if(((CArray) args[2]).inAssociativeMode()) {
 					throw new CRECastException("If the second argument to " + getName() + " is an array, it may not be associative.", t);
 				} else {
@@ -1937,7 +1936,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String val = args[0].val();
 			String encoding = "UTF-8";
 			if(args.length == 2) {
@@ -1993,8 +1992,8 @@ public class StringHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			CByteArray ba = ArgumentValidation.getByteArray(args[0], t, env);
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			CByteArray ba = ArgumentValidation.getByteArray(args[0], t);
 			String encoding = "UTF-8";
 			if(args.length == 2) {
 				encoding = args[1].val();
@@ -2048,7 +2047,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args.length < 2) {
 				throw new CREInsufficientArgumentsException(getName() + " must have 2 arguments at minimum", t);
 			}
@@ -2137,9 +2136,9 @@ public class StringHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			try {
-				return new CString(new String(Character.toChars(ArgumentValidation.getInt32(args[0], t, env))), t);
+				return new CString(new String(Character.toChars(ArgumentValidation.getInt32(args[0], t))), t);
 			} catch (IllegalArgumentException ex) {
 				throw new CRERangeException("Code point out of range: " + args[0].val(), t);
 			}
@@ -2205,7 +2204,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args[0].val().toCharArray().length == 0) {
 				throw new CRERangeException("Empty string cannot be converted to unicode.", t);
 			}
@@ -2263,7 +2262,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return new CInt(StringUtils.LevenshteinDistance(args[0].val(), args[1].val()), t);
 		}
 
@@ -2320,7 +2319,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return new CInt(args[0].val().compareTo(args[1].val()), t);
 		}
 
@@ -2365,7 +2364,7 @@ public class StringHandling {
 	public static class string_compare_ic extends string_compare {
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return new CInt(args[0].val().compareToIgnoreCase(args[1].val()), t);
 		}
 
@@ -2418,12 +2417,12 @@ public class StringHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args[0] instanceof CNull) {
 				return CNull.NULL;
 			}
 			String string = args[0].val();
-			int times = ArgumentValidation.getInt32(args[1], t, env);
+			int times = ArgumentValidation.getInt32(args[1], t);
 			if(times < 0) {
 				throw new CRERangeException("Expecting a value >= 0, but " + times + " was found.", t);
 			}
@@ -2527,9 +2526,9 @@ public class StringHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
-				CArray array = ArgumentValidation.getArray(args[0], t, env);
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			if(args[0].isInstanceOf(CArray.TYPE)) {
+				CArray array = ArgumentValidation.getArray(args[0], t);
 				return new CSecureString(array, t);
 			} else {
 				String s = args[0].val();
@@ -2605,14 +2604,14 @@ public class StringHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			if(args[0].isInstanceOf(CSecureString.TYPE, null, env)) {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			if(args[0].isInstanceOf(CSecureString.TYPE)) {
 				CSecureString secure = ArgumentValidation.getObject(args[0], t, CSecureString.class);
 				return secure.getDecryptedCharCArray();
-			} else if(args[0].isInstanceOf(CString.TYPE, null, env)) {
+			} else if(args[0].isInstanceOf(CString.TYPE)) {
 				CArray array = new CArray(Target.UNKNOWN, args[0].val().length());
 				for(char c : args[0].val().toCharArray()) {
-					array.push(new CString(c, t), t, env);
+					array.push(new CString(c, t), t);
 				}
 				return array;
 			} else {
@@ -2714,7 +2713,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			UUIDType type = UUIDType.RANDOM;
 			String input = null;
 			if(args.length > 0) {

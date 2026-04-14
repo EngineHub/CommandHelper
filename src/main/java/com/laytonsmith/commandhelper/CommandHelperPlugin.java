@@ -66,15 +66,9 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.UpgradeLog;
 import com.laytonsmith.core.apps.AppsApiUtil;
 import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.environments.DebugContext;
-import com.laytonsmith.core.environments.Environment;
-import com.laytonsmith.core.environments.GlobalEnv;
-import com.laytonsmith.core.environments.RuntimeMode;
 import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.telemetry.DefaultTelemetry;
 import com.laytonsmith.core.telemetry.Telemetry;
-import com.laytonsmith.tools.debugger.DebugSecurity;
-import com.laytonsmith.tools.debugger.MSDebugServer;
 import org.bukkit.Bukkit;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.Command;
@@ -99,7 +93,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -120,7 +113,6 @@ public class CommandHelperPlugin extends JavaPlugin {
 	private static int hostnameThreadPoolID = 0;
 	private boolean firstLoad = true;
 	private long interpreterUnlockedUntil = 0;
-	private MSDebugServer debugServer;
 
 	/**
 	 * Listener for the plugin system.
@@ -393,12 +385,6 @@ public class CommandHelperPlugin extends JavaPlugin {
 			StreamUtils.GetSystemOut().println("\n\n" + Static.Logo());
 		}
 		ac = new AliasCore(CommandHelperFileLocations.getDefault());
-
-		String debugMode = Prefs.prefS(Prefs.PNames.DEBUG_SERVER_MODE);
-		if("on".equalsIgnoreCase(debugMode)) {
-			startDebugServer();
-		}
-
 		ac.reload(null, null, this.firstLoad);
 
 		//Clear out our hostname cache
@@ -443,13 +429,6 @@ public class CommandHelperPlugin extends JavaPlugin {
 	 */
 	@Override
 	public void onDisable() {
-		if(debugServer != null) {
-			debugServer.shutdown();
-			if(ac != null) {
-				ac.setDebugContext(null);
-			}
-			debugServer = null;
-		}
 		//free up some memory
 		StaticLayer.GetConvertor().runShutdownHooks();
 		if(ac.getStaticRuntimeEnv() != null) {
@@ -557,8 +536,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
 		MCCommandSender mcsender = BukkitConvertor.BukkitGetCorrectSender(sender);
 		MCCommand cmd = new BukkitMCCommand(command);
-		// TODO: Figure out how to get an env here
-		return cmd.handleTabComplete(mcsender, alias, args, null);
+		return cmd.handleTabComplete(mcsender, alias, args);
 	}
 
 	/**
@@ -636,151 +614,10 @@ public class CommandHelperPlugin extends JavaPlugin {
 						+ " line by itself to exit, >>> to enter multiline mode, and ~ to clear the environment.");
 			}
 			return true;
-		} else if(cmdName.equalsIgnoreCase("debug-server")) {
-			if(!(sender instanceof ConsoleCommandSender)) {
-				sender.sendMessage(MCChatColor.RED
-						+ "This command can only be run from the console.");
-				return true;
-			}
-			if(args.length == 0) {
-				sender.sendMessage("Usage: /debug-server <start|stop|status>");
-				return true;
-			}
-			String action = args[0].toLowerCase();
-			if("start".equals(action)) {
-				String debugMode = Prefs.prefS(Prefs.PNames.DEBUG_SERVER_MODE);
-				if("off".equalsIgnoreCase(debugMode)) {
-					sender.sendMessage("Debug server is disabled in preferences. "
-							+ "Set debug-server-mode to 'manual' or 'on' to enable it.");
-					return true;
-				}
-				if(debugServer != null) {
-					sender.sendMessage("Debug server is already running on port "
-							+ debugServer.getPort());
-					return true;
-				}
-				startDebugServer();
-				if(debugServer != null) {
-					sender.sendMessage("Debug server started on port "
-							+ debugServer.getPort());
-				} else {
-					sender.sendMessage("Failed to start debug server. "
-							+ "Check the server log for details.");
-				}
-			} else if("stop".equals(action)) {
-				if(debugServer == null) {
-					sender.sendMessage("Debug server is not running.");
-				} else {
-					debugServer.shutdown();
-					ac.setDebugContext(null);
-					debugServer = null;
-					sender.sendMessage("Debug server stopped.");
-				}
-			} else if("status".equals(action)) {
-				if(debugServer == null) {
-					sender.sendMessage("Debug server is not running.");
-				} else {
-					sender.sendMessage("Debug server is running on port "
-							+ debugServer.getPort());
-				}
-			} else {
-				sender.sendMessage("Usage: /debug-server <start|stop|status>");
-			}
-			return true;
 		} else {
 			MCCommandSender mcsender = BukkitConvertor.BukkitGetCorrectSender(sender);
 			MCCommand mccmd = new BukkitMCCommand(cmd);
 			return mccmd.handleCustomCommand(mcsender, commandLabel, args);
 		}
-	}
-
-	private void startDebugServer() {
-		int port = Prefs.prefI(Prefs.PNames.DEBUG_SERVER_PORT);
-		String securityStr = Prefs.prefS(Prefs.PNames.DEBUG_SERVER_SECURITY);
-		String bindAddress = Prefs.prefS(Prefs.PNames.DEBUG_SERVER_BIND_ADDRESS);
-		String threadingStr = Prefs.prefS(Prefs.PNames.DEBUG_SERVER_THREADING);
-		String debugMode = Prefs.prefS(Prefs.PNames.DEBUG_SERVER_MODE);
-		boolean suspend = false;
-
-		DebugSecurity security;
-		try {
-			security = DebugSecurity.valueOf(securityStr.toUpperCase());
-		} catch(IllegalArgumentException e) {
-			getLogger().log(Level.SEVERE,
-					"Invalid debug-server-security value: " + securityStr
-					+ ". Must be NONE or KEYPAIR.");
-			return;
-		}
-
-		DebugContext.ThreadingMode threading;
-		if("async".equalsIgnoreCase(threadingStr)) {
-			threading = DebugContext.ThreadingMode.ASYNCHRONOUS;
-		} else if("sync".equalsIgnoreCase(threadingStr)) {
-			threading = DebugContext.ThreadingMode.SYNCHRONOUS;
-		} else {
-			getLogger().log(Level.SEVERE,
-					"Invalid debug-server-threading value: " + threadingStr
-					+ ". Must be 'async' or 'sync'.");
-			return;
-		}
-
-		File authorizedKeysFile = security == DebugSecurity.KEYPAIR
-				? MethodScriptFileLocations.getDefault().getAuthorizedDebugKeysFile()
-				: null;
-
-		debugServer = new MSDebugServer();
-		debugServer.setManagedExecution(true);
-		try {
-			GlobalEnv gEnv = new GlobalEnv(
-					MethodScriptFileLocations.getDefault().getConfigDirectory(),
-					EnumSet.of(RuntimeMode.EMBEDDED));
-			Environment env = Environment.createEnvironment(gEnv);
-			env = debugServer.startListening(port, bindAddress, env, suspend,
-					threading, security, authorizedKeysFile);
-			ac.setDebugContext(env.getEnv(DebugContext.class));
-			if("manual".equalsIgnoreCase(debugMode)) {
-				int timeout = Prefs.prefI(Prefs.PNames.DEBUG_SERVER_TIMEOUT);
-				if(timeout > 0) {
-					startDebugServerTimeout(timeout);
-				}
-			}
-		} catch(IOException e) {
-			getLogger().log(Level.SEVERE, "Failed to start debug server", e);
-			debugServer = null;
-		}
-	}
-
-	private void startDebugServerTimeout(int timeoutMinutes) {
-		final MSDebugServer ds = debugServer;
-		java.lang.Thread timeoutThread = new java.lang.Thread(() -> {
-			long remaining = timeoutMinutes * 60_000L;
-			final long checkInterval = 10_000L;
-			try {
-				while(remaining > 0) {
-					java.lang.Thread.sleep(checkInterval);
-					if(ds != debugServer) {
-						return;
-					}
-					if(ds.isClientConnected()) {
-						remaining = timeoutMinutes * 60_000L;
-					} else {
-						remaining -= checkInterval;
-					}
-				}
-				if(ds == debugServer) {
-					getLogger().info("Debug server timed out after "
-							+ timeoutMinutes
-							+ (timeoutMinutes == 1 ? " minute" : " minutes")
-							+ " with no connected client. Shutting down.");
-					ds.shutdown();
-					ac.setDebugContext(null);
-					debugServer = null;
-				}
-			} catch(InterruptedException e) {
-				// Shutting down
-			}
-		}, "DebugServerTimeout");
-		timeoutThread.setDaemon(true);
-		timeoutThread.start();
 	}
 }

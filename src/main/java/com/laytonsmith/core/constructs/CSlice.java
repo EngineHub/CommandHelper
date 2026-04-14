@@ -4,7 +4,6 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
-import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -70,7 +69,7 @@ public class CSlice extends CArray {
 
 	@Override
 	public List<Mixed> asList() {
-		CArray ca = new ArrayHandling.range().exec(Target.UNKNOWN, null, null, new CInt(start, Target.UNKNOWN), new CInt(finish, Target.UNKNOWN));
+		CArray ca = new ArrayHandling.range().exec(Target.UNKNOWN, null, new CInt(start, Target.UNKNOWN), new CInt(finish, Target.UNKNOWN));
 		return ca.asList();
 	}
 
@@ -104,7 +103,7 @@ public class CSlice extends CArray {
 	}
 
 	@Override
-	protected String getString(Stack<CArray> arrays, Target t, Environment env) {
+	protected String getString(Stack<CArray> arrays, Target t) {
 		//We don't need to consider arrays, because we can't
 		//get stuck in an infinite loop.
 		return val();
@@ -115,43 +114,22 @@ public class CSlice extends CArray {
 		return false;
 	}
 
-	/** @deprecated Use {@link #set(Mixed, Mixed, Target, Environment)} instead. */
-	@Deprecated
 	@Override
 	public void set(Mixed index, Mixed c, Target t) {
-		set(index, c, t, null);
-	}
-
-	@Override
-	public void set(Mixed index, Mixed c, Target t, Environment env) {
 		throw new CRECastException("CSlices cannot set values", t);
 	}
 
-	/** @deprecated Use {@link #get(Mixed, Target, Environment)} instead. */
-	@Deprecated
 	@Override
 	public Mixed get(Mixed index, Target t) {
-		return get(index, t, null);
-	}
-
-	@Override
-	public Mixed get(Mixed index, Target t, Environment env) {
-		long i = ArgumentValidation.getInt(index, t, env);
+		long i = ArgumentValidation.getInt(index, t);
 		if(i > max) {
 			throw new CRERangeException("Index out of bounds. Index: " + i + " Size: " + max, t);
 		}
 		return new CInt(start + (direction * i), t);
 	}
 
-	/** @deprecated Use {@link #keySet(Environment)} instead. */
-	@Deprecated
 	@Override
 	public Set<Mixed> keySet() {
-		return keySet(null);
-	}
-
-	@Override
-	public Set<Mixed> keySet(Environment env) {
 		// To keep our memory footprint down, we create a "fake" keyset here, which doesn't
 		// require actually creating an entire Set. Removing items from the set isn't supported,
 		// but all iteration options are.
@@ -187,15 +165,8 @@ public class CSlice extends CArray {
 		};
 	}
 
-	/** @deprecated Use {@link #size(Environment)} instead. */
-	@Deprecated
 	@Override
 	public long size() {
-		return size(null);
-	}
-
-	@Override
-	public long size(Environment env) {
 		return size;
 	}
 

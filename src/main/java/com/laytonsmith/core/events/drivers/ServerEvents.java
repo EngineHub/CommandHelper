@@ -33,6 +33,7 @@ import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventBuilder;
 import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
+import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
@@ -98,7 +99,12 @@ public class ServerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
+		public BindableEvent convert(CArray manualObject, Target t) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			if(!(e instanceof MCServerCommandEvent)) {
 				throw new EventException("Cannot convert e to MCServerCommandEvent");
 			}
@@ -128,7 +134,7 @@ public class ServerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			if(event instanceof MCServerCommandEvent) {
 				MCServerCommandEvent e = (MCServerCommandEvent) event;
 				if(key.equals("command")) {
@@ -180,7 +186,12 @@ public class ServerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
+		public BindableEvent convert(CArray manualObject, Target t) {
+			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
+		}
+
+		@Override
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			if(e instanceof MCServerPingEvent) {
 				MCServerPingEvent event = (MCServerPingEvent) e;
 				Target t = Target.UNKNOWN;
@@ -197,7 +208,7 @@ public class ServerEvents {
 				ret.put("maxplayers", new CInt(event.getMaxPlayers(), t));
 				CArray players = new CArray(t);
 				for(MCPlayer player : event.getPlayers()) {
-					players.push(new CString(player.getName(), t), t, env);
+					players.push(new CString(player.getName(), t), t);
 				}
 				ret.put("list", players);
 				return ret;
@@ -207,7 +218,7 @@ public class ServerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			if(event instanceof MCServerPingEvent) {
 				MCServerPingEvent e = (MCServerPingEvent) event;
 				switch(key.toLowerCase()) {
@@ -215,13 +226,13 @@ public class ServerEvents {
 						e.setMOTD(value.val());
 						return true;
 					case "maxplayers":
-						e.setMaxPlayers(ArgumentValidation.getInt32(value, value.getTarget(), env));
+						e.setMaxPlayers(ArgumentValidation.getInt32(value, value.getTarget()));
 						return true;
 					case "list":
 						// Modifies the player list. The new list will be the intersection of the original
 						// and the given list. Names and UUID's outside this intersection will simply be ignored.
 						Set<MCPlayer> modifiedPlayers = new HashSet<>();
-						List<Mixed> passedList = ArgumentValidation.getArray(value, value.getTarget(), env).asList(env);
+						List<Mixed> passedList = ArgumentValidation.getArray(value, value.getTarget()).asList();
 						for(MCPlayer player : e.getPlayers()) {
 							for(Mixed construct : passedList) {
 								String playerStr = construct.val();
@@ -283,7 +294,12 @@ public class ServerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
+		public BindableEvent convert(CArray manualObject, Target t) {
+			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
+		}
+
+		@Override
+		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
 			if(event instanceof MCCommandTabCompleteEvent) {
 				MCCommandTabCompleteEvent e = (MCCommandTabCompleteEvent) event;
 				Target t = Target.UNKNOWN;
@@ -292,14 +308,14 @@ public class ServerEvents {
 				CArray comp = new CArray(t);
 				if(e.getCompletions() != null) {
 					for(String c : e.getCompletions()) {
-						comp.push(new CString(c, t), t, env);
+						comp.push(new CString(c, t), t);
 					}
 				}
 				ret.put("completions", comp);
 				ret.put("command", new CString(e.getCommand().getName(), t));
 				CArray args = new CArray(t);
 				for(String a : e.getArguments()) {
-					args.push(new CString(a, t), t, env);
+					args.push(new CString(a, t), t);
 				}
 				ret.put("args", args);
 				ret.put("alias", new CString(e.getAlias(), t));
@@ -315,18 +331,18 @@ public class ServerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			if(event instanceof MCCommandTabCompleteEvent) {
 				MCCommandTabCompleteEvent e = (MCCommandTabCompleteEvent) event;
 				if("completions".equals(key)) {
-					if(value.isInstanceOf(CArray.TYPE, null, env)) {
+					if(value.isInstanceOf(CArray.TYPE)) {
 						List<String> comp = new ArrayList<>();
 						if(((CArray) value).inAssociativeMode()) {
-							for(Mixed k : ((CArray) value).keySet(env)) {
-								comp.add(((CArray) value).get(k, value.getTarget(), env).val());
+							for(Mixed k : ((CArray) value).keySet()) {
+								comp.add(((CArray) value).get(k, value.getTarget()).val());
 							}
 						} else {
-							for(Mixed v : ((CArray) value).asList(env)) {
+							for(Mixed v : ((CArray) value).asList()) {
 								comp.add(v.val());
 							}
 						}
@@ -390,7 +406,12 @@ public class ServerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
+		public BindableEvent convert(CArray manualObject, Target t) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			MCRedstoneChangedEvent event = (MCRedstoneChangedEvent) e;
 			Map<String, Mixed> map = evaluate_helper(e);
 			map.put("location", ObjectGenerator.GetGenerator().location(event.getLocation(), false));
@@ -404,7 +425,7 @@ public class ServerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			return false;
 		}
 
@@ -444,24 +465,26 @@ public class ServerEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 
 			// Get the player recipients.
-			Mixed cRecipients = manualObject.get("player_recipients", t, env);
+			Mixed cRecipients = manualObject.get("player_recipients", t);
 			if(!(cRecipients instanceof CArray) && !(cRecipients instanceof CNull)) {
-				throw new CRECastException("Expected player_recipients to be an array", t);
+				throw new CRECastException("Expected player_recipients to be an array, but received: "
+						+ cRecipients.typeof().toString(), t);
 			}
 			Set<MCCommandSender> recipients = new HashSet<>();
 			CArray recipientsArray = (CArray) cRecipients;
-			for(int i = 0; i < recipientsArray.size(env); i++) {
-				MCPlayer player = Static.GetPlayer(recipientsArray.get(i, t, env), t, env);
+			for(int i = 0; i < recipientsArray.size(); i++) {
+				MCPlayer player = Static.GetPlayer(recipientsArray.get(i, t), t);
 				recipients.add(player);
 			}
 
 			// Get the message.
-			Mixed cMessage = manualObject.get("message", t, env);
+			Mixed cMessage = manualObject.get("message", t);
 			if(!(cMessage instanceof CString)) {
-				throw new CRECastException("Expected message to be a string.", t);
+				throw new CRECastException("Expected message to be a string, but received: "
+						+ cMessage.typeof().toString(), t);
 			}
 
 			// Instantiate and return the event.
@@ -470,13 +493,13 @@ public class ServerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			MCBroadcastMessageEvent event = (MCBroadcastMessageEvent) e;
 			Map<String, Mixed> map = evaluate_helper(e);
 			map.put("message", new CString(event.getMessage(), Target.UNKNOWN));
 			CArray cRecipients = new CArray(Target.UNKNOWN);
 			for(MCPlayer player : event.getPlayerRecipients()) {
-				cRecipients.push(new CString(player.getName(), Target.UNKNOWN), Target.UNKNOWN, env);
+				cRecipients.push(new CString(player.getName(), Target.UNKNOWN), Target.UNKNOWN);
 			}
 			map.put("player_recipients", cRecipients);
 			return map;
@@ -488,7 +511,7 @@ public class ServerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent e, Environment env) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent e) {
 			if(key.equals("message")) {
 				MCBroadcastMessageEvent event = (MCBroadcastMessageEvent) e;
 				event.setMessage(Construct.nval(value));

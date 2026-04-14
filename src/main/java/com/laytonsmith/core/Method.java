@@ -9,6 +9,7 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.Arrays;
 
@@ -39,7 +40,7 @@ public class Method extends Construct implements Callable {
 
 	@Override
 	public Mixed executeCallable(Environment env, Target t, Mixed... values)
-			throws ConfigRuntimeException, CancelCommandException {
+			throws ConfigRuntimeException, ProgramFlowManipulationException, CancelCommandException {
 		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 	}
 

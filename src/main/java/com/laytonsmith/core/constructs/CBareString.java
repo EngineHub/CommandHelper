@@ -2,7 +2,6 @@ package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
-import com.laytonsmith.core.constructs.generics.GenericParameters;
 
 /**
  *
@@ -44,10 +43,5 @@ public class CBareString extends CString {
 	@Override
 	public CBareString duplicate() {
 		return new CBareString(val(), getTarget());
-	}
-
-	@Override
-	public GenericParameters getGenericParameters() {
-		return null;
 	}
 }

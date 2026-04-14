@@ -7,6 +7,7 @@ import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.Script;
 import com.laytonsmith.core.compiler.SelfStatement;
 import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
@@ -14,7 +15,6 @@ import com.laytonsmith.core.compiler.signature.FunctionSignatures;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -106,7 +106,7 @@ public abstract class LLVMFunction implements FunctionBase, Function {
 	}
 
 	@Override
-	public final Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+	public final Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 		throw new UnsupportedOperationException("Not supported.");
 	}
 
@@ -193,7 +193,7 @@ public abstract class LLVMFunction implements FunctionBase, Function {
 	}
 
 	@Override
-	public String profileMessage(Environment env, Mixed... args) {
+	public String profileMessage(Mixed... args) {
 		throw new UnsupportedOperationException("Not supported.");
 	}
 
@@ -228,13 +228,22 @@ public abstract class LLVMFunction implements FunctionBase, Function {
 	 * @param builder The ongoing builder. Functions should append to this as needed.
 	 * @param t The code target this node comes from.
 	 * @param env The Environment
-	 * @param parameters Generic parameters passed to this function call.
 	 * @param nodes The children passed to this function, could be empty array.
 	 * @return Information on the returned value, including things like type (if known) and how to reference the
 	 * output value.
 	 * @throws com.laytonsmith.core.exceptions.ConfigCompileException If there is a compilation error.
 	 */
-	public abstract IRData buildIR(IRBuilder builder, Target t, Environment env, GenericParameters parameters, ParseTree... nodes) throws ConfigCompileException;
+	public abstract IRData buildIR(IRBuilder builder, Target t, Environment env, ParseTree... nodes) throws ConfigCompileException;
+
+	@Override
+	public final boolean useSpecialExec() {
+		throw new UnsupportedOperationException("Not supported.");
+	}
+
+	@Override
+	public final Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		throw new UnsupportedOperationException("Not supported.");
+	}
 
 	/**
 	 * If this function is used, and it needs to do startup configuration, that configuration goes here.

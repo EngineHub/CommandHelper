@@ -17,7 +17,6 @@ import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
@@ -69,7 +68,7 @@ public class Commands {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCServer s = Static.getServer();
 			MCCommandMap map = s.getCommandMap();
 			if(map == null) {
@@ -79,7 +78,7 @@ public class Commands {
 			if(cmd == null) {
 				throw new CRENotFoundException("Command not found, did you forget to register it?", t);
 			}
-			customExec(t, env, cmd, args[1]);
+			customExec(t, environment, cmd, args[1]);
 			return CVoid.VOID;
 		}
 
@@ -87,12 +86,12 @@ public class Commands {
 		 * For setting the completion code of a command that exists but might not be registered yet
 		 *
 		 * @param t
-		 * @param env
+		 * @param environment
 		 * @param cmd
 		 * @param arg
 		 */
-		public static void customExec(Target t, Environment env, MCCommand cmd, Mixed arg) {
-			if(arg.isInstanceOf(Callable.TYPE, null, env)) {
+		public static void customExec(Target t, Environment environment, MCCommand cmd, Mixed arg) {
+			if(arg.isInstanceOf(Callable.TYPE)) {
 				onTabComplete.put(cmd.getName(), (Callable) arg);
 			} else {
 				throw new CREFormatException("Only Callables are accepted as tabcompleters", t);
@@ -165,7 +164,7 @@ public class Commands {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCCommandMap map = Static.getServer().getCommandMap();
 			if(map == null) {
 				throw new CRENotFoundException(this.getName() + " is not supported in this mode (CommandMap not found).", t);
@@ -226,7 +225,7 @@ public class Commands {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCCommandMap map = Static.getServer().getCommandMap();
 			if(map == null) {
 				throw new CRENotFoundException(
@@ -244,7 +243,7 @@ public class Commands {
 				register = true;
 				cmd = StaticLayer.GetConvertor().getNewCommand(cmdStr);
 			}
-			if(args[1].isInstanceOf(CArray.TYPE, null, env)) {
+			if(args[1].isInstanceOf(CArray.TYPE)) {
 				CArray ops = (CArray) args[1];
 				if(ops.containsKey("permission")) {
 					cmd.setPermission(ops.get("permission", t).val());
@@ -260,7 +259,7 @@ public class Commands {
 				}
 				List<String> oldAliases = new ArrayList<>(cmd.getAliases());
 				if(ops.containsKey("aliases")) {
-					if(ops.get("aliases", t).isInstanceOf(CArray.TYPE, null, env)) {
+					if(ops.get("aliases", t).isInstanceOf(CArray.TYPE)) {
 						List<Mixed> ca = ((CArray) ops.get("aliases", t)).asList();
 						List<String> aliases = new ArrayList<>();
 						for(Mixed c : ca) {
@@ -281,10 +280,10 @@ public class Commands {
 					}
 				}
 				if(ops.containsKey("executor")) {
-					set_executor.customExec(t, env, cmd, ops.get("executor", t));
+					set_executor.customExec(t, environment, cmd, ops.get("executor", t));
 				}
 				if(ops.containsKey("tabcompleter")) {
-					set_tabcompleter.customExec(t, env, cmd, ops.get("tabcompleter", t));
+					set_tabcompleter.customExec(t, environment, cmd, ops.get("tabcompleter", t));
 				}
 				boolean success = true;
 				if(register) {
@@ -497,7 +496,7 @@ public class Commands {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCCommandMap map = Static.getServer().getCommandMap();
 			if(map == null) {
 				throw new CRENotFoundException(this.getName() + " is not supported in this mode (CommandMap not found).", t);
@@ -506,7 +505,7 @@ public class Commands {
 			if(cmd == null) {
 				throw new CRENotFoundException("Command not found did you forget to register it?", t);
 			}
-			customExec(t, env, cmd, args[1]);
+			customExec(t, environment, cmd, args[1]);
 			return CVoid.VOID;
 		}
 
@@ -514,12 +513,12 @@ public class Commands {
 		 * For setting the execution code of a command that exists but might not be registered yet
 		 *
 		 * @param t
-		 * @param env
+		 * @param environment
 		 * @param cmd
 		 * @param arg
 		 */
-		static void customExec(Target t, Environment env, MCCommand cmd, Mixed arg) {
-			if(arg.isInstanceOf(CClosure.TYPE, null, env)) {
+		static void customExec(Target t, Environment environment, MCCommand cmd, Mixed arg) {
+			if(arg.isInstanceOf(CClosure.TYPE)) {
 				onCommand.put(cmd.getName(), (CClosure) arg);
 			} else {
 				throw new CREFormatException("At this time, only closures are accepted as command executors.", t);
@@ -569,7 +568,7 @@ public class Commands {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCCommandMap map = Static.getServer().getCommandMap();
 			if(map == null) {
 				return CNull.NULL;
@@ -642,7 +641,7 @@ public class Commands {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCCommandMap map = Static.getServer().getCommandMap();
 			if(map != null) {
 				map.clearCommands();

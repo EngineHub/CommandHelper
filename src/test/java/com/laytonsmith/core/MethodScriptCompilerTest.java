@@ -29,9 +29,7 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Ignore;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.Timeout;
 
 import java.io.File;
 import java.net.URI;
@@ -64,9 +62,6 @@ import static org.mockito.Mockito.verify;
 //@PrepareForTest(CommandHelperPlugin.class)
 //@PowerMockIgnore({"javax.xml.parsers.*", "com.sun.org.apache.xerces.internal.jaxp.*"})
 public class MethodScriptCompilerTest extends AbstractIntegrationTest {
-
-	@Rule
-	public Timeout globalTimeout = Timeout.seconds(10);
 
 	MCServer fakeServer;
 	MCPlayer fakePlayer;

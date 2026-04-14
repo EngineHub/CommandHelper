@@ -176,7 +176,7 @@ public final class GenericParameters {
 
 	/**
 	 * Begins construction of a new GenericParameters object, which represents the RHS of the generic declaration.The
-	 * actual GenericDeclaration object is passed in in order to validate the types against the constraints. Each
+	 * actual GenericDeclaration object is passed in in order to validate the types against the constraints.Each
 	 * instance of a class which has a GenericDeclaration will have one of these objects in it, associated with that
 	 * particular instance. This data is not lost after compilation, and types are reified for runtime use.
 	 * <p>

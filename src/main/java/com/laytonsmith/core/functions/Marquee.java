@@ -8,7 +8,6 @@ import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
@@ -53,7 +52,7 @@ public class Marquee {
 		}
 
 		@Override
-		public Mixed exec(final Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(final Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			final String marqueeName;
 			final String text;
 			final int stringWidth;
@@ -69,7 +68,7 @@ public class Marquee {
 			text = args[1 + offset].val();
 			stringWidth = ArgumentValidation.getInt32(args[2 + offset], t);
 			delayTime = ArgumentValidation.getInt32(args[3 + offset], t);
-			if(args[4 + offset].isInstanceOf(CClosure.TYPE, null, env)) {
+			if(args[4 + offset].isInstanceOf(CClosure.TYPE)) {
 				callback = ((CClosure) args[4 + offset]);
 			} else {
 				throw new CRECastException("Expected argument " + (4 + offset + 1) + " to be a closure, but was not.", t);
@@ -159,7 +158,7 @@ public class Marquee {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String marqueeName = args[0].val();
 			if(MARQUEE_MAP.containsKey(marqueeName)) {
 				MARQUEE_MAP.get(marqueeName).stop();

@@ -6,9 +6,6 @@ import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.constructs.generics.GenericParameters;
-import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
-import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.objects.AccessModifier;
 import com.laytonsmith.core.objects.ObjectModifier;
 import java.net.URL;
@@ -63,19 +60,12 @@ public abstract class AbstractMixed implements Mixed {
 		return null;
 	}
 
-	/** @deprecated Use {@link #isInstanceOf(CClassType, LeftHandGenericUse, Environment)} instead. */
-	@Deprecated
 	@Override
 	public boolean isInstanceOf(CClassType type) {
-		return isInstanceOf(type, null, null);
-	}
-
-	@Override
-	public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env) {
 		if(type.getNativeType() != null) {
 			return type.getNativeType().isAssignableFrom(this.getClass());
 		}
-		return Construct.isInstanceof(this, type, env);
+		return Construct.isInstanceof(this, type);
 	}
 
 	@Override
@@ -91,22 +81,10 @@ public abstract class AbstractMixed implements Mixed {
 	 * This method may be overridden in special cases, such as dynamic types, but for most types, this
 	 * @return
 	 * @throws IllegalArgumentException If the class isn't public facing.
-	 * @deprecated Use {@link #typeof(Environment)} instead.
 	 */
-	@Deprecated
 	@Override
 	public CClassType typeof() {
-		return typeof(null);
-	}
-
-	@Override
-	public CClassType typeof(Environment env) {
 		return Construct.typeof(this);
-	}
-
-	@Override
-	public GenericParameters getGenericParameters() {
-		return null;
 	}
 
 	@Override

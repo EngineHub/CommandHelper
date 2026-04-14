@@ -8,13 +8,10 @@ import com.laytonsmith.annotations.hide;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.natives.interfaces.Callable;
 import com.laytonsmith.core.FullyQualifiedClassName;
-import com.laytonsmith.core.FlowFunction;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
-import com.laytonsmith.core.StepAction.Complete;
-import com.laytonsmith.core.StepAction.Evaluate;
-import com.laytonsmith.core.StepAction.StepResult;
+import com.laytonsmith.core.Script;
 import com.laytonsmith.core.UnqualifiedClassName;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.FileOptions;
@@ -27,7 +24,6 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.CREClassDefinitionError;
@@ -84,7 +80,7 @@ public class ObjectManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 		}
 
@@ -112,7 +108,7 @@ public class ObjectManagement {
 
 	@api
 	@hide("Not meant for normal use")
-	public static class define_object extends AbstractFunction implements FlowFunction<Void>, Optimizable {
+	public static class define_object extends AbstractFunction implements Optimizable {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -130,19 +126,13 @@ public class ObjectManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public boolean useSpecialExec() {
+			return true;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			throw new Error();
-		}
-
-		@Override
-		public StepResult<Void> begin(Target t, ParseTree[] children, Environment env) {
-			doDefineObject(t, env, children);
-			return new StepResult<>(new Complete(CVoid.VOID), null);
-		}
-
-		@Override
-		public StepResult<Void> childCompleted(Target t, Void state, Mixed result, Environment env) {
-			throw new Error("define_object does not evaluate children");
 		}
 
 		/**
@@ -178,17 +168,17 @@ public class ObjectManagement {
 			return (CArray) d;
 		}
 
-		private Mixed evaluateString(ParseTree data, Target t, Environment env) {
+		private Mixed evaluateString(ParseTree data, Target t) {
 			if(data.getData() instanceof CNull) {
 				return CNull.NULL;
 			}
-			if(!(data.getData().isInstanceOf(CString.TYPE, null, env))) {
+			if(!(data.getData().isInstanceOf(CString.TYPE))) {
 				throw new CREClassDefinitionError("Expected a string, but found " + data.getData() + " instead", t);
 			}
 			return data.getData();
 		}
-		private CString evaluateStringNoNull(ParseTree data, Target t, Environment env) {
-			Mixed d = evaluateString(data, t, env);
+		private CString evaluateStringNoNull(ParseTree data, Target t) {
+			Mixed d = evaluateString(data, t);
 			if(d instanceof CNull) {
 				throw new CREClassDefinitionError("Expected a string, but found null instead", t);
 			}
@@ -207,7 +197,7 @@ public class ObjectManagement {
 					throw new CREClassDefinitionError("Expected __to_class_reference__, but found " + data.getData()
 							+ " instead", t);
 				}
-				return new __to_class_reference__().exec(t, null, null,
+				return new __to_class_reference__().exec(t, null,
 						data.getChildren().stream()
 								.map((parseTree -> parseTree.getData()))
 								.collect(Collectors.toList())
@@ -216,10 +206,10 @@ public class ObjectManagement {
 			return data.getData();
 		}
 
-
-		private void doDefineObject(Target t, Environment env, ParseTree... nodes) {
+		@Override
+		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			// 0 - Access Modifier
-			AccessModifier accessModifier = ArgumentValidation.getEnum(evaluateStringNoNull(nodes[0], t, env),
+			AccessModifier accessModifier = ArgumentValidation.getEnum(evaluateStringNoNull(nodes[0], t),
 					AccessModifier.class, t);
 
 			// 1 - Object Modifiers
@@ -228,11 +218,11 @@ public class ObjectManagement {
 					.collect(Collectors.toSet());
 
 			// 2 - Object Type
-			ObjectType type = ArgumentValidation.getEnum(evaluateStringNoNull(nodes[2], t, env), ObjectType.class, t);
+			ObjectType type = ArgumentValidation.getEnum(evaluateStringNoNull(nodes[2], t), ObjectType.class, t);
 
 			// 3 - Object Name
 			FullyQualifiedClassName name
-					= FullyQualifiedClassName.forFullyQualifiedClass(evaluateStringNoNull(nodes[3], t, env).val());
+					= FullyQualifiedClassName.forFullyQualifiedClass(evaluateStringNoNull(nodes[3], t).val());
 
 			// 4 - Superclasses
 			Set<UnqualifiedClassName> superclasses = new HashSet<>();
@@ -381,6 +371,7 @@ public class ObjectManagement {
 				}
 			}
 
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -388,7 +379,8 @@ public class ObjectManagement {
 				Set<Class<? extends Environment.EnvironmentImpl>> envs,
 				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
-			doDefineObject(t, env, children.toArray(new ParseTree[children.size()]));
+			// Do the same thing as execs, but remove this call
+			execs(t, env, null, children.toArray(new ParseTree[children.size()]));
 			return REMOVE_ME;
 		}
 
@@ -433,7 +425,7 @@ public class ObjectManagement {
 
 	@api
 	@hide("Normally one should use the new keyword")
-	public static class new_object extends AbstractFunction implements FlowFunction<new_object.NewObjectState>, Optimizable {
+	public static class new_object extends AbstractFunction implements Optimizable {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -451,7 +443,12 @@ public class ObjectManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public boolean useSpecialExec() {
+			return true;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			throw new Error();
 		}
 
@@ -462,25 +459,18 @@ public class ObjectManagement {
 		private static final int DEFAULT = -1;
 		private static final int UNDECIDEABLE = -2;
 
-		static class NewObjectState {
-			ParseTree[] children;
-			Callable constructor;
-			Mixed obj;
-			Mixed[] constructorArgs;
-			int nextArgIndex;
-		}
-
 		@Override
-		public StepResult<NewObjectState> begin(Target t, ParseTree[] children, Environment env) {
+		public Mixed execs(final Target t, final Environment env, Script parent, ParseTree... args)
+				throws ConfigRuntimeException {
 			ObjectDefinitionTable odt = env.getEnv(CompilerEnvironment.class).getObjectDefinitionTable();
-			CClassType clazz = ((CClassType) children[0].getData());
+			CClassType clazz = ((CClassType) args[0].getData());
 			ObjectDefinition od;
 			try {
 				od = odt.get(clazz.getFQCN());
-			} catch(ObjectDefinitionNotFoundException ex) {
+			} catch (ObjectDefinitionNotFoundException ex) {
 				throw new CREClassDefinitionError(ex.getMessage(), t, ex);
 			}
-			int constructorId = (int) ((CInt) children[1].getData()).getInt();
+			int constructorId = (int) ((CInt) args[1].getData()).getInt();
 			Callable constructor;
 			switch(constructorId) {
 				case DEFAULT:
@@ -505,39 +495,17 @@ public class ObjectManagement {
 				// TODO If this is a native object, we need to intercept the call to the native constructor,
 				// and grab the object generated there.
 			}
-			Mixed obj = new UserObject(t, null, env, od, null);
-
-			NewObjectState state = new NewObjectState();
-			state.children = children;
-			state.constructor = constructor;
-			state.obj = obj;
-
+			Mixed obj = new UserObject(t, parent, env, od, null);
 			// This is the MethodScript construction.
 			if(constructor != null) {
-				state.constructorArgs = new Mixed[children.length - 1];
-				state.constructorArgs[0] = obj;
-				if(children.length > 2) {
-					state.nextArgIndex = 2;
-					return new StepResult<>(new Evaluate(children[2]), state);
+				Mixed[] values = new Mixed[args.length - 1];
+				values[0] = obj;
+				for(int i = 2; i < args.length; i++) {
+					values[i + 1] = parent.eval(args[i], env);
 				}
-				constructor.executeCallable(env, t, state.constructorArgs);
+				constructor.executeCallable(env, t, values);
 			}
-
-			return new StepResult<>(new Complete(obj), state);
-		}
-
-		@Override
-		public StepResult<NewObjectState> childCompleted(Target t, NewObjectState state,
-				Mixed result, Environment env) {
-			state.constructorArgs[state.nextArgIndex - 1] = result;
-			state.nextArgIndex++;
-
-			if(state.nextArgIndex < state.children.length) {
-				return new StepResult<>(new Evaluate(state.children[state.nextArgIndex]), state);
-			}
-
-			state.constructor.executeCallable(env, t, state.constructorArgs);
-			return new StepResult<>(new Complete(state.obj), state);
+			return obj;
 		}
 
 		@Override
@@ -629,7 +597,7 @@ public class ObjectManagement {
 
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			try {
 				return CClassType.get(FullyQualifiedClassName.forFullyQualifiedClass(args[0].val()));
 			} catch (ClassNotFoundException ex) {

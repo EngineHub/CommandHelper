@@ -329,4 +329,4 @@ Now %1 is a pointer to memory, which contains the value 0. To get 0 back, we hav
 for the various IR commands. Note that this is not necessarily the authoritative source though, reverse engineering \
 clang output is.
 * [https://borretti.me/article/compiling-llvm-ir-binary Compiling hand written LLVM, for test purposes.]
-* [https://mapping-high-level-constructs-to-llvm-ir.readthedocs.io/en/latest/ Guide for mapping high level language concepts to LLVM.]
+* [https://mapping-high-level-constructs-to-llvm-ir.readthedocs.io/en/latest/README.html Guide for mapping high level language concepts to LLVM.]

@@ -9,6 +9,7 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.functions.IncludeCache;
 import com.laytonsmith.core.profiler.ProfilePoint;
 
@@ -222,6 +223,9 @@ public class LocalPackages {
 				if(e.getMessage() != null && !e.getMessage().trim().isEmpty()) {
 					Static.getLogger().log(Level.INFO, e.getMessage());
 				}
+			} catch (ProgramFlowManipulationException e) {
+				ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.CreateUncatchableException(
+						"Cannot break program flow in main files.", e.getTarget()), env);
 			}
 		}
 	}

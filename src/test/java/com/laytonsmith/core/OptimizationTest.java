@@ -332,9 +332,9 @@ public class OptimizationTest extends AbstractIntegrationTest {
 
 	@Test
 	public void testForWithPostfix() throws Exception {
-		assertEquals("__statements__(forelse(assign(@i,0),lt(@i,5),inc(@i),msg(''),null))",
+		assertEquals("__statements__(for(assign(@i,0),lt(@i,5),inc(@i),msg('')))",
 				optimize("for(@i = 0, @i < 5, @i++, msg(''))"));
-		assertEquals("__statements__(forelse(assign(@i,0),lt(@i,5),dec(@i),msg(''),null))",
+		assertEquals("__statements__(for(assign(@i,0),lt(@i,5),dec(@i),msg('')))",
 				optimize("for(@i = 0, @i < 5, @i--, msg(''))"));
 	}
 
@@ -761,9 +761,9 @@ public class OptimizationTest extends AbstractIntegrationTest {
 
 	@Test
 	public void testForIsSelfStatement() throws Exception {
-		assertEquals("__statements__(forelse(__unsafe_assign__(ms.lang.int,@i,0),lt(@i,10),inc(@i),__statements__(msg(@i)),null))",
+		assertEquals("__statements__(for(__unsafe_assign__(ms.lang.int,@i,0),lt(@i,10),inc(@i),__statements__(msg(@i))))",
 				optimize("for(int @i = 0, @i < 10, @i++) { msg(@i); }"));
-		assertEquals("__statements__(while(true,__statements__(msg(''),forelse(__unsafe_assign__(ms.lang.int,@i,0),lt(@i,10),inc(@i),__statements__(msg(@i)),null))))",
+		assertEquals("__statements__(while(true,__statements__(msg(''),for(__unsafe_assign__(ms.lang.int,@i,0),lt(@i,10),inc(@i),__statements__(msg(@i))))))",
 				optimize("while(true) { msg('') for(int @i = 0, @i < 10, @i++) { msg(@i); }}"));
 	}
 

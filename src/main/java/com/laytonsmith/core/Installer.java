@@ -61,15 +61,6 @@ public final class Installer {
 				Logger.getLogger(Installer.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
-
-		File authorizedDebugKeys = new File(root, "authorized_debug_keys");
-		if(!authorizedDebugKeys.exists()) {
-			try {
-				authorizedDebugKeys.createNewFile();
-			} catch (IOException ex) {
-				Logger.getLogger(Installer.class.getName()).log(Level.SEVERE, null, ex);
-			}
-		}
 	}
 
 	public static void InstallCmdlineInterpreter() {

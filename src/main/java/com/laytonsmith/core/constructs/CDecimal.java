@@ -3,7 +3,6 @@ package com.laytonsmith.core.constructs;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.MSVersion;
-import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import java.math.BigDecimal;
 
@@ -84,15 +83,8 @@ public class CDecimal extends CPrimitive implements Cloneable {
 		return new CDecimal(val, getTarget());
 	}
 
-	/** @deprecated Use {@link #getBooleanValue(Target, Environment)} instead. */
-	@Deprecated
 	@Override
 	public boolean getBooleanValue(Target t) {
-		return getBooleanValue(t, null);
-	}
-
-	@Override
-	public boolean getBooleanValue(Target t, Environment env) {
 		return val.compareTo(new BigDecimal(0)) != 0;
 	}
 

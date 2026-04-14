@@ -5,7 +5,6 @@ import com.laytonsmith.PureUtilities.Common.Annotations.InterfaceRunnerFor;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.constructs.CClassType;
-import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.objects.AccessModifier;
 
 /**
@@ -46,8 +45,4 @@ public class MixedRunner extends AbstractMixedInterfaceRunner {
 		return AccessModifier.PUBLIC;
 	}
 
-	@Override
-	public GenericParameters getGenericParameters() {
-		return null;
-	}
 }

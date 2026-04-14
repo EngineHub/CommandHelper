@@ -14,7 +14,6 @@ import com.laytonsmith.core.asm.LLVMVersion;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
@@ -29,7 +28,7 @@ public class DataHandling {
 	public static class assign extends LLVMFunction {
 
 		@Override
-		public IRData buildIR(IRBuilder builder, Target t, Environment env, GenericParameters generics, ParseTree... nodes) throws ConfigCompileException {
+		public IRData buildIR(IRBuilder builder, Target t, Environment env, ParseTree... nodes) throws ConfigCompileException {
 			LLVMEnvironment llvmenv = env.getEnv(LLVMEnvironment.class);
 			int offset;
 			CClassType type;

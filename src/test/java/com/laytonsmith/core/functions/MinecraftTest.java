@@ -5,7 +5,6 @@ import static org.junit.Assert.assertEquals;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.enums.MCVersion;
-import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -81,15 +80,5 @@ public class MinecraftTest extends AbstractIntegrationTest {
 		assertEquals(MCVersion.match(new String[]{"1", "8", "6"}), MCVersion.MC1_8_6);
 		assertEquals(MCVersion.match(new String[]{"1", "8", "8"}), MCVersion.MC1_8_X);
 		assertEquals(MCVersion.match(new String[]{"3", "1", "4"}), MCVersion.MCX_X);
-	}
-
-	@Test
-	public void testMaterialInfoWithVariable() throws Exception {
-		// material_info's optimizeDynamic should not crash when the first
-		// argument is a variable (IVariable has no @typeof annotation).
-		String script = "assign(@mat, 'STONE') material_info(@mat, 'isBlock')";
-		MethodScriptCompiler.compile(
-				MethodScriptCompiler.lex(script, env, null, true),
-				env, env.getEnvClasses());
 	}
 }

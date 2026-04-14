@@ -10,7 +10,6 @@ import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
@@ -51,21 +50,21 @@ public class TaskHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
-			TaskManager tm = env.getEnv(StaticRuntimeEnv.class).GetTaskManager();
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			TaskManager tm = environment.getEnv(StaticRuntimeEnv.class).GetTaskManager();
 			CArray ret = new CArray(t);
 			for(TaskHandler task : tm.getTasks()) {
-				CArray tt = CArray.GetAssociativeArray(t, null, env);
-				tt.set("id", new CInt(task.getID(), t), t, env);
-				tt.set("type", task.getType().name(), env);
-				tt.set("state", task.getState().name(), env);
-				tt.set("target", task.getDefinedAt().toString(), env);
-				CArray properties = CArray.GetAssociativeArray(t, null, env);
+				CArray tt = CArray.GetAssociativeArray(t);
+				tt.set("id", new CInt(task.getID(), t), t);
+				tt.set("type", task.getType().name());
+				tt.set("state", task.getState().name());
+				tt.set("target", task.getDefinedAt().toString());
+				CArray properties = CArray.GetAssociativeArray(t);
 				for(String prop : task.getProperties()) {
-					properties.set(prop, task.getPropertyData().get(prop).toString(), env);
+					properties.set(prop, task.getPropertyData().get(prop).toString());
 				}
-				tt.set("properties", properties, t, env);
-				ret.push(tt, t, env);
+				tt.set("properties", properties, t);
+				ret.push(tt, t);
 			}
 			return ret;
 		}
@@ -135,10 +134,10 @@ public class TaskHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String type = args[0].val();
-			int id = ArgumentValidation.getInt32(args[1], t, env);
-			TaskManager tm = env.getEnv(StaticRuntimeEnv.class).GetTaskManager();
+			int id = ArgumentValidation.getInt32(args[1], t);
+			TaskManager tm = environment.getEnv(StaticRuntimeEnv.class).GetTaskManager();
 			tm.killTask(type, id);
 			return CVoid.VOID;
 		}
