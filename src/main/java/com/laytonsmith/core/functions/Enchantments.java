@@ -21,6 +21,7 @@ import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
@@ -69,8 +70,8 @@ public class Enchantments {
 	 * @param value
 	 * @return
 	 */
-	public static int ConvertLevel(Mixed value) {
-		if(value.isInstanceOf(CInt.TYPE)) {
+	public static int ConvertLevel(Mixed value, Environment env) {
+		if(value.isInstanceOf(CInt.TYPE, null, env)) {
 			return (int) ((CInt) value).getInt();
 		}
 		String lc = value.val().toLowerCase().trim();
@@ -182,29 +183,29 @@ public class Enchantments {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			int offset = 0;
-			if(args.length == 4 || args.length == 3 && args[2].isInstanceOf(CArray.TYPE)) {
-				p = Static.GetPlayer(args[0].val(), t);
+			if(args.length == 4 || args.length == 3 && args[2].isInstanceOf(CArray.TYPE, null, env)) {
+				p = Static.GetPlayer(args[0].val(), t, env);
 				offset = 1;
 			} else {
-				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
 			}
-			MCItemStack is = p.getItemAt(args[offset] instanceof CNull ? null : ArgumentValidation.getInt32(args[offset], t));
+			MCItemStack is = p.getItemAt(args[offset] instanceof CNull ? null : ArgumentValidation.getInt32(args[offset], t, env));
 			if(is == null) {
 				throw new CRECastException("There is no item at slot " + args[offset], t);
 			}
 
-			if(args[args.length - 1].isInstanceOf(CArray.TYPE)) {
+			if(args[args.length - 1].isInstanceOf(CArray.TYPE, null, env)) {
 				CArray ca = (CArray) args[args.length - 1];
 				Map<MCEnchantment, Integer> enchants = ObjectGenerator.GetGenerator().enchants(ca, t);
 				for(Map.Entry<MCEnchantment, Integer> en : enchants.entrySet()) {
 					is.addUnsafeEnchantment(en.getKey(), en.getValue());
 				}
 			} else {
-				int level = ConvertLevel(args[offset + 2]);
+				int level = ConvertLevel(args[offset + 2], env);
 				if(level > 0) {
 					is.addUnsafeEnchantment(GetEnchantment(args[offset + 1].val(), t), level);
 				} else {
@@ -257,23 +258,23 @@ public class Enchantments {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			int offset = 0;
 			if(args.length == 3) {
-				p = Static.GetPlayer(args[0].val(), t);
+				p = Static.GetPlayer(args[0].val(), t, env);
 				offset = 1;
 			} else {
-				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
 			}
 
-			MCItemStack is = p.getItemAt(args[offset] instanceof CNull ? null : ArgumentValidation.getInt32(args[offset], t));
+			MCItemStack is = p.getItemAt(args[offset] instanceof CNull ? null : ArgumentValidation.getInt32(args[offset], t, env));
 			if(is == null) {
 				throw new CRECastException("There is no item at slot " + args[offset], t);
 			}
 
-			if(args[offset + 1].isInstanceOf(CArray.TYPE)) {
+			if(args[offset + 1].isInstanceOf(CArray.TYPE, null, env)) {
 				for(String name : ((CArray) args[offset + 1]).stringKeySet()) {
 					MCEnchantment e = GetEnchantment(name, t);
 					is.removeEnchantment(e);
@@ -330,18 +331,18 @@ public class Enchantments {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			Mixed slot;
 			if(args.length == 2) {
-				p = Static.GetPlayer(args[0].val(), t);
+				p = Static.GetPlayer(args[0].val(), t, env);
 				slot = args[1];
 			} else {
-				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
 				slot = args[0];
 			}
-			MCItemStack is = p.getItemAt(slot instanceof CNull ? null : ArgumentValidation.getInt32(slot, t));
+			MCItemStack is = p.getItemAt(slot instanceof CNull ? null : ArgumentValidation.getInt32(slot, t, env));
 			if(is == null) {
 				return new CArray(t);
 			}
@@ -391,9 +392,9 @@ public class Enchantments {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCEnchantment e = GetEnchantment(args[0].val(), t);
-			MCItemStack is = ObjectGenerator.GetGenerator().item(args[1], t);
+			MCItemStack is = ObjectGenerator.GetGenerator().item(args[1], t, env);
 			return CBoolean.get(e.canEnchantItem(is));
 		}
 	}
@@ -438,7 +439,7 @@ public class Enchantments {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCEnchantment e = GetEnchantment(args[0].val().replace(' ', '_'), t);
 			return new CInt(e.getMaxLevel(), t);
 		}
@@ -487,10 +488,10 @@ public class Enchantments {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCItemStack is;
-			if(args[0].isInstanceOf(CArray.TYPE)) {
-				is = ObjectGenerator.GetGenerator().item(args[0], t);
+			if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
+				is = ObjectGenerator.GetGenerator().item(args[0], t, env);
 			} else {
 				is = Static.ParseItemNotation(null, args[0].val(), 1, t);
 			}
@@ -505,7 +506,7 @@ public class Enchantments {
 			CArray ca = new CArray(t);
 			for(MCEnchantment e : MCEnchantment.values()) {
 				if(e.canEnchantItem(is)) {
-					ca.push(new CString(e.name().toLowerCase(), t), t);
+					ca.push(new CString(e.name().toLowerCase(), t), t, env);
 				}
 			}
 			CACHE.put(name, ca);
@@ -518,7 +519,7 @@ public class Enchantments {
 				FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() == 1
-					&& (children.get(0).getData().isInstanceOf(CString.TYPE) || children.get(0).getData().isInstanceOf(CInt.TYPE))) {
+					&& (children.get(0).getData().isInstanceOf(CString.TYPE, null, env) || children.get(0).getData().isInstanceOf(CInt.TYPE, null, env))) {
 				env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
 						new CompilerWarning("The string item format in " + getName() + " is deprecated.", t, null));
 			}
@@ -570,7 +571,7 @@ public class Enchantments {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			try {
 				GetEnchantment(args[0].val(), t);
 				return CBoolean.TRUE;
@@ -599,10 +600,10 @@ public class Enchantments {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CArray ret = new CArray(t);
 			for(MCEnchantment e : MCEnchantment.values()) {
-				ret.push(new CString(e.name().toLowerCase(), t), t);
+				ret.push(new CString(e.name().toLowerCase(), t), t, env);
 			}
 			return ret;
 		}

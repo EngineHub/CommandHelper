@@ -9,7 +9,6 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
-import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
@@ -64,12 +63,7 @@ public class WeatherEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
-		}
-
-		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			if(event instanceof MCLightningStrikeEvent) {
 				MCLightningStrikeEvent e = (MCLightningStrikeEvent) event;
 				Target t = Target.UNKNOWN;
@@ -91,7 +85,7 @@ public class WeatherEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			return false;
 		}
 
@@ -149,12 +143,7 @@ public class WeatherEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
-		}
-
-		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			if(event instanceof MCThunderChangeEvent) {
 				MCThunderChangeEvent e = (MCThunderChangeEvent) event;
 				Target t = Target.UNKNOWN;
@@ -173,7 +162,7 @@ public class WeatherEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			return false;
 		}
 
@@ -212,13 +201,9 @@ public class WeatherEvents {
 			return false;
 		}
 
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
-		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			if(event instanceof MCWeatherChangeEvent) {
 				MCWeatherChangeEvent e = (MCWeatherChangeEvent) event;
 				Target t = Target.UNKNOWN;
@@ -237,7 +222,7 @@ public class WeatherEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			return false;
 		}
 

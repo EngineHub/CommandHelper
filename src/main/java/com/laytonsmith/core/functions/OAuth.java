@@ -20,6 +20,7 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
@@ -116,7 +117,7 @@ public class OAuth {
 		}
 
 		public static String execute(Environment env, OAuthOptions options) {
-			return new x_get_oauth_token().exec(Target.UNKNOWN, env, options.toOptionsArray()).val();
+			return new x_get_oauth_token().exec(Target.UNKNOWN, env, null, options.toOptionsArray()).val();
 		}
 
 		@Override
@@ -135,35 +136,35 @@ public class OAuth {
 		}
 
 		@Override
-		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			// TODO: Make this part support profiles
-			CArray options = ArgumentValidation.getArray(args[0], t);
-			String authorizationUrl = options.get("authorizationUrl", t).val();
-			String tokenUrl = options.get("tokenUrl", t).val();
-			String clientId = options.get("clientId", t).val();
-			String clientSecret = options.get("clientSecret", t).val();
-			String scope = options.get("scope", t).val();
-			String successText = Construct.nval(options.get("successText", t));
+			CArray options = ArgumentValidation.getArray(args[0], t, env);
+			String authorizationUrl = options.get("authorizationUrl", t, env).val();
+			String tokenUrl = options.get("tokenUrl", t, env).val();
+			String clientId = options.get("clientId", t, env).val();
+			String clientSecret = options.get("clientSecret", t, env).val();
+			String scope = options.get("scope", t, env).val();
+			String successText = Construct.nval(options.get("successText", t, env));
 			CArray extraHeaders1 = null;
 			if(options.containsKey("extraHeaders")) {
-				extraHeaders1 = ArgumentValidation.getArray(options.get("extraHeaders", t), t);
+				extraHeaders1 = ArgumentValidation.getArray(options.get("extraHeaders", t, env), t, env);
 			}
 			Map<String, String> extraHeaders = new HashMap<>();
 			if(extraHeaders1 != null) {
 				for(String key : extraHeaders1.stringKeySet()) {
-					extraHeaders.put(key, extraHeaders1.get(key, t).val());
+					extraHeaders.put(key, extraHeaders1.get(key, t, env).val());
 				}
 			}
 			Integer forcePort = null;
 			if(options.containsKey("forcePort")) {
-				forcePort = ArgumentValidation.getInt32(options.get("forcePort", t), t);
+				forcePort = ArgumentValidation.getInt32(options.get("forcePort", t, env), t, env);
 			}
 			try { // Persistence errors
 				String accessToken = getAccessToken(env, clientId);
 				if(accessToken == null) {
 					try {
 						if(options.containsKey("refreshToken")) {
-							String refreshToken = options.get("refreshToken", t).val();
+							String refreshToken = options.get("refreshToken", t, env).val();
 							storeRefreshToken(env, clientId, refreshToken);
 						}
 						String refreshToken;
@@ -179,7 +180,7 @@ public class OAuth {
 							}
 							String requestURI = generateRequestURI(authorizationUrl, clientId, scope, redirectUrl,
 									extraHeaders);
-							new XGUI.x_launch_browser().exec(t, env, new CString(requestURI, t));
+							new XGUI.x_launch_browser().exec(t, env, null, new CString(requestURI, t));
 							synchronized(lock) {
 								if(lock.getObject() == null) {
 									lock.wait();
@@ -207,14 +208,14 @@ public class OAuth {
 							switch(responseType) {
 								case "application/json": {
 									CArray tokenJson = (CArray) new DataTransformations.json_decode()
-											.exec(t, env, new CString(tokenResponse.getContentAsString(), t));
+											.exec(t, env, null, new CString(tokenResponse.getContentAsString(), t));
 									if(tokenJson.containsKey("refresh_token")) {
-										storeRefreshToken(env, clientId, tokenJson.get("refresh_token", t).val());
+										storeRefreshToken(env, clientId, tokenJson.get("refresh_token", t, env).val());
 									}
-									accessToken = tokenJson.get("access_token", t).val();
+									accessToken = tokenJson.get("access_token", t, env).val();
 									int expiresIn;
 									if(tokenJson.containsKey("expires_in")) {
-										expiresIn = ArgumentValidation.getInt32(tokenJson.get("expires_in", t), t) * 1000;
+										expiresIn = ArgumentValidation.getInt32(tokenJson.get("expires_in", t, env), t, env) * 1000;
 									} else {
 										expiresIn = Integer.MAX_VALUE;
 									}
@@ -246,9 +247,9 @@ public class OAuth {
 							tokenParameters.put("grant_type", "refresh_token");
 							settings.setParameters(tokenParameters);
 							HTTPResponse tokenResponse = WebUtility.GetPage(new URL(tokenUrl), settings);
-							CArray tokenJson = (CArray) new DataTransformations.json_decode().exec(t, env, new CString(tokenResponse.getContentAsString(), t));
-							accessToken = tokenJson.get("access_token", t).val();
-							storeAccessToken(env, clientId, new AccessToken(accessToken, ArgumentValidation.getInt32(tokenJson.get("expires_in", t), t) * 1000));
+							CArray tokenJson = (CArray) new DataTransformations.json_decode().exec(t, env, null, new CString(tokenResponse.getContentAsString(), t));
+							accessToken = tokenJson.get("access_token", t, env).val();
+							storeAccessToken(env, clientId, new AccessToken(accessToken, ArgumentValidation.getInt32(tokenJson.get("expires_in", t, env), t, env) * 1000));
 						}
 					} catch (InterruptedException ex) {
 						return CNull.NULL;
@@ -500,7 +501,7 @@ public class OAuth {
 			if(clientId != null) {
 				args = new Mixed[]{new CString(clientId, Target.UNKNOWN)};
 			}
-			new clear_oauth_tokens().exec(Target.UNKNOWN, env, args);
+			new clear_oauth_tokens().exec(Target.UNKNOWN, env, null, args);
 		}
 
 		@Override
@@ -519,13 +520,13 @@ public class OAuth {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			PersistenceNetwork pn = environment.getEnv(StaticRuntimeEnv.class).GetPersistenceNetwork();
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			PersistenceNetwork pn = env.getEnv(StaticRuntimeEnv.class).GetPersistenceNetwork();
 			String namespace = "oauth";
 			if(args.length >= 1) {
 				namespace += "." + x_get_oauth_token.getFormattedClientId(args[0].val());
 			}
-			DaemonManager dm = environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager();
+			DaemonManager dm = env.getEnv(StaticRuntimeEnv.class).GetDaemonManager();
 			try {
 				Map<String[], String> list = pn.getNamespace(namespace.split("\\."));
 				for(String[] key : list.keySet()) {

@@ -4,6 +4,7 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.CallbackYield;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Optimizable;
@@ -16,6 +17,7 @@ import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
@@ -90,18 +92,18 @@ public class Regex {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			Pattern pattern = getPattern(args[0], t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			Pattern pattern = getPattern(args[0], t, env);
 			String subject = args[1].val();
 			Matcher m = pattern.matcher(subject);
 			if(m.find()) {
 				CArray ret = ObjectGenerator.GetGenerator().regMatchValue(m, t);
 				for(String key : getNamedGroups(pattern.pattern())) {
-					ret.set(key, m.group(key), t);
+					ret.set(key, m.group(key), t, env);
 				}
 				return ret;
 			}
-			return CArray.GetAssociativeArray(t);
+			return CArray.GetAssociativeArray(t, null, env);
 		}
 
 		@Override
@@ -110,7 +112,7 @@ public class Regex {
 				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(!Construct.IsDynamicHelper(children.get(0).getData())) {
-				getPattern(children.get(0).getData(), t);
+				getPattern(children.get(0).getData(), t, env);
 			}
 			return null;
 		}
@@ -178,8 +180,8 @@ public class Regex {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			Pattern pattern = getPattern(args[0], t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			Pattern pattern = getPattern(args[0], t, env);
 			String subject = args[1].val();
 			CArray fret = new CArray(t);
 			Matcher m = pattern.matcher(subject);
@@ -188,9 +190,9 @@ public class Regex {
 				CArray ret = ObjectGenerator.GetGenerator().regMatchValue(m, t);
 
 				for(String key : namedGroups) {
-					ret.set(key, m.group(key), t);
+					ret.set(key, m.group(key), t, env);
 				}
-				fret.push(ret, t);
+				fret.push(ret, t, env);
 			}
 			return fret;
 		}
@@ -201,7 +203,7 @@ public class Regex {
 				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(!Construct.IsDynamicHelper(children.get(0).getData())) {
-				getPattern(children.get(0).getData(), t);
+				getPattern(children.get(0).getData(), t, env);
 			}
 			return null;
 		}
@@ -230,7 +232,7 @@ public class Regex {
 	}
 
 	@api
-	public static class reg_replace extends AbstractFunction implements Optimizable {
+	public static class reg_replace extends CallbackYield implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -271,26 +273,55 @@ public class Regex {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			Pattern pattern = getPattern(args[0], t);
+		protected void execWithYield(Target t, Environment env, Mixed[] args, CallbackYield.Yield yield) {
+			Pattern pattern = getPattern(args[0], t, env);
 			Mixed replacement = args[1];
 			String subject = args[2].val();
-			String ret = "";
 
-			try {
-				if(replacement instanceof Callable replacer) {
-					ret = pattern.matcher(subject).replaceAll(mr -> ArgumentValidation.getStringObject(
-							replacer.executeCallable(env, t, ObjectGenerator.GetGenerator().regMatchValue(mr, t)), t));
-				} else {
-					ret = pattern.matcher(subject).replaceAll(replacement.val());
+			if(replacement instanceof Callable replacer) {
+				// Collect all match positions upfront, then yield each closure call.
+				Matcher m = pattern.matcher(subject);
+				StringBuilder sb = new StringBuilder();
+				int lastEnd = 0;
+				boolean found = false;
+				try {
+					while(m.find()) {
+						found = true;
+						final int segStart = lastEnd;
+						final int matchStart = m.start();
+						CArray matchData = ObjectGenerator.GetGenerator().regMatchValue(m, t);
+						yield.call(replacer, env, t, matchData)
+								.then((result, y) -> {
+									sb.append(subject, segStart, matchStart);
+									sb.append(ArgumentValidation.getStringObject(result, t, env));
+								});
+						lastEnd = m.end();
+					}
+				} catch(IndexOutOfBoundsException e) {
+					throw new CREFormatException("Expecting a regex group at parameter 1 of reg_replace", t);
+				} catch(IllegalArgumentException e) {
+					throw new CREFormatException(e.getMessage(), t);
 				}
-			} catch (IndexOutOfBoundsException e) {
-				throw new CREFormatException("Expecting a regex group at parameter 1 of reg_replace", t);
-			} catch (IllegalArgumentException e) {
-				throw new CREFormatException(e.getMessage(), t);
+				if(!found) {
+					yield.done(() -> new CString(subject, t));
+				} else {
+					final int tail = lastEnd;
+					yield.done(() -> {
+						sb.append(subject, tail, subject.length());
+						return new CString(sb.toString(), t);
+					});
+				}
+			} else {
+				// Plain string replacement — no closures, synchronous.
+				try {
+					String ret = pattern.matcher(subject).replaceAll(replacement.val());
+					yield.done(() -> new CString(ret, t));
+				} catch(IndexOutOfBoundsException e) {
+					throw new CREFormatException("Expecting a regex group at parameter 1 of reg_replace", t);
+				} catch(IllegalArgumentException e) {
+					throw new CREFormatException(e.getMessage(), t);
+				}
 			}
-
-			return new CString(ret, t);
 		}
 
 		@Override
@@ -314,7 +345,7 @@ public class Regex {
 					replaceNode.addChildAt(2, children.get(1)); //replacement -> that
 					return replaceNode;
 				} else {
-					getPattern(patternArg.getData(), t);
+					getPattern(patternArg.getData(), t, env);
 				}
 			}
 			return null;
@@ -392,8 +423,8 @@ public class Regex {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			Pattern pattern = getPattern(args[0], t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			Pattern pattern = getPattern(args[0], t, env);
 			String subject = args[1].val();
 			/**
 			 * We use a different indexing notation than Java's regex split. In the case of 0 for the limit, we will
@@ -404,12 +435,12 @@ public class Regex {
 			 */
 			int limit = Integer.MAX_VALUE - 1;
 			if(args.length >= 3) {
-				limit = ArgumentValidation.getInt32(args[2], t);
+				limit = ArgumentValidation.getInt32(args[2], t, env);
 			}
 			String[] rsplit = pattern.split(subject, limit + 1);
 			CArray ret = new CArray(t);
 			for(String split : rsplit) {
-				ret.push(new CString(split, t), t);
+				ret.push(new CString(split, t), t, env);
 			}
 			return ret;
 		}
@@ -429,7 +460,7 @@ public class Regex {
 					splitNode.addChildAt(1, children.get(1));
 					return splitNode;
 				} else {
-					getPattern(data.getData(), t);
+					getPattern(data.getData(), t, env);
 				}
 			}
 			return null;
@@ -492,8 +523,8 @@ public class Regex {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			Pattern pattern = getPattern(args[0], t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			Pattern pattern = getPattern(args[0], t, env);
 			String subject = args[1].val();
 			long ret = 0;
 			Matcher m = pattern.matcher(subject);
@@ -509,7 +540,7 @@ public class Regex {
 				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(!Construct.IsDynamicHelper(children.get(0).getData())) {
-				getPattern(children.get(0).getData(), t);
+				getPattern(children.get(0).getData(), t, env);
 			}
 			return null;
 		}
@@ -551,7 +582,7 @@ public class Regex {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return new CString(java.util.regex.Pattern.quote(args[0].val()), t);
 		}
 
@@ -595,14 +626,14 @@ public class Regex {
 
 	}
 
-	private static Pattern getPattern(Mixed c, Target t) throws ConfigRuntimeException {
+	private static Pattern getPattern(Mixed c, Target t, Environment env) throws ConfigRuntimeException {
 		String regex = "";
 		int flags = 0;
 		String sflags = "";
-		if(c.isInstanceOf(CArray.TYPE)) {
+		if(c.isInstanceOf(CArray.TYPE, null, env)) {
 			CArray ca = (CArray) c;
-			regex = ca.get(0, t).val();
-			sflags = ca.get(1, t).val();
+			regex = ca.get(0, t, env).val();
+			sflags = ca.get(1, t, env).val();
 			for(int i = 0; i < sflags.length(); i++) {
 				if(sflags.toLowerCase().charAt(i) == 'i') {
 					flags |= java.util.regex.Pattern.CASE_INSENSITIVE;

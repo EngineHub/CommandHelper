@@ -64,7 +64,7 @@ public class ArrayHandlingTest extends AbstractIntegrationTest {
 	public void testArraySize() throws Exception, CancelCommandException {
 		ArrayHandling.array_size a = new ArrayHandling.array_size();
 		CArray arr = commonArray;
-		Mixed ret = a.exec(Target.UNKNOWN, env, arr);
+		Mixed ret = a.exec(Target.UNKNOWN, env, null, arr);
 		assertReturn(ret, C.INT);
 		assertCEquals(C.onstruct(3), ret);
 	}
@@ -72,7 +72,7 @@ public class ArrayHandlingTest extends AbstractIntegrationTest {
 	@Test(expected = Exception.class, timeout = 10000)
 	public void testArraySizeEx() throws CancelCommandException {
 		ArrayHandling.array_size a = new ArrayHandling.array_size();
-		a.exec(Target.UNKNOWN, env, C.Int(0));
+		a.exec(Target.UNKNOWN, env, null, C.Int(0));
 	}
 
 	@Test//(timeout = 10000)
@@ -121,46 +121,46 @@ public class ArrayHandlingTest extends AbstractIntegrationTest {
 	@Test(timeout = 10000)
 	public void testArrayContains() throws CancelCommandException {
 		ArrayHandling.array_contains a = new ArrayHandling.array_contains();
-		assertCEquals(C.onstruct(true), a.exec(Target.UNKNOWN, env, commonArray, C.onstruct(1)));
-		assertCEquals(C.onstruct(false), a.exec(Target.UNKNOWN, env, commonArray, C.onstruct(55)));
+		assertCEquals(C.onstruct(true), a.exec(Target.UNKNOWN, env, null, commonArray, C.onstruct(1)));
+		assertCEquals(C.onstruct(false), a.exec(Target.UNKNOWN, env, null, commonArray, C.onstruct(55)));
 	}
 
 	@Test(timeout = 10000)
 	public void testArraySContains() throws CancelCommandException {
 		ArrayHandling.array_scontains a = new ArrayHandling.array_scontains();
-		assertCEquals(C.onstruct(true), a.exec(Target.UNKNOWN, env, commonArray, C.onstruct(1)));
-		assertCEquals(C.onstruct(false), a.exec(Target.UNKNOWN, env, commonArray, C.onstruct(55)));
-		assertCEquals(C.onstruct(false), a.exec(Target.UNKNOWN, env, commonArray, new CString("2", Target.UNKNOWN)));
+		assertCEquals(C.onstruct(true), a.exec(Target.UNKNOWN, env, null, commonArray, C.onstruct(1)));
+		assertCEquals(C.onstruct(false), a.exec(Target.UNKNOWN, env, null, commonArray, C.onstruct(55)));
+		assertCEquals(C.onstruct(false), a.exec(Target.UNKNOWN, env, null, commonArray, new CString("2", Target.UNKNOWN)));
 	}
 
 	@Test(expected = Exception.class, timeout = 10000)
 	public void testArrayContainsEx() throws CancelCommandException {
 		ArrayHandling.array_contains a = new ArrayHandling.array_contains();
-		a.exec(Target.UNKNOWN, env, C.Int(0), C.Int(1));
+		a.exec(Target.UNKNOWN, env, null, C.Int(0), C.Int(1));
 	}
 
 	@Test(timeout = 10000)
 	public void testArrayGet() throws CancelCommandException {
 		ArrayHandling.array_get a = new ArrayHandling.array_get();
-		assertCEquals(C.onstruct(1), a.exec(Target.UNKNOWN, env, commonArray, C.onstruct(0)));
+		assertCEquals(C.onstruct(1), a.exec(Target.UNKNOWN, env, null, commonArray, C.onstruct(0)));
 	}
 
 	@Test(expected = Exception.class, timeout = 10000)
 	public void testArrayGetEx() throws CancelCommandException {
 		ArrayHandling.array_get a = new ArrayHandling.array_get();
-		a.exec(Target.UNKNOWN, env, C.Int(0), C.Int(1));
+		a.exec(Target.UNKNOWN, env, null, C.Int(0), C.Int(1));
 	}
 
 	@Test(expected = ConfigRuntimeException.class, timeout = 10000)
 	public void testArrayGetBad() throws CancelCommandException {
 		ArrayHandling.array_get a = new ArrayHandling.array_get();
-		a.exec(Target.UNKNOWN, env, commonArray, C.onstruct(55));
+		a.exec(Target.UNKNOWN, env, null, commonArray, C.onstruct(55));
 	}
 
 	@Test(timeout = 10000)
 	public void testArrayPush() throws CancelCommandException {
 		ArrayHandling.array_push a = new ArrayHandling.array_push();
-		assertReturn(a.exec(Target.UNKNOWN, env, commonArray, C.onstruct(4)), C.VOID);
+		assertReturn(a.exec(Target.UNKNOWN, env, null, commonArray, C.onstruct(4)), C.VOID);
 		assertCEquals(C.onstruct(1), commonArray.get(0, Target.UNKNOWN));
 		assertCEquals(C.onstruct(2), commonArray.get(1, Target.UNKNOWN));
 		assertCEquals(C.onstruct(3), commonArray.get(2, Target.UNKNOWN));
@@ -178,7 +178,7 @@ public class ArrayHandlingTest extends AbstractIntegrationTest {
 	@Test(expected = Exception.class)
 	public void testArrayPushEx() throws CancelCommandException {
 		ArrayHandling.array_push a = new ArrayHandling.array_push();
-		a.exec(Target.UNKNOWN, env, C.Int(0), C.Int(1));
+		a.exec(Target.UNKNOWN, env, null, C.Int(0), C.Int(1));
 	}
 
 	@Test(timeout = 10000)
@@ -299,6 +299,30 @@ public class ArrayHandlingTest extends AbstractIntegrationTest {
 	public void testAssociativeArraySort() throws Exception {
 		Run("msg(array_sort(array('a': '002', 'b': '1', 'c': '03')))", fakePlayer);
 		verify(fakePlayer).sendMessage("{1, 002, 03}");
+	}
+
+	@Test
+	public void testArraySortCustomClosure() throws Exception {
+		Run("@a = array(3, 1, 4, 1, 5, 9);\n"
+				+ "array_sort(@a, closure(@l, @r){ return(@l - @r); });\n"
+				+ "msg(@a);", fakePlayer);
+		verify(fakePlayer).sendMessage("{1, 1, 3, 4, 5, 9}");
+	}
+
+	@Test
+	public void testArraySortCustomClosureReverse() throws Exception {
+		Run("@a = array(3, 1, 4, 1, 5, 9);\n"
+				+ "array_sort(@a, closure(@l, @r){ return(@r - @l); });\n"
+				+ "msg(@a);", fakePlayer);
+		verify(fakePlayer).sendMessage("{9, 5, 4, 3, 1, 1}");
+	}
+
+	@Test
+	public void testArraySortCustomClosureBoolean() throws Exception {
+		Run("@a = array(5, 2, 8, 1);\n"
+				+ "array_sort(@a, closure(@l, @r){ return(@l > @r); });\n"
+				+ "msg(@a);", fakePlayer);
+		verify(fakePlayer).sendMessage("{1, 2, 5, 8}");
 	}
 
 	@Test
@@ -519,6 +543,51 @@ public class ArrayHandlingTest extends AbstractIntegrationTest {
 	}
 
 	@Test
+	public void testArrayFilterNormal() throws Exception {
+		Run("@array = array(1, 2, 3, 4, 5);\n"
+				+ "@odds = array_filter(@array, closure(@key, @value){\n"
+				+ "\treturn(@value % 2 == 1);\n"
+				+ "});\n"
+				+ "msg(@odds);", fakePlayer);
+		verify(fakePlayer).sendMessage("{1, 3, 5}");
+	}
+
+	@Test
+	public void testArrayFilterAssociative() throws Exception {
+		Run("@array = array(a: 1, b: 2, c: 3);\n"
+				+ "@result = array_filter(@array, closure(@key, @value){\n"
+				+ "\treturn(@value > 1);\n"
+				+ "});\n"
+				+ "msg(@result);", fakePlayer);
+		verify(fakePlayer).sendMessage("{b: 2, c: 3}");
+	}
+
+	@Test
+	public void testArrayFilterEmpty() throws Exception {
+		Run("@array = array();\n"
+				+ "@result = array_filter(@array, closure(@key, @value){\n"
+				+ "\treturn(true);\n"
+				+ "});\n"
+				+ "msg(@result);", fakePlayer);
+		verify(fakePlayer).sendMessage("{}");
+	}
+
+	@Test
+	public void testArrayReduceEmpty() throws Exception {
+		assertEquals("null", SRun("array_reduce(array(), closure(@a, @b){ return(@a + @b); })", fakePlayer));
+	}
+
+	@Test
+	public void testArrayReduceSingle() throws Exception {
+		assertEquals("5", SRun("array_reduce(array(5), closure(@a, @b){ return(@a + @b); })", fakePlayer));
+	}
+
+	@Test
+	public void testArrayReduceRightSingle() throws Exception {
+		assertEquals("5", SRun("array_reduce_right(array(5), closure(@a, @b){ return(@a + @b); })", fakePlayer));
+	}
+
+	@Test
 	public void testArrayReverse() throws Exception {
 		Run("@array = array(1, 2, 3, 4);\n"
 				+ "array_reverse(@array);\n"
@@ -555,6 +624,38 @@ public class ArrayHandlingTest extends AbstractIntegrationTest {
 				+ " array(array(id: 1, qty: 19), array(id: 6, qty: 2)), closure(@a, @b){ return(@a['id'] == @b['id']); })", fakePlayer),
 				is("{{id: 1, qty: 2}}"));
 
+	}
+
+	@Test
+	public void testArraySubtractHash() throws Exception {
+		assertThat(SRun("array_subtract(array(1, 2, 3, 4), array(2, 4))", fakePlayer), is("{1, 3}"));
+	}
+
+	@Test
+	public void testArraySubtractEquals() throws Exception {
+		assertThat(SRun("array_subtract(array(1, 2, 3), array(2, 3, 4), 'EQUALS')", fakePlayer), is("{1}"));
+	}
+
+	@Test
+	public void testArraySubtractAssociative() throws Exception {
+		assertThat(SRun("array_subtract(array(a: 1, b: 2, c: 3), array(b: 99, d: 4))", fakePlayer), is("{a: 1, c: 3}"));
+	}
+
+	@Test
+	public void testArraySubtractClosure() throws Exception {
+		assertThat(SRun("array_subtract(array(1, 2, 3, 4), array(10, 20), closure(@a, @b){ return(@a * 10 == @b); })",
+				fakePlayer), is("{3, 4}"));
+	}
+
+	@Test
+	public void testArraySubtractNoOverlap() throws Exception {
+		assertThat(SRun("array_subtract(array(1, 2, 3), array(4, 5, 6))", fakePlayer), is("{1, 2, 3}"));
+	}
+
+	@Test
+	public void testArrayIntersectClosurePartial() throws Exception {
+		assertThat(SRun("array_intersect(array(1, 2, 3, 4), array(10, 30), closure(@a, @b){ return(@a * 10 == @b); })",
+				fakePlayer), is("{1, 3}"));
 	}
 
 	@Test

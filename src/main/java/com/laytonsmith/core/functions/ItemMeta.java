@@ -35,6 +35,7 @@ import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
@@ -78,19 +79,19 @@ public class ItemMeta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			MCItemStack is;
 			Mixed slot;
 			if(args.length == 2) {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 				slot = args[1];
 			} else {
-				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
 				slot = args[0];
 			}
-			is = p.getItemAt(slot instanceof CNull ? null : ArgumentValidation.getInt32(slot, t));
+			is = p.getItemAt(slot instanceof CNull ? null : ArgumentValidation.getInt32(slot, t, env));
 			return ObjectGenerator.GetGenerator().itemMeta(is, t);
 		}
 
@@ -182,26 +183,26 @@ public class ItemMeta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			Mixed slot;
 			Mixed meta;
 			MCItemStack is;
 			if(args.length == 3) {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 				slot = args[1];
 				meta = args[2];
 			} else {
-				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
 				slot = args[0];
 				meta = args[1];
 			}
-			is = p.getItemAt(slot instanceof CNull ? null : ArgumentValidation.getInt32(slot, t));
+			is = p.getItemAt(slot instanceof CNull ? null : ArgumentValidation.getInt32(slot, t, env));
 			if(is == null) {
 				throw new CRECastException("There is no item at slot " + slot, t);
 			}
-			is.setItemMeta(ObjectGenerator.GetGenerator().itemMeta(meta, is.getType(), t));
+			is.setItemMeta(ObjectGenerator.GetGenerator().itemMeta(meta, is.getType(), t, env));
 			return CVoid.VOID;
 		}
 
@@ -290,14 +291,14 @@ public class ItemMeta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int slot;
 			if(args.length == 2) {
-				p = Static.GetPlayer(args[0], t);
-				slot = ArgumentValidation.getInt32(args[1], t);
+				p = Static.GetPlayer(args[0], t, env);
+				slot = ArgumentValidation.getInt32(args[1], t, env);
 			} else {
-				slot = ArgumentValidation.getInt32(args[0], t);
+				slot = ArgumentValidation.getInt32(args[0], t, env);
 			}
 			Static.AssertPlayerNonNull(p, t);
 			MCItemStack is = p.getItemAt(slot);
@@ -355,21 +356,21 @@ public class ItemMeta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int slot;
 			CArray color;
 			if(args.length == 3) {
-				p = Static.GetPlayer(args[0], t);
-				slot = ArgumentValidation.getInt32(args[1], t);
-				if(args[2].isInstanceOf(CArray.TYPE)) {
+				p = Static.GetPlayer(args[0], t, env);
+				slot = ArgumentValidation.getInt32(args[1], t, env);
+				if(args[2].isInstanceOf(CArray.TYPE, null, env)) {
 					color = (CArray) args[2];
 				} else {
 					throw new CREFormatException("Expected an array but received " + args[2] + " instead.", t);
 				}
 			} else {
-				slot = ArgumentValidation.getInt32(args[0], t);
-				if(args[1].isInstanceOf(CArray.TYPE)) {
+				slot = ArgumentValidation.getInt32(args[0], t, env);
+				if(args[1].isInstanceOf(CArray.TYPE, null, env)) {
 					color = (CArray) args[1];
 				} else {
 					throw new CREFormatException("Expected an array but received " + args[1] + " instead.", t);
@@ -434,18 +435,18 @@ public class ItemMeta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			Mixed slot;
 			if(args.length == 2) {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 				slot = args[1];
 			} else {
-				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
 				slot = args[0];
 			}
-			MCItemStack is = p.getItemAt(slot instanceof CNull ? null : ArgumentValidation.getInt32(slot, t));
+			MCItemStack is = p.getItemAt(slot instanceof CNull ? null : ArgumentValidation.getInt32(slot, t, env));
 			if(is == null) {
 				return CBoolean.FALSE;
 			}

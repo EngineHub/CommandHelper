@@ -251,4 +251,12 @@ public class MethodScriptFileLocations extends FileLocations {
 			return getLinuxNativeDirectory();
 		}
 	}
+
+	/**
+	 * Returns the location of the authorized_debug_keys file.
+	 * @return
+	 */
+	public File getAuthorizedDebugKeysFile() {
+		return new File(new File(getUserHome(), ".mscript"), "authorized_debug_keys");
+	}
 }

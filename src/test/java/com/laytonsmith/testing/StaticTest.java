@@ -74,9 +74,6 @@ import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
-import com.laytonsmith.core.exceptions.FunctionReturnException;
-import com.laytonsmith.core.exceptions.LoopBreakException;
-import com.laytonsmith.core.exceptions.LoopContinueException;
 import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.functions.BasicLogic.equals;
 import com.laytonsmith.core.functions.Function;
@@ -180,8 +177,7 @@ public class StaticTest extends AbstractIntegrationTest {
 			TestExec(f, StaticTest.GetFakeConsoleCommandSender(), "fake console command sender");
 		}
 
-		//Let's make sure that if execs is defined in the class, useSpecialExec returns true.
-		//Same thing for optimize/canOptimize and optimizeDynamic/canOptimizeDynamic
+		//Let's make sure optimization declarations are consistent.
 		if(f instanceof Optimizable) {
 			Set<Optimizable.OptimizationOption> options = ((Optimizable) f).optimizationOptions();
 			if(options.contains(Optimizable.OptimizationOption.CONSTANT_OFFLINE) && options.contains(Optimizable.OptimizationOption.OPTIMIZE_CONSTANT)) {
@@ -189,12 +185,6 @@ public class StaticTest extends AbstractIntegrationTest {
 			}
 		}
 		for(Method method : f.getClass().getDeclaredMethods()) {
-			if(method.getName().equals("execs")) {
-				if(!f.useSpecialExec()) {
-					fail(f.getName() + " declares execs, but returns false for useSpecialExec.");
-				}
-			}
-
 			if(f instanceof Optimizable) {
 				Set<Optimizable.OptimizationOption> options = ((Optimizable) f).optimizationOptions();
 				if(method.getName().equals("optimize")) {
@@ -289,7 +279,7 @@ public class StaticTest extends AbstractIntegrationTest {
 					}
 				}
 				try {
-					f.exec(Target.UNKNOWN, env, con);
+					Function.ExecuteFunction(f, Target.UNKNOWN, env, con);
 				} catch (CancelCommandException e) {
 				} catch (ConfigRuntimeException e) {
 					if(f.getName().equals("throw")) {
@@ -313,15 +303,6 @@ public class StaticTest extends AbstractIntegrationTest {
 								+ name + ", but it did.");
 					}
 				} catch (Throwable e) {
-					if(e instanceof LoopBreakException && !f.getName().equals("break")) {
-						fail("Only break() can throw LoopBreakExceptions");
-					}
-					if(e instanceof LoopContinueException && !f.getName().equals("continue")) {
-						fail("Only continue() can throw LoopContinueExceptions");
-					}
-					if(e instanceof FunctionReturnException && !f.getName().equals("return")) {
-						fail("Only return() can throw FunctionReturnExceptions");
-					}
 					if(e instanceof NullPointerException) {
 						String error = (f.getName() + " breaks if you send it the following while using a " + commandType + ": " + Arrays.deepToString(con) + "\n");
 						error += ("Here is the first few stack trace lines:\n");
@@ -364,7 +345,7 @@ public class StaticTest extends AbstractIntegrationTest {
 	 */
 	public static void assertCEquals(Mixed expected, Mixed actual) throws CancelCommandException {
 		equals e = new equals();
-		CBoolean ret = (CBoolean) e.exec(Target.UNKNOWN, null, expected, actual);
+		CBoolean ret = (CBoolean) e.exec(Target.UNKNOWN, null, null, expected, actual);
 		if(ret.getBoolean() == false) {
 			throw new AssertionError("Expected " + expected + " and " + actual + " to be equal to each other");
 		}
@@ -379,7 +360,7 @@ public class StaticTest extends AbstractIntegrationTest {
 	 */
 	public static void assertCNotEquals(Mixed expected, Mixed actual) throws CancelCommandException {
 		equals e = new equals();
-		CBoolean ret = (CBoolean) e.exec(Target.UNKNOWN, null, expected, actual);
+		CBoolean ret = (CBoolean) e.exec(Target.UNKNOWN, null, null, expected, actual);
 		if(ret.getBoolean() == true) {
 			throw new AssertionError("Did not expect " + expected + " and " + actual + " to be equal to each other");
 		}
@@ -545,6 +526,7 @@ public class StaticTest extends AbstractIntegrationTest {
 			env = StaticTest.env;
 		}
 		env.getEnv(GlobalEnv.class).GetVarList().clear();
+		env.getEnv(GlobalEnv.class).GetStackTraceManager().clear();
 		env.getEnv(CommandHelperEnvironment.class).SetCommandSender(player);
 		StaticAnalysis analysis = new StaticAnalysis(true);
 		analysis.setLocalEnable(false);

@@ -1,9 +1,9 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ParseTree;
-import com.laytonsmith.core.Script;
 import com.laytonsmith.core.compiler.SelfStatement;
 import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
@@ -11,14 +11,18 @@ import com.laytonsmith.core.compiler.signature.FunctionSignatures;
 import com.laytonsmith.core.compiler.signature.SignatureBuilder;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Note that to "activate" this class as a function, you must prefix the '@api' annotation to it.
@@ -68,18 +72,18 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 	 * function can provide a more specific error message for the user. If the function was canceled due to a fatal
 	 * error in the syntax of the user input or some similar situation, it should throw a ConfigRuntimeException. All
 	 * parameters sent to the function have already been resolved into an atomic value, so functions do not have to
-	 * worry about resolving parameters. There is an explicit check made before calling exec to ensure that Construct
-	 * ... args will only be one of the atomic Constructs. If a code tree is needed instead of a resolved construct, the
-	 * function should indicate so, and {@code execs} will be called instead. If exec is needed, execs should return
-	 * CVoid.
+	 * worry about resolving parameters. There is an explicit check made before calling exec to ensure that Mixed
+	 * ... args will only be one of the atomic objects. If a code tree is needed instead of a resolved construct, the
+	 * function should implement {@link FlowFunction} instead.
 	 *
 	 * @param t The location of this function call in the code, used for correct error messages
 	 * @param environment The current code environment
+	 * @param generics The generic parameters for this function call, or null if none were provided
 	 * @param args An array of evaluated objects
 	 * @return
 	 * @throws CancelCommandException
 	 */
-	public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException;
+	public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException;
 
 	/**
 	 * Gets the function's signatures. {@link SignatureBuilder} offers a convenient way to create these signatures.
@@ -144,25 +148,6 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 			Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> exceptions);
 
 	/**
-	 * If a function needs a code tree instead of a resolved construct, it should return true here. Most functions will
-	 * return false for this value.
-	 *
-	 * @return
-	 */
-	public boolean useSpecialExec();
-
-	/**
-	 * If useSpecialExec indicates it needs the code tree instead of the resolved constructs, this gets called instead
-	 * of exec. If execs is needed, exec should return CVoid.
-	 *
-	 * @param t
-	 * @param env
-	 * @param nodes
-	 * @return
-	 */
-	public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes);
-
-	/**
 	 * Returns an array of example scripts, which are used for documentation purposes.
 	 * <p>
 	 * If there are no examples, null or empty array should be returned.
@@ -188,15 +173,16 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 	public LogLevel profileAt();
 
 	/**
-	 * Returns the message to use when this function gets profiled, if useSpecialExec returns false.
+	 * Returns the message to use when this function gets profiled with resolved args.
 	 *
+	 * @param env
 	 * @param args
 	 * @return
 	 */
-	public String profileMessage(Mixed... args);
+	public String profileMessage(Environment env, Mixed... args);
 
 	/**
-	 * Returns the message to use when this function gets profiled, if useSpecialExec returns true.
+	 * Returns the message to use when this function gets profiled with unresolved parse tree args.
 	 *
 	 * @param args
 	 * @return
@@ -236,5 +222,92 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 		 * @return
 		 */
 		public List<ParseTree> getBranches(ParseTree self);
+	}
+
+	// Reflection bridge for backward compatibility with 3rd-party functions
+	// that still implement the old 3-arg exec(Target, Environment, Mixed...) signature.
+	// Once all known extensions have been updated, the cache and reflection fallback
+	// can be removed, and callers can invoke exec directly.
+	// Added 2026-02-23.
+
+	/**
+	 * Cache of Function classes that only implement the old 3-arg exec signature.
+	 */
+	Set<Class<?>> OLD_EXEC_CACHE = Collections.newSetFromMap(new ConcurrentHashMap<>());
+
+	/**
+	 * Invokes {@link #exec} on the given function with backward compatibility for 3rd-party functions
+	 * that still implement the old 3-arg exec(Target, Environment, Mixed...) signature.
+	 * For functions with the new signature, this has zero overhead beyond a Set lookup on cached misses.
+	 *
+	 * @param f The function to execute.
+	 * @param t The code target.
+	 * @param env The environment.
+	 * @param args The arguments.
+	 * @return The result of the function execution.
+	 * @throws ConfigRuntimeException
+	 */
+	static Mixed ExecuteFunction(Function f, Target t, Environment env, Mixed[] args) throws ConfigRuntimeException {
+		if(OLD_EXEC_CACHE.contains(f.getClass())) {
+			return invokeOldExec(f, t, env, args);
+		}
+		try {
+			return f.exec(t, env, null, args);
+		} catch(AbstractMethodError e) {
+			OLD_EXEC_CACHE.add(f.getClass());
+			return invokeOldExec(f, t, env, args);
+		}
+	}
+
+	private static Mixed invokeOldExec(Function f, Target t, Environment env, Mixed[] args)
+			throws ConfigRuntimeException {
+		try {
+			return ReflectionUtils.invokeMethod(f.getClass(), f, "exec",
+					new Class[]{Target.class, Environment.class, Mixed[].class},
+					new Object[]{t, env, args});
+		} catch(ReflectionUtils.ReflectionException e) {
+			Throwable cause = e.getCause();
+			if(cause instanceof InvocationTargetException) {
+				cause = cause.getCause();
+			}
+			if(cause instanceof ConfigRuntimeException) {
+				throw (ConfigRuntimeException) cause;
+			}
+			throw e;
+		}
+	}
+
+	// Reflection bridge for backward compatibility with 3rd-party functions
+	// that still implement the old profileMessage(Mixed...) signature only.
+	// Added 2026-02-23.
+	Set<Class<?>> OLD_PROFILE_MESSAGE_CACHE = Collections.newSetFromMap(new ConcurrentHashMap<>());
+
+	static String ExecuteProfileMessage(Function f, Environment env, Mixed[] args) {
+		if(OLD_PROFILE_MESSAGE_CACHE.contains(f.getClass())) {
+			return invokeOldProfileMessage(f, args);
+		}
+		try {
+			return f.profileMessage(env, args);
+		} catch(AbstractMethodError e) {
+			OLD_PROFILE_MESSAGE_CACHE.add(f.getClass());
+			return invokeOldProfileMessage(f, args);
+		}
+	}
+
+	private static String invokeOldProfileMessage(Function f, Mixed[] args) {
+		try {
+			return (String) ReflectionUtils.invokeMethod(f.getClass(), f, "profileMessage",
+					new Class[]{Mixed[].class},
+					new Object[]{args});
+		} catch(ReflectionUtils.ReflectionException e) {
+			Throwable cause = e.getCause();
+			if(cause instanceof InvocationTargetException) {
+				cause = cause.getCause();
+			}
+			if(cause instanceof ConfigRuntimeException) {
+				throw (ConfigRuntimeException) cause;
+			}
+			throw e;
+		}
 	}
 }

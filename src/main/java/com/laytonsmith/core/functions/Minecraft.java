@@ -38,6 +38,7 @@ import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -95,9 +96,9 @@ public class Minecraft {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
-			if(args[0].isInstanceOf(CInt.TYPE)) {
-				return new CInt(ArgumentValidation.getInt(args[0], t), t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+			if(args[0].isInstanceOf(CInt.TYPE, null, env)) {
+				return new CInt(ArgumentValidation.getInt(args[0], t, env), t);
 			}
 			String c = args[0].val();
 			MCMaterial mat = StaticLayer.GetMaterial("LEGACY_" + c.toUpperCase());
@@ -225,10 +226,10 @@ public class Minecraft {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			int i = -1;
 			int i2 = -1;
-			if(args[0].isInstanceOf(CString.TYPE)) {
+			if(args[0].isInstanceOf(CString.TYPE, null, env)) {
 				//We also accept item notation
 				if(args[0].val().contains(":")) {
 					String[] split = args[0].val().split(":");
@@ -240,13 +241,13 @@ public class Minecraft {
 						throw new CREFormatException("Incorrect format for the item notation: " + args[0].val(), t);
 					}
 				}
-			} else if(args[0].isInstanceOf(CArray.TYPE)) {
+			} else if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
 				MCItemStack is = ObjectGenerator.GetGenerator().item(args[0], t, true);
 				return new CString(is.getType().getName(), t);
 			}
 			if(i == -1) {
 				try {
-					i = ArgumentValidation.getInt32(args[0], t);
+					i = ArgumentValidation.getInt32(args[0], t, env);
 				} catch (CRECastException ex) {
 					// possibly a material name
 					MCMaterial mat = StaticLayer.GetMaterialFromLegacy(args[0].val(), 0);
@@ -309,8 +310,8 @@ public class Minecraft {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			CArray item = ArgumentValidation.getArray(args[0], t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			CArray item = ArgumentValidation.getArray(args[0], t, env);
 			MCItemStack is = ObjectGenerator.GetGenerator().item(item, t, true);
 			return ObjectGenerator.GetGenerator().item(is, t);
 		}
@@ -357,9 +358,9 @@ public class Minecraft {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			Mixed id = args[0];
-			if(id.isInstanceOf(CArray.TYPE)) {
+			if(id.isInstanceOf(CArray.TYPE, null, env)) {
 				MCItemStack is = ObjectGenerator.GetGenerator().item(id, t);
 				return new CInt(is.maxStackSize(), t);
 			}
@@ -397,8 +398,8 @@ public class Minecraft {
 			if(children.size() < 1) {
 				return null;
 			}
-			if(children.get(0).getData().isInstanceOf(CString.TYPE) && children.get(0).getData().val().contains(":")
-					|| ArgumentValidation.isNumber(children.get(0).getData())) {
+			if(children.get(0).isConst() && (children.get(0).getData().isInstanceOf(CString.TYPE, null, env) && children.get(0).getData().val().contains(":")
+					|| ArgumentValidation.isNumber(children.get(0).getData()))) {
 				env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
 						new CompilerWarning("Numeric ids are deprecated in " + getName(), t, null));
 			}
@@ -461,9 +462,9 @@ public class Minecraft {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			MCLocation l = ObjectGenerator.GetGenerator().location(args[0], p == null ? null : p.getWorld(), t);
+			MCLocation l = ObjectGenerator.GetGenerator().location(args[0], p == null ? null : p.getWorld(), t, env);
 			MCEffect effect;
 			int data = 0;
 			String effectName = args[1].val();
@@ -481,7 +482,7 @@ public class Minecraft {
 				return CVoid.VOID;
 			}
 			if(args.length > 2) {
-				radius = ArgumentValidation.getInt32(args[args.length - 1], t);
+				radius = ArgumentValidation.getInt32(args[args.length - 1], t, env);
 			}
 			if(!dataString.isEmpty()) {
 				switch(effect) {
@@ -550,7 +551,7 @@ public class Minecraft {
 				return null;
 			}
 			Mixed effect = children.get(1).getData();
-			if(effect.isInstanceOf(CString.TYPE)) {
+			if(effect.isInstanceOf(CString.TYPE, null, env)) {
 				String effectName = effect.val().split(":")[0].toUpperCase();
 				try {
 					MCEffect.valueOf(effectName);
@@ -629,13 +630,13 @@ public class Minecraft {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			MCServer server = Static.getServer();
 			int index = -1;
 			if(args.length == 0) {
 				index = -1;
 			} else if(args.length == 1) {
-				index = ArgumentValidation.getInt32(args[0], t);
+				index = ArgumentValidation.getInt32(args[0], t, env);
 			}
 
 			if(index < -1 || index > 16) {
@@ -685,7 +686,7 @@ public class Minecraft {
 						continue;
 					}
 					CString os = new CString(o.getName(), t);
-					co.push(os, t);
+					co.push(os, t, env);
 				}
 				retVals.add(co);
 			}
@@ -703,7 +704,7 @@ public class Minecraft {
 						continue;
 					}
 					CString name = new CString(p.getName(), t);
-					co.push(name, t);
+					co.push(name, t, env);
 				}
 
 				retVals.add(co);
@@ -748,7 +749,7 @@ public class Minecraft {
 
 			CArray ca = new CArray(t);
 			for(Mixed c : retVals) {
-				ca.push(c, t);
+				ca.push(c, t, env);
 			}
 			return ca;
 		}
@@ -793,7 +794,7 @@ public class Minecraft {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			MCServer server = Static.getServer();
 			CArray co = new CArray(t);
 			List<MCOfflinePlayer> so = server.getBannedPlayers();
@@ -802,7 +803,7 @@ public class Minecraft {
 					continue;
 				}
 				CString os = new CString(o.getName(), t);
-				co.push(os, t);
+				co.push(os, t, env);
 			}
 			return co;
 		}
@@ -847,7 +848,7 @@ public class Minecraft {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			MCServer server = Static.getServer();
 			CArray co = new CArray(t);
 			List<MCOfflinePlayer> so = server.getWhitelistedPlayers();
@@ -856,7 +857,7 @@ public class Minecraft {
 					continue;
 				}
 				CString os = new CString(o.getName(), t);
-				co.push(os, t);
+				co.push(os, t, env);
 			}
 			return co;
 		}
@@ -881,13 +882,13 @@ public class Minecraft {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCWorld w = null;
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(p != null) {
 				w = p.getWorld();
 			}
-			MCLocation location = ObjectGenerator.GetGenerator().location(args[0], w, t);
+			MCLocation location = ObjectGenerator.GetGenerator().location(args[0], w, t, env);
 			MCBlockState state = location.getBlock().getState();
 			if(!(state instanceof MCCreatureSpawner)) {
 				throw new CREFormatException("The block at " + location + " is not a spawner block", t);
@@ -941,13 +942,13 @@ public class Minecraft {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCWorld w = null;
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(p != null) {
 				w = p.getWorld();
 			}
-			MCLocation location = ObjectGenerator.GetGenerator().location(args[0], w, t);
+			MCLocation location = ObjectGenerator.GetGenerator().location(args[0], w, t, env);
 			MCBlockState state = location.getBlock().getState();
 			if(!(state instanceof MCCreatureSpawner)) {
 				throw new CREFormatException("The block at " + location + " is not a spawner block", t);
@@ -1010,8 +1011,8 @@ public class Minecraft {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = Static.GetPlayer(args[0], t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = Static.GetPlayer(args[0], t, env);
 			p.sendResourcePack(args[1].val());
 			return CVoid.VOID;
 		}
@@ -1060,11 +1061,11 @@ public class Minecraft {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCServer s = Static.getServer();
 			CArray ret = new CArray(t);
 			for(String ip : s.getIPBans()) {
-				ret.push(new CString(ip, t), t);
+				ret.push(new CString(ip, t), t, env);
 			}
 			return ret;
 		}
@@ -1109,10 +1110,10 @@ public class Minecraft {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCServer s = Static.getServer();
 			String ip = args[0].val();
-			if(ArgumentValidation.getBoolean(args[1], t)) {
+			if(ArgumentValidation.getBoolean(args[1], t, env)) {
 				s.banIP(ip);
 			} else {
 				s.unbanIP(ip);
@@ -1151,11 +1152,11 @@ public class Minecraft {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCMaterial mat = StaticLayer.GetMaterial(args[0].val());
 			if(mat == null) {
 				try {
-					mat = StaticLayer.GetMaterialFromLegacy(ArgumentValidation.getInt32(args[0], t), 0);
+					mat = StaticLayer.GetMaterialFromLegacy(ArgumentValidation.getInt32(args[0], t, env), 0);
 				} catch (CRECastException ex) {
 					throw new CREIllegalArgumentException("Unable to get the material from: " + args[0].val(), t);
 				}
@@ -1204,23 +1205,23 @@ public class Minecraft {
 						throw new CREFormatException("Invalid argument for material_info: " + args[1].val(), t);
 				}
 			}
-			CArray ret = CArray.GetAssociativeArray(t);
-			ret.set("maxStacksize", new CInt(mat.getMaxStackSize(), t), t);
-			ret.set("maxDurability", new CInt(mat.getMaxDurability(), t), t);
-			ret.set("hasGravity", CBoolean.get(mat.hasGravity()), t);
-			ret.set("isBlock", CBoolean.get(mat.isBlock()), t);
-			ret.set("isItem", CBoolean.get(mat.isItem()), t);
-			ret.set("isBurnable", CBoolean.get(mat.isBurnable()), t);
-			ret.set("isEdible", CBoolean.get(mat.isEdible()), t);
-			ret.set("isFlammable", CBoolean.get(mat.isFlammable()), t);
-			ret.set("isOccluding", CBoolean.get(mat.isOccluding()), t);
-			ret.set("isRecord", CBoolean.get(mat.isRecord()), t);
-			ret.set("isSolid", CBoolean.get(mat.isSolid()), t);
-			ret.set("isTransparent", CBoolean.get(mat.isTransparent()), t);
-			ret.set("isInteractable", CBoolean.get(mat.isInteractable()), t);
+			CArray ret = CArray.GetAssociativeArray(t, null, env);
+			ret.set("maxStacksize", new CInt(mat.getMaxStackSize(), t), t, env);
+			ret.set("maxDurability", new CInt(mat.getMaxDurability(), t), t, env);
+			ret.set("hasGravity", CBoolean.get(mat.hasGravity()), t, env);
+			ret.set("isBlock", CBoolean.get(mat.isBlock()), t, env);
+			ret.set("isItem", CBoolean.get(mat.isItem()), t, env);
+			ret.set("isBurnable", CBoolean.get(mat.isBurnable()), t, env);
+			ret.set("isEdible", CBoolean.get(mat.isEdible()), t, env);
+			ret.set("isFlammable", CBoolean.get(mat.isFlammable()), t, env);
+			ret.set("isOccluding", CBoolean.get(mat.isOccluding()), t, env);
+			ret.set("isRecord", CBoolean.get(mat.isRecord()), t, env);
+			ret.set("isSolid", CBoolean.get(mat.isSolid()), t, env);
+			ret.set("isTransparent", CBoolean.get(mat.isTransparent()), t, env);
+			ret.set("isInteractable", CBoolean.get(mat.isInteractable()), t, env);
 			if(mat.isBlock()) {
-				ret.set("hardness", new CDouble(mat.getHardness(), t), t);
-				ret.set("blastResistance", new CDouble(mat.getBlastResistance(), t), t);
+				ret.set("hardness", new CDouble(mat.getHardness(), t), t, env);
+				ret.set("blastResistance", new CDouble(mat.getBlastResistance(), t), t, env);
 			}
 			return ret;
 		}
@@ -1267,7 +1268,7 @@ public class Minecraft {
 			if(children.size() < 1) {
 				return null;
 			}
-			if(ArgumentValidation.isNumber(children.get(0).getData())) {
+			if(children.get(0).isConst() && ArgumentValidation.isNumber(children.get(0).getData())) {
 				env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
 						new CompilerWarning("Numeric ids are deprecated in " + getName() + ".", t, null));
 			}
@@ -1319,7 +1320,7 @@ public class Minecraft {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws CancelCommandException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException {
 			Static.getServer().shutdown();
 			throw new CancelCommandException("", t);
 		}
@@ -1351,16 +1352,16 @@ public class Minecraft {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCWorld world = null;
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(p != null) {
 				world = p.getWorld();
 			}
-			MCLocation location = ObjectGenerator.GetGenerator().location(args[0], world, t);
+			MCLocation location = ObjectGenerator.GetGenerator().location(args[0], world, t, env);
 			boolean add = true;
 			if(args.length > 1) {
-				add = ArgumentValidation.getBoolean(args[1], t);
+				add = ArgumentValidation.getBoolean(args[1], t, env);
 			}
 			Map<MCLocation, Boolean> redstoneMonitors = ServerEvents.getRedstoneMonitors();
 			if(add) {
@@ -1414,10 +1415,10 @@ public class Minecraft {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CArray mats = new CArray(t);
 			for(String mat : MCMaterial.types()) {
-				mats.push(new CString(mat, t), t);
+				mats.push(new CString(mat, t), t, env);
 			}
 			return mats;
 		}
@@ -1465,14 +1466,14 @@ public class Minecraft {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender sender;
 			String selector;
 			if(args.length == 2) {
-				sender = Static.GetPlayer(args[0], t);
+				sender = Static.GetPlayer(args[0], t, env);
 				selector = args[1].val();
 			} else {
-				sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+				sender = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 				if(sender == null) {
 					throw new CREException("No command sender in this context.", t);
 				}
@@ -1481,7 +1482,7 @@ public class Minecraft {
 			try {
 				CArray result = new CArray(t);
 				for(UUID id : Static.getServer().selectEntites(sender, selector)) {
-					result.push(new CString(id.toString(), t), t);
+					result.push(new CString(id.toString(), t), t, env);
 				}
 				return result;
 			} catch(IllegalArgumentException ex) {

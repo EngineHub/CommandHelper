@@ -82,7 +82,13 @@ public final class Prefs {
 		TELEMETRY_ON("telemetry-on", Preferences.Type.STRING),
 		TELEMETRY_PREF_DEFAULT_COLLECT("telemetry-pref-default-collect", Preferences.Type.BOOLEAN),
 		TELEMETRY_AUDIT("telemetry-audit", Preferences.Type.BOOLEAN),
-		CHECK_FOR_UPDATES("check-for-updates", Preferences.Type.BOOLEAN);
+		CHECK_FOR_UPDATES("check-for-updates", Preferences.Type.BOOLEAN),
+		DEBUG_SERVER_MODE("debug-server-mode", Preferences.Type.STRING),
+		DEBUG_SERVER_PORT("debug-server-port", Preferences.Type.INT),
+		DEBUG_SERVER_SECURITY("debug-server-security", Preferences.Type.STRING),
+		DEBUG_SERVER_BIND_ADDRESS("debug-server-bind-address", Preferences.Type.STRING),
+		DEBUG_SERVER_THREADING("debug-server-threading", Preferences.Type.STRING),
+		DEBUG_SERVER_TIMEOUT("debug-server-timeout", Preferences.Type.INT);
 		private final String name;
 		private final Preferences.Type type;
 
@@ -239,6 +245,29 @@ public final class Prefs {
 				+ " execution context, so in all cases, you can check for updates manually with the check-update"
 				+ " command.",
 				UPDATE_GROUP));
+		a.add(new Preference(PNames.DEBUG_SERVER_MODE.config(), "off", Preferences.Type.STRING,
+				"Controls the DAP debug server. 'off' disables it entirely (default), 'on' starts "
+				+ "it automatically when the plugin loads, 'manual' allows starting it via "
+				+ "/debug-server start.", DEBUG_GROUP));
+		a.add(new Preference(PNames.DEBUG_SERVER_PORT.config(), "6732", Preferences.Type.INT,
+				"The TCP port for the DAP debug server.", DEBUG_GROUP));
+		a.add(new Preference(PNames.DEBUG_SERVER_SECURITY.config(), "KEYPAIR", Preferences.Type.STRING,
+				"The security mode for the debug server. 'KEYPAIR' requires SSH-style "
+				+ "authentication and enables TLS encryption (recommended). 'NONE' allows "
+				+ "unauthenticated connections and is restricted to localhost only.",
+				DEBUG_GROUP));
+		a.add(new Preference(PNames.DEBUG_SERVER_BIND_ADDRESS.config(), "127.0.0.1", Preferences.Type.STRING,
+				"The address the debug server binds to. Use '0.0.0.0' to accept remote "
+				+ "connections (requires KEYPAIR security).", DEBUG_GROUP));
+		a.add(new Preference(PNames.DEBUG_SERVER_THREADING.config(), "async", Preferences.Type.STRING,
+				"The threading mode for the debug server. 'async' snapshots state without "
+				+ "blocking the server thread (recommended for Minecraft). 'sync' blocks "
+				+ "the executing thread when a breakpoint is hit.", DEBUG_GROUP));
+		a.add(new Preference(PNames.DEBUG_SERVER_TIMEOUT.config(), "15", Preferences.Type.INT,
+				"Sets the time (in minutes) that the debug server will remain running "
+				+ "without a connected client before automatically shutting down. Set to "
+				+ "0 (or a negative number) to disable the timeout. Only applies when "
+				+ "debug-server-mode is 'manual'.", DEBUG_GROUP));
 		prefs = new Preferences("CommandHelper", Static.getLogger(), a);
 		prefs.init(f);
 	}

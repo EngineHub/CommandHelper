@@ -9,6 +9,8 @@ import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.net.URL;
@@ -149,9 +151,11 @@ public class UserObject implements Mixed {
 		return objectDefinition.getContainingClass();
 	}
 
+	/** @deprecated Use {@link #isInstanceOf(CClassType, LeftHandGenericUse, Environment)} instead. */
+	@Deprecated
 	@Override
 	public boolean isInstanceOf(CClassType type) {
-		return Construct.isInstanceof(this, type);
+		return isInstanceOf(type, null, null);
 	}
 
 	@Override
@@ -160,8 +164,25 @@ public class UserObject implements Mixed {
 	}
 
 	@Override
+	public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env) {
+		return Construct.isInstanceof(this, type, env);
+	}
+
+	/** @deprecated Use {@link #typeof(Environment)} instead. */
+	@Deprecated
+	@Override
 	public CClassType typeof() {
+		return typeof(null);
+	}
+
+	@Override
+	public CClassType typeof(Environment env) {
 		return objectDefinition.getType();
+	}
+
+	@Override
+	public GenericParameters getGenericParameters() {
+		return null;
 	}
 
 	@Override

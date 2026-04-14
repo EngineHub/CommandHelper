@@ -56,6 +56,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.CompletionItemKind;
+import org.eclipse.lsp4j.MarkupContent;
+import org.eclipse.lsp4j.MarkupKind;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.DidChangeTextDocumentParams;
@@ -248,8 +250,9 @@ public class LangServModel {
 			// Cmdline mode disables things like security checks and whatnot.
 			// These may be present in the runtime environment,
 			// but it's not possible for us to tell that at this point.
+			StaticAnalysis envSa = new StaticAnalysis(true);
 			env = Static.GenerateStandaloneEnvironment(false, EnumSet.of(RuntimeMode.CMDLINE), includeCache,
-					new StaticAnalysis(true));
+					envSa);
 			// Make this configurable at some point. For now, however, we need this so we can get
 			// correct handling on minecraft functions.
 			env = env.cloneAndAdd(new CommandHelperEnvironment());
@@ -289,7 +292,7 @@ public class LangServModel {
 		for(File f2 : mainFiles) {
 			String uri = f2.toURI().toString();
 			StaticAnalysis staticAnalysis = new StaticAnalysis(true);
-			parseTrees.put(uri, doCompilation(uri, new StaticAnalysis(true), env, exceptions));
+			parseTrees.put(uri, doCompilation(uri, staticAnalysis, env, exceptions));
 			staticAnalysisMap.put(uri, staticAnalysis);
 		}
 
@@ -442,8 +445,9 @@ public class LangServModel {
 								//					ci.setCommitCharacters(Arrays.asList("("));
 								ci.setKind(CompletionItemKind.Function);
 								ci.setDetail(di.ret);
-								ci.setDocumentation(di.originalArgs + "\n\n" + di.desc
-										+ (di.extendedDesc == null ? "" : "\n\n" + di.extendedDesc));
+								ci.setDocumentation(new MarkupContent(MarkupKind.MARKDOWN,
+										WikiToMarkdown.convert(di.originalArgs + "\n\n" + di.desc
+										+ (di.extendedDesc == null ? "" : "\n\n" + di.extendedDesc))));
 								list.add(ci);
 							}
 							functionCompletionItems = list;
@@ -489,7 +493,8 @@ public class LangServModel {
 									}
 									description.append("\n");
 								}
-								ci.setDocumentation(description.toString());
+								ci.setDocumentation(new MarkupContent(MarkupKind.MARKDOWN,
+										WikiToMarkdown.convert(description.toString())));
 								list.add(ci);
 							}
 							eventCompletionItems = list;
@@ -500,10 +505,11 @@ public class LangServModel {
 							for(FullyQualifiedClassName fqcn : NativeTypeList.getNativeTypeList()) {
 								try {
 									Mixed m = NativeTypeList.getInvalidInstanceForUse(fqcn);
-									CompletionItem ci = new CompletionItem(m.typeof().getSimpleName());
+									CompletionItem ci = new CompletionItem(m.typeof(null).getSimpleName());
 									ci.setKind(CompletionItemKind.TypeParameter);
 									ci.setDetail(m.getName());
-									ci.setDocumentation(m.docs());
+									ci.setDocumentation(new MarkupContent(MarkupKind.MARKDOWN,
+										WikiToMarkdown.convert(m.docs())));
 									ci.setCommitCharacters(Arrays.asList(" "));
 									list.add(ci);
 								} catch(Throwable ex) {

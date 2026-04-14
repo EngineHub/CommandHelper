@@ -5,54 +5,58 @@ import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.SimpleVersion;
 import com.laytonsmith.PureUtilities.SmartComment;
 import com.laytonsmith.PureUtilities.TermColors;
-import com.laytonsmith.abstraction.Implementation;
+import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
-import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.TokenStream;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
-import com.laytonsmith.core.constructs.CClosure;
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Command;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Construct.ConstructType;
 import com.laytonsmith.core.constructs.IVariable;
+import com.laytonsmith.core.constructs.IVariableList;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.constructs.Token.TType;
 import com.laytonsmith.core.constructs.Variable;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
+import com.laytonsmith.core.environments.DebugContext;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
-import com.laytonsmith.core.environments.InvalidEnvironmentException;
+import com.laytonsmith.core.environments.LivePausedState;
+import com.laytonsmith.core.environments.PausedState;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
-import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
 import com.laytonsmith.core.exceptions.CRE.CREInsufficientPermissionException;
 import com.laytonsmith.core.exceptions.CRE.CREInvalidProcedureException;
-import com.laytonsmith.core.exceptions.CRE.CREStackOverflowError;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.exceptions.FunctionReturnException;
-import com.laytonsmith.core.exceptions.LoopBreakException;
-import com.laytonsmith.core.exceptions.LoopContinueException;
-import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
+import com.laytonsmith.core.exceptions.StackTraceFrame;
 import com.laytonsmith.core.exceptions.StackTraceManager;
-import com.laytonsmith.core.extensions.Extension;
-import com.laytonsmith.core.extensions.ExtensionManager;
-import com.laytonsmith.core.extensions.ExtensionTracker;
+import com.laytonsmith.core.exceptions.UnhandledFlowControlException;
+import com.laytonsmith.core.functions.ControlFlow;
+import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.functions.Function;
-import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.natives.interfaces.Mixed;
-import com.laytonsmith.core.profiler.ProfilePoint;
-import com.laytonsmith.core.profiler.Profiler;
+import com.laytonsmith.core.objects.AccessModifier;
+import com.laytonsmith.core.objects.ObjectModifier;
+import com.laytonsmith.core.objects.ObjectType;
+import java.net.URL;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -70,6 +74,131 @@ import java.util.Set;
  * Secondly, the default values of any variables, and thirdly, the unparsed tree for the right side of the script.
  */
 public class Script {
+
+	/**
+	 * Sentinel value returned by eval/evalLoop when the debugger pauses execution.
+	 * Callers should check with {@link #isDebuggerPaused(Mixed)} before using the result.
+	 */
+	private static final Mixed DEBUGGER_PAUSED
+// <editor-fold defaultstate="collapsed" desc="DEBUGGER_PAUSED implementation">
+			= new Mixed() {
+		@Override
+		public String val() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public void setTarget(Target target) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public Target getTarget() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public Mixed clone() throws CloneNotSupportedException {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public String getName() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public String docs() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public Version since() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public CClassType[] getSuperclasses() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public CClassType[] getInterfaces() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public ObjectType getObjectType() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public Set<ObjectModifier> getObjectModifiers() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public AccessModifier getAccessModifier() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public CClassType getContainingClass() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public boolean isInstanceOf(CClassType type) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public boolean isInstanceOf(Class<? extends Mixed> type) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public CClassType typeof() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public CClassType typeof(Environment env) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public GenericParameters getGenericParameters() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public URL getSourceJar() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public Class<? extends Documentation>[] seeAlso() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+	};
+// </editor-fold>
+
+	/**
+	 * Returns true if the given result indicates the debugger paused execution
+	 * rather than completing normally.
+	 *
+	 * @param result The return value from eval or execute
+	 * @return true if execution was paused by the debugger
+	 */
+	public static boolean isDebuggerPaused(Mixed result) {
+		return result == DEBUGGER_PAUSED;
+	}
 
 	// See set_debug_output()
 	public static boolean debugOutput = false;
@@ -227,15 +356,20 @@ public class Script {
 				if(rootNode == null) {
 					continue;
 				}
-				for(Mixed tempNode : rootNode.getAllData()) {
-					if(tempNode instanceof Variable) {
-						if(leftVars == null) {
-							throw ConfigRuntimeException.CreateUncatchableException("$variables may not be used in this context."
-									+ " Only @variables may be.", tempNode.getTarget());
+				if(leftVars != null) {
+					IdentityHashMap<Mixed, String> dollarBindings = new IdentityHashMap<>();
+					for(Mixed tempNode : rootNode.getAllData()) {
+						if(tempNode instanceof Variable variable) {
+							Construct leftVar = leftVars.get(variable.getVariableName());
+							if(leftVar == null) {
+								throw ConfigRuntimeException.CreateUncatchableException("$variables may not be used in this context."
+										+ " Only @variables may be.", tempNode.getTarget());
+							}
+							Construct c = Static.resolveDollarVar(leftVar, vars);
+							dollarBindings.put(tempNode, c.toString());
 						}
-						Construct c = Static.resolveDollarVar(leftVars.get(((Variable) tempNode).getVariableName()), vars);
-						((Variable) tempNode).setVal(new CString(c.toString(), tempNode.getTarget()));
 					}
+					myEnv.getEnv(GlobalEnv.class).SetDollarVarBindings(dollarBindings);
 				}
 
 				myEnv.getEnv(StaticRuntimeEnv.class).getIncludeCache().executeAutoIncludes(myEnv, this);
@@ -247,25 +381,6 @@ public class Script {
 		} catch (CancelCommandException e) {
 			//p.sendMessage(e.getMessage());
 			//The message in the exception is actually empty
-		} catch (LoopBreakException e) {
-			if(p != null) {
-				p.sendMessage("The break() function must be used inside a for() or foreach() loop");
-			}
-			StreamUtils.GetSystemOut().println("The break() function must be used inside a for() or foreach() loop");
-		} catch (LoopContinueException e) {
-			if(p != null) {
-				p.sendMessage("The continue() function must be used inside a for() or foreach() loop");
-			}
-			StreamUtils.GetSystemOut().println("The continue() function must be used inside a for() or foreach() loop");
-		} catch (FunctionReturnException e) {
-			if(myEnv.getEnv(GlobalEnv.class).GetEvent() != null) {
-				//Oh, we're running in an event handler. Those know how to catch it too.
-				throw e;
-			}
-			if(p != null) {
-				p.sendMessage("The return() function must be used inside a procedure.");
-			}
-			StreamUtils.GetSystemOut().println("The return() function must be used inside a procedure.");
 		} catch (Throwable t) {
 			StreamUtils.GetSystemOut().println("An unexpected exception occurred during the execution of a script.");
 			t.printStackTrace();
@@ -295,6 +410,410 @@ public class Script {
 	}
 
 	/**
+	 * Iterative interpreter loop. Evaluates a parse tree using an explicit stack instead of
+	 * recursive Java calls. This enables:
+	 * <ul>
+	 *   <li>Control flow (break/continue/return) as first-class FlowControl actions, not exceptions</li>
+	 *   <li>Save/restore of execution state (for debugger, async/await)</li>
+	 *   <li>1:1 MethodScript-to-stack-frame mapping</li>
+	 * </ul>
+	 *
+	 * <p>Two execution paths exist for function calls:</p>
+	 * <ol>
+	 *   <li><b>FlowFunction</b> — Function implements {@link FlowFunction}. The loop drives it
+	 *       via begin/childCompleted/childInterrupted. (This replaces the old execs mechanism.)</li>
+	 *   <li><b>Simple exec</b> — Normal functions. Children are evaluated left-to-right,
+	 *       then {@code exec()} is called with the results.</li>
+	 * </ol>
+	 *
+	 * @param root The parse tree to evaluate
+	 * @param env The environment
+	 * @return The result of evaluation
+	 */
+	private Mixed iterativeEval(ParseTree root, Environment env) {
+		EvalStack stack = new EvalStack();
+		stack.push(new StackFrame(root, env, null, null));
+		Mixed result = evalLoop(stack, null, false, null, env);
+		DebugContext debugCtx = env.hasEnv(DebugContext.class)
+				? env.getEnv(DebugContext.class) : null;
+		if(debugCtx != null && !isDebuggerPaused(result)) {
+			debugCtx.getListener().onCompleted();
+		}
+		return result;
+	}
+
+	/**
+	 * Resumes execution from a previously frozen {@link DebugSnapshot}. The snapshot is
+	 * created by the interpreter when a debug pause is triggered, and is passed to the
+	 * {@link DebugListener#onPaused} callback. The caller must set the desired
+	 * {@link DebugContext.StepMode} on the DebugContext before calling this method.
+	 *
+	 * @param snapshot The frozen state to resume from
+	 * @return The result of evaluation, or null if execution pauses again
+	 */
+	public static Mixed resumeEval(DebugSnapshot snapshot) {
+		DebugContext debugCtx = snapshot.env.hasEnv(DebugContext.class)
+				? snapshot.env.getEnv(DebugContext.class) : null;
+		if(debugCtx != null) {
+			debugCtx.setPaused(false, null);
+			debugCtx.getListener().onResumed();
+		}
+		// Re-associate the StackTraceManager with the current thread. Since
+		// resumeOnThread spawns a new thread each time, the thread identity
+		// changes, but the StackTraceManager state must carry over. All cloned
+		// GlobalEnvs (from proc calls) share the same StackTraceManager
+		// reference, so adopting once on the top-level env suffices.
+		snapshot.env.getEnv(GlobalEnv.class).adoptStackTraceManager();
+		Mixed result = evalLoop(snapshot.stack, snapshot.lastResult, snapshot.hasResult,
+				snapshot.pendingFlowControl, snapshot.env);
+		if(debugCtx != null && !isDebuggerPaused(result)) {
+			debugCtx.getListener().onCompleted();
+		}
+		return result;
+	}
+
+	@SuppressWarnings("unchecked")
+	private static Mixed evalLoop(EvalStack stack, Mixed lastResult, boolean hasResult,
+			StepAction.FlowControl pendingFlowControl, Environment env) {
+		DebugContext debugCtx = env.hasEnv(DebugContext.class)
+				? env.getEnv(DebugContext.class) : null;
+
+		while(!stack.isEmpty()) {
+			GlobalEnv gEnv = env.getEnv(GlobalEnv.class);
+
+			if(gEnv.IsInterrupted()) {
+				throw new CancelCommandException("", Target.UNKNOWN);
+			}
+
+			// Propagate pending flow control
+			StackFrame frame = stack.peek();
+			if(pendingFlowControl != null) {
+				if(frame.hasFlowFunction() && frame.hasBegun()) {
+					Target t = frame.getNode().getTarget();
+					StepAction.StepResult<?> response =
+							((FlowFunction<Object>) frame.getFlowFunction()).childInterrupted(
+							t, frame.getFunctionState(), pendingFlowControl, frame.getEnv());
+					if(response != null) {
+						pendingFlowControl = null;
+						frame.setFunctionState(response.getState());
+						StepAction action = response.getAction();
+						if(action instanceof StepAction.Evaluate e) {
+							frame.setKeepIVariable(e.keepIVariable());
+							Environment evalEnv = e.getEnv() != null ? e.getEnv() : frame.getEnv();
+							stack.push(new StackFrame(e.getNode(), evalEnv, null, null));
+						} else if(action instanceof StepAction.Complete c) {
+							lastResult = c.getResult();
+							hasResult = true;
+							cleanupAndPop(stack, frame);
+						} else if(action instanceof StepAction.FlowControl fc) {
+							pendingFlowControl = fc;
+							cleanupAndPop(stack, frame);
+						}
+						continue;
+					}
+				}
+				cleanupAndPop(stack, frame);
+				if(stack.isEmpty()) {
+					if(pendingFlowControl.getAction()
+							instanceof ControlFlow.ReturnAction ret) {
+						return ret.getValue();
+					}
+					if(pendingFlowControl.getAction()
+							instanceof Exceptions.ThrowAction ta) {
+						throw ta.getException();
+					}
+					throw new UnhandledFlowControlException(pendingFlowControl.getAction());
+				}
+				continue;
+			}
+
+			ParseTree node = frame.getNode();
+			Mixed data = node.getData();
+
+			// Debug pause check (after flow control is resolved, only on first visit to function nodes)
+			if(debugCtx != null && !debugCtx.isDisconnected()
+					&& data instanceof CFunction
+					&& !frame.hasBegun()) {
+				Target currentTarget = node.getTarget();
+				int userDepth = gEnv.GetStackTraceManager().getDepth();
+				if(debugCtx.shouldPause(currentTarget, userDepth, frame.getEnv())) {
+					Mixed pauseResult = debugPause(debugCtx, stack, lastResult, hasResult,
+							pendingFlowControl, frame.getEnv(), currentTarget);
+					if(pauseResult != null) {
+						return pauseResult;
+					}
+				}
+			}
+
+			// Literal / variable nodes (no children)
+			if(data instanceof Construct co && co.getCType() != Construct.ConstructType.FUNCTION
+					&& node.numberOfChildren() == 0) {
+				if(co.getCType() == Construct.ConstructType.VARIABLE) {
+					String val = gEnv.GetDollarVarBinding(data);
+					if(val == null) {
+						val = "";
+					}
+					lastResult = new CString(val, data.getTarget());
+				} else {
+					lastResult = data;
+				}
+				hasResult = true;
+				stack.pop();
+				continue;
+			}
+
+			// Sequence nodes (non-function with children, e.g. root node) skip
+			// function resolution and use simple exec with function=null
+			if(data instanceof CFunction cfunc) {
+				// First visit: resolve function or procedure
+				if(frame.getFunction() == null && !frame.hasFlowFunction()) {
+					if(cfunc.hasProcedure()) {
+						Procedure p = frame.getEnv().getEnv(GlobalEnv.class)
+								.GetProcs().get(data.val());
+						if(p == null) {
+							throw new CREInvalidProcedureException(
+									"Unknown procedure \"" + data.val() + "\"", data.getTarget());
+						}
+						FlowFunction<?> procedureFlow = p.createProcedureFlow(data.getTarget());
+						stack.pop();
+						stack.push(new StackFrame(node, frame.getEnv(), null, procedureFlow));
+						hasResult = false;
+						continue;
+					}
+
+					Function f = cfunc.getCachedFunction();
+					if(f == null) {
+						try {
+							f = cfunc.getFunction();
+						} catch(ConfigCompileException ex) {
+							throw ConfigRuntimeException.CreateUncatchableException(
+									"Unknown function \"" + cfunc.val() + "\"", cfunc.getTarget());
+						}
+					}
+
+					FlowFunction<?> flowFunction = (f instanceof FlowFunction<?>) ? (FlowFunction<?>) f : null;
+
+					stack.pop();
+					StackFrame newFrame = new StackFrame(node, frame.getEnv(), f, flowFunction);
+					stack.push(newFrame);
+					frame = newFrame;
+					hasResult = false;
+				}
+			}
+
+			Function f = frame.getFunction();
+
+			// Permission check on first visit
+			if(!frame.hasBegun() && f != null && f.isRestricted()
+					&& !Static.hasCHPermission(f.getName(), frame.getEnv())) {
+				throw new CREInsufficientPermissionException(
+						"You do not have permission to use the " + f.getName() + " function.",
+						data.getTarget());
+			}
+
+			// Flow function mode
+			if(frame.hasFlowFunction()) {
+				Target t = node.getTarget();
+				StepAction.StepResult<?> result;
+				if(!frame.hasBegun()) {
+					frame.markBegun();
+					result = ((FlowFunction<Object>) frame.getFlowFunction()).begin(
+							t, frame.getChildren(), frame.getEnv());
+				} else if(hasResult) {
+					// Resolve IVariables unless the parent explicitly asked to keep them
+					if(!frame.keepIVariable()) {
+						while(lastResult instanceof IVariable cur) {
+							GlobalEnv frameGEnv = frame.getEnv().getEnv(GlobalEnv.class);
+							lastResult = frameGEnv.GetVarList()
+									.get(cur.getVariableName(), cur.getTarget(),
+											frame.getEnv()).ival();
+						}
+					}
+					frame.setKeepIVariable(false);
+					result = ((FlowFunction<Object>) frame.getFlowFunction()).childCompleted(
+							t, frame.getFunctionState(), lastResult, frame.getEnv());
+					hasResult = false;
+				} else {
+					throw ConfigRuntimeException.CreateUncatchableException(
+							"Flow function in invalid state for " + data.val(), data.getTarget());
+				}
+
+				frame.setFunctionState(result.getState());
+				StepAction action = result.getAction();
+				if(action instanceof StepAction.Evaluate e) {
+					frame.setKeepIVariable(e.keepIVariable());
+					Environment evalEnv = e.getEnv() != null ? e.getEnv() : frame.getEnv();
+					stack.push(new StackFrame(e.getNode(), evalEnv, null, null));
+				} else if(action instanceof StepAction.Complete c) {
+					lastResult = c.getResult();
+					hasResult = true;
+					cleanupAndPop(stack, frame);
+				} else if(action instanceof StepAction.FlowControl fc) {
+					pendingFlowControl = fc;
+					cleanupAndPop(stack, frame);
+					// Exception breakpoint check for FlowFunction-originated throws
+					if(debugCtx != null && !debugCtx.isDisconnected()
+							&& fc.getAction()
+									instanceof Exceptions.ThrowAction ta
+							&& debugCtx.shouldBreakOnException(ta.getException(), stack)) {
+						Mixed pauseResult = debugPause(debugCtx, stack, lastResult, hasResult,
+								pendingFlowControl, frame.getEnv(), ta.getException().getTarget());
+						if(pauseResult != null) {
+							return pauseResult;
+						}
+					}
+				}
+				continue;
+			}
+
+			// Simple exec mode
+			if(hasResult) {
+				Mixed arg = lastResult;
+				while(f != null && f.preResolveVariables() && arg instanceof IVariable cur) {
+					GlobalEnv frameGEnv = frame.getEnv().getEnv(GlobalEnv.class);
+					arg = frameGEnv.GetVarList().get(cur.getVariableName(), cur.getTarget(),
+							frame.getEnv()).ival();
+				}
+				frame.addArg(arg);
+				hasResult = false;
+			}
+
+			if(frame.hasMoreChildren()) {
+				if(!frame.hasBegun()) {
+					frame.markBegun();
+				}
+				stack.push(new StackFrame(frame.nextChild(), frame.getEnv(), null, null));
+			} else {
+				if(!frame.hasBegun()) {
+					frame.markBegun();
+				}
+				if(f == null) {
+					// Sequence node — return last child's result
+					Mixed[] args = frame.getArgs();
+					lastResult = args.length > 0 ? args[args.length - 1] : CVoid.VOID;
+					hasResult = true;
+					stack.pop();
+				} else {
+					try {
+						lastResult = Function.ExecuteFunction(f, data.getTarget(),
+								frame.getEnv(), frame.getArgs());
+						hasResult = true;
+						stack.pop();
+					} catch(ConfigRuntimeException e) {
+						// Convert MethodScript exceptions to FlowControl(ThrowAction)
+						stack.pop();
+						pendingFlowControl = new StepAction.FlowControl(
+								new Exceptions.ThrowAction(e));
+						// Exception breakpoint check
+						if(debugCtx != null && !debugCtx.isDisconnected()
+								&& debugCtx.shouldBreakOnException(e, stack)) {
+							Mixed pauseResult = debugPause(debugCtx, stack, lastResult, hasResult,
+									pendingFlowControl, frame.getEnv(), e.getTarget());
+							if(pauseResult != null) {
+								return pauseResult;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		return lastResult;
+	}
+
+	/**
+	 * Calls {@link FlowFunction#cleanup} if the frame has a FlowFunction that has begun,
+	 * then pops the frame from the stack.
+	 */
+	@SuppressWarnings("unchecked")
+	private static void cleanupAndPop(EvalStack stack, StackFrame frame) {
+		if(frame.hasFlowFunction() && frame.hasBegun()) {
+			((FlowFunction<Object>) frame.getFlowFunction()).cleanup(
+					frame.getNode().getTarget(), frame.getFunctionState(), frame.getEnv());
+		}
+		stack.pop();
+	}
+
+	/**
+	 * Handles the debug pause at a breakpoint or step condition. In synchronous mode,
+	 * blocks the interpreter thread until the DAP server calls resume, then returns
+	 * {@code null} to indicate execution should continue. In asynchronous mode,
+	 * creates a snapshot and returns {@link #DEBUGGER_PAUSED} to indicate the caller
+	 * should return that sentinel value.
+	 *
+	 * @param debugCtx The debug context
+	 * @param stack The eval stack (used for async snapshot)
+	 * @param lastResult The last result (used for async snapshot)
+	 * @param hasResult Whether there is a pending result (used for async snapshot)
+	 * @param pendingFlowControl The pending flow control (used for exception state)
+	 * @param env The current frame's environment
+	 * @param pauseTarget The source location where execution is pausing
+	 * @return {@link #DEBUGGER_PAUSED} if the caller should return (async mode),
+	 *     or null if execution should continue (sync mode resumed or interrupted)
+	 */
+	private static Mixed debugPause(DebugContext debugCtx, EvalStack stack,
+			Mixed lastResult, boolean hasResult,
+			StepAction.FlowControl pendingFlowControl, Environment env, Target pauseTarget) {
+		List<PausedState.StepInTargetInfo> stepInTargets = findStepInTargets(stack, pauseTarget);
+		debugCtx.setPaused(true, pauseTarget);
+		if(debugCtx.shouldUseSyncMode()) {
+			LivePausedState state = new LivePausedState(env, pauseTarget,
+					pendingFlowControl, stepInTargets);
+			debugCtx.prepareAwait();
+			debugCtx.getListener().onPaused(state);
+			try {
+				debugCtx.awaitResume();
+			} catch(InterruptedException e) {
+				java.lang.Thread.currentThread().interrupt();
+			}
+			debugCtx.setPaused(false, null);
+			debugCtx.getListener().onResumed();
+			return null;
+		} else {
+			DebugSnapshot snapshot = new DebugSnapshot(
+					stack, lastResult, hasResult, pendingFlowControl, env, pauseTarget,
+					stepInTargets);
+			debugCtx.getListener().onPaused(snapshot);
+			return DEBUGGER_PAUSED;
+		}
+	}
+
+	/**
+	 * Walks the parse tree at the top of the eval stack to find steppable function
+	 * calls on the same line as the pause target. These are the "step into targets"
+	 * that the user can choose to step into specifically (e.g. procs, closures).
+	 */
+	private static List<PausedState.StepInTargetInfo> findStepInTargets(
+			EvalStack stack, Target pauseTarget) {
+		List<PausedState.StepInTargetInfo> targets = new ArrayList<>();
+		if(stack.isEmpty() || pauseTarget == null) {
+			return targets;
+		}
+		StackFrame frame = stack.peek();
+		ParseTree node = frame.getNode();
+		if(node == null) {
+			return targets;
+		}
+		collectSteppableTargets(node, pauseTarget.line(), targets);
+		return targets;
+	}
+
+	/**
+	 * Recursively collects steppable function calls (procs) on the given line.
+	 */
+	private static void collectSteppableTargets(ParseTree node, int line,
+			List<PausedState.StepInTargetInfo> targets) {
+		if(node.getData() instanceof CFunction cf) {
+			if(cf.getTarget().line() == line && cf.val().startsWith("_")) {
+				targets.add(new PausedState.StepInTargetInfo(cf.val(), cf.getTarget().col()));
+			}
+		}
+		for(ParseTree child : node.getChildren()) {
+			collectSteppableTargets(child, line, targets);
+		}
+	}
+
+	/**
 	 * Given the parse tree and environment, executes the tree.
 	 *
 	 * @param c
@@ -302,260 +821,8 @@ public class Script {
 	 * @return
 	 * @throws CancelCommandException
 	 */
-	@SuppressWarnings("UseSpecificCatch")
 	public Mixed eval(ParseTree c, final Environment env) throws CancelCommandException {
-		GlobalEnv globalEnv = env.getEnv(GlobalEnv.class);
-		if(globalEnv.IsInterrupted()) {
-			//First things first, if we're interrupted, kill the script unconditionally.
-			throw new CancelCommandException("", Target.UNKNOWN);
-		}
-
-		final Mixed m = c.getData();
-		if(m instanceof Construct co) {
-			if(co.getCType() != ConstructType.FUNCTION) {
-				if(co.getCType() == ConstructType.VARIABLE) {
-					return new CString(m.val(), m.getTarget());
-				} else {
-					return m;
-				}
-			}
-		}
-
-		final CFunction possibleFunction;
-		try {
-			possibleFunction = (CFunction) m;
-		} catch (ClassCastException e) {
-			throw ConfigRuntimeException.CreateUncatchableException("Expected to find CFunction at runtime but found: "
-					+ m.val(), m.getTarget());
-		}
-
-		StackTraceManager stManager = globalEnv.GetStackTraceManager();
-		boolean addedRootStackElement = false;
-		try {
-			// If it's an unknown target, this is not user generated code, and we want to skip adding the element here.
-			if(stManager.isStackEmpty() && m.getTarget() != Target.UNKNOWN) {
-				stManager.addStackTraceElement(new ConfigRuntimeException.StackTraceElement("<<main code>>", m.getTarget()));
-				addedRootStackElement = true;
-			}
-			stManager.setCurrentTarget(c.getTarget());
-			globalEnv.SetScript(this);
-
-			if(possibleFunction.hasProcedure()) {
-				//Not really a function, so we can't put it in Function.
-				Procedure p = globalEnv.GetProcs().get(m.val());
-				if(p == null) {
-					throw new CREInvalidProcedureException("Unknown procedure \"" + m.val() + "\"", m.getTarget());
-				}
-				ProfilePoint pp = null;
-				Profiler profiler = env.getEnv(StaticRuntimeEnv.class).GetProfiler();
-				if(profiler.isLoggable(LogLevel.INFO)) {
-					pp = profiler.start(m.val() + " execution", LogLevel.INFO);
-				}
-				Mixed ret;
-				try {
-					if(debugOutput) {
-						doDebugOutput(p.getName(), c.getChildren());
-					}
-					ret = p.cexecute(c.getChildren(), env, m.getTarget());
-				} finally {
-					if(pp != null) {
-						pp.stop();
-					}
-				}
-				return ret;
-			}
-
-			final Function f;
-			try {
-				f = possibleFunction.getFunction();
-			} catch (ConfigCompileException e) {
-				//Turn it into a config runtime exception. This shouldn't ever happen though.
-				throw ConfigRuntimeException.CreateUncatchableException("Unable to find function at runtime: "
-						+ m.val(), m.getTarget());
-			}
-
-			globalEnv.SetFileOptions(c.getFileOptions());
-
-			Mixed[] args = new Mixed[c.numberOfChildren()];
-			try {
-				if(f.isRestricted() && !Static.hasCHPermission(f.getName(), env)) {
-					throw new CREInsufficientPermissionException("You do not have permission to use the "
-							+ f.getName() + " function.", m.getTarget());
-				}
-
-				if(debugOutput) {
-					doDebugOutput(f.getName(), c.getChildren());
-				}
-				if(f.useSpecialExec()) {
-					ProfilePoint p = null;
-					if(f.shouldProfile()) {
-						Profiler profiler = env.getEnv(StaticRuntimeEnv.class).GetProfiler();
-						if(profiler.isLoggable(f.profileAt())) {
-							p = profiler.start(f.profileMessageS(c.getChildren()), f.profileAt());
-						}
-					}
-					Mixed ret;
-					try {
-						ret = f.execs(m.getTarget(), env, this, c.getChildren().toArray(new ParseTree[args.length]));
-					} finally {
-						if(p != null) {
-							p.stop();
-						}
-					}
-					return ret;
-				}
-
-				for(int i = 0; i < args.length; i++) {
-					args[i] = eval(c.getChildAt(i), env);
-					while(f.preResolveVariables() && args[i] instanceof IVariable cur) {
-						args[i] = globalEnv.GetVarList().get(cur.getVariableName(), cur.getTarget(), env).ival();
-					}
-				}
-
-				// Reset stacktrace manager to current function (argument evaluation might have changed this).
-				stManager.setCurrentTarget(c.getTarget());
-
-				{
-					//It takes a moment to generate the toString of some things, so lets not do it
-					//if we actually aren't going to profile
-					ProfilePoint p = null;
-					if(f.shouldProfile()) {
-						Profiler profiler = env.getEnv(StaticRuntimeEnv.class).GetProfiler();
-						if(profiler.isLoggable(f.profileAt())) {
-							p = profiler.start(f.profileMessage(args), f.profileAt());
-						}
-					}
-					Mixed ret;
-					try {
-						ret = f.exec(m.getTarget(), env, args);
-					} finally {
-						if(p != null) {
-							p.stop();
-						}
-					}
-					return ret;
-				}
-				//We want to catch and rethrow the ones we know how to catch, and then
-				//catch and report anything else.
-			} catch (ConfigRuntimeException | ProgramFlowManipulationException e) {
-				if(e instanceof AbstractCREException) {
-					((AbstractCREException) e).freezeStackTraceElements(stManager);
-				}
-				throw e;
-			} catch (InvalidEnvironmentException e) {
-				if(!e.isDataSet()) {
-					e.setData(f.getName());
-				}
-				throw e;
-			} catch (StackOverflowError e) {
-				// This handles this in all cases that weren't previously considered. But it still should
-				// be individually handled by other cases to ensure that the stack trace is more correct
-				throw new CREStackOverflowError(null, c.getTarget(), e);
-			} catch (Throwable e) {
-				if(e instanceof ThreadDeath) {
-					// Bail quickly in this case
-					throw e;
-				}
-				String brand = Implementation.GetServerType().getBranding();
-				SimpleVersion version;
-
-				try {
-					version = Static.getVersion();
-				} catch (Throwable ex) {
-					// This failing should not be a dealbreaker, so fill it with default data
-					version = GARBAGE_VERSION;
-				}
-
-				String culprit = brand;
-				outer:
-				for(ExtensionTracker tracker : ExtensionManager.getTrackers().values()) {
-					for(FunctionBase b : tracker.getFunctions()) {
-						if(b.getName().equals(f.getName())) {
-							//This extension provided the function, so its the culprit. Report this
-							//name instead of the core plugin's name.
-							for(Extension extension : tracker.getExtensions()) {
-								culprit = extension.getName();
-								break outer;
-							}
-						}
-					}
-				}
-
-				String emsg = TermColors.RED + "Uh oh! You've found an error in " + TermColors.CYAN + culprit + TermColors.RED + ".\n"
-						+ "This happened while running your code, so you may be able to find a workaround,"
-						+ (!(e instanceof Exception) ? " (though since this is an Error, maybe not)" : "")
-						+ " but is ultimately an issue in " + culprit + ".\n"
-						+ "The following code caused the error:\n" + TermColors.WHITE;
-
-				List<String> args2 = new ArrayList<>();
-				Map<String, String> vars = new HashMap<>();
-				for(int i = 0; i < args.length; i++) {
-					Mixed cc = args[i];
-					if(c.getChildAt(i).getData() instanceof IVariable ivar) {
-						String vval = cc.val();
-						if(cc instanceof CString) {
-							vval = ((CString) cc).getQuote();
-						}
-						vars.put(ivar.getVariableName(), vval);
-						args2.add(ivar.getVariableName());
-					} else if(cc == null) {
-						args2.add("java-null");
-					} else if(cc instanceof CString) {
-						args2.add(new CString(cc.val(), Target.UNKNOWN).getQuote());
-					} else if(cc instanceof CClosure) {
-						args2.add("<closure>");
-					} else {
-						args2.add(cc.val());
-					}
-				}
-				if(!vars.isEmpty()) {
-					emsg += StringUtils.Join(vars, " = ", "\n") + "\n";
-				}
-				emsg += f.getName() + "(";
-				emsg += StringUtils.Join(args2, ", ");
-				emsg += ")\n";
-
-				emsg += TermColors.RED + "on or around "
-						+ TermColors.YELLOW + m.getTarget().file() + TermColors.WHITE + ":" + TermColors.CYAN
-						+ m.getTarget().line() + TermColors.RED + ".\n";
-
-				//Server might not be available in this platform, so let's be sure to ignore those exceptions
-				String modVersion;
-				try {
-					modVersion = StaticLayer.GetConvertor().GetServer().getAPIVersion();
-				} catch (Exception ex) {
-					modVersion = Implementation.GetServerType().name();
-				}
-
-				String extensionData = "";
-				for(ExtensionTracker tracker : ExtensionManager.getTrackers().values()) {
-					for(Extension extension : tracker.getExtensions()) {
-						try {
-							extensionData += TermColors.CYAN + extension.getName() + TermColors.RED
-									+ " (" + TermColors.RESET + extension.getVersion() + TermColors.RED + ")\n";
-						} catch (AbstractMethodError ex) {
-							// This happens with an old style extensions. Just skip it.
-							extensionData += TermColors.CYAN + "Unknown Extension" + TermColors.RED + "\n";
-						}
-					}
-				}
-				if(extensionData.isEmpty()) {
-					extensionData = "NONE\n";
-				}
-
-				emsg += "Please report this to the developers, and be sure to include the version numbers:\n"
-						+ TermColors.CYAN + "Server" + TermColors.RED + " version: " + TermColors.RESET + modVersion + TermColors.RED + ";\n"
-						+ TermColors.CYAN + brand + TermColors.RED + " version: " + TermColors.RESET + version + TermColors.RED + ";\n"
-						+ "Loaded extensions and versions:\n" + extensionData
-						+ "Here's the stacktrace:\n" + TermColors.RESET + Static.GetStacktraceString(e);
-				StreamUtils.GetSystemErr().println(emsg);
-				throw new CancelCommandException(null, Target.UNKNOWN);
-			}
-		} finally {
-			if(addedRootStackElement && stManager.isStackSingle()) {
-				stManager.popStackTraceElement();
-			}
-		}
+		return iterativeEval(c, env);
 	}
 
 	private void doDebugOutput(String nodeName, List<ParseTree> children) {
@@ -1006,6 +1273,136 @@ public class Script {
 
 	public boolean doLog() {
 		return !nolog;
+	}
+
+	/**
+	 * A frozen snapshot of the interpreter's execution state, created when the debugger pauses.
+	 * Contains everything needed to inspect the current state (variables, call stack, source
+	 * location) and to resume execution later.
+	 *
+	 * <p>The raw interpreter state (eval stack, pending flow control, etc.) is private and
+	 * accessible only to {@link Script}. External callers (e.g. a DAP server) can use the
+	 * public inspection methods to read variables, call stack, and source location.</p>
+	 */
+	public static final class DebugSnapshot implements PausedState {
+
+		private final EvalStack stack;
+		private final Mixed lastResult;
+		private final boolean hasResult;
+		private final StepAction.FlowControl pendingFlowControl;
+		private final Environment env;
+		private final Target pauseTarget;
+		private final List<PausedState.StepInTargetInfo> stepInTargets;
+
+		private DebugSnapshot(EvalStack stack, Mixed lastResult, boolean hasResult,
+				StepAction.FlowControl pendingFlowControl, Environment env, Target pauseTarget,
+				List<PausedState.StepInTargetInfo> stepInTargets) {
+			this.stack = stack;
+			this.lastResult = lastResult;
+			this.hasResult = hasResult;
+			this.pendingFlowControl = pendingFlowControl;
+			this.env = env;
+			this.pauseTarget = pauseTarget;
+			this.stepInTargets = stepInTargets;
+		}
+
+		/**
+		 * Returns the source location where execution paused.
+		 */
+		@Override
+		public Target getPauseTarget() {
+			return pauseTarget;
+		}
+
+		/**
+		 * Returns the environment at the point of the pause.
+		 */
+		@Override
+		public Environment getEnvironment() {
+			return env;
+		}
+
+		/**
+		 * Returns the user-visible call stack (proc/closure/include frames) at the point
+		 * of the pause. The list is ordered from innermost (most recent) to outermost.
+		 *
+		 * @return A list of stack trace frames
+		 */
+		@Override
+		public List<StackTraceFrame> getCallStack() {
+			StackTraceManager stm = env.getEnv(GlobalEnv.class).peekStackTraceManager();
+			if(stm == null) {
+				return Collections.emptyList();
+			}
+			return stm.getCurrentStackTrace();
+		}
+
+		/**
+		 * Returns the user-visible call depth at the point of the pause. This is the
+		 * count of proc/closure/include frames, not the raw eval stack size.
+		 *
+		 * @return The user-visible call depth
+		 */
+		@Override
+		public int getUserCallDepth() {
+			StackTraceManager stm = env.getEnv(GlobalEnv.class).peekStackTraceManager();
+			if(stm == null) {
+				return 0;
+			}
+			return stm.getDepth();
+		}
+
+		/**
+		 * Returns the variables visible at the point of the pause as a name-to-value map.
+		 * The map preserves insertion order.
+		 *
+		 * @return A map from variable name (including the @ prefix) to its current value
+		 */
+		@Override
+		public Map<String, Mixed> getVariables() {
+			IVariableList varList = env.getEnv(GlobalEnv.class).GetVarList();
+			Map<String, Mixed> result = new LinkedHashMap<>();
+			for(String name : varList.keySet()) {
+				IVariable iv = varList.get(name);
+				if(iv != null) {
+					result.put(name, iv.ival());
+				}
+			}
+			return result;
+		}
+
+		/**
+		 * Returns true if this pause was caused by an exception breakpoint.
+		 */
+		@Override
+		public boolean isExceptionPause() {
+			return pendingFlowControl != null
+					&& pendingFlowControl.getAction() instanceof Exceptions.ThrowAction;
+		}
+
+		/**
+		 * If this is an exception pause, returns the exception that caused the pause.
+		 * Otherwise returns null.
+		 */
+		@Override
+		public ConfigRuntimeException getPauseException() {
+			if(pendingFlowControl != null
+					&& pendingFlowControl.getAction() instanceof Exceptions.ThrowAction ta) {
+				return ta.getException();
+			}
+			return null;
+		}
+
+		@Override
+		public List<StepInTargetInfo> getStepInTargets() {
+			return stepInTargets;
+		}
+
+		@Override
+		public String toString() {
+			return "DebugSnapshot{target=" + pauseTarget + ", depth=" + getUserCallDepth()
+					+ ", vars=" + getVariables().size() + ", hasResult=" + hasResult + "}";
+		}
 	}
 
 }

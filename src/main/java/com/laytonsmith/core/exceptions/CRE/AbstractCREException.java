@@ -14,8 +14,11 @@ import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.exceptions.StackTraceFrame;
 import com.laytonsmith.core.exceptions.StackTraceManager;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.natives.interfaces.Mixed;
@@ -35,7 +38,7 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 
 	private static final Class[] EMPTY_CLASS = new Class[0];
 
-	private List<StackTraceElement> stackTrace = null;
+	private List<StackTraceFrame> stackTrace = null;
 
 	public AbstractCREException(String msg, Target t) {
 		super(msg, t);
@@ -118,7 +121,7 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 		ret.set("message", this.getMessage());
 		CArray stackTrace = new CArray(Target.UNKNOWN);
 		ret.set("stackTrace", stackTrace, Target.UNKNOWN);
-		for(StackTraceElement e : this.getCREStackTrace()) {
+		for(StackTraceFrame e : this.getCREStackTrace()) {
 			CArray element = e.getObjectFor();
 			stackTrace.push(element, Target.UNKNOWN);
 		}
@@ -133,18 +136,18 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 				.forName(exception.get("classType", t).val(), t, env);
 		Class<? extends Mixed> clzz = NativeTypeList.getNativeClass(classType);
 		Throwable cause = null;
-		if(exception.get("causedBy", t).isInstanceOf(CArray.TYPE)) {
+		if(exception.get("causedBy", t).isInstanceOf(CArray.TYPE, null, env)) {
 			// It has a cause
 			cause = new CRECausedByWrapper((CArray) exception.get("causedBy", t));
 		}
 		String message = exception.get("message", t).val();
-		List<StackTraceElement> st = new ArrayList<>();
+		List<StackTraceFrame> st = new ArrayList<>();
 		for(Mixed consStElement : ArgumentValidation.getArray(exception.get("stackTrace", t), t).asList()) {
 			CArray stElement = ArgumentValidation.getArray(consStElement, t);
 			int line = ArgumentValidation.getInt32(stElement.get("line", t), t);
 			File f = new File(stElement.get("file", t).val());
 			int col = ArgumentValidation.getInt32(stElement.get("col", t), t);
-			st.add(new StackTraceElement(stElement.get("id", t).val(), new Target(line, f, col)));
+			st.add(new StackTraceFrame(stElement.get("id", t).val(), new Target(line, f, col)));
 		}
 		// Now we have parsed everything into POJOs
 		Class[] types = new Class[]{String.class, Target.class, Throwable.class};
@@ -189,25 +192,53 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 	 * @param t
 	 * @return
 	 * @throws ConfigRuntimeException
+	 * @deprecated Use {@link #get(String, Target, Environment)} instead.
 	 */
+	@Deprecated
 	@Override
 	public Mixed get(String index, Target t) throws ConfigRuntimeException {
-		return exceptionObject.get(index, t);
+		return get(index, t, null);
 	}
 
+	@Override
+	public Mixed get(String index, Target t, Environment env) throws ConfigRuntimeException {
+		return exceptionObject.get(index, t, env);
+	}
+
+	/** @deprecated Use {@link #get(int, Target, Environment)} instead. */
+	@Deprecated
 	@Override
 	public Mixed get(int index, Target t) throws ConfigRuntimeException {
-		return exceptionObject.get(index, t);
+		return get(index, t, null);
 	}
 
+	@Override
+	public Mixed get(int index, Target t, Environment env) throws ConfigRuntimeException {
+		return exceptionObject.get(index, t, env);
+	}
+
+	/** @deprecated Use {@link #get(Mixed, Target, Environment)} instead. */
+	@Deprecated
 	@Override
 	public Mixed get(Mixed index, Target t) throws ConfigRuntimeException {
-		return exceptionObject.get(index, t);
+		return get(index, t, null);
 	}
 
 	@Override
+	public Mixed get(Mixed index, Target t, Environment env) throws ConfigRuntimeException {
+		return exceptionObject.get(index, t, env);
+	}
+
+	/** @deprecated Use {@link #keySet(Environment)} instead. */
+	@Deprecated
+	@Override
 	public Set<Mixed> keySet() {
-		return exceptionObject.keySet();
+		return keySet(null);
+	}
+
+	@Override
+	public Set<Mixed> keySet(Environment env) {
+		return exceptionObject.keySet(env);
 	}
 
 	@Override
@@ -220,9 +251,16 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 		return exceptionObject.canBeAssociative();
 	}
 
+	/** @deprecated Use {@link #slice(int, int, Target, Environment)} instead. */
+	@Deprecated
 	@Override
 	public Mixed slice(int begin, int end, Target t) {
-		return exceptionObject.slice(begin, end, t);
+		return slice(begin, end, t, null);
+	}
+
+	@Override
+	public Mixed slice(int begin, int end, Target t, Environment env) {
+		return exceptionObject.slice(begin, end, t, env);
 	}
 
 	@Override
@@ -260,14 +298,14 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 	 * If the stacktrace was already set, this is an Error, because this should never happen in the usual case.
 	 * @param st
 	 */
-	public void setStackTraceElements(List<StackTraceElement> st) {
+	public void setStackTraceElements(List<StackTraceFrame> st) {
 		if(this.stackTrace != null) {
 			throw new RuntimeException("The stacktrace was already set, and it cannot be set again");
 		}
 		this.stackTrace = st;
 	}
 
-	public List<StackTraceElement> getCREStackTrace() {
+	public List<StackTraceFrame> getCREStackTrace() {
 		if(this.stackTrace == null) {
 			return new ArrayList<>();
 		}
@@ -294,9 +332,11 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 		throw new UnsupportedOperationException();
 	}
 
+	/** @deprecated Use {@link #isInstanceOf(CClassType, LeftHandGenericUse, Environment)} instead. */
+	@Deprecated
 	@Override
 	public boolean isInstanceOf(CClassType type) {
-		return Construct.isInstanceof(this, type);
+		return isInstanceOf(type, null, null);
 	}
 
 	@Override
@@ -305,12 +345,36 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 	}
 
 	@Override
+	public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env) {
+		return Construct.isInstanceof(this, type, env);
+	}
+
+	/** @deprecated Use {@link #typeof(Environment)} instead. */
+	@Deprecated
+	@Override
 	public CClassType typeof() {
+		return typeof(null);
+	}
+
+	@Override
+	public CClassType typeof(Environment env) {
 		return Construct.typeof(this);
 	}
 
 	@Override
+	public GenericParameters getGenericParameters() {
+		return null;
+	}
+
+	/** @deprecated Use {@link #getBooleanValue(Target, Environment)} instead. */
+	@Deprecated
+	@Override
 	public boolean getBooleanValue(Target t) {
+		return getBooleanValue(t, null);
+	}
+
+	@Override
+	public boolean getBooleanValue(Target t, Environment env) {
 		return true;
 	}
 

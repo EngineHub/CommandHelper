@@ -11,6 +11,7 @@ import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.constructs.CResource;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
@@ -110,7 +111,7 @@ public class ResourceManager {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			ResourceTypes type;
 			Mixed data = null;
 			try {
@@ -209,8 +210,8 @@ public class ResourceManager {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			if(args[0].isInstanceOf(CResource.TYPE)) {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			if(args[0].isInstanceOf(CResource.TYPE, null, env)) {
 				CResource<?> resource = (CResource<?>) args[0];
 				if(RESOURCES.containsKey(resource.getId())) {
 					RESOURCES.remove(resource.getId());

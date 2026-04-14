@@ -6,10 +6,13 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.FlowFunction;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
-import com.laytonsmith.core.Script;
+import com.laytonsmith.core.StepAction.Complete;
+import com.laytonsmith.core.StepAction.Evaluate;
+import com.laytonsmith.core.StepAction.StepResult;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.compiler.analysis.Scope;
@@ -29,6 +32,7 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CSymbol;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
@@ -55,6 +59,75 @@ public class BasicLogic {
 		return "These functions provide basic logical operations.";
 	}
 
+	/**
+	 * Shared state for short-circuit logic FlowFunctions (and, or, dand, dor, nand, nor).
+	 */
+	static class ShortCircuitState {
+		ParseTree[] children;
+		int index;
+
+		ShortCircuitState(ParseTree[] children) {
+			this.children = children;
+			this.index = 0;
+		}
+
+		@Override
+		public String toString() {
+			return "index=" + index + "/" + children.length;
+		}
+	}
+
+	enum ShortCircuitMode {
+		AND,  // short-circuit on false, return CBoolean
+		OR,   // short-circuit on true, return CBoolean
+		DAND, // short-circuit on falsy, return actual value
+		DOR   // short-circuit on truthy, return actual value
+	}
+
+	private static StepResult<ShortCircuitState> scBegin(ParseTree[] children) {
+		ShortCircuitState state = new ShortCircuitState(children);
+		return new StepResult<>(new Evaluate(children[0]), state);
+	}
+
+	private static StepResult<ShortCircuitState> scChildCompleted(Target t,
+			ShortCircuitState state, Mixed result, Environment env, ShortCircuitMode mode) {
+		boolean boolVal;
+		switch(mode) {
+			case AND -> {
+				boolVal = ArgumentValidation.getBoolean(result, t, env);
+				if(!boolVal) {
+					return new StepResult<>(new Complete(CBoolean.FALSE), state);
+				}
+			}
+			case OR -> {
+				boolVal = ArgumentValidation.getBoolean(result, t, env);
+				if(boolVal) {
+					return new StepResult<>(new Complete(CBoolean.TRUE), state);
+				}
+			}
+			case DAND -> {
+				if(!ArgumentValidation.getBooleanish(result, t, env)) {
+					return new StepResult<>(new Complete(result), state);
+				}
+			}
+			case DOR -> {
+				if(ArgumentValidation.getBooleanish(result, t, env)) {
+					return new StepResult<>(new Complete(result), state);
+				}
+			}
+		}
+		state.index++;
+		if(state.index < state.children.length) {
+			return new StepResult<>(new Evaluate(state.children[state.index]), state);
+		}
+		// All evaluated, none short-circuited
+		return switch(mode) {
+			case AND -> new StepResult<>(new Complete(CBoolean.TRUE), state);
+			case OR -> new StepResult<>(new Complete(CBoolean.FALSE), state);
+			case DAND, DOR -> new StepResult<>(new Complete(result), state);
+		};
+	}
+
 	@api
 	@seealso({nequals.class, sequals.class, snequals.class})
 	@OperatorPreferred("==")
@@ -71,7 +144,7 @@ public class BasicLogic {
 		 * @return
 		 */
 		public static boolean doEquals(Mixed one, Mixed two) {
-			CBoolean ret = SELF.exec(Target.UNKNOWN, null, one, two);
+			CBoolean ret = SELF.exec(Target.UNKNOWN, null, null, one, two);
 			return ret.getBoolean();
 		}
 
@@ -86,7 +159,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CBoolean exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			if(args.length <= 1) {
 				throw new CREInsufficientArgumentsException("At least two arguments must be passed to equals", t);
 			}
@@ -112,8 +185,8 @@ public class BasicLogic {
 			if(ArgumentValidation.anyBooleans(args)) {
 				boolean equals = true;
 				for(int i = 1; i < args.length; i++) {
-					boolean arg1 = ArgumentValidation.getBoolean(args[i - 1], t);
-					boolean arg2 = ArgumentValidation.getBoolean(args[i], t);
+					boolean arg1 = ArgumentValidation.getBoolean(args[i - 1], t, env);
+					boolean arg2 = ArgumentValidation.getBoolean(args[i], t, env);
 					if(arg1 != arg2) {
 						equals = false;
 						break;
@@ -143,8 +216,8 @@ public class BasicLogic {
 					if(!ArgumentValidation.isNumber(args[i])) {
 						return CBoolean.FALSE;
 					}
-					double arg1 = ArgumentValidation.getNumber(args[i - 1], t);
-					double arg2 = ArgumentValidation.getNumber(args[i], t);
+					double arg1 = ArgumentValidation.getNumber(args[i - 1], t, env);
+					double arg2 = ArgumentValidation.getNumber(args[i], t, env);
 					if(arg1 != arg2) {
 						return CBoolean.FALSE;
 					}
@@ -254,17 +327,17 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CBoolean exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
-			if(args[1].typeof().equals(args[0].typeof())) {
-				if(args[0].isInstanceOf(CString.TYPE) && args[1].isInstanceOf(CString.TYPE)) {
+			if(args[1].typeof(env).equals(args[0].typeof(env))) {
+				if(args[0].isInstanceOf(CString.TYPE, null, env) && args[1].isInstanceOf(CString.TYPE, null, env)) {
 					// Check for actual string equality, so we don't do type massaging
 					// for numeric strings. Thus '2' !== '2.0'
 					return CBoolean.get(args[0].val().equals(args[1].val()));
 				}
-				return new equals().exec(t, environment, args);
+				return new equals().exec(t, env, null, args);
 			} else {
 				return CBoolean.FALSE;
 			}
@@ -332,8 +405,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			return new sequals().exec(t, environment, args).not();
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			return new sequals().exec(t, env, null, args).not();
 		}
 
 		@Override
@@ -410,8 +483,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CBoolean exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			return new equals().exec(t, env, args).not();
+		public CBoolean exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			return new equals().exec(t, env, null, args).not();
 		}
 
 		@Override
@@ -480,15 +553,15 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CBoolean exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(args.length <= 1) {
 				throw new CREInsufficientArgumentsException("At least two arguments must be passed to equals_ic", t);
 			}
 			if(ArgumentValidation.anyBooleans(args)) {
 				boolean equals = true;
 				for(int i = 1; i < args.length; i++) {
-					boolean arg1 = ArgumentValidation.getBoolean(args[i - 1], t);
-					boolean arg2 = ArgumentValidation.getBoolean(args[i], t);
+					boolean arg1 = ArgumentValidation.getBoolean(args[i - 1], t, env);
+					boolean arg2 = ArgumentValidation.getBoolean(args[i], t, env);
 					if(arg1 != arg2) {
 						equals = false;
 						break;
@@ -519,8 +592,8 @@ public class BasicLogic {
 					if(!ArgumentValidation.isNumber(args[i])) {
 						return CBoolean.FALSE;
 					}
-					double arg1 = ArgumentValidation.getNumber(args[i - 1], t);
-					double arg2 = ArgumentValidation.getNumber(args[i], t);
+					double arg1 = ArgumentValidation.getNumber(args[i - 1], t, env);
+					double arg2 = ArgumentValidation.getNumber(args[i], t, env);
 					if(arg1 != arg2) {
 						return CBoolean.FALSE;
 					}
@@ -574,13 +647,13 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CBoolean exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			Mixed v1 = args[0];
 			Mixed v2 = args[1];
 			if(!v2.getClass().equals(v1.getClass())) {
 				return CBoolean.FALSE;
 			}
-			return new equals_ic().exec(t, environment, v1, v2);
+			return new equals_ic().exec(t, env, null, v1, v2);
 		}
 
 		@Override
@@ -673,8 +746,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CBoolean exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			return new equals_ic().exec(t, environment, args).not();
+		public CBoolean exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			return new equals_ic().exec(t, env, null, args).not();
 		}
 
 		@Override
@@ -720,11 +793,11 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CBoolean exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			if(args[0].isInstanceOf(CArray.TYPE) && args[1].isInstanceOf(CArray.TYPE)) {
+		public CBoolean exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			if(args[0].isInstanceOf(CArray.TYPE, null, env) && args[1].isInstanceOf(CArray.TYPE, null, env)) {
 				return CBoolean.get(args[0] == args[1]);
 			} else {
-				return new equals().exec(t, environment, args);
+				return new equals().exec(t, env, null, args);
 			}
 		}
 
@@ -792,12 +865,12 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CBoolean exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
-			double arg1 = ArgumentValidation.getNumber(args[0], t);
-			double arg2 = ArgumentValidation.getNumber(args[1], t);
+			double arg1 = ArgumentValidation.getNumber(args[0], t, env);
+			double arg2 = ArgumentValidation.getNumber(args[1], t, env);
 			return CBoolean.get(arg1 < arg2);
 		}
 
@@ -866,12 +939,12 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CBoolean exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
-			double arg1 = ArgumentValidation.getNumber(args[0], t);
-			double arg2 = ArgumentValidation.getNumber(args[1], t);
+			double arg1 = ArgumentValidation.getNumber(args[0], t, env);
+			double arg2 = ArgumentValidation.getNumber(args[1], t, env);
 			return CBoolean.get(arg1 > arg2);
 		}
 
@@ -940,12 +1013,12 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CBoolean exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
-			double arg1 = ArgumentValidation.getNumber(args[0], t);
-			double arg2 = ArgumentValidation.getNumber(args[1], t);
+			double arg1 = ArgumentValidation.getNumber(args[0], t, env);
+			double arg2 = ArgumentValidation.getNumber(args[1], t, env);
 			return CBoolean.get(arg1 <= arg2);
 		}
 
@@ -1015,12 +1088,12 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CBoolean exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
-			double arg1 = ArgumentValidation.getNumber(args[0], t);
-			double arg2 = ArgumentValidation.getNumber(args[1], t);
+			double arg1 = ArgumentValidation.getNumber(args[0], t, env);
+			double arg2 = ArgumentValidation.getNumber(args[1], t, env);
 			return CBoolean.get(arg1 >= arg2);
 		}
 
@@ -1076,7 +1149,7 @@ public class BasicLogic {
 	@api(environments = {GlobalEnv.class})
 	@seealso({or.class})
 	@OperatorPreferred("&&")
-	public static class and extends AbstractFunction implements Optimizable {
+	public static class and extends AbstractFunction implements Optimizable, FlowFunction<ShortCircuitState> {
 
 		public static final String NAME = "and";
 
@@ -1091,11 +1164,11 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CBoolean exec(Target t, Environment env, Mixed... args) {
+		public CBoolean exec(Target t, Environment env, GenericParameters generics, Mixed... args) {
 			//This will only happen if they hardcode true/false in, but we still
 			//need to handle it appropriately.
 			for(Mixed c : args) {
-				if(!ArgumentValidation.getBoolean(c, t)) {
+				if(!ArgumentValidation.getBoolean(c, t, env)) {
 					return CBoolean.FALSE;
 				}
 			}
@@ -1103,15 +1176,14 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CBoolean execs(Target t, Environment env, Script parent, ParseTree... nodes) {
-			for(ParseTree tree : nodes) {
-				Mixed c = env.getEnv(GlobalEnv.class).GetScript().seval(tree, env);
-				boolean b = ArgumentValidation.getBoolean(c, t);
-				if(b == false) {
-					return CBoolean.FALSE;
-				}
-			}
-			return CBoolean.TRUE;
+		public StepResult<ShortCircuitState> begin(Target t, ParseTree[] children, Environment env) {
+			return scBegin(children);
+		}
+
+		@Override
+		public StepResult<ShortCircuitState> childCompleted(Target t, ShortCircuitState state,
+				Mixed result, Environment env) {
+			return scChildCompleted(t, state, result, env, ShortCircuitMode.AND);
 		}
 
 		@Override
@@ -1155,11 +1227,6 @@ public class BasicLogic {
 		}
 
 		@Override
-		public boolean useSpecialExec() {
-			return true;
-		}
-
-		@Override
 		public ParseTree optimizeDynamic(Target t, Environment env,
 				Set<Class<? extends Environment.EnvironmentImpl>> envs,
 				List<ParseTree> children, FileOptions fileOptions)
@@ -1179,7 +1246,7 @@ public class BasicLogic {
 					continue;
 				}
 				if(child.isConst()) {
-					if(ArgumentValidation.getBoolean(child.getData(), t) == true) {
+					if(ArgumentValidation.getBoolean(child.getData(), t, env) == true) {
 						it.remove();
 					} else {
 						foundFalse = true;
@@ -1203,7 +1270,7 @@ public class BasicLogic {
 //			}
 			// At this point, it could be that there are some conditions with side effects, followed by a final false. However,
 			// if false is the only remaining condition (which could be) then we can simply return false here.
-			if(children.size() == 1 && children.get(0).isConst() && ArgumentValidation.getBoolean(children.get(0).getData(), t) == false) {
+			if(children.size() == 1 && children.get(0).isConst() && ArgumentValidation.getBoolean(children.get(0).getData(), t, env) == false) {
 				return new ParseTree(CBoolean.FALSE, fileOptions);
 			}
 			if(children.isEmpty()) {
@@ -1229,7 +1296,7 @@ public class BasicLogic {
 	}
 
 	@api
-	public static class dand extends AbstractFunction implements Optimizable {
+	public static class dand extends AbstractFunction implements Optimizable, FlowFunction<ShortCircuitState> {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -1247,25 +1314,19 @@ public class BasicLogic {
 		}
 
 		@Override
-		public boolean useSpecialExec() {
-			return true;
-		}
-
-		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return CVoid.VOID;
 		}
 
 		@Override
-		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
-			Mixed lastValue = CBoolean.TRUE;
-			for(ParseTree tree : nodes) {
-				lastValue = env.getEnv(GlobalEnv.class).GetScript().seval(tree, env);
-				if(!ArgumentValidation.getBooleanish(lastValue, t)) {
-					return lastValue;
-				}
-			}
-			return lastValue;
+		public StepResult<ShortCircuitState> begin(Target t, ParseTree[] children, Environment env) {
+			return scBegin(children);
+		}
+
+		@Override
+		public StepResult<ShortCircuitState> childCompleted(Target t, ShortCircuitState state,
+				Mixed result, Environment env) {
+			return scChildCompleted(t, state, result, env, ShortCircuitMode.DAND);
 		}
 
 		@Override
@@ -1304,7 +1365,7 @@ public class BasicLogic {
 					continue;
 				}
 				if(child.isConst()) {
-					if(ArgumentValidation.getBoolean(child.getData(), t) == true) {
+					if(ArgumentValidation.getBoolean(child.getData(), t, env) == true) {
 						it.remove();
 					} else {
 						foundFalse = true;
@@ -1328,7 +1389,7 @@ public class BasicLogic {
 //			}
 			// At this point, it could be that there are some conditions with side effects, followed by a final false. However,
 			// if false is the only remaining condition (which could be) then we can simply return false here.
-			if(children.size() == 1 && children.get(0).isConst() && ArgumentValidation.getBoolean(children.get(0).getData(), t) == false) {
+			if(children.size() == 1 && children.get(0).isConst() && ArgumentValidation.getBoolean(children.get(0).getData(), t, env) == false) {
 				return new ParseTree(children.get(0).getData(), fileOptions);
 			}
 			if(children.isEmpty()) {
@@ -1371,7 +1432,7 @@ public class BasicLogic {
 	@api(environments = {GlobalEnv.class})
 	@seealso({and.class})
 	@OperatorPreferred("||")
-	public static class or extends AbstractFunction implements Optimizable {
+	public static class or extends AbstractFunction implements Optimizable, FlowFunction<ShortCircuitState> {
 
 		@Override
 		public String getName() {
@@ -1384,11 +1445,11 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CBoolean exec(Target t, Environment env, Mixed... args) {
+		public CBoolean exec(Target t, Environment env, GenericParameters generics, Mixed... args) {
 			//This will only happen if they hardcode true/false in, but we still
 			//need to handle it appropriately.
 			for(Mixed c : args) {
-				if(ArgumentValidation.getBoolean(c, t)) {
+				if(ArgumentValidation.getBoolean(c, t, env)) {
 					return CBoolean.TRUE;
 				}
 			}
@@ -1396,14 +1457,14 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CBoolean execs(Target t, Environment env, Script parent, ParseTree... nodes) {
-			for(ParseTree tree : nodes) {
-				Mixed c = env.getEnv(GlobalEnv.class).GetScript().seval(tree, env);
-				if(ArgumentValidation.getBoolean(c, t)) {
-					return CBoolean.TRUE;
-				}
-			}
-			return CBoolean.FALSE;
+		public StepResult<ShortCircuitState> begin(Target t, ParseTree[] children, Environment env) {
+			return scBegin(children);
+		}
+
+		@Override
+		public StepResult<ShortCircuitState> childCompleted(Target t, ShortCircuitState state,
+				Mixed result, Environment env) {
+			return scChildCompleted(t, state, result, env, ShortCircuitMode.OR);
 		}
 
 		@Override
@@ -1448,11 +1509,6 @@ public class BasicLogic {
 		}
 
 		@Override
-		public boolean useSpecialExec() {
-			return true;
-		}
-
-		@Override
 		public ParseTree optimizeDynamic(Target t, Environment env,
 				Set<Class<? extends Environment.EnvironmentImpl>> envs,
 				List<ParseTree> children, FileOptions fileOptions)
@@ -1475,7 +1531,7 @@ public class BasicLogic {
 					if(child.getData() instanceof CSymbol) {
 						throw new ConfigCompileException("Unexpected symbol: \"" + child.getData().val() + "\"", t);
 					}
-					if(ArgumentValidation.getBoolean(child.getData(), t) == false) {
+					if(ArgumentValidation.getBoolean(child.getData(), t, env) == false) {
 						it.remove();
 					} else {
 						foundTrue = true;
@@ -1499,7 +1555,7 @@ public class BasicLogic {
 //			}
 			// At this point, it could be that there are some conditions with side effects, followed by a final true. However,
 			// if true is the only remaining condition (which could be) then we can simply return true here.
-			if(children.size() == 1 && children.get(0).isConst() && ArgumentValidation.getBoolean(children.get(0).getData(), t) == true) {
+			if(children.size() == 1 && children.get(0).isConst() && ArgumentValidation.getBoolean(children.get(0).getData(), t, env) == true) {
 				return new ParseTree(CBoolean.TRUE, fileOptions);
 			}
 			if(children.isEmpty()) {
@@ -1525,7 +1581,7 @@ public class BasicLogic {
 	}
 
 	@api
-	public static class dor extends AbstractFunction implements Optimizable {
+	public static class dor extends AbstractFunction implements Optimizable, FlowFunction<ShortCircuitState> {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -1543,24 +1599,19 @@ public class BasicLogic {
 		}
 
 		@Override
-		public boolean useSpecialExec() {
-			return true;
-		}
-
-		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return CVoid.VOID;
 		}
 
 		@Override
-		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
-			for(ParseTree tree : nodes) {
-				Mixed c = env.getEnv(GlobalEnv.class).GetScript().seval(tree, env);
-				if(ArgumentValidation.getBooleanish(c, t)) {
-					return c;
-				}
-			}
-			return env.getEnv(GlobalEnv.class).GetScript().seval(nodes[nodes.length - 1], env);
+		public StepResult<ShortCircuitState> begin(Target t, ParseTree[] children, Environment env) {
+			return scBegin(children);
+		}
+
+		@Override
+		public StepResult<ShortCircuitState> childCompleted(Target t, ShortCircuitState state,
+				Mixed result, Environment env) {
+			return scChildCompleted(t, state, result, env, ShortCircuitMode.DOR);
 		}
 
 		@Override
@@ -1586,6 +1637,9 @@ public class BasicLogic {
 				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			OptimizationUtilities.pullUpLikeFunctions(children, getName());
+			if(children.isEmpty()) {
+				throw new ConfigCompileException(getName() + " requires at least one argument", t);
+			}
 			return null;
 		}
 
@@ -1644,11 +1698,11 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CBoolean exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			if(args.length != 1) {
 				throw new CREFormatException(this.getName() + " expects 1 argument.", t);
 			}
-			return CBoolean.get(!ArgumentValidation.getBoolean(args[0], t));
+			return CBoolean.get(!ArgumentValidation.getBoolean(args[0], t, env));
 		}
 
 		@Override
@@ -1748,12 +1802,12 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CBoolean exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
-			boolean val1 = ArgumentValidation.getBoolean(args[0], t);
-			boolean val2 = ArgumentValidation.getBoolean(args[1], t);
+			boolean val1 = ArgumentValidation.getBoolean(args[0], t, env);
+			boolean val2 = ArgumentValidation.getBoolean(args[1], t, env);
 			return CBoolean.get(val1 ^ val2);
 		}
 
@@ -1784,7 +1838,7 @@ public class BasicLogic {
 
 	@api
 	@seealso({and.class})
-	public static class nand extends AbstractFunction {
+	public static class nand extends AbstractFunction implements FlowFunction<ShortCircuitState> {
 
 		@Override
 		public String getName() {
@@ -1822,13 +1876,23 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) {
 			return CNull.NULL;
 		}
 
 		@Override
-		public CBoolean execs(Target t, Environment env, Script parent, ParseTree... nodes) {
-			return new and().execs(t, env, parent, nodes).not();
+		public StepResult<ShortCircuitState> begin(Target t, ParseTree[] children, Environment env) {
+			return scBegin(children);
+		}
+
+		@Override
+		public StepResult<ShortCircuitState> childCompleted(Target t, ShortCircuitState state,
+				Mixed result, Environment env) {
+			StepResult<ShortCircuitState> r = scChildCompleted(t, state, result, env, ShortCircuitMode.AND);
+			if(r.getAction() instanceof Complete c) {
+				return new StepResult<>(new Complete(((CBoolean) c.getResult()).not()), state);
+			}
+			return r;
 		}
 
 		@Override
@@ -1846,11 +1910,6 @@ public class BasicLogic {
 		}
 
 		@Override
-		public boolean useSpecialExec() {
-			return true;
-		}
-
-		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "nand(true, true)")};
@@ -1859,7 +1918,7 @@ public class BasicLogic {
 
 	@api
 	@seealso({or.class})
-	public static class nor extends AbstractFunction {
+	public static class nor extends AbstractFunction implements FlowFunction<ShortCircuitState> {
 
 		@Override
 		public String getName() {
@@ -1897,13 +1956,23 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) {
 			return CNull.NULL;
 		}
 
 		@Override
-		public CBoolean execs(Target t, Environment environment, Script parent, ParseTree... args) throws ConfigRuntimeException {
-			return new or().execs(t, environment, parent, args).not();
+		public StepResult<ShortCircuitState> begin(Target t, ParseTree[] children, Environment env) {
+			return scBegin(children);
+		}
+
+		@Override
+		public StepResult<ShortCircuitState> childCompleted(Target t, ShortCircuitState state,
+				Mixed result, Environment env) {
+			StepResult<ShortCircuitState> r = scChildCompleted(t, state, result, env, ShortCircuitMode.OR);
+			if(r.getAction() instanceof Complete c) {
+				return new StepResult<>(new Complete(((CBoolean) c.getResult()).not()), state);
+			}
+			return r;
 		}
 
 		@Override
@@ -1918,11 +1987,6 @@ public class BasicLogic {
 		public Scope linkScope(StaticAnalysis analysis, Scope parentScope,
 				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
 			return this.linkScopeLazy(analysis, parentScope, ast, env, exceptions);
-		}
-
-		@Override
-		public boolean useSpecialExec() {
-			return true;
 		}
 
 		@Override
@@ -1972,11 +2036,11 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CBoolean exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
-			return new xor().exec(t, environment, args).not();
+			return new xor().exec(t, env, null, args).not();
 		}
 
 		@Override
@@ -2044,13 +2108,13 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CInt exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public CInt exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(args.length < 2) {
 				throw new CREFormatException(this.getName() + " expects at least 2 arguments.", t);
 			}
-			long val = ArgumentValidation.getInt(args[0], t);
+			long val = ArgumentValidation.getInt(args[0], t, env);
 			for(int i = 1; i < args.length; i++) {
-				val = val & ArgumentValidation.getInt(args[i], t);
+				val = val & ArgumentValidation.getInt(args[i], t, env);
 			}
 			return new CInt(val, t);
 		}
@@ -2131,13 +2195,13 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CInt exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public CInt exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(args.length < 2) {
 				throw new CREFormatException(this.getName() + " expects at least 2 arguments.", t);
 			}
-			long val = ArgumentValidation.getInt(args[0], t);
+			long val = ArgumentValidation.getInt(args[0], t, env);
 			for(int i = 1; i < args.length; i++) {
-				val = val | ArgumentValidation.getInt(args[i], t);
+				val = val | ArgumentValidation.getInt(args[i], t, env);
 			}
 			return new CInt(val, t);
 		}
@@ -2220,13 +2284,13 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CInt exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public CInt exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(args.length < 2) {
 				throw new CREFormatException(this.getName() + " expects at least 2 arguments.", t);
 			}
-			long val = ArgumentValidation.getInt(args[0], t);
+			long val = ArgumentValidation.getInt(args[0], t, env);
 			for(int i = 1; i < args.length; i++) {
-				val = val ^ ArgumentValidation.getInt(args[i], t);
+				val = val ^ ArgumentValidation.getInt(args[i], t, env);
 			}
 			return new CInt(val, t);
 		}
@@ -2305,11 +2369,11 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CInt exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public CInt exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(args.length != 1) {
 				throw new CREFormatException(this.getName() + " expects 1 argument.", t);
 			}
-			return new CInt(~ArgumentValidation.getInt(args[0], t), t);
+			return new CInt(~ArgumentValidation.getInt(args[0], t, env), t);
 		}
 
 		@Override
@@ -2371,12 +2435,12 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CInt exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public CInt exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
-			long value = ArgumentValidation.getInt(args[0], t);
-			long toShift = ArgumentValidation.getInt(args[1], t);
+			long value = ArgumentValidation.getInt(args[0], t, env);
+			long toShift = ArgumentValidation.getInt(args[1], t, env);
 			return new CInt(value << toShift, t);
 		}
 
@@ -2441,12 +2505,12 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CInt exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public CInt exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
-			long value = ArgumentValidation.getInt(args[0], t);
-			long toShift = ArgumentValidation.getInt(args[1], t);
+			long value = ArgumentValidation.getInt(args[0], t, env);
+			long toShift = ArgumentValidation.getInt(args[1], t, env);
 			return new CInt(value >> toShift, t);
 		}
 
@@ -2513,12 +2577,12 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CInt exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public CInt exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
-			long value = ArgumentValidation.getInt(args[0], t);
-			long toShift = ArgumentValidation.getInt(args[1], t);
+			long value = ArgumentValidation.getInt(args[0], t, env);
+			long toShift = ArgumentValidation.getInt(args[1], t, env);
 			return new CInt(value >>> toShift, t);
 		}
 
@@ -2564,7 +2628,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return CVoid.VOID;
 		}
 
@@ -2644,7 +2708,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CInt exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public CInt exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return new CInt(args[0].hashCode(), t);
 		}
 
@@ -2705,10 +2769,10 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			double d1 = ArgumentValidation.getNumber(args[0], t);
-			double d2 = ArgumentValidation.getNumber(args[1], t);
-			double epsilon = ArgumentValidation.getDouble(args[2], t);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			double d1 = ArgumentValidation.getNumber(args[0], t, env);
+			double d2 = ArgumentValidation.getNumber(args[1], t, env);
+			double epsilon = ArgumentValidation.getDouble(args[2], t, env);
 			return CBoolean.get(java.lang.Math.abs(d1 - d2) < epsilon);
 		}
 

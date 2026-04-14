@@ -9,7 +9,7 @@ import com.laytonsmith.PureUtilities.CommandExecutor;
 import com.laytonsmith.PureUtilities.Common.ArrayUtils;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.OSUtils;
-import com.laytonsmith.PureUtilities.Common.RSAEncrypt;
+import com.laytonsmith.PureUtilities.Common.SSHKeyPair;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Common.UIUtils;
@@ -27,6 +27,7 @@ import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.DebugContext;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.RuntimeMode;
@@ -53,6 +54,8 @@ import com.laytonsmith.tools.Manager;
 import com.laytonsmith.tools.ProfilerSummary;
 import com.laytonsmith.tools.SyntaxHighlighters;
 import com.laytonsmith.tools.UILauncher;
+import com.laytonsmith.tools.debugger.DebugSecurity;
+import com.laytonsmith.tools.debugger.MSDebugServer;
 import com.laytonsmith.tools.docgen.DocGen;
 import com.laytonsmith.tools.docgen.DocGenExportTool;
 import com.laytonsmith.tools.docgen.DocGenTemplates;
@@ -335,9 +338,9 @@ public class Main {
 
 		@Override
 		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
-			String buildYear = new Scheduling.simple_date().exec(Target.UNKNOWN, null,
+			String buildYear = new Scheduling.simple_date().exec(Target.UNKNOWN, null, null,
 					new CString("yyyy", Target.UNKNOWN),
-					new Meta.engine_build_date().exec(Target.UNKNOWN, null)).val();
+					new Meta.engine_build_date().exec(Target.UNKNOWN, null, null)).val();
 			StreamUtils.GetSystemOut().println("The MIT License (MIT)\n"
 					+ "\n"
 					+ "Copyright (c) 2012-" + buildYear + " Methodscript Contributors\n"
@@ -594,7 +597,7 @@ public class Main {
 						+ "\tstrict;" + li
 						+ "\tname: " + f.getName() + ";" + li
 						+ "\tauthor: " + System.getProperty("user.name") + ";" + li
-						+ "\tcreated: " + new Scheduling.simple_date().exec(Target.UNKNOWN, null, new CString("yyyy-MM-dd", Target.UNKNOWN)).val() + ";" + li
+						+ "\tcreated: " + new Scheduling.simple_date().exec(Target.UNKNOWN, null, null, new CString("yyyy-MM-dd", Target.UNKNOWN)).val() + ";" + li
 						+ "\tdescription: " + ";" + li
 						+ ">" + li + li, f, true);
 			}
@@ -641,7 +644,7 @@ public class Main {
 			classSimpleName = split[split.length - 1];
 
 			String author = System.getProperty("user.name");
-			String created = new Scheduling.simple_date().exec(Target.UNKNOWN, null,
+			String created = new Scheduling.simple_date().exec(Target.UNKNOWN, null, null,
 					new CString("yyyy-MM-dd", Target.UNKNOWN)).val();
 			File file = new File(clazz.replace(".", "/") + ".ms");
 			if(file.exists()) {
@@ -763,6 +766,9 @@ public class Main {
 				String modules = Static.GetStringResource("/interpreter-helpers/modules");
 				modules = modules.replaceAll("(.*)\n", "--add-opens $1=ALL-UNNAMED ");
 				args += " " + modules;
+			}
+			if(JavaVersion.GetMajorVersion() >= 16) {
+				args += "--enable-native-access=ALL-UNNAMED ";
 			}
 			args += "-Xrs ";
 			StreamUtils.GetSystemOut().println(args.trim());
@@ -1072,21 +1078,134 @@ public class Main {
 					.addArgument(new ArgumentBuilder()
 						.setDescription("The code to run")
 						.setUsageName("methodscript code")
-						.setRequiredAndDefault());
+						.setRequiredAndDefault())
+					.addArgument(new ArgumentBuilder()
+						.setDescription("Enable the DAP debug server.")
+						.asFlag()
+						.setName("debug"))
+					.addArgument(new ArgumentBuilder()
+						.setDescription("The port for the debug server. Defaults to "
+								+ MSDebugServer.DEFAULT_PORT + ".")
+						.setUsageName("port")
+						.setOptional()
+						.setName("debug-port")
+						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.NUMBER))
+					.addArgument(new ArgumentBuilder()
+						.setDescription("Wait for the debugger to connect before executing.")
+						.asFlag()
+						.setName("debug-suspend"))
+					.addArgument(new ArgumentBuilder()
+						.setDescription("The security mode for the debug server."
+								+ " Required when --debug is set."
+								+ " NONE: no authentication (localhost only)."
+								+ " KEYPAIR: SSH-style key authentication with TLS.")
+						.setUsageName("mode")
+						.setOptional()
+						.setName("debug-security")
+						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING))
+					.addArgument(new ArgumentBuilder()
+						.setDescription("The address to bind the debug server to."
+								+ " Defaults to " + MSDebugServer.DEFAULT_BIND_ADDRESS + ".")
+						.setUsageName("address")
+						.setOptional()
+						.setName("debug-bind-address")
+						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING))
+					.addArgument(new ArgumentBuilder()
+						.setDescription("Convenience shorthand that sets --debug-security NONE"
+								+ " and --debug-bind-address 0.0.0.0. For quick testing only.")
+						.asFlag()
+						.setName("debug-insecure"))
+					.addArgument(new ArgumentBuilder()
+						.setDescription("The threading mode for the debug server."
+								+ " sync: blocks the executing thread at breakpoints."
+								+ " async: snapshots state without blocking."
+								+ " Defaults to sync.")
+						.setUsageName("mode")
+						.setOptional()
+						.setName("debug-threading-mode")
+						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING));
 		}
 
 		@Override
 		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
 			ClassDiscovery.getDefaultInstance().addThisJar();
 
+			boolean debug = parsedArgs.isFlagSet("debug");
+			int debugPort = 0;
+			if(parsedArgs.getNumberArgument("debug-port") != null) {
+				debugPort = parsedArgs.getNumberArgument("debug-port").intValue();
+			}
+			boolean debugSuspend = parsedArgs.isFlagSet("debug-suspend");
+			boolean debugInsecure = parsedArgs.isFlagSet("debug-insecure");
+			String debugSecurityStr = parsedArgs.getStringArgument("debug-security");
+			String debugBindAddress = parsedArgs.getStringArgument("debug-bind-address");
+			String debugThreadingModeStr = parsedArgs.getStringArgument("debug-threading-mode");
+
+			// --debug-insecure changes defaults but explicit values take priority
+			String defaultSecurity = debugInsecure
+					? DebugSecurity.NONE.name() : null;
+			String defaultBindAddress = debugInsecure ? "0.0.0.0"
+					: MSDebugServer.DEFAULT_BIND_ADDRESS;
+
+			DebugSecurity debugSecurity;
+			String securityValue = debugSecurityStr != null ? debugSecurityStr : defaultSecurity;
+			if(securityValue != null) {
+				try {
+					debugSecurity = DebugSecurity.valueOf(securityValue.toUpperCase());
+				} catch(IllegalArgumentException e) {
+					StreamUtils.GetSystemErr().println("Invalid --debug-security value: "
+							+ securityValue + ". Must be one of "
+							+ StringUtils.Join(DebugSecurity.values(),
+									", ", ", or "));
+					System.exit(1);
+					return;
+				}
+			} else if(debug) {
+				StreamUtils.GetSystemErr().println("--debug-security is required when"
+						+ " --debug is set. Must be one of "
+						+ StringUtils.Join(DebugSecurity.values(),
+								", ", ", or "));
+				System.exit(1);
+				return;
+			} else {
+				debugSecurity = DebugSecurity.KEYPAIR;
+			}
+			if(debugBindAddress == null) {
+				debugBindAddress = defaultBindAddress;
+			}
+
 			String script = parsedArgs.getStringArgument();
 			File file = new File("Interpreter");
 			Environment env = Static.GenerateStandaloneEnvironment(true,
 					EnumSet.of(RuntimeMode.CMDLINE, RuntimeMode.INTERPRETER));
 			Set<Class<? extends Environment.EnvironmentImpl>> envs = Environment.getDefaultEnvClasses();
-			MethodScriptCompiler.execute(script, file, true, env, envs, (s) -> {
-				System.out.println(s);
-			}, null, null);
+
+			MSDebugServer debugServer = null;
+			if(debug) {
+				int port = debugPort == 0 ? MSDebugServer.DEFAULT_PORT : debugPort;
+				DebugContext.ThreadingMode threadingMode = DebugContext.ThreadingMode.SYNCHRONOUS;
+				if("async".equals(debugThreadingModeStr)) {
+					threadingMode = DebugContext.ThreadingMode.ASYNCHRONOUS;
+				}
+				debugServer = new MSDebugServer();
+				File authorizedKeysFile = debugSecurity == DebugSecurity.KEYPAIR
+						? MethodScriptFileLocations.getDefault().getAuthorizedDebugKeysFile()
+						: null;
+				env = debugServer.startListening(port, debugBindAddress, env,
+						debugSuspend, threadingMode,
+						debugSecurity, authorizedKeysFile);
+				debugServer.awaitConfiguration();
+			}
+
+			try {
+				MethodScriptCompiler.execute(script, file, true, env, envs, (s) -> {
+					System.out.println(s);
+				}, null, null);
+			} finally {
+				if(debugServer != null) {
+					debugServer.shutdown();
+				}
+			}
 		}
 	}
 
@@ -1218,15 +1337,101 @@ public class Main {
 			//We actually can't use the parsedArgs, because there may be cmdline switches in
 			//the arguments that we want to ignore here, but otherwise pass through. parsedArgs
 			//will prevent us from seeing those, however.
-			List<String> allArgs = parsedArgs.getRawArguments();
+			List<String> allArgs = new ArrayList<>(parsedArgs.getRawArguments());
 			if(allArgs.isEmpty()) {
 				StreamUtils.GetSystemErr().println("Usage: path/to/file.ms [arg1 arg2]");
 				System.exit(1);
 			}
+
+			boolean debug = false;
+			int debugPort = 0;
+			boolean debugSuspend = false;
+			String debugThreadingMode = null;
+			String debugSecurityStr = null;
+			String debugBindAddress = null;
+			boolean debugInsecure = false;
+			for(java.util.Iterator<String> it = allArgs.iterator(); it.hasNext();) {
+				String arg = it.next();
+				if("--debug".equals(arg)) {
+					debug = true;
+					it.remove();
+				} else if("--debug-port".equals(arg)) {
+					it.remove();
+					if(it.hasNext()) {
+						debugPort = Integer.parseInt(it.next());
+						it.remove();
+					}
+				} else if("--debug-suspend".equals(arg)) {
+					debugSuspend = true;
+					it.remove();
+				} else if("--debug-threading-mode".equals(arg)) {
+					it.remove();
+					if(it.hasNext()) {
+						debugThreadingMode = it.next();
+						it.remove();
+					}
+				} else if("--debug-security".equals(arg)) {
+					it.remove();
+					if(it.hasNext()) {
+						debugSecurityStr = it.next();
+						it.remove();
+					}
+				} else if("--debug-bind-address".equals(arg)) {
+					it.remove();
+					if(it.hasNext()) {
+						debugBindAddress = it.next();
+						it.remove();
+					}
+				} else if("--debug-insecure".equals(arg)) {
+					debugInsecure = true;
+					it.remove();
+				}
+			}
+
+			// Resolve security and bind address.
+			// --debug-insecure changes defaults; explicit values take priority.
+			String defaultSecurity = debugInsecure
+					? DebugSecurity.NONE.name() : null;
+			String defaultBindAddress = debugInsecure ? "0.0.0.0"
+					: MSDebugServer.DEFAULT_BIND_ADDRESS;
+
+			DebugSecurity debugSecurity;
+			String securityValue = debugSecurityStr != null
+					? debugSecurityStr : defaultSecurity;
+			if(securityValue != null) {
+				try {
+					debugSecurity = DebugSecurity.valueOf(
+							securityValue.toUpperCase());
+				} catch(IllegalArgumentException e) {
+					StreamUtils.GetSystemErr().println(
+							"Invalid --debug-security value: "
+							+ securityValue + ". Must be one of "
+							+ StringUtils.Join(DebugSecurity.values(),
+									", ", ", or "));
+					System.exit(1);
+					return;
+				}
+			} else if(debug) {
+				StreamUtils.GetSystemErr().println(
+						"--debug-security is required when --debug is"
+						+ " set. Must be one of "
+						+ StringUtils.Join(DebugSecurity.values(),
+								", ", ", or "));
+				System.exit(1);
+				return;
+			} else {
+				debugSecurity = DebugSecurity.KEYPAIR;
+			}
+			if(debugBindAddress == null) {
+				debugBindAddress = defaultBindAddress;
+			}
+
 			String fileName = allArgs.get(0);
 			allArgs.remove(0);
 			try {
-				Interpreter.startWithTTY(fileName, allArgs);
+				Interpreter.startWithTTY(fileName, allArgs, true,
+						debug, debugPort, debugSuspend, debugThreadingMode,
+						debugSecurity, debugBindAddress);
 			} catch (Profiles.InvalidProfileException ex) {
 				StreamUtils.GetSystemErr().println("Invalid profile file at " + MethodScriptFileLocations.getDefault()
 						.getProfilesFile()
@@ -1319,26 +1524,41 @@ public class Main {
 	}
 
 	@tool("key-gen")
-	public static class RSAKeyGenMode extends AbstractCommandLineTool {
+	public static class KeyGenMode extends AbstractCommandLineTool {
 
 		@Override
 		public ArgumentParser getArgumentParser() {
 			return ArgumentParser.GetParser()
-				.addDescription("Creates an ssh compatible rsa key pair. This is used with the Federation system, but"
-						+ " is useful with other tools as well.")
+				.addDescription("Creates an ssh compatible key pair, suitable for use with the"
+						+ " MethodScript debugger's KEYPAIR security mode, or other tools that"
+						+ " require key authentication. Supports "
+						+ StringUtils.Join(SSHKeyPair.KeyType.values(), ", ",
+								", or ", " or ", null, (kt) -> kt.name())
+						+ " key types.")
 				.addArgument(new ArgumentBuilder()
-						.setDescription("Output file for the keys. For instance, \"/home/user/.ssh/id_rsa\"."
+						.setDescription("Output file for the keys. For instance,"
+							+ " \"/home/user/.ssh/id_ed25519\"."
 							+ " The public key will have the same name, with \".pub\" appended.")
 						.setUsageName("file")
 						.setRequired()
 						.setName('o', "output-file")
 						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING))
 				.addArgument(new ArgumentBuilder()
-						.setDescription("Label for the public key. For instance, \"user@localhost\" or an email"
-								+ " address.")
+						.setDescription("Label for the public key. For instance,"
+								+ " \"user@localhost\" or an email address.")
 						.setUsageName("label")
 						.setRequired()
 						.setName('l', "label")
+						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING))
+				.addArgument(new ArgumentBuilder()
+						.setDescription("Key type to generate. Options: "
+								+ StringUtils.Join(SSHKeyPair.KeyType.values(), ", ",
+										", or ", " or ", null, (kt) -> kt.name())
+								+ ". Default: ED25519.")
+						.setUsageName("type")
+						.setOptional()
+						.setName('t', "type")
+						.setDefaultVal("ED25519")
 						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING));
 		}
 
@@ -1348,13 +1568,30 @@ public class Main {
 			File privOutputFile = new File(outputFileString);
 			File pubOutputFile = new File(outputFileString + ".pub");
 			String label = parsedArgs.getStringArgument('l');
+			String typeStr = parsedArgs.getStringArgument('t');
+			if(typeStr == null || typeStr.isEmpty()) {
+				typeStr = "ED25519";
+			}
+			SSHKeyPair.KeyType keyType;
+			try {
+				keyType = SSHKeyPair.KeyType.valueOf(typeStr.toUpperCase());
+			} catch(IllegalArgumentException e) {
+				StreamUtils.GetSystemErr().println("Unknown key type: " + typeStr
+						+ ". Supported types: "
+						+ StringUtils.Join(SSHKeyPair.KeyType.values(), ", ",
+								", or ", " or ", null, (kt) -> kt.name()));
+				System.exit(1);
+				return;
+			}
 			if(privOutputFile.exists() || pubOutputFile.exists()) {
-				StreamUtils.GetSystemErr().println("Either the public key or private key file already exists. This utility will not overwrite any existing files.");
+				StreamUtils.GetSystemErr().println("Either the public key or private key"
+						+ " file already exists. This utility will not overwrite any"
+						+ " existing files.");
 				System.exit(1);
 			}
-			RSAEncrypt enc = RSAEncrypt.generateKey(label);
-			FileUtil.write(enc.getPrivateKey(), privOutputFile);
-			FileUtil.write(enc.getPublicKey(), pubOutputFile);
+			SSHKeyPair keyPair = SSHKeyPair.generateKey(keyType, label);
+			FileUtil.write(keyPair.getPrivateKeyPem(), privOutputFile);
+			FileUtil.write(keyPair.getPublicKeySsh(), pubOutputFile);
 			System.exit(0);
 		}
 	}

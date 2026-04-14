@@ -16,6 +16,7 @@ import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
@@ -107,12 +108,12 @@ public class BukkitMetadata {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			List<MCMetadataValue> metadata;
 			if(args.length == 1) {
-				metadata = Static.getPlayer(environment, t).getMetadata(args[0].val());
+				metadata = Static.getPlayer(env, t).getMetadata(args[0].val());
 			} else {
-				metadata = GetMetadatable(args[0], t).getMetadata(args[1].val());
+				metadata = GetMetadatable(args[0], t, env).getMetadata(args[1].val());
 			}
 			if(args.length == 3) {
 				MCPlugin plugin = Static.getPlugin(args[2], t);
@@ -156,14 +157,14 @@ public class BukkitMetadata {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String key;
 			MCMetadatable metadatable;
 			if(args.length == 1) {
-				metadatable = Static.getPlayer(environment, t);
+				metadatable = Static.getPlayer(env, t);
 				key = args[0].val();
 			} else {
-				metadatable = GetMetadatable(args[0], t);
+				metadatable = GetMetadatable(args[0], t, env);
 				key = args[1].val();
 			}
 			if(metadatable.hasMetadata(key)) {
@@ -213,23 +214,23 @@ public class BukkitMetadata {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String key;
 			MCMetadatable metadatable;
 			Mixed value;
 			MCPlugin plugin;
 			if(args.length == 2) {
-				metadatable = Static.getPlayer(environment, t);
+				metadatable = Static.getPlayer(env, t);
 				key = args[0].val();
 				value = args[1];
 				plugin = StaticLayer.GetPlugin();
 			} else {
-				metadatable = GetMetadatable(args[0], t);
+				metadatable = GetMetadatable(args[0], t, env);
 				key = args[1].val();
 				value = args[2];
 				plugin = (args.length == 4) ? Static.getPlugin(args[3], t) : StaticLayer.GetPlugin();
 			}
-			metadatable.setMetadata(key, ObjectGenerator.GetGenerator().metadataValue(value, plugin));
+			metadatable.setMetadata(key, ObjectGenerator.GetGenerator().metadataValue(value, plugin, env));
 			return CVoid.VOID;
 		}
 
@@ -258,14 +259,14 @@ public class BukkitMetadata {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String key;
 			MCMetadatable metadatable;
 			if(args.length == 1) {
-				metadatable = Static.getPlayer(environment, t);
+				metadatable = Static.getPlayer(env, t);
 				key = args[0].val();
 			} else {
-				metadatable = GetMetadatable(args[0], t);
+				metadatable = GetMetadatable(args[0], t, env);
 				key = args[1].val();
 			}
 			if(args.length == 3) {
@@ -292,8 +293,8 @@ public class BukkitMetadata {
 	 * @param t
 	 * @return
 	 */
-	private static MCMetadatable GetMetadatable(Mixed construct, Target t) {
-		if(construct.isInstanceOf(CArray.TYPE)) {
+	private static MCMetadatable GetMetadatable(Mixed construct, Target t, Environment env) {
+		if(construct.isInstanceOf(CArray.TYPE, null, env)) {
 			return ObjectGenerator.GetGenerator().location(construct, null, t).getBlock();
 		} else if(construct instanceof CString) {
 			switch(construct.val().length()) {

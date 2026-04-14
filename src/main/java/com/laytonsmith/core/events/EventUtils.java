@@ -9,6 +9,7 @@ import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.BoundEvent.Priority;
 import com.laytonsmith.core.events.prefilters.Prefilter;
 import com.laytonsmith.core.exceptions.CRE.CREBindException;
@@ -18,7 +19,6 @@ import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.extensions.ExtensionTracker;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
-import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 
@@ -142,7 +142,7 @@ public final class EventUtils {
 		return EVENT_HANDLES.get(type);
 	}
 
-	public static void ManualTrigger(String eventName, CArray object, Target t, boolean serverWide) {
+	public static void ManualTrigger(String eventName, CArray object, Target t, boolean serverWide, Environment env) {
 		for(Driver type : EVENT_HANDLES.keySet()) {
 			SortedSet<BoundEvent> toRun = new TreeSet<>();
 			SortedSet<BoundEvent> bounded = GetEvents(type);
@@ -152,7 +152,7 @@ public final class EventUtils {
 					if(b.getEventName().equalsIgnoreCase(eventName)) {
 						BindableEvent convertedEvent = null;
 						try {
-							convertedEvent = driver.convert(object, t);
+							convertedEvent = driver.convert(object, t, env);
 						} catch (UnsupportedOperationException ex) {
 							// The event will stay null, and be caught below
 						}
@@ -167,10 +167,10 @@ public final class EventUtils {
 			//If it's not a serverwide event, or this event doesn't support external events.
 			if(!toRun.isEmpty()) {
 				if(!serverWide || !driver.supportsExternal()) {
-					FireListeners(toRun, driver, driver.convert(object, t));
+					FireListeners(toRun, driver, driver.convert(object, t, env));
 				} else {
 					//It's serverwide, so we can just trigger it normally with the driver, and it should trickle back down to us
-					driver.manualTrigger(driver.convert(object, t));
+					driver.manualTrigger(driver.convert(object, t, env));
 				}
 			} else {
 				//They have fired a non existent event
@@ -336,10 +336,8 @@ public final class EventUtils {
 				try {
 					//We must re-set the active event's bound event and parsed event
 					activeEvent.setBoundEvent(b);
-					activeEvent.setParsedEvent(driver.evaluate(e));
+					activeEvent.setParsedEvent(Event.ExecuteEvaluate(driver, e, b.getEnvironment()));
 					b.trigger(activeEvent);
-				} catch (FunctionReturnException ex) {
-					//We also know how to deal with this
 				} catch (EventException ex) {
 					throw new CREEventException(ex.getMessage(), b.getTarget(), ex);
 				} catch (ConfigRuntimeException ex) {

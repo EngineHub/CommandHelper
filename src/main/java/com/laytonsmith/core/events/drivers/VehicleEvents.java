@@ -29,6 +29,7 @@ import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.AbstractEvent;
 import com.laytonsmith.core.events.BindableEvent;
 import com.laytonsmith.core.events.BoundEvent;
@@ -86,12 +87,7 @@ public class VehicleEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
-		}
-
-		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			if(event instanceof MCVehicleEnterExitEvent) {
 				MCVehicleEnterExitEvent e = (MCVehicleEnterExitEvent) event;
 				Target t = Target.UNKNOWN;
@@ -117,7 +113,7 @@ public class VehicleEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			return false;
 		}
 
@@ -157,12 +153,7 @@ public class VehicleEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
-		}
-
-		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			if(event instanceof MCVehicleEnterExitEvent) {
 				MCVehicleEnterExitEvent e = (MCVehicleEnterExitEvent) event;
 				Target t = Target.UNKNOWN;
@@ -188,7 +179,7 @@ public class VehicleEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			return false;
 		}
 
@@ -229,7 +220,7 @@ public class VehicleEvents {
 			Map<String, Mixed> prefilter = event.getPrefilter();
 			if(prefilter.containsKey("hittype")) {
 				Mixed type = prefilter.get("hittype");
-				if(type.isInstanceOf(CString.TYPE) && type.val().contains(":") || ArgumentValidation.isNumber(type)) {
+				if(type.isInstanceOf(CString.TYPE, null, event.getEnvironment()) && type.val().contains(":") || ArgumentValidation.isNumber(type)) {
 					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The 0:0 block format in " + getName()
 							+ " is deprecated in \"hittype\".", event.getTarget());
 					MCItemStack is = Static.ParseItemNotation(null, type.val(), 1, event.getTarget());
@@ -272,14 +263,8 @@ public class VehicleEvents {
 			}
 			return false;
 		}
-
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
-		}
-
-		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			if(event instanceof MCVehicleCollideEvent) {
 				MCVehicleCollideEvent e = (MCVehicleCollideEvent) event;
 				Target t = Target.UNKNOWN;
@@ -323,15 +308,15 @@ public class VehicleEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			if(event instanceof MCVehicleEntityCollideEvent) {
 				MCVehicleEntityCollideEvent e = (MCVehicleEntityCollideEvent) event;
 				if(key.equals("collide")) {
-					e.setCollisionCancelled(!ArgumentValidation.getBoolean(value, Target.UNKNOWN));
+					e.setCollisionCancelled(!ArgumentValidation.getBoolean(value, Target.UNKNOWN, env));
 					return true;
 				}
 				if(key.equals("pickup")) {
-					e.setPickupCancelled(!ArgumentValidation.getBoolean(value, Target.UNKNOWN));
+					e.setPickupCancelled(!ArgumentValidation.getBoolean(value, Target.UNKNOWN, env));
 					return true;
 				}
 			}
@@ -482,20 +467,22 @@ public class VehicleEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
+		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
 
-			MCEntity e = Static.getEntity(manualObject.get("id", Target.UNKNOWN), Target.UNKNOWN);
+			MCEntity e = Static.getEntity(manualObject.get("id", t, env), t);
 			if(!(e instanceof MCVehicle)) {
-				throw new CREBadEntityException("The id was not a vehicle", Target.UNKNOWN);
+				throw new CREBadEntityException("The id was not a vehicle", t);
 			}
 
-			MCLocation from = ObjectGenerator.GetGenerator().location(manualObject.get("from", Target.UNKNOWN), e.getWorld(), manualObject.getTarget());
-			MCLocation to = ObjectGenerator.GetGenerator().location(manualObject.get("to", Target.UNKNOWN), e.getWorld(), manualObject.getTarget());
+			MCLocation from = ObjectGenerator.GetGenerator().location(manualObject.get("from", t, env),
+					e.getWorld(), manualObject.getTarget());
+			MCLocation to = ObjectGenerator.GetGenerator().location(manualObject.get("to", t, env),
+					e.getWorld(), manualObject.getTarget());
 			return EventBuilder.instantiate(MCVehicleMoveEvent.class, e, from, to);
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			if(event instanceof MCVehicleMoveEvent) {
 				MCVehicleMoveEvent e = (MCVehicleMoveEvent) event;
 				Target t = Target.UNKNOWN;
@@ -538,7 +525,7 @@ public class VehicleEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			//Nothing can be modified, so always return false
 			return false;
 		}
@@ -581,12 +568,7 @@ public class VehicleEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
-		}
-
-		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			if(event instanceof MCVehicleDestroyEvent) {
 				MCVehicleDestroyEvent e = (MCVehicleDestroyEvent) event;
 				Target t = Target.UNKNOWN;
@@ -622,7 +604,7 @@ public class VehicleEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			return false;
 		}
 

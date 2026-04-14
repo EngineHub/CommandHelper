@@ -12,7 +12,6 @@ import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
-import com.laytonsmith.core.Script;
 import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.SelfStatement;
@@ -24,7 +23,6 @@ import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CString;
-import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.IVariableList;
 import com.laytonsmith.core.constructs.Target;
@@ -56,22 +54,6 @@ public abstract class AbstractFunction implements Function {
 	protected AbstractFunction() {
 		//If we have the noprofile annotation, cache that we don't want to profile.
 		shouldProfile = !this.getClass().isAnnotationPresent(noprofile.class);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * By default, we return CVoid.
-	 *
-	 * @param t
-	 * @param env
-	 * @param parent
-	 * @param nodes
-	 * @return
-	 */
-	@Override
-	public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
-		return CVoid.VOID;
 	}
 
 	/**
@@ -204,16 +186,6 @@ public abstract class AbstractFunction implements Function {
 	}
 
 	/**
-	 * By default, we return false, because most functions do not need this
-	 *
-	 * @return
-	 */
-	@Override
-	public boolean useSpecialExec() {
-		return false;
-	}
-
-	/**
 	 * Most functions should show up in the normal documentation. However, if this function shouldn't show up in the
 	 * documentation, it should mark itself with the @hide annotation.
 	 *
@@ -297,7 +269,7 @@ public abstract class AbstractFunction implements Function {
 	}
 
 	@Override
-	public String profileMessage(Mixed... args) {
+	public String profileMessage(Environment env, Mixed... args) {
 		StringBuilder b = new StringBuilder();
 		boolean first = true;
 		for(Mixed ccc : args) {
@@ -305,14 +277,14 @@ public abstract class AbstractFunction implements Function {
 				b.append(", ");
 			}
 			first = false;
-			if(ccc.isInstanceOf(CArray.TYPE)) {
+			if(ccc.isInstanceOf(CArray.TYPE, null, env)) {
 				//Arrays take too long to toString, so we don't want to actually toString them here if
 				//we don't need to.
 				b.append("<arrayNotShown size:").append(((CArray) ccc).size()).append(">");
-			} else if(ccc.isInstanceOf(CClosure.TYPE)) {
+			} else if(ccc.isInstanceOf(CClosure.TYPE, null, env)) {
 				//The toString of a closure is too long, so let's not output them either.
 				b.append("<closureNotShown>");
-			} else if(ccc.isInstanceOf(CString.TYPE)) {
+			} else if(ccc.isInstanceOf(CString.TYPE, null, env)) {
 				String val = ccc.val().replace("\\", "\\\\").replace("'", "\\'");
 				int max = 1000;
 				if(val.length() > max) {

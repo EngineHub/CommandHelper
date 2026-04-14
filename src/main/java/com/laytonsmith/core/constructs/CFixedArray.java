@@ -9,6 +9,7 @@ import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREIndexOverflowException;
 import com.laytonsmith.core.exceptions.CRE.CREUnsupportedOperationException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.natives.interfaces.ArrayAccessSet;
 import com.laytonsmith.core.natives.interfaces.Booleanish;
 import com.laytonsmith.core.natives.interfaces.Mixed;
@@ -43,13 +44,27 @@ public class CFixedArray extends Construct implements
 		return true;
 	}
 
+	/** @deprecated Use {@link #get(String, Target, Environment)} instead. */
+	@Deprecated
 	@Override
 	public Mixed get(String index, Target t) throws ConfigRuntimeException {
-		return null;
+		return get(index, t, null);
 	}
 
 	@Override
+	public Mixed get(String index, Target t, Environment env) throws ConfigRuntimeException {
+		return null;
+	}
+
+	/** @deprecated Use {@link #get(int, Target, Environment)} instead. */
+	@Deprecated
+	@Override
 	public Mixed get(int index, Target t) throws ConfigRuntimeException {
+		return get(index, t, null);
+	}
+
+	@Override
+	public Mixed get(int index, Target t, Environment env) throws ConfigRuntimeException {
 		if(index < 0 || index >= data.length) {
 			throw new CREIndexOverflowException("Index overflows array size", t);
 		}
@@ -60,13 +75,27 @@ public class CFixedArray extends Construct implements
 		return d;
 	}
 
+	/** @deprecated Use {@link #get(Mixed, Target, Environment)} instead. */
+	@Deprecated
 	@Override
 	public Mixed get(Mixed index, Target t) throws ConfigRuntimeException {
-		return get(ArgumentValidation.getInt32(index, t), t);
+		return get(index, t, null);
 	}
 
 	@Override
+	public Mixed get(Mixed index, Target t, Environment env) throws ConfigRuntimeException {
+		return get(ArgumentValidation.getInt32(index, t, env), t, env);
+	}
+
+	/** @deprecated Use {@link #keySet(Environment)} instead. */
+	@Deprecated
+	@Override
 	public Set<Mixed> keySet() {
+		return keySet(null);
+	}
+
+	@Override
+	public Set<Mixed> keySet(Environment env) {
 		Set<Mixed> set = new LinkedHashSet<>(data.length);
 		for(int i = 0; i < data.length; i++) {
 			set.add(new CInt(i, Target.UNKNOWN));
@@ -74,20 +103,27 @@ public class CFixedArray extends Construct implements
 		return set;
 	}
 
-	private void validateSet(Mixed value, Target t) {
-		if(!value.typeof().doesExtend(allowedType)) {
-			throw new CRECastException("Cannot set value of type " + value.typeof().toString() + " into fixed_array of type " + allowedType.toString(), t);
+	private void validateSet(Mixed value, Target t, Environment env) {
+		if(!value.typeof(env).doesExtend(allowedType)) {
+			throw new CRECastException("Cannot set value of type " + value.typeof(env).toString() + " into fixed_array of type " + allowedType.toString(), t);
 		}
 	}
 
+	/** @deprecated Use {@link #set(Mixed, Mixed, Target, Environment)} instead. */
+	@Deprecated
 	@Override
 	public void set(Mixed index, Mixed value, Target t) {
-		int in = ArgumentValidation.getInt32(index, t);
-		set(in, value, t);
+		set(index, value, t, null);
 	}
 
-	public void set(int index, Mixed value, Target t) {
-		validateSet(value, t);
+	@Override
+	public void set(Mixed index, Mixed value, Target t, Environment env) {
+		int in = ArgumentValidation.getInt32(index, t, env);
+		set(in, value, t, env);
+	}
+
+	public void set(int index, Mixed value, Target t, Environment env) {
+		validateSet(value, t, env);
 		if(index >= data.length || index < 0) {
 			throw new CREIndexOverflowException("Index under/overflow in fixed_array", t);
 		}
@@ -104,23 +140,44 @@ public class CFixedArray extends Construct implements
 		return false;
 	}
 
+	/** @deprecated Use {@link #slice(int, int, Target, Environment)} instead. */
+	@Deprecated
 	@Override
 	public Mixed slice(int begin, int end, Target t) {
+		return slice(begin, end, t, null);
+	}
+
+	@Override
+	public Mixed slice(int begin, int end, Target t, Environment env) {
 		throw new CREUnsupportedOperationException("slices are not yet implemented on fixed_array", t);
 	}
 
+	/** @deprecated Use {@link #getBooleanValue(Target, Environment)} instead. */
+	@Deprecated
 	@Override
 	public boolean getBooleanValue(Target t) {
-		return size() > 0;
+		return getBooleanValue(t, null);
 	}
 
 	@Override
+	public boolean getBooleanValue(Target t, Environment env) {
+		return size(env) > 0;
+	}
+
+	/** @deprecated Use {@link #size(Environment)} instead. */
+	@Deprecated
+	@Override
 	public long size() {
+		return size(null);
+	}
+
+	@Override
+	public long size(Environment env) {
 		return data.length;
 	}
 
-	public void fill(Mixed value, Target t) {
-		validateSet(value, t);
+	public void fill(Mixed value, Target t, Environment env) {
+		validateSet(value, t, env);
 		ArrayUtils.fill(data, value);
 	}
 

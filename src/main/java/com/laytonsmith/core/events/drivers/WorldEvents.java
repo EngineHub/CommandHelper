@@ -21,6 +21,7 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.events.AbstractEvent;
 import com.laytonsmith.core.events.BindableEvent;
 import com.laytonsmith.core.events.Driver;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
@@ -40,7 +41,7 @@ public final class WorldEvents {
 	public abstract static class WorldEvent extends AbstractEvent {
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			Map<String, Mixed> r = evaluate_helper(e);
 			r.put("world", new CString(((MCWorldEvent) e).getWorld().getName(), Target.UNKNOWN));
 			return r;
@@ -85,13 +86,8 @@ public final class WorldEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
 		}
 	}
 
@@ -133,13 +129,8 @@ public final class WorldEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
 		}
 	}
 
@@ -181,13 +172,8 @@ public final class WorldEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
 		}
 	}
 
@@ -248,13 +234,13 @@ public final class WorldEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
-			Map<String, Mixed> r = super.evaluate(e);
+		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
+			Map<String, Mixed> r = super.evaluate(e, env);
 			MCStructureGrowEvent event = (MCStructureGrowEvent) e;
 			List<MCBlockState> blocks = event.getBlocks();
 			CArray a = new CArray(Target.UNKNOWN, blocks.size());
 			for(MCBlockState block : blocks) {
-				a.push(ObjectGenerator.GetGenerator().location(block.getLocation(), false), Target.UNKNOWN);
+				a.push(ObjectGenerator.GetGenerator().location(block.getLocation(), false), Target.UNKNOWN, env);
 			}
 			r.put("blocks", a);
 			r.put("location", ObjectGenerator.GetGenerator().location(event.getLocation(), false));
@@ -266,13 +252,8 @@ public final class WorldEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
 		}
 	}
 }

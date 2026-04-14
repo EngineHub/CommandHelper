@@ -7,7 +7,6 @@ import com.laytonsmith.core.Procedure;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.natives.interfaces.Callable;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.objects.ObjectModifier;
@@ -76,9 +75,14 @@ public class ProcedureUsage extends Construct implements Callable {
 	}
 
 	@Override
-	public Mixed executeCallable(Environment environment, Target t, Mixed... values) throws ConfigRuntimeException,
-			ProgramFlowManipulationException, CancelCommandException {
-		return proc.execute(Arrays.asList(values), environment, t);
+	public Mixed executeCallable(Environment env, Target t, Mixed... values) throws ConfigRuntimeException,
+			CancelCommandException {
+		return proc.execute(Arrays.asList(values), env, t);
+	}
+
+	@Override
+	public Callable.PreparedCallable prepareForStack(Environment callerEnv, Target t, Mixed... values) {
+		return proc.prepareCall(Arrays.asList(values), callerEnv, t);
 	}
 
 	@Override

@@ -10,6 +10,9 @@ import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.objects.AccessModifier;
 import java.net.URL;
 import java.util.EnumSet;
@@ -113,20 +116,39 @@ public abstract class AbstractMixedInterfaceRunner implements MixedInterfaceRunn
 	 *
 	 * @return
 	 * @throws IllegalArgumentException If the class isn't public facing.
+	 * @deprecated Use {@link #typeof(Environment)} instead.
 	 */
+	@Deprecated
 	@Override
 	public final CClassType typeof() {
-		return Construct.typeof(this);
+		return typeof(null);
 	}
 
 	@Override
+	public final CClassType typeof(Environment env) {
+		return Construct.typeof(this);
+	}
+
+	/** @deprecated Use {@link #isInstanceOf(CClassType, LeftHandGenericUse, Environment)} instead. */
+	@Deprecated
+	@Override
 	public boolean isInstanceOf(CClassType type) {
-		return Construct.isInstanceof(this, type);
+		return isInstanceOf(type, null, null);
 	}
 
 	@Override
 	public boolean isInstanceOf(Class<? extends Mixed> type) {
 		return Construct.isInstanceof(this, type);
+	}
+
+	@Override
+	public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env) {
+		return Construct.isInstanceof(this, type, env);
+	}
+
+	@Override
+	public GenericParameters getGenericParameters() {
+		return null;
 	}
 
 }

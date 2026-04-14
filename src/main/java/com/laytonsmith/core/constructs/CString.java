@@ -60,8 +60,15 @@ public class CString extends CPrimitive implements Cloneable,
 		return false;
 	}
 
+	/** @deprecated Use {@link #size(Environment)} instead. */
+	@Deprecated
 	@Override
 	public long size() {
+		return size(null);
+	}
+
+	@Override
+	public long size(Environment env) {
 		return val().length();
 	}
 
@@ -70,8 +77,15 @@ public class CString extends CPrimitive implements Cloneable,
 		return false;
 	}
 
+	/** @deprecated Use {@link #slice(int, int, Target, Environment)} instead. */
+	@Deprecated
 	@Override
 	public Mixed slice(int begin, int end, Target t) {
+		return slice(begin, end, t, null);
+	}
+
+	@Override
+	public Mixed slice(int begin, int end, Target t, Environment env) {
 		if(begin > end) {
 			return new CString("", t);
 		}
@@ -87,8 +101,15 @@ public class CString extends CPrimitive implements Cloneable,
 		return super.getQuote();
 	}
 
+	/** @deprecated Use {@link #get(int, Target, Environment)} instead. */
+	@Deprecated
 	@Override
 	public Mixed get(int index, Target t) throws ConfigRuntimeException {
+		return get(index, t, null);
+	}
+
+	@Override
+	public Mixed get(int index, Target t, Environment env) throws ConfigRuntimeException {
 		try {
 			return new CString(this.val().charAt(index), t);
 		} catch (StringIndexOutOfBoundsException e) {
@@ -96,17 +117,31 @@ public class CString extends CPrimitive implements Cloneable,
 		}
 	}
 
+	/** @deprecated Use {@link #get(Mixed, Target, Environment)} instead. */
+	@Deprecated
 	@Override
 	public final Mixed get(Mixed index, Target t) throws ConfigRuntimeException {
-		int i = ArgumentValidation.getInt32(index, t);
-		return get(i, t);
+		return get(index, t, null);
 	}
 
 	@Override
+	public final Mixed get(Mixed index, Target t, Environment env) throws ConfigRuntimeException {
+		int i = ArgumentValidation.getInt32(index, t, env);
+		return get(i, t, env);
+	}
+
+	/** @deprecated Use {@link #get(String, Target, Environment)} instead. */
+	@Deprecated
+	@Override
 	public final Mixed get(String index, Target t) {
+		return get(index, t, null);
+	}
+
+	@Override
+	public final Mixed get(String index, Target t, Environment env) {
 		try {
 			int i = Integer.parseInt(index);
-			return get(i, t);
+			return get(i, t, env);
 		} catch (NumberFormatException e) {
 			throw new CREFormatException("Expecting numerical index, but received " + index, t);
 		}
@@ -117,8 +152,15 @@ public class CString extends CPrimitive implements Cloneable,
 		return false;
 	}
 
+	/** @deprecated Use {@link #keySet(Environment)} instead. */
+	@Deprecated
 	@Override
 	public Set<Mixed> keySet() {
+		return keySet(null);
+	}
+
+	@Override
+	public Set<Mixed> keySet(Environment env) {
 		return new AbstractSet<Mixed>() {
 			@Override
 			public int size() {
@@ -175,8 +217,15 @@ public class CString extends CPrimitive implements Cloneable,
 		return new CString(val(), getTarget());
 	}
 
+	/** @deprecated Use {@link #getBooleanValue(Target, Environment)} instead. */
+	@Deprecated
 	@Override
 	public boolean getBooleanValue(Target t) {
+		return getBooleanValue(t, null);
+	}
+
+	@Override
+	public boolean getBooleanValue(Target t, Environment env) {
 		if(val().equals("false")) {
 			MSLog.GetLogger().e(MSLog.Tags.FALSESTRING, "String \"false\" evaluates as true (non-empty strings are"
 					+ " true). This is most likely not what you meant to do. This warning can globally be disabled"

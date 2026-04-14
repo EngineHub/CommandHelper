@@ -97,7 +97,13 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		this(t, initialCapacity, getArray(items));
 	}
 
+	/** @deprecated Use {@code CArray(Target, int, Environment, Mixed[]} instead. */
+	@Deprecated
 	public CArray(Target t, int initialCapacity, Mixed... items) {
+		this(t, initialCapacity, null, items);
+	}
+
+	public CArray(Target t, int initialCapacity, Environment env, Mixed... items) {
 		super("{}", ConstructType.ARRAY, t);
 		if(initialCapacity == -1) {
 			associativeMode = true;
@@ -117,8 +123,8 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 				for(Mixed item : items) {
 					if(item instanceof CEntry) {
 						Mixed value = ((CEntry) item).construct;
-						associativeArray.put(normalizeConstruct(((CEntry) item).ckey), value);
-						if(value.isInstanceOf(CArray.TYPE)) {
+						associativeArray.put(normalizeConstruct(((CEntry) item).ckey, env), value);
+						if(value.isInstanceOf(CArray.TYPE, null, env)) {
 							((CArray) value).parent = this;
 						}
 					} else {
@@ -134,7 +140,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 							max = -1; //Special case, there are no integer indexes in here yet.
 						}
 						associativeArray.put(Integer.toString(max + 1), item);
-						if(item.isInstanceOf(CArray.TYPE)) {
+						if(item.isInstanceOf(CArray.TYPE, null, env)) {
 							((CArray) item).parent = this;
 						}
 					}
@@ -144,7 +150,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 			if(items != null) {
 				for(Mixed item : items) {
 					array.add(item);
-					if(item.isInstanceOf(CArray.TYPE)) {
+					if(item.isInstanceOf(CArray.TYPE, null, env)) {
 						((CArray) item).parent = this;
 					}
 				}
@@ -182,12 +188,19 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		return c;
 	}
 
+	/** @deprecated Use {@link #asList(Environment)} instead. */
+	@Deprecated
+	public List<Mixed> asList() {
+		return asList(null);
+	}
+
 	/**
 	 * Returns a List based on the array. This is only applicable if this is a normal array.
 	 *
+	 * @param env
 	 * @return
 	 */
-	public List<Mixed> asList() {
+	public List<Mixed> asList(Environment env) {
 		if(inAssociativeMode()) {
 			throw new RuntimeException("asList can only be called on a normal array");
 		} else {
@@ -216,13 +229,33 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	 *
 	 * @param t
 	 * @return
+	 * @deprecated Use {@link #GetAssociativeArray(Target, GenericParameters, Environment)} instead.
 	 */
+	@Deprecated
 	public static CArray GetAssociativeArray(Target t) {
-		return new CArray(t, -1);
+		return GetAssociativeArray(t, null, null);
 	}
 
+	/** @deprecated Use {@link #GetAssociativeArray(Target, GenericParameters, Environment, Mixed[])} instead. */
+	@Deprecated
 	public static CArray GetAssociativeArray(Target t, Mixed[] args) {
-		return new CArray(t, -1, args);
+		return GetAssociativeArray(t, null, null, args);
+	}
+
+	/**
+	 * Returns a new empty CArray that is in associative mode.
+	 *
+	 * @param t
+	 * @param genericParameters
+	 * @param env
+	 * @return
+	 */
+	public static CArray GetAssociativeArray(Target t, GenericParameters genericParameters, Environment env) {
+		return new CArray(t, -1, genericParameters, env);
+	}
+
+	public static CArray GetAssociativeArray(Target t, GenericParameters genericParameters, Environment env, Mixed[] args) {
+		return new CArray(t, -1, env, args);
 	}
 
 	/**
@@ -261,18 +294,31 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		}
 	}
 
+	/** @deprecated Use {@link #push(Mixed, Target, Environment)} instead. */
+	@Deprecated
+	public final void push(Mixed c, Target t) {
+		push(c, t, null);
+	}
+
 	/**
 	 * Pushes a new Construct onto the end of the array.
 	 *
 	 * @param c
 	 * @param t
+	 * @param env
 	 */
-	public final void push(Mixed c, Target t) {
-		push(c, null, t);
+	public final void push(Mixed c, Target t, Environment env) {
+		push(c, null, t, env);
 	}
 
 	public final void push(String s) {
-		push(new CString(s, Target.UNKNOWN), Target.UNKNOWN);
+		push(new CString(s, Target.UNKNOWN), Target.UNKNOWN, null);
+	}
+
+	/** @deprecated Use {@link #push(Mixed, Integer, Target, Environment)} instead. */
+	@Deprecated
+	public void push(Mixed c, Integer index, Target t) throws IllegalArgumentException, IndexOutOfBoundsException {
+		push(c, index, t, null);
 	}
 
 	/**
@@ -282,10 +328,13 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	 * should use {@link #set} anyways for an associative array.
 	 *
 	 * @param c The Construct to add to the array
+	 * @param index The index to push on. May be null.
+	 * @param t The code target
+	 * @param env The environment
 	 * @throws IllegalArgumentException If index is not null, and this is an associative array.
 	 * @throws IndexOutOfBoundsException If the index is not null, and the index specified is out of range.
 	 */
-	public void push(Mixed c, Integer index, Target t) throws IllegalArgumentException, IndexOutOfBoundsException {
+	public void push(Mixed c, Integer index, Target t, Environment env) throws IllegalArgumentException, IndexOutOfBoundsException {
 		if(!associativeMode) {
 			if(index != null) {
 				array.add(index, c);
@@ -311,20 +360,28 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 				associativeArray.put(Integer.toString(max + 1), c);
 			}
 		}
-		if(c.isInstanceOf(CArray.TYPE)) {
+		if(c.isInstanceOf(CArray.TYPE, null, env)) {
 			((CArray) c).parent = this;
 		}
 		setDirty();
+	}
+
+	/** @deprecated Use {@link #keySet(Environment)} instead. */
+	@Deprecated
+	@Override
+	public Set<Mixed> keySet() {
+		return keySet(null);
 	}
 
 	/**
 	 * Returns the key set for this array. If it's an associative array, it simply returns the key set of the map,
 	 * otherwise it generates a set of CInts from 0 to size-1, and returns that.
 	 *
+	 * @param env
 	 * @return
 	 */
 	@Override
-	public Set<Mixed> keySet() {
+	public Set<Mixed> keySet(Environment env) {
 		Set<Mixed> set;
 		if(!associativeMode) {
 			set = new LinkedHashSet<>(array.size());
@@ -367,25 +424,34 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		array = null; // null out the original array container so it can be GC'd
 	}
 
+	/** @deprecated Use {@link #set(Mixed, Mixed, Target, Environment)} instead. */
+	@Deprecated
+	public void set(Mixed index, Mixed c, Target t) {
+		set(index, c, t, null);
+	}
+
 	/**
+	 * Sets the value at the given index.
 	 *
-	 * @param index
-	 * @param c
+	 * @param index The index. Should be either an int or a string.
+	 * @param c The element to set.
+	 * @param t The code target.
+	 * @param env The environment.
 	 */
 	@Override
-	public void set(Mixed index, Mixed c, Target t) {
+	public void set(Mixed index, Mixed c, Target t, Environment env) {
 		if(!associativeMode) {
 			if(index instanceof CNull) {
 				// Invalid normal array index
 				setAssociative();
 			} else {
 				try {
-					int indx = ArgumentValidation.getInt32(index, t);
+					int indx = ArgumentValidation.getInt32(index, t, env);
 					if(indx > nextIndex || indx < 0) {
 						// Out of range
 						setAssociative();
 					} else if(indx == nextIndex) {
-						this.push(c, t);
+						this.push(c, t, env);
 					} else {
 						array.set(indx, c);
 					}
@@ -396,49 +462,80 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 			}
 		}
 		if(associativeMode) {
-			associativeArray.put(normalizeConstruct(index), c);
+			associativeArray.put(normalizeConstruct(index, env), c);
 		}
-		if(c.isInstanceOf(CArray.TYPE)) {
+		if(c.isInstanceOf(CArray.TYPE, null, env)) {
 			((CArray) c).parent = this;
 		}
 		setDirty();
 	}
 
+	/** @deprecated Use {@link #set(int, Mixed, Target, Environment)} instead. */
+	@Deprecated
 	public final void set(int index, Mixed c, Target t) {
-		this.set(new CInt(index, t), c, t);
+		this.set(index, c, t, null);
+	}
+
+	public final void set(int index, Mixed c, Target t, Environment env) {
+		this.set(new CInt(index, t), c, t, env);
 	}
 
 	/* Shortcuts */
+	/** @deprecated Use {@link #set(String, Mixed, Target, Environment)} instead. */
+	@Deprecated
 	public final void set(String index, Mixed c, Target t) {
-		set(new CString(index, t), c, t);
+		set(index, c, t, null);
 	}
 
+	public final void set(String index, Mixed c, Target t, Environment env) {
+		set(new CString(index, t), c, t, env);
+	}
+
+	/** @deprecated Use {@link #set(String, String, Target, Environment)} instead. */
+	@Deprecated
 	public final void set(String index, String value, Target t) {
-		set(index, new CString(value, t), t);
+		set(index, value, t, null);
 	}
 
+	public final void set(String index, String value, Target t, Environment env) {
+		set(index, new CString(value, t), t, env);
+	}
+
+	/** @deprecated Use {@link #set(String, String, Environment)} instead. */
+	@Deprecated
 	public final void set(String index, String value) {
-		set(index, value, Target.UNKNOWN);
+		set(index, value, (Environment) null);
+	}
+
+	public final void set(String index, String value, Environment env) {
+		set(index, value, Target.UNKNOWN, env);
 	}
 
 	public final void set(String index, double value) {
-		set(index, new CDouble(value, Target.UNKNOWN), Target.UNKNOWN);
+		set(index, new CDouble(value, Target.UNKNOWN), Target.UNKNOWN, null);
 	}
 
 	public final void set(String index, long value) {
-		set(index, new CInt(value, Target.UNKNOWN), Target.UNKNOWN);
+		set(index, new CInt(value, Target.UNKNOWN), Target.UNKNOWN, null);
+	}
+
+	/** @deprecated Use {@link #get(Mixed, Target, Environment)} instead. */
+	@Deprecated
+	@Override
+	public Mixed get(Mixed index, Target t) {
+		return get(index, t, null);
 	}
 
 	@Override
-	public Mixed get(Mixed index, Target t) {
+	public Mixed get(Mixed index, Target t, Environment env) {
 		if(!associativeMode) {
 			try {
-				return array.get(ArgumentValidation.getInt32(index, t));
+				return array.get(ArgumentValidation.getInt32(index, t, env));
 			} catch (IndexOutOfBoundsException e) {
 				throw new CREIndexOverflowException("The element at index \"" + index.val() + "\" does not exist", t, e);
 			}
 		} else {
-			Mixed val = associativeArray.get(normalizeConstruct(index));
+			Mixed val = associativeArray.get(normalizeConstruct(index, env));
 			if(val != null) {
 				if(val instanceof CEntry) {
 					return ((CEntry) val).construct();
@@ -453,18 +550,41 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		}
 	}
 
+	/** @deprecated Use {@link #get(Mixed, Target, Environment)} instead. */
+	@Deprecated
 	public final Mixed get(long index, Target t) {
-		return this.get(new CInt(index, t), t);
+		return this.get(new CInt(index, t), t, null);
 	}
 
+	public final Mixed get(long index, Target t, Environment env) {
+		if((int) index != index) {
+			throw new CREIndexOverflowException("The element at index \"" + index + "\" does not exist", t);
+		}
+		return this.get(new CInt(index, t), t, env);
+	}
+
+	/** @deprecated Use {@link #get(int, Target, Environment)} instead. */
+	@Deprecated
 	@Override
 	public final Mixed get(int index, Target t) {
-		return this.get(new CInt(index, t), t);
+		return this.get(new CInt(index, t), t, null);
 	}
 
 	@Override
+	public final Mixed get(int index, Target t, Environment env) {
+		return this.get(new CInt(index, t), t, env);
+	}
+
+	/** @deprecated Use {@link #get(String, Target, Environment)} instead. */
+	@Deprecated
+	@Override
 	public final Mixed get(String index, Target t) {
-		return this.get(new CString(index, t), t);
+		return this.get(new CString(index, t), t, null);
+	}
+
+	@Override
+	public final Mixed get(String index, Target t, Environment env) {
+		return this.get(new CString(index, t), t, env);
 	}
 
 	public boolean containsKey(String c) {
@@ -499,13 +619,20 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		return contains(new CString(Integer.toString(i), Target.UNKNOWN));
 	}
 
+	/** @deprecated Use {@link #indexesOf(Mixed, Environment)} instead. */
+	@Deprecated
+	public CArray indexesOf(Mixed value) {
+		return indexesOf(value, null);
+	}
+
 	/**
 	 * Returns an array of the keys of all the values that are equal to the value specified
 	 *
-	 * @param value
-	 * @return
+	 * @param value The value to find the index(es) of
+	 * @param env The environment
+	 * @return An array of keys where the corresponding value is equal to the value specified.
 	 */
-	public CArray indexesOf(Mixed value) {
+	public CArray indexesOf(Mixed value, Environment env) {
 		CArray ret = new CArray(Target.UNKNOWN);
 		if(associativeMode) {
 			for(String key : associativeArray.keySet()) {
@@ -526,7 +653,8 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	@Override
 	public String val() {
 		if(valueDirty) {
-			getString(new Stack<>(), this.getTarget());
+			// TODO: Hmmmmmm. Might need env here.
+			getString(new Stack<>(), this.getTarget(), null);
 		}
 		return mutVal;
 	}
@@ -544,23 +672,23 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	 * @param t
 	 * @return
 	 */
-	protected String getString(Stack<CArray> arrays, Target t) {
+	protected String getString(Stack<CArray> arrays, Target t, Environment env) {
 		if(!valueDirty) {
 			return mutVal;
 		}
 		StringBuilder b = new StringBuilder();
 		b.append("{");
 		if(!inAssociativeMode()) {
-			for(int i = 0; i < this.size(); i++) {
-				Mixed value = this.get(i, t);
+			for(int i = 0; i < this.size(env); i++) {
+				Mixed value = this.get(i, t, env);
 				String v;
-				if(value.isInstanceOf(CArray.TYPE)) {
+				if(value.isInstanceOf(CArray.TYPE, null, env)) {
 					if(arrays.contains(value)) {
 						//Check for recursion
 						v = "*recursion*";
 					} else {
 						arrays.add(((CArray) value));
-						v = ((CArray) value).getString(arrays, t);
+						v = ((CArray) value).getString(arrays, t, env);
 						arrays.pop();
 					}
 				} else {
@@ -579,16 +707,16 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 				}
 				first = false;
 				String v;
-				if(this.get(key, t) == null) {
+				if(this.get(key, t, env) == null) {
 					v = "null";
 				} else {
-					Mixed value = this.get(key, t);
-					if(value.isInstanceOf(CArray.TYPE)) {
+					Mixed value = this.get(key, t, env);
+					if(value.isInstanceOf(CArray.TYPE, null, env)) {
 						if(arrays.contains(value)) {
 							v = "*recursion*";
 						} else {
 							arrays.add(((CArray) value));
-							v = ((CArray) value).getString(arrays, t);
+							v = ((CArray) value).getString(arrays, t, env);
 						}
 					} else {
 						v = value.val();
@@ -603,8 +731,15 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		return mutVal;
 	}
 
+	/** @deprecated Use {@link #size(Environment)} instead. */
+	@Deprecated
 	@Override
 	public long size() {
+		return size(null);
+	}
+
+	@Override
+	public long size(Environment env) {
 		if(associativeMode) {
 			return associativeArray.size();
 		} else {
@@ -632,11 +767,23 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		return clone;
 	}
 
+	/** @deprecated Use {@link #deepClone(Target, Environment)} instead. */
+	@Deprecated
 	public CArray deepClone(Target t) {
-		return deepClone(this, t, new ArrayList<>());
+		return deepClone(t, null);
 	}
 
+	public CArray deepClone(Target t, Environment env) {
+		return deepClone(this, t, new ArrayList<>(), env);
+	}
+
+	/** @deprecated Use {@link #deepClone(CArray, Target, ArrayList, Environment)} instead. */
+	@Deprecated
 	protected CArray deepClone(CArray array, Target t, ArrayList<CArray[]> cloneRefs) {
+		return deepClone(array, t, cloneRefs, null);
+	}
+
+	protected CArray deepClone(CArray array, Target t, ArrayList<CArray[]> cloneRefs, Environment env) {
 
 		// Return the clone reference if this array has been cloned before (both clones will have the same reference).
 		for(CArray[] refCouple : cloneRefs) {
@@ -646,69 +793,90 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		}
 
 		// Create the clone to put array in and add it to the cloneRefs list.
-		CArray clone = new CArray(t, (int) array.size());
+		CArray clone = new CArray(t, (int) array.size(env));
 		clone.associativeMode = array.associativeMode;
 		cloneRefs.add(new CArray[]{array, clone});
 
 		// Iterate over the array, recursively calling this method to perform a deep clone.
-		for(Mixed key : array.keySet()) {
-			Mixed value = array.get(key, t);
-			if(value.isInstanceOf(CArray.TYPE)) {
-				value = deepClone((CArray) value, t, cloneRefs);
+		for(Mixed key : array.keySet(env)) {
+			Mixed value = array.get(key, t, env);
+			if(value.isInstanceOf(CArray.TYPE, null, env)) {
+				value = deepClone((CArray) value, t, cloneRefs, env);
 			}
-			clone.set(key, value, t);
+			clone.set(key, value, t, env);
 		}
 		return clone;
 	}
 
-	private String normalizeConstruct(Mixed c) {
-		if(c.isInstanceOf(CArray.TYPE)) {
+	private String normalizeConstruct(Mixed c, Environment env) {
+		if(c.isInstanceOf(CArray.TYPE, null, env)) {
 			throw new CRECastException("Arrays cannot be used as the key in an associative array", c.getTarget());
-		} else if(c.isInstanceOf(CString.TYPE) || c.isInstanceOf(CInt.TYPE)) {
+		} else if(c.isInstanceOf(CString.TYPE, null, env) || c.isInstanceOf(CInt.TYPE, null, env)) {
 			return c.val();
 		} else if(c instanceof CNull) {
 			return "";
-		} else if(c.isInstanceOf(CBoolean.TYPE)) {
+		} else if(c instanceof CBoolean) {
 			if(((CBoolean) c).getBoolean()) {
 				return "1";
 			} else {
 				return "0";
 			}
 		} else if(c instanceof CLabel) {
-			return normalizeConstruct(((CLabel) c).cVal());
+			return normalizeConstruct(((CLabel) c).cVal(), env);
 		} else {
 			return c.val();
 		}
 	}
 
+	/** @deprecated Use {@link #remove(int, Environment)} instead. */
+	@Deprecated
+	public Mixed remove(int i) {
+		return remove(i, null);
+	}
+
 	/**
 	 * Removes the value at the specified integer key.
 	 *
-	 * @param i
-	 * @return
+	 * @param i The index to remove at
+	 * @param env The environment
+	 * @return The value that was removed
 	 */
-	public Mixed remove(int i) {
-		return remove(new CInt(i, Target.UNKNOWN));
+	public Mixed remove(int i, Environment env) {
+		return remove(new CInt(i, Target.UNKNOWN), env);
+	}
+
+	/** @deprecated Use {@link #remove(String, Environment)} instead. */
+	@Deprecated
+	public Mixed remove(String s) {
+		return remove(s, null);
 	}
 
 	/**
 	 * Removes the value at the specified string key.
 	 *
-	 * @param s
-	 * @return
+	 * @param s The index to remove at
+	 * @param env The environment
+	 * @return The value that was removed
 	 */
-	public Mixed remove(String s) {
-		return remove(new CString(s, Target.UNKNOWN));
+	public Mixed remove(String s, Environment env) {
+		return remove(new CString(s, Target.UNKNOWN), env);
+	}
+
+	/** @deprecated Use {@link #remove(Mixed, Environment)} instead. */
+	@Deprecated
+	public Mixed remove(Mixed construct) {
+		return remove(construct, null);
 	}
 
 	/**
 	 * Removes the value at the specified key
 	 *
 	 * @param construct The value to remove
+	 * @param env The environment
 	 * @return The removed value, or CNull if nothing was removed.
 	 */
-	public Mixed remove(Mixed construct) {
-		String c = normalizeConstruct(construct);
+	public Mixed remove(Mixed construct, Environment env) {
+		String c = normalizeConstruct(construct, env);
 		Mixed ret;
 		if(!associativeMode) {
 			try {
@@ -757,14 +925,21 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		setDirty();
 	}
 
+	/** @deprecated Use {@link #createNew(Target, Environment)} instead. */
+	@Deprecated
+	public CArray createNew(Target t) {
+		return createNew(t, null);
+	}
+
 	/**
 	 * Creates a new, empty array, with the same type. Note to subclasses: By default, this method expects a constructor
 	 * that accepts a {@link Target}. If this assumption is not valid, you may override this method as needed.
 	 *
-	 * @param t
-	 * @return
+	 * @param t The code target
+	 * @param env The environment
+	 * @return A new empty array
 	 */
-	public CArray createNew(Target t) {
+	public CArray createNew(Target t, Environment env) {
 		try {
 			Constructor<CArray> con = (Constructor<CArray>) this.getClass().getConstructor(Target.class);
 			try {
@@ -773,7 +948,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 				throw new RuntimeException(ex);
 			}
 		} catch (NoSuchMethodException ex) {
-			throw new RuntimeException(this.typeof() + " does not support creating a new value.");
+			throw new RuntimeException(this.typeof(env) + " does not support creating a new value.");
 		} catch (SecurityException ex) {
 			throw new RuntimeException(ex);
 		}
@@ -821,9 +996,16 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		return true;
 	}
 
+	/** @deprecated Use {@link #slice(int, int, Target, Environment)} instead. */
+	@Deprecated
 	@Override
 	public Mixed slice(int begin, int end, Target t) {
-		return new ArrayHandling.array_get().exec(t, null, new CSlice(begin, end, t));
+		return slice(begin, end, t, null);
+	}
+
+	@Override
+	public Mixed slice(int begin, int end, Target t, Environment env) {
+		return new ArrayHandling.array_get().exec(t, env, null, new CSlice(begin, end, t));
 	}
 
 	@Override
@@ -866,7 +1048,13 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		STRING_IC
 	}
 
+	/** @deprecated Use {@link #sort(ArraySortType, Environment)} instead. */
+	@Deprecated
 	public void sort(final ArraySortType sort) {
+		sort(sort, null);
+	}
+
+	public void sort(final ArraySortType sort, Environment env) {
 		if(this.associativeMode) {
 			array = new ArrayList<>(associativeArray.values());
 			this.associativeArray.clear();
@@ -887,12 +1075,12 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 					} else {
 						c = o2;
 					}
-					if(c.isInstanceOf(CArray.TYPE)) {
+					if(c.isInstanceOf(CArray.TYPE, null, env)) {
 						throw new CRECastException("Cannot sort an array of arrays.", CArray.this.getTarget());
 					}
-					if(!(c.isInstanceOf(CBoolean.TYPE) || c.isInstanceOf(CString.TYPE) || c.isInstanceOf(CInt.TYPE)
-							|| c.isInstanceOf(CDouble.TYPE) || c instanceof CNull || c.isInstanceOf(CClassType.TYPE))) {
-						throw new CREFormatException("Unsupported type being sorted: " + c.typeof(), CArray.this.getTarget());
+					if(!(c instanceof CBoolean || c.isInstanceOf(CString.TYPE, null, env) || c.isInstanceOf(CInt.TYPE, null, env)
+							|| c.isInstanceOf(CDouble.TYPE, null, env) || c instanceof CNull || c instanceof CClassType)) {
+						throw new CREFormatException("Unsupported type being sorted: " + c.typeof(env), CArray.this.getTarget());
 					}
 				}
 				if(o1 instanceof CNull || o2 instanceof CNull) {
@@ -904,12 +1092,12 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 						return o1.val().compareTo("");
 					}
 				}
-				if(o1.isInstanceOf(CBoolean.TYPE) || o2.isInstanceOf(CBoolean.TYPE)) {
-					if(ArgumentValidation.getBooleanish(o1, Target.UNKNOWN) == ArgumentValidation.getBooleanish(o2, Target.UNKNOWN)) {
+				if(o1 instanceof CBoolean || o2 instanceof CBoolean) {
+					if(ArgumentValidation.getBooleanish(o1, Target.UNKNOWN, env) == ArgumentValidation.getBooleanish(o2, Target.UNKNOWN, env)) {
 						return 0;
 					} else {
-						int oo1 = ArgumentValidation.getBooleanish(o1, Target.UNKNOWN) ? 1 : 0;
-						int oo2 = ArgumentValidation.getBooleanish(o2, Target.UNKNOWN) ? 1 : 0;
+						int oo1 = ArgumentValidation.getBooleanish(o1, Target.UNKNOWN, env) ? 1 : 0;
+						int oo2 = ArgumentValidation.getBooleanish(o2, Target.UNKNOWN, env) ? 1 : 0;
 						return (oo1 < oo2) ? -1 : 1;
 					}
 				}
@@ -923,13 +1111,13 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 			}
 
 			public int compareRegular(Mixed o1, Mixed o2) {
-				if(ArgumentValidation.getBooleanObject(new DataHandling.is_numeric().exec(Target.UNKNOWN, null, o1), Target.UNKNOWN)
-						&& ArgumentValidation.getBooleanObject(new DataHandling.is_numeric().exec(Target.UNKNOWN, null, o2), Target.UNKNOWN)) {
+				if(ArgumentValidation.getBooleanObject(new DataHandling.is_numeric().exec(Target.UNKNOWN, null, null, o1), Target.UNKNOWN, env)
+						&& ArgumentValidation.getBooleanObject(new DataHandling.is_numeric().exec(Target.UNKNOWN, null, null, o2), Target.UNKNOWN, env)) {
 					return compareNumeric(o1, o2);
-				} else if(ArgumentValidation.getBooleanObject(new DataHandling.is_numeric().exec(Target.UNKNOWN, null, o1), Target.UNKNOWN)) {
+				} else if(ArgumentValidation.getBooleanObject(new DataHandling.is_numeric().exec(Target.UNKNOWN, null, null, o1), Target.UNKNOWN, env)) {
 					//The first is a number, the second is a string
 					return -1;
-				} else if(ArgumentValidation.getBooleanObject(new DataHandling.is_numeric().exec(Target.UNKNOWN, null, o2), Target.UNKNOWN)) {
+				} else if(ArgumentValidation.getBooleanObject(new DataHandling.is_numeric().exec(Target.UNKNOWN, null, null, o2), Target.UNKNOWN, env)) {
 					//The second is a number, the first is a string
 					return 1;
 				} else {
@@ -939,8 +1127,8 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 			}
 
 			public int compareNumeric(Mixed o1, Mixed o2) {
-				double d1 = ArgumentValidation.getNumber(o1, o1.getTarget());
-				double d2 = ArgumentValidation.getNumber(o2, o2.getTarget());
+				double d1 = ArgumentValidation.getNumber(o1, o1.getTarget(), env);
+				double d2 = ArgumentValidation.getNumber(o2, o2.getTarget(), env);
 				return Double.compare(d1, d2);
 			}
 
@@ -951,8 +1139,14 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		this.setDirty();
 	}
 
+	/** @deprecated Use {@link #isEmpty(Environment)} instead. */
+	@Deprecated
 	public boolean isEmpty() {
-		return size() == 0;
+		return isEmpty(null);
+	}
+
+	public boolean isEmpty(Environment env) {
+		return size(env) == 0;
 	}
 
 	/**
@@ -986,9 +1180,16 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 			ArrayAccessSet.TYPE};
 	}
 
+	/** @deprecated Use {@link #getBooleanValue(Target, Environment)} instead. */
+	@Deprecated
 	@Override
 	public boolean getBooleanValue(Target t) {
-		return size() > 0;
+		return getBooleanValue(t, null);
+	}
+
+	@Override
+	public boolean getBooleanValue(Target t, Environment env) {
+		return size(env) > 0;
 	}
 
 }

@@ -38,15 +38,14 @@ import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.AbstractEvent;
 import com.laytonsmith.core.events.BindableEvent;
 import com.laytonsmith.core.events.BoundEvent;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
-import com.laytonsmith.core.exceptions.CRE.CREBindException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
-import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.core.functions.InventoryManagement;
@@ -102,7 +101,7 @@ public class InventoryEvents {
 			Map<String, Mixed> prefilter = event.getPrefilter();
 			if(prefilter.containsKey("slotitem")) {
 				Mixed type = prefilter.get("slotitem");
-				if(type.isInstanceOf(CString.TYPE) && type.val().contains(":") || ArgumentValidation.isNumber(type)) {
+				if(type.isInstanceOf(CString.TYPE, null, event.getEnvironment()) && type.val().contains(":") || ArgumentValidation.isNumber(type)) {
 					MCItemStack is = Static.ParseItemNotation(null, prefilter.get("slotitem").val(), 1, event.getTarget());
 					prefilter.put("slotitem", new CString(is.getType().getName(), event.getTarget()));
 					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The item notation format for the \"slotitem\" prefilter"
@@ -134,12 +133,7 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			throw new CREBindException("Unsupported Operation", Target.UNKNOWN);
-		}
-
-		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			if(event instanceof MCInventoryClickEvent) {
 				MCInventoryClickEvent e = (MCInventoryClickEvent) event;
 				Map<String, Mixed> map = evaluate_helper(event);
@@ -148,7 +142,7 @@ public class InventoryEvents {
 				map.put("player", new CString(e.getWhoClicked().getName(), t));
 				CArray viewers = new CArray(t);
 				for(MCHumanEntity viewer : e.getViewers()) {
-					viewers.push(new CString(viewer.getName(), t), t);
+					viewers.push(new CString(viewer.getName(), t), t, env);
 				}
 				map.put("viewers", viewers);
 
@@ -168,10 +162,10 @@ public class InventoryEvents {
 				map.put("slottype", new CString(e.getSlotType().name(), t));
 				map.put("slotitem", ObjectGenerator.GetGenerator().item(e.getCurrentItem(), t));
 
-				CArray items = CArray.GetAssociativeArray(t);
+				CArray items = CArray.GetAssociativeArray(t, null, env);
 				MCInventory inv = e.getInventory();
 				for(int i = 0; i < inv.getSize(); i++) {
-					items.set(i, ObjectGenerator.GetGenerator().item(inv.getItem(i), t), t);
+					items.set(i, ObjectGenerator.GetGenerator().item(inv.getItem(i), t), t, env);
 				}
 				map.put("inventory", items);
 				map.put("inventorytype", new CString(inv.getType().name(), t));
@@ -189,16 +183,16 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			if(event instanceof MCInventoryClickEvent) {
 				MCInventoryClickEvent e = (MCInventoryClickEvent) event;
 
 				if(key.equalsIgnoreCase("slotitem")) {
-					e.setCurrentItem(ObjectGenerator.GetGenerator().item(value, value.getTarget()));
+					e.setCurrentItem(ObjectGenerator.GetGenerator().item(value, value.getTarget(), env));
 					return true;
 				}
 				if(key.equalsIgnoreCase("cursoritem")) {
-					e.setCursor(ObjectGenerator.GetGenerator().item(value, value.getTarget()));
+					e.setCursor(ObjectGenerator.GetGenerator().item(value, value.getTarget(), env));
 					return true;
 				}
 			}
@@ -244,7 +238,7 @@ public class InventoryEvents {
 			Map<String, Mixed> prefilter = event.getPrefilter();
 			if(prefilter.containsKey("cursoritem")) {
 				Mixed type = prefilter.get("cursoritem");
-				if(type.isInstanceOf(CString.TYPE) && type.val().contains(":") || ArgumentValidation.isNumber(type)) {
+				if(type.isInstanceOf(CString.TYPE, null, event.getEnvironment()) && type.val().contains(":") || ArgumentValidation.isNumber(type)) {
 					MCItemStack is = Static.ParseItemNotation(null, prefilter.get("cursoritem").val(), 1, event.getTarget());
 					prefilter.put("cursoritem", new CString(is.getType().getName(), event.getTarget()));
 					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The item notation format for the \"cursoritem\" prefilter"
@@ -274,12 +268,7 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
-		}
-
-		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			if(event instanceof MCInventoryDragEvent) {
 				MCInventoryDragEvent e = (MCInventoryDragEvent) event;
 				Map<String, Mixed> map = evaluate_helper(event);
@@ -290,28 +279,28 @@ public class InventoryEvents {
 
 				CArray slots = new CArray(Target.UNKNOWN);
 				for(Integer slot : e.getInventorySlots()) {
-					slots.push(new CInt(slot.intValue(), Target.UNKNOWN), Target.UNKNOWN);
+					slots.push(new CInt(slot.intValue(), Target.UNKNOWN), Target.UNKNOWN, env);
 				}
 				map.put("slots", slots);
 
 				CArray rawSlots = new CArray(Target.UNKNOWN);
 				for(Integer slot : e.getRawSlots()) {
-					rawSlots.push(new CInt(slot.intValue(), Target.UNKNOWN), Target.UNKNOWN);
+					rawSlots.push(new CInt(slot.intValue(), Target.UNKNOWN), Target.UNKNOWN, env);
 				}
 				map.put("rawslots", rawSlots);
 
-				CArray newItems = CArray.GetAssociativeArray(Target.UNKNOWN);
+				CArray newItems = CArray.GetAssociativeArray(Target.UNKNOWN, null, env);
 				for(Map.Entry<Integer, MCItemStack> ni : e.getNewItems().entrySet()) {
 					Integer key = ni.getKey();
 					MCItemStack value = ni.getValue();
-					newItems.set(key.intValue(), ObjectGenerator.GetGenerator().item(value, Target.UNKNOWN), Target.UNKNOWN);
+					newItems.set(key.intValue(), ObjectGenerator.GetGenerator().item(value, Target.UNKNOWN), Target.UNKNOWN, env);
 				}
 				map.put("newitems", newItems);
 
-				CArray items = CArray.GetAssociativeArray(Target.UNKNOWN);
+				CArray items = CArray.GetAssociativeArray(Target.UNKNOWN, null, env);
 				MCInventory inv = e.getInventory();
 				for(int i = 0; i < inv.getSize(); i++) {
-					items.set(i, ObjectGenerator.GetGenerator().item(inv.getItem(i), Target.UNKNOWN), Target.UNKNOWN);
+					items.set(i, ObjectGenerator.GetGenerator().item(inv.getItem(i), Target.UNKNOWN), Target.UNKNOWN, env);
 				}
 				map.put("inventory", items);
 				map.put("inventorytype", new CString(inv.getType().name(), Target.UNKNOWN));
@@ -331,12 +320,12 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			if(event instanceof MCInventoryDragEvent) {
 				MCInventoryDragEvent e = (MCInventoryDragEvent) event;
 
 				if(key.equalsIgnoreCase("cursoritem")) {
-					e.setCursor(ObjectGenerator.GetGenerator().item(value, value.getTarget()));
+					e.setCursor(ObjectGenerator.GetGenerator().item(value, value.getTarget(), env));
 					return true;
 				}
 			}
@@ -384,12 +373,7 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
-		}
-
-		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			if(event instanceof MCInventoryOpenEvent) {
 				MCInventoryOpenEvent e = (MCInventoryOpenEvent) event;
 				Map<String, Mixed> map = evaluate_helper(event);
@@ -397,16 +381,16 @@ public class InventoryEvents {
 
 				map.put("player", new CString(e.getPlayer().getName(), t));
 
-				CArray items = CArray.GetAssociativeArray(t);
+				CArray items = CArray.GetAssociativeArray(t, null, env);
 				MCInventory inv = e.getInventory();
 				for(int i = 0; i < inv.getSize(); i++) {
 					Mixed c = ObjectGenerator.GetGenerator().item(inv.getItem(i), t);
-					items.set(i, c, t);
+					items.set(i, c, t, env);
 				}
 				map.put("inventory", items);
 
 				map.put("inventorytype", new CString(inv.getType().name(), t));
-				map.put("holder", InventoryManagement.GetInventoryHolder(inv, t));
+				map.put("holder", InventoryManagement.GetInventoryHolder(inv, t, env));
 				map.put("virtual", CBoolean.get(inv.getHolder() instanceof MCVirtualInventoryHolder));
 
 				return map;
@@ -421,7 +405,7 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			return false;
 		}
 
@@ -466,12 +450,7 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
-		}
-
-		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			if(event instanceof MCInventoryCloseEvent) {
 				MCInventoryCloseEvent e = (MCInventoryCloseEvent) event;
 				Map<String, Mixed> map = evaluate_helper(event);
@@ -479,16 +458,16 @@ public class InventoryEvents {
 
 				map.put("player", new CString(e.getPlayer().getName(), t));
 
-				CArray items = CArray.GetAssociativeArray(t);
+				CArray items = CArray.GetAssociativeArray(t, null, env);
 				MCInventory inv = e.getInventory();
 				for(int i = 0; i < inv.getSize(); i++) {
 					Mixed c = ObjectGenerator.GetGenerator().item(inv.getItem(i), t);
-					items.set(i, c, t);
+					items.set(i, c, t, env);
 				}
 				map.put("inventory", items);
 
 				map.put("inventorytype", new CString(inv.getType().name(), t));
-				map.put("holder", InventoryManagement.GetInventoryHolder(inv, t));
+				map.put("holder", InventoryManagement.GetInventoryHolder(inv, t, env));
 				map.put("virtual", CBoolean.get(inv.getHolder() instanceof MCVirtualInventoryHolder));
 
 				return map;
@@ -503,7 +482,7 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			return false;
 		}
 
@@ -547,12 +526,7 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
-		}
-
-		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			if(event instanceof MCEnchantItemEvent) {
 				MCEnchantItemEvent e = (MCEnchantItemEvent) event;
 				Map<String, Mixed> map = evaluate_helper(event);
@@ -581,17 +555,17 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			if(event instanceof MCEnchantItemEvent) {
 				MCEnchantItemEvent e = (MCEnchantItemEvent) event;
 
 				if(key.equalsIgnoreCase("levels")) {
-					e.setExpLevelCost(ArgumentValidation.getInt32(value, value.getTarget()));
+					e.setExpLevelCost(ArgumentValidation.getInt32(value, value.getTarget(), env));
 					return true;
 				}
 
 				if(key.equalsIgnoreCase("item")) {
-					e.setItem(ObjectGenerator.GetGenerator().item(value, value.getTarget()));
+					e.setItem(ObjectGenerator.GetGenerator().item(value, value.getTarget(), env));
 					return true;
 				}
 
@@ -638,12 +612,7 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
-		}
-
-		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			if(event instanceof MCPrepareItemEnchantEvent) {
 				Target t = Target.UNKNOWN;
 				MCPrepareItemEnchantEvent e = (MCPrepareItemEnchantEvent) event;
@@ -657,7 +626,7 @@ public class InventoryEvents {
 				CArray expCostsCArray = new CArray(t);
 				MCEnchantmentOffer[] offers = e.getOffers();
 				for(MCEnchantmentOffer offer : offers) {
-					expCostsCArray.push(new CInt(offer.getCost(), t), t);
+					expCostsCArray.push(new CInt(offer.getCost(), t), t, env);
 				}
 				map.put("expcosts", expCostsCArray);
 
@@ -675,26 +644,26 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			if(event instanceof MCPrepareItemEnchantEvent) {
 				Target t = value.getTarget();
 				MCPrepareItemEnchantEvent e = (MCPrepareItemEnchantEvent) event;
 
 				if(key.equalsIgnoreCase("item")) {
-					e.setItem(ObjectGenerator.GetGenerator().item(value, t));
+					e.setItem(ObjectGenerator.GetGenerator().item(value, t, env));
 					return true;
 				}
 
 				if(key.equalsIgnoreCase("expcosts")) {
-					if(value.isInstanceOf(CArray.TYPE)) {
+					if(value.isInstanceOf(CArray.TYPE, null, env)) {
 						CArray cExpCosts = (CArray) value;
 						if(!cExpCosts.inAssociativeMode()) {
 							MCEnchantmentOffer[] offers = e.getOffers();
 
 							for(int i = 0; i <= 2; i++) {
 								MCEnchantmentOffer offer = offers[i];
-								Mixed cost = cExpCosts.get(i, t);
-								offer.setCost(ArgumentValidation.getInt32(cost, t));
+								Mixed cost = cExpCosts.get(i, t, env);
+								offer.setCost(ArgumentValidation.getInt32(cost, t, env));
 							}
 						} else {
 							throw new CREFormatException("Expected a normal array!", t);
@@ -744,12 +713,7 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			throw ConfigRuntimeException.CreateUncatchableException("Unsupported operation.", Target.UNKNOWN);
-		}
-
-		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			if(event instanceof MCItemHeldEvent) {
 				MCItemHeldEvent e = (MCItemHeldEvent) event;
 				Map<String, Mixed> ret = evaluate_helper(e);
@@ -767,11 +731,11 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			if(event instanceof MCItemHeldEvent) {
 				MCItemHeldEvent e = (MCItemHeldEvent) event;
 				if("to".equals(key)) {
-					e.getPlayer().getInventory().setHeldItemSlot(ArgumentValidation.getInt32(value, value.getTarget()));
+					e.getPlayer().getInventory().setHeldItemSlot(ArgumentValidation.getInt32(value, value.getTarget(), env));
 					return true;
 				}
 			}
@@ -811,7 +775,7 @@ public class InventoryEvents {
 			Map<String, Mixed> prefilter = event.getPrefilter();
 			if(prefilter.containsKey("main_hand")) {
 				Mixed type = prefilter.get("main_hand");
-				if(type.isInstanceOf(CString.TYPE) && type.val().contains(":") || ArgumentValidation.isNumber(type)) {
+				if(type.isInstanceOf(CString.TYPE, null, event.getEnvironment()) && type.val().contains(":") || ArgumentValidation.isNumber(type)) {
 					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The item notation format in the \"main_hand\""
 							+ " prefilter in " + getName() + " is deprecated.", event.getTarget());
 					MCItemStack is = Static.ParseItemNotation(null, prefilter.get("main_hand").val(), 1, event.getTarget());
@@ -820,7 +784,7 @@ public class InventoryEvents {
 			}
 			if(prefilter.containsKey("off_hand")) {
 				Mixed type = prefilter.get("off_hand");
-				if(type.isInstanceOf(CString.TYPE) && type.val().contains(":") || ArgumentValidation.isNumber(type)) {
+				if(type.isInstanceOf(CString.TYPE, null, event.getEnvironment()) && type.val().contains(":") || ArgumentValidation.isNumber(type)) {
 					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The item notation format in the \"off_hand\""
 							+ " prefilter in " + getName() + " is deprecated.", event.getTarget());
 					MCItemStack is = Static.ParseItemNotation(null, prefilter.get("off_hand").val(), 1, event.getTarget());
@@ -854,12 +818,7 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			throw ConfigRuntimeException.CreateUncatchableException("Unsupported operation.", Target.UNKNOWN);
-		}
-
-		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			if(event instanceof MCItemSwapEvent) {
 				MCItemSwapEvent e = (MCItemSwapEvent) event;
 				Map<String, Mixed> ret = evaluate_helper(e);
@@ -877,15 +836,15 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			if(event instanceof MCItemSwapEvent) {
 				MCItemSwapEvent e = (MCItemSwapEvent) event;
 				if("main_hand".equals(key)) {
-					e.setMainHandItem(ObjectGenerator.GetGenerator().item(value, value.getTarget()));
+					e.setMainHandItem(ObjectGenerator.GetGenerator().item(value, value.getTarget(), env));
 					return true;
 				}
 				if("off_hand".equals(key)) {
-					e.setOffHandItem(ObjectGenerator.GetGenerator().item(value, value.getTarget()));
+					e.setOffHandItem(ObjectGenerator.GetGenerator().item(value, value.getTarget(), env));
 					return true;
 				}
 			}
@@ -929,27 +888,22 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			throw ConfigRuntimeException.CreateUncatchableException("Unsupported operation.", Target.UNKNOWN);
-		}
-
-		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			if(event instanceof MCPrepareItemCraftEvent e) {
 				Map<String, Mixed> ret = evaluate_helper(e);
 				Target t = Target.UNKNOWN;
 				CArray viewers = new CArray(t);
 				for(MCHumanEntity v : e.getViewers()) {
-					viewers.push(new CString(v.getName(), t), t);
+					viewers.push(new CString(v.getName(), t), t, env);
 				}
 				ret.put("viewers", viewers);
 				ret.put("player", new CString(e.getPlayer().getName(), t));
 				ret.put("recipe", ObjectGenerator.GetGenerator().recipe(e.getRecipe(), t));
 				ret.put("isRepair", CBoolean.get(e.isRepair()));
-				CArray matrix = CArray.GetAssociativeArray(t);
+				CArray matrix = CArray.GetAssociativeArray(t, null, env);
 				MCItemStack[] mi = e.getInventory().getMatrix();
 				for(int i = 0; i < mi.length; i++) {
-					matrix.set(i, ObjectGenerator.GetGenerator().item(mi[i], t), t);
+					matrix.set(i, ObjectGenerator.GetGenerator().item(mi[i], t), t, env);
 				}
 				ret.put("matrix", matrix);
 				ret.put("result", ObjectGenerator.GetGenerator().item(e.getInventory().getResult(), t));
@@ -965,11 +919,11 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			if(event instanceof MCPrepareItemCraftEvent e) {
 				Target t = Target.UNKNOWN;
 				if("result".equals(key)) {
-					e.getInventory().setResult(ObjectGenerator.GetGenerator().item(value, t));
+					e.getInventory().setResult(ObjectGenerator.GetGenerator().item(value, t, env));
 					return true;
 				}
 			}
@@ -1019,12 +973,7 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			throw ConfigRuntimeException.CreateUncatchableException("Unsupported operation.", Target.UNKNOWN);
-		}
-
-		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			if(event instanceof MCPrepareAnvilEvent e) {
 				MCAnvilInventory anvil = (MCAnvilInventory) e.getInventory();
 				Map<String, Mixed> ret = evaluate_helper(e);
@@ -1051,23 +1000,23 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			if(event instanceof MCPrepareAnvilEvent e) {
 				Target t = value.getTarget();
 				if(key.equalsIgnoreCase("result")) {
-					e.setResult(ObjectGenerator.GetGenerator().item(value, t));
+					e.setResult(ObjectGenerator.GetGenerator().item(value, t, env));
 					return true;
 				}
 
 				MCAnvilInventory anvil = (MCAnvilInventory) e.getInventory();
 				if(key.equalsIgnoreCase("level_repair_cost")) {
-					anvil.setRepairCost(ArgumentValidation.getInt32(value, t));
+					anvil.setRepairCost(ArgumentValidation.getInt32(value, t, env));
 					return true;
 				}
 
 				if(key.equalsIgnoreCase("item_repair_cost")) {
 					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_18_1)) {
-						anvil.setRepairCostAmount(ArgumentValidation.getInt32(value, t));
+						anvil.setRepairCostAmount(ArgumentValidation.getInt32(value, t, env));
 						return true;
 					} else {
 						return false;
@@ -1075,7 +1024,7 @@ public class InventoryEvents {
 				}
 
 				if(key.equalsIgnoreCase("max_repair_cost")) {
-					anvil.setMaximumRepairCost(ArgumentValidation.getInt32(value, t));
+					anvil.setMaximumRepairCost(ArgumentValidation.getInt32(value, t, env));
 					return true;
 				}
 			}
@@ -1121,12 +1070,7 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			throw ConfigRuntimeException.CreateUncatchableException("Unsupported operation.", Target.UNKNOWN);
-		}
-
-		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			if(event instanceof MCPrepareSmithingEvent e) {
 				MCSmithingInventory smithing = (MCSmithingInventory) e.getInventory();
 				Map<String, Mixed> ret = evaluate_helper(e);
@@ -1152,11 +1096,11 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			if(event instanceof MCPrepareSmithingEvent e) {
 				Target t = value.getTarget();
 				if(key.equalsIgnoreCase("result")) {
-					e.setResult(ObjectGenerator.GetGenerator().item(value, t));
+					e.setResult(ObjectGenerator.GetGenerator().item(value, t, env));
 					return true;
 				}
 			}
@@ -1199,12 +1143,7 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			throw ConfigRuntimeException.CreateUncatchableException("Unsupported operation.", Target.UNKNOWN);
-		}
-
-		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			if(event instanceof MCPrepareGrindstoneEvent e) {
 				MCGrindstoneInventory grindstone = (MCGrindstoneInventory) e.getInventory();
 				Map<String, Mixed> ret = evaluate_helper(e);
@@ -1226,11 +1165,11 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			if(event instanceof MCPrepareGrindstoneEvent e) {
 				Target t = value.getTarget();
 				if(key.equalsIgnoreCase("result")) {
-					e.setResult(ObjectGenerator.GetGenerator().item(value, t));
+					e.setResult(ObjectGenerator.GetGenerator().item(value, t, env));
 					return true;
 				}
 			}

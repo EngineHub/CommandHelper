@@ -10,9 +10,12 @@ import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.FlowFunction;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ParseTree;
-import com.laytonsmith.core.Script;
+import com.laytonsmith.core.StepAction.Complete;
+import com.laytonsmith.core.StepAction.Evaluate;
+import com.laytonsmith.core.StepAction.StepResult;
 import com.laytonsmith.core.compiler.BranchStatement;
 import com.laytonsmith.core.compiler.SelfStatement;
 import com.laytonsmith.core.compiler.VariableScope;
@@ -23,6 +26,7 @@ import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
@@ -33,8 +37,6 @@ import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.exceptions.LoopManipulationException;
-import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.natives.interfaces.ValueType;
 import java.util.ArrayList;
@@ -84,25 +86,21 @@ public final class Threading {
 		}
 
 		@Override
-		public Mixed exec(final Target t, final Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(final Target t, final Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			final String threadId = args[0].val();
 			final com.laytonsmith.core.natives.interfaces.Callable closure
 					= ArgumentValidation.getObject(args[1], t, com.laytonsmith.core.natives.interfaces.Callable.class);
+			DaemonManager dm = env.getEnv(StaticRuntimeEnv.class).GetDaemonManager();
 			Thread th = new Thread("(" + Implementation.GetServerType().getBranding() + ") " + threadId) {
 				@Override
 				public void run() {
-					DaemonManager dm = env.getEnv(StaticRuntimeEnv.class).GetDaemonManager();
-					dm.activateThread(Thread.currentThread());
 					try {
 						closure.executeCallable(env, t);
-					} catch (LoopManipulationException ex) {
-						ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.CreateUncatchableException("Unexpected loop manipulation"
-								+ " operation was triggered inside the closure.", t), env);
 					} catch (ConfigRuntimeException ex) {
 						ConfigRuntimeException.HandleUncaughtException(ex, env);
 					} catch (CancelCommandException ex) {
 						if(ex.getMessage() != null) {
-							new Echoes.console().exec(t, env, new CString(ex.getMessage(), t), CBoolean.FALSE);
+							new Echoes.console().exec(t, env, null, new CString(ex.getMessage(), t), CBoolean.FALSE);
 						}
 					} finally {
 						dm.deactivateThread(Thread.currentThread());
@@ -114,6 +112,7 @@ public final class Threading {
 					}
 				}
 			};
+			dm.activateThread(th, threadId);
 			th.start();
 			synchronized(THREAD_ID_MAP) {
 				THREAD_ID_MAP.put(threadId, th);
@@ -183,7 +182,7 @@ public final class Threading {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return new CString(Thread.currentThread().getName(), t);
 		}
 
@@ -237,7 +236,7 @@ public final class Threading {
 		}
 
 		@Override
-		public Mixed exec(final Target t, final Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(final Target t, final Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			final com.laytonsmith.core.natives.interfaces.Callable closure
 					= ArgumentValidation.getObject(args[0], t, com.laytonsmith.core.natives.interfaces.Callable.class);
 			StaticLayer.GetConvertor().runOnMainThreadLater(
@@ -249,7 +248,7 @@ public final class Threading {
 						closure.executeCallable(env, t);
 					} catch (ConfigRuntimeException e) {
 						ConfigRuntimeException.HandleUncaughtException(e, env);
-					} catch (ProgramFlowManipulationException e) {
+					} catch (CancelCommandException e) {
 						// Ignored
 					}
 				}
@@ -302,7 +301,7 @@ public final class Threading {
 		}
 
 		@Override
-		public Mixed exec(final Target t, final Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(final Target t, final Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			final com.laytonsmith.core.natives.interfaces.Callable closure = ArgumentValidation.getObject(args[0], t,
 					com.laytonsmith.core.natives.interfaces.Callable.class);
 			Object ret;
@@ -313,7 +312,7 @@ public final class Threading {
 					public Object call() throws Exception {
 						try {
 							return closure.executeCallable(env, t);
-						} catch (ConfigRuntimeException | ProgramFlowManipulationException e) {
+						} catch (ConfigRuntimeException | CancelCommandException e) {
 							return e;
 						}
 					}
@@ -370,13 +369,13 @@ public final class Threading {
 	 */
 	private static final Map<Object, Lock> SYNC_OBJECT_LOCKS = new HashMap<>();
 
-	private static Lock getSyncObject(Mixed cSyncObject, Function f, Target t) {
+	private static Lock getSyncObject(Mixed cSyncObject, Function f, Target t, Environment env) {
 
 		if(cSyncObject instanceof CNull || cSyncObject == null) {
 			throw new CRENullPointerException("Synchronization object may not be null in " + f.getName() + "().", t);
 		}
 		Object syncObject = cSyncObject;
-		if(cSyncObject.isInstanceOf(ValueType.TYPE)) {
+		if(cSyncObject.isInstanceOf(ValueType.TYPE, null, env)) {
 			if(!(cSyncObject instanceof CString)) {
 				throw new CREIllegalArgumentException("Only strings and non-value types can be used for synchronization.", t);
 			}
@@ -459,7 +458,7 @@ public final class Threading {
 	@noboilerplate
 	@seealso({x_new_thread.class, x_get_lock.class})
 	@SelfStatement
-	public static class _synchronized extends AbstractFunction implements VariableScope, BranchStatement {
+	public static class _synchronized extends AbstractFunction implements FlowFunction<_synchronized.SyncState>, VariableScope, BranchStatement {
 
 
 
@@ -484,35 +483,52 @@ public final class Threading {
 		}
 
 		@Override
-		public boolean useSpecialExec() {
-			return true;
+		public Mixed exec(final Target t, final Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			return CVoid.VOID;
+		}
+
+		// -- FlowFunction implementation --
+		// Phase 1: evaluate sync object (arg 0, with IVariable resolution)
+		// Phase 2: acquire lock, evaluate code (arg 1)
+		// cleanup() releases the lock if acquired
+
+		static class SyncState {
+			enum Phase { EVAL_SYNC_OBJ, EVAL_CODE }
+			Phase phase = Phase.EVAL_SYNC_OBJ;
+			ParseTree[] children;
+			Lock syncObject;
 		}
 
 		@Override
-		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public StepResult<SyncState> begin(Target t, ParseTree[] children, Environment env) {
+			SyncState state = new SyncState();
+			state.children = children;
+			return new StepResult<>(new Evaluate(children[0]), state);
+		}
 
-			// Get the sync object tree and the code to synchronize.
-			ParseTree syncObjectTree = nodes[0];
-			ParseTree code = nodes[1];
-
-			// Get the sync object (CArray or String value of the Mixed).
-			Mixed cSyncObject = parent.seval(syncObjectTree, env);
-			Lock syncObject = getSyncObject(cSyncObject, this, t);
-
-			// Evaluate the code, synchronized by the passed sync object.
-			try {
-				syncObject.lock();
-				parent.eval(code, env);
-			} finally {
-				syncObject.unlock();
-				cleanupSync(syncObject);
+		@Override
+		public StepResult<SyncState> childCompleted(Target t, SyncState state,
+				Mixed result, Environment env) {
+			switch(state.phase) {
+				case EVAL_SYNC_OBJ -> {
+					state.syncObject = getSyncObject(result, this, t, env);
+					state.syncObject.lock();
+					state.phase = SyncState.Phase.EVAL_CODE;
+					return new StepResult<>(new Evaluate(state.children[1]), state);
+				}
+				case EVAL_CODE -> {
+					return new StepResult<>(new Complete(CVoid.VOID), state);
+				}
 			}
-			return CVoid.VOID;
+			throw new Error("Unreachable");
 		}
 
 		@Override
-		public Mixed exec(final Target t, final Environment env, Mixed... args) throws ConfigRuntimeException {
-			return CVoid.VOID;
+		public void cleanup(Target t, SyncState state, Environment env) {
+			if(state != null && state.syncObject != null) {
+				state.syncObject.unlock();
+				cleanupSync(state.syncObject);
+			}
 		}
 
 		@Override
@@ -631,14 +647,14 @@ public final class Threading {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			// Get the sync object tree and the code to synchronize.
 			Mixed cSyncObject = args[0];
 			com.laytonsmith.core.natives.interfaces.Callable callable
 					= ArgumentValidation.getObject(args[1], t, com.laytonsmith.core.natives.interfaces.Callable.class);
 
 			// Get the sync object (CArray or String value of the Mixed).
-			Lock syncObject = getSyncObject(cSyncObject, this, t);
+			Lock syncObject = getSyncObject(cSyncObject, this, t, env);
 
 			// Evaluate the code, synchronized by the passed sync object.
 			DaemonManager dm = env.getEnv(StaticRuntimeEnv.class).GetDaemonManager();
@@ -726,7 +742,7 @@ public final class Threading {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String threadId = args[0].val();
 			Thread th;
 			synchronized(THREAD_ID_MAP) {
@@ -791,7 +807,7 @@ public final class Threading {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String threadId = args[0].val();
 			Thread th;
 			synchronized(THREAD_ID_MAP) {
@@ -844,7 +860,7 @@ public final class Threading {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			Thread th;
 			if(args.length == 1) {
 				String threadId = args[0].val();
@@ -904,7 +920,7 @@ public final class Threading {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(args.length == 1) {
 				String threadId = args[0].val();
 				Thread th;
@@ -963,7 +979,7 @@ public final class Threading {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return CBoolean.get(Thread.interrupted());
 		}
 

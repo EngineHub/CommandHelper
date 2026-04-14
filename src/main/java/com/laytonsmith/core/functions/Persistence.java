@@ -15,6 +15,7 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
@@ -91,11 +92,11 @@ public class Persistence {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			String key = GetNamespace(args, args.length - 1, getName(), t);
 			String value = null;
 			try {
-				value = Construct.json_encode(args[args.length - 1], t);
+				value = Construct.json_encode(args[args.length - 1], t, env);
 			} catch (MarshalException e) {
 				throw new CREFormatException(e.getMessage(), t);
 			}
@@ -174,7 +175,7 @@ public class Persistence {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			Object o;
 			String namespace = GetNamespace(args, null, getName(), t);
 			MSLog.GetLogger().Log(MSLog.Tags.PERSISTENCE, LogLevel.DEBUG, "Getting value: " + namespace, t);
@@ -264,8 +265,8 @@ public class Persistence {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			PersistenceNetwork p = environment.getEnv(StaticRuntimeEnv.class).GetPersistenceNetwork();
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			PersistenceNetwork p = env.getEnv(StaticRuntimeEnv.class).GetPersistenceNetwork();
 			List<String> keyChain = new ArrayList<String>();
 			keyChain.add("storage");
 			String namespace = GetNamespace(args, null, getName(), t);
@@ -345,7 +346,7 @@ public class Persistence {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			try {
 				return CBoolean.get(env.getEnv(StaticRuntimeEnv.class).GetPersistenceNetwork()
 						.hasKey(("storage." + GetNamespace(args, null, getName(), t)).split("\\.")));
@@ -403,12 +404,12 @@ public class Persistence {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			String namespace = GetNamespace(args, null, getName(), t);
 			MSLog.GetLogger().Log(MSLog.Tags.PERSISTENCE, LogLevel.DEBUG, "Clearing value: " + namespace, t);
 			try {
-				environment.getEnv(StaticRuntimeEnv.class).GetPersistenceNetwork().clearKey(
-						environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager(),
+				env.getEnv(StaticRuntimeEnv.class).GetPersistenceNetwork().clearKey(
+						env.getEnv(StaticRuntimeEnv.class).GetDaemonManager(),
 						("storage." + namespace).split("\\."));
 			} catch (DataSourceException | ReadOnlyException | IOException ex) {
 				throw new CREIOException(ex.getMessage(), t, ex);

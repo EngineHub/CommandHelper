@@ -14,6 +14,7 @@ import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.FlowFunction;
 import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.LogLevel;
@@ -21,7 +22,6 @@ import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Prefs;
-import com.laytonsmith.core.Script;
 import com.laytonsmith.core.compiler.BranchStatement;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.SelfStatement;
@@ -39,6 +39,7 @@ import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.IVariableList;
 import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
@@ -48,10 +49,13 @@ import com.laytonsmith.core.exceptions.CRE.CRECausedByWrapper;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.functions.Compiler.__type_ref__;
+import com.laytonsmith.core.StepAction;
+import com.laytonsmith.core.StepAction.Complete;
+import com.laytonsmith.core.StepAction.Evaluate;
+import com.laytonsmith.core.StepAction.StepResult;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.StackTraceManager;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.ArrayList;
@@ -70,12 +74,185 @@ public class Exceptions {
 		return "This class contains functions related to Exception handling in MethodScript";
 	}
 
+	/**
+	 * Produced by {@code throw()} and by native functions that throw {@link ConfigRuntimeException}.
+	 * The interpreter loop catches ConfigRuntimeException from exec() calls and wraps them in this.
+	 * {@code _try} and {@code complex_try} handle this in their {@code childInterrupted()}.
+	 */
+	public static class ThrowAction implements StepAction.FlowControlAction {
+		private final ConfigRuntimeException exception;
+
+		public ThrowAction(ConfigRuntimeException exception) {
+			this.exception = exception;
+		}
+
+		public ConfigRuntimeException getException() {
+			return exception;
+		}
+
+		@Override
+		public Target getTarget() {
+			return exception.getTarget();
+		}
+	}
+
 	@api
 	@seealso({_throw.class, com.laytonsmith.tools.docgen.templates.Exceptions.class})
 	@SelfStatement
-	public static class _try extends AbstractFunction implements BranchStatement, VariableScope {
+	public static class _try extends AbstractFunction implements FlowFunction<_try.TryState>, BranchStatement, VariableScope {
 
 		public static final String NAME = "try";
+
+		enum Phase { RESOLVE_VAR, RESOLVE_TYPES, TRY_BODY, CATCH_BODY }
+
+		static class TryState {
+			Phase phase;
+			ParseTree[] children;
+			IVariable ivar;
+			List<FullyQualifiedClassName> interest;
+			int catchIndex;
+
+			TryState(ParseTree[] children) {
+				this.children = children;
+				this.interest = new ArrayList<>();
+				if(children.length == 2) {
+					catchIndex = 1;
+				} else if(children.length >= 3) {
+					catchIndex = 2;
+				} else {
+					catchIndex = -1;
+				}
+			}
+
+			@Override
+			public String toString() {
+				return phase.name();
+			}
+		}
+
+		@Override
+		public StepResult<TryState> begin(Target t, ParseTree[] children, Environment env) {
+			TryState state = new TryState(children);
+			if(children.length >= 3) {
+				state.phase = Phase.RESOLVE_VAR;
+				return new StepResult<>(new Evaluate(children[1], null, true), state);
+			}
+			state.phase = Phase.TRY_BODY;
+			return new StepResult<>(new Evaluate(children[0]), state);
+		}
+
+		@Override
+		public StepResult<TryState> childCompleted(Target t, TryState state, Mixed result, Environment env) {
+			switch(state.phase) {
+				case RESOLVE_VAR:
+					if(result instanceof IVariable iv) {
+						state.ivar = iv;
+					} else {
+						throw new CRECastException("Expected argument 2 to be an IVariable", t);
+					}
+					if(state.children.length == 4) {
+						state.phase = Phase.RESOLVE_TYPES;
+						return new StepResult<>(new Evaluate(state.children[3]), state);
+					}
+					state.phase = Phase.TRY_BODY;
+					return new StepResult<>(new Evaluate(state.children[0]), state);
+				case RESOLVE_TYPES:
+					Mixed ptypes = result;
+					if(ptypes.isInstanceOf(CString.TYPE, null, env)) {
+						state.interest.add(FullyQualifiedClassName.forName(ptypes.val(), t, env));
+					} else if(ptypes.isInstanceOf(CArray.TYPE, null, env)) {
+						CArray ca = (CArray) ptypes;
+						for(int i = 0; i < ca.size(); i++) {
+							state.interest.add(FullyQualifiedClassName.forName(
+									ca.get(i, t).val(), t, env));
+						}
+					} else {
+						throw new CRECastException(
+								"Expected argument 4 to be a string, or an array of strings.", t);
+					}
+					for(FullyQualifiedClassName in : state.interest) {
+						try {
+							NativeTypeList.getNativeClass(in);
+						} catch(ClassNotFoundException e) {
+							throw new CREFormatException(
+									"Invalid exception type passed to try():" + in, t);
+						}
+					}
+					state.phase = Phase.TRY_BODY;
+					return new StepResult<>(new Evaluate(state.children[0]), state);
+				case TRY_BODY:
+				case CATCH_BODY:
+					return new StepResult<>(new Complete(CVoid.VOID), state);
+				default:
+					throw ConfigRuntimeException.CreateUncatchableException(
+							"Invalid try state: " + state.phase, t);
+			}
+		}
+
+		@Override
+		public StepResult<TryState> childInterrupted(Target t, TryState state,
+				StepAction.FlowControl action, Environment env) {
+			if(state.phase == Phase.TRY_BODY
+					&& action.getAction() instanceof ThrowAction throwAction) {
+				ConfigRuntimeException e = throwAction.getException();
+				if(!(e instanceof AbstractCREException)) {
+					return null;
+				}
+				CClassType exType = ((AbstractCREException) e).getExceptionType();
+				if(Prefs.DebugMode()) {
+					StreamUtils.GetSystemOut().println("[" + Implementation.GetServerType().getBranding() + "]:"
+							+ " Exception thrown (debug mode on) -> " + e.getMessage() + " :: " + exType.getFQCN() + ":"
+							+ e.getTarget().file() + ":" + e.getTarget().line());
+				}
+				if(matchesInterest(exType, state.interest)) {
+					if(state.catchIndex >= 0) {
+						CArray ex = ObjectGenerator.GetGenerator().exception(e, env, t);
+						if(state.ivar != null) {
+							state.ivar.setIval(ex);
+							env.getEnv(GlobalEnv.class).GetVarList().set(state.ivar);
+						}
+						state.phase = Phase.CATCH_BODY;
+						return new StepResult<>(
+								new Evaluate(state.children[state.catchIndex]), state);
+					}
+					return new StepResult<>(new Complete(CVoid.VOID), state);
+				}
+				return null;
+			}
+			return null;
+		}
+
+		@Override
+		public boolean wouldCatch(TryState state, ConfigRuntimeException exception) {
+			if(state.phase != Phase.TRY_BODY) {
+				return false;
+			}
+			if(!(exception instanceof AbstractCREException ace)) {
+				return false;
+			}
+			return matchesInterest(ace.getExceptionType(), state.interest);
+		}
+
+		/**
+		 * Returns true if the given exception type matches the interest list,
+		 * using {@code doesExtend} for proper subtype checking. An empty interest
+		 * list matches all exception types.
+		 */
+		private static boolean matchesInterest(CClassType exType, List<FullyQualifiedClassName> interest) {
+			if(interest.isEmpty()) {
+				return true;
+			}
+			for(FullyQualifiedClassName interestFqcn : interest) {
+				try {
+					if(exType.doesExtend(CClassType.get(interestFqcn))) {
+						return true;
+					}
+				} catch(ClassNotFoundException e) {
+					// Unknown type can't match
+				}
+			}
+			return false;
+		}
 
 		@Override
 		public String getName() {
@@ -127,85 +304,7 @@ public class Exceptions {
 		}
 
 		@Override
-		public Mixed execs(Target t, Environment env, Script that, ParseTree... nodes) {
-			ParseTree tryCode = nodes[0];
-			ParseTree varName = null;
-			ParseTree catchCode = null;
-			ParseTree types = null;
-			if(nodes.length == 2) {
-				catchCode = nodes[1];
-			} else if(nodes.length == 3) {
-				varName = nodes[1];
-				catchCode = nodes[2];
-			} else if(nodes.length == 4) {
-				varName = nodes[1];
-				catchCode = nodes[2];
-				types = nodes[3];
-			}
-
-			IVariable ivar = null;
-			if(varName != null) {
-				Mixed pivar = that.eval(varName, env);
-				if(pivar instanceof IVariable) {
-					ivar = (IVariable) pivar;
-				} else {
-					throw new CRECastException("Expected argument 2 to be an IVariable", t);
-				}
-			}
-			List<FullyQualifiedClassName> interest = new ArrayList<>();
-			if(types != null) {
-				Mixed ptypes = that.seval(types, env);
-				if(ptypes.isInstanceOf(CString.TYPE)) {
-					interest.add(FullyQualifiedClassName.forName(ptypes.val(), t, env));
-				} else if(ptypes.isInstanceOf(CArray.TYPE)) {
-					CArray ca = (CArray) ptypes;
-					for(int i = 0; i < ca.size(); i++) {
-						interest.add(FullyQualifiedClassName.forName(ca.get(i, t).val(), t, env));
-					}
-				} else {
-					throw new CRECastException("Expected argument 4 to be a string, or an array of strings.", t);
-				}
-			}
-
-			for(FullyQualifiedClassName in : interest) {
-				try {
-					NativeTypeList.getNativeClass(in);
-				} catch (ClassNotFoundException e) {
-					throw new CREFormatException("Invalid exception type passed to try():" + in, t);
-				}
-			}
-
-			try {
-				that.eval(tryCode, env);
-			} catch (ConfigRuntimeException e) {
-				if(!(e instanceof AbstractCREException)) {
-					throw e;
-				}
-				FullyQualifiedClassName name = ((AbstractCREException) e).getExceptionType().getFQCN();
-				if(Prefs.DebugMode()) {
-					StreamUtils.GetSystemOut().println("[" + Implementation.GetServerType().getBranding() + "]:"
-							+ " Exception thrown (debug mode on) -> " + e.getMessage() + " :: " + name + ":"
-							+ e.getTarget().file() + ":" + e.getTarget().line());
-				}
-				if(interest.isEmpty() || interest.contains(name)) {
-					if(catchCode != null) {
-						CArray ex = ObjectGenerator.GetGenerator().exception(e, env, t);
-						if(ivar != null) {
-							ivar.setIval(ex);
-							env.getEnv(GlobalEnv.class).GetVarList().set(ivar);
-						}
-						that.eval(catchCode, env);
-					}
-				} else {
-					throw e;
-				}
-			}
-
-			return CVoid.VOID;
-		}
-
-		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			return CVoid.VOID;
 		}
 
@@ -243,11 +342,6 @@ public class Exceptions {
 					return parentScope;
 				}
 			}
-		}
-
-		@Override
-		public boolean useSpecialExec() {
-			return true;
 		}
 
 		@Override
@@ -339,7 +433,7 @@ public class Exceptions {
 //			return true;
 //		}
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			if(args.length == 1) {
 				try {
 					// Exception type
@@ -397,10 +491,10 @@ public class Exceptions {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			if(args[0].isInstanceOf(CClosure.TYPE)) {
-				CClosure old = environment.getEnv(StaticRuntimeEnv.class).getExceptionHandler();
-				environment.getEnv(StaticRuntimeEnv.class).setExceptionHandler((CClosure) args[0]);
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			if(args[0].isInstanceOf(CClosure.TYPE, null, env)) {
+				CClosure old = env.getEnv(StaticRuntimeEnv.class).getExceptionHandler();
+				env.getEnv(StaticRuntimeEnv.class).setExceptionHandler((CClosure) args[0]);
 				if(old == null) {
 					return CNull.NULL;
 				} else {
@@ -464,7 +558,7 @@ public class Exceptions {
 	@hide("In general, this should never be used in the functional syntax, and should only be"
 			+ " automatically generated by the try keyword.")
 	@SelfStatement
-	public static class complex_try extends AbstractFunction implements Optimizable, BranchStatement, VariableScope {
+	public static class complex_try extends AbstractFunction implements FlowFunction<complex_try.ComplexTryState>, Optimizable, BranchStatement, VariableScope {
 
 		public static final String NAME = "complex_try";
 
@@ -473,6 +567,159 @@ public class Exceptions {
 		 */
 		@SuppressWarnings("FieldMayBeFinal")
 		private static boolean doScreamError = false;
+
+		enum Phase { TRY_BODY, CATCH_BODY, FINALLY }
+
+		static class ComplexTryState {
+			Phase phase;
+			ParseTree[] children;
+			boolean hasFinally;
+			StepAction.FlowControl pendingAction;
+			ConfigRuntimeException suppressedException;
+			boolean exceptionWasCaught;
+			String catchVarName;
+
+			ComplexTryState(ParseTree[] children) {
+				this.children = children;
+				this.hasFinally = (children.length % 2 == 0);
+			}
+
+			@Override
+			public String toString() {
+				return phase.name();
+			}
+		}
+
+		@Override
+		public StepResult<ComplexTryState> begin(Target t, ParseTree[] children, Environment env) {
+			ComplexTryState state = new ComplexTryState(children);
+			state.phase = Phase.TRY_BODY;
+			return new StepResult<>(new Evaluate(children[0]), state);
+		}
+
+		@Override
+		public StepResult<ComplexTryState> childCompleted(Target t, ComplexTryState state,
+				Mixed result, Environment env) {
+			switch(state.phase) {
+				case TRY_BODY:
+					if(state.hasFinally) {
+						state.phase = Phase.FINALLY;
+						return new StepResult<>(new Evaluate(
+								state.children[state.children.length - 1]), state);
+					}
+					return new StepResult<>(new Complete(CVoid.VOID), state);
+				case CATCH_BODY:
+					if(state.catchVarName != null) {
+						env.getEnv(GlobalEnv.class).GetVarList().remove(state.catchVarName);
+					}
+					if(state.hasFinally) {
+						state.phase = Phase.FINALLY;
+						return new StepResult<>(new Evaluate(
+								state.children[state.children.length - 1]), state);
+					}
+					return new StepResult<>(new Complete(CVoid.VOID), state);
+				case FINALLY:
+					if(state.pendingAction != null) {
+						return new StepResult<>(state.pendingAction, state);
+					}
+					return new StepResult<>(new Complete(CVoid.VOID), state);
+				default:
+					throw ConfigRuntimeException.CreateUncatchableException(
+							"Invalid complex_try state: " + state.phase, t);
+			}
+		}
+
+		@Override
+		public StepResult<ComplexTryState> childInterrupted(Target t, ComplexTryState state,
+				StepAction.FlowControl action, Environment env) {
+			switch(state.phase) {
+				case TRY_BODY:
+					if(action.getAction() instanceof ThrowAction throwAction) {
+						ConfigRuntimeException ex = throwAction.getException();
+						if(ex instanceof AbstractCREException) {
+							AbstractCREException e = AbstractCREException.getAbstractCREException(ex);
+							CClassType exceptionType = e.getExceptionType();
+							for(int i = 1; i < state.children.length - 1; i += 2) {
+								ParseTree assign = state.children[i];
+								CClassType clauseType = ((CClassType) assign.getChildAt(0).getData());
+								if(exceptionType.doesExtend(clauseType)) {
+									IVariableList varList = env.getEnv(GlobalEnv.class).GetVarList();
+									IVariable var = (IVariable) assign.getChildAt(1).getData();
+									state.catchVarName = var.getVariableName();
+									varList.set(new IVariable(CArray.TYPE, var.getVariableName(),
+											e.getExceptionObject(), t));
+									state.phase = Phase.CATCH_BODY;
+									return new StepResult<>(new Evaluate(state.children[i + 1]), state);
+								}
+							}
+						}
+						// No clause matched or non-AbstractCREException
+						if(state.hasFinally) {
+							state.pendingAction = action;
+							state.exceptionWasCaught = true;
+							state.suppressedException = throwAction.getException();
+							state.phase = Phase.FINALLY;
+							return new StepResult<>(new Evaluate(
+									state.children[state.children.length - 1]), state);
+						}
+						return null;
+					}
+					// Non-throw flow control (return, break, etc.) — run finally then re-propagate
+					if(state.hasFinally) {
+						state.pendingAction = action;
+						state.phase = Phase.FINALLY;
+						return new StepResult<>(new Evaluate(
+								state.children[state.children.length - 1]), state);
+					}
+					return null;
+				case CATCH_BODY:
+					if(action.getAction() instanceof ThrowAction throwAction) {
+						state.suppressedException = throwAction.getException();
+					}
+					state.exceptionWasCaught = true;
+					if(state.hasFinally) {
+						state.pendingAction = action;
+						state.phase = Phase.FINALLY;
+						return new StepResult<>(new Evaluate(
+								state.children[state.children.length - 1]), state);
+					}
+					return null;
+				case FINALLY:
+					if(state.exceptionWasCaught
+							&& (doScreamError || Prefs.ScreamErrors() || Prefs.DebugMode())) {
+						MSLog.GetLogger().Log(MSLog.Tags.RUNTIME, LogLevel.WARNING,
+								"Exception was thrown and unhandled in any catch clause,"
+								+ " but is being hidden by a new exception being thrown"
+								+ " in the finally clause.", t);
+						if(state.suppressedException != null) {
+							ConfigRuntimeException.HandleUncaughtException(
+									state.suppressedException, env);
+						}
+					}
+					return null;
+				default:
+					return null;
+			}
+		}
+
+		@Override
+		public boolean wouldCatch(ComplexTryState state, ConfigRuntimeException exception) {
+			if(state.phase != Phase.TRY_BODY) {
+				return false;
+			}
+			if(!(exception instanceof AbstractCREException ace)) {
+				return false;
+			}
+			CClassType exceptionType = ace.getExceptionType();
+			for(int i = 1; i < state.children.length - 1; i += 2) {
+				ParseTree assign = state.children[i];
+				CClassType clauseType = ((CClassType) assign.getChildAt(0).getData());
+				if(exceptionType.doesExtend(clauseType)) {
+					return true;
+				}
+			}
+			return false;
+		}
 
 		@Override
 		public String getName() {
@@ -495,66 +742,7 @@ public class Exceptions {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			return CVoid.VOID;
-		}
-
-		@Override
-		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
-			boolean exceptionCaught = false;
-			ConfigRuntimeException caughtException = null;
-			try {
-				parent.eval(nodes[0], env);
-			} catch (ConfigRuntimeException ex) {
-				if(!(ex instanceof AbstractCREException)) {
-					// This should never actually happen, but we want to protect
-					// against errors, and continue to throw this one up the chain
-					throw ex;
-				}
-				AbstractCREException e = AbstractCREException.getAbstractCREException(ex);
-				CClassType exceptionType = e.getExceptionType();
-				for(int i = 1; i < nodes.length - 1; i += 2) {
-					ParseTree assign = nodes[i];
-					CClassType clauseType = ((CClassType) assign.getChildAt(0).getData());
-					if(exceptionType.doesExtend(clauseType)) {
-						try {
-							// We need to define the exception in the variable table
-							IVariableList varList = env.getEnv(GlobalEnv.class).GetVarList();
-							IVariable var = (IVariable) assign.getChildAt(1).getData();
-							varList.set(new IVariable(CArray.TYPE, var.getVariableName(), e.getExceptionObject(), t));
-							parent.eval(nodes[i + 1], env);
-							varList.remove(var.getVariableName());
-						} catch (ConfigRuntimeException | FunctionReturnException newEx) {
-							if(newEx instanceof ConfigRuntimeException) {
-								caughtException = (ConfigRuntimeException) newEx;
-							}
-							exceptionCaught = true;
-							throw newEx;
-						}
-						return CVoid.VOID;
-					}
-				}
-				// No clause caught it. Continue to throw the exception up the chain
-				caughtException = ex;
-				exceptionCaught = true;
-				throw ex;
-			} finally {
-				if(nodes.length % 2 == 0) {
-					// There is a finally clause. Run that here.
-					try {
-						parent.eval(nodes[nodes.length - 1], env);
-					} catch (ConfigRuntimeException | FunctionReturnException ex) {
-						if(exceptionCaught && (doScreamError || Prefs.ScreamErrors() || Prefs.DebugMode())) {
-							MSLog.GetLogger().Log(MSLog.Tags.RUNTIME, LogLevel.WARNING, "Exception was thrown and"
-									+ " unhandled in any catch clause,"
-									+ " but is being hidden by a new exception being thrown in the finally clause.", t);
-							ConfigRuntimeException.HandleUncaughtException(caughtException, env);
-						}
-						throw ex;
-					}
-				}
-			}
-
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return CVoid.VOID;
 		}
 
@@ -611,7 +799,7 @@ public class Exceptions {
 
 				// Check for a container function with a string as first argument, being an unknown type.
 				if(assign.numberOfChildren() > 0) {
-					if(assign.getChildAt(0).getData().isInstanceOf(CString.TYPE)) {
+					if(assign.getChildAt(0).getData().isInstanceOf(CString.TYPE, null, env)) {
 						throw new ConfigCompileException("Unknown class type: "
 								+ assign.getChildAt(0).getData().val(), t);
 					}
@@ -630,8 +818,8 @@ public class Exceptions {
 						&& (cf.getFunction().getName().equals(DataHandling.assign.NAME)
 								|| cf.getFunction().getName().equals(Compiler.__unsafe_assign__.NAME)))
 						|| assign.numberOfChildren() != 3) {
-					throw new ConfigCompileException("Expecting a variable declaration, but instead "
-						+ assign.getData().val() + " was found", t);
+					throw new ConfigCompileException("catch clause requires a type and a variable,"
+						+ " e.g. catch(Exception @e)", assign.getData().getTarget());
 				}
 
 				// Validate that the first argument of the assign is a valid type.
@@ -679,11 +867,6 @@ public class Exceptions {
 		}
 
 		@Override
-		public boolean useSpecialExec() {
-			return true;
-		}
-
-		@Override
 		public List<Boolean> isBranch(List<ParseTree> children) {
 			List<Boolean> ret = new ArrayList<>(children.size());
 			ret.add(true);
@@ -728,11 +911,11 @@ public class Exceptions {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			StackTraceManager stManager = environment.getEnv(GlobalEnv.class).GetStackTraceManager();
-			List<ConfigRuntimeException.StackTraceElement> elements = stManager.getCurrentStackTrace();
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
+			StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
+			List<com.laytonsmith.core.exceptions.StackTraceFrame> elements = stManager.getCurrentStackTrace();
 			CArray ret = new CArray(t);
-			for(ConfigRuntimeException.StackTraceElement e : elements) {
+			for(com.laytonsmith.core.exceptions.StackTraceFrame e : elements) {
 				ret.push(e.getObjectFor(), Target.UNKNOWN);
 			}
 			return ret;

@@ -17,6 +17,7 @@ import com.laytonsmith.core.constructs.CReal2dMatrix;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
@@ -96,7 +97,7 @@ public class MatrixHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			if(args.length == 1) {
 				return CReal2dMatrix.FromConstruct(ArgumentValidation.getArray(args[0], t), t);
 			} else {
@@ -173,7 +174,7 @@ public class MatrixHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CReal2dMatrix matrix = getMatrix(args[0], t, 1);
 			int column = ArgumentValidation.getInt32(args[1], t);
 			double[] data = matrix.getColumn(column);
@@ -236,7 +237,7 @@ public class MatrixHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CReal2dMatrix matrix = getMatrixOnly(args[0], t, 1);
 			return matrix.deepClone();
 		}
@@ -290,7 +291,7 @@ public class MatrixHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CReal2dMatrix matrix = getMatrix(args[0], t, 1);
 			double[] data = matrix.getData();
 			String format = "%.3f";
@@ -382,7 +383,7 @@ public class MatrixHandling {
 		}
 
 		@Override
-		public CArray exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public CArray exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CReal2dMatrix m = MatrixHandling.getMatrixOnly(args[0], t, 1);
 			return m.toArray();
 		}
@@ -438,7 +439,7 @@ public class MatrixHandling {
 		}
 
 		@Override
-		public CReal2dMatrix exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public CReal2dMatrix exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			int dimension = ArgumentValidation.getInt32(args[0], t);
 			double[] data = new double[dimension * dimension];
 			for(int i = 0; i < (dimension * dimension); i++) {
@@ -498,7 +499,7 @@ public class MatrixHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			return MatrixHandling.getMatrix(args[0], t, 1).transpose();
 		}
 
@@ -553,7 +554,7 @@ public class MatrixHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CReal2dMatrix left = MatrixHandling.getMatrix(args[0], t, 1);
 			CReal2dMatrix right = MatrixHandling.getMatrix(args[1], t, 2);
 			left.add(right, t);
@@ -618,7 +619,7 @@ public class MatrixHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CReal2dMatrix left = MatrixHandling.getMatrix(args[0], t, 1);
 			CReal2dMatrix right = MatrixHandling.getMatrix(args[1], t, 2);
 			left.subtract(right, t);
@@ -683,7 +684,7 @@ public class MatrixHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CReal2dMatrix matrix = MatrixHandling.getMatrix(args[0], t, 1);
 			double scalar = ArgumentValidation.getDouble(args[1], t);
 			matrix.scalarMultiply(scalar);
@@ -742,7 +743,7 @@ public class MatrixHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CReal2dMatrix matrix = MatrixHandling.getMatrix(args[0], t, 1);
 			int row = ArgumentValidation.getInt32(args[1], t);
 			int column = ArgumentValidation.getInt32(args[2], t);
@@ -806,7 +807,7 @@ public class MatrixHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CReal2dMatrix left = MatrixHandling.getMatrix(args[0], t, 1);
 			CReal2dMatrix right = MatrixHandling.getMatrix(args[1], t, 2);
 			return left.multiply(right, t);
@@ -872,7 +873,7 @@ public class MatrixHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CReal2dMatrix left = MatrixHandling.getMatrix(args[0], t, 1);
 			CReal2dMatrix right = MatrixHandling.getMatrix(args[1], t, 2);
 			return CBoolean.get(left.canMultiply(right));
@@ -937,7 +938,7 @@ public class MatrixHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CReal2dMatrix left = MatrixHandling.getMatrix(args[0], t, 1);
 			CReal2dMatrix right = MatrixHandling.getMatrix(args[1], t, 2);
 			return CBoolean.get(left.canAdd(right));
@@ -1002,7 +1003,7 @@ public class MatrixHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CReal2dMatrix matrix = MatrixHandling.getMatrix(args[0], t, 1);
 			return CBoolean.get(matrix.isSquare());
 		}
@@ -1057,7 +1058,7 @@ public class MatrixHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CReal2dMatrix left = MatrixHandling.getMatrix(args[0], t, 1);
 			CReal2dMatrix right = MatrixHandling.getMatrix(args[1], t, 2);
 			double tolerance = ArgumentValidation.getDouble(args[2], t);
@@ -1126,7 +1127,7 @@ public class MatrixHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CReal2dMatrix matrix = MatrixHandling.getMatrix(args[0], t, 1);
 			return new CDouble(matrix.trace(t), t);
 		}
@@ -1182,7 +1183,7 @@ public class MatrixHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CReal2dMatrix matrix = MatrixHandling.getMatrix(args[0], t, 1);
 			return new CDouble(matrix.determinant(t), t);
 		}
@@ -1239,7 +1240,7 @@ public class MatrixHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, GenericParameters generics, Mixed... args) throws ConfigRuntimeException {
 			CReal2dMatrix matrix = MatrixHandling.getMatrix(args[0], t, 1);
 			return new CDouble(matrix.norm(), t);
 		}

@@ -441,7 +441,7 @@ public class ParseTree implements Cloneable {
 	 */
 	public CClassType getDeclaredType(Environment env) {
 		if(isConst()) {
-			return getData().typeof();
+			return getData().typeof(env);
 		} else if(getData() instanceof IVariable ivar) {
 			StaticAnalysis sa = env.getEnv(CompilerEnvironment.class).getStaticAnalysis();
 			if(sa.isLocalEnabled()) {

@@ -13,6 +13,7 @@ import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.exceptions.CRE.CREPluginInternalException;
@@ -208,7 +209,7 @@ public class BukkitMCCommand implements MCCommand {
 	}
 
 	@Override
-	public List<String> handleTabComplete(MCCommandSender sender, String alias, String[] args) {
+	public List<String> handleTabComplete(MCCommandSender sender, String alias, String[] args, Environment env) {
 		if(Commands.onTabComplete.containsKey(cmd.getName().toLowerCase())) {
 			Target t = Target.UNKNOWN;
 			CArray cargs = new CArray(t);
@@ -221,7 +222,7 @@ public class BukkitMCCommand implements MCCommand {
 				Mixed fret = closure.executeCallable(null, t, new CString(alias, t), new CString(sender.getName(), t), cargs,
 						new CArray(t) // reserved for an obgen style command array
 				);
-				if(fret.isInstanceOf(CArray.TYPE)) {
+				if(fret.isInstanceOf(CArray.TYPE, null, env)) {
 					List<String> ret = new ArrayList<>();
 					if(((CArray) fret).inAssociativeMode()) {
 						for(Mixed key : ((CArray) fret).keySet()) {
@@ -262,7 +263,7 @@ public class BukkitMCCommand implements MCCommand {
 				Mixed fret = closure.executeCallable(null, t, new CString(label, t), new CString(sender.getName(), t), cargs,
 						new CArray(t) // reserved for an obgen style command array
 				);
-				if(fret.isInstanceOf(CBoolean.TYPE)) {
+				if(fret instanceof CBoolean) {
 					return ((CBoolean) fret).getBoolean();
 				}
 			} catch (ConfigRuntimeException cre) {
