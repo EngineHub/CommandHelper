@@ -2544,15 +2544,23 @@ public class World {
 			}
 			CArray params = (CArray) c;
 			if(params.containsKey("width")) {
-				if(params.containsKey("seconds")) {
-					wb.setSize(ArgumentValidation.getDouble(params.get("width", t), t),
-							ArgumentValidation.getInt32(params.get("seconds", t), t));
-				} else {
-					wb.setSize(ArgumentValidation.getDouble(params.get("width", t), t));
+				try {
+					if(params.containsKey("seconds")) {
+						wb.setSize(ArgumentValidation.getDouble(params.get("width", t), t),
+								ArgumentValidation.getInt32(params.get("seconds", t), t));
+					} else {
+						wb.setSize(ArgumentValidation.getDouble(params.get("width", t), t));
+					}
+				} catch(IllegalArgumentException ex) {
+					throw new CRERangeException(ex.getMessage(), t);
 				}
 			}
 			if(params.containsKey("center")) {
-				wb.setCenter(ObjectGenerator.GetGenerator().location(params.get("center", t), w, t));
+				try {
+					wb.setCenter(ObjectGenerator.GetGenerator().location(params.get("center", t), w, t));
+				} catch(IllegalArgumentException ex) {
+					throw new CRERangeException(ex.getMessage(), t);
+				}
 			}
 			if(params.containsKey("damagebuffer")) {
 				wb.setDamageBuffer(ArgumentValidation.getDouble(params.get("damagebuffer", t), t));
@@ -2561,7 +2569,11 @@ public class World {
 				wb.setDamageAmount(ArgumentValidation.getDouble(params.get("damageamount", t), t));
 			}
 			if(params.containsKey("warningtime")) {
-				wb.setWarningTime(ArgumentValidation.getInt32(params.get("warningtime", t), t));
+				try {
+					wb.setWarningTime(ArgumentValidation.getInt32(params.get("warningtime", t), t));
+				} catch(IllegalArgumentException ex) {
+					throw new CRERangeException(ex.getMessage(), t);
+				}
 			}
 			if(params.containsKey("warningdistance")) {
 				wb.setWarningDistance(ArgumentValidation.getInt32(params.get("warningdistance", t), t));

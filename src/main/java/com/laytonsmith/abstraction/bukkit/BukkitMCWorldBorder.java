@@ -30,7 +30,13 @@ public class BukkitMCWorldBorder implements MCWorldBorder {
 
 	@Override
 	public void setSize(double size, int seconds) {
-		wb.setSize(size, seconds);
+		try {
+			wb.setSize(size, seconds);
+		} catch(ArithmeticException ex) {
+			// Probably MC 1.21.11+ when world border interpolation changed from seconds to ticks.
+			// Paper doesn't clamp but instead throws an ArithmeticException.
+			wb.setSize(size, Integer.MAX_VALUE / 20);
+		}
 	}
 
 	@Override
@@ -70,7 +76,13 @@ public class BukkitMCWorldBorder implements MCWorldBorder {
 
 	@Override
 	public void setWarningTime(int seconds) {
-		wb.setWarningTime(seconds);
+		try {
+			wb.setWarningTime(seconds);
+		} catch(ArithmeticException ex) {
+			// Probably MC 1.21.11+ when world border warning time changed from seconds to ticks.
+			// Paper doesn't clamp but instead throws an ArithmeticException.
+			wb.setWarningTime(Integer.MAX_VALUE / 20);
+		}
 	}
 
 	@Override
