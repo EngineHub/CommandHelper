@@ -52,7 +52,6 @@ import com.laytonsmith.abstraction.bukkit.entities.BukkitMCBoat;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCBreedable;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCChestBoat;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCCommandMinecart;
-import com.laytonsmith.abstraction.bukkit.entities.BukkitMCComplexEntityPart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCComplexLivingEntity;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCEntity;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCFireball;
@@ -452,6 +451,10 @@ public class BukkitConvertor extends AbstractConvertor {
 			return null;
 		}
 
+		if(be instanceof ComplexEntityPart part) {
+			be = part.getParent();
+		}
+
 		BukkitMCEntityType type = BukkitMCEntityType.valueOfConcrete(be.getType());
 		if(type.getWrapperClass() != null) {
 			return ReflectionUtils.newInstance(type.getWrapperClass(), new Class[]{Entity.class}, new Object[]{be});
@@ -534,11 +537,6 @@ public class BukkitConvertor extends AbstractConvertor {
 			// Must come before LivingEntity
 			type.setWrapperClass(BukkitMCHumanEntity.class);
 			return new BukkitMCHumanEntity(be);
-		}
-
-		if(be instanceof ComplexEntityPart) {
-			type.setWrapperClass(BukkitMCComplexEntityPart.class);
-			return new BukkitMCComplexEntityPart(be);
 		}
 
 		if(be instanceof ComplexLivingEntity) {
