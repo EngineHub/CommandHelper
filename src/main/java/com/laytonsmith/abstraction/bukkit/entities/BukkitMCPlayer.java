@@ -141,11 +141,6 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 		ItemStack is = null;
 		if(slot == null) {
 			is = p.getInventory().getItemInMainHand();
-			// Empty slots should return null, but unlike other PlayerInventory methods,
-			// getItemInMainHand() never returns null.
-			if(is.getType() == Material.AIR) {
-				return null;
-			}
 		} else if(slot == 100) {
 			is = p.getInventory().getBoots();
 		} else if(slot == 101) {
@@ -159,7 +154,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 		} else if(slot >= 0 && slot <= 35) {
 			is = p.getInventory().getItem(slot);
 		}
-		if(is == null) {
+		if(is == null || is.getAmount() <= 0 || is.getType() == Material.AIR) {
 			return null;
 		}
 		return new BukkitMCItemStack(is);
