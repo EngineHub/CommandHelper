@@ -15,4 +15,8 @@ public interface MCAgeable extends MCLivingEntity {
 	boolean isBaby();
 
 	void setBaby();
+
+	boolean getAgeLock();
+
+	void setAgeLock(boolean lock);
 }

@@ -1867,7 +1867,11 @@ public abstract class MCMaterial<Concrete> extends DynamicEnum<MCVanillaMaterial
 		PARCHED_SPAWN_EGG(MCVersion.MC1_21_11),
 		STONE_SPEAR(MCVersion.MC1_21_11),
 		WOODEN_SPEAR(MCVersion.MC1_21_11),
-		ZOMBIE_NAUTILUS_SPAWN_EGG(MCVersion.MC1_21_11);
+		ZOMBIE_NAUTILUS_SPAWN_EGG(MCVersion.MC1_21_11),
+
+		// 26.1 additions
+		GOLDEN_DANDELION(MCVersion.MC26_1),
+		POTTED_GOLDEN_DANDELION(MCVersion.MC26_1);
 
 		private final MCVersion since;
 		private final MCVersion until;

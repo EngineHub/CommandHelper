@@ -43,4 +43,14 @@ public class BukkitMCAgeable extends BukkitMCLivingEntity implements MCAgeable {
 		a.setBaby();
 	}
 
+	@Override
+	public boolean getAgeLock() {
+		return a.getAgeLock();
+	}
+
+	@Override
+	public void setAgeLock(boolean lock) {
+		a.setAgeLock(lock);
+	}
+
 }

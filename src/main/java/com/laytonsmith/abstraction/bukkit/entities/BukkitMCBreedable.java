@@ -23,14 +23,4 @@ public class BukkitMCBreedable extends BukkitMCAgeable implements MCBreedable {
 		b.setBreed(breed);
 	}
 
-	@Override
-	public boolean getAgeLock() {
-		return b.getAgeLock();
-	}
-
-	@Override
-	public void setAgeLock(boolean lock) {
-		b.setAgeLock(lock);
-	}
-
 }

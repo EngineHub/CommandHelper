@@ -434,6 +434,8 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 			return;
 		}
 		boolean isPaper = ((BukkitMCServer) Static.getServer()).isPaper();
+		MCVersion mcversion = Static.getServer().getMinecraftVersion();
+
 		// Get some version specific mappings
 		String nms = "net.minecraft.server";
 		String playersPackage = nms + ".players";
@@ -443,7 +445,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 		String map = "map";
 		String serverOpListEntry = ".ServerOpListEntry";
 		String owner = "OWNER";
-		if(!isPaper) {
+		if(!isPaper && mcversion.lt(MCVersion.MC26_1)) {
 			ops = "o";
 			getPlayerList = "aj";
 			map = "e";
@@ -451,7 +453,6 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 			owner = "e";
 		}
 
-		MCVersion mcversion = Static.getServer().getMinecraftVersion();
 		if(mcversion.lt(MCVersion.MC1_21_11)) {
 			getPlayerList = isPaper ? "getPlayerList" : "am";
 			if(mcversion.lt(MCVersion.MC1_21_9)) {

@@ -3668,7 +3668,9 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "int {[player]} Returns the time of the specified player, as an integer from 0 to 24000-1";
+			return "int {[player]} Returns the time of the specified player, as an integer in ticks from 0 to 23999."
+					+ " As of MC 26.1 non-overworld dimensions do not have a world clock and will return 0 unless"
+					+ " modified for this player.";
 		}
 
 		@Override

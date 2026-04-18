@@ -86,13 +86,19 @@ public enum MCVersion implements Version {
 	MC1_21_10,
 	MC1_21_11,
 	MC1_21_X,
+	// below this point, MC versioning changed to <year>.<update>.<hotfix>
+	MC26_1,
+	MC26_1_1,
+	MC26_1_2,
+	MC26_1_X,
+	MC26_X,
 	MCX_X,
 	CURRENT,
 	FUTURE,
 	NEVER;
 
 	public static final MCVersion EARLIEST_SUPPORTED = MC1_16_X;
-	public static final MCVersion LATEST_SUPPORTED = MC1_21_11;
+	public static final MCVersion LATEST_SUPPORTED = MC26_1_2;
 
 	public static MCVersion match(String[] source) {
 		String[] parts = new String[Math.min(3, source.length)];

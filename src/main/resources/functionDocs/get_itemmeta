@@ -469,4 +469,12 @@ Data components not yet supported in item meta:
 ! attack_range
 | 1.21.11
 |
+|-
+! dye
+| 26.1
+|
+|-
+! additional_trade_cost
+| 26.1
+|
 |}

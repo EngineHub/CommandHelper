@@ -895,9 +895,11 @@ public class World {
 		public String docs() {
 			StringBuilder doc = new StringBuilder();
 			synchronized(World.class) {
-				doc.append("void {[world], time} Sets the time of a given world. Should be a number from 0 to"
-						+ " 24000, if not, it is modulo scaled. ---- Alternatively, common time notation"
-						+ " (9:30pm, 4:00 am) is acceptable, and convenient english mappings also exist:");
+				doc.append("void {[world], time} Sets the time of a given world."
+						+ " As of MC 26.1 all overworld dimensions share a world clock and other dimensions will throw"
+						+ " an InvalidWorldException. The time should be a number in ticks from 0 to 24000."
+						+ " If not, it is modulo scaled. Alternatively, common time notation (9:30pm, 4:00 am) is"
+						+ " acceptable, and convenient english mappings also exist:");
 				doc.append("<ul>");
 				for(String key : TIME_LOOKUP.keySet()) {
 					doc.append("<li>").append(key).append(" = ").append(TIME_LOOKUP.get(key)).append("</li>");
@@ -975,6 +977,8 @@ public class World {
 				w.setTime(Long.parseLong(stime));
 			} catch (NumberFormatException e) {
 				throw new CREFormatException("Invalid time provided", t);
+			} catch(IllegalArgumentException ex) {
+				throw new CREInvalidWorldException(ex.getMessage(), t);
 			}
 			return CVoid.VOID;
 		}
@@ -995,7 +999,8 @@ public class World {
 
 		@Override
 		public String docs() {
-			return "int {[world]} Returns the time of the specified world, as an integer from 0 to 24000-1";
+			return "int {[world]} Returns the time of the specified world, as an integer in ticks from 0 to 23999."
+					+ " As of MC 26.1 non-overworld dimensions do not have a world clock and will return 0.";
 		}
 
 		@Override
@@ -1049,7 +1054,9 @@ public class World {
 
 		@Override
 		public String docs() {
-			return "void {[world], day} Set the current day number of a given world";
+			return "void {[world], day} Set the current day number of a given world."
+					+ " As of MC 26.1 all overworld dimensions share the same world clock and other dimensions will"
+					+ " throw an InvalidWorldException.";
 		}
 
 		@Override
@@ -1090,7 +1097,11 @@ public class World {
 				throw new CRERangeException("Day cannot be negative.", t);
 			}
 
-			w.setFullTime((day * 24000) + w.getTime());
+			try {
+				w.setFullTime(((long) day * 24000) + w.getTime());
+			} catch(IllegalArgumentException ex) {
+				throw new CREInvalidWorldException(ex.getMessage(), t);
+			}
 			return CVoid.VOID;
 		}
 	}
@@ -1110,7 +1121,8 @@ public class World {
 
 		@Override
 		public String docs() {
-			return "int {[world]} Returns the current day number of the specified world";
+			return "int {[world]} Returns the current day number of the specified world."
+					+ " As of MC 26.1 non-overworld dimensions do not have a world clock and will return 0.";
 		}
 
 		@Override

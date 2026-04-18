@@ -456,9 +456,7 @@ public class MobManagement {
 			MCLivingEntity ent = Static.getLivingEntity(args[0], t);
 			if(ent instanceof MCAgeable mob) {
 				mob.setAge(age);
-				if(mob instanceof MCBreedable breedable) {
-					breedable.setAgeLock(lock);
-				}
+				mob.setAgeLock(lock);
 				return CVoid.VOID;
 			} else {
 				throw new CREUnageableMobException("The specified entity does not age", t);
@@ -478,7 +476,7 @@ public class MobManagement {
 		@Override
 		public String docs() {
 			return "void {entityUUID, int[, lockAge]} sets the age of the mob to the specified int, and locks it at"
-					+ " that age if lockAge is true, but by default it will not. (locking only applies to breedable mobs)"
+					+ " that age if lockAge is true, but by default it will not."
 					+ " Throws a UnageableMobException if the mob does not age naturally.";
 		}
 
