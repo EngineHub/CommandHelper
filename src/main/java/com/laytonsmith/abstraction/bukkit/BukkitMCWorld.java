@@ -471,7 +471,12 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 
 	@Override
 	public void setTime(long time) {
-		w.setTime(time);
+		try {
+			w.setTime(time);
+		} catch(IllegalArgumentException ignored) {
+			// Probably after Paper 26.1 for worlds without a world clock (nether by default).
+			// Ignored for consistency across versions and implementations.
+		}
 	}
 
 	@Override
@@ -481,7 +486,12 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 
 	@Override
 	public void setFullTime(long time) {
-		w.setFullTime(time);
+		try {
+			w.setFullTime(time);
+		} catch(IllegalArgumentException ignored) {
+			// Probably after Paper 26.1 for worlds without a world clock (nether by default).
+			// Ignored for consistency across versions and implementations.
+		}
 	}
 
 	@Override
