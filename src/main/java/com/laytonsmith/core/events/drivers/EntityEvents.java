@@ -2397,7 +2397,8 @@ public class EntityEvents {
 					+ " This event is called when a leash is broken."
 					+ " {id: The entityID of the entity | type: The entity type of the entity"
 					+ " | reason: The reason the leash broke. Can be one of HOLDER_GONE, PLAYER_UNLEASH, DISTANCE,"
-					+ " SHEAR (Spigot-only 1.21.6+), FIREWORK (Spigot-only 1.21.6+), UNKNOWN}"
+					+ " LEASHED_GONE (Paper-only 26.1.2+), SHEAR (Spigot-only 1.21.6+), FIREWORK (Spigot-only 1.21.6+),"
+					+" UNKNOWN}"
 					+ " {}";
 		}
 
