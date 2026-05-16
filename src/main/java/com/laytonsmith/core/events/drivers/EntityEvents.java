@@ -2398,7 +2398,7 @@ public class EntityEvents {
 					+ " {id: The entityID of the entity | type: The entity type of the entity"
 					+ " | reason: The reason the leash broke. Can be one of HOLDER_GONE, PLAYER_UNLEASH, DISTANCE,"
 					+ " LEASHED_GONE (Paper-only 26.1.2+), SHEAR (Spigot-only 1.21.6+), FIREWORK (Spigot-only 1.21.6+),"
-					+" UNKNOWN}"
+					+ " UNKNOWN}"
 					+ " {}";
 		}
 
