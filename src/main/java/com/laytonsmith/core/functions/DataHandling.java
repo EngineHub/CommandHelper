@@ -3878,7 +3878,7 @@ public class DataHandling {
 
 				// Unwrap single value in __statements__() and return its string value.
 				if(root.getChildren().size() == 1 && root.getChildAt(0).getData() instanceof CFunction
-						&& ((CFunction) root.getChildAt(0).getData()).getFunction().getName().equals(__statements__.NAME)
+						&& root.getChildAt(0).getData().val().equals(__statements__.NAME)
 						&& root.getChildAt(0).getChildren().size() == 1) {
 					return new CString(parent.seval(root.getChildAt(0).getChildAt(0), env).val(), t);
 				}
