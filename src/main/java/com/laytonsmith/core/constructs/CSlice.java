@@ -166,6 +166,43 @@ public class CSlice extends CArray {
 	}
 
 	@Override
+	public Iterator<Mixed> iterator() {
+		if(start <= finish) {
+			return new Iterator<Mixed>() {
+
+				private long current = start;
+				private long last = finish;
+
+				@Override
+				public boolean hasNext() {
+					return this.current <= this.last;
+				}
+
+				@Override
+				public Mixed next() {
+					return new CInt(this.current++, Target.UNKNOWN);
+				}
+			};
+		} else {
+			return new Iterator<Mixed>() {
+
+				private long current = start;
+				private long last = finish;
+
+				@Override
+				public boolean hasNext() {
+					return this.current >= this.last;
+				}
+
+				@Override
+				public Mixed next() {
+					return new CInt(this.current--, Target.UNKNOWN);
+				}
+			};
+		}
+	}
+
+	@Override
 	public long size() {
 		return size;
 	}
