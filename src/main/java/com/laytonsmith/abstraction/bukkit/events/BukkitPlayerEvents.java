@@ -346,8 +346,8 @@ public class BukkitPlayerEvents {
 					newloc.getX(),
 					newloc.getY(),
 					newloc.getZ(),
-					newloc.getPitch(),
-					newloc.getYaw()
+					newloc.getYaw(),
+					newloc.getPitch()
 			);
 			e.setTo(loc);
 		}
