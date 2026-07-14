@@ -1262,7 +1262,7 @@ public class Compiler {
 			// Typecheck value and type nodes.
 			ParseTree valNode = ast.getChildAt(0);
 			CClassType valType = analysis.typecheck(valNode, env, exceptions);
-			StaticAnalysis.requireType(valType, Mixed.TYPE, valType.getTarget(), env, exceptions);
+			StaticAnalysis.requireType(valType, Mixed.TYPE, valNode.getTarget(), env, exceptions);
 			ParseTree typeNode = ast.getChildAt(1);
 			CClassType typeType = analysis.typecheck(typeNode, env, exceptions);
 			StaticAnalysis.requireType(typeType, CClassType.TYPE, typeNode.getTarget(), env, exceptions);
