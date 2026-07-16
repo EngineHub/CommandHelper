@@ -27,7 +27,8 @@ public class FunctionSignature {
 	 * @param returnType - The function return type.
 	 * @param params - The function parameters.
 	 * @param throwsList - The list of possibly thrown exceptions by the function.
-	 * @param noneIsAllowed If the none type is allowed. If so, none is treated as auto.
+	 * @param noneIsAllowed - If the none (Java {@code null}) type is allowed and should be treated as
+	 * {@link CClassType.AUTO}.
 	 */
 	public FunctionSignature(ReturnType returnType, List<Param> params, List<Throws> throwsList, boolean noneIsAllowed) {
 		this.returnType = returnType;
@@ -129,9 +130,8 @@ public class FunctionSignature {
 				// Match as many arguments as possible with this varparam.
 				int numMatches = 0;
 				while(argIndex < argTypes.size()
-						&& (
-						(argTypes.get(argIndex) == null && noneIsAllowed)
-						|| InstanceofUtil.isInstanceof(argTypes.get(argIndex), param.getType(), env))) {
+						&& ((argTypes.get(argIndex) == null && this.noneIsAllowed)
+								|| InstanceofUtil.isInstanceof(argTypes.get(argIndex), param.getType(), env))) {
 					argIndex++;
 					numMatches++;
 				}

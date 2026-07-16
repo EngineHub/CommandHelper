@@ -96,7 +96,7 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 	 * @param exceptions - A set to which all type errors will be added.
 	 * @return The return type of this function when invoked with the given argument types. If the return type
 	 * is unknown, {@link CClassType#AUTO} is returned, indicating that this value should be handled as dynamic
-	 * during static type checking.
+	 * during static type checking. If this invocation will never return due to control flow, {@code null} is returned.
 	 */
 	public CClassType getReturnType(Target t, List<CClassType> argTypes,
 			List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions);
@@ -109,7 +109,7 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 	 * @param ast - The parse tree.
 	 * @param env - The {@link Environment}, used for instanceof checks on types.
 	 * @param exceptions - Any compile exceptions will be added to this set.
-	 * @return The return type of this function.
+	 * @return The return type of this function, or {@code null} when this function does not return.
 	 */
 	public CClassType typecheck(StaticAnalysis analysis,
 			ParseTree ast, Environment env, Set<ConfigCompileException> exceptions);

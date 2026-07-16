@@ -17,6 +17,7 @@ public class SignatureBuilder {
 	 * Creates a new {@link SignatureBuilder}, initialized with a {@link FunctionSignature} with the given return type.
 	 * When determining the return type for given argument types, all matching signatures will be used.
 	 * @param returnType - The return type for the first {@link FunctionSignature}.
+	 * Passing {@code null} indicates that the function does not return.
 	 */
 	public SignatureBuilder(CClassType returnType) {
 		this(returnType, null, MatchType.MATCH_ALL);
@@ -25,6 +26,7 @@ public class SignatureBuilder {
 	/**
 	 * Creates a new {@link SignatureBuilder}, initialized with a {@link FunctionSignature} with the given return type.
 	 * @param returnType - The return type for the first {@link FunctionSignature}.
+	 * Passing {@code null} indicates that the function does not return.
 	 * @param matchType - The {@link MatchType} used for determining the return type for given argument types.
 	 */
 	public SignatureBuilder(CClassType returnType, MatchType matchType) {
@@ -35,6 +37,7 @@ public class SignatureBuilder {
 	 * Creates a new {@link SignatureBuilder}, initialized with a {@link FunctionSignature} with the given return type.
 	 * When determining the return type for given argument types, all matching signatures will be used.
 	 * @param returnType - The return type for the first {@link FunctionSignature}.
+	 * Passing {@code null} indicates that the function does not return.
 	 * @param returnValDesc - The return value description.
 	 */
 	public SignatureBuilder(CClassType returnType, String returnValDesc) {
@@ -44,6 +47,7 @@ public class SignatureBuilder {
 	/**
 	 * Creates a new {@link SignatureBuilder}, initialized with a {@link FunctionSignature} with the given return type.
 	 * @param returnType - The return type for the first {@link FunctionSignature}.
+	 * Passing {@code null} indicates that the function does not return.
 	 * @param returnValDesc - The return value description.
 	 * @param matchType - The {@link MatchType} used for determining the return type for given argument types.
 	 */
