@@ -622,7 +622,10 @@ public class Exceptions {
 		@Override
 		public FunctionSignatures getSignatures() {
 
-			// TODO - Define a better way to define "[catchVariable, catchCode]*, [catchCode]" in function signatures.
+			/*
+			 * TODO - Implement a way to define [catchVariable, catchCode]*, [catchCode] using signatures, and use it here.
+			 * Also check ifelse(), switch() and switch_ic(), as they need the same feature.
+			 */
 			return new SignatureBuilder(CVoid.TYPE)
 					.param(null, "tryCode", "The try code block.")
 					.varParam(null, "[catchVariable, catchCode]*, [catchCode]", "The catch blocks.").build();
