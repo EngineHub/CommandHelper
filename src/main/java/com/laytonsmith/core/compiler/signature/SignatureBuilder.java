@@ -62,6 +62,22 @@ public class SignatureBuilder {
 	 * @param paramName - The name of the parameter.
 	 * @param paramDesc - The description of the parameter.
 	 * @param isOptional - Whether the parameter is optional or not.
+	 * @param noneTypeAllowed - Whether a none type (Java {@code null}) is allowed to match this parameter in addition
+	 * to what the parameter type already matches.
+	 * @return This {@link SignatureBuilder}, for chaining builder methods.
+	 */
+	public SignatureBuilder param(
+			CClassType paramType, String paramName, String paramDesc, boolean isOptional, boolean noneTypeAllowed) {
+		this.signature.addParam(new Param(paramType, paramName, paramDesc, false, isOptional, noneTypeAllowed));
+		return this;
+	}
+
+	/**
+	 * Adds a normal function parameter. Parameters should be added from left to right.
+	 * @param paramType - The {@link CClassType} of the parameter.
+	 * @param paramName - The name of the parameter.
+	 * @param paramDesc - The description of the parameter.
+	 * @param isOptional - Whether the parameter is optional or not.
 	 * @return This {@link SignatureBuilder}, for chaining builder methods.
 	 */
 	public SignatureBuilder param(CClassType paramType, String paramName, String paramDesc, boolean isOptional) {
@@ -85,6 +101,21 @@ public class SignatureBuilder {
 	 * @param paramType - The {@link CClassType} of the parameter (the 'paramType' in 'paramType... paramName').
 	 * @param paramName - The name of the parameter.
 	 * @param paramDesc - The description of the parameter.
+	 * @param noneTypeAllowed - Whether a none type (Java {@code null}) is allowed to match an entry in this parameter
+	 * in addition to what the parameter type already matches.
+	 * @return This {@link SignatureBuilder}, for chaining builder methods.
+	 */
+	public SignatureBuilder varParam(
+			CClassType paramType, String paramName, String paramDesc, boolean noneTypeAllowed) {
+		this.signature.addParam(new Param(paramType, paramName, paramDesc, true, false, noneTypeAllowed));
+		return this;
+	}
+
+	/**
+	 * Adds a variadic function parameter (varparam). Parameters should be added from left to right.
+	 * @param paramType - The {@link CClassType} of the parameter (the 'paramType' in 'paramType... paramName').
+	 * @param paramName - The name of the parameter.
+	 * @param paramDesc - The description of the parameter.
 	 * @return This {@link SignatureBuilder}, for chaining builder methods.
 	 */
 	public SignatureBuilder varParam(CClassType paramType, String paramName, String paramDesc) {
@@ -100,11 +131,6 @@ public class SignatureBuilder {
 	 */
 	public SignatureBuilder throwsEx(Class<? extends CREThrowable> exception, String when) {
 		this.signature.addThrows(new Throws(exception, when));
-		return this;
-	}
-
-	public SignatureBuilder setNoneIsAllowed(boolean allowed) {
-		this.signature.setNoneIsAllowed(allowed);
 		return this;
 	}
 

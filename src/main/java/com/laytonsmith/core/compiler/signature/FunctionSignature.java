@@ -20,21 +20,17 @@ public class FunctionSignature {
 	private final ReturnType returnType;
 	private final List<Param> params;
 	private final List<Throws> throwsList;
-	private boolean noneIsAllowed;
 
 	/**
 	 * Creates a new {@link FunctionSignature} with the given properties.
 	 * @param returnType - The function return type.
 	 * @param params - The function parameters.
 	 * @param throwsList - The list of possibly thrown exceptions by the function.
-	 * @param noneIsAllowed - If the none (Java {@code null}) type is allowed and should be treated as
-	 * {@link CClassType.AUTO}.
 	 */
-	public FunctionSignature(ReturnType returnType, List<Param> params, List<Throws> throwsList, boolean noneIsAllowed) {
+	public FunctionSignature(ReturnType returnType, List<Param> params, List<Throws> throwsList) {
 		this.returnType = returnType;
 		this.params = params;
 		this.throwsList = throwsList;
-		this.noneIsAllowed = noneIsAllowed;
 	}
 
 	/**
@@ -43,7 +39,7 @@ public class FunctionSignature {
 	 * @param returnType - The function return type.
 	 */
 	public FunctionSignature(ReturnType returnType) {
-		this(returnType, new ArrayList<>(), new ArrayList<>(), false);
+		this(returnType, new ArrayList<>(), new ArrayList<>());
 	}
 
 	/**
@@ -59,10 +55,6 @@ public class FunctionSignature {
 
 	protected void addThrows(Throws throwsObj) {
 		this.throwsList.add(throwsObj);
-	}
-
-	protected void setNoneIsAllowed(boolean noneIsAllowed) {
-		this.noneIsAllowed = noneIsAllowed;
 	}
 
 	/**
@@ -109,7 +101,8 @@ public class FunctionSignature {
 
 				// Match normal or optional parameter.
 				if(argIndex < argTypes.size()
-						&& InstanceofUtil.isInstanceof(argTypes.get(argIndex), param.getType(), env)) {
+						&& ((param.getNoneTypeAllowed() && argTypes.get(argIndex) == null)
+								|| InstanceofUtil.isInstanceof(argTypes.get(argIndex), param.getType(), env))) {
 
 					// Keep track of the optional parameter match.
 					if(param.isOptional()) {
@@ -130,7 +123,7 @@ public class FunctionSignature {
 				// Match as many arguments as possible with this varparam.
 				int numMatches = 0;
 				while(argIndex < argTypes.size()
-						&& ((argTypes.get(argIndex) == null && this.noneIsAllowed)
+						&& ((param.getNoneTypeAllowed() && argTypes.get(argIndex) == null)
 								|| InstanceofUtil.isInstanceof(argTypes.get(argIndex), param.getType(), env))) {
 					argIndex++;
 					numMatches++;
@@ -172,7 +165,8 @@ public class FunctionSignature {
 	 */
 	public String getParamTypesString() {
 		return "(" + StringUtils.Join(this.params, ", ", null, null, null, (Param param) -> {
-			String ret = (param.getType() == null ? "any" : param.getType().getSimpleName());
+			String ret = (param.getType() == null ? "any" : (param.getNoneTypeAllowed()
+					? param.getType().getSimpleName() + "|none" : param.getType().getSimpleName()));
 			if(param.isVarParam()) {
 				ret += "...";
 			}

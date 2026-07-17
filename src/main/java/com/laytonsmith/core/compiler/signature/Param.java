@@ -13,6 +13,32 @@ public class Param {
 	private final String desc;
 	private final boolean isVarParam;
 	private final boolean isOptional;
+	private final boolean noneTypeAllowed;
+
+	/**
+	 * Creates a new {@link Param} with the given properties.
+	 * Parameters cannot be variadic and optional at the same time, as varparams already imply optionality.
+	 * @param type - The (parent) type of the parameter.
+	 * @param name - The name of the parameter.
+	 * @param desc - The description of the parameter.
+	 * @param isVarParam - {@code true} if the parameter is a varparam, meaning that it matches zero or more arguments
+	 * of the given type, or one argument of type {@code array<type>}. {@code false} otherwise.
+	 * Note that a varparam is only usable as type {@code array<type>}.
+	 * @param isOptional - {@code true} if the parameter is optional, {@code false} otherwise.
+	 * @param noneTypeAllowed - {@code true} if the none (Java {@code null}) type is allowed to match this parameter in
+	 * addition to what the parameter type already matches.
+	 * {@code false} otherwise. If the parameter type is {@code null}, then this boolean parameter is ignored.
+	 */
+	public Param(CClassType type, String name, String desc,
+			boolean isVarParam, boolean isOptional, boolean noneTypeAllowed) {
+		assert !isVarParam || !isOptional : "A parameter cannot be variadic and optional at the same time.";
+		this.type = type;
+		this.name = name;
+		this.desc = desc;
+		this.isVarParam = isVarParam;
+		this.isOptional = isOptional;
+		this.noneTypeAllowed = noneTypeAllowed;
+	}
 
 	/**
 	 * Creates a new {@link Param} with the given properties.
@@ -26,12 +52,7 @@ public class Param {
 	 * @param isOptional - {@code true} if the parameter is optional, {@code false} otherwise.
 	 */
 	public Param(CClassType type, String name, String desc, boolean isVarParam, boolean isOptional) {
-		assert !isVarParam || !isOptional : "A parameter cannot be variadic and optional at the same time.";
-		this.type = type;
-		this.name = name;
-		this.desc = desc;
-		this.isVarParam = isVarParam;
-		this.isOptional = isOptional;
+		this(type, name, desc, isVarParam, isOptional, false);
 	}
 
 	/**
@@ -84,5 +105,16 @@ public class Param {
 	 */
 	public boolean isOptional() {
 		return this.isOptional;
+	}
+
+	/**
+	 * Gets whether the none type is allowed to match this parameter in addition to what the parameter type matches.
+	 * When this returns {@code false}, the none type can still match this parameter if {@ref #getType()} returns
+	 * {@code null}.
+	 * @return {@code true} if a none type argument can match this parameter in addition to what the parameter type
+	 * matches, {@code false} otherwise.
+	 */
+	public boolean getNoneTypeAllowed() {
+		return this.noneTypeAllowed;
 	}
 }
