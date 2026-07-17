@@ -1444,4 +1444,126 @@ public class MethodScriptCompilerTest extends AbstractIntegrationTest {
 		sa.setLocalEnable(true);
 		MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, env, null, true), env, env.getEnvClasses(), sa);
 	}
+
+	@Test
+	public void testNoFalseMissingReturnInProcErrors() throws Exception {
+		String script = """
+				<!strict>
+				int proc _a() {
+					return 1;
+				}
+				_a();
+				int proc _b(@a, @b) {
+					if(@a) {
+						return 1;
+					} else if(@b) {
+						return 1;
+					} else {
+						return 1;
+					}
+				}
+				_b(1, 2);
+				int proc _c(@a) {
+					switch(@a) {
+						case 1: return 1;
+						case 2: return 1;
+						default: return 1;
+					}
+				}
+				_c(1);
+				int proc _d(@a) {
+					switch_ic(@a) {
+						case 'a': return 1;
+						case 'b': return 1;
+						default: return 1;
+					}
+				}
+				_d('str');
+				int proc _e() {
+					try(return(1), return(1));
+				}
+				_e();
+				int proc _f() {
+					try {
+						return 1;
+					} catch(RangeException @ex) {
+						return 1;
+					} catch(CastException @ex) {
+						return 1;
+					}
+				}
+				_f();
+				""";
+		Environment env = Static.GenerateStandaloneEnvironment();
+		StaticAnalysis sa = new StaticAnalysis(true);
+		sa.setLocalEnable(true);
+		MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, env, null, true), env, env.getEnvClasses(), sa);
+	}
+
+	@Test
+	public void testNoFalseNoneTypeErrorsInBranchAssigns() throws Exception {
+		String script = """
+				<!strict>
+				boolean @cond = dyn(true);
+				boolean @cond2 = dyn(true);
+				string @str = dyn('');
+
+				int @a1 = if(@cond, 1, 2);
+				int @a2 = if(@cond, die(), 2);
+				int @a3 = if(@cond, 1, die());
+
+				int @b1 = if(@cond) {1} else if(@cond2) {2} else {3}
+				int @b2 = if(@cond) {die()} else if(@cond2) {2} else {3}
+				int @b3 = if(@cond) {1} else if(@cond2) {die()} else {3}
+				int @b4 = if(@cond) {1} else if(@cond2) {2} else {die()}
+				int @b5 = if(@cond) {die()} else if(@cond2) {die()} else {3}
+				int @b6 = if(@cond) {die()} else if(@cond2) {2} else {die()}
+				int @b7 = if(@cond) {1} else if(@cond2) {die()} else {die()}
+
+				int @c1 = switch(@str) {
+					default: 1
+				}
+				int @c2 = switch(@str) {
+					case 1: 1
+					default: 1
+				}
+				int @c3 = switch(@str) {
+					case 1: die()
+					default: 1
+				}
+				int @c4 = switch(@str) {
+					case 1: 1
+					default: die()
+				}
+				int @c5 = switch(@str) {
+					case 1: 1
+					case 2: 1
+					default: 1
+				}
+				int @c6 = switch(@str) {
+					case 1: die()
+					case 2: 1
+					default: 1
+				}
+				int @c7 = switch(@str) {
+					case 1: 1
+					case 2: die()
+					default: 1
+				}
+				int @c8 = switch(@str) {
+					case 1: 1
+					case 2: 1
+					default: die()
+				}
+
+				int @d1 = if(@cond, 1, try(die(), die()));
+
+				int @e1 = if(@cond, 1, try {die()} catch(Exception @ex) {die()});
+				int @e2 = if(@cond, 1, try {die()} catch(RangeException @ex) {die()} catch(CastException @ex) {die()});
+				""";
+		Environment env = Static.GenerateStandaloneEnvironment();
+		StaticAnalysis sa = new StaticAnalysis(true);
+		sa.setLocalEnable(true);
+		MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, env, null, true), env, env.getEnvClasses(), sa);
+	}
 }
