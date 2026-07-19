@@ -104,6 +104,11 @@ public abstract class MCAttribute<Concrete> extends DynamicEnum<MCAttribute.MCVa
 		CAMERA_DISTANCE(MCVersion.MC1_21_6),
 		WAYPOINT_TRANSMIT_RANGE(MCVersion.MC1_21_6),
 		WAYPOINT_RECEIVE_RANGE(MCVersion.MC1_21_6),
+		AIR_DRAG_MODIFIER(MCVersion.MC26_2),
+		FRICTION_MODIFIER(MCVersion.MC26_2),
+		BOUNCINESS(MCVersion.MC26_2),
+		BELOW_NAME_DISTANCE(MCVersion.MC26_2),
+		NAME_TAG_DISTANCE(MCVersion.MC26_2),
 
 		UNKNOWN(MCVersion.NEVER);
 

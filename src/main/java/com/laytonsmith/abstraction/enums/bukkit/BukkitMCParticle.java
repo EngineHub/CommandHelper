@@ -6,6 +6,7 @@ import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCParticleData;
 import com.laytonsmith.abstraction.blocks.MCBlockData;
 import com.laytonsmith.abstraction.bukkit.BukkitMCColor;
+import com.laytonsmith.abstraction.bukkit.BukkitMCServer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCVibration;
 import com.laytonsmith.abstraction.enums.MCParticle;
 import com.laytonsmith.abstraction.enums.MCVersion;
@@ -119,7 +120,7 @@ public class BukkitMCParticle extends MCParticle<Particle> {
 				if(data instanceof MCColor) {
 					return new Particle.DustOptions(BukkitMCColor.GetColor((MCColor) data), 1.0F);
 				} else {
-					return new Particle.DustOptions(Color.RED, 1.0F);
+					return new Particle.DustOptions(Color.RED, 1.0F); // 0.01 - 4.0F
 				}
 			case DUST_COLOR_TRANSITION:
 				if(data instanceof MCParticleData.DustTransition transition) {
@@ -194,6 +195,26 @@ public class BukkitMCParticle extends MCParticle<Particle> {
 					}
 				}
 				break;
+			case GEYSER_BASE:
+			case GEYSER_POOF:
+				if(data instanceof MCParticleData.GeyserBase geyserBase) {
+					return new Particle.GeyserBase(geyserBase.waterBlocks(), geyserBase.burstImpulseBase());
+				}
+				return new Particle.GeyserBase(1, 1.0F);
+			case GEYSER:
+			case GEYSER_PLUME:
+				if(data instanceof Integer) {
+					if(((BukkitMCServer) Static.getServer()).isPaper()) {
+						return new Particle.Geyser((Integer) data);
+					} else {
+						return data;
+					}
+				}
+				if(((BukkitMCServer) Static.getServer()).isPaper()) {
+					return new Particle.Geyser(1);
+				} else {
+					return 1;
+				}
 		}
 		return null;
 	}

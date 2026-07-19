@@ -375,11 +375,11 @@ public class Minecraft {
 					type = Integer.parseInt(id.val());
 				}
 			} catch (NumberFormatException e) {
-				throw new CREFormatException("Invalid item notation: " + id.val(), t);
+				throw new CREFormatException("Expected an item array but got: " + id.val(), t);
 			}
 			MCMaterial mat = StaticLayer.GetMaterialFromLegacy(type, data);
 			if(mat == null) {
-				throw new CRENotFoundException("A material type could not be found based on the given id.", t);
+				throw new CRENotFoundException("Expected an item array but got: " + id.val(), t);
 			}
 			return new CInt(mat.getMaxStackSize(), t);
 		}
@@ -432,12 +432,13 @@ public class Minecraft {
 					+ StringUtils.Join(MCEffect.values(), ", ", ", or ", " or ") + "."
 					+ " Some effects may require an applicable block at the specified location."
 					+ " Additional data can be supplied with the syntax EFFECT:DATA.<br>"
-					+ "<br>STEP_SOUND and PARTICLES_AND_SOUND_BRUSH_BLOCK_COMPLETE (Paper) take a block material name."
+					+ "<br>STEP_SOUND takes a block material name."
+					+ "<br>PARTICLES_AND_SOUND_BRUSH_BLOCK_COMPLETE (Paper 1.20+) or DESTROY_BLOCK (Paper 26.2+) take block data."
 					+ "<br>RECORD_PLAY takes a record material name."
-					+ "<br>SHOOT_WHITE_SMOKE (Paper) and SMOKE take a facing, one of " + StringUtils.Join(MCBlockFace.values(), ", ", ", or ", " or ")
+					+ "<br>SHOOT_WHITE_SMOKE (Paper 1.20+) and SMOKE take a facing, one of " + StringUtils.Join(MCBlockFace.values(), ", ", ", or ", " or ")
 					+ "<br>POTION_BREAK takes an int (represents color)."
-					+ "<br>BONE_MEAL_USE, BEE_GROWTH (Paper), SMASH_ATTACK (Paper) and"
-					+ " TURTLE_EGG_PLACEMENT (Paper) take an int for the number of particles.";
+					+ "<br>BONE_MEAL_USE, BEE_GROWTH (Paper 1.20.6+), SMASH_ATTACK (Paper 1.20.5+) and"
+					+ " TURTLE_EGG_PLACEMENT (Paper 1.20.6+) take an int for the number of particles.";
 		}
 
 		@Override
@@ -513,6 +514,7 @@ public class Minecraft {
 						}
 						break;
 					case PARTICLES_AND_SOUND_BRUSH_BLOCK_COMPLETE:
+					case DESTROY_BLOCK:
 						try {
 							MCBlockData blockData = Static.getServer().createBlockData(dataString.toLowerCase(Locale.ROOT));
 							try {

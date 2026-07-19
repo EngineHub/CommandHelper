@@ -88,6 +88,7 @@ import com.laytonsmith.abstraction.entities.MCSlime;
 import com.laytonsmith.abstraction.entities.MCSnowman;
 import com.laytonsmith.abstraction.entities.MCSpectralArrow;
 import com.laytonsmith.abstraction.entities.MCStrider;
+import com.laytonsmith.abstraction.entities.MCSulfurCube;
 import com.laytonsmith.abstraction.entities.MCTNT;
 import com.laytonsmith.abstraction.entities.MCTextDisplay;
 import com.laytonsmith.abstraction.entities.MCThrownPotion;
@@ -2183,7 +2184,7 @@ public class EntityManagement {
 				case MAGMA_CUBE:
 				case SLIME:
 					MCSlime cube = (MCSlime) entity;
-					specArray.set(entity_spec.KEY_SLIME_SIZE, new CInt(cube.getSize(), t), t);
+					specArray.set(entity_spec.KEY_CUBE_SIZE, new CInt(cube.getSize(), t), t);
 					break;
 				case MANNEQUIN:
 					MCMannequin mannequin = (MCMannequin) entity;
@@ -2321,6 +2322,10 @@ public class EntityManagement {
 				case STRIDER:
 					MCStrider strider = (MCStrider) entity;
 					specArray.set(entity_spec.KEY_STEERABLE_SADDLED, CBoolean.get(strider.isSaddled()), t);
+					break;
+				case SULFUR_CUBE:
+					MCSulfurCube sulfurCube = (MCSulfurCube) entity;
+					specArray.set(entity_spec.KEY_CUBE_SIZE, new CInt(sulfurCube.getSize(), t), t);
 					break;
 				case TEXT_DISPLAY:
 					MCTextDisplay tDisplay = (MCTextDisplay) entity;
@@ -2545,7 +2550,7 @@ public class EntityManagement {
 		private static final String KEY_SHEEP_SHEARED = "sheared";
 		private static final String KEY_SHULKER_COLOR = "color";
 		private static final String KEY_SHULKERBULLET_TARGET = "target";
-		private static final String KEY_SLIME_SIZE = "size";
+		private static final String KEY_CUBE_SIZE = "size";
 		private static final String KEY_SNOWMAN_DERP = "derp";
 		private static final String KEY_SPECTRAL_ARROW_GLOWING_TICKS = "glowingticks";
 		private static final String KEY_SPLASH_POTION_ITEM = "item";
@@ -3457,7 +3462,7 @@ public class EntityManagement {
 					MCSlime cube = (MCSlime) entity;
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
-							case entity_spec.KEY_SLIME_SIZE:
+							case entity_spec.KEY_CUBE_SIZE:
 								cube.setSize(ArgumentValidation.getInt32(specArray.get(index, t), t));
 								break;
 							default:
@@ -3892,6 +3897,18 @@ public class EntityManagement {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_STEERABLE_SADDLED:
 								strider.setSaddled(ArgumentValidation.getBoolean(specArray.get(index, t), t));
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
+				case SULFUR_CUBE:
+					MCSulfurCube sulfurCube = (MCSulfurCube) entity;
+					for(String index : specArray.stringKeySet()) {
+						switch(index.toLowerCase()) {
+							case entity_spec.KEY_CUBE_SIZE:
+								sulfurCube.setSize(ArgumentValidation.getInt32(specArray.get(index, t), t));
 								break;
 							default:
 								throwException(index, t);

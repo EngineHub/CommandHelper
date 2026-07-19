@@ -2,6 +2,7 @@ package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.MCWorldCreator;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.enums.MCWorldEnvironment;
 import com.laytonsmith.abstraction.enums.MCWorldType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCWorldEnvironment;
@@ -26,7 +27,8 @@ public class BukkitMCWorldCreator implements MCWorldCreator {
 	@Override
 	public MCWorld createWorld() {
 		World w = creator.createWorld();
-		if(w != null && w.getEnvironment() == Environment.NORMAL) {
+		if(w != null && w.getEnvironment() == Environment.NORMAL
+				&& Static.getServer().getMinecraftVersion().lt(MCVersion.MC26_1)) {
 			File nether = new File(w.getWorldFolder(), "DIM-1");
 			if(nether.exists()) {
 				Static.getLogger().log(Level.WARNING, "Loaded " + w.getName() + " world with overworld (NORMAL)"
@@ -44,6 +46,9 @@ public class BukkitMCWorldCreator implements MCWorldCreator {
 	@Override
 	public MCWorldCreator type(MCWorldType type) {
 		WorldType wt = BukkitMCWorldType.getConvertor().getConcreteEnum(type);
+		if(wt == null) {
+			throw new IllegalArgumentException(type.name() + " unsupported on this version.");
+		}
 		creator.type(wt);
 		return this;
 	}

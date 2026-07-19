@@ -12,6 +12,7 @@ public enum MCEffect {
 	COMPOSTER_FILL_ATTEMPT, // boolean for success
 	COPPER_WAX_OFF,
 	COPPER_WAX_ON,
+	DESTROY_BLOCK, // Material for block type destroyed, added in Paper 26.2, replaces STEP_SOUND
 	DRAGON_BREATH,
 	DRIPPING_DRIPSTONE,
 	ELECTRIC_SPARK, // Axis at which particles are shown
@@ -90,7 +91,8 @@ public enum MCEffect {
 	SMITHING_TABLE_USE,
 	SOUND_STOP_JUKEBOX_SONG, // Paper, added 1.20 - 1.20.4
 	SOUND_WITH_CHARGE_SHOT, // Paper, added 1.21
-	STEP_SOUND, // Material for block type stepped on
+	STEP_SOUND, // Material for block type stepped on, deprecated for DESTROY_BLOCK in Paper 26.2
+	SULFUR_SPIKE_LAND, // Paper, added in 26.2
 	TRAPDOOR_CLOSE, // deprecated in 1.19.3
 	TRAPDOOR_TOGGLE, // deprecated in 1.19.3
 	ZOMBIE_CHEW_WOODEN_DOOR,

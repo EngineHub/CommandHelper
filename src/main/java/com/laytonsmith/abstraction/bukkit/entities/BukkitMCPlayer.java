@@ -693,7 +693,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 		if(cat == null) {
 			cat = SoundCategory.MASTER;
 		}
-		if(category == null) {
+		if(seed == null) {
 			p.playSound((Entity) ent.getHandle(), ((BukkitMCSound) sound).getConcrete(), cat, volume, pitch);
 		} else {
 			p.playSound((Entity) ent.getHandle(), ((BukkitMCSound) sound).getConcrete(), cat, volume, pitch, seed);

@@ -97,4 +97,22 @@ public class MCParticleData {
 			return this.color;
 		}
 	}
+
+	public static class GeyserBase {
+		int waterBlocks;
+		float burstImpulseBase;
+
+		public GeyserBase(int waterBlocks, float burstImpulseBase) {
+			this.waterBlocks = waterBlocks;
+			this.burstImpulseBase = burstImpulseBase;
+		}
+
+		public int waterBlocks() {
+			return this.waterBlocks;
+		}
+
+		public float burstImpulseBase() {
+			return this.burstImpulseBase;
+		}
+	}
 }

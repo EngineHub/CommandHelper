@@ -1651,7 +1651,10 @@ public class Environment {
 					+ "<br>SCULK_CHARGE particles take an \"angle\" in radians. (defaults to 0.0)"
 					+ "<br>SHRIEK particles take an integer \"delay\" in ticks before playing. (defaults to 0)"
 					+ "<br>TRAIL particles take a \"target\" location array, a \"color\" as an RGB array or name, and a"
-					+ " \"duration\" integer in ticks.";
+					+ " \"duration\" integer in ticks."
+					+ "<br>GEYSER and GEYSER_PLUME (26.2) particles take \"water\" as a positive integer (defaults to 1)."
+					+ "<br>GEYSER_BASE and GEYSER_POOF (26.2) particles take \"water\" as a positive integer"
+					+ " (defaults to 1) and \"burst\" as a double (defaults to 1.0).";
 		}
 
 		@Override

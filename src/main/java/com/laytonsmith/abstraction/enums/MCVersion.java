@@ -91,6 +91,8 @@ public enum MCVersion implements Version {
 	MC26_1_1,
 	MC26_1_2,
 	MC26_1_X,
+	MC26_2,
+	MC26_2_X,
 	MC26_X,
 	MCX_X,
 	CURRENT,
@@ -98,7 +100,7 @@ public enum MCVersion implements Version {
 	NEVER;
 
 	public static final MCVersion EARLIEST_SUPPORTED = MC1_16_X;
-	public static final MCVersion LATEST_SUPPORTED = MC26_1_2;
+	public static final MCVersion LATEST_SUPPORTED = MC26_2;
 
 	public static MCVersion match(String[] source) {
 		String[] parts = new String[Math.min(3, source.length)];
@@ -110,7 +112,7 @@ public enum MCVersion implements Version {
 			return valueOf(attempt);
 		} catch (IllegalArgumentException iae) {
 			if(parts.length == 3) {
-				parts[2] = "0".equals(parts[2]) ? null : "X";
+				parts[2] = "0".equals(parts[2]) || parts[2].isEmpty() || !Character.isDigit(parts[2].charAt(0)) ? null : "X";
 				attempt = "MC" + StringUtils.Join(parts[2] == null ? new String[]{parts[0], parts[1]} : parts, "_");
 				try {
 					return valueOf(attempt);

@@ -95,10 +95,12 @@ public enum MCDamageCause {
 	FLY_INTO_WALL,
 	/**
 	 * Damage caused when an entity steps on MAGMA.
+	 * Deprecated since Paper 26.2 for CONTACT
 	 */
 	HOT_FLOOR,
 	/**
 	 * Damage caused when an entity is on top a campfire.
+	 * Deprecated since Paper 26.2 for CONTACT
 	 */
 	CAMPFIRE,
 	/**

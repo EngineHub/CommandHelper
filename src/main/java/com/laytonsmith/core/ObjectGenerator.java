@@ -3086,11 +3086,38 @@ public class ObjectGenerator {
 				int duration;
 				if(pa.containsKey("duration")) {
 					duration = ArgumentValidation.getInt32(pa.get("duration", t), t);
+					if(duration < 1) {
+						throw new CRERangeException("Duration must be positive.", t);
+					}
 				} else {
 					// Default duration is a random value from 0.5 to 2.5 seconds
 					duration = new Random().nextInt(40) + 10;
 				}
 				return new MCParticleData.Trail(target, color, duration);
+			case GEYSER_BASE:
+			case GEYSER_POOF:
+				int waterBlocks = 1;
+				float burstImpulseBase = 1.0F;
+				if(pa.containsKey("water")) {
+					waterBlocks = ArgumentValidation.getInt32(pa.get("water", t), t);
+					if(waterBlocks < 1) {
+						throw new CRERangeException("Geyser water blocks must be postive.", t);
+					}
+				}
+				if(pa.containsKey("burst")) {
+					burstImpulseBase = ArgumentValidation.getDouble32(pa.get("burst", t), t);
+				}
+				return new MCParticleData.GeyserBase(waterBlocks, burstImpulseBase);
+			case GEYSER:
+			case GEYSER_PLUME:
+				if(pa.containsKey("water")) {
+					int geyserWaterBlocks = ArgumentValidation.getInt32(pa.get("water", t), t);
+					if(geyserWaterBlocks < 1) {
+						throw new CRERangeException("Geyser water blocks must be postive.", t);
+					}
+					return geyserWaterBlocks;
+				}
+				return 1;
 		}
 		return null;
 	}

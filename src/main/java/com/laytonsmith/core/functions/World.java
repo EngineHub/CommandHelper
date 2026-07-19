@@ -1176,22 +1176,19 @@ public class World {
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCWorldCreator creator = StaticLayer.GetConvertor().getWorldCreator(args[0].val());
 			if(args.length >= 3) {
-				MCWorldType type;
 				try {
-					type = MCWorldType.valueOf(args[1].val().toUpperCase());
+					creator.type(MCWorldType.valueOf(args[1].val().toUpperCase()));
 				} catch (IllegalArgumentException e) {
 					throw new CREFormatException(args[1].val() + " is not a valid world type.", t);
 				}
-				MCWorldEnvironment environment;
 				try {
-					environment = MCWorldEnvironment.valueOf(args[2].val().toUpperCase());
+					creator.environment(MCWorldEnvironment.valueOf(args[2].val().toUpperCase()));
 				} catch (IllegalArgumentException e) {
 					throw new CREFormatException(args[2].val() + " is not a valid environment type. Must be one of: "
 							+ StringUtils.Join(MCWorldEnvironment.values(), ", "), t);
 				}
-				creator.type(type).environment(environment);
 			}
-			if((args.length >= 4) && !(args[3] instanceof CNull)) {
+			if(args.length >= 4 && !(args[3] instanceof CNull)) {
 				if(args[3].isInstanceOf(CInt.TYPE)) {
 					creator.seed(ArgumentValidation.getInt(args[3], t));
 				} else {
@@ -1220,10 +1217,11 @@ public class World {
 			return "void {name, type, environment, [seed, [generator]]} Creates or loads a world."
 					+ " The 'name' is the same as the directory name for the world."
 					+ " If a world directory by that name already exists, it will be loaded."
-					+ " The 'type' is one of " + StringUtils.Join(MCWorldType.values(), ", ") + "."
+					+ " The 'type' must be one of " + StringUtils.Join(MCWorldType.values(), ", ") + ","
+					+ " provided it is supported on the server, otherwise it'll throw an exception."
 					+ " However, if level.dat exists in the world directory, the type from that will be used instead."
-					+ " The 'environment' is one of " + StringUtils.Join(MCWorldEnvironment.values(), ", ") + "."
-					+ " This affects which regions directory is used in the world directory."
+					+ " The 'environment' must be one of " + StringUtils.Join(MCWorldEnvironment.values(), ", ")
+					+ ". This also determines which regions directory is used in MC versions prior to 26.1."
 					+ " The 'seed' can be an integer, a string (will be the hashcode), or null (will be random int)."
 					+ " The 'generator' is the name of a custom world generator loaded on the server.";
 		}

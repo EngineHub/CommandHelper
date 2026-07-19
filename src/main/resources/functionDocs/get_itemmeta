@@ -160,7 +160,7 @@ These fields only exist for specific item types.
 |-
 ! AxolotlBucket
 |
-This field may only return the default value on 1.21.5 due to a server API implementation bug.
+This field may erroneously return the default value on versions 1.21.5 - 26.1.2 due to a server API implementation bug.
 * '''variant''' : (string) The type of axolotl, one of %AXOLOTL_TYPES%. (MC 1.17+)
 The entity's custom name is derived from the item "display" string. All other axolotl data is not yet supported.
 |-
@@ -355,7 +355,7 @@ Spawn potentials other than entity type is not yet supported.
 |-
 ! Tropical Fish Bucket
 |
-These fields may be null on 1.21.5 due to a server API implementation bug.
+These fields can be null on versions 1.21.5 - 26.1.2 due to a server API implementation bug.
 * '''fishcolor''' : (string) The color of the fish, can be one of %DYE_COLORS%.
 * '''fishpatterncolor''' : (string) The color of the pattern on the fish.
 * '''fishpattern''' : (string) The pattern type on the fish, can be one of %FISH_PATTERNS%.
@@ -476,5 +476,9 @@ Data components not yet supported in item meta:
 |-
 ! additional_trade_cost
 | 26.1
+|
+|-
+! sulfur_cube_content
+| 26.2
 |
 |}

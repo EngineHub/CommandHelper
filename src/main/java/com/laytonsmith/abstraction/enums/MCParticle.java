@@ -228,6 +228,14 @@ public abstract class MCParticle<Concrete> extends DynamicEnum<MCParticle.MCVani
 		COPPER_FIRE_FLAME(MCVersion.MC1_21_9),
 		PAUSE_MOB_GROWTH(MCVersion.MC26_1),
 		RESET_MOB_GROWTH(MCVersion.MC26_1),
+		GEYSER(MCVersion.MC26_2),
+		GEYSER_BASE(MCVersion.MC26_2),
+		GEYSER_PLUME(MCVersion.MC26_2),
+		GEYSER_POOF(MCVersion.MC26_2),
+		NOXIOUS_GAS(MCVersion.MC26_2),
+		NOXIOUS_GAS_CLOUD(MCVersion.MC26_2),
+		SULFUR_BUBBLES(MCVersion.MC26_2),
+		SULFUR_CUBE_GOO(MCVersion.MC26_2),
 		UNKNOWN(MCVersion.NEVER);
 
 		private final MCVersion since;

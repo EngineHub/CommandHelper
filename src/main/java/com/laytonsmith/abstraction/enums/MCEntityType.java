@@ -270,6 +270,7 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 		SPLASH_POTION,
 		STRAY,
 		STRIDER(true, MCVersion.MC1_16),
+		SULFUR_CUBE(true, MCVersion.MC26_2),
 		TADPOLE(true, MCVersion.MC1_19),
 		TEXT_DISPLAY(true, MCVersion.MC1_19_4),
 		THROWN_EXP_BOTTLE,

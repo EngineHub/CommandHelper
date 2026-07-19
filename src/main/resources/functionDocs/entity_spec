@@ -198,7 +198,7 @@ without knowing the rotations on the other axis or of other body parts beforehan
 |-
 | MAGMA_CUBE
 | 
-* %KEY_SLIME_SIZE%: The size of the magma cube.
+* %KEY_CUBE_SIZE%: The size of the magma cube. Must be an integer (0 - 126) where 1 is small, 2 is medium, and 4 is large.
 |-
 | MANNEQUIN
 |
@@ -295,7 +295,7 @@ without knowing the rotations on the other axis or of other body parts beforehan
 |-
 | SLIME
 | 
-* %KEY_SLIME_SIZE%: The size of the slime. Must be an integer (0 - 126) where 0 is small, 1 is medium, and 3 is large.
+* %KEY_CUBE_SIZE%: The size of the slime. Must be an integer (0 - 126) where 1 is small, 2 is medium, and 4 is large.
 |-
 | SNOWMAN
 | 
@@ -311,6 +311,11 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | SPLASH_POTION, LINGERING_POTION
 | 
 * %KEY_SPLASH_POTION_ITEM%: The item for the thrown potion.
+|-
+| SULFUR_CUBE
+|
+See {{function|get_mob_equipment}} body slot for stored block.
+* %KEY_CUBE_SIZE%: The size of the sulfur cube. Must be an integer (0 - 126) where 1 is a baby, 2 is an adult.
 |-
 | TEXT_DISPLAY
 |

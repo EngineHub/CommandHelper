@@ -39,6 +39,7 @@ import com.laytonsmith.abstraction.enums.MCWorldEnvironment;
 import com.laytonsmith.abstraction.enums.MCWorldType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCBiomeType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDifficulty;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEffect;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCParticle;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSound;
@@ -319,13 +320,13 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	}
 
 	@Override
-	public void playEffect(MCLocation l, MCEffect mCEffect, int data, int radius) {
-		w.playEffect(((BukkitMCLocation) l).l, Effect.valueOf(mCEffect.name()), data, radius);
+	public void playEffect(MCLocation l, MCEffect mcEffect, int data, int radius) {
+		w.playEffect(((BukkitMCLocation) l).l, BukkitMCEffect.getConvertor().getConcreteEnum(mcEffect), data, radius);
 	}
 
 	@Override
 	public void playEffect(MCLocation l, MCEffect mcEffect, Object data, int radius) {
-		Effect effect = Effect.valueOf(mcEffect.name());
+		Effect effect = BukkitMCEffect.getConvertor().getConcreteEnum(mcEffect);
 		switch(mcEffect) {
 			case RECORD_PLAY:
 			case STEP_SOUND:
@@ -336,6 +337,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 				w.playEffect((Location) l.getHandle(), effect, BlockFace.valueOf(((MCBlockFace) data).name()), radius);
 				return;
 			case PARTICLES_AND_SOUND_BRUSH_BLOCK_COMPLETE:
+			case DESTROY_BLOCK:
 				w.playEffect((Location) l.getHandle(), effect, ((MCBlockData) data).getHandle(), radius);
 				return;
 		}
