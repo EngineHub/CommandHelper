@@ -1593,8 +1593,15 @@ public class DataHandling {
 						} finally {
 							env.getEnv(GlobalEnv.class).ClearFlag(GlobalEnv.FLAG_VAR_ARGS_ALLOWED);
 						}
+
+						// Get default parameter value from IVariable.
 						if(paramDefaultValues[i] instanceof IVariable ivar) {
 							paramDefaultValues[i] = originalList.get(ivar.getVariableName(), t, env).ival();
+
+							// Map undefined default value to null since the parameter is defined.
+							if(paramDefaultValues[i] == CNull.UNDEFINED) {
+								paramDefaultValues[i] = CNull.NULL;
+							}
 						}
 
 						// Mark proc as not constant if a default parameter is not a constant.
