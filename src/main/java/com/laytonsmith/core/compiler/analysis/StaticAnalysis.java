@@ -880,6 +880,7 @@ public class StaticAnalysis {
 			ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
 		return linkParamScope(paramScope, valScope, ast, env, exceptions, null);
 	}
+
 	/**
 	 * Handles parameter AST nodes, namely {@link IVariable}s or the {@code assign()} function (for typed parameters or
 	 * parameters with a default value).The parameter is declared in a new scope that is chained to paramScope. If the
@@ -902,7 +903,7 @@ public class StaticAnalysis {
 		}
 
 		// Handle normal untyped parameter.
-		if(node instanceof IVariable iVar) { // Normal parameter.
+		if(node instanceof IVariable iVar) { // Untyped parameter without default value.
 			Scope newParamScope = this.createNewScope(paramScope);
 			ParamDeclaration param = new ParamDeclaration(
 					iVar.getVariableName(), iVar.getDefinedType(), null,
@@ -914,7 +915,7 @@ public class StaticAnalysis {
 		}
 
 		// Handle assign parameter (typed and/or with default value).
-		if(node instanceof CFunction cFunction) { // Typed parameter or assign.
+		if(node instanceof CFunction cFunction) { // Typed parameter or parameter with default value (assign()).
 			Function func = cFunction.getCachedFunction();
 			if(func != null && func instanceof DataHandling.assign) {
 				return ((DataHandling.assign) func).linkParamScope(this, paramScope, valScope, ast, env, exceptions, params);
@@ -922,7 +923,6 @@ public class StaticAnalysis {
 		}
 
 		// Handle non-parameter parameter. Fall back to handling the function's arguments.
-		// TODO - Does this fallback make sense or should this term just be skipped?
 		exceptions.add(new ConfigCompileException("Invalid parameter", node.getTarget()));
 		return new Scope[]{paramScope, this.linkScope(valScope, ast, env, exceptions)};
 	}
