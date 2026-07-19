@@ -17,6 +17,7 @@ import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.signature.FunctionSignatures;
 import com.laytonsmith.core.compiler.signature.SignatureBuilder;
 import com.laytonsmith.core.constructs.Auto;
+import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CKeyword;
@@ -467,7 +468,8 @@ public class StaticAnalysis {
 					return CClassType.AUTO;
 				} else {
 					// TODO - Get the most specific type when multiple declarations exist.
-					return decls.iterator().next().getType();
+					CClassType varType = decls.iterator().next().getType();
+					return (varType.isVariadicType() ? CArray.TYPE : varType);
 				}
 			} else {
 				// If this runs, then an IVariable reference was created without setting its Scope using setTermScope().
