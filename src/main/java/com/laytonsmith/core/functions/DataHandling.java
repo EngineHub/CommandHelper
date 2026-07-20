@@ -1593,9 +1593,15 @@ public class DataHandling {
 						} finally {
 							env.getEnv(GlobalEnv.class).ClearFlag(GlobalEnv.FLAG_VAR_ARGS_ALLOWED);
 						}
+
+						// Get default parameter value from IVariable.
 						if(paramDefaultValues[i] instanceof IVariable ivar) {
-							paramDefaultValues[i] = env.getEnv(GlobalEnv.class)
-									.GetVarList().get(ivar.getVariableName(), t, true, env).ival();
+							paramDefaultValues[i] = originalList.get(ivar.getVariableName(), t, env).ival();
+
+							// Map undefined default value to null since the parameter is defined.
+							if(paramDefaultValues[i] == CNull.UNDEFINED) {
+								paramDefaultValues[i] = CNull.NULL;
+							}
 						}
 
 						// Mark proc as not constant if a default parameter is not a constant.
@@ -1678,7 +1684,7 @@ public class DataHandling {
 				varNames.add(varName);
 
 				// Get IVariable value.
-				Mixed ivarVal = (paramDefaultValue != null ? paramDefaultValue : new CString("", t));
+				Mixed ivarVal = (paramDefaultValue != null ? paramDefaultValue : CNull.UNDEFINED);
 
 				// Store IVariable object clone.
 				vars.add(new IVariable(ivar.getDefinedType(), ivar.getVariableName(), ivarVal, ivar.getTarget()));
@@ -1698,6 +1704,34 @@ public class DataHandling {
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return CVoid.VOID;
+		}
+
+		@Override
+		public CClassType typecheck(StaticAnalysis analysis,
+				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+
+			// Fall back to super implementation for invalid usage.
+			if(ast.numberOfChildren() < 2) {
+				return super.typecheck(analysis, ast, env, exceptions);
+			}
+
+			// Get procedure declared return type (not the proc() return type).
+			CClassType returnType = (ast.getChildAt(0).getData() instanceof CClassType type ? type : CClassType.AUTO);
+
+			// Typecheck arguments excluding code block.
+			for(int i = 0; i < ast.numberOfChildren() - 1; i++) {
+				analysis.typecheck(ast.getChildAt(i), env, exceptions);
+			}
+
+			// Typecheck code block.
+			CClassType codeBlockType = analysis.typecheck(ast.getChildAt(ast.numberOfChildren() - 1), env, exceptions);
+			if(returnType != CClassType.AUTO && returnType != CVoid.TYPE && codeBlockType != null) {
+				exceptions.add(new ConfigCompileException(
+						"Missing return statement; Not all code paths return a value.", ast.getTarget()));
+			}
+
+			// Return void.
+			return CVoid.TYPE;
 		}
 
 		@Override
@@ -1748,7 +1782,6 @@ public class DataHandling {
 			analysis.linkScope(paramScope, code, env, exceptions);
 
 			// Create proc declaration in a new scope.
-			// TODO - Include proc signature (argument types and number of arguments) in declaration.
 			Scope declScope = analysis.createNewScope(parentScope);
 			ProcDeclaration procDecl = new ProcDeclaration(procName, retType, params,
 					ast.getNodeModifiers(), ast.getTarget());

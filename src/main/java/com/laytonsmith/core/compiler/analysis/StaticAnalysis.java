@@ -14,7 +14,10 @@ import java.util.TreeSet;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
+import com.laytonsmith.core.compiler.signature.FunctionSignatures;
+import com.laytonsmith.core.compiler.signature.SignatureBuilder;
 import com.laytonsmith.core.constructs.Auto;
+import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CKeyword;
@@ -379,28 +382,77 @@ public class StaticAnalysis {
 			} else if(cFunc.hasProcedure()) { // The function is a procedure reference.
 
 				// Type check procedure arguments.
+				List<CClassType> argTypes = new ArrayList<>(ast.numberOfChildren());
+				List<Target> argTargets = new ArrayList<>(ast.numberOfChildren());
 				for(ParseTree child : ast.getChildren()) {
-					this.typecheck(child, env, exceptions);
+					argTypes.add(this.typecheck(child, env, exceptions));
+					argTargets.add(child.getTarget());
 				}
 
-				// Return procedure return type.
+				// Get procedure declaration.
 				String procName = cFunc.val();
-				Scope scope = this.getTermScope(ast);
-				if(scope != null) {
-					Set<Declaration> decls = scope.getDeclarations(Namespace.PROCEDURE, procName);
-					if(decls.isEmpty()) {
-						return CClassType.AUTO; // Proc cannot be resolved. Exception for this is already generated.
-					} else {
-						// TODO - Get the most specific type when multiple declarations exist.
-						return decls.iterator().next().getType();
-					}
-				} else {
+				Target procTarget = cFunc.getTarget();
+				Scope procRefScope = this.getTermScope(ast);
+				if(procRefScope == null) {
+
 					// If this runs, then a proc reference was created without setting its Scope using setTermScope().
 					exceptions.add(new ConfigCompileException("Procedure cannot be resolved (missing procedure scope,"
 							+ " this is an internal error that should never happen): "
-							+ procName, cFunc.getTarget()));
+							+ procName, procTarget));
 					return CClassType.AUTO;
 				}
+				Set<Declaration> decls = procRefScope.getDeclarations(Namespace.PROCEDURE, procName);
+				if(decls.isEmpty()) {
+					return CClassType.AUTO; // Proc cannot be resolved. Exception already generated.
+				}
+
+				// Create procedure signatures.
+				List<CClassType> procReturnTypes = new ArrayList<>(1);
+				for(Declaration decl : decls) {
+					if(decl instanceof ProcDeclaration procDecl) {
+
+						// Create new procedure signature.
+						SignatureBuilder signatureBuilder = new SignatureBuilder(procDecl.getType());
+						boolean optionalParamDetected = false;
+						boolean varargsParamDetected = false;
+						for(ParamDeclaration paramDecl : procDecl.getParameters()) {
+							CClassType paramType = paramDecl.getType();
+							if(varargsParamDetected) {
+								return CClassType.AUTO; // Invalid procedure signature. Exception(s) already generated.
+							}
+							if(paramType.isVariadicType()) {
+								signatureBuilder.varParam(
+										paramType.getVarargsBaseType(), paramDecl.getIdentifier(), null);
+								varargsParamDetected = true;
+							} else {
+								boolean paramOptional = paramDecl.getDefaultValue() != null;
+								signatureBuilder.param(paramType, paramDecl.getIdentifier(), null, paramOptional);
+								if(paramOptional) {
+									optionalParamDetected = true;
+								} else if(optionalParamDetected) {
+									return CClassType.AUTO; // Invalid procedure signature. Exception(s) already generated.
+								}
+							}
+						}
+
+						// Typecheck arguments against new procedure signature.
+						FunctionSignatures procSignature = signatureBuilder.build();
+						procReturnTypes.add(procSignature.getReturnType(
+								procTarget, argTypes, argTargets, env, exceptions));
+					} else {
+
+						// If this runs, then a wrong declaration type proc declaration was created.
+						exceptions.add(new ConfigCompileException("Procedure resolves to non-procedure declaration"
+								+ " (this is an internal error that should never happen): "
+								+ procName + " -> " + decl.getIdentifier(), procTarget));
+					}
+				}
+				if(procReturnTypes.isEmpty()) {
+					return CClassType.AUTO; // No ProcDeclarations found. Exception already generated.
+				}
+
+				// Return procedure return type.
+				return CClassType.getMostSpecificType(procReturnTypes, env);
 			} else {
 				throw new Error("Unsupported " + CFunction.class.getSimpleName()
 						+ " type in type checking for node with value: " + cFunc.val());
@@ -414,8 +466,14 @@ public class StaticAnalysis {
 							"Variable cannot be resolved: " + ivar.getVariableName(), ivar.getTarget()));
 					return CClassType.AUTO;
 				} else {
-					// TODO - Get the most specific type when multiple declarations exist.
-					return decls.iterator().next().getType();
+
+					// Return the most specific type of all declarations.
+					Set<CClassType> varTypes = new HashSet<>();
+					for(Declaration decl : decls) {
+						CClassType varType = decl.getType();
+						varTypes.add(varType.isVariadicType() ? CArray.TYPE : varType);
+					}
+					return CClassType.getMostSpecificType(varTypes, env);
 				}
 			} else {
 				// If this runs, then an IVariable reference was created without setting its Scope using setTermScope().
@@ -828,6 +886,7 @@ public class StaticAnalysis {
 			ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
 		return linkParamScope(paramScope, valScope, ast, env, exceptions, null);
 	}
+
 	/**
 	 * Handles parameter AST nodes, namely {@link IVariable}s or the {@code assign()} function (for typed parameters or
 	 * parameters with a default value).The parameter is declared in a new scope that is chained to paramScope. If the
@@ -850,7 +909,7 @@ public class StaticAnalysis {
 		}
 
 		// Handle normal untyped parameter.
-		if(node instanceof IVariable iVar) { // Normal parameter.
+		if(node instanceof IVariable iVar) { // Untyped parameter without default value.
 			Scope newParamScope = this.createNewScope(paramScope);
 			ParamDeclaration param = new ParamDeclaration(
 					iVar.getVariableName(), iVar.getDefinedType(), null,
@@ -862,7 +921,7 @@ public class StaticAnalysis {
 		}
 
 		// Handle assign parameter (typed and/or with default value).
-		if(node instanceof CFunction cFunction) { // Typed parameter or assign.
+		if(node instanceof CFunction cFunction) { // Typed parameter or parameter with default value (assign()).
 			Function func = cFunction.getCachedFunction();
 			if(func != null && func instanceof DataHandling.assign) {
 				return ((DataHandling.assign) func).linkParamScope(this, paramScope, valScope, ast, env, exceptions, params);
@@ -870,7 +929,6 @@ public class StaticAnalysis {
 		}
 
 		// Handle non-parameter parameter. Fall back to handling the function's arguments.
-		// TODO - Does this fallback make sense or should this term just be skipped?
 		exceptions.add(new ConfigCompileException("Invalid parameter", node.getTarget()));
 		return new Scope[]{paramScope, this.linkScope(valScope, ast, env, exceptions)};
 	}

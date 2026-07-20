@@ -16,7 +16,6 @@ import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.compiler.signature.FunctionSignatures;
 import com.laytonsmith.core.compiler.signature.SignatureBuilder;
-import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CClassType;
@@ -1275,7 +1274,23 @@ public class BasicLogic {
 			 *  Note that getReturnType could be overridden, not using this signature for typechecking.
 			 *  That implementation is not yet possible until A OR B OR ... types can be described.
 			 */
-			return new SignatureBuilder(CClassType.AUTO).varParam(Mixed.TYPE, "vals", null).build();
+			return new SignatureBuilder(CClassType.AUTO)
+					.varParam(Mixed.TYPE, "vals", "The values.")
+					.newSignature(CClassType.AUTO)
+					.param(Mixed.TYPE, "val", "The first value.")
+					.varParam(Mixed.TYPE, "vals", "The values.")
+					.param(Mixed.TYPE, "termVal", "The final terminating (non-returning) value.", true, true).build();
+		}
+
+		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes,
+				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+
+			// Get return type based on the function signatures. This generates all necessary compile errors.
+			CClassType retType = super.getReturnType(t, argTypes, argTargets, env, exceptions);
+
+			// Return the most specific argument type.
+			return CClassType.getMostSpecificType(argTypes, retType, env);
 		}
 
 		@Override
@@ -1570,8 +1585,21 @@ public class BasicLogic {
 			 *  Note that getReturnType could be overridden, not using this signature for typechecking.
 			 *  That implementation is not yet possible until A OR B OR ... types can be described.
 			 */
-			return new SignatureBuilder(Auto.TYPE).varParam(Mixed.TYPE, "vals", null)
-					.setNoneIsAllowed(true).build();
+			return new SignatureBuilder(CClassType.AUTO)
+					.param(Mixed.TYPE, "val", "The first value.")
+					.varParam(Mixed.TYPE, "vals", "The values.")
+					.param(Mixed.TYPE, "termVal", "The final terminating (non-returning) value.", true, true).build();
+		}
+
+		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes,
+				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+
+			// Get return type based on the function signatures. This generates all necessary compile errors.
+			CClassType retType = super.getReturnType(t, argTypes, argTargets, env, exceptions);
+
+			// Return the most specific argument type.
+			return CClassType.getMostSpecificType(argTypes, retType, env);
 		}
 
 		@Override

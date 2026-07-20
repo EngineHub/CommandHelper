@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.MathUtils;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Version;
@@ -84,6 +85,7 @@ import com.laytonsmith.tools.docgen.templates.Loops;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -135,14 +137,22 @@ public class ControlFlow {
 		@Override
 		public FunctionSignatures getSignatures() {
 			/*
-			 *  TODO - Decide how to define the ternary return value.
-			 *  Note that getReturnType is overridden, so these signatures are not used for typechecking.
+			 * TODO - Decide how to define the ternary return value.
 			 */
 			return new SignatureBuilder(CClassType.AUTO, MatchType.MATCH_FIRST)
 					.param(Booleanish.TYPE, "cond", "The condition.")
 					.param(Mixed.TYPE, "ifValue", "The value that is returned when the condition is true.")
 					.param(Mixed.TYPE, "elseValue", "The value that is returned when the condition is false.")
-					.newSignature(CVoid.TYPE).param(Booleanish.TYPE, "cond", "The condition.")
+					.newSignature(CClassType.AUTO)
+					.param(Booleanish.TYPE, "cond", "The condition.")
+					.param(Mixed.TYPE, "ifValue", "The value that is returned when the condition is true.")
+					.param(null, "elseCode", "The optional code that runs when the condition is false. This code must be terminating.")
+					.newSignature(CClassType.AUTO)
+					.param(Booleanish.TYPE, "cond", "The condition.")
+					.param(null, "ifCode", "The code that runs when the condition is true. This code must be terminating.")
+					.param(Mixed.TYPE, "elseValue", "The value that is returned when the condition is false.")
+					.newSignature(CVoid.TYPE)
+					.param(Booleanish.TYPE, "cond", "The condition.")
 					.param(null, "ifCode", "The code that runs when the condition is true.")
 					.param(null, "elseCode", "The optional code that runs when the condition is false.", true).build();
 		}
@@ -154,9 +164,9 @@ public class ControlFlow {
 			// Get return type based on the function signatures. This generates all necessary compile errors.
 			CClassType retType = super.getReturnType(t, argTypes, argTargets, env, exceptions);
 
-			// When void is returned, ternary usage could still be possible when a branch is terminating.
-			// It is also possible that both branches are terminating, in which case this should return null as well.
-			if(retType == CVoid.TYPE && argTypes.size() == 3) {
+			// Return the type of the other code branch / value if one branch is terminating.
+			// Return null if both branches are terminating.
+			if(argTypes.size() == 3) {
 
 				// Return the type of the other branch if one branch is terminating (ternary, terminating or void).
 				if(argTypes.get(1) == null) {
@@ -181,7 +191,7 @@ public class ControlFlow {
 				}
 			}
 
-			// Return the super result.
+			// Return super result.
 			return retType;
 		}
 
@@ -431,11 +441,57 @@ public class ControlFlow {
 
 		@Override
 		public FunctionSignatures getSignatures() {
+
 			/*
-			 * TODO - Implement a way to define [cond, code]* using signatures, and use it here.
-			 * Also check switch() and switch_ic(), as they need the same feature.
+			 * TODO - Implement a way to define [cond, code]*, [elseCode] using signatures, and use it here.
+			 * Also check complex_try(), switch() and switch_ic(), as they need the same feature.
+			 * Implement Booleanish typecheck for all conditions. These are currently checked in getReturnType().
 			 */
-			return super.getSignatures();
+			return new SignatureBuilder(CVoid.TYPE)
+					.varParam(null, "[cond, code]*, [elseCode]", "The conditional code blocks.").build();
+		}
+
+		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes,
+				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+
+			// Get return type based on the function signatures. This generates all necessary compile errors.
+			CClassType retType = super.getReturnType(t, argTypes, argTargets, env, exceptions);
+
+			// Override return type with null if all code branches (including the else code branch) are terminating.
+			if(argTypes.size() >= 1) {
+
+				// Get all code branch return types.
+				boolean allBranchesTerminate = true;
+				Set<CClassType> returnTypes = new HashSet<>();
+				for(int i = 1; i < argTypes.size(); i += 2) {
+
+					// Typecheck condition arguments.
+					// TODO - Remove this typecheck when it is implemented through function signatures.
+					CClassType condType = argTypes.get(i - 1);
+					StaticAnalysis.requireType(condType, Booleanish.TYPE, argTargets.get(i - 1), env, exceptions);
+
+					CClassType codeType = argTypes.get(i);
+					returnTypes.add(codeType);
+					allBranchesTerminate &= (codeType == null);
+				}
+				if(MathUtils.isOdd(argTypes.size())) {
+					CClassType defaultArgType = argTypes.get(argTypes.size() - 1);
+					returnTypes.add(defaultArgType);
+					allBranchesTerminate &= (defaultArgType == null);
+				}
+
+				// Return null if all branches (including the else code branch) are terminating.
+				if(allBranchesTerminate) {
+					return null;
+				}
+
+				// Return the most specific return type.
+				return CClassType.getMostSpecificType(returnTypes, env);
+			}
+
+			// Return super result.
+			return retType;
 		}
 
 		@Override
@@ -462,7 +518,7 @@ public class ControlFlow {
 			}
 
 			// Handle optional else branch in separate scope.
-			if((ast.numberOfChildren() & 0x01) == 0x01) { // (size % 2) == 1.
+			if(MathUtils.isOdd(ast.numberOfChildren())) {
 				analysis.linkScope(analysis.createNewScope(parentScope),
 						ast.getChildAt(ast.numberOfChildren() - 1), env, exceptions);
 			}
@@ -719,11 +775,51 @@ public class ControlFlow {
 
 		@Override
 		public FunctionSignatures getSignatures() {
+
 			/*
 			 * TODO - Implement a way to define [case, code]* using signatures, and use it here.
-			 * Also check ifelse() and switch_ic(), as they need the same feature.
+			 * Also check complex_try(), ifelse() and switch_ic(), as they need the same feature.
 			 */
-			return super.getSignatures();
+			return new SignatureBuilder(CVoid.TYPE)
+					.param(Mixed.TYPE, "value", "The switch value.")
+					.varParam(null, "[caseVal, caseCode]*, [defaultCode]", "The case blocks.").build();
+		}
+
+		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes,
+				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+
+			// Get return type based on the function signatures. This generates all necessary compile errors.
+			CClassType retType = super.getReturnType(t, argTypes, argTargets, env, exceptions);
+
+			// Override return type with null if all cases (including the default case) are terminating.
+			if(argTypes.size() >= 2) {
+
+				// Get all case/default code branch return types.
+				boolean allBranchesTerminate = true;
+				Set<CClassType> returnTypes = new HashSet<>();
+				for(int i = 2; i < argTypes.size(); i += 2) {
+					CClassType argType = argTypes.get(i);
+					returnTypes.add(argType);
+					allBranchesTerminate &= (argType == null);
+				}
+				if(MathUtils.isEven(argTypes.size())) {
+					CClassType defaultArgType = argTypes.get(argTypes.size() - 1);
+					returnTypes.add(defaultArgType);
+					allBranchesTerminate &= (defaultArgType == null);
+				}
+
+				// Return null if all cases (including the default case) are terminating.
+				if(allBranchesTerminate) {
+					return null;
+				}
+
+				// Return the most specific return type.
+				return CClassType.getMostSpecificType(returnTypes, env);
+			}
+
+			// Return super result.
+			return retType;
 		}
 
 		@Override
@@ -757,7 +853,7 @@ public class ControlFlow {
 			}
 
 			// Handle optional default branch in separate scope.
-			if((children.size() & 0x01) == 0x00) { // (size % 2) == 0.
+			if(MathUtils.isEven(children.size())) {
 				analysis.linkScope(
 						analysis.createNewScope(caseParentScope), children.get(children.size() - 1), env, exceptions);
 			}
@@ -2708,8 +2804,8 @@ public class ControlFlow {
 				}
 			}
 
-			// Return void.
-			return CVoid.TYPE;
+			// Return null to indicate that this call does not result in a value.
+			return null;
 		}
 
 		@Override

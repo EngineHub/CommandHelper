@@ -21,6 +21,7 @@ import com.laytonsmith.core.objects.ObjectDefinitionNotFoundException;
 import com.laytonsmith.core.objects.ObjectDefinitionTable;
 import com.laytonsmith.core.objects.UserObject;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -785,5 +786,49 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	 */
 	public static CClassType getFromGenericTypeName(String genericTypeName, Target t) {
 		throw new UnsupportedOperationException("Not yet implemented");
+	}
+
+	/**
+	 * Get the most specific type for a collection of types. This is the type for which holds that all types are
+	 * instance of this type. None (Java {@code null}) types are ignored.
+	 * When {@link CVoid#TYPE} is present in the types, it is returned.
+	 * Note that the intention of this method is to be replaced by a variant that returns a multi-type instead.
+	 * @param types - The types.
+	 * @param defaultType - The default type.
+	 * @param env - The environment.
+	 * @return The most specific type, or the provided default type if no such type exists.
+	 */
+	public static CClassType getMostSpecificType(
+			Collection<CClassType> types, CClassType defaultType, Environment env) {
+		// TODO - Change this method to return a multi-type based on the passed types when the type system allows this.
+		search:
+		for(CClassType type1 : types) {
+			if(type1 != null) {
+				if(type1.equals(CVoid.TYPE)) {
+					return CVoid.TYPE;
+				}
+				for(CClassType type2 : types) {
+					if(type2 != null && !InstanceofUtil.isInstanceof(type2, type1, env)) {
+						continue search;
+					}
+				}
+				return type1;
+			}
+		}
+		return defaultType;
+	}
+
+	/**
+	 * Get the most specific type for a collection of types. This is the type for which holds that all types are
+	 * instance of this type. None (Java {@code null}) types are ignored.
+	 * When {@link CVoid#TYPE} is present in the types, it is returned.
+	 * Note that the intention of this method is to be replaced by a variant that returns a multi-type instead.
+	 * @param types - The types.
+	 * @param env - The environment.
+	 * @return The most specific type, or {@link CClassType#AUTO} if no such type exists.
+	 */
+	public static CClassType getMostSpecificType(Collection<CClassType> types, Environment env) {
+		// TODO - Change this method to return a multi-type based on the passed types when the type system allows this.
+		return getMostSpecificType(types, CClassType.AUTO, env);
 	}
 }

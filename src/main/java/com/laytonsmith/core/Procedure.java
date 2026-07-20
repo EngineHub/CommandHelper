@@ -7,6 +7,7 @@ import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CNull;
+import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
@@ -66,10 +67,12 @@ public class Procedure implements Cloneable {
 		this.definedAt = t;
 		this.varList = new HashMap<>();
 		this.procComment = procComment;
+		boolean optionalParamDetected = false;
 		for(int i = 0; i < varList.size(); i++) {
 			IVariable var = varList.get(i);
 			if(var.getDefinedType().isVariadicType() && i != varList.size() - 1) {
-				throw new CREFormatException("Varargs can only be added to the last argument.", t);
+				throw new CREFormatException(
+						"Varargs can only be added to the last parameter in a procedure.", var.getTarget());
 			}
 			try {
 				this.varList.put(var.getVariableName(), var.clone());
@@ -77,14 +80,22 @@ public class Procedure implements Cloneable {
 				this.varList.put(var.getVariableName(), var);
 			}
 			this.varIndex.add(var);
-			if(var.getDefinedType().isVariadicType() && var.ival() != CNull.UNDEFINED) {
-				throw new CREFormatException("Varargs may not have default values", t);
+			boolean paramOptional = (var.ival() != CNull.UNDEFINED);
+			if(paramOptional) {
+				if(var.getDefinedType().isVariadicType()) {
+					throw new CREFormatException("Varargs may not have default values.", var.getTarget());
+				}
+				optionalParamDetected = true;
+			} else if(optionalParamDetected && !var.getDefinedType().isVariadicType()) {
+				throw new CREFormatException(
+						"Procedure parameters after optional parameters must be optional or varargs.", var.getTarget());
 			}
 			this.originals.put(var.getVariableName(), var.ival());
 		}
 		this.tree = tree;
 		if(!PROCEDURE_NAME_REGEX.matcher(name).matches()) {
-			throw new CREFormatException("Procedure names must start with an underscore, and may only contain letters, underscores, and digits. (Found " + this.name + ")", t);
+			throw new CREFormatException("Procedure names must start with an underscore,"
+					+ " and may only contain letters, underscores, and digits. (Found " + this.name + ")", t);
 		}
 		//Let's look through the tree now, and see if this is possibly constant or not.
 		//If it is, it may or may not help us during compilation, but if it's not,
@@ -189,92 +200,107 @@ public class Procedure implements Cloneable {
 	 * Executes this procedure, with the arguments that were passed in
 	 *
 	 * @param args The arguments passed to the procedure call.
-	 * @param oldEnv The environment to be cloned.
+	 * @param parentEnv The environment to be cloned.
 	 * @param t
 	 * @return
 	 */
-	public Mixed execute(List<Mixed> args, Environment oldEnv, Target t) {
-		boolean prev = oldEnv.getEnv(GlobalEnv.class).getCloneVars();
-		oldEnv.getEnv(GlobalEnv.class).setCloneVars(false);
+	public Mixed execute(List<Mixed> args, Environment parentEnv, Target t) {
+		boolean prevCloneVars = parentEnv.getEnv(GlobalEnv.class).getCloneVars();
+		parentEnv.getEnv(GlobalEnv.class).setCloneVars(false);
 		Environment env;
 		try {
-			env = oldEnv.clone();
+			env = parentEnv.clone();
 			env.getEnv(GlobalEnv.class).setCloneVars(true);
 		} catch (CloneNotSupportedException ex) {
 			throw new RuntimeException(ex);
 		}
-		oldEnv.getEnv(GlobalEnv.class).setCloneVars(prev);
+		parentEnv.getEnv(GlobalEnv.class).setCloneVars(prevCloneVars);
 
 		Script fakeScript = Script.GenerateScript(tree, env.getEnv(GlobalEnv.class).GetLabel(), null);
 
 		// Create container for the @arguments variable.
 		CArray arguments = new CArray(Target.UNKNOWN, this.varIndex.size());
+		env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, "@arguments", arguments, t));
+
+		// Initialize varargs parameter if present.
+		CArray vararg = null;
+		IVariable varargsVar = (!this.varIndex.isEmpty()
+				&& this.varIndex.get(this.varIndex.size() - 1).getDefinedType().isVariadicType()
+				? this.varIndex.get(this.varIndex.size() - 1) : null);
+		if(varargsVar != null) {
+			vararg = new CArray(t); // TODO - Add type once generics are implemented.
+			Target varargsTarget = (args.size() >= this.varIndex.size()
+					? args.get(this.varIndex.size() - 1).getTarget() : t);
+			env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE,
+					varargsVar.getVariableName(), vararg, varargsTarget));
+		}
 
 		// Handle passed procedure arguments.
 		int varInd;
-		CArray vararg = null;
 		for(varInd = 0; varInd < args.size(); varInd++) {
-			Mixed c = args.get(varInd);
-			arguments.push(c, t);
-			if(this.varIndex.size() > varInd
-					|| (!this.varIndex.isEmpty()
-						&& this.varIndex.get(this.varIndex.size() - 1).getDefinedType().isVariadicType())) {
-				IVariable var;
-				if(varInd < this.varIndex.size() - 1
-						|| !this.varIndex.get(this.varIndex.size() - 1).getDefinedType().isVariadicType()) {
-					var = this.varIndex.get(varInd);
-				} else {
-					var = this.varIndex.get(this.varIndex.size() - 1);
-					if(vararg == null) {
-						// TODO: Once generics are added, add the type
-						vararg = new CArray(t);
-						env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE,
-								var.getVariableName(), vararg, c.getTarget()));
-					}
-				}
 
-				// Type check "void" value.
-				if(c instanceof CVoid
-						&& !(var.getDefinedType().equals(Auto.TYPE) || var.getDefinedType().equals(CVoid.TYPE))) {
-					throw new CRECastException("Procedure \"" + name + "\" expects a value of type "
-							+ var.getDefinedType().val() + " in argument " + (varInd + 1) + ", but"
-							+ " a void value was found instead.", c.getTarget());
-				}
+			// Get argument value.
+			Mixed argVal = args.get(varInd);
 
-				// Type check vararg parameter.
-				if(var.getDefinedType().isVariadicType()) {
-					if(InstanceofUtil.isInstanceof(c.typeof(), var.getDefinedType().getVarargsBaseType(), env)) {
-						vararg.push(c, t);
-						continue;
-					} else {
-						throw new CRECastException("Procedure \"" + name + "\" expects a value of type "
-								+ var.getDefinedType().val() + " in argument " + (varInd + 1) + ", but"
-								+ " a value of type " + c.typeof() + " was found instead.", c.getTarget());
-					}
-				}
+			// Add argument value to @arguments array.
+			arguments.push(argVal, t);
 
-				// Type check non-vararg parameter.
-				if(InstanceofUtil.isInstanceof(c.typeof(), var.getDefinedType(), env)) {
-					env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(var.getDefinedType(),
-							var.getVariableName(), c, c.getTarget()));
+			// Get parameter to assign argument value to.
+			IVariable var;
+			if(this.varIndex.size() > varInd) {
+				var = this.varIndex.get(varInd);
+			} else if(varargsVar != null) {
+				var = varargsVar;
+			} else {
+				continue; // No parameters remaining and no varargs present. Ignore excessive arguments.
+			}
+
+			// Type check "void" argument/parameter.
+			if(argVal instanceof CVoid
+					&& !(var.getDefinedType().equals(Auto.TYPE) || var.getDefinedType().equals(CVoid.TYPE))) {
+				throw new CRECastException("Procedure \"" + name + "\" expects a value of type "
+						+ var.getDefinedType().val() + " in argument " + (varInd + 1) + ", but"
+						+ " a void value was found instead.", argVal.getTarget());
+			}
+
+			// Type check vararg argument/parameter.
+			if(var.getDefinedType().isVariadicType()) {
+				if(InstanceofUtil.isInstanceof(argVal.typeof(), var.getDefinedType().getVarargsBaseType(), env)) {
+					vararg.push(argVal, t);
 					continue;
 				} else {
 					throw new CRECastException("Procedure \"" + name + "\" expects a value of type "
 							+ var.getDefinedType().val() + " in argument " + (varInd + 1) + ", but"
-							+ " a value of type " + c.typeof() + " was found instead.", c.getTarget());
+							+ " a value of type " + argVal.typeof() + " was found instead.", argVal.getTarget());
 				}
+			}
+
+			// Type check non-vararg argument/parameter.
+			if(InstanceofUtil.isInstanceof(argVal.typeof(), var.getDefinedType(), env)) {
+				env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(var.getDefinedType(),
+						var.getVariableName(), argVal, argVal.getTarget()));
+				continue;
+			} else {
+				throw new CRECastException("Procedure \"" + name + "\" expects a value of type "
+						+ var.getDefinedType().val() + " in argument " + (varInd + 1) + ", but"
+						+ " a value of type " + argVal.typeof() + " was found instead.", argVal.getTarget());
 			}
 		}
 
 		// Assign default values to remaining proc arguments.
-		while(varInd < this.varIndex.size()) {
-			String varName = this.varIndex.get(varInd++).getVariableName();
+		int nonVarargVarSize = (vararg == null ? this.varIndex.size() : this.varIndex.size() - 1);
+		while(varInd < nonVarargVarSize) {
+			IVariable paramVar = this.varIndex.get(varInd++);
+			String varName = paramVar.getVariableName();
 			Mixed defVal = this.originals.get(varName);
+			if(defVal == CNull.UNDEFINED) {
+				defVal = new CString("", paramVar.getTarget()); // Fill in empty string for undefined parameters.
+			}
 			env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(Auto.TYPE, varName, defVal, defVal.getTarget()));
 			arguments.push(defVal, t);
 		}
 
-		env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, "@arguments", arguments, t));
+		// Execute procedure body.
 		StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
 		stManager.addStackTraceElement(new ConfigRuntimeException.StackTraceElement("proc " + name, getTarget()));
 		try {

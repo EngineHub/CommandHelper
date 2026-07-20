@@ -28,6 +28,8 @@ import com.laytonsmith.core.compiler.SelfStatement;
 import com.laytonsmith.core.compiler.VariableScope;
 import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
+import com.laytonsmith.core.compiler.signature.FunctionSignatures;
+import com.laytonsmith.core.compiler.signature.SignatureBuilder;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CClosure;
@@ -210,6 +212,40 @@ public class Exceptions {
 		}
 
 		@Override
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CVoid.TYPE)
+					.param(null, "tryCode", "The try code block.")
+					.param(null, "catchCode", "The catch code block.", true)
+					.newSignature(CVoid.TYPE)
+					.param(null, "tryCode", "The try code block.")
+					.param(null, "exVar", "The exception variable.")
+					.param(null, "catchCode", "The catch code block.")
+					.param(CString.TYPE, "exceptionType", "The exception type to catch.")
+					.newSignature(CVoid.TYPE)
+					.param(null, "tryCode", "The try code block.")
+					.param(null, "exVar", "The exception variable.")
+					.param(null, "catchCode", "The catch code block.")
+					.param(CArray.TYPE, "exceptionTypes", "Array of exception types to catch.", true).build();
+		}
+
+		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes,
+				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+
+			// Get return type based on the function signatures. This generates all necessary compile errors.
+			CClassType retType = super.getReturnType(t, argTypes, argTargets, env, exceptions);
+
+			// Return null if both try and catch block do not return.
+			if((argTypes.size() == 2 && argTypes.get(0) == null && argTypes.get(1) == null)
+					|| (argTypes.size() >= 3 && argTypes.get(0) == null && argTypes.get(2) == null)) {
+				return null;
+			}
+
+			// Return return type based on function signatures.
+			return retType;
+		}
+
+		@Override
 		@SuppressWarnings({"checkstyle:fallthrough", "checkstyle:defaultcomeslast"}) // Intended for control flow.
 		public Scope linkScope(StaticAnalysis analysis, Scope parentScope,
 				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
@@ -282,9 +318,11 @@ public class Exceptions {
 	@seealso({_try.class, com.laytonsmith.tools.docgen.templates.Exceptions.class})
 	public static class _throw extends AbstractFunction {
 
+		public static final String NAME = "throw";
+
 		@Override
 		public String getName() {
-			return "throw";
+			return NAME;
 		}
 
 		@Override
@@ -374,6 +412,29 @@ public class Exceptions {
 				CREThrowable throwable = (CREThrowable) ReflectionUtils.newInstance(c, classes.toArray(new Class[classes.size()]), arguments.toArray());
 				throw throwable;
 			}
+		}
+
+		@Override
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(null).param(CArray.TYPE, "exception", "The exception to throw.")
+					.newSignature(null).param(CREThrowable.TYPE, "exception", "The exception to throw.")
+					.newSignature(null)
+						.param(CString.TYPE, "exceptionType", "The exception type string.")
+						.param(CString.TYPE, "msg", "The exception message.")
+						.param(CArray.TYPE, "causedBy", "The causing exception object.", true)
+					.newSignature(null)
+						.param(CString.TYPE, "exceptionType", "The exception type string.")
+						.param(CString.TYPE, "msg", "The exception message.")
+						.param(CREThrowable.TYPE, "causedBy", "The causing exception object.", true)
+					.newSignature(null)
+						.param(CClassType.TYPE, "exceptionType", "The exception type.")
+						.param(CString.TYPE, "msg", "The exception message.")
+						.param(CArray.TYPE, "causedBy", "The causing exception object.", true)
+					.newSignature(null)
+						.param(CClassType.TYPE, "exceptionType", "The exception type.")
+						.param(CString.TYPE, "msg", "The exception message.")
+						.param(CREThrowable.TYPE, "causedBy", "The causing exception object.", true)
+					.build();
 		}
 	}
 
@@ -556,6 +617,43 @@ public class Exceptions {
 			}
 
 			return CVoid.VOID;
+		}
+
+		@Override
+		public FunctionSignatures getSignatures() {
+
+			/*
+			 * TODO - Implement a way to define [catchVariable, catchCode]*, [catchCode] using signatures, and use it here.
+			 * Also check ifelse(), switch() and switch_ic(), as they need the same feature.
+			 */
+			return new SignatureBuilder(CVoid.TYPE)
+					.param(null, "tryCode", "The try code block.")
+					.varParam(null, "[catchVariable, catchCode]*, [catchCode]", "The catch blocks.").build();
+		}
+
+		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes,
+				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+
+			// Get return type based on the function signatures. This generates all necessary compile errors.
+			CClassType retType = super.getReturnType(t, argTypes, argTargets, env, exceptions);
+
+			// Return null if both try and all catch blocks do not return.
+			if(argTypes.size() > 1 && argTypes.get(0) == null) {
+				search: {
+					for(int i = 2; i < argTypes.size(); i += 2) {
+						if(argTypes.get(i) != null) {
+							break search;
+						}
+					}
+					if(!MathUtils.isEven(argTypes.size()) || argTypes.get(argTypes.size() - 1) == null) {
+						return null;
+					}
+				}
+			}
+
+			// Return return type based on function signatures.
+			return retType;
 		}
 
 		@Override
