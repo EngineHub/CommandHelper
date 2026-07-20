@@ -486,20 +486,8 @@ public class ControlFlow {
 					return null;
 				}
 
-				// Return an occurring return type if all return types extend that type.
-				// TODO - Make this return a multitype instead as soon as all typechecking code supports multitypes.
-				search:
-				for(CClassType type1 : returnTypes) {
-					if(type1 != null) {
-						for(CClassType type2 : returnTypes) {
-							if(type2 != null && !InstanceofUtil.isInstanceof(type2, type1, env)) {
-								continue search;
-							}
-						}
-						return type1;
-					}
-				}
-				return CClassType.AUTO;
+				// Return the most specific return type.
+				return CClassType.getMostSpecificType(returnTypes, env);
 			}
 
 			// Return super result.
@@ -826,20 +814,8 @@ public class ControlFlow {
 					return null;
 				}
 
-				// Return an occurring return type if all return types extend that type.
-				// TODO - Make this return a multitype instead as soon as all typechecking code supports multitypes.
-				search:
-				for(CClassType type1 : returnTypes) {
-					if(type1 != null) {
-						for(CClassType type2 : returnTypes) {
-							if(type2 != null && !InstanceofUtil.isInstanceof(type2, type1, env)) {
-								continue search;
-							}
-						}
-						return type1;
-					}
-				}
-				return CClassType.AUTO;
+				// Return the most specific return type.
+				return CClassType.getMostSpecificType(returnTypes, env);
 			}
 
 			// Return super result.

@@ -27,7 +27,6 @@ import com.laytonsmith.core.constructs.CNumber;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CSymbol;
 import com.laytonsmith.core.constructs.CVoid;
-import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
@@ -1290,22 +1289,8 @@ public class BasicLogic {
 			// Get return type based on the function signatures. This generates all necessary compile errors.
 			CClassType retType = super.getReturnType(t, argTypes, argTargets, env, exceptions);
 
-			// Return an occurring argument type if all argument types extend that type.
-			// TODO - Make this return a multitype instead as soon as all typechecking code supports multitypes.
-			search:
-			for(CClassType type1 : argTypes) {
-				if(type1 != null) {
-					for(CClassType type2 : argTypes) {
-						if(type2 != null && !InstanceofUtil.isInstanceof(type2, type1, env)) {
-							continue search;
-						}
-					}
-					return type1;
-				}
-			}
-
-			// Return super result.
-			return retType;
+			// Return the most specific argument type.
+			return CClassType.getMostSpecificType(argTypes, retType, env);
 		}
 
 		@Override
@@ -1613,22 +1598,8 @@ public class BasicLogic {
 			// Get return type based on the function signatures. This generates all necessary compile errors.
 			CClassType retType = super.getReturnType(t, argTypes, argTargets, env, exceptions);
 
-			// Return an occurring argument type if all argument types extend that type.
-			// TODO - Make this return a multitype instead as soon as all typechecking code supports multitypes.
-			search:
-			for(CClassType type1 : argTypes) {
-				if(type1 != null) {
-					for(CClassType type2 : argTypes) {
-						if(type2 != null && !InstanceofUtil.isInstanceof(type2, type1, env)) {
-							continue search;
-						}
-					}
-					return type1;
-				}
-			}
-
-			// Return super result.
-			return retType;
+			// Return the most specific argument type.
+			return CClassType.getMostSpecificType(argTypes, retType, env);
 		}
 
 		@Override

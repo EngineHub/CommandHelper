@@ -1782,7 +1782,6 @@ public class DataHandling {
 			analysis.linkScope(paramScope, code, env, exceptions);
 
 			// Create proc declaration in a new scope.
-			// TODO - Include proc signature (argument types and number of arguments) in declaration.
 			Scope declScope = analysis.createNewScope(parentScope);
 			ProcDeclaration procDecl = new ProcDeclaration(procName, retType, params,
 					ast.getNodeModifiers(), ast.getTarget());

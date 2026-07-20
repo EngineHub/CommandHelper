@@ -452,8 +452,7 @@ public class StaticAnalysis {
 				}
 
 				// Return procedure return type.
-				// TODO - Get the most specific type when multiple declarations exist.
-				return procReturnTypes.get(0);
+				return CClassType.getMostSpecificType(procReturnTypes, env);
 			} else {
 				throw new Error("Unsupported " + CFunction.class.getSimpleName()
 						+ " type in type checking for node with value: " + cFunc.val());
@@ -467,9 +466,14 @@ public class StaticAnalysis {
 							"Variable cannot be resolved: " + ivar.getVariableName(), ivar.getTarget()));
 					return CClassType.AUTO;
 				} else {
-					// TODO - Get the most specific type when multiple declarations exist.
-					CClassType varType = decls.iterator().next().getType();
-					return (varType.isVariadicType() ? CArray.TYPE : varType);
+
+					// Return the most specific type of all declarations.
+					Set<CClassType> varTypes = new HashSet<>();
+					for(Declaration decl : decls) {
+						CClassType varType = decl.getType();
+						varTypes.add(varType.isVariadicType() ? CArray.TYPE : varType);
+					}
+					return CClassType.getMostSpecificType(varTypes, env);
 				}
 			} else {
 				// If this runs, then an IVariable reference was created without setting its Scope using setTermScope().
