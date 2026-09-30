@@ -433,9 +433,11 @@ public class Minecraft {
 					+ " Some effects may require an applicable block at the specified location."
 					+ " Additional data can be supplied with the syntax EFFECT:DATA.<br>"
 					+ "<br>STEP_SOUND takes a block material name."
-					+ "<br>PARTICLES_AND_SOUND_BRUSH_BLOCK_COMPLETE (Paper 1.20+) or DESTROY_BLOCK (Paper 26.2+) take block data."
+					+ "<br>PARTICLES_AND_SOUND_BRUSH_BLOCK_COMPLETE (Paper 1.20+), DESTROY_BLOCK (Paper 26.2+), or"
+					+ " DESTROY_BLOCK_WITH_SOUND (Paper 26.3+) take block data."
 					+ "<br>RECORD_PLAY takes a record material name."
-					+ "<br>SHOOT_WHITE_SMOKE (Paper 1.20+) and SMOKE take a facing, one of " + StringUtils.Join(MCBlockFace.values(), ", ", ", or ", " or ")
+					+ "<br>SMOKE, SHOOT_WHITE_SMOKE (Paper 1.20+), DESTROY_PROGRESS (Paper 26.3+), and"
+					+ " DESTROY_PROGRESS_WITH_SOUND (Paper 26.3+) take a facing, one of " + StringUtils.Join(MCBlockFace.values(), ", ", ", or ", " or ")
 					+ "<br>POTION_BREAK takes an int (represents color)."
 					+ "<br>BONE_MEAL_USE, BEE_GROWTH (Paper 1.20.6+), SMASH_ATTACK (Paper 1.20.5+) and"
 					+ " TURTLE_EGG_PLACEMENT (Paper 1.20.6+) take an int for the number of particles.";
@@ -501,6 +503,8 @@ public class Minecraft {
 						break;
 					case SMOKE:
 					case SHOOT_WHITE_SMOKE:
+					case DESTROY_PROGRESS:
+					case DESTROY_PROGRESS_WITH_SOUND:
 						try {
 							MCBlockFace facing = MCBlockFace.valueOf(dataString.toUpperCase());
 							try {
@@ -515,6 +519,7 @@ public class Minecraft {
 						break;
 					case PARTICLES_AND_SOUND_BRUSH_BLOCK_COMPLETE:
 					case DESTROY_BLOCK:
+					case DESTROY_BLOCK_WITH_SOUND:
 						try {
 							MCBlockData blockData = Static.getServer().createBlockData(dataString.toLowerCase(Locale.ROOT));
 							try {

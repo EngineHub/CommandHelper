@@ -37,6 +37,7 @@ import com.laytonsmith.abstraction.entities.MCCat;
 import com.laytonsmith.abstraction.entities.MCChestedHorse;
 import com.laytonsmith.abstraction.entities.MCCommandMinecart;
 import com.laytonsmith.abstraction.entities.MCCreeper;
+import com.laytonsmith.abstraction.entities.MCCushion;
 import com.laytonsmith.abstraction.entities.MCDisplay;
 import com.laytonsmith.abstraction.entities.MCEnderCrystal;
 import com.laytonsmith.abstraction.entities.MCEnderDragon;
@@ -2009,6 +2010,10 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_CREEPER_MAXFUSETICKS, new CInt(creeper.getMaxFuseTicks(), t), t);
 					specArray.set(entity_spec.KEY_CREEPER_EXPLOSIONRADIUS, new CInt(creeper.getExplosionRadius(), t), t);
 					break;
+				case CUSHION:
+					MCCushion cushion = (MCCushion) entity;
+					specArray.set(entity_spec.KEY_CUSHION_COLOR, new CString(cushion.getColor().name(), t), t);
+					break;
 				case DONKEY:
 				case MULE:
 					MCChestedHorse chestedhorse = (MCChestedHorse) entity;
@@ -2466,6 +2471,7 @@ public class EntityManagement {
 		private static final String KEY_CREEPER_FUSETICKS = "fuseticks";
 		private static final String KEY_CREEPER_MAXFUSETICKS = "maxfuseticks";
 		private static final String KEY_CREEPER_EXPLOSIONRADIUS = "explosionradius";
+		private static final String KEY_CUSHION_COLOR = "color";
 		private static final String KEY_DISPLAY_BLOCK = "blockdata";
 		private static final String KEY_DISPLAY_ITEM = "item";
 		private static final String KEY_DISPLAY_ITEM_DISPLAY = "itemdisplay";
@@ -3003,6 +3009,18 @@ public class EntityManagement {
 								} catch(IllegalArgumentException ex) {
 									throw new CRERangeException("Radius must not be negative.", t);
 								}
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
+				case CUSHION:
+					MCCushion cushion = (MCCushion) entity;
+					for(String index : specArray.stringKeySet()) {
+						switch(index.toLowerCase()) {
+							case entity_spec.KEY_CUSHION_COLOR:
+								cushion.setColor(MCDyeColor.valueOf(specArray.get(index, t).val().toUpperCase()));
 								break;
 							default:
 								throwException(index, t);

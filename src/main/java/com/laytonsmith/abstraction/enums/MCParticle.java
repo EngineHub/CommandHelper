@@ -236,6 +236,9 @@ public abstract class MCParticle<Concrete> extends DynamicEnum<MCParticle.MCVani
 		NOXIOUS_GAS_CLOUD(MCVersion.MC26_2),
 		SULFUR_BUBBLES(MCVersion.MC26_2),
 		SULFUR_CUBE_GOO(MCVersion.MC26_2),
+		ORANGE_POPLAR_LEAVES(MCVersion.MC26_3),
+		RED_POPLAR_LEAVES(MCVersion.MC26_3),
+		YELLOW_POPLAR_LEAVES(MCVersion.MC26_3),
 		UNKNOWN(MCVersion.NEVER);
 
 		private final MCVersion since;

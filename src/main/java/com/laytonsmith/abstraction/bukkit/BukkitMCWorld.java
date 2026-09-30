@@ -334,10 +334,13 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 				return;
 			case SMOKE:
 			case SHOOT_WHITE_SMOKE:
+			case DESTROY_PROGRESS:
+			case DESTROY_PROGRESS_WITH_SOUND:
 				w.playEffect((Location) l.getHandle(), effect, BlockFace.valueOf(((MCBlockFace) data).name()), radius);
 				return;
 			case PARTICLES_AND_SOUND_BRUSH_BLOCK_COMPLETE:
 			case DESTROY_BLOCK:
+			case DESTROY_BLOCK_WITH_SOUND:
 				w.playEffect((Location) l.getHandle(), effect, ((MCBlockData) data).getHandle(), radius);
 				return;
 		}

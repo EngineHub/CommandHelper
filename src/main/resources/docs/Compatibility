@@ -3,7 +3,7 @@ In general, the compatibility requirements, if not listed, are the same as the p
 The requirements for the latest builds are:
 
 * Java 16+
-* Spigot or Paper 1.16.5 - 26.2 (when used as a plugin)
+* Paper (or Spigot) 1.16.5 - 26.3 (when used as a plugin)
 
 CommandHelper may still be backwards and forward compatible to a large degree. Many of the advanced features that
 normally have hard dependencies on certain versions of external dependencies have been configured to "soft" fail.
@@ -18,40 +18,50 @@ Regardless, only the most current builds are officially supported.
 ! scope="col" width="63%" | Milestone
 ! scope="col" width="18%" | Compatibility
 |-
-| 3.3.5 build-662
+| 3.3.5 build-668
 |
-| Added support for Spigot 26.2
-| Spigot 1.16.5 - 26.2
+| Added support for Paper 26.3
+| Paper 1.16.5 - 26.3
+|-
+| 3.3.5 build-663
+| [https://github.com/EngineHub/CommandHelper/commit/0692fabf43b9464e9f8bab9b85c7950893e7b42f 0692fab]
+| Added support for Paper 26.2
+| Paper 1.16.5 - 26.2
 |-
 | 3.3.5 build-653
 | [https://github.com/EngineHub/CommandHelper/commit/caffcb0d120f3bec6507317688e85694c98c8703 caffcb0]
-| Added support for Spigot 26.1
-| Spigot 1.16.5 - 26.1.2
+| Added support for Paper 26.1
+| Paper 1.16.5 - 26.1.2
 |-
 | 3.3.5 build-616
 | [https://github.com/EngineHub/CommandHelper/commit/1ae6b070cc58099689c9d31ffbfa5d1988322dbe 1ae6b07]
-| Added support for Spigot 1.21.11
-| Spigot 1.16.5 - 1.21.11
+| Added support for Paper 1.21.11
+| Paper 1.16.5 - 1.21.11
 |-
 | 3.3.5 build-576
 | [https://github.com/EngineHub/CommandHelper/commit/261a1e83f526e34d41d09239fdd7e1b2e8e418f8 261a1e8]
-| Added support for Spigot 1.21.9
-| Spigot 1.16.5 - 1.21.10
+| Added support for Paper 1.21.9
+| Paper 1.16.5 - 1.21.10
 |-
 | 3.3.5 build-566
 | [https://github.com/EngineHub/CommandHelper/commit/e1da2841e2896a64f0bc2b79f388aa1210afff44 e1da284]
-| Added support for Spigot 1.21.7
-| Spigot 1.16.5 - 1.21.8
+| Added support for Paper 1.21.7
+| Paper 1.16.5 - 1.21.8
 |-
 | 3.3.5 build-564
 | [https://github.com/EngineHub/CommandHelper/commit/103f5fce8eb07f8e8b1adeeafb1f3815cf7c7775 103f5fc]
-| Added support for Spigot 1.21.6
-| Spigot 1.16.5 - 1.21.6
+| Added support for Paper 1.21.6
+| Paper 1.16.5 - 1.21.6
 |-
 | 3.3.5 build-552
 | [https://github.com/EngineHub/CommandHelper/commit/c6a961e1c02e2a24fe9994468b0076a10bb8a536 c6a961e]
-| Added support for Spigot 1.21.5
-| Spigot 1.16.5 - 1.21.5
+| Added support for Paper 1.21.5
+| Paper 1.16.5 - 1.21.5
+|-
+| 3.3.5 build-543
+| [https://github.com/EngineHub/CommandHelper/commit/18fa0492bb87b806ead8e47c7d7a9f0951aaf8b6 18fa049]
+| Build against Paper. Basic Spigot support continues but API diverges more at this point.
+| Paper 1.16.5 - 1.21.4
 |-
 | 3.3.5 build-513
 | [https://github.com/EngineHub/CommandHelper/commit/df5302231299db84ae415ccf3b9017d8b70773ec df53022]

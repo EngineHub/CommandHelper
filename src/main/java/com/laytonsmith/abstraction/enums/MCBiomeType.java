@@ -179,6 +179,7 @@ public abstract class MCBiomeType<Concrete> extends DynamicEnum<MCBiomeType.MCVa
 		CHERRY_GROVE(MCVersion.MC1_19_4),
 		PALE_GARDEN(MCVersion.MC1_21_3),
 		SULFUR_CAVES(MCVersion.MC26_2),
+		DAPPLED_FOREST(MCVersion.MC26_3),
 		UNKNOWN(MCVersion.NEVER);
 
 		private final MCVersion since;

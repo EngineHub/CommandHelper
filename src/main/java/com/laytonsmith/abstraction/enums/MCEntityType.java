@@ -164,6 +164,8 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 		OAK_CHEST_BOAT(true, MCVersion.MC1_21_3),
 		PALE_OAK_BOAT(true, MCVersion.MC1_21_3),
 		PALE_OAK_CHEST_BOAT(true, MCVersion.MC1_21_3),
+		POPLAR_BOAT(true, MCVersion.MC26_3),
+		POPLAR_CHEST_BOAT(true, MCVersion.MC26_3),
 		SPRUCE_BOAT(true, MCVersion.MC1_21_3),
 		SPRUCE_CHEST_BOAT(true, MCVersion.MC1_21_3),
 
@@ -180,6 +182,7 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 		COW,
 		CREAKING(true, MCVersion.MC1_21_3),
 		CREEPER,
+		CUSHION(true, MCVersion.MC26_3),
 		DOLPHIN,
 		DRAGON_FIREBALL,
 		DROPPED_ITEM,

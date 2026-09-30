@@ -77,6 +77,10 @@ without knowing the rotations on the other axis or of other body parts beforehan
 * %KEY_CREEPER_FUSETICKS%: The amount of time in server ticks that the Creeper has been primed. (must below or equals maxfuseticks and not negative)
 * %KEY_CREEPER_EXPLOSIONRADIUS%: The radius of the Creeper's explosion.
 |-
+| CUSHION
+|
+* %KEY_CUSHION_COLOR%: The dye color of the cushion (can be %DYE_COLOR%).
+|-
 | DONKEY, MULE
 |
 * %KEY_HORSE_CHEST%: Whether the horse has a chest equipped.

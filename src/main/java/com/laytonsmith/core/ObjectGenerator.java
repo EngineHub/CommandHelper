@@ -8,6 +8,7 @@ import com.laytonsmith.abstraction.MCBannerMeta;
 import com.laytonsmith.abstraction.MCBlockStateMeta;
 import com.laytonsmith.abstraction.MCBookMeta;
 import com.laytonsmith.abstraction.MCBrewerInventory;
+import com.laytonsmith.abstraction.MCBrewingRecipe;
 import com.laytonsmith.abstraction.MCBundleMeta;
 import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.MCColorableArmorMeta;
@@ -894,11 +895,13 @@ public class ObjectGenerator {
 				ma.set("patterns", patterns, t);
 			} else if(meta instanceof MCMapMeta) {
 				MCMapMeta mm = ((MCMapMeta) meta);
-				MCColor mapcolor = mm.getColor();
-				if(mapcolor == null) {
-					ma.set("color", CNull.NULL, t);
-				} else {
-					ma.set("color", color(mapcolor, t), t);
+				if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC26_3)) {
+					MCColor mapcolor = mm.getColor();
+					if(mapcolor == null) {
+						ma.set("color", CNull.NULL, t);
+					} else {
+						ma.set("color", color(mapcolor, t), t);
+					}
 				}
 				if(mm.hasMapId()) {
 					ma.set("mapid", new CInt(mm.getMapId(), t), t);
@@ -2590,6 +2593,13 @@ public class ObjectGenerator {
 					mats.push(new CString(mat.getName(), t), t);
 				}
 				ret.set("addition", mats, t);
+			}
+		} else if(r instanceof MCBrewingRecipe recipe) {
+			try {
+				ret.set("input", recipeChoice(recipe.getInput()), t);
+				ret.set("reagent", recipeChoice(recipe.getIngredient()), t);
+			} catch(NoSuchMethodError ex) {
+				// Spigot limitation
 			}
 		}
 		return ret;

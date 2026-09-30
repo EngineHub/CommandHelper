@@ -93,6 +93,8 @@ public enum MCVersion implements Version {
 	MC26_1_X,
 	MC26_2,
 	MC26_2_X,
+	MC26_3,
+	MC26_3_X,
 	MC26_X,
 	MCX_X,
 	CURRENT,
@@ -100,7 +102,7 @@ public enum MCVersion implements Version {
 	NEVER;
 
 	public static final MCVersion EARLIEST_SUPPORTED = MC1_16_X;
-	public static final MCVersion LATEST_SUPPORTED = MC26_2;
+	public static final MCVersion LATEST_SUPPORTED = MC26_3;
 
 	public static MCVersion match(String[] source) {
 		String[] parts = new String[Math.min(3, source.length)];

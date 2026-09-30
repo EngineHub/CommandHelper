@@ -30,4 +30,5 @@ public enum MCTreeType {
 	CHERRY,
 	PALE_OAK,
 	PALE_OAK_CREAKING,
+	POPLAR,
 }

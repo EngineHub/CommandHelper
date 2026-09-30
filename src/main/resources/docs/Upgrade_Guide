@@ -3,6 +3,11 @@ Below is a reverse chronological guide to help you with the most notable of thes
 Where possible, any value changes are converted for backwards compatibility with saved data, but any script that checks output for equality will need to be updated.
 ----
 
+== Minecraft 26.3 ==
+* Filled maps no longer have a color in item meta.
+
+----
+
 == Minecraft 26.2 ==
 * Damage causes HOT_FLOOR and CAMPFIRE for damage events now use CONTACT instead (Paper).
 * The projectile_launch event now properly gives a dispenser location for "shooter" (and "shootertype": "block") on Paper servers.

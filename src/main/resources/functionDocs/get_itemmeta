@@ -282,7 +282,7 @@ Custom instrument definitions featuring a different sound event, description, du
 ! Filled Maps
 |
 * '''mapid''' : (int) The unique id for a map on the server.
-* '''color''' : (associative array) An RGB color array for the ink used on the map item.
+* '''color''' : (associative array) An RGB color array for the ink used on the map item. (removed in MC 26.3)
 ** '''r''' : (int) Red value ranging from 0 to 255
 ** '''g''' : (int) Green value
 ** '''b''' : (int) Blue value
@@ -459,8 +459,8 @@ Data components not yet supported in item meta:
 |
 |-
 ! swing_animation
-| 1.21.11
-|
+| 1.21.11 - 26.2
+| Replaced with attack_animation (and interact_animation) in 26.3
 |-
 ! use_effects
 | 1.21.11
@@ -480,5 +480,41 @@ Data components not yet supported in item meta:
 |-
 ! sulfur_cube_content
 | 26.2
+|
+|-
+! provides_pottery_pattern
+| 26.3
+|
+|-
+! block_transformer
+| 26.3
+|
+|-
+! cooking_fuel
+| 26.3
+|
+|-
+! brewing_fuel
+| 26.3
+|
+|-
+! cushion/color
+| 26.3
+|
+|-
+! villager_food
+| 26.3
+|
+|-
+! mob_visibility
+| 26.3
+|
+|-
+! attack_animation
+| 26.3
+|
+|-
+! interact_animation
+| 26.3
 |
 |}

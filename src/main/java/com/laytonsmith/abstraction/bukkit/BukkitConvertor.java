@@ -95,6 +95,7 @@ import com.laytonsmith.annotations.convert;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.MSLog;
+import com.laytonsmith.core.MSLog.Tags;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
@@ -154,6 +155,7 @@ import org.bukkit.entity.ThrowableProjectile;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.entity.minecart.CommandMinecart;
 import org.bukkit.inventory.BlastingRecipe;
+import org.bukkit.inventory.BrewingRecipe;
 import org.bukkit.inventory.CampfireRecipe;
 import org.bukkit.inventory.ComplexRecipe;
 import org.bukkit.inventory.EquipmentSlot;
@@ -873,6 +875,7 @@ public class BukkitConvertor extends AbstractConvertor {
 					return new BukkitMCStonecuttingRecipe(new StonecuttingRecipe(nskey, is, Material.STRUCTURE_VOID));
 				case SMITHING:
 				case COMPLEX:
+				case BREWING:
 					throw new IllegalArgumentException("Unable to generate recipe type: " + type.name());
 			}
 		} catch (NoClassDefFoundError ex) {
@@ -909,7 +912,10 @@ public class BukkitConvertor extends AbstractConvertor {
 			return new BukkitMCShapedRecipe((ShapedRecipe) r);
 		} else if(r instanceof MerchantRecipe) {
 			return new BukkitMCMerchantRecipe((MerchantRecipe) r);
+		} else if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC26_3) && r instanceof BrewingRecipe) {
+			return new BukkitMCBrewingRecipe((BrewingRecipe) r);
 		} else {
+			MSLog.GetLogger().e(Tags.GENERAL, "Unhandled recipe type: " + r.getClass().getSimpleName(), Target.UNKNOWN);
 			return null;
 		}
 	}

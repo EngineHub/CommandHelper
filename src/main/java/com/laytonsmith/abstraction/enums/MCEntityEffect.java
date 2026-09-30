@@ -79,4 +79,6 @@ public enum MCEntityEffect {
 	SHAKE,
 	TRUSTING_FAILED,
 	TRUSTING_SUCCEEDED,
+	BOAT_SINK,
+	BOAT_LAUNCH,
 }

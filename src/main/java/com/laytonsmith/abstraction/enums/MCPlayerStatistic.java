@@ -89,7 +89,8 @@ public enum MCPlayerStatistic {
 	INTERACT_WITH_SMITHING_TABLE(Type.NONE, MCVersion.MC1_16),
 	STRIDER_ONE_CM(Type.NONE, MCVersion.MC1_16),
 	HAPPY_GHAST_ONE_CM(Type.NONE, MCVersion.MC1_21_6),
-	NAUTILUS_ONE_CM(Type.NONE, MCVersion.MC1_21_11);
+	NAUTILUS_ONE_CM(Type.NONE, MCVersion.MC1_21_11),
+	SLEEP_IN_STRAW_BED(Type.NONE, MCVersion.MC26_3);
 
 	private final Type type;
 	private final MCVersion since;

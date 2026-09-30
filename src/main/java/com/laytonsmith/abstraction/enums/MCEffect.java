@@ -10,13 +10,19 @@ public enum MCEffect {
 	BEE_GROWTH, // integer, Paper, added in 1.20.6, partially replaces VILLAGER_PLANT_GROW
 	BONE_MEAL_USE, // integer
 	COMPOSTER_FILL_ATTEMPT, // boolean for success
+	CONSUME_EFFECT_TELEPORT, // integer, added in Paper 26.3
 	COPPER_WAX_OFF,
 	COPPER_WAX_ON,
-	DESTROY_BLOCK, // Material for block type destroyed, added in Paper 26.2, replaces STEP_SOUND
+	DESTROY_BLOCK, // BlockData, added in Paper 26.2
+	DESTROY_BLOCK_WITH_SOUND, // BlockData, added in Paper 26.3, replaced STEP_SOUND
+	DESTROY_PROGRESS, // BlockFace, added in Paper 26.3
+	DESTROY_PROGRESS_WITH_SOUND, // BlockFace, added in Paper 26.3
 	DRAGON_BREATH,
+	ENDER_DRAGON_EGG_TELEPORT, // integer, added in Paper 26.3
 	DRIPPING_DRIPSTONE,
 	ELECTRIC_SPARK, // Axis at which particles are shown
 	ENDER_DRAGON_DESTROY_BLOCK,
+	ENDERMAN_TELEPORT, // integer, added in Paper 26.3
 	END_GATEWAY_SPAWN,
 	END_PORTAL_FRAME_FILL,
 	ENDER_SIGNAL,
@@ -30,6 +36,7 @@ public enum MCEffect {
 	POTION_BREAK, // Color
 	REDSTONE_TORCH_BURNOUT,
 	SHOOT_WHITE_SMOKE, // BlockFace for the direction, Paper, added 1.20 - 1.20.4
+	SHULKER_TELEPORT, // integer, added in Paper 26.3
 	SMASH_ATTACK, // integer, Paper, added in 1.20.5
 	SMOKE, // BlockFace for the direction of the smoke particles
 	SPAWN_COBWEB, // Paper, added in 1.20.6
@@ -76,6 +83,7 @@ public enum MCEffect {
 	GHAST_SHRIEK,
 	GRINDSTONE_USE,
 	HUSK_CONVERTED_TO_ZOMBIE,
+	INSTANT_POTION_SPLASH, // Paper, added 26.3
 	IRON_DOOR_CLOSE, // deprecated in 1.19.3
 	IRON_DOOR_TOGGLE, // deprecated in 1.19.3
 	IRON_TRAPDOOR_CLOSE, // deprecated in 1.19.3
@@ -91,6 +99,7 @@ public enum MCEffect {
 	SMITHING_TABLE_USE,
 	SOUND_STOP_JUKEBOX_SONG, // Paper, added 1.20 - 1.20.4
 	SOUND_WITH_CHARGE_SHOT, // Paper, added 1.21
+	SPELL_POTION_SPLASH, // Paper, added 26.3
 	STEP_SOUND, // Material for block type stepped on, deprecated for DESTROY_BLOCK in Paper 26.2
 	SULFUR_SPIKE_LAND, // Paper, added in 26.2
 	TRAPDOOR_CLOSE, // deprecated in 1.19.3
