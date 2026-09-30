@@ -518,8 +518,9 @@ public class EntityEvents {
 					+ " For instance when a player shoots an arrow with a bow, if the event is cancelled the bow will"
 					+ " still take damage from use."
 					+ " {id: The entityID of the projectile | type: The entity type of the projectile |"
-					+ " shooter: The entityID of the shooter (null if the projectile is launched by a dispenser) |"
-					+ " shootertype: The entity type of the shooter (null if the projectile is launched by a dispenser) |"
+					+ " shooter: entityID or dispenser location of the shooter (can be null for dispensers in Paper"
+					+ " <=26.2 or any version of Spigot) | shootertype: entity type of the shooter or 'block' if a"
+					+ " dispenser (can be null for dispensers in Paper <=26.2 or any version Spigot) |"
 					+ " player: the player which has launched the projectile (null if the shooter is not a player) |"
 					+ " location: from where the projectile is launched | velocity: the velocity of the projectile}"
 					+ " {velocity}"
@@ -579,7 +580,7 @@ public class EntityEvents {
 				} else if(shooter instanceof MCBlockProjectileSource) {
 					mapEvent.put("shooter", ObjectGenerator.GetGenerator().location(
 							((MCBlockProjectileSource) shooter).getBlock().getLocation(), false));
-					mapEvent.put("shootertype", new CString("BLOCK", Target.UNKNOWN));
+					mapEvent.put("shootertype", new CString("block", Target.UNKNOWN));
 					mapEvent.put("player", CNull.NULL);
 				} else {
 					mapEvent.put("shooter", CNull.NULL);
