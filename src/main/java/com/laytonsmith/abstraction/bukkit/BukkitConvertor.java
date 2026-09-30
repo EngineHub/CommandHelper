@@ -35,6 +35,7 @@ import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBeehive;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlockState;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBrewingStand;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCChest;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCChiseledBookshelf;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCCommandBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCContainer;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCDecoratedPot;
@@ -44,6 +45,7 @@ import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCEndGateway;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCFurnace;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCLectern;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCShelf;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCSign;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCSkull;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCAgeable;
@@ -113,6 +115,7 @@ import org.bukkit.block.Beehive;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.BrewingStand;
 import org.bukkit.block.Chest;
+import org.bukkit.block.ChiseledBookshelf;
 import org.bukkit.block.CommandBlock;
 import org.bukkit.block.Container;
 import org.bukkit.block.CreatureSpawner;
@@ -122,6 +125,7 @@ import org.bukkit.block.Dropper;
 import org.bukkit.block.EndGateway;
 import org.bukkit.block.Furnace;
 import org.bukkit.block.Lectern;
+import org.bukkit.block.Shelf;
 import org.bukkit.block.Sign;
 import org.bukkit.block.Skull;
 import org.bukkit.block.banner.Pattern;
@@ -642,8 +646,14 @@ public class BukkitConvertor extends AbstractConvertor {
 		if(bs instanceof EndGateway) {
 			return new BukkitMCEndGateway((EndGateway) bs);
 		}
+		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_19_3) && bs instanceof ChiseledBookshelf) {
+			return new BukkitMCChiseledBookshelf((ChiseledBookshelf) bs);
+		}
 		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_20_1) && bs instanceof DecoratedPot) {
 			return new BukkitMCDecoratedPot((DecoratedPot) bs);
+		}
+		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_21_9) && bs instanceof Shelf) {
+			return new BukkitMCShelf((Shelf) bs);
 		}
 		return new BukkitMCBlockState(bs);
 	}
