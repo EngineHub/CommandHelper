@@ -1953,12 +1953,12 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {[player], level} Sets the level of a player.";
+			return "void {[player], level} Sets the level of a player. Must not be negative.";
 		}
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class, CREPlayerOfflineException.class};
+			return new Class[]{CRECastException.class, CREPlayerOfflineException.class, CRERangeException.class};
 		}
 
 		@Override
@@ -1991,6 +1991,9 @@ public class PlayerManagement {
 				level = ArgumentValidation.getInt32(args[0], t);
 			}
 			Static.AssertPlayerNonNull(m, t);
+			if(level < 0) {
+				throw new CRERangeException("Level must not be negative.", t);
+			}
 			m.setLevel(level);
 			return CVoid.VOID;
 		}
