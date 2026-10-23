@@ -263,7 +263,12 @@ public class SQL {
 									case Types.BINARY:
 									case Types.VARBINARY:
 									case Types.LONGVARBINARY:
-										value = CByteArray.wrap(rs.getBytes(i), t);
+										byte[] bytes = rs.getBytes(i);
+										if(bytes == null) {
+											value = CNull.NULL;
+										} else {
+											value = CByteArray.wrap(bytes, t);
+										}
 										break;
 
 									case Types.DATE:
