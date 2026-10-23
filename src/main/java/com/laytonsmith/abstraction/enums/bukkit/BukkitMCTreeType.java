@@ -1,15 +1,10 @@
 package com.laytonsmith.abstraction.enums.bukkit;
 
 import com.laytonsmith.abstraction.Implementation;
-import com.laytonsmith.abstraction.bukkit.BukkitMCServer;
 import com.laytonsmith.abstraction.enums.EnumConvertor;
 import com.laytonsmith.abstraction.enums.MCTreeType;
-import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.annotations.abstractionenum;
-import com.laytonsmith.core.Static;
 import org.bukkit.TreeType;
-
-import java.util.Random;
 
 @abstractionenum(
 		implementation = Implementation.Type.BUKKIT,
@@ -29,27 +24,29 @@ public class BukkitMCTreeType extends EnumConvertor<MCTreeType, TreeType> {
 
 	@Override
 	protected MCTreeType getAbstractedEnumCustom(TreeType concrete) {
-		if(!((BukkitMCServer) Static.getServer()).isPaper()
-				&& Static.getServer().getMinecraftVersion().gte(MCVersion.MC26_3)) {
-			switch(concrete.name()) {
-				case "RED_POPLAR":
-				case "ORANGE_POPLAR":
-				case "YELLOW_POPLAR":
-					return MCTreeType.POPLAR;
+		try {
+			return super.getAbstractedEnumCustom(concrete);
+		} catch(IllegalArgumentException ex) {
+			// Poplar variants were briefly merged on Paper 26.3
+			if(concrete.name().equals("POPLAR")) {
+				return MCTreeType.ORANGE_POPLAR;
 			}
+			throw ex;
 		}
-		return super.getAbstractedEnumCustom(concrete);
 	}
 
 	@Override
 	protected TreeType getConcreteEnumCustom(MCTreeType abstracted) {
-		if(!((BukkitMCServer) Static.getServer()).isPaper()
-				&& Static.getServer().getMinecraftVersion().gte(MCVersion.MC26_3)) {
-			if(abstracted == MCTreeType.POPLAR) {
-				String[] colors = new String[]{"RED", "ORANGE", "YELLOW"};
-				return TreeType.valueOf(colors[Math.abs(new Random().nextInt()) % 3] + "_POPLAR");
+		try {
+			return super.getConcreteEnumCustom(abstracted);
+		} catch(IllegalArgumentException ex) {
+			// Poplar variants were briefly merged on Paper 26.3
+			if(abstracted == MCTreeType.ORANGE_POPLAR
+					|| abstracted == MCTreeType.RED_POPLAR
+					|| abstracted == MCTreeType.YELLOW_POPLAR) {
+				return TreeType.valueOf("POPLAR");
 			}
+			throw ex;
 		}
-		return super.getConcreteEnumCustom(abstracted);
 	}
 }
