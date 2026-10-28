@@ -284,9 +284,9 @@
 		<!-- Embedded SSH Client -->
 		<dependency>
 			<!-- BSD -->
-			<groupId>com.jcraft</groupId>
+			<groupId>com.github.mwiede</groupId>
 			<artifactId>jsch</artifactId>
-			<version>0.1.55</version>
+			<version>2.28.8</version>
 		</dependency>
 
 		<!-- Charset detection library -->
@@ -513,6 +513,7 @@
 							<!--<mainClass>com.laytonsmith.core.MainSandbox</mainClass>-->
 						</manifest>
 						<manifestEntries>
+							<Multi-Release>true</Multi-Release>
 							<paperweight-mappings-namespace>mojang</paperweight-mappings-namespace>
 							<Class-Path>../bukkit.jar CommandHelper/bukkit.jar</Class-Path>
 						</manifestEntries>
@@ -524,7 +525,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
-				<version>3.5.2</version>
+				<version>3.6.2</version>
 				<executions>
 					<execution>
 						<id>ShadedBundle</id>
@@ -550,7 +551,7 @@
 									<include>org.yaml:snakeyaml:jar:*</include>
 									<include>com.googlecode.json-simple:json-simple:jar:*</include>
 									<include>org.mindrot:jBCrypt:jar:*</include>
-									<include>com.jcraft:jsch:jar:*</include>
+									<include>com.github.mwiede:jsch:jar:*</include>
 									<include>org.apache.commons:commons-io:jar:*</include>
 									<include>org.xerial:sqlite-jdbc:jar:*</include>
 									<include>net.sourceforge.jchardet:jchardet:jar:*</include>
@@ -610,6 +611,12 @@
 								<relocation>
 									<pattern>com.jcraft.jsch</pattern>
 									<shadedPattern>com.laytonsmith.libs.com.jcraft.jsch</shadedPattern>
+								</relocation>
+								<!-- Versioned classes must remain overrides of their relocated base classes. -->
+								<relocation>
+									<pattern>^META-INF/versions/([0-9]+)/com/jcraft/jsch/</pattern>
+									<shadedPattern>META-INF/versions/$1/com/laytonsmith/libs/com/jcraft/jsch/</shadedPattern>
+									<rawString>true</rawString>
 								</relocation>
 								<relocation>
 									<pattern>org.apache.commons.io</pattern>
